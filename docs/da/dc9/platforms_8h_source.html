@@ -132,7 +132,7 @@ $(function(){initNavTree('da/dc9/platforms_8h_source.html','../../'); initResiza
 <div class="line"><a id="l00029" name="l00029"></a><span class="lineno">   29</span><span class="preprocessor">#elif defined(__SAM3X8E__)</span></div>
 <div class="line"><a id="l00030" name="l00030"></a><span class="lineno">   30</span><span class="comment">// Include sam/due headers</span></div>
 <div class="line"><a id="l00031" name="l00031"></a><span class="lineno">   31</span><span class="preprocessor">#include &quot;platforms/arm/sam/fastled_arm_sam.h&quot;</span></div>
-<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F2XX) || defined(STM32F1)</span></div>
+<div class="line"><a id="l00032" name="l00032"></a><span class="lineno">   32</span><span class="preprocessor">#elif defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)</span></div>
 <div class="line"><a id="l00033" name="l00033"></a><span class="lineno">   33</span><span class="preprocessor">#include &quot;platforms/arm/stm32/fastled_arm_stm32.h&quot;</span></div>
 <div class="line"><a id="l00034" name="l00034"></a><span class="lineno">   34</span><span class="preprocessor">#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__)</span></div>
 <div class="line"><a id="l00035" name="l00035"></a><span class="lineno">   35</span><span class="preprocessor">#include &quot;platforms/arm/d21/fastled_arm_d21.h&quot;</span></div>
@@ -151,16 +151,17 @@ $(function(){initNavTree('da/dc9/platforms_8h_source.html','../../'); initResiza
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="preprocessor">#include &quot;platforms/arm/renesas/fastled_arm_renesas.h&quot;</span></div>
 <div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#elif defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)</span></div>
 <div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#include &quot;platforms/arm/giga/fastled_arm_giga.h&quot;</span></div>
-<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)</span></div>
-<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span> </div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="comment">// stub platform for testing (on cpu)</span></div>
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#include &quot;platforms/stub/fastled_stub.h&quot;</span></div>
-<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">#else</span></div>
-<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// AVR platforms</span></div>
-<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;platforms/avr/fastled_avr.h&quot;</span></div>
-<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#endif</span></div>
-<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span> </div>
-<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
+<div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#elif defined(ARDUINO_ARCH_SILABS)</span></div>
+<div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// Silicon Labs MGM240 (Arduino Nano Matter, SparkFun Thing Plus Matter)</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#include &quot;platforms/arm/mgm240/fastled_arm_mgm240.h&quot;</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)</span></div>
+<div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span> </div>
+<div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="comment">// stub platform for testing (on cpu)</span></div>
+<div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">#include &quot;platforms/stub/fastled_stub.h&quot;</span></div>
+<div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">#else</span></div>
+<div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="comment">// AVR platforms</span></div>
+<div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span><span class="preprocessor">#include &quot;platforms/avr/fastled_avr.h&quot;</span></div>
+<div class="line"><a id="l00061" name="l00061"></a><span class="lineno">   61</span><span class="preprocessor">#endif</span></div>
 <div class="ttc" id="a_fast_l_e_d_8h_html"><div class="ttname"><a href="../../db/d97/_fast_l_e_d_8h.html">FastLED.h</a></div><div class="ttdoc">central include file for FastLED, defines the CFastLED class/object</div></div>
 <div class="ttc" id="afastled__config_8h_html"><div class="ttname"><a href="../../d5/d11/fastled__config_8h.html">fastled_config.h</a></div><div class="ttdoc">Contains definitions that can be used to configure FastLED at compile time.</div></div>
 </div><!-- fragment --></div><!-- contents -->
@@ -170,7 +171,7 @@ $(function(){initNavTree('da/dc9/platforms_8h_source.html','../../'); initResiza
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../da/dc9/platforms_8h.html">platforms.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

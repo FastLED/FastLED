@@ -8,7 +8,7 @@ digraph "fl::RedBlackTree&lt; T, Compare, Allocator &gt;::iterator"
   rankdir="LR";
   Node1 [id="Node000001",label="fl::RedBlackTree\< T,\l Compare, Allocator\l \>::iterator",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
   Node2 -> Node1 [id="edge1_Node000001_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" node_",fontcolor="grey" ];
-  Node2 [id="Node000002",label="fl::RedBlackTree\< T,\l Compare, Allocator\l \>::Node",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d5/d2d/structfl_1_1_red_black_tree_1_1_node.html",tooltip=" "];
+  Node2 [id="Node000002",label="fl::RedBlackTree\< T,\l Compare, Allocator\l \>::RBNode",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node.html",tooltip=" "];
   Node2 -> Node2 [id="edge2_Node000002_Node000002",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" left\nparent\nright",fontcolor="grey" ];
   Node3 -> Node1 [id="edge3_Node000001_Node000003",dir="back",color="darkorchid3",style="dashed",tooltip=" ",label=" mTree",fontcolor="grey" ];
   Node3 [id="Node000003",label="fl::RedBlackTree\< T,\l Compare, Allocator \>",height=0.2,width=0.4,color="gray40", fillcolor="white", style="filled",URL="$dd/d28/classfl_1_1_red_black_tree.html",tooltip=" "];

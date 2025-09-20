@@ -123,24 +123,24 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_a2fb8e16dd8530e5872d
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00060">60</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   60</span>                                                        {</div>
-<div class="line"><span class="lineno">   61</span>    <span class="comment">// Get PCM data from AudioSample</span></div>
-<div class="line"><span class="lineno">   62</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; pcmData = sample.pcm();</div>
-<div class="line"><span class="lineno">   63</span>    <span class="keywordflow">if</span> (pcmData.empty()) <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">   64</span>    </div>
-<div class="line"><span class="lineno">   65</span>    <span class="comment">// Use AudioSample&#39;s built-in FFT capability</span></div>
-<div class="line"><span class="lineno">   66</span>    sample.fft(&amp;<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>);</div>
-<div class="line"><span class="lineno">   67</span>    </div>
-<div class="line"><span class="lineno">   68</span>    <span class="comment">// Map FFT bins to frequency channels using WLED-compatible mapping</span></div>
-<div class="line"><span class="lineno">   69</span>    <a class="code hl_function" href="../../d3/d40/classfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03.html#a50453d52700a451d8c4c534bf9538b03">mapFFTBinsToFrequencyChannels</a>();</div>
-<div class="line"><span class="lineno">   70</span>}</div>
-<div class="ttc" id="aclassfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03_html_a50453d52700a451d8c4c534bf9538b03"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03.html#a50453d52700a451d8c4c534bf9538b03">fl::AudioReactive::mapFFTBinsToFrequencyChannels</a></div><div class="ttdeci">void mapFFTBinsToFrequencyChannels()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d14/audio__reactive_8cpp_source.html#l00072">audio_reactive.cpp:72</a></div></div>
-<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00087">audio_reactive.h:87</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00090">90</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   90</span>                                                        {</div>
+<div class="line"><span class="lineno">   91</span>    <span class="comment">// Get PCM data from AudioSample</span></div>
+<div class="line"><span class="lineno">   92</span>    <span class="keyword">const</span> <span class="keyword">auto</span>&amp; pcmData = sample.pcm();</div>
+<div class="line"><span class="lineno">   93</span>    <span class="keywordflow">if</span> (pcmData.empty()) <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">   94</span>    </div>
+<div class="line"><span class="lineno">   95</span>    <span class="comment">// Use AudioSample&#39;s built-in FFT capability</span></div>
+<div class="line"><span class="lineno">   96</span>    sample.fft(&amp;<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>);</div>
+<div class="line"><span class="lineno">   97</span>    </div>
+<div class="line"><span class="lineno">   98</span>    <span class="comment">// Map FFT bins to frequency channels using WLED-compatible mapping</span></div>
+<div class="line"><span class="lineno">   99</span>    <a class="code hl_function" href="../../d3/d40/classfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03.html#a50453d52700a451d8c4c534bf9538b03">mapFFTBinsToFrequencyChannels</a>();</div>
+<div class="line"><span class="lineno">  100</span>}</div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03_html_a50453d52700a451d8c4c534bf9538b03"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a50453d52700a451d8c4c534bf9538b03.html#a50453d52700a451d8c4c534bf9538b03">fl::AudioReactive::mapFFTBinsToFrequencyChannels</a></div><div class="ttdeci">void mapFFTBinsToFrequencyChannels()</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d14/audio__reactive_8cpp_source.html#l00102">audio_reactive.cpp:102</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00126">audio_reactive.h:126</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00128">fl::AudioSample::fft()</a>, <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00072">mapFFTBinsToFrequencyChannels()</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00087">mFFTBins</a>, and <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00017">fl::AudioSample::pcm()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00173">fl::AudioSample::fft()</a>, <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00102">mapFFTBinsToFrequencyChannels()</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00126">mFFTBins</a>, and <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00062">fl::AudioSample::pcm()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00034">processSample()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00053">processSample()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -165,7 +165,7 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_a2fb8e16dd8530e5872d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d40/classfl_1_1_audio_reactive.html">AudioReactive</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

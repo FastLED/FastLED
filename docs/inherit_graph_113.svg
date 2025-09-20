@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d3/d65/structfl_1_1contains__type_3_01_t_00_01_u_00_01_rest_8_8_8_01_4.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="d4/d36/namespacefl.html#d5/d42/structfl_1_1contains__type" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="105,-30 0,-30 0,0 105,0 105,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::contains_type&lt;</text>
-<text text-anchor="middle" x="52.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> T, U, Rest... &gt;</text>
+<text text-anchor="middle" x="52.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00"> T, Types &gt;</text>
 </a>
 </g>
 </g>

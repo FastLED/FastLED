@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::detail::PromiseImpl\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/da5/classfl_1_1detail_1_1_promise_impl.html",tooltip="Implementation class for promise - holds the actual state and logic."];
+  Node0 [id="Node000000",label="fl::detail::NoDeleter\< T \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/dfa/structfl_1_1detail_1_1_no_deleter.html",tooltip=" "];
 }

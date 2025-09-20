@@ -35,14 +35,14 @@ var searchData=
   ['rgbw_32',['rgbw',['../d1/d3a/_r_g_b_w_emulated_8ino_af6840056f51753c6731a47458751842d.html#af6840056f51753c6731a47458751842d',1,'RGBWEmulated.ino']]],
   ['rgbw_5fmode_33',['rgbw_mode',['../d7/d27/structfl_1_1_rgbw_a871c41328e9a0e8fc5cdcefcf9204d15.html#a871c41328e9a0e8fc5cdcefcf9204d15',1,'fl::Rgbw::rgbw_mode'],['../db/d74/struct_rgbw_a871c41328e9a0e8fc5cdcefcf9204d15.html#a871c41328e9a0e8fc5cdcefcf9204d15',1,'Rgbw::rgbw_mode']]],
   ['rgbwemu_34',['rgbwEmu',['../d1/d3a/_r_g_b_w_emulated_8ino_a6075e4aa5ec6a0ab92565c1f885b5678.html#a6075e4aa5ec6a0ab92565c1f885b5678',1,'RGBWEmulated.ino']]],
-  ['right_35',['right',['../d5/d2d/structfl_1_1_red_black_tree_1_1_node_aa8819a0d896a3183265a836cc49587b3.html#aa8819a0d896a3183265a836cc49587b3',1,'fl::RedBlackTree::Node']]],
+  ['right_35',['right',['../d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_af4c41bec374754f88b3eda8aa10241f7.html#af4c41bec374754f88b3eda8aa10241f7',1,'fl::RedBlackTree::RBNode']]],
   ['right_5fdown_36',['RIGHT_DOWN',['../d4/dee/classgen_1_1_hexagon_angle_a4c8ded49feb15350856551dff1f11c79.html#a4c8ded49feb15350856551dff1f11c79',1,'gen::HexagonAngle']]],
   ['right_5fup_37',['RIGHT_UP',['../d4/dee/classgen_1_1_hexagon_angle_aa0cafc5e4f6a62f494cd2495f849a089.html#aa0cafc5e4f6a62f494cd2495f849a089',1,'gen::HexagonAngle']]],
   ['ring_5flut_38',['ring_lut',['../d5/d77/_fx_noise_ring_8h_ac7a3041d83ec128b86ab96becf10841b.html#ac7a3041d83ec128b86ab96becf10841b',1,'FxNoiseRing.h']]],
   ['ripplecount_39',['rippleCount',['../d1/d85/class_ripple_ad1fe244336130644cc742a908fbf6781.html#ad1fe244336130644cc742a908fbf6781',1,'Ripple']]],
   ['rippleid_40',['rippleId',['../d1/d85/class_ripple_ab636f855a020648d0c87c27e72fef17e.html#ab636f855a020648d0c87c27e72fef17e',1,'Ripple']]],
   ['rlevel_41',['rLevel',['../d9/d33/classfl_1_1_object_f_l_e_d_aae8f49b7faf9c8cd17d75efd689b49e5.html#aae8f49b7faf9c8cd17d75efd689b49e5',1,'fl::ObjectFLED']]],
-  ['root_5f_42',['root_',['../dd/d28/classfl_1_1_red_black_tree_aeb9508a4b86f871ae73ce3268ede7ef1.html#aeb9508a4b86f871ae73ce3268ede7ef1',1,'fl::RedBlackTree']]],
+  ['root_5f_42',['root_',['../dd/d28/classfl_1_1_red_black_tree_a2809cd57e24365289149aa30ce8fdcc1.html#a2809cd57e24365289149aa30ce8fdcc1',1,'fl::RedBlackTree']]],
   ['rotation_43',['rotation',['../d0/dfa/structfl_1_1_transform16_aae474c83f05403ecf2e49ebd4ba3739e.html#aae474c83f05403ecf2e49ebd4ba3739e',1,'fl::Transform16::rotation'],['../d5/db7/classfl_1_1_transform_float_impl_ae29b40b9efdd0619175a936a1c389e5e.html#ae29b40b9efdd0619175a936a1c389e5e',1,'fl::TransformFloatImpl::rotation']]],
   ['running_44',['running',['../d6/d7f/classfl_1_1_fx_layer_afb58a3a4fd74b9c33c03be29870e9fbf.html#afb58a3a4fd74b9c33c03be29870e9fbf',1,'fl::FxLayer::running'],['../d8/d08/class_timer_a3b8bb57a0a252c88f85c0592715ea425.html#a3b8bb57a0a252c88f85c0592715ea425',1,'Timer::running']]]
 ];

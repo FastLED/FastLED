@@ -112,9 +112,28 @@ $(function(){initNavTree('d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.h
       </table>
 </div><div class="memdoc">
 
-<p><a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a set of LED objects.">CPixelView</a> for <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> arrays. </p>
+<p><a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a view/window into a set of LED pixels, providing array-like access and rich color operati...">CPixelView</a> specialized for <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> pixel arrays - the most commonly used pixel view type. </p>
+<p><a class="el" href="#af5de5d996b3399837264a10ba96df667" title="CPixelView specialized for CRGB pixel arrays - the most commonly used pixel view type.">CRGBSet</a> provides all the functionality of <a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a view/window into a set of LED pixels, providing array-like access and rich color operati...">CPixelView</a> optimized for <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> pixels. This is the primary interface for working with LED strips in FastLED.</p>
+<p><b>Quick Start:</b> </p><div class="fragment"><div class="line"><a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[<a class="code hl_define" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>];</div>
+<div class="line"><a class="code hl_typedef" href="#af5de5d996b3399837264a10ba96df667">CRGBSet</a> pixels(<a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>, <a class="code hl_define" href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a>);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Basic operations</span></div>
+<div class="line">pixels[0] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;</div>
+<div class="line">pixels.fill_solid(<a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a>);</div>
+<div class="line">pixels.fadeToBlackBy(64);</div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Advanced effects</span></div>
+<div class="line">pixels(0, 10).fill_rainbow(0, 25);      <span class="comment">// Rainbow on first 10 LEDs</span></div>
+<div class="line">pixels(20, 10).blur1d(128);             <span class="comment">// Blur segment (reverse order)</span></div>
+<div class="ttc" id="a_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">AdafruitBridge.ino:13</a></div></div>
+<div class="ttc" id="a_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd_html_a4c4ae9a4146ce8d6a5debc90300d9abd"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a4c4ae9a4146ce8d6a5debc90300d9abd.html#a4c4ae9a4146ce8d6a5debc90300d9abd">NUM_LEDS</a></div><div class="ttdeci">#define NUM_LEDS</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00011">AdafruitBridge.ino:11</a></div></div>
+<div class="ttc" id="apixelset_8h_af5de5d996b3399837264a10ba96df667_html_af5de5d996b3399837264a10ba96df667"><div class="ttname"><a href="#af5de5d996b3399837264a10ba96df667">CRGBSet</a></div><div class="ttdeci">CPixelView&lt; CRGB &gt; CRGBSet</div><div class="ttdoc">CPixelView specialized for CRGB pixel arrays - the most commonly used pixel view type.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d46/pixelset_8h_source.html#l00059">pixelset.h:59</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00569">crgb.h:569</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00679">crgb.h:679</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
+</div><!-- fragment --><dl class="section see"><dt>See also</dt><dd><a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a view/window into a set of LED pixels, providing array-like access and rich color operati...">CPixelView</a> for full API documentation </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/pixelset_8h_source.html#l00039">39</a> of file <a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/pixelset_8h_source.html#l00059">59</a> of file <a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>.</p>
 
 </div>
 </div>
@@ -125,7 +144,7 @@ $(function(){initNavTree('d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d46/pixelset_8h.html">pixelset.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

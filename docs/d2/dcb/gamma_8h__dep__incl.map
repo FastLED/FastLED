@@ -2,13 +2,13 @@
 <area shape="rect" id="Node000001" title=" " alt="" coords="127,5,223,31"/>
 <area shape="rect" id="Node000002" href="$dc/d44/five__bit__hd__gamma_8h.html" title="Declares functions for five&#45;bit gamma correction." alt="" coords="5,79,180,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="153,42,108,80,104,76,150,38"/>
-<area shape="rect" id="Node000159" href="$d3/d43/gamma_8cpp.html" title=" " alt="" coords="204,79,315,104"/>
-<area shape="poly" id="edge6_Node000001_Node000159" title=" " alt="" coords="201,38,247,76,244,80,198,42"/>
+<area shape="rect" id="Node000160" href="$d3/d43/gamma_8cpp.html" title=" " alt="" coords="204,79,315,104"/>
+<area shape="poly" id="edge6_Node000001_Node000160" title=" " alt="" coords="201,38,247,76,244,80,198,42"/>
 <area shape="rect" id="Node000003" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="9,152,97,177"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="82,118,61,153,57,151,77,115"/>
-<area shape="rect" id="Node000148" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="26,299,159,324"/>
-<area shape="poly" id="edge5_Node000002_Node000148" title=" " alt="" coords="103,117,111,152,113,195,110,251,99,299,94,298,105,250,108,195,106,152,98,118"/>
+<area shape="rect" id="Node000149" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="26,299,159,324"/>
+<area shape="poly" id="edge5_Node000002_Node000149" title=" " alt="" coords="103,117,111,152,113,195,110,251,99,299,94,298,105,250,108,195,106,152,98,118"/>
 <area shape="rect" id="Node000004" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="10,225,95,251"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="55,191,55,225,50,225,50,191"/>
-<area shape="poly" id="edge4_Node000004_Node000148" title=" " alt="" coords="68,262,89,297,84,300,64,264"/>
+<area shape="poly" id="edge4_Node000004_Node000149" title=" " alt="" coords="68,262,89,297,84,300,64,264"/>
 </map>

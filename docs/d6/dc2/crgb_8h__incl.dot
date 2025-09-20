@@ -48,16 +48,16 @@ digraph "crgb.h"
   Node14 -> Node11 [id="edge27_Node000014_Node000011",color="steelblue1",style="solid",tooltip=" "];
   Node12 -> Node2 [id="edge28_Node000012_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node12 -> Node8 [id="edge29_Node000012_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node12 -> Node21 [id="edge30_Node000012_Node000021",color="steelblue1",style="solid",tooltip=" "];
-  Node21 [id="Node000021",label="fl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
+  Node12 -> Node22 [id="edge30_Node000012_Node000022",color="steelblue1",style="solid",tooltip=" "];
+  Node22 [id="Node000022",label="fl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
   Node12 -> Node4 [id="edge31_Node000012_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node54 [id="edge32_Node000001_Node000054",color="steelblue1",style="solid",tooltip=" "];
-  Node54 [id="Node000054",label="hsv2rgb.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d9a/hsv2rgb_8h.html",tooltip="Functions to convert from the HSV colorspace to the RGB colorspace."];
-  Node1 -> Node55 [id="edge33_Node000001_Node000055",color="steelblue1",style="solid",tooltip=" "];
-  Node55 [id="Node000055",label="fl/ease.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
-  Node55 -> Node2 [id="edge34_Node000055_Node000002",color="steelblue1",style="solid",tooltip=" "];
-  Node55 -> Node4 [id="edge35_Node000055_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node55 -> Node56 [id="edge36_Node000055_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="fastled_progmem.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dab/fastled__progmem_8h.html",tooltip="Wrapper definitions to allow seamless use of PROGMEM in environments that have it."];
-  Node56 -> Node8 [id="edge37_Node000056_Node000008",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node55 [id="edge32_Node000001_Node000055",color="steelblue1",style="solid",tooltip=" "];
+  Node55 [id="Node000055",label="hsv2rgb.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d9a/hsv2rgb_8h.html",tooltip="Functions to convert from the HSV colorspace to the RGB colorspace."];
+  Node1 -> Node56 [id="edge33_Node000001_Node000056",color="steelblue1",style="solid",tooltip=" "];
+  Node56 [id="Node000056",label="fl/ease.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
+  Node56 -> Node2 [id="edge34_Node000056_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node56 -> Node4 [id="edge35_Node000056_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node56 -> Node57 [id="edge36_Node000056_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="fastled_progmem.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/dab/fastled__progmem_8h.html",tooltip="Wrapper definitions to allow seamless use of PROGMEM in environments that have it."];
+  Node57 -> Node8 [id="edge37_Node000057_Node000008",color="steelblue1",style="solid",tooltip=" "];
 }

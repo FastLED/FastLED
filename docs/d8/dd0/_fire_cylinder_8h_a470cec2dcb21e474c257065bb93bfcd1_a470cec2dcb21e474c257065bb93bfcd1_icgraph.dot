@@ -99,9 +99,9 @@ digraph "palette"
   Node39 [id="Node000039",label="drawWaveform",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/dc7/advanced_8h_a715d5587b1a493c350ae39b13e881463.html#a715d5587b1a493c350ae39b13e881463",tooltip=" "];
   Node39 -> Node34 [id="edge53_Node000039_Node000034",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node1 -> Node40 [id="edge54_Node000001_Node000040",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node40 [id="Node000040",label="getPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d88/_fire_matrix_8h_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220",tooltip=" "];
+  Node40 [id="Node000040",label="getPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_a0c74bc312803a49e792bffc775a56220.html#a0c74bc312803a49e792bffc775a56220",tooltip=" "];
   Node40 -> Node41 [id="edge55_Node000040_Node000041",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node41 [id="Node000041",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d88/_fire_matrix_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node41 [id="Node000041",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node1 -> Node42 [id="edge56_Node000001_Node000042",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node42 [id="Node000042",label="fl::Gradient::set",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/d6b/classfl_1_1_gradient_a07780f0f173e9c35e0e71b00617a1c8a.html#a07780f0f173e9c35e0e71b00617a1c8a",tooltip=" "];
   Node42 -> Node7 [id="edge57_Node000042_Node000007",dir="back",color="steelblue1",style="solid",tooltip=" "];

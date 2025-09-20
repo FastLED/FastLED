@@ -22,6 +22,7 @@ digraph "/home/runner/work/FastLED/FastLED/examples/Chromancer/Chromancer.ino"
   Node4 -> Node2 [id="edge8_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node6 [id="edge9_Node000004_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node7 [id="edge10_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node62 [id="edge11_Node000001_Node000062",color="steelblue1",style="solid",tooltip=" "];
-  Node62 [id="Node000062",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
+  Node3 -> Node2 [id="edge11_Node000003_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node63 [id="edge12_Node000001_Node000063",color="steelblue1",style="solid",tooltip=" "];
+  Node63 [id="Node000063",label="Arduino.h",height=0.2,width=0.4,color="grey60", fillcolor="#E0E0E0", style="filled",tooltip=" "];
 }

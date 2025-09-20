@@ -17,10 +17,10 @@ digraph "fl/tuple.h"
   Node4 -> Node8 [id="edge5_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
   Node8 -> Node8 [id="edge6_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node4 -> Node19 [id="edge7_Node000004_Node000019",color="steelblue1",style="solid",tooltip=" "];
-  Node19 [id="Node000019",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
-  Node4 -> Node18 [id="edge8_Node000004_Node000018",color="steelblue1",style="solid",tooltip=" "];
-  Node18 [id="Node000018",label="fl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
+  Node4 -> Node20 [id="edge7_Node000004_Node000020",color="steelblue1",style="solid",tooltip=" "];
+  Node20 [id="Node000020",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
+  Node4 -> Node19 [id="edge8_Node000004_Node000019",color="steelblue1",style="solid",tooltip=" "];
+  Node19 [id="Node000019",label="fl/move.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d83/move_8h.html",tooltip=" "];
   Node4 -> Node7 [id="edge9_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
   Node7 [id="Node000007",label="fl/int.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d3/d7e/int_8h.html",tooltip=" "];
   Node7 -> Node8 [id="edge10_Node000007_Node000008",color="steelblue1",style="solid",tooltip=" "];

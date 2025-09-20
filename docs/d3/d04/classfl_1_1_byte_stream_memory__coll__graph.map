@@ -1,15 +1,15 @@
 <map id="fl::ByteStreamMemory" name="fl::ByteStreamMemory">
-<area shape="rect" id="Node000001" title=" " alt="" coords="67,313,237,339"/>
-<area shape="rect" id="Node000002" href="$d2/d5e/classfl_1_1_byte_stream.html" title=" " alt="" coords="73,218,188,243"/>
-<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="139,256,152,313,147,314,134,257"/>
-<area shape="rect" id="Node000003" href="$d2/d4f/classfl_1_1_circular_buffer.html" title=" " alt="" coords="213,211,339,251"/>
-<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="241,261,169,315,166,311,238,257"/>
+<area shape="rect" id="Node000001" title=" " alt="" coords="59,313,229,339"/>
+<area shape="rect" id="Node000002" href="$d2/d5e/classfl_1_1_byte_stream.html" title=" " alt="" coords="65,218,180,243"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="131,256,144,313,139,314,126,257"/>
+<area shape="rect" id="Node000003" href="$d0/d56/classfl_1_1_dynamic_circular_buffer.html" title=" " alt="" coords="205,211,390,251"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="256,260,164,316,162,311,253,255"/>
 <area shape="rect" id="Node000004" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="89,108,237,148"/>
-<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="196,155,257,209,253,213,192,159"/>
+<area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="200,154,274,208,271,213,197,158"/>
 <area shape="rect" id="Node000005" href="$df/db6/structfl_1_1_array_deleter.html" title=" " alt="" coords="5,5,149,45"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="104,54,149,106,145,110,100,58"/>
 <area shape="rect" id="Node000007" href="$d3/d92/classfl_1_1scoped__array.html" title=" " alt="" coords="173,5,325,45"/>
 <area shape="poly" id="edge5_Node000004_Node000007" title=" " alt="" coords="226,58,181,110,177,106,222,54"/>
-<area shape="rect" id="Node000008" href="$d2/d4f/classfl_1_1_circular_buffer.html" title=" " alt="" coords="261,115,427,141"/>
-<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="331,154,291,212,287,209,326,151"/>
+<area shape="rect" id="Node000008" href="$d0/d56/classfl_1_1_dynamic_circular_buffer.html" title=" " alt="" coords="261,115,483,141"/>
+<area shape="poly" id="edge6_Node000003_Node000008" title=" " alt="" coords="357,153,314,212,309,209,353,150"/>
 </map>

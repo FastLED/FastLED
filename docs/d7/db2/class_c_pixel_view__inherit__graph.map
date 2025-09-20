@@ -1,5 +1,5 @@
 <map id="CPixelView&lt; PIXEL_TYPE &gt;" name="CPixelView&lt; PIXEL_TYPE &gt;">
-<area shape="rect" id="Node000001" title="Represents a set of LED objects." alt="" coords="5,5,204,31"/>
+<area shape="rect" id="Node000001" title="Represents a view/window into a set of LED pixels, providing array&#45;like access and rich color operati..." alt="" coords="5,5,204,31"/>
 <area shape="rect" id="Node000002" href="$db/df7/class_c_pixel_view.html" title=" " alt="" coords="24,93,185,119"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="107,45,107,93,102,93,102,45"/>
 <area shape="rect" id="Node000003" href="$d4/dc4/class_c_r_g_b_array.html" title="A version of CPixelView&lt;CRGB&gt; with an included array of CRGB LEDs." alt="" coords="28,168,181,193"/>

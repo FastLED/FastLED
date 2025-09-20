@@ -1,0 +1,15 @@
+digraph "fl::RedBlackTree::RBNode::RBNode"
+{
+ // INTERACTIVE_SVG=YES
+ // LATEX_PDF_SIZE
+  bgcolor="transparent";
+  edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
+  node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
+  rankdir="LR";
+  Node1 [id="Node000001",label="fl::RedBlackTree::RBNode\l::RBNode",height=0.2,width=0.4,color="gray40", fillcolor="grey60", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node2 [id="Node000002",label="fl::RedBlackTree::RBNode\l::RBNode",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node_a20f35852f4079735bf0a5651b64780bc.html#a20f35852f4079735bf0a5651b64780bc",tooltip=" "];
+  Node2 -> Node2 [id="edge2_Node000002_Node000002",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node3 [id="edge3_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
+  Node3 [id="Node000003",label="fl::forward",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d4/d36/namespacefl_aed7245c077ae6f226d13c9ea795694a8.html#aed7245c077ae6f226d13c9ea795694a8",tooltip=" "];
+}

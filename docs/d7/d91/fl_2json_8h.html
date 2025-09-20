@@ -140,25 +140,25 @@ Parsing JSON Data - The Clean Way:</h2>
 <div class="line"><span class="stringliteral"></span> </div>
 <div class="line"><span class="stringliteral"></span><span class="comment">// Accessing an integer with a default value</span></div>
 <div class="line"><span class="keywordtype">int</span> <a class="code hl_function" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a> = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;brightness&quot;</span>] | 255; <span class="comment">// Result: 128</span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Brightness: &quot;</span> &lt;&lt; <a class="code hl_function" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a>);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Brightness: &quot;</span> &lt;&lt; <a class="code hl_function" href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a>);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Accessing a boolean with a default value</span></div>
 <div class="line"><span class="keywordtype">bool</span> enabled = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;enabled&quot;</span>] | <span class="keyword">false</span>;    <span class="comment">// Result: true</span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Enabled: &quot;</span> &lt;&lt; enabled);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Enabled: &quot;</span> &lt;&lt; enabled);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Accessing a string with a default value</span></div>
 <div class="line"><a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> deviceName = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;name&quot;</span>] | <a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a>(<span class="stringliteral">&quot;unknown&quot;</span>); <span class="comment">// Result: &quot;my_device&quot;</span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Device Name: &quot;</span> &lt;&lt; deviceName);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Device Name: &quot;</span> &lt;&lt; deviceName);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Accessing a non-existent key with a default value</span></div>
 <div class="line"><span class="keywordtype">int</span> nonExistent = jsonDoc[<span class="stringliteral">&quot;config&quot;</span>][<span class="stringliteral">&quot;non_existent_key&quot;</span>] | 0; <span class="comment">// Result: 0</span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Non-existent: &quot;</span> &lt;&lt; nonExistent);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Non-existent: &quot;</span> &lt;&lt; nonExistent);</div>
 <div class="ttc" id="aadvanced_8h_a96d9503945476f13a97c8f406269fcef_html_a96d9503945476f13a97c8f406269fcef"><div class="ttname"><a href="../../da/dc7/advanced_8h_a96d9503945476f13a97c8f406269fcef.html#a96d9503945476f13a97c8f406269fcef">brightness</a></div><div class="ttdeci">UISlider brightness(&quot;Brightness&quot;, 128, 0, 255, 1)</div></div>
 <div class="ttc" id="aclassfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c_html_acba319cd1a600f1a88beeecab57d4e7c"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_acba319cd1a600f1a88beeecab57d4e7c.html#acba319cd1a600f1a88beeecab57d4e7c">fl::Json::parse</a></div><div class="ttdeci">static Json parse(const fl::string &amp;txt)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02126">json.h:2126</a></div></div>
 <div class="ttc" id="aclassfl_1_1_json_html"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json.html">fl::Json</a></div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l01620">json.h:1620</a></div></div>
 <div class="ttc" id="aclassfl_1_1string_html"><div class="ttname"><a href="../../d2/db2/classfl_1_1string.html">fl::string</a></div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00594">str.h:594</a></div></div>
 <div class="ttc" id="afl_2json_8h_html"><div class="ttname"><a href="../../d7/d91/fl_2json_8h.html">json.h</a></div><div class="ttdoc">FastLED&#39;s Elegant JSON Library: fl::Json</div></div>
-<div class="ttc" id="awarn_8h_a906151b6a1baa2784f6ae1496e6a316b_html_a906151b6a1baa2784f6ae1496e6a316b"><div class="ttname"><a href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a></div><div class="ttdeci">#define FL_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00012">warn.h:12</a></div></div>
+<div class="ttc" id="awarn_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00018">warn.h:18</a></div></div>
 <div class="ttc" id="awarn_8h_html"><div class="ttname"><a href="../../de/d77/warn_8h.html">warn.h</a></div></div>
 </div><!-- fragment --><h2><a class="anchor" id="autotoc_md2"></a>
 Generating JSON Data - Build with Ease:</h2>
@@ -191,7 +191,7 @@ Generating JSON Data - Build with Ease:</h2>
 <div class="line"> </div>
 <div class="line"><span class="comment">// Convert the entire JSON object to a string</span></div>
 <div class="line"><a class="code hl_class" href="../../d2/db2/classfl_1_1string.html">fl::string</a> jsonString = newJson.<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1.html#a1739bfed700a1a81d78fb3a37c4ecea1">to_string</a>();</div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Generated JSON:\n&quot;</span> &lt;&lt; jsonString);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Generated JSON:\n&quot;</span> &lt;&lt; jsonString);</div>
 <div class="line"><span class="comment">// Expected output (formatting may vary):</span></div>
 <div class="line"><span class="comment">// {&quot;version&quot;:1.0,&quot;isActive&quot;:true,&quot;message&quot;:&quot;Hello, FastLED!&quot;,&quot;settings&quot;:{&quot;mode&quot;:&quot;dynamic&quot;,&quot;speed&quot;:50},&quot;colors&quot;:[&quot;red&quot;,&quot;green&quot;,&quot;blue&quot;]}</span></div>
 <div class="ttc" id="aclassfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1_html_a1739bfed700a1a81d78fb3a37c4ecea1"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1.html#a1739bfed700a1a81d78fb3a37c4ecea1">fl::Json::to_string</a></div><div class="ttdeci">fl::string to_string() const</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02120">json.h:2120</a></div></div>
@@ -313,7 +313,7 @@ Functions</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d7/d91/fl_2json_8h.html">json.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

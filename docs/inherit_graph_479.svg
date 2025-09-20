@@ -11,9 +11,9 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="db/d58/group___fractional_types.html#d3/d2c/union_i_e_e_e754binary32__t" target="_top" xlink:title="typedef for IEEE754 &quot;binary32&quot; float type internals">
+<g id="a_Node000000"><a xlink:href="d2/dbc/classfl_1_1_x_y_path_renderer.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="107,-19 0,-19 0,0 107,0 107,-19"/>
-<text text-anchor="middle" x="53.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">IEEE754binary32_t</text>
+<text text-anchor="middle" x="53.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">fl::XYPathRenderer</text>
 </a>
 </g>
 </g>

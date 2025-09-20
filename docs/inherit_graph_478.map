@@ -1,3 +1,13 @@
 <map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="Node000000" href="$df/dc6/classgen_1_1_point.html" title=" " alt="" coords="5,5,88,31"/>
+<area shape="rect" id="Node000000" href="$da/d32/classfl_1_1_x_y_path_params.html" title=" " alt="" coords="5,104,136,129"/>
+<area shape="rect" id="Node000001" href="$d8/d11/classfl_1_1_catmull_rom_params.html" title=" " alt="" coords="184,5,351,31"/>
+<area shape="poly" id="edge223_Node000000_Node000001" title=" " alt="" coords="97,93,137,66,183,40,213,28,214,33,185,44,139,70,100,98"/>
+<area shape="rect" id="Node000002" href="$d7/dbd/classfl_1_1_gielis_curve_params.html" title=" " alt="" coords="187,55,348,80"/>
+<area shape="poly" id="edge224_Node000000_Node000002" title=" " alt="" coords="134,98,215,77,217,83,136,103"/>
+<area shape="rect" id="Node000003" href="$dc/dc8/classfl_1_1_line_path_params.html" title=" " alt="" coords="197,104,338,129"/>
+<area shape="poly" id="edge225_Node000000_Node000003" title=" " alt="" coords="150,114,197,114,197,119,150,119"/>
+<area shape="rect" id="Node000004" href="$de/d32/classfl_1_1_phyllotaxis_params.html" title=" " alt="" coords="188,153,347,179"/>
+<area shape="poly" id="edge226_Node000000_Node000004" title=" " alt="" coords="136,130,217,151,215,156,134,135"/>
+<area shape="rect" id="Node000005" href="$dc/dc2/classfl_1_1_rose_path_params.html" title=" " alt="" coords="194,203,341,228"/>
+<area shape="poly" id="edge227_Node000000_Node000005" title=" " alt="" coords="101,135,140,162,185,188,218,200,216,205,183,192,137,167,98,140"/>
 </map>

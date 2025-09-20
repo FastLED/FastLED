@@ -269,18 +269,18 @@ No Emoticons or Emojis</h2>
 <div class="line"><span class="comment">// 🎯 This function handles user input</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ❌ BAD - Emoticons in log messages  </span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;✅ Operation successful!&quot;</span>);</div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;❌ Error occurred: &quot;</span> &lt;&lt; error_msg);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;✅ Operation successful!&quot;</span>);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;❌ Error occurred: &quot;</span> &lt;&lt; error_msg);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ❌ BAD - Emoticons in string literals</span></div>
 <div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span>* status = <span class="stringliteral">&quot;🔄 Processing...&quot;</span>;</div>
-<div class="ttc" id="awarn_8h_a906151b6a1baa2784f6ae1496e6a316b_html_a906151b6a1baa2784f6ae1496e6a316b"><div class="ttname"><a href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a></div><div class="ttdeci">#define FL_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00012">warn.h:12</a></div></div>
+<div class="ttc" id="awarn_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00018">warn.h:18</a></div></div>
 </div><!-- fragment --><p><b>Examples of correct alternatives:</b> </p><div class="fragment"><div class="line"><span class="comment">// ✅ GOOD - Clear text in comments</span></div>
 <div class="line"><span class="comment">// TUTORIAL: This function handles user input</span></div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ✅ GOOD - Text prefixes in log messages</span></div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;SUCCESS: Operation completed successfully!&quot;</span>);</div>
-<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;ERROR: Failed to process request: &quot;</span> &lt;&lt; error_msg);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;SUCCESS: Operation completed successfully!&quot;</span>);</div>
+<div class="line"><a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ERROR: Failed to process request: &quot;</span> &lt;&lt; error_msg);</div>
 <div class="line"> </div>
 <div class="line"><span class="comment">// ✅ GOOD - Descriptive text in string literals  </span></div>
 <div class="line"><span class="keyword">const</span> <span class="keywordtype">char</span>* status = <span class="stringliteral">&quot;PROCESSING: Request in progress...&quot;</span>;</div>
@@ -410,7 +410,7 @@ Exception Handling</h1>
 <p><b>Examples of proper error handling:</b> </p><div class="fragment"><div class="line"><span class="comment">// Good: Using return codes</span></div>
 <div class="line"><span class="keywordtype">bool</span> initializeHardware() {</div>
 <div class="line">    <span class="keywordflow">if</span> (!setupPins()) {</div>
-<div class="line">        <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Failed to setup pins&quot;</span>);</div>
+<div class="line">        <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Failed to setup pins&quot;</span>);</div>
 <div class="line">        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
 <div class="line">    }</div>
 <div class="line">    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
@@ -427,12 +427,12 @@ Exception Handling</h1>
 <div class="line"><span class="comment">// Good: Using early returns</span></div>
 <div class="line"><span class="keywordtype">void</span> processData(<span class="keyword">const</span> uint8_t* data, <span class="keywordtype">size_t</span> len) {</div>
 <div class="line">    <span class="keywordflow">if</span> (!data || len == 0) {</div>
-<div class="line">        <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;Invalid input data&quot;</span>);</div>
+<div class="line">        <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;Invalid input data&quot;</span>);</div>
 <div class="line">        <span class="keywordflow">return</span>;  <span class="comment">// Early return on error</span></div>
 <div class="line">    }</div>
 <div class="line">    <span class="comment">// Process data...</span></div>
 <div class="line">}</div>
-<div class="ttc" id="anamespacefl_a3b127995147ef801bf625e939aeae61a_html_a3b127995147ef801bf625e939aeae61a"><div class="ttname"><a href="../../d4/d36/namespacefl_a3b127995147ef801bf625e939aeae61a.html#a3b127995147ef801bf625e939aeae61a">fl::make_optional</a></div><div class="ttdeci">optional&lt; T &gt; make_optional(const T &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00120">optional.h:120</a></div></div>
+<div class="ttc" id="anamespacefl_a3b127995147ef801bf625e939aeae61a_html_a3b127995147ef801bf625e939aeae61a"><div class="ttname"><a href="../../d4/d36/namespacefl_a3b127995147ef801bf625e939aeae61a.html#a3b127995147ef801bf625e939aeae61a">fl::make_optional</a></div><div class="ttdeci">optional&lt; T &gt; make_optional(const T &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00128">optional.h:128</a></div></div>
 <div class="ttc" id="anamespacefl_a451542d0bf4d13f0bc00e055c18e6726_html_a451542d0bf4d13f0bc00e055c18e6726"><div class="ttname"><a href="../../d4/d36/namespacefl_a451542d0bf4d13f0bc00e055c18e6726.html#a451542d0bf4d13f0bc00e055c18e6726">fl::optional</a></div><div class="ttdeci">Optional&lt; T &gt; optional</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00014">optional.h:14</a></div></div>
 <div class="ttc" id="anamespacefl_aa51c7c6f506ca9d9f3db40422b352b11_html_aa51c7c6f506ca9d9f3db40422b352b11"><div class="ttname"><a href="../../d4/d36/namespacefl_aa51c7c6f506ca9d9f3db40422b352b11.html#aa51c7c6f506ca9d9f3db40422b352b11">fl::nullopt</a></div><div class="ttdeci">constexpr nullopt_t nullopt</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d62/optional_8h_source.html#l00011">optional.h:11</a></div></div>
 </div><!-- fragment --><h1><a class="anchor" id="autotoc_md132"></a>
@@ -445,7 +445,7 @@ Memory Refresh Rule</h1>
 <!-- start footer part -->
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

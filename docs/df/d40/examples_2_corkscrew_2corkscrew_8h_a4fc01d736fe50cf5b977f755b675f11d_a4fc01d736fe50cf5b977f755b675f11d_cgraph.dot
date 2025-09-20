@@ -10,12 +10,7 @@ digraph "setup"
   Node1 -> Node2 [id="edge1_Node000001_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node2 [id="Node000002",label="cachingEnabled",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d40/examples_2_corkscrew_2corkscrew_8h_a0c286afd59eb2b6fe7511cc723142c6f.html#a0c286afd59eb2b6fe7511cc723142c6f",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::XYMap::constructRectangularGrid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_a6faeccfa39121c788943e3dc1ae6507c.html#a6faeccfa39121c788943e3dc1ae6507c",tooltip=" "];
-  Node3 -> Node4 [id="edge3_Node000003_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::XYMap::XYMap",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/dce/classfl_1_1_x_y_map_abdbc76293c26157ec67716a365bd5460.html#abdbc76293c26157ec67716a365bd5460",tooltip=" "];
-  Node4 -> Node5 [id="edge4_Node000004_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node5 [id="Node000005",label="offset",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/daf/direct_8h_a0b3fd115c40d6ac683a810a572fc6104.html#a0b3fd115c40d6ac683a810a572fc6104",tooltip=" "];
-  Node3 -> Node5 [id="edge5_Node000003_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node1 -> Node6 [id="edge6_Node000001_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node6 [id="Node000006",label="corkscrew",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4",tooltip=" "];
+  Node3 [id="Node000003",label="XYMap::constructRectangularGrid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/de6/class_x_y_map_a6faeccfa39121c788943e3dc1ae6507c.html#a6faeccfa39121c788943e3dc1ae6507c",tooltip=" "];
+  Node1 -> Node4 [id="edge3_Node000001_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="corkscrew",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d40/examples_2_corkscrew_2corkscrew_8h_a3ce1eed35210653027031143f1cc1ef4.html#a3ce1eed35210653027031143f1cc1ef4",tooltip=" "];
 }

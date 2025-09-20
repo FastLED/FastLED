@@ -8,10 +8,10 @@
 <area shape="poly" id="edge6_Node000001_Node000006" title=" " alt="" coords="295,62,262,99,258,96,291,58"/>
 <area shape="rect" id="Node000007" href="$d0/d7c/midi___message_8h.html" title="MIDI Library for the Arduino &#45; Message struct definition." alt="" coords="326,108,454,133"/>
 <area shape="poly" id="edge8_Node000001_Node000007" title=" " alt="" coords="340,58,373,96,369,99,336,62"/>
-<area shape="rect" id="Node000056" href="$db/dff/serial_m_i_d_i_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="424,181,524,207"/>
-<area shape="poly" id="edge14_Node000001_Node000056" title=" " alt="" coords="407,58,441,78,469,107,480,137,481,168,475,168,475,138,464,109,437,82,404,62"/>
-<area shape="rect" id="Node000057" href="$de/d99/_m_i_d_i_8hpp.html" title="MIDI Library for the Arduino &#45; Inline implementations." alt="" coords="529,108,609,133"/>
-<area shape="poly" id="edge16_Node000001_Node000057" title=" " alt="" coords="394,58,523,101,521,106,392,63"/>
+<area shape="rect" id="Node000057" href="$db/dff/serial_m_i_d_i_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="424,181,524,207"/>
+<area shape="poly" id="edge14_Node000001_Node000057" title=" " alt="" coords="407,58,441,78,469,107,480,137,481,168,475,168,475,138,464,109,437,82,404,62"/>
+<area shape="rect" id="Node000058" href="$de/d99/_m_i_d_i_8hpp.html" title="MIDI Library for the Arduino &#45; Inline implementations." alt="" coords="529,108,609,133"/>
+<area shape="poly" id="edge16_Node000001_Node000058" title=" " alt="" coords="394,58,523,101,521,106,392,63"/>
 <area shape="rect" id="Node000003" href="$df/dce/midi___namespace_8h.html" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="313,255,460,280"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="265,204,352,246,349,251,263,209"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="198,255,284,280"/>
@@ -26,5 +26,5 @@
 <area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="593,208,573,244,569,241,588,206"/>
 <area shape="rect" id="Node000011" href="$d3/d7e/int_8h.html" title=" " alt="" coords="618,255,680,280"/>
 <area shape="poly" id="edge13_Node000008_Node000011" title=" " alt="" coords="608,205,635,242,630,245,603,209"/>
-<area shape="poly" id="edge15_Node000056_Node000003" title=" " alt="" coords="462,209,413,248,410,244,458,205"/>
+<area shape="poly" id="edge15_Node000057_Node000003" title=" " alt="" coords="462,209,413,248,410,244,458,205"/>
 </map>

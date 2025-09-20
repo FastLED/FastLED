@@ -6,15 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="fl::Rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d7/d27/structfl_1_1_rgbw.html",tooltip=" "];
-  Node0 -> Node1 [id="edge190_Node000000_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node1 [id="Node000001",label="fl::RgbwDefault",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/da6/structfl_1_1_rgbw_default.html",tooltip=" "];
-  Node0 -> Node3 [id="edge191_Node000000_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node3 [id="Node000003",label="fl::RgbwInvalid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d2/d73/structfl_1_1_rgbw_invalid.html",tooltip=" "];
-  Node0 -> Node4 [id="edge192_Node000000_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::RgbwWhiteIsOff",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/da6/structfl_1_1_rgbw_white_is_off.html",tooltip=" "];
-  Node2 [id="Node000002",label="Rgbw",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d74/struct_rgbw.html",tooltip=" "];
-  Node2 -> Node1 [id="edge193_Node000002_Node000001",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node3 [id="edge194_Node000002_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node4 [id="edge195_Node000002_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node0 [id="Node000000",label="fl::RequestOptions",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dd/dda/structfl_1_1_request_options.html",tooltip="Request options (matches JavaScript fetch RequestInit)"];
 }

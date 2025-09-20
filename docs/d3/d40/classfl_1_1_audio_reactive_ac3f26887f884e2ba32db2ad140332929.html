@@ -127,24 +127,24 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_ac3f26887f884e2ba32d
 </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00383">383</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  383</span>                                                           {</div>
-<div class="line"><span class="lineno">  384</span>    <span class="keywordflow">if</span> (fromBin &lt; 0 || toBin &gt;= <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.size()) || fromBin &gt; toBin) {</div>
-<div class="line"><span class="lineno">  385</span>        <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">  386</span>    }</div>
-<div class="line"><span class="lineno">  387</span>    </div>
-<div class="line"><span class="lineno">  388</span>    <span class="keywordtype">float</span> sum = 0.0f;</div>
-<div class="line"><span class="lineno">  389</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = fromBin; i &lt;= toBin; ++i) {</div>
-<div class="line"><span class="lineno">  390</span>        <span class="keywordflow">if</span> (i &lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.bins_raw.size())) {</div>
-<div class="line"><span class="lineno">  391</span>            sum += <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.bins_raw[i];</div>
-<div class="line"><span class="lineno">  392</span>        }</div>
-<div class="line"><span class="lineno">  393</span>    }</div>
-<div class="line"><span class="lineno">  394</span>    </div>
-<div class="line"><span class="lineno">  395</span>    <span class="keywordflow">return</span> sum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(toBin - fromBin + 1);</div>
-<div class="line"><span class="lineno">  396</span>}</div>
-<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00087">audio_reactive.h:87</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00530">530</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  530</span>                                                           {</div>
+<div class="line"><span class="lineno">  531</span>    <span class="keywordflow">if</span> (fromBin &lt; 0 || toBin &gt;= <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.size()) || fromBin &gt; toBin) {</div>
+<div class="line"><span class="lineno">  532</span>        <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  533</span>    }</div>
+<div class="line"><span class="lineno">  534</span>    </div>
+<div class="line"><span class="lineno">  535</span>    <span class="keywordtype">float</span> sum = 0.0f;</div>
+<div class="line"><span class="lineno">  536</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = fromBin; i &lt;= toBin; ++i) {</div>
+<div class="line"><span class="lineno">  537</span>        <span class="keywordflow">if</span> (i &lt; <span class="keyword">static_cast&lt;</span><span class="keywordtype">int</span><span class="keyword">&gt;</span>(<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.bins_raw.size())) {</div>
+<div class="line"><span class="lineno">  538</span>            sum += <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>.bins_raw[i];</div>
+<div class="line"><span class="lineno">  539</span>        }</div>
+<div class="line"><span class="lineno">  540</span>    }</div>
+<div class="line"><span class="lineno">  541</span>    </div>
+<div class="line"><span class="lineno">  542</span>    <span class="keywordflow">return</span> sum / <span class="keyword">static_cast&lt;</span><span class="keywordtype">float</span><span class="keyword">&gt;</span>(toBin - fromBin + 1);</div>
+<div class="line"><span class="lineno">  543</span>}</div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00126">audio_reactive.h:126</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00087">mFFTBins</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00126">mFFTBins</a>.</p>
 
 </div>
 </div>
@@ -155,7 +155,7 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_ac3f26887f884e2ba32d
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d40/classfl_1_1_audio_reactive.html">AudioReactive</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

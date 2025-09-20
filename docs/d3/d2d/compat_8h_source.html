@@ -116,7 +116,7 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00011" name="l00011"></a><span class="lineno">   11</span><span class="comment">// IDF 4.4 and 5.0+ both have analogWrite() available, so this polyfill is only needed</span></div>
 <div class="line"><a id="l00012" name="l00012"></a><span class="lineno">   12</span><span class="comment">// for very old IDF versions. We use a weak symbol so it auto-disables on newer platforms.</span></div>
 <div class="line"><a id="l00013" name="l00013"></a><span class="lineno">   13</span><span class="preprocessor">#if !ESP_IDF_VERSION_4_OR_HIGHER</span></div>
-<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_a76133a2ed7928b88dbacf57276e0cd68.html#a76133a2ed7928b88dbacf57276e0cd68">FL_WEAK</a> <span class="keywordtype">void</span> analogWrite(uint8_t pin, <span class="keywordtype">int</span> value) {</div>
+<div class="line"><a id="l00014" name="l00014"></a><span class="lineno">   14</span><a class="code hl_define" href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a> <span class="keywordtype">void</span> analogWrite(uint8_t pin, <span class="keywordtype">int</span> value) {</div>
 <div class="line"><a id="l00015" name="l00015"></a><span class="lineno">   15</span>  <span class="comment">// Setup PWM channel for the pin if not already done</span></div>
 <div class="line"><a id="l00016" name="l00016"></a><span class="lineno">   16</span>  <span class="keyword">static</span> <span class="keywordtype">bool</span> channels_setup[16] = {<span class="keyword">false</span>}; <span class="comment">// ESP32 has 16 PWM channels</span></div>
 <div class="line"><a id="l00017" name="l00017"></a><span class="lineno">   17</span>  <span class="keyword">static</span> uint8_t channel_counter = 0;</div>
@@ -145,7 +145,7 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div class="line"><a id="l00040" name="l00040"></a><span class="lineno">   40</span> </div>
 <div class="line"><a id="l00041" name="l00041"></a><span class="lineno">   41</span> </div>
 <div class="line"><a id="l00042" name="l00042"></a><span class="lineno">   42</span><span class="preprocessor">#endif  </span><span class="comment">// ESP32</span></div>
-<div class="ttc" id="acompiler__control_8h_a76133a2ed7928b88dbacf57276e0cd68_html_a76133a2ed7928b88dbacf57276e0cd68"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_a76133a2ed7928b88dbacf57276e0cd68.html#a76133a2ed7928b88dbacf57276e0cd68">FL_WEAK</a></div><div class="ttdeci">#define FL_WEAK</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00145">compiler_control.h:145</a></div></div>
+<div class="ttc" id="acompiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8_html_afde174fbd5fd09901dcac3f36aed38d8"><div class="ttname"><a href="../../d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8">FL_LINK_WEAK</a></div><div class="ttdeci">#define FL_LINK_WEAK</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d54/compiler__control_8h_source.html#l00145">compiler_control.h:145</a></div></div>
 <div class="ttc" id="acompiler__control_8h_html"><div class="ttname"><a href="../../d4/d54/compiler__control_8h.html">compiler_control.h</a></div></div>
 </div><!-- fragment --></div><!-- contents -->
 </div><!-- doc-content -->
@@ -154,7 +154,7 @@ $(function(){initNavTree('d3/d2d/compat_8h_source.html','../../'); initResizable
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_8bb4b718726ef6bb146f349e752b8dbd.html">AnalogOutput</a></li><li class="navelem"><a class="el" href="../../d3/d2d/compat_8h.html">compat.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:19 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

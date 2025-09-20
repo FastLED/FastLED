@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d8/dcf/structfl_1_1is__floating__point_3_01float_01_4.html" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="d0/d26/structfl_1_1is__floating__point_3_01const_01_t_01_4.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="109,-30 0,-30 0,0 109,0 109,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::is_floating_point</text>
-<text text-anchor="middle" x="54.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; float &gt;</text>
+<text text-anchor="middle" x="54.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; const T &gt;</text>
 </a>
 </g>
 </g>

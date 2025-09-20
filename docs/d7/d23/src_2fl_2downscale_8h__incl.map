@@ -25,10 +25,10 @@
 <area shape="poly" id="edge21_Node000006_Node000012" title=" " alt="" coords="536,102,625,144,623,148,534,106"/>
 <area shape="rect" id="Node000013" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="256,225,372,251"/>
 <area shape="poly" id="edge22_Node000006_Node000013" title=" " alt="" coords="505,106,477,141,437,179,398,204,359,222,357,218,396,199,434,175,473,138,501,103"/>
-<area shape="rect" id="Node000055" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="747,152,833,177"/>
-<area shape="poly" id="edge28_Node000006_Node000055" title=" " alt="" coords="543,98,734,146,732,151,542,103"/>
-<area shape="rect" id="Node000056" href="$db/d19/ease_8h.html" title=" " alt="" coords="173,152,250,177"/>
-<area shape="poly" id="edge29_Node000006_Node000056" title=" " alt="" coords="480,103,264,154,263,148,479,98"/>
+<area shape="rect" id="Node000056" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="747,152,833,177"/>
+<area shape="poly" id="edge28_Node000006_Node000056" title=" " alt="" coords="543,98,734,146,732,151,542,103"/>
+<area shape="rect" id="Node000057" href="$db/d19/ease_8h.html" title=" " alt="" coords="173,152,250,177"/>
+<area shape="poly" id="edge29_Node000006_Node000057" title=" " alt="" coords="480,103,264,154,263,148,479,98"/>
 <area shape="rect" id="Node000008" href="$d2/d4f/hsv_8h.html" title="Defines the hue, saturation, and value (HSV) pixel struct." alt="" coords="164,225,232,251"/>
 <area shape="poly" id="edge10_Node000007_Node000008" title=" " alt="" coords="361,180,243,223,241,218,359,175"/>
 <area shape="poly" id="edge13_Node000007_Node000009" title=" " alt="" coords="423,168,490,186,526,202,560,223,585,253,602,284,597,287,581,256,556,227,524,206,488,191,422,173"/>
@@ -43,11 +43,11 @@
 <area shape="poly" id="edge25_Node000013_Node000009" title=" " alt="" coords="362,248,548,293,547,298,361,253"/>
 <area shape="rect" id="Node000014" href="$da/d66/string_8h.html" title=" " alt="" coords="283,299,353,324"/>
 <area shape="poly" id="edge23_Node000013_Node000014" title=" " alt="" coords="317,251,319,285,314,285,312,251"/>
-<area shape="rect" id="Node000022" href="$d9/d83/move_8h.html" title=" " alt="" coords="378,299,461,324"/>
-<area shape="poly" id="edge26_Node000013_Node000022" title=" " alt="" coords="332,248,392,289,390,293,329,253"/>
-<area shape="poly" id="edge31_Node000056_Node000002" title=" " alt="" coords="183,180,145,199,109,227,89,256,75,286,70,284,84,254,105,223,142,195,180,175"/>
-<area shape="poly" id="edge30_Node000056_Node000003" title=" " alt="" coords="196,179,173,199,155,226,153,238,155,250,165,281,178,310,206,359,201,362,173,313,160,283,150,251,147,238,150,224,169,196,193,175"/>
-<area shape="rect" id="Node000057" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="397,225,546,251"/>
-<area shape="poly" id="edge32_Node000056_Node000057" title=" " alt="" coords="251,174,417,219,415,224,250,179"/>
-<area shape="poly" id="edge33_Node000057_Node000009" title=" " alt="" coords="495,248,575,290,573,295,492,253"/>
+<area shape="rect" id="Node000023" href="$d9/d83/move_8h.html" title=" " alt="" coords="378,299,461,324"/>
+<area shape="poly" id="edge26_Node000013_Node000023" title=" " alt="" coords="332,248,392,289,390,293,329,253"/>
+<area shape="poly" id="edge31_Node000057_Node000002" title=" " alt="" coords="183,180,145,199,109,227,89,256,75,286,70,284,84,254,105,223,142,195,180,175"/>
+<area shape="poly" id="edge30_Node000057_Node000003" title=" " alt="" coords="196,179,173,199,155,226,153,238,155,250,165,281,178,310,206,359,201,362,173,313,160,283,150,251,147,238,150,224,169,196,193,175"/>
+<area shape="rect" id="Node000058" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="397,225,546,251"/>
+<area shape="poly" id="edge32_Node000057_Node000058" title=" " alt="" coords="251,174,417,219,415,224,250,179"/>
+<area shape="poly" id="edge33_Node000058_Node000009" title=" " alt="" coords="495,248,575,290,573,295,492,253"/>
 </map>

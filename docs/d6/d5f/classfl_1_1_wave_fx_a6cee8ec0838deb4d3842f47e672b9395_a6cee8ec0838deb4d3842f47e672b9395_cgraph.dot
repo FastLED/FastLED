@@ -22,5 +22,7 @@ digraph "fl::WaveFx::WaveFx"
   Node1 -> Node8 [id="edge7_Node000001_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fl::WaveFx::setAutoUpdate",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_a35b76280dc308f7b6c0e6783bf6be390.html#a35b76280dc308f7b6c0e6783bf6be390",tooltip=" "];
   Node1 -> Node9 [id="edge8_Node000001_Node000009",color="steelblue1",style="solid",tooltip=" "];
-  Node9 [id="Node000009",label="fl::WaveFx::setXCylindrical",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_adcc62937b64c442f328b89f5c9529a30.html#adcc62937b64c442f328b89f5c9529a30",tooltip=" "];
+  Node9 [id="Node000009",label="fl::WaveFx::setUseChangeGrid",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_a7d47419f3f728fa8a8518a621c1498b2.html#a7d47419f3f728fa8a8518a621c1498b2",tooltip=" "];
+  Node1 -> Node10 [id="edge9_Node000001_Node000010",color="steelblue1",style="solid",tooltip=" "];
+  Node10 [id="Node000010",label="fl::WaveFx::setXCylindrical",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d6/d5f/classfl_1_1_wave_fx_adcc62937b64c442f328b89f5c9529a30.html#adcc62937b64c442f328b89f5c9529a30",tooltip=" "];
 }

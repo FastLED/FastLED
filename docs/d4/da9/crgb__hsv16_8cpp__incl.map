@@ -4,8 +4,8 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="488,31,488,138,483,138,483,31"/>
 <area shape="rect" id="Node000009" href="$df/d2a/namespace_8h.html" title="Implements the FastLED namespace macros." alt="" coords="713,372,834,397"/>
 <area shape="poly" id="edge38_Node000001_Node000009" title=" " alt="" coords="553,25,661,43,780,71,833,89,877,110,906,135,914,149,917,163,917,239,914,286,906,305,891,326,862,351,827,369,825,364,859,347,887,322,902,302,909,284,912,239,912,164,909,151,902,138,874,115,831,94,778,76,660,48,552,30"/>
-<area shape="rect" id="Node000058" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="89,79,175,104"/>
-<area shape="poly" id="edge33_Node000001_Node000058" title=" " alt="" coords="429,33,189,81,188,76,428,28"/>
+<area shape="rect" id="Node000059" href="$d0/d1a/hsv16_8h.html" title=" " alt="" coords="89,79,175,104"/>
+<area shape="poly" id="edge33_Node000001_Node000059" title=" " alt="" coords="429,33,189,81,188,76,428,28"/>
 <area shape="rect" id="Node000003" href="$df/dd8/stdint_8h.html" title=" " alt="" coords="244,445,327,471"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="455,179,414,195,367,221,322,256,303,277,288,300,276,333,273,369,276,403,281,432,276,433,271,404,268,369,271,332,283,297,299,273,318,252,364,216,412,191,453,174"/>
 <area shape="rect" id="Node000005" href="$d3/d7e/int_8h.html" title=" " alt="" coords="158,372,221,397"/>
@@ -21,10 +21,10 @@
 <area shape="poly" id="edge20_Node000002_Node000012" title=" " alt="" coords="506,175,573,216,570,220,503,180"/>
 <area shape="rect" id="Node000013" href="$df/d63/type__traits_8h.html" title=" " alt="" coords="953,299,1069,324"/>
 <area shape="poly" id="edge21_Node000002_Node000013" title=" " alt="" coords="517,164,582,169,669,179,767,196,864,223,931,254,986,289,983,293,928,259,862,228,766,201,668,184,581,174,517,170"/>
-<area shape="rect" id="Node000055" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="739,225,826,251"/>
-<area shape="poly" id="edge27_Node000002_Node000055" title=" " alt="" coords="518,171,727,221,725,226,517,176"/>
-<area shape="rect" id="Node000056" href="$db/d19/ease_8h.html" title=" " alt="" coords="93,225,171,251"/>
-<area shape="poly" id="edge28_Node000002_Node000056" title=" " alt="" coords="455,175,184,229,183,224,453,170"/>
+<area shape="rect" id="Node000056" href="$de/d9a/hsv2rgb_8h.html" title="Functions to convert from the HSV colorspace to the RGB colorspace." alt="" coords="739,225,826,251"/>
+<area shape="poly" id="edge27_Node000002_Node000056" title=" " alt="" coords="518,171,727,221,725,226,517,176"/>
+<area shape="rect" id="Node000057" href="$db/d19/ease_8h.html" title=" " alt="" coords="93,225,171,251"/>
+<area shape="poly" id="edge28_Node000002_Node000057" title=" " alt="" coords="455,175,184,229,183,224,453,170"/>
 <area shape="poly" id="edge4_Node000003_Node000003" title=" " alt="" coords="316,443,341,444,350,449,353,458,346,470,330,474,329,469,343,465,348,458,346,453,339,449,316,448"/>
 <area shape="rect" id="Node000004" title=" " alt="" coords="248,519,323,544"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="288,471,288,505,283,505,283,471"/>
@@ -45,15 +45,15 @@
 <area shape="poly" id="edge24_Node000013_Node000009" title=" " alt="" coords="973,327,826,371,824,365,972,321"/>
 <area shape="rect" id="Node000014" href="$da/d66/string_8h.html" title=" " alt="" coords="970,372,1041,397"/>
 <area shape="poly" id="edge22_Node000013_Node000014" title=" " alt="" coords="1012,325,1010,359,1005,358,1007,324"/>
-<area shape="rect" id="Node000022" href="$d9/d83/move_8h.html" title=" " alt="" coords="863,372,945,397"/>
-<area shape="poly" id="edge25_Node000013_Node000022" title=" " alt="" coords="995,326,934,367,931,362,992,322"/>
-<area shape="poly" id="edge29_Node000056_Node000003" title=" " alt="" coords="132,251,128,280,126,318,132,359,139,378,149,396,162,407,183,418,235,438,233,443,180,423,159,411,145,399,134,380,127,360,121,318,122,279,127,251"/>
-<area shape="poly" id="edge30_Node000056_Node000005" title=" " alt="" coords="139,250,182,358,177,360,134,252"/>
-<area shape="rect" id="Node000057" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="536,299,685,324"/>
-<area shape="poly" id="edge31_Node000056_Node000057" title=" " alt="" coords="171,242,523,294,522,300,170,248"/>
-<area shape="poly" id="edge32_Node000057_Node000009" title=" " alt="" coords="638,322,735,364,733,369,636,326"/>
-<area shape="poly" id="edge36_Node000058_Node000002" title=" " alt="" coords="175,99,441,152,440,157,174,104"/>
-<area shape="poly" id="edge34_Node000058_Node000003" title=" " alt="" coords="112,106,80,127,46,157,19,194,11,214,8,237,8,312,14,330,31,349,57,367,90,384,164,415,234,439,232,444,162,420,88,389,55,371,28,353,10,333,3,313,3,236,6,213,14,191,42,153,77,123,109,102"/>
-<area shape="poly" id="edge35_Node000058_Node000005" title=" " alt="" coords="125,106,108,132,90,168,80,209,79,230,84,250,100,283,121,313,166,361,163,364,117,317,95,286,79,252,74,230,74,208,85,166,103,129,121,103"/>
-<area shape="poly" id="edge37_Node000058_Node000056" title=" " alt="" coords="135,104,135,212,129,212,129,104"/>
+<area shape="rect" id="Node000023" href="$d9/d83/move_8h.html" title=" " alt="" coords="863,372,945,397"/>
+<area shape="poly" id="edge25_Node000013_Node000023" title=" " alt="" coords="995,326,934,367,931,362,992,322"/>
+<area shape="poly" id="edge29_Node000057_Node000003" title=" " alt="" coords="132,251,128,280,126,318,132,359,139,378,149,396,162,407,183,418,235,438,233,443,180,423,159,411,145,399,134,380,127,360,121,318,122,279,127,251"/>
+<area shape="poly" id="edge30_Node000057_Node000005" title=" " alt="" coords="139,250,182,358,177,360,134,252"/>
+<area shape="rect" id="Node000058" href="$df/dab/fastled__progmem_8h.html" title="Wrapper definitions to allow seamless use of PROGMEM in environments that have it." alt="" coords="536,299,685,324"/>
+<area shape="poly" id="edge31_Node000057_Node000058" title=" " alt="" coords="171,242,523,294,522,300,170,248"/>
+<area shape="poly" id="edge32_Node000058_Node000009" title=" " alt="" coords="638,322,735,364,733,369,636,326"/>
+<area shape="poly" id="edge36_Node000059_Node000002" title=" " alt="" coords="175,99,441,152,440,157,174,104"/>
+<area shape="poly" id="edge34_Node000059_Node000003" title=" " alt="" coords="112,106,80,127,46,157,19,194,11,214,8,237,8,312,14,330,31,349,57,367,90,384,164,415,234,439,232,444,162,420,88,389,55,371,28,353,10,333,3,313,3,236,6,213,14,191,42,153,77,123,109,102"/>
+<area shape="poly" id="edge35_Node000059_Node000005" title=" " alt="" coords="125,106,108,132,90,168,80,209,79,230,84,250,100,283,121,313,166,361,163,364,117,317,95,286,79,252,74,230,74,208,85,166,103,129,121,103"/>
+<area shape="poly" id="edge37_Node000059_Node000057" title=" " alt="" coords="135,104,135,212,129,212,129,104"/>
 </map>

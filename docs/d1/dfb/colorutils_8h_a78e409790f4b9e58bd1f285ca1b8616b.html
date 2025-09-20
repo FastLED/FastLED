@@ -124,23 +124,23 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a78e409790f4b9e58bd1f285ca1b8616b
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../de/dc8/blur_8cpp_source.html#l00055">55</a> of file <a class="el" href="../../de/dc8/blur_8cpp_source.html">blur.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   55</span>                                                           {</div>
-<div class="line"><span class="lineno">   56</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> keep = 255 - blur_amount;</div>
-<div class="line"><span class="lineno">   57</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> seep = blur_amount &gt;&gt; 1;</div>
-<div class="line"><span class="lineno">   58</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> carryover = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
-<div class="line"><span class="lineno">   59</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; numLeds; ++i) {</div>
-<div class="line"><span class="lineno">   60</span>        <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> cur = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i];</div>
-<div class="line"><span class="lineno">   61</span>        <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> part = cur;</div>
-<div class="line"><span class="lineno">   62</span>        part.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da">nscale8</a>(seep);</div>
-<div class="line"><span class="lineno">   63</span>        cur.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da">nscale8</a>(keep);</div>
-<div class="line"><span class="lineno">   64</span>        cur += carryover;</div>
-<div class="line"><span class="lineno">   65</span>        <span class="keywordflow">if</span> (i)</div>
-<div class="line"><span class="lineno">   66</span>            <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i - 1] += part;</div>
-<div class="line"><span class="lineno">   67</span>        <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i] = cur;</div>
-<div class="line"><span class="lineno">   68</span>        carryover = part;</div>
-<div class="line"><span class="lineno">   69</span>    }</div>
-<div class="line"><span class="lineno">   70</span>}</div>
+<p class="definition">Definition at line <a class="el" href="../../de/dc8/blur_8cpp_source.html#l00056">56</a> of file <a class="el" href="../../de/dc8/blur_8cpp_source.html">blur.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   56</span>                                                           {</div>
+<div class="line"><span class="lineno">   57</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> keep = 255 - blur_amount;</div>
+<div class="line"><span class="lineno">   58</span>    <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a> seep = blur_amount &gt;&gt; 1;</div>
+<div class="line"><span class="lineno">   59</span>    <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> carryover = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99abde6007b13c22c05d888db898ec814a7">CRGB::Black</a>;</div>
+<div class="line"><span class="lineno">   60</span>    <span class="keywordflow">for</span> (fl::u16 i = 0; i &lt; numLeds; ++i) {</div>
+<div class="line"><span class="lineno">   61</span>        <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> cur = <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i];</div>
+<div class="line"><span class="lineno">   62</span>        <a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> part = cur;</div>
+<div class="line"><span class="lineno">   63</span>        part.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da">nscale8</a>(seep);</div>
+<div class="line"><span class="lineno">   64</span>        cur.<a class="code hl_function" href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da">nscale8</a>(keep);</div>
+<div class="line"><span class="lineno">   65</span>        cur += carryover;</div>
+<div class="line"><span class="lineno">   66</span>        <span class="keywordflow">if</span> (i)</div>
+<div class="line"><span class="lineno">   67</span>            <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i - 1] += part;</div>
+<div class="line"><span class="lineno">   68</span>        <a class="code hl_variable" href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>[i] = cur;</div>
+<div class="line"><span class="lineno">   69</span>        carryover = part;</div>
+<div class="line"><span class="lineno">   70</span>    }</div>
+<div class="line"><span class="lineno">   71</span>}</div>
 <div class="ttc" id="a_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d_html_a1b4f26a01e11d7eb2848bc41b0f6dd9d"><div class="ttname"><a href="../../d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a></div><div class="ttdeci">CRGB leds[NUM_LEDS]</div><div class="ttdef"><b>Definition</b> <a href="../../d8/d21/_adafruit_bridge_8ino_source.html#l00013">AdafruitBridge.ino:13</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
 <div class="ttc" id="astruct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da_html_a271bc2ba8b57b41d0c1cda3eed0eb8da"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_a271bc2ba8b57b41d0c1cda3eed0eb8da.html#a271bc2ba8b57b41d0c1cda3eed0eb8da">CRGB::nscale8</a></div><div class="ttdeci">CRGB &amp; nscale8(fl::u8 scaledown)</div><div class="ttdoc">Scale down a RGB to N/256ths of its current brightness, using &quot;plain math&quot; dimming rules.</div></div>
@@ -165,7 +165,7 @@ $(function(){initNavTree('d1/dfb/colorutils_8h_a78e409790f4b9e58bd1f285ca1b8616b
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d1/dfb/colorutils_8h.html">colorutils.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

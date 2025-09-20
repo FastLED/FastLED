@@ -115,31 +115,31 @@ $(function(){initNavTree('da/dc7/advanced_8h_a669fa41e860b24902914d77946476084.h
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../da/dc7/advanced_8h_source.html#l00148">148</a> of file <a class="el" href="../../da/dc7/advanced_8h_source.html">advanced.h</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  148</span>                                 {</div>
-<div class="line"><span class="lineno">  149</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34">autoGain</a>) {</div>
-<div class="line"><span class="lineno">  150</span>        <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> = 1.0f;</div>
-<div class="line"><span class="lineno">  151</span>        <span class="keywordflow">return</span>;</div>
-<div class="line"><span class="lineno">  152</span>    }</div>
-<div class="line"><span class="lineno">  153</span>    </div>
-<div class="line"><span class="lineno">  154</span>    <span class="keyword">static</span> <span class="keywordtype">float</span> targetLevel = 0.7f;</div>
-<div class="line"><span class="lineno">  155</span>    <span class="keyword">static</span> <span class="keywordtype">float</span> avgLevel = 0.0f;</div>
+<p class="definition">Definition at line <a class="el" href="../../da/dc7/advanced_8h_source.html#l00146">146</a> of file <a class="el" href="../../da/dc7/advanced_8h_source.html">advanced.h</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  146</span>                                 {</div>
+<div class="line"><span class="lineno">  147</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34">autoGain</a>) {</div>
+<div class="line"><span class="lineno">  148</span>        <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> = 1.0f;</div>
+<div class="line"><span class="lineno">  149</span>        <span class="keywordflow">return</span>;</div>
+<div class="line"><span class="lineno">  150</span>    }</div>
+<div class="line"><span class="lineno">  151</span>    </div>
+<div class="line"><span class="lineno">  152</span>    <span class="keyword">static</span> <span class="keywordtype">float</span> targetLevel = 0.7f;</div>
+<div class="line"><span class="lineno">  153</span>    <span class="keyword">static</span> <span class="keywordtype">float</span> avgLevel = 0.0f;</div>
+<div class="line"><span class="lineno">  154</span>    </div>
+<div class="line"><span class="lineno">  155</span>    avgLevel = avgLevel * 0.95f + level * 0.05f;</div>
 <div class="line"><span class="lineno">  156</span>    </div>
-<div class="line"><span class="lineno">  157</span>    avgLevel = avgLevel * 0.95f + level * 0.05f;</div>
-<div class="line"><span class="lineno">  158</span>    </div>
-<div class="line"><span class="lineno">  159</span>    <span class="keywordflow">if</span> (avgLevel &gt; 0.01f) {</div>
-<div class="line"><span class="lineno">  160</span>        <span class="keywordtype">float</span> gainAdjust = targetLevel / avgLevel;</div>
-<div class="line"><span class="lineno">  161</span>        gainAdjust = <a class="code hl_function" href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a>(gainAdjust, 0.5f, 2.0f);</div>
-<div class="line"><span class="lineno">  162</span>        <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> = <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> * 0.9f + gainAdjust * 0.1f;</div>
-<div class="line"><span class="lineno">  163</span>    }</div>
-<div class="line"><span class="lineno">  164</span>}</div>
-<div class="ttc" id="aadvanced_8h_ab656ca94f0f14a07bd099c276fa3359c_html_ab656ca94f0f14a07bd099c276fa3359c"><div class="ttname"><a href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a></div><div class="ttdeci">float autoGainValue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00091">advanced.h:91</a></div></div>
+<div class="line"><span class="lineno">  157</span>    <span class="keywordflow">if</span> (avgLevel &gt; 0.01f) {</div>
+<div class="line"><span class="lineno">  158</span>        <span class="keywordtype">float</span> gainAdjust = targetLevel / avgLevel;</div>
+<div class="line"><span class="lineno">  159</span>        gainAdjust = <a class="code hl_function" href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a>(gainAdjust, 0.5f, 2.0f);</div>
+<div class="line"><span class="lineno">  160</span>        <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> = <a class="code hl_variable" href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a> * 0.9f + gainAdjust * 0.1f;</div>
+<div class="line"><span class="lineno">  161</span>    }</div>
+<div class="line"><span class="lineno">  162</span>}</div>
+<div class="ttc" id="aadvanced_8h_ab656ca94f0f14a07bd099c276fa3359c_html_ab656ca94f0f14a07bd099c276fa3359c"><div class="ttname"><a href="../../da/dc7/advanced_8h_ab656ca94f0f14a07bd099c276fa3359c.html#ab656ca94f0f14a07bd099c276fa3359c">autoGainValue</a></div><div class="ttdeci">float autoGainValue</div><div class="ttdef"><b>Definition</b> <a href="../../da/dc7/advanced_8h_source.html#l00089">advanced.h:89</a></div></div>
 <div class="ttc" id="aadvanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34_html_aed2bfc0e3ae7cebbe26e38bda776ed34"><div class="ttname"><a href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34">autoGain</a></div><div class="ttdeci">UICheckbox autoGain(&quot;Auto Gain&quot;, true)</div></div>
 <div class="ttc" id="anamespacefl_a6072e119545650c71b6544cc0ce9e355_html_a6072e119545650c71b6544cc0ce9e355"><div class="ttname"><a href="../../d4/d36/namespacefl_a6072e119545650c71b6544cc0ce9e355.html#a6072e119545650c71b6544cc0ce9e355">fl::clamp</a></div><div class="ttdeci">FASTLED_FORCE_INLINE T clamp(T value, T min, T max)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/dd3/clamp_8h_source.html#l00010">clamp.h:10</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34">autoGain()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00091">autoGainValue</a>, and <a class="el" href="../../d6/dd3/clamp_8h_source.html#l00010">fl::clamp()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/dc7/advanced_8h_aed2bfc0e3ae7cebbe26e38bda776ed34.html#aed2bfc0e3ae7cebbe26e38bda776ed34">autoGain()</a>, <a class="el" href="../../da/dc7/advanced_8h_source.html#l00089">autoGainValue</a>, and <a class="el" href="../../d6/dd3/clamp_8h_source.html#l00010">fl::clamp()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dc7/advanced_8h_source.html#l00472">loop()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../da/dc7/advanced_8h_source.html#l00470">loop()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -164,7 +164,7 @@ $(function(){initNavTree('da/dc7/advanced_8h_a669fa41e860b24902914d77946476084.h
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_d28a4824dc47e487b107a5db32ef43c4.html">examples</a></li><li class="navelem"><a class="el" href="../../dir_1fe2633b6793b56f980e752e54e330d5.html">Audio</a></li><li class="navelem"><a class="el" href="../../dir_ff850ecb835b14ab54bf39de49075331.html">advanced</a></li><li class="navelem"><a class="el" href="../../da/dc7/advanced_8h.html">advanced.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -15,11 +15,11 @@ var compiler__control_8h =
     [ "FL_DISABLE_WARNING_UNUSED_PARAMETER", "d4/d54/compiler__control_8h_ab1bcf9d614c3898399ce2be35dbe30ca.html#ab1bcf9d614c3898399ce2be35dbe30ca", null ],
     [ "FL_FAST_MATH_BEGIN", "d4/d54/compiler__control_8h_a5ac4d63dab6758858b6f2a351798f4ec.html#a5ac4d63dab6758858b6f2a351798f4ec", null ],
     [ "FL_FAST_MATH_END", "d4/d54/compiler__control_8h_a5b54053b2cf95b58ee6101c5d475d4da.html#a5b54053b2cf95b58ee6101c5d475d4da", null ],
+    [ "FL_LINK_WEAK", "d4/d54/compiler__control_8h_afde174fbd5fd09901dcac3f36aed38d8.html#afde174fbd5fd09901dcac3f36aed38d8", null ],
     [ "FL_OPTIMIZATION_LEVEL_O0_BEGIN", "d4/d54/compiler__control_8h_a5d341d4555c8684ddd73b8bb476b3e6b.html#a5d341d4555c8684ddd73b8bb476b3e6b", null ],
     [ "FL_OPTIMIZATION_LEVEL_O0_END", "d4/d54/compiler__control_8h_a1cac7dee8d1aa22c9e9e122855746e63.html#a1cac7dee8d1aa22c9e9e122855746e63", null ],
     [ "FL_OPTIMIZATION_LEVEL_O3_BEGIN", "d4/d54/compiler__control_8h_a0044e4fd9a50a929868d342eccc4e608.html#a0044e4fd9a50a929868d342eccc4e608", null ],
     [ "FL_OPTIMIZATION_LEVEL_O3_END", "d4/d54/compiler__control_8h_a5bd866d3b87b778bc1dd8f4725459000.html#a5bd866d3b87b778bc1dd8f4725459000", null ],
     [ "FL_STRINGIFY", "d4/d54/compiler__control_8h_af4b1ba347c5a9b2d7435de16b2bc2a5d.html#af4b1ba347c5a9b2d7435de16b2bc2a5d", null ],
-    [ "FL_STRINGIFY2", "d4/d54/compiler__control_8h_a2a3318e0940a7660c4629b92b843f267.html#a2a3318e0940a7660c4629b92b843f267", null ],
-    [ "FL_WEAK", "d4/d54/compiler__control_8h_a76133a2ed7928b88dbacf57276e0cd68.html#a76133a2ed7928b88dbacf57276e0cd68", null ]
+    [ "FL_STRINGIFY2", "d4/d54/compiler__control_8h_a2a3318e0940a7660c4629b92b843f267.html#a2a3318e0940a7660c4629b92b843f267", null ]
 ];

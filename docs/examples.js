@@ -11,7 +11,7 @@ var examples =
     [ "BlinkParallel.ino", "d5/d44/_blink_parallel_8ino-example.html", null ],
     [ "Blur2d.ino", "d2/d42/_blur2d_8ino-example.html", null ],
     [ "Chromancer.ino", "d1/dce/_chromancer_8ino-example.html", null ],
-    [ "Rgb8Video.ino", "d3/db8/_rgb8_video_8ino-example.html", null ],
+    [ "ColorBoost.ino", "d1/d64/_color_boost_8ino-example.html", null ],
     [ "ColorPalette.ino", "df/d66/_color_palette_8ino-example.html", null ],
     [ "ColorTemperature.ino", "d8/d79/_color_temperature_8ino-example.html", null ],
     [ "Cylon.ino", "d8/dd0/_cylon_8ino-example.html", null ],

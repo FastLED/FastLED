@@ -115,28 +115,28 @@ $(function(){initNavTree('d0/de1/classfl_1_1_audio_sample_aad106b78fa799d9dbf91f
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00083">83</a> of file <a class="el" href="../../d1/ddc/audio_8cpp_source.html">audio.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   83</span>                             {</div>
-<div class="line"><span class="lineno">   84</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5">isValid</a>()) {</div>
-<div class="line"><span class="lineno">   85</span>        <span class="keywordflow">return</span> 0.0f;</div>
-<div class="line"><span class="lineno">   86</span>    }</div>
-<div class="line"><span class="lineno">   87</span>    fl::u64 sum_sq = 0;</div>
-<div class="line"><span class="lineno">   88</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62.html#a487aa2e70e20c9531a2603e26ea15d62">size</a>();</div>
-<div class="line"><span class="lineno">   89</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) {</div>
-<div class="line"><span class="lineno">   90</span>        fl::i32 x32 = fl::i32(<a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089.html#a1e832f8e8093a7464089e7b41bebe089">pcm</a>()[i]);</div>
-<div class="line"><span class="lineno">   91</span>        sum_sq += x32 * x32;</div>
-<div class="line"><span class="lineno">   92</span>    }</div>
-<div class="line"><span class="lineno">   93</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="#aad106b78fa799d9dbf91f0be71ced341">rms</a> = sqrtf(<span class="keywordtype">float</span>(sum_sq) / N);</div>
-<div class="line"><span class="lineno">   94</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#aad106b78fa799d9dbf91f0be71ced341">rms</a>;</div>
-<div class="line"><span class="lineno">   95</span>}</div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089_html_a1e832f8e8093a7464089e7b41bebe089"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089.html#a1e832f8e8093a7464089e7b41bebe089">fl::AudioSample::pcm</a></div><div class="ttdeci">const VectorPCM &amp; pcm() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00017">audio.cpp:17</a></div></div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62_html_a487aa2e70e20c9531a2603e26ea15d62"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62.html#a487aa2e70e20c9531a2603e26ea15d62">fl::AudioSample::size</a></div><div class="ttdeci">fl::size size() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00030">audio.cpp:30</a></div></div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5_html_a787afa32bf4171d89070085579b9b1e5"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5">fl::AudioSample::isValid</a></div><div class="ttdeci">bool isValid() const</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00029">audio.h:29</a></div></div>
-<div class="ttc" id="aclassfl_1_1_audio_sample_aad106b78fa799d9dbf91f0be71ced341_html_aad106b78fa799d9dbf91f0be71ced341"><div class="ttname"><a href="#aad106b78fa799d9dbf91f0be71ced341">fl::AudioSample::rms</a></div><div class="ttdeci">float rms() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00083">audio.cpp:83</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00128">128</a> of file <a class="el" href="../../d1/ddc/audio_8cpp_source.html">audio.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  128</span>                             {</div>
+<div class="line"><span class="lineno">  129</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5">isValid</a>()) {</div>
+<div class="line"><span class="lineno">  130</span>        <span class="keywordflow">return</span> 0.0f;</div>
+<div class="line"><span class="lineno">  131</span>    }</div>
+<div class="line"><span class="lineno">  132</span>    fl::u64 sum_sq = 0;</div>
+<div class="line"><span class="lineno">  133</span>    <span class="keyword">const</span> <span class="keywordtype">int</span> N = <a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62.html#a487aa2e70e20c9531a2603e26ea15d62">size</a>();</div>
+<div class="line"><span class="lineno">  134</span>    <span class="keywordflow">for</span> (<span class="keywordtype">int</span> i = 0; i &lt; N; ++i) {</div>
+<div class="line"><span class="lineno">  135</span>        fl::i32 x32 = fl::i32(<a class="code hl_function" href="../../d0/de1/classfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089.html#a1e832f8e8093a7464089e7b41bebe089">pcm</a>()[i]);</div>
+<div class="line"><span class="lineno">  136</span>        sum_sq += x32 * x32;</div>
+<div class="line"><span class="lineno">  137</span>    }</div>
+<div class="line"><span class="lineno">  138</span>    <span class="keywordtype">float</span> <a class="code hl_function" href="#aad106b78fa799d9dbf91f0be71ced341">rms</a> = sqrtf(<span class="keywordtype">float</span>(sum_sq) / N);</div>
+<div class="line"><span class="lineno">  139</span>    <span class="keywordflow">return</span> <a class="code hl_function" href="#aad106b78fa799d9dbf91f0be71ced341">rms</a>;</div>
+<div class="line"><span class="lineno">  140</span>}</div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089_html_a1e832f8e8093a7464089e7b41bebe089"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a1e832f8e8093a7464089e7b41bebe089.html#a1e832f8e8093a7464089e7b41bebe089">fl::AudioSample::pcm</a></div><div class="ttdeci">const VectorPCM &amp; pcm() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00062">audio.cpp:62</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62_html_a487aa2e70e20c9531a2603e26ea15d62"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a487aa2e70e20c9531a2603e26ea15d62.html#a487aa2e70e20c9531a2603e26ea15d62">fl::AudioSample::size</a></div><div class="ttdeci">fl::size size() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00075">audio.cpp:75</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5_html_a787afa32bf4171d89070085579b9b1e5"><div class="ttname"><a href="../../d0/de1/classfl_1_1_audio_sample_a787afa32bf4171d89070085579b9b1e5.html#a787afa32bf4171d89070085579b9b1e5">fl::AudioSample::isValid</a></div><div class="ttdeci">bool isValid() const</div><div class="ttdef"><b>Definition</b> <a href="../../da/d09/audio_8h_source.html#l00036">audio.h:36</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_sample_aad106b78fa799d9dbf91f0be71ced341_html_aad106b78fa799d9dbf91f0be71ced341"><div class="ttname"><a href="#aad106b78fa799d9dbf91f0be71ced341">fl::AudioSample::rms</a></div><div class="ttdeci">float rms() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/ddc/audio_8cpp_source.html#l00128">audio.cpp:128</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../da/d09/audio_8h_source.html#l00029">isValid()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00017">pcm()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00083">rms()</a>, and <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00030">size()</a>.</p>
+<p class="reference">References <a class="el" href="../../da/d09/audio_8h_source.html#l00036">isValid()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00062">pcm()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00128">rms()</a>, and <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00075">size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../da/dc7/advanced_8h_source.html#l00472">loop()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00083">rms()</a>, and <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00122">fl::AudioReactive::updateVolumeAndPeak()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d8/dce/_audio_input_8h_source.html#l00064">loop()</a>, <a class="el" href="../../d1/ddc/audio_8cpp_source.html#l00128">rms()</a>, and <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00152">fl::AudioReactive::updateVolumeAndPeak()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -161,7 +161,7 @@ $(function(){initNavTree('d0/de1/classfl_1_1_audio_sample_aad106b78fa799d9dbf91f
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d0/de1/classfl_1_1_audio_sample.html">AudioSample</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

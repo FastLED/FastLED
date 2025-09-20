@@ -4,23 +4,23 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="210,38,175,56,145,81,123,108,105,138,78,201,61,259,52,299,47,298,56,257,73,199,100,135,119,105,141,77,172,51,207,33"/>
 <area shape="rect" id="Node000003" href="$dc/d44/five__bit__hd__gamma_8h.html" title="Declares functions for five&#45;bit gamma correction." alt="" coords="171,79,346,104"/>
 <area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="261,44,261,79,256,79,256,44"/>
-<area shape="rect" id="Node000142" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="373,299,456,324"/>
-<area shape="poly" id="edge11_Node000001_Node000142" title=" " alt="" coords="311,33,350,51,386,77,420,111,443,142,459,178,473,225,476,238,473,252,455,280,433,300,429,297,451,276,468,250,471,238,468,226,454,180,439,145,416,115,382,81,347,56,309,38"/>
-<area shape="rect" id="Node000148" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="115,299,248,324"/>
-<area shape="poly" id="edge15_Node000001_Node000148" title=" " alt="" coords="211,38,183,56,161,80,149,109,144,140,144,171,148,203,163,259,178,297,173,299,158,260,143,204,139,172,139,139,144,107,156,77,179,52,208,34"/>
-<area shape="rect" id="Node000159" href="$d5/dd1/math8_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="329,225,458,251"/>
-<area shape="poly" id="edge12_Node000001_Node000159" title=" " alt="" coords="305,34,335,52,361,77,381,116,392,158,396,225,391,225,386,159,376,118,357,80,332,56,303,39"/>
+<area shape="rect" id="Node000143" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="373,299,456,324"/>
+<area shape="poly" id="edge11_Node000001_Node000143" title=" " alt="" coords="311,33,350,51,386,77,420,111,443,142,459,178,473,225,476,238,473,252,455,280,433,300,429,297,451,276,468,250,471,238,468,226,454,180,439,145,416,115,382,81,347,56,309,38"/>
+<area shape="rect" id="Node000149" href="$d5/d4d/pixel__controller_8h.html" title="Low level pixel data writing class." alt="" coords="115,299,248,324"/>
+<area shape="poly" id="edge15_Node000001_Node000149" title=" " alt="" coords="211,38,183,56,161,80,149,109,144,140,144,171,148,203,163,259,178,297,173,299,158,260,143,204,139,172,139,139,144,107,156,77,179,52,208,34"/>
+<area shape="rect" id="Node000160" href="$d5/dd1/math8_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="329,225,458,251"/>
+<area shape="poly" id="edge12_Node000001_Node000160" title=" " alt="" coords="305,34,335,52,361,77,381,116,392,158,396,225,391,225,386,159,376,118,357,80,332,56,303,39"/>
 <area shape="rect" id="Node000004" href="$db/d66/chipsets_8h.html" title="Contains the bulk of the definitions for the various LED chipsets supported." alt="" coords="219,152,307,177"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="263,118,265,152,259,152,257,118"/>
-<area shape="poly" id="edge10_Node000003_Node000148" title=" " alt="" coords="237,115,222,133,209,153,195,193,187,235,184,299,178,298,182,234,190,192,204,151,217,130,233,112"/>
+<area shape="poly" id="edge10_Node000003_Node000149" title=" " alt="" coords="237,115,222,133,209,153,195,193,187,235,184,299,178,298,182,234,190,192,204,151,217,130,233,112"/>
 <area shape="rect" id="Node000005" href="$db/d97/_fast_l_e_d_8h.html" title="central include file for FastLED, defines the CFastLED class/object" alt="" coords="219,225,304,251"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="265,191,264,225,259,225,260,191"/>
 <area shape="poly" id="edge6_Node000005_Node000002" title=" " alt="" coords="215,257,83,301,82,296,213,252"/>
-<area shape="rect" id="Node000112" href="$d0/de3/crgb_8cpp.html" title="Utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="272,299,349,324"/>
-<area shape="poly" id="edge5_Node000005_Node000112" title=" " alt="" coords="279,261,305,297,300,300,275,264"/>
-<area shape="poly" id="edge7_Node000005_Node000142" title=" " alt="" coords="292,254,384,296,382,301,290,259"/>
-<area shape="poly" id="edge9_Node000005_Node000148" title=" " alt="" coords="240,262,196,300,193,296,237,258"/>
-<area shape="poly" id="edge8_Node000142_Node000005" title=" " alt="" coords="383,295,292,253,294,248,386,290"/>
-<area shape="poly" id="edge13_Node000159_Node000112" title=" " alt="" coords="371,262,326,300,322,296,368,258"/>
-<area shape="poly" id="edge14_Node000159_Node000142" title=" " alt="" coords="403,263,414,298,409,299,398,265"/>
+<area shape="rect" id="Node000113" href="$d0/de3/crgb_8cpp.html" title="Utility functions for the red, green, and blue (RGB) pixel struct." alt="" coords="272,299,349,324"/>
+<area shape="poly" id="edge5_Node000005_Node000113" title=" " alt="" coords="279,261,305,297,300,300,275,264"/>
+<area shape="poly" id="edge7_Node000005_Node000143" title=" " alt="" coords="292,254,384,296,382,301,290,259"/>
+<area shape="poly" id="edge9_Node000005_Node000149" title=" " alt="" coords="240,262,196,300,193,296,237,258"/>
+<area shape="poly" id="edge8_Node000143_Node000005" title=" " alt="" coords="383,295,292,253,294,248,386,290"/>
+<area shape="poly" id="edge13_Node000160_Node000113" title=" " alt="" coords="371,262,326,300,322,296,368,258"/>
+<area shape="poly" id="edge14_Node000160_Node000143" title=" " alt="" coords="403,263,414,298,409,299,398,265"/>
 </map>

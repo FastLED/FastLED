@@ -11,6 +11,7 @@ var classfl_1_1_wave_simulation2_d =
     [ "geti8", "da/d47/classfl_1_1_wave_simulation2_d_a0f3ab992853b6ce736d4c549a77f5046.html#a0f3ab992853b6ce736d4c549a77f5046", null ],
     [ "getSpeed", "da/d47/classfl_1_1_wave_simulation2_d_abb05d3ae788bc0a7e16d469b9e96bfc6.html#abb05d3ae788bc0a7e16d469b9e96bfc6", null ],
     [ "getu8", "da/d47/classfl_1_1_wave_simulation2_d_ae1ef6ad4bb760c06f8e3337206883555.html#ae1ef6ad4bb760c06f8e3337206883555", null ],
+    [ "getUseChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a4bed06e30a66d9ce2c06c73d6cb4831e.html#a4bed06e30a66d9ce2c06c73d6cb4831e", null ],
     [ "getWidth", "da/d47/classfl_1_1_wave_simulation2_d_ad7a351b7ffac7b9daa96c2475b5fdd86.html#ad7a351b7ffac7b9daa96c2475b5fdd86", null ],
     [ "has", "da/d47/classfl_1_1_wave_simulation2_d_ab5cd05c03667abbe1b971cb5ff31fac7.html#ab5cd05c03667abbe1b971cb5ff31fac7", null ],
     [ "init", "da/d47/classfl_1_1_wave_simulation2_d_ae729085b341ecdaef1ea2c4fa18bac40.html#ae729085b341ecdaef1ea2c4fa18bac40", null ],
@@ -23,6 +24,7 @@ var classfl_1_1_wave_simulation2_d =
     [ "seti16", "da/d47/classfl_1_1_wave_simulation2_d_a20e603699773ea39419e3950103309f8.html#a20e603699773ea39419e3950103309f8", null ],
     [ "setSpeed", "da/d47/classfl_1_1_wave_simulation2_d_a614a159f66c77408c1cfedbd8644784c.html#a614a159f66c77408c1cfedbd8644784c", null ],
     [ "setSuperSample", "da/d47/classfl_1_1_wave_simulation2_d_a018b582b7a5830a2bdafdc52a4cd39d9.html#a018b582b7a5830a2bdafdc52a4cd39d9", null ],
+    [ "setUseChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_af82c174b9a15691c46698ce5e4eb9acf.html#af82c174b9a15691c46698ce5e4eb9acf", null ],
     [ "setXCylindrical", "da/d47/classfl_1_1_wave_simulation2_d_a3e9083afb328803c446cc0ddec40cb3c.html#a3e9083afb328803c446cc0ddec40cb3c", null ],
     [ "update", "da/d47/classfl_1_1_wave_simulation2_d_a1b5867a9c2a54dc64ea1e57e2d07dc04.html#a1b5867a9c2a54dc64ea1e57e2d07dc04", null ],
     [ "mChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a29dcc162e5620ba2010fd70d070d0003.html#a29dcc162e5620ba2010fd70d070d0003", null ],
@@ -31,5 +33,6 @@ var classfl_1_1_wave_simulation2_d =
     [ "mOuterHeight", "da/d47/classfl_1_1_wave_simulation2_d_a624359411d9e4bf7ba5e427adb56fbf6.html#a624359411d9e4bf7ba5e427adb56fbf6", null ],
     [ "mOuterWidth", "da/d47/classfl_1_1_wave_simulation2_d_a700768d8ba289e3a6853a9681bf4b5fc.html#a700768d8ba289e3a6853a9681bf4b5fc", null ],
     [ "mSim", "da/d47/classfl_1_1_wave_simulation2_d_af14cfa3ccff8fdf7cd092d5eb0f995bf.html#af14cfa3ccff8fdf7cd092d5eb0f995bf", null ],
-    [ "mU8Mode", "da/d47/classfl_1_1_wave_simulation2_d_abf0e654a7bc0f43e2d64f40a5bc1454a.html#abf0e654a7bc0f43e2d64f40a5bc1454a", null ]
+    [ "mU8Mode", "da/d47/classfl_1_1_wave_simulation2_d_abf0e654a7bc0f43e2d64f40a5bc1454a.html#abf0e654a7bc0f43e2d64f40a5bc1454a", null ],
+    [ "mUseChangeGrid", "da/d47/classfl_1_1_wave_simulation2_d_a11059b466d0b475b1e28faac627f55b4.html#a11059b466d0b475b1e28faac627f55b4", null ]
 ];

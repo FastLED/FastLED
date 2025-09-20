@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/EaseInOut"
   dir_5ca98a45f053116b8b338d9435eab00e [label="EaseInOut", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_5ca98a45f053116b8b338d9435eab00e.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_5ca98a45f053116b8b338d9435eab00e->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000029_000041.html" href="dir_000029_000041.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_5ca98a45f053116b8b338d9435eab00e->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="3", labeldistance=1.5 headhref="dir_000030_000042.html" href="dir_000030_000042.html" color="steelblue1" fontcolor="steelblue1"];
 }

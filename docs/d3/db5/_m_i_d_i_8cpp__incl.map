@@ -10,10 +10,10 @@
 <area shape="poly" id="edge7_Node000002_Node000007" title=" " alt="" coords="305,135,264,174,260,170,301,131"/>
 <area shape="rect" id="Node000008" href="$d0/d7c/midi___message_8h.html" title="MIDI Library for the Arduino &#45; Message struct definition." alt="" coords="325,181,453,207"/>
 <area shape="poly" id="edge9_Node000002_Node000008" title=" " alt="" coords="329,131,369,170,366,174,325,135"/>
-<area shape="rect" id="Node000057" href="$db/dff/serial_m_i_d_i_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="462,255,562,280"/>
-<area shape="poly" id="edge13_Node000002_Node000057" title=" " alt="" coords="348,125,407,144,439,159,467,179,491,209,506,241,502,243,487,212,464,183,436,164,405,149,346,131"/>
-<area shape="rect" id="Node000058" href="$de/d99/_m_i_d_i_8hpp.html" title="MIDI Library for the Arduino &#45; Inline implementations." alt="" coords="528,181,608,207"/>
-<area shape="poly" id="edge15_Node000002_Node000058" title=" " alt="" coords="348,128,516,175,514,180,346,134"/>
+<area shape="rect" id="Node000058" href="$db/dff/serial_m_i_d_i_8h.html" title="MIDI Library for the Arduino &#45; Platform @license MIT &#45; Copyright (c) 2015 Francois Best." alt="" coords="462,255,562,280"/>
+<area shape="poly" id="edge13_Node000002_Node000058" title=" " alt="" coords="348,125,407,144,439,159,467,179,491,209,506,241,502,243,487,212,464,183,436,164,405,149,346,131"/>
+<area shape="rect" id="Node000059" href="$de/d99/_m_i_d_i_8hpp.html" title="MIDI Library for the Arduino &#45; Inline implementations." alt="" coords="528,181,608,207"/>
+<area shape="poly" id="edge15_Node000002_Node000059" title=" " alt="" coords="348,128,516,175,514,180,346,134"/>
 <area shape="rect" id="Node000004" href="$df/dce/midi___namespace_8h.html" title="MIDI Library for the Arduino &#45; Namespace declaration." alt="" coords="244,328,391,353"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="223,278,289,318,286,323,220,282"/>
 <area shape="rect" id="Node000005" title=" " alt="" coords="133,328,219,353"/>
@@ -24,5 +24,5 @@
 <area shape="poly" id="edge10_Node000008_Node000004" title=" " alt="" coords="375,209,352,229,332,256,323,285,320,314,314,314,317,284,327,253,348,226,371,205"/>
 <area shape="rect" id="Node000009" href="$d0/dda/memfill_8h.html" title=" " alt="" coords="341,255,437,280"/>
 <area shape="poly" id="edge12_Node000008_Node000009" title=" " alt="" coords="392,207,392,241,387,241,387,207"/>
-<area shape="poly" id="edge14_Node000057_Node000004" title=" " alt="" coords="482,283,363,326,361,321,480,278"/>
+<area shape="poly" id="edge14_Node000058_Node000004" title=" " alt="" coords="482,283,363,326,361,321,480,278"/>
 </map>

@@ -110,16 +110,49 @@ $(function(){initNavTree('db/df7/class_c_pixel_view.html','../../'); initResizab
 <div class="contents">
 <a name="details" id="details"></a><h2 class="groupheader">Detailed Description</h2>
 <div class="textblock"><div class="compoundTemplParams">template&lt;class PIXEL_TYPE&gt;<br />
-class CPixelView&lt; PIXEL_TYPE &gt;</div><p>Represents a set of LED objects. </p>
-<p>Provides the [] array operator, and works like a normal array in that case. This should be kept in sync with the set of functions provided by the other <a class="el" href="../../db/d87/group___pixel_types.html">Pixel Data Types (CRGB/CHSV)</a> as well as functions in colorutils.h. </p><dl class="tparams"><dt>Template Parameters</dt><dd>
+class CPixelView&lt; PIXEL_TYPE &gt;</div><p>Represents a view/window into a set of LED pixels, providing array-like access and rich color operations. </p>
+<p><a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a view/window into a set of LED pixels, providing array-like access and rich color operati...">CPixelView</a> provides a non-owning view into LED pixel data with extensive manipulation capabilities. It supports forward and reverse iteration, subset operations, and a comprehensive set of color functions.</p>
+<p><b><a class="el" href="../../db/d42/struct_key.html">Key</a> Features:</b></p><ul>
+<li>Array-like access with <code>operator[]</code></li>
+<li>Subset creation with <code>operator(start, end)</code></li>
+<li>Reverse iteration when <code>start &gt; end</code></li>
+<li>Rich color operations: fill, gradients, scaling, blending</li>
+<li>Automatic conversion to <code><a class="el" href="../../d4/d36/namespacefl_a41efc6482adf6ba3487dee62b02c7f13.html#a41efc6482adf6ba3487dee62b02c7f13">fl::span</a>&lt;T&gt;</code> for modern C++ interop</li>
+<li>Iterator support for range-based loops</li>
+</ul>
+<p><b>Common Usage Patterns:</b> </p><div class="fragment"><div class="line"><span class="comment">// Basic usage</span></div>
+<div class="line"><a class="code hl_struct" href="../../d7/d82/struct_c_r_g_b.html">CRGB</a> <a class="code hl_variable" href="../../db/df7/class_c_pixel_view_a21679cd86fce5882d1b04aa78f2dd4ab.html#a21679cd86fce5882d1b04aa78f2dd4ab">leds</a>[100];</div>
+<div class="line"><a class="code hl_typedef" href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667">CRGBSet</a> pixels(<a class="code hl_variable" href="../../db/df7/class_c_pixel_view_a21679cd86fce5882d1b04aa78f2dd4ab.html#a21679cd86fce5882d1b04aa78f2dd4ab">leds</a>, 100);</div>
+<div class="line">pixels[0] = <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a>;                    <span class="comment">// Set individual pixel</span></div>
+<div class="line">pixels.fill_solid(<a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a>);           <span class="comment">// Fill all pixels</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Subset operations  </span></div>
+<div class="line"><span class="keyword">auto</span> segment = pixels(10, 50);           <span class="comment">// Forward subset (indices 10-50)</span></div>
+<div class="line"><span class="keyword">auto</span> reverse = pixels(50, 10);           <span class="comment">// Reverse subset (50 down to 10)</span></div>
+<div class="line">segment.fill_rainbow(0, 5);              <span class="comment">// Apply rainbow to segment</span></div>
+<div class="line"> </div>
+<div class="line"><span class="comment">// Modern C++ interop</span></div>
+<div class="line"><a class="code hl_typedef" href="../../d4/d36/namespacefl_a41efc6482adf6ba3487dee62b02c7f13.html#a41efc6482adf6ba3487dee62b02c7f13">fl::span&lt;CRGB&gt;</a> span = pixels;            <span class="comment">// Automatic conversion</span></div>
+<div class="line">std::fill(pixels.begin(), pixels.end(), <a class="code hl_enumvalue" href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4">CRGB::Green</a>);  <span class="comment">// STL algorithms</span></div>
+<div class="ttc" id="aclass_c_pixel_view_a21679cd86fce5882d1b04aa78f2dd4ab_html_a21679cd86fce5882d1b04aa78f2dd4ab"><div class="ttname"><a href="../../db/df7/class_c_pixel_view_a21679cd86fce5882d1b04aa78f2dd4ab.html#a21679cd86fce5882d1b04aa78f2dd4ab">CPixelView::leds</a></div><div class="ttdeci">PIXEL_TYPE *const leds</div><div class="ttdoc">pointer to the LED data</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d46/pixelset_8h_source.html#l00115">pixelset.h:115</a></div></div>
+<div class="ttc" id="anamespacefl_a41efc6482adf6ba3487dee62b02c7f13_html_a41efc6482adf6ba3487dee62b02c7f13"><div class="ttname"><a href="../../d4/d36/namespacefl_a41efc6482adf6ba3487dee62b02c7f13.html#a41efc6482adf6ba3487dee62b02c7f13">fl::span</a></div><div class="ttdeci">Slice&lt; T &gt; span</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d7a/span_8h_source.html#l00008">span.h:8</a></div></div>
+<div class="ttc" id="apixelset_8h_af5de5d996b3399837264a10ba96df667_html_af5de5d996b3399837264a10ba96df667"><div class="ttname"><a href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667">CRGBSet</a></div><div class="ttdeci">CPixelView&lt; CRGB &gt; CRGBSet</div><div class="ttdoc">CPixelView specialized for CRGB pixel arrays - the most commonly used pixel view type.</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d46/pixelset_8h_source.html#l00059">pixelset.h:59</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99a684af7c4da07453f87c525fc009c3ec4">CRGB::Green</a></div><div class="ttdeci">@ Green</div><div class="ttdoc">&lt;div style=&#39;background:#008000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00615">crgb.h:615</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab16fc35a3771b58550363f15d2003976">CRGB::Blue</a></div><div class="ttdeci">@ Blue</div><div class="ttdoc">&lt;div style=&#39;background:#0000FF;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00569">crgb.h:569</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99_html_aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b_aeb40a08b7cb90c1e21bd408261558b99.html#aeb40a08b7cb90c1e21bd408261558b99ab35114af96aa24d28e7901b1318cc43a">CRGB::Red</a></div><div class="ttdeci">@ Red</div><div class="ttdoc">&lt;div style=&#39;background:#FF0000;width:4em;height:4em;&#39;&gt;&lt;/div&gt;</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00679">crgb.h:679</a></div></div>
+<div class="ttc" id="astruct_c_r_g_b_html"><div class="ttname"><a href="../../d7/d82/struct_c_r_g_b.html">CRGB</a></div><div class="ttdoc">Representation of an RGB pixel (Red, Green, Blue)</div><div class="ttdef"><b>Definition</b> <a href="../../db/dd1/crgb_8h_source.html#l00086">crgb.h:86</a></div></div>
+</div><!-- fragment --><dl class="tparams"><dt>Template Parameters</dt><dd>
   <table class="tparams">
-    <tr><td class="paramname">PIXEL_TYPE</td><td>the type of LED data referenced in the class, e.g. <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a>. </td></tr>
+    <tr><td class="paramname">PIXEL_TYPE</td><td>the type of LED data referenced, typically <a class="el" href="../../d7/d82/struct_c_r_g_b.html" title="Representation of an RGB pixel (Red, Green, Blue)">CRGB</a> or <a class="el" href="../../dc/d53/struct_c_h_s_v.html" title="Representation of an HSV pixel (hue, saturation, value (aka brightness)).">CHSV</a> </td></tr>
   </table>
   </dd>
 </dl>
-<dl class="section note"><dt>Note</dt><dd>A pixel set is a window into another set of LED data, it is not its own set of LED data. </dd></dl>
+<dl class="section note"><dt>Note</dt><dd>This is a non-owning view - it references existing LED data, doesn't own it </dd></dl>
+<dl class="section see"><dt>See also</dt><dd><a class="el" href="../../d4/d46/pixelset_8h_af5de5d996b3399837264a10ba96df667.html#af5de5d996b3399837264a10ba96df667" title="CPixelView specialized for CRGB pixel arrays - the most commonly used pixel view type.">CRGBSet</a> - typedef for <a class="el" href="../../db/df7/class_c_pixel_view.html">CPixelView&lt;CRGB&gt;</a>, the most common usage </dd>
+<dd>
+<a class="el" href="../../d4/dc4/class_c_r_g_b_array.html" title="A version of CPixelView&lt;CRGB&gt; with an included array of CRGB LEDs.">CRGBArray</a> - version that owns its LED data </dd></dl>
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d46/pixelset_8h_source.html#l00059">59</a> of file <a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>.</p>
+<p class="definition">Definition at line <a class="el" href="../../d4/d46/pixelset_8h_source.html#l00110">110</a> of file <a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>.</p>
 </div>
 <p><code>#include &lt;<a class="el" href="../../d4/d46/pixelset_8h_source.html">pixelset.h</a>&gt;</code></p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -133,7 +166,7 @@ class CPixelView&lt; PIXEL_TYPE &gt;</div><p>Represents a set of LED objects. </
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html">pixelset_iterator_base</a></td></tr>
-<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator helper class for <a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a set of LED objects.">CPixelView</a>.  <a href="../../db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html#details">More...</a><br /></td></tr>
+<tr class="memdesc:"><td class="mdescLeft">&#160;</td><td class="mdescRight">Iterator helper class for <a class="el" href="../../db/df7/class_c_pixel_view.html" title="Represents a view/window into a set of LED pixels, providing array-like access and rich color operati...">CPixelView</a>.  <a href="../../db/d9b/class_c_pixel_view_1_1pixelset__iterator__base.html#details">More...</a><br /></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="pub-methods" name="pub-methods"></a>
@@ -351,7 +384,7 @@ Public Attributes</h2></td></tr>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../db/df7/class_c_pixel_view.html">CPixelView</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:35 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:21 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

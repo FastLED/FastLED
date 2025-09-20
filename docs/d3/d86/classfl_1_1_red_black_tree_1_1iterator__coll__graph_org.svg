@@ -22,11 +22,11 @@
 <!-- Node2 -->
 <g id="Node000002" class="node">
 <title>Node2</title>
-<g id="a_Node000002"><a xlink:href="../../d5/d2d/structfl_1_1_red_black_tree_1_1_node.html" target="_top" xlink:title=" ">
+<g id="a_Node000002"><a xlink:href="../../d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="302,-130.5 187,-130.5 187,-89.5 302,-89.5 302,-130.5"/>
 <text text-anchor="start" x="195" y="-118.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
 <text text-anchor="start" x="195" y="-107.5" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator</text>
-<text text-anchor="middle" x="244.5" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::Node</text>
+<text text-anchor="middle" x="244.5" y="-96.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::RBNode</text>
 </a>
 </g>
 </g>

@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="db/d87/group___pixel_types.html#d4/d0e/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed2____" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="db/d87/group___pixel_types.html#d5/d0d/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed0____" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="179,-30 0,-30 0,0 179,0 179,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::CHSV.__unnamed0</text>
-<text text-anchor="middle" x="89.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">__.__unnamed0__.__unnamed2__</text>
+<text text-anchor="middle" x="89.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">__.__unnamed0__.__unnamed0__</text>
 </a>
 </g>
 </g>

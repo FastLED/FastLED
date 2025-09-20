@@ -115,18 +115,18 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_ae9478f0e41220920a2a
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00374">374</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  374</span>                                                           {</div>
-<div class="line"><span class="lineno">  375</span>    <span class="keywordflow">if</span> (binIndex &gt;= 16) <span class="keywordflow">return</span> 0;</div>
-<div class="line"><span class="lineno">  376</span>    </div>
-<div class="line"><span class="lineno">  377</span>    <span class="keywordtype">float</span> value = (<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex] &lt; 0.0f) ? 0.0f : </div>
-<div class="line"><span class="lineno">  378</span>                  ((<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex] &gt; 255.0f) ? 255.0f : <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex]);</div>
-<div class="line"><span class="lineno">  379</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(value);</div>
-<div class="line"><span class="lineno">  380</span>}</div>
-<div class="ttc" id="aclassfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9_html_a93d1ec2fc51ac38d5712d91ef87103e9"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">fl::AudioReactive::mCurrentData</a></div><div class="ttdeci">AudioData mCurrentData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00090">audio_reactive.h:90</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00432">432</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  432</span>                                                           {</div>
+<div class="line"><span class="lineno">  433</span>    <span class="keywordflow">if</span> (binIndex &gt;= 16) <span class="keywordflow">return</span> 0;</div>
+<div class="line"><span class="lineno">  434</span>    </div>
+<div class="line"><span class="lineno">  435</span>    <span class="keywordtype">float</span> value = (<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex] &lt; 0.0f) ? 0.0f : </div>
+<div class="line"><span class="lineno">  436</span>                  ((<a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex] &gt; 255.0f) ? 255.0f : <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">mCurrentData</a>.frequencyBins[binIndex]);</div>
+<div class="line"><span class="lineno">  437</span>    <span class="keywordflow">return</span> <span class="keyword">static_cast&lt;</span><a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a><span class="keyword">&gt;</span>(value);</div>
+<div class="line"><span class="lineno">  438</span>}</div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9_html_a93d1ec2fc51ac38d5712d91ef87103e9"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a93d1ec2fc51ac38d5712d91ef87103e9.html#a93d1ec2fc51ac38d5712d91ef87103e9">fl::AudioReactive::mCurrentData</a></div><div class="ttdeci">AudioData mCurrentData</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00129">audio_reactive.h:129</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00090">mCurrentData</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00129">mCurrentData</a>.</p>
 
 </div>
 </div>
@@ -137,7 +137,7 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_ae9478f0e41220920a2a
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d40/classfl_1_1_audio_reactive.html">AudioReactive</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

@@ -18,12 +18,13 @@ digraph "fl/warn.h"
   Node3 -> Node8 [id="edge6_Node000003_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node8 [id="Node000008",label="fl/str.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$d1/d93/str_8h.html",tooltip=" "];
   Node8 -> Node4 [id="edge7_Node000008_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node3 -> Node52 [id="edge8_Node000003_Node000052",color="steelblue1",style="solid",tooltip=" "];
-  Node52 [id="Node000052",label="crgb.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd1/crgb_8h.html",tooltip="Defines the red, green, and blue (RGB) pixel struct."];
-  Node52 -> Node5 [id="edge9_Node000052_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node52 -> Node4 [id="edge10_Node000052_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node60 [id="edge11_Node000002_Node000060",color="steelblue1",style="solid",tooltip=" "];
-  Node60 [id="Node000060",label="fl/sketch_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dbc/sketch__macros_8h.html",tooltip=" "];
+  Node3 -> Node53 [id="edge8_Node000003_Node000053",color="steelblue1",style="solid",tooltip=" "];
+  Node53 [id="Node000053",label="crgb.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/dd1/crgb_8h.html",tooltip="Defines the red, green, and blue (RGB) pixel struct."];
+  Node53 -> Node5 [id="edge9_Node000053_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node53 -> Node4 [id="edge10_Node000053_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node61 [id="edge11_Node000002_Node000061",color="steelblue1",style="solid",tooltip=" "];
+  Node61 [id="Node000061",label="fl/sketch_macros.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d1/dbc/sketch__macros_8h.html",tooltip=" "];
   Node2 -> Node4 [id="edge12_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node5 [id="edge13_Node000002_Node000005",color="steelblue1",style="solid",tooltip=" "];
+  Node1 -> Node61 [id="edge14_Node000001_Node000061",color="steelblue1",style="solid",tooltip=" "];
 }

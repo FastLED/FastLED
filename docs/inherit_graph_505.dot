@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="MaxFadeTracker",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$da/db7/class_max_fade_tracker.html",tooltip="Tracks a smoothed peak with attack, decay, and output-inertia time-constants."];
+  Node0 [id="Node000000",label="led_strip_spi_config\l_t.flags",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/d8e/led__strip__spi_8h.html#d4/d47/structled__strip__spi__config__t_8flags",tooltip=" "];
 }

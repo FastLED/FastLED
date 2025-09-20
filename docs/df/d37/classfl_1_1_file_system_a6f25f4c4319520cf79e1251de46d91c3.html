@@ -124,31 +124,31 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a6f25f4c4319520cf79e125
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00112">112</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  113</span>                                                                                 {</div>
-<div class="line"><span class="lineno">  114</span>    <span class="keywordtype">string</span> text;</div>
-<div class="line"><span class="lineno">  115</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0.html#a0188b7f45ef58f2bdb3718d3cffbd3f0">readText</a>(path, &amp;text)) {</div>
-<div class="line"><span class="lineno">  116</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to read file: &quot;</span> &lt;&lt; path);</div>
-<div class="line"><span class="lineno">  117</span>        <span class="keywordflow">if</span> (error) {</div>
-<div class="line"><span class="lineno">  118</span>            *error = <span class="stringliteral">&quot;Failed to read file: &quot;</span>;</div>
-<div class="line"><span class="lineno">  119</span>            error-&gt;append(path);</div>
-<div class="line"><span class="lineno">  120</span>        }</div>
-<div class="line"><span class="lineno">  121</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  122</span>    }</div>
-<div class="line"><span class="lineno">  123</span>    <span class="keywordtype">string</span> err;</div>
-<div class="line"><span class="lineno">  124</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_a00aec6179fcbe0275fe7ca8770540b3c.html#a00aec6179fcbe0275fe7ca8770540b3c">ScreenMap::ParseJson</a>(text.c_str(), out, &amp;err);</div>
-<div class="line"><span class="lineno">  125</span>    <span class="keywordflow">if</span> (!ok) {</div>
-<div class="line"><span class="lineno">  126</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to parse screen map: &quot;</span> &lt;&lt; err.c_str());</div>
-<div class="line"><span class="lineno">  127</span>        *error = err;</div>
-<div class="line"><span class="lineno">  128</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  129</span>    }</div>
-<div class="line"><span class="lineno">  130</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  131</span>}</div>
-<div class="ttc" id="aclassfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0_html_a0188b7f45ef58f2bdb3718d3cffbd3f0"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0.html#a0188b7f45ef58f2bdb3718d3cffbd3f0">fl::FileSystem::readText</a></div><div class="ttdeci">bool readText(const char *path, string *out)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d37/file__system_8cpp_source.html#l00171">file_system.cpp:171</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00114">114</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  115</span>                                                                                 {</div>
+<div class="line"><span class="lineno">  116</span>    <span class="keywordtype">string</span> text;</div>
+<div class="line"><span class="lineno">  117</span>    <span class="keywordflow">if</span> (!<a class="code hl_function" href="../../df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0.html#a0188b7f45ef58f2bdb3718d3cffbd3f0">readText</a>(path, &amp;text)) {</div>
+<div class="line"><span class="lineno">  118</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to read file: &quot;</span> &lt;&lt; path);</div>
+<div class="line"><span class="lineno">  119</span>        <span class="keywordflow">if</span> (error) {</div>
+<div class="line"><span class="lineno">  120</span>            *error = <span class="stringliteral">&quot;Failed to read file: &quot;</span>;</div>
+<div class="line"><span class="lineno">  121</span>            error-&gt;append(path);</div>
+<div class="line"><span class="lineno">  122</span>        }</div>
+<div class="line"><span class="lineno">  123</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  124</span>    }</div>
+<div class="line"><span class="lineno">  125</span>    <span class="keywordtype">string</span> err;</div>
+<div class="line"><span class="lineno">  126</span>    <span class="keywordtype">bool</span> ok = <a class="code hl_function" href="../../d2/d78/classfl_1_1_screen_map_a00aec6179fcbe0275fe7ca8770540b3c.html#a00aec6179fcbe0275fe7ca8770540b3c">ScreenMap::ParseJson</a>(text.c_str(), out, &amp;err);</div>
+<div class="line"><span class="lineno">  127</span>    <span class="keywordflow">if</span> (!ok) {</div>
+<div class="line"><span class="lineno">  128</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to parse screen map: &quot;</span> &lt;&lt; err.c_str());</div>
+<div class="line"><span class="lineno">  129</span>        *error = err;</div>
+<div class="line"><span class="lineno">  130</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  131</span>    }</div>
+<div class="line"><span class="lineno">  132</span>    <span class="keywordflow">return</span> <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  133</span>}</div>
+<div class="ttc" id="aclassfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0_html_a0188b7f45ef58f2bdb3718d3cffbd3f0"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718d3cffbd3f0.html#a0188b7f45ef58f2bdb3718d3cffbd3f0">fl::FileSystem::readText</a></div><div class="ttdeci">bool readText(const char *path, string *out)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d37/file__system_8cpp_source.html#l00173">file_system.cpp:173</a></div></div>
 <div class="ttc" id="aclassfl_1_1_screen_map_a00aec6179fcbe0275fe7ca8770540b3c_html_a00aec6179fcbe0275fe7ca8770540b3c"><div class="ttname"><a href="../../d2/d78/classfl_1_1_screen_map_a00aec6179fcbe0275fe7ca8770540b3c.html#a00aec6179fcbe0275fe7ca8770540b3c">fl::ScreenMap::ParseJson</a></div><div class="ttdeci">static bool ParseJson(const char *jsonStrScreenMap, fl::fl_map&lt; string, ScreenMap &gt; *segmentMaps, string *err=nullptr)</div><div class="ttdef"><b>Definition</b> <a href="../../d9/d6f/screenmap_8cpp_source.html#l00082">screenmap.cpp:82</a></div></div>
-<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
+<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00008">warn.h:8</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00675">fl::string::append()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00326">fl::StrN&lt; SIZE &gt;::c_str()</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../d9/d6f/screenmap_8cpp_source.html#l00082">fl::ScreenMap::ParseJson()</a>, and <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00171">readText()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00675">fl::string::append()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00326">fl::StrN&lt; SIZE &gt;::c_str()</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN</a>, <a class="el" href="../../d9/d6f/screenmap_8cpp_source.html#l00082">fl::ScreenMap::ParseJson()</a>, and <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00173">readText()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -166,7 +166,7 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a6f25f4c4319520cf79e125
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d37/classfl_1_1_file_system.html">FileSystem</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

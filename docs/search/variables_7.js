@@ -5,7 +5,7 @@ var searchData=
   ['g_5fcounter_2',['g_counter',['../dd/d25/namespacefl_1_1anonymous__namespace_02pir_8cpp_03_abe86300aa1015328598fc34546a7de4c.html#abe86300aa1015328598fc34546a7de4c',1,'fl::anonymous_namespace{pir.cpp}']]],
   ['g_5fpos_3',['g_pos',['../d4/d88/led__strip__types_8h.html#ab31530265f76a1e677f9bde230d8e72e',1,'led_color_component_format_t::format_layout']]],
   ['g_5fuser_5ffunction_4',['g_user_function',['../d4/d36/namespacefl_a0299c39f1f1d292af88b88942a62e96e.html#a0299c39f1f1d292af88b88942a62e96e',1,'fl']]],
-  ['gain_5',['gain',['../d4/d36/namespacefl.html#aba69d7aa6fcbe98a9f6ce4ab18e291b7',1,'fl::AudioConfig']]],
+  ['gain_5',['gain',['../d4/d36/namespacefl.html#a28bff1dd30e611bd4d7dfe7a2ef8202a',1,'fl::AudioReactiveConfig']]],
   ['gamma_5f2_5f8_6',['gamma_2_8',['../d4/d36/namespacefl_a81b994c3af0ed54a37f36487f9485adf.html#a81b994c3af0ed54a37f36487f9485adf',1,'fl']]],
   ['gap_7',['gap',['../dd/deb/structfl_1_1_gap_ac4718da683c1bc131330139ac3f6c647.html#ac4718da683c1bc131330139ac3f6c647',1,'fl::Gap']]],
   ['gbackgroundcolor_8',['gBackgroundColor',['../d4/dd0/_twinkle_fox_8ino_ab16af5d73b6d424dd8a3632e6ee208a8.html#ab16af5d73b6d424dd8a3632e6ee208a8',1,'TwinkleFox.ino']]],

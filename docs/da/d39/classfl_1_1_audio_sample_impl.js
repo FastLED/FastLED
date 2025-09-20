@@ -5,6 +5,7 @@ var classfl_1_1_audio_sample_impl =
     [ "assign", "da/d39/classfl_1_1_audio_sample_impl_aeb218e025a921782e078a44dddad6288.html#aeb218e025a921782e078a44dddad6288", null ],
     [ "initZeroCrossings", "da/d39/classfl_1_1_audio_sample_impl_abc40b208aebb869c47b64951b3f78268.html#abc40b208aebb869c47b64951b3f78268", null ],
     [ "pcm", "da/d39/classfl_1_1_audio_sample_impl_aff4dc454fbb2f957861e96809ba214e4.html#aff4dc454fbb2f957861e96809ba214e4", null ],
+    [ "reset", "da/d39/classfl_1_1_audio_sample_impl_a07e6fe90e57434fb1b1ea35ff6478526.html#a07e6fe90e57434fb1b1ea35ff6478526", null ],
     [ "timestamp", "da/d39/classfl_1_1_audio_sample_impl_a6ce23ad34099b66c8c514e49f7e7e9c6.html#a6ce23ad34099b66c8c514e49f7e7e9c6", null ],
     [ "zcf", "da/d39/classfl_1_1_audio_sample_impl_a4378fd986788cfafc6ed175cf7aa772d.html#a4378fd986788cfafc6ed175cf7aa772d", null ],
     [ "mSignedPcm", "da/d39/classfl_1_1_audio_sample_impl_aef06d10780e4a863c1f383c4815d4335.html#aef06d10780e4a863c1f383c4815d4335", null ],

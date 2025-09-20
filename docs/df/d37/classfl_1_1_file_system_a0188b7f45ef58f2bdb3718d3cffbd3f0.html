@@ -119,38 +119,38 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00171">171</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">  171</span>                                                         {</div>
-<div class="line"><span class="lineno">  172</span>    FileHandlePtr file = <a class="code hl_function" href="../../df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12">openRead</a>(path);</div>
-<div class="line"><span class="lineno">  173</span>    <span class="keywordflow">if</span> (!file) {</div>
-<div class="line"><span class="lineno">  174</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to open file: &quot;</span> &lt;&lt; path);</div>
-<div class="line"><span class="lineno">  175</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  176</span>    }</div>
-<div class="line"><span class="lineno">  177</span>    fl::size size = file-&gt;size();</div>
-<div class="line"><span class="lineno">  178</span>    out-&gt;<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a33038285d820738ba7ca0af8e8b62927.html#a33038285d820738ba7ca0af8e8b62927">reserve</a>(size + out-&gt;<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a10074eeff3144d54106280a2a26f5af4.html#a10074eeff3144d54106280a2a26f5af4">size</a>());</div>
-<div class="line"><span class="lineno">  179</span>    <span class="keywordtype">bool</span> wrote = <span class="keyword">false</span>;</div>
-<div class="line"><span class="lineno">  180</span>    <span class="keywordflow">while</span> (file-&gt;available()) {</div>
-<div class="line"><span class="lineno">  181</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> buf[64];</div>
-<div class="line"><span class="lineno">  182</span>        fl::size n = file-&gt;read(buf, <span class="keyword">sizeof</span>(buf));</div>
-<div class="line"><span class="lineno">  183</span>        <span class="comment">// out-&gt;append(buf, n);</span></div>
-<div class="line"><span class="lineno">  184</span>        out-&gt;<a class="code hl_function" href="../../d2/db2/classfl_1_1string_a78222786068d86a8463f4e408dc393eb.html#a78222786068d86a8463f4e408dc393eb">append</a>((<span class="keyword">const</span> <span class="keywordtype">char</span> *)buf, n);</div>
-<div class="line"><span class="lineno">  185</span>        wrote = <span class="keyword">true</span>;</div>
-<div class="line"><span class="lineno">  186</span>    }</div>
-<div class="line"><span class="lineno">  187</span>    file-&gt;close();</div>
-<div class="line"><span class="lineno">  188</span>    <a class="code hl_define" href="../../d6/d01/dbg_8h_a930937edcc9079db4573928306510ff8.html#a930937edcc9079db4573928306510ff8">FASTLED_DBG_IF</a>(!wrote, <span class="stringliteral">&quot;Failed to write any data to the output string.&quot;</span>);</div>
-<div class="line"><span class="lineno">  189</span>    <span class="keywordflow">return</span> wrote;</div>
-<div class="line"><span class="lineno">  190</span>}</div>
-<div class="ttc" id="aclassfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12_html_a0a8fc3906ce050f295125645c0c55b12"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12">fl::FileSystem::openRead</a></div><div class="ttdeci">FileHandlePtr openRead(const char *path)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d37/file__system_8cpp_source.html#l00156">file_system.cpp:156</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00173">173</a> of file <a class="el" href="../../d4/d37/file__system_8cpp_source.html">file_system.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">  173</span>                                                         {</div>
+<div class="line"><span class="lineno">  174</span>    FileHandlePtr file = <a class="code hl_function" href="../../df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12">openRead</a>(path);</div>
+<div class="line"><span class="lineno">  175</span>    <span class="keywordflow">if</span> (!file) {</div>
+<div class="line"><span class="lineno">  176</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a>(<span class="stringliteral">&quot;Failed to open file: &quot;</span> &lt;&lt; path);</div>
+<div class="line"><span class="lineno">  177</span>        <span class="keywordflow">return</span> <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  178</span>    }</div>
+<div class="line"><span class="lineno">  179</span>    fl::size size = file-&gt;size();</div>
+<div class="line"><span class="lineno">  180</span>    out-&gt;<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a33038285d820738ba7ca0af8e8b62927.html#a33038285d820738ba7ca0af8e8b62927">reserve</a>(size + out-&gt;<a class="code hl_function" href="../../dc/d96/classfl_1_1_str_n_a10074eeff3144d54106280a2a26f5af4.html#a10074eeff3144d54106280a2a26f5af4">size</a>());</div>
+<div class="line"><span class="lineno">  181</span>    <span class="keywordtype">bool</span> wrote = <span class="keyword">false</span>;</div>
+<div class="line"><span class="lineno">  182</span>    <span class="keywordflow">while</span> (file-&gt;available()) {</div>
+<div class="line"><span class="lineno">  183</span>        <a class="code hl_typedef" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a> buf[64];</div>
+<div class="line"><span class="lineno">  184</span>        fl::size n = file-&gt;read(buf, <span class="keyword">sizeof</span>(buf));</div>
+<div class="line"><span class="lineno">  185</span>        <span class="comment">// out-&gt;append(buf, n);</span></div>
+<div class="line"><span class="lineno">  186</span>        out-&gt;<a class="code hl_function" href="../../d2/db2/classfl_1_1string_a78222786068d86a8463f4e408dc393eb.html#a78222786068d86a8463f4e408dc393eb">append</a>((<span class="keyword">const</span> <span class="keywordtype">char</span> *)buf, n);</div>
+<div class="line"><span class="lineno">  187</span>        wrote = <span class="keyword">true</span>;</div>
+<div class="line"><span class="lineno">  188</span>    }</div>
+<div class="line"><span class="lineno">  189</span>    file-&gt;close();</div>
+<div class="line"><span class="lineno">  190</span>    <a class="code hl_define" href="../../d6/d01/dbg_8h_a930937edcc9079db4573928306510ff8.html#a930937edcc9079db4573928306510ff8">FASTLED_DBG_IF</a>(!wrote, <span class="stringliteral">&quot;Failed to write any data to the output string.&quot;</span>);</div>
+<div class="line"><span class="lineno">  191</span>    <span class="keywordflow">return</span> wrote;</div>
+<div class="line"><span class="lineno">  192</span>}</div>
+<div class="ttc" id="aclassfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12_html_a0a8fc3906ce050f295125645c0c55b12"><div class="ttname"><a href="../../df/d37/classfl_1_1_file_system_a0a8fc3906ce050f295125645c0c55b12.html#a0a8fc3906ce050f295125645c0c55b12">fl::FileSystem::openRead</a></div><div class="ttdeci">FileHandlePtr openRead(const char *path)</div><div class="ttdef"><b>Definition</b> <a href="../../d4/d37/file__system_8cpp_source.html#l00158">file_system.cpp:158</a></div></div>
 <div class="ttc" id="aclassfl_1_1_str_n_a10074eeff3144d54106280a2a26f5af4_html_a10074eeff3144d54106280a2a26f5af4"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a10074eeff3144d54106280a2a26f5af4.html#a10074eeff3144d54106280a2a26f5af4">fl::StrN::size</a></div><div class="ttdeci">fl::size size() const</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00324">str.h:324</a></div></div>
 <div class="ttc" id="aclassfl_1_1_str_n_a33038285d820738ba7ca0af8e8b62927_html_a33038285d820738ba7ca0af8e8b62927"><div class="ttname"><a href="../../dc/d96/classfl_1_1_str_n_a33038285d820738ba7ca0af8e8b62927.html#a33038285d820738ba7ca0af8e8b62927">fl::StrN::reserve</a></div><div class="ttdeci">void reserve(fl::size newCapacity)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00370">str.h:370</a></div></div>
 <div class="ttc" id="aclassfl_1_1string_a78222786068d86a8463f4e408dc393eb_html_a78222786068d86a8463f4e408dc393eb"><div class="ttname"><a href="../../d2/db2/classfl_1_1string_a78222786068d86a8463f4e408dc393eb.html#a78222786068d86a8463f4e408dc393eb">fl::string::append</a></div><div class="ttdeci">string &amp; append(const BitsetFixed&lt; N &gt; &amp;bs)</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d93/str_8h_source.html#l00675">str.h:675</a></div></div>
 <div class="ttc" id="adbg_8h_a930937edcc9079db4573928306510ff8_html_a930937edcc9079db4573928306510ff8"><div class="ttname"><a href="../../d6/d01/dbg_8h_a930937edcc9079db4573928306510ff8.html#a930937edcc9079db4573928306510ff8">FASTLED_DBG_IF</a></div><div class="ttdeci">#define FASTLED_DBG_IF(COND, MSG)</div><div class="ttdef"><b>Definition</b> <a href="../../d6/d01/dbg_8h_source.html#l00064">dbg.h:64</a></div></div>
 <div class="ttc" id="anamespacefl_a058ceeac48f181da463c2ba07401292c_html_a058ceeac48f181da463c2ba07401292c"><div class="ttname"><a href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">fl::u8</a></div><div class="ttdeci">unsigned char u8</div><div class="ttdef"><b>Definition</b> <a href="../../d3/d7e/int_8h_source.html#l00017">int.h:17</a></div></div>
-<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00007">warn.h:7</a></div></div>
+<div class="ttc" id="awarn_8h_a0291e2b944eb41a7ca52786382e21e82_html_a0291e2b944eb41a7ca52786382e21e82"><div class="ttname"><a href="../../de/d77/warn_8h_a0291e2b944eb41a7ca52786382e21e82.html#a0291e2b944eb41a7ca52786382e21e82">FASTLED_WARN</a></div><div class="ttdeci">#define FASTLED_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00008">warn.h:8</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00675">fl::string::append()</a>, <a class="el" href="../../d6/d01/dbg_8h_source.html#l00064">FASTLED_DBG_IF</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00007">FASTLED_WARN</a>, <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00156">openRead()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00370">fl::StrN&lt; SIZE &gt;::reserve()</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00324">fl::StrN&lt; SIZE &gt;::size()</a>.</p>
+<p class="reference">References <a class="el" href="../../d1/d93/str_8h_source.html#l00675">fl::string::append()</a>, <a class="el" href="../../d6/d01/dbg_8h_source.html#l00064">FASTLED_DBG_IF</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00008">FASTLED_WARN</a>, <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00158">openRead()</a>, <a class="el" href="../../d1/d93/str_8h_source.html#l00370">fl::StrN&lt; SIZE &gt;::reserve()</a>, and <a class="el" href="../../d1/d93/str_8h_source.html#l00324">fl::StrN&lt; SIZE &gt;::size()</a>.</p>
 
-<p class="reference">Referenced by <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00101">readJson()</a>, <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00133">readScreenMap()</a>, and <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00112">readScreenMaps()</a>.</p>
+<p class="reference">Referenced by <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00103">readJson()</a>, <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00135">readScreenMap()</a>, and <a class="el" href="../../d4/d37/file__system_8cpp_source.html#l00114">readScreenMaps()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
   <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
 <div id="dynsection-0-summary" class="dynsummary" style="display:block;">
@@ -175,7 +175,7 @@ $(function(){initNavTree('df/d37/classfl_1_1_file_system_a0188b7f45ef58f2bdb3718
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../df/d37/classfl_1_1_file_system.html">FileSystem</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

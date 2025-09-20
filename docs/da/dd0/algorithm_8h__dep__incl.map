@@ -8,8 +8,8 @@
 <area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="210,25,677,82,677,87,209,30"/>
 <area shape="rect" id="Node000005" href="$dc/db7/map_8h.html" title=" " alt="" coords="683,152,757,177"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="723,118,723,152,717,152,717,118"/>
-<area shape="rect" id="Node000196" href="$d4/d13/set_8h.html" title=" " alt="" coords="1181,233,1248,258"/>
-<area shape="poly" id="edge15_Node000004_Node000196" title=" " alt="" coords="777,104,954,153,1172,223,1190,230,1188,235,1170,228,952,158,775,109"/>
+<area shape="rect" id="Node000197" href="$d4/d13/set_8h.html" title=" " alt="" coords="1181,233,1248,258"/>
+<area shape="poly" id="edge15_Node000004_Node000197" title=" " alt="" coords="777,104,954,153,1172,223,1190,230,1188,235,1170,228,952,158,775,109"/>
 <area shape="rect" id="Node000006" href="$d6/d6a/fetch_8h.html" title="Unified HTTP fetch API for FastLED (cross&#45;platform)" alt="" coords="179,233,258,258"/>
 <area shape="poly" id="edge5_Node000005_Node000006" title=" " alt="" coords="669,172,491,189,380,205,270,228,247,235,245,230,269,223,379,200,490,184,668,166"/>
 <area shape="rect" id="Node000009" href="$d4/df9/raster__sparse_8h.html" title=" " alt="" coords="282,233,417,258"/>
@@ -20,11 +20,11 @@
 <area shape="poly" id="edge8_Node000005_Node000026" title=" " alt="" coords="734,189,747,225,749,245,747,266,739,292,729,314,724,312,734,291,741,265,744,245,741,226,729,190"/>
 <area shape="rect" id="Node000027" href="$d7/d97/screenmap_8h.html" title=" " alt="" coords="613,233,731,258"/>
 <area shape="poly" id="edge9_Node000005_Node000027" title=" " alt="" coords="708,190,681,234,677,231,704,188"/>
-<area shape="poly" id="edge12_Node000005_Node000196" title=" " alt="" coords="771,166,950,181,1061,198,1171,223,1192,230,1190,235,1170,228,1060,203,949,187,771,171"/>
-<area shape="rect" id="Node000181" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="807,233,921,258"/>
-<area shape="poly" id="edge13_Node000005_Node000181" title=" " alt="" coords="754,182,844,230,841,235,752,186"/>
-<area shape="rect" id="Node000191" href="$d3/dda/frame__interpolator_8h.html" title=" " alt="" coords="946,233,1158,258"/>
-<area shape="poly" id="edge14_Node000005_Node000191" title=" " alt="" coords="771,175,1004,230,1003,235,770,180"/>
+<area shape="poly" id="edge12_Node000005_Node000197" title=" " alt="" coords="771,166,950,181,1061,198,1171,223,1192,230,1190,235,1170,228,1060,203,949,187,771,171"/>
+<area shape="rect" id="Node000182" href="$d9/d3c/fx__engine_8h.html" title=" " alt="" coords="807,233,921,258"/>
+<area shape="poly" id="edge13_Node000005_Node000182" title=" " alt="" coords="754,182,844,230,841,235,752,186"/>
+<area shape="rect" id="Node000192" href="$d3/dda/frame__interpolator_8h.html" title=" " alt="" coords="946,233,1158,258"/>
+<area shape="poly" id="edge14_Node000005_Node000192" title=" " alt="" coords="771,175,1004,230,1003,235,770,180"/>
 <area shape="poly" id="edge10_Node000027_Node000003" title=" " alt="" coords="617,264,421,316,420,311,615,259"/>
 <area shape="poly" id="edge11_Node000027_Node000026" title=" " alt="" coords="688,268,715,312,711,315,684,271"/>
 </map>

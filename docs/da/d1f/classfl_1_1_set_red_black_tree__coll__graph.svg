@@ -89,11 +89,11 @@ var sectionId = 'dynsection-1';
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../d5/d2d/structfl_1_1_red_black_tree_1_1_node.html" target="_top" xlink:title=" ">
+<g id="a_Node000003"><a xlink:href="../../d3/d6c/structfl_1_1_red_black_tree_1_1_r_b_node.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="302,-131.5 187,-131.5 187,-90.5 302,-90.5 302,-131.5"/>
 <text text-anchor="start" x="195" y="-119.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::RedBlackTree&lt; T,</text>
 <text text-anchor="start" x="195" y="-108.5" font-family="Helvetica,sans-Serif" font-size="10.00"> Compare, Allocator</text>
-<text text-anchor="middle" x="244.5" y="-97.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::Node</text>
+<text text-anchor="middle" x="244.5" y="-97.5" font-family="Helvetica,sans-Serif" font-size="10.00"> &gt;::RBNode</text>
 </a>
 </g>
 </g>

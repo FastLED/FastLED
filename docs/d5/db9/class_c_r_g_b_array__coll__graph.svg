@@ -49,7 +49,7 @@
 <!-- Node3 -->
 <g id="Node000003" class="node">
 <title>Node3</title>
-<g id="a_Node000003"><a xlink:href="../../db/df7/class_c_pixel_view.html" target="_top" xlink:title="Represents a set of LED objects.">
+<g id="a_Node000003"><a xlink:href="../../db/df7/class_c_pixel_view.html" target="_top" xlink:title="Represents a view/window into a set of LED pixels, providing array&#45;like access and rich color operati...">
 <polygon fill="white" stroke="#666666" points="149,-151 0,-151 0,-132 149,-132 149,-151"/>
 <text text-anchor="middle" x="74.5" y="-139" font-family="Helvetica,sans-Serif" font-size="10.00">CPixelView&lt; PIXEL_TYPE &gt;</text>
 </a>

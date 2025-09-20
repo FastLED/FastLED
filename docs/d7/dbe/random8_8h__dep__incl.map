@@ -2,26 +2,26 @@
 <area shape="rect" id="Node000001" title="Fast, efficient random number generators specifically designed for high&#45;performance LED programming." alt="" coords="499,5,645,31"/>
 <area shape="rect" id="Node000002" href="$d1/d79/random_8h.html" title=" " alt="" coords="269,79,365,104"/>
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="518,37,359,81,358,76,517,32"/>
-<area shape="rect" id="Node000153" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="423,152,590,177"/>
-<area shape="poly" id="edge7_Node000001_Node000153" title=" " alt="" coords="490,38,456,54,430,80,426,90,427,99,438,119,460,136,483,149,480,154,456,140,434,122,421,101,421,89,426,77,453,50,488,33"/>
-<area shape="rect" id="Node000154" href="$d6/dc7/noisepalette_8h.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="440,79,592,104"/>
-<area shape="poly" id="edge8_Node000001_Node000154" title=" " alt="" coords="556,43,527,80,523,77,552,40"/>
-<area shape="rect" id="Node000156" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="642,152,785,177"/>
-<area shape="poly" id="edge10_Node000001_Node000156" title=" " alt="" coords="594,39,657,102,704,150,700,154,653,106,591,42"/>
-<area shape="rect" id="Node000200" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="667,79,795,104"/>
-<area shape="poly" id="edge11_Node000001_Node000200" title=" " alt="" coords="611,34,706,76,704,81,609,39"/>
-<area shape="rect" id="Node000161" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="819,79,901,104"/>
-<area shape="poly" id="edge13_Node000001_Node000161" title=" " alt="" coords="632,31,819,77,818,82,631,37"/>
+<area shape="rect" id="Node000154" href="$d6/d66/noisepalette_8cpp.html" title=" " alt="" coords="423,152,590,177"/>
+<area shape="poly" id="edge7_Node000001_Node000154" title=" " alt="" coords="490,38,456,54,430,80,426,90,427,99,438,119,460,136,483,149,480,154,456,140,434,122,421,101,421,89,426,77,453,50,488,33"/>
+<area shape="rect" id="Node000155" href="$d6/dc7/noisepalette_8h.html" title="Demonstrates how to mix noise generation with color palettes on a 2D LED matrix." alt="" coords="440,79,592,104"/>
+<area shape="poly" id="edge8_Node000001_Node000155" title=" " alt="" coords="556,43,527,80,523,77,552,40"/>
+<area shape="rect" id="Node000157" href="$dc/d8c/scale__up_8cpp.html" title=" " alt="" coords="642,152,785,177"/>
+<area shape="poly" id="edge10_Node000001_Node000157" title=" " alt="" coords="594,39,657,102,704,150,700,154,653,106,591,42"/>
+<area shape="rect" id="Node000201" href="$d2/d74/scale__up_8h.html" title="Expands a grid using bilinear interpolation and scaling up." alt="" coords="667,79,795,104"/>
+<area shape="poly" id="edge11_Node000001_Node000201" title=" " alt="" coords="611,34,706,76,704,81,609,39"/>
+<area shape="rect" id="Node000162" href="$df/da5/lib8tion_8h.html" title="Fast, efficient 8&#45;bit math functions specifically designed for high&#45;performance LED programming." alt="" coords="819,79,901,104"/>
+<area shape="poly" id="edge13_Node000001_Node000162" title=" " alt="" coords="632,31,819,77,818,82,631,37"/>
 <area shape="rect" id="Node000003" href="$df/dd9/algorithm_8h.html" title=" " alt="" coords="137,152,247,177"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="287,113,214,154,211,149,284,108"/>
-<area shape="rect" id="Node000199" href="$de/daa/random_8cpp.html" title=" " alt="" coords="271,152,382,177"/>
-<area shape="poly" id="edge6_Node000002_Node000199" title=" " alt="" coords="323,117,328,152,323,152,318,118"/>
+<area shape="rect" id="Node000200" href="$de/daa/random_8cpp.html" title=" " alt="" coords="271,152,382,177"/>
+<area shape="poly" id="edge6_Node000002_Node000200" title=" " alt="" coords="323,117,328,152,323,152,318,118"/>
 <area shape="rect" id="Node000004" href="$d0/d95/async_8cpp.html" title=" " alt="" coords="5,225,104,251"/>
 <area shape="poly" id="edge3_Node000003_Node000004" title=" " alt="" coords="159,186,78,227,76,223,157,181"/>
 <area shape="rect" id="Node000005" href="$d3/d9b/corkscrew_8cpp.html" title=" " alt="" coords="129,225,255,251"/>
 <area shape="poly" id="edge4_Node000003_Node000005" title=" " alt="" coords="195,191,195,225,189,225,189,191"/>
 <area shape="rect" id="Node000006" href="$d5/ddf/rbtree_8h.html" title=" " alt="" coords="280,225,365,251"/>
 <area shape="poly" id="edge5_Node000003_Node000006" title=" " alt="" coords="227,182,303,223,300,227,224,186"/>
-<area shape="poly" id="edge9_Node000154_Node000153" title=" " alt="" coords="515,118,511,152,506,152,510,117"/>
-<area shape="poly" id="edge12_Node000200_Node000156" title=" " alt="" coords="727,118,719,153,714,151,722,117"/>
+<area shape="poly" id="edge9_Node000155_Node000154" title=" " alt="" coords="515,118,511,152,506,152,510,117"/>
+<area shape="poly" id="edge12_Node000201_Node000157" title=" " alt="" coords="727,118,719,153,714,151,722,117"/>
 </map>

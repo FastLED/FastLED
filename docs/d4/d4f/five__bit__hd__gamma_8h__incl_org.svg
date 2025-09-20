@@ -45,9 +45,9 @@
 </g>
 </g>
 <!-- Node1&#45;&gt;Node3 -->
-<g id="edge31_Node000001_Node000003" class="edge">
+<g id="edge30_Node000001_Node000003" class="edge">
 <title>Node1&#45;&gt;Node3</title>
-<g id="a_edge31_Node000001_Node000003"><a xlink:title=" ">
+<g id="a_edge30_Node000001_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M457.58,-275.23C457.58,-257.73 457.58,-218.37 457.58,-194.84"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="461.08,-194.72 457.58,-184.72 454.08,-194.72 461.08,-194.72"/>
 </a>
@@ -89,19 +89,19 @@
 </a>
 </g>
 </g>
-<!-- Node59 -->
-<g id="Node000059" class="node">
-<title>Node59</title>
-<g id="a_Node000059"><a xlink:href="../../db/d91/scale8_8h.html" target="_top" xlink:title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming.">
+<!-- Node60 -->
+<g id="Node000060" class="node">
+<title>Node60</title>
+<g id="a_Node000060"><a xlink:href="../../db/d91/scale8_8h.html" target="_top" xlink:title="Fast, efficient 8&#45;bit scaling functions specifically designed for high&#45;performance LED programming.">
 <polygon fill="white" stroke="#666666" points="926.08,-239.56 829.08,-239.56 829.08,-220.56 926.08,-220.56 926.08,-239.56"/>
 <text text-anchor="middle" x="877.58" y="-227.56" font-family="Helvetica,sans-Serif" font-size="10.00">lib8tion/scale8.h</text>
 </a>
 </g>
 </g>
-<!-- Node1&#45;&gt;Node59 -->
-<g id="edge32_Node000001_Node000059" class="edge">
-<title>Node1&#45;&gt;Node59</title>
-<g id="a_edge32_Node000001_Node000059"><a xlink:title=" ">
+<!-- Node1&#45;&gt;Node60 -->
+<g id="edge31_Node000001_Node000060" class="edge">
+<title>Node1&#45;&gt;Node60</title>
+<g id="a_edge31_Node000001_Node000060"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M523.2,-275.78C604.24,-265.56 740.86,-248.32 818.67,-238.5"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="819.3,-241.95 828.78,-237.22 818.42,-235 819.3,-241.95"/>
 </a>
@@ -143,19 +143,19 @@
 </a>
 </g>
 </g>
-<!-- Node57 -->
-<g id="Node000057" class="node">
-<title>Node57</title>
-<g id="a_Node000057"><a xlink:href="../../db/d19/ease_8h.html" target="_top" xlink:title=" ">
+<!-- Node58 -->
+<g id="Node000058" class="node">
+<title>Node58</title>
+<g id="a_Node000058"><a xlink:href="../../db/d19/ease_8h.html" target="_top" xlink:title=" ">
 <polygon fill="#fff0f0" stroke="red" points="73.58,-129.56 15.58,-129.56 15.58,-110.56 73.58,-110.56 73.58,-129.56"/>
 <text text-anchor="middle" x="44.58" y="-117.56" font-family="Helvetica,sans-Serif" font-size="10.00">fl/ease.h</text>
 </a>
 </g>
 </g>
-<!-- Node2&#45;&gt;Node57 -->
-<g id="edge27_Node000002_Node000057" class="edge">
-<title>Node2&#45;&gt;Node57</title>
-<g id="a_edge27_Node000002_Node000057"><a xlink:title=" ">
+<!-- Node2&#45;&gt;Node58 -->
+<g id="edge27_Node000002_Node000058" class="edge">
+<title>Node2&#45;&gt;Node58</title>
+<g id="a_edge27_Node000002_Node000058"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M73.04,-220.23C68,-202.66 56.62,-163.01 49.87,-139.52"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="53.19,-138.37 47.06,-129.72 46.46,-140.3 53.19,-138.37"/>
 </a>
@@ -287,28 +287,28 @@
 </a>
 </g>
 </g>
-<!-- Node56 -->
-<g id="Node000056" class="node">
-<title>Node56</title>
-<g id="a_Node000056"><a xlink:href="../../de/d9a/hsv2rgb_8h.html" target="_top" xlink:title="Functions to convert from the HSV colorspace to the RGB colorspace.">
+<!-- Node57 -->
+<g id="Node000057" class="node">
+<title>Node57</title>
+<g id="a_Node000057"><a xlink:href="../../de/d9a/hsv2rgb_8h.html" target="_top" xlink:title="Functions to convert from the HSV colorspace to the RGB colorspace.">
 <polygon fill="white" stroke="#666666" points="768.08,-129.56 703.08,-129.56 703.08,-110.56 768.08,-110.56 768.08,-129.56"/>
 <text text-anchor="middle" x="735.58" y="-117.56" font-family="Helvetica,sans-Serif" font-size="10.00">hsv2rgb.h</text>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node56 -->
-<g id="edge21_Node000003_Node000056" class="edge">
-<title>Node3&#45;&gt;Node56</title>
-<g id="a_edge21_Node000003_Node000056"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node57 -->
+<g id="edge21_Node000003_Node000057" class="edge">
+<title>Node3&#45;&gt;Node57</title>
+<g id="a_edge21_Node000003_Node000057"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M481.38,-169.68C522.35,-162.12 609.09,-146.01 693.07,-129.64"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="693.88,-133.05 703.03,-127.7 692.54,-126.18 693.88,-133.05"/>
 </a>
 </g>
 </g>
-<!-- Node3&#45;&gt;Node57 -->
-<g id="edge22_Node000003_Node000057" class="edge">
-<title>Node3&#45;&gt;Node57</title>
-<g id="a_edge22_Node000003_Node000057"><a xlink:title=" ">
+<!-- Node3&#45;&gt;Node58 -->
+<g id="edge22_Node000003_Node000058" class="edge">
+<title>Node3&#45;&gt;Node58</title>
+<g id="a_edge22_Node000003_Node000058"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M433.89,-171.02C365.69,-162.27 168.36,-136.95 83.8,-126.1"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="84.19,-122.62 73.82,-124.82 83.3,-129.56 84.19,-122.62"/>
 </a>
@@ -404,118 +404,109 @@
 </a>
 </g>
 </g>
-<!-- Node57&#45;&gt;Node4 -->
-<g id="edge23_Node000057_Node000004" class="edge">
-<title>Node57&#45;&gt;Node4</title>
-<g id="a_edge23_Node000057_Node000004"><a xlink:title=" ">
+<!-- Node58&#45;&gt;Node4 -->
+<g id="edge23_Node000058_Node000004" class="edge">
+<title>Node58&#45;&gt;Node4</title>
+<g id="a_edge23_Node000058_Node000004"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M58.12,-110.41C87.17,-91.84 155.7,-48.05 191.27,-25.32"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="193.43,-28.09 199.97,-19.76 189.66,-22.2 193.43,-28.09"/>
 </a>
 </g>
 </g>
-<!-- Node57&#45;&gt;Node6 -->
-<g id="edge24_Node000057_Node000006" class="edge">
-<title>Node57&#45;&gt;Node6</title>
-<g id="a_edge24_Node000057_Node000006"><a xlink:title=" ">
+<!-- Node58&#45;&gt;Node6 -->
+<g id="edge24_Node000058_Node000006" class="edge">
+<title>Node58&#45;&gt;Node6</title>
+<g id="a_edge24_Node000058_Node000006"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M65.95,-110.55C87.73,-101.87 121.74,-88.31 146.5,-78.45"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="147.83,-81.69 155.82,-74.73 145.23,-75.18 147.83,-81.69"/>
 </a>
 </g>
 </g>
-<!-- Node18&#45;&gt;Node18 -->
-<g id="edge30_Node000018_Node000018" class="edge">
-<title>Node18&#45;&gt;Node18</title>
-<g id="a_edge30_Node000018_Node000018"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M997.29,-239.63C1010.39,-241.58 1022.58,-238.4 1022.58,-230.06 1022.58,-223.94 1016,-220.6 1007.33,-220.03"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1007.12,-216.53 997.29,-220.49 1007.45,-223.52 1007.12,-216.53"/>
-</a>
-</g>
-</g>
-<!-- Node59&#45;&gt;Node3 -->
-<g id="edge35_Node000059_Node000003" class="edge">
-<title>Node59&#45;&gt;Node3</title>
-<g id="a_edge35_Node000059_Node000003"><a xlink:title=" ">
+<!-- Node60&#45;&gt;Node3 -->
+<g id="edge34_Node000060_Node000003" class="edge">
+<title>Node60&#45;&gt;Node3</title>
+<g id="a_edge34_Node000060_Node000003"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M828.99,-222.93C742.96,-212.08 565.93,-189.74 491.61,-180.36"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="491.77,-176.85 481.41,-179.07 490.89,-183.8 491.77,-176.85"/>
 </a>
 </g>
 </g>
-<!-- Node59&#45;&gt;Node10 -->
-<g id="edge36_Node000059_Node000010" class="edge">
-<title>Node59&#45;&gt;Node10</title>
-<g id="a_edge36_Node000059_Node000010"><a xlink:title=" ">
+<!-- Node60&#45;&gt;Node10 -->
+<g id="edge35_Node000060_Node000010" class="edge">
+<title>Node60&#45;&gt;Node10</title>
+<g id="a_edge35_Node000060_Node000010"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M873.19,-220.32C861.32,-197.72 826.19,-137.25 777.58,-110.56 731.73,-85.39 585.54,-73.54 504.32,-68.78"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="504.45,-65.28 494.27,-68.21 504.05,-72.27 504.45,-65.28"/>
 </a>
 </g>
 </g>
-<!-- Node22 -->
-<g id="Node000022" class="node">
-<title>Node22</title>
-<g id="a_Node000022"><a xlink:href="../../d4/d54/compiler__control_8h.html" target="_top" xlink:title=" ">
+<!-- Node23 -->
+<g id="Node000023" class="node">
+<title>Node23</title>
+<g id="a_Node000023"><a xlink:href="../../d4/d54/compiler__control_8h.html" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="978.58,-184.56 862.58,-184.56 862.58,-165.56 978.58,-165.56 978.58,-184.56"/>
 <text text-anchor="middle" x="920.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">fl/compiler_control.h</text>
 </a>
 </g>
 </g>
-<!-- Node59&#45;&gt;Node22 -->
-<g id="edge33_Node000059_Node000022" class="edge">
-<title>Node59&#45;&gt;Node22</title>
-<g id="a_edge33_Node000059_Node000022"><a xlink:title=" ">
+<!-- Node60&#45;&gt;Node23 -->
+<g id="edge32_Node000060_Node000023" class="edge">
+<title>Node60&#45;&gt;Node23</title>
+<g id="a_edge32_Node000060_Node000023"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M884.68,-220.31C890.75,-212.83 899.66,-201.84 907.09,-192.69"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="910.03,-194.62 913.61,-184.65 904.59,-190.21 910.03,-194.62"/>
-</a>
-</g>
-</g>
-<!-- Node60 -->
-<g id="Node000060" class="node">
-<title>Node60</title>
-<g id="a_Node000060"><a xlink:href="../../db/d16/config_8h.html" target="_top" xlink:title=" ">
-<polygon fill="white" stroke="#666666" points="1092.08,-184.56 997.08,-184.56 997.08,-165.56 1092.08,-165.56 1092.08,-184.56"/>
-<text text-anchor="middle" x="1044.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">lib8tion/config.h</text>
-</a>
-</g>
-</g>
-<!-- Node59&#45;&gt;Node60 -->
-<g id="edge34_Node000059_Node000060" class="edge">
-<title>Node59&#45;&gt;Node60</title>
-<g id="a_edge34_Node000059_Node000060"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M904.41,-220.55C932.45,-211.65 976.62,-197.63 1007.88,-187.71"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1009.06,-191.01 1017.54,-184.65 1006.95,-184.33 1009.06,-191.01"/>
 </a>
 </g>
 </g>
 <!-- Node61 -->
 <g id="Node000061" class="node">
 <title>Node61</title>
-<g id="a_Node000061"><a xlink:href="../../d5/d11/fastled__config_8h.html" target="_top" xlink:title="Contains definitions that can be used to configure FastLED at compile time.">
-<polygon fill="white" stroke="#666666" points="1204.58,-184.56 1110.58,-184.56 1110.58,-165.56 1204.58,-165.56 1204.58,-184.56"/>
-<text text-anchor="middle" x="1157.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">fastled_config.h</text>
+<g id="a_Node000061"><a xlink:href="../../db/d16/config_8h.html" target="_top" xlink:title=" ">
+<polygon fill="white" stroke="#666666" points="1092.08,-184.56 997.08,-184.56 997.08,-165.56 1092.08,-165.56 1092.08,-184.56"/>
+<text text-anchor="middle" x="1044.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">lib8tion/config.h</text>
 </a>
 </g>
 </g>
-<!-- Node59&#45;&gt;Node61 -->
-<g id="edge37_Node000059_Node000061" class="edge">
-<title>Node59&#45;&gt;Node61</title>
-<g id="a_edge37_Node000059_Node000061"><a xlink:title=" ">
-<path fill="none" stroke="#63b8ff" d="M922.56,-220.55C971.51,-211.28 1049.78,-196.47 1102.4,-186.51"/>
-<polygon fill="#63b8ff" stroke="#63b8ff" points="1103.06,-189.94 1112.24,-184.65 1101.76,-183.07 1103.06,-189.94"/>
+<!-- Node60&#45;&gt;Node61 -->
+<g id="edge33_Node000060_Node000061" class="edge">
+<title>Node60&#45;&gt;Node61</title>
+<g id="a_edge33_Node000060_Node000061"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M904.41,-220.55C932.45,-211.65 976.62,-197.63 1007.88,-187.71"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1009.06,-191.01 1017.54,-184.65 1006.95,-184.33 1009.06,-191.01"/>
 </a>
 </g>
 </g>
 <!-- Node62 -->
 <g id="Node000062" class="node">
 <title>Node62</title>
-<g id="a_Node000062"><a xlink:href="../../d4/d7a/lib8static_8h.html" target="_top" xlink:title="Defines static inlining macros for lib8tion functions.">
+<g id="a_Node000062"><a xlink:href="../../d5/d11/fastled__config_8h.html" target="_top" xlink:title="Contains definitions that can be used to configure FastLED at compile time.">
+<polygon fill="white" stroke="#666666" points="1204.58,-184.56 1110.58,-184.56 1110.58,-165.56 1204.58,-165.56 1204.58,-184.56"/>
+<text text-anchor="middle" x="1157.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">fastled_config.h</text>
+</a>
+</g>
+</g>
+<!-- Node60&#45;&gt;Node62 -->
+<g id="edge36_Node000060_Node000062" class="edge">
+<title>Node60&#45;&gt;Node62</title>
+<g id="a_edge36_Node000060_Node000062"><a xlink:title=" ">
+<path fill="none" stroke="#63b8ff" d="M922.56,-220.55C971.51,-211.28 1049.78,-196.47 1102.4,-186.51"/>
+<polygon fill="#63b8ff" stroke="#63b8ff" points="1103.06,-189.94 1112.24,-184.65 1101.76,-183.07 1103.06,-189.94"/>
+</a>
+</g>
+</g>
+<!-- Node63 -->
+<g id="Node000063" class="node">
+<title>Node63</title>
+<g id="a_Node000063"><a xlink:href="../../d4/d7a/lib8static_8h.html" target="_top" xlink:title="Defines static inlining macros for lib8tion functions.">
 <polygon fill="white" stroke="#666666" points="1294.08,-184.56 1223.08,-184.56 1223.08,-165.56 1294.08,-165.56 1294.08,-184.56"/>
 <text text-anchor="middle" x="1258.58" y="-172.56" font-family="Helvetica,sans-Serif" font-size="10.00">lib8static.h</text>
 </a>
 </g>
 </g>
-<!-- Node59&#45;&gt;Node62 -->
-<g id="edge38_Node000059_Node000062" class="edge">
-<title>Node59&#45;&gt;Node62</title>
-<g id="a_edge38_Node000059_Node000062"><a xlink:title=" ">
+<!-- Node60&#45;&gt;Node63 -->
+<g id="edge37_Node000060_Node000063" class="edge">
+<title>Node60&#45;&gt;Node63</title>
+<g id="a_edge37_Node000060_Node000063"><a xlink:title=" ">
 <path fill="none" stroke="#63b8ff" d="M926.3,-221.86C929.44,-221.42 932.55,-220.98 935.58,-220.56 1055.86,-203.96 1088.88,-204.11 1212.87,-184.59"/>
 <polygon fill="#63b8ff" stroke="#63b8ff" points="1213.42,-188.05 1222.75,-183.02 1212.32,-181.13 1213.42,-188.05"/>
 </a>

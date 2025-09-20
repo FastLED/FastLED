@@ -164,7 +164,7 @@ Core concepts and types</h2>
 <li><b>Base classes</b>:<ul>
 <li><code><a class="el" href="da/d5d/classfl_1_1_fx.html">fl::Fx</a></code>: abstract base with a single method to implement: <code>void draw(DrawContext ctx)</code>.</li>
 <li><code><a class="el" href="d4/d1c/classfl_1_1_fx1d.html">fl::Fx1d</a></code>: base for strip effects; holds LED count and (optionally) an <code>XMap</code>.</li>
-<li><code><a class="el" href="d7/d3e/classfl_1_1_fx2d.html">fl::Fx2d</a></code>: base for matrix effects; holds an <code>XYMap</code> to convert <code>(x,y)</code> to LED indices.</li>
+<li><code><a class="el" href="d7/d3e/classfl_1_1_fx2d.html">fl::Fx2d</a></code>: base for matrix effects; holds an <code><a class="el" href="d7/de6/class_x_y_map.html">XYMap</a></code> to convert <code>(x,y)</code> to LED indices.</li>
 </ul>
 </li>
 <li><b>DrawContext</b>: <code>Fx::DrawContext</code> carries per‑frame data: <code>now</code> (ms), <code>CRGB* leds</code>, optional <code>frame_time</code>, and a <code>speed</code> hint.</li>
@@ -241,10 +241,10 @@ Examples (from <code>examples/Fx*</code>)</h2>
 <p>Minimal 1D call pattern: </p><div class="fragment"><div class="line">fx.draw(<a class="code hl_typedef" href="da/d5d/classfl_1_1_fx_a932d6e78e1afa4bb40cacefe1f01c97a.html#a932d6e78e1afa4bb40cacefe1f01c97a">fl::Fx::DrawContext</a>(millis(), <a class="code hl_variable" href="d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>));</div>
 <div class="line"><a class="code hl_variable" href="d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
 <div class="ttc" id="a_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9_html_a8e94985674086ea368e1d51cbc0f82a9"><div class="ttname"><a href="d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a></div><div class="ttdeci">FL_DISABLE_WARNING_PUSH FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS CFastLED FastLED</div><div class="ttdoc">Global LED strip management instance.</div><div class="ttdef"><b>Definition</b> <a href="d6/dda/_fast_l_e_d_8cpp_source.html#l00074">FastLED.cpp:74</a></div></div>
-</div><!-- fragment --><p> Minimal 2D call pattern (requires <code>XYMap</code>): </p><div class="fragment"><div class="line"><a class="code hl_class" href="d9/d41/classfl_1_1_noise_palette.html">fl::NoisePalette</a> fx(<a class="code hl_variable" href="db/df4/_color_boost_8h_a21389841876f0e37ca08ab26d211736c.html#a21389841876f0e37ca08ab26d211736c">xyMap</a>);</div>
+</div><!-- fragment --><p> Minimal 2D call pattern (requires <code><a class="el" href="d7/de6/class_x_y_map.html">XYMap</a></code>): </p><div class="fragment"><div class="line"><a class="code hl_class" href="d9/d41/classfl_1_1_noise_palette.html">fl::NoisePalette</a> fx(<a class="code hl_variable" href="db/df4/_color_boost_8h_a21389841876f0e37ca08ab26d211736c.html#a21389841876f0e37ca08ab26d211736c">xyMap</a>);</div>
 <div class="line">fx.draw(<a class="code hl_typedef" href="da/d5d/classfl_1_1_fx_a932d6e78e1afa4bb40cacefe1f01c97a.html#a932d6e78e1afa4bb40cacefe1f01c97a">fl::Fx::DrawContext</a>(millis(), <a class="code hl_variable" href="d8/d21/_adafruit_bridge_8ino_a1b4f26a01e11d7eb2848bc41b0f6dd9d.html#a1b4f26a01e11d7eb2848bc41b0f6dd9d">leds</a>));</div>
 <div class="line"><a class="code hl_variable" href="d6/dda/_fast_l_e_d_8cpp_a8e94985674086ea368e1d51cbc0f82a9.html#a8e94985674086ea368e1d51cbc0f82a9">FastLED</a>.show();</div>
-<div class="ttc" id="a_color_boost_8h_a21389841876f0e37ca08ab26d211736c_html_a21389841876f0e37ca08ab26d211736c"><div class="ttname"><a href="db/df4/_color_boost_8h_a21389841876f0e37ca08ab26d211736c.html#a21389841876f0e37ca08ab26d211736c">xyMap</a></div><div class="ttdeci">fl::XYMap xyMap</div><div class="ttdef"><b>Definition</b> <a href="db/df4/_color_boost_8h_source.html#l00061">ColorBoost.h:61</a></div></div>
+<div class="ttc" id="a_color_boost_8h_a21389841876f0e37ca08ab26d211736c_html_a21389841876f0e37ca08ab26d211736c"><div class="ttname"><a href="db/df4/_color_boost_8h_a21389841876f0e37ca08ab26d211736c.html#a21389841876f0e37ca08ab26d211736c">xyMap</a></div><div class="ttdeci">fl::XYMap xyMap</div><div class="ttdef"><b>Definition</b> <a href="db/df4/_color_boost_8h_source.html#l00057">ColorBoost.h:57</a></div></div>
 </div><!-- fragment --> </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -252,7 +252,7 @@ Examples (from <code>examples/Fx*</code>)</h2>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="dir_acbb946b833f21b16ec30aa21c4c3a72.html">fx</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:24 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

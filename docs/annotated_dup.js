@@ -8,6 +8,9 @@ var annotated_dup =
       [ "rgb", "d6/d74/namespaceanimartrix__detail.html#d1/d5c/structanimartrix__detail_1_1rgb", "d6/d74/namespaceanimartrix__detail_d1/d5c/structanimartrix__detail_1_1rgb_dup" ]
     ] ],
     [ "fl", "d4/d36/namespacefl.html", [
+      [ "anonymous_namespace{audio.cpp}", "d3/d5c/namespacefl_1_1anonymous__namespace_02audio_8cpp_03.html", [
+        [ "AudioSamplePool", "d5/d1a/structfl_1_1anonymous__namespace_02audio_8cpp_03_1_1_audio_sample_pool.html", "d5/d1a/structfl_1_1anonymous__namespace_02audio_8cpp_03_1_1_audio_sample_pool" ]
+      ] ],
       [ "anonymous_namespace{gradient.cpp}", "d5/de6/namespacefl_1_1anonymous__namespace_02gradient_8cpp_03.html", [
         [ "Visitor", "d6/ddc/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor.html", "d6/ddc/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor" ],
         [ "VisitorFill", "d0/dd1/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_fill.html", "d0/dd1/structfl_1_1anonymous__namespace_02gradient_8cpp_03_1_1_visitor_fill" ]
@@ -54,11 +57,12 @@ var annotated_dup =
       [ "async_runner", "d9/d7a/classfl_1_1async__runner.html", "d9/d7a/classfl_1_1async__runner" ],
       [ "AsyncManager", "d2/d14/classfl_1_1_async_manager.html", "d2/d14/classfl_1_1_async_manager" ],
       [ "AtomicFake", "da/d98/classfl_1_1_atomic_fake.html", "da/d98/classfl_1_1_atomic_fake" ],
-      [ "AudioConfig", "d4/d36/namespacefl.html#de/d0d/structfl_1_1_audio_config", "d4/d36/namespacefl_de/d0d/structfl_1_1_audio_config_dup" ],
       [ "AudioData", "d4/d36/namespacefl.html#d0/d36/structfl_1_1_audio_data", "d4/d36/namespacefl_d0/d36/structfl_1_1_audio_data_dup" ],
       [ "AudioReactive", "d3/d40/classfl_1_1_audio_reactive.html", "d3/d40/classfl_1_1_audio_reactive" ],
+      [ "AudioReactiveConfig", "d4/d36/namespacefl.html#d1/da4/structfl_1_1_audio_reactive_config", "d4/d36/namespacefl_d1/da4/structfl_1_1_audio_reactive_config_dup" ],
       [ "AudioSample", "d0/de1/classfl_1_1_audio_sample.html", "d0/de1/classfl_1_1_audio_sample" ],
       [ "AudioSampleImpl", "da/d39/classfl_1_1_audio_sample_impl.html", "da/d39/classfl_1_1_audio_sample_impl" ],
+      [ "BeatDetectors", "df/df4/structfl_1_1_beat_detectors.html", "df/df4/structfl_1_1_beat_detectors" ],
       [ "bitset_dynamic", "d3/d56/classfl_1_1bitset__dynamic.html", "d3/d56/classfl_1_1bitset__dynamic" ],
       [ "BitsetFixed", "d4/d36/namespacefl.html#dd/d03/classfl_1_1_bitset_fixed", null ],
       [ "BitsetInlined", "d4/d36/namespacefl.html#d6/d6a/classfl_1_1_bitset_inlined", null ],
@@ -80,7 +84,6 @@ var annotated_dup =
       [ "CHSV.__unnamed0__.__unnamed0__.__unnamed1__", "db/d87/group___pixel_types.html#dd/db1/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed1____", "db/d87/group___pixel_types_dd/db1/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed1____" ],
       [ "CHSV.__unnamed0__.__unnamed0__.__unnamed2__", "db/d87/group___pixel_types.html#d4/d0e/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed2____", "db/d87/group___pixel_types_d4/d0e/unionfl_1_1_c_h_s_v_8____unnamed0_____8____unnamed0_____8____unnamed2____" ],
       [ "CirclePath", "da/d3f/classfl_1_1_circle_path.html", "da/d3f/classfl_1_1_circle_path" ],
-      [ "CircularBuffer", "d2/d4f/classfl_1_1_circular_buffer.html", "d2/d4f/classfl_1_1_circular_buffer" ],
       [ "common_type", "d4/d36/namespacefl.html#da/dd8/structfl_1_1common__type", "d4/d36/namespacefl_da/dd8/structfl_1_1common__type_dup" ],
       [ "common_type_impl", "d4/d36/namespacefl.html#d4/d2b/structfl_1_1common__type__impl", "d4/d36/namespacefl_d4/d2b/structfl_1_1common__type__impl_dup" ],
       [ "common_type_impl< double, float >", "d4/d36/namespacefl.html#d3/d4b/structfl_1_1common__type__impl_3_01double_00_01float_01_4", "d4/d36/namespacefl_d3/d4b/structfl_1_1common__type__impl_3_01double_00_01float_01_4_dup" ],
@@ -113,6 +116,7 @@ var annotated_dup =
       [ "DigitalPin", "d0/d32/classfl_1_1_digital_pin.html", "d0/d32/classfl_1_1_digital_pin" ],
       [ "DigitalPinImpl", "d3/d25/classfl_1_1_digital_pin_impl.html", "d3/d25/classfl_1_1_digital_pin_impl" ],
       [ "DrawItem", "da/d9d/structfl_1_1_draw_item.html", "da/d9d/structfl_1_1_draw_item" ],
+      [ "DynamicCircularBuffer", "d0/d56/classfl_1_1_dynamic_circular_buffer.html", "d0/d56/classfl_1_1_dynamic_circular_buffer" ],
       [ "Empty", "d4/d36/namespacefl.html#dd/d75/structfl_1_1_empty", null ],
       [ "enable_if", "d4/d36/namespacefl.html#d5/d67/structfl_1_1enable__if", null ],
       [ "enable_if< true, T >", "d4/d36/namespacefl.html#d2/d82/structfl_1_1enable__if_3_01true_00_01_t_01_4", "d4/d36/namespacefl_d2/d82/structfl_1_1enable__if_3_01true_00_01_t_01_4_dup" ],
@@ -307,6 +311,7 @@ var annotated_dup =
       [ "pair_element< 1, T1, T2 >", "d4/d36/namespacefl.html#d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4", "d4/d36/namespacefl_d8/dbc/structfl_1_1pair__element_3_011_00_01_t1_00_01_t2_01_4_dup" ],
       [ "pair_xy", "d3/da1/structfl_1_1pair__xy.html", "d3/da1/structfl_1_1pair__xy" ],
       [ "ParseResult", "db/d38/structfl_1_1_parse_result.html", "db/d38/structfl_1_1_parse_result" ],
+      [ "PerceptualWeighting", "d6/dd1/classfl_1_1_perceptual_weighting.html", "d6/dd1/classfl_1_1_perceptual_weighting" ],
       [ "PhyllotaxisParams", "de/d32/classfl_1_1_phyllotaxis_params.html", "de/d32/classfl_1_1_phyllotaxis_params" ],
       [ "PhyllotaxisPath", "df/d1d/classfl_1_1_phyllotaxis_path.html", "df/d1d/classfl_1_1_phyllotaxis_path" ],
       [ "Pir", "db/db1/classfl_1_1_pir.html", "db/db1/classfl_1_1_pir" ],
@@ -367,6 +372,8 @@ var annotated_dup =
       [ "SortedHeapMap", "dc/d45/classfl_1_1_sorted_heap_map.html", "dc/d45/classfl_1_1_sorted_heap_map" ],
       [ "SortedHeapVector", "d0/d5c/classfl_1_1_sorted_heap_vector.html", "d0/d5c/classfl_1_1_sorted_heap_vector" ],
       [ "SoundLevelMeter", "d9/d68/classfl_1_1_sound_level_meter.html", "d9/d68/classfl_1_1_sound_level_meter" ],
+      [ "SpectralFluxDetector", "df/d55/classfl_1_1_spectral_flux_detector.html", "df/d55/classfl_1_1_spectral_flux_detector" ],
+      [ "StaticCircularBuffer", "d0/d51/classfl_1_1_static_circular_buffer.html", "d0/d51/classfl_1_1_static_circular_buffer" ],
       [ "string", "d2/db2/classfl_1_1string.html", "d2/db2/classfl_1_1string" ],
       [ "StringConversionVisitor", "de/d51/structfl_1_1_string_conversion_visitor.html", "de/d51/structfl_1_1_string_conversion_visitor" ],
       [ "StringFormatter", "d4/d8d/classfl_1_1_string_formatter.html", "d4/d8d/classfl_1_1_string_formatter" ],
@@ -639,6 +646,15 @@ var annotated_dup =
     [ "UCS2903", "d7/d84/class_u_c_s2903.html", null ],
     [ "UCS2903Controller", "d6/d05/class_u_c_s2903_controller.html", null ],
     [ "ui_state", "da/db7/structui__state.html", "da/db7/structui__state" ],
+    [ "UIButton", "da/d03/class_u_i_button.html", "da/d03/class_u_i_button" ],
+    [ "UICheckbox", "de/d39/class_u_i_checkbox.html", "de/d39/class_u_i_checkbox" ],
+    [ "UIDescription", "db/d0c/class_u_i_description.html", "db/d0c/class_u_i_description" ],
+    [ "UIDropdown", "df/d10/class_u_i_dropdown.html", "df/d10/class_u_i_dropdown" ],
+    [ "UIGroup", "d6/def/class_u_i_group.html", "d6/def/class_u_i_group" ],
+    [ "UIHelp", "df/d5a/class_u_i_help.html", "df/d5a/class_u_i_help" ],
+    [ "UINumberField", "db/d12/class_u_i_number_field.html", "db/d12/class_u_i_number_field" ],
+    [ "UISlider", "df/d68/class_u_i_slider.html", "df/d68/class_u_i_slider" ],
+    [ "UITitle", "d0/db2/class_u_i_title.html", "d0/db2/class_u_i_title" ],
     [ "WaveEffect", "d6/def/struct_wave_effect.html", "d6/def/struct_wave_effect" ],
     [ "WS2801Controller", "d9/d95/class_w_s2801_controller.html", "d9/d95/class_w_s2801_controller" ],
     [ "WS2803Controller", "dc/d28/class_w_s2803_controller.html", null ],
@@ -655,5 +671,6 @@ var annotated_dup =
     [ "WS2815Controller", "de/d5f/class_w_s2815_controller.html", null ],
     [ "WS2816", "dc/d9f/class_w_s2816.html", null ],
     [ "WS2816Controller", "dd/dbc/class_w_s2816_controller.html", "dd/dbc/class_w_s2816_controller" ],
-    [ "WS2852", "df/d10/class_w_s2852.html", null ]
+    [ "WS2852", "df/d10/class_w_s2852.html", null ],
+    [ "XYMap", "d7/de6/class_x_y_map.html", "d7/de6/class_x_y_map" ]
 ];

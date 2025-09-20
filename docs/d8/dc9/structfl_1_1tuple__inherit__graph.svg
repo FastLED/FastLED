@@ -34,7 +34,7 @@
 <g id="a_Node000002"><a xlink:href="../../d4/d36/namespacefl.html#d4/d36/namespacefl" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="341,-141.5 226,-141.5 226,-111.5 341,-111.5 341,-141.5"/>
 <text text-anchor="start" x="234" y="-129.5" font-family="Helvetica,sans-Serif" font-size="10.00">fl::tuple&lt; const char</text>
-<text text-anchor="middle" x="283.5" y="-118.5" font-family="Helvetica,sans-Serif" font-size="10.00"> *, int, uint32_t &gt;</text>
+<text text-anchor="middle" x="283.5" y="-118.5" font-family="Helvetica,sans-Serif" font-size="10.00"> *, int, fl::u32 &gt;</text>
 </a>
 </g>
 </g>
@@ -47,7 +47,7 @@
 </a>
 </g>
 <text text-anchor="start" x="104" y="-127.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> &lt; const char *, int,</text>
-<text text-anchor="middle" x="151.5" y="-116.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> uint32_t &gt;</text>
+<text text-anchor="middle" x="151.5" y="-116.5" font-family="Helvetica,sans-Serif" font-size="10.00" fill="grey"> fl::u32 &gt;</text>
 </g>
 <!-- Node3 -->
 <g id="Node000003" class="node">

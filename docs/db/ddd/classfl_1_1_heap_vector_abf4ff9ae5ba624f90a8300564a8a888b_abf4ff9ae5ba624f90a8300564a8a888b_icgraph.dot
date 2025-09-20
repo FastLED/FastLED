@@ -11,6 +11,8 @@ digraph "fl::HeapVector::begin"
   Node2 [id="Node000002",label="fl::HeapVector\< DrawItem\l \>::HeapVector",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_a6d15afbf78d67f63fea514df17c58a3c.html#a6d15afbf78d67f63fea514df17c58a3c",tooltip=" "];
   Node1 -> Node3 [id="edge2_Node000001_Node000003",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node3 [id="Node000003",label="fl::AudioSample::begin",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/de1/classfl_1_1_audio_sample_ae63e6b3ed29f693c0f46d55b8af625cf.html#ae63e6b3ed29f693c0f46d55b8af625cf",tooltip=" "];
-  Node1 -> Node4 [id="edge3_Node000001_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node4 [id="Node000004",label="fl::HeapVector\< DrawItem\l \>::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_aa9b2b916a85e1737b51662db173d533a.html#aa9b2b916a85e1737b51662db173d533a",tooltip=" "];
+  Node3 -> Node4 [id="edge3_Node000003_Node000004",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node4 [id="Node000004",label="fl::AudioSample::AudioSample",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d0/de1/classfl_1_1_audio_sample_ab067aa94aded71afb3205a4e33edc5d3.html#ab067aa94aded71afb3205a4e33edc5d3",tooltip=" "];
+  Node1 -> Node5 [id="edge4_Node000001_Node000005",dir="back",color="steelblue1",style="solid",tooltip=" "];
+  Node5 [id="Node000005",label="fl::HeapVector\< DrawItem\l \>::operator=",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$db/ddd/classfl_1_1_heap_vector_aa9b2b916a85e1737b51662db173d533a.html#aa9b2b916a85e1737b51662db173d533a",tooltip=" "];
 }

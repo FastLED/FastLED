@@ -36,13 +36,13 @@ digraph "fl/gamma.cpp"
   Node14 -> Node4 [id="edge18_Node000014_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node14 -> Node10 [id="edge19_Node000014_Node000010",color="steelblue1",style="solid",tooltip=" "];
   Node14 -> Node6 [id="edge20_Node000014_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node3 -> Node56 [id="edge21_Node000003_Node000056",color="steelblue1",style="solid",tooltip=" "];
-  Node56 [id="Node000056",label="hsv2rgb.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d9a/hsv2rgb_8h.html",tooltip="Functions to convert from the HSV colorspace to the RGB colorspace."];
-  Node3 -> Node57 [id="edge22_Node000003_Node000057",color="steelblue1",style="solid",tooltip=" "];
-  Node57 [id="Node000057",label="fl/ease.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
-  Node57 -> Node4 [id="edge23_Node000057_Node000004",color="steelblue1",style="solid",tooltip=" "];
-  Node57 -> Node6 [id="edge24_Node000057_Node000006",color="steelblue1",style="solid",tooltip=" "];
+  Node3 -> Node57 [id="edge21_Node000003_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node57 [id="Node000057",label="hsv2rgb.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d9a/hsv2rgb_8h.html",tooltip="Functions to convert from the HSV colorspace to the RGB colorspace."];
+  Node3 -> Node58 [id="edge22_Node000003_Node000058",color="steelblue1",style="solid",tooltip=" "];
+  Node58 [id="Node000058",label="fl/ease.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$db/d19/ease_8h.html",tooltip=" "];
+  Node58 -> Node4 [id="edge23_Node000058_Node000004",color="steelblue1",style="solid",tooltip=" "];
+  Node58 -> Node6 [id="edge24_Node000058_Node000006",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node4 [id="edge25_Node000002_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node2 -> Node6 [id="edge26_Node000002_Node000006",color="steelblue1",style="solid",tooltip=" "];
-  Node2 -> Node57 [id="edge27_Node000002_Node000057",color="steelblue1",style="solid",tooltip=" "];
+  Node2 -> Node58 [id="edge27_Node000002_Node000058",color="steelblue1",style="solid",tooltip=" "];
 }

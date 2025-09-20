@@ -112,6 +112,9 @@ $(function(){initNavTree('d1/d9a/audio__reactive_8h.html','../../'); initResizab
 <code>#include &quot;<a class="el" href="../../df/dd8/stdint_8h_source.html">fl/stdint.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d3/d7e/int_8h_source.html">fl/int.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../da/d09/audio_8h_source.html">fl/audio.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../db/d63/array_8h_source.html">fl/array.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../da/d4b/unique__ptr_8h_source.html">fl/unique_ptr.h</a>&quot;</code><br />
+<code>#include &quot;<a class="el" href="../../d1/dbc/sketch__macros_8h_source.html">fl/sketch_macros.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../db/dd1/crgb_8h_source.html">crgb.h</a>&quot;</code><br />
 <code>#include &quot;<a class="el" href="../../d7/df9/fl_2colorutils_8h_source.html">fl/colorutils.h</a>&quot;</code><br />
 </div><div class="textblock"><div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -133,11 +136,17 @@ $(function(){initNavTree('d1/d9a/audio__reactive_8h.html','../../'); initResizab
 <table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="nested-classes" name="nested-classes"></a>
 Classes</h2></td></tr>
-<tr class="memitem:de/d0d/structfl_1_1_audio_config" id="r_de/d0d/structfl_1_1_audio_config"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#de/d0d/structfl_1_1_audio_config">fl::AudioConfig</a></td></tr>
-<tr class="separator:de/d0d/structfl_1_1_audio_config"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:d0/d36/structfl_1_1_audio_data" id="r_d0/d36/structfl_1_1_audio_data"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d0/d36/structfl_1_1_audio_data">fl::AudioData</a></td></tr>
 <tr class="separator:d0/d36/structfl_1_1_audio_data"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d3/d40/classfl_1_1_audio_reactive.html">fl::AudioReactive</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:d1/da4/structfl_1_1_audio_reactive_config" id="r_d1/da4/structfl_1_1_audio_reactive_config"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d4/d36/namespacefl.html#d1/da4/structfl_1_1_audio_reactive_config">fl::AudioReactiveConfig</a></td></tr>
+<tr class="separator:d1/da4/structfl_1_1_audio_reactive_config"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">struct &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/df4/structfl_1_1_beat_detectors.html">fl::BeatDetectors</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../d6/dd1/classfl_1_1_perceptual_weighting.html">fl::PerceptualWeighting</a></td></tr>
+<tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:"><td class="memItemLeft" align="right" valign="top">class &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="../../df/d55/classfl_1_1_spectral_flux_detector.html">fl::SpectralFluxDetector</a></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table><table class="memberdecls">
 <tr class="heading"><td colspan="2"><h2 class="groupheader"><a id="namespaces" name="namespaces"></a>
@@ -147,71 +156,6 @@ Namespaces</h2></td></tr>
 <tr class="separator:"><td class="memSeparator" colspan="2">&#160;</td></tr>
 </table>
 <hr/><h2 class="groupheader">Class Documentation</h2>
-<a name="de/d0d/structfl_1_1_audio_config" id="de/d0d/structfl_1_1_audio_config"></a>
-<h2 class="memtitle"><span class="permalink"><a href="#de/d0d/structfl_1_1_audio_config">&#9670;&#160;</a></span>fl::AudioConfig</h2>
-
-<div class="memitem">
-<div class="memproto">
-      <table class="memname">
-        <tr>
-          <td class="memname">struct fl::AudioConfig</td>
-        </tr>
-      </table>
-</div><div class="memdoc">
-<table class="fieldtable">
-<tr><th colspan="3">Class Members</th></tr>
-<tr><td class="fieldtype">
-<a id="a5f1bafeff283591d7207b00da07b3636" name="a5f1bafeff283591d7207b00da07b3636"></a>bool</td>
-<td class="fieldname">
-agcEnabled = true</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="aa144f5c4d35193f1b8a3c10c2391fd75" name="aa144f5c4d35193f1b8a3c10c2391fd75"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
-<td class="fieldname">
-attack = 50</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a60020b327b1f1b876d27e8b5cead3576" name="a60020b327b1f1b876d27e8b5cead3576"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
-<td class="fieldname">
-decay = 200</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="aba69d7aa6fcbe98a9f6ce4ab18e291b7" name="aba69d7aa6fcbe98a9f6ce4ab18e291b7"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
-<td class="fieldname">
-gain = 128</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a58ca9f9dc52fd806f4230a095ce856f0" name="a58ca9f9dc52fd806f4230a095ce856f0"></a>bool</td>
-<td class="fieldname">
-noiseGate = true</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a6af51de239aef294ab8e362d83dec359" name="a6af51de239aef294ab8e362d83dec359"></a>u16</td>
-<td class="fieldname">
-sampleRate = 22050</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a4e5d3d596a52b2cd7d68dadacfc64639" name="a4e5d3d596a52b2cd7d68dadacfc64639"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
-<td class="fieldname">
-scalingMode = 3</td>
-<td class="fielddoc">
-</td></tr>
-<tr><td class="fieldtype">
-<a id="a5ff4e5855155a3a85c2a536ffcfe0435" name="a5ff4e5855155a3a85c2a536ffcfe0435"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
-<td class="fieldname">
-sensitivity = 128</td>
-<td class="fielddoc">
-</td></tr>
-</table>
-
-</div>
-</div>
 <a name="d0/d36/structfl_1_1_audio_data" id="d0/d36/structfl_1_1_audio_data"></a>
 <h2 class="memtitle"><span class="permalink"><a href="#d0/d36/structfl_1_1_audio_data">&#9670;&#160;</a></span>fl::AudioData</h2>
 
@@ -225,6 +169,18 @@ sensitivity = 128</td>
 </div><div class="memdoc">
 <table class="fieldtable">
 <tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="a31be91e2ed82589fcbd496c7a56ba5c6" name="a31be91e2ed82589fcbd496c7a56ba5c6"></a>bool</td>
+<td class="fieldname">
+bassBeatDetected = false</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a12d5b754a137714536d8057c58514692" name="a12d5b754a137714536d8057c58514692"></a>float</td>
+<td class="fieldname">
+bassEnergy = 0.0f</td>
+<td class="fielddoc">
+</td></tr>
 <tr><td class="fieldtype">
 <a id="a4fa87b955cefbe258b0fc70b253135b5" name="a4fa87b955cefbe258b0fc70b253135b5"></a>bool</td>
 <td class="fieldname">
@@ -250,15 +206,45 @@ magnitude = 0.0f</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
+<a id="aea6605631b4558edd5ec836a2bca7988" name="aea6605631b4558edd5ec836a2bca7988"></a>bool</td>
+<td class="fieldname">
+midBeatDetected = false</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="aebaeff7134a59e4769f626560019d2d7" name="aebaeff7134a59e4769f626560019d2d7"></a>float</td>
+<td class="fieldname">
+midEnergy = 0.0f</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
 <a id="a1af12d1a3c26807c9dc0d926e8d0f27d" name="a1af12d1a3c26807c9dc0d926e8d0f27d"></a>float</td>
 <td class="fieldname">
 peak = 0.0f</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
+<a id="acbd3f26959fa7f7594910e4102d33f95" name="acbd3f26959fa7f7594910e4102d33f95"></a>float</td>
+<td class="fieldname">
+spectralFlux = 0.0f</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
 <a id="aed010d9884cf6d3923d607f2db61e083" name="aed010d9884cf6d3923d607f2db61e083"></a>u32</td>
 <td class="fieldname">
 timestamp = 0</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a74ac53a503f13916facce9d28314c3c1" name="a74ac53a503f13916facce9d28314c3c1"></a>bool</td>
+<td class="fieldname">
+trebleBeatDetected = false</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="aa48deca8fc960ac917256aca03ad715b" name="aa48deca8fc960ac917256aca03ad715b"></a>float</td>
+<td class="fieldname">
+trebleEnergy = 0.0f</td>
 <td class="fielddoc">
 </td></tr>
 <tr><td class="fieldtype">
@@ -277,6 +263,107 @@ volumeRaw = 0.0f</td>
 
 </div>
 </div>
+<a name="d1/da4/structfl_1_1_audio_reactive_config" id="d1/da4/structfl_1_1_audio_reactive_config"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#d1/da4/structfl_1_1_audio_reactive_config">&#9670;&#160;</a></span>fl::AudioReactiveConfig</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">struct fl::AudioReactiveConfig</td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+<table class="fieldtable">
+<tr><th colspan="3">Class Members</th></tr>
+<tr><td class="fieldtype">
+<a id="aa96219b5407438c4d9efd3c1aba2aa0b" name="aa96219b5407438c4d9efd3c1aba2aa0b"></a>bool</td>
+<td class="fieldname">
+agcEnabled = true</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af124ecdc33e783b2119c93c98fe0396c" name="af124ecdc33e783b2119c93c98fe0396c"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+attack = 50</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ac6fde7df5c8b4f131fbf03644624de71" name="ac6fde7df5c8b4f131fbf03644624de71"></a>float</td>
+<td class="fieldname">
+bassThreshold = 0.15f</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ab080ac6c56aff3f3bad4682937106c93" name="ab080ac6c56aff3f3bad4682937106c93"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+decay = 200</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a95b6ae0b646ab98dc74b646b2753fc07" name="a95b6ae0b646ab98dc74b646b2753fc07"></a>bool</td>
+<td class="fieldname">
+enableMultiBand = true</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a0268728b1bd441add559fe8bacb73f45" name="a0268728b1bd441add559fe8bacb73f45"></a>bool</td>
+<td class="fieldname">
+enableSpectralFlux = true</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a28bff1dd30e611bd4d7dfe7a2ef8202a" name="a28bff1dd30e611bd4d7dfe7a2ef8202a"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+gain = 128</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af018f3e579107e99b21b012413607907" name="af018f3e579107e99b21b012413607907"></a>float</td>
+<td class="fieldname">
+midThreshold = 0.12f</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a34e140a328411c88e61aa77d8ea2ec57" name="a34e140a328411c88e61aa77d8ea2ec57"></a>bool</td>
+<td class="fieldname">
+noiseGate = true</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a602b88a51dc3af6dd565e444bfa91911" name="a602b88a51dc3af6dd565e444bfa91911"></a>u16</td>
+<td class="fieldname">
+sampleRate = 22050</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="ac9b1c58ad1ee660467fb85dbbb1043d7" name="ac9b1c58ad1ee660467fb85dbbb1043d7"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+scalingMode = 3</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="abb8b6453708578588748df8ca54ea0d2" name="abb8b6453708578588748df8ca54ea0d2"></a><a class="el" href="../../d4/d36/namespacefl_a058ceeac48f181da463c2ba07401292c.html#a058ceeac48f181da463c2ba07401292c">u8</a></td>
+<td class="fieldname">
+sensitivity = 128</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="af5e7715c62d7128fde51d7d49f719235" name="af5e7715c62d7128fde51d7d49f719235"></a>float</td>
+<td class="fieldname">
+spectralFluxThreshold = 0.1f</td>
+<td class="fielddoc">
+</td></tr>
+<tr><td class="fieldtype">
+<a id="a7c1e01b49a01a8b031f91ecf094f9224" name="a7c1e01b49a01a8b031f91ecf094f9224"></a>float</td>
+<td class="fieldname">
+trebleThreshold = 0.08f</td>
+<td class="fielddoc">
+</td></tr>
+</table>
+
+</div>
+</div>
 </div><!-- contents -->
 </div><!-- doc-content -->
 <!-- HTML footer for doxygen 1.9.3-->
@@ -284,7 +371,7 @@ volumeRaw = 0.0f</td>
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d1/d9a/audio__reactive_8h.html">audio_reactive.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:34 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

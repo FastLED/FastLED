@@ -38,7 +38,7 @@ digraph "map8"
   Node18 -> Node19 [id="edge15_Node000018_Node000019",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node19 [id="Node000019",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$de/d71/_fire2023_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node4 -> Node20 [id="edge16_Node000004_Node000020",dir="back",color="steelblue1",style="solid",tooltip=" "];
-  Node20 [id="Node000020",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d5/d88/_fire_matrix_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
+  Node20 [id="Node000020",label="loop",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d8/dd0/_fire_cylinder_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f",tooltip=" "];
   Node4 -> Node21 [id="edge17_Node000004_Node000021",dir="back",color="steelblue1",style="solid",tooltip=" "];
   Node21 [id="Node000021",label="fl::NoisePalette::mapNoise\lToLEDsUsingPalette",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$d9/d41/classfl_1_1_noise_palette_a546f14f524f7a1b965c872ddad7be8a4.html#a546f14f524f7a1b965c872ddad7be8a4",tooltip=" "];
   Node21 -> Node22 [id="edge18_Node000021_Node000022",dir="back",color="steelblue1",style="solid",tooltip=" "];

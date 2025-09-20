@@ -22,11 +22,11 @@ digraph "fl/pair.h"
   Node8 [id="Node000008",label="fl/stdint.h",height=0.2,width=0.4,color="red", fillcolor="#FFF0F0", style="filled",URL="$df/dd8/stdint_8h.html",tooltip=" "];
   Node8 -> Node8 [id="edge8_Node000008_Node000008",color="steelblue1",style="solid",tooltip=" "];
   Node6 -> Node5 [id="edge9_Node000006_Node000005",color="steelblue1",style="solid",tooltip=" "];
-  Node6 -> Node17 [id="edge10_Node000006_Node000017",color="steelblue1",style="solid",tooltip=" "];
-  Node17 [id="Node000017",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
+  Node6 -> Node18 [id="edge10_Node000006_Node000018",color="steelblue1",style="solid",tooltip=" "];
+  Node18 [id="Node000018",label="fl/namespace.h",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d2a/namespace_8h.html",tooltip="Implements the FastLED namespace macros."];
   Node6 -> Node4 [id="edge11_Node000006_Node000004",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node8 [id="edge12_Node000004_Node000008",color="steelblue1",style="solid",tooltip=" "];
-  Node4 -> Node17 [id="edge13_Node000004_Node000017",color="steelblue1",style="solid",tooltip=" "];
+  Node4 -> Node18 [id="edge13_Node000004_Node000018",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node2 [id="edge14_Node000004_Node000002",color="steelblue1",style="solid",tooltip=" "];
   Node4 -> Node7 [id="edge15_Node000004_Node000007",color="steelblue1",style="solid",tooltip=" "];
 }

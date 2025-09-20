@@ -6,5 +6,5 @@ digraph "Graphical Class Hierarchy"
   edge [fontname=Helvetica,fontsize=10,labelfontname=Helvetica,labelfontsize=10];
   node [fontname=Helvetica,fontsize=10,shape=box,height=0.2,width=0.4];
   rankdir="LR";
-  Node0 [id="Node000000",label="P",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$dc/db7/examples_2_luminova_2luminova_8h.html#dc/dba/struct_p",tooltip=" "];
+  Node0 [id="Node000000",label="MidiInterface\< Transport,\l _Settings, _Platform \>",height=0.2,width=0.4,color="grey40", fillcolor="white", style="filled",URL="$df/d6a/class_midi_interface.html",tooltip="The main class for MIDI handling. It is templated over the type of serial port to provide abstraction..."];
 }

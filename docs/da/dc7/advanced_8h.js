@@ -28,7 +28,7 @@ var advanced_8h =
     [ "drawWaveform", "da/dc7/advanced_8h_a715d5587b1a493c350ae39b13e881463.html#a715d5587b1a493c350ae39b13e881463", null ],
     [ "enableAudio", "da/dc7/advanced_8h_af83baeb70bd64caaefac2125f856388f.html#af83baeb70bd64caaefac2125f856388f", null ],
     [ "fadeSpeed", "da/dc7/advanced_8h_a40fb0ce80fe239814f5a2d21922802b3.html#a40fb0ce80fe239814f5a2d21922802b3", null ],
-    [ "FL_DISABLE_WARNING", "da/dc7/advanced_8h_a10fa947887a0e6f1578290c0a8624f2e.html#a10fa947887a0e6f1578290c0a8624f2e", null ],
+    [ "FL_DISABLE_WARNING", "da/dc7/advanced_8h_a47044ccc4b641bd6b1f6002bcd074796.html#a47044ccc4b641bd6b1f6002bcd074796", null ],
     [ "getCurrentPalette", "da/dc7/advanced_8h_ac17afe8b8a0d48cf8ffdaada59b5a7c4.html#ac17afe8b8a0d48cf8ffdaada59b5a7c4", null ],
     [ "loop", "da/dc7/advanced_8h_afe461d27b9c48d5921c00d521181f12f.html#afe461d27b9c48d5921c00d521181f12f", null ],
     [ "mirrorMode", "da/dc7/advanced_8h_a917c39da5a9c4d01b2422be57980deec.html#a917c39da5a9c4d01b2422be57980deec", null ],

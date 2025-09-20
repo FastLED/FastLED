@@ -131,11 +131,11 @@ $(function(){initNavTree('d2/d78/classfl_1_1_screen_map_a00aa2580648abcf15187e47
 <div class="fragment"><div class="line"><span class="lineno">  243</span>                                    {</div>
 <div class="line"><span class="lineno">  244</span> </div>
 <div class="line"><span class="lineno">  245</span><span class="preprocessor">#if FASTLED_NO_JSON</span></div>
-<div class="line"><span class="lineno">  246</span>    <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with FASTLED_NO_JSON&quot;</span>);</div>
+<div class="line"><span class="lineno">  246</span>    <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with FASTLED_NO_JSON&quot;</span>);</div>
 <div class="line"><span class="lineno">  247</span>    <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  248</span><span class="preprocessor">#else</span></div>
 <div class="line"><span class="lineno">  249</span>    <span class="keywordflow">if</span> (!doc) {</div>
-<div class="line"><span class="lineno">  250</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with nullptr doc&quot;</span>);</div>
+<div class="line"><span class="lineno">  250</span>        <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with nullptr doc&quot;</span>);</div>
 <div class="line"><span class="lineno">  251</span>        <span class="keywordflow">return</span>;</div>
 <div class="line"><span class="lineno">  252</span>    }</div>
 <div class="line"><span class="lineno">  253</span> </div>
@@ -148,7 +148,7 @@ $(function(){initNavTree('d2/d78/classfl_1_1_screen_map_a00aa2580648abcf15187e47
 <div class="line"><span class="lineno">  260</span>    <span class="comment">// Populate the map object with segments</span></div>
 <div class="line"><span class="lineno">  261</span>    <span class="keywordflow">for</span> (<span class="keyword">const</span> <span class="keyword">auto</span>&amp; kv : segmentMaps) {</div>
 <div class="line"><span class="lineno">  262</span>        <span class="keywordflow">if</span> (kv.second.getLength() == 0) {</div>
-<div class="line"><span class="lineno">  263</span>            <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with empty segment: &quot;</span> &lt;&lt; fl::string(kv.first));   </div>
+<div class="line"><span class="lineno">  263</span>            <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson called with empty segment: &quot;</span> &lt;&lt; fl::string(kv.first));   </div>
 <div class="line"><span class="lineno">  264</span>            <span class="keywordflow">continue</span>;</div>
 <div class="line"><span class="lineno">  265</span>        }</div>
 <div class="line"><span class="lineno">  266</span>        </div>
@@ -184,7 +184,7 @@ $(function(){initNavTree('d2/d78/classfl_1_1_screen_map_a00aa2580648abcf15187e47
 <div class="line"><span class="lineno">  296</span>    </div>
 <div class="line"><span class="lineno">  297</span>    <span class="comment">// Debug output</span></div>
 <div class="line"><span class="lineno">  298</span>    fl::string debugStr = doc-&gt;<a class="code hl_function" href="../../d4/d13/classfl_1_1_json_a1739bfed700a1a81d78fb3a37c4ecea1.html#a1739bfed700a1a81d78fb3a37c4ecea1">to_string</a>();</div>
-<div class="line"><span class="lineno">  299</span>    <a class="code hl_define" href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson generated JSON: &quot;</span> &lt;&lt; debugStr);</div>
+<div class="line"><span class="lineno">  299</span>    <a class="code hl_define" href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a>(<span class="stringliteral">&quot;ScreenMap::toJson generated JSON: &quot;</span> &lt;&lt; debugStr);</div>
 <div class="line"><span class="lineno">  300</span><span class="preprocessor">#endif</span></div>
 <div class="line"><span class="lineno">  301</span>}</div>
 <div class="ttc" id="a_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33_html_a0a2f84ed7838f07779ae24c5a9086d33"><div class="ttname"><a href="../../db/d49/_audio_2simple_2simple_8h_a0a2f84ed7838f07779ae24c5a9086d33.html#a0a2f84ed7838f07779ae24c5a9086d33">y</a></div><div class="ttdeci">int y</div><div class="ttdef"><b>Definition</b> <a href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">simple.h:93</a></div></div>
@@ -194,9 +194,9 @@ $(function(){initNavTree('d2/d78/classfl_1_1_screen_map_a00aa2580648abcf15187e47
 <div class="ttc" id="aclassfl_1_1_json_a96d8778149c15f39425d134e725c0f53_html_a96d8778149c15f39425d134e725c0f53"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a96d8778149c15f39425d134e725c0f53.html#a96d8778149c15f39425d134e725c0f53">fl::Json::set</a></div><div class="ttdeci">void set(const fl::string &amp;key, const Json &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02149">json.h:2149</a></div></div>
 <div class="ttc" id="aclassfl_1_1_json_a97485f76ef6407f98c99636b05cf5307_html_a97485f76ef6407f98c99636b05cf5307"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_a97485f76ef6407f98c99636b05cf5307.html#a97485f76ef6407f98c99636b05cf5307">fl::Json::push_back</a></div><div class="ttdeci">void push_back(const Json &amp;value)</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02172">json.h:2172</a></div></div>
 <div class="ttc" id="aclassfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873_html_ab581af4715e0e3d6dcc7c890a168b873"><div class="ttname"><a href="../../d4/d13/classfl_1_1_json_ab581af4715e0e3d6dcc7c890a168b873.html#ab581af4715e0e3d6dcc7c890a168b873">fl::Json::array</a></div><div class="ttdeci">static Json array()</div><div class="ttdef"><b>Definition</b> <a href="../../d7/d91/fl_2json_8h_source.html#l02137">json.h:2137</a></div></div>
-<div class="ttc" id="awarn_8h_a906151b6a1baa2784f6ae1496e6a316b_html_a906151b6a1baa2784f6ae1496e6a316b"><div class="ttname"><a href="../../de/d77/warn_8h_a906151b6a1baa2784f6ae1496e6a316b.html#a906151b6a1baa2784f6ae1496e6a316b">FL_WARN</a></div><div class="ttdeci">#define FL_WARN</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00012">warn.h:12</a></div></div>
+<div class="ttc" id="awarn_8h_a868b194fdb2234182e76042d9fde3062_html_a868b194fdb2234182e76042d9fde3062"><div class="ttname"><a href="../../de/d77/warn_8h_a868b194fdb2234182e76042d9fde3062.html#a868b194fdb2234182e76042d9fde3062">FL_WARN</a></div><div class="ttdeci">#define FL_WARN(X)</div><div class="ttdef"><b>Definition</b> <a href="../../de/d77/warn_8h_source.html#l00018">warn.h:18</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02137">fl::Json::array()</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00012">FL_WARN</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02141">fl::Json::object()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02172">fl::Json::push_back()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02149">fl::Json::set()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02120">fl::Json::to_string()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
+<p class="reference">References <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02137">fl::Json::array()</a>, <a class="el" href="../../de/d77/warn_8h_source.html#l00018">FL_WARN</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02141">fl::Json::object()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02172">fl::Json::push_back()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02149">fl::Json::set()</a>, <a class="el" href="../../d7/d91/fl_2json_8h_source.html#l02120">fl::Json::to_string()</a>, <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00092">x</a>, and <a class="el" href="../../db/d49/_audio_2simple_2simple_8h_source.html#l00093">y</a>.</p>
 
 <p class="reference">Referenced by <a class="el" href="../../d9/d6f/screenmap_8cpp_source.html#l00303">toJsonStr()</a>.</p>
 <div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
@@ -223,7 +223,7 @@ $(function(){initNavTree('d2/d78/classfl_1_1_screen_map_a00aa2580648abcf15187e47
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d2/d78/classfl_1_1_screen_map.html">ScreenMap</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:37 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:23 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

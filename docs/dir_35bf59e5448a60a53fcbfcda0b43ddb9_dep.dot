@@ -11,5 +11,5 @@ digraph "/home/runner/work/FastLED/FastLED/examples/HSVTest"
   dir_35bf59e5448a60a53fcbfcda0b43ddb9 [label="HSVTest", fillcolor="#edf0f7", color="grey25", style="filled,bold", URL="dir_35bf59e5448a60a53fcbfcda0b43ddb9.html",tooltip=""];
   }
   dir_4d1829fa9bd13d7db71e765b2707b248 [label="fl", fillcolor="#edf0f7", color="grey25", style="filled", URL="dir_4d1829fa9bd13d7db71e765b2707b248.html",tooltip=""];
-  dir_35bf59e5448a60a53fcbfcda0b43ddb9->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000059_000041.html" href="dir_000059_000041.html" color="steelblue1" fontcolor="steelblue1"];
+  dir_35bf59e5448a60a53fcbfcda0b43ddb9->dir_4d1829fa9bd13d7db71e765b2707b248 [headlabel="1", labeldistance=1.5 headhref="dir_000060_000042.html" href="dir_000060_000042.html" color="steelblue1" fontcolor="steelblue1"];
 }

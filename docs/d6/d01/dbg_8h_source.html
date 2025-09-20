@@ -151,20 +151,18 @@ $(function(){initNavTree('d6/d01/dbg_8h_source.html','../../'); initResizable(tr
 <div class="line"><a id="l00044" name="l00044"></a><span class="lineno">   44</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00045" name="l00045"></a><span class="lineno">   45</span> </div>
 <div class="line"><a id="l00046" name="l00046"></a><span class="lineno">   46</span><span class="comment">// Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat</span></div>
-<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#ifndef FASTLED_FORCE_DBG</span></div>
+<div class="line"><a id="l00047" name="l00047"></a><span class="lineno">   47</span><span class="preprocessor">#if !defined(FASTLED_FORCE_DBG) || !SKETCH_HAS_LOTS_OF_MEMORY</span></div>
 <div class="line"><a id="l00048" name="l00048"></a><span class="lineno">   48</span><span class="comment">// By default, debug printing is disabled to prevent memory bloat in simple applications</span></div>
-<div class="line"><a id="l00049" name="l00049"></a><span class="lineno">   49</span><span class="preprocessor">#define FASTLED_HAS_DBG 0</span></div>
-<div class="line"><a id="l00050" name="l00050"></a><span class="lineno">   50</span><span class="preprocessor">#define _FASTLED_DGB(X) do { if (false) { fl::println(&quot;&quot;); } } while(0)  </span><span class="comment">// No-op that handles &lt;&lt; operator</span></div>
+<div class="line"><a id="l00049" name="l00049"></a><span class="lineno"><a class="line" href="../../d6/d01/dbg_8h_a0218bc096fb5986b597b84b2fe7b8fe9.html#a0218bc096fb5986b597b84b2fe7b8fe9">   49</a></span><span class="preprocessor">#define FASTLED_HAS_DBG 0</span></div>
+<div class="line"><a id="l00050" name="l00050"></a><span class="lineno"><a class="line" href="../../d6/d01/dbg_8h_a98a9801e0141354bf27f238a3021dc30.html#a98a9801e0141354bf27f238a3021dc30">   50</a></span><span class="preprocessor">#define _FASTLED_DGB(X) do { if (false) { fl::println(&quot;&quot;); } } while(0)  </span><span class="comment">// No-op that handles &lt;&lt; operator</span></div>
 <div class="line"><a id="l00051" name="l00051"></a><span class="lineno">   51</span><span class="preprocessor">#else</span></div>
 <div class="line"><a id="l00052" name="l00052"></a><span class="lineno">   52</span><span class="comment">// Explicit debug mode enabled - uses fl::println()</span></div>
-<div class="line"><a id="l00053" name="l00053"></a><span class="lineno"><a class="line" href="../../d6/d01/dbg_8h_a0218bc096fb5986b597b84b2fe7b8fe9.html#a0218bc096fb5986b597b84b2fe7b8fe9">   53</a></span><span class="preprocessor">#define FASTLED_HAS_DBG 1</span></div>
-<div class="foldopen" id="foldopen00054" data-start="" data-end="">
-<div class="line"><a id="l00054" name="l00054"></a><span class="lineno"><a class="line" href="../../d6/d01/dbg_8h_a98a9801e0141354bf27f238a3021dc30.html#a98a9801e0141354bf27f238a3021dc30">   54</a></span><span class="preprocessor">#define _FASTLED_DGB(X)                                                        \</span></div>
+<div class="line"><a id="l00053" name="l00053"></a><span class="lineno">   53</span><span class="preprocessor">#define FASTLED_HAS_DBG 1</span></div>
+<div class="line"><a id="l00054" name="l00054"></a><span class="lineno">   54</span><span class="preprocessor">#define _FASTLED_DGB(X)                                                        \</span></div>
 <div class="line"><a id="l00055" name="l00055"></a><span class="lineno">   55</span><span class="preprocessor">    fl::println(                                                               \</span></div>
 <div class="line"><a id="l00056" name="l00056"></a><span class="lineno">   56</span><span class="preprocessor">        (fl::StrStream() &lt;&lt; (fl::fastled_file_offset(__FILE__))                \</span></div>
 <div class="line"><a id="l00057" name="l00057"></a><span class="lineno">   57</span><span class="preprocessor">                         &lt;&lt; &quot;(&quot; &lt;&lt; int(__LINE__) &lt;&lt; &quot;): &quot; &lt;&lt; X)                     \</span></div>
 <div class="line"><a id="l00058" name="l00058"></a><span class="lineno">   58</span><span class="preprocessor">            .c_str())</span></div>
-</div>
 <div class="line"><a id="l00059" name="l00059"></a><span class="lineno">   59</span><span class="preprocessor">#endif</span></div>
 <div class="line"><a id="l00060" name="l00060"></a><span class="lineno">   60</span> </div>
 <div class="line"><a id="l00061" name="l00061"></a><span class="lineno"><a class="line" href="../../d6/d01/dbg_8h_ad827e4b2bf1db9d697a566d6046b6f8b.html#ad827e4b2bf1db9d697a566d6046b6f8b">   61</a></span><span class="preprocessor">#define FASTLED_DBG(X) _FASTLED_DGB(X)</span></div>
@@ -190,7 +188,7 @@ $(function(){initNavTree('d6/d01/dbg_8h_source.html','../../'); initResizable(tr
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../dir_4d1829fa9bd13d7db71e765b2707b248.html">fl</a></li><li class="navelem"><a class="el" href="../../d6/d01/dbg_8h.html">dbg.h</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:33 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:20 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

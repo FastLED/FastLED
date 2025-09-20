@@ -115,14 +115,33 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_a9e305a66d23701571a8
       </table>
 </div><div class="memdoc">
 
-<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00009">9</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
-<div class="fragment"><div class="line"><span class="lineno">   10</span>    : <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>(16)  <span class="comment">// Initialize with 16 frequency bins</span></div>
-<div class="line"><span class="lineno">   11</span>{</div>
-<div class="line"><span class="lineno">   12</span>    <span class="comment">// No internal buffers needed</span></div>
-<div class="line"><span class="lineno">   13</span>}</div>
-<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00087">audio_reactive.h:87</a></div></div>
+<p class="definition">Definition at line <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html#l00010">10</a> of file <a class="el" href="../../d4/d14/audio__reactive_8cpp_source.html">audio_reactive.cpp</a>.</p>
+<div class="fragment"><div class="line"><span class="lineno">   11</span>    : <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a4464a62b161be02ed222abccce91e2c7.html#a4464a62b161be02ed222abccce91e2c7">mConfig</a>{}, <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">mFFTBins</a>(16)  <span class="comment">// Initialize with 16 frequency bins</span></div>
+<div class="line"><span class="lineno">   12</span>{</div>
+<div class="line"><span class="lineno">   13</span>    <span class="comment">// Initialize enhanced beat detection components</span></div>
+<div class="line"><span class="lineno">   14</span>    <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a85883588767063dc2a9ce73e54a73f5c.html#a85883588767063dc2a9ce73e54a73f5c">mSpectralFluxDetector</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a2db2912842971bc75bc5528219bedc95.html#a2db2912842971bc75bc5528219bedc95">fl::make_unique&lt;SpectralFluxDetector&gt;</a>();</div>
+<div class="line"><span class="lineno">   15</span>    <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_af96a25b4d5b043c2b8ddab227447356d.html#af96a25b4d5b043c2b8ddab227447356d">mPerceptualWeighting</a> = <a class="code hl_function" href="../../d4/d36/namespacefl_a2db2912842971bc75bc5528219bedc95.html#a2db2912842971bc75bc5528219bedc95">fl::make_unique&lt;PerceptualWeighting&gt;</a>();</div>
+<div class="line"><span class="lineno">   16</span>    </div>
+<div class="line"><span class="lineno">   17</span>    <span class="comment">// Initialize previous magnitudes array to zero</span></div>
+<div class="line"><span class="lineno">   18</span>    <span class="keywordflow">for</span> (fl::size i = 0; i &lt; <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a0aa0dfc363f5f28d245d8d02c93b8993.html#a0aa0dfc363f5f28d245d8d02c93b8993">mPreviousMagnitudes</a>.size(); ++i) {</div>
+<div class="line"><span class="lineno">   19</span>        <a class="code hl_variable" href="../../d3/d40/classfl_1_1_audio_reactive_a0aa0dfc363f5f28d245d8d02c93b8993.html#a0aa0dfc363f5f28d245d8d02c93b8993">mPreviousMagnitudes</a>[i] = 0.0f;</div>
+<div class="line"><span class="lineno">   20</span>    }</div>
+<div class="line"><span class="lineno">   21</span>}</div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a0aa0dfc363f5f28d245d8d02c93b8993_html_a0aa0dfc363f5f28d245d8d02c93b8993"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a0aa0dfc363f5f28d245d8d02c93b8993.html#a0aa0dfc363f5f28d245d8d02c93b8993">fl::AudioReactive::mPreviousMagnitudes</a></div><div class="ttdeci">fl::array&lt; float, 16 &gt; mPreviousMagnitudes</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00156">audio_reactive.h:156</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a4464a62b161be02ed222abccce91e2c7_html_a4464a62b161be02ed222abccce91e2c7"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a4464a62b161be02ed222abccce91e2c7.html#a4464a62b161be02ed222abccce91e2c7">fl::AudioReactive::mConfig</a></div><div class="ttdeci">AudioReactiveConfig mConfig</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00122">audio_reactive.h:122</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e_html_a71a1252852016389696ba8ec73ffba1e"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a71a1252852016389696ba8ec73ffba1e.html#a71a1252852016389696ba8ec73ffba1e">fl::AudioReactive::mFFTBins</a></div><div class="ttdeci">FFTBins mFFTBins</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00126">audio_reactive.h:126</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_a85883588767063dc2a9ce73e54a73f5c_html_a85883588767063dc2a9ce73e54a73f5c"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_a85883588767063dc2a9ce73e54a73f5c.html#a85883588767063dc2a9ce73e54a73f5c">fl::AudioReactive::mSpectralFluxDetector</a></div><div class="ttdeci">fl::unique_ptr&lt; SpectralFluxDetector &gt; mSpectralFluxDetector</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00152">audio_reactive.h:152</a></div></div>
+<div class="ttc" id="aclassfl_1_1_audio_reactive_af96a25b4d5b043c2b8ddab227447356d_html_af96a25b4d5b043c2b8ddab227447356d"><div class="ttname"><a href="../../d3/d40/classfl_1_1_audio_reactive_af96a25b4d5b043c2b8ddab227447356d.html#af96a25b4d5b043c2b8ddab227447356d">fl::AudioReactive::mPerceptualWeighting</a></div><div class="ttdeci">fl::unique_ptr&lt; PerceptualWeighting &gt; mPerceptualWeighting</div><div class="ttdef"><b>Definition</b> <a href="../../d1/d9a/audio__reactive_8h_source.html#l00153">audio_reactive.h:153</a></div></div>
+<div class="ttc" id="anamespacefl_a2db2912842971bc75bc5528219bedc95_html_a2db2912842971bc75bc5528219bedc95"><div class="ttname"><a href="../../d4/d36/namespacefl_a2db2912842971bc75bc5528219bedc95.html#a2db2912842971bc75bc5528219bedc95">fl::make_unique</a></div><div class="ttdeci">fl::enable_if&lt;!fl::is_array&lt; T &gt;::value, unique_ptr&lt; T &gt; &gt;::type make_unique(Args &amp;&amp;... args)</div><div class="ttdef"><b>Definition</b> <a href="../../dc/d18/memory_8h_source.html#l00042">memory.h:42</a></div></div>
 </div><!-- fragment -->
-<p class="reference">References <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00087">mFFTBins</a>.</p>
+<p class="reference">References <a class="el" href="../../dc/d18/memory_8h_source.html#l00042">fl::make_unique()</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00122">mConfig</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00126">mFFTBins</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00153">mPerceptualWeighting</a>, <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00156">mPreviousMagnitudes</a>, and <a class="el" href="../../d1/d9a/audio__reactive_8h_source.html#l00152">mSpectralFluxDetector</a>.</p>
+<div id="dynsection-0" onclick="return dynsection.toggleVisibility(this)" class="dynheader closed" style="cursor:pointer;">
+  <img id="dynsection-0-trigger" src="../../closed.png" alt="+"/> Here is the call graph for this function:</div>
+<div id="dynsection-0-summary" class="dynsummary" style="display:block;">
+</div>
+<div id="dynsection-0-content" class="dyncontent" style="display:none;">
+<div class="center"><iframe scrolling="no" frameborder="0" src="../../d3/d40/classfl_1_1_audio_reactive_a9e305a66d23701571a815bafc523bd27_a9e305a66d23701571a815bafc523bd27_cgraph.svg" width="460" height="51"><p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p></iframe></div>
+</div>
 
 </div>
 </div>
@@ -133,7 +152,7 @@ $(function(){initNavTree('d3/d40/classfl_1_1_audio_reactive_a9e305a66d23701571a8
 <div id="nav-path" class="navpath"><!-- id is needed for treeview function! -->
   <ul>
     <li class="navelem"><a class="el" href="../../d4/d36/namespacefl.html">fl</a></li><li class="navelem"><a class="el" href="../../d3/d40/classfl_1_1_audio_reactive.html">AudioReactive</a></li>
-    <li class="footer">Generated on Fri Aug 22 2025 20:59:36 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
+    <li class="footer">Generated on Sat Sep 20 2025 20:42:22 for FastLED by <a href="https://www.doxygen.org/index.html"><img class="footer" src="../../doxygen.svg" width="104" height="31" alt="doxygen"/></a> 1.13.2 </li>
   </ul>
 </div>
 <!-- ... -->

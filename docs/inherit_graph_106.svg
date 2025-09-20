@@ -11,10 +11,10 @@
 <!-- Node0 -->
 <g id="Node000000" class="node">
 <title>Node0</title>
-<g id="a_Node000000"><a xlink:href="d4/d36/namespacefl.html#d4/d2b/structfl_1_1common__type__impl" target="_top" xlink:title=" ">
+<g id="a_Node000000"><a xlink:href="d4/d36/namespacefl.html#d8/d12/structfl_1_1common__type__impl_3_01_t_00_01_t_01_4" target="_top" xlink:title=" ">
 <polygon fill="white" stroke="#666666" points="125,-30 0,-30 0,0 125,0 125,-30"/>
 <text text-anchor="start" x="8" y="-18" font-family="Helvetica,sans-Serif" font-size="10.00">fl::common_type_impl</text>
-<text text-anchor="middle" x="62.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, U, typename &gt;</text>
+<text text-anchor="middle" x="62.5" y="-7" font-family="Helvetica,sans-Serif" font-size="10.00">&lt; T, T &gt;</text>
 </a>
 </g>
 </g>

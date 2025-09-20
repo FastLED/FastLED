@@ -4,17 +4,17 @@
 <area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="278,41,220,81,217,76,275,36"/>
 <area shape="rect" id="Node000004" href="$d9/d57/cpixel__ledcontroller_8h.html" title="defines the templated version of the CLEDController class" alt="" coords="173,167,333,192"/>
 <area shape="poly" id="edge5_Node000001_Node000004" title=" " alt="" coords="299,45,280,105,260,167,255,166,275,103,294,43"/>
-<area shape="rect" id="Node000156" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="548,79,703,104"/>
-<area shape="poly" id="edge6_Node000001_Node000156" title=" " alt="" coords="369,31,574,76,573,81,368,36"/>
+<area shape="rect" id="Node000157" href="$d3/dc3/animartrix_8hpp.html" title=" " alt="" coords="548,79,703,104"/>
+<area shape="poly" id="edge6_Node000001_Node000157" title=" " alt="" coords="369,31,574,76,573,81,368,36"/>
 <area shape="rect" id="Node000003" href="$dd/dd8/cled__controller_8cpp.html" title="base definitions used by led controllers for writing out led data" alt="" coords="5,167,149,192"/>
 <area shape="poly" id="edge2_Node000002_Node000003" title=" " alt="" coords="175,114,96,169,93,164,172,110"/>
 <area shape="poly" id="edge3_Node000002_Node000004" title=" " alt="" coords="218,115,248,165,244,168,213,117"/>
 <area shape="rect" id="Node000005" href="$d2/dd9/controller_8h.html" title="deprecated: base definitions used by led controllers for writing out led data" alt="" coords="206,255,301,280"/>
 <area shape="poly" id="edge4_Node000004_Node000005" title=" " alt="" coords="256,206,256,254,251,254,251,206"/>
-<area shape="rect" id="Node000040" href="$d4/d06/curr_8h.html" title=" " alt="" coords="357,159,629,199"/>
-<area shape="poly" id="edge7_Node000156_Node000040" title=" " alt="" coords="598,114,524,161,521,157,595,109"/>
-<area shape="rect" id="Node000052" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="654,152,863,207"/>
-<area shape="poly" id="edge8_Node000156_Node000052" title=" " alt="" coords="656,109,719,150,717,154,653,114"/>
-<area shape="rect" id="Node000103" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="888,152,1088,207"/>
-<area shape="poly" id="edge9_Node000156_Node000103" title=" " alt="" coords="688,105,888,152,887,157,686,110"/>
+<area shape="rect" id="Node000041" href="$d4/d06/curr_8h.html" title=" " alt="" coords="357,159,629,199"/>
+<area shape="poly" id="edge7_Node000157_Node000041" title=" " alt="" coords="598,114,524,161,521,157,595,109"/>
+<area shape="rect" id="Node000053" href="$d6/d35/_fx_engine_8ino.html" title="Demonstrates FxEngine for switching between effects." alt="" coords="654,152,863,207"/>
+<area shape="poly" id="edge8_Node000157_Node000053" title=" " alt="" coords="656,109,719,150,717,154,653,114"/>
+<area shape="rect" id="Node000104" href="$da/d40/wasm__impl_8h.html" title=" " alt="" coords="888,152,1088,207"/>
+<area shape="poly" id="edge9_Node000157_Node000104" title=" " alt="" coords="688,105,888,152,887,157,686,110"/>
 </map>
