@@ -8,7 +8,6 @@ FastLED 3.10.3
     * ESP8266 clockless controller timing updated for better reliability
     * Maintains backward compatibility while supporting newer WS2812B chip revisions
   * **STM32F4 Support Added**: BlackPill STM32F411CE and STM32F4 family support
-    * Resolves GitHub issue #726: "avr/io.h: No such file or directory" compilation error
     * Added STM32F4 platform detection using canonical `STM32F4` preprocessor define
     * Full GPIO pin mapping support for WeAct Studio BlackPill V2.0 (STM32F411CE)
     * Consolidated STM32F1/STM32F4 pin definitions to reduce code duplication
