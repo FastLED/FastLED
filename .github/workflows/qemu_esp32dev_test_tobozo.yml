@@ -285,6 +285,20 @@ jobs:
           fi
           echo "✅ firmware.bin size: $(stat -c%s qemu-build/firmware.bin) bytes"
 
+          # Verify debug-enabled build by checking for Serial output strings in firmware
+          echo "=== Build verification: checking for debug strings ==="
+          if strings qemu-build/firmware.bin | grep -q "BlinkParallel setup starting"; then
+            echo "✅ Debug string 'BlinkParallel setup starting' found in firmware"
+          else
+            echo "⚠️  Debug string 'BlinkParallel setup starting' not found in firmware"
+          fi
+
+          if strings qemu-build/firmware.bin | grep -q "Starting loop iteration"; then
+            echo "✅ Debug string 'Starting loop iteration' found in firmware"
+          else
+            echo "⚠️  Debug string 'Starting loop iteration' not found in firmware"
+          fi
+
       - name: Pre-QEMU verification
         working-directory: trusted
         run: |
@@ -314,7 +328,7 @@ jobs:
           flash-size: 4
           psram: "disabled"
           qemu-timeout: "60"
-          timeout-interrupt-regex: "FL_WARN.*test finished"
+          timeout-interrupt-regex: "Test finished.*completed.*iterations"
 
       - name: Display QEMU output
         if: always()
@@ -370,14 +384,14 @@ jobs:
             exit 1
           fi
 
-          # Validate FL_WARN output is present
-          if grep -q "FL_WARN:" qemu_output.log; then
-            echo "✅ FL_WARN macro output detected"
-            echo "FL_WARN messages found:"
-            grep "FL_WARN:" qemu_output.log | head -20
+          # Validate debug output is present (now using Serial.print instead of FL_WARN)
+          if grep -q "BlinkParallel setup starting" qemu_output.log; then
+            echo "✅ Debug output detected"
+            echo "Setup messages found:"
+            grep "BlinkParallel setup starting\|Initialized.*LED strips\|Setup complete" qemu_output.log | head -10
           else
-            echo "❌ No FL_WARN output detected"
-            echo "Expected FL_WARN messages not found in QEMU log"
+            echo "❌ No debug output detected"
+            echo "Expected Serial.print messages not found in QEMU log"
             exit 1
           fi
 
@@ -404,10 +418,10 @@ jobs:
           fi
 
           # Check for test completion
-          if grep -q "FL_WARN.*test finished" qemu_output.log; then
-            echo "✅ FL_WARN test completion detected"
+          if grep -q "Test finished.*completed.*iterations" qemu_output.log; then
+            echo "✅ Test completion detected"
           else
-            echo "⚠️  FL_WARN test completion not detected (may need more time)"
+            echo "⚠️  Test completion not detected (may need more time)"
           fi
 
           # Validate boot success
@@ -447,6 +461,6 @@ jobs:
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
-            echo "FL_WARN count: $(grep -c 'FL_WARN:' qemu_output.log || echo 0)"
+            echo "Debug message count: $(grep -c 'BlinkParallel setup starting\|Starting loop iteration' qemu_output.log || echo 0)"
             echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           fi
