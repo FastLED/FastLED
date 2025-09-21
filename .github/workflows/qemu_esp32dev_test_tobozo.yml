@@ -308,7 +308,7 @@ jobs:
 
       - name: Run ESP32 in QEMU
         id: qemu
-        uses: tobozo/esp32-qemu-sim@v1
+        uses: tobozo/esp32-qemu-sim@v1.0.5
         with:
           build-folder: trusted/qemu-build
           flash-size: 4
