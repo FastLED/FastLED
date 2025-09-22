@@ -1,4 +1,5 @@
 #include "fl/codec/jpeg.h"
+#include "fl/codec/jpeg_tjpg_decoder.h"
 #include "fl/utility.h"
 
 namespace fl {
@@ -7,17 +8,13 @@ namespace fl {
 namespace jpeg {
 
 fl::shared_ptr<IDecoder> createDecoder(const JpegConfig& config, fl::string* error_message) {
-    // Return nullptr for now since actual implementation is pending
-    (void)config; // Suppress unused parameter warning
-    if (error_message) {
-        *error_message = "JPEG decoder not yet implemented";
-    }
-    return fl::shared_ptr<IDecoder>();
+    (void)error_message; // Suppress unused parameter warning for now
+    return fl::make_shared<TJpgDecoder>(config);
 }
 
 bool isSupported() {
-    // Return false since actual implementation is pending
-    return false;
+    // TJpg_Decoder is now integrated
+    return true;
 }
 
 } // namespace jpeg
