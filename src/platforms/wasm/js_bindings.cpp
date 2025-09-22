@@ -322,7 +322,9 @@ EMSCRIPTEN_KEEPALIVE void jsFillInMissingScreenMaps(ActiveStripData &active_stri
     };
     const auto &info = active_strips.getData();
     // check to see if we have any missing screenmaps.
-    for (const auto &[stripIndex, stripData] : info) {
+    for (const auto &pair : info) {
+        int stripIndex = pair.first;
+        const auto &stripData = pair.second;
         const bool has_screen_map = active_strips.hasScreenMap(stripIndex);
         if (!has_screen_map) {
             printf("Missing screenmap for strip %d\n", stripIndex);

@@ -23,10 +23,11 @@ ranlib = ["uv", "run", "python", "-m", "ziglang", "ranlib"]
 [all]
 # Universal compilation flags (compiler command handled separately)
 compiler_flags = [
-    "-std=gnu++17",
+    "-std=gnu++11",
     "-fpermissive",
     "-Wall",
     "-Wextra",
+    "-Werror=c++17-extensions",  # Error on C++17 features when using C++11
     "-Wno-deprecated-register",  # Suppress 'register' keyword warnings for C++17 compatibility
     "-Wno-backslash-newline-escape",  # Suppress backslash newline escape warnings
     "-fno-exceptions",
@@ -62,7 +63,7 @@ cc_flags = [
 cpp_flags = [
     "--target=x86_64-windows-gnu",     # Explicit target for MSYS2/MinGW compatibility
     "-fuse-ld=lld-link",                  # Use lld-link (Windows MSVC-compatible linker)
-    "-std=c++17",                         # C++17 standard
+    "-std=c++11",                         # C++11 standard
     "-Wall", 
     "-Wextra",
     "-fno-exceptions",

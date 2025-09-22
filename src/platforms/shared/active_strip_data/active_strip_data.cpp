@@ -78,7 +78,8 @@ fl::string ActiveStripData::infoJsonString() {
     FLArduinoJson::JsonDocument doc;
     auto array = doc.to<FLArduinoJson::JsonArray>();
 
-    for (const auto &[stripIndex, stripData] : mStripMap) {
+    for (const auto &pair : mStripMap) {
+        int stripIndex = pair.first;
         auto obj = array.add<FLArduinoJson::JsonObject>();
         obj["strip_id"] = stripIndex;
         obj["type"] = "r8g8b8";
@@ -113,7 +114,8 @@ fl::string ActiveStripData::infoJsonStringNew() {
     auto json = fl::Json::createArray();
     
     // Add each strip as an object to the array
-    for (const auto &[stripIndex, stripData] : mStripMap) {
+    for (const auto &pair : mStripMap) {
+        int stripIndex = pair.first;
         auto stripObj = fl::Json::createObject();
         stripObj.set("strip_id", stripIndex);
         stripObj.set("type", "r8g8b8");

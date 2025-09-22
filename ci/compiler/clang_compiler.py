@@ -88,7 +88,7 @@ class CompilerOptions:
     include_path: str
     compiler: str = "python -m ziglang c++"
     defines: list[str] | None = None
-    std_version: str = "c++17"
+    std_version: str = "c++11"
     compiler_args: list[str] = field(default_factory=list[str])
 
     # PCH (Precompiled Headers) settings
