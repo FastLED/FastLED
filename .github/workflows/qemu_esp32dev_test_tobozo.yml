@@ -430,7 +430,17 @@ jobs:
           fi
 
           # Save output to file for easier processing
-          echo "${{ steps.qemu.outputs.serial-output }}" > qemu_output.log
+          # The tobozo action creates logs.txt with the QEMU output
+          if [ -f "logs.txt" ]; then
+            cp logs.txt qemu_output.log
+            echo "✅ Found QEMU logs in logs.txt ($(wc -l < logs.txt) lines)"
+          else
+            echo "❌ No logs.txt file found from tobozo action"
+            echo "Looking for alternative log sources..."
+            # Check for any log files that might contain QEMU output
+            find . -name "*.log" -o -name "*.txt" | head -10
+            echo "" > qemu_output.log
+          fi
 
           # Check if we actually got any output
           if [ ! -s qemu_output.log ]; then
@@ -440,13 +450,14 @@ jobs:
             echo "QEMU Debug Information:"
             echo "  QEMU conclusion: ${{ steps.qemu.conclusion }}"
             echo "  QEMU outcome: ${{ steps.qemu.outcome }}"
-            if [ -n "${{ steps.qemu.outputs.qemu-log }}" ]; then
-              echo "  QEMU log length: $(echo '${{ steps.qemu.outputs.qemu-log }}' | wc -c) characters"
-              echo "  QEMU log preview:"
-              echo "${{ steps.qemu.outputs.qemu-log }}" | head -20
-            else
-              echo "  No QEMU log available"
-            fi
+            echo "  Looking for log files..."
+            find . -name "*.log" -o -name "*.txt" -type f | while read logfile; do
+              echo "  Found: $logfile ($(wc -l < "$logfile") lines)"
+              if [ -s "$logfile" ]; then
+                echo "    Preview:"
+                head -5 "$logfile" | sed 's/^/      /'
+              fi
+            done
             echo ""
             echo "Possible causes:"
             echo "  1. ESP32 firmware failed to boot (flash mode incompatibility)"
