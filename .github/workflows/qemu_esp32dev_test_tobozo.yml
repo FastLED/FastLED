@@ -201,25 +201,20 @@ jobs:
               fi
             fi
 
-            # Always ensure partitions.csv exists for QEMU (required by tobozo/esp32-qemu-sim)
-            if [ ! -f "qemu-build/partitions.csv" ]; then
-              echo "⚠️ partitions.csv not found, creating QEMU-optimized partition table"
-              # Use larger app partition for better QEMU compatibility
-              printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
-              echo "✅ Created QEMU-optimized partitions.csv"
-            else
-              echo "✅ Using existing partitions.csv:"
-              cat qemu-build/partitions.csv
-            fi
+            # Always create QEMU-optimized partitions.csv (required by tobozo/esp32-qemu-sim)
+            # Force QEMU-compatible partition layout to avoid memory overlap issues
+            echo "🔧 Creating QEMU-optimized partition table (override PlatformIO layout)"
+            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
+            echo "✅ Created QEMU-optimized partitions.csv (otadata at 0xe000 to avoid overlap)"
           else
             echo "⚠️ PlatformIO build directory not found, using defaults"
             # Download default bootloader
             wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
             echo "✅ Downloaded default ESP32 bootloader"
 
-            # Create QEMU-optimized partition table
+            # Create QEMU-optimized partition table (otadata at 0xe000 to avoid overlap)
             printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
-            echo "✅ Created QEMU-optimized partitions.csv"
+            echo "✅ Created QEMU-optimized partitions.csv (otadata at 0xe000 to avoid overlap)"
 
             # Create default boot_app0.bin (required by tobozo/esp32-qemu-sim)
             dd if=/dev/zero bs=1 count=8192 | tr '\000' '\377' > qemu-build/boot_app0.bin
