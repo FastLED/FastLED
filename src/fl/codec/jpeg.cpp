@@ -8,73 +8,53 @@
 
 namespace fl {
 
-// Platform-specific base class for JPEG decoders
-class JpegDecoderBase : public IDecoder {
-protected:
+// TJpg decoder implementation
+class TJpgDecoder : public IDecoder {
+private:
+    // Configuration and state
     JpegConfig config_;
     fl::ByteStreamPtr stream_;
-    Frame currentFrame_;
     fl::string errorMessage_;
     bool ready_ = false;
     bool hasError_ = false;
 
-    // Internal buffer management
-    fl::scoped_array<fl::u8> frameBuffer_;
-    fl::size bufferSize_ = 0;
-
-    virtual bool initializeDecoder() = 0;
-    virtual bool decodeInternal() = 0;
-    virtual void cleanupDecoder() = 0;
-
-public:
-    explicit JpegDecoderBase(const JpegConfig& config);
-    virtual ~JpegDecoderBase();
-
-    // IDecoder interface
-    bool begin(fl::ByteStreamPtr stream) override;
-    void end() override;
-    bool isReady() const override { return ready_; }
-    bool hasError(fl::string* msg = nullptr) const override;
-
-    DecodeResult decode() override;
-    Frame getCurrentFrame() override { return currentFrame_; }
-    bool hasMoreFrames() const override { return false; } // JPEG is single frame
-
-protected:
-    void allocateFrameBuffer();
-    void setError(const fl::string& message);
-    fl::size getExpectedFrameSize() const;
-};
-
-// TJpg decoder implementation
-class TJpgDecoder : public JpegDecoderBase {
-private:
+    // TJpg decoder specific
     fl::third_party::TJpg_Decoder decoder_;
     fl::scoped_array<fl::u8> inputBuffer_;
     size_t inputSize_;
     bool frameDecoded_;
     fl::shared_ptr<Frame> decodedFrame_;
 
+    // Internal buffer management
+    fl::scoped_array<fl::u8> frameBuffer_;
+    fl::size bufferSize_ = 0;
+
     // Static callback for TJpg_Decoder output
     static bool outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data);
 
     // Internal helper methods
+    bool initializeDecoder();
+    bool decodeInternal();
+    void cleanupDecoder();
     void mapQualityToScale();
     void convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_t w, uint16_t h);
     fl::size getBytesPerPixel() const;
-
-protected:
-    bool initializeDecoder() override;
-    bool decodeInternal() override;
-    void cleanupDecoder() override;
     void allocateFrameBuffer(uint16_t width, uint16_t height);
+    void setError(const fl::string& message);
+    fl::size getExpectedFrameSize() const;
 
 public:
     explicit TJpgDecoder(const JpegConfig& config);
     ~TJpgDecoder() override;
 
-    // Override to return our decoded frame
+    // IDecoder interface
+    bool begin(fl::ByteStreamPtr stream) override;
+    void end() override;
+    bool isReady() const override { return ready_; }
+    bool hasError(fl::string* msg = nullptr) const override;
+    DecodeResult decode() override;
     Frame getCurrentFrame() override;
+    bool hasMoreFrames() const override { return false; } // JPEG is single frame
 };
 
 // JPEG factory implementation
@@ -92,17 +72,19 @@ bool isSupported() {
 
 } // namespace jpeg
 
-// JpegDecoderBase implementation
-JpegDecoderBase::JpegDecoderBase(const JpegConfig& config)
-    : config_(config), currentFrame_(0) {
-    // Frame will be properly initialized when decode() is called
+
+// Thread-local variable to hold current decoder instance for callback
+static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
+
+TJpgDecoder::TJpgDecoder(const JpegConfig& config)
+    : config_(config), inputSize_(0), frameDecoded_(false) {
 }
 
-JpegDecoderBase::~JpegDecoderBase() {
+TJpgDecoder::~TJpgDecoder() {
     end();
 }
 
-bool JpegDecoderBase::begin(fl::ByteStreamPtr stream) {
+bool TJpgDecoder::begin(fl::ByteStreamPtr stream) {
     if (!stream) {
         setError("Invalid ByteStream provided");
         return false;
@@ -120,7 +102,7 @@ bool JpegDecoderBase::begin(fl::ByteStreamPtr stream) {
     return true;
 }
 
-void JpegDecoderBase::end() {
+void TJpgDecoder::end() {
     if (ready_) {
         cleanupDecoder();
         ready_ = false;
@@ -129,14 +111,14 @@ void JpegDecoderBase::end() {
     frameBuffer_.reset();
 }
 
-bool JpegDecoderBase::hasError(fl::string* msg) const {
+bool TJpgDecoder::hasError(fl::string* msg) const {
     if (msg && hasError_) {
         *msg = errorMessage_;
     }
     return hasError_;
 }
 
-DecodeResult JpegDecoderBase::decode() {
+DecodeResult TJpgDecoder::decode() {
     if (!ready_) {
         return DecodeResult::Error;
     }
@@ -150,37 +132,6 @@ DecodeResult JpegDecoderBase::decode() {
     }
 
     return DecodeResult::Success;
-}
-
-void JpegDecoderBase::allocateFrameBuffer() {
-    bufferSize_ = getExpectedFrameSize();
-    if (bufferSize_ > 0) {
-        frameBuffer_.reset(new fl::u8[bufferSize_]);
-    }
-}
-
-void JpegDecoderBase::setError(const fl::string& message) {
-    hasError_ = true;
-    errorMessage_ = message;
-    ready_ = false;
-}
-
-fl::size JpegDecoderBase::getExpectedFrameSize() const {
-    if (currentFrame_.getWidth() == 0 || currentFrame_.getHeight() == 0) {
-        return 0;
-    }
-    return static_cast<fl::size>(currentFrame_.getWidth()) * currentFrame_.getHeight() * getBytesPerPixel(config_.format);
-}
-
-// Thread-local variable to hold current decoder instance for callback
-static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
-
-TJpgDecoder::TJpgDecoder(const JpegConfig& config)
-    : JpegDecoderBase(config), inputSize_(0), frameDecoded_(false) {
-}
-
-TJpgDecoder::~TJpgDecoder() {
-    cleanupDecoder();
 }
 
 bool TJpgDecoder::initializeDecoder() {
@@ -378,6 +329,19 @@ void TJpgDecoder::convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_
 
 fl::size TJpgDecoder::getBytesPerPixel() const {
     return fl::getBytesPerPixel(config_.format);
+}
+
+void TJpgDecoder::setError(const fl::string& message) {
+    hasError_ = true;
+    errorMessage_ = message;
+    ready_ = false;
+}
+
+fl::size TJpgDecoder::getExpectedFrameSize() const {
+    if (!decodedFrame_ || decodedFrame_->getWidth() == 0 || decodedFrame_->getHeight() == 0) {
+        return 0;
+    }
+    return static_cast<fl::size>(decodedFrame_->getWidth()) * decodedFrame_->getHeight() * getBytesPerPixel();
 }
 
 void TJpgDecoder::allocateFrameBuffer(uint16_t width, uint16_t height) {
