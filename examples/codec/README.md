@@ -73,12 +73,12 @@ The FastLED codec module provides video and image decoding capabilities optimize
 #include "fl/bytestreammemory.h"
 
 // Configure decoder
-fl::JpegConfig config;
+fl::JpegDecoderConfig config;
 config.format = fl::PixelFormat::RGB888;
-config.quality = fl::JpegConfig::Medium;
+config.quality = fl::JpegDecoderConfig::Medium;
 
 // Create decoder
-auto decoder = fl::jpeg::createDecoder(config);
+auto decoder = fl::Jpeg::createDecoder(config);
 
 // Create stream from data
 auto stream = fl::make_shared<fl::ByteStreamMemory>(jpegData, dataSize);
@@ -139,7 +139,7 @@ All decoders provide comprehensive error reporting:
 
 ```cpp
 fl::string error_msg;
-auto decoder = fl::jpeg::createDecoder(config, &error_msg);
+auto decoder = fl::Jpeg::createDecoder(config, &error_msg);
 
 if (!decoder) {
     Serial.println("Failed to create decoder: " + error_msg);

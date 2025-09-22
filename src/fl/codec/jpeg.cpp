@@ -12,7 +12,7 @@ namespace fl {
 class TJpgDecoder : public IDecoder {
 private:
     // Configuration and state
-    JpegConfig config_;
+    JpegDecoderConfig config_;
     fl::ByteStreamPtr stream_;
     fl::string errorMessage_;
     bool ready_ = false;
@@ -44,7 +44,7 @@ private:
     fl::size getExpectedFrameSize() const;
 
 public:
-    explicit TJpgDecoder(const JpegConfig& config);
+    explicit TJpgDecoder(const JpegDecoderConfig& config);
     ~TJpgDecoder() override;
 
     // IDecoder interface
@@ -57,26 +57,22 @@ public:
     bool hasMoreFrames() const override { return false; } // JPEG is single frame
 };
 
-// JPEG factory implementation
-namespace jpeg {
-
-fl::shared_ptr<IDecoder> createDecoder(const JpegConfig& config, fl::string* error_message) {
+// JPEG class implementation
+fl::shared_ptr<IDecoder> Jpeg::createDecoder(const JpegDecoderConfig& config, fl::string* error_message) {
     (void)error_message; // Suppress unused parameter warning for now
     return fl::make_shared<TJpgDecoder>(config);
 }
 
-bool isSupported() {
+bool Jpeg::isSupported() {
     // TJpg_Decoder is now integrated
     return true;
 }
-
-} // namespace jpeg
 
 
 // Thread-local variable to hold current decoder instance for callback
 static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
 
-TJpgDecoder::TJpgDecoder(const JpegConfig& config)
+TJpgDecoder::TJpgDecoder(const JpegDecoderConfig& config)
     : config_(config), inputSize_(0), frameDecoded_(false) {
 }
 
@@ -276,13 +272,13 @@ bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, u
 void TJpgDecoder::mapQualityToScale() {
     fl::u8 scale = 1;
     switch (config_.quality) {
-        case JpegConfig::Quality::Low:
+        case JpegDecoderConfig::Quality::Low:
             scale = 8;
             break;
-        case JpegConfig::Quality::Medium:
+        case JpegDecoderConfig::Quality::Medium:
             scale = 4;
             break;
-        case JpegConfig::Quality::High:
+        case JpegDecoderConfig::Quality::High:
             scale = 1;
             break;
     }

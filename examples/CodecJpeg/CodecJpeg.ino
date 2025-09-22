@@ -33,7 +33,7 @@ void setup() {
     FastLED.setBrightness(50);
 
     // Check if JPEG decoding is supported
-    if (!fl::jpeg::isSupported()) {
+    if (!fl::Jpeg::isSupported()) {
         Serial.println("JPEG decoding not supported on this platform");
         return;
     }
@@ -41,15 +41,15 @@ void setup() {
     Serial.println("JPEG decoding supported - starting decode");
 
     // Configure JPEG decoder
-    fl::JpegConfig config;
+    fl::JpegDecoderConfig config;
     config.format = fl::PixelFormat::RGB888;
-    config.quality = fl::JpegConfig::Medium;
+    config.quality = fl::JpegDecoderConfig::Medium;
     config.maxWidth = 64;
     config.maxHeight = 64;
 
     // Create decoder
     fl::string error_msg;
-    auto decoder = fl::jpeg::createDecoder(config, &error_msg);
+    auto decoder = fl::Jpeg::createDecoder(config, &error_msg);
 
     if (!decoder) {
         Serial.print("Failed to create JPEG decoder: ");

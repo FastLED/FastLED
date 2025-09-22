@@ -57,7 +57,7 @@ const size_t test_jpeg_2x2_size = 696;
 
 // Test JPEG decoder availability
 TEST_CASE("JPEG availability") {
-    bool jpegSupported = jpeg::isSupported();
+    bool jpegSupported = Jpeg::isSupported();
 
     // JPEG is now implemented via TJpg_Decoder
     CHECK(jpegSupported);
@@ -65,12 +65,12 @@ TEST_CASE("JPEG availability") {
 
 // Test JPEG decoder creation
 TEST_CASE("JPEG decoder creation") {
-    JpegConfig config;
+    JpegDecoderConfig config;
     config.format = PixelFormat::RGB888;
-    config.quality = JpegConfig::Medium;
+    config.quality = JpegDecoderConfig::Medium;
 
     fl::string error_msg;
-    auto decoder = jpeg::createDecoder(config, &error_msg);
+    auto decoder = Jpeg::createDecoder(config, &error_msg);
 
     // JPEG is now implemented, should return valid decoder
     CHECK(decoder != nullptr);
@@ -79,8 +79,8 @@ TEST_CASE("JPEG decoder creation") {
 
 // Test JPEG decoder with null stream
 TEST_CASE("JPEG decoder with null stream") {
-    JpegConfig config;
-    auto decoder = jpeg::createDecoder(config);
+    JpegDecoderConfig config;
+    auto decoder = Jpeg::createDecoder(config);
 
     CHECK(decoder != nullptr);
 
@@ -91,8 +91,8 @@ TEST_CASE("JPEG decoder with null stream") {
 
 // Test JPEG decoder lifecycle
 TEST_CASE("JPEG decoder lifecycle") {
-    JpegConfig config;
-    auto decoder = jpeg::createDecoder(config);
+    JpegDecoderConfig config;
+    auto decoder = Jpeg::createDecoder(config);
 
     CHECK(decoder != nullptr);
 
@@ -116,21 +116,21 @@ TEST_CASE("JPEG decoder lifecycle") {
 TEST_CASE("JPEG configuration") {
     // Test different quality settings
     {
-        JpegConfig config(JpegConfig::Low, PixelFormat::RGB565);
-        CHECK(config.quality == JpegConfig::Low);
+        JpegDecoderConfig config(JpegDecoderConfig::Low, PixelFormat::RGB565);
+        CHECK(config.quality == JpegDecoderConfig::Low);
         CHECK(config.format == PixelFormat::RGB565);
     }
 
     {
-        JpegConfig config(JpegConfig::High, PixelFormat::RGBA8888);
-        CHECK(config.quality == JpegConfig::High);
+        JpegDecoderConfig config(JpegDecoderConfig::High, PixelFormat::RGBA8888);
+        CHECK(config.quality == JpegDecoderConfig::High);
         CHECK(config.format == PixelFormat::RGBA8888);
     }
 
     // Test default constructor
     {
-        JpegConfig config;
-        CHECK(config.quality == JpegConfig::Medium);
+        JpegDecoderConfig config;
+        CHECK(config.quality == JpegDecoderConfig::Medium);
         CHECK(config.format == PixelFormat::RGB888);
         CHECK(config.useHardwareAcceleration == true);
         CHECK(config.maxWidth == 1920);
@@ -140,9 +140,9 @@ TEST_CASE("JPEG configuration") {
 
 // Test JPEG decoding with real image data
 TEST_CASE("JPEG decoder with real 2x2 image") {
-    JpegConfig config;
+    JpegDecoderConfig config;
     config.format = PixelFormat::RGB888;  // Use RGB888 for easy color verification
-    auto decoder = jpeg::createDecoder(config);
+    auto decoder = Jpeg::createDecoder(config);
 
     CHECK(decoder != nullptr);
 
