@@ -13,9 +13,33 @@
 #include "fl/memfill.h"
 namespace fl {
 
-Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb() {
+Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
     mRgb.resize(pixels_count);
     fl::memfill((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+}
+
+Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp)
+    : mPixelsCount(static_cast<size_t>(width) * height), mRgb(),
+      mWidth(width), mHeight(height), mFormat(format), mTimestamp(timestamp), mIsFromCodec(true) {
+
+    mRgb.resize(mPixelsCount);
+
+    if (pixels && width > 0 && height > 0) {
+        convertPixelsToRgb(pixels, format);
+    } else {
+        fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+    }
+}
+
+Frame::Frame(const Frame& other)
+    : mPixelsCount(other.mPixelsCount), mRgb(),
+      mWidth(other.mWidth), mHeight(other.mHeight), mFormat(other.mFormat),
+      mTimestamp(other.mTimestamp), mIsFromCodec(other.mIsFromCodec) {
+
+    mRgb.resize(mPixelsCount);
+    if (!other.mRgb.empty()) {
+        memcpy(mRgb.data(), other.mRgb.data(), mPixelsCount * sizeof(CRGB));
+    }
 }
 
 Frame::~Frame() {
@@ -101,6 +125,58 @@ void Frame::interpolate(const Frame &frame1, const Frame &frame2,
         return; // Frames must have the same size
     }
     interpolate(frame1, frame2, amountOfFrame2, mRgb.data());
+}
+
+bool Frame::isValid() const {
+    if (mIsFromCodec) {
+        return mWidth > 0 && mHeight > 0 && !mRgb.empty();
+    }
+    return !mRgb.empty();
+}
+
+void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
+    CRGB* rgbData = mRgb.data();
+
+    switch (format) {
+        case PixelFormat::RGB888: {
+            for (size_t i = 0; i < mPixelsCount; i++) {
+                fl::u8* pixel = &pixels[i * 3];
+                rgbData[i] = CRGB(pixel[0], pixel[1], pixel[2]);
+            }
+            break;
+        }
+        case PixelFormat::RGB565: {
+            fl::u16* pixel565 = reinterpret_cast<fl::u16*>(pixels);
+            for (size_t i = 0; i < mPixelsCount; i++) {
+                fl::u8 r, g, b;
+                rgb565ToRgb888(pixel565[i], r, g, b);
+                rgbData[i] = CRGB(r, g, b);
+            }
+            break;
+        }
+        case PixelFormat::RGBA8888: {
+            for (size_t i = 0; i < mPixelsCount; i++) {
+                fl::u8* pixel = &pixels[i * 4];
+                rgbData[i] = CRGB(pixel[0], pixel[1], pixel[2]);
+                // Ignoring alpha channel for now
+            }
+            break;
+        }
+        case PixelFormat::YUV420: {
+            // Basic YUV420 to RGB conversion - simplified implementation
+            // For now, just use the Y (luminance) component as grayscale
+            for (size_t i = 0; i < mPixelsCount; i++) {
+                fl::u8 y = pixels[i];
+                rgbData[i] = CRGB(y, y, y);
+            }
+            break;
+        }
+        default: {
+            // Fallback: fill with black
+            fl::memfill((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
+            break;
+        }
+    }
 }
 
 } // namespace fl
