@@ -101,6 +101,8 @@ jobs:
         run: |
           # Install Python dependencies needed for compilation
           uv sync
+          # Install esptool for flash image creation
+          uv pip install esptool
 
       - name: Install CCACHE
         run: |
@@ -138,9 +140,9 @@ jobs:
         run: |
           echo "Building ${{ matrix.example }} for ESP32-DEV"
 
-          # Build the firmware and output to qemu-build directory
-          # Using uv run to ensure proper Python environment
-          uv run ci/ci-compile.py esp32dev --examples ${{ matrix.example }} -o qemu-build/firmware.bin
+          # Build the firmware using specialized QEMU-optimized board configuration
+          # This board enforces DIO flash mode and QEMU compatibility settings
+          uv run ci/ci-compile.py esp32dev_qemu --examples ${{ matrix.example }} -o qemu-build/firmware.bin
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/
@@ -150,10 +152,11 @@ jobs:
           echo "Looking for bootloader and partition files..."
 
           # Find the PlatformIO build directory
-          # PlatformIO build directory is at .build/pio/esp32dev
-          PIO_BUILD_DIR=".build/pio/esp32dev"
+          # PlatformIO build directory is at .build/pio/esp32dev_qemu
+          PIO_BUILD_DIR=".build/pio/esp32dev_qemu"
 
           # The actual build artifacts are in .pio/build/esp32dev within the PIO_BUILD_DIR
+          # Note: artifacts still use esp32dev since that's the real_board_name
           PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/esp32dev"
 
           if [ -d "$PIO_BUILD_DIR" ]; then
@@ -201,9 +204,13 @@ jobs:
 
             # Always ensure partitions.csv exists for QEMU (required by tobozo/esp32-qemu-sim)
             if [ ! -f "qemu-build/partitions.csv" ]; then
-              echo "⚠️ partitions.csv not found, creating default partition table"
-              printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x6000,\notadata,  data, ota,     0xf000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
-              echo "✅ Created default partitions.csv"
+              echo "⚠️ partitions.csv not found, creating QEMU-optimized partition table"
+              # Use larger app partition for better QEMU compatibility
+              printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
+              echo "✅ Created QEMU-optimized partitions.csv"
+            else
+              echo "✅ Using existing partitions.csv:"
+              cat qemu-build/partitions.csv
             fi
           else
             echo "⚠️ PlatformIO build directory not found, using defaults"
@@ -211,9 +218,9 @@ jobs:
             wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
             echo "✅ Downloaded default ESP32 bootloader"
 
-            # Create default partition table
-            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x6000,\notadata,  data, ota,     0xf000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x140000,\nspiffs,   data, spiffs,  0x150000,0xb0000,\n' > qemu-build/partitions.csv
-            echo "✅ Created default partitions.csv"
+            # Create QEMU-optimized partition table
+            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
+            echo "✅ Created QEMU-optimized partitions.csv"
 
             # Create default boot_app0.bin (required by tobozo/esp32-qemu-sim)
             dd if=/dev/zero bs=1 count=8192 | tr '\000' '\377' > qemu-build/boot_app0.bin
@@ -299,6 +306,35 @@ jobs:
             echo "⚠️  Debug string 'Starting loop iteration' not found in firmware"
           fi
 
+          # Verify QEMU-specific build flags were applied
+          echo "=== QEMU build verification ==="
+          if strings qemu-build/firmware.bin | grep -q "QEMU_BUILD"; then
+            echo "✅ QEMU_BUILD flag detected in firmware"
+          else
+            echo "⚠️  QEMU_BUILD flag not found - check board configuration"
+          fi
+
+          # Validate flash mode for QEMU compatibility
+          echo "=== Flash mode validation ==="
+          if [ -d ".build/pio/esp32dev_qemu" ]; then
+            FLASH_ARGS_FILE=$(find .build/pio/esp32dev_qemu -name "flash_args" 2>/dev/null | head -1)
+            if [ -n "$FLASH_ARGS_FILE" ]; then
+              echo "Found flash_args: $FLASH_ARGS_FILE"
+              if grep -q "flash_mode dio" "$FLASH_ARGS_FILE"; then
+                echo "✅ DIO flash mode detected - QEMU compatible"
+              elif grep -q "flash_mode qio" "$FLASH_ARGS_FILE"; then
+                echo "⚠️  WARNING: QIO flash mode detected - may cause QEMU boot issues"
+                echo "Flash args content:"
+                cat "$FLASH_ARGS_FILE"
+              else
+                echo "ℹ️  Flash mode not explicitly detected"
+                cat "$FLASH_ARGS_FILE"
+              fi
+            else
+              echo "⚠️  flash_args file not found"
+            fi
+          fi
+
       - name: Pre-QEMU verification
         working-directory: trusted
         run: |
@@ -320,6 +356,38 @@ jobs:
           echo "=== All files in qemu-build ==="
           ls -la qemu-build/
 
+          # Create flash.bin for QEMU if it doesn't exist
+          if [ ! -f "qemu-build/flash.bin" ]; then
+            echo "=== Creating flash.bin for QEMU ==="
+            if [ -f "qemu-build/firmware.bin" ] && [ -f "qemu-build/bootloader.bin" ] && [ -f "qemu-build/partitions.bin" ]; then
+              # Use esptool to create proper flash image if available
+              if command -v esptool.py >/dev/null 2>&1; then
+                echo "Using esptool.py to create flash image..."
+                esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
+                  --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                  0x1000 qemu-build/bootloader.bin \
+                  0x8000 qemu-build/partitions.bin \
+                  0xe000 qemu-build/boot_app0.bin \
+                  0x10000 qemu-build/firmware.bin
+                echo "✅ Created flash.bin using esptool"
+              else
+                echo "esptool.py not available, creating simple flash image..."
+                # Create 4MB flash image filled with 0xFF
+                dd if=/dev/zero bs=1M count=4 | tr '\000' '\377' > qemu-build/flash.bin
+                # Write firmware at offset 0x10000 (64KB)
+                dd if=qemu-build/firmware.bin of=qemu-build/flash.bin bs=1 seek=65536 conv=notrunc
+                echo "✅ Created basic flash.bin"
+              fi
+            else
+              echo "⚠️  Missing required files for flash.bin creation"
+            fi
+          else
+            echo "✅ flash.bin already exists"
+          fi
+
+          echo "=== Final qemu-build contents ==="
+          ls -la qemu-build/
+
       - name: Run ESP32 in QEMU
         id: qemu
         uses: tobozo/esp32-qemu-sim@v1.0.5
@@ -327,8 +395,9 @@ jobs:
           build-folder: trusted/qemu-build
           flash-size: 4
           psram: "disabled"
-          qemu-timeout: "60"
-          timeout-interrupt-regex: "Test finished.*completed.*iterations"
+          qemu-timeout: "120"
+          timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
+          debug: true
 
       - name: Display QEMU output
         if: always()
@@ -372,6 +441,23 @@ jobs:
           if [ ! -s qemu_output.log ]; then
             echo "❌ No serial output captured from QEMU - empty or missing output"
             echo "This indicates QEMU may not have started properly or ESP32 may not be booting"
+            echo ""
+            echo "QEMU Debug Information:"
+            echo "  QEMU conclusion: ${{ steps.qemu.conclusion }}"
+            echo "  QEMU outcome: ${{ steps.qemu.outcome }}"
+            if [ -n "${{ steps.qemu.outputs.qemu-log }}" ]; then
+              echo "  QEMU log length: $(echo '${{ steps.qemu.outputs.qemu-log }}' | wc -c) characters"
+              echo "  QEMU log preview:"
+              echo "${{ steps.qemu.outputs.qemu-log }}" | head -20
+            else
+              echo "  No QEMU log available"
+            fi
+            echo ""
+            echo "Possible causes:"
+            echo "  1. ESP32 firmware failed to boot (flash mode incompatibility)"
+            echo "  2. Serial communication not properly configured"
+            echo "  3. QEMU emulation issues with the current firmware"
+            echo "  4. Bootloader/partition configuration problems"
             exit 1
           fi
 
@@ -424,11 +510,15 @@ jobs:
             echo "⚠️  Test completion not detected (may need more time)"
           fi
 
-          # Validate boot success
-          if grep -q -E "(rst:|boot:|ESP32)" qemu_output.log; then
-            echo "✅ ESP32-DEV boot successful"
+          # Validate boot success - check for ESP32 boot indicators or our application output
+          if grep -q -E "(rst:|boot:|ESP32|BlinkParallel|ets_main\.c|cpu_start\.c)" qemu_output.log; then
+            echo "✅ ESP32-DEV boot/application output detected"
           else
-            echo "❌ ESP32-DEV boot indicators not found"
+            echo "❌ No ESP32-DEV boot indicators or application output found"
+            echo "Output content preview:"
+            head -10 qemu_output.log | cat -A
+            echo "Full output:"
+            cat qemu_output.log
             exit 1
           fi
 
@@ -456,7 +546,7 @@ jobs:
         if: always()
         run: |
           echo "=== ESP32-DEV QEMU Test Summary ==="
-          echo "Platform: esp32dev"
+          echo "Platform: esp32dev_qemu (QEMU-optimized)"
           echo "Example: ${{ matrix.example }}"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then

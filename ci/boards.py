@@ -430,6 +430,43 @@ ESP32DEV = Board(
     platform=ESP32_IDF_5_3_PIOARDUINO,
 )
 
+# TODO: esp32dev_qemu remove when possible, we don't want an extra board definition unless we need it
+# Specialized board configuration optimized for QEMU testing
+ESP32DEV_QEMU = Board(
+    board_name="esp32dev_qemu",
+    real_board_name="esp32dev",
+    platform=ESP32_IDF_5_3_PIOARDUINO,
+    build_flags=[
+        # QEMU compatibility flags
+        "-DBOARD_HAS_PSRAM=false",
+        "-DARDUINO_BOARD_HAS_PSRAM=false",
+        "-DCONFIG_SPIRAM_SUPPORT=0",
+        "-DCONFIG_ESP32_SPIRAM_SUPPORT=0",
+        # Flash mode enforcement for QEMU
+        "-DCONFIG_ESPTOOLPY_FLASHMODE_DIO=1",
+        "-DCONFIG_ESPTOOLPY_FLASHMODE_QIO=0",
+        # Optimize for QEMU emulation speed
+        "-DCONFIG_ESP32_DEFAULT_CPU_FREQ_80=1",
+        "-DCONFIG_ESP32_DEFAULT_CPU_FREQ_240=0",
+        # Serial output optimization
+        "-DCONFIG_ESP_CONSOLE_UART_DEFAULT=1",
+        "-DCONFIG_ESP_CONSOLE_UART_NUM=0",
+        "-DARDUINO_USB_CDC_ON_BOOT=0",
+        # Memory and performance optimizations for QEMU
+        "-DCONFIG_SPIRAM_CACHE_WORKAROUND=0",
+        "-DCONFIG_ESP32_WIFI_ENABLED=0",
+        "-DCONFIG_ESP32_BT_ENABLED=0",
+        # Debug output optimization
+        "-DCORE_DEBUG_LEVEL=3",  # Moderate debug level for QEMU
+        "-DCONFIG_LOG_DEFAULT_LEVEL=3",
+    ],
+    defines=[
+        "FASTLED_ESP32_FLASH_LOCK=0",  # Disable flash locking for QEMU
+        "FASTLED_ESP32_RAW_PIN_ORDER=1",  # Use raw pin order for simpler QEMU emulation
+        "QEMU_BUILD=1",  # Flag to indicate QEMU build
+    ],
+)
+
 ESP32DEV_IDF3_3 = Board(
     board_name="esp32dev_idf33",
     real_board_name="esp32dev",
