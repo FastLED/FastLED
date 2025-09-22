@@ -140,9 +140,9 @@ jobs:
         run: |
           echo "Building ${{ matrix.example }} for ESP32-DEV"
 
-          # Build the firmware using specialized QEMU-optimized board configuration
-          # This board enforces DIO flash mode and QEMU compatibility settings
-          uv run ci/ci-compile.py esp32dev_qemu --examples ${{ matrix.example }} -o qemu-build/firmware.bin
+          # Build the firmware using standard ESP32dev board (revert from QEMU-specific config)
+          # QEMU-specific board was causing boot failures
+          uv run ci/ci-compile.py esp32dev --examples ${{ matrix.example }} -o qemu-build/firmware.bin
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/
@@ -152,11 +152,10 @@ jobs:
           echo "Looking for bootloader and partition files..."
 
           # Find the PlatformIO build directory
-          # PlatformIO build directory is at .build/pio/esp32dev_qemu
-          PIO_BUILD_DIR=".build/pio/esp32dev_qemu"
+          # PlatformIO build directory is at .build/pio/esp32dev
+          PIO_BUILD_DIR=".build/pio/esp32dev"
 
           # The actual build artifacts are in .pio/build/esp32dev within the PIO_BUILD_DIR
-          # Note: artifacts still use esp32dev since that's the real_board_name
           PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/esp32dev"
 
           if [ -d "$PIO_BUILD_DIR" ]; then
@@ -306,18 +305,19 @@ jobs:
             echo "⚠️  Debug string 'Starting loop iteration' not found in firmware"
           fi
 
-          # Verify QEMU-specific build flags were applied
-          echo "=== QEMU build verification ==="
-          if strings qemu-build/firmware.bin | grep -q "QEMU_BUILD"; then
-            echo "✅ QEMU_BUILD flag detected in firmware"
+          # Verify firmware was built successfully
+          echo "=== Firmware build verification ==="
+          if [ -f "qemu-build/firmware.bin" ] && [ -s "qemu-build/firmware.bin" ]; then
+            echo "✅ Firmware binary created successfully"
+            echo "Firmware size: $(wc -c < qemu-build/firmware.bin) bytes"
           else
-            echo "⚠️  QEMU_BUILD flag not found - check board configuration"
+            echo "❌ Firmware binary missing or empty"
           fi
 
           # Validate flash mode for QEMU compatibility
           echo "=== Flash mode validation ==="
-          if [ -d ".build/pio/esp32dev_qemu" ]; then
-            FLASH_ARGS_FILE=$(find .build/pio/esp32dev_qemu -name "flash_args" 2>/dev/null | head -1)
+          if [ -d ".build/pio/esp32dev" ]; then
+            FLASH_ARGS_FILE=$(find .build/pio/esp32dev -name "flash_args" 2>/dev/null | head -1)
             if [ -n "$FLASH_ARGS_FILE" ]; then
               echo "Found flash_args: $FLASH_ARGS_FILE"
               if grep -q "flash_mode dio" "$FLASH_ARGS_FILE"; then
@@ -546,7 +546,7 @@ jobs:
         if: always()
         run: |
           echo "=== ESP32-DEV QEMU Test Summary ==="
-          echo "Platform: esp32dev_qemu (QEMU-optimized)"
+          echo "Platform: esp32dev (standard configuration)"
           echo "Example: ${{ matrix.example }}"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
