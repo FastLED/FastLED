@@ -30,42 +30,5 @@ bool isSupported();
 
 } // namespace jpeg
 
-// Platform-specific base class for JPEG decoders
-class JpegDecoderBase : public IDecoder {
-protected:
-    JpegConfig config_;
-    fl::ByteStreamPtr stream_;
-    Frame currentFrame_;
-    fl::string errorMessage_;
-    bool ready_ = false;
-    bool hasError_ = false;
-
-    // Internal buffer management
-    fl::scoped_array<fl::u8> frameBuffer_;
-    fl::size bufferSize_ = 0;
-
-    virtual bool initializeDecoder() = 0;
-    virtual bool decodeInternal() = 0;
-    virtual void cleanupDecoder() = 0;
-
-public:
-    explicit JpegDecoderBase(const JpegConfig& config);
-    virtual ~JpegDecoderBase();
-
-    // IDecoder interface
-    bool begin(fl::ByteStreamPtr stream) override;
-    void end() override;
-    bool isReady() const override { return ready_; }
-    bool hasError(fl::string* msg = nullptr) const override;
-
-    DecodeResult decode() override;
-    Frame getCurrentFrame() override { return currentFrame_; }
-    bool hasMoreFrames() const override { return false; } // JPEG is single frame
-
-protected:
-    void allocateFrameBuffer();
-    void setError(const fl::string& message);
-    fl::size getExpectedFrameSize() const;
-};
 
 } // namespace fl
