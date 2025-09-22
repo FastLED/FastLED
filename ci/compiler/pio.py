@@ -71,7 +71,7 @@ def _generate_build_info_json_from_existing_build(
             capture_output=True,
             text=True,
             cwd=build_dir,
-            timeout=60,
+            timeout=900,  # 15 minutes for platform builds
         )
 
         if metadata_result.returncode != 0:
@@ -1428,7 +1428,9 @@ class PioCompiler(Compiler):
         )
         try:
             # Output is transformed by the formatter, but we need to print it
-            while line := running_process.get_next_line(timeout=60):
+            while line := running_process.get_next_line(
+                timeout=900
+            ):  # 15 minutes for platform builds
                 if isinstance(line, EndOfStream):
                     break
                 # Print the transformed line
@@ -1673,7 +1675,9 @@ class PioCompiler(Compiler):
             )
             try:
                 # Output is transformed by the formatter, but we need to print it
-                while line := running_process.get_next_line(timeout=60):
+                while line := running_process.get_next_line(
+                    timeout=900
+                ):  # 15 minutes for platform builds
                     if isinstance(line, EndOfStream):
                         break
                     # Print the transformed line

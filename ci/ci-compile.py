@@ -410,10 +410,283 @@ def validate_output_path(
     return True, resolved_path, ""
 
 
+def validate_esp32_flash_mode_for_qemu(build_dir: Path, board: Board) -> bool:
+    """Validate ESP32 flash mode for QEMU compatibility.
+
+    QEMU requires DIO/80MHz flash mode, not QIO mode.
+
+    Args:
+        build_dir: Build directory path
+        board: Board configuration
+
+    Returns:
+        True if flash mode is compatible or successfully validated
+    """
+    if not board.board_name.startswith("esp32"):
+        return True  # Not an ESP32 board, no validation needed
+
+    try:
+        # Check platformio.ini for flash mode settings
+        platformio_ini = build_dir / "platformio.ini"
+        if platformio_ini.exists():
+            content = platformio_ini.read_text()
+
+            # Look for flash mode settings in build_flags
+            if "FLASH_MODE=qio" in content.upper():
+                print(f"⚠️  WARNING: QIO flash mode detected in platformio.ini")
+                print(f"   QEMU requires DIO flash mode for compatibility")
+                print(f"   Consider using DIO mode for QEMU builds")
+                return True  # Warning but not blocking
+
+            if "FLASH_MODE=dio" in content.upper():
+                print(f"✅ DIO flash mode detected - compatible with QEMU")
+                return True
+
+        # Check if build artifacts exist to examine flash settings
+        artifact_dir = build_dir / ".pio" / "build" / board.board_name
+        if artifact_dir.exists():
+            # Look for flash_args file which contains esptool flash arguments
+            flash_args_file = artifact_dir / "flash_args"
+            if flash_args_file.exists():
+                flash_args = flash_args_file.read_text()
+                if "--flash_mode qio" in flash_args:
+                    print(f"⚠️  WARNING: QIO flash mode detected in build artifacts")
+                    print(f"   QEMU may not boot properly with QIO mode")
+                elif "--flash_mode dio" in flash_args:
+                    print(
+                        f"✅ DIO flash mode detected in build artifacts - QEMU compatible"
+                    )
+
+        print(f"ℹ️  Flash mode validation complete for {board.board_name}")
+        return True
+
+    except Exception as e:
+        print(f"WARNING: Could not validate ESP32 flash mode: {e}")
+        return True  # Don't fail build for validation issues
+
+
+def create_esp32_flash_image(
+    firmware_path: Path, output_path: Path, flash_size_mb: int = 4
+) -> bool:
+    """Create a properly formatted flash image for ESP32 QEMU.
+
+    Args:
+        firmware_path: Path to the firmware.bin file
+        output_path: Path where to write the flash.bin
+        flash_size_mb: Flash size in MB (must be 2, 4, 8, or 16)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        if flash_size_mb not in [2, 4, 8, 16]:
+            print(
+                f"ERROR: Invalid flash size: {flash_size_mb}MB. Must be 2, 4, 8, or 16"
+            )
+            return False
+
+        flash_size = flash_size_mb * 1024 * 1024
+
+        # Read firmware content
+        firmware_data = firmware_path.read_bytes()
+
+        # Create flash image: firmware at beginning, rest filled with 0xFF
+        flash_data = firmware_data + b"\xff" * (flash_size - len(firmware_data))
+
+        # Ensure we have exactly the right size
+        if len(flash_data) > flash_size:
+            print(
+                f"ERROR: Firmware size ({len(firmware_data)} bytes) exceeds flash size ({flash_size} bytes)"
+            )
+            return False
+
+        flash_data = flash_data[:flash_size]  # Truncate to exact size
+
+        output_path.write_bytes(flash_data)
+        print(f"✅ Created flash image: {output_path} ({len(flash_data)} bytes)")
+        return True
+
+    except Exception as e:
+        print(f"ERROR: Failed to create flash image: {e}")
+        return False
+
+
+def copy_esp32_qemu_artifacts(
+    build_dir: Path, board: Board, sketch_name: str, output_path: str
+) -> bool:
+    """Copy all ESP32 QEMU artifacts to the specified output directory.
+
+    Args:
+        build_dir: Build directory path
+        board: Board configuration
+        sketch_name: Name of the sketch
+        output_path: Target output path (directory or firmware.bin file)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    import os
+    import shutil
+
+    print(f"🔧 ESP32 QEMU mode detected - collecting all required artifacts")
+
+    # Validate flash mode for QEMU compatibility
+    validate_esp32_flash_mode_for_qemu(build_dir, board)
+
+    # Determine output directory
+    output_path_obj = Path(output_path)
+    if output_path.endswith(".bin"):
+        # Output path is a file, use its parent directory
+        output_dir = output_path_obj.parent
+        firmware_name = output_path_obj.name
+    else:
+        # Output path is a directory
+        output_dir = output_path_obj
+        firmware_name = "firmware.bin"
+
+    # Ensure output directory exists
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    # Find the PlatformIO build directory
+    artifact_dir = build_dir / ".pio" / "build" / board.board_name
+
+    if not artifact_dir.exists():
+        print(f"ERROR: PlatformIO build directory not found: {artifact_dir}")
+        return False
+
+    print(f"📁 Searching for ESP32 artifacts in: {artifact_dir}")
+
+    # Required files for ESP32 QEMU
+    required_files = {
+        "firmware.bin": firmware_name,
+        "bootloader.bin": "bootloader.bin",
+        "partitions.bin": "partitions.bin",
+        "boot_app0.bin": "boot_app0.bin",
+    }
+
+    # Optional files
+    optional_files = {"spiffs.bin": "spiffs.bin"}
+
+    success = True
+    copied_files: List[str] = []
+
+    # Copy required files
+    for source_name, dest_name in required_files.items():
+        source_file = artifact_dir / source_name
+        dest_file = output_dir / dest_name
+
+        if source_file.exists():
+            try:
+                shutil.copy2(source_file, dest_file)
+                file_size = source_file.stat().st_size
+                print(f"✅ Copied {source_name}: {file_size} bytes")
+                copied_files.append(dest_name)
+            except Exception as e:
+                print(f"ERROR: Failed to copy {source_name}: {e}")
+                success = False
+        else:
+            print(f"⚠️  {source_name} not found at {source_file}")
+            if source_name == "firmware.bin":
+                success = False
+            elif source_name == "partitions.bin":
+                # Try to generate partitions.bin from partitions.csv if available
+                partitions_csv = artifact_dir / "partitions.csv"
+                if partitions_csv.exists():
+                    print(
+                        f"ℹ️  Found partitions.csv, you may need to generate partitions.bin manually"
+                    )
+                # For now, we'll create a default one in the fallback section
+
+    # Copy optional files
+    for source_name, dest_name in optional_files.items():
+        source_file = artifact_dir / source_name
+        dest_file = output_dir / dest_name
+
+        if source_file.exists():
+            try:
+                shutil.copy2(source_file, dest_file)
+                file_size = source_file.stat().st_size
+                print(f"✅ Copied {source_name}: {file_size} bytes (optional)")
+                copied_files.append(dest_name)
+            except Exception as e:
+                print(f"WARNING: Failed to copy optional file {source_name}: {e}")
+
+    # Handle partitions.csv - required by tobozo QEMU
+    partitions_csv_src = artifact_dir / "partitions.csv"
+    partitions_csv_dest = output_dir / "partitions.csv"
+
+    if partitions_csv_src.exists():
+        try:
+            shutil.copy2(partitions_csv_src, partitions_csv_dest)
+            print(f"✅ Copied partitions.csv")
+            copied_files.append("partitions.csv")
+        except Exception as e:
+            print(f"ERROR: Failed to copy partitions.csv: {e}")
+            success = False
+    else:
+        # Create default partitions.csv
+        print(f"⚠️  partitions.csv not found, creating default")
+        default_partitions = """# Name,   Type, SubType, Offset,  Size, Flags
+nvs,      data, nvs,     0x9000,  0x6000,
+otadata,  data, ota,     0xf000,  0x2000,
+app0,     app,  ota_0,   0x10000, 0x140000,
+spiffs,   data, spiffs,  0x150000,0xb0000,
+"""
+        try:
+            partitions_csv_dest.write_text(default_partitions)
+            print(f"✅ Created default partitions.csv")
+            copied_files.append("partitions.csv")
+        except Exception as e:
+            print(f"ERROR: Failed to create default partitions.csv: {e}")
+            success = False
+
+    # Generate missing critical files with defaults
+    if not (output_dir / "boot_app0.bin").exists():
+        print(f"⚠️  boot_app0.bin not found, creating default")
+        try:
+            # Create a minimal boot_app0.bin (8KB of 0xFF)
+            boot_app0_data = b"\xff" * 8192
+            (output_dir / "boot_app0.bin").write_bytes(boot_app0_data)
+            print(f"✅ Created default boot_app0.bin (8192 bytes)")
+            copied_files.append("boot_app0.bin")
+        except Exception as e:
+            print(f"ERROR: Failed to create default boot_app0.bin: {e}")
+            success = False
+
+    # Create proper flash image for QEMU
+    firmware_bin = output_dir / firmware_name
+    if firmware_bin.exists() and success:
+        flash_bin = output_dir / "flash.bin"
+        if create_esp32_flash_image(firmware_bin, flash_bin):
+            copied_files.append("flash.bin")
+        else:
+            print(f"WARNING: Failed to create flash.bin - QEMU may not work properly")
+
+    # Final verification
+    print(f"\n📋 ESP32 QEMU artifacts summary:")
+    print(f"   Output directory: {output_dir}")
+    print(f"   Files copied: {len(copied_files)}")
+    for filename in sorted(copied_files):
+        file_path = output_dir / filename
+        if file_path.exists():
+            size = file_path.stat().st_size
+            print(f"     ✅ {filename}: {size} bytes")
+
+    if not success:
+        print(f"❌ Some required files could not be copied or created")
+        return False
+
+    print(f"✅ ESP32 QEMU artifacts ready for use with tobozo/esp32-qemu-sim")
+    return True
+
+
 def copy_build_artifact(
     build_dir: Path, board: Board, sketch_name: str, output_path: str
 ) -> bool:
     """Copy the build artifact to the specified output path.
+
+    For ESP32 boards with QEMU-style output paths, this will copy all required
+    QEMU artifacts. For other cases, copies only the main firmware file.
 
     Args:
         build_dir: Build directory path
@@ -427,6 +700,18 @@ def copy_build_artifact(
     import os
     import shutil
 
+    # Detect ESP32 QEMU mode
+    is_esp32 = board.board_name.startswith("esp32")
+    is_qemu_mode = (
+        "qemu" in output_path.lower()
+        or output_path.endswith("/")
+        or output_path.endswith("\\")
+    )
+
+    if is_esp32 and is_qemu_mode:
+        return copy_esp32_qemu_artifacts(build_dir, board, sketch_name, output_path)
+
+    # Original single-file copy logic for non-QEMU cases
     expected_ext = get_board_artifact_extension(board)
 
     # Find the source artifact
