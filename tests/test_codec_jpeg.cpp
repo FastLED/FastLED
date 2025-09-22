@@ -63,53 +63,50 @@ TEST_CASE("JPEG availability") {
     CHECK(jpegSupported);
 }
 
-// Test JPEG decoder creation
-TEST_CASE("JPEG decoder creation") {
+// Test JPEG decoder simple decode
+TEST_CASE("JPEG decoder simple decode") {
     JpegDecoderConfig config;
     config.format = PixelFormat::RGB888;
     config.quality = JpegDecoderConfig::Medium;
 
     fl::string error_msg;
-    auto decoder = Jpeg::createDecoder(config, &error_msg);
+    fl::span<const fl::u8> data(test_jpeg_2x2, test_jpeg_2x2_size);
+    FramePtr frame = Jpeg::decode(config, data, &error_msg);
 
-    // JPEG is now implemented, should return valid decoder
-    CHECK(decoder != nullptr);
-    CHECK_FALSE(decoder->isReady());
+    // JPEG decode should work with valid data
+    CHECK(frame != nullptr);
+    if (frame) {
+        CHECK(frame->isValid());
+        CHECK(frame->getWidth() == 2);
+        CHECK(frame->getHeight() == 2);
+    }
 }
 
-// Test JPEG decoder with null stream
-TEST_CASE("JPEG decoder with null stream") {
+// Test JPEG decoder with empty data
+TEST_CASE("JPEG decoder with empty data") {
     JpegDecoderConfig config;
-    auto decoder = Jpeg::createDecoder(config);
+    fl::string error_msg;
+    fl::span<const fl::u8> empty_data;
+    FramePtr frame = Jpeg::decode(config, empty_data, &error_msg);
 
-    CHECK(decoder != nullptr);
-
-    // Should fail with null stream
-    CHECK_FALSE(decoder->begin(fl::ByteStreamPtr()));
-    CHECK(decoder->hasError());
+    // Should fail with empty data
+    CHECK(frame == nullptr);
+    CHECK_FALSE(error_msg.empty());
 }
 
-// Test JPEG decoder lifecycle
-TEST_CASE("JPEG decoder lifecycle") {
+// Test JPEG decoder with invalid data
+TEST_CASE("JPEG decoder with invalid data") {
     JpegDecoderConfig config;
-    auto decoder = Jpeg::createDecoder(config);
+    fl::string error_msg;
 
-    CHECK(decoder != nullptr);
+    // Create invalid JPEG data (just header)
+    fl::u8 testData[] = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG header only
+    fl::span<const fl::u8> data(testData, sizeof(testData));
+    FramePtr frame = Jpeg::decode(config, data, &error_msg);
 
-    // Create a simple test stream
-    fl::u8 testData[] = {0xFF, 0xD8, 0xFF, 0xE0}; // JPEG header
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(sizeof(testData));
-    stream->write(testData, sizeof(testData));
-
-    // Test lifecycle
-    CHECK_FALSE(decoder->isReady());
-
-    // Begin should fail with incomplete JPEG data (only 4 bytes)
-    CHECK_FALSE(decoder->begin(stream));
-
-    // End should work
-    decoder->end();
-    CHECK_FALSE(decoder->isReady());
+    // Should fail with incomplete JPEG data
+    CHECK(frame == nullptr);
+    CHECK_FALSE(error_msg.empty());
 }
 
 // Test JPEG configuration options
@@ -138,62 +135,35 @@ TEST_CASE("JPEG configuration") {
     }
 }
 
-// Test JPEG decoding with real image data
-TEST_CASE("JPEG decoder with real 2x2 image") {
+// Test JPEG decoding with real image data using new decode function
+TEST_CASE("JPEG decoder with real 2x2 image using new decode") {
     JpegDecoderConfig config;
     config.format = PixelFormat::RGB888;  // Use RGB888 for easy color verification
-    auto decoder = Jpeg::createDecoder(config);
 
-    CHECK(decoder != nullptr);
+    fl::string error_msg;
+    fl::span<const fl::u8> data(test_jpeg_2x2, test_jpeg_2x2_size);
+    FramePtr frame = Jpeg::decode(config, data, &error_msg);
 
-    // Create stream with actual JPEG data
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(test_jpeg_2x2_size);
-    fl::size bytesWritten = stream->write(test_jpeg_2x2, test_jpeg_2x2_size);
-    if (bytesWritten != test_jpeg_2x2_size) {
-        FAIL("Failed to write all JPEG data to stream. Expected: " << test_jpeg_2x2_size << ", Written: " << bytesWritten);
+    if (!frame) {
+        FAIL("Decoder failed: " << error_msg);
     }
 
-    // Check if stream has data after writing
-    if (!stream->available(1)) {
-        FAIL("Stream reports no data available after writing " << bytesWritten << " bytes");
+    // Verify frame properties
+    CHECK(frame->isValid());
+    CHECK(frame->getWidth() == 2);
+    CHECK(frame->getHeight() == 2);
+    CHECK(frame->getFormat() == PixelFormat::RGB888);
+
+    // Test that in-place decode can work with a properly constructed frame
+    // First, create a frame with the correct dimensions for a 2x2 RGB888 image
+    fl::u8 dummy_pixels[12]; // 2x2 * 3 bytes per pixel = 12 bytes
+    Frame target_frame(dummy_pixels, 2, 2, PixelFormat::RGB888);
+    fl::string in_place_error;
+    bool success = Jpeg::decode(config, data, &target_frame, &in_place_error);
+
+    if (!success) {
+        FAIL("In-place decode failed: " << in_place_error);
     }
-    if (!stream->available(test_jpeg_2x2_size)) {
-        FAIL("Stream doesn't have all " << test_jpeg_2x2_size << " bytes available after writing");
-    }
-
-    // Begin decoding
-    if (!decoder->begin(stream)) {
-        fl::string error_msg;
-        if (decoder->hasError(&error_msg)) {
-            FAIL("Decoder begin failed: " << error_msg);
-        } else {
-            FAIL("Decoder begin failed with no error message");
-        }
-    }
-    CHECK(decoder->isReady());
-
-    // Decode the image
-    fl::DecodeResult result = decoder->decode();
-    if (result != fl::DecodeResult::Success) {
-        fl::string decode_error_msg;
-        if (decoder->hasError(&decode_error_msg)) {
-            FAIL("Decoder decode failed: " << decode_error_msg);
-        } else {
-            FAIL("Decoder decode failed with no error message");
-        }
-    }
-
-    // Get the decoded frame
-    Frame frame = decoder->getCurrentFrame();
-    CHECK(frame.isValid());
-    CHECK(frame.getWidth() == 2);
-    CHECK(frame.getHeight() == 2);
-    CHECK(frame.getFormat() == PixelFormat::RGB888);
-
-    // For now, just verify that we got a valid frame
-    // Note: The actual pixel data verification would require access to the frame's pixel buffer
-    // This test confirms the decoder works end-to-end with real JPEG data
-
-    decoder->end();
-    CHECK_FALSE(decoder->isReady());
+    CHECK(success);
+    CHECK(target_frame.isValid());
 }

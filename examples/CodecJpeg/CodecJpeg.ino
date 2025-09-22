@@ -47,56 +47,37 @@ void setup() {
     config.maxWidth = 64;
     config.maxHeight = 64;
 
-    // Create decoder
-    fl::string error_msg;
-    auto decoder = fl::Jpeg::createDecoder(config, &error_msg);
+    // Create data span from sample data
+    fl::span<const fl::u8> jpegData(sampleJpegData, sizeof(sampleJpegData));
 
-    if (!decoder) {
-        Serial.print("Failed to create JPEG decoder: ");
+    // Decode the JPEG directly
+    fl::string error_msg;
+    fl::FramePtr framePtr = fl::Jpeg::decode(config, jpegData, &error_msg);
+
+    if (!framePtr) {
+        Serial.print("Failed to decode JPEG: ");
         Serial.println(error_msg.c_str());
         return;
     }
 
-    // Create byte stream from sample data
-    auto stream = fl::make_shared<fl::ByteStreamMemory>(sizeof(sampleJpegData));
-    stream->write(sampleJpegData, sizeof(sampleJpegData));
+    Serial.println("JPEG decoded successfully!");
 
-    // Begin decoding
-    if (!decoder->begin(stream)) {
-        fl::string error;
-        decoder->hasError(&error);
-        Serial.print("Failed to begin decoding: ");
-        Serial.println(error.c_str());
-        return;
-    }
+    // Get the decoded frame
+    fl::Frame frame = *framePtr;
 
-    // Decode the image
-    fl::DecodeResult result = decoder->decode();
+    if (frame.isValid()) {
+        Serial.print("Frame size: ");
+        Serial.print(frame.getWidth());
+        Serial.print("x");
+        Serial.print(frame.getHeight());
+        Serial.print(", format: ");
+        Serial.println((int)frame.getFormat());
 
-    if (result == fl::DecodeResult::Success) {
-        Serial.println("JPEG decoded successfully!");
-
-        // Get the decoded frame
-        fl::Frame frame = decoder->getCurrentFrame();
-
-        if (frame.isValid()) {
-            Serial.print("Frame size: ");
-            Serial.print(frame.getWidth());
-            Serial.print("x");
-            Serial.print(frame.getHeight());
-            Serial.print(", format: ");
-            Serial.println((int)frame.getFormat());
-
-            // Copy frame data to LEDs
-            displayFrameOnLEDs(frame);
-        } else {
-            Serial.println("Invalid frame received");
-        }
+        // Copy frame data to LEDs
+        displayFrameOnLEDs(frame);
     } else {
-        Serial.println("JPEG decoding failed");
+        Serial.println("Invalid frame received");
     }
-
-    decoder->end();
 }
 
 void loop() {
@@ -139,7 +120,7 @@ CRGB getPixelFromFrame(const fl::Frame& frame, int x, int y) {
     int pixelIndex = y * frame.getWidth() + x;
 
     // Frame now stores data as CRGB, so we can directly access it
-    if (pixelIndex < frame.size()) {
+    if (static_cast<size_t>(pixelIndex) < frame.size()) {
         return frame.rgb()[pixelIndex];
     }
 

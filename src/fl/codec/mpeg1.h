@@ -8,13 +8,13 @@ namespace fl {
 
 // MPEG1-specific configuration
 struct Mpeg1Config {
-    enum FrameMode { SingleFrame, Streaming };
+    enum FrameMode { SingleFrame, Streaming };  // TODO: Why is this needed?
 
     FrameMode mode = Streaming;
     fl::u16 targetFps = 30;
     bool looping = false;
     bool skipAudio = true;
-    fl::u8 bufferFrames = 2;
+    fl::u8 bufferFrames = 2;  // TODO: Is this necessary?
 
     Mpeg1Config() = default;
     Mpeg1Config(FrameMode m, fl::u16 fps = 30)
@@ -37,9 +37,8 @@ bool isSupported();
 class SoftwareMpeg1Decoder : public IDecoder {
 private:
     struct Mpeg1DecoderData;
-    Mpeg1DecoderData* decoderData_;
-
     Mpeg1Config config_;
+    Mpeg1DecoderData* decoderData_;
     fl::ByteStreamPtr stream_;
     fl::shared_ptr<Frame> currentFrame_;
     fl::string errorMessage_;
@@ -86,6 +85,9 @@ public:
     fl::u16 getWidth() const;
     fl::u16 getHeight() const;
     fl::u16 getFrameRate() const;
+
+    // Static callback for pl_mpeg video decoding
+    static void videoDecodeCallback(void* plm, void* frame, void* user);
 };
 
 } // namespace fl

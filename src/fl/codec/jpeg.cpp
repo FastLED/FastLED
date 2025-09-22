@@ -5,6 +5,7 @@
 #include "fx/frame.h"
 #include "fl/thread_local.h"
 #include "fl/printf.h"
+#include "fl/bytestreammemory.h"
 
 namespace fl {
 
@@ -58,9 +59,78 @@ public:
 };
 
 // JPEG class implementation
-fl::shared_ptr<IDecoder> Jpeg::createDecoder(const JpegDecoderConfig& config, fl::string* error_message) {
-    (void)error_message; // Suppress unused parameter warning for now
-    return fl::make_shared<TJpgDecoder>(config);
+
+bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, Frame* frame, fl::string* error_message) {
+    if (!frame) {
+        if (error_message) {
+            *error_message = "Frame pointer is null";
+        }
+        return false;
+    }
+
+    // Check if frame has codec dimensions (width/height > 0)
+    if (!frame->isFromCodec() || frame->getWidth() == 0 || frame->getHeight() == 0) {
+        if (error_message) {
+            *error_message = "Target frame must be created with proper dimensions for in-place decoding";
+        }
+        return false;
+    }
+
+    auto decoder = fl::make_shared<TJpgDecoder>(config);
+    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
+    stream->write(data.data(), data.size());
+
+    if (!decoder->begin(stream)) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return false;
+    }
+
+    DecodeResult result = decoder->decode();
+    if (result != DecodeResult::Success) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return false;
+    }
+
+    Frame decoded = decoder->getCurrentFrame();
+
+    // Check if dimensions match
+    if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
+        if (error_message) {
+            *error_message = "Target frame dimensions do not match decoded image dimensions";
+        }
+        return false;
+    }
+
+    frame->copy(decoded);
+    return true;
+}
+
+FramePtr Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
+    auto decoder = fl::make_shared<TJpgDecoder>(config);
+    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
+    stream->write(data.data(), data.size());
+
+    if (!decoder->begin(stream)) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return nullptr;
+    }
+
+    DecodeResult result = decoder->decode();
+    if (result != DecodeResult::Success) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return nullptr;
+    }
+
+    Frame frame = decoder->getCurrentFrame();
+    return fl::make_shared<Frame>(frame);
 }
 
 bool Jpeg::isSupported() {

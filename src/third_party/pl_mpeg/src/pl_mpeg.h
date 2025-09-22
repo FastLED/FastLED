@@ -144,6 +144,7 @@ See below for detailed the API documentation.
 #define PL_MPEG_H
 
 #include <stdint.h>
+#include <stddef.h>
 
 
 #ifdef __cplusplus
@@ -3682,7 +3683,7 @@ static const short PLM_AUDIO_BIT_RATE[] = {
 	 8, 16, 24, 32, 40, 48,  56,  64,  80,  96, 112, 128, 144, 160  // MPEG-2
 };
 
-static const int PLM_AUDIO_SCALEFACTOR_BASE[] = {
+static const int32_t PLM_AUDIO_SCALEFACTOR_BASE[] = {
 	0x02000000, 0x01965FEA, 0x01428A30
 };
 
