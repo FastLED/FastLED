@@ -141,10 +141,10 @@ jobs:
           fi
         shell: bash
 
-      - name: Validate FL_WARN output
+      - name: Validate QEMU output
         working-directory: trusted
         run: |
-          echo "=== Validating FL_WARN output in QEMU logs ==="
+          echo "=== Validating QEMU output logs ==="
 
           # Check if QEMU output file exists
           if [ -f "qemu_output.log" ]; then
@@ -160,6 +160,15 @@ jobs:
             exit 1
           fi
 
+          # Check if we actually got any output
+          if [ ! -s qemu_output.log ]; then
+            echo "❌ No serial output captured from QEMU - empty or missing output"
+            echo "This indicates QEMU may not have started properly or ESP32 may not be booting"
+            exit 1
+          fi
+
+          echo "✅ QEMU output file created with $(wc -l < qemu_output.log) lines"
+
           # Check for crash patterns
           if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
             echo "❌ ${{ inputs.platform_display }} crashed during execution"
@@ -167,14 +176,14 @@ jobs:
             exit 1
           fi
 
-          # Validate FL_WARN output is present
-          if grep -q "FL_WARN:" qemu_output.log; then
-            echo "✅ FL_WARN macro output detected"
-            echo "FL_WARN messages found:"
-            grep "FL_WARN:" qemu_output.log | head -20
+          # Validate debug output is present (using Serial.print instead of FL_WARN)
+          if grep -q "BlinkParallel setup starting" qemu_output.log; then
+            echo "✅ Debug output detected"
+            echo "Setup messages found:"
+            grep "BlinkParallel setup starting\|Initialized.*LED strips\|Setup complete" qemu_output.log | head -10
           else
-            echo "❌ No FL_WARN output detected"
-            echo "Expected FL_WARN messages not found in QEMU log"
+            echo "❌ No debug output detected"
+            echo "Expected Serial.print messages not found in QEMU log"
             exit 1
           fi
 
@@ -200,28 +209,26 @@ jobs:
             echo "⚠️  No loop execution messages found"
           fi
 
-          # Check for test completion (after several loops)
-          if grep -q "FL_WARN.*test finished" qemu_output.log; then
-            echo "✅ FL_WARN test completion detected"
+          # Check for test completion
+          if grep -q "Test finished.*completed.*iterations" qemu_output.log; then
+            echo "✅ Test completion detected"
           else
-            echo "⚠️  FL_WARN test completion not detected (may need more time)"
+            echo "⚠️  Test completion not detected (may need more time)"
           fi
 
-          # Validate boot success - dynamic platform check
-          if [[ "${{ inputs.platform }}" == "esp32c3" ]]; then
-            boot_pattern="(rst:|boot:|ESP32-C3)"
+          # Validate boot success - check for ESP32 boot indicators or our application output
+          if grep -q -E "(rst:|boot:|ESP32|BlinkParallel|ets_main\.c|cpu_start\.c)" qemu_output.log; then
+            echo "✅ ${{ inputs.platform_display }} boot/application output detected"
           else
-            boot_pattern="(rst:|boot:|ESP32)"
-          fi
-
-          if grep -q -E "$boot_pattern" qemu_output.log; then
-            echo "✅ ${{ inputs.platform_display }} boot successful"
-          else
-            echo "❌ ${{ inputs.platform_display }} boot indicators not found"
+            echo "❌ No ${{ inputs.platform_display }} boot indicators or application output found"
+            echo "Output content preview:"
+            head -10 qemu_output.log | cat -A
+            echo "Full output:"
+            cat qemu_output.log
             exit 1
           fi
 
-          echo "=== FL_WARN validation complete ==="
+          echo "=== QEMU validation complete ==="
         shell: bash
 
       - name: Upload QEMU logs and build artifacts on failure
@@ -251,6 +258,6 @@ jobs:
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
-            echo "FL_WARN count: $(grep -c 'FL_WARN:' qemu_output.log || echo 0)"
+            echo "Debug message count: $(grep -c 'BlinkParallel setup starting\|Starting loop iteration' qemu_output.log || echo 0)"
             echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           fi

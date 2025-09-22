@@ -17,6 +17,7 @@ from ci.util.paths import PROJECT_ROOT
 from ci.util.running_process import RunningProcess
 from ci.util.test_args import parse_args as parse_global_test_args
 
+from ..ci.fingerprint_cache import FingerprintCache
 from .clang_compiler import (
     BuildFlags,
     Compiler,
@@ -233,6 +234,53 @@ def get_unit_test_fastled_sources() -> list[Path]:
     return all_sources
 
 
+def _should_rebuild_library(
+    lib_file: Path, fastled_sources: list[Path], cache_file: Path
+) -> bool:
+    """
+    Check if FastLED library needs to be rebuilt based on source file changes.
+
+    Uses fingerprint cache to detect changes in source files, similar to PCH system.
+
+    Args:
+        lib_file: Path to the FastLED library file (libfastled.a)
+        fastled_sources: List of FastLED source files to check
+        cache_file: Path to fingerprint cache file
+
+    Returns:
+        True if library should be rebuilt, False if cache is valid
+    """
+    # If library file doesn't exist, need to build
+    if not lib_file.exists():
+        print("[LIBRARY CACHE] Library file doesn't exist, rebuilding required")
+        return True
+
+    # Get library file modification time as baseline
+    lib_modtime = os.path.getmtime(lib_file)
+
+    # Create fingerprint cache instance
+    fingerprint_cache = FingerprintCache(cache_file)
+
+    # Check if any FastLED source files have changed
+    print(f"[LIBRARY CACHE] Checking {len(fastled_sources)} FastLED source files...")
+
+    for src_file in fastled_sources:
+        try:
+            if fingerprint_cache.has_changed(src_file, lib_modtime):
+                print(
+                    f"[LIBRARY CACHE] Source changed: {src_file.name} - library rebuild required"
+                )
+                return True
+        except FileNotFoundError:
+            print(
+                f"[LIBRARY CACHE] Source not found: {src_file.name} - library rebuild required"
+            )
+            return True
+
+    print("[LIBRARY CACHE] All sources unchanged - using cached library")
+    return False
+
+
 def create_unit_test_fastled_library(
     clean: bool = False, use_pch: bool = True
 ) -> Path | None:
@@ -248,7 +296,14 @@ def create_unit_test_fastled_library(
     fastled_build_dir.mkdir(parents=True, exist_ok=True)
     lib_file = fastled_build_dir / "libfastled.a"
 
-    if lib_file.exists() and not clean:
+    # Get FastLED sources for cache checking
+    fastled_sources = get_unit_test_fastled_sources()
+
+    # Set up fingerprint cache file
+    cache_file = fastled_build_dir / "library_fingerprint_cache.json"
+
+    # Check if library needs rebuilding using fingerprint cache
+    if not clean and not _should_rebuild_library(lib_file, fastled_sources, cache_file):
         print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
         return lib_file
 
@@ -287,8 +342,7 @@ def create_unit_test_fastled_library(
         # Restore original working directory
         os.chdir(original_cwd)
 
-    # Get FastLED sources using optimized selection
-    fastled_sources = get_unit_test_fastled_sources()
+    # FastLED sources already obtained for cache checking above
     fastled_objects: list[Path] = []
 
     obj_dir = fastled_build_dir / "obj"
