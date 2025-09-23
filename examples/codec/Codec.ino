@@ -35,6 +35,8 @@
 #define TARGET_FPS 30
 
 CRGB leds[NUM_LEDS];
+fl::string formatNames[] = {"JPEG", "WebP", "GIF", "MPEG1"};
+
 
 // Forward declarations
 void processJpeg();
@@ -74,29 +76,38 @@ void setup() {
     Serial.println("System initialized - starting codec demonstration...");
 }
 
+
+
 void loop() {
+    FL_WARN("Starting loop");
     EVERY_N_MILLISECONDS(FORMAT_INTERVAL) {
-        fl::string formatNames[] = {"JPEG", "WebP", "GIF", "MPEG1"};
+        const fl::string& formatName = formatNames[currentFormat];
+        FL_WARN("Starting format " << formatName);
+
 
         fl::u32 start_time = millis();
 
         switch(currentFormat) {
             case 0:
+                FL_WARN("Processing JPEG");
                 processJpeg();
                 break;
             case 1:
+                FL_WARN("Processing WebP");
                 processWebp();
                 break;
             case 2:
+                FL_WARN("Processing GIF");
                 processGif();
                 break;
             case 3:
+                FL_WARN("Processing MPEG1");
                 processMpeg1();
                 break;
         }
 
         fl::u32 diff_time = millis() - start_time;
-        const fl::string& formatName = formatNames[currentFormat];
+
         FL_WARN("Format took " << diff_time << "ms to process " << formatName);
 
         // Move to next format
