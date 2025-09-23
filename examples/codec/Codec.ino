@@ -16,13 +16,19 @@
 #include "fl/codec/gif.h"
 #include "fl/codec/mpeg1.h"
 #include "fl/bytestreammemory.h"
+#include "fl/xymap.h"
+#include "fl/sstream.h"
+
 
 #include "sample_jpeg_data.h"
 #include "sample_webp_data.h"
 #include "sample_gif_data.h"
 #include "sample_mpeg1_data.h"
 
-#define NUM_LEDS 64*64  // 64x64 LED matrix
+#define WIDTH 2
+#define HEIGHT 2
+
+#define NUM_LEDS WIDTH*HEIGHT  // 64x64 LED matrix
 #define DATA_PIN 6
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
@@ -49,8 +55,16 @@ void setup() {
     Serial.println("FastLED Multimedia Codec Demonstration");
     Serial.println("Cycling through JPEG, WebP, GIF, and MPEG1 every 250ms");
 
-    // Initialize LED strip
-    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS).setCorrection(TypicalLEDStrip);
+    // xymap is for the wasm compiler and is otherwise a no-op.
+    // Simple 2x2 grid for WASM display using XYMap
+    // Just display the first 4 LEDs in a 2x2 grid
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(2, 2);  // 2x2 grid
+
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, 4)
+        .setCorrection(TypicalLEDStrip)
+        .setScreenMap(xymap.toScreenMap());
+
+
     FastLED.setBrightness(50);
 
     // Clear LEDs
@@ -62,6 +76,10 @@ void setup() {
 
 void loop() {
     EVERY_N_MILLISECONDS(FORMAT_INTERVAL) {
+        fl::string formatNames[] = {"JPEG", "WebP", "GIF", "MPEG1"};
+
+        fl::u32 start_time = millis();
+
         switch(currentFormat) {
             case 0:
                 processJpeg();
@@ -77,12 +95,29 @@ void loop() {
                 break;
         }
 
+        fl::u32 diff_time = millis() - start_time;
+        const fl::string& formatName = formatNames[currentFormat];
+        FL_WARN("Format took " << diff_time << "ms to process " << formatName);
+
         // Move to next format
         currentFormat = (currentFormat + 1) % 4;
-    }
 
-    FastLED.show();
-    delay(10); // Small delay to prevent overwhelming the system
+        // Now build up the message to display the current leds
+        fl::sstream message;
+        message << "Format: " << formatNames[currentFormat] << "\n";
+        message << "LEDs: " << NUM_LEDS << "\n";
+        // now do each of the 4 LEDs
+        for (int i = 0; i < 4; i++) {
+            message << "LED " << i << ": ";
+            for (int j = 0; j < WIDTH; j++) {
+                message << leds[i * WIDTH + j] << " ";
+            }
+            message << "\n";
+        }
+        // Serial.println(message.str().c_str());
+        FL_WARN(message.str().c_str());
+        FastLED.show();
+    }
 }
 
 void processJpeg() {
