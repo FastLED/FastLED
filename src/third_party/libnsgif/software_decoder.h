@@ -10,29 +10,11 @@
 #include "fx/frame.h"
 
 // Include the actual nsgif header
-extern "C" {
-#include "include/nsgif.h"
-}
 
-// Include the namespaced libnsgif
+#include "third_party/libnsgif/include/nsgif.hpp"
+
 namespace fl {
 namespace third_party {
-    // Use the actual types from nsgif.h
-    using nsgif_t = ::nsgif_t;
-    using nsgif_bitmap_cb_vt = ::nsgif_bitmap_cb_vt;
-    using nsgif_bitmap_fmt_t = ::nsgif_bitmap_fmt;
-    using nsgif_error = ::nsgif_error;
-    using nsgif_bitmap_t = ::nsgif_bitmap_t;
-    using nsgif_info_t = ::nsgif_info_t;
-
-    // Use the actual functions from nsgif.h
-    using ::nsgif_create;
-    using ::nsgif_destroy;
-    using ::nsgif_data_scan;
-    using ::nsgif_data_complete;
-    using ::nsgif_frame_decode;
-    using ::nsgif_get_info;
-    using ::nsgif_strerror;
 
     // Simple bitmap wrapper for libnsgif integration with FastLED Frame
     struct GifBitmap {

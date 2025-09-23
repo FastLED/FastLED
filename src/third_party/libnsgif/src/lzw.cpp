@@ -7,14 +7,14 @@
  * Copyright 2021 Michael Drake <tlsa@netsurf-browser.org>
  */
 
-extern "C" {
-#include <assert.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <stdbool.h>
+#include "fl/assert.h"
+#include "fl/stdint.h"
+#include "fl/allocator.h"
 
 #include "lzw.h"
-}
+
+namespace fl {
+namespace third_party {
 
 /**
  * \file
@@ -38,7 +38,7 @@ extern "C" {
  * Note that an individual LZW code can be split over up to three sub-blocks.
  */
 struct lzw_read_ctx {
-	const uint8_t *restrict data; /**< Pointer to start of input data */
+	const uint8_t * data; /**< Pointer to start of input data */
 	size_t data_len;              /**< Input data length */
 	size_t data_sb_next;          /**< Offset to sub-block size */
 
@@ -89,7 +89,7 @@ struct lzw_ctx {
 
 	bool     has_transparency;     /**< Whether the image is opaque. */
 	uint8_t  transparency_idx;     /**< Index representing transparency. */
-	const uint32_t *restrict colour_map; /**< Index to colour mapping. */
+	const uint32_t * colour_map; /**< Index to colour mapping. */
 
 	/** LZW code table. Generated during decode. */
 	struct lzw_table_entry table[LZW_TABLE_ENTRY_MAX];
@@ -101,7 +101,7 @@ struct lzw_ctx {
 /* Exported function, documented in lzw.h */
 lzw_result lzw_context_create(struct lzw_ctx **ctx)
 {
-	struct lzw_ctx *c = static_cast<struct lzw_ctx*>(malloc(sizeof(*c)));
+	struct lzw_ctx *c = static_cast<struct lzw_ctx*>(fl::Malloc(sizeof(*c)));
 	if (c == NULL) {
 		return LZW_NO_MEM;
 	}
@@ -113,7 +113,7 @@ lzw_result lzw_context_create(struct lzw_ctx **ctx)
 /* Exported function, documented in lzw.h */
 void lzw_context_destroy(struct lzw_ctx *ctx)
 {
-	free(ctx);
+	fl::Free(ctx);
 }
 
 /**
@@ -122,7 +122,7 @@ void lzw_context_destroy(struct lzw_ctx *ctx)
  * \param[in] ctx  LZW reading context, updated on success.
  * \return LZW_OK or LZW_OK_EOD on success, appropriate error otherwise.
  */
-static lzw_result lzw__block_advance(struct lzw_read_ctx *restrict ctx)
+static lzw_result lzw__block_advance(struct lzw_read_ctx * ctx)
 {
 	size_t block_size;
 	size_t next_block_pos = ctx->data_sb_next;
@@ -163,9 +163,9 @@ static lzw_result lzw__block_advance(struct lzw_read_ctx *restrict ctx)
  * \return LZW_OK or LZW_OK_EOD on success, appropriate error otherwise.
  */
 static inline lzw_result lzw__read_code(
-		struct lzw_read_ctx *restrict ctx,
+		struct lzw_read_ctx * ctx,
 		uint16_t code_size,
-		uint16_t *restrict code_out)
+		uint16_t * code_out)
 {
 	uint32_t code = 0;
 	uint32_t current_bit = ctx->sb_bit & 0x7;
@@ -190,7 +190,7 @@ static inline lzw_result lzw__read_code(
 			(uint8_t)(bits_remaining_1 - 8),
 		};
 
-		assert(byte_advance <= 2);
+		FL_ASSERT(byte_advance <= 2, "Byte advance too large");
 
 		while (true) {
 			const uint8_t *data = ctx->sb_data;
@@ -368,7 +368,7 @@ static inline void lzw__table_add_entry(
 
 typedef uint32_t (*lzw_writer_fn)(
 		struct lzw_ctx *ctx,
-		void *restrict output_data,
+		void * output_data,
 		uint32_t output_length,
 		uint32_t output_pos,
 		uint16_t code,
@@ -387,9 +387,9 @@ typedef uint32_t (*lzw_writer_fn)(
 static inline lzw_result lzw__decode(
 		struct lzw_ctx    *ctx,
 		lzw_writer_fn      write_fn,
-		void     *restrict output_data,
+		void     * output_data,
 		uint32_t           output_length,
-		uint32_t *restrict output_written)
+		uint32_t * output_written)
 {
 	lzw_result res;
 	uint16_t code;
@@ -457,13 +457,13 @@ static inline lzw_result lzw__decode(
  * \return Number of pixel values written.
  */
 static inline uint32_t lzw__write_fn(struct lzw_ctx *ctx,
-		void *restrict output_data,
+		void * output_data,
 		uint32_t output_length,
 		uint32_t output_used,
 		uint16_t code,
 		uint16_t left)
 {
-	uint8_t *restrict output_pos = (uint8_t *)output_data + output_used;
+	uint8_t * output_pos = (uint8_t *)output_data + output_used;
 	const struct lzw_table_entry * const table = ctx->table;
 	uint32_t space = output_length - output_used;
 	uint16_t count = left;
@@ -496,8 +496,8 @@ static inline uint32_t lzw__write_fn(struct lzw_ctx *ctx,
 
 /* Exported function, documented in lzw.h */
 lzw_result lzw_decode(struct lzw_ctx *ctx,
-		const uint8_t *restrict *const restrict output_data,
-		uint32_t *restrict                      output_written)
+		const uint8_t * *const  output_data,
+		uint32_t *                      output_written)
 {
 	const uint32_t output_length = sizeof(ctx->stack_base);
 
@@ -538,13 +538,13 @@ lzw_result lzw_decode(struct lzw_ctx *ctx,
  * \return Number of pixel values written.
  */
 static inline uint32_t lzw__map_write_fn(struct lzw_ctx *ctx,
-		void *restrict output_data,
+		void * output_data,
 		uint32_t output_length,
 		uint32_t output_used,
 		uint16_t code,
 		uint16_t left)
 {
-	uint32_t *restrict output_pos = (uint32_t *)output_data + output_used;
+	uint32_t * output_pos = (uint32_t *)output_data + output_used;
 	const struct lzw_table_entry * const table = ctx->table;
 	uint32_t space = output_length - output_used;
 	uint16_t count = left;
@@ -587,9 +587,9 @@ static inline uint32_t lzw__map_write_fn(struct lzw_ctx *ctx,
 
 /* Exported function, documented in lzw.h */
 lzw_result lzw_decode_map(struct lzw_ctx *ctx,
-		uint32_t *restrict output_data,
+		uint32_t * output_data,
 		uint32_t           output_length,
-		uint32_t *restrict output_written)
+		uint32_t * output_written)
 {
 	*output_written = 0;
 
@@ -613,3 +613,6 @@ lzw_result lzw_decode_map(struct lzw_ctx *ctx,
 
 	return LZW_OK;
 }
+
+} // namespace third_party
+} // namespace fl

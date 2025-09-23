@@ -10,14 +10,10 @@
 #ifndef LZW_H_
 #define LZW_H_
 
-// C++ compatibility for restrict keyword
-#ifdef __cplusplus
-#ifndef restrict
-#define restrict
-#endif
-#endif
-
 #include "fl/stdint.h"
+
+namespace fl {
+namespace third_party {
 
 /**
  * \file
@@ -93,8 +89,8 @@ lzw_result lzw_decode_init(
  * \return LZW_OK on success, or appropriate error code otherwise.
  */
 lzw_result lzw_decode(struct lzw_ctx *ctx,
-		const uint8_t *restrict *const restrict output_data,
-		uint32_t *restrict                      output_written);
+		const uint8_t **const output_data,
+		uint32_t *output_written);
 
 /**
  * Initialise an LZW decompression context for decoding to colour map values.
@@ -139,8 +135,11 @@ lzw_result lzw_decode_init_map(
  * \return LZW_OK on success, or appropriate error code otherwise.
  */
 lzw_result lzw_decode_map(struct lzw_ctx *ctx,
-		uint32_t *restrict output_data,
-		uint32_t           output_length,
-		uint32_t *restrict output_written);
+		uint32_t *output_data,
+		uint32_t output_length,
+		uint32_t *output_written);
+
+} // namespace third_party
+} // namespace fl
 
 #endif

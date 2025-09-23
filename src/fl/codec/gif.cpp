@@ -1,5 +1,5 @@
 #include "gif.h"
-#include "../../third_party/libnsgif/software_decoder.h"
+#include "third_party/libnsgif/software_decoder.h"
 
 namespace fl {
 
