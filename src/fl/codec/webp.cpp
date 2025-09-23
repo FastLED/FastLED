@@ -3,19 +3,19 @@
 #include "fl/str.h"
 #include "fl/compiler_control.h"
 
-// TODO: Implement full simplewebp integration
-// For now, provide a stub implementation
+// Note: simplewebp has compilation issues on embedded platforms
+// Keeping stub implementation for now until the issues are resolved
 
 namespace fl {
 
 bool Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> data, Frame* frame, fl::string* error_message) {
-    // TODO: Implement actual WebP decoding with simplewebp
+    // TODO: Implement actual WebP decoding with simplewebp after fixing compilation issues
     FL_UNUSED(config);
     FL_UNUSED(data);
     FL_UNUSED(frame);
 
     if (error_message) {
-        *error_message = "WebP decoding not yet implemented - placeholder function";
+        *error_message = "WebP decoding not yet implemented - simplewebp has compilation issues on embedded platforms";
     }
     return false;
 }
@@ -25,14 +25,14 @@ FramePtr Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> da
     FL_UNUSED(data);
 
     if (error_message) {
-        *error_message = "WebP decoding not yet implemented - placeholder function";
+        *error_message = "WebP decoding not yet implemented - simplewebp has compilation issues on embedded platforms";
     }
     return nullptr;
 }
 
 bool Webp::isSupported() {
-    // WebP will be supported once simplewebp integration is complete
-    return false; // TODO: Return true when implementation is complete
+    // WebP will be supported once simplewebp compilation issues are resolved
+    return false;
 }
 
 bool Webp::getDimensions(fl::span<const fl::u8> data, fl::u16* width, fl::u16* height, fl::string* error_message) {

@@ -325,8 +325,12 @@ bool SoftwareMpeg1Decoder::decodeNextFrame() {
         return false;
     }
 
-    // Return true if we have a new frame
-    return decoderData_->hasNewFrame;
+    // If we have a new frame, create the Frame objects
+    if (decoderData_->hasNewFrame) {
+        return decodeFrame();
+    }
+
+    return false;
 }
 
 bool SoftwareMpeg1Decoder::decodePictureHeader() {
