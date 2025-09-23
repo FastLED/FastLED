@@ -72,7 +72,7 @@ static void setupTestData(fl::u8 testData[4096]) {
 
 // Test MPEG1 decoder availability
 TEST_CASE("MPEG1 availability") {
-    bool mpeg1Supported = mpeg1::isSupported();
+    bool mpeg1Supported = Mpeg1::isSupported();
 
     // MPEG1 should be supported via software decoder
     CHECK(mpeg1Supported);
@@ -102,7 +102,7 @@ TEST_CASE("MPEG1 decoder creation") {
     config.bufferFrames = 3;
 
     fl::string error_msg;
-    auto decoder = mpeg1::createDecoder(config, &error_msg);
+    auto decoder = Mpeg1::createDecoder(config, &error_msg);
 
     CHECK(decoder != nullptr);
     CHECK_FALSE(decoder->isReady());
@@ -117,7 +117,7 @@ TEST_CASE("MPEG1 decoder creation") {
 
     // Should succeed on platforms that support MPEG1 if the test data is valid
     // However, synthetic test data may not be valid MPEG1, so we just check it doesn't crash
-    if (mpeg1::isSupported()) {
+    if (Mpeg1::isSupported()) {
         // Test data may not be valid MPEG1 format, so we allow both success and failure
         // The main thing is that it doesn't crash
         if (beginResult) {
@@ -132,13 +132,13 @@ TEST_CASE("MPEG1 decoder creation") {
 
 // Test frame decoding
 TEST_CASE("MPEG1 frame decoding") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         // Skip test if MPEG1 not supported
         return;
     }
 
     Mpeg1Config config(Mpeg1Config::SingleFrame);
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     fl::u8 testData[4096];
     setupTestData(testData);
@@ -167,7 +167,7 @@ TEST_CASE("MPEG1 frame decoding") {
 
 // Test streaming mode
 TEST_CASE("MPEG1 streaming mode") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         return;
     }
 
@@ -175,7 +175,7 @@ TEST_CASE("MPEG1 streaming mode") {
     config.mode = Mpeg1Config::Streaming;
     config.bufferFrames = 2;
 
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     fl::u8 testData[4096];
     setupTestData(testData);
@@ -209,14 +209,14 @@ TEST_CASE("MPEG1 streaming mode") {
 
 // Test single frame mode
 TEST_CASE("MPEG1 single frame mode") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         return;
     }
 
     Mpeg1Config config;
     config.mode = Mpeg1Config::SingleFrame;
 
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     fl::u8 testData[4096];
     setupTestData(testData);
@@ -242,12 +242,12 @@ TEST_CASE("MPEG1 single frame mode") {
 
 // Test decoder lifecycle
 TEST_CASE("MPEG1 decoder lifecycle") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         return;
     }
 
     Mpeg1Config config;
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     // Initial state
     CHECK_FALSE(decoder->isReady());
@@ -280,12 +280,12 @@ TEST_CASE("MPEG1 decoder lifecycle") {
 
 // Test error handling
 TEST_CASE("MPEG1 error handling") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         return;
     }
 
     Mpeg1Config config;
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     // Test with null stream
     CHECK_FALSE(decoder->begin(fl::ByteStreamPtr()));
@@ -306,13 +306,13 @@ static bool checkPixelColor(const CRGB& pixel, fl::u8 expectedR, fl::u8 expected
 
 // Test 2x2 MPEG1 video with specific frame colors
 TEST_CASE("MPEG1 2x2 frame color validation") {
-    if (!mpeg1::isSupported()) {
+    if (!Mpeg1::isSupported()) {
         return;
     }
 
     Mpeg1Config config;
     config.mode = Mpeg1Config::Streaming;
-    auto decoder = mpeg1::createDecoder(config);
+    auto decoder = Mpeg1::createDecoder(config);
 
     // Create stream with our 2x2 test data
     auto stream = fl::make_shared<fl::ByteStreamMemory>(test2x2MpegDataSize);

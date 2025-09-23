@@ -22,15 +22,14 @@ struct Mpeg1Config {
 };
 
 // MPEG1 decoder factory
-namespace mpeg1 {
+class Mpeg1 {
+public:
+    // Create an MPEG1 decoder for the current platform
+    static fl::shared_ptr<IDecoder> createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr);
 
-// Create an MPEG1 decoder for the current platform
-fl::shared_ptr<IDecoder> createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr);
-
-// Check if MPEG1 decoding is supported on this platform
-bool isSupported();
-
-} // namespace mpeg1
+    // Check if MPEG1 decoding is supported on this platform
+    static bool isSupported();
+};
 
 // Software MPEG1 decoder implementation
 // Based on pl_mpeg library concepts but simplified for microcontrollers

@@ -20,20 +20,16 @@ FL_DISABLE_WARNING_POP
 namespace fl {
 
 // MPEG1 factory implementation
-namespace mpeg1 {
-
-fl::shared_ptr<IDecoder> createDecoder(const Mpeg1Config& config, fl::string* error_message) {
+fl::shared_ptr<IDecoder> Mpeg1::createDecoder(const Mpeg1Config& config, fl::string* error_message) {
     FL_UNUSED(error_message);
     // MPEG1 is currently supported via software decoder on all platforms
     return fl::make_shared<SoftwareMpeg1Decoder>(config);
 }
 
-bool isSupported() {
+bool Mpeg1::isSupported() {
     // Software MPEG1 decoder is available on all platforms
     return true;
 }
-
-} // namespace mpeg1
 
 // Helper function to convert YUV to RGB
 static void yuv_to_rgb(const fl::third_party::plm_frame_t* frame, fl::u8* rgb_buffer) {
