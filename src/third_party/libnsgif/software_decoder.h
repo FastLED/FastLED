@@ -11,7 +11,7 @@
 
 // Include the actual nsgif header
 extern "C" {
-#include "third_party/libnsgif/include/nsgif.h"
+#include "include/nsgif.h"
 }
 
 // Include the namespaced libnsgif
