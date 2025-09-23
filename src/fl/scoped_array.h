@@ -205,4 +205,10 @@ template <typename T, typename Alloc = fl::allocator<T>> class scoped_array2 {
     fl::size_t size_ = 0;      // Size of the array
 };
 
-} // namespace fl 
+// Helper function to create scoped_array (similar to make_unique)
+template<typename T>
+scoped_array<T> make_scoped_array(fl::size_t size) {
+    return scoped_array<T>(new T[size]);
+}
+
+} // namespace fl
