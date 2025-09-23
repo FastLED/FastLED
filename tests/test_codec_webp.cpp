@@ -81,9 +81,9 @@ static const fl::u8 test2x2WebpLossyData[] = {
 TEST_CASE("WebP availability") {
     bool webpSupported = Webp::isSupported();
     // WebP support depends on platform:
-    // - Supported on desktop/host platforms (unit tests)
-    // - Not supported on Arduino/embedded platforms
-#if !defined(ARDUINO) && !defined(__AVR__) && !defined(ESP32) && !defined(ESP8266)
+    // - Supported on desktop/host platforms (unit tests) and ESP32
+    // - Not supported on Arduino/embedded platforms (except ESP32)
+#if !defined(ARDUINO) && !defined(__AVR__) && !defined(ESP8266)
     CHECK(webpSupported == true);
 #else
     CHECK(webpSupported == false);

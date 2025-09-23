@@ -4,7 +4,7 @@
 #include "fl/compiler_control.h"
 
 // Enable simplewebp only on platforms that support it (not Arduino/embedded)
-#if !defined(ARDUINO) && !defined(__AVR__) && !defined(ESP32) && !defined(ESP8266)
+#if !defined(ARDUINO) && !defined(__AVR__) && !defined(ESP8266)
     #define SIMPLEWEBP_IMPLEMENTATION
     #include "third_party/simplewebp/src/simplewebp.h"
     #define WEBP_SUPPORTED 1
