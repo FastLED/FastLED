@@ -123,14 +123,14 @@ class FsImpl {
 
 // Standalone helper function to load JPEG from SD card
 // Combines SD card initialization and JPEG loading in one convenient function
-inline FramePtr loadImageFromSD(int cs_pin, const char *filepath,
+inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
                                  const JpegDecoderConfig &config = JpegDecoderConfig(),
                                  fl::string *error_message = nullptr) {
     FileSystem fs;
     if (!fs.beginSd(cs_pin)) {
         if (error_message) {
             *error_message = "Failed to initialize SD card on CS pin ";
-            error_message->append(static_cast<u32>(cs_pin));
+            error_message->append(static_cast<fl::u32>(cs_pin));
         }
         return FramePtr();
     }
