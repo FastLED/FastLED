@@ -20,6 +20,14 @@ FASTLED_SMART_PTR(FsImpl);
 // Otherwise a null filesystem will be used that will do nothing but spew
 // warnings, but otherwise won't crash the system.
 FsImplPtr make_sdcard_filesystem(int cs_pin);
+
+#ifdef FASTLED_TESTING
+// Test-specific functions for setting up filesystem root path
+// These are implemented in platforms/stub/fs_stub.hpp
+void setTestFileSystemRoot(const char* root_path);
+const char* getTestFileSystemRoot();
+#endif
+
 } // namespace fl
 
 FASTLED_NAMESPACE_BEGIN

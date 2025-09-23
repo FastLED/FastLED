@@ -7,7 +7,11 @@
 #include "fl/vector.h"
 #include "fl/math_macros.h"
 
-#ifdef __EMSCRIPTEN__
+#ifdef FASTLED_TESTING
+// Test filesystem implementation that maps to real hard drive
+#include "platforms/stub/fs_stub.hpp"
+#define FASTLED_HAS_SDCARD 1
+#elif defined(__EMSCRIPTEN__)
 #include "platforms/wasm/fs_wasm.h"
 #define FASTLED_HAS_SDCARD 1
 #elif FL_HAS_INCLUDE(<SD.h>) && FL_HAS_INCLUDE(<fs.h>)
@@ -74,6 +78,7 @@ class NullFileSystem : public FsImpl {
         return out;
     }
 };
+
 
 bool FileSystem::beginSd(int cs_pin) {
     mFs = make_sdcard_filesystem(cs_pin);
@@ -263,6 +268,7 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegDecoderConfig &config,
 } // namespace fl
 
 namespace fl {
+
 #if !FASTLED_HAS_SDCARD
 // Weak fallback implementation when SD library is not available
 FL_LINK_WEAK FsImplPtr make_sdcard_filesystem(int cs_pin) {
