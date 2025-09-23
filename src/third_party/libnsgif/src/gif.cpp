@@ -8,6 +8,7 @@
  *                http://www.opensource.org/licenses/mit-license.php
  */
 
+extern "C" {
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -16,6 +17,7 @@
 
 #include "lzw.h"
 #include "../include/nsgif.h"
+}
 
 /** Default minimum allowable frame delay in cs. */
 #define NSGIF_FRAME_DELAY_MIN 2
@@ -176,13 +178,15 @@ struct nsgif {
 static nsgif_error nsgif__error_from_lzw(lzw_result l_res)
 {
 	static const nsgif_error g_res[] = {
-		[LZW_OK]        = NSGIF_OK,
-		[LZW_NO_MEM]    = NSGIF_ERR_OOM,
-		[LZW_OK_EOD]    = NSGIF_ERR_END_OF_DATA,
-		[LZW_NO_DATA]   = NSGIF_ERR_END_OF_DATA,
-		[LZW_EOI_CODE]  = NSGIF_ERR_DATA_FRAME,
-		[LZW_BAD_ICODE] = NSGIF_ERR_DATA_FRAME,
-		[LZW_BAD_CODE]  = NSGIF_ERR_DATA_FRAME,
+		NSGIF_OK,                 /* LZW_OK */
+		NSGIF_ERR_END_OF_DATA,    /* LZW_OK_EOD */
+		NSGIF_ERR_OOM,            /* LZW_NO_MEM */
+		NSGIF_ERR_END_OF_DATA,    /* LZW_NO_DATA */
+		NSGIF_ERR_DATA_FRAME,     /* LZW_EOI_CODE */
+		NSGIF_ERR_DATA_FRAME,     /* LZW_NO_COLOUR */
+		NSGIF_ERR_DATA_FRAME,     /* LZW_BAD_ICODE */
+		NSGIF_ERR_DATA_FRAME,     /* LZW_BAD_PARAM */
+		NSGIF_ERR_DATA_FRAME,     /* LZW_BAD_CODE */
 	};
 	assert(l_res != LZW_BAD_PARAM);
 	assert(l_res != LZW_NO_COLOUR);
@@ -240,7 +244,7 @@ static inline uint32_t* nsgif__bitmap_get(
 
 	/* Get the frame data */
 	assert(gif->bitmap.get_buffer);
-	return (void *)gif->bitmap.get_buffer(gif->frame_image);
+	return reinterpret_cast<uint32_t*>(gif->bitmap.get_buffer(gif->frame_image));
 }
 
 /**
@@ -312,13 +316,13 @@ static void nsgif__record_frame(
 	}
 
 	if (gif->prev_frame == NULL) {
-		prev_frame = realloc(gif->prev_frame,
-				width * height * pixel_bytes);
+		prev_frame = static_cast<uint32_t*>(realloc(gif->prev_frame,
+				width * height * pixel_bytes));
 		if (prev_frame == NULL) {
 			return;
 		}
 	} else {
-		prev_frame = gif->prev_frame;
+		prev_frame = static_cast<uint32_t*>(gif->prev_frame);
 	}
 
 	memcpy(prev_frame, bitmap, width * height * pixel_bytes);
@@ -331,7 +335,7 @@ static nsgif_error nsgif__recover_frame(
 		const struct nsgif *gif,
 		uint32_t *bitmap)
 {
-	const uint32_t *prev_frame = gif->prev_frame;
+	const uint32_t *prev_frame = static_cast<const uint32_t*>(gif->prev_frame);
 	size_t pixel_bytes = sizeof(*bitmap);
 	size_t height = gif->info.height;
 	size_t width  = gif->info.width;
@@ -470,7 +474,7 @@ static nsgif_error nsgif__decode_complex(
 	}
 
 	/* Initialise the LZW decoding */
-	res = lzw_decode_init(gif->lzw_ctx, data[0],
+	res = lzw_decode_init(static_cast<struct lzw_ctx*>(gif->lzw_ctx), data[0],
 			gif->buf, gif->buf_len,
 			data + 1 - gif->buf);
 	if (res != LZW_OK) {
@@ -498,7 +502,7 @@ static nsgif_error nsgif__decode_complex(
 					}
 					return ret;
 				}
-				res = lzw_decode(gif->lzw_ctx,
+				res = lzw_decode(static_cast<struct lzw_ctx*>(gif->lzw_ctx),
 						&uncompressed, &available);
 
 				if (available == 0) {
@@ -560,7 +564,7 @@ static nsgif_error nsgif__decode_simple(
 	}
 
 	/* Initialise the LZW decoding */
-	res = lzw_decode_init_map(gif->lzw_ctx, data[0],
+	res = lzw_decode_init_map(static_cast<struct lzw_ctx*>(gif->lzw_ctx), data[0],
 			transparency_index, colour_table,
 			gif->buf, gif->buf_len,
 			data + 1 - gif->buf);
@@ -572,7 +576,7 @@ static nsgif_error nsgif__decode_simple(
 	pixels = gif->info.width * height;
 
 	while (pixels > 0) {
-		res = lzw_decode_map(gif->lzw_ctx,
+		res = lzw_decode_map(static_cast<struct lzw_ctx*>(gif->lzw_ctx),
 				frame_data, pixels, &written);
 		pixels -= written;
 		frame_data += written;
@@ -1275,7 +1279,7 @@ static struct nsgif_frame *nsgif__get_frame(
 		size_t count = frame_idx + 1;
 		struct nsgif_frame *temp;
 
-		temp = realloc(gif->frames, count * sizeof(*frame));
+		temp = static_cast<struct nsgif_frame*>(realloc(gif->frames, count * sizeof(*frame)));
 		if (temp == NULL) {
 			return NULL;
 		}
@@ -1399,7 +1403,7 @@ void nsgif_destroy(nsgif_t *gif)
 	free(gif->prev_frame);
 	gif->prev_frame = NULL;
 
-	lzw_context_destroy(gif->lzw_ctx);
+	lzw_context_destroy(static_cast<struct lzw_ctx*>(gif->lzw_ctx));
 	gif->lzw_ctx = NULL;
 
 	free(gif);
@@ -1451,36 +1455,16 @@ static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
 	default:
 		/* Fall through. */
 	case NSGIF_BITMAP_FMT_R8G8B8A8:
-		return (struct nsgif_colour_layout) {
-			.r = 0,
-			.g = 1,
-			.b = 2,
-			.a = 3,
-		};
+			{ struct nsgif_colour_layout result = {0, 1, 2, 3}; return result; }
 
 	case NSGIF_BITMAP_FMT_B8G8R8A8:
-		return (struct nsgif_colour_layout) {
-			.b = 0,
-			.g = 1,
-			.r = 2,
-			.a = 3,
-		};
+			{ struct nsgif_colour_layout result = {2, 1, 0, 3}; return result; }
 
 	case NSGIF_BITMAP_FMT_A8R8G8B8:
-		return (struct nsgif_colour_layout) {
-			.a = 0,
-			.r = 1,
-			.g = 2,
-			.b = 3,
-		};
+			{ struct nsgif_colour_layout result = {1, 2, 3, 0}; return result; }
 
 	case NSGIF_BITMAP_FMT_A8B8G8R8:
-		return (struct nsgif_colour_layout) {
-			.a = 0,
-			.b = 1,
-			.g = 2,
-			.r = 3,
-		};
+			{ struct nsgif_colour_layout result = {3, 2, 1, 0}; return result; }
 	}
 }
 
@@ -1492,7 +1476,7 @@ nsgif_error nsgif_create(
 {
 	nsgif_t *gif;
 
-	gif = calloc(1, sizeof(*gif));
+	gif = static_cast<nsgif_t*>(calloc(1, sizeof(*gif)));
 	if (gif == NULL) {
 		return NSGIF_ERR_OOM;
 	}
@@ -1739,8 +1723,9 @@ nsgif_error nsgif_data_scan(
 	}
 
 	if (gif->lzw_ctx == NULL) {
-		lzw_result res = lzw_context_create(
-				(struct lzw_ctx **)&gif->lzw_ctx);
+		struct lzw_ctx *lzw_ctx_ptr;
+		lzw_result res = lzw_context_create(&lzw_ctx_ptr);
+		gif->lzw_ctx = lzw_ctx_ptr;
 		if (res != LZW_OK) {
 			return nsgif__error_from_lzw(res);
 		}
@@ -1877,10 +1862,7 @@ nsgif_error nsgif_frame_prepare(
 		uint32_t *frame_new)
 {
 	nsgif_error ret;
-	nsgif_rect_t rect = {
-		.x1 = 0,
-		.y1 = 0,
-	};
+	nsgif_rect_t rect = {0, 0, 0, 0};
 	uint32_t delay = 0;
 	uint32_t frame = gif->frame;
 
@@ -2039,15 +2021,15 @@ bool nsgif_local_palette(
 const char *nsgif_strerror(nsgif_error err)
 {
 	static const char *const str[] = {
-		[NSGIF_OK]                = "Success",
-		[NSGIF_ERR_OOM]           = "Out of memory",
-		[NSGIF_ERR_DATA]          = "Invalid source data",
-		[NSGIF_ERR_BAD_FRAME]     = "Requested frame does not exist",
-		[NSGIF_ERR_DATA_FRAME]    = "Invalid frame data",
-		[NSGIF_ERR_END_OF_DATA]   = "Unexpected end of GIF source data",
-		[NSGIF_ERR_DATA_COMPLETE] = "Can't add data to completed GIF",
-		[NSGIF_ERR_FRAME_DISPLAY] = "Frame can't be displayed",
-		[NSGIF_ERR_ANIMATION_END] = "Animation complete",
+		"Success",                             /* NSGIF_OK */
+		"Out of memory",                       /* NSGIF_ERR_OOM */
+		"Invalid source data",                 /* NSGIF_ERR_DATA */
+		"Requested frame does not exist",      /* NSGIF_ERR_BAD_FRAME */
+		"Invalid frame data",                  /* NSGIF_ERR_DATA_FRAME */
+		"Unexpected end of GIF source data",   /* NSGIF_ERR_END_OF_DATA */
+		"Can't add data to completed GIF",     /* NSGIF_ERR_DATA_COMPLETE */
+		"Frame can't be displayed",            /* NSGIF_ERR_FRAME_DISPLAY */
+		"Animation complete",                  /* NSGIF_ERR_ANIMATION_END */
 	};
 
 	if (err >= NSGIF_ARRAY_LEN(str) || str[err] == NULL) {
@@ -2061,11 +2043,11 @@ const char *nsgif_strerror(nsgif_error err)
 const char *nsgif_str_disposal(enum nsgif_disposal disposal)
 {
 	static const char *const str[] = {
-		[NSGIF_DISPOSAL_UNSPECIFIED]   = "Unspecified",
-		[NSGIF_DISPOSAL_NONE]          = "None",
-		[NSGIF_DISPOSAL_RESTORE_BG]    = "Restore background",
-		[NSGIF_DISPOSAL_RESTORE_PREV]  = "Restore previous",
-		[NSGIF_DISPOSAL_RESTORE_QUIRK] = "Restore quirk",
+		"Unspecified",        /* NSGIF_DISPOSAL_UNSPECIFIED */
+		"None",               /* NSGIF_DISPOSAL_NONE */
+		"Restore background", /* NSGIF_DISPOSAL_RESTORE_BG */
+		"Restore previous",   /* NSGIF_DISPOSAL_RESTORE_PREV */
+		"Restore quirk",      /* NSGIF_DISPOSAL_RESTORE_QUIRK */
 	};
 
 	if (disposal >= NSGIF_ARRAY_LEN(str) || str[disposal] == NULL) {

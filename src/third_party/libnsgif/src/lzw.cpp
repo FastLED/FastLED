@@ -7,12 +7,14 @@
  * Copyright 2021 Michael Drake <tlsa@netsurf-browser.org>
  */
 
+extern "C" {
 #include <assert.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdbool.h>
 
 #include "lzw.h"
+}
 
 /**
  * \file
@@ -99,7 +101,7 @@ struct lzw_ctx {
 /* Exported function, documented in lzw.h */
 lzw_result lzw_context_create(struct lzw_ctx **ctx)
 {
-	struct lzw_ctx *c = malloc(sizeof(*c));
+	struct lzw_ctx *c = static_cast<struct lzw_ctx*>(malloc(sizeof(*c)));
 	if (c == NULL) {
 		return LZW_NO_MEM;
 	}
@@ -183,9 +185,9 @@ static inline lzw_result lzw__read_code(
 				code_size : (8u - current_bit);
 		uint8_t bits_remaining_1 = code_size - bits_remaining_0;
 		uint8_t bits_used[3] = {
-			[0] = bits_remaining_0,
-			[1] = bits_remaining_1 < 8 ? bits_remaining_1 : 8,
-			[2] = bits_remaining_1 - 8,
+			bits_remaining_0,
+			(uint8_t)(bits_remaining_1 < 8 ? bits_remaining_1 : 8),
+			(uint8_t)(bits_remaining_1 - 8),
 		};
 
 		assert(byte_advance <= 2);
