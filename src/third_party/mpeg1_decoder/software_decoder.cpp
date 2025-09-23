@@ -183,7 +183,7 @@ DecodeResult SoftwareMpeg1Decoder::decode() {
 }
 
 Frame SoftwareMpeg1Decoder::getCurrentFrame() {
-    if (config_.mode == Mpeg1Config::Streaming && !frameBuffer_.empty() && currentFrameIndex_ > 0) {
+    if (config_.mode == Mpeg1Config::Streaming && !config_.immediateMode && !frameBuffer_.empty() && currentFrameIndex_ > 0) {
         Frame result = *frameBuffer_[lastDecodedIndex_];
         return result;
     }
@@ -347,7 +347,7 @@ bool SoftwareMpeg1Decoder::decodeFrame() {
     fl::u32 timestampMs = static_cast<fl::u32>(decoderData_->lastFrameTime * 1000.0);
 
     // Update current frame
-    if (config_.mode == Mpeg1Config::Streaming && !frameBuffer_.empty()) {
+    if (config_.mode == Mpeg1Config::Streaming && !config_.immediateMode && !frameBuffer_.empty()) {
         fl::u8 bufferIndex = currentFrameIndex_ % config_.bufferFrames;
         // Create a new Frame using shared_ptr
         frameBuffer_[bufferIndex] = fl::make_shared<Frame>(decoderData_->rgbFrameBuffer.get(),
@@ -357,7 +357,7 @@ bool SoftwareMpeg1Decoder::decodeFrame() {
                                                            timestampMs);
         lastDecodedIndex_ = bufferIndex;
     } else {
-        // Create a new frame as shared_ptr
+        // Create a new frame as shared_ptr (for SingleFrame mode or immediate mode)
         currentFrame_ = fl::make_shared<Frame>(decoderData_->rgbFrameBuffer.get(),
                                               decoderData_->width,
                                               decoderData_->height,
@@ -376,7 +376,7 @@ void SoftwareMpeg1Decoder::allocateFrameBuffers() {
     // Allocate RGB frame buffer for converted frames
     decoderData_->rgbFrameBuffer.reset(new fl::u8[frameSize]);
 
-    if (config_.mode == Mpeg1Config::Streaming) {
+    if (config_.mode == Mpeg1Config::Streaming && !config_.immediateMode) {
         frameBuffer_.resize(config_.bufferFrames);
         for (fl::u8 i = 0; i < config_.bufferFrames; ++i) {
             // Create Frame objects with shared_ptr (initially empty)

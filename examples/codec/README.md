@@ -97,11 +97,15 @@ if (decoder->begin(stream)) {
 ```cpp
 #include "fl/codec/mpeg1.h"
 
-// Configure for streaming
+// Configure for real-time streaming (immediate mode)
 fl::Mpeg1Config config;
 config.mode = fl::Mpeg1Config::Streaming;
 config.targetFps = 25;
-config.bufferFrames = 2;
+config.immediateMode = true;  // Default: bypasses frame buffering for minimal latency
+
+// For buffered mode (when you need frame buffering):
+// config.immediateMode = false;
+// config.bufferFrames = 2;
 
 // Create decoder
 auto decoder = fl::mpeg1::createDecoder(config);
@@ -114,6 +118,26 @@ while (decoder->hasMoreFrames()) {
     }
 }
 ```
+
+## Performance Modes
+
+### Immediate Mode (Default - Recommended for Real-Time)
+- **Enabled by default**: `config.immediateMode = true`
+- **Benefits**:
+  - Minimal latency - frames available immediately after decode
+  - Lower memory usage - no frame buffer vector allocation
+  - Simpler code path - direct frame access
+- **Best for**: Real-time LED applications, live video streaming
+
+### Buffered Mode (Legacy)
+- **Enable with**: `config.immediateMode = false`
+- **Benefits**:
+  - Multiple frame lookahead capability
+  - Smoother playback for high-frame-rate content
+- **Drawbacks**:
+  - Adds frame buffering latency
+  - Higher memory usage
+- **Best for**: Non-real-time applications where smooth playback matters more than latency
 
 ## Memory Considerations
 

@@ -15,7 +15,8 @@ struct Mpeg1Config {
     fl::u16 targetFps = 30;
     bool looping = false;
     bool skipAudio = true;
-    fl::u8 bufferFrames = 2;  // TODO: Is this necessary?
+    bool immediateMode = true;  // For real-time LED applications - bypass frame buffering
+    fl::u8 bufferFrames = 2;  // Only used when immediateMode = false
 
     Mpeg1Config() = default;
     Mpeg1Config(FrameMode m, fl::u16 fps = 30)

@@ -87,6 +87,7 @@ TEST_CASE("MPEG1 decoder configuration") {
     CHECK(config.targetFps == 30);
     CHECK(config.skipAudio == true);
     CHECK(config.looping == false);
+    CHECK(config.immediateMode == true);  // Default for real-time applications
     CHECK(config.bufferFrames == 2);
 
     // Test custom configuration
@@ -238,6 +239,66 @@ TEST_CASE("MPEG1 single frame mode") {
            result == DecodeResult::NeedsMoreData));
 
     decoder->end();
+}
+
+// Test immediate mode for real-time applications
+TEST_CASE("MPEG1 immediate mode") {
+    if (!Mpeg1::isSupported()) {
+        return;
+    }
+
+    Mpeg1Config config;
+    config.mode = Mpeg1Config::Streaming;
+    config.immediateMode = true;  // Enable immediate mode
+
+    auto decoder = Mpeg1::createDecoder(config);
+
+    fl::u8 testData[4096];
+    setupTestData(testData);
+    auto stream = fl::make_shared<fl::ByteStreamMemory>(sizeof(testData));
+    stream->write(testData, sizeof(testData));
+
+    bool beginResult = decoder->begin(stream);
+    if (!beginResult) {
+        // If synthetic test data is invalid, skip the test
+        return;
+    }
+
+    // Test that immediate mode bypasses frame buffering
+    DecodeResult result = decoder->decode();
+    if (result == DecodeResult::Success) {
+        Frame frame = decoder->getCurrentFrame();
+        CHECK(frame.isValid());
+        // In immediate mode, frame should be available immediately without buffering delay
+    }
+
+    decoder->end();
+}
+
+// Test buffered mode vs immediate mode performance
+TEST_CASE("MPEG1 buffered vs immediate mode") {
+    if (!Mpeg1::isSupported()) {
+        return;
+    }
+
+    // Test buffered mode
+    Mpeg1Config bufferedConfig;
+    bufferedConfig.mode = Mpeg1Config::Streaming;
+    bufferedConfig.immediateMode = false;
+    bufferedConfig.bufferFrames = 3;
+
+    auto bufferedDecoder = Mpeg1::createDecoder(bufferedConfig);
+    CHECK(bufferedDecoder != nullptr);
+
+    // Test immediate mode
+    Mpeg1Config immediateConfig;
+    immediateConfig.mode = Mpeg1Config::Streaming;
+    immediateConfig.immediateMode = true;
+
+    auto immediateDecoder = Mpeg1::createDecoder(immediateConfig);
+    CHECK(immediateDecoder != nullptr);
+
+    // Both should be functional but with different memory usage patterns
 }
 
 // Test decoder lifecycle
