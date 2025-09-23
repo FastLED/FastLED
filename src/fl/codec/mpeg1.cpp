@@ -20,7 +20,7 @@ FL_DISABLE_WARNING_POP
 namespace fl {
 
 // MPEG1 factory implementation
-fl::shared_ptr<IDecoder> Mpeg1::createDecoder(const Mpeg1Config& config, fl::string* error_message) {
+IDecoderPtr Mpeg1::createDecoder(const Mpeg1Config& config, fl::string* error_message) {
     FL_UNUSED(error_message);
     // MPEG1 is currently supported via software decoder on all platforms
     return fl::make_shared<SoftwareMpeg1Decoder>(config);

@@ -25,7 +25,7 @@ struct Mpeg1Config {
 class Mpeg1 {
 public:
     // Create an MPEG1 decoder for the current platform
-    static fl::shared_ptr<IDecoder> createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr);
+    static IDecoderPtr createDecoder(const Mpeg1Config& config, fl::string* error_message = nullptr);
 
     // Check if MPEG1 decoding is supported on this platform
     static bool isSupported();

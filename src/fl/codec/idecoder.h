@@ -5,6 +5,7 @@
 #include "fl/str.h"
 #include "fl/stdint.h"
 #include "fl/bytestream.h"
+#include "fl/ptr.h"
 #include "fx/frame.h"
 
 namespace fl {
@@ -61,5 +62,9 @@ public:
     Frame getCurrentFrame() override { return Frame(0); }
     bool hasMoreFrames() const override { return false; }
 };
+
+// Smart pointer typedef - must come after class definition
+FASTLED_SMART_PTR(IDecoder);
+
 
 } // namespace fl

@@ -3,7 +3,7 @@
 
 namespace fl {
 
-fl::shared_ptr<IDecoder> Gif::createDecoder(const GifConfig& config, fl::string* error_message) {
+IDecoderPtr Gif::createDecoder(const GifConfig& config, fl::string* error_message) {
     // Create the software GIF decoder
     auto decoder = fl::make_shared<fl::third_party::SoftwareGifDecoder>(config.format);
 

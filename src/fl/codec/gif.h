@@ -26,7 +26,7 @@ struct GifConfig {
 class Gif {
 public:
     // Create a GIF decoder for the current platform
-    static fl::shared_ptr<IDecoder> createDecoder(const GifConfig& config, fl::string* error_message = nullptr);
+    static IDecoderPtr createDecoder(const GifConfig& config, fl::string* error_message = nullptr);
 
     // Check if GIF decoding is supported on this platform
     static bool isSupported();

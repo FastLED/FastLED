@@ -1,4 +1,5 @@
 #include "fl/file_system.h"
+#include "fl/codec/idecoder.h"
 #include "fl/unused.h"
 #include "fl/warn.h"
 #include "fl/compiler_control.h"
@@ -66,7 +67,7 @@ public:
 // Custom ByteStream that wraps MPEG1 decoder for seamless integration with Video system
 class Mpeg1ByteStream : public ByteStream {
 private:
-    fl::shared_ptr<IDecoder> decoder_;
+    IDecoderPtr decoder_;
     fl::shared_ptr<Frame> currentFrame_;
     fl::size frameSize_;
     fl::size currentPos_;
@@ -75,7 +76,7 @@ private:
     bool hasValidFrame_;
 
 public:
-    Mpeg1ByteStream(fl::shared_ptr<IDecoder> decoder, fl::size pixelsPerFrame, const char* path)
+    Mpeg1ByteStream(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
         : decoder_(decoder), currentFrame_(nullptr), frameSize_(pixelsPerFrame * 3), currentPos_(0),
           pixelsPerFrame_(pixelsPerFrame), path_(path), hasValidFrame_(false) {
         // Try to decode the first frame
@@ -330,7 +331,7 @@ Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, floa
 
     // Create MPEG1 decoder
     fl::string error_message;
-    fl::shared_ptr<IDecoder> decoder = Mpeg1::createDecoder(config, &error_message);
+    IDecoderPtr decoder = Mpeg1::createDecoder(config, &error_message);
     if (!decoder) {
         video.setError(fl::string("Failed to create MPEG1 decoder: ").append(error_message));
         return video;
