@@ -24,6 +24,10 @@
 /                     Some performance improvement.
 /----------------------------------------------------------------------------*/
 
+// Include standard library headers outside namespace to avoid conflicts
+#include <stdlib.h>
+#include <string.h>
+
 #include "tjpgd.h"
 
 namespace fl {

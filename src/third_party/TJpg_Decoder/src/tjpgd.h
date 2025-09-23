@@ -4,13 +4,18 @@
 #ifndef DEF_TJPGDEC
 #define DEF_TJPGDEC
 
+// Include standard library headers outside namespace to avoid conflicts
+#include <string.h>
+#if !defined(_WIN32)	/* Embedded platform */
+#include <stdint.h>
+#endif
+
 namespace fl {
 namespace third_party {
 
 extern "C" {
 
 #include "tjpgdcnf.h"
-#include <string.h>
 
 #if defined(_WIN32)	/* VC++ or some compiler without stdint.h */
 typedef unsigned char	uint8_t;
@@ -18,8 +23,6 @@ typedef unsigned short	uint16_t;
 typedef short			int16_t;
 typedef unsigned long	uint32_t;
 typedef long			int32_t;
-#else				/* Embedded platform */
-#include <stdint.h>
 #endif
 
 #if JD_FASTDECODE >= 1
