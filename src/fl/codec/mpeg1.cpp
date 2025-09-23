@@ -35,7 +35,7 @@ bool isSupported() {
 } // namespace mpeg1
 
 // Helper function to convert YUV to RGB
-static void yuv_to_rgb(const plm_frame_t* frame, fl::u8* rgb_buffer) {
+static void yuv_to_rgb(const fl::third_party::plm_frame_t* frame, fl::u8* rgb_buffer) {
     fl::u32 width = frame->width;
     fl::u32 height = frame->height;
 
@@ -80,7 +80,7 @@ static void yuv_to_rgb(const plm_frame_t* frame, fl::u8* rgb_buffer) {
 // MPEG1 decoder internal data structure
 struct SoftwareMpeg1Decoder::Mpeg1DecoderData {
     // pl_mpeg decoder instance
-    plm_t* plmpeg = nullptr;
+    fl::third_party::plm_t* plmpeg = nullptr;
 
     // Video properties
     fl::u16 width = 0;
@@ -109,7 +109,7 @@ struct SoftwareMpeg1Decoder::Mpeg1DecoderData {
 // Static callback wrapper for pl_mpeg
 void SoftwareMpeg1Decoder::videoDecodeCallback(void* plm_ptr, void* frame_ptr, void* user) {
     auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
-    auto* frame = static_cast<plm_frame_t*>(frame_ptr);
+    auto* frame = static_cast<fl::third_party::plm_frame_t*>(frame_ptr);
 
     if (decoder && decoder->decoderData_ && frame) {
         decoder->decoderData_->hasNewFrame = true;
@@ -268,7 +268,7 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     memcpy(decoderData_->inputBuffer.get(), tempBuffer.data(), decoderData_->totalSize);
 
     // Create pl_mpeg instance with memory buffer
-    decoderData_->plmpeg = plm_create_with_memory(
+    decoderData_->plmpeg = fl::third_party::plm_create_with_memory(
         decoderData_->inputBuffer.get(),
         decoderData_->totalSize,
         0  // Don't free when done - we manage the memory
@@ -281,27 +281,27 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
 
     // Disable audio decoding if requested
     if (config_.skipAudio) {
-        plm_set_audio_enabled(decoderData_->plmpeg, 0);
+        fl::third_party::plm_set_audio_enabled(decoderData_->plmpeg, 0);
     }
 
     // Set looping if requested
-    plm_set_loop(decoderData_->plmpeg, config_.looping ? 1 : 0);
+    fl::third_party::plm_set_loop(decoderData_->plmpeg, config_.looping ? 1 : 0);
 
     // Wait for headers to be parsed
-    if (!plm_has_headers(decoderData_->plmpeg)) {
+    if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
         // Try to decode one frame to get headers
-        plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
+        fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
     }
 
-    if (!plm_has_headers(decoderData_->plmpeg)) {
+    if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
         setError("Failed to parse MPEG1 headers");
         return false;
     }
 
     // Get video properties
-    decoderData_->width = static_cast<fl::u16>(plm_get_width(decoderData_->plmpeg));
-    decoderData_->height = static_cast<fl::u16>(plm_get_height(decoderData_->plmpeg));
-    decoderData_->frameRate = static_cast<fl::u16>(plm_get_framerate(decoderData_->plmpeg));
+    decoderData_->width = static_cast<fl::u16>(fl::third_party::plm_get_width(decoderData_->plmpeg));
+    decoderData_->height = static_cast<fl::u16>(fl::third_party::plm_get_height(decoderData_->plmpeg));
+    decoderData_->frameRate = static_cast<fl::u16>(fl::third_party::plm_get_framerate(decoderData_->plmpeg));
 
     if (decoderData_->width == 0 || decoderData_->height == 0) {
         setError("Invalid video dimensions from MPEG1 stream");
@@ -309,8 +309,8 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     }
 
     // Set up video decode callback
-    plm_set_video_decode_callback(decoderData_->plmpeg,
-        reinterpret_cast<plm_video_decode_callback>(SoftwareMpeg1Decoder::videoDecodeCallback), this);
+    fl::third_party::plm_set_video_decode_callback(decoderData_->plmpeg,
+        reinterpret_cast<fl::third_party::plm_video_decode_callback>(SoftwareMpeg1Decoder::videoDecodeCallback), this);
 
     allocateFrameBuffers();
     decoderData_->initialized = true;
@@ -332,10 +332,10 @@ bool SoftwareMpeg1Decoder::decodeNextFrame() {
     decoderData_->hasNewFrame = false;
 
     // Decode using pl_mpeg
-    plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
+    fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
 
     // Check if we have reached the end
-    if (plm_has_ended(decoderData_->plmpeg)) {
+    if (fl::third_party::plm_has_ended(decoderData_->plmpeg)) {
         return false;
     }
 
@@ -402,7 +402,7 @@ void SoftwareMpeg1Decoder::cleanupDecoder() {
     if (decoderData_) {
         // Destroy pl_mpeg instance
         if (decoderData_->plmpeg) {
-            plm_destroy(decoderData_->plmpeg);
+            fl::third_party::plm_destroy(decoderData_->plmpeg);
             decoderData_->plmpeg = nullptr;
         }
 

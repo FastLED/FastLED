@@ -151,6 +151,11 @@ See below for detailed the API documentation.
 extern "C" {
 #endif
 
+#ifdef __cplusplus
+namespace fl {
+namespace third_party {
+#endif
+
 // -----------------------------------------------------------------------------
 // Public Data Types
 
@@ -811,6 +816,8 @@ plm_samples_t *plm_audio_decode(plm_audio_t *self);
 
 
 #ifdef __cplusplus
+} // namespace third_party
+} // namespace fl
 }
 #endif
 
@@ -825,6 +832,11 @@ plm_samples_t *plm_audio_decode(plm_audio_t *self);
 // IMPLEMENTATION
 
 #ifdef PL_MPEG_IMPLEMENTATION
+
+#ifdef __cplusplus
+namespace fl {
+namespace third_party {
+#endif
 
 #include <string.h>
 #include <stdlib.h>
@@ -4436,5 +4448,9 @@ void plm_audio_idct36(int s[32][3], int ss, float *d, int dp) {
 	d[dp + 15] = t02; d[dp + 16] = 0.0;
 }
 
+#ifdef __cplusplus
+} // namespace third_party
+} // namespace fl
+#endif
 
 #endif // PL_MPEG_IMPLEMENTATION
