@@ -10,6 +10,15 @@
 #ifndef LZW_H_
 #define LZW_H_
 
+// C++ compatibility for restrict keyword
+#ifdef __cplusplus
+#ifndef restrict
+#define restrict
+#endif
+#endif
+
+#include "fl/stdint.h"
+
 /**
  * \file
  * \brief LZW decompression (interface)

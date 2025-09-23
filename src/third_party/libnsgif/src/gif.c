@@ -15,7 +15,7 @@
 #include <stdbool.h>
 
 #include "lzw.h"
-#include "nsgif.h"
+#include "../include/nsgif.h"
 
 /** Default minimum allowable frame delay in cs. */
 #define NSGIF_FRAME_DELAY_MIN 2

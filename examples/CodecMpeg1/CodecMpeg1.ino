@@ -46,7 +46,7 @@ void setup() {
     frameInterval = 1000 / TARGET_FPS;
 
     // Check if MPEG1 decoding is supported
-    if (!fl::mpeg1::isSupported()) {
+    if (!fl::Mpeg1::isSupported()) {
         Serial.println("MPEG1 decoding not supported on this platform");
         showErrorPattern();
         return;
@@ -64,7 +64,7 @@ void setup() {
 
     // Create decoder
     fl::string error_msg;
-    videoDecoder = fl::mpeg1::createDecoder(config, &error_msg);
+    videoDecoder = fl::Mpeg1::createDecoder(config, &error_msg);
 
     if (!videoDecoder) {
         Serial.println("Failed to create MPEG1 decoder: " + error_msg);
@@ -155,8 +155,8 @@ void displayVideoFrame(const fl::Frame& frame) {
     for (int y = 0; y < ledHeight; y++) {
         for (int x = 0; x < ledWidth; x++) {
             // Calculate source pixel coordinates (with scaling)
-            int srcX = (x * frame.getWidth()) / ledWidth;
-            int srcY = (y * frame.getHeight()) / ledHeight;
+            int srcX = (x * (int)frame.getWidth()) / ledWidth;
+            int srcY = (y * (int)frame.getHeight()) / ledHeight;
 
             // Get pixel from frame using Frame's rgb() method
             CRGB color = getPixelFromVideoFrame(frame, srcX, srcY);
@@ -171,14 +171,14 @@ void displayVideoFrame(const fl::Frame& frame) {
 }
 
 CRGB getPixelFromVideoFrame(const fl::Frame& frame, int x, int y) {
-    if (x >= frame.getWidth() || y >= frame.getHeight() || !frame.isValid()) {
+    if (x >= (int)frame.getWidth() || y >= (int)frame.getHeight() || !frame.isValid()) {
         return CRGB::Black;
     }
 
-    int pixelIndex = y * frame.getWidth() + x;
+    int pixelIndex = y * (int)frame.getWidth() + x;
 
     // Frame now stores data as CRGB, so we can directly access it
-    if (pixelIndex < frame.size()) {
+    if (pixelIndex < (int)frame.size()) {
         return frame.rgb()[pixelIndex];
     }
 

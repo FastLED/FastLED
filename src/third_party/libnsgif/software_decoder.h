@@ -1,0 +1,119 @@
+#pragma once
+
+#include "fl/codec/idecoder.h"
+#include "fl/codec/common.h"
+#include "fl/namespace.h"
+#include "fl/shared_ptr.h"
+#include "fl/str.h"
+#include "fl/stdint.h"
+#include "fl/scoped_array.h"
+#include "fx/frame.h"
+
+// Include the actual nsgif header
+extern "C" {
+#include "third_party/libnsgif/include/nsgif.h"
+}
+
+// Include the namespaced libnsgif
+namespace fl {
+namespace third_party {
+    // Use the actual types from nsgif.h
+    using nsgif_t = ::nsgif_t;
+    using nsgif_bitmap_cb_vt = ::nsgif_bitmap_cb_vt;
+    using nsgif_bitmap_fmt_t = ::nsgif_bitmap_fmt;
+    using nsgif_error = ::nsgif_error;
+    using nsgif_bitmap_t = ::nsgif_bitmap_t;
+    using nsgif_info_t = ::nsgif_info_t;
+
+    // Use the actual functions from nsgif.h
+    using ::nsgif_create;
+    using ::nsgif_destroy;
+    using ::nsgif_data_scan;
+    using ::nsgif_data_complete;
+    using ::nsgif_frame_decode;
+    using ::nsgif_get_info;
+    using ::nsgif_strerror;
+
+    // Simple bitmap wrapper for libnsgif integration with FastLED Frame
+    struct GifBitmap {
+        fl::scoped_array<fl::u8> pixels;
+        fl::u16 width;
+        fl::u16 height;
+        fl::u8 bytesPerPixel;
+
+        GifBitmap(fl::u16 w, fl::u16 h, fl::u8 bpp)
+            : pixels(fl::make_scoped_array<fl::u8>(w * h * bpp))
+            , width(w)
+            , height(h)
+            , bytesPerPixel(bpp) {
+        }
+    };
+
+    /**
+     * Software GIF decoder implementation using libnsgif.
+     *
+     * This decoder provides full animated GIF support through the FastLED IDecoder
+     * interface, enabling streaming decode of GIF animations with proper frame timing
+     * and disposal method handling.
+     */
+    class SoftwareGifDecoder : public fl::IDecoder {
+    private:
+        nsgif_t* gif_;
+        fl::ByteStreamPtr stream_;
+        fl::shared_ptr<fl::Frame> currentFrame_;
+        fl::string errorMessage_;
+        bool ready_;
+        bool hasError_;
+        bool dataComplete_;
+
+        // Animation state
+        fl::u32 currentFrameIndex_;
+        fl::u32 totalFrames_;
+        bool endOfStream_;
+
+        // Bitmap callbacks for libnsgif
+        static nsgif_bitmap_cb_vt bitmapCallbacks_;
+
+        // Configuration
+        fl::PixelFormat outputFormat_;
+
+        // Internal helper methods
+        bool initializeDecoder();
+        void cleanupDecoder();
+        void setError(const fl::string& message);
+        bool loadMoreData();
+        fl::shared_ptr<fl::Frame> convertBitmapToFrame(nsgif_bitmap_t* bitmap);
+
+        // Static callbacks for libnsgif
+        static nsgif_bitmap_t* bitmapCreate(int width, int height);
+        static void bitmapDestroy(nsgif_bitmap_t* bitmap);
+        static fl::u8* bitmapGetBuffer(nsgif_bitmap_t* bitmap);
+
+    public:
+        explicit SoftwareGifDecoder(fl::PixelFormat format = fl::PixelFormat::RGB888);
+        ~SoftwareGifDecoder();
+
+        // IDecoder interface implementation
+        bool begin(fl::ByteStreamPtr stream) override;
+        void end() override;
+        bool isReady() const override { return ready_; }
+        bool hasError(fl::string* msg = nullptr) const override;
+
+        fl::DecodeResult decode() override;
+        fl::Frame getCurrentFrame() override;
+        bool hasMoreFrames() const override;
+
+        // Animation support methods
+        fl::u32 getFrameCount() const override;
+        fl::u32 getCurrentFrameIndex() const override { return currentFrameIndex_; }
+        bool seek(fl::u32 frameIndex) override;
+
+        // Get GIF properties
+        fl::u16 getWidth() const;
+        fl::u16 getHeight() const;
+        bool isAnimated() const;
+        fl::u32 getLoopCount() const;
+    };
+
+} // namespace third_party
+} // namespace fl
