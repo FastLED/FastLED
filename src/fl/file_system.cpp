@@ -3,6 +3,9 @@
 #include "fl/warn.h"
 #include "fl/compiler_control.h"
 #include "fl/has_include.h"
+#include "fl/codec/jpeg.h"
+#include "fl/vector.h"
+#include "fl/math_macros.h"
 
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/fs_wasm.h"
@@ -189,6 +192,73 @@ bool FileSystem::readText(const char *path, fl::string *out) {
     file->close();
     FASTLED_DBG_IF(!wrote, "Failed to write any data to the output string.");
     return wrote;
+}
+
+FramePtr FileSystem::loadJpeg(const char *path, const JpegDecoderConfig &config,
+                               fl::string *error_message) {
+    // Open the JPEG file
+    FileHandlePtr file = openRead(path);
+    if (!file || !file->valid()) {
+        if (error_message) {
+            *error_message = "Failed to open file: ";
+            error_message->append(path);
+        }
+        FASTLED_WARN("Failed to open JPEG file: " << path);
+        return FramePtr();
+    }
+
+    // Get file size
+    fl::size fileSize = file->size();
+    if (fileSize == 0) {
+        if (error_message) {
+            *error_message = "File is empty: ";
+            error_message->append(path);
+        }
+        file->close();
+        return FramePtr();
+    }
+
+    // Read the entire file into memory
+    // For small files, use stack allocation; for larger files use heap
+    fl::vector<u8> buffer;
+    buffer.reserve(fileSize);
+    buffer.resize(fileSize);
+
+    fl::size bytesRead = 0;
+    while (bytesRead < fileSize && file->available()) {
+        fl::size chunkSize = fl_min<fl::size>(4096, fileSize - bytesRead);
+        fl::size n = file->read(buffer.data() + bytesRead, chunkSize);
+        if (n == 0) {
+            break; // No more data to read
+        }
+        bytesRead += n;
+    }
+
+    file->close();
+
+    if (bytesRead != fileSize) {
+        if (error_message) {
+            *error_message = "Failed to read complete file. Expected ";
+            error_message->append(static_cast<u32>(fileSize));
+            error_message->append(" bytes, got ");
+            error_message->append(static_cast<u32>(bytesRead));
+        }
+        FASTLED_WARN("Failed to read complete JPEG file: " << path);
+        return FramePtr();
+    }
+
+    // Create a span from the buffer
+    fl::span<const u8> jpegData(buffer.data(), buffer.size());
+
+    // Decode the JPEG
+    FramePtr frame = Jpeg::decode(config, jpegData, error_message);
+
+    if (!frame && error_message && error_message->empty()) {
+        *error_message = "Failed to decode JPEG from file: ";
+        error_message->append(path);
+    }
+
+    return frame;
 }
 } // namespace fl
 
