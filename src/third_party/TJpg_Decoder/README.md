@@ -243,8 +243,8 @@ The JPEG decoder integrates seamlessly with FastLED's codec architecture:
 Existing test framework: `tests/codec_jpeg.cpp`
 
 ### Current Test Coverage
-- ✅ **Availability Testing**: `jpeg::isSupported()` detection
-- ✅ **Factory Testing**: `jpeg::createDecoder()` with error handling
+- ✅ **Availability Testing**: `Jpeg::isSupported()` detection
+- ✅ **Factory Testing**: `Jpeg::decode()` static methods
 - ✅ **Lifecycle Testing**: `begin()`, `end()`, and state management
 - ✅ **Configuration Testing**: `JpegConfig` parameter validation
 - ✅ **Error Handling**: Null stream and invalid input handling

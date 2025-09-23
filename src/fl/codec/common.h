@@ -7,57 +7,10 @@
 #include "fl/bytestream.h"
 #include "fl/scoped_array.h"
 #include "fx/frame.h"
+#include "fl/codec/idecoder.h"
 
 namespace fl {
 
-// Decoder result types
-enum class DecodeResult {
-    Success,
-    NeedsMoreData,
-    EndOfStream,
-    Error,
-    UnsupportedFormat
-};
-
-
-// Base decoder interface
-class IDecoder {
-public:
-    virtual ~IDecoder() = default;
-
-    // Lifecycle methods
-    virtual bool begin(fl::ByteStreamPtr stream) = 0;
-    virtual void end() = 0;
-    virtual bool isReady() const = 0;
-    virtual bool hasError(fl::string* msg = nullptr) const = 0;
-
-    // Decoding methods
-    virtual DecodeResult decode() = 0;
-    virtual Frame getCurrentFrame() = 0;
-    virtual bool hasMoreFrames() const = 0;
-
-    // Optional methods for advanced usage
-    virtual fl::u32 getFrameCount() const { return 0; }
-    virtual fl::u32 getCurrentFrameIndex() const { return 0; }
-    virtual bool seek(fl::u32 frameIndex) { (void)frameIndex; return false; }
-};
-
-// Null decoder implementation for unsupported platforms
-class NullDecoder : public IDecoder {
-public:
-    bool begin(fl::ByteStreamPtr) override { return false; }
-    void end() override {}
-    bool isReady() const override { return false; }
-    bool hasError(fl::string* msg = nullptr) const override {
-        if (msg) {
-            *msg = "Codec not supported on this platform";
-        }
-        return true;
-    }
-
-    DecodeResult decode() override { return DecodeResult::UnsupportedFormat; }
-    Frame getCurrentFrame() override { return Frame(0); }
-    bool hasMoreFrames() const override { return false; }
-};
+// Common codec utilities and shared functionality
 
 } // namespace fl
