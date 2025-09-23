@@ -3,21 +3,15 @@
 #include "fl/str.h"
 #include "fl/compiler_control.h"
 
-// Enable simplewebp only on platforms that support it (not Arduino/embedded)
-#if !defined(ARDUINO) && !defined(__AVR__) && !defined(ESP8266)
-    #define SIMPLEWEBP_IMPLEMENTATION
-    #include "third_party/simplewebp/src/simplewebp.h"
-    #define WEBP_SUPPORTED 1
-#else
-    #define WEBP_SUPPORTED 0
-#endif
+// Enable simplewebp on all platforms now that integer types are properly defined
+#define SIMPLEWEBP_IMPLEMENTATION
+#include "third_party/simplewebp/src/simplewebp.h"
 
 #include "fx/frame.h"
 
 namespace fl {
 
 bool Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> data, Frame* frame, fl::string* error_message) {
-#if WEBP_SUPPORTED
     if (!frame) {
         if (error_message) {
             *error_message = "Frame pointer is null";
@@ -54,19 +48,9 @@ bool Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> data, 
         *error_message = "Failed to access frame buffers for copying";
     }
     return false;
-#else
-    FL_UNUSED(config);
-    FL_UNUSED(data);
-    FL_UNUSED(frame);
-    if (error_message) {
-        *error_message = "WebP decoding not supported on this platform";
-    }
-    return false;
-#endif
 }
 
 FramePtr Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
-#if WEBP_SUPPORTED
     // Set up simplewebp allocator
     simplewebp_allocator allocator;
     allocator.alloc = malloc;
@@ -119,22 +103,13 @@ FramePtr Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> da
 
     // Create and return frame
     return fl::make_shared<Frame>(buffer.get(), static_cast<fl::u16>(width), static_cast<fl::u16>(height), config.format);
-#else
-    FL_UNUSED(config);
-    FL_UNUSED(data);
-    if (error_message) {
-        *error_message = "WebP decoding not supported on this platform";
-    }
-    return nullptr;
-#endif
 }
 
 bool Webp::isSupported() {
-    return WEBP_SUPPORTED;
+    return true;
 }
 
 bool Webp::getDimensions(fl::span<const fl::u8> data, fl::u16* width, fl::u16* height, fl::string* error_message) {
-#if WEBP_SUPPORTED
     if (!width || !height) {
         if (error_message) {
             *error_message = "Width or height pointer is null";
@@ -172,19 +147,9 @@ bool Webp::getDimensions(fl::span<const fl::u8> data, fl::u16* width, fl::u16* h
 
     simplewebp_unload(webp_decoder);
     return true;
-#else
-    FL_UNUSED(data);
-    FL_UNUSED(width);
-    FL_UNUSED(height);
-    if (error_message) {
-        *error_message = "WebP dimension detection not supported on this platform";
-    }
-    return false;
-#endif
 }
 
 bool Webp::isLossless(fl::span<const fl::u8> data, bool* lossless, fl::string* error_message) {
-#if WEBP_SUPPORTED
     if (!lossless) {
         if (error_message) {
             *error_message = "Lossless pointer is null";
@@ -222,14 +187,6 @@ bool Webp::isLossless(fl::span<const fl::u8> data, bool* lossless, fl::string* e
 
     simplewebp_unload(webp_decoder);
     return true;
-#else
-    FL_UNUSED(data);
-    FL_UNUSED(lossless);
-    if (error_message) {
-        *error_message = "WebP lossless detection not supported on this platform";
-    }
-    return false;
-#endif
 }
 
 } // namespace fl

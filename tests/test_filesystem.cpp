@@ -195,7 +195,7 @@ TEST_CASE("FileSystem test with binary file loading") {
     REQUIRE(ok);
 
     // Try to read the JPEG test file
-    FileHandlePtr handle = fs.openRead("data/codec/jpdata.jpg");
+    FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -234,4 +234,3 @@ TEST_CASE("FileSystem test with binary file loading") {
     handle->close();
     fs.end();
 }
-
