@@ -839,7 +839,35 @@ namespace third_party {
 #endif
 
 #include <string.h>
+
+// Fix for Windows/Zig libcxx compatibility - avoid stdlib.h entirely on problematic platforms
+#if defined(_WIN32) && defined(__clang__) && defined(_LIBCPP_VERSION)
+// Skip stdlib.h inclusion on Windows with Zig compiler
+#define _STDLIB_H_
+#define _STDLIB_H
+#define __STDLIB_H__
+
+// Need to step outside the namespace to provide global stdlib function declarations
+#ifdef __cplusplus
+} // end namespace third_party
+} // end namespace fl
+
+// Provide the stdlib functions that pl_mpeg actually needs in global scope
+extern "C" {
+void* malloc(size_t size);
+void free(void* ptr);
+void* realloc(void* ptr, size_t size);
+void* memset(void* ptr, int value, size_t size);
+int abs(int x);
+}
+
+namespace fl {
+namespace third_party {
+#endif
+
+#else
 #include <stdlib.h>
+#endif
 #ifndef PLM_NO_STDIO
 #include <stdio.h>
 #endif

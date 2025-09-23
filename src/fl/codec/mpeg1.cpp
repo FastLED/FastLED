@@ -23,6 +23,7 @@ namespace fl {
 namespace mpeg1 {
 
 fl::shared_ptr<IDecoder> createDecoder(const Mpeg1Config& config, fl::string* error_message) {
+    FL_UNUSED(error_message);
     // MPEG1 is currently supported via software decoder on all platforms
     return fl::make_shared<SoftwareMpeg1Decoder>(config);
 }
@@ -108,6 +109,7 @@ struct SoftwareMpeg1Decoder::Mpeg1DecoderData {
 
 // Static callback wrapper for pl_mpeg
 void SoftwareMpeg1Decoder::videoDecodeCallback(void* plm_ptr, void* frame_ptr, void* user) {
+    FL_UNUSED(plm_ptr);
     auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
     auto* frame = static_cast<fl::third_party::plm_frame_t*>(frame_ptr);
 

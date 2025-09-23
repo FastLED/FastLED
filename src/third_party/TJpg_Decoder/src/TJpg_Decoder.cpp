@@ -8,6 +8,7 @@ https://github.com/Bodmer/TJpg_Decoder
 */
 
 #include "TJpg_Decoder.h"
+#include "fl/unused.h"
 
 namespace fl {
 namespace third_party {
@@ -81,7 +82,7 @@ void TJpg_Decoder::setCallback(SketchCallback sketchCallback)
 size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
 {
   TJpg_Decoder *thisPtr = TJpgDec.thisPtr;
-  jdec = jdec; // Supress warning
+  FL_UNUSED(jdec);
 
   // Handle an array input
   if (thisPtr->jpg_source == TJPG_ARRAY) {
@@ -110,7 +111,7 @@ int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect)
   // This is a static function so create a pointer to access other members of the class
   TJpg_Decoder *thisPtr = TJpgDec.thisPtr;
 
-  jdec = jdec; // Supress warning as ID is not used
+  FL_UNUSED(jdec);
 
   // Retrieve rendering parameters and add any offset
   int16_t  x = jrect->left + thisPtr->jpeg_x;
