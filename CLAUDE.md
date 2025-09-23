@@ -29,6 +29,7 @@ This project uses directory-specific agent guidelines. See:
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
+- **`codeup`**: Global command - when asked to run `codeup`, know it's a globally available command
 
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`
