@@ -126,9 +126,37 @@ FASTLED_NAMESPACE_END
 #endif
 #endif
 
-// Emulution layer to support RGBW leds on RGB controllers. This works by creating
-// a side buffer dedicated for the RGBW data. The RGB data is then converted to RGBW
-// and sent to the delegate controller for rendering as if it were RGB data.
+/// @brief Emulation layer to support RGBW LEDs on RGB controllers
+/// @details This template class allows you to use RGBW (4-channel) LED strips with
+/// controllers that only support RGB (3-channel) output. It works by:
+/// 1. Creating an internal buffer to store the converted RGBW data
+/// 2. Converting RGB color values to RGBW using configurable color conversion modes
+/// 3. Packing the RGBW data (4 bytes per pixel) into RGB format (3 bytes) for transmission
+/// 4. Sending the packed data to the underlying RGB controller
+///
+/// @tparam CONTROLLER The base RGB controller type (e.g., WS2812)
+/// @tparam RGB_ORDER The color channel ordering (e.g., GRB for WS2812)
+///
+/// Usage Example:
+/// @code
+/// // Define your base RGB controller (must use RGB ordering, no reordering allowed)
+/// typedef WS2812<DATA_PIN, RGB> ControllerT;
+///
+/// // Create the RGBW emulator with your desired color ordering
+/// static RGBWEmulatedController<ControllerT, GRB> rgbwController;
+///
+/// // Add to FastLED
+/// FastLED.addLeds(&rgbwController, leds, NUM_LEDS);
+/// @endcode
+///
+/// Color Conversion Modes (via Rgbw parameter):
+/// - kRGBWExactColors: Preserves color accuracy, reduces max brightness
+/// - kRGBWMaxBrightness: Maximizes brightness, may oversaturate colors
+/// - kRGBWBoostedWhite: Boosts white channel for better whites
+/// - kRGBWNullWhitePixel: Disables white channel (RGB mode only)
+///
+/// @note The base CONTROLLER must use RGB ordering (no internal reordering).
+/// Color channel reordering is handled by this wrapper class via RGB_ORDER.
 FASTLED_NAMESPACE_BEGIN
 
 template <
@@ -161,9 +189,13 @@ class RGBWEmulatedController
     // The delegated controller must do no reordering.
     static_assert(RGB == CONTROLLER::RGB_ORDER_VALUE, "The delegated controller MUST NOT do reordering");
 
+    /// @brief Constructor with optional RGBW configuration
+    /// @param rgbw Configuration for RGBW color conversion (defaults to kRGBWExactColors mode)
     RGBWEmulatedController(const Rgbw& rgbw = RgbwDefault()) {
         this->setRgbw(rgbw);
     };
+
+    /// @brief Destructor - cleans up the internal RGBW buffer
     ~RGBWEmulatedController() { delete[] mRGBWPixels; }
 
 	virtual void *beginShowLeds(int size) override {
@@ -174,6 +206,13 @@ class RGBWEmulatedController
 		return mController.callEndShowLeds(data);
 	}
 
+    /// @brief Main rendering function that converts RGB to RGBW and shows pixels
+    /// @details This function:
+    /// 1. Converts each RGB pixel to RGBW format based on the configured conversion mode
+    /// 2. Packs the RGBW data into a format the RGB controller can transmit
+    /// 3. Temporarily bypasses color correction/temperature on the base controller
+    /// 4. Sends the packed data to the physical LED strip
+    /// @param pixels The pixel controller containing RGB data to be converted
     virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
         // Ensure buffer is large enough
         ensureBuffer(pixels.size());
@@ -205,12 +244,18 @@ class RGBWEmulatedController
     }
 
   private:
-    // Needed by the interface.
+    /// @brief Initialize the controller and disable the base controller
+    /// @details The base controller is kept disabled to prevent it from
+    /// refreshing with its own settings. We only enable it temporarily during show().
     void init() override {
 		mController.init();
 		mController.setEnabled(false);
 	}
 
+    /// @brief Ensures the internal RGBW buffer is large enough for the LED count
+    /// @param num_leds Number of RGB LEDs to convert to RGBW
+    /// @details Reallocates the buffer if needed, accounting for the 4:3 byte ratio
+    /// when packing RGBW data into RGB format
     void ensureBuffer(int32_t num_leds) {
         if (num_leds != mNumRGBLeds) {
             mNumRGBLeds = num_leds;
@@ -230,10 +275,10 @@ class RGBWEmulatedController
         }
     }
 
-    CRGB *mRGBWPixels = nullptr;
-    int32_t mNumRGBLeds = 0;
-    int32_t mNumRGBWLeds = 0;
-    ControllerT mController; // Real controller.
+    CRGB *mRGBWPixels = nullptr;        ///< Internal buffer for packed RGBW data
+    int32_t mNumRGBLeds = 0;            ///< Number of RGB LEDs in the original array
+    int32_t mNumRGBWLeds = 0;           ///< Number of RGBW pixels the buffer can hold
+    ControllerT mController;             ///< The underlying RGB controller instance
 };
 
 /// @defgroup ClockedChipsets Clocked Chipsets
