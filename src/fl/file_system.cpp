@@ -26,8 +26,136 @@
 #include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/unused.h"
+#include "fl/codec/mpeg1.h"
+#include "fl/bytestream.h"
+#include "fl/math_macros.h" // for fl_min
+#include <string.h> // for memcpy
 
 namespace fl {
+
+// Adapter to convert FileHandle to ByteStream for codec input
+class ByteStreamFileHandle : public ByteStream {
+private:
+    FileHandlePtr fileHandle_;
+
+public:
+    explicit ByteStreamFileHandle(FileHandlePtr handle) : fileHandle_(handle) {}
+
+    bool available(fl::size bytesRequested) const override {
+        if (!fileHandle_) return false;
+        return fileHandle_->available() && fileHandle_->bytesLeft() >= bytesRequested;
+    }
+
+    fl::size read(fl::u8* dst, fl::size bytesToRead) override {
+        if (!fileHandle_) return 0;
+        return fileHandle_->read(dst, bytesToRead);
+    }
+
+    const char* path() const override {
+        if (!fileHandle_) return "INVALID_HANDLE";
+        return fileHandle_->path();
+    }
+
+    void close() override {
+        if (fileHandle_) {
+            fileHandle_->close();
+        }
+    }
+};
+
+// Custom ByteStream that wraps MPEG1 decoder for seamless integration with Video system
+class Mpeg1ByteStream : public ByteStream {
+private:
+    fl::shared_ptr<IDecoder> decoder_;
+    fl::shared_ptr<Frame> currentFrame_;
+    fl::size frameSize_;
+    fl::size currentPos_;
+    fl::size pixelsPerFrame_;
+    fl::string path_;
+    bool hasValidFrame_;
+
+public:
+    Mpeg1ByteStream(fl::shared_ptr<IDecoder> decoder, fl::size pixelsPerFrame, const char* path)
+        : decoder_(decoder), currentFrame_(nullptr), frameSize_(pixelsPerFrame * 3), currentPos_(0),
+          pixelsPerFrame_(pixelsPerFrame), path_(path), hasValidFrame_(false) {
+        // Try to decode the first frame
+        decodeNextFrameIfNeeded();
+    }
+
+    bool available(fl::size bytesRequested) const override {
+        if (!decoder_ || !hasValidFrame_) {
+            return false;
+        }
+        // Check if we have enough bytes remaining in current frame or if we can get next frame
+        return (currentPos_ < frameSize_) || decoder_->hasMoreFrames();
+    }
+
+    fl::size read(fl::u8* dst, fl::size bytesToRead) override {
+        if (!decoder_ || !hasValidFrame_) {
+            return 0;
+        }
+
+        fl::size totalRead = 0;
+
+        while (bytesToRead > 0 && hasValidFrame_) {
+            fl::size remainingInFrame = frameSize_ - currentPos_;
+
+            if (remainingInFrame == 0) {
+                // Need next frame
+                if (!decodeNextFrameIfNeeded()) {
+                    break;
+                }
+                remainingInFrame = frameSize_ - currentPos_;
+            }
+
+            fl::size toRead = fl::fl_min(bytesToRead, remainingInFrame);
+            if (toRead > 0 && currentFrame_ && currentFrame_->rgb()) {
+                memcpy(dst + totalRead, (fl::u8*)currentFrame_->rgb() + currentPos_, toRead);
+                currentPos_ += toRead;
+                totalRead += toRead;
+                bytesToRead -= toRead;
+            } else {
+                break;
+            }
+        }
+
+        return totalRead;
+    }
+
+    const char* path() const override {
+        return path_.c_str();
+    }
+
+    void close() override {
+        if (decoder_) {
+            decoder_->end();
+        }
+    }
+
+private:
+    bool decodeNextFrameIfNeeded() {
+        if (currentPos_ >= frameSize_ || !hasValidFrame_) {
+            // Need to decode next frame
+            if (!decoder_->hasMoreFrames()) {
+                hasValidFrame_ = false;
+                return false;
+            }
+
+            DecodeResult result = decoder_->decode();
+            if (result == DecodeResult::Success) {
+                Frame decodedFrame = decoder_->getCurrentFrame();
+                currentFrame_ = fl::make_shared<Frame>(decodedFrame);
+                currentPos_ = 0;
+                hasValidFrame_ = true;
+                return true;
+            } else {
+                hasValidFrame_ = false;
+                return false;
+            }
+        }
+        return hasValidFrame_;
+    }
+};
 
 class NullFileHandle : public FileHandle {
   public:
@@ -175,6 +303,57 @@ Video FileSystem::openVideo(const char *path, fl::size pixelsPerFrame, float fps
         return video;
     }
     video.begin(file);
+    return video;
+}
+
+Video FileSystem::openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps,
+                                 fl::size nFrameHistory) {
+    Video video(pixelsPerFrame, fps, nFrameHistory);
+
+    // Open the MPEG1 file from SD card
+    FileHandlePtr file = openRead(path);
+    if (!file) {
+        video.setError(fl::string("Could not open MPEG1 file: ").append(path));
+        return video;
+    }
+
+    // Create ByteStream adapter for the file
+    fl::shared_ptr<ByteStreamFileHandle> fileStream =
+        fl::make_shared<ByteStreamFileHandle>(file);
+
+    // Create MPEG1 decoder configuration
+    Mpeg1Config config;
+    config.mode = Mpeg1Config::Streaming;
+    config.targetFps = static_cast<fl::u16>(fps);
+    config.looping = false; // Can be made configurable later
+    config.skipAudio = true; // Skip audio for LED applications
+
+    // Create MPEG1 decoder
+    fl::string error_message;
+    fl::shared_ptr<IDecoder> decoder = Mpeg1::createDecoder(config, &error_message);
+    if (!decoder) {
+        video.setError(fl::string("Failed to create MPEG1 decoder: ").append(error_message));
+        return video;
+    }
+
+    // Initialize decoder with file stream
+    if (!decoder->begin(fileStream)) {
+        fl::string decoder_error;
+        decoder->hasError(&decoder_error);
+        video.setError(fl::string("Failed to initialize MPEG1 decoder: ").append(decoder_error));
+        return video;
+    }
+
+    // Create custom ByteStream that provides decoded frames
+    fl::shared_ptr<Mpeg1ByteStream> mpeg1Stream =
+        fl::make_shared<Mpeg1ByteStream>(decoder, pixelsPerFrame, path);
+
+    // Initialize video with the MPEG1 stream
+    if (!video.beginStream(mpeg1Stream)) {
+        video.setError(fl::string("Failed to initialize video with MPEG1 stream"));
+        return video;
+    }
+
     return video;
 }
 

@@ -59,6 +59,9 @@ class FileSystem {
     Video
     openVideo(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
               fl::size nFrameHistory = 0); // Null if video could not be opened.
+    Video
+    openMpeg1Video(const char *path, fl::size pixelsPerFrame, float fps = 30.0f,
+                   fl::size nFrameHistory = 0); // Open MPEG1 video file
     bool readText(const char *path, string *out);
     bool readJson(const char *path, Json *doc);
     bool readScreenMaps(const char *path, fl::fl_map<string, ScreenMap> *out,
