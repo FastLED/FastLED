@@ -41,6 +41,8 @@ dependencies = [
     "fasteners>=0.20",
     "esptool>=5.0.2",
     "docker",
+    "pillow>=11.3.0",
+    "ffmpeg-python>=0.2.0",
 ]
 
 [build-system]
