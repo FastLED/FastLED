@@ -68,7 +68,6 @@ namespace third_party {
 
         // Animation state
         fl::u32 currentFrameIndex_;
-        fl::u32 totalFrames_;
         bool endOfStream_;
 
         // Bitmap callbacks for libnsgif

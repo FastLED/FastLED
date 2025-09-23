@@ -93,10 +93,9 @@ struct SoftwareMpeg1Decoder::Mpeg1DecoderData {
 };
 
 // Static callback wrapper for pl_mpeg
-void SoftwareMpeg1Decoder::videoDecodeCallback(void* plm_ptr, void* frame_ptr, void* user) {
+void SoftwareMpeg1Decoder::videoDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_frame_t* frame, void* user) {
     FL_UNUSED(plm_ptr);
     auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
-    auto* frame = static_cast<fl::third_party::plm_frame_t*>(frame_ptr);
 
     if (decoder && decoder->decoderData_ && frame) {
         decoder->decoderData_->hasNewFrame = true;
@@ -297,7 +296,7 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
 
     // Set up video decode callback
     fl::third_party::plm_set_video_decode_callback(decoderData_->plmpeg,
-        reinterpret_cast<fl::third_party::plm_video_decode_callback>(SoftwareMpeg1Decoder::videoDecodeCallback), this);
+        SoftwareMpeg1Decoder::videoDecodeCallback, this);
 
     allocateFrameBuffers();
     decoderData_->initialized = true;

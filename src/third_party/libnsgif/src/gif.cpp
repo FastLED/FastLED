@@ -521,7 +521,7 @@ static nsgif_error nsgif__decode_complex(
 				}
 			} else {
 				while (row_available-- > 0) {
-					register uint32_t colour;
+					uint32_t colour;
 					colour = *uncompressed++;
 					if (colour != transparency_index) {
 						*frame_scanline =
@@ -1446,6 +1446,12 @@ static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
 		bitmap_fmt = (le) ? NSGIF_BITMAP_FMT_R8G8B8A8
 		                  : NSGIF_BITMAP_FMT_A8B8G8R8;
 		break;
+	case NSGIF_BITMAP_FMT_R8G8B8A8:
+	case NSGIF_BITMAP_FMT_B8G8R8A8:
+	case NSGIF_BITMAP_FMT_A8R8G8B8:
+	case NSGIF_BITMAP_FMT_A8B8G8R8:
+		/* These are already byte-wise formats, no conversion needed */
+		break;
 	default:
 		break;
 	}
@@ -1465,6 +1471,13 @@ static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
 
 	case NSGIF_BITMAP_FMT_A8B8G8R8:
 			{ struct nsgif_colour_layout result = {3, 2, 1, 0}; return result; }
+
+	case NSGIF_BITMAP_FMT_RGBA8888:
+	case NSGIF_BITMAP_FMT_BGRA8888:
+	case NSGIF_BITMAP_FMT_ARGB8888:
+	case NSGIF_BITMAP_FMT_ABGR8888:
+		/* These should have been converted to byte-wise formats above */
+		{ struct nsgif_colour_layout result = {0, 1, 2, 3}; return result; }
 	}
 }
 

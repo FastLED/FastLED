@@ -3,6 +3,7 @@
 #include "fl/codec/common.h"
 #include "fl/vector.h"
 #include "fl/shared_ptr.h"
+#include "third_party/pl_mpeg/driver.h"
 
 namespace fl {
 namespace third_party {
@@ -40,7 +41,6 @@ private:
     fl::vector<fl::shared_ptr<Frame>> frameBuffer_;
     fl::u8 currentFrameIndex_ = 0;
     fl::u8 lastDecodedIndex_ = 0;
-    fl::u8 totalFrames_ = 0;
     bool endOfStream_ = false;
 
     // Internal methods
@@ -78,7 +78,7 @@ public:
     fl::u16 getFrameRate() const;
 
     // Static callback for pl_mpeg video decoding
-    static void videoDecodeCallback(void* plm, void* frame, void* user);
+    static void videoDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_frame_t* frame, void* user);
 };
 
 } // namespace third_party

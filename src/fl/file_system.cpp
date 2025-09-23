@@ -71,14 +71,13 @@ private:
     fl::shared_ptr<Frame> currentFrame_;
     fl::size frameSize_;
     fl::size currentPos_;
-    fl::size pixelsPerFrame_;
     fl::string path_;
     bool hasValidFrame_;
 
 public:
     Mpeg1ByteStream(IDecoderPtr decoder, fl::size pixelsPerFrame, const char* path)
         : decoder_(decoder), currentFrame_(nullptr), frameSize_(pixelsPerFrame * 3), currentPos_(0),
-          pixelsPerFrame_(pixelsPerFrame), path_(path), hasValidFrame_(false) {
+          path_(path), hasValidFrame_(false) {
         // Try to decode the first frame
         decodeNextFrameIfNeeded();
     }

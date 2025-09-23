@@ -24,7 +24,6 @@ SoftwareGifDecoder::SoftwareGifDecoder(fl::PixelFormat format)
     , hasError_(false)
     , dataComplete_(false)
     , currentFrameIndex_(0)
-    , totalFrames_(0)
     , endOfStream_(false)
     , outputFormat_(format) {
 }
@@ -56,7 +55,6 @@ void SoftwareGifDecoder::end() {
     hasError_ = false;
     dataComplete_ = false;
     currentFrameIndex_ = 0;
-    totalFrames_ = 0;
     endOfStream_ = false;
     errorMessage_.clear();
 }
@@ -110,6 +108,12 @@ fl::DecodeResult SoftwareGifDecoder::decode() {
             endOfStream_ = true;
             return fl::DecodeResult::EndOfStream;
 
+        case NSGIF_ERR_OOM:
+        case NSGIF_ERR_DATA:
+        case NSGIF_ERR_BAD_FRAME:
+        case NSGIF_ERR_DATA_FRAME:
+        case NSGIF_ERR_DATA_COMPLETE:
+        case NSGIF_ERR_FRAME_DISPLAY:
         default:
             setError(fl::string("GIF decode error: ") + nsgif_strerror(result));
             return fl::DecodeResult::Error;
@@ -205,6 +209,7 @@ bool SoftwareGifDecoder::initializeDecoder() {
             break;
         case fl::PixelFormat::RGB888:
         case fl::PixelFormat::RGB565:
+        case fl::PixelFormat::YUV420:
         default:
             // Use RGBA8888 internally and convert later
             bitmapFormat = NSGIF_BITMAP_FMT_RGBA8888;
@@ -266,11 +271,7 @@ bool SoftwareGifDecoder::loadMoreData() {
         return false;
     }
 
-    // Update frame count
-    const nsgif_info_t* info = nsgif_get_info(gif_);
-    if (info) {
-        totalFrames_ = info->frame_count;
-    }
+    // Frame count is available via nsgif_get_info() if needed in the future
 
     return true;
 }
