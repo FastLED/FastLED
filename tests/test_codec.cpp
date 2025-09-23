@@ -2,11 +2,11 @@
 #include "fl/file_system.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/webp.h"
+#include "fl/codec/mpeg1.h"
 // #include "fl/codec/gif.h"  // Disabled due to linking issues
 #include "fx/frame.h"
-#ifdef FASTLED_TESTING
+#include "fl/bytestreammemory.h"
 #include "platforms/stub/fs_stub.hpp"
-#endif
 
 using namespace fl;
 
@@ -144,6 +144,135 @@ TEST_CASE("Codec file loading and decoding") {
 
         // Note: GIF decoder testing disabled due to libnsgif linking issues
         MESSAGE("GIF file loaded successfully - decoder testing disabled due to linking issues");
+
+        handle->close();
+    }
+
+    SUBCASE("MPEG1 file loading and decoding") {
+        // Test that we can load the MPEG1 file from filesystem
+        FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+        REQUIRE(handle != nullptr);
+        REQUIRE(handle->valid());
+
+        // Get file size and read into buffer
+        fl::size file_size = handle->size();
+        CHECK(file_size > 0);
+
+        fl::vector<fl::u8> file_data(file_size);
+        fl::size bytes_read = handle->read(file_data.data(), file_size);
+        CHECK_EQ(bytes_read, file_size);
+
+        // MPEG1 files should start with start code (0x000001)
+        CHECK_EQ(file_data[0], 0x00);
+        CHECK_EQ(file_data[1], 0x00);
+        CHECK_EQ(file_data[2], 0x01);
+        // Fourth byte can be BA (pack header) or B3 (sequence header)
+        CHECK((file_data[3] == 0xBA || file_data[3] == 0xB3));
+
+        // Test MPEG1 decoder
+        if (Mpeg1::isSupported()) {
+            Mpeg1Config config;
+            config.mode = Mpeg1Config::SingleFrame;
+
+            fl::string error_msg;
+            auto decoder = Mpeg1::createDecoder(config, &error_msg);
+
+            if (decoder) {
+                // Create byte stream from file data
+                auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+                stream->write(file_data.data(), file_size);
+                bool began = decoder->begin(stream);
+                CHECK(began);
+
+                if (began) {
+                    // Attempt to decode first frame
+                    auto result = decoder->decode();
+
+                    if (result == DecodeResult::Success) {
+                        Frame frame0 = decoder->getCurrentFrame();
+
+                        if (frame0.isValid() && frame0.getWidth() == 2 && frame0.getHeight() == 2) {
+                            // Verify pixel values for frame 0
+                            // Expected: red-white-blue-black (2x2)
+                            const CRGB* pixels = frame0.rgb();
+                            if (pixels) {
+                                // Top-left: red (255, 0, 0)
+                                CHECK_EQ(pixels[0].r, 255);
+                                CHECK_EQ(pixels[0].g, 0);
+                                CHECK_EQ(pixels[0].b, 0);
+
+                                // Top-right: white (255, 255, 255)
+                                CHECK_EQ(pixels[1].r, 255);
+                                CHECK_EQ(pixels[1].g, 255);
+                                CHECK_EQ(pixels[1].b, 255);
+
+                                // Bottom-left: blue (0, 0, 255)
+                                CHECK_EQ(pixels[2].r, 0);
+                                CHECK_EQ(pixels[2].g, 0);
+                                CHECK_EQ(pixels[2].b, 255);
+
+                                // Bottom-right: black (0, 0, 0)
+                                CHECK_EQ(pixels[3].r, 0);
+                                CHECK_EQ(pixels[3].g, 0);
+                                CHECK_EQ(pixels[3].b, 0);
+                            }
+
+                            // Check if there are more frames
+                            if (decoder->hasMoreFrames()) {
+                                // Attempt to decode second frame
+                                result = decoder->decode();
+
+                                if (result == DecodeResult::Success) {
+                                    Frame frame1 = decoder->getCurrentFrame();
+
+                                    if (frame1.isValid() && frame1.getWidth() == 2 && frame1.getHeight() == 2) {
+                                        // Verify pixel values for frame 1
+                                        const CRGB* pixels1 = frame1.rgb();
+                                        if (pixels1) {
+                                            // Top-left: white (255, 255, 255)
+                                            CHECK_EQ(pixels1[0].r, 255);
+                                            CHECK_EQ(pixels1[0].g, 255);
+                                            CHECK_EQ(pixels1[0].b, 255);
+
+                                            // Top-right: blue (0, 0, 255)
+                                            CHECK_EQ(pixels1[1].r, 0);
+                                            CHECK_EQ(pixels1[1].g, 0);
+                                            CHECK_EQ(pixels1[1].b, 255);
+
+                                            // Bottom-left: black (0, 0, 0)
+                                            CHECK_EQ(pixels1[2].r, 0);
+                                            CHECK_EQ(pixels1[2].g, 0);
+                                            CHECK_EQ(pixels1[2].b, 0);
+
+                                            // Bottom-right: red (255, 0, 0)
+                                            CHECK_EQ(pixels1[3].r, 255);
+                                            CHECK_EQ(pixels1[3].g, 0);
+                                            CHECK_EQ(pixels1[3].b, 0);
+                                        }
+                                    } else {
+                                        MESSAGE("Second frame is not valid or wrong dimensions");
+                                    }
+                                } else {
+                                    MESSAGE("Failed to decode second frame, result: " << static_cast<int>(result));
+                                }
+                            }
+                        } else {
+                            MESSAGE("First frame is not valid or wrong dimensions");
+                        }
+                    } else {
+                        MESSAGE("Failed to decode first frame, result: " << static_cast<int>(result));
+                    }
+
+                    decoder->end();
+                } else {
+                    MESSAGE("Failed to begin MPEG1 decoder");
+                }
+            } else {
+                MESSAGE("MPEG1 decoder creation failed: " << error_msg);
+            }
+        } else {
+            MESSAGE("MPEG1 decoder not supported on this platform");
+        }
 
         handle->close();
     }
