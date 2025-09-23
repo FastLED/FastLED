@@ -71,7 +71,7 @@ class I2S_Audio : public IAudioInput {
             return AudioSample();  // Invalid sample
         }
 
-        esp_i2s::audio_sample_t buf[esp_i2s::I2S_AUDIO_BUFFER_LEN];
+        esp_i2s::audio_sample_t buf[I2S_AUDIO_BUFFER_LEN];
         const esp_i2s::I2SContext &ctx = *mI2sContextOpt;
         size_t samples_read_size = esp_i2s::i2s_read_raw_samples(ctx, buf);
         int samples_read = static_cast<int>(samples_read_size);

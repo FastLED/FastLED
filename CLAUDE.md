@@ -30,6 +30,7 @@ This project uses directory-specific agent guidelines. See:
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
 - **`codeup`**: Global command - when asked to run `codeup`, know it's a globally available command
+- **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile esp32s3 Blink`)
 
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`
