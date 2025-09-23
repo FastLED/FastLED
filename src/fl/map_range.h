@@ -35,14 +35,13 @@ FASTLED_FORCE_INLINE U map_range(T value, T in_min, T in_max, U out_min,
                                  U out_max) {
     // Not fully tested with all unsigned types, so watch out if you use this
     // with u16 and you value < in_min.
-    using namespace map_range_detail;
-    if (equals(value, in_min)) {
+    if (map_range_detail::equals(value, in_min)) {
         return out_min;
     }
-    if (equals(value, in_max)) {
+    if (map_range_detail::equals(value, in_max)) {
         return out_max;
     }
-    return map_range_math<T, U>::map(value, in_min, in_max, out_min, out_max);
+    return map_range_detail::map_range_math<T, U>::map(value, in_min, in_max, out_min, out_max);
 }
 
 template <typename T, typename U>
@@ -50,7 +49,6 @@ FASTLED_FORCE_INLINE U map_range_clamped(T value, T in_min, T in_max, U out_min,
                                          U out_max) {
     // Not fully tested with all unsigned types, so watch out if you use this
     // with u16 and you value < in_min.
-    using namespace map_range_detail;
     value = clamp(value, in_min, in_max);
     return map_range<T, U>(value, in_min, in_max, out_min, out_max);
 }

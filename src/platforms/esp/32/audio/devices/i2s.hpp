@@ -39,23 +39,21 @@ class I2S_Audio : public IAudioInput {
     ~I2S_Audio() {}
 
     void start() override {
-        using namespace esp_i2s;
         if (mI2sContextOpt) {
             FL_WARN("I2S channel is already initialized");
             return;
         }
-        I2SContext ctx = i2s_audio_init(mStdConfig);
+        esp_i2s::I2SContext ctx = esp_i2s::i2s_audio_init(mStdConfig);
         mI2sContextOpt = ctx;
         mTotalSamplesRead = 0;  // Reset sample counter on start
     }
 
     void stop() override {
-        using namespace esp_i2s;
         if (!mI2sContextOpt) {
             FL_WARN("I2S channel is not initialized");
             return;
         }
-        i2s_audio_destroy(*mI2sContextOpt);
+        esp_i2s::i2s_audio_destroy(*mI2sContextOpt);
         mI2sContextOpt = fl::nullopt;
         mTotalSamplesRead = 0;  // Reset sample counter on stop
     }
@@ -68,15 +66,14 @@ class I2S_Audio : public IAudioInput {
     }
 
     AudioSample read() override {
-        using namespace esp_i2s;
         if (!mI2sContextOpt) {
             FL_WARN("I2S channel is not initialized");
             return AudioSample();  // Invalid sample
         }
-        
-        audio_sample_t buf[I2S_AUDIO_BUFFER_LEN];
-        const I2SContext &ctx = *mI2sContextOpt;
-        size_t samples_read_size = i2s_read_raw_samples(ctx, buf);
+
+        esp_i2s::audio_sample_t buf[esp_i2s::I2S_AUDIO_BUFFER_LEN];
+        const esp_i2s::I2SContext &ctx = *mI2sContextOpt;
+        size_t samples_read_size = esp_i2s::i2s_read_raw_samples(ctx, buf);
         int samples_read = static_cast<int>(samples_read_size);
         
         if (samples_read <= 0) {
