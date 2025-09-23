@@ -18,13 +18,12 @@ bool ByteStreamMemory::available(fl::size n) const {
 }
 
 fl::size ByteStreamMemory::read(fl::u8 *dst, fl::size bytesToRead) {
-    if (!available(bytesToRead) || dst == nullptr) {
-        FASTLED_WARN("ByteStreamMemory::read: !available(bytesToRead): "
-                     << bytesToRead
-                     << " mReadBuffer.size(): " << mReadBuffer.size());
+    if (dst == nullptr) {
+        FASTLED_WARN("ByteStreamMemory::read: dst == nullptr");
         return 0;
     }
 
+    // Read up to the requested amount, whatever is available
     fl::size actualBytesToRead = MIN(bytesToRead, mReadBuffer.size());
     fl::size bytesRead = 0;
 
@@ -32,10 +31,6 @@ fl::size ByteStreamMemory::read(fl::u8 *dst, fl::size bytesToRead) {
         fl::u8 &b = dst[bytesRead];
         mReadBuffer.pop_front(&b);
         bytesRead++;
-    }
-
-    if (bytesRead == 0) {
-        FASTLED_WARN("ByteStreamMemory::read: bytesRead == 0");
     }
 
     return bytesRead;
