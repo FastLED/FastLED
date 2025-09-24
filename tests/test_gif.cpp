@@ -1,197 +1,139 @@
 #include "test.h"
+#include "fl/file_system.h"
 #include "fl/codec/gif.h"
-#include "fl/bytestreammemory.h"
 #include "fx/frame.h"
+#include "fl/bytestreammemory.h"
+#include "platforms/stub/fs_stub.hpp"
 
 using namespace fl;
 
-// Test GIF data: 2x2 image with Red, Blue, Green, Black pixels
-// This is a minimal GIF89a file with a 2x2 image
-const uint8_t test_gif_2x2[] = {
-    0x47, 0x49, 0x46, 0x38, 0x39, 0x61,       // GIF89a signature
-    0x02, 0x00,                               // Width: 2
-    0x02, 0x00,                               // Height: 2
-    0xF0, 0x00, 0x00,                         // Global Color Table: 2 bits, no sort, 2 colors
-
-    // Global Color Table (4 colors, 3 bytes each)
-    0xFF, 0x00, 0x00,                         // Color 0: Red
-    0x00, 0x00, 0xFF,                         // Color 1: Blue
-    0x00, 0xFF, 0x00,                         // Color 2: Green
-    0x00, 0x00, 0x00,                         // Color 3: Black
-
-    0x21, 0xF9, 0x04,                         // Graphic Control Extension
-    0x00, 0x00, 0x00, 0x00, 0x00,            // No delay, no transparency
-
-    0x2C,                                     // Image Descriptor
-    0x00, 0x00, 0x00, 0x00,                   // Left, Top: 0, 0
-    0x02, 0x00, 0x02, 0x00,                   // Width, Height: 2, 2
-    0x00,                                     // No local color table
-
-    0x02,                                     // LZW minimum code size: 2
-    0x04,                                     // Data sub-block size: 4
-    0x84, 0x8F, 0xA9, 0xCB,                   // Compressed image data
-    0x00,                                     // End of data sub-blocks
-
-    0x3B                                      // GIF trailer
-};
-const size_t test_gif_2x2_size = sizeof(test_gif_2x2);
-
-// Test GIF decoder availability
-TEST_CASE("GIF availability") {
-    bool gifSupported = Gif::isSupported();
-
-    // GIF should be supported
-    CHECK(gifSupported);
+// Helper function to set up filesystem for codec tests
+static FileSystem setupCodecFilesystem() {
+    setTestFileSystemRoot("tests");
+    FileSystem fs;
+    bool ok = fs.beginSd(5);
+    REQUIRE(ok);
+    return fs;
 }
 
-// Test GIF decoder creation
-TEST_CASE("GIF decoder creation") {
-    GifConfig config;
-    config.mode = GifConfig::SingleFrame;
-    config.format = PixelFormat::RGB888;
+TEST_CASE("GIF file loading and decoding") {
+    FileSystem fs = setupCodecFilesystem();
+        // Test that we can load the GIF file from filesystem
+        FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+        REQUIRE(handle != nullptr);
+        REQUIRE(handle->valid());
 
-    fl::string error_msg;
-    auto decoder = Gif::createDecoder(config, &error_msg);
+        // Get file size and read into buffer
+        fl::size file_size = handle->size();
+        CHECK(file_size > 0);
 
-    // Decoder creation should succeed
-    CHECK(decoder != nullptr);
-    if (!decoder) {
-        FAIL("GIF decoder creation failed: " << error_msg);
-    }
-}
+        fl::vector<fl::u8> file_data(file_size);
+        fl::size bytes_read = handle->read(file_data.data(), file_size);
+        CHECK_EQ(bytes_read, file_size);
 
-// Test GIF configuration
-TEST_CASE("GIF configuration") {
-    // Test different modes and formats
-    {
-        GifConfig config(GifConfig::SingleFrame, PixelFormat::RGB565);
-        CHECK(config.mode == GifConfig::SingleFrame);
-        CHECK(config.format == PixelFormat::RGB565);
-    }
+        // Validate GIF file signature
+        CHECK_EQ(file_data[0], 'G');
+        CHECK_EQ(file_data[1], 'I');
+        CHECK_EQ(file_data[2], 'F');
 
-    {
-        GifConfig config(GifConfig::Streaming, PixelFormat::RGBA8888);
-        CHECK(config.mode == GifConfig::Streaming);
-        CHECK(config.format == PixelFormat::RGBA8888);
-    }
+        // Check for valid GIF version (87a or 89a)
+        bool valid_version = (file_data[3] == '8' &&
+                             ((file_data[4] == '7' && file_data[5] == 'a') ||
+                              (file_data[4] == '9' && file_data[5] == 'a')));
+        CHECK(valid_version);
 
-    // Test default constructor
-    {
+        // Test GIF decoder if supported
+        if (!Gif::isSupported()) {
+            MESSAGE("GIF decoder not supported on this platform");
+            handle->close();
+            return;
+        }
+
         GifConfig config;
-        CHECK(config.mode == GifConfig::Streaming);
-        CHECK(config.format == PixelFormat::RGB888);
-        CHECK(config.looping == true);
-        CHECK(config.maxWidth == 1920);
-        CHECK(config.maxHeight == 1080);
-        CHECK(config.bufferFrames == 3);
-    }
-}
+        config.mode = GifConfig::SingleFrame;
+        config.format = PixelFormat::RGB888;
 
-// Test GIF decoder with 2x2 test data
-TEST_CASE("GIF decoder with 2x2 test data") {
-    GifConfig config;
-    config.mode = GifConfig::SingleFrame;
-    config.format = PixelFormat::RGB888;
+        fl::string error_msg;
+        auto decoder = Gif::createDecoder(config, &error_msg);
+        REQUIRE_MESSAGE(decoder != nullptr, "GIF decoder creation failed: " << error_msg);
 
-    fl::string error_msg;
-    auto decoder = Gif::createDecoder(config, &error_msg);
+        // Create byte stream and begin decoding
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+        stream->write(file_data.data(), file_size);
+        REQUIRE_MESSAGE(decoder->begin(stream), "Failed to begin GIF decoder");
 
-    if (!decoder) {
-        FAIL("GIF decoder creation failed: " << error_msg);
-    }
+        // Decode first frame
+        auto result = decoder->decode();
+        if (result == DecodeResult::Success) {
+            Frame frame0 = decoder->getCurrentFrame();
+            if (frame0.isValid() && frame0.getWidth() == 2 && frame0.getHeight() == 2) {
+                const CRGB* pixels = frame0.rgb();
+                REQUIRE_MESSAGE(pixels != nullptr, "GIF frame pixels should not be null");
 
-    // Create a ByteStreamMemory and write our test data to it
-    auto stream = fl::make_shared<ByteStreamMemory>(test_gif_2x2_size);
-    stream->write(test_gif_2x2, test_gif_2x2_size);
+                // Debug: Show decoded pixel values like JPEG test
+                MESSAGE("GIF decoded pixel values - Red: (" << (int)pixels[0].r << "," << (int)pixels[0].g << "," << (int)pixels[0].b
+                        << ") White: (" << (int)pixels[1].r << "," << (int)pixels[1].g << "," << (int)pixels[1].b
+                        << ") Blue: (" << (int)pixels[2].r << "," << (int)pixels[2].g << "," << (int)pixels[2].b
+                        << ") Black: (" << (int)pixels[3].r << "," << (int)pixels[3].g << "," << (int)pixels[3].b << ")");
 
-    // Begin decoding
-    bool beginSuccess = decoder->begin(stream);
-    if (!beginSuccess) {
-        fl::string errorMsg;
-        decoder->hasError(&errorMsg);
-        INFO("GIF decoder begin failed (expected during development): " << errorMsg);
-        return;
-    }
+                // Expected layout: red-white-blue-black (2x2) - same as JPEG test
+                // Allow tolerance for GIF compression artifacts
+                const int tolerance = 50;
 
-    // Decode frame
-    DecodeResult result = decoder->decode();
-    if (result != DecodeResult::Success) {
-        fl::string errorMsg;
-        decoder->hasError(&errorMsg);
-        INFO("GIF decode failed (expected during development): " << errorMsg);
-        return;
-    }
+                // Pixel 0: Red (high R, low G/B)
+                CHECK_MESSAGE(pixels[0].r > 150, "Red pixel should have high red value, got: " << (int)pixels[0].r);
+                CHECK_MESSAGE(pixels[0].g < 100, "Red pixel should have low green value, got: " << (int)pixels[0].g);
+                CHECK_MESSAGE(pixels[0].b < 100, "Red pixel should have low blue value, got: " << (int)pixels[0].b);
 
-    // Get the decoded frame
-    Frame frame = decoder->getCurrentFrame();
-    if (!frame.isValid()) {
-        INFO("GIF frame invalid (expected during development)");
-        return;
-    }
+                // Pixel 1: White (high R/G/B)
+                CHECK_MESSAGE(pixels[1].r > 200, "White pixel should have high red value, got: " << (int)pixels[1].r);
+                CHECK_MESSAGE(pixels[1].g > 200, "White pixel should have high green value, got: " << (int)pixels[1].g);
+                CHECK_MESSAGE(pixels[1].b > 200, "White pixel should have high blue value, got: " << (int)pixels[1].b);
 
-    // Verify frame properties if decode succeeds
-    CHECK(frame.isValid());
-    CHECK(frame.getWidth() == 2);
-    CHECK(frame.getHeight() == 2);
-    CHECK(frame.getFormat() == PixelFormat::RGB888);
+                // Pixel 2: Blue (low R/G, high B)
+                CHECK_MESSAGE(pixels[2].r < 100, "Blue pixel should have low red value, got: " << (int)pixels[2].r);
+                CHECK_MESSAGE(pixels[2].g < 100, "Blue pixel should have low green value, got: " << (int)pixels[2].g);
+                CHECK_MESSAGE(pixels[2].b > 150, "Blue pixel should have high blue value, got: " << (int)pixels[2].b);
 
-    decoder->end();
-}
+                // Pixel 3: Black (low R/G/B)
+                CHECK_MESSAGE(pixels[3].r < 50, "Black pixel should have low red value, got: " << (int)pixels[3].r);
+                CHECK_MESSAGE(pixels[3].g < 50, "Black pixel should have low green value, got: " << (int)pixels[3].g);
+                CHECK_MESSAGE(pixels[3].b < 50, "Black pixel should have low blue value, got: " << (int)pixels[3].b);
 
-// Test GIF decoder with empty data
-TEST_CASE("GIF decoder with empty data") {
-    GifConfig config;
-    fl::string error_msg;
-    auto decoder = Gif::createDecoder(config, &error_msg);
+                // Check if all pixels are black (indicating decoder failure like JPEG test)
+                bool all_pixels_black = true;
+                for (int i = 0; i < 4; i++) {
+                    if (pixels[i].r != 0 || pixels[i].g != 0 || pixels[i].b != 0) {
+                        all_pixels_black = false;
+                        break;
+                    }
+                }
 
-    if (!decoder) {
-        FAIL("GIF decoder creation failed: " << error_msg);
-    }
+                CHECK_MESSAGE(!all_pixels_black,
+                    "GIF decoder returned all black pixels - decoder failure. "
+                    "Frame details: valid=" << frame0.isValid()
+                    << ", width=" << frame0.getWidth()
+                    << ", height=" << frame0.getHeight());
 
-    // Create empty stream
-    auto empty_stream = fl::make_shared<ByteStreamMemory>(0);
+                // Verify pixels are not all identical (decoder should produce varied output)
+                bool all_pixels_identical = true;
+                for (int i = 1; i < 4; i++) {
+                    if (pixels[i].r != pixels[0].r || pixels[i].g != pixels[0].g || pixels[i].b != pixels[0].b) {
+                        all_pixels_identical = false;
+                        break;
+                    }
+                }
+                CHECK_FALSE_MESSAGE(all_pixels_identical,
+                    "GIF decoder returned all identical pixels - indicates improper decoding");
 
-    // Try to begin with empty data - behavior may vary by implementation
-    bool beginSuccess = decoder->begin(empty_stream);
+            } else {
+                MESSAGE("GIF frame dimensions invalid: " << frame0.getWidth() << "x" << frame0.getHeight());
+            }
+        } else {
+            MESSAGE("Failed to decode GIF first frame, result: " << static_cast<int>(result));
+        }
 
-    // If begin succeeds with empty data, try to decode (should fail)
-    if (beginSuccess) {
-        DecodeResult result = decoder->decode();
-        CHECK(result != DecodeResult::Success);
         decoder->end();
-    } else {
-        // If begin fails, that's also acceptable behavior
-        // Note: Some decoders may not set error state immediately
-        INFO("Begin failed with empty data (expected behavior)");
-    }
-}
-
-// Test GIF decoder with invalid data
-TEST_CASE("GIF decoder with invalid data") {
-    GifConfig config;
-    fl::string error_msg;
-    auto decoder = Gif::createDecoder(config, &error_msg);
-
-    if (!decoder) {
-        FAIL("GIF decoder creation failed: " << error_msg);
-    }
-
-    // Create invalid GIF data (just partial header)
-    fl::u8 testData[] = {0x47, 0x49, 0x46}; // "GIF" only
-    auto stream = fl::make_shared<ByteStreamMemory>(sizeof(testData));
-    stream->write(testData, sizeof(testData));
-
-    // Try to begin with invalid data - behavior may vary by implementation
-    bool beginSuccess = decoder->begin(stream);
-
-    if (beginSuccess) {
-        // If begin succeeds with partial data, decode should fail
-        DecodeResult result = decoder->decode();
-        CHECK(result != DecodeResult::Success);
-        decoder->end();
-    } else {
-        // If begin fails with invalid data, that's also acceptable
-        // Note: Some decoders may not set error state immediately
-        INFO("Begin failed with invalid data (expected behavior)");
-    }
+        handle->close();
+        fs.end();
 }

@@ -1,3 +1,6 @@
+#include <Arduino.h>
+#include <FastLED.h>
+
 #include "codec_processor.h"
 #include "inlined_data.h"
 
