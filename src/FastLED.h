@@ -1004,7 +1004,7 @@ using namespace fl;
 #endif
 
 #if FASTLED_LOOP_RUNS_ASYNC == 1
-#include "fl/async.h"
+#include "fl/async.h" // namespace ok
 // The loop is set as a macro that re-defines the user loop function
 // to sketch_loop()
 #define loop() \
@@ -1014,4 +1014,4 @@ using namespace fl;
 #endif
 
 
-#include "fl/sketch_macros.h"
+#include "fl/sketch_macros.h" // namespace ok

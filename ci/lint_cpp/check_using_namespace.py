@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from typing import List, Tuple
 
+from ci.util.paths import PROJECT_ROOT
+
 
 def find_using_namespace_violations(file_path: Path) -> List[Tuple[int, str]]:
     """
@@ -73,10 +75,18 @@ def check_header_files(root_dir: Path, extensions: List[str]) -> bool:
 
     for ext in extensions:
         for file_path in root_dir.rglob(f"*.{ext}"):
-            # Skip third-party directories
+            # Skip third-party directories, build directories, and virtual environments
             if any(
                 part in str(file_path).lower()
-                for part in ["third_party", "vendor", "external"]
+                for part in [
+                    "third_party",
+                    "vendor",
+                    "external",
+                    ".build",
+                    ".pio",
+                    ".venv",
+                    "libdeps",
+                ]
             ):
                 continue
 
@@ -98,8 +108,8 @@ def main():
     parser.add_argument(
         "--root",
         type=Path,
-        default=".",
-        help="Root directory to search (default: current directory)",
+        default=PROJECT_ROOT / "src" / "fl",
+        help="Root directory to search (default: PROJECT_ROOT/src/fl)",
     )
     parser.add_argument(
         "--extensions",

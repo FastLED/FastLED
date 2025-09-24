@@ -79,6 +79,30 @@ else
       echo "Running clang-format on $folder"
       uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
     done
+
+    # C++ custom linters
+    echo ""
+    echo "🔍 C++ CUSTOM LINTERS"
+    echo "----------------------"
+    for lint_script in ci/lint_cpp/*.py; do
+        if [ -f "$lint_script" ]; then
+            echo "Running $(basename "$lint_script")"
+            # Check if it's a unittest-based script or standalone
+            if grep -q "unittest.main()" "$lint_script"; then
+                # Run as unittest
+                uv run python -m pytest "$lint_script" -v || {
+                    echo "❌ C++ linter failed: $(basename "$lint_script")"
+                    exit 1
+                }
+            else
+                # Run as standalone script
+                uv run python "$lint_script" || {
+                    echo "❌ C++ linter failed: $(basename "$lint_script")"
+                    exit 1
+                }
+            fi
+        fi
+    done
 fi
 
 # JavaScript linting and enhanced checking (now included by default)
