@@ -2,14 +2,16 @@
 
 #ifdef _WIN32
 #include <io.h>  // for _write
+#include <stdio.h>  // for _flushall
 #else
 #include <unistd.h>  // for write
+#include <unistd.h>  // for fsync
 #endif
 
 namespace fl {
 
 // Print functions
-inline void print_native(const char* str) {
+inline void print_native(const char* str, bool flush=true) {
     if (!str) return;
     
     // Native/Testing: Use direct system calls to stderr
@@ -21,16 +23,23 @@ inline void print_native(const char* str) {
 #ifdef _WIN32
     // Windows version
     _write(2, str, len);  // 2 = stderr
+    if (flush) {
+        _flushall();
+    }
 #else
     // Unix/Linux version
     ::write(2, str, len);  // 2 = stderr
+    // Force flush stderr during testing to prevent output loss on crashes
+    if (flush) {
+        fsync(2);
+    }
 #endif
 }
 
 inline void println_native(const char* str) {
     if (!str) return;
-    print_native(str);
-    print_native("\n");
+    print_native(str, false);
+    print_native("\n", true);
 }
 
 // Input functions
