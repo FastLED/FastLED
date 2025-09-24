@@ -48,11 +48,11 @@ private:
 
     fl::u8 getScale() const {
         switch (config_.quality) {
-            case JpegConfig::Quality::Low: return 8;
-            case JpegConfig::Quality::Medium: return 4;
-            case JpegConfig::Quality::High: return 1;
+            case JpegConfig::Quality::Low: return 3;     // 1/8 scale
+            case JpegConfig::Quality::Medium: return 2;  // 1/4 scale
+            case JpegConfig::Quality::High: return 0;    // Full scale (1:1)
         }
-        return 1;
+        return 0;
     }
 
 public:

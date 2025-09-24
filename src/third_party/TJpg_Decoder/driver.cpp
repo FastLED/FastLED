@@ -326,8 +326,8 @@ int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
     // Calculate rectangle dimensions
     fl::u16 x = rect->left;
     fl::u16 y = rect->top;
-    fl::u16 w = rect->right - rect->left;
-    fl::u16 h = rect->bottom - rect->top;
+    fl::u16 w = rect->right - rect->left + 1;  // JRECT is inclusive
+    fl::u16 h = rect->bottom - rect->top + 1;  // JRECT is inclusive
 
     // Bounds check
     if (x >= frame_width || y >= frame_height ||
@@ -341,22 +341,22 @@ int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
         return 0;
     }
 
-    // Copy and convert pixels
-    fl::u16* rgb565_data = reinterpret_cast<fl::u16*>(bitmap);
+    // Copy pixels (already in RGB888 format since JD_FORMAT=0)
+    fl::u8* rgb_data = reinterpret_cast<fl::u8*>(bitmap);
 
     for (fl::u16 row = 0; row < h; ++row) {
         for (fl::u16 col = 0; col < w; ++col) {
-            fl::u16 src_idx = row * w + col;
+            fl::u16 src_idx = (row * w + col) * 3;  // RGB888 is 3 bytes per pixel
 
             // Calculate destination position
             int pixel_x = x + col;
             int pixel_y = y + row;
             int frame_idx = pixel_y * frame_width + pixel_x;
 
-            // Convert RGB565 to RGB888
-            fl::u16 rgb565 = rgb565_data[src_idx];
-            fl::u8 r, g, b;
-            rgb565ToRgb888(rgb565, r, g, b);
+            // Get RGB888 values directly
+            fl::u8 r = rgb_data[src_idx + 0];
+            fl::u8 g = rgb_data[src_idx + 1];
+            fl::u8 b = rgb_data[src_idx + 2];
 
             // Set pixel in frame buffer
             frame_pixels[frame_idx] = CRGB(r, g, b);
