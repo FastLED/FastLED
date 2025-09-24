@@ -141,6 +141,133 @@ bool Jpeg::isSupported() {
     return true;
 }
 
+JpegInfo Jpeg::parseJpegInfo(fl::span<const fl::u8> data, fl::string* error_message) {
+    JpegInfo info;
+
+    // Validate input data
+    if (data.empty()) {
+        if (error_message) {
+            *error_message = "Empty JPEG data";
+        }
+        return info; // returns invalid info
+    }
+
+    // Minimum size check - JPEG must have at least SOI marker + some content
+    if (data.size() < 10) {
+        if (error_message) {
+            *error_message = "JPEG data too small";
+        }
+        return info;
+    }
+
+    // Use TJpg_Decoder's getJpgSize function which only parses the header
+    fl::u16 width, height;
+    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(
+        &width, &height,
+        data.data(),
+        data.size()
+    );
+
+    // Handle result codes
+    if (result != fl::third_party::JDR_OK) {
+        if (error_message) {
+            // Convert JRESULT to readable error message
+            switch (result) {
+                case fl::third_party::JDR_INP:
+                    *error_message = "JPEG input stream error or invalid termination";
+                    break;
+                case fl::third_party::JDR_MEM1:
+                case fl::third_party::JDR_MEM2:
+                    *error_message = "Insufficient memory for JPEG parsing";
+                    break;
+                case fl::third_party::JDR_PAR:
+                    *error_message = "Invalid JPEG parameters";
+                    break;
+                case fl::third_party::JDR_FMT1:
+                    *error_message = "Invalid JPEG data format (possibly corrupt)";
+                    break;
+                case fl::third_party::JDR_FMT2:
+                    *error_message = "Valid JPEG format but not supported";
+                    break;
+                case fl::third_party::JDR_FMT3:
+                    *error_message = "Unsupported JPEG standard";
+                    break;
+                default:
+                    char error_code_str[16];
+                    fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
+                    *error_message = "JPEG parsing failed with error code: ";
+                    *error_message += error_code_str;
+                    break;
+            }
+        }
+        return info; // returns invalid info
+    }
+
+    // Basic validation of parsed dimensions
+    if (width == 0 || height == 0) {
+        if (error_message) {
+            *error_message = "Invalid JPEG dimensions";
+        }
+        return info;
+    }
+
+    // For additional metadata, we need to parse the JPEG header manually
+    // Look for Start of Frame (SOF) markers to get component information
+    fl::u8 components = 0;
+    bool foundSOF = false;
+
+    // Search for SOF markers (0xFFC0 - 0xFFCF, excluding 0xFFC4, 0xFFC8, 0xFFCC)
+    for (fl::size i = 0; i < data.size() - 1; i++) {
+        if (data[i] == 0xFF) {
+            fl::u8 marker = data[i + 1];
+            // Check for SOF markers (baseline DCT, extended sequential DCT, progressive DCT)
+            if ((marker >= 0xC0 && marker <= 0xC3) ||
+                (marker >= 0xC5 && marker <= 0xC7) ||
+                (marker >= 0xC9 && marker <= 0xCB) ||
+                (marker >= 0xCD && marker <= 0xCF)) {
+
+                // SOF marker found, extract components count
+                if (i + 9 < data.size()) {  // Ensure we have enough bytes
+                    // SOF structure: FF Cn LL LL PP HH HH VV VV CC
+                    // CC = number of components at offset +9 from marker
+                    components = data[i + 9];
+                    foundSOF = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    // If we couldn't parse components from SOF, make educated guess
+    if (!foundSOF) {
+        // Most JPEGs are either grayscale (1) or color (3)
+        // Default to 3 components (color) as it's more common
+        components = 3;
+        FL_WARN("Could not find SOF marker in JPEG, assuming 3 components");
+    }
+
+    // Validate component count
+    if (components != 1 && components != 3) {
+        if (error_message) {
+            char comp_str[16];
+            fl::snprintf(comp_str, sizeof(comp_str), "%d", static_cast<int>(components));
+            *error_message = "Unsupported number of JPEG components: ";
+            *error_message += comp_str;
+        }
+        return info;
+    }
+
+    // Successfully parsed metadata
+    info.width = width;
+    info.height = height;
+    info.components = components;
+    info.bitsPerComponent = 8;  // JPEG baseline is always 8 bits per component
+    info.isGrayscale = (components == 1);
+    info.isValid = true;
+
+    return info;
+}
+
 
 // Thread-local variable to hold current decoder instance for callback
 static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
@@ -260,11 +387,8 @@ bool TJpgDecoder::initializeDecoder() {
         return false;
     }
 
-    // Validate dimensions
-    if (width > config_.maxWidth || height > config_.maxHeight) {
-        setError("Image dimensions exceed maximum allowed size");
-        return false;
-    }
+    // Dimensions are now extracted from the actual image metadata
+    // No artificial size limits needed
 
     // Initialize frame buffer and create Frame immediately
     allocateFrameBuffer(width, height);

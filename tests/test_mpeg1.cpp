@@ -512,3 +512,86 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
     decoder->end();
     fs.end();
 }
+
+TEST_CASE("MPEG1 metadata parsing without decoding") {
+    FileSystem fs = setupCodecFilesystem();
+
+    // Test that we can load the MPEG1 file from filesystem
+    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    REQUIRE(handle != nullptr);
+    REQUIRE(handle->valid());
+
+    // Get file size and read into buffer
+    fl::size file_size = handle->size();
+    CHECK(file_size > 0);
+
+    fl::vector<fl::u8> file_data(file_size);
+    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    CHECK_EQ(bytes_read, file_size);
+
+    // Test MPEG1 metadata parsing
+    fl::string error_msg;
+    fl::span<const fl::u8> data(file_data.data(), file_size);
+    Mpeg1Info info = Mpeg1::parseMpeg1Info(data, &error_msg);
+
+    // The metadata parsing should succeed
+    CHECK_MESSAGE(info.isValid, "MPEG1 metadata parsing failed: " << error_msg);
+
+    if (info.isValid) {
+        // Verify basic metadata
+        CHECK_MESSAGE(info.width > 0, "MPEG1 width should be greater than 0, got: " << info.width);
+        CHECK_MESSAGE(info.height > 0, "MPEG1 height should be greater than 0, got: " << info.height);
+
+        // For our test video (2x2 pixels), verify exact dimensions
+        CHECK_MESSAGE(info.width == 2, "Expected width=2, got: " << info.width);
+        CHECK_MESSAGE(info.height == 2, "Expected height=2, got: " << info.height);
+
+        // Verify video properties
+        CHECK_MESSAGE(info.frameRate > 0, "MPEG1 should have positive frame rate, got: " << info.frameRate);
+
+        fl::string audio_str = info.hasAudio ? "yes" : "no";
+        MESSAGE("MPEG1 metadata - Width: " << info.width
+                << ", Height: " << info.height
+                << ", FrameRate: " << info.frameRate
+                << ", FrameCount: " << info.frameCount
+                << ", Duration: " << info.duration << "ms"
+                << ", HasAudio: " << audio_str);
+    }
+
+    // Test edge cases
+    SUBCASE("Empty data") {
+        fl::vector<fl::u8> empty_data;
+        fl::span<const fl::u8> empty_span(empty_data.data(), 0);
+        fl::string empty_error;
+
+        Mpeg1Info empty_info = Mpeg1::parseMpeg1Info(empty_span, &empty_error);
+        CHECK_FALSE(empty_info.isValid);
+        CHECK_FALSE(empty_error.empty());
+        MESSAGE("Empty data error: " << empty_error);
+    }
+
+    SUBCASE("Too small data") {
+        fl::vector<fl::u8> small_data = {0x00, 0x00, 0x01, 0xBA}; // Just pack header start
+        fl::span<const fl::u8> small_span(small_data.data(), small_data.size());
+        fl::string small_error;
+
+        Mpeg1Info small_info = Mpeg1::parseMpeg1Info(small_span, &small_error);
+        CHECK_FALSE(small_info.isValid);
+        CHECK_FALSE(small_error.empty());
+        MESSAGE("Small data error: " << small_error);
+    }
+
+    SUBCASE("Invalid MPEG1 stream") {
+        fl::vector<fl::u8> invalid_data(50, 0x42); // Random bytes
+        fl::span<const fl::u8> invalid_span(invalid_data.data(), invalid_data.size());
+        fl::string invalid_error;
+
+        Mpeg1Info invalid_info = Mpeg1::parseMpeg1Info(invalid_span, &invalid_error);
+        CHECK_FALSE(invalid_info.isValid);
+        CHECK_FALSE(invalid_error.empty());
+        MESSAGE("Invalid stream error: " << invalid_error);
+    }
+
+    handle->close();
+    fs.end();
+}

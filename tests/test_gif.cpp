@@ -137,3 +137,97 @@ TEST_CASE("GIF file loading and decoding") {
         handle->close();
         fs.end();
 }
+
+TEST_CASE("GIF metadata parsing without decoding") {
+    FileSystem fs = setupCodecFilesystem();
+
+    // Test that we can load the GIF file from filesystem
+    FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+    REQUIRE(handle != nullptr);
+    REQUIRE(handle->valid());
+
+    // Get file size and read into buffer
+    fl::size file_size = handle->size();
+    CHECK(file_size > 0);
+
+    fl::vector<fl::u8> file_data(file_size);
+    fl::size bytes_read = handle->read(file_data.data(), file_size);
+    CHECK_EQ(bytes_read, file_size);
+
+    // Test GIF metadata parsing
+    fl::string error_msg;
+    fl::span<const fl::u8> data(file_data.data(), file_size);
+    GifInfo info = Gif::parseGifInfo(data, &error_msg);
+
+    // The metadata parsing should succeed
+    CHECK_MESSAGE(info.isValid, "GIF metadata parsing failed: " << error_msg);
+
+    if (info.isValid) {
+        // Verify basic metadata
+        CHECK_MESSAGE(info.width > 0, "GIF width should be greater than 0, got: " << info.width);
+        CHECK_MESSAGE(info.height > 0, "GIF height should be greater than 0, got: " << info.height);
+
+        // For our test image (2x2 pixels), verify exact dimensions
+        CHECK_MESSAGE(info.width == 2, "Expected width=2, got: " << info.width);
+        CHECK_MESSAGE(info.height == 2, "Expected height=2, got: " << info.height);
+
+        // Verify frame and animation information
+        CHECK_MESSAGE(info.frameCount > 0, "GIF should have at least 1 frame, got: " << info.frameCount);
+        CHECK_MESSAGE(info.bitsPerPixel == 8, "GIF should have 8 bits per pixel, got: " << (int)info.bitsPerPixel);
+
+        // Animation consistency check
+        if (info.frameCount == 1) {
+            CHECK_MESSAGE(!info.isAnimated, "GIF with 1 frame should not be marked as animated");
+        } else {
+            CHECK_MESSAGE(info.isAnimated, "GIF with " << info.frameCount << " frames should be marked as animated");
+        }
+
+        fl::string animated_str = info.isAnimated ? "yes" : "no";
+        MESSAGE("GIF metadata - Width: " << info.width
+                << ", Height: " << info.height
+                << ", FrameCount: " << info.frameCount
+                << ", LoopCount: " << info.loopCount
+                << ", BitsPerPixel: " << (int)info.bitsPerPixel
+                << ", IsAnimated: " << animated_str);
+    }
+
+    // Test edge cases
+    SUBCASE("Empty data") {
+        fl::vector<fl::u8> empty_data;
+        fl::span<const fl::u8> empty_span(empty_data.data(), 0);
+        fl::string empty_error;
+
+        GifInfo empty_info = Gif::parseGifInfo(empty_span, &empty_error);
+        CHECK_FALSE(empty_info.isValid);
+        CHECK_FALSE(empty_error.empty());
+        MESSAGE("Empty data error: " << empty_error);
+    }
+
+    SUBCASE("Too small data") {
+        fl::vector<fl::u8> small_data = {'G', 'I', 'F', '8', '7', 'a'}; // Just signature
+        fl::span<const fl::u8> small_span(small_data.data(), small_data.size());
+        fl::string small_error;
+
+        GifInfo small_info = Gif::parseGifInfo(small_span, &small_error);
+        CHECK_FALSE(small_info.isValid);
+        CHECK_FALSE(small_error.empty());
+        MESSAGE("Small data error: " << small_error);
+    }
+
+    SUBCASE("Invalid GIF signature") {
+        fl::vector<fl::u8> invalid_data(50, 0x42); // Random bytes
+        invalid_data[0] = 'X'; // Invalid signature
+        invalid_data[1] = 'I';
+        invalid_data[2] = 'F';
+        fl::span<const fl::u8> invalid_span(invalid_data.data(), invalid_data.size());
+        fl::string invalid_error;
+
+        GifInfo invalid_info = Gif::parseGifInfo(invalid_span, &invalid_error);
+        CHECK_FALSE(invalid_info.isValid);
+        CHECK_FALSE(invalid_error.empty());
+        MESSAGE("Invalid signature error: " << invalid_error);
+    }
+
+    handle->close();
+    fs.end();
+}
