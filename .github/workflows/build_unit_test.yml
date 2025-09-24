@@ -115,7 +115,7 @@ jobs:
       - name: No namespace after headers
         working-directory: trusted
         run: |
-          uv run python ci/tests/no_using_namespace_fl_in_headers.py
+          uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py
 
 
       
