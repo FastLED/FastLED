@@ -311,14 +311,27 @@ void TJpgDecoder::cleanupDecoder() {
 
 bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
     TJpgDecoder* decoder = currentDecoder.access();
-    if (!decoder || !decoder->frameBuffer_ || !decoder->decodedFrame_) {
+    if (!decoder) {
         return false;
     }
+
+    if (!decoder->frameBuffer_ || !decoder->decodedFrame_) {
+        // Set error for debugging
+        decoder->setError("Output callback called but frame buffer or decoded frame is null");
+        return false;
+    }
+
+    if (!data) {
+        decoder->setError("Output callback called with null data pointer");
+        return false;
+    }
+
     uint16_t frameWidth = decoder->decodedFrame_->getWidth();
     uint16_t frameHeight = decoder->decodedFrame_->getHeight();
 
     // Bounds checking
     if (x < 0 || y < 0 || x + w > frameWidth || y + h > frameHeight) {
+        decoder->setError("Output callback bounds check failed");
         return false;
     }
 
@@ -414,6 +427,10 @@ void TJpgDecoder::allocateFrameBuffer(uint16_t width, uint16_t height) {
     bufferSize_ = static_cast<fl::size>(width) * height * getBytesPerPixel();
     if (bufferSize_ > 0) {
         frameBuffer_.reset(new fl::u8[bufferSize_]);
+        // Initialize buffer to zero to prevent garbage values
+        if (frameBuffer_) {
+            memset(frameBuffer_.get(), 0, bufferSize_);
+        }
     }
 }
 
