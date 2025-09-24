@@ -255,7 +255,7 @@ TEST_CASE("manager replacement") {
         void toJson(fl::Json& json) const override { FL_UNUSED(json); }
         void updateInternal(const fl::Json& json) override { FL_UNUSED(json); }
     };
-    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test_id");
+    auto mockComponent = fl::make_shared<MockJsonUiInternal>("test2");
     fl::weak_ptr<fl::JsonUiInternal> weakComponent(mockComponent);
     fl::addJsonUiComponent(weakComponent);
     

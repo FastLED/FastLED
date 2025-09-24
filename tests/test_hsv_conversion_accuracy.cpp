@@ -8,52 +8,52 @@
 
 FASTLED_USING_NAMESPACE
 
-struct ErrorStats {
+struct AccuracyStats {
     float average;
     float median;
     float max;
     float min;
-    std::vector<float> errors;
+    std::vector<float> deviations;
     
     void calculate() {
-        if (errors.empty()) {
+        if (deviations.empty()) {
             average = median = max = min = 0.0f;
             return;
         }
-        
+
         // Sort for median calculation
-        std::sort(errors.begin(), errors.end());
-        
+        std::sort(deviations.begin(), deviations.end());
+
         // Calculate average
-        float sum = std::accumulate(errors.begin(), errors.end(), 0.0f);
-        average = sum / errors.size();
-        
+        float sum = std::accumulate(deviations.begin(), deviations.end(), 0.0f);
+        average = sum / deviations.size();
+
         // Calculate median
-        size_t mid = errors.size() / 2;
-        if (errors.size() % 2 == 0) {
-            median = (errors[mid - 1] + errors[mid]) / 2.0f;
+        size_t mid = deviations.size() / 2;
+        if (deviations.size() % 2 == 0) {
+            median = (deviations[mid - 1] + deviations[mid]) / 2.0f;
         } else {
-            median = errors[mid];
+            median = deviations[mid];
         }
-        
+
         // Min and max
-        min = errors.front();
-        max = errors.back();
+        min = deviations.front();
+        max = deviations.back();
     }
     
     void print(const char* function_name) const {
-        printf("%s Error Statistics:\n", function_name);
-        printf("  Average: %.6f\n", average);
-        printf("  Median:  %.6f\n", median);
-        printf("  Min:     %.6f\n", min);
-        printf("  Max:     %.6f\n", max);
-        printf("  Samples: %zu\n", errors.size());
-        printf("\n");
+        FL_WARN(function_name << " Accuracy Statistics:");
+        FL_WARN("  Average: " << average);
+        FL_WARN("  Median:  " << median);
+        FL_WARN("  Min:     " << min);
+        FL_WARN("  Max:     " << max);
+        FL_WARN("  Samples: " << deviations.size());
+        FL_WARN("");
     }
 };
 
 // Calculate euclidean distance between two RGB colors
-static float calculateRGBError(const CRGB& original, const CRGB& converted) {
+static float calculateRGBDeviation(const CRGB& original, const CRGB& converted) {
     float dr = float(original.r) - float(converted.r);
     float dg = float(original.g) - float(converted.g);
     float db = float(original.b) - float(converted.b);
@@ -62,9 +62,9 @@ static float calculateRGBError(const CRGB& original, const CRGB& converted) {
 
 // Test a specific conversion function with RGB -> HSV -> RGB round trip
 template<typename ConversionFunc>
-static ErrorStats testConversionFunction(ConversionFunc hsv2rgb_func, const char* func_name) {
+static AccuracyStats testConversionFunction(ConversionFunc hsv2rgb_func, const char* func_name) {
     (void)func_name; // Suppress unused parameter warning
-    ErrorStats stats;
+    AccuracyStats stats;
     
     // Test a comprehensive set of RGB colors
     // We'll test every 8th value to get good coverage without taking too long
@@ -83,9 +83,9 @@ static ErrorStats testConversionFunction(ConversionFunc hsv2rgb_func, const char
                 CRGB converted_rgb;
                 hsv2rgb_func(hsv, converted_rgb);
                 
-                // Calculate error
-                float error = calculateRGBError(original_rgb, converted_rgb);
-                stats.errors.push_back(error);
+                // Calculate deviation
+                float deviation = calculateRGBDeviation(original_rgb, converted_rgb);
+                stats.deviations.push_back(deviation);
             }
         }
     }
@@ -95,22 +95,23 @@ static ErrorStats testConversionFunction(ConversionFunc hsv2rgb_func, const char
 }
 
 TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
-    printf("\n=== HSV to RGB Conversion Accuracy Test ===\n");
-    printf("Testing RGB -> HSV -> RGB round-trip accuracy\n");
-    printf("Sampling every 8th RGB value for comprehensive coverage\n\n");
+    FL_WARN("=== HSV to RGB Conversion Accuracy Test ===");
+    FL_WARN("Testing RGB -> HSV -> RGB round-trip accuracy");
+    FL_WARN("Sampling every 8th RGB value for comprehensive coverage");
+    FL_WARN("");
     
     // Test all three conversion functions
-    ErrorStats rainbow_stats = testConversionFunction(
+    AccuracyStats rainbow_stats = testConversionFunction(
         [](const CHSV& hsv, CRGB& rgb) { hsv2rgb_rainbow(hsv, rgb); },
         "hsv2rgb_rainbow"
     );
-    
-    ErrorStats spectrum_stats = testConversionFunction(
+
+    AccuracyStats spectrum_stats = testConversionFunction(
         [](const CHSV& hsv, CRGB& rgb) { hsv2rgb_spectrum(hsv, rgb); },
         "hsv2rgb_spectrum"
     );
-    
-    ErrorStats fullspectrum_stats = testConversionFunction(
+
+    AccuracyStats fullspectrum_stats = testConversionFunction(
         [](const CHSV& hsv, CRGB& rgb) { hsv2rgb_fullspectrum(hsv, rgb); },
         "hsv2rgb_fullspectrum"
     );
@@ -121,15 +122,12 @@ TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     fullspectrum_stats.print("hsv2rgb_fullspectrum");
     
     // Print comparison
-    printf("=== Error Comparison ===\n");
-    printf("Function            Average    Median     Min        Max\n");
-    printf("hsv2rgb_rainbow     %.6f   %.6f   %.6f   %.6f\n", 
-           rainbow_stats.average, rainbow_stats.median, rainbow_stats.min, rainbow_stats.max);
-    printf("hsv2rgb_spectrum    %.6f   %.6f   %.6f   %.6f\n", 
-           spectrum_stats.average, spectrum_stats.median, spectrum_stats.min, spectrum_stats.max);
-    printf("hsv2rgb_fullspectrum%.6f   %.6f   %.6f   %.6f\n", 
-           fullspectrum_stats.average, fullspectrum_stats.median, fullspectrum_stats.min, fullspectrum_stats.max);
-    printf("\n");
+    FL_WARN("=== Accuracy Comparison ===");
+    FL_WARN("Function            Average    Median     Min        Max");
+    FL_WARN("hsv2rgb_rainbow     " << rainbow_stats.average << "   " << rainbow_stats.median << "   " << rainbow_stats.min << "   " << rainbow_stats.max);
+    FL_WARN("hsv2rgb_spectrum    " << spectrum_stats.average << "   " << spectrum_stats.median << "   " << spectrum_stats.min << "   " << spectrum_stats.max);
+    FL_WARN("hsv2rgb_fullspectrum" << fullspectrum_stats.average << "   " << fullspectrum_stats.median << "   " << fullspectrum_stats.min << "   " << fullspectrum_stats.max);
+    FL_WARN("");
     
     // Find the best performing function for each metric
     std::vector<std::pair<float, const char*>> avg_results = {
@@ -153,34 +151,34 @@ TEST_CASE("HSV to RGB Conversion Accuracy Comparison") {
     };
     std::sort(max_results.begin(), max_results.end());
     
-    printf("=== Best Performance Rankings ===\n");
-    printf("Lowest Average Error: %s (%.6f)\n", avg_results[0].second, avg_results[0].first);
-    printf("Lowest Median Error:  %s (%.6f)\n", median_results[0].second, median_results[0].first);
-    printf("Lowest Max Error:     %s (%.6f)\n", max_results[0].second, max_results[0].first);
-    printf("\n");
+    FL_WARN("=== Best Performance Rankings ===");
+    FL_WARN("Lowest Average Deviation: " << avg_results[0].second << " (" << avg_results[0].first << ")");
+    FL_WARN("Lowest Median Deviation:  " << median_results[0].second << " (" << median_results[0].first << ")");
+    FL_WARN("Lowest Max Deviation:     " << max_results[0].second << " (" << max_results[0].first << ")");
+    FL_WARN("");
     
-    // Basic sanity checks - errors should be reasonable for RGB->HSV->RGB round-trip
+    // Basic sanity checks - deviations should be reasonable for RGB->HSV->RGB round-trip
     // Note: RGB->HSV->RGB conversion is inherently lossy due to the approximation function
-    CHECK_LT(rainbow_stats.average, 150.0f);     // Average error should be reasonable
+    CHECK_LT(rainbow_stats.average, 150.0f);     // Average deviation should be reasonable
     CHECK_LT(spectrum_stats.average, 150.0f);
     CHECK_LT(fullspectrum_stats.average, 150.0f);
-    
-    // Max error can exceed single RGB channel distance due to euclidean distance calculation
-    CHECK_LT(rainbow_stats.max, 500.0f);         // Max error should be reasonable 
+
+    // Max deviation can exceed single RGB channel distance due to euclidean distance calculation
+    CHECK_LT(rainbow_stats.max, 500.0f);         // Max deviation should be reasonable
     CHECK_LT(spectrum_stats.max, 500.0f);
     CHECK_LT(fullspectrum_stats.max, 500.0f);
-    
-    CHECK_GE(rainbow_stats.min, 0.0f);           // Min error should be non-negative
+
+    CHECK_GE(rainbow_stats.min, 0.0f);           // Min deviation should be non-negative
     CHECK_GE(spectrum_stats.min, 0.0f);
     CHECK_GE(fullspectrum_stats.min, 0.0f);
-    
-    // Verify rainbow has the best (lowest) average error
+
+    // Verify rainbow has the best (lowest) average deviation
     CHECK_LT(rainbow_stats.average, spectrum_stats.average);
     CHECK_LT(rainbow_stats.average, fullspectrum_stats.average);
 }
 
 TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
-    printf("\n=== Specific Color Conversion Tests ===\n");
+    FL_WARN("=== Specific Color Conversion Tests ===");
     
     // Test some specific colors known to be challenging
     struct TestColor {
@@ -203,8 +201,8 @@ TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
         {{255, 192, 203}, "Pink"}
     };
     
-    printf("Color           Original RGB    Rainbow RGB     Spectrum RGB    FullSpectrum RGB\n");
-    printf("-------------   -----------     -----------     ------------    ----------------\n");
+    FL_WARN("Color           Original RGB    Rainbow RGB     Spectrum RGB    FullSpectrum RGB");
+    FL_WARN("-------------   -----------     -----------     ------------    ----------------");
     
     for (const auto& test : test_colors) {
         CHSV hsv = rgb2hsv_approximate(test.rgb);
@@ -214,22 +212,20 @@ TEST_CASE("HSV to RGB Conversion - Specific Color Tests") {
         hsv2rgb_spectrum(hsv, spectrum_rgb);
         hsv2rgb_fullspectrum(hsv, fullspectrum_rgb);
         
-        printf("%-15s (%3d,%3d,%3d)   (%3d,%3d,%3d)   (%3d,%3d,%3d)   (%3d,%3d,%3d)\n",
-               test.name,
-               test.rgb.r, test.rgb.g, test.rgb.b,
-               rainbow_rgb.r, rainbow_rgb.g, rainbow_rgb.b,
-               spectrum_rgb.r, spectrum_rgb.g, spectrum_rgb.b,
-               fullspectrum_rgb.r, fullspectrum_rgb.g, fullspectrum_rgb.b);
+        FL_WARN(test.name << " (" << (int)test.rgb.r << "," << (int)test.rgb.g << "," << (int)test.rgb.b << ")   (" <<
+                (int)rainbow_rgb.r << "," << (int)rainbow_rgb.g << "," << (int)rainbow_rgb.b << ")   (" <<
+                (int)spectrum_rgb.r << "," << (int)spectrum_rgb.g << "," << (int)spectrum_rgb.b << ")   (" <<
+                (int)fullspectrum_rgb.r << "," << (int)fullspectrum_rgb.g << "," << (int)fullspectrum_rgb.b << ")");
     }
-    printf("\n");
+    FL_WARN("");
 }
 
 TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
-    printf("\n=== Hue Sweep Conversion Test ===\n");
-    printf("Testing full hue range at maximum saturation and brightness\n");
-    
-    printf("Hue   Rainbow RGB     Spectrum RGB    FullSpectrum RGB\n");
-    printf("----  -----------     ------------    ----------------\n");
+    FL_WARN("=== Hue Sweep Conversion Test ===");
+    FL_WARN("Testing full hue range at maximum saturation and brightness");
+    FL_WARN("");
+    FL_WARN("Hue   Rainbow RGB     Spectrum RGB    FullSpectrum RGB");
+    FL_WARN("----  -----------     ------------    ----------------");
     
     // Test hue sweep at full saturation and brightness
     for (int hue = 0; hue < 256; hue += 1) {
@@ -240,11 +236,9 @@ TEST_CASE("HSV to RGB Conversion - Hue Sweep Test") {
         hsv2rgb_spectrum(hsv, spectrum_rgb);
         hsv2rgb_fullspectrum(hsv, fullspectrum_rgb);
         
-        printf("%3d   (%3d,%3d,%3d)   (%3d,%3d,%3d)   (%3d,%3d,%3d)\n",
-               hue,
-               rainbow_rgb.r, rainbow_rgb.g, rainbow_rgb.b,
-               spectrum_rgb.r, spectrum_rgb.g, spectrum_rgb.b,
-               fullspectrum_rgb.r, fullspectrum_rgb.g, fullspectrum_rgb.b);
+        FL_WARN(hue << "   (" << (int)rainbow_rgb.r << "," << (int)rainbow_rgb.g << "," << (int)rainbow_rgb.b << ")   (" <<
+                (int)spectrum_rgb.r << "," << (int)spectrum_rgb.g << "," << (int)spectrum_rgb.b << ")   (" <<
+                (int)fullspectrum_rgb.r << "," << (int)fullspectrum_rgb.g << "," << (int)fullspectrum_rgb.b << ")");
     }
-    printf("\n");
+    FL_WARN("");
 }
