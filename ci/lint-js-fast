@@ -8,12 +8,25 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
+# Store project root directory for cache operations
+PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+
 echo -e "${BLUE}FAST FastLED JavaScript Linting (Node.js + ESLint + JSDoc Type Checking - FAST!)${NC}"
 
 # Check if ESLint is installed
 if [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
     echo -e "${RED}ERROR: ESLint not found. Run: uv run ci/setup-js-linting-fast.py${NC}"
     exit 1
+fi
+
+# Check if JS files need linting using fingerprint cache (from project root)
+echo -e "${BLUE}🔍 Checking if JavaScript files need linting...${NC}"
+cd "$PROJECT_ROOT"
+if uv run python ci/js_lint_cache.py check; then
+    echo -e "${BLUE}📋 JavaScript files changed - proceeding with linting${NC}"
+else
+    echo -e "${GREEN}⚡ No changes detected - skipping JavaScript linting${NC}"
+    exit 0
 fi
 
 # Find JavaScript files in WASM platform
@@ -96,3 +109,7 @@ else
 fi
 
 echo -e "${GREEN}SUCCESS: JavaScript linting and type checking completed successfully${NC}"
+
+# Mark linting as successful in cache (from project root)
+cd "$PROJECT_ROOT"
+uv run python ci/js_lint_cache.py success
