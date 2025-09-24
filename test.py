@@ -27,7 +27,9 @@ from ci.util.test_types import (
     FingerprintResult,
     TestArgs,
     calculate_cpp_test_fingerprint,
+    calculate_examples_fingerprint,
     calculate_fingerprint,
+    calculate_python_test_fingerprint,
     process_test_flags,
 )
 
@@ -344,6 +346,78 @@ def main() -> None:
         )
         write_cpp_test_fingerprint(cpp_test_fingerprint_data)
 
+        # Set up examples test fingerprint caching
+        examples_fingerprint_file = cache_dir / "examples_fingerprint.json"
+
+        def write_examples_fingerprint(fingerprint: FingerprintResult) -> None:
+            fingerprint_dict = {
+                "hash": fingerprint.hash,
+                "elapsed_seconds": fingerprint.elapsed_seconds,
+                "status": fingerprint.status,
+            }
+            with open(examples_fingerprint_file, "w") as f:
+                json.dump(fingerprint_dict, f, indent=2)
+
+        def read_examples_fingerprint() -> FingerprintResult | None:
+            if examples_fingerprint_file.exists():
+                with open(examples_fingerprint_file, "r") as f:
+                    try:
+                        data = json.load(f)
+                        return FingerprintResult(
+                            hash=data["hash"],
+                            elapsed_seconds=data["elapsed_seconds"],
+                            status=data["status"],
+                        )
+                    except (json.JSONDecodeError, KeyError):
+                        return None
+            return None
+
+        # Calculate and save examples fingerprint
+        prev_examples_fingerprint = read_examples_fingerprint()
+        examples_fingerprint_data = calculate_examples_fingerprint()
+        examples_change = (
+            True
+            if prev_examples_fingerprint is None
+            else examples_fingerprint_data.hash != prev_examples_fingerprint.hash
+        )
+        write_examples_fingerprint(examples_fingerprint_data)
+
+        # Set up Python test fingerprint caching
+        python_test_fingerprint_file = cache_dir / "python_test_fingerprint.json"
+
+        def write_python_test_fingerprint(fingerprint: FingerprintResult) -> None:
+            fingerprint_dict = {
+                "hash": fingerprint.hash,
+                "elapsed_seconds": fingerprint.elapsed_seconds,
+                "status": fingerprint.status,
+            }
+            with open(python_test_fingerprint_file, "w") as f:
+                json.dump(fingerprint_dict, f, indent=2)
+
+        def read_python_test_fingerprint() -> FingerprintResult | None:
+            if python_test_fingerprint_file.exists():
+                with open(python_test_fingerprint_file, "r") as f:
+                    try:
+                        data = json.load(f)
+                        return FingerprintResult(
+                            hash=data["hash"],
+                            elapsed_seconds=data["elapsed_seconds"],
+                            status=data["status"],
+                        )
+                    except (json.JSONDecodeError, KeyError):
+                        return None
+            return None
+
+        # Calculate and save Python test fingerprint
+        prev_python_test_fingerprint = read_python_test_fingerprint()
+        python_test_fingerprint_data = calculate_python_test_fingerprint()
+        python_test_change = (
+            True
+            if prev_python_test_fingerprint is None
+            else python_test_fingerprint_data.hash != prev_python_test_fingerprint.hash
+        )
+        write_python_test_fingerprint(python_test_fingerprint_data)
+
         # Handle QEMU testing
         if args.qemu is not None:
             print("=== QEMU Testing ===")
@@ -428,7 +502,17 @@ def main() -> None:
                 sys.exit(1)
         else:
             # Use normal test runner for other cases
-            test_runner(args, src_code_change, cpp_test_change)
+            # Force change flags=True when running a specific test to disable fingerprint cache
+            force_cpp_test_change = cpp_test_change or (args.test is not None)
+            force_examples_change = examples_change or (args.test is not None)
+            force_python_test_change = python_test_change or (args.test is not None)
+            test_runner(
+                args,
+                src_code_change,
+                force_cpp_test_change,
+                force_examples_change,
+                force_python_test_change,
+            )
 
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()

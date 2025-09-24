@@ -439,6 +439,8 @@ def create_unit_test_process(
         test_cmd.extend(["--test", str(args.test)])
     if args.verbose:
         test_cmd.append("--verbose")
+    if enable_stack_trace:
+        test_cmd.append("--stack-trace")
 
     both_cmds: list[str] = []
     both_cmds.extend(compile_cmd)
@@ -1374,7 +1376,11 @@ def run_test_processes(
 
 
 def runner(
-    args: TestArgs, src_code_change: bool = True, cpp_test_change: bool = True
+    args: TestArgs,
+    src_code_change: bool = True,
+    cpp_test_change: bool = True,
+    examples_change: bool = True,
+    python_test_change: bool = True,
 ) -> None:
     """
     Main test runner function that determines what to run and executes tests
@@ -1383,15 +1389,25 @@ def runner(
         args: Parsed command line arguments
         src_code_change: Whether source code has changed since last run
         cpp_test_change: Whether C++ test-related files (src/ or tests/) have changed
+        examples_change: Whether example-related files have changed
+        python_test_change: Whether Python test-related files have changed
     """
     print(f"[TEST_RUNNER] Starting runner function")
     print(f"[TEST_RUNNER] Args: {args}")
     print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
     print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
+    print(f"[TEST_RUNNER] Example files changed: {examples_change}")
+    print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
     try:
         # Determine test categories
         test_categories = determine_test_categories(args)
-        enable_stack_trace = not args.no_stack_trace
+        # Handle stack trace flags: --stack-trace overrides --no-stack-trace, default is enabled
+        if args.stack_trace:
+            enable_stack_trace = True
+        elif args.no_stack_trace:
+            enable_stack_trace = False
+        else:
+            enable_stack_trace = True  # Default: enabled
 
         # Build up unified list of all processes to run
         processes: list[RunningProcess] = []
@@ -1417,8 +1433,8 @@ def runner(
         if src_code_change and not test_categories.py_only:
             processes.append(create_compile_uno_test_process(enable_stack_trace))
 
-        # Add Python tests if needed
-        if test_categories.py or test_categories.py_only:
+        # Add Python tests if needed and Python test files have changed
+        if (test_categories.py or test_categories.py_only) and python_test_change:
             # Pass full_tests=True if we're running integration tests or any form of full tests
             full_tests = (
                 test_categories.integration
@@ -1429,10 +1445,22 @@ def runner(
             processes.append(
                 create_python_test_process(False, full_tests)
             )  # Disable stack trace for Python tests
+        elif (test_categories.py or test_categories.py_only) and not python_test_change:
+            print(
+                "Skipping Python tests - no changes detected in Python test-related files"
+            )
 
-        # Add example tests if needed
-        if test_categories.examples or test_categories.examples_only:
+        # Add example tests if needed and example files have changed
+        if (
+            test_categories.examples or test_categories.examples_only
+        ) and examples_change:
             processes.append(create_examples_test_process(args, enable_stack_trace))
+        elif (
+            test_categories.examples or test_categories.examples_only
+        ) and not examples_change:
+            print(
+                "Skipping example tests - no changes detected in example-related files"
+            )
 
         # Determine if we'll run in parallel
         will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))

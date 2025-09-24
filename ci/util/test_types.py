@@ -74,6 +74,7 @@ class TestArgs:
     show_link: bool = False
     quick: bool = False
     no_stack_trace: bool = False
+    stack_trace: bool = False
     check: bool = False
     examples: Optional[list[str]] = None
     no_pch: bool = False
@@ -345,6 +346,105 @@ def calculate_cpp_test_fingerprint() -> FingerprintResult:
     if tests_dir.exists():
         tests_result = fingerprint_code_base(tests_dir, "**/*.h,**/*.cpp,**/*.hpp")
         hasher.update(f"tests:{tests_result.hash}".encode("utf-8"))
+
+    elapsed_time = time.time() - start_time
+
+    return FingerprintResult(
+        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+    )
+
+
+def calculate_examples_fingerprint() -> FingerprintResult:
+    """
+    Calculate fingerprint for example tests, including examples/ directory.
+
+    Returns:
+        The fingerprint result covering files that affect example compilation tests
+    """
+    start_time = time.time()
+    cwd = Path.cwd()
+
+    # Combine fingerprints from relevant directories
+    hasher = hashlib.sha256()
+
+    # Process src/ directory (affects example compilation)
+    src_dir = cwd / "src"
+    if src_dir.exists():
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        hasher.update(f"src:{src_result.hash}".encode("utf-8"))
+
+    # Process examples/ directory
+    examples_dir = cwd / "examples"
+    if examples_dir.exists():
+        examples_result = fingerprint_code_base(
+            examples_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp"
+        )
+        hasher.update(f"examples:{examples_result.hash}".encode("utf-8"))
+
+    # Include test_example_compilation.py and related scripts
+    example_test_files = [
+        cwd / "ci" / "compiler" / "test_example_compilation.py",
+        cwd / "ci" / "compiler" / "clang_compiler.py",
+        cwd / "ci" / "compiler" / "native_fingerprint.py",
+    ]
+    for script_file in example_test_files:
+        if script_file.exists():
+            with open(script_file, "rb") as f:
+                script_content = f.read()
+                hasher.update(
+                    f"script:{script_file.name}:{hashlib.sha256(script_content).hexdigest()}".encode(
+                        "utf-8"
+                    )
+                )
+
+    elapsed_time = time.time() - start_time
+
+    return FingerprintResult(
+        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+    )
+
+
+def calculate_python_test_fingerprint() -> FingerprintResult:
+    """
+    Calculate fingerprint for Python tests, including ci/tests/ directory.
+
+    Returns:
+        The fingerprint result covering files that affect Python tests
+    """
+    start_time = time.time()
+    cwd = Path.cwd()
+
+    # Combine fingerprints from relevant directories
+    hasher = hashlib.sha256()
+
+    # Process ci/tests/ directory (Python test files)
+    ci_tests_dir = cwd / "ci" / "tests"
+    if ci_tests_dir.exists():
+        ci_tests_result = fingerprint_code_base(ci_tests_dir, "**/*.py")
+        hasher.update(f"ci_tests:{ci_tests_result.hash}".encode("utf-8"))
+
+    # Process ci/ directory (Python modules that affect tests)
+    ci_dir = cwd / "ci"
+    if ci_dir.exists():
+        # Include important Python modules
+        ci_modules_result = fingerprint_code_base(ci_dir, "**/*.py")
+        hasher.update(f"ci_modules:{ci_modules_result.hash}".encode("utf-8"))
+
+    # Include relevant configuration files
+    config_files = [
+        cwd / "pyproject.toml",
+        cwd / "uv.lock",
+        cwd / ".python-version",
+    ]
+    for config_file in config_files:
+        if config_file.exists():
+            with open(config_file, "rb") as f:
+                config_content = f.read()
+                hasher.update(
+                    f"config:{config_file.name}:{hashlib.sha256(config_content).hexdigest()}".encode(
+                        "utf-8"
+                    )
+                )
 
     elapsed_time = time.time() - start_time
 

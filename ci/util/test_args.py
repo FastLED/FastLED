@@ -94,6 +94,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Disable stack trace dumping on timeout",
     )
     parser.add_argument(
+        "--stack-trace",
+        action="store_true",
+        help="Enable stack trace dumping on crashes and timeouts (overrides default behavior)",
+    )
+    parser.add_argument(
         "--check",
         action="store_true",
         help="Enable static analysis (IWYU, clang-tidy) - auto-enables --cpp and --clang",
@@ -164,6 +169,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         show_link=parsed_args.show_link,
         quick=parsed_args.quick,
         no_stack_trace=parsed_args.no_stack_trace,
+        stack_trace=parsed_args.stack_trace,
         check=parsed_args.check,
         examples=parsed_args.examples,
         no_pch=parsed_args.no_pch,
