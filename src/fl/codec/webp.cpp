@@ -67,7 +67,31 @@ FramePtr Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> da
 
     if (err != SIMPLEWEBP_NO_ERROR || !webp_decoder) {
         if (error_message) {
-            *error_message = "Failed to load WebP image";
+            fl::string error_str = "Failed to load WebP image - ";
+            switch (err) {
+                case SIMPLEWEBP_ALLOC_ERROR:
+                    error_str += "allocation error";
+                    break;
+                case SIMPLEWEBP_IO_ERROR:
+                    error_str += "I/O error";
+                    break;
+                case SIMPLEWEBP_NOT_WEBP_ERROR:
+                    error_str += "not a WebP image";
+                    break;
+                case SIMPLEWEBP_CORRUPT_ERROR:
+                    error_str += "corrupt WebP image";
+                    break;
+                case SIMPLEWEBP_UNSUPPORTED_ERROR:
+                    error_str += "unsupported WebP format";
+                    break;
+                case SIMPLEWEBP_IS_LOSSLESS_ERROR:
+                    error_str += "lossless WebP not supported by simplewebp decoder";
+                    break;
+                default:
+                    error_str += "unknown error (" + fl::to_string((int)err) + ")";
+                    break;
+            }
+            *error_message = error_str;
         }
         return nullptr;
     }
@@ -96,7 +120,31 @@ FramePtr Webp::decode(const WebpDecoderConfig& config, fl::span<const fl::u8> da
 
     if (err != SIMPLEWEBP_NO_ERROR) {
         if (error_message) {
-            *error_message = "Failed to decode WebP image";
+            fl::string error_str = "Failed to decode WebP image - ";
+            switch (err) {
+                case SIMPLEWEBP_ALLOC_ERROR:
+                    error_str += "allocation error during decode";
+                    break;
+                case SIMPLEWEBP_IO_ERROR:
+                    error_str += "I/O error during decode";
+                    break;
+                case SIMPLEWEBP_NOT_WEBP_ERROR:
+                    error_str += "not a WebP image during decode";
+                    break;
+                case SIMPLEWEBP_CORRUPT_ERROR:
+                    error_str += "corrupt WebP image during decode";
+                    break;
+                case SIMPLEWEBP_UNSUPPORTED_ERROR:
+                    error_str += "unsupported WebP format during decode";
+                    break;
+                case SIMPLEWEBP_IS_LOSSLESS_ERROR:
+                    error_str += "lossless WebP not supported by simplewebp decoder";
+                    break;
+                default:
+                    error_str += "unknown decode error (" + fl::to_string((int)err) + ")";
+                    break;
+            }
+            *error_message = error_str;
         }
         return nullptr;
     }

@@ -114,5 +114,9 @@ Run: `bash test codec` - Both JPEG and GIF tests now pass with perfect pixel val
 
   * tests/test_codec.cpp should comprehensively test all the RGB 565 convers values.
     * we only have to do one component at a time
+      * Do red, such that CRGB(0,0,0) -> CRGB(255,0,0) is tested (ignore green and blue)
+      * Do green, such that CRGB(0,0,0) -> CRGB(0,255,0) is tested (ignore red and blue)
+      * Do blue, such that CRGB(0,0,0) -> CRGB(0,0,255) is tested (ignore red and green)
   * tests/test_codec.cpp should test the animated gif using the IDecoder interface. Test that there are two frames.
-  * 
+  * Organize the codec tests into seperate TEST_CASE blocks instead of SUBCASE.
+    * Add large seperators for JPEG/GIF/WEBP/MPEG1 tests
