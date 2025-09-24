@@ -170,6 +170,11 @@ public:
 
         auto driver_state = driver_->getState();
         switch (driver_state) {
+            case fl::third_party::TJpgInstanceDecoder::State::NotStarted:
+            case fl::third_party::TJpgInstanceDecoder::State::HeaderParsed:
+            case fl::third_party::TJpgInstanceDecoder::State::Decoding:
+                progress_ = driver_->getProgress();
+                break;
             case fl::third_party::TJpgInstanceDecoder::State::Complete:
                 state_ = JpegDecoder::State::Complete;
                 progress_ = 1.0f;
@@ -183,9 +188,6 @@ public:
                 }
                 return false;
             }
-            default:
-                progress_ = driver_->getProgress();
-                break;
         }
 
         return more_work;
