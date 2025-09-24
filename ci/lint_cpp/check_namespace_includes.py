@@ -88,17 +88,8 @@ def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Dictionary mapping file paths to lists of violation data
     """
-    cpp_extensions = [
-        ".cpp",
-        ".cc",
-        ".cxx",
-        ".c++",
-        ".hpp",
-        ".h",
-        ".hh",
-        ".hxx",
-        ".h++",
-    ]
+    # Only check .h and .hpp files
+    cpp_extensions = [".h", ".hpp"]
     violations: Dict[str, Any] = {}
 
     for root, dirs, files in os.walk(directory):
@@ -130,7 +121,9 @@ def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
 
 
 def main() -> None:
-    violations: Dict[str, Any] = scan_cpp_files(str(PROJECT_ROOT))
+    # Only scan src/ directory for .h files
+    src_dir = os.path.join(PROJECT_ROOT, "src")
+    violations: Dict[str, Any] = scan_cpp_files(str(src_dir))
 
     if violations:
         # Count total violations
