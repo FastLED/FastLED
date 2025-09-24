@@ -1373,17 +1373,21 @@ def run_test_processes(
         raise
 
 
-def runner(args: TestArgs, src_code_change: bool = True) -> None:
+def runner(
+    args: TestArgs, src_code_change: bool = True, cpp_test_change: bool = True
+) -> None:
     """
     Main test runner function that determines what to run and executes tests
 
     Args:
         args: Parsed command line arguments
         src_code_change: Whether source code has changed since last run
+        cpp_test_change: Whether C++ test-related files (src/ or tests/) have changed
     """
     print(f"[TEST_RUNNER] Starting runner function")
     print(f"[TEST_RUNNER] Args: {args}")
     print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
+    print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
     try:
         # Determine test categories
         test_categories = determine_test_categories(args)
@@ -1395,9 +1399,15 @@ def runner(args: TestArgs, src_code_change: bool = True) -> None:
         # Always start with namespace check
         processes.append(create_namespace_check_process(enable_stack_trace))
 
-        # Add unit tests if needed
-        if test_categories.unit or test_categories.unit_only:
+        # Add unit tests if needed and C++ test files have changed
+        if (test_categories.unit or test_categories.unit_only) and cpp_test_change:
             processes.append(create_unit_test_process(args, enable_stack_trace))
+        elif (
+            test_categories.unit or test_categories.unit_only
+        ) and not cpp_test_change:
+            print(
+                "Skipping C++ unit tests - no changes detected in src/ or tests/ directories"
+            )
 
         # Add integration tests if needed
         if test_categories.integration or test_categories.integration_only:

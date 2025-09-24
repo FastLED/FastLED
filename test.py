@@ -26,6 +26,7 @@ from ci.util.test_runner import runner as test_runner
 from ci.util.test_types import (
     FingerprintResult,
     TestArgs,
+    calculate_cpp_test_fingerprint,
     calculate_fingerprint,
     process_test_flags,
 )
@@ -307,6 +308,42 @@ def main() -> None:
         )
         write_fingerprint(fingerprint_data)
 
+        # Set up C++ test-specific fingerprint caching
+        cpp_test_fingerprint_file = cache_dir / "cpp_test_fingerprint.json"
+
+        def write_cpp_test_fingerprint(fingerprint: FingerprintResult) -> None:
+            fingerprint_dict = {
+                "hash": fingerprint.hash,
+                "elapsed_seconds": fingerprint.elapsed_seconds,
+                "status": fingerprint.status,
+            }
+            with open(cpp_test_fingerprint_file, "w") as f:
+                json.dump(fingerprint_dict, f, indent=2)
+
+        def read_cpp_test_fingerprint() -> FingerprintResult | None:
+            if cpp_test_fingerprint_file.exists():
+                with open(cpp_test_fingerprint_file, "r") as f:
+                    try:
+                        data = json.load(f)
+                        return FingerprintResult(
+                            hash=data.get("hash", ""),
+                            elapsed_seconds=data.get("elapsed_seconds"),
+                            status=data.get("status"),
+                        )
+                    except json.JSONDecodeError:
+                        print("Invalid C++ test fingerprint file. Recalculating...")
+            return None
+
+        # Calculate and save C++ test fingerprint
+        prev_cpp_test_fingerprint = read_cpp_test_fingerprint()
+        cpp_test_fingerprint_data = calculate_cpp_test_fingerprint()
+        cpp_test_change = (
+            True
+            if prev_cpp_test_fingerprint is None
+            else cpp_test_fingerprint_data.hash != prev_cpp_test_fingerprint.hash
+        )
+        write_cpp_test_fingerprint(cpp_test_fingerprint_data)
+
         # Handle QEMU testing
         if args.qemu is not None:
             print("=== QEMU Testing ===")
@@ -391,7 +428,7 @@ def main() -> None:
                 sys.exit(1)
         else:
             # Use normal test runner for other cases
-            test_runner(args, src_code_change)
+            test_runner(args, src_code_change, cpp_test_change)
 
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()

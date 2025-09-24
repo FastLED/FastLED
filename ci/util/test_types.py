@@ -319,3 +319,35 @@ def calculate_fingerprint(root_dir: Path | None = None) -> FingerprintResult:
     result.elapsed_seconds = f"{elapsed_time:.2f}"
 
     return result
+
+
+def calculate_cpp_test_fingerprint() -> FingerprintResult:
+    """
+    Calculate fingerprint for C++ unit tests, including both src/ and tests/ directories.
+
+    Returns:
+        The fingerprint result covering files that affect C++ unit tests
+    """
+    start_time = time.time()
+    cwd = Path.cwd()
+
+    # Combine fingerprints from both src/ and tests/ directories
+    hasher = hashlib.sha256()
+
+    # Process src/ directory (C++ source files)
+    src_dir = cwd / "src"
+    if src_dir.exists():
+        src_result = fingerprint_code_base(src_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        hasher.update(f"src:{src_result.hash}".encode("utf-8"))
+
+    # Process tests/ directory (test files)
+    tests_dir = cwd / "tests"
+    if tests_dir.exists():
+        tests_result = fingerprint_code_base(tests_dir, "**/*.h,**/*.cpp,**/*.hpp")
+        hasher.update(f"tests:{tests_result.hash}".encode("utf-8"))
+
+    elapsed_time = time.time() - start_time
+
+    return FingerprintResult(
+        hash=hasher.hexdigest(), elapsed_seconds=f"{elapsed_time:.2f}", status="success"
+    )
