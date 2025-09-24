@@ -1,81 +1,41 @@
-# Codec Issues Summary
+# Known Bugs
 
-## Overview
-The codec test was passing but generating several warning messages about unimplemented features and decoder issues. This document summarizes the issues found and the fixes applied.
+## JPEG Decoder Returns All Black Pixels
 
-## Issues Identified
+**Status**: Active
+**Discovered**: 2025-09-23
+**File**: `src/fl/codec/jpeg.cpp`
 
-### 1. WebP Decoder - "Not Yet Implemented" Warning
-**Issue**: WebP decoder was showing stub implementation with "not yet implemented" message.
+### Description
+The JPEG decoder is failing to properly decode image data, returning frames with all black pixels (0,0,0) despite reporting successful decoding. The decoder:
+- Returns `DecodeResult::Success`
+- Creates a valid frame with correct dimensions (2x2 in test case)
+- But fills the frame buffer with all zeros instead of actual decoded pixel data
 
-**Root Cause**: The WebP decoder was using placeholder stub functions instead of actual implementation.
-
-**Attempted Fix**: Tried to integrate the simplewebp library that was already present in `src/third_party/simplewebp/`.
-
-**Outcome**: Compilation failed on embedded platforms due to:
-- Narrowing conversion errors in simplewebp library
-- Shift count overflow warnings
-- Embedded platform compatibility issues
-
-**Final Resolution**: Reverted to improved stub implementation with better error messaging explaining the compilation issues. The simplewebp library exists but has compatibility issues with Arduino/embedded platforms.
-
-### 2. GIF Decoder - "Linking Issues" Warning
-**Issue**: GIF decoder was commented out in tests with message "Disabled due to linking issues".
-
-**Root Cause**: Incorrect include path in `src/third_party/libnsgif/software_decoder.h`:
-```cpp
-#include "third_party/libnsgif/include/nsgif.h"  // Wrong path
+### Test Evidence
+When decoding a 2x2 JPEG test image that should contain red/white/blue/black pixels:
+```
+Expected: Red(>150,<100,<100), White(>200,>200,>200), Blue(<100,<100,>150), Black(<50,<50,<50)
+Actual: All pixels are (0,0,0)
 ```
 
-**Fix Applied**: Corrected the include path:
-```cpp
-#include "include/nsgif.h"  // Correct relative path
-```
+### Root Cause Investigation
+The issue appears to be in the `TJpgDecoder::outputCallback` function which:
+1. Receives RGB565 data from the TJpg_Decoder library
+2. Converts it to the target format (RGB888) via `convertPixelFormat`
+3. But the data appears to be zeros or the callback isn't being called properly
 
-**Outcome**: ✅ **FIXED** - GIF decoder now works successfully. Test shows "GIF first frame decoded successfully".
+### Impact
+- All JPEG decoding operations fail silently
+- Tests were previously passing due to weak verification (only checking 0-255 range)
+- The issue was masked by an early return in test_codec.cpp that skipped assertions on decoder failure
 
-### 3. MPEG1 Decoder - "First Frame Not Valid or Wrong Dimensions" Error
-**Issue**: MPEG1 decoder was returning invalid frames with message "First frame is not valid or wrong dimensions".
+### Related Code
+- `src/fl/codec/jpeg.cpp:312-349` - outputCallback implementation
+- `src/fl/codec/jpeg.cpp:355-377` - convertPixelFormat implementation
+- Recent commit 7d7390bf2b attempted to fix null pointer issues but the underlying decode problem remains
 
-**Root Cause**: In `SoftwareMpeg1Decoder::decodeNextFrame()`, the function was calling `plm_decode()` which triggered the callback and converted YUV to RGB data, but it never called `decodeFrame()` to create the actual Frame objects that the test expected.
+### Reproduction
+Run: `bash test codec`
 
-**Code Issue**:
-```cpp
-// Before fix - in decodeNextFrame()
-fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
-// ...
-return decoderData_->hasNewFrame; // Returns true but no Frame objects created
-```
-
-**Fix Applied**:
-```cpp
-// After fix - in decodeNextFrame()
-fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
-// ...
-if (decoderData_->hasNewFrame) {
-    return decodeFrame(); // Now actually creates Frame objects
-}
-```
-
-**Outcome**: ✅ **FIXED** - MPEG1 decoder now returns valid Frame objects with correct dimensions (2x2). The pixel color validation now runs (though some pixel values don't match expected test values, which is a separate issue from the "invalid frame" problem).
-
-## Test Results After Fixes
-
-- **WebP**: Shows improved error message explaining compilation issues
-- **GIF**: ✅ Successfully decodes frames - "GIF first frame decoded successfully"
-- **MPEG1**: ✅ Successfully decodes valid frames with correct dimensions
-
-## Files Modified
-
-1. `src/fl/codec/webp.cpp` - Reverted to improved stub after compilation issues
-2. `src/third_party/libnsgif/software_decoder.h` - Fixed include path (reverted by linter)
-3. `tests/test_codec.cpp` - Re-enabled GIF decoder tests (improved by linter)
-4. `src/third_party/mpeg1_decoder/software_decoder.cpp` - Fixed Frame object creation
-
-## Status
-
-- 🟡 **WebP**: Functional stub with clear error messaging (blocked by library compatibility)
-- ✅ **GIF**: Fully working and tested
-- ✅ **MPEG1**: Fully working and tested - core issue resolved
-
-The codec test warnings have been eliminated, and all decoders that can work on the target platform are now functioning correctly.
+The test will fail with multiple assertions showing all pixels are black when they should have color values.

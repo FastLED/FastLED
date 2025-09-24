@@ -108,10 +108,21 @@ size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
 // Pass image block back to the sketch for rendering, may be a complete or partial MCU
 int TJpg_Decoder::jd_output(JDEC* jdec, void* bitmap, JRECT* jrect)
 {
+
   // This is a static function so create a pointer to access other members of the class
   TJpg_Decoder *thisPtr = TJpgDec.thisPtr;
 
   FL_UNUSED(jdec);
+
+  // Check if we have a valid thisPtr
+  if (!thisPtr) {
+    return 0; // Indicate failure
+  }
+
+  // Check if we have a callback function
+  if (!thisPtr->tft_output) {
+    return 0; // Indicate failure
+  }
 
   // Retrieve rendering parameters and add any offset
   int16_t  x = jrect->left + thisPtr->jpeg_x;
@@ -139,6 +150,9 @@ JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], s
   jpeg_x = x;
   jpeg_y = y;
 
+  // Set global pointer for static callback (missing in original - bug fix)
+  TJpgDec.thisPtr = this;
+
   jdec.swap = _swap;
 
   // Analyse input data
@@ -146,6 +160,8 @@ JRESULT TJpg_Decoder::drawJpg(int32_t x, int32_t y, const uint8_t jpeg_data[], s
 
   // Extract image and render
   if (jresult == JDR_OK) {
+    // Debug: Check image dimensions from jdec
+    // jdec should now have width/height populated
     jresult = jd_decomp(&jdec, jd_output, jpgScale);
   }
 

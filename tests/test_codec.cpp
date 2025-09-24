@@ -45,6 +45,7 @@ TEST_CASE("Codec file loading and decoding") {
         if (Jpeg::isSupported()) {
             JpegDecoderConfig config;
             config.format = PixelFormat::RGB888;
+            config.quality = JpegDecoderConfig::Quality::High;  // Use 1:1 scaling for 2x2 test image
 
             fl::string error_msg;
             fl::span<const fl::u8> data(file_data.data(), file_size);
@@ -72,16 +73,30 @@ TEST_CASE("Codec file loading and decoding") {
                         << ") Blue: (" << (int)pixels[2].r << "," << (int)pixels[2].g << "," << (int)pixels[2].b
                         << ") Black: (" << (int)pixels[3].r << "," << (int)pixels[3].g << "," << (int)pixels[3].b << ")");
 
-                // For JPEG with compression artifacts, verify we have reasonable color values
-                // All pixels should have values in a reasonable range (not completely wrong)
-                for (int i = 0; i < 4; i++) {
-                    CHECK_GE(pixels[i].r, 0);
-                    CHECK_LE(pixels[i].r, 255);
-                    CHECK_GE(pixels[i].g, 0);
-                    CHECK_LE(pixels[i].g, 255);
-                    CHECK_GE(pixels[i].b, 0);
-                    CHECK_LE(pixels[i].b, 255);
-                }
+                // For JPEG with compression artifacts, verify approximate color values
+                // Expected layout: red-white-blue-black (2x2)
+                // Allow tolerance for JPEG compression artifacts
+                const int tolerance = 50; // JPEG compression can alter values significantly
+
+                // Pixel 0: Red (high R, low G/B)
+                CHECK_MESSAGE(pixels[0].r > 150, "Red pixel should have high red value, got: " << (int)pixels[0].r);
+                CHECK_MESSAGE(pixels[0].g < 100, "Red pixel should have low green value, got: " << (int)pixels[0].g);
+                CHECK_MESSAGE(pixels[0].b < 100, "Red pixel should have low blue value, got: " << (int)pixels[0].b);
+
+                // Pixel 1: White (high R/G/B)
+                CHECK_MESSAGE(pixels[1].r > 200, "White pixel should have high red value, got: " << (int)pixels[1].r);
+                CHECK_MESSAGE(pixels[1].g > 200, "White pixel should have high green value, got: " << (int)pixels[1].g);
+                CHECK_MESSAGE(pixels[1].b > 200, "White pixel should have high blue value, got: " << (int)pixels[1].b);
+
+                // Pixel 2: Blue (low R/G, high B)
+                CHECK_MESSAGE(pixels[2].r < 100, "Blue pixel should have low red value, got: " << (int)pixels[2].r);
+                CHECK_MESSAGE(pixels[2].g < 100, "Blue pixel should have low green value, got: " << (int)pixels[2].g);
+                CHECK_MESSAGE(pixels[2].b > 150, "Blue pixel should have high blue value, got: " << (int)pixels[2].b);
+
+                // Pixel 3: Black (low R/G/B)
+                CHECK_MESSAGE(pixels[3].r < 50, "Black pixel should have low red value, got: " << (int)pixels[3].r);
+                CHECK_MESSAGE(pixels[3].g < 50, "Black pixel should have low green value, got: " << (int)pixels[3].g);
+                CHECK_MESSAGE(pixels[3].b < 50, "Black pixel should have low blue value, got: " << (int)pixels[3].b);
 
                 // Check if all pixels are black (indicating decoder failure)
                 bool all_pixels_black = true;
@@ -92,16 +107,14 @@ TEST_CASE("Codec file loading and decoding") {
                     }
                 }
 
-                // If all pixels are black, this indicates a decoder problem, but we'll report it and continue
-                // instead of failing the test completely since this appears to be an intermittent issue
-                if (all_pixels_black) {
-                    MESSAGE("WARNING: JPEG decoder returned all black pixels - this may indicate a decoder issue");
-                    MESSAGE("Frame details: valid=" << frame->isValid() << ", width=" << frame->getWidth() << ", height=" << frame->getHeight());
-                    MESSAGE("This test will be marked as passed pending investigation of the JPEG decoder intermittent failure");
-                    return; // Skip the rest of the test when decoder fails
-                }
+                // If all pixels are black, this indicates a decoder failure and should fail the test
+                CHECK_MESSAGE(!all_pixels_black,
+                    "JPEG decoder returned all black pixels - decoder failure. "
+                    "Frame details: valid=" << frame->isValid()
+                    << ", width=" << frame->getWidth()
+                    << ", height=" << frame->getHeight());
 
-                // If we get here, decoder worked - verify pixels are not all identical
+                // Verify pixels are not all identical (decoder should produce varied output)
                 bool all_pixels_identical = true;
                 for (int i = 1; i < 4; i++) {
                     if (pixels[i].r != pixels[0].r || pixels[i].g != pixels[0].g || pixels[i].b != pixels[0].b) {
@@ -109,7 +122,8 @@ TEST_CASE("Codec file loading and decoding") {
                         break;
                     }
                 }
-                CHECK_FALSE(all_pixels_identical);
+                CHECK_FALSE_MESSAGE(all_pixels_identical,
+                    "JPEG decoder returned all identical pixels - indicates improper decoding");
             }
         }
 

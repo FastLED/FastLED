@@ -8,7 +8,7 @@ namespace fl {
 struct JpegDecoderConfig {
     enum Quality { Low, Medium, High };
 
-    Quality quality = Medium;
+    Quality quality = High;
     PixelFormat format = PixelFormat::RGB888;
     bool useHardwareAcceleration = true;  // TODO: Is this even used?
     fl::u16 maxWidth = 1920;

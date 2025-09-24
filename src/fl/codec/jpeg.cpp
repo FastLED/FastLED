@@ -5,6 +5,7 @@
 #include "fx/frame.h"
 #include "fl/thread_local.h"
 #include "fl/printf.h"
+#include "fl/warn.h"
 #include "fl/bytestreammemory.h"
 
 namespace fl {
@@ -19,8 +20,7 @@ private:
     bool ready_ = false;
     bool hasError_ = false;
 
-    // TJpg decoder specific
-    fl::third_party::TJpg_Decoder decoder_;
+    // TJpg decoder specific - removed member instance, will use global TJpgDec
     fl::scoped_array<fl::u8> inputBuffer_;
     size_t inputSize_;
     bool frameDecoded_;
@@ -56,6 +56,9 @@ public:
     DecodeResult decode() override;
     Frame getCurrentFrame() override;
     bool hasMoreFrames() const override { return false; } // JPEG is single frame
+
+    // Additional method to get frame pointer directly
+    fl::shared_ptr<Frame> getFramePtr() const { return decodedFrame_; }
 };
 
 // JPEG class implementation
@@ -129,8 +132,7 @@ FramePtr Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> da
         return nullptr;
     }
 
-    Frame frame = decoder->getCurrentFrame();
-    return fl::make_shared<Frame>(frame);
+    return decoder->getFramePtr();
 }
 
 bool Jpeg::isSupported() {
@@ -141,6 +143,9 @@ bool Jpeg::isSupported() {
 
 // Thread-local variable to hold current decoder instance for callback
 static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
+
+// Debug flag to track if callback was invoked
+static bool g_callbackInvoked = false;
 
 TJpgDecoder::TJpgDecoder(const JpegDecoderConfig& config)
     : config_(config), inputSize_(0), frameDecoded_(false) {
@@ -244,7 +249,7 @@ bool TJpgDecoder::initializeDecoder() {
 
     // Get image dimensions first
     uint16_t width, height;
-    fl::third_party::JRESULT result = decoder_.getJpgSize(&width, &height, inputBuffer_.get(), inputSize_);
+    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(&width, &height, inputBuffer_.get(), inputSize_);
     if (result != fl::third_party::JDR_OK) {
         char error_code_str[16];
         fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
@@ -260,7 +265,7 @@ bool TJpgDecoder::initializeDecoder() {
         return false;
     }
 
-    // Initialize frame with correct dimensions and format - allocate frame buffer first
+    // Initialize frame buffer and create Frame immediately
     allocateFrameBuffer(width, height);
 
     // Create frame with our allocated buffer
@@ -268,8 +273,8 @@ bool TJpgDecoder::initializeDecoder() {
 
     // Set up decoder configuration
     mapQualityToScale();
-    decoder_.setSwapBytes(false); // We'll handle byte order ourselves
-    decoder_.setCallback(outputCallback);
+    fl::third_party::TJpgDec.setSwapBytes(false); // We'll handle byte order ourselves
+    fl::third_party::TJpgDec.setCallback(outputCallback);
 
     frameDecoded_ = false;
     return true;
@@ -282,9 +287,15 @@ bool TJpgDecoder::decodeInternal() {
 
     // Set current decoder for static callback
     currentDecoder.set(this);
+    g_callbackInvoked = false;  // Reset debug flag
+
+    // Re-set the callback right before decoding (in case it was lost)
+    fl::third_party::TJpgDec.setCallback(outputCallback);
+
 
     // Decode the JPEG
-    fl::third_party::JRESULT result = decoder_.drawJpg(0, 0, inputBuffer_.get(), inputSize_);
+    fl::third_party::JRESULT result = fl::third_party::TJpgDec.drawJpg(0, 0, inputBuffer_.get(), inputSize_);
+
 
     currentDecoder.set(nullptr);
 
@@ -296,6 +307,13 @@ bool TJpgDecoder::decodeInternal() {
         setError(error_msg);
         return false;
     }
+
+    // Check if callback was invoked
+    if (!g_callbackInvoked) {
+        setError("JPEG decoder callback was never invoked - no pixel data transferred");
+        return false;
+    }
+
 
     frameDecoded_ = true;
     return true;
@@ -310,10 +328,13 @@ void TJpgDecoder::cleanupDecoder() {
 }
 
 bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
+    g_callbackInvoked = true;  // Mark that callback was called
+
     TJpgDecoder* decoder = currentDecoder.access();
     if (!decoder) {
         return false;
     }
+
 
     if (!decoder->frameBuffer_ || !decoder->decodedFrame_) {
         // Set error for debugging
@@ -335,17 +356,26 @@ bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, u
         return false;
     }
 
-    // Copy the decoded block to the frame buffer
-    fl::size bytesPerPixel = decoder->getBytesPerPixel();
-    fl::u8* frameBuffer = decoder->frameBuffer_.get();
+    // Write directly to the Frame's RGB buffer
+    CRGB* framePixels = decoder->decodedFrame_->rgb();
 
     for (uint16_t row = 0; row < h; ++row) {
         for (uint16_t col = 0; col < w; ++col) {
             uint16_t srcIdx = row * w + col;
-            fl::size dstIdx = ((y + row) * frameWidth + (x + col)) * bytesPerPixel;
 
-            // Convert from RGB565 to target format
-            decoder->convertPixelFormat(&data[srcIdx], &frameBuffer[dstIdx], 1, 1);
+            // Calculate destination position in Frame buffer
+            int pixelX = x + col;
+            int pixelY = y + row;
+            int frameIdx = pixelY * frameWidth + pixelX;
+
+            // Convert RGB565 pixel to CRGB
+            uint16_t rgb565 = data[srcIdx];
+            fl::u8 r = (rgb565 >> 11) << 3;  // 5 bits -> 8 bits
+            fl::u8 g = ((rgb565 >> 5) & 0x3F) << 2;  // 6 bits -> 8 bits
+            fl::u8 b = (rgb565 & 0x1F) << 3;  // 5 bits -> 8 bits
+
+            // Set pixel directly in the Frame's buffer
+            framePixels[frameIdx] = CRGB(r, g, b);
         }
     }
 
@@ -365,7 +395,7 @@ void TJpgDecoder::mapQualityToScale() {
             scale = 1;
             break;
     }
-    decoder_.setJpgScale(scale);
+    fl::third_party::TJpgDec.setJpgScale(scale);
 }
 
 void TJpgDecoder::convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_t w, uint16_t h) {
