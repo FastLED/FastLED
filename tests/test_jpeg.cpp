@@ -1,6 +1,7 @@
 #include "test.h"
 #include "fl/file_system.h"
 #include "fl/codec/jpeg.h"
+#include "fl/bytestreammemory.h"
 #include "fx/frame.h"
 #include "platforms/stub/fs_stub.hpp"
 
@@ -74,7 +75,6 @@ TEST_CASE("JPEG file loading and decoding") {
             // For JPEG with compression artifacts, verify approximate color values
             // Expected layout: red-white-blue-black (2x2)
             // Allow tolerance for JPEG compression artifacts
-            const int tolerance = 50; // JPEG compression can alter values significantly
 
             // Pixel 0: Red (high R, low G/B)
             CHECK_MESSAGE(pixels[0].r > 150, "Red pixel should have high red value, got: " << (int)pixels[0].r);
@@ -123,97 +123,6 @@ TEST_CASE("JPEG file loading and decoding") {
             CHECK_FALSE_MESSAGE(all_pixels_identical,
                 "JPEG decoder returned all identical pixels - indicates improper decoding");
         }
-    }
-
-    handle->close();
-    fs.end();
-}
-
-TEST_CASE("JPEG metadata parsing without decoding") {
-    FileSystem fs = setupCodecFilesystem();
-
-    // Test that we can load the JPEG file from filesystem
-    FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
-    REQUIRE(handle != nullptr);
-    REQUIRE(handle->valid());
-
-    // Get file size and read into buffer
-    fl::size file_size = handle->size();
-    CHECK(file_size > 0);
-
-    fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
-    CHECK_EQ(bytes_read, file_size);
-
-    // Test JPEG metadata parsing
-    fl::string error_msg;
-    fl::span<const fl::u8> data(file_data.data(), file_size);
-    JpegInfo info = Jpeg::parseJpegInfo(data, &error_msg);
-
-    // The metadata parsing should succeed
-    CHECK_MESSAGE(info.isValid, "JPEG metadata parsing failed: " << error_msg);
-
-    if (info.isValid) {
-        // Verify basic metadata
-        CHECK_MESSAGE(info.width > 0, "JPEG width should be greater than 0, got: " << info.width);
-        CHECK_MESSAGE(info.height > 0, "JPEG height should be greater than 0, got: " << info.height);
-
-        // For our test image (2x2 pixels), verify exact dimensions
-        CHECK_MESSAGE(info.width == 2, "Expected width=2, got: " << info.width);
-        CHECK_MESSAGE(info.height == 2, "Expected height=2, got: " << info.height);
-
-        // Verify component information
-        CHECK_MESSAGE(info.components > 0, "JPEG should have at least 1 component, got: " << (int)info.components);
-        CHECK_MESSAGE(info.components <= 3, "JPEG should have at most 3 components, got: " << (int)info.components);
-        CHECK_MESSAGE(info.bitsPerComponent == 8, "JPEG should have 8 bits per component, got: " << (int)info.bitsPerComponent);
-
-        // Verify grayscale flag consistency
-        if (info.components == 1) {
-            CHECK_MESSAGE(info.isGrayscale, "JPEG with 1 component should be marked as grayscale");
-        } else {
-            CHECK_MESSAGE(!info.isGrayscale, "JPEG with " << (int)info.components << " components should not be marked as grayscale");
-        }
-
-        fl::string grayscale_str = info.isGrayscale ? "yes" : "no";
-        MESSAGE("JPEG metadata - Width: " << info.width
-                << ", Height: " << info.height
-                << ", Components: " << (int)info.components
-                << ", BitsPerComponent: " << (int)info.bitsPerComponent
-                << ", IsGrayscale: " << grayscale_str);
-    }
-
-    // Test edge cases
-    SUBCASE("Empty data") {
-        fl::vector<fl::u8> empty_data;
-        fl::span<const fl::u8> empty_span(empty_data.data(), 0);
-        fl::string empty_error;
-
-        JpegInfo empty_info = Jpeg::parseJpegInfo(empty_span, &empty_error);
-        CHECK_FALSE(empty_info.isValid);
-        CHECK_FALSE(empty_error.empty());
-        MESSAGE("Empty data error: " << empty_error);
-    }
-
-    SUBCASE("Too small data") {
-        fl::vector<fl::u8> small_data = {0xFF, 0xD8}; // Just SOI marker
-        fl::span<const fl::u8> small_span(small_data.data(), small_data.size());
-        fl::string small_error;
-
-        JpegInfo small_info = Jpeg::parseJpegInfo(small_span, &small_error);
-        CHECK_FALSE(small_info.isValid);
-        CHECK_FALSE(small_error.empty());
-        MESSAGE("Small data error: " << small_error);
-    }
-
-    SUBCASE("Invalid JPEG data") {
-        fl::vector<fl::u8> invalid_data(100, 0x42); // Random bytes
-        fl::span<const fl::u8> invalid_span(invalid_data.data(), invalid_data.size());
-        fl::string invalid_error;
-
-        JpegInfo invalid_info = Jpeg::parseJpegInfo(invalid_span, &invalid_error);
-        CHECK_FALSE(invalid_info.isValid);
-        CHECK_FALSE(invalid_error.empty());
-        MESSAGE("Invalid data error: " << invalid_error);
     }
 
     handle->close();

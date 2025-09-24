@@ -8,8 +8,46 @@
 #include "fl/warn.h"
 #include "fl/bytestreammemory.h"
 #include "fl/codec/pixel.h"
+#include "fl/time.h"
 
 namespace fl {
+
+// Forward declaration for progressive callback bridge
+static int progressiveOutputCallbackBridge(fl::third_party::JDEC* jd, void* bitmap, fl::third_party::JRECT* rect);
+
+// ProcessingTimeManager for 4ms time budget management
+class ProcessingTimeManager {
+    fl::u32 start_time_ms_;        // Start time in milliseconds
+    fl::u32 budget_ms_ = 4;        // 4ms time budget for progressive processing
+    fl::u16 operations_this_tick_ = 0;
+
+public:
+    void startTick() {
+        start_time_ms_ = fl::time();
+        operations_this_tick_ = 0;
+    }
+
+    bool shouldYield() const {
+        return (fl::time() - start_time_ms_) >= budget_ms_;
+    }
+
+    fl::u32 getRemainingBudget() const {
+        fl::u32 elapsed = fl::time() - start_time_ms_;
+        return (elapsed < budget_ms_) ? (budget_ms_ - elapsed) : 0;
+    }
+
+    void setBudget(fl::u32 budget_ms) {
+        budget_ms_ = budget_ms;
+    }
+
+    void incrementOperations() {
+        operations_this_tick_++;
+    }
+
+    fl::u16 getOperations() const {
+        return operations_this_tick_;
+    }
+};
 
 // TJpg decoder implementation
 class TJpgDecoder : public IDecoder {
@@ -141,6 +179,132 @@ bool Jpeg::isSupported() {
     return true;
 }
 
+// Progressive interface implementation
+ProgressiveJpegDecoderPtr Jpeg::createProgressiveDecoder(const JpegDecoderConfig& config) {
+    return fl::make_shared<ProgressiveJpegDecoder>(config);
+}
+
+bool Jpeg::decodeWithTimeout(
+    const JpegDecoderConfig& config,
+    fl::span<const fl::u8> data,
+    Frame* frame,
+    fl::u32 timeout_ms,
+    float* progress_out,
+    fl::string* error_message) {
+
+    if (!frame) {
+        if (error_message) {
+            *error_message = "Frame pointer is null";
+        }
+        return false;
+    }
+
+    auto decoder = createProgressiveDecoder(config);
+    auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
+    stream->write(data.data(), data.size());
+
+    if (!decoder->begin(stream)) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return false;
+    }
+
+    fl::u32 start_time = fl::time();
+    fl::u32 deadline = start_time + timeout_ms;
+
+    // Process chunks until timeout or completion
+    bool more_work = true;
+    while (more_work && fl::time() < deadline) {
+        more_work = decoder->processChunk();
+
+        if (progress_out) {
+            *progress_out = decoder->getProgress();
+        }
+    }
+
+    // Check if completed
+    if (decoder->getState() == ProgressiveJpegDecoder::State::Complete) {
+        Frame decoded = decoder->getCurrentFrame();
+
+        // Check if dimensions match
+        if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
+            if (error_message) {
+                *error_message = "Target frame dimensions do not match decoded image dimensions";
+            }
+            return false;
+        }
+
+        frame->copy(decoded);
+        return true;
+    } else if (decoder->hasError()) {
+        if (error_message) {
+            decoder->hasError(error_message);
+        }
+        return false;
+    }
+
+    // Timeout reached but not complete
+    if (progress_out) {
+        *progress_out = decoder->getProgress();
+    }
+    return false; // Not completed within timeout
+}
+
+bool Jpeg::decodeStream(
+    const JpegDecoderConfig& config,
+    fl::ByteStreamPtr input_stream,
+    Frame* frame,
+    fl::u32 max_time_per_chunk_ms,
+    fl::function<bool(float)> progress_callback) {
+
+    if (!frame || !input_stream) {
+        return false;
+    }
+
+    auto decoder = createProgressiveDecoder(config);
+
+    // Set progressive config for time budgets
+    ProgressiveConfig prog_config;
+    prog_config.max_time_per_tick_ms = max_time_per_chunk_ms;
+    decoder->setProgressiveConfig(prog_config);
+
+    if (!decoder->begin(input_stream)) {
+        return false;
+    }
+
+    // Process chunks with progress callback
+    bool more_work = true;
+    while (more_work) {
+        more_work = decoder->processChunk();
+
+        float progress = decoder->getProgress();
+
+        // Call progress callback if provided
+        if (progress_callback) {
+            if (!progress_callback(progress)) {
+                // User cancelled
+                return false;
+            }
+        }
+    }
+
+    // Check if completed successfully
+    if (decoder->getState() == ProgressiveJpegDecoder::State::Complete) {
+        Frame decoded = decoder->getCurrentFrame();
+
+        // Check if dimensions match
+        if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
+            return false;
+        }
+
+        frame->copy(decoded);
+        return true;
+    }
+
+    return false;
+}
+
 JpegInfo Jpeg::parseJpegInfo(fl::span<const fl::u8> data, fl::string* error_message) {
     JpegInfo info;
 
@@ -270,7 +434,7 @@ JpegInfo Jpeg::parseJpegInfo(fl::span<const fl::u8> data, fl::string* error_mess
 
 
 // Thread-local variable to hold current decoder instance for callback
-static fl::ThreadLocal<TJpgDecoder*> currentDecoder(nullptr);
+static fl::ThreadLocal<void*> currentDecoder(nullptr);
 
 // Debug flag to track if callback was invoked
 static bool g_callbackInvoked = false;
@@ -455,7 +619,7 @@ void TJpgDecoder::cleanupDecoder() {
 bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
     g_callbackInvoked = true;  // Mark that callback was called
 
-    TJpgDecoder* decoder = currentDecoder.access();
+    TJpgDecoder* decoder = reinterpret_cast<TJpgDecoder*>(currentDecoder.access());
     if (!decoder) {
         return false;
     }
@@ -593,6 +757,378 @@ Frame TJpgDecoder::getCurrentFrame() {
     }
     // Return empty frame if not decoded yet
     return Frame(0);
+}
+
+// Progressive JPEG Decoder Implementation
+ProgressiveJpegDecoder::ProgressiveJpegDecoder(const JpegDecoderConfig& config)
+    : config_(config) {
+    // Initialize progressive state
+    memset(&progressive_decoder_, 0, sizeof(progressive_decoder_));
+    progressive_decoder_.workspace_initialized = 0;
+}
+
+bool ProgressiveJpegDecoder::begin(fl::ByteStreamPtr stream) {
+    if (!stream) {
+        setError("Invalid ByteStream provided");
+        return false;
+    }
+
+    input_stream_ = stream;
+    state_ = State::NotStarted;
+    has_error_ = false;
+    error_message_.clear();
+    progress_percentage_ = 0.0f;
+
+    // Read stream data into buffer
+    if (!readStreamData()) {
+        return false;
+    }
+
+    // Initialize decoder
+    if (!initializeProgressiveDecoder()) {
+        return false;
+    }
+
+    state_ = State::HeaderParsed;
+    return true;
+}
+
+void ProgressiveJpegDecoder::end() {
+    cleanupProgressiveDecoder();
+    input_stream_.reset();
+    partial_frame_.reset();
+    pixel_buffer_.reset();
+    state_ = State::NotStarted;
+}
+
+bool ProgressiveJpegDecoder::isReady() const {
+    return state_ == State::HeaderParsed || state_ == State::Decoding || state_ == State::Suspended;
+}
+
+bool ProgressiveJpegDecoder::hasError(fl::string* msg) const {
+    if (msg && has_error_) {
+        *msg = error_message_;
+    }
+    return has_error_;
+}
+
+DecodeResult ProgressiveJpegDecoder::decode() {
+    if (state_ == State::Error) {
+        return DecodeResult::Error;
+    }
+
+    if (state_ == State::Complete) {
+        return DecodeResult::Success;
+    }
+
+    // Process until complete or error
+    while (processChunk()) {
+        // Continue processing
+    }
+
+    return (state_ == State::Complete) ? DecodeResult::Success : DecodeResult::Error;
+}
+
+Frame ProgressiveJpegDecoder::getCurrentFrame() {
+    if (partial_frame_) {
+        return *partial_frame_;
+    }
+    return Frame(0); // Empty frame
+}
+
+void ProgressiveJpegDecoder::setProgressiveConfig(const ProgressiveConfig& config) {
+    progressive_config_ = config;
+}
+
+bool ProgressiveJpegDecoder::processChunk() {
+    if (state_ == State::Error || state_ == State::Complete) {
+        return false;
+    }
+
+    if (state_ == State::NotStarted || state_ == State::HeaderParsed) {
+        state_ = State::Decoding;
+    }
+
+    ProcessingTimeManager timer;
+    timer.setBudget(progressive_config_.max_time_per_tick_ms);
+    timer.startTick();
+
+    // Set current decoder for callback
+    currentDecoder.set(this);
+
+    fl::u8 more_data_needed = 0;
+    fl::u8 processing_complete = 0;
+
+    fl::third_party::JRESULT result = fl::third_party::jd_decomp_progressive(
+        &progressive_decoder_,
+        progressiveOutputCallbackBridge,
+        getScale(),
+        progressive_config_.max_mcus_per_tick,
+        &more_data_needed,
+        &processing_complete
+    );
+
+    currentDecoder.set(nullptr);
+
+    if (result == fl::third_party::JDR_SUSPEND) {
+        state_ = State::Suspended;
+        updateProgress();
+        return true; // More work to do
+    } else if (result == fl::third_party::JDR_OK) {
+        if (processing_complete) {
+            state_ = State::Complete;
+            progress_percentage_ = 1.0f;
+            return false; // Complete
+        } else {
+            // Continue processing
+            updateProgress();
+            return true;
+        }
+    } else {
+        // Error occurred
+        char error_code_str[16];
+        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
+        fl::string error_msg = "Progressive JPEG decoding failed, error code: ";
+        error_msg += error_code_str;
+        setError(error_msg);
+        return false;
+    }
+}
+
+float ProgressiveJpegDecoder::getProgress() const {
+    return progress_percentage_;
+}
+
+bool ProgressiveJpegDecoder::canSuspend() const {
+    return state_ == State::Suspended || state_ == State::Decoding;
+}
+
+void ProgressiveJpegDecoder::suspend() {
+    if (state_ == State::Decoding) {
+        state_ = State::Suspended;
+    }
+}
+
+bool ProgressiveJpegDecoder::resume() {
+    if (state_ == State::Suspended) {
+        state_ = State::Decoding;
+        return true;
+    }
+    return false;
+}
+
+bool ProgressiveJpegDecoder::hasPartialImage() const {
+    return partial_frame_ && partial_frame_->isValid();
+}
+
+Frame ProgressiveJpegDecoder::getPartialFrame() {
+    return getCurrentFrame();
+}
+
+fl::u16 ProgressiveJpegDecoder::getDecodedRows() const {
+    if (progressive_decoder_.total_mcus > 0) {
+        fl::u16 mcu_height = progressive_decoder_.base.msy * 8;
+        return progressive_decoder_.current_mcu_y * mcu_height;
+    }
+    return 0;
+}
+
+bool ProgressiveJpegDecoder::feedData(fl::span<const fl::u8> data) {
+    (void)data; // Unused parameter
+    // For now, we assume all data is provided at the beginning
+    // This could be extended for true streaming support
+    return false;
+}
+
+bool ProgressiveJpegDecoder::needsMoreData() const {
+    return false; // For now, we work with complete data
+}
+
+fl::size ProgressiveJpegDecoder::getBytesProcessed() const {
+    return input_size_; // All bytes processed initially
+}
+
+// Private helper methods
+bool ProgressiveJpegDecoder::readStreamData() {
+    if (!input_stream_) {
+        setError("No input stream provided");
+        return false;
+    }
+
+    // Read all data from stream into buffer
+    fl::vector<fl::u8> tempBuffer;
+    tempBuffer.reserve(4096);
+
+    fl::u8 chunk[256];
+    while (true) {
+        fl::size bytesRead = input_stream_->read(chunk, sizeof(chunk));
+        if (bytesRead == 0) break;
+
+        fl::size oldSize = tempBuffer.size();
+        tempBuffer.resize(oldSize + bytesRead);
+        memcpy(tempBuffer.data() + oldSize, chunk, bytesRead);
+    }
+
+    input_size_ = tempBuffer.size();
+    if (input_size_ == 0) {
+        setError("Empty input stream");
+        return false;
+    }
+
+    input_buffer_.reset(new fl::u8[input_size_]);
+    if (!input_buffer_) {
+        setError("Failed to allocate input buffer");
+        return false;
+    }
+
+    memcpy(input_buffer_.get(), tempBuffer.data(), input_size_);
+    return true;
+}
+
+bool ProgressiveJpegDecoder::initializeProgressiveDecoder() {
+    // Get image dimensions first
+    fl::u16 width, height;
+    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(
+        &width, &height, input_buffer_.get(), input_size_);
+
+    if (result != fl::third_party::JDR_OK) {
+        char error_code_str[16];
+        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
+        fl::string error_msg = "Failed to parse progressive JPEG header, error code: ";
+        error_msg += error_code_str;
+        setError(error_msg);
+        return false;
+    }
+
+    // Validate dimensions
+    if (width > config_.maxWidth || height > config_.maxHeight) {
+        setError("Progressive JPEG dimensions exceed maximum allowed size");
+        return false;
+    }
+
+    // Allocate frame buffer
+    allocateFrameBuffer(width, height);
+
+    // Create partial frame
+    partial_frame_ = fl::make_shared<Frame>(pixel_buffer_.get(), width, height, config_.format);
+
+    // Set up progressive decoder configuration
+    fl::third_party::TJpgDec.setSwapBytes(false);
+    fl::third_party::TJpgDec.setJpgScale(getScale());
+
+    return true;
+}
+
+void ProgressiveJpegDecoder::cleanupProgressiveDecoder() {
+    input_buffer_.reset();
+    input_size_ = 0;
+    memset(&progressive_decoder_, 0, sizeof(progressive_decoder_));
+    progressive_decoder_.workspace_initialized = 0;
+}
+
+fl::u8 ProgressiveJpegDecoder::getScale() const {
+    switch (config_.quality) {
+        case JpegDecoderConfig::Quality::Low:
+            return 8;
+        case JpegDecoderConfig::Quality::Medium:
+            return 4;
+        case JpegDecoderConfig::Quality::High:
+            return 1;
+    }
+    return 1;
+}
+
+void ProgressiveJpegDecoder::updateProgress() {
+    if (progressive_decoder_.total_mcus > 0) {
+        progress_percentage_ = static_cast<float>(progressive_decoder_.mcus_processed) /
+                              static_cast<float>(progressive_decoder_.total_mcus);
+    }
+}
+
+void ProgressiveJpegDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) {
+    fl::size buffer_size = static_cast<fl::size>(width) * height * getBytesPerPixel();
+    if (buffer_size > 0) {
+        pixel_buffer_.reset(new fl::u8[buffer_size]);
+        if (pixel_buffer_) {
+            memset(pixel_buffer_.get(), 0, buffer_size);
+        }
+    }
+}
+
+fl::size ProgressiveJpegDecoder::getBytesPerPixel() const {
+    return fl::getBytesPerPixel(config_.format);
+}
+
+void ProgressiveJpegDecoder::setError(const fl::string& message) {
+    has_error_ = true;
+    error_message_ = message;
+    state_ = State::Error;
+}
+
+// Static progressive output callback bridge
+static int progressiveOutputCallbackBridge(fl::third_party::JDEC* jd, void* bitmap, fl::third_party::JRECT* rect) {
+    (void)jd; // Unused parameter
+
+    ProgressiveJpegDecoder* decoder =
+        reinterpret_cast<ProgressiveJpegDecoder*>(currentDecoder.access());
+
+    if (!decoder || !rect) {
+        return 0; // Failure
+    }
+
+    // Convert JRECT to our expected format and call the actual handler
+    // Note: The bitmap parameter contains the RGB565 data for this rectangle
+    uint16_t* rgb565_data = reinterpret_cast<uint16_t*>(bitmap);
+
+    bool success = decoder->handleProgressiveOutput(
+        rect->left,
+        rect->top,
+        rect->right - rect->left,
+        rect->bottom - rect->top,
+        rgb565_data
+    );
+
+    return success ? 1 : 0; // Return 1 for success, 0 for failure
+}
+
+bool ProgressiveJpegDecoder::handleProgressiveOutput(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
+    if (!partial_frame_ || !data) {
+        setError("Progressive output callback called with invalid state");
+        return false;
+    }
+
+    fl::u16 frameWidth = partial_frame_->getWidth();
+    fl::u16 frameHeight = partial_frame_->getHeight();
+
+    // Bounds checking
+    if (x < 0 || y < 0 || x + w > frameWidth || y + h > frameHeight) {
+        setError("Progressive output callback bounds check failed");
+        return false;
+    }
+
+    // Write directly to the Frame's RGB buffer
+    CRGB* framePixels = partial_frame_->rgb();
+
+    for (fl::u16 row = 0; row < h; ++row) {
+        for (fl::u16 col = 0; col < w; ++col) {
+            fl::u16 srcIdx = row * w + col;
+
+            // Calculate destination position in Frame buffer
+            int pixelX = x + col;
+            int pixelY = y + row;
+            int frameIdx = pixelY * frameWidth + pixelX;
+
+            // Convert RGB565 pixel to CRGB
+            fl::u16 rgb565 = data[srcIdx];
+            fl::u8 r, g, b;
+            rgb565ToRgb888(rgb565, r, g, b);
+
+            // Set pixel directly in the Frame's buffer
+            framePixels[frameIdx] = CRGB(r, g, b);
+        }
+    }
+
+    return true;
 }
 
 } // namespace fl

@@ -93,11 +93,47 @@ struct JDEC {
 	uint8_t swap;       /* Added by Bodmer to control byte swapping */
 };
 
+/* Extended decoder state for progressive processing */
+struct JDEC_Progressive {
+	JDEC base;					/* Original decoder state */
+
+	/* Progressive state */
+	uint16_t current_mcu_x;		/* Current MCU position X */
+	uint16_t current_mcu_y;		/* Current MCU position Y */
+	uint16_t mcus_processed;	/* MCUs completed so far */
+	uint16_t total_mcus;		/* Total MCUs in image */
+
+	/* Suspension/Resume support */
+	uint8_t is_suspended;		/* Can be suspended between MCUs */
+	uint8_t suspend_reason;		/* Why suspended (data/time/callback) */
+
+	/* Buffer state preservation */
+	size_t stream_position;		/* Current stream read position */
+	uint8_t bit_buffer_state;	/* Partial bit decoding state */
+	uint32_t partial_bits;		/* Bits waiting to be processed */
+
+	/* Memory management */
+	void* persistent_workspace;	/* Workspace that survives suspend/resume */
+	uint8_t workspace_initialized; /* Track initialization state */
+};
+
 
 
 /* TJpgDec API functions */
 JRESULT jd_prepare (JDEC* jd, size_t (*infunc)(JDEC*,uint8_t*,size_t), void* pool, size_t sz_pool, void* dev);
 JRESULT jd_decomp (JDEC* jd, int (*outfunc)(JDEC*,void*,JRECT*), uint8_t scale);
+
+/* Progressive decompression API */
+enum { JDR_SUSPEND = 9 };  /* Suspended for progressive processing */
+
+JRESULT jd_decomp_progressive(
+    JDEC_Progressive* jpd,                     /* Progressive decoder state */
+    int (*outfunc)(JDEC*, void*, JRECT*),      /* Output callback */
+    uint8_t scale,                             /* Scaling factor */
+    uint16_t max_mcus_per_call,                /* MCU processing limit per call */
+    uint8_t* more_data_needed,                 /* Output: needs more input data */
+    uint8_t* processing_complete               /* Output: decode finished */
+);
 
 
 } // extern "C"

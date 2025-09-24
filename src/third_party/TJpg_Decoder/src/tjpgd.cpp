@@ -1177,5 +1177,108 @@ JRESULT jd_decomp (
 }
 
 
+/*-----------------------------------------------------------------------*/
+/* Progressive decompression with 4ms yield points                      */
+/*-----------------------------------------------------------------------*/
+
+JRESULT jd_decomp_progressive(
+    JDEC_Progressive* jpd,                     /* Progressive decoder state */
+    int (*outfunc)(JDEC*, void*, JRECT*),      /* Output callback */
+    uint8_t scale,                             /* Scaling factor */
+    uint16_t max_mcus_per_call,                /* MCU processing limit per call */
+    uint8_t* more_data_needed,                 /* Output: needs more input data */
+    uint8_t* processing_complete               /* Output: decode finished */
+)
+{
+    JDEC* jd = &jpd->base;
+    unsigned int mx, my;
+    uint16_t rst, rsc;
+    JRESULT rc;
+    uint16_t mcus_processed_this_call = 0;
+
+    // Initialize output flags
+    if (more_data_needed) *more_data_needed = 0;
+    if (processing_complete) *processing_complete = 0;
+
+    if (scale > (JD_USE_SCALE ? 3 : 0)) return JDR_PAR;
+    jd->scale = scale;
+
+    mx = jd->msx * 8; my = jd->msy * 8;  /* Size of the MCU (pixel) */
+
+    // Initialize progressive state if first call
+    if (!jpd->workspace_initialized) {
+        jpd->current_mcu_x = 0;
+        jpd->current_mcu_y = 0;
+        jpd->mcus_processed = 0;
+        jpd->total_mcus = ((jd->width + mx - 1) / mx) * ((jd->height + my - 1) / my);
+        jpd->is_suspended = 0;
+        jpd->workspace_initialized = 1;
+
+        // Initialize DC values and restart state
+        jd->dcv[2] = jd->dcv[1] = jd->dcv[0] = 0;
+        rst = rsc = 0;
+    }
+
+    rc = JDR_OK;
+
+    // Resume from where we left off
+    unsigned int x = jpd->current_mcu_x * mx;
+    unsigned int y = jpd->current_mcu_y * my;
+    rst = jpd->mcus_processed % (jd->nrst ? jd->nrst : 1);
+    rsc = jpd->mcus_processed / (jd->nrst ? jd->nrst : 1);
+
+    // Process MCUs with yield support
+    while (y < jd->height) {
+        while (x < jd->width) {
+            // Process restart interval if enabled
+            if (jd->nrst && rst++ == jd->nrst) {
+                rc = restart(jd, rsc++);
+                if (rc != JDR_OK) return rc;
+                rst = 1;
+            }
+
+            // Load and output single MCU
+            rc = mcu_load(jd);
+            if (rc != JDR_OK) return rc;
+
+            rc = mcu_output(jd, outfunc, x, y);
+            if (rc != JDR_OK) return rc;
+
+            // Update progressive state
+            jpd->mcus_processed++;
+            mcus_processed_this_call++;
+            x += mx;
+            jpd->current_mcu_x++;
+
+            // Check if we should yield
+            if (mcus_processed_this_call >= max_mcus_per_call) {
+                jpd->is_suspended = 1;
+                jpd->suspend_reason = 1; // Time/MCU limit reached
+
+                // Save current position
+                if (x >= jd->width) {
+                    jpd->current_mcu_x = 0;
+                    jpd->current_mcu_y++;
+                } else {
+                    jpd->current_mcu_x = x / mx;
+                }
+
+                return (JRESULT)JDR_SUSPEND;
+            }
+        }
+
+        // Move to next row
+        x = 0;
+        y += my;
+        jpd->current_mcu_x = 0;
+        jpd->current_mcu_y++;
+    }
+
+    // Processing complete
+    if (processing_complete) *processing_complete = 1;
+    return rc;
+}
+
+
 } // namespace third_party
 } // namespace fl
