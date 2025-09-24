@@ -25,11 +25,11 @@ static void yuv_to_rgb(const fl::third_party::plm_frame_t* frame, fl::u8* rgb_bu
     fl::u32 width = frame->width;
     fl::u32 height = frame->height;
 
-    // YUV to RGB conversion coefficients
+    // YUV to RGB conversion coefficients (ITU-R BT.601 standard, scaled by 1000)
     const fl::i32 YUV_TO_RGB_MATRIX[9] = {
         1164,    0, 1596,  // Y, U, V coefficients for R
         1164, -391, -813,  // Y, U, V coefficients for G
-        1164, 2018,    0   // Y, U, V coefficients for B
+        1164, 2017,    0   // Y, U, V coefficients for B (fixed: 2018 -> 2017)
     };
 
     for (fl::u32 y = 0; y < height; y++) {
