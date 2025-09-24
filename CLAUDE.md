@@ -40,6 +40,9 @@ This project uses directory-specific agent guidelines. See:
 - **Use `FL_WARN`** for warnings (available in the project)
 - **Follow existing code patterns** and naming conventions
 
+### Python Code Standards
+- **Collection Types**: Always fully type annotate collections using `List[T]`, `Set[T]`, `Dict[K, V]` instead of bare `list`, `set`, `dict` to pass pyright type checking
+
 ### JavaScript Code Standards
 - **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
 

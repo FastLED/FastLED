@@ -38,6 +38,61 @@ CACHE_DIR.mkdir(parents=True, exist_ok=True)
 TEST_FILES_LIST = CACHE_DIR / "test_files_list.txt"
 
 
+def cleanup_orphaned_binaries() -> None:
+    """
+    Clean up orphaned test binaries that no longer have corresponding .cpp files.
+
+    This function scans the tests/bin/ directory for test executables and removes
+    any that don't have a corresponding test_*.cpp file in the tests/ directory.
+    """
+    tests_dir = PROJECT_ROOT / "tests"
+    bin_dir = tests_dir / "bin"
+
+    # If bin directory doesn't exist, nothing to clean
+    if not bin_dir.exists():
+        return
+
+    # Get all existing test source files
+    existing_test_sources: Set[str] = set()
+    for cpp_file in tests_dir.glob("test_*.cpp"):
+        test_name = cpp_file.stem  # e.g., "test_foo" from "test_foo.cpp"
+        existing_test_sources.add(test_name)
+
+    # Scan for orphaned binaries
+    orphaned_binaries: List[Path] = []
+
+    # Check for .exe files (Windows) and executables without extension (Unix-like)
+    for binary_file in bin_dir.glob("test_*"):
+        # Skip directories and non-executable files
+        if not binary_file.is_file():
+            continue
+
+        # Extract test name from binary filename
+        if binary_file.suffix == ".exe":
+            test_name = binary_file.stem  # "test_foo" from "test_foo.exe"
+        else:
+            test_name = binary_file.name  # "test_foo" from "test_foo"
+
+        # Only process files that follow test naming convention
+        if not test_name.startswith("test_"):
+            continue
+
+        # Check if corresponding source file exists
+        if test_name not in existing_test_sources:
+            orphaned_binaries.append(binary_file)
+
+    # Remove orphaned binaries and show warnings
+    for orphaned_binary in orphaned_binaries:
+        try:
+            orphaned_binary.unlink()
+            print(f"removing orphaned test file {orphaned_binary}")
+        except OSError as e:
+            # Non-fatal error, continue with other files
+            print(
+                f"Warning: Failed to remove orphaned test file {orphaned_binary}: {e}"
+            )
+
+
 # ============================================================================
 # HASH-BASED LINKING CACHE (same optimization as examples)
 # ============================================================================
@@ -1001,6 +1056,9 @@ def main() -> None:
 
     os.chdir(str(HERE))
     print(f"Current directory: {Path('.').absolute()}")
+
+    # Clean up orphaned test binaries before compilation
+    cleanup_orphaned_binaries()
 
     # Auto-detection for --clean based on test file changes
     need_clean = args.clean
