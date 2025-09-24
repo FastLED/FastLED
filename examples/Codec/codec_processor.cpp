@@ -56,11 +56,9 @@ void processJpeg() {
     memcpy(jpegData.data(), CodecData::sampleJpegData, CodecData::sampleJpegDataLength);
 
     // Configure JPEG decoder
-    fl::JpegDecoderConfig config;
+    fl::JpegConfig config;
     config.format = fl::PixelFormat::RGB888;
-    config.quality = fl::JpegDecoderConfig::Medium;
-    config.maxWidth = 64;
-    config.maxHeight = 64;
+    config.quality = fl::JpegConfig::Medium;
 
     // Create data span
     fl::span<const fl::u8> data(jpegData.data(), jpegData.size());
@@ -95,8 +93,6 @@ void processGif() {
     fl::GifConfig config;
     config.mode = fl::GifConfig::SingleFrame;
     config.format = fl::PixelFormat::RGB888;
-    config.maxWidth = 64;
-    config.maxHeight = 64;
 
     // Create decoder
     fl::string error_msg;

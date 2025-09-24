@@ -378,7 +378,7 @@ bool FileSystem::readText(const char *path, fl::string *out) {
     return wrote;
 }
 
-FramePtr FileSystem::loadJpeg(const char *path, const JpegDecoderConfig &config,
+FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
                                fl::string *error_message) {
     // Open the JPEG file
     FileHandlePtr file = openRead(path);

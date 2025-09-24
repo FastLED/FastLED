@@ -71,7 +71,7 @@ class FileSystem {
     void close(FileHandlePtr file);
 
     // Load JPEG image from file path directly to Frame
-    FramePtr loadJpeg(const char *path, const JpegDecoderConfig &config = JpegDecoderConfig(),
+    FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(),
                       fl::string *error_message = nullptr);
 
   private:
@@ -124,7 +124,7 @@ class FsImpl {
 // Standalone helper function to load JPEG from SD card
 // Combines SD card initialization and JPEG loading in one convenient function
 inline FramePtr loadJpegFromSD(int cs_pin, const char *filepath,
-                                 const JpegDecoderConfig &config = JpegDecoderConfig(),
+                                 const JpegConfig &config = JpegConfig(),
                                  fl::string *error_message = nullptr) {
     FileSystem fs;
     if (!fs.beginSd(cs_pin)) {

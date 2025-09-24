@@ -1,9 +1,8 @@
 #include "fl/codec/jpeg.h"
-#include "third_party/TJpg_Decoder/src/TJpg_Decoder.h"
+#include "third_party/TJpg_Decoder/driver.h"
 #include "fl/utility.h"
 #include "fl/vector.h"
 #include "fx/frame.h"
-#include "fl/thread_local.h"
 #include "fl/printf.h"
 #include "fl/warn.h"
 #include "fl/bytestreammemory.h"
@@ -12,97 +11,283 @@
 
 namespace fl {
 
-// Forward declaration for progressive callback bridge
-static int progressiveOutputCallbackBridge(fl::third_party::JDEC* jd, void* bitmap, fl::third_party::JRECT* rect);
+//////////////////////////////////////////////////////////////////////////
+// JpegInfo Implementation
+//////////////////////////////////////////////////////////////////////////
 
-// ProcessingTimeManager for 4ms time budget management
-class ProcessingTimeManager {
-    fl::u32 start_time_ms_;        // Start time in milliseconds
-    fl::u32 budget_ms_ = 4;        // 4ms time budget for progressive processing
-    fl::u16 operations_this_tick_ = 0;
+JpegInfo::JpegInfo(fl::u16 w, fl::u16 h, fl::u8 comp)
+    : width(w), height(h), components(comp)
+    , is_grayscale(comp == 1), is_valid(true) {}
 
-public:
-    void startTick() {
-        start_time_ms_ = fl::time();
-        operations_this_tick_ = 0;
-    }
+//////////////////////////////////////////////////////////////////////////
+// JpegConfig Implementation
+//////////////////////////////////////////////////////////////////////////
 
-    bool shouldYield() const {
-        return (fl::time() - start_time_ms_) >= budget_ms_;
-    }
+JpegConfig::JpegConfig(Quality q, PixelFormat fmt)
+    : quality(q), format(fmt) {}
 
-    fl::u32 getRemainingBudget() const {
-        fl::u32 elapsed = fl::time() - start_time_ms_;
-        return (elapsed < budget_ms_) ? (budget_ms_ - elapsed) : 0;
-    }
+//////////////////////////////////////////////////////////////////////////
+// JpegDecoder::Impl - PIMPL Implementation
+//////////////////////////////////////////////////////////////////////////
 
-    void setBudget(fl::u32 budget_ms) {
-        budget_ms_ = budget_ms;
-    }
-
-    void incrementOperations() {
-        operations_this_tick_++;
-    }
-
-    fl::u16 getOperations() const {
-        return operations_this_tick_;
-    }
-};
-
-// TJpg decoder implementation
-class TJpgDecoder : public IDecoder {
+class JpegDecoder::Impl {
 private:
-    // Configuration and state
-    JpegDecoderConfig config_;
-    fl::ByteStreamPtr stream_;
-    fl::string errorMessage_;
-    bool ready_ = false;
-    bool hasError_ = false;
+    fl::third_party::TJpgInstanceDecoderPtr driver_;
+    JpegConfig config_;
+    ProgressiveConfig progressive_config_;
+    JpegDecoder::State state_;
+    float progress_;
+    fl::string error_message_;
+    bool has_error_;
 
-    // TJpg decoder specific - removed member instance, will use global TJpgDec
-    fl::scoped_array<fl::u8> inputBuffer_;
-    size_t inputSize_;
-    bool frameDecoded_;
-    fl::shared_ptr<Frame> decodedFrame_;
+    void setError(const fl::string& message) {
+        has_error_ = true;
+        error_message_ = message;
+        state_ = JpegDecoder::State::Error;
+    }
 
-    // Internal buffer management
-    fl::scoped_array<fl::u8> frameBuffer_;
-    fl::size bufferSize_ = 0;
-
-    // Static callback for TJpg_Decoder output
-    static bool outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data);
-
-    // Internal helper methods
-    bool initializeDecoder();
-    bool decodeInternal();
-    void cleanupDecoder();
-    void mapQualityToScale();
-    void convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_t w, uint16_t h);
-    fl::size getBytesPerPixel() const;
-    void allocateFrameBuffer(uint16_t width, uint16_t height);
-    void setError(const fl::string& message);
-    fl::size getExpectedFrameSize() const;
+    fl::u8 getScale() const {
+        switch (config_.quality) {
+            case JpegConfig::Quality::Low: return 8;
+            case JpegConfig::Quality::Medium: return 4;
+            case JpegConfig::Quality::High: return 1;
+        }
+        return 1;
+    }
 
 public:
-    explicit TJpgDecoder(const JpegDecoderConfig& config);
-    ~TJpgDecoder() override;
+    explicit Impl(const JpegConfig& config)
+        : config_(config), state_(JpegDecoder::State::NotStarted)
+        , progress_(0.0f), has_error_(false) {
+        driver_ = fl::third_party::createTJpgInstanceDecoder();
+    }
 
-    // IDecoder interface
-    bool begin(fl::ByteStreamPtr stream) override;
-    void end() override;
-    bool isReady() const override { return ready_; }
-    bool hasError(fl::string* msg = nullptr) const override;
-    DecodeResult decode() override;
-    Frame getCurrentFrame() override;
-    bool hasMoreFrames() const override { return false; } // JPEG is single frame
+    ~Impl() = default;
 
-    // Additional method to get frame pointer directly
-    fl::shared_ptr<Frame> getFramePtr() const { return decodedFrame_; }
+    bool begin(fl::ByteStreamPtr stream) {
+        if (!driver_) {
+            setError("Driver not initialized");
+            return false;
+        }
+
+        state_ = JpegDecoder::State::NotStarted;
+        has_error_ = false;
+        error_message_.clear();
+        progress_ = 0.0f;
+
+        // Configure progressive settings
+        fl::third_party::TJpgProgressiveConfig driver_config;
+        driver_config.max_mcus_per_tick = progressive_config_.max_mcus_per_tick;
+        driver_config.max_time_per_tick_ms = progressive_config_.max_time_per_tick_ms;
+        driver_->setProgressiveConfig(driver_config);
+
+        // Set scale based on quality setting
+        driver_->setScale(getScale());
+
+        if (!driver_->beginDecodingStream(stream, config_.format)) {
+            fl::string err;
+            if (driver_->hasError(&err)) {
+                setError(err);
+            } else {
+                setError("Failed to begin JPEG decoding");
+            }
+            return false;
+        }
+
+        state_ = JpegDecoder::State::HeaderParsed;
+        return true;
+    }
+
+    void end() {
+        if (driver_) {
+            driver_->endDecoding();
+        }
+        state_ = JpegDecoder::State::NotStarted;
+    }
+
+    bool isReady() const {
+        return state_ == JpegDecoder::State::HeaderParsed ||
+               state_ == JpegDecoder::State::Decoding;
+    }
+
+    bool hasError(fl::string* msg = nullptr) const {
+        if (msg && has_error_) {
+            *msg = error_message_;
+        }
+        return has_error_;
+    }
+
+    DecodeResult decode(fl::optional<fl::function<bool()>> should_yield) {
+        if (state_ == JpegDecoder::State::Error) {
+            return DecodeResult::Error;
+        }
+
+        if (state_ == JpegDecoder::State::Complete) {
+            return DecodeResult::Success;
+        }
+
+        while (processChunk()) {
+            if (should_yield && (*should_yield)()) {
+                // Caller requested yield - return current state
+                return (state_ == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::NeedsMoreData;
+            }
+        }
+
+        return (state_ == JpegDecoder::State::Complete) ? DecodeResult::Success : DecodeResult::Error;
+    }
+
+    Frame getCurrentFrame() {
+        return driver_ ? driver_->getCurrentFrame() : Frame(0);
+    }
+
+    bool hasMoreFrames() const { return false; } // JPEG is single frame
+
+    void setProgressiveConfig(const ProgressiveConfig& config) {
+        progressive_config_ = config;
+        if (driver_) {
+            fl::third_party::TJpgProgressiveConfig driver_config;
+            driver_config.max_mcus_per_tick = config.max_mcus_per_tick;
+            driver_config.max_time_per_tick_ms = config.max_time_per_tick_ms;
+            driver_->setProgressiveConfig(driver_config);
+        }
+    }
+
+    bool processChunk() {
+        if (state_ == JpegDecoder::State::Error || state_ == JpegDecoder::State::Complete) {
+            return false;
+        }
+
+        if (state_ == JpegDecoder::State::NotStarted || state_ == JpegDecoder::State::HeaderParsed) {
+            state_ = JpegDecoder::State::Decoding;
+        }
+
+        if (!driver_) {
+            setError("Driver not available");
+            return false;
+        }
+
+        bool more_work = driver_->processChunk();
+
+        auto driver_state = driver_->getState();
+        switch (driver_state) {
+            case fl::third_party::TJpgInstanceDecoder::State::Complete:
+                state_ = JpegDecoder::State::Complete;
+                progress_ = 1.0f;
+                return false;
+            case fl::third_party::TJpgInstanceDecoder::State::Error: {
+                fl::string err;
+                if (driver_->hasError(&err)) {
+                    setError(err);
+                } else {
+                    setError("JPEG decoding failed");
+                }
+                return false;
+            }
+            default:
+                progress_ = driver_->getProgress();
+                break;
+        }
+
+        return more_work;
+    }
+
+    float getProgress() const { return progress_; }
+    bool hasPartialImage() const { return driver_ ? driver_->hasPartialImage() : false; }
+    Frame getPartialFrame() { return driver_ ? driver_->getPartialFrame() : Frame(0); }
+    fl::u16 getDecodedRows() const { return driver_ ? driver_->getDecodedRows() : 0; }
+    bool feedData(fl::span<const fl::u8> data) { (void)data; return false; } // Not implemented
+    bool needsMoreData() const { return false; } // Not implemented
+    fl::size getBytesProcessed() const { return driver_ ? driver_->getBytesProcessed() : 0; }
+    JpegDecoder::State getState() const { return state_; }
+    ProgressiveConfig getProgressiveConfig() const { return progressive_config_; }
 };
 
-// JPEG class implementation
+//////////////////////////////////////////////////////////////////////////
+// JpegDecoder Implementation
+//////////////////////////////////////////////////////////////////////////
 
-bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, Frame* frame, fl::string* error_message) {
+JpegDecoder::JpegDecoder(const JpegConfig& config)
+    : impl_(fl::make_unique<Impl>(config)) {}
+
+JpegDecoder::~JpegDecoder() = default;
+
+bool JpegDecoder::begin(fl::ByteStreamPtr stream) {
+    return impl_->begin(stream);
+}
+
+void JpegDecoder::end() {
+    impl_->end();
+}
+
+bool JpegDecoder::isReady() const {
+    return impl_->isReady();
+}
+
+bool JpegDecoder::hasError(fl::string* msg) const {
+    return impl_->hasError(msg);
+}
+
+DecodeResult JpegDecoder::decode() {
+    return impl_->decode(fl::nullopt); // No callback - process to completion
+}
+
+DecodeResult JpegDecoder::decode(fl::optional<fl::function<bool()>> should_yield) {
+    return impl_->decode(should_yield);
+}
+
+Frame JpegDecoder::getCurrentFrame() {
+    return impl_->getCurrentFrame();
+}
+
+bool JpegDecoder::hasMoreFrames() const {
+    return impl_->hasMoreFrames();
+}
+
+void JpegDecoder::setProgressiveConfig(const ProgressiveConfig& config) {
+    impl_->setProgressiveConfig(config);
+}
+
+ProgressiveConfig JpegDecoder::getProgressiveConfig() const {
+    return impl_->getProgressiveConfig();
+}
+
+float JpegDecoder::getProgress() const {
+    return impl_->getProgress();
+}
+
+bool JpegDecoder::hasPartialImage() const {
+    return impl_->hasPartialImage();
+}
+
+Frame JpegDecoder::getPartialFrame() {
+    return impl_->getPartialFrame();
+}
+
+fl::u16 JpegDecoder::getDecodedRows() const {
+    return impl_->getDecodedRows();
+}
+
+bool JpegDecoder::feedData(fl::span<const fl::u8> data) {
+    return impl_->feedData(data);
+}
+
+bool JpegDecoder::needsMoreData() const {
+    return impl_->needsMoreData();
+}
+
+fl::size JpegDecoder::getBytesProcessed() const {
+    return impl_->getBytesProcessed();
+}
+
+JpegDecoder::State JpegDecoder::getState() const {
+    return impl_->getState();
+}
+
+//////////////////////////////////////////////////////////////////////////
+// Jpeg Static Methods Implementation
+//////////////////////////////////////////////////////////////////////////
+
+bool Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, Frame* frame, fl::string* error_message) {
     if (!frame) {
         if (error_message) {
             *error_message = "Frame pointer is null";
@@ -110,7 +295,6 @@ bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, 
         return false;
     }
 
-    // Check if frame has codec dimensions (width/height > 0)
     if (!frame->isFromCodec() || frame->getWidth() == 0 || frame->getHeight() == 0) {
         if (error_message) {
             *error_message = "Target frame must be created with proper dimensions for in-place decoding";
@@ -118,7 +302,7 @@ bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, 
         return false;
     }
 
-    auto decoder = fl::make_shared<TJpgDecoder>(config);
+    auto decoder = createDecoder(config);
     auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
     stream->write(data.data(), data.size());
 
@@ -139,7 +323,6 @@ bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, 
 
     Frame decoded = decoder->getCurrentFrame();
 
-    // Check if dimensions match
     if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
         if (error_message) {
             *error_message = "Target frame dimensions do not match decoded image dimensions";
@@ -151,8 +334,8 @@ bool Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, 
     return true;
 }
 
-FramePtr Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
-    auto decoder = fl::make_shared<TJpgDecoder>(config);
+FramePtr Jpeg::decode(const JpegConfig& config, fl::span<const fl::u8> data, fl::string* error_message) {
+    auto decoder = createDecoder(config);
     auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
     stream->write(data.data(), data.size());
 
@@ -171,21 +354,25 @@ FramePtr Jpeg::decode(const JpegDecoderConfig& config, fl::span<const fl::u8> da
         return nullptr;
     }
 
-    return decoder->getFramePtr();
+    Frame frame = decoder->getCurrentFrame();
+    return frame.isValid() ? fl::make_shared<Frame>(frame) : nullptr;
+}
+
+FramePtr Jpeg::decode(fl::span<const fl::u8> data, fl::string* error_message) {
+    JpegConfig config; // Uses defaults
+    return decode(config, data, error_message);
+}
+
+JpegDecoderPtr Jpeg::createDecoder(const JpegConfig& config) {
+    return fl::make_shared<JpegDecoder>(config);
 }
 
 bool Jpeg::isSupported() {
-    // TJpg_Decoder is now integrated
-    return true;
-}
-
-// Progressive interface implementation
-ProgressiveJpegDecoderPtr Jpeg::createProgressiveDecoder(const JpegDecoderConfig& config) {
-    return fl::make_shared<ProgressiveJpegDecoder>(config);
+    return true; // TJpg decoder is always supported
 }
 
 bool Jpeg::decodeWithTimeout(
-    const JpegDecoderConfig& config,
+    const JpegConfig& config,
     fl::span<const fl::u8> data,
     Frame* frame,
     fl::u32 timeout_ms,
@@ -199,7 +386,7 @@ bool Jpeg::decodeWithTimeout(
         return false;
     }
 
-    auto decoder = createProgressiveDecoder(config);
+    auto decoder = createDecoder(config);
     auto stream = fl::make_shared<fl::ByteStreamMemory>(data.size());
     stream->write(data.data(), data.size());
 
@@ -213,21 +400,17 @@ bool Jpeg::decodeWithTimeout(
     fl::u32 start_time = fl::time();
     fl::u32 deadline = start_time + timeout_ms;
 
-    // Process chunks until timeout or completion
-    bool more_work = true;
-    while (more_work && fl::time() < deadline) {
-        more_work = decoder->processChunk();
-
+    // Use callback-based decode with time budget check
+    DecodeResult result = decoder->decode(fl::function<bool()>([&]() {
         if (progress_out) {
             *progress_out = decoder->getProgress();
         }
-    }
+        return fl::time() >= deadline; // Yield if time budget exceeded
+    }));
 
-    // Check if completed
-    if (decoder->getState() == ProgressiveJpegDecoder::State::Complete) {
+    if (result == DecodeResult::Success) {
         Frame decoded = decoder->getCurrentFrame();
 
-        // Check if dimensions match
         if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
             if (error_message) {
                 *error_message = "Target frame dimensions do not match decoded image dimensions";
@@ -237,22 +420,22 @@ bool Jpeg::decodeWithTimeout(
 
         frame->copy(decoded);
         return true;
-    } else if (decoder->hasError()) {
+    } else if (result == DecodeResult::Error || decoder->hasError()) {
         if (error_message) {
             decoder->hasError(error_message);
         }
         return false;
     }
 
-    // Timeout reached but not complete
+    // Partial completion due to timeout
     if (progress_out) {
         *progress_out = decoder->getProgress();
     }
-    return false; // Not completed within timeout
+    return false; // Not complete yet
 }
 
 bool Jpeg::decodeStream(
-    const JpegDecoderConfig& config,
+    const JpegConfig& config,
     fl::ByteStreamPtr input_stream,
     Frame* frame,
     fl::u32 max_time_per_chunk_ms,
@@ -262,9 +445,8 @@ bool Jpeg::decodeStream(
         return false;
     }
 
-    auto decoder = createProgressiveDecoder(config);
+    auto decoder = createDecoder(config);
 
-    // Set progressive config for time budgets
     ProgressiveConfig prog_config;
     prog_config.max_time_per_tick_ms = max_time_per_chunk_ms;
     decoder->setProgressiveConfig(prog_config);
@@ -273,27 +455,19 @@ bool Jpeg::decodeStream(
         return false;
     }
 
-    // Process chunks with progress callback
-    bool more_work = true;
-    while (more_work) {
-        more_work = decoder->processChunk();
-
-        float progress = decoder->getProgress();
-
-        // Call progress callback if provided
-        if (progress_callback) {
-            if (!progress_callback(progress)) {
-                // User cancelled
-                return false;
-            }
-        }
+    // Use callback-based decode with progress notifications
+    fl::optional<fl::function<bool()>> yield_func;
+    if (progress_callback) {
+        yield_func = fl::function<bool()>([&]() {
+            float progress = decoder->getProgress();
+            return !progress_callback(progress); // Yield if callback returns false
+        });
     }
+    DecodeResult result = decoder->decode(yield_func);
 
-    // Check if completed successfully
-    if (decoder->getState() == ProgressiveJpegDecoder::State::Complete) {
+    if (result == DecodeResult::Success) {
         Frame decoded = decoder->getCurrentFrame();
 
-        // Check if dimensions match
         if (frame->getWidth() != decoded.getWidth() || frame->getHeight() != decoded.getHeight()) {
             return false;
         }
@@ -305,830 +479,11 @@ bool Jpeg::decodeStream(
     return false;
 }
 
-JpegInfo Jpeg::parseJpegInfo(fl::span<const fl::u8> data, fl::string* error_message) {
-    JpegInfo info;
-
-    // Validate input data
-    if (data.empty()) {
-        if (error_message) {
-            *error_message = "Empty JPEG data";
-        }
-        return info; // returns invalid info
-    }
-
-    // Minimum size check - JPEG must have at least SOI marker + some content
-    if (data.size() < 10) {
-        if (error_message) {
-            *error_message = "JPEG data too small";
-        }
-        return info;
-    }
-
-    // Use TJpg_Decoder's getJpgSize function which only parses the header
-    fl::u16 width, height;
-    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(
-        &width, &height,
-        data.data(),
-        data.size()
-    );
-
-    // Handle result codes
-    if (result != fl::third_party::JDR_OK) {
-        if (error_message) {
-            // Convert JRESULT to readable error message
-            switch (result) {
-                case fl::third_party::JDR_INP:
-                    *error_message = "JPEG input stream error or invalid termination";
-                    break;
-                case fl::third_party::JDR_MEM1:
-                case fl::third_party::JDR_MEM2:
-                    *error_message = "Insufficient memory for JPEG parsing";
-                    break;
-                case fl::third_party::JDR_PAR:
-                    *error_message = "Invalid JPEG parameters";
-                    break;
-                case fl::third_party::JDR_FMT1:
-                    *error_message = "Invalid JPEG data format (possibly corrupt)";
-                    break;
-                case fl::third_party::JDR_FMT2:
-                    *error_message = "Valid JPEG format but not supported";
-                    break;
-                case fl::third_party::JDR_FMT3:
-                    *error_message = "Unsupported JPEG standard";
-                    break;
-                default:
-                    char error_code_str[16];
-                    fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
-                    *error_message = "JPEG parsing failed with error code: ";
-                    *error_message += error_code_str;
-                    break;
-            }
-        }
-        return info; // returns invalid info
-    }
-
-    // Basic validation of parsed dimensions
-    if (width == 0 || height == 0) {
-        if (error_message) {
-            *error_message = "Invalid JPEG dimensions";
-        }
-        return info;
-    }
-
-    // For additional metadata, we need to parse the JPEG header manually
-    // Look for Start of Frame (SOF) markers to get component information
-    fl::u8 components = 0;
-    bool foundSOF = false;
-
-    // Search for SOF markers (0xFFC0 - 0xFFCF, excluding 0xFFC4, 0xFFC8, 0xFFCC)
-    for (fl::size i = 0; i < data.size() - 1; i++) {
-        if (data[i] == 0xFF) {
-            fl::u8 marker = data[i + 1];
-            // Check for SOF markers (baseline DCT, extended sequential DCT, progressive DCT)
-            if ((marker >= 0xC0 && marker <= 0xC3) ||
-                (marker >= 0xC5 && marker <= 0xC7) ||
-                (marker >= 0xC9 && marker <= 0xCB) ||
-                (marker >= 0xCD && marker <= 0xCF)) {
-
-                // SOF marker found, extract components count
-                if (i + 9 < data.size()) {  // Ensure we have enough bytes
-                    // SOF structure: FF Cn LL LL PP HH HH VV VV CC
-                    // CC = number of components at offset +9 from marker
-                    components = data[i + 9];
-                    foundSOF = true;
-                    break;
-                }
-            }
-        }
-    }
-
-    // If we couldn't parse components from SOF, make educated guess
-    if (!foundSOF) {
-        // Most JPEGs are either grayscale (1) or color (3)
-        // Default to 3 components (color) as it's more common
-        components = 3;
-        FL_WARN("Could not find SOF marker in JPEG, assuming 3 components");
-    }
-
-    // Validate component count
-    if (components != 1 && components != 3) {
-        if (error_message) {
-            char comp_str[16];
-            fl::snprintf(comp_str, sizeof(comp_str), "%d", static_cast<int>(components));
-            *error_message = "Unsupported number of JPEG components: ";
-            *error_message += comp_str;
-        }
-        return info;
-    }
-
-    // Successfully parsed metadata
-    info.width = width;
-    info.height = height;
-    info.components = components;
-    info.bitsPerComponent = 8;  // JPEG baseline is always 8 bits per component
-    info.isGrayscale = (components == 1);
-    info.isValid = true;
-
-    return info;
-}
-
-
-// Thread-local variable to hold current decoder instance for callback
-static fl::ThreadLocal<void*> currentDecoder(nullptr);
-
-// Debug flag to track if callback was invoked
-static bool g_callbackInvoked = false;
-
-TJpgDecoder::TJpgDecoder(const JpegDecoderConfig& config)
-    : config_(config), inputSize_(0), frameDecoded_(false) {
-}
-
-TJpgDecoder::~TJpgDecoder() {
-    end();
-}
-
-bool TJpgDecoder::begin(fl::ByteStreamPtr stream) {
-    if (!stream) {
-        setError("Invalid ByteStream provided");
-        return false;
-    }
-
-    stream_ = stream;
-    hasError_ = false;
-    errorMessage_.clear();
-
-    if (!initializeDecoder()) {
-        return false;
-    }
-
-    ready_ = true;
-    return true;
-}
-
-void TJpgDecoder::end() {
-    if (ready_) {
-        cleanupDecoder();
-        ready_ = false;
-    }
-    stream_.reset();
-    frameBuffer_.reset();
-}
-
-bool TJpgDecoder::hasError(fl::string* msg) const {
-    if (msg && hasError_) {
-        *msg = errorMessage_;
-    }
-    return hasError_;
-}
-
-DecodeResult TJpgDecoder::decode() {
-    if (!ready_) {
-        return DecodeResult::Error;
-    }
-
-    if (hasError_) {
-        return DecodeResult::Error;
-    }
-
-    if (!decodeInternal()) {
-        return DecodeResult::Error;
-    }
-
-    return DecodeResult::Success;
-}
-
-bool TJpgDecoder::initializeDecoder() {
-    if (!stream_) {
-        setError("No input stream provided");
-        return false;
-    }
-
-    // Read all data from stream into buffer
-    fl::vector<fl::u8> tempBuffer;
-    tempBuffer.reserve(4096); // Initial capacity
-
-    fl::u8 chunk[256];
-    size_t totalBytesRead = 0;
-    while (true) {
-        fl::size bytesRead = stream_->read(chunk, sizeof(chunk));
-        if (bytesRead == 0) break;
-
-        // Append read data to buffer
-        size_t oldSize = tempBuffer.size();
-        tempBuffer.resize(oldSize + bytesRead);
-        memcpy(tempBuffer.data() + oldSize, chunk, bytesRead);
-        totalBytesRead += bytesRead;
-    }
-
-    inputSize_ = tempBuffer.size();
-    if (inputSize_ == 0) {
-        setError("Empty input stream - read 0 bytes total");
-        return false;
-    }
-    if (inputSize_ != totalBytesRead) {
-        setError("Size mismatch in reading");
-        return false;
-    }
-
-    inputBuffer_.reset(new fl::u8[inputSize_]);
-    if (!inputBuffer_) {
-        setError("Failed to allocate input buffer");
-        return false;
-    }
-
-    // Copy data from temp buffer to allocated buffer
-    memcpy(inputBuffer_.get(), tempBuffer.data(), inputSize_);
-
-    // Get image dimensions first
-    uint16_t width, height;
-    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(&width, &height, inputBuffer_.get(), inputSize_);
-    if (result != fl::third_party::JDR_OK) {
-        char error_code_str[16];
-        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
-        fl::string error_msg = "Failed to parse JPEG header, error code: ";
-        error_msg += error_code_str;
-        setError(error_msg);
-        return false;
-    }
-
-    // Dimensions are now extracted from the actual image metadata
-    // No artificial size limits needed
-
-    // Initialize frame buffer and create Frame immediately
-    allocateFrameBuffer(width, height);
-
-    // Create frame with our allocated buffer
-    decodedFrame_ = fl::make_shared<Frame>(frameBuffer_.get(), width, height, config_.format);
-
-    // Set up decoder configuration
-    mapQualityToScale();
-    fl::third_party::TJpgDec.setSwapBytes(false); // We'll handle byte order ourselves
-    fl::third_party::TJpgDec.setCallback(outputCallback);
-
-    frameDecoded_ = false;
-    return true;
-}
-
-bool TJpgDecoder::decodeInternal() {
-    if (frameDecoded_) {
-        return true; // Already decoded
-    }
-
-    // Set current decoder for static callback
-    currentDecoder.set(this);
-    g_callbackInvoked = false;  // Reset debug flag
-
-    // Re-set the callback right before decoding (in case it was lost)
-    fl::third_party::TJpgDec.setCallback(outputCallback);
-
-
-    // Decode the JPEG
-    fl::third_party::JRESULT result = fl::third_party::TJpgDec.drawJpg(0, 0, inputBuffer_.get(), inputSize_);
-
-
-    currentDecoder.set(nullptr);
-
-    if (result != fl::third_party::JDR_OK) {
-        char error_code_str[16];
-        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
-        fl::string error_msg = "JPEG decoding failed, error code: ";
-        error_msg += error_code_str;
-        setError(error_msg);
-        return false;
-    }
-
-    // Check if callback was invoked
-    if (!g_callbackInvoked) {
-        setError("JPEG decoder callback was never invoked - no pixel data transferred");
-        return false;
-    }
-
-
-    frameDecoded_ = true;
-    return true;
-}
-
-void TJpgDecoder::cleanupDecoder() {
-    inputBuffer_.reset();
-    inputSize_ = 0;
-    frameDecoded_ = false;
-    decodedFrame_.reset();
-    currentDecoder.set(nullptr);
-}
-
-bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
-    g_callbackInvoked = true;  // Mark that callback was called
-
-    TJpgDecoder* decoder = reinterpret_cast<TJpgDecoder*>(currentDecoder.access());
-    if (!decoder) {
-        return false;
-    }
-
-
-    if (!decoder->frameBuffer_ || !decoder->decodedFrame_) {
-        // Set error for debugging
-        decoder->setError("Output callback called but frame buffer or decoded frame is null");
-        return false;
-    }
-
-    if (!data) {
-        decoder->setError("Output callback called with null data pointer");
-        return false;
-    }
-
-    uint16_t frameWidth = decoder->decodedFrame_->getWidth();
-    uint16_t frameHeight = decoder->decodedFrame_->getHeight();
-
-    // Bounds checking
-    if (x < 0 || y < 0 || x + w > frameWidth || y + h > frameHeight) {
-        decoder->setError("Output callback bounds check failed");
-        return false;
-    }
-
-    // Write directly to the Frame's RGB buffer
-    CRGB* framePixels = decoder->decodedFrame_->rgb();
-
-    for (uint16_t row = 0; row < h; ++row) {
-        for (uint16_t col = 0; col < w; ++col) {
-            uint16_t srcIdx = row * w + col;
-
-            // Calculate destination position in Frame buffer
-            int pixelX = x + col;
-            int pixelY = y + row;
-            int frameIdx = pixelY * frameWidth + pixelX;
-
-            // Convert RGB565 pixel to CRGB using rgb565ToRgb888 function with lookup tables
-            uint16_t rgb565 = data[srcIdx];
-            fl::u8 r, g, b;
-            rgb565ToRgb888(rgb565, r, g, b);
-
-            // Set pixel directly in the Frame's buffer
-            framePixels[frameIdx] = CRGB(r, g, b);
-        }
-    }
-
-    return true;
-}
-
-void TJpgDecoder::mapQualityToScale() {
-    fl::u8 scale = 1;
-    switch (config_.quality) {
-        case JpegDecoderConfig::Quality::Low:
-            scale = 8;
-            break;
-        case JpegDecoderConfig::Quality::Medium:
-            scale = 4;
-            break;
-        case JpegDecoderConfig::Quality::High:
-            scale = 1;
-            break;
-    }
-    fl::third_party::TJpgDec.setJpgScale(scale);
-}
-
-void TJpgDecoder::convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_t w, uint16_t h) {
-    (void)w; (void)h; // Suppress unused parameter warnings
-
-    uint16_t rgb565 = *srcData;
-
-    // Convert RGB565 to RGB888 using lookup tables
-    fl::u8 r, g, b;
-    rgb565ToRgb888(rgb565, r, g, b);
-
-    switch (config_.format) {
-        case PixelFormat::RGB888:
-            dstData[0] = r;
-            dstData[1] = g;
-            dstData[2] = b;
-            break;
-        case PixelFormat::RGBA8888:
-            dstData[0] = r;
-            dstData[1] = g;
-            dstData[2] = b;
-            dstData[3] = 255; // Full alpha
-            break;
-        case PixelFormat::RGB565:
-            *reinterpret_cast<fl::u16*>(dstData) = rgb565;
-            break;
-        case PixelFormat::YUV420:
-            // Simple conversion to grayscale for YUV420
-            dstData[0] = static_cast<fl::u8>(0.299f * r + 0.587f * g + 0.114f * b);
-            break;
-        default:
-            // Default to RGB888
-            dstData[0] = r;
-            dstData[1] = g;
-            dstData[2] = b;
-            break;
-    }
-}
-
-fl::size TJpgDecoder::getBytesPerPixel() const {
-    return fl::getBytesPerPixel(config_.format);
-}
-
-void TJpgDecoder::setError(const fl::string& message) {
-    hasError_ = true;
-    errorMessage_ = message;
-    ready_ = false;
-}
-
-fl::size TJpgDecoder::getExpectedFrameSize() const {
-    if (!decodedFrame_ || decodedFrame_->getWidth() == 0 || decodedFrame_->getHeight() == 0) {
-        return 0;
-    }
-    return static_cast<fl::size>(decodedFrame_->getWidth()) * decodedFrame_->getHeight() * getBytesPerPixel();
-}
-
-void TJpgDecoder::allocateFrameBuffer(uint16_t width, uint16_t height) {
-    bufferSize_ = static_cast<fl::size>(width) * height * getBytesPerPixel();
-    if (bufferSize_ > 0) {
-        frameBuffer_.reset(new fl::u8[bufferSize_]);
-        // Initialize buffer to zero to prevent garbage values
-        if (frameBuffer_) {
-            memset(frameBuffer_.get(), 0, bufferSize_);
-        }
-    }
-}
-
-Frame TJpgDecoder::getCurrentFrame() {
-    if (decodedFrame_) {
-        return *decodedFrame_;
-    }
-    // Return empty frame if not decoded yet
-    return Frame(0);
-}
-
-// Progressive JPEG Decoder Implementation
-ProgressiveJpegDecoder::ProgressiveJpegDecoder(const JpegDecoderConfig& config)
-    : config_(config) {
-    // Initialize progressive state
-    memset(&progressive_decoder_, 0, sizeof(progressive_decoder_));
-    progressive_decoder_.workspace_initialized = 0;
-}
-
-bool ProgressiveJpegDecoder::begin(fl::ByteStreamPtr stream) {
-    if (!stream) {
-        setError("Invalid ByteStream provided");
-        return false;
-    }
-
-    input_stream_ = stream;
-    state_ = State::NotStarted;
-    has_error_ = false;
-    error_message_.clear();
-    progress_percentage_ = 0.0f;
-
-    // Read stream data into buffer
-    if (!readStreamData()) {
-        return false;
-    }
-
-    // Initialize decoder
-    if (!initializeProgressiveDecoder()) {
-        return false;
-    }
-
-    state_ = State::HeaderParsed;
-    return true;
-}
-
-void ProgressiveJpegDecoder::end() {
-    cleanupProgressiveDecoder();
-    input_stream_.reset();
-    partial_frame_.reset();
-    pixel_buffer_.reset();
-    state_ = State::NotStarted;
-}
-
-bool ProgressiveJpegDecoder::isReady() const {
-    return state_ == State::HeaderParsed || state_ == State::Decoding || state_ == State::Suspended;
-}
-
-bool ProgressiveJpegDecoder::hasError(fl::string* msg) const {
-    if (msg && has_error_) {
-        *msg = error_message_;
-    }
-    return has_error_;
-}
-
-DecodeResult ProgressiveJpegDecoder::decode() {
-    if (state_ == State::Error) {
-        return DecodeResult::Error;
-    }
-
-    if (state_ == State::Complete) {
-        return DecodeResult::Success;
-    }
-
-    // Process until complete or error
-    while (processChunk()) {
-        // Continue processing
-    }
-
-    return (state_ == State::Complete) ? DecodeResult::Success : DecodeResult::Error;
-}
-
-Frame ProgressiveJpegDecoder::getCurrentFrame() {
-    if (partial_frame_) {
-        return *partial_frame_;
-    }
-    return Frame(0); // Empty frame
-}
-
-void ProgressiveJpegDecoder::setProgressiveConfig(const ProgressiveConfig& config) {
-    progressive_config_ = config;
-}
-
-bool ProgressiveJpegDecoder::processChunk() {
-    if (state_ == State::Error || state_ == State::Complete) {
-        return false;
-    }
-
-    if (state_ == State::NotStarted || state_ == State::HeaderParsed) {
-        state_ = State::Decoding;
-    }
-
-    ProcessingTimeManager timer;
-    timer.setBudget(progressive_config_.max_time_per_tick_ms);
-    timer.startTick();
-
-    // Set current decoder for callback
-    currentDecoder.set(this);
-
-    fl::u8 more_data_needed = 0;
-    fl::u8 processing_complete = 0;
-
-    fl::third_party::JRESULT result = fl::third_party::jd_decomp_progressive(
-        &progressive_decoder_,
-        progressiveOutputCallbackBridge,
-        getScale(),
-        progressive_config_.max_mcus_per_tick,
-        &more_data_needed,
-        &processing_complete
-    );
-
-    currentDecoder.set(nullptr);
-
-    if (result == fl::third_party::JDR_SUSPEND) {
-        state_ = State::Suspended;
-        updateProgress();
-        return true; // More work to do
-    } else if (result == fl::third_party::JDR_OK) {
-        if (processing_complete) {
-            state_ = State::Complete;
-            progress_percentage_ = 1.0f;
-            return false; // Complete
-        } else {
-            // Continue processing
-            updateProgress();
-            return true;
-        }
-    } else {
-        // Error occurred
-        char error_code_str[16];
-        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
-        fl::string error_msg = "Progressive JPEG decoding failed, error code: ";
-        error_msg += error_code_str;
-        setError(error_msg);
-        return false;
-    }
-}
-
-float ProgressiveJpegDecoder::getProgress() const {
-    return progress_percentage_;
-}
-
-bool ProgressiveJpegDecoder::canSuspend() const {
-    return state_ == State::Suspended || state_ == State::Decoding;
-}
-
-void ProgressiveJpegDecoder::suspend() {
-    if (state_ == State::Decoding) {
-        state_ = State::Suspended;
-    }
-}
-
-bool ProgressiveJpegDecoder::resume() {
-    if (state_ == State::Suspended) {
-        state_ = State::Decoding;
-        return true;
-    }
-    return false;
-}
-
-bool ProgressiveJpegDecoder::hasPartialImage() const {
-    return partial_frame_ && partial_frame_->isValid();
-}
-
-Frame ProgressiveJpegDecoder::getPartialFrame() {
-    return getCurrentFrame();
-}
-
-fl::u16 ProgressiveJpegDecoder::getDecodedRows() const {
-    if (progressive_decoder_.total_mcus > 0) {
-        fl::u16 mcu_height = progressive_decoder_.base.msy * 8;
-        return progressive_decoder_.current_mcu_y * mcu_height;
-    }
-    return 0;
-}
-
-bool ProgressiveJpegDecoder::feedData(fl::span<const fl::u8> data) {
-    (void)data; // Unused parameter
-    // For now, we assume all data is provided at the beginning
-    // This could be extended for true streaming support
-    return false;
-}
-
-bool ProgressiveJpegDecoder::needsMoreData() const {
-    return false; // For now, we work with complete data
-}
-
-fl::size ProgressiveJpegDecoder::getBytesProcessed() const {
-    return input_size_; // All bytes processed initially
-}
-
-// Private helper methods
-bool ProgressiveJpegDecoder::readStreamData() {
-    if (!input_stream_) {
-        setError("No input stream provided");
-        return false;
-    }
-
-    // Read all data from stream into buffer
-    fl::vector<fl::u8> tempBuffer;
-    tempBuffer.reserve(4096);
-
-    fl::u8 chunk[256];
-    while (true) {
-        fl::size bytesRead = input_stream_->read(chunk, sizeof(chunk));
-        if (bytesRead == 0) break;
-
-        fl::size oldSize = tempBuffer.size();
-        tempBuffer.resize(oldSize + bytesRead);
-        memcpy(tempBuffer.data() + oldSize, chunk, bytesRead);
-    }
-
-    input_size_ = tempBuffer.size();
-    if (input_size_ == 0) {
-        setError("Empty input stream");
-        return false;
-    }
-
-    input_buffer_.reset(new fl::u8[input_size_]);
-    if (!input_buffer_) {
-        setError("Failed to allocate input buffer");
-        return false;
-    }
-
-    memcpy(input_buffer_.get(), tempBuffer.data(), input_size_);
-    return true;
-}
-
-bool ProgressiveJpegDecoder::initializeProgressiveDecoder() {
-    // Get image dimensions first
-    fl::u16 width, height;
-    fl::third_party::JRESULT result = fl::third_party::TJpgDec.getJpgSize(
-        &width, &height, input_buffer_.get(), input_size_);
-
-    if (result != fl::third_party::JDR_OK) {
-        char error_code_str[16];
-        fl::snprintf(error_code_str, sizeof(error_code_str), "%d", static_cast<int>(result));
-        fl::string error_msg = "Failed to parse progressive JPEG header, error code: ";
-        error_msg += error_code_str;
-        setError(error_msg);
-        return false;
-    }
-
-    // Validate dimensions
-    if (width > config_.maxWidth || height > config_.maxHeight) {
-        setError("Progressive JPEG dimensions exceed maximum allowed size");
-        return false;
-    }
-
-    // Allocate frame buffer
-    allocateFrameBuffer(width, height);
-
-    // Create partial frame
-    partial_frame_ = fl::make_shared<Frame>(pixel_buffer_.get(), width, height, config_.format);
-
-    // Set up progressive decoder configuration
-    fl::third_party::TJpgDec.setSwapBytes(false);
-    fl::third_party::TJpgDec.setJpgScale(getScale());
-
-    return true;
-}
-
-void ProgressiveJpegDecoder::cleanupProgressiveDecoder() {
-    input_buffer_.reset();
-    input_size_ = 0;
-    memset(&progressive_decoder_, 0, sizeof(progressive_decoder_));
-    progressive_decoder_.workspace_initialized = 0;
-}
-
-fl::u8 ProgressiveJpegDecoder::getScale() const {
-    switch (config_.quality) {
-        case JpegDecoderConfig::Quality::Low:
-            return 8;
-        case JpegDecoderConfig::Quality::Medium:
-            return 4;
-        case JpegDecoderConfig::Quality::High:
-            return 1;
-    }
-    return 1;
-}
-
-void ProgressiveJpegDecoder::updateProgress() {
-    if (progressive_decoder_.total_mcus > 0) {
-        progress_percentage_ = static_cast<float>(progressive_decoder_.mcus_processed) /
-                              static_cast<float>(progressive_decoder_.total_mcus);
-    }
-}
-
-void ProgressiveJpegDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) {
-    fl::size buffer_size = static_cast<fl::size>(width) * height * getBytesPerPixel();
-    if (buffer_size > 0) {
-        pixel_buffer_.reset(new fl::u8[buffer_size]);
-        if (pixel_buffer_) {
-            memset(pixel_buffer_.get(), 0, buffer_size);
-        }
-    }
-}
-
-fl::size ProgressiveJpegDecoder::getBytesPerPixel() const {
-    return fl::getBytesPerPixel(config_.format);
-}
-
-void ProgressiveJpegDecoder::setError(const fl::string& message) {
-    has_error_ = true;
-    error_message_ = message;
-    state_ = State::Error;
-}
-
-// Static progressive output callback bridge
-static int progressiveOutputCallbackBridge(fl::third_party::JDEC* jd, void* bitmap, fl::third_party::JRECT* rect) {
-    (void)jd; // Unused parameter
-
-    ProgressiveJpegDecoder* decoder =
-        reinterpret_cast<ProgressiveJpegDecoder*>(currentDecoder.access());
-
-    if (!decoder || !rect) {
-        return 0; // Failure
-    }
-
-    // Convert JRECT to our expected format and call the actual handler
-    // Note: The bitmap parameter contains the RGB565 data for this rectangle
-    uint16_t* rgb565_data = reinterpret_cast<uint16_t*>(bitmap);
-
-    bool success = decoder->handleProgressiveOutput(
-        rect->left,
-        rect->top,
-        rect->right - rect->left,
-        rect->bottom - rect->top,
-        rgb565_data
-    );
-
-    return success ? 1 : 0; // Return 1 for success, 0 for failure
-}
-
-bool ProgressiveJpegDecoder::handleProgressiveOutput(int16_t x, int16_t y, uint16_t w, uint16_t h, uint16_t* data) {
-    if (!partial_frame_ || !data) {
-        setError("Progressive output callback called with invalid state");
-        return false;
-    }
-
-    fl::u16 frameWidth = partial_frame_->getWidth();
-    fl::u16 frameHeight = partial_frame_->getHeight();
-
-    // Bounds checking
-    if (x < 0 || y < 0 || x + w > frameWidth || y + h > frameHeight) {
-        setError("Progressive output callback bounds check failed");
-        return false;
-    }
-
-    // Write directly to the Frame's RGB buffer
-    CRGB* framePixels = partial_frame_->rgb();
-
-    for (fl::u16 row = 0; row < h; ++row) {
-        for (fl::u16 col = 0; col < w; ++col) {
-            fl::u16 srcIdx = row * w + col;
-
-            // Calculate destination position in Frame buffer
-            int pixelX = x + col;
-            int pixelY = y + row;
-            int frameIdx = pixelY * frameWidth + pixelX;
-
-            // Convert RGB565 pixel to CRGB
-            fl::u16 rgb565 = data[srcIdx];
-            fl::u8 r, g, b;
-            rgb565ToRgb888(rgb565, r, g, b);
-
-            // Set pixel directly in the Frame's buffer
-            framePixels[frameIdx] = CRGB(r, g, b);
-        }
-    }
-
-    return true;
+JpegInfo Jpeg::parseInfo(fl::span<const fl::u8> data, fl::string* error_message) {
+    (void)data;
+    (void)error_message;
+    // TODO: Implement JPEG header parsing
+    return JpegInfo();
 }
 
 } // namespace fl

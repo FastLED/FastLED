@@ -42,9 +42,9 @@ TEST_CASE("JPEG file loading and decoding") {
 
     // Test JPEG decoder
     if (Jpeg::isSupported()) {
-        JpegDecoderConfig config;
+        JpegConfig config;
         config.format = PixelFormat::RGB888;
-        config.quality = JpegDecoderConfig::Quality::High;  // Use 1:1 scaling for 2x2 test image
+        config.quality = JpegConfig::Quality::High;  // Use 1:1 scaling for 2x2 test image
 
         fl::string error_msg;
         fl::span<const fl::u8> data(file_data.data(), file_size);
