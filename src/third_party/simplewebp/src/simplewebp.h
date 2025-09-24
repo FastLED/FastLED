@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include "fl/stdint.h"
+#include "fl/unused.h"
 
 #define SIMPLEWEBP_VERSION 20231226
 
@@ -392,7 +393,7 @@ struct simplewebp__vp8_decoder
 	int32_t alpha_dithering;
 };
 
-static char simplewebp__longlong_must_64bit[sizeof(uint64_t) == 8 ? 1 : -1];
+static FL_UNUSED_FUNCTION char simplewebp__longlong_must_64bit[sizeof(uint64_t) == 8 ? 1 : -1];
 
 struct simplewebp__vp8l_bitread
 {
@@ -2839,7 +2840,7 @@ static void simplewebp__predchroma8(uint8_t num, uint8_t *out)
 	}
 }
 
-static void simplewebp__dither_combine_8x8(const uint8_t *dither, uint8_t *out, int32_t stride)
+static FL_UNUSED_FUNCTION void simplewebp__dither_combine_8x8(const uint8_t *dither, uint8_t *out, int32_t stride)
 {
 	int32_t i, j, delta0, delta1;
 
@@ -2974,7 +2975,7 @@ static const uint32_t simplewebp__random_table[55] = {
 	0x27e5ed3c
 };
 
-static void simplewebp__random_init(struct simplewebp__random *rng, float dithering)
+static FL_UNUSED_FUNCTION void simplewebp__random_init(struct simplewebp__random *rng, float dithering)
 {
 	memcpy(rng->tab, simplewebp__random_table, sizeof(rng->tab));
 	rng->index1 = 0;
@@ -2987,7 +2988,7 @@ Returns a centered pseudo-random number with 'num_bits' amplitude.
 (uses D.Knuth's Difference-based random generator).
 'amp' is in VP8_RANDOM_DITHER_FIX fixed-point precision.
 */
-static int32_t simplewebp__random_bits2(struct simplewebp__random *rng, int32_t num_bits, int32_t amp)
+static FL_UNUSED_FUNCTION int32_t simplewebp__random_bits2(struct simplewebp__random *rng, int32_t num_bits, int32_t amp)
 {
 	int32_t diff;
 
@@ -3405,7 +3406,7 @@ static uint8_t *simplewebp__vp8_alloc_memory(struct simplewebp__vp8_decoder *vp8
 	f_info_size = vp8d->filter_type > 0 ? (mb_w * sizeof(struct simplewebp__finfo)) : 0;
 	yuv_size = (32 * 17 + 32 * 9) * sizeof(*vp8d->yuv_b);
 	mb_data_size = mb_w * sizeof(*vp8d->mb_data);
-	cache_height = (16 + simplewebp__fextrarows[vp8d->filter_type]) * 3 / 2;
+	cache_height = (16 + simplewebp__fextrarows[(int)vp8d->filter_type]) * 3 / 2;
 	cache_size = top_size * cache_height;
 	alpha_size = vp8d->alpha_data ? (vp8d->picture_header.width * vp8d->picture_header.width) : 0;
 
@@ -3449,7 +3450,7 @@ static uint8_t *simplewebp__vp8_alloc_memory(struct simplewebp__vp8_decoder *vp8
 		{
 			int32_t extra_rows, extra_y, extra_uv;
 
-			extra_rows = simplewebp__fextrarows[vp8d->filter_type];
+			extra_rows = simplewebp__fextrarows[(int)vp8d->filter_type];
 			extra_y = extra_rows * vp8d->cache_y_stride;
 			extra_uv = (extra_rows / 2) * vp8d->cache_uv_stride;
 			vp8d->cache_y = mem + extra_y;
@@ -3780,7 +3781,7 @@ static void simplewebp__yuv2rgb_plain(uint8_t y, uint8_t u, uint8_t v, uint8_t *
 	rgb[2] = simplewebp__yuv2rgb_clip8(yhi + simplewebp__multhi(u, 33050) - 17685);
 }
 
-static void simplewebp__yuv2rgba(uint8_t *y_out, uint8_t *u_out, uint8_t *v_out, int32_t y_start, int32_t y_end, int32_t y_stride, int32_t uv_stride, int32_t width, uint8_t *rgbout)
+static FL_UNUSED_FUNCTION void simplewebp__yuv2rgba(uint8_t *y_out, uint8_t *u_out, uint8_t *v_out, int32_t y_start, int32_t y_end, int32_t y_stride, int32_t uv_stride, int32_t width, uint8_t *rgbout)
 {
 	int32_t y, x;
 
@@ -3804,7 +3805,7 @@ static uint8_t simplewebp__interpolate(uint8_t a, uint8_t b)
 
 }
 
-static uint8_t simplewebp__interpolate2(uint8_t tl, uint8_t tr, uint8_t bl, uint8_t br)
+static FL_UNUSED_FUNCTION uint8_t simplewebp__interpolate2(uint8_t tl, uint8_t tr, uint8_t bl, uint8_t br)
 {
 	uint8_t tm, bm;
 
@@ -3859,7 +3860,7 @@ static uint8_t simplewebp__uv_fancy_upsample(uint8_t *v, size_t left_x, size_t x
 static void simplewebp__yuva2rgba(struct simplewebp__yuvdst *yuva, size_t w, size_t h, uint8_t *rgba)
 {
 	size_t y, x, uvw, uvh;
-	uint8_t buf[4];
+	// uint8_t buf[4];  // Unused variable
 
 	uvw = (w + 1) / 2;
 	uvh = (h + 1) / 2;
@@ -4055,7 +4056,7 @@ static simplewebp_error simplewebp__vp8_process_row(struct simplewebp__vp8_decod
 		int32_t extra_y_rows, ysize, uvsize, mb_y;
 		uint8_t *ydst, *udst, *vdst, is_first_row, is_last_row;
 
-		extra_y_rows = simplewebp__fextrarows[vp8d->filter_type];
+		extra_y_rows = simplewebp__fextrarows[(int)vp8d->filter_type];
 		ysize = extra_y_rows * vp8d->cache_y_stride;
 		uvsize = (extra_y_rows / 2) * vp8d->cache_uv_stride;
 		ydst = vp8d->cache_y - ysize;
