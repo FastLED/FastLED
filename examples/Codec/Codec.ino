@@ -7,10 +7,7 @@
 #include "fl/ui.h"
 #include <string.h>
 
-// Only compile if we have enough memory
-#if SKETCH_HAS_LOTS_OF_MEMORY == 0
-#error "This sketch requires lots of memory and cannot run on low-memory devices"
-#endif
+#if SKETCH_HAS_LOTS_OF_MEMORY
 
 #include "fl/xymap.h"
 #include "inlined_data.h"
@@ -83,3 +80,16 @@ void loop() {
         CodecProcessor::processCodecWithTiming("MPEG1", []() { CodecProcessor::processMpeg1(); });
     }
 }
+
+#else
+
+void setup() {
+    Serial.begin(9600);
+    Serial.println("This sketch requires lots of memory and cannot run on low-memory devices");
+}
+
+void loop() {
+    delay(1000);
+}
+
+#endif
