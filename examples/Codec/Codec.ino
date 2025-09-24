@@ -20,7 +20,7 @@
 #define HEIGHT 2
 
 #define NUM_LEDS WIDTH*HEIGHT  // 2x2 LED matrix
-#define DATA_PIN 6
+#define DATA_PIN 3
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
 
