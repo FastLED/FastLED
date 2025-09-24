@@ -242,7 +242,64 @@ TEST_CASE("Codec file loading and decoding") {
             Frame frame0 = decoder->getCurrentFrame();
             if (frame0.isValid() && frame0.getWidth() == 2 && frame0.getHeight() == 2) {
                 const CRGB* pixels = frame0.rgb();
-                CHECK_MESSAGE(pixels != nullptr, "GIF first frame decoded successfully");
+                REQUIRE_MESSAGE(pixels != nullptr, "GIF frame pixels should not be null");
+
+                // Debug: Show decoded pixel values like JPEG test
+                MESSAGE("GIF decoded pixel values - Red: (" << (int)pixels[0].r << "," << (int)pixels[0].g << "," << (int)pixels[0].b
+                        << ") White: (" << (int)pixels[1].r << "," << (int)pixels[1].g << "," << (int)pixels[1].b
+                        << ") Blue: (" << (int)pixels[2].r << "," << (int)pixels[2].g << "," << (int)pixels[2].b
+                        << ") Black: (" << (int)pixels[3].r << "," << (int)pixels[3].g << "," << (int)pixels[3].b << ")");
+
+                // Expected layout: red-white-blue-black (2x2) - same as JPEG test
+                // Allow tolerance for GIF compression artifacts
+                const int tolerance = 50;
+
+                // Pixel 0: Red (high R, low G/B)
+                CHECK_MESSAGE(pixels[0].r > 150, "Red pixel should have high red value, got: " << (int)pixels[0].r);
+                CHECK_MESSAGE(pixels[0].g < 100, "Red pixel should have low green value, got: " << (int)pixels[0].g);
+                CHECK_MESSAGE(pixels[0].b < 100, "Red pixel should have low blue value, got: " << (int)pixels[0].b);
+
+                // Pixel 1: White (high R/G/B)
+                CHECK_MESSAGE(pixels[1].r > 200, "White pixel should have high red value, got: " << (int)pixels[1].r);
+                CHECK_MESSAGE(pixels[1].g > 200, "White pixel should have high green value, got: " << (int)pixels[1].g);
+                CHECK_MESSAGE(pixels[1].b > 200, "White pixel should have high blue value, got: " << (int)pixels[1].b);
+
+                // Pixel 2: Blue (low R/G, high B)
+                CHECK_MESSAGE(pixels[2].r < 100, "Blue pixel should have low red value, got: " << (int)pixels[2].r);
+                CHECK_MESSAGE(pixels[2].g < 100, "Blue pixel should have low green value, got: " << (int)pixels[2].g);
+                CHECK_MESSAGE(pixels[2].b > 150, "Blue pixel should have high blue value, got: " << (int)pixels[2].b);
+
+                // Pixel 3: Black (low R/G/B)
+                CHECK_MESSAGE(pixels[3].r < 50, "Black pixel should have low red value, got: " << (int)pixels[3].r);
+                CHECK_MESSAGE(pixels[3].g < 50, "Black pixel should have low green value, got: " << (int)pixels[3].g);
+                CHECK_MESSAGE(pixels[3].b < 50, "Black pixel should have low blue value, got: " << (int)pixels[3].b);
+
+                // Check if all pixels are black (indicating decoder failure like JPEG test)
+                bool all_pixels_black = true;
+                for (int i = 0; i < 4; i++) {
+                    if (pixels[i].r != 0 || pixels[i].g != 0 || pixels[i].b != 0) {
+                        all_pixels_black = false;
+                        break;
+                    }
+                }
+
+                CHECK_MESSAGE(!all_pixels_black,
+                    "GIF decoder returned all black pixels - decoder failure. "
+                    "Frame details: valid=" << frame0.isValid()
+                    << ", width=" << frame0.getWidth()
+                    << ", height=" << frame0.getHeight());
+
+                // Verify pixels are not all identical (decoder should produce varied output)
+                bool all_pixels_identical = true;
+                for (int i = 1; i < 4; i++) {
+                    if (pixels[i].r != pixels[0].r || pixels[i].g != pixels[0].g || pixels[i].b != pixels[0].b) {
+                        all_pixels_identical = false;
+                        break;
+                    }
+                }
+                CHECK_FALSE_MESSAGE(all_pixels_identical,
+                    "GIF decoder returned all identical pixels - indicates improper decoding");
+
             } else {
                 MESSAGE("GIF frame dimensions invalid: " << frame0.getWidth() << "x" << frame0.getHeight());
             }

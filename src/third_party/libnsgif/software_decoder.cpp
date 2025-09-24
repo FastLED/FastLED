@@ -202,19 +202,8 @@ fl::u32 SoftwareGifDecoder::getLoopCount() const {
 
 bool SoftwareGifDecoder::initializeDecoder() {
     // Determine bitmap format based on output format
-    nsgif_bitmap_fmt_t bitmapFormat;
-    switch (outputFormat_) {
-        case fl::PixelFormat::RGBA8888:
-            bitmapFormat = NSGIF_BITMAP_FMT_RGBA8888;
-            break;
-        case fl::PixelFormat::RGB888:
-        case fl::PixelFormat::RGB565:
-        case fl::PixelFormat::YUV420:
-        default:
-            // Use RGBA8888 internally and convert later
-            bitmapFormat = NSGIF_BITMAP_FMT_RGBA8888;
-            break;
-    }
+    // Use R8G8B8A8 explicitly to ensure byte order: 0xRR, 0xGG, 0xBB, 0xAA
+    nsgif_bitmap_fmt_t bitmapFormat = NSGIF_BITMAP_FMT_R8G8B8A8;
 
     nsgif_error result = nsgif_create(&bitmapCallbacks_, bitmapFormat, &gif_);
     if (result != NSGIF_OK) {
@@ -278,19 +267,40 @@ bool SoftwareGifDecoder::loadMoreData() {
 
 fl::shared_ptr<fl::Frame> SoftwareGifDecoder::convertBitmapToFrame(nsgif_bitmap_t* bitmap) {
     if (!bitmap) {
+        setError("convertBitmapToFrame called with null bitmap");
         return nullptr;
     }
 
     GifBitmap* gifBitmap = static_cast<GifBitmap*>(bitmap);
 
-    // Create Frame with the decoded pixel data
+    // Validate bitmap data
+    if (!gifBitmap->pixels || gifBitmap->width == 0 || gifBitmap->height == 0) {
+        setError("GIF bitmap has invalid data or dimensions");
+        return nullptr;
+    }
+
+    // Debug: Check if we're getting RGBA8888 data as expected from libnsgif
+    fl::u8* rawData = gifBitmap->pixels.get();
+    fl::size expectedSize = static_cast<fl::size>(gifBitmap->width) * gifBitmap->height * gifBitmap->bytesPerPixel;
+
+    // Since libnsgif outputs RGBA8888, we need to handle the conversion properly
+    // The Frame constructor expects the format we specify (outputFormat_)
+    // but libnsgif always gives us RGBA8888 data
+
+    // Create Frame with RGBA8888 format since that's what libnsgif provides
+    // The Frame constructor will handle conversion to outputFormat_ via convertPixelsToRgb
     auto frame = fl::make_shared<fl::Frame>(
-        gifBitmap->pixels.get(),
+        rawData,
         gifBitmap->width,
         gifBitmap->height,
-        outputFormat_,
+        fl::PixelFormat::RGBA8888,  // What libnsgif actually provides
         currentFrameIndex_ // Use frame index as timestamp
     );
+
+    if (!frame || !frame->isValid()) {
+        setError("Failed to create valid Frame from GIF bitmap");
+        return nullptr;
+    }
 
     return frame;
 }
