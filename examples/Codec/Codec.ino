@@ -25,11 +25,10 @@
 #define COLOR_ORDER GRB
 
 CRGB leds[NUM_LEDS];
-fl::string formatNames[] = {"JPEG", "WebP", "GIF", "MPEG1"};
+fl::string formatNames[] = {"JPEG", "GIF", "MPEG1"};
 
 // UI Button definitions
 fl::UIButton jpegButton("JPEG");
-fl::UIButton webpButton("WebP");
 fl::UIButton gifButton("GIF");
 fl::UIButton mpeg1Button("MPEG1");
 
@@ -39,7 +38,7 @@ fl::UIButton mpeg1Button("MPEG1");
 void setup() {
     Serial.begin(115200);
     Serial.println("FastLED Multimedia Codec Demonstration");
-    Serial.println("Click buttons to decode JPEG, WebP, GIF, and MPEG1 formats");
+    Serial.println("Click buttons to decode JPEG, GIF, and MPEG1 formats");
 
     // xymap is for the wasm compiler and is otherwise a no-op.
     // Simple 2x2 grid for WASM display using XYMap
@@ -74,10 +73,6 @@ void loop() {
     // Check for button clicks
     if (jpegButton.clicked()) {
         CodecProcessor::processCodecWithTiming("JPEG", []() { CodecProcessor::processJpeg(); });
-    }
-
-    if (webpButton.clicked()) {
-        CodecProcessor::processCodecWithTiming("WebP", []() { CodecProcessor::processWebp(); });
     }
 
     if (gifButton.clicked()) {

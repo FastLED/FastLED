@@ -113,7 +113,9 @@ def _analyze_crash_type(return_code: int, output: str) -> Optional[str]:
     return None
 
 
-def _dump_post_mortem_stack_trace(test_executable: Path, enable_stack_trace: bool) -> Optional[str]:
+def _dump_post_mortem_stack_trace(
+    test_executable: Path, enable_stack_trace: bool
+) -> Optional[str]:
     """
     Attempt to get a post-mortem stack trace by running the test under GDB.
     This is used when a test crashes immediately and timeout-based stack traces won't work.
@@ -126,26 +128,23 @@ def _dump_post_mortem_stack_trace(test_executable: Path, enable_stack_trace: boo
 
     try:
         # Create GDB script for running the test and capturing stack trace on crash
-        with tempfile.NamedTemporaryFile(mode="w+", delete=False, suffix=".gdb") as gdb_script:
+        with tempfile.NamedTemporaryFile(
+            mode="w+", delete=False, suffix=".gdb"
+        ) as gdb_script:
             gdb_script.write("set pagination off\n")
             gdb_script.write("set confirm off\n")
             gdb_script.write("set logging file gdb_output.txt\n")
             gdb_script.write("set logging on\n")
             gdb_script.write("run --minimal\n")  # Run the test with minimal output
-            gdb_script.write("bt full\n")         # Backtrace on crash
+            gdb_script.write("bt full\n")  # Backtrace on crash
             gdb_script.write("info registers\n")  # Register info
-            gdb_script.write("x/16i $pc\n")      # Disassembly around PC
+            gdb_script.write("x/16i $pc\n")  # Disassembly around PC
             gdb_script.write("thread apply all bt full\n")  # All thread backtraces
             gdb_script.write("quit\n")
             gdb_script_path = gdb_script.name
 
         # Run the test under GDB
-        gdb_command = [
-            "gdb",
-            "-batch",
-            "-x", gdb_script_path,
-            str(test_executable)
-        ]
+        gdb_command = ["gdb", "-batch", "-x", gdb_script_path, str(test_executable)]
 
         print(f"Running post-mortem stack trace analysis: {' '.join(gdb_command)}")
 
@@ -154,7 +153,7 @@ def _dump_post_mortem_stack_trace(test_executable: Path, enable_stack_trace: boo
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
-            cwd=_PROJECT_ROOT
+            cwd=_PROJECT_ROOT,
         )
 
         gdb_output, _ = gdb_process.communicate(timeout=60)  # 1 minute timeout for GDB
@@ -229,7 +228,9 @@ def parse_args() -> Args:
     )
     parser.add_argument("--jobs", "-j", type=int, help="Number of parallel jobs")
     parser.add_argument(
-        "--stack-trace", action="store_true", help="Enable GDB stack trace dumps on test crashes/timeouts"
+        "--stack-trace",
+        action="store_true",
+        help="Enable GDB stack trace dumps on test crashes/timeouts",
     )
 
     parsed_args = parser.parse_args()
@@ -242,7 +243,9 @@ def parse_args() -> Args:
     )
 
 
-def run_test(test_file: Path, verbose: bool = False, enable_stack_trace: bool = False) -> TestResult:
+def run_test(
+    test_file: Path, verbose: bool = False, enable_stack_trace: bool = False
+) -> TestResult:
     """Run a single test and capture its output"""
     global _ABORT_EVENT
     if _ABORT_EVENT.is_set():
@@ -264,7 +267,9 @@ def run_test(test_file: Path, verbose: bool = False, enable_stack_trace: bool = 
     captured_lines: List[str] = []
     try:
         # Set timeout when stack traces are enabled to ensure stack trace functionality works
-        timeout = 120 if enable_stack_trace else None  # 2 minutes timeout for stack traces
+        timeout = (
+            120 if enable_stack_trace else None
+        )  # 2 minutes timeout for stack traces
 
         process = RunningProcess(
             command=cmd,
@@ -306,15 +311,17 @@ def run_test(test_file: Path, verbose: bool = False, enable_stack_trace: bool = 
 
             # Attempt post-mortem stack trace if enabled and test crashed
             if enable_stack_trace and return_code != 0:
-                print(f"\n{'='*80}")
+                print(f"\n{'=' * 80}")
                 print("ATTEMPTING POST-MORTEM STACK TRACE ANALYSIS")
-                print(f"{'='*80}")
-                stack_trace = _dump_post_mortem_stack_trace(test_executable, enable_stack_trace)
+                print(f"{'=' * 80}")
+                stack_trace = _dump_post_mortem_stack_trace(
+                    test_executable, enable_stack_trace
+                )
                 if stack_trace:
                     print("POST-MORTEM STACK TRACE:")
-                    print(f"{'='*80}")
+                    print(f"{'=' * 80}")
                     print(stack_trace)
-                    print(f"{'='*80}")
+                    print(f"{'=' * 80}")
                     # Also add to output for the test result
                     output = f"{output}\n\nPOST-MORTEM STACK TRACE:\n{stack_trace}"
     except KeyboardInterrupt:
@@ -385,7 +392,9 @@ def main() -> None:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_test = {
-                executor.submit(run_test, test_file, args.verbose, args.enable_stack_trace): test_file
+                executor.submit(
+                    run_test, test_file, args.verbose, args.enable_stack_trace
+                ): test_file
                 for test_file in test_files
             }
 

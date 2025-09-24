@@ -75,37 +75,6 @@ void processJpeg() {
     }
 }
 
-void processWebp() {
-    Serial.println("\n=== Processing WebP ===");
-
-    if (!fl::Webp::isSupported()) {
-        Serial.println("WebP decoding not yet implemented");
-        return;
-    }
-
-    // Copy data from PROGMEM to RAM
-    fl::vector<fl::u8> webpData(CodecData::sampleWebpDataLength);
-    memcpy(webpData.data(), CodecData::sampleWebpData, CodecData::sampleWebpDataLength);
-
-    // Configure WebP decoder
-    fl::WebpDecoderConfig config;
-    config.format = fl::PixelFormat::RGB888;
-
-    // Create data span
-    fl::span<const fl::u8> data(webpData.data(), webpData.size());
-
-    // Decode the WebP
-    fl::string error_msg;
-    fl::FramePtr framePtr = fl::Webp::decode(config, data, &error_msg);
-
-    if (framePtr && framePtr->isValid()) {
-        displayFrameOnLEDs(*framePtr);
-        showDecodedMessage("WebP decoded successfully!");
-    } else {
-        Serial.print("Failed to decode WebP: ");
-        Serial.println(error_msg.c_str());
-    }
-}
 
 void processGif() {
     Serial.println("\n=== Processing GIF ===");

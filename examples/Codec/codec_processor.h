@@ -1,8 +1,6 @@
 #pragma once
 
-#include <FastLED.h>
 #include "fl/codec/jpeg.h"
-#include "fl/codec/webp.h"
 #include "fl/codec/gif.h"
 #include "fl/codec/mpeg1.h"
 #include "fl/bytestreammemory.h"
@@ -13,11 +11,10 @@
 namespace CodecProcessor {
 
 // Configuration constants
-extern const int TARGET_FPS;
+extern const int TARGET_FPS;  // TODO: make configurable.
 
 // Codec processing functions
 void processJpeg();
-void processWebp();
 void processGif();
 void processMpeg1();
 

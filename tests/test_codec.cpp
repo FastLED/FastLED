@@ -1,7 +1,6 @@
 #include "test.h"
 #include "fl/file_system.h"
 #include "fl/codec/jpeg.h"
-#include "fl/codec/webp.h"
 #include "fl/codec/mpeg1.h"
 #include "fl/codec/gif.h"
 #include "fx/frame.h"
@@ -10,8 +9,6 @@
 #include "fl/codec/pixel.h"
 
 using namespace fl;
-
-#define WEBP_DISABLED  // causes heap corrupt. investigate!
 
 // Helper function to set up filesystem for codec tests
 static FileSystem setupCodecFilesystem() {
@@ -138,129 +135,6 @@ TEST_CASE("JPEG file loading and decoding") {
 
 
 
-#ifndef WEBP_DISABLED  // webp disabled for testing due to heap corruption with test data
-
-TEST_CASE("WebP file loading and decoding") {
-    FileSystem fs = setupCodecFilesystem();
-
-    // Test that we can load the WebP file from filesystem (using lossy version)
-    FileHandlePtr handle = fs.openRead("data/codec/lossy.webp");
-    REQUIRE(handle != nullptr);
-    REQUIRE(handle->valid());
-
-    // Get file size and read into buffer
-    fl::size file_size = handle->size();
-    CHECK(file_size > 0);
-
-    fl::vector<fl::u8> file_data(file_size);
-    fl::size bytes_read = handle->read(file_data.data(), file_size);
-    CHECK_EQ(bytes_read, file_size);
-
-    // WebP files should start with "RIFF"
-    CHECK_EQ(file_data[0], 'R');
-    CHECK_EQ(file_data[1], 'I');
-    CHECK_EQ(file_data[2], 'F');
-    CHECK_EQ(file_data[3], 'F');
-
-    // WebP files should have "WEBP" at offset 8
-    CHECK_EQ(file_data[8], 'W');
-    CHECK_EQ(file_data[9], 'E');
-    CHECK_EQ(file_data[10], 'B');
-    CHECK_EQ(file_data[11], 'P');
-
-    // Test WebP decoder (if supported)
-    if (Webp::isSupported()) {
-        WebpDecoderConfig config;
-        config.format = PixelFormat::RGB888;
-
-        fl::string error_msg;
-        fl::span<const fl::u8> data(file_data.data(), file_size);
-        FramePtr frame = Webp::decode(config, data, &error_msg);
-
-        if (!frame) {
-            MESSAGE("WebP decode failed with error: " << error_msg);
-            REQUIRE_MESSAGE(frame, "WebP decoder returned null frame with error: " << error_msg);
-        }
-
-        if (frame) {
-            CHECK(frame->isValid());
-            CHECK_EQ(frame->getWidth(), 16);
-            CHECK_EQ(frame->getHeight(), 16);
-            CHECK_EQ(frame->getFormat(), PixelFormat::RGB888);
-
-                // Expected layout: 16x16 with 8x8 blocks of red-white-blue-black
-                // Verify pixel values match expected color pattern
-                const CRGB* pixels = frame->rgb();
-                REQUIRE(pixels != nullptr);
-
-                // Sample corner pixels to represent each color quadrant (16x16 = 256 pixels)
-                const CRGB& red_pixel = pixels[0];          // Top-left corner (red quadrant)
-                const CRGB& white_pixel = pixels[15];       // Top-right corner (white quadrant)
-                const CRGB& blue_pixel = pixels[240];       // Bottom-left corner (blue quadrant) - row 15 * 16
-                const CRGB& black_pixel = pixels[255];      // Bottom-right corner (black quadrant) - last pixel
-
-                MESSAGE("WebP decoded corner pixels - Red: (" << (int)red_pixel.r << "," << (int)red_pixel.g << "," << (int)red_pixel.b
-                        << ") White: (" << (int)white_pixel.r << "," << (int)white_pixel.g << "," << (int)white_pixel.b
-                        << ") Blue: (" << (int)blue_pixel.r << "," << (int)blue_pixel.g << "," << (int)blue_pixel.b
-                        << ") Black: (" << (int)black_pixel.r << "," << (int)black_pixel.g << "," << (int)black_pixel.b << ")");
-
-                // 16x16 WebP lossy compression with 8x8 blocks preserves colors nearly perfectly
-                // Expected: Red:(255,1,0), White:(255,255,255), Blue:(0,0,255), Black:(0,0,0)
-
-                // Red quadrant: Should be predominantly red
-                CHECK_MESSAGE(red_pixel.r > 200, "Red pixel should have high red component, got: " << (int)red_pixel.r);
-                CHECK_MESSAGE(red_pixel.g < 50, "Red pixel should have low green component, got: " << (int)red_pixel.g);
-                CHECK_MESSAGE(red_pixel.b < 50, "Red pixel should have low blue component, got: " << (int)red_pixel.b);
-
-                // White quadrant: Should have high values for all components
-                CHECK_MESSAGE(white_pixel.r > 200, "White pixel should have high red component, got: " << (int)white_pixel.r);
-                CHECK_MESSAGE(white_pixel.g > 200, "White pixel should have high green component, got: " << (int)white_pixel.g);
-                CHECK_MESSAGE(white_pixel.b > 200, "White pixel should have high blue component, got: " << (int)white_pixel.b);
-
-                // Blue quadrant: Should be predominantly blue
-                CHECK_MESSAGE(blue_pixel.r < 50, "Blue pixel should have low red component, got: " << (int)blue_pixel.r);
-                CHECK_MESSAGE(blue_pixel.g < 50, "Blue pixel should have low green component, got: " << (int)blue_pixel.g);
-                CHECK_MESSAGE(blue_pixel.b > 200, "Blue pixel should have high blue component, got: " << (int)blue_pixel.b);
-
-                // Black quadrant: Should have low values for all components
-                CHECK_MESSAGE(black_pixel.r < 50, "Black pixel should have low red component, got: " << (int)black_pixel.r);
-                CHECK_MESSAGE(black_pixel.g < 50, "Black pixel should have low green component, got: " << (int)black_pixel.g);
-                CHECK_MESSAGE(black_pixel.b < 50, "Black pixel should have low blue component, got: " << (int)black_pixel.b);
-
-                // Check if all pixels are black (indicating decoder failure)
-                bool all_pixels_black = true;
-                for (int i = 0; i < 256; i++) {
-                    if (pixels[i].r != 0 || pixels[i].g != 0 || pixels[i].b != 0) {
-                        all_pixels_black = false;
-                        break;
-                    }
-                }
-
-                // If all pixels are black, this indicates a decoder failure and should fail the test
-                CHECK_MESSAGE(!all_pixels_black,
-                    "WebP decoder returned all black pixels - decoder failure. "
-                    "Frame details: valid=" << frame->isValid()
-                    << ", width=" << frame->getWidth()
-                    << ", height=" << frame->getHeight());
-
-                // Verify the four quadrants are distinct (decoder should produce varied output)
-                bool red_vs_white = (red_pixel.r != white_pixel.r || red_pixel.g != white_pixel.g || red_pixel.b != white_pixel.b);
-                bool red_vs_blue = (red_pixel.r != blue_pixel.r || red_pixel.g != blue_pixel.g || red_pixel.b != blue_pixel.b);
-                bool red_vs_black = (red_pixel.r != black_pixel.r || red_pixel.g != black_pixel.g || red_pixel.b != black_pixel.b);
-
-                CHECK_MESSAGE(red_vs_white, "Red and white pixels should be distinct");
-                CHECK_MESSAGE(red_vs_blue, "Red and blue pixels should be distinct");
-                CHECK_MESSAGE(red_vs_black, "Red and black pixels should be distinct");
-            }
-        } else {
-            // WebP decoder not supported, verify we can still load the file
-            MESSAGE("WebP decoder not supported on this platform - file loading test passed");
-        }
-
-    handle->close();
-    fs.end();
-}
-#endif  // webp disabled
 
 TEST_CASE("GIF file loading and decoding") {
     FileSystem fs = setupCodecFilesystem();
