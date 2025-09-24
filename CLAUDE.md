@@ -36,6 +36,8 @@ This project uses directory-specific agent guidelines. See:
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Use proper warning macros** from `fl/compiler_control.h`
+- **Use `fl::printf`** for formatted output (available in the project) - never use `::printf`
+- **Use `FL_WARN`** for warnings (available in the project)
 - **Follow existing code patterns** and naming conventions
 
 ### JavaScript Code Standards
