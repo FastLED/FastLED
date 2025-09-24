@@ -3,11 +3,14 @@ Comprehensive test suite for fingerprint cache functionality.
 
 Tests cover:
 - Core functionality (cache hits, misses, content changes)
-- Edge cases (touched files, copied files, corruption)
-- Performance requirements
-- Integration scenarios
+- Special modes (modtime_only for PCH compilation)
+- Edge cases (touched files, copied files, corruption, binary files)
+- Concurrent access patterns
+- Performance requirements (<0.5s total runtime)
+- Integration scenarios and dataclass functionality
 """
 
+import concurrent.futures
 import json
 import os
 import shutil
@@ -18,7 +21,12 @@ from typing import List, Optional
 from unittest import TestCase
 
 # Import the fingerprint cache module
-from ci.ci.fingerprint_cache import CacheEntry, FingerprintCache, has_changed
+from ci.ci.fingerprint_cache import (
+    CacheEntry,
+    FingerprintCache,
+    FingerprintCacheConfig,
+    has_changed,
+)
 
 
 class TestFingerprintCache(TestCase):
@@ -541,6 +549,282 @@ class TestFingerprintCache(TestCase):
         self.assertEqual(len(changed_files), 1, "Only modified file should be detected")
         self.assertEqual(
             changed_files[0], source_files[0], "Should detect the correct modified file"
+        )
+
+    def test_modtime_only_mode_basic(self) -> None:
+        """Test basic functionality of modtime_only mode."""
+        cache_file = self.cache_dir / "modtime_only.json"
+        cache = FingerprintCache(cache_file, modtime_only=True)
+
+        # Create test file
+        test_file = self.temp_dir / "modtime_test.txt"
+        content = "test content"
+        self.create_test_file(test_file, content)
+        original_modtime = os.path.getmtime(test_file)
+
+        # Test 1: Same modtime should return False
+        result = cache.has_changed(test_file, original_modtime)
+        self.assertFalse(
+            result, "Same modtime should return False in modtime_only mode"
+        )
+
+        # Test 2: Older reference time should return True
+        result = cache.has_changed(test_file, original_modtime - 1)
+        self.assertTrue(
+            result, "Older reference time should return True in modtime_only mode"
+        )
+
+        # Test 3: Newer reference time should return False
+        result = cache.has_changed(test_file, original_modtime + 1)
+        self.assertFalse(
+            result, "Newer reference time should return False in modtime_only mode"
+        )
+
+    def test_modtime_only_mode_touch_behavior(self) -> None:
+        """Test that modtime_only mode treats touched files as changed."""
+        cache_file = self.cache_dir / "modtime_only_touch.json"
+        cache = FingerprintCache(cache_file, modtime_only=True)
+
+        # Create test file
+        test_file = self.temp_dir / "touch_test.txt"
+        content = "unchanged content"
+        self.create_test_file(test_file, content)
+        original_modtime = os.path.getmtime(test_file)
+
+        # Touch the file (changes modtime but not content)
+        # Use manual timestamp setting to avoid sleep
+        new_modtime = original_modtime + 1.0
+        os.utime(test_file, (new_modtime, new_modtime))
+
+        # Verify content is unchanged
+        with open(test_file, "r") as f:
+            current_content = f.read()
+        self.assertEqual(current_content, content, "Content should be unchanged")
+
+        # In modtime_only mode, this should return True (different from hash mode)
+        result = cache.has_changed(test_file, original_modtime)
+        self.assertTrue(
+            result, "Touched file should be detected as changed in modtime_only mode"
+        )
+
+    def test_cache_entry_dataclass(self) -> None:
+        """Test CacheEntry dataclass functionality."""
+        entry = CacheEntry(modification_time=1234567890.0, md5_hash="abc123")
+
+        self.assertEqual(entry.modification_time, 1234567890.0)
+        self.assertEqual(entry.md5_hash, "abc123")
+
+        # Test equality
+        entry2 = CacheEntry(modification_time=1234567890.0, md5_hash="abc123")
+        self.assertEqual(entry, entry2)
+
+        # Test inequality
+        entry3 = CacheEntry(modification_time=1234567890.0, md5_hash="xyz789")
+        self.assertNotEqual(entry, entry3)
+
+    def test_cache_config_dataclass(self) -> None:
+        """Test FingerprintCacheConfig dataclass functionality."""
+        config = FingerprintCacheConfig(
+            cache_file=Path("test.json"),
+            hash_algorithm="md5",
+            ignore_patterns=["*.tmp", "*.log"],
+            max_cache_size=1000,
+        )
+
+        self.assertEqual(config.cache_file, Path("test.json"))
+        self.assertEqual(config.hash_algorithm, "md5")
+        self.assertEqual(config.ignore_patterns, ["*.tmp", "*.log"])
+        self.assertEqual(config.max_cache_size, 1000)
+
+    def test_concurrent_access_same_file(self) -> None:
+        """Test concurrent access to the same cache file."""
+        cache_file = self.cache_dir / "concurrent.json"
+        test_file = self.temp_dir / "concurrent_test.txt"
+        self.create_test_file(test_file, "concurrent content")
+        baseline_time = time.time() - 3600
+
+        def check_file(thread_id: int) -> bool:
+            cache = FingerprintCache(cache_file)
+            return cache.has_changed(test_file, baseline_time)
+
+        # Run concurrent checks with fewer threads for speed
+        with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+            futures = [executor.submit(check_file, i) for i in range(3)]
+            results = [
+                future.result() for future in concurrent.futures.as_completed(futures)
+            ]
+
+        # The first check should return True, subsequent ones may return False due to caching
+        # What's important is that at least one returned True and no exceptions occurred
+        self.assertGreaterEqual(
+            sum(results), 1, "At least one concurrent check should return True"
+        )
+
+        # Verify cache file exists and is valid
+        self.assertTrue(
+            cache_file.exists(), "Cache file should exist after concurrent access"
+        )
+
+        # Verify we can still use the cache
+        cache = FingerprintCache(cache_file)
+        modtime = os.path.getmtime(test_file)
+        result = cache.has_changed(test_file, modtime)
+        self.assertFalse(result, "Cache should still work after concurrent access")
+
+    def test_cache_corruption_recovery_edge_cases(self) -> None:
+        """Test recovery from various types of cache corruption."""
+        cache_file = self.cache_dir / "corruption_test.json"
+        test_file = self.temp_dir / "recovery.txt"
+        self.create_test_file(test_file, "recovery content")
+        baseline_time = time.time() - 3600
+
+        # Test 1: Empty file
+        with open(cache_file, "w") as f:
+            f.write("")
+
+        cache = FingerprintCache(cache_file)
+        result = cache.has_changed(test_file, baseline_time)
+        self.assertTrue(result, "Should work with empty cache file")
+
+        # Test 2: Invalid JSON structure
+        with open(cache_file, "w") as f:
+            f.write('{"key": "value"')  # Missing closing brace
+
+        cache = FingerprintCache(cache_file)
+        result = cache.has_changed(test_file, baseline_time)
+        self.assertTrue(result, "Should work with malformed JSON")
+
+        # Test 3: Wrong data types
+        with open(cache_file, "w") as f:
+            json.dump(
+                {
+                    "test": {
+                        "modification_time": "not_a_number",
+                        "md5_hash": 12345,  # Should be string
+                    }
+                },
+                f,
+            )
+
+        cache = FingerprintCache(cache_file)
+        result = cache.has_changed(test_file, baseline_time)
+        self.assertTrue(result, "Should work with wrong data types")
+
+    def test_large_file_performance(self) -> None:
+        """Test caching behavior with moderately large files."""
+        cache_file = self.cache_dir / "large_file.json"
+        cache = FingerprintCache(cache_file)
+
+        # Create a test file (5KB) for reasonable speed
+        large_file = self.temp_dir / "large.txt"
+        large_content = "x" * (5 * 1024)  # 5KB
+        self.create_test_file(large_file, large_content)
+        baseline_time = time.time() - 3600
+
+        # Measure performance
+        start_time = time.time()
+        result = cache.has_changed(large_file, baseline_time)
+        elapsed = time.time() - start_time
+
+        self.assertTrue(result, "Large file should be detected as changed")
+        self.assertLess(
+            elapsed,
+            0.05,
+            f"Large file processing took {elapsed:.2f}s, should be < 0.05s",
+        )
+
+        # Test cache hit performance
+        modtime = os.path.getmtime(large_file)
+        start_time = time.time()
+        result = cache.has_changed(large_file, modtime)
+        elapsed = time.time() - start_time
+
+        self.assertFalse(result, "Large file cache hit should return False")
+        self.assertLess(
+            elapsed, 0.005, f"Cache hit took {elapsed:.3f}s, should be < 0.005s"
+        )
+
+    def test_binary_file_handling(self) -> None:
+        """Test cache with binary files."""
+        cache_file = self.cache_dir / "binary.json"
+        cache = FingerprintCache(cache_file)
+
+        # Create binary file
+        binary_file = self.temp_dir / "test.bin"
+        binary_data = bytes(range(256))  # 0-255
+        with open(binary_file, "wb") as f:
+            f.write(binary_data)
+
+        baseline_time = time.time() - 3600
+
+        # Test binary file caching
+        result = cache.has_changed(binary_file, baseline_time)
+        self.assertTrue(result, "Binary file should be detected as changed")
+
+        # Test cache hit
+        modtime = os.path.getmtime(binary_file)
+        result = cache.has_changed(binary_file, modtime)
+        self.assertFalse(result, "Binary file cache hit should return False")
+
+        # Modify binary file
+        with open(binary_file, "wb") as f:
+            f.write(binary_data + b"\x00\x01")  # Add two bytes
+        # Update modtime manually to avoid sleep
+        os.utime(binary_file, (modtime + 1, modtime + 1))
+
+        # Should detect change
+        result = cache.has_changed(binary_file, modtime)
+        self.assertTrue(result, "Modified binary file should be detected as changed")
+
+    def test_directory_handling(self) -> None:
+        """Test cache behavior with directories (expects IOError)."""
+        cache_file = self.cache_dir / "directory.json"
+        cache = FingerprintCache(cache_file)
+
+        # Create a directory
+        test_dir = self.temp_dir / "test_directory"
+        test_dir.mkdir()
+        baseline_time = time.time() - 3600
+
+        # The fingerprint cache is designed for files only
+        # Directories should raise IOError when it tries to compute MD5
+        with self.assertRaises(IOError) as context:
+            cache.has_changed(test_dir, baseline_time)
+
+        # Verify the error message mentions the directory
+        self.assertIn("Cannot read file", str(context.exception))
+
+    def test_modtime_only_directory_handling(self) -> None:
+        """Test directory handling in modtime_only mode."""
+        cache_file = self.cache_dir / "directory_modtime_only.json"
+        cache = FingerprintCache(cache_file, modtime_only=True)
+
+        # Create a directory
+        test_dir = self.temp_dir / "test_directory_modtime"
+        test_dir.mkdir()
+
+        # In modtime_only mode, directories should work fine since no hashing is attempted
+        dir_modtime = os.path.getmtime(test_dir)
+
+        # Same modtime should return False
+        result = cache.has_changed(test_dir, dir_modtime)
+        self.assertFalse(
+            result,
+            "Directory with same modtime should return False in modtime_only mode",
+        )
+
+        # Older reference time should return True
+        result = cache.has_changed(test_dir, dir_modtime - 1.0)
+        self.assertTrue(
+            result,
+            "Directory should be newer than older reference time in modtime_only mode",
+        )
+
+        # Future reference time should return False
+        result = cache.has_changed(test_dir, dir_modtime + 1.0)
+        self.assertFalse(
+            result,
+            "Directory should be older than future reference time in modtime_only mode",
         )
 
 
