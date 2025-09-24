@@ -179,4 +179,5 @@ void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
     }
 }
 
+
 } // namespace fl

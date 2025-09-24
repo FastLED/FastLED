@@ -29,7 +29,7 @@ This project uses directory-specific agent guidelines. See:
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
-- **`codeup`**: Global command - when asked to run `codeup`, know it's a globally available command
+- **`codeup`**: Global command - ONLY run when user explicitly requests it
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile esp32s3 Blink`)
 
 ### C++ Code Standards

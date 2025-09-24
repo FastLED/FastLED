@@ -7,6 +7,7 @@
 #include "fl/printf.h"
 #include "fl/warn.h"
 #include "fl/bytestreammemory.h"
+#include "fl/codec/pixel.h"
 
 namespace fl {
 
@@ -368,11 +369,10 @@ bool TJpgDecoder::outputCallback(int16_t x, int16_t y, uint16_t w, uint16_t h, u
             int pixelY = y + row;
             int frameIdx = pixelY * frameWidth + pixelX;
 
-            // Convert RGB565 pixel to CRGB
+            // Convert RGB565 pixel to CRGB using rgb565ToRgb888 function with lookup tables
             uint16_t rgb565 = data[srcIdx];
-            fl::u8 r = (rgb565 >> 11) << 3;  // 5 bits -> 8 bits
-            fl::u8 g = ((rgb565 >> 5) & 0x3F) << 2;  // 6 bits -> 8 bits
-            fl::u8 b = (rgb565 & 0x1F) << 3;  // 5 bits -> 8 bits
+            fl::u8 r, g, b;
+            rgb565ToRgb888(rgb565, r, g, b);
 
             // Set pixel directly in the Frame's buffer
             framePixels[frameIdx] = CRGB(r, g, b);
@@ -403,10 +403,9 @@ void TJpgDecoder::convertPixelFormat(uint16_t* srcData, fl::u8* dstData, uint16_
 
     uint16_t rgb565 = *srcData;
 
-    // Extract RGB components from RGB565
-    fl::u8 r = (rgb565 >> 11) << 3;  // 5 bits -> 8 bits
-    fl::u8 g = ((rgb565 >> 5) & 0x3F) << 2;  // 6 bits -> 8 bits
-    fl::u8 b = (rgb565 & 0x1F) << 3;  // 5 bits -> 8 bits
+    // Convert RGB565 to RGB888 using lookup tables
+    fl::u8 r, g, b;
+    rgb565ToRgb888(rgb565, r, g, b);
 
     switch (config_.format) {
         case PixelFormat::RGB888:

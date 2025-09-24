@@ -82,12 +82,37 @@ The GIF decoder tests were artificially passing due to weak validation that only
 2. **Wrong bitmap format** (`RGBA8888` vs `R8G8B8A8`) caused color channel corruption
 3. **No bitmap validation** masked underlying libnsgif integration issues
 
-### Verification
-Run: `bash test codec` - Both JPEG and GIF tests now pass with correct pixel values:
-- JPEG: Red:(248,0,0), White:(248,252,248), Blue:(0,0,248), Black:(0,0,0) ✅
-- GIF: Red:(255,0,0), White:(255,255,255), Blue:(0,0,255), Black:(0,0,0) ✅
+### Additional Fix: RGB565 to RGB888 Scaling Issue ✅ FIXED
+
+**Problem**: JPEG decoder showed incorrect white pixels (248,252,248) instead of (255,255,255) due to improper RGB565 scaling
+**Root Cause**: RGB565 → RGB888 conversion used simple bit-shifting instead of proper scaling
+- Old: `(value >> 11) << 3` gave 0-248 instead of 0-255 for 5-bit values
+- Old: `((value >> 5) & 0x3F) << 2` gave 0-252 instead of 0-255 for 6-bit values
+
+**Fix**: Implemented proper scaling with lookup tables for performance
+- 5-bit values: Scale 0-31 → 0-255 using `(value * 255) / 31`
+- 6-bit values: Scale 0-63 → 0-255 using `(value * 255) / 63`
+- Used static lookup tables to avoid divisions per pixel
+
+**Files Fixed**:
+- `src/fx/frame.h:42-67` - Added `rgb565ToRgb888()` with lookup tables
+- `src/fl/codec/jpeg.cpp:371-374` - Updated JPEG decoder to use lookup function
+- `src/fl/codec/jpeg.cpp:405-407` - Updated `convertPixelFormat()` function
+
+### Final Verification
+Run: `bash test codec` - Both JPEG and GIF tests now pass with perfect pixel values:
+- **JPEG**: Red:(255,0,0), White:(255,255,255), Blue:(0,0,255), Black:(0,0,0) ✅
+- **GIF**: Red:(255,0,0), White:(255,255,255), Blue:(0,0,255), Black:(0,0,0) ✅
 
 ### Related Code (Fixed)
 - `src/third_party/libnsgif/software_decoder.cpp:206` - Fixed bitmap format specification
 - `src/third_party/libnsgif/software_decoder.cpp:279-317` - Enhanced convertBitmapToFrame validation
 - `tests/test_codec.cpp:239-308` - Comprehensive GIF pixel value testing
+
+
+### Additinal
+
+  * tests/test_codec.cpp should comprehensively test all the RGB 565 convers values.
+    * we only have to do one component at a time
+  * tests/test_codec.cpp should test the animated gif using the IDecoder interface. Test that there are two frames.
+  * 
