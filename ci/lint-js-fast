@@ -11,6 +11,9 @@ NC='\033[0m' # No Color
 # Store project root directory for cache operations
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
+# Set up trap to invalidate cache on failure
+trap 'if [ $? -ne 0 ]; then cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure; fi' EXIT
+
 echo -e "${BLUE}FAST FastLED JavaScript Linting (Node.js + ESLint + JSDoc Type Checking - FAST!)${NC}"
 
 # Check if ESLint is installed
@@ -47,6 +50,7 @@ if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c ../../ci
     echo -e "${GREEN}✅ ESLint completed successfully${NC}"
 else
     echo -e "${RED}ERROR: ESLint failed${NC}"
+    cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure
     exit 1
 fi
 
@@ -67,6 +71,7 @@ if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
         echo "$FILTERED_OUTPUT"
         if [ $TSC_EXIT_CODE -ne 0 ]; then
             echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure
             exit 1
         fi
     fi
@@ -83,6 +88,7 @@ elif [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc" ]; then
         echo "$FILTERED_OUTPUT"
         if [ $TSC_EXIT_CODE -ne 0 ]; then
             echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure
             exit 1
         fi
     fi
@@ -99,6 +105,7 @@ elif command -v npx >/dev/null 2>&1 && npx tsc --version >/dev/null 2>&1; then
         echo "$FILTERED_OUTPUT"
         if [ $TSC_EXIT_CODE -ne 0 ]; then
             echo -e "${RED}❌ JSDoc type checking failed with errors${NC}"
+            cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure
             exit 1
         fi
     fi

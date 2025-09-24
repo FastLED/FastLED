@@ -212,6 +212,61 @@ class FingerprintCache:
             else 0,
         }
 
+    def get_cached_files(self) -> list[Path]:
+        """
+        Get list of all files currently tracked in the cache.
+
+        Returns:
+            List of Path objects for all files in the cache
+        """
+        return [Path(file_path) for file_path in self.cache.keys()]
+
+    def check_for_deleted_files(self, base_path: Optional[Path] = None) -> list[Path]:
+        """
+        Check for files that are cached but no longer exist on disk.
+
+        Args:
+            base_path: Optional base path to limit search scope. If provided, only
+                      checks for deleted files under this path.
+
+        Returns:
+            List of Path objects for files that are cached but missing from disk
+        """
+        deleted_files: list[Path] = []
+
+        for file_path_str in self.cache.keys():
+            file_path = Path(file_path_str)
+
+            # If base_path is provided, only check files under that path
+            if base_path is not None:
+                try:
+                    file_path.relative_to(base_path.resolve())
+                except ValueError:
+                    # File is not under base_path, skip it
+                    continue
+
+            # Check if the cached file still exists
+            if not file_path.exists():
+                deleted_files.append(file_path)
+
+        return deleted_files
+
+    def remove_deleted_files(self, deleted_files: list[Path]) -> None:
+        """
+        Remove entries for deleted files from the cache.
+
+        Args:
+            deleted_files: List of deleted file paths to remove from cache
+        """
+        for file_path in deleted_files:
+            file_key = str(file_path.resolve())
+            if file_key in self.cache:
+                del self.cache[file_key]
+
+        # Save the updated cache if any entries were removed
+        if deleted_files:
+            self._save_cache()
+
     def clear_cache(self) -> None:
         """Clear all cache entries and remove cache file."""
         self.cache.clear()

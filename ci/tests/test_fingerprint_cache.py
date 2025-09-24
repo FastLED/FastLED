@@ -373,6 +373,123 @@ class TestFingerprintCache(TestCase):
         self.assertEqual(len(cache.cache), 0)
         self.assertFalse(cache_file.exists())
 
+    def test_deleted_file_detection(self) -> None:
+        """Test detection of files that were cached but have been deleted."""
+        cache_file = self.cache_dir / "deleted_test.json"
+        cache = FingerprintCache(cache_file)
+
+        # Create test files and add them to cache
+        test_files = [
+            self.temp_dir / "file1.txt",
+            self.temp_dir / "file2.txt",
+            self.temp_dir / "subdir" / "file3.txt",
+        ]
+
+        # Ensure subdir exists
+        (self.temp_dir / "subdir").mkdir(exist_ok=True)
+
+        # Create files and add to cache
+        baseline_time = time.time() - 3600
+        for i, test_file in enumerate(test_files):
+            self.create_test_file(test_file, f"content {i}")
+            cache.has_changed(test_file, baseline_time)  # Add to cache
+
+        # Verify all files are cached
+        cached_files = cache.get_cached_files()
+        self.assertEqual(len(cached_files), 3, "All files should be cached")
+
+        # Delete one file
+        test_files[1].unlink()
+
+        # Check for deleted files
+        deleted_files = cache.check_for_deleted_files()
+        self.assertEqual(len(deleted_files), 1, "Should detect one deleted file")
+        self.assertEqual(
+            deleted_files[0], test_files[1], "Should detect correct deleted file"
+        )
+
+        # Test with base_path filtering
+        deleted_files_filtered = cache.check_for_deleted_files(self.temp_dir)
+        self.assertEqual(
+            len(deleted_files_filtered),
+            1,
+            "Should detect deleted file with base_path filter",
+        )
+
+        # Test with unrelated base_path
+        unrelated_dir = self.test_dir / "unrelated"
+        unrelated_dir.mkdir()
+        deleted_files_unrelated = cache.check_for_deleted_files(unrelated_dir)
+        self.assertEqual(
+            len(deleted_files_unrelated), 0, "Should not detect files outside base_path"
+        )
+
+    def test_remove_deleted_files(self) -> None:
+        """Test removal of deleted file entries from cache."""
+        cache_file = self.cache_dir / "remove_test.json"
+        cache = FingerprintCache(cache_file)
+
+        # Create and cache test files
+        test_files = [
+            self.temp_dir / "keep.txt",
+            self.temp_dir / "delete.txt",
+        ]
+
+        baseline_time = time.time() - 3600
+        for i, test_file in enumerate(test_files):
+            self.create_test_file(test_file, f"content {i}")
+            cache.has_changed(test_file, baseline_time)
+
+        # Verify both files are cached
+        self.assertEqual(len(cache.cache), 2, "Both files should be cached")
+
+        # Delete one file
+        test_files[1].unlink()
+        deleted_files = [test_files[1]]
+
+        # Remove deleted file from cache
+        cache.remove_deleted_files(deleted_files)
+
+        # Verify cache was updated
+        self.assertEqual(len(cache.cache), 1, "Cache should have one entry remaining")
+        cached_files = cache.get_cached_files()
+        self.assertEqual(
+            cached_files[0], test_files[0], "Only non-deleted file should remain"
+        )
+
+        # Verify cache file was saved
+        cache2 = FingerprintCache(cache_file)
+        self.assertEqual(len(cache2.cache), 1, "Persisted cache should have one entry")
+
+    def test_get_cached_files(self) -> None:
+        """Test retrieval of cached file list."""
+        cache_file = self.cache_dir / "cached_files_test.json"
+        cache = FingerprintCache(cache_file)
+
+        # Initially empty
+        cached_files = cache.get_cached_files()
+        self.assertEqual(len(cached_files), 0, "New cache should be empty")
+
+        # Add some files
+        test_files = [
+            self.temp_dir / "test1.cpp",
+            self.temp_dir / "test2.h",
+        ]
+
+        baseline_time = time.time() - 3600
+        for i, test_file in enumerate(test_files):
+            self.create_test_file(test_file, f"content {i}")
+            cache.has_changed(test_file, baseline_time)
+
+        # Check cached files
+        cached_files = cache.get_cached_files()
+        self.assertEqual(len(cached_files), 2, "Should return all cached files")
+
+        # Verify files are returned as Path objects
+        for cached_file in cached_files:
+            self.assertIsInstance(cached_file, Path, "Should return Path objects")
+            self.assertIn(cached_file, test_files, "Should return correct files")
+
     def test_build_system_workflow(self) -> None:
         """Test complete build system workflow."""
         cache_file = self.cache_dir / "build.json"
