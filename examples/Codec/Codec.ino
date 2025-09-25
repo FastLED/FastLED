@@ -13,10 +13,10 @@
 #include "inlined_data.h"
 #include "codec_processor.h"
 
-#define WIDTH 2
-#define HEIGHT 2
+#define WIDTH 32
+#define HEIGHT 32
 
-#define NUM_LEDS WIDTH*HEIGHT  // 2x2 LED matrix
+#define NUM_LEDS WIDTH*HEIGHT  // 32x32 LED matrix
 #define DATA_PIN 3
 #define LED_TYPE WS2812B
 #define COLOR_ORDER GRB
@@ -38,11 +38,10 @@ void setup() {
     Serial.println("Click buttons to decode JPEG, GIF, and MPEG1 formats");
 
     // xymap is for the wasm compiler and is otherwise a no-op.
-    // Simple 2x2 grid for WASM display using XYMap
-    // Just display the first 4 LEDs in a 2x2 grid
-    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(2, 2);  // 2x2 grid
+    // 32x32 grid for WASM display using XYMap
+    fl::XYMap xymap = fl::XYMap::constructRectangularGrid(WIDTH, HEIGHT);  // 32x32 grid
 
-    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, 4)
+    FastLED.addLeds<LED_TYPE, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(xymap.toScreenMap());
 
@@ -58,8 +57,8 @@ void setup() {
     // Initialize codec processor with LED array
     CodecProcessor::leds = leds;
     CodecProcessor::numLeds = NUM_LEDS;
-    CodecProcessor::ledWidth = 64;  // Keep original 64x64 for scaling
-    CodecProcessor::ledHeight = 64;
+    CodecProcessor::ledWidth = WIDTH;  // 32x32 for 1:1 mapping
+    CodecProcessor::ledHeight = HEIGHT;
 
     Serial.println("System initialized - codec demonstration ready. Click buttons to decode formats...");
 }

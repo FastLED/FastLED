@@ -30,14 +30,21 @@ void processCodecWithTiming(const char* codecName, fl::function<void()> codecFun
     // Now build up the message to display the current leds
     fl::sstream message;
     message << "Format: " << codecName << "\n";
-    message << "LEDs: " << numLeds << "\n";
-    // now do each of the 4 LEDs
-    for (int i = 0; i < 4; i++) {
-        message << "LED " << i << ": ";
-        for (int j = 0; j < 2; j++) { // WIDTH = 2
-            message << leds[i * 2 + j] << " ";
+    message << "LEDs: " << numLeds << " (" << ledWidth << "x" << ledHeight << ")\n";
+
+    // For 32x32, just show a summary rather than all pixels
+    if (numLeds > 16) {
+        // Show first few pixels as a sample
+        message << "First 4 pixels: ";
+        for (int i = 0; i < 4 && i < numLeds; i++) {
+            message << "RGB(" << (int)leds[i].r << "," << (int)leds[i].g << "," << (int)leds[i].b << ") ";
         }
         message << "\n";
+    } else {
+        // For small displays, show all LEDs
+        for (int i = 0; i < numLeds; i++) {
+            message << "LED " << i << ": " << leds[i] << "\n";
+        }
     }
     FL_WARN(message.str().c_str());
     FastLED.show();
