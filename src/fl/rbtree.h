@@ -273,7 +273,7 @@ private:
         
         RBNode* newNode = alloc_.allocate(1);
         if (newNode == nullptr) {
-            return fl::pair<iterator, bool>(end(), false);
+            return fl::pair<iterator, bool>(iterator(nullptr, this), false);
         }
         
         alloc_.construct(newNode, fl::forward<U>(value), RED, parent);
@@ -523,12 +523,12 @@ public:
 
     // Iterators
     iterator begin() {
-        if (root_ == nullptr) return end();
+        if (root_ == nullptr) return iterator(nullptr, this);
         return iterator(minimum(root_), this);
     }
 
     const_iterator begin() const {
-        if (root_ == nullptr) return end();
+        if (root_ == nullptr) return const_iterator(nullptr, this);
         return const_iterator(minimum(root_), this);
     }
 
