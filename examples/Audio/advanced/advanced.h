@@ -195,7 +195,7 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
         int barHeight = magnitude * HEIGHT;
         int xStart = band * barWidth;
         
-        for (int x = 0; x < barWidth - 1; x++) {
+        for (int x = 0; x < MAX(barWidth, 1); x++) {
             for (int y = 0; y < barHeight; y++) {
                 uint8_t colorIndex = fl::map_range<float, uint8_t>(
                     float(y) / HEIGHT, 0, 1, 0, 255
