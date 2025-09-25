@@ -31,12 +31,13 @@ const DEFAULT_VIDEO_CONFIG = {
  * @constant {string[]}
  */
 const FALLBACK_MIME_TYPES = [
-  'video/webm;codecs=vp9,opus',
-  'video/webm;codecs=vp8,opus',
-  'video/webm;codecs=vp9',
-  'video/webm;codecs=vp8',
-  'video/webm',
   'video/mp4',
+  'video/mp4;codecs=avc1.42E01E',
+  'video/mp4;codecs=h264',
+  'video/mp4;codecs=h264,aac',
+  'video/webm;codecs=vp8',
+  'video/webm;codecs=vp9',
+  'video/webm',
 ];
 
 /**
@@ -245,6 +246,12 @@ export class VideoRecorder {
         audioBitsPerSecond: this.settings.audioBitrate * 1000, // Convert kbps to bps
       };
 
+      // Add encoding optimization hints for faster processing
+      if (this.selectedMimeType.includes('mp4')) {
+        // For MP4, prioritize speed over compression efficiency
+        options.videoKeyFrameIntervalDuration = 1000; // Keyframe every 1 second for faster seeking
+      }
+
       // Remove mimeType if empty (use browser default)
       if (!options.mimeType) {
         delete options.mimeType;
@@ -316,7 +323,7 @@ export class VideoRecorder {
       // Start recording with explicit timeslice to ensure data collection
       try {
         // Try different timeslice values - some browsers are picky
-        const timeslice = 1000; // Default: 1 second
+        const timeslice = 500; // Default: 0.5 second for quicker data availability
         try {
           this.mediaRecorder.start(timeslice);
           console.log(`MediaRecorder.start(${timeslice}) called successfully`);
