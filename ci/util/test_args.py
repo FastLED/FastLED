@@ -150,6 +150,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         nargs="+",
         help="Run examples in QEMU emulation. Usage: --qemu esp32s3 [example_names...]",
     )
+    parser.add_argument(
+        "--no-fingerprint",
+        action="store_true",
+        help="Disable fingerprint caching for tests (force rebuild/rerun)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -180,6 +185,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         unity_chunks=parsed_args.unity_chunks,
         debug=parsed_args.debug,
         qemu=parsed_args.qemu,
+        no_fingerprint=parsed_args.no_fingerprint,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided

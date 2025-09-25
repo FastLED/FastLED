@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import _thread
 import json
 import os
 import sys
@@ -194,6 +195,9 @@ def run_qemu_tests(args: TestArgs) -> None:
                 )
                 failure_count += 1
 
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
         except Exception as e:
             print(f"ERROR: {example} failed with exception: {e}")
             failure_count += 1
@@ -497,18 +501,33 @@ def main() -> None:
                     print(f"\nExecution Summary:")
                     for timing in timings:
                         print(f"  {timing.name}: {timing.duration:.2f}s")
+            except KeyboardInterrupt:
+                _thread.interrupt_main()
+                raise
             except Exception as e:
                 print(f"Sequential test execution failed: {e}")
                 sys.exit(1)
         else:
             # Use normal test runner for other cases
             # Force change flags=True when running a specific test to disable fingerprint cache
-            force_cpp_test_change = cpp_test_change or (args.test is not None)
-            force_examples_change = examples_change or (args.test is not None)
-            force_python_test_change = python_test_change or (args.test is not None)
+            # Also force when --no-fingerprint is used
+            force_cpp_test_change = (
+                cpp_test_change or (args.test is not None) or args.no_fingerprint
+            )
+            force_examples_change = (
+                examples_change or (args.test is not None) or args.no_fingerprint
+            )
+            force_python_test_change = (
+                python_test_change or (args.test is not None) or args.no_fingerprint
+            )
+            force_src_code_change = src_code_change or args.no_fingerprint
+
+            if args.no_fingerprint:
+                print("Fingerprint caching disabled (--no-fingerprint)")
+
             test_runner(
                 args,
-                src_code_change,
+                force_src_code_change,
                 force_cpp_test_change,
                 force_examples_change,
                 force_python_test_change,

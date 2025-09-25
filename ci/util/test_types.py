@@ -86,6 +86,7 @@ class TestArgs:
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
     qemu: Optional[list[str]] = None  # Run examples in QEMU emulation
+    no_fingerprint: bool = False  # Disable fingerprint caching
 
 
 @typechecked

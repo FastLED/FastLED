@@ -4,65 +4,44 @@ JavaScript Linting Cache Integration
 
 Monitors the src/platforms/wasm/compiler directory for any changes
 to determine if JS files need re-linting.
+
+Refactored to use the new hash-based fingerprint cache system.
 """
 
-import hashlib
-import os
+import _thread
 import sys
 from pathlib import Path
+from typing import List
+
+# Import the new hash-based cache system
+from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
-def get_directory_fingerprint(directory: Path) -> str:
+def get_directory_files(directory: Path) -> List[Path]:
     """
-    Generate a fingerprint for a directory based on all files' modification times.
+    Get all files in a directory for fingerprint hashing.
 
-    This captures any changes including:
-    - File modifications
-    - File additions
-    - File deletions
-    - Subdirectory changes
+    This captures all files including:
+    - All file types
+    - Files in subdirectories
+    - Directory structure
     """
     if not directory.exists():
-        return "directory_not_found"
+        return []
 
-    hasher = hashlib.sha256()
-
-    # Walk through all files in the directory
-    all_files = sorted(directory.glob("**/*"))
-
-    for file_path in all_files:
+    # Get all files (not directories) recursively
+    all_files: List[Path] = []
+    for file_path in directory.glob("**/*"):
         if file_path.is_file():
-            # Include file path and modification time
-            hasher.update(str(file_path.relative_to(directory)).encode("utf-8"))
-            hasher.update(str(os.path.getmtime(file_path)).encode("utf-8"))
+            all_files.append(file_path)
 
-    # Also include count of files to detect deletions
-    hasher.update(f"file_count:{len(all_files)}".encode("utf-8"))
-
-    return hasher.hexdigest()
+    return sorted(all_files, key=str)
 
 
-def get_last_lint_fingerprint(cache_dir: Path) -> str:
-    """Get the fingerprint from the last successful lint run."""
-    fingerprint_file = cache_dir / "last_lint_fingerprint.txt"
-
-    if fingerprint_file.exists():
-        try:
-            with open(fingerprint_file, "r") as f:
-                return f.read().strip()
-        except IOError:
-            pass
-
-    return ""  # No previous fingerprint
-
-
-def update_last_lint_fingerprint(cache_dir: Path, fingerprint: str) -> None:
-    """Update the fingerprint after successful lint run."""
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    fingerprint_file = cache_dir / "last_lint_fingerprint.txt"
-
-    with open(fingerprint_file, "w") as f:
-        f.write(fingerprint)
+def _get_js_lint_cache() -> HashFingerprintCache:
+    """Get the hash fingerprint cache for JS linting."""
+    cache_dir = Path(".cache")
+    return HashFingerprintCache(cache_dir, "js_lint")
 
 
 def check_js_files_changed() -> bool:
@@ -73,8 +52,6 @@ def check_js_files_changed() -> bool:
         True if directory changed and linting should run
         False if no changes detected and linting can be skipped
     """
-    cache_dir = Path(".cache/js-lint")
-
     # Monitor the wasm/compiler directory
     compiler_dir = Path("src/platforms/wasm/compiler")
 
@@ -82,53 +59,66 @@ def check_js_files_changed() -> bool:
         print("⚠️  Directory src/platforms/wasm/compiler not found")
         return False
 
-    # Get current directory fingerprint
-    current_fingerprint = get_directory_fingerprint(compiler_dir)
+    # Get all files in the directory
+    file_paths = get_directory_files(compiler_dir)
 
-    # Get last lint fingerprint
-    last_fingerprint = get_last_lint_fingerprint(cache_dir)
-
-    if not last_fingerprint:
-        print("📝 No previous lint fingerprint found - triggering lint")
+    if not file_paths:
+        print("📝 No files found in src/platforms/wasm/compiler/ - triggering lint")
         return True
 
-    if current_fingerprint != last_fingerprint:
-        # Count JS files for informational purposes
-        js_files = list(compiler_dir.glob("**/*.js"))
-        print(f"🔄 Changes detected in src/platforms/wasm/compiler/")
-        print(f"   Found {len(js_files)} JavaScript files")
-        return True
-    else:
+    # Check if files have changed using hash cache
+    cache = _get_js_lint_cache()
+
+    if cache.is_valid(file_paths):
         print("✅ No changes in src/platforms/wasm/compiler/ - skipping lint")
         return False
+    else:
+        # Count JS files for informational purposes
+        js_files = [f for f in file_paths if f.suffix == ".js"]
+        print(f"🔄 Changes detected in src/platforms/wasm/compiler/")
+        print(
+            f"   Found {len(js_files)} JavaScript files, {len(file_paths)} total files"
+        )
+        return True
 
 
 def mark_lint_success() -> None:
     """Mark the current lint run as successful."""
-    cache_dir = Path(".cache/js-lint")
     compiler_dir = Path("src/platforms/wasm/compiler")
 
-    if compiler_dir.exists():
-        current_fingerprint = get_directory_fingerprint(compiler_dir)
-        update_last_lint_fingerprint(cache_dir, current_fingerprint)
+    if not compiler_dir.exists():
+        print("⚠️  Cannot update fingerprint - compiler directory not found")
+        return
+
+    # Get all files in the directory
+    file_paths = get_directory_files(compiler_dir)
+
+    if not file_paths:
+        print("⚠️  No files found to cache fingerprint for")
+        return
+
+    # Mark as successful using hash cache
+    cache = _get_js_lint_cache()
+    success = cache.mark_success(file_paths)
+
+    if success:
         print("📝 Lint success fingerprint updated")
     else:
-        print("⚠️  Cannot update fingerprint - compiler directory not found")
+        print("⚠️  Fingerprint update failed - files changed during lint process")
 
 
 def invalidate_cache() -> None:
     """Invalidate the cache when lint/test fails, forcing a re-run next time."""
-    cache_dir = Path(".cache/js-lint")
-    fingerprint_file = cache_dir / "last_lint_fingerprint.txt"
+    cache = _get_js_lint_cache()
 
-    if fingerprint_file.exists():
-        try:
-            fingerprint_file.unlink()
-            print("🔄 Lint cache invalidated due to failure - will re-run next time")
-        except IOError as e:
-            print(f"⚠️  Failed to invalidate cache: {e}")
-    else:
-        print("📝 No cache to invalidate")
+    try:
+        cache.invalidate()
+        print("🔄 Lint cache invalidated due to failure - will re-run next time")
+    except KeyboardInterrupt:
+        _thread.interrupt_main()
+        raise
+    except Exception as e:
+        print(f"⚠️  Failed to invalidate cache: {e}")
 
 
 def main() -> int:

@@ -13,6 +13,7 @@ This project uses directory-specific agent guidelines. See:
 - `uv run test.py` - Run all tests
 - `uv run test.py --cpp` - Run C++ tests only
 - `uv run test.py TestName` - Run specific C++ test (e.g., `uv run test.py xypath`)
+- `uv run test.py --no-fingerprint` - Disable fingerprint caching (force rebuild/rerun)
 - `bash lint` - Run code formatting/linting
 - `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
