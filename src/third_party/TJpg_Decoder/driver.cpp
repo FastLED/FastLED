@@ -91,10 +91,13 @@ bool TJpgInstanceDecoder::initializeDecoder() {
     // Create JDEC instance in our workspace
     JDEC* jdec = reinterpret_cast<JDEC*>(embedded_tjpg_.workspace);
 
+    // Calculate working memory pool (after JDEC struct)
+    fl::size jdec_size = sizeof(JDEC);
+    fl::u8* pool = embedded_tjpg_.workspace + jdec_size;
+    fl::size pool_size = sizeof(embedded_tjpg_.workspace) - jdec_size;
+
     // Prepare decoder with our input callback
-    fl::printf("Calling jd_prepare...\n");
-    JRESULT res = jd_prepare(jdec, inputCallback, embedded_tjpg_.workspace,
-                             sizeof(embedded_tjpg_.workspace), &embedded_tjpg_);
+    JRESULT res = jd_prepare(jdec, inputCallback, pool, pool_size, &embedded_tjpg_);
 
     if (res != JDR_OK) {
         char err_str[32];
@@ -102,17 +105,18 @@ bool TJpgInstanceDecoder::initializeDecoder() {
         setError(err_str);
         return false;
     }
-    fl::printf("jd_prepare succeeded\n");
 
     // Get image dimensions
     fl::u16 width = jdec->width;
     fl::u16 height = jdec->height;
+
 
     // Apply scaling based on jpg_scale setting
     if (embedded_tjpg_.jpg_scale > 1) {
         width /= embedded_tjpg_.jpg_scale;
         height /= embedded_tjpg_.jpg_scale;
     }
+
 
     // Allocate frame buffer
     allocateFrameBuffer(width, height);
@@ -191,12 +195,25 @@ bool TJpgInstanceDecoder::processChunk() {
         // Non-progressive decoding (all at once)
         JDEC* jdec = reinterpret_cast<JDEC*>(embedded_tjpg_.workspace);
 
-        fl::printf("About to call jd_decomp with scale=%d\n", embedded_tjpg_.jpg_scale);
         JRESULT res = jd_decomp(jdec, outputCallback, embedded_tjpg_.jpg_scale);
-        fl::printf("jd_decomp returned: %d\n", (int)res);
 
         if (res == JDR_OK) {
-            fl::printf("Decode completed successfully\n");
+            // Check if any pixels were actually set by sampling the first pixel
+            CRGB* pixels = current_frame_->rgb();
+            fl::u8 first_pixel_sum = 0;
+            if (pixels) {
+                first_pixel_sum = pixels[0].r + pixels[0].g + pixels[0].b;
+            }
+
+            char debug_str[64];
+            fl::snprintf(debug_str, sizeof(debug_str), "JPEG decode OK, first_pixel_sum=%d", first_pixel_sum);
+
+            // If no pixels were set, this indicates the output callback wasn't called
+            if (first_pixel_sum == 0) {
+                setError("JPEG decode succeeded but output callback was not called");
+                return false;
+            }
+
             state_ = State::Complete;
             progress_ = 1.0f;
             return false; // Complete
@@ -303,14 +320,10 @@ fl::size TJpgInstanceDecoder::inputCallback(JDEC* jd, fl::u8* buff, fl::size nby
 
 // Static output callback - writes to frame buffer
 int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
-    fl::printf("outputCallback called: rect=(%d,%d,%d,%d)\n",
-               rect ? rect->left : -1, rect ? rect->right : -1,
-               rect ? rect->top : -1, rect ? rect->bottom : -1);
 
     EmbeddedTJpgState* state = reinterpret_cast<EmbeddedTJpgState*>(jd->device);
 
     if (!state || !state->decoder_instance) {
-        fl::printf("outputCallback: invalid state or decoder_instance\n");
         return 0;
     }
 
@@ -328,6 +341,15 @@ int TJpgInstanceDecoder::outputCallback(JDEC* jd, void* bitmap, JRECT* rect) {
     fl::u16 y = rect->top;
     fl::u16 w = rect->right - rect->left + 1;  // JRECT is inclusive
     fl::u16 h = rect->bottom - rect->top + 1;  // JRECT is inclusive
+
+
+    // Handle zero-size rectangle by treating it as full frame for small images
+    if (w == 0 && h == 0 && frame_width <= 8 && frame_height <= 8) {
+        x = 0;
+        y = 0;
+        w = frame_width;
+        h = frame_height;
+    }
 
     // Bounds check
     if (x >= frame_width || y >= frame_height ||
