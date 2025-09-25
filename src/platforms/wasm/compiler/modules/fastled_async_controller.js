@@ -41,6 +41,7 @@ class FastLEDAsyncController {
     this.fastledSetupCalled = false; // Track if extern_setup() has been called
     this.lastFrameTime = 0;
     this.frameInterval = 1000 / this.frameRate;
+    this.lastSlowFrameWarningTime = 0; // Track last slow frame warning timestamp
 
     FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Properties initialized', {
       hasModule: Boolean(this.module),
@@ -461,9 +462,13 @@ class FastLEDAsyncController {
       this.frameTimes.shift();
     }
 
-    // Log performance warnings for slow frames
+    // Log performance warnings for slow frames (max 1 per second)
     if (frameTime > 32) { // Slower than ~30 FPS
-      console.warn(`Slow FastLED frame: ${frameTime.toFixed(2)}ms`);
+      const now = Date.now();
+      if (now - this.lastSlowFrameWarningTime >= 1000) {
+        console.warn(`Slow FastLED frame: ${frameTime.toFixed(2)}ms`);
+        this.lastSlowFrameWarningTime = now;
+      }
     }
   }
 
