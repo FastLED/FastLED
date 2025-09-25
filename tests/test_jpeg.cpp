@@ -100,7 +100,7 @@ TEST_CASE("JPEG file loading and decoding") {
                     break;
                 }
             }
-            CHECK_MESSAGE(has_non_zero_pixels, "At least some pixels should have non-zero color values")
+            CHECK_MESSAGE(has_non_zero_pixels, "At least some pixels should have non-zero color values");
 
             // Check if all pixels are black (indicating decoder failure)
             bool all_pixels_black = true;
