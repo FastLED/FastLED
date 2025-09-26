@@ -10,9 +10,6 @@ on:
       - 'examples/**/*.ino'
       - 'examples/**/*.cpp'
       - 'examples/**/*.h'
-      - 'ci/install-qemu.py'
-      - 'ci/qemu-esp32.py'
-      - 'ci/ci-compile.py'
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
@@ -25,9 +22,6 @@ on:
       - 'examples/**/*.ino'
       - 'examples/**/*.cpp'
       - 'examples/**/*.h'
-      - 'ci/install-qemu.py'
-      - 'ci/qemu-esp32.py'
-      - 'ci/ci-compile.py'
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
@@ -35,7 +29,7 @@ on:
 
 jobs:
   esp32dev_qemu_test:
-    uses: ./.github/workflows/build_qemu_template.yml
+    uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32dev
       platform_display: ESP32-DEV

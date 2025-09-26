@@ -1,31 +1,16 @@
-name: ESP32-DEV QEMU Test (tobozo)
+name: ESP32 QEMU Test Template
 
 on:
-  workflow_dispatch:
-  push:
-    branches: [master]
-    paths:
-      - 'src/**/*.cpp'
-      - 'src/**/*.h'
-      - 'examples/**/*.ino'
-      - 'examples/**/*.cpp'
-      - 'examples/**/*.h'
-      - 'platformio.ini'
-      - 'CMakeLists.txt'
-      - 'library.json'
-      - '.github/workflows/qemu_esp32dev_test_tobozo.yml'
-  pull_request:
-    branches: [master]
-    paths:
-      - 'src/**/*.cpp'
-      - 'src/**/*.h'
-      - 'examples/**/*.ino'
-      - 'examples/**/*.cpp'
-      - 'examples/**/*.h'
-      - 'platformio.ini'
-      - 'CMakeLists.txt'
-      - 'library.json'
-      - '.github/workflows/qemu_esp32dev_test_tobozo.yml'
+  workflow_call:
+    inputs:
+      platform:
+        description: 'ESP32 platform to test (esp32dev, esp32c3, etc.)'
+        required: true
+        type: string
+      platform_display:
+        description: 'Display name for the platform (e.g., ESP32-DEV, ESP32-C3)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -34,7 +19,7 @@ permissions:
   pull-requests: read
 
 jobs:
-  esp32dev_qemu_test:
+  qemu_test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -96,17 +81,15 @@ jobs:
         with:
           python-version-file: "trusted/.python-version"
 
-      - name: Install Dependencies
-        working-directory: trusted
-        run: |
-          # Install Python dependencies needed for compilation
-          uv sync
-          # Install esptool for flash image creation
-          uv pip install esptool
-
       - name: Install CCACHE
         run: |
-          sudo apt-get update && sudo apt-get install -y ccache
+          if [ "$RUNNER_OS" == "Linux" ]; then
+            sudo apt-get update && sudo apt-get install -y ccache
+          elif [ "$RUNNER_OS" == "macOS" ]; then
+            brew install ccache
+          elif [ "$RUNNER_OS" == "Windows" ]; then
+            choco install ccache
+          fi
         shell: bash
 
       - name: Setup CCACHE
@@ -129,20 +112,27 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-ccache-
 
+      - name: Install Dependencies
+        working-directory: trusted
+        run: |
+          # Install Python dependencies needed for compilation
+          uv sync
+          # Install esptool for flash image creation
+          uv pip install esptool
+
       - name: Create build directory for QEMU
         working-directory: trusted
         run: |
           mkdir -p qemu-build
-          echo "Created qemu-build directory for ESP32 binaries"
+          echo "Created qemu-build directory for ${{ inputs.platform }} binaries"
 
-      - name: Build ESP32 firmware
+      - name: Build ${{ inputs.platform }} firmware
         working-directory: trusted
         run: |
-          echo "Building ${{ matrix.example }} for ESP32-DEV"
+          echo "Building BlinkParallel for ${{ inputs.platform }}"
 
-          # Build the firmware using standard ESP32dev board (revert from QEMU-specific config)
-          # QEMU-specific board was causing boot failures
-          uv run ci/ci-compile.py esp32dev --examples ${{ matrix.example }} -o qemu-build/firmware.bin
+          # Build the firmware using standard platform board
+          uv run ci/ci-compile.py ${{ inputs.platform }} --examples BlinkParallel -o qemu-build/firmware.bin
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/
@@ -152,11 +142,10 @@ jobs:
           echo "Looking for bootloader and partition files..."
 
           # Find the PlatformIO build directory
-          # PlatformIO build directory is at .build/pio/esp32dev
-          PIO_BUILD_DIR=".build/pio/esp32dev"
+          PIO_BUILD_DIR=".build/pio/${{ inputs.platform }}"
 
-          # The actual build artifacts are in .pio/build/esp32dev within the PIO_BUILD_DIR
-          PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/esp32dev"
+          # The actual build artifacts are in .pio/build/${{ inputs.platform }} within the PIO_BUILD_DIR
+          PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/${{ inputs.platform }}"
 
           if [ -d "$PIO_BUILD_DIR" ]; then
             echo "Found PlatformIO build directory: $PIO_BUILD_DIR"
@@ -176,10 +165,18 @@ jobs:
                 cp "$BOOTLOADER" qemu-build/bootloader.bin
                 echo "✅ Found and copied bootloader.bin from $BOOTLOADER"
               else
-                echo "⚠️ bootloader.bin not found, will try default ESP32 bootloader"
-                # Download default ESP32 bootloader if needed
-                wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-                echo "✅ Downloaded default ESP32 bootloader"
+                echo "⚠️ bootloader.bin not found, will try default ${{ inputs.platform }} bootloader"
+                # Download default bootloader if needed
+                if [ "${{ inputs.platform }}" = "esp32dev" ]; then
+                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+                elif [ "${{ inputs.platform }}" = "esp32c3" ]; then
+                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32c3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+                elif [ "${{ inputs.platform }}" = "esp32s3" ]; then
+                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32s3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+                else
+                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+                fi
+                echo "✅ Downloaded default ${{ inputs.platform }} bootloader"
               fi
             fi
 
@@ -209,8 +206,16 @@ jobs:
           else
             echo "⚠️ PlatformIO build directory not found, using defaults"
             # Download default bootloader
-            wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-            echo "✅ Downloaded default ESP32 bootloader"
+            if [ "${{ inputs.platform }}" = "esp32dev" ]; then
+              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            elif [ "${{ inputs.platform }}" = "esp32c3" ]; then
+              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32c3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            elif [ "${{ inputs.platform }}" = "esp32s3" ]; then
+              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32s3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            else
+              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            fi
+            echo "✅ Downloaded default ${{ inputs.platform }} bootloader"
 
             # Create QEMU-optimized partition table (otadata at 0xe000 to avoid overlap)
             printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
@@ -311,8 +316,8 @@ jobs:
 
           # Validate flash mode for QEMU compatibility
           echo "=== Flash mode validation ==="
-          if [ -d ".build/pio/esp32dev" ]; then
-            FLASH_ARGS_FILE=$(find .build/pio/esp32dev -name "flash_args" 2>/dev/null | head -1)
+          if [ -d ".build/pio/${{ inputs.platform }}" ]; then
+            FLASH_ARGS_FILE=$(find .build/pio/${{ inputs.platform }} -name "flash_args" 2>/dev/null | head -1)
             if [ -n "$FLASH_ARGS_FILE" ]; then
               echo "Found flash_args: $FLASH_ARGS_FILE"
               if grep -q "flash_mode dio" "$FLASH_ARGS_FILE"; then
@@ -358,12 +363,29 @@ jobs:
               # Use esptool to create proper flash image if available
               if command -v esptool.py >/dev/null 2>&1; then
                 echo "Using esptool.py to create flash image..."
-                esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
-                  --flash_mode dio --flash_freq 80m --flash_size 4MB \
-                  0x1000 qemu-build/bootloader.bin \
-                  0x8000 qemu-build/partitions.bin \
-                  0xe000 qemu-build/boot_app0.bin \
-                  0x10000 qemu-build/firmware.bin
+                # Determine correct chip and offsets based on platform
+                if [ "${{ inputs.platform }}" = "esp32dev" ]; then
+                  esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x1000 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                elif [ "${{ inputs.platform }}" = "esp32c3" ] || [ "${{ inputs.platform }}" = "esp32s3" ]; then
+                  esptool.py --chip ${{ inputs.platform }} merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x0 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                else
+                  esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x1000 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                fi
                 echo "✅ Created flash.bin using esptool"
               else
                 echo "esptool.py not available, creating simple flash image..."
@@ -383,7 +405,7 @@ jobs:
           echo "=== Final qemu-build contents ==="
           ls -la qemu-build/
 
-      - name: Run ESP32 in QEMU
+      - name: Run ${{ inputs.platform_display }} in QEMU
         id: qemu
         uses: tobozo/esp32-qemu-sim@v1.0.5
         with:
@@ -393,6 +415,7 @@ jobs:
           qemu-timeout: "120"
           timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
           debug: true
+          chip: "${{ inputs.platform }}"
 
       - name: Display QEMU output
         if: always()
@@ -445,7 +468,7 @@ jobs:
           # Check if we actually got any output
           if [ ! -s qemu_output.log ]; then
             echo "❌ No serial output captured from QEMU - empty or missing output"
-            echo "This indicates QEMU may not have started properly or ESP32 may not be booting"
+            echo "This indicates QEMU may not have started properly or ${{ inputs.platform_display }} may not be booting"
             echo ""
             echo "QEMU Debug Information:"
             echo "  QEMU conclusion: ${{ steps.qemu.conclusion }}"
@@ -460,7 +483,7 @@ jobs:
             done
             echo ""
             echo "Possible causes:"
-            echo "  1. ESP32 firmware failed to boot (flash mode incompatibility)"
+            echo "  1. ${{ inputs.platform_display }} firmware failed to boot (flash mode incompatibility)"
             echo "  2. Serial communication not properly configured"
             echo "  3. QEMU emulation issues with the current firmware"
             echo "  4. Bootloader/partition configuration problems"
@@ -471,7 +494,7 @@ jobs:
 
           # Check for crash patterns
           if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
-            echo "❌ ESP32-DEV crashed during execution"
+            echo "❌ ${{ inputs.platform_display }} crashed during execution"
             echo "Crash indicators found in QEMU log"
             exit 1
           fi
@@ -518,9 +541,9 @@ jobs:
 
           # Validate boot success - check for ESP32 boot indicators or our application output
           if grep -q -E "(rst:|boot:|ESP32|BlinkParallel|ets_main\.c|cpu_start\.c)" qemu_output.log; then
-            echo "✅ ESP32-DEV boot/application output detected"
+            echo "✅ ${{ inputs.platform_display }} boot/application output detected"
           else
-            echo "❌ No ESP32-DEV boot indicators or application output found"
+            echo "❌ No ${{ inputs.platform_display }} boot indicators or application output found"
             echo "Output content preview:"
             head -10 qemu_output.log | cat -A
             echo "Full output:"
@@ -535,7 +558,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32dev-qemu-failure-${{ matrix.example }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-failure-BlinkParallel-${{ github.sha }}
           path: |
             qemu_output.log
             trusted/qemu-build/
@@ -545,15 +568,15 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: esp32dev-qemu-success-${{ matrix.example }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-success-BlinkParallel-${{ github.sha }}
           path: qemu_output.log
 
       - name: Summary
         if: always()
         run: |
-          echo "=== ESP32-DEV QEMU Test Summary ==="
-          echo "Platform: esp32dev (standard configuration)"
-          echo "Example: ${{ matrix.example }}"
+          echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
+          echo "Platform: ${{ inputs.platform }} (standard configuration)"
+          echo "Example: BlinkParallel"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
