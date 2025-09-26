@@ -179,7 +179,7 @@ export class GraphicsManager {
 
   /**
    * Processes frame data and updates texture
-   * @param {StripData[]} frameData - Array of LED strip data to render
+   * @param {StripData[] & {screenMap?: ScreenMapData}} frameData - Array of LED strip data to render with optional screenMap
    */
   processFrameData(frameData) {
     // Implementation delegated to updateCanvas for now
@@ -330,7 +330,7 @@ export class GraphicsManager {
   /**
    * Updates the canvas with new LED frame data
    * Processes strip data and renders LEDs to the WebGL texture
-   * @param {StripData[]} frameData - Array of frame data containing LED strip information
+   * @param {StripData[] & {screenMap?: ScreenMapData}} frameData - Array of frame data containing LED strip information with optional screenMap
    */
   updateCanvas(frameData) {
     // Check if frameData is null or invalid
@@ -347,6 +347,11 @@ export class GraphicsManager {
     if (frameData.length === 0) {
       console.warn('Received empty frame data, skipping update');
       return;
+    }
+
+    // Update screenMap from frameData if available
+    if (frameData.screenMap) {
+      this.screenMap = frameData.screenMap;
     }
 
     if (!this.gl) this.initWebGL();
