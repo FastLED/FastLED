@@ -250,12 +250,41 @@
     const fileMenuItems = document.querySelectorAll('.menu-item:first-child .menu-dropdown-item');
     fileMenuItems.forEach(item => {
         item.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const action = this.getAttribute('data-action');
-            console.log('File action selected:', action);
-            
-            // Handle file actions
-            handleFileAction(action);
+            try {
+                e.stopPropagation();
+                const action = this.getAttribute('data-action');
+
+                if (action) {
+                    console.log('File action selected:', action);
+                    handleFileAction(action);
+                } else {
+                    console.warn('File menu item missing data-action attribute:', this);
+                }
+            } catch (error) {
+                console.error('Error handling File menu click:', error);
+                throw error;
+            }
+        });
+    });
+
+    // Handle Settings menu items
+    const settingsMenuItems = document.querySelectorAll('.menu-item:nth-child(2) .menu-dropdown-item');
+    settingsMenuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            try {
+                e.stopPropagation();
+                const selectedValue = this.getAttribute('data-value');
+
+                if (selectedValue) {
+                    console.log('Settings option selected:', selectedValue);
+                    handleGraphicsOptionChange(selectedValue);
+                } else {
+                    console.warn('Settings menu item missing data-value attribute:', this);
+                }
+            } catch (error) {
+                console.error('Error handling Settings menu click:', error);
+                throw error;
+            }
         });
     });
 
@@ -263,16 +292,23 @@
     const toolsMenuItems = document.querySelectorAll('.menu-item:nth-child(3) .menu-dropdown-item');
     toolsMenuItems.forEach(item => {
         item.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const selectedValue = this.getAttribute('data-value');
-            const selectedAction = this.getAttribute('data-action');
+            try {
+                e.stopPropagation();
+                const selectedValue = this.getAttribute('data-value');
+                const selectedAction = this.getAttribute('data-action');
 
-            if (selectedValue) {
-                console.log('Tools option selected:', selectedValue);
-                handleToolsOptionChange(selectedValue);
-            } else if (selectedAction) {
-                console.log('Tools action selected:', selectedAction);
-                handleToolsActionChange(selectedAction);
+                if (selectedValue) {
+                    console.log('Tools option selected:', selectedValue);
+                    handleToolsOptionChange(selectedValue);
+                } else if (selectedAction) {
+                    console.log('Tools action selected:', selectedAction);
+                    handleToolsActionChange(selectedAction);
+                } else {
+                    console.warn('Tools menu item missing data-value or data-action attribute:', this);
+                }
+            } catch (error) {
+                console.error('Error handling Tools menu click:', error);
+                throw error;
             }
         });
     });
