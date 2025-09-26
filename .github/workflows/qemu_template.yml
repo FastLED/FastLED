@@ -11,6 +11,10 @@ on:
         description: 'Display name for the platform (e.g., ESP32-DEV, ESP32-C3)'
         required: true
         type: string
+      sketch:
+        description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink, etc.)'
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -21,9 +25,6 @@ permissions:
 jobs:
   qemu_test:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        example: [BlinkParallel]  # Test with FL_WARN output
 
     steps:
       - name: Checkout trusted base branch code
@@ -129,10 +130,10 @@ jobs:
       - name: Build ${{ inputs.platform }} firmware
         working-directory: trusted
         run: |
-          echo "Building BlinkParallel for ${{ inputs.platform }}"
+          echo "Building ${{ inputs.sketch }} for ${{ inputs.platform }}"
 
           # Build the firmware using standard platform board
-          uv run ci/ci-compile.py ${{ inputs.platform }} --examples BlinkParallel -o qemu-build/firmware.bin
+          uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} -o qemu-build/firmware.bin
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/
@@ -293,10 +294,10 @@ jobs:
 
           # Verify debug-enabled build by checking for Serial output strings in firmware
           echo "=== Build verification: checking for debug strings ==="
-          if strings qemu-build/firmware.bin | grep -q "BlinkParallel setup starting"; then
-            echo "✅ Debug string 'BlinkParallel setup starting' found in firmware"
+          if strings qemu-build/firmware.bin | grep -q "${{ inputs.sketch }} setup starting"; then
+            echo "✅ Debug string '${{ inputs.sketch }} setup starting' found in firmware"
           else
-            echo "⚠️  Debug string 'BlinkParallel setup starting' not found in firmware"
+            echo "⚠️  Debug string '${{ inputs.sketch }} setup starting' not found in firmware"
           fi
 
           if strings qemu-build/firmware.bin | grep -q "Starting loop iteration"; then
@@ -441,9 +442,9 @@ jobs:
             echo "No QEMU log available"
           fi
 
-      - name: Validate FL_WARN output
+      - name: Validate ${{ inputs.sketch }} output
         run: |
-          echo "=== Validating FL_WARN output in QEMU logs ==="
+          echo "=== Validating ${{ inputs.sketch }} output in QEMU logs ==="
 
           # Check if QEMU step succeeded
           if [ "${{ steps.qemu.conclusion }}" != "success" ]; then
@@ -500,21 +501,21 @@ jobs:
           fi
 
           # Validate debug output is present (now using Serial.print instead of FL_WARN)
-          if grep -q "BlinkParallel setup starting" qemu_output.log; then
+          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
             echo "✅ Debug output detected"
             echo "Setup messages found:"
-            grep "BlinkParallel setup starting\|Initialized.*LED strips\|Setup complete" qemu_output.log | head -10
+            grep "${{ inputs.sketch }} setup starting\|Initialized.*LED strips\|Setup complete" qemu_output.log | head -10
           else
             echo "❌ No debug output detected"
             echo "Expected Serial.print messages not found in QEMU log"
             exit 1
           fi
 
-          # Validate BlinkParallel startup
-          if grep -q "BlinkParallel setup starting" qemu_output.log; then
-            echo "✅ BlinkParallel setup started"
+          # Validate sketch startup
+          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
+            echo "✅ ${{ inputs.sketch }} setup started"
           else
-            echo "❌ BlinkParallel startup message not found"
+            echo "❌ ${{ inputs.sketch }} startup message not found"
             exit 1
           fi
 
@@ -540,7 +541,7 @@ jobs:
           fi
 
           # Validate boot success - check for ESP32 boot indicators or our application output
-          if grep -q -E "(rst:|boot:|ESP32|BlinkParallel|ets_main\.c|cpu_start\.c)" qemu_output.log; then
+          if grep -q -E "(rst:|boot:|ESP32|${{ inputs.sketch }}|ets_main\.c|cpu_start\.c)" qemu_output.log; then
             echo "✅ ${{ inputs.platform_display }} boot/application output detected"
           else
             echo "❌ No ${{ inputs.platform_display }} boot indicators or application output found"
@@ -551,14 +552,14 @@ jobs:
             exit 1
           fi
 
-          echo "=== FL_WARN validation complete ==="
+          echo "=== ${{ inputs.sketch }} validation complete ==="
         shell: bash
 
       - name: Upload QEMU logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-failure-BlinkParallel-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-failure-${{ inputs.sketch }}-${{ github.sha }}
           path: |
             qemu_output.log
             trusted/qemu-build/
@@ -568,7 +569,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-success-BlinkParallel-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-success-${{ inputs.sketch }}-${{ github.sha }}
           path: qemu_output.log
 
       - name: Summary
@@ -576,10 +577,10 @@ jobs:
         run: |
           echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
           echo "Platform: ${{ inputs.platform }} (standard configuration)"
-          echo "Example: BlinkParallel"
+          echo "Example: ${{ inputs.sketch }}"
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
-            echo "Debug message count: $(grep -c 'BlinkParallel setup starting\|Starting loop iteration' qemu_output.log || echo 0)"
+            echo "Debug message count: $(grep -c '${{ inputs.sketch }} setup starting\|Starting loop iteration' qemu_output.log || echo 0)"
             echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           fi
