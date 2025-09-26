@@ -10,16 +10,16 @@
 /* eslint-disable no-console */
 
 /**
- * Default video recording configuration optimized for fastest encoding
+ * Default video recording configuration optimized for fastest encoding and MP4 compatibility
  * @constant {Object}
  */
 const DEFAULT_VIDEO_CONFIG = {
-  /** @type {string} Video MIME type for recording - VP8 for fastest encoding */
-  videoCodec: 'video/webm;codecs=vp8',
+  /** @type {string} Video MIME type for recording - H.264 baseline for fastest encoding with MP4 compatibility */
+  videoCodec: 'video/mp4;codecs=avc1.42E01E',
   /** @type {number} Target video bitrate in Mbps - higher for speed over compression */
   videoBitrate: 8,
   /** @type {string} Audio codec for recording */
-  audioCodec: 'opus',
+  audioCodec: 'aac',
   /** @type {number} Target audio bitrate in kbps */
   audioBitrate: 128,
   /** @type {number} Default frame rate */
@@ -28,23 +28,25 @@ const DEFAULT_VIDEO_CONFIG = {
 
 /**
  * Codec priority ordered by encoding speed (fastest to slowest)
- * Optimized for real-time recording performance over file size
+ * Prefers MP4 containers when same codec is available in both MP4 and WebM
+ * Optimized for real-time recording performance and universal compatibility
  * @constant {string[]}
  */
 const SPEED_OPTIMIZED_CODECS = [
-  // Fastest codecs - prioritize encoding speed
-  'video/webm;codecs=vp8',           // VP8: Fast encoding, WebRTC standard
-  'video/mp4;codecs=avc1.42E01E',    // H.264 baseline profile: Fastest H.264
-  'video/mp4;codecs=h264',           // H.264: Fast and widely supported
-  'video/mp4;codecs=h264,aac',       // H.264 with AAC
+  // Fastest codecs - prioritize MP4 containers for compatibility
+  'video/mp4;codecs=avc1.42E01E',    // H.264 baseline profile: Fastest H.264 in MP4
+  'video/mp4;codecs=h264',           // H.264: Fast and widely supported in MP4
+  'video/mp4;codecs=h264,aac',       // H.264 with AAC in MP4
+  'video/webm;codecs=vp8',           // VP8: Fast encoding, WebRTC standard (WebM only)
   'video/mp4',                       // MP4 container auto-select
 
   // Medium speed codecs - balance of speed and quality
-  'video/webm;codecs=vp9',           // VP9: Better compression but slower
+  'video/webm;codecs=vp9',           // VP9: Better compression but slower (WebM only)
+  'video/webm;codecs=h264',          // H.264 in WebM container (fallback)
   'video/webm',                      // WebM auto-select
 
   // Slower codecs - better compression but much slower encoding
-  'video/webm;codecs=av1',           // AV1: Best compression, slowest encoding
+  'video/webm;codecs=av1',           // AV1: Best compression, slowest encoding (WebM only)
 ];
 
 /**
@@ -276,13 +278,17 @@ export class VideoRecorder {
       };
 
       // Encoding speed optimizations based on codec type
-      if (this.selectedMimeType.includes('vp8')) {
-        // VP8 optimizations for fastest encoding
+      if (this.selectedMimeType.includes('avc1.42E01E')) {
+        // H.264 Baseline profile - optimized for fastest encoding
+        options.videoKeyFrameIntervalDuration = 2000; // Less frequent keyframes for speed
+        options.bitsPerSecond = options.videoBitsPerSecond; // No cap, baseline is fast
+      } else if (this.selectedMimeType.includes('h264') || this.selectedMimeType.includes('avc1')) {
+        // H.264 standard optimizations for fast encoding
+        options.videoKeyFrameIntervalDuration = 2000; // Less frequent keyframes for speed
+      } else if (this.selectedMimeType.includes('vp8')) {
+        // VP8 optimizations for fast encoding
         options.bitsPerSecond = options.videoBitsPerSecond; // Don't cap VP8, it's already fast
         // VP8 benefits from slightly higher bitrates for speed vs compression trade-off
-      } else if (this.selectedMimeType.includes('h264') || this.selectedMimeType.includes('avc1')) {
-        // H.264 optimizations for fast encoding
-        options.videoKeyFrameIntervalDuration = 2000; // Less frequent keyframes for speed
       } else if (this.selectedMimeType.includes('vp9')) {
         // VP9 is slower, so limit bitrate to help encoding speed
         options.bitsPerSecond = Math.min(options.videoBitsPerSecond, 6000000); // Cap at 6Mbps
@@ -363,7 +369,7 @@ export class VideoRecorder {
       try {
         // Optimize timeslice based on codec encoding speed
         let timeslice = 1000; // Default 1 second
-        if (this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
+        if (this.selectedMimeType.includes('avc1.42E01E') || this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
           timeslice = 500; // Faster codecs can handle more frequent chunks
         } else if (this.selectedMimeType.includes('av1')) {
           timeslice = 2000; // Slower codecs need longer chunks to avoid overwhelming CPU

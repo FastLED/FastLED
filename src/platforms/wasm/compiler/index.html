@@ -86,9 +86,9 @@
                     <label for="video-codec">Video Codec:</label>
                     <select id="video-codec">
                         <optgroup label="⚡ Fast Encoding (Real-time Performance)">
-                            <option value="video/webm;codecs=vp8" selected>VP8 (WebM) - Fastest</option>
-                            <option value="video/mp4;codecs=avc1.42E01E">H.264 Baseline (MP4) - Very Fast</option>
-                            <option value="video/mp4;codecs=h264">H.264 (MP4) - Fast</option>
+                            <option value="video/mp4;codecs=avc1.42E01E" selected>H.264 Baseline (MP4) - Fastest</option>
+                            <option value="video/mp4;codecs=h264">H.264 (MP4) - Very Fast</option>
+                            <option value="video/webm;codecs=vp8">VP8 (WebM) - Fast</option>
                         </optgroup>
                         <optgroup label="⚖️ Balanced (Speed vs Quality)">
                             <option value="video/webm;codecs=vp9">VP9 (WebM) - Good Compression</option>
@@ -110,8 +110,8 @@
                 <div class="setting-group">
                     <label for="audio-codec">Audio Codec:</label>
                     <select id="audio-codec">
-                        <option value="opus" selected>Opus (Fast & High Quality)</option>
-                        <option value="aac">AAC (Compatible)</option>
+                        <option value="aac" selected>AAC (MP4 Compatible & Fast)</option>
+                        <option value="opus">Opus (WebM High Quality)</option>
                         <option value="vorbis">Vorbis (Open Source)</option>
                         <option value="mp3">MP3 (Legacy)</option>
                     </select>
@@ -398,11 +398,11 @@
         }, 500);
     }
 
-    // Video Settings Popup Functions - Optimized for encoding speed
+    // Video Settings Popup Functions - Optimized for encoding speed with MP4 compatibility
     const videoSettingsDefaults = {
-        videoCodec: 'video/webm;codecs=vp8',  // VP8 for fastest encoding
-        videoBitrate: 8,                      // Slightly lower bitrate for speed
-        audioCodec: 'opus',                   // Opus is fast and high quality
+        videoCodec: 'video/mp4;codecs=avc1.42E01E',  // H.264 Baseline for fastest encoding with MP4
+        videoBitrate: 8,                             // Slightly lower bitrate for speed
+        audioCodec: 'aac',                           // AAC for MP4 compatibility
         audioBitrate: 128,
         fps: 30
     };
