@@ -97,6 +97,9 @@ export class GraphicsManager extends GraphicsManagerBase {
 
     /** @type {Map} Cached position calculations per strip */
     this.positionCache = new Map();
+
+    /** @type {number} Count bounds warnings to prevent spam */
+    this.boundsWarningCount = 0;
   }
 
   /**
@@ -330,11 +333,13 @@ export class GraphicsManager extends GraphicsManagerBase {
 
     // Update canvas size based on screenMap dimensions
     if (this.screenMap && this.canvas) {
-      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0];
-      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1];
+      // Add 1 to include the boundary coordinates (e.g., 0 to 63 = 64 pixels wide)
+      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0] + 1;
+      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1] + 1;
 
       // Only update canvas size if it's different from current size
       if (this.canvas.width !== screenWidth || this.canvas.height !== screenHeight) {
+        console.error(`🔍 CANVAS UPDATE: ${this.canvas.width}x${this.canvas.height} → ${screenWidth}x${screenHeight}`);
         this.canvas.width = screenWidth;
         this.canvas.height = screenHeight;
 
@@ -447,9 +452,15 @@ export class GraphicsManager extends GraphicsManagerBase {
 
         // check to make sure that the pixel is within the canvas
         if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
-          console.warn(
-            `Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`,
-          );
+          this.boundsWarningCount++;
+          if (this.boundsWarningCount <= 5) {
+            console.error(
+              `🚨 BOUNDS ERROR #${this.boundsWarningCount}: Strip ${strip_id} Pixel ${i} at ${x},${y} outside canvas ${canvasWidth}x${canvasHeight}`
+            );
+            if (this.boundsWarningCount === 5) {
+              console.error(`🚨 Suppressing further bounds warnings...`);
+            }
+          }
           continue;
         }
         // log(x, y);
