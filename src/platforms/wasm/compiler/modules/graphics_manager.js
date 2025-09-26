@@ -91,6 +91,12 @@ export class GraphicsManager extends GraphicsManagerBase {
 
     /** @type {number} */
     this.texHeight = 0;
+
+    /** @type {boolean} Whether to clear texture background (for sparse LED layouts) */
+    this.needsBackgroundClear = true;
+
+    /** @type {Map} Cached position calculations per strip */
+    this.positionCache = new Map();
   }
 
   /**
@@ -255,10 +261,40 @@ export class GraphicsManager extends GraphicsManagerBase {
     this.texWidth = 0;
     this.texHeight = 0;
     this.texData = null;
+    this.positionCache.clear();
   }
 
+  /**
+   * Builds position cache for a strip to avoid redundant calculations
+   * @private
+   * @param {number} stripId - Strip ID
+   * @param {Object} stripData - Strip mapping data
+   * @param {number} minX - Minimum X coordinate
+   * @param {number} minY - Minimum Y coordinate
+   * @returns {Array} Array of cached position objects
+   */
+  _buildPositionCache(stripId, stripData, minX, minY) {
+    const cacheKey = `${stripId}_${minX}_${minY}`;
 
+    if (this.positionCache.has(cacheKey)) {
+      return this.positionCache.get(cacheKey);
+    }
 
+    const { map } = stripData;
+    const x_array = map.x;
+    const y_array = map.y;
+    const len = Math.min(x_array.length, y_array.length);
+    const positions = [];
+
+    for (let i = 0; i < len; i++) {
+      const x = Number.parseInt(x_array[i] - minX, 10);
+      const y = Number.parseInt(y_array[i] - minY, 10);
+      positions.push({ x, y });
+    }
+
+    this.positionCache.set(cacheKey, positions);
+    return positions;
+  }
 
   /**
    * Updates the canvas with new LED frame data
@@ -391,29 +427,23 @@ export class GraphicsManager extends GraphicsManagerBase {
       }
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
-      const { map } = stripData;
       const min_x = screenMap.absMin[0];
       const min_y = screenMap.absMin[1];
-      const x_array = map.x;
-      const y_array = map.y;
-      const len = Math.min(x_array.length, y_array.length);
+
+      // Get cached positions for this strip
+      const positions = this._buildPositionCache(strip_id, stripData, min_x, min_y);
+
       // log("Writing data to canvas");
       for (let i = 0; i < pixelCount; i++) { // eslint-disable-line
-        if (i >= len) {
+        if (i >= positions.length) {
           console.warn(
-            `Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`,
+            `Strip ${strip_id}: Pixel ${i} is outside the screen map ${positions.length}, skipping update`,
           );
           continue;
         }
-        // let [x, y] = map[i];
-        let x = x_array[i];
-        let y = y_array[i];
-        x -= min_x;
-        y -= min_y;
 
-        // Can't access the texture with floating point.
-        x = Number.parseInt(x, 10);
-        y = Number.parseInt(y, 10);
+        // Use cached position calculations
+        const { x, y } = positions[i];
 
         // check to make sure that the pixel is within the canvas
         if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
