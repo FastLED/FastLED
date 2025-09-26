@@ -5,9 +5,13 @@
  *
  * High-performance 2D graphics rendering system for FastLED WebAssembly applications.
  * Uses WebGL for hardware-accelerated pixel rendering and supports real-time LED strip visualization.
+ * Now includes OffscreenCanvas support for background worker rendering.
  *
  * @module GraphicsManager
  */
+
+// Import OffscreenCanvas adapter for unified canvas handling
+import { createGraphicsAdapter } from './offscreen_graphics_adapter.js';
 
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
@@ -38,45 +42,8 @@
  * @property {ScreenMapData} screenMap - Screen coordinate mapping data
  */
 
-/**
- * Creates and injects WebGL shaders into the document head
- * Ensures shaders are only created once by checking for existing elements
- */
-function createShaders() {
-  const fragmentShaderId = 'fastled_FragmentShader';
-  const vertexShaderId = 'fastled_vertexShader';
-  if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
-    return;
-  }
-  const vertexShaderStr = `
-        attribute vec2 a_position;
-        attribute vec2 a_texCoord;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_Position = vec4(a_position, 0, 1);
-            v_texCoord = a_texCoord;
-        }
-        `;
-
-  const fragmentShaderStr = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_FragColor = texture2D(u_image, v_texCoord);
-        }
-        `;
-  const fragmentShader = document.createElement('script');
-  const vertexShader = document.createElement('script');
-  fragmentShader.id = fragmentShaderId;
-  vertexShader.id = vertexShaderId;
-  fragmentShader.type = 'x-shader/x-fragment';
-  vertexShader.type = 'x-shader/x-vertex';
-  fragmentShader.text = fragmentShaderStr;
-  vertexShader.text = vertexShaderStr;
-  document.head.appendChild(fragmentShader);
-  document.head.appendChild(vertexShader);
-}
+// Shader creation function removed - shaders are now defined inline in initWebGL()
+// to avoid DOM dependencies and work properly in both main thread and worker contexts
 
 /**
  * WebGL-based 2D graphics manager for FastLED visualization
@@ -86,18 +53,25 @@ export class GraphicsManager {
   /**
    * Creates a new GraphicsManager instance
    * @param {Object} graphicsArgs - Configuration options
-   * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
+   * @param {string|HTMLCanvasElement|OffscreenCanvas} graphicsArgs.canvasId - Canvas element or ID
    * @param {Object} [graphicsArgs.threeJsModules] - Three.js modules (unused but kept for consistency)
    * @param {boolean} [graphicsArgs.usePixelatedRendering=true] - Whether to use pixelated rendering
+   * @param {OffscreenCanvas} [graphicsArgs.offscreenCanvas] - Direct OffscreenCanvas instance
    */
   constructor(graphicsArgs) {
-    const { canvasId, usePixelatedRendering = true } = graphicsArgs;
+    const { canvasId, usePixelatedRendering = true, offscreenCanvas } = graphicsArgs;
 
-    /** @type {string} */
+    /** @type {string|HTMLCanvasElement|OffscreenCanvas} */
     this.canvasId = canvasId;
 
-    /** @type {HTMLCanvasElement|null} */
+    /** @type {HTMLCanvasElement|OffscreenCanvas|null} */
     this.canvas = null;
+
+    /** @type {OffscreenCanvas|null} Direct OffscreenCanvas reference */
+    this.offscreenCanvas = offscreenCanvas || null;
+
+    /** @type {import('./offscreen_graphics_adapter.js').OffscreenGraphicsAdapter|null} */
+    this.canvasAdapter = null;
 
     /** @type {WebGLRenderingContext|null} */
     this.gl = null;
@@ -134,23 +108,84 @@ export class GraphicsManager {
 
   /**
    * Initializes the WebGL context and sets up rendering resources
-   * @returns {boolean} True if initialization was successful
+   * @returns {boolean|Promise<boolean>} True if initialization was successful
    */
   initialize() {
-    /** @type {HTMLCanvasElement} */
-    this.canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(this.canvasId));
-    if (!this.canvas) {
-      console.error(`Canvas with id ${this.canvasId} not found`);
+    try {
+      // Handle different canvas input types
+      if (this.offscreenCanvas) {
+        // Direct OffscreenCanvas provided
+        this.canvas = this.offscreenCanvas;
+      } else if (typeof this.canvasId === 'string') {
+        // Canvas ID string provided
+        if (typeof document !== 'undefined') {
+          this.canvas = document.getElementById(this.canvasId);
+        } else {
+          console.error('Document not available for canvas ID lookup in worker context');
+          return false;
+        }
+      } else if (this.canvasId instanceof HTMLCanvasElement || this.canvasId instanceof OffscreenCanvas) {
+        // Direct canvas element provided
+        this.canvas = this.canvasId;
+      } else {
+        console.error('Invalid canvas reference provided');
+        return false;
+      }
+
+      if (!this.canvas) {
+        console.error(`Canvas with id ${this.canvasId} not found`);
+        return false;
+      }
+
+      // Create canvas adapter for unified API
+      this.canvasAdapter = createGraphicsAdapter(this.canvas, {
+        contextType: 'webgl2', // Prefer WebGL2 for better OffscreenCanvas support
+        contextAttributes: {
+          alpha: false,
+          antialias: false,
+          preserveDrawingBuffer: false,
+          powerPreference: 'high-performance'
+        }
+      });
+
+      // Initialize context through adapter
+      return this.initializeWithAdapter();
+
+    } catch (error) {
+      console.error('Graphics manager initialization failed:', error);
       return false;
     }
+  }
 
-    this.gl = this.canvas.getContext('webgl');
-    if (!this.gl) {
-      console.error('WebGL not supported');
+  /**
+   * Initializes WebGL context through the canvas adapter
+   * @returns {Promise<boolean>} True if initialization was successful
+   */
+  async initializeWithAdapter() {
+    try {
+      // Create WebGL context through adapter
+      this.gl = await this.canvasAdapter.createContext();
+
+      if (!this.gl) {
+        console.error('Failed to create WebGL context through adapter');
+        return false;
+      }
+
+      console.log('WebGL context created successfully', {
+        contextType: this.canvasAdapter.activeContextType,
+        isOffscreen: this.canvasAdapter.isOffscreen,
+        canvasSize: {
+          width: this.canvas.width,
+          height: this.canvas.height
+        }
+      });
+
+      return this.initWebGL();
+
+    } catch (error) {
+      console.error('Canvas adapter initialization failed:', error);
       return false;
     }
-
-    return this.initWebGL();
   }
 
   /**
@@ -219,6 +254,56 @@ export class GraphicsManager {
 
     // Draw
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+
+    // Handle OffscreenCanvas ImageBitmap transfer for worker mode
+    this.handleOffscreenTransfer();
+  }
+
+  /**
+   * Handles ImageBitmap transfer for OffscreenCanvas rendering
+   * Creates and transfers ImageBitmap to main thread when in worker mode
+   * @private
+   */
+  async handleOffscreenTransfer() {
+    if (!this.canvasAdapter || !this.canvasAdapter.isOffscreen) {
+      return; // Not in OffscreenCanvas mode
+    }
+
+    try {
+      // Check if we're in a worker context
+      const isWorker = typeof WorkerGlobalScope !== 'undefined' &&
+                       typeof self !== 'undefined' &&
+                       self instanceof WorkerGlobalScope;
+
+      if (isWorker) {
+        // In worker context - create and transfer ImageBitmap
+        const imageBitmap = await this.canvasAdapter.transferToImageBitmap();
+
+        if (imageBitmap && typeof postMessage === 'function') {
+          // Send ImageBitmap to main thread for display
+          postMessage({
+            type: 'frame_imageBitmap',
+            payload: {
+              imageBitmap,
+              width: this.canvas.width,
+              height: this.canvas.height,
+              timestamp: performance.now()
+            }
+          }, [imageBitmap]); // Transfer ImageBitmap
+        }
+      } else {
+        // In main thread with OffscreenCanvas (worker manager mode)
+        // The worker manager will handle the transfer
+        if (typeof window !== 'undefined' && window.fastLEDEvents) {
+          window.fastLEDEvents.emit('offscreen:frame_ready', {
+            canvas: this.canvas,
+            timestamp: performance.now()
+          });
+        }
+      }
+    } catch (error) {
+      console.error('Failed to transfer OffscreenCanvas ImageBitmap:', error);
+    }
   }
 
   /**
@@ -243,22 +328,40 @@ export class GraphicsManager {
    * @returns {boolean} True if initialization was successful
    */
   initWebGL() {
-    createShaders();
-    const canvas = document.getElementById(this.canvasId);
-    this.gl = canvas.getContext('webgl');
+    // Use the already created context from initializeWithAdapter
     if (!this.gl) {
-      console.error('WebGL not supported');
+      console.error('WebGL context not available');
       return false;
     }
+
+    // Get shader sources directly (avoid DOM dependency)
+    const vertexShaderSource = `
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_Position = vec4(a_position, 0, 1);
+            v_texCoord = a_texCoord;
+        }
+    `;
+
+    const fragmentShaderSource = `
+        precision mediump float;
+        uniform sampler2D u_image;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_FragColor = texture2D(u_image, v_texCoord);
+        }
+    `;
 
     // Create shaders
     const vertexShader = this.createShader(
       this.gl.VERTEX_SHADER,
-      document.getElementById('fastled_vertexShader').text,
+      vertexShaderSource,
     );
     const fragmentShader = this.createShader(
       this.gl.FRAGMENT_SHADER,
-      document.getElementById('fastled_FragmentShader').text,
+      fragmentShaderSource,
     );
 
     // Create program
@@ -538,5 +641,108 @@ export class GraphicsManager {
     this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
 
     this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+  }
+
+  /**
+   * Resizes the canvas and updates WebGL viewport
+   * @param {number} width - New canvas width
+   * @param {number} height - New canvas height
+   * @returns {boolean} True if resize was successful
+   */
+  resize(width, height) {
+    try {
+      if (this.canvasAdapter) {
+        // Use adapter for unified resize handling
+        const success = this.canvasAdapter.resize(width, height);
+        if (!success) {
+          console.error('Canvas adapter resize failed');
+          return false;
+        }
+      } else {
+        // Fallback direct resize
+        this.canvas.width = width;
+        this.canvas.height = height;
+        if (this.gl) {
+          this.gl.viewport(0, 0, width, height);
+        }
+      }
+
+      console.log('Graphics manager resized', {
+        width,
+        height,
+        isOffscreen: this.canvasAdapter?.isOffscreen || false
+      });
+
+      return true;
+
+    } catch (error) {
+      console.error('Graphics manager resize failed:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Gets performance statistics including canvas adapter info
+   * @returns {Object} Performance and capability information
+   */
+  getPerformanceInfo() {
+    const baseInfo = {
+      canvasSize: {
+        width: this.canvas?.width || 0,
+        height: this.canvas?.height || 0
+      },
+      textureSize: {
+        width: this.texWidth,
+        height: this.texHeight
+      },
+      hasWebGL: !!this.gl,
+      initialized: !!(this.gl && this.program)
+    };
+
+    if (this.canvasAdapter) {
+      return {
+        ...baseInfo,
+        ...this.canvasAdapter.getPerformanceStats()
+      };
+    }
+
+    return baseInfo;
+  }
+
+  /**
+   * Clean up resources including canvas adapter
+   */
+  destroy() {
+    // Clean up WebGL resources
+    if (this.gl) {
+      if (this.program) {
+        this.gl.deleteProgram(this.program);
+      }
+      if (this.positionBuffer) {
+        this.gl.deleteBuffer(this.positionBuffer);
+      }
+      if (this.texCoordBuffer) {
+        this.gl.deleteBuffer(this.texCoordBuffer);
+      }
+      if (this.texture) {
+        this.gl.deleteTexture(this.texture);
+      }
+    }
+
+    // Clean up canvas adapter
+    if (this.canvasAdapter) {
+      this.canvasAdapter.destroy();
+      this.canvasAdapter = null;
+    }
+
+    this.gl = null;
+    this.canvas = null;
+    this.program = null;
+    this.positionBuffer = null;
+    this.texCoordBuffer = null;
+    this.texture = null;
+    this.texData = null;
+
+    console.log('Graphics manager destroyed');
   }
 }
