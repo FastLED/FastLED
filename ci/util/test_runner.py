@@ -123,6 +123,7 @@ class ProcessTiming:
     name: str
     duration: float
     command: str
+    skipped: bool = False
 
 
 @dataclass
@@ -654,6 +655,11 @@ def _extract_test_name(command: str | list[str]) -> str:
     return "unknown_test"
 
 
+def _create_skipped_timing(test_name: str, command: str = "") -> ProcessTiming:
+    """Create a ProcessTiming entry for a skipped test"""
+    return ProcessTiming(name=test_name, duration=0.0, command=command, skipped=True)
+
+
 def _get_friendly_test_name(command: str | list[str]) -> str:
     """Extract a user-friendly test name for display in summary table"""
     if isinstance(command, list):
@@ -701,22 +707,25 @@ def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
     if not process_timings:
         return ""
 
-    # Sort by duration (longest first)
-    sorted_timings = sorted(process_timings, key=lambda x: x.duration, reverse=True)
+    # Sort by skipped status first (non-skipped first), then by duration (longest first)
+    sorted_timings = sorted(process_timings, key=lambda x: (x.skipped, -x.duration))
 
     # Calculate column widths
     max_name_width = max(len(timing.name) for timing in sorted_timings)
     max_name_width = max(max_name_width, len("Test Name"))  # Ensure header fits
 
     # Create header
-    header = f"{'Test Name':<{max_name_width}} | {'Duration':>10}"
-    separator = f"{'-' * max_name_width}-+-{'-' * 10}"
+    header = f"{'Test Name':<{max_name_width}} | {'Duration':>23}"
+    separator = f"{'-' * max_name_width}-+-{'-' * 23}"
 
     # Create rows
     rows: list[str] = []
     for timing in sorted_timings:
-        duration_str = f"{timing.duration:.2f}s"
-        row = f"{timing.name:<{max_name_width}} | {duration_str:>10}"
+        if timing.skipped:
+            duration_str = "Skipped because no changes"
+        else:
+            duration_str = f"{timing.duration:.2f}s"
+        row = f"{timing.name:<{max_name_width}} | {duration_str:>23}"
         rows.append(row)
 
     # Combine all parts
@@ -1412,6 +1421,7 @@ def runner(
 
         # Build up unified list of all processes to run
         processes: list[RunningProcess] = []
+        skipped_timings: list[ProcessTiming] = []
 
         # Always start with namespace check
         processes.append(create_namespace_check_process(enable_stack_trace))
@@ -1425,6 +1435,7 @@ def runner(
             print_cache_hit(
                 "Fingerprint cache valid - skipping C++ unit tests (no changes detected in src/ or tests/ directories)"
             )
+            skipped_timings.append(_create_skipped_timing("unit_tests"))
 
         # Add integration tests if needed
         if test_categories.integration or test_categories.integration_only:
@@ -1450,6 +1461,7 @@ def runner(
             print_cache_hit(
                 "Fingerprint cache valid - skipping Python tests (no changes detected in Python test-related files)"
             )
+            skipped_timings.append(_create_skipped_timing("python_tests"))
 
         # Add example tests if needed and example files have changed
         if (
@@ -1461,6 +1473,9 @@ def runner(
         ) and not examples_change:
             print_cache_hit(
                 "Fingerprint cache valid - skipping example tests (no changes detected in example-related files)"
+            )
+            skipped_timings.append(
+                _create_skipped_timing("test_example_compilation.py")
             )
 
         # Determine if we'll run in parallel
@@ -1477,8 +1492,9 @@ def runner(
         )
 
         # Display timing summary
-        if timings:
-            summary = _format_timing_summary(timings)
+        all_timings = timings + skipped_timings
+        if all_timings:
+            summary = _format_timing_summary(all_timings)
             print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print summary and exit with proper code
