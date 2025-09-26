@@ -83,57 +83,6 @@ void loop() {
 
 *MGM240 (EFR32MG24) support for Arduino Nano Matter, SparkFun Thing Plus Matter, and Seeed Xiao MG24 Sense boards
 
-##### ezWS2812 Hardware-Accelerated Drivers
-
-FastLED includes optimized ezWS2812 drivers imported from Silicon Labs for EFR32MG24 series microcontrollers. These drivers provide superior performance and timing accuracy compared to standard bit-banging approaches.
-
-###### Available Controllers
-
-- **`EZWS2812_GPIO`**: Always available, uses optimized GPIO bit-banging with cycle-accurate timing
-  - Calibrated for 39MHz and 78MHz CPU frequencies
-  - No hardware peripheral consumption
-  - Good performance (~400Hz refresh rate)
-  - Usage: `FastLED.addLeds<EZWS2812_GPIO, DATA_PIN, GRB>(leds, NUM_LEDS)`
-
-- **`EZWS2812_SPI`**: Optional hardware SPI acceleration for maximum performance
-  - **Requires**: `#define FASTLED_USES_EZWS2812_SPI` before `#include <FastLED.h>`
-  - **Consumes**: One hardware SPI peripheral
-  - Excellent performance (~1000Hz refresh rate)
-  - Usage: `FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS)`
-
-###### Why SPI Requires Opt-In
-
-The SPI controller consumes a hardware SPI peripheral that may be needed for other components (SD cards, displays, sensors, etc.). Following the same pattern as ObjectFLED for Teensy, the SPI controller must be explicitly enabled to prevent accidentally consuming the SPI peripheral.
-
-###### Usage Examples
-
-**GPIO Controller (Default - No Define Needed):**
-```cpp
-#include <FastLED.h>
-
-CRGB leds[NUM_LEDS];
-void setup() {
-    // GPIO-based controller on pin 7
-    FastLED.addLeds<EZWS2812_GPIO, 7, GRB>(leds, NUM_LEDS);
-}
-```
-
-**SPI Controller (Requires Define):**
-```cpp
-#define FASTLED_USES_EZWS2812_SPI  // MUST be before #include
-#include <FastLED.h>
-
-CRGB leds[NUM_LEDS];
-void setup() {
-    // SPI-based controller (consumes hardware SPI)
-    FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS);
-}
-```
-
-These drivers are based on the Silicon Labs ezWS2812 library and provide seamless FastLED API compatibility with enhanced performance for MG24-based boards.
-
-**Important**: The `EZWS2812_GPIO` and `EZWS2812_SPI` controllers are optimized specifically for **WS2812 LEDs only**. For other LED chipsets (SK6812, TM1809, UCS1903, etc.), FastLED automatically uses the generic clockless driver which supports all timing variants but with standard performance.
-
 ### Raspberry Pi Pico
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml) [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml) [![rp2350B SparkfunXRP](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml)
 
@@ -346,19 +295,19 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 - **ESP32DEV**: [120-output virtual driver](https://github.com/hpwit/I2SClocklessVirtualLedDriver)
 - **ESP32-S3**: [120-output S3 driver](https://github.com/hpwit/I2SClockLessLedVirtualDriveresp32s3) 
 
-### Parallel WS2812 Drivers
+## 🚀 Platform-Specific Driver Configuration
 
-FastLED supports several drivers for parallel WS2812 output.
+---
 
-#### Teensy
+## Teensy Platform
 
-The following drivers are available for Teensy boards:
+<details>
+<summary><b>🎯 WS2812Serial Driver</b> - High-performance serial-based LED control</summary>
 
-##### WS2812Serial driver
+### Overview
+The `WS2812Serial` driver leverages serial ports for LED data transmission on Teensy boards, providing non-blocking operation and precise timing.
 
-The `WS2812Serial` driver leverages serial ports for LED data transmission on Teensy boards.
-
-###### Usage
+### Configuration
 To use this driver, you must define `USE_WS2812SERIAL` before including the FastLED header.
 
 ```cpp
@@ -385,13 +334,15 @@ FastLED.addLeds<WS2812SERIAL, /* DATA_PIN */, GRB>(leds, NUM_LEDS);
 | Serial7 |             |            |            |            | 29         | 29         |
 | Serial8 |             |            |            |            |            | 35         |
 
-##### ObjectFLED Driver
+</details>
 
-The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It is designed to provide high-performance, multi-pin output.
+<details>
+<summary><b>⚡ ObjectFLED Driver</b> - Advanced parallel output for Teensy 4.x</summary>
 
-By default, FastLED automatically uses the `ObjectFLED` driver for WS2812 LEDs on Teensy 4.0/4.1 boards.
+### Overview
+The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It provides high-performance, multi-pin output and is **enabled by default** on Teensy 4.x.
 
-###### Disabling ObjectFLED (Reverting to Legacy Driver)
+### Disabling ObjectFLED (Reverting to Legacy Driver)
 If you encounter compatibility issues or wish to use the standard clockless driver instead of `ObjectFLED`, you can disable it by defining `FASTLED_NOT_USES_OBJECTFLED` before including the FastLED header:
 
 ```cpp
@@ -399,7 +350,7 @@ If you encounter compatibility issues or wish to use the standard clockless driv
 #include <FastLED.h>
 ```
 
-###### Re-enabling ObjectFLED (Explicitly)
+### Re-enabling ObjectFLED (Explicitly)
 While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable it (though not strictly necessary) using:
 
 ```cpp
@@ -407,15 +358,20 @@ While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable 
 #include <FastLED.h>
 ```
 
-#### ESP32
+</details>
 
-The following drivers are available for ESP32 boards:
+---
 
-#### ESP32-S3 I2S Driver
+## ESP32 Platform
 
-The `ESP32-S3 I2S` driver leverages the I2S peripheral for high-performance parallel WS2812 output on ESP32-S3 boards. This driver is a dedicated clockless implementation.
+<details>
+<summary><b>🔧 ESP32-S3 I2S Driver</b> - Parallel output using I2S peripheral</summary>
 
-##### Usage
+### Overview
+
+The ESP32-S3 I2S driver leverages the I2S peripheral for high-performance parallel WS2812 output on ESP32-S3 boards. This driver is a dedicated clockless implementation.
+
+### Configuration
 To use this driver, you must define `FASTLED_USES_ESP32S3_I2S` before including the FastLED header.
 
 ```cpp
@@ -431,14 +387,41 @@ FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
 
 **Note:** This driver requires a compatible Arduino-ESP32 core/IDF.
 
-#### Generic ESP32 I2S Driver
+</details>
 
-The generic `ESP32 I2S` driver provides parallel WS2812 output for various ESP32 boards (e.g., ESP32-DevKitC). It uses the I2S peripheral for efficient data transmission.
+<details>
+<summary><b>📡 Generic ESP32 I2S Driver</b> - Universal I2S support for ESP32</summary>
 
-##### Usage
+### Overview
+The generic ESP32 I2S driver provides parallel WS2812 output for various ESP32 boards (e.g., ESP32-DevKitC). It uses the I2S peripheral for efficient data transmission.
+
+### Configuration
 To use this driver, you must define `FASTLED_ESP32_I2S` before including the FastLED header.
 
-#### ESP32 RMT Driver Configuration
+```cpp
+#define FASTLED_ESP32_I2S
+#include <FastLED.h>
+```
+
+Then, use `WS2812` as the chipset type in your `addLeds` call:
+
+```cpp
+FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+```
+
+### DMA Buffer Configuration
+For improved resilience under interrupt load (e.g., Wi-Fi activity), you can increase the number of I2S DMA buffers:
+
+```cpp
+#define FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4
+```
+
+</details>
+
+<details>
+<summary><b>⚠️ ESP32 RMT Driver Configuration</b> - Critical performance and compatibility information</summary>
+
+### ⚡ Performance Alert
 
 **Important:** The RMT4 and RMT5 drivers use completely different APIs. FastLED's custom RMT4 driver is specifically optimized for LED control and significantly outperforms Espressif's generic RMT5 wrapper in terms of:
 - **Performance**: Lower interrupt overhead and better timing precision
@@ -454,7 +437,7 @@ By default, FastLED automatically selects:
 - **ESP-IDF 5.0+**: Uses RMT5 driver (for compatibility)
 - **ESP-IDF 4.x and earlier**: Uses RMT4 driver
 
-###### Forcing RMT4 Driver (Recommended for Performance)
+### Forcing RMT4 Driver (Recommended for Performance)
 
 To force the use of FastLED's optimized RMT4 driver, you have two options:
 
@@ -482,23 +465,80 @@ build_flags =
 
 **Note:** Using RMT4 is strongly recommended if you experience flickering with Wi-Fi enabled or need maximum LED performance. RMT4 uses ESP-IDF's legacy RMT APIs which are still maintained for backward compatibility in ESP-IDF 5.x, though marked as deprecated.
 
+</details>
+
+---
+
+## Silicon Labs (MGM240/EFR32MG24) Platform
+
+<details>
+<summary><b>🔧 ezWS2812 GPIO Driver</b> - Optimized bit-banging with cycle-accurate timing</summary>
+
+### Overview
+The `EZWS2812_GPIO` driver uses optimized GPIO bit-banging with cycle-accurate timing calibrated for 39MHz and 78MHz CPU frequencies. This driver is **always available** and requires no hardware peripherals.
+
+### Performance
+- ~400Hz refresh rate
+- No hardware peripheral consumption
+- Optimized assembly-level timing
+
+### Usage
 ```cpp
-#define FASTLED_ESP32_I2S
 #include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+void setup() {
+    // GPIO-based controller on pin 7
+    FastLED.addLeds<EZWS2812_GPIO, 7, GRB>(leds, NUM_LEDS);
+}
 ```
 
-Then, use `WS2812` as the chipset type in your `addLeds` call. The data pin will be configured by the I2S driver.
+</details>
 
+<details>
+<summary><b>⚡ ezWS2812 SPI Driver</b> - Hardware-accelerated maximum performance</summary>
+
+### Overview
+The `EZWS2812_SPI` driver provides hardware SPI acceleration for maximum performance (~1000Hz refresh rate). This driver **consumes a hardware SPI peripheral** and must be explicitly enabled.
+
+### Why Opt-In Required
+Following the same pattern as ObjectFLED for Teensy, the SPI controller must be explicitly enabled to prevent accidentally consuming the SPI peripheral that may be needed for other components (SD cards, displays, sensors).
+
+### Configuration
+**Required define before including FastLED:**
 ```cpp
-FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+#define FASTLED_USES_EZWS2812_SPI  // MUST be before #include
+#include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+void setup() {
+    // SPI-based controller (consumes hardware SPI)
+    FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS);
+}
 ```
 
-###### DMA Buffer Configuration
-For improved resilience under interrupt load (e.g., Wi-Fi activity), you can increase the number of I2S DMA buffers by defining `FASTLED_ESP32_I2S_NUM_DMA_BUFFERS`. A value of `4` is often recommended.
+### Performance
+- ~1000Hz refresh rate (2.5x faster than GPIO)
+- Hardware-accelerated
+- Consumes one SPI peripheral
 
-```cpp
-#define FASTLED_ESP32_I2S_NUM_DMA_BUFFERS 4
-```
+</details>
+
+<details>
+<summary><b>ℹ️ Important Notes</b> - Compatibility and limitations</summary>
+
+### Supported Boards
+- Arduino Nano Matter
+- SparkFun Thing Plus Matter
+- Seeed Xiao MG24 Sense
+
+### LED Compatibility
+The `EZWS2812_GPIO` and `EZWS2812_SPI` controllers are optimized specifically for **WS2812 LEDs only**. For other LED chipsets (SK6812, TM1809, UCS1903, etc.), FastLED automatically uses the generic clockless driver which supports all timing variants but with standard performance.
+
+### Driver Source
+These drivers are based on the Silicon Labs ezWS2812 library and provide seamless FastLED API compatibility with enhanced performance for MG24-based boards.
+
+</details>
 
 **Note:** All I2S lanes must share the same chipset/timings. If per-lane timing differs, consider using the RMT driver instead. 
 
