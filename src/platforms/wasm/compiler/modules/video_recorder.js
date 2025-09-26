@@ -10,16 +10,16 @@
 /* eslint-disable no-console */
 
 /**
- * Default video recording configuration
+ * Default video recording configuration optimized for fastest encoding
  * @constant {Object}
  */
 const DEFAULT_VIDEO_CONFIG = {
-  /** @type {string} Video MIME type for recording */
-  videoCodec: 'video/mp4;codecs=h264,aac',
-  /** @type {number} Target video bitrate in Mbps */
-  videoBitrate: 10,
+  /** @type {string} Video MIME type for recording - VP8 for fastest encoding */
+  videoCodec: 'video/webm;codecs=vp8',
+  /** @type {number} Target video bitrate in Mbps - higher for speed over compression */
+  videoBitrate: 8,
   /** @type {string} Audio codec for recording */
-  audioCodec: 'aac',
+  audioCodec: 'opus',
   /** @type {number} Target audio bitrate in kbps */
   audioBitrate: 128,
   /** @type {number} Default frame rate */
@@ -27,17 +27,24 @@ const DEFAULT_VIDEO_CONFIG = {
 };
 
 /**
- * Fallback MIME types if H.264/MP4 is not supported
+ * Codec priority ordered by encoding speed (fastest to slowest)
+ * Optimized for real-time recording performance over file size
  * @constant {string[]}
  */
-const FALLBACK_MIME_TYPES = [
-  'video/mp4',
-  'video/mp4;codecs=avc1.42E01E',
-  'video/mp4;codecs=h264',
-  'video/mp4;codecs=h264,aac',
-  'video/webm;codecs=vp8',
-  'video/webm;codecs=vp9',
-  'video/webm',
+const SPEED_OPTIMIZED_CODECS = [
+  // Fastest codecs - prioritize encoding speed
+  'video/webm;codecs=vp8',           // VP8: Fast encoding, WebRTC standard
+  'video/mp4;codecs=avc1.42E01E',    // H.264 baseline profile: Fastest H.264
+  'video/mp4;codecs=h264',           // H.264: Fast and widely supported
+  'video/mp4;codecs=h264,aac',       // H.264 with AAC
+  'video/mp4',                       // MP4 container auto-select
+
+  // Medium speed codecs - balance of speed and quality
+  'video/webm;codecs=vp9',           // VP9: Better compression but slower
+  'video/webm',                      // WebM auto-select
+
+  // Slower codecs - better compression but much slower encoding
+  'video/webm;codecs=av1',           // AV1: Best compression, slowest encoding
 ];
 
 /**
@@ -58,6 +65,8 @@ export class VideoRecorder {
       canvas, audioContext, fps, onStateChange, settings,
     } = options;
 
+    console.log('VideoRecorder constructor called with options:', options);
+
     /** @type {HTMLCanvasElement} */
     this.canvas = canvas;
 
@@ -66,6 +75,7 @@ export class VideoRecorder {
 
     /** @type {Object} Current recording settings */
     this.settings = { ...DEFAULT_VIDEO_CONFIG, ...settings };
+    console.log('Final merged settings:', this.settings);
 
     /** @type {number} */
     this.fps = fps || this.settings.fps;
@@ -91,6 +101,9 @@ export class VideoRecorder {
     /** @type {string} */
     this.selectedMimeType = this.selectMimeType();
 
+    /** @type {string} User's preferred format for file extension */
+    this.preferredFormat = this.determinePreferredFormat();
+
     /** @type {number} Frame counter for logging */
     this.frameCounter = 0;
 
@@ -102,7 +115,22 @@ export class VideoRecorder {
   }
 
   /**
-   * Selects the best available MIME type for recording
+   * Determines the user's preferred format for file naming
+   * @returns {string} Preferred format ('mp4' or 'webm')
+   */
+  determinePreferredFormat() {
+    const mimeType = this.settings.videoCodec;
+    console.log('Determining preferred format from videoCodec:', mimeType);
+    if (mimeType && mimeType.includes('mp4')) {
+      console.log('Preferred format: mp4');
+      return 'mp4';
+    }
+    console.log('Preferred format: webm');
+    return 'webm';
+  }
+
+  /**
+   * Selects the best available MIME type for recording, optimized for encoding speed
    * @returns {string} Selected MIME type
    */
   selectMimeType() {
@@ -118,21 +146,22 @@ export class VideoRecorder {
       return mimeType;
     }
 
-    // Try fallback MIME types
-    for (const fallbackType of FALLBACK_MIME_TYPES) {
-      if (MediaRecorder.isTypeSupported(fallbackType)) {
-        console.log('Using fallback MIME type:', fallbackType);
-        return fallbackType;
+    // Try speed-optimized codecs in order of encoding speed (fastest first)
+    console.log('Configured codec not supported, trying speed-optimized fallbacks...');
+    for (const speedOptimizedType of SPEED_OPTIMIZED_CODECS) {
+      if (MediaRecorder.isTypeSupported(speedOptimizedType)) {
+        console.log(`Using speed-optimized fallback: ${speedOptimizedType}`);
+        return speedOptimizedType;
       }
     }
 
-    // Try extremely basic WebM
+    // Final fallback to basic WebM
     if (MediaRecorder.isTypeSupported('video/webm')) {
-      console.log('Using basic WebM');
+      console.log('Using basic WebM as final fallback');
       return 'video/webm';
     }
 
-    // Use default if nothing else works
+    // Use browser default if nothing else works
     console.warn('No MIME types supported, using browser default');
     return '';
   }
@@ -246,16 +275,20 @@ export class VideoRecorder {
         audioBitsPerSecond: this.settings.audioBitrate * 1000, // Convert kbps to bps
       };
 
-      // Add encoding optimization hints for faster processing
-      if (this.selectedMimeType.includes('mp4')) {
-        // For MP4, prioritize speed over compression efficiency
-        options.videoKeyFrameIntervalDuration = 1000; // Keyframe every 1 second for faster seeking
-      }
-
-      // Additional performance optimizations
-      if (this.selectedMimeType.includes('webm')) {
-        // For WebM, use aggressive compression for better real-time performance
-        options.bitsPerSecond = Math.min(options.videoBitsPerSecond, 5000000); // Cap at 5Mbps for performance
+      // Encoding speed optimizations based on codec type
+      if (this.selectedMimeType.includes('vp8')) {
+        // VP8 optimizations for fastest encoding
+        options.bitsPerSecond = options.videoBitsPerSecond; // Don't cap VP8, it's already fast
+        // VP8 benefits from slightly higher bitrates for speed vs compression trade-off
+      } else if (this.selectedMimeType.includes('h264') || this.selectedMimeType.includes('avc1')) {
+        // H.264 optimizations for fast encoding
+        options.videoKeyFrameIntervalDuration = 2000; // Less frequent keyframes for speed
+      } else if (this.selectedMimeType.includes('vp9')) {
+        // VP9 is slower, so limit bitrate to help encoding speed
+        options.bitsPerSecond = Math.min(options.videoBitsPerSecond, 6000000); // Cap at 6Mbps
+      } else if (this.selectedMimeType.includes('av1')) {
+        // AV1 is slowest, so significantly limit bitrate for speed
+        options.bitsPerSecond = Math.min(options.videoBitsPerSecond, 4000000); // Cap at 4Mbps
       }
 
       // Remove mimeType if empty (use browser default)
@@ -326,10 +359,15 @@ export class VideoRecorder {
       console.log('Stream active:', this.stream.active);
       console.log('Stream tracks:', this.stream.getTracks().map((t) => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
 
-      // Start recording with optimized timeslice for performance
+      // Start recording with codec-optimized timeslice for performance
       try {
-        // Use longer timeslices to reduce CPU usage and improve performance
-        const timeslice = 1000; // 1 second chunks for better performance
+        // Optimize timeslice based on codec encoding speed
+        let timeslice = 1000; // Default 1 second
+        if (this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
+          timeslice = 500; // Faster codecs can handle more frequent chunks
+        } else if (this.selectedMimeType.includes('av1')) {
+          timeslice = 2000; // Slower codecs need longer chunks to avoid overwhelming CPU
+        }
         try {
           this.mediaRecorder.start(timeslice);
           console.log(`MediaRecorder.start(${timeslice}ms chunks) called successfully for optimized performance`);
@@ -421,15 +459,16 @@ export class VideoRecorder {
         type: this.selectedMimeType || 'video/webm',
       });
 
-      // Determine file extension from MIME type
-      let extension = '.webm'; // default
-      if (this.selectedMimeType) {
-        if (this.selectedMimeType.includes('mp4')) {
-          extension = '.mp4';
-        } else if (this.selectedMimeType.includes('webm')) {
-          extension = '.webm';
-        }
-      }
+      // Determine file extension from user's preferred format
+      const extension = this.preferredFormat === 'mp4' ? '.mp4' : '.webm';
+
+      // Debug logging for filename generation
+      console.log('Saving recording with settings:', {
+        originalVideoCodec: this.settings.videoCodec,
+        selectedMimeType: this.selectedMimeType,
+        preferredFormat: this.preferredFormat,
+        extension: extension
+      });
 
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
@@ -498,6 +537,8 @@ export class VideoRecorder {
    * @param {Object} newSettings - New settings to apply
    */
   updateSettings(newSettings) {
+    console.log('VideoRecorder.updateSettings() called with:', newSettings);
+
     if (this.isRecording) {
       console.warn('Cannot change settings while recording');
       return;
@@ -505,17 +546,20 @@ export class VideoRecorder {
 
     // Merge new settings with current settings
     this.settings = { ...this.settings, ...newSettings };
+    console.log('Updated settings:', this.settings);
 
     // Update fps if provided
     if (newSettings.fps) {
       this.fps = newSettings.fps;
     }
 
-    // Reselect MIME type with new settings
+    // Reselect MIME type and preferred format with new settings
     this.selectedMimeType = this.selectMimeType();
+    this.preferredFormat = this.determinePreferredFormat();
 
     console.log('Video recorder settings updated:', this.settings);
     console.log('New MIME type:', this.selectedMimeType);
+    console.log('Preferred format:', this.preferredFormat);
   }
 
   /**

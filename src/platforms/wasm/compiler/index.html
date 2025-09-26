@@ -85,29 +85,35 @@
                 <div class="setting-group">
                     <label for="video-codec">Video Codec:</label>
                     <select id="video-codec">
-                        <option value="video/webm;codecs=vp9">VP9 (WebM) - Recommended</option>
-                        <option value="video/webm;codecs=vp8">VP8 (WebM)</option>
-                        <option value="video/webm;codecs=h264">H.264 (WebM)</option>
-                        <option value="video/webm;codecs=av1">AV1 (WebM)</option>
-                        <option value="video/mp4;codecs=h264">H.264 (MP4)</option>
-                        <option value="video/mp4;codecs=avc1">AVC1 (MP4)</option>
-                        <option value="video/webm">WebM (Auto)</option>
+                        <optgroup label="⚡ Fast Encoding (Real-time Performance)">
+                            <option value="video/webm;codecs=vp8" selected>VP8 (WebM) - Fastest</option>
+                            <option value="video/mp4;codecs=avc1.42E01E">H.264 Baseline (MP4) - Very Fast</option>
+                            <option value="video/mp4;codecs=h264">H.264 (MP4) - Fast</option>
+                        </optgroup>
+                        <optgroup label="⚖️ Balanced (Speed vs Quality)">
+                            <option value="video/webm;codecs=vp9">VP9 (WebM) - Good Compression</option>
+                            <option value="video/mp4;codecs=h264,aac">H.264+AAC (MP4) - Compatible</option>
+                            <option value="video/webm">WebM (Auto)</option>
+                        </optgroup>
+                        <optgroup label="🎯 High Quality (Slower Encoding)">
+                            <option value="video/webm;codecs=av1">AV1 (WebM) - Best Compression</option>
+                        </optgroup>
                     </select>
                 </div>
 
                 <div class="setting-group">
                     <label for="video-bitrate">Video Bitrate (Mbps):</label>
-                    <input type="number" id="video-bitrate" min="1" max="50" value="10" step="0.5">
-                    <span class="bitrate-display">10 Mbps</span>
+                    <input type="number" id="video-bitrate" min="1" max="50" value="8" step="0.5">
+                    <span class="bitrate-display">8 Mbps</span>
                 </div>
 
                 <div class="setting-group">
                     <label for="audio-codec">Audio Codec:</label>
                     <select id="audio-codec">
-                        <option value="opus">Opus (Recommended)</option>
-                        <option value="vorbis">Vorbis</option>
-                        <option value="aac">AAC</option>
-                        <option value="mp3">MP3</option>
+                        <option value="opus" selected>Opus (Fast & High Quality)</option>
+                        <option value="aac">AAC (Compatible)</option>
+                        <option value="vorbis">Vorbis (Open Source)</option>
+                        <option value="mp3">MP3 (Legacy)</option>
                     </select>
                 </div>
 
@@ -392,11 +398,11 @@
         }, 500);
     }
 
-    // Video Settings Popup Functions
+    // Video Settings Popup Functions - Optimized for encoding speed
     const videoSettingsDefaults = {
-        videoCodec: 'video/webm;codecs=vp9',
-        videoBitrate: 10,
-        audioCodec: 'opus',
+        videoCodec: 'video/webm;codecs=vp8',  // VP8 for fastest encoding
+        videoBitrate: 8,                      // Slightly lower bitrate for speed
+        audioCodec: 'opus',                   // Opus is fast and high quality
         audioBitrate: 128,
         fps: 30
     };

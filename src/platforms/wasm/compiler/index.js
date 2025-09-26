@@ -1005,10 +1005,8 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
       audioContext: null, // Disable audio for better performance
       fps: savedSettings?.fps || 30,
       settings: {
+        // Use saved settings directly, or let VideoRecorder use its own defaults
         ...savedSettings,
-        // Optimize for performance over quality
-        videoBitrate: savedSettings?.videoBitrate || 5, // Lower bitrate for faster processing
-        videoCodec: savedSettings?.videoCodec || 'video/webm;codecs=vp8', // VP8 is faster than H.264
       },
       onStateChange: (isRecording) => {
         // Update button visual state
@@ -1031,6 +1029,9 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
         }
       },
     });
+
+    // Expose video recorder globally for settings updates
+    window.videoRecorder = videoRecorder;
 
     // Add click handler to record button
     recordButton.addEventListener('click', (e) => {

@@ -101,9 +101,10 @@ declare class GraphicsManagerThreeJS {
  * Video Recorder for recording animations
  */
 declare class VideoRecorder {
-  constructor();
-  startRecording(): Promise<void>;
-  stopRecording(): Promise<void>;
+  constructor(options: any);
+  startRecording(): boolean;
+  stopRecording(): boolean;
+  updateSettings(settings: any): void;
   [key: string]: any;
 }
 
@@ -234,6 +235,7 @@ declare global {
     getAudioBufferStats: () => any;
 
     // Video Recording
+    videoRecorder: VideoRecorder | null;
     getVideoRecorder: () => VideoRecorder;
     startVideoRecording: () => Promise<void>;
     stopVideoRecording: () => Promise<void>;
