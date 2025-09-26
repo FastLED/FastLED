@@ -74,6 +74,46 @@ class HashFingerprintCache:
 
         return hasher.hexdigest()
 
+    def _store_pending_fingerprint(
+        self, hash_value: str, timestamp: float, file_count: int
+    ) -> None:
+        """Store pending fingerprint data in a temporary cache file."""
+        pending_file = self.cache_file.with_suffix(".pending")
+        pending_data = {
+            "hash": hash_value,
+            "timestamp": timestamp,
+            "file_count": file_count,
+            "subpath": self.subpath,
+        }
+
+        try:
+            with open(pending_file, "w") as f:
+                json.dump(pending_data, f, indent=2)
+        except OSError as e:
+            # If we can't store pending data, that's okay - we'll fall back to force update
+            pass
+
+    def _load_pending_fingerprint(self) -> Optional[Dict[str, Any]]:
+        """Load pending fingerprint data from temporary cache file."""
+        pending_file = self.cache_file.with_suffix(".pending")
+        if not pending_file.exists():
+            return None
+
+        try:
+            with open(pending_file, "r") as f:
+                return json.load(f)
+        except (json.JSONDecodeError, OSError):
+            return None
+
+    def _clear_pending_fingerprint(self) -> None:
+        """Remove the pending fingerprint file."""
+        pending_file = self.cache_file.with_suffix(".pending")
+        if pending_file.exists():
+            try:
+                pending_file.unlink()
+            except OSError:
+                pass
+
     def get_current_hash(self, file_paths: List[Path]) -> str:
         """
         Get current hash for the given file paths.
@@ -119,6 +159,9 @@ class HashFingerprintCache:
         """
         Check if the current file state matches the cached hash.
 
+        Note: This method is deprecated in favor of check_needs_update().
+        Use check_needs_update() for new code as it follows the safe pattern.
+
         Args:
             file_paths: List of file paths to validate
 
@@ -137,47 +180,76 @@ class HashFingerprintCache:
             cached_hash = cache_data.get("hash")
             return cached_hash == current_hash
 
-    def mark_success(self, file_paths: List[Path]) -> bool:
+    def check_needs_update(self, file_paths: List[Path]) -> bool:
         """
-        Mark validation as successful using compare-and-swap operation.
+        Check if files need to be processed and store fingerprint for later use.
 
-        This method prevents race conditions by checking if the hash has changed
-        between validation and update. If another process updated the cache
-        in the meantime, this operation will fail.
+        This is the safe pattern: compute fingerprint before processing, store it
+        in the cache file temporarily, and use the stored fingerprint in mark_success()
+        regardless of file changes during processing.
 
         Args:
-            file_paths: List of file paths that were successfully validated
+            file_paths: List of file paths to check
 
         Returns:
-            True if cache was updated successfully, False if hash changed
-            (indicating another process updated the cache)
+            True if processing is needed, False if cache is valid
         """
         current_hash = self.get_current_hash(file_paths)
         current_time = time.time()
 
-        # Use write lock for compare-and-swap operation
+        # Check if cache is valid
         lock = fasteners.InterProcessLock(self.lock_file)
         with lock:
-            # Read current cache state
             cache_data = self._read_cache_data()
+            if cache_data is None:
+                # No cache - store pending fingerprint and return needs update
+                self._store_pending_fingerprint(
+                    current_hash, current_time, len(file_paths)
+                )
+                return True
 
-            if cache_data is not None:
-                # Check if hash changed since our validation
-                cached_hash = cache_data.get("hash")
-                if cached_hash != current_hash:
-                    # Hash changed - another process updated the cache
-                    return False
+            cached_hash = cache_data.get("hash")
+            needs_update = cached_hash != current_hash
 
-            # Hash matches or no previous cache - safe to update
-            new_cache_data = {
-                "hash": current_hash,
-                "timestamp": current_time,
-                "subpath": self.subpath,
-                "file_count": len(file_paths),
-            }
+            if needs_update:
+                # Store pending fingerprint for successful completion
+                self._store_pending_fingerprint(
+                    current_hash, current_time, len(file_paths)
+                )
 
-            self._write_cache_data(new_cache_data)
-            return True
+            return needs_update
+
+    def mark_success(self) -> None:
+        """
+        Mark processing as successful using the pre-computed fingerprint.
+
+        This method uses the fingerprint stored by check_needs_update(),
+        making it immune to file changes during processing. Works across
+        process boundaries by storing pending data in a temporary file.
+        """
+        # Try to load pending fingerprint from file (cross-process safe)
+        fingerprint_data = self._load_pending_fingerprint()
+
+        # Fall back to in-memory pending fingerprint (single-process case)
+        if fingerprint_data is None and hasattr(self, "_pending_fingerprint"):
+            pending_fp: Dict[str, Any] = getattr(self, "_pending_fingerprint")
+            fingerprint_data = pending_fp.copy()
+            fingerprint_data["subpath"] = self.subpath
+
+        if fingerprint_data is None:
+            raise RuntimeError(
+                "mark_success() called without prior check_needs_update()"
+            )
+
+        # Save using write lock
+        lock = fasteners.InterProcessLock(self.lock_file)
+        with lock:
+            self._write_cache_data(fingerprint_data)
+
+        # Clean up stored fingerprints
+        self._clear_pending_fingerprint()
+        if hasattr(self, "_pending_fingerprint"):
+            delattr(self, "_pending_fingerprint")
 
     def invalidate(self) -> None:
         """
@@ -258,21 +330,21 @@ if __name__ == "__main__":
 
         print(f"Test files: {[str(f) for f in test_files]}")
 
-        # First validation - should be invalid (no cache)
-        is_valid = cache.is_valid(test_files)
-        print(f"Initial validation: {is_valid}")
+        # First check - should need update (no cache)
+        needs_update = cache.check_needs_update(test_files)
+        print(f"Initial check needs update: {needs_update}")
 
         # Get current hash
         current_hash = cache.get_current_hash(test_files)
         print(f"Current hash: {current_hash[:16]}...")
 
         # Mark as successful
-        success = cache.mark_success(test_files)
-        print(f"Mark success result: {success}")
+        cache.mark_success()
+        print("Mark success completed")
 
-        # Second validation - should be valid now
-        is_valid2 = cache.is_valid(test_files)
-        print(f"Second validation: {is_valid2}")
+        # Second check - should not need update now
+        needs_update2 = cache.check_needs_update(test_files)
+        print(f"Second check needs update: {needs_update2}")
 
         # Get cache info
         cache_info = cache.get_cache_info()
@@ -286,8 +358,8 @@ if __name__ == "__main__":
         print("\nModifying test file...")
         test_file1.write_text("Modified content!")
 
-        # Third validation - should be invalid now
-        is_valid3 = cache.is_valid(test_files)
-        print(f"Validation after modification: {is_valid3}")
+        # Third check - should need update now
+        needs_update3 = cache.check_needs_update(test_files)
+        print(f"Check after modification needs update: {needs_update3}")
 
         print("\nDemo completed successfully!")

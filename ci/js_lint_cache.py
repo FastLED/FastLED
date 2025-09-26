@@ -50,6 +50,8 @@ def check_js_files_changed() -> bool:
     """
     Check if the wasm/compiler directory has changed since the last lint run.
 
+    Uses the safe pre-computed fingerprint pattern to avoid race conditions.
+
     Returns:
         True if directory changed and linting should run
         False if no changes detected and linting can be skipped
@@ -68,13 +70,11 @@ def check_js_files_changed() -> bool:
         print("📝 No files found in src/platforms/wasm/compiler/ - triggering lint")
         return True
 
-    # Check if files have changed using hash cache
+    # Use the safe pattern: check_needs_update stores fingerprint for later use
     cache = _get_js_lint_cache()
+    needs_update = cache.check_needs_update(file_paths)
 
-    if cache.is_valid(file_paths):
-        print_cache_hit("No changes in src/platforms/wasm/compiler/ - skipping lint")
-        return False
-    else:
+    if needs_update:
         # Count JS files for informational purposes
         js_files = [f for f in file_paths if f.suffix == ".js"]
         print_cache_miss(f"Changes detected in src/platforms/wasm/compiler/")
@@ -82,31 +82,29 @@ def check_js_files_changed() -> bool:
             f"   Found {len(js_files)} JavaScript files, {len(file_paths)} total files"
         )
         return True
+    else:
+        print_cache_hit("No changes in src/platforms/wasm/compiler/ - skipping lint")
+        return False
 
 
 def mark_lint_success() -> None:
-    """Mark the current lint run as successful."""
-    compiler_dir = Path("src/platforms/wasm/compiler")
+    """
+    Mark the current lint run as successful.
 
-    if not compiler_dir.exists():
-        print("⚠️  Cannot update fingerprint - compiler directory not found")
-        return
-
-    # Get all files in the directory
-    file_paths = get_directory_files(compiler_dir)
-
-    if not file_paths:
-        print("⚠️  No files found to cache fingerprint for")
-        return
-
-    # Mark as successful using hash cache
+    Uses the safe pre-computed fingerprint pattern - saves the fingerprint
+    that was computed before linting started, regardless of file changes
+    during the linting process.
+    """
     cache = _get_js_lint_cache()
-    success = cache.mark_success(file_paths)
 
-    if success:
+    try:
+        cache.mark_success()
         print("📝 Lint success fingerprint updated")
-    else:
-        print("⚠️  Fingerprint update failed - files changed during lint process")
+    except RuntimeError as e:
+        print(f"⚠️  Fingerprint update failed: {e}")
+        print(
+            "    This indicates check_js_files_changed() was not called before linting"
+        )
 
 
 def invalidate_cache() -> None:
