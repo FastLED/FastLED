@@ -124,6 +124,99 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
 
     /** @type {boolean} Whether to use instanced rendering (preferred) */
     this.useInstancedRendering = true;
+
+    // Object pools for reducing garbage collection
+    /** @type {Object} Object pools for Three.js objects */
+    this.objectPools = {
+      colors: [],
+      matrices: [],
+      vectors: [],
+      maxPoolSize: 100 // Limit pool size to prevent memory bloat
+    };
+  }
+
+  /**
+   * Gets a Color object from the pool or creates a new one
+   * @returns {THREE.Color} Pooled Color object
+   */
+  _getPooledColor() {
+    const { THREE } = this.threeJsModules;
+
+    if (this.objectPools.colors.length > 0) {
+      return this.objectPools.colors.pop();
+    }
+    return new THREE.Color();
+  }
+
+  /**
+   * Returns a Color object to the pool
+   * @param {THREE.Color} color - Color object to return
+   */
+  _releasePooledColor(color) {
+    if (this.objectPools.colors.length < this.objectPools.maxPoolSize) {
+      // Reset color to default state
+      color.setRGB(0, 0, 0);
+      this.objectPools.colors.push(color);
+    }
+  }
+
+  /**
+   * Gets a Matrix4 object from the pool or creates a new one
+   * @returns {THREE.Matrix4} Pooled Matrix4 object
+   */
+  _getPooledMatrix() {
+    const { THREE } = this.threeJsModules;
+
+    if (this.objectPools.matrices.length > 0) {
+      return this.objectPools.matrices.pop();
+    }
+    return new THREE.Matrix4();
+  }
+
+  /**
+   * Returns a Matrix4 object to the pool
+   * @param {THREE.Matrix4} matrix - Matrix4 object to return
+   */
+  _releasePooledMatrix(matrix) {
+    if (this.objectPools.matrices.length < this.objectPools.maxPoolSize) {
+      // Reset matrix to identity
+      matrix.identity();
+      this.objectPools.matrices.push(matrix);
+    }
+  }
+
+  /**
+   * Gets a Vector3 object from the pool or creates a new one
+   * @returns {THREE.Vector3} Pooled Vector3 object
+   */
+  _getPooledVector() {
+    const { THREE } = this.threeJsModules;
+
+    if (this.objectPools.vectors.length > 0) {
+      return this.objectPools.vectors.pop();
+    }
+    return new THREE.Vector3();
+  }
+
+  /**
+   * Returns a Vector3 object to the pool
+   * @param {THREE.Vector3} vector - Vector3 object to return
+   */
+  _releasePooledVector(vector) {
+    if (this.objectPools.vectors.length < this.objectPools.maxPoolSize) {
+      // Reset vector to origin
+      vector.set(0, 0, 0);
+      this.objectPools.vectors.push(vector);
+    }
+  }
+
+  /**
+   * Clears all object pools (useful for cleanup)
+   */
+  _clearObjectPools() {
+    this.objectPools.colors.length = 0;
+    this.objectPools.matrices.length = 0;
+    this.objectPools.vectors.length = 0;
   }
 
   /**
@@ -134,9 +227,18 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     // Clean up LED objects
     if (this.leds) {
       this.leds.forEach((led) => {
-        if (!led._isMerged) {
-          led.geometry.dispose();
-          led.material.dispose();
+        // Release pooled objects from LED tracking objects
+        if (led.material && led.material.color && led.material.color instanceof this.threeJsModules.THREE.Color) {
+          this._releasePooledColor(led.material.color);
+        }
+        if (led.position && led.position instanceof this.threeJsModules.THREE.Vector3) {
+          this._releasePooledVector(led.position);
+        }
+
+        // Clean up non-instanced LED objects
+        if (!led._isMerged && !led._isInstanced) {
+          led.geometry?.dispose();
+          led.material?.dispose();
           this.scene?.remove(led);
         }
       });
@@ -168,6 +270,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     if (this.composer) {
       this.composer.dispose();
     }
+
+    // Clear object pools to prevent memory leaks
+    this._clearObjectPools();
 
     // Call parent reset (which clears the scene)
     super.reset();
@@ -429,9 +534,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     this.instancePositions = new Float32Array(totalLeds * 3); // x, y, z for each instance
     this.instanceColors = new Float32Array(totalLeds * 3); // r, g, b for each instance
 
-    // Set up instance transformations and colors
-    const matrix = new THREE.Matrix4();
-    const color = new THREE.Color();
+    // Set up instance transformations and colors using pooled objects
+    const matrix = this._getPooledMatrix();
+    const color = this._getPooledColor();
 
     for (let i = 0; i < totalLeds; i++) {
       const ledData = ledDataList[i];
@@ -461,8 +566,8 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
         _instanceIndex: i,
         _stripId: ledData.stripId,
         _ledIndex: ledData.ledIndex,
-        material: { color: new THREE.Color(0, 0, 0) },
-        position: new THREE.Vector3(ledData.x, ledData.y, ledData.z),
+        material: { color: this._getPooledColor() }, // Released in reset()
+        position: this._getPooledVector().set(ledData.x, ledData.y, ledData.z), // Released in reset()
       });
     }
 
@@ -471,6 +576,10 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
 
     // Clean up base geometry (it's been transferred to the instanced mesh)
     baseGeometry.dispose();
+
+    // Return pooled objects to their pools
+    this._releasePooledMatrix(matrix);
+    this._releasePooledColor(color);
 
     console.log(`Instanced rendering setup complete: ${totalLeds} LEDs in 1 draw call`);
   }
@@ -674,7 +783,7 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
    * @private
    */
   _updateInstancedLeds(positionMap) {
-    const { THREE } = this.threeJsModules;
+    // THREE.js modules available via this.threeJsModules if needed
 
     // Use the stored bounds from setup - currently unused but may be needed for future optimizations
     // const min_x = this.screenBounds.minX;
@@ -682,7 +791,7 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     // const { width } = this.screenBounds;
     // const { height } = this.screenBounds;
 
-    const color = new THREE.Color();
+    const color = this._getPooledColor();
     let ledIndex = 0;
     let hasChanges = false;
 
@@ -744,6 +853,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     if (hasChanges) {
       this.instancedMesh.instanceColor.needsUpdate = true;
     }
+
+    // Return pooled color object
+    this._releasePooledColor(color);
   }
 
   /**
@@ -751,7 +863,7 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
    * @private
    */
   _updateLegacyLeds(positionMap) {
-    const { THREE } = this.threeJsModules;
+    // THREE.js modules available via this.threeJsModules if needed
 
     // Use the stored bounds from setup
     const min_x = this.screenBounds.minX;
@@ -789,9 +901,11 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
           if (!mergedMeshUpdates.has(led._parentMesh)) {
             mergedMeshUpdates.set(led._parentMesh, []);
           }
+          const tempColor = this._getPooledColor();
+          tempColor.setRGB(ledData.r, ledData.g, ledData.b);
           mergedMeshUpdates.get(led._parentMesh).push({
             index: led._mergedIndex,
-            color: new THREE.Color(ledData.r, ledData.g, ledData.b),
+            color: tempColor, // Will be released in _updateMergedMeshes
           });
         }
       } else {
@@ -847,6 +961,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
           colorAttribute.array[i + 1] = color.g;
           colorAttribute.array[i + 2] = color.b;
         }
+
+        // Return pooled color object after use
+        this._releasePooledColor(color);
       });
 
       // Mark the attribute as needing an update

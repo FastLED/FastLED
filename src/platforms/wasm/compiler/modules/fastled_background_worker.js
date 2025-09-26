@@ -50,7 +50,14 @@ const workerState = {
   frameCount: 0,
   startTime: performance.now(),
   lastFrameTime: 0,
-  averageFrameTime: 16.67 // Default to ~60 FPS
+  averageFrameTime: 16.67, // Default to ~60 FPS
+
+  // SharedArrayBuffer support for zero-copy data transfer
+  sharedFrameBuffer: null,
+  sharedFrameHeader: null,
+  sharedPixelBuffer: null,
+  useSharedMemory: false,
+  maxPixelDataSize: 0
 };
 
 /**
@@ -176,6 +183,49 @@ self.onmessage = async function(event) {
 };
 
 /**
+ * Initializes SharedArrayBuffer for zero-copy data transfer
+ * @param {Object} payload - Initialization payload containing shared buffers
+ * @returns {Promise<void>}
+ */
+async function initializeSharedMemory(payload) {
+  try {
+    // Check if SharedArrayBuffer is available and provided
+    if (typeof SharedArrayBuffer === 'undefined') {
+      workerLog('LOG', 'BACKGROUND_WORKER', 'SharedArrayBuffer not available, using standard transfer');
+      return;
+    }
+
+    if (!payload.sharedBuffers) {
+      workerLog('LOG', 'BACKGROUND_WORKER', 'No shared buffers provided, using standard transfer');
+      return;
+    }
+
+    const { frameBuffer, pixelBuffer, maxPixelDataSize } = payload.sharedBuffers;
+
+    if (frameBuffer instanceof SharedArrayBuffer && pixelBuffer instanceof SharedArrayBuffer) {
+      workerState.sharedFrameBuffer = frameBuffer;
+      workerState.sharedPixelBuffer = pixelBuffer;
+      workerState.maxPixelDataSize = maxPixelDataSize || 1024 * 1024; // Default 1MB
+      workerState.useSharedMemory = true;
+
+      // Create views for shared memory access
+      // Frame header: [frameCount, pixelDataOffset, pixelDataLength, screenMapPresent, timestamp]
+      workerState.sharedFrameHeader = new Int32Array(frameBuffer, 0, 8);
+
+      workerLog('LOG', 'BACKGROUND_WORKER', 'SharedArrayBuffer initialized successfully', {
+        frameBufferSize: frameBuffer.byteLength,
+        pixelBufferSize: pixelBuffer.byteLength,
+        maxPixelDataSize: workerState.maxPixelDataSize
+      });
+    }
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'SharedArrayBuffer initialization failed', error);
+    // Fall back to standard transfer
+    workerState.useSharedMemory = false;
+  }
+}
+
+/**
  * Handles worker initialization
  * @param {Object} payload - Initialization payload
  * @returns {Promise<Object>} Initialization result
@@ -188,6 +238,9 @@ async function handleInitialize(payload) {
     workerState.canvas = payload.canvas;
     workerState.capabilities = payload.capabilities;
     workerState.frameRate = payload.frameRate || 60;
+
+    // Initialize SharedArrayBuffer support if available
+    await initializeSharedMemory(payload);
 
     // Validate OffscreenCanvas
     if (!workerState.canvas || !(workerState.canvas instanceof OffscreenCanvas)) {
@@ -487,19 +540,17 @@ async function executeFrameLoop(currentTime) {
     const frameData = extractFrameData();
 
     if (frameData) {
-      // Render frame
+      // Render frame locally in worker
       workerState.graphicsManager.updateCanvas(frameData);
 
-      // Notify main thread of frame render
-      postMessage({
-        type: 'frame_rendered',
-        payload: {
-          frameNumber: workerState.frameCount,
-          timestamp: currentTime,
-          hasScreenMap: !!frameData.screenMap,
-          pixelCount: Array.isArray(frameData) ? frameData.length : 0
-        }
-      });
+      // Transfer data to main thread using the most efficient method
+      if (workerState.useSharedMemory) {
+        // Use SharedArrayBuffer for zero-copy transfer
+        transferFrameDataShared(frameData, currentTime);
+      } else {
+        // Use standard postMessage (fallback)
+        transferFrameDataStandard(frameData, currentTime);
+      }
     }
 
     // Update performance metrics
@@ -519,6 +570,139 @@ async function executeFrameLoop(currentTime) {
       }
     });
   }
+}
+
+/**
+ * Transfers frame data using SharedArrayBuffer (zero-copy)
+ * @param {Object} frameData - Frame data from WASM
+ * @param {number} timestamp - Current timestamp
+ */
+function transferFrameDataShared(frameData, timestamp) {
+  try {
+    if (!workerState.sharedFrameHeader || !workerState.sharedPixelBuffer) {
+      // Fall back to standard transfer if shared memory is not available
+      transferFrameDataStandard(frameData, timestamp);
+      return;
+    }
+
+    // Calculate total pixel data size
+    let totalPixelDataSize = 0;
+    for (const strip of frameData) {
+      if (strip.pixel_data) {
+        totalPixelDataSize += strip.pixel_data.length;
+      }
+    }
+
+    // Check if pixel data fits in shared buffer
+    if (totalPixelDataSize > workerState.maxPixelDataSize) {
+      workerLog('WARN', 'BACKGROUND_WORKER', `Pixel data too large for shared buffer: ${totalPixelDataSize} > ${workerState.maxPixelDataSize}`);
+      transferFrameDataStandard(frameData, timestamp);
+      return;
+    }
+
+    // Use atomic operations for synchronization
+    const header = new Int32Array(workerState.sharedFrameHeader);
+
+    // Atomic write sequence: set write flag first, then data, then commit
+    Atomics.store(header, 7, 1); // Set write flag (reserved field becomes write flag)
+
+    // Write frame header to shared memory
+    Atomics.store(header, 0, workerState.frameCount); // frameNumber
+    Atomics.store(header, 1, 0); // pixelDataOffset (will be updated)
+    Atomics.store(header, 2, totalPixelDataSize); // pixelDataLength
+    Atomics.store(header, 3, frameData.screenMap ? 1 : 0); // screenMapPresent
+    Atomics.store(header, 4, Math.floor(timestamp)); // timestamp (lower 32 bits)
+    Atomics.store(header, 5, Math.floor((timestamp * 1000) % 1000)); // timestamp fractional part
+    Atomics.store(header, 6, frameData.length); // number of strips
+
+    // Write pixel data to shared buffer
+    const pixelView = new Uint8Array(workerState.sharedPixelBuffer);
+    let pixelOffset = 0;
+
+    for (let i = 0; i < frameData.length; i++) {
+      const strip = frameData[i];
+      if (strip.pixel_data && strip.pixel_data.length > 0) {
+        // Copy pixel data to shared buffer
+        pixelView.set(strip.pixel_data, pixelOffset);
+        strip.sharedOffset = pixelOffset; // Store offset for main thread
+        strip.sharedLength = strip.pixel_data.length;
+        pixelOffset += strip.pixel_data.length;
+
+        // Clear local pixel data to save memory (it's now in shared buffer)
+        strip.pixel_data = null;
+      } else {
+        strip.sharedOffset = -1; // No pixel data
+        strip.sharedLength = 0;
+      }
+    }
+
+    // Write screen map to shared buffer if present (after pixel data)
+    let screenMapOffset = -1;
+    let screenMapLength = 0;
+    if (frameData.screenMap) {
+      const screenMapJson = JSON.stringify(frameData.screenMap);
+      const screenMapBytes = new TextEncoder().encode(screenMapJson);
+
+      if (pixelOffset + screenMapBytes.length <= workerState.maxPixelDataSize) {
+        pixelView.set(screenMapBytes, pixelOffset);
+        screenMapOffset = pixelOffset;
+        screenMapLength = screenMapBytes.length;
+        pixelOffset += screenMapBytes.length;
+      }
+    }
+
+    // Update header with screen map info using atomic operations
+    if (screenMapOffset >= 0) {
+      // Store screen map info in header
+      Atomics.store(header, 1, screenMapOffset); // pixelDataOffset now stores screenMap offset
+    }
+
+    // Atomic commit: clear write flag to signal data is ready
+    Atomics.store(header, 7, 0); // Clear write flag to commit the frame
+
+    // Notify main thread that new frame data is available in shared memory
+    postMessage({
+      type: 'frame_shared',
+      payload: {
+        frameNumber: workerState.frameCount,
+        timestamp: timestamp,
+        stripCount: frameData.length,
+        totalPixelDataSize: totalPixelDataSize,
+        screenMapOffset: screenMapOffset,
+        screenMapLength: screenMapLength,
+        sharedFrameHeader: workerState.sharedFrameHeader,
+        sharedPixelBuffer: workerState.sharedPixelBuffer,
+        frameDataStructure: frameData.map(strip => ({
+          strip_id: strip.strip_id,
+          sharedOffset: strip.sharedOffset,
+          sharedLength: strip.sharedLength
+        }))
+      }
+    });
+
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'SharedArrayBuffer transfer failed', error);
+    // Fall back to standard transfer
+    transferFrameDataStandard(frameData, timestamp);
+  }
+}
+
+/**
+ * Transfers frame data using standard postMessage (with copying)
+ * @param {Object} frameData - Frame data from WASM
+ * @param {number} timestamp - Current timestamp
+ */
+function transferFrameDataStandard(frameData, timestamp) {
+  // Standard postMessage approach (existing behavior)
+  postMessage({
+    type: 'frame_rendered',
+    payload: {
+      frameNumber: workerState.frameCount,
+      timestamp: timestamp,
+      hasScreenMap: !!frameData.screenMap,
+      pixelCount: Array.isArray(frameData) ? frameData.length : 0
+    }
+  });
 }
 
 /**

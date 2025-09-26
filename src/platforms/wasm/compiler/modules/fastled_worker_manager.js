@@ -429,6 +429,10 @@ export class FastLEDWorkerManager {
           this.handleFrameImageBitmap(data.payload);
           break;
 
+        case 'frame_shared':
+          this.handleFrameShared(data.payload);
+          break;
+
         case 'error':
           this.handleWorkerErrorMessage(data.payload);
           break;
@@ -478,6 +482,109 @@ export class FastLEDWorkerManager {
       source: 'background_worker',
       ...payload
     });
+  }
+
+  /**
+   * Handles SharedArrayBuffer frame transfers from worker
+   * @param {Object} payload - Frame shared memory references
+   */
+  handleFrameShared(payload) {
+    try {
+      if (!payload.sharedFrameHeader || !payload.sharedPixelBuffer) {
+        FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Invalid shared frame payload - missing buffers');
+        return;
+      }
+
+      // Read frame header from shared memory using atomic operations
+      const headerView = new Int32Array(payload.sharedFrameHeader);
+
+      // Check if data is ready (write flag should be 0)
+      const writeFlag = Atomics.load(headerView, 7);
+      if (writeFlag !== 0) {
+        // Data is still being written, skip this frame
+        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Frame data not ready, skipping');
+        return;
+      }
+
+      // Atomically read frame information
+      const frameInfo = {
+        frameNumber: Atomics.load(headerView, 0),
+        screenMapOffset: Atomics.load(headerView, 1),
+        pixelDataSize: Atomics.load(headerView, 2),
+        screenMapPresent: Atomics.load(headerView, 3),
+        timestampLow: Atomics.load(headerView, 4),
+        timestampFrac: Atomics.load(headerView, 5),
+        numStrips: Atomics.load(headerView, 6)
+      };
+
+      // Reconstruct timestamp
+      frameInfo.timestamp = frameInfo.timestampLow + (frameInfo.timestampFrac / 1000);
+
+      // Read pixel data from shared memory
+      const pixelView = new Uint8Array(payload.sharedPixelBuffer);
+
+      // Reconstruct frame data structure using payload information
+      const frameData = {
+        numStrips: frameInfo.numStrips,
+        strips: [],
+        timestamp: frameInfo.timestamp,
+        frameNumber: frameInfo.frameNumber
+      };
+
+      // Reconstruct strips using frameDataStructure from payload
+      if (payload.frameDataStructure) {
+        for (const stripInfo of payload.frameDataStructure) {
+          if (stripInfo.sharedOffset >= 0 && stripInfo.sharedLength > 0) {
+            // Read pixel data from shared buffer at the specified offset
+            const stripPixelData = new Uint8Array(pixelView.buffer,
+                                                  stripInfo.sharedOffset,
+                                                  stripInfo.sharedLength);
+
+            // Convert raw pixel data to pixel objects (assuming RGB format)
+            const pixels = [];
+            for (let i = 0; i < stripPixelData.length; i += 3) {
+              if (i + 2 < stripPixelData.length) {
+                pixels.push({
+                  r: stripPixelData[i],
+                  g: stripPixelData[i + 1],
+                  b: stripPixelData[i + 2]
+                });
+              }
+            }
+
+            frameData.strips.push({
+              stripId: stripInfo.strip_id,
+              numPixels: pixels.length,
+              pixels: pixels,
+              pixel_data: stripPixelData // Keep reference to shared data
+            });
+          }
+        }
+      }
+
+      // Read screen map if present
+      if (frameInfo.screenMapPresent && frameInfo.screenMapOffset >= 0 && payload.screenMapLength > 0) {
+        try {
+          const screenMapData = new Uint8Array(pixelView.buffer,
+                                               frameInfo.screenMapOffset,
+                                               payload.screenMapLength);
+          const screenMapJson = new TextDecoder().decode(screenMapData);
+          frameData.screenMap = JSON.parse(screenMapJson);
+        } catch (error) {
+          FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to parse screen map from shared memory', error);
+        }
+      }
+
+      // Emit frame data event for graphics managers
+      fastLEDEvents.emit('frame:data', {
+        source: 'background_worker_shared',
+        frameData,
+        timestamp: frameInfo.timestamp
+      });
+
+    } catch (error) {
+      FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to process shared frame data', error);
+    }
   }
 
   /**
