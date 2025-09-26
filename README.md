@@ -411,11 +411,11 @@ While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable 
 
 The following drivers are available for ESP32 boards:
 
-##### ESP32-S3 I2S Driver
+#### ESP32-S3 I2S Driver
 
 The `ESP32-S3 I2S` driver leverages the I2S peripheral for high-performance parallel WS2812 output on ESP32-S3 boards. This driver is a dedicated clockless implementation.
 
-###### Usage
+##### Usage
 To use this driver, you must define `FASTLED_USES_ESP32S3_I2S` before including the FastLED header.
 
 ```cpp
@@ -431,24 +431,24 @@ FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
 
 **Note:** This driver requires a compatible Arduino-ESP32 core/IDF.
 
-##### Generic ESP32 I2S Driver
+#### Generic ESP32 I2S Driver
 
 The generic `ESP32 I2S` driver provides parallel WS2812 output for various ESP32 boards (e.g., ESP32-DevKitC). It uses the I2S peripheral for efficient data transmission.
 
-###### Usage
+##### Usage
 To use this driver, you must define `FASTLED_ESP32_I2S` before including the FastLED header.
 
-##### ESP32 RMT Driver Configuration
-
-FastLED includes two RMT driver implementations:
-- **RMT4 driver**: FastLED's custom, highly-optimized driver with direct RMT peripheral control
-- **RMT5 driver**: Wrapper around Espressif's `led_strip` component (ESP-IDF 5.0+)
+#### ESP32 RMT Driver Configuration
 
 **Important:** The RMT4 and RMT5 drivers use completely different APIs. FastLED's custom RMT4 driver is specifically optimized for LED control and significantly outperforms Espressif's generic RMT5 wrapper in terms of:
 - **Performance**: Lower interrupt overhead and better timing precision
 - **Wi-Fi resistance**: Dual-buffer design prevents flickering under Wi-Fi load
 - **Efficiency**: Direct hardware control vs. abstraction layer overhead
 - **Strip capacity**: RMT4 uses worker pools to support more LED strips; RMT5 lacks worker pools and is limited by hardware channels (particularly restrictive on ESP32-C3 with only 2 TX channels)
+
+FastLED includes two RMT driver implementations:
+- **RMT4 driver**: FastLED's custom, highly-optimized driver with direct RMT peripheral control
+- **RMT5 driver**: Wrapper around Espressif's `led_strip` component (ESP-IDF 5.0+)
 
 By default, FastLED automatically selects:
 - **ESP-IDF 5.0+**: Uses RMT5 driver (for compatibility)
