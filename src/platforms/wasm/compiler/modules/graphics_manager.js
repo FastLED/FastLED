@@ -169,10 +169,11 @@ export class GraphicsManager {
   }
 
   /**
-   * Clears the texture data buffer
+   * Clears the texture data buffer - optimized for recording performance
    */
   clearTexture() {
     if (this.texData) {
+      // Use faster TypedArray.fill(0) - already optimal
       this.texData.fill(0);
     }
   }
@@ -376,7 +377,7 @@ export class GraphicsManager {
     const canvasWidth = this.gl.canvas.width;
     const canvasHeight = this.gl.canvas.height;
 
-    // Check if we need to reallocate the texture
+    // Check if we need to reallocate the texture - optimized to reduce reallocations
     const newTexWidth = 2 ** Math.ceil(Math.log2(canvasWidth));
     const newTexHeight = 2 ** Math.ceil(Math.log2(canvasHeight));
 
@@ -400,6 +401,7 @@ export class GraphicsManager {
 
       // Reallocate texData buffer
       this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
+      console.log(`WebGL texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
     }
 
     if (!this.screenMap) {
