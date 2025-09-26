@@ -291,10 +291,8 @@ export class VideoRecorder {
         console.log(`Frame buffer: ${this.frameBuffer.length} frames, ${(this.bufferMemoryUsage / 1024 / 1024).toFixed(1)}MB`);
       }
 
-      // Start async processing if not already running
-      if (!this.isProcessingBuffer) {
-        this.processBufferAsync();
-      }
+      // NOTE: Buffer processing disabled - using native canvas.captureStream() instead
+      // Manual buffering is no longer needed and only wastes CPU cycles
 
     } catch (error) {
       console.error('Error capturing frame to buffer:', error);
@@ -753,14 +751,11 @@ export class VideoRecorder {
 
       // Set up event handlers
       this.mediaRecorder.onstart = () => {
-        console.log('MediaRecorder start event fired - initializing with startup optimizations');
+        console.log('MediaRecorder start event fired - using native canvas.captureStream()');
         this.isRecording = true;
-        // Initialize buffer system with startup-friendly settings
-        this.frameBuffer = [];
-        this.bufferMemoryUsage = 0;
+        // Initialize minimal counters (no manual buffering needed)
         this.droppedFrames = 0;
         this.capturedFrames = 0;
-        this.emergencyBufferMode = false;
 
         // Note: Frame capture is handled by canvas.captureStream() - no manual capture needed
         console.log('Using native canvas.captureStream() for optimal performance');
@@ -769,7 +764,7 @@ export class VideoRecorder {
         if (this.onStateChange) {
           this.onStateChange(true);
         }
-        console.log(`Frame buffer system initialized with startup optimizations: max ${this.maxBufferFrames} frames, ${this.settings.maxBufferSizeMB}MB`);
+        console.log('Native canvas.captureStream() recording initialized successfully');
       };
 
       this.mediaRecorder.ondataavailable = (event) => {
@@ -785,10 +780,8 @@ export class VideoRecorder {
         console.log('MediaRecorder stopped, total chunks:', this.recordedChunks.length);
         console.log('Total data size:', this.recordedChunks.reduce((sum, chunk) => sum + chunk.size, 0), 'bytes');
 
-        // Process any remaining frames in buffer before saving
-        this.finalizeBufferProcessing().then(() => {
-          this.saveRecording();
-        });
+        // No buffer processing needed with canvas.captureStream() - save directly
+        this.saveRecording();
       };
 
       this.mediaRecorder.onerror = (event) => {
@@ -806,15 +799,14 @@ export class VideoRecorder {
       console.log('Stream active:', this.stream.active);
       console.log('Stream tracks:', this.stream.getTracks().map((t) => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
 
-      // Start recording with codec-optimized timeslice for performance
+      // Start recording with optimized timeslice for native canvas.captureStream()
       try {
-        // Optimize timeslice based on frame rate and codec for smooth recording
-        // Use longer initial timeslices to reduce startup frame dropping
-        let timeslice = Math.max(200, 2000 / this.fps); // Startup-friendly: double interval, minimum 200ms
+        // With native canvas capture, we can use more aggressive timeslices for better responsiveness
+        let timeslice = Math.max(100, 1000 / this.fps); // Standard interval, minimum 100ms
         if (this.selectedMimeType.includes('avc1.42E01E') || this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
-          timeslice = Math.max(150, 1000 / this.fps); // Faster codecs with moderate sync during startup
+          timeslice = Math.max(50, 500 / this.fps); // Faster codecs with tighter sync
         } else if (this.selectedMimeType.includes('av1')) {
-          timeslice = Math.max(300, 2000 / this.fps); // Slower codecs with very conservative startup timing
+          timeslice = Math.max(150, 1000 / this.fps); // Slower codecs but still responsive
         }
         try {
           this.mediaRecorder.start(timeslice);
@@ -825,16 +817,7 @@ export class VideoRecorder {
           console.log('MediaRecorder.start() called successfully (no timeslice)');
         }
 
-        // Add a timeout to ensure we detect if recording fails to start
-        setTimeout(() => {
-          if (this.mediaRecorder && this.mediaRecorder.state !== 'recording') {
-            console.error('MediaRecorder failed to transition to recording state:', this.mediaRecorder.state);
-            this.isRecording = false;
-            if (this.onStateChange) {
-              this.onStateChange(false);
-            }
-          }
-        }, 500);
+        // MediaRecorder state monitoring handled by onstart/onerror events
 
       } catch (startError) {
         console.error('MediaRecorder.start() failed:', startError);
