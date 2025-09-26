@@ -492,6 +492,11 @@
         // Apply to video recorder if it exists
         if (window.videoRecorder) {
             window.videoRecorder.updateSettings(videoSettings);
+
+            // Update record button tooltip with new encoding format
+            if (window.updateRecordButtonTooltip) {
+                window.updateRecordButtonTooltip();
+            }
         }
 
         // Show confirmation toast

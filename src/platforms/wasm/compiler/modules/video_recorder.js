@@ -132,6 +132,38 @@ export class VideoRecorder {
   }
 
   /**
+   * Gets a user-friendly display name for the current codec
+   * @returns {string} Human-readable codec name
+   */
+  getCodecDisplayName() {
+    const codec = this.settings.videoCodec;
+
+    // Map codec MIME types to user-friendly names
+    if (codec.includes('avc1.42E01E')) {
+      return 'H.264 Baseline MP4';
+    } else if (codec.includes('h264,aac')) {
+      return 'H.264+AAC MP4';
+    } else if (codec.includes('h264') && codec.includes('mp4')) {
+      return 'H.264 MP4';
+    } else if (codec.includes('h264') && codec.includes('webm')) {
+      return 'H.264 WebM';
+    } else if (codec.includes('vp8')) {
+      return 'VP8 WebM';
+    } else if (codec.includes('vp9')) {
+      return 'VP9 WebM';
+    } else if (codec.includes('av1')) {
+      return 'AV1 WebM';
+    } else if (codec.includes('mp4')) {
+      return 'MP4 Auto';
+    } else if (codec.includes('webm')) {
+      return 'WebM Auto';
+    }
+
+    // Fallback to the actual MIME type if no match
+    return codec || 'Default';
+  }
+
+  /**
    * Selects the best available MIME type for recording, optimized for encoding speed
    * @returns {string} Selected MIME type
    */

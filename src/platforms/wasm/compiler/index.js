@@ -1012,7 +1012,6 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
         // Update button visual state
         if (isRecording) {
           recordButton.classList.add('recording');
-          recordButton.title = 'Stop Recording';
           // Update icon
           const recordIcon = recordButton.querySelector('.record-icon');
           const stopIcon = recordButton.querySelector('.stop-icon');
@@ -1020,18 +1019,45 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
           if (stopIcon) stopIcon.style.display = 'block';
         } else {
           recordButton.classList.remove('recording');
-          recordButton.title = 'Start Recording';
           // Update icon
           const recordIcon = recordButton.querySelector('.record-icon');
           const stopIcon = recordButton.querySelector('.stop-icon');
           if (recordIcon) recordIcon.style.display = 'block';
           if (stopIcon) stopIcon.style.display = 'none';
         }
+
+        // Update tooltip with current encoding format
+        // Use setTimeout to ensure the state change is complete
+        setTimeout(() => {
+          if (window.updateRecordButtonTooltip) {
+            window.updateRecordButtonTooltip();
+          }
+        }, 0);
       },
     });
 
     // Expose video recorder globally for settings updates
     window.videoRecorder = videoRecorder;
+
+    // Function to update record button tooltip with current encoding format
+    function updateRecordButtonTooltip() {
+      if (videoRecorder && recordButton) {
+        const codecName = videoRecorder.getCodecDisplayName();
+        const isRecording = videoRecorder.getIsRecording();
+
+        if (isRecording) {
+          recordButton.title = `Stop Recording (${codecName})`;
+        } else {
+          recordButton.title = `Record in ${codecName}`;
+        }
+      }
+    }
+
+    // Update tooltip initially
+    updateRecordButtonTooltip();
+
+    // Expose globally so it can be called when settings change
+    window.updateRecordButtonTooltip = updateRecordButtonTooltip;
 
     // Add click handler to record button
     recordButton.addEventListener('click', (e) => {

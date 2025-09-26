@@ -105,6 +105,8 @@ declare class VideoRecorder {
   startRecording(): boolean;
   stopRecording(): boolean;
   updateSettings(settings: any): void;
+  getIsRecording(): boolean;
+  getCodecDisplayName(): string;
   [key: string]: any;
 }
 
@@ -241,6 +243,7 @@ declare global {
     stopVideoRecording: () => Promise<void>;
     testVideoRecording: () => void;
     getVideoSettings: () => any;
+    updateRecordButtonTooltip: () => void;
 
     // FastLED Control Functions
     getFastLEDController: () => FastLEDAsyncController | null;
