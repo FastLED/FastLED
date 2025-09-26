@@ -363,7 +363,9 @@ export class VideoRecorder {
 
     console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
     console.log('Video stream tracks:', videoStream.getVideoTracks().length);
-    console.log('Video stream settings:', videoStream.getVideoTracks()[0]?.getSettings());
+    const videoTrackSettings = videoStream.getVideoTracks()[0]?.getSettings();
+    console.log('Video stream settings:', videoTrackSettings);
+    console.log('🎬 FINAL FPS SENT TO MEDIA RECORDER:', videoTrackSettings?.frameRate || 'unknown');
 
     // Validate that we have video tracks
     const videoTracks = videoStream.getVideoTracks();
@@ -803,12 +805,12 @@ export class VideoRecorder {
 
       // Start recording with optimized timeslice for native canvas.captureStream()
       try {
-        // With native canvas capture, we can use more aggressive timeslices for better responsiveness
-        let timeslice = Math.max(100, 1000 / this.fps); // Standard interval, minimum 100ms
+        // Use fixed reasonable timeslices to avoid browser batching issues
+        let timeslice = 100; // 100ms chunks = 10 chunks per second, good balance
         if (this.selectedMimeType.includes('avc1.42E01E') || this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
-          timeslice = Math.max(50, 500 / this.fps); // Faster codecs with tighter sync
+          timeslice = 100; // Fast codecs - consistent 100ms chunks
         } else if (this.selectedMimeType.includes('av1')) {
-          timeslice = Math.max(150, 1000 / this.fps); // Slower codecs but still responsive
+          timeslice = 200; // Slower codecs - larger chunks to reduce encoding pressure
         }
         try {
           this.mediaRecorder.start(timeslice);
