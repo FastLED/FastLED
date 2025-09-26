@@ -1,3 +1,13 @@
+FastLED 3.10.4
+==============
+  * **ezWS2812 Hardware-Accelerated Drivers for Silicon Labs MG24**: Optimized WS2812 controllers imported from Silicon Labs
+    * Resolves GitHub issue #1891: Platform support for Seeed Xiao MG24 Sense and other EFR32MG24-based boards
+    * Added `EZWS2812_GPIO`: Always-available GPIO controller with cycle-accurate timing for 39MHz and 78MHz CPUs
+    * Added `EZWS2812_SPI`: Optional SPI-based controller for maximum performance (define `FASTLED_USES_EZWS2812_SPI`)
+    * SPI controller follows ObjectFLED pattern - explicit opt-in required to prevent consuming hardware SPI peripheral
+    * Supports all EFR32MG24 series: Arduino Nano Matter, SparkFun Thing Plus Matter, Seeed Xiao MG24 Sense
+    * Based on Silicon Labs ezWS2812 library with FastLED integration for seamless API compatibility
+
 FastLED 3.10.3
 ==============
   * **WS2812B Reset Time Update**: Enhanced compatibility with newer WS2812B chipsets
@@ -20,6 +30,7 @@ FastLED 3.10.3
     * Clockless LED controller support for WS2812, SK6812, and other standard chipsets
     * Board definitions for `mgm240` target with `siliconlabsefm32` platform
     * Added CI testing with GitHub Actions build badge for continuous validation
+
 
 FastLED 3.10.2
 ==============

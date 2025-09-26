@@ -81,7 +81,56 @@ void loop() {
 ### Silicon Labs (SiLabs)
 [![ThingPlusMatter_mgm240s](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_mgm240s_thingplusmatter.yml)
 
-*MGM240 (EFR32MG24) support for Arduino Nano Matter and SparkFun Thing Plus Matter boards
+*MGM240 (EFR32MG24) support for Arduino Nano Matter, SparkFun Thing Plus Matter, and Seeed Xiao MG24 Sense boards
+
+##### ezWS2812 Hardware-Accelerated Drivers
+
+FastLED includes optimized ezWS2812 drivers imported from Silicon Labs for EFR32MG24 series microcontrollers. These drivers provide superior performance and timing accuracy compared to standard bit-banging approaches.
+
+###### Available Controllers
+
+- **`EZWS2812_GPIO`**: Always available, uses optimized GPIO bit-banging with cycle-accurate timing
+  - Calibrated for 39MHz and 78MHz CPU frequencies
+  - No hardware peripheral consumption
+  - Good performance (~400Hz refresh rate)
+  - Usage: `FastLED.addLeds<EZWS2812_GPIO, DATA_PIN, GRB>(leds, NUM_LEDS)`
+
+- **`EZWS2812_SPI`**: Optional hardware SPI acceleration for maximum performance
+  - **Requires**: `#define FASTLED_USES_EZWS2812_SPI` before `#include <FastLED.h>`
+  - **Consumes**: One hardware SPI peripheral
+  - Excellent performance (~1000Hz refresh rate)
+  - Usage: `FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS)`
+
+###### Why SPI Requires Opt-In
+
+The SPI controller consumes a hardware SPI peripheral that may be needed for other components (SD cards, displays, sensors, etc.). Following the same pattern as ObjectFLED for Teensy, the SPI controller must be explicitly enabled to prevent accidentally consuming the SPI peripheral.
+
+###### Usage Examples
+
+**GPIO Controller (Default - No Define Needed):**
+```cpp
+#include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+void setup() {
+    // GPIO-based controller on pin 7
+    FastLED.addLeds<EZWS2812_GPIO, 7, GRB>(leds, NUM_LEDS);
+}
+```
+
+**SPI Controller (Requires Define):**
+```cpp
+#define FASTLED_USES_EZWS2812_SPI  // MUST be before #include
+#include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+void setup() {
+    // SPI-based controller (consumes hardware SPI)
+    FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS);
+}
+```
+
+These drivers are based on the Silicon Labs ezWS2812 library and provide seamless FastLED API compatibility with enhanced performance for MG24-based boards.
 
 ### Raspberry Pi Pico
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml) [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml) [![rp2350B SparkfunXRP](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml)

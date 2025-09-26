@@ -49,7 +49,8 @@
 #elif defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
 #include "platforms/arm/giga/fastled_arm_giga.h"
 #elif defined(ARDUINO_ARCH_SILABS)
-// Silicon Labs MGM240 (Arduino Nano Matter, SparkFun Thing Plus Matter)
+// Silicon Labs MGM240 (EFR32MG24 SoC) - Arduino Nano Matter, SparkFun Thing Plus Matter
+// Also supports Seeed Xiao MG24 Sense and other EFR32MG24-based boards
 #include "platforms/arm/mgm240/fastled_arm_mgm240.h"
 #elif defined(__x86_64__) || defined(FASTLED_STUB_IMPL)
 

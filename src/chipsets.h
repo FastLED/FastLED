@@ -1279,6 +1279,62 @@ private:
 
 
 #endif
+
+/// @defgroup SilabsChipsets Silicon Labs ezWS2812 Controllers
+/// Hardware-accelerated LED controllers for Silicon Labs MGM240/MG24 series
+///
+/// These controllers use Silicon Labs' ezWS2812 drivers to provide optimized
+/// WS2812 LED control on MGM240 and MG24 series microcontrollers.
+///
+/// Available controllers:
+/// - EZWS2812_SPI: Uses hardware SPI (must define FASTLED_USES_EZWS2812_SPI)
+/// - EZWS2812_GPIO: Uses optimized GPIO timing (always available)
+/// @{
+
+#if defined(ARDUINO_ARCH_SILABS)
+
+/// Silicon Labs ezWS2812 GPIO controller (always available)
+/// @tparam DATA_PIN the pin to write data out on
+/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for WS2812)
+///
+/// This controller uses optimized GPIO manipulation with frequency-specific timing.
+/// Automatically selects 39MHz or 78MHz implementation based on F_CPU.
+///
+/// Usage:
+/// @code
+/// FastLED.addLeds<EZWS2812_GPIO, 7, GRB>(leds, NUM_LEDS);
+/// @endcode
+template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+using EZWS2812_GPIO = ClocklessController_ezWS2812_GPIO_Auto<DATA_PIN, RGB_ORDER>;
+
+#ifdef FASTLED_USES_EZWS2812_SPI
+
+/// Silicon Labs ezWS2812 SPI controller (requires FASTLED_USES_EZWS2812_SPI)
+/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for WS2812)
+///
+/// This controller uses the MGM240/MG24's hardware SPI peripheral to generate
+/// precise WS2812 timing signals. Excellent performance but consumes SPI peripheral.
+///
+/// IMPORTANT: You must define FASTLED_USES_EZWS2812_SPI before including FastLED.h
+///
+/// Usage:
+/// @code
+/// #define FASTLED_USES_EZWS2812_SPI
+/// #include <FastLED.h>
+///
+/// void setup() {
+///     FastLED.addLeds<EZWS2812_SPI, GRB>(leds, NUM_LEDS);
+/// }
+/// @endcode
+template<EOrder RGB_ORDER = GRB>
+using EZWS2812_SPI = ClocklessController_ezWS2812_SPI<RGB_ORDER>;
+
+#endif // FASTLED_USES_EZWS2812_SPI
+
+#endif // ARDUINO_ARCH_SILABS
+
+/// @} SilabsChipsets
+
 /// @} Chipsets
 
 FASTLED_NAMESPACE_END
