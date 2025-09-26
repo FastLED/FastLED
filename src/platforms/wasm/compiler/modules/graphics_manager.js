@@ -356,6 +356,23 @@ export class GraphicsManager {
 
     if (!this.gl) this.initWebGL();
 
+    // Update canvas size based on screenMap dimensions
+    if (this.screenMap && this.canvas) {
+      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0];
+      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1];
+
+      // Only update canvas size if it's different from current size
+      if (this.canvas.width !== screenWidth || this.canvas.height !== screenHeight) {
+        this.canvas.width = screenWidth;
+        this.canvas.height = screenHeight;
+
+        // Update WebGL viewport to match new canvas size
+        if (this.gl) {
+          this.gl.viewport(0, 0, screenWidth, screenHeight);
+        }
+      }
+    }
+
     const canvasWidth = this.gl.canvas.width;
     const canvasHeight = this.gl.canvas.height;
 
