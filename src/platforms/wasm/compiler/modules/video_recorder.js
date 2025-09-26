@@ -357,10 +357,9 @@ export class VideoRecorder {
     // The video recorder will capture whatever is being rendered to the canvas
     console.log('Video recorder creating media stream from canvas...');
 
-    // Get video stream from canvas with optimized frame rate
-    // Use slightly higher capture rate to ensure smooth recording during busy periods
-    const captureRate = Math.min(this.fps * 1.1, 60); // 10% buffer, max 60fps
-    const videoStream = this.canvas.captureStream(captureRate);
+    // Get video stream from canvas with exact frame rate
+    // Use exact fps - canvas.captureStream() is hardware-accelerated and non-blocking
+    const videoStream = this.canvas.captureStream(this.fps);
 
     console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
     console.log('Video stream tracks:', videoStream.getVideoTracks().length);
@@ -609,13 +608,9 @@ export class VideoRecorder {
       }
     };
 
-    // Delay first capture slightly to allow animation loop to stabilize during startup
-    setTimeout(() => {
-      if (this.isRecording) {
-        requestAnimationFrame(captureLoop);
-        console.log(`Frame capture loop started at ${this.fps} FPS (${captureInterval.toFixed(1)}ms per frame, startup stabilized)`);
-      }
-    }, 50); // 50ms delay to prevent startup conflicts
+    // Start capture loop immediately - no delay needed
+    requestAnimationFrame(captureLoop);
+    console.log(`Frame capture loop started at ${this.fps} FPS (${captureInterval.toFixed(1)}ms per frame)`);
   }
 
   /**
@@ -767,8 +762,8 @@ export class VideoRecorder {
         this.capturedFrames = 0;
         this.emergencyBufferMode = false;
 
-        // Start the frame capture loop with startup delay
-        this.startFrameCapture();
+        // Note: Frame capture is handled by canvas.captureStream() - no manual capture needed
+        console.log('Using native canvas.captureStream() for optimal performance');
 
         // Notify state change
         if (this.onStateChange) {
