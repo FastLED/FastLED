@@ -1039,19 +1039,83 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
     // Expose video recorder globally for settings updates
     window.videoRecorder = videoRecorder;
 
+    // Create custom tooltip element
+    const tooltip = document.createElement('div');
+    tooltip.id = 'record-tooltip';
+    tooltip.style.cssText = `
+      position: absolute;
+      background: rgba(0, 0, 0, 0.9);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      white-space: nowrap;
+      z-index: 10000;
+      pointer-events: none;
+      display: none;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    `;
+    document.body.appendChild(tooltip);
+
     // Function to update record button tooltip with current encoding format
     function updateRecordButtonTooltip() {
       if (videoRecorder && recordButton) {
         const codecName = videoRecorder.getCodecDisplayName();
         const isRecording = videoRecorder.getIsRecording();
 
+        let tooltipText;
         if (isRecording) {
-          recordButton.title = `Stop Recording (${codecName})`;
+          tooltipText = `Stop Recording (${codecName})`;
         } else {
-          recordButton.title = `Record in ${codecName}`;
+          tooltipText = `Record in ${codecName}`;
         }
+
+        // Store tooltip text for mouse events
+        recordButton.setAttribute('data-tooltip', tooltipText);
+        // Remove browser default tooltip
+        recordButton.removeAttribute('title');
       }
     }
+
+    // Add mouse events for immediate tooltip display
+    recordButton.addEventListener('mouseenter', (e) => {
+      const tooltipText = e.target.getAttribute('data-tooltip');
+      if (tooltipText) {
+        tooltip.textContent = tooltipText;
+        tooltip.style.display = 'block';
+
+        // Position tooltip above the button
+        const rect = recordButton.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2}px`;
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
+
+        // Adjust horizontal position if tooltip would go off-screen
+        const tooltipRect = tooltip.getBoundingClientRect();
+        if (tooltipRect.right > window.innerWidth - 10) {
+          tooltip.style.left = `${window.innerWidth - tooltipRect.width - 10}px`;
+        }
+        if (tooltipRect.left < 10) {
+          tooltip.style.left = '10px';
+        }
+      }
+    });
+
+    recordButton.addEventListener('mouseleave', () => {
+      tooltip.style.display = 'none';
+    });
+
+    recordButton.addEventListener('mousemove', () => {
+      // Update position on mouse move for better tracking
+      const rect = recordButton.getBoundingClientRect();
+      tooltip.style.left = `${rect.left + rect.width / 2}px`;
+      tooltip.style.top = `${rect.top - tooltip.offsetHeight - 8}px`;
+
+      // Center tooltip horizontally relative to button
+      const tooltipRect = tooltip.getBoundingClientRect();
+      const centerOffset = tooltipRect.width / 2;
+      tooltip.style.left = `${rect.left + rect.width / 2 - centerOffset}px`;
+    });
 
     // Update tooltip initially
     updateRecordButtonTooltip();
