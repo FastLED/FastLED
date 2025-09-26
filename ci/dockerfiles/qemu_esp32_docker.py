@@ -80,7 +80,7 @@ def run_docker_command_no_fail(cmd: List[str]) -> int:
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
-    DEFAULT_IMAGE = "mluis/qemu-esp32:latest"
+    DEFAULT_IMAGE = "espressif/idf:latest"
     ALTERNATIVE_IMAGE = "espressif/idf:latest"
     FALLBACK_IMAGE = "espressif/idf:release-v5.2"
 
@@ -262,16 +262,16 @@ class DockerQEMURunner:
 
         # Determine QEMU system and machine based on target
         if machine == "esp32c3":
-            qemu_system = "/usr/local/bin/qemu-system-riscv32"
+            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-riscv32"
             qemu_machine = "esp32c3"
             echo_target = "ESP32C3"
         elif machine == "esp32s3":
-            qemu_system = "/usr/local/bin/qemu-system-xtensa"
+            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-xtensa"
             qemu_machine = "esp32s3"
             echo_target = "ESP32S3"
         else:
             # Default to ESP32 (Xtensa)
-            qemu_system = "/usr/local/bin/qemu-system-xtensa"
+            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-xtensa"
             qemu_machine = "esp32"
             echo_target = "ESP32"
 
