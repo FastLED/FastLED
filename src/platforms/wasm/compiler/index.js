@@ -977,16 +977,8 @@ function initializeVideoRecorder() {
  * Actually initializes the video recorder once canvas is ready
  */
 function actuallyInitializeVideoRecorder(canvas, recordButton) {
-  // Try to get audio context if available
-  let audioContext = null;
-  if (typeof AudioContext !== 'undefined' || typeof window.webkitAudioContext !== 'undefined') {
-    try {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      audioContext = new AudioContextClass();
-    } catch (error) {
-      console.warn('Could not create AudioContext for video recording:', error);
-    }
-  }
+  // Note: Audio context removed for async video recorder
+  // Audio recording will be handled separately if needed
 
   // Check if MediaRecorder is supported
   if (typeof MediaRecorder === 'undefined') {
@@ -1007,14 +999,19 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
     // Don't create a context here - the graphics manager handles context creation
     // Just validate the canvas element is ready for use
 
-    // Create video recorder instance
+    // Create video recorder instance with optimized settings
     videoRecorder = new VideoRecorder({
       canvas,
-      audioContext,
+      audioContext: null, // Disable audio for better performance
       fps: savedSettings?.fps || 30,
-      settings: savedSettings,
+      settings: {
+        ...savedSettings,
+        // Optimize for performance over quality
+        videoBitrate: savedSettings?.videoBitrate || 5, // Lower bitrate for faster processing
+        videoCodec: savedSettings?.videoCodec || 'video/webm;codecs=vp8', // VP8 is faster than H.264
+      },
       onStateChange: (isRecording) => {
-      // Update button visual state
+        // Update button visual state
         if (isRecording) {
           recordButton.classList.add('recording');
           recordButton.title = 'Stop Recording';
@@ -1053,7 +1050,7 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
       }
     });
 
-    console.log('Video recorder initialized');
+    console.log('Optimized video recorder initialized (performance settings applied)');
   } catch (error) {
     console.error('Failed to initialize video recorder:', error);
     recordButton.style.display = 'none';

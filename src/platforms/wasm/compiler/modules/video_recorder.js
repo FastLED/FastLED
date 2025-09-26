@@ -252,6 +252,12 @@ export class VideoRecorder {
         options.videoKeyFrameIntervalDuration = 1000; // Keyframe every 1 second for faster seeking
       }
 
+      // Additional performance optimizations
+      if (this.selectedMimeType.includes('webm')) {
+        // For WebM, use aggressive compression for better real-time performance
+        options.bitsPerSecond = Math.min(options.videoBitsPerSecond, 5000000); // Cap at 5Mbps for performance
+      }
+
       // Remove mimeType if empty (use browser default)
       if (!options.mimeType) {
         delete options.mimeType;
@@ -320,13 +326,13 @@ export class VideoRecorder {
       console.log('Stream active:', this.stream.active);
       console.log('Stream tracks:', this.stream.getTracks().map((t) => ({ kind: t.kind, enabled: t.enabled, muted: t.muted })));
 
-      // Start recording with explicit timeslice to ensure data collection
+      // Start recording with optimized timeslice for performance
       try {
-        // Try different timeslice values - some browsers are picky
-        const timeslice = 500; // Default: 0.5 second for quicker data availability
+        // Use longer timeslices to reduce CPU usage and improve performance
+        const timeslice = 1000; // 1 second chunks for better performance
         try {
           this.mediaRecorder.start(timeslice);
-          console.log(`MediaRecorder.start(${timeslice}) called successfully`);
+          console.log(`MediaRecorder.start(${timeslice}ms chunks) called successfully for optimized performance`);
         } catch (timesliceError) {
           console.warn(`MediaRecorder.start(${timeslice}) failed, trying without timeslice:`, timesliceError);
           this.mediaRecorder.start(); // Try without timeslice
@@ -521,31 +527,44 @@ export class VideoRecorder {
   }
 
   /**
-   * Forces a frame update to trigger canvas content capture
-   * This helps ensure MediaRecorder gets data when recording starts
+   * Forces a frame update to trigger canvas content capture using requestIdleCallback
+   * This helps ensure MediaRecorder gets data when recording starts without blocking
    */
   requestFrameUpdate() {
     try {
-      // Try to request a frame update if available
-      if (window.requestAnimationFrame) {
+      // Use requestIdleCallback for non-blocking frame updates
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(() => {
+          console.log('Idle frame update requested to trigger canvas capture');
+          this.updateCanvasWhenIdle();
+        }, { timeout: 16 }); // 16ms timeout for 60fps
+      } else {
+        // Fallback to requestAnimationFrame
         window.requestAnimationFrame(() => {
           console.log('Frame update requested to trigger canvas capture');
-          // If we have access to a render function, call it
-          if (window.updateCanvas && typeof window.updateCanvas === 'function') {
-            try {
-              // Pass empty frame data with screenMap for canvas refresh during recording
-              const emptyFrameData = Object.assign([], {
-                screenMap: window.screenMap || undefined
-              });
-              window.updateCanvas(emptyFrameData);
-            } catch (e) {
-              console.warn('updateCanvas() call failed:', e);
-            }
-          }
+          this.updateCanvasWhenIdle();
         });
       }
     } catch (e) {
       console.warn('requestFrameUpdate failed:', e);
+    }
+  }
+
+  /**
+   * Updates canvas during idle time to minimize main thread impact
+   */
+  updateCanvasWhenIdle() {
+    try {
+      // If we have access to a render function, call it
+      if (window.updateCanvas && typeof window.updateCanvas === 'function') {
+        // Pass empty frame data with screenMap for canvas refresh during recording
+        const emptyFrameData = Object.assign([], {
+          screenMap: window.screenMap || undefined
+        });
+        window.updateCanvas(emptyFrameData);
+      }
+    } catch (e) {
+      console.warn('updateCanvasWhenIdle() call failed:', e);
     }
   }
 
