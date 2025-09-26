@@ -33,3 +33,4 @@ jobs:
     with:
       platform: esp32dev
       platform_display: ESP32-DEV
+      sketch: BlinkParallel
