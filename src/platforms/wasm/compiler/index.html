@@ -474,27 +474,27 @@
         videoBitrate: 8,                             // Slightly lower bitrate for speed
         audioCodec: 'aac',                           // AAC for MP4 compatibility
         audioBitrate: 128,
-        fps: 30
+        fps: 60
     };
 
     let videoSettings = { ...videoSettingsDefaults };
 
-    // Load saved settings from localStorage
+    // Always use default settings (no localStorage persistence)
     function loadVideoSettings() {
-        const saved = localStorage.getItem('videoRecordingSettings');
-        if (saved) {
-            try {
-                videoSettings = { ...videoSettingsDefaults, ...JSON.parse(saved) };
-            } catch (e) {
-                console.error('Failed to load video settings:', e);
-            }
+        // Clean up any existing saved settings since we no longer use them
+        if (localStorage.getItem('videoRecordingSettings')) {
+            localStorage.removeItem('videoRecordingSettings');
+            console.log('Removed old video recording settings from localStorage');
         }
+        // Always return fresh defaults - no persistence needed
+        videoSettings = { ...videoSettingsDefaults };
         return videoSettings;
     }
 
-    // Save settings to localStorage
+    // No longer saving to localStorage - always use defaults
     function saveVideoSettings() {
-        localStorage.setItem('videoRecordingSettings', JSON.stringify(videoSettings));
+        // Settings are not persisted - always use defaults on reload
+        console.log('Video settings not saved (using defaults only)');
     }
 
     // Show video settings popup

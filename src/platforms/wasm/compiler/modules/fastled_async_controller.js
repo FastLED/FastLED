@@ -269,8 +269,9 @@ class FastLEDAsyncController {
       return;
     }
 
-    // Maintain consistent frame rate
-    if (currentTime - this.lastFrameTime < this.frameInterval) {
+    // Maintain consistent frame rate with some tolerance for timing jitter
+    const timeSinceLastFrame = currentTime - this.lastFrameTime;
+    if (timeSinceLastFrame < this.frameInterval * 0.9) { // Allow 10% tolerance
       requestAnimationFrame(this.loop);
       return;
     }
@@ -481,19 +482,12 @@ class FastLEDAsyncController {
   }
 
   /**
-     * Schedules the next animation frame with adaptive frame rate - optimized for video recording
+     * Schedules the next animation frame - always use RAF for consistent 60fps
      */
   scheduleNextFrame() {
-    const avgFrameTime = this.getAverageFrameTime();
-
-    // Prioritize consistent frame timing for video recording
-    if (avgFrameTime > 20) {
-      // If frames are consistently slow, use setTimeout for more predictable timing
-      setTimeout(() => requestAnimationFrame(this.loop), Math.max(16, this.frameInterval - avgFrameTime));
-    } else {
-      // Use standard RAF for smooth animation
-      requestAnimationFrame(this.loop);
-    }
+    // Always use requestAnimationFrame for consistent browser-optimized timing
+    // Let the browser handle frame timing instead of complex adaptive logic
+    requestAnimationFrame(this.loop);
   }
 
   /**

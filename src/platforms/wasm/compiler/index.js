@@ -987,8 +987,8 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
     return;
   }
 
-  // Load video settings from localStorage or use defaults
-  const savedSettings = window.getVideoSettings ? window.getVideoSettings() : null;
+  // Always use default settings (no localStorage persistence)
+  const defaultSettings = window.getVideoSettings ? window.getVideoSettings() : null;
 
   try {
     // Validate canvas is ready (without creating a context that would conflict with graphics manager)
@@ -1003,10 +1003,11 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
     videoRecorder = new VideoRecorder({
       canvas,
       audioContext: null, // Disable audio for better performance
-      fps: savedSettings?.fps || 60,
+      fps: defaultSettings?.fps || 60,
       settings: {
-        // Use saved settings directly, or let VideoRecorder use its own defaults
-        ...savedSettings,
+        // Use default settings but exclude fps to avoid conflicts
+        ...defaultSettings,
+        fps: undefined, // Remove fps from settings to ensure constructor fps parameter takes precedence
       },
       onStateChange: (isRecording) => {
         // Update button visual state

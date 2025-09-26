@@ -84,7 +84,8 @@ export class VideoRecorder {
     console.log('Final merged settings:', this.settings);
 
     /** @type {number} */
-    this.fps = fps || this.settings.fps;
+    this.fps = fps !== undefined ? fps : this.settings.fps;
+    console.log('VideoRecorder fps set to:', this.fps, 'from fps param:', fps, 'settings.fps:', this.settings.fps);
 
     /** @type {MediaRecorder|null} */
     this.mediaRecorder = null;
@@ -357,6 +358,7 @@ export class VideoRecorder {
 
     // Get video stream from canvas with exact frame rate
     // Use exact fps - canvas.captureStream() is hardware-accelerated and non-blocking
+    console.log('Calling canvas.captureStream() with fps:', this.fps);
     const videoStream = this.canvas.captureStream(this.fps);
 
     console.log('Canvas dimensions:', this.canvas.width, 'x', this.canvas.height);
