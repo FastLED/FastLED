@@ -33,7 +33,7 @@ import { isDenseGrid } from './graphics_utils.js';
 /* global THREE */
 
 /** Disable geometry merging for debugging (set to true to force individual LED objects) */
-const DISABLE_MERGE_GEOMETRIES = false;
+// const DISABLE_MERGE_GEOMETRIES = false; // Currently unused
 
 /**
  * Creates position calculator functions for mapping LED coordinates to 3D space
@@ -108,6 +108,22 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
 
     /** @type {boolean} Whether to use merged geometries for performance */
     this.useMergedGeometry = true; // Enable geometry merging by default
+
+    // Instanced rendering properties
+    /** @type {Object|null} Three.js instanced mesh for all LEDs */
+    this.instancedMesh = null;
+
+    /** @type {number} Total number of LED instances */
+    this.instanceCount = 0;
+
+    /** @type {Float32Array|null} Instance position data */
+    this.instancePositions = null;
+
+    /** @type {Float32Array|null} Instance color data */
+    this.instanceColors = null;
+
+    /** @type {boolean} Whether to use instanced rendering (preferred) */
+    this.useInstancedRendering = true;
   }
 
   /**
@@ -136,6 +152,17 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
       });
     }
     this.mergedMeshes = [];
+
+    // Clean up instanced rendering resources
+    if (this.instancedMesh) {
+      this.instancedMesh.geometry.dispose();
+      this.instancedMesh.material.dispose();
+      this.scene?.remove(this.instancedMesh);
+      this.instancedMesh = null;
+    }
+    this.instanceCount = 0;
+    this.instancePositions = null;
+    this.instanceColors = null;
 
     // Dispose of the composer
     if (this.composer) {
@@ -334,7 +361,7 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
   }
 
   /**
-   * Creates LED objects for each pixel in the frame data
+   * Creates LED objects using instanced rendering for maximum performance
    * @private
    */
   _createLedObjects(
@@ -348,29 +375,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     const { THREE } = this.threeJsModules;
     const { screenMap } = frameData;
 
-    // If BufferGeometryUtils is not available, fall back to individual LEDs
-    const { BufferGeometryUtils } = this.threeJsModules;
-    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils
-      && !DISABLE_MERGE_GEOMETRIES;
-
-    if (!canMergeGeometries) {
-      console.log('BufferGeometryUtils not available, falling back to individual LEDs');
-    } else {
-      console.log('Using merged geometries for better performance');
-    }
-
-    // Create template geometries for reuse
-    let circleGeometry;
-    let planeGeometry;
-    if (!isDenseScreenMap) {
-      circleGeometry = new THREE.CircleGeometry(1.0, this.SEGMENTS);
-    } else {
-      planeGeometry = new THREE.PlaneGeometry(1.0, 1.0);
-    }
-
-    // Group all geometries together for merging
-    const allGeometries = [];
-    const allLedData = [];
+    // Count total LEDs first
+    let totalLeds = 0;
+    const ledDataList = [];
 
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
@@ -379,128 +386,93 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
       }
 
       const stripData = screenMap.strips[stripId];
-      let stripDiameter = null;
-      if (stripData.diameter) {
-        stripDiameter = stripData.diameter * normalizedScale;
-      } else {
-        stripDiameter = defaultDotSize;
-      }
+      const stripDiameter = stripData.diameter ? stripData.diameter * normalizedScale : defaultDotSize;
 
       const x_array = stripData.map.x;
       const y_array = stripData.map.y;
 
       for (let i = 0; i < x_array.length; i++) {
-        // Calculate position
         const x = calcXPosition(x_array[i]);
         const y = calcYPosition(y_array[i]);
         const z = 500;
+        const scale = stripDiameter * this.LED_SCALE;
 
-        if (!canMergeGeometries) {
-          // Create individual LEDs (original approach)
-          let geometry;
-          if (isDenseScreenMap) {
-            const w = stripDiameter * this.LED_SCALE;
-            const h = stripDiameter * this.LED_SCALE;
-            geometry = new THREE.PlaneGeometry(w, h);
-          } else {
-            geometry = new THREE.CircleGeometry(
-              stripDiameter * this.LED_SCALE,
-              this.SEGMENTS,
-            );
-          }
-
-          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-          const led = new THREE.Mesh(geometry, material);
-          led.position.set(x, y, z);
-
-          this.scene.add(led);
-          this.leds.push(led);
-        } else {
-          // Create instance geometry for merging
-          let instanceGeometry;
-          if (isDenseScreenMap) {
-            instanceGeometry = planeGeometry.clone();
-            instanceGeometry.scale(
-              stripDiameter * this.LED_SCALE,
-              stripDiameter * this.LED_SCALE,
-              1,
-            );
-          } else {
-            instanceGeometry = circleGeometry.clone();
-            instanceGeometry.scale(
-              stripDiameter * this.LED_SCALE,
-              stripDiameter * this.LED_SCALE,
-              1,
-            );
-          }
-
-          // Apply position transformation
-          instanceGeometry.translate(x, y, z);
-
-          // Add to collection for merging
-          allGeometries.push(instanceGeometry);
-          allLedData.push({ x, y, z });
-        }
+        ledDataList.push({ x, y, z, scale, stripId, ledIndex: i });
+        totalLeds++;
       }
     });
 
-    // If using merged geometry, create a single merged mesh for all LEDs
-    if (canMergeGeometries && allGeometries.length > 0) {
-      try {
-        // Merge all geometries together
-        const mergedGeometry = BufferGeometryUtils.mergeGeometries(allGeometries);
-
-        // Create material and mesh with vertex colors
-        const material = new THREE.MeshBasicMaterial({
-          color: 0xffffff,
-          vertexColors: true,
-        });
-
-        // Create color attribute for the merged geometry
-        const colorCount = mergedGeometry.attributes.position.count;
-        const colorArray = new Float32Array(colorCount * 3);
-        mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
-
-        const mesh = new THREE.Mesh(mergedGeometry, material);
-        this.scene.add(mesh);
-        this.mergedMeshes.push(mesh);
-
-        // Create dummy objects for individual control
-        for (let i = 0; i < allLedData.length; i++) {
-          const pos = allLedData[i];
-          const dummyObj = {
-            material: { color: new THREE.Color(0, 0, 0) },
-            position: new THREE.Vector3(pos.x, pos.y, pos.z),
-            _isMerged: true,
-            _mergedIndex: i,
-            _parentMesh: mesh,
-          };
-          this.leds.push(dummyObj);
-        }
-      } catch (e) {
-        console.log(BufferGeometryUtils);
-        console.error('Failed to merge geometries:', e);
-
-        // Fallback to individual geometries
-        for (let i = 0; i < allGeometries.length; i++) {
-          const pos = allLedData[i];
-          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
-          const geometry = allGeometries[i].clone();
-          geometry.translate(-pos.x, -pos.y, -pos.z); // Reset position
-          const led = new THREE.Mesh(geometry, material);
-          led.position.set(pos.x, pos.y, pos.z);
-          this.scene.add(led);
-          this.leds.push(led);
-        }
-      }
-
-      // Clean up template geometries
-      if (circleGeometry) circleGeometry.dispose();
-      if (planeGeometry) planeGeometry.dispose();
-
-      // Clean up individual geometries
-      allGeometries.forEach((g) => g.dispose());
+    if (totalLeds === 0) {
+      console.warn('No LEDs to create');
+      return;
     }
+
+    console.log(`Creating instanced mesh for ${totalLeds} LEDs`);
+
+    // Create base geometry (same for all instances)
+    let baseGeometry;
+    if (isDenseScreenMap) {
+      baseGeometry = new THREE.PlaneGeometry(1.0, 1.0);
+    } else {
+      baseGeometry = new THREE.CircleGeometry(1.0, this.SEGMENTS);
+    }
+
+    // Create instanced mesh
+    const material = new THREE.MeshBasicMaterial({
+      color: 0xffffff, // Will be overridden by instance colors
+    });
+
+    this.instancedMesh = new THREE.InstancedMesh(baseGeometry, material, totalLeds);
+    this.instanceCount = totalLeds;
+
+    // Allocate instance data arrays
+    this.instancePositions = new Float32Array(totalLeds * 3); // x, y, z for each instance
+    this.instanceColors = new Float32Array(totalLeds * 3); // r, g, b for each instance
+
+    // Set up instance transformations and colors
+    const matrix = new THREE.Matrix4();
+    const color = new THREE.Color();
+
+    for (let i = 0; i < totalLeds; i++) {
+      const ledData = ledDataList[i];
+
+      // Set instance transformation matrix (position and scale)
+      matrix.makeScale(ledData.scale, ledData.scale, 1);
+      matrix.setPosition(ledData.x, ledData.y, ledData.z);
+      this.instancedMesh.setMatrixAt(i, matrix);
+
+      // Set initial color to black
+      color.setRGB(0, 0, 0);
+      this.instancedMesh.setColorAt(i, color);
+
+      // Store position data for faster updates
+      this.instancePositions[i * 3] = ledData.x;
+      this.instancePositions[i * 3 + 1] = ledData.y;
+      this.instancePositions[i * 3 + 2] = ledData.z;
+
+      // Store initial color data
+      this.instanceColors[i * 3] = 0;
+      this.instanceColors[i * 3 + 1] = 0;
+      this.instanceColors[i * 3 + 2] = 0;
+
+      // Create LED tracking object for compatibility
+      this.leds.push({
+        _isInstanced: true,
+        _instanceIndex: i,
+        _stripId: ledData.stripId,
+        _ledIndex: ledData.ledIndex,
+        material: { color: new THREE.Color(0, 0, 0) },
+        position: new THREE.Vector3(ledData.x, ledData.y, ledData.z),
+      });
+    }
+
+    // Add to scene
+    this.scene.add(this.instancedMesh);
+
+    // Clean up base geometry (it's been transferred to the instanced mesh)
+    baseGeometry.dispose();
+
+    console.log(`Instanced rendering setup complete: ${totalLeds} LEDs in 1 draw call`);
   }
 
   /**
@@ -681,10 +653,104 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
   }
 
   /**
-   * Updates LED visuals based on position map data
+   * Updates LED visuals based on position map data using instanced rendering
    * @private
    */
   _updateLedVisuals(positionMap) {
+    // const { THREE } = this.threeJsModules; // Currently unused in this method
+
+    if (this.useInstancedRendering && this.instancedMesh) {
+      // Use highly optimized instanced rendering path
+      this._updateInstancedLeds(positionMap);
+      return;
+    }
+
+    // Fallback to legacy rendering (for compatibility)
+    this._updateLegacyLeds(positionMap);
+  }
+
+  /**
+   * Updates instanced LEDs with maximum performance using batch operations
+   * @private
+   */
+  _updateInstancedLeds(positionMap) {
+    const { THREE } = this.threeJsModules;
+
+    // Use the stored bounds from setup - currently unused but may be needed for future optimizations
+    // const min_x = this.screenBounds.minX;
+    // const min_y = this.screenBounds.minY;
+    // const { width } = this.screenBounds;
+    // const { height } = this.screenBounds;
+
+    const color = new THREE.Color();
+    let ledIndex = 0;
+    let hasChanges = false;
+
+    // Batch update colors for active LEDs
+    for (const [, ledData] of positionMap) {
+      if (ledIndex >= this.instanceCount) break;
+
+      // Check if color actually changed to avoid unnecessary GPU updates
+      const currentR = this.instanceColors[ledIndex * 3];
+      const currentG = this.instanceColors[ledIndex * 3 + 1];
+      const currentB = this.instanceColors[ledIndex * 3 + 2];
+
+      if (Math.abs(currentR - ledData.r) > 0.001 ||
+          Math.abs(currentG - ledData.g) > 0.001 ||
+          Math.abs(currentB - ledData.b) > 0.001) {
+
+        // Color changed, update it
+        color.setRGB(ledData.r, ledData.g, ledData.b);
+        this.instancedMesh.setColorAt(ledIndex, color);
+
+        // Update our tracking array
+        this.instanceColors[ledIndex * 3] = ledData.r;
+        this.instanceColors[ledIndex * 3 + 1] = ledData.g;
+        this.instanceColors[ledIndex * 3 + 2] = ledData.b;
+
+        // Update LED tracking object for compatibility
+        if (this.leds[ledIndex]) {
+          this.leds[ledIndex].material.color.setRGB(ledData.r, ledData.g, ledData.b);
+        }
+
+        hasChanges = true;
+      }
+
+      ledIndex++;
+    }
+
+    // Clear any remaining LEDs to black (batch operation)
+    color.setRGB(0, 0, 0);
+    for (let i = ledIndex; i < this.instanceCount; i++) {
+      // Check if LED is not already black
+      if (this.instanceColors[i * 3] !== 0 ||
+          this.instanceColors[i * 3 + 1] !== 0 ||
+          this.instanceColors[i * 3 + 2] !== 0) {
+
+        this.instancedMesh.setColorAt(i, color);
+        this.instanceColors[i * 3] = 0;
+        this.instanceColors[i * 3 + 1] = 0;
+        this.instanceColors[i * 3 + 2] = 0;
+
+        if (this.leds[i]) {
+          this.leds[i].material.color.setRGB(0, 0, 0);
+        }
+
+        hasChanges = true;
+      }
+    }
+
+    // Only trigger GPU update if there were actual changes
+    if (hasChanges) {
+      this.instancedMesh.instanceColor.needsUpdate = true;
+    }
+  }
+
+  /**
+   * Legacy LED update method (fallback for merged/individual geometry)
+   * @private
+   */
+  _updateLegacyLeds(positionMap) {
     const { THREE } = this.threeJsModules;
 
     // Use the stored bounds from setup
