@@ -10,17 +10,18 @@ import time
 from pathlib import Path
 from typing import Any, Callable, Dict, List, Optional, Set
 
-from ci.ci.fingerprint_cache import FingerprintCache
 from ci.compiler.clang_compiler import Compiler
 from ci.compiler.test_example_compilation import CompilationResult
+from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 class CacheAwareCompiler:
     """Simple wrapper that adds cache checking to compilation."""
 
-    def __init__(self, compiler: Compiler, cache_file: Path, verbose: bool = False):
+    def __init__(self, compiler: Compiler, cache_dir: Path, verbose: bool = False):
         self.compiler = compiler
-        self.cache = FingerprintCache(cache_file)
+        cache_dir.mkdir(parents=True, exist_ok=True)
+        self.cache = HashFingerprintCache(cache_dir, "example_compilation")
         self.verbose = verbose
         self.stats = {
             "files_checked": 0,
@@ -30,22 +31,31 @@ class CacheAwareCompiler:
             "cache_misses": 0,
         }
 
-    def should_compile(self, file_path: Path, baseline_time: float) -> bool:
-        """Check if file needs compilation using cache."""
-        self.stats["files_checked"] += 1
+    def check_needs_compilation(self, all_files: List[Path]) -> bool:
+        """
+        Check if any files need compilation using unified safe pattern.
+
+        This replaces the old file-by-file checking with a single check
+        of all relevant files using the safe pre-computed fingerprint pattern.
+        """
+        self.stats["files_checked"] = len(all_files)
 
         try:
-            needs_compile = self.cache.has_changed(file_path, baseline_time)
+            needs_compile = self.cache.check_needs_update(all_files)
 
             if needs_compile:
-                self.stats["cache_misses"] += 1
-                self.stats["files_compiled"] += 1
+                self.stats["cache_misses"] = 1
+                self.stats["files_compiled"] = len(all_files)
+                self.stats["files_skipped"] = 0
                 return True
             else:
-                self.stats["cache_hits"] += 1
-                self.stats["files_skipped"] += 1
+                self.stats["cache_hits"] = 1
+                self.stats["files_skipped"] = len(all_files)
+                self.stats["files_compiled"] = 0
                 if self.verbose:
-                    print(f"[CACHE] Skipping unchanged: {file_path.name}")
+                    print(
+                        f"[CACHE] All {len(all_files)} files unchanged - skipping compilation"
+                    )
                 return False
         except KeyboardInterrupt:
             import _thread
@@ -54,53 +64,76 @@ class CacheAwareCompiler:
             raise
         except Exception as e:
             if self.verbose:
-                print(f"[CACHE] Error checking {file_path.name}: {e}")
-            self.stats["cache_misses"] += 1
-            self.stats["files_compiled"] += 1
+                print(f"[CACHE] Error checking files: {e}")
+            self.stats["cache_misses"] = 1
+            self.stats["files_compiled"] = len(all_files)
+            self.stats["files_skipped"] = 0
             return True
 
-    def _headers_changed(self, baseline_time: float) -> bool:
-        """Detect if any relevant header dependency has changed since last run.
-
-        Uses the compiler's PCH dependency discovery to collect a conservative
-        set of headers that impact example compilation, then queries the
-        fingerprint cache to see if any actually changed content.
-        """
+    def mark_compilation_success(self) -> None:
+        """Mark the compilation as successful using the safe pattern."""
         try:
-            # Reuse the compiler's dependency discovery (covers src/** and platforms/**)
-            dependencies: List[Path] = []
+            self.cache.mark_success()
+            if self.verbose:
+                print("[CACHE] Compilation success marked in cache")
+        except Exception as e:
+            if self.verbose:
+                print(f"[CACHE] Failed to mark success: {e}")
+
+    def invalidate_cache(self) -> None:
+        """Invalidate cache on compilation failure."""
+        try:
+            self.cache.invalidate()
+            if self.verbose:
+                print("[CACHE] Cache invalidated due to compilation failure")
+        except Exception as e:
+            if self.verbose:
+                print(f"[CACHE] Failed to invalidate cache: {e}")
+
+    def _get_all_dependencies(self) -> List[Path]:
+        """Get all files that should be monitored for changes."""
+        dependencies: List[Path] = []
+
+        try:
+            # Include compiler dependencies (headers, etc.)
             if hasattr(self.compiler, "_get_pch_dependencies"):
-                dependencies = self.compiler._get_pch_dependencies()  # type: ignore[attr-defined]
+                dependencies.extend(self.compiler._get_pch_dependencies())  # type: ignore[attr-defined]
             else:
                 # Fallback: hash all headers under the compiler's include path
                 include_root = Path(self.compiler.settings.include_path)
                 for pattern in ("**/*.h", "**/*.hpp"):
                     dependencies.extend(include_root.glob(pattern))
-
-            changed_any = False
-            for dep in dependencies:
-                try:
-                    if self.cache.has_changed(dep, baseline_time):
-                        if self.verbose:
-                            print(f"[CACHE] Header changed: {dep}")
-                        changed_any = True
-                        break
-                except FileNotFoundError:
-                    # Missing dependency means we must rebuild conservatively
-                    if self.verbose:
-                        print(f"[CACHE] Header missing (forces rebuild): {dep}")
-                    changed_any = True
-                    break
-            return changed_any
-        except KeyboardInterrupt:
-            import _thread
-
-            _thread.interrupt_main()
-            raise
         except Exception as e:
             if self.verbose:
-                print(f"[CACHE] Header scan failed, forcing rebuild: {e}")
-            return True
+                print(f"[CACHE] Warning: Could not get compiler dependencies: {e}")
+
+        return dependencies
+
+    def _headers_changed(self, baseline_time: float) -> bool:
+        """Check if any header dependencies have changed since baseline_time."""
+        try:
+            dependencies = self._get_all_dependencies()
+            for dep in dependencies:
+                if dep.exists() and dep.stat().st_mtime > baseline_time:
+                    return True
+            return False
+        except Exception as e:
+            if self.verbose:
+                print(f"[CACHE] Warning: Could not check header dependencies: {e}")
+            return True  # Conservative: assume headers changed if we can't check
+
+    def should_compile(self, file_path: Path, baseline_time: float) -> bool:
+        """Check if a specific file should be compiled based on modification time."""
+        try:
+            if not file_path.exists():
+                return True  # File doesn't exist, should compile
+            return file_path.stat().st_mtime > baseline_time
+        except Exception as e:
+            if self.verbose:
+                print(f"[CACHE] Warning: Could not check file {file_path}: {e}")
+            return (
+                True  # Conservative: assume file should be compiled if we can't check
+            )
 
     def compile_with_cache(
         self,

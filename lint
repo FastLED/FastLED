@@ -55,8 +55,21 @@ else
     echo "Running ruff format (formatting + import sorting)"
     uv run ruff format test.py
     uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
-    echo "Running pyright (all configured files)"
-    uv run pyright
+
+    # Check if pyright needs to run using fingerprint cache
+    echo "Checking if pyright needs to run..."
+    if uv run python ci/python_lint_cache.py check; then
+        echo "Running pyright (all configured files)"
+        if uv run pyright; then
+            # Mark pyright as successful
+            uv run python ci/python_lint_cache.py success
+        else
+            # Invalidate cache on pyright failure
+            uv run python ci/python_lint_cache.py failure
+            echo "❌ pyright failed"
+            exit 1
+        fi
+    fi
 
     export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
