@@ -302,6 +302,41 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 ## Teensy Platform
 
 <details>
+<summary><b>⚡ ObjectFLED Driver</b> - DEFAULT driver for Teensy 4.x with advanced parallel output</summary>
+
+### Overview
+The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It provides high-performance, multi-pin output and is **enabled by default** on Teensy 4.x - no configuration needed!
+
+### Default Usage
+```cpp
+#include <FastLED.h>
+
+CRGB leds[NUM_LEDS];
+void setup() {
+    // ObjectFLED is used automatically on Teensy 4.x
+    FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
+}
+```
+
+### Disabling ObjectFLED (Reverting to Legacy Driver)
+If you encounter compatibility issues or wish to use the standard clockless driver instead of `ObjectFLED`, you can disable it by defining `FASTLED_NOT_USES_OBJECTFLED` before including the FastLED header:
+
+```cpp
+#define FASTLED_NOT_USES_OBJECTFLED
+#include <FastLED.h>
+```
+
+### Re-enabling ObjectFLED (Explicitly)
+While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable it (though not strictly necessary) using:
+
+```cpp
+#define FASTLED_USES_OBJECTFLED
+#include <FastLED.h>
+```
+
+</details>
+
+<details>
 <summary><b>🎯 WS2812Serial Driver</b> - High-performance serial-based LED control</summary>
 
 ### Overview
@@ -321,7 +356,7 @@ Then, use `WS2812SERIAL` as the chipset type in your `addLeds` call. The data pi
 FastLED.addLeds<WS2812SERIAL, /* DATA_PIN */, GRB>(leds, NUM_LEDS);
 ```
 
-###### Supported Pins & Serial Ports
+### Supported Pins & Serial Ports
 
 | Port    | Teensy LC   | Teensy 3.2 | Teensy 3.5 | Teensy 3.6 | Teensy 4.0 | Teensy 4.1 |
 | :------ | :---------: | :--------: | :--------: | :--------: | :--------: | :--------: |
@@ -333,30 +368,6 @@ FastLED.addLeds<WS2812SERIAL, /* DATA_PIN */, GRB>(leds, NUM_LEDS);
 | Serial6 |             |            | 48         |            | 24         | 24         |
 | Serial7 |             |            |            |            | 29         | 29         |
 | Serial8 |             |            |            |            |            | 35         |
-
-</details>
-
-<details>
-<summary><b>⚡ ObjectFLED Driver</b> - Advanced parallel output for Teensy 4.x</summary>
-
-### Overview
-The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It provides high-performance, multi-pin output and is **enabled by default** on Teensy 4.x.
-
-### Disabling ObjectFLED (Reverting to Legacy Driver)
-If you encounter compatibility issues or wish to use the standard clockless driver instead of `ObjectFLED`, you can disable it by defining `FASTLED_NOT_USES_OBJECTFLED` before including the FastLED header:
-
-```cpp
-#define FASTLED_NOT_USES_OBJECTFLED
-#include <FastLED.h>
-```
-
-### Re-enabling ObjectFLED (Explicitly)
-While `ObjectFLED` is the default for Teensy 4.0/4.1, you can explicitly enable it (though not strictly necessary) using:
-
-```cpp
-#define FASTLED_USES_OBJECTFLED
-#include <FastLED.h>
-```
 
 </details>
 
