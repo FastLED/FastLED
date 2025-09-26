@@ -26,8 +26,13 @@
         <div class="menu-item">
             <span class="menu-label">Settings</span>
             <div class="menu-dropdown">
-                <div class="menu-dropdown-item" data-value="gfx-simple">gfx 0</div>
-                <div class="menu-dropdown-item" data-value="gfx-bloom">gfx 1</div>
+                <div class="menu-dropdown-item has-submenu">
+                    <span class="submenu-label">gfx mode</span>
+                    <div class="submenu-dropdown">
+                        <div class="menu-dropdown-item" data-value="gfx-simple">tile</div>
+                        <div class="menu-dropdown-item" data-value="gfx-bloom">bloom</div>
+                    </div>
+                </div>
                 <div class="menu-dropdown-item" data-value="video-settings">Video Settings</div>
             </div>
         </div>
@@ -318,6 +323,12 @@
             try {
                 e.stopPropagation();
                 const selectedValue = this.getAttribute('data-value');
+                const hasSubmenu = this.classList.contains('has-submenu');
+
+                // If this is a submenu parent, don't trigger navigation
+                if (hasSubmenu) {
+                    return;
+                }
 
                 if (selectedValue) {
                     console.log('Settings option selected:', selectedValue);
@@ -327,6 +338,27 @@
                 }
             } catch (error) {
                 console.error('Error handling Settings menu click:', error);
+                throw error;
+            }
+        });
+    });
+
+    // Handle Settings submenu items (gfx mode options)
+    const submenuItems = document.querySelectorAll('.menu-item:nth-child(2) .submenu-dropdown .menu-dropdown-item');
+    submenuItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            try {
+                e.stopPropagation();
+                const selectedValue = this.getAttribute('data-value');
+
+                if (selectedValue) {
+                    console.log('Settings submenu option selected:', selectedValue);
+                    handleGraphicsOptionChange(selectedValue);
+                } else {
+                    console.warn('Settings submenu item missing data-value attribute:', this);
+                }
+            } catch (error) {
+                console.error('Error handling Settings submenu click:', error);
                 throw error;
             }
         });

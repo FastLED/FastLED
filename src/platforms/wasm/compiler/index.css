@@ -1040,6 +1040,60 @@ audio::-webkit-media-controls-mute-button {
     border-bottom-right-radius: 5px;
 }
 
+/* Submenu styles for gfx mode */
+.menu-dropdown-item.has-submenu {
+    position: relative;
+}
+
+.submenu-label {
+    color: #E0E0E0;
+    font-family: 'Roboto Condensed', sans-serif;
+    font-size: 1.5em;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.submenu-label::after {
+    content: "▶";
+    margin-left: auto;
+    font-size: 0.8em;
+    color: #999;
+    transition: transform 0.2s ease;
+}
+
+.submenu-dropdown {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    min-width: 150px;
+    background: linear-gradient(135deg,
+        rgba(20, 20, 20, 0.98) 0%,
+        rgba(30, 30, 30, 0.98) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 6px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.6),
+        0 4px 16px rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateX(-10px);
+    transition: all 0.2s ease;
+    z-index: 1002;
+}
+
+.menu-dropdown-item.has-submenu:hover .submenu-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+.menu-dropdown-item.has-submenu:hover .submenu-label::after {
+    transform: rotate(90deg);
+}
+
 /* Inspector button styles */
 .inspector-button {
     background: rgba(255, 255, 255, 0.1);
