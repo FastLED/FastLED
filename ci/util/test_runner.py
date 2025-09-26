@@ -21,6 +21,7 @@ from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
 from typeguard import typechecked
 
+from ci.util.color_output import print_cache_hit
 from ci.util.running_process import EndOfStream, RunningProcess
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
@@ -1421,8 +1422,8 @@ def runner(
         elif (
             test_categories.unit or test_categories.unit_only
         ) and not cpp_test_change:
-            print(
-                "Skipping C++ unit tests - no changes detected in src/ or tests/ directories"
+            print_cache_hit(
+                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in src/ or tests/ directories)"
             )
 
         # Add integration tests if needed
@@ -1446,8 +1447,8 @@ def runner(
                 create_python_test_process(False, full_tests)
             )  # Disable stack trace for Python tests
         elif (test_categories.py or test_categories.py_only) and not python_test_change:
-            print(
-                "Skipping Python tests - no changes detected in Python test-related files"
+            print_cache_hit(
+                "Fingerprint cache valid - skipping Python tests (no changes detected in Python test-related files)"
             )
 
         # Add example tests if needed and example files have changed
@@ -1458,8 +1459,8 @@ def runner(
         elif (
             test_categories.examples or test_categories.examples_only
         ) and not examples_change:
-            print(
-                "Skipping example tests - no changes detected in example-related files"
+            print_cache_hit(
+                "Fingerprint cache valid - skipping example tests (no changes detected in example-related files)"
             )
 
         # Determine if we'll run in parallel

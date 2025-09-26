@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional, Set
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from ci.ci.fingerprint_cache import FingerprintCache
+from ci.util.color_output import print_cache_miss
 from ci.util.test_types import FingerprintResult, fingerprint_code_base
 
 
@@ -279,11 +280,15 @@ class NativeCompilationCache:
                 del cache_data[build_id]
                 with open(self.build_cache_file, "w") as f:
                     json.dump(cache_data, f, indent=2)
-                print("🔄 Native build cache invalidated - will rebuild next time")
+                print_cache_miss(
+                    "Native build cache invalidated - will rebuild next time"
+                )
         except (json.JSONDecodeError, IOError):
             # If there's an error, just delete the entire cache file
             self.build_cache_file.unlink()
-            print("🔄 Native build cache cleared due to error - will rebuild next time")
+            print_cache_miss(
+                "Native build cache cleared due to error - will rebuild next time"
+            )
 
     def clear_cache(self):
         """Clear all cached fingerprints"""

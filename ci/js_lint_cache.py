@@ -13,6 +13,8 @@ import sys
 from pathlib import Path
 from typing import List
 
+from ci.util.color_output import print_cache_hit, print_cache_miss
+
 # Import the new hash-based cache system
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
@@ -70,12 +72,12 @@ def check_js_files_changed() -> bool:
     cache = _get_js_lint_cache()
 
     if cache.is_valid(file_paths):
-        print("✅ No changes in src/platforms/wasm/compiler/ - skipping lint")
+        print_cache_hit("No changes in src/platforms/wasm/compiler/ - skipping lint")
         return False
     else:
         # Count JS files for informational purposes
         js_files = [f for f in file_paths if f.suffix == ".js"]
-        print(f"🔄 Changes detected in src/platforms/wasm/compiler/")
+        print_cache_miss(f"Changes detected in src/platforms/wasm/compiler/")
         print(
             f"   Found {len(js_files)} JavaScript files, {len(file_paths)} total files"
         )
@@ -113,12 +115,14 @@ def invalidate_cache() -> None:
 
     try:
         cache.invalidate()
-        print("🔄 Lint cache invalidated due to failure - will re-run next time")
+        print_cache_miss(
+            "Lint cache invalidated due to failure - will re-run next time"
+        )
     except KeyboardInterrupt:
         _thread.interrupt_main()
         raise
     except Exception as e:
-        print(f"⚠️  Failed to invalidate cache: {e}")
+        print_cache_miss(f"Failed to invalidate cache: {e}")
 
 
 def main() -> int:
