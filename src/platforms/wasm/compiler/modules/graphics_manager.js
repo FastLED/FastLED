@@ -168,8 +168,8 @@ export class GraphicsManager extends GraphicsManagerBase {
    * Clears the texture data buffer - optimized for recording performance
    */
   clearTexture() {
-    if (this.texData) {
-      // Use faster TypedArray.fill(0) - already optimal
+    if (this.texData && this.needsBackgroundClear) {
+      // Only clear if we have sparse LEDs that need black background
       this.texData.fill(0);
     }
   }
@@ -300,6 +300,35 @@ export class GraphicsManager extends GraphicsManagerBase {
   }
 
   /**
+   * Updates background clear flag based on LED density
+   * @private
+   * @param {Object} frameData - Frame data with screen mapping
+   */
+  _updateBackgroundClearFlag(frameData) {
+    if (!this.screenMap || !frameData || !Array.isArray(frameData)) {
+      return;
+    }
+
+    // Calculate total LEDs and screen area
+    let totalLeds = 0;
+    for (const strip of frameData) {
+      if (strip && strip.pixel_data) {
+        totalLeds += strip.pixel_data.length / 3;
+      }
+    }
+
+    const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0] + 1;
+    const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1] + 1;
+    const screenArea = screenWidth * screenHeight;
+    const ledDensity = totalLeds / screenArea;
+
+    // If LED density is high (>50% coverage), skip clearing for performance
+    this.needsBackgroundClear = ledDensity < 0.5;
+
+    console.log(`LED density: ${(ledDensity * 100).toFixed(1)}% (${totalLeds}/${screenArea}), clearing: ${this.needsBackgroundClear}`);
+  }
+
+  /**
    * Updates the canvas with new LED frame data
    * Processes strip data and renders LEDs to the Three.js texture using tile rendering
    * @param {StripData[] & {screenMap?: ScreenMapData}} frameData - Array of frame data containing LED strip information with optional screenMap
@@ -324,6 +353,9 @@ export class GraphicsManager extends GraphicsManagerBase {
     // Update screenMap from frameData if available
     if (frameData.screenMap) {
       this.screenMap = frameData.screenMap;
+
+      // Determine if we need background clearing based on LED density
+      this._updateBackgroundClearFlag(frameData);
     }
 
     // Initialize Three.js if not already done
