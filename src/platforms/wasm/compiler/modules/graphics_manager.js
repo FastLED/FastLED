@@ -274,10 +274,12 @@ export class GraphicsManager extends GraphicsManagerBase {
    * @param {Object} stripData - Strip mapping data
    * @param {number} minX - Minimum X coordinate
    * @param {number} minY - Minimum Y coordinate
-   * @returns {Array} Array of cached position objects
+   * @param {number} canvasWidth - Canvas width for bounds calculation
+   * @param {number} canvasHeight - Canvas height for bounds calculation
+   * @returns {Array} Array of cached position objects with drawing bounds
    */
-  _buildPositionCache(stripId, stripData, minX, minY) {
-    const cacheKey = `${stripId}_${minX}_${minY}`;
+  _buildPositionCache(stripId, stripData, minX, minY, canvasWidth, canvasHeight) {
+    const cacheKey = `${stripId}_${minX}_${minY}_${canvasWidth}_${canvasHeight}`;
 
     if (this.positionCache.has(cacheKey)) {
       return this.positionCache.get(cacheKey);
@@ -287,12 +289,29 @@ export class GraphicsManager extends GraphicsManagerBase {
     const x_array = map.x;
     const y_array = map.y;
     const len = Math.min(x_array.length, y_array.length);
+    const diameter = stripData.diameter || 1.0;
+    const radius = Math.floor(diameter / 2);
     const positions = [];
 
     for (let i = 0; i < len; i++) {
       const x = Number.parseInt(x_array[i] - minX, 10);
       const y = Number.parseInt(y_array[i] - minY, 10);
-      positions.push({ x, y });
+
+      // Pre-calculate drawing bounds to avoid per-frame calculations
+      const minDx = Math.max(-radius, -x);
+      const maxDx = Math.min(radius, canvasWidth - 1 - x);
+      const minDy = Math.max(-radius, -y);
+      const maxDy = Math.min(radius, canvasHeight - 1 - y);
+
+      positions.push({
+        x,
+        y,
+        minDx,
+        maxDx,
+        minDy,
+        maxDy,
+        radius
+      });
     }
 
     this.positionCache.set(cacheKey, positions);
@@ -467,8 +486,8 @@ export class GraphicsManager extends GraphicsManagerBase {
       const min_x = screenMap.absMin[0];
       const min_y = screenMap.absMin[1];
 
-      // Get cached positions for this strip
-      const positions = this._buildPositionCache(strip_id, stripData, min_x, min_y);
+      // Get cached positions for this strip with pre-calculated drawing bounds
+      const positions = this._buildPositionCache(strip_id, stripData, min_x, min_y, canvasWidth, canvasHeight);
 
       // log("Writing data to canvas");
       for (let i = 0; i < pixelCount; i++) { // eslint-disable-line
@@ -479,8 +498,9 @@ export class GraphicsManager extends GraphicsManagerBase {
           continue;
         }
 
-        // Use cached position calculations
-        const { x, y } = positions[i];
+        // Use cached position calculations with pre-calculated bounds
+        const posData = positions[i];
+        const { x, y, minDx, maxDx, minDy, maxDy } = posData;
 
         // check to make sure that the pixel is within the canvas
         if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
@@ -495,28 +515,23 @@ export class GraphicsManager extends GraphicsManagerBase {
           }
           continue;
         }
-        // log(x, y);
-        const diameter = stripData.diameter || 1.0;
-        const radius = Math.floor(diameter / 2);
 
-        // Draw a filled square for each LED
-        for (let dy = -radius; dy <= radius; dy++) {
-          for (let dx = -radius; dx <= radius; dx++) {
+        // Pre-calculate color data outside inner loops
+        const srcIndex = i * 3;
+        const r = data[srcIndex] & 0xFF; // eslint-disable-line
+        const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
+        const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
+
+        // Draw a filled square for each LED with pre-calculated bounds (no bounds checking needed!)
+        for (let dy = minDy; dy <= maxDy; dy++) {
+          const py = y + dy;
+          const rowOffset = py * this.texWidth;
+          for (let dx = minDx; dx <= maxDx; dx++) {
             const px = x + dx;
-            const py = y + dy;
-
-            // Check bounds
-            if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight) {
-              const srcIndex = i * 3;
-              const destIndex = (py * this.texWidth + px) * 3;
-              // Pixel data is already in 0-255 range, use directly
-              const r = data[srcIndex] & 0xFF; // eslint-disable-line
-              const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
-              const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
-              this.texData[destIndex] = r;
-              this.texData[destIndex + 1] = g;
-              this.texData[destIndex + 2] = b;
-            }
+            const destIndex = (rowOffset + px) * 3;
+            this.texData[destIndex] = r;
+            this.texData[destIndex + 1] = g;
+            this.texData[destIndex + 2] = b;
           }
         }
       }
