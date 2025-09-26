@@ -305,7 +305,12 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 <summary><b>⚡ ObjectFLED Driver</b> - DEFAULT driver for Teensy 4.x with advanced parallel output</summary>
 
 ### Overview
-The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It provides high-performance, multi-pin output and is **enabled by default** on Teensy 4.x - no configuration needed!
+The `ObjectFLED` driver is an advanced parallel output driver specifically optimized for Teensy 4.0 and 4.1 boards when using WS2812 LEDs. It provides **massive parallel output capacity** and is **enabled by default** on Teensy 4.x - no configuration needed!
+
+### Parallel Output Capacity
+- **Teensy 4.1**: Up to **50 parallel strips**
+- **Teensy 4.0**: Up to **42 parallel strips**
+- **Performance**: ~7x more strips than OctoWS2811
 
 ### Default Usage
 ```cpp
