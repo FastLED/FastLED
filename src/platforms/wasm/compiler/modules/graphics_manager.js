@@ -313,10 +313,17 @@ export class GraphicsManager extends GraphicsManagerBase {
     const canvasHeight = this.canvas.height;
 
     // Check if we need to reallocate the texture - optimized to reduce reallocations
-    const newTexWidth = 2 ** Math.ceil(Math.log2(canvasWidth));
-    const newTexHeight = 2 ** Math.ceil(Math.log2(canvasHeight));
+    // Use actual canvas dimensions instead of power-of-2 when WebGL2 supports NPOT textures
+    const newTexWidth = canvasWidth;
+    const newTexHeight = canvasHeight;
 
-    if (this.texWidth !== newTexWidth || this.texHeight !== newTexHeight) {
+    // Only reallocate if texture grows (never shrink to avoid thrashing)
+    const needsReallocation = !this.texData ||
+                             newTexWidth > this.texWidth ||
+                             newTexHeight > this.texHeight;
+
+    if (needsReallocation) {
+      const oldSize = this.texData ? this.texData.length : 0;
       this.texWidth = newTexWidth;
       this.texHeight = newTexHeight;
 
@@ -349,7 +356,7 @@ export class GraphicsManager extends GraphicsManagerBase {
         this.material.needsUpdate = true;
       }
 
-      console.log(`Three.js texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
+      console.log(`Three.js texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB), saved ${((oldSize - this.texData.length) / 1024 / 1024).toFixed(1)}MB`);
     }
 
     if (!this.screenMap) {
