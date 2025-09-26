@@ -26,6 +26,7 @@
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
+import { GraphicsManagerBase } from './graphics_manager_base.js';
 import { isDenseGrid } from './graphics_utils.js';
 
 // Declare THREE as global namespace for type checking
@@ -69,7 +70,7 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
  * Beautiful 3D Graphics Manager using Three.js for LED rendering
  * Provides advanced visual effects and post-processing for stunning LED displays
  */
-export class GraphicsManagerThreeJS {
+export class GraphicsManagerThreeJS extends GraphicsManagerBase {
   /**
    * Creates a new GraphicsManagerThreeJS instance
    * @param {Object} graphicsArgs - Configuration options
@@ -77,14 +78,8 @@ export class GraphicsManagerThreeJS {
    * @param {Object} graphicsArgs.threeJsModules - Three.js modules and dependencies
    */
   constructor(graphicsArgs) {
-    const { canvasId, threeJsModules } = graphicsArgs;
-
-    // Configuration
-    /** @type {string} HTML canvas element ID */
-    this.canvasId = canvasId;
-
-    /** @type {Object} Three.js modules and dependencies */
-    this.threeJsModules = threeJsModules;
+    // Call parent constructor
+    super(graphicsArgs);
 
     /** @type {number} Number of segments for LED sphere geometry */
     this.SEGMENTS = 16;
@@ -92,41 +87,21 @@ export class GraphicsManagerThreeJS {
     /** @type {number} Scale factor for LED size */
     this.LED_SCALE = 1.0;
 
-    // Rendering properties
-    /** @type {number} Screen width in rendering units */
-    this.SCREEN_WIDTH = 0;
-
-    /** @type {number} Screen height in rendering units */
-    this.SCREEN_HEIGHT = 0;
-
     /** @type {number} Bloom effect strength (0-1) */
     this.bloom_stength = 1;
 
     /** @type {number} Bloom effect radius in pixels */
     this.bloom_radius = 16;
 
-    // Scene objects
+    // Scene objects specific to 3D rendering
     /** @type {Array} Array of LED mesh objects */
     this.leds = [];
 
     /** @type {Array} Array of merged mesh objects for performance */
     this.mergedMeshes = [];
 
-    /** @type {Object|null} Three.js scene object */
-    this.scene = null;
-
-    /** @type {Object|null} Three.js camera object */
-    this.camera = null;
-
-    /** @type {Object|null} Three.js WebGL renderer */
-    this.renderer = null;
-
     /** @type {Object|null} Post-processing composer */
     this.composer = null;
-
-    // State tracking
-    /** @type {number} Previous frame's total LED count for optimization */
-    this.previousTotalLeds = 0;
 
     /** @type {number} Counter for out-of-bounds warnings to prevent spam */
     this.outside_bounds_warning_count = 0;
@@ -167,12 +142,8 @@ export class GraphicsManagerThreeJS {
       this.composer.dispose();
     }
 
-    // Clear the scene
-    if (this.scene) {
-      while (this.scene.children.length > 0) {
-        this.scene.remove(this.scene.children[0]);
-      }
-    }
+    // Call parent reset (which clears the scene)
+    super.reset();
 
     // Don't remove the renderer or canvas
     if (this.renderer) {
@@ -186,6 +157,7 @@ export class GraphicsManagerThreeJS {
    * @param {Object} frameData - The frame data containing screen mapping information
    */
   initThreeJS(frameData) {
+    // Use inherited methods from base class
     this._setupCanvasAndDimensions(frameData);
     this._setupScene();
     this._setupRenderer();
@@ -198,110 +170,9 @@ export class GraphicsManagerThreeJS {
     }
   }
 
-  /**
-   * Sets up canvas dimensions and display properties
-   * @private
-   * @param {Object} frameData - Frame data containing screen mapping
-   */
-  _setupCanvasAndDimensions(frameData) {
-    const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
-    const MAX_WIDTH = 640; // Max pixels width on browser
 
-    const canvas = document.getElementById(this.canvasId);
-    const { screenMap } = frameData;
-    const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
-    const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
-    // Always set width to 640px and scale height proportionally
-    const targetWidth = MAX_WIDTH;
-    const aspectRatio = screenMapWidth / screenMapHeight;
-    const targetHeight = Math.round(targetWidth / aspectRatio);
 
-    // Set the rendering resolution (2x the display size)
-    this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;
-    this.SCREEN_HEIGHT = targetHeight * RESOLUTION_BOOST;
-
-    // Set internal canvas size to 2x for higher resolution
-    canvas.width = targetWidth * RESOLUTION_BOOST;
-    canvas.height = targetHeight * RESOLUTION_BOOST;
-
-    // But keep display size the same
-    canvas.style.width = `${targetWidth}px`;
-    canvas.style.height = `${targetHeight}px`;
-    canvas.style.maxWidth = `${targetWidth}px`;
-    canvas.style.maxHeight = `${targetHeight}px`;
-
-    // Store the bounds for orthographic camera calculations
-    this.screenBounds = {
-      width: screenMapWidth,
-      height: screenMapHeight,
-      minX: screenMap.absMin[0],
-      minY: screenMap.absMin[1],
-      maxX: screenMap.absMax[0],
-      maxY: screenMap.absMax[1],
-    };
-  }
-
-  /**
-   * Sets up the Three.js scene and camera
-   * @private
-   */
-  _setupScene() {
-    const { THREE } = this.threeJsModules;
-
-    // Create the scene
-    this.scene = new THREE.Scene();
-
-    // Camera configuration
-    this._setupCamera();
-  }
-
-  /**
-   * Sets up the camera with proper positioning and projection
-   * @private
-   */
-  _setupCamera() {
-    const { THREE } = this.threeJsModules;
-
-    // Camera parameters
-    const NEAR_PLANE = 0.1;
-    const FAR_PLANE = 5000;
-    const MARGIN = 1.05; // Add a small margin around the screen
-
-    // Calculate half width and height for orthographic camera
-    const halfWidth = this.SCREEN_WIDTH / 2;
-    const halfHeight = this.SCREEN_HEIGHT / 2;
-
-    // Create orthographic camera
-    this.camera = new THREE.OrthographicCamera(
-      -halfWidth * MARGIN, // left
-      halfWidth * MARGIN, // right
-      halfHeight * MARGIN, // top
-      -halfHeight * MARGIN, // bottom
-      NEAR_PLANE,
-      FAR_PLANE,
-    );
-
-    // Position the camera at a fixed distance
-    this.camera.position.set(0, 0, 1000);
-    this.camera.zoom = 1.0;
-    this.camera.updateProjectionMatrix();
-  }
-
-  /**
-   * Sets up the WebGL renderer
-   * @private
-   */
-  _setupRenderer() {
-    const { THREE } = this.threeJsModules;
-    const canvas = document.getElementById(this.canvasId);
-
-    this.renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: true,
-    });
-    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
-  }
 
   /**
    * Sets up render passes including bloom effect

@@ -4,14 +4,14 @@
  * FastLED Graphics Manager Module
  *
  * High-performance 2D graphics rendering system for FastLED WebAssembly applications.
- * Uses WebGL for hardware-accelerated pixel rendering and supports real-time LED strip visualization.
+ * Uses Three.js for hardware-accelerated tile-based LED rendering and supports real-time LED strip visualization.
  * Now includes OffscreenCanvas support for background worker rendering.
  *
  * @module GraphicsManager
  */
 
-// Import OffscreenCanvas adapter for unified canvas handling
-import { createGraphicsAdapter } from './offscreen_graphics_adapter.js';
+// Import base class for unified Three.js functionality
+import { GraphicsManagerBase } from './graphics_manager_base.js';
 
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
@@ -46,144 +46,96 @@ import { createGraphicsAdapter } from './offscreen_graphics_adapter.js';
 // to avoid DOM dependencies and work properly in both main thread and worker contexts
 
 /**
- * WebGL-based 2D graphics manager for FastLED visualization
- * Provides hardware-accelerated rendering of LED strips using WebGL shaders
+ * Three.js-based 2D graphics manager for FastLED visualization
+ * Provides hardware-accelerated tile rendering of LED strips using Three.js
  */
-export class GraphicsManager {
+export class GraphicsManager extends GraphicsManagerBase {
   /**
    * Creates a new GraphicsManager instance
    * @param {Object} graphicsArgs - Configuration options
    * @param {string|HTMLCanvasElement|OffscreenCanvas} graphicsArgs.canvasId - Canvas element or ID
-   * @param {Object} [graphicsArgs.threeJsModules] - Three.js modules (unused but kept for consistency)
+   * @param {Object} graphicsArgs.threeJsModules - Three.js modules for tile rendering
    * @param {boolean} [graphicsArgs.usePixelatedRendering=true] - Whether to use pixelated rendering
    * @param {OffscreenCanvas} [graphicsArgs.offscreenCanvas] - Direct OffscreenCanvas instance
    */
   constructor(graphicsArgs) {
-    const { canvasId, usePixelatedRendering = true, offscreenCanvas } = graphicsArgs;
+    const { threeJsModules, usePixelatedRendering = true } = graphicsArgs;
 
-    /** @type {string|HTMLCanvasElement|OffscreenCanvas} */
-    this.canvasId = canvasId;
+    // Call parent constructor
+    super(graphicsArgs);
 
-    /** @type {HTMLCanvasElement|OffscreenCanvas|null} */
-    this.canvas = null;
+    if (!threeJsModules) {
+      throw new Error('ThreeJS modules are required for GraphicsManager');
+    }
 
-    /** @type {OffscreenCanvas|null} Direct OffscreenCanvas reference */
-    this.offscreenCanvas = offscreenCanvas || null;
+    /** @type {Object} Configuration options */
+    this.args = { usePixelatedRendering };
 
-    /** @type {import('./offscreen_graphics_adapter.js').OffscreenGraphicsAdapter|null} */
-    this.canvasAdapter = null;
-
-    /** @type {WebGLRenderingContext|null} */
-    this.gl = null;
-
-    /** @type {WebGLProgram|null} */
-    this.program = null;
-
-    /** @type {WebGLBuffer|null} */
-    this.positionBuffer = null;
-
-    /** @type {WebGLBuffer|null} */
-    this.texCoordBuffer = null;
-
-    /** @type {WebGLTexture|null} */
+    /** @type {Object|null} Three.js texture for tile rendering */
     this.texture = null;
+
+    /** @type {Object|null} Three.js material for tile rendering */
+    this.material = null;
+
+    /** @type {Object|null} Three.js plane geometry for displaying the texture */
+    this.planeGeometry = null;
+
+    /** @type {Object|null} Three.js mesh for the tile surface */
+    this.planeMesh = null;
 
     /** @type {Uint8Array|null} */
     this.texData = null;
-
-    /** @type {ScreenMapData} */
-    this.screenMap = null;
-
-    /** @type {Object} */
-    this.args = { usePixelatedRendering };
 
     /** @type {number} */
     this.texWidth = 0;
 
     /** @type {number} */
     this.texHeight = 0;
-
-    this.initialize();
   }
 
   /**
-   * Initializes the WebGL context and sets up rendering resources
+   * Initializes the Three.js context and sets up tile rendering resources
    * @returns {boolean|Promise<boolean>} True if initialization was successful
    */
   initialize() {
-    try {
-      // Handle different canvas input types
-      if (this.offscreenCanvas) {
-        // Direct OffscreenCanvas provided
-        this.canvas = this.offscreenCanvas;
-      } else if (typeof this.canvasId === 'string') {
-        // Canvas ID string provided
-        if (typeof document !== 'undefined') {
-          this.canvas = document.getElementById(this.canvasId);
-        } else {
-          console.error('Document not available for canvas ID lookup in worker context');
-          return false;
-        }
-      } else if (this.canvasId instanceof HTMLCanvasElement || this.canvasId instanceof OffscreenCanvas) {
-        // Direct canvas element provided
-        this.canvas = this.canvasId;
-      } else {
-        console.error('Invalid canvas reference provided');
-        return false;
-      }
-
-      if (!this.canvas) {
-        console.error(`Canvas with id ${this.canvasId} not found`);
-        return false;
-      }
-
-      // Create canvas adapter for unified API
-      this.canvasAdapter = createGraphicsAdapter(this.canvas, {
-        contextType: 'webgl2', // Prefer WebGL2 for better OffscreenCanvas support
-        contextAttributes: {
-          alpha: false,
-          antialias: false,
-          preserveDrawingBuffer: false,
-          powerPreference: 'high-performance'
-        }
-      });
-
-      // Initialize context through adapter
-      return this.initializeWithAdapter();
-
-    } catch (error) {
-      console.error('Graphics manager initialization failed:', error);
+    // Call parent initialization
+    const baseInitialized = super.initialize();
+    if (!baseInitialized) {
       return false;
     }
+
+    // Additional tile-specific initialization will be done in initThreeJS
+    return true;
   }
 
   /**
-   * Initializes WebGL context through the canvas adapter
-   * @returns {Promise<boolean>} True if initialization was successful
+   * Initializes the Three.js rendering environment for tile-based rendering
+   * @param {Object} frameData - The frame data containing screen mapping information
+   * @returns {boolean} True if initialization was successful
    */
-  async initializeWithAdapter() {
+  initThreeJS(frameData) {
     try {
-      // Create WebGL context through adapter
-      this.gl = await this.canvasAdapter.createContext();
+      this._setupCanvasAndDimensions(frameData);
+      this._setupScene();
+      this._setupRenderer();
+      this._setupTileRenderingSystem();
 
-      if (!this.gl) {
-        console.error('Failed to create WebGL context through adapter');
-        return false;
+      // Update camera projection matrix
+      if (this.camera) {
+        this.camera.updateProjectionMatrix();
       }
 
-      console.log('WebGL context created successfully', {
-        contextType: this.canvasAdapter.activeContextType,
-        isOffscreen: this.canvasAdapter.isOffscreen,
+      console.log('Three.js tile rendering initialized successfully', {
+        isOffscreen: this.canvasAdapter?.isOffscreen || false,
         canvasSize: {
           width: this.canvas.width,
           height: this.canvas.height
         }
       });
 
-      return this.initWebGL();
-
+      return true;
     } catch (error) {
-      console.error('Canvas adapter initialization failed:', error);
+      console.error('Three.js tile rendering initialization failed:', error);
       return false;
     }
   }
@@ -193,7 +145,7 @@ export class GraphicsManager {
    * @param {StripData[]} frameData - Array of LED strip data to render
    */
   updateDisplay(frameData) {
-    if (!this.gl || !this.canvas) {
+    if (!this.scene || !this.camera || !this.renderer) {
       console.warn('Graphics manager not properly initialized');
       return;
     }
@@ -223,217 +175,94 @@ export class GraphicsManager {
   }
 
   /**
-   * Renders the current texture to the canvas
+   * Renders the current texture to the canvas using Three.js
    */
   render() {
-    if (!this.gl || !this.program) {
+    if (!this.renderer || !this.scene || !this.camera) {
       return;
     }
 
-    const canvasWidth = this.gl.canvas.width;
-    const canvasHeight = this.gl.canvas.height;
-
-    // Set the viewport
-    this.gl.viewport(0, 0, canvasWidth, canvasHeight);
-    this.gl.clearColor(0, 0, 0, 1);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-
-    this.gl.useProgram(this.program);
-
-    // Bind position buffer
-    const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
-    this.gl.enableVertexAttribArray(positionLocation);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-    // Bind texture coordinate buffer
-    const texCoordLocation = this.gl.getAttribLocation(this.program, 'a_texCoord');
-    this.gl.enableVertexAttribArray(texCoordLocation);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-    this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-    // Draw
-    this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+    // Render the scene
+    this.renderer.render(this.scene, this.camera);
 
     // Handle OffscreenCanvas ImageBitmap transfer for worker mode
     this.handleOffscreenTransfer();
   }
 
+
   /**
-   * Handles ImageBitmap transfer for OffscreenCanvas rendering
-   * Creates and transfers ImageBitmap to main thread when in worker mode
+   * Sets up the tile rendering system with Three.js texture
    * @private
    */
-  async handleOffscreenTransfer() {
-    if (!this.canvasAdapter || !this.canvasAdapter.isOffscreen) {
-      return; // Not in OffscreenCanvas mode
-    }
+  _setupTileRenderingSystem() {
+    const { THREE } = this.threeJsModules;
 
-    try {
-      // Check if we're in a worker context
-      const isWorker = typeof WorkerGlobalScope !== 'undefined' &&
-                       typeof self !== 'undefined' &&
-                       self instanceof WorkerGlobalScope;
+    // Create a plane geometry to display the texture
+    this.planeGeometry = new THREE.PlaneGeometry(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
 
-      if (isWorker) {
-        // In worker context - create and transfer ImageBitmap
-        const imageBitmap = await this.canvasAdapter.transferToImageBitmap();
+    // Create texture for tile rendering
+    this.texture = new THREE.DataTexture(
+      null, // data will be set later
+      1, 1, // initial size
+      THREE.RGBFormat,
+      THREE.UnsignedByteType
+    );
 
-        if (imageBitmap && typeof postMessage === 'function') {
-          // Send ImageBitmap to main thread for display
-          postMessage({
-            type: 'frame_imageBitmap',
-            payload: {
-              imageBitmap,
-              width: this.canvas.width,
-              height: this.canvas.height,
-              timestamp: performance.now()
-            }
-          }, [imageBitmap]); // Transfer ImageBitmap
-        }
-      } else {
-        // In main thread with OffscreenCanvas (worker manager mode)
-        // The worker manager will handle the transfer
-        if (typeof window !== 'undefined' && window.fastLEDEvents) {
-          window.fastLEDEvents.emit('offscreen:frame_ready', {
-            canvas: this.canvas,
-            timestamp: performance.now()
-          });
-        }
-      }
-    } catch (error) {
-      console.error('Failed to transfer OffscreenCanvas ImageBitmap:', error);
-    }
+    // Set texture parameters for pixel-perfect rendering
+    this.texture.magFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
+    this.texture.minFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
+    this.texture.wrapS = THREE.ClampToEdgeWrapping;
+    this.texture.wrapT = THREE.ClampToEdgeWrapping;
+
+    // Create material with the texture
+    this.material = new THREE.MeshBasicMaterial({
+      map: this.texture,
+      transparent: false
+    });
+
+    // Create mesh and add to scene
+    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
+    this.planeMesh.position.set(0, 0, 0);
+    this.scene.add(this.planeMesh);
   }
 
   /**
-   * Resets and cleans up WebGL resources
-   * Disposes of buffers, textures, and programs to free memory
+   * Resets and cleans up Three.js resources
+   * Disposes of textures, materials, and geometries to free memory
    */
   reset() {
-    if (this.gl) {
-      this.gl.deleteBuffer(this.positionBuffer);
-      this.gl.deleteBuffer(this.texCoordBuffer);
-      this.gl.deleteTexture(this.texture);
-      this.gl.deleteProgram(this.program);
+    // Call parent reset
+    super.reset();
+
+    // Clean up tile-specific resources
+    if (this.texture) {
+      this.texture.dispose();
+      this.texture = null;
     }
+    if (this.material) {
+      this.material.dispose();
+      this.material = null;
+    }
+    if (this.planeGeometry) {
+      this.planeGeometry.dispose();
+      this.planeGeometry = null;
+    }
+    if (this.planeMesh && this.scene) {
+      this.scene.remove(this.planeMesh);
+      this.planeMesh = null;
+    }
+
     this.texWidth = 0;
     this.texHeight = 0;
-    this.gl = null;
+    this.texData = null;
   }
 
-  /**
-   * Initializes the WebGL rendering context and resources
-   * Sets up shaders, buffers, and textures for LED rendering
-   * @returns {boolean} True if initialization was successful
-   */
-  initWebGL() {
-    // Use the already created context from initializeWithAdapter
-    if (!this.gl) {
-      console.error('WebGL context not available');
-      return false;
-    }
 
-    // Get shader sources directly (avoid DOM dependency)
-    const vertexShaderSource = `
-        attribute vec2 a_position;
-        attribute vec2 a_texCoord;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_Position = vec4(a_position, 0, 1);
-            v_texCoord = a_texCoord;
-        }
-    `;
 
-    const fragmentShaderSource = `
-        precision mediump float;
-        uniform sampler2D u_image;
-        varying vec2 v_texCoord;
-        void main() {
-            gl_FragColor = texture2D(u_image, v_texCoord);
-        }
-    `;
-
-    // Create shaders
-    const vertexShader = this.createShader(
-      this.gl.VERTEX_SHADER,
-      vertexShaderSource,
-    );
-    const fragmentShader = this.createShader(
-      this.gl.FRAGMENT_SHADER,
-      fragmentShaderSource,
-    );
-
-    // Create program
-    this.program = this.createProgram(vertexShader, fragmentShader);
-
-    // Create buffers
-    this.positionBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.bufferData(
-      this.gl.ARRAY_BUFFER,
-      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
-      this.gl.STREAM_DRAW,
-    );
-
-    this.texCoordBuffer = this.gl.createBuffer();
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-    this.gl.bufferData(
-      this.gl.ARRAY_BUFFER,
-      new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
-      this.gl.STREAM_DRAW,
-    );
-
-    // Create texture
-    this.texture = this.gl.createTexture();
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
-    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
-
-    return true;
-  }
-
-  /**
-   * Creates and compiles a WebGL shader
-   * @param {number} type - Shader type (VERTEX_SHADER or FRAGMENT_SHADER)
-   * @param {string} source - GLSL shader source code
-   * @returns {WebGLShader|null} Compiled shader or null on error
-   */
-  createShader(type, source) {
-    const shader = this.gl.createShader(type);
-    this.gl.shaderSource(shader, source);
-    this.gl.compileShader(shader);
-    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
-      console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
-      this.gl.deleteShader(shader);
-      return null;
-    }
-    return shader;
-  }
-
-  /**
-   * Creates and links a WebGL program from vertex and fragment shaders
-   * @param {WebGLShader} vertexShader - Compiled vertex shader
-   * @param {WebGLShader} fragmentShader - Compiled fragment shader
-   * @returns {WebGLProgram|null} Linked program or null on error
-   */
-  createProgram(vertexShader, fragmentShader) {
-    const program = this.gl.createProgram();
-    this.gl.attachShader(program, vertexShader);
-    this.gl.attachShader(program, fragmentShader);
-    this.gl.linkProgram(program);
-    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
-      console.error('Program link error:', this.gl.getProgramInfoLog(program));
-      return null;
-    }
-    return program;
-  }
 
   /**
    * Updates the canvas with new LED frame data
-   * Processes strip data and renders LEDs to the WebGL texture
+   * Processes strip data and renders LEDs to the Three.js texture using tile rendering
    * @param {StripData[] & {screenMap?: ScreenMapData}} frameData - Array of frame data containing LED strip information with optional screenMap
    */
   updateCanvas(frameData) {
@@ -458,7 +287,10 @@ export class GraphicsManager {
       this.screenMap = frameData.screenMap;
     }
 
-    if (!this.gl) this.initWebGL();
+    // Initialize Three.js if not already done
+    if (!this.scene || !this.camera || !this.renderer) {
+      this.initThreeJS(frameData);
+    }
 
     // Update canvas size based on screenMap dimensions
     if (this.screenMap && this.canvas) {
@@ -470,15 +302,15 @@ export class GraphicsManager {
         this.canvas.width = screenWidth;
         this.canvas.height = screenHeight;
 
-        // Update WebGL viewport to match new canvas size
-        if (this.gl) {
-          this.gl.viewport(0, 0, screenWidth, screenHeight);
+        // Update Three.js renderer size
+        if (this.renderer) {
+          this.renderer.setSize(screenWidth, screenHeight);
         }
       }
     }
 
-    const canvasWidth = this.gl.canvas.width;
-    const canvasHeight = this.gl.canvas.height;
+    const canvasWidth = this.canvas.width;
+    const canvasHeight = this.canvas.height;
 
     // Check if we need to reallocate the texture - optimized to reduce reallocations
     const newTexWidth = 2 ** Math.ceil(Math.log2(canvasWidth));
@@ -488,23 +320,36 @@ export class GraphicsManager {
       this.texWidth = newTexWidth;
       this.texHeight = newTexHeight;
 
-      // Reallocate texture
-      this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-      this.gl.texImage2D(
-        this.gl.TEXTURE_2D,
-        0,
-        this.gl.RGB,
+      // Reallocate Three.js texture and data buffer
+      this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
+
+      if (this.texture) {
+        this.texture.dispose(); // Clean up old texture
+      }
+
+      // Create new Three.js texture
+      const { THREE } = this.threeJsModules;
+      this.texture = new THREE.DataTexture(
+        this.texData,
         this.texWidth,
         this.texHeight,
-        0,
-        this.gl.RGB,
-        this.gl.UNSIGNED_BYTE,
-        null,
+        THREE.RGBFormat,
+        THREE.UnsignedByteType
       );
 
-      // Reallocate texData buffer
-      this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
-      console.log(`WebGL texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
+      // Set texture parameters for pixel-perfect rendering
+      this.texture.magFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
+      this.texture.minFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
+      this.texture.wrapS = THREE.ClampToEdgeWrapping;
+      this.texture.wrapT = THREE.ClampToEdgeWrapping;
+
+      // Update material with new texture
+      if (this.material) {
+        this.material.map = this.texture;
+        this.material.needsUpdate = true;
+      }
+
+      console.log(`Three.js texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
     }
 
     if (!this.screenMap) {
@@ -515,7 +360,9 @@ export class GraphicsManager {
     const { screenMap } = this;
 
     // Clear the texture data
-    this.texData.fill(0);
+    if (this.texData) {
+      this.texData.fill(0);
+    }
 
     for (let i = 0; i < frameData.length; i++) {
       const strip = frameData[i];
@@ -595,89 +442,15 @@ export class GraphicsManager {
       }
     }
 
-    // Update texture with new data
-    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
-    this.gl.texSubImage2D(
-      this.gl.TEXTURE_2D,
-      0,
-      0,
-      0,
-      this.texWidth,
-      this.texHeight,
-      this.gl.RGB,
-      this.gl.UNSIGNED_BYTE,
-      this.texData,
-    );
-
-    // Set the viewport to the original canvas size
-    this.gl.viewport(0, 0, canvasWidth, canvasHeight);
-    this.gl.clearColor(0, 0, 0, 1);
-    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
-
-    this.gl.useProgram(this.program);
-
-    const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
-    this.gl.enableVertexAttribArray(positionLocation);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
-    this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-    const texCoordLocation = this.gl.getAttribLocation(this.program, 'a_texCoord');
-    this.gl.enableVertexAttribArray(texCoordLocation);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-    this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
-
-    // Update texture coordinates based on actual canvas size
-    const texCoords = new Float32Array([
-      0,
-      0,
-      canvasWidth / this.texWidth,
-      0,
-      0,
-      canvasHeight / this.texHeight,
-      canvasWidth / this.texWidth,
-      canvasHeight / this.texHeight,
-    ]);
-    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
-    this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
-
-    this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
-  }
-
-  /**
-   * Resizes the canvas and updates WebGL viewport
-   * @param {number} width - New canvas width
-   * @param {number} height - New canvas height
-   * @returns {boolean} True if resize was successful
-   */
-  resize(width, height) {
-    try {
-      if (this.canvasAdapter) {
-        // Use adapter for unified resize handling
-        const success = this.canvasAdapter.resize(width, height);
-        if (!success) {
-          console.error('Canvas adapter resize failed');
-          return false;
-        }
-      } else {
-        // Fallback direct resize
-        this.canvas.width = width;
-        this.canvas.height = height;
-        if (this.gl) {
-          this.gl.viewport(0, 0, width, height);
-        }
-      }
-
-      console.log('Graphics manager resized', {
-        width,
-        height,
-        isOffscreen: this.canvasAdapter?.isOffscreen || false
-      });
-
-      return true;
-
-    } catch (error) {
-      console.error('Graphics manager resize failed:', error);
-      return false;
+    // Update Three.js texture with new data
+    if (this.texture && this.texData) {
+      // Update texture size if needed
+      this.texture.image = {
+        data: this.texData,
+        width: this.texWidth,
+        height: this.texHeight
+      };
+      this.texture.needsUpdate = true;
     }
   }
 
@@ -686,63 +459,29 @@ export class GraphicsManager {
    * @returns {Object} Performance and capability information
    */
   getPerformanceInfo() {
-    const baseInfo = {
-      canvasSize: {
-        width: this.canvas?.width || 0,
-        height: this.canvas?.height || 0
-      },
+    const baseInfo = super.getPerformanceInfo();
+
+    return {
+      ...baseInfo,
       textureSize: {
         width: this.texWidth,
         height: this.texHeight
       },
-      hasWebGL: !!this.gl,
-      initialized: !!(this.gl && this.program)
+      renderingMode: 'tile-based',
+      usePixelatedRendering: this.args.usePixelatedRendering
     };
-
-    if (this.canvasAdapter) {
-      return {
-        ...baseInfo,
-        ...this.canvasAdapter.getPerformanceStats()
-      };
-    }
-
-    return baseInfo;
   }
 
   /**
-   * Clean up resources including canvas adapter
+   * Clean up resources including Three.js tile rendering objects
    */
   destroy() {
-    // Clean up WebGL resources
-    if (this.gl) {
-      if (this.program) {
-        this.gl.deleteProgram(this.program);
-      }
-      if (this.positionBuffer) {
-        this.gl.deleteBuffer(this.positionBuffer);
-      }
-      if (this.texCoordBuffer) {
-        this.gl.deleteBuffer(this.texCoordBuffer);
-      }
-      if (this.texture) {
-        this.gl.deleteTexture(this.texture);
-      }
-    }
+    // Clean up tile-specific resources
+    this.reset();
 
-    // Clean up canvas adapter
-    if (this.canvasAdapter) {
-      this.canvasAdapter.destroy();
-      this.canvasAdapter = null;
-    }
+    // Call parent destroy
+    super.destroy();
 
-    this.gl = null;
-    this.canvas = null;
-    this.program = null;
-    this.positionBuffer = null;
-    this.texCoordBuffer = null;
-    this.texture = null;
-    this.texData = null;
-
-    console.log('Graphics manager destroyed');
+    console.log('Tile-based graphics manager destroyed');
   }
 }
