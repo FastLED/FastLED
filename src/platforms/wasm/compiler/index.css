@@ -846,9 +846,16 @@ audio::-webkit-media-controls-mute-button {
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s ease, opacity 0.3s ease;
     z-index: 10;
     color: #888;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.record-button.visible {
+    opacity: 1;
+    pointer-events: auto;
 }
 
 .record-button:hover {
@@ -899,14 +906,6 @@ audio::-webkit-media-controls-mute-button {
     }
 }
 
-@keyframes labelFade {
-    0% { opacity: 0; }
-    3% { opacity: 0; }  /* Quick fade in (0.25s) */
-    10% { opacity: 1; } /* Hold for 0.5s */
-    80% { opacity: 1; }  /* Hold for 1s */
-    100% { opacity: 0; } /* Slow fade out (2s) */
-}
-
 #canvas-label {
     position: absolute;
     top: 10px;
@@ -922,6 +921,7 @@ audio::-webkit-media-controls-mute-button {
     z-index: 10;
     min-width: 80px;
     text-align: center;
+    transition: all 0.3s ease; /* Add transition for smooth fade */
 }
 
 /* When record button is hidden, center the canvas label */
@@ -930,10 +930,9 @@ audio::-webkit-media-controls-mute-button {
     transform: translateX(-50%);
 }
 
-/* Add a new class for when we want to trigger the animation */
-#canvas-label.show-animation {
-    animation: labelFade 10s ease-out forwards;
-    animation-delay: 0;  /* Delay animation start */
+/* Visible state for canvas label - matches record button pattern */
+#canvas-label.visible {
+    opacity: 1;
 }
 
 /* Menu Bar Styling */

@@ -180,40 +180,78 @@
 <script type="module">
     import { loadFastLED } from './index.js';
     
+    // Unified canvas UI fade-in/fade-out logic
+    let canvasUITimeout = null;
+    const canvas = document.getElementById('myCanvas');
+    const recordButton = document.getElementById('record-btn');
+    const canvasLabel = document.getElementById('canvas-label');
+
+    function showCanvasUI() {
+        if (canvasUITimeout) {
+            clearTimeout(canvasUITimeout);
+            canvasUITimeout = null;
+        }
+        recordButton.classList.add('visible');
+        canvasLabel.classList.add('visible');
+    }
+
+    function hideCanvasUIWithDelay() {
+        if (canvasUITimeout) {
+            clearTimeout(canvasUITimeout);
+        }
+        canvasUITimeout = setTimeout(() => {
+            recordButton.classList.remove('visible');
+            canvasLabel.classList.remove('visible');
+            canvasUITimeout = null;
+        }, 2000); // 2 second delay
+    }
+
+    // Add event listeners for canvas hover - controls both record button and label
+    canvas.addEventListener('mouseenter', showCanvasUI);
+    canvas.addEventListener('mouseleave', hideCanvasUIWithDelay);
+
+    // Also handle record button hover to keep UI visible
+    recordButton.addEventListener('mouseenter', showCanvasUI);
+    recordButton.addEventListener('mouseleave', hideCanvasUIWithDelay);
+
+    // Handle canvas label hover to keep UI visible (even though it has pointer-events: none)
+    // This is for consistency in case pointer-events is changed later
+    canvasLabel.addEventListener('mouseenter', showCanvasUI);
+    canvasLabel.addEventListener('mouseleave', hideCanvasUIWithDelay);
+
     document.getElementById('myCanvas').addEventListener('click', function() {
         const output = document.getElementById('output');
         const popup = document.getElementById('output-popup');
         const overlay = document.getElementById('popup-overlay');
-        
+
         // Move the output element to the popup
         popup.appendChild(output);
-        
+
         // Show the popup and overlay with animation
         overlay.style.opacity = '0';
         overlay.style.display = 'block';
         popup.style.display = 'block';
-        
+
         // Trigger reflow
         void overlay.offsetWidth;
-        
+
         // Fade in
         overlay.style.opacity = '1';
-        
+
         // Close popup when clicking overlay
         overlay.onclick = function() {
             // Fade out
             overlay.style.opacity = '0';
-            
+
             setTimeout(() => {
                 popup.style.display = 'none';
                 overlay.style.display = 'none';
-                
-                // Remove and re-add the animation class to trigger it again
+
+                // Reset the canvas UI fade state when popup closes
                 const label = document.getElementById('canvas-label');
-                label.classList.remove('show-animation');
-                // Force reflow to ensure animation restarts
+                label.classList.remove('visible');
+                // Force reflow to ensure state resets properly
                 void label.offsetWidth;
-                label.classList.add('show-animation');
             }, 200); // Match the transition duration
         };
     });
@@ -557,10 +595,13 @@
             threeJs: threeJs,
         }
         await loadFastLED(options);
-        
-        // Trigger the animation (it will start after the delay)
+
+        // Show the canvas UI briefly on initial load, then hide automatically
         const label = document.getElementById('canvas-label');
-        label.classList.add('show-animation');
+        setTimeout(() => {
+            showCanvasUI();
+            hideCanvasUIWithDelay();
+        }, 500); // Brief delay after page load
     }
 
     // Wait for fonts to load before showing content
