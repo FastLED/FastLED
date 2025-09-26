@@ -435,6 +435,7 @@ export class VideoRecorder {
 
   /**
    * Processes the frame buffer asynchronously to encode frames into video
+   * Optimized for startup performance to reduce frame drops
    */
   async processBufferAsync() {
     if (this.isProcessingBuffer || this.frameBuffer.length === 0) {
@@ -444,9 +445,25 @@ export class VideoRecorder {
     this.isProcessingBuffer = true;
 
     try {
+      // Use smaller batch sizes during startup to reduce blocking
+      const isStartup = this.frameCounter < 60; // First 1 second at 60fps
+      const baseBatchSize = isStartup ? 3 : 10;
+      const processingDelay = isStartup ? 8 : 0; // Longer delays during startup
+
       while (this.frameBuffer.length > 0 && this.isRecording) {
-        // Process frames in batches to prevent blocking
-        const batchSize = Math.min(10, this.frameBuffer.length);
+        // Adaptive batch sizing based on buffer fill level
+        const bufferFillRatio = this.frameBuffer.length / this.maxBufferFrames;
+        let batchSize = baseBatchSize;
+
+        if (bufferFillRatio > 0.8) {
+          // Aggressive processing when buffer is nearly full
+          batchSize = Math.min(20, this.frameBuffer.length);
+        } else if (bufferFillRatio > 0.5) {
+          // Moderate processing when buffer is half full
+          batchSize = Math.min(15, this.frameBuffer.length);
+        }
+
+        batchSize = Math.min(batchSize, this.frameBuffer.length);
         const frameBatch = this.frameBuffer.splice(0, batchSize);
 
         for (const frameInfo of frameBatch) {
@@ -457,9 +474,9 @@ export class VideoRecorder {
           this.bufferMemoryUsage = Math.max(0, this.bufferMemoryUsage - frameSize);
         }
 
-        // Yield control back to main thread between batches
+        // Yield control back to main thread between batches with adaptive delays
         await new Promise((resolve) => {
-          setTimeout(() => resolve(), 0);
+          setTimeout(() => resolve(), processingDelay);
         });
       }
 
@@ -476,8 +493,9 @@ export class VideoRecorder {
 
       // Continue processing if there are still frames and we're recording
       if (this.frameBuffer.length > 0 && this.isRecording) {
-        // Schedule next processing cycle
-        setTimeout(() => this.processBufferAsync(), 16);
+        // Dynamic scheduling based on buffer pressure
+        const nextProcessDelay = this.frameBuffer.length > this.maxBufferFrames * 0.7 ? 8 : 16;
+        setTimeout(() => this.processBufferAsync(), nextProcessDelay);
       }
     }
   }
@@ -552,6 +570,7 @@ export class VideoRecorder {
 
   /**
    * Starts the frame capture loop that continuously captures frames at the target FPS
+   * Uses a more efficient timing approach to reduce startup frame drops
    */
   startFrameCapture() {
     if (!this.isRecording) {
@@ -559,26 +578,44 @@ export class VideoRecorder {
     }
 
     const captureInterval = 1000 / this.fps; // Milliseconds per frame
-    let lastCaptureTime = 0;
+    let lastCaptureTime = performance.now(); // Use performance.now() for better precision
+    let frameSkips = 0;
 
     const captureLoop = (currentTime) => {
       if (!this.isRecording) {
         return; // Exit loop if recording stopped
       }
 
-      // Maintain consistent frame rate
-      if (currentTime - lastCaptureTime >= captureInterval) {
+      const deltaTime = currentTime - lastCaptureTime;
+
+      // Maintain consistent frame rate with adaptive timing to prevent startup drops
+      if (deltaTime >= captureInterval * 0.95) { // 5% tolerance for timing jitter
         this.captureFrameToBuffer();
-        lastCaptureTime = currentTime;
+        lastCaptureTime = currentTime - (deltaTime % captureInterval); // Correct for drift
+        frameSkips = 0;
+      } else if (deltaTime < captureInterval * 0.5) {
+        // If we're way ahead of schedule, skip to prevent overloading
+        frameSkips++;
+        if (frameSkips > 2) {
+          // Reset timing if we're consistently too fast
+          lastCaptureTime = currentTime;
+          frameSkips = 0;
+        }
       }
 
-      // Schedule next capture
-      requestAnimationFrame(captureLoop);
+      // Schedule next capture with priority timing
+      if (this.isRecording) {
+        requestAnimationFrame(captureLoop);
+      }
     };
 
-    // Start the capture loop
-    requestAnimationFrame(captureLoop);
-    console.log(`Frame capture loop started at ${this.fps} FPS (${captureInterval.toFixed(1)}ms per frame)`);
+    // Delay first capture slightly to allow animation loop to stabilize during startup
+    setTimeout(() => {
+      if (this.isRecording) {
+        requestAnimationFrame(captureLoop);
+        console.log(`Frame capture loop started at ${this.fps} FPS (${captureInterval.toFixed(1)}ms per frame, startup stabilized)`);
+      }
+    }, 50); // 50ms delay to prevent startup conflicts
   }
 
   /**
@@ -721,23 +758,23 @@ export class VideoRecorder {
 
       // Set up event handlers
       this.mediaRecorder.onstart = () => {
-        console.log('MediaRecorder start event fired');
+        console.log('MediaRecorder start event fired - initializing with startup optimizations');
         this.isRecording = true;
-        // Initialize buffer system
+        // Initialize buffer system with startup-friendly settings
         this.frameBuffer = [];
         this.bufferMemoryUsage = 0;
         this.droppedFrames = 0;
         this.capturedFrames = 0;
         this.emergencyBufferMode = false;
 
-        // Start the frame capture loop
+        // Start the frame capture loop with startup delay
         this.startFrameCapture();
 
         // Notify state change
         if (this.onStateChange) {
           this.onStateChange(true);
         }
-        console.log(`Frame buffer system initialized: max ${this.maxBufferFrames} frames, ${this.settings.maxBufferSizeMB}MB`);
+        console.log(`Frame buffer system initialized with startup optimizations: max ${this.maxBufferFrames} frames, ${this.settings.maxBufferSizeMB}MB`);
       };
 
       this.mediaRecorder.ondataavailable = (event) => {
@@ -777,12 +814,12 @@ export class VideoRecorder {
       // Start recording with codec-optimized timeslice for performance
       try {
         // Optimize timeslice based on frame rate and codec for smooth recording
-        // Use shorter timeslices to reduce frame dropping during busy rendering
-        let timeslice = Math.max(100, 1000 / this.fps); // Sync with frame rate, minimum 100ms
+        // Use longer initial timeslices to reduce startup frame dropping
+        let timeslice = Math.max(200, 2000 / this.fps); // Startup-friendly: double interval, minimum 200ms
         if (this.selectedMimeType.includes('avc1.42E01E') || this.selectedMimeType.includes('vp8') || this.selectedMimeType.includes('h264')) {
-          timeslice = Math.max(100, 500 / this.fps); // Faster codecs with tighter sync
+          timeslice = Math.max(150, 1000 / this.fps); // Faster codecs with moderate sync during startup
         } else if (this.selectedMimeType.includes('av1')) {
-          timeslice = Math.max(200, 1000 / this.fps); // Slower codecs but still frame-synced
+          timeslice = Math.max(300, 2000 / this.fps); // Slower codecs with very conservative startup timing
         }
         try {
           this.mediaRecorder.start(timeslice);
