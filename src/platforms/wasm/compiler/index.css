@@ -1066,7 +1066,7 @@ audio::-webkit-media-controls-mute-button {
 .submenu-dropdown {
     position: absolute;
     top: 0;
-    left: 100%;
+    left: calc(100% - 5px); /* Small overlap to prevent gap */
     min-width: 150px;
     background: linear-gradient(135deg,
         rgba(20, 20, 20, 0.98) 0%,
@@ -1084,7 +1084,15 @@ audio::-webkit-media-controls-mute-button {
     z-index: 1002;
 }
 
+/* Show submenu on parent hover */
 .menu-dropdown-item.has-submenu:hover .submenu-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(0);
+}
+
+/* Keep submenu visible when hovering over the submenu itself */
+.submenu-dropdown:hover {
     opacity: 1;
     visibility: visible;
     transform: translateX(0);
@@ -1092,6 +1100,29 @@ audio::-webkit-media-controls-mute-button {
 
 .menu-dropdown-item.has-submenu:hover .submenu-label::after {
     transform: rotate(90deg);
+}
+
+/* Submenu items inside the submenu dropdown */
+.submenu-dropdown .menu-dropdown-item {
+    padding: 10px 16px;
+    font-size: 1.3em;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+}
+
+.submenu-dropdown .menu-dropdown-item:last-child {
+    border-bottom: none;
+}
+
+.submenu-dropdown .menu-dropdown-item:hover {
+    background-color: rgba(30, 144, 255, 0.2);
+    color: #4DA6FF;
+}
+
+/* DEBUG: Temporary visibility for testing - remove when working */
+.submenu-dropdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+    transform: translateX(0) !important;
 }
 
 /* Inspector button styles */
