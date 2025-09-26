@@ -131,8 +131,8 @@
                 <div class="setting-group">
                     <label for="video-fps">Frame Rate (FPS):</label>
                     <select id="video-fps">
-                        <option value="30">30 FPS</option>
                         <option value="60">60 FPS</option>
+                        <option value="30">30 FPS</option>
                         <option value="24">24 FPS</option>
                         <option value="25">25 FPS</option>
                         <option value="50">50 FPS</option>
@@ -481,13 +481,24 @@
 
     // Always use default settings (no localStorage persistence)
     function loadVideoSettings() {
-        // Clean up any existing saved settings since we no longer use them
-        if (localStorage.getItem('videoRecordingSettings')) {
-            localStorage.removeItem('videoRecordingSettings');
-            console.log('Removed old video recording settings from localStorage');
-        }
+        // Aggressive cleanup of any video-related localStorage keys
+        const keysToRemove = [
+            'videoRecordingSettings',
+            'videoSettings',
+            'fastled_video_settings',
+            'recording_settings'
+        ];
+
+        keysToRemove.forEach(key => {
+            if (localStorage.getItem(key)) {
+                localStorage.removeItem(key);
+                console.log(`Removed old ${key} from localStorage`);
+            }
+        });
+
         // Always return fresh defaults - no persistence needed
         videoSettings = { ...videoSettingsDefaults };
+        console.log('Video settings reset to defaults:', videoSettings);
         return videoSettings;
     }
 
@@ -601,6 +612,16 @@
     });
 
     document.getElementById('video-settings-overlay').addEventListener('click', hideVideoSettingsPopup);
+
+    // Initialize video settings on page load to ensure defaults are set
+    loadVideoSettings();
+
+    // Set form values immediately to override HTML defaults
+    document.getElementById('video-codec').value = videoSettings.videoCodec;
+    document.getElementById('video-bitrate').value = videoSettings.videoBitrate;
+    document.getElementById('audio-codec').value = videoSettings.audioCodec;
+    document.getElementById('audio-bitrate').value = videoSettings.audioBitrate;
+    document.getElementById('video-fps').value = videoSettings.fps;
 
     // Expose functions globally
     window.showVideoSettingsPopup = showVideoSettingsPopup;
