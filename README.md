@@ -438,6 +438,50 @@ The generic `ESP32 I2S` driver provides parallel WS2812 output for various ESP32
 ###### Usage
 To use this driver, you must define `FASTLED_ESP32_I2S` before including the FastLED header.
 
+##### ESP32 RMT Driver Configuration
+
+FastLED includes two RMT driver implementations:
+- **RMT4 driver**: FastLED's custom, highly-optimized driver with direct RMT peripheral control
+- **RMT5 driver**: Wrapper around Espressif's `led_strip` component (ESP-IDF 5.0+)
+
+**Important:** The RMT4 and RMT5 drivers use completely different APIs. FastLED's custom RMT4 driver is specifically optimized for LED control and significantly outperforms Espressif's generic RMT5 wrapper in terms of:
+- **Performance**: Lower interrupt overhead and better timing precision
+- **Wi-Fi resistance**: Dual-buffer design prevents flickering under Wi-Fi load
+- **Efficiency**: Direct hardware control vs. abstraction layer overhead
+- **Strip capacity**: RMT4 uses worker pools to support more LED strips; RMT5 lacks worker pools and is limited by hardware channels (particularly restrictive on ESP32-C3 with only 2 TX channels)
+
+By default, FastLED automatically selects:
+- **ESP-IDF 5.0+**: Uses RMT5 driver (for compatibility)
+- **ESP-IDF 4.x and earlier**: Uses RMT4 driver
+
+###### Forcing RMT4 Driver (Recommended for Performance)
+
+To force the use of FastLED's optimized RMT4 driver, you have two options:
+
+**Option 1: Arduino IDE - Downgrade ESP32 Core**
+- Use any ESP32 Arduino Core version below 3.0.
+- These versions use ESP-IDF 4.x and below which defaults to RMT4
+
+**Option 2: PlatformIO - Set Build Flag**
+
+For ESP-IDF 5.0+ environments, set `FASTLED_RMT5=0` as a build flag:
+
+```ini
+[env:esp32]
+platform = espressif32
+board = esp32dev
+framework = arduino
+lib_deps = fastled/FastLED
+build_flags =
+    -D FASTLED_RMT5=0
+```
+
+**📚 PlatformIO Users:** For a complete quick start guide with FastLED and PlatformIO, check out our official starter template: [github.com/fastled/platformio-starter](https://github.com/fastled/platformio-starter)
+
+**⚠️ Critical:** RMT4 and RMT5 drivers cannot coexist in the same sketch. Espressif's ESP-IDF will cause a boot crash if it detects both drivers attempting to initialize. You must choose one or the other at compile time.
+
+**Note:** Using RMT4 is strongly recommended if you experience flickering with Wi-Fi enabled or need maximum LED performance. RMT4 uses ESP-IDF's legacy RMT APIs which are still maintained for backward compatibility in ESP-IDF 5.x, though marked as deprecated.
+
 ```cpp
 #define FASTLED_ESP32_I2S
 #include <FastLED.h>
