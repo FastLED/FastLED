@@ -132,6 +132,8 @@ void setup() {
 
 These drivers are based on the Silicon Labs ezWS2812 library and provide seamless FastLED API compatibility with enhanced performance for MG24-based boards.
 
+**Important**: The `EZWS2812_GPIO` and `EZWS2812_SPI` controllers are optimized specifically for **WS2812 LEDs only**. For other LED chipsets (SK6812, TM1809, UCS1903, etc.), FastLED automatically uses the generic clockless driver which supports all timing variants but with standard performance.
+
 ### Raspberry Pi Pico
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml) [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml) [![rp2350B SparkfunXRP](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml)
 
