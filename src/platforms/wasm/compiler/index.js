@@ -1003,7 +1003,7 @@ function actuallyInitializeVideoRecorder(canvas, recordButton) {
     videoRecorder = new VideoRecorder({
       canvas,
       audioContext: null, // Disable audio for better performance
-      fps: savedSettings?.fps || 30,
+      fps: savedSettings?.fps || 60,
       settings: {
         // Use saved settings directly, or let VideoRecorder use its own defaults
         ...savedSettings,

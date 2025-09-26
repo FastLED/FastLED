@@ -23,7 +23,7 @@ const DEFAULT_VIDEO_CONFIG = {
   /** @type {number} Target audio bitrate in kbps */
   audioBitrate: 128,
   /** @type {number} Default frame rate */
-  fps: 30,
+  fps: 60,
   /** @type {number} Maximum frame buffer size in frames - extremely large buffer to prevent drops */
   maxBufferFrames: 10000,
   /** @type {number} Buffer size in MB for frame storage */
