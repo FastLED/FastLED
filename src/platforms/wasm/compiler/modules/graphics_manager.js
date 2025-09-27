@@ -396,7 +396,8 @@ export class GraphicsManager extends GraphicsManagerBase {
 
         // Update Three.js renderer size
         if (this.renderer) {
-          this.renderer.setSize(screenWidth, screenHeight);
+          // Use the base class helper for OffscreenCanvas compatibility
+          this._setRendererSize(screenWidth, screenHeight);
         }
       }
     }

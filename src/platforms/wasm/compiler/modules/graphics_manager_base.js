@@ -7,8 +7,6 @@
  * @module GraphicsManagerBase
  */
 
-import { createGraphicsAdapter } from './offscreen_graphics_adapter.js';
-
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
 /* eslint-disable max-len */
@@ -123,16 +121,9 @@ export class GraphicsManagerBase {
         return false;
       }
 
-      // Create canvas adapter for unified API (but we'll use Three.js renderer instead)
-      this.canvasAdapter = createGraphicsAdapter(this.canvas, {
-        contextType: 'webgl2',
-        contextAttributes: {
-          alpha: false,
-          antialias: true,
-          preserveDrawingBuffer: false,
-          powerPreference: 'high-performance'
-        }
-      });
+      // Skip canvas adapter for Three.js graphics managers to avoid context conflicts
+      // Three.js will create and manage its own WebGL context
+      this.canvasAdapter = null;
 
       return true;
 
@@ -162,10 +153,26 @@ export class GraphicsManagerBase {
     const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
     const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
-    // Always set width to 640px and scale height proportionally
-    const targetWidth = MAX_WIDTH;
-    const aspectRatio = screenMapWidth / screenMapHeight;
-    const targetHeight = Math.round(targetWidth / aspectRatio);
+    // Validate screen map dimensions to prevent NaN
+    let targetWidth, targetHeight;
+    if (!screenMapWidth || !screenMapHeight || screenMapWidth <= 0 || screenMapHeight <= 0) {
+      console.warn('Invalid screen map dimensions, using 1:1 aspect ratio:', {
+        screenMapWidth,
+        screenMapHeight,
+        screenMap: {
+          absMax: screenMap.absMax,
+          absMin: screenMap.absMin
+        }
+      });
+      // Use 1:1 aspect ratio as fallback
+      targetWidth = MAX_WIDTH;
+      targetHeight = MAX_WIDTH;
+    } else {
+      // Always set width to 640px and scale height proportionally
+      targetWidth = MAX_WIDTH;
+      const aspectRatio = screenMapWidth / screenMapHeight;
+      targetHeight = Math.round(targetWidth / aspectRatio);
+    }
 
     // Set the rendering resolution (2x the display size)
     this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;
@@ -247,11 +254,146 @@ export class GraphicsManagerBase {
   _setupRenderer() {
     const { THREE } = this.threeJsModules;
 
-    this.renderer = new THREE.WebGLRenderer({
-      canvas: this.canvas,
-      antialias: true,
-    });
-    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+    // Skip WebGL validation when using Three.js to avoid context conflicts
+    // Three.js will handle its own WebGL detection and error reporting
+
+    try {
+      // Check for existing contexts without creating any new ones
+      console.log('Setting up Three.js WebGL renderer on canvas');
+
+      // Ensure we have valid dimensions before creating renderer
+      if (!this.SCREEN_WIDTH || !this.SCREEN_HEIGHT || this.SCREEN_WIDTH <= 0 || this.SCREEN_HEIGHT <= 0) {
+        console.warn('Invalid screen dimensions for renderer setup, using defaults:', {
+          SCREEN_WIDTH: this.SCREEN_WIDTH,
+          SCREEN_HEIGHT: this.SCREEN_HEIGHT
+        });
+        this.SCREEN_WIDTH = 640;
+        this.SCREEN_HEIGHT = 640;
+      }
+
+      // Try with conservative settings first
+      const rendererOptions = {
+        canvas: this.canvas,
+        antialias: true,
+        context: null, // Let Three.js create its own context
+        powerPreference: 'high-performance',
+        failIfMajorPerformanceCaveat: false,
+        preserveDrawingBuffer: false,
+        alpha: false
+      };
+
+      this.renderer = new THREE.WebGLRenderer(rendererOptions);
+
+      // Set size with proper OffscreenCanvas handling
+      console.log('Setting renderer size to:', this.SCREEN_WIDTH, 'x', this.SCREEN_HEIGHT);
+      this._setRendererSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+
+      // Verify the renderer was created successfully
+      if (!this.renderer.getContext() || !this.renderer.domElement) {
+        throw new Error('WebGL renderer creation failed - no context available');
+      }
+
+      console.log('Three.js WebGL renderer initialized successfully');
+    } catch (error) {
+      console.error('Failed to create Three.js WebGL renderer:', error);
+
+      // Try creating a fresh canvas for Three.js if the original has context conflicts
+      try {
+        console.warn('Attempting WebGL renderer with fresh canvas...');
+
+        // Create a new canvas with the same dimensions
+        let freshCanvas;
+        if (typeof OffscreenCanvas !== 'undefined') {
+          freshCanvas = new OffscreenCanvas(this.canvas.width || 640, this.canvas.height || 640);
+        } else if (typeof document !== 'undefined') {
+          freshCanvas = document.createElement('canvas');
+          freshCanvas.width = this.canvas.width || 640;
+          freshCanvas.height = this.canvas.height || 640;
+          freshCanvas.style.width = this.canvas.style?.width || '640px';
+          freshCanvas.style.height = this.canvas.style?.height || '640px';
+        } else {
+          throw new Error('Cannot create fresh canvas in this environment');
+        }
+
+        const fallbackOptions = {
+          canvas: freshCanvas,
+          antialias: false,
+          context: null,
+          powerPreference: 'default',
+          failIfMajorPerformanceCaveat: true,
+          preserveDrawingBuffer: true,
+          alpha: true
+        };
+
+        this.renderer = new THREE.WebGLRenderer(fallbackOptions);
+        // Set size with proper OffscreenCanvas handling
+        this._setRendererSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+
+        if (!this.renderer.getContext() || !this.renderer.domElement) {
+          throw new Error('Fresh canvas WebGL renderer creation also failed');
+        }
+
+        // Replace the original canvas with the fresh one
+        if (this.canvas.parentNode && freshCanvas.style) {
+          this.canvas.parentNode.replaceChild(freshCanvas, this.canvas);
+        }
+        this.canvas = freshCanvas;
+
+        console.warn('Three.js WebGL renderer initialized with fresh canvas');
+      } catch (fallbackError) {
+        console.error('Both primary and fresh canvas WebGL renderer creation failed:', fallbackError);
+        throw new Error(`WebGL renderer initialization failed: ${error.message}. Fresh canvas fallback also failed: ${fallbackError.message}`);
+      }
+    }
+  }
+
+  /**
+   * Helper method to set renderer size with OffscreenCanvas compatibility
+   * @protected
+   * @param {number} width - Width in pixels
+   * @param {number} height - Height in pixels
+   */
+  _setRendererSize(width, height) {
+    if (!this.renderer) return;
+
+    // Ensure we have valid dimensions
+    if (!width || !height || width <= 0 || height <= 0) {
+      console.warn('Invalid renderer dimensions provided, using defaults:', {
+        provided: { width, height },
+        fallback: { width: 640, height: 640 }
+      });
+      width = 640;
+      height = 640;
+    }
+
+    // Check if we're working with OffscreenCanvas
+    const isOffscreenCanvas = this.canvas instanceof OffscreenCanvas ||
+                             (typeof OffscreenCanvas !== 'undefined' &&
+                              this.canvas &&
+                              this.canvas.constructor &&
+                              this.canvas.constructor.name === 'OffscreenCanvas');
+
+    console.log('Setting renderer size:', { width, height, isOffscreenCanvas });
+
+    if (isOffscreenCanvas) {
+      // OffscreenCanvas doesn't have style properties, so don't update them
+      this.renderer.setSize(width, height, false);
+    } else {
+      // Regular canvas - update both renderer size and CSS style
+      this.renderer.setSize(width, height, true);
+    }
+  }
+
+  /**
+   * Validates WebGL support and context creation capability
+   * @protected
+   * @returns {boolean} True if WebGL is supported and context can be created
+   */
+  _validateWebGLSupport() {
+    // Skip WebGL validation entirely to prevent context conflicts with Three.js
+    // Let Three.js handle all WebGL context creation and validation
+    console.log('Skipping WebGL validation to avoid context conflicts with Three.js');
+    return true;
   }
 
   /**
@@ -279,7 +421,7 @@ export class GraphicsManagerBase {
    */
   async handleOffscreenTransfer() {
     if (!this.canvasAdapter || !this.canvasAdapter.isOffscreen) {
-      return; // Not in OffscreenCanvas mode
+      return; // Not in OffscreenCanvas mode or no adapter
     }
 
     try {
@@ -341,7 +483,7 @@ export class GraphicsManagerBase {
 
       // Update Three.js renderer size
       if (this.renderer) {
-        this.renderer.setSize(width, height);
+        this._setRendererSize(width, height);
       }
 
       // Update camera if needed

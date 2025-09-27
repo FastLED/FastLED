@@ -345,28 +345,87 @@ function updateCanvas(frameData) {
       ...graphicsArgs
     };
 
-    if (FORCE_THREEJS_RENDERER) {
-      console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
-    } else if (FORCE_FAST_RENDERER) {
-      console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
-      graphicsManager = new GraphicsManager(currentGraphicsArgs);
-    } else if (isDenseMap) {
-      console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManager(currentGraphicsArgs);
-    } else {
-      console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
-      graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
+    // Try to create graphics manager with WebGL error handling and fallback
+    try {
+      if (FORCE_THREEJS_RENDERER) {
+        console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
+        graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
+      } else if (FORCE_FAST_RENDERER) {
+        console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
+        graphicsManager = new GraphicsManager(currentGraphicsArgs);
+      } else if (isDenseMap) {
+        console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
+        graphicsManager = new GraphicsManager(currentGraphicsArgs);
+      } else {
+        console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
+        try {
+          graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
+        } catch (webglError) {
+          console.warn('Three.js GraphicsManager failed, falling back to Fast GraphicsManager:', webglError);
+          // Fall back to fast 2D renderer if WebGL fails
+          graphicsManager = new GraphicsManager(currentGraphicsArgs);
+
+          // Show user notification about fallback
+          const errorDisplay = document.getElementById('error-display');
+          if (errorDisplay) {
+            errorDisplay.textContent = 'Using fast 2D renderer (WebGL unavailable)';
+            errorDisplay.style.color = '#ffaa00'; // Orange warning color
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Failed to create graphics manager:', error);
+
+      // Last resort fallback - try the fast renderer
+      try {
+        console.log('Attempting fallback to Fast GraphicsManager...');
+        graphicsManager = new GraphicsManager(currentGraphicsArgs);
+
+        const errorDisplay = document.getElementById('error-display');
+        if (errorDisplay) {
+          errorDisplay.textContent = 'Using fallback 2D renderer';
+          errorDisplay.style.color = '#ffaa00';
+        }
+      } catch (fallbackError) {
+        console.error('All graphics managers failed:', fallbackError);
+
+        const errorDisplay = document.getElementById('error-display');
+        if (errorDisplay) {
+          errorDisplay.textContent = 'Graphics initialization failed. Please refresh the page.';
+          errorDisplay.style.color = '#ff6b6b'; // Red error color
+        }
+        return; // Exit early if all graphics managers fail
+      }
     }
+
     uiCanvasChanged = false;
   }
 
   if (uiCanvasChanged) {
     uiCanvasChanged = false;
-    graphicsManager.reset();
+    try {
+      graphicsManager.reset();
+    } catch (resetError) {
+      console.error('Graphics manager reset failed:', resetError);
+      // Try to recreate the graphics manager
+      graphicsManager = null;
+      updateCanvas(frameData); // Recursive call to recreate
+      return;
+    }
   }
 
-  graphicsManager.updateCanvas(frameData);
+  try {
+    graphicsManager.updateCanvas(frameData);
+  } catch (updateError) {
+    console.error('Graphics manager update failed:', updateError);
+
+    // Show error to user
+    const errorDisplay = document.getElementById('error-display');
+    if (errorDisplay) {
+      errorDisplay.textContent = 'Rendering error occurred';
+      errorDisplay.style.color = '#ff6b6b';
+    }
+  }
 }
 
 /**

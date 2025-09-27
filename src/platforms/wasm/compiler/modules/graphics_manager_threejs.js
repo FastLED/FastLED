@@ -279,7 +279,8 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
 
     // Don't remove the renderer or canvas
     if (this.renderer) {
-      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+      // Use the base class helper for OffscreenCanvas compatibility
+      this._setRendererSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
     }
   }
 
