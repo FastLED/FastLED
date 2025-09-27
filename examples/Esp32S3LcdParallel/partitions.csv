@@ -1,0 +1,8 @@
+# ESP32-S3 LCD Parallel LED Driver Partition Table
+# Optimized for large application with PSRAM support
+
+# Name,   Type, SubType, Offset,  Size,     Flags
+nvs,      data, nvs,     0x9000,  0x6000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, 0x10000, 0xF00000,
+spiffs,   data, spiffs,  0xF10000,0xF0000,
