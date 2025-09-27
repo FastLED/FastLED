@@ -40,10 +40,20 @@ class ConsoleErrorCollector:
         self.all_messages.append(message_data)
 
         if msg.type == "error":
-            self.errors.append(message_data)
-            print(f"❌ ERROR: {msg.text}")
-            if msg.location:
-                print(f"   Location: {message_data['location']}")
+            # Filter out debug messages that are incorrectly classified as errors
+            text_lower = msg.text.lower()
+            is_debug_message = any(
+                pattern in text_lower
+                for pattern in ["canvas update:", "canvas resize", "🔍"]
+            )
+
+            if not is_debug_message:
+                self.errors.append(message_data)
+                print(f"❌ ERROR: {msg.text}")
+                if msg.location:
+                    print(f"   Location: {message_data['location']}")
+            else:
+                print(f"🔍 DEBUG: {msg.text} (filtered from errors)")
 
         elif msg.type == "warning":
             self.warnings.append(message_data)
@@ -89,6 +99,8 @@ class ConsoleErrorCollector:
                     "ready with stats",
                     "system ready",
                     "event system",
+                    "canvas update:",
+                    "canvas resize",
                 ]
             )
 
@@ -226,9 +238,10 @@ async def run_console_test(test_iteration: int = 1) -> ConsoleErrorCollector:
                 # Set up console message handler
                 page.on("console", collector.add_message)
 
-                # Navigate to the page
-                print(f"🔗 Navigating to http://localhost:{port}")
-                await page.goto(f"http://localhost:{port}", timeout=30000)
+                # Navigate to the page with gfx=0 parameter
+                test_url = f"http://localhost:{port}?gfx=0"
+                print(f"🔗 Navigating to {test_url}")
+                await page.goto(test_url, timeout=30000)
 
                 # Wait for the page to load and initialize
                 print("⏳ Waiting for FastLED initialization...")

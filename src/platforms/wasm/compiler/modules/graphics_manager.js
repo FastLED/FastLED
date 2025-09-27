@@ -191,6 +191,12 @@ export class GraphicsManager extends GraphicsManagerBase {
       return;
     }
 
+    // Ensure plane mesh exists before rendering
+    if (!this.planeMesh) {
+      console.warn('No plane mesh to render');
+      return;
+    }
+
     // Render the scene
     this.renderer.render(this.scene, this.camera);
 
@@ -206,8 +212,8 @@ export class GraphicsManager extends GraphicsManagerBase {
   _setupTileRenderingSystem() {
     const { THREE } = this.threeJsModules;
 
-    // Create a plane geometry to display the texture
-    this.planeGeometry = new THREE.PlaneGeometry(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+    // Don't create plane geometry here - we'll create it once we know the actual texture size
+    this.planeGeometry = null;
 
     // Create texture for tile rendering
     this.texture = new THREE.DataTexture(
@@ -229,10 +235,8 @@ export class GraphicsManager extends GraphicsManagerBase {
       transparent: false
     });
 
-    // Create mesh and add to scene
-    this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
-    this.planeMesh.position.set(0, 0, 0);
-    this.scene.add(this.planeMesh);
+    // Don't create mesh yet - we'll create it when we know the texture dimensions
+    this.planeMesh = null;
   }
 
   /**
@@ -449,6 +453,40 @@ export class GraphicsManager extends GraphicsManagerBase {
         this.material.needsUpdate = true;
       }
 
+      // Create or update plane geometry to match texture size
+      // Remove old mesh if exists
+      if (this.planeMesh && this.scene) {
+        this.scene.remove(this.planeMesh);
+        this.planeMesh = null;
+      }
+
+      // Dispose old geometry if exists
+      if (this.planeGeometry) {
+        this.planeGeometry.dispose();
+      }
+
+      // Create new plane geometry that matches the texture dimensions
+      // Use the actual texture dimensions directly
+      this.planeGeometry = new THREE.PlaneGeometry(this.texWidth, this.texHeight);
+
+      // Create new mesh with updated geometry
+      this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
+      this.planeMesh.position.set(0, 0, 0);
+      this.scene.add(this.planeMesh);
+
+      // Update camera to fit the new texture dimensions
+      if (this.camera && this.camera.isOrthographicCamera) {
+        const halfWidth = this.texWidth / 2;
+        const halfHeight = this.texHeight / 2;
+        const MARGIN = 1.05;
+
+        this.camera.left = -halfWidth * MARGIN;
+        this.camera.right = halfWidth * MARGIN;
+        this.camera.top = halfHeight * MARGIN;
+        this.camera.bottom = -halfHeight * MARGIN;
+        this.camera.updateProjectionMatrix();
+      }
+
       console.log(`Three.js texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB), saved ${((oldSize - this.texData.length) / 1024 / 1024).toFixed(1)}MB`);
     }
 
@@ -547,6 +585,37 @@ export class GraphicsManager extends GraphicsManagerBase {
         height: this.texHeight
       };
       this.texture.needsUpdate = true;
+
+      // Create plane mesh if it doesn't exist yet (for cases where texture wasn't reallocated)
+      if (!this.planeMesh && this.scene && this.material) {
+        const { THREE } = this.threeJsModules;
+
+        // Dispose old geometry if exists
+        if (this.planeGeometry) {
+          this.planeGeometry.dispose();
+        }
+
+        // Create plane geometry that matches the texture dimensions
+        this.planeGeometry = new THREE.PlaneGeometry(this.texWidth, this.texHeight);
+
+        // Create mesh with geometry
+        this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
+        this.planeMesh.position.set(0, 0, 0);
+        this.scene.add(this.planeMesh);
+
+        // Update camera to fit the texture dimensions
+        if (this.camera && this.camera.isOrthographicCamera) {
+          const halfWidth = this.texWidth / 2;
+          const halfHeight = this.texHeight / 2;
+          const MARGIN = 1.05;
+
+          this.camera.left = -halfWidth * MARGIN;
+          this.camera.right = halfWidth * MARGIN;
+          this.camera.top = halfHeight * MARGIN;
+          this.camera.bottom = -halfHeight * MARGIN;
+          this.camera.updateProjectionMatrix();
+        }
+      }
     }
   }
 
