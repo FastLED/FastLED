@@ -10,6 +10,13 @@
 
 #include <Arduino.h>
 #include <stdio.h>
+#include "fl/sketch_macros.h"
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+// Platform does not have enough memory
+void setup() {}
+void loop() {}
+#else
 
 #include "fl/json.h"
 #include "fl/math_macros.h"
@@ -106,6 +113,8 @@ void loop() {
     FastLED.setBrightness(bri * brightness.as<float>());
     // Apply leds generation to the leds.
     draw(now);
-    
+
     FastLED.show();
 }
+
+#endif
