@@ -20,7 +20,6 @@
 #include "fl/ui.h"
 #include "FastLED.h"
 #include "sensors/pir.h"
-#include "timer.h"
 #include "fl/sstream.h"
 #include "fl/assert.h"
 
@@ -48,7 +47,6 @@ UISlider timescale("Time Scale", 1, .1, 10, .1);
 Pir pir(PIN_PIR, PIR_LATCH_MS, PIR_RISING_TIME, PIR_FALLING_TIME);
 UICheckbox useDither("Use Binary Dither", true);
 
-Timer timer;
 float current_brightness = 0;
 
 // Save a pointer to the controller so that we can modify the dither in real time.
