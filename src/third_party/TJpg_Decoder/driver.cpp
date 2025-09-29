@@ -173,7 +173,7 @@ bool TJpgInstanceDecoder::processChunk() {
             return false;
         }
 
-        if (res == JDR_SUSPEND) {
+        if (res == (JRESULT)JDR_SUSPEND) {
             // Time budget exceeded, more work remains
             // Update progress
             if (progressive_state_.total_mcus > 0) {
