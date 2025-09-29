@@ -14,7 +14,6 @@ on:
       - 'library.json'
       - 'library.properties'
   # pull_request_target: DISABLED - Security vulnerability through PlatformIO pre-script execution
-  # This workflow executes ci/util/ccache_config.py via platformio.ini extra_scripts
   # Running on pull_request_target allows execution of malicious Python code
   # Workflow still runs on push to master for validation
 
