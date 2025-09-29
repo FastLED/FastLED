@@ -406,9 +406,34 @@ jobs:
           echo "=== Final qemu-build contents ==="
           ls -la qemu-build/
 
+      - name: Map platform to chip name
+        id: chip_mapping
+        run: |
+          # Map PlatformIO platform names to QEMU chip names
+          # esp32dev -> esp32 (esp32dev is PlatformIO name, esp32 is chip name)
+          PLATFORM="${{ inputs.platform }}"
+          case "$PLATFORM" in
+            esp32dev|esp32wroom|esp32_i2s_ws2812)
+              CHIP="esp32"
+              ;;
+            esp32c3)
+              CHIP="esp32c3"
+              ;;
+            esp32s3)
+              CHIP="esp32s3"
+              ;;
+            *)
+              echo "Unknown platform: $PLATFORM, defaulting to esp32"
+              CHIP="esp32"
+              ;;
+          esac
+          echo "chip=$CHIP" >> $GITHUB_OUTPUT
+          echo "Mapped platform '$PLATFORM' to chip '$CHIP'"
+        shell: bash
+
       - name: Run ${{ inputs.platform_display }} in QEMU
         id: qemu
-        uses: tobozo/esp32-qemu-sim@v1.0.5
+        uses: tobozo/esp32-qemu-sim@v2.0.0
         with:
           build-folder: trusted/qemu-build
           flash-size: 4
@@ -416,7 +441,7 @@ jobs:
           qemu-timeout: "120"
           timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
           debug: true
-          chip: "${{ inputs.platform }}"
+          chip: "${{ steps.chip_mapping.outputs.chip }}"
 
       - name: Display QEMU output
         if: always()
