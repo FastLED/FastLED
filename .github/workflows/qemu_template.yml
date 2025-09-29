@@ -152,7 +152,7 @@ jobs:
             echo "Found PlatformIO build directory: $PIO_BUILD_DIR"
             echo "Checking artifacts directory: $PIO_ARTIFACTS_DIR"
 
-            # Copy bootloader.bin if it exists
+            # Copy bootloader.bin if it exists - MUST use PlatformIO's bootloader
             if [ -f "$PIO_ARTIFACTS_DIR/bootloader.bin" ]; then
               cp "$PIO_ARTIFACTS_DIR/bootloader.bin" qemu-build/
               echo "✅ Copied bootloader.bin from artifacts directory"
@@ -166,22 +166,13 @@ jobs:
                 cp "$BOOTLOADER" qemu-build/bootloader.bin
                 echo "✅ Found and copied bootloader.bin from $BOOTLOADER"
               else
-                echo "⚠️ bootloader.bin not found, will try default ${{ inputs.platform }} bootloader"
-                # Download default bootloader if needed
-                if [ "${{ inputs.platform }}" = "esp32dev" ]; then
-                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-                elif [ "${{ inputs.platform }}" = "esp32c3" ]; then
-                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32c3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-                elif [ "${{ inputs.platform }}" = "esp32s3" ]; then
-                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32s3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-                else
-                  wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-                fi
-                echo "✅ Downloaded default ${{ inputs.platform }} bootloader"
+                echo "❌ ERROR: bootloader.bin not found in PlatformIO build artifacts"
+                echo "Cannot use generic bootloader - must match firmware IDF version"
+                exit 1
               fi
             fi
 
-            # Copy partitions.bin if it exists
+            # Copy partitions.bin if it exists - MUST use PlatformIO's partition table
             if [ -f "$PIO_ARTIFACTS_DIR/partitions.bin" ]; then
               cp "$PIO_ARTIFACTS_DIR/partitions.bin" qemu-build/
               echo "✅ Copied partitions.bin from artifacts directory"
@@ -195,36 +186,30 @@ jobs:
                 cp "$PARTITIONS" qemu-build/partitions.bin
                 echo "✅ Found and copied partitions.bin from $PARTITIONS"
               else
-                echo "⚠️ partitions.bin not found in build artifacts"
+                echo "❌ ERROR: partitions.bin not found in PlatformIO build artifacts"
+                exit 1
               fi
             fi
 
-            # Always create QEMU-optimized partitions.csv (required by tobozo/esp32-qemu-sim)
-            # Force QEMU-compatible partition layout to avoid memory overlap issues
-            echo "🔧 Creating QEMU-optimized partition table (override PlatformIO layout)"
-            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
-            echo "✅ Created QEMU-optimized partitions.csv (otadata at 0xe000 to avoid overlap)"
-          else
-            echo "⚠️ PlatformIO build directory not found, using defaults"
-            # Download default bootloader
-            if [ "${{ inputs.platform }}" = "esp32dev" ]; then
-              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-            elif [ "${{ inputs.platform }}" = "esp32c3" ]; then
-              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32c3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
-            elif [ "${{ inputs.platform }}" = "esp32s3" ]; then
-              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32s3/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+            # Copy partitions.csv if it exists - use PlatformIO's partition table
+            if [ -f "$PIO_ARTIFACTS_DIR/partitions.csv" ]; then
+              cp "$PIO_ARTIFACTS_DIR/partitions.csv" qemu-build/
+              echo "✅ Copied partitions.csv from artifacts directory"
             else
-              wget -q https://github.com/espressif/arduino-esp32/raw/master/tools/sdk/esp32/bin/bootloader_dio_80m.bin -O qemu-build/bootloader.bin
+              # Try to find partitions.csv in subdirectories
+              PARTITIONS_CSV=$(find "$PIO_BUILD_DIR" -name "partitions.csv" 2>/dev/null | head -1)
+              if [ -n "$PARTITIONS_CSV" ]; then
+                cp "$PARTITIONS_CSV" qemu-build/partitions.csv
+                echo "✅ Found and copied partitions.csv from $PARTITIONS_CSV"
+              else
+                echo "⚠️ partitions.csv not found, creating minimal default for QEMU"
+                printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
+              fi
             fi
-            echo "✅ Downloaded default ${{ inputs.platform }} bootloader"
-
-            # Create QEMU-optimized partition table (otadata at 0xe000 to avoid overlap)
-            printf '# Name,   Type, SubType, Offset,  Size, Flags\nnvs,      data, nvs,     0x9000,  0x5000,\notadata,  data, ota,     0xe000,  0x2000,\napp0,     app,  ota_0,   0x10000, 0x200000,\nspiffs,   data, spiffs,  0x210000,0x1f0000,\n' > qemu-build/partitions.csv
-            echo "✅ Created QEMU-optimized partitions.csv (otadata at 0xe000 to avoid overlap)"
-
-            # Create default boot_app0.bin (required by tobozo/esp32-qemu-sim)
-            dd if=/dev/zero bs=1 count=8192 | tr '\000' '\377' > qemu-build/boot_app0.bin
-            echo "✅ Created default boot_app0.bin"
+          else
+            echo "❌ ERROR: PlatformIO build directory not found"
+            echo "Cannot proceed without PlatformIO build artifacts"
+            exit 1
           fi
 
           # Ensure boot_app0.bin exists if we have PIO_BUILD_DIR and it wasn't already created
@@ -437,7 +422,7 @@ jobs:
         with:
           build-folder: trusted/qemu-build
           flash-size: 4
-          psram: "disabled"
+          psram: "8M"
           qemu-timeout: "120"
           timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
           debug: true
