@@ -14,6 +14,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32dev_test.yml'
+      - '.github/workflows/qemu_template.yml'
   pull_request:
     branches: [master]
     paths:
@@ -26,6 +27,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32dev_test.yml'
+      - '.github/workflows/qemu_template.yml'
 
 jobs:
   esp32dev_qemu_test:
