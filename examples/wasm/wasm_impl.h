@@ -27,8 +27,8 @@ using namespace fl;
 #define BRIGHTNESS 96
 #define COLOR_ORDER GRB
 
-#define MATRIX_WIDTH 100
-#define MATRIX_HEIGHT 100
+#define MATRIX_WIDTH 32
+#define MATRIX_HEIGHT 32
 #define GRID_SERPENTINE false
 
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
