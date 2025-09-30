@@ -387,7 +387,7 @@ jobs:
 
       - name: Run ${{ inputs.platform_display }} in QEMU
         id: qemu
-        uses: tobozo/esp32-qemu-sim@v2.0.0
+        uses: tobozo/esp32-qemu-sim@v2.0.1
         with:
           build-folder: trusted/qemu-build
           flash-size: 4
