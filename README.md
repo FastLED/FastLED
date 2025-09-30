@@ -241,6 +241,17 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 **FastLED supports 50+ platforms!** From sub-$1 ATtiny chips to high-end Teensy 4.1 with 50 parallel outputs.
 
+## 📂 Source Code Directory Structure
+
+FastLED's codebase is organized into several major areas. Each directory contains a README with detailed documentation:
+
+| **Path** | **Description** |
+|----------|-----------------|
+| [src/README.md](src/README.md) | Overview of the FastLED source tree including public headers, core foundation, effects, platforms, sensors, and third-party integrations |
+| [src/fl/README.md](src/fl/README.md) | FastLED core library (`fl::`) providing cross-platform STL-like containers, graphics primitives, math, async, JSON, and I/O utilities |
+| [src/fx/README.md](src/fx/README.md) | FX library with 1D/2D effects, video playback, composition utilities, and links to effect subdirectories |
+| [src/platforms/readme.md](src/platforms/readme.md) | Platform directory overview with backend selection guide, controller types, board-specific documentation, and links to all platform subdirectories |
+
 ## 📦 Installation
 
 ### Quick Install Options
