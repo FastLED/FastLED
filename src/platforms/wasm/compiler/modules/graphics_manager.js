@@ -4,14 +4,10 @@
  * FastLED Graphics Manager Module
  *
  * High-performance 2D graphics rendering system for FastLED WebAssembly applications.
- * Uses Three.js for hardware-accelerated tile-based LED rendering and supports real-time LED strip visualization.
- * Now includes OffscreenCanvas support for background worker rendering.
+ * Uses WebGL for hardware-accelerated pixel rendering and supports real-time LED strip visualization.
  *
  * @module GraphicsManager
  */
-
-// Import base class for unified Three.js functionality
-import { GraphicsManagerBase } from './graphics_manager_base.js';
 
 /* eslint-disable no-console */
 /* eslint-disable no-restricted-syntax */
@@ -42,49 +38,90 @@ import { GraphicsManagerBase } from './graphics_manager_base.js';
  * @property {ScreenMapData} screenMap - Screen coordinate mapping data
  */
 
-// Shader creation function removed - shaders are now defined inline in initWebGL()
-// to avoid DOM dependencies and work properly in both main thread and worker contexts
+/**
+ * Creates and injects WebGL shaders into the document head
+ * Ensures shaders are only created once by checking for existing elements
+ */
+function createShaders() {
+  const fragmentShaderId = 'fastled_FragmentShader';
+  const vertexShaderId = 'fastled_vertexShader';
+  if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
+    return;
+  }
+  const vertexShaderStr = `
+        attribute vec2 a_position;
+        attribute vec2 a_texCoord;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_Position = vec4(a_position, 0, 1);
+            v_texCoord = a_texCoord;
+        }
+        `;
+
+  const fragmentShaderStr = `
+        precision mediump float;
+        uniform sampler2D u_image;
+        varying vec2 v_texCoord;
+        void main() {
+            gl_FragColor = texture2D(u_image, v_texCoord);
+        }
+        `;
+  const fragmentShader = document.createElement('script');
+  const vertexShader = document.createElement('script');
+  fragmentShader.id = fragmentShaderId;
+  vertexShader.id = vertexShaderId;
+  fragmentShader.type = 'x-shader/x-fragment';
+  vertexShader.type = 'x-shader/x-vertex';
+  fragmentShader.text = fragmentShaderStr;
+  vertexShader.text = vertexShaderStr;
+  document.head.appendChild(fragmentShader);
+  document.head.appendChild(vertexShader);
+}
 
 /**
- * Three.js-based 2D graphics manager for FastLED visualization
- * Provides hardware-accelerated tile rendering of LED strips using Three.js
+ * WebGL-based 2D graphics manager for FastLED visualization
+ * Provides hardware-accelerated rendering of LED strips using WebGL shaders
  */
-export class GraphicsManager extends GraphicsManagerBase {
+export class GraphicsManager {
   /**
    * Creates a new GraphicsManager instance
    * @param {Object} graphicsArgs - Configuration options
-   * @param {string|HTMLCanvasElement|OffscreenCanvas} graphicsArgs.canvasId - Canvas element or ID
-   * @param {Object} graphicsArgs.threeJsModules - Three.js modules for tile rendering
+   * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
+   * @param {Object} [graphicsArgs.threeJsModules] - Three.js modules (unused but kept for consistency)
    * @param {boolean} [graphicsArgs.usePixelatedRendering=true] - Whether to use pixelated rendering
-   * @param {OffscreenCanvas} [graphicsArgs.offscreenCanvas] - Direct OffscreenCanvas instance
    */
   constructor(graphicsArgs) {
-    const { threeJsModules, usePixelatedRendering = true } = graphicsArgs;
+    const { canvasId, usePixelatedRendering = true } = graphicsArgs;
 
-    // Call parent constructor
-    super(graphicsArgs);
+    /** @type {string} */
+    this.canvasId = canvasId;
 
-    if (!threeJsModules) {
-      throw new Error('ThreeJS modules are required for GraphicsManager');
-    }
+    /** @type {HTMLCanvasElement|null} */
+    this.canvas = null;
 
-    /** @type {Object} Configuration options */
-    this.args = { usePixelatedRendering };
+    /** @type {WebGLRenderingContext|null} */
+    this.gl = null;
 
-    /** @type {Object|null} Three.js texture for tile rendering */
+    /** @type {WebGLProgram|null} */
+    this.program = null;
+
+    /** @type {WebGLBuffer|null} */
+    this.positionBuffer = null;
+
+    /** @type {WebGLBuffer|null} */
+    this.texCoordBuffer = null;
+
+    /** @type {WebGLTexture|null} */
     this.texture = null;
-
-    /** @type {Object|null} Three.js material for tile rendering */
-    this.material = null;
-
-    /** @type {Object|null} Three.js plane geometry for displaying the texture */
-    this.planeGeometry = null;
-
-    /** @type {Object|null} Three.js mesh for the tile surface */
-    this.planeMesh = null;
 
     /** @type {Uint8Array|null} */
     this.texData = null;
+
+    /** @type {ScreenMapData} */
+    this.screenMap = null;
+
+    /** @type {Object} */
+    this.args = { usePixelatedRendering };
 
     /** @type {number} */
     this.texWidth = 0;
@@ -92,61 +129,28 @@ export class GraphicsManager extends GraphicsManagerBase {
     /** @type {number} */
     this.texHeight = 0;
 
-    /** @type {boolean} Whether to clear texture background (for sparse LED layouts) */
-    this.needsBackgroundClear = true;
-
-    /** @type {Map} Cached position calculations per strip */
-    this.positionCache = new Map();
-
-    /** @type {number} Count bounds warnings to prevent spam */
-    this.boundsWarningCount = 0;
+    this.initialize();
   }
 
   /**
-   * Initializes the Three.js context and sets up tile rendering resources
-   * @returns {boolean|Promise<boolean>} True if initialization was successful
-   */
-  initialize() {
-    // Call parent initialization
-    const baseInitialized = super.initialize();
-    if (!baseInitialized) {
-      return false;
-    }
-
-    // Additional tile-specific initialization will be done in initThreeJS
-    return true;
-  }
-
-  /**
-   * Initializes the Three.js rendering environment for tile-based rendering
-   * @param {Object} frameData - The frame data containing screen mapping information
+   * Initializes the WebGL context and sets up rendering resources
    * @returns {boolean} True if initialization was successful
    */
-  initThreeJS(frameData) {
-    try {
-      this._setupCanvasAndDimensions(frameData);
-      this._setupScene();
-      this._setupRenderer();
-      this._setupTileRenderingSystem();
-
-      // Update camera projection matrix
-      if (this.camera) {
-        this.camera.updateProjectionMatrix();
-      }
-
-      console.log('Three.js tile rendering initialized successfully', {
-        isOffscreen: this.canvasAdapter?.isOffscreen || false,
-        canvasSize: {
-          width: this.canvas.width,
-          height: this.canvas.height
-        }
-      });
-
-      return true;
-    } catch (error) {
-      console.error('Three.js tile rendering initialization failed:', error);
+  initialize() {
+    /** @type {HTMLCanvasElement} */
+    this.canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(this.canvasId));
+    if (!this.canvas) {
+      console.error(`Canvas with id ${this.canvasId} not found`);
       return false;
     }
+
+    this.gl = this.canvas.getContext('webgl');
+    if (!this.gl) {
+      console.error('WebGL not supported');
+      return false;
+    }
+
+    return this.initWebGL();
   }
 
   /**
@@ -154,7 +158,7 @@ export class GraphicsManager extends GraphicsManagerBase {
    * @param {StripData[]} frameData - Array of LED strip data to render
    */
   updateDisplay(frameData) {
-    if (!this.scene || !this.camera || !this.renderer) {
+    if (!this.gl || !this.canvas) {
       console.warn('Graphics manager not properly initialized');
       return;
     }
@@ -168,8 +172,8 @@ export class GraphicsManager extends GraphicsManagerBase {
    * Clears the texture data buffer - optimized for recording performance
    */
   clearTexture() {
-    if (this.texData && this.needsBackgroundClear) {
-      // Only clear if we have sparse LEDs that need black background
+    if (this.texData) {
+      // Use faster TypedArray.fill(0) - already optimal
       this.texData.fill(0);
     }
   }
@@ -184,176 +188,149 @@ export class GraphicsManager extends GraphicsManagerBase {
   }
 
   /**
-   * Renders the current texture to the canvas using Three.js
+   * Renders the current texture to the canvas
    */
   render() {
-    if (!this.renderer || !this.scene || !this.camera) {
+    if (!this.gl || !this.program) {
       return;
     }
 
-    // Ensure plane mesh exists before rendering
-    if (!this.planeMesh) {
-      console.warn('No plane mesh to render');
-      return;
-    }
+    const canvasWidth = this.gl.canvas.width;
+    const canvasHeight = this.gl.canvas.height;
 
-    // Render the scene
-    this.renderer.render(this.scene, this.camera);
+    // Set the viewport
+    this.gl.viewport(0, 0, canvasWidth, canvasHeight);
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-    // Handle OffscreenCanvas ImageBitmap transfer for worker mode
-    this.handleOffscreenTransfer();
-  }
+    this.gl.useProgram(this.program);
 
+    // Bind position buffer
+    const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
+    this.gl.enableVertexAttribArray(positionLocation);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+    this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
 
-  /**
-   * Sets up the tile rendering system with Three.js texture
-   * @private
-   */
-  _setupTileRenderingSystem() {
-    const { THREE } = this.threeJsModules;
+    // Bind texture coordinate buffer
+    const texCoordLocation = this.gl.getAttribLocation(this.program, 'a_texCoord');
+    this.gl.enableVertexAttribArray(texCoordLocation);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+    this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
 
-    // Don't create plane geometry here - we'll create it once we know the actual texture size
-    this.planeGeometry = null;
-
-    // Create texture for tile rendering
-    this.texture = new THREE.DataTexture(
-      null, // data will be set later
-      1, 1, // initial size
-      THREE.RGBFormat,
-      THREE.UnsignedByteType
-    );
-
-    // Set texture parameters for pixel-perfect rendering
-    this.texture.magFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
-    this.texture.minFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
-    this.texture.wrapS = THREE.ClampToEdgeWrapping;
-    this.texture.wrapT = THREE.ClampToEdgeWrapping;
-
-    // Create material with the texture
-    this.material = new THREE.MeshBasicMaterial({
-      map: this.texture,
-      transparent: false
-    });
-
-    // Don't create mesh yet - we'll create it when we know the texture dimensions
-    this.planeMesh = null;
+    // Draw
+    this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
   }
 
   /**
-   * Resets and cleans up Three.js resources
-   * Disposes of textures, materials, and geometries to free memory
+   * Resets and cleans up WebGL resources
+   * Disposes of buffers, textures, and programs to free memory
    */
   reset() {
-    // Call parent reset
-    super.reset();
-
-    // Clean up tile-specific resources
-    if (this.texture) {
-      this.texture.dispose();
-      this.texture = null;
+    if (this.gl) {
+      this.gl.deleteBuffer(this.positionBuffer);
+      this.gl.deleteBuffer(this.texCoordBuffer);
+      this.gl.deleteTexture(this.texture);
+      this.gl.deleteProgram(this.program);
     }
-    if (this.material) {
-      this.material.dispose();
-      this.material = null;
-    }
-    if (this.planeGeometry) {
-      this.planeGeometry.dispose();
-      this.planeGeometry = null;
-    }
-    if (this.planeMesh && this.scene) {
-      this.scene.remove(this.planeMesh);
-      this.planeMesh = null;
-    }
-
     this.texWidth = 0;
     this.texHeight = 0;
-    this.texData = null;
-    this.positionCache.clear();
+    this.gl = null;
   }
 
   /**
-   * Builds position cache for a strip to avoid redundant calculations
-   * @private
-   * @param {number} stripId - Strip ID
-   * @param {Object} stripData - Strip mapping data
-   * @param {number} minX - Minimum X coordinate
-   * @param {number} minY - Minimum Y coordinate
-   * @param {number} canvasWidth - Canvas width for bounds calculation
-   * @param {number} canvasHeight - Canvas height for bounds calculation
-   * @returns {Array} Array of cached position objects with drawing bounds
+   * Initializes the WebGL rendering context and resources
+   * Sets up shaders, buffers, and textures for LED rendering
+   * @returns {boolean} True if initialization was successful
    */
-  _buildPositionCache(stripId, stripData, minX, minY, canvasWidth, canvasHeight) {
-    const cacheKey = `${stripId}_${minX}_${minY}_${canvasWidth}_${canvasHeight}`;
-
-    if (this.positionCache.has(cacheKey)) {
-      return this.positionCache.get(cacheKey);
+  initWebGL() {
+    createShaders();
+    const canvas = document.getElementById(this.canvasId);
+    this.gl = canvas.getContext('webgl');
+    if (!this.gl) {
+      console.error('WebGL not supported');
+      return false;
     }
 
-    const { map } = stripData;
-    const x_array = map.x;
-    const y_array = map.y;
-    const len = Math.min(x_array.length, y_array.length);
-    const diameter = stripData.diameter || 1.0;
-    const radius = Math.floor(diameter / 2);
-    const positions = [];
+    // Create shaders
+    const vertexShader = this.createShader(
+      this.gl.VERTEX_SHADER,
+      document.getElementById('fastled_vertexShader').text,
+    );
+    const fragmentShader = this.createShader(
+      this.gl.FRAGMENT_SHADER,
+      document.getElementById('fastled_FragmentShader').text,
+    );
 
-    for (let i = 0; i < len; i++) {
-      const x = Number.parseInt(x_array[i] - minX, 10);
-      const y = Number.parseInt(y_array[i] - minY, 10);
+    // Create program
+    this.program = this.createProgram(vertexShader, fragmentShader);
 
-      // Pre-calculate drawing bounds to avoid per-frame calculations
-      const minDx = Math.max(-radius, -x);
-      const maxDx = Math.min(radius, canvasWidth - 1 - x);
-      const minDy = Math.max(-radius, -y);
-      const maxDy = Math.min(radius, canvasHeight - 1 - y);
+    // Create buffers
+    this.positionBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+      this.gl.STREAM_DRAW,
+    );
 
-      positions.push({
-        x,
-        y,
-        minDx,
-        maxDx,
-        minDy,
-        maxDy,
-        radius
-      });
-    }
+    this.texCoordBuffer = this.gl.createBuffer();
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+    this.gl.bufferData(
+      this.gl.ARRAY_BUFFER,
+      new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]),
+      this.gl.STREAM_DRAW,
+    );
 
-    this.positionCache.set(cacheKey, positions);
-    return positions;
+    // Create texture
+    this.texture = this.gl.createTexture();
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_S, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_WRAP_T, this.gl.CLAMP_TO_EDGE);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MIN_FILTER, this.gl.NEAREST);
+    this.gl.texParameteri(this.gl.TEXTURE_2D, this.gl.TEXTURE_MAG_FILTER, this.gl.NEAREST);
+
+    return true;
   }
 
   /**
-   * Updates background clear flag based on LED density
-   * @private
-   * @param {Object} frameData - Frame data with screen mapping
+   * Creates and compiles a WebGL shader
+   * @param {number} type - Shader type (VERTEX_SHADER or FRAGMENT_SHADER)
+   * @param {string} source - GLSL shader source code
+   * @returns {WebGLShader|null} Compiled shader or null on error
    */
-  _updateBackgroundClearFlag(frameData) {
-    if (!this.screenMap || !frameData || !Array.isArray(frameData)) {
-      return;
+  createShader(type, source) {
+    const shader = this.gl.createShader(type);
+    this.gl.shaderSource(shader, source);
+    this.gl.compileShader(shader);
+    if (!this.gl.getShaderParameter(shader, this.gl.COMPILE_STATUS)) {
+      console.error('Shader compile error:', this.gl.getShaderInfoLog(shader));
+      this.gl.deleteShader(shader);
+      return null;
     }
+    return shader;
+  }
 
-    // Calculate total LEDs and screen area
-    let totalLeds = 0;
-    for (const strip of frameData) {
-      if (strip && strip.pixel_data) {
-        totalLeds += strip.pixel_data.length / 3;
-      }
+  /**
+   * Creates and links a WebGL program from vertex and fragment shaders
+   * @param {WebGLShader} vertexShader - Compiled vertex shader
+   * @param {WebGLShader} fragmentShader - Compiled fragment shader
+   * @returns {WebGLProgram|null} Linked program or null on error
+   */
+  createProgram(vertexShader, fragmentShader) {
+    const program = this.gl.createProgram();
+    this.gl.attachShader(program, vertexShader);
+    this.gl.attachShader(program, fragmentShader);
+    this.gl.linkProgram(program);
+    if (!this.gl.getProgramParameter(program, this.gl.LINK_STATUS)) {
+      console.error('Program link error:', this.gl.getProgramInfoLog(program));
+      return null;
     }
-
-    const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0] + 1;
-    const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1] + 1;
-    const screenArea = screenWidth * screenHeight;
-    const ledDensity = totalLeds / screenArea;
-
-    // If LED density is high (>50% coverage), skip clearing for performance
-    this.needsBackgroundClear = ledDensity < 0.5;
-
-    console.log(`LED density: ${(ledDensity * 100).toFixed(1)}% (${totalLeds}/${screenArea}), clearing: ${this.needsBackgroundClear}`);
+    return program;
   }
 
   /**
    * Updates the canvas with new LED frame data
-   * Processes strip data and renders LEDs to the Three.js texture using tile rendering
+   * Processes strip data and renders LEDs to the WebGL texture
    * @param {StripData[] & {screenMap?: ScreenMapData}} frameData - Array of frame data containing LED strip information with optional screenMap
    */
   updateCanvas(frameData) {
@@ -376,118 +353,55 @@ export class GraphicsManager extends GraphicsManagerBase {
     // Update screenMap from frameData if available
     if (frameData.screenMap) {
       this.screenMap = frameData.screenMap;
-
-      // Determine if we need background clearing based on LED density
-      this._updateBackgroundClearFlag(frameData);
     }
 
-    // Initialize Three.js if not already done
-    if (!this.scene || !this.camera || !this.renderer) {
-      this.initThreeJS(frameData);
-    }
+    if (!this.gl) this.initWebGL();
 
     // Update canvas size based on screenMap dimensions
     if (this.screenMap && this.canvas) {
-      // Add 1 to include the boundary coordinates (e.g., 0 to 63 = 64 pixels wide)
-      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0] + 1;
-      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1] + 1;
+      const screenWidth = this.screenMap.absMax[0] - this.screenMap.absMin[0];
+      const screenHeight = this.screenMap.absMax[1] - this.screenMap.absMin[1];
 
       // Only update canvas size if it's different from current size
       if (this.canvas.width !== screenWidth || this.canvas.height !== screenHeight) {
-        console.error(`🔍 CANVAS UPDATE: ${this.canvas.width}x${this.canvas.height} → ${screenWidth}x${screenHeight}`);
         this.canvas.width = screenWidth;
         this.canvas.height = screenHeight;
 
-        // Update Three.js renderer size
-        if (this.renderer) {
-          // Use the base class helper for OffscreenCanvas compatibility
-          this._setRendererSize(screenWidth, screenHeight);
+        // Update WebGL viewport to match new canvas size
+        if (this.gl) {
+          this.gl.viewport(0, 0, screenWidth, screenHeight);
         }
       }
     }
 
-    const canvasWidth = this.canvas.width;
-    const canvasHeight = this.canvas.height;
+    const canvasWidth = this.gl.canvas.width;
+    const canvasHeight = this.gl.canvas.height;
 
     // Check if we need to reallocate the texture - optimized to reduce reallocations
-    // Use actual canvas dimensions instead of power-of-2 when WebGL2 supports NPOT textures
-    const newTexWidth = canvasWidth;
-    const newTexHeight = canvasHeight;
+    const newTexWidth = 2 ** Math.ceil(Math.log2(canvasWidth));
+    const newTexHeight = 2 ** Math.ceil(Math.log2(canvasHeight));
 
-    // Only reallocate if texture grows (never shrink to avoid thrashing)
-    const needsReallocation = !this.texData ||
-                             newTexWidth > this.texWidth ||
-                             newTexHeight > this.texHeight;
-
-    if (needsReallocation) {
-      const oldSize = this.texData ? this.texData.length : 0;
+    if (this.texWidth !== newTexWidth || this.texHeight !== newTexHeight) {
       this.texWidth = newTexWidth;
       this.texHeight = newTexHeight;
 
-      // Reallocate Three.js texture and data buffer
-      this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
-
-      if (this.texture) {
-        this.texture.dispose(); // Clean up old texture
-      }
-
-      // Create new Three.js texture
-      const { THREE } = this.threeJsModules;
-      this.texture = new THREE.DataTexture(
-        this.texData,
+      // Reallocate texture
+      this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+      this.gl.texImage2D(
+        this.gl.TEXTURE_2D,
+        0,
+        this.gl.RGB,
         this.texWidth,
         this.texHeight,
-        THREE.RGBFormat,
-        THREE.UnsignedByteType
+        0,
+        this.gl.RGB,
+        this.gl.UNSIGNED_BYTE,
+        null,
       );
 
-      // Set texture parameters for pixel-perfect rendering
-      this.texture.magFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
-      this.texture.minFilter = this.args.usePixelatedRendering ? THREE.NearestFilter : THREE.LinearFilter;
-      this.texture.wrapS = THREE.ClampToEdgeWrapping;
-      this.texture.wrapT = THREE.ClampToEdgeWrapping;
-
-      // Update material with new texture
-      if (this.material) {
-        this.material.map = this.texture;
-        this.material.needsUpdate = true;
-      }
-
-      // Create or update plane geometry to match texture size
-      // Remove old mesh if exists
-      if (this.planeMesh && this.scene) {
-        this.scene.remove(this.planeMesh);
-        this.planeMesh = null;
-      }
-
-      // Dispose old geometry if exists
-      if (this.planeGeometry) {
-        this.planeGeometry.dispose();
-      }
-
-      // Create new plane geometry that matches the texture dimensions
-      // Use the actual texture dimensions directly
-      this.planeGeometry = new THREE.PlaneGeometry(this.texWidth, this.texHeight);
-
-      // Create new mesh with updated geometry
-      this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
-      this.planeMesh.position.set(0, 0, 0);
-      this.scene.add(this.planeMesh);
-
-      // Update camera to fit the new texture dimensions
-      if (this.camera && this.camera.isOrthographicCamera) {
-        const halfWidth = this.texWidth / 2;
-        const halfHeight = this.texHeight / 2;
-        const MARGIN = 1.05;
-
-        this.camera.left = -halfWidth * MARGIN;
-        this.camera.right = halfWidth * MARGIN;
-        this.camera.top = halfHeight * MARGIN;
-        this.camera.bottom = -halfHeight * MARGIN;
-        this.camera.updateProjectionMatrix();
-      }
-
-      console.log(`Three.js texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB), saved ${((oldSize - this.texData.length) / 1024 / 1024).toFixed(1)}MB`);
+      // Reallocate texData buffer
+      this.texData = new Uint8Array(this.texWidth * this.texHeight * 3);
+      console.log(`WebGL texture reallocated: ${this.texWidth}x${this.texHeight} (${(this.texData.length / 1024 / 1024).toFixed(1)}MB)`);
     }
 
     if (!this.screenMap) {
@@ -498,9 +412,7 @@ export class GraphicsManager extends GraphicsManagerBase {
     const { screenMap } = this;
 
     // Clear the texture data
-    if (this.texData) {
-      this.texData.fill(0);
-    }
+    this.texData.fill(0);
 
     for (let i = 0; i < frameData.length; i++) {
       const strip = frameData[i];
@@ -522,131 +434,109 @@ export class GraphicsManager extends GraphicsManagerBase {
       }
       const stripData = screenMap.strips[strip_id];
       const pixelCount = data.length / 3;
+      const { map } = stripData;
       const min_x = screenMap.absMin[0];
       const min_y = screenMap.absMin[1];
-
-      // Get cached positions for this strip with pre-calculated drawing bounds
-      const positions = this._buildPositionCache(strip_id, stripData, min_x, min_y, canvasWidth, canvasHeight);
-
+      const x_array = map.x;
+      const y_array = map.y;
+      const len = Math.min(x_array.length, y_array.length);
       // log("Writing data to canvas");
       for (let i = 0; i < pixelCount; i++) { // eslint-disable-line
-        if (i >= positions.length) {
+        if (i >= len) {
           console.warn(
-            `Strip ${strip_id}: Pixel ${i} is outside the screen map ${positions.length}, skipping update`,
+            `Strip ${strip_id}: Pixel ${i} is outside the screen map ${map.length}, skipping update`,
           );
           continue;
         }
+        // let [x, y] = map[i];
+        let x = x_array[i];
+        let y = y_array[i];
+        x -= min_x;
+        y -= min_y;
 
-        // Use cached position calculations with pre-calculated bounds
-        const posData = positions[i];
-        const { x, y, minDx, maxDx, minDy, maxDy } = posData;
+        // Can't access the texture with floating point.
+        x = Number.parseInt(x, 10);
+        y = Number.parseInt(y, 10);
 
         // check to make sure that the pixel is within the canvas
         if (x < 0 || x >= canvasWidth || y < 0 || y >= canvasHeight) {
-          this.boundsWarningCount++;
-          if (this.boundsWarningCount <= 5) {
-            console.error(
-              `🚨 BOUNDS ERROR #${this.boundsWarningCount}: Strip ${strip_id} Pixel ${i} at ${x},${y} outside canvas ${canvasWidth}x${canvasHeight}`
-            );
-            if (this.boundsWarningCount === 5) {
-              console.error(`🚨 Suppressing further bounds warnings...`);
-            }
-          }
+          console.warn(
+            `Strip ${strip_id}: Pixel ${i} is outside the canvas at ${x}, ${y}, skipping update`,
+          );
           continue;
         }
+        // log(x, y);
+        const diameter = stripData.diameter || 1.0;
+        const radius = Math.floor(diameter / 2);
 
-        // Pre-calculate color data outside inner loops
-        const srcIndex = i * 3;
-        const r = data[srcIndex] & 0xFF; // eslint-disable-line
-        const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
-        const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
-
-        // Draw a filled square for each LED with pre-calculated bounds (no bounds checking needed!)
-        for (let dy = minDy; dy <= maxDy; dy++) {
-          const py = y + dy;
-          const rowOffset = py * this.texWidth;
-          for (let dx = minDx; dx <= maxDx; dx++) {
+        // Draw a filled square for each LED
+        for (let dy = -radius; dy <= radius; dy++) {
+          for (let dx = -radius; dx <= radius; dx++) {
             const px = x + dx;
-            const destIndex = (rowOffset + px) * 3;
-            this.texData[destIndex] = r;
-            this.texData[destIndex + 1] = g;
-            this.texData[destIndex + 2] = b;
+            const py = y + dy;
+
+            // Check bounds
+            if (px >= 0 && px < canvasWidth && py >= 0 && py < canvasHeight) {
+              const srcIndex = i * 3;
+              const destIndex = (py * this.texWidth + px) * 3;
+              // Pixel data is already in 0-255 range, use directly
+              const r = data[srcIndex] & 0xFF; // eslint-disable-line
+              const g = data[srcIndex + 1] & 0xFF; // eslint-disable-line
+              const b = data[srcIndex + 2] & 0xFF; // eslint-disable-line
+              this.texData[destIndex] = r;
+              this.texData[destIndex + 1] = g;
+              this.texData[destIndex + 2] = b;
+            }
           }
         }
       }
     }
 
-    // Update Three.js texture with new data
-    if (this.texture && this.texData) {
-      // Update texture size if needed
-      this.texture.image = {
-        data: this.texData,
-        width: this.texWidth,
-        height: this.texHeight
-      };
-      this.texture.needsUpdate = true;
+    // Update texture with new data
+    this.gl.bindTexture(this.gl.TEXTURE_2D, this.texture);
+    this.gl.texSubImage2D(
+      this.gl.TEXTURE_2D,
+      0,
+      0,
+      0,
+      this.texWidth,
+      this.texHeight,
+      this.gl.RGB,
+      this.gl.UNSIGNED_BYTE,
+      this.texData,
+    );
 
-      // Create plane mesh if it doesn't exist yet (for cases where texture wasn't reallocated)
-      if (!this.planeMesh && this.scene && this.material) {
-        const { THREE } = this.threeJsModules;
+    // Set the viewport to the original canvas size
+    this.gl.viewport(0, 0, canvasWidth, canvasHeight);
+    this.gl.clearColor(0, 0, 0, 1);
+    this.gl.clear(this.gl.COLOR_BUFFER_BIT);
 
-        // Dispose old geometry if exists
-        if (this.planeGeometry) {
-          this.planeGeometry.dispose();
-        }
+    this.gl.useProgram(this.program);
 
-        // Create plane geometry that matches the texture dimensions
-        this.planeGeometry = new THREE.PlaneGeometry(this.texWidth, this.texHeight);
+    const positionLocation = this.gl.getAttribLocation(this.program, 'a_position');
+    this.gl.enableVertexAttribArray(positionLocation);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.positionBuffer);
+    this.gl.vertexAttribPointer(positionLocation, 2, this.gl.FLOAT, false, 0, 0);
 
-        // Create mesh with geometry
-        this.planeMesh = new THREE.Mesh(this.planeGeometry, this.material);
-        this.planeMesh.position.set(0, 0, 0);
-        this.scene.add(this.planeMesh);
+    const texCoordLocation = this.gl.getAttribLocation(this.program, 'a_texCoord');
+    this.gl.enableVertexAttribArray(texCoordLocation);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+    this.gl.vertexAttribPointer(texCoordLocation, 2, this.gl.FLOAT, false, 0, 0);
 
-        // Update camera to fit the texture dimensions
-        if (this.camera && this.camera.isOrthographicCamera) {
-          const halfWidth = this.texWidth / 2;
-          const halfHeight = this.texHeight / 2;
-          const MARGIN = 1.05;
+    // Update texture coordinates based on actual canvas size
+    const texCoords = new Float32Array([
+      0,
+      0,
+      canvasWidth / this.texWidth,
+      0,
+      0,
+      canvasHeight / this.texHeight,
+      canvasWidth / this.texWidth,
+      canvasHeight / this.texHeight,
+    ]);
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER, this.texCoordBuffer);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER, texCoords, this.gl.STREAM_DRAW);
 
-          this.camera.left = -halfWidth * MARGIN;
-          this.camera.right = halfWidth * MARGIN;
-          this.camera.top = halfHeight * MARGIN;
-          this.camera.bottom = -halfHeight * MARGIN;
-          this.camera.updateProjectionMatrix();
-        }
-      }
-    }
-  }
-
-  /**
-   * Gets performance statistics including canvas adapter info
-   * @returns {Object} Performance and capability information
-   */
-  getPerformanceInfo() {
-    const baseInfo = super.getPerformanceInfo();
-
-    return {
-      ...baseInfo,
-      textureSize: {
-        width: this.texWidth,
-        height: this.texHeight
-      },
-      renderingMode: 'tile-based',
-      usePixelatedRendering: this.args.usePixelatedRendering
-    };
-  }
-
-  /**
-   * Clean up resources including Three.js tile rendering objects
-   */
-  destroy() {
-    // Clean up tile-specific resources
-    this.reset();
-
-    // Call parent destroy
-    super.destroy();
-
-    console.log('Tile-based graphics manager destroyed');
+    this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
   }
 }

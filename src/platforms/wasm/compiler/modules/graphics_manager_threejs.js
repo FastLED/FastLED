@@ -26,14 +26,13 @@
 // Selective bloom demo:
 // https://discourse.threejs.org/t/totentanz-selective-bloom/8329
 
-import { GraphicsManagerBase } from './graphics_manager_base.js';
 import { isDenseGrid } from './graphics_utils.js';
 
 // Declare THREE as global namespace for type checking
 /* global THREE */
 
 /** Disable geometry merging for debugging (set to true to force individual LED objects) */
-// const DISABLE_MERGE_GEOMETRIES = false; // Currently unused
+const DISABLE_MERGE_GEOMETRIES = false;
 
 /**
  * Creates position calculator functions for mapping LED coordinates to 3D space
@@ -70,7 +69,7 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
  * Beautiful 3D Graphics Manager using Three.js for LED rendering
  * Provides advanced visual effects and post-processing for stunning LED displays
  */
-export class GraphicsManagerThreeJS extends GraphicsManagerBase {
+export class GraphicsManagerThreeJS {
   /**
    * Creates a new GraphicsManagerThreeJS instance
    * @param {Object} graphicsArgs - Configuration options
@@ -78,8 +77,14 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
    * @param {Object} graphicsArgs.threeJsModules - Three.js modules and dependencies
    */
   constructor(graphicsArgs) {
-    // Call parent constructor
-    super(graphicsArgs);
+    const { canvasId, threeJsModules } = graphicsArgs;
+
+    // Configuration
+    /** @type {string} HTML canvas element ID */
+    this.canvasId = canvasId;
+
+    /** @type {Object} Three.js modules and dependencies */
+    this.threeJsModules = threeJsModules;
 
     /** @type {number} Number of segments for LED sphere geometry */
     this.SEGMENTS = 16;
@@ -87,136 +92,47 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     /** @type {number} Scale factor for LED size */
     this.LED_SCALE = 1.0;
 
+    // Rendering properties
+    /** @type {number} Screen width in rendering units */
+    this.SCREEN_WIDTH = 0;
+
+    /** @type {number} Screen height in rendering units */
+    this.SCREEN_HEIGHT = 0;
+
     /** @type {number} Bloom effect strength (0-1) */
     this.bloom_stength = 1;
 
     /** @type {number} Bloom effect radius in pixels */
     this.bloom_radius = 16;
 
-    // Scene objects specific to 3D rendering
+    // Scene objects
     /** @type {Array} Array of LED mesh objects */
     this.leds = [];
 
     /** @type {Array} Array of merged mesh objects for performance */
     this.mergedMeshes = [];
 
+    /** @type {Object|null} Three.js scene object */
+    this.scene = null;
+
+    /** @type {Object|null} Three.js camera object */
+    this.camera = null;
+
+    /** @type {Object|null} Three.js WebGL renderer */
+    this.renderer = null;
+
     /** @type {Object|null} Post-processing composer */
     this.composer = null;
+
+    // State tracking
+    /** @type {number} Previous frame's total LED count for optimization */
+    this.previousTotalLeds = 0;
 
     /** @type {number} Counter for out-of-bounds warnings to prevent spam */
     this.outside_bounds_warning_count = 0;
 
     /** @type {boolean} Whether to use merged geometries for performance */
     this.useMergedGeometry = true; // Enable geometry merging by default
-
-    // Instanced rendering properties
-    /** @type {Object|null} Three.js instanced mesh for all LEDs */
-    this.instancedMesh = null;
-
-    /** @type {number} Total number of LED instances */
-    this.instanceCount = 0;
-
-    /** @type {Float32Array|null} Instance position data */
-    this.instancePositions = null;
-
-    /** @type {Float32Array|null} Instance color data */
-    this.instanceColors = null;
-
-    /** @type {boolean} Whether to use instanced rendering (preferred) */
-    this.useInstancedRendering = true;
-
-    // Object pools for reducing garbage collection
-    /** @type {Object} Object pools for Three.js objects */
-    this.objectPools = {
-      colors: [],
-      matrices: [],
-      vectors: [],
-      maxPoolSize: 100 // Limit pool size to prevent memory bloat
-    };
-  }
-
-  /**
-   * Gets a Color object from the pool or creates a new one
-   * @returns {THREE.Color} Pooled Color object
-   */
-  _getPooledColor() {
-    const { THREE } = this.threeJsModules;
-
-    if (this.objectPools.colors.length > 0) {
-      return this.objectPools.colors.pop();
-    }
-    return new THREE.Color();
-  }
-
-  /**
-   * Returns a Color object to the pool
-   * @param {THREE.Color} color - Color object to return
-   */
-  _releasePooledColor(color) {
-    if (this.objectPools.colors.length < this.objectPools.maxPoolSize) {
-      // Reset color to default state
-      color.setRGB(0, 0, 0);
-      this.objectPools.colors.push(color);
-    }
-  }
-
-  /**
-   * Gets a Matrix4 object from the pool or creates a new one
-   * @returns {THREE.Matrix4} Pooled Matrix4 object
-   */
-  _getPooledMatrix() {
-    const { THREE } = this.threeJsModules;
-
-    if (this.objectPools.matrices.length > 0) {
-      return this.objectPools.matrices.pop();
-    }
-    return new THREE.Matrix4();
-  }
-
-  /**
-   * Returns a Matrix4 object to the pool
-   * @param {THREE.Matrix4} matrix - Matrix4 object to return
-   */
-  _releasePooledMatrix(matrix) {
-    if (this.objectPools.matrices.length < this.objectPools.maxPoolSize) {
-      // Reset matrix to identity
-      matrix.identity();
-      this.objectPools.matrices.push(matrix);
-    }
-  }
-
-  /**
-   * Gets a Vector3 object from the pool or creates a new one
-   * @returns {THREE.Vector3} Pooled Vector3 object
-   */
-  _getPooledVector() {
-    const { THREE } = this.threeJsModules;
-
-    if (this.objectPools.vectors.length > 0) {
-      return this.objectPools.vectors.pop();
-    }
-    return new THREE.Vector3();
-  }
-
-  /**
-   * Returns a Vector3 object to the pool
-   * @param {THREE.Vector3} vector - Vector3 object to return
-   */
-  _releasePooledVector(vector) {
-    if (this.objectPools.vectors.length < this.objectPools.maxPoolSize) {
-      // Reset vector to origin
-      vector.set(0, 0, 0);
-      this.objectPools.vectors.push(vector);
-    }
-  }
-
-  /**
-   * Clears all object pools (useful for cleanup)
-   */
-  _clearObjectPools() {
-    this.objectPools.colors.length = 0;
-    this.objectPools.matrices.length = 0;
-    this.objectPools.vectors.length = 0;
   }
 
   /**
@@ -227,18 +143,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     // Clean up LED objects
     if (this.leds) {
       this.leds.forEach((led) => {
-        // Release pooled objects from LED tracking objects
-        if (led.material && led.material.color && led.material.color instanceof this.threeJsModules.THREE.Color) {
-          this._releasePooledColor(led.material.color);
-        }
-        if (led.position && led.position instanceof this.threeJsModules.THREE.Vector3) {
-          this._releasePooledVector(led.position);
-        }
-
-        // Clean up non-instanced LED objects
-        if (!led._isMerged && !led._isInstanced) {
-          led.geometry?.dispose();
-          led.material?.dispose();
+        if (!led._isMerged) {
+          led.geometry.dispose();
+          led.material.dispose();
           this.scene?.remove(led);
         }
       });
@@ -255,32 +162,21 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     }
     this.mergedMeshes = [];
 
-    // Clean up instanced rendering resources
-    if (this.instancedMesh) {
-      this.instancedMesh.geometry.dispose();
-      this.instancedMesh.material.dispose();
-      this.scene?.remove(this.instancedMesh);
-      this.instancedMesh = null;
-    }
-    this.instanceCount = 0;
-    this.instancePositions = null;
-    this.instanceColors = null;
-
     // Dispose of the composer
     if (this.composer) {
       this.composer.dispose();
     }
 
-    // Clear object pools to prevent memory leaks
-    this._clearObjectPools();
-
-    // Call parent reset (which clears the scene)
-    super.reset();
+    // Clear the scene
+    if (this.scene) {
+      while (this.scene.children.length > 0) {
+        this.scene.remove(this.scene.children[0]);
+      }
+    }
 
     // Don't remove the renderer or canvas
     if (this.renderer) {
-      // Use the base class helper for OffscreenCanvas compatibility
-      this._setRendererSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
     }
   }
 
@@ -290,7 +186,6 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
    * @param {Object} frameData - The frame data containing screen mapping information
    */
   initThreeJS(frameData) {
-    // Use inherited methods from base class
     this._setupCanvasAndDimensions(frameData);
     this._setupScene();
     this._setupRenderer();
@@ -303,9 +198,110 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     }
   }
 
+  /**
+   * Sets up canvas dimensions and display properties
+   * @private
+   * @param {Object} frameData - Frame data containing screen mapping
+   */
+  _setupCanvasAndDimensions(frameData) {
+    const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
+    const MAX_WIDTH = 640; // Max pixels width on browser
 
+    const canvas = document.getElementById(this.canvasId);
+    const { screenMap } = frameData;
+    const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
+    const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
 
+    // Always set width to 640px and scale height proportionally
+    const targetWidth = MAX_WIDTH;
+    const aspectRatio = screenMapWidth / screenMapHeight;
+    const targetHeight = Math.round(targetWidth / aspectRatio);
 
+    // Set the rendering resolution (2x the display size)
+    this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;
+    this.SCREEN_HEIGHT = targetHeight * RESOLUTION_BOOST;
+
+    // Set internal canvas size to 2x for higher resolution
+    canvas.width = targetWidth * RESOLUTION_BOOST;
+    canvas.height = targetHeight * RESOLUTION_BOOST;
+
+    // But keep display size the same
+    canvas.style.width = `${targetWidth}px`;
+    canvas.style.height = `${targetHeight}px`;
+    canvas.style.maxWidth = `${targetWidth}px`;
+    canvas.style.maxHeight = `${targetHeight}px`;
+
+    // Store the bounds for orthographic camera calculations
+    this.screenBounds = {
+      width: screenMapWidth,
+      height: screenMapHeight,
+      minX: screenMap.absMin[0],
+      minY: screenMap.absMin[1],
+      maxX: screenMap.absMax[0],
+      maxY: screenMap.absMax[1],
+    };
+  }
+
+  /**
+   * Sets up the Three.js scene and camera
+   * @private
+   */
+  _setupScene() {
+    const { THREE } = this.threeJsModules;
+
+    // Create the scene
+    this.scene = new THREE.Scene();
+
+    // Camera configuration
+    this._setupCamera();
+  }
+
+  /**
+   * Sets up the camera with proper positioning and projection
+   * @private
+   */
+  _setupCamera() {
+    const { THREE } = this.threeJsModules;
+
+    // Camera parameters
+    const NEAR_PLANE = 0.1;
+    const FAR_PLANE = 5000;
+    const MARGIN = 1.05; // Add a small margin around the screen
+
+    // Calculate half width and height for orthographic camera
+    const halfWidth = this.SCREEN_WIDTH / 2;
+    const halfHeight = this.SCREEN_HEIGHT / 2;
+
+    // Create orthographic camera
+    this.camera = new THREE.OrthographicCamera(
+      -halfWidth * MARGIN, // left
+      halfWidth * MARGIN, // right
+      halfHeight * MARGIN, // top
+      -halfHeight * MARGIN, // bottom
+      NEAR_PLANE,
+      FAR_PLANE,
+    );
+
+    // Position the camera at a fixed distance
+    this.camera.position.set(0, 0, 1000);
+    this.camera.zoom = 1.0;
+    this.camera.updateProjectionMatrix();
+  }
+
+  /**
+   * Sets up the WebGL renderer
+   * @private
+   */
+  _setupRenderer() {
+    const { THREE } = this.threeJsModules;
+    const canvas = document.getElementById(this.canvasId);
+
+    this.renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+    });
+    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+  }
 
   /**
    * Sets up render passes including bloom effect
@@ -467,7 +463,7 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
   }
 
   /**
-   * Creates LED objects using instanced rendering for maximum performance
+   * Creates LED objects for each pixel in the frame data
    * @private
    */
   _createLedObjects(
@@ -481,9 +477,29 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
     const { THREE } = this.threeJsModules;
     const { screenMap } = frameData;
 
-    // Count total LEDs first
-    let totalLeds = 0;
-    const ledDataList = [];
+    // If BufferGeometryUtils is not available, fall back to individual LEDs
+    const { BufferGeometryUtils } = this.threeJsModules;
+    const canMergeGeometries = this.useMergedGeometry && BufferGeometryUtils
+      && !DISABLE_MERGE_GEOMETRIES;
+
+    if (!canMergeGeometries) {
+      console.log('BufferGeometryUtils not available, falling back to individual LEDs');
+    } else {
+      console.log('Using merged geometries for better performance');
+    }
+
+    // Create template geometries for reuse
+    let circleGeometry;
+    let planeGeometry;
+    if (!isDenseScreenMap) {
+      circleGeometry = new THREE.CircleGeometry(1.0, this.SEGMENTS);
+    } else {
+      planeGeometry = new THREE.PlaneGeometry(1.0, 1.0);
+    }
+
+    // Group all geometries together for merging
+    const allGeometries = [];
+    const allLedData = [];
 
     frameData.forEach((strip) => {
       const stripId = strip.strip_id;
@@ -492,97 +508,128 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
       }
 
       const stripData = screenMap.strips[stripId];
-      const stripDiameter = stripData.diameter ? stripData.diameter * normalizedScale : defaultDotSize;
+      let stripDiameter = null;
+      if (stripData.diameter) {
+        stripDiameter = stripData.diameter * normalizedScale;
+      } else {
+        stripDiameter = defaultDotSize;
+      }
 
       const x_array = stripData.map.x;
       const y_array = stripData.map.y;
 
       for (let i = 0; i < x_array.length; i++) {
+        // Calculate position
         const x = calcXPosition(x_array[i]);
         const y = calcYPosition(y_array[i]);
         const z = 500;
-        const scale = stripDiameter * this.LED_SCALE;
 
-        ledDataList.push({ x, y, z, scale, stripId, ledIndex: i });
-        totalLeds++;
+        if (!canMergeGeometries) {
+          // Create individual LEDs (original approach)
+          let geometry;
+          if (isDenseScreenMap) {
+            const w = stripDiameter * this.LED_SCALE;
+            const h = stripDiameter * this.LED_SCALE;
+            geometry = new THREE.PlaneGeometry(w, h);
+          } else {
+            geometry = new THREE.CircleGeometry(
+              stripDiameter * this.LED_SCALE,
+              this.SEGMENTS,
+            );
+          }
+
+          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+          const led = new THREE.Mesh(geometry, material);
+          led.position.set(x, y, z);
+
+          this.scene.add(led);
+          this.leds.push(led);
+        } else {
+          // Create instance geometry for merging
+          let instanceGeometry;
+          if (isDenseScreenMap) {
+            instanceGeometry = planeGeometry.clone();
+            instanceGeometry.scale(
+              stripDiameter * this.LED_SCALE,
+              stripDiameter * this.LED_SCALE,
+              1,
+            );
+          } else {
+            instanceGeometry = circleGeometry.clone();
+            instanceGeometry.scale(
+              stripDiameter * this.LED_SCALE,
+              stripDiameter * this.LED_SCALE,
+              1,
+            );
+          }
+
+          // Apply position transformation
+          instanceGeometry.translate(x, y, z);
+
+          // Add to collection for merging
+          allGeometries.push(instanceGeometry);
+          allLedData.push({ x, y, z });
+        }
       }
     });
 
-    if (totalLeds === 0) {
-      console.warn('No LEDs to create');
-      return;
+    // If using merged geometry, create a single merged mesh for all LEDs
+    if (canMergeGeometries && allGeometries.length > 0) {
+      try {
+        // Merge all geometries together
+        const mergedGeometry = BufferGeometryUtils.mergeGeometries(allGeometries);
+
+        // Create material and mesh with vertex colors
+        const material = new THREE.MeshBasicMaterial({
+          color: 0xffffff,
+          vertexColors: true,
+        });
+
+        // Create color attribute for the merged geometry
+        const colorCount = mergedGeometry.attributes.position.count;
+        const colorArray = new Float32Array(colorCount * 3);
+        mergedGeometry.setAttribute('color', new THREE.BufferAttribute(colorArray, 3));
+
+        const mesh = new THREE.Mesh(mergedGeometry, material);
+        this.scene.add(mesh);
+        this.mergedMeshes.push(mesh);
+
+        // Create dummy objects for individual control
+        for (let i = 0; i < allLedData.length; i++) {
+          const pos = allLedData[i];
+          const dummyObj = {
+            material: { color: new THREE.Color(0, 0, 0) },
+            position: new THREE.Vector3(pos.x, pos.y, pos.z),
+            _isMerged: true,
+            _mergedIndex: i,
+            _parentMesh: mesh,
+          };
+          this.leds.push(dummyObj);
+        }
+      } catch (e) {
+        console.log(BufferGeometryUtils);
+        console.error('Failed to merge geometries:', e);
+
+        // Fallback to individual geometries
+        for (let i = 0; i < allGeometries.length; i++) {
+          const pos = allLedData[i];
+          const material = new THREE.MeshBasicMaterial({ color: 0x000000 });
+          const geometry = allGeometries[i].clone();
+          geometry.translate(-pos.x, -pos.y, -pos.z); // Reset position
+          const led = new THREE.Mesh(geometry, material);
+          led.position.set(pos.x, pos.y, pos.z);
+          this.scene.add(led);
+          this.leds.push(led);
+        }
+      }
+
+      // Clean up template geometries
+      if (circleGeometry) circleGeometry.dispose();
+      if (planeGeometry) planeGeometry.dispose();
+
+      // Clean up individual geometries
+      allGeometries.forEach((g) => g.dispose());
     }
-
-    console.log(`Creating instanced mesh for ${totalLeds} LEDs`);
-
-    // Create base geometry (same for all instances)
-    let baseGeometry;
-    if (isDenseScreenMap) {
-      baseGeometry = new THREE.PlaneGeometry(1.0, 1.0);
-    } else {
-      baseGeometry = new THREE.CircleGeometry(1.0, this.SEGMENTS);
-    }
-
-    // Create instanced mesh
-    const material = new THREE.MeshBasicMaterial({
-      color: 0xffffff, // Will be overridden by instance colors
-    });
-
-    this.instancedMesh = new THREE.InstancedMesh(baseGeometry, material, totalLeds);
-    this.instanceCount = totalLeds;
-
-    // Allocate instance data arrays
-    this.instancePositions = new Float32Array(totalLeds * 3); // x, y, z for each instance
-    this.instanceColors = new Float32Array(totalLeds * 3); // r, g, b for each instance
-
-    // Set up instance transformations and colors using pooled objects
-    const matrix = this._getPooledMatrix();
-    const color = this._getPooledColor();
-
-    for (let i = 0; i < totalLeds; i++) {
-      const ledData = ledDataList[i];
-
-      // Set instance transformation matrix (position and scale)
-      matrix.makeScale(ledData.scale, ledData.scale, 1);
-      matrix.setPosition(ledData.x, ledData.y, ledData.z);
-      this.instancedMesh.setMatrixAt(i, matrix);
-
-      // Set initial color to black
-      color.setRGB(0, 0, 0);
-      this.instancedMesh.setColorAt(i, color);
-
-      // Store position data for faster updates
-      this.instancePositions[i * 3] = ledData.x;
-      this.instancePositions[i * 3 + 1] = ledData.y;
-      this.instancePositions[i * 3 + 2] = ledData.z;
-
-      // Store initial color data
-      this.instanceColors[i * 3] = 0;
-      this.instanceColors[i * 3 + 1] = 0;
-      this.instanceColors[i * 3 + 2] = 0;
-
-      // Create LED tracking object for compatibility
-      this.leds.push({
-        _isInstanced: true,
-        _instanceIndex: i,
-        _stripId: ledData.stripId,
-        _ledIndex: ledData.ledIndex,
-        material: { color: this._getPooledColor() }, // Released in reset()
-        position: this._getPooledVector().set(ledData.x, ledData.y, ledData.z), // Released in reset()
-      });
-    }
-
-    // Add to scene
-    this.scene.add(this.instancedMesh);
-
-    // Clean up base geometry (it's been transferred to the instanced mesh)
-    baseGeometry.dispose();
-
-    // Return pooled objects to their pools
-    this._releasePooledMatrix(matrix);
-    this._releasePooledColor(color);
-
-    console.log(`Instanced rendering setup complete: ${totalLeds} LEDs in 1 draw call`);
   }
 
   /**
@@ -763,108 +810,11 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
   }
 
   /**
-   * Updates LED visuals based on position map data using instanced rendering
+   * Updates LED visuals based on position map data
    * @private
    */
   _updateLedVisuals(positionMap) {
-    // const { THREE } = this.threeJsModules; // Currently unused in this method
-
-    if (this.useInstancedRendering && this.instancedMesh) {
-      // Use highly optimized instanced rendering path
-      this._updateInstancedLeds(positionMap);
-      return;
-    }
-
-    // Fallback to legacy rendering (for compatibility)
-    this._updateLegacyLeds(positionMap);
-  }
-
-  /**
-   * Updates instanced LEDs with maximum performance using batch operations
-   * @private
-   */
-  _updateInstancedLeds(positionMap) {
-    // THREE.js modules available via this.threeJsModules if needed
-
-    // Use the stored bounds from setup - currently unused but may be needed for future optimizations
-    // const min_x = this.screenBounds.minX;
-    // const min_y = this.screenBounds.minY;
-    // const { width } = this.screenBounds;
-    // const { height } = this.screenBounds;
-
-    const color = this._getPooledColor();
-    let ledIndex = 0;
-    let hasChanges = false;
-
-    // Batch update colors for active LEDs
-    for (const [, ledData] of positionMap) {
-      if (ledIndex >= this.instanceCount) break;
-
-      // Check if color actually changed to avoid unnecessary GPU updates
-      const currentR = this.instanceColors[ledIndex * 3];
-      const currentG = this.instanceColors[ledIndex * 3 + 1];
-      const currentB = this.instanceColors[ledIndex * 3 + 2];
-
-      if (Math.abs(currentR - ledData.r) > 0.001 ||
-          Math.abs(currentG - ledData.g) > 0.001 ||
-          Math.abs(currentB - ledData.b) > 0.001) {
-
-        // Color changed, update it
-        color.setRGB(ledData.r, ledData.g, ledData.b);
-        this.instancedMesh.setColorAt(ledIndex, color);
-
-        // Update our tracking array
-        this.instanceColors[ledIndex * 3] = ledData.r;
-        this.instanceColors[ledIndex * 3 + 1] = ledData.g;
-        this.instanceColors[ledIndex * 3 + 2] = ledData.b;
-
-        // Update LED tracking object for compatibility
-        if (this.leds[ledIndex]) {
-          this.leds[ledIndex].material.color.setRGB(ledData.r, ledData.g, ledData.b);
-        }
-
-        hasChanges = true;
-      }
-
-      ledIndex++;
-    }
-
-    // Clear any remaining LEDs to black (batch operation)
-    color.setRGB(0, 0, 0);
-    for (let i = ledIndex; i < this.instanceCount; i++) {
-      // Check if LED is not already black
-      if (this.instanceColors[i * 3] !== 0 ||
-          this.instanceColors[i * 3 + 1] !== 0 ||
-          this.instanceColors[i * 3 + 2] !== 0) {
-
-        this.instancedMesh.setColorAt(i, color);
-        this.instanceColors[i * 3] = 0;
-        this.instanceColors[i * 3 + 1] = 0;
-        this.instanceColors[i * 3 + 2] = 0;
-
-        if (this.leds[i]) {
-          this.leds[i].material.color.setRGB(0, 0, 0);
-        }
-
-        hasChanges = true;
-      }
-    }
-
-    // Only trigger GPU update if there were actual changes
-    if (hasChanges) {
-      this.instancedMesh.instanceColor.needsUpdate = true;
-    }
-
-    // Return pooled color object
-    this._releasePooledColor(color);
-  }
-
-  /**
-   * Legacy LED update method (fallback for merged/individual geometry)
-   * @private
-   */
-  _updateLegacyLeds(positionMap) {
-    // THREE.js modules available via this.threeJsModules if needed
+    const { THREE } = this.threeJsModules;
 
     // Use the stored bounds from setup
     const min_x = this.screenBounds.minX;
@@ -902,11 +852,9 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
           if (!mergedMeshUpdates.has(led._parentMesh)) {
             mergedMeshUpdates.set(led._parentMesh, []);
           }
-          const tempColor = this._getPooledColor();
-          tempColor.setRGB(ledData.r, ledData.g, ledData.b);
           mergedMeshUpdates.get(led._parentMesh).push({
             index: led._mergedIndex,
-            color: tempColor, // Will be released in _updateMergedMeshes
+            color: new THREE.Color(ledData.r, ledData.g, ledData.b),
           });
         }
       } else {
@@ -962,9 +910,6 @@ export class GraphicsManagerThreeJS extends GraphicsManagerBase {
           colorAttribute.array[i + 1] = color.g;
           colorAttribute.array[i + 2] = color.b;
         }
-
-        // Return pooled color object after use
-        this._releasePooledColor(color);
       });
 
       // Mark the attribute as needing an update
