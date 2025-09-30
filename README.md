@@ -301,6 +301,53 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 
 *Note: Some ESP32 Arduino core versions (3.10+) have compatibility issues. Older versions work better - see [issue #1903](https://github.com/FastLED/FastLED/issues/1903)*
 
+### Wiring Best Practices for High-Parallel Setups
+
+**Applies to:** Teensy/ESP32/etc. driving WS2812/WS2813/SK6812 (1-wire) and APA102/clocked chips
+
+<details>
+<summary><b>📐 Critical Wiring Rules</b> - Eliminate flickering and corruption (Click to expand)</summary>
+
+#### 1. Star/Bus Ground Architecture
+- Tie every ground together: controller GND, each strip GND, PSU GNDs, shield/braid
+- Use low-impedance connections (soldered/crimped, not tape-only)
+- Keep ground paths short
+- Verify: <20mV DC drop between controller and strip GNDs under load
+
+**Why:** Data line voltage is measured against controller ground. Weak ground = corrupt bits.
+
+#### 2. Twisted Pair: Data + Ground
+- Run each data line twisted with its own ground wire end-to-end
+- Use Cat5/6: one pair per output (data on one wire, other wire as return)
+- Bond shield to GND at controller side if using shielded cable
+
+**Why:** Minimizes EMI pickup/emissions and preserves signal integrity over distance.
+
+#### 3. Level Shifting to 5V Logic
+- 3.3V microcontrollers need level shifting for 5V LED strips
+- Use **74HCT245** (8ch), **74HCT541** (8ch), or **74HCT125/126** (4ch) buffers
+- Place **33–220Ω series resistors** at buffer output (before twisted pair)
+- Keep buffers close to controller
+
+**Why:** Restores full-swing logic and reduces ringing/reflections.
+
+#### Example: 16-Output Teensy Setup
+```
+Grounds → ground bus → Teensy GND
+Level shifters: 2× 74HCT245 (16 channels), powered at 5V
+Per channel: Buffer → 33–100Ω → twisted pair → strip DIN/GND
+At strip start: 1000µF cap across +5V/GND
+Power injection as needed; keep data/power runs separate
+```
+
+#### Quick Do/Don't
+- ✅ **Do:** Star/bus ground, twisted pairs, HCT buffers, source resistors, big cap at strip
+- ❌ **Don't:** Float grounds, share one ground for many runs, use unbuffered 3.3V for long 5V lines
+
+Following these practices eliminates 90% of "random sparkle/corruption" issues.
+
+</details>
+
 ### Exotic Setups (120+ Outputs!)
 **Custom shift register boards** can achieve extreme parallel output:
 - **ESP32DEV**: [120-output virtual driver](https://github.com/hpwit/I2SClocklessVirtualLedDriver)
