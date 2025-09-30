@@ -340,6 +340,11 @@ At strip start: 1000µF cap across +5V/GND
 Power injection as needed; keep data/power runs separate
 ```
 
+#### Troubleshooting Tips
+- **Signal issues?** Try underclocking: `FASTLED_OVERCLOCK=0.8` in `platformio.ini` build flags
+- **Long runs failing?** Insert dummy LED near controller (set to black, offset array index)
+- **Intermittent glitches?** Ensure all PSUs share the same AC circuit
+
 #### Quick Do/Don't
 - ✅ **Do:** Star/bus ground, twisted pairs, HCT buffers, source resistors, big cap at strip
 - ❌ **Don't:** Float grounds, share one ground for many runs, use unbuffered 3.3V for long 5V lines
