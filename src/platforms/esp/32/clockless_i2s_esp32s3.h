@@ -97,6 +97,11 @@ class ClocklessController_I2S_Esp32_WS2812
     typedef ClocklessController_I2S_Esp32_WS2812Base<RGB_ORDER> Base;
     I2S_Esp32 mI2S_Esp32;
 
+    // Compile-time check for invalid pins
+    static_assert(!(DATA_PIN == 19 || DATA_PIN == 20),
+                  "GPIO19 and GPIO20 are reserved for USB-JTAG on ESP32S3 and cannot be used for LED output. "
+                  "Using these pins will break USB flashing capability. Please choose a different pin.");
+
   public:
     ClocklessController_I2S_Esp32_WS2812(): Base(DATA_PIN) {};
     void init() override {}

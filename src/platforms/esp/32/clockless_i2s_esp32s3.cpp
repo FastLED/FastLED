@@ -88,6 +88,11 @@ class I2SEsp32S3_Group {
             mDriver.reset(new fl::I2SClocklessLedDriveresp32S3());
             fl::FixedVector<int, 16> pinList;
             for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
+                // Check for invalid USB-JTAG pins
+                if (it->mPin == 19 || it->mPin == 20) {
+                    FL_ASSERT(false, "GPIO19 and GPIO20 are reserved for USB-JTAG on ESP32S3 and cannot be used for LED output. "
+                                     "Using these pins will break USB flashing capability. Please choose a different pin.");
+                }
                 pinList.push_back(it->mPin);
             }
             uint32_t num_strips = 0;

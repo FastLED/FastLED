@@ -1,5 +1,12 @@
 FastLED 3.10.4
 ==============
+  * **ESP32-S3 USB-JTAG Pin Protection**: Added safeguards to prevent using GPIO19/GPIO20 for LED output
+    * GPIO19 and GPIO20 are reserved for USB-JTAG interface on ESP32-S3
+    * Using these pins for LED output breaks USB flashing capability requiring UART adapter recovery
+    * Compile-time `static_assert` check in clockless I2S controller prevents compilation with these pins
+    * Runtime `FL_ASSERT` in I2S driver group initialization catches dynamic pin assignments
+    * Updated example Esp32S3I2SDemo to use GPIO1 instead of GPIO19 as safe default
+    * Pins now marked as unusable in `FASTLED_UNUSABLE_PIN_MASK` for ESP32-S3
   * **ezWS2812 Hardware-Accelerated Drivers for Silicon Labs MG24**: Optimized WS2812 controllers imported from Silicon Labs
     * Resolves GitHub issue #1891: Platform support for Seeed Xiao MG24 Sense and other EFR32MG24-based boards
     * Added `EZWS2812_GPIO`: Always-available GPIO controller with cycle-accurate timing for 39MHz and 78MHz CPUs

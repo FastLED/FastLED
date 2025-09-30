@@ -50,7 +50,7 @@
 
 // Note that you can use less strips than this.
 
-#define EXAMPLE_PIN_NUM_DATA0 19  // B0
+#define EXAMPLE_PIN_NUM_DATA0 1   // B0 - Safe pin (avoids USB-JTAG conflict with GPIO19)
 #define EXAMPLE_PIN_NUM_DATA1 45  // B1
 #define EXAMPLE_PIN_NUM_DATA2 21  // B2
 #define EXAMPLE_PIN_NUM_DATA3 6   // B3

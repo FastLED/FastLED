@@ -109,9 +109,10 @@ public:
 
 #elif CONFIG_IDF_TARGET_ESP32S3
 // 49 GPIO pins. ESPIDF defineds 22-25 as invalid.
+// GPIO 19-20 used for USB-JTAG and will break flashing if used.
 // GPIO 27-32 used by default for SPI flash.
 // NOTE: GPIO 43 & 44 commonly used for UART and may cause flashes when uploading.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(27) | _FL_BIT(28) | _FL_BIT(29) | _FL_BIT(30) | _FL_BIT(31) | _FL_BIT(32))
 
 #elif CONFIG_IDF_TARGET_ESP32C5
 
