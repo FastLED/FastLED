@@ -476,6 +476,26 @@ jobs:
           if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
             echo "❌ ${{ inputs.platform_display }} crashed during execution"
             echo "Crash indicators found in QEMU log"
+            echo ""
+            echo "=== Crash Details ==="
+            # Show which patterns matched
+            echo "Matched crash patterns:"
+            grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -20
+            echo ""
+            echo "=== Context around crash (20 lines before and after first match) ==="
+            # Get line number of first crash
+            CRASH_LINE=$(grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -1 | cut -d: -f1)
+            if [ -n "$CRASH_LINE" ]; then
+              # Show context around the crash
+              START_LINE=$((CRASH_LINE - 20))
+              if [ $START_LINE -lt 1 ]; then
+                START_LINE=1
+              fi
+              END_LINE=$((CRASH_LINE + 20))
+              sed -n "${START_LINE},${END_LINE}p" qemu_output.log
+            fi
+            echo ""
+            echo "=== End of crash context ==="
             exit 1
           fi
 
