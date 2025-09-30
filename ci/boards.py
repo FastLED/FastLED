@@ -289,6 +289,13 @@ class Board:
                 f"board_build.filesystem_size = {self.board_build_filesystem_size}"
             )
 
+        # Force DIO flash mode for ESP32 boards to ensure QEMU compatibility
+        # QEMU doesn't support QIO flash mode which requires setting the QIE bit
+        if self.board_name.startswith("esp32") or (
+            self.real_board_name and self.real_board_name.startswith("esp32")
+        ):
+            lines.append("board_build.flash_mode = dio")
+
         if self.board_partitions:
             lines.append(f"board_partitions = {self.board_partitions}")
 
