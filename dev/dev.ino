@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/FestivalStick/FestivalStick.ino"
+#include "../examples/Esp32LcdDriver/Esp32LcdDriver.ino"
