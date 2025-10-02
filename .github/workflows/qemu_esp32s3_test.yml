@@ -30,9 +30,16 @@ on:
       - '.github/workflows/qemu_template.yml'
 
 jobs:
-  esp32s3_qemu_test:
+  esp32s3_qemu_rmt:
     uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: BlinkParallel
+
+  esp32s3_qemu_lcd:
+    uses: ./.github/workflows/qemu_template.yml
+    with:
+      platform: esp32s3
+      platform_display: ESP32-S3
+      sketch: Esp32LcdDriver
