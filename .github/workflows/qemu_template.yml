@@ -507,6 +507,12 @@ jobs:
           else
             echo "❌ No debug output detected"
             echo "Expected Serial.print messages not found in QEMU log"
+            echo ""
+            echo "=== Full QEMU output (first 200 lines) ==="
+            head -200 qemu_output.log
+            echo ""
+            echo "=== End of QEMU output preview ==="
+            echo "Total lines in log: $(wc -l < qemu_output.log)"
             exit 1
           fi
 
