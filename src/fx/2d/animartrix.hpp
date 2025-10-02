@@ -76,6 +76,7 @@ enum AnimartrixAnim {
     MODULE_EXPERIMENT_SM8,
     MODULE_EXPERIMENT_SM9,
     MODULE_EXPERIMENT_SM10,
+    FLUFFY_BLOBS,
     NUM_ANIMATIONS
 };
 
@@ -244,6 +245,7 @@ static const AnimartrixEntry ANIMATION_TABLE[] = {
     {MODULE_EXPERIMENT_SM9, "MODULE_EXPERIMENT_SM9", &FastLEDANIMartRIX::SM9},
     {MODULE_EXPERIMENT_SM10, "MODULE_EXPERIMENT_SM10",
      &FastLEDANIMartRIX::SM10},
+    {FLUFFY_BLOBS, "FLUFFY_BLOBS", &FastLEDANIMartRIX::Fluffy_Blobs},
 };
 
 fl::string getAnimartrixName(int animation) {
