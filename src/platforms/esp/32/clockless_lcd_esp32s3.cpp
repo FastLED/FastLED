@@ -27,17 +27,16 @@ typedef fl::FixedVector<int, 16> PinList16;
 typedef uint8_t LCDPin;
 
 // Maps multiple pins and CRGB strips to a single LCD driver object.
-// Template parameter allows separate driver instances per chipset type.
-template <typename CHIPSET>
+// Uses WS2812 chipset timing (most common for parallel LCD driver)
 class LCDEsp32S3_Group {
   public:
 
-    fl::unique_ptr<fl::LcdLedDriver<CHIPSET>> mDriver;
+    fl::unique_ptr<fl::LcdLedDriver<fl::WS2812ChipsetTiming>> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 
-    static LCDEsp32S3_Group<CHIPSET> &getInstance() {
-        return fl::Singleton<LCDEsp32S3_Group<CHIPSET>>::instance();
+    static LCDEsp32S3_Group &getInstance() {
+        return fl::Singleton<LCDEsp32S3_Group>::instance();
     }
 
     LCDEsp32S3_Group() = default;
@@ -69,7 +68,7 @@ class LCDEsp32S3_Group {
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
-            mDriver.reset(new fl::LcdLedDriver<CHIPSET>());
+            mDriver.reset(new fl::LcdLedDriver<fl::WS2812ChipsetTiming>());
 
             // Build pin list and config
             fl::LcdDriverConfig config;
@@ -116,16 +115,14 @@ class LCDEsp32S3_Group {
 
 namespace fl {
 
-template <typename CHIPSET>
-void LCD_Esp32<CHIPSET>::beginShowLeds(int datapin, int nleds) {
-    LCDEsp32S3_Group<CHIPSET> &group = LCDEsp32S3_Group<CHIPSET>::getInstance();
+void LCD_Esp32::beginShowLeds(int datapin, int nleds) {
+    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
-template <typename CHIPSET>
-void LCD_Esp32<CHIPSET>::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    LCDEsp32S3_Group<CHIPSET> &group = LCDEsp32S3_Group<CHIPSET>::getInstance();
+void LCD_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
@@ -161,20 +158,14 @@ void LCD_Esp32<CHIPSET>::showPixels(uint8_t data_pin, PixelIterator& pixel_itera
     }
 }
 
-template <typename CHIPSET>
-void LCD_Esp32<CHIPSET>::endShowLeds() {
+void LCD_Esp32::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
-    LCDEsp32S3_Group<CHIPSET>::getInstance().showPixelsOnceThisFrame();
+    LCDEsp32S3_Group::getInstance().showPixelsOnceThisFrame();
 }
 
-// Explicit template instantiations for supported chipsets
-template class LCD_Esp32<WS2812ChipsetTiming>;
-template class LCD_Esp32<WS2811ChipsetTiming>;
-template class LCD_Esp32<WS2813ChipsetTiming>;
-template class LCD_Esp32<SK6812ChipsetTiming>;
-template class LCD_Esp32<TM1814ChipsetTiming>;
-template class LCD_Esp32<WS2816ChipsetTiming>;
+// Explicit template instantiation for WS2812 chipset (forces compilation)
+template class LcdLedDriver<WS2812ChipsetTiming>;
 
 } // namespace fl
 

@@ -44,7 +44,6 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
-#include "clockless_lcd_esp32s3_impl.hpp"
 
 // Data alignment for PSRAM transfers
 #ifndef LCD_DRIVER_PSRAM_DATA_ALIGNMENT
@@ -229,9 +228,10 @@ private:
     void encodeFrame(int buffer_index);
 
     /// @brief DMA transfer complete callback (static, ISR context)
-    static bool IRAM_ATTR dmaCallback(esp_lcd_panel_io_handle_t panel_io,
-                                      esp_lcd_panel_io_event_data_t* edata,
-                                      void* user_ctx);
+    /// Note: IRAM_ATTR removed to avoid GCC template issues - placed in flash
+    static bool dmaCallback(esp_lcd_panel_io_handle_t panel_io,
+                           esp_lcd_panel_io_event_data_t* edata,
+                           void* user_ctx);
 
     // Configuration
     LcdDriverConfig config_;
@@ -263,8 +263,8 @@ private:
 namespace fl {
 
 /// @brief LCD_Esp32 wrapper class that uses RectangularDrawBuffer
-/// This provides the same interface as I2S_Esp32 and ObjectFled
-template <typename CHIPSET>
+/// This provides the same interface as I2S_Esp32
+/// Implementation is in clockless_lcd_esp32s3.cpp (always compiled for ESP32-S3)
 class LCD_Esp32 {
   public:
     void beginShowLeds(int data_pin, int nleds);
@@ -272,17 +272,17 @@ class LCD_Esp32 {
     void endShowLeds();
 };
 
-// Base version of this class allows dynamic pins and chipset selection.
-template <EOrder RGB_ORDER, typename CHIPSET>
-class ClocklessController_LCD_Esp32Base
+// Base version of this class allows dynamic pins (WS2812 chipset)
+template <EOrder RGB_ORDER = RGB>
+class ClocklessController_LCD_Esp32_WS2812Base
     : public CPixelLEDController<RGB_ORDER> {
   private:
     typedef CPixelLEDController<RGB_ORDER> Base;
-    LCD_Esp32<CHIPSET> mLCD_Esp32;
+    LCD_Esp32 mLCD_Esp32;
     int mPin;
 
   public:
-    ClocklessController_LCD_Esp32Base(int pin): mPin(pin) {}
+    ClocklessController_LCD_Esp32_WS2812Base(int pin): mPin(pin) {}
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
@@ -309,11 +309,11 @@ class ClocklessController_LCD_Esp32Base
 
 
 // Template parameter for the data pin so that it conforms to the API.
-template <int DATA_PIN, EOrder RGB_ORDER, typename CHIPSET>
-class ClocklessController_LCD_Esp32
-    : public ClocklessController_LCD_Esp32Base<RGB_ORDER, CHIPSET> {
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class ClocklessController_LCD_Esp32_WS2812
+    : public ClocklessController_LCD_Esp32_WS2812Base<RGB_ORDER> {
   private:
-    typedef ClocklessController_LCD_Esp32Base<RGB_ORDER, CHIPSET> Base;
+    typedef ClocklessController_LCD_Esp32_WS2812Base<RGB_ORDER> Base;
 
     // Compile-time check for invalid pins
     static_assert(!(DATA_PIN == 19 || DATA_PIN == 20),
@@ -321,14 +321,14 @@ class ClocklessController_LCD_Esp32
                   "Using these pins WILL BREAK USB flashing capability. Please choose a different pin.");
 
   public:
-    ClocklessController_LCD_Esp32(): Base(DATA_PIN) {};
+    ClocklessController_LCD_Esp32_WS2812(): Base(DATA_PIN) {};
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
 };
 
-// Convenience aliases for common chipsets (WS2812 is the default)
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-using ClocklessController_LCD_Esp32_WS2812 = ClocklessController_LCD_Esp32<DATA_PIN, RGB_ORDER, WS2812ChipsetTiming>;
-
 } // namespace fl
+
+// Include template implementation file
+// This must be at the end after all class definitions are complete
+#include "clockless_lcd_esp32s3_impl.hpp"  // allow-include-after-namespace

@@ -1,9 +1,9 @@
 /// @file clockless_lcd_esp32s3_impl.hpp
 /// @brief Implementation of ESP32-S3 LCD parallel LED driver template methods
+///
+/// NOTE: This file should only be included from clockless_lcd_esp32s3.h
+///       Do not include this file directly in other translation units.
 
-#pragma once
-
-#include "clockless_lcd_esp32s3.h"
 #include "esp_log.h"
 #include "platforms/assert_defs.h"
 
@@ -368,10 +368,13 @@ void LcdLedDriver<CHIPSET>::wait() {
     }
 }
 
+// Note: IRAM_ATTR removed from template function to avoid GCC issues with older compilers
+// The function will be placed in flash, which is acceptable for ISR callbacks on ESP32-S3
+// with cache enabled. If IRAM placement is critical, use explicit non-template wrapper.
 template <typename CHIPSET>
-bool IRAM_ATTR LcdLedDriver<CHIPSET>::dmaCallback(esp_lcd_panel_io_handle_t panel_io,
-                                                   esp_lcd_panel_io_event_data_t* edata,
-                                                   void* user_ctx) {
+bool  IRAM_ATTR LcdLedDriver<CHIPSET>::dmaCallback(esp_lcd_panel_io_handle_t panel_io,
+                                        esp_lcd_panel_io_event_data_t* edata,
+                                        void* user_ctx) {
     LcdLedDriver<CHIPSET>* driver = static_cast<LcdLedDriver<CHIPSET>*>(user_ctx);
 
     // Mark transfer as complete
