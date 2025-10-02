@@ -44,6 +44,7 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
+#include "clockless_lcd_esp32s3_impl.hpp"
 
 // Data alignment for PSRAM transfers
 #ifndef LCD_DRIVER_PSRAM_DATA_ALIGNMENT
@@ -331,6 +332,3 @@ template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 using ClocklessController_LCD_Esp32_WS2812 = ClocklessController_LCD_Esp32<DATA_PIN, RGB_ORDER, WS2812ChipsetTiming>;
 
 } // namespace fl
-
-// Include implementation
-#include "clockless_lcd_esp32s3_impl.hpp"

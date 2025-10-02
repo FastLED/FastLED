@@ -10,6 +10,16 @@
 /* eslint-disable no-console */
 
 /**
+ * @typedef {Object} FrameInfo
+ * @property {ImageData} imageData - The image data
+ * @property {number} timestamp - Frame timestamp
+ * @property {number} frameNumber - Frame number
+ * @property {number} width - Frame width
+ * @property {number} height - Frame height
+ * @property {boolean} [fromWebGL] - Whether from WebGL
+ */
+
+/**
  * Default video recording configuration optimized for fastest encoding and MP4 compatibility
  * @constant {Object}
  */
@@ -118,7 +128,7 @@ export class VideoRecorder {
     this.recordingStartTime = 0;
 
     // === FRAME BUFFER SYSTEM ===
-    /** @type {Array<ImageData>} Massive frame buffer to prevent any drops */
+    /** @type {Array<FrameInfo>} Massive frame buffer to prevent any drops */
     this.frameBuffer = [];
 
     /** @type {number} Current buffer memory usage in bytes */
@@ -503,7 +513,7 @@ export class VideoRecorder {
 
   /**
    * Encodes a single frame from the buffer into the video stream
-   * @param {Object} frameInfo - Frame information with ImageData and timing
+   * @param {FrameInfo} frameInfo - Frame information with ImageData and timing
    */
   async encodeFrameFromBuffer(frameInfo) {
     try {

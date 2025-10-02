@@ -18,6 +18,9 @@
 /* eslint-env worker */
 
 // Worker-specific imports and initialization - Optimized loading
+/** @type {function(string): void} */
+// @ts-ignore
+const importScripts = self.importScripts;
 importScripts('../fastled.js'); // Import the WASM module
 
 /* global fastled, postMessage, self, performance, requestAnimationFrame, cancelAnimationFrame */
@@ -31,6 +34,19 @@ importScripts('../fastled.js'); // Import the WASM module
  * @property {boolean} running - Animation loop status
  * @property {number} frameRate - Target frame rate
  * @property {Object} capabilities - Worker capabilities
+ * @property {Object|null} renderingContext - Rendering context
+ * @property {number|null} animationFrameId - Animation frame ID
+ * @property {number} frameCount - Frame counter
+ * @property {number} startTime - Worker start timestamp
+ * @property {number} lastFrameTime - Last frame timestamp
+ * @property {number} averageFrameTime - Average frame time in ms
+ * @property {Int32Array|null} sharedFrameBuffer - Shared frame buffer
+ * @property {Int32Array|null} sharedFrameHeader - Shared frame header
+ * @property {Uint8ClampedArray|null} sharedPixelBuffer - Shared pixel buffer
+ * @property {boolean} useSharedMemory - Whether shared memory is enabled
+ * @property {number} maxPixelDataSize - Maximum pixel data size
+ * @property {Object|null} externFunctions - External functions
+ * @property {Object|null} wasmFunctions - WASM functions
  */
 
 /**
@@ -57,7 +73,11 @@ const workerState = {
   sharedFrameHeader: null,
   sharedPixelBuffer: null,
   useSharedMemory: false,
-  maxPixelDataSize: 0
+  maxPixelDataSize: 0,
+
+  // Function references
+  externFunctions: null,
+  wasmFunctions: null
 };
 
 /**
@@ -203,8 +223,8 @@ async function initializeSharedMemory(payload) {
     const { frameBuffer, pixelBuffer, maxPixelDataSize } = payload.sharedBuffers;
 
     if (frameBuffer instanceof SharedArrayBuffer && pixelBuffer instanceof SharedArrayBuffer) {
-      workerState.sharedFrameBuffer = frameBuffer;
-      workerState.sharedPixelBuffer = pixelBuffer;
+      workerState.sharedFrameBuffer = new Int32Array(frameBuffer);
+      workerState.sharedPixelBuffer = new Uint8ClampedArray(pixelBuffer);
       workerState.maxPixelDataSize = maxPixelDataSize || 1024 * 1024; // Default 1MB
       workerState.useSharedMemory = true;
 
@@ -293,11 +313,13 @@ async function initializeFastLEDModule() {
   try {
     // Load the FastLED WASM module
     // Note: The module is loaded via importScripts at the top of this file
+    // @ts-ignore - fastled is loaded globally via importScripts
     if (typeof self.fastled !== 'function') {
       throw new Error('FastLED module not available in worker context');
     }
 
     // Initialize the module
+    // @ts-ignore - fastled is loaded globally via importScripts
     workerState.fastledModule = await self.fastled({
       canvas: workerState.canvas,
       locateFile: (path) => {
@@ -338,8 +360,7 @@ async function initializeGraphicsManager() {
 
     // Create graphics manager with OffscreenCanvas
     workerState.graphicsManager = new GraphicsManager({
-      canvasId: workerState.canvas, // Pass OffscreenCanvas directly
-      offscreenCanvas: workerState.canvas,
+      canvasId: /** @type {string} */ (/** @type {*} */ (workerState.canvas)), // Pass OffscreenCanvas directly
       usePixelatedRendering: true
     });
 
@@ -856,22 +877,27 @@ function getPerformanceStats() {
 
 /**
  * Handle worker errors
+ * @param {ErrorEvent|string} error - Error event
  */
 self.onerror = function(error) {
-  workerLog('ERROR', 'BACKGROUND_WORKER', 'Worker error', {
-    message: error.message,
-    filename: error.filename,
-    lineno: error.lineno,
-    colno: error.colno
-  });
+  const errorData = typeof error === 'string'
+    ? { message: error, filename: '', lineno: 0, colno: 0 }
+    : {
+        message: error.message,
+        filename: error.filename || '',
+        lineno: error.lineno || 0,
+        colno: error.colno || 0
+      };
+
+  workerLog('ERROR', 'BACKGROUND_WORKER', 'Worker error', errorData);
 
   postMessage({
     type: 'error',
     payload: {
       source: 'worker_error',
-      message: error.message,
-      filename: error.filename,
-      lineno: error.lineno
+      message: errorData.message,
+      filename: errorData.filename,
+      lineno: errorData.lineno
     }
   });
 };

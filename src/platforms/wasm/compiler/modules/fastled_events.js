@@ -159,6 +159,17 @@ class FastLEDEventSystem extends EventTarget {
   }
 
   /**
+     * Generic emit method for custom events
+     * @param {string} eventName - Name of the event
+     * @param {Object} [eventData] - Event data
+     */
+  emit(eventName, eventData = {}) {
+    this.dispatchEvent(new CustomEvent(eventName, {
+      detail: { ...eventData, timestamp: Date.now() },
+    }));
+  }
+
+  /**
      * Emit an error event
      * @param {string} errorType - Type of error
      * @param {string} errorMessage - Error message

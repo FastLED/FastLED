@@ -96,8 +96,7 @@ export class FastLEDWorkerManager {
     const capabilities = {
       offscreenCanvas: typeof OffscreenCanvas !== 'undefined',
       sharedArrayBuffer: typeof SharedArrayBuffer !== 'undefined',
-      transferableObjects: typeof Transferable !== 'undefined' ||
-                          (typeof window !== 'undefined' && 'postMessage' in window),
+      transferableObjects: (typeof window !== 'undefined' && 'postMessage' in window),
       webgl2: false
     };
 
@@ -201,7 +200,7 @@ export class FastLEDWorkerManager {
     }
 
     // Check for compile-time feature flags
-    if (typeof window !== 'undefined' && window.FASTLED_ENABLE_BACKGROUND_WORKER === false) {
+    if (typeof window !== 'undefined' && /** @type {*} */(window).FASTLED_ENABLE_BACKGROUND_WORKER === false) {
       FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker mode disabled by compile flag');
       return false;
     }
@@ -699,14 +698,14 @@ export class FastLEDWorkerManager {
 
         // Attempt to recreate worker (would need original config - store it)
         // For now, fall back to main thread mode
-        await this.initializeFallback({});
+        await this.initializeFallback(/** @type {WorkerConfiguration} */({}));
 
       } catch (recoveryError) {
         FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Worker recovery failed', recoveryError);
       }
     } else {
       FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Max retries exceeded, falling back to main thread');
-      await this.initializeFallback({});
+      await this.initializeFallback(/** @type {WorkerConfiguration} */({}));
     }
   }
 
@@ -780,5 +779,5 @@ export const fastLEDWorkerManager = new FastLEDWorkerManager();
 
 // Expose globally for debugging and external access
 if (typeof window !== 'undefined') {
-  window.fastLEDWorkerManager = fastLEDWorkerManager;
+  /** @type {*} */(window).fastLEDWorkerManager = fastLEDWorkerManager;
 }
