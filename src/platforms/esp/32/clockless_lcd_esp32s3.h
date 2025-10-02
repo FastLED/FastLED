@@ -227,11 +227,11 @@ private:
     /// @param buffer_index Buffer index (0 or 1)
     void encodeFrame(int buffer_index);
 
-    /// @brief DMA transfer complete callback (static, ISR context)
-    /// Note: IRAM_ATTR removed to avoid GCC template issues - placed in flash
-    static bool dmaCallback(esp_lcd_panel_io_handle_t panel_io,
-                           esp_lcd_panel_io_event_data_t* edata,
-                           void* user_ctx);
+    /// @brief DMA transfer complete callback (static, ISR context, IRAM)
+    /// Safe with IRAM_ATTR because explicit instantiation in .cpp file
+    static bool IRAM_ATTR dmaCallback(esp_lcd_panel_io_handle_t panel_io,
+                                      esp_lcd_panel_io_event_data_t* edata,
+                                      void* user_ctx);
 
     // Configuration
     LcdDriverConfig config_;
