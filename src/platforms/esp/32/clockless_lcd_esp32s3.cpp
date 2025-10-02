@@ -3,7 +3,7 @@
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32S3)
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
@@ -178,5 +178,5 @@ template class LCD_Esp32<WS2816ChipsetTiming>;
 
 } // namespace fl
 
-#endif  // CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+#endif  // CONFIG_IDF_TARGET_ESP32S3
 #endif  // ESP32

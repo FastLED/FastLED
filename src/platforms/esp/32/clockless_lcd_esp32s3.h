@@ -1,13 +1,11 @@
 /// @file clockless_lcd_esp32s3.h
-/// @brief ESP32-S2/S3 LCD/I80 parallel LED driver with memory-optimized 3-word encoding
+/// @brief ESP32-S3 LCD/I80 parallel LED driver with memory-optimized 3-word encoding
 ///
-/// This driver uses the ESP32-S2/S3 LCD_CAM peripheral (I80 mode) to drive up to 16
+/// This driver uses the ESP32-S3 LCD_CAM peripheral (I80 mode) to drive up to 16
 /// identical WS28xx-style LED strips in parallel with automatic PCLK optimization.
 ///
 /// Supported platforms:
-/// - ESP32-S2: LCD peripheral with I80 interface
-/// - ESP32-S3: LCD_CAM peripheral with I80 interface
-/// Both platforms use identical esp_lcd_i80 API
+/// - ESP32-S3: LCD_CAM peripheral with I80 interface (requires hal/lcd_ll.h)
 ///
 /// Key features:
 /// - Template-parameterized chipset binding (compile-time optimization)
@@ -20,8 +18,8 @@
 
 #pragma once
 
-#if !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32S3)
-#error "This file is only for ESP32-S2 and ESP32-S3"
+#if !defined(CONFIG_IDF_TARGET_ESP32S3)
+#error "This file is only for ESP32-S3"
 #endif
 
 #include "sdkconfig.h"
