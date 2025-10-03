@@ -72,10 +72,39 @@ static fl::vector<fl::string> animationNames = getAnimationNames();
 fl::UIDropdown animationSelector("Animation", animationNames);
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
+fl::UICheckbox autoBrightness("Auto Brightness", true);
+
+// Calculate average brightness percentage from LED array
+float getAverageBrightness(CRGB* leds, int numLeds) {
+    uint32_t total = 0;
+    for (int i = 0; i < numLeds; i++) {
+        total += leds[i].r + leds[i].g + leds[i].b;
+    }
+    float avgValue = float(total) / float(numLeds * 3);
+    return (avgValue / 255.0f) * 100.0f; // Return as percentage
+}
+
+// Apply compression curve: input brightness % -> output brightness multiplier
+uint8_t applyBrightnessCompression(float inputBrightnessPercent) {
+    if (inputBrightnessPercent < 8.0f) {
+        // Below 8%: full brightness (100%)
+        return 255;
+    } else if (inputBrightnessPercent < 22.0f) {
+        // 8-22%: linear dampening from 100% down to 33%
+        // map 8->22% input to 100%->33% output
+        float range = 22.0f - 8.0f; // 14%
+        float position = (inputBrightnessPercent - 8.0f) / range; // 0.0 to 1.0
+        float outputPercent = 100.0f - (position * 67.0f); // 100% -> 33%
+        return uint8_t((outputPercent / 100.0f) * 255.0f);
+    } else {
+        // Above 22%: cap at 33% brightness
+        return uint8_t(0.33f * 255.0f); // ~84
+    }
+}
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
+    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
     FastLED.setBrightness(BRIGHTNESS);
     fxEngine.addFx(fx2dTo1d);
 
@@ -106,12 +135,23 @@ void loop() {
         lastSelectedIndex = selectedIndex;
     }
 
-    // Update brightness
-    FastLED.setBrightness(brightness.as_int());
-
     // Draw the effect (Fx2dTo1d handles 2D rendering and sampling)
     fxEngine.setSpeed(timeSpeed);
     fxEngine.draw(millis(), leds);
+
+    // Apply brightness control
+    uint8_t finalBrightness;
+    if (autoBrightness.value()) {
+        // Apply automatic brightness compression based on average pixel brightness
+        float avgBrightnessPercent = getAverageBrightness(leds, NUM_LEDS);
+        uint8_t compressedBrightness = applyBrightnessCompression(avgBrightnessPercent);
+        // Combine manual brightness control with automatic compression
+        finalBrightness = (brightness.as_int() * compressedBrightness) / 255;
+    } else {
+        // Use manual brightness only
+        finalBrightness = brightness.as_int();
+    }
+    FastLED.setBrightness(finalBrightness);
 
     FastLED.show();
 }
