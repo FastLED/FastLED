@@ -302,5 +302,9 @@ def create_cache_compiler(
 ) -> CacheAwareCompiler:
     """Create a cache-aware compiler. Simple factory function."""
     if cache_file is None:
-        cache_file = Path(".build/fingerprint_cache.json")
-    return CacheAwareCompiler(compiler, cache_file, verbose)
+        cache_dir = Path(".build")
+    else:
+        # Extract directory from the cache_file path if it's a file
+        # This maintains backward compatibility while fixing the directory issue
+        cache_dir = cache_file.parent if cache_file.suffix else cache_file
+    return CacheAwareCompiler(compiler, cache_dir, verbose)
