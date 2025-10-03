@@ -54,6 +54,9 @@ class Board:
     board_build_mcu: str | None = None
     board_build_core: str | None = None
     board_build_filesystem_size: str | None = None
+    board_build_flash_size: str | None = (
+        None  # Flash size for ESP32 boards (e.g., '4MB')
+    )
     build_flags: list[str] | None = None  # Reserved for future use.
     build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
@@ -181,6 +184,8 @@ class Board:
             options.append(
                 f"board_build.filesystem_size={self.board_build_filesystem_size}"
             )
+        if self.board_build_flash_size:
+            options.append(f"board_build.flash_size={self.board_build_flash_size}")
         if self.defines:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
@@ -289,12 +294,18 @@ class Board:
                 f"board_build.filesystem_size = {self.board_build_filesystem_size}"
             )
 
+        if self.board_build_flash_size:
+            lines.append(f"board_build.flash_size = {self.board_build_flash_size}")
+            # Also set upload flash size to override board defaults
+            lines.append(f"board_upload.flash_size = {self.board_build_flash_size}")
+
         # Force DIO flash mode for ESP32 boards to ensure QEMU compatibility
         # QEMU doesn't support QIO flash mode which requires setting the QIE bit
         if self.board_name.startswith("esp32") or (
             self.real_board_name and self.real_board_name.startswith("esp32")
         ):
             lines.append("board_build.flash_mode = dio")
+            lines.append("board_upload.flash_mode = dio")
 
         if self.board_partitions:
             lines.append(f"board_partitions = {self.board_partitions}")
@@ -512,6 +523,7 @@ ESP32_S3_DEVKITC_1 = Board(
     real_board_name="esp32-s3-devkitc-1",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     framework="arduino",
+    board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     # board_partitions="huge_app.csv",  # Removed: requires 8MB, QEMU uses 4MB
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
@@ -747,6 +759,7 @@ XIAO_ESP32S3 = Board(
     board_name="seeed_xiao_esp32s3",
     real_board_name="seeed_xiao_esp32s3",
     platform=ESP32_IDF_5_4_PIOARDUINO,
+    board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     # board_partitions="huge_app.csv",  # Removed: requires 8MB, QEMU uses 4MB
     defines=None,
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
