@@ -56,6 +56,7 @@ static fl::vector<fl::string> animationNames = getAnimationNames();
 // UI controls
 fl::UIDropdown animationSelector("Animation", animationNames);
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
+fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
 
 void setup() {
     Serial.begin(115200);
@@ -89,6 +90,9 @@ void loop() {
 
         lastSelectedIndex = selectedIndex;
     }
+
+    // Update brightness
+    FastLED.setBrightness(brightness.as_int());
 
     // Generate Animartrix pattern on rectangular grid using the library
     fxEngine.setSpeed(timeSpeed);
