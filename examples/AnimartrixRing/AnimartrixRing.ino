@@ -1,6 +1,6 @@
 // AnimartrixRing: Sample a circle from an Animartrix rectangular grid
 // This example generates a rectangular animation grid and samples a circular
-// region from it to display on a ring of LEDs.
+// region from it to display on a ring of LEDs using Fx2dTo1d.
 
 #include "fl/sketch_macros.h"
 #if !SKETCH_HAS_LOTS_OF_MEMORY
@@ -12,6 +12,7 @@
 #include "fl/screenmap.h"
 #include "fl/ui.h"
 #include "fx/2d/animartrix.hpp"
+#include "fx/fx2d_to_1d.h"
 #include "fx/fx_engine.h"
 
 #ifndef TWO_PI
@@ -27,12 +28,10 @@
 #define GRID_HEIGHT 32
 
 CRGB leds[NUM_LEDS];
-CRGB grid[GRID_WIDTH * GRID_HEIGHT];
 
-// Animartrix parameters
+// Animartrix 2D effect
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
-fl::Animartrix animartrix(xymap, fl::RGB_BLOBS5);
-fl::FxEngine fxEngine(GRID_WIDTH * GRID_HEIGHT);
+auto animartrix = fl::make_shared<fl::Animartrix>(xymap, fl::RGB_BLOBS5);
 int currentAnimationIndex = 0;
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
@@ -44,6 +43,17 @@ fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f&
     pt_out.x = centerX + cos(angle) * radius;
     pt_out.y = centerY + sin(angle) * radius;
 });
+
+// Create the 2D-to-1D sampling effect
+auto fx2dTo1d = fl::make_shared<fl::Fx2dTo1d>(
+    NUM_LEDS,
+    animartrix,
+    screenmap,
+    fl::Fx2dTo1d::BILINEAR
+);
+
+// FxEngine for the 1D strip
+fl::FxEngine fxEngine(NUM_LEDS);
 
 // Helper function to get animation names for dropdown
 fl::vector<fl::string> getAnimationNames() {
@@ -65,9 +75,9 @@ fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
+    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(BRIGHTNESS);
-    fxEngine.addFx(animartrix);
+    fxEngine.addFx(fx2dTo1d);
 
     // Print available Animartrix animations
     Serial.println("Available Animartrix animations:");
@@ -86,7 +96,7 @@ void loop() {
     int selectedIndex = animationSelector.as_int();
     if (selectedIndex != lastSelectedIndex) {
         currentAnimationIndex = selectedIndex;
-        animartrix.fxSet(currentAnimationIndex);
+        animartrix->fxSet(currentAnimationIndex);
 
         // Print the current animation name
         fl::AnimartrixAnimInfo info = fl::getAnimartrixInfo(currentAnimationIndex);
@@ -99,36 +109,9 @@ void loop() {
     // Update brightness
     FastLED.setBrightness(brightness.as_int());
 
-    // Generate Animartrix pattern on rectangular grid using the library
+    // Draw the effect (Fx2dTo1d handles 2D rendering and sampling)
     fxEngine.setSpeed(timeSpeed);
-    fxEngine.draw(millis(), grid);
-
-    // Sample circle from grid using screenmap
-    for (uint8_t i = 0; i < NUM_LEDS; i++) {
-        fl::vec2f pos = screenmap[i];
-        float x = pos.x;
-        float y = pos.y;
-
-        // Bilinear interpolation for smooth sampling
-        int x0 = (int)x;
-        int y0 = (int)y;
-        int x1 = min(x0 + 1, GRID_WIDTH - 1);
-        int y1 = min(y0 + 1, GRID_HEIGHT - 1);
-
-        float fx = x - x0;
-        float fy = y - y0;
-
-        // Get four neighboring pixels
-        CRGB c00 = grid[xymap.mapToIndex(x0, y0)];
-        CRGB c10 = grid[xymap.mapToIndex(x1, y0)];
-        CRGB c01 = grid[xymap.mapToIndex(x0, y1)];
-        CRGB c11 = grid[xymap.mapToIndex(x1, y1)];
-
-        // Interpolate
-        CRGB c0 = blend(c00, c10, fx * 255);
-        CRGB c1 = blend(c01, c11, fx * 255);
-        leds[i] = blend(c0, c1, fy * 255);
-    }
+    fxEngine.draw(millis(), leds);
 
     FastLED.show();
 }
