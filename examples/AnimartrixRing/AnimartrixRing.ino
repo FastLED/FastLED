@@ -5,6 +5,7 @@
 #include <FastLED.h>
 #include "fl/math_macros.h"
 #include "fl/screenmap.h"
+#include "fx/2d/animartrix.hpp"
 
 #ifndef TWO_PI
 #define TWO_PI 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
@@ -23,6 +24,8 @@ CRGB grid[GRID_WIDTH * GRID_HEIGHT];
 
 // Animartrix parameters
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
+fl::Animartrix animartrix(xymap, fl::RGB_BLOBS5);
+int currentAnimationIndex = 0;
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
 fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f& pt_out) {
@@ -35,28 +38,40 @@ fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f&
 });
 
 void setup() {
+    Serial.begin(115200);
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
     FastLED.setBrightness(BRIGHTNESS);
+
+    // Print available Animartrix animations
+    Serial.println("Available Animartrix animations:");
+    for (int i = 0; i < fl::getAnimartrixCount(); i++) {
+        fl::AnimartrixAnimInfo info = fl::getAnimartrixInfo(i);
+        Serial.print(i);
+        Serial.print(": ");
+        Serial.println(info.name);
+    }
 }
 
 void loop() {
-    static uint16_t frame = 0;
+    static uint32_t modeChangeTime = 0;
+    static uint32_t frame = 0;
 
-    // Generate Animartrix pattern on rectangular grid
-    uint16_t ms = millis();
-    for (uint8_t y = 0; y < GRID_HEIGHT; y++) {
-        for (uint8_t x = 0; x < GRID_WIDTH; x++) {
-            uint16_t index = xymap.mapToIndex(x, y);
+    // Auto-cycle through Animartrix animations every 10 seconds
+    if (millis() - modeChangeTime > 10000) {
+        currentAnimationIndex = (currentAnimationIndex + 1) % fl::getAnimartrixCount();
+        animartrix.fxSet(currentAnimationIndex);
 
-            // Create a moving rainbow plasma effect
-            uint8_t hue = (x * 8) + (y * 8) + (ms / 20);
-            uint8_t sat = 255 - ((x * 4) ^ (y * 4));
-            uint8_t val = sin8((x * 16) + (ms / 30)) / 2 +
-                          sin8((y * 16) + (ms / 40)) / 2;
+        // Print the current animation name
+        fl::AnimartrixAnimInfo info = fl::getAnimartrixInfo(currentAnimationIndex);
+        Serial.print("Switching to: ");
+        Serial.println(info.name);
 
-            grid[index] = CHSV(hue, sat, val);
-        }
+        modeChangeTime = millis();
     }
+
+    // Generate Animartrix pattern on rectangular grid using the library
+    fl::_DrawContext ctx(millis(), grid);
+    animartrix.draw(ctx);
 
     // Sample circle from grid using screenmap
     for (uint8_t i = 0; i < NUM_LEDS; i++) {

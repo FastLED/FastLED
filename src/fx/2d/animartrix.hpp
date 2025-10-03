@@ -81,6 +81,14 @@ enum AnimartrixAnim {
 };
 
 fl::string getAnimartrixName(int animation);
+int getAnimartrixCount();
+
+struct AnimartrixAnimInfo {
+    int id;
+    const char* name;
+};
+
+AnimartrixAnimInfo getAnimartrixInfo(int index);
 
 class FastLEDANIMartRIX;
 class Animartrix : public Fx2d {
@@ -253,6 +261,17 @@ fl::string getAnimartrixName(int animation) {
         return "UNKNOWN";
     }
     return ANIMATION_TABLE[animation].name;
+}
+
+int getAnimartrixCount() {
+    return NUM_ANIMATIONS;
+}
+
+AnimartrixAnimInfo getAnimartrixInfo(int index) {
+    if (index < 0 || index >= NUM_ANIMATIONS) {
+        return {-1, "UNKNOWN"};
+    }
+    return {static_cast<int>(ANIMATION_TABLE[index].anim), ANIMATION_TABLE[index].name};
 }
 
 void FastLEDANIMartRIX::loop() {
