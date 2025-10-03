@@ -1,0 +1,38 @@
+name: ESP32-P4 QEMU Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32p4_test.yml'
+      - '.github/workflows/qemu_template.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/qemu_esp32p4_test.yml'
+      - '.github/workflows/qemu_template.yml'
+
+jobs:
+  esp32p4_qemu_parlio:
+    uses: ./.github/workflows/qemu_template.yml
+    with:
+      platform: esp32p4
+      platform_display: ESP32-P4
+      sketch: Esp32ParlioDriver
