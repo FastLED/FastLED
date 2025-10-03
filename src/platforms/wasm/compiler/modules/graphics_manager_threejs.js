@@ -46,6 +46,16 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
   const width = screenMap.absMax[0] - screenMap.absMin[0];
   const height = screenMap.absMax[1] - screenMap.absMin[1];
 
+  // Validate screenmap bounds
+  if (Number.isNaN(width) || Number.isNaN(height) || width === 0 || height === 0) {
+    console.error('Invalid screenmap bounds detected:');
+    console.error(`  absMin: [${screenMap.absMin[0]}, ${screenMap.absMin[1]}]`);
+    console.error(`  absMax: [${screenMap.absMax[0]}, ${screenMap.absMax[1]}]`);
+    console.error(`  width: ${width}, height: ${height}`);
+    console.error('This indicates the screenmap was not properly set up.');
+    console.error('Make sure to call .setScreenMap() on your LED controller in setup().');
+  }
+
   return {
     /**
      * Calculates X position in 3D space from screen coordinates
@@ -544,6 +554,15 @@ export class GraphicsManagerThreeJS {
         const x = calcXPosition(x_array[i]);
         const y = calcYPosition(y_array[i]);
         const z = 500;
+
+        // Validate coordinates - detect NaN which indicates missing screenmap registration
+        if (Number.isNaN(x) || Number.isNaN(y)) {
+          console.error(`Invalid LED coordinates detected for strip ${stripId}, LED ${i}:`);
+          console.error(`  x=${x}, y=${y} (raw: x_array[${i}]=${x_array[i]}, y_array[${i}]=${y_array[i]})`);
+          console.error(`  This usually means you created a ScreenMap but forgot to call .setScreenMap() on the controller.`);
+          console.error(`  Example: FastLED.addLeds<...>(leds, NUM_LEDS).setScreenMap(yourScreenMap);`);
+          throw new Error(`Invalid LED coordinates for strip ${stripId}, LED ${i}. Did you forget to call .setScreenMap()?`);
+        }
 
         if (!canMergeGeometries) {
           // Create individual LEDs (original approach)
