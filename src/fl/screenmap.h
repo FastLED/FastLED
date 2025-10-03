@@ -10,6 +10,7 @@
 #include "fl/namespace.h"
 #include "fl/str.h"
 #include "fl/json.h"
+#include "fl/function.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
@@ -53,6 +54,9 @@ class ScreenMap {
     template <u32 N>
     ScreenMap(const vec2f (&lut)[N], float diameter = -1.0)
         : ScreenMap(lut, N, diameter) {}
+
+    // Constructor with functor to fill in values
+    ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func);
 
     ScreenMap(const ScreenMap &other);
     ScreenMap(ScreenMap&& other);

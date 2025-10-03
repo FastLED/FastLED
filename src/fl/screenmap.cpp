@@ -329,6 +329,18 @@ ScreenMap::ScreenMap(const vec2f *lut, u32 length, float diameter)
     }
 }
 
+ScreenMap::ScreenMap(int count, float diameter, fl::function<void(int, vec2f& pt_out)> func)
+    : length(count), mDiameter(diameter) {
+    if (count > 0) {
+        mLookUpTable = fl::make_shared<LUTXYFLOAT>(count);
+        LUTXYFLOAT &lut = *mLookUpTable.get();
+        vec2f *data = lut.getDataMutable();
+        for (int i = 0; i < count; i++) {
+            func(i, data[i]);
+        }
+    }
+}
+
 ScreenMap::ScreenMap(const ScreenMap &other) {
     mDiameter = other.mDiameter;
     length = other.length;
