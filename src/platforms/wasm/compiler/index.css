@@ -1583,6 +1583,7 @@ audio::-webkit-media-controls-mute-button {
     justify-content: center;
     align-items: center;
     pointer-events: none;
+    user-select: none;
     background: transparent;
     z-index: 2;
     font-size: 0.95em;
