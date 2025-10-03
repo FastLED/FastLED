@@ -524,7 +524,7 @@ ESP32_S3_DEVKITC_1 = Board(
     platform=ESP32_IDF_5_4_PIOARDUINO,
     framework="arduino",
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
-    # board_partitions="huge_app.csv",  # Removed: requires 8MB, QEMU uses 4MB
+    board_partitions="default.csv",  # Use default 4MB partition table for QEMU compatibility
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
@@ -760,7 +760,7 @@ XIAO_ESP32S3 = Board(
     real_board_name="seeed_xiao_esp32s3",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
-    # board_partitions="huge_app.csv",  # Removed: requires 8MB, QEMU uses 4MB
+    board_partitions="default.csv",  # Use default 4MB partition table for QEMU compatibility
     defines=None,
     build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
