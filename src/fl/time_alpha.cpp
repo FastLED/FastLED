@@ -40,23 +40,6 @@ u16 time_alpha16(u32 now, u32 start, u32 end) {
 TimeRamp::TimeRamp(u32 risingTime, u32 latchMs, u32 fallingTime)
     : mLatchMs(latchMs), mRisingTime(risingTime), mFallingTime(fallingTime) {}
 
-void TimeRamp::trigger(u32 now) {
-    mStart = now;
-    // mLastValue = 0;
-
-    mFinishedRisingTime = mStart + mRisingTime;
-    mFinishedPlateauTime = mFinishedRisingTime + mLatchMs;
-    mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
-}
-
-void TimeRamp::trigger(u32 now, u32 risingTime, u32 latchMs,
-                       u32 fallingTime) {
-    mRisingTime = risingTime;
-    mLatchMs = latchMs;
-    mFallingTime = fallingTime;
-    trigger(now);
-}
-
 bool TimeRamp::isActive(u32 now) const {
 
     bool not_started = (mFinishedRisingTime == 0) &&
@@ -78,6 +61,57 @@ bool TimeRamp::isActive(u32 now) const {
     }
 
     return true;
+}
+
+RampPhase TimeRamp::getCurrentPhase(u32 now) const {
+    if (!isActive(now)) {
+        return RampPhase::Inactive;
+    }
+
+    if (now < mFinishedRisingTime) {
+        return RampPhase::Rising;
+    } else if (now < mFinishedPlateauTime) {
+        return RampPhase::Plateau;
+    } else if (now < mFinishedFallingTime) {
+        return RampPhase::Falling;
+    }
+
+    return RampPhase::Inactive;
+}
+
+void TimeRamp::trigger(u32 now) {
+    RampPhase phase = getCurrentPhase(now);
+
+    switch (phase) {
+        case RampPhase::Inactive:
+            // Not active, start fresh
+            mStart = now;
+            mFinishedRisingTime = mStart + mRisingTime;
+            mFinishedPlateauTime = mFinishedRisingTime + mLatchMs;
+            mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
+            break;
+
+        case RampPhase::Rising:
+            // Continue rising, just extend the plateau end time
+            mFinishedPlateauTime = mFinishedRisingTime + mLatchMs;
+            mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
+            break;
+
+        case RampPhase::Plateau:
+            // Extend the plateau by the full latch time from now
+            mFinishedPlateauTime = now + mLatchMs;
+            mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
+            break;
+
+        case RampPhase::Falling:
+            // Reverse back to plateau
+            // Jump immediately to plateau and hold for latch time
+            mFinishedRisingTime = now;
+            mFinishedPlateauTime = now + mLatchMs;
+            mFinishedFallingTime = mFinishedPlateauTime + mFallingTime;
+            mStart = now - mRisingTime; // Adjust start so timing stays consistent
+            break;
+    }
 }
 
 u8 TimeRamp::update8(u32 now) {

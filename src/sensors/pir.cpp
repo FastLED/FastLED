@@ -48,6 +48,7 @@ Pir::Pir(int pin, uint32_t latchMs, uint32_t risingTime,
 bool Pir::detect(uint32_t now) {
     bool currentState = mPir.detect();
     if (currentState && !mLastState) {
+        // Use smart retrigger to avoid resetting brightness when already active
         mRamp.trigger(now);
     }
     mLastState = currentState;
