@@ -113,14 +113,17 @@ class LCDEsp32S3_Group {
             int num_leds_per_strip = bytes_per_strip / 3;
 
             // Initialize PSRAM if not already done
+            // Skip PSRAM initialization in QEMU environment (not emulated)
+            #ifndef FASTLED_ESP32_IS_QEMU
             static bool gPsramInited = false;
             if (!gPsramInited) {
                 gPsramInited = true;
                 bool psram_ok = psramInit();
                 if (!psram_ok) {
-                    log_e("PSRAM initialization failed, LCD driver may need to use internal RAM.");
+                    log_e("PSRAM initialization failed, LCD driver will use internal RAM.");
                 }
             }
+            #endif
 
             // Initialize the driver
             bool ok = mDriver->begin(config, num_leds_per_strip);

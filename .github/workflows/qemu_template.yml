@@ -102,7 +102,8 @@ jobs:
           echo "Building ${{ inputs.sketch }} for ${{ inputs.platform }}"
 
           # Build the firmware using standard platform board
-          uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} -o qemu-build/firmware.bin
+          # Add FASTLED_ESP32_IS_QEMU define for QEMU builds to reduce memory usage
+          uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} -o qemu-build/firmware.bin --defines FASTLED_ESP32_IS_QEMU
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/

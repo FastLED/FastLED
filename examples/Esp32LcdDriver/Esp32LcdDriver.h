@@ -30,7 +30,12 @@
 
 #include <FastLED.h>
 
+// Reduce LED count in QEMU since it doesn't have PSRAM
+#ifdef FASTLED_ESP32_IS_QEMU
+#define NUM_LEDS 16
+#else
 #define NUM_LEDS 256
+#endif
 
 // GPIO pins for LED strips
 #define PIN1  3
@@ -47,6 +52,8 @@ CRGB leds4[NUM_LEDS];
 void setup() {
     Serial.begin(115200);
     delay(1000);
+
+    Serial.println("Esp32LcdDriver setup starting");
 
     Serial.println("FastLED ESP32 LCD Driver Demo");
     Serial.println("==============================");
