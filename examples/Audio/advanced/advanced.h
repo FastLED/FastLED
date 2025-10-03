@@ -13,6 +13,7 @@
 #include "fl/xymap.h"
 #include "fl/math.h"
 #include "fl/math_macros.h"
+#include "fx/audio/pitch_to_midi.h"
 
 #include "fl/compiler_control.h"
 
@@ -69,6 +70,10 @@ UICheckbox beatDetect("Beat Detection", true);
 UISlider beatSensitivity("Beat Sensitivity", 1.5f, 0.5f, 3.0f, 0.1f);
 UICheckbox beatFlash("Beat Flash", true);
 
+// Pitch detection
+UICheckbox pitchDetectEnable("Pitch Detection", false);
+UICheckbox pitchVisualizer("Show Pitch Visualizer", false);
+
 // Audio input
 UIAudio audio("Audio Input");
 
@@ -96,6 +101,13 @@ uint8_t hue = 0;
 float plasma[WIDTH][HEIGHT] = {{0}};
 uint8_t fireBuffer[WIDTH][HEIGHT] = {{0}};
 #endif
+
+// Pitch detection engine
+PitchToMIDI pitchConfig;
+PitchToMIDIEngine* pitchEngine = nullptr;
+uint8_t currentMIDINote = 0;
+uint8_t currentVelocity = 0;
+bool noteIsOn = false;
 
 // Get current color palette
 CRGBPalette16 getCurrentPalette() {
@@ -445,25 +457,44 @@ void drawPlasmaWave(float peak) {
 void setup() {
     Serial.begin(115200);
     delay(1000);
-    
+
     Serial.println("Audio Reactive Visualizations");
     Serial.println("Initializing...");
     Serial.print("Display size: ");
     Serial.print(WIDTH);
     Serial.print("x");
     Serial.println(HEIGHT);
-    
+
     // Initialize LEDs
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
     FastLED.setBrightness(brightness.as_int());
     FastLED.clear();
     FastLED.show();
-    
+
     // Set up UI callbacks
     brightness.onChanged([](float value) {
         FastLED.setBrightness(value);
     });
-    
+
+    // Initialize pitch detection
+    pitchConfig.sample_rate_hz = SAMPLE_RATE;
+    pitchEngine = new PitchToMIDIEngine(pitchConfig);
+    pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
+        currentMIDINote = note;
+        currentVelocity = velocity;
+        noteIsOn = true;
+        Serial.print("Note ON: ");
+        Serial.print(note);
+        Serial.print(" (vel: ");
+        Serial.print(velocity);
+        Serial.println(")");
+    };
+    pitchEngine->onNoteOff = [](uint8_t note) {
+        noteIsOn = false;
+        Serial.print("Note OFF: ");
+        Serial.println(note);
+    };
+
     Serial.println("Setup complete!");
 }
 
@@ -480,6 +511,17 @@ void loop() {
     // Process only one audio sample per frame to avoid accumulation
     AudioSample sample = audio.next();
     if (sample.isValid()) {
+        // Process pitch detection if enabled
+        if (pitchDetectEnable && pitchEngine) {
+            // Convert int16_t samples to float for pitch detection
+            static float floatBuffer[FFT_SIZE];
+            size_t numSamples = fl::fl_min(sample.pcm().size(), (size_t)FFT_SIZE);
+            for (size_t i = 0; i < numSamples; i++) {
+                floatBuffer[i] = sample.pcm()[i] / 32768.0f;
+            }
+            pitchEngine->processFrame(floatBuffer, numSamples);
+        }
+
         // Update sound meter
         soundMeter.processBlock(sample.pcm());
         
@@ -549,8 +591,44 @@ void loop() {
                 drawPlasmaWave(peakLevel);
                 break;
         }
+
+        // Add pitch visualizer overlay if enabled
+        if (pitchVisualizer && pitchDetectEnable && noteIsOn) {
+            // Display pitch as a horizontal line at a specific height
+            int noteY = HEIGHT - 4;  // Near the top
+
+            // Map MIDI note to X position (common singing range: 40-88)
+            float notePos = fl::map_range<float, float>(currentMIDINote, 40.0f, 88.0f, 0.0f, 1.0f);
+            notePos = fl::clamp(notePos, 0.0f, 1.0f);
+            int noteX = notePos * (WIDTH - 1);
+
+            // Draw pitch indicator - brightness based on velocity
+            uint8_t brightness = fl::map_range<uint8_t, uint8_t>(currentVelocity, 0, 127, 50, 255);
+            CRGB pitchColor = CRGB(255, 0, 255);  // Magenta
+            pitchColor.fadeToBlackBy(255 - brightness);
+
+            // Draw a small cross at the pitch position
+            for (int dx = -2; dx <= 2; dx++) {
+                int x = noteX + dx;
+                if (x >= 0 && x < WIDTH) {
+                    int ledIndex = xyMap(x, noteY);
+                    if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
+                        leds[ledIndex] = pitchColor;
+                    }
+                }
+            }
+            for (int dy = -2; dy <= 2; dy++) {
+                int y = noteY + dy;
+                if (y >= 0 && y < HEIGHT) {
+                    int ledIndex = xyMap(noteX, y);
+                    if (ledIndex >= 0 && ledIndex < NUM_LEDS) {
+                        leds[ledIndex] = pitchColor;
+                    }
+                }
+            }
+        }
     }
-    
+
     FastLED.show();
     
     // Add a small delay to prevent tight loops in WebAssembly

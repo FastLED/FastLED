@@ -37,6 +37,7 @@ all the UI elements you see below.
 #include "fl/unused.h"
 #include "fx/time.h"
 #include "fl/function.h"
+#include "fx/audio/pitch_to_midi.h"
 
 // Sketch.
 #include "fx_audio.h"
@@ -56,6 +57,7 @@ UIDescription description("This is more of a test for new features.");
 UICheckbox enableVolumeVis("Enable volume visualization", false);
 UICheckbox enableRMS("Enable RMS visualization", false);
 UICheckbox enableFFT("Enable FFT visualization", true);
+UICheckbox enablePitchDetect("Enable pitch detection", false);
 UICheckbox freeze("Freeze frame", false);
 UIButton advanceFrame("Advance frame");
 UISlider decayTimeSeconds("Fade time Seconds", .1, 0, 4, .02);
@@ -66,7 +68,7 @@ UIAudio audio("Audio");
 UISlider fadeToBlack("Fade to black by", 5, 0, 20, 1);
 
 // Group related UI elements using UIGroup template multi-argument constructor
-UIGroup visualizationControls("Visualization", enableVolumeVis, enableRMS, enableFFT);
+UIGroup visualizationControls("Visualization", enableVolumeVis, enableRMS, enableFFT, enablePitchDetect);
 UIGroup audioProcessingControls("Audio Processing", decayTimeSeconds, attackTimeSeconds, outputTimeSec);
 UIGroup generalControls("General Controls", freeze, advanceFrame, fadeToBlack);
 
@@ -94,6 +96,12 @@ int y = 0;
 bool triggered = false;
 
 SoundLevelMeter soundLevelMeter(.0, 0.0);
+
+// Pitch detection engine
+PitchToMIDI pitchConfig;
+PitchToMIDIEngine* pitchEngine = nullptr;
+uint8_t currentMIDINote = 0;
+bool noteIsOn = false;
 
 float rms(Slice<const int16_t> data) {
     double sumSq = 0.0;
@@ -127,6 +135,24 @@ void setup() {
         audioFadeTracker.setOutputTime(value);
         FASTLED_WARN("Output time seconds: " << value);
     });
+
+    // Initialize pitch detection
+    pitchConfig.sample_rate_hz = 44100.0f;
+    pitchEngine = new PitchToMIDIEngine(pitchConfig);
+    pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
+        currentMIDINote = note;
+        noteIsOn = true;
+        Serial.print("Note ON: ");
+        Serial.print(note);
+        Serial.print(" vel: ");
+        Serial.println(velocity);
+    };
+    pitchEngine->onNoteOff = [](uint8_t note) {
+        noteIsOn = false;
+        Serial.print("Note OFF: ");
+        Serial.println(note);
+    };
+
     FastLED.addLeds<NEOPIXEL, PIN_DATA>(leds, ledsXY.getTotal())
         .setScreenMap(screenmap);
 }
@@ -175,6 +201,18 @@ void loop() {
         if (!do_frame) {
             continue;
         }
+
+        // Process pitch detection if enabled
+        if (enablePitchDetect && pitchEngine) {
+            // Convert int16_t samples to float for pitch detection
+            static float floatBuffer[512];
+            size_t numSamples = fl::fl_min(sample.pcm().size(), (size_t)512);
+            for (size_t i = 0; i < numSamples; i++) {
+                floatBuffer[i] = sample.pcm()[i] / 32768.0f;
+            }
+            pitchEngine->processFrame(floatBuffer, numSamples);
+        }
+
         float fade = audioFadeTracker(sample.pcm().data(), sample.pcm().size());
         shiftUp();
         // FASTLED_WARN("Audio sample size: " << sample.pcm().size());
@@ -236,6 +274,18 @@ void loop() {
             rms = fl::clamp(rms, 0.0f, 1.0f) * WIDTH;
             framebuffer[frameBufferXY(rms, HEIGHT * 3 / 4)] = CRGB(0, 0, 255);
         }
+
+        // Display pitch detection result
+        if (enablePitchDetect && noteIsOn) {
+            // Map MIDI note to position (common range: 40-88)
+            float notePos = fl::map_range<float, float>(currentMIDINote, 40.0f, 88.0f, 0.0f, 1.0f);
+            notePos = fl::clamp(notePos, 0.0f, 1.0f);
+            uint16_t note_x = notePos * (WIDTH - 1);
+            uint16_t h = HEIGHT / 8;
+            // magenta color for pitch
+            framebuffer[frameBufferXY(note_x, h)] = CRGB(255, 0, 255);
+        }
+
         if (true) {
             uint16_t fade_width = fade * (WIDTH - 1);
             uint16_t h = HEIGHT / 4;
