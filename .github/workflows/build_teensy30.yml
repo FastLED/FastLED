@@ -6,6 +6,15 @@ on:
       - master
     paths:
       - 'src/**'
+      - '!src/platforms/esp/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - '!src/platforms/arm/rp2040/**'
+      - '!src/platforms/arm/sam/**'
+      - 'src/platforms/arm/k20/**'
+      - 'src/platforms/arm/k66/**'
+      - 'src/platforms/arm/kl26/**'
+      - 'src/platforms/arm/mxrt1062/**'
       - 'examples/**'
       - 'ci/**'
       - '.github/workflows/**'
@@ -18,6 +27,15 @@ on:
       - master
     paths:
       - 'src/**'
+      - '!src/platforms/esp/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - '!src/platforms/arm/rp2040/**'
+      - '!src/platforms/arm/sam/**'
+      - 'src/platforms/arm/k20/**'
+      - 'src/platforms/arm/k66/**'
+      - 'src/platforms/arm/kl26/**'
+      - 'src/platforms/arm/mxrt1062/**'
       - 'examples/**'
       - 'ci/**'
       - '.github/workflows/**'

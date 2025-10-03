@@ -6,6 +6,10 @@ on:
       - master
     paths:
       - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
       - 'examples/**'
       - 'ci/**'
       - '.github/workflows/**'
@@ -18,6 +22,10 @@ on:
       - master
     paths:
       - 'src/**'
+      - '!src/platforms/arm/**'
+      - '!src/platforms/wasm/**'
+      - '!src/platforms/avr/**'
+      - 'src/platforms/esp/**'
       - 'examples/**'
       - 'ci/**'
       - '.github/workflows/**'
