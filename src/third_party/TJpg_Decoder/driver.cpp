@@ -7,13 +7,6 @@
 namespace fl {
 namespace third_party {
 
-// Helper to convert RGB565 to RGB888
-static void rgb565ToRgb888(fl::u16 rgb565, fl::u8& r, fl::u8& g, fl::u8& b) {
-    r = (rgb565 >> 11) << 3;
-    g = ((rgb565 >> 5) & 0x3F) << 2;
-    b = (rgb565 & 0x1F) << 3;
-}
-
 TJpgInstanceDecoder::TJpgInstanceDecoder() {
     memset(&embedded_tjpg_, 0, sizeof(embedded_tjpg_));
     memset(&progressive_state_, 0, sizeof(progressive_state_));

@@ -55,9 +55,6 @@ namespace third_party {
         // Bitmap callbacks for libnsgif
         static nsgif_bitmap_cb_vt bitmapCallbacks_;
 
-        // Configuration
-        fl::PixelFormat outputFormat_;
-
         // Internal helper methods
         bool initializeDecoder();
         void cleanupDecoder();
