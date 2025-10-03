@@ -171,9 +171,18 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
     ESP_LOGI(LCD_TAG, "Frame time (estimated): %u us", getFrameTimeUs());
 
     // Allocate double buffers
-    uint32_t alloc_caps = config_.use_psram ?
-        (MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT) :
-        (MALLOC_CAP_DMA | MALLOC_CAP_8BIT);
+    // LCD peripheral requires DMA-capable memory
+    // - Internal DMA RAM: Always works but limited size (~160KB on ESP32-S3)
+    // - PSRAM: Requires EDMA (cache-DMA) support, available on ESP32-S3 with proper config
+    uint32_t alloc_caps;
+    if (config_.use_psram) {
+        // Try PSRAM with DMA capability (EDMA on ESP32-S3)
+        // MALLOC_CAP_SPIRAM alone isn't DMA-capable, need DMA flag too
+        alloc_caps = MALLOC_CAP_SPIRAM | MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    } else {
+        // Internal DMA RAM
+        alloc_caps = MALLOC_CAP_DMA | MALLOC_CAP_8BIT;
+    }
 
     for (int i = 0; i < 2; i++) {
         buffers_[i] = (uint16_t*)heap_caps_aligned_alloc(
@@ -182,8 +191,21 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
             alloc_caps
         );
 
+        // Fallback: If PSRAM+DMA allocation failed, try internal DMA RAM only
+        if (buffers_[i] == nullptr && config_.use_psram) {
+            ESP_LOGW(LCD_TAG, "PSRAM+DMA allocation failed for buffer %d, falling back to internal DMA RAM", i);
+            buffers_[i] = (uint16_t*)heap_caps_aligned_alloc(
+                LCD_DRIVER_PSRAM_DATA_ALIGNMENT,
+                buffer_size_,
+                MALLOC_CAP_DMA | MALLOC_CAP_8BIT
+            );
+        }
+
         if (buffers_[i] == nullptr) {
             ESP_LOGE(LCD_TAG, "Failed to allocate buffer %d (%u bytes)", i, buffer_size_);
+            ESP_LOGE(LCD_TAG, "Free DMA heap: %u bytes, largest block: %u bytes",
+                     heap_caps_get_free_size(MALLOC_CAP_DMA),
+                     heap_caps_get_largest_free_block(MALLOC_CAP_DMA));
             end();
             return false;
         }

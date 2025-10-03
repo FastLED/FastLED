@@ -112,6 +112,16 @@ class LCDEsp32S3_Group {
             mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
             int num_leds_per_strip = bytes_per_strip / 3;
 
+            // Initialize PSRAM if not already done
+            static bool gPsramInited = false;
+            if (!gPsramInited) {
+                gPsramInited = true;
+                bool psram_ok = psramInit();
+                if (!psram_ok) {
+                    log_e("PSRAM initialization failed, LCD driver may need to use internal RAM.");
+                }
+            }
+
             // Initialize the driver
             bool ok = mDriver->begin(config, num_leds_per_strip);
             if (!ok) {
