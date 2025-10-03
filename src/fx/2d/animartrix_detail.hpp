@@ -1971,7 +1971,7 @@ class ANIMartRIX {
         // show_frame();
     }
 
-    void SM1() { // nice one
+    void SpiralMatrix1() { // nice one
 
         get_ready();
 
@@ -2057,7 +2057,7 @@ class ANIMartRIX {
         // show_frame();
     }
 
-    void SM2() {
+    void SpiralMatrix2() {
 
         get_ready();
 
@@ -2119,7 +2119,7 @@ class ANIMartRIX {
         // show_frame();
     }
 
-    void SM3() {
+    void SpiralMatrix3() {
 
         get_ready();
 
@@ -2212,7 +2212,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM4() {
+    void SpiralMatrix4() {
 
         get_ready();
 
@@ -2269,7 +2269,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM5() {
+    void SpiralMatrix5() {
 
         get_ready();
 
@@ -2364,7 +2364,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM6() {
+    void SpiralMatrix6() {
 
         get_ready();
 
@@ -2465,7 +2465,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM8() {
+    void SpiralMatrix8() {
 
         get_ready();
 
@@ -2541,7 +2541,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM9() {
+    void SpiralMatrix9() {
 
         get_ready();
 
@@ -2623,7 +2623,7 @@ class ANIMartRIX {
         }
     }
 
-    void SM10() {
+    void SpiralMatrix10() {
 
         get_ready();
 
