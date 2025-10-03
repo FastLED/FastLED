@@ -256,30 +256,34 @@ public:
 private:
     /// @brief Pack LED data into PARLIO format
     ///
-    /// For each LED position and each of 24 color bits (GRB, MSB-first):
+    /// For each LED position and each of 24 color bits (in specified order, MSB-first):
     /// - Collect the same bit position from all DATA_WIDTH strips
     /// - Pack into single output byte
     ///
-    /// @tparam RGB_ORDER Color order for output
+    /// CRGB data is always stored as RGB in memory (r, g, b fields).
+    /// This function outputs in the specified order (e.g., GRB for WS2812).
+    ///
+    /// @tparam RGB_ORDER Color order for output (GRB for WS2812)
     template<EOrder RGB_ORDER>
     void pack_data() {
         size_t byte_idx = 0;
 
         for (uint16_t led = 0; led < num_leds_; led++) {
-            // Process each color component in WS2812 order (G, R, B)
-            for (uint8_t component = 0; component < 3; component++) {
-                // Get component index based on color order
-                uint8_t comp_idx = get_component_index<RGB_ORDER>(component);
+            // Process each of 3 color bytes in the specified output order
+            for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
+                // Get which CRGB byte to output at this position
+                uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
 
-                // Process 8 bits of this color component (MSB first)
+                // Process 8 bits of this byte (MSB first)
                 for (int8_t bit = 7; bit >= 0; bit--) {
                     uint8_t output_byte = 0;
 
                     // Pack same bit position from all DATA_WIDTH channels
                     for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
                         if (strips_[channel]) {
-                            uint8_t channel_color = get_color_component(strips_[channel][led], comp_idx);
-                            uint8_t bit_val = (channel_color >> bit) & 0x01;
+                            const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
+                            uint8_t channel_byte = channel_data[crgb_offset];
+                            uint8_t bit_val = (channel_byte >> bit) & 0x01;
                             // MSB of output byte corresponds to channel 0
                             output_byte |= (bit_val << (7 - channel));
                         }
@@ -291,41 +295,28 @@ private:
         }
     }
 
-    /// @brief Get component index for WS2812 GRB order
+    /// @brief Map output position to CRGB byte offset
     ///
-    /// @tparam RGB_ORDER Requested color order
-    /// @param component Component position (0=G, 1=R, 2=B for WS2812)
-    /// @return Index into CRGB structure
+    /// CRGB is stored in memory as: struct { uint8_t r, g, b; }
+    /// So byte offsets are: r=0, g=1, b=2
+    ///
+    /// @tparam RGB_ORDER Desired output color order
+    /// @param output_pos Position in output stream (0, 1, or 2)
+    /// @return Byte offset into CRGB structure
     template<EOrder RGB_ORDER>
-    static constexpr uint8_t get_component_index(uint8_t component) {
-        // WS2812 expects GRB order
-        // component 0 = G, 1 = R, 2 = B
-
-        // Map from GRB position to RGB position based on RGB_ORDER
-        // This is a simplified version - full implementation would handle all EOrder values
+    static constexpr uint8_t get_crgb_byte_offset(uint8_t output_pos) {
         if constexpr (RGB_ORDER == GRB) {
-            // G=0, R=1, B=2 -> G=1, R=0, B=2
-            return (component == 0) ? 1 : (component == 1) ? 0 : 2;
+            // Output: G, R, B -> byte offsets: 1, 0, 2
+            return (output_pos == 0) ? 1 : (output_pos == 1) ? 0 : 2;
         } else if constexpr (RGB_ORDER == RGB) {
-            // G=0, R=1, B=2 -> need R, G, B = 0, 1, 2
-            return (component == 0) ? 1 : (component == 1) ? 0 : 2;
+            // Output: R, G, B -> byte offsets: 0, 1, 2
+            return output_pos;
+        } else if constexpr (RGB_ORDER == BGR) {
+            // Output: B, G, R -> byte offsets: 2, 1, 0
+            return (output_pos == 0) ? 2 : (output_pos == 1) ? 1 : 0;
         } else {
-            // Default to GRB
-            return (component == 0) ? 1 : (component == 1) ? 0 : 2;
-        }
-    }
-
-    /// @brief Extract color component from CRGB
-    ///
-    /// @param pixel CRGB pixel data
-    /// @param index Component index (0=R, 1=G, 2=B)
-    /// @return Color component value
-    static uint8_t get_color_component(const CRGB& pixel, uint8_t index) {
-        switch (index) {
-            case 0: return pixel.r;
-            case 1: return pixel.g;
-            case 2: return pixel.b;
-            default: return 0;
+            // Default to RGB
+            return output_pos;
         }
     }
 
@@ -428,19 +419,21 @@ public:
         }
 
         // Extract pixel data from iterator into our buffer
-        uint16_t idx = 0;
-        while (pixels.has(1) && idx < num_leds) {
-            uint8_t r, g, b;
-            pixels.loadAndScaleRGB(&r, &g, &b);
-            pixel_buffer_[idx].r = r;
-            pixel_buffer_[idx].g = g;
-            pixel_buffer_[idx].b = b;
+        // PixelIterator already provides data in RGB_ORDER, so we write bytes directly
+        uint8_t* byte_buffer = reinterpret_cast<uint8_t*>(pixel_buffer_);
+        uint16_t byte_idx = 0;
+        while (pixels.has(1)) {
+            uint8_t b0, b1, b2;
+            pixels.loadAndScaleRGB(&b0, &b1, &b2);
+            byte_buffer[byte_idx++] = b0;
+            byte_buffer[byte_idx++] = b1;
+            byte_buffer[byte_idx++] = b2;
             pixels.advanceData();
             pixels.stepDithering();
-            idx++;
         }
 
-        driver_.show();
+        // Show without reordering - data is already in correct order from PixelIterator
+        driver_.show<RGB>();
         driver_.wait();
 
         return pixels;
