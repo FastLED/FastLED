@@ -113,6 +113,36 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
         return false;
     }
 
+    // Validate GPIO pins
+    for (int i = 0; i < config_.num_lanes; i++) {
+        int pin = config_.gpio_pins[i];
+
+        // Check for invalid USB-JTAG pins
+        if (pin == 19 || pin == 20) {
+            ESP_LOGE(LCD_TAG, "GPIO%d is reserved for USB-JTAG and cannot be used for LED output", pin);
+            return false;
+        }
+
+        // Check for Flash/PSRAM pins
+        if (pin >= 26 && pin <= 32) {
+            ESP_LOGE(LCD_TAG, "GPIO%d is reserved for SPI Flash/PSRAM and cannot be used for LED output", pin);
+            return false;
+        }
+
+        // Warning for strapping pins
+        if (pin == 0 || pin == 3 || pin == 45 || pin == 46) {
+            ESP_LOGW(LCD_TAG, "GPIO%d is a strapping pin - use with caution, may affect boot behavior", pin);
+        }
+
+        #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
+        // Check for Octal Flash/PSRAM pins
+        if (pin >= 33 && pin <= 37) {
+            ESP_LOGE(LCD_TAG, "GPIO%d is reserved for Octal Flash/PSRAM and cannot be used for LED output", pin);
+            return false;
+        }
+        #endif
+    }
+
     // Generate bit templates
     generateTemplates();
 

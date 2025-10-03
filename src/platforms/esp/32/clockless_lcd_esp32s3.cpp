@@ -80,6 +80,29 @@ class LCDEsp32S3_Group {
                                           "Using these pins WILL BREAK USB flashing capability. Please choose a different pin.");
                     return; // Don't continue if assertion doesn't halt
                 }
+
+                // Check for Flash/PSRAM pins (GPIO26-32)
+                if (it->mPin >= 26 && it->mPin <= 32) {
+                    FASTLED_ASSERT(false, "GPIO26-32 are reserved for SPI Flash/PSRAM and CANNOT be used for LED output. "
+                                          "Using these pins WILL BREAK flash/PSRAM functionality. Please choose a different pin.");
+                    return;
+                }
+
+                // Warning for strapping pins (GPIO0, 3, 45, 46)
+                if (it->mPin == 0 || it->mPin == 3 || it->mPin == 45 || it->mPin == 46) {
+                    FL_WARN("GPIO%d is a strapping pin used for boot configuration. "
+                            "Using this pin may affect boot behavior and requires careful external circuit design.", it->mPin);
+                }
+
+                #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
+                // Check for Octal Flash/PSRAM pins (GPIO33-37)
+                if (it->mPin >= 33 && it->mPin <= 37) {
+                    FASTLED_ASSERT(false, "GPIO33-37 are reserved for Octal Flash/PSRAM (SPIIO4-7, SPIDQS) and CANNOT be used for LED output. "
+                                          "Using these pins WILL BREAK Octal flash/PSRAM functionality. Please choose a different pin.");
+                    return;
+                }
+                #endif
+
                 config.gpio_pins[config.num_lanes++] = it->mPin;
             }
 

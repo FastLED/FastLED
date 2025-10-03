@@ -324,6 +324,21 @@ class ClocklessController_LCD_Esp32_WS2812
                   "GPIO19 and GPIO20 are reserved for USB-JTAG on ESP32-S2/S3 and CANNOT be used for LED output. "
                   "Using these pins WILL BREAK USB flashing capability. Please choose a different pin.");
 
+    static_assert(!(DATA_PIN >= 26 && DATA_PIN <= 32),
+                  "GPIO26-32 are reserved for SPI Flash/PSRAM and CANNOT be used for LED output. "
+                  "Using these pins WILL BREAK flash/PSRAM functionality. Please choose a different pin.");
+
+    // Warning for strapping pins (compile-time warning via static_assert with always-true condition)
+    static_assert(!(DATA_PIN == 0 || DATA_PIN == 3 || DATA_PIN == 45 || DATA_PIN == 46) || true,
+                  "WARNING: GPIO0, GPIO3, GPIO45, and GPIO46 are strapping pins used for boot configuration. "
+                  "Using these pins may affect boot behavior and requires careful external circuit design.");
+
+    #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
+    static_assert(!(DATA_PIN >= 33 && DATA_PIN <= 37),
+                  "GPIO33-37 are reserved for Octal Flash/PSRAM (SPIIO4-7, SPIDQS) and CANNOT be used for LED output. "
+                  "Using these pins WILL BREAK Octal flash/PSRAM functionality. Please choose a different pin.");
+    #endif
+
   public:
     ClocklessController_LCD_Esp32_WS2812(): Base(DATA_PIN) {};
     void init() override {}
