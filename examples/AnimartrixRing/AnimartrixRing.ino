@@ -25,7 +25,7 @@ CRGB grid[GRID_WIDTH * GRID_HEIGHT];
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
-ScreenMap screenmap = ScreenMap(NUM_LEDS, 0.5f, [](int index, vec2f& pt_out) {
+fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f& pt_out) {
     float centerX = GRID_WIDTH / 2.0f;
     float centerY = GRID_HEIGHT / 2.0f;
     float radius = min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
@@ -60,7 +60,7 @@ void loop() {
 
     // Sample circle from grid using screenmap
     for (uint8_t i = 0; i < NUM_LEDS; i++) {
-        vec2f pos = screenmap[i];
+        fl::vec2f pos = screenmap[i];
         float x = pos.x;
         float y = pos.y;
 
