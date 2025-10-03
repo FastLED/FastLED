@@ -22,6 +22,10 @@
 #error "This file is only for ESP32-S3"
 #endif
 
+#if defined(CONFIG_IDF_TARGET_ESP32S2)
+#error "LCD driver is not supported on ESP32-S2"
+#endif
+
 #include "sdkconfig.h"
 
 
