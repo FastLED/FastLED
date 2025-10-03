@@ -346,7 +346,7 @@ def main() -> None:
         cpp_test_change = (
             True
             if prev_cpp_test_fingerprint is None
-            else cpp_test_fingerprint_data.hash != prev_cpp_test_fingerprint.hash
+            else not prev_cpp_test_fingerprint.should_skip(cpp_test_fingerprint_data)
         )
         write_cpp_test_fingerprint(cpp_test_fingerprint_data)
 
@@ -382,7 +382,7 @@ def main() -> None:
         examples_change = (
             True
             if prev_examples_fingerprint is None
-            else examples_fingerprint_data.hash != prev_examples_fingerprint.hash
+            else not prev_examples_fingerprint.should_skip(examples_fingerprint_data)
         )
         write_examples_fingerprint(examples_fingerprint_data)
 
@@ -418,7 +418,9 @@ def main() -> None:
         python_test_change = (
             True
             if prev_python_test_fingerprint is None
-            else python_test_fingerprint_data.hash != prev_python_test_fingerprint.hash
+            else not prev_python_test_fingerprint.should_skip(
+                python_test_fingerprint_data
+            )
         )
         write_python_test_fingerprint(python_test_fingerprint_data)
 

@@ -133,6 +133,30 @@ class FingerprintResult:
     elapsed_seconds: Optional[str] = None
     status: Optional[str] = None
 
+    def should_skip(self, current: "FingerprintResult") -> bool:
+        """
+        Determine if we should skip running tests based on fingerprint comparison.
+
+        Args:
+            current: The current fingerprint calculated from the codebase
+
+        Returns:
+            True if we should skip (cache hit), False if we should run tests
+
+        Logic:
+            - Skip if hash matches AND previous status was "success"
+            - Always run if hash differs (code changed)
+            - Always run if previous status was not "success" (previous failure)
+        """
+        if self.hash != current.hash:
+            # Code changed - must run
+            return False
+        if self.status != "success":
+            # Previous run failed - must run again
+            return False
+        # Hash matches and previous run succeeded - safe to skip
+        return True
+
 
 def process_test_flags(args: TestArgs) -> TestArgs:
     """Process and validate test execution flags"""
