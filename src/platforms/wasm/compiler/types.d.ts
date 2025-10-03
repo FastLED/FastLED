@@ -81,7 +81,7 @@ declare class JsonUiManager {
  */
 declare class GraphicsManager {
   constructor(options: { canvasId: string; threeJsModules?: any; usePixelatedRendering?: boolean });
-  initialize(): Promise<void>;
+  initialize(): boolean;
   clearTexture(): void;
   processFrameData(frameData: FrameData): void;
   render(): void;
@@ -93,7 +93,7 @@ declare class GraphicsManager {
  */
 declare class GraphicsManagerThreeJS {
   constructor(options: { canvasId: string; threeJsModules: any });
-  initialize(): Promise<void>;
+  
   [key: string]: any;
 }
 

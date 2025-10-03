@@ -398,6 +398,9 @@ function updateCanvas(frameData) {
       }
     }
 
+    // Expose graphics manager globally for video recorder initialization
+    window.graphicsManager = graphicsManager;
+
     uiCanvasChanged = false;
   }
 
