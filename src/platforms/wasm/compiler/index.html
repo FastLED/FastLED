@@ -33,6 +33,10 @@
                         <div class="menu-dropdown-item" data-value="gfx-bloom">bloom</div>
                     </div>
                 </div>
+                <div class="menu-dropdown-item" data-value="toggle-auto-bloom">
+                    <input type="checkbox" id="auto-bloom-toggle" checked>
+                    <label for="auto-bloom-toggle">Auto Bloom</label>
+                </div>
                 <div class="menu-dropdown-item" data-value="video-settings">Video Settings</div>
             </div>
         </div>
@@ -435,7 +439,12 @@
             showVideoSettingsPopup();
             return;
         }
-        
+
+        if (option === 'toggle-auto-bloom') {
+            // Don't process as regular option - handled by checkbox
+            return;
+        }
+
         // Determine URL parameter based on selection
         let gfxParam = '';
         if (option === 'gfx-simple') {
@@ -443,7 +452,7 @@
         } else if (option === 'gfx-bloom') {
             gfxParam = '1'; // Force ThreeJS renderer with bloom
         }
-        
+
         // Update URL and reload page with new graphics setting
         const url = new URL(window.location);
         if (gfxParam) {
@@ -451,17 +460,17 @@
         } else {
             url.searchParams.delete('gfx');
         }
-        
+
         // Show a brief notification before reloading
         const toast = document.createElement('div');
         toast.className = 'toast-notification';
         toast.textContent = `Switching to ${option.replace('-', ' ')}...`;
         document.body.appendChild(toast);
-        
+
         // Force reflow
         void toast.offsetHeight;
         toast.classList.add('toast-notification-show');
-        
+
         // Reload with new graphics setting after brief delay
         setTimeout(() => {
             window.location.href = url.toString();
@@ -626,6 +635,26 @@
     // Expose functions globally
     window.showVideoSettingsPopup = showVideoSettingsPopup;
     window.getVideoSettings = loadVideoSettings;
+
+    // Auto-bloom toggle handler
+    const autoBloomToggle = document.getElementById('auto-bloom-toggle');
+    if (autoBloomToggle) {
+        autoBloomToggle.addEventListener('change', function(e) {
+            e.stopPropagation(); // Prevent menu from closing
+            if (typeof graphicsManager !== 'undefined' && graphicsManager) {
+                graphicsManager.auto_bloom_enabled = this.checked;
+                console.log('Auto-bloom', this.checked ? 'enabled' : 'disabled');
+            }
+        });
+
+        // Prevent clicking the label from closing the menu
+        const autoBloomLabel = autoBloomToggle.parentElement;
+        if (autoBloomLabel) {
+            autoBloomLabel.addEventListener('click', function(e) {
+                e.stopPropagation();
+            });
+        }
+    }
 
     async function loadThreeJs() {
         console.log('Using ThreeJS modules:', window.threeJsModules);

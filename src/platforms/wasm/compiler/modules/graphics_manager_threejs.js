@@ -105,6 +105,27 @@ export class GraphicsManagerThreeJS {
     /** @type {number} Bloom effect radius in pixels */
     this.bloom_radius = 16;
 
+    /** @type {number} Current brightness level for auto-bloom (0-1) */
+    this.current_brightness = 0;
+
+    /** @type {number} Target brightness level for iris simulation */
+    this.target_brightness = 0;
+
+    /** @type {number} Iris response speed (lower = slower, simulates pupil dilation) */
+    this.iris_response_speed = 0.05;
+
+    /** @type {number} Base bloom strength for auto-adjustment */
+    this.base_bloom_strength = 16;
+
+    /** @type {number} Maximum bloom strength */
+    this.max_bloom_strength = 20;
+
+    /** @type {number} Minimum bloom strength */
+    this.min_bloom_strength = 0.5;
+
+    /** @type {boolean} Enable auto-bloom feature */
+    this.auto_bloom_enabled = true;
+
     // Scene objects
     /** @type {Array} Array of LED mesh objects */
     this.leds = [];
@@ -660,6 +681,11 @@ export class GraphicsManagerThreeJS {
     // Process the frame data
     const positionMap = this._collectLedColorData(frameData);
 
+    // Calculate average brightness for auto-bloom
+    if (this.auto_bloom_enabled) {
+      this._updateAutoBrightness(positionMap);
+    }
+
     // Update LED visuals
     const screenMap = (/** @type {any} */ (frameData)).screenMap;
     if (screenMap) {
@@ -670,6 +696,68 @@ export class GraphicsManagerThreeJS {
 
     // Render the scene
     this.composer.render();
+  }
+
+  /**
+   * Updates auto-brightness tracking and adjusts bloom effect
+   * @private
+   * @param {Map} positionMap - Map of LED positions to color data
+   */
+  _updateAutoBrightness(positionMap) {
+    if (!positionMap || positionMap.size === 0) {
+      return;
+    }
+
+    // Calculate average brightness from all LEDs
+    let totalBrightness = 0;
+    let count = 0;
+
+    for (const [, ledData] of positionMap) {
+      totalBrightness += ledData.brightness;
+      count++;
+    }
+
+    // Set target brightness (0-1 range)
+    this.target_brightness = count > 0 ? totalBrightness / count : 0;
+
+    // Apply iris response delay (smoothly interpolate current to target)
+    const delta = this.target_brightness - this.current_brightness;
+    this.current_brightness += delta * this.iris_response_speed;
+
+    // Calculate bloom strength based on brightness and density
+    // Lower brightness = stronger bloom (like eyes dilating in darkness)
+    // Higher brightness = weaker bloom (like pupils constricting)
+    const densityFactor = count / Math.max(this.leds.length, 1);
+    const invertedBrightness = 1.0 - this.current_brightness;
+
+    // Scale bloom: brighter scenes get less bloom, darker scenes get more
+    const bloomStrength = this.min_bloom_strength
+      + (this.max_bloom_strength - this.min_bloom_strength)
+      * invertedBrightness
+      * densityFactor;
+
+    // Update bloom pass if it exists
+    this._updateBloomStrength(bloomStrength);
+  }
+
+  /**
+   * Updates the bloom pass strength dynamically
+   * @private
+   * @param {number} strength - New bloom strength value
+   */
+  _updateBloomStrength(strength) {
+    if (!this.composer || !this.composer.passes) {
+      return;
+    }
+
+    // Find the bloom pass and update its strength
+    for (const pass of this.composer.passes) {
+      if (pass.constructor.name === 'UnrealBloomPass') {
+        pass.strength = strength;
+        this.bloom_stength = strength;
+        break;
+      }
+    }
   }
 
   /**
