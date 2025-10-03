@@ -13,6 +13,9 @@
 #include "fl/memory.h"
 #include "fl/unique_ptr.h"
 #include "fl/xymap.h"
+#include "fl/vector.h"
+#include "fl/pair.h"
+#include "fl/str.h"
 #include "fx/fx2d.h"
 #include "eorder.h"
 #include "pixel_controller.h"  // For RGB_BYTE_0, RGB_BYTE_1, RGB_BYTE_2
@@ -108,6 +111,16 @@ class Animartrix : public Fx2d {
     void fxNext(int fx = 1) { fxSet(fxGet() + fx); }
     void setColorOrder(EOrder order) { color_order = order; }
     EOrder getColorOrder() const { return color_order; }
+
+    // Get a list of all animation names with their indices
+    static fl::vector<fl::pair<int, fl::string>> getAnimationList() {
+        fl::vector<fl::pair<int, fl::string>> list;
+        for (int i = 0; i < NUM_ANIMATIONS; i++) {
+            AnimartrixAnimInfo info = getAnimartrixInfo(i);
+            list.push_back(fl::make_pair(info.id, fl::string(info.name)));
+        }
+        return list;
+    }
 
   private:
     friend void AnimartrixLoop(Animartrix &self, fl::u32 now);

@@ -5,6 +5,7 @@
 #include <FastLED.h>
 #include "fl/math_macros.h"
 #include "fl/screenmap.h"
+#include "fl/ui.h"
 #include "fx/2d/animartrix.hpp"
 
 #ifndef TWO_PI
@@ -37,6 +38,22 @@ fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f&
     pt_out.y = centerY + sin(angle) * radius;
 });
 
+// Helper function to get animation names for dropdown
+fl::vector<fl::string> getAnimationNames() {
+    fl::vector<fl::pair<int, fl::string>> animList = fl::Animartrix::getAnimationList();
+    fl::vector<fl::string> names;
+    for (const auto& item : animList) {
+        names.push_back(item.second);
+    }
+    return names;
+}
+
+// Store animation names in a static variable so they persist
+static fl::vector<fl::string> animationNames = getAnimationNames();
+
+// UI Dropdown for selecting Animartrix animations
+fl::UIDropdown animationSelector("Animation", animationNames);
+
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
@@ -53,12 +70,12 @@ void setup() {
 }
 
 void loop() {
-    static uint32_t modeChangeTime = 0;
-    static uint32_t frame = 0;
+    static int lastSelectedIndex = -1;
 
-    // Auto-cycle through Animartrix animations every 10 seconds
-    if (millis() - modeChangeTime > 10000) {
-        currentAnimationIndex = (currentAnimationIndex + 1) % fl::getAnimartrixCount();
+    // Check if the dropdown selection has changed
+    int selectedIndex = animationSelector.as_int();
+    if (selectedIndex != lastSelectedIndex) {
+        currentAnimationIndex = selectedIndex;
         animartrix.fxSet(currentAnimationIndex);
 
         // Print the current animation name
@@ -66,7 +83,7 @@ void loop() {
         Serial.print("Switching to: ");
         Serial.println(info.name);
 
-        modeChangeTime = millis();
+        lastSelectedIndex = selectedIndex;
     }
 
     // Generate Animartrix pattern on rectangular grid using the library
@@ -101,5 +118,4 @@ void loop() {
     }
 
     FastLED.show();
-    frame++;
 }
