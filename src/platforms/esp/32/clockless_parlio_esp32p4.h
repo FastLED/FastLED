@@ -364,10 +364,12 @@ private:
     ParlioLedDriver<DATA_WIDTH, CHIPSET> driver_;
     ParlioDriverConfig config_;
     bool initialized_;
+    CRGB* pixel_buffer_;  // Internal buffer for pixel data when using PixelIterator
+    uint16_t num_leds_;
 
 public:
     ParlioController(int clk_gpio, const int data_gpios[DATA_WIDTH])
-        : initialized_(false)
+        : initialized_(false), pixel_buffer_(nullptr), num_leds_(0)
     {
         config_.clk_gpio = clk_gpio;
         config_.num_lanes = DATA_WIDTH;
@@ -375,6 +377,12 @@ public:
 
         for (int i = 0; i < DATA_WIDTH; i++) {
             config_.data_gpios[i] = data_gpios[i];
+        }
+    }
+
+    ~ParlioController() {
+        if (pixel_buffer_) {
+            heap_caps_free(pixel_buffer_);
         }
     }
 
@@ -392,16 +400,44 @@ public:
 
     /// @brief Show pixels - main rendering function
     PixelIterator showPixels(PixelIterator pixels) override {
-        if (!initialized_) {
-            // Initialize on first call with LED count
-            uint16_t num_leds = pixels.size();
+        uint16_t num_leds = pixels.size();
+
+        if (!initialized_ || num_leds_ != num_leds) {
+            // Allocate or reallocate pixel buffer if needed
+            if (pixel_buffer_ && num_leds_ != num_leds) {
+                heap_caps_free(pixel_buffer_);
+                pixel_buffer_ = nullptr;
+            }
+
+            if (!pixel_buffer_) {
+                pixel_buffer_ = (CRGB*)heap_caps_malloc(num_leds * sizeof(CRGB), MALLOC_CAP_DEFAULT);
+                if (!pixel_buffer_) {
+                    return pixels;  // Allocation failed
+                }
+                num_leds_ = num_leds;
+            }
+
+            // Initialize driver
             if (!driver_.begin(config_, num_leds)) {
                 return pixels;  // Initialization failed
             }
 
-            // Set strip pointers (only channel 0 for now)
-            driver_.set_strip(0, pixels.as_array());
+            // Set strip pointer to our internal buffer (only channel 0 for now)
+            driver_.set_strip(0, pixel_buffer_);
             initialized_ = true;
+        }
+
+        // Extract pixel data from iterator into our buffer
+        uint16_t idx = 0;
+        while (pixels.has(1) && idx < num_leds) {
+            uint8_t r, g, b;
+            pixels.loadAndScaleRGB(&r, &g, &b);
+            pixel_buffer_[idx].r = r;
+            pixel_buffer_[idx].g = g;
+            pixel_buffer_[idx].b = b;
+            pixels.advanceData();
+            pixels.stepDithering();
+            idx++;
         }
 
         driver_.show();
