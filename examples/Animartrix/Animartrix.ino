@@ -92,8 +92,20 @@ UITitle title("Animartrix");
 UIDescription description("Demo of the Animatrix effects. @author of fx is StefanPetrick");
 
 UISlider brightness("Brightness", BRIGHTNESS, 0, 255);
-UINumberField fxIndex("Animartrix - index", 0, 0, NUM_ANIMATIONS - 1);
-UINumberField colorOrder("Color Order", 0, 0, 5);
+UIDropdown fxIndex("Animartrix - index", {
+    "RGB_BLOBS5", "RGB_BLOBS4", "RGB_BLOBS3", "RGB_BLOBS2", "RGB_BLOBS",
+    "POLAR_WAVES", "SLOW_FADE", "ZOOM2", "ZOOM", "HOT_BLOB",
+    "SPIRALUS2", "SPIRALUS", "YVES", "SCALEDEMO1", "LAVA1",
+    "CALEIDO3", "CALEIDO2", "CALEIDO1", "DISTANCE_EXPERIMENT", "CENTER_FIELD",
+    "WAVES", "CHASING_SPIRALS", "ROTATING_BLOB", "RINGS", "COMPLEX_KALEIDO",
+    "COMPLEX_KALEIDO_2", "COMPLEX_KALEIDO_3", "COMPLEX_KALEIDO_4", "COMPLEX_KALEIDO_5", "COMPLEX_KALEIDO_6",
+    "WATER", "PARAMETRIC_WATER", "MODULE_EXPERIMENT1", "MODULE_EXPERIMENT2", "MODULE_EXPERIMENT3",
+    "MODULE_EXPERIMENT4", "MODULE_EXPERIMENT5", "MODULE_EXPERIMENT6", "MODULE_EXPERIMENT7", "MODULE_EXPERIMENT8",
+    "MODULE_EXPERIMENT9", "MODULE_EXPERIMENT10", "MODULE_EXPERIMENT_SM1", "MODULE_EXPERIMENT_SM2", "MODULE_EXPERIMENT_SM3",
+    "MODULE_EXPERIMENT_SM4", "MODULE_EXPERIMENT_SM5", "MODULE_EXPERIMENT_SM6", "MODULE_EXPERIMENT_SM8", "MODULE_EXPERIMENT_SM9",
+    "MODULE_EXPERIMENT_SM10", "FLUFFY_BLOBS"
+});
+UIDropdown colorOrder("Color Order", {"RGB", "RBG", "GRB", "GBR", "BRG", "BGR"});
 UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 
@@ -123,7 +135,8 @@ void setup() {
     setup_max_power();
     fxEngine.addFx(animartrix);
 
-    colorOrder.onChanged([](int value) {
+    colorOrder.onChanged([](UIDropdown &dropdown) {
+        int value = dropdown.as_int();
         switch(value) {
             case 0: value = RGB; break;
             case 1: value = RBG; break;
@@ -142,9 +155,9 @@ void loop() {
     FastLED.setBrightness(brightness);
     fxEngine.setSpeed(timeSpeed);
     static int lastFxIndex = -1;
-    if (fxIndex.value() != lastFxIndex) {
-        lastFxIndex = fxIndex;
-        animartrix.fxSet(fxIndex);
+    if (fxIndex.as_int() != lastFxIndex) {
+        lastFxIndex = fxIndex.as_int();
+        animartrix.fxSet(fxIndex.as_int());
     }
     fxEngine.draw(millis(), leds);
     uint32_t end = millis();
