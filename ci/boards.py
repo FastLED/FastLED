@@ -308,7 +308,7 @@ class Board:
             lines.append("board_upload.flash_mode = dio")
 
         if self.board_partitions:
-            lines.append(f"board_partitions = {self.board_partitions}")
+            lines.append(f"board_build.partitions = {self.board_partitions}")
 
         # Build-time flags and unflags ---------------------------------------
         build_flags_elements: list[str] = []
