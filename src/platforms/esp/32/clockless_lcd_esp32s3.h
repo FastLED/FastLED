@@ -87,7 +87,7 @@ public:
 
     /// @brief Calculate timing using shared ClocklessTiming module
     static constexpr ClocklessTimingResult calculate_timing() {
-        if (LCD_PCLK_HZ_OVERRIDE > 0) {
+        if constexpr (LCD_PCLK_HZ_OVERRIDE > 0) {
             // If override is set, still use ClocklessTiming for validation
             // but we'll use the override frequency
             auto result = ClocklessTiming::calculate_optimal_pclk(
