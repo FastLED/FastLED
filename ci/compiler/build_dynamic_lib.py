@@ -65,7 +65,7 @@ def build_fastled_dynamic_library(build_dir: Path) -> Path:
     # Load build flags from TOML
     build_flags_path = Path(PROJECT_ROOT) / "ci" / "build_unit.toml"
     build_flags = BuildFlags.parse(
-        build_flags_path, quick_build=False, strict_mode=False
+        build_flags_path, quick_build=False, strict_mode=True
     )
 
     compiler = Compiler(settings, build_flags)

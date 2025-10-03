@@ -341,7 +341,9 @@ def check_pch_status(build_dir: Path) -> Dict[str, Union[bool, Path, int, str]]:
     return {"exists": False, "path": None, "size": 0, "size_formatted": "0B"}  # type: ignore
 
 
-def create_fastled_compiler(use_pch: bool, parallel: bool) -> Compiler:
+def create_fastled_compiler(
+    use_pch: bool, parallel: bool, strict_mode: bool = False
+) -> Compiler:
     """Create compiler with standard FastLED settings for simple build system."""
     import os
     import tempfile
@@ -422,7 +424,7 @@ def create_fastled_compiler(use_pch: bool, parallel: bool) -> Compiler:
     current_dir_path = Path(current_dir)
     build_flags_path = current_dir_path / "ci" / "build_example.toml"
     build_flags = BuildFlags.parse(
-        build_flags_path, quick_build=False, strict_mode=False
+        build_flags_path, quick_build=False, strict_mode=strict_mode
     )
 
     return Compiler(settings, build_flags)

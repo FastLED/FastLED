@@ -31,6 +31,7 @@ compiler_flags = [
     "-Wno-backslash-newline-escape",  # Suppress backslash newline escape warnings
     "-fno-exceptions",
     "-fno-rtti",
+    "-Werror=unused-variable",  # Treat unused variables as errors
 ]
 
 defines = [

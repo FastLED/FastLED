@@ -379,6 +379,7 @@ def create_unit_test_fastled_library(
         library_compiler = create_fastled_compiler(
             use_pch=use_pch,
             parallel=True,
+            strict_mode=True,
         )
 
         # CRITICAL: Add required defines for unit test library compilation
@@ -477,9 +478,7 @@ def create_unit_test_compiler(
 
     # Load build flags configuration
     build_flags_path = current_dir / "ci" / "build_unit.toml"
-    build_flags = BuildFlags.parse(
-        build_flags_path, quick_build=True, strict_mode=False
-    )
+    build_flags = BuildFlags.parse(build_flags_path, quick_build=True, strict_mode=True)
 
     # Unit test specific defines
     unit_test_defines = [
