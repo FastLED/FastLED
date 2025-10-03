@@ -74,4 +74,4 @@ void loop() {
     FastLED.show();
 }
 
-#endif  // __AVR__
+#endif  // SKETCH_HAS_LOTS_OF_MEMORY
