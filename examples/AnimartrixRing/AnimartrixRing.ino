@@ -7,6 +7,7 @@
 #include "fl/screenmap.h"
 #include "fl/ui.h"
 #include "fx/2d/animartrix.hpp"
+#include "fx/fx_engine.h"
 
 #ifndef TWO_PI
 #define TWO_PI 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
@@ -26,6 +27,7 @@ CRGB grid[GRID_WIDTH * GRID_HEIGHT];
 // Animartrix parameters
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
 fl::Animartrix animartrix(xymap, fl::RGB_BLOBS5);
+fl::FxEngine fxEngine(GRID_WIDTH * GRID_HEIGHT);
 int currentAnimationIndex = 0;
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
@@ -51,13 +53,15 @@ fl::vector<fl::string> getAnimationNames() {
 // Store animation names in a static variable so they persist
 static fl::vector<fl::string> animationNames = getAnimationNames();
 
-// UI Dropdown for selecting Animartrix animations
+// UI controls
 fl::UIDropdown animationSelector("Animation", animationNames);
+fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 
 void setup() {
     Serial.begin(115200);
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
     FastLED.setBrightness(BRIGHTNESS);
+    fxEngine.addFx(animartrix);
 
     // Print available Animartrix animations
     Serial.println("Available Animartrix animations:");
@@ -87,8 +91,8 @@ void loop() {
     }
 
     // Generate Animartrix pattern on rectangular grid using the library
-    fl::_DrawContext ctx(millis(), grid);
-    animartrix.draw(ctx);
+    fxEngine.setSpeed(timeSpeed);
+    fxEngine.draw(millis(), grid);
 
     // Sample circle from grid using screenmap
     for (uint8_t i = 0; i < NUM_LEDS; i++) {
