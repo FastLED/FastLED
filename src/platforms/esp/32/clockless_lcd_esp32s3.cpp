@@ -88,10 +88,18 @@ class LCDEsp32S3_Group {
                     return;
                 }
 
-                // Warning for strapping pins (GPIO0, 3, 45, 46)
+                // Error for strapping pins (GPIO0, 3, 45, 46) - can be suppressed with FASTLED_ESP32_ALLOW_STRAPPING_PINS
                 if (it->mPin == 0 || it->mPin == 3 || it->mPin == 45 || it->mPin == 46) {
+                    #ifndef FASTLED_ESP32_ALLOW_STRAPPING_PINS
+                    FASTLED_ASSERT(false, "GPIO" << int(it->mPin) << " is a strapping pin used for boot configuration. "
+                                          "Using this pin may affect boot behavior and requires careful external circuit design. "
+                                          "Define FASTLED_ESP32_ALLOW_STRAPPING_PINS to suppress this error if you know what you're doing.");
+                    return;
+                    #else
                     FL_WARN("GPIO" << int(it->mPin) << " is a strapping pin used for boot configuration. "
-                            "Using this pin may affect boot behavior and requires careful external circuit design.");
+                            "Using this pin may affect boot behavior and requires careful external circuit design. "
+                            "(Warning shown because FASTLED_ESP32_ALLOW_STRAPPING_PINS is defined)");
+                    #endif
                 }
 
                 #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
