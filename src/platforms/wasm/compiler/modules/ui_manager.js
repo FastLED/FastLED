@@ -1954,6 +1954,9 @@ export class JsonUiManager {
           currentValues[elementId] = element.selectedIndex;
         } else if (element.type === 'submit') {
           currentValues[elementId] = element.getAttribute('data-pressed') === 'true';
+        } else if (element.type === 'file') {
+          // Skip file inputs - cannot preserve/restore file values for security reasons
+          continue;
         } else {
           currentValues[elementId] = element.value;
         }
@@ -1978,6 +1981,9 @@ export class JsonUiManager {
           } else {
             element.classList.remove('active');
           }
+        } else if (element.type === 'file') {
+          // Skip file inputs - cannot restore file values for security reasons
+          continue;
         } else {
           element.value = value;
         }
