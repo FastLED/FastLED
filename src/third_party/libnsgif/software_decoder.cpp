@@ -24,8 +24,8 @@ SoftwareGifDecoder::SoftwareGifDecoder(fl::PixelFormat format)
     , hasError_(false)
     , dataComplete_(false)
     , currentFrameIndex_(0)
-    , endOfStream_(false)
-    , outputFormat_(format) {
+    , endOfStream_(false) {
+    (void)format; // Unused - libnsgif always outputs RGBA8888
 }
 
 SoftwareGifDecoder::~SoftwareGifDecoder() {
