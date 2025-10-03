@@ -4,6 +4,7 @@
 
 #include <FastLED.h>
 #include "fl/math_macros.h"
+#include "fl/screenmap.h"
 
 #ifndef TWO_PI
 #define TWO_PI 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
@@ -22,6 +23,16 @@ CRGB grid[GRID_WIDTH * GRID_HEIGHT];
 
 // Animartrix parameters
 XYMap xymap = XYMap::constructRectangularGrid(GRID_WIDTH, GRID_HEIGHT);
+
+// ScreenMap for the ring - defines circular sampling positions using a lambda
+ScreenMap screenmap = ScreenMap(NUM_LEDS, 0.5f, [](int index, vec2f& pt_out) {
+    float centerX = GRID_WIDTH / 2.0f;
+    float centerY = GRID_HEIGHT / 2.0f;
+    float radius = min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
+    float angle = (TWO_PI * index) / NUM_LEDS;
+    pt_out.x = centerX + cos(angle) * radius;
+    pt_out.y = centerY + sin(angle) * radius;
+});
 
 void setup() {
     FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS);
@@ -47,18 +58,11 @@ void loop() {
         }
     }
 
-    // Sample circle from grid and map to ring
-    float centerX = GRID_WIDTH / 2.0f;
-    float centerY = GRID_HEIGHT / 2.0f;
-    float radius = min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
-
+    // Sample circle from grid using screenmap
     for (uint8_t i = 0; i < NUM_LEDS; i++) {
-        // Calculate angle for this LED position
-        float angle = (TWO_PI * i) / NUM_LEDS;
-
-        // Sample position on the grid
-        float x = centerX + cos(angle) * radius;
-        float y = centerY + sin(angle) * radius;
+        vec2f pos = screenmap[i];
+        float x = pos.x;
+        float y = pos.y;
 
         // Bilinear interpolation for smooth sampling
         int x0 = (int)x;
