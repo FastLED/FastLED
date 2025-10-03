@@ -1,5 +1,16 @@
 FastLED 3.10.4
 ==============
+  * **NEW: Fx2dTo1d - Sample 2D Effects into 1D LED Strips**: Reusable component for sampling any Fx2d effect into a 1D strip
+    * Generic adapter class that wraps any Fx2d effect and samples it using a ScreenMap
+    * Supports two interpolation modes:
+      * NEAREST: Fast nearest-neighbor sampling for pixelated look
+      * BILINEAR: Smooth bilinear interpolation (default)
+    * Perfect for creating circular, spiral, or arbitrary sampling patterns from rectangular grids
+    * Automatic memory management with internal 2D rendering buffer
+    * Runtime flexibility: swap effects, screen maps, or interpolation modes on the fly
+    * Example use case: Sample a circular ring from Animartrix rectangular grid (see examples/AnimartrixRing/)
+    * Works naturally with FxEngine and all existing Fx infrastructure
+    * New files: [src/fx/fx2d_to_1d.h](src/fx/fx2d_to_1d.h), [src/fx/fx2d_to_1d.cpp](src/fx/fx2d_to_1d.cpp)
   * **NEW: ESP32-S2/S3 LCD Driver**: Memory-efficient parallel LED driver using LCD_CAM peripheral
     * High-performance alternative to I2S driver for ESP32-S2 and ESP32-S3
     * Up to 16 parallel WS28xx LED strips with automatic chipset timing optimization
