@@ -46,8 +46,8 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
   const width = screenMap.absMax[0] - screenMap.absMin[0];
   const height = screenMap.absMax[1] - screenMap.absMin[1];
 
-  // Validate screenmap bounds
-  if (Number.isNaN(width) || Number.isNaN(height) || width === 0 || height === 0) {
+  // Validate screenmap bounds - allow width=0 for Nx1 or height=0 for 1xN strips
+  if (Number.isNaN(width) || Number.isNaN(height) || (width === 0 && height === 0)) {
     console.error('Invalid screenmap bounds detected:');
     console.error(`  absMin: [${screenMap.absMin[0]}, ${screenMap.absMin[1]}]`);
     console.error(`  absMax: [${screenMap.absMax[0]}, ${screenMap.absMax[1]}]`);
@@ -62,13 +62,17 @@ function makePositionCalculators(frameData, screenWidth, screenHeight) {
      * @param {number} x - Screen X coordinate
      * @returns {number} 3D X position centered around origin
      */
-    calcXPosition: (x) => (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2),
+    calcXPosition: (x) => {
+      if (width === 0) return 0; // Handle Nx1 case
+      return (((x - screenMap.absMin[0]) / width) * screenWidth) - (screenWidth / 2);
+    },
     /**
      * Calculates Y position in 3D space from screen coordinates
      * @param {number} y - Screen Y coordinate
      * @returns {number} 3D Y position centered around origin
      */
     calcYPosition: (y) => {
+      if (height === 0) return 0; // Handle 1xN case
       const negY = (((y - screenMap.absMin[1]) / height) * screenHeight) - (screenHeight / 2);
       return negY; // Remove negative sign to fix Y-axis orientation
     },

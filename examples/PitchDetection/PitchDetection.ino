@@ -257,8 +257,9 @@ void setup() {
     Serial.println("Pitch Detection Visualizer");
     Serial.println("===========================");
 
-    // Initialize LEDs
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS);
+    // Initialize LEDs with screenmap for visualization
+    XYMap xyMap = XYMap::constructRectangularGrid(NUM_LEDS, 1);
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setScreenMap(xyMap);
     FastLED.setBrightness(brightness.as_int());
     FastLED.clear();
     FastLED.show();
