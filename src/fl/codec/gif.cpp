@@ -72,12 +72,6 @@ GifInfo Gif::parseGifInfo(fl::span<const fl::u8> data, fl::string* error_message
         return info;
     }
 
-    // Parse packed byte at offset 10
-    fl::u8 packed = data[10];
-    fl::u8 globalColorTableFlag = (packed & 0x80) >> 7;
-    fl::u8 colorResolution = ((packed & 0x70) >> 4) + 1;
-    fl::u8 globalColorTableSize = 2 << (packed & 0x07);
-
     // For a more complete parsing, we would need to create a temporary decoder
     // and let libnsgif parse the structure. Let's use the existing decoder briefly.
     auto decoder = fl::make_shared<fl::third_party::SoftwareGifDecoder>(PixelFormat::RGB888);

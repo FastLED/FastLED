@@ -279,9 +279,7 @@ fl::shared_ptr<fl::Frame> SoftwareGifDecoder::convertBitmapToFrame(nsgif_bitmap_
         return nullptr;
     }
 
-    // Debug: Check if we're getting RGBA8888 data as expected from libnsgif
     fl::u8* rawData = gifBitmap->pixels.get();
-    fl::size expectedSize = static_cast<fl::size>(gifBitmap->width) * gifBitmap->height * gifBitmap->bytesPerPixel;
 
     // Since libnsgif outputs RGBA8888, we need to handle the conversion properly
     // The Frame constructor expects the format we specify (outputFormat_)
