@@ -73,6 +73,9 @@ fl::UIDropdown animationSelector("Animation", animationNames);
 fl::UISlider timeSpeed("Time Speed", 1, -10, 10, .1);
 fl::UISlider brightness("Brightness", BRIGHTNESS, 0, 255, 1);
 fl::UICheckbox autoBrightness("Auto Brightness", true);
+fl::UISlider autoBrightnessMax("Auto Brightness Max", 84, 0, 255, 1);
+fl::UISlider autoBrightnessLowThreshold("Auto Brightness Low Threshold", 8, 0, 100, 1);
+fl::UISlider autoBrightnessHighThreshold("Auto Brightness High Threshold", 22, 0, 100, 1);
 
 // Calculate average brightness percentage from LED array
 float getAverageBrightness(CRGB* leds, int numLeds) {
@@ -85,20 +88,21 @@ float getAverageBrightness(CRGB* leds, int numLeds) {
 }
 
 // Apply compression curve: input brightness % -> output brightness multiplier
-uint8_t applyBrightnessCompression(float inputBrightnessPercent) {
-    if (inputBrightnessPercent < 8.0f) {
-        // Below 8%: full brightness (100%)
+uint8_t applyBrightnessCompression(float inputBrightnessPercent, uint8_t maxBrightness, float lowThreshold, float highThreshold) {
+    float maxBrightnessPercent = (maxBrightness / 255.0f) * 100.0f;
+    if (inputBrightnessPercent < lowThreshold) {
+        // Below lowThreshold: full brightness (100%)
         return 255;
-    } else if (inputBrightnessPercent < 22.0f) {
-        // 8-22%: linear dampening from 100% down to 33%
-        // map 8->22% input to 100%->33% output
-        float range = 22.0f - 8.0f; // 14%
-        float position = (inputBrightnessPercent - 8.0f) / range; // 0.0 to 1.0
-        float outputPercent = 100.0f - (position * 67.0f); // 100% -> 33%
+    } else if (inputBrightnessPercent < highThreshold) {
+        // lowThreshold-highThreshold: linear dampening from 100% down to maxBrightnessPercent
+        // map lowThreshold->highThreshold input to 100%->maxBrightnessPercent output
+        float range = highThreshold - lowThreshold;
+        float position = (inputBrightnessPercent - lowThreshold) / range; // 0.0 to 1.0
+        float outputPercent = 100.0f - (position * (100.0f - maxBrightnessPercent));
         return uint8_t((outputPercent / 100.0f) * 255.0f);
     } else {
-        // Above 22%: cap at 33% brightness
-        return uint8_t(0.33f * 255.0f); // ~84
+        // Above highThreshold: cap at maxBrightness
+        return maxBrightness;
     }
 }
 
@@ -144,7 +148,12 @@ void loop() {
     if (autoBrightness.value()) {
         // Apply automatic brightness compression based on average pixel brightness
         float avgBrightnessPercent = getAverageBrightness(leds, NUM_LEDS);
-        uint8_t compressedBrightness = applyBrightnessCompression(avgBrightnessPercent);
+        uint8_t compressedBrightness = applyBrightnessCompression(
+            avgBrightnessPercent,
+            autoBrightnessMax.as_int(),
+            autoBrightnessLowThreshold.value(),
+            autoBrightnessHighThreshold.value()
+        );
         // Combine manual brightness control with automatic compression
         finalBrightness = (brightness.as_int() * compressedBrightness) / 255;
     } else {
