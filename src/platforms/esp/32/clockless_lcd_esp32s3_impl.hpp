@@ -177,7 +177,7 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
     esp_lcd_i80_bus_config_t bus_config = {};
     bus_config.clk_src = LCD_CLK_SRC_PLL160M;
     bus_config.dc_gpio_num = -1;  // Not used
-    bus_config.wr_gpio_num = config_.gpio_pins[0];  // Use first pin as WR signal
+    bus_config.wr_gpio_num = -1;  // Not used - WS2812 doesn't need external WR signal
     bus_config.bus_width = 16;
     bus_config.max_transfer_bytes = buffer_size_;
 
