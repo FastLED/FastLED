@@ -8,15 +8,13 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
+#include "fl/sketch_macros.h"
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+#include "platforms/sketch_fake.hpp"
+#else
+
 #include <FastLED.h>
 using namespace fl;
-
-#if  defined(__AVR__)
-// __AVR__:  Not enough memory enough for the FxEngine, so skipping this example
-void setup() {}
-void loop() {}
-
-#else
 
 #include "fx/2d/noisepalette.h"
 #include "fx/2d/animartrix.hpp"
