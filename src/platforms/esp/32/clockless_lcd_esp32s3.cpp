@@ -90,8 +90,8 @@ class LCDEsp32S3_Group {
 
                 // Warning for strapping pins (GPIO0, 3, 45, 46)
                 if (it->mPin == 0 || it->mPin == 3 || it->mPin == 45 || it->mPin == 46) {
-                    FL_WARN("GPIO%d is a strapping pin used for boot configuration. "
-                            "Using this pin may affect boot behavior and requires careful external circuit design.", it->mPin);
+                    FL_WARN("GPIO" << int(it->mPin) << " is a strapping pin used for boot configuration. "
+                            "Using this pin may affect boot behavior and requires careful external circuit design.");
                 }
 
                 #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
