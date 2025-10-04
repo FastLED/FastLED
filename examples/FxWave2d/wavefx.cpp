@@ -176,14 +176,14 @@ void applyFancyEffect(uint32_t now, bool button_active) {
     // Higher fancySpeed value = shorter duration (faster animation)
     uint32_t total =
         map(fancySpeed.as<uint32_t>(), 0, fancySpeed.getMax(), 1000, 100);
-    
+
     // Create a static TimeRamp to manage the animation timing
     // TimeRamp handles the transition from start to end over time
-    static TimeRamp pointTransition = TimeRamp(total, 0, 0);
+    static TimeRamp pointTransition = TimeRamp(0, total, 0);
 
     // If the button is active, start/restart the animation
     if (button_active) {
-        pointTransition.trigger(now, total, 0, 0);
+        pointTransition.trigger(now);
     }
 
     // If the animation isn't currently active, exit early
