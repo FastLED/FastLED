@@ -49,7 +49,7 @@ namespace fl {
 struct SoundToMIDI {
   // Audio Parameters
   float sample_rate_hz = 16000.0f;  ///< Input audio sample rate in Hz (typical: 16000-48000)
-  int   frame_size     = 512;       ///< Analysis window size in samples (FastLED default: 512, use 2048+ for 44.1kHz+)
+  int   frame_size     = 512;       ///< Analysis window size in samples (512 for 16kHz, 1024+ for 44.1kHz+)
   int   hop_size       = 256;       ///< Step size between frames in samples (typically frame_size/2)
 
   // Pitch Detection Range
