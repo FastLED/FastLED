@@ -51,6 +51,7 @@ UISlider confidenceThreshold("Confidence Threshold", 0.82f, 0.5f, 0.95f, 0.01f);
 // Visual controls
 UISlider brightness("Brightness", 128, 0, 255, 1);
 UISlider fadeSpeed("Fade Speed", 20, 5, 100, 5);
+UIButton testWhite("Test All White");
 
 // Global variables
 CRGB leds[NUM_LEDS];
@@ -160,6 +161,18 @@ void setup() {
             cfg.confidence_threshold = value;
             pitchEngine->setConfig(cfg);
         }
+    });
+
+    testWhite.onPressed([]() {
+        for (int i = 0; i < NUM_LEDS; i++) {
+            leds[i] = CRGB(255, 255, 255);
+        }
+        FastLED.show();
+        Serial.println("Button pressed - All LEDs set to white (255, 255, 255)");
+    });
+
+    testWhite.onReleased([]() {
+        Serial.println("Button released");
     });
 
     // Initialize pitch detection

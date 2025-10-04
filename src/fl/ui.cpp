@@ -35,15 +35,29 @@ void UISlider::Listener::onBeginFrame() {
 
 void UIButton::Listener::onBeginFrame() {
     bool clicked_this_frame = mOwner->clicked();
-    
+    bool pressed_this_frame = mOwner->isPressed();
+
     // Check the real button if one is attached
     if (mOwner->mRealButton) {
         if (mOwner->mRealButton->isPressed()) {
             clicked_this_frame = true;
+            pressed_this_frame = true;
             //mOwner->click(); // Update the UI button state
         }
     }
-    
+
+    // Detect press event (was not pressed, now is pressed)
+    if (pressed_this_frame && !mPressedLastFrame) {
+        mOwner->mPressCallbacks.invoke();
+    }
+
+    // Detect release event (was pressed, now is not pressed)
+    if (!pressed_this_frame && mPressedLastFrame) {
+        mOwner->mReleaseCallbacks.invoke();
+    }
+
+    mPressedLastFrame = pressed_this_frame;
+
     const bool clicked_changed = (clicked_this_frame != mClickedLastFrame);
     mClickedLastFrame = clicked_this_frame;
     if (clicked_changed) {

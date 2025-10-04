@@ -187,6 +187,18 @@ class UIButton : public UIElement {
         return id;
     }
 
+    int onPressed(function<void()> callback) {
+        int id = mPressCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+        return id;
+    }
+
+    int onReleased(function<void()> callback) {
+        int id = mReleaseCallbacks.add(callback);
+        mListener.addToEngineEventsOnce();
+        return id;
+    }
+
     void removeCallback(int id) { mCallbacks.remove(id); }
     void clearCallbacks() { mCallbacks.clear(); }
 
@@ -215,10 +227,13 @@ class UIButton : public UIElement {
         UIButton *mOwner;
         bool added = false;
         bool mClickedLastFrame = false;
+        bool mPressedLastFrame = false;
     };
 
   private:
     FunctionList<UIButton &> mCallbacks;
+    FunctionList<> mPressCallbacks;
+    FunctionList<> mReleaseCallbacks;
     Listener mListener;
     fl::shared_ptr<Button> mRealButton;
 };
