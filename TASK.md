@@ -1,384 +1,186 @@
-# FastLED Audio→MIDI: Spectral-Peak Polyphony Upgrade (Design Doc)
+Auto‑Tuning Extension for FastLED Sound_to_MIDI
+1 Introduction and problem statement
 
-## 0) Summary
+FastLED's sound_to_midi module converts short audio frames into MIDI Note On/Off events in either a monophonic mode (using a YIN/MPM style autocorrelation detector) or a polyphonic mode (spectral‐peak detection with harmonic filtering). Both paths expose configurable thresholds, smoothing options and hold‑times via the SoundToMIDI configuration structure. In practice, users report that the default settings either let through many spurious MIDI events when the ambient noise is high or miss notes when the signal is quiet. Manual tuning—adjusting RMS gates, confidence thresholds, peak thresholds and smoothing parameters—helps but is time‑consuming and brittle; the optimal settings vary with environment, instrument and sample rate. The goal of this work is to design an automatic tuning mechanism that continuously adapts detection thresholds and filters as audio is processed, reducing false triggers while maintaining responsiveness and low latency.
 
-Augment FastLED’s current polyphonic path with a Spectrotune-style **spectral peak** pipeline that remains MCU-friendly. We do **not** vendor Spectrotune; we adapt the ideas:
+2 Goals and non‑goals
 
-* Windowed FFT + **parabolic peak interpolation**
-* Lightweight **spectral tilt (linear EQ)**
-* Configurable **noise smoothing**
-* **Octave masks** (enable/disable octave bands)
-* Toggleable **harmonic filter / fundamental veto**
-* Optional **PCP (12-bin chroma) stabilizer**
-* Runtime **threshold** control
-* Optional **octave→MIDI channel mapping**
+Goals
 
-All features are behind compile-time and runtime flags so the default remains lean.
+Reduce false MIDI events and jitter by automatically adjusting pitch‑detection parameters based on real‑time measurements.
 
----
+Retain FastLED's ability to run on low‑resource microcontrollers (ESP32, SAMD), with minimal additional CPU and memory overhead.
 
-## 1) Goals & Non-Goals
+Maintain backward compatibility: existing applications should work without modification when auto‑tuning is disabled.
 
-**Goals**
+Provide API hooks for users to monitor and tweak auto‑tuning behaviour (e.g. set limits or turn on logging).
 
-* Improve **polyphonic accuracy** (dense chords, quiet notes).
-* Improve **robustness** (noise, rumble, hiss, spectral leakage).
-* Keep **real-time** on ESP32-class MCUs (S3/C3/C6/P4) at typical sample rates (16–48 kHz) with FFT sizes 512–2048.
-* Minimal heap churn; deterministic latency.
+Non‑goals
 
-**Non-Goals**
+Introducing heavy DSP or machine‑learning algorithms that exceed embedded resource budgets.
 
-* No heavyweight ML models.
-* No file/codec I/O (still upstream PCM).
-* No GUI; we expose hooks/params only.
+Changing the underlying pitch‑detection algorithms (YIN/MPM or spectral peak); we adapt the thresholds, not the core detection logic.
 
----
+Persisting per‑instrument calibration across sessions—auto‑tuning is session‑based.
 
-## 2) Constraints (MCU)
+3 Overview of tunable parameters
 
-* **CPU**: ~3–7 ms/frame budget at 16 kHz, 1024-pt FFT (ESP32-S3 @240–240+ MHz).
-* **RAM**: < 20–40 KB incremental (FFT buffers, temp arrays, PCP history).
-* **Latency**: 20–80 ms typical (FRAME_SIZE/SR + processing), must be stable.
-* **Portability**: Works with ARDUINO/PlatformIO; no dynamic allocations in tight loops.
+The existing SoundToMIDI struct defines numerous knobs:
 
----
+Monophonic detection:
 
-## 3) Architecture Overview
+confidence_threshold (0–1) – minimum pitch confidence.
 
-```
-[PCM frames] → [Window] → [FFT] → [Mag Spectrum] → [Tilt EQ] → [Smoothing]
-                                                       ↓
-                                        [Peak Find + Parabolic Interp]
-                                                       ↓
-                      [Harmonic Filter] ←→ [Octave Mask] ←→ [PCP Stabilizer (optional)]
-                                                       ↓
-                                        [Note Tracker + Onset/Offset]
-                                                       ↓
-                                         [MIDI Events / Callbacks]
-```
+note_hold_frames – number of consecutive frames before a note on is emitted.
 
----
+silence_frames_off – consecutive silent frames before note off.
 
-## 4) Components & Algorithms
+rms_gate – RMS amplitude threshold below which a frame is considered silent.
 
-### 4.1 Windowing (configurable)
+note_change_semitone_threshold, note_change_hold_frames and median_filter_size – parameters to filter out small pitch jitters.
 
-* **Add**: `Hann` (default), `Hamming`, `Blackman` (optional).
-* Rationale: reduces leakage → clearer peaks.
-* **Implementation**: precompute window tables per FFT size in PROGMEM/flash; apply in-place multiply before FFT.
+Polyphonic detection:
 
-### 4.2 FFT
+window_type, spectral_tilt_db_per_decade and smoothing_mode – spectral conditioning options.
 
-* Continue using existing FFT backend (or KissFFT / ESP-DSP depending on target).
-* Support N = 512/1024/2048 (power-of-two).
-* Output: magnitude `M[k] = sqrt(Re^2+Im^2)` or `|Re| + |Im|` (cheaper approximation) gated by config.
+peak_threshold_db – magnitude threshold (in dB) for spectral peaks.
 
-### 4.3 Spectral Tilt (linear EQ)
+parabolic_interp – sub‑bin interpolation toggle.
 
-* **Add**: one-parameter tilt (slope in dB/decade), applied as:
+harmonic_filter_enable, harmonic_tolerance_cents, harmonic_energy_ratio_max – parameters for harmonic suppression.
 
-  * `M'[k] = M[k] * (k / k_ref)^α`, with α computed from slope.
-  * Fixed-point: precompute per-bin gain Q15.
-* Rationale: compensate pinkish spectra; help high-freq notes.
+octave_mask – bitmask enabling or disabling detection in specific octaves.
 
-### 4.4 Noise Smoothing (selectable)
+pcp_enable, pcp_history_frames, pcp_bias_weight – pitch‑class profile stabiliser settings.
 
-* **Modes**: `NONE`, `BOX3`, `TRI5` (triangular), `ADJAVG` (2-sided adjacent avg).
-* Apply to `M'` prior to peak picking.
-* Rationale: suppress narrowband noise; stabilize peaks.
-* Impl: 1D FIR across bins (constant-time per bin).
+These parameters are currently set once at startup. The auto‑tuning extension will adjust them dynamically.
 
-### 4.5 Peak Picking + Parabolic Interpolation
+4 Conceptual approach
 
-* Find local maxima `k0` where `M'[k0]` is above **threshold** `T`.
-* **Parabolic Interp** (3-point):
+The auto‑tuning system treats the pitch‑detection engine as a feedback‑controlled process. It measures the noise floor, pitch confidence, spectral occupancy and event rate from recent frames, then uses heuristics to adjust thresholds, smoothing and gating parameters. Key components include:
 
-  * Given `y_-1 = M'[k0-1], y0 = M'[k0], y_+1 = M'[k0+1]`,
-  * fractional offset: `δ = 0.5 * (y_-1 - y_+1) / (y_-1 - 2*y0 + y_+1)`, clamp |δ|≤0.5
-  * refined bin: `k* = k0 + δ`
-  * frequency: `f = k* * (SR / N)`
-* Rationale: reduce binning error; improve separation of close pitches.
+Noise floor estimator – computes an exponential moving average (EMA) of RMS amplitudes and spectral magnitudes when the engine believes there is no note present. It tracks slow changes in ambient noise.
 
-### 4.6 Octave Masks (runtime)
+Adaptive gates – sets the rms_gate and peak_threshold_db relative to the estimated noise floor. For example, the RMS gate becomes noise_rms × k_rms and the peak threshold becomes noise_mag_db + k_peak, where k_rms and k_peak are tunable margins.
 
-* **Add**: bitmask over octaves [0..7] (or computed from MIDI note range).
-* Computation:
+Confidence tracker – monitors the distribution of detection confidences (for monophonic) or the number of peaks surviving filtering (for polyphonic). If too many low‑confidence detections occur, the confidence_threshold or peak_threshold_db is increased slightly; if genuine notes are missed, the thresholds are lowered.
 
-  * Convert candidate `f` → MIDI `n = round(69 + 12*log2(f/440))`.
-  * Determine `oct = floor(n/12)`; accept only if `oct_mask & (1<<oct)`.
-* Rationale: ignore rumble/hiss bands quickly.
+Hold‑time optimiser – adjusts note_hold_frames and silence_frames_off according to observed note durations and inter‑note gaps. It uses running histograms of durations to choose hold lengths that are long enough to suppress noise bursts but short enough to preserve responsiveness.
 
-### 4.7 Harmonic Filter / Fundamental Veto (toggle)
+Jitter monitor – evaluates variability in consecutive pitch estimates. High jitter suggests noise or unstable detection; the system can widen the median filter (median_filter_size) or increase note_change_hold_frames to smooth the output. Low jitter permits narrower filters to reduce latency.
 
-* **Motivation**: avoid double-counting overtones as fundamentals.
-* Strategy:
+Octave and harmonic adjuster (polyphonic) – maintains statistics about which octaves and harmonics are frequently triggered. If spurious notes cluster in certain octaves or are likely overtones, the system tightens the harmonic filter (reducing harmonic_energy_ratio_max or increasing harmonic_tolerance_cents) or disables those octaves via octave_mask. Conversely, if legitimate notes appear in a previously disabled octave, the mask can be re‑enabled.
 
-  1. Sort peaks by magnitude descending.
-  2. For each accepted fundamental `f0`, **veto** peaks near integer multiples `m*f0` (m=2..4) within cents tolerance (e.g., ±35 cents), **unless** the “harmonic > fundamental” rule triggers (configurable).
-  3. Optional back-projection: test if putative `f0/2` exists at expected energy ratio; if yes, demote current to harmonic.
-* Config:
+These adjustments operate on a sliding window (e.g. the last 0.5–1 second of audio) and update parameters smoothly to avoid oscillations.
 
-  * `harmonic_filter_enable` (bool)
-  * `harmonic_tolerance_cents` (default 35)
-  * `harmonic_energy_ratio_max` (e.g., overtone must be < α·fundamental; α default 0.7)
+5 Detailed algorithm
+5.1 Noise floor estimation
 
-### 4.8 PCP (Chroma) Stabilizer (optional, low-cost)
+Maintain two EMAs: one for RMS amplitude (noise_rms_est) and one for spectral median dB (noise_mag_db_est). Update them only when no note is currently sounding (monophonic) or when the number of detected peaks is below a minimal threshold (polyphonic). Use a long time constant (e.g. 0.5 s) to track room noise but ignore transient signals.
 
-* **Add**: 12-bin chroma accumulator over last `K` frames (e.g., K=8–16).
-* For each candidate note `n`, compute pitch-class `pc = n mod 12`.
-* Maintain EMA per `pc`: `C[pc] ← (1-β)·C[pc] + β·1` when pc appears; decay others.
-* **Use**: when two candidates are near threshold, **bias** acceptance toward higher `C[pc]`.
-* Rationale: simple musical context → fewer octave flips / spurious notes.
-* Memory: 12 floats (or Q15), negligible.
+5.2 Adaptive thresholds
 
-### 4.9 Thresholding (runtime-tunable)
+RMS gate (rms_gate): Set to max(default_rms_gate, noise_rms_est × k_rms). A typical margin k_rms is 1.5–2.0. This prevents the gate from dropping too low in very quiet environments (avoiding false triggers) and from rising too high (missing quiet notes).
 
-* Global magnitude threshold `T` (in linear or dB), adjustable at runtime via API.
-* Optionally **adaptive**: `T = μ + λ·σ` computed from noise floor estimate in non-musical bins.
-* Keep default static `T` for deterministic behavior; expose setter for advanced users.
+Peak threshold (peak_threshold_db): In polyphonic mode, compute the median (or mean) of the magnitude spectrum for each frame, convert to dB and track an EMA. Set the peak threshold to noise_mag_db_est + margin_db. A margin of 6–10 dB above the noise floor is a good starting point. Optionally adapt margin_db up or down based on the current event rate (Section 5.5).
 
-### 4.10 Note Tracking (onset/offset)
+5.3 Confidence and jitter adjustments
 
-* Reuse current monophonic tracker logic per note id, extended for multiple notes:
+Confidence threshold (monophonic): Maintain an EMA of detected pitch confidences for note onsets. If the average confidence of recent note‐on events is below the current confidence_threshold minus a safety margin, raise confidence_threshold by a small step (e.g. +0.02) to reject spurious detections. If several frames pass with no note despite a moderately strong RMS, lower the threshold (e.g. −0.02) to avoid missing valid notes. Clamp within [0.6, 0.95] to avoid extremes.
 
-  * **Onset**: require `N_on` consecutive frames above pitch & magnitude confidence.
-  * **Offset**: require `N_off` consecutive frames below.
-  * **Hysteresis**: semitone stickiness to avoid chatter.
-* Velocity = scaled RMS or **per-peak magnitude** mapped to 0..127.
+Note change filter: Monitor the semitone difference between consecutive pitch estimates. If frequent ±1‑semitone fluctuations occur, increase note_change_semitone_threshold (to 2) or note_change_hold_frames (to 4–5). Conversely, if the detector lags behind legitimate pitch changes, reduce these values.
 
-### 4.11 Optional: Octave→MIDI Channel Mapping
+Median filter: Compute the median absolute deviation (MAD) of pitch estimates. If the MAD is high, enlarge the median_filter_size to 3 or 5; if low, reduce it to 1 to minimise latency.
 
-* If enabled, map note’s **octave** to MIDI channel (e.g., C1..B1 → ch1, …, C6..B6 → ch6).
-* Zero-cost if disabled.
+5.4 Hold‑time optimisation
 
----
+Track histograms of note durations (from note on to note off) and inter‑note gaps. Compute the median of each distribution. Set note_hold_frames slightly below the median note duration (e.g. 75th percentile of durations divided by frame hop) to ensure a note is recognised quickly. Set silence_frames_off slightly below the median gap duration. When the environment is noisy, increase both hold times modestly to avoid fluttering; when stable, decrease them for responsiveness.
 
-## 5) Public API (proposed)
+5.5 Event rate control
 
-```cpp
-namespace fl { namespace audio {
+Maintain a counter of note‑on events per second (monophonic) or peak detections per frame (polyphonic). Define target ranges—e.g. 1–10 notes per second for monophonic, 1–5 peaks per frame for polyphonic. If the rate exceeds the upper bound, increment peak_threshold_db and/or confidence_threshold gradually. If the rate falls below the lower bound and RMS suggests there should be notes, decrement those thresholds. This provides a high‑level feedback loop stabilising the number of events.
 
-enum class Window : uint8_t { Hann, Hamming, Blackman };
-enum class Smooth : uint8_t { None, Box3, Tri5, AdjAvg };
+5.6 Harmonic and octave control (polyphonic)
 
-struct PolySpecCfg {
-  // FFT / window
-  uint16_t fft_size = 1024;         // 512/1024/2048
-  Window   window   = Window::Hann;
+Maintain counts of detected notes per octave. If an octave consistently produces spurious detections (e.g. low rumble or hiss), increase harmonic_energy_ratio_max from 0.7 to 0.5, or increase harmonic_tolerance_cents to 50–60 cents to allow more aggressive grouping; if it remains noisy, clear the corresponding bit in octave_mask. Conversely, if an octave has been disabled but the EMA of RMS energy in that frequency band rises significantly, re‑enable it.
 
-  // Spectral conditioning
-  float spectral_tilt_db_per_dec = 0.0f; // e.g., +3.0 boosts highs
-  Smooth smoothing = Smooth::Box3;
+Monitor the ratio of fundamental to overtone energy. If harmonic peaks regularly exceed this ratio, temporarily disable harmonic filtering (harmonic_filter_enable=false) to prevent legitimate notes from being removed; re‑enable once the detection stabilises.
 
-  // Detection
-  float peak_threshold_db = -40.0f; // runtime-adjustable
-  bool  harmonic_filter = true;
-  float harmonic_tol_cents = 35.f;
-  float harmonic_energy_ratio_max = 0.7f;
+5.7 PCP stabiliser tuning (polyphonic)
 
-  // Octave mask: bit i enables octave i (MIDI 12*i..12*i+11)
-  uint8_t octave_mask = 0xFF;       // enable all by default
+Measure the distribution of recently detected pitch classes. If the engine frequently oscillates between two pitch classes within the same octave, enable the PCP stabiliser (pcp_enable=true) and gradually increase pcp_bias_weight to up‑weight the persistent classes. If the pitch class distribution is stable, decrease pcp_bias_weight or disable PCP to reduce bias against novel notes.
 
-  // PCP stabilizer
-  bool  pcp_enable = false;
-  uint8_t pcp_history = 12;         // frames (EMA depth)
-  float pcp_bias = 0.1f;            // weight in acceptance
+5.8 Update schedule and smoothing
 
-  // Note gating
-  uint8_t onset_frames = 2;         // frames required for NoteOn
-  uint8_t offset_frames = 2;        // frames required for NoteOff
+To avoid audible oscillation of parameters, update all adaptation variables at a fixed, moderate rate (e.g. 5–10 Hz). Each update applies an incremental change capped by a maximum delta per second (for thresholds and gates) to ensure smooth transitions. Use first‑order low‑pass filtering to blend new parameter values with the previous ones, preserving continuity.
 
-  // Velocity
-  bool velocity_from_peak = true;   // else from RMS
+6 Implementation
+6.1 Data structures
 
-  // Mapping
-  bool octave_to_midi_channel = false;
-};
+Extend SoundToMIDI and the internal SoundToMIDIEngine with the following fields:
 
-class PolySpec {
-public:
-  explicit PolySpec(const PolySpecCfg& cfg);
+bool auto_tune_enable – master switch for auto‑tuning.
 
-  // Process one frame of PCM (mono float16/float32/int16)
-  void process_frame(const float* pcm, int n_samples);
+float noise_rms_est, float noise_mag_db_est – noise floor estimates.
 
-  // Runtime controls
-  void set_peak_threshold_db(float db);
-  void set_octave_mask(uint8_t mask);
-  void set_spectral_tilt(float db_per_dec);
-  void set_smoothing(Smooth s);
+EMAs for average pitch confidence, pitch variance, event rate, note durations and gaps.
 
-  // Callback registration
-  using NoteOnFn  = void(*)(uint8_t midi_note, uint8_t velocity, uint8_t channel, void* user);
-  using NoteOffFn = void(*)(uint8_t midi_note, uint8_t channel, void* user);
-  void on_note_on(NoteOnFn f, void* user);
-  void on_note_off(NoteOffFn f, void* user);
+Counters for harmonic peaks and octave statistics.
 
-private:
-  // opaque
-};
+Configuration limits for each tunable parameter (min and max values, adaptation rate).
 
-}} // namespace
-```
+6.2 Algorithm integration
 
-* Backward-compatible: existing `sound_to_midi` remains; `PolySpec` is a new path under `fx/audio/`.
-* Allow float or int16 input; internal convert to float or Q15 depending on build flag.
+Initial calibration: On engine initialisation (or when auto_tune_enable is toggled), run a short calibration phase (0.5–1 s) where audio is analysed but no note events are emitted. Use this period to estimate initial noise floor, confidence distribution and typical event rates.
 
----
+Modified processFrame: After each frame is processed by the existing pitch detector:
 
-## 6) Performance & Memory Budget
+Determine whether a note is currently active or, in polyphonic mode, whether peaks exceed a minimal count. If not, update the noise floor estimates.
 
-| Feature                      | CPU impact              | RAM impact           | Notes                    |
-| ---------------------------- | ----------------------- | -------------------- | ------------------------ |
-| Window multiply              | O(N)                    | N floats (table)     | Precompute per FFT size  |
-| FFT (1024)                   | O(N log N)              | 2N (complex buffers) | Existing                 |
-| Magnitude (approx)           | O(N/2)                  | none                 | `abs(Re)+abs(Im)` option |
-| Tilt EQ                      | O(N/2)                  | N/2 gains (Q15)      | Precompute               |
-| Smoothing (Box3/Tri5)        | O(N/2)                  | none                 | FIR 1D                   |
-| Peak pick + parabolic interp | O(P) with P≪N           | none                 | ~5–20 peaks              |
-| Harmonic filter              | O(P^2) worst-case small | none                 | P limited (e.g., ≤16)    |
-| PCP stabilizer               | O(P) + 12 state         | 12 scalars           | Optional                 |
+Update EMAs for confidence, pitch variance and event rate.
 
-**Target**: ≤ 4 ms per 1024-pt frame on ESP32-S3 @ 240 MHz (typical).
+Every N frames (e.g. N = hop_size × update_frequency / frame_size), call an autoTuneUpdate() method that calculates new parameter values according to Section 5. This method applies smoothing and clamps to user‑defined ranges.
 
----
+Use the updated parameters for subsequent frames.
 
-## 7) Fixed-Point & Fast Paths (build flags)
+Backward compatibility: When auto_tune_enable is false, the engine behaves exactly as before. Users can still manually set all thresholds.
 
-* `FASTLED_AUDIO_FIXEDPOINT`: use Q15 magnitude approximation, Q15 tilt gains, int16 PCM.
-* `FASTLED_AUDIO_MAG_ABS1`: use `abs(Re)+abs(Im)` for magnitude (no sqrt).
-* `FASTLED_AUDIO_NO_TILT`: compile out tilt stage.
-* `FASTLED_AUDIO_NO_PCP`: compile out PCP code.
-* `FASTLED_AUDIO_SMALL_FFT`: limit to 512/1024 tables.
+API exposure: Add setters/getters to inspect current adaptive parameter values and to set adaptation margins (k_rms, margin_db, event rate bounds, adaptation speeds). Provide optional callbacks so applications can be notified when the auto‑tuner adjusts values.
 
-These let downstream users trim CPU/RAM.
+6.3 Footprint considerations
 
----
+The EMAs and counters require only a handful of floats/integers; memory overhead is negligible (< 1 KB).
 
-## 8) Tracking & MIDI Emission
+Computation involves basic arithmetic, comparisons and occasional histogram updates. Running the adaptation logic at 5 Hz adds < 1 % CPU on an ESP32 (estimated at a few hundred operations per update). The heavy lifting (FFT, pitch detection) remains unchanged.
 
-* **De-dup within frame**: after harmonic filtering, cap max new notes per frame (e.g., 8).
-* **Semitone stickiness**: for existing notes, ignore small freq drift (±40 cents) to prevent re-note.
-* **Velocity**: map peak magnitude via log scale to 0..127; clamp. If `velocity_from_peak=false`, use RMS gate at onset.
-* **Channel**: if `octave_to_midi_channel`, compute `channel = base + octave`.
+To conserve CPU, disable adaptation steps (harmonic control, PCP adjustment) if the corresponding features are off (e.g. when harmonic_filter_enable=false or pcp_enable=false).
 
----
+7 Testing and tuning plan
 
-## 9) Testing Plan
+To validate the auto‑tuning system:
 
-### Unit tests
+Synthetic datasets: Generate audio files with known pitches and controlled noise (white, pink, environmental). Measure false‑positive and false‑negative rates as auto‑tuning adjusts thresholds. Verify that event rate stays within target bounds.
 
-* Parabolic interpolation correctness (synthetic sinusoids at fractional bins).
-* Harmonic veto logic (fundamental vs 2×/3× peaks).
-* Octave mask acceptance/rejection.
-* PCP biasing (preference under ambiguous two-note collision).
+Real instruments: Test with monophonic sources (e.g. sine waves, flute) and polyphonic sources (piano chords, guitar strums) at various volumes. Record the raw audio and the MIDI output. Compare note timing, pitch accuracy and the number of spurious events.
 
-### Golden audio sets
+Environmental noise: Introduce background sounds (talking, HVAC, traffic) and confirm that the noise floor adapts, raising thresholds to suppress false events without missing quieter notes.
 
-* **Single tones** (A4 sweeps; low/high SNR).
-* **Intervals & chords** (3rds, 4ths, 5ths, clustered tritones).
-* **Noisy beds** (pink/white noise underlay; rumble @ 60–120 Hz).
-* **Percussive onsets** (piano/guitar strums).
-* **Edge cases**: detuned pairs (±20–40 cents), close partials.
+Latency measurement: Measure end‑to‑end latency for note detection with and without auto‑tuning to ensure that adaptation and larger filters do not delay note onsets beyond acceptable limits (e.g. ≤ 50 ms for polyphonic and ≤ 30 ms for monophonic).
 
-Metrics:
+Stress test: Feed rapid sequences and dense chords to detect any oscillatory behaviour or instability in the adaptation loops; adjust smoothing constants if necessary.
 
-* Precision/recall on note events, onset timing error (ms), false positive rate in silence.
+Parameter sweep: Evaluate different values of adaptation margins (k_rms, margin_db), update frequencies and smoothing constants. Provide recommended presets for typical environments (quiet room, live stage, outdoor).
 
-### Benchmarks
+8 Potential extensions and future work
 
-* Measure per-frame execution on ESP32-S3/C3/C6/P4 at 16 kHz/1024 FFT.
-* Memory audit (static + peak).
+Machine learning‑based adaptation: Train a lightweight model on annotated audio to predict optimal thresholds based on spectral features. This could improve adaptation in complex, non‑stationary noise conditions while still fitting into embedded resources.
 
----
+Per‑instrument profiles: Allow users to select instrument profiles (piano, guitar, voice) that bias the auto‑tuner's parameters (e.g. expected octaves and harmonic content).
 
-## 10) Migration & Backward Compatibility
+Persistent calibration: Save noise floor estimates and parameter settings to non‑volatile storage to skip calibration on subsequent runs.
 
-* Existing `sound_to_midi` API unchanged.
-* New `PolySpec` class opt-in; default config mirrors current behavior as closely as possible (Hann, Box3, modest threshold, harmonic on, PCP off).
-* Compile flags default to **minimal features** unless enabled.
+Graphical tuning interface: Provide a real‑time visualisation (e.g. on a web interface or over serial) showing current parameter values, noise floor and event rate, allowing advanced users to monitor and override auto‑tuning decisions.
 
----
+9 Conclusion
 
-## 11) Rollout (Phased)
-
-1. **Phase A** (core accuracy):
-
-   * Windowing, parabolic interpolation, smoothing, threshold runtime setter.
-2. **Phase B** (robustness):
-
-   * Harmonic filter toggle with ratios, octave mask.
-3. **Phase C** (musical context & UX):
-
-   * PCP stabilizer, octave→channel mapping, adaptive threshold (optional).
-
-Each phase gated by unit tests + embedded benchmarks.
-
----
-
-## 12) Risks & Mitigations
-
-* **CPU spikes** (many peaks): cap P (e.g., keep top-K by magnitude).
-* **Mis-veto fundamentals**: expose harmonic toggle; log debug counters.
-* **PCP bias wrong key**: keep PCP weight small (pcp_bias ≤ 0.15) and decay quickly; easy off switch.
-* **Config complexity**: provide sane defaults; document 2–3 recommended profiles (“Low-CPU”, “Balanced”, “Hi-Accuracy”).
-
----
-
-## 13) Developer Notes (Implementation Tips)
-
-* Precompute `bin→midi` lookup for fast octave mapping.
-* Keep all arrays static/stack; avoid malloc in `process_frame`.
-* Use `constexpr` tables for windows/tilt where possible.
-* Consider `esp_dsp` FFT on ESP32 for speed; fall back to portable FFT.
-* Provide a debug hook to dump per-frame peaks (freq, mag, accepted/vetoed) for profiling.
-
----
-
-## 14) Example (minimal usage)
-
-```cpp
-#include <fastled/fx/audio/poly_spec.h>
-
-using namespace fl::audio;
-
-static void note_on(uint8_t n, uint8_t v, uint8_t ch, void*)  { /* send MIDI */ }
-static void note_off(uint8_t n, uint8_t ch, void*)            { /* send MIDI */ }
-
-PolySpecCfg cfg;
-cfg.fft_size = 1024;
-cfg.window = Window::Hann;
-cfg.spectral_tilt_db_per_dec = +3.0f;
-cfg.smoothing = Smooth::Box3;
-cfg.peak_threshold_db = -42.0f;
-cfg.harmonic_filter = true;
-cfg.octave_mask = 0b01111110; // octaves 1..6
-cfg.pcp_enable = false;
-
-PolySpec poly(cfg);
-poly.on_note_on(note_on, nullptr);
-poly.on_note_off(note_off, nullptr);
-
-// In audio callback:
-void audio_frame(const float* pcm, int n) {
-  poly.process_frame(pcm, n); // n == FRAME_SIZE
-}
-```
-
----
-
-## 15) Documentation (to add)
-
-* Tuning guide: threshold, tilt, smoothing presets.
-* “When to enable PCP” cheat sheet.
-* Known limitations (very dense, detuned cluster chords; very low SR + tiny FFT).
-* Performance table per MCU.
-
----
-
-### Done Right, This Gives Us:
-
-* Better chord coverage (clearer peaks via window+interp).
-* Fewer octave/harmonic mistakes (octave mask + harmonic veto).
-* More stable behavior across material (tilt + smoothing + optional PCP).
-* Still **real-time** and MCU-friendly, with compile-time levers to stay lean.
+FastLED's sound_to_midi already supplies a flexible set of parameters for pitch detection and MIDI conversion. However, these parameters are currently static and require manual tuning. The auto‑tuning extension proposed here introduces a feedback loop that continuously monitors the audio signal, estimates noise and event statistics, and adjusts thresholds, smoothing and gating accordingly. The design emphasises smooth, low‑overhead adaptation suitable for microcontrollers, backwards compatibility, and configurability. By implementing this design, FastLED can respond dynamically to changing acoustic environments, producing cleaner MIDI outputs without sacrificing responsiveness.
