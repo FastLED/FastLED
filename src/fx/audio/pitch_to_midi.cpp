@@ -127,7 +127,50 @@ PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, f
 
 // ---------- PitchToMIDIEngine ----------
 PitchToMIDIEngine::PitchToMIDIEngine(const PitchToMIDI& cfg)
-    : _cfg(cfg), _noteOnFrames(0), _silenceFrames(0), _currentNote(-1) {}
+    : _cfg(cfg), _noteOnFrames(0), _silenceFrames(0), _currentNote(-1),
+      _candidateNote(-1), _candidateHoldFrames(0),
+      _historyIndex(0), _historyCount(0) {
+  for (int i = 0; i < MAX_MEDIAN_SIZE; ++i) {
+    _noteHistory[i] = -1;
+  }
+}
+
+int PitchToMIDIEngine::getMedianNote() {
+  if (_historyCount == 0) return -1;
+
+  // Clamp filter size to valid range
+  int filterSize = _cfg.median_filter_size;
+  if (filterSize < 1) filterSize = 1;
+  if (filterSize > MAX_MEDIAN_SIZE) filterSize = MAX_MEDIAN_SIZE;
+  if (filterSize > _historyCount) filterSize = _historyCount;
+
+  // If filter size is 1, just return the most recent note
+  if (filterSize == 1) {
+    int idx = (_historyIndex - 1 + MAX_MEDIAN_SIZE) % MAX_MEDIAN_SIZE;
+    return _noteHistory[idx];
+  }
+
+  // Copy last N notes for sorting
+  int temp[MAX_MEDIAN_SIZE];
+  for (int i = 0; i < filterSize; ++i) {
+    int idx = (_historyIndex - filterSize + i + MAX_MEDIAN_SIZE) % MAX_MEDIAN_SIZE;
+    temp[i] = _noteHistory[idx];
+  }
+
+  // Simple bubble sort (small array, fine for embedded)
+  for (int i = 0; i < filterSize - 1; ++i) {
+    for (int j = 0; j < filterSize - i - 1; ++j) {
+      if (temp[j] > temp[j + 1]) {
+        int swap = temp[j];
+        temp[j] = temp[j + 1];
+        temp[j + 1] = swap;
+      }
+    }
+  }
+
+  // Return median
+  return temp[filterSize / 2];
+}
 
 void PitchToMIDIEngine::processFrame(const float* frame, int n) {
   if (!frame || n != _cfg.frame_size) return;
@@ -140,7 +183,16 @@ void PitchToMIDIEngine::processFrame(const float* frame, int n) {
                       (pr.freq_hz > 0.0f);
 
   if (voiced) {
-    const int note = clampMidi(hz_to_midi(pr.freq_hz));
+    int rawNote = clampMidi(hz_to_midi(pr.freq_hz));
+
+    // Option 3: Add to median filter history
+    _noteHistory[_historyIndex] = rawNote;
+    _historyIndex = (_historyIndex + 1) % MAX_MEDIAN_SIZE;
+    if (_historyCount < MAX_MEDIAN_SIZE) _historyCount++;
+
+    // Get filtered note
+    const int note = getMedianNote();
+
     if (_currentNote < 0) {
       // confirm new note-on
       if (++_noteOnFrames >= _cfg.note_hold_frames) {
@@ -149,26 +201,50 @@ void PitchToMIDIEngine::processFrame(const float* frame, int n) {
         _currentNote = note;
         _noteOnFrames = 0;
         _silenceFrames = 0;
+        _candidateNote = -1;
+        _candidateHoldFrames = 0;
       }
     } else {
-      // Retrigger when pitch changes by >= 1 semitone
+      // Option 1: Check semitone threshold
       const int dn = noteDelta(note, _currentNote);
-      if (dn >= 1) {
-        if (onNoteOff) onNoteOff((uint8_t)_currentNote);
-        const uint8_t vel = amp_to_velocity(rms, _cfg.vel_gain, _cfg.vel_floor);
-        if (onNoteOn) onNoteOn((uint8_t)note, vel);
-        _currentNote = note;
+      if (dn >= _cfg.note_change_semitone_threshold) {
+        // Option 2: Check if candidate note persists
+        if (note == _candidateNote) {
+          _candidateHoldFrames++;
+          if (_candidateHoldFrames >= _cfg.note_change_hold_frames) {
+            // Retrigger confirmed
+            if (onNoteOff) onNoteOff((uint8_t)_currentNote);
+            const uint8_t vel = amp_to_velocity(rms, _cfg.vel_gain, _cfg.vel_floor);
+            if (onNoteOn) onNoteOn((uint8_t)note, vel);
+            _currentNote = note;
+            _candidateNote = -1;
+            _candidateHoldFrames = 0;
+          }
+        } else {
+          // New candidate note
+          _candidateNote = note;
+          _candidateHoldFrames = 1;
+        }
+      } else {
+        // Note within threshold, reset candidate
+        _candidateNote = -1;
+        _candidateHoldFrames = 0;
       }
       _noteOnFrames = 0;
       _silenceFrames = 0;
     }
   } else {
     _noteOnFrames = 0;
+    _candidateNote = -1;
+    _candidateHoldFrames = 0;
     if (_currentNote >= 0) {
       if (++_silenceFrames >= _cfg.silence_frames_off) {
         if (onNoteOff) onNoteOff((uint8_t)_currentNote);
         _currentNote = -1;
         _silenceFrames = 0;
+        // Clear median filter history on silence
+        _historyCount = 0;
+        _historyIndex = 0;
       }
     }
   }

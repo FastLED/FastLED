@@ -97,6 +97,7 @@ TEST_CASE("PitchToMIDI - Pitch change triggers retrigger") {
     PitchToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
+    cfg.median_filter_size = 1; // Disable median filter to avoid lag in this test
 
     PitchToMIDIEngine engine(cfg);
 

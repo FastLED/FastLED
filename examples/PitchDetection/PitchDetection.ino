@@ -48,6 +48,11 @@ UIAudio audio("Audio Input");
 UISlider audioGain("Audio Gain", 1.0f, 0.1f, 5.0f, 0.1f);
 UISlider confidenceThreshold("Confidence Threshold", 0.82f, 0.5f, 0.95f, 0.01f);
 
+// Stability controls (anti-jitter)
+UISlider semitoneThreshold("Semitone Threshold", 2, 1, 5, 1);
+UISlider noteChangeHoldFrames("Note Change Hold", 5, 1, 20, 1);
+UISlider medianFilterSize("Median Filter Size", 5, 1, 11, 1);
+
 // Visual controls
 UISlider brightness("Brightness", 128, 0, 255, 1);
 UISlider fadeSpeed("Fade Speed", 20, 5, 100, 5);
@@ -173,6 +178,30 @@ void setup() {
         }
     });
 
+    semitoneThreshold.onChanged([](float value) {
+        if (pitchEngine) {
+            PitchToMIDI cfg = pitchEngine->config();
+            cfg.note_change_semitone_threshold = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    noteChangeHoldFrames.onChanged([](float value) {
+        if (pitchEngine) {
+            PitchToMIDI cfg = pitchEngine->config();
+            cfg.note_change_hold_frames = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    medianFilterSize.onChanged([](float value) {
+        if (pitchEngine) {
+            PitchToMIDI cfg = pitchEngine->config();
+            cfg.median_filter_size = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
     testWhite.onPressed([]() {
         FL_WARN("Test White button pressed - setting all LEDs to white");
         for (int i = 0; i < NUM_LEDS; i++) {
@@ -187,9 +216,12 @@ void setup() {
         Serial.println("Button released");
     });
 
-    // Initialize pitch detection
+    // Initialize pitch detection with stability settings
     pitchConfig.sample_rate_hz = SAMPLE_RATE;
     pitchConfig.confidence_threshold = confidenceThreshold.value();
+    pitchConfig.note_change_semitone_threshold = semitoneThreshold.as_int();
+    pitchConfig.note_change_hold_frames = noteChangeHoldFrames.as_int();
+    pitchConfig.median_filter_size = medianFilterSize.as_int();
     pitchEngine = new PitchToMIDIEngine(pitchConfig);
 
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
