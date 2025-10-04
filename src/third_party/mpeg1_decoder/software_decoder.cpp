@@ -108,6 +108,35 @@ void SoftwareMpeg1Decoder::videoDecodeCallback(fl::third_party::plm_t* plm_ptr, 
     }
 }
 
+// Static callback for audio decoding
+void SoftwareMpeg1Decoder::audioDecodeCallback(fl::third_party::plm_t* plm_ptr, fl::third_party::plm_samples_t* samples, void* user) {
+    FL_UNUSED(plm_ptr);
+    auto* decoder = static_cast<SoftwareMpeg1Decoder*>(user);
+
+    if (!decoder || !samples || !decoder->config_.audioCallback) {
+        return;
+    }
+
+    // Convert float samples to i16 PCM
+    // pl_mpeg provides interleaved stereo samples as floats in range [-1.0, 1.0]
+    fl::vector<fl::i16> pcm;
+    pcm.reserve(samples->count * 2);  // stereo
+
+    for (unsigned i = 0; i < samples->count * 2; i++) {
+        float sample = samples->interleaved[i];
+        // Clamp and convert to i16 range
+        sample = sample < -1.0f ? -1.0f : (sample > 1.0f ? 1.0f : sample);
+        pcm.push_back(static_cast<fl::i16>(sample * 32767.0f));
+    }
+
+    // Create AudioSample with timestamp in milliseconds
+    fl::u32 timestampMs = static_cast<fl::u32>(samples->time * 1000.0);
+    AudioSample audioSample(fl::span<const fl::i16>(pcm.data(), pcm.size()), timestampMs);
+
+    // Call the user's audio callback
+    decoder->config_.audioCallback(audioSample);
+}
+
 SoftwareMpeg1Decoder::SoftwareMpeg1Decoder(const Mpeg1Config& config)
     : config_(config)
     , decoderData_(new Mpeg1DecoderData()) {
@@ -265,9 +294,13 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
         return false;
     }
 
-    // Disable audio decoding if requested
-    if (config_.skipAudio) {
+    // Enable/disable audio decoding based on config
+    if (config_.skipAudio || !config_.audioCallback) {
         fl::third_party::plm_set_audio_enabled(decoderData_->plmpeg, 0);
+    } else {
+        fl::third_party::plm_set_audio_enabled(decoderData_->plmpeg, 1);
+        fl::third_party::plm_set_audio_decode_callback(decoderData_->plmpeg,
+            SoftwareMpeg1Decoder::audioDecodeCallback, this);
     }
 
     // Set looping if requested
@@ -411,6 +444,36 @@ void SoftwareMpeg1Decoder::setError(const fl::string& message) {
     hasError_ = true;
     errorMessage_ = message;
     ready_ = false;
+}
+
+// IDecoder audio interface implementations
+bool SoftwareMpeg1Decoder::hasAudio() const {
+    if (!decoderData_ || !decoderData_->plmpeg) {
+        return false;
+    }
+    return fl::third_party::plm_get_num_audio_streams(decoderData_->plmpeg) > 0;
+}
+
+void SoftwareMpeg1Decoder::setAudioCallback(AudioFrameCallback callback) {
+    config_.audioCallback = callback;
+
+    // If decoder is already initialized, update the callback
+    if (decoderData_ && decoderData_->plmpeg) {
+        if (callback && !config_.skipAudio) {
+            fl::third_party::plm_set_audio_enabled(decoderData_->plmpeg, 1);
+            fl::third_party::plm_set_audio_decode_callback(decoderData_->plmpeg,
+                SoftwareMpeg1Decoder::audioDecodeCallback, this);
+        } else {
+            fl::third_party::plm_set_audio_enabled(decoderData_->plmpeg, 0);
+        }
+    }
+}
+
+int SoftwareMpeg1Decoder::getAudioSampleRate() const {
+    if (!decoderData_ || !decoderData_->plmpeg) {
+        return 0;
+    }
+    return fl::third_party::plm_get_samplerate(decoderData_->plmpeg);
 }
 
 } // namespace third_party

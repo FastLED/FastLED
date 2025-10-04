@@ -595,3 +595,157 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
     handle->close();
     fs.end();
 }
+
+TEST_CASE("MPEG1 audio extraction") {
+    FileSystem fs = setupCodecFilesystem();
+
+    // Load valid MPEG1 data with audio
+    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    REQUIRE(handle != nullptr);
+
+    fl::size file_size = handle->size();
+    fl::vector<fl::u8> file_data(file_size);
+    handle->read(file_data.data(), file_size);
+    handle->close();
+
+    SUBCASE("Audio callback receives samples") {
+        Mpeg1Config config;
+        config.skipAudio = false;  // Enable audio
+
+        // Track audio samples received
+        int audio_frames_received = 0;
+        int total_audio_samples = 0;
+
+        config.audioCallback = [&](const AudioSample& sample) {
+            audio_frames_received++;
+            total_audio_samples += sample.size();
+
+            // Verify audio sample properties
+            CHECK(sample.isValid());
+            CHECK_GT(sample.size(), 0);
+            CHECK_GE(sample.timestamp(), 0);
+
+            // Verify PCM data is accessible
+            const auto& pcm = sample.pcm();
+            CHECK_GT(pcm.size(), 0);
+        };
+
+        fl::string error_msg;
+        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        REQUIRE(decoder);
+
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+        stream->write(file_data.data(), file_size);
+
+        CHECK(decoder->begin(stream));
+
+        // Decode frames (this should also trigger audio callbacks if present)
+        DecodeResult result;
+        int frames_decoded = 0;
+        while ((result = decoder->decode()) == DecodeResult::Success && frames_decoded < 10) {
+            frames_decoded++;
+        }
+
+        // Report results - test file may or may not have audio
+        if (decoder->hasAudio()) {
+            MESSAGE("Decoded " << frames_decoded << " video frames, received "
+                    << audio_frames_received << " audio frames with "
+                    << total_audio_samples << " total samples at "
+                    << decoder->getAudioSampleRate() << " Hz");
+            CHECK_GT(audio_frames_received, 0);
+        } else {
+            MESSAGE("Test file has no audio track (this is expected)");
+            CHECK_EQ(audio_frames_received, 0);
+        }
+
+        decoder->end();
+    }
+
+    SUBCASE("Audio disabled via skipAudio flag") {
+        Mpeg1Config config;
+        config.skipAudio = true;  // Disable audio
+
+        int audio_frames_received = 0;
+        config.audioCallback = [&](const AudioSample& sample) {
+            (void)sample;
+            audio_frames_received++;
+        };
+
+        fl::string error_msg;
+        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        REQUIRE(decoder);
+
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+        stream->write(file_data.data(), file_size);
+
+        CHECK(decoder->begin(stream));
+
+        // Decode some frames
+        for (int i = 0; i < 5 && decoder->hasMoreFrames(); i++) {
+            decoder->decode();
+        }
+
+        // Should not receive audio callbacks when skipAudio is true
+        CHECK_EQ(audio_frames_received, 0);
+
+        decoder->end();
+    }
+
+    SUBCASE("Audio disabled via empty callback") {
+        Mpeg1Config config;
+        config.skipAudio = false;
+        // audioCallback is default-constructed (empty)
+
+        fl::string error_msg;
+        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        REQUIRE(decoder);
+
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+        stream->write(file_data.data(), file_size);
+
+        CHECK(decoder->begin(stream));
+
+        // Decode some frames - should not crash even without audio callback
+        for (int i = 0; i < 5 && decoder->hasMoreFrames(); i++) {
+            DecodeResult res = decoder->decode();
+            CHECK((res == DecodeResult::Success || res == DecodeResult::EndOfStream));
+        }
+
+        decoder->end();
+    }
+
+    SUBCASE("Dynamic audio callback setting") {
+        Mpeg1Config config;
+        config.skipAudio = false;
+
+        fl::string error_msg;
+        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        REQUIRE(decoder);
+
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
+        stream->write(file_data.data(), file_size);
+
+        CHECK(decoder->begin(stream));
+
+        // Set audio callback after initialization
+        int audio_frames_received = 0;
+        decoder->setAudioCallback([&](const AudioSample& sample) {
+            (void)sample;
+            audio_frames_received++;
+        });
+
+        // Decode some frames
+        for (int i = 0; i < 5 && decoder->hasMoreFrames(); i++) {
+            decoder->decode();
+        }
+
+        // Should receive audio if file has audio
+        if (decoder->hasAudio()) {
+            MESSAGE("Received " << audio_frames_received << " audio frames via dynamic callback");
+        }
+
+        decoder->end();
+    }
+
+    fs.end();
+}

@@ -6,6 +6,8 @@
 #include "fl/stdint.h"
 #include "fl/bytestream.h"
 #include "fl/ptr.h"
+#include "fl/function.h"
+#include "fl/audio.h"
 #include "fx/frame.h"
 
 namespace fl {
@@ -18,6 +20,10 @@ enum class DecodeResult {
     Error,
     UnsupportedFormat
 };
+
+// Audio frame callback - called when audio frames are decoded
+// Not all decoders will support audio
+using AudioFrameCallback = fl::function<void(const AudioSample&)>;
 
 // Base decoder interface for multimedia codecs
 // This interface provides a unified API for decoding various formats including:
@@ -43,6 +49,11 @@ public:
     virtual fl::u32 getFrameCount() const { return 0; }
     virtual fl::u32 getCurrentFrameIndex() const { return 0; }
     virtual bool seek(fl::u32 frameIndex) { (void)frameIndex; return false; }
+
+    // Audio support (optional - default implementations for decoders without audio)
+    virtual bool hasAudio() const { return false; }
+    virtual void setAudioCallback(AudioFrameCallback callback) { (void)callback; }
+    virtual int getAudioSampleRate() const { return 0; }
 };
 
 // Null decoder implementation for unsupported platforms

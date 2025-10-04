@@ -15,9 +15,10 @@ struct Mpeg1Config {
     FrameMode mode = Streaming;
     fl::u16 targetFps = 30;
     bool looping = false;
-    bool skipAudio = true;
+    bool skipAudio = false;  // Enable audio by default
     bool immediateMode = true;  // For real-time LED applications - bypass frame buffering
     fl::u8 bufferFrames = 2;  // Only used when immediateMode = false
+    AudioFrameCallback audioCallback;  // Optional callback for audio frames (default-constructed is empty)
 
     Mpeg1Config() = default;
     Mpeg1Config(FrameMode m, fl::u16 fps = 30)
@@ -79,6 +80,14 @@ public:
 
     // Static callback for pl_mpeg video decoding
     static void videoDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_frame_t* frame, void* user);
+
+    // Static callback for pl_mpeg audio decoding
+    static void audioDecodeCallback(fl::third_party::plm_t* plm, fl::third_party::plm_samples_t* samples, void* user);
+
+    // IDecoder audio interface overrides
+    bool hasAudio() const override;
+    void setAudioCallback(AudioFrameCallback callback) override;
+    int getAudioSampleRate() const override;
 };
 
 } // namespace third_party
