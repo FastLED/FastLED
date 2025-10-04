@@ -62,6 +62,8 @@ PitchToMIDIEngine* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 uint8_t currentVelocity = 0;
 bool noteIsOn = false;
+bool anyNoteDetected = false;
+uint32_t lastNoteTime = 0;
 
 // Note names
 const char* noteNames[] = {"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"};
@@ -93,8 +95,28 @@ int XY(int x, int y) {
     }
 }
 
+// Draw checkerboard pattern
+void drawCheckerboard() {
+    const int checkerSize = 8;
+    for (int y = 0; y < MATRIX_HEIGHT; y++) {
+        for (int x = 0; x < MATRIX_WIDTH; x++) {
+            int idx = XY(x, y);
+            if (idx >= 0) {
+                bool isWhite = ((x / checkerSize) + (y / checkerSize)) & 1;
+                leds[idx] = isWhite ? CRGB(40, 40, 40) : CRGB(0, 0, 0);
+            }
+        }
+    }
+}
+
 // Draw histogram
 void drawHistogram() {
+    // If no note has been detected for 2 seconds, show checkerboard
+    if (!anyNoteDetected || (millis() - lastNoteTime > 2000)) {
+        drawCheckerboard();
+        return;
+    }
+
     // Fade the entire matrix
     fadeToBlackBy(leds, NUM_LEDS, fadeSpeed.as_int());
 
@@ -164,6 +186,7 @@ void setup() {
     });
 
     testWhite.onPressed([]() {
+        FL_WARN("Test White button pressed - setting all LEDs to white");
         for (int i = 0; i < NUM_LEDS; i++) {
             leds[i] = CRGB(255, 255, 255);
         }
@@ -172,6 +195,7 @@ void setup() {
     });
 
     testWhite.onReleased([]() {
+        FL_WARN("Test White button released");
         Serial.println("Button released");
     });
 
@@ -184,6 +208,8 @@ void setup() {
         currentMIDINote = note;
         currentVelocity = velocity;
         noteIsOn = true;
+        anyNoteDetected = true;
+        lastNoteTime = millis();
 
         char noteName[8];
         getNoteName(note, noteName);
@@ -199,6 +225,7 @@ void setup() {
 
     pitchEngine->onNoteOff = [](uint8_t note) {
         noteIsOn = false;
+        lastNoteTime = millis();
 
         char noteName[8];
         getNoteName(note, noteName);
@@ -230,14 +257,21 @@ void loop() {
         pitchEngine->processFrame(floatBuffer, numSamples);
     }
 
-    // Draw histogram visualization
-    drawHistogram();
-
-    FastLED.show();
-
-    #ifdef __EMSCRIPTEN__
-    delay(1);
-    #endif
+    // Draw histogram visualization at fixed frame rate
+    EVERY_N_MILLISECONDS(16) {  // ~60 FPS
+        // Skip drawing histogram if test white button is pressed
+        if (testWhite.isPressed()) {
+            FL_WARN("Test White button is pressed - skipping histogram draw");
+            // Keep LEDs white while button is held
+            for (int i = 0; i < NUM_LEDS; i++) {
+                leds[i] = CRGB(255, 255, 255);
+            }
+            FastLED.show();
+        } else {
+            drawHistogram();
+            FastLED.show();
+        }
+    }
 }
 
 FL_DISABLE_WARNING_POP
