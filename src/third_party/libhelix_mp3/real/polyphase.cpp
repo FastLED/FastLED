@@ -41,13 +41,21 @@
  * polyphase.c - final stage of subband transform (polyphase synthesis filter)
  *
  * This is the C reference version using __int64
- * Look in the appropriate subdirectories for optimized asm implementations 
+ * Look in the appropriate subdirectories for optimized asm implementations
  *   (e.g. arm/asmpoly.s)
  **************************************************************************************/
 
 #include "coder.h"
 #include <stdint.h>
 #include "assembly.h"
+
+// Compile C++ polyphase implementation unless ARM32 assembly is available
+// ARM assembly (asmpoly_gcc.S) compiles only on: __GNUC__ && __arm__ && !__thumb__ && !__thumb2__ && !__AVR__
+// This matches: ARM Cortex-A (full ARM32 instruction set)
+// Does NOT match: ARM Cortex-M (Thumb-2 only), AVR, or other non-ARM32 platforms
+#if !(defined(__GNUC__) && defined(__arm__) && !defined(__thumb__) && !defined(__thumb2__) && !defined(__AVR__))
+#define COMPILE_CPP_POLYPHASE
+#endif
 
 /* input to Polyphase = Q(DQ_FRACBITS_OUT-2), gain 2 bits in convolution
  *  we also have the implicit bias of 2^15 to add back, so net fraction bits = 
@@ -91,6 +99,8 @@ static __inline short ClipToShort(int x, int fracBits)
 		sum1L = MADD64(sum1L, vHi, -c2);	sum2L = MADD64(sum2L, vHi,  c1); \
 }
 
+#ifdef COMPILE_CPP_POLYPHASE
+
 /**************************************************************************************
  * Function:    PolyphaseMono
  *
@@ -100,7 +110,7 @@ static __inline short ClipToShort(int x, int fracBits)
  *              number of "extra shifts" (vbuf format = Q(DQ_FRACBITS_OUT-2))
  *              pointer to start of vbuf (preserved from last call)
  *              start of filter coefficient table (in proper, shuffled order)
- *              no minimum number of guard bits is required for input vbuf 
+ *              no minimum number of guard bits is required for input vbuf
  *                (see additional scaling comments below)
  *
  * Outputs:     32 samples of one channel of decoded PCM data, (i.e. Q16.0)
@@ -294,3 +304,5 @@ void PolyphaseStereo(short *pcm, int *vbuf, const int32_t *coefBase)
 		pcm += 2;
 	}
 }
+
+#endif // COMPILE_CPP_POLYPHASE

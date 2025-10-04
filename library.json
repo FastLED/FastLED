@@ -74,6 +74,7 @@
             "+<platforms/adafruit/**/*.cpp>",
             "+<third_party/**/*.cpp>",
             "+<third_party/**/*.c>",
+            "+<third_party/libhelix_mp3/real/arm/*.S>",
             "+<fx/**/*.cpp>",
             "+<fl/**/*.cpp>",
             "+<fl/*.cpp>",
