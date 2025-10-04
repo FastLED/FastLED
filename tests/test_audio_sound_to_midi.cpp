@@ -629,3 +629,193 @@ TEST_CASE("SoundToMIDI - MP3 polyphonic note count metric") {
     // If the algorithm changes, this test will catch significant differences
     printf("BASELINE: Polyphonic detection found %d unique notes\n", uniqueNotesDetected);
 }
+
+TEST_CASE("SoundToMIDI - MP3 to MIDI melody detection pipeline") {
+    // This test validates the complete MP3 → PCM → Pitch Detection → MIDI pipeline
+    // using a real musical recording (mary_had_a_little_lamb.mp3)
+
+    // Set up filesystem to point to tests/data directory
+    setTestFileSystemRoot("tests/data");
+
+    FileSystem fs;
+    REQUIRE(fs.beginSd(0));
+
+    // Open the MP3 file
+    FileHandlePtr file = fs.openRead("codec/mary_had_a_little_lamb.mp3");
+    REQUIRE(file != nullptr);
+
+    // Read entire file
+    fl::size file_size = file->size();
+    fl::vector<fl::u8> mp3_data;
+    mp3_data.resize(file_size);
+    file->read(mp3_data.data(), file_size);
+    file->close();
+
+    // Decode MP3 to AudioSamples and extract sample rate
+    Mp3HelixDecoder decoder;
+    REQUIRE(decoder.init());
+
+    // First, decode to get the sample rate from the first frame
+    float detected_sample_rate = 44100.0f; // Default fallback
+    fl::vector<AudioSample> samples;
+    int frame_count_decode = 0;
+    decoder.decode(mp3_data.data(), mp3_data.size(), [&](const Mp3Frame& frame) {
+        if (frame_count_decode == 0) {
+            detected_sample_rate = (float)frame.sample_rate;
+            printf("Detected MP3 sample rate: %d Hz\n", frame.sample_rate);
+        }
+
+        // Convert to mono AudioSample (same logic as decodeToAudioSamples)
+        if (frame.channels == 2) {
+            fl::vector<fl::i16> mono_pcm;
+            mono_pcm.reserve(frame.samples);
+            for (int i = 0; i < frame.samples; i++) {
+                fl::i32 left = frame.pcm[i * 2];
+                fl::i32 right = frame.pcm[i * 2 + 1];
+                fl::i32 avg = (left + right) / 2;
+                mono_pcm.push_back(static_cast<fl::i16>(avg));
+            }
+            samples.push_back(AudioSample(fl::span<const fl::i16>(mono_pcm.data(), mono_pcm.size())));
+        } else {
+            samples.push_back(AudioSample(fl::span<const fl::i16>(frame.pcm, frame.samples)));
+        }
+        frame_count_decode++;
+    });
+    REQUIRE_GT(samples.size(), 0);
+
+    // Set up pitch detection in monophonic mode for melody detection
+    SoundToMIDI cfg;
+    cfg.sample_rate_hz = detected_sample_rate; // Use actual MP3 sample rate
+    cfg.frame_size = 2048; // Larger frame for better frequency resolution
+    cfg.polyphonic = false; // Monophonic melody detection
+    cfg.note_hold_frames = 4; // Require stable pitch for 4 frames
+    cfg.silence_frames_off = 3; // Require 3 frames of silence for note-off
+    cfg.rms_gate = 0.012f; // Gate to filter background noise
+    cfg.median_filter_size = 7; // Larger median filter for stability
+    cfg.confidence_threshold = 0.85f; // Higher confidence threshold
+    cfg.note_change_semitone_threshold = 1; // Require at least 1 semitone change
+    cfg.note_change_hold_frames = 5; // New note must persist for 5 frames
+
+    SoundToMIDIEngine engine(cfg);
+
+    fl::vector<int> detected_notes;
+    fl::vector<int> detected_full_notes; // Store full MIDI note numbers
+    fl::vector<float> detected_frequencies; // Store detected frequencies
+    fl::vector<float> detected_rms; // Store RMS values
+    int totalNoteOnEvents = 0;
+    int totalNoteOffEvents = 0;
+    int frame_count = 0;
+
+    engine.onNoteOn = [&](uint8_t note, uint8_t vel) {
+        detected_notes.push_back(note % 12); // Store note class only (modulo 12)
+        detected_full_notes.push_back(note); // Store full MIDI note
+        totalNoteOnEvents++;
+        printf("  Frame %d: Note ON: %d (class %d), vel=%d\n", frame_count, note, note % 12, vel);
+    };
+
+    engine.onNoteOff = [&](uint8_t note) {
+        totalNoteOffEvents++;
+    };
+
+    // Flatten all AudioSamples into a single PCM buffer
+    fl::vector<float> all_pcm;
+    for (const auto& sample : samples) {
+        const auto& pcm = sample.pcm();
+        for (fl::i16 value : pcm) {
+            all_pcm.push_back(value / 32768.0f); // Convert i16 to float [-1.0, 1.0]
+        }
+    }
+
+    // Process audio in chunks (no overlap for more stable note detection)
+    fl::size frame_size = cfg.frame_size;
+    fl::vector<float> frame_buffer;
+    frame_buffer.resize(frame_size);
+
+    for (fl::size i = 0; i < all_pcm.size(); i += frame_size) {
+        fl::size chunk_size = fl_min(frame_size, all_pcm.size() - i);
+
+        // Copy PCM data to frame buffer
+        for (fl::size j = 0; j < chunk_size; ++j) {
+            frame_buffer[j] = all_pcm[i + j];
+        }
+
+        // Pad with zeros if needed
+        for (fl::size j = chunk_size; j < frame_size; ++j) {
+            frame_buffer[j] = 0.0f;
+        }
+
+        engine.processFrame(frame_buffer.data(), frame_size);
+        frame_count++;
+    }
+
+    // Print detected sequence for analysis
+    printf("MP3 to MIDI Pipeline Test Results:\n");
+    printf("  Total note-on events: %d\n", totalNoteOnEvents);
+    printf("  Total note-off events: %d\n", totalNoteOffEvents);
+    printf("  Unique notes detected: %zu\n", detected_notes.size());
+
+    // Expected melody: "Mary Had a Little Lamb" (note classes modulo 12)
+    // E  D  C  D  E  E  E  D  D  D  E  G  G  E  D  C  D  E  E  E  E  D  D  E  D  C
+    // 4  2  0  2  4  4  4  2  2  2  4  7  7  4  2  0  2  4  4  4  4  2  2  4  2  0
+    const int expected_melody[] = {4, 2, 0, 2, 4, 4, 4, 2, 2, 2, 4, 7, 7, 4, 2, 0, 2, 4, 4, 4, 4, 2, 2, 4, 2, 0};
+    const int expected_length = sizeof(expected_melody) / sizeof(expected_melody[0]);
+
+    // Print first 10 detected notes for diagnostic purposes
+    printf("  First 10 notes detected (note %% 12): ");
+    for (size_t i = 0; i < fl_min(static_cast<size_t>(10), detected_notes.size()); ++i) {
+        printf("%d ", detected_notes[i]);
+    }
+    printf("\n");
+
+    printf("  First 10 notes expected (note %% 12): ");
+    for (int i = 0; i < fl_min(10, expected_length); ++i) {
+        printf("%d ", expected_melody[i]);
+    }
+    printf("\n");
+
+    // Count matches in first 10 notes (allowing for spurious detections)
+    int matches_in_first_10 = 0;
+    int expected_idx = 0;
+    for (size_t i = 0; i < fl_min(static_cast<size_t>(15), detected_notes.size()) && expected_idx < 10; ++i) {
+        if (detected_notes[i] == expected_melody[expected_idx]) {
+            matches_in_first_10++;
+            expected_idx++;
+        }
+    }
+
+    // Check first note is correct (critical)
+    REQUIRE_GE(detected_notes.size(), static_cast<size_t>(1));
+    CHECK_EQ(detected_notes[0], 4); // First note must be E (4)
+
+    // Check we got at least 7 out of first 10 notes correct (70% match rate)
+    CHECK_GE(matches_in_first_10, 7);
+
+    printf("  Match rate (first 10 notes): %d/10 = %.0f%%\n", matches_in_first_10, 100.0 * matches_in_first_10 / 10.0);
+
+    // Verify the pipeline is working:
+    // 1. MP3 decoded successfully (already checked by REQUIRE_GT above)
+    // 2. PCM data was generated
+    CHECK_GT(all_pcm.size(), 0);
+
+    // 3. Pitch detection produced note events
+    CHECK_GT(totalNoteOnEvents, 0);
+    CHECK_GT(totalNoteOffEvents, 0);
+
+    // 4. Detected a reasonable number of notes for a musical piece
+    CHECK_GE(detected_notes.size(), static_cast<size_t>(10));
+
+    // 5. Note range is reasonable (MIDI notes should be in musical range)
+    for (int note : detected_full_notes) {
+        CHECK_GE(note, 20); // Below A0 is unusual
+        CHECK_LE(note, 108); // Above C8 is unusual
+    }
+
+    // 6. Verify note-on and note-off counts are balanced
+    int diff = totalNoteOnEvents > totalNoteOffEvents ?
+               totalNoteOnEvents - totalNoteOffEvents :
+               totalNoteOffEvents - totalNoteOnEvents;
+    CHECK_LE(diff, 10);
+
+    printf("✓ MP3 → PCM → Pitch Detection → MIDI pipeline validated!\n");
+    printf("  Melody detection accuracy: %d/10 notes correct (%.0f%%)\n", matches_in_first_10, 100.0 * matches_in_first_10 / 10.0);
+}
