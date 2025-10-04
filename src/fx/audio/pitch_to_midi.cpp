@@ -1,10 +1,18 @@
 #include "pitch_to_midi.h"
 #include "fl/math.h"
+#include "fl/vector.h"
+#include "fl/pair.h"
 
 namespace fl {
 
 // ---------- Helper functions ----------
 namespace {
+
+// Structure to hold a detected note and its peak magnitude
+struct NotePeak {
+  int midi;
+  float magnitude;
+};
 
 inline int hz_to_midi(float f) {
   // log2(x) = log(x) / log(2)
@@ -40,6 +48,142 @@ inline int clampMidi(int n) {
 inline int noteDelta(int a, int b) {
   int d = a - b;
   return d >= 0 ? d : -d;
+}
+
+// Cooley-Tukey FFT (in-place, radix-2). Requires N to be a power of 2.
+inline void fft(const float* input, int N, fl::vector<fl::pair<float, float>>& out) {
+  out.resize(N);
+  // Copy input into output array (real, imag)
+  for (int i = 0; i < N; ++i) {
+    out[i].first = input[i];
+    out[i].second = 0.0f;
+  }
+
+  // Bit-reversal permutation
+  int log2N = 0;
+  while ((1 << log2N) < N) ++log2N;
+  for (int i = 1, j = 0; i < N; ++i) {
+    int bit = N >> 1;
+    for (; j & bit; bit >>= 1) {
+      j ^= bit;
+    }
+    j ^= bit;
+    if (i < j) {
+      fl::pair<float, float> tmp = out[i];
+      out[i] = out[j];
+      out[j] = tmp;
+    }
+  }
+
+  // FFT butterfly stages
+  for (int len = 2; len <= N; len <<= 1) {
+    float theta = -2.0f * M_PI / (float)len;
+    float wlen_re = cosf(theta);
+    float wlen_im = sinf(theta);
+    for (int i = 0; i < N; i += len) {
+      float w_re = 1.0f;
+      float w_im = 0.0f;
+      for (int j = 0; j < len/2; ++j) {
+        float u_re = out[i+j].first;
+        float u_im = out[i+j].second;
+        float v_re = out[i+j+len/2].first * w_re - out[i+j+len/2].second * w_im;
+        float v_im = out[i+j+len/2].first * w_im + out[i+j+len/2].second * w_re;
+
+        out[i+j].first = u_re + v_re;
+        out[i+j].second = u_im + v_im;
+        out[i+j+len/2].first = u_re - v_re;
+        out[i+j+len/2].second = u_im - v_im;
+
+        float w_tmp = w_re * wlen_re - w_im * wlen_im;
+        w_im = w_re * wlen_im + w_im * wlen_re;
+        w_re = w_tmp;
+      }
+    }
+  }
+}
+
+// Detect multiple fundamental frequencies in the frame using FFT.
+// Returns a list of NotePeak (MIDI note and its fundamental magnitude).
+inline fl::vector<NotePeak> detectPolyphonicNotes(const float* x, int N, float sr, float fmin, float fmax) {
+  // Compute FFT of input frame (assume N is power of 2 for simplicity)
+  fl::vector<fl::pair<float, float>> spectrum;
+  fft(x, N, spectrum);
+  int halfN = N / 2;
+
+  // Magnitude spectrum (only need [0, N/2] for real input)
+  fl::vector<float> mag(halfN);
+  for (int i = 0; i < halfN; ++i) {
+    float re = spectrum[i].first;
+    float im = spectrum[i].second;
+    mag[i] = sqrtf(re*re + im*im);
+  }
+
+  // Determine frequency bin range for fmin to fmax
+  int binMin = (int)floorf(fmin * N / sr);
+  int binMax = (int)ceilf(fmax * N / sr);
+  if (binMin < 1) binMin = 1;               // start from 1 to skip DC
+  if (binMax > halfN - 1) binMax = halfN - 1;
+
+  // Calculate median magnitude in [binMin, binMax] to use as noise threshold
+  fl::vector<float> magslice;
+  magslice.reserve(binMax - binMin + 1);
+  for (int i = binMin; i <= binMax; ++i) {
+    magslice.push_back(mag[i]);
+  }
+
+  // Simple median calculation (sort and take middle)
+  for (size_t i = 0; i < magslice.size() - 1; ++i) {
+    for (size_t j = 0; j < magslice.size() - i - 1; ++j) {
+      if (magslice[j] > magslice[j + 1]) {
+        float tmp = magslice[j];
+        magslice[j] = magslice[j + 1];
+        magslice[j + 1] = tmp;
+      }
+    }
+  }
+  float medianMag = magslice[magslice.size() / 2];
+  float threshold = medianMag * 1.5f;  // threshold factor (1.5x median, adjust as needed)
+
+  // Find local peaks above threshold in the specified range
+  fl::vector<int> peakIndices;
+  peakIndices.reserve(16);
+  for (int i = binMin + 1; i < binMax; ++i) {
+    if (mag[i] > threshold && mag[i] >= mag[i-1] && mag[i] >= mag[i+1]) {
+      peakIndices.push_back(i);
+    }
+  }
+  if (peakIndices.empty()) {
+    return fl::vector<NotePeak>();  // no significant peaks found
+  }
+
+  // Sort detected peaks by frequency (ascending) - already in order from loop above
+
+  // Group peaks by fundamental-harmonic relationship
+  fl::vector<NotePeak> result;
+  fl::vector<bool> used(peakIndices.size(), false);
+  for (size_t p = 0; p < peakIndices.size(); ++p) {
+    if (used[p]) continue;
+    int idx = peakIndices[p];
+    // Consider this peak a fundamental frequency
+    float freq = sr * (float)idx / (float)N;
+    int midiNote = clampMidi(hz_to_midi(freq));
+    float peakMag = mag[idx];
+
+    // Mark harmonics of this fundamental as used
+    for (size_t q = p + 1; q < peakIndices.size(); ++q) {
+      int idx2 = peakIndices[q];
+      if (used[q]) continue;
+      // Check if idx2 is ~ an integer multiple of idx
+      float ratio = (float)idx2 / idx;
+      int roundMult = (int)floorf(ratio + 0.5f);
+      if (roundMult >= 2 && fabsf(ratio - roundMult) < 0.1f) {
+        used[q] = true;
+      }
+    }
+    // Store this fundamental note and its magnitude
+    result.push_back({midiNote, peakMag});
+  }
+  return result;
 }
 
 } // namespace
@@ -133,6 +277,12 @@ PitchToMIDIEngine::PitchToMIDIEngine(const PitchToMIDI& cfg)
   for (int i = 0; i < MAX_MEDIAN_SIZE; ++i) {
     _noteHistory[i] = -1;
   }
+  // Initialize polyphonic tracking arrays
+  for (int note = 0; note < 128; ++note) {
+    _activeNotes[note] = false;
+    _noteOnCount[note] = 0;
+    _noteOffCount[note] = 0;
+  }
 }
 
 int PitchToMIDIEngine::getMedianNote() {
@@ -175,14 +325,103 @@ int PitchToMIDIEngine::getMedianNote() {
 void PitchToMIDIEngine::processFrame(const float* frame, int n) {
   if (!frame || n != _cfg.frame_size) return;
 
-  // Pitch & loudness
-  const PitchResult pr = _det.detect(frame, n, _cfg.sample_rate_hz, _cfg.fmin_hz, _cfg.fmax_hz);
+  // Compute loudness (RMS) of the frame
   const float rms = compute_rms(frame, n);
-  const bool voiced = (rms > _cfg.rms_gate) &&
-                      (pr.confidence > _cfg.confidence_threshold) &&
-                      (pr.freq_hz > 0.0f);
 
-  if (voiced) {
+  if (_cfg.polyphonic) {
+    // --- Polyphonic pitch detection branch ---
+    bool voiced = (rms > _cfg.rms_gate);
+    if (voiced) {
+      // Get all detected note peaks in this frame
+      fl::vector<NotePeak> notes = detectPolyphonicNotes(frame, n, _cfg.sample_rate_hz,
+                                                         _cfg.fmin_hz, _cfg.fmax_hz);
+      // Prepare a lookup for which MIDI notes are present in this frame
+      bool present[128] = {false};
+      for (const NotePeak& np : notes) {
+        if (np.midi >= 0 && np.midi < 128) {
+          present[np.midi] = true;
+        }
+      }
+      // Compute global amplitude normalization for velocity
+      float globalNorm = clamp01(rms * _cfg.vel_gain);
+      // Determine the maximum peak magnitude among detected notes (for relative loudness)
+      float maxMag = 0.0f;
+      for (const NotePeak& np : notes) {
+        if (np.magnitude > maxMag) maxMag = np.magnitude;
+      }
+      if (maxMag < 1e-6f) maxMag = 1e-6f;  // avoid division by zero
+
+      // Update note states
+      for (int note = 0; note < 128; ++note) {
+        if (present[note]) {
+          // Note is detected in current frame
+          if (!_activeNotes[note]) {
+            // Note currently off -> potential note-on
+            _noteOnCount[note] += 1;
+            _noteOffCount[note] = 0;
+            if (_noteOnCount[note] >= _cfg.note_hold_frames) {
+              // Confirmed new Note On
+              // Calculate velocity based on note's relative magnitude
+              float relAmp = 0.0f;
+              // Find this note's magnitude in the notes vector
+              for (const NotePeak& np : notes) {
+                if (np.midi == note) {
+                  relAmp = np.magnitude / maxMag;
+                  break;
+                }
+              }
+              float velNorm = clamp01(globalNorm * relAmp);
+              int vel = (int)lroundf(_cfg.vel_floor + velNorm * (127 - _cfg.vel_floor));
+              if (vel < 1) vel = 1;
+              if (vel > 127) vel = 127;
+              if (onNoteOn) onNoteOn((uint8_t)note, (uint8_t)vel);
+              _activeNotes[note] = true;
+              _noteOnCount[note] = 0;
+            }
+          } else {
+            // Note is already active and continues
+            _noteOnCount[note] = 0;  // reset any pending on counter (already on)
+            _noteOffCount[note] = 0; // reset off counter since still sounding
+          }
+        } else {
+          // Note is NOT present in current frame
+          _noteOnCount[note] = 0;
+          if (_activeNotes[note]) {
+            // An active note might be turning off
+            _noteOffCount[note] += 1;
+            if (_noteOffCount[note] >= _cfg.silence_frames_off) {
+              // Confirmed note-off after sustained silence
+              if (onNoteOff) onNoteOff((uint8_t)note);
+              _activeNotes[note] = false;
+              _noteOffCount[note] = 0;
+            }
+          } else {
+            _noteOffCount[note] = 0;
+          }
+        }
+      }
+    } else {
+      // Not voiced (below RMS gate): treat as silence, increment off counters for all active notes
+      for (int note = 0; note < 128; ++note) {
+        _noteOnCount[note] = 0;
+        if (_activeNotes[note]) {
+          _noteOffCount[note] += 1;
+          if (_noteOffCount[note] >= _cfg.silence_frames_off) {
+            if (onNoteOff) onNoteOff((uint8_t)note);
+            _activeNotes[note] = false;
+            _noteOffCount[note] = 0;
+          }
+        }
+      }
+    }
+  } else {
+    // --- Monophonic pitch detection branch (original logic) ---
+    const PitchResult pr = _det.detect(frame, n, _cfg.sample_rate_hz, _cfg.fmin_hz, _cfg.fmax_hz);
+    const bool voiced = (rms > _cfg.rms_gate) &&
+                        (pr.confidence > _cfg.confidence_threshold) &&
+                        (pr.freq_hz > 0.0f);
+
+    if (voiced) {
     int rawNote = clampMidi(hz_to_midi(pr.freq_hz));
 
     // Option 3: Add to median filter history
@@ -246,6 +485,7 @@ void PitchToMIDIEngine::processFrame(const float* frame, int n) {
         _historyCount = 0;
         _historyIndex = 0;
       }
+    }
     }
   }
 }

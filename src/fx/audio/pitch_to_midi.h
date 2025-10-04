@@ -70,6 +70,9 @@ struct PitchToMIDI {
   int   note_change_semitone_threshold = 1;  ///< Semitones required to trigger note change (0=off)
   int   note_change_hold_frames = 5;         ///< Frames new note must persist before switching
   int   median_filter_size = 5;              ///< Median filter window size (1=off, max=11, odd recommended)
+
+  // Polyphonic Mode
+  bool  polyphonic = false;                  ///< Enable polyphonic detection (multiple simultaneous notes)
 };
 
 // ---------- Pitch Detection Result ----------
@@ -159,6 +162,11 @@ private:
   int _noteHistory[MAX_MEDIAN_SIZE];  ///< Circular buffer of recent note detections
   int _historyIndex;                  ///< Current write position in history
   int _historyCount;                  ///< Number of valid entries in history
+
+  // Polyphonic tracking state (128 MIDI notes)
+  bool _activeNotes[128];             ///< Which notes are currently on
+  int _noteOnCount[128];              ///< Consecutive frames each note has been detected
+  int _noteOffCount[128];             ///< Consecutive frames each note has been silent
 
   /// @brief Calculate median from note history buffer
   /// @return Median MIDI note number

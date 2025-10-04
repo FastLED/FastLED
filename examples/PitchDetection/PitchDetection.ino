@@ -58,15 +58,30 @@ UISlider brightness("Brightness", 128, 0, 255, 1);
 UISlider fadeSpeed("Fade Speed", 20, 5, 100, 5);
 UIButton testWhite("Test All White");
 
+// Polyphonic mode
+UICheckbox polyphonicMode("Polyphonic Mode", false);
+
 // Global variables
 CRGB leds[NUM_LEDS];
 
 // Pitch detection
 PitchToMIDI pitchConfig;
 PitchToMIDIEngine* pitchEngine = nullptr;
+
+// Monophonic state
 uint8_t currentMIDINote = 0;
 uint8_t currentVelocity = 0;
 bool noteIsOn = false;
+
+// Polyphonic state (track up to 16 simultaneous notes)
+struct ActiveNote {
+    uint8_t midiNote;
+    uint8_t velocity;
+    bool active;
+};
+ActiveNote activeNotes[16];
+int numActiveNotes = 0;
+
 bool anyNoteDetected = false;
 uint32_t lastNoteTime = 0;
 
@@ -121,21 +136,46 @@ void drawHistogram() {
     // Fade the entire matrix
     fadeToBlackBy(leds, NUM_LEDS, fadeSpeed.as_int());
 
-    if (noteIsOn) {
-        // Map MIDI note to Y position (piano range: 21-108, 88 keys)
-        float notePos = fl::map_range<float, float>(currentMIDINote, 21.0f, 108.0f, 0.0f, 1.0f);
-        notePos = fl::clamp(notePos, 0.0f, 1.0f);
-        int yPos = notePos * (MATRIX_HEIGHT - 1);
+    if (polyphonicMode.value()) {
+        // Polyphonic mode: draw all active notes
+        for (int i = 0; i < numActiveNotes; i++) {
+            if (activeNotes[i].active) {
+                // Map MIDI note to Y position (piano range: 21-108, 88 keys)
+                float notePos = fl::map_range<float, float>(activeNotes[i].midiNote, 21.0f, 108.0f, 0.0f, 1.0f);
+                notePos = fl::clamp(notePos, 0.0f, 1.0f);
+                int yPos = notePos * (MATRIX_HEIGHT - 1);
 
-        // Draw new column at x=0 (left side)
-        CRGB color = getNoteColor(currentMIDINote);
-        uint8_t ledBrightness = fl::map_range<uint8_t, uint8_t>(currentVelocity, 0, 127, 100, 255);
-        color.fadeToBlackBy(255 - ledBrightness);
+                // Draw new column at x=0 (left side)
+                CRGB color = getNoteColor(activeNotes[i].midiNote);
+                uint8_t ledBrightness = fl::map_range<uint8_t, uint8_t>(activeNotes[i].velocity, 0, 127, 100, 255);
+                color.fadeToBlackBy(255 - ledBrightness);
 
-        // Draw a single dot at yPos
-        int idx = XY(0, yPos);
-        if (idx >= 0) {
-            leds[idx] = color;
+                // Draw a single dot at yPos
+                int idx = XY(0, yPos);
+                if (idx >= 0) {
+                    // Blend if multiple notes at same position
+                    leds[idx] += color;
+                }
+            }
+        }
+    } else {
+        // Monophonic mode: draw single note
+        if (noteIsOn) {
+            // Map MIDI note to Y position (piano range: 21-108, 88 keys)
+            float notePos = fl::map_range<float, float>(currentMIDINote, 21.0f, 108.0f, 0.0f, 1.0f);
+            notePos = fl::clamp(notePos, 0.0f, 1.0f);
+            int yPos = notePos * (MATRIX_HEIGHT - 1);
+
+            // Draw new column at x=0 (left side)
+            CRGB color = getNoteColor(currentMIDINote);
+            uint8_t ledBrightness = fl::map_range<uint8_t, uint8_t>(currentVelocity, 0, 127, 100, 255);
+            color.fadeToBlackBy(255 - ledBrightness);
+
+            // Draw a single dot at yPos
+            int idx = XY(0, yPos);
+            if (idx >= 0) {
+                leds[idx] = color;
+            }
         }
     }
 
@@ -216,42 +256,133 @@ void setup() {
         Serial.println("Button released");
     });
 
+    polyphonicMode.onChanged([](bool value) {
+        if (pitchEngine) {
+            PitchToMIDI cfg = pitchEngine->config();
+            cfg.polyphonic = value;
+            pitchEngine->setConfig(cfg);
+
+            // Clear active notes when switching modes
+            numActiveNotes = 0;
+            for (int i = 0; i < 16; i++) {
+                activeNotes[i].active = false;
+            }
+            noteIsOn = false;
+
+            Serial.print("Polyphonic mode ");
+            Serial.println(value ? "ENABLED" : "DISABLED");
+        }
+    });
+
     // Initialize pitch detection with stability settings
     pitchConfig.sample_rate_hz = SAMPLE_RATE;
     pitchConfig.confidence_threshold = confidenceThreshold.value();
     pitchConfig.note_change_semitone_threshold = semitoneThreshold.as_int();
     pitchConfig.note_change_hold_frames = noteChangeHoldFrames.as_int();
     pitchConfig.median_filter_size = medianFilterSize.as_int();
+    pitchConfig.polyphonic = polyphonicMode.value();
     pitchEngine = new PitchToMIDIEngine(pitchConfig);
 
+    // Initialize active notes array
+    for (int i = 0; i < 16; i++) {
+        activeNotes[i].active = false;
+    }
+
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
-        currentMIDINote = note;
-        currentVelocity = velocity;
-        noteIsOn = true;
         anyNoteDetected = true;
         lastNoteTime = millis();
 
         char noteName[8];
         getNoteName(note, noteName);
 
-        Serial.print("Note ON: ");
-        Serial.print(noteName);
-        Serial.print(" (MIDI: ");
-        Serial.print(note);
-        Serial.print(", vel: ");
-        Serial.print(velocity);
-        Serial.println(")");
+        if (polyphonicMode.value()) {
+            // Polyphonic mode: add to active notes
+            int slot = -1;
+            // First, check if note is already active (update velocity)
+            for (int i = 0; i < numActiveNotes; i++) {
+                if (activeNotes[i].active && activeNotes[i].midiNote == note) {
+                    activeNotes[i].velocity = velocity;
+                    slot = i;
+                    break;
+                }
+            }
+            // If not found, add to first available slot
+            if (slot == -1) {
+                for (int i = 0; i < 16; i++) {
+                    if (!activeNotes[i].active) {
+                        activeNotes[i].midiNote = note;
+                        activeNotes[i].velocity = velocity;
+                        activeNotes[i].active = true;
+                        if (i >= numActiveNotes) {
+                            numActiveNotes = i + 1;
+                        }
+                        break;
+                    }
+                }
+            }
+
+            Serial.print("Note ON (poly): ");
+            Serial.print(noteName);
+            Serial.print(" (MIDI: ");
+            Serial.print(note);
+            Serial.print(", vel: ");
+            Serial.print(velocity);
+            Serial.print(") - Active notes: ");
+            int count = 0;
+            for (int i = 0; i < 16; i++) {
+                if (activeNotes[i].active) count++;
+            }
+            Serial.println(count);
+        } else {
+            // Monophonic mode
+            currentMIDINote = note;
+            currentVelocity = velocity;
+            noteIsOn = true;
+
+            Serial.print("Note ON: ");
+            Serial.print(noteName);
+            Serial.print(" (MIDI: ");
+            Serial.print(note);
+            Serial.print(", vel: ");
+            Serial.print(velocity);
+            Serial.println(")");
+        }
     };
 
     pitchEngine->onNoteOff = [](uint8_t note) {
-        noteIsOn = false;
         lastNoteTime = millis();
 
         char noteName[8];
         getNoteName(note, noteName);
 
-        Serial.print("Note OFF: ");
-        Serial.println(noteName);
+        if (polyphonicMode.value()) {
+            // Polyphonic mode: remove from active notes
+            for (int i = 0; i < 16; i++) {
+                if (activeNotes[i].active && activeNotes[i].midiNote == note) {
+                    activeNotes[i].active = false;
+                    break;
+                }
+            }
+            // Compact the array
+            while (numActiveNotes > 0 && !activeNotes[numActiveNotes - 1].active) {
+                numActiveNotes--;
+            }
+
+            Serial.print("Note OFF (poly): ");
+            Serial.print(noteName);
+            Serial.print(" - Active notes: ");
+            int count = 0;
+            for (int i = 0; i < 16; i++) {
+                if (activeNotes[i].active) count++;
+            }
+            Serial.println(count);
+        } else {
+            // Monophonic mode
+            noteIsOn = false;
+
+            Serial.print("Note OFF: ");
+            Serial.println(noteName);
+        }
     };
 
     Serial.println("Setup complete!");
