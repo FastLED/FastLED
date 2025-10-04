@@ -66,7 +66,7 @@ CRGB leds[NUM_LEDS];
 
 // Pitch detection
 SoundToMIDI pitchConfig;
-SoundToMIDIEngine* pitchEngine = nullptr;
+SoundToMIDIBase* pitchEngine = nullptr;
 
 // Monophonic state
 uint8_t currentMIDINote = 0;
@@ -191,102 +191,9 @@ void drawHistogram() {
     }
 }
 
-void setup() {
-    Serial.begin(115200);
-    delay(1000);
-
-    Serial.println("Sound to MIDI Histogram");
-    Serial.println("=======================");
-
-    // Initialize LEDs with rectangular screenmap for visualization
-    XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
-    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setScreenMap(xyMap);
-    FastLED.setBrightness(brightness.as_int());
-    FastLED.clear();
-    FastLED.show();
-
-    // Set up UI callbacks
-    brightness.onChanged([](float value) {
-        FastLED.setBrightness(value);
-    });
-
-    confidenceThreshold.onChanged([](float value) {
-        if (pitchEngine) {
-            SoundToMIDI cfg = pitchEngine->config();
-            cfg.confidence_threshold = value;
-            pitchEngine->setConfig(cfg);
-        }
-    });
-
-    semitoneThreshold.onChanged([](float value) {
-        if (pitchEngine) {
-            SoundToMIDI cfg = pitchEngine->config();
-            cfg.note_change_semitone_threshold = (int)value;
-            pitchEngine->setConfig(cfg);
-        }
-    });
-
-    noteChangeHoldFrames.onChanged([](float value) {
-        if (pitchEngine) {
-            SoundToMIDI cfg = pitchEngine->config();
-            cfg.note_change_hold_frames = (int)value;
-            pitchEngine->setConfig(cfg);
-        }
-    });
-
-    medianFilterSize.onChanged([](float value) {
-        if (pitchEngine) {
-            SoundToMIDI cfg = pitchEngine->config();
-            cfg.median_filter_size = (int)value;
-            pitchEngine->setConfig(cfg);
-        }
-    });
-
-    testWhite.onPressed([]() {
-        FL_WARN("Test White button pressed - setting all LEDs to white");
-        for (int i = 0; i < NUM_LEDS; i++) {
-            leds[i] = CRGB(255, 255, 255);
-        }
-        FastLED.show();
-        Serial.println("Button pressed - All LEDs set to white (255, 255, 255)");
-    });
-
-    testWhite.onReleased([]() {
-        FL_WARN("Test White button released");
-        Serial.println("Button released");
-    });
-
-    polyphonicMode.onChanged([](bool value) {
-        if (pitchEngine) {
-            SoundToMIDI cfg = pitchEngine->config();
-            cfg.polyphonic = value;
-            pitchEngine->setConfig(cfg);
-
-            // Clear active notes when switching modes
-            numActiveNotes = 0;
-            for (int i = 0; i < 16; i++) {
-                activeNotes[i].active = false;
-            }
-            noteIsOn = false;
-
-            Serial.print("Polyphonic mode ");
-            Serial.println(value ? "ENABLED" : "DISABLED");
-        }
-    });
-
-    // Initialize pitch detection with stability settings
-    pitchConfig.sample_rate_hz = SAMPLE_RATE;
-    pitchConfig.confidence_threshold = confidenceThreshold.value();
-    pitchConfig.note_change_semitone_threshold = semitoneThreshold.as_int();
-    pitchConfig.note_change_hold_frames = noteChangeHoldFrames.as_int();
-    pitchConfig.median_filter_size = medianFilterSize.as_int();
-    pitchConfig.polyphonic = polyphonicMode.value();
-    pitchEngine = new SoundToMIDIEngine(pitchConfig);
-
-    // Initialize active notes array
-    for (int i = 0; i < 16; i++) {
-        activeNotes[i].active = false;
-    }
+// Setup pitch engine callbacks
+void setupPitchEngineCallbacks() {
+    if (!pitchEngine) return;
 
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
         anyNoteDetected = true;
@@ -381,9 +288,126 @@ void setup() {
             noteIsOn = false;
 
             Serial.print("Note OFF: ");
-            Serial.println(noteName);
+            Serial.print(noteName);
+            Serial.println();
         }
     };
+}
+
+void setup() {
+    Serial.begin(115200);
+    delay(1000);
+
+    Serial.println("Sound to MIDI Histogram");
+    Serial.println("=======================");
+
+    // Initialize LEDs with rectangular screenmap for visualization
+    XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
+    FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setScreenMap(xyMap);
+    FastLED.setBrightness(brightness.as_int());
+    FastLED.clear();
+    FastLED.show();
+
+    // Set up UI callbacks
+    brightness.onChanged([](float value) {
+        FastLED.setBrightness(value);
+    });
+
+    confidenceThreshold.onChanged([](float value) {
+        if (pitchEngine) {
+            SoundToMIDI cfg = pitchEngine->config();
+            cfg.confidence_threshold = value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    semitoneThreshold.onChanged([](float value) {
+        if (pitchEngine) {
+            SoundToMIDI cfg = pitchEngine->config();
+            cfg.note_change_semitone_threshold = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    noteChangeHoldFrames.onChanged([](float value) {
+        if (pitchEngine) {
+            SoundToMIDI cfg = pitchEngine->config();
+            cfg.note_change_hold_frames = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    medianFilterSize.onChanged([](float value) {
+        if (pitchEngine) {
+            SoundToMIDI cfg = pitchEngine->config();
+            cfg.median_filter_size = (int)value;
+            pitchEngine->setConfig(cfg);
+        }
+    });
+
+    testWhite.onPressed([]() {
+        FL_WARN("Test White button pressed - setting all LEDs to white");
+        for (int i = 0; i < NUM_LEDS; i++) {
+            leds[i] = CRGB(255, 255, 255);
+        }
+        FastLED.show();
+        Serial.println("Button pressed - All LEDs set to white (255, 255, 255)");
+    });
+
+    testWhite.onReleased([]() {
+        FL_WARN("Test White button released");
+        Serial.println("Button released");
+    });
+
+    polyphonicMode.onChanged([](bool value) {
+        if (pitchEngine) {
+            // Get current config and delete old engine
+            SoundToMIDI cfg = pitchEngine->config();
+            delete pitchEngine;
+
+            // Create new engine with appropriate type
+            if (value) {
+                pitchEngine = new SoundToMIDIPoly(cfg);
+            } else {
+                pitchEngine = new SoundToMIDIMono(cfg);
+            }
+
+            // Re-setup callbacks for the new engine
+            setupPitchEngineCallbacks();
+
+            // Clear active notes when switching modes
+            numActiveNotes = 0;
+            for (int i = 0; i < 16; i++) {
+                activeNotes[i].active = false;
+            }
+            noteIsOn = false;
+
+            Serial.print("Polyphonic mode ");
+            Serial.println(value ? "ENABLED" : "DISABLED");
+        }
+    });
+
+    // Initialize pitch detection with stability settings
+    pitchConfig.sample_rate_hz = SAMPLE_RATE;
+    pitchConfig.confidence_threshold = confidenceThreshold.value();
+    pitchConfig.note_change_semitone_threshold = semitoneThreshold.as_int();
+    pitchConfig.note_change_hold_frames = noteChangeHoldFrames.as_int();
+    pitchConfig.median_filter_size = medianFilterSize.as_int();
+
+    // Create engine based on polyphonic mode
+    if (polyphonicMode.value()) {
+        pitchEngine = new SoundToMIDIPoly(pitchConfig);
+    } else {
+        pitchEngine = new SoundToMIDIMono(pitchConfig);
+    }
+
+    // Initialize active notes array
+    for (int i = 0; i < 16; i++) {
+        activeNotes[i].active = false;
+    }
+
+    // Setup pitch engine callbacks
+    setupPitchEngineCallbacks();
 
     Serial.println("Setup complete!");
     Serial.println("Sing or play an instrument to see sound to MIDI conversion.");

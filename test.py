@@ -304,7 +304,7 @@ def main() -> None:
                         print("Invalid fingerprint file. Recalculating...")
             return None
 
-        # Calculate and save fingerprint
+        # Calculate fingerprint (but don't save until tests pass)
         prev_fingerprint = read_fingerprint()
         fingerprint_data = calculate_fingerprint()
         src_code_change = (
@@ -312,7 +312,6 @@ def main() -> None:
             if prev_fingerprint is None
             else fingerprint_data.hash != prev_fingerprint.hash
         )
-        write_fingerprint(fingerprint_data)
 
         # Set up C++ test-specific fingerprint caching
         cpp_test_fingerprint_file = cache_dir / "cpp_test_fingerprint.json"
@@ -340,7 +339,7 @@ def main() -> None:
                         print("Invalid C++ test fingerprint file. Recalculating...")
             return None
 
-        # Calculate and save C++ test fingerprint
+        # Calculate C++ test fingerprint (but don't save until tests pass)
         prev_cpp_test_fingerprint = read_cpp_test_fingerprint()
         cpp_test_fingerprint_data = calculate_cpp_test_fingerprint()
         cpp_test_change = (
@@ -348,7 +347,6 @@ def main() -> None:
             if prev_cpp_test_fingerprint is None
             else not prev_cpp_test_fingerprint.should_skip(cpp_test_fingerprint_data)
         )
-        write_cpp_test_fingerprint(cpp_test_fingerprint_data)
 
         # Set up examples test fingerprint caching
         examples_fingerprint_file = cache_dir / "examples_fingerprint.json"
@@ -376,7 +374,7 @@ def main() -> None:
                         return None
             return None
 
-        # Calculate and save examples fingerprint
+        # Calculate examples fingerprint (but don't save until tests pass)
         prev_examples_fingerprint = read_examples_fingerprint()
         examples_fingerprint_data = calculate_examples_fingerprint()
         examples_change = (
@@ -384,7 +382,6 @@ def main() -> None:
             if prev_examples_fingerprint is None
             else not prev_examples_fingerprint.should_skip(examples_fingerprint_data)
         )
-        write_examples_fingerprint(examples_fingerprint_data)
 
         # Set up Python test fingerprint caching
         python_test_fingerprint_file = cache_dir / "python_test_fingerprint.json"
@@ -412,7 +409,7 @@ def main() -> None:
                         return None
             return None
 
-        # Calculate and save Python test fingerprint
+        # Calculate Python test fingerprint (but don't save until tests pass)
         prev_python_test_fingerprint = read_python_test_fingerprint()
         python_test_fingerprint_data = calculate_python_test_fingerprint()
         python_test_change = (
@@ -422,7 +419,6 @@ def main() -> None:
                 python_test_fingerprint_data
             )
         )
-        write_python_test_fingerprint(python_test_fingerprint_data)
 
         # Handle QEMU testing
         if args.qemu is not None:
@@ -430,110 +426,140 @@ def main() -> None:
             run_qemu_tests(args)
             return
 
-        # Run tests using the test runner with sequential example compilation
-        # Check if we need to use sequential execution to avoid resource conflicts
-        if not args.unit and not args.examples and not args.py and args.full:
-            # Full test mode - use RunningProcessGroup for dependency-based execution
-            from ci.util.running_process import RunningProcess
-            from ci.util.running_process_group import (
-                ExecutionMode,
-                ProcessExecutionConfig,
-                RunningProcessGroup,
-            )
-            from ci.util.test_runner import (
-                create_examples_test_process,
-                create_python_test_process,
-            )
+        # Helper function to save all fingerprints with a given status
+        def save_fingerprints_with_status(status: str) -> None:
+            """Save all fingerprints with the specified status (success/failure)"""
+            fingerprint_data.status = status
+            cpp_test_fingerprint_data.status = status
+            examples_fingerprint_data.status = status
+            python_test_fingerprint_data.status = status
 
-            # Create Python test process (runs first)
-            python_process = create_python_test_process(
-                enable_stack_trace=False, full_tests=True
-            )
-            python_process.auto_run = False
+            write_fingerprint(fingerprint_data)
+            write_cpp_test_fingerprint(cpp_test_fingerprint_data)
+            write_examples_fingerprint(examples_fingerprint_data)
+            write_python_test_fingerprint(python_test_fingerprint_data)
 
-            # Create examples compilation process
-            examples_process = create_examples_test_process(
-                args, not args.no_stack_trace
-            )
-            examples_process.auto_run = False
+        # Track test success/failure for fingerprint status
+        tests_passed = False
 
-            # Configure sequential execution with dependencies
-            config = ProcessExecutionConfig(
-                execution_mode=ExecutionMode.SEQUENTIAL_WITH_DEPENDENCIES,
-                verbose=args.verbose,
-                timeout_seconds=2100,  # 35 minutes for sequential examples compilation
-                live_updates=True,  # Enable real-time display
-                display_type="auto",  # Auto-detect best display format
-            )
+        try:
+            # Run tests using the test runner with sequential example compilation
+            # Check if we need to use sequential execution to avoid resource conflicts
+            if not args.unit and not args.examples and not args.py and args.full:
+                # Full test mode - use RunningProcessGroup for dependency-based execution
+                from ci.util.running_process import RunningProcess
+                from ci.util.running_process_group import (
+                    ExecutionMode,
+                    ProcessExecutionConfig,
+                    RunningProcessGroup,
+                )
+                from ci.util.test_runner import (
+                    create_examples_test_process,
+                    create_python_test_process,
+                )
 
-            # Create process group and set up dependency
-            group = RunningProcessGroup(config=config, name="FullTestSequence")
-            group.add_process(python_process)
-            group.add_dependency(
-                examples_process, python_process
-            )  # examples depends on python
+                # Create Python test process (runs first)
+                python_process = create_python_test_process(
+                    enable_stack_trace=False, full_tests=True
+                )
+                python_process.auto_run = False
 
-            try:
-                # Start real-time display for full test mode
-                display_thread = None
-                if not args.verbose and config.live_updates:
-                    try:
-                        from ci.util.process_status_display import (
-                            display_process_status,
-                        )
+                # Create examples compilation process
+                examples_process = create_examples_test_process(
+                    args, not args.no_stack_trace
+                )
+                examples_process.auto_run = False
 
-                        display_thread = display_process_status(
-                            group,
-                            display_type=config.display_type,
-                            update_interval=config.update_interval,
-                        )
-                    except ImportError:
-                        pass  # Fall back to normal execution
+                # Configure sequential execution with dependencies
+                config = ProcessExecutionConfig(
+                    execution_mode=ExecutionMode.SEQUENTIAL_WITH_DEPENDENCIES,
+                    verbose=args.verbose,
+                    timeout_seconds=2100,  # 35 minutes for sequential examples compilation
+                    live_updates=True,  # Enable real-time display
+                    display_type="auto",  # Auto-detect best display format
+                )
 
-                timings = group.run()
+                # Create process group and set up dependency
+                group = RunningProcessGroup(config=config, name="FullTestSequence")
+                group.add_process(python_process)
+                group.add_dependency(
+                    examples_process, python_process
+                )  # examples depends on python
 
-                # Stop display thread if it was started
-                if display_thread:
-                    time.sleep(0.5)
+                try:
+                    # Start real-time display for full test mode
+                    display_thread = None
+                    if not args.verbose and config.live_updates:
+                        try:
+                            from ci.util.process_status_display import (
+                                display_process_status,
+                            )
 
-                print("Sequential test execution completed successfully")
+                            display_thread = display_process_status(
+                                group,
+                                display_type=config.display_type,
+                                update_interval=config.update_interval,
+                            )
+                        except ImportError:
+                            pass  # Fall back to normal execution
 
-                # Print timing summary
-                if timings:
-                    print(f"\nExecution Summary:")
-                    for timing in timings:
-                        print(f"  {timing.name}: {timing.duration:.2f}s")
-            except KeyboardInterrupt:
-                _thread.interrupt_main()
-                raise
-            except Exception as e:
-                print(f"Sequential test execution failed: {e}")
-                sys.exit(1)
-        else:
-            # Use normal test runner for other cases
-            # Force change flags=True when running a specific test to disable fingerprint cache
-            # Also force when --no-fingerprint is used
-            force_cpp_test_change = (
-                cpp_test_change or (args.test is not None) or args.no_fingerprint
-            )
-            force_examples_change = (
-                examples_change or (args.test is not None) or args.no_fingerprint
-            )
-            force_python_test_change = (
-                python_test_change or (args.test is not None) or args.no_fingerprint
-            )
-            force_src_code_change = src_code_change or args.no_fingerprint
+                    timings = group.run()
 
-            if args.no_fingerprint:
-                print("Fingerprint caching disabled (--no-fingerprint)")
+                    # Stop display thread if it was started
+                    if display_thread:
+                        time.sleep(0.5)
 
-            test_runner(
-                args,
-                force_src_code_change,
-                force_cpp_test_change,
-                force_examples_change,
-                force_python_test_change,
-            )
+                    print("Sequential test execution completed successfully")
+
+                    # Print timing summary
+                    if timings:
+                        print(f"\nExecution Summary:")
+                        for timing in timings:
+                            print(f"  {timing.name}: {timing.duration:.2f}s")
+                except KeyboardInterrupt:
+                    _thread.interrupt_main()
+                    raise
+                except Exception as e:
+                    print(f"Sequential test execution failed: {e}")
+                    sys.exit(1)
+            else:
+                # Use normal test runner for other cases
+                # Force change flags=True when running a specific test to disable fingerprint cache
+                # Also force when --no-fingerprint is used
+                force_cpp_test_change = (
+                    cpp_test_change or (args.test is not None) or args.no_fingerprint
+                )
+                force_examples_change = (
+                    examples_change or (args.test is not None) or args.no_fingerprint
+                )
+                force_python_test_change = (
+                    python_test_change or (args.test is not None) or args.no_fingerprint
+                )
+                force_src_code_change = src_code_change or args.no_fingerprint
+
+                if args.no_fingerprint:
+                    print("Fingerprint caching disabled (--no-fingerprint)")
+
+                test_runner(
+                    args,
+                    force_src_code_change,
+                    force_cpp_test_change,
+                    force_examples_change,
+                    force_python_test_change,
+                )
+
+            # If we got here, tests passed
+            tests_passed = True
+
+        except SystemExit as e:
+            # Test runner calls sys.exit() on failure
+            if e.code != 0:
+                tests_passed = False
+            raise
+        finally:
+            # Always save fingerprints with appropriate status
+            status = "success" if tests_passed else "failure"
+            save_fingerprints_with_status(status)
 
         # Set up force exit daemon and exit
         daemon_thread = setup_force_exit()

@@ -195,10 +195,9 @@ TEST_CASE("SoundToMIDI - Polyphonic mode detects two simultaneous notes") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
     int noteOnCount = 0;
@@ -231,10 +230,9 @@ TEST_CASE("SoundToMIDI - Polyphonic mode detects three-note chord") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -266,11 +264,10 @@ TEST_CASE("SoundToMIDI - Polyphonic mode handles note off for individual notes")
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
     cfg.silence_frames_off = 2;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -310,10 +307,9 @@ TEST_CASE("SoundToMIDI - Polyphonic mode handles silence") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.silence_frames_off = 2;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -349,10 +345,9 @@ TEST_CASE("SoundToMIDI - Polyphonic mode filters out harmonics") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -385,11 +380,10 @@ TEST_CASE("SoundToMIDI - Polyphonic velocity reflects relative amplitude") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
     cfg.vel_gain = 5.0f;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     uint8_t vel69 = 0;
     uint8_t vel76 = 0;
@@ -424,7 +418,6 @@ TEST_CASE("SoundToMIDI - Monophonic mode still works (backward compatibility)") 
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
-    cfg.polyphonic = false; // Explicitly monophonic
 
     SoundToMIDIEngine engine(cfg);
 
@@ -479,11 +472,10 @@ TEST_CASE("SoundToMIDI - Real MP3 file polyphonic detection") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 44100.0f; // MP3 is likely 44.1kHz
     cfg.frame_size = 1024;
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 3;
     cfg.silence_frames_off = 5;
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     fl::FixedSet<uint8_t, 128> allNotesDetected;
     int totalNoteOnEvents = 0;
@@ -574,12 +566,11 @@ TEST_CASE("SoundToMIDI - MP3 polyphonic note count metric") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = 44100.0f;
     cfg.frame_size = 2048; // Larger frame for better frequency resolution
-    cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
     cfg.silence_frames_off = 3;
     cfg.rms_gate = 0.005f; // Lower gate to catch quieter notes
 
-    SoundToMIDIEngine engine(cfg);
+    SoundToMIDIPoly engine(cfg);
 
     int uniqueNotesDetected = 0;
     fl::FixedSet<uint8_t, 128> notesSet;
@@ -687,7 +678,6 @@ TEST_CASE("SoundToMIDI - MP3 to MIDI melody detection pipeline") {
     SoundToMIDI cfg;
     cfg.sample_rate_hz = detected_sample_rate; // Use actual MP3 sample rate
     cfg.frame_size = 1024; // 1024 required for 48kHz (512 insufficient for low notes)
-    cfg.polyphonic = false; // Monophonic melody detection
     cfg.note_hold_frames = 3; // Slightly faster onset
     cfg.silence_frames_off = 3; // Require 3 frames of silence for note-off
     cfg.rms_gate = 0.012f; // Gate to filter background noise
