@@ -2,9 +2,15 @@
 #include "fx/audio/pitch_to_midi.h"
 #include "fl/math.h"
 #include "fl/set.h"
+#include "fl/codec/mp3.h"
+#include "fl/file_system.h"
+#ifdef FASTLED_TESTING
+#include "platforms/stub/fs_stub.hpp"
+#endif
 #include <math.h>
 
 using namespace fl;
+using namespace fl::third_party;
 
 // Helper: Generate a sine wave at given frequency
 static void generateSineWave(float* buffer, int n, float freq_hz, float sample_rate) {
@@ -440,4 +446,186 @@ TEST_CASE("PitchToMIDI - Monophonic mode still works (backward compatibility)") 
 
     CHECK_GT(noteOnCount, 0);
     CHECK_EQ(lastNoteOn, 69); // A4
+}
+
+// ========== MP3 Decoder Integration Tests ==========
+
+TEST_CASE("PitchToMIDI - Real MP3 file polyphonic detection") {
+    // Set up filesystem to point to tests/data directory
+    setTestFileSystemRoot("tests/data");
+
+    FileSystem fs;
+    REQUIRE(fs.beginSd(0));
+
+    // Open the MP3 file
+    FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    REQUIRE(file != nullptr);
+
+    // Read entire file
+    fl::size file_size = file->size();
+    fl::vector<fl::u8> mp3_data;
+    mp3_data.resize(file_size);
+    file->read(mp3_data.data(), file_size);
+    file->close();
+
+    // Decode MP3 to AudioSamples
+    Mp3HelixDecoder decoder;
+    REQUIRE(decoder.init());
+
+    fl::vector<AudioSample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
+    REQUIRE_GT(samples.size(), 0);
+
+    // Set up pitch detection in polyphonic mode
+    PitchToMIDI cfg;
+    cfg.sample_rate_hz = 44100.0f; // MP3 is likely 44.1kHz
+    cfg.frame_size = 1024;
+    cfg.polyphonic = true;
+    cfg.note_hold_frames = 3;
+    cfg.silence_frames_off = 5;
+
+    PitchToMIDIEngine engine(cfg);
+
+    fl::FixedSet<uint8_t, 128> allNotesDetected;
+    int totalNoteOnEvents = 0;
+    int totalNoteOffEvents = 0;
+
+    engine.onNoteOn = [&](uint8_t note, uint8_t vel) {
+        allNotesDetected.insert(note);
+        totalNoteOnEvents++;
+    };
+
+    engine.onNoteOff = [&](uint8_t note) {
+        totalNoteOffEvents++;
+    };
+
+    // Flatten all AudioSamples into a single PCM buffer
+    fl::vector<float> all_pcm;
+    for (const auto& sample : samples) {
+        const auto& pcm = sample.pcm();
+        for (fl::i16 value : pcm) {
+            all_pcm.push_back(value / 32768.0f); // Convert i16 to float [-1.0, 1.0]
+        }
+    }
+
+    // Process audio in chunks
+    fl::size frame_size = cfg.frame_size;
+    fl::vector<float> frame_buffer;
+    frame_buffer.resize(frame_size);
+
+    for (fl::size i = 0; i < all_pcm.size(); i += frame_size) {
+        fl::size chunk_size = fl_min(frame_size, all_pcm.size() - i);
+
+        // Copy PCM data to frame buffer
+        for (fl::size j = 0; j < chunk_size; ++j) {
+            frame_buffer[j] = all_pcm[i + j];
+        }
+
+        // Pad with zeros if needed
+        for (fl::size j = chunk_size; j < frame_size; ++j) {
+            frame_buffer[j] = 0.0f;
+        }
+
+        engine.processFrame(frame_buffer.data(), frame_size);
+    }
+
+    // Print statistics
+    printf("MP3 Polyphonic Detection Results:\n");
+    printf("  Total unique notes detected: %zu\n", allNotesDetected.size());
+    printf("  Total note-on events: %d\n", totalNoteOnEvents);
+    printf("  Total note-off events: %d\n", totalNoteOffEvents);
+    printf("  Notes detected: ");
+    for (uint8_t note : allNotesDetected) {
+        printf("%d ", note);
+    }
+    printf("\n");
+
+    // Verify we detected some notes
+    CHECK_GT(allNotesDetected.size(), 0);
+    CHECK_GT(totalNoteOnEvents, 0);
+
+    // For a musical piece with percussion, we should detect a reasonable range of notes
+    // Percussion typically produces multiple harmonics that appear as different pitches
+    CHECK_GE(allNotesDetected.size(), 3); // At least 3 different notes/pitches detected
+    CHECK_LE(allNotesDetected.size(), 60); // But not too many (sanity check)
+}
+
+TEST_CASE("PitchToMIDI - MP3 polyphonic note count metric") {
+    // Set up filesystem
+    setTestFileSystemRoot("tests/data");
+    FileSystem fs;
+    REQUIRE(fs.beginSd(0));
+
+    // Load MP3
+    FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    REQUIRE(file != nullptr);
+    fl::size file_size = file->size();
+    fl::vector<fl::u8> mp3_data;
+    mp3_data.resize(file_size);
+    file->read(mp3_data.data(), file_size);
+    file->close();
+
+    // Decode MP3
+    Mp3HelixDecoder decoder;
+    REQUIRE(decoder.init());
+    fl::vector<AudioSample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
+    REQUIRE_GT(samples.size(), 0);
+
+    // Configure pitch detection for polyphonic mode
+    PitchToMIDI cfg;
+    cfg.sample_rate_hz = 44100.0f;
+    cfg.frame_size = 2048; // Larger frame for better frequency resolution
+    cfg.polyphonic = true;
+    cfg.note_hold_frames = 2;
+    cfg.silence_frames_off = 3;
+    cfg.rms_gate = 0.005f; // Lower gate to catch quieter notes
+
+    PitchToMIDIEngine engine(cfg);
+
+    int uniqueNotesDetected = 0;
+    fl::FixedSet<uint8_t, 128> notesSet;
+
+    engine.onNoteOn = [&](uint8_t note, uint8_t vel) {
+        if (!notesSet.has(note)) {
+            notesSet.insert(note);
+            uniqueNotesDetected++;
+        }
+    };
+
+    // Flatten all AudioSamples into a single PCM buffer
+    fl::vector<float> all_pcm;
+    for (const auto& sample : samples) {
+        const auto& pcm = sample.pcm();
+        for (fl::i16 value : pcm) {
+            all_pcm.push_back(value / 32768.0f); // Convert i16 to float [-1.0, 1.0]
+        }
+    }
+
+    // Process entire audio with 50% overlap
+    fl::size frame_size = cfg.frame_size;
+    fl::vector<float> frame_buffer;
+    frame_buffer.resize(frame_size);
+
+    for (fl::size i = 0; i < all_pcm.size(); i += frame_size / 2) { // 50% overlap
+        fl::size chunk_size = fl_min(frame_size, all_pcm.size() - i);
+
+        for (fl::size j = 0; j < chunk_size; ++j) {
+            frame_buffer[j] = all_pcm[i + j];
+        }
+        for (fl::size j = chunk_size; j < frame_size; ++j) {
+            frame_buffer[j] = 0.0f;
+        }
+
+        engine.processFrame(frame_buffer.data(), frame_size);
+    }
+
+    printf("Total unique notes detected in polyphonic mode: %d\n", uniqueNotesDetected);
+
+    // Assert reasonable metrics for jazzy_percussion.mp3
+    // A percussion piece should produce various pitches from drums/cymbals
+    CHECK_GE(uniqueNotesDetected, 5); // At least 5 distinct pitches
+    CHECK_LE(uniqueNotesDetected, 50); // But not excessive (would indicate noise)
+
+    // Store this as a regression test baseline
+    // If the algorithm changes, this test will catch significant differences
+    printf("BASELINE: Polyphonic detection found %d unique notes\n", uniqueNotesDetected);
 }

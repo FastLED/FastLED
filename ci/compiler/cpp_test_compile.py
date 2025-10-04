@@ -258,13 +258,16 @@ def get_unit_test_fastled_sources() -> list[Path]:
         src_dir / "hsv2rgb.cpp",
     ]
 
-    # Find all .cpp files in key directories
+    # Find all .cpp and .c files in key directories
     additional_sources: list[Path] = []
     for pattern in ["*.cpp", "lib8tion/*.cpp", "platforms/stub/*.cpp"]:
         additional_sources.extend(list(src_dir.glob(pattern)))
 
     # Include essential .cpp files from nested directories
     additional_sources.extend(list(src_dir.rglob("*.cpp")))
+
+    # Include .c files (for third-party C libraries like libhelix_mp3)
+    additional_sources.extend(list(src_dir.rglob("*.c")))
 
     # Filter out duplicates and ensure files exist
     all_sources: list[Path] = []
@@ -510,6 +513,7 @@ def create_unit_test_compiler(
         "-Wextra",
         "-Wno-deprecated-register",
         "-Wno-backslash-newline-escape",
+        "-Wno-narrowing",  # For third-party C code (e.g., libhelix_mp3)
         "-fno-exceptions",
         "-fno-rtti",
         # Optimization/debug controls set below based on debug flag

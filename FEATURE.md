@@ -1,433 +1,321 @@
-Polyphonic MIDI Detection: Research and Code Enhancements
-Challenges of Polyphonic Pitch Detection
+Design Doc — Integrate Helix MP3 (fixed-point) decoder into FastLED (src/third_party/)
+1) Objective
 
-Detecting multiple simultaneous musical pitches (polyphonic pitch detection) is significantly more difficult than monophonic pitch detection. As one signal processing expert succinctly put it, "monophonic pitch detection is hard enough; polyphonic is a whole dimension harder"
-dsp.stackexchange.com
-. Unlike single-pitch (monophonic) detection where algorithms like YIN or autocorrelation can lock onto one fundamental frequency at a time, polyphonic detection must disentangle overlapping harmonics from several notes played together. There is no straightforward, standard algorithm that universally solves this problem
-dsp.stackexchange.com
- – it remains an active research area
-github.com
-. Even commercial solutions like Melodyne’s Direct Note Access (a sophisticated polyphonic pitch editor) and real-time guitar synthesizers (e.g. JamOrigin’s MIDI Guitar) rely on complex, often proprietary methods, and still face challenges with speed and accuracy
-forum.loopypro.com
-. In summary, polyphonic pitch detection is challenging because multiple tones’ overtone series can mask or mimic each other, making it hard to reliably identify individual fundamentals.
+Add a small, fast fixed-point MP3 decoder to FastLED so sketches can decode MP3 frames on-device (e.g., from SD/stream) and feed PCM to audio-reactive effects (RMS, FFT, onset/beat, pitch) or to MIDI extractors. The integration should be vendorable, license-compliant, and easy to use from Arduino and ESP-IDF builds.
 
-Approaches to Polyphonic Detection
+Chosen decoder: Helix MP3 (fixed-point) — widely used on MCUs, fast, predictable memory, proven on ESP32, RP2040, and Cortex-M. 
+GitHub
++2
+GitHub
++2
 
-Researchers and developers have explored several approaches to detect multiple pitches simultaneously:
+GitHub references:
 
-Spectral Peak Analysis: A classic approach is to apply a Fast Fourier Transform (FFT) to the audio frame and analyze the magnitude spectrum for peaks corresponding to musical tones. By “binning the frequencies according to the frequency ranges for all the standard musical pitches”, one can check for the presence of expected peaks and their harmonics
-stackoverflow.com
-. If a peak and its first few harmonics are all above a noise threshold, the corresponding note is assumed present
-stackoverflow.com
-. This approach is intuitive and fast, but choosing a proper detection threshold is tricky. Too high a threshold misses quiet notes; too low a threshold causes false positives
-stackoverflow.com
-. Moreover, different instruments have varying harmonic amplitude patterns (e.g. bass notes often have a weak fundamental and stronger overtones
-stackoverflow.com
-), which complicates simple peak-threshold methods.
+Primary: chmorgan/libhelix-mp3 (fixed-point decoder) 
+GitHub
 
-Iterative Fundamental Extraction: Another strategy is iterative estimation and subtraction. The algorithm identifies the strongest pitch (e.g. via autocorrelation or finding the dominant spectral peak) and then “uses a comb filter to filter out that note” from the signal, thereby removing its harmonic structure
-dsp.stackexchange.com
-. After subtracting the first note, the algorithm repeats the process on the residual signal to find the next note, and so on. This peeling technique can isolate multiple fundamentals sequentially. It tends to work if one pitch is clearly dominant at a time, but it may struggle when several notes have comparable strength or when notes are close in frequency (and thus not cleanly removable). Additionally, comb-filter subtraction can introduce artifacts or fail if the identified fundamental was slightly off (potentially subtracting wrong frequencies).
+ESP-IDF component (wrapper): chmorgan/esp-libhelix-mp3 
+GitHub
++1
 
-Harmonic Grouping and Pattern Recognition: Instead of blindly picking peaks, more advanced algorithms group spectral components into clusters belonging to individual notes. For example, methods by Klapuri and others sum or correlate expected harmonic series patterns across the spectrum to decide the best set of fundamental frequencies that explain the observed peaks
-dsp.stackexchange.com
-. These methods often involve searching for combinations of fundamentals whose harmonics best match the spectrum, sometimes using machine learning or heuristic search. Techniques like Harmonic Product Spectrum (HPS) (which multiplies downsampled spectra to emphasize fundamentals) and parametric model-fitting (e.g. using Gaussian Mixture Models or MUSIC/ESPRIT frequency estimation
-dsp.stackexchange.com
-) have been investigated. Such methods can be more robust but are computationally heavier, sometimes unsuitable for real-time use without optimization
-dsp.stackexchange.com
-.
+Arduino integration ideas (uses Helix under the hood): earlephilhower/ESP8266Audio 
+GitHub
 
-Machine Learning & Specialized Algorithms: Modern research has also introduced data-driven approaches (e.g. neural networks trained for multi-pitch or chord detection) and specialized signal processing techniques. For instance, one open-source project uses complex resonators in a combined time-frequency analysis for guitar chords
-github.com
-github.com
-. It achieves impressive latency (~15–20ms) and accuracy by exploiting guitar string physics and detecting partial vibrations even before a full waveform cycle is complete
-github.com
-. However, such sophisticated solutions are complex to implement and often tailored to specific instruments or contexts. In practice, many real-time systems opt for simpler spectral or iterative methods and accept some trade-offs in accuracy. As noted by one developer, fully enabling polyphonic detection can make “note detection glitchy” in real-time transcription scenarios
-forum.loopypro.com
-, underscoring the practical challenges.
+Licensing note: Helix sources carry RealNetworks licenses (RPSL/RCSL) in the fixpt code; ensure compliance when vendoring. (See Silicon Labs + Microchip app notes reminding to include the license files.) 
+Silicon Labs
++1
 
-Implementing a Polyphonic Detector in Code
+2) Scope & Non-Goals
 
-To enhance the provided pitch-to-MIDI code for polyphonic detection, we propose integrating an FFT-based multi-pitch detection mechanism and extending the logic to handle multiple simultaneous notes. The overall strategy is:
+In scope
 
-Frequency Spectrum Analysis: For each audio frame, compute its FFT to obtain the magnitude spectrum. Identify significant local maxima (peaks) in the spectrum within the expected pitch range (between configured fmin and fmax). We will ignore the DC component and any frequency bins outside the target range.
+Vendor Helix MP3 (fixed-point) into src/third_party/libhelix_mp3/ with minimal patches.
 
-Adaptive Thresholding: Determine a threshold to separate real note peaks from noise. A robust choice is to use the median magnitude of the spectrum (or a multiple of it) as a baseline
-stackoverflow.com
-. Only peaks with magnitudes notably above this median (indicating they stand out from background noise/harmonics) are considered candidates. This helps adapt to different volume levels dynamically.
+Provide a tiny C++ façade API (fl::audio::Mp3HelixDecoder) exposing init/decode/reset and yielding 16-bit interleaved PCM.
 
-Harmonic Grouping: Filter out peaks that are likely harmonics of lower-frequency peaks. For each candidate peak (starting from the lowest frequency), check if higher-frequency peaks occur at integer multiples of that frequency. If so, those peaks are marked as belonging to the same note’s harmonic series rather than independent fundamentals. For example, if we detected a peak at 130 Hz and another at ~260 Hz (roughly 2×130), the 260 Hz peak is probably the second harmonic of the 130 Hz fundamental, not a new note. By grouping and eliminating harmonics, we obtain a set of distinct fundamental frequencies corresponding to separate notes. Note: This simple harmonic grouping may mistakenly merge notes that are exact octaves apart (since one’s fundamental can align with another’s harmonic), but in practice such scenarios are relatively rare or can be mitigated by context.
+Offer Arduino (ESP32-S3/S2/S3, ESP32, RP2040) and ESP-IDF build paths.
 
-Convert to MIDI Notes: Convert each remaining fundamental frequency to the nearest MIDI note number using the provided hz_to_midi function. These MIDI notes represent the detected pitches for that frame. For each detected note, we can also carry along its amplitude (e.g. the magnitude of its fundamental frequency bin) to estimate a MIDI velocity.
+Examples that decode from SD and memory stream, pushing PCM into I2S or analysis hooks.
 
-Multiple Note Tracking: Extend the state logic to handle multiple concurrent notes. We maintain a boolean array (size 128 for all MIDI notes) to track which notes are currently “active” (sustained) and arrays of counters to implement hysteresis for note-on and note-off events. Similar to the original single-note logic, a note is only confirmed “ON” if it appears in several consecutive frames (determined by note_hold_frames) to avoid spurious one-frame detections. Likewise, a note turns “OFF” after it disappears (falls below detection threshold) for a number of frames (silence_frames_off). This prevents rapid flicker on/off if a note briefly dips below threshold. Each note has its own counters, so multiple notes can overlap in time with independent lifetimes.
+Out of scope
 
-Velocity Estimation: Compute a MIDI velocity for each note-on event based on the note’s amplitude. We can derive a note’s relative loudness from the FFT peak magnitude of its fundamental (normalized to the strongest note in the frame, and scaled by the overall frame energy). The original amp_to_velocity function mapped the frame’s RMS to velocity; we adapt this by weighting each note’s velocity according to its peak strength relative to the loudest note and the global gain setting. This ensures that louder notes produce higher velocities, while softer concurrently played notes get lower velocities. (Exact tuning of this scaling can be adjusted; the goal is to reflect dynamics for each note).
+MP3 encoder, AAC/FLAC, streaming over HTTP (may come later).
 
-Using this approach, the code will detect chords or multiple simultaneous notes and emit corresponding MIDI note-on/off events. Below is the updated code snippet with the polyphonic detection integrated. We added inline documentation for clarity. This implementation assumes the frame size is a power of 2 (for FFT) and uses the existing configuration parameters (like frame_size, sample_rate_hz, fmin_hz, fmax_hz, note_hold_frames, silence_frames_off, vel_gain, vel_floor) from the PitchToMIDI config structure. A new boolean config field polyphonic is introduced to enable/disable polyphonic mode. When polyphonic is true, the code uses the new multi-note detection logic; otherwise it retains the original monophonic behavior for single-note sources.
+Heavy audio stacks (e.g., esp-adf). We stay lightweight. 
+ESP Component Registry
 
+3) Target Platforms & Budgets
 
+ESP32 family (Xtensa & RISC-V variants incl. S3): 240 MHz recommended for 44.1 kHz stereo + effects; RAM ≥ 200 KB free.
 
+RP2040: works (Helix via ESP8266Audio shows viability); buffer sizes tuned smaller. 
+GitHub
++1
 
+AVR: not targeted (flash/RAM too tight for real-time MP3).
 
-SOURCE CODE SAMPLE
+Typical Helix footprint (varies by config/toolchain): small flash (~tens of KB) and modest RAM; used broadly on Cortex-M/PIC32 by vendors. 
+Silicon Labs
++1
 
+4) Repository Layout (proposed)
+FastLED/
+└─ src/
+   ├─ third_party/
+   │  └─ libhelix_mp3/
+   │     ├─ LICENSE/               # include RPSL/RCSL/license files verbatim
+   │     ├─ helix/…                # decoder sources (fixpt)
+   │     ├─ CMakeLists.txt         # minimal; used by ESP-IDF builds
+   │     └─ helix_config.h         # our compile-time toggles
+   ├─ audio/
+   │  ├─ mp3_helix_decoder.h       # C++ façade (public)
+   │  └─ mp3_helix_decoder.cpp     # adapter to Helix C API
+   └─ fx/…                         # (existing FastLED)
+examples/
+└─ Audio/
+   ├─ Mp3ToI2S_Minimal/            # decode -> I2S out
+   ├─ Mp3ToAnalysis_RMS_FFT/       # decode -> analysis callbacks
+   └─ Mp3Stream_SD/                # decode from SD/file
 
+5) Build System Integration
+5.1 Arduino (PlatformIO & Arduino IDE)
 
+CMake is not required; compile Helix C sources alongside FastLED.
 
+Add library.properties/library.json updates if needed so Arduino/PIO picks up src/third_party/libhelix_mp3/helix/*.c.
 
-#include "pitch_to_midi.h"
-#include "fl/math.h"
-#include <vector>
-#include <complex>
-#include <cmath>
+Default flags:
 
-namespace fl {
+-Os -ffunction-sections -fdata-sections
 
-// ---------- Helper structures and functions ----------
-namespace {
+-DHELIx_FIXEDPOINT=1 (build fixpt only)
 
-// Structure to hold a detected note and its peak magnitude
-struct NotePeak {
-  int midi;
-  float magnitude;
+Disable unused features in helix_config.h (no CRC, minimal tables).
+
+ESP32: enable I2S; recommend CONFIG_FREERTOS_UNICORE=n (dual-core OK) and 240 MHz for headroom.
+
+5.2 ESP-IDF
+
+Option A (vendor only): compile vendored Helix directly (our CMakeLists.txt).
+
+Option B (optional path): allow using esp-libhelix-mp3 component instead of vendored copy when -DUSE_IDF_HELIX=ON. 
+GitHub
++1
+
+Agent task: detect environment → choose A or B via small cmake/ifdef shim.
+
+6) Public API (façade)
+// src/audio/mp3_helix_decoder.h
+namespace fl::audio {
+
+struct Mp3Frame {
+  const int16_t* pcm;   // interleaved L/R
+  int samples;          // samples per channel
+  int channels;         // 1 or 2
+  int sample_rate;      // Hz
 };
 
-// Cooley-Tukey FFT (in-place, radix-2). Requires N to be a power of 2.
-inline void fft(const float* input, int N, std::vector<std::complex<float>>& out) {
-  out.resize(N);
-  // Copy input into complex output array (imag = 0)
-  for (int i = 0; i < N; ++i) {
-    out[i] = std::complex<float>(input[i], 0.0f);
-  }
-  // Bit-reversal permutation
-  int log2N = 0;
-  while ((1 << log2N) < N) ++log2N;
-  for (int i = 1, j = 0; i < N; ++i) {
-    int bit = N >> 1;
-    for (; j & bit; bit >>= 1) {
-      j ^= bit;
-    }
-    j ^= bit;
-    if (i < j) {
-      std::swap(out[i], out[j]);
-    }
-  }
-  // FFT butterfly stages
-  for (int len = 2; len <= N; len <<= 1) {
-    float theta = -2.0f * M_PI / (float)len;
-    std::complex<float> wlen(std::cos(theta), std::sin(theta));
-    for (int i = 0; i < N; i += len) {
-      std::complex<float> w(1.0f, 0.0f);
-      for (int j = 0; j < len/2; ++j) {
-        std::complex<float> u = out[i+j];
-        std::complex<float> v = out[i+j + len/2] * w;
-        out[i+j]           = u + v;
-        out[i+j + len/2]   = u - v;
-        w *= wlen;
-      }
-    }
-  }
+class Mp3HelixDecoder {
+ public:
+  // init with an external scratch buffer to avoid mallocs
+  bool init(void* workbuf, size_t workbuf_len);
+
+  // Feed raw MP3 bytes; decode zero or more frames.
+  // Returns number of PCM frames produced into the callback.
+  template <typename Fn>
+  int decode(const uint8_t* data, size_t len, Fn on_frame);
+
+  void reset();
+};
+
+} // namespace fl::audio
+
+
+Design notes
+
+No allocations after init(); the agent sizes workbuf using Helix’s MP3GetBuffersize() (or equivalent).
+
+decode() can be called repeatedly with partial MP3 data; handle ID3 safely (skip/continue). 
+GitHub
+
+Output format: 16-bit signed PCM, interleaved, ready for I2S or analysis.
+
+7) Data Flow & Hooks
+
+Sources: SD card, SPIFFS/LittleFS, network stream (future).
+Pipeline: Read MP3 bytes → Mp3HelixDecoder.decode() → PCM callback(s)
+Consumers (callbacks):
+
+I2S sink (optional helper): writes PCM to DAC/I2S.
+
+Analysis sink: RMS/peak, FFT, onset/beat, pitch detector, MIDI extractor (existing/planned FastLED audio tools).
+
+8) Performance & Buffers (starting points)
+
+MP3 input ring: 2–4 KB (tune per source latency).
+
+PCM output block: 1152 samples per channel (max MP3 frame) → 2304 int16 samples total; double-buffer.
+
+Work buffer: per Helix query; allocate once in global/static arena.
+
+ESP32-S3 @ 240 MHz: should sustain 44.1 kHz stereo with room for analysis; keep I2S DMA at ≥ 2x frame depth.
+
+9) Licensing & Compliance
+
+Vendor Helix license files (RPSL/RCSL/LICENSE) with the copied sources and keep any headers intact. 
+Silicon Labs
++1
+
+Our façade code under the FastLED license; clearly separate third-party code in src/third_party/libhelix_mp3/.
+
+Document that decoding patents for MP3 were sunset (2017 notice)—still keep license files per upstream guidance. 
+Silicon Labs
+
+10) Testing & QA
+
+Unit tests (IDF Unity / Arduino CI):
+
+Frame decode sanity: sample-rate, channels, frame size.
+
+Corrupt frames & ID3 headers don’t crash; decoder resumes. 
+GitHub
+
+Buffer size guards: assert if workbuf too small.
+
+Integration tests:
+
+SD → decode → I2S playback (44.1 kHz stereo).
+
+SD → decode → analysis (RMS + 1024-pt FFT) → verify energy bands stable.
+
+Artifacts:
+
+Include 2–3 short MP3 test vectors (public/redistributable).
+
+11) Example Sketches (deliverables)
+
+Mp3ToI2S_Minimal
+
+#include <FastLED.h>
+#include "audio/mp3_helix_decoder.h"
+#include "i2s_sink.h"   // tiny helper (examples/)
+
+fl::audio::Mp3HelixDecoder dec;
+static uint8_t mp3in[3072];
+static int16_t pcmout[2304];
+
+void setup() {
+  // mount SD, init I2S, allocate helix workbuf...
 }
 
-// Detect multiple fundamental frequencies in the frame using FFT.
-// Returns a list of NotePeak (MIDI note and its fundamental magnitude).
-inline std::vector<NotePeak> detectPolyphonicNotes(const float* x, int N, float sr, float fmin, float fmax) {
-  // Compute FFT of input frame (assume N is power of 2 for simplicity)
-  std::vector<std::complex<float>> spectrum;
-  fft(x, N, spectrum);
-  int halfN = N / 2;
-  // Magnitude spectrum (only need [0, N/2] for real input)
-  std::vector<float> mag(halfN);
-  for (int i = 0; i < halfN; ++i) {
-    float re = spectrum[i].real();
-    float im = spectrum[i].imag();
-    mag[i] = std::sqrt(re*re + im*im);
-  }
-
-  // Determine frequency bin range for fmin to fmax
-  int binMin = (int)std::floor(fmin * N / sr);
-  int binMax = (int)std::ceil(fmax * N / sr);
-  if (binMin < 1) binMin = 1;               // start from 1 to skip DC
-  if (binMax > halfN - 1) binMax = halfN - 1;
-
-  // Calculate median magnitude in [binMin, binMax] to use as noise threshold
-  std::vector<float> magslice;
-  magslice.reserve(binMax - binMin + 1);
-  for (int i = binMin; i <= binMax; ++i) {
-    magslice.push_back(mag[i]);
-  }
-  std::nth_element(magslice.begin(), magslice.begin() + magslice.size()/2, magslice.end());
-  float medianMag = magslice[magslice.size()/2];
-  float threshold = medianMag * 1.5f;  // threshold factor (1.5x median, adjust as needed)
-
-  // Find local peaks above threshold in the specified range
-  std::vector<int> peakIndices;
-  peakIndices.reserve(16);
-  for (int i = binMin + 1; i < binMax; ++i) {
-    if (mag[i] > threshold && mag[i] >= mag[i-1] && mag[i] >= mag[i+1]) {
-      peakIndices.push_back(i);
-    }
-  }
-  if (peakIndices.empty()) {
-    return {};  // no significant peaks found
-  }
-  // Sort detected peaks by frequency (ascending)
-  std::sort(peakIndices.begin(), peakIndices.end());
-
-  // Group peaks by fundamental-harmonic relationship
-  std::vector<NotePeak> result;
-  std::vector<bool> used(peakIndices.size(), false);
-  for (size_t p = 0; p < peakIndices.size(); ++p) {
-    if (used[p]) continue;
-    int idx = peakIndices[p];
-    // Consider this peak a fundamental frequency
-    float freq = sr * (float)idx / (float)N;
-    int midiNote = clampMidi(hz_to_midi(freq));
-    float peakMag = mag[idx];
-    // Mark harmonics of this fundamental as used
-    for (size_t q = p + 1; q < peakIndices.size(); ++q) {
-      int idx2 = peakIndices[q];
-      if (used[q]) continue;
-      // Check if idx2 is ~ an integer multiple of idx
-      float ratio = (float)idx2 / idx;
-      int roundMult = (int)std::floor(ratio + 0.5f);
-      if (roundMult >= 2 && std::fabs(ratio - roundMult) < 0.1f) {
-        used[q] = true;
-      }
-    }
-    // Store this fundamental note and its magnitude
-    result.push_back({midiNote, peakMag});
-  }
-  return result;
+void loop() {
+  size_t n = read_mp3_bytes(mp3in, sizeof(mp3in));
+  dec.decode(mp3in, n, [&](const fl::audio::Mp3Frame& f){
+    i2s_write_pcm(f.pcm, f.samples * f.channels);
+    // also: audio_reactive_update(f.pcm, f.samples, f.sample_rate);
+  });
 }
 
-inline int hz_to_midi(float f) {
-  // Convert frequency (Hz) to MIDI note number (69 = A4 = 440 Hz).
-  return (int)lroundf(69.0f + 12.0f * (std::logf(f / 440.0f) / std::logf(2.0f)));
-}
 
-inline float clamp01(float v) {
-  return v < 0 ? 0.0f : (v > 1.0f ? 1.0f : v);
-}
+Mp3ToAnalysis_RMS_FFT — same but routes PCM to analysis callbacks.
 
-inline float compute_rms(const float* x, int n) {
-  double acc = 0.0;
-  for (int i = 0; i < n; ++i) {
-    acc += (double)x[i] * x[i];
-  }
-  return std::sqrt(acc / (double)n);
-}
+Mp3Stream_SD — shows incremental reads + ID3 skipping.
 
-inline uint8_t amp_to_velocity(float rms, float gain, uint8_t floorV) {
-  // Map amplitude (RMS) to MIDI velocity using a simple linear scale.
-  float v = clamp01(rms * gain);
-  int vel = (int)lroundf(floorV + v * (127 - floorV));
-  if (vel < 1) vel = 1;
-  if (vel > 127) vel = 127;
-  return (uint8_t)vel;
-}
+12) Agent Work Plan (step-by-step)
 
-inline int clampMidi(int n) {
-  if (n < 0) return 0;
-  if (n > 127) return 127;
-  return n;
-}
+Vendor Helix
 
-inline int noteDelta(int a, int b) {
-  int d = a - b;
-  return d >= 0 ? d : -d;
-}
+Create src/third_party/libhelix_mp3/ and import fixpt decoder sources + RPSL/RCSL/LICENSE files. 
+GitHub
++1
 
-} // namespace (anonymous)
+Add helix_config.h to disable unused features; keep build consistent across Arduino/IDF.
 
-// ---------- PitchDetector (monophonic) unchanged ----------
-// ... (PitchDetector::PitchDetector constructor and PitchDetector::detect as in original code) ...
+Build wiring
 
-// ---------- PitchToMIDIEngine ----------
-PitchToMIDIEngine::PitchToMIDIEngine(const PitchToMIDI& cfg)
-    : _cfg(cfg), _noteOnFrames(0), _silenceFrames(0), _currentNote(-1),
-      _candidateNote(-1), _candidateHoldFrames(0),
-      _historyIndex(0), _historyCount(0) {
-  // Initialize history buffer for monophonic median filter
-  for (int i = 0; i < MAX_MEDIAN_SIZE; ++i) {
-    _noteHistory[i] = -1;
-  }
-  // Initialize polyphonic tracking arrays
-  for (int note = 0; note < 128; ++note) {
-    _activeNotes[note] = false;
-    _noteOnCount[note] = 0;
-    _noteOffCount[note] = 0;
-  }
-}
+Arduino/PIO: ensure .c files are compiled; add minimal guards in src/audio/mp3_helix_decoder.cpp.
 
-void PitchToMIDIEngine::processFrame(const float* frame, int n) {
-  if (!frame || n != _cfg.frame_size) return;
-  // Compute loudness (RMS) of the frame
-  const float rms = compute_rms(frame, n);
-  if (_cfg.polyphonic) {
-    // --- Polyphonic pitch detection branch ---
-    bool voiced = (rms > _cfg.rms_gate);
-    if (voiced) {
-      // Get all detected note peaks in this frame
-      std::vector<NotePeak> notes = detectPolyphonicNotes(frame, n, _cfg.sample_rate_hz,
-                                                         _cfg.fmin_hz, _cfg.fmax_hz);
-      // Prepare a lookup for which MIDI notes are present in this frame
-      bool present[128] = {false};
-      for (const NotePeak& np : notes) {
-        if (np.midi >= 0 && np.midi < 128) {
-          present[np.midi] = true;
-        }
-      }
-      // Compute global amplitude normalization for velocity
-      float globalNorm = clamp01(rms * _cfg.vel_gain);
-      // Determine the maximum peak magnitude among detected notes (for relative loudness)
-      float maxMag = 0.0f;
-      for (const NotePeak& np : notes) {
-        if (np.magnitude > maxMag) maxMag = np.magnitude;
-      }
-      if (maxMag < 1e-6f) maxMag = 1e-6f;  // avoid division by zero
+ESP-IDF: simple CMakeLists.txt to build vendored sources; optional path to use esp-libhelix-mp3 if USE_IDF_HELIX=ON. 
+GitHub
 
-      // Update note states
-      for (int note = 0; note < 128; ++note) {
-        if (present[note]) {
-          // Note is detected in current frame
-          if (!_activeNotes[note]) {
-            // Note currently off -> potential note-on
-            _noteOnCount[note] += 1;
-            _noteOffCount[note] = 0;
-            if (_noteOnCount[note] >= _cfg.note_hold_frames) {
-              // Confirmed new Note On
-              // Calculate velocity based on note's relative magnitude
-              float relAmp = 0.0f;
-              // Find this note's magnitude in the notes vector
-              for (const NotePeak& np : notes) {
-                if (np.midi == note) {
-                  relAmp = np.magnitude / maxMag;
-                  break;
-                }
-              }
-              float velNorm = clamp01(globalNorm * relAmp);
-              int vel = (int)lroundf(_cfg.vel_floor + velNorm * (127 - _cfg.vel_floor));
-              if (vel < 1) vel = 1;
-              if (vel > 127) vel = 127;
-              if (onNoteOn) onNoteOn((uint8_t)note, (uint8_t)vel);
-              _activeNotes[note] = true;
-              _noteOnCount[note] = 0;
-            }
-          } else {
-            // Note is already active and continues
-            _noteOnCount[note] = 0;  // reset any pending on counter (already on)
-            _noteOffCount[note] = 0; // reset off counter since still sounding
-          }
-        } else {
-          // Note is NOT present in current frame
-          _noteOnCount[note] = 0;
-          if (_activeNotes[note]) {
-            // An active note might be turning off
-            _noteOffCount[note] += 1;
-            if (_noteOffCount[note] >= _cfg.silence_frames_off) {
-              // Confirmed note-off after sustained silence
-              if (onNoteOff) onNoteOff((uint8_t)note);
-              _activeNotes[note] = false;
-              _noteOffCount[note] = 0;
-            }
-          } else {
-            _noteOffCount[note] = 0;
-          }
-        }
-      }
-    } else {
-      // Not voiced (below RMS gate): treat as silence, increment off counters for all active notes
-      for (int note = 0; note < 128; ++note) {
-        _noteOnCount[note] = 0;
-        if (_activeNotes[note]) {
-          _noteOffCount[note] += 1;
-          if (_noteOffCount[note] >= _cfg.silence_frames_off) {
-            if (onNoteOff) onNoteOff((uint8_t)note);
-            _activeNotes[note] = false;
-            _noteOffCount[note] = 0;
-          }
-        }
-      }
-    }
-  } else {
-    // --- Monophonic pitch detection branch (original logic) ---
-    const PitchResult pr = _det.detect(frame, n, _cfg.sample_rate_hz, _cfg.fmin_hz, _cfg.fmax_hz);
-    const bool voiced = (rms > _cfg.rms_gate) &&
-                        (pr.confidence > _cfg.confidence_threshold) &&
-                        (pr.freq_hz > 0.0f);
-    if (voiced) {
-      int rawNote = clampMidi(hz_to_midi(pr.freq_hz));
-      // Median filter for note stability
-      _noteHistory[_historyIndex] = rawNote;
-      _historyIndex = (_historyIndex + 1) % MAX_MEDIAN_SIZE;
-      if (_historyCount < MAX_MEDIAN_SIZE) _historyCount++;
-      const int note = getMedianNote();
-      if (_currentNote < 0) {
-        // Was silence, now a note candidate
-        if (++_noteOnFrames >= _cfg.note_hold_frames) {
-          uint8_t vel = amp_to_velocity(rms, _cfg.vel_gain, _cfg.vel_floor);
-          if (onNoteOn) onNoteOn((uint8_t)note, vel);
-          _currentNote = note;
-          _noteOnFrames = 0;
-          _silenceFrames = 0;
-          _candidateNote = -1;
-          _candidateHoldFrames = 0;
-        }
-      } else {
-        // Already had a note active
-        int dn = noteDelta(note, _currentNote);
-        if (dn >= _cfg.note_change_semitone_threshold) {
-          // Pitch changed significantly -> candidate for new note
-          if (note == _candidateNote) {
-            if (++_candidateHoldFrames >= _cfg.note_change_hold_frames) {
-              // Confirm note change
-              if (onNoteOff) onNoteOff((uint8_t)_currentNote);
-              uint8_t vel = amp_to_velocity(rms, _cfg.vel_gain, _cfg.vel_floor);
-              if (onNoteOn) onNoteOn((uint8_t)note, vel);
-              _currentNote = note;
-              _candidateNote = -1;
-              _candidateHoldFrames = 0;
-            }
-          } else {
-            // New candidate note (start counting)
-            _candidateNote = note;
-            _candidateHoldFrames = 1;
-          }
-        } else {
-          // Note difference is small -> consider it the same note (no change)
-          _candidateNote = -1;
-          _candidateHoldFrames = 0;
-        }
-        _noteOnFrames = 0;
-        _silenceFrames = 0;
-      }
-    } else {
-      // No voiced pitch detected (noise/silence)
-      _noteOnFrames = 0;
-      _candidateNote = -1;
-      _candidateHoldFrames = 0;
-      if (_currentNote >= 0) {
-        if (++_silenceFrames >= _cfg.silence_frames_off) {
-          if (onNoteOff) onNoteOff((uint8_t)_currentNote);
-          _currentNote = -1;
-          _silenceFrames = 0;
-          // Clear history on complete silence
-          _historyCount = 0;
-          _historyIndex = 0;
-        }
-      }
-    }
-  }
-}
+Façade API
 
-const PitchToMIDI& PitchToMIDIEngine::config() const {
-  return _cfg;
-}
+Implement Mp3HelixDecoder around Helix C API (MP3InitDecoder, MP3Decode, …).
 
-void PitchToMIDIEngine::setConfig(const PitchToMIDI& c) {
-  _cfg = c;
-}
+Expose init(workbuf, len), decode(data,len,callback), reset().
 
-} // namespace fl
+I/O helpers
+
+Minimal i2s_sink.h/.cpp in examples (not core) for ESP32.
+
+SD reader helper for chunked reads.
+
+Examples
+
+Add the three sketches above; confirm on ESP32-S3 (240 MHz).
+
+Tests
+
+Add simple frame decode unit test (IDF Unity).
+
+Add ID3-tag regression (feed file with large ID3v2 header). 
+GitHub
+
+Docs
+
+docs/audio/mp3.md: how to enable, memory estimates, example wiring, known limitations (e.g., malformed streams).
+
+CI
+
+Build check for Arduino (ESP32) + IDF.
+
+Size report for core + examples.
+
+13) Risks & Mitigations
+
+License mistakes → Keep Helix in isolated folder with upstream license files and attribution; document clearly. 
+Silicon Labs
++1
+
+ID3 edge cases → Add simple ID3 skipper and loop MP3Decode() until sync found (document behavior). 
+GitHub
+
+Timing under load → Recommend 240 MHz on ESP32-S3 and DMA-backed I2S; provide buffer sizing guidance.
+
+RAM pressure → Require external work buffer; allow user to size via API.
+
+14) Acceptance Criteria
+
+Buildable on Arduino (ESP32) and ESP-IDF without extra dependencies.
+
+Decode and play a 44.1 kHz stereo MP3 from SD with glitch-free audio for ≥ 60 s.
+
+Provide PCM to analysis callbacks at frame boundaries with correct sample rate and channel count.
+
+Vendored code includes upstream license files and clear separation.
+
+15) Nice-to-Haves (later)
+
+Optional minimp3 backend for users preferring CC0 / single-header (trade-offs in speed).
+
+HTTP streaming example and seamless ID3v2 skip.
+
+Built-in RMS/FFT helper nodes wired to FastLED audio-reactive FX.
+
+Appendix: Upstream Links (for code agent)
+
+Helix decoder (fixed-point): https://github.com/chmorgan/libhelix-mp3 
+GitHub
+
+ESP-IDF component: https://github.com/chmorgan/esp-libhelix-mp3 (also on Espressif Component Registry) 
+GitHub
++1
+
+Arduino reference implementation using Helix: https://github.com/earlephilhower/ESP8266Audio 
+GitHub
+
+License guidance / vendor app notes: Silicon Labs AN1112; Microchip AN1367. 
+Silicon Labs
++1
+
+If you want, I can generate the initial PR skeleton (folders, façade, CMake/PIO glue, and one minimal example) ready to drop into github.com/fastled/fastled.
