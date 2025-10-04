@@ -13,7 +13,7 @@
 #include "fl/xymap.h"
 #include "fl/math.h"
 #include "fl/math_macros.h"
-#include "fx/audio/pitch_to_midi.h"
+#include "fx/audio/sound_to_midi.h"
 
 #include "fl/compiler_control.h"
 
@@ -103,8 +103,8 @@ uint8_t fireBuffer[WIDTH][HEIGHT] = {{0}};
 #endif
 
 // Pitch detection engine
-PitchToMIDI pitchConfig;
-PitchToMIDIEngine* pitchEngine = nullptr;
+SoundToMIDI pitchConfig;
+SoundToMIDIEngine* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 uint8_t currentVelocity = 0;
 bool noteIsOn = false;
@@ -478,7 +478,7 @@ void setup() {
 
     // Initialize pitch detection
     pitchConfig.sample_rate_hz = SAMPLE_RATE;
-    pitchEngine = new PitchToMIDIEngine(pitchConfig);
+    pitchEngine = new SoundToMIDIEngine(pitchConfig);
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
         currentMIDINote = note;
         currentVelocity = velocity;

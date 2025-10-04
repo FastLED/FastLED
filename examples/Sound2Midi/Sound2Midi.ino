@@ -1,8 +1,8 @@
-/// @file    PitchDetection.ino
-/// @brief   Real-time pitch detection with histogram visualization
-/// @example PitchDetection.ino
+/// @file    Sound2Midi.ino
+/// @brief   Real-time sound to MIDI conversion with histogram visualization
+/// @example Sound2Midi.ino
 ///
-/// This sketch demonstrates real-time pitch detection using the PitchToMIDI engine.
+/// This sketch demonstrates real-time sound to MIDI conversion using the SoundToMIDI engine.
 /// It visualizes detected pitches as a 128x128 histogram where each note creates
 /// a colored streak that fades over time.
 
@@ -20,7 +20,7 @@ void loop() {}
 #include "fl/math.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"
-#include "fx/audio/pitch_to_midi.h"
+#include "fx/audio/sound_to_midi.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(float-conversion)
@@ -40,8 +40,8 @@ using namespace fl;
 #define SAMPLE_RATE 44100
 
 // UI Elements
-UITitle title("Pitch Detection Histogram");
-UIDescription description("Real-time pitch histogram with fading color streaks");
+UITitle title("Sound to MIDI Histogram");
+UIDescription description("Real-time sound to MIDI conversion with fading color streaks");
 
 // Audio controls
 UIAudio audio("Audio Input");
@@ -65,8 +65,8 @@ UICheckbox polyphonicMode("Polyphonic Mode", false);
 CRGB leds[NUM_LEDS];
 
 // Pitch detection
-PitchToMIDI pitchConfig;
-PitchToMIDIEngine* pitchEngine = nullptr;
+SoundToMIDI pitchConfig;
+SoundToMIDIEngine* pitchEngine = nullptr;
 
 // Monophonic state
 uint8_t currentMIDINote = 0;
@@ -195,8 +195,8 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
 
-    Serial.println("Pitch Detection Histogram");
-    Serial.println("===========================");
+    Serial.println("Sound to MIDI Histogram");
+    Serial.println("=======================");
 
     // Initialize LEDs with rectangular screenmap for visualization
     XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
@@ -212,7 +212,7 @@ void setup() {
 
     confidenceThreshold.onChanged([](float value) {
         if (pitchEngine) {
-            PitchToMIDI cfg = pitchEngine->config();
+            SoundToMIDI cfg = pitchEngine->config();
             cfg.confidence_threshold = value;
             pitchEngine->setConfig(cfg);
         }
@@ -220,7 +220,7 @@ void setup() {
 
     semitoneThreshold.onChanged([](float value) {
         if (pitchEngine) {
-            PitchToMIDI cfg = pitchEngine->config();
+            SoundToMIDI cfg = pitchEngine->config();
             cfg.note_change_semitone_threshold = (int)value;
             pitchEngine->setConfig(cfg);
         }
@@ -228,7 +228,7 @@ void setup() {
 
     noteChangeHoldFrames.onChanged([](float value) {
         if (pitchEngine) {
-            PitchToMIDI cfg = pitchEngine->config();
+            SoundToMIDI cfg = pitchEngine->config();
             cfg.note_change_hold_frames = (int)value;
             pitchEngine->setConfig(cfg);
         }
@@ -236,7 +236,7 @@ void setup() {
 
     medianFilterSize.onChanged([](float value) {
         if (pitchEngine) {
-            PitchToMIDI cfg = pitchEngine->config();
+            SoundToMIDI cfg = pitchEngine->config();
             cfg.median_filter_size = (int)value;
             pitchEngine->setConfig(cfg);
         }
@@ -258,7 +258,7 @@ void setup() {
 
     polyphonicMode.onChanged([](bool value) {
         if (pitchEngine) {
-            PitchToMIDI cfg = pitchEngine->config();
+            SoundToMIDI cfg = pitchEngine->config();
             cfg.polyphonic = value;
             pitchEngine->setConfig(cfg);
 
@@ -281,7 +281,7 @@ void setup() {
     pitchConfig.note_change_hold_frames = noteChangeHoldFrames.as_int();
     pitchConfig.median_filter_size = medianFilterSize.as_int();
     pitchConfig.polyphonic = polyphonicMode.value();
-    pitchEngine = new PitchToMIDIEngine(pitchConfig);
+    pitchEngine = new SoundToMIDIEngine(pitchConfig);
 
     // Initialize active notes array
     for (int i = 0; i < 16; i++) {
@@ -386,7 +386,7 @@ void setup() {
     };
 
     Serial.println("Setup complete!");
-    Serial.println("Sing or play an instrument to see pitch histogram.");
+    Serial.println("Sing or play an instrument to see sound to MIDI conversion.");
 }
 
 void loop() {

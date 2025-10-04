@@ -37,7 +37,7 @@ all the UI elements you see below.
 #include "fl/unused.h"
 #include "fx/time.h"
 #include "fl/function.h"
-#include "fx/audio/pitch_to_midi.h"
+#include "fx/audio/sound_to_midi.h"
 
 // Sketch.
 #include "fx_audio.h"
@@ -98,8 +98,8 @@ bool triggered = false;
 SoundLevelMeter soundLevelMeter(.0, 0.0);
 
 // Pitch detection engine
-PitchToMIDI pitchConfig;
-PitchToMIDIEngine* pitchEngine = nullptr;
+SoundToMIDI pitchConfig;
+SoundToMIDIEngine* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 bool noteIsOn = false;
 
@@ -138,7 +138,7 @@ void setup() {
 
     // Initialize pitch detection
     pitchConfig.sample_rate_hz = 44100.0f;
-    pitchEngine = new PitchToMIDIEngine(pitchConfig);
+    pitchEngine = new SoundToMIDIEngine(pitchConfig);
     pitchEngine->onNoteOn = [](uint8_t note, uint8_t velocity) {
         currentMIDINote = note;
         noteIsOn = true;

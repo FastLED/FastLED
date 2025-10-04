@@ -1,4 +1,4 @@
-#include "pitch_to_midi.h"
+#include "sound_to_midi.h"
 #include "fl/math.h"
 #include "fl/vector.h"
 #include "fl/pair.h"
@@ -269,8 +269,8 @@ PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, f
   return {freq, conf};
 }
 
-// ---------- PitchToMIDIEngine ----------
-PitchToMIDIEngine::PitchToMIDIEngine(const PitchToMIDI& cfg)
+// ---------- SoundToMIDIEngine ----------
+SoundToMIDIEngine::SoundToMIDIEngine(const SoundToMIDI& cfg)
     : _cfg(cfg), _noteOnFrames(0), _silenceFrames(0), _currentNote(-1),
       _candidateNote(-1), _candidateHoldFrames(0),
       _historyIndex(0), _historyCount(0) {
@@ -285,7 +285,7 @@ PitchToMIDIEngine::PitchToMIDIEngine(const PitchToMIDI& cfg)
   }
 }
 
-int PitchToMIDIEngine::getMedianNote() {
+int SoundToMIDIEngine::getMedianNote() {
   if (_historyCount == 0) return -1;
 
   // Clamp filter size to valid range
@@ -322,7 +322,7 @@ int PitchToMIDIEngine::getMedianNote() {
   return temp[filterSize / 2];
 }
 
-void PitchToMIDIEngine::processFrame(const float* frame, int n) {
+void SoundToMIDIEngine::processFrame(const float* frame, int n) {
   if (!frame || n != _cfg.frame_size) return;
 
   // Compute loudness (RMS) of the frame
@@ -490,11 +490,11 @@ void PitchToMIDIEngine::processFrame(const float* frame, int n) {
   }
 }
 
-const PitchToMIDI& PitchToMIDIEngine::config() const {
+const SoundToMIDI& SoundToMIDIEngine::config() const {
   return _cfg;
 }
 
-void PitchToMIDIEngine::setConfig(const PitchToMIDI& c) {
+void SoundToMIDIEngine::setConfig(const SoundToMIDI& c) {
   _cfg = c;
 }
 

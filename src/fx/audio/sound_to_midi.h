@@ -1,4 +1,4 @@
-/*  FastLED - Audio Pitch → MIDI (Monophonic)
+/*  FastLED - Audio Sound → MIDI (Monophonic)
     ---------------------------------------------------------
     Converts short audio frames to MIDI Note On/Off events using a
     YIN/MPM-like pitch detector plus simple onset/offset hysteresis
@@ -19,12 +19,12 @@
       • Callback-based event system
 
     Usage:
-      PitchToMIDI cfg;
+      SoundToMIDI cfg;
       cfg.sample_rate_hz = 16000;
       cfg.frame_size = 512;
       cfg.confidence_threshold = 0.82f;
 
-      PitchToMIDIEngine eng(cfg);
+      SoundToMIDIEngine eng(cfg);
       eng.onNoteOn  = [](uint8_t note, uint8_t vel){
         // Handle note on events
       };
@@ -46,7 +46,7 @@ namespace fl {
 
 // ---------- Configuration ----------
 /// @brief Configuration parameters for pitch detection and MIDI conversion
-struct PitchToMIDI {
+struct SoundToMIDI {
   // Audio Parameters
   float sample_rate_hz = 16000.0f;  ///< Input audio sample rate in Hz (typical: 16000-48000)
   int   frame_size     = 512;       ///< Analysis window size in samples (power of 2 recommended)
@@ -116,11 +116,11 @@ private:
 ///          4. RMS-based velocity calculation
 ///          5. Anti-jitter filtering (semitone threshold, hold frames, median filter)
 ///          6. MIDI event callbacks
-class PitchToMIDIEngine {
+class SoundToMIDIEngine {
 public:
   /// @brief Construct engine with specified configuration
-  /// @param cfg Configuration parameters (see PitchToMIDI struct)
-  explicit PitchToMIDIEngine(const PitchToMIDI& cfg);
+  /// @param cfg Configuration parameters (see SoundToMIDI struct)
+  explicit SoundToMIDIEngine(const SoundToMIDI& cfg);
 
   /// @brief Callback invoked when a new note starts
   /// @param note MIDI note number (0-127)
@@ -140,14 +140,14 @@ public:
 
   /// @brief Get current configuration
   /// @return Reference to active configuration
-  const PitchToMIDI& config() const;
+  const SoundToMIDI& config() const;
 
   /// @brief Update configuration (affects subsequent processFrame calls)
   /// @param c New configuration parameters
-  void setConfig(const PitchToMIDI& c);
+  void setConfig(const SoundToMIDI& c);
 
 private:
-  PitchToMIDI _cfg;           ///< Active configuration
+  SoundToMIDI _cfg;           ///< Active configuration
   PitchDetector _det;         ///< Pitch detection instance
   int _noteOnFrames;          ///< Counter for note onset hysteresis
   int _silenceFrames;         ///< Counter for silence/offset detection

@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fx/audio/pitch_to_midi.h"
+#include "fx/audio/sound_to_midi.h"
 #include "fl/math.h"
 #include "fl/set.h"
 #include "fl/codec/mp3.h"
@@ -20,12 +20,12 @@ static void generateSineWave(float* buffer, int n, float freq_hz, float sample_r
     }
 }
 
-TEST_CASE("PitchToMIDI - Simple A4 sine wave (440Hz -> MIDI 69)") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Simple A4 sine wave (440Hz -> MIDI 69)") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     uint8_t lastNoteOn = 0;
     uint8_t lastVelocity = 0;
@@ -58,13 +58,13 @@ TEST_CASE("PitchToMIDI - Simple A4 sine wave (440Hz -> MIDI 69)") {
     CHECK_GT(lastVelocity, 0);
 }
 
-TEST_CASE("PitchToMIDI - Note off after silence") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Note off after silence") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.silence_frames_off = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     uint8_t lastNoteOff = 0;
     int noteOnCount = 0;
@@ -100,13 +100,13 @@ TEST_CASE("PitchToMIDI - Note off after silence") {
     CHECK_EQ(lastNoteOff, 69); // Should turn off A4
 }
 
-TEST_CASE("PitchToMIDI - Pitch change triggers retrigger") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Pitch change triggers retrigger") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.median_filter_size = 1; // Disable median filter to avoid lag in this test
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     uint8_t firstNote = 0;
     uint8_t secondNote = 0;
@@ -150,13 +150,13 @@ TEST_CASE("PitchToMIDI - Pitch change triggers retrigger") {
     CHECK_EQ(secondNote, 72);
 }
 
-TEST_CASE("PitchToMIDI - Low amplitude below gate is ignored") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Low amplitude below gate is ignored") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.rms_gate = 0.010f;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     int noteOnCount = 0;
 
@@ -191,14 +191,14 @@ static void generateMultiTone(float* buffer, int n, const float* freqs, int numF
     }
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic mode detects two simultaneous notes") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic mode detects two simultaneous notes") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
     int noteOnCount = 0;
@@ -227,14 +227,14 @@ TEST_CASE("PitchToMIDI - Polyphonic mode detects two simultaneous notes") {
     CHECK(notesOn.has(76)); // E5
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic mode detects three-note chord") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic mode detects three-note chord") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -262,15 +262,15 @@ TEST_CASE("PitchToMIDI - Polyphonic mode detects three-note chord") {
     // Note: exact detection depends on FFT parameters, threshold, etc.
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic mode handles note off for individual notes") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic mode handles note off for individual notes") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
     cfg.silence_frames_off = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -306,14 +306,14 @@ TEST_CASE("PitchToMIDI - Polyphonic mode handles note off for individual notes")
     CHECK_FALSE(notesOn.has(76)); // E5 should be off
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic mode handles silence") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic mode handles silence") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.silence_frames_off = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -345,14 +345,14 @@ TEST_CASE("PitchToMIDI - Polyphonic mode handles silence") {
     CHECK_EQ(notesOn.size(), 0); // All notes should be off
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic mode filters out harmonics") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic mode filters out harmonics") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 16> notesOn;
 
@@ -381,15 +381,15 @@ TEST_CASE("PitchToMIDI - Polyphonic mode filters out harmonics") {
     // We're being lenient here - the important thing is we get the fundamental
 }
 
-TEST_CASE("PitchToMIDI - Polyphonic velocity reflects relative amplitude") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Polyphonic velocity reflects relative amplitude") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 2;
     cfg.vel_gain = 5.0f;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     uint8_t vel69 = 0;
     uint8_t vel76 = 0;
@@ -420,13 +420,13 @@ TEST_CASE("PitchToMIDI - Polyphonic velocity reflects relative amplitude") {
     CHECK_GE(vel69, vel76 * 0.8f); // Allow some tolerance
 }
 
-TEST_CASE("PitchToMIDI - Monophonic mode still works (backward compatibility)") {
-    PitchToMIDI cfg;
+TEST_CASE("SoundToMIDI - Monophonic mode still works (backward compatibility)") {
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 16000.0f;
     cfg.frame_size = 512;
     cfg.polyphonic = false; // Explicitly monophonic
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     uint8_t lastNoteOn = 0;
     int noteOnCount = 0;
@@ -450,7 +450,7 @@ TEST_CASE("PitchToMIDI - Monophonic mode still works (backward compatibility)") 
 
 // ========== MP3 Decoder Integration Tests ==========
 
-TEST_CASE("PitchToMIDI - Real MP3 file polyphonic detection") {
+TEST_CASE("SoundToMIDI - Real MP3 file polyphonic detection") {
     // Set up filesystem to point to tests/data directory
     setTestFileSystemRoot("tests/data");
 
@@ -476,14 +476,14 @@ TEST_CASE("PitchToMIDI - Real MP3 file polyphonic detection") {
     REQUIRE_GT(samples.size(), 0);
 
     // Set up pitch detection in polyphonic mode
-    PitchToMIDI cfg;
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 44100.0f; // MP3 is likely 44.1kHz
     cfg.frame_size = 1024;
     cfg.polyphonic = true;
     cfg.note_hold_frames = 3;
     cfg.silence_frames_off = 5;
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     fl::FixedSet<uint8_t, 128> allNotesDetected;
     int totalNoteOnEvents = 0;
@@ -549,7 +549,7 @@ TEST_CASE("PitchToMIDI - Real MP3 file polyphonic detection") {
     CHECK_LE(allNotesDetected.size(), 60); // But not too many (sanity check)
 }
 
-TEST_CASE("PitchToMIDI - MP3 polyphonic note count metric") {
+TEST_CASE("SoundToMIDI - MP3 polyphonic note count metric") {
     // Set up filesystem
     setTestFileSystemRoot("tests/data");
     FileSystem fs;
@@ -571,7 +571,7 @@ TEST_CASE("PitchToMIDI - MP3 polyphonic note count metric") {
     REQUIRE_GT(samples.size(), 0);
 
     // Configure pitch detection for polyphonic mode
-    PitchToMIDI cfg;
+    SoundToMIDI cfg;
     cfg.sample_rate_hz = 44100.0f;
     cfg.frame_size = 2048; // Larger frame for better frequency resolution
     cfg.polyphonic = true;
@@ -579,7 +579,7 @@ TEST_CASE("PitchToMIDI - MP3 polyphonic note count metric") {
     cfg.silence_frames_off = 3;
     cfg.rms_gate = 0.005f; // Lower gate to catch quieter notes
 
-    PitchToMIDIEngine engine(cfg);
+    SoundToMIDIEngine engine(cfg);
 
     int uniqueNotesDetected = 0;
     fl::FixedSet<uint8_t, 128> notesSet;
