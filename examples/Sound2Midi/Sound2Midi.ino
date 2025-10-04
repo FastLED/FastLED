@@ -41,17 +41,44 @@ using namespace fl;
 
 // UI Elements
 UITitle title("Sound to MIDI Histogram");
-UIDescription description("Real-time sound to MIDI conversion with fading color streaks");
+UIDescription description(
+    "Real-time sound to MIDI conversion with histogram visualization.\n\n"
+    "## Audio Settings\n"
+    "**Audio Gain** (0.1-5.0): Amplifies input signal. Increase for quiet sources, decrease for loud ones to prevent clipping.\n"
+    "**Confidence Threshold** (0.5-0.95): Minimum confidence to trigger note detection. Higher = fewer false positives. Recommended: 0.75-0.85 for instruments, 0.65-0.75 for voice.\n\n"
+    "## Stability Controls (Anti-Jitter)\n"
+    "**Semitone Threshold** (1-5): Minimum pitch change to register new note. 1=responsive/may flicker, 2-3=balanced, 4-5=stable/less responsive.\n"
+    "**Note Change Hold Frames** (1-20): Consecutive frames needed before switching notes. Lower=faster/responsive, higher=stable/slower.\n"
+    "**Median Filter Size** (1-11): Smooths pitch outliers. 1=no filtering, 3-5=balanced, 7-11=maximum smoothing.\n\n"
+    "## Modes\n"
+    "**Polyphonic Mode**: OFF=single note (monophonic), ON=multiple simultaneous notes (up to 16).\n"
+    "**One Frame Mode**: OFF=notes sustain, ON=notes flash once (impulse/trigger mode).\n\n"
+    "## Visual\n"
+    "**Brightness** (0-255): Overall LED brightness.\n"
+    "**Fade Speed** (5-100): Trail fade rate. Higher=faster fade/shorter trails.\n"
+    "**Test White**: Button to test LEDs with white while pressed.\n\n"
+    "## Visualization\n"
+    "Notes shown as colored streaks: vertical position=pitch (low to high), color=chromatic mapping (12 semitones), brightness=velocity. New notes appear left, scroll right.\n\n"
+    "## Tuning Presets\n"
+    "**Simple Melodies**: Semitone 1-2, Hold 2-4, Filter 3, Confidence 0.75-0.8\n"
+    "**Fast Passages**: Semitone 1, Hold 1-2, Filter 1-3, Confidence 0.7-0.75\n"
+    "**Sustained Notes**: Semitone 2-3, Hold 5-10, Filter 5-7, Confidence 0.75-0.85\n"
+    "**Noisy Environments**: Semitone 2-3, Hold 5-8, Filter 5-7, Confidence 0.85-0.9"
+);
 
 // Audio controls
 UIAudio audio("Audio Input");
 UISlider audioGain("Audio Gain", 1.0f, 0.1f, 5.0f, 0.1f);
-UISlider confidenceThreshold("Confidence Threshold", 0.82f, 0.5f, 0.95f, 0.01f);
+UISlider confidenceThreshold("Confidence Threshold", 0.75f, 0.5f, 0.95f, 0.01f);
 
 // Stability controls (anti-jitter)
-UISlider semitoneThreshold("Semitone Threshold", 2, 1, 5, 1);
-UISlider noteChangeHoldFrames("Note Change Hold", 5, 1, 20, 1);
-UISlider medianFilterSize("Median Filter Size", 5, 1, 11, 1);
+// Optimized for simple melodies like "Mary Had a Little Lamb"
+// - Lower semitone threshold for well-separated notes
+// - Shorter hold frames for faster note transitions
+// - Smaller median filter for more responsive detection
+UISlider semitoneThreshold("Semitone Threshold", 1, 1, 5, 1);
+UISlider noteChangeHoldFrames("Note Change Hold", 3, 1, 20, 1);
+UISlider medianFilterSize("Median Filter Size", 3, 1, 11, 1);
 
 // Visual controls
 UISlider brightness("Brightness", 128, 0, 255, 1);
@@ -60,6 +87,7 @@ UIButton testWhite("Test All White");
 
 // Polyphonic mode
 UICheckbox polyphonicMode("Polyphonic Mode", false);
+UICheckbox oneFrameMode("One Frame Mode", false);
 
 // Global variables
 CRGB leds[NUM_LEDS];
@@ -72,12 +100,14 @@ SoundToMIDIBase* pitchEngine = nullptr;
 uint8_t currentMIDINote = 0;
 uint8_t currentVelocity = 0;
 bool noteIsOn = false;
+bool noteJustHit = false;  // For one-frame mode visualization
 
 // Polyphonic state (track up to 16 simultaneous notes)
 struct ActiveNote {
     uint8_t midiNote;
     uint8_t velocity;
     bool active;
+    bool justHit;  // For one-frame mode visualization
 };
 ActiveNote activeNotes[16];
 int numActiveNotes = 0;
@@ -139,7 +169,8 @@ void drawHistogram() {
     if (polyphonicMode.value()) {
         // Polyphonic mode: draw all active notes
         for (int i = 0; i < numActiveNotes; i++) {
-            if (activeNotes[i].active) {
+            bool shouldDraw = activeNotes[i].active || (oneFrameMode.value() && activeNotes[i].justHit);
+            if (shouldDraw) {
                 // Map MIDI note to Y position (piano range: 21-108, 88 keys)
                 float notePos = fl::map_range<float, float>(activeNotes[i].midiNote, 21.0f, 108.0f, 0.0f, 1.0f);
                 notePos = fl::clamp(notePos, 0.0f, 1.0f);
@@ -157,10 +188,13 @@ void drawHistogram() {
                     leds[idx] += color;
                 }
             }
+            // Clear justHit flag after drawing
+            activeNotes[i].justHit = false;
         }
     } else {
         // Monophonic mode: draw single note
-        if (noteIsOn) {
+        bool shouldDraw = noteIsOn || (oneFrameMode.value() && noteJustHit);
+        if (shouldDraw) {
             // Map MIDI note to Y position (piano range: 21-108, 88 keys)
             float notePos = fl::map_range<float, float>(currentMIDINote, 21.0f, 108.0f, 0.0f, 1.0f);
             notePos = fl::clamp(notePos, 0.0f, 1.0f);
@@ -177,6 +211,8 @@ void drawHistogram() {
                 leds[idx] = color;
             }
         }
+        // Clear justHit flag after drawing
+        noteJustHit = false;
     }
 
     // Scroll right: shift all columns to the right
@@ -219,13 +255,18 @@ void setupPitchEngineCallbacks() {
                     if (!activeNotes[i].active) {
                         activeNotes[i].midiNote = note;
                         activeNotes[i].velocity = velocity;
-                        activeNotes[i].active = true;
+                        activeNotes[i].active = !oneFrameMode.value();  // Only keep active if not in one-frame mode
+                        activeNotes[i].justHit = true;
                         if (i >= numActiveNotes) {
                             numActiveNotes = i + 1;
                         }
+                        slot = i;
                         break;
                     }
                 }
+            } else {
+                // Note was already active, mark as just hit
+                activeNotes[slot].justHit = true;
             }
 
             Serial.print("Note ON (poly): ");
@@ -244,7 +285,8 @@ void setupPitchEngineCallbacks() {
             // Monophonic mode
             currentMIDINote = note;
             currentVelocity = velocity;
-            noteIsOn = true;
+            noteIsOn = !oneFrameMode.value();  // Only keep on if not in one-frame mode
+            noteJustHit = true;
 
             Serial.print("Note ON: ");
             Serial.print(noteName);
@@ -262,34 +304,37 @@ void setupPitchEngineCallbacks() {
         char noteName[8];
         getNoteName(note, noteName);
 
-        if (polyphonicMode.value()) {
-            // Polyphonic mode: remove from active notes
-            for (int i = 0; i < 16; i++) {
-                if (activeNotes[i].active && activeNotes[i].midiNote == note) {
-                    activeNotes[i].active = false;
-                    break;
+        // In one-frame mode, note offs are ignored (notes already inactive)
+        if (!oneFrameMode.value()) {
+            if (polyphonicMode.value()) {
+                // Polyphonic mode: remove from active notes
+                for (int i = 0; i < 16; i++) {
+                    if (activeNotes[i].active && activeNotes[i].midiNote == note) {
+                        activeNotes[i].active = false;
+                        break;
+                    }
                 }
-            }
-            // Compact the array
-            while (numActiveNotes > 0 && !activeNotes[numActiveNotes - 1].active) {
-                numActiveNotes--;
-            }
+                // Compact the array
+                while (numActiveNotes > 0 && !activeNotes[numActiveNotes - 1].active) {
+                    numActiveNotes--;
+                }
 
-            Serial.print("Note OFF (poly): ");
-            Serial.print(noteName);
-            Serial.print(" - Active notes: ");
-            int count = 0;
-            for (int i = 0; i < 16; i++) {
-                if (activeNotes[i].active) count++;
-            }
-            Serial.println(count);
-        } else {
-            // Monophonic mode
-            noteIsOn = false;
+                Serial.print("Note OFF (poly): ");
+                Serial.print(noteName);
+                Serial.print(" - Active notes: ");
+                int count = 0;
+                for (int i = 0; i < 16; i++) {
+                    if (activeNotes[i].active) count++;
+                }
+                Serial.println(count);
+            } else {
+                // Monophonic mode
+                noteIsOn = false;
 
-            Serial.print("Note OFF: ");
-            Serial.print(noteName);
-            Serial.println();
+                Serial.print("Note OFF: ");
+                Serial.print(noteName);
+                Serial.println();
+            }
         }
     };
 }
@@ -379,8 +424,10 @@ void setup() {
             numActiveNotes = 0;
             for (int i = 0; i < 16; i++) {
                 activeNotes[i].active = false;
+                activeNotes[i].justHit = false;
             }
             noteIsOn = false;
+            noteJustHit = false;
 
             Serial.print("Polyphonic mode ");
             Serial.println(value ? "ENABLED" : "DISABLED");
@@ -404,6 +451,7 @@ void setup() {
     // Initialize active notes array
     for (int i = 0; i < 16; i++) {
         activeNotes[i].active = false;
+        activeNotes[i].justHit = false;
     }
 
     // Setup pitch engine callbacks
