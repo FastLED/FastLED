@@ -66,13 +66,10 @@ struct SoundToMIDI {
   float vel_gain             = 5.0f;  ///< Gain multiplier for RMS → velocity conversion
   uint8_t vel_floor          = 10;    ///< Minimum MIDI velocity (1-127, prevents zero velocity)
 
-  // Stability/Anti-Jitter Controls
+  // Stability/Anti-Jitter Controls (Monophonic only)
   int   note_change_semitone_threshold = 1;  ///< Semitones required to trigger note change (0=off)
   int   note_change_hold_frames = 3;         ///< Frames new note must persist before switching
   int   median_filter_size = 1;              ///< Median filter window size (1=off for monophonic, 3-5 for noisy input)
-
-  // Polyphonic Mode
-  bool  polyphonic = false;                  ///< Enable polyphonic detection (multiple simultaneous notes)
 };
 
 // ---------- Pitch Detection Result ----------
@@ -107,20 +104,12 @@ private:
   float _cmnd[MAX_TAU + 1];            ///< Cumulative mean normalized difference buffer
 };
 
-// ---------- MIDI Conversion Engine ----------
-/// @brief Main engine that converts audio frames to MIDI Note On/Off events
-/// @details This class manages the complete pipeline from audio input to MIDI output:
-///          1. Pitch detection via PitchDetector
-///          2. Frequency → MIDI note conversion
-///          3. Onset/offset detection with hysteresis
-///          4. RMS-based velocity calculation
-///          5. Anti-jitter filtering (semitone threshold, hold frames, median filter)
-///          6. MIDI event callbacks
-class SoundToMIDIEngine {
+// ---------- Abstract Base Class ----------
+/// @brief Abstract base class for sound-to-MIDI conversion engines
+/// @details Defines the common interface for both monophonic and polyphonic implementations
+class SoundToMIDIBase {
 public:
-  /// @brief Construct engine with specified configuration
-  /// @param cfg Configuration parameters (see SoundToMIDI struct)
-  explicit SoundToMIDIEngine(const SoundToMIDI& cfg);
+  virtual ~SoundToMIDIBase() = default;
 
   /// @brief Callback invoked when a new note starts
   /// @param note MIDI note number (0-127)
@@ -136,15 +125,44 @@ public:
   /// @param n Number of samples in the frame
   /// @details Call this repeatedly with consecutive audio chunks. The engine
   ///          will invoke onNoteOn/onNoteOff callbacks as needed.
-  void processFrame(const float* frame, int n);
+  virtual void processFrame(const float* frame, int n) = 0;
 
   /// @brief Get current configuration
   /// @return Reference to active configuration
-  const SoundToMIDI& config() const;
+  virtual const SoundToMIDI& config() const = 0;
 
   /// @brief Update configuration (affects subsequent processFrame calls)
   /// @param c New configuration parameters
-  void setConfig(const SoundToMIDI& c);
+  virtual void setConfig(const SoundToMIDI& c) = 0;
+};
+
+// ---------- Monophonic MIDI Conversion Engine ----------
+/// @brief Monophonic engine that converts audio frames to MIDI Note On/Off events
+/// @details This class manages the complete pipeline from audio input to MIDI output:
+///          1. Pitch detection via PitchDetector
+///          2. Frequency → MIDI note conversion
+///          3. Onset/offset detection with hysteresis
+///          4. RMS-based velocity calculation
+///          5. Anti-jitter filtering (semitone threshold, hold frames, median filter)
+///          6. MIDI event callbacks
+class SoundToMIDIMono : public SoundToMIDIBase {
+public:
+  /// @brief Construct engine with specified configuration
+  /// @param cfg Configuration parameters (see SoundToMIDI struct)
+  explicit SoundToMIDIMono(const SoundToMIDI& cfg);
+
+  /// @brief Process an audio frame and generate MIDI events
+  /// @param frame Pointer to audio samples (normalized float array, typically -1.0 to +1.0)
+  /// @param n Number of samples in the frame
+  void processFrame(const float* frame, int n) override;
+
+  /// @brief Get current configuration
+  /// @return Reference to active configuration
+  const SoundToMIDI& config() const override;
+
+  /// @brief Update configuration (affects subsequent processFrame calls)
+  /// @param c New configuration parameters
+  void setConfig(const SoundToMIDI& c) override;
 
 private:
   SoundToMIDI _cfg;           ///< Active configuration
@@ -163,14 +181,47 @@ private:
   int _historyIndex;                  ///< Current write position in history
   int _historyCount;                  ///< Number of valid entries in history
 
-  // Polyphonic tracking state (128 MIDI notes)
-  bool _activeNotes[128];             ///< Which notes are currently on
-  int _noteOnCount[128];              ///< Consecutive frames each note has been detected
-  int _noteOffCount[128];             ///< Consecutive frames each note has been silent
-
   /// @brief Calculate median from note history buffer
   /// @return Median MIDI note number
   int getMedianNote();
 };
+
+// ---------- Polyphonic MIDI Conversion Engine ----------
+/// @brief Polyphonic engine that detects multiple simultaneous notes
+/// @details This class uses FFT-based pitch detection to identify multiple
+///          fundamental frequencies and generate independent Note On/Off events
+///          for each detected pitch.
+class SoundToMIDIPoly : public SoundToMIDIBase {
+public:
+  /// @brief Construct engine with specified configuration
+  /// @param cfg Configuration parameters (see SoundToMIDI struct)
+  explicit SoundToMIDIPoly(const SoundToMIDI& cfg);
+
+  /// @brief Process an audio frame and generate MIDI events
+  /// @param frame Pointer to audio samples (normalized float array, typically -1.0 to +1.0)
+  /// @param n Number of samples in the frame
+  void processFrame(const float* frame, int n) override;
+
+  /// @brief Get current configuration
+  /// @return Reference to active configuration
+  const SoundToMIDI& config() const override;
+
+  /// @brief Update configuration (affects subsequent processFrame calls)
+  /// @param c New configuration parameters
+  void setConfig(const SoundToMIDI& c) override;
+
+private:
+  SoundToMIDI _cfg;           ///< Active configuration
+
+  // Polyphonic tracking state (128 MIDI notes)
+  bool _activeNotes[128];     ///< Which notes are currently on
+  int _noteOnCount[128];      ///< Consecutive frames each note has been detected
+  int _noteOffCount[128];     ///< Consecutive frames each note has been silent
+};
+
+// ---------- Legacy Alias (Deprecated) ----------
+/// @brief Legacy alias for backward compatibility - use SoundToMIDIMono instead
+/// @deprecated Use SoundToMIDIMono for monophonic or SoundToMIDIPoly for polyphonic
+using SoundToMIDIEngine = SoundToMIDIMono;
 
 } // namespace fl
