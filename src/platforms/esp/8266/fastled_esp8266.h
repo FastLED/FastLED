@@ -8,3 +8,7 @@
 
 #include "clockless_esp8266.h"
 #include "clockless_block_esp8266.h"
+
+#ifdef FASTLED_ESP8266_UART
+#include "fastled_esp8266_uart.h"
+#endif

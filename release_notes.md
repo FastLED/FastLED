@@ -1,5 +1,20 @@
 FastLED 3.10.4
 ==============
+  * **NEW: ESP8266 UART Driver (Opt-in)**: UART-based WS2812 driver for ESP8266 with improved Wi-Fi stability
+    * Alternative to bit-bang driver using UART1 peripheral (GPIO2) for hardware-timed LED output
+    * Enable with `#define FASTLED_ESP8266_UART` before including FastLED.h
+    * Or use explicit controller: `FastLED.addLeds<UARTController_ESP8266<GRB>>(leds, NUM_LEDS);`
+    * Key advantages over bit-bang driver:
+      * Hardware UART shifts bits automatically - minimal CPU overhead
+      * Improved stability under Wi-Fi load (no NMI interrupt timing issues)
+      * Robust timing using 3.2 Mbps UART with 4-bit symbol encoding (1000/1100)
+      * Maintains ±150ns WS2812 timing tolerance via 2-bit-per-byte LUT encoding
+    * Trade-offs:
+      * Higher RAM usage: ~12 bytes per LED (300 LEDs = 3.6 KB buffer)
+      * Single pin only: GPIO2 (UART1 TX-only on ESP8266)
+      * Not compatible with parallel output modes
+    * Proven technique from NeoPixelBus, now available in FastLED
+    * Files: [src/platforms/esp/8266/fastled_esp8266_uart.h](src/platforms/esp/8266/fastled_esp8266_uart.h), [src/platforms/esp/8266/fastled_esp8266_uart.cpp](src/platforms/esp/8266/fastled_esp8266_uart.cpp)
   * **NEW: ESP32-P4 PARLIO Driver (Alpha)**: Hardware-accelerated parallel LED driver using PARLIO TX peripheral
     * Drive 8 or 16 WS28xx LED strips simultaneously with DMA and hardware timing
     * Minimal CPU overhead with automatic timing for WS2812, WS2811, SK6812, etc.
