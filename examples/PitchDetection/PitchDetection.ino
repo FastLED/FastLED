@@ -29,8 +29,8 @@ FL_DISABLE_WARNING(sign-conversion)
 using namespace fl;
 
 // LED Configuration
-#define MATRIX_WIDTH 128
-#define MATRIX_HEIGHT 128
+#define MATRIX_WIDTH 64
+#define MATRIX_HEIGHT 64
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 #define LED_PIN 3
 #define LED_TYPE WS2812B
@@ -131,18 +131,10 @@ void drawHistogram() {
         uint8_t ledBrightness = fl::map_range<uint8_t, uint8_t>(currentVelocity, 0, 127, 100, 255);
         color.fadeToBlackBy(255 - ledBrightness);
 
-        // Draw a vertical streak centered at yPos
-        for (int dy = -2; dy <= 2; dy++) {
-            int y = yPos + dy;
-            if (y >= 0 && y < MATRIX_HEIGHT) {
-                int idx = XY(0, y);
-                if (idx >= 0) {
-                    uint8_t fade = 255 - (abs(dy) * 50);
-                    CRGB c = color;
-                    c.fadeToBlackBy(255 - fade);
-                    leds[idx] = c;
-                }
-            }
+        // Draw a single dot at yPos
+        int idx = XY(0, yPos);
+        if (idx >= 0) {
+            leds[idx] = color;
         }
     }
 
