@@ -14,7 +14,7 @@ namespace fl {
 
 #if FASTLED_MULTITHREADED
 template <typename T>
-using atomic = std::atomic<T>;
+using atomic = std::atomic<T>;  // okay std namespace
 #else
 template <typename T> class AtomicFake;
 template <typename T>

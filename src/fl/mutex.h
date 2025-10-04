@@ -54,7 +54,7 @@ template <typename T> class MutexFake {
 
 
 #if FASTLED_MULTITHREADED
-class MutexReal : public std::recursive_mutex {
+class MutexReal : public std::recursive_mutex {  // okay std namespace
   public:
     MutexReal() = default;
     

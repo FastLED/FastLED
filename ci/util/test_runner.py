@@ -396,6 +396,16 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
     )
 
 
+def create_std_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
+    """Create a std:: namespace check process without starting it"""
+    return RunningProcess(
+        "uv run python ci/lint_cpp/test_no_std_namespace.py",
+        shell=True,
+        auto_run=False,  # Don't auto-start - will be started in parallel later
+        enable_stack_trace=enable_stack_trace,
+    )
+
+
 def create_unit_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
@@ -558,8 +568,9 @@ def get_cpp_test_processes(
     """Return all processes needed for C++ tests"""
     processes: list[RunningProcess] = []
 
-    # Always include namespace check
+    # Always include namespace checks
     processes.append(create_namespace_check_process(enable_stack_trace))
+    processes.append(create_std_namespace_check_process(enable_stack_trace))
 
     if test_categories.unit:
         processes.append(create_unit_test_process(args, enable_stack_trace))
@@ -595,8 +606,9 @@ def get_all_test_processes(
     """Return all processes needed for all tests"""
     processes: list[RunningProcess] = []
 
-    # Always include namespace check
+    # Always include namespace checks
     processes.append(create_namespace_check_process(enable_stack_trace))
+    processes.append(create_std_namespace_check_process(enable_stack_trace))
 
     # Add test processes based on categories
     if test_categories.unit:
@@ -1423,8 +1435,9 @@ def runner(
         processes: list[RunningProcess] = []
         skipped_timings: list[ProcessTiming] = []
 
-        # Always start with namespace check
+        # Always start with namespace checks
         processes.append(create_namespace_check_process(enable_stack_trace))
+        processes.append(create_std_namespace_check_process(enable_stack_trace))
 
         # Add unit tests if needed and C++ test files have changed
         if (test_categories.unit or test_categories.unit_only) and cpp_test_change:

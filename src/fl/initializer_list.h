@@ -57,6 +57,6 @@ namespace fl {
 #else
 #include <initializer_list>
 namespace fl {
-    using std::initializer_list;
+    using std::initializer_list;  // okay std namespace
 }
 #endif 

@@ -620,15 +620,15 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
     }
 
 #ifdef __EMSCRIPTEN__
-    string(const std::string &str) {
+    string(const std::string &str) {  // okay std namespace
         copy(str.c_str(), str.size());
     }
-    string &operator=(const std::string &str) {
+    string &operator=(const std::string &str) {  // okay std namespace
         copy(str.c_str(), str.size());
         return *this;
     }
     // append
-    string &append(const std::string &str) {
+    string &append(const std::string &str) {  // okay std namespace
         write(str.c_str(), str.size());
         return *this;
     }

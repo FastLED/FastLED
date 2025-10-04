@@ -26,7 +26,7 @@
     
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
-    static const auto start_time = std::chrono::steady_clock::now();
+    static const auto start_time = std::chrono::steady_clock::now();  // okay std namespace
     FL_DISABLE_WARNING_POP
 #else
     // Default fallback - assume Arduino-compatible millis() is available
@@ -118,8 +118,8 @@ fl::u32 get_platform_time() {
     
 #elif defined(FASTLED_TESTING) || defined(__linux__) || defined(__APPLE__) || defined(_WIN32)
     // Native platforms - use std::chrono with consistent start time
-    auto current_time = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time);
+    auto current_time = std::chrono::steady_clock::now();  // okay std namespace
+    auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time);  // okay std namespace
     return static_cast<fl::u32>(elapsed.count());
     
 #else
