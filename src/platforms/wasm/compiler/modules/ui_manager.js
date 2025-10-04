@@ -1257,7 +1257,13 @@ export class JsonUiManager {
       const transformedChanges = {};
       for (const [id, value] of Object.entries(changes)) {
         const key = `${id}`;
-        transformedChanges[key] = value;
+        // Wrap audio data in an object with "audioData" key for C++ backend
+        const element = this.uiElements[id];
+        if (element && element.type === 'file' && element.accept === 'audio/*') {
+          transformedChanges[key] = { audioData: value };
+        } else {
+          transformedChanges[key] = value;
+        }
       }
       // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
 
