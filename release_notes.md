@@ -1,5 +1,17 @@
 FastLED 3.10.4
 ==============
+  * **NEW: ESP32-P4 PARLIO Driver (Alpha)**: Hardware-accelerated parallel LED driver using PARLIO TX peripheral
+    * Drive 8 or 16 WS28xx LED strips simultaneously with DMA and hardware timing
+    * Minimal CPU overhead with automatic timing for WS2812, WS2811, SK6812, etc.
+    * Enable by creating `fl::ParlioLedDriver` instance (see example)
+    * Example: [examples/Esp32P4Parlio/](examples/Esp32P4Parlio/)
+    * ESP32-P4 only - uses dedicated parallel I/O peripheral
+  * **ESP32-S2/S3 LCD Driver (Beta)**: Production-ready LCD_CAM peripheral driver for parallel LED strips
+    * Alternative to I2S driver with Serial.print() debugging support
+    * Up to 16 parallel WS28xx strips with automatic chipset timing optimization
+    * Enable with `#define FASTLED_ESP32_LCD_DRIVER` before including FastLED.h
+    * Same memory efficiency as I2S: 144 KB per 1000 LEDs
+    * Example: [examples/Esp32LcdDriver/](examples/Esp32LcdDriver/)
   * **NEW: Fx2dTo1d - Sample 2D Effects into 1D LED Strips**: Reusable component for sampling any Fx2d effect into a 1D strip
     * Generic adapter class that wraps any Fx2d effect and samples it using a ScreenMap
     * Supports two interpolation modes:
