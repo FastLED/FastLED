@@ -49,7 +49,7 @@ namespace fl {
 struct SoundToMIDI {
   // Audio Parameters
   float sample_rate_hz = 16000.0f;  ///< Input audio sample rate in Hz (typical: 16000-48000)
-  int   frame_size     = 512;       ///< Analysis window size in samples (power of 2 recommended)
+  int   frame_size     = 512;       ///< Analysis window size in samples (FastLED default: 512, use 2048+ for 44.1kHz+)
   int   hop_size       = 256;       ///< Step size between frames in samples (typically frame_size/2)
 
   // Pitch Detection Range
@@ -57,7 +57,7 @@ struct SoundToMIDI {
   float fmax_hz        = 1600.0f;   ///< Maximum detectable frequency in Hz (e.g., G6 ≈ 1568 Hz)
 
   // Detection Thresholds
-  float confidence_threshold = 0.82f; ///< Minimum confidence [0-1] to accept pitch (higher = stricter)
+  float confidence_threshold = 0.80f; ///< Minimum confidence [0-1] to accept pitch (0.80 recommended for music)
   int   note_hold_frames     = 3;     ///< Consecutive frames required before Note On (debounce)
   int   silence_frames_off   = 3;     ///< Consecutive silent frames before Note Off (anti-flutter)
   float rms_gate             = 0.010f;///< RMS amplitude threshold below which signal is silent
@@ -68,8 +68,8 @@ struct SoundToMIDI {
 
   // Stability/Anti-Jitter Controls
   int   note_change_semitone_threshold = 1;  ///< Semitones required to trigger note change (0=off)
-  int   note_change_hold_frames = 5;         ///< Frames new note must persist before switching
-  int   median_filter_size = 5;              ///< Median filter window size (1=off, max=11, odd recommended)
+  int   note_change_hold_frames = 3;         ///< Frames new note must persist before switching
+  int   median_filter_size = 1;              ///< Median filter window size (1=off for monophonic, 3-5 for noisy input)
 
   // Polyphonic Mode
   bool  polyphonic = false;                  ///< Enable polyphonic detection (multiple simultaneous notes)

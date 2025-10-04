@@ -228,7 +228,7 @@ PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, f
   }
 
   // First crossing under classic threshold; else global min
-  const float thresh = 0.12f;
+  const float thresh = 0.10f; // ITER7: Stricter threshold for better pitch accuracy
   int tauEst = -1;
   for (int tau = tauMin; tau <= tauMax; ++tau) {
     if (_cmnd[tau] < thresh) {

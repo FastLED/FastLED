@@ -686,15 +686,15 @@ TEST_CASE("SoundToMIDI - MP3 to MIDI melody detection pipeline") {
     // Set up pitch detection in monophonic mode for melody detection
     SoundToMIDI cfg;
     cfg.sample_rate_hz = detected_sample_rate; // Use actual MP3 sample rate
-    cfg.frame_size = 2048; // Larger frame for better frequency resolution
+    cfg.frame_size = 4096; // ITER6: Larger frame for better freq resolution
     cfg.polyphonic = false; // Monophonic melody detection
-    cfg.note_hold_frames = 4; // Require stable pitch for 4 frames
+    cfg.note_hold_frames = 3; // ITER6: Slightly faster onset
     cfg.silence_frames_off = 3; // Require 3 frames of silence for note-off
     cfg.rms_gate = 0.012f; // Gate to filter background noise
-    cfg.median_filter_size = 7; // Larger median filter for stability
-    cfg.confidence_threshold = 0.85f; // Higher confidence threshold
+    cfg.median_filter_size = 1; // No median filter
+    cfg.confidence_threshold = 0.80f; // Lower confidence threshold
     cfg.note_change_semitone_threshold = 1; // Require at least 1 semitone change
-    cfg.note_change_hold_frames = 5; // New note must persist for 5 frames
+    cfg.note_change_hold_frames = 3; // Faster note changes
 
     SoundToMIDIEngine engine(cfg);
 
