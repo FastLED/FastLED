@@ -1409,8 +1409,8 @@ export class AudioManager {
     audioIndicator.className = 'audio-indicator';
     audioIndicator.textContent = 'Audio samples ready';
 
-    // Replace any existing indicator
-    const existingIndicator = container.querySelector('.audio-indicator');
+    // Replace any existing indicator (including errors)
+    const existingIndicator = container.querySelector('.audio-indicator, .audio-error');
     if (existingIndicator) {
       container.removeChild(existingIndicator);
     }
