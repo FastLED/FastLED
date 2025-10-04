@@ -154,6 +154,7 @@ flags = [
     "-Wcast-align",
     "-Wcast-qual",
     "-Werror=return-type",
+    "-Werror=switch-enum",              # Force error on incomplete switch over enum
 ]
 
 [test]

@@ -41,8 +41,26 @@
 #pragma once
 #include "fl/stdint.h"
 #include "fl/function.h"
+#include "fl/vector.h"
 
 namespace fl {
+
+// ---------- Enumerations for Polyphonic Spectral Processing ----------
+/// @brief Window function types for FFT preprocessing
+enum class WindowType : uint8_t {
+  None = 0,    ///< No windowing (rectangular)
+  Hann,        ///< Hann window (default, good general purpose)
+  Hamming,     ///< Hamming window (better sidelobe suppression)
+  Blackman     ///< Blackman window (best sidelobe suppression, wider main lobe)
+};
+
+/// @brief Smoothing modes for magnitude spectrum
+enum class SmoothingMode : uint8_t {
+  None = 0,    ///< No smoothing
+  Box3,        ///< 3-point box filter
+  Tri5,        ///< 5-point triangular filter
+  AdjAvg       ///< Adjacent average (2-sided)
+};
 
 // ---------- Configuration ----------
 /// @brief Configuration parameters for pitch detection and MIDI conversion
@@ -70,6 +88,34 @@ struct SoundToMIDI {
   int   note_change_semitone_threshold = 1;  ///< Semitones required to trigger note change (0=off)
   int   note_change_hold_frames = 3;         ///< Frames new note must persist before switching
   int   median_filter_size = 1;              ///< Median filter window size (1=off for monophonic, 3-5 for noisy input)
+
+  // ---------- Polyphonic Spectral Processing Parameters ----------
+  // FFT & Windowing
+  WindowType window_type = WindowType::Hann;  ///< Window function for FFT preprocessing
+
+  // Spectral Conditioning
+  float spectral_tilt_db_per_decade = 0.0f;   ///< Spectral tilt in dB/decade (e.g., +3.0 boosts highs)
+  SmoothingMode smoothing_mode = SmoothingMode::Box3;  ///< Magnitude spectrum smoothing
+
+  // Peak Detection & Interpolation
+  float peak_threshold_db = -40.0f;           ///< Magnitude threshold in dB for peak detection
+  bool parabolic_interp = true;               ///< Enable parabolic interpolation for sub-bin accuracy
+
+  // Harmonic Filtering
+  bool harmonic_filter_enable = true;         ///< Enable harmonic filtering to suppress overtones
+  float harmonic_tolerance_cents = 35.0f;     ///< Cents tolerance for harmonic detection (±35 cents)
+  float harmonic_energy_ratio_max = 0.7f;     ///< Max energy ratio for harmonic vs fundamental
+
+  // Octave Masking
+  uint8_t octave_mask = 0xFF;                 ///< Bitmask for enabled octaves (bit 0-7 = octave 0-7)
+
+  // PCP (Pitch Class Profile) Stabilizer
+  bool pcp_enable = false;                    ///< Enable pitch class profile stabilizer
+  uint8_t pcp_history_frames = 12;            ///< Number of frames for PCP history (EMA depth)
+  float pcp_bias_weight = 0.1f;               ///< Weight for PCP bias in note acceptance [0-1]
+
+  // Velocity from Peak Magnitude
+  bool velocity_from_peak_mag = true;         ///< Use peak magnitude for velocity (else RMS)
 };
 
 // ---------- Pitch Detection Result ----------
@@ -190,7 +236,9 @@ private:
 /// @brief Polyphonic engine that detects multiple simultaneous notes
 /// @details This class uses FFT-based pitch detection to identify multiple
 ///          fundamental frequencies and generate independent Note On/Off events
-///          for each detected pitch.
+///          for each detected pitch. Supports advanced spectral processing features
+///          including windowing, spectral tilt, smoothing, parabolic interpolation,
+///          harmonic filtering, octave masking, and PCP stabilization.
 class SoundToMIDIPoly : public SoundToMIDIBase {
 public:
   /// @brief Construct engine with specified configuration
@@ -210,6 +258,22 @@ public:
   /// @param c New configuration parameters
   void setConfig(const SoundToMIDI& c) override;
 
+  /// @brief Set peak threshold at runtime
+  /// @param db Threshold in dB
+  void setPeakThresholdDb(float db);
+
+  /// @brief Set octave mask at runtime
+  /// @param mask Bitmask for enabled octaves
+  void setOctaveMask(uint8_t mask);
+
+  /// @brief Set spectral tilt at runtime
+  /// @param db_per_decade Tilt in dB/decade
+  void setSpectralTilt(float db_per_decade);
+
+  /// @brief Set smoothing mode at runtime
+  /// @param mode Smoothing mode
+  void setSmoothingMode(SmoothingMode mode);
+
 private:
   SoundToMIDI _cfg;           ///< Active configuration
 
@@ -217,6 +281,25 @@ private:
   bool _activeNotes[128];     ///< Which notes are currently on
   int _noteOnCount[128];      ///< Consecutive frames each note has been detected
   int _noteOffCount[128];     ///< Consecutive frames each note has been silent
+
+  // PCP (Pitch Class Profile) state for stabilization
+  static constexpr int NUM_PITCH_CLASSES = 12;
+  float _pcpHistory[NUM_PITCH_CLASSES];  ///< EMA history for each pitch class (C, C#, D, ...)
+
+  // Initialize internal state
+  void initializeState();
+
+  // Precompute window coefficients for current FFT size
+  void precomputeWindow();
+
+  // Check if a note passes the octave mask
+  bool passesOctaveMask(int midiNote) const;
+
+  // Update PCP history with detected notes
+  void updatePCP(const fl::vector<int>& notes);
+
+  // Get PCP bias for a given MIDI note
+  float getPCPBias(int midiNote) const;
 };
 
 // ---------- Legacy Alias (Deprecated) ----------

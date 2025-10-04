@@ -102,12 +102,116 @@ inline void fft(const float* input, int N, fl::vector<fl::pair<float, float>>& o
   }
 }
 
-// Detect multiple fundamental frequencies in the frame using FFT.
+// Apply window function to signal
+inline void applyWindow(float* signal, int N, WindowType windowType) {
+  if (windowType == WindowType::None) return;
+
+  for (int i = 0; i < N; ++i) {
+    float w = 1.0f;
+    float t = (float)i / (float)(N - 1);
+
+    switch (windowType) {
+      case WindowType::None:
+        break;
+      case WindowType::Hann:
+        w = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+        break;
+      case WindowType::Hamming:
+        w = 0.54f - 0.46f * cosf(2.0f * M_PI * t);
+        break;
+      case WindowType::Blackman:
+        w = 0.42f - 0.5f * cosf(2.0f * M_PI * t) + 0.08f * cosf(4.0f * M_PI * t);
+        break;
+    }
+    signal[i] *= w;
+  }
+}
+
+// Apply spectral tilt (linear EQ) to magnitude spectrum
+inline void applySpectralTilt(fl::vector<float>& mag, float db_per_decade, float sr, int N) {
+  if (fabsf(db_per_decade) < 1e-6f) return;
+
+  // Convert dB/decade to linear slope per bin
+  // f_nyquist = sr/2, number of decades from DC to Nyquist
+  float f_nyquist = sr / 2.0f;
+  float decades = log10f(f_nyquist / 1.0f); // Decades from 1 Hz to Nyquist
+
+  for (size_t i = 1; i < mag.size(); ++i) {
+    float freq = (float)i * sr / (float)N;
+    if (freq < 1.0f) freq = 1.0f;
+    float decades_from_ref = log10f(freq / 1.0f);
+    float gain_db = db_per_decade * decades_from_ref / decades;
+    float gain_linear = powf(10.0f, gain_db / 20.0f);
+    mag[i] *= gain_linear;
+  }
+}
+
+// Apply smoothing to magnitude spectrum
+inline void applySmoothing(fl::vector<float>& mag, SmoothingMode mode) {
+  if (mode == SmoothingMode::None || mag.size() < 3) return;
+
+  fl::vector<float> smoothed = mag;
+
+  switch (mode) {
+    case SmoothingMode::None:
+      break;
+
+    case SmoothingMode::Box3:
+      // 3-point box filter
+      for (size_t i = 1; i < mag.size() - 1; ++i) {
+        smoothed[i] = (mag[i-1] + mag[i] + mag[i+1]) / 3.0f;
+      }
+      break;
+
+    case SmoothingMode::Tri5:
+      // 5-point triangular filter [1, 2, 3, 2, 1] / 9
+      if (mag.size() >= 5) {
+        for (size_t i = 2; i < mag.size() - 2; ++i) {
+          smoothed[i] = (mag[i-2] + 2.0f*mag[i-1] + 3.0f*mag[i] + 2.0f*mag[i+1] + mag[i+2]) / 9.0f;
+        }
+      }
+      break;
+
+    case SmoothingMode::AdjAvg:
+      // Adjacent average (2-sided)
+      for (size_t i = 1; i < mag.size() - 1; ++i) {
+        smoothed[i] = (mag[i-1] + mag[i+1]) / 2.0f;
+      }
+      break;
+  }
+
+  mag = smoothed;
+}
+
+// Parabolic interpolation for sub-bin accuracy
+inline float parabolicInterp(float y_minus1, float y0, float y_plus1, int bin0) {
+  float denom = (y_minus1 - 2.0f*y0 + y_plus1);
+  if (fabsf(denom) < 1e-12f) return (float)bin0;
+
+  float delta = 0.5f * (y_minus1 - y_plus1) / denom;
+  // Clamp delta to reasonable range
+  if (delta > 0.5f) delta = 0.5f;
+  if (delta < -0.5f) delta = -0.5f;
+
+  return (float)bin0 + delta;
+}
+
+// Detect multiple fundamental frequencies in the frame using FFT with enhanced spectral processing.
 // Returns a list of NotePeak (MIDI note and its fundamental magnitude).
-inline fl::vector<NotePeak> detectPolyphonicNotes(const float* x, int N, float sr, float fmin, float fmax) {
-  // Compute FFT of input frame (assume N is power of 2 for simplicity)
+inline fl::vector<NotePeak> detectPolyphonicNotes(
+    const float* x, int N, float sr, float fmin, float fmax,
+    const SoundToMIDI& cfg) {
+
+  // Apply windowing
+  fl::vector<float> windowed(N);
+  for (int i = 0; i < N; ++i) {
+    windowed[i] = x[i];
+  }
+  applyWindow(windowed.data(), N, cfg.window_type);
+
+  // Compute FFT of windowed input frame
   fl::vector<fl::pair<float, float>> spectrum;
-  fft(x, N, spectrum);
+  fft(windowed.data(), N, spectrum);
   int halfN = N / 2;
 
   // Magnitude spectrum (only need [0, N/2] for real input)
@@ -118,71 +222,116 @@ inline fl::vector<NotePeak> detectPolyphonicNotes(const float* x, int N, float s
     mag[i] = sqrtf(re*re + im*im);
   }
 
+  // Apply spectral tilt
+  applySpectralTilt(mag, cfg.spectral_tilt_db_per_decade, sr, N);
+
+  // Apply smoothing
+  applySmoothing(mag, cfg.smoothing_mode);
+
   // Determine frequency bin range for fmin to fmax
   int binMin = (int)floorf(fmin * N / sr);
   int binMax = (int)ceilf(fmax * N / sr);
   if (binMin < 1) binMin = 1;               // start from 1 to skip DC
   if (binMax > halfN - 1) binMax = halfN - 1;
 
-  // Calculate median magnitude in [binMin, binMax] to use as noise threshold
-  fl::vector<float> magslice;
-  magslice.reserve(binMax - binMin + 1);
-  for (int i = binMin; i <= binMax; ++i) {
-    magslice.push_back(mag[i]);
-  }
-
-  // Simple median calculation (sort and take middle)
-  for (size_t i = 0; i < magslice.size() - 1; ++i) {
-    for (size_t j = 0; j < magslice.size() - i - 1; ++j) {
-      if (magslice[j] > magslice[j + 1]) {
-        float tmp = magslice[j];
-        magslice[j] = magslice[j + 1];
-        magslice[j + 1] = tmp;
-      }
-    }
-  }
-  float medianMag = magslice[magslice.size() / 2];
-  float threshold = medianMag * 1.5f;  // threshold factor (1.5x median, adjust as needed)
+  // Convert threshold from dB to linear
+  float threshold_linear = powf(10.0f, cfg.peak_threshold_db / 20.0f);
 
   // Find local peaks above threshold in the specified range
-  fl::vector<int> peakIndices;
-  peakIndices.reserve(16);
+  struct PeakInfo {
+    float bin;     // Possibly fractional bin (after parabolic interp)
+    float mag;     // Magnitude
+    float freq;    // Frequency in Hz
+    int midiNote;  // MIDI note number
+  };
+
+  fl::vector<PeakInfo> peaks;
+  peaks.reserve(16);
+
   for (int i = binMin + 1; i < binMax; ++i) {
-    if (mag[i] > threshold && mag[i] >= mag[i-1] && mag[i] >= mag[i+1]) {
-      peakIndices.push_back(i);
+    if (mag[i] > threshold_linear && mag[i] >= mag[i-1] && mag[i] >= mag[i+1]) {
+      float binFractional = (float)i;
+
+      // Apply parabolic interpolation if enabled
+      if (cfg.parabolic_interp && i > 0 && i < halfN - 1) {
+        binFractional = parabolicInterp(mag[i-1], mag[i], mag[i+1], i);
+      }
+
+      float freq = binFractional * sr / (float)N;
+      int midiNote = clampMidi(hz_to_midi(freq));
+
+      peaks.push_back({binFractional, mag[i], freq, midiNote});
     }
   }
-  if (peakIndices.empty()) {
+
+  if (peaks.empty()) {
     return fl::vector<NotePeak>();  // no significant peaks found
   }
 
-  // Sort detected peaks by frequency (ascending) - already in order from loop above
-
-  // Group peaks by fundamental-harmonic relationship
-  fl::vector<NotePeak> result;
-  fl::vector<bool> used(peakIndices.size(), false);
-  for (size_t p = 0; p < peakIndices.size(); ++p) {
-    if (used[p]) continue;
-    int idx = peakIndices[p];
-    // Consider this peak a fundamental frequency
-    float freq = sr * (float)idx / (float)N;
-    int midiNote = clampMidi(hz_to_midi(freq));
-    float peakMag = mag[idx];
-
-    // Mark harmonics of this fundamental as used
-    for (size_t q = p + 1; q < peakIndices.size(); ++q) {
-      int idx2 = peakIndices[q];
-      if (used[q]) continue;
-      // Check if idx2 is ~ an integer multiple of idx
-      float ratio = (float)idx2 / idx;
-      int roundMult = (int)floorf(ratio + 0.5f);
-      if (roundMult >= 2 && fabsf(ratio - roundMult) < 0.1f) {
-        used[q] = true;
+  // Sort peaks by magnitude descending (strongest first)
+  for (size_t i = 0; i < peaks.size() - 1; ++i) {
+    for (size_t j = 0; j < peaks.size() - i - 1; ++j) {
+      if (peaks[j].mag < peaks[j + 1].mag) {
+        PeakInfo tmp = peaks[j];
+        peaks[j] = peaks[j + 1];
+        peaks[j + 1] = tmp;
       }
     }
-    // Store this fundamental note and its magnitude
-    result.push_back({midiNote, peakMag});
   }
+
+  // Harmonic filtering: veto peaks that are harmonics of stronger fundamentals
+  fl::vector<bool> vetoed(peaks.size(), false);
+
+  if (cfg.harmonic_filter_enable) {
+    for (size_t p = 0; p < peaks.size(); ++p) {
+      if (vetoed[p]) continue;
+
+      float f0 = peaks[p].freq;
+
+      // Check all other peaks to see if they are harmonics of this fundamental
+      for (size_t q = 0; q < peaks.size(); ++q) {
+        if (p == q || vetoed[q]) continue;
+
+        float fq = peaks[q].freq;
+
+        // Check if fq is approximately an integer multiple of f0
+        float ratio = fq / f0;
+        int harmonic_num = (int)lroundf(ratio);
+
+        if (harmonic_num >= 2 && harmonic_num <= 8) {
+          // Calculate frequency difference in cents
+          float expected_freq = f0 * harmonic_num;
+          float cents_diff = 1200.0f * (logf(fq / expected_freq) / logf(2.0f));
+
+          if (fabsf(cents_diff) < cfg.harmonic_tolerance_cents) {
+            // fq is likely a harmonic of f0
+            // Check energy ratio: harmonic should be weaker than fundamental (or similar)
+            if (peaks[q].mag < peaks[p].mag * cfg.harmonic_energy_ratio_max) {
+              vetoed[q] = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Build result from non-vetoed peaks that pass octave mask
+  fl::vector<NotePeak> result;
+  for (size_t p = 0; p < peaks.size(); ++p) {
+    if (vetoed[p]) continue;
+
+    int midiNote = peaks[p].midiNote;
+
+    // Check octave mask
+    int octave = midiNote / 12;
+    if (octave > 7) octave = 7;
+    if ((cfg.octave_mask & (1 << octave)) == 0) {
+      continue; // This octave is masked out
+    }
+
+    result.push_back({midiNote, peaks[p].mag});
+  }
+
   return result;
 }
 
@@ -407,11 +556,19 @@ void SoundToMIDIMono::setConfig(const SoundToMIDI& c) {
 // ---------- SoundToMIDIPoly ----------
 SoundToMIDIPoly::SoundToMIDIPoly(const SoundToMIDI& cfg)
     : _cfg(cfg) {
+  initializeState();
+}
+
+void SoundToMIDIPoly::initializeState() {
   // Initialize polyphonic tracking arrays
   for (int note = 0; note < 128; ++note) {
     _activeNotes[note] = false;
     _noteOnCount[note] = 0;
     _noteOffCount[note] = 0;
+  }
+  // Initialize PCP history
+  for (int i = 0; i < NUM_PITCH_CLASSES; ++i) {
+    _pcpHistory[i] = 0.0f;
   }
 }
 
@@ -424,9 +581,20 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
   // --- Polyphonic pitch detection logic ---
   bool voiced = (rms > _cfg.rms_gate);
   if (voiced) {
-    // Get all detected note peaks in this frame
+    // Get all detected note peaks in this frame using enhanced spectral processing
     fl::vector<NotePeak> notes = detectPolyphonicNotes(frame, n, _cfg.sample_rate_hz,
-                                                       _cfg.fmin_hz, _cfg.fmax_hz);
+                                                       _cfg.fmin_hz, _cfg.fmax_hz, _cfg);
+
+    // Update PCP (Pitch Class Profile) if enabled
+    if (_cfg.pcp_enable) {
+      fl::vector<int> detected_midi_notes;
+      detected_midi_notes.reserve(notes.size());
+      for (const NotePeak& np : notes) {
+        detected_midi_notes.push_back(np.midi);
+      }
+      updatePCP(detected_midi_notes);
+    }
+
     // Prepare a lookup for which MIDI notes are present in this frame
     bool present[128] = {false};
     for (const NotePeak& np : notes) {
@@ -514,6 +682,63 @@ const SoundToMIDI& SoundToMIDIPoly::config() const {
 
 void SoundToMIDIPoly::setConfig(const SoundToMIDI& c) {
   _cfg = c;
+}
+
+void SoundToMIDIPoly::setPeakThresholdDb(float db) {
+  _cfg.peak_threshold_db = db;
+}
+
+void SoundToMIDIPoly::setOctaveMask(uint8_t mask) {
+  _cfg.octave_mask = mask;
+}
+
+void SoundToMIDIPoly::setSpectralTilt(float db_per_decade) {
+  _cfg.spectral_tilt_db_per_decade = db_per_decade;
+}
+
+void SoundToMIDIPoly::setSmoothingMode(SmoothingMode mode) {
+  _cfg.smoothing_mode = mode;
+}
+
+void SoundToMIDIPoly::precomputeWindow() {
+  // Window precomputation will be added when we implement windowing
+  // For now this is a placeholder
+}
+
+bool SoundToMIDIPoly::passesOctaveMask(int midiNote) const {
+  if (midiNote < 0 || midiNote > 127) return false;
+  int octave = midiNote / 12;
+  if (octave > 7) octave = 7; // Cap at octave 7
+  return (_cfg.octave_mask & (1 << octave)) != 0;
+}
+
+void SoundToMIDIPoly::updatePCP(const fl::vector<int>& notes) {
+  if (!_cfg.pcp_enable) return;
+
+  // Decay factor for EMA
+  const float decay = 1.0f - (1.0f / _cfg.pcp_history_frames);
+
+  // Decay all pitch classes
+  for (int i = 0; i < NUM_PITCH_CLASSES; ++i) {
+    _pcpHistory[i] *= decay;
+  }
+
+  // Increment detected pitch classes
+  for (int note : notes) {
+    if (note >= 0 && note < 128) {
+      int pc = note % 12;
+      _pcpHistory[pc] += (1.0f - decay);
+      if (_pcpHistory[pc] > 1.0f) _pcpHistory[pc] = 1.0f;
+    }
+  }
+}
+
+float SoundToMIDIPoly::getPCPBias(int midiNote) const {
+  if (!_cfg.pcp_enable || midiNote < 0 || midiNote > 127) {
+    return 0.0f;
+  }
+  int pc = midiNote % 12;
+  return _pcpHistory[pc] * _cfg.pcp_bias_weight;
 }
 
 } // namespace fl
