@@ -29,8 +29,8 @@ FL_DISABLE_WARNING(sign-conversion)
 using namespace fl;
 
 // LED Configuration
-#define MATRIX_WIDTH 64
-#define MATRIX_HEIGHT 64
+#define MATRIX_WIDTH 32
+#define MATRIX_HEIGHT 32
 #define NUM_LEDS (MATRIX_WIDTH * MATRIX_HEIGHT)
 #define LED_PIN 3
 #define LED_TYPE WS2812B
@@ -87,12 +87,8 @@ int XY(int x, int y) {
     if (x < 0 || x >= MATRIX_WIDTH || y < 0 || y >= MATRIX_HEIGHT) {
         return -1;
     }
-    // Serpentine layout
-    if (y & 1) {
-        return y * MATRIX_WIDTH + (MATRIX_WIDTH - 1 - x);
-    } else {
-        return y * MATRIX_WIDTH + x;
-    }
+    // Rectangular layout
+    return y * MATRIX_WIDTH + x;
 }
 
 // Draw checkerboard pattern
@@ -102,8 +98,8 @@ void drawCheckerboard() {
         for (int x = 0; x < MATRIX_WIDTH; x++) {
             int idx = XY(x, y);
             if (idx >= 0) {
-                bool isWhite = ((x / checkerSize) + (y / checkerSize)) & 1;
-                leds[idx] = isWhite ? CRGB(40, 40, 40) : CRGB(0, 0, 0);
+                bool isRed = ((x / checkerSize) + (y / checkerSize)) & 1;
+                leds[idx] = isRed ? CRGB(20, 0, 0) : CRGB(0, 0, 0);
             }
         }
     }
@@ -157,7 +153,7 @@ void setup() {
     Serial.println("Pitch Detection Histogram");
     Serial.println("===========================");
 
-    // Initialize LEDs with 128x128 screenmap for visualization
+    // Initialize LEDs with rectangular screenmap for visualization
     XYMap xyMap = XYMap::constructRectangularGrid(MATRIX_WIDTH, MATRIX_HEIGHT);
     FastLED.addLeds<LED_TYPE, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS).setScreenMap(xyMap);
     FastLED.setBrightness(brightness.as_int());
