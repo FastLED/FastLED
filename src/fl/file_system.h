@@ -11,6 +11,7 @@
 #include "fx/video.h"
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
+#include "fl/codec/mp3.h"
 
 namespace fl {
 
@@ -73,6 +74,10 @@ class FileSystem {
     // Load JPEG image from file path directly to Frame
     FramePtr loadJpeg(const char *path, const JpegConfig &config = JpegConfig(),
                       fl::string *error_message = nullptr);
+
+    // Open MP3 audio file and return streaming decoder
+    fl::third_party::Mp3StreamDecoderPtr openMp3(const char *path,
+                                                   fl::string *error_message = nullptr);
 
   private:
     FsImplPtr mFs; // System dependent filesystem.

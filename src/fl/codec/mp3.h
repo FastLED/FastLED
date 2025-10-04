@@ -4,6 +4,9 @@
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/stdint.h"
+#include "fl/bytestream.h"
+#include "fl/shared_ptr.h"
+#include "fl/str.h"
 
 namespace fl {
 namespace third_party {
@@ -79,12 +82,15 @@ class Mp3HelixDecoder {
     // Reset the decoder state
     void reset();
 
-  private:
+    // Public access for Mp3StreamDecoder
     int findSyncWord(const fl::u8* buf, fl::size len);
     int decodeFrame(const fl::u8** inbuf, fl::size* bytes_left);
 
+  private:
     void* mDecoder;  // HMP3Decoder handle
-    fl::i16* mPcmBuffer;  // PCM output buffer
+
+  public:
+    fl::i16* mPcmBuffer;  // PCM output buffer (public for Mp3StreamDecoder)
     struct FrameInfo {
         int bitrate;
         int nChans;
@@ -94,8 +100,54 @@ class Mp3HelixDecoder {
         int layer;
         int version;
     };
-    FrameInfo mFrameInfo;
+    FrameInfo mFrameInfo;  // Public for Mp3StreamDecoder
 };
+
+// Mp3StreamDecoder provides streaming MP3 decoding from a ByteStream.
+// This allows decoding large MP3 files without loading them entirely into memory.
+class Mp3StreamDecoder {
+  public:
+    Mp3StreamDecoder();
+    ~Mp3StreamDecoder();
+
+    // Initialize with a byte stream
+    bool begin(fl::ByteStreamPtr stream);
+    void end();
+
+    // Check if decoder is ready to use
+    bool isReady() const { return mStream != nullptr && mDecoder != nullptr; }
+
+    // Check for errors
+    bool hasError(fl::string* msg = nullptr) const;
+
+    // Decode the next audio frame from the stream
+    // Returns true if a frame was decoded, false if end of stream or error
+    bool decodeNextFrame(AudioSample* out_sample);
+
+    // Get current stream position
+    fl::size getPosition() const { return mBytesProcessed; }
+
+    // Reset decoder state (but keep stream)
+    void reset();
+
+  private:
+    static constexpr fl::size BUFFER_SIZE = 4096;
+
+    bool fillBuffer();
+    bool findAndDecodeFrame(AudioSample* out_sample);
+
+    fl::ByteStreamPtr mStream;
+    Mp3HelixDecoder* mDecoder;
+    fl::vector<fl::u8> mBuffer;
+    fl::size mBufferPos;
+    fl::size mBufferFilled;
+    fl::size mBytesProcessed;
+    fl::string mErrorMsg;
+    bool mHasError;
+    bool mEndOfStream;
+};
+
+FASTLED_SMART_PTR(Mp3StreamDecoder);
 
 }  // namespace third_party
 }  // namespace fl

@@ -5,6 +5,7 @@
 #include "fl/compiler_control.h"
 #include "fl/has_include.h"
 #include "fl/codec/jpeg.h"
+#include "fl/codec/mp3.h"
 #include "fl/vector.h"
 #include "fl/math_macros.h"
 
@@ -444,6 +445,42 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
 
     return frame;
 }
+
+fl::third_party::Mp3StreamDecoderPtr FileSystem::openMp3(const char *path,
+                                                          fl::string *error_message) {
+    // Open the MP3 file
+    FileHandlePtr file = openRead(path);
+    if (!file || !file->valid()) {
+        if (error_message) {
+            *error_message = "Failed to open file: ";
+            error_message->append(path);
+        }
+        FASTLED_WARN("Failed to open MP3 file: " << path);
+        return fl::third_party::Mp3StreamDecoderPtr();
+    }
+
+    // Create ByteStream adapter for the file
+    fl::shared_ptr<ByteStreamFileHandle> fileStream =
+        fl::make_shared<ByteStreamFileHandle>(file);
+
+    // Create MP3 stream decoder
+    fl::third_party::Mp3StreamDecoderPtr decoder =
+        fl::make_shared<fl::third_party::Mp3StreamDecoder>();
+
+    if (!decoder->begin(fileStream)) {
+        fl::string decoder_error;
+        decoder->hasError(&decoder_error);
+        if (error_message) {
+            *error_message = "Failed to initialize MP3 decoder: ";
+            error_message->append(decoder_error);
+        }
+        FASTLED_WARN("Failed to initialize MP3 decoder for: " << path);
+        return fl::third_party::Mp3StreamDecoderPtr();
+    }
+
+    return decoder;
+}
+
 } // namespace fl
 
 namespace fl {
