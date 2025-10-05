@@ -13,6 +13,7 @@
 #include "fl/math.h"
 #include "fl/algorithm.h"
 #include "fl/printf.h"
+#include <math.h>
 
 namespace fl {
 
@@ -72,6 +73,84 @@ inline float fastRayleighWeight(float x) {
         return x * fl::exp(-0.5f * x * x);
     }
     return g_rayleigh_lut[idx];
+}
+
+// Cooley-Tukey FFT (in-place, radix-2). Requires N to be a power of 2.
+// Computes the FFT and returns magnitude spectrum.
+inline void fft_magnitude(const float* input, int N, float* magnitude_out) {
+    // Temporary arrays for real and imaginary parts
+    static float temp_real[2048];
+    static float temp_imag[2048];
+
+    if (N > 2048) {
+        // FFT size too large, zero output
+        for (int i = 0; i < N / 2; ++i) {
+            magnitude_out[i] = 0.0f;
+        }
+        return;
+    }
+
+    // Copy input into temp arrays
+    for (int i = 0; i < N; ++i) {
+        temp_real[i] = input[i];
+        temp_imag[i] = 0.0f;
+    }
+
+    // Bit-reversal permutation
+    int j = 0;
+    for (int i = 0; i < N - 1; ++i) {
+        if (i < j) {
+            // Swap real parts
+            float tmp = temp_real[i];
+            temp_real[i] = temp_real[j];
+            temp_real[j] = tmp;
+            // Swap imaginary parts
+            tmp = temp_imag[i];
+            temp_imag[i] = temp_imag[j];
+            temp_imag[j] = tmp;
+        }
+        int k = N >> 1;
+        while (k <= j) {
+            j -= k;
+            k >>= 1;
+        }
+        j += k;
+    }
+
+    // FFT butterfly stages
+    for (int len = 2; len <= N; len <<= 1) {
+        float theta = -2.0f * M_PI / static_cast<float>(len);
+        float wlen_re = ::cos(theta);
+        float wlen_im = ::sin(theta);
+        for (int i = 0; i < N; i += len) {
+            float w_re = 1.0f;
+            float w_im = 0.0f;
+            for (int k = 0; k < len / 2; ++k) {
+                int idx_even = i + k;
+                int idx_odd = i + k + len / 2;
+
+                float t_re = w_re * temp_real[idx_odd] - w_im * temp_imag[idx_odd];
+                float t_im = w_re * temp_imag[idx_odd] + w_im * temp_real[idx_odd];
+
+                temp_real[idx_odd] = temp_real[idx_even] - t_re;
+                temp_imag[idx_odd] = temp_imag[idx_even] - t_im;
+                temp_real[idx_even] = temp_real[idx_even] + t_re;
+                temp_imag[idx_even] = temp_imag[idx_even] + t_im;
+
+                float w_re_new = w_re * wlen_re - w_im * wlen_im;
+                float w_im_new = w_re * wlen_im + w_im * wlen_re;
+                w_re = w_re_new;
+                w_im = w_im_new;
+            }
+        }
+    }
+
+    // Compute magnitude spectrum (only need first N/2 bins for real input)
+    for (int i = 0; i < N / 2; ++i) {
+        float real = temp_real[i];
+        float imag = temp_imag[i];
+        magnitude_out[i] = ::sqrt(real * real + imag * imag);
+    }
 }
 
 } // anonymous namespace
@@ -652,7 +731,7 @@ void TempoTracker::updateTempoEstimate() {
 
     // Find peak lag
     int peak_lag = findPeakLag(acf, max_lag);
-    if (peak_lag > 0) {
+    if (peak_lag > 0 && peak_lag < max_lag) {
         _currentBPM = lagToBPM(peak_lag);
         _periodSamples = bpmToSamples(_currentBPM);
         _tempoConfidence = acf[peak_lag];
@@ -748,7 +827,13 @@ int TempoTracker::bpmToLag(float bpm) const {
 }
 
 float TempoTracker::lagToBPM(int lag) const {
+    if (lag <= 0) {
+        return 0.0f;  // Avoid division by zero
+    }
     int period_samples = lag * _cfg.hop_size;
+    if (period_samples <= 0) {
+        return 0.0f;  // Avoid division by zero
+    }
     return samplesToBPM(period_samples, _cfg.sample_rate_hz);
 }
 
@@ -791,17 +876,40 @@ void BeatDetector::setConfig(const BeatDetectorConfig& cfg) {
 }
 
 void BeatDetector::processFrame(const float* frame, int n) {
+    float timestamp_ms = getTimestampMs();
+
     // For time-domain ODFs (Energy)
     if (_cfg.odf_type == OnsetDetectionFunction::Energy) {
         _currentODF = _odfProcessor.processTimeDomain(frame, n);
     } else {
-        // Need FFT for spectral methods
-        // This is a placeholder - in real implementation, compute FFT here
-        // For now, just return
-        return;
+        // Spectral methods require FFT
+        static float padded_frame[2048];       // Padded input for FFT
+        static float magnitude_spectrum[1024];  // Max FFT size / 2
+        int spectrum_size = _cfg.fft_size / 2;
+
+        if (_cfg.fft_size > 2048) {
+            // FFT too large, skip this frame
+            _frameCount++;
+            return;
+        }
+
+        // Copy input frame and zero-pad if necessary
+        int copy_size = MIN(n, _cfg.fft_size);
+        for (int i = 0; i < copy_size; ++i) {
+            padded_frame[i] = frame[i];
+        }
+        // Zero-pad the rest
+        for (int i = copy_size; i < _cfg.fft_size; ++i) {
+            padded_frame[i] = 0.0f;
+        }
+
+        // Compute FFT magnitude spectrum
+        fft_magnitude(padded_frame, _cfg.fft_size, magnitude_spectrum);
+
+        // Process via spectral method
+        _currentODF = _odfProcessor.processSpectrum(magnitude_spectrum, spectrum_size);
     }
 
-    float timestamp_ms = getTimestampMs();
 
     // Peak picking
     auto onsets = _peakPicker.process(_currentODF, _frameCount, timestamp_ms);
