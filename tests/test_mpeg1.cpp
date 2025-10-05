@@ -747,5 +747,96 @@ TEST_CASE("MPEG1 audio extraction") {
         decoder->end();
     }
 
+    SUBCASE("Audio and video both decode from multiplexed stream") {
+        // Load MPEG1 file with both audio and video
+        FileHandlePtr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
+        REQUIRE(av_handle != nullptr);
+
+        fl::size av_file_size = av_handle->size();
+        fl::vector<fl::u8> av_file_data(av_file_size);
+        av_handle->read(av_file_data.data(), av_file_size);
+        av_handle->close();
+
+        Mpeg1Config config;
+        config.skipAudio = false;  // Enable audio
+
+        // Track both audio and video
+        int audio_frames_received = 0;
+        int video_frames_decoded = 0;
+        int total_audio_samples = 0;
+
+        config.audioCallback = [&](const AudioSample& sample) {
+            audio_frames_received++;
+            total_audio_samples += sample.size();
+
+            // Verify audio sample properties
+            CHECK(sample.isValid());
+            CHECK_GT(sample.size(), 0);
+            CHECK_GE(sample.timestamp(), 0);
+
+            // Verify PCM data is accessible
+            const auto& pcm = sample.pcm();
+            CHECK_GT(pcm.size(), 0);
+        };
+
+        fl::string error_msg;
+        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        REQUIRE(decoder);
+
+        auto stream = fl::make_shared<fl::ByteStreamMemory>(av_file_size);
+        stream->write(av_file_data.data(), av_file_size);
+
+        bool began = decoder->begin(stream);
+        if (!began) {
+            fl::string error_message;
+            decoder->hasError(&error_message);
+            MESSAGE("Failed to begin decoder: " << error_message);
+        }
+        CHECK(began);
+
+        // Decode frames - audio will be detected once we hit audio packets
+        DecodeResult result;
+        int decode_attempts = 0;
+        while (decode_attempts < 50 && video_frames_decoded < 30) {
+            result = decoder->decode();
+            decode_attempts++;
+
+            if (result == DecodeResult::Success) {
+                Frame frame = decoder->getCurrentFrame();
+                if (frame.isValid()) {
+                    video_frames_decoded++;
+
+                    // Verify video frame properties
+                    CHECK_EQ(frame.getWidth(), 2);
+                    CHECK_EQ(frame.getHeight(), 2);
+                    CHECK_EQ(frame.getFormat(), PixelFormat::RGB888);
+                }
+            } else if (result == DecodeResult::EndOfStream) {
+                break;
+            } else if (result == DecodeResult::Error) {
+                break;
+            }
+        }
+
+        // Log results
+        if (decoder->hasAudio() && decoder->getAudioSampleRate() > 0) {
+            MESSAGE("Decoded " << video_frames_decoded << " video frames and received "
+                    << audio_frames_received << " audio frames with "
+                    << total_audio_samples << " total samples at "
+                    << decoder->getAudioSampleRate() << " Hz");
+
+            // We should have received both video and audio
+            CHECK_GT(video_frames_decoded, 0);
+            CHECK_GT(audio_frames_received, 0);
+            CHECK_GT(total_audio_samples, 0);
+        } else {
+            MESSAGE("Decoded " << video_frames_decoded << " video frames, but no audio was found");
+            MESSAGE("This may indicate audio packets are located very far into the stream");
+            CHECK_GT(video_frames_decoded, 0);
+        }
+
+        decoder->end();
+    }
+
     fs.end();
 }

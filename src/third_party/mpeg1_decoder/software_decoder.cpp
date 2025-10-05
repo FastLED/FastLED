@@ -306,16 +306,22 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     // Set looping if requested
     fl::third_party::plm_set_loop(decoderData_->plmpeg, config_.looping ? 1 : 0);
 
-    // Wait for headers to be parsed
+    // Try to get headers - for multiplexed streams with audio, this may require decoding
+    // some frames before audio headers are found
     if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
-        // Try to decode one frame to get headers
+        // Decode one frame to get headers
         fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
     }
 
-    if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
+    // Check if we at least have video - video headers are mandatory
+    if (fl::third_party::plm_get_width(decoderData_->plmpeg) == 0 ||
+        fl::third_party::plm_get_height(decoderData_->plmpeg) == 0) {
         setError("Failed to parse MPEG1 headers");
         return false;
     }
+
+    // Audio headers might not be present yet if audio packets come later in the stream
+    // This is OK - audio will work once we encounter audio packets during decode
 
     // Get video properties
     decoderData_->width = static_cast<fl::u16>(fl::third_party::plm_get_width(decoderData_->plmpeg));
