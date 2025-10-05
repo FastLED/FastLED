@@ -1275,17 +1275,204 @@ export class AudioManager {
       existingAudio.currentTime = 0;
       existingAudio.src = '';
       existingAudio.load();
-      container.removeChild(existingAudio);
+      existingAudio.remove();
     }
 
-    // Always create a fresh audio element
+    // Remove any existing custom player
+    const existingCustomPlayer = container.querySelector('.custom-audio-player');
+    if (existingCustomPlayer) {
+      existingCustomPlayer.remove();
+    }
+
+    // Create audio element (hidden, used for playback)
     const audio = document.createElement('audio');
-    audio.controls = true;
+    audio.controls = false;
     audio.className = 'audio-player';
-    audio.setAttribute('data-audio-id', audioId); // Track which input this belongs to
+    audio.setAttribute('data-audio-id', audioId);
     container.appendChild(audio);
 
+    // Create custom player UI
+    this.createCustomAudioPlayer(container, audio, audioId);
+
     return audio;
+  }
+
+  /**
+   * Create custom audio player UI with full control styling
+   * @param {HTMLElement} container - The container element
+   * @param {HTMLAudioElement} audio - The audio element
+   * @param {string} audioId - The audio input ID
+   */
+  createCustomAudioPlayer(container, audio, audioId) {
+    // Create custom player wrapper
+    const customPlayer = document.createElement('div');
+    customPlayer.className = 'custom-audio-player';
+    customPlayer.setAttribute('data-audio-id', audioId);
+
+    // Create controls row
+    const controlsRow = document.createElement('div');
+    controlsRow.className = 'custom-audio-controls';
+
+    // Play/Pause button
+    const playBtn = document.createElement('button');
+    playBtn.className = 'audio-play-btn';
+    playBtn.innerHTML = `
+      <svg class="play-icon" viewBox="0 0 24 24">
+        <path d="M8 5v14l11-7z"/>
+      </svg>
+      <svg class="pause-icon" style="display:none;" viewBox="0 0 24 24">
+        <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+      </svg>
+    `;
+
+    // Time display
+    const timeDisplay = document.createElement('div');
+    timeDisplay.className = 'audio-time';
+    timeDisplay.textContent = '0:00 / 0:00';
+
+    // Volume control
+    const volumeControl = document.createElement('div');
+    volumeControl.className = 'audio-volume-control';
+
+    const volumeBtn = document.createElement('button');
+    volumeBtn.className = 'audio-volume-btn';
+    volumeBtn.innerHTML = `
+      <svg viewBox="0 0 24 24">
+        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+      </svg>
+    `;
+
+    const volumeSlider = document.createElement('input');
+    volumeSlider.type = 'range';
+    volumeSlider.className = 'audio-volume-slider';
+    volumeSlider.min = '0';
+    volumeSlider.max = '100';
+    volumeSlider.value = '100';
+
+    volumeControl.appendChild(volumeBtn);
+    volumeControl.appendChild(volumeSlider);
+
+    // Assemble controls row
+    controlsRow.appendChild(playBtn);
+    controlsRow.appendChild(timeDisplay);
+    controlsRow.appendChild(volumeControl);
+
+    // Progress bar container
+    const progressContainer = document.createElement('div');
+    progressContainer.className = 'audio-progress-container';
+
+    const progressBg = document.createElement('div');
+    progressBg.className = 'audio-progress-bg';
+
+    const progressFill = document.createElement('div');
+    progressFill.className = 'audio-progress-fill';
+
+    const scrubberHandle = document.createElement('div');
+    scrubberHandle.className = 'audio-scrubber-handle';
+
+    progressFill.appendChild(scrubberHandle);
+    progressBg.appendChild(progressFill);
+    progressContainer.appendChild(progressBg);
+
+    // Assemble custom player
+    customPlayer.appendChild(controlsRow);
+    customPlayer.appendChild(progressContainer);
+    container.appendChild(customPlayer);
+
+    // Wire up event handlers
+    this.setupCustomPlayerEvents(audio, playBtn, timeDisplay, progressContainer, progressFill, volumeSlider, volumeBtn);
+  }
+
+  /**
+   * Set up event handlers for custom audio player
+   */
+  setupCustomPlayerEvents(audio, playBtn, timeDisplay, progressContainer, progressFill, volumeSlider, volumeBtn) {
+    const playIcon = playBtn.querySelector('.play-icon');
+    const pauseIcon = playBtn.querySelector('.pause-icon');
+
+    // Play/Pause toggle
+    playBtn.addEventListener('click', () => {
+      if (audio.paused) {
+        audio.play();
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+      } else {
+        audio.pause();
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+      }
+    });
+
+    // Update time display and progress
+    audio.addEventListener('timeupdate', () => {
+      const currentTime = this.formatTime(audio.currentTime);
+      const duration = this.formatTime(audio.duration);
+      timeDisplay.textContent = `${currentTime} / ${duration}`;
+
+      // Update progress bar
+      const progress = (audio.currentTime / audio.duration) * 100 || 0;
+      progressFill.style.width = `${progress}%`;
+    });
+
+    // Reset play button on audio end
+    audio.addEventListener('ended', () => {
+      playIcon.style.display = 'block';
+      pauseIcon.style.display = 'none';
+    });
+
+    // Seek on progress bar click
+    let isSeeking = false;
+
+    const seek = (e) => {
+      const rect = progressContainer.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const percentage = Math.max(0, Math.min(1, x / rect.width));
+      audio.currentTime = percentage * audio.duration;
+    };
+
+    progressContainer.addEventListener('mousedown', (e) => {
+      isSeeking = true;
+      seek(e);
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (isSeeking) {
+        seek(e);
+      }
+    });
+
+    document.addEventListener('mouseup', () => {
+      isSeeking = false;
+    });
+
+    progressContainer.addEventListener('click', seek);
+
+    // Volume control
+    volumeSlider.addEventListener('input', (e) => {
+      audio.volume = e.target.value / 100;
+    });
+
+    volumeBtn.addEventListener('click', () => {
+      if (audio.volume > 0) {
+        audio.volume = 0;
+        volumeSlider.value = 0;
+      } else {
+        audio.volume = 1;
+        volumeSlider.value = 100;
+      }
+    });
+  }
+
+  /**
+   * Format time in seconds to MM:SS
+   */
+  formatTime(seconds) {
+    if (isNaN(seconds) || seconds === Infinity) {
+      return '0:00';
+    }
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
   /**

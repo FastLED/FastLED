@@ -1205,4 +1205,163 @@ void SoundToMIDIPoly::autoTuneUpdate() {
   }
 }
 
+// ========== Sliding Window STFT Implementation ==========
+
+SoundToMIDISliding::SoundToMIDISliding(const SoundToMIDI& baseCfg, const SlidingCfg& slideCfg, bool use_poly)
+  : mSlideCfg(slideCfg), mUsePoly(use_poly) {
+
+  // Allocate ring buffer (capacity = frame_size + hop_size to avoid wrap branch)
+  mPcmRing.resize(mSlideCfg.frame_size + mSlideCfg.hop_size);
+
+  // Allocate frame buffer
+  mFrameBuffer.resize(mSlideCfg.frame_size);
+
+  // Initialize window coefficients
+  initWindow();
+
+  // Initialize K-of-M onset history
+  mOnsetHistory.resize(mSlideCfg.k_of_m_window);
+
+  // Create appropriate engine
+  if (mUsePoly) {
+    mPolyEngine = new SoundToMIDIPoly(baseCfg);
+  } else {
+    mMonoEngine = new SoundToMIDIMono(baseCfg);
+  }
+}
+
+void SoundToMIDISliding::initWindow() {
+  mWindow.resize(mSlideCfg.frame_size);
+
+  for (uint16_t i = 0; i < mSlideCfg.frame_size; ++i) {
+    float t = static_cast<float>(i) / static_cast<float>(mSlideCfg.frame_size - 1);
+
+    switch (mSlideCfg.window) {
+      case SlidingCfg::Window::Hann:
+        mWindow[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+        break;
+
+      case SlidingCfg::Window::Hamming:
+        mWindow[i] = 0.54f - 0.46f * cosf(2.0f * M_PI * t);
+        break;
+
+      case SlidingCfg::Window::Blackman:
+        mWindow[i] = 0.42f - 0.5f * cosf(2.0f * M_PI * t) + 0.08f * cosf(4.0f * M_PI * t);
+        break;
+    }
+  }
+}
+
+void SoundToMIDISliding::processSamples(const float* samples, int n) {
+  for (int i = 0; i < n; ++i) {
+    // Add sample to ring buffer
+    mPcmRing[mWriteIdx++] = samples[i];
+    if (mWriteIdx >= static_cast<int>(mPcmRing.size())) {
+      mWriteIdx = 0;
+    }
+    mAccumulated++;
+
+    // When we have enough samples, process a frame
+    if (mAccumulated >= static_cast<int>(mSlideCfg.hop_size)) {
+      makeFrame(mFrameBuffer.data());
+      applyWindow(mFrameBuffer.data());
+      runAnalysis(mFrameBuffer.data());
+      mAccumulated -= static_cast<int>(mSlideCfg.hop_size);
+    }
+  }
+}
+
+void SoundToMIDISliding::makeFrame(float* outFrame) {
+  // Extract last frame_size samples from ring buffer into contiguous frame
+  int readIdx = mWriteIdx - mSlideCfg.frame_size;
+  if (readIdx < 0) {
+    readIdx += mPcmRing.size();
+  }
+
+  for (uint16_t i = 0; i < mSlideCfg.frame_size; ++i) {
+    outFrame[i] = mPcmRing[readIdx++];
+    if (readIdx >= static_cast<int>(mPcmRing.size())) {
+      readIdx = 0;
+    }
+  }
+}
+
+void SoundToMIDISliding::applyWindow(float* frame) {
+  for (uint16_t i = 0; i < mSlideCfg.frame_size; ++i) {
+    frame[i] *= mWindow[i];
+  }
+}
+
+void SoundToMIDISliding::runAnalysis(const float* frame) {
+  if (mUsePoly) {
+    mPolyEngine->processFrame(frame, mSlideCfg.frame_size);
+  } else {
+    mMonoEngine->processFrame(frame, mSlideCfg.frame_size);
+  }
+}
+
+bool SoundToMIDISliding::checkKofMOnset(bool current_onset) {
+  // Add current onset to history
+  mOnsetHistory[mOnsetHistoryIdx] = current_onset;
+  mOnsetHistoryIdx = (mOnsetHistoryIdx + 1) % mSlideCfg.k_of_m_window;
+
+  // Count how many of the last m frames had onsets
+  int onset_count = 0;
+  for (uint8_t i = 0; i < mSlideCfg.k_of_m_window; ++i) {
+    if (mOnsetHistory[i]) {
+      onset_count++;
+    }
+  }
+
+  // Return true if we have at least k onsets in the last m frames
+  return onset_count >= mSlideCfg.k_of_m_onset;
+}
+
+void SoundToMIDISliding::setSlidingCfg(const SlidingCfg& cfg) {
+  // Update configuration
+  bool needResize = (cfg.frame_size != mSlideCfg.frame_size ||
+                     cfg.hop_size != mSlideCfg.hop_size ||
+                     cfg.k_of_m_window != mSlideCfg.k_of_m_window);
+
+  mSlideCfg = cfg;
+
+  if (needResize) {
+    // Reallocate buffers
+    mPcmRing.resize(mSlideCfg.frame_size + mSlideCfg.hop_size);
+    mFrameBuffer.resize(mSlideCfg.frame_size);
+    mOnsetHistory.resize(mSlideCfg.k_of_m_window);
+
+    // Reset state
+    mWriteIdx = 0;
+    mAccumulated = 0;
+    mOnsetHistoryIdx = 0;
+
+    // Reinitialize window
+    initWindow();
+  } else if (cfg.window != mSlideCfg.window) {
+    // Just update window coefficients
+    initWindow();
+  }
+}
+
+SoundToMIDIMono& SoundToMIDISliding::mono() {
+  if (!mMonoEngine) {
+    // Engine is polyphonic - this is a usage error
+    static SoundToMIDI dummyCfg;
+    static SoundToMIDIMono dummyEngine(dummyCfg);
+    return dummyEngine;
+  }
+  return *mMonoEngine;
+}
+
+SoundToMIDIPoly& SoundToMIDISliding::poly() {
+  if (!mPolyEngine) {
+    // Engine is monophonic - this is a usage error
+    static SoundToMIDI dummyCfg;
+    static SoundToMIDIPoly dummyEngine(dummyCfg);
+    return dummyEngine;
+  }
+  return *mPolyEngine;
+}
+
 } // namespace fl

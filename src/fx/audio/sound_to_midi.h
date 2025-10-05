@@ -441,6 +441,109 @@ private:
   void notifyParamChange(const char* name, float old_val, float new_val);
 };
 
+// ---------- Sliding Window STFT Configuration ----------
+/// @brief Configuration for sliding-window (overlapped) analysis
+struct SlidingCfg {
+  // Streaming parameters
+  uint16_t frame_size = 1024;           ///< Analysis window size in samples
+  uint16_t hop_size = 512;              ///< Step size between frames (overlap = frame_size - hop_size)
+
+  // Window function
+  enum class Window : uint8_t {
+    Hann = 0,
+    Hamming,
+    Blackman
+  };
+  Window window = Window::Hann;         ///< Window function type
+
+  // Multi-frame logic for onset detection
+  uint8_t k_of_m_onset = 2;             ///< Require ≥k detections in last m frames for onset
+  uint8_t k_of_m_window = 3;            ///< Window size (m) for K-of-M onset detection
+
+  // Peak continuity (polyphonic)
+  bool enable_peak_continuity = true;   ///< Match peaks across frames for stability
+  float continuity_cents = 35.0f;       ///< Max drift in cents to match a peak across frames
+
+  // Adaptive thresholds
+  bool adaptive_rms_gate = true;        ///< Enable adaptive RMS gate based on noise floor
+  float rms_margin_db = 3.0f;           ///< Margin above noise floor in dB
+  bool adaptive_peak_thresh = true;     ///< Enable adaptive peak threshold (polyphonic)
+  float peak_margin_db = 6.0f;          ///< Margin above spectral median in dB
+
+  // History buffers (bounded for MCU)
+  uint8_t spectra_history = 6;          ///< Number of magnitude spectra to store (polyphonic)
+  uint8_t pcp_history = 12;             ///< PCP history depth
+
+  // CPU optimization
+  bool magnitude_abs1 = true;           ///< Use |Re|+|Im| instead of sqrt(Re²+Im²)
+};
+
+// ---------- Sliding Window STFT Wrapper ----------
+/// @brief Wrapper class providing sliding-window analysis for both mono and poly engines
+/// @details This class maintains a ring buffer and schedules analysis at regular hop intervals,
+///          enabling overlapped analysis for improved stability and onset recall
+class SoundToMIDISliding {
+public:
+  /// @brief Construct with base configuration and sliding window parameters
+  /// @param baseCfg Base SoundToMIDI configuration
+  /// @param slideCfg Sliding window configuration
+  /// @param use_poly Use polyphonic engine (default: false = monophonic)
+  SoundToMIDISliding(const SoundToMIDI& baseCfg, const SlidingCfg& slideCfg, bool use_poly = false);
+
+  /// @brief Stream audio samples - analyzer will trigger events when ready
+  /// @param samples Pointer to audio samples (normalized float array)
+  /// @param n Number of samples
+  void processSamples(const float* samples, int n);
+
+  /// @brief Update sliding window configuration at runtime
+  /// @param cfg New sliding configuration
+  void setSlidingCfg(const SlidingCfg& cfg);
+
+  /// @brief Get current sliding configuration
+  const SlidingCfg& slidingConfig() const { return mSlideCfg; }
+
+  /// @brief Access underlying mono engine (only valid if constructed with use_poly=false)
+  /// @return Reference to mono engine
+  SoundToMIDIMono& mono();
+
+  /// @brief Access underlying poly engine (only valid if constructed with use_poly=true)
+  /// @return Reference to poly engine
+  SoundToMIDIPoly& poly();
+
+  /// @brief Check if using polyphonic mode
+  bool isPolyphonic() const { return mUsePoly; }
+
+private:
+  SlidingCfg mSlideCfg;
+  bool mUsePoly;
+
+  // Ring buffer for PCM accumulation
+  fl::vector<float> mPcmRing;
+  int mWriteIdx = 0;
+  int mAccumulated = 0;
+
+  // Windowing coefficients
+  fl::vector<float> mWindow;
+
+  // Frame buffer
+  fl::vector<float> mFrameBuffer;
+
+  // K-of-M onset tracking
+  fl::vector<bool> mOnsetHistory;    // Circular buffer for onset detections
+  int mOnsetHistoryIdx = 0;
+
+  // Underlying engines (only one will be used)
+  SoundToMIDIMono* mMonoEngine = nullptr;
+  SoundToMIDIPoly* mPolyEngine = nullptr;
+
+  // Helper methods
+  void initWindow();
+  void makeFrame(float* outFrame);
+  void applyWindow(float* frame);
+  void runAnalysis(const float* frame);
+  bool checkKofMOnset(bool current_onset);
+};
+
 // ---------- Legacy Alias (Deprecated) ----------
 /// @brief Legacy alias for backward compatibility - use SoundToMIDIMono instead
 /// @deprecated Use SoundToMIDIMono for monophonic or SoundToMIDIPoly for polyphonic
