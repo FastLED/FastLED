@@ -3,7 +3,7 @@
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
@@ -19,7 +19,7 @@
 #include "fl/rectangular_draw_buffer.h"
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
-#include "clockless_lcd_esp32s3.h"
+#include "clockless_lcd_esp32p4.h"
 
 namespace { // anonymous namespace
 
@@ -28,19 +28,19 @@ typedef uint8_t LCDPin;
 
 // Maps multiple pins and CRGB strips to a single LCD driver object.
 // Uses WS2812 chipset timing (most common for parallel LCD driver)
-class LCDEsp32S3_Group {
+class LCDEsp32P4_Group {
   public:
 
-    fl::unique_ptr<fl::LcdLedDriver_S3<fl::WS2812ChipsetTiming>> mDriver;
+    fl::unique_ptr<fl::LcdLedDriver_P4<fl::WS2812ChipsetTiming>> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 
-    static LCDEsp32S3_Group &getInstance() {
-        return fl::Singleton<LCDEsp32S3_Group>::instance();
+    static LCDEsp32P4_Group &getInstance() {
+        return fl::Singleton<LCDEsp32P4_Group>::instance();
     }
 
-    LCDEsp32S3_Group() = default;
-    ~LCDEsp32S3_Group() { mDriver.reset(); }
+    LCDEsp32P4_Group() = default;
+    ~LCDEsp32P4_Group() { mDriver.reset(); }
 
     void onQueuingStart() {
         mRectDrawBuffer.onQueuingStart();
@@ -68,50 +68,30 @@ class LCDEsp32S3_Group {
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
-            mDriver.reset(new fl::LcdLedDriver_S3<fl::WS2812ChipsetTiming>());
+            mDriver.reset(new fl::LcdLedDriver_P4<fl::WS2812ChipsetTiming>());
 
             // Build pin list and config
-            fl::LcdDriverConfig config;
+            fl::LcdP4DriverConfig config;
             config.num_lanes = 0;
+
+            // P4 RGB LCD requires PCLK and data pins
+            // For now, use default GPIO assignments - these should be configurable
+            // TODO: Make these configurable via user API
+            config.pclk_gpio = 10;  // Example PCLK pin
+            config.vsync_gpio = -1;  // Optional
+            config.hsync_gpio = -1;  // Optional
+            config.de_gpio = -1;     // Optional
+            config.disp_gpio = -1;   // Optional
+
             for (auto it = mRectDrawBuffer.mDrawList.begin(); it != mRectDrawBuffer.mDrawList.end(); ++it) {
-                // Check for invalid USB-JTAG pins (ESP32-S2/S3)
-                if (it->mPin == 19 || it->mPin == 20) {
-                    FASTLED_ASSERT(false, "GPIO19 and GPIO20 are reserved for USB-JTAG on ESP32-S2/S3 and CANNOT be used for LED output. "
-                                          "Using these pins WILL BREAK USB flashing capability. Please choose a different pin.");
-                    return; // Don't continue if assertion doesn't halt
-                }
-
-                // Check for Flash/PSRAM pins (GPIO26-32)
-                if (it->mPin >= 26 && it->mPin <= 32) {
-                    FASTLED_ASSERT(false, "GPIO26-32 are reserved for SPI Flash/PSRAM and CANNOT be used for LED output. "
-                                          "Using these pins WILL BREAK flash/PSRAM functionality. Please choose a different pin.");
+                // Validate pins using P4-specific validation
+                auto result = fl::validate_esp32p4_lcd_pin(it->mPin);
+                if (!result.valid) {
+                    FASTLED_ASSERT(false, "GPIO" << int(it->mPin) << " validation failed: " << result.error_message);
                     return;
                 }
 
-                // Error for strapping pins (GPIO0, 3, 45, 46) - can be suppressed with FASTLED_ESP32_ALLOW_STRAPPING_PINS
-                if (it->mPin == 0 || it->mPin == 3 || it->mPin == 45 || it->mPin == 46) {
-                    #ifndef FASTLED_ESP32_ALLOW_STRAPPING_PINS
-                    FASTLED_ASSERT(false, "GPIO" << int(it->mPin) << " is a strapping pin used for boot configuration. "
-                                          "Using this pin may affect boot behavior and requires careful external circuit design. "
-                                          "Define FASTLED_ESP32_ALLOW_STRAPPING_PINS to suppress this error if you know what you're doing.");
-                    return;
-                    #else
-                    FL_WARN("GPIO" << int(it->mPin) << " is a strapping pin used for boot configuration. "
-                            "Using this pin may affect boot behavior and requires careful external circuit design. "
-                            "(Warning shown because FASTLED_ESP32_ALLOW_STRAPPING_PINS is defined)");
-                    #endif
-                }
-
-                #if defined(CONFIG_SPIRAM_MODE_OCT) || defined(CONFIG_ESPTOOLPY_FLASHMODE_OPI)
-                // Check for Octal Flash/PSRAM pins (GPIO33-37)
-                if (it->mPin >= 33 && it->mPin <= 37) {
-                    FASTLED_ASSERT(false, "GPIO33-37 are reserved for Octal Flash/PSRAM (SPIIO4-7, SPIDQS) and CANNOT be used for LED output. "
-                                          "Using these pins WILL BREAK Octal flash/PSRAM functionality. Please choose a different pin.");
-                    return;
-                }
-                #endif
-
-                config.gpio_pins[config.num_lanes++] = it->mPin;
+                config.data_gpios[config.num_lanes++] = it->mPin;
             }
 
             uint32_t num_strips = 0;
@@ -136,7 +116,7 @@ class LCDEsp32S3_Group {
             // Initialize the driver
             bool ok = mDriver->begin(config, num_leds_per_strip);
             if (!ok) {
-                FASTLED_ASSERT(false, "Failed to initialize LCD driver");
+                FASTLED_ASSERT(false, "Failed to initialize P4 LCD driver");
                 return;
             }
 
@@ -145,7 +125,7 @@ class LCDEsp32S3_Group {
             for (int i = 0; i < config.num_lanes; i++) {
                 // Get the LED buffer for this pin and convert to CRGB*
                 fl::span<uint8_t> pin_buffer = mRectDrawBuffer.getLedsBufferBytesForPin(
-                    config.gpio_pins[i], false);
+                    config.data_gpios[i], false);
                 strips[i] = reinterpret_cast<CRGB*>(pin_buffer.data());
             }
             mDriver->attachStrips(strips);
@@ -159,14 +139,14 @@ class LCDEsp32S3_Group {
 
 namespace fl {
 
-void LCD_Esp32::beginShowLeds(int datapin, int nleds) {
-    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
+void LCD_Esp32P4::beginShowLeds(int datapin, int nleds) {
+    LCDEsp32P4_Group &group = LCDEsp32P4_Group::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
-void LCD_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
+void LCD_Esp32P4::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+    LCDEsp32P4_Group &group = LCDEsp32P4_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
@@ -202,16 +182,16 @@ void LCD_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     }
 }
 
-void LCD_Esp32::endShowLeds() {
+void LCD_Esp32P4::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
-    LCDEsp32S3_Group::getInstance().showPixelsOnceThisFrame();
+    LCDEsp32P4_Group::getInstance().showPixelsOnceThisFrame();
 }
 
 // Explicit template instantiation for WS2812 chipset (forces compilation)
-template class LcdLedDriver_S3<WS2812ChipsetTiming>;
+template class LcdLedDriver_P4<WS2812ChipsetTiming>;
 
 } // namespace fl
 
-#endif  // CONFIG_IDF_TARGET_ESP32S3
+#endif  // CONFIG_IDF_TARGET_ESP32P4
 #endif  // ESP32
