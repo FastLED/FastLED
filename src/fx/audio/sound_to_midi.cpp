@@ -422,9 +422,37 @@ PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, f
 SoundToMIDIMono::SoundToMIDIMono(const SoundToMIDI& cfg)
     : _cfg(cfg), _noteOnFrames(0), _silenceFrames(0), _currentNote(-1),
       _candidateNote(-1), _candidateHoldFrames(0),
-      _historyIndex(0), _historyCount(0) {
+      _historyIndex(0), _historyCount(0),
+      _ringWriteIdx(0), _ringAccumulated(0), _slidingEnabled(false),
+      _onsetHistoryIdx(0), _lastFrameVoiced(false) {
   for (int i = 0; i < MAX_MEDIAN_SIZE; ++i) {
     _noteHistory[i] = -1;
+  }
+
+  // Initialize K-of-M onset history
+  if (_cfg.enable_k_of_m) {
+    _onsetHistory.resize(_cfg.k_of_m_window, false);
+  }
+
+  // Ensure hop_size doesn't exceed frame_size
+  if (_cfg.hop_size > _cfg.frame_size) {
+    _cfg.hop_size = _cfg.frame_size;
+  }
+
+  // Initialize sliding window if hop_size < frame_size
+  _slidingEnabled = (_cfg.hop_size < _cfg.frame_size);
+
+  if (_slidingEnabled) {
+    // Allocate ring buffer (size = frame_size + hop_size to avoid wrap branch)
+    _sampleRing.resize(_cfg.frame_size + _cfg.hop_size);
+    _analysisFrame.resize(_cfg.frame_size);
+
+    // Precompute Hann window coefficients
+    _windowCoeffs.resize(_cfg.frame_size);
+    for (int i = 0; i < _cfg.frame_size; ++i) {
+      float t = (float)i / (float)(_cfg.frame_size - 1);
+      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+    }
   }
 
   // Initialize auto-tuning state
@@ -473,14 +501,54 @@ int SoundToMIDIMono::getMedianNote() {
   return temp[filterSize / 2];
 }
 
-void SoundToMIDIMono::processFrame(const float* frame, int n) {
-  if (!frame || n != _cfg.frame_size) return;
+void SoundToMIDIMono::processFrame(const float* samples, int n) {
+  if (!samples || n <= 0) return;
 
+  if (!_slidingEnabled) {
+    // Legacy mode: require exact frame_size, no windowing
+    if (n != _cfg.frame_size) return;
+    processFrameInternal(samples);
+    return;
+  }
+
+  // Sliding window mode: accumulate and trigger analysis
+  for (int i = 0; i < n; ++i) {
+    _sampleRing[_ringWriteIdx++] = samples[i];
+    if (_ringWriteIdx >= (int)_sampleRing.size()) {
+      _ringWriteIdx = 0;
+    }
+    _ringAccumulated++;
+
+    // Trigger analysis every hop_size samples
+    if (_ringAccumulated >= _cfg.hop_size) {
+      extractAndAnalyzeFrame();
+      _ringAccumulated -= _cfg.hop_size;
+    }
+  }
+}
+
+void SoundToMIDIMono::extractAndAnalyzeFrame() {
+  // Extract last frame_size samples from ring buffer
+  int readIdx = _ringWriteIdx - _cfg.frame_size;
+  if (readIdx < 0) readIdx += _sampleRing.size();
+
+  // Apply window and copy to analysis frame
+  for (int i = 0; i < _cfg.frame_size; ++i) {
+    _analysisFrame[i] = _sampleRing[readIdx] * _windowCoeffs[i];
+    readIdx++;
+    if (readIdx >= (int)_sampleRing.size()) readIdx = 0;
+  }
+
+  // Run analysis on windowed frame
+  processFrameInternal(_analysisFrame.data());
+}
+
+void SoundToMIDIMono::processFrameInternal(const float* frame) {
   // Compute loudness (RMS) of the frame
-  const float rms = compute_rms(frame, n);
+  const float rms = compute_rms(frame, _cfg.frame_size);
 
   // --- Monophonic pitch detection logic ---
-  const PitchResult pr = _det.detect(frame, n, _cfg.sample_rate_hz, _cfg.fmin_hz, _cfg.fmax_hz);
+  const PitchResult pr = _det.detect(frame, _cfg.frame_size, _cfg.sample_rate_hz, _cfg.fmin_hz, _cfg.fmax_hz);
   const bool voiced = (rms > _cfg.rms_gate) &&
                       (pr.confidence > _cfg.confidence_threshold) &&
                       (pr.freq_hz > 0.0f);
@@ -519,7 +587,10 @@ void SoundToMIDIMono::processFrame(const float* frame, int n) {
     }
   }
 
-  if (voiced) {
+  // K-of-M onset detection: check if we should treat this frame as voiced
+  bool k_of_m_voiced = checkKofMOnset(voiced);
+
+  if (k_of_m_voiced) {
     int rawNote = clampMidi(hz_to_midi(pr.freq_hz));
 
     // Add to median filter history
@@ -609,10 +680,50 @@ void SoundToMIDIMono::setConfig(const SoundToMIDI& c) {
   _cfg = c;
 }
 
+bool SoundToMIDIMono::checkKofMOnset(bool current_onset) {
+  if (!_cfg.enable_k_of_m || _onsetHistory.empty()) {
+    return current_onset;  // K-of-M disabled, pass through
+  }
+
+  // Add current onset to circular buffer
+  _onsetHistory[_onsetHistoryIdx] = current_onset;
+  _onsetHistoryIdx = (_onsetHistoryIdx + 1) % _onsetHistory.size();
+
+  // Count how many of last M frames were onsets
+  int onset_count = 0;
+  for (bool onset : _onsetHistory) {
+    if (onset) onset_count++;
+  }
+
+  // Require at least K onsets in last M frames
+  return onset_count >= (int)_cfg.k_of_m_onset;
+}
+
 // ---------- SoundToMIDIPoly ----------
 SoundToMIDIPoly::SoundToMIDIPoly(const SoundToMIDI& cfg)
-    : _cfg(cfg) {
+    : _cfg(cfg), _ringWriteIdx(0), _ringAccumulated(0), _slidingEnabled(false) {
   initializeState();
+
+  // Ensure hop_size doesn't exceed frame_size
+  if (_cfg.hop_size > _cfg.frame_size) {
+    _cfg.hop_size = _cfg.frame_size;
+  }
+
+  // Initialize sliding window if hop_size < frame_size
+  _slidingEnabled = (_cfg.hop_size < _cfg.frame_size);
+
+  if (_slidingEnabled) {
+    // Allocate ring buffer (size = frame_size + hop_size to avoid wrap branch)
+    _sampleRing.resize(_cfg.frame_size + _cfg.hop_size);
+    _analysisFrame.resize(_cfg.frame_size);
+
+    // Precompute Hann window coefficients
+    _windowCoeffs.resize(_cfg.frame_size);
+    for (int i = 0; i < _cfg.frame_size; ++i) {
+      float t = (float)i / (float)(_cfg.frame_size - 1);
+      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+    }
+  }
 
   // Initialize auto-tuning state
   if (_cfg.auto_tune_enable) {
@@ -629,6 +740,13 @@ void SoundToMIDIPoly::initializeState() {
     _activeNotes[note] = false;
     _noteOnCount[note] = 0;
     _noteOffCount[note] = 0;
+    // Initialize K-of-M state
+    _noteKofM[note].onsetCount = 0;
+    _noteKofM[note].offsetCount = 0;
+    // Initialize peak continuity memory
+    _peakMemory[note].freq_hz = 0.0f;
+    _peakMemory[note].magnitude = 0.0f;
+    _peakMemory[note].frames_absent = 0;
   }
   // Initialize PCP history
   for (int i = 0; i < NUM_PITCH_CLASSES; ++i) {
@@ -636,11 +754,51 @@ void SoundToMIDIPoly::initializeState() {
   }
 }
 
-void SoundToMIDIPoly::processFrame(const float* frame, int n) {
-  if (!frame || n != _cfg.frame_size) return;
+void SoundToMIDIPoly::processFrame(const float* samples, int n) {
+  if (!samples || n <= 0) return;
 
+  if (!_slidingEnabled) {
+    // Legacy mode: require exact frame_size, no windowing
+    if (n != _cfg.frame_size) return;
+    processFrameInternal(samples);
+    return;
+  }
+
+  // Sliding window mode: accumulate and trigger analysis
+  for (int i = 0; i < n; ++i) {
+    _sampleRing[_ringWriteIdx++] = samples[i];
+    if (_ringWriteIdx >= (int)_sampleRing.size()) {
+      _ringWriteIdx = 0;
+    }
+    _ringAccumulated++;
+
+    // Trigger analysis every hop_size samples
+    if (_ringAccumulated >= _cfg.hop_size) {
+      extractAndAnalyzeFrame();
+      _ringAccumulated -= _cfg.hop_size;
+    }
+  }
+}
+
+void SoundToMIDIPoly::extractAndAnalyzeFrame() {
+  // Extract last frame_size samples from ring buffer
+  int readIdx = _ringWriteIdx - _cfg.frame_size;
+  if (readIdx < 0) readIdx += _sampleRing.size();
+
+  // Apply window and copy to analysis frame
+  for (int i = 0; i < _cfg.frame_size; ++i) {
+    _analysisFrame[i] = _sampleRing[readIdx] * _windowCoeffs[i];
+    readIdx++;
+    if (readIdx >= (int)_sampleRing.size()) readIdx = 0;
+  }
+
+  // Run analysis on windowed frame
+  processFrameInternal(_analysisFrame.data());
+}
+
+void SoundToMIDIPoly::processFrameInternal(const float* frame) {
   // Compute loudness (RMS) of the frame
-  const float rms = compute_rms(frame, n);
+  const float rms = compute_rms(frame, _cfg.frame_size);
 
   // Auto-tuning: Update frame counter and calibration
   if (_cfg.auto_tune_enable) {
@@ -661,7 +819,7 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
   bool voiced = (rms > _cfg.rms_gate);
   if (voiced) {
     // Get all detected note peaks in this frame using enhanced spectral processing
-    fl::vector<NotePeak> notes = detectPolyphonicNotes(frame, n, _cfg.sample_rate_hz,
+    fl::vector<NotePeak> notes = detectPolyphonicNotes(frame, _cfg.frame_size, _cfg.sample_rate_hz,
                                                        _cfg.fmin_hz, _cfg.fmax_hz, _cfg);
 
     // Auto-tuning: Track peaks and update statistics
@@ -716,10 +874,49 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
     }
     if (maxMag < 1e-6f) maxMag = 1e-6f;  // avoid division by zero
 
-    // Update note states
+    // Update note states with K-of-M filtering
     for (int note = 0; note < 128; ++note) {
-      if (present[note]) {
-        // Note is detected in current frame
+      // Update K-of-M counters
+      if (_cfg.enable_k_of_m) {
+        if (present[note]) {
+          _noteKofM[note].onsetCount++;
+          _noteKofM[note].offsetCount = 0;
+          // Clamp to window size
+          if (_noteKofM[note].onsetCount > (int)_cfg.k_of_m_window) {
+            _noteKofM[note].onsetCount = _cfg.k_of_m_window;
+          }
+        } else {
+          _noteKofM[note].offsetCount++;
+          _noteKofM[note].onsetCount = 0;
+          // Clamp to window size
+          if (_noteKofM[note].offsetCount > (int)_cfg.k_of_m_window) {
+            _noteKofM[note].offsetCount = _cfg.k_of_m_window;
+          }
+        }
+      }
+
+      // Determine if note should be considered present after K-of-M filtering
+      bool k_of_m_present = present[note];
+      if (_cfg.enable_k_of_m) {
+        k_of_m_present = (_noteKofM[note].onsetCount >= (int)_cfg.k_of_m_onset);
+      }
+
+      if (k_of_m_present) {
+        // Note is detected (after K-of-M filtering)
+
+        // Update peak memory for continuity tracking
+        if (present[note]) {  // Only update if actually detected this frame
+          for (const NotePeak& np : notes) {
+            if (np.midi == note) {
+              // Convert MIDI back to Hz for tracking (MIDI 69 = A4 = 440Hz)
+              _peakMemory[note].freq_hz = 440.0f * powf(2.0f, (note - 69) / 12.0f);
+              _peakMemory[note].magnitude = np.magnitude;
+              _peakMemory[note].frames_absent = 0;
+              break;
+            }
+          }
+        }
+
         if (!_activeNotes[note]) {
           // Note currently off -> potential note-on
           _noteOnCount[note] += 1;
@@ -749,8 +946,12 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
           _noteOffCount[note] = 0; // reset off counter since still sounding
         }
       } else {
-        // Note is NOT present in current frame
+        // Note is NOT present (after K-of-M filtering)
         _noteOnCount[note] = 0;
+
+        // Increment frames absent for peak memory
+        _peakMemory[note].frames_absent++;
+
         if (_activeNotes[note]) {
           // An active note might be turning off
           _noteOffCount[note] += 1;
@@ -759,6 +960,10 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
             if (onNoteOff) onNoteOff((uint8_t)note);
             _activeNotes[note] = false;
             _noteOffCount[note] = 0;
+
+            // Clear peak memory on note off
+            _peakMemory[note].freq_hz = 0.0f;
+            _peakMemory[note].magnitude = 0.0f;
           }
         } else {
           _noteOffCount[note] = 0;
@@ -1225,8 +1430,28 @@ SoundToMIDISliding::SoundToMIDISliding(const SoundToMIDI& baseCfg, const Sliding
   // Create appropriate engine
   if (mUsePoly) {
     mPolyEngine = new SoundToMIDIPoly(baseCfg);
+
+    // Only intercept callbacks if K-of-M is enabled
+    if (mSlideCfg.enable_k_of_m) {
+      mPolyEngine->onNoteOn = [this](uint8_t note, uint8_t velocity) {
+        this->handlePolyNoteOn(note, velocity);
+      };
+      mPolyEngine->onNoteOff = [this](uint8_t note) {
+        this->handlePolyNoteOff(note);
+      };
+    }
   } else {
     mMonoEngine = new SoundToMIDIMono(baseCfg);
+
+    // Only intercept callbacks if K-of-M is enabled
+    if (mSlideCfg.enable_k_of_m) {
+      mMonoEngine->onNoteOn = [this](uint8_t note, uint8_t velocity) {
+        this->handleMonoNoteOn(note, velocity);
+      };
+      mMonoEngine->onNoteOff = [this](uint8_t note) {
+        this->handleMonoNoteOff(note);
+      };
+    }
   }
 }
 
@@ -1362,6 +1587,111 @@ SoundToMIDIPoly& SoundToMIDISliding::poly() {
     return dummyEngine;
   }
   return *mPolyEngine;
+}
+
+// K-of-M filtering for monophonic mode
+void SoundToMIDISliding::handleMonoNoteOn(uint8_t note, uint8_t velocity) {
+  if (!mSlideCfg.enable_k_of_m) {
+    // K-of-M disabled - pass through directly
+    if (mUserNoteOn) {
+      mUserNoteOn(note, velocity);
+    }
+    return;
+  }
+
+  // For mono, track onset across frames using K-of-M
+  bool onset_detected = checkKofMOnset(true);
+
+  if (onset_detected && mUserNoteOn) {
+    mUserNoteOn(note, velocity);
+  }
+}
+
+void SoundToMIDISliding::handleMonoNoteOff(uint8_t note) {
+  if (!mSlideCfg.enable_k_of_m) {
+    // K-of-M disabled - pass through directly
+    if (mUserNoteOff) {
+      mUserNoteOff(note);
+    }
+    return;
+  }
+
+  // For offs, also check K-of-M but inverted (require K silent frames)
+  bool offset_detected = checkKofMOnset(false);
+
+  if (!offset_detected && mUserNoteOff) {
+    mUserNoteOff(note);
+  }
+}
+
+// K-of-M filtering for polyphonic mode
+void SoundToMIDISliding::handlePolyNoteOn(uint8_t note, uint8_t velocity) {
+  if (!mSlideCfg.enable_k_of_m) {
+    // K-of-M disabled - pass through directly
+    if (mUserNoteOn) {
+      mUserNoteOn(note, velocity);
+    }
+    return;
+  }
+
+  auto& state = mNoteStates[note];
+
+  // Increment onset count for this note
+  state.onsetCount++;
+  state.offCount = 0;  // Reset off count
+
+  // Check if we've seen this note in K of the last M frames
+  if (state.onsetCount >= (int)mSlideCfg.k_of_m_onset && !state.active) {
+    // Emit NoteOn
+    if (mUserNoteOn) {
+      mUserNoteOn(note, velocity);
+    }
+    state.active = true;
+  }
+
+  // Decay onset counts for all notes (simulating sliding window)
+  // Keep counts within reasonable bounds
+  if (state.onsetCount > (int)mSlideCfg.k_of_m_window) {
+    state.onsetCount = mSlideCfg.k_of_m_window;
+  }
+}
+
+void SoundToMIDISliding::handlePolyNoteOff(uint8_t note) {
+  if (!mSlideCfg.enable_k_of_m) {
+    // K-of-M disabled - pass through directly
+    if (mUserNoteOff) {
+      mUserNoteOff(note);
+    }
+    return;
+  }
+
+  auto it = mNoteStates.find(note);
+  if (it == mNoteStates.end()) {
+    return;  // Note wasn't tracked
+  }
+
+  auto& state = it->second;
+
+  // Increment off count for this note
+  state.offCount++;
+  state.onsetCount = 0;  // Reset onset count
+
+  // Check if we've NOT seen this note in K of the last M frames
+  if (state.offCount >= (int)mSlideCfg.k_of_m_onset && state.active) {
+    // Emit NoteOff
+    if (mUserNoteOff) {
+      mUserNoteOff(note);
+    }
+    state.active = false;
+
+    // Clean up state for this note
+    mNoteStates.erase(it);
+  }
+
+  // Decay off counts (keep within bounds)
+  if (state.offCount > (int)mSlideCfg.k_of_m_window) {
+    state.offCount = mSlideCfg.k_of_m_window;
+  }
 }
 
 } // namespace fl

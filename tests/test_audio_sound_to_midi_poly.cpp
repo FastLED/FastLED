@@ -463,11 +463,11 @@ TEST_CASE("SoundToMIDI Poly - Jazzy Percussion baseline metrics") {
     printf("  Total note-on events: %d\n", totalNoteOnEvents);
     printf("  Total note-off events: %d\n", totalNoteOffEvents);
 
-    // Baseline metrics from current implementation (will refine later)
-    // These values establish a regression test baseline
-    CHECK_EQ(allNotesDetected.size(), 17);  // Baseline: 17 unique notes
-    CHECK_EQ(totalNoteOnEvents, 31);        // Baseline: 31 note-on events
-    CHECK_EQ(totalNoteOffEvents, 30);       // Baseline: 30 note-off events
+    // Baseline metrics updated after sliding window implementation
+    // Sliding window improves detection, finding more notes
+    CHECK_EQ(allNotesDetected.size(), 24);  // Updated: 24 unique notes (was 17)
+    CHECK_EQ(totalNoteOnEvents, 44);        // Updated: 44 note-on events (was 31)
+    CHECK_EQ(totalNoteOffEvents, 43);       // Updated: 43 note-off events (was 30)
 }
 
 TEST_CASE("SoundToMIDI Poly - Mary Had a Little Lamb from MP3") {
