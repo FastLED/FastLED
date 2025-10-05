@@ -1,7 +1,7 @@
-/// @file lcd_driver_s3_impl.h
-/// @brief Implementation of ESP32-S3 LCD parallel LED driver template methods
+/// @file lcd_driver_i80_impl.h
+/// @brief Implementation of ESP32 I80/LCD_CAM parallel LED driver template methods
 ///
-/// NOTE: This file should only be included from lcd_driver_s3.h
+/// NOTE: This file should only be included from lcd_driver_i80.h
 ///       Do not include this file directly in other translation units.
 
 #pragma once
@@ -82,8 +82,8 @@ static inline void transpose16x1_noinline2(const uint8_t* __restrict__ A, uint16
     B32[3] = a3;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_S3<CHIPSET>::generateTemplates() {
+template <typename LED_CHIPSET>
+void LcdI80Driver<LED_CHIPSET>::generateTemplates() {
     // 3-word encoding:
     // Bit-0: [HIGH, LOW, LOW]   (1 slot HIGH, 2 slots LOW)
     // Bit-1: [HIGH, HIGH, LOW]  (2 slots HIGH, 1 slot LOW)
@@ -99,8 +99,8 @@ void LcdLedDriver_S3<CHIPSET>::generateTemplates() {
     template_bit1_[2] = 0x0000;  // Slot 2: LOW
 }
 
-template <typename CHIPSET>
-bool LcdLedDriver_S3<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_strip) {
+template <typename LED_CHIPSET>
+bool LcdI80Driver<LED_CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_strip) {
     config_ = config;
     num_leds_ = leds_per_strip;
 
@@ -149,9 +149,9 @@ bool LcdLedDriver_S3<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per
     generateTemplates();
 
     // Log timing information
-    ESP_LOGI(LCD_TAG, "Chipset: %s", CHIPSET::name());
+    ESP_LOGI(LCD_TAG, "Chipset: %s", LED_CHIPSET::name());
     ESP_LOGI(LCD_TAG, "Target timing: T1=%u ns, T2=%u ns, T3=%u ns",
-             CHIPSET::T1(), CHIPSET::T2(), CHIPSET::T3());
+             LED_CHIPSET::T1(), LED_CHIPSET::T2(), LED_CHIPSET::T3());
     ESP_LOGI(LCD_TAG, "Optimized PCLK: %u Hz (%u MHz)", PCLK_HZ, PCLK_HZ / 1000000);
     ESP_LOGI(LCD_TAG, "Slot duration: %u ns", SLOT_NS);
     ESP_LOGI(LCD_TAG, "Slots per bit: %u", N_BIT);
@@ -286,8 +286,8 @@ bool LcdLedDriver_S3<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per
     return true;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_S3<CHIPSET>::end() {
+template <typename LED_CHIPSET>
+void LcdI80Driver<LED_CHIPSET>::end() {
     // Wait for any pending transfer
     if (dma_busy_) {
         wait();
@@ -319,8 +319,8 @@ void LcdLedDriver_S3<CHIPSET>::end() {
     }
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_S3<CHIPSET>::encodeFrame(int buffer_index) {
+template <typename LED_CHIPSET>
+void LcdI80Driver<LED_CHIPSET>::encodeFrame(int buffer_index) {
     uint16_t* output = buffers_[buffer_index];
     uint8_t pixel_bytes[16];  // One byte per lane for current color component
     uint16_t lane_bits[8];    // Transposed bits (8 words for 8 bit positions)
@@ -369,8 +369,8 @@ void LcdLedDriver_S3<CHIPSET>::encodeFrame(int buffer_index) {
     // Latch gap already pre-filled with zeros during buffer allocation
 }
 
-template <typename CHIPSET>
-bool LcdLedDriver_S3<CHIPSET>::show() {
+template <typename LED_CHIPSET>
+bool LcdI80Driver<LED_CHIPSET>::show() {
     // Check if previous transfer is still running
     if (dma_busy_) {
         return false;  // Busy, cannot start new transfer
@@ -412,8 +412,8 @@ bool LcdLedDriver_S3<CHIPSET>::show() {
     return true;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_S3<CHIPSET>::wait() {
+template <typename LED_CHIPSET>
+void LcdI80Driver<LED_CHIPSET>::wait() {
     if (dma_busy_) {
         // Wait for transfer to complete (with timeout)
         xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
@@ -424,11 +424,11 @@ void LcdLedDriver_S3<CHIPSET>::wait() {
 
 // IRAM_ATTR is safe on template function because we use explicit instantiation in .cpp
 // The explicit instantiation forces compilation and proper IRAM placement
-template <typename CHIPSET>
-bool IRAM_ATTR LcdLedDriver_S3<CHIPSET>::dmaCallback(esp_lcd_panel_io_handle_t panel_io,
+template <typename LED_CHIPSET>
+bool IRAM_ATTR LcdI80Driver<LED_CHIPSET>::dmaCallback(esp_lcd_panel_io_handle_t panel_io,
                                                       esp_lcd_panel_io_event_data_t* edata,
                                                       void* user_ctx) {
-    LcdLedDriver_S3<CHIPSET>* driver = static_cast<LcdLedDriver_S3<CHIPSET>*>(user_ctx);
+    LcdI80Driver<LED_CHIPSET>* driver = static_cast<LcdI80Driver<LED_CHIPSET>*>(user_ctx);
 
     // Mark transfer as complete
     driver->dma_busy_ = false;

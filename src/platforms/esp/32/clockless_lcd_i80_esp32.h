@@ -1,11 +1,12 @@
-/// @file clockless_lcd_esp32s3.h
-/// @brief ESP32-S3 LCD/I80 parallel LED driver wrapper
+/// @file clockless_lcd_i80_esp32.h
+/// @brief ESP32 I80/LCD_CAM parallel LED driver wrapper
 ///
-/// This file provides the FastLED controller interface for the ESP32-S3 LCD driver.
-/// The actual driver implementation is in lcd/lcd_driver_s3.h
+/// This file provides the FastLED controller interface for the I80 LCD driver.
+/// The actual driver implementation is in lcd/lcd_driver_i80.h
 ///
 /// Supported platforms:
 /// - ESP32-S3: LCD_CAM peripheral with I80 interface
+/// - ESP32-P4: I80 interface (if available)
 
 #pragma once
 
@@ -24,8 +25,8 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 
-// Include the S3 LCD driver
-#include "lcd/lcd_driver_s3.h"
+// Include the I80 LCD driver
+#include "lcd/lcd_driver_i80.h"
 
 namespace fl {
 
@@ -37,10 +38,10 @@ using fl::LcdDriverConfig;
 // Forward declarations for wrapper API (matches I2S driver pattern)
 namespace fl {
 
-/// @brief LCD_Esp32 wrapper class that uses RectangularDrawBuffer
+/// @brief LCD_I80_Esp32 wrapper class that uses RectangularDrawBuffer
 /// This provides the same interface as I2S_Esp32
-/// Implementation is in clockless_lcd_esp32s3.cpp (always compiled for ESP32-S3)
-class LCD_Esp32 {
+/// Implementation is in clockless_lcd_i80_esp32.cpp (compiled for ESP32-S3)
+class LCD_I80_Esp32 {
   public:
     void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
@@ -49,15 +50,15 @@ class LCD_Esp32 {
 
 // Base version of this class allows dynamic pins (WS2812 chipset)
 template <EOrder RGB_ORDER = RGB>
-class ClocklessController_LCD_Esp32_WS2812Base
+class ClocklessController_LCD_I80_WS2812Base
     : public CPixelLEDController<RGB_ORDER> {
   private:
     typedef CPixelLEDController<RGB_ORDER> Base;
-    LCD_Esp32 mLCD_Esp32;
+    LCD_I80_Esp32 mLCD_I80_Esp32;
     int mPin;
 
   public:
-    ClocklessController_LCD_Esp32_WS2812Base(int pin): mPin(pin) {}
+    ClocklessController_LCD_I80_WS2812Base(int pin): mPin(pin) {}
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
@@ -65,30 +66,30 @@ class ClocklessController_LCD_Esp32_WS2812Base
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
         void *data = Base::beginShowLeds(nleds);
-        mLCD_Esp32.beginShowLeds(mPin, nleds);
+        mLCD_I80_Esp32.beginShowLeds(mPin, nleds);
         return data;
     }
 
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         auto pixel_iterator = pixels.as_iterator(this->getRgbw());
-        mLCD_Esp32.showPixels(mPin, pixel_iterator);
+        mLCD_I80_Esp32.showPixels(mPin, pixel_iterator);
     }
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
         Base::endShowLeds(data);
-        mLCD_Esp32.endShowLeds();
+        mLCD_I80_Esp32.endShowLeds();
     }
 };
 
 
 // Template parameter for the data pin so that it conforms to the API.
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class ClocklessController_LCD_Esp32_WS2812
-    : public ClocklessController_LCD_Esp32_WS2812Base<RGB_ORDER> {
+class ClocklessController_LCD_I80_WS2812
+    : public ClocklessController_LCD_I80_WS2812Base<RGB_ORDER> {
   private:
-    typedef ClocklessController_LCD_Esp32_WS2812Base<RGB_ORDER> Base;
+    typedef ClocklessController_LCD_I80_WS2812Base<RGB_ORDER> Base;
 
     // Compile-time check for invalid pins
     static_assert(!(DATA_PIN == 19 || DATA_PIN == 20),
@@ -111,7 +112,7 @@ class ClocklessController_LCD_Esp32_WS2812
     #endif
 
   public:
-    ClocklessController_LCD_Esp32_WS2812(): Base(DATA_PIN) {};
+    ClocklessController_LCD_I80_WS2812(): Base(DATA_PIN) {};
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 

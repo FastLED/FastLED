@@ -19,28 +19,28 @@
 #include "fl/rectangular_draw_buffer.h"
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
-#include "clockless_lcd_esp32p4.h"
+#include "clockless_lcd_rgb_esp32.h"
 
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
 typedef uint8_t LCDPin;
 
-// Maps multiple pins and CRGB strips to a single LCD driver object.
+// Maps multiple pins and CRGB strips to a single RGB LCD driver object.
 // Uses WS2812 chipset timing (most common for parallel LCD driver)
-class LCDEsp32P4_Group {
+class LCDRGBEsp32_Group {
   public:
 
-    fl::unique_ptr<fl::LcdLedDriver_P4<fl::WS2812ChipsetTiming>> mDriver;
+    fl::unique_ptr<fl::LcdRgbDriver<fl::WS2812ChipsetTiming>> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 
-    static LCDEsp32P4_Group &getInstance() {
-        return fl::Singleton<LCDEsp32P4_Group>::instance();
+    static LCDRGBEsp32_Group &getInstance() {
+        return fl::Singleton<LCDRGBEsp32_Group>::instance();
     }
 
-    LCDEsp32P4_Group() = default;
-    ~LCDEsp32P4_Group() { mDriver.reset(); }
+    LCDRGBEsp32_Group() = default;
+    ~LCDRGBEsp32_Group() { mDriver.reset(); }
 
     void onQueuingStart() {
         mRectDrawBuffer.onQueuingStart();
@@ -71,7 +71,7 @@ class LCDEsp32P4_Group {
             mDriver.reset(new fl::LcdLedDriver_P4<fl::WS2812ChipsetTiming>());
 
             // Build pin list and config
-            fl::LcdP4DriverConfig config;
+            fl::LcdRgbDriverConfig config;
             config.num_lanes = 0;
 
             // P4 RGB LCD requires PCLK and data pins
@@ -139,14 +139,14 @@ class LCDEsp32P4_Group {
 
 namespace fl {
 
-void LCD_Esp32P4::beginShowLeds(int datapin, int nleds) {
-    LCDEsp32P4_Group &group = LCDEsp32P4_Group::getInstance();
+void LCD_RGB_Esp32::beginShowLeds(int datapin, int nleds) {
+    LCDRGBEsp32_Group &group = LCDRGBEsp32_Group::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
-void LCD_Esp32P4::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    LCDEsp32P4_Group &group = LCDEsp32P4_Group::getInstance();
+void LCD_RGB_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+    LCDRGBEsp32_Group &group = LCDRGBEsp32_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
@@ -182,10 +182,10 @@ void LCD_Esp32P4::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     }
 }
 
-void LCD_Esp32P4::endShowLeds() {
+void LCD_RGB_Esp32::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
-    LCDEsp32P4_Group::getInstance().showPixelsOnceThisFrame();
+    LCDRGBEsp32_Group::getInstance().showPixelsOnceThisFrame();
 }
 
 // Explicit template instantiation for WS2812 chipset (forces compilation)

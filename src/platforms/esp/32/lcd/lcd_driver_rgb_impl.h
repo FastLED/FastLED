@@ -1,7 +1,7 @@
-/// @file lcd_driver_p4_impl.h
-/// @brief Implementation of ESP32-P4 RGB LCD parallel LED driver template methods
+/// @file lcd_driver_rgb_impl.h
+/// @brief Implementation of ESP32 RGB LCD parallel LED driver template methods
 ///
-/// NOTE: This file should only be included from lcd_driver_p4.h
+/// NOTE: This file should only be included from lcd_driver_rgb.h
 ///       Do not include this file directly in other translation units.
 
 #pragma once
@@ -84,8 +84,8 @@ static inline void transpose16x1_p4(const uint8_t* __restrict__ A, uint16_t* __r
     B32[3] = a3;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_P4<CHIPSET>::generateTemplates() {
+template <typename LED_CHIPSET>
+void LcdRgbDriver<LED_CHIPSET>::generateTemplates() {
     // 4-pixel encoding for WS2812 at 3.2 MHz PCLK (312.5ns per pixel):
     // Bit-0: [HI, LO, LO, LO]   (312ns high, 938ns low)
     // Bit-1: [HI, HI, LO, LO]   (625ns high, 625ns low)
@@ -103,8 +103,8 @@ void LcdLedDriver_P4<CHIPSET>::generateTemplates() {
     template_bit1_[3] = 0x0000;  // Pixel 3: LOW
 }
 
-template <typename CHIPSET>
-bool LcdLedDriver_P4<CHIPSET>::begin(const LcdP4DriverConfig& config, int leds_per_strip) {
+template <typename LED_CHIPSET>
+bool LcdRgbDriver<LED_CHIPSET>::begin(const LcdRgbDriverConfig& config, int leds_per_strip) {
     config_ = config;
     num_leds_ = leds_per_strip;
 
@@ -133,9 +133,9 @@ bool LcdLedDriver_P4<CHIPSET>::begin(const LcdP4DriverConfig& config, int leds_p
     generateTemplates();
 
     // Log timing information
-    ESP_LOGI(LCD_P4_TAG, "Chipset: %s", CHIPSET::name());
+    ESP_LOGI(LCD_P4_TAG, "Chipset: %s", LED_CHIPSET::name());
     ESP_LOGI(LCD_P4_TAG, "Target timing: T1=%u ns, T2=%u ns, T3=%u ns",
-             CHIPSET::T1(), CHIPSET::T2(), CHIPSET::T3());
+             LED_CHIPSET::T1(), LED_CHIPSET::T2(), LED_CHIPSET::T3());
     ESP_LOGI(LCD_P4_TAG, "Optimized PCLK: %u Hz (%u MHz)", PCLK_HZ, PCLK_HZ / 1000000);
     ESP_LOGI(LCD_P4_TAG, "Pixel duration: %u ns", PIXEL_NS);
     ESP_LOGI(LCD_P4_TAG, "Pixels per bit: %u", N_PIXELS);
@@ -274,8 +274,8 @@ bool LcdLedDriver_P4<CHIPSET>::begin(const LcdP4DriverConfig& config, int leds_p
     return true;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_P4<CHIPSET>::end() {
+template <typename LED_CHIPSET>
+void LcdRgbDriver<LED_CHIPSET>::end() {
     // Wait for any pending transfer
     if (dma_busy_) {
         wait();
@@ -302,8 +302,8 @@ void LcdLedDriver_P4<CHIPSET>::end() {
     }
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_P4<CHIPSET>::encodeFrame(int buffer_index) {
+template <typename LED_CHIPSET>
+void LcdRgbDriver<LED_CHIPSET>::encodeFrame(int buffer_index) {
     uint16_t* output = buffers_[buffer_index];
     uint8_t pixel_bytes[16];  // One byte per lane for current color component
     uint16_t lane_bits[8];    // Transposed bits (8 words for 8 bit positions)
@@ -352,8 +352,8 @@ void LcdLedDriver_P4<CHIPSET>::encodeFrame(int buffer_index) {
     // Latch gap already pre-filled with zeros during buffer allocation
 }
 
-template <typename CHIPSET>
-bool LcdLedDriver_P4<CHIPSET>::show() {
+template <typename LED_CHIPSET>
+bool LcdRgbDriver<LED_CHIPSET>::show() {
     // Check if previous transfer is still running
     if (dma_busy_) {
         return false;  // Busy, cannot start new transfer
@@ -399,8 +399,8 @@ bool LcdLedDriver_P4<CHIPSET>::show() {
     return true;
 }
 
-template <typename CHIPSET>
-void LcdLedDriver_P4<CHIPSET>::wait() {
+template <typename LED_CHIPSET>
+void LcdRgbDriver<LED_CHIPSET>::wait() {
     if (dma_busy_) {
         // Wait for transfer to complete (with timeout)
         xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
@@ -409,11 +409,11 @@ void LcdLedDriver_P4<CHIPSET>::wait() {
     }
 }
 
-template <typename CHIPSET>
-bool IRAM_ATTR LcdLedDriver_P4<CHIPSET>::drawCallback(esp_lcd_panel_handle_t panel,
+template <typename LED_CHIPSET>
+bool IRAM_ATTR LcdRgbDriver<LED_CHIPSET>::drawCallback(esp_lcd_panel_handle_t panel,
                                                        void* edata,
                                                        void* user_ctx) {
-    LcdLedDriver_P4<CHIPSET>* driver = static_cast<LcdLedDriver_P4<CHIPSET>*>(user_ctx);
+    LcdRgbDriver<LED_CHIPSET>* driver = static_cast<LcdRgbDriver<LED_CHIPSET>*>(user_ctx);
 
     // Mark transfer as complete
     driver->dma_busy_ = false;

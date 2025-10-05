@@ -22,7 +22,7 @@
 #ifdef ESP32
 
 #include <FastLED.h>
-#include "platforms/esp/32/clockless_lcd_esp32s3.h"
+#include "platforms/esp/32/clockless_lcd_i80_esp32.h"
 
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256
@@ -50,8 +50,8 @@ const int PINS[NUMSTRIPS] = {
 // LED data arrays (one per strip)
 CRGB leds[NUMSTRIPS][NUM_LEDS_PER_STRIP];
 
-// LCD driver instance (template-bound to WS2812 timing)
-fl::LcdLedDriver<fl::WS2812ChipsetTiming> lcd_driver;
+// I80 LCD driver instance (template-bound to WS2812 timing)
+fl::LcdI80Driver<fl::WS2812ChipsetTiming> lcd_driver;
 
 void setup_lcd() {
     Serial.begin(115200);

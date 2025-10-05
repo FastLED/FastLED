@@ -41,10 +41,10 @@ class WS2812Controller800Khz:
 	> {};
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #elif defined(FASTLED_ESP32_LCD_DRIVER) && defined(CONFIG_IDF_TARGET_ESP32S3)
-#include "platforms/esp/32/clockless_lcd_esp32s3.h"
+#include "platforms/esp/32/clockless_lcd_i80_esp32.h"
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 class WS2812Controller800Khz:
-	public fl::ClocklessController_LCD_Esp32_WS2812<
+	public fl::ClocklessController_LCD_I80_WS2812<
 		DATA_PIN,
 		RGB_ORDER
 	> {};

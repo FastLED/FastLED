@@ -19,28 +19,28 @@
 #include "fl/rectangular_draw_buffer.h"
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
-#include "clockless_lcd_esp32s3.h"
+#include "clockless_lcd_i80_esp32.h"
 
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
 typedef uint8_t LCDPin;
 
-// Maps multiple pins and CRGB strips to a single LCD driver object.
+// Maps multiple pins and CRGB strips to a single I80 LCD driver object.
 // Uses WS2812 chipset timing (most common for parallel LCD driver)
-class LCDEsp32S3_Group {
+class LCDI80Esp32_Group {
   public:
 
-    fl::unique_ptr<fl::LcdLedDriver_S3<fl::WS2812ChipsetTiming>> mDriver;
+    fl::unique_ptr<fl::LcdI80Driver<fl::WS2812ChipsetTiming>> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
 
-    static LCDEsp32S3_Group &getInstance() {
-        return fl::Singleton<LCDEsp32S3_Group>::instance();
+    static LCDI80Esp32_Group &getInstance() {
+        return fl::Singleton<LCDI80Esp32_Group>::instance();
     }
 
-    LCDEsp32S3_Group() = default;
-    ~LCDEsp32S3_Group() { mDriver.reset(); }
+    LCDI80Esp32_Group() = default;
+    ~LCDI80Esp32_Group() { mDriver.reset(); }
 
     void onQueuingStart() {
         mRectDrawBuffer.onQueuingStart();
@@ -68,7 +68,7 @@ class LCDEsp32S3_Group {
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
-            mDriver.reset(new fl::LcdLedDriver_S3<fl::WS2812ChipsetTiming>());
+            mDriver.reset(new fl::LcdI80Driver<fl::WS2812ChipsetTiming>());
 
             // Build pin list and config
             fl::LcdDriverConfig config;
@@ -159,13 +159,13 @@ class LCDEsp32S3_Group {
 
 namespace fl {
 
-void LCD_Esp32::beginShowLeds(int datapin, int nleds) {
+void LCD_I80_Esp32::beginShowLeds(int datapin, int nleds) {
     LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
-void LCD_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
+void LCD_I80_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
@@ -202,7 +202,7 @@ void LCD_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
     }
 }
 
-void LCD_Esp32::endShowLeds() {
+void LCD_I80_Esp32::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
     LCDEsp32S3_Group::getInstance().showPixelsOnceThisFrame();

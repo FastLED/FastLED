@@ -1,27 +1,24 @@
-/// @file lcd_driver_s3.h
-/// @brief ESP32-S3 LCD/I80 parallel LED driver with memory-optimized 3-word encoding
+/// @file lcd_driver_rgb.h
+/// @brief ESP32 RGB LCD parallel LED driver with 4-pixel encoding
 ///
-/// This driver uses the ESP32-S3 LCD_CAM peripheral (I80 mode) to drive up to 16
-/// identical WS28xx-style LED strips in parallel with automatic PCLK optimization.
+/// This driver uses the RGB LCD peripheral to drive up to 16
+/// identical WS28xx-style LED strips in parallel with DMA-based hardware timing.
 ///
 /// Supported platforms:
-/// - ESP32-S3: LCD_CAM peripheral with I80 interface (requires hal/lcd_ll.h)
+/// - ESP32-P4: RGB LCD controller (requires esp_lcd_panel_ops.h)
+/// - Future ESP32 variants with RGB LCD support
 ///
 /// Key features:
 /// - Template-parameterized chipset binding (compile-time optimization)
-/// - Automatic PCLK frequency calculation for optimal memory efficiency
-/// - 3-word-per-bit encoding (6 bytes per bit) - same as I2S driver
-/// - Pre-computed bit templates with bit-masking
-/// - Memory usage: 144 KB per 1000 LEDs (identical to I2S driver)
+/// - Automatic PCLK frequency calculation for WS2812 timing
+/// - 4-pixel-per-bit encoding (8 bytes per bit)
+/// - RGB LCD peripheral with HSYNC/VSYNC/DE signals
+/// - Up to 16 parallel strips via data bus width
 
 #pragma once
 
-#if !defined(CONFIG_IDF_TARGET_ESP32S3)
-#error "This file is only for ESP32-S3"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32S2)
-#error "LCD driver is not supported on ESP32-S2"
+#if !defined(CONFIG_IDF_TARGET_ESP32P4)
+#error "This file is only for ESP32-P4"
 #endif
 
 #include "sdkconfig.h"
@@ -34,9 +31,6 @@
 #include "esp_lcd_panel_io.h"
 #include "esp_lcd_panel_ops.h"
 #include "driver/gpio.h"
-#include "hal/lcd_hal.h"
-#include "hal/lcd_ll.h"
-#include "soc/lcd_periph.h"
 #include "platforms/esp/esp_version.h"
 
 #include "crgb.h"
@@ -45,29 +39,45 @@
 
 namespace fl {
 
-/// @brief Memory-optimized LCD parallel LED driver with template-based chipset binding
-///
-/// This driver achieves the same memory efficiency as the I2S driver (6 bytes per bit)
-/// while providing per-chipset PCLK optimization and compile-time type safety.
-///
-/// @tparam CHIPSET Chipset timing trait (e.g., WS2812ChipsetTiming)
-template <typename CHIPSET>
-class LcdLedDriver_S3 {
-public:
-    /// @brief Fixed 3-word encoding for memory efficiency (matches I2S driver)
-    static constexpr uint32_t N_BIT = 3;
+/// @brief Configuration structure for RGB LCD driver
+struct LcdRgbDriverConfig {
+    int pclk_gpio;               ///< GPIO for pixel clock output
+    int vsync_gpio = -1;         ///< GPIO for VSYNC (optional, -1 to disable)
+    int hsync_gpio = -1;         ///< GPIO for HSYNC (optional, -1 to disable)
+    int de_gpio = -1;            ///< GPIO for data enable (optional, -1 to disable)
+    int disp_gpio = -1;          ///< GPIO for display enable (optional, -1 to disable)
+    int data_gpios[16];          ///< GPIO numbers for data lanes D0-D15
+    int num_lanes;               ///< Active lane count (1-16)
+    int latch_us = 300;          ///< Reset gap duration (microseconds)
+    bool use_psram = true;       ///< Allocate DMA buffers in PSRAM
+    uint32_t pclk_hz_override = LCD_PCLK_HZ_OVERRIDE;  ///< Optional: Force specific PCLK
+};
 
-    /// @brief Bytes per bit (3 words × 2 bytes)
-    static constexpr uint32_t BYTES_PER_BIT = N_BIT * 2;
+/// @brief RGB LCD parallel LED driver with template-based chipset binding
+///
+/// This driver uses the RGB LCD peripheral with 4-pixel encoding
+/// to generate precise WS2812 timing on up to 16 parallel data lines.
+///
+/// @tparam LED_CHIPSET LED chipset timing trait (e.g., WS2812ChipsetTiming)
+template <typename LED_CHIPSET>
+class LcdRgbDriver {
+public:
+    /// @brief Fixed 4-pixel encoding for WS2812 timing
+    /// At 3.2 MHz PCLK (312.5ns per pixel):
+    /// - Bit 0: [HI, LO, LO, LO] = 312ns high, 938ns low
+    /// - Bit 1: [HI, HI, LO, LO] = 625ns high, 625ns low
+    static constexpr uint32_t N_PIXELS = 4;
+
+    /// @brief Bytes per bit (4 pixels × 2 bytes per pixel)
+    static constexpr uint32_t BYTES_PER_BIT = N_PIXELS * 2;
 
     /// @brief Calculate timing using shared ClocklessTiming module
     static constexpr ClocklessTimingResult calculate_timing() {
         if constexpr (LCD_PCLK_HZ_OVERRIDE > 0) {
-            // If override is set, still use ClocklessTiming for validation
-            // but we'll use the override frequency
+            // If override is set, use it directly
             auto result = ClocklessTiming::calculate_optimal_pclk(
-                CHIPSET::T1(), CHIPSET::T2(), CHIPSET::T3(),
-                N_BIT, 1000000, 80000000, true
+                LED_CHIPSET::T1(), LED_CHIPSET::T2(), LED_CHIPSET::T3(),
+                N_PIXELS, 1000000, 40000000, true
             );
             result.pclk_hz = LCD_PCLK_HZ_OVERRIDE;
             result.slot_ns = 1000000000UL / LCD_PCLK_HZ_OVERRIDE;
@@ -75,12 +85,12 @@ public:
         }
 
         return ClocklessTiming::calculate_optimal_pclk(
-            CHIPSET::T1(),
-            CHIPSET::T2(),
-            CHIPSET::T3(),
-            N_BIT,           // 3 words per bit
+            LED_CHIPSET::T1(),
+            LED_CHIPSET::T2(),
+            LED_CHIPSET::T3(),
+            N_PIXELS,        // 4 pixels per bit
             1000000,         // 1 MHz min
-            80000000,        // 80 MHz max
+            40000000,        // 40 MHz max (conservative for WS2812)
             true             // Round to MHz
         );
     }
@@ -91,18 +101,17 @@ public:
     /// @brief Optimized PCLK frequency (Hz)
     static constexpr uint32_t PCLK_HZ = TIMING.pclk_hz;
 
-    /// @brief Slot duration (nanoseconds)
-    static constexpr uint32_t SLOT_NS = TIMING.slot_ns;
+    /// @brief Pixel duration (nanoseconds)
+    static constexpr uint32_t PIXEL_NS = TIMING.slot_ns;
 
     /// @brief Constructor
-    LcdLedDriver_S3()
+    LcdRgbDriver()
         : config_{}
         , num_leds_(0)
         , strips_{}
         , template_bit0_{}
         , template_bit1_{}
-        , bus_handle_(nullptr)
-        , io_handle_(nullptr)
+        , panel_handle_(nullptr)
         , buffers_{nullptr, nullptr}
         , buffer_size_(0)
         , front_buffer_(0)
@@ -116,7 +125,7 @@ public:
     }
 
     /// @brief Destructor
-    ~LcdLedDriver_S3() {
+    ~LcdRgbDriver() {
         end();
     }
 
@@ -125,7 +134,7 @@ public:
     /// @param config Driver configuration (pins, lane count, options)
     /// @param leds_per_strip Number of LEDs in each strip (uniform across lanes)
     /// @return true on success, false on error
-    bool begin(const LcdDriverConfig& config, int leds_per_strip);
+    bool begin(const LcdRgbDriverConfig& config, int leds_per_strip);
 
     /// @brief Shutdown driver and free resources
     void end();
@@ -179,8 +188,8 @@ public:
     /// @brief Get timing calculation result
     constexpr ClocklessTimingResult getTiming() const { return TIMING; }
 
-    /// @brief Get slot count per bit
-    constexpr uint32_t getSlotsPerBit() const { return N_BIT; }
+    /// @brief Get pixels per bit
+    constexpr uint32_t getPixelsPerBit() const { return N_PIXELS; }
 
     /// @brief Get optimized PCLK frequency (Hz)
     constexpr uint32_t getPclkHz() const { return PCLK_HZ; }
@@ -188,7 +197,7 @@ public:
     /// @brief Get estimated frame time (microseconds)
     uint32_t getFrameTimeUs() const {
         return ClocklessTiming::calculate_frame_time_us(
-            num_leds_, 24, N_BIT, SLOT_NS, config_.latch_us
+            num_leds_, 24, N_PIXELS, PIXEL_NS, config_.latch_us
         );
     }
 
@@ -206,24 +215,22 @@ private:
     /// @param buffer_index Buffer index (0 or 1)
     void encodeFrame(int buffer_index);
 
-    /// @brief DMA transfer complete callback (static, ISR context, IRAM)
-    /// Safe with IRAM_ATTR because explicit instantiation in .cpp file
-    static bool IRAM_ATTR dmaCallback(esp_lcd_panel_io_handle_t panel_io,
-                                      esp_lcd_panel_io_event_data_t* edata,
-                                      void* user_ctx);
+    /// @brief RGB panel draw complete callback (static, ISR context, IRAM)
+    static bool IRAM_ATTR drawCallback(esp_lcd_panel_handle_t panel,
+                                       void* edata,
+                                       void* user_ctx);
 
     // Configuration
-    LcdDriverConfig config_;
+    LcdRgbDriverConfig config_;
     int num_leds_;
     CRGB* strips_[16];
 
-    // Pre-computed bit templates (3 words each for 3-slot encoding)
-    uint16_t template_bit0_[N_BIT];
-    uint16_t template_bit1_[N_BIT];
+    // Pre-computed bit templates (4 pixels each for 4-pixel encoding)
+    uint16_t template_bit0_[N_PIXELS];
+    uint16_t template_bit1_[N_PIXELS];
 
-    // ESP-LCD handles
-    esp_lcd_i80_bus_handle_t bus_handle_;
-    esp_lcd_panel_io_handle_t io_handle_;
+    // ESP-LCD RGB panel handle
+    esp_lcd_panel_handle_t panel_handle_;
 
     // DMA buffers (double-buffered)
     uint16_t* buffers_[2];
@@ -239,4 +246,4 @@ private:
 }  // namespace fl
 
 // Include template implementation
-#include "lcd_driver_s3_impl.h"
+#include "lcd_driver_rgb_impl.h"

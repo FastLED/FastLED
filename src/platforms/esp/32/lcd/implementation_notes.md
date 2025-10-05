@@ -176,54 +176,55 @@ References
 
 ### ✅ Completed (Date: 2025-01-XX)
 
-#### Phase 1: ESP32-S3 LCD Driver Refactoring
+#### Phase 1: ESP32 I80 LCD Driver Refactoring
 - ✅ Created unified `lcd/` subdirectory structure in `src/platforms/esp/32/lcd/`
-- ✅ Extracted S3 LCD driver to modular architecture:
+- ✅ Extracted I80 LCD driver to modular architecture:
   - `lcd/lcd_driver_common.h` - Shared structures and pin validation utilities
-  - `lcd/lcd_driver_s3.h` - ESP32-S3 LCD driver class definition
-  - `lcd/lcd_driver_s3_impl.h` - Template implementation for S3
-- ✅ Refactored existing S3 wrapper files to use new structure:
-  - Updated `clockless_lcd_esp32s3.h` to include from `lcd/` directory
-  - Updated `clockless_lcd_esp32s3.cpp` to use `LcdLedDriver_S3` class
-- ✅ Preserved backward compatibility - all existing S3 LCD code still works
+  - `lcd/lcd_driver_i80.h` - I80/LCD_CAM driver class definition
+  - `lcd/lcd_driver_i80_impl.h` - Template implementation for I80
+- ✅ Refactored existing wrapper files to use new structure:
+  - Updated `clockless_lcd_i80_esp32.h` to include from `lcd/` directory
+  - Updated `clockless_lcd_i80_esp32.cpp` to use `LcdI80Driver` class
+- ✅ Preserved backward compatibility - all existing LCD code still works
 - ✅ Verified with unit tests - all C++ tests pass
 
-#### Phase 2: ESP32-P4 RGB LCD Driver Implementation
-- ✅ Implemented P4 RGB LCD driver following TASK.md specification:
-  - `lcd/lcd_driver_p4.h` - ESP32-P4 RGB LCD driver class definition
-  - `lcd/lcd_driver_p4_impl.h` - Template implementation for P4
-- ✅ Key P4 implementation features:
-  - 4-pixel encoding for WS2812 timing (vs S3's 3-word encoding)
-  - Uses `esp_lcd_new_rgb_panel()` API (vs S3's I80 API)
+#### Phase 2: ESP32 RGB LCD Driver Implementation
+- ✅ Implemented RGB LCD driver following TASK.md specification:
+  - `lcd/lcd_driver_rgb.h` - RGB LCD driver class definition
+  - `lcd/lcd_driver_rgb_impl.h` - Template implementation for RGB
+- ✅ Key RGB implementation features:
+  - 4-pixel encoding for WS2812 timing (vs I80's 3-word encoding)
+  - Uses `esp_lcd_new_rgb_panel()` API (vs I80's I80 API)
   - VSYNC front porch for reset gap generation
   - Optimized PCLK calculation via `ClocklessTiming` module
 - ✅ Created FastLED controller wrappers:
-  - `clockless_lcd_esp32p4.h` - Controller class definitions
-  - `clockless_lcd_esp32p4.cpp` - RectangularDrawBuffer integration
-- ✅ Follows same patterns as S3/I2S/PARLIO drivers for consistency
+  - `clockless_lcd_rgb_esp32.h` - Controller class definitions
+  - `clockless_lcd_rgb_esp32.cpp` - RectangularDrawBuffer integration
+- ✅ Follows same patterns as I80/I2S/PARLIO drivers for consistency
 
 ### Architecture Summary
 
 **File Structure:**
 ```
 src/platforms/esp/32/
-├── lcd/                          (NEW - shared LCD driver code)
+├── lcd/                          (LCD driver code - peripheral-based naming)
 │   ├── lcd_driver_common.h       - Shared config, pin validation
-│   ├── lcd_driver_s3.h           - S3 LCD driver (I80 mode)
-│   ├── lcd_driver_s3_impl.h      - S3 implementation
-│   ├── lcd_driver_p4.h           - P4 RGB LCD driver
-│   └── lcd_driver_p4_impl.h      - P4 implementation
+│   ├── lcd_driver_i80.h          - I80/LCD_CAM driver (ESP32-S3, potentially others)
+│   ├── lcd_driver_i80_impl.h     - I80 implementation
+│   ├── lcd_driver_rgb.h          - RGB LCD driver (ESP32-P4, potentially others)
+│   └── lcd_driver_rgb_impl.h     - RGB implementation
 │
-├── clockless_lcd_esp32s3.h       - S3 controller wrapper
-├── clockless_lcd_esp32s3.cpp     - S3 RectangularDrawBuffer integration
-├── clockless_lcd_esp32p4.h       - P4 controller wrapper (NEW)
-└── clockless_lcd_esp32p4.cpp     - P4 RectangularDrawBuffer integration (NEW)
+├── clockless_lcd_i80_esp32.h     - I80 controller wrapper
+├── clockless_lcd_i80_esp32.cpp   - I80 RectangularDrawBuffer integration
+├── clockless_lcd_rgb_esp32.h     - RGB controller wrapper
+└── clockless_lcd_rgb_esp32.cpp   - RGB RectangularDrawBuffer integration
 ```
 
-**Key Differences: S3 vs P4**
+**Key Differences: I80 vs RGB**
 
-| Aspect | ESP32-S3 (I80/LCD_CAM) | ESP32-P4 (RGB LCD) |
-|--------|------------------------|---------------------|
+| Aspect | I80/LCD_CAM | RGB LCD |
+|--------|-------------|---------|
+| Platforms | ESP32-S3 | ESP32-P4 |
 | Peripheral | LCD_CAM (I80 mode) | RGB LCD controller |
 | API | `esp_lcd_panel_io_i80` | `esp_lcd_rgb_panel` |
 | Headers | `hal/lcd_ll.h`, `hal/lcd_hal.h` | `esp_lcd_panel_rgb.h` |
@@ -235,33 +236,33 @@ src/platforms/esp/32/
 
 ### Testing Notes
 
-- ✅ S3 refactor verified with existing unit tests
-- ⚠️ P4 implementation requires actual hardware for testing
-- ⚠️ P4 GPIO pin assignments currently hardcoded (line 77-81 in clockless_lcd_esp32p4.cpp)
+- ✅ I80 refactor verified with existing unit tests
+- ⚠️ RGB implementation requires actual ESP32-P4 hardware for testing
+- ⚠️ RGB GPIO pin assignments currently hardcoded in clockless_lcd_rgb_esp32.cpp
   - TODO: Make PCLK/VSYNC/HSYNC/DE/DISP pins user-configurable
 
 ### Next Steps / TODOs
 
 1. **Hardware Testing**:
-   - Test P4 driver on actual ESP32-P4 hardware with WS2812 strips
+   - Test RGB driver on actual ESP32-P4 hardware with WS2812 strips
    - Verify timing with logic analyzer
    - Measure actual frame rates and memory usage
 
 2. **GPIO Configuration**:
    - Add user API to configure PCLK and sync signal pins
-   - Document P4-specific pin constraints from datasheet
+   - Document platform-specific pin constraints from datasheets
    - Update `validate_esp32p4_lcd_pin()` with actual reserved pins
 
 3. **Performance Optimization**:
    - Fine-tune PCLK frequency for different chipsets (SK6812, APA102, etc.)
    - Test PSRAM vs SRAM buffer performance
-   - Benchmark against PARLIO driver
+   - Benchmark I80 vs RGB vs PARLIO drivers
 
 4. **Documentation**:
-   - Add P4 LCD driver examples
+   - Add RGB LCD driver examples
    - Document memory requirements and performance characteristics
    - Create migration guide for users upgrading from PARLIO
 
 5. **Feature Parity**:
-   - Ensure P4 driver supports all features available in S3 driver
-   - Consider dual-engine mode (RGB LCD + PARLIO for 32 strips)
+   - Ensure RGB driver supports all features available in I80 driver
+   - Consider dual-engine mode (RGB LCD + PARLIO for 32 strips on P4)

@@ -1,11 +1,12 @@
-/// @file clockless_lcd_esp32p4.h
-/// @brief ESP32-P4 RGB LCD parallel LED driver wrapper
+/// @file clockless_lcd_rgb_esp32.h
+/// @brief ESP32 RGB LCD parallel LED driver wrapper
 ///
-/// This file provides the FastLED controller interface for the ESP32-P4 LCD driver.
-/// The actual driver implementation is in lcd/lcd_driver_p4.h
+/// This file provides the FastLED controller interface for the RGB LCD driver.
+/// The actual driver implementation is in lcd/lcd_driver_rgb.h
 ///
 /// Supported platforms:
 /// - ESP32-P4: RGB LCD peripheral
+/// - Future ESP32 variants with RGB LCD support
 
 #pragma once
 
@@ -20,23 +21,23 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 
-// Include the P4 LCD driver
-#include "lcd/lcd_driver_p4.h"
+// Include the RGB LCD driver
+#include "lcd/lcd_driver_rgb.h"
 
 namespace fl {
 
-// Bring in LcdP4DriverConfig from P4 driver header
-using fl::LcdP4DriverConfig;
+// Bring in LcdRgbDriverConfig from RGB driver header
+using fl::LcdRgbDriverConfig;
 
 }  // namespace fl
 
 // Forward declarations for wrapper API (matches I2S/S3 LCD driver pattern)
 namespace fl {
 
-/// @brief LCD_Esp32P4 wrapper class that uses RectangularDrawBuffer
-/// This provides the same interface as I2S_Esp32 and LCD_Esp32
-/// Implementation is in clockless_lcd_esp32p4.cpp (always compiled for ESP32-P4)
-class LCD_Esp32P4 {
+/// @brief LCD_RGB_Esp32 wrapper class that uses RectangularDrawBuffer
+/// This provides the same interface as I2S_Esp32 and LCD_I80_Esp32
+/// Implementation is in clockless_lcd_rgb_esp32.cpp (compiled for ESP32-P4)
+class LCD_RGB_Esp32 {
   public:
     void beginShowLeds(int data_pin, int nleds);
     void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
@@ -45,15 +46,15 @@ class LCD_Esp32P4 {
 
 // Base version of this class allows dynamic pins (WS2812 chipset)
 template <EOrder RGB_ORDER = RGB>
-class ClocklessController_LCD_Esp32P4_WS2812Base
+class ClocklessController_LCD_RGB_WS2812Base
     : public CPixelLEDController<RGB_ORDER> {
   private:
     typedef CPixelLEDController<RGB_ORDER> Base;
-    LCD_Esp32P4 mLCD_Esp32P4;
+    LCD_RGB_Esp32 mLCD_RGB_Esp32;
     int mPin;
 
   public:
-    ClocklessController_LCD_Esp32P4_WS2812Base(int pin): mPin(pin) {}
+    ClocklessController_LCD_RGB_WS2812Base(int pin): mPin(pin) {}
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
@@ -61,36 +62,36 @@ class ClocklessController_LCD_Esp32P4_WS2812Base
     // Wait until the last draw is complete, if necessary.
     virtual void *beginShowLeds(int nleds) override {
         void *data = Base::beginShowLeds(nleds);
-        mLCD_Esp32P4.beginShowLeds(mPin, nleds);
+        mLCD_RGB_Esp32.beginShowLeds(mPin, nleds);
         return data;
     }
 
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         auto pixel_iterator = pixels.as_iterator(this->getRgbw());
-        mLCD_Esp32P4.showPixels(mPin, pixel_iterator);
+        mLCD_RGB_Esp32.showPixels(mPin, pixel_iterator);
     }
 
     // Send the data to the strip
     virtual void endShowLeds(void *data) override {
         Base::endShowLeds(data);
-        mLCD_Esp32P4.endShowLeds();
+        mLCD_RGB_Esp32.endShowLeds();
     }
 };
 
 
 // Template parameter for the data pin so that it conforms to the API.
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class ClocklessController_LCD_Esp32P4_WS2812
-    : public ClocklessController_LCD_Esp32P4_WS2812Base<RGB_ORDER> {
+class ClocklessController_LCD_RGB_WS2812
+    : public ClocklessController_LCD_RGB_WS2812Base<RGB_ORDER> {
   private:
-    typedef ClocklessController_LCD_Esp32P4_WS2812Base<RGB_ORDER> Base;
+    typedef ClocklessController_LCD_RGB_WS2812Base<RGB_ORDER> Base;
 
     // Compile-time check for invalid pins (P4-specific)
     // TODO: Add P4-specific pin validation based on datasheet
 
   public:
-    ClocklessController_LCD_Esp32P4_WS2812(): Base(DATA_PIN) {};
+    ClocklessController_LCD_RGB_WS2812(): Base(DATA_PIN) {};
     void init() override {}
     virtual uint16_t getMaxRefreshRate() const { return 800; }
 
