@@ -446,8 +446,8 @@ FramePtr FileSystem::loadJpeg(const char *path, const JpegConfig &config,
     return frame;
 }
 
-fl::third_party::Mp3StreamDecoderPtr FileSystem::openMp3(const char *path,
-                                                          fl::string *error_message) {
+fl::Mp3DecoderPtr FileSystem::openMp3(const char *path,
+                                      fl::string *error_message) {
     // Open the MP3 file
     FileHandlePtr file = openRead(path);
     if (!file || !file->valid()) {
@@ -456,16 +456,15 @@ fl::third_party::Mp3StreamDecoderPtr FileSystem::openMp3(const char *path,
             error_message->append(path);
         }
         FASTLED_WARN("Failed to open MP3 file: " << path);
-        return fl::third_party::Mp3StreamDecoderPtr();
+        return fl::Mp3DecoderPtr();
     }
 
     // Create ByteStream adapter for the file
     fl::shared_ptr<ByteStreamFileHandle> fileStream =
         fl::make_shared<ByteStreamFileHandle>(file);
 
-    // Create MP3 stream decoder
-    fl::third_party::Mp3StreamDecoderPtr decoder =
-        fl::make_shared<fl::third_party::Mp3StreamDecoder>();
+    // Create MP3 stream decoder using the public API
+    fl::Mp3DecoderPtr decoder = fl::Mp3::createDecoder(error_message);
 
     if (!decoder->begin(fileStream)) {
         fl::string decoder_error;
@@ -475,7 +474,7 @@ fl::third_party::Mp3StreamDecoderPtr FileSystem::openMp3(const char *path,
             error_message->append(decoder_error);
         }
         FASTLED_WARN("Failed to initialize MP3 decoder for: " << path);
-        return fl::third_party::Mp3StreamDecoderPtr();
+        return fl::Mp3DecoderPtr();
     }
 
     return decoder;

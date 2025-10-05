@@ -76,8 +76,8 @@ class FileSystem {
                       fl::string *error_message = nullptr);
 
     // Open MP3 audio file and return streaming decoder
-    fl::third_party::Mp3StreamDecoderPtr openMp3(const char *path,
-                                                   fl::string *error_message = nullptr);
+    fl::Mp3DecoderPtr openMp3(const char *path,
+                              fl::string *error_message = nullptr);
 
   private:
     FsImplPtr mFs; // System dependent filesystem.
