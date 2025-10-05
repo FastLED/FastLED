@@ -235,8 +235,20 @@ function createSingleNumberField(element) {
   numberInput.step = (element.step !== undefined) ? element.step : 'any';
   numberInput.style.display = 'inline-block';
   numberInput.style.verticalAlign = 'middle';
-  numberInput.style.width = '60px';
   numberInput.style.boxSizing = 'border-box';
+
+  // Calculate dynamic width based on expected value range
+  const calculateInputWidth = () => {
+    const minDigits = String(Math.floor(element.min || 0)).length;
+    const maxDigits = String(Math.floor(element.max || 0)).length;
+    const valueDigits = String(Math.floor(element.value || 0)).length;
+    const maxLength = Math.max(minDigits, maxDigits, valueDigits, 5); // Minimum 5 digits
+    // ~8px per character + 20px for padding/controls
+    return `${maxLength * 8 + 20}px`;
+  };
+
+  numberInput.style.width = calculateInputWidth();
+  numberInput.style.minWidth = '70px'; // Ensure minimum usable width
 
   controlDiv.appendChild(label);
   controlDiv.appendChild(numberInput);

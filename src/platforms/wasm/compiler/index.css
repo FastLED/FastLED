@@ -1700,9 +1700,9 @@ audio::-moz-range-track {
 }
 
 .ui-control.number-control.inline-row input[type="number"] {
-    width: 80px;
-    min-width: 0;
-    max-width: none;
+    /* Width is set dynamically via JavaScript based on value range */
+    min-width: 70px;
+    max-width: 150px;
     flex: none;
     display: inline-block;
     vertical-align: middle;
@@ -1742,9 +1742,9 @@ audio::-moz-range-track {
 }
 
 .ui-control.number-pair-control .single-number-field input[type="number"] {
-    width: 55px;
-    min-width: 50px;
-    max-width: 65px;
+    /* Width is set dynamically via JavaScript based on value range */
+    min-width: 60px;
+    max-width: 120px;
     flex-shrink: 0;
     box-sizing: border-box;
 }
@@ -1760,9 +1760,9 @@ audio::-moz-range-track {
 }
 
 .mobile-layout .ui-control.number-pair-control .single-number-field input[type="number"] {
-    width: 50px;
-    min-width: 45px;
-    max-width: 60px;
+    /* Width is set dynamically via JavaScript */
+    min-width: 55px;
+    max-width: 100px;
 }
 
 /* Ultra-wide optimizations for paired number fields */
@@ -1775,9 +1775,9 @@ audio::-moz-range-track {
 }
 
 .ultrawide-layout .ui-control.number-pair-control .single-number-field input[type="number"] {
-    width: 65px;
-    min-width: 55px;
-    max-width: 75px;
+    /* Width is set dynamically via JavaScript */
+    min-width: 65px;
+    max-width: 140px;
 }
 
 /* Overlay label for slider - hovers over the slider widget */
