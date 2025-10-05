@@ -48,17 +48,34 @@ struct ParlioDriverConfig {
     uint32_t clock_freq_hz;      ///< PARLIO clock frequency (e.g., 12000000 for 12MHz)
 };
 
+/// @brief Abstract base for PARLIO driver (enables runtime polymorphism)
+class ParlioLedDriverBase {
+public:
+    virtual ~ParlioLedDriverBase() = default;
+    virtual bool begin(const ParlioDriverConfig& config, uint16_t num_leds) = 0;
+    virtual void end() = 0;
+    virtual void set_strip(uint8_t channel, CRGB* leds) = 0;
+    virtual void show_grb() = 0;
+    virtual void show_rgb() = 0;
+    virtual void show_bgr() = 0;
+    virtual void wait() = 0;
+    virtual bool is_initialized() const = 0;
+};
+
 /// @brief PARLIO parallel LED driver with template-based configuration
 ///
 /// This driver uses the ESP32-P4's Parallel IO TX peripheral to simultaneously
 /// drive multiple LED strips with hardware-timed output and DMA transfers.
 ///
-/// @tparam DATA_WIDTH Number of parallel data lanes (8 or 16)
+/// @tparam DATA_WIDTH Number of parallel data lanes (1, 2, 4, 8, or 16)
 /// @tparam CHIPSET Chipset timing trait (e.g., WS2812ChipsetTiming)
 template <uint8_t DATA_WIDTH, typename CHIPSET>
-class ParlioLedDriver {
+class ParlioLedDriver : public ParlioLedDriverBase {
 public:
-    static_assert(DATA_WIDTH == 8 || DATA_WIDTH == 16, "DATA_WIDTH must be 8 or 16");
+    static_assert(DATA_WIDTH >= 1 && DATA_WIDTH <= 16, "DATA_WIDTH must be 1-16");
+    static_assert((DATA_WIDTH == 1) || (DATA_WIDTH == 2) || (DATA_WIDTH == 4) ||
+                  (DATA_WIDTH == 8) || (DATA_WIDTH == 16),
+                  "DATA_WIDTH must be power of 2 (1, 2, 4, 8, or 16)");
 
     /// @brief Default clock frequency for WS2812 timing
     static constexpr uint32_t DEFAULT_CLOCK_FREQ_HZ = 12000000;  // 12 MHz
@@ -89,7 +106,7 @@ public:
     /// @param config Driver configuration (pins, lane count, clock frequency)
     /// @param num_leds Number of LEDs per strip
     /// @return true if initialization succeeded
-    bool begin(const ParlioDriverConfig& config, uint16_t num_leds) {
+    bool begin(const ParlioDriverConfig& config, uint16_t num_leds) override {
         if (config.num_lanes != DATA_WIDTH) {
             return false;
         }
@@ -177,7 +194,7 @@ public:
     }
 
     /// @brief Shutdown driver and free resources
-    void end() {
+    void end() override {
         if (tx_unit_) {
             parlio_tx_unit_disable(tx_unit_);
             parlio_del_tx_unit(tx_unit_);
@@ -201,7 +218,7 @@ public:
     ///
     /// @param channel Channel index (0 to DATA_WIDTH-1)
     /// @param leds Pointer to LED data array
-    void set_strip(uint8_t channel, CRGB* leds) {
+    void set_strip(uint8_t channel, CRGB* leds) override {
         if (channel < DATA_WIDTH) {
             strips_[channel] = leds;
         }
@@ -241,7 +258,7 @@ public:
     }
 
     /// @brief Wait for current transmission to complete
-    void wait() {
+    void wait() override {
         if (xfer_done_sem_) {
             xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
             xSemaphoreGive(xfer_done_sem_);
@@ -249,9 +266,14 @@ public:
     }
 
     /// @brief Check if driver is initialized
-    bool is_initialized() const {
+    bool is_initialized() const override {
         return tx_unit_ != nullptr;
     }
+
+    /// @brief Virtual show methods for base class interface
+    void show_grb() override { show<GRB>(); }
+    void show_rgb() override { show<RGB>(); }
+    void show_bgr() override { show<BGR>(); }
 
 private:
     /// @brief Pack LED data into PARLIO format
@@ -343,117 +365,63 @@ private:
     volatile bool dma_busy_;        ///< Flag indicating DMA transfer in progress
 };
 
-/// @brief FastLED controller wrapper for PARLIO driver
-///
-/// This class provides a FastLED-compatible interface for the PARLIO driver.
-///
-/// @tparam DATA_WIDTH Number of parallel data lanes (8 or 16)
-/// @tparam CHIPSET Chipset timing trait
-template <uint8_t DATA_WIDTH = 8, typename CHIPSET = WS2812ChipsetTiming>
-class ParlioController : public CPixelLEDController<GRB> {
+// ===== Proxy Controller System (matches I2S pattern) =====
+
+/// @brief Helper object for PARLIO proxy controllers
+class Parlio_Esp32P4 {
+public:
+    void beginShowLeds(int data_pin, int nleds);
+    void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
+    void endShowLeds();
+};
+
+/// @brief Base proxy controller with dynamic pin
+template <EOrder RGB_ORDER = RGB>
+class ClocklessController_Parlio_Esp32P4_WS2812Base
+    : public CPixelLEDController<RGB_ORDER> {
 private:
-    ParlioLedDriver<DATA_WIDTH, CHIPSET> driver_;
-    ParlioDriverConfig config_;
-    bool initialized_;
-    CRGB* pixel_buffer_;  // Internal buffer for pixel data when using PixelIterator
-    uint16_t num_leds_;
+    typedef CPixelLEDController<RGB_ORDER> Base;
+    Parlio_Esp32P4 mParlio_Esp32P4;
+    int mPin;
 
 public:
-    ParlioController(int clk_gpio, const int data_gpios[DATA_WIDTH])
-        : initialized_(false), pixel_buffer_(nullptr), num_leds_(0)
-    {
-        config_.clk_gpio = clk_gpio;
-        config_.num_lanes = DATA_WIDTH;
-        config_.clock_freq_hz = ParlioLedDriver<DATA_WIDTH, CHIPSET>::DEFAULT_CLOCK_FREQ_HZ;
+    ClocklessController_Parlio_Esp32P4_WS2812Base(int pin) : mPin(pin) {}
 
-        for (int i = 0; i < DATA_WIDTH; i++) {
-            config_.data_gpios[i] = data_gpios[i];
-        }
+    void init() override {}
+
+    uint16_t getMaxRefreshRate() const override { return 800; }
+
+protected:
+    void *beginShowLeds(int nleds) override {
+        void *data = Base::beginShowLeds(nleds);
+        mParlio_Esp32P4.beginShowLeds(mPin, nleds);
+        return data;
     }
 
-    ~ParlioController() {
-        if (pixel_buffer_) {
-            heap_caps_free(pixel_buffer_);
-        }
+    void showPixels(PixelController<RGB_ORDER> &pixels) override {
+        auto pixel_iterator = pixels.as_iterator(this->getRgbw());
+        mParlio_Esp32P4.showPixels(mPin, pixel_iterator);
     }
 
-    /// @brief Initialize controller
-    void init() override {
-        // Initialization happens in showPixels when we know the LED count
+    void endShowLeds(void *data) override {
+        Base::endShowLeds(data);
+        mParlio_Esp32P4.endShowLeds();
     }
+};
 
-    /// @brief Get maximum refresh rate
-    uint16_t getMaxRefreshRate() const override {
-        // Conservative estimate: ~185 FPS theoretical max for 256 LEDs
-        // Actual rate depends on LED count and DMA overhead
-        return 60;  // 60 FPS guaranteed for 256-pixel strips
-    }
+/// @brief Template version with compile-time pin
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class ClocklessController_Parlio_Esp32P4_WS2812
+    : public ClocklessController_Parlio_Esp32P4_WS2812Base<RGB_ORDER> {
+private:
+    typedef ClocklessController_Parlio_Esp32P4_WS2812Base<RGB_ORDER> Base;
 
-    /// @brief Show pixels - main rendering function
-    PixelIterator showPixels(PixelIterator pixels) override {
-        uint16_t num_leds = pixels.size();
+public:
+    ClocklessController_Parlio_Esp32P4_WS2812() : Base(DATA_PIN) {}
 
-        if (!initialized_ || num_leds_ != num_leds) {
-            // Allocate or reallocate pixel buffer if needed
-            if (pixel_buffer_ && num_leds_ != num_leds) {
-                heap_caps_free(pixel_buffer_);
-                pixel_buffer_ = nullptr;
-            }
+    void init() override {}
 
-            if (!pixel_buffer_) {
-                pixel_buffer_ = (CRGB*)heap_caps_malloc(num_leds * sizeof(CRGB), MALLOC_CAP_DEFAULT);
-                if (!pixel_buffer_) {
-                    return pixels;  // Allocation failed
-                }
-                num_leds_ = num_leds;
-            }
-
-            // Initialize driver
-            if (!driver_.begin(config_, num_leds)) {
-                return pixels;  // Initialization failed
-            }
-
-            // Set strip pointer to our internal buffer (only channel 0 for now)
-            driver_.set_strip(0, pixel_buffer_);
-            initialized_ = true;
-        }
-
-        // Extract pixel data from iterator into our buffer
-        // PixelIterator already provides data in RGB_ORDER, so we write bytes directly
-        uint8_t* byte_buffer = reinterpret_cast<uint8_t*>(pixel_buffer_);
-        uint16_t byte_idx = 0;
-        while (pixels.has(1)) {
-            uint8_t b0, b1, b2;
-            pixels.loadAndScaleRGB(&b0, &b1, &b2);
-            byte_buffer[byte_idx++] = b0;
-            byte_buffer[byte_idx++] = b1;
-            byte_buffer[byte_idx++] = b2;
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-
-        // Show without reordering - data is already in correct order from PixelIterator
-        driver_.show<RGB>();
-        driver_.wait();
-
-        return pixels;
-    }
-
-    /// @brief Set LED strip for a specific channel
-    ///
-    /// @param channel Channel index (0 to DATA_WIDTH-1)
-    /// @param leds Pointer to LED array
-    /// @param num_leds Number of LEDs in array
-    void setStrip(uint8_t channel, CRGB* leds, uint16_t num_leds) {
-        if (!initialized_) {
-            if (!driver_.begin(config_, num_leds)) {
-                return;
-            }
-            initialized_ = true;
-        }
-
-        driver_.set_strip(channel, leds);
-    }
+    uint16_t getMaxRefreshRate() const override { return 800; }
 };
 
 }  // namespace fl
