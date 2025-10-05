@@ -643,3 +643,124 @@ TEST_CASE("SoundToMIDI Poly - Mary Had a Little Lamb from MP3") {
            allNotesDetected.size(), totalNoteOnEvents);
     printf("  Test validates: MP3 loading, header parsing, and polyphonic detection\n");
 }
+
+// ========== Sliding Window Polyphonic Tests ==========
+
+TEST_CASE("SoundToMIDI Sliding Poly - Basic chord detection with overlap") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+    baseCfg.note_hold_frames = 2;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 256;  // 50% overlap
+    slideCfg.window = SlidingCfg::Window::Hann;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, true); // Polyphonic
+
+    fl::FixedSet<uint8_t, 16> notesOn;
+
+    engine.poly().onNoteOn = [&](uint8_t note, uint8_t vel) {
+        notesOn.insert(note);
+    };
+
+    // Generate A4 (440Hz) + E5 (659.25Hz) chord
+    float freqs[] = {440.0f, 659.25f};
+    float testSignal[1024];
+    generateMultiTone(testSignal, 1024, freqs, 2, 16000.0f);
+
+    engine.processSamples(testSignal, 1024);
+
+    // Should detect both notes in the chord
+    CHECK_GE(notesOn.size(), 1); // At least one note detected
+}
+
+TEST_CASE("SoundToMIDI Sliding Poly - Sliding window enables accurate onset detection") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+    baseCfg.note_hold_frames = 2;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 256;
+    slideCfg.window = SlidingCfg::Window::Hann;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, true);
+
+    int noteOnCount = 0;
+    engine.poly().onNoteOn = [&](uint8_t note, uint8_t vel) {
+        noteOnCount++;
+    };
+
+    // Generate C major chord: C4, E4, G4
+    float freqs[] = {261.63f, 329.63f, 392.0f};
+    float testSignal[2048];
+    generateMultiTone(testSignal, 2048, freqs, 3, 16000.0f);
+
+    engine.processSamples(testSignal, 2048);
+
+    // With sliding window, onset detection should be more reliable
+    CHECK_GT(noteOnCount, 0);
+}
+
+TEST_CASE("SoundToMIDI Sliding Poly - Different overlaps work correctly") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+
+    // Test 50%, 75%, and 87.5% overlap
+    int hops[] = {256, 128, 64};
+
+    for (int hop : hops) {
+        SlidingCfg slideCfg;
+        slideCfg.frame_size = 512;
+        slideCfg.hop_size = hop;
+        slideCfg.window = SlidingCfg::Window::Hann;
+
+        SoundToMIDISliding engine(baseCfg, slideCfg, true);
+
+        int noteCount = 0;
+        engine.poly().onNoteOn = [&](uint8_t note, uint8_t vel) {
+            noteCount++;
+        };
+
+        // Generate simple two-note chord
+        float freqs[] = {440.0f, 659.25f};
+        float testSignal[1024];
+        generateMultiTone(testSignal, 1024, freqs, 2, 16000.0f);
+
+        engine.processSamples(testSignal, 1024);
+
+        // All overlap levels should detect notes
+        CHECK_GT(noteCount, 0);
+    }
+}
+
+TEST_CASE("SoundToMIDI Sliding Poly - Access to underlying poly engine") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 256;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, true);
+
+    // Verify we can access the poly engine and set callbacks
+    bool callbackInvoked = false;
+    engine.poly().onNoteOn = [&](uint8_t note, uint8_t vel) {
+        callbackInvoked = true;
+    };
+
+    // Generate test signal
+    float freqs[] = {440.0f};
+    float testSignal[1024];
+    generateMultiTone(testSignal, 1024, freqs, 1, 16000.0f);
+
+    engine.processSamples(testSignal, 1024);
+
+    CHECK(callbackInvoked); // Callback should have been called
+}

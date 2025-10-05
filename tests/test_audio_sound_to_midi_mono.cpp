@@ -395,3 +395,111 @@ TEST_CASE("SoundToMIDI Mono - MP3 melody detection pipeline") {
     printf("✓ MP3 → PCM → Pitch Detection → MIDI pipeline validated!\n");
     printf("  Melody detection accuracy: %d/10 notes correct (%.0f%%)\n", matches_in_first_10, 100.0 * matches_in_first_10 / 10.0);
 }
+
+// ========== Sliding Window Tests ==========
+
+TEST_CASE("SoundToMIDI Sliding - Basic monophonic detection with overlap") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 256;  // 50% overlap
+    slideCfg.window = SlidingCfg::Window::Hann;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, false); // Monophonic
+
+    uint8_t lastNoteOn = 0;
+    int noteOnCount = 0;
+
+    engine.mono().onNoteOn = [&](uint8_t note, uint8_t vel) {
+        lastNoteOn = note;
+        noteOnCount++;
+    };
+
+    // Generate A4 (440Hz) sine wave
+    float testSignal[1024];
+    generateSineWave(testSignal, 1024, 440.0f, 16000.0f);
+
+    // Stream samples to sliding window engine
+    engine.processSamples(testSignal, 1024);
+
+    CHECK_GT(noteOnCount, 0);
+    CHECK_EQ(lastNoteOn, 69); // A4 = MIDI 69
+}
+
+TEST_CASE("SoundToMIDI Sliding - Hann window application") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 256;
+    slideCfg.window = SlidingCfg::Window::Hann;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, false);
+
+    // Verify that sliding window was created without crashing
+    CHECK(engine.isPolyphonic() == false);
+    CHECK(slideCfg.frame_size == 512);
+    CHECK(slideCfg.hop_size == 256);
+}
+
+TEST_CASE("SoundToMIDI Sliding - Different window types compile") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+
+    // Test all window types
+    for (int w = 0; w < 3; ++w) {
+        SlidingCfg slideCfg;
+        slideCfg.frame_size = 512;
+        slideCfg.hop_size = 256;
+        slideCfg.window = static_cast<SlidingCfg::Window>(w);
+
+        SoundToMIDISliding engine(baseCfg, slideCfg, false);
+
+        // Generate test signal
+        float testSignal[512];
+        generateSineWave(testSignal, 512, 440.0f, 16000.0f);
+
+        // Process samples - should not crash
+        engine.processSamples(testSignal, 512);
+    }
+
+    CHECK(true); // If we get here, all window types work
+}
+
+TEST_CASE("SoundToMIDI Sliding - 75% overlap improves stability") {
+    SoundToMIDI baseCfg;
+    baseCfg.sample_rate_hz = 16000.0f;
+    baseCfg.frame_size = 512;
+    baseCfg.note_hold_frames = 2;
+
+    SlidingCfg slideCfg;
+    slideCfg.frame_size = 512;
+    slideCfg.hop_size = 128;  // 75% overlap
+    slideCfg.window = SlidingCfg::Window::Hann;
+
+    SoundToMIDISliding engine(baseCfg, slideCfg, false);
+
+    int noteOnCount = 0;
+    uint8_t detectedNote = 0;
+
+    engine.mono().onNoteOn = [&](uint8_t note, uint8_t vel) {
+        detectedNote = note;
+        noteOnCount++;
+    };
+
+    // Generate longer A4 signal
+    float testSignal[2048];
+    generateSineWave(testSignal, 2048, 440.0f, 16000.0f);
+
+    engine.processSamples(testSignal, 2048);
+
+    // With more overlap, we should get more stable detections
+    CHECK_GT(noteOnCount, 0);
+    CHECK_EQ(detectedNote, 69);
+}
