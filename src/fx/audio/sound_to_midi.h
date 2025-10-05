@@ -116,6 +116,35 @@ struct SoundToMIDI {
 
   // Velocity from Peak Magnitude
   bool velocity_from_peak_mag = true;         ///< Use peak magnitude for velocity (else RMS)
+
+  // ---------- Auto-Tuning Configuration ----------
+  bool auto_tune_enable = false;              ///< Enable auto-tuning (default: off)
+
+  // Auto-tuning adaptation margins
+  float auto_tune_rms_margin = 1.8f;          ///< RMS gate margin multiplier (k_rms, 1.5-2.0)
+  float auto_tune_peak_margin_db = 8.0f;      ///< Peak threshold margin above noise floor in dB (6-10)
+
+  // Auto-tuning limits
+  float auto_tune_rms_gate_min = 0.005f;      ///< Minimum RMS gate value
+  float auto_tune_rms_gate_max = 0.100f;      ///< Maximum RMS gate value
+  float auto_tune_confidence_min = 0.60f;     ///< Minimum confidence threshold
+  float auto_tune_confidence_max = 0.95f;     ///< Maximum confidence threshold
+  float auto_tune_peak_db_min = -60.0f;       ///< Minimum peak threshold in dB
+  float auto_tune_peak_db_max = -20.0f;       ///< Maximum peak threshold in dB
+
+  // Auto-tuning event rate targets
+  float auto_tune_notes_per_sec_min = 1.0f;   ///< Minimum note events per second (monophonic)
+  float auto_tune_notes_per_sec_max = 10.0f;  ///< Maximum note events per second (monophonic)
+  float auto_tune_peaks_per_frame_min = 1.0f; ///< Minimum peaks per frame (polyphonic)
+  float auto_tune_peaks_per_frame_max = 5.0f; ///< Maximum peaks per frame (polyphonic)
+
+  // Auto-tuning adaptation speeds
+  float auto_tune_update_rate_hz = 5.0f;      ///< Update frequency for adaptation (5-10 Hz)
+  float auto_tune_param_smoothing = 0.95f;    ///< Smoothing factor for parameter updates (0.9-0.99)
+  float auto_tune_threshold_step = 0.02f;     ///< Step size for threshold adjustments
+
+  // Auto-tuning calibration
+  float auto_tune_calibration_time_sec = 1.0f; ///< Initial calibration period in seconds
 };
 
 // ---------- Pitch Detection Result ----------
@@ -124,6 +153,54 @@ struct PitchResult {
   float freq_hz;      ///< Detected fundamental frequency in Hz (0 if no pitch detected)
   float confidence;   ///< Detection confidence level [0-1] (higher = more confident)
 };
+
+// ---------- Auto-Tuning State ----------
+/// @brief Internal state for auto-tuning algorithm
+struct AutoTuneState {
+  // Noise floor estimation
+  float noise_rms_est = 0.0f;           ///< EMA of RMS amplitude during silence
+  float noise_mag_db_est = -80.0f;      ///< EMA of spectral median dB during silence
+
+  // Tracking EMAs
+  float confidence_ema = 0.0f;          ///< EMA of pitch confidence values
+  float pitch_variance_ema = 0.0f;      ///< EMA of pitch variance (jitter)
+  float event_rate_ema = 0.0f;          ///< EMA of event rate (notes/sec or peaks/frame)
+
+  // Histogram tracking (simplified as EMAs)
+  float note_duration_ema = 0.0f;       ///< EMA of note durations (in frames)
+  float note_gap_ema = 0.0f;            ///< EMA of inter-note gaps (in frames)
+
+  // Octave statistics (polyphonic)
+  static constexpr int NUM_OCTAVES = 8;
+  int octave_detections[NUM_OCTAVES] = {0}; ///< Detection counts per octave
+  int octave_spurious[NUM_OCTAVES] = {0};   ///< Spurious detection counts per octave
+
+  // Frame counting
+  int frames_processed = 0;             ///< Total frames processed
+  int frames_since_update = 0;          ///< Frames since last auto-tune update
+  int calibration_frames = 0;           ///< Frames remaining in calibration
+  bool in_calibration = true;           ///< Currently in calibration phase
+
+  // Event tracking
+  int note_events_count = 0;            ///< Note events in current update window
+  int peaks_total = 0;                  ///< Total peaks detected in current window
+  int peaks_count = 0;                  ///< Frames counted for peak average
+
+  // Note duration tracking (monophonic)
+  int current_note_start_frame = -1;    ///< Frame when current note started
+  int last_note_off_frame = -1;         ///< Frame when last note ended
+
+  // Previous pitch tracking (for jitter)
+  float prev_pitch_hz = 0.0f;           ///< Previous detected pitch
+  bool prev_pitch_valid = false;        ///< Whether prev_pitch_hz is valid
+};
+
+// ---------- Auto-Tuning Callback ----------
+/// @brief Callback signature for auto-tuning parameter updates
+/// @param param_name Name of the parameter that was adjusted
+/// @param old_value Previous value
+/// @param new_value New value
+using AutoTuneCallback = function<void(const char* param_name, float old_value, float new_value)>;
 
 // ---------- Pitch Detector ----------
 /// @brief Low-level pitch detector using YIN/MPM-like autocorrelation algorithm
@@ -210,6 +287,14 @@ public:
   /// @param c New configuration parameters
   void setConfig(const SoundToMIDI& c) override;
 
+  /// @brief Get auto-tuning state (for monitoring/debugging)
+  /// @return Reference to auto-tuning state
+  const AutoTuneState& getAutoTuneState() const { return _autoTuneState; }
+
+  /// @brief Set auto-tuning callback for parameter updates
+  /// @param cb Callback function
+  void setAutoTuneCallback(AutoTuneCallback cb) { _autoTuneCallback = cb; }
+
 private:
   SoundToMIDI _cfg;           ///< Active configuration
   PitchDetector _det;         ///< Pitch detection instance
@@ -227,9 +312,44 @@ private:
   int _historyIndex;                  ///< Current write position in history
   int _historyCount;                  ///< Number of valid entries in history
 
+  // Auto-tuning state
+  AutoTuneState _autoTuneState;       ///< Auto-tuning state and statistics
+  AutoTuneCallback _autoTuneCallback; ///< Optional callback for parameter updates
+
   /// @brief Calculate median from note history buffer
   /// @return Median MIDI note number
   int getMedianNote();
+
+  /// @brief Update auto-tuning parameters based on current statistics
+  void autoTuneUpdate();
+
+  /// @brief Update noise floor estimation
+  /// @param rms Current frame RMS
+  /// @param is_silent Whether frame is considered silent
+  void updateNoiseFloor(float rms, bool is_silent);
+
+  /// @brief Update confidence tracking
+  /// @param confidence Current pitch confidence
+  void updateConfidenceTracking(float confidence);
+
+  /// @brief Update jitter tracking
+  /// @param freq_hz Current detected pitch
+  void updateJitterTracking(float freq_hz);
+
+  /// @brief Update event rate tracking
+  /// @param note_on True if a note-on event occurred
+  void updateEventRate(bool note_on);
+
+  /// @brief Update note duration tracking
+  /// @param note_started True if note just started
+  /// @param note_ended True if note just ended
+  void updateNoteDuration(bool note_started, bool note_ended);
+
+  /// @brief Notify parameter change via callback
+  /// @param name Parameter name
+  /// @param old_val Old value
+  /// @param new_val New value
+  void notifyParamChange(const char* name, float old_val, float new_val);
 };
 
 // ---------- Polyphonic MIDI Conversion Engine ----------
@@ -274,6 +394,14 @@ public:
   /// @param mode Smoothing mode
   void setSmoothingMode(SmoothingMode mode);
 
+  /// @brief Get auto-tuning state (for monitoring/debugging)
+  /// @return Reference to auto-tuning state
+  const AutoTuneState& getAutoTuneState() const { return _autoTuneState; }
+
+  /// @brief Set auto-tuning callback for parameter updates
+  /// @param cb Callback function
+  void setAutoTuneCallback(AutoTuneCallback cb) { _autoTuneCallback = cb; }
+
 private:
   SoundToMIDI _cfg;           ///< Active configuration
 
@@ -285,6 +413,10 @@ private:
   // PCP (Pitch Class Profile) state for stabilization
   static constexpr int NUM_PITCH_CLASSES = 12;
   float _pcpHistory[NUM_PITCH_CLASSES];  ///< EMA history for each pitch class (C, C#, D, ...)
+
+  // Auto-tuning state
+  AutoTuneState _autoTuneState;       ///< Auto-tuning state and statistics
+  AutoTuneCallback _autoTuneCallback; ///< Optional callback for parameter updates
 
   // Initialize internal state
   void initializeState();
@@ -300,6 +432,13 @@ private:
 
   // Get PCP bias for a given MIDI note
   float getPCPBias(int midiNote) const;
+
+  // Auto-tuning methods
+  void autoTuneUpdate();
+  void updateNoiseFloor(float rms, int num_peaks, const fl::vector<float>& spectrum);
+  void updatePeakTracking(int num_peaks);
+  void updateOctaveStatistics(const fl::vector<int>& notes);
+  void notifyParamChange(const char* name, float old_val, float new_val);
 };
 
 // ---------- Legacy Alias (Deprecated) ----------

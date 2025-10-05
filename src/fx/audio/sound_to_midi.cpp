@@ -426,6 +426,14 @@ SoundToMIDIMono::SoundToMIDIMono(const SoundToMIDI& cfg)
   for (int i = 0; i < MAX_MEDIAN_SIZE; ++i) {
     _noteHistory[i] = -1;
   }
+
+  // Initialize auto-tuning state
+  if (_cfg.auto_tune_enable) {
+    // Calculate calibration frames needed
+    float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
+    _autoTuneState.calibration_frames = (int)(_cfg.auto_tune_calibration_time_sec * frames_per_sec);
+    _autoTuneState.in_calibration = true;
+  }
 }
 
 int SoundToMIDIMono::getMedianNote() {
@@ -477,6 +485,40 @@ void SoundToMIDIMono::processFrame(const float* frame, int n) {
                       (pr.confidence > _cfg.confidence_threshold) &&
                       (pr.freq_hz > 0.0f);
 
+  // Auto-tuning: Update tracking statistics
+  if (_cfg.auto_tune_enable) {
+    _autoTuneState.frames_processed++;
+
+    // Handle calibration phase
+    if (_autoTuneState.in_calibration) {
+      _autoTuneState.calibration_frames--;
+      if (_autoTuneState.calibration_frames <= 0) {
+        _autoTuneState.in_calibration = false;
+      }
+      // During calibration, update noise floor but don't emit events
+      updateNoiseFloor(rms, !voiced);
+      return; // Skip MIDI output during calibration
+    }
+
+    // Update noise floor estimation
+    updateNoiseFloor(rms, _currentNote < 0);
+
+    // Update confidence tracking
+    if (voiced) {
+      updateConfidenceTracking(pr.confidence);
+      updateJitterTracking(pr.freq_hz);
+    }
+
+    // Determine if auto-tune update is needed
+    _autoTuneState.frames_since_update++;
+    float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
+    int frames_per_update = (int)(frames_per_sec / _cfg.auto_tune_update_rate_hz);
+    if (_autoTuneState.frames_since_update >= frames_per_update) {
+      autoTuneUpdate();
+      _autoTuneState.frames_since_update = 0;
+    }
+  }
+
   if (voiced) {
     int rawNote = clampMidi(hz_to_midi(pr.freq_hz));
 
@@ -498,6 +540,10 @@ void SoundToMIDIMono::processFrame(const float* frame, int n) {
         _silenceFrames = 0;
         _candidateNote = -1;
         _candidateHoldFrames = 0;
+
+        // Auto-tuning: Track note start
+        updateEventRate(true);
+        updateNoteDuration(true, false);
       }
     } else {
       // Check semitone threshold
@@ -511,6 +557,12 @@ void SoundToMIDIMono::processFrame(const float* frame, int n) {
             if (onNoteOff) onNoteOff((uint8_t)_currentNote);
             const uint8_t vel = amp_to_velocity(rms, _cfg.vel_gain, _cfg.vel_floor);
             if (onNoteOn) onNoteOn((uint8_t)note, vel);
+
+            // Auto-tuning: Track note change
+            updateNoteDuration(false, true);
+            updateEventRate(true);
+            updateNoteDuration(true, false);
+
             _currentNote = note;
             _candidateNote = -1;
             _candidateHoldFrames = 0;
@@ -535,6 +587,10 @@ void SoundToMIDIMono::processFrame(const float* frame, int n) {
     if (_currentNote >= 0) {
       if (++_silenceFrames >= _cfg.silence_frames_off) {
         if (onNoteOff) onNoteOff((uint8_t)_currentNote);
+
+        // Auto-tuning: Track note end
+        updateNoteDuration(false, true);
+
         _currentNote = -1;
         _silenceFrames = 0;
         // Clear median filter history on silence
@@ -557,6 +613,14 @@ void SoundToMIDIMono::setConfig(const SoundToMIDI& c) {
 SoundToMIDIPoly::SoundToMIDIPoly(const SoundToMIDI& cfg)
     : _cfg(cfg) {
   initializeState();
+
+  // Initialize auto-tuning state
+  if (_cfg.auto_tune_enable) {
+    // Calculate calibration frames needed
+    float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
+    _autoTuneState.calibration_frames = (int)(_cfg.auto_tune_calibration_time_sec * frames_per_sec);
+    _autoTuneState.in_calibration = true;
+  }
 }
 
 void SoundToMIDIPoly::initializeState() {
@@ -578,12 +642,53 @@ void SoundToMIDIPoly::processFrame(const float* frame, int n) {
   // Compute loudness (RMS) of the frame
   const float rms = compute_rms(frame, n);
 
+  // Auto-tuning: Update frame counter and calibration
+  if (_cfg.auto_tune_enable) {
+    _autoTuneState.frames_processed++;
+
+    // Handle calibration phase
+    if (_autoTuneState.in_calibration) {
+      _autoTuneState.calibration_frames--;
+      if (_autoTuneState.calibration_frames <= 0) {
+        _autoTuneState.in_calibration = false;
+      }
+      // During calibration, skip MIDI output
+      return;
+    }
+  }
+
   // --- Polyphonic pitch detection logic ---
   bool voiced = (rms > _cfg.rms_gate);
   if (voiced) {
     // Get all detected note peaks in this frame using enhanced spectral processing
     fl::vector<NotePeak> notes = detectPolyphonicNotes(frame, n, _cfg.sample_rate_hz,
                                                        _cfg.fmin_hz, _cfg.fmax_hz, _cfg);
+
+    // Auto-tuning: Track peaks and update statistics
+    if (_cfg.auto_tune_enable) {
+      updatePeakTracking((int)notes.size());
+
+      fl::vector<int> midi_notes;
+      midi_notes.reserve(notes.size());
+      for (const NotePeak& np : notes) {
+        midi_notes.push_back(np.midi);
+      }
+      updateOctaveStatistics(midi_notes);
+
+      // Note: We don't have easy access to the spectrum here, so we'll use a simplified approach
+      // for noise floor estimation based on RMS when no peaks are detected
+      fl::vector<float> empty_spectrum;
+      updateNoiseFloor(rms, (int)notes.size(), empty_spectrum);
+
+      // Determine if auto-tune update is needed
+      _autoTuneState.frames_since_update++;
+      float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
+      int frames_per_update = (int)(frames_per_sec / _cfg.auto_tune_update_rate_hz);
+      if (_autoTuneState.frames_since_update >= frames_per_update) {
+        autoTuneUpdate();
+        _autoTuneState.frames_since_update = 0;
+      }
+    }
 
     // Update PCP (Pitch Class Profile) if enabled
     if (_cfg.pcp_enable) {
@@ -739,6 +844,365 @@ float SoundToMIDIPoly::getPCPBias(int midiNote) const {
   }
   int pc = midiNote % 12;
   return _pcpHistory[pc] * _cfg.pcp_bias_weight;
+}
+
+// ---------- Auto-Tuning Methods (Monophonic) ----------
+
+void SoundToMIDIMono::updateNoiseFloor(float rms, bool is_silent) {
+  if (!_cfg.auto_tune_enable) return;
+
+  // Only update noise floor during silence (no active note)
+  if (is_silent) {
+    const float alpha = 0.05f; // Slow EMA for noise floor (time constant ~0.5s at 5Hz update)
+    _autoTuneState.noise_rms_est = _autoTuneState.noise_rms_est * (1.0f - alpha) + rms * alpha;
+  }
+}
+
+void SoundToMIDIMono::updateConfidenceTracking(float confidence) {
+  if (!_cfg.auto_tune_enable) return;
+
+  const float alpha = 0.1f; // EMA smoothing factor
+  _autoTuneState.confidence_ema = _autoTuneState.confidence_ema * (1.0f - alpha) + confidence * alpha;
+}
+
+void SoundToMIDIMono::updateJitterTracking(float freq_hz) {
+  if (!_cfg.auto_tune_enable) return;
+
+  if (_autoTuneState.prev_pitch_valid && freq_hz > 0) {
+    // Calculate pitch variance (semitone difference)
+    float semitone_diff = 12.0f * (logf(freq_hz / _autoTuneState.prev_pitch_hz) / logf(2.0f));
+    float variance = semitone_diff * semitone_diff;
+
+    const float alpha = 0.1f;
+    _autoTuneState.pitch_variance_ema = _autoTuneState.pitch_variance_ema * (1.0f - alpha) + variance * alpha;
+  }
+
+  _autoTuneState.prev_pitch_hz = freq_hz;
+  _autoTuneState.prev_pitch_valid = (freq_hz > 0);
+}
+
+void SoundToMIDIMono::updateEventRate(bool note_on) {
+  if (!_cfg.auto_tune_enable) return;
+
+  if (note_on) {
+    _autoTuneState.note_events_count++;
+  }
+}
+
+void SoundToMIDIMono::updateNoteDuration(bool note_started, bool note_ended) {
+  if (!_cfg.auto_tune_enable) return;
+
+  if (note_started) {
+    _autoTuneState.current_note_start_frame = _autoTuneState.frames_processed;
+  }
+
+  if (note_ended && _autoTuneState.current_note_start_frame >= 0) {
+    // Calculate note duration
+    int duration = _autoTuneState.frames_processed - _autoTuneState.current_note_start_frame;
+
+    // Calculate gap since last note
+    int gap = 0;
+    if (_autoTuneState.last_note_off_frame >= 0) {
+      gap = _autoTuneState.current_note_start_frame - _autoTuneState.last_note_off_frame;
+    }
+
+    // Update EMAs
+    const float alpha = 0.15f;
+    if (_autoTuneState.note_duration_ema > 0) {
+      _autoTuneState.note_duration_ema = _autoTuneState.note_duration_ema * (1.0f - alpha) + duration * alpha;
+    } else {
+      _autoTuneState.note_duration_ema = (float)duration;
+    }
+
+    if (gap > 0) {
+      if (_autoTuneState.note_gap_ema > 0) {
+        _autoTuneState.note_gap_ema = _autoTuneState.note_gap_ema * (1.0f - alpha) + gap * alpha;
+      } else {
+        _autoTuneState.note_gap_ema = (float)gap;
+      }
+    }
+
+    _autoTuneState.last_note_off_frame = _autoTuneState.frames_processed;
+    _autoTuneState.current_note_start_frame = -1;
+  }
+}
+
+void SoundToMIDIMono::notifyParamChange(const char* name, float old_val, float new_val) {
+  if (_autoTuneCallback && fabsf(new_val - old_val) > 1e-6f) {
+    _autoTuneCallback(name, old_val, new_val);
+  }
+}
+
+void SoundToMIDIMono::autoTuneUpdate() {
+  if (!_cfg.auto_tune_enable || _autoTuneState.in_calibration) return;
+
+  const float smoothing = _cfg.auto_tune_param_smoothing;
+  const float step = _cfg.auto_tune_threshold_step;
+
+  // 1. Adaptive RMS gate
+  float target_rms_gate = _autoTuneState.noise_rms_est * _cfg.auto_tune_rms_margin;
+  // Clamp to configured limits
+  if (target_rms_gate < _cfg.auto_tune_rms_gate_min) target_rms_gate = _cfg.auto_tune_rms_gate_min;
+  if (target_rms_gate > _cfg.auto_tune_rms_gate_max) target_rms_gate = _cfg.auto_tune_rms_gate_max;
+
+  // Smooth update
+  float old_rms = _cfg.rms_gate;
+  _cfg.rms_gate = _cfg.rms_gate * smoothing + target_rms_gate * (1.0f - smoothing);
+  notifyParamChange("rms_gate", old_rms, _cfg.rms_gate);
+
+  // 2. Adaptive confidence threshold
+  // If average confidence is low, raise threshold; if missing notes, lower it
+  if (_autoTuneState.confidence_ema > 0) {
+    float old_conf = _cfg.confidence_threshold;
+
+    if (_autoTuneState.confidence_ema < _cfg.confidence_threshold - 0.1f) {
+      // Many low-confidence detections, raise threshold
+      _cfg.confidence_threshold += step;
+    } else if (_autoTuneState.event_rate_ema < _cfg.auto_tune_notes_per_sec_min * 0.8f) {
+      // Too few events, lower threshold
+      _cfg.confidence_threshold -= step;
+    }
+
+    // Clamp
+    if (_cfg.confidence_threshold < _cfg.auto_tune_confidence_min) {
+      _cfg.confidence_threshold = _cfg.auto_tune_confidence_min;
+    }
+    if (_cfg.confidence_threshold > _cfg.auto_tune_confidence_max) {
+      _cfg.confidence_threshold = _cfg.auto_tune_confidence_max;
+    }
+
+    notifyParamChange("confidence_threshold", old_conf, _cfg.confidence_threshold);
+  }
+
+  // 3. Jitter-based median filter adjustment
+  if (_autoTuneState.pitch_variance_ema > 0) {
+    int old_median = _cfg.median_filter_size;
+
+    if (_autoTuneState.pitch_variance_ema > 1.0f) {
+      // High jitter, increase median filter
+      if (_cfg.median_filter_size < 5) _cfg.median_filter_size = 3;
+      if (_autoTuneState.pitch_variance_ema > 4.0f && _cfg.median_filter_size < 5) {
+        _cfg.median_filter_size = 5;
+      }
+    } else if (_autoTuneState.pitch_variance_ema < 0.25f) {
+      // Low jitter, reduce latency
+      _cfg.median_filter_size = 1;
+    }
+
+    if (old_median != _cfg.median_filter_size) {
+      notifyParamChange("median_filter_size", (float)old_median, (float)_cfg.median_filter_size);
+    }
+  }
+
+  // 4. Event rate control
+  // Calculate frames per update window
+  float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
+  float update_window_sec = 1.0f / _cfg.auto_tune_update_rate_hz;
+  float frames_per_window = frames_per_sec * update_window_sec;
+
+  // Calculate event rate (events per second)
+  float event_rate = _autoTuneState.note_events_count / update_window_sec;
+
+  // Update EMA
+  const float alpha_rate = 0.2f;
+  _autoTuneState.event_rate_ema = _autoTuneState.event_rate_ema * (1.0f - alpha_rate) + event_rate * alpha_rate;
+
+  // Adjust confidence threshold based on event rate
+  if (_autoTuneState.event_rate_ema > _cfg.auto_tune_notes_per_sec_max) {
+    float old_conf = _cfg.confidence_threshold;
+    _cfg.confidence_threshold += step * 0.5f;
+    if (_cfg.confidence_threshold > _cfg.auto_tune_confidence_max) {
+      _cfg.confidence_threshold = _cfg.auto_tune_confidence_max;
+    }
+    notifyParamChange("confidence_threshold", old_conf, _cfg.confidence_threshold);
+  } else if (_autoTuneState.event_rate_ema < _cfg.auto_tune_notes_per_sec_min) {
+    float old_conf = _cfg.confidence_threshold;
+    _cfg.confidence_threshold -= step * 0.5f;
+    if (_cfg.confidence_threshold < _cfg.auto_tune_confidence_min) {
+      _cfg.confidence_threshold = _cfg.auto_tune_confidence_min;
+    }
+    notifyParamChange("confidence_threshold", old_conf, _cfg.confidence_threshold);
+  }
+
+  // 5. Hold-time optimization (based on note duration/gap EMAs)
+  if (_autoTuneState.note_duration_ema > 0) {
+    int old_hold = _cfg.note_hold_frames;
+
+    // Set hold frames to ~75% of average note duration
+    float target_hold = _autoTuneState.note_duration_ema * 0.75f;
+    int new_hold = (int)(target_hold + 0.5f);
+    if (new_hold < 1) new_hold = 1;
+    if (new_hold > 10) new_hold = 10;
+
+    _cfg.note_hold_frames = new_hold;
+
+    if (old_hold != _cfg.note_hold_frames) {
+      notifyParamChange("note_hold_frames", (float)old_hold, (float)_cfg.note_hold_frames);
+    }
+  }
+
+  if (_autoTuneState.note_gap_ema > 0) {
+    int old_silence = _cfg.silence_frames_off;
+
+    // Set silence frames to ~50% of average gap
+    float target_silence = _autoTuneState.note_gap_ema * 0.5f;
+    int new_silence = (int)(target_silence + 0.5f);
+    if (new_silence < 1) new_silence = 1;
+    if (new_silence > 10) new_silence = 10;
+
+    _cfg.silence_frames_off = new_silence;
+
+    if (old_silence != _cfg.silence_frames_off) {
+      notifyParamChange("silence_frames_off", (float)old_silence, (float)_cfg.silence_frames_off);
+    }
+  }
+
+  // Reset event counter for next window
+  _autoTuneState.note_events_count = 0;
+}
+
+// ---------- Auto-Tuning Methods (Polyphonic) ----------
+
+void SoundToMIDIPoly::updateNoiseFloor(float rms, int num_peaks, const fl::vector<float>& spectrum) {
+  if (!_cfg.auto_tune_enable) return;
+
+  // Update noise floor when no significant peaks detected
+  if (num_peaks == 0) {
+    const float alpha = 0.05f;
+    _autoTuneState.noise_rms_est = _autoTuneState.noise_rms_est * (1.0f - alpha) + rms * alpha;
+
+    // Calculate spectral median for noise mag estimation
+    if (!spectrum.empty()) {
+      fl::vector<float> sorted = spectrum;
+      // Simple bubble sort for median (spectrum is small)
+      for (size_t i = 0; i < sorted.size() - 1; ++i) {
+        for (size_t j = 0; j < sorted.size() - i - 1; ++j) {
+          if (sorted[j] > sorted[j + 1]) {
+            float tmp = sorted[j];
+            sorted[j] = sorted[j + 1];
+            sorted[j + 1] = tmp;
+          }
+        }
+      }
+      float median_mag = sorted[sorted.size() / 2];
+      float median_db = 20.0f * log10f(median_mag + 1e-12f);
+
+      _autoTuneState.noise_mag_db_est = _autoTuneState.noise_mag_db_est * (1.0f - alpha) + median_db * alpha;
+    }
+  }
+}
+
+void SoundToMIDIPoly::updatePeakTracking(int num_peaks) {
+  if (!_cfg.auto_tune_enable) return;
+
+  _autoTuneState.peaks_total += num_peaks;
+  _autoTuneState.peaks_count++;
+}
+
+void SoundToMIDIPoly::updateOctaveStatistics(const fl::vector<int>& notes) {
+  if (!_cfg.auto_tune_enable) return;
+
+  for (int note : notes) {
+    int octave = note / 12;
+    if (octave >= 0 && octave < AutoTuneState::NUM_OCTAVES) {
+      _autoTuneState.octave_detections[octave]++;
+    }
+  }
+}
+
+void SoundToMIDIPoly::notifyParamChange(const char* name, float old_val, float new_val) {
+  if (_autoTuneCallback && fabsf(new_val - old_val) > 1e-6f) {
+    _autoTuneCallback(name, old_val, new_val);
+  }
+}
+
+void SoundToMIDIPoly::autoTuneUpdate() {
+  if (!_cfg.auto_tune_enable || _autoTuneState.in_calibration) return;
+
+  const float smoothing = _cfg.auto_tune_param_smoothing;
+  const float step = _cfg.auto_tune_threshold_step;
+
+  // 1. Adaptive peak threshold based on noise floor
+  float target_peak_db = _autoTuneState.noise_mag_db_est + _cfg.auto_tune_peak_margin_db;
+
+  // Clamp to configured limits
+  if (target_peak_db < _cfg.auto_tune_peak_db_min) target_peak_db = _cfg.auto_tune_peak_db_min;
+  if (target_peak_db > _cfg.auto_tune_peak_db_max) target_peak_db = _cfg.auto_tune_peak_db_max;
+
+  // Smooth update
+  float old_peak = _cfg.peak_threshold_db;
+  _cfg.peak_threshold_db = _cfg.peak_threshold_db * smoothing + target_peak_db * (1.0f - smoothing);
+  notifyParamChange("peak_threshold_db", old_peak, _cfg.peak_threshold_db);
+
+  // 2. Event rate control (peaks per frame)
+  if (_autoTuneState.peaks_count > 0) {
+    float avg_peaks = (float)_autoTuneState.peaks_total / (float)_autoTuneState.peaks_count;
+
+    // Update EMA
+    const float alpha_rate = 0.2f;
+    _autoTuneState.event_rate_ema = _autoTuneState.event_rate_ema * (1.0f - alpha_rate) + avg_peaks * alpha_rate;
+
+    // Adjust peak threshold based on event rate
+    if (_autoTuneState.event_rate_ema > _cfg.auto_tune_peaks_per_frame_max) {
+      float old_db = _cfg.peak_threshold_db;
+      _cfg.peak_threshold_db += step * 2.0f; // Larger step for dB
+      if (_cfg.peak_threshold_db > _cfg.auto_tune_peak_db_max) {
+        _cfg.peak_threshold_db = _cfg.auto_tune_peak_db_max;
+      }
+      notifyParamChange("peak_threshold_db", old_db, _cfg.peak_threshold_db);
+    } else if (_autoTuneState.event_rate_ema < _cfg.auto_tune_peaks_per_frame_min) {
+      float old_db = _cfg.peak_threshold_db;
+      _cfg.peak_threshold_db -= step * 2.0f;
+      if (_cfg.peak_threshold_db < _cfg.auto_tune_peak_db_min) {
+        _cfg.peak_threshold_db = _cfg.auto_tune_peak_db_min;
+      }
+      notifyParamChange("peak_threshold_db", old_db, _cfg.peak_threshold_db);
+    }
+
+    // Reset counters
+    _autoTuneState.peaks_total = 0;
+    _autoTuneState.peaks_count = 0;
+  }
+
+  // 3. Octave mask adjustment (disable noisy octaves)
+  int total_detections = 0;
+  for (int i = 0; i < AutoTuneState::NUM_OCTAVES; ++i) {
+    total_detections += _autoTuneState.octave_detections[i];
+  }
+
+  if (total_detections > 100) { // Need enough data
+    for (int i = 0; i < AutoTuneState::NUM_OCTAVES; ++i) {
+      float ratio = (float)_autoTuneState.octave_detections[i] / (float)total_detections;
+
+      // If an octave has very few detections (<1%) and it's enabled, consider disabling
+      if (ratio < 0.01f && (_cfg.octave_mask & (1 << i))) {
+        // Don't disable automatically - just track as potentially spurious
+        _autoTuneState.octave_spurious[i]++;
+      }
+
+      // Reset detection counts periodically
+      _autoTuneState.octave_detections[i] = 0;
+    }
+  }
+
+  // 4. Harmonic filter adjustment
+  // If event rate is still high after threshold increase, tighten harmonic filtering
+  if (_autoTuneState.event_rate_ema > _cfg.auto_tune_peaks_per_frame_max * 1.2f) {
+    if (_cfg.harmonic_energy_ratio_max > 0.5f) {
+      float old_ratio = _cfg.harmonic_energy_ratio_max;
+      _cfg.harmonic_energy_ratio_max -= 0.05f;
+      if (_cfg.harmonic_energy_ratio_max < 0.5f) _cfg.harmonic_energy_ratio_max = 0.5f;
+      notifyParamChange("harmonic_energy_ratio_max", old_ratio, _cfg.harmonic_energy_ratio_max);
+    }
+  }
+
+  // 5. PCP stabilizer adjustment
+  // Enable PCP if we detect oscillation between pitch classes (heuristic: moderate event rate with variance)
+  // This is a simplified heuristic - full implementation would track pitch class transitions
+  if (!_cfg.pcp_enable && _autoTuneState.event_rate_ema > 3.0f) {
+    // Could enable PCP here, but let's be conservative
+    // _cfg.pcp_enable = true;
+  }
 }
 
 } // namespace fl
