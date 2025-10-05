@@ -299,7 +299,7 @@ function createSlider(element) {
 
   const valueDisplay = document.createElement('span');
   valueDisplay.className = 'slider-value';
-  valueDisplay.textContent = String(element.value);
+  valueDisplay.textContent = Number(element.value).toFixed(3);
 
   overlayDiv.appendChild(labelText);
   overlayDiv.appendChild(valueDisplay);
@@ -307,12 +307,12 @@ function createSlider(element) {
   // Set initial value in next frame to ensure proper initialization
   setTimeout(() => {
     slider.setAttribute('value', String(Number.parseFloat(String(element.value))));
-    valueDisplay.textContent = slider.value;
+    valueDisplay.textContent = Number(slider.value).toFixed(3);
   }, 0);
 
   // Update value display when slider changes
   slider.addEventListener('input', () => {
-    valueDisplay.textContent = slider.value;
+    valueDisplay.textContent = Number(slider.value).toFixed(3);
   });
 
   // Add elements to container
@@ -914,7 +914,7 @@ export class JsonUiManager {
       // Update the value display if it exists
       const valueDisplay = document.getElementById(`${name}_value`);
       if (valueDisplay) {
-        valueDisplay.textContent = String(value);
+        valueDisplay.textContent = Number(value).toFixed(3);
       }
 
       // Trigger change event
@@ -955,9 +955,9 @@ export class JsonUiManager {
           } else if (element.type === 'range') {
             element.value = value;
             // Also update the display value if it exists
-            const valueDisplay = element.parentElement.querySelector('span');
+            const valueDisplay = element.parentElement.querySelector('.slider-value');
             if (valueDisplay) {
-              valueDisplay.textContent = value;
+              valueDisplay.textContent = Number(value).toFixed(3);
             }
           } else if (element.type === 'number') {
             element.value = value;
