@@ -149,7 +149,8 @@ private:
     volatile bool dma_busy_;        ///< Flag indicating DMA transfer in progress
 };
 
-}  // namespace fl
-
 // Include template implementation
+// allow-include-after-namespace
 #include "parlio_driver_impl.h"
+
+}  // namespace fl

@@ -5,8 +5,6 @@
 
 #include "parlio_driver.h"
 
-namespace fl {
-
 template <uint8_t DATA_WIDTH, typename CHIPSET>
 ParlioLedDriver<DATA_WIDTH, CHIPSET>::ParlioLedDriver()
     : config_{}
@@ -267,5 +265,3 @@ bool IRAM_ATTR ParlioLedDriver<DATA_WIDTH, CHIPSET>::parlio_tx_done_callback(
 
     return high_priority_task_awoken == pdTRUE;
 }
-
-}  // namespace fl

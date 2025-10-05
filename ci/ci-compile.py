@@ -165,6 +165,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "If path ends with '/', treated as directory. If has suffix, treated as file. "
         "Use '-o .' to save in current directory with sketch name.",
     )
+    parser.add_argument(
+        "--run",
+        action="store_true",
+        help="For WASM: Run Playwright tests after compilation (default is compile-only)",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)
@@ -752,6 +757,41 @@ def main() -> int:
         boards_names = args.boards.split(",")
     else:
         boards_names = get_default_boards()
+
+    # Handle WASM compilation by delegating to wasm_compile.py
+    if "wasm" in boards_names:
+        if len(boards_names) > 1:
+            print("ERROR: WASM compilation cannot be combined with other boards")
+            return 1
+
+        # Determine which examples to compile
+        if args.positional_examples:
+            examples: List[str] = []
+            for example in args.positional_examples:
+                if example.startswith("examples/"):
+                    example = example[len("examples/") :]
+                examples.append(example)
+        elif args.examples:
+            examples = args.examples.split(",")
+        else:
+            examples = ["wasm"]
+
+        if len(examples) != 1:
+            print(
+                f"ERROR: WASM compilation requires exactly one example, got {len(examples)}: {examples}"
+            )
+            return 1
+
+        # Delegate to wasm_compile.py
+        import subprocess
+
+        example = examples[0]
+        cmd = [sys.executable, "-m", "ci.wasm_compile", f"examples/{example}"]
+        if args.run:
+            cmd.append("--run")
+
+        result = subprocess.run(cmd)
+        return result.returncode
 
     # Get board objects
     boards: List[Board] = []
