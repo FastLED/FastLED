@@ -112,6 +112,11 @@ CRGB blueLeds[NUM_LEDS_PER_STRIP];
     #define PIN_RED   2
     #define PIN_GREEN 3
     #define PIN_BLUE  4
+  #elif defined(CONFIG_IDF_TARGET_ESP32C5)
+    // ESP32-C5: Avoid strapping pins 2, 7, 25, 27, 28, USB pins 13, 14, and flash pins 16-22
+    #define PIN_RED   3
+    #define PIN_GREEN 4
+    #define PIN_BLUE  5
   #else
     // ESP32 classic (WROOM-32, WROVER, etc): Avoid strapping and flash pins
     #define PIN_RED   13

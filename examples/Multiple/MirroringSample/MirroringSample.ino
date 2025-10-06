@@ -44,6 +44,12 @@ CRGB leds[NUM_LEDS_PER_STRIP];
     #define PIN_2  3
     #define PIN_3  4
     #define PIN_4  5
+  #elif defined(CONFIG_IDF_TARGET_ESP32C5)
+    // ESP32-C5: Avoid strapping pins 2, 7, 25, 27, 28, USB pins 13, 14, and flash pins 16-22
+    #define PIN_1  3
+    #define PIN_2  4
+    #define PIN_3  5
+    #define PIN_4  8
   #else
     // ESP32 classic (WROOM-32, WROVER, etc): Avoid strapping and flash pins
     #define PIN_1  13
