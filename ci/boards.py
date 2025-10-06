@@ -743,6 +743,7 @@ DIGIX = Board(
 # ESP8266 boards
 ESP8266 = Board(
     board_name="esp8266",
+    real_board_name="esp01",
     platform="espressif8266",
     framework="arduino",
 )
