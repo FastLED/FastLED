@@ -37,12 +37,12 @@ dependencies = [
     "dirsync>=2.2.6",
     "llvm-installer>=1.4.10",
     "sys-detection>=1.3.4",
-    "fastled>=1.4.38",
     "fasteners>=0.20",
     "esptool>=5.0.2",
     "docker",
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
+    "fastled>=1.4.48",
 ]
 
 [build-system]
