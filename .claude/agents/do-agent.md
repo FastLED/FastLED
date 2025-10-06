@@ -27,6 +27,7 @@ For each iteration (you will do multiple iterations up to the max specified):
 6. **Test**: Run `uv run test.py` for relevant tests
 7. **Fix**: Address any test failures or lint issues that occurred
 8. **Update**: Update the task file with what you did, test results, and what's next
+9. **Report**: Output iteration status summary (see below)
 
 ## Key Rules
 
@@ -35,9 +36,10 @@ For each iteration (you will do multiple iterations up to the max specified):
 - **Run tests after each change** - never batch multiple changes before testing
 - **Follow FastLED standards**: Use `fl::` namespace, proper warning macros, `uv run` for Python
 - **Update the task file after each iteration** with: what you did, test results, next steps
+- **Output iteration status report** after EVERY iteration (required!)
 - **Stop early if task is complete** - don't waste iterations
 - **If stuck for 3 iterations**, document the blocker in the task file and stop
-- **Count iterations explicitly** - track which iteration you're on
+- **Count iterations explicitly** - track which iteration you're on (e.g., "ITERATION 2/5")
 
 ## Task File Format
 
@@ -48,6 +50,66 @@ Expect the task file to have:
 - **Next Steps**: What to do next
 
 If the task file doesn't have this format, adapt and work with what's there.
+
+## Iteration Status Report
+
+**After EACH iteration**, you MUST output a status summary in this format:
+
+```
+═══════════════════════════════════════════════════════════
+ITERATION N STATUS
+═══════════════════════════════════════════════════════════
+
+📋 What I Did This Iteration:
+- [Bullet point list of actions taken]
+- [What files were modified]
+- [What tests were run]
+
+✅ Successes:
+- [What worked]
+- [Tests that passed]
+- [Code quality improvements]
+
+❌ Issues Found:
+- [Test failures, if any]
+- [Lint errors, if any]
+- [Blockers encountered]
+
+🔄 Next Steps:
+- [What needs to be done in next iteration]
+- [OR "Task complete!" if done]
+
+📊 Progress: [N/MAX iterations used] | Status: [ON_TRACK/NEEDS_ATTENTION/BLOCKED]
+═══════════════════════════════════════════════════════════
+```
+
+**Example:**
+```
+═══════════════════════════════════════════════════════════
+ITERATION 1 STATUS
+═══════════════════════════════════════════════════════════
+
+📋 What I Did This Iteration:
+- Modified ci/compiler/compiler.py to add merged_bin_path field to SketchResult
+- Added supports_merged_bin() method to ci/compiler/pio.py
+- Ran lint to verify code quality
+
+✅ Successes:
+- Code changes compile successfully
+- No lint errors
+- Type annotations correct
+
+❌ Issues Found:
+- None
+
+🔄 Next Steps:
+- Implement get_merged_bin_path() method
+- Implement build_with_merged_bin() method
+- Write unit tests
+
+📊 Progress: [1/5 iterations used] | Status: [ON_TRACK]
+═══════════════════════════════════════════════════════════
+```
 
 ## Final Status Report
 
