@@ -265,6 +265,15 @@ jobs:
             fi
           fi
 
+          # Copy build_info.json for addr2line tool path lookup
+          echo "=== Copying build_info.json for backtrace decoding ==="
+          if [ -f "$PIO_BUILD_DIR/build_info.json" ]; then
+            cp "$PIO_BUILD_DIR/build_info.json" qemu-build/
+            echo "✅ Copied build_info.json from build directory"
+          else
+            echo "⚠️  build_info.json not found - will use default addr2line search"
+          fi
+
           # Verify debug-enabled build by checking for Serial output strings in firmware
           echo "=== Build verification: checking for debug strings ==="
           if strings qemu-build/firmware.bin | grep -q "${{ inputs.sketch }} setup starting"; then
@@ -544,12 +553,31 @@ jobs:
               ELF_FILE="trusted/.build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf"
             fi
 
+            # Find build_info.json for addr2line tool path
+            BUILD_INFO_FILE=""
+            if [ -f "trusted/qemu-build/build_info.json" ]; then
+              BUILD_INFO_FILE="trusted/qemu-build/build_info.json"
+            elif [ -f "trusted/.build/pio/${{ inputs.platform }}/build_info.json" ]; then
+              BUILD_INFO_FILE="trusted/.build/pio/${{ inputs.platform }}/build_info.json"
+            fi
+
             if [ -n "$ELF_FILE" ] && [ -f "$ELF_FILE" ]; then
               echo "Using ELF file: $ELF_FILE"
+              if [ -n "$BUILD_INFO_FILE" ]; then
+                echo "Using build_info.json: $BUILD_INFO_FILE"
+              fi
 
-              # Use the Python decode script which handles toolchain detection automatically
+              # Use the Python decode script with build_info.json for toolchain detection
               cd trusted
-              if uv run python ci/decode_esp32_backtrace.py "$ELF_FILE" < ../qemu_output.log; then
+              DECODE_CMD="uv run python ci/decode_esp32_backtrace.py"
+              if [ -n "$BUILD_INFO_FILE" ]; then
+                # Use relative path from trusted directory
+                RELATIVE_BUILD_INFO="${BUILD_INFO_FILE#trusted/}"
+                DECODE_CMD="$DECODE_CMD --build-info $RELATIVE_BUILD_INFO"
+              fi
+              DECODE_CMD="$DECODE_CMD $(basename $ELF_FILE)"
+
+              if $DECODE_CMD < ../qemu_output.log; then
                 echo "✅ Successfully decoded backtrace using Python script"
               else
                 echo "⚠️  Python decode script failed, trying manual decode..."

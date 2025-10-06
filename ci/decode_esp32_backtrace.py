@@ -8,20 +8,71 @@ Decodes ESP32 crash dumps using addr2line. Can process:
 - Stack memory dumps
 
 Usage:
-    python decode_esp32_backtrace.py <elf_file> <addresses...>
+    python decode_esp32_backtrace.py <elf_file> [--build-info <build_info.json>] <addresses...>
 
     Or pipe crash log:
-    cat crash.log | python decode_esp32_backtrace.py <elf_file>
+    cat crash.log | python decode_esp32_backtrace.py <elf_file> [--build-info <build_info.json>]
 
 Example:
     python decode_esp32_backtrace.py .pio/build/dev/firmware.elf 0x42002a3c 0x42001234
+    python decode_esp32_backtrace.py firmware.elf --build-info build_info.json < crash.log
 """
 
+import json
 import re
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, Dict, List, Optional, cast
+
+
+def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
+    """Find addr2line tool from build_info.json.
+
+    Args:
+        build_info_path: Path to build_info.json file
+
+    Returns:
+        Path to addr2line tool or None if not found
+    """
+    try:
+        with open(build_info_path, "r") as f:
+            build_info: Dict[str, Any] = json.load(f)
+
+        # Build info has structure: { "board_name": { "aliases": { "addr2line": "path" } } }
+        # Get the first (and usually only) board entry
+        for board_name, board_data in build_info.items():
+            if not isinstance(board_data, dict):
+                continue
+            if "aliases" not in board_data:
+                continue
+            aliases = cast(Dict[str, Any], board_data["aliases"])
+            if not isinstance(aliases, dict):
+                continue
+            addr2line_path = cast(Optional[str], aliases.get("addr2line"))
+            if addr2line_path and isinstance(addr2line_path, str):
+                path = Path(addr2line_path)
+                if path.exists():
+                    print(
+                        f"Using addr2line from build_info.json: {path}",
+                        file=sys.stderr,
+                    )
+                    return path
+                else:
+                    print(
+                        f"Warning: addr2line path from build_info.json does not exist: {path}",
+                        file=sys.stderr,
+                    )
+
+        print("Warning: No addr2line path found in build_info.json", file=sys.stderr)
+        return None
+
+    except Exception as e:
+        print(
+            f"Warning: Failed to load addr2line from build_info.json: {e}",
+            file=sys.stderr,
+        )
+        return None
 
 
 def find_addr2line() -> Optional[Path]:
@@ -60,12 +111,29 @@ def find_addr2line() -> Optional[Path]:
     return None
 
 
-def decode_addresses(elf_file: Path, addresses: List[str]) -> None:
-    """Decode addresses using addr2line."""
-    addr2line = find_addr2line()
+def decode_addresses(
+    elf_file: Path, addresses: List[str], build_info_path: Optional[Path] = None
+) -> None:
+    """Decode addresses using addr2line.
+
+    Args:
+        elf_file: Path to ELF file
+        addresses: List of addresses to decode
+        build_info_path: Optional path to build_info.json for finding addr2line
+    """
+    # Try build_info.json first if provided
+    addr2line = None
+    if build_info_path:
+        addr2line = find_addr2line_from_build_info(build_info_path)
+
+    # Fall back to default search
+    if not addr2line:
+        addr2line = find_addr2line()
+
     if not addr2line:
         print("Error: Could not find addr2line tool", file=sys.stderr)
         print("Make sure PlatformIO ESP32 toolchain is installed", file=sys.stderr)
+        print("Or provide --build-info with path to build_info.json", file=sys.stderr)
         return
 
     if not elf_file.exists():
@@ -110,8 +178,9 @@ def extract_addresses_from_crash_log(log: str) -> List[str]:
     if ra_match:
         addresses.append(ra_match.group(1))
 
-    # Extract backtrace addresses (0x42xxxxxx pattern for ESP32-C3)
-    backtrace_pattern = r"0x[4][0-9a-fA-F]{7}"
+    # Extract backtrace addresses from ESP32 memory regions:
+    # 0x3C - Flash DROM, 0x3F - DRAM, 0x40 - IRAM, 0x42 - Flash IROM, 0x50 - RTC
+    backtrace_pattern = r"0x(?:3[CF]|4[02]|50)[0-9a-fA-F]{6}"
     backtrace_addrs: List[str] = re.findall(backtrace_pattern, log)
     addresses.extend(backtrace_addrs[:10])  # Limit to first 10 addresses
 
@@ -127,23 +196,35 @@ def extract_addresses_from_crash_log(log: str) -> List[str]:
 
 
 def main():
-    if len(sys.argv) < 2:
-        print(
-            "Usage: decode_esp32_backtrace.py <elf_file> [addresses...]",
-            file=sys.stderr,
-        )
-        print(
-            "   or: cat crash.log | decode_esp32_backtrace.py <elf_file>",
-            file=sys.stderr,
-        )
-        sys.exit(1)
+    import argparse
 
-    elf_file = Path(sys.argv[1])
+    parser = argparse.ArgumentParser(
+        description="Decode ESP32 crash dumps using addr2line",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+    %(prog)s firmware.elf 0x42002a3c 0x42001234
+    %(prog)s firmware.elf --build-info build_info.json 0x42002a3c
+    cat crash.log | %(prog)s firmware.elf --build-info build_info.json
+        """,
+    )
+    parser.add_argument("elf_file", type=Path, help="Path to firmware.elf file")
+    parser.add_argument(
+        "--build-info",
+        type=Path,
+        help="Path to build_info.json for finding addr2line tool",
+    )
+    parser.add_argument(
+        "addresses",
+        nargs="*",
+        help="Addresses to decode (or pipe crash log to stdin)",
+    )
+
+    args = parser.parse_args()
 
     # Check if addresses provided on command line
-    if len(sys.argv) > 2:
-        addresses = sys.argv[2:]
-        decode_addresses(elf_file, addresses)
+    if args.addresses:
+        decode_addresses(args.elf_file, args.addresses, args.build_info)
     else:
         # Read from stdin
         if sys.stdin.isatty():
@@ -162,7 +243,7 @@ def main():
             sys.exit(1)
 
         print(f"Found {len(addresses)} addresses to decode")
-        decode_addresses(elf_file, addresses)
+        decode_addresses(args.elf_file, addresses, args.build_info)
 
 
 if __name__ == "__main__":
