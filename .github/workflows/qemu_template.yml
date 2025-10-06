@@ -547,38 +547,60 @@ jobs:
             if [ -n "$ELF_FILE" ] && [ -f "$ELF_FILE" ]; then
               echo "Using ELF file: $ELF_FILE"
 
-              # Find appropriate addr2line tool
-              ADDR2LINE=""
-              if [ "${{ inputs.platform }}" = "esp32c3" ]; then
-                ADDR2LINE="riscv32-esp-elf-addr2line"
-              elif [ "${{ inputs.platform }}" = "esp32s3" ] || [ "${{ inputs.platform }}" = "esp32dev" ]; then
-                ADDR2LINE="xtensa-esp32-elf-addr2line"
-              fi
-
-              if command -v $ADDR2LINE >/dev/null 2>&1; then
-                # Decode abort() PC addresses
-                grep "abort() was called at PC" qemu_output.log | while read line; do
-                  PC=$(echo "$line" | grep -oP '0x[0-9a-fA-F]+' | head -1)
-                  if [ -n "$PC" ]; then
-                    echo "PC $PC:"
-                    $ADDR2LINE -e "$ELF_FILE" -f -C "$PC" 2>/dev/null || echo "  (failed to decode)"
-                  fi
-                done
-
-                # Decode backtrace addresses if present
-                if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
-                  echo ""
-                  echo "Backtrace symbols:"
-                  grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | grep -oP '0x[0-9a-fA-F]{8}' | while read addr; do
-                    echo "  $addr:"
-                    $ADDR2LINE -e "$ELF_FILE" -f -C "$addr" 2>/dev/null | sed 's/^/    /' || echo "    (failed to decode)"
-                  done
-                fi
+              # Use the Python decode script which handles toolchain detection automatically
+              cd trusted
+              if uv run python ci/decode_esp32_backtrace.py "$ELF_FILE" < ../qemu_output.log; then
+                echo "✅ Successfully decoded backtrace using Python script"
               else
-                echo "⚠️  $ADDR2LINE not found in PATH - cannot decode addresses"
-                echo "Raw backtrace:"
-                grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | head -30
+                echo "⚠️  Python decode script failed, trying manual decode..."
+
+                # Fallback: Find appropriate addr2line tool from PlatformIO packages
+                ADDR2LINE=""
+                if [ "${{ inputs.platform }}" = "esp32c3" ]; then
+                  # Try PlatformIO-installed RISC-V toolchain first
+                  if [ -f "$HOME/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line" ]; then
+                    ADDR2LINE="$HOME/.platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line"
+                  else
+                    ADDR2LINE="riscv32-esp-elf-addr2line"
+                  fi
+                elif [ "${{ inputs.platform }}" = "esp32s3" ] || [ "${{ inputs.platform }}" = "esp32dev" ]; then
+                  # Try PlatformIO-installed Xtensa toolchain first
+                  if [ -f "$HOME/.platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line" ]; then
+                    ADDR2LINE="$HOME/.platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line"
+                  elif [ -f "$HOME/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line" ]; then
+                    ADDR2LINE="$HOME/.platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line"
+                  else
+                    ADDR2LINE="xtensa-esp32-elf-addr2line"
+                  fi
+                fi
+
+                if [ -n "$ADDR2LINE" ] && ([ -f "$ADDR2LINE" ] || command -v $ADDR2LINE >/dev/null 2>&1); then
+                  # Decode abort() PC addresses
+                  grep "abort() was called at PC" ../qemu_output.log | while read line; do
+                    PC=$(echo "$line" | grep -oP '0x[0-9a-fA-F]+' | head -1)
+                    if [ -n "$PC" ]; then
+                      echo "PC $PC:"
+                      $ADDR2LINE -e "$ELF_FILE" -f -C "$PC" 2>/dev/null || echo "  (failed to decode)"
+                    fi
+                  done
+
+                  # Decode backtrace addresses if present
+                  if grep -q -E "(Backtrace|backtrace)" ../qemu_output.log; then
+                    echo ""
+                    echo "Backtrace symbols:"
+                    grep -A 10 -E "(Backtrace|backtrace)" ../qemu_output.log | grep -oP '0x[0-9a-fA-F]{8}' | while read addr; do
+                      echo "  $addr:"
+                      $ADDR2LINE -e "$ELF_FILE" -f -C "$addr" 2>/dev/null | sed 's/^/    /' || echo "    (failed to decode)"
+                    done
+                  fi
+                else
+                  echo "⚠️  addr2line not found - cannot decode addresses"
+                  echo "Toolchain searched: $ADDR2LINE"
+                  echo "Raw backtrace:"
+                  grep -A 10 -E "(Backtrace|backtrace)" ../qemu_output.log | head -30
+                fi
               fi
+              cd ..
             else
               echo "⚠️  ELF file not found - cannot decode addresses"
               if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
