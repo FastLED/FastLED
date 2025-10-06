@@ -100,18 +100,18 @@ jobs:
             exit 1
           fi
 
-          # Check ESP32 magic byte at offset 0x1000 (bootloader location)
-          MAGIC=$(xxd -s 0x1000 -p -l 1 qemu-build/merged.bin)
+          # Check ESP32 application magic byte at offset 0x10000 (application location)
+          MAGIC=$(xxd -s 0x10000 -p -l 1 qemu-build/merged.bin)
           if [ "$MAGIC" = "e9" ]; then
-            echo "✅ Valid ESP32 bootloader magic byte (0xE9) at offset 0x1000"
+            echo "✅ Valid ESP32 application magic byte (0xE9) at offset 0x10000"
           else
-            echo "❌ Invalid magic byte at 0x1000: 0x$MAGIC (expected 0xE9)"
+            echo "❌ Invalid magic byte at 0x10000: 0x$MAGIC (expected 0xE9)"
             exit 1
           fi
 
-          # Show hex dump at bootloader location
-          echo "=== Binary Header at 0x1000 (bootloader location, first 32 bytes) ==="
-          xxd -s 0x1000 -l 32 qemu-build/merged.bin
+          # Show hex dump at application location
+          echo "=== Binary Header at 0x10000 (application location, first 32 bytes) ==="
+          xxd -s 0x10000 -l 32 qemu-build/merged.bin
 
           # MD5 checksum
           echo "=== Binary Checksum ==="
