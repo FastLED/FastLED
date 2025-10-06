@@ -1,0 +1,65 @@
+# Docker build context exclusions
+# Reduces context size and speeds up Docker builds
+
+# Version control
+**/.git
+**/.gitignore
+**/.gitattributes
+
+# Python cache and bytecode
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/*.pyd
+**/.Python
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+# Node.js
+**/node_modules
+**/npm-debug.log
+**/yarn-error.log
+
+# Build artifacts
+**/.build
+**/.pio
+**/build
+**/dist
+**/*.o
+**/*.a
+**/*.so
+**/*.elf
+**/*.bin
+**/*.hex
+
+# IDE and editor files
+**/.vscode
+**/.idea
+**/*.swp
+**/*.swo
+**/~*
+
+# OS files
+**/.DS_Store
+**/Thumbs.db
+**/*.tmp
+
+# Documentation (not needed in Docker builds)
+**/*.md
+!README.md
+
+# Test files and fixtures
+**/test
+**/tests
+**/*_test.py
+**/*_test.cpp
+
+# CI/CD
+**/.github
+**/.gitlab-ci.yml
+**/.travis.yml
+
+# Temporary files
+**/tmp
+**/*.log

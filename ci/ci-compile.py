@@ -86,82 +86,148 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
         # Fallback if hash generation fails
         image_name = f"fastled-platformio-{architecture}-{board_name}"
 
-    # Build Docker image for the platform
-    print(f"Building Docker image for platform: {board_name}")
-    build_cmd = [
-        sys.executable,
-        "ci/build_docker_image_pio.py",
-        "--platform",
-        board_name,
-        "--image-name",
-        image_name,
-    ]
+    # Check if Docker image exists
+    image_check = subprocess.run(
+        ["docker", "image", "inspect", image_name], capture_output=True, text=True
+    )
 
-    # Run build - Docker image name is deterministic from platform
-    result = subprocess.run(build_cmd)
-    if result.returncode != 0:
-        print("Error: Failed to build Docker image")
-        return 1
+    if image_check.returncode != 0:
+        # Image doesn't exist, build it
+        print(f"Building Docker image for platform: {board_name}")
+        build_cmd = [
+            sys.executable,
+            "ci/build_docker_image_pio.py",
+            "--platform",
+            board_name,
+            "--image-name",
+            image_name,
+        ]
+
+        result = subprocess.run(build_cmd)
+        if result.returncode != 0:
+            print("Error: Failed to build Docker image")
+            return 1
+    else:
+        print(f"✓ Using existing Docker image: {image_name}")
 
     # Get absolute path to project root
     project_root = str(Path(__file__).parent.parent.absolute())
 
+    # Container name based on platform (one container per platform)
+    container_name = f"fastled-{board_name}"
+
     print()
-    print(f"Running compilation in Docker container: {image_name}")
+    print(f"Managing Docker container: {container_name}")
+
+    # Check if container exists
+    container_check = subprocess.run(
+        ["docker", "container", "inspect", container_name],
+        capture_output=True,
+        text=True,
+    )
+
+    if container_check.returncode != 0:
+        # Container doesn't exist, create it
+        print(f"Creating new container: {container_name}")
+
+        # Use MSYS_NO_PATHCONV to prevent git-bash from mangling paths on Windows
+        env = os.environ.copy()
+        env["MSYS_NO_PATHCONV"] = "1"
+
+        # Escape paths for git-bash on Windows (use // prefix)
+        mount_target = "//host" if sys.platform == "win32" else "/host"
+
+        create_cmd = [
+            "docker",
+            "create",
+            "--name",
+            container_name,
+            "-v",
+            f"{project_root}:{mount_target}:ro",
+            "--stop-timeout",
+            "300",  # Auto-stop after 5 minutes of inactivity
+            image_name,
+            "tail",
+            "-f",
+            "/dev/null",  # Keep container running
+        ]
+
+        result = subprocess.run(create_cmd, env=env)
+        if result.returncode != 0:
+            print("Error: Failed to create container")
+            return 1
+    else:
+        print(f"✓ Using existing container: {container_name}")
+
+    # Check if container is running and paused
+    container_state = subprocess.run(
+        [
+            "docker",
+            "inspect",
+            "-f",
+            "{{.State.Running}} {{.State.Paused}}",
+            container_name,
+        ],
+        capture_output=True,
+        text=True,
+    )
+
+    state_parts = container_state.stdout.strip().split()
+    is_running = state_parts[0] == "true"
+    is_paused = state_parts[1] == "true" if len(state_parts) > 1 else False
+
+    if not is_running:
+        print(f"Starting container: {container_name}")
+        result = subprocess.run(["docker", "start", container_name])
+        if result.returncode != 0:
+            print("Error: Failed to start container")
+            return 1
+    elif is_paused:
+        print(f"Unpausing container: {container_name}")
+        result = subprocess.run(["docker", "unpause", container_name])
+        if result.returncode != 0:
+            print("Error: Failed to unpause container")
+            return 1
+
+    print()
+    print(f"Running compilation in container: {container_name}")
     print()
 
     # Build command to run inside Docker
-    # Create a minimal platformio.ini and compile directly with pio
-    # This avoids Python dependency issues
+    # Rsync only necessary directories: src/, examples/, ci/ (not .git, .venv, etc.)
     example_name = examples[0] if examples else "Blink"
 
-    # Determine platform based on board
-    board_obj = create_board(board_name, no_project_options=True)
-    platform = board_obj.platform or "atmelavr"
-    framework = board_obj.framework or "arduino"
+    docker_compile_cmd = f"bash compile {board_name} {example_name}"
 
-    docker_compile_cmd = f"""cat > platformio.ini << 'EOINI'
-[platformio]
-
-[env:{board_name}]
-board = {board_name}
-platform = {platform}
-framework = {framework}
-lib_ldf_mode = chain
-lib_archive = true
-lib_deps = FastLED
-EOINI
-mkdir -p src && cp examples/{example_name}/{example_name}.ino src/{example_name}.ino && pio run"""
-
-    # Run compilation in Docker container
-    # Mount host directory at /fastled-mount for rsync
-    # Use MSYS_NO_PATHCONV to prevent git-bash from mangling paths on Windows
-    env = os.environ.copy()
-    env["MSYS_NO_PATHCONV"] = "1"
-
-    # Escape paths for git-bash on Windows (use // prefix)
-    workdir = "//fastled" if sys.platform == "win32" else "/fastled"
-    mount_target = "//fastled-mount" if sys.platform == "win32" else "/fastled-mount"
-
-    docker_cmd = [
+    # Execute command in running container
+    # Ensure FASTLED_DOCKER=1 is set to skip .venv installation
+    exec_cmd = [
         "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{project_root}:{mount_target}:ro",
-        "-w",
-        workdir,
-        image_name,
+        "exec",
+        "-e",
+        "FASTLED_DOCKER=1",
+        container_name,
         "bash",
         "-c",
         docker_compile_cmd,
     ]
 
-    print(f"Docker command: {' '.join(docker_cmd)}")
+    print(f"Executing: {docker_compile_cmd}")
     print()
 
     # Stream output in real-time
-    result = subprocess.run(docker_cmd, env=env)
+    result = subprocess.run(exec_cmd)
+
+    # Pause container immediately after compilation
+    # This keeps the container state but frees resources
+    print()
+    print(f"Pausing container: {container_name}")
+    subprocess.run(
+        ["docker", "pause", container_name],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+    )
+
     return result.returncode
 
 

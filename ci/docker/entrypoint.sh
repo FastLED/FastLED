@@ -4,6 +4,8 @@
 
 set -e
 
+# TODO: Rsync /host/src, /host/examples, /host/ci to /fastled/src, /fastled/examples, /fastled/src, etc..
+
 # Execute the command passed to the container
 "$@"
 EXIT_CODE=$?

@@ -1,15 +1,24 @@
 #!/bin/bash
 # Pre-cache PlatformIO platform dependencies
-# This script runs initial compilation to download and cache:
+# Runs: bash compile <platform> Blink
+# This downloads and caches:
 # - Platform toolchains (e.g., xtensa-esp32-elf-gcc)
 # - Framework files (e.g., Arduino core)
-# - Required libraries (e.g., FastLED)
+# - FastLED library compilation
 
 set -e
 
-# Run PlatformIO compilation to trigger dependency downloads
-# The cache is stored in ~/.platformio/packages and ~/.platformio/platforms
-pio run || {
-    echo "Initial compilation may have warnings, continuing..."
-    exit 0
-}
+cd /fastled
+
+# Check if PLATFORM_NAME is set
+if [ -z "$PLATFORM_NAME" ]; then
+    echo "Error: PLATFORM_NAME not set"
+    exit 1
+fi
+
+echo "Warming up platform cache for: $PLATFORM_NAME"
+
+# Run compile command to cache dependencies
+# This is the same command users will run, ensuring perfect cache hit
+# If compilation fails, the Docker build should fail
+bash compile "$PLATFORM_NAME" Blink

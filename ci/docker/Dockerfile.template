@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # PlatformIO Platform-Specific Image for FastLED
 # This image builds on the base image and pre-caches platform-specific toolchains
 # (e.g., avr-gcc for Arduino Uno, xtensa-esp32-elf-gcc for ESP32, etc.)
@@ -5,47 +7,35 @@
 # Use FastLED PlatformIO base image (contains uv, PlatformIO, and all Python dependencies)
 FROM fastled-platformio:latest
 
-# Copy platformio.ini from build context
-# This file defines the platform, board, and framework configuration
-COPY platformio.ini /fastled/platformio.ini
-
-# FastLED project (with src/, examples/, etc.) is already in the base image at /fastled/
-# Use the existing Blink example to pre-cache platform-specific toolchains
-RUN mkdir -p /fastled/src && \
-    cp /fastled/examples/Blink/Blink.ino /fastled/src/
+# Accept platform name as build argument
+ARG PLATFORM_NAME
+ENV PLATFORM_NAME=${PLATFORM_NAME}
 
 # Copy build script for dependency caching
 # Using a script file makes Docker layer caching more deterministic
 COPY build.sh /tmp/build.sh
 
-# Run initial compilation to cache all platform dependencies
-# This pre-downloads platform toolchains, framework files, and libraries
-# The cache is stored in ~/.platformio/packages and ~/.platformio/platforms
-RUN chmod +x /tmp/build.sh && /tmp/build.sh
+# Run initial compilation to pre-download and BAKE-IN all platform dependencies
+# This downloads platform toolchains, framework files, and libraries INTO THE IMAGE
+# Everything is stored in ~/.platformio/packages and ~/.platformio/platforms
+# These files become part of the Docker image layers (NOT an external cache)
+# Runs: bash compile <platform> Blink to download everything
+RUN chmod +x /tmp/build.sh && \
+    /tmp/build.sh
 
-# Clean up build artifacts but preserve the PlatformIO cache
-RUN rm -rf /fastled/src/Blink.ino \
-           /fastled/.pio/build/*
+# The platform toolchains are now BAKED INTO the image at ~/.platformio
+# /fastled remains pristine with library source downloaded from GitHub
+# At runtime, mount your local FastLED code to update /fastled
 
-# The PlatformIO cache is preserved in ~/.platformio
-# Future compilations will use these cached files
-
-# Keep the /fastled directory with cached compilation
-# It will be updated via rsync at runtime
-
-# Install rsync for syncing files at runtime
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends rsync && \
-    rm -rf /var/lib/apt/lists/*
 
 # Create output directory for compiled binaries
 RUN mkdir -p /fastled/output
 
-# Copy entrypoint script for handling rsync and output directory
+# Copy entrypoint script for handling output directory
 COPY entrypoint.sh /usr/local/bin/fastled-entrypoint.sh
 RUN chmod +x /usr/local/bin/fastled-entrypoint.sh
 
-# Set working directory
+# Set working directory to FastLED root
 WORKDIR /fastled
 
 # Set entrypoint to handle output directory

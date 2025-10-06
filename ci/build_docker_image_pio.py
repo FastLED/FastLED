@@ -238,9 +238,11 @@ def build_base_image(no_cache: bool = False) -> None:
         print(f"Command: {' '.join(cmd)}")
         print()
 
-        # Run docker build
+        # Run docker build with BuildKit enabled for cache mounts
+        env = os.environ.copy()
+        env["DOCKER_BUILDKIT"] = "1"
         try:
-            subprocess.run(cmd, check=True)
+            subprocess.run(cmd, check=True, env=env)
             print()
             print(f"Successfully built base image: {base_image_name}")
             print()
@@ -282,6 +284,9 @@ def build_docker_image(
     if no_cache:
         cmd.append("--no-cache")
 
+    # Add build arguments for platform name (used during dependency caching)
+    cmd.extend(["--build-arg", f"PLATFORM_NAME={platform_name}"])
+
     # Add metadata labels
     cmd.extend(
         [
@@ -300,9 +305,11 @@ def build_docker_image(
     print(f"Command: {' '.join(cmd)}")
     print()
 
-    # Run docker build
+    # Run docker build with BuildKit enabled for cache mounts
+    env = os.environ.copy()
+    env["DOCKER_BUILDKIT"] = "1"
     try:
-        subprocess.run(cmd, check=True)
+        subprocess.run(cmd, check=True, env=env)
         print()
         print(f"Successfully built Docker image: {image_name}")
     except subprocess.CalledProcessError as e:

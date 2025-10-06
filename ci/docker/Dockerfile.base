@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1.7
+
 # FastLED PlatformIO Base Image - Debian Slim Build
 # UV-based build system with glibc for compatibility
 
@@ -16,6 +18,7 @@ RUN apt-get update && \
         curl \
         wget \
         unzip \
+        rsync \
         bash \
     && rm -rf /var/lib/apt/lists/*
 
@@ -40,17 +43,15 @@ RUN wget -q https://github.com/FastLED/FastLED/archive/refs/heads/master.zip -O 
 # Set working directory to FastLED project root
 WORKDIR /fastled
 
-# Create virtual environment and install PlatformIO
-# Note: Install pip explicitly as ESP32 Arduino framework requires it
-RUN uv venv .venv && \
-    uv pip install pip && \
-    uv pip install platformio==6.1.18
+RUN bash install
 
 # Add venv binaries to PATH so 'pio' command is available
 ENV PATH="/fastled/.venv/bin:${PATH}"
 
 # Disable PlatformIO update checks for faster builds
 RUN pio settings set check_platformio_interval 0
+
+RUN platformio update
 
 # Metadata labels
 LABEL maintainer="FastLED Team"

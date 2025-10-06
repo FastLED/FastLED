@@ -49,44 +49,55 @@ uv run python ci/build_docker_image_pio.py --platform uno --no-cache
 
 ### 2. Run Compilation in Container
 
-```bash
-# Basic compilation
-docker run --rm \
-  -v ./src:/fastled/src:ro \
-  -v ./examples:/fastled/examples:ro \
-  fastled-platformio-avr-uno-abc123 \
-  pio run
+The Docker image contains a snapshot of FastLED from GitHub. To compile your local code, rsync your repo and run the same `compile` command:
 
-# With output directory (saves compiled binaries to host)
+```bash
+# The pattern: bash compile <platform> <example> --docker
+# Host command:      bash compile esp32dev Blink --docker
+# Container command: bash compile esp32dev Blink (mirrors host, minus --docker flag)
+
+# Compile with output directory
 docker run --rm \
-  -v ./src:/fastled/src:ro \
-  -v ./examples:/fastled/examples:ro \
+  -v $(pwd):/host:ro \
   -v ./build_output:/fastled/output:rw \
+  fastled-platformio-esp32-esp32dev-abc123 \
+  bash -c "rsync -a /host/ /fastled/ && bash compile esp32dev Blink"
+
+# Compile without output directory (shorter example)
+docker run --rm \
+  -v $(pwd):/host:ro \
   fastled-platformio-avr-uno-abc123 \
-  pio run
+  bash -c "rsync -a /host/ /fastled/ && bash compile uno Blink"
 
 # Interactive shell for debugging
 docker run --rm -it \
-  -v ./src:/fastled/src:ro \
-  -v ./examples:/fastled/examples:ro \
+  -v $(pwd):/host:ro \
   fastled-platformio-avr-uno-abc123 \
-  /bin/bash
+  bash
+# Inside container:
+# rsync -a /host/ /fastled/
+# bash compile uno Blink
 ```
 
 ## Volume Mounts
 
-### Required (Read-Only)
-- `-v ./src:/fastled/src:ro` - FastLED source code
-- `-v ./examples:/fastled/examples:ro` - Arduino sketches
+### Recommended Pattern
+
+- `-v $(pwd):/host:ro` - Mount your FastLED repo as read-only
+  - Use `rsync -a /host/ /fastled/` inside container to update code
+  - Read-only mount keeps host filesystem safe
+  - Rsync handles efficient updates (only changed files)
 
 ### Optional (Read-Write)
 - `-v ./build_output:/fastled/output:rw` - Output directory for compiled binaries
 
-When `/fastled/output` is mounted, the container automatically copies build artifacts after compilation:
+When `/fastled/output` is mounted, the entrypoint automatically copies build artifacts after successful compilation:
 - `*.bin` - Binary files (ESP32, STM32, etc.)
 - `*.hex` - Hex files (AVR platforms)
 - `*.elf` - ELF files (debugging symbols)
 - `*.factory.bin` - Merged binaries for ESP32 (includes bootloader + partitions + app)
+
+**Key Insight:** `/fastled/` inside the container starts with a GitHub snapshot, then gets updated via rsync with your local code. The `compile` script works identically inside and outside the container.
 
 ## Build Modes
 
