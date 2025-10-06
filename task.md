@@ -164,7 +164,7 @@ buffer_size_ = num_leds * 24 * DATA_WIDTH;
    - Update performance characteristics
    - Add WLED-MM insights
 
-4. `examples/Esp32P4Parlio/Esp32P4Parlio.h`
+4. `examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/Esp32P4Parlio.h`
    - Add example demonstrating buffer breaking
    - Test with high LED counts (512×16)
 

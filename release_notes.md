@@ -19,14 +19,14 @@ FastLED 3.10.4
     * Drive 8 or 16 WS28xx LED strips simultaneously with DMA and hardware timing
     * Minimal CPU overhead with automatic timing for WS2812, WS2811, SK6812, etc.
     * Enable by creating `fl::ParlioLedDriver` instance (see example)
-    * Example: [examples/Esp32P4Parlio/](examples/Esp32P4Parlio/)
+    * Example: [examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/](examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/)
     * ESP32-P4 only - uses dedicated parallel I/O peripheral
   * **ESP32-S2/S3 LCD Driver (Beta)**: Production-ready LCD_CAM peripheral driver for parallel LED strips
     * Alternative to I2S driver with Serial.print() debugging support
     * Up to 16 parallel WS28xx strips with automatic chipset timing optimization
     * Enable with `#define FASTLED_ESP32_LCD_DRIVER` before including FastLED.h
     * Same memory efficiency as I2S: 144 KB per 1000 LEDs
-    * Example: [examples/Esp32LcdDriver/](examples/Esp32LcdDriver/)
+    * Example: [examples/SpecialDrivers/ESP/LCD_I80/](examples/SpecialDrivers/ESP/LCD_I80/)
   * **NEW: Fx2dTo1d - Sample 2D Effects into 1D LED Strips**: Reusable component for sampling any Fx2d effect into a 1D strip
     * Generic adapter class that wraps any Fx2d effect and samples it using a ScreenMap
     * Supports two interpolation modes:
@@ -342,7 +342,7 @@ FastLED 3.9.12
 FastLED 3.9.11
 ==============
 * Bug fix for the Teensy and ESP32S3 massive parallel drivers.
-  * Teensy ObjectFLED: Each led strip can now be a different length, see [examples](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino)
+  * Teensy ObjectFLED: Each led strip can now be a different length, see [examples](https://github.com/FastLED/FastLED/blob/master/examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/TeensyMassiveParallel.ino)
   * ESP32 S3 I2S:
     * The FastLED.addLeds(...) style api now works..
       * Please note at this time that all 16 strips must be used. Not sure why this is. If anyone has clarification please reach out.
@@ -390,7 +390,7 @@ FastLED 3.9.9 - I2S For ESP32-S3
     * 12 way parallel, I2S/LCD protocol.
     * https://github.com/hpwit/I2SClockLessLedDriveresp32s3
     * 12
-    * See the Esp32-S3-I2SDemo: https://github.com/FastLED/FastLED/blob/master/examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino
+    * See the Esp32-S3-I2SDemo: https://github.com/FastLED/FastLED/blob/master/examples/SpecialDrivers/ESP/I2S/Esp32S3I2SDemo/Esp32S3I2SDemo.ino
       * Be mindful of the requirements, this driver requires psram to be enabled, which requires platformio or esp-idf to work. Instructions are in the example.
       * There's no standard FastLED.add<....> api for this driver yet... But hopefully soon.
   * RMT Green light being stuck on / Performance issues on the Wroom
@@ -419,7 +419,7 @@ FastLED 3.9.8 - FastLED now supports 27.5k pixels and more, on the Teensy 4.x
     * Teensy 4.0: 40 strips of WS2812 - 22,000 pixels @ 60fps.
   * The Teensy 4.x series is a **absolute** LED driving beast!
   * This driver is async, so you can prepare the next frame while the current frame draws.
-  * Sketch Example: [https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino](https://github.com/FastLED/FastLED/blob/master/examples/TeensyMassiveParallel/TeensyMassiveParallel.ino)
+  * Sketch Example: [https://github.com/FastLED/FastLED/blob/master/examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/TeensyMassiveParallel.ino](https://github.com/FastLED/FastLED/blob/master/examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/TeensyMassiveParallel.ino)
   * It's very simple to turn on:
     * `#define FASTLED_USES_OBJECTFLED`
     * `#include "FastLED.h"` - that's it! No other changes necessary!

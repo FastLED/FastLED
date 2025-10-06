@@ -14,4 +14,4 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/Esp32LcdDriver/Esp32LcdDriver.ino"
+#include "../examples/SpecialDrivers/ESP/LCD_I80/LCD_I80.ino"

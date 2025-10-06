@@ -48,4 +48,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: teensy41 --extra-packages OctoWS2811 --examples OctoWS2811
+      args: teensy41 --extra-packages OctoWS2811 --examples SpecialDrivers/Teensy/OctoWS2811/OctoWS2811

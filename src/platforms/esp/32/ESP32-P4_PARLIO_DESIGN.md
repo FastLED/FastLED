@@ -387,7 +387,7 @@ Based on WLED-MM implementation:
 **Completed**:
 1. ✓ Implemented `ParlioLedDriver` class in `clockless_parlio_esp32p4.h`
 2. ✓ Created `ParlioController` FastLED wrapper
-3. ✓ Added example in `examples/Esp32P4ParlioDriver/`
+3. ✓ Added example in `examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/`
 4. ✓ Supports 8 or 16 parallel channels with template parameterization
 5. ✓ DMA-based transmission with hardware timing
 

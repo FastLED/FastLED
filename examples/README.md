@@ -73,13 +73,17 @@ The repository includes `ci/native/` and `ci/kitchensink/` PlatformIO configs yo
 
 ### Teensy/OctoWS2811
 
-- Examples under `examples/OctoWS2811*` and related Teensy demos show multi-output patterns
+- Examples under `examples/SpecialDrivers/Teensy/OctoWS2811/*` and related Teensy demos show multi-output patterns
 - Replace pin/channel configuration and buffer sizes to match your wiring; ensure you select the correct Teensy model in your IDE/toolchain
 
-### ESP32 / I2S (parallel output)
+### ESP32 Special Drivers (parallel output)
 
-- See `examples/EspI2SDemo/` and `examples/Esp32S3I2SDemo/`
-- These demonstrate high-throughput I2S-driven output; choose a board definition matching your dev board and wiring
+- See `examples/SpecialDrivers/ESP/` for all ESP32 special drivers:
+  - `I2S/` - I2S-based parallel output for ESP32 and ESP32-S3
+  - `LCD_I80/` - LCD I80 peripheral for ESP32-S2/S3
+  - `LCD_RGB/` - LCD RGB peripheral for ESP32-P4
+  - `Parlio/` - Parallel IO driver for ESP32-P4
+- These demonstrate high-throughput hardware-accelerated output; choose a board definition matching your dev board and wiring
 - On some environments, parallel output requires specific pin sets and PSRAM settings; consult the sketch notes
 
 ### WASM (browser demos + JSON UI)
@@ -146,12 +150,12 @@ This list highlights commonly used examples. It is not exhaustive—browse the f
 
 - `Multiple/` — organize multiple arrays/segments
 - `TeensyParallel/` — multi-output example
-- `TeensyMassiveParallel/` — larger multi-output wiring
-- `OctoWS2811/`, `OctoWS2811Demo/` — OctoWS2811 multi-channel output
+- See `SpecialDrivers/` for platform-specific high-performance drivers (ESP, Teensy, Adafruit)
 
 ### ESP/Teensy/SmartMatrix specifics
 
-- `EspI2SDemo/`, `Esp32S3I2SDemo/` — ESP32 parallel/I2S output
+- See `SpecialDrivers/ESP/` for ESP32 parallel drivers (LCD, I2S, Parlio)
+- See `SpecialDrivers/Teensy/` for Teensy parallel drivers (OctoWS2811, ObjectFLED)
 - `SmartMatrix/` — run on SmartMatrix hardware
 
 ### WASM and UI

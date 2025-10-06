@@ -1,32 +1,28 @@
-/// @file Esp32LcdDriver.h
-/// @brief ESP32-S2/S3 LCD parallel driver demo - Ideal FastLED API
+/// @file LCD_RGB.h
+/// @brief ESP32-P4 LCD RGB parallel driver demo
 ///
-/// This example demonstrates the ideal FastLED API for ESP32-S2/S3 parallel output.
-/// By default, this uses the I2S driver. To use the LCD driver instead, define:
-///   #define FASTLED_ESP32_LCD_DRIVER
-/// before including FastLED.h
+/// This example demonstrates the LCD RGB driver for ESP32-P4 parallel output.
 ///
 /// Key features:
-/// - Same FastLED API as any other platform
+/// - Standard FastLED API
 /// - Automatic chipset timing (WS2812, WS2811, SK6812, etc.)
-/// - Driver selection via compile-time define
-/// - Up to 16 parallel strips with rectangular buffer optimization
+/// - RGB LCD peripheral for high-performance parallel output
+/// - Up to 16 parallel strips
 ///
 /// Hardware Requirements:
-/// - ESP32-S2 or ESP32-S3 (both have LCD/I80 peripheral)
+/// - ESP32-P4 (has RGB LCD peripheral)
 /// - PSRAM recommended for >500 LEDs per strip
 /// - Up to 16 WS28xx LED strips
 ///
 /// Notes:
-/// - Define FASTLED_ESP32_LCD_DRIVER to use LCD instead of I2S
-/// - Works on both ESP32-S2 and ESP32-S3 (identical API)
-/// - All strips on same platform share the same bulk driver instance
-/// - Serial output works with LCD driver (not recommended with I2S)
+/// - Uses LCD RGB peripheral (different from I80 interface)
+/// - ESP32-P4 specific
+/// - All strips share the same bulk driver instance
 
 #pragma once
 
-// Use LCD driver instead of I2S (default)
-#define FASTLED_ESP32_LCD_DRIVER
+// Use LCD RGB driver (ESP32-P4 only)
+#define FASTLED_ESP32_LCD_RGB_DRIVER
 
 #include <FastLED.h>
 
@@ -37,11 +33,11 @@
 #define NUM_LEDS 256
 #endif
 
-// GPIO pins for LED strips
-#define PIN1  3
-#define PIN2  45
-#define PIN3  21
-#define PIN4  6
+// GPIO pins for LED strips (P4-specific pins)
+#define PIN1  10
+#define PIN2  11
+#define PIN3  12
+#define PIN4  13
 
 // LED arrays
 CRGB leds1[NUM_LEDS];
@@ -53,21 +49,17 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
 
-    Serial.println("Esp32LcdDriver setup starting");
-
-    Serial.println("FastLED ESP32 LCD Driver Demo");
+    Serial.println("LCD_RGB Driver Demo (ESP32-P4)");
     Serial.println("==============================");
+    Serial.println("Using LCD RGB parallel driver");
 
-    Serial.println("Using LCD driver");
-
-
-    // Standard FastLED API - driver auto-selected based on platform and define
+    // Standard FastLED API - driver auto-selected for ESP32-P4
     FastLED.addLeds<WS2812, PIN1>(leds1, NUM_LEDS);
     FastLED.addLeds<WS2812, PIN2>(leds2, NUM_LEDS);
     FastLED.addLeds<WS2812, PIN3>(leds3, NUM_LEDS);
     FastLED.addLeds<WS2812, PIN4>(leds4, NUM_LEDS);
 
-    Serial.println("\nReady!");
+    Serial.println("Ready!");
 }
 
 void loop() {
@@ -87,7 +79,7 @@ void loop() {
     fill_solid(leds3, NUM_LEDS, CRGB::Black);
     leds3[beatsin16(60, 0, NUM_LEDS-1)] = CRGB::White;
 
-    // Pulse on strip 4 (SK6812)
+    // Pulse on strip 4
     fill_solid(leds4, NUM_LEDS, CHSV(hue + 128, 255, beatsin8(60)));
 
     FastLED.show();

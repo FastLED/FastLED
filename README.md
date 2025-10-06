@@ -294,10 +294,10 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 
 | **Platform** | **Max Parallel Outputs** | **Performance Notes** |
 |--------------|---------------------------|----------------------|
-| **Teensy 4.1** | 50 parallel strips | Current record holder - [Example](examples/TeensyMassiveParallel/TeensyMassiveParallel.ino) |
+| **Teensy 4.1** | 50 parallel strips | Current record holder - [Example](examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/TeensyMassiveParallel.ino) |
 | **Teensy 4.0** | 42 parallel strips | High-performance ARM Cortex-M7 |
-| **ESP32DEV** | 24 via I2S + 8 via RMT | [I2S Example](examples/EspI2SDemo/EspI2SDemo.ino) |
-| **ESP32-S3** | 16 via LCD/I2S + 4 via RMT | [LCD/I80 Example](examples/Esp32S3I80/) (NEW!), [I2S Example](examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino) |
+| **ESP32DEV** | 24 via I2S + 8 via RMT | [I2S Example](examples/SpecialDrivers/ESP/I2S/EspI2SDemo/EspI2SDemo.ino) |
+| **ESP32-S3** | 16 via LCD/I2S + 4 via RMT | [LCD/I80 Example](examples/SpecialDrivers/ESP/LCD_I80/LCD_I80.ino) (NEW!), [I2S Example](examples/SpecialDrivers/ESP/I2S/Esp32S3I2SDemo/Esp32S3I2SDemo.ino) |
 | **ESP32-P4** | 16 via LCD (RGB or I80) + RMT | [See LCD docs](#-esp32-lcd-driver---new-memory-efficient-parallel-output-using-lcd-peripheral-recommended) - Supports both RGB and I80 modes |
 
 *Note: The new **LCD driver** is recommended over I2S for better Serial debugging support and memory efficiency. ESP32-P4 supports both RGB and I80 LCD modes. Some ESP32 Arduino core versions (3.10+) have compatibility issues with I2S. Older versions work better - see [issue #1903](https://github.com/FastLED/FastLED/issues/1903)*
