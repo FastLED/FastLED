@@ -146,7 +146,7 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 #elif CONFIG_IDF_TARGET_ESP32S3
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #elif CONFIG_IDF_TARGET_ESP32C3
-    RMT.tx_lim[mChannelId].tx_lim = 48;
+    RMT.tx_lim[mChannelId].limit = 48;
 #elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #else
