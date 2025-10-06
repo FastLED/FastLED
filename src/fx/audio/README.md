@@ -17,6 +17,10 @@ Both modules are designed for real-time operation on resource-constrained platfo
 
 **Files:** `beat_detector.h`, `beat_detector.cpp`
 
+**Documentation:**
+- **[Beat Detection API](beat_detection.md)** - Complete API reference, configuration guide, and usage examples
+- **[Research & Design Decisions](BEAT_DETECTION_DECISIONS.md)** - Detailed research analysis, algorithm choices, and implementation rationale
+
 ### What is it?
 
 The Beat Detector is a complete real-time beat detection and tempo tracking system optimized for Electronic Dance Music (EDM). It analyzes incoming audio and detects when beats occur, estimates the tempo (BPM), and provides callbacks for onset and beat events.
@@ -259,6 +263,10 @@ Based on academic research in onset detection and beat tracking:
 - Ellis (2007) - Dynamic Programming Beat Tracker
 - Masri (1996) - High-Frequency Content Method
 - Subramani et al. (2018) - Energy-Weighted Multi-Band Novelty Functions
+
+For complete research analysis and implementation decisions, see **[BEAT_DETECTION_DECISIONS.md](BEAT_DETECTION_DECISIONS.md)**.
+
+For detailed API reference and configuration options, see **[beat_detection.md](beat_detection.md)**.
 
 ### Example
 

@@ -2,6 +2,7 @@
     ---------------------------------------------------------
     Implements onset detection and beat tracking algorithms optimized
     for Electronic Dance Music (EDM) on embedded platforms (ESP32).
+    Includes particle filter support for live DJ tempo tracking.
 
     Based on research from "Real-Time Onset Detection & Beat Tracking
     Algorithms for EDM and Embedded Systems" - implements SuperFlux-based
@@ -52,6 +53,7 @@
 #include "fl/vector.h"
 #include "fl/algorithm.h"
 #include "fl/math.h"
+#include "polymetric_analyzer.h"
 
 namespace fl {
 
@@ -77,9 +79,10 @@ enum class PeakPickingMode : uint8_t {
 /// @brief Tempo tracking algorithm
 enum class TempoTrackerType : uint8_t {
     None = 0,           ///< No tempo tracking, onset detection only
-    CombFilter,         ///< Comb filter with autocorrelation (recommended for EDM)
+    CombFilter,         ///< Comb filter with autocorrelation (recommended for constant-tempo EDM)
     Autocorrelation,    ///< Simple autocorrelation of ODF
-    DynamicProgramming  ///< DP-based beat tracking (higher latency, handles tempo changes)
+    DynamicProgramming, ///< DP-based beat tracking (higher latency, handles tempo changes)
+    ParticleFilter      ///< Particle filter (recommended for live DJ sets with tempo changes)
 };
 
 // ---------- Configuration Structures ----------
@@ -119,10 +122,17 @@ struct BeatDetectorConfig {
 
     // Tempo Tracking
     TempoTrackerType tempo_tracker = TempoTrackerType::CombFilter;  ///< Tempo tracking algorithm
-    float tempo_min_bpm = 100.0f;       ///< Minimum tempo in BPM (EDM: 100-140)
-    float tempo_max_bpm = 150.0f;       ///< Maximum tempo in BPM (EDM: 100-140)
+    float tempo_min_bpm = 100.0f;       ///< Minimum tempo in BPM (EDM: 100-140, DJ: 90-180)
+    float tempo_max_bpm = 150.0f;       ///< Maximum tempo in BPM (EDM: 100-140, DJ: 90-180)
     float tempo_rayleigh_sigma = 120.0f;///< Rayleigh prior center (BPM, typical human tempo)
     int tempo_acf_window_sec = 4;       ///< Autocorrelation window for tempo estimation (seconds)
+
+    // Particle Filter (for live DJ sets with tempo changes)
+    int pf_num_particles = 200;         ///< Number of particles (32-256, higher = more CPU, default 200)
+    float pf_tempo_std_dev = 2.0f;      ///< Tempo drift std dev (BPM/sec, higher = faster adaptation)
+    float pf_phase_std_dev = 0.02f;     ///< Phase drift std dev (0.01-0.05)
+    float pf_resample_threshold = 0.5f; ///< Resample when N_eff < threshold * N (0.3-0.7)
+    bool pf_use_fixed_point = false;    ///< TODO: Convert to fixed-point arithmetic
 
     // Adaptive Whitening (improves polyphonic detection)
     bool adaptive_whitening = false;    ///< Enable adaptive spectral whitening
@@ -131,6 +141,9 @@ struct BeatDetectorConfig {
     // Optimization
     bool use_fixed_point = false;       ///< Use fixed-point arithmetic (faster, less precise)
     int fft_size = 512;                 ///< FFT size (must be power of 2, >= frame_size)
+
+    // Polymetric Analysis
+    PolymetricConfig polymetric;        ///< Polymetric rhythm analysis configuration
 
     // Constructor with EDM-optimized defaults
     BeatDetectorConfig() {
@@ -168,6 +181,14 @@ struct TempoEstimate {
 
 // ---------- Onset Detection Function (ODF) Processor ----------
 
+/// @brief Multi-band onset detection result
+struct MultiBandOnset {
+    float bass = 0.0f;   ///< Bass band onset strength
+    float mid = 0.0f;    ///< Mid band onset strength
+    float high = 0.0f;   ///< High band onset strength
+    float combined = 0.0f; ///< Combined weighted onset strength
+};
+
 /// @brief Low-level onset detection function computation
 /// @details Computes novelty curves from audio/spectral data
 class OnsetDetectionProcessor {
@@ -197,6 +218,10 @@ public:
     /// @brief Update configuration
     void setConfig(const BeatDetectorConfig& cfg);
 
+    /// @brief Get last multi-band onset detection values
+    /// @return Multi-band onset structure with bass/mid/high values
+    MultiBandOnset getLastMultiBandOnset() const { return _lastMultiBandOnset; }
+
 private:
     BeatDetectorConfig _cfg;
 
@@ -212,6 +237,9 @@ private:
 
     // Previous energy for time-domain ODF
     float _lastEnergy;
+
+    // Last multi-band onset detection result
+    MultiBandOnset _lastMultiBandOnset;
 
     // Internal methods
     float computeSpectralFlux(const float* mag, int size);
@@ -334,7 +362,18 @@ private:
     // Comb filter state
     float _combFilter[MAX_ACF_LAG];
 
-    // Internal methods
+    // Particle filter state
+    struct Particle {
+        float tempo_bpm;    ///< Tempo estimate in BPM
+        float phase;        ///< Beat phase [0.0-1.0]
+        float weight;       ///< Particle weight (normalized)
+    };
+    static constexpr int MAX_PARTICLES = 256;
+    Particle _particles[MAX_PARTICLES];
+    int _numParticles;
+    float _pfLastUpdateTime;
+
+    // Internal methods (autocorrelation/comb filter)
     void updateTempoEstimate();
     void computeAutocorrelation(float* acf, int max_lag);
     void applyCombFilter(float* acf, int max_lag);
@@ -343,6 +382,14 @@ private:
     int bpmToLag(float bpm) const;
     float lagToBPM(int lag) const;
     int bpmToSamples(float bpm) const;
+
+    // Particle filter methods
+    void initializeParticles();
+    void predictParticles(float dt_sec);
+    void weightParticles(float odf_value);
+    void resampleParticles();
+    float computeEffectiveParticles() const;
+    void updateParticleEstimate();
 };
 
 // ---------- Main Beat Detector ----------
@@ -370,6 +417,36 @@ public:
     /// @param bpm New tempo in BPM
     /// @param confidence Confidence in tempo estimate (0.0-1.0)
     function<void(float bpm, float confidence)> onTempoChange;
+
+    /// @brief Callback invoked when a bass-band onset is detected
+    /// @param confidence Onset confidence (0.0-1.0+)
+    /// @param timestamp_ms Timestamp in milliseconds
+    function<void(float confidence, float timestamp_ms)> onOnsetBass;
+
+    /// @brief Callback invoked when a mid-band onset is detected
+    /// @param confidence Onset confidence (0.0-1.0+)
+    /// @param timestamp_ms Timestamp in milliseconds
+    function<void(float confidence, float timestamp_ms)> onOnsetMid;
+
+    /// @brief Callback invoked when a high-band onset is detected
+    /// @param confidence Onset confidence (0.0-1.0+)
+    /// @param timestamp_ms Timestamp in milliseconds
+    function<void(float confidence, float timestamp_ms)> onOnsetHigh;
+
+    /// @brief Callback invoked on polymetric beat
+    /// @param phase4_4 Phase in 4/4 meter (0.0-1.0)
+    /// @param phase7_8 Phase in overlay meter (0.0-1.0)
+    function<void(float phase4_4, float phase7_8)> onPolymetricBeat;
+
+    /// @brief Callback invoked on subdivision events
+    /// @param subdivision Subdivision type
+    /// @param swing_offset Swing offset value
+    function<void(SubdivisionType subdivision, float swing_offset)> onSubdivision;
+
+    /// @brief Callback invoked on fill detection
+    /// @param starting True if fill is starting, false if ending
+    /// @param density Fill density (0.0-1.0)
+    function<void(bool starting, float density)> onFill;
 
     /// @brief Process an audio frame
     /// @param frame Audio samples (normalized float, -1.0 to +1.0)
@@ -412,6 +489,18 @@ public:
     /// @brief Get total number of beats detected
     uint32_t getBeatCount() const { return _beatCount; }
 
+    /// @brief Get current 4/4 phase (0.0-1.0)
+    /// @return Phase within 4/4 bar
+    float getPhase4_4() const;
+
+    /// @brief Get current 7/8 overlay phase (0.0-1.0)
+    /// @return Phase within overlay cycle
+    float getPhase7_8() const;
+
+    /// @brief Get current 16th note phase (0.0-1.0)
+    /// @return Phase within 16th note subdivision
+    float getPhase16th() const;
+
 private:
     BeatDetectorConfig _cfg;
 
@@ -419,6 +508,12 @@ private:
     OnsetDetectionProcessor _odfProcessor;
     PeakPicker _peakPicker;
     TempoTracker _tempoTracker;
+    PolymetricAnalyzer _polymetricAnalyzer;
+
+    // Per-band peak pickers (for multi-band onset callbacks)
+    PeakPicker _peakPickerBass;
+    PeakPicker _peakPickerMid;
+    PeakPicker _peakPickerHigh;
 
     // State tracking
     uint32_t _frameCount;
@@ -429,6 +524,7 @@ private:
 
     // Internal methods
     float getTimestampMs() const;
+    void processMultiBandOnsets(float timestamp_ms);
 };
 
 // ---------- Utility Functions ----------

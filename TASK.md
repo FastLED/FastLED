@@ -1,186 +1,546 @@
-Auto‑Tuning Extension for FastLED Sound_to_MIDI
-1 Introduction and problem statement
+# CURRENT TASK: Fix BeatDetection WASM Compilation
+
+## Problem
+The `examples/BeatDetection/BeatDetection.ino` example fails to compile to WASM because the cached libfastled library doesn't include the latest `beat_detector.h` changes (ParticleFilter support).
+
+**Compilation Errors:**
+```
+error: no member named 'ParticleFilter' in 'fl::TempoTrackerType'
+error: no member named 'pf_num_particles' in 'fl::BeatDetectorConfig'
+error: no member named 'pf_tempo_std_dev' in 'fl::BeatDetectorConfig'
+error: no member named 'pf_phase_std_dev' in 'fl::BeatDetectorConfig'
+error: no member named 'pf_resample_threshold' in 'fl::BeatDetectorConfig'
+```
+
+**Root Cause:**
+The WASM compilation server uses a cached precompiled header and library (`/build/quick/libfastled.a`, `/build/quick/fastled_pch.h`) that was built before ParticleFilter was added to `beat_detector.h`.
+
+The server output shows:
+- "Skipping library recompilation - only asset files changed"
+- The library was compiled with old headers
 
-FastLED's sound_to_midi module converts short audio frames into MIDI Note On/Off events in either a monophonic mode (using a YIN/MPM style autocorrelation detector) or a polyphonic mode (spectral‐peak detection with harmonic filtering). Both paths expose configurable thresholds, smoothing options and hold‑times via the SoundToMIDI configuration structure. In practice, users report that the default settings either let through many spurious MIDI events when the ambient noise is high or miss notes when the signal is quiet. Manual tuning—adjusting RMS gates, confidence thresholds, peak thresholds and smoothing parameters—helps but is time‑consuming and brittle; the optimal settings vary with environment, instrument and sample rate. The goal of this work is to design an automatic tuning mechanism that continuously adapts detection thresholds and filters as audio is processed, reducing false triggers while maintaining responsiveness and low latency.
+**Evidence:**
+- `src/fx/audio/beat_detector.h` line 85: `ParticleFilter` enum value EXISTS
+- `src/fx/audio/beat_detector.h` lines 131-135: All `pf_*` config fields EXIST
+- `examples/BeatDetection/BeatDetection.ino` lines 117, 124-127: Code correctly uses these features
+- WASM compilation uses cached library that predates these changes
+
+## Required Solution
+Force rebuild the WASM libfastled library to include the latest beat_detector.h changes. Options to investigate:
+
+1. **Stop and restart the local WASM compilation server** to force cache invalidation
+2. **Find the Docker container** running the server and restart it
+3. **Purge the Docker build cache** for the WASM compilation environment
+4. **Force library recompilation** through fled options (--force-compile didn't work, need different approach)
+
+## Success Criteria
+```bash
+fled examples/BeatDetection --just-compile
+```
+Should compile successfully with ParticleFilter features.
+
+## Notes
+- The example compiles successfully when changed to use `CombFilter` instead (verified)
+- This confirms the issue is only the cached library, not the source code
+- The local server was at http://localhost:9021 but failed to start properly
+- Fell back to https://fastled.onrender.com which also has old cache
 
-2 Goals and non‑goals
+---
 
-Goals
+# BACKGROUND: FastLED Task Specification: Polymetric Beat Detection & Particle Visualization
 
-Reduce false MIDI events and jitter by automatically adjusting pitch‑detection parameters based on real‑time measurements.
+## Executive Summary
 
-Retain FastLED's ability to run on low‑resource microcontrollers (ESP32, SAMD), with minimal additional CPU and memory overhead.
+Extend the existing **BeatDetector** system with polymetric rhythm analysis (N/M overlay support) and create a particle-based LED visualization engine. Generic algorithm with profile presets for different musical styles (Tipper, Aphex Twin, etc.).
 
-Maintain backward compatibility: existing applications should work without modification when auto‑tuning is disabled.
+**Status:** COMPLETE - All phases implemented, tested, and refactored ✅
 
-Provide API hooks for users to monitor and tweak auto‑tuning behaviour (e.g. set limits or turn on logging).
+## Phase 3 Summary + Refactoring
 
-Non‑goals
+Phase 3 has been successfully completed with the following achievements:
 
-Introducing heavy DSP or machine‑learning algorithms that exceed embedded resource budgets.
+1. **PolymetricBeats Fx Class**: Created high-level Fx2d effect class that integrates all components:
+   - Inherits from Fx2d following FastLED patterns
+   - Owns BeatDetector and RhythmParticles instances
+   - **Generic algorithm** supporting arbitrary N/M overlays
+   - Provides simple, user-friendly API
 
-Changing the underlying pitch‑detection algorithms (YIN/MPM or spectral peak); we adapt the thresholds, not the core detection logic.
+2. **Complete Callback Wiring**: Automatic routing of all events:
+   - Beat detector onset callbacks → Particle emitters
+   - Polymetric beat events → Particle system
+   - Subdivision events → Particle micro-timing
+   - Fill detection → Overlay particle bursts
 
-Persisting per‑instrument calibration across sessions—auto‑tuning is session‑based.
+3. **Audio Processing Integration**:
+   - `processAudio()` method feeds frames to BeatDetector
+   - Automatic FFT and onset detection
+   - Real-time particle emission based on rhythmic events
 
-3 Overview of tunable parameters
+4. **Rendering Pipeline**:
+   - `draw()` method handles animation loop
+   - Configurable background fade for trailing effects
+   - Optional clear-on-beat for impact effects
+   - Automatic particle physics updates and LED rendering
 
-The existing SoundToMIDI struct defines numerous knobs:
+5. **Configuration Management**:
+   - Unified PolymetricBeatsConfig structure
+   - Runtime reconfiguration support
+   - Access to all underlying components
+   - **Profile system**: `PolymetricProfiles::Tipper()` for preset configurations
 
-Monophonic detection:
+6. **Comprehensive Testing**: 11 integration tests validating end-to-end functionality
 
-confidence_threshold (0–1) – minimum pitch confidence.
+**Refactoring (Post-Phase 3):**
+- Renamed `TipperBeats` → `PolymetricBeats` (generic algorithm name)
+- Extracted Tipper-specific config as `PolymetricProfiles::Tipper()` preset
+- Emphasized generic polymetric capabilities in documentation
+- All components now clearly separated: Algorithm (generic) vs Profile (style-specific)
 
-note_hold_frames – number of consecutive frames before a note on is emitted.
+**Completed Files:**
+- `src/fx/2d/polymetric_beats.h` - PolymetricBeats Fx class with generic API + profile presets
+- `src/fx/2d/polymetric_beats.cpp` - Integration implementation with callback wiring
+- `tests/test_polymetric_beats.cpp` - 11 integration tests
 
-silence_frames_off – consecutive silent frames before note off.
+**Status**: All three phases complete + refactored! Ready for Phase 4 (Example & Documentation).
 
-rms_gate – RMS amplitude threshold below which a frame is considered silent.
+📝 **Cleanup Guide**: See **`CLEAN.md`** for comprehensive documentation of:
+- All 10 new files and 2 modified files
+- Technical debt items with exact locations
+- Performance optimization opportunities (prioritized)
+- Refactoring suggestions
+- API stability guarantees
+- Breaking changes to avoid
 
-note_change_semitone_threshold, note_change_hold_frames and median_filter_size – parameters to filter out small pitch jitters.
+## Phase 2 Summary
 
-Polyphonic detection:
+Phase 2 has been successfully completed with the following achievements:
 
-window_type, spectral_tilt_db_per_decade and smoothing_mode – spectral conditioning options.
+1. **Structure-of-Arrays (SoA) Particle Pool**: Implemented cache-efficient particle storage with separate arrays for position, velocity, color (HSV), and lifetime data
 
-peak_threshold_db – magnitude threshold (in dB) for spectral peaks.
+2. **Multi-Emitter System**: Created four specialized emitters responding to different rhythmic events:
+   - Kick emitter (bass onsets) - orange/red particles with high velocity
+   - Snare emitter (mid onsets) - cyan particles with medium velocity
+   - Hi-hat emitter (high onsets) - yellow particles with low velocity
+   - Overlay emitter (polymetric/fill events) - purple particles
 
-parabolic_interp – sub‑bin interpolation toggle.
+3. **Physics Engine**: Implemented complete particle dynamics:
+   - Radial gravity (attraction/repulsion from center)
+   - Curl noise flow field using FastLED's inoise16_raw for smooth particle motion
+   - Velocity decay for natural damping
+   - Boundary wrapping for continuous motion
 
-harmonic_filter_enable, harmonic_tolerance_cents, harmonic_energy_ratio_max – parameters for harmonic suppression.
+4. **Kick Ducking Effect**: Added dynamic brightness reduction on kick hits to simulate sidechaining (configurable amount and duration)
 
-octave_mask – bitmask enabling or disabling detection in specific octaves.
+5. **LED Rendering**: Complete rendering pipeline with:
+   - 2D→1D LED mapping
+   - HSV→RGB conversion with hue variance per emitter
+   - Additive blending for particle accumulation
+   - Optional bloom effect for bright particles
 
-pcp_enable, pcp_history_frames, pcp_bias_weight – pitch‑class profile stabiliser settings.
+6. **Lifecycle Management**: Automatic particle birth/death with fade-out based on remaining lifetime
 
-These parameters are currently set once at startup. The auto‑tuning extension will adjust them dynamically.
+7. **Comprehensive Testing**: 15 unit tests covering initialization, emission, physics, rendering, and configuration
 
-4 Conceptual approach
+**Next Steps**: Phase 3 will create the high-level Fx class that integrates BeatDetector and RhythmParticles.
 
-The auto‑tuning system treats the pitch‑detection engine as a feedback‑controlled process. It measures the noise floor, pitch confidence, spectral occupancy and event rate from recent frames, then uses heuristics to adjust thresholds, smoothing and gating parameters. Key components include:
+## Phase 1 Summary
 
-Noise floor estimator – computes an exponential moving average (EMA) of RMS amplitudes and spectral magnitudes when the engine believes there is no note present. It tracks slow changes in ambient noise.
+Phase 1 has been successfully completed with the following achievements:
 
-Adaptive gates – sets the rms_gate and peak_threshold_db relative to the estimated noise floor. For example, the RMS gate becomes noise_rms × k_rms and the peak threshold becomes noise_mag_db + k_peak, where k_rms and k_peak are tunable margins.
+1. **Per-band Onset Detection**: Extended BeatDetector to expose bass, mid, and high-frequency band onsets separately via dedicated callbacks (`onOnsetBass`, `onOnsetMid`, `onOnsetHigh`)
 
-Confidence tracker – monitors the distribution of detection confidences (for monophonic) or the number of peaks surviving filtering (for polyphonic). If too many low‑confidence detections occur, the confidence_threshold or peak_threshold_db is increased slightly; if genuine notes are missed, the thresholds are lowered.
+2. **Polymetric Analysis**: Created new `PolymetricAnalyzer` class that tracks:
+   - 4/4 base meter phase (0.0-1.0)
+   - 7/8 overlay phase that drifts against the base meter
+   - 16th note subdivisions
+   - Swing/humanize micro-timing offsets
+   - Fill detection based on polymetric tension
 
-Hold‑time optimiser – adjusts note_hold_frames and silence_frames_off according to observed note durations and inter‑note gaps. It uses running histograms of durations to choose hold lengths that are long enough to suppress noise bursts but short enough to preserve responsiveness.
+3. **Callbacks Integration**: Added new callbacks to BeatDetector:
+   - `onPolymetricBeat(phase4_4, phase7_8)` - Fires on each beat with both phase values
+   - `onSubdivision(type, swing_offset)` - Fires on subdivision boundaries (16ths, triplets, etc.)
+   - `onFill(starting, density)` - Fires when fill sections are detected
 
-Jitter monitor – evaluates variability in consecutive pitch estimates. High jitter suggests noise or unstable detection; the system can widen the median filter (median_filter_size) or increase note_change_hold_frames to smooth the output. Low jitter permits narrower filters to reduce latency.
+4. **Phase Accessors**: Added public methods to query current phases:
+   - `getPhase4_4()` - Current 4/4 bar phase
+   - `getPhase7_8()` - Current overlay cycle phase
+   - `getPhase16th()` - Current 16th note phase
 
-Octave and harmonic adjuster (polyphonic) – maintains statistics about which octaves and harmonics are frequently triggered. If spurious notes cluster in certain octaves or are likely overtones, the system tightens the harmonic filter (reducing harmonic_energy_ratio_max or increasing harmonic_tolerance_cents) or disables those octaves via octave_mask. Conversely, if legitimate notes appear in a previously disabled octave, the mask can be re‑enabled.
+5. **Testing**: Comprehensive unit tests validate all polymetric functionality
 
-These adjustments operate on a sliding window (e.g. the last 0.5–1 second of audio) and update parameters smoothly to avoid oscillations.
+**Next Steps**: Phase 2 will implement the particle system that responds to these rhythmic events.
 
-5 Detailed algorithm
-5.1 Noise floor estimation
+## Background & Context
 
-Maintain two EMAs: one for RMS amplitude (noise_rms_est) and one for spectral median dB (noise_mag_db_est). Update them only when no note is currently sounding (monophonic) or when the number of detected peaks is below a minimal threshold (polyphonic). Use a long time constant (e.g. 0.5 s) to track room noise but ignore transient signals.
+### Related Systems (VALIDATED)
 
-5.2 Adaptive thresholds
+- ✅ **Existing:** `src/fx/audio/beat_detector.{h,cpp}` - SuperFlux onset detection + tempo tracking
+  - Already implements: SuperFlux, multi-band onset detection, adaptive whitening, comb filter tempo tracking
+  - Already has callbacks: `onOnset(confidence, timestamp_ms)`, `onBeat(confidence, bpm, timestamp_ms)`
 
-RMS gate (rms_gate): Set to max(default_rms_gate, noise_rms_est × k_rms). A typical margin k_rms is 1.5–2.0. This prevents the gate from dropping too low in very quiet environments (avoiding false triggers) and from rising too high (missing quiet notes).
+- ✅ **Existing:** `src/fx/audio/sound_to_midi.{h,cpp}` - Multi-band spectral analysis
+
+- ✅ **Existing:** `examples/BeatDetection/BeatDetection.ino` - Current beat visualization with UISlider controls
+
+- ✅ **Existing UI System:** `src/fl/ui.h` - UISlider, UINumberField, UICheckbox, UIGroup, UIAudio
+
+### Musical Context
+
+Tipper's production style features:
+- 4/4 foundation with polymetric 7/8 overlay patterns
+- Micro-timed swing (triplets, quintuplets)
+- Multi-band onset complexity (kick, snare, hi-hats operate independently)
+- "Broken 4/4" with syncopated fills and humanized timing
+
+## Requirements
 
-Peak threshold (peak_threshold_db): In polyphonic mode, compute the median (or mean) of the magnitude spectrum for each frame, convert to dB and track an EMA. Set the peak threshold to noise_mag_db_est + margin_db. A margin of 6–10 dB above the noise floor is a good starting point. Optionally adapt margin_db up or down based on the current event rate (Section 5.5).
-
-5.3 Confidence and jitter adjustments
-
-Confidence threshold (monophonic): Maintain an EMA of detected pitch confidences for note onsets. If the average confidence of recent note‐on events is below the current confidence_threshold minus a safety margin, raise confidence_threshold by a small step (e.g. +0.02) to reject spurious detections. If several frames pass with no note despite a moderately strong RMS, lower the threshold (e.g. −0.02) to avoid missing valid notes. Clamp within [0.6, 0.95] to avoid extremes.
-
-Note change filter: Monitor the semitone difference between consecutive pitch estimates. If frequent ±1‑semitone fluctuations occur, increase note_change_semitone_threshold (to 2) or note_change_hold_frames (to 4–5). Conversely, if the detector lags behind legitimate pitch changes, reduce these values.
-
-Median filter: Compute the median absolute deviation (MAD) of pitch estimates. If the MAD is high, enlarge the median_filter_size to 3 or 5; if low, reduce it to 1 to minimise latency.
-
-5.4 Hold‑time optimisation
-
-Track histograms of note durations (from note on to note off) and inter‑note gaps. Compute the median of each distribution. Set note_hold_frames slightly below the median note duration (e.g. 75th percentile of durations divided by frame hop) to ensure a note is recognised quickly. Set silence_frames_off slightly below the median gap duration. When the environment is noisy, increase both hold times modestly to avoid fluttering; when stable, decrease them for responsiveness.
-
-5.5 Event rate control
-
-Maintain a counter of note‑on events per second (monophonic) or peak detections per frame (polyphonic). Define target ranges—e.g. 1–10 notes per second for monophonic, 1–5 peaks per frame for polyphonic. If the rate exceeds the upper bound, increment peak_threshold_db and/or confidence_threshold gradually. If the rate falls below the lower bound and RMS suggests there should be notes, decrement those thresholds. This provides a high‑level feedback loop stabilising the number of events.
-
-5.6 Harmonic and octave control (polyphonic)
-
-Maintain counts of detected notes per octave. If an octave consistently produces spurious detections (e.g. low rumble or hiss), increase harmonic_energy_ratio_max from 0.7 to 0.5, or increase harmonic_tolerance_cents to 50–60 cents to allow more aggressive grouping; if it remains noisy, clear the corresponding bit in octave_mask. Conversely, if an octave has been disabled but the EMA of RMS energy in that frequency band rises significantly, re‑enable it.
-
-Monitor the ratio of fundamental to overtone energy. If harmonic peaks regularly exceed this ratio, temporarily disable harmonic filtering (harmonic_filter_enable=false) to prevent legitimate notes from being removed; re‑enable once the detection stabilises.
-
-5.7 PCP stabiliser tuning (polyphonic)
-
-Measure the distribution of recently detected pitch classes. If the engine frequently oscillates between two pitch classes within the same octave, enable the PCP stabiliser (pcp_enable=true) and gradually increase pcp_bias_weight to up‑weight the persistent classes. If the pitch class distribution is stable, decrease pcp_bias_weight or disable PCP to reduce bias against novel notes.
-
-5.8 Update schedule and smoothing
-
-To avoid audible oscillation of parameters, update all adaptation variables at a fixed, moderate rate (e.g. 5–10 Hz). Each update applies an incremental change capped by a maximum delta per second (for thresholds and gates) to ensure smooth transitions. Use first‑order low‑pass filtering to blend new parameter values with the previous ones, preserving continuity.
-
-6 Implementation
-6.1 Data structures
-
-Extend SoundToMIDI and the internal SoundToMIDIEngine with the following fields:
-
-bool auto_tune_enable – master switch for auto‑tuning.
-
-float noise_rms_est, float noise_mag_db_est – noise floor estimates.
-
-EMAs for average pitch confidence, pitch variance, event rate, note durations and gaps.
-
-Counters for harmonic peaks and octave statistics.
-
-Configuration limits for each tunable parameter (min and max values, adaptation rate).
-
-6.2 Algorithm integration
-
-Initial calibration: On engine initialisation (or when auto_tune_enable is toggled), run a short calibration phase (0.5–1 s) where audio is analysed but no note events are emitted. Use this period to estimate initial noise floor, confidence distribution and typical event rates.
-
-Modified processFrame: After each frame is processed by the existing pitch detector:
-
-Determine whether a note is currently active or, in polyphonic mode, whether peaks exceed a minimal count. If not, update the noise floor estimates.
-
-Update EMAs for confidence, pitch variance and event rate.
-
-Every N frames (e.g. N = hop_size × update_frequency / frame_size), call an autoTuneUpdate() method that calculates new parameter values according to Section 5. This method applies smoothing and clamps to user‑defined ranges.
-
-Use the updated parameters for subsequent frames.
-
-Backward compatibility: When auto_tune_enable is false, the engine behaves exactly as before. Users can still manually set all thresholds.
-
-API exposure: Add setters/getters to inspect current adaptive parameter values and to set adaptation margins (k_rms, margin_db, event rate bounds, adaptation speeds). Provide optional callbacks so applications can be notified when the auto‑tuner adjusts values.
-
-6.3 Footprint considerations
-
-The EMAs and counters require only a handful of floats/integers; memory overhead is negligible (< 1 KB).
-
-Computation involves basic arithmetic, comparisons and occasional histogram updates. Running the adaptation logic at 5 Hz adds < 1 % CPU on an ESP32 (estimated at a few hundred operations per update). The heavy lifting (FFT, pitch detection) remains unchanged.
-
-To conserve CPU, disable adaptation steps (harmonic control, PCP adjustment) if the corresponding features are off (e.g. when harmonic_filter_enable=false or pcp_enable=false).
-
-7 Testing and tuning plan
-
-To validate the auto‑tuning system:
-
-Synthetic datasets: Generate audio files with known pitches and controlled noise (white, pink, environmental). Measure false‑positive and false‑negative rates as auto‑tuning adjusts thresholds. Verify that event rate stays within target bounds.
-
-Real instruments: Test with monophonic sources (e.g. sine waves, flute) and polyphonic sources (piano chords, guitar strums) at various volumes. Record the raw audio and the MIDI output. Compare note timing, pitch accuracy and the number of spurious events.
-
-Environmental noise: Introduce background sounds (talking, HVAC, traffic) and confirm that the noise floor adapts, raising thresholds to suppress false events without missing quieter notes.
-
-Latency measurement: Measure end‑to‑end latency for note detection with and without auto‑tuning to ensure that adaptation and larger filters do not delay note onsets beyond acceptable limits (e.g. ≤ 50 ms for polyphonic and ≤ 30 ms for monophonic).
-
-Stress test: Feed rapid sequences and dense chords to detect any oscillatory behaviour or instability in the adaptation loops; adjust smoothing constants if necessary.
-
-Parameter sweep: Evaluate different values of adaptation margins (k_rms, margin_db), update frequencies and smoothing constants. Provide recommended presets for typical environments (quiet room, live stage, outdoor).
-
-8 Potential extensions and future work
-
-Machine learning‑based adaptation: Train a lightweight model on annotated audio to predict optimal thresholds based on spectral features. This could improve adaptation in complex, non‑stationary noise conditions while still fitting into embedded resources.
-
-Per‑instrument profiles: Allow users to select instrument profiles (piano, guitar, voice) that bias the auto‑tuner's parameters (e.g. expected octaves and harmonic content).
-
-Persistent calibration: Save noise floor estimates and parameter settings to non‑volatile storage to skip calibration on subsequent runs.
-
-Graphical tuning interface: Provide a real‑time visualisation (e.g. on a web interface or over serial) showing current parameter values, noise floor and event rate, allowing advanced users to monitor and override auto‑tuning decisions.
-
-9 Conclusion
-
-FastLED's sound_to_midi already supplies a flexible set of parameters for pitch detection and MIDI conversion. However, these parameters are currently static and require manual tuning. The auto‑tuning extension proposed here introduces a feedback loop that continuously monitors the audio signal, estimates noise and event statistics, and adjusts thresholds, smoothing and gating accordingly. The design emphasises smooth, low‑overhead adaptation suitable for microcontrollers, backwards compatibility, and configurability. By implementing this design, FastLED can respond dynamically to changing acoustic environments, producing cleaner MIDI outputs without sacrificing responsiveness.
+### Functional Requirements
+
+**FR1: Polymetric Beat Analysis (NEW - extends BeatDetector)**
+- Detect 4/4 base meter (existing tempo tracker can handle this ✅)
+- **NEW:** Add 7/8 overlay phase tracker (7 pulses per 2 bars)
+- **NEW:** Micro-timing engine: swing quantization (±12-25% of subdivision)
+- **NEW:** Tuplet detection: triplet/quintuplet fill patterns
+
+**FR2: Multi-Band Onset Detection (PARTIALLY EXISTS)**
+- ✅ Existing: SuperFlux with multi-band onset detection already implemented
+- ✅ Existing: Adaptive thresholds with debouncing (minimum inter-onset intervals)
+- **NEW:** Expose per-band onset callbacks (bass/mid/high) - currently combined into single onset callback
+
+**FR3: Particle System (NEW)**
+- SoA (structure-of-arrays) layout for cache efficiency
+- Emitter system tied to rhythmic events:
+  - Kick emitter (bass onsets + quarter notes)
+  - Snare/glitch emitter (mid onsets + syncopated 16ths)
+  - Hi-hat spray emitter (high onsets + triplet subdivisions)
+  - Overlay spiral emitter (7/8 phase accents)
+- Physics: radial gravity, curl noise field, kick ducking
+- Follow FastLED namespace conventions (`fl::`)
+
+**FR4: LED Rendering (NEW)**
+- Map particles to LED strips/matrices
+- HSV color system with audio-reactive palettes
+- Optional bloom effect (1-tap exponential blur)
+
+### Non-Functional Requirements
+
+**NFR1: Performance (ESP32-S3 @ 240MHz)**
+- Audio processing: ≤50% of one core @ 44.1kHz
+- Particle update + render: ≥60 FPS with 1000 particles
+- Memory: ≤24KB additional RAM (configurable via macros)
+
+**NFR2: Real-Time Constraints**
+- Zero heap allocations in audio/render loops
+- All buffers statically allocated or arena-based
+- Frame-to-frame jitter <5ms (95th percentile)
+
+**NFR3: Code Quality**
+- Follow FastLED namespace conventions (`fl::`)
+- Use FastLED types (`CRGB`, `fl::vector`, `fl::function`)
+- Include comprehensive unit tests
+- Document all public APIs with Doxygen
+
+## Architecture
+
+### Module Structure (UPDATED)
+
+```
+src/fx/audio/
+  ├── beat_detector.{h,cpp}             [MODIFY - add polymetric callbacks]
+  └── polymetric_analyzer.{h,cpp}       [NEW - 7/8 overlay tracker]
+
+src/fx/particles/
+  └── rhythm_particles.{h,cpp}          [NEW - particle system]
+
+examples/Fx/
+  └── RhythmicParticles/RhythmicParticles.ino [NEW - demo with UISlider controls]
+```
+
+### Data Flow
+
+```
+PCM Audio (44.1kHz)
+  ↓
+BeatDetector (existing - SuperFlux + tempo tracker) ✅
+  ├→ Base tempo (4/4) + beat phase
+  └→ Multi-band onsets (already computed internally, need to expose via callbacks)
+      ↓
+PolymetricAnalyzer [NEW]
+  ├→ 7/8 overlay phase
+  ├→ Swing/tuplet timing
+  └→ Fill detection
+      ↓
+Event Bus (callbacks - extend existing BeatDetector callbacks)
+  ├→ onBeat(quarter, phase4_4, phase7_8)          [EXTEND existing onBeat]
+  ├→ onSubdivision(16th, swingOffset)              [NEW callback]
+  ├→ onOnsetBass/Mid/High(confidence, time)        [NEW - split existing onOnset]
+  └→ onFill(start/end, density)                    [NEW callback]
+      ↓
+RhythmParticles [NEW]
+  ├→ Emitter management
+  ├→ Physics simulation (SoA)
+  └→ Particle lifecycle
+      ↓
+LED Renderer
+  └→ CRGB* output (strip/matrix)
+```
+
+### Public APIs
+
+#### Extension to BeatDetectorConfig (beat_detector.h) - MODIFY EXISTING
+
+```cpp
+struct BeatDetectorConfig {
+    // ... existing fields (sample_rate_hz, frame_size, hop_size, etc.) ...
+
+    // NEW: Polymetric analysis
+    bool enable_polymetric = false;       ///< Enable 7/8 overlay analysis
+    int overlay_numerator = 7;            ///< Overlay meter numerator (7 for 7/8)
+    int overlay_bars = 2;                 ///< Overlay cycle length (bars)
+    float swing_amount = 0.12f;           ///< Swing 0.0-0.25 (0=straight, 0.25=hard swing)
+    float humanize_ms = 4.0f;             ///< Micro-timing jitter ±ms
+    bool enable_tuplet_detection = true;  ///< Detect triplet/quintuplet fills
+};
+```
+
+#### New Callbacks for BeatDetector - EXTEND EXISTING CLASS
+
+```cpp
+class BeatDetector {
+public:
+    // EXISTING callbacks (keep as-is) ✅
+    fl::function<void(float confidence, float timestamp_ms)> onOnset;
+    fl::function<void(float confidence, float bpm, float timestamp_ms)> onBeat;
+
+    // NEW: Polymetric callbacks (add to existing class)
+    fl::function<void(float phase4_4, float phase7_8)> onPolymetricBeat;
+    fl::function<void(int subdivision, float swingOffset)> onSubdivision;
+    fl::function<void(float confidence, float timestamp_ms)> onOnsetBass;
+    fl::function<void(float confidence, float timestamp_ms)> onOnsetMid;
+    fl::function<void(float confidence, float timestamp_ms)> onOnsetHigh;
+    fl::function<void(bool starting, float density)> onFill;
+
+    // NEW: Phase accessors
+    float getPhase4_4() const;
+    float getPhase7_8() const;
+    float getPhase16th() const;
+};
+```
+
+#### New: RhythmParticles class (src/fx/particles/rhythm_particles.h)
+
+```cpp
+namespace fl {
+
+struct RhythmParticlesConfig {
+    int max_particles = 1000;            ///< Maximum particle count
+    float dt = 1.0f / 120.0f;            ///< Simulation timestep (120 FPS default)
+    float velocity_decay = 0.985f;       ///< Velocity damping per frame
+    float radial_gravity = 0.0f;         ///< Radial pull to center
+    float curl_strength = 0.7f;          ///< Flow field intensity
+    float kick_duck_amount = 0.35f;      ///< Brightness duck on kick (0-1)
+    float kick_duck_duration_ms = 80.0f; ///< Duck duration
+    uint8_t bloom_threshold = 64;        ///< Bloom activation threshold (0-255)
+    float bloom_strength = 0.5f;         ///< Bloom intensity
+    int width = 32;                      ///< Logical canvas width
+    int height = 8;                      ///< Logical canvas height
+};
+
+struct ParticleEmitterConfig {
+    float emit_rate = 10.0f;             ///< Particles per event
+    float velocity_min = 0.5f;           ///< Min initial velocity
+    float velocity_max = 2.0f;           ///< Max initial velocity
+    float life_min = 0.5f;               ///< Min lifetime (seconds)
+    float life_max = 2.0f;               ///< Max lifetime (seconds)
+    CRGB color_base = CRGB::White;       ///< Base color
+    uint8_t hue_variance = 30;           ///< Hue randomization ±
+};
+
+class RhythmParticles {
+public:
+    explicit RhythmParticles(const RhythmParticlesConfig& cfg);
+
+    // Connect to beat detector events
+    void onBeat(float phase4_4, float phase7_8);
+    void onSubdivision(int subdiv, float swingOffset);
+    void onOnsetBass(float confidence, float timestamp_ms);
+    void onOnsetMid(float confidence, float timestamp_ms);
+    void onOnsetHigh(float confidence, float timestamp_ms);
+    void onFill(bool starting, float density);
+
+    // Simulation
+    void update(float dt);               ///< Advance physics
+    void render(CRGB* leds, int num_leds); ///< Render to LED buffer
+
+    // Configuration
+    void setEmitterConfig(const char* emitter_name, const ParticleEmitterConfig& cfg);
+    void setPalette(const CRGBPalette16& palette);
+
+    // Stats
+    int getActiveParticleCount() const;
+
+private:
+    // SoA particle storage
+    struct ParticlePool {
+        static constexpr int MAX = 2048;
+        float x[MAX], y[MAX], z[MAX];
+        float vx[MAX], vy[MAX], vz[MAX];
+        uint8_t h[MAX], s[MAX], v[MAX];
+        float life[MAX];
+        int count = 0;
+    } _pool;
+
+    void emitParticles(const char* emitter, int count);
+    void applyForces();
+    void updateLifetime(float dt);
+    void cullDead();
+};
+
+} // namespace fl
+```
+
+## Implementation Plan
+
+### Phase 1: Extend BeatDetector (Week 1) ✅ COMPLETE
+- [x] Add per-band onset callbacks (bass/mid/high) by exposing existing multi-band analysis
+- [x] Implement 7/8 overlay phase tracker in new `PolymetricAnalyzer` class
+- [x] Add swing/humanize micro-timing engine
+- [x] Create new callback system (extend existing `BeatDetector`)
+- [x] Unit tests for polymetric analysis
+
+**Completed Files:**
+- `src/fx/audio/beat_detector.h` - Added per-band onset callbacks (onOnsetBass/Mid/High), polymetric callbacks (onPolymetricBeat, onSubdivision, onFill), phase accessors
+- `src/fx/audio/beat_detector.cpp` - Integrated PolymetricAnalyzer, wired callbacks, added per-band peak picking
+- `src/fx/audio/polymetric_analyzer.h` - New class for 7/8 overlay tracking, swing/humanize micro-timing
+- `src/fx/audio/polymetric_analyzer.cpp` - Implementation of polymetric rhythm analysis
+- `tests/test_polymetric_beat.cpp` - Comprehensive unit tests for polymetric analysis
+
+### Phase 2: Particle System Core (Week 2) ✅ COMPLETE
+- [x] Implement SoA particle pool in new `RhythmParticles` class
+- [x] Create emitter system (kick, snare, hat, overlay)
+- [x] Physics: gravity, curl noise, ducking field
+- [x] Particle lifecycle management
+- [x] Unit tests for particle dynamics
+
+**Completed Files:**
+- `src/fx/particles/rhythm_particles.h` - RhythmParticles class with SoA layout, emitter configs, physics settings
+- `src/fx/particles/rhythm_particles.cpp` - Complete implementation: emission, physics (gravity/curl noise/ducking), lifecycle, rendering with bloom
+- `tests/test_rhythm_particles.cpp` - 15 comprehensive unit tests for particle system
+
+### Phase 3: Integration & High-Level Fx Class (Week 3) ✅ COMPLETE + REFACTORED
+- [x] Create PolymetricBeats Fx2d class integrating BeatDetector + RhythmParticles
+- [x] Wire all callbacks between components
+- [x] Audio processing integration (processAudio method)
+- [x] Rendering pipeline with configurable fade/clear-on-beat
+- [x] Integration tests
+- [x] **Refactor to separate algorithm from profile** (Post-Phase 3)
+
+**Completed Files:**
+- `src/fx/2d/polymetric_beats.h` - PolymetricBeats Fx class with unified API + PolymetricProfiles namespace
+- `src/fx/2d/polymetric_beats.cpp` - Complete integration with automatic callback wiring
+- `tests/test_polymetric_beats.cpp` - 11 integration tests covering all major functionality
+
+### Phase 4: Example & Documentation (Week 4)
+- [ ] Create `RhythmicParticles.ino` example (following `BeatDetection.ino` pattern)
+- [ ] Add UI controls using existing UISlider, UINumberField, UICheckbox, UIGroup
+- [ ] Write comprehensive documentation
+- [ ] Performance benchmarks
+- [ ] Integration tests with real audio
+
+## Testing Strategy
+
+### Unit Tests
+- Polymetric phase alignment (7 vs 8 cycles)
+- Swing quantization accuracy
+- Per-band onset detection (verify bass/mid/high callbacks)
+- Particle emission/culling
+- SoA memory layout correctness
+
+### Integration Tests
+- End-to-end with synthetic 4/4 + syncopation
+- Tempo change handling (existing tempo tracker robustness)
+- Memory usage profiling
+- Frame timing consistency
+
+### Acceptance Criteria
+1. **Accuracy:** Locks to 100-140 BPM ±1.5 BPM within 4 seconds
+2. **Overlay:** `phase7_8` visibly drifts against `phase4_4`, realigns every 2 bars
+3. **Performance:** 60 FPS sustained with 1000 particles on ESP32-S3
+4. **Memory:** Static allocation only, ≤24KB overhead
+5. **Visual:** Kick ducking visible within 20ms of onset
+
+## File Structure (UPDATED)
+
+```
+src/fx/audio/beat_detector.h         [MODIFIED - added polymetric callbacks & config]
+src/fx/audio/beat_detector.cpp       [MODIFIED - integrated PolymetricAnalyzer]
+src/fx/audio/polymetric_analyzer.h   [NEW - generic N/M overlay tracker]
+src/fx/audio/polymetric_analyzer.cpp [NEW - generic N/M overlay tracker]
+
+src/fx/particles/rhythm_particles.h  [NEW - generic particle system]
+src/fx/particles/rhythm_particles.cpp [NEW - generic particle system]
+
+src/fx/2d/polymetric_beats.h         [NEW - integration Fx class + PolymetricProfiles namespace]
+src/fx/2d/polymetric_beats.cpp       [NEW - integration implementation]
+
+examples/Fx/RhythmicParticles/
+  └── RhythmicParticles.ino           [FUTURE - demo with UISlider/UIGroup]
+
+tests/
+  ├── test_polymetric_beat.cpp        [NEW - polymetric analysis tests]
+  ├── test_rhythm_particles.cpp       [NEW - particle system tests]
+  └── test_polymetric_beats.cpp       [NEW - integration tests]
+
+docs/fx/
+  └── RhythmicParticles.md            [NEW - user guide]
+```
+
+## Dependencies
+
+### Existing (Verified) ✅
+- `beat_detector.{h,cpp}` - SuperFlux onset detection + tempo tracking
+- `sound_to_midi.{h,cpp}` - FFT utilities for band splits
+- `fl/ui.h` - UISlider, UINumberField, UICheckbox, UIGroup, UIAudio
+- `fl::vector`, `fl::function`, `CRGB` types
+
+### New Dependencies
+- Curl noise function (2D/3D Perlin-based) - will need to implement or find existing in FastLED
+
+## Open Questions
+
+1. Should the 7/8 overlay be hardcoded or user-configurable (N/M over K bars)?
+   - **Recommendation:** Make it configurable via `BeatDetectorConfig` fields
+
+2. Particle collision detection: enable by default or opt-in?
+   - **Recommendation:** Opt-in via `RhythmParticlesConfig` (disabled by default for performance)
+
+3. Should we support multiple overlay patterns simultaneously (7/8 + 5/4)?
+   - **Recommendation:** Phase 1 supports single overlay, add multiple overlays in future if needed
+
+4. Bloom: GPU-style or simple box blur for MCU?
+   - **Recommendation:** 1-tap exponential blur (fast on MCU)
+
+## Key Changes from Original Spec
+
+### What Already Exists ✅
+1. **BeatDetector class** - Already has SuperFlux, multi-band onset detection, tempo tracking
+2. **Callbacks:** `onOnset` and `onBeat` already implemented
+3. **Multi-band analysis** - Already computed internally via `MultiBand` onset detection function
+4. **UI system** - UISlider, UINumberField, UICheckbox, UIGroup already available
+5. **Example structure** - BeatDetection.ino shows the pattern to follow
+
+### What Needs to Be Added
+1. **Polymetric callbacks** - Extend `BeatDetector` with new callbacks for 7/8 overlay, subdivisions, fills
+2. **Per-band onset callbacks** - Expose existing multi-band analysis via `onOnsetBass/Mid/High` callbacks
+3. **PolymetricAnalyzer** - New class to compute 7/8 overlay phase, swing timing, tuplet detection
+4. **RhythmParticles** - New particle system with SoA layout and physics
+5. **Example integration** - New `RhythmicParticles.ino` following existing patterns
+
+### Terminology Updates
+- ~~"Particle filter tempo tracking"~~ → Already exists as `TempoTrackerType::ParticleFilter` in BeatDetector
+- ~~"Event bus"~~ → Use existing `fl::function` callbacks in `BeatDetector` class
+- ~~"Multi-band onset callbacks"~~ → Extend existing `onOnset` to also fire per-band callbacks
+
+---
+
+**This task aligns with existing FastLED architecture while adding Tipper-specific rhythm analysis. All new code follows `fl::` namespace, uses existing types, and maintains zero-heap-allocation real-time constraints.**

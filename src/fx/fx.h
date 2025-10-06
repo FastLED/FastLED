@@ -53,4 +53,7 @@ class Fx {
     uint16_t mNumLeds;
 };
 
+// Make DrawContext available at namespace level for convenience
+using DrawContext = _DrawContext;
+
 } // namespace fl

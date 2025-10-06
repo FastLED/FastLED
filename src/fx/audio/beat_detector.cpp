@@ -397,6 +397,7 @@ float OnsetDetectionProcessor::computeHFC(const float* mag, int size) {
 
 float OnsetDetectionProcessor::computeMultiBand(const float* mag, int size) {
     if (_historyCount < 1) {
+        _lastMultiBandOnset = MultiBandOnset();
         return 0.0f;
     }
 
@@ -406,7 +407,11 @@ float OnsetDetectionProcessor::computeMultiBand(const float* mag, int size) {
 
     float total_novelty = 0.0f;
 
-    // Process each frequency band
+    // Reset multi-band onset structure
+    _lastMultiBandOnset = MultiBandOnset();
+
+    // Process each frequency band (assumes 3 bands: bass, mid, high)
+    int band_idx = 0;
     for (const auto& band : _cfg.bands) {
         int bin_low = freqToBin(band.low_hz, _cfg.fft_size, _cfg.sample_rate_hz);
         int bin_high = freqToBin(band.high_hz, _cfg.fft_size, _cfg.sample_rate_hz);
@@ -420,9 +425,20 @@ float OnsetDetectionProcessor::computeMultiBand(const float* mag, int size) {
             band_flux += MAX(0.0f, diff);
         }
 
+        // Store per-band onset values (assuming default 3-band config: bass, mid, high)
+        if (band_idx == 0) {
+            _lastMultiBandOnset.bass = band_flux;
+        } else if (band_idx == 1) {
+            _lastMultiBandOnset.mid = band_flux;
+        } else if (band_idx == 2) {
+            _lastMultiBandOnset.high = band_flux;
+        }
+
         total_novelty += band.weight * band_flux;
+        band_idx++;
     }
 
+    _lastMultiBandOnset.combined = total_novelty;
     return total_novelty;
 }
 
@@ -628,9 +644,16 @@ TempoTracker::TempoTracker(const BeatDetectorConfig& cfg)
     , _periodSamples(0)
     , _beatPhase(0.0f)
     , _lastBeatTime(0.0f)
+    , _numParticles(0)
+    , _pfLastUpdateTime(0.0f)
 {
     reset();
     initializeLookupTables();
+
+    // Initialize particle filter if selected
+    if (_cfg.tempo_tracker == TempoTrackerType::ParticleFilter) {
+        initializeParticles();
+    }
 }
 
 void TempoTracker::reset() {
@@ -647,13 +670,19 @@ void TempoTracker::reset() {
     _periodSamples = 0;
     _beatPhase = 0.0f;
     _lastBeatTime = 0.0f;
+    _pfLastUpdateTime = 0.0f;
+
+    // Reset particle filter if active
+    if (_cfg.tempo_tracker == TempoTrackerType::ParticleFilter) {
+        initializeParticles();
+    }
 }
 
 void TempoTracker::setConfig(const BeatDetectorConfig& cfg) {
     _cfg = cfg;
 }
 
-void TempoTracker::addOnset(const OnsetEvent& onset) {
+void TempoTracker::addOnset(const OnsetEvent& /* onset */) {
     // For tempo tracking from onsets (not currently used)
 }
 
@@ -662,6 +691,29 @@ void TempoTracker::addODFValue(float odf_value, float timestamp_ms) {
         return;
     }
 
+    // Particle filter update (real-time, every frame)
+    if (_cfg.tempo_tracker == TempoTrackerType::ParticleFilter) {
+        float dt_sec = (_pfLastUpdateTime == 0.0f) ? 0.01f : (timestamp_ms - _pfLastUpdateTime) / 1000.0f;
+        _pfLastUpdateTime = timestamp_ms;
+
+        // Predict particles forward
+        predictParticles(dt_sec);
+
+        // Weight particles based on ODF value
+        weightParticles(odf_value);
+
+        // Resample if effective particles drops below threshold
+        float n_eff = computeEffectiveParticles();
+        if (n_eff < _cfg.pf_resample_threshold * _numParticles) {
+            resampleParticles();
+        }
+
+        // Update tempo estimate from particles
+        updateParticleEstimate();
+        return;
+    }
+
+    // Autocorrelation/comb filter (periodic update)
     // Add to history
     _odfHistory[_odfHistoryIndex] = odf_value;
     _odfHistoryIndex = (_odfHistoryIndex + 1) % MAX_ODF_HISTORY;
@@ -691,6 +743,28 @@ fl::vector<BeatEvent> TempoTracker::checkBeat(float timestamp_ms) {
         return beats;
     }
 
+    // Particle filter uses phase-based beat detection
+    if (_cfg.tempo_tracker == TempoTrackerType::ParticleFilter) {
+        // Beat occurs when phase wraps from near 1.0 to near 0.0
+        static float last_phase = 0.0f;
+
+        // Detect phase wrap (beat event)
+        if (_beatPhase < 0.3f && last_phase > 0.7f) {
+            BeatEvent beat;
+            beat.frame_index = static_cast<uint32_t>((timestamp_ms / 1000.0f) * _cfg.sample_rate_hz / _cfg.hop_size);
+            beat.timestamp_ms = timestamp_ms;
+            beat.bpm = _currentBPM;
+            beat.confidence = _tempoConfidence;
+            beat.phase = _beatPhase;
+
+            beats.push_back(beat);
+        }
+
+        last_phase = _beatPhase;
+        return beats;
+    }
+
+    // Autocorrelation/comb filter uses period-based beat detection
     // Convert timestamp to samples
     float current_time_samples = (timestamp_ms / 1000.0f) * _cfg.sample_rate_hz;
 
@@ -702,7 +776,7 @@ fl::vector<BeatEvent> TempoTracker::checkBeat(float timestamp_ms) {
         beat.timestamp_ms = timestamp_ms;
         beat.bpm = _currentBPM;
         beat.confidence = _tempoConfidence;
-        beat.phase = 0.0f;  // TODO: Implement phase tracking
+        beat.phase = 0.0f;
 
         beats.push_back(beat);
         _lastBeatTime = current_time_samples;
@@ -841,6 +915,170 @@ int TempoTracker::bpmToSamples(float bpm) const {
     return fl::bpmToSamples(bpm, _cfg.sample_rate_hz);
 }
 
+// ---------- Particle Filter Methods ----------
+
+void TempoTracker::initializeParticles() {
+    _numParticles = (_cfg.pf_num_particles < MAX_PARTICLES) ? _cfg.pf_num_particles : MAX_PARTICLES;
+
+    // Initialize particles uniformly across tempo range
+    float tempo_range = _cfg.tempo_max_bpm - _cfg.tempo_min_bpm;
+    for (int i = 0; i < _numParticles; ++i) {
+        _particles[i].tempo_bpm = _cfg.tempo_min_bpm + (i * tempo_range) / _numParticles;
+        _particles[i].phase = static_cast<float>(i) / _numParticles;  // Distribute phases
+        _particles[i].weight = 1.0f / _numParticles;  // Uniform initial weights
+    }
+}
+
+void TempoTracker::predictParticles(float dt_sec) {
+    static uint32_t seed = 12345;  // Keep seed as static but update it
+
+    // Add process noise and propagate particles forward
+    for (int i = 0; i < _numParticles; ++i) {
+        // Add tempo drift noise (Gaussian random walk)
+        // Simple Box-Muller transform for Gaussian noise
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        float u1 = (seed & 0xFFFF) / 65536.0f;
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        float u2 = (seed & 0xFFFF) / 65536.0f;
+        float gaussian = ::sqrt(-2.0f * ::log(u1 + 1e-10f)) * ::cos(2.0f * 3.14159265f * u2);
+
+        float tempo_noise = gaussian * _cfg.pf_tempo_std_dev * ::sqrt(dt_sec);
+        _particles[i].tempo_bpm += tempo_noise;
+
+        // Clamp tempo to valid range
+        if (_particles[i].tempo_bpm < _cfg.tempo_min_bpm) {
+            _particles[i].tempo_bpm = _cfg.tempo_min_bpm;
+        }
+        if (_particles[i].tempo_bpm > _cfg.tempo_max_bpm) {
+            _particles[i].tempo_bpm = _cfg.tempo_max_bpm;
+        }
+
+        // Propagate phase forward based on tempo
+        float beats_per_sec = _particles[i].tempo_bpm / 60.0f;
+        _particles[i].phase += beats_per_sec * dt_sec;
+        _particles[i].phase -= ::floor(_particles[i].phase);  // Wrap to [0,1]
+
+        // Add phase noise
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        u1 = (seed & 0xFFFF) / 65536.0f;
+        seed = (1103515245 * seed + 12345) & 0x7fffffff;
+        u2 = (seed & 0xFFFF) / 65536.0f;
+        gaussian = ::sqrt(-2.0f * ::log(u1 + 1e-10f)) * ::cos(2.0f * 3.14159265f * u2);
+
+        float phase_noise = gaussian * _cfg.pf_phase_std_dev;
+        _particles[i].phase += phase_noise;
+        _particles[i].phase -= ::floor(_particles[i].phase);  // Wrap to [0,1]
+    }
+}
+
+void TempoTracker::weightParticles(float odf_value) {
+    // Weight particles based on how well their predicted beat aligns with ODF peaks
+    for (int i = 0; i < _numParticles; ++i) {
+        // Particles with phase near 0.0 (beat time) should have high weight if ODF is high
+        // Use Gaussian likelihood around beat phase
+        float phase_dist = (_particles[i].phase < (1.0f - _particles[i].phase)) ? _particles[i].phase : (1.0f - _particles[i].phase);
+        float likelihood = ::exp(-phase_dist * phase_dist / (2.0f * 0.05f * 0.05f));  // Sigma = 0.05
+
+        _particles[i].weight *= (likelihood * odf_value + 0.1f);  // Add baseline to prevent collapse
+    }
+
+    // Normalize weights
+    float weight_sum = 0.0f;
+    for (int i = 0; i < _numParticles; ++i) {
+        weight_sum += _particles[i].weight;
+    }
+    if (weight_sum > 0.0f) {
+        for (int i = 0; i < _numParticles; ++i) {
+            _particles[i].weight /= weight_sum;
+        }
+    }
+}
+
+void TempoTracker::resampleParticles() {
+    if (_numParticles <= 0) return;
+
+    // Systematic resampling
+    static Particle temp[MAX_PARTICLES];
+
+    // Compute cumulative sum of weights
+    float cumsum[MAX_PARTICLES];
+    cumsum[0] = _particles[0].weight;
+    for (int i = 1; i < _numParticles; ++i) {
+        cumsum[i] = cumsum[i-1] + _particles[i].weight;
+    }
+
+    // Safety check: if cumulative sum is invalid, reinitialize
+    if (cumsum[_numParticles - 1] <= 0.0f || ::isnan(cumsum[_numParticles - 1])) {
+        initializeParticles();
+        return;
+    }
+
+    // Generate starting point
+    static uint32_t seed = 54321;
+    seed = (1103515245 * seed + 12345) & 0x7fffffff;
+    float u = (seed & 0xFFFF) / (65536.0f * _numParticles);
+
+    // Systematic resampling loop
+    int j = 0;
+    for (int i = 0; i < _numParticles; ++i) {
+        float threshold = u + i / static_cast<float>(_numParticles);
+
+        // Safety guard: prevent infinite loop
+        int loop_guard = 0;
+        while (j < _numParticles && cumsum[j] < threshold && loop_guard < _numParticles * 2) {
+            j++;
+            loop_guard++;
+        }
+        if (j >= _numParticles) j = _numParticles - 1;
+
+        temp[i] = _particles[j];
+        temp[i].weight = 1.0f / _numParticles;  // Reset weights
+    }
+
+    // Copy back
+    for (int i = 0; i < _numParticles; ++i) {
+        _particles[i] = temp[i];
+    }
+}
+
+float TempoTracker::computeEffectiveParticles() const {
+    float sum_sq = 0.0f;
+    for (int i = 0; i < _numParticles; ++i) {
+        sum_sq += _particles[i].weight * _particles[i].weight;
+    }
+    return (sum_sq > 0.0f) ? (1.0f / sum_sq) : 0.0f;
+}
+
+void TempoTracker::updateParticleEstimate() {
+    // Weighted average of particle states
+    float tempo_sum = 0.0f;
+    float phase_x = 0.0f;
+    float phase_y = 0.0f;
+
+    for (int i = 0; i < _numParticles; ++i) {
+        tempo_sum += _particles[i].weight * _particles[i].tempo_bpm;
+
+        // Use circular mean for phase
+        float theta = _particles[i].phase * 2.0f * 3.14159265f;
+        phase_x += _particles[i].weight * ::cos(theta);
+        phase_y += _particles[i].weight * ::sin(theta);
+    }
+
+    _currentBPM = tempo_sum;
+    _beatPhase = ::atan2(phase_y, phase_x) / (2.0f * 3.14159265f);
+    if (_beatPhase < 0.0f) _beatPhase += 1.0f;
+
+    _periodSamples = bpmToSamples(_currentBPM);
+
+    // Compute confidence from particle variance
+    float variance = 0.0f;
+    for (int i = 0; i < _numParticles; ++i) {
+        float diff = _particles[i].tempo_bpm - _currentBPM;
+        variance += _particles[i].weight * diff * diff;
+    }
+    _tempoConfidence = 1.0f / (1.0f + variance);  // Higher confidence = lower variance
+}
+
 // ---------- BeatDetector Implementation ----------
 
 BeatDetector::BeatDetector(const BeatDetectorConfig& cfg)
@@ -848,6 +1086,10 @@ BeatDetector::BeatDetector(const BeatDetectorConfig& cfg)
     , _odfProcessor(cfg)
     , _peakPicker(cfg)
     , _tempoTracker(cfg)
+    , _polymetricAnalyzer(cfg.polymetric)
+    , _peakPickerBass(cfg)
+    , _peakPickerMid(cfg)
+    , _peakPickerHigh(cfg)
     , _frameCount(0)
     , _onsetCount(0)
     , _beatCount(0)
@@ -855,12 +1097,35 @@ BeatDetector::BeatDetector(const BeatDetectorConfig& cfg)
     , _lastTempoBPM(0.0f)
 {
     initializeLookupTables();
+
+    // Wire up polymetric analyzer callbacks to BeatDetector callbacks
+    _polymetricAnalyzer.onPolymetricBeat = [this](float phase4_4, float phase7_8) {
+        if (onPolymetricBeat) {
+            onPolymetricBeat(phase4_4, phase7_8);
+        }
+    };
+
+    _polymetricAnalyzer.onSubdivision = [this](SubdivisionType subdiv, float swing_offset) {
+        if (onSubdivision) {
+            onSubdivision(subdiv, swing_offset);
+        }
+    };
+
+    _polymetricAnalyzer.onFill = [this](bool starting, float density) {
+        if (onFill) {
+            onFill(starting, density);
+        }
+    };
 }
 
 void BeatDetector::reset() {
     _odfProcessor.reset();
     _peakPicker.reset();
+    _peakPickerBass.reset();
+    _peakPickerMid.reset();
+    _peakPickerHigh.reset();
     _tempoTracker.reset();
+    _polymetricAnalyzer.reset();
     _frameCount = 0;
     _onsetCount = 0;
     _beatCount = 0;
@@ -872,7 +1137,11 @@ void BeatDetector::setConfig(const BeatDetectorConfig& cfg) {
     _cfg = cfg;
     _odfProcessor.setConfig(cfg);
     _peakPicker.setConfig(cfg);
+    _peakPickerBass.setConfig(cfg);
+    _peakPickerMid.setConfig(cfg);
+    _peakPickerHigh.setConfig(cfg);
     _tempoTracker.setConfig(cfg);
+    _polymetricAnalyzer.setConfig(cfg.polymetric);
 }
 
 void BeatDetector::processFrame(const float* frame, int n) {
@@ -920,6 +1189,9 @@ void BeatDetector::processFrame(const float* frame, int n) {
         }
     }
 
+    // Process multi-band onsets (if using MultiBand ODF)
+    processMultiBandOnsets(timestamp_ms);
+
     // Tempo tracking
     _tempoTracker.addODFValue(_currentODF, timestamp_ms);
     auto beats = _tempoTracker.checkBeat(timestamp_ms);
@@ -929,6 +1201,9 @@ void BeatDetector::processFrame(const float* frame, int n) {
             onBeat(beat.confidence, beat.bpm, beat.timestamp_ms);
         }
 
+        // Notify polymetric analyzer of beat
+        _polymetricAnalyzer.onBeat(beat.bpm, beat.timestamp_ms);
+
         // Notify tempo change
         if (ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
             _lastTempoBPM = beat.bpm;
@@ -937,6 +1212,9 @@ void BeatDetector::processFrame(const float* frame, int n) {
             }
         }
     }
+
+    // Update polymetric analyzer every frame
+    _polymetricAnalyzer.update(timestamp_ms);
 
     _frameCount++;
 }
@@ -953,6 +1231,9 @@ void BeatDetector::processSpectrum(const float* magnitude_spectrum, int spectrum
         }
     }
 
+    // Process multi-band onsets (if using MultiBand ODF)
+    processMultiBandOnsets(timestamp_ms);
+
     // Tempo tracking
     _tempoTracker.addODFValue(_currentODF, timestamp_ms);
     auto beats = _tempoTracker.checkBeat(timestamp_ms);
@@ -961,6 +1242,9 @@ void BeatDetector::processSpectrum(const float* magnitude_spectrum, int spectrum
         if (onBeat) {
             onBeat(beat.confidence, beat.bpm, beat.timestamp_ms);
         }
+
+        // Notify polymetric analyzer of beat
+        _polymetricAnalyzer.onBeat(beat.bpm, beat.timestamp_ms);
 
         // Notify tempo change
         if (ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
@@ -971,6 +1255,9 @@ void BeatDetector::processSpectrum(const float* magnitude_spectrum, int spectrum
         }
     }
 
+    // Update polymetric analyzer every frame
+    _polymetricAnalyzer.update(timestamp_ms);
+
     _frameCount++;
 }
 
@@ -980,6 +1267,52 @@ TempoEstimate BeatDetector::getTempo() const {
 
 float BeatDetector::getTimestampMs() const {
     return (_frameCount * _cfg.hop_size * 1000.0f) / _cfg.sample_rate_hz;
+}
+
+void BeatDetector::processMultiBandOnsets(float timestamp_ms) {
+    // Only process multi-band onsets if using MultiBand ODF
+    if (_cfg.odf_type != OnsetDetectionFunction::MultiBand) {
+        return;
+    }
+
+    // Get multi-band onset values from ODF processor
+    MultiBandOnset mb = _odfProcessor.getLastMultiBandOnset();
+
+    // Process bass band onset
+    auto bass_onsets = _peakPickerBass.process(mb.bass, _frameCount, timestamp_ms);
+    for (const auto& onset : bass_onsets) {
+        if (onOnsetBass) {
+            onOnsetBass(onset.confidence, onset.timestamp_ms);
+        }
+    }
+
+    // Process mid band onset
+    auto mid_onsets = _peakPickerMid.process(mb.mid, _frameCount, timestamp_ms);
+    for (const auto& onset : mid_onsets) {
+        if (onOnsetMid) {
+            onOnsetMid(onset.confidence, onset.timestamp_ms);
+        }
+    }
+
+    // Process high band onset
+    auto high_onsets = _peakPickerHigh.process(mb.high, _frameCount, timestamp_ms);
+    for (const auto& onset : high_onsets) {
+        if (onOnsetHigh) {
+            onOnsetHigh(onset.confidence, onset.timestamp_ms);
+        }
+    }
+}
+
+float BeatDetector::getPhase4_4() const {
+    return _polymetricAnalyzer.getPhase4_4();
+}
+
+float BeatDetector::getPhase7_8() const {
+    return _polymetricAnalyzer.getPhase7_8();
+}
+
+float BeatDetector::getPhase16th() const {
+    return _polymetricAnalyzer.getPhase16th();
 }
 
 } // namespace fl

@@ -996,9 +996,7 @@ void SoundToMIDIMono::autoTuneUpdate() {
 
   // 4. Event rate control
   // Calculate frames per update window
-  float frames_per_sec = _cfg.sample_rate_hz / (float)_cfg.hop_size;
   float update_window_sec = 1.0f / _cfg.auto_tune_update_rate_hz;
-  float frames_per_window = frames_per_sec * update_window_sec;
 
   // Calculate event rate (events per second)
   float event_rate = _autoTuneState.note_events_count / update_window_sec;
