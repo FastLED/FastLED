@@ -435,7 +435,7 @@ static __inline int MULSHIFT32(int x, int y)
      *     RdHi and RdLo can't be the same register
      * Note: Rs determines early termination (leading sign bits) so if you want to specify
      *   which operand is Rs, put it in the SECOND argument (y)
-     * For inline assembly, x and y are not assumed to be R0, R1 so it shouldn't matter
+     * For inline assembly, x and y are not assumed to be R0, R1 so it doesn't matter
      *   which one is returned. (If this were a function call, returning y (R1) would
      *   require an extra "mov r0, r1")
      */
@@ -446,7 +446,12 @@ static __inline int MULSHIFT32(int x, int y)
 
 #else
 
-#error Missing definition of MULSHIFT32
+// Fallback for Xtensa without MUL32_HIGH (e.g., ESP8266)
+static __inline int MULSHIFT32(int x, int y)
+{
+    Word64 result = ((Word64) x) * y;
+    return (int)(result >> 32);
+}
 
 #endif
 
@@ -461,7 +466,15 @@ static __inline int FASTABS(int x)
 
 #else
 
-#error Missing definition of FASTABS
+// Fallback for Xtensa without ABS instruction (e.g., ESP8266)
+static __inline int FASTABS(int x)
+{
+    int sign;
+    sign = x >> (sizeof(int) * 8 - 1);
+    x ^= sign;
+    x -= sign;
+    return x;
+}
 
 #endif
 
