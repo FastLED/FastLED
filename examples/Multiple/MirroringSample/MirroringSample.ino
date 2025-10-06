@@ -20,11 +20,11 @@ void setup() {
   // tell FastLED there's 60 NEOPIXEL leds on pin 5
   FastLED.addLeds<NEOPIXEL, 5>(leds, NUM_LEDS_PER_STRIP);
 
-  // tell FastLED there's 60 NEOPIXEL leds on pin 6
-  FastLED.addLeds<NEOPIXEL, 6>(leds, NUM_LEDS_PER_STRIP);
+  // tell FastLED there's 60 NEOPIXEL leds on pin 12
+  FastLED.addLeds<NEOPIXEL, 12>(leds, NUM_LEDS_PER_STRIP);
 
-  // tell FastLED there's 60 NEOPIXEL leds on pin 7
-  FastLED.addLeds<NEOPIXEL, 7>(leds, NUM_LEDS_PER_STRIP);
+  // tell FastLED there's 60 NEOPIXEL leds on pin 13
+  FastLED.addLeds<NEOPIXEL, 13>(leds, NUM_LEDS_PER_STRIP);
 }
 
 void loop() {
