@@ -87,6 +87,9 @@ public:
     // Get worker type (one-shot)
     WorkerType getWorkerType() const override { return WorkerType::ONE_SHOT; }
 
+    // Check if channel has been created
+    bool hasChannel() const override { return mChannel != nullptr; }
+
 private:
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;

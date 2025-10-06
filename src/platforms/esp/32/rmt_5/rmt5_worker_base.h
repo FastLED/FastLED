@@ -54,6 +54,9 @@ public:
     };
 
     virtual WorkerType getWorkerType() const = 0;
+
+    // Channel status
+    virtual bool hasChannel() const = 0;
 };
 
 } // namespace fl

@@ -490,19 +490,51 @@ jobs:
             exit 1
           fi
 
-          # Check for crash patterns
-          if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
+          # Check for crash patterns (including stack traces and register dumps)
+          if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction|Core.*register dump|MEPC|MSTATUS)" qemu_output.log; then
             echo "❌ ${{ inputs.platform_display }} crashed during execution"
             echo ""
             echo "=== Crash Details ==="
-            grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -20
+
+            # Show all abort() calls with PC addresses
+            echo "=== Abort Calls ==="
+            grep -n "abort() was called" qemu_output.log | head -20
             echo ""
+
+            # Show register dumps if present
+            if grep -q "register dump" qemu_output.log; then
+              echo "=== Register Dump ==="
+              grep -A 15 "register dump" qemu_output.log | head -50
+              echo ""
+            fi
+
+            # Show stack memory if present
+            if grep -q "Stack memory" qemu_output.log; then
+              echo "=== Stack Memory ==="
+              grep -A 10 "Stack memory" qemu_output.log | head -30
+              echo ""
+            fi
+
+            # Show backtrace if present
+            if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
+              echo "=== Backtrace ==="
+              grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | head -30
+              echo ""
+            fi
+
+            # Show RMT exhaustion errors if present
+            if grep -q "RMT CHANNEL EXHAUSTION" qemu_output.log; then
+              echo "=== RMT Channel Exhaustion Details ==="
+              grep -B 5 -A 10 "RMT CHANNEL EXHAUSTION" qemu_output.log
+              echo ""
+            fi
+
             echo "=== Context around crash ==="
-            CRASH_LINE=$(grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -1 | cut -d: -f1)
+            CRASH_LINE=$(grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction|register dump)" qemu_output.log | head -1 | cut -d: -f1)
             if [ -n "$CRASH_LINE" ]; then
               START_LINE=$((CRASH_LINE - 20))
               [ $START_LINE -lt 1 ] && START_LINE=1
-              END_LINE=$((CRASH_LINE + 20))
+              END_LINE=$((CRASH_LINE + 50))
               sed -n "${START_LINE},${END_LINE}p" qemu_output.log
             fi
             exit 1

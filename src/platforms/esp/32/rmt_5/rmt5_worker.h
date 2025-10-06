@@ -85,6 +85,9 @@ public:
     // Get worker type (double-buffer)
     WorkerType getWorkerType() const override { return WorkerType::DOUBLE_BUFFER; }
 
+    // Check if channel has been created
+    bool hasChannel() const override { return mChannel != nullptr; }
+
 private:
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;

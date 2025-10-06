@@ -140,6 +140,9 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     portEXIT_CRITICAL(&mSpinlock);
 
     if (worker) {
+        // Check if this worker already has a channel (to track actual channel creation)
+        bool had_channel = worker->hasChannel();
+
         // Configure the worker before returning
         if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
             // Configuration failed (likely channel creation failed due to exhaustion)
@@ -150,17 +153,22 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
             ESP_LOGE(RMT5_POOL_TAG, "========================================");
             ESP_LOGE(RMT5_POOL_TAG, "Expected:  %d RMT channels", mExpectedChannels);
             ESP_LOGE(RMT5_POOL_TAG, "Created:   %d channels", mCreatedChannels);
-            ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d (first acquisition)", (int)pin);
+            ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d", (int)pin);
             ESP_LOGE(RMT5_POOL_TAG, "========================================");
             ESP_LOGE(RMT5_POOL_TAG, "");
 
             // Stack trace from abort() will be printed by panic handler
             abort();
         } else {
-            // Successfully configured - track channel creation
-            mCreatedChannels++;
-            ESP_LOGI(RMT5_POOL_TAG, "Successfully created RMT channel %d/%d for GPIO %d",
-                     mCreatedChannels, mExpectedChannels, (int)pin);
+            // Successfully configured - track channel creation only if this is a NEW channel
+            if (!had_channel) {
+                mCreatedChannels++;
+                ESP_LOGI(RMT5_POOL_TAG, "Successfully created RMT channel %d/%d for GPIO %d",
+                         mCreatedChannels, mExpectedChannels, (int)pin);
+            } else {
+                ESP_LOGI(RMT5_POOL_TAG, "Successfully reconfigured existing RMT channel for GPIO %d",
+                         (int)pin);
+            }
             return worker;
         }
     }
@@ -188,11 +196,19 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         portEXIT_CRITICAL(&mSpinlock);
 
         if (worker) {
+            // Check if this worker already has a channel (to track actual channel creation)
+            bool had_channel = worker->hasChannel();
+
             if (worker->configure(pin, t1, t2, t3, reset_ns)) {
-                // Success - track channel creation if this is a new channel
-                mCreatedChannels++;
-                ESP_LOGI(RMT5_POOL_TAG, "Successfully configured RMT channel for GPIO %d (retry path)",
-                         (int)pin);
+                // Success - track channel creation only if this is a NEW channel
+                if (!had_channel) {
+                    mCreatedChannels++;
+                    ESP_LOGI(RMT5_POOL_TAG, "Successfully created RMT channel %d/%d for GPIO %d (retry path)",
+                             mCreatedChannels, mExpectedChannels, (int)pin);
+                } else {
+                    ESP_LOGI(RMT5_POOL_TAG, "Successfully reconfigured existing RMT channel for GPIO %d (retry path)",
+                             (int)pin);
+                }
                 return worker;
             }
             // Configuration failed - likely RMT channel exhaustion
