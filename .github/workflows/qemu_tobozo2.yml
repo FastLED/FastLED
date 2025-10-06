@@ -41,7 +41,7 @@ jobs:
 
           echo "=== Environment ==="
           python --version
-          pio --version
+          uv run pio --version
 
       - name: Build with merged binary
         run: |
