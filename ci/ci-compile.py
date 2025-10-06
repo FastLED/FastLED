@@ -194,10 +194,45 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     print()
 
     # Build command to run inside Docker
-    # Rsync only necessary directories: src/, examples/, ci/ (not .git, .venv, etc.)
+    # Replicate the full entrypoint logic since docker exec bypasses the entrypoint
     example_name = examples[0] if examples else "Blink"
 
-    docker_compile_cmd = f"bash compile {board_name} {example_name}"
+    # Full entrypoint logic: sync files, compile, handle artifacts
+    entrypoint_logic = f"""
+set -e
+
+# Sync host directories to container working directory if they exist
+if command -v rsync &> /dev/null; then
+    echo "Syncing directories from host..."
+    [ -d "/host/src" ] && rsync -a --delete /host/src/ /fastled/src/
+    [ -d "/host/examples" ] && rsync -a --delete /host/examples/ /fastled/examples/
+    [ -d "/host/ci" ] && rsync -a --delete /host/ci/ /fastled/ci/
+    echo "Directory sync complete"
+else
+    echo "Warning: rsync not available, skipping directory sync"
+fi
+
+# Execute the compile command
+bash compile {board_name} {example_name}
+EXIT_CODE=$?
+
+# If /fastled/output is mounted and compilation succeeded, copy build artifacts
+if [ -d "/fastled/output" ] && [ $EXIT_CODE -eq 0 ]; then
+    echo ""
+    echo "Copying build artifacts to output directory..."
+
+    # Find and copy all build artifacts
+    if [ -d "/fastled/.pio/build" ]; then
+        # Copy all binary files
+        find /fastled/.pio/build -type f \\( -name "*.bin" -o -name "*.hex" -o -name "*.elf" -o -name "*.factory.bin" \\) \\
+            -exec cp -v {{}} /fastled/output/ \\; 2>/dev/null || true
+
+        echo "Build artifacts copied to output directory"
+    fi
+fi
+
+exit $EXIT_CODE
+"""
 
     # Execute command in running container
     # Ensure FASTLED_DOCKER=1 is set to skip .venv installation
@@ -209,10 +244,10 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
         container_name,
         "bash",
         "-c",
-        docker_compile_cmd,
+        entrypoint_logic,
     ]
 
-    print(f"Executing: {docker_compile_cmd}")
+    print(f"Executing: bash compile {board_name} {example_name}")
     print()
 
     # Stream output in real-time

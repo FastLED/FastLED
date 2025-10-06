@@ -31,17 +31,11 @@ RUN chmod +x /tmp/build.sh && \
 # Create output directory for compiled binaries
 RUN mkdir -p /fastled/output
 
-# Copy entrypoint script for handling output directory
-COPY entrypoint.sh /usr/local/bin/fastled-entrypoint.sh
-RUN chmod +x /usr/local/bin/fastled-entrypoint.sh
-
 # Set working directory to FastLED root
 WORKDIR /fastled
 
-# Set entrypoint to handle output directory
-ENTRYPOINT ["/usr/local/bin/fastled-entrypoint.sh"]
-
-# Default command - can be overridden at runtime
+# No entrypoint - all sync/output logic is handled by ci-compile.py via docker exec
+# Default command to keep container running (overridden at runtime)
 CMD ["/bin/bash"]
 
 # Metadata labels (can be overridden with --label flags during build)
