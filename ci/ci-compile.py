@@ -77,8 +77,7 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     print(f"Building Docker image for platform: {board_name}")
     build_cmd = [
         sys.executable,
-        "-m",
-        "ci.docker.build_image",
+        "ci/build_docker_image_pio.py",
         "--platform",
         board_name,
     ]

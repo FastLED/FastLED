@@ -6,10 +6,34 @@ PlatformIO dependencies for faster cross-platform compilation.
 
 import hashlib
 import json
+import subprocess
 import sys
 from typing import Optional
 
 from ci.boards import create_board
+
+
+def get_platformio_version() -> str:
+    """Get the installed PlatformIO version.
+
+    Returns:
+        Version string (e.g., '6.1.15')
+    """
+    try:
+        result = subprocess.run(
+            ["pio", "--version"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        # Output format: "PlatformIO Core, version 6.1.15"
+        version_line = result.stdout.strip()
+        if "version" in version_line:
+            return version_line.split("version")[-1].strip()
+        return version_line
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        # If PlatformIO is not installed, return a default version
+        return "unknown"
 
 
 def extract_architecture(board_name: str) -> str:
@@ -79,6 +103,13 @@ def generate_config_hash(board_name: str, framework: Optional[str] = None) -> st
     This hash is used for Docker image naming to ensure automatic cache
     invalidation when platform configuration changes.
 
+    The hash is based on:
+    - platform: Platform name (e.g., 'espressif32')
+    - framework: Framework name (e.g., 'arduino')
+    - board: Board identifier (e.g., 'esp32-s3-devkitc-1')
+    - platform_packages: Custom platform packages/URLs
+    - platformio_version: PlatformIO version for reproducibility
+
     Args:
         board_name: Name of the board (e.g., 'uno', 'esp32s3')
         framework: Optional framework override (e.g., 'arduino')
@@ -106,25 +137,15 @@ def generate_config_hash(board_name: str, framework: Optional[str] = None) -> st
         "platform_packages": sorted(board.platform_packages.split(","))
         if board.platform_packages
         else [],
+        # Include PlatformIO version for full reproducibility
+        "platformio_version": get_platformio_version(),
     }
 
     config_json = json.dumps(config_data, sort_keys=True)
     return hashlib.sha256(config_json.encode()).hexdigest()[:8]
 
 
-def main() -> int:
-    """Main entry point for Docker image builder.
-
-    Note: The actual build logic is in ci/build_docker_image_pio.py
-    This is a backward compatibility wrapper.
-
-    Returns:
-        Exit code (0 for success, non-zero for failure)
-    """
+if __name__ == "__main__":
     print("Note: Please use 'uv run ci/build_docker_image_pio.py' instead")
     print("This module provides utility functions only.")
-    return 1
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+    sys.exit(1)
