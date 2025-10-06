@@ -41,7 +41,9 @@ RUN wget -q https://github.com/FastLED/FastLED/archive/refs/heads/master.zip -O 
 WORKDIR /fastled
 
 # Create virtual environment and install PlatformIO
+# Note: Install pip explicitly as ESP32 Arduino framework requires it
 RUN uv venv .venv && \
+    uv pip install pip && \
     uv pip install platformio==6.1.18
 
 # Add venv binaries to PATH so 'pio' command is available

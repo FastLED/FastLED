@@ -75,7 +75,16 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
 
     # Determine architecture for image name
     architecture = extract_architecture(board_name)
-    image_name = f"fastled-platformio-{architecture}-{board_name}"
+
+    # Generate config hash for image name BEFORE building
+    from ci.docker.build_image import generate_config_hash
+
+    try:
+        config_hash = generate_config_hash(board_name)
+        image_name = f"fastled-platformio-{architecture}-{board_name}-{config_hash}"
+    except:
+        # Fallback if hash generation fails
+        image_name = f"fastled-platformio-{architecture}-{board_name}"
 
     # Build Docker image for the platform
     print(f"Building Docker image for platform: {board_name}")
@@ -93,17 +102,6 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     if result.returncode != 0:
         print("Error: Failed to build Docker image")
         return 1
-
-    # Extract image name - it's deterministic based on platform
-    architecture = extract_architecture(board_name)
-    from ci.docker.build_image import generate_config_hash
-
-    try:
-        config_hash = generate_config_hash(board_name)
-        image_name = f"fastled-platformio-{architecture}-{board_name}-{config_hash}"
-    except:
-        # Fallback
-        image_name = f"fastled-platformio-{architecture}-{board_name}"
 
     # Get absolute path to project root
     project_root = str(Path(__file__).parent.parent.absolute())
