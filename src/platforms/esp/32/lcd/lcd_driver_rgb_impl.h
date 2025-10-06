@@ -38,6 +38,11 @@ bool LcdRgbDriver<LED_CHIPSET>::begin(const LcdRgbDriverConfig& config, int leds
     config_ = config;
     num_leds_ = leds_per_strip;
 
+    // Use chipset default reset time if not specified
+    if (config_.latch_us == 0) {
+        config_.latch_us = LED_CHIPSET::RESET();
+    }
+
     // Validate configuration
     if (config_.num_lanes < 1 || config_.num_lanes > 16) {
         ESP_LOGE(LCD_P4_TAG, "Invalid num_lanes: %d (must be 1-16)", config_.num_lanes);

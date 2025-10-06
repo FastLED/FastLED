@@ -57,7 +57,7 @@ struct LcdRgbDriverConfig {
     int disp_gpio = -1;          ///< GPIO for display enable (optional, -1 to disable)
     int data_gpios[16];          ///< GPIO numbers for data lanes D0-D15
     int num_lanes;               ///< Active lane count (1-16)
-    int latch_us = 300;          ///< Reset gap duration (microseconds)
+    int latch_us = 0;            ///< Reset gap duration (microseconds), 0 = use chipset default
     bool use_psram = true;       ///< Allocate DMA buffers in PSRAM
     uint32_t pclk_hz_override = LCD_PCLK_HZ_OVERRIDE;  ///< Optional: Force specific PCLK
 };

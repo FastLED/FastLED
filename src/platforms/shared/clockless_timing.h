@@ -32,51 +32,56 @@ struct WS2812ChipsetTiming {
 
 /// @brief Timing trait for WS2816 high-density RGB LEDs
 /// T1=300ns, T2=700ns, T3=550ns
-/// Total bit period: 1550ns
+/// Total bit period: 1550ns, Reset time: >280µs
 struct WS2816ChipsetTiming {
     static constexpr uint32_t T1() { return 300; }  // ns
     static constexpr uint32_t T2() { return 700; }  // ns
     static constexpr uint32_t T3() { return 550; }  // ns
+    static constexpr uint32_t RESET() { return 280; }  // µs
     static constexpr const char* name() { return "WS2816"; }
 };
 
 /// @brief Timing trait for WS2811 slow variant LEDs
 /// T1=500ns, T2=2000ns, T3=2000ns
-/// Total bit period: 4500ns (slower protocol)
+/// Total bit period: 4500ns (slower protocol), Reset time: >50µs
 struct WS2811ChipsetTiming {
     static constexpr uint32_t T1() { return 500; }   // ns
     static constexpr uint32_t T2() { return 2000; }  // ns
     static constexpr uint32_t T3() { return 2000; }  // ns
+    static constexpr uint32_t RESET() { return 50; }  // µs
     static constexpr const char* name() { return "WS2811"; }
 };
 
 /// @brief Timing trait for WS2813 LEDs (same as WS2812)
 /// T1=350ns, T2=700ns, T3=600ns
-/// Total bit period: 1650ns
+/// Total bit period: 1650ns, Reset time: >300µs
 struct WS2813ChipsetTiming {
     static constexpr uint32_t T1() { return 350; }  // ns
     static constexpr uint32_t T2() { return 700; }  // ns
     static constexpr uint32_t T3() { return 600; }  // ns
+    static constexpr uint32_t RESET() { return 300; }  // µs
     static constexpr const char* name() { return "WS2813"; }
 };
 
 /// @brief Timing trait for SK6812 RGBW LEDs
 /// T1=300ns, T2=600ns, T3=300ns
-/// Total bit period: 1200ns (faster protocol)
+/// Total bit period: 1200ns (faster protocol), Reset time: >80µs
 struct SK6812ChipsetTiming {
     static constexpr uint32_t T1() { return 300; }  // ns
     static constexpr uint32_t T2() { return 600; }  // ns
     static constexpr uint32_t T3() { return 300; }  // ns
+    static constexpr uint32_t RESET() { return 80; }  // µs
     static constexpr const char* name() { return "SK6812"; }
 };
 
 /// @brief Timing trait for TM1814 RGBW LEDs
 /// T1=360ns, T2=600ns, T3=340ns
-/// Total bit period: 1300ns
+/// Total bit period: 1300ns, Reset time: >300µs
 struct TM1814ChipsetTiming {
     static constexpr uint32_t T1() { return 360; }  // ns
     static constexpr uint32_t T2() { return 600; }  // ns
     static constexpr uint32_t T3() { return 340; }  // ns
+    static constexpr uint32_t RESET() { return 300; }  // µs
     static constexpr const char* name() { return "TM1814"; }
 };
 

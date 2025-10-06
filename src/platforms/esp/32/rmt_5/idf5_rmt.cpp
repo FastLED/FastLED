@@ -24,8 +24,8 @@
 namespace fl {
 
 
-RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode)
-        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3), mDmaMode(dma_mode) {
+RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode, int RESET_US)
+        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3), mResetUs(RESET_US), mDmaMode(dma_mode) {
 }
 
 RmtController5::~RmtController5() {
@@ -53,9 +53,11 @@ void RmtController5::loadPixelData(PixelIterator &pixels) {
     if (!mLedStrip) {
         uint16_t t0h, t0l, t1h, t1l;
         convert_fastled_timings_to_timedeltas(mT1, mT2, mT3, &t0h, &t0l, &t1h, &t1l);
+        // Convert reset time from microseconds to nanoseconds (ESP-IDF expects ns)
+        uint32_t reset_ns = mResetUs * 1000;
         mLedStrip = IRmtStrip::Create(
             mPin, pixels.size(),
-            is_rgbw, t0h, t0l, t1h, t1l, 280,
+            is_rgbw, t0h, t0l, t1h, t1l, reset_ns,
             convertDmaMode(mDmaMode));
         
     } else {

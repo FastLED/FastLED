@@ -14,7 +14,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
@@ -30,7 +30,7 @@ private:
     }
 
 public:
-    ClocklessController(): mRMTController(DATA_PIN, T1, T2, T3, DefaultDmaMode())
+    ClocklessController(): mRMTController(DATA_PIN, T1, T2, T3, DefaultDmaMode(), WAIT_TIME)
     {
     }
 
