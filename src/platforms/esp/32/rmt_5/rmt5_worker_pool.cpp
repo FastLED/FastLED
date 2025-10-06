@@ -58,6 +58,9 @@ RmtWorkerPool::~RmtWorkerPool() {
 }
 
 void RmtWorkerPool::initializeWorkersIfNeeded() {
+    // Set log level to verbose for maximum debugging
+    esp_log_level_set(RMT5_POOL_TAG, ESP_LOG_VERBOSE);
+
     ESP_LOGI(RMT5_POOL_TAG, "=== initializeWorkersIfNeeded() ENTRY ===");
     ESP_LOGI(RMT5_POOL_TAG, "mInitialized=%d", mInitialized);
 
