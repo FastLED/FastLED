@@ -58,8 +58,8 @@ public:
     #define FASTLED_RMT_MEM_BLOCKS 2
     #endif
 
-    static constexpr fl::size MAX_PULSES = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS;
-    static constexpr fl::size PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
+    static constexpr int MAX_PULSES = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS;
+    static constexpr int PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
 
     // Worker lifecycle
     RmtWorker();
@@ -75,7 +75,7 @@ public:
     bool configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns);
 
     // Transmission control
-    void transmit(const uint8_t* pixel_data, fl::size num_bytes);
+    void transmit(const uint8_t* pixel_data, int num_bytes);
     void waitForCompletion();
 
     // Get worker ID
@@ -108,7 +108,7 @@ private:
     rmt_item32_t mOne;
 
     // Double buffer state (like RMT4)
-    volatile fl::size mCur;          // Current byte position in pixel data
+    volatile int mCur;               // Current byte position in pixel data
     volatile uint8_t mWhichHalf;     // Which half of buffer (0 or 1)
     volatile rmt_item32_t* mRMT_mem_start;  // Start of RMT channel memory
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
@@ -117,7 +117,7 @@ private:
     volatile bool mAvailable;        // Worker available for assignment
     volatile bool mTransmitting;     // Transmission in progress
     const uint8_t* mPixelData;       // POINTER ONLY - not owned by worker
-    fl::size mNumBytes;              // Total bytes to transmit
+    int mNumBytes;                   // Total bytes to transmit
 
     // Spinlock for ISR synchronization
     static portMUX_TYPE sRmtSpinlock;
@@ -126,7 +126,8 @@ private:
     void IRAM_ATTR fillNextHalf();
 
     // ISR handlers
-    static void IRAM_ATTR globalISR(void* arg);
+    static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (currently unused)
+    static bool IRAM_ATTR onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data);  // RMT5 callback
     void IRAM_ATTR handleThresholdInterrupt();
     void IRAM_ATTR handleDoneInterrupt();
 

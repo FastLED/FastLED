@@ -36,6 +36,15 @@
 #if !FASTLED_RMT5
 #include "rmt_4/idf4_clockless_rmt_esp32.h"
 #else
-#include "rmt_5/idf5_clockless_rmt_esp32.h"
+// Default to V2 (new worker pool driver) if not defined
+#ifndef FASTLED_RMT5_V2
+#define FASTLED_RMT5_V2 1
+#endif
+
+#if FASTLED_RMT5_V2
+#include "rmt_5/idf5_clockless_rmt_esp32_v2.h"  // NEW: Worker pool driver
+#else
+#include "rmt_5/idf5_clockless_rmt_esp32.h"     // OLD: led_strip driver
+#endif
 #endif
 #endif  // FASTLED_ESP32_HAS_RMT

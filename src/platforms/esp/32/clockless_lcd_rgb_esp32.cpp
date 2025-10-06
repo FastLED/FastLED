@@ -3,8 +3,9 @@
 
 #include "sdkconfig.h"
 
-// RGB LCD driver is only available on ESP32-P4
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
+// Feature-based detection: compile RGB LCD driver if platform supports it
+// The lcd_driver_rgb.h header will provide compile-time errors if headers are missing
+#if defined(CONFIG_IDF_TARGET_ESP32P4) && __has_include("esp_lcd_panel_rgb.h")
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"

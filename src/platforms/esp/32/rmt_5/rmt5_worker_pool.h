@@ -55,10 +55,10 @@ public:
     void releaseWorker(RmtWorker* worker);
 
     // Get total number of workers in pool
-    fl::size getWorkerCount() const { return mWorkers.size(); }
+    int getWorkerCount() const { return static_cast<int>(mWorkers.size()); }
 
     // Get number of available workers
-    fl::size getAvailableCount() const;
+    int getAvailableCount() const;
 
 private:
     // Private constructor (singleton pattern)
@@ -76,7 +76,7 @@ private:
     RmtWorker* findAvailableWorker();
 
     // Get platform-specific max worker count
-    static fl::size getMaxWorkers();
+    static int getMaxWorkers();
 
     // Worker storage
     fl::vector<RmtWorker*> mWorkers;

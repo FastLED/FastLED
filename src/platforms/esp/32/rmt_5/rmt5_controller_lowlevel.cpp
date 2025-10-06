@@ -70,8 +70,8 @@ void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) {
     // Copy pixel data to buffer
     if (is_rgbw) {
         uint8_t r, g, b, w;
-        fl::size offset = 0;
-        for (fl::size i = 0; pixels.has(1); i++) {
+        int offset = 0;
+        for (int i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGBW(&r, &g, &b, &w);
             mPixelData[offset++] = r;
             mPixelData[offset++] = g;
@@ -83,8 +83,8 @@ void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) {
         mPixelDataSize = offset;
     } else {
         uint8_t r, g, b;
-        fl::size offset = 0;
-        for (fl::size i = 0; pixels.has(1); i++) {
+        int offset = 0;
+        for (int i = 0; pixels.has(1); i++) {
             pixels.loadAndScaleRGB(&r, &g, &b);
             mPixelData[offset++] = r;
             mPixelData[offset++] = g;
@@ -115,7 +115,7 @@ void RmtController5LowLevel::onEndShow() {
     // Configure worker for this controller's pin and timing
     bool configured = worker->configure(mPin, mT1, mT2, mT3, mResetNs);
     if (!configured) {
-        FL_WARN("RmtController5LowLevel: Failed to configure worker for pin %d", mPin);
+        ESP_LOGW(RMT5_CONTROLLER_TAG, "Failed to configure worker for pin %d", mPin);
         RmtWorkerPool::getInstance().releaseWorker(worker);
         return;
     }
@@ -138,17 +138,17 @@ void RmtController5LowLevel::waitForPreviousTransmission() {
     }
 }
 
-void RmtController5LowLevel::ensurePixelBufferCapacity(fl::size required_bytes) {
+void RmtController5LowLevel::ensurePixelBufferCapacity(int required_bytes) {
     if (required_bytes <= mPixelDataCapacity) {
         return;  // Sufficient capacity
     }
 
     // Allocate new buffer with extra headroom to reduce reallocations
-    fl::size new_capacity = required_bytes + (required_bytes / 4);  // 25% headroom
+    int new_capacity = required_bytes + (required_bytes / 4);  // 25% headroom
 
     uint8_t* new_buffer = static_cast<uint8_t*>(malloc(new_capacity));
     if (!new_buffer) {
-        FL_WARN("RmtController5LowLevel: Failed to allocate pixel buffer (%u bytes)",
+        ESP_LOGE(RMT5_CONTROLLER_TAG, "Failed to allocate pixel buffer (%u bytes)",
             static_cast<unsigned int>(new_capacity));
         return;
     }

@@ -6,6 +6,8 @@
 
 #include "rmt5_worker_pool.h"
 
+#include <Arduino.h>  // ok include - needed for delayMicroseconds()
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -38,7 +40,7 @@ RmtWorkerPool::RmtWorkerPool()
 
 RmtWorkerPool::~RmtWorkerPool() {
     // Clean up workers
-    for (fl::size i = 0; i < mWorkers.size(); i++) {
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
         delete mWorkers[i];
     }
     mWorkers.clear();
@@ -49,14 +51,14 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
         return;
     }
 
-    fl::size max_workers = getMaxWorkers();
+    int max_workers = getMaxWorkers();
 
-    FL_WARN("RmtWorkerPool: Initializing %u workers", static_cast<unsigned int>(max_workers));
+    ESP_LOGI(RMT5_POOL_TAG, "Initializing %u workers", static_cast<unsigned int>(max_workers));
 
-    for (fl::size i = 0; i < max_workers; i++) {
+    for (int i = 0; i < max_workers; i++) {
         RmtWorker* worker = new RmtWorker();
         if (!worker->initialize(static_cast<uint8_t>(i))) {
-            FL_WARN("RmtWorkerPool: Failed to initialize worker %u", static_cast<unsigned int>(i));
+            ESP_LOGW(RMT5_POOL_TAG, "Failed to initialize worker %u", static_cast<unsigned int>(i));
             delete worker;
             continue;
         }
@@ -64,9 +66,9 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     }
 
     if (mWorkers.size() == 0) {
-        FL_WARN("RmtWorkerPool: No workers initialized successfully!");
+        ESP_LOGE(RMT5_POOL_TAG, "No workers initialized successfully!");
     } else {
-        FL_WARN("RmtWorkerPool: Successfully initialized %u/%u workers",
+        ESP_LOGI(RMT5_POOL_TAG, "Successfully initialized %u/%u workers",
             static_cast<unsigned int>(mWorkers.size()),
             static_cast<unsigned int>(max_workers));
     }
@@ -110,7 +112,7 @@ RmtWorker* RmtWorkerPool::acquireWorker() {
 
         // Safety: Warn if waiting too long (more than 100ms = very unusual)
         if (poll_count % 1000 == 0) {  // Every 100ms
-            FL_WARN("RmtWorkerPool: Still waiting for available worker after %u ms",
+            ESP_LOGW(RMT5_POOL_TAG, "Still waiting for available worker after %u ms",
                 static_cast<unsigned int>(poll_count / 10));
         }
     }
@@ -123,21 +125,21 @@ void RmtWorkerPool::releaseWorker(RmtWorker* worker) {
     // Nothing to do here - worker is automatically recycled
 }
 
-fl::size RmtWorkerPool::getAvailableCount() const {
-    portENTER_CRITICAL(&mSpinlock);
-    fl::size count = 0;
-    for (fl::size i = 0; i < mWorkers.size(); i++) {
+int RmtWorkerPool::getAvailableCount() const {
+    portENTER_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
+    int count = 0;
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
         if (mWorkers[i]->isAvailable()) {
             count++;
         }
     }
-    portEXIT_CRITICAL(&mSpinlock);
+    portEXIT_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
     return count;
 }
 
 RmtWorker* RmtWorkerPool::findAvailableWorker() {
     // Caller must hold mSpinlock
-    for (fl::size i = 0; i < mWorkers.size(); i++) {
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
         if (mWorkers[i]->isAvailable()) {
             return mWorkers[i];
         }
@@ -145,7 +147,7 @@ RmtWorker* RmtWorkerPool::findAvailableWorker() {
     return nullptr;
 }
 
-fl::size RmtWorkerPool::getMaxWorkers() {
+int RmtWorkerPool::getMaxWorkers() {
     // Platform-specific maximum worker count
     // Based on SOC RMT TX channel capabilities
 
