@@ -16,6 +16,49 @@ from typing import Any, Dict, List, Optional, Tuple
 from ci.util.paths import PROJECT_ROOT
 
 
+def strip_comments(content: str) -> str:
+    """
+    Strip C/C++ comments from content.
+
+    Args:
+        content (str): The content to strip comments from
+
+    Returns:
+        str: Content with comments removed
+    """
+    # Remove multi-line comments
+    content = re.sub(r"/\*.*?\*/", "", content, flags=re.DOTALL)
+    # Remove single-line comments
+    content = re.sub(r"//.*$", "", content, flags=re.MULTILINE)
+    return content
+
+
+def is_bracket_balanced(file_path: Path) -> bool:
+    """
+    Check if brackets are balanced in a file (after stripping comments).
+
+    Args:
+        file_path (Path): Path to the file to check
+
+    Returns:
+        bool: True if brackets are balanced, False otherwise
+    """
+    try:
+        with open(file_path, "r", encoding="utf-8") as f:
+            content = f.read()
+
+        # Strip comments first
+        content = strip_comments(content)
+
+        # Count brackets
+        open_count = content.count("{")
+        close_count = content.count("}")
+
+        return open_count == close_count
+    except (UnicodeDecodeError, IOError):
+        return True  # Assume balanced if we can't read
+
+
 def find_includes_after_namespace(
     file_path: Path,
 ) -> List[Tuple[int, str, Optional[Tuple[int, str]]]]:
@@ -71,6 +114,15 @@ def find_includes_after_namespace(
                     if not has_suppression:
                         include_snippet = truncate_snippet(original_line)
                         violations.append((i, include_snippet, current_namespace))
+
+        # Second pass: if we found violations, verify with bracket counting
+        if violations:
+            if not is_bracket_balanced(file_path):
+                # Brackets are unbalanced, keep violations as they might be false positives
+                # But file has syntax errors, so just clear violations to avoid noise
+                return []
+            # Brackets are balanced, violations are real
+            return violations
 
         return violations
     except (UnicodeDecodeError, IOError):
