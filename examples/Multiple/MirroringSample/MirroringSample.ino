@@ -2,6 +2,12 @@
 /// @brief   Demonstrates how to use multiple LED strips, each with the same data
 /// @example MirroringSample.ino
 
+#include "fl/sketch_macros.h"
+
+#if !SKETCH_HAS_LOTS_OF_MEMORY
+#include "platforms/sketch_fake.hpp"
+#else
+
 // MirroringSample - see https://github.com/FastLED/FastLED/wiki/Multiple-Controller-Examples for more info on
 // using multiple controllers.  In this example, we're going to set up four NEOPIXEL strips on four
 // different pins, and show the same thing on all four of them, a simple bouncing dot/cyclon type pattern
@@ -46,3 +52,5 @@ void loop() {
     delay(100);
   }
 }
+
+#endif // SKETCH_HAS_LOTS_OF_MEMORY
