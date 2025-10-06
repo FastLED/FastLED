@@ -73,6 +73,10 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     print(f"Examples: {', '.join(examples)}")
     print()
 
+    # Determine architecture for image name
+    architecture = extract_architecture(board_name)
+    image_name = f"fastled-platformio-{architecture}-{board_name}"
+
     # Build Docker image for the platform
     print(f"Building Docker image for platform: {board_name}")
     build_cmd = [
@@ -80,6 +84,8 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
         "ci/build_docker_image_pio.py",
         "--platform",
         board_name,
+        "--image-name",
+        image_name,
     ]
 
     # Run build - Docker image name is deterministic from platform
