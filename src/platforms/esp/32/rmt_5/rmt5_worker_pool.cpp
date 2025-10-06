@@ -144,37 +144,16 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
             // Configuration failed (likely channel creation failed due to exhaustion)
             // STRICT MODE: Abort immediately with stack trace
-            ESP_LOGE(RMT5_POOL_TAG, "FATAL: Failed to configure worker on first acquisition attempt!");
-            ESP_LOGE(RMT5_POOL_TAG, "Expected %d RMT channels for this %s variant, but channel creation failed",
-                     mExpectedChannels,
-#if defined(CONFIG_IDF_TARGET_ESP32)
-                     "ESP32"
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-                     "ESP32-S2"
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-                     "ESP32-S3"
-#elif defined(CONFIG_IDF_TARGET_ESP32C2)
-                     "ESP32-C2"
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
-                     "ESP32-C3"
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
-                     "ESP32-C6"
-#elif defined(CONFIG_IDF_TARGET_ESP32H2)
-                     "ESP32-H2"
-#else
-                     "Unknown ESP32"
-#endif
-            );
-            ESP_LOGE(RMT5_POOL_TAG, "Pin: GPIO %d, Worker type: %s",
-                     (int)pin,
-                     use_oneshot ? "ONE-SHOT" : "DOUBLE-BUFFER");
-            ESP_LOGE(RMT5_POOL_TAG, "This indicates a bug in RMT channel management - dumping stack trace:");
+            fl::printf("\n\n");
+            fl::printf("========================================\n");
+            fl::printf("FATAL: RMT CHANNEL EXHAUSTION\n");
+            fl::printf("========================================\n");
+            fl::printf("Expected:  %d RMT channels\n", mExpectedChannels);
+            fl::printf("Created:   %d channels\n", mCreatedChannels);
+            fl::printf("Failed on: GPIO %d (first acquisition)\n", (int)pin);
+            fl::printf("========================================\n\n");
 
-            // Print stack trace
-            esp_backtrace_print(100);
-
-            // Abort to trigger core dump
-            ESP_LOGE(RMT5_POOL_TAG, "ABORTING due to RMT channel exhaustion on first acquisition");
+            // Stack trace from abort() will be printed by panic handler
             abort();
         } else {
             // Successfully configured - track channel creation
@@ -220,39 +199,16 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
             if (config_fail_count >= MAX_CONFIG_RETRIES) {
                 // STRICT MODE: Abort with stack trace after exhausting retries
-                ESP_LOGE(RMT5_POOL_TAG, "FATAL: Failed to configure worker after %u retries!",
-                         config_fail_count);
-                ESP_LOGE(RMT5_POOL_TAG, "Expected %d RMT channels for this %s variant",
-                         mExpectedChannels,
-#if defined(CONFIG_IDF_TARGET_ESP32)
-                         "ESP32"
-#elif defined(CONFIG_IDF_TARGET_ESP32S2)
-                         "ESP32-S2"
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-                         "ESP32-S3"
-#elif defined(CONFIG_IDF_TARGET_ESP32C2)
-                         "ESP32-C2"
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
-                         "ESP32-C3"
-#elif defined(CONFIG_IDF_TARGET_ESP32C6)
-                         "ESP32-C6"
-#elif defined(CONFIG_IDF_TARGET_ESP32H2)
-                         "ESP32-H2"
-#else
-                         "Unknown ESP32"
-#endif
-                );
-                ESP_LOGE(RMT5_POOL_TAG, "Successfully created: %d channels", mCreatedChannels);
-                ESP_LOGE(RMT5_POOL_TAG, "Failed channel - Pin: GPIO %d, Worker type: %s",
-                         (int)pin,
-                         use_oneshot ? "ONE-SHOT" : "DOUBLE-BUFFER");
-                ESP_LOGE(RMT5_POOL_TAG, "This indicates RMT channels are exhausted - dumping stack trace:");
+                fl::printf("\n\n");
+                fl::printf("========================================\n");
+                fl::printf("FATAL: RMT CHANNEL EXHAUSTION\n");
+                fl::printf("========================================\n");
+                fl::printf("Expected:  %d RMT channels\n", mExpectedChannels);
+                fl::printf("Created:   %d channels\n", mCreatedChannels);
+                fl::printf("Failed on: GPIO %d (after %u retries)\n", (int)pin, config_fail_count);
+                fl::printf("========================================\n\n");
 
-                // Print stack trace
-                esp_backtrace_print(100);
-
-                // Abort to trigger core dump
-                ESP_LOGE(RMT5_POOL_TAG, "ABORTING due to RMT channel exhaustion after retries");
+                // Stack trace from abort() will be printed by panic handler
                 abort();
             }
 

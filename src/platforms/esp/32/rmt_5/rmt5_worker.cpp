@@ -115,6 +115,9 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 bool RmtWorker::createChannel(gpio_num_t pin) {
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Creating RMT TX channel for GPIO %d", mWorkerId, (int)pin);
 
+    // Flush logs before potentially failing operation
+    esp_log_level_set("*", ESP_LOG_VERBOSE);
+
     // Create RMT TX channel with double memory blocks
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
@@ -125,7 +128,10 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     tx_config.flags.invert_out = false;
     tx_config.flags.with_dma = false;  // Phase 1: No DMA
 
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: About to call rmt_new_tx_channel for GPIO %d...", mWorkerId, (int)pin);
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: rmt_new_tx_channel returned: %s (0x%x)", mWorkerId, esp_err_to_name(ret), ret);
+
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %s (0x%x)",
                  mWorkerId, esp_err_to_name(ret), ret);
