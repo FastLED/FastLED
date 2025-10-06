@@ -298,9 +298,9 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 | **Teensy 4.0** | 42 parallel strips | High-performance ARM Cortex-M7 |
 | **ESP32DEV** | 24 via I2S + 8 via RMT | [I2S Example](examples/EspI2SDemo/EspI2SDemo.ino) |
 | **ESP32-S3** | 16 via LCD/I2S + 4 via RMT | [LCD/I80 Example](examples/Esp32S3I80/) (NEW!), [I2S Example](examples/Esp32S3I2SDemo/Esp32S3I2SDemo.ino) |
-| **ESP32-S2** | 16 via LCD + 4 via RMT | Same LCD driver as S3 - [See LCD docs](#-esp32-s2s3-lcd-driver---new-memory-efficient-parallel-output-using-lcd-peripheral-recommended) |
+| **ESP32-P4** | 16 via LCD (RGB or I80) + RMT | [See LCD docs](#-esp32-lcd-driver---new-memory-efficient-parallel-output-using-lcd-peripheral-recommended) - Supports both RGB and I80 modes |
 
-*Note: The new **LCD driver** for ESP32-S2/S3 is recommended over I2S for better Serial debugging support and memory efficiency. Some ESP32 Arduino core versions (3.10+) have compatibility issues with I2S. Older versions work better - see [issue #1903](https://github.com/FastLED/FastLED/issues/1903)*
+*Note: The new **LCD driver** is recommended over I2S for better Serial debugging support and memory efficiency. ESP32-P4 supports both RGB and I80 LCD modes. Some ESP32 Arduino core versions (3.10+) have compatibility issues with I2S. Older versions work better - see [issue #1903](https://github.com/FastLED/FastLED/issues/1903)*
 
 ### Wiring Best Practices for High-Parallel Setups
 
@@ -445,21 +445,26 @@ FastLED.addLeds<WS2812SERIAL, /* DATA_PIN */, GRB>(leds, NUM_LEDS);
 ## ESP32 Platform
 
 <details>
-<summary><b>🚀 ESP32-S2/S3 LCD Driver</b> - NEW! Memory-efficient parallel output using LCD peripheral (RECOMMENDED)</summary>
+<summary><b>🚀 ESP32 LCD Driver</b> - NEW! Memory-efficient parallel output using LCD peripheral (RECOMMENDED)</summary>
 
 ### Overview
 
-The **LCD driver** is a new high-performance parallel output driver for **ESP32-S2** and **ESP32-S3** boards. It uses the LCD_CAM peripheral (I80 mode) to drive up to **16 parallel WS28xx LED strips** with automatic chipset timing optimization.
+The **LCD driver** is a high-performance parallel output driver for ESP32 boards with LCD peripheral support. It uses hardware LCD peripherals to drive up to **16 parallel WS28xx LED strips** with automatic chipset timing optimization.
+
+**Two Driver Variants:**
+- **I80 Mode**: Uses LCD_CAM/I80 peripheral with 3-word-per-bit encoding (6 bytes per bit)
+- **RGB Mode**: Uses RGB LCD controller with 4-pixel-per-bit encoding (8 bytes per bit)
 
 **Key Advantages over I2S:**
-- ✅ **More WS282x Chipsets**: 3-word-per-bit encoding (6 bytes per bit) - same as I2S but with better support for WS2811, WS2816, WS2813 etc.
+- ✅ **More WS282x Chipsets**: Better support for WS2811, WS2816, WS2813, etc.
 - ✅ **Better timing accuracy**: Automatic PCLK optimization per chipset
 - ✅ **Serial output works**: Unlike I2S, you can use Serial.print() for debugging
-- ✅ **Supports both S2 and S3**: Identical esp_lcd_i80 API on both platforms
+- ✅ **Platform-agnostic**: Automatically detects and uses available LCD peripheral
 
 ### Supported Platforms
-- **ESP32-S2**: LCD peripheral with I80 interface
-- **ESP32-S3**: LCD_CAM peripheral with I80 interface
+- **ESP32-S3**: LCD_CAM peripheral with I80 interface (3-word encoding)
+- **ESP32-P4**: Both RGB LCD controller (4-pixel encoding) AND I80 interface (3-word encoding)
+- **Future ESP32 variants**: Any chip with RGB or I80 LCD peripheral support
 
 ### Configuration
 To use the LCD driver instead of I2S, define `FASTLED_ESP32_LCD_DRIVER` before including FastLED:
@@ -487,8 +492,10 @@ void loop() {
 
 ### Performance
 - **Up to 16 parallel strips** (all must use the same chipset)
-- **Memory usage**: 144 KB per 1000 LEDs (identical to I2S driver)
-- **Recommended for new projects** on ESP32-S2/S3
+- **Memory usage**:
+  - I80 (S3): 144 KB per 1000 LEDs (6 bytes per bit)
+  - RGB (P4): 192 KB per 1000 LEDs (8 bytes per bit)
+- **Recommended for new projects** on ESP32-S3/P4
 
 ### Examples
 - [Esp32S3I80 Example](examples/Esp32S3I80/) - Demonstrates LCD/I80 driver usage
@@ -504,7 +511,7 @@ void loop() {
 
 The ESP32-S3 I2S driver leverages the I2S peripheral for high-performance parallel WS2812 output on ESP32-S3 boards. This driver is a dedicated clockless implementation.
 
-**Note:** The **LCD driver** (above) is now recommended for new projects on ESP32-S2/S3 due to better memory efficiency and Serial debugging support.
+**Note:** The **LCD driver** (above) is now recommended for new projects on ESP32-S3 due to better memory efficiency and Serial debugging support.
 
 ### Configuration
 To use this driver, you must define `FASTLED_USES_ESP32S3_I2S` before including the FastLED header.

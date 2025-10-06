@@ -17,8 +17,16 @@
 
 #pragma once
 
-#if !defined(CONFIG_IDF_TARGET_ESP32P4)
-#error "This file is only for ESP32-P4"
+// Feature-based platform detection for RGB LCD peripheral
+// This driver requires:
+// - ESP LCD panel operations API (esp_lcd_panel_ops.h)
+// - RGB LCD panel support (esp_lcd_panel_rgb.h)
+#if !__has_include("esp_lcd_panel_ops.h")
+#error "RGB LCD driver requires esp_lcd_panel_ops.h (ESP-IDF LCD component)"
+#endif
+
+#if !__has_include("esp_lcd_panel_rgb.h")
+#error "RGB LCD peripheral not available on this platform - requires RGB LCD controller"
 #endif
 
 #include "sdkconfig.h"
@@ -36,7 +44,7 @@
 #include "crgb.h"
 #include "platforms/shared/clockless_timing.h"
 #include "lcd_driver_common.h"
-#include "lcd_driver_rgb_impl.h"
+#include "lcd_driver_base.h"
 
 namespace fl {
 
@@ -61,7 +69,7 @@ struct LcdRgbDriverConfig {
 ///
 /// @tparam LED_CHIPSET LED chipset timing trait (e.g., WS2812ChipsetTiming)
 template <typename LED_CHIPSET>
-class LcdRgbDriver {
+class LcdRgbDriver : public LcdDriverBase {
 public:
     /// @brief Fixed 4-pixel encoding for WS2812 timing
     /// At 3.2 MHz PCLK (312.5ns per pixel):
@@ -107,22 +115,12 @@ public:
 
     /// @brief Constructor
     LcdRgbDriver()
-        : config_{}
-        , num_leds_(0)
-        , strips_{}
+        : LcdDriverBase()
+        , config_{}
         , template_bit0_{}
         , template_bit1_{}
         , panel_handle_(nullptr)
-        , buffers_{nullptr, nullptr}
-        , buffer_size_(0)
-        , front_buffer_(0)
-        , xfer_done_sem_(nullptr)
-        , dma_busy_(false)
-        , frame_counter_(0)
     {
-        for (int i = 0; i < 16; i++) {
-            strips_[i] = nullptr;
-        }
     }
 
     /// @brief Destructor
@@ -140,37 +138,17 @@ public:
     /// @brief Shutdown driver and free resources
     void end();
 
-    /// @brief Attach per-lane LED strip data
+    /// @brief Attach per-lane LED strip data (overload for config-aware attachment)
     ///
     /// @param strips Array of CRGB pointers (size = num_lanes from config)
     void attachStrips(CRGB** strips) {
-        for (int i = 0; i < config_.num_lanes && i < 16; i++) {
-            strips_[i] = strips[i];
-        }
-    }
-
-    /// @brief Attach single strip to specific lane
-    ///
-    /// @param lane Lane index (0 to num_lanes-1)
-    /// @param strip Pointer to LED data array
-    void attachStrip(int lane, CRGB* strip) {
-        if (lane >= 0 && lane < 16) {
-            strips_[lane] = strip;
-        }
+        LcdDriverBase::attachStrips(strips, config_.num_lanes);
     }
 
     /// @brief Encode current LED data and start DMA transfer
     ///
     /// @return true if transfer started, false if previous transfer still active
     bool show();
-
-    /// @brief Block until current DMA transfer completes
-    void wait();
-
-    /// @brief Check if DMA transfer is in progress
-    ///
-    /// @return true if busy, false if idle
-    bool busy() const { return dma_busy_; }
 
     /// @brief Get actual timing after quantization (nanoseconds)
     void getActualTiming(uint32_t& T1_actual, uint32_t& T2_actual, uint32_t& T3_actual) const {
@@ -202,11 +180,6 @@ public:
         );
     }
 
-    /// @brief Get buffer memory usage (bytes, per buffer)
-    size_t getBufferSize() const {
-        return buffer_size_;
-    }
-
 private:
     /// @brief Generate bit-0 and bit-1 templates (called during initialization)
     void generateTemplates();
@@ -221,27 +194,15 @@ private:
                                        void* edata,
                                        void* user_ctx);
 
-    // Configuration
+    // Configuration (driver-specific)
     LcdRgbDriverConfig config_;
-    int num_leds_;
-    CRGB* strips_[16];
 
     // Pre-computed bit templates (4 pixels each for 4-pixel encoding)
     uint16_t template_bit0_[N_PIXELS];
     uint16_t template_bit1_[N_PIXELS];
 
-    // ESP-LCD RGB panel handle
+    // ESP-LCD RGB panel handle (RGB-specific)
     esp_lcd_panel_handle_t panel_handle_;
-
-    // DMA buffers (double-buffered)
-    uint16_t* buffers_[2];
-    size_t buffer_size_;
-    int front_buffer_;
-
-    // Synchronization
-    SemaphoreHandle_t xfer_done_sem_;
-    volatile bool dma_busy_;
-    uint32_t frame_counter_;
 };
 
 }  // namespace fl

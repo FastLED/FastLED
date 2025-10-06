@@ -3,7 +3,9 @@
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
+// Feature-based detection: compile RGB LCD driver if platform supports it
+// The lcd_driver_rgb.h header will provide compile-time errors if headers are missing
+#if __has_include("esp_lcd_panel_rgb.h")
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
@@ -20,6 +22,7 @@
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
 #include "clockless_lcd_rgb_esp32.h"
+#include "lcd/lcd_driver_rgb_impl.h"
 
 namespace { // anonymous namespace
 
@@ -68,7 +71,7 @@ class LCDRGBEsp32_Group {
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
-            mDriver.reset(new fl::LcdLedDriver_P4<fl::WS2812ChipsetTiming>());
+            mDriver.reset(new fl::LcdRgbDriver<fl::WS2812ChipsetTiming>());
 
             // Build pin list and config
             fl::LcdRgbDriverConfig config;
@@ -189,9 +192,9 @@ void LCD_RGB_Esp32::endShowLeds() {
 }
 
 // Explicit template instantiation for WS2812 chipset (forces compilation)
-template class LcdLedDriver_P4<WS2812ChipsetTiming>;
+template class LcdRgbDriver<WS2812ChipsetTiming>;
 
 } // namespace fl
 
-#endif  // CONFIG_IDF_TARGET_ESP32P4
+#endif  // __has_include("esp_lcd_panel_rgb.h")
 #endif  // ESP32

@@ -17,12 +17,21 @@
 
 #pragma once
 
-#if !defined(CONFIG_IDF_TARGET_ESP32S3)
-#error "This file is only for ESP32-S3"
+// Feature-based platform detection for I80 LCD peripheral
+// This driver requires:
+// - ESP LCD panel I/O API (esp_lcd_panel_io.h)
+// - LCD HAL layer (hal/lcd_hal.h and hal/lcd_ll.h)
+// - LCD peripheral register definitions (soc/lcd_periph.h)
+#if !__has_include("esp_lcd_panel_ops.h")
+#error "I80 LCD driver requires esp_lcd_panel_ops.h (ESP-IDF LCD component)"
 #endif
 
-#if defined(CONFIG_IDF_TARGET_ESP32S2)
-#error "LCD driver is not supported on ESP32-S2"
+#if !__has_include("hal/lcd_hal.h") || !__has_include("hal/lcd_ll.h")
+#error "I80 LCD peripheral not available on this platform - requires LCD_CAM or I80 interface"
+#endif
+
+#if !__has_include("soc/lcd_periph.h")
+#error "I80 LCD peripheral not available on this platform - missing LCD peripheral definitions"
 #endif
 
 #include "sdkconfig.h"
@@ -43,7 +52,7 @@
 #include "crgb.h"
 #include "platforms/shared/clockless_timing.h"
 #include "lcd_driver_common.h"
-#include "lcd_driver_i80_impl.h"
+#include "lcd_driver_base.h"
 
 namespace fl {
 
@@ -54,7 +63,7 @@ namespace fl {
 ///
 /// @tparam LED_CHIPSET LED chipset timing trait (e.g., WS2812ChipsetTiming)
 template <typename LED_CHIPSET>
-class LcdI80Driver {
+class LcdI80Driver : public LcdDriverBase {
 public:
     /// @brief Fixed 3-word encoding for memory efficiency (matches I2S driver)
     static constexpr uint32_t N_BIT = 3;
@@ -98,23 +107,13 @@ public:
 
     /// @brief Constructor
     LcdI80Driver()
-        : config_{}
-        , num_leds_(0)
-        , strips_{}
+        : LcdDriverBase()
+        , config_{}
         , template_bit0_{}
         , template_bit1_{}
         , bus_handle_(nullptr)
         , io_handle_(nullptr)
-        , buffers_{nullptr, nullptr}
-        , buffer_size_(0)
-        , front_buffer_(0)
-        , xfer_done_sem_(nullptr)
-        , dma_busy_(false)
-        , frame_counter_(0)
     {
-        for (int i = 0; i < 16; i++) {
-            strips_[i] = nullptr;
-        }
     }
 
     /// @brief Destructor
@@ -132,37 +131,17 @@ public:
     /// @brief Shutdown driver and free resources
     void end();
 
-    /// @brief Attach per-lane LED strip data
+    /// @brief Attach per-lane LED strip data (overload for config-aware attachment)
     ///
     /// @param strips Array of CRGB pointers (size = num_lanes from config)
     void attachStrips(CRGB** strips) {
-        for (int i = 0; i < config_.num_lanes && i < 16; i++) {
-            strips_[i] = strips[i];
-        }
-    }
-
-    /// @brief Attach single strip to specific lane
-    ///
-    /// @param lane Lane index (0 to num_lanes-1)
-    /// @param strip Pointer to LED data array
-    void attachStrip(int lane, CRGB* strip) {
-        if (lane >= 0 && lane < 16) {
-            strips_[lane] = strip;
-        }
+        LcdDriverBase::attachStrips(strips, config_.num_lanes);
     }
 
     /// @brief Encode current LED data and start DMA transfer
     ///
     /// @return true if transfer started, false if previous transfer still active
     bool show();
-
-    /// @brief Block until current DMA transfer completes
-    void wait();
-
-    /// @brief Check if DMA transfer is in progress
-    ///
-    /// @return true if busy, false if idle
-    bool busy() const { return dma_busy_; }
 
     /// @brief Get actual timing after quantization (nanoseconds)
     void getActualTiming(uint32_t& T1_actual, uint32_t& T2_actual, uint32_t& T3_actual) const {
@@ -194,11 +173,6 @@ public:
         );
     }
 
-    /// @brief Get buffer memory usage (bytes, per buffer)
-    size_t getBufferSize() const {
-        return buffer_size_;
-    }
-
 private:
     /// @brief Generate bit-0 and bit-1 templates (called during initialization)
     void generateTemplates();
@@ -214,28 +188,16 @@ private:
                                       esp_lcd_panel_io_event_data_t* edata,
                                       void* user_ctx);
 
-    // Configuration
+    // Configuration (driver-specific)
     LcdDriverConfig config_;
-    int num_leds_;
-    CRGB* strips_[16];
 
     // Pre-computed bit templates (3 words each for 3-slot encoding)
     uint16_t template_bit0_[N_BIT];
     uint16_t template_bit1_[N_BIT];
 
-    // ESP-LCD handles
+    // ESP-LCD handles (I80-specific)
     esp_lcd_i80_bus_handle_t bus_handle_;
     esp_lcd_panel_io_handle_t io_handle_;
-
-    // DMA buffers (double-buffered)
-    uint16_t* buffers_[2];
-    size_t buffer_size_;
-    int front_buffer_;
-
-    // Synchronization
-    SemaphoreHandle_t xfer_done_sem_;
-    volatile bool dma_busy_;
-    uint32_t frame_counter_;
 };
 
 }  // namespace fl

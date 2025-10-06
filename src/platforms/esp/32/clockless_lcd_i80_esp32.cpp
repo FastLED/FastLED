@@ -3,7 +3,9 @@
 
 #include "sdkconfig.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
+// Feature-based detection: compile I80 LCD driver if platform supports it
+// The lcd_driver_i80.h header will provide compile-time errors if headers are missing
+#if __has_include("hal/lcd_hal.h") && __has_include("soc/lcd_periph.h")
 
 #define FASTLED_INTERNAL
 #include "FastLED.h"
@@ -20,6 +22,7 @@
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
 #include "clockless_lcd_i80_esp32.h"
+#include "lcd/lcd_driver_i80_impl.h"
 
 namespace { // anonymous namespace
 
@@ -160,13 +163,13 @@ class LCDI80Esp32_Group {
 namespace fl {
 
 void LCD_I80_Esp32::beginShowLeds(int datapin, int nleds) {
-    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
+    LCDI80Esp32_Group &group = LCDI80Esp32_Group::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
 void LCD_I80_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    LCDEsp32S3_Group &group = LCDEsp32S3_Group::getInstance();
+    LCDI80Esp32_Group &group = LCDI80Esp32_Group::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
@@ -205,13 +208,13 @@ void LCD_I80_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) 
 void LCD_I80_Esp32::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
-    LCDEsp32S3_Group::getInstance().showPixelsOnceThisFrame();
+    LCDI80Esp32_Group::getInstance().showPixelsOnceThisFrame();
 }
 
 // Explicit template instantiation for WS2812 chipset (forces compilation)
-template class LcdLedDriver_S3<WS2812ChipsetTiming>;
+template class LcdI80Driver<WS2812ChipsetTiming>;
 
 } // namespace fl
 
-#endif  // CONFIG_IDF_TARGET_ESP32S3
+#endif  // __has_include("hal/lcd_hal.h") && __has_include("soc/lcd_periph.h")
 #endif  // ESP32

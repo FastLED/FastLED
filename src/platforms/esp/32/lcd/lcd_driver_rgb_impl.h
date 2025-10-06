@@ -14,76 +14,6 @@
 
 namespace fl {
 
-// Helper function: Transpose 16 bytes into 16-bit words (one bit per lane)
-// Input: 16 bytes (one per lane)
-// Output: 8 uint16_t words representing bits 7-0 across 16 lanes
-// (Reuse same transpose function from S3 driver)
-static inline void transpose16x1_p4(const uint8_t* __restrict__ A, uint16_t* __restrict__ B) {
-    uint32_t x;
-
-    // Load 16 bytes as 4 uint32_t words
-    uint32_t* A32 = (uint32_t*)A;
-    uint32_t a0 = A32[0];
-    uint32_t a1 = A32[1];
-    uint32_t a2 = A32[2];
-    uint32_t a3 = A32[3];
-
-    // Bit manipulation magic for transposing 16x8 bits
-    // This converts column-major (16 bytes) to row-major (8 words of 16 bits each)
-
-    // Phase 1: 16-bit shuffles
-    x = (a0 & 0xFFFF0000) | (a1 >> 16);
-    a1 = (a0 << 16) | (a1 & 0x0000FFFF);
-    a0 = x;
-
-    x = (a2 & 0xFFFF0000) | (a3 >> 16);
-    a3 = (a2 << 16) | (a3 & 0x0000FFFF);
-    a2 = x;
-
-    // Phase 2: 8-bit shuffles
-    x = (a0 & 0xFF00FF00) | ((a1 >> 8) & 0x00FF00FF);
-    a1 = ((a0 << 8) & 0xFF00FF00) | (a1 & 0x00FF00FF);
-    a0 = x;
-
-    x = (a2 & 0xFF00FF00) | ((a3 >> 8) & 0x00FF00FF);
-    a3 = ((a2 << 8) & 0xFF00FF00) | (a3 & 0x00FF00FF);
-    a2 = x;
-
-    // Phase 3: 4-bit shuffles
-    x = (a0 & 0xF0F0F0F0) | ((a1 >> 4) & 0x0F0F0F0F);
-    a1 = ((a0 << 4) & 0xF0F0F0F0) | (a1 & 0x0F0F0F0F);
-    a0 = x;
-
-    x = (a2 & 0xF0F0F0F0) | ((a3 >> 4) & 0x0F0F0F0F);
-    a3 = ((a2 << 4) & 0xF0F0F0F0) | (a3 & 0x0F0F0F0F);
-    a2 = x;
-
-    // Phase 4: 2-bit shuffles
-    x = (a0 & 0xCCCCCCCC) | ((a1 >> 2) & 0x33333333);
-    a1 = ((a0 << 2) & 0xCCCCCCCC) | (a1 & 0x33333333);
-    a0 = x;
-
-    x = (a2 & 0xCCCCCCCC) | ((a3 >> 2) & 0x33333333);
-    a3 = ((a2 << 2) & 0xCCCCCCCC) | (a3 & 0x33333333);
-    a2 = x;
-
-    // Phase 5: 1-bit shuffles
-    x = (a0 & 0xAAAAAAAA) | ((a1 >> 1) & 0x55555555);
-    a1 = ((a0 << 1) & 0xAAAAAAAA) | (a1 & 0x55555555);
-    a0 = x;
-
-    x = (a2 & 0xAAAAAAAA) | ((a3 >> 1) & 0x55555555);
-    a3 = ((a2 << 1) & 0xAAAAAAAA) | (a3 & 0x55555555);
-    a2 = x;
-
-    // Extract 8 words (bits 7-0 across 16 lanes)
-    uint32_t* B32 = (uint32_t*)B;
-    B32[0] = a0;
-    B32[1] = a2;
-    B32[2] = a1;
-    B32[3] = a3;
-}
-
 template <typename LED_CHIPSET>
 void LcdRgbDriver<LED_CHIPSET>::generateTemplates() {
     // 4-pixel encoding for WS2812 at 3.2 MHz PCLK (312.5ns per pixel):
@@ -331,7 +261,7 @@ void LcdRgbDriver<LED_CHIPSET>::encodeFrame(int buffer_index) {
             }
 
             // Transpose 16 bytes into 8 words (one bit per lane)
-            transpose16x1_p4(pixel_bytes, lane_bits);
+            LcdDriverBase::transpose16x1(pixel_bytes, lane_bits);
 
             // Encode each bit (MSB first: bit 7 down to bit 0)
             for (int bit_idx = 7; bit_idx >= 0; bit_idx--) {
@@ -397,16 +327,6 @@ bool LcdRgbDriver<LED_CHIPSET>::show() {
     xSemaphoreGive(xfer_done_sem_);
 
     return true;
-}
-
-template <typename LED_CHIPSET>
-void LcdRgbDriver<LED_CHIPSET>::wait() {
-    if (dma_busy_) {
-        // Wait for transfer to complete (with timeout)
-        xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
-        // Semaphore will be given by show() after transfer
-        xSemaphoreGive(xfer_done_sem_);  // Re-give for next wait
-    }
 }
 
 template <typename LED_CHIPSET>
