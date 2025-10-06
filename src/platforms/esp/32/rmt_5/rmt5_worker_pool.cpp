@@ -144,14 +144,15 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
             // Configuration failed (likely channel creation failed due to exhaustion)
             // STRICT MODE: Abort immediately with stack trace
-            fl::printf("\n\n");
-            fl::printf("========================================\n");
-            fl::printf("FATAL: RMT CHANNEL EXHAUSTION\n");
-            fl::printf("========================================\n");
-            fl::printf("Expected:  %d RMT channels\n", mExpectedChannels);
-            fl::printf("Created:   %d channels\n", mCreatedChannels);
-            fl::printf("Failed on: GPIO %d (first acquisition)\n", (int)pin);
-            fl::printf("========================================\n\n");
+            ESP_LOGE(RMT5_POOL_TAG, "");
+            ESP_LOGE(RMT5_POOL_TAG, "========================================");
+            ESP_LOGE(RMT5_POOL_TAG, "FATAL: RMT CHANNEL EXHAUSTION");
+            ESP_LOGE(RMT5_POOL_TAG, "========================================");
+            ESP_LOGE(RMT5_POOL_TAG, "Expected:  %d RMT channels", mExpectedChannels);
+            ESP_LOGE(RMT5_POOL_TAG, "Created:   %d channels", mCreatedChannels);
+            ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d (first acquisition)", (int)pin);
+            ESP_LOGE(RMT5_POOL_TAG, "========================================");
+            ESP_LOGE(RMT5_POOL_TAG, "");
 
             // Stack trace from abort() will be printed by panic handler
             abort();
@@ -199,14 +200,15 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
             if (config_fail_count >= MAX_CONFIG_RETRIES) {
                 // STRICT MODE: Abort with stack trace after exhausting retries
-                fl::printf("\n\n");
-                fl::printf("========================================\n");
-                fl::printf("FATAL: RMT CHANNEL EXHAUSTION\n");
-                fl::printf("========================================\n");
-                fl::printf("Expected:  %d RMT channels\n", mExpectedChannels);
-                fl::printf("Created:   %d channels\n", mCreatedChannels);
-                fl::printf("Failed on: GPIO %d (after %u retries)\n", (int)pin, config_fail_count);
-                fl::printf("========================================\n\n");
+                ESP_LOGE(RMT5_POOL_TAG, "");
+                ESP_LOGE(RMT5_POOL_TAG, "========================================");
+                ESP_LOGE(RMT5_POOL_TAG, "FATAL: RMT CHANNEL EXHAUSTION");
+                ESP_LOGE(RMT5_POOL_TAG, "========================================");
+                ESP_LOGE(RMT5_POOL_TAG, "Expected:  %d RMT channels", mExpectedChannels);
+                ESP_LOGE(RMT5_POOL_TAG, "Created:   %d channels", mCreatedChannels);
+                ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d (after %u retries)", (int)pin, config_fail_count);
+                ESP_LOGE(RMT5_POOL_TAG, "========================================");
+                ESP_LOGE(RMT5_POOL_TAG, "");
 
                 // Stack trace from abort() will be printed by panic handler
                 abort();
