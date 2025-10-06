@@ -11,17 +11,31 @@ FROM fastled-platformio:latest
 ARG PLATFORM_NAME
 ENV PLATFORM_NAME=${PLATFORM_NAME}
 
+# NOTE: platformio.ini is NOT copied here - it's generated dynamically by build.sh
+# from the PLATFORM_NAME using ci/boards.py (the source of truth)
+
 # Copy build script for dependency caching
 # Using a script file makes Docker layer caching more deterministic
 COPY build.sh /tmp/build.sh
+RUN chmod +x /tmp/build.sh
 
-# Run initial compilation to pre-download and BAKE-IN all platform dependencies
-# This downloads platform toolchains, framework files, and libraries INTO THE IMAGE
-# Everything is stored in ~/.platformio/packages and ~/.platformio/platforms
-# These files become part of the Docker image layers (NOT an external cache)
-# Runs: bash compile <platform> Blink to download everything
-RUN chmod +x /tmp/build.sh && \
-    /tmp/build.sh
+# Multi-stage dependency installation for better Docker layer caching
+# Each RUN creates a separate cache layer that only invalidates when its specific dependency changes
+
+# LAYER 1: Install Platform (separate cache layer)
+# This installs the platform definition without default packages
+# Invalidates only when platform version/URL changes
+RUN /tmp/build.sh install-platform
+
+# LAYER 2: Install Platform Packages (toolchains, compilers - separate cache layer)
+# This installs platform-specific toolchains and tools (e.g., avr-gcc, xtensa-esp32-elf-gcc)
+# Invalidates only when toolchain versions change
+RUN /tmp/build.sh install-packages
+
+# LAYER 3: Warm up compilation (separate cache layer)
+# Run initial compilation to complete any remaining setup and validate everything works
+# This downloads any framework files needed during compilation
+RUN /tmp/build.sh compile
 
 # The platform toolchains are now BAKED INTO the image at ~/.platformio
 # /fastled remains pristine with library source downloaded from GitHub

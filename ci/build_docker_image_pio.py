@@ -256,7 +256,6 @@ def build_base_image(no_cache: bool = False) -> None:
 
 def build_docker_image(
     dockerfile_path: str,
-    platformio_ini_path: str,
     image_name: str,
     context_dir: str,
     platform_name: str,
@@ -268,10 +267,9 @@ def build_docker_image(
 
     Args:
         dockerfile_path: Path to Dockerfile
-        platformio_ini_path: Path to platformio.ini
         image_name: Name for the Docker image
         context_dir: Build context directory
-        platform_name: Platform name for labeling
+        platform_name: Platform name for labeling and runtime generation of platformio.ini
         architecture: Architecture name for labeling
         no_cache: Whether to disable Docker cache
 
@@ -422,12 +420,13 @@ def _main_impl() -> int:
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
 
-        # Write platformio.ini to temp directory
-        platformio_ini_path = temp_path / "platformio.ini"
-        with open(platformio_ini_path, "w") as f:
-            f.write(platformio_ini_content)
+        # NOTE: We no longer write platformio.ini to the temp directory
+        # The Dockerfile now generates it dynamically from PLATFORM_NAME using build.sh
+        # This makes ci/boards.py the single source of truth
 
-        print("Generated platformio.ini:")
+        print(
+            "Platform configuration (will be generated in Docker from PLATFORM_NAME):"
+        )
         print("=" * 70)
         print(platformio_ini_content)
         print("=" * 70)
@@ -472,7 +471,6 @@ def _main_impl() -> int:
         try:
             build_docker_image(
                 str(dockerfile_path),
-                str(platformio_ini_path),
                 image_name,
                 str(temp_path),
                 platform_name,
