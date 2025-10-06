@@ -8,7 +8,7 @@ on:
       - 'src/**'
       - 'examples/**'
       - 'ci/**'
-      - '.github/workflows/**'
+      - '.github/workflows/build_clone_and_compile.yml'
       - 'CMakeLists.txt'
       - 'platformio.ini'
       - 'library.json'
