@@ -150,6 +150,8 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     RMT.tx_lim[mChannelId].limit = 48;
 #elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+#elif CONFIG_IDF_TARGET_ESP32P4
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #else
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
 #endif
@@ -254,7 +256,11 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
 
     // Use low-level API to change GPIO
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+#if CONFIG_IDF_TARGET_ESP32P4
+    gpio_matrix_out(pin, RMT_SIG_PAD_OUT0_IDX + mChannelId, false, false);
+#else
     gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
+#endif
 
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
@@ -442,6 +448,21 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // Start transmission
     RMT.chnconf0[mChannelId].conf_update_chn = 1;
     RMT.chnconf0[mChannelId].tx_start_chn = 1;
+#elif CONFIG_IDF_TARGET_ESP32P4
+    // Reset RMT memory read pointer
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
+
+    // Clear and enable both TX end and threshold interrupts
+    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+
+    // Start transmission
+    RMT.chnconf0[mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mChannelId].tx_start_chn = 1;
 #else
 #error "RMT5 worker not yet implemented for this ESP32 variant"
 #endif
@@ -462,7 +483,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     uint32_t intr_st = RMT.int_st.val;
 
     // Platform-specific bit positions (from RMT4)
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32P4
     int tx_done_bit = worker->mChannelId;
     int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
 #else
