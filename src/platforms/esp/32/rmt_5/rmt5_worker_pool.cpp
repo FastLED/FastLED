@@ -63,17 +63,20 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 
     ESP_LOGI(RMT5_POOL_TAG, "Initializing %d workers (hybrid mode: threshold=%d LEDs)",
              max_workers, FASTLED_ONESHOT_THRESHOLD_LEDS);
+    ESP_LOGI(RMT5_POOL_TAG, "RMT worker pool initialization starting - max_workers=%d", max_workers);
 
     // Create K double-buffer workers (current default)
     // Note: We only create one type because we only have K hardware channels
     // Future: could dynamically choose worker type based on usage patterns
     for (int i = 0; i < max_workers; i++) {
+        ESP_LOGI(RMT5_POOL_TAG, "Creating double-buffer worker %d/%d", i, max_workers);
         RmtWorker* worker = new RmtWorker();
         if (!worker->initialize(static_cast<uint8_t>(i))) {
-            ESP_LOGW(RMT5_POOL_TAG, "Failed to initialize double-buffer worker %d", i);
+            ESP_LOGE(RMT5_POOL_TAG, "Failed to initialize double-buffer worker %d - skipping", i);
             delete worker;
             continue;
         }
+        ESP_LOGI(RMT5_POOL_TAG, "Successfully initialized double-buffer worker %d", i);
         mDoubleBufferWorkers.push_back(worker);
         mWorkers.push_back(worker);  // Legacy support
     }
@@ -94,12 +97,18 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     int t1, int t2, int t3,
     uint32_t reset_ns
 ) {
+    ESP_LOGI(RMT5_POOL_TAG, "acquireWorker called: num_bytes=%d, pin=%d, t1=%d, t2=%d, t3=%d",
+             num_bytes, (int)pin, t1, t2, t3);
+
     // Initialize workers on first use
     initializeWorkersIfNeeded();
 
     // Determine which worker type to use based on strip size
     // For now, always use double-buffer (hybrid mode for future expansion)
     bool use_oneshot = (static_cast<size_t>(num_bytes) <= ONE_SHOT_THRESHOLD_BYTES);
+
+    ESP_LOGI(RMT5_POOL_TAG, "Worker selection: use_oneshot=%d, threshold_bytes=%zu",
+             use_oneshot, ONE_SHOT_THRESHOLD_BYTES);
 
     // Try to get an available worker immediately
     portENTER_CRITICAL(&mSpinlock);

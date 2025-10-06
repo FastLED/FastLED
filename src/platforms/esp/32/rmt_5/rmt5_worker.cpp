@@ -28,6 +28,7 @@ extern "C" {
 #include "fl/assert.h"
 #include "fl/memfill.h"
 #include "fl/compiler_control.h"
+#include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 #define RMT5_WORKER_TAG "rmt5_worker"
 
@@ -103,6 +104,8 @@ RmtWorker::~RmtWorker() {
 bool RmtWorker::initialize(uint8_t worker_id) {
     mWorkerId = worker_id;
 
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Starting initialization", worker_id);
+
     // Create RMT TX channel with double memory blocks
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = GPIO_NUM_NC;  // Will be set during configure()
@@ -113,14 +116,23 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     tx_config.flags.invert_out = false;
     tx_config.flags.with_dma = false;  // Phase 1: No DMA
 
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Creating RMT TX channel with gpio=%d, resolution=%lu Hz, mem_blocks=%lu",
+             worker_id, (int)tx_config.gpio_num, tx_config.resolution_hz, tx_config.mem_block_symbols);
+
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %s (0x%x)",
+                 worker_id, esp_err_to_name(ret), ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "Stack trace:");
+        esp_backtrace_print(10);  // Print up to 10 stack frames
         return false;
     }
 
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: RMT TX channel created successfully", worker_id);
+
     // Extract channel ID from handle (relies on internal IDF structure)
     mChannelId = getChannelIdFromHandle(mChannel);
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Extracted channel_id=%lu from handle", worker_id, mChannelId);
 
     // Get direct pointer to RMT memory
     mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
@@ -129,7 +141,8 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     // Enable the channel
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable RMT channel: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable RMT channel: %s (0x%x)",
+                 worker_id, esp_err_to_name(ret), ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
@@ -175,7 +188,8 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     );
 
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %s (0x%x)",
+                 worker_id, esp_err_to_name(ret), ret);
         rmt_disable(mChannel);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
@@ -191,7 +205,8 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
     ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to register callbacks: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to register callbacks: %s (0x%x)",
+                 worker_id, esp_err_to_name(ret), ret);
         rmt_disable(mChannel);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
@@ -206,13 +221,21 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 }
 
 bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) {
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu",
+             mWorkerId, (int)pin, t1, t2, t3, reset_ns);
+
     // Check if reconfiguration needed
     if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
+        ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Already configured with same parameters - skipping", mWorkerId);
         return true;  // Already configured
     }
 
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Reconfiguration needed (previous pin=%d)",
+             mWorkerId, (int)mCurrentPin);
+
     // Wait for active transmission
     if (mTransmitting) {
+        ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Waiting for active transmission to complete", mWorkerId);
         waitForCompletion();
     }
 
@@ -249,25 +272,41 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
 
     // Update GPIO pin assignment
     // Note: ESP-IDF v5 requires channel to be disabled before changing GPIO
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Updating GPIO assignment to pin %d (channel_id=%lu)",
+             mWorkerId, (int)pin, mChannelId);
+
     esp_err_t ret = rmt_disable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %s (0x%x)",
+                 mWorkerId, esp_err_to_name(ret), ret);
         return false;
     }
 
     // Use low-level API to change GPIO
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Setting GPIO %d direction to OUTPUT", mWorkerId, (int)pin);
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
+
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
-    gpio_matrix_out(pin, RMT_SIG_PAD_OUT0_IDX + mChannelId, false, false);
+    int signal_idx = RMT_SIG_PAD_OUT0_IDX + mChannelId;
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Mapping GPIO %d to RMT signal %d (ESP32P4)",
+             mWorkerId, (int)pin, signal_idx);
+    gpio_matrix_out(pin, signal_idx, false, false);
 #else
-    gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
+    int signal_idx = RMT_SIG_OUT0_IDX + mChannelId;
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Mapping GPIO %d to RMT signal %d",
+             mWorkerId, (int)pin, signal_idx);
+    gpio_matrix_out(pin, signal_idx, false, false);
 #endif
 
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to re-enable channel: %d", mWorkerId, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to re-enable channel: %s (0x%x)",
+                 mWorkerId, esp_err_to_name(ret), ret);
         return false;
     }
+
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: GPIO configuration complete - pin %d ready",
+             mWorkerId, (int)pin);
 
     return true;
 }
