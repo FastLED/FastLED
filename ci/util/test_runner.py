@@ -504,7 +504,7 @@ def create_examples_test_process(
 
 
 def create_python_test_process(
-    enable_stack_trace: bool, full_tests: bool = False
+    enable_stack_trace: bool, run_slow: bool = False
 ) -> RunningProcess:
     """Create a Python test process without starting it"""
     # Use list format for better environment handling
@@ -519,9 +519,9 @@ def create_python_test_process(
         "ci/tests",  # Test directory
     ]
 
-    # If not running full tests, exclude tests marked with @pytest.mark.full
-    if not full_tests:
-        cmd.extend(["-m", "not full"])
+    # If running slow tests, add --runslow flag (handled by conftest.py)
+    if run_slow:
+        cmd.append("--runslow")
 
     cmd_str = subprocess.list2cmdline(cmd)
 
@@ -582,11 +582,11 @@ def get_cpp_test_processes(
 
 
 def get_python_test_processes(
-    enable_stack_trace: bool, full_tests: bool = False
+    enable_stack_trace: bool, run_slow: bool = False
 ) -> list[RunningProcess]:
     """Return all processes needed for Python tests"""
     return [
-        create_python_test_process(False, full_tests)
+        create_python_test_process(False, run_slow)
     ]  # Disable stack trace for Python tests
 
 
@@ -1460,15 +1460,15 @@ def runner(
 
         # Add Python tests if needed and Python test files have changed
         if (test_categories.py or test_categories.py_only) and python_test_change:
-            # Pass full_tests=True if we're running integration tests or any form of full tests
-            full_tests = (
+            # Pass run_slow=True if we're running integration tests or any form of full tests
+            run_slow = (
                 test_categories.integration
                 or test_categories.integration_only
                 or args.full
             )
 
             processes.append(
-                create_python_test_process(False, full_tests)
+                create_python_test_process(False, run_slow)
             )  # Disable stack trace for Python tests
         elif (test_categories.py or test_categories.py_only) and not python_test_change:
             print_cache_hit(

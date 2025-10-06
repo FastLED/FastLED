@@ -95,7 +95,7 @@ def init() -> None:
             _compilation_done = True
 
 
-@pytest.mark.full
+@pytest.mark.slow
 class TestSymbolAnalysis(unittest.TestCase):
     @classmethod
     @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")

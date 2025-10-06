@@ -3,10 +3,13 @@
 
 from pathlib import Path
 
+import pytest
+
 from ci.boards import create_board
 from ci.compiler.pio import PioCompiler
 
 
+@pytest.mark.slow
 def test_platformio_merge_bin_target_exists() -> None:
     """Verify esptool can generate merged.bin for ESP32.
 
@@ -49,6 +52,7 @@ def test_platformio_merge_bin_target_exists() -> None:
     print(f"   Magic byte: 0x{magic_byte:02X}")
 
 
+@pytest.mark.slow
 def test_build_with_merged_bin_esp32() -> None:
     """Test PioCompiler.build_with_merged_bin() method."""
     board = create_board("esp32dev")
@@ -79,6 +83,7 @@ def test_build_with_merged_bin_esp32() -> None:
     print(f"   Size: {merged_size:,} bytes")
 
 
+@pytest.mark.slow
 def test_supports_merged_bin() -> None:
     """Test supports_merged_bin() method for various boards."""
     # ESP32 should support merged bin
@@ -102,6 +107,7 @@ def test_supports_merged_bin() -> None:
     print("SUCCESS: supports_merged_bin() correctly identifies board support")
 
 
+@pytest.mark.slow
 def test_merge_bin_unsupported_board() -> None:
     """Test that unsupported boards fail gracefully."""
     board = create_board("uno")  # AVR board
@@ -121,6 +127,7 @@ def test_merge_bin_unsupported_board() -> None:
     print("SUCCESS: Unsupported board failed gracefully with clear error message")
 
 
+@pytest.mark.slow
 def test_merge_bin_custom_output_path() -> None:
     """Test custom output path for merged binary."""
     board = create_board("esp32dev")
