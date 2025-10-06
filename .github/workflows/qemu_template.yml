@@ -576,12 +576,21 @@ jobs:
 
           echo "=== ${{ inputs.sketch }} validation complete ==="
         shell: bash
+      - name: Generate artifact name
+        id: artifact_name
+        if: always()
+        run: |
+          SKETCH_NAME="${{ inputs.sketch }}"
+          ARTIFACT_SKETCH="${SKETCH_NAME////-}"
+          echo "sketch=$ARTIFACT_SKETCH" >> $GITHUB_OUTPUT
+        shell: bash
+
 
       - name: Upload QEMU logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-failure-${{ replace(inputs.sketch, '/', '-') }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: |
             qemu_output.log
             trusted/qemu-build/
@@ -591,7 +600,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-success-${{ replace(inputs.sketch, '/', '-') }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: qemu_output.log
 
       - name: Summary
