@@ -42,4 +42,4 @@ jobs:
     with:
       platform: esp32s3
       platform_display: ESP32-S3
-      sketch: SpecialDrivers/ESP/LCD_I80/LCD_I80
+      sketch: SpecialDrivers/ESP/LCD_I80
