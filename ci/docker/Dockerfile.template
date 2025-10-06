@@ -26,35 +26,19 @@ RUN rm -rf /fastled/src/Blink.ino \
 # The PlatformIO cache is preserved in ~/.platformio
 # Future compilations will use these cached files
 
-# Clean up the /fastled directory - it will be mounted at runtime
-RUN rm -rf /fastled
+# Keep the /fastled directory with cached compilation
+# It will be updated via rsync at runtime
+
+# Install rsync for syncing files at runtime
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends rsync && \
+    rm -rf /var/lib/apt/lists/*
 
 # Create output directory for compiled binaries
 RUN mkdir -p /fastled/output
 
-# Copy entrypoint script for handling output directory
-COPY <<'EOF' /usr/local/bin/fastled-entrypoint.sh
-#!/bin/bash
-set -e
-
-# Run the command passed to the container
-"$@"
-
-# If /fastled/output is mounted and .pio/build exists, copy binaries
-if [ -d "/fastled/output" ] && [ -d "/fastled/.pio/build" ]; then
-    echo "Copying build artifacts to output directory..."
-
-    # Copy all firmware files (binary, hex, elf)
-    find /fastled/.pio/build -type f \( -name "*.bin" -o -name "*.hex" -o -name "*.elf" \) -exec cp {} /fastled/output/ \; 2>/dev/null || true
-
-    # For ESP32, also copy merged binary if it exists
-    find /fastled/.pio/build -type f -name "*.factory.bin" -exec cp {} /fastled/output/ \; 2>/dev/null || true
-
-    echo "Build artifacts copied to /fastled/output/"
-    ls -lh /fastled/output/ || true
-fi
-EOF
-
+# Copy entrypoint script for handling rsync and output directory
+COPY entrypoint.sh /usr/local/bin/fastled-entrypoint.sh
 RUN chmod +x /usr/local/bin/fastled-entrypoint.sh
 
 # Set working directory

@@ -61,7 +61,8 @@ int frequencyBinsHorizontal[matrix_width] = {
   15, 16, 17, 18, 19, 20, 22, 23, 24, 25
 };
 
-
+// Forward declaration
+void computeVerticalLevels();
 
 // Run setup once
 void setup() {

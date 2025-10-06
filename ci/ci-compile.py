@@ -19,7 +19,7 @@ from typing import List, Optional, cast
 from typeguard import typechecked
 
 from ci.boards import ALL, Board, create_board
-from ci.build_docker_image_pio import extract_architecture
+from ci.docker.build_image import extract_architecture
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
 
@@ -78,19 +78,26 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     build_cmd = [
         sys.executable,
         "-m",
-        "ci.build_docker_image_pio",
+        "ci.docker.build_image",
         "--platform",
         board_name,
     ]
 
+    # Run build - Docker image name is deterministic from platform
     result = subprocess.run(build_cmd)
     if result.returncode != 0:
         print("Error: Failed to build Docker image")
         return 1
 
-    # Determine architecture for image name
+    # Extract image name - it's deterministic based on platform
     architecture = extract_architecture(board_name)
-    image_name = f"fastled-platformio-{architecture}-{board_name}"
+    from ci.docker.build_image import generate_config_hash
+    try:
+        config_hash = generate_config_hash(board_name)
+        image_name = f"fastled-platformio-{architecture}-{board_name}-{config_hash}"
+    except:
+        # Fallback
+        image_name = f"fastled-platformio-{architecture}-{board_name}"
 
     # Get absolute path to project root
     project_root = str(Path(__file__).parent.parent.absolute())
@@ -100,25 +107,57 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     print()
 
     # Build command to run inside Docker
-    # Remove --docker flag and run native compile command
-    docker_compile_cmd = f"bash compile {board_name} {' '.join(examples)}"
+    # Create a minimal platformio.ini and compile directly with pio
+    # This avoids Python dependency issues
+    example_name = examples[0] if examples else "Blink"
+
+    # Determine platform based on board
+    board_obj = create_board(board_name, no_project_options=True)
+    platform = board_obj.platform or "atmelavr"
+    framework = board_obj.framework or "arduino"
+
+    docker_compile_cmd = f"""cat > platformio.ini << 'EOINI'
+[platformio]
+
+[env:{board_name}]
+board = {board_name}
+platform = {platform}
+framework = {framework}
+lib_ldf_mode = chain
+lib_archive = true
+lib_deps = FastLED
+EOINI
+mkdir -p src && cp examples/{example_name}/{example_name}.ino src/{example_name}.ino && pio run"""
 
     # Run compilation in Docker container
+    # Mount host directory at /fastled-mount for rsync
+    # Use MSYS_NO_PATHCONV to prevent git-bash from mangling paths on Windows
+    env = os.environ.copy()
+    env["MSYS_NO_PATHCONV"] = "1"
+
+    # Escape paths for git-bash on Windows (use // prefix)
+    workdir = "//fastled" if sys.platform == "win32" else "/fastled"
+    mount_target = "//fastled-mount" if sys.platform == "win32" else "/fastled-mount"
+
     docker_cmd = [
         "docker",
         "run",
         "--rm",
         "-v",
-        f"{project_root}:/fastled",
+        f"{project_root}:{mount_target}:ro",
         "-w",
-        "/fastled",
+        workdir,
         image_name,
         "bash",
         "-c",
         docker_compile_cmd,
     ]
 
-    result = subprocess.run(docker_cmd)
+    print(f"Docker command: {' '.join(docker_cmd)}")
+    print()
+
+    # Stream output in real-time
+    result = subprocess.run(docker_cmd, env=env)
     return result.returncode
 
 
@@ -188,6 +227,8 @@ def get_all_examples() -> List[str]:
 
 def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
     """Parse command line arguments."""
+    print(f"DEBUG parse_args: input args = {args}")
+    print(f"DEBUG parse_args: sys.argv = {sys.argv}")
     parser = argparse.ArgumentParser(
         description="Compile FastLED examples for various boards using PioCompiler"
     )
@@ -301,6 +342,10 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         )
         positional_examples.extend(unknown_examples)
         parsed_args.positional_examples = positional_examples
+
+    print(f"DEBUG parse_args: parsed_args.docker = {parsed_args.docker}")
+    print(f"DEBUG parse_args: parsed_args.boards = {parsed_args.boards}")
+    print(f"DEBUG parse_args: parsed_args.positional_examples = {parsed_args.positional_examples}")
 
     return parsed_args
 
@@ -890,8 +935,14 @@ def main() -> int:
         return 0
 
     # Handle Docker compilation mode
-    if args.docker:
+    # Skip if already running inside Docker (FASTLED_DOCKER env var is set)
+    if args.docker and not os.environ.get("FASTLED_DOCKER"):
+        print(f"DEBUG: args.docker={args.docker}, entering Docker mode")
         return handle_docker_compilation(args)
+    elif args.docker and os.environ.get("FASTLED_DOCKER"):
+        print(f"DEBUG: Already in Docker (FASTLED_DOCKER={os.environ.get('FASTLED_DOCKER')}), skipping nested Docker")
+    else:
+        print(f"DEBUG: args.docker={args.docker}, running native compilation")
 
     # Determine which boards to compile for
     if args.boards:

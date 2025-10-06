@@ -1,27 +1,27 @@
-# FastLED PlatformIO Base Image - Minimal Alpine Build
-# UV-based build system with minimal dependencies
+# FastLED PlatformIO Base Image - Debian Slim Build
+# UV-based build system with glibc for compatibility
 
-# Pre-built Alpine image with GCC toolchain
-FROM frolvlad/alpine-gxx
+# Use Python 3.11 on Debian Bookworm (slim variant for smaller size)
+FROM python:3.11-slim-bookworm
 
 # Install essential dependencies:
-# - curl: to install UV
+# - build-essential: gcc, g++, make and other build tools
 # - git: required by PlatformIO for platform/library management
-# - build-base: minimal GCC toolchain for compilation (equivalent to build-essential)
-# - bash: for running install script and general shell operations
+# - curl: to install UV
 # - wget & unzip: for downloading FastLED project (removed after use)
-RUN apk add --no-cache \
-    curl \
-    git \
-    bash \
-    wget \
-    unzip
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        build-essential \
+        git \
+        curl \
+        wget \
+        unzip \
+        bash \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install UV (handles all Python/package management) and Python in one step
-# This ensures the PATH from the install script is available immediately
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    export PATH="/root/.local/bin:${PATH}" && \
-    uv python install 3.11 --default
+# Install UV (handles all Python/package management)
+# Python is already installed from the base image
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Add UV to PATH for subsequent layers
 ENV PATH="/root/.local/bin:${PATH}"
