@@ -18,7 +18,7 @@ CRGB leds[NUM_LEDS];
 void setup() {
     // Initialize UART-based LED controller
     // Uses hardware UART for stable timing under Wi-Fi load
-    FastLED.addLeds<UARTController_ESP8266<GRB>>(leds, NUM_LEDS);
+    FastLED.addLeds<UARTController_ESP8266, GRB>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
 }
 
