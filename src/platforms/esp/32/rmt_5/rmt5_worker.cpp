@@ -26,6 +26,7 @@ extern "C" {
 #include "fl/force_inline.h"
 #include "fl/assert.h"
 #include "fl/memfill.h"
+#include "fl/compiler_control.h"
 
 #define RMT5_WORKER_TAG "rmt5_worker"
 
@@ -305,6 +306,8 @@ void RmtWorker::waitForCompletion() {
 }
 
 // Convert byte to 8 RMT items (one per bit)
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     uint8_t byte_val,
     volatile rmt_item32_t* out
@@ -333,8 +336,11 @@ FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     out[6].val = tmp[6];
     out[7].val = tmp[7];
 }
+FL_DISABLE_WARNING_POP
 
 // Fill next half of RMT buffer (interrupt context)
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
     volatile rmt_item32_t* pItem = mRMT_mem_ptr;
     uint8_t currentHalf = mWhichHalf;
@@ -369,8 +375,11 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
         ets_printf("W%d: fillHalf=%d, byte=%d/%d\n", mWorkerId, currentHalf, mCur, mNumBytes);
     }
 }
+FL_DISABLE_WARNING_POP
 
 // Start RMT transmission
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::tx_start() {
     // Use direct register access like RMT4
     // This is platform-specific and based on RMT4's approach
@@ -437,6 +446,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
 #error "RMT5 worker not yet implemented for this ESP32 variant"
 #endif
 }
+FL_DISABLE_WARNING_POP
 
 // RMT5 TX done callback (called from ISR context)
 bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data) {
@@ -474,6 +484,8 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 }
 
 // Handle threshold interrupt (refill next buffer half)
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
     portENTER_CRITICAL_ISR(&sRmtSpinlock);
 
@@ -487,8 +499,11 @@ void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
     fillNextHalf();
     portEXIT_CRITICAL_ISR(&sRmtSpinlock);
 }
+FL_DISABLE_WARNING_POP
 
 // Handle done interrupt (transmission complete)
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
     portENTER_CRITICAL_ISR(&sRmtSpinlock);
 
@@ -499,6 +514,7 @@ void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
     mAvailable = true;
     portEXIT_CRITICAL_ISR(&sRmtSpinlock);
 }
+FL_DISABLE_WARNING_POP
 
 // Extract channel ID from opaque handle
 uint32_t RmtWorker::getChannelIdFromHandle(rmt_channel_handle_t handle) {
