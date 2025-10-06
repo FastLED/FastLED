@@ -129,7 +129,9 @@ def test_create_flash_manual_merge_esp32s3():
     spec = importlib.util.spec_from_file_location(
         "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
     )
+    assert spec is not None, "Could not load module spec"
     ci_compile = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None, "Module spec has no loader"
     spec.loader.exec_module(ci_compile)
 
     # Create temporary directory
@@ -166,7 +168,9 @@ def test_create_flash_manual_merge_missing_files():
     spec = importlib.util.spec_from_file_location(
         "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
     )
+    assert spec is not None, "Could not load module spec"
     ci_compile = importlib.util.module_from_spec(spec)
+    assert spec.loader is not None, "Module spec has no loader"
     spec.loader.exec_module(ci_compile)
 
     # Create temporary directory
