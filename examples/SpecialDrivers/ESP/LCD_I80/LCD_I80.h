@@ -34,8 +34,8 @@
 #endif
 
 // GPIO pins for LED strips
-#define PIN1  3
-#define PIN2  45
+#define PIN1  4
+#define PIN2  5
 #define PIN3  21
 #define PIN4  6
 
