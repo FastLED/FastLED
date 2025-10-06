@@ -438,7 +438,7 @@ def _main_impl() -> int:
         with open(dockerfile_path, "w") as f:
             f.write(dockerfile_content)
 
-        # Copy entrypoint.sh to temp directory
+        # Copy entrypoint.sh and build.sh to temp directory
         import shutil
 
         entrypoint_src = Path(__file__).parent / "docker" / "entrypoint.sh"
@@ -448,6 +448,12 @@ def _main_impl() -> int:
             print(
                 f"Warning: entrypoint.sh not found at {entrypoint_src}", file=sys.stderr
             )
+
+        build_script_src = Path(__file__).parent / "docker" / "build.sh"
+        if build_script_src.exists():
+            shutil.copy(build_script_src, temp_path / "build.sh")
+        else:
+            print(f"Warning: build.sh not found at {build_script_src}", file=sys.stderr)
 
         print("Using Dockerfile template:")
         print("=" * 70)

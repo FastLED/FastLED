@@ -14,10 +14,14 @@ COPY platformio.ini /fastled/platformio.ini
 RUN mkdir -p /fastled/src && \
     cp /fastled/examples/Blink/Blink.ino /fastled/src/
 
+# Copy build script for dependency caching
+# Using a script file makes Docker layer caching more deterministic
+COPY build.sh /tmp/build.sh
+
 # Run initial compilation to cache all platform dependencies
 # This pre-downloads platform toolchains, framework files, and libraries
 # The cache is stored in ~/.platformio/packages and ~/.platformio/platforms
-RUN pio run || echo "Initial compilation may have warnings, continuing..."
+RUN chmod +x /tmp/build.sh && /tmp/build.sh
 
 # Clean up build artifacts but preserve the PlatformIO cache
 RUN rm -rf /fastled/src/Blink.ino \
