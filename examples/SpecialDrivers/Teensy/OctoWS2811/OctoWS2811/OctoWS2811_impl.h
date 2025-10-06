@@ -1,6 +1,9 @@
 
 // BasicTest example to demonstrate how to use FastLED with OctoWS2811
-
+//
+// @note OctoWS2811 is only supported on Teensy 3.x and Teensy 4.x
+//       (not Teensy LC due to hardware limitations)
+//
 // FastLED does not directly support Teensy 4.x PinList (for any
 // number of pins) but it can be done with edits to FastLED code:
 // https://www.blinkylights.blog/2021/02/03/using-teensy-4-1-with-fastled/

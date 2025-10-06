@@ -11,6 +11,9 @@
 //   http://www.pjrc.com/store/teensy31.html
 //   http://www.pjrc.com/store/octo28_adaptor.html
 //
+// @note OctoWS2811 is only supported on Teensy 3.x and Teensy 4.x
+//       (not Teensy LC due to hardware limitations)
+//
 // Line Level Audio Input connects to analog pin A3
 //   Recommended input circuit:
 //   http://www.pjrc.com/teensy/gui/?info=AudioInputAnalog

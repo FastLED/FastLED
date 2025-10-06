@@ -4,6 +4,9 @@
 /// @file    OctoWS2811Demo.ino
 /// @brief   Demonstrates how to use OctoWS2811 output
 /// @example OctoWS2811Demo.ino
+///
+/// @note OctoWS2811 is only supported on Teensy 3.x and Teensy 4.x
+///       (not Teensy LC due to hardware limitations)
 
 #define USE_OCTOWS2811
 #include <OctoWS2811.h>
