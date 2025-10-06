@@ -10,8 +10,8 @@
 
 #pragma once
 
-#if !defined(CONFIG_IDF_TARGET_ESP32S3)
-#error "This file is only for ESP32-S3"
+#if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32P4)
+#error "This file is only for ESP32-S3 and ESP32-P4 (I80 LCD interface required)"
 #endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32S2)

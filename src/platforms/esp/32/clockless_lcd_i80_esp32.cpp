@@ -1,7 +1,9 @@
 
 #if defined(ESP32)
-
 #include "sdkconfig.h"
+
+// I80 LCD driver is only available on ESP32-S3 and ESP32-P4
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
 
 // Feature-based detection: compile I80 LCD driver if platform supports it
 // The lcd_driver_i80.h header will provide compile-time errors if headers are missing
@@ -217,4 +219,5 @@ template class LcdI80Driver<WS2812ChipsetTiming>;
 } // namespace fl
 
 #endif  // __has_include("hal/lcd_hal.h") && __has_include("soc/lcd_periph.h")
+#endif  // CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32P4
 #endif  // ESP32
