@@ -400,6 +400,7 @@ jobs:
           timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
           debug: true
           chip: "${{ steps.chip_mapping.outputs.chip }}"
+          spiffs-address: "0x210000"
 
       - name: Display QEMU output
         if: always()
