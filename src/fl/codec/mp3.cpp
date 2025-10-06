@@ -74,7 +74,7 @@ int Mp3HelixDecoder::decodeFrame(const fl::u8** inbuf, fl::size* bytes_left) {
         static_cast<HMP3Decoder>(mDecoder),
         inbuf,
         bytes_left,
-        mPcmBuffer,
+        reinterpret_cast<short*>(mPcmBuffer),
         0  // useSize = 0 (use default)
     );
 

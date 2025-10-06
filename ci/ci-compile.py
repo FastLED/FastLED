@@ -19,9 +19,9 @@ from typing import List, Optional, cast
 from typeguard import typechecked
 
 from ci.boards import ALL, Board, create_board
-from ci.docker.build_image import extract_architecture
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
+from ci.docker.build_image import extract_architecture
 
 
 def green_text(text: str) -> str:
@@ -92,6 +92,7 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     # Extract image name - it's deterministic based on platform
     architecture = extract_architecture(board_name)
     from ci.docker.build_image import generate_config_hash
+
     try:
         config_hash = generate_config_hash(board_name)
         image_name = f"fastled-platformio-{architecture}-{board_name}-{config_hash}"
@@ -345,7 +346,9 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
 
     print(f"DEBUG parse_args: parsed_args.docker = {parsed_args.docker}")
     print(f"DEBUG parse_args: parsed_args.boards = {parsed_args.boards}")
-    print(f"DEBUG parse_args: parsed_args.positional_examples = {parsed_args.positional_examples}")
+    print(
+        f"DEBUG parse_args: parsed_args.positional_examples = {parsed_args.positional_examples}"
+    )
 
     return parsed_args
 
@@ -940,7 +943,9 @@ def main() -> int:
         print(f"DEBUG: args.docker={args.docker}, entering Docker mode")
         return handle_docker_compilation(args)
     elif args.docker and os.environ.get("FASTLED_DOCKER"):
-        print(f"DEBUG: Already in Docker (FASTLED_DOCKER={os.environ.get('FASTLED_DOCKER')}), skipping nested Docker")
+        print(
+            f"DEBUG: Already in Docker (FASTLED_DOCKER={os.environ.get('FASTLED_DOCKER')}), skipping nested Docker"
+        )
     else:
         print(f"DEBUG: args.docker={args.docker}, running native compilation")
 

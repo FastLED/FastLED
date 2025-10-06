@@ -7,7 +7,9 @@ This wrapper is kept for backward compatibility.
 """
 
 import sys
+
 from ci.docker.build_image import main
+
 
 if __name__ == "__main__":
     sys.exit(main())
