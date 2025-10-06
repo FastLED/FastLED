@@ -1946,8 +1946,12 @@ class PioCompiler(Compiler):
             return result
 
         # 3. Run merge_bin target
+        # Use shutil.which to find pio in PATH (works in venv)
+        import shutil
+        pio_cmd = shutil.which("pio") or "pio"
+
         merge_cmd = [
-            "pio",
+            pio_cmd,
             "run",
             "--project-dir",
             str(self.build_dir),
