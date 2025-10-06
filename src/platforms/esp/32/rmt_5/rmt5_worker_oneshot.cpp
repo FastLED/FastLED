@@ -203,7 +203,14 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_
     }
 
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-    gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
+    // ESP32-P4 uses different signal index naming (RMT_SIG_PAD_OUT0_IDX vs RMT_SIG_OUT0_IDX)
+    #if defined(RMT_SIG_PAD_OUT0_IDX)
+        gpio_matrix_out(pin, RMT_SIG_PAD_OUT0_IDX + mChannelId, false, false);
+    #elif defined(RMT_SIG_OUT0_IDX)
+        gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
+    #else
+        #error "Neither RMT_SIG_OUT0_IDX nor RMT_SIG_PAD_OUT0_IDX is defined"
+    #endif
 
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
