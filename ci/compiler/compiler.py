@@ -43,6 +43,7 @@ class SketchResult(CompilerResult):
     """Result from sketch compilation."""
 
     example: str
+    merged_bin_path: Path | None = None
 
 
 class Compiler(ABC):

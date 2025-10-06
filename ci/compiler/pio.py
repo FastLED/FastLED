@@ -19,7 +19,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 import fasteners
 from dirsync import sync  # type: ignore
@@ -1917,6 +1917,189 @@ class PioCompiler(Compiler):
         except Exception as e:
             print(f"ERROR: Failed to install udev rules: {e}")
             return False
+
+    def supports_merged_bin(self) -> bool:
+        """Check if board supports merged binary generation.
+
+        Returns:
+            True if the board platform supports merged binary generation
+        """
+        supported_platforms = ["espressif32", "espressif8266"]
+        return any(
+            platform in str(self.board.platform).lower()
+            for platform in supported_platforms
+        )
+
+    def get_merged_bin_path(self, example: str) -> Path | None:
+        """Get path to merged binary if it exists.
+
+        Args:
+            example: Example name (unused but kept for API consistency)
+
+        Returns:
+            Path to merged.bin if it exists, None otherwise
+        """
+        env_name = self.board.board_name
+        merged_bin = self.build_dir / ".pio" / "build" / env_name / "merged.bin"
+        return merged_bin if merged_bin.exists() else None
+
+    def build_with_merged_bin(
+        self, example: str, output_path: Path | None = None
+    ) -> SketchResult:
+        """Build example and generate merged binary.
+
+        Args:
+            example: Example name to build
+            output_path: Optional custom output path for merged binary
+
+        Returns:
+            SketchResult with merged_bin_path populated
+        """
+        # 1. Validate board support
+        if not self.supports_merged_bin():
+            return SketchResult(
+                success=False,
+                output=f"Board {self.board.board_name} does not support merged binary. "
+                f"Supported platforms: ESP32, ESP8266",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 2. Build normally first
+        cancelled = threading.Event()
+        result = self._internal_build_no_lock(example, cancelled)
+        if not result.success:
+            return result
+
+        # 3. Use esptool to merge binaries
+        # PlatformIO doesn't have a merge_bin target - we must use esptool directly
+        env_name = self.board.board_name
+        artifacts_dir = self.build_dir / ".pio" / "build" / env_name
+
+        # Find required binary components
+        bootloader_bin = artifacts_dir / "bootloader.bin"
+        partitions_bin = artifacts_dir / "partitions.bin"
+        boot_app0_bin = artifacts_dir / "boot_app0.bin"
+        firmware_bin = artifacts_dir / "firmware.bin"
+
+        # Verify all required files exist
+        missing_files: List[str] = []
+        for bin_file in [bootloader_bin, partitions_bin, firmware_bin]:
+            if not bin_file.exists():
+                missing_files.append(str(bin_file))
+
+        if missing_files:
+            return SketchResult(
+                success=False,
+                output=f"Required binary files not found after build: {', '.join(missing_files)}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # Create boot_app0.bin if it doesn't exist (it's optional)
+        if not boot_app0_bin.exists():
+            # Create default 8KB boot_app0.bin (all 0xFF)
+            boot_app0_bin.write_bytes(b"\xff" * 8192)
+            print(f"Created default boot_app0.bin")
+
+        # Determine chip type and offsets based on board
+        # ESP32 (original) uses 0x1000 for bootloader
+        # ESP32-S3/C3 use 0x0 for bootloader
+        platform_str = str(self.board.platform).lower()
+        if "esp32s3" in env_name.lower() or "esp32s3" in platform_str:
+            chip = "esp32s3"
+            bootloader_offset = "0x0"
+        elif "esp32c3" in env_name.lower() or "esp32c3" in platform_str:
+            chip = "esp32c3"
+            bootloader_offset = "0x0"
+        elif "esp8266" in platform_str:
+            chip = "esp8266"
+            bootloader_offset = "0x0"
+        else:
+            # Default ESP32
+            chip = "esp32"
+            bootloader_offset = "0x1000"
+
+        # Create merged binary using esptool
+        merged_bin = artifacts_dir / "merged.bin"
+
+        merge_cmd = [
+            "uv",
+            "run",
+            "esptool",
+            "--chip",
+            chip,
+            "merge-bin",
+            "-o",
+            str(merged_bin),
+            "--flash-mode",
+            "dio",
+            "--flash-freq",
+            "80m",
+            "--flash-size",
+            "4MB",
+            bootloader_offset,
+            str(bootloader_bin),
+            "0x8000",
+            str(partitions_bin),
+            "0xe000",
+            str(boot_app0_bin),
+            "0x10000",
+            str(firmware_bin),
+        ]
+
+        print(f"Running esptool merge_bin: {' '.join(merge_cmd)}")
+
+        try:
+            merge_proc = subprocess.run(
+                merge_cmd, capture_output=True, text=True, timeout=300
+            )
+        except subprocess.TimeoutExpired:
+            return SketchResult(
+                success=False,
+                output="esptool merge_bin timed out after 300 seconds",
+                build_dir=self.build_dir,
+                example=example,
+            )
+        except FileNotFoundError:
+            return SketchResult(
+                success=False,
+                output="esptool not found. Please install: uv pip install esptool",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        if merge_proc.returncode != 0:
+            return SketchResult(
+                success=False,
+                output=f"esptool merge_bin failed: {merge_proc.stderr}\n{merge_proc.stdout}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 4. Verify merged binary was created
+        if not merged_bin.exists():
+            return SketchResult(
+                success=False,
+                output=f"Merged binary not created at {merged_bin}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 5. Copy to output path if specified
+        if output_path:
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(merged_bin, output_path)
+            merged_bin = output_path
+
+        # 6. Return enhanced result
+        return SketchResult(
+            success=True,
+            output=result.output,
+            build_dir=self.build_dir,
+            example=example,
+            merged_bin_path=merged_bin,
+        )
 
 
 def run_pio_build(
