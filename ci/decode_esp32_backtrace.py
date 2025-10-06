@@ -31,8 +31,10 @@ def find_addr2line() -> Optional[Path]:
 
     # Try RISC-V (ESP32-C3, C6, etc.)
     riscv_paths = [
-        home / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line",
-        home / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line.exe",
+        home
+        / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line",
+        home
+        / ".platformio/packages/toolchain-riscv32-esp/bin/riscv32-esp-elf-addr2line.exe",
     ]
 
     for path in riscv_paths:
@@ -41,10 +43,14 @@ def find_addr2line() -> Optional[Path]:
 
     # Try Xtensa (ESP32, ESP32-S2, ESP32-S3)
     xtensa_paths = [
-        home / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line",
-        home / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line.exe",
-        home / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line",
-        home / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line.exe",
+        home
+        / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line",
+        home
+        / ".platformio/packages/toolchain-xtensa-esp32/bin/xtensa-esp32-elf-addr2line.exe",
+        home
+        / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line",
+        home
+        / ".platformio/packages/toolchain-xtensa-esp32s3/bin/xtensa-esp32s3-elf-addr2line.exe",
     ]
 
     for path in xtensa_paths:
@@ -77,7 +83,7 @@ def decode_addresses(elf_file: Path, addresses: List[str]) -> None:
         result = subprocess.run(cmd, capture_output=True, text=True, check=True)
         print("\n=== Decoded Stack Trace ===")
 
-        lines = result.stdout.strip().split('\n')
+        lines = result.stdout.strip().split("\n")
         for i in range(0, len(lines), 2):
             if i + 1 < len(lines):
                 func = lines[i]
@@ -92,26 +98,26 @@ def decode_addresses(elf_file: Path, addresses: List[str]) -> None:
 
 def extract_addresses_from_crash_log(log: str) -> List[str]:
     """Extract addresses from ESP32 crash log."""
-    addresses = []
+    addresses: List[str] = []
 
     # Extract MEPC (RISC-V program counter)
-    mepc_match = re.search(r'MEPC\s*:\s*(0x[0-9a-fA-F]+)', log)
+    mepc_match = re.search(r"MEPC\s*:\s*(0x[0-9a-fA-F]+)", log)
     if mepc_match:
         addresses.append(mepc_match.group(1))
 
     # Extract RA (return address)
-    ra_match = re.search(r'RA\s*:\s*(0x[0-9a-fA-F]+)', log)
+    ra_match = re.search(r"RA\s*:\s*(0x[0-9a-fA-F]+)", log)
     if ra_match:
         addresses.append(ra_match.group(1))
 
     # Extract backtrace addresses (0x42xxxxxx pattern for ESP32-C3)
-    backtrace_pattern = r'0x[4][0-9a-fA-F]{7}'
-    backtrace_addrs = re.findall(backtrace_pattern, log)
+    backtrace_pattern = r"0x[4][0-9a-fA-F]{7}"
+    backtrace_addrs: List[str] = re.findall(backtrace_pattern, log)
     addresses.extend(backtrace_addrs[:10])  # Limit to first 10 addresses
 
     # Remove duplicates while preserving order
-    seen = set()
-    unique_addresses = []
+    seen: set[str] = set()
+    unique_addresses: List[str] = []
     for addr in addresses:
         if addr not in seen:
             seen.add(addr)
@@ -122,8 +128,14 @@ def extract_addresses_from_crash_log(log: str) -> List[str]:
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: decode_esp32_backtrace.py <elf_file> [addresses...]", file=sys.stderr)
-        print("   or: cat crash.log | decode_esp32_backtrace.py <elf_file>", file=sys.stderr)
+        print(
+            "Usage: decode_esp32_backtrace.py <elf_file> [addresses...]",
+            file=sys.stderr,
+        )
+        print(
+            "   or: cat crash.log | decode_esp32_backtrace.py <elf_file>",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     elf_file = Path(sys.argv[1])
@@ -136,7 +148,10 @@ def main():
         # Read from stdin
         if sys.stdin.isatty():
             print("Error: No addresses provided and stdin is empty", file=sys.stderr)
-            print("Provide addresses as arguments or pipe crash log to stdin", file=sys.stderr)
+            print(
+                "Provide addresses as arguments or pipe crash log to stdin",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         log = sys.stdin.read()

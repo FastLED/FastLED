@@ -26,11 +26,16 @@ This project uses directory-specific agent guidelines. See:
 
 ## Core Rules
 
+### Git and Code Publishing (ALL AGENTS)
+- **🚫 NEVER run git commit**: Do NOT create commits - user will commit when ready
+- **🚫 NEVER push code to remote**: Do NOT run `git push` or any command that pushes to remote repository
+- **🚫 NEVER run `codeup`**: ONLY run `codeup` when user explicitly requests it with the exact command "run codeup" or "codeup"
+- **User controls all git operations**: All git commit and push decisions are made by the user
+
 ### Command Execution (ALL AGENTS)
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
-- **`codeup`**: Global command - ONLY run when user explicitly requests it
 - **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile esp32s3 Blink`)
 
 ### C++ Code Standards
