@@ -37,7 +37,7 @@ jobs:
         run: |
           echo "=== Installing dependencies ==="
           uv sync
-          uv pip install esptool
+          uv pip install platformio esptool
 
           echo "=== Environment ==="
           python --version
