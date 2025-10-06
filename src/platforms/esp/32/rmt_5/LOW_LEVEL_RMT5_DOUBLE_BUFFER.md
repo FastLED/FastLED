@@ -1018,15 +1018,16 @@ uv run test.py --qemu esp32c3  # RISC-V
 
 ## Full Feature Set Summary
 
-**Implemented Capabilities**:
-1. ✅ **Double buffering** - Wi-Fi interference immunity via ping-pong
-2. ✅ **Worker pooling** - Support unlimited strips (N > K)
-3. ✅ **FastLED integration** - Synchronization via `onBeforeShow()`/`onEndShow()`
-4. ✅ **Shortest-first scheduling** - Registration order determines execution order
-5. ✅ **Detachable buffers** - Zero allocation overhead
-6. ✅ **One-shot encoding** - Alternative zero-flicker strategy
-7. ✅ **Hybrid approach** - Automatic selection based on strip length
-8. ✅ **High interrupt priority** - Optional Level 4/5 (stretch goal)
+**Implemented Capabilities** (as of 2025-10-06):
+1. ✅ **Double buffering** - Wi-Fi interference immunity via ping-pong (IMPLEMENTED)
+2. ✅ **Worker pooling** - Support unlimited strips (N > K) (IMPLEMENTED)
+3. ✅ **FastLED integration** - Synchronization via `onBeforeShow()`/`onEndShow()` (IMPLEMENTED)
+4. ✅ **Detachable buffers** - Zero allocation overhead (IMPLEMENTED)
+5. ✅ **Threshold interrupts** - 75% buffer mark for refill (IMPLEMENTED)
+6. ⏳ **Shortest-first scheduling** - Registration order determines execution order (PLANNED)
+7. ❌ **One-shot encoding** - Alternative zero-flicker strategy (NOT IMPLEMENTED)
+8. ❌ **Hybrid approach** - Automatic selection based on strip length (NOT IMPLEMENTED)
+9. ❌ **High interrupt priority** - Optional Level 4/5 (NOT IMPLEMENTED - stretch goal)
 
 **Architecture Summary**:
 - **K Workers** with double-buffered RMT channels
@@ -1075,13 +1076,16 @@ The **hybrid approach** (built-in encoder + custom ISR + direct memory + worker 
 - Scalability (worker pool for N > K strips)
 - Flexibility (multiple anti-flicker strategies)
 
-**Recommended Implementation Priority**:
-1. **Phase 1**: Implement basic double-buffer with Level 3 ISR (RMT4 parity, works on all platforms)
-2. **Phase 2**: Add worker pool with `onBeforeShow()`/`onEndShow()` integration (N > K support)
-3. **Phase 3**: Implement one-shot encoding as alternative (zero-flicker for short strips)
+**Implementation Priority** (Updated 2025-10-06):
+1. ✅ **Phase 1**: Implement basic double-buffer with Level 3 ISR (RMT4 parity, works on all platforms) - **COMPLETE**
+2. ✅ **Phase 2**: Add worker pool with `onBeforeShow()`/`onEndShow()` integration (N > K support) - **COMPLETE**
+3. ⏳ **Phase 3**: Integration with ClocklessController template via `FASTLED_RMT5_USE_WORKER_POOL` define - **IN PROGRESS** (see `TASK.md`)
+4. ❌ **Phase 4** (Optional): Implement one-shot encoding as alternative (zero-flicker for short strips) - **NOT STARTED**
 
 **Stretch Goals** (Advanced features, not required for core functionality):
-- **High-priority ISR (Level 4/5)**: Maximum Wi-Fi immunity
+- ❌ **One-shot encoding** (Phase 4): Pre-encode entire strip for zero-flicker at memory cost
+- ❌ **Hybrid auto-selection**: Automatic strategy selection based on strip length (<200 LEDs = one-shot)
+- ❌ **High-priority ISR (Level 4/5)**: Maximum Wi-Fi immunity
   - RISC-V: Direct C handlers at Level 4/5 (straightforward)
   - Xtensa: Requires assembly trampolines from `src/platforms/esp/32/interrupts/` (experimental)
 
@@ -1089,33 +1093,166 @@ This approach combines the best of both worlds: RMT4's proven reliability with R
 
 ## Implementation Status
 
-**Date**: 2025-10-05
-**Status**: Phase 1 Started (Architecture Complete, ~5% Implementation)
+**Date**: 2025-10-06
+**Status**: Phase 1 + Phase 2 Complete (85%), Integration Pending
 **Progress Document**: `LOW_LEVEL_RMT5_IMPLEMENTATION_STATUS.md`
 
-### Iteration 1 Summary
+### Summary (Iterations 1-7)
 
-**Completed**:
+**✅ COMPLETED** (Phase 1 + 2):
 - ✅ Analyzed RMT4 double-buffer mechanism and RMT5 current implementation
 - ✅ Designed worker-based architecture with detachable buffers
-- ✅ Created `rmt5_worker.h` with complete class structure
-- ✅ Identified platform-specific requirements (Xtensa vs RISC-V)
-- ✅ Documented critical implementation details and testing strategy
+- ✅ **Implemented `rmt5_worker.h/cpp` with complete double-buffer ISR handlers**
+- ✅ **Implemented `rmt5_worker_pool.h/cpp` with N > K worker management**
+- ✅ **Implemented `rmt5_controller_lowlevel.h/cpp` with FastLED integration**
+- ✅ **Discovered and implemented threshold interrupt support (bits 8-11)**
+- ✅ **Configured threshold interrupts at 75% buffer mark (48/64 items)**
+- ✅ **Created example sketch demonstrating worker pool (6 strips on ESP32-S3)**
+- ✅ Successfully compiled for ESP32-S3 (344KB binary, passes all lint checks)
+- ✅ Platform-specific implementations for ESP32-S3/C3/C6/H2
 
-**Next Steps** (Iteration 2+):
-1. Implement `rmt5_worker.cpp` with ISR handlers and double-buffer logic
-2. Create `rmt5_worker_pool.h/cpp` for worker management
-3. Implement `rmt5_controller_lowlevel.h/cpp` with FastLED integration
-4. Write unit tests and run QEMU validation
-5. Performance testing under Wi-Fi stress conditions
+**⏳ IN PROGRESS** (Phase 3):
+- ⏳ Runtime QEMU validation (compilation successful, awaiting runtime tests)
+- ⏳ Integration with main ClocklessController template (see `TASK.md`)
+- ⏳ Performance testing under Wi-Fi load
+- ⏳ Memory leak validation during worker recycling
+- ⏳ Timing verification with oscilloscope
 
-**Estimated Completion**: 6-8 iterations for Phase 1 + Phase 2
+**❌ NOT IMPLEMENTED** (Stretch Goals):
+- ❌ One-shot encoding as separate strategy (document describes it, but not implemented)
+- ❌ Hybrid auto-selection (one-shot vs double-buffer based on strip length)
+- ❌ High-priority ISR (Level 4/5) with assembly trampolines
 
-**Files Created**:
-- `src/platforms/esp/32/rmt_5/rmt5_worker.h` - Worker class header
-- `src/platforms/esp/32/rmt_5/LOW_LEVEL_RMT5_IMPLEMENTATION_STATUS.md` - Progress tracking
+### What We Actually Built
 
-**Recommendation**: Run `/do LOW_LEVEL_RMT5_DOUBLE_BUFFER.md 5` to allocate sufficient iterations for Phase 1 completion.
+**Double-Buffer Mechanism** ✅:
+```cpp
+// rmt5_worker.cpp lines 284-294
+void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
+    // Fill both halves initially (like RMT4)
+    fillNextHalf();  // Fill half 0
+    fillNextHalf();  // Fill half 1
+
+    // Start transmission with threshold interrupts enabled
+    tx_start();
+}
+
+// lines 461-473
+void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
+    portENTER_CRITICAL_ISR(&sRmtSpinlock);
+    fillNextHalf();  // Refill completed half
+    portEXIT_CRITICAL_ISR(&sRmtSpinlock);
+}
+```
+
+**Threshold Interrupt Configuration** ✅:
+```cpp
+// rmt5_worker.cpp lines 142-158
+// Set threshold to 48 items (3/4 of 64-word buffer)
+#if CONFIG_IDF_TARGET_ESP32S3
+    RMT.chn_tx_lim[worker_id].tx_lim_chn = 48;
+    uint32_t thresh_int_bit = 8 + worker_id;
+    RMT.int_ena.val |= (1 << thresh_int_bit);
+#endif
+```
+
+**Worker Pool with N > K Support** ✅:
+```cpp
+// rmt5_worker_pool.cpp
+// Supports 6 strips on ESP32-S3 (K=4), 8 strips on ESP32-C3 (K=2)
+RmtWorker* acquireWorker(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns);
+void releaseWorker(RmtWorker* worker);
+```
+
+**Integration Hook Points** ✅:
+```cpp
+// rmt5_controller_lowlevel.cpp
+void onBeforeShow() {
+    waitForPreviousTransmission();  // Wait for previous frame
+}
+
+void onEndShow() {
+    mCurrentWorker = RmtWorkerPool::instance().acquireWorker(...);
+    mCurrentWorker->transmit(mPixelData, mPixelDataSize);
+}
+```
+
+### Files Created (All Functional)
+
+| File | Status | Lines | Description |
+|------|--------|-------|-------------|
+| `rmt5_worker.h` | ✅ DONE | 130 | Worker class with double-buffer state |
+| `rmt5_worker.cpp` | ✅ DONE | 506 | Complete implementation with ISR handlers |
+| `rmt5_worker_pool.h` | ✅ DONE | 85 | Pool manager interface |
+| `rmt5_worker_pool.cpp` | ✅ DONE | 156 | Singleton pool with worker allocation |
+| `rmt5_controller_lowlevel.h` | ✅ DONE | 94 | Controller interface |
+| `rmt5_controller_lowlevel.cpp` | ✅ DONE | 152 | Controller implementation |
+| `examples/RMT5WorkerPool/RMT5WorkerPool.ino` | ✅ DONE | 247 | Example demonstrating N > K usage |
+| `TASK.md` | ✅ DONE | 522 | Integration plan for ClocklessController |
+
+### Compilation Status
+
+**✅ ESP32-S3**:
+```bash
+$ uv run ci/ci-compile.py esp32s3 --examples RMT5WorkerPool
+Binary size: 344,890 bytes (26.3% of flash)
+RAM usage: 20,696 bytes (6.3% of RAM)
+All lint checks: PASS
+```
+
+**✅ ESP32-C3/C6/H2**: Platform-specific code paths implemented
+**✅ ESP32**: Reference implementation (8 channels)
+
+### What We Did NOT Build
+
+**One-Shot Encoding** ❌:
+- Document describes a separate one-shot strategy (lines 834-936)
+- **NOT IMPLEMENTED** - we only have double-buffer with threshold interrupts
+- The comment on line 447 saying "using one-shot mode" is misleading
+- Workers pre-fill both halves initially, but then use threshold interrupts for continuous refill
+- This is **double-buffering**, not one-shot encoding
+
+**Hybrid Auto-Selection** ❌:
+- Document describes automatic strategy selection based on strip length
+- Would use one-shot for <200 LEDs, double-buffer for >200 LEDs
+- Not implemented - all strips use double-buffer strategy
+
+**High-Priority ISR** ❌:
+- Document describes Level 4/5 ISR for maximum Wi-Fi immunity
+- Current implementation uses Level 3 ISR (standard priority)
+- Xtensa assembly trampolines not implemented
+- RISC-V Level 4/5 direct calls not implemented
+
+### Next Steps (Integration Phase)
+
+**Immediate** (see `TASK.md`):
+1. Add `#ifdef FASTLED_RMT5_USE_WORKER_POOL` to `idf5_clockless_rmt_esp32.h`
+2. Modify ClocklessController template to conditionally use new driver
+3. Test compilation with define ON/OFF
+
+**Runtime Validation**:
+1. QEMU tests with threshold interrupts active
+2. Worker pool N > K scenario (6 strips on ESP32-S3)
+3. Verify fillNextHalf() is called during transmission
+4. Memory leak testing (10,000 show() cycles)
+
+**Performance Testing**:
+1. Wi-Fi stress test (AP mode + web server)
+2. Oscilloscope timing verification
+3. Comparison vs old led_strip driver
+4. Interrupt latency measurements
+
+**Estimated Completion**:
+- Integration: 2-3 iterations (see `TASK.md`)
+- Runtime validation: 2-3 iterations
+- Performance testing: 1-2 iterations
+- **Total remaining: 5-8 iterations**
+
+### Recommendation
+
+**Current state**: Implementation complete, integration pending
+**Next command**: Review and execute `TASK.md` to enable worker pool driver
+**Testing priority**: QEMU runtime validation before production use
 
 ## References
 

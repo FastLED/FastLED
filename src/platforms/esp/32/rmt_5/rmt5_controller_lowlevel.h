@@ -73,8 +73,8 @@ private:
 
     // Pixel data buffer (owned by controller)
     uint8_t* mPixelData;
-    fl::size mPixelDataSize;
-    fl::size mPixelDataCapacity;
+    int mPixelDataSize;
+    int mPixelDataCapacity;
 
     // Current worker assignment (temporary)
     RmtWorker* mCurrentWorker;
@@ -83,7 +83,7 @@ private:
     void waitForPreviousTransmission();
 
     // Allocate or resize pixel buffer
-    void ensurePixelBufferCapacity(fl::size required_bytes);
+    void ensurePixelBufferCapacity(int required_bytes);
 };
 
 } // namespace fl

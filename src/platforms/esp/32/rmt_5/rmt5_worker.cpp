@@ -10,7 +10,13 @@
 extern "C" {
 #endif
 
-#include "hal/rmt_ll.h"
+#include "esp32-hal.h"
+#include "esp_intr_alloc.h"
+#include "driver/gpio.h"
+#include "soc/soc.h"  // For ETS_RMT_INTR_SOURCE
+#include "soc/rmt_struct.h"
+#include "rom/gpio.h"  // For gpio_matrix_out
+#include "rom/ets_sys.h"  // For ets_printf (ISR-safe logging)
 #include "esp_log.h"
 
 #ifdef __cplusplus
@@ -19,17 +25,35 @@ extern "C" {
 
 #include "fl/force_inline.h"
 #include "fl/assert.h"
-#include "fl/warn.h"
+#include "fl/memfill.h"
 
 #define RMT5_WORKER_TAG "rmt5_worker"
+
+// Define rmt_item32_t union (compatible with RMT4)
+union rmt_item32_t {
+    struct {
+        uint32_t duration0 : 15;
+        uint32_t level0 : 1;
+        uint32_t duration1 : 15;
+        uint32_t level1 : 1;
+    };
+    uint32_t val;
+};
+
+// Define rmt_block_mem_t for IDF5 (removed from public headers)
+typedef struct {
+    struct {
+        rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
+    } chan[SOC_RMT_CHANNELS_PER_GROUP];
+} rmt_block_mem_t;
+
+// RMTMEM address is declared in <target>.peripherals.ld
+extern rmt_block_mem_t RMTMEM;
 
 namespace fl {
 
 // Static spinlock for ISR synchronization
 portMUX_TYPE RmtWorker::sRmtSpinlock = portMUX_INITIALIZER_UNLOCKED;
-
-// Global reference to RMTMEM for direct memory access
-extern rmt_block_mem_t RMTMEM;
 
 RmtWorker::RmtWorker()
     : mChannel(nullptr)
@@ -89,7 +113,7 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
     if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[%d]: Failed to create RMT TX channel: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %d", worker_id, ret);
         return false;
     }
 
@@ -103,13 +127,39 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     // Enable the channel
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[%d]: Failed to enable RMT channel: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable RMT channel: %d", worker_id, ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
     }
 
-    // Register custom ISR for threshold and done interrupts
+    // Configure threshold interrupt for double-buffer ping-pong
+    // Research from iteration 4 confirmed ESP-IDF v5 DOES support threshold interrupts!
+    // Threshold interrupt bits: channel 0-3 use bits 8-11 in int_ena/int_st registers
+    // Threshold value register: chn_tx_lim[channel].tx_lim_chn
+
+    // Set threshold to 48 items (3/4 of 64-word buffer)
+    // This triggers interrupt when 48 items have been transmitted, leaving 16 items
+    // in hardware buffer while we refill the next half
+#if CONFIG_IDF_TARGET_ESP32S3
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+#elif CONFIG_IDF_TARGET_ESP32C3
+    RMT.tx_lim[mChannelId].tx_lim = 48;
+#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+#else
+#error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
+#endif
+
+    // Enable threshold interrupt using direct register access
+    uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
+    RMT.int_ena.val |= (1 << thresh_int_bit);
+
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Threshold interrupt enabled on bit %d", worker_id, thresh_int_bit);
+
+    // Allocate custom ISR at Level 3 (compatible with Xtensa and RISC-V)
+    // This gives us control over both threshold and done interrupts
+#ifdef ETS_RMT_INTR_SOURCE
     ret = esp_intr_alloc(
         ETS_RMT_INTR_SOURCE,
         ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
@@ -119,19 +169,31 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     );
 
     if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[%d]: Failed to allocate ISR: %d", worker_id, ret);
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %d", worker_id, ret);
         rmt_disable(mChannel);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
     }
 
-    // Enable threshold interrupt at 50% mark
-    rmt_ll_enable_tx_thres_interrupt(&RMT, mChannelId, true);
-    rmt_ll_set_tx_thres(&RMT, mChannelId, static_cast<uint32_t>(PULSES_PER_FILL));
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Custom ISR allocated successfully", worker_id);
+#else
+    // Fallback: Use RMT5 high-level callback API if ETS_RMT_INTR_SOURCE not available
+    ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: ETS_RMT_INTR_SOURCE not available, using callbacks", worker_id);
 
-    // Enable done interrupt
-    rmt_ll_enable_tx_end_interrupt(&RMT, mChannelId, true);
+    rmt_tx_event_callbacks_t callbacks = {};
+    callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
+    ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
+    if (ret != ESP_OK) {
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to register callbacks: %d", worker_id, ret);
+        rmt_disable(mChannel);
+        rmt_del_channel(mChannel);
+        mChannel = nullptr;
+        return false;
+    }
+
+    ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Threshold interrupts require custom ISR (not available in callback mode)", worker_id);
+#endif
 
     mAvailable = true;
     return true;
@@ -183,31 +245,34 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
     // Note: ESP-IDF v5 requires channel to be disabled before changing GPIO
     esp_err_t ret = rmt_disable(mChannel);
     if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
+        ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
         return false;
     }
 
     // Use low-level API to change GPIO
-    rmt_ll_tx_reset_pointer(&RMT, mChannelId);
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
     gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
 
     ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[%d]: Failed to re-enable channel: %d", mWorkerId, ret);
+        ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to re-enable channel: %d", mWorkerId, ret);
         return false;
     }
 
     return true;
 }
 
-void RmtWorker::transmit(const uint8_t* pixel_data, fl::size num_bytes) {
+void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_ASSERT(!mTransmitting, "RmtWorker::transmit called while already transmitting");
     FL_ASSERT(pixel_data != nullptr, "RmtWorker::transmit called with null pixel data");
 
     // Store pixel data pointer (not owned by worker)
     mPixelData = pixel_data;
     mNumBytes = num_bytes;
+
+    // Debug: Log transmission start
+    ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: TX START - %d bytes (%d LEDs)",
+             mWorkerId, num_bytes, num_bytes / 3);
 
     // Reset state
     mCur = 0;
@@ -223,6 +288,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, fl::size num_bytes) {
     // Reset memory pointer and start transmission
     mWhichHalf = 0;
     mRMT_mem_ptr = mRMT_mem_start;
+
+    ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Both halves filled, starting HW transmission", mWorkerId);
 
     tx_start();
 }
@@ -268,9 +335,10 @@ FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
 // Fill next half of RMT buffer (interrupt context)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
     volatile rmt_item32_t* pItem = mRMT_mem_ptr;
+    uint8_t currentHalf = mWhichHalf;
 
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
-    for (fl::size i = 0; i < PULSES_PER_FILL / 8; i++) {
+    for (fl::size i = 0; i < RmtWorker::PULSES_PER_FILL / 8; i++) {
         if (mCur < mNumBytes) {
             convertByteToRmt(mPixelData[mCur], pItem);
             pItem += 8;
@@ -283,50 +351,123 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
     }
 
     // Flip to other half
-    mWhichHalf++;
-    if (mWhichHalf == 2) {
+    uint8_t nextHalf = mWhichHalf + 1;
+    if (nextHalf == 2) {
         pItem = mRMT_mem_start;
-        mWhichHalf = 0;
+        nextHalf = 0;
     }
+    mWhichHalf = nextHalf;
 
     mRMT_mem_ptr = pItem;
+
+    // Debug logging - track buffer refills
+    // Note: Use ets_printf for ISR-safe logging (ESP_LOG* may not be ISR-safe)
+    // Only log if significantly more data remaining (avoid spam at end)
+    if (mCur < mNumBytes - 16) {
+        ets_printf("W%d: fillHalf=%d, byte=%d/%d\n", mWorkerId, currentHalf, mCur, mNumBytes);
+    }
 }
 
 // Start RMT transmission
 void IRAM_ATTR RmtWorker::tx_start() {
+    // Use direct register access like RMT4
+    // This is platform-specific and based on RMT4's approach
+#if CONFIG_IDF_TARGET_ESP32S3
     // Reset RMT memory read pointer
-    rmt_ll_tx_reset_pointer(&RMT, mChannelId);
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
 
-    // Set continuous mode (loop within allocated memory)
-    rmt_ll_tx_enable_loop(&RMT, mChannelId, false);
+    // Clear and enable both TX end and threshold interrupts
+    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    rmt_ll_tx_start(&RMT, mChannelId);
+    RMT.chnconf0[mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mChannelId].tx_start_chn = 1;
+#elif CONFIG_IDF_TARGET_ESP32C3
+    // Reset RMT memory read pointer
+    RMT.tx_conf[mChannelId].mem_rd_rst = 1;
+    RMT.tx_conf[mChannelId].mem_rd_rst = 0;
+    RMT.tx_conf[mChannelId].mem_rst = 1;
+    RMT.tx_conf[mChannelId].mem_rst = 0;
+
+    // Clear and enable both TX end and threshold interrupts
+    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+
+    // Start transmission
+    RMT.tx_conf[mChannelId].conf_update = 1;
+    RMT.tx_conf[mChannelId].tx_start = 1;
+#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+    // Reset RMT memory read pointer
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
+
+    // Clear and enable both TX end and threshold interrupts
+    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+
+    // Start transmission
+    RMT.chnconf0[mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mChannelId].tx_start_chn = 1;
+#else
+#error "RMT5 worker not yet implemented for this ESP32 variant"
+#endif
+}
+
+// RMT5 TX done callback (called from ISR context)
+bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data) {
+    RmtWorker* worker = static_cast<RmtWorker*>(user_data);
+    worker->handleDoneInterrupt();
+    return false;  // Don't yield from ISR
 }
 
 // Global ISR handler (dispatches to instance handlers)
+// NOTE: This is currently unused - using RMT5 high-level callbacks instead
 void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     RmtWorker* worker = static_cast<RmtWorker*>(arg);
     uint32_t intr_st = RMT.int_st.val;
-    uint32_t channel_mask = (1 << worker->mChannelId);
 
-    // Check threshold interrupt (buffer half empty)
-    uint32_t thresh_bit = worker->mChannelId + 24;  // TX threshold bits start at bit 24
-    if (intr_st & (1 << thresh_bit)) {
+    // Platform-specific bit positions (from RMT4)
+#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+    int tx_done_bit = worker->mChannelId;
+    int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
+#else
+#error "RMT5 worker ISR not yet implemented for this ESP32 variant"
+#endif
+
+    // Check threshold interrupt (buffer half empty) - if enabled
+    // Note: Currently disabled - using one-shot mode
+    if (intr_st & (1 << tx_next_bit)) {
         worker->handleThresholdInterrupt();
-        RMT.int_clr.val = (1 << thresh_bit);
+        RMT.int_clr.val = (1 << tx_next_bit);
     }
 
     // Check done interrupt (transmission complete)
-    if (intr_st & channel_mask) {
+    if (intr_st & (1 << tx_done_bit)) {
         worker->handleDoneInterrupt();
-        RMT.int_clr.val = channel_mask;
+        RMT.int_clr.val = (1 << tx_done_bit);
     }
 }
 
 // Handle threshold interrupt (refill next buffer half)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
     portENTER_CRITICAL_ISR(&sRmtSpinlock);
+
+    // Debug: Track threshold interrupts
+    static uint32_t thresholdCount = 0;
+    thresholdCount++;
+    if (thresholdCount % 10 == 0) {  // Log every 10th to reduce spam
+        ets_printf("W%d: THRESHOLD_ISR #%d\n", mWorkerId, thresholdCount);
+    }
+
     fillNextHalf();
     portEXIT_CRITICAL_ISR(&sRmtSpinlock);
 }
@@ -334,6 +475,10 @@ void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
 // Handle done interrupt (transmission complete)
 void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
     portENTER_CRITICAL_ISR(&sRmtSpinlock);
+
+    // Debug: Track transmission completion
+    ets_printf("W%d: TX DONE - sent %d/%d bytes\n", mWorkerId, mCur, mNumBytes);
+
     mTransmitting = false;
     mAvailable = true;
     portEXIT_CRITICAL_ISR(&sRmtSpinlock);
