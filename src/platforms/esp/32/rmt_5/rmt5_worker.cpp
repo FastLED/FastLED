@@ -141,7 +141,9 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     // Set threshold to 48 items (3/4 of 64-word buffer)
     // This triggers interrupt when 48 items have been transmitted, leaving 16 items
     // in hardware buffer while we refill the next half
-#if CONFIG_IDF_TARGET_ESP32S3
+#if CONFIG_IDF_TARGET_ESP32
+    RMT.tx_lim_ch[mChannelId].limit = 48;
+#elif CONFIG_IDF_TARGET_ESP32S3
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #elif CONFIG_IDF_TARGET_ESP32C3
     RMT.tx_lim[mChannelId].tx_lim = 48;
@@ -372,7 +374,21 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
 void IRAM_ATTR RmtWorker::tx_start() {
     // Use direct register access like RMT4
     // This is platform-specific and based on RMT4's approach
-#if CONFIG_IDF_TARGET_ESP32S3
+#if CONFIG_IDF_TARGET_ESP32
+    // Reset RMT memory read pointer
+    RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 1;
+    RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 0;
+    RMT.conf_ch[mChannelId].conf1.apb_mem_rst = 1;
+    RMT.conf_ch[mChannelId].conf1.apb_mem_rst = 0;
+
+    // Clear and enable both TX end and threshold interrupts
+    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+
+    // Start transmission
+    RMT.conf_ch[mChannelId].conf1.tx_start = 1;
+#elif CONFIG_IDF_TARGET_ESP32S3
     // Reset RMT memory read pointer
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
@@ -436,7 +452,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     uint32_t intr_st = RMT.int_st.val;
 
     // Platform-specific bit positions (from RMT4)
-#if CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
     int tx_done_bit = worker->mChannelId;
     int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
 #else
