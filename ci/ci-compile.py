@@ -321,6 +321,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         action="store_true",
         help="Run compilation inside Docker container with pre-cached dependencies",
     )
+    parser.add_argument(
+        "--extra-packages",
+        type=str,
+        help="Comma-separated list of extra PlatformIO library packages to install (e.g., 'OctoWS2811')",
+    )
 
     try:
         parsed_args = parser.parse_intermixed_args(args)
@@ -392,6 +397,7 @@ def compile_board_examples(
     global_cache_dir: Optional[Path] = None,
     merged_bin: bool = False,
     merged_bin_output: Optional[Path] = None,
+    extra_packages: Optional[List[str]] = None,
 ) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
 
@@ -440,6 +446,7 @@ def compile_board_examples(
             verbose=verbose,
             global_cache_dir=resolved_cache_dir,
             additional_defines=defines,
+            additional_libs=extra_packages,
             cache_type=cache_type,
         )
 
@@ -1084,6 +1091,11 @@ def main() -> int:
     if args.defines:
         defines.extend(args.defines.split(","))
 
+    # Set up extra packages
+    extra_packages: Optional[List[str]] = None
+    if args.extra_packages:
+        extra_packages = [pkg.strip() for pkg in args.extra_packages.split(",")]
+
     # Start compilation
     start_time = time.time()
     print(
@@ -1117,6 +1129,7 @@ def main() -> int:
             global_cache_dir=global_cache_dir,
             merged_bin=args.merged_bin,
             merged_bin_output=merged_bin_output,
+            extra_packages=extra_packages,
         )
 
         if not result.ok:
