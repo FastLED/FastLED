@@ -4,6 +4,18 @@ FastLED Example Compiler
 
 Streamlined compiler that uses the PioCompiler to build FastLED examples for various boards.
 This replaces the previous complex compilation system with a simpler approach using the Pio compiler.
+
+ESP32 QEMU Support:
+-------------------
+When using -o/--out with ESP32 boards and a directory path or filename containing "qemu",
+the compiler automatically generates properly merged flash images for QEMU testing.
+The merged flash image includes:
+  - Bootloader at 0x1000 (ESP32) or 0x0 (ESP32-C3/S3)
+  - Partition table at 0x8000
+  - boot_app0 at 0xe000
+  - Application firmware at 0x10000
+
+Uses esptool.py when available, falls back to manual binary merge if not installed.
 """
 
 import argparse
