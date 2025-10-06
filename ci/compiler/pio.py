@@ -19,7 +19,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List
 
 import fasteners
 from dirsync import sync  # type: ignore
@@ -1945,21 +1945,82 @@ class PioCompiler(Compiler):
         if not result.success:
             return result
 
-        # 3. Run merge_bin target
-        # Use shutil.which to find pio in PATH (works in venv)
-        import shutil
-        pio_cmd = shutil.which("pio") or "pio"
+        # 3. Use esptool to merge binaries
+        # PlatformIO doesn't have a merge_bin target - we must use esptool directly
+        env_name = self.board.board_name
+        artifacts_dir = self.build_dir / ".pio" / "build" / env_name
+
+        # Find required binary components
+        bootloader_bin = artifacts_dir / "bootloader.bin"
+        partitions_bin = artifacts_dir / "partitions.bin"
+        boot_app0_bin = artifacts_dir / "boot_app0.bin"
+        firmware_bin = artifacts_dir / "firmware.bin"
+
+        # Verify all required files exist
+        missing_files: List[str] = []
+        for bin_file in [bootloader_bin, partitions_bin, firmware_bin]:
+            if not bin_file.exists():
+                missing_files.append(str(bin_file))
+
+        if missing_files:
+            return SketchResult(
+                success=False,
+                output=f"Required binary files not found after build: {', '.join(missing_files)}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # Create boot_app0.bin if it doesn't exist (it's optional)
+        if not boot_app0_bin.exists():
+            # Create default 8KB boot_app0.bin (all 0xFF)
+            boot_app0_bin.write_bytes(b"\xff" * 8192)
+            print(f"Created default boot_app0.bin")
+
+        # Determine chip type and offsets based on board
+        # ESP32 (original) uses 0x1000 for bootloader
+        # ESP32-S3/C3 use 0x0 for bootloader
+        platform_str = str(self.board.platform).lower()
+        if "esp32s3" in env_name.lower() or "esp32s3" in platform_str:
+            chip = "esp32s3"
+            bootloader_offset = "0x0"
+        elif "esp32c3" in env_name.lower() or "esp32c3" in platform_str:
+            chip = "esp32c3"
+            bootloader_offset = "0x0"
+        elif "esp8266" in platform_str:
+            chip = "esp8266"
+            bootloader_offset = "0x0"
+        else:
+            # Default ESP32
+            chip = "esp32"
+            bootloader_offset = "0x1000"
+
+        # Create merged binary using esptool
+        merged_bin = artifacts_dir / "merged.bin"
 
         merge_cmd = [
-            pio_cmd,
-            "run",
-            "--project-dir",
-            str(self.build_dir),
-            "--target",
+            "esptool.py",
+            "--chip",
+            chip,
             "merge_bin",
+            "-o",
+            str(merged_bin),
+            "--flash_mode",
+            "dio",
+            "--flash_freq",
+            "80m",
+            "--flash_size",
+            "4MB",
+            bootloader_offset,
+            str(bootloader_bin),
+            "0x8000",
+            str(partitions_bin),
+            "0xe000",
+            str(boot_app0_bin),
+            "0x10000",
+            str(firmware_bin),
         ]
 
-        print(f"Running merge_bin: {' '.join(merge_cmd)}")
+        print(f"Running esptool merge_bin: {' '.join(merge_cmd)}")
 
         try:
             merge_proc = subprocess.run(
@@ -1968,7 +2029,14 @@ class PioCompiler(Compiler):
         except subprocess.TimeoutExpired:
             return SketchResult(
                 success=False,
-                output="merge_bin command timed out after 300 seconds",
+                output="esptool merge_bin timed out after 300 seconds",
+                build_dir=self.build_dir,
+                example=example,
+            )
+        except FileNotFoundError:
+            return SketchResult(
+                success=False,
+                output="esptool.py not found. Please install: uv pip install esptool",
                 build_dir=self.build_dir,
                 example=example,
             )
@@ -1976,26 +2044,22 @@ class PioCompiler(Compiler):
         if merge_proc.returncode != 0:
             return SketchResult(
                 success=False,
-                output=f"merge_bin failed: {merge_proc.stderr}",
+                output=f"esptool merge_bin failed: {merge_proc.stderr}\n{merge_proc.stdout}",
                 build_dir=self.build_dir,
                 example=example,
             )
 
-        # 4. Get merged binary path
-        merged_bin = self.get_merged_bin_path(example)
-
-        if not merged_bin or not merged_bin.exists():
+        # 4. Verify merged binary was created
+        if not merged_bin.exists():
             return SketchResult(
                 success=False,
-                output=f"Merged binary not found at expected location",
+                output=f"Merged binary not created at {merged_bin}",
                 build_dir=self.build_dir,
                 example=example,
             )
 
         # 5. Copy to output path if specified
         if output_path:
-            import shutil
-
             output_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy2(merged_bin, output_path)
             merged_bin = output_path
