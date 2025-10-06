@@ -148,7 +148,7 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #elif CONFIG_IDF_TARGET_ESP32C3
     RMT.tx_lim[mChannelId].limit = 48;
-#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #elif CONFIG_IDF_TARGET_ESP32P4
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
@@ -433,7 +433,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // Start transmission
     RMT.tx_conf[mChannelId].conf_update = 1;
     RMT.tx_conf[mChannelId].tx_start = 1;
-#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2
+#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5
     // Reset RMT memory read pointer
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
@@ -483,7 +483,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     uint32_t intr_st = RMT.int_st.val;
 
     // Platform-specific bit positions (from RMT4)
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32P4
+#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32P4
     int tx_done_bit = worker->mChannelId;
     int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
 #else
