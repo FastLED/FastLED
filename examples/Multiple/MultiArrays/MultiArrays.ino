@@ -117,6 +117,11 @@ CRGB blueLeds[NUM_LEDS_PER_STRIP];
     #define PIN_RED   3
     #define PIN_GREEN 4
     #define PIN_BLUE  5
+  #elif defined(CONFIG_IDF_TARGET_ESP32H2)
+    // ESP32-H2: Avoid flash pins 15-21, strapping pins 2, 3, 8, 9, 25, USB-Serial-JTAG 26, 27
+    #define PIN_RED   0
+    #define PIN_GREEN 1
+    #define PIN_BLUE  4
   #else
     // ESP32 classic (WROOM-32, WROVER, etc): Avoid strapping and flash pins
     #define PIN_RED   13
