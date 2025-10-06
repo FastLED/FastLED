@@ -35,4 +35,4 @@ jobs:
     with:
       platform: esp32p4
       platform_display: ESP32-P4
-      sketch: Esp32ParlioDriver
+      sketch: SpecialDrivers/ESP/Parlio/Esp32P4Parlio

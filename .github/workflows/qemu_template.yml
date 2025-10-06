@@ -377,6 +377,9 @@ jobs:
             esp32s3)
               CHIP="esp32s3"
               ;;
+            esp32p4)
+              CHIP="esp32p4"
+              ;;
             *)
               echo "Unknown platform: $PLATFORM, defaulting to esp32"
               CHIP="esp32"
@@ -501,12 +504,25 @@ jobs:
           fi
 
           # Validate debug output is present (now using Serial.print instead of FL_WARN)
-          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
-            echo "✅ Debug output detected"
-            echo "Setup messages found:"
-            grep "${{ inputs.sketch }} setup starting\|Initialized.*LED strips\|Setup complete" qemu_output.log | head -10
+          # Check for sketch-specific patterns based on platform
+          SKETCH_PATTERN=""
+          if echo "${{ inputs.sketch }}" | grep -q "Parlio"; then
+            # ESP32-P4 PARLIO driver patterns
+            SKETCH_PATTERN="FastLED ESP32-P4 PARLIO"
+          elif echo "${{ inputs.sketch }}" | grep -q "LCD_I80"; then
+            # LCD I80 driver patterns
+            SKETCH_PATTERN="LCD_I80\|LCD I80"
           else
-            echo "❌ No debug output detected"
+            # Default pattern for other sketches
+            SKETCH_PATTERN="${{ inputs.sketch }} setup starting"
+          fi
+
+          if grep -q -E "$SKETCH_PATTERN" qemu_output.log; then
+            echo "✅ Debug output detected (pattern: $SKETCH_PATTERN)"
+            echo "Setup messages found:"
+            grep -E "$SKETCH_PATTERN\|Initialized.*LED strips\|Setup complete\|Ready!" qemu_output.log | head -10
+          else
+            echo "❌ No debug output detected (expected pattern: $SKETCH_PATTERN)"
             echo "Expected Serial.print messages not found in QEMU log"
             echo ""
             echo "=== Full QEMU output (first 200 lines) ==="
@@ -518,32 +534,32 @@ jobs:
           fi
 
           # Validate sketch startup
-          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
+          if grep -q -E "$SKETCH_PATTERN" qemu_output.log; then
             echo "✅ ${{ inputs.sketch }} setup started"
           else
             echo "❌ ${{ inputs.sketch }} startup message not found"
             exit 1
           fi
 
-          # Check for LED strip initialization
-          if grep -q "Initialized 4 LED strips" qemu_output.log; then
-            echo "✅ 4 LED strips initialized"
+          # Check for LED strip initialization (optional, depends on sketch)
+          if grep -q "Initialized.*LED strips\|Ready!" qemu_output.log; then
+            echo "✅ LED strip/driver initialization detected"
           else
-            echo "⚠️  LED strip initialization message not found"
+            echo "⚠️  LED strip initialization message not found (may be normal for this sketch)"
           fi
 
           # Check for loop execution
           if grep -q "Starting loop iteration" qemu_output.log; then
             echo "✅ Loop execution detected"
           else
-            echo "⚠️  No loop execution messages found"
+            echo "⚠️  No loop iteration messages found (sketch may not output loop iterations)"
           fi
 
           # Check for test completion
           if grep -q "Test finished.*completed.*iterations" qemu_output.log; then
             echo "✅ Test completion detected"
           else
-            echo "⚠️  Test completion not detected (may need more time)"
+            echo "⚠️  Test completion not detected (may need more time or sketch doesn't output completion)"
           fi
 
           # Validate boot success - check for ESP32 boot indicators or our application output
@@ -565,7 +581,7 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-failure-${{ inputs.sketch }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-failure-${{ replace(inputs.sketch, '/', '-') }}-${{ github.sha }}
           path: |
             qemu_output.log
             trusted/qemu-build/
@@ -575,7 +591,7 @@ jobs:
         if: success()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ inputs.platform }}-qemu-success-${{ inputs.sketch }}-${{ github.sha }}
+          name: ${{ inputs.platform }}-qemu-success-${{ replace(inputs.sketch, '/', '-') }}-${{ github.sha }}
           path: qemu_output.log
 
       - name: Summary
