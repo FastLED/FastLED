@@ -98,7 +98,7 @@ FastLED's codebase is organized into several major areas. Each directory contain
 [![rp2040](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2040.yml) [![rp2350](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350.yml) [![rp2350B SparkfunXRP](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_rp2350B.yml)
 
 ### ESP32 (Espressif)
-**ESP8266:** [![esp32-8266](https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp8622.yml)
+**ESP8266:** [![esp32-8266](https://github.com/FastLED/FastLED/actions/workflows/build_esp8266.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp8266.yml)
 
 **ESP32 Classic:** [![esp32dev](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32dev.yml) [![esp32wroom](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_esp32wroom.yml)
 
