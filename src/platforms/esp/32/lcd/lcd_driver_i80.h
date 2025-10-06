@@ -43,6 +43,7 @@
 #include "crgb.h"
 #include "platforms/shared/clockless_timing.h"
 #include "lcd_driver_common.h"
+#include "lcd_driver_i80_impl.h"
 
 namespace fl {
 
@@ -238,6 +239,3 @@ private:
 };
 
 }  // namespace fl
-
-// Include template implementation
-#include "lcd_driver_i80_impl.h"

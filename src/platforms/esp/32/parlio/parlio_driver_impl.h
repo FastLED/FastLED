@@ -12,12 +12,17 @@ ParlioLedDriver<DATA_WIDTH, CHIPSET>::ParlioLedDriver()
     , strips_{}
     , tx_unit_(nullptr)
     , dma_buffer_(nullptr)
+    , dma_sub_buffers_{}
     , buffer_size_(0)
+    , sub_buffer_size_(0)
     , xfer_done_sem_(nullptr)
     , dma_busy_(false)
 {
     for (int i = 0; i < 16; i++) {
         strips_[i] = nullptr;
+    }
+    for (int i = 0; i < 3; i++) {
+        dma_sub_buffers_[i] = nullptr;
     }
 }
 
@@ -44,18 +49,45 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     // Each LED has 24 bits (GRB), and each bit position requires DATA_WIDTH bytes
     buffer_size_ = num_leds * 24 * DATA_WIDTH;
 
-    // Allocate DMA buffer
-    dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
-    if (!dma_buffer_) {
-        return false;
+    // Allocate DMA buffers based on strategy
+    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+        // Allocate 3 sub-buffers (one for each color component: G, R, B)
+        // Each sub-buffer holds 8 bits * DATA_WIDTH bytes per LED
+        sub_buffer_size_ = num_leds * 8 * DATA_WIDTH;
+
+        for (int i = 0; i < 3; i++) {
+            dma_sub_buffers_[i] = (uint8_t*)heap_caps_malloc(sub_buffer_size_, MALLOC_CAP_DMA);
+            if (!dma_sub_buffers_[i]) {
+                // Clean up previously allocated buffers
+                for (int j = 0; j < i; j++) {
+                    heap_caps_free(dma_sub_buffers_[j]);
+                    dma_sub_buffers_[j] = nullptr;
+                }
+                return false;
+            }
+            memset(dma_sub_buffers_[i], 0, sub_buffer_size_);
+        }
+    } else {
+        // Monolithic buffer (original implementation)
+        dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
+        if (!dma_buffer_) {
+            return false;
+        }
+        memset(dma_buffer_, 0, buffer_size_);
     }
-    memset(dma_buffer_, 0, buffer_size_);
 
     // Create semaphore for transfer completion
     xfer_done_sem_ = xSemaphoreCreateBinary();
     if (!xfer_done_sem_) {
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+            for (int i = 0; i < 3; i++) {
+                heap_caps_free(dma_sub_buffers_[i]);
+                dma_sub_buffers_[i] = nullptr;
+            }
+        } else {
+            heap_caps_free(dma_buffer_);
+            dma_buffer_ = nullptr;
+        }
         return false;
     }
     xSemaphoreGive(xfer_done_sem_);
@@ -70,7 +102,10 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     parlio_config.clk_out_gpio_num = (gpio_num_t)config_.clk_gpio;
     parlio_config.valid_gpio_num = (gpio_num_t)-1;  // No separate valid signal
     parlio_config.trans_queue_depth = 4;
-    parlio_config.max_transfer_size = buffer_size_;
+    // Use sub-buffer size if breaking per color, otherwise use full buffer size
+    parlio_config.max_transfer_size = (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR)
+                                       ? sub_buffer_size_
+                                       : buffer_size_;
     parlio_config.dma_burst_size = 64;  // Standard DMA burst size
     parlio_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
     parlio_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
@@ -87,8 +122,15 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     esp_err_t err = parlio_new_tx_unit(&parlio_config, &tx_unit_);
     if (err != ESP_OK) {
         vSemaphoreDelete(xfer_done_sem_);
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+            for (int i = 0; i < 3; i++) {
+                heap_caps_free(dma_sub_buffers_[i]);
+                dma_sub_buffers_[i] = nullptr;
+            }
+        } else {
+            heap_caps_free(dma_buffer_);
+            dma_buffer_ = nullptr;
+        }
         xfer_done_sem_ = nullptr;
         return false;
     }
@@ -104,9 +146,16 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     if (err != ESP_OK) {
         parlio_del_tx_unit(tx_unit_);
         vSemaphoreDelete(xfer_done_sem_);
-        heap_caps_free(dma_buffer_);
+        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+            for (int i = 0; i < 3; i++) {
+                heap_caps_free(dma_sub_buffers_[i]);
+                dma_sub_buffers_[i] = nullptr;
+            }
+        } else {
+            heap_caps_free(dma_buffer_);
+            dma_buffer_ = nullptr;
+        }
         tx_unit_ = nullptr;
-        dma_buffer_ = nullptr;
         xfer_done_sem_ = nullptr;
         return false;
     }
@@ -127,6 +176,13 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::end() {
         dma_buffer_ = nullptr;
     }
 
+    for (int i = 0; i < 3; i++) {
+        if (dma_sub_buffers_[i]) {
+            heap_caps_free(dma_sub_buffers_[i]);
+            dma_sub_buffers_[i] = nullptr;
+        }
+    }
+
     if (xfer_done_sem_) {
         vSemaphoreDelete(xfer_done_sem_);
         xfer_done_sem_ = nullptr;
@@ -145,15 +201,26 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::set_strip(uint8_t channel, CRGB* leds
 template <uint8_t DATA_WIDTH, typename CHIPSET>
 template<EOrder RGB_ORDER>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
-    if (!tx_unit_ || !dma_buffer_) {
+    if (!tx_unit_) {
         return;
+    }
+
+    // Verify buffers are allocated
+    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+        if (!dma_sub_buffers_[0] || !dma_sub_buffers_[1] || !dma_sub_buffers_[2]) {
+            return;
+        }
+    } else {
+        if (!dma_buffer_) {
+            return;
+        }
     }
 
     // Wait for previous transfer to complete
     xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
     dma_busy_ = true;
 
-    // Pack LED data into DMA buffer
+    // Pack LED data into DMA buffer(s)
     pack_data<RGB_ORDER>();
 
     // Configure transmission
@@ -161,16 +228,37 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     tx_config.idle_value = 0x00000000;  // Lines idle low between frames
     tx_config.flags.queue_nonblocking = 0;
 
-    // Transmit (non-blocking DMA)
-    size_t total_bits = buffer_size_ * 8;
-    esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_buffer_, total_bits, &tx_config);
+    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+        // Transmit 3 sub-buffers sequentially (G, R, B)
+        // This ensures DMA gaps only occur at color component boundaries
+        for (int color = 0; color < 3; color++) {
+            size_t total_bits = sub_buffer_size_ * 8;
+            esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_sub_buffers_[color], total_bits, &tx_config);
 
-    if (err != ESP_OK) {
-        dma_busy_ = false;
-        xSemaphoreGive(xfer_done_sem_);
+            if (err != ESP_OK) {
+                dma_busy_ = false;
+                xSemaphoreGive(xfer_done_sem_);
+                return;
+            }
+
+            // Wait for this buffer to complete before transmitting next
+            // This is necessary because we're reusing the completion callback
+            if (color < 2) {
+                xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
+            }
+        }
+        // Last callback will give semaphore when done
+    } else {
+        // Monolithic buffer (original implementation)
+        size_t total_bits = buffer_size_ * 8;
+        esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_buffer_, total_bits, &tx_config);
+
+        if (err != ESP_OK) {
+            dma_busy_ = false;
+            xSemaphoreGive(xfer_done_sem_);
+        }
+        // Callback will give semaphore when done
     }
-
-    // Callback will give semaphore when done
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
@@ -204,30 +292,61 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show_bgr() {
 template <uint8_t DATA_WIDTH, typename CHIPSET>
 template<EOrder RGB_ORDER>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
-    size_t byte_idx = 0;
-
-    for (uint16_t led = 0; led < num_leds_; led++) {
-        // Process each of 3 color bytes in the specified output order
+    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
+        // Pack data into 3 separate sub-buffers (one per color component)
+        // This ensures DMA gaps only occur at color boundaries
         for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
             // Get which CRGB byte to output at this position
             uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
+            size_t byte_idx = 0;
 
-            // Process 8 bits of this byte (MSB first)
-            for (int8_t bit = 7; bit >= 0; bit--) {
-                uint8_t output_byte = 0;
+            for (uint16_t led = 0; led < num_leds_; led++) {
+                // Process 8 bits of this color byte (MSB first)
+                for (int8_t bit = 7; bit >= 0; bit--) {
+                    uint8_t output_byte = 0;
 
-                // Pack same bit position from all DATA_WIDTH channels
-                for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
-                    if (strips_[channel]) {
-                        const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                        uint8_t channel_byte = channel_data[crgb_offset];
-                        uint8_t bit_val = (channel_byte >> bit) & 0x01;
-                        // MSB of output byte corresponds to channel 0
-                        output_byte |= (bit_val << (7 - channel));
+                    // Pack same bit position from all DATA_WIDTH channels
+                    for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
+                        if (strips_[channel]) {
+                            const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
+                            uint8_t channel_byte = channel_data[crgb_offset];
+                            uint8_t bit_val = (channel_byte >> bit) & 0x01;
+                            // MSB of output byte corresponds to channel 0
+                            output_byte |= (bit_val << (7 - channel));
+                        }
                     }
-                }
 
-                dma_buffer_[byte_idx++] = output_byte;
+                    dma_sub_buffers_[output_pos][byte_idx++] = output_byte;
+                }
+            }
+        }
+    } else {
+        // Monolithic buffer (original implementation)
+        size_t byte_idx = 0;
+
+        for (uint16_t led = 0; led < num_leds_; led++) {
+            // Process each of 3 color bytes in the specified output order
+            for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
+                // Get which CRGB byte to output at this position
+                uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
+
+                // Process 8 bits of this byte (MSB first)
+                for (int8_t bit = 7; bit >= 0; bit--) {
+                    uint8_t output_byte = 0;
+
+                    // Pack same bit position from all DATA_WIDTH channels
+                    for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
+                        if (strips_[channel]) {
+                            const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
+                            uint8_t channel_byte = channel_data[crgb_offset];
+                            uint8_t bit_val = (channel_byte >> bit) & 0x01;
+                            // MSB of output byte corresponds to channel 0
+                            output_byte |= (bit_val << (7 - channel));
+                        }
+                    }
+
+                    dma_buffer_[byte_idx++] = output_byte;
+                }
             }
         }
     }

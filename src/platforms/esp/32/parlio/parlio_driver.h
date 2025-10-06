@@ -33,12 +33,25 @@
 
 namespace fl {
 
+/// @brief Buffer breaking strategy for DMA transmission
+enum class ParlioBufferStrategy {
+    /// @brief Single monolithic buffer (original implementation)
+    /// May experience visible glitches if DMA gaps occur mid-component
+    MONOLITHIC = 0,
+
+    /// @brief Break buffers at LSB boundaries of each color component
+    /// Ensures DMA gaps only affect LSB, making errors imperceptible (±1 brightness)
+    /// Breaks after each complete color byte: G[7:0], R[7:0], B[7:0]
+    BREAK_PER_COLOR = 1
+};
+
 /// @brief Configuration structure for PARLIO LED driver
 struct ParlioDriverConfig {
     int clk_gpio;                ///< GPIO number for clock output
     int data_gpios[16];          ///< GPIO numbers for data lanes (up to 16)
     int num_lanes;               ///< Active lane count (1, 2, 4, 8, or 16)
     uint32_t clock_freq_hz;      ///< PARLIO clock frequency (e.g., 12000000 for 12MHz)
+    ParlioBufferStrategy buffer_strategy; ///< Buffer breaking strategy (default: BREAK_PER_COLOR)
 };
 
 /// @brief Abstract base for PARLIO driver (enables runtime polymorphism)
@@ -143,8 +156,10 @@ private:
     uint16_t num_leds_;             ///< Number of LEDs per strip
     CRGB* strips_[16];              ///< Pointers to LED data for each strip
     parlio_tx_unit_handle_t tx_unit_; ///< PARLIO TX unit handle
-    uint8_t* dma_buffer_;           ///< DMA buffer for bit-packed data
-    size_t buffer_size_;            ///< Size of DMA buffer in bytes
+    uint8_t* dma_buffer_;           ///< DMA buffer for bit-packed data (monolithic mode)
+    uint8_t* dma_sub_buffers_[3];   ///< Sub-buffers for BREAK_PER_COLOR mode (G, R, B)
+    size_t buffer_size_;            ///< Size of DMA buffer in bytes (total for all sub-buffers)
+    size_t sub_buffer_size_;        ///< Size of each sub-buffer in bytes (BREAK_PER_COLOR mode)
     SemaphoreHandle_t xfer_done_sem_; ///< Semaphore for transfer completion
     volatile bool dma_busy_;        ///< Flag indicating DMA transfer in progress
 };
