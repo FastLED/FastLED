@@ -30,7 +30,7 @@ DEFAULT_BOARDS_NAMES = [
     "web",  # work in progress
     "uno",  # Build is faster if this is first, because it's used for global init.
     "esp32dev",
-    "esp01",  # ESP8266
+    "esp8266",  # ESP8266
     "esp32c3",
     "attiny85",
     "ATtiny1616",

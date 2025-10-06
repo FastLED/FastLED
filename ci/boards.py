@@ -488,8 +488,8 @@ GIGA_R1 = Board(
     real_board_name="giga_r1_m7",
 )
 
-# ESP01 = Board(
-#     board_name="esp01",
+# ESP8266 = Board(
+#     board_name="esp8266",
 #     platform=ESP32_IDF_5_1_PIOARDUINO,
 # )
 
@@ -741,8 +741,8 @@ DIGIX = Board(
 )
 
 # ESP8266 boards
-ESP01 = Board(
-    board_name="esp01",
+ESP8266 = Board(
+    board_name="esp8266",
     platform="espressif8266",
     framework="arduino",
 )

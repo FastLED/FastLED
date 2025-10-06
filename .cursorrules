@@ -337,7 +337,7 @@ The tool follows the pattern established in `ci/wasm_test.py` and `ci/ci/scraper
 - `uv run ci/ci-compile.py uno --examples Blink` - Compile examples for specific platform
   - For example (uno): `uv run ci/ci-compile.py uno --examples Blink`
   - For example (esp32dev): `uv run ci/ci-compile.py esp32dev --examples Blink`
-  - For example (esp8266): `uv run ci/ci-compile.py esp01 --examples Blink`
+  - For example (esp8266): `uv run ci/ci-compile.py esp8266 --examples Blink`
   - For example (teensy31): `uv run ci/ci-compile.py teensy31 --examples Blink`
 - **WASM Compilation** - Compile Arduino sketches to run in web browsers:
   - `uv run ci/wasm_compile.py examples/Blink -b --open` - Compile Blink to WASM and open browser

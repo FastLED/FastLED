@@ -129,7 +129,7 @@ def get_default_boards() -> List[str]:
     preferred_board_names = [
         "uno",  # Build is faster if this is first, because it's used for global init.
         "esp32dev",
-        "esp01",  # ESP8266
+        "esp8266",  # ESP8266
         "esp32c3",
         "esp32c6",
         "esp32s3",

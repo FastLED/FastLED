@@ -25,10 +25,10 @@ jobs:
     with:
       args: "esp32dev"
 
-  build_esp01:
+  build_esp8266:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "esp01"
+      args: "esp8266"
 
   build_esp32_c3_devkitm_1:
     uses: ./.github/workflows/build_template.yml
