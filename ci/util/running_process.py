@@ -14,6 +14,8 @@ from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, ContextManager, Iterator
 
+import psutil
+
 
 class EndOfStream(Exception):
     """Sentinel used to indicate end-of-stream from the reader."""
@@ -479,6 +481,20 @@ class RunningProcess:
             errors="replace",  # Replace invalid chars instead of failing
             env=self.env,  # Use provided environment variables
         )
+
+        # Lower process priority to be more CPU-friendly
+        try:
+            proc_handle = psutil.Process(self.proc.pid)
+            if sys.platform == "win32":
+                # Windows: Set to below normal priority
+                proc_handle.nice(psutil.BELOW_NORMAL_PRIORITY_CLASS)
+            else:
+                # Unix/Linux/Mac: Set nice value to 10 (lower priority)
+                # Nice values range from -20 (highest) to 19 (lowest)
+                proc_handle.nice(10)
+        except (psutil.NoSuchProcess, psutil.AccessDenied, AttributeError) as e:
+            # If we can't set priority, just continue - not a critical failure
+            warnings.warn(f"Could not set process priority: {e}")
 
         # Track start time after process is successfully created
         # This excludes process creation overhead from timing measurements
