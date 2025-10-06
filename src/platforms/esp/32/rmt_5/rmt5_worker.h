@@ -8,6 +8,7 @@
 
 #include "fl/stdint.h"
 #include "fl/namespace.h"
+#include "rmt5_worker_base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -45,7 +46,7 @@ class RmtWorkerPool;
  * - Manual buffer refill via fillNextHalf() in interrupt context
  * - Direct RMT memory access like RMT4
  */
-class RmtWorker {
+class RmtWorker : public IRmtWorkerBase {
 public:
     friend class RmtWorkerPool;
 
@@ -63,23 +64,26 @@ public:
 
     // Worker lifecycle
     RmtWorker();
-    ~RmtWorker();
+    ~RmtWorker() override;
 
     // Initialize hardware channel (called once per worker)
-    bool initialize(uint8_t worker_id);
+    bool initialize(uint8_t worker_id) override;
 
     // Check if worker is available for assignment
-    bool isAvailable() const { return mAvailable; }
+    bool isAvailable() const override { return mAvailable; }
 
     // Configuration (called before each transmission)
-    bool configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns);
+    bool configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) override;
 
     // Transmission control
-    void transmit(const uint8_t* pixel_data, int num_bytes);
-    void waitForCompletion();
+    void transmit(const uint8_t* pixel_data, int num_bytes) override;
+    void waitForCompletion() override;
 
     // Get worker ID
-    uint8_t getWorkerId() const { return mWorkerId; }
+    uint8_t getWorkerId() const override { return mWorkerId; }
+
+    // Get worker type (double-buffer)
+    WorkerType getWorkerType() const override { return WorkerType::DOUBLE_BUFFER; }
 
 private:
     // Hardware resources (persistent)

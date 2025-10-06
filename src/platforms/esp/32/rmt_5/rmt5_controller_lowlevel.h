@@ -9,7 +9,7 @@
 #include "pixel_iterator.h"
 #include "fl/stdint.h"
 #include "fl/namespace.h"
-#include "rmt5_worker.h"
+#include "rmt5_worker_base.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,7 +23,7 @@ extern "C" {
 
 namespace fl {
 
-class RmtWorker;
+class IRmtWorkerBase;
 
 /**
  * RmtController5LowLevel - Lightweight FastLED controller using worker pool
@@ -77,7 +77,7 @@ private:
     int mPixelDataCapacity;
 
     // Current worker assignment (temporary)
-    RmtWorker* mCurrentWorker;
+    IRmtWorkerBase* mCurrentWorker;
 
     // Wait for previous transmission to complete
     void waitForPreviousTransmission();

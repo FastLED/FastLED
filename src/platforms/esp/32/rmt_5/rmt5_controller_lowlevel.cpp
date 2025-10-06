@@ -109,14 +109,17 @@ void RmtController5LowLevel::onBeforeShow() {
 }
 
 void RmtController5LowLevel::onEndShow() {
-    // Acquire worker (may block if N > K and all workers busy)
-    RmtWorker* worker = RmtWorkerPool::getInstance().acquireWorker();
+    // Acquire worker with hybrid mode selection (may block if N > K and all workers busy)
+    // Worker is pre-configured based on strip size and timing parameters
+    IRmtWorkerBase* worker = RmtWorkerPool::getInstance().acquireWorker(
+        mPixelDataSize,
+        mPin,
+        mT1, mT2, mT3,
+        mResetNs
+    );
 
-    // Configure worker for this controller's pin and timing
-    bool configured = worker->configure(mPin, mT1, mT2, mT3, mResetNs);
-    if (!configured) {
-        ESP_LOGW(RMT5_CONTROLLER_TAG, "Failed to configure worker for pin %d", mPin);
-        RmtWorkerPool::getInstance().releaseWorker(worker);
+    if (!worker) {
+        ESP_LOGW(RMT5_CONTROLLER_TAG, "Failed to acquire worker for pin %d", mPin);
         return;
     }
 

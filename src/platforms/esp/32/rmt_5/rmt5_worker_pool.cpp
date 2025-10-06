@@ -39,10 +39,18 @@ RmtWorkerPool::RmtWorkerPool()
 }
 
 RmtWorkerPool::~RmtWorkerPool() {
-    // Clean up workers
-    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
-        delete mWorkers[i];
+    // Clean up double-buffer workers
+    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
+        delete mDoubleBufferWorkers[i];
     }
+    mDoubleBufferWorkers.clear();
+
+    // Clean up one-shot workers
+    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
+        delete mOneShotWorkers[i];
+    }
+    mOneShotWorkers.clear();
+
     mWorkers.clear();
 }
 
@@ -53,39 +61,72 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 
     int max_workers = getMaxWorkers();
 
-    ESP_LOGI(RMT5_POOL_TAG, "Initializing %u workers", static_cast<unsigned int>(max_workers));
+    ESP_LOGI(RMT5_POOL_TAG, "Initializing %d workers (hybrid mode: threshold=%d LEDs)",
+             max_workers, FASTLED_ONESHOT_THRESHOLD_LEDS);
 
+    // Create K double-buffer workers (current default)
+    // Note: We only create one type because we only have K hardware channels
+    // Future: could dynamically choose worker type based on usage patterns
     for (int i = 0; i < max_workers; i++) {
         RmtWorker* worker = new RmtWorker();
         if (!worker->initialize(static_cast<uint8_t>(i))) {
-            ESP_LOGW(RMT5_POOL_TAG, "Failed to initialize worker %u", static_cast<unsigned int>(i));
+            ESP_LOGW(RMT5_POOL_TAG, "Failed to initialize double-buffer worker %d", i);
             delete worker;
             continue;
         }
-        mWorkers.push_back(worker);
+        mDoubleBufferWorkers.push_back(worker);
+        mWorkers.push_back(worker);  // Legacy support
     }
 
-    if (mWorkers.size() == 0) {
+    ESP_LOGI(RMT5_POOL_TAG, "Initialized %zu double-buffer workers (one-shot infrastructure ready)",
+             mDoubleBufferWorkers.size());
+
+    if (mDoubleBufferWorkers.size() == 0 && mOneShotWorkers.size() == 0) {
         ESP_LOGE(RMT5_POOL_TAG, "No workers initialized successfully!");
-    } else {
-        ESP_LOGI(RMT5_POOL_TAG, "Successfully initialized %u/%u workers",
-            static_cast<unsigned int>(mWorkers.size()),
-            static_cast<unsigned int>(max_workers));
     }
 
     mInitialized = true;
 }
 
-RmtWorker* RmtWorkerPool::acquireWorker() {
+IRmtWorkerBase* RmtWorkerPool::acquireWorker(
+    int num_bytes,
+    gpio_num_t pin,
+    int t1, int t2, int t3,
+    uint32_t reset_ns
+) {
     // Initialize workers on first use
     initializeWorkersIfNeeded();
 
+    // Determine which worker type to use based on strip size
+    // For now, always use double-buffer (hybrid mode for future expansion)
+    bool use_oneshot = (static_cast<size_t>(num_bytes) <= ONE_SHOT_THRESHOLD_BYTES);
+
     // Try to get an available worker immediately
     portENTER_CRITICAL(&mSpinlock);
-    RmtWorker* worker = findAvailableWorker();
+    IRmtWorkerBase* worker = nullptr;
+
+    if (use_oneshot && mOneShotWorkers.size() > 0) {
+        worker = findAvailableOneShotWorker();
+        if (worker) {
+            ESP_LOGD(RMT5_POOL_TAG, "Using ONE-SHOT worker for %d bytes (%d LEDs)",
+                     num_bytes, num_bytes / 3);
+        }
+    }
+
+    if (!worker) {
+        // Fall back to double-buffer (either by choice or if no one-shot available)
+        worker = findAvailableDoubleBufferWorker();
+        if (worker && use_oneshot) {
+            ESP_LOGD(RMT5_POOL_TAG, "Using DOUBLE-BUFFER worker for %d bytes (no one-shot available)",
+                     num_bytes);
+        }
+    }
+
     portEXIT_CRITICAL(&mSpinlock);
 
     if (worker) {
+        // Configure the worker before returning
+        worker->configure(pin, t1, t2, t3, reset_ns);
         return worker;
     }
 
@@ -97,10 +138,19 @@ RmtWorker* RmtWorkerPool::acquireWorker() {
         delayMicroseconds(100);
 
         portENTER_CRITICAL(&mSpinlock);
-        worker = findAvailableWorker();
+
+        if (use_oneshot && mOneShotWorkers.size() > 0) {
+            worker = findAvailableOneShotWorker();
+        }
+
+        if (!worker) {
+            worker = findAvailableDoubleBufferWorker();
+        }
+
         portEXIT_CRITICAL(&mSpinlock);
 
         if (worker) {
+            worker->configure(pin, t1, t2, t3, reset_ns);
             return worker;
         }
 
@@ -118,7 +168,7 @@ RmtWorker* RmtWorkerPool::acquireWorker() {
     }
 }
 
-void RmtWorkerPool::releaseWorker(RmtWorker* worker) {
+void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "RmtWorkerPool::releaseWorker called with null worker");
 
     // Worker marks itself as available after transmission completes
@@ -128,20 +178,40 @@ void RmtWorkerPool::releaseWorker(RmtWorker* worker) {
 int RmtWorkerPool::getAvailableCount() const {
     portENTER_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
     int count = 0;
-    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
-        if (mWorkers[i]->isAvailable()) {
+
+    // Count double-buffer workers
+    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
+        if (mDoubleBufferWorkers[i]->isAvailable()) {
             count++;
         }
     }
+
+    // Count one-shot workers
+    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
+        if (mOneShotWorkers[i]->isAvailable()) {
+            count++;
+        }
+    }
+
     portEXIT_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
     return count;
 }
 
-RmtWorker* RmtWorkerPool::findAvailableWorker() {
+RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
     // Caller must hold mSpinlock
-    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
-        if (mWorkers[i]->isAvailable()) {
-            return mWorkers[i];
+    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
+        if (mDoubleBufferWorkers[i]->isAvailable()) {
+            return mDoubleBufferWorkers[i];
+        }
+    }
+    return nullptr;
+}
+
+RmtWorkerOneShot* RmtWorkerPool::findAvailableOneShotWorker() {
+    // Caller must hold mSpinlock
+    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
+        if (mOneShotWorkers[i]->isAvailable()) {
+            return mOneShotWorkers[i];
         }
     }
     return nullptr;
