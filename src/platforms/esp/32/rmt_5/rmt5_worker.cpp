@@ -103,12 +103,21 @@ RmtWorker::~RmtWorker() {
 
 bool RmtWorker::initialize(uint8_t worker_id) {
     mWorkerId = worker_id;
+    mAvailable = true;
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Starting initialization", worker_id);
+    // Channel creation is deferred to configure() where we know the actual GPIO pin.
+    // This avoids needing placeholder GPIOs and is safe for static initialization.
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Initialized (channel creation deferred to first configure)", worker_id);
+
+    return true;
+}
+
+bool RmtWorker::createChannel(gpio_num_t pin) {
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Creating RMT TX channel for GPIO %d", mWorkerId, (int)pin);
 
     // Create RMT TX channel with double memory blocks
     rmt_tx_channel_config_t tx_config = {};
-    tx_config.gpio_num = GPIO_NUM_NC;  // Will be set during configure()
+    tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
     tx_config.resolution_hz = 10000000;  // 10MHz (100ns resolution)
     tx_config.mem_block_symbols = 2 * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // Double buffer
@@ -116,46 +125,22 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     tx_config.flags.invert_out = false;
     tx_config.flags.with_dma = false;  // Phase 1: No DMA
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Creating RMT TX channel with gpio=%d, resolution=%lu Hz, mem_blocks=%lu",
-             worker_id, (int)tx_config.gpio_num, tx_config.resolution_hz, tx_config.mem_block_symbols);
-
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %s (0x%x)",
-                 worker_id, esp_err_to_name(ret), ret);
-        ESP_LOGE(RMT5_WORKER_TAG, "Stack trace:");
-        esp_backtrace_print(10);  // Print up to 10 stack frames
+                 mWorkerId, esp_err_to_name(ret), ret);
         return false;
     }
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: RMT TX channel created successfully", worker_id);
-
     // Extract channel ID from handle (relies on internal IDF structure)
     mChannelId = getChannelIdFromHandle(mChannel);
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Extracted channel_id=%lu from handle", worker_id, mChannelId);
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Created channel_id=%lu", mWorkerId, mChannelId);
 
     // Get direct pointer to RMT memory
     mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
     mRMT_mem_ptr = mRMT_mem_start;
 
-    // Enable the channel
-    ret = rmt_enable(mChannel);
-    if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable RMT channel: %s (0x%x)",
-                 worker_id, esp_err_to_name(ret), ret);
-        rmt_del_channel(mChannel);
-        mChannel = nullptr;
-        return false;
-    }
-
     // Configure threshold interrupt for double-buffer ping-pong
-    // Research from iteration 4 confirmed ESP-IDF v5 DOES support threshold interrupts!
-    // Threshold interrupt bits: channel 0-3 use bits 8-11 in int_ena/int_st registers
-    // Threshold value register: chn_tx_lim[channel].tx_lim_chn
-
-    // Set threshold to 48 items (3/4 of 64-word buffer)
-    // This triggers interrupt when 48 items have been transmitted, leaving 16 items
-    // in hardware buffer while we refill the next half
 #if defined(CONFIG_IDF_TARGET_ESP32)
     RMT.tx_lim_ch[mChannelId].limit = 48;
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
@@ -174,10 +159,7 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
     RMT.int_ena.val |= (1 << thresh_int_bit);
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Threshold interrupt enabled on bit %d", worker_id, thresh_int_bit);
-
     // Allocate custom ISR at Level 3 (compatible with Xtensa and RISC-V)
-    // This gives us control over both threshold and done interrupts
 #ifdef ETS_RMT_INTR_SOURCE
     ret = esp_intr_alloc(
         ETS_RMT_INTR_SOURCE,
@@ -189,40 +171,39 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %s (0x%x)",
-                 worker_id, esp_err_to_name(ret), ret);
-        rmt_disable(mChannel);
+                 mWorkerId, esp_err_to_name(ret), ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
     }
-
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Custom ISR allocated successfully", worker_id);
 #else
-    // Fallback: Use RMT5 high-level callback API if ETS_RMT_INTR_SOURCE not available
-    ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: ETS_RMT_INTR_SOURCE not available, using callbacks", worker_id);
-
+    // Fallback: Use RMT5 high-level callback API
     rmt_tx_event_callbacks_t callbacks = {};
     callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
     ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to register callbacks: %s (0x%x)",
-                 worker_id, esp_err_to_name(ret), ret);
-        rmt_disable(mChannel);
+                 mWorkerId, esp_err_to_name(ret), ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
     }
-
-    ESP_LOGW(RMT5_WORKER_TAG, "RmtWorker[%d]: Threshold interrupts require custom ISR (not available in callback mode)", worker_id);
 #endif
 
-    mAvailable = true;
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
     return true;
 }
 
 bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) {
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu",
              mWorkerId, (int)pin, t1, t2, t3, reset_ns);
+
+    // Create channel on first configure
+    if (mChannel == nullptr) {
+        if (!createChannel(pin)) {
+            return false;
+        }
+    }
 
     // Check if reconfiguration needed
     if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
@@ -238,6 +219,9 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
         ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Waiting for active transmission to complete", mWorkerId);
         waitForCompletion();
     }
+
+    // Save old pin before updating (needed to check if channel needs disable)
+    gpio_num_t old_pin = mCurrentPin;
 
     // Update configuration
     mCurrentPin = pin;
@@ -275,11 +259,14 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Updating GPIO assignment to pin %d (channel_id=%lu)",
              mWorkerId, (int)pin, mChannelId);
 
-    esp_err_t ret = rmt_disable(mChannel);
-    if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %s (0x%x)",
-                 mWorkerId, esp_err_to_name(ret), ret);
-        return false;
+    // Disable channel if it's currently enabled (not on first configure)
+    if (old_pin != GPIO_NUM_NC) {
+        esp_err_t ret = rmt_disable(mChannel);
+        if (ret != ESP_OK) {
+            ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %s (0x%x)",
+                     mWorkerId, esp_err_to_name(ret), ret);
+            return false;
+        }
     }
 
     // Use low-level API to change GPIO
@@ -298,9 +285,9 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
     gpio_matrix_out(pin, signal_idx, false, false);
 #endif
 
-    ret = rmt_enable(mChannel);
+    esp_err_t ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to re-enable channel: %s (0x%x)",
+        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable channel: %s (0x%x)",
                  mWorkerId, esp_err_to_name(ret), ret);
         return false;
     }

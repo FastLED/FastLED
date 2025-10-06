@@ -85,10 +85,21 @@ RmtWorkerOneShot::~RmtWorkerOneShot() {
 
 bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
     mWorkerId = worker_id;
+    mAvailable = true;
+
+    // Channel creation is deferred to configure() where we know the actual GPIO pin.
+    // This avoids needing placeholder GPIOs and is safe for static initialization.
+    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Initialized (channel creation deferred to first configure)", worker_id);
+
+    return true;
+}
+
+bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
+    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Creating RMT TX channel for GPIO %d", mWorkerId, (int)pin);
 
     // Create RMT TX channel (no double-buffer needed for one-shot)
     rmt_tx_channel_config_t tx_config = {};
-    tx_config.gpio_num = GPIO_NUM_NC;  // Will be set during configure()
+    tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
     tx_config.resolution_hz = 10000000;  // 10MHz (100ns resolution)
     tx_config.mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;  // Single block (no double-buffer)
@@ -98,7 +109,7 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
 
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create RMT TX channel: %d", worker_id, ret);
+        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create RMT TX channel: %d", mWorkerId, ret);
         return false;
     }
 
@@ -106,8 +117,9 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
     mChannelId = getChannelIdFromHandle(mChannel);
 
     // Create bytes encoder for converting pixel data to RMT symbols
+    // Note: Encoder symbols are placeholders - will be updated in configure()
     rmt_bytes_encoder_config_t encoder_config = {};
-    encoder_config.bit0.duration0 = 4;   // Placeholder (will be updated in configure())
+    encoder_config.bit0.duration0 = 4;
     encoder_config.bit0.level0 = 1;
     encoder_config.bit0.duration1 = 8;
     encoder_config.bit0.level1 = 0;
@@ -119,7 +131,7 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
 
     ret = rmt_new_bytes_encoder(&encoder_config, &mEncoder);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create bytes encoder: %d", worker_id, ret);
+        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create bytes encoder: %d", mWorkerId, ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
@@ -130,7 +142,7 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
     callbacks.on_trans_done = &RmtWorkerOneShot::onTransDoneCallback;
     ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to register callbacks: %d", worker_id, ret);
+        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to register callbacks: %d", mWorkerId, ret);
         rmt_del_encoder(mEncoder);
         rmt_del_channel(mChannel);
         mEncoder = nullptr;
@@ -138,24 +150,18 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
         return false;
     }
 
-    // Enable the channel
-    ret = rmt_enable(mChannel);
-    if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to enable RMT channel: %d", worker_id, ret);
-        rmt_del_encoder(mEncoder);
-        rmt_del_channel(mChannel);
-        mEncoder = nullptr;
-        mChannel = nullptr;
-        return false;
-    }
-
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Initialized successfully (one-shot mode - no ISR needed)", worker_id);
-
-    mAvailable = true;
+    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Channel created successfully", mWorkerId);
     return true;
 }
 
 bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) {
+    // Create channel on first configure
+    if (mChannel == nullptr) {
+        if (!createChannel(pin)) {
+            return false;
+        }
+    }
+
     // Check if reconfiguration needed
     if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
         return true;  // Already configured
@@ -165,6 +171,9 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_
     if (mTransmitting) {
         waitForCompletion();
     }
+
+    // Save old pin before updating (needed to check if channel needs disable)
+    gpio_num_t old_pin = mCurrentPin;
 
     // Update configuration
     mCurrentPin = pin;
@@ -196,10 +205,13 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_
     mReset.level1 = 0;
 
     // Update GPIO pin assignment
-    esp_err_t ret = rmt_disable(mChannel);
-    if (ret != ESP_OK) {
-        ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
-        return false;
+    // Disable channel if it's currently enabled (not on first configure)
+    if (old_pin != GPIO_NUM_NC) {
+        esp_err_t ret = rmt_disable(mChannel);
+        if (ret != ESP_OK) {
+            ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
+            return false;
+        }
     }
 
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
@@ -212,9 +224,9 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_
         #error "Neither RMT_SIG_OUT0_IDX nor RMT_SIG_PAD_OUT0_IDX is defined"
     #endif
 
-    ret = rmt_enable(mChannel);
+    esp_err_t ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to re-enable channel: %d", mWorkerId, ret);
+        ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to enable channel: %d", mWorkerId, ret);
         return false;
     }
 

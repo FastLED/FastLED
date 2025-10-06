@@ -135,6 +135,9 @@ private:
     void IRAM_ATTR handleThresholdInterrupt();
     void IRAM_ATTR handleDoneInterrupt();
 
+    // Helper: create RMT channel (called from configure on first use)
+    bool createChannel(gpio_num_t pin);
+
     // Helper: convert byte to RMT pulses
     void IRAM_ATTR convertByteToRmt(uint8_t byte, volatile rmt_item32_t* pItem);
 

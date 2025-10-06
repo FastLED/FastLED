@@ -126,6 +126,9 @@ private:
     // Pre-encode pixel data to RMT symbols
     void preEncode(const uint8_t* pixel_data, int num_bytes);
 
+    // Helper: create RMT channel (called from configure on first use)
+    bool createChannel(gpio_num_t pin);
+
     // Convert byte to 8 RMT items (one per bit)
     void convertByteToRmt(uint8_t byte, rmt_item32_t* out);
 
