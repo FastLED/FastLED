@@ -610,6 +610,6 @@ LoopPM:
 	ADD      r13,r13,#8
 	LDMFD    r13!,{r4-r11,pc}
 
-#endif // ARM32 assembly
-
 	.END
+
+#endif // ARM32 assembly
