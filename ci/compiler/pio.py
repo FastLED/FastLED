@@ -404,9 +404,18 @@ def detect_and_fix_corrupted_packages_dynamic(
     """Dynamically detect and fix corrupted packages based on platform requirements."""
     import shutil
 
+    from ci.util.lock_handler import force_remove_path, is_psutil_available
+
     print("=== Dynamic Package Corruption Detection & Fix ===")
     print(f"Board: {board_name}")
     print(f"Packages dir: {paths.packages_dir}")
+
+    if is_psutil_available():
+        print("  Lock detection: psutil available ✓")
+    else:
+        print(
+            "  Lock detection: psutil NOT available (install with: uv pip install psutil)"
+        )
 
     results: Dict[str, bool] = {}
 
@@ -447,7 +456,7 @@ def detect_and_fix_corrupted_packages_dynamic(
 
     if not packages_to_check:
         print("No packages to check - using fallback hardcoded list")
-        packages_to_check = ["framework-arduinoespressif32-libs"]
+        packages_to_check = ["framework-arduinoespressif32-libs", "tool-esptoolpy"]
 
     # Check each package for corruption
     for package_name in packages_to_check:
@@ -463,16 +472,33 @@ def detect_and_fix_corrupted_packages_dynamic(
         print(f"  .piopm exists: {piopm_exists}")
         print(f"  package.json exists: {manifest_exists}")
 
-        is_corrupted = exists and piopm_exists and not manifest_exists
+        # Two types of corruption:
+        # 1. Has .piopm but missing package.json (installed but corrupted)
+        # 2. Exists but has neither .piopm nor package.json (failed during installation)
+        is_corrupted = exists and (
+            (piopm_exists and not manifest_exists)  # Type 1
+            or (not piopm_exists and not manifest_exists)  # Type 2
+        )
         if is_corrupted:
-            print(f"  -> CORRUPTED: Has .piopm but missing package.json")
+            if piopm_exists and not manifest_exists:
+                print(f"  -> CORRUPTED: Has .piopm but missing package.json")
+            elif not piopm_exists and not manifest_exists:
+                print(
+                    f"  -> CORRUPTED: Incomplete installation (missing both .piopm and package.json)"
+                )
             print(f"  -> FIXING: Removing corrupted package...")
             try:
-                # Safe deletion with lock already held by caller
-                shutil.rmtree(package_path)
-                print(f"  -> SUCCESS: Removed {package_name}")
-                print(f"  -> PlatformIO will re-download package automatically")
-                results[package_name] = True  # Was corrupted, now fixed
+                # Use lock-aware deletion that kills holding processes
+                success = force_remove_path(package_path, max_retries=3)
+                if success:
+                    print(f"  -> SUCCESS: Removed {package_name}")
+                    print(f"  -> PlatformIO will re-download package automatically")
+                    results[package_name] = True  # Was corrupted, now fixed
+                else:
+                    print(
+                        f"  -> ERROR: Failed to remove {package_name} after all retries"
+                    )
+                    results[package_name] = False  # Still corrupted
             except Exception as e:
                 print(f"  -> ERROR: Failed to remove {package_name}: {e}")
                 results[package_name] = False  # Still corrupted

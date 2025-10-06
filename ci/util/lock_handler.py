@@ -11,7 +11,8 @@ import platform
 import subprocess
 import time
 from pathlib import Path
-from typing import List, Set
+from typing import Any, Dict, List, Set
+
 
 try:
     import psutil
@@ -51,7 +52,7 @@ def find_processes_locking_path(path: Path) -> Set[int]:
     path_str = str(normalized_path).lower()
 
     # Iterate through all processes
-    for proc in psutil.process_iter(['pid', 'name']):
+    for proc in psutil.process_iter(["pid", "name"]):  # type: ignore[misc]
         try:
             # Get open files for this process
             open_files = proc.open_files()
@@ -64,17 +65,26 @@ def find_processes_locking_path(path: Path) -> Set[int]:
                 if normalized_path.is_dir():
                     # Check if file is inside the directory
                     if file_path_str.startswith(path_str):
-                        locking_pids.add(proc.info['pid'])
-                        print(f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}")
+                        locking_pids.add(proc.info["pid"])
+                        print(
+                            f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}"
+                        )
                         break
                 else:
                     # Check if file matches exactly
                     if file_path_str == path_str:
-                        locking_pids.add(proc.info['pid'])
-                        print(f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}")
+                        locking_pids.add(proc.info["pid"])
+                        print(
+                            f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}"
+                        )
                         break
 
-        except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess, PermissionError):
+        except (
+            psutil.NoSuchProcess,
+            psutil.AccessDenied,
+            psutil.ZombieProcess,
+            PermissionError,
+        ):
             # Skip processes we can't access
             continue
         except Exception as e:
@@ -128,7 +138,9 @@ def kill_processes(pids: Set[int], force: bool = True) -> bool:
         except psutil.NoSuchProcess:
             print(f"  ✓ Process {pid} already terminated")
         except psutil.AccessDenied:
-            print(f"  ✗ Access denied killing process {pid} (may require admin privileges)")
+            print(
+                f"  ✗ Access denied killing process {pid} (may require admin privileges)"
+            )
             all_killed = False
         except Exception as e:
             print(f"  ✗ Failed to kill process {pid}: {e}")
@@ -192,14 +204,14 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
                                     ["cmd", "/c", "rmdir", "/S", "/Q", str(path)],
                                     capture_output=True,
                                     text=True,
-                                    timeout=30
+                                    timeout=30,
                                 )
                             else:
                                 result = subprocess.run(
                                     ["cmd", "/c", "del", "/F", "/Q", str(path)],
                                     capture_output=True,
                                     text=True,
-                                    timeout=30
+                                    timeout=30,
                                 )
 
                             if result.returncode == 0:
@@ -219,7 +231,7 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
     return False
 
 
-def get_process_info(pids: Set[int]) -> List[dict]:
+def get_process_info(pids: Set[int]) -> List[Dict[str, Any]]:
     """Get detailed information about processes.
 
     Args:
@@ -231,26 +243,28 @@ def get_process_info(pids: Set[int]) -> List[dict]:
     if not is_psutil_available():
         return []
 
-    process_info: List[dict] = []
+    process_info: List[Dict[str, Any]] = []
 
     for pid in pids:
         try:
             proc = psutil.Process(pid)
             info = {
-                'pid': pid,
-                'name': proc.name(),
-                'exe': proc.exe(),
-                'cmdline': ' '.join(proc.cmdline()),
-                'status': proc.status(),
+                "pid": pid,
+                "name": proc.name(),
+                "exe": proc.exe(),
+                "cmdline": " ".join(proc.cmdline()),
+                "status": proc.status(),
             }
             process_info.append(info)
         except (psutil.NoSuchProcess, psutil.AccessDenied):
-            process_info.append({
-                'pid': pid,
-                'name': 'Unknown',
-                'exe': 'Unknown',
-                'cmdline': 'Unknown',
-                'status': 'Unknown',
-            })
+            process_info.append(
+                {
+                    "pid": pid,
+                    "name": "Unknown",
+                    "exe": "Unknown",
+                    "cmdline": "Unknown",
+                    "status": "Unknown",
+                }
+            )
 
     return process_info
