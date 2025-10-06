@@ -247,6 +247,24 @@ jobs:
           fi
           echo "✅ firmware.bin size: $(stat -c%s qemu-build/firmware.bin) bytes"
 
+          # Copy ELF file for backtrace decoding
+          echo "=== Copying ELF file for debugging ==="
+          if [ -f "$PIO_ARTIFACTS_DIR/firmware.elf" ]; then
+            cp "$PIO_ARTIFACTS_DIR/firmware.elf" qemu-build/
+            echo "✅ Copied firmware.elf from artifacts directory"
+          elif [ -f "$PIO_BUILD_DIR/firmware.elf" ]; then
+            cp "$PIO_BUILD_DIR/firmware.elf" qemu-build/
+            echo "✅ Copied firmware.elf from build directory"
+          else
+            ELF_FILE=$(find "$PIO_BUILD_DIR" -name "firmware.elf" 2>/dev/null | head -1)
+            if [ -n "$ELF_FILE" ]; then
+              cp "$ELF_FILE" qemu-build/firmware.elf
+              echo "✅ Found and copied firmware.elf from $ELF_FILE"
+            else
+              echo "⚠️  firmware.elf not found - backtrace decoding will not be available"
+            fi
+          fi
+
           # Verify debug-enabled build by checking for Serial output strings in firmware
           echo "=== Build verification: checking for debug strings ==="
           if strings qemu-build/firmware.bin | grep -q "${{ inputs.sketch }} setup starting"; then
@@ -515,12 +533,60 @@ jobs:
               echo ""
             fi
 
-            # Show backtrace if present
-            if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
-              echo "=== Backtrace ==="
-              grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | head -30
-              echo ""
+            # Decode PC addresses and backtrace if present
+            echo "=== Decoded Backtrace ==="
+
+            # Find the ELF file for addr2line
+            ELF_FILE=""
+            if [ -f "qemu-build/firmware.elf" ]; then
+              ELF_FILE="qemu-build/firmware.elf"
+            elif [ -f ".build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf" ]; then
+              ELF_FILE=".build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf"
             fi
+
+            if [ -n "$ELF_FILE" ] && [ -f "$ELF_FILE" ]; then
+              echo "Using ELF file: $ELF_FILE"
+
+              # Find appropriate addr2line tool
+              ADDR2LINE=""
+              if [ "${{ inputs.platform }}" = "esp32c3" ]; then
+                ADDR2LINE="riscv32-esp-elf-addr2line"
+              elif [ "${{ inputs.platform }}" = "esp32s3" ] || [ "${{ inputs.platform }}" = "esp32dev" ]; then
+                ADDR2LINE="xtensa-esp32-elf-addr2line"
+              fi
+
+              if command -v $ADDR2LINE >/dev/null 2>&1; then
+                # Decode abort() PC addresses
+                grep "abort() was called at PC" qemu_output.log | while read line; do
+                  PC=$(echo "$line" | grep -oP '0x[0-9a-fA-F]+' | head -1)
+                  if [ -n "$PC" ]; then
+                    echo "PC $PC:"
+                    $ADDR2LINE -e "$ELF_FILE" -f -C "$PC" 2>/dev/null || echo "  (failed to decode)"
+                  fi
+                done
+
+                # Decode backtrace addresses if present
+                if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
+                  echo ""
+                  echo "Backtrace symbols:"
+                  grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | grep -oP '0x[0-9a-fA-F]{8}' | while read addr; do
+                    echo "  $addr:"
+                    $ADDR2LINE -e "$ELF_FILE" -f -C "$addr" 2>/dev/null | sed 's/^/    /' || echo "    (failed to decode)"
+                  done
+                fi
+              else
+                echo "⚠️  $ADDR2LINE not found in PATH - cannot decode addresses"
+                echo "Raw backtrace:"
+                grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | head -30
+              fi
+            else
+              echo "⚠️  ELF file not found - cannot decode addresses"
+              if grep -q -E "(Backtrace|backtrace)" qemu_output.log; then
+                echo "Raw backtrace:"
+                grep -A 10 -E "(Backtrace|backtrace)" qemu_output.log | head -30
+              fi
+            fi
+            echo ""
 
             # Show RMT exhaustion errors if present
             if grep -q "RMT CHANNEL EXHAUSTION" qemu_output.log; then
