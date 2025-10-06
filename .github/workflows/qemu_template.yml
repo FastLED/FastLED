@@ -425,18 +425,11 @@ jobs:
             echo "No QEMU log available"
           fi
 
-      - name: Validate ${{ inputs.sketch }} output
+      - name: Save QEMU output log
+        if: always()
         run: |
-          echo "=== Validating ${{ inputs.sketch }} output in QEMU logs ==="
+          echo "=== Saving QEMU output log ==="
 
-          # Check if QEMU step succeeded
-          if [ "${{ steps.qemu.conclusion }}" != "success" ]; then
-            echo "❌ QEMU action failed with conclusion: ${{ steps.qemu.conclusion }}"
-            echo "❌ QEMU action outcome: ${{ steps.qemu.outcome }}"
-            exit 1
-          fi
-
-          # Save output to file for easier processing
           # The tobozo action creates logs.txt with the QEMU output
           if [ -f "logs.txt" ]; then
             cp logs.txt qemu_output.log
@@ -444,7 +437,6 @@ jobs:
           else
             echo "❌ No logs.txt file found from tobozo action"
             echo "Looking for alternative log sources..."
-            # Check for any log files that might contain QEMU output
             find . -name "*.log" -o -name "*.txt" | head -10
             echo "" > qemu_output.log
           fi
@@ -465,116 +457,116 @@ jobs:
                 head -5 "$logfile" | sed 's/^/      /'
               fi
             done
-            echo ""
-            echo "Possible causes:"
-            echo "  1. ${{ inputs.platform_display }} firmware failed to boot (flash mode incompatibility)"
-            echo "  2. Serial communication not properly configured"
-            echo "  3. QEMU emulation issues with the current firmware"
-            echo "  4. Bootloader/partition configuration problems"
             exit 1
           fi
 
           echo "✅ QEMU output file created with $(wc -l < qemu_output.log) lines"
+        shell: bash
+
+      - name: Display complete QEMU log
+        if: always()
+        run: |
+          echo "=== Complete QEMU Serial Output ($(wc -l < qemu_output.log) lines) ==="
+          cat qemu_output.log
+          echo ""
+          echo "=== End of QEMU output ==="
+        shell: bash
+
+      - name: Validate ${{ inputs.sketch }} output
+        run: |
+          echo "=== Validating ${{ inputs.sketch }} output ==="
+
+          # Check if QEMU step succeeded
+          if [ "${{ steps.qemu.conclusion }}" != "success" ]; then
+            echo "❌ QEMU action failed with conclusion: ${{ steps.qemu.conclusion }}"
+            echo "❌ QEMU action outcome: ${{ steps.qemu.outcome }}"
+            exit 1
+          fi
+
+          # Verify log file exists
+          if [ ! -f qemu_output.log ]; then
+            echo "❌ qemu_output.log not found"
+            exit 1
+          fi
 
           # Check for crash patterns
           if grep -q -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log; then
             echo "❌ ${{ inputs.platform_display }} crashed during execution"
-            echo "Crash indicators found in QEMU log"
             echo ""
             echo "=== Crash Details ==="
-            # Show which patterns matched
-            echo "Matched crash patterns:"
             grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -20
             echo ""
-            echo "=== Context around crash (20 lines before and after first match) ==="
-            # Get line number of first crash
+            echo "=== Context around crash ==="
             CRASH_LINE=$(grep -n -E "(guru meditation|abort\(\)|LoadProhibited|IllegalInstruction)" qemu_output.log | head -1 | cut -d: -f1)
             if [ -n "$CRASH_LINE" ]; then
-              # Show context around the crash
               START_LINE=$((CRASH_LINE - 20))
-              if [ $START_LINE -lt 1 ]; then
-                START_LINE=1
-              fi
+              [ $START_LINE -lt 1 ] && START_LINE=1
               END_LINE=$((CRASH_LINE + 20))
               sed -n "${START_LINE},${END_LINE}p" qemu_output.log
             fi
-            echo ""
-            echo "=== End of crash context ==="
             exit 1
           fi
 
-          # Validate debug output is present (now using Serial.print instead of FL_WARN)
-          # Check for sketch-specific patterns based on platform
+          # Determine expected pattern based on sketch
           SKETCH_PATTERN=""
           if echo "${{ inputs.sketch }}" | grep -q "Parlio"; then
-            # ESP32-P4 PARLIO driver patterns
             SKETCH_PATTERN="FastLED ESP32-P4 PARLIO"
           elif echo "${{ inputs.sketch }}" | grep -q "LCD_I80"; then
-            # LCD I80 driver patterns
             SKETCH_PATTERN="LCD_I80\|LCD I80"
           else
-            # Default pattern for other sketches
             SKETCH_PATTERN="${{ inputs.sketch }} setup starting"
           fi
 
-          if grep -q -E "$SKETCH_PATTERN" qemu_output.log; then
-            echo "✅ Debug output detected (pattern: $SKETCH_PATTERN)"
-            echo "Setup messages found:"
-            grep -E "$SKETCH_PATTERN\|Initialized.*LED strips\|Setup complete\|Ready!" qemu_output.log | head -10
-          else
-            echo "❌ No debug output detected (expected pattern: $SKETCH_PATTERN)"
+          # Validate sketch startup message is present
+          if ! grep -q -E "$SKETCH_PATTERN" qemu_output.log; then
+            echo "❌ Expected pattern not found: $SKETCH_PATTERN"
             echo "Expected Serial.print messages not found in QEMU log"
             echo ""
-            echo "=== Full QEMU output (first 200 lines) ==="
-            head -200 qemu_output.log
-            echo ""
-            echo "=== End of QEMU output preview ==="
-            echo "Total lines in log: $(wc -l < qemu_output.log)"
+            echo "=== Full QEMU output ==="
+            cat qemu_output.log
             exit 1
           fi
 
-          # Validate sketch startup
-          if grep -q -E "$SKETCH_PATTERN" qemu_output.log; then
-            echo "✅ ${{ inputs.sketch }} setup started"
-          else
-            echo "❌ ${{ inputs.sketch }} startup message not found"
-            exit 1
-          fi
+          echo "✅ Found expected pattern: $SKETCH_PATTERN"
 
-          # Check for LED strip initialization (optional, depends on sketch)
+          # Show matching lines from log
+          echo ""
+          echo "=== Matching setup/initialization messages ==="
+          grep -E "$SKETCH_PATTERN\|Initialized.*LED strips\|Setup complete\|Ready!\|Starting loop iteration" qemu_output.log || echo "(no additional messages)"
+
+          # Check for LED strip initialization (optional)
           if grep -q "Initialized.*LED strips\|Ready!" qemu_output.log; then
             echo "✅ LED strip/driver initialization detected"
           else
             echo "⚠️  LED strip initialization message not found (may be normal for this sketch)"
           fi
 
-          # Check for loop execution
+          # Check for loop execution (optional)
           if grep -q "Starting loop iteration" qemu_output.log; then
             echo "✅ Loop execution detected"
           else
             echo "⚠️  No loop iteration messages found (sketch may not output loop iterations)"
           fi
 
-          # Check for test completion
+          # Check for test completion (optional)
           if grep -q "Test finished.*completed.*iterations" qemu_output.log; then
             echo "✅ Test completion detected"
           else
             echo "⚠️  Test completion not detected (may need more time or sketch doesn't output completion)"
           fi
 
-          # Validate boot success - check for ESP32 boot indicators or our application output
-          if grep -q -E "(rst:|boot:|ESP32|${{ inputs.sketch }}|ets_main\.c|cpu_start\.c)" qemu_output.log; then
-            echo "✅ ${{ inputs.platform_display }} boot/application output detected"
-          else
+          # Validate ESP32 boot indicators
+          if ! grep -q -E "(rst:|boot:|ESP32|${{ inputs.sketch }}|ets_main\.c|cpu_start\.c)" qemu_output.log; then
             echo "❌ No ${{ inputs.platform_display }} boot indicators or application output found"
-            echo "Output content preview:"
-            head -10 qemu_output.log | cat -A
-            echo "Full output:"
+            echo ""
+            echo "=== Full QEMU output ==="
             cat qemu_output.log
             exit 1
           fi
 
-          echo "=== ${{ inputs.sketch }} validation complete ==="
+          echo "✅ ${{ inputs.platform_display }} boot/application output detected"
+          echo ""
+          echo "=== Validation complete ==="
         shell: bash
       - name: Generate artifact name
         id: artifact_name
