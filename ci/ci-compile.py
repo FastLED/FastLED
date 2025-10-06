@@ -166,6 +166,12 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "Use '-o .' to save in current directory with sketch name.",
     )
     parser.add_argument(
+        "--merged-bin",
+        action="store_true",
+        help="Generate merged binary for QEMU/flashing (ESP32/ESP8266 only). "
+        "Produces a single flash image instead of separate bootloader/firmware/partition files.",
+    )
+    parser.add_argument(
         "--run",
         action="store_true",
         help="For WASM: Run Playwright tests after compilation (default is compile-only)",
@@ -233,6 +239,8 @@ def compile_board_examples(
     verbose: bool,
     enable_cache: bool,
     global_cache_dir: Optional[Path] = None,
+    merged_bin: bool = False,
+    merged_bin_output: Optional[Path] = None,
 ) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
 
@@ -249,6 +257,10 @@ def compile_board_examples(
     print(f"COMPILING BOARD: {board.board_name}")
     print(f"EXAMPLES: {', '.join(examples)}")
     print(f"GLOBAL CACHE: {resolved_cache_dir}")
+    if merged_bin:
+        print(f"MERGED-BIN MODE: Enabled")
+        if merged_bin_output:
+            print(f"MERGED-BIN OUTPUT: {merged_bin_output}")
 
     # Show other cache directories
     from ci.compiler.pio import FastLEDPaths
@@ -280,8 +292,35 @@ def compile_board_examples(
             cache_type=cache_type,
         )
 
-        # Build all examples
-        futures: List[Future[SketchResult]] = compiler.build(examples)
+        # Build all examples - use merged-bin method if requested
+        if merged_bin:
+            # Validate board supports merged binary
+            if not compiler.supports_merged_bin():
+                raise RuntimeError(
+                    f"Board {board.board_name} does not support merged binary. "
+                    f"Supported platforms: ESP32, ESP8266"
+                )
+
+            # Build with merged binary (only one example allowed in this mode)
+            if len(examples) != 1:
+                raise RuntimeError(
+                    f"Merged-bin mode requires exactly one example, got {len(examples)}"
+                )
+
+            result = compiler.build_with_merged_bin(
+                examples[0], output_path=merged_bin_output
+            )
+            futures: List[Future[SketchResult]] = []
+
+            # Wrap the result in a completed future for consistency
+            from concurrent.futures import Future as ConcurrentFuture
+
+            future: ConcurrentFuture[SketchResult] = ConcurrentFuture()
+            future.set_result(result)
+            futures.append(future)
+        else:
+            # Build all examples normally
+            futures = compiler.build(examples)
 
         # Wait for completion and collect results
         results: List[SketchResult] = []
@@ -831,6 +870,28 @@ def main() -> int:
             print(f"ERROR: {e}")
             return 1
 
+    # Validate --merged-bin option requirements
+    if args.merged_bin:
+        if len(examples) != 1:
+            print(
+                f"ERROR: --merged-bin option requires exactly one sketch, got {len(examples)}: {examples}"
+            )
+            return 1
+
+        if len(boards) != 1:
+            print(
+                f"ERROR: --merged-bin option requires exactly one board, got {len(boards)}: {[b.board_name for b in boards]}"
+            )
+            return 1
+
+        # Check if board supports merged binary
+        board = boards[0]
+        if not board.board_name.startswith("esp"):
+            print(
+                f"ERROR: --merged-bin only supports ESP32/ESP8266 boards, got: {board.board_name}"
+            )
+            return 1
+
     # Validate -o/--out option requirements
     if args.out:
         if len(examples) != 1:
@@ -879,6 +940,11 @@ def main() -> int:
         if args.global_cache:
             global_cache_dir = Path(args.global_cache)
 
+        # Determine merged-bin output path if requested
+        merged_bin_output = None
+        if args.merged_bin and args.out:
+            merged_bin_output = Path(args.out)
+
         result = compile_board_examples(
             board=board,
             examples=examples,
@@ -886,6 +952,8 @@ def main() -> int:
             verbose=args.verbose,
             enable_cache=(args.enable_cache or args.cache) and not args.no_cache,
             global_cache_dir=global_cache_dir,
+            merged_bin=args.merged_bin,
+            merged_bin_output=merged_bin_output,
         )
 
         if not result.ok:

@@ -1892,6 +1892,119 @@ class PioCompiler(Compiler):
             print(f"ERROR: Failed to install udev rules: {e}")
             return False
 
+    def supports_merged_bin(self) -> bool:
+        """Check if board supports merged binary generation.
+
+        Returns:
+            True if the board platform supports merged binary generation
+        """
+        supported_platforms = ["espressif32", "espressif8266"]
+        return any(
+            platform in str(self.board.platform).lower()
+            for platform in supported_platforms
+        )
+
+    def get_merged_bin_path(self, example: str) -> Path | None:
+        """Get path to merged binary if it exists.
+
+        Args:
+            example: Example name (unused but kept for API consistency)
+
+        Returns:
+            Path to merged.bin if it exists, None otherwise
+        """
+        env_name = self.board.board_name
+        merged_bin = self.build_dir / ".pio" / "build" / env_name / "merged.bin"
+        return merged_bin if merged_bin.exists() else None
+
+    def build_with_merged_bin(
+        self, example: str, output_path: Path | None = None
+    ) -> SketchResult:
+        """Build example and generate merged binary.
+
+        Args:
+            example: Example name to build
+            output_path: Optional custom output path for merged binary
+
+        Returns:
+            SketchResult with merged_bin_path populated
+        """
+        # 1. Validate board support
+        if not self.supports_merged_bin():
+            return SketchResult(
+                success=False,
+                output=f"Board {self.board.board_name} does not support merged binary. "
+                f"Supported platforms: ESP32, ESP8266",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 2. Build normally first
+        cancelled = threading.Event()
+        result = self._internal_build_no_lock(example, cancelled)
+        if not result.success:
+            return result
+
+        # 3. Run merge_bin target
+        merge_cmd = [
+            "pio",
+            "run",
+            "--project-dir",
+            str(self.build_dir),
+            "--target",
+            "merge_bin",
+        ]
+
+        print(f"Running merge_bin: {' '.join(merge_cmd)}")
+
+        try:
+            merge_proc = subprocess.run(
+                merge_cmd, capture_output=True, text=True, timeout=300
+            )
+        except subprocess.TimeoutExpired:
+            return SketchResult(
+                success=False,
+                output="merge_bin command timed out after 300 seconds",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        if merge_proc.returncode != 0:
+            return SketchResult(
+                success=False,
+                output=f"merge_bin failed: {merge_proc.stderr}",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 4. Get merged binary path
+        merged_bin = self.get_merged_bin_path(example)
+
+        if not merged_bin or not merged_bin.exists():
+            return SketchResult(
+                success=False,
+                output=f"Merged binary not found at expected location",
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # 5. Copy to output path if specified
+        if output_path:
+            import shutil
+
+            output_path.parent.mkdir(parents=True, exist_ok=True)
+            shutil.copy2(merged_bin, output_path)
+            merged_bin = output_path
+
+        # 6. Return enhanced result
+        return SketchResult(
+            success=True,
+            output=result.output,
+            build_dir=self.build_dir,
+            example=example,
+            merged_bin_path=merged_bin,
+        )
+
 
 def run_pio_build(
     board: Board | str,
