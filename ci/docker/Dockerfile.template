@@ -1,0 +1,72 @@
+# PlatformIO Platform-Specific Image for FastLED
+# This image builds on the base image and pre-caches platform-specific toolchains
+# (e.g., avr-gcc for Arduino Uno, xtensa-esp32-elf-gcc for ESP32, etc.)
+
+# Use FastLED PlatformIO base image (contains uv, PlatformIO, and all Python dependencies)
+FROM fastled-platformio:latest
+
+# Copy platformio.ini from build context
+# This file defines the platform, board, and framework configuration
+COPY platformio.ini /fastled/platformio.ini
+
+# FastLED project (with src/, examples/, etc.) is already in the base image at /fastled/
+# Use the existing Blink example to pre-cache platform-specific toolchains
+RUN mkdir -p /fastled/src && \
+    cp /fastled/examples/Blink/Blink.ino /fastled/src/
+
+# Run initial compilation to cache all platform dependencies
+# This pre-downloads platform toolchains, framework files, and libraries
+# The cache is stored in ~/.platformio/packages and ~/.platformio/platforms
+RUN pio run || echo "Initial compilation may have warnings, continuing..."
+
+# Clean up build artifacts but preserve the PlatformIO cache
+RUN rm -rf /fastled/src/Blink.ino \
+           /fastled/.pio/build/*
+
+# The PlatformIO cache is preserved in ~/.platformio
+# Future compilations will use these cached files
+
+# Clean up the /fastled directory - it will be mounted at runtime
+RUN rm -rf /fastled
+
+# Create output directory for compiled binaries
+RUN mkdir -p /fastled/output
+
+# Copy entrypoint script for handling output directory
+COPY <<'EOF' /usr/local/bin/fastled-entrypoint.sh
+#!/bin/bash
+set -e
+
+# Run the command passed to the container
+"$@"
+
+# If /fastled/output is mounted and .pio/build exists, copy binaries
+if [ -d "/fastled/output" ] && [ -d "/fastled/.pio/build" ]; then
+    echo "Copying build artifacts to output directory..."
+
+    # Copy all firmware files (binary, hex, elf)
+    find /fastled/.pio/build -type f \( -name "*.bin" -o -name "*.hex" -o -name "*.elf" \) -exec cp {} /fastled/output/ \; 2>/dev/null || true
+
+    # For ESP32, also copy merged binary if it exists
+    find /fastled/.pio/build -type f -name "*.factory.bin" -exec cp {} /fastled/output/ \; 2>/dev/null || true
+
+    echo "Build artifacts copied to /fastled/output/"
+    ls -lh /fastled/output/ || true
+fi
+EOF
+
+RUN chmod +x /usr/local/bin/fastled-entrypoint.sh
+
+# Set working directory
+WORKDIR /fastled
+
+# Set entrypoint to handle output directory
+ENTRYPOINT ["/usr/local/bin/fastled-entrypoint.sh"]
+
+# Default command - can be overridden at runtime
+CMD ["/bin/bash"]
+
+# Metadata labels (can be overridden with --label flags during build)
+LABEL maintainer="FastLED Team"
+LABEL description="PlatformIO Docker image with pre-cached dependencies for FastLED"
+LABEL version="1.0.0"

@@ -19,6 +19,7 @@ from typing import List, Optional, cast
 from typeguard import typechecked
 
 from ci.boards import ALL, Board, create_board
+from ci.build_docker_image_pio import extract_architecture
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
 
@@ -31,6 +32,94 @@ def green_text(text: str) -> str:
 def red_text(text: str) -> str:
     """Return text in red color."""
     return f"\033[31m{text}\033[0m"
+
+
+def handle_docker_compilation(args: argparse.Namespace) -> int:
+    """
+    Handle Docker compilation workflow.
+
+    This function builds the Docker image (if needed) and runs the compilation
+    inside a Docker container with pre-cached dependencies.
+
+    Args:
+        args: Parsed command-line arguments
+
+    Returns:
+        Exit code (0 for success, non-zero for failure)
+    """
+    import subprocess
+
+    # Validate arguments
+    if not args.boards:
+        print("Error: --docker requires at least a board name")
+        print("Usage: compile --docker <board> <example1> [example2 ...]")
+        return 1
+
+    board_name = args.boards.split(",")[0]  # Use first board for Docker
+
+    # Get examples
+    examples: List[str] = []
+    if args.positional_examples:
+        examples = args.positional_examples
+    elif args.examples:
+        examples = args.examples.split(",")
+    else:
+        print("Error: --docker requires at least one example")
+        print("Usage: compile --docker <board> <example1> [example2 ...]")
+        return 1
+
+    print("🐳 Docker compilation mode enabled")
+    print(f"Board: {board_name}")
+    print(f"Examples: {', '.join(examples)}")
+    print()
+
+    # Build Docker image for the platform
+    print(f"Building Docker image for platform: {board_name}")
+    build_cmd = [
+        sys.executable,
+        "-m",
+        "ci.build_docker_image_pio",
+        "--platform",
+        board_name,
+    ]
+
+    result = subprocess.run(build_cmd)
+    if result.returncode != 0:
+        print("Error: Failed to build Docker image")
+        return 1
+
+    # Determine architecture for image name
+    architecture = extract_architecture(board_name)
+    image_name = f"fastled-platformio-{architecture}-{board_name}"
+
+    # Get absolute path to project root
+    project_root = str(Path(__file__).parent.parent.absolute())
+
+    print()
+    print(f"Running compilation in Docker container: {image_name}")
+    print()
+
+    # Build command to run inside Docker
+    # Remove --docker flag and run native compile command
+    docker_compile_cmd = f"bash compile {board_name} {' '.join(examples)}"
+
+    # Run compilation in Docker container
+    docker_cmd = [
+        "docker",
+        "run",
+        "--rm",
+        "-v",
+        f"{project_root}:/fastled",
+        "-w",
+        "/fastled",
+        image_name,
+        "bash",
+        "-c",
+        docker_compile_cmd,
+    ]
+
+    result = subprocess.run(docker_cmd)
+    return result.returncode
 
 
 def get_default_boards() -> List[str]:
@@ -169,6 +258,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "--run",
         action="store_true",
         help="For WASM: Run Playwright tests after compilation (default is compile-only)",
+    )
+    parser.add_argument(
+        "--docker",
+        action="store_true",
+        help="Run compilation inside Docker container with pre-cached dependencies",
     )
 
     try:
@@ -751,6 +845,10 @@ def main() -> int:
     if args.supported_boards:
         print(",".join(get_default_boards()))
         return 0
+
+    # Handle Docker compilation mode
+    if args.docker:
+        return handle_docker_compilation(args)
 
     # Determine which boards to compile for
     if args.boards:

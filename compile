@@ -21,10 +21,14 @@ if ! command -v uv &> /dev/null; then
 fi
 
 cd "$(dirname "$0")"
-# if .venv not found
-if [ ! -d .venv ]; then
-    # create virtual environment
-    ./install
+
+# Skip .venv setup if running inside Docker (system packages are pre-installed)
+if [ -z "$FASTLED_DOCKER" ]; then
+    # if .venv not found
+    if [ ! -d .venv ]; then
+        # create virtual environment
+        ./install
+    fi
 fi
 
 interactive_stmt=""
