@@ -388,16 +388,16 @@ class I2SClocklessLedDriveresp32S3 {
         bus_config.bus_width = 16;
         bus_config.max_transfer_bytes =
             _nb_components * NUM_LED_PER_STRIP * 8 * 3 * 2 + __OFFSET + __OFFSET_END;
+        // IDF 5.4 and earlier use deprecated alignment fields
         #if IDF_5_4_OR_EARLIER
         #pragma GCC diagnostic push
         #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-        #endif
-        // In IDF 5.3, psram_trans_align became deprecated. We kick the can down
-        // the road a little bit and suppress the warning until idf 5.5 arrives.
         bus_config.psram_trans_align = LCD_DRIVER_PSRAM_DATA_ALIGNMENT;
         bus_config.sram_trans_align = 4;
-        #if IDF_5_4_OR_EARLIER
         #pragma GCC diagnostic pop
+        #else
+        // IDF 5.5+ uses new dma_burst_size field (replaces both psram/sram alignment)
+        bus_config.dma_burst_size = 64;
         #endif
 
         esp_err_t bus_err = esp_lcd_new_i80_bus(&bus_config, &i80_bus);

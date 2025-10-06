@@ -155,7 +155,16 @@ bool LcdRgbDriver<LED_CHIPSET>::begin(const LcdRgbDriverConfig& config, int leds
     panel_config.clk_src = LCD_CLK_SRC_DEFAULT;
     panel_config.data_width = 16;  // Use 16 data lines
     panel_config.bits_per_pixel = 16;  // 16 bits per pixel output
+    // IDF 5.4 and earlier use deprecated psram_trans_align
+    #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     panel_config.psram_trans_align = LCD_DRIVER_PSRAM_DATA_ALIGNMENT;
+    #pragma GCC diagnostic pop
+    #else
+    // IDF 5.5+ uses new dma_burst_size field
+    panel_config.dma_burst_size = 64;
+    #endif
     panel_config.num_fbs = 0;  // We manage our own frame buffers
 
     // Timing parameters

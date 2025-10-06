@@ -241,14 +241,17 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
         }
     }
 
-    // IDF 5.4 and earlier use deprecated psram_trans_align
+    // IDF 5.4 and earlier use deprecated alignment fields
     #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 5, 0)
     #pragma GCC diagnostic push
     #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     bus_config.psram_trans_align = LCD_DRIVER_PSRAM_DATA_ALIGNMENT;
-    #pragma GCC diagnostic pop
-    #endif
     bus_config.sram_trans_align = 4;
+    #pragma GCC diagnostic pop
+    #else
+    // IDF 5.5+ uses new dma_burst_size field (replaces both psram/sram alignment)
+    bus_config.dma_burst_size = 64;
+    #endif
 
     esp_err_t bus_err = esp_lcd_new_i80_bus(&bus_config, &bus_handle_);
     if (bus_err != ESP_OK) {
