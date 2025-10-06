@@ -135,11 +135,17 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
     if (worker) {
         // Configure the worker before returning
-        worker->configure(pin, t1, t2, t3, reset_ns);
-        return worker;
+        if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
+            // Configuration failed (likely channel creation failed due to exhaustion)
+            // Release worker back to pool and return nullptr
+            ESP_LOGE(RMT5_POOL_TAG, "Failed to configure worker - configuration failed");
+            worker = nullptr;  // Don't return failed worker
+        } else {
+            return worker;
+        }
     }
 
-    // No workers available - poll until one frees up
+    // No workers available (or configuration failed) - poll until one frees up
     // This implements the N > K blocking behavior
     uint32_t poll_count = 0;
     while (true) {
@@ -159,8 +165,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         portEXIT_CRITICAL(&mSpinlock);
 
         if (worker) {
-            worker->configure(pin, t1, t2, t3, reset_ns);
-            return worker;
+            if (worker->configure(pin, t1, t2, t3, reset_ns)) {
+                return worker;
+            }
+            // Configuration failed - worker not usable, continue waiting
+            ESP_LOGW(RMT5_POOL_TAG, "Worker configuration failed in retry loop - continuing to wait");
+            worker = nullptr;
         }
 
         // Yield to FreeRTOS periodically to prevent watchdog
