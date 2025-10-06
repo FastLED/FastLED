@@ -14,6 +14,7 @@ extern "C" {
 
 #include "esp_log.h"
 #include "freertos/task.h"
+#include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 #ifdef __cplusplus
 }
@@ -35,6 +36,8 @@ RmtWorkerPool& RmtWorkerPool::getInstance() {
 RmtWorkerPool::RmtWorkerPool()
     : mInitialized(false)
     , mSpinlock(portMUX_INITIALIZER_UNLOCKED)
+    , mExpectedChannels(0)
+    , mCreatedChannels(0)
 {
 }
 
@@ -60,10 +63,13 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     }
 
     int max_workers = getMaxWorkers();
+    mExpectedChannels = max_workers;
+    mCreatedChannels = 0;
 
     ESP_LOGI(RMT5_POOL_TAG, "Initializing %d workers (hybrid mode: threshold=%d LEDs)",
              max_workers, FASTLED_ONESHOT_THRESHOLD_LEDS);
     ESP_LOGI(RMT5_POOL_TAG, "RMT worker pool initialization starting - max_workers=%d", max_workers);
+    ESP_LOGI(RMT5_POOL_TAG, "STRICT MODE: Will abort if all %d channels cannot be created", max_workers);
 
     // Create K double-buffer workers (current default)
     // Note: We only create one type because we only have K hardware channels
@@ -137,10 +143,44 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         // Configure the worker before returning
         if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
             // Configuration failed (likely channel creation failed due to exhaustion)
-            // Release worker back to pool and return nullptr
-            ESP_LOGE(RMT5_POOL_TAG, "Failed to configure worker - configuration failed");
-            worker = nullptr;  // Don't return failed worker
+            // STRICT MODE: Abort immediately with stack trace
+            ESP_LOGE(RMT5_POOL_TAG, "FATAL: Failed to configure worker on first acquisition attempt!");
+            ESP_LOGE(RMT5_POOL_TAG, "Expected %d RMT channels for this %s variant, but channel creation failed",
+                     mExpectedChannels,
+#if defined(CONFIG_IDF_TARGET_ESP32)
+                     "ESP32"
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+                     "ESP32-S2"
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+                     "ESP32-S3"
+#elif defined(CONFIG_IDF_TARGET_ESP32C2)
+                     "ESP32-C2"
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+                     "ESP32-C3"
+#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+                     "ESP32-C6"
+#elif defined(CONFIG_IDF_TARGET_ESP32H2)
+                     "ESP32-H2"
+#else
+                     "Unknown ESP32"
+#endif
+            );
+            ESP_LOGE(RMT5_POOL_TAG, "Pin: GPIO %d, Worker type: %s",
+                     (int)pin,
+                     use_oneshot ? "ONE-SHOT" : "DOUBLE-BUFFER");
+            ESP_LOGE(RMT5_POOL_TAG, "This indicates a bug in RMT channel management - dumping stack trace:");
+
+            // Print stack trace
+            esp_backtrace_print(100);
+
+            // Abort to trigger core dump
+            ESP_LOGE(RMT5_POOL_TAG, "ABORTING due to RMT channel exhaustion on first acquisition");
+            abort();
         } else {
+            // Successfully configured - track channel creation
+            mCreatedChannels++;
+            ESP_LOGI(RMT5_POOL_TAG, "Successfully created RMT channel %d/%d for GPIO %d",
+                     mCreatedChannels, mExpectedChannels, (int)pin);
             return worker;
         }
     }
@@ -148,6 +188,9 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     // No workers available (or configuration failed) - poll until one frees up
     // This implements the N > K blocking behavior
     uint32_t poll_count = 0;
+    uint32_t config_fail_count = 0;  // Track consecutive configuration failures
+    const uint32_t MAX_CONFIG_RETRIES = 10;  // Limit retries before aborting
+
     while (true) {
         // Short delay before retry
         delayMicroseconds(100);
@@ -166,10 +209,55 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
         if (worker) {
             if (worker->configure(pin, t1, t2, t3, reset_ns)) {
+                // Success - track channel creation if this is a new channel
+                mCreatedChannels++;
+                ESP_LOGI(RMT5_POOL_TAG, "Successfully configured RMT channel for GPIO %d (retry path)",
+                         (int)pin);
                 return worker;
             }
-            // Configuration failed - worker not usable, continue waiting
-            ESP_LOGW(RMT5_POOL_TAG, "Worker configuration failed in retry loop - continuing to wait");
+            // Configuration failed - likely RMT channel exhaustion
+            config_fail_count++;
+
+            if (config_fail_count >= MAX_CONFIG_RETRIES) {
+                // STRICT MODE: Abort with stack trace after exhausting retries
+                ESP_LOGE(RMT5_POOL_TAG, "FATAL: Failed to configure worker after %u retries!",
+                         config_fail_count);
+                ESP_LOGE(RMT5_POOL_TAG, "Expected %d RMT channels for this %s variant",
+                         mExpectedChannels,
+#if defined(CONFIG_IDF_TARGET_ESP32)
+                         "ESP32"
+#elif defined(CONFIG_IDF_TARGET_ESP32S2)
+                         "ESP32-S2"
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
+                         "ESP32-S3"
+#elif defined(CONFIG_IDF_TARGET_ESP32C2)
+                         "ESP32-C2"
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+                         "ESP32-C3"
+#elif defined(CONFIG_IDF_TARGET_ESP32C6)
+                         "ESP32-C6"
+#elif defined(CONFIG_IDF_TARGET_ESP32H2)
+                         "ESP32-H2"
+#else
+                         "Unknown ESP32"
+#endif
+                );
+                ESP_LOGE(RMT5_POOL_TAG, "Successfully created: %d channels", mCreatedChannels);
+                ESP_LOGE(RMT5_POOL_TAG, "Failed channel - Pin: GPIO %d, Worker type: %s",
+                         (int)pin,
+                         use_oneshot ? "ONE-SHOT" : "DOUBLE-BUFFER");
+                ESP_LOGE(RMT5_POOL_TAG, "This indicates RMT channels are exhausted - dumping stack trace:");
+
+                // Print stack trace
+                esp_backtrace_print(100);
+
+                // Abort to trigger core dump
+                ESP_LOGE(RMT5_POOL_TAG, "ABORTING due to RMT channel exhaustion after retries");
+                abort();
+            }
+
+            ESP_LOGW(RMT5_POOL_TAG, "Worker configuration failed (attempt %u/%u) - will retry",
+                     config_fail_count, MAX_CONFIG_RETRIES);
             worker = nullptr;
         }
 

@@ -111,6 +111,10 @@ private:
 
     // Spinlock for thread-safe access
     portMUX_TYPE mSpinlock;
+
+    // Channel accounting (for strict verification)
+    int mExpectedChannels;  // Number of channels we expect to create
+    int mCreatedChannels;   // Number of channels successfully created
 };
 
 } // namespace fl
