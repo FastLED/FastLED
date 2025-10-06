@@ -695,8 +695,6 @@ def _get_example_error_message(project_root: Path, example: str) -> str:
 
     if example_path.is_absolute():
         return f"Example directory not found: {example}"
-    elif "/" in example or "\\" in example:
-        return f"Example directory not found: {example_path.resolve()}"
     else:
         return f"Example not found: {project_root / 'examples' / example}"
 
@@ -719,13 +717,8 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
         # Absolute path - use as-is
         if not example_path.exists():
             return False
-    elif "/" in example or "\\" in example:
-        # Relative path - resolve relative to current directory
-        example_path = example_path.resolve()
-        if not example_path.exists():
-            return False
     else:
-        # Just a name - resolve to examples directory
+        # Relative path (including nested paths like Fx/FxWave2d) - resolve to examples directory
         example_path = project_root / "examples" / example
         if not example_path.exists():
             return False

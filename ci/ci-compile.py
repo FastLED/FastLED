@@ -169,13 +169,17 @@ def get_all_examples() -> List[str]:
     if not examples_dir.exists():
         return []
 
+    # Find all .ino files recursively
+    ino_files = list(examples_dir.rglob("*.ino"))
+
     examples: List[str] = []
-    for item in examples_dir.iterdir():
-        if item.is_dir():
-            # Check if it contains a .ino file with the same name
-            ino_file = item / f"{item.name}.ino"
-            if ino_file.exists():
-                examples.append(item.name)
+    for ino_file in ino_files:
+        # Get the parent directory relative to examples/
+        # For examples/Blink/Blink.ino -> "Blink"
+        # For examples/Fx/FxWave2d/FxWave2d.ino -> "Fx/FxWave2d"
+        example_dir = ino_file.parent.relative_to(examples_dir)
+        example_name = str(example_dir).replace("\\", "/")  # Normalize path separators
+        examples.append(example_name)
 
     # Sort for consistent ordering
     examples.sort()
