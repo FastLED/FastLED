@@ -1,5 +1,6 @@
 #ifdef ESP32
 
+#include "sdkconfig.h"
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
@@ -142,15 +143,15 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     // Set threshold to 48 items (3/4 of 64-word buffer)
     // This triggers interrupt when 48 items have been transmitted, leaving 16 items
     // in hardware buffer while we refill the next half
-#if CONFIG_IDF_TARGET_ESP32
+#if defined(CONFIG_IDF_TARGET_ESP32)
     RMT.tx_lim_ch[mChannelId].limit = 48;
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
-#elif CONFIG_IDF_TARGET_ESP32C3
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
     RMT.tx_lim[mChannelId].limit = 48;
-#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5
+#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
-#elif CONFIG_IDF_TARGET_ESP32P4
+#elif defined(CONFIG_IDF_TARGET_ESP32P4)
     RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
 #else
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
@@ -256,7 +257,7 @@ bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset
 
     // Use low-level API to change GPIO
     gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-#if CONFIG_IDF_TARGET_ESP32P4
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
     gpio_matrix_out(pin, RMT_SIG_PAD_OUT0_IDX + mChannelId, false, false);
 #else
     gpio_matrix_out(pin, RMT_SIG_OUT0_IDX + mChannelId, false, false);
@@ -389,7 +390,7 @@ FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::tx_start() {
     // Use direct register access like RMT4
     // This is platform-specific and based on RMT4's approach
-#if CONFIG_IDF_TARGET_ESP32
+#if defined(CONFIG_IDF_TARGET_ESP32)
     // Reset RMT memory read pointer
     RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 1;
     RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 0;
@@ -403,7 +404,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
 
     // Start transmission
     RMT.conf_ch[mChannelId].conf1.tx_start = 1;
-#elif CONFIG_IDF_TARGET_ESP32S3
+#elif defined(CONFIG_IDF_TARGET_ESP32S3)
     // Reset RMT memory read pointer
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
@@ -418,7 +419,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // Start transmission
     RMT.chnconf0[mChannelId].conf_update_chn = 1;
     RMT.chnconf0[mChannelId].tx_start_chn = 1;
-#elif CONFIG_IDF_TARGET_ESP32C3
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
     // Reset RMT memory read pointer
     RMT.tx_conf[mChannelId].mem_rd_rst = 1;
     RMT.tx_conf[mChannelId].mem_rd_rst = 0;
@@ -433,7 +434,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // Start transmission
     RMT.tx_conf[mChannelId].conf_update = 1;
     RMT.tx_conf[mChannelId].tx_start = 1;
-#elif CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5
+#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
     // Reset RMT memory read pointer
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
@@ -448,7 +449,7 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // Start transmission
     RMT.chnconf0[mChannelId].conf_update_chn = 1;
     RMT.chnconf0[mChannelId].tx_start_chn = 1;
-#elif CONFIG_IDF_TARGET_ESP32P4
+#elif defined(CONFIG_IDF_TARGET_ESP32P4)
     // Reset RMT memory read pointer
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
     RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
@@ -483,7 +484,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     uint32_t intr_st = RMT.int_st.val;
 
     // Platform-specific bit positions (from RMT4)
-#if CONFIG_IDF_TARGET_ESP32 || CONFIG_IDF_TARGET_ESP32S3 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6 || CONFIG_IDF_TARGET_ESP32H2 || CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32P4
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
     int tx_done_bit = worker->mChannelId;
     int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
 #else

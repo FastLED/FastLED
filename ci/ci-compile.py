@@ -824,6 +824,85 @@ def create_esp32_flash_image(
         return False
 
 
+def _create_flash_manual_merge(
+    build_dir: Path, board_name: str, flash_size_mb: int
+) -> bool:
+    """Create a manually merged flash image from individual binary files.
+
+    This function is used for testing and creates a properly formatted flash image
+    by merging bootloader, partitions, boot_app0, and firmware at the correct offsets.
+
+    Args:
+        build_dir: Directory containing the binary files
+        board_name: Name of the board (e.g., "esp32dev", "esp32c3", "esp32s3")
+        flash_size_mb: Flash size in MB (must be 2, 4, 8, or 16)
+
+    Returns:
+        True if successful, False otherwise
+    """
+    try:
+        if flash_size_mb not in [2, 4, 8, 16]:
+            print(
+                f"ERROR: Invalid flash size: {flash_size_mb}MB. Must be 2, 4, 8, or 16"
+            )
+            return False
+
+        flash_size = flash_size_mb * 1024 * 1024
+
+        # Determine bootloader offset based on chip type
+        # ESP32 uses 0x1000, newer chips (C3, S3, C2, C5, C6, etc.) use 0x0
+        if board_name.startswith("esp32") and not any(
+            board_name.startswith(f"esp32{x}")
+            for x in ["c3", "s3", "c2", "c5", "c6", "h2", "p4"]
+        ):
+            bootloader_offset = 0x1000  # ESP32 classic
+        else:
+            bootloader_offset = 0x0  # ESP32-C3, ESP32-S3, and newer
+
+        # Standard offsets for partition table, boot_app0, and firmware
+        partitions_offset = 0x8000
+        boot_app0_offset = 0xE000
+        firmware_offset = 0x10000
+
+        # Create flash image filled with 0xFF
+        flash_data = bytearray(b"\xff" * flash_size)
+
+        # Required files and their offsets
+        files_to_merge = [
+            ("bootloader.bin", bootloader_offset),
+            ("partitions.bin", partitions_offset),
+            ("boot_app0.bin", boot_app0_offset),
+            ("firmware.bin", firmware_offset),
+        ]
+
+        # Merge each file at its offset
+        for filename, offset in files_to_merge:
+            file_path = build_dir / filename
+            if file_path.exists():
+                file_data = file_path.read_bytes()
+                # Check if file fits
+                if offset + len(file_data) > flash_size:
+                    print(
+                        f"WARNING: {filename} at offset 0x{offset:x} exceeds flash size"
+                    )
+                    continue
+                # Write file data at the specified offset
+                flash_data[offset : offset + len(file_data)] = file_data
+            else:
+                # File not found - this is acceptable for optional files
+                pass
+
+        # Write the merged flash image
+        output_path = build_dir / "flash.bin"
+        output_path.write_bytes(flash_data)
+
+        return True
+
+    except Exception as e:
+        print(f"ERROR: Failed to create manual flash merge: {e}")
+        return False
+
+
 def copy_esp32_qemu_artifacts(
     build_dir: Path, board: Board, sketch_name: str, output_path: str
 ) -> bool:
