@@ -948,13 +948,25 @@ def copy_esp32_qemu_artifacts(
 
     print(f"📁 Searching for ESP32 artifacts in: {artifact_dir}")
 
-    # Required files for ESP32 QEMU
-    required_files = {
-        "firmware.bin": firmware_name,
-        "bootloader.bin": "bootloader.bin",
-        "partitions.bin": "partitions.bin",
-        "boot_app0.bin": "boot_app0.bin",
-    }
+    # Check if merged.bin exists (from --merged-bin build)
+    merged_bin_src = artifact_dir / "merged.bin"
+    if merged_bin_src.exists() and firmware_name == "merged.bin":
+        # Use the already-created merged binary instead of copying firmware.bin
+        print(f"ℹ️  Using pre-built merged.bin from build artifacts")
+        required_files = {
+            "merged.bin": firmware_name,
+            "bootloader.bin": "bootloader.bin",
+            "partitions.bin": "partitions.bin",
+            "boot_app0.bin": "boot_app0.bin",
+        }
+    else:
+        # Required files for ESP32 QEMU
+        required_files = {
+            "firmware.bin": firmware_name,
+            "bootloader.bin": "bootloader.bin",
+            "partitions.bin": "partitions.bin",
+            "boot_app0.bin": "boot_app0.bin",
+        }
 
     # Optional files
     optional_files = {"spiffs.bin": "spiffs.bin"}
