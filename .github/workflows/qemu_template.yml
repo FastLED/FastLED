@@ -538,10 +538,10 @@ jobs:
 
             # Find the ELF file for addr2line
             ELF_FILE=""
-            if [ -f "qemu-build/firmware.elf" ]; then
-              ELF_FILE="qemu-build/firmware.elf"
-            elif [ -f ".build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf" ]; then
-              ELF_FILE=".build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf"
+            if [ -f "trusted/qemu-build/firmware.elf" ]; then
+              ELF_FILE="trusted/qemu-build/firmware.elf"
+            elif [ -f "trusted/.build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf" ]; then
+              ELF_FILE="trusted/.build/pio/${{ inputs.platform }}/.pio/build/${{ inputs.platform }}/firmware.elf"
             fi
 
             if [ -n "$ELF_FILE" ] && [ -f "$ELF_FILE" ]; then
