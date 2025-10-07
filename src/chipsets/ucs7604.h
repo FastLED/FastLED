@@ -516,8 +516,8 @@ protected:
     }
 };
 
-#endif // Platform checks
-
 FASTLED_NAMESPACE_END
+
+#endif // Platform checks
 
 #endif // __INC_UCS7604_H
