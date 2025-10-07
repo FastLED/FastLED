@@ -103,8 +103,7 @@ jobs:
 
           # Build the firmware using standard platform board
           # Add FASTLED_ESP32_IS_QEMU define for QEMU builds to reduce memory usage
-          # Use --merged-bin to create a single merged binary for QEMU
-          uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} --merged-bin -o qemu-build/merged.bin --defines FASTLED_ESP32_IS_QEMU
+          uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} -o qemu-build/firmware.bin --defines FASTLED_ESP32_IS_QEMU
 
           echo "Build completed. Contents of qemu-build directory:"
           ls -la qemu-build/
@@ -241,12 +240,12 @@ jobs:
             fi
           done
 
-          # Verify merged.bin exists
-          if [ ! -f "qemu-build/merged.bin" ]; then
-            echo "❌ merged.bin not found after build"
+          # Verify firmware.bin exists
+          if [ ! -f "qemu-build/firmware.bin" ]; then
+            echo "❌ firmware.bin not found after build"
             exit 1
           fi
-          echo "✅ merged.bin size: $(stat -c%s qemu-build/merged.bin) bytes"
+          echo "✅ firmware.bin size: $(stat -c%s qemu-build/firmware.bin) bytes"
 
           # Copy ELF file for backtrace decoding
           echo "=== Copying ELF file for debugging ==="
@@ -277,13 +276,13 @@ jobs:
 
           # Verify debug-enabled build by checking for Serial output strings in firmware
           echo "=== Build verification: checking for debug strings ==="
-          if strings qemu-build/merged.bin | grep -q "${{ inputs.sketch }} setup starting"; then
+          if strings qemu-build/firmware.bin | grep -q "${{ inputs.sketch }} setup starting"; then
             echo "✅ Debug string '${{ inputs.sketch }} setup starting' found in firmware"
           else
             echo "⚠️  Debug string '${{ inputs.sketch }} setup starting' not found in firmware"
           fi
 
-          if strings qemu-build/merged.bin | grep -q "Starting loop iteration"; then
+          if strings qemu-build/firmware.bin | grep -q "Starting loop iteration"; then
             echo "✅ Debug string 'Starting loop iteration' found in firmware"
           else
             echo "⚠️  Debug string 'Starting loop iteration' not found in firmware"
@@ -291,11 +290,11 @@ jobs:
 
           # Verify firmware was built successfully
           echo "=== Firmware build verification ==="
-          if [ -f "qemu-build/merged.bin" ] && [ -s "qemu-build/merged.bin" ]; then
-            echo "✅ Merged binary created successfully"
-            echo "Merged binary size: $(wc -c < qemu-build/merged.bin) bytes"
+          if [ -f "qemu-build/firmware.bin" ] && [ -s "qemu-build/firmware.bin" ]; then
+            echo "✅ Firmware binary created successfully"
+            echo "Firmware size: $(wc -c < qemu-build/firmware.bin) bytes"
           else
-            echo "❌ Merged binary missing or empty"
+            echo "❌ Firmware binary missing or empty"
           fi
 
           # Validate flash mode for QEMU compatibility
@@ -328,7 +327,7 @@ jobs:
           echo "Build folder absolute path: $(realpath qemu-build 2>/dev/null || echo 'FAILED')"
 
           echo "=== Required files verification ==="
-          required_files=("merged.bin" "bootloader.bin" "partitions.bin" "partitions.csv" "boot_app0.bin")
+          required_files=("firmware.bin" "bootloader.bin" "partitions.bin" "partitions.csv" "boot_app0.bin")
           for file in "${required_files[@]}"; do
             if [ -f "qemu-build/$file" ]; then
               echo "✅ $file: $(stat -c%s qemu-build/$file) bytes"
@@ -340,12 +339,50 @@ jobs:
           echo "=== All files in qemu-build ==="
           ls -la qemu-build/
 
-          # Verify merged.bin exists (it should already contain everything)
-          if [ -f "qemu-build/merged.bin" ]; then
-            echo "✅ merged.bin exists (contains bootloader + partitions + firmware)"
+          # Create flash.bin for QEMU if it doesn't exist
+          if [ ! -f "qemu-build/flash.bin" ]; then
+            echo "=== Creating flash.bin for QEMU ==="
+            if [ -f "qemu-build/firmware.bin" ] && [ -f "qemu-build/bootloader.bin" ] && [ -f "qemu-build/partitions.bin" ]; then
+              # Use esptool to create proper flash image if available
+              if command -v esptool.py >/dev/null 2>&1; then
+                echo "Using esptool.py to create flash image..."
+                # Determine correct chip and offsets based on platform
+                if [ "${{ inputs.platform }}" = "esp32dev" ]; then
+                  esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x1000 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                elif [ "${{ inputs.platform }}" = "esp32c3" ] || [ "${{ inputs.platform }}" = "esp32s3" ]; then
+                  esptool.py --chip ${{ inputs.platform }} merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x0 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                else
+                  esptool.py --chip esp32 merge_bin -o qemu-build/flash.bin \
+                    --flash_mode dio --flash_freq 80m --flash_size 4MB \
+                    0x1000 qemu-build/bootloader.bin \
+                    0x8000 qemu-build/partitions.bin \
+                    0xe000 qemu-build/boot_app0.bin \
+                    0x10000 qemu-build/firmware.bin
+                fi
+                echo "✅ Created flash.bin using esptool"
+              else
+                echo "esptool.py not available, creating simple flash image..."
+                # Create 4MB flash image filled with 0xFF
+                dd if=/dev/zero bs=1M count=4 | tr '\000' '\377' > qemu-build/flash.bin
+                # Write firmware at offset 0x10000 (64KB)
+                dd if=qemu-build/firmware.bin of=qemu-build/flash.bin bs=1 seek=65536 conv=notrunc
+                echo "✅ Created basic flash.bin"
+              fi
+            else
+              echo "⚠️  Missing required files for flash.bin creation"
+            fi
           else
-            echo "❌ merged.bin not found"
-            exit 1
+            echo "✅ flash.bin already exists"
           fi
 
           echo "=== Final qemu-build contents ==="
@@ -383,13 +420,14 @@ jobs:
         id: qemu
         uses: tobozo/esp32-qemu-sim@v2.0.1
         with:
-          flash-image: trusted/qemu-build/merged.bin
+          build-folder: trusted/qemu-build
           flash-size: 4
           psram: "8M"
           qemu-timeout: "120"
           timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
           debug: true
           chip: "${{ steps.chip_mapping.outputs.chip }}"
+          spiffs-address: "0x210000"
 
       - name: Display QEMU output
         if: always()
