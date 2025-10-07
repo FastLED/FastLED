@@ -383,22 +383,22 @@ RmtWorkerOneShot* RmtWorkerPool::findAvailableOneShotWorker() {
 
 int RmtWorkerPool::getMaxWorkers() {
     // Platform-specific maximum worker count
-    // ESP32-C3/C6/H2: Use 1 worker with double-buffering to time-multiplex all strips
-    // Other platforms: Multiple workers for true parallel output
+    // Double-buffering uses 2 memory blocks per worker, so actual worker count
+    // is half the number of RMT TX channels
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
-    // ESP32-C3/C6/H2: 1 worker that time-multiplexes between strips
-    // Double-buffering uses 2 memory blocks, leaving no room for a second worker
+    // ESP32-C3/C6/H2: 2 RMT TX channels ÷ 2 (double-buffer) = 1 worker
     return 1;
 #elif defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
     // Modern ESP-IDF defines this (ESP32-S3, etc.)
-    return SOC_RMT_TX_CANDIDATES_PER_GROUP;
+    // Divide by 2 for double-buffering
+    return SOC_RMT_TX_CANDIDATES_PER_GROUP / 2;
 #elif defined(CONFIG_IDF_TARGET_ESP32)
-    // ESP32 has 8 RMT TX channels
-    return 8;
-#elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    // ESP32-S2/S3 have 4 RMT TX channels
+    // ESP32: 8 RMT TX channels ÷ 2 (double-buffer) = 4 workers
     return 4;
+#elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
+    // ESP32-S2/S3: 4 RMT TX channels ÷ 2 (double-buffer) = 2 workers
+    return 2;
 #else
     // Conservative default
     #warning "Unknown ESP32 variant - defaulting to 1 RMT worker"
