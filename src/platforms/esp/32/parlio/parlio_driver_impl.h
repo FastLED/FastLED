@@ -124,7 +124,9 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     // Create PARLIO TX unit
     esp_err_t err = parlio_new_tx_unit(&parlio_config, &tx_unit_);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: parlio_new_tx_unit() failed with error 0x" << fl::FixedHexNum<uint32_t>(err));
+        char hex_buf[16];
+        fl::snprintf(hex_buf, sizeof(hex_buf), "0x%x", err);
+        FL_WARN("PARLIO: parlio_new_tx_unit() failed with error " << hex_buf);
         FL_WARN("  Check GPIO pins - clk:" << config_.clk_gpio << ", data:["
                 << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << "]");
 
@@ -151,7 +153,9 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     // Enable PARLIO TX unit
     err = parlio_tx_unit_enable(tx_unit_);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: parlio_tx_unit_enable() failed with error 0x" << fl::FixedHexNum<uint32_t>(err));
+        char hex_buf[16];
+        fl::snprintf(hex_buf, sizeof(hex_buf), "0x%x", err);
+        FL_WARN("PARLIO: parlio_tx_unit_enable() failed with error " << hex_buf);
 
         parlio_del_tx_unit(tx_unit_);
         vSemaphoreDelete(xfer_done_sem_);
