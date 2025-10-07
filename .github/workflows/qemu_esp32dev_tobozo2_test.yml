@@ -121,7 +121,7 @@ jobs:
 
       - name: Run QEMU
         id: qemu
-        uses: tobozo/esp32-qemu-sim@v2.0.1
+        uses: tobozo/esp32-qemu-sim@v2.1.0
         with:
           flash-image: qemu-build/merged.bin  # Single merged file!
           chip: esp32
