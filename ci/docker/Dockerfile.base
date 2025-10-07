@@ -32,11 +32,13 @@ ENV PATH="/root/.local/bin:${PATH}"
 # Set environment variable to indicate running inside Docker
 ENV FASTLED_DOCKER=1
 
-# Download and extract FastLED project from GitHub (master branch)
+# Download and extract FastLED project from GitHub (latest release)
 # This contains src/, examples/, install, pyproject.toml, ci/, etc.
-RUN wget -q https://github.com/FastLED/FastLED/archive/refs/heads/master.zip -O /tmp/fastled.zip && \
+# Using latest release instead of master to avoid build breakage from unstable code
+RUN RELEASE_URL=$(wget -qO- https://api.github.com/repos/FastLED/FastLED/releases/latest | grep "zipball_url" | cut -d '"' -f 4) && \
+    wget -q "$RELEASE_URL" -O /tmp/fastled.zip && \
     unzip -q /tmp/fastled.zip -d /tmp && \
-    mv /tmp/FastLED-master /fastled && \
+    mv /tmp/FastLED-* /fastled && \
     rm -rf /tmp/fastled.zip
 
 
