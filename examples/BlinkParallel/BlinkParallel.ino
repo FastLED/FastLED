@@ -22,6 +22,8 @@ void setup() {
     Serial.begin(115200);
     delay(100);  // Give serial time to initialize
 
+    delay(2000);
+
     Serial.println("BlinkParallel setup starting");
     Serial.print("NUM_LEDS: ");
     Serial.println(NUM_LEDS);
