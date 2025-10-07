@@ -1,5 +1,17 @@
 FastLED 3.10.4
 ==============
+  * **NEW: UCS7604 RGBW Chipset Support (BETA)**: 16-bit RGBW LED driver for ARM M0/M0+ platforms
+    * High-resolution 4-channel LED driver with configurable bit depth (8/12/14/16-bit) and dual data rates (800kHz/1.6MHz)
+    * Currently supported on ARM M0/M0+ platforms (SAMD21/SAMD51)
+    * Usage: `FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);`
+    * Features:
+      * 16-bit color resolution (65,536 levels per channel) for ultra-smooth gradients
+      * Configurable per-channel current control (0x00-0x0F)
+      * Unique preamble-based protocol: sends configuration before pixel data
+      * Reuses existing ARM M0 showLedData<>() assembly for efficiency
+    * Beta status: Hardware validation ongoing, ARM M0/M0+ only
+    * Example: [examples/UCS7604_Basic/UCS7604_Basic.ino](examples/UCS7604_Basic/UCS7604_Basic.ino)
+    * Files: [src/chipsets/ucs7604.h](src/chipsets/ucs7604.h)
   * **NEW: ESP8266 UART Driver (Opt-in)**: UART-based WS2812 driver for ESP8266 with improved Wi-Fi stability
     * Alternative to bit-bang driver using UART1 peripheral (GPIO2) for hardware-timed LED output
     * Enable with `#define FASTLED_ESP8266_UART` before including FastLED.h

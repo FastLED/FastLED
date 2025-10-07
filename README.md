@@ -139,6 +139,16 @@ FastLED's codebase is organized into several major areas. Each directory contain
 
 ## 🆕 Latest Features
 
+## **FastLED 3.10.3: UCS7604 RGBW Chipset Support (BETA)**
+
+**New 16-bit RGBW LED chipset support** for ARM M0/M0+ platforms (SAMD21/SAMD51). The UCS7604 is a high-resolution 4-channel LED driver with configurable bit depth (8/12/14/16-bit) and dual data rates (800kHz/1.6MHz).
+
+```cpp
+FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);  // 16-bit mode, 800kHz
+```
+
+**⚠️ Beta Status**: Currently ARM M0/M0+ only. Hardware validation ongoing. See [examples/UCS7604_Basic](examples/UCS7604_Basic/UCS7604_Basic.ino) for usage.
+
 ## **FastLED 3.10.2: Corkscrew Mapping**
 
 See [examples/FestivalStick/FestivalStick.ino](examples/FestivalStick/FestivalStick.ino)

@@ -13,6 +13,9 @@
 #include "fl/namespace.h"
 #include "fl/math_macros.h"
 
+// Include UCS7604 controller
+#include "chipsets/ucs7604.h"  // optional.
+
 // Conditional namespace handling for WASM builds
 #ifdef FASTLED_FORCE_NAMESPACE
 #define FASTLED_CLOCKLESS_CONTROLLER fl::ClocklessController
@@ -967,6 +970,30 @@ class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
 class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 9 * FMUL, 1 * FMUL, RGB_ORDER, 0, false, 200> {};
 
+
+
+// UCS7604 controller typedefs (available on supported platforms)
+// Uses WS2812-like timing (800kHz) for preambles and pixel data by default
+#ifdef UCS7604_HAS_CONTROLLER
+/// UCS7604 controller class @ 800 KHz, 16-bit mode
+/// @tparam DATA_PIN the data pin for these LEDs
+/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for UCS7604)
+///
+/// The UCS7604 is a 4-channel (RGBW) LED driver with 16-bit color resolution.
+/// This controller sends protocol-required preambles before pixel data.
+/// Default mode: 16-bit depth @ 800 kHz with RGBW ordering.
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+class UCS7604Controller800Khz : public UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, UCS7604_MODE_16BIT_800KHZ> {};
+
+/// UCS7604 controller class @ 800 KHz, 8-bit mode
+/// @copydetails UCS7604Controller800Khz
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+class UCS7604Controller800Khz_8bit : public UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, UCS7604_MODE_8BIT_800KHZ> {};
+
+/// UCS7604 default typedef (16-bit @ 800kHz)
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604 = UCS7604Controller800Khz<DATA_PIN, RGB_ORDER>;
+#endif
 
 #else
 
