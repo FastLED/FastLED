@@ -113,12 +113,16 @@ public:
             // Configure driver
             fl::ParlioDriverConfig config;
             config.clk_gpio = mClkPin;
-            config.num_lanes = num_strips;
+            config.num_lanes = optimal_width;  // Must match DATA_WIDTH template parameter
             config.clock_freq_hz = 12000000;  // 12 MHz
             config.buffer_strategy = fl::ParlioBufferStrategy::BREAK_PER_COLOR;  // Use LSB-safe buffer breaking
 
             for (int i = 0; i < num_strips; i++) {
                 config.data_gpios[i] = pinList[i];
+            }
+            // Pad unused lanes with -1 (GPIO_NUM_NC) to indicate unused
+            for (int i = num_strips; i < optimal_width; i++) {
+                config.data_gpios[i] = -1;
             }
 
             // Initialize
