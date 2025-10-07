@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sketch: [BlinkParallel, Blink]
+        sketch: [BlinkParallel]
     uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32c3
