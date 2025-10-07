@@ -5,7 +5,6 @@
 
 #include "pixeltypes.h"
 #include "pixel_controller.h"
-#include "fl/namespace.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -216,7 +215,7 @@
 #include "led_controller.h"
 #include "fl/force_inline.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief UCS7604 protocol configuration modes
 enum UCS7604Mode {
@@ -389,16 +388,6 @@ protected:
 #elif defined(__SAMD51__) || defined(__SAME51__)
 #define UCS7604_HAS_CONTROLLER 1
 
-FASTLED_NAMESPACE_END
-
-#include "../platforms/arm/common/m0clockless.h"
-#include "eorder.h"
-#include "fastpin.h"
-#include "led_controller.h"
-#include "fl/force_inline.h"
-
-FASTLED_NAMESPACE_BEGIN
-
 /// @brief UCS7604 controller for ARM M0+ platforms (SAMD51)
 /// Same implementation as SAMD21 version
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
@@ -516,7 +505,7 @@ protected:
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif // Platform checks
 

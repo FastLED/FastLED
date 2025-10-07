@@ -14,7 +14,7 @@
 #include "fl/math_macros.h"
 
 // Include UCS7604 controller
-#include "chipsets/ucs7604.h"  // optional.
+#include "fl/chipsets/ucs7604.h"  // optional.
 
 // Conditional namespace handling for WASM builds
 #ifdef FASTLED_FORCE_NAMESPACE
@@ -983,12 +983,12 @@ class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMU
 /// This controller sends protocol-required preambles before pixel data.
 /// Default mode: 16-bit depth @ 800 kHz with RGBW ordering.
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604Controller800Khz : public UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, UCS7604_MODE_16BIT_800KHZ> {};
+class UCS7604Controller800Khz : public fl::UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ> {};
 
 /// UCS7604 controller class @ 800 KHz, 8-bit mode
 /// @copydetails UCS7604Controller800Khz
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604Controller800Khz_8bit : public UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, UCS7604_MODE_8BIT_800KHZ> {};
+class UCS7604Controller800Khz_8bit : public fl::UCS7604Controller<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ> {};
 
 /// UCS7604 default typedef (16-bit @ 800kHz)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>

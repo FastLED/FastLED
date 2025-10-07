@@ -11,7 +11,7 @@ FastLED 3.10.4
       * Reuses existing ARM M0 showLedData<>() assembly for efficiency
     * Beta status: Hardware validation ongoing, ARM M0/M0+ only
     * Example: [examples/UCS7604_Basic/UCS7604_Basic.ino](examples/UCS7604_Basic/UCS7604_Basic.ino)
-    * Files: [src/chipsets/ucs7604.h](src/chipsets/ucs7604.h)
+    * Files: [src/fl/chipsets/ucs7604.h](src/fl/chipsets/ucs7604.h)
   * **NEW: ESP8266 UART Driver (Opt-in)**: UART-based WS2812 driver for ESP8266 with improved Wi-Fi stability
     * Alternative to bit-bang driver using UART1 peripheral (GPIO2) for hardware-timed LED output
     * Enable with `#define FASTLED_ESP8266_UART` before including FastLED.h
