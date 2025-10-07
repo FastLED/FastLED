@@ -569,13 +569,15 @@ jobs:
 
               # Use the Python decode script with build_info.json for toolchain detection
               cd trusted
+              # Use relative path from trusted directory
+              RELATIVE_ELF="${ELF_FILE#trusted/}"
               DECODE_CMD="uv run python ci/decode_esp32_backtrace.py"
               if [ -n "$BUILD_INFO_FILE" ]; then
                 # Use relative path from trusted directory
                 RELATIVE_BUILD_INFO="${BUILD_INFO_FILE#trusted/}"
                 DECODE_CMD="$DECODE_CMD --build-info $RELATIVE_BUILD_INFO"
               fi
-              DECODE_CMD="$DECODE_CMD $(basename $ELF_FILE)"
+              DECODE_CMD="$DECODE_CMD $RELATIVE_ELF"
 
               if $DECODE_CMD < ../qemu_output.log; then
                 echo "✅ Successfully decoded backtrace using Python script"
