@@ -152,7 +152,6 @@
 #include "fl/functional.h"
 #include "fl/str.h" // For StringFormatter
 #include "fl/promise.h" // For Error type
-#include "fl/warn.h" // For FL_WARN
 
 #include "fl/sketch_macros.h"
 
