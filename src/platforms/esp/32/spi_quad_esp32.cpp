@@ -26,9 +26,8 @@ public:
     ~SPIQuadESP32();
 
     bool begin(const SPIQuad::Config& config) override;
-    uint8_t* allocateDMABuffer(size_t size_bytes) override;
-    void freeDMABuffer(uint8_t* buffer) override;
-    bool transmitAsync(const uint8_t* buffer, size_t length_bytes) override;
+    void end() override;
+    bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -141,24 +140,11 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     return true;
 }
 
-uint8_t* SPIQuadESP32::allocateDMABuffer(size_t size_bytes) {
-    if (size_bytes == 0) return nullptr;
-
-    // Align to 4-byte boundary for optimal DMA performance
-    size_t aligned_size = (size_bytes + 3) & ~3;
-
-    return static_cast<uint8_t*>(
-        heap_caps_malloc(aligned_size, MALLOC_CAP_DMA)
-    );
+void SPIQuadESP32::end() {
+    cleanup();
 }
 
-void SPIQuadESP32::freeDMABuffer(uint8_t* buffer) {
-    if (buffer) {
-        heap_caps_free(buffer);
-    }
-}
-
-bool SPIQuadESP32::transmitAsync(const uint8_t* buffer, size_t length_bytes) {
+bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -168,15 +154,15 @@ bool SPIQuadESP32::transmitAsync(const uint8_t* buffer, size_t length_bytes) {
         waitComplete();
     }
 
-    if (length_bytes == 0) {
+    if (buffer.empty()) {
         return true;  // Nothing to transmit
     }
 
     // Configure transaction
     memset(&mTransaction, 0, sizeof(mTransaction));
     mTransaction.flags = SPI_TRANS_MODE_QIO;  // Quad I/O mode
-    mTransaction.length = length_bytes * 8;   // Length in BITS (critical!)
-    mTransaction.tx_buffer = buffer;
+    mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
+    mTransaction.tx_buffer = buffer.data();
 
     // Queue transaction (non-blocking)
     esp_err_t ret = spi_device_queue_trans(mSPIHandle, &mTransaction, portMAX_DELAY);

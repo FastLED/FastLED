@@ -10,6 +10,7 @@
 
 #include "fl/namespace.h"
 #include "fl/vector.h"
+#include "fl/span.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -53,21 +54,16 @@ public:
     /// @note Implementation should auto-detect dual/quad mode based on active pins
     virtual bool begin(const Config& config) = 0;
 
-    /// Allocate DMA-capable buffer
-    /// @param size_bytes Buffer size in bytes
-    /// @returns Pointer to DMA buffer, or nullptr on failure
-    /// @note Buffer must be properly aligned for DMA transfers
-    virtual uint8_t* allocateDMABuffer(size_t size_bytes) = 0;
-
-    /// Free previously allocated DMA buffer
-    /// @param buffer Pointer returned by allocateDMABuffer()
-    virtual void freeDMABuffer(uint8_t* buffer) = 0;
+    /// Shutdown SPI peripheral and release resources
+    /// @note Should wait for any pending transmissions to complete
+    virtual void end() = 0;
 
     /// Queue asynchronous DMA transmission (non-blocking)
-    /// @param buffer Pointer to DMA-capable buffer
-    /// @param length_bytes Data length in bytes
+    /// @param buffer Data buffer to transmit (platform handles DMA requirements internally)
     /// @returns true if queued successfully, false on error
-    virtual bool transmitAsync(const uint8_t* buffer, size_t length_bytes) = 0;
+    /// @note Platform implementations handle DMA buffer allocation/alignment internally
+    /// @note Buffer must remain valid until waitComplete() returns
+    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds

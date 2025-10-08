@@ -133,34 +133,6 @@ public:
         mMaxLaneSize = fl::fl_max(mMaxLaneSize, data.size());
     }
 
-    // Backward compatibility: Add a lane with single padding byte
-    // This converts a single byte to a 1-byte padding frame
-    void addLane(uint8_t lane_id, const fl::vector<uint8_t>& data, uint8_t padding_byte) {
-        // Store the padding byte in the lane data itself rather than a shared static
-        // The byte will be copied when we access it later via the pointer
-        if (lane_id >= 4) {
-            return;  // Invalid lane ID
-        }
-
-        LaneInfo lane;
-        lane.lane_id = lane_id;
-
-        // Allocate single-byte padding frame in lane data
-        static uint8_t padding_bytes[4] = {0, 0, 0, 0};
-        padding_bytes[lane_id] = padding_byte;
-        lane.padding_frame_ptr = &padding_bytes[lane_id];
-        lane.padding_frame_size = 1;
-
-        lane.actual_size = data.size();
-        // Store pointer to external data instead of copying
-        lane.data_ptr = data.data();
-        lane.data_size = data.size();
-
-        mLanes.push_back(lane);
-        mNumLanes++;
-        mMaxLaneSize = fl::fl_max(mMaxLaneSize, data.size());
-    }
-
     // Transpose all lanes into pre-allocated output buffer
     // Output buffer must be pre-allocated by caller
     // Returns pointer to internal interleaved buffer for convenience

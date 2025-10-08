@@ -10,6 +10,8 @@
 
 namespace fl {
 
+#ifndef FASTLED_TESTING  // Skip weak default when testing (stub provides strong definition)
+
 /// Weak default factory - returns empty vector (no Quad-SPI support)
 /// Platform-specific implementations override this function
 FL_LINK_WEAK
@@ -18,5 +20,7 @@ fl::vector<SPIQuad*> SPIQuad::createInstances() {
     // Platform implementations will override this with their own strong definition
     return fl::vector<SPIQuad*>();
 }
+
+#endif  // FASTLED_TESTING
 
 }  // namespace fl

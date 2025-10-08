@@ -4,35 +4,104 @@
 #include "test.h"
 #include "FastLED.h"
 #include "platforms/shared/quad_spi_transposer.h"
-#include "platforms/stub/quad_spi_driver.h"
+#include "platforms/shared/spi_quad.h"
+#include "platforms/stub/spi_quad_stub.h"
 #include <chrono>
 
 using namespace fl;
 
 // ============================================================================
+// Test Setup/Teardown - Reset mock drivers before/after each test
+// ============================================================================
+
+// Per-test fixture that resets mock drivers
+struct SPIQuadTestFixture {
+    SPIQuadTestFixture() {
+        resetAllStubs();
+    }
+
+    // Don't reset in destructor - tests need to extract data after transmit
+    // ~SPIQuadTestFixture() {
+    //     resetAllStubs();
+    // }
+
+    static void resetAllStubs() {
+        auto controllers = SPIQuad::getAll();
+        for (int i = 0; i < controllers.size(); ++i) {
+            SPIQuadStub* stub = toStub(controllers[i]);
+            if (stub) {
+                // Call end() to clear initialization state
+                stub->end();
+                // Then reset transmission state
+                stub->reset();
+                // Initialize with default config for tests that don't specify
+                // Tests that need different settings should call end() + begin()
+                SPIQuad::Config config;
+                config.bus_num = i + 2;  // Bus 2, 3, etc.
+                config.clock_speed_hz = 20000000;
+                config.clock_pin = 14;
+                config.data0_pin = 13;
+                config.data1_pin = 12;
+                config.data2_pin = 27;
+                config.data3_pin = 33;
+                stub->begin(config);
+            }
+        }
+    }
+};
+
+// Global fixture that runs once at test suite start
+struct SPIQuadGlobalFixture {
+    SPIQuadGlobalFixture() {
+        SPIQuadTestFixture::resetAllStubs();
+    }
+};
+
+// Apply global fixture
+static SPIQuadGlobalFixture g_fixture;
+
+// ============================================================================
 // Test-only QuadSPI controller (inlined from helpers/quad_spi_test_controller.h)
 // ============================================================================
 
-/// Test-only QuadSPI controller that uses MockQuadSPIDriver
+/// Test-only QuadSPI controller that uses SPIQuad interface
 /// @tparam SPI_BUS_NUM SPI bus number (ignored in tests)
 /// @tparam SPI_CLOCK_HZ Clock frequency in Hz
 template<uint8_t SPI_BUS_NUM = 2, uint32_t SPI_CLOCK_HZ = 10000000>
 class QuadSPITestController {
 private:
-    MockQuadSPIDriver mMockDriver;
+    SPIQuad* mMockDriver;
     QuadSPITransposer mTransposer;
     fl::vector<fl::vector<uint8_t>> mLaneBuffers;
-    fl::vector<uint8_t> mPaddingBytes;
+    fl::vector<fl::vector<uint8_t>> mPaddingFrames;  // Changed from single bytes to frames
     fl::vector<uint8_t> mInterleavedDMABuffer;
     size_t mMaxLaneBytes = 0;
     uint8_t mNumLanes = 0;
     bool mFinalized = false;
 
 public:
-    QuadSPITestController() = default;
+    QuadSPITestController() {
+        // Get mock SPI controller from factory
+        const auto& controllers = SPIQuad::getAll();
+        if (!controllers.empty()) {
+            mMockDriver = controllers[0];  // Use first available
+        } else {
+            mMockDriver = nullptr;
+        }
+    }
 
     void begin() {
-        mMockDriver.setClockSpeed(SPI_CLOCK_HZ);
+        if (mMockDriver) {
+            SPIQuad::Config config;
+            config.bus_num = SPI_BUS_NUM;
+            config.clock_speed_hz = SPI_CLOCK_HZ;
+            config.clock_pin = 14;
+            config.data0_pin = 13;
+            config.data1_pin = 12;
+            config.data2_pin = 27;
+            config.data3_pin = 33;
+            mMockDriver->begin(config);
+        }
     }
 
     template<typename CONTROLLER_TYPE>
@@ -40,15 +109,19 @@ public:
         if (lane_id >= 4) return;
 
         size_t bytes_needed = CONTROLLER_TYPE::calculateBytes(num_leds);
-        uint8_t padding = CONTROLLER_TYPE::getPaddingByte();
+        auto padding_frame = CONTROLLER_TYPE::getPaddingLEDFrame();
 
         if (mLaneBuffers.size() <= lane_id) {
             mLaneBuffers.resize(lane_id + 1);
-            mPaddingBytes.resize(lane_id + 1);
+            mPaddingFrames.resize(lane_id + 1);
         }
 
         mLaneBuffers[lane_id].resize(bytes_needed);
-        mPaddingBytes[lane_id] = padding;
+        // Copy padding frame to vector
+        mPaddingFrames[lane_id].clear();
+        for (size_t i = 0; i < padding_frame.size(); ++i) {
+            mPaddingFrames[lane_id].push_back(padding_frame[i]);
+        }
 
         if (bytes_needed > mMaxLaneBytes) {
             mMaxLaneBytes = bytes_needed;
@@ -89,7 +162,11 @@ public:
         // Pad all lanes to max size
         for (size_t i = 0; i < mLaneBuffers.size(); ++i) {
             if (mLaneBuffers[i].size() < mMaxLaneBytes) {
-                mLaneBuffers[i].resize(mMaxLaneBytes, mPaddingBytes[i]);
+                // Padding is now handled by transposer during transpose(), not by buffer resize
+                // Just ensure buffer is properly sized
+                size_t old_size = mLaneBuffers[i].size();
+                // Don't resize - transposer will handle padding with full LED frames
+                (void)old_size;  // Suppress unused warning
             }
         }
 
@@ -103,22 +180,28 @@ public:
     }
 
     void transmit() {
+        if (!mMockDriver) return;
+
         mTransposer.reset();
 
         for (size_t i = 0; i < mLaneBuffers.size(); ++i) {
             if (!mLaneBuffers[i].empty()) {
-                mTransposer.addLane(i, mLaneBuffers[i], mPaddingBytes[i]);
+                // Pass padding frame instead of single byte
+                mTransposer.addLane(i, mLaneBuffers[i],
+                    fl::span<const uint8_t>(mPaddingFrames[i].data(), mPaddingFrames[i].size()));
             }
         }
 
         auto interleaved = mTransposer.transpose();
         if (!interleaved.empty()) {
-            mMockDriver.transmitDMA(interleaved.data(), interleaved.size());
+            mMockDriver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
         }
     }
 
     void waitComplete() {
-        // Mock driver completes instantly
+        if (mMockDriver) {
+            mMockDriver->waitComplete();
+        }
     }
 
     uint8_t getNumLanes() const { return mNumLanes; }
@@ -128,7 +211,7 @@ public:
         return mFinalized;
     }
 
-    MockQuadSPIDriver& getMockDriver() { return mMockDriver; }
+    SPIQuad* getMockDriver() { return mMockDriver; }
 };
 
 // Alias for tests
@@ -280,41 +363,41 @@ inline size_t calculateP9813Size(int num_leds) {
 // SECTION 1: Chipset Padding Bytes (7 tests)
 // ============================================================================
 
-TEST_CASE("QuadSPI: APA102 padding byte") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding byte") {
     uint8_t padding = APA102Controller<1, 2, RGB>::getPaddingByte();
     CHECK_EQ(padding, 0xFF);
 }
 
-TEST_CASE("QuadSPI: LPD8806 padding byte") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: LPD8806 padding byte") {
     uint8_t padding = LPD8806Controller<3, 4, RGB>::getPaddingByte();
     CHECK_EQ(padding, 0x00);
 }
 
-TEST_CASE("QuadSPI: WS2801 padding byte") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: WS2801 padding byte") {
     uint8_t padding = WS2801Controller<5, 6, RGB>::getPaddingByte();
     CHECK_EQ(padding, 0x00);
 }
 
-TEST_CASE("QuadSPI: P9813 padding byte") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: P9813 padding byte") {
     uint8_t padding = P9813Controller<7, 8, RGB>::getPaddingByte();
     CHECK_EQ(padding, 0x00);
 }
 
-TEST_CASE("QuadSPI: SK9822 inherits APA102 padding") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: SK9822 inherits APA102 padding") {
     uint8_t sk9822_padding = SK9822Controller<1, 2, RGB>::getPaddingByte();
     uint8_t apa102_padding = APA102Controller<1, 2, RGB>::getPaddingByte();
     CHECK_EQ(sk9822_padding, apa102_padding);
     CHECK_EQ(sk9822_padding, 0xFF);
 }
 
-TEST_CASE("QuadSPI: HD107 inherits APA102 padding") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: HD107 inherits APA102 padding") {
     uint8_t hd107_padding = HD107Controller<1, 2, RGB>::getPaddingByte();
     uint8_t apa102_padding = APA102Controller<1, 2, RGB>::getPaddingByte();
     CHECK_EQ(hd107_padding, apa102_padding);
     CHECK_EQ(hd107_padding, 0xFF);
 }
 
-TEST_CASE("QuadSPI: Mixed chipsets have correct padding") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mixed chipsets have correct padding") {
     CHECK_EQ(APA102Controller<1, 2, RGB>::getPaddingByte(), 0xFF);
     CHECK_EQ(LPD8806Controller<3, 4, RGB>::getPaddingByte(), 0x00);
     CHECK_EQ(WS2801Controller<5, 6, RGB>::getPaddingByte(), 0x00);
@@ -325,7 +408,7 @@ TEST_CASE("QuadSPI: Mixed chipsets have correct padding") {
 // SECTION 2: calculateBytes() Tests (7 tests)
 // ============================================================================
 
-TEST_CASE("QuadSPI: calculateBytes() is constexpr") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: calculateBytes() is constexpr") {
     constexpr size_t apa102_size = APA102Controller<1, 2, RGB>::calculateBytes(100);
     constexpr size_t lpd8806_size = LPD8806Controller<3, 4, RGB>::calculateBytes(100);
     constexpr size_t ws2801_size = WS2801Controller<5, 6, RGB>::calculateBytes(100);
@@ -337,7 +420,7 @@ TEST_CASE("QuadSPI: calculateBytes() is constexpr") {
     CHECK(p9813_size > 0);
 }
 
-TEST_CASE("QuadSPI: APA102 calculateBytes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 calculateBytes") {
     // APA102: 4 + (num_leds * 4) + (4 * ((num_leds / 32) + 1))
     size_t bytes_10 = APA102Controller<1, 2, RGB>::calculateBytes(10);
     size_t bytes_100 = APA102Controller<1, 2, RGB>::calculateBytes(100);
@@ -346,7 +429,7 @@ TEST_CASE("QuadSPI: APA102 calculateBytes") {
     CHECK_EQ(bytes_100, 420); // 4 + 400 + 16 = 420
 }
 
-TEST_CASE("QuadSPI: LPD8806 calculateBytes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: LPD8806 calculateBytes") {
     // LPD8806: (num_leds * 3) + ((num_leds * 3 + 63) / 64)
     size_t bytes_10 = LPD8806Controller<1, 2, RGB>::calculateBytes(10);
     size_t bytes_100 = LPD8806Controller<3, 4, RGB>::calculateBytes(100);
@@ -355,7 +438,7 @@ TEST_CASE("QuadSPI: LPD8806 calculateBytes") {
     CHECK_EQ(bytes_100, 305); // 300 + 5 = 305
 }
 
-TEST_CASE("QuadSPI: WS2801 calculateBytes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: WS2801 calculateBytes") {
     // WS2801: num_leds * 3 (no overhead)
     size_t bytes_10 = WS2801Controller<1, 2, RGB>::calculateBytes(10);
     size_t bytes_100 = WS2801Controller<5, 6, RGB>::calculateBytes(100);
@@ -364,7 +447,7 @@ TEST_CASE("QuadSPI: WS2801 calculateBytes") {
     CHECK_EQ(bytes_100, 300);
 }
 
-TEST_CASE("QuadSPI: P9813 calculateBytes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: P9813 calculateBytes") {
     // P9813: 4 + (num_leds * 4) + 4
     size_t bytes_10 = P9813Controller<1, 2, RGB>::calculateBytes(10);
     size_t bytes_100 = P9813Controller<7, 8, RGB>::calculateBytes(100);
@@ -373,7 +456,7 @@ TEST_CASE("QuadSPI: P9813 calculateBytes") {
     CHECK_EQ(bytes_100, 408); // 4 + 400 + 4 = 408
 }
 
-TEST_CASE("QuadSPI: calculateBytes() for mixed chipset scenario") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: calculateBytes() for mixed chipset scenario") {
     // Simulate SpecialDrivers/ESP/QuadSPI/MultiChipset example:
     size_t lane0 = APA102Controller<1, 2, RGB>::calculateBytes(60);
     size_t lane1 = LPD8806Controller<3, 4, RGB>::calculateBytes(40);
@@ -384,7 +467,7 @@ TEST_CASE("QuadSPI: calculateBytes() for mixed chipset scenario") {
     CHECK_EQ(max_bytes, 420);  // Lane 3 (APA102 100 LEDs) is largest
 }
 
-TEST_CASE("QuadSPI: calculateBytes() edge case - zero LEDs") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: calculateBytes() edge case - zero LEDs") {
     CHECK_EQ(APA102Controller<1, 2, RGB>::calculateBytes(0), 8);
     CHECK_EQ(LPD8806Controller<3, 4, RGB>::calculateBytes(0), 0);
     CHECK_EQ(WS2801Controller<5, 6, RGB>::calculateBytes(0), 0);
@@ -395,17 +478,17 @@ TEST_CASE("QuadSPI: calculateBytes() edge case - zero LEDs") {
 // SECTION 3: Bit-Interleaving Transpose Tests (13 tests)
 // ============================================================================
 
-TEST_CASE("QuadSPI: Basic 4-lane transpose with variable LED counts") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Basic 4-lane transpose with variable LED counts") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(1, 0xAA);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(2, 0xBB);
     auto lane2 = TestHelpers::generateAPA102ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(7, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
 
@@ -413,55 +496,55 @@ TEST_CASE("QuadSPI: Basic 4-lane transpose with variable LED counts") {
     CHECK_EQ(interleaved.size(), max_size * 4);
 }
 
-TEST_CASE("QuadSPI: Transpose with equal-length lanes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Transpose with equal-length lanes") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(5, 0x11);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(5, 0x22);
     auto lane2 = TestHelpers::generateAPA102ProtocolData(5, 0x33);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(5, 0x44);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Single-lane transpose (degraded mode)") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Single-lane transpose (degraded mode)") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(3, 0xAB);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Dual-lane transpose") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Dual-lane transpose") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(4, 0x11);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(6, 0x22);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane1.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Mixed chipset transpose with different padding") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mixed chipset transpose with different padding") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(3, 0xAA);
     auto lane1 = TestHelpers::generateLPD8806ProtocolData(5, 0xBB);
     auto lane2 = TestHelpers::generateWS2801ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateP9813ProtocolData(6, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
 
@@ -470,128 +553,128 @@ TEST_CASE("QuadSPI: Mixed chipset transpose with different padding") {
     CHECK_EQ(interleaved.size(), max_size * 4);
 }
 
-TEST_CASE("QuadSPI: APA102-only transpose (all 0xFF padding)") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102-only transpose (all 0xFF padding)") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(2, 0xAA);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(3, 0xBB);
     auto lane2 = TestHelpers::generateAPA102ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(5, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
-TEST_CASE("QuadSPI: LPD8806-only transpose (all 0x00 padding)") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: LPD8806-only transpose (all 0x00 padding)") {
     auto lane0 = TestHelpers::generateLPD8806ProtocolData(3, 0x11);
     auto lane1 = TestHelpers::generateLPD8806ProtocolData(4, 0x22);
     auto lane2 = TestHelpers::generateLPD8806ProtocolData(5, 0x33);
     auto lane3 = TestHelpers::generateLPD8806ProtocolData(6, 0x44);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
-TEST_CASE("QuadSPI: WS2801-only transpose") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: WS2801-only transpose") {
     auto lane0 = TestHelpers::generateWS2801ProtocolData(5, 0xAA);
     auto lane1 = TestHelpers::generateWS2801ProtocolData(7, 0xBB);
     auto lane2 = TestHelpers::generateWS2801ProtocolData(6, 0xCC);
     auto lane3 = TestHelpers::generateWS2801ProtocolData(8, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane3.size() * 4);  // lane3 is longest (8 LEDs)
 }
 
-TEST_CASE("QuadSPI: P9813-only transpose") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: P9813-only transpose") {
     auto lane0 = TestHelpers::generateP9813ProtocolData(4, 0x55);
     auto lane1 = TestHelpers::generateP9813ProtocolData(5, 0x66);
     auto lane2 = TestHelpers::generateP9813ProtocolData(6, 0x77);
     auto lane3 = TestHelpers::generateP9813ProtocolData(7, 0x88);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Empty transpose") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Empty transpose") {
     QuadSPITransposer transposer;
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), 0);
 }
 
-TEST_CASE("QuadSPI: Reset and reuse transposer") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Reset and reuse transposer") {
     QuadSPITransposer transposer;
 
     // First use
     auto lane0_a = TestHelpers::generateAPA102ProtocolData(5, 0xAA);
-    transposer.addLane(0, lane0_a, 0xFF);
+    transposer.addLane(0, lane0_a, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
     auto result_a = transposer.transpose();
     CHECK_EQ(result_a.size(), lane0_a.size() * 4);
 
     // Reset and reuse
     transposer.reset();
     auto lane0_b = TestHelpers::generateAPA102ProtocolData(10, 0xBB);
-    transposer.addLane(0, lane0_b, 0xFF);
+    transposer.addLane(0, lane0_b, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
     auto result_b = transposer.transpose();
     CHECK_EQ(result_b.size(), lane0_b.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Large buffer transpose (stress test)") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Large buffer transpose (stress test)") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(150, 0x11);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(200, 0x22);
     auto lane2 = TestHelpers::generateAPA102ProtocolData(175, 0x33);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(250, 0x44);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
-TEST_CASE("QuadSPI: Interleave order validation") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Interleave order validation") {
     fl::vector<uint8_t> lane0 = {0xAA};
     fl::vector<uint8_t> lane1 = {0xBB};
     fl::vector<uint8_t> lane2 = {0xCC};
     fl::vector<uint8_t> lane3 = {0xDD};
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), 4);
 
     // Verify round-trip extraction works correctly
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = driver.extractLanes(4, 1);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = driver->extractLanes(4, 1);
     CHECK_EQ(extracted[0][0], 0xAA);
     CHECK_EQ(extracted[1][0], 0xBB);
     CHECK_EQ(extracted[2][0], 0xCC);
@@ -602,56 +685,77 @@ TEST_CASE("QuadSPI: Interleave order validation") {
 // SECTION 4: Mock Driver Tests (13 tests)
 // ============================================================================
 
-TEST_CASE("QuadSPI: Mock driver initialization") {
-    MockQuadSPIDriver driver;
-    CHECK_EQ(driver.getClockSpeed(), 40000000);
-    CHECK_EQ(driver.getTransmissionCount(), 0);
-    CHECK(!driver.isTransmissionActive());
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver initialization") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    CHECK_EQ(driver->getClockSpeed(), 20000000);  // Default clock speed
+    CHECK_EQ(driver->getTransmissionCount(), 0);
+    CHECK(!driver->isTransmissionActive());
 }
 
-TEST_CASE("QuadSPI: Mock driver clock speed configuration") {
-    MockQuadSPIDriver driver;
-    driver.setClockSpeed(10000000);
-    CHECK_EQ(driver.getClockSpeed(), 10000000);
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver clock speed configuration") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 10000000;
+    driver->end();  // End first to allow re-initialization
+    driver->begin(config);
+    CHECK_EQ(driver->getClockSpeed(), 10000000);
 
-    driver.setClockSpeed(40000000);
-    CHECK_EQ(driver.getClockSpeed(), 40000000);
+    config.clock_speed_hz = 40000000;
+    driver->end();  // End before changing clock speed
+    driver->begin(config);
+    CHECK_EQ(driver->getClockSpeed(), 40000000);
 }
 
-TEST_CASE("QuadSPI: Mock driver DMA transmission tracking") {
-    MockQuadSPIDriver driver;
-    driver.setClockSpeed(40000000);
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver DMA transmission tracking") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->reset();
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 40000000;
+    driver->begin(config);
 
     uint8_t test_data[] = {0xAA, 0xBB, 0xCC, 0xDD};
-    driver.transmitDMA(test_data, sizeof(test_data));
+    driver->transmitAsync(fl::span<const uint8_t>(test_data, sizeof(test_data)));
 
-    CHECK_EQ(driver.getTransmissionCount(), 1);
-    CHECK(driver.isTransmissionActive());
+    CHECK_EQ(driver->getTransmissionCount(), 1);
+    CHECK(driver->isTransmissionActive());
 }
 
-TEST_CASE("QuadSPI: Mock driver timing estimation accuracy") {
-    MockQuadSPIDriver driver;
-    driver.setClockSpeed(10000000);
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver transmission reset") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 10000000;
+    driver->begin(config);
 
-    uint64_t time_10mhz = driver.estimateTransmissionTimeMicros(100);
-    CHECK_EQ(time_10mhz, 80);  // 100 bytes * 8 bits / 10 MHz = 80µs
+    uint8_t test_data[] = {0xAA, 0xBB, 0xCC, 0xDD};
+    driver->transmitAsync(fl::span<const uint8_t>(test_data, sizeof(test_data)));
+    CHECK_EQ(driver->getTransmissionCount(), 1);
 
-    driver.setClockSpeed(40000000);
-    uint64_t time_40mhz = driver.estimateTransmissionTimeMicros(100);
-    CHECK_EQ(time_40mhz, 20);  // 4× faster
+    driver->reset();
+    CHECK_EQ(driver->getTransmissionCount(), 0);
+    CHECK(!driver->isTransmissionActive());
 }
 
-TEST_CASE("QuadSPI: Mock driver timing edge cases") {
-    MockQuadSPIDriver driver;
-    driver.setClockSpeed(1000000);
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver multiple transmissions") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 40000000;
+    driver->begin(config);
 
-    CHECK_EQ(driver.estimateTransmissionTimeMicros(0), 0);
-    CHECK_EQ(driver.estimateTransmissionTimeMicros(1), 8);
-    CHECK_EQ(driver.estimateTransmissionTimeMicros(1000), 8000);
+    uint8_t data1[] = {0x11, 0x22};
+    driver->transmitAsync(fl::span<const uint8_t>(data1, sizeof(data1)));
+    CHECK_EQ(driver->getTransmissionCount(), 1);
+
+    uint8_t data2[] = {0x33, 0x44, 0x55};
+    driver->transmitAsync(fl::span<const uint8_t>(data2, sizeof(data2)));
+    CHECK_EQ(driver->getTransmissionCount(), 2);
 }
 
-TEST_CASE("QuadSPI: Mock driver lane extraction basic") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction basic") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0_data = {0xAA};
@@ -659,15 +763,15 @@ TEST_CASE("QuadSPI: Mock driver lane extraction basic") {
     fl::vector<uint8_t> lane2_data = {0xCC};
     fl::vector<uint8_t> lane3_data = {0xDD};
 
-    transposer.addLane(0, lane0_data, 0x00);
-    transposer.addLane(1, lane1_data, 0x00);
-    transposer.addLane(2, lane2_data, 0x00);
-    transposer.addLane(3, lane3_data, 0x00);
+    transposer.addLane(0, lane0_data, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1_data, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2_data, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3_data, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
-    driver.transmitDMA(interleaved.data(), interleaved.size());
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    auto extracted = driver.extractLanes(4, 1);
+    auto extracted = driver->extractLanes(4, 1);
     CHECK_EQ(extracted.size(), 4);
     CHECK_EQ(extracted[0][0], 0xAA);
     CHECK_EQ(extracted[1][0], 0xBB);
@@ -675,8 +779,8 @@ TEST_CASE("QuadSPI: Mock driver lane extraction basic") {
     CHECK_EQ(extracted[3][0], 0xDD);
 }
 
-TEST_CASE("QuadSPI: Mock driver lane extraction multi-byte") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction multi-byte") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0 = {0x11, 0x22, 0x33};
@@ -684,22 +788,22 @@ TEST_CASE("QuadSPI: Mock driver lane extraction multi-byte") {
     fl::vector<uint8_t> lane2 = {0x77, 0x88, 0x99};
     fl::vector<uint8_t> lane3 = {0xAA, 0xBB, 0xCC};
 
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
-    driver.transmitDMA(interleaved.data(), interleaved.size());
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    auto extracted = driver.extractLanes(4, 3);
+    auto extracted = driver->extractLanes(4, 3);
     CHECK_EQ(extracted[0][0], 0x11);
     CHECK_EQ(extracted[0][2], 0x33);
     CHECK_EQ(extracted[3][1], 0xBB);
 }
 
-TEST_CASE("QuadSPI: Mock driver lane extraction with padding") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction with padding") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0 = {0xAA};
@@ -707,46 +811,48 @@ TEST_CASE("QuadSPI: Mock driver lane extraction with padding") {
     fl::vector<uint8_t> lane2 = {0xDD, 0xEE, 0xFF};
     fl::vector<uint8_t> lane3 = {0x11, 0x22};
 
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
-    driver.transmitDMA(interleaved.data(), interleaved.size());
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    auto extracted = driver.extractLanes(4, 3);
-    // Padding now goes at BEGINNING, so lane 0 layout: [0xFF, 0xFF, 0xAA]
-    CHECK_EQ(extracted[0][0], 0xFF);  // APA102 padding at beginning
-    CHECK_EQ(extracted[0][1], 0xFF);  // APA102 padding
+    auto extracted = driver->extractLanes(4, 3);
+    // Padding now goes at BEGINNING using repeating LED frame pattern
+    // Lane 0: max=3, data=1, padding=2 bytes from {0xE0,0x00,0x00,0x00}
+    CHECK_EQ(extracted[0][0], 0xE0);  // APA102 padding frame[0]
+    CHECK_EQ(extracted[0][1], 0x00);  // APA102 padding frame[1]
     CHECK_EQ(extracted[0][2], 0xAA);  // Original data at end
-    CHECK_EQ(extracted[1][0], 0x00);  // LPD8806 padding at beginning
+    // Lane 1: max=3, data=2, padding=1 byte from {0x00}
+    CHECK_EQ(extracted[1][0], 0x00);  // Single-byte padding
     CHECK_EQ(extracted[1][1], 0xBB);  // Original data
     CHECK_EQ(extracted[1][2], 0xCC);  // Original data
 }
 
-TEST_CASE("QuadSPI: Mock driver dual-SPI mode") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver dual-SPI mode") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0 = {0xAA, 0xBB};
     fl::vector<uint8_t> lane1 = {0xCC, 0xDD};
 
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
 
     auto interleaved = transposer.transpose();
-    driver.transmitDMA(interleaved.data(), interleaved.size());
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    auto extracted = driver.extractLanes(4, 2);
+    auto extracted = driver->extractLanes(4, 2);
     CHECK_EQ(extracted[0][0], 0xAA);
     CHECK_EQ(extracted[1][1], 0xDD);
     CHECK_EQ(extracted[2][0], 0x00);  // Unused lane
     CHECK_EQ(extracted[3][1], 0x00);  // Unused lane
 }
 
-TEST_CASE("QuadSPI: Mock driver round-trip validation") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver round-trip validation") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0_pattern;
@@ -761,15 +867,15 @@ TEST_CASE("QuadSPI: Mock driver round-trip validation") {
         lane3_pattern.push_back(0x30 + i);
     }
 
-    transposer.addLane(0, lane0_pattern, 0xFF);
-    transposer.addLane(1, lane1_pattern, 0xFF);
-    transposer.addLane(2, lane2_pattern, 0xFF);
-    transposer.addLane(3, lane3_pattern, 0xFF);
+    transposer.addLane(0, lane0_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
-    driver.transmitDMA(interleaved.data(), interleaved.size());
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    auto extracted = driver.extractLanes(4, 10);
+    auto extracted = driver->extractLanes(4, 10);
     for (int i = 0; i < 10; ++i) {
         CHECK_EQ(extracted[0][i], lane0_pattern[i]);
         CHECK_EQ(extracted[1][i], lane1_pattern[i]);
@@ -778,46 +884,50 @@ TEST_CASE("QuadSPI: Mock driver round-trip validation") {
     }
 }
 
-TEST_CASE("QuadSPI: Mock driver extraction edge cases") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver extraction edge cases") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
 
-    auto empty_extract = driver.extractLanes(4, 0);
+    auto empty_extract = driver->extractLanes(4, 0);
     CHECK_EQ(empty_extract.size(), 4);
     for (const auto& lane : empty_extract) {
         CHECK_EQ(lane.size(), 0);
     }
 }
 
-TEST_CASE("QuadSPI: Mock driver state persistence") {
-    MockQuadSPIDriver driver;
-    driver.setClockSpeed(25000000);
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver state persistence") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 25000000;
+    driver->end();  // End first to allow re-initialization with new clock speed
+    driver->begin(config);
 
     uint8_t data[] = {0x11, 0x22, 0x33, 0x44};
-    driver.transmitDMA(data, sizeof(data));
+    driver->transmitAsync(fl::span<const uint8_t>(data, sizeof(data)));
 
-    CHECK_EQ(driver.getClockSpeed(), 25000000);
-    CHECK_EQ(driver.getTransmissionCount(), 1);
-    CHECK(driver.isTransmissionActive());
+    CHECK_EQ(driver->getClockSpeed(), 25000000);
+    CHECK_EQ(driver->getTransmissionCount(), 1);
+    CHECK(driver->isTransmissionActive());
 }
 
-TEST_CASE("QuadSPI: Mock driver buffer capture") {
-    MockQuadSPIDriver driver;
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver buffer capture") {
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
 
     uint8_t data1[] = {0x01, 0x02, 0x03};
     uint8_t data2[] = {0x04, 0x05, 0x06, 0x07};
 
-    driver.transmitDMA(data1, sizeof(data1));
-    CHECK_EQ(driver.getTransmissionCount(), 1);
+    driver->transmitAsync(fl::span<const uint8_t>(data1, sizeof(data1)));
+    CHECK_EQ(driver->getTransmissionCount(), 1);
 
-    driver.transmitDMA(data2, sizeof(data2));
-    CHECK_EQ(driver.getTransmissionCount(), 2);
+    driver->transmitAsync(fl::span<const uint8_t>(data2, sizeof(data2)));
+    CHECK_EQ(driver->getTransmissionCount(), 2);
 }
 
 // ============================================================================
 // SECTION 5: Controller Integration Tests (10 tests combined)
 // ============================================================================
 
-TEST_CASE("QuadSPI: Controller uses mock driver in test mode") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Controller uses mock driver in test mode") {
     QuadSPIController<2, 40000000> controller;
     controller.begin();
 
@@ -836,14 +946,17 @@ TEST_CASE("QuadSPI: Controller uses mock driver in test mode") {
     for (size_t i = 0; i < buf0->size(); ++i) (*buf0)[i] = 0xAA;
 
     controller.transmit();
-    controller.waitComplete();
+    // Don't call waitComplete() - it clears the transmission active flag
 
-    auto& mockDriver = controller.getMockDriver();
-    CHECK_EQ(mockDriver.getTransmissionCount(), 1);
-    CHECK(mockDriver.isTransmissionActive());
+    SPIQuadStub* mockDriver = toStub(controller.getMockDriver());
+    CHECK_EQ(mockDriver->getTransmissionCount(), 1);
+    CHECK(mockDriver->isTransmissionActive());
+
+    // Clean up by completing the transmission
+    controller.waitComplete();
 }
 
-TEST_CASE("QuadSPI: Controller calculates correct byte counts") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Controller calculates correct byte counts") {
     QuadSPIController<2, 10000000> controller;
 
     controller.addLane<APA102Controller<1, 2, RGB>>(0, 50);
@@ -863,7 +976,7 @@ TEST_CASE("QuadSPI: Controller calculates correct byte counts") {
     CHECK_EQ(controller.getMaxLaneBytes(), expected_max);
 }
 
-TEST_CASE("QuadSPI: Controller preserves protocol-safe padding") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Controller preserves protocol-safe padding") {
     QuadSPIController<2, 20000000> controller;
 
     controller.addLane<APA102Controller<1, 2, RGB>>(0, 10);
@@ -881,19 +994,31 @@ TEST_CASE("QuadSPI: Controller preserves protocol-safe padding") {
 
     controller.transmit();
 
-    auto& mockDriver = controller.getMockDriver();
-    auto extracted = mockDriver.extractLanes(4, controller.getMaxLaneBytes());
+    SPIQuadStub* mockDriver = toStub(controller.getMockDriver());
+    auto extracted = mockDriver->extractLanes(4, controller.getMaxLaneBytes());
 
     size_t max_bytes = controller.getMaxLaneBytes();
+    // Padding now goes at BEGINNING using repeating LED frame pattern
+    // APA102 frame: {0xE0, 0x00, 0x00, 0x00}, WS2801 frame: {0x00, 0x00, 0x00}
     if (apa102_actual < max_bytes) {
-        CHECK_EQ(extracted[0][apa102_actual], 0xFF);
+        // Padding is at the BEGINNING, actual data comes after
+        size_t padding_bytes = max_bytes - apa102_actual;
+        CHECK_EQ(extracted[0][0], 0xE0);  // First padding byte is frame[0]
+        // Actual data starts after padding
+        CHECK_EQ(extracted[0][padding_bytes], 0x11);  // First actual data byte
     }
     if (ws2801_actual < max_bytes) {
-        CHECK_EQ(extracted[1][ws2801_actual], 0x00);
+        // WS2801 padding is at beginning
+        size_t padding_bytes = max_bytes - ws2801_actual;
+        if (padding_bytes > 0) {
+            CHECK_EQ(extracted[1][0], 0x00);  // WS2801 frame[0]
+        }
+        // Actual data starts after padding
+        CHECK_EQ(extracted[1][padding_bytes], 0x22);  // First actual data byte
     }
 }
 
-TEST_CASE("QuadSPI: Controller handles empty configuration") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Controller handles empty configuration") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
     controller.finalize();
@@ -905,7 +1030,7 @@ TEST_CASE("QuadSPI: Controller handles empty configuration") {
     controller.waitComplete();
 }
 
-TEST_CASE("QuadSPI: Controller single lane operation") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Controller single lane operation") {
     QuadSPIController<2, 40000000> controller;
     controller.addLane<APA102Controller<1, 2, RGB>>(0, 50);
     controller.finalize();
@@ -918,11 +1043,11 @@ TEST_CASE("QuadSPI: Controller single lane operation") {
     controller.transmit();
     controller.waitComplete();
 
-    auto& mockDriver = controller.getMockDriver();
-    CHECK_EQ(mockDriver.getTransmissionCount(), 1);
+    SPIQuadStub* mockDriver = toStub(controller.getMockDriver());
+    CHECK_EQ(mockDriver->getTransmissionCount(), 1);
 }
 
-TEST_CASE("QuadSPI: Integration - 4-lane APA102 different lengths") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - 4-lane APA102 different lengths") {
     const int num_leds_lane0 = 60;
     const int num_leds_lane1 = 100;
     const int num_leds_lane2 = 80;
@@ -933,27 +1058,30 @@ TEST_CASE("QuadSPI: Integration - 4-lane APA102 different lengths") {
     auto lane2_data = TestHelpers::generateAPA102ProtocolData(num_leds_lane2, 0xCC);
     auto lane3_data = TestHelpers::generateAPA102ProtocolData(num_leds_lane3, 0xDD);
 
-    uint8_t padding_byte = APA102Controller<1, 2, RGB>::getPaddingByte();
-    CHECK_EQ(padding_byte, 0xFF);
+    auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
+    CHECK_EQ(padding_frame.size(), 4);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0_data, padding_byte);
-    transposer.addLane(1, lane1_data, padding_byte);
-    transposer.addLane(2, lane2_data, padding_byte);
-    transposer.addLane(3, lane3_data, padding_byte);
+    transposer.addLane(0, lane0_data, padding_frame);
+    transposer.addLane(1, lane1_data, padding_frame);
+    transposer.addLane(2, lane2_data, padding_frame);
+    transposer.addLane(3, lane3_data, padding_frame);
 
     auto interleaved = transposer.transpose();
     size_t max_lane_size = lane3_data.size();
     CHECK_EQ(interleaved.size(), max_lane_size * 4);
 
-    MockQuadSPIDriver mock_driver;
-    mock_driver.setClockSpeed(40000000);
-    mock_driver.transmitDMA(interleaved.data(), interleaved.size());
+    SPIQuadStub* mock_driver = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 40000000;
+    mock_driver->begin(config);
+    mock_driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    CHECK_EQ(mock_driver.getTransmissionCount(), 1);
-    CHECK(mock_driver.isTransmissionActive());
+    CHECK_EQ(mock_driver->getTransmissionCount(), 1);
+    CHECK(mock_driver->isTransmissionActive());
 
-    auto extracted = mock_driver.extractLanes(4, max_lane_size);
+    auto extracted = mock_driver->extractLanes(4, max_lane_size);
 
     // Padding now goes at BEGINNING, so lanes have: [padding...][original data]
     size_t padding0 = max_lane_size - lane0_data.size();
@@ -962,21 +1090,21 @@ TEST_CASE("QuadSPI: Integration - 4-lane APA102 different lengths") {
     }
 }
 
-TEST_CASE("QuadSPI: Integration - Mixed chipsets on different lanes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Mixed chipsets on different lanes") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(10, 0x11);
     auto lane1 = TestHelpers::generateLPD8806ProtocolData(15, 0x22);
     auto lane2 = TestHelpers::generateWS2801ProtocolData(12, 0x33);
     auto lane3 = TestHelpers::generateP9813ProtocolData(8, 0x44);
 
-    uint8_t padding0 = APA102Controller<1, 2, RGB>::getPaddingByte();
-    uint8_t padding1 = LPD8806Controller<3, 4, RGB>::getPaddingByte();
-    uint8_t padding2 = WS2801Controller<5, 6, RGB>::getPaddingByte();
-    uint8_t padding3 = P9813Controller<7, 8, RGB>::getPaddingByte();
+    auto padding0 = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
+    auto padding1 = LPD8806Controller<3, 4, RGB>::getPaddingLEDFrame();
+    auto padding2 = WS2801Controller<5, 6, RGB>::getPaddingLEDFrame();
+    auto padding3 = P9813Controller<7, 8, RGB>::getPaddingLEDFrame();
 
-    CHECK_EQ(padding0, 0xFF);
-    CHECK_EQ(padding1, 0x00);
-    CHECK_EQ(padding2, 0x00);
-    CHECK_EQ(padding3, 0x00);
+    CHECK_EQ(padding0.size(), 4);
+    CHECK_EQ(padding1.size(), 3);
+    CHECK_EQ(padding2.size(), 3);
+    CHECK_EQ(padding3.size(), 4);
 
     size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
                                  fl::fl_max(lane2.size(), lane3.size()));
@@ -989,9 +1117,9 @@ TEST_CASE("QuadSPI: Integration - Mixed chipsets on different lanes") {
 
     auto interleaved = transposer.transpose();
 
-    MockQuadSPIDriver mock;
-    mock.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = mock.extractLanes(4, max_size);
+    SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
+    mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = mock->extractLanes(4, max_size);
 
     for (size_t i = 0; i < lane0.size(); ++i) {
         CHECK_EQ(extracted[0][i], lane0[i]);
@@ -1002,7 +1130,7 @@ TEST_CASE("QuadSPI: Integration - Mixed chipsets on different lanes") {
     }
 }
 
-TEST_CASE("QuadSPI: Integration - Performance estimation") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Transmission verification") {
     const int num_leds = 300;
 
     auto lane0 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xAA);
@@ -1011,64 +1139,65 @@ TEST_CASE("QuadSPI: Integration - Performance estimation") {
     auto lane3 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
 
-    MockQuadSPIDriver mock;
-    mock.setClockSpeed(40000000);
-    uint64_t time_40mhz = mock.estimateTransmissionTimeMicros(interleaved.size());
+    SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
+    SPIQuad::Config config;
+    config.bus_num = 2;
+    config.clock_speed_hz = 40000000;
+    mock->begin(config);
 
-    mock.setClockSpeed(20000000);
-    uint64_t time_20mhz = mock.estimateTransmissionTimeMicros(interleaved.size());
-
-    CHECK(time_40mhz < time_20mhz);
-    CHECK_EQ(time_40mhz * 2, time_20mhz);
+    mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    CHECK_EQ(mock->getTransmissionCount(), 1);
+    CHECK(mock->isTransmissionActive());
 }
 
-TEST_CASE("QuadSPI: Integration - Single lane degraded mode") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Single lane degraded mode") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(50, 0xAB);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 
-    MockQuadSPIDriver mock;
-    mock.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = mock.extractLanes(4, lane0.size());
+    SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
+    mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = mock->extractLanes(4, lane0.size());
 
     for (size_t i = 0; i < lane0.size(); ++i) {
         CHECK_EQ(extracted[0][i], lane0[i]);
     }
 }
 
-TEST_CASE("QuadSPI: Integration - Dual-SPI mode (2 lanes)") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Dual-SPI mode (2 lanes)") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(40, 0xC0);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(60, 0xC1);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     auto interleaved = transposer.transpose();
 
-    MockQuadSPIDriver mock;
-    mock.transmitDMA(interleaved.data(), interleaved.size());
+    SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
+    mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     size_t max_size = lane1.size();
-    auto extracted = mock.extractLanes(4, max_size);
+    auto extracted = mock->extractLanes(4, max_size);
 
-    // Padding now goes at BEGINNING
+    // Padding now goes at BEGINNING using repeating APA102 frame {0xE0, 0x00, 0x00, 0x00}
     size_t padding0 = max_size - lane0.size();
 
-    // Check padding at beginning of lane 0
+    // Check padding at beginning of lane 0 - repeating 4-byte APA102 frame
+    const uint8_t apa102_frame[] = {0xE0, 0x00, 0x00, 0x00};
     for (size_t i = 0; i < padding0; ++i) {
-        CHECK_EQ(extracted[0][i], 0xFF);
+        CHECK_EQ(extracted[0][i], apa102_frame[i % 4]);
     }
 
     // Check original data at end of lane 0
@@ -1090,7 +1219,7 @@ uint64_t measureMicroseconds(Func&& func) {
     return std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 }
 
-TEST_CASE("QuadSPI: Performance - Bit-interleaving speed") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Bit-interleaving speed") {
     const size_t led_counts[] = {10, 50, 100, 200, 300};
 
     for (size_t num_leds : led_counts) {
@@ -1102,10 +1231,10 @@ TEST_CASE("QuadSPI: Performance - Bit-interleaving speed") {
         QuadSPITransposer transposer;
         uint64_t transpose_time = measureMicroseconds([&]() {
             transposer.reset();
-            transposer.addLane(0, lane0, 0xFF);
-            transposer.addLane(1, lane1, 0xFF);
-            transposer.addLane(2, lane2, 0xFF);
-            transposer.addLane(3, lane3, 0xFF);
+            transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+            transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+            transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+            transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
             auto result = transposer.transpose();
         });
 
@@ -1117,7 +1246,7 @@ TEST_CASE("QuadSPI: Performance - Bit-interleaving speed") {
     }
 }
 
-TEST_CASE("QuadSPI: Performance - Transmission time estimation") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Different clock speeds") {
     const size_t num_leds = 100;
     const uint32_t clock_speeds[] = {10000000, 20000000, 40000000};
 
@@ -1127,25 +1256,27 @@ TEST_CASE("QuadSPI: Performance - Transmission time estimation") {
     auto lane3 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xDD);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0xFF);
-    transposer.addLane(1, lane1, 0xFF);
-    transposer.addLane(2, lane2, 0xFF);
-    transposer.addLane(3, lane3, 0xFF);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
     auto interleaved = transposer.transpose();
 
     for (uint32_t clock_speed : clock_speeds) {
-        MockQuadSPIDriver driver;
-        driver.setClockSpeed(clock_speed);
+        SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+        SPIQuad::Config config;
+        config.bus_num = 2;
+        config.clock_speed_hz = clock_speed;
+        driver->end();  // End before each iteration to allow re-initialization
+        driver->begin(config);
 
-        uint64_t estimated_time = driver.estimateTransmissionTimeMicros(interleaved.size());
-
-        if (clock_speed == 40000000) {
-            CHECK(estimated_time < 500);
-        }
+        driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+        CHECK_EQ(driver->getClockSpeed(), clock_speed);
+        CHECK(driver->isTransmissionActive());
     }
 }
 
-TEST_CASE("QuadSPI: Performance - Full controller workflow") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Full controller workflow") {
     const size_t num_leds = 100;
 
     QuadSPIController<2, 40000000> controller;
@@ -1175,11 +1306,11 @@ TEST_CASE("QuadSPI: Performance - Full controller workflow") {
 
     CHECK(transmit_time < 1000);
 
-    auto& driver = controller.getMockDriver();
-    CHECK_EQ(driver.getTransmissionCount(), 1);
+    SPIQuadStub* driver = toStub(controller.getMockDriver());
+    CHECK_EQ(driver->getTransmissionCount(), 1);
 }
 
-TEST_CASE("QuadSPI: Performance - Theoretical speedup vs serial") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Theoretical speedup vs serial") {
     const size_t num_leds = 100;
     const uint32_t serial_speed = 6000000;
     const uint32_t parallel_speed = 40000000;
@@ -1190,10 +1321,10 @@ TEST_CASE("QuadSPI: Performance - Theoretical speedup vs serial") {
 
     QuadSPITransposer transposer;
     auto lane_data = TestHelpers::generateAPA102ProtocolData(num_leds, 0xAA);
-    transposer.addLane(0, lane_data, 0xFF);
-    transposer.addLane(1, lane_data, 0xFF);
-    transposer.addLane(2, lane_data, 0xFF);
-    transposer.addLane(3, lane_data, 0xFF);
+    transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
     auto interleaved = transposer.transpose();
 
     uint64_t parallel_time = (interleaved.size() * 8 * 1000000ULL) / parallel_speed;
@@ -1205,7 +1336,7 @@ TEST_CASE("QuadSPI: Performance - Theoretical speedup vs serial") {
     CHECK(parallel_time < total_serial_time);
 }
 
-TEST_CASE("QuadSPI: Performance - Memory footprint") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Memory footprint") {
     const size_t num_leds = 150;
 
     QuadSPIController<2, 40000000> controller;
@@ -1230,32 +1361,32 @@ TEST_CASE("QuadSPI: Performance - Memory footprint") {
     }
 }
 
-TEST_CASE("QuadSPI: Performance - Cache-friendly sequential access") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Cache-friendly sequential access") {
     const size_t num_leds = 50;
     auto lane_data = TestHelpers::generateAPA102ProtocolData(num_leds, 0xAA);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane_data, 0xFF);
-    transposer.addLane(1, lane_data, 0xFF);
-    transposer.addLane(2, lane_data, 0xFF);
-    transposer.addLane(3, lane_data, 0xFF);
+    transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
 
     // Warm up cache
     for (int i = 0; i < 10; ++i) {
         transposer.reset();
-        transposer.addLane(0, lane_data, 0xFF);
-        transposer.addLane(1, lane_data, 0xFF);
-        transposer.addLane(2, lane_data, 0xFF);
-        transposer.addLane(3, lane_data, 0xFF);
+        transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
         auto result = transposer.transpose();
     }
 
     uint64_t final_time = measureMicroseconds([&]() {
         transposer.reset();
-        transposer.addLane(0, lane_data, 0xFF);
-        transposer.addLane(1, lane_data, 0xFF);
-        transposer.addLane(2, lane_data, 0xFF);
-        transposer.addLane(3, lane_data, 0xFF);
+        transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+        transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
         auto result = transposer.transpose();
     });
 
@@ -1266,7 +1397,7 @@ TEST_CASE("QuadSPI: Performance - Cache-friendly sequential access") {
 // Optimized bit-spreading algorithm tests
 // ============================================================================
 
-TEST_CASE("QuadSPI: Optimized bit spreading - exact bit positions") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - exact bit positions") {
     // This test verifies the EXACT bit positions in the output
     // Uses distinct bit patterns for each lane to verify correct interleaving
     QuadSPITransposer transposer;
@@ -1277,10 +1408,10 @@ TEST_CASE("QuadSPI: Optimized bit spreading - exact bit positions") {
     fl::vector<uint8_t> lane2 = {0x0C};  // 00001100 (bits 3:2 = 11, rest 00)
     fl::vector<uint8_t> lane3 = {0x03};  // 00000011 (bits 1:0 = 11, rest 00)
 
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto result = transposer.transpose();
     CHECK_EQ(result.size(), 4);
@@ -1310,15 +1441,15 @@ TEST_CASE("QuadSPI: Optimized bit spreading - exact bit positions") {
     CHECK_EQ(result[3], 0xC0);
 }
 
-TEST_CASE("QuadSPI: Optimized bit spreading - known patterns") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - known patterns") {
     QuadSPITransposer transposer;
 
     // Test 1: All 0xAA (10101010)
     fl::vector<uint8_t> lane_aa = {0xAA};
-    transposer.addLane(0, lane_aa, 0x00);
-    transposer.addLane(1, lane_aa, 0x00);
-    transposer.addLane(2, lane_aa, 0x00);
-    transposer.addLane(3, lane_aa, 0x00);
+    transposer.addLane(0, lane_aa, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane_aa, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane_aa, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane_aa, fl::vector<uint8_t>{0x00});
 
     auto result_aa = transposer.transpose();
     CHECK_EQ(result_aa.size(), 4);
@@ -1328,31 +1459,31 @@ TEST_CASE("QuadSPI: Optimized bit spreading - known patterns") {
     CHECK_EQ(result_aa[2], result_aa[3]);
 }
 
-TEST_CASE("QuadSPI: Optimized bit spreading - alternating lanes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - alternating lanes") {
     QuadSPITransposer transposer;
 
     // Test 2: Alternating 0xFF and 0x00
     fl::vector<uint8_t> lane_ff = {0xFF};
     fl::vector<uint8_t> lane_00 = {0x00};
-    transposer.addLane(0, lane_ff, 0x00);
-    transposer.addLane(1, lane_00, 0x00);
-    transposer.addLane(2, lane_ff, 0x00);
-    transposer.addLane(3, lane_00, 0x00);
+    transposer.addLane(0, lane_ff, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane_00, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane_ff, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane_00, fl::vector<uint8_t>{0x00});
 
     auto result_alt = transposer.transpose();
     CHECK_EQ(result_alt.size(), 4);
 
     // Verify lanes can be extracted
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(result_alt.data(), result_alt.size());
-    auto extracted = driver.extractLanes(4, 1);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(result_alt.data(), result_alt.size()));
+    auto extracted = driver->extractLanes(4, 1);
     CHECK_EQ(extracted[0][0], 0xFF);
     CHECK_EQ(extracted[1][0], 0x00);
     CHECK_EQ(extracted[2][0], 0xFF);
     CHECK_EQ(extracted[3][0], 0x00);
 }
 
-TEST_CASE("QuadSPI: Optimized bit spreading - correctness check") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - correctness check") {
     // Test known bit patterns and verify output
     QuadSPITransposer transposer;
 
@@ -1361,34 +1492,34 @@ TEST_CASE("QuadSPI: Optimized bit spreading - correctness check") {
     fl::vector<uint8_t> lane2 = {0x56};  // 01010110
     fl::vector<uint8_t> lane3 = {0x78};  // 01111000
 
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto result = transposer.transpose();
     CHECK_EQ(result.size(), 4);
 
     // Verify by extracting lanes back
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(result.data(), result.size());
-    auto extracted = driver.extractLanes(4, 1);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(result.data(), result.size()));
+    auto extracted = driver->extractLanes(4, 1);
     CHECK_EQ(extracted[0][0], 0x12);
     CHECK_EQ(extracted[1][0], 0x34);
     CHECK_EQ(extracted[2][0], 0x56);
     CHECK_EQ(extracted[3][0], 0x78);
 }
 
-TEST_CASE("QuadSPI: Optimized bit spreading - large buffer") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - large buffer") {
     // Test with larger buffer to verify performance improvement
     const size_t NUM_BYTES = 1000;  // Simulate 100 LEDs * 3 bytes + overhead
     fl::vector<uint8_t> large_buffer(NUM_BYTES, 0xAA);
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, large_buffer, 0x00);
-    transposer.addLane(1, large_buffer, 0x00);
-    transposer.addLane(2, large_buffer, 0x00);
-    transposer.addLane(3, large_buffer, 0x00);
+    transposer.addLane(0, large_buffer, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, large_buffer, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, large_buffer, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, large_buffer, fl::vector<uint8_t>{0x00});
 
     auto result = transposer.transpose();
 
@@ -1396,9 +1527,9 @@ TEST_CASE("QuadSPI: Optimized bit spreading - large buffer") {
     CHECK_EQ(result.size(), NUM_BYTES * 4);
 
     // Verify correctness by checking extracted lanes
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(result.data(), result.size());
-    auto extracted = driver.extractLanes(4, NUM_BYTES);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(result.data(), result.size()));
+    auto extracted = driver->extractLanes(4, NUM_BYTES);
     for (size_t i = 0; i < NUM_BYTES; i++) {
         CHECK_EQ(extracted[0][i], 0xAA);
         CHECK_EQ(extracted[1][i], 0xAA);
@@ -1407,7 +1538,7 @@ TEST_CASE("QuadSPI: Optimized bit spreading - large buffer") {
     }
 }
 
-TEST_CASE("QuadSPI: Optimized bit spreading - mixed patterns") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - mixed patterns") {
     // Test with different patterns on each lane
     fl::vector<uint8_t> lane0 = {0x11, 0x22, 0x33};
     fl::vector<uint8_t> lane1 = {0x44, 0x55, 0x66};
@@ -1415,18 +1546,18 @@ TEST_CASE("QuadSPI: Optimized bit spreading - mixed patterns") {
     fl::vector<uint8_t> lane3 = {0xAA, 0xBB, 0xCC};
 
     QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, 0x00);
-    transposer.addLane(1, lane1, 0x00);
-    transposer.addLane(2, lane2, 0x00);
-    transposer.addLane(3, lane3, 0x00);
+    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
+    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
+    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
 
     auto result = transposer.transpose();
     CHECK_EQ(result.size(), 12);  // 3 bytes * 4 = 12 output bytes
 
     // Verify correctness
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(result.data(), result.size());
-    auto extracted = driver.extractLanes(4, 3);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(result.data(), result.size()));
+    auto extracted = driver->extractLanes(4, 3);
     CHECK_EQ(extracted[0][0], 0x11);
     CHECK_EQ(extracted[0][1], 0x22);
     CHECK_EQ(extracted[0][2], 0x33);
@@ -1439,7 +1570,7 @@ TEST_CASE("QuadSPI: Optimized bit spreading - mixed patterns") {
 // Buffer validation tests
 // ============================================================================
 
-TEST_CASE("QuadSPI: Buffer validation - empty lanes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - empty lanes") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
 
@@ -1448,7 +1579,7 @@ TEST_CASE("QuadSPI: Buffer validation - empty lanes") {
     CHECK(!controller.isFinalized());
 }
 
-TEST_CASE("QuadSPI: Buffer validation - exceeds DMA limit") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - exceeds DMA limit") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
 
@@ -1463,7 +1594,7 @@ TEST_CASE("QuadSPI: Buffer validation - exceeds DMA limit") {
     CHECK(controller.getMaxLaneBytes() <= 16384);
 }
 
-TEST_CASE("QuadSPI: Buffer validation - mismatched sizes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - mismatched sizes") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
 
@@ -1473,19 +1604,20 @@ TEST_CASE("QuadSPI: Buffer validation - mismatched sizes") {
 
     controller.finalize();
 
-    // All lanes should be padded to max size
+    // Max lane bytes should be based on largest lane
     CHECK(controller.isFinalized());
     size_t max_bytes = controller.getMaxLaneBytes();
     CHECK(max_bytes == APA102Controller<1, 2, RGB>::calculateBytes(100));
 
-    // Verify both lanes have same size
+    // Buffers are NOT pre-padded - they remain their original size
+    // Padding is applied during transpose() using LED frames
     auto* buf0 = controller.getLaneBuffer(0);
     auto* buf1 = controller.getLaneBuffer(1);
-    CHECK_EQ(buf0->size(), max_bytes);
-    CHECK_EQ(buf1->size(), max_bytes);
+    CHECK_EQ(buf0->size(), APA102Controller<1, 2, RGB>::calculateBytes(25));
+    CHECK_EQ(buf1->size(), APA102Controller<1, 2, RGB>::calculateBytes(100));
 }
 
-TEST_CASE("QuadSPI: Buffer validation - all empty capture buffers") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - all empty capture buffers") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
 
@@ -1501,7 +1633,7 @@ TEST_CASE("QuadSPI: Buffer validation - all empty capture buffers") {
     CHECK(controller.getMaxLaneBytes() < 20);
 }
 
-TEST_CASE("QuadSPI: Buffer validation - mixed empty and valid lanes") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - mixed empty and valid lanes") {
     QuadSPIController<2, 10000000> controller;
     controller.begin();
 
@@ -1519,7 +1651,7 @@ TEST_CASE("QuadSPI: Buffer validation - mixed empty and valid lanes") {
 // APA102 Padding Tests - Different Strip Lengths
 // ============================================================================
 
-TEST_CASE("QuadSPI: APA102 padding - different strip lengths padded to same size") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - different strip lengths padded to same size") {
     // Test that strips of different lengths (1, 3, 7, 13 LEDs) are all
     // padded to the same size in the interleaved format
     QuadSPITransposer transposer;
@@ -1561,9 +1693,9 @@ TEST_CASE("QuadSPI: APA102 padding - different strip lengths padded to same size
     CHECK_EQ(interleaved.size(), expected_size);
 
     // Extract lanes back using mock driver
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = driver.extractLanes(4, bytes_13_leds);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = driver->extractLanes(4, bytes_13_leds);
 
     // Verify all lanes are same size after extraction
     CHECK_EQ(extracted[0].size(), bytes_13_leds);
@@ -1606,7 +1738,7 @@ TEST_CASE("QuadSPI: APA102 padding - different strip lengths padded to same size
     }
 }
 
-TEST_CASE("QuadSPI: APA102 padding - verify black LED padding source") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LED padding source") {
     // Test that padding comes from controller's getPaddingLEDFrame()
     // and uses black LED frames for synchronized latching
     QuadSPITransposer transposer;
@@ -1635,9 +1767,9 @@ TEST_CASE("QuadSPI: APA102 padding - verify black LED padding source") {
     auto interleaved = transposer.transpose();
 
     // Extract and verify padding
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = driver.extractLanes(4, bytes_10_leds);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = driver->extractLanes(4, bytes_10_leds);
 
     size_t padding_bytes = bytes_10_leds - bytes_5_leds;
 
@@ -1660,7 +1792,7 @@ TEST_CASE("QuadSPI: APA102 padding - verify black LED padding source") {
     }
 }
 
-TEST_CASE("QuadSPI: APA102 padding - verify black LED padding at the BEGINNING") {
+TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LED padding at the BEGINNING") {
     // Test that black LED padding appears at the BEGINNING of shorter strips
     // for synchronized latching (all strips finish transmitting simultaneously)
     QuadSPITransposer transposer;
@@ -1685,9 +1817,9 @@ TEST_CASE("QuadSPI: APA102 padding - verify black LED padding at the BEGINNING")
 
     auto interleaved = transposer.transpose();
 
-    MockQuadSPIDriver driver;
-    driver.transmitDMA(interleaved.data(), interleaved.size());
-    auto extracted = driver.extractLanes(4, bytes_6_leds);
+    SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
+    driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+    auto extracted = driver->extractLanes(4, bytes_6_leds);
 
     // Verify short lane has:
     // - Black LED padding at the BEGINNING
