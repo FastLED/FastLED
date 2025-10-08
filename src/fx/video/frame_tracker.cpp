@@ -1,19 +1,8 @@
 #include "frame_tracker.h"
 #include "fl/int.h"
+#include "fl/map_range.h"
 
 namespace fl {
-
-namespace { // anonymous namespace
-long linear_map(long x, long in_min, long in_max, long out_min, long out_max) {
-    const long run = in_max - in_min;
-    if (run == 0) {
-        return 0; // AVR returns -1, SAM returns 0
-    }
-    const long rise = out_max - out_min;
-    const long delta = x - in_min;
-    return (delta * rise) / run + out_min;
-}
-} // anonymous namespace
 
 FrameTracker::FrameTracker(float fps) {
     // Convert fps to microseconds per frame interval
@@ -39,7 +28,7 @@ void FrameTracker::get_interval_frames(fl::u32 now, fl::u32 *frameNumber,
         fl::u64 frame2_start = (*nextFrameNumber * mMicrosSecondsPerInterval);
         fl::u32 rel_time = microseconds - frame1_start;
         fl::u32 frame_duration = frame2_start - frame1_start;
-        uint8_t progress = uint8_t(linear_map(rel_time, 0, frame_duration, 0, 255));
+        uint8_t progress = uint8_t(map_range(rel_time, 0u, frame_duration, 0u, 255u));
         *amountOfNextFrame = progress;
     }
 }
