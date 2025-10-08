@@ -378,7 +378,6 @@ private:
   // K-of-M onset detection state
   fl::vector<bool> _onsetHistory;     ///< Circular buffer for onset detections
   int _onsetHistoryIdx;               ///< Current write position in onset history
-  bool _lastFrameVoiced;              ///< Previous frame's voiced state for onset detection
 
   /// @brief Calculate median from note history buffer
   /// @return Median MIDI note number
@@ -647,7 +646,6 @@ private:
   // K-of-M onset tracking for mono
   fl::vector<bool> mOnsetHistory;    // Circular buffer for onset detections
   int mOnsetHistoryIdx = 0;
-  bool mLastVoiced = false;           // Track voiced state for onset detection
 
   // K-of-M note tracking for poly (per-MIDI-note persistence)
   struct NoteState {

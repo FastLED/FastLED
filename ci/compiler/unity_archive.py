@@ -5,7 +5,7 @@ import os
 import sys
 from concurrent.futures import Future
 from pathlib import Path
-from typing import List, Sequence
+from typing import Dict, List, Sequence
 
 from ci.compiler.clang_compiler import Compiler, CompilerOptions, Result
 from ci.compiler.test_example_compilation import (
@@ -45,12 +45,71 @@ def _partition(files: List[Path], chunks: int) -> List[List[Path]]:
     return partitions
 
 
+def partition_by_subdirectory(files: List[Path]) -> List[List[Path]]:
+    """
+    Partition files by top-level subdirectory for more logical unity chunks.
+
+    Groups files into subdirectory-based chunks:
+    - src/fl/**/*.cpp
+    - src/platforms/**/*.cpp
+    - src/fx/**/*.cpp
+    - src/*.cpp (root level files)
+
+    Returns chunks in descending order by file count for better load balancing.
+    """
+    from collections import defaultdict
+
+    project_root = Path.cwd()
+    src_dir = project_root / "src"
+
+    # Group files by subdirectory
+    groups: Dict[str, List[Path]] = defaultdict(list)
+
+    for f in files:
+        # Convert to absolute path first if it's relative
+        if not f.is_absolute():
+            f_abs = project_root / f
+        else:
+            f_abs = f
+
+        try:
+            rel = f_abs.relative_to(src_dir)
+            # Get top-level subdirectory or 'root' for src/*.cpp
+            parts = rel.parts
+            if len(parts) == 1:
+                # File directly in src/
+                groups["src_root"].append(f)
+            else:
+                # File in subdirectory
+                subdir = parts[0]
+                groups[subdir].append(f)
+        except ValueError:
+            # File not under src/, put in 'other'
+            groups["other"].append(f)
+
+    # Sort each group internally for deterministic ordering
+    for group_name in groups:
+        groups[group_name] = sorted(groups[group_name], key=lambda p: p.as_posix())
+
+    # Create partitions in descending order by size for load balancing
+    # Larger groups compile first in parallel builds
+    sorted_groups = sorted(groups.items(), key=lambda x: len(x[1]), reverse=True)
+
+    partitions: List[List[Path]] = []
+    for group_name, group_files in sorted_groups:
+        if group_files:
+            partitions.append(group_files)
+
+    return partitions if partitions else [[]]
+
+
 def build_unity_chunks_and_archive(
     compiler: Compiler,
     chunks: int,
     output_archive: Path,
     unity_dir: Path,
     no_parallel: bool,
+    subdirectory_mode: bool = True,
 ) -> Path:
     unity_dir.mkdir(parents=True, exist_ok=True)
     # Gather and sort source files consistently with existing library logic
@@ -61,7 +120,17 @@ def build_unity_chunks_and_archive(
     if not files:
         raise RuntimeError("No source files found under src/** for unity build")
 
-    partitions = _partition(files, chunks)
+    # Choose partitioning strategy
+    if subdirectory_mode:
+        partitions = partition_by_subdirectory(files)
+        print(
+            f"[UNITY] Using subdirectory-based partitioning: {len(partitions)} chunks"
+        )
+        for i, partition in enumerate(partitions):
+            print(f"[UNITY]   Chunk {i + 1}: {len(partition)} files")
+    else:
+        partitions = _partition(files, chunks)
+        print(f"[UNITY] Using ordinal partitioning: {len(partitions)} chunks")
 
     # Prepare per-chunk unity paths
     unity_cpp_paths: List[Path] = [
@@ -140,12 +209,30 @@ def main() -> int:
         action="store_true",
         help="Enable PCH (not recommended for unity builds)",
     )
+    parser.add_argument(
+        "--subdirectory-mode",
+        action="store_true",
+        default=True,
+        help="Use subdirectory-based partitioning (default: True)",
+    )
+    parser.add_argument(
+        "--ordinal-mode",
+        action="store_true",
+        help="Use ordinal partitioning instead of subdirectory-based",
+    )
     args = parser.parse_args()
 
     # Anchor to project root (two levels up from this file)
     here = Path(__file__).resolve()
     project_root = here.parent.parent.parent
     os.chdir(project_root)
+
+    # Determine subdirectory mode
+    subdirectory_mode = (
+        not args.ordinal_mode
+        if hasattr(args, "ordinal_mode")
+        else args.subdirectory_mode
+    )
 
     try:
         compiler = create_fastled_compiler(
@@ -157,6 +244,7 @@ def main() -> int:
             output_archive=Path(args.output),
             unity_dir=Path(args.unity_dir),
             no_parallel=args.no_parallel,
+            subdirectory_mode=subdirectory_mode,
         )
         print(f"[UNITY] Created archive: {out}")
         return 0

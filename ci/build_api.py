@@ -106,6 +106,8 @@ class BuildAPI:
         use_pch: bool = True,
         parallel: bool = True,
         clean: bool = False,
+        unity_chunks: int = 0,
+        subdirectory_mode: bool = True,
     ):
         """
         Initialize the build API.
@@ -117,6 +119,8 @@ class BuildAPI:
             use_pch: Whether to use precompiled headers
             parallel: Whether to enable parallel compilation
             clean: Whether to force a clean build
+            unity_chunks: Number of unity chunks (0 = auto-detect based on mode)
+            subdirectory_mode: Use subdirectory-based chunking (True) or ordinal chunking (False)
         """
         self.build_flags_toml = Path(build_flags_toml)
         self.build_dir = Path(build_dir)
@@ -124,6 +128,8 @@ class BuildAPI:
         self.use_pch = use_pch
         self.parallel = parallel
         self.clean = clean
+        self.unity_chunks = unity_chunks
+        self.subdirectory_mode = subdirectory_mode
 
         # Ensure build directory exists
         self.build_dir.mkdir(parents=True, exist_ok=True)
@@ -271,10 +277,39 @@ class BuildAPI:
 
             all_sources = sorted(all_sources, key=sort_key)
 
-            # Partition into chunks (1..4 typical)
-            total = len(all_sources)
-            max_chunks = min(4, max(1, (os.cpu_count() or 2) // 2))
-            chunks = max_chunks if total >= max_chunks else max(1, total)
+            # Partition into chunks based on mode
+            if self.subdirectory_mode:
+                from ci.compiler.unity_archive import partition_by_subdirectory
+
+                partitions = partition_by_subdirectory(all_sources)
+                print(
+                    f"[BUILD API] Using subdirectory-based partitioning: {len(partitions)} chunks"
+                )
+                for i, partition in enumerate(partitions):
+                    print(f"[BUILD API]   Chunk {i + 1}: {len(partition)} files")
+            else:
+                # Ordinal chunking: use unity_chunks if specified, else auto-detect
+                total = len(all_sources)
+                if self.unity_chunks > 0:
+                    max_chunks = self.unity_chunks
+                else:
+                    max_chunks = min(4, max(1, (os.cpu_count() or 2) // 2))
+                chunks = max_chunks if total >= max_chunks else max(1, total)
+
+                # Manual partition by ordinal
+                base = total // chunks
+                rem = total % chunks
+                partitions: List[List[Path]] = []
+                start = 0
+                for i in range(chunks):
+                    size = base + (1 if i < rem else 0)
+                    end = start + size
+                    if size > 0:
+                        partitions.append(all_sources[start:end])
+                    start = end
+                print(
+                    f"[BUILD API] Using ordinal partitioning: {len(partitions)} chunks"
+                )
 
             # Prepare compile options (PCH off for unity)
             compile_opts = CompilerOptions(
@@ -288,18 +323,9 @@ class BuildAPI:
                 parallel=self.parallel,
             )
 
-            # Compute chunk sizes
-            base = total // chunks
-            rem = total % chunks
-            start = 0
+            # Compile each partition
             unity_objects: list[Path] = []
-
-            for i in range(chunks):
-                size = base + (1 if i < rem else 0)
-                end = start + size
-                group = all_sources[start:end]
-                start = end
-
+            for i, group in enumerate(partitions):
                 if not group:
                     continue
 
@@ -590,6 +616,8 @@ def create_unit_test_builder(
     use_pch: bool = True,
     parallel: bool = True,
     clean: bool = False,
+    unity_chunks: int = 0,
+    subdirectory_mode: bool = True,
 ) -> BuildAPI:
     """
     Create a BuildAPI instance for unit tests.
@@ -599,6 +627,8 @@ def create_unit_test_builder(
         use_pch: Whether to use precompiled headers
         parallel: Whether to enable parallel compilation
         clean: Whether to force a clean build
+        unity_chunks: Number of unity chunks (0 = auto-detect)
+        subdirectory_mode: Use subdirectory-based chunking
 
     Returns:
         BuildAPI: Configured build API for unit tests
@@ -611,6 +641,8 @@ def create_unit_test_builder(
         use_pch=use_pch,
         parallel=parallel,
         clean=clean,
+        unity_chunks=unity_chunks,
+        subdirectory_mode=subdirectory_mode,
     )
 
 
@@ -619,6 +651,8 @@ def create_example_builder(
     use_pch: bool = True,
     parallel: bool = True,
     clean: bool = False,
+    unity_chunks: int = 0,
+    subdirectory_mode: bool = True,
 ) -> BuildAPI:
     """
     Create a BuildAPI instance for examples.
@@ -628,6 +662,8 @@ def create_example_builder(
         use_pch: Whether to use precompiled headers
         parallel: Whether to enable parallel compilation
         clean: Whether to force a clean build
+        unity_chunks: Number of unity chunks (0 = auto-detect)
+        subdirectory_mode: Use subdirectory-based chunking
 
     Returns:
         BuildAPI: Configured build API for examples
@@ -640,4 +676,6 @@ def create_example_builder(
         use_pch=use_pch,
         parallel=parallel,
         clean=clean,
+        unity_chunks=unity_chunks,
+        subdirectory_mode=subdirectory_mode,
     )

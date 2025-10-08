@@ -59,8 +59,9 @@ inline float fastLog10(float x) {
     return g_log10_lut[idx];
 }
 
-// Convert magnitude to dB
+// Convert magnitude to dB (unused, but kept for future use)
 inline float magnitudeToDB(float mag) {
+    (void)mag;  // Suppress unused parameter warning
     return 20.0f * fastLog10(mag);
 }
 
@@ -655,9 +656,11 @@ void TempoTracker::setConfig(const BeatDetectorConfig& cfg) {
 
 void TempoTracker::addOnset(const OnsetEvent& onset) {
     // For tempo tracking from onsets (not currently used)
+    (void)onset;
 }
 
 void TempoTracker::addODFValue(float odf_value, float timestamp_ms) {
+    (void)timestamp_ms;  // Reserved for future use
     if (_cfg.tempo_tracker == TempoTrackerType::None) {
         return;
     }
