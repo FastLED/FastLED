@@ -540,8 +540,11 @@ def compile_examples_simple(
                 cpp_output_path = example_build_dir / f"{cpp_file.stem}.o"
                 example_obj_files.append(cpp_output_path)
 
+            # Determine PCH compatibility for this specific .cpp file
+            use_pch_for_cpp = cpp_file in pch_compatible_files
+
             if verbose:
-                pch_status = "with PCH" if use_pch_for_file else "direct compilation"
+                pch_status = "with PCH" if use_pch_for_cpp else "direct compilation"
                 print(
                     f"[VERBOSE] Compiling {cpp_file.relative_to(Path('examples'))} ({pch_status})"
                 )
@@ -552,12 +555,12 @@ def compile_examples_simple(
             cpp_future = compiler.compile_cpp_file(
                 cpp_file,
                 output_path=cpp_output_path,
-                use_pch_for_this_file=use_pch_for_file,
+                use_pch_for_this_file=use_pch_for_cpp,
                 additional_flags=additional_flags,
             )
             future_to_file[cpp_future] = cpp_file
 
-            if use_pch_for_file:
+            if use_pch_for_cpp:
                 pch_files_count += 1
             else:
                 direct_files_count += 1
@@ -1872,7 +1875,8 @@ class CompilationTestRunner:
         config_parts.append("cache: disabled")
 
         pch_compatible_files: set[Path] = set()
-        pch_incompatible_files: List[str] = []
+        pch_incompatible_ino_files: List[str] = []
+        pch_incompatible_cpp_files: List[str] = []
 
         if self.config.unity_build:
             self.log_timing("[UNITY] PCH disabled for UNITY builds (not needed)")
@@ -1880,33 +1884,67 @@ class CompilationTestRunner:
         elif compiler.settings.use_pch:
             self.log_timing("[PCH] Analyzing examples for PCH compatibility...")
 
+            # Analyze .ino files
             for ino_file in ino_files:
                 if compiler.analyze_ino_for_pch_compatibility(ino_file):
                     pch_compatible_files.add(ino_file)
                 else:
-                    pch_incompatible_files.append(ino_file.name)
+                    pch_incompatible_ino_files.append(ino_file.name)
 
-            if pch_incompatible_files:
+                # Also analyze .cpp files for this example
+                cpp_files = compiler.find_cpp_files_for_example(ino_file)
+                for cpp_file in cpp_files:
+                    has_fastled, is_pch_compatible = (
+                        compiler.analyze_file_for_pch_compatibility(cpp_file)
+                    )
+                    if has_fastled:
+                        if is_pch_compatible:
+                            pch_compatible_files.add(cpp_file)
+                        else:
+                            pch_incompatible_cpp_files.append(
+                                str(cpp_file.relative_to(Path("examples")))
+                            )
+
+            # Report incompatible .ino files
+            if pch_incompatible_ino_files:
                 self.log_timing(
-                    f"[PCH] Found {len(pch_incompatible_files)} incompatible files (will use direct compilation):"
+                    f"[PCH] Found {len(pch_incompatible_ino_files)} incompatible .ino files (will use direct compilation):"
                 )
-                for filename in pch_incompatible_files[:5]:  # Show first 5
+                for filename in pch_incompatible_ino_files[:5]:  # Show first 5
                     self.log_timing(f"[PCH]   - {filename} (has code before FastLED.h)")
-                if len(pch_incompatible_files) > 5:
+                if len(pch_incompatible_ino_files) > 5:
                     self.log_timing(
-                        f"[PCH]   - ... and {len(pch_incompatible_files) - 5} more"
+                        f"[PCH]   - ... and {len(pch_incompatible_ino_files) - 5} more"
                     )
 
+            # Report incompatible .cpp files with FastLED.h
+            if pch_incompatible_cpp_files:
+                self.log_timing(
+                    f"[PCH] Found {len(pch_incompatible_cpp_files)} incompatible .cpp files with FastLED.h:"
+                )
+                for filepath in pch_incompatible_cpp_files[:10]:  # Show first 10
+                    self.log_timing(f"[PCH]   - {filepath} (has code before FastLED.h)")
+                if len(pch_incompatible_cpp_files) > 10:
+                    self.log_timing(
+                        f"[PCH]   - ... and {len(pch_incompatible_cpp_files) - 10} more"
+                    )
+
+            total_incompatible = len(pch_incompatible_ino_files) + len(
+                pch_incompatible_cpp_files
+            )
+            if total_incompatible > 0:
                 config_parts.append(
                     f"PCH: selective ({len(pch_compatible_files)} files)"
                 )
             else:
-                self.log_timing(f"[PCH] All {len(ino_files)} files are PCH compatible")
+                self.log_timing(f"[PCH] All files are PCH compatible")
                 config_parts.append("PCH: enabled (all files)")
         else:
             self.log_timing("[PCH] PCH disabled globally")
             config_parts.append("PCH: disabled")
 
+        # Keep old interface for compatibility
+        pch_incompatible_files = pch_incompatible_ino_files + pch_incompatible_cpp_files
         return pch_compatible_files, pch_incompatible_files, config_parts
 
     def setup_pch(self, compiler: Compiler, pch_compatible_files: set[Path]) -> bool:

@@ -5,15 +5,15 @@
 
 //#include "./tcl.h"
 #include <Arduino.h>
+#include "FastLED.h"
+#include "fl/dbg.h"
+#include "fl/ui.h"
+
 #include "../shared/color.h"
 #include "../shared/framebuffer.h"
 #include "../shared/settings.h"
 #include "./LedRopeTCL.h"
 #include "../shared/led_layout_array.h"
-
-#include "FastLED.h"
-#include "fl/dbg.h"
-#include "fl/ui.h"
 
 using namespace fl;
 

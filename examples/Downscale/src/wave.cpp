@@ -1,6 +1,6 @@
 
-#include "wave.h"
 #include "FastLED.h"
+#include "wave.h"
 
 DEFINE_GRADIENT_PALETTE(electricBlueFirePal){
     0,   0,   0,   0,   // Black

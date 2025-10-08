@@ -1600,27 +1600,32 @@ class Compiler:
         except:
             pass
 
-    def analyze_ino_for_pch_compatibility(self, ino_path: str | Path) -> bool:
+    def analyze_file_for_pch_compatibility(
+        self, file_path: str | Path
+    ) -> tuple[bool, bool]:
         """
-        Analyze a .ino file to determine if it's compatible with PCH.
+        Analyze a .ino or .cpp file to determine if it's compatible with PCH.
 
         PCH is incompatible if the file has any defines, includes, or other preprocessor
         directives before including FastLED.h, as this can cause conflicts with the
         precompiled header assumptions.
 
         Args:
-            ino_path (str|Path): Path to the .ino file to analyze
+            file_path (str|Path): Path to the .ino or .cpp file to analyze
 
         Returns:
-            bool: True if compatible with PCH, False if PCH should be disabled
+            tuple[bool, bool]: (has_fastled, is_pch_compatible)
+                - has_fastled: True if file includes FastLED.h
+                - is_pch_compatible: True if compatible with PCH (only meaningful if has_fastled=True)
         """
         try:
-            ino_file_path = Path(ino_path).resolve()
+            file_path = Path(file_path).resolve()
 
-            with open(ino_file_path, "r", encoding="utf-8", errors="ignore") as f:
+            with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
                 content = f.read()
 
             lines = content.split("\n")
+            has_fastled = False
 
             for line in lines:
                 # Strip whitespace for analysis
@@ -1652,7 +1657,8 @@ class Compiler:
 
                 # Check for FastLED.h include (any quote style)
                 if code_part.startswith("#include") and "FastLED.h" in code_part:
-                    return True
+                    has_fastled = True
+                    return (True, True)  # Found FastLED.h, and it's PCH compatible
 
                 # Check for problematic constructs before FastLED.h
                 # Allow Arduino.h before FastLED.h, but nothing else (any quote style)
@@ -1662,7 +1668,9 @@ class Compiler:
                 problematic_patterns = [
                     is_include
                     and not is_arduino_include,  # Any include except Arduino.h
-                    code_part.startswith("#define"),  # Any define (after removing comments)
+                    code_part.startswith(
+                        "#define"
+                    ),  # Any define (after removing comments)
                     code_part.startswith("#ifdef"),  # Conditional compilation
                     code_part.startswith("#ifndef"),  # Conditional compilation
                     code_part.startswith("#if "),  # Conditional compilation
@@ -1675,18 +1683,49 @@ class Compiler:
 
                 if any(problematic_patterns):
                     # Found problematic code before FastLED.h
-                    return False
+                    # Keep scanning to see if FastLED.h exists at all
+                    has_fastled = False
+                    for remaining_line in lines[lines.index(line) :]:
+                        remaining_stripped = remaining_line.strip()
+                        if (
+                            remaining_stripped.startswith("#include")
+                            and "FastLED.h" in remaining_stripped
+                        ):
+                            has_fastled = True
+                            break
+                    return (has_fastled, False)  # Not PCH compatible
 
-            # If we found FastLED.h and no problematic code before it, PCH is compatible
-            # If we didn't find FastLED.h at all, assume PCH is still ok (might be included indirectly)
-            return True
+            # If we didn't find FastLED.h at all, return (False, False)
+            # This means the file doesn't use FastLED and PCH shouldn't be applied
+            return (False, False)
 
         except KeyboardInterrupt:
             _thread.interrupt_main()
             raise
         except Exception:
-            # If we can't analyze the file, err on the side of caution and disable PCH
-            return False
+            # If we can't analyze the file, err on the side of caution
+            return (False, False)
+
+    def analyze_ino_for_pch_compatibility(self, ino_path: str | Path) -> bool:
+        """
+        Analyze a .ino file to determine if it's compatible with PCH.
+
+        This is a legacy wrapper for backward compatibility.
+
+        Args:
+            ino_path (str|Path): Path to the .ino file to analyze
+
+        Returns:
+            bool: True if compatible with PCH, False if PCH should be disabled
+        """
+        has_fastled, is_pch_compatible = self.analyze_file_for_pch_compatibility(
+            ino_path
+        )
+        # For .ino files, if they don't have FastLED.h, we still return True
+        # because they might include it indirectly
+        if not has_fastled:
+            return True
+        return is_pch_compatible
 
     def compile_unity(
         self,
