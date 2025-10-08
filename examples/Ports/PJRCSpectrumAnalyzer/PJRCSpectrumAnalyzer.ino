@@ -2,6 +2,9 @@
 /// @brief   PJRCSpectrumAnalyzer example with platform detection
 /// @example PJRCSpectrumAnalyzer.ino
 
+// FastLED.h must be included first to trigger precompiled headers for FastLED's build system
+#include "FastLED.h"
+
 #include "fl/sketch_macros.h"
 
 // Platform detection logic

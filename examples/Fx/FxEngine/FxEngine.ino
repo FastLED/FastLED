@@ -8,6 +8,9 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
+// FastLED.h must be included first to trigger precompiled headers for FastLED's build system
+#include "FastLED.h"
+
 #include "fl/sketch_macros.h"
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 #include "platforms/sketch_fake.hpp"

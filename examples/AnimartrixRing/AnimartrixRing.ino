@@ -2,6 +2,9 @@
 // This example generates a rectangular animation grid and samples a circular
 // region from it to display on a ring of LEDs using Fx2dTo1d.
 
+// FastLED.h must be included first to trigger precompiled headers for FastLED's build system
+#include "FastLED.h"
+
 #include "fl/sketch_macros.h"
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 #include "platforms/sketch_fake.hpp"
