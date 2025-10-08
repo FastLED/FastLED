@@ -31,6 +31,8 @@
 // ⚠️⚠️⚠️ REMEMBER: Timing errors break ALL animations and effects! ⚠️⚠️⚠️
 
 #include "fl/stdint.h"
+#include "fl/warn.h"
+#include "js.h"
 #include <thread>
 #include <cmath>  // For fmod function
 
