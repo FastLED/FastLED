@@ -3,18 +3,22 @@
 
 namespace fl {
 
-bool SPITransposerQuad::transpose(const fl::optional<LaneData> lanes[4],
-                                   size_t max_size,
+bool SPITransposerQuad::transpose(const fl::optional<LaneData>& lane0,
+                                   const fl::optional<LaneData>& lane1,
+                                   const fl::optional<LaneData>& lane2,
+                                   const fl::optional<LaneData>& lane3,
                                    fl::span<uint8_t> output,
                                    const char** error) {
-    // Validate output buffer size
-    const size_t required_size = max_size * 4;
-    if (output.size() < required_size) {
+    // Validate output buffer size (must be divisible by 4)
+    if (output.size() % 4 != 0) {
         if (error) {
-            *error = "Output buffer too small";
+            *error = "Output buffer size must be divisible by 4";
         }
         return false;
     }
+
+    // Calculate max lane size from output buffer
+    const size_t max_size = output.size() / 4;
 
     // Handle empty case
     if (max_size == 0) {
@@ -24,11 +28,14 @@ bool SPITransposerQuad::transpose(const fl::optional<LaneData> lanes[4],
         return true;
     }
 
+    // Create array of lane references for easier iteration
+    const fl::optional<LaneData>* lanes[4] = {&lane0, &lane1, &lane2, &lane3};
+
     // Determine default padding byte from first available lane
     uint8_t default_padding = 0x00;
     for (size_t i = 0; i < 4; i++) {
-        if (lanes[i].has_value() && !lanes[i]->padding_frame.empty()) {
-            default_padding = lanes[i]->padding_frame[0];
+        if (lanes[i]->has_value() && !(*lanes[i])->padding_frame.empty()) {
+            default_padding = (*lanes[i])->padding_frame[0];
             break;
         }
     }
@@ -39,8 +46,8 @@ bool SPITransposerQuad::transpose(const fl::optional<LaneData> lanes[4],
 
         // Gather bytes from each lane (handles padding automatically)
         for (size_t lane = 0; lane < 4; lane++) {
-            if (lanes[lane].has_value()) {
-                lane_bytes[lane] = getLaneByte(*lanes[lane], byte_idx, max_size);
+            if (lanes[lane]->has_value()) {
+                lane_bytes[lane] = getLaneByte(**lanes[lane], byte_idx, max_size);
             } else {
                 // Empty lane - use default padding
                 lane_bytes[lane] = default_padding;

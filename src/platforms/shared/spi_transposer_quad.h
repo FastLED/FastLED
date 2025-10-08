@@ -112,17 +112,21 @@ public:
 
     /// Transpose up to 4 lanes of data into interleaved quad-SPI format
     ///
-    /// @param lanes Array of 4 optional lane data structures (use fl::nullopt for unused lanes)
-    /// @param max_size Maximum size across all lanes (determines padding)
-    /// @param output Output buffer to write interleaved data (must be >= max_size * 4 bytes)
+    /// @param lane0 Lane 0 data (use fl::nullopt for unused lane)
+    /// @param lane1 Lane 1 data (use fl::nullopt for unused lane)
+    /// @param lane2 Lane 2 data (use fl::nullopt for unused lane)
+    /// @param lane3 Lane 3 data (use fl::nullopt for unused lane)
+    /// @param output Output buffer to write interleaved data (size must be divisible by 4)
     /// @param error Optional pointer to receive error message (set to nullptr if unused)
-    /// @return true on success, false if output buffer is too small or invalid parameters
+    /// @return true on success, false if output buffer size is invalid
     ///
-    /// @note Output buffer size must be exactly max_size * 4 bytes
+    /// @note Output buffer size determines max lane size: max_size = output.size() / 4
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
-    static bool transpose(const fl::optional<LaneData> lanes[4],
-                         size_t max_size,
+    static bool transpose(const fl::optional<LaneData>& lane0,
+                         const fl::optional<LaneData>& lane1,
+                         const fl::optional<LaneData>& lane2,
+                         const fl::optional<LaneData>& lane3,
                          fl::span<uint8_t> output,
                          const char** error = nullptr);
 
