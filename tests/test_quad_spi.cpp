@@ -3,7 +3,7 @@
 
 #include "test.h"
 #include "FastLED.h"
-#include "platforms/shared/quad_spi_transposer.h"
+#include "platforms/shared/spi_transposer_quad.h"
 #include "platforms/shared/spi_quad.h"
 #include "platforms/stub/spi_quad_stub.h"
 #include <chrono>
@@ -71,7 +71,6 @@ template<uint8_t SPI_BUS_NUM = 2, uint32_t SPI_CLOCK_HZ = 10000000>
 class QuadSPITestController {
 private:
     SPIQuad* mMockDriver;
-    QuadSPITransposer mTransposer;
     fl::vector<fl::vector<uint8_t>> mLaneBuffers;
     fl::vector<fl::vector<uint8_t>> mPaddingFrames;  // Changed from single bytes to frames
     fl::vector<uint8_t> mInterleavedDMABuffer;
@@ -182,19 +181,27 @@ public:
     void transmit() {
         if (!mMockDriver) return;
 
-        mTransposer.reset();
-
-        for (size_t i = 0; i < mLaneBuffers.size(); ++i) {
+        // Setup lanes using optional
+        fl::optional<SPITransposerQuad::LaneData> lanes[4];
+        for (size_t i = 0; i < mLaneBuffers.size() && i < 4; ++i) {
             if (!mLaneBuffers[i].empty()) {
-                // Pass padding frame instead of single byte
-                mTransposer.addLane(i, mLaneBuffers[i],
-                    fl::span<const uint8_t>(mPaddingFrames[i].data(), mPaddingFrames[i].size()));
+                lanes[i] = SPITransposerQuad::LaneData{
+                    fl::span<const uint8_t>(mLaneBuffers[i].data(), mLaneBuffers[i].size()),
+                    fl::span<const uint8_t>(mPaddingFrames[i].data(), mPaddingFrames[i].size())
+                };
             }
         }
 
-        auto interleaved = mTransposer.transpose();
-        if (!interleaved.empty()) {
-            mMockDriver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
+        // Allocate output buffer
+        mInterleavedDMABuffer.resize(mMaxLaneBytes * 4);
+
+        // Perform transpose
+        const char* error = nullptr;
+        bool success = SPITransposerQuad::transpose(lanes, mMaxLaneBytes,
+            fl::span<uint8_t>(mInterleavedDMABuffer.data(), mInterleavedDMABuffer.size()), &error);
+
+        if (success && !mInterleavedDMABuffer.empty()) {
+            mMockDriver->transmitAsync(fl::span<const uint8_t>(mInterleavedDMABuffer.data(), mInterleavedDMABuffer.size()));
         }
     }
 
@@ -484,15 +491,19 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Basic 4-lane transpose with vari
     auto lane2 = TestHelpers::generateAPA102ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(7, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
     size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    const char* error = nullptr;
+    bool success = SPITransposerQuad::transpose(lanes, max_size, interleaved, &error);
+
+    CHECK(success);
     CHECK_EQ(interleaved.size(), max_size * 4);
 }
 
@@ -502,23 +513,29 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Transpose with equal-length lane
     auto lane2 = TestHelpers::generateAPA102ProtocolData(5, 0x33);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(5, 0x44);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane0.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 }
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Single-lane transpose (degraded mode)") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(3, 0xAB);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane0.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 }
 
@@ -526,11 +543,14 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Dual-lane transpose") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(4, 0x11);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(6, 0x22);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane1.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane1.size() * 4);
 }
 
@@ -540,16 +560,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mixed chipset transpose with dif
     auto lane2 = TestHelpers::generateWS2801ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateP9813ProtocolData(6, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
-
-    auto interleaved = transposer.transpose();
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00}};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, fl::vector<uint8_t>{0x00}};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, fl::vector<uint8_t>{0x00}};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, fl::vector<uint8_t>{0x00}};
 
     size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
                                  fl::fl_max(lane2.size(), lane3.size()));
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
+
     CHECK_EQ(interleaved.size(), max_size * 4);
 }
 
@@ -559,13 +580,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102-only transpose (all 0xFF 
     auto lane2 = TestHelpers::generateAPA102ProtocolData(4, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(5, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
@@ -575,13 +599,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: LPD8806-only transpose (all 0x00
     auto lane2 = TestHelpers::generateLPD8806ProtocolData(5, 0x33);
     auto lane3 = TestHelpers::generateLPD8806ProtocolData(6, 0x44);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
@@ -591,13 +618,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: WS2801-only transpose") {
     auto lane2 = TestHelpers::generateWS2801ProtocolData(6, 0xCC);
     auto lane3 = TestHelpers::generateWS2801ProtocolData(8, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane3.size() * 4);  // lane3 is longest (8 LEDs)
 }
 
@@ -607,36 +637,43 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: P9813-only transpose") {
     auto lane2 = TestHelpers::generateP9813ProtocolData(6, 0x77);
     auto lane3 = TestHelpers::generateP9813ProtocolData(7, 0x88);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Empty transpose") {
-    QuadSPITransposer transposer;
-    auto interleaved = transposer.transpose();
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    fl::vector<uint8_t> interleaved(0);
+    SPITransposerQuad::transpose(lanes, 0, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), 0);
 }
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Reset and reuse transposer") {
-    QuadSPITransposer transposer;
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
 
     // First use
     auto lane0_a = TestHelpers::generateAPA102ProtocolData(5, 0xAA);
-    transposer.addLane(0, lane0_a, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    auto result_a = transposer.transpose();
+    fl::optional<SPITransposerQuad::LaneData> lanes_a[4];
+    lanes_a[0] = SPITransposerQuad::LaneData{lane0_a, padding};
+    fl::vector<uint8_t> result_a(lane0_a.size() * 4);
+    SPITransposerQuad::transpose(lanes_a, lane0_a.size(), result_a, nullptr);
     CHECK_EQ(result_a.size(), lane0_a.size() * 4);
 
-    // Reset and reuse
-    transposer.reset();
+    // Reuse (stateless API doesn't need reset)
     auto lane0_b = TestHelpers::generateAPA102ProtocolData(10, 0xBB);
-    transposer.addLane(0, lane0_b, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    auto result_b = transposer.transpose();
+    fl::optional<SPITransposerQuad::LaneData> lanes_b[4];
+    lanes_b[0] = SPITransposerQuad::LaneData{lane0_b, padding};
+    fl::vector<uint8_t> result_b(lane0_b.size() * 4);
+    SPITransposerQuad::transpose(lanes_b, lane0_b.size(), result_b, nullptr);
     CHECK_EQ(result_b.size(), lane0_b.size() * 4);
 }
 
@@ -646,13 +683,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Large buffer transpose (stress t
     auto lane2 = TestHelpers::generateAPA102ProtocolData(175, 0x33);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(250, 0x44);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane3.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane3.size() * 4);
 }
 
@@ -662,13 +702,15 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Interleave order validation") {
     fl::vector<uint8_t> lane2 = {0xCC};
     fl::vector<uint8_t> lane3 = {0xDD};
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> interleaved(1 * 4);
+    SPITransposerQuad::transpose(lanes, 1, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), 4);
 
     // Verify round-trip extraction works correctly
@@ -756,19 +798,21 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver multiple transmissio
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction basic") {
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
-    QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0_data = {0xAA};
     fl::vector<uint8_t> lane1_data = {0xBB};
     fl::vector<uint8_t> lane2_data = {0xCC};
     fl::vector<uint8_t> lane3_data = {0xDD};
 
-    transposer.addLane(0, lane0_data, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1_data, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2_data, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3_data, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0_data, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1_data, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2_data, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3_data, padding};
 
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> interleaved(1 * 4);
+    SPITransposerQuad::transpose(lanes, 1, interleaved, nullptr);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     auto extracted = driver->extractLanes(4, 1);
@@ -781,19 +825,21 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction basi
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction multi-byte") {
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
-    QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0 = {0x11, 0x22, 0x33};
     fl::vector<uint8_t> lane1 = {0x44, 0x55, 0x66};
     fl::vector<uint8_t> lane2 = {0x77, 0x88, 0x99};
     fl::vector<uint8_t> lane3 = {0xAA, 0xBB, 0xCC};
 
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> interleaved(3 * 4);
+    SPITransposerQuad::transpose(lanes, 3, interleaved, nullptr);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     auto extracted = driver->extractLanes(4, 3);
@@ -804,19 +850,23 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction mult
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction with padding") {
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
-    QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0 = {0xAA};
     fl::vector<uint8_t> lane1 = {0xBB, 0xCC};
     fl::vector<uint8_t> lane2 = {0xDD, 0xEE, 0xFF};
     fl::vector<uint8_t> lane3 = {0x11, 0x22};
 
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding0 = {0xE0, 0x00, 0x00, 0x00};
+    fl::vector<uint8_t> padding1 = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding0};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding1};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding1};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding1};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = 3;
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     auto extracted = driver->extractLanes(4, 3);
@@ -833,15 +883,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver lane extraction with
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver dual-SPI mode") {
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
-    QuadSPITransposer transposer;
-
     fl::vector<uint8_t> lane0 = {0xAA, 0xBB};
     fl::vector<uint8_t> lane1 = {0xCC, 0xDD};
 
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = {0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = fl::fl_max(lane0.size(), lane1.size());
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     auto extracted = driver->extractLanes(4, 2);
@@ -853,7 +905,6 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver dual-SPI mode") {
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver round-trip validation") {
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
-    QuadSPITransposer transposer;
 
     fl::vector<uint8_t> lane0_pattern;
     fl::vector<uint8_t> lane1_pattern;
@@ -867,12 +918,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Mock driver round-trip validatio
         lane3_pattern.push_back(0x30 + i);
     }
 
-    transposer.addLane(0, lane0_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3_pattern, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0_pattern, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1_pattern, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2_pattern, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3_pattern, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = 10;
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
     auto extracted = driver->extractLanes(4, 10);
@@ -1061,13 +1116,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - 4-lane APA102 diff
     auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
     CHECK_EQ(padding_frame.size(), 4);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0_data, padding_frame);
-    transposer.addLane(1, lane1_data, padding_frame);
-    transposer.addLane(2, lane2_data, padding_frame);
-    transposer.addLane(3, lane3_data, padding_frame);
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0_data, padding_frame};
+    lanes[1] = SPITransposerQuad::LaneData{lane1_data, padding_frame};
+    lanes[2] = SPITransposerQuad::LaneData{lane2_data, padding_frame};
+    lanes[3] = SPITransposerQuad::LaneData{lane3_data, padding_frame};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = fl::fl_max(fl::fl_max(lane0_data.size(), lane1_data.size()),
+                                 fl::fl_max(lane2_data.size(), lane3_data.size()));
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     size_t max_lane_size = lane3_data.size();
     CHECK_EQ(interleaved.size(), max_lane_size * 4);
 
@@ -1109,13 +1167,13 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Mixed chipsets on 
     size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
                                  fl::fl_max(lane2.size(), lane3.size()));
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, padding0);
-    transposer.addLane(1, lane1, padding1);
-    transposer.addLane(2, lane2, padding2);
-    transposer.addLane(3, lane3, padding3);
-
-    auto interleaved = transposer.transpose();
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding0};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding1};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding2};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding3};
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
     mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
@@ -1138,13 +1196,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Transmission verif
     auto lane2 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
+                                 fl::fl_max(lane2.size(), lane3.size()));
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
     SPIQuad::Config config;
@@ -1160,10 +1222,13 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Transmission verif
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Single lane degraded mode") {
     auto lane0 = TestHelpers::generateAPA102ProtocolData(50, 0xAB);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = lane0.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
     CHECK_EQ(interleaved.size(), lane0.size() * 4);
 
     SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
@@ -1179,16 +1244,18 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Integration - Dual-SPI mode (2 l
     auto lane0 = TestHelpers::generateAPA102ProtocolData(40, 0xC0);
     auto lane1 = TestHelpers::generateAPA102ProtocolData(60, 0xC1);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = fl::fl_max(lane0.size(), lane1.size());
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     SPIQuadStub* mock = toStub(SPIQuad::getAll()[0]);
     mock->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));
 
-    size_t max_size = lane1.size();
     auto extracted = mock->extractLanes(4, max_size);
 
     // Padding now goes at BEGINNING using repeating APA102 frame {0xE0, 0x00, 0x00, 0x00}
@@ -1228,14 +1295,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Bit-interleaving s
         auto lane2 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xCC);
         auto lane3 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xDD);
 
-        QuadSPITransposer transposer;
+                fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
         uint64_t transpose_time = measureMicroseconds([&]() {
-            transposer.reset();
-            transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-            transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-            transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-            transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-            auto result = transposer.transpose();
+            fl::optional<SPITransposerQuad::LaneData> lanes[4];
+            lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+            lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+            lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+            lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
+            size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
+                                         fl::fl_max(lane2.size(), lane3.size()));
+            fl::vector<uint8_t> result(max_size * 4);
+            SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
         });
 
         if (num_leds == 10) {
@@ -1255,12 +1325,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Different clock sp
     auto lane2 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xCC);
     auto lane3 = TestHelpers::generateAPA102ProtocolData(num_leds, 0xDD);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
+
+    size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
+                                 fl::fl_max(lane2.size(), lane3.size()));
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     for (uint32_t clock_speed : clock_speeds) {
         SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
@@ -1319,13 +1394,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Theoretical speedu
     uint64_t serial_time_per_strip = (bytes_per_strip * 8 * 1000000ULL) / serial_speed;
     uint64_t total_serial_time = serial_time_per_strip * 4;
 
-    QuadSPITransposer transposer;
     auto lane_data = TestHelpers::generateAPA102ProtocolData(num_leds, 0xAA);
-    transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    auto interleaved = transposer.transpose();
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane_data, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane_data, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane_data, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane_data, padding};
+
+    size_t max_size = lane_data.size();
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     uint64_t parallel_time = (interleaved.size() * 8 * 1000000ULL) / parallel_speed;
 
@@ -1365,29 +1444,28 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Cache-friendly seq
     const size_t num_leds = 50;
     auto lane_data = TestHelpers::generateAPA102ProtocolData(num_leds, 0xAA);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-    transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-
     // Warm up cache
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00};
     for (int i = 0; i < 10; ++i) {
-        transposer.reset();
-        transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        auto result = transposer.transpose();
+        fl::optional<SPITransposerQuad::LaneData> lanes[4];
+        lanes[0] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[1] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[2] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[3] = SPITransposerQuad::LaneData{lane_data, padding};
+        size_t max_size = lane_data.size();
+        fl::vector<uint8_t> result(max_size * 4);
+        SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
     }
 
     uint64_t final_time = measureMicroseconds([&]() {
-        transposer.reset();
-        transposer.addLane(0, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(1, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(2, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        transposer.addLane(3, lane_data, fl::vector<uint8_t>{0xE0, 0x00, 0x00, 0x00});
-        auto result = transposer.transpose();
+        fl::optional<SPITransposerQuad::LaneData> lanes[4];
+        lanes[0] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[1] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[2] = SPITransposerQuad::LaneData{lane_data, padding};
+        lanes[3] = SPITransposerQuad::LaneData{lane_data, padding};
+        size_t max_size = lane_data.size();
+        fl::vector<uint8_t> result(max_size * 4);
+        SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
     });
 
     CHECK(final_time < 1000);  // Very lenient - just checking it's not pathologically slow
@@ -1400,20 +1478,22 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Performance - Cache-friendly seq
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - exact bit positions") {
     // This test verifies the EXACT bit positions in the output
     // Uses distinct bit patterns for each lane to verify correct interleaving
-    QuadSPITransposer transposer;
-
     // Use bit patterns where only specific 2-bit pairs are set
     fl::vector<uint8_t> lane0 = {0xC0};  // 11000000 (bits 7:6 = 11, rest 00)
     fl::vector<uint8_t> lane1 = {0x30};  // 00110000 (bits 5:4 = 11, rest 00)
     fl::vector<uint8_t> lane2 = {0x0C};  // 00001100 (bits 3:2 = 11, rest 00)
     fl::vector<uint8_t> lane3 = {0x03};  // 00000011 (bits 1:0 = 11, rest 00)
 
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto result = transposer.transpose();
+    size_t max_size = 1;
+    fl::vector<uint8_t> result(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
     CHECK_EQ(result.size(), 4);
 
     // Verify exact bit positions in output
@@ -1442,16 +1522,18 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - exact 
 }
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - known patterns") {
-    QuadSPITransposer transposer;
-
     // Test 1: All 0xAA (10101010)
     fl::vector<uint8_t> lane_aa = {0xAA};
-    transposer.addLane(0, lane_aa, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane_aa, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane_aa, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane_aa, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane_aa, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane_aa, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane_aa, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane_aa, padding};
 
-    auto result_aa = transposer.transpose();
+    size_t max_size = lane_aa.size();
+    fl::vector<uint8_t> result_aa(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result_aa, nullptr);
     CHECK_EQ(result_aa.size(), 4);
     // All lanes identical should produce specific pattern
     CHECK_EQ(result_aa[0], result_aa[1]);
@@ -1460,17 +1542,19 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - known 
 }
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - alternating lanes") {
-    QuadSPITransposer transposer;
-
     // Test 2: Alternating 0xFF and 0x00
     fl::vector<uint8_t> lane_ff = {0xFF};
     fl::vector<uint8_t> lane_00 = {0x00};
-    transposer.addLane(0, lane_ff, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane_00, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane_ff, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane_00, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane_ff, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane_00, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane_ff, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane_00, padding};
 
-    auto result_alt = transposer.transpose();
+    size_t max_size = 1;
+    fl::vector<uint8_t> result_alt(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result_alt, nullptr);
     CHECK_EQ(result_alt.size(), 4);
 
     // Verify lanes can be extracted
@@ -1485,19 +1569,21 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - altern
 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - correctness check") {
     // Test known bit patterns and verify output
-    QuadSPITransposer transposer;
-
     fl::vector<uint8_t> lane0 = {0x12};  // 00010010
     fl::vector<uint8_t> lane1 = {0x34};  // 00110100
     fl::vector<uint8_t> lane2 = {0x56};  // 01010110
     fl::vector<uint8_t> lane3 = {0x78};  // 01111000
 
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
 
-    auto result = transposer.transpose();
+    size_t max_size = 1;
+    fl::vector<uint8_t> result(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
     CHECK_EQ(result.size(), 4);
 
     // Verify by extracting lanes back
@@ -1515,13 +1601,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - large 
     const size_t NUM_BYTES = 1000;  // Simulate 100 LEDs * 3 bytes + overhead
     fl::vector<uint8_t> large_buffer(NUM_BYTES, 0xAA);
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, large_buffer, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, large_buffer, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, large_buffer, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, large_buffer, fl::vector<uint8_t>{0x00});
-
-    auto result = transposer.transpose();
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{large_buffer, padding};
+    lanes[1] = SPITransposerQuad::LaneData{large_buffer, padding};
+    lanes[2] = SPITransposerQuad::LaneData{large_buffer, padding};
+    lanes[3] = SPITransposerQuad::LaneData{large_buffer, padding};
+    size_t max_size = fl::fl_max(fl::fl_max(large_buffer.size(), large_buffer.size()),
+                                 fl::fl_max(large_buffer.size(), large_buffer.size()));
+    fl::vector<uint8_t> result (max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
 
     // Verify output size is correct
     CHECK_EQ(result.size(), NUM_BYTES * 4);
@@ -1545,13 +1634,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Optimized bit spreading - mixed 
     fl::vector<uint8_t> lane2 = {0x77, 0x88, 0x99};
     fl::vector<uint8_t> lane3 = {0xAA, 0xBB, 0xCC};
 
-    QuadSPITransposer transposer;
-    transposer.addLane(0, lane0, fl::vector<uint8_t>{0x00});
-    transposer.addLane(1, lane1, fl::vector<uint8_t>{0x00});
-    transposer.addLane(2, lane2, fl::vector<uint8_t>{0x00});
-    transposer.addLane(3, lane3, fl::vector<uint8_t>{0x00});
-
-    auto result = transposer.transpose();
+    fl::vector<uint8_t> padding = fl::vector<uint8_t>{0x00};
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0, padding};
+    lanes[1] = SPITransposerQuad::LaneData{lane1, padding};
+    lanes[2] = SPITransposerQuad::LaneData{lane2, padding};
+    lanes[3] = SPITransposerQuad::LaneData{lane3, padding};
+    size_t max_size = fl::fl_max(fl::fl_max(lane0.size(), lane1.size()),
+                                 fl::fl_max(lane2.size(), lane3.size()));
+    fl::vector<uint8_t> result (max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, result, nullptr);
     CHECK_EQ(result.size(), 12);  // 3 bytes * 4 = 12 output bytes
 
     // Verify correctness
@@ -1654,7 +1746,6 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: Buffer validation - mixed empty 
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - different strip lengths padded to same size") {
     // Test that strips of different lengths (1, 3, 7, 13 LEDs) are all
     // padded to the same size in the interleaved format
-    QuadSPITransposer transposer;
 
     // Calculate byte sizes for each LED count using APA102 protocol
     // Formula: 4 (start frame) + (num_leds * 4) + (4 * ((num_leds / 32) + 1)) (end frame)
@@ -1679,14 +1770,17 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - different strip
     auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
     CHECK_EQ(padding_frame.size(), 4);
 
-    // Add lanes to transposer
-    transposer.addLane(0, lane0_data, padding_frame);
-    transposer.addLane(1, lane1_data, padding_frame);
-    transposer.addLane(2, lane2_data, padding_frame);
-    transposer.addLane(3, lane3_data, padding_frame);
+    // Setup lanes
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0_data, padding_frame};
+    lanes[1] = SPITransposerQuad::LaneData{lane1_data, padding_frame};
+    lanes[2] = SPITransposerQuad::LaneData{lane2_data, padding_frame};
+    lanes[3] = SPITransposerQuad::LaneData{lane3_data, padding_frame};
 
     // Perform transpose
-    auto interleaved = transposer.transpose();
+    size_t max_size = bytes_13_leds;
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     // Verify output size: max_lane_bytes * 4
     size_t expected_size = bytes_13_leds * 4;
@@ -1741,7 +1835,6 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - different strip
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LED padding source") {
     // Test that padding comes from controller's getPaddingLEDFrame()
     // and uses black LED frames for synchronized latching
-    QuadSPITransposer transposer;
 
     // Create two lanes of different lengths
     size_t bytes_5_leds = APA102Controller<1, 2, RGB>::calculateBytes(5);   // 28 bytes
@@ -1749,6 +1842,7 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LE
 
     fl::vector<uint8_t> lane0_data(bytes_10_leds, 0x11); // Longer
     fl::vector<uint8_t> lane1_data(bytes_5_leds, 0x22);  // Shorter
+    fl::vector<uint8_t> empty_lane;
 
     // Get black LED frame from APA102 controller
     auto apa102_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
@@ -1758,13 +1852,16 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LE
     CHECK_EQ(apa102_frame[2], 0x00);  // Green = 0
     CHECK_EQ(apa102_frame[3], 0x00);  // Red = 0
 
-    // Add lanes with black LED padding
-    transposer.addLane(0, lane0_data, apa102_frame);
-    transposer.addLane(1, lane1_data, apa102_frame);
-    transposer.addLane(2, fl::vector<uint8_t>(), apa102_frame); // Empty lane
-    transposer.addLane(3, fl::vector<uint8_t>(), apa102_frame); // Empty lane
+    // Setup lanes with black LED padding
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{lane0_data, apa102_frame};
+    lanes[1] = SPITransposerQuad::LaneData{lane1_data, apa102_frame};
+    lanes[2] = SPITransposerQuad::LaneData{empty_lane, apa102_frame}; // Empty lane
+    lanes[3] = SPITransposerQuad::LaneData{empty_lane, apa102_frame}; // Empty lane
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = bytes_10_leds;
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     // Extract and verify padding
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
@@ -1795,7 +1892,6 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LE
 TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LED padding at the BEGINNING") {
     // Test that black LED padding appears at the BEGINNING of shorter strips
     // for synchronized latching (all strips finish transmitting simultaneously)
-    QuadSPITransposer transposer;
 
     size_t bytes_2_leds = APA102Controller<1, 2, RGB>::calculateBytes(2);  // 16 bytes
     size_t bytes_6_leds = APA102Controller<1, 2, RGB>::calculateBytes(6);  // 32 bytes
@@ -1807,15 +1903,19 @@ TEST_CASE_FIXTURE(SPIQuadTestFixture, "QuadSPI: APA102 padding - verify black LE
     }
 
     fl::vector<uint8_t> long_lane(bytes_6_leds, 0xEE);
+    fl::vector<uint8_t> empty_lane;
 
     auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
 
-    transposer.addLane(0, long_lane, padding_frame);
-    transposer.addLane(1, short_lane, padding_frame);
-    transposer.addLane(2, fl::vector<uint8_t>(), padding_frame);
-    transposer.addLane(3, fl::vector<uint8_t>(), padding_frame);
+    fl::optional<SPITransposerQuad::LaneData> lanes[4];
+    lanes[0] = SPITransposerQuad::LaneData{long_lane, padding_frame};
+    lanes[1] = SPITransposerQuad::LaneData{short_lane, padding_frame};
+    lanes[2] = SPITransposerQuad::LaneData{empty_lane, padding_frame};
+    lanes[3] = SPITransposerQuad::LaneData{empty_lane, padding_frame};
 
-    auto interleaved = transposer.transpose();
+    size_t max_size = bytes_6_leds;
+    fl::vector<uint8_t> interleaved(max_size * 4);
+    SPITransposerQuad::transpose(lanes, max_size, interleaved, nullptr);
 
     SPIQuadStub* driver = toStub(SPIQuad::getAll()[0]);
     driver->transmitAsync(fl::span<const uint8_t>(interleaved.data(), interleaved.size()));

@@ -99,7 +99,7 @@
 
 ### 📁 **Files Modified/Created**
 - ✅ `src/chipsets.h` - Added `getPaddingLEDFrame()` to 4 controllers
-- ✅ `src/platforms/shared/quad_spi_transposer.h` - Optimized interleaving + span-based padding
+- ✅ `src/platforms/shared/spi_transposer_quad.h` - Optimized interleaving + span-based padding
 - ✅ `src/platforms/esp/32/quad_spi_controller.h` - Updated to use span-based API + hardware driver
 - ✅ **`src/platforms/esp/32/esp32_quad_spi_driver.h`** - **NEW: Complete ESP32 driver** ✨
 - ✅ `tests/test_quad_spi.cpp` - Updated 3 tests, all 70 passing
@@ -144,7 +144,7 @@ This document was validated against the current codebase. Key findings:
 
 ### ✅ **VERIFIED - Exists in Codebase**
 - ✅ `src/platforms/esp/32/quad_spi_controller.h` - Architecture complete, has TODOs for hardware
-- ✅ `src/platforms/shared/quad_spi_transposer.h` - **Optimized bit-interleaving implemented ✨**
+- ✅ `src/platforms/shared/spi_transposer_quad.h` - **Optimized bit-interleaving implemented ✨**
 - ✅ `tests/test_quad_spi.cpp` - **70 comprehensive tests passing (expanded from 56)** ✨
 - ✅ `getPaddingByte()` methods in all 4 chipsets (APA102, LPD8806, WS2801, P9813)
 - ✅ **`getPaddingLEDFrame()` methods in all 4 chipsets** ✨ **NEW**
@@ -241,7 +241,7 @@ This document has been **reorganized to prioritize unit-testable features first*
 - Buffer management with protocol-safe padding
 - Clean separation of concerns (controller + transposer)
 
-✅ **Bit Interleaving** (`src/platforms/shared/quad_spi_transposer.h`):
+✅ **Bit Interleaving** (`src/platforms/shared/spi_transposer_quad.h`):
 - Generic transpose algorithm
 - Multi-chipset padding support (APA102, LPD8806, WS2801, P9813)
 
@@ -357,7 +357,7 @@ static inline void interleave_spi(uint32_t *dest,
 }
 ```
 
-**Note**: Current implementation in `quad_spi_transposer.h` uses simple nested loops (lines 203-215). The optimized version above can be added in Phase 3 for 2-3× performance improvement.
+**Note**: Current implementation in `spi_transposer_quad.h` uses simple nested loops (lines 203-215). The optimized version above can be added in Phase 3 for 2-3× performance improvement.
 
 ---
 
@@ -387,8 +387,8 @@ To make the committed code functional, we need to **create** these components (t
    - GPIO pin routing
    - Transaction queuing/completion
 
-2. **Optimized Interleaving** (optional enhancement to `quad_spi_transposer.h`)
-   - **Current**: Simple nested loops (lines 203-215 in `quad_spi_transposer.h`)
+2. **Optimized Interleaving** (optional enhancement to `spi_transposer_quad.h`)
+   - **Current**: Simple nested loops (lines 203-215 in `spi_transposer_quad.h`)
    - **Proposed**: Parallel bit-spreading algorithm (Phase 3)
    - Performance improvement: ~2-3× faster transpose
 
@@ -403,7 +403,7 @@ To make the committed code functional, we need to **create** these components (t
 
 ### Phase 1: Optimize Bit Interleaving (UNIT TESTABLE - PRIORITY)
 
-**File**: `src/platforms/shared/quad_spi_transposer.h`
+**File**: `src/platforms/shared/spi_transposer_quad.h`
 
 **Purpose**: Replace simple nested-loop interleaving with optimized parallel bit-spreading algorithm
 
@@ -413,7 +413,7 @@ To make the committed code functional, we need to **create** these components (t
 - ✅ Provides immediate performance improvement (2-3× faster)
 - ✅ Independent of hardware integration
 
-**Current Implementation** (lines 203-215 in `quad_spi_transposer.h`):
+**Current Implementation** (lines 203-215 in `spi_transposer_quad.h`):
 Simple nested loops - works but slow for large LED counts
 
 **Optimized Implementation**:
@@ -1520,7 +1520,7 @@ TEST_CASE("QuadSPI: Buffer size calculations") {
 ## Implementation Checklist
 
 ### Phase 1: Optimize Bit Interleaving ⚡ (UNIT TESTABLE) - ✅ **COMPLETE**
-- [x] Implement `interleave_byte_optimized()` in `quad_spi_transposer.h`
+- [x] Implement `interleave_byte_optimized()` in `spi_transposer_quad.h`
 - [x] Replace simple nested loops with bit-spreading algorithm
 - [x] Add unit tests for bit pattern correctness
 - [x] Add performance comparison tests
@@ -2303,7 +2303,7 @@ Both approaches will be supported - automatic for ease of use, manual for advanc
 - `FEATURE_QUAD_SPI.md` - Original feature proposal and TDD strategy (if exists)
 - `QUAD_SPI_PROGRESS.md` - Implementation progress tracking (if exists)
 - `src/platforms/esp/32/quad_spi_controller.h` - Controller architecture (VERIFIED ✅)
-- `src/platforms/shared/quad_spi_transposer.h` - Bit interleaving implementation (VERIFIED ✅)
+- `src/platforms/shared/spi_transposer_quad.h` - Bit interleaving implementation (VERIFIED ✅)
 - `tests/test_quad_spi.cpp` - 56 comprehensive tests (VERIFIED ✅)
 
 ### Implementation References (for creating the driver)
@@ -2893,13 +2893,13 @@ This design document has been enhanced through 10 iterations, with final revisio
 
 ### ✅ Existing Foundation
 - [x] Complete controller architecture in `quad_spi_controller.h`
-- [x] Bit-interleaving transposer in `quad_spi_transposer.h` (simple implementation)
+- [x] Bit-interleaving transposer in `spi_transposer_quad.h` (simple implementation)
 - [x] 56 passing unit tests
 - [x] Mock driver for testing
 
 ### ✅ Phase 1-2: Unit Testable Work - **COMPLETE**
 - [x] **Bit Spreading Algorithm** (~2-4 hours) - ✅ **COMPLETE**
-  - [x] Implement `interleave_byte_optimized()` in `quad_spi_transposer.h`
+  - [x] Implement `interleave_byte_optimized()` in `spi_transposer_quad.h`
   - [x] Replace nested loops with direct bit extraction
   - [x] Add unit tests for known bit patterns (0xAA, 0xFF, 0x00 combinations)
   - [x] Add performance comparison test

@@ -188,7 +188,7 @@ template <typename T> class Slice {
 
     const T &back() const { return *(mData + mSize - 1); }
 
-    bool empty() { return mSize == 0; }
+    bool empty() const { return mSize == 0; }
 
   private:
     T *mData;
