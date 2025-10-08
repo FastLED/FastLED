@@ -1,6 +1,11 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportUnknownVariableType=false, reportUnknownArgumentType=false
-"""RunningProcessGroup - Unified process execution management for FastLED CI."""
+"""RunningProcessGroup - Unified process execution management for FastLED CI.
+
+IMPORTANT: Always use flush=True with print() statements to prevent stdout buffering issues
+when output is piped to other processes (e.g., codeup, CI tools). Python switches from line-buffered
+to fully-buffered mode when stdout is not a TTY, which can cause multi-second delays in output.
+"""
 
 import os
 import subprocess
@@ -168,7 +173,7 @@ class RunningProcessGroup:
         if not self.processes:
             return []
 
-        print(f"Running process group: {self.name}")
+        print(f"Running process group: {self.name}", flush=True)
 
         if self.config.execution_mode == ExecutionMode.PARALLEL:
             return self._run_parallel()
@@ -204,9 +209,9 @@ class RunningProcessGroup:
             cmd_str = proc.get_command_str()
             if proc.proc is None:  # Only start if not already running
                 proc.run()
-                print(f"Started: {cmd_str}")
+                print(f"Started: {cmd_str}", flush=True)
             else:
-                print(f"Process already running: {cmd_str}")
+                print(f"Process already running: {cmd_str}", flush=True)
 
         # Monitor all processes for output and completion
         active_processes = self.processes.copy()
@@ -251,9 +256,12 @@ class RunningProcessGroup:
             while active_processes:
                 # Check global timeout
                 if time_expired():
-                    print(f"\nGlobal timeout reached after {global_timeout} seconds")
-                    print("\033[91m###### ERROR ######\033[0m")
-                    print("Tests failed due to global timeout")
+                    print(
+                        f"\nGlobal timeout reached after {global_timeout} seconds",
+                        flush=True,
+                    )
+                    print("\033[91m###### ERROR ######\033[0m", flush=True)
+                    print("Tests failed due to global timeout", flush=True)
                     failures: list[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(
@@ -287,7 +295,8 @@ class RunningProcessGroup:
                             len(exit_failed_processes) + len(failed_processes)
                         ) >= self.config.max_failures_before_abort:
                             print(
-                                f"\nExceeded failure threshold ({self.config.max_failures_before_abort}). Aborting remaining tests."
+                                f"\nExceeded failure threshold ({self.config.max_failures_before_abort}). Aborting remaining tests.",
+                                flush=True,
                             )
                             # Kill any remaining active processes
                             for p in active_processes:
@@ -322,12 +331,13 @@ class RunningProcessGroup:
 
         # Check for processes that failed with non-zero exit codes
         if exit_failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m")
+            print(f"\n\033[91m###### ERROR ######\033[0m", flush=True)
             print(
-                f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
+                f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:",
+                flush=True,
             )
             for proc, exit_code in exit_failed_processes:
-                print(f"  - {proc.command} (exit code {exit_code})")
+                print(f"  - {proc.command} (exit code {exit_code})", flush=True)
             failures: list[TestFailureInfo] = []
             for proc, exit_code in exit_failed_processes:
                 # Extract error snippet from process output
@@ -346,11 +356,14 @@ class RunningProcessGroup:
 
         # Check for failed processes (killed due to timeout/stuck)
         if failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m")
-            print(f"Tests failed due to {len(failed_processes)} killed process(es):")
+            print(f"\n\033[91m###### ERROR ######\033[0m", flush=True)
+            print(
+                f"Tests failed due to {len(failed_processes)} killed process(es):",
+                flush=True,
+            )
             for cmd in failed_processes:
-                print(f"  - {cmd}")
-            print("Processes were killed due to timeout/stuck detection")
+                print(f"  - {cmd}", flush=True)
+            print("Processes were killed due to timeout/stuck detection", flush=True)
             failures: list[TestFailureInfo] = []
             for cmd in failed_processes:
                 failures.append(
@@ -535,7 +548,10 @@ class RunningProcessGroup:
 
                 # Check for non-zero exit code (failure)
                 if exit_code != 0:
-                    print(f"Process failed with exit code {exit_code}: {proc.command}")
+                    print(
+                        f"Process failed with exit code {exit_code}: {proc.command}",
+                        flush=True,
+                    )
                     exit_failed_processes.append((proc, exit_code))
                     # Early abort if we reached the failure threshold
                     if (
@@ -566,7 +582,7 @@ class RunningProcessGroup:
         self._status_monitoring_active = True
         try:
             for process in self.processes:
-                print(f"Running: {process.get_command_str()}")
+                print(f"Running: {process.get_command_str()}", flush=True)
 
                 # Track process start time
                 self._track_process_start(process)
@@ -639,7 +655,7 @@ class RunningProcessGroup:
 
                 # Run the first ready process
                 process = ready_processes[0]
-                print(f"Running: {process.get_command_str()}")
+                print(f"Running: {process.get_command_str()}", flush=True)
 
                 # Track process start time
                 self._track_process_start(process)
