@@ -1394,7 +1394,7 @@ class PlatformIOIni:
                 cmd,
                 capture_output=True,
                 text=True,
-                timeout=30,
+                timeout=60,
                 check=True,
             )
 
