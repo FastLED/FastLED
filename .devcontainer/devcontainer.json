@@ -1,0 +1,48 @@
+{
+  "name": "FastLED Development",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+
+  "features": {
+    "ghcr.io/devcontainers/features/python:1": {
+      "version": "3.11"
+    },
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "lts"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "platformio.platformio-ide",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-vscode.cpptools-extension-pack",
+        "ms-vscode.cmake-tools"
+      ],
+      "settings": {
+        "python.defaultInterpreterPath": "/usr/local/bin/python3.11",
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+
+  "postCreateCommand": "pip install uv && uv sync",
+
+  "containerEnv": {
+    "PYTHONUNBUFFERED": "1"
+  },
+
+  "forwardPorts": [3000, 8080],
+
+  "mounts": [
+    "source=${localWorkspaceFolder}/.platformio,target=/home/vscode/.platformio,type=bind,consistency=cached"
+  ],
+
+  "remoteUser": "vscode"
+}
