@@ -758,7 +758,12 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
             # Recursively sync subdirectories for better caching
             dest_subdir = sketch_dir / file_path.name
             dest_subdir.mkdir(parents=True, exist_ok=True)
-            sync(str(file_path), str(dest_subdir), "sync", purge=True)
+            # Only pass content=True in Docker environments (content-based comparison)
+            # On other systems, use default behavior (timestamp/size) by omitting the parameter
+            if os.environ.get("DOCKER_CONTAINER", "") != "":
+                sync(str(file_path), str(dest_subdir), "sync", purge=True, content=True)
+            else:
+                sync(str(file_path), str(dest_subdir), "sync", purge=True)
             try:
                 rel_source = file_path.relative_to(Path.cwd())
                 rel_dest = dest_subdir.relative_to(Path.cwd())
@@ -848,7 +853,12 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
         boards_dst.mkdir(parents=True, exist_ok=True)
 
         # Use sync for better caching - purge=True removes extra files
-        sync(str(boards_src), str(boards_dst), "sync", purge=True)
+        # Only pass content=True in Docker environments (content-based comparison)
+        # On other systems, use default behavior (timestamp/size) by omitting the parameter
+        if os.environ.get("DOCKER_CONTAINER", "") != "":
+            sync(str(boards_src), str(boards_dst), "sync", purge=True, content=True)
+        else:
+            sync(str(boards_src), str(boards_dst), "sync", purge=True)
     except Exception as e:
         warnings.warn(f"Failed to sync boards directory: {e}")
         return False
@@ -1041,7 +1051,12 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
         lib_dir.mkdir(parents=True, exist_ok=True)
 
         # Use dirsync.sync for efficient incremental synchronization
-        sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
+        # Only pass content=True in Docker environments (content-based comparison)
+        # On other systems, use default behavior (timestamp/size) by omitting the parameter
+        if os.environ.get("DOCKER_CONTAINER", "") != "":
+            sync(str(fastled_src_path), str(lib_dir), "sync", purge=True, content=True)
+        else:
+            sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
 
         # Copy library.json to the root of lib/FastLED
         library_json_src = project_root / "library.json"
