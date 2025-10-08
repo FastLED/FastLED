@@ -345,16 +345,57 @@ class BuildAPI:
                 print("[BUILD API] No unity objects produced")
                 return False
 
-            # Archive unity objects into the final library
+            # Compile third_party files separately (they can't be in unity builds)
+            from ci.compiler.linking.library_builder import get_third_party_sources
+
+            third_party_sources = get_third_party_sources()
+            third_party_objects: list[Path] = []
+
+            if third_party_sources:
+                print(
+                    f"[BUILD API] Compiling {len(third_party_sources)} third_party files separately..."
+                )
+                third_party_dir = unity_dir / "third_party"
+                third_party_dir.mkdir(parents=True, exist_ok=True)
+
+                for tp_file in third_party_sources:
+                    # Create unique object file name
+                    rel_path = (
+                        tp_file.relative_to(PROJECT_ROOT / "src")
+                        if tp_file.is_relative_to(PROJECT_ROOT / "src")
+                        else tp_file
+                    )
+                    obj_name = (
+                        str(rel_path.with_suffix(".o"))
+                        .replace("/", "_")
+                        .replace("\\", "_")
+                    )
+                    obj_file = third_party_dir / obj_name
+
+                    # Compile the third_party file
+                    result = self._compiler.compile_cpp_file(tp_file, obj_file).result()
+                    if not result.ok:
+                        print(
+                            f"[BUILD API] Failed to compile third_party file {tp_file}: {result.stderr}"
+                        )
+                        return False
+                    third_party_objects.append(obj_file)
+
+                print(
+                    f"[BUILD API] Successfully compiled {len(third_party_objects)} third_party files"
+                )
+
+            # Archive unity objects + third_party objects into the final library
+            all_objects = unity_objects + third_party_objects
             archive_result = self._compiler.create_archive(
-                unity_objects, self._library_file, LibarchiveOptions()
+                all_objects, self._library_file, LibarchiveOptions()
             ).result()
             if not archive_result.ok:
                 print(f"[BUILD API] Archive creation failed: {archive_result.stderr}")
                 return False
 
             print(
-                f"[BUILD API] Library built successfully (UNITY): {self._library_file}"
+                f"[BUILD API] Library built successfully (UNITY + third_party): {self._library_file}"
             )
             return True
         except Exception as e:

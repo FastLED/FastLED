@@ -169,12 +169,50 @@ def build_unity_chunks_and_archive(
             if not result.ok:
                 raise RuntimeError(f"Unity chunk {i + 1} failed: {result.stderr}")
 
-    # Create archive from chunk objects
+    # Compile third_party files separately (they can't be in unity builds)
+    from ci.compiler.linking.library_builder import get_third_party_sources
+
+    third_party_sources = get_third_party_sources()
+    third_party_objects: List[Path] = []
+
+    if third_party_sources:
+        print(
+            f"[UNITY] Compiling {len(third_party_sources)} third_party files separately..."
+        )
+        third_party_dir = unity_dir / "third_party"
+        third_party_dir.mkdir(parents=True, exist_ok=True)
+
+        project_root = Path.cwd()
+        for tp_file in third_party_sources:
+            # Create unique object file name
+            try:
+                rel_path = tp_file.relative_to(project_root / "src")
+            except ValueError:
+                rel_path = tp_file
+            obj_name = (
+                str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
+            )
+            obj_file = third_party_dir / obj_name
+
+            # Compile the third_party file
+            result = compiler.compile_cpp_file(tp_file, obj_file).result()
+            if not result.ok:
+                raise RuntimeError(
+                    f"Failed to compile third_party file {tp_file}: {result.stderr}"
+                )
+            third_party_objects.append(obj_file)
+
+        print(
+            f"[UNITY] Successfully compiled {len(third_party_objects)} third_party files"
+        )
+
+    # Create archive from chunk objects + third_party objects
     from ci.compiler.clang_compiler import LibarchiveOptions
 
+    all_objects = unity_obj_paths + third_party_objects
     output_archive.parent.mkdir(parents=True, exist_ok=True)
     archive_result = compiler.create_archive(
-        unity_obj_paths, output_archive, LibarchiveOptions()
+        all_objects, output_archive, LibarchiveOptions()
     ).result()
     if not archive_result.ok:
         raise RuntimeError(f"Archive creation failed: {archive_result.stderr}")

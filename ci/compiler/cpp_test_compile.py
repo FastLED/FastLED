@@ -280,6 +280,10 @@ def get_unit_test_fastled_sources() -> list[Path]:
         if cpp_file.name == "stub_main.cpp":
             continue
 
+        # Skip third_party files - they need special handling (not for unity builds)
+        if "third_party" in cpp_file.parts:
+            continue
+
         # Skip platform-specific files that aren't needed for unit tests
         rel_path_str = str(cpp_file)
         if any(
@@ -498,6 +502,63 @@ def create_unit_test_fastled_library(
                 f"CRITICAL: {failed_count} FastLED source files failed to compile in unity chunks. "
                 f"This indicates a serious build environment issue."
             )
+
+        # Compile third_party files separately (they can't be in unity builds)
+        from ci.compiler.linking.library_builder import get_third_party_sources
+
+        third_party_sources = get_third_party_sources()
+
+        if third_party_sources:
+            print(
+                f"[LIBRARY] Compiling {len(third_party_sources)} third_party files separately..."
+            )
+            third_party_dir = unity_dir / "third_party"
+            third_party_dir.mkdir(exist_ok=True)
+
+            third_party_futures: List[Tuple[Future[Result], Path, Path]] = []
+            for tp_file in third_party_sources:
+                # Create unique object file name
+                if tp_file.is_relative_to(src_dir):
+                    rel_path = tp_file.relative_to(src_dir)
+                else:
+                    rel_path = tp_file
+                obj_name = (
+                    str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
+                )
+                obj_file = third_party_dir / obj_name
+
+                # Compile the third_party file
+                future = library_compiler.compile_cpp_file(tp_file, obj_file)
+                third_party_futures.append((future, obj_file, tp_file))
+
+            # Wait for third_party compilations to complete
+            tp_compiled_count = 0
+            tp_failed_count = 0
+            for future, obj_file, tp_file in third_party_futures:
+                try:
+                    result = future.result()
+                    if result.ok:
+                        fastled_objects.append(obj_file)
+                        tp_compiled_count += 1
+                    else:
+                        tp_failed_count += 1
+                        print(
+                            f"[LIBRARY] ERROR: Failed to compile third_party file {tp_file}: {result.stderr[:300]}..."
+                        )
+                except Exception as e:
+                    tp_failed_count += 1
+                    print(
+                        f"[LIBRARY] ERROR: Exception compiling third_party file {tp_file}: {e}"
+                    )
+
+            print(
+                f"[LIBRARY] Successfully compiled {tp_compiled_count}/{len(third_party_sources)} third_party files"
+            )
+
+            if tp_failed_count > 0:
+                raise Exception(
+                    f"CRITICAL: {tp_failed_count} third_party source files failed to compile."
+                )
 
     else:
         # Original individual file compilation (fallback)

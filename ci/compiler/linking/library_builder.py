@@ -8,7 +8,7 @@ from ci.compiler.clang_compiler import Compiler, Result
 
 
 def get_fastled_core_sources() -> List[Path]:
-    """Get essential FastLED .cpp files for library creation."""
+    """Get essential FastLED .cpp files for library creation (excludes third_party)."""
     src_dir = Path("src")
 
     # Core FastLED files that must be included
@@ -35,11 +35,45 @@ def get_fastled_core_sources() -> List[Path]:
         if cpp_file.name == "stub_main.cpp":
             continue
 
+        # Skip third_party files - they need special handling (not for unity builds)
+        if "third_party" in cpp_file.parts:
+            continue
+
         if cpp_file.exists() and cpp_file not in seen_files:
             all_sources.append(cpp_file)
             seen_files.add(cpp_file)
 
     return all_sources
+
+
+def get_third_party_sources() -> List[Path]:
+    """Get third_party .cpp/.c files that need separate compilation."""
+    # Find project root - go up from this file's location
+    # This file is at ci/compiler/linking/library_builder.py
+    this_file = Path(__file__).resolve()
+    project_root = this_file.parent.parent.parent.parent  # Go up to project root
+
+    src_dir = project_root / "src"
+    third_party_dir = src_dir / "third_party"
+
+    if not third_party_dir.exists():
+        return []
+
+    # Find all .cpp and .c files in third_party
+    sources: List[Path] = []
+    sources.extend(list(third_party_dir.rglob("*.cpp")))
+    sources.extend(list(third_party_dir.rglob("*.c")))
+
+    # Filter out duplicates
+    seen_files: set[Path] = set()
+    unique_sources: List[Path] = []
+
+    for source_file in sources:
+        if source_file.exists() and source_file not in seen_files:
+            unique_sources.append(source_file)
+            seen_files.add(source_file)
+
+    return unique_sources
 
 
 def create_fastled_library(
