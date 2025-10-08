@@ -115,7 +115,7 @@ public:
             config.clk_gpio = mClkPin;
             config.num_lanes = optimal_width;  // Must match DATA_WIDTH template parameter
             config.clock_freq_hz = 12000000;  // 12 MHz
-            config.buffer_strategy = fl::ParlioBufferStrategy::BREAK_PER_COLOR;  // Use LSB-safe buffer breaking
+            config.buffer_strategy = fl::ParlioBufferStrategy::MONOLITHIC;  // Send all data contiguously
 
             for (int i = 0; i < num_strips; i++) {
                 config.data_gpios[i] = pinList[i];

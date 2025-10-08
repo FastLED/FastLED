@@ -14,6 +14,22 @@
     #define PARLIO_DLOG(msg) do { } while(0)
 #endif
 
+// ============================================================================
+// TODO: WLED-MM-P4 Style Buffer Breaking Strategy
+// ============================================================================
+// Current BREAK_PER_COLOR implementation breaks buffers between entire color
+// components (all G bits → all R bits → all B bits). This can cause LEDs to
+// latch prematurely during DMA gaps between color transmissions.
+//
+// WLED-MM-P4 uses a superior approach:
+// - Break buffers at LED boundaries after the LSB (bit 0) of each color byte
+// - DMA gaps only affect the least significant bit (minimal visual impact)
+// - Worst case artifact: 0,0,0 becomes 0,0,1 (imperceptible)
+// - Keeps each transmission under timing threshold (<20μs gap tolerance)
+//
+// Reference: https://github.com/FastLED/FastLED/issues/2095#issuecomment-3369337632
+// ============================================================================
+
 // Helper function to convert esp_err_t to readable string
 namespace detail {
 inline const char* parlio_err_to_str(esp_err_t err) {
@@ -370,6 +386,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
         PARLIO_DLOG("Using BREAK_PER_COLOR packing strategy");
         // Pack data into 3 separate sub-buffers (one per color component)
         // This ensures DMA gaps only occur at color boundaries
+        // TODO: See top of file for WLED-MM-P4 style buffer breaking strategy
         for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
             // Get which CRGB byte to output at this position
             uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
@@ -469,7 +486,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
             }
         }
     }
-    PARLIO_DLOG("pack_data() completed - packed " << byte_idx << " bytes");
+    PARLIO_DLOG("pack_data() completed");
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
