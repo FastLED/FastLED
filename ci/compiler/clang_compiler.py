@@ -1648,7 +1648,8 @@ class Compiler:
                 is_arduino_include = is_include and "Arduino.h" in stripped
 
                 problematic_patterns = [
-                    is_include and not is_arduino_include,  # Any include except Arduino.h
+                    is_include
+                    and not is_arduino_include,  # Any include except Arduino.h
                     stripped.startswith("#define"),  # Any define
                     stripped.startswith("#ifdef"),  # Conditional compilation
                     stripped.startswith("#ifndef"),  # Conditional compilation
