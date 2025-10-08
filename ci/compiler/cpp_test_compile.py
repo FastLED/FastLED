@@ -121,9 +121,28 @@ def calculate_linker_args_hash(linker_args: list[str]) -> str:
 
 
 def calculate_link_cache_key(
-    object_files: list[str | Path], fastled_lib_path: Path, linker_args: list[str]
+    object_files: list[str | Path],
+    fastled_lib_path: Path,
+    linker_args: list[str],
+    source_file: Path | None = None,  # NEW: Source .cpp file dependency
 ) -> str:
-    """Calculate comprehensive cache key for linking (same as examples)"""
+    """
+    Calculate comprehensive cache key for linking.
+
+    Dependencies tracked:
+    - Source .cpp file content (if provided)
+    - Object .o file content
+    - FastLED library content
+    - Linker arguments
+
+    If ANY of these change, the cache is invalidated.
+    """
+    # Hash source file FIRST (cheapest and most likely to change)
+    if source_file and source_file.exists():
+        src_hash = calculate_file_hash(source_file)
+    else:
+        src_hash = "no_source"
+
     # Calculate hash for each object file
     obj_hashes: list[str] = []
     for obj_file in object_files:
@@ -144,8 +163,8 @@ def calculate_link_cache_key(
     fastled_hash = calculate_file_hash(fastled_lib_path)
     linker_hash = calculate_linker_args_hash(linker_args)
 
-    # Combine all components (same format as FastLEDTestCompiler)
-    combined = f"fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}"
+    # Combine all components - source file hash is included FIRST
+    combined = f"source:{src_hash}|fastled:{fastled_hash}|objects:{combined_obj_hash}|flags:{linker_hash}"
     final_hash = hashlib.sha256(combined.encode("utf-8")).hexdigest()
 
     return final_hash[:16]  # Use first 16 chars for readability
@@ -952,14 +971,16 @@ def compile_unit_tests_python_api(
             else:  # Linux/macOS
                 linker_args = ["-pthread"]
 
-            # HASH-BASED CACHE CHECK (same as examples)
+            # HASH-BASED CACHE CHECK (includes source file dependency)
             if not fastled_lib_path:
                 print(f"⚠️  No FastLED library found, skipping cache for {test_name}")
                 cache_key = "no_fastled_lib"
                 cached_exe = None
             else:
+                # Include source file in cache key so ANY source change invalidates cache
+                test_source_file = info["test_file"]
                 cache_key = calculate_link_cache_key(
-                    object_files, fastled_lib_path, linker_args
+                    object_files, fastled_lib_path, linker_args, test_source_file
                 )
                 cached_exe = get_cached_executable(test_name, cache_key)
 
