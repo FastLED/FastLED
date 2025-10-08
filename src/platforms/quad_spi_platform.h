@@ -1,46 +1,27 @@
 #pragma once
 
-// Platform detection and capability macros for Quad-SPI support
-// Determines which platforms support hardware Quad-SPI for parallel LED control
-//
-// This file does coarse platform detection and delegates to platform-specific headers
-// for fine-grained detection and configuration.
-
-// Coarse platform detection - delegate to platform-specific headers
-#if defined(FASTLED_TESTING)
-    // Testing mode: Use stub platform with mock driver
-    #include "platforms/stub/quad_spi_platform_stub.h"
-
-#elif defined(ESP32)
-    // ESP32 family: Delegate to ESP-specific platform header
-    #include "platforms/esp/quad_spi_platform_esp.h"
-#endif
+/// @file quad_spi_platform.h
+/// @brief Simple platform detection for Quad-SPI examples
+///
+/// This header provides a simple compile-time check for platforms that
+/// support the SPIQuad API. The actual platform capabilities are determined
+/// at runtime through SPIQuad::getAll().
+///
+/// For example code, use: #if FASTLED_HAS_QUAD_SPI_API
+/// For runtime detection, use: SPIQuad::getAll()
 
 namespace fl {
 
-// Fallback for platforms without hardware Quad-SPI support
-#if !defined(FASTLED_HAS_QUAD_SPI)
-    #define FASTLED_HAS_QUAD_SPI 0
-    #define FASTLED_QUAD_SPI_MAX_LANES 0
-    #define FASTLED_QUAD_SPI_NUM_BUSES 0
-#endif
-
-// Helper macros
-#ifndef FASTLED_HAS_DUAL_SPI
-#define FASTLED_HAS_DUAL_SPI 0
-#endif
-
-#ifndef FASTLED_HAS_OCTAL_SPI
-#define FASTLED_HAS_OCTAL_SPI 0
-#endif
-
-#define FASTLED_HAS_HARDWARE_SPI (FASTLED_HAS_QUAD_SPI || FASTLED_HAS_DUAL_SPI || FASTLED_HAS_OCTAL_SPI)
-
-// Maximum total parallel strips (lanes × buses)
-#if FASTLED_HAS_HARDWARE_SPI
-#define FASTLED_QUAD_SPI_MAX_TOTAL_LANES (FASTLED_QUAD_SPI_MAX_LANES * FASTLED_QUAD_SPI_NUM_BUSES)
+// Simple compile-time flag for example compilation
+// This only indicates that the SPIQuad API is available, not actual hardware support
+// Use SPIQuad::getAll() at runtime to check for actual hardware controllers
+#if defined(FASTLED_TESTING) || defined(ESP32)
+    #define FASTLED_HAS_QUAD_SPI_API 1
 #else
-#define FASTLED_QUAD_SPI_MAX_TOTAL_LANES 0
+    #define FASTLED_HAS_QUAD_SPI_API 0
 #endif
+
+// Legacy macro for backwards compatibility with existing examples
+#define FASTLED_HAS_QUAD_SPI FASTLED_HAS_QUAD_SPI_API
 
 }  // namespace fl

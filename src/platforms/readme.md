@@ -106,36 +106,61 @@ FastLED follows a **coarse-to-fine delegation pattern** for platform detection h
 
 #### Real-world example: Quad-SPI detection
 
-**Coarse detection** in `platforms/quad_spi_platform.h`:
+**Modern approach** uses runtime detection with weak symbols instead of compile-time macros:
+
 ```cpp
-#if defined(FASTLED_TESTING)
-    #include "platforms/stub/quad_spi_platform_stub.h"
-#elif defined(ESP32)
-    // All ESP32 variants go here
-    #include "platforms/esp/quad_spi_platform_esp.h"
+// platforms/quad_spi_platform.h - Simple compile-time API check
+#if defined(FASTLED_TESTING) || defined(ESP32)
+    #define FASTLED_HAS_QUAD_SPI_API 1
 #else
-    // No Quad-SPI support
+    #define FASTLED_HAS_QUAD_SPI_API 0
 #endif
 ```
 
-**Fine-grained detection** in `platforms/esp/quad_spi_platform_esp.h`:
+**Platform-specific implementation** in `platforms/esp/32/spi_quad_esp32.cpp`:
 ```cpp
-#if defined(ESP32) || defined(CONFIG_IDF_TARGET_ESP32)
-    #define FASTLED_HAS_QUAD_SPI 1
-    #define FASTLED_QUAD_SPI_MAX_LANES 4  // ESP32 classic: 4 lanes
-#elif defined(ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    #define FASTLED_HAS_QUAD_SPI 1
-    #define FASTLED_QUAD_SPI_MAX_LANES 4  // ESP32-S3: 4 lanes
-#elif defined(ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C3)
-    #define FASTLED_HAS_DUAL_SPI 1
-    #define FASTLED_QUAD_SPI_MAX_LANES 2  // ESP32-C3: only 2 lanes
-#elif defined(ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32P4)
-    #define FASTLED_HAS_OCTAL_SPI 1
-    #define FASTLED_QUAD_SPI_MAX_LANES 8  // ESP32-P4: 8 lanes!
+// Weak default in platforms/shared/spi_quad.cpp
+FL_LINK_WEAK
+fl::vector<SPIQuad*> SPIQuad::createInstances() {
+    return fl::vector<SPIQuad*>();  // No Quad-SPI
+}
+
+// Strong override in platforms/esp/32/spi_quad_esp32.cpp
+fl::vector<SPIQuad*> SPIQuad::createInstances() {
+    fl::vector<SPIQuad*> controllers;
+
+#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3)
+    static SPIQuadESP32 controller2(2, "HSPI");
+    static SPIQuadESP32 controller3(3, "VSPI");
+    controllers.push_back(&controller2);
+    controllers.push_back(&controller3);
+#elif defined(ESP32C3)
+    static SPIQuadESP32 controller2(2, "SPI2");  // Dual-SPI only
+    controllers.push_back(&controller2);
+#elif defined(ESP32P4)
+    // Octal-SPI support - future enhancement
+    static SPIQuadESP32 controller2(2, "SPI2");
+    static SPIQuadESP32 controller3(3, "SPI3");
+    controllers.push_back(&controller2);
+    controllers.push_back(&controller3);
 #endif
+
+    return controllers;
+}
 ```
 
-This pattern ensures clean separation: the top-level header knows only "this is ESP32" and delegates all variant-specific details to the ESP subdirectory.
+**Runtime usage**:
+```cpp
+// Check available controllers at runtime
+const auto& controllers = SPIQuad::getAll();
+if (controllers.empty()) {
+    // Platform doesn't support Quad-SPI
+} else {
+    // Use controllers[0], controllers[1], etc.
+}
+```
+
+This pattern uses weak linkage to provide default behavior while allowing platform-specific implementations to override at link time. It moves platform detection from compile-time to runtime, making the codebase more maintainable and testable.
 
 ### Controller types in FastLED
 
