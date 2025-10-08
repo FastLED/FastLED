@@ -39,15 +39,7 @@ T max(T a, T b) {
 
 namespace fl {
 
-inline long map(long x, long in_min, long in_max, long out_min, long out_max) {
-    const long run = in_max - in_min;
-    if (run == 0) {
-        return 0; // AVR returns -1, SAM returns 0
-    }
-    const long rise = out_max - out_min;
-    const long delta = x - in_min;
-    return (delta * rise) / run + out_min;
-}
+long map(long x, long in_min, long in_max, long out_min, long out_max);
 
 // constrain
 template <typename T> T constrain(T x, T a, T b) {
@@ -58,30 +50,10 @@ template <typename T> T constrain(T x, T a, T b) {
 using fl::constrain;
 using fl::map;
 
-inline long random(long min, long max) {
-    if (min == max) {
-        return min;
-    }
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    // Arduino random is exclusive of the max value, but
-    // std::uniform_int_distribution is inclusive. So we subtract 1 from the max
-    // value.
-    std::uniform_int_distribution<> dis(min, max - 1);
-    return dis(gen);
-}
-
-inline int analogRead(int) { return random(0, 1023); }
-
-inline long random(long max) { return random(0, max); }
-
-// Arduino-compatible random() with no parameters - returns full range random long
-inline long random() { 
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<long> dis;
-    return dis(gen);
-}
+long random(long min, long max);
+long random(long max);
+long random();
+int analogRead(int);
 
 
 
@@ -136,85 +108,32 @@ inline long random() {
 
 
 struct SerialEmulation {
-    void begin(int) {}
+    void begin(int);
+
+    // Template methods must stay in header
     template <typename T> void print(T val) {
         fl::cout << val;
     }
     template <typename T> void println(T val) {
         fl::cout << val << fl::endl;
     }
-    
-    // Two-argument print overloads for formatting
-    void print(float _val, int digits) { 
-        // Clamp digits to reasonable range
-        digits = digits < 0 ? 0 : (digits > 9 ? 9 : digits);
-        double val = static_cast<double>(_val);
-        
-        // Use literal format strings to avoid linter warnings
-        switch(digits) {
-            case 0: printf("%.0f", val); break;
-            case 1: printf("%.1f", val); break;
-            case 2: printf("%.2f", val); break;
-            case 3: printf("%.3f", val); break;
-            case 4: printf("%.4f", val); break;
-            case 5: printf("%.5f", val); break;
-            case 6: printf("%.6f", val); break;
-            case 7: printf("%.7f", val); break;
-            case 8: printf("%.8f", val); break;
-            case 9: printf("%.9f", val); break;
-        }
-    }
-    void print(double val, int digits) { 
-        // Clamp digits to reasonable range
-        digits = digits < 0 ? 0 : (digits > 9 ? 9 : digits);
-        
-        // Use literal format strings to avoid linter warnings
-        switch(digits) {
-            case 0: printf("%.0f", val); break;
-            case 1: printf("%.1f", val); break;
-            case 2: printf("%.2f", val); break;
-            case 3: printf("%.3f", val); break;
-            case 4: printf("%.4f", val); break;
-            case 5: printf("%.5f", val); break;
-            case 6: printf("%.6f", val); break;
-            case 7: printf("%.7f", val); break;
-            case 8: printf("%.8f", val); break;
-            case 9: printf("%.9f", val); break;
-        }
-    }
-    void print(int val, int base) {
-        if (base == 16) printf("%x", val);
-        else if (base == 8) printf("%o", val);
-        else if (base == 2) {
-            // Binary output
-            for (int i = 31; i >= 0; i--) {
-                printf("%d", (val >> i) & 1);
-            }
-        }
-        else printf("%d", val);
-    }
-    void print(unsigned int val, int base) {
-        if (base == 16) printf("%x", val);
-        else if (base == 8) printf("%o", val);
-        else if (base == 2) {
-            // Binary output
-            for (int i = 31; i >= 0; i--) {
-                printf("%d", (val >> i) & 1);
-            }
-        }
-        else printf("%u", val);
-    }
-    
-    void println() { printf("\n"); }
-    int available() { return 0; }
-    int read() { return 0; }
-    void write(uint8_t) {}
-    void write(const char *s) { printf("%s", s); }
-    void write(const uint8_t *s, size_t n) { fwrite(s, 1, n, stdout); }
-    void write(const char *s, size_t n) { fwrite(s, 1, n, stdout); }
-    void flush() {}
-    void end() {}
-    uint8_t peek() { return 0; }
+
+    // Two-argument print overloads for formatting - moved to .cpp
+    void print(float val, int digits);
+    void print(double val, int digits);
+    void print(int val, int base);
+    void print(unsigned int val, int base);
+
+    void println();
+    int available();
+    int read();
+    void write(uint8_t);
+    void write(const char *s);
+    void write(const uint8_t *s, size_t n);
+    void write(const char *s, size_t n);
+    void flush();
+    void end();
+    uint8_t peek();
 };
 
 #define LED_BUILTIN 13
@@ -224,10 +143,10 @@ struct SerialEmulation {
 #define OUTPUT 1
 #define INPUT_PULLUP 2
 
-inline void digitalWrite(int, int) {}
-inline void analogWrite(int, int) {}
-inline int digitalRead(int) { return LOW; }
-inline void pinMode(int, int) {}
+void digitalWrite(int, int);
+void analogWrite(int, int);
+int digitalRead(int);
+void pinMode(int, int);
 
 
 
