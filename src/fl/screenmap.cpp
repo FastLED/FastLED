@@ -6,18 +6,26 @@
 
 #include "fl/screenmap.h"
 
-#include "fl/json.h"
-#include "fl/map.h"
+// Heavy includes moved from header to reduce compilation time
+#include "fl/lut.h"       // Full LUT definitions needed for implementation
+#include "fl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
+#include "fl/str.h"       // 129.4ms - only needed for string parameters in implementations
+#include "fl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
+#include "fl/function.h"  // ~5ms - only needed for function<> constructor implementation
+
+// Other implementation dependencies
 #include "fl/math.h"
 #include "fl/math_macros.h"
 #include "fl/namespace.h"
-#include "fl/screenmap.h"
-#include "fl/str.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 
 
 namespace fl {
+
+// Default constructor and destructor - must be in .cpp for proper smart_ptr handling
+ScreenMap::ScreenMap() = default;
+ScreenMap::~ScreenMap() = default;
 
 // Helper function to extract a vector of floats from a JSON array
 fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray) {
@@ -77,6 +85,11 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 
     screenMap.setDiameter(cm_led_diameter);
     return screenMap;
+}
+
+ScreenMap ScreenMap::DefaultStrip(int numLeds, float cm_between_leds,
+                                  float cm_led_diameter, float completion) {
+    return Circle(numLeds, cm_between_leds, cm_led_diameter, completion);
 }
 
 bool ScreenMap::ParseJson(const char *jsonStrScreenMap,

@@ -3,14 +3,8 @@
 #include "fl/stdint.h"
 
 #include "fl/force_inline.h"
-#include "fl/lut.h"
-#include "fl/memory.h"
-
-#include "fl/map.h"
+#include "fl/map.h"      // Required: fl_map is a template alias, cannot be forward declared
 #include "fl/namespace.h"
-#include "fl/str.h"
-#include "fl/json.h"
-#include "fl/function.h"
 
 /* Screenmap maps strip indexes to x,y coordinates. This is used for FastLED Web
  * to map the 1D strip to a 2D screen. Note that the strip can have arbitrary
@@ -23,11 +17,20 @@
 
 namespace fl {
 
+// Forward declarations - full definitions only needed in .cpp
 class string;
 class Json;
+template<typename Signature> class function;
 
-// Forward declaration for internal helper function
-fl::vector<float> jsonArrayToFloatVector(const fl::Json& jsonArray);
+// Forward declare geometry types
+template<typename T> struct vec2;
+using vec2f = vec2<float>;
+
+// Forward declare LUT types and smart pointers
+template<typename T> class LUT;
+using LUTXYFLOAT = LUT<vec2f>;
+template<typename T> class shared_ptr;
+using LUTXYFLOATPtr = shared_ptr<LUTXYFLOAT>;
 
 // ScreenMap screen map maps strip indexes to x,y coordinates for a ui
 // canvas in float format.
@@ -40,11 +43,11 @@ class ScreenMap {
 
     static ScreenMap DefaultStrip(int numLeds, float cm_between_leds = 1.5f,
                                   float cm_led_diameter = 0.2f,
-                                  float completion = .9f) {
-        return Circle(numLeds, cm_between_leds, cm_led_diameter, completion);
-    }
+                                  float completion = .9f);
 
-    ScreenMap() = default;
+    // Constructors and destructor - implemented in .cpp for proper smart_ptr handling
+    ScreenMap();
+    ~ScreenMap();
 
     // is_reverse is false by default for linear layout
     ScreenMap(u32 length, float mDiameter = -1.0f);
