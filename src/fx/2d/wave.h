@@ -8,17 +8,13 @@
 
 #include "fl/stdint.h"
 
-#include "fl/warn.h"
-
 #include "fl/colorutils.h"
 #include "fl/gradient.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
-#include "fl/shared_ptr.h"  // For shared_ptr
+#include "fl/ptr.h"  // For FASTLED_SMART_PTR macros and shared_ptr
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"
 #include "fx/fx2d.h"
-#include "pixelset.h"
 
 namespace fl {
 
