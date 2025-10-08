@@ -103,59 +103,22 @@ namespace fl {
 /// @note Memory optimized: All buffers pre-allocated, zero allocations after first frame
 class QuadSPITransposer {
 public:
-    QuadSPITransposer() : mMaxLaneSize(0), mNumLanes(0) {
-        // Pre-allocate lanes array to maximum size (4 for quad-SPI)
-        // This prevents reallocation when adding lanes
-        mLanes.reserve(4);
-    }
+    QuadSPITransposer();
 
-    // Add a lane with its data and padding LED frame
-    // lane_id: 0-3 for quad-SPI
-    // data: protocol data for this lane
-    // padding_frame: black LED frame for synchronized latching (e.g., {0xE0,0,0,0} for APA102)
+    /// Add a lane with its data and padding LED frame
+    /// @param lane_id 0-3 for quad-SPI
+    /// @param data Protocol data for this lane
+    /// @param padding_frame Black LED frame for synchronized latching (e.g., {0xE0,0,0,0} for APA102)
     void addLane(uint8_t lane_id, const fl::vector<uint8_t>& data,
-                 fl::span<const uint8_t> padding_frame) {
-        if (lane_id >= 4) {
-            return;  // Invalid lane ID
-        }
+                 fl::span<const uint8_t> padding_frame);
 
-        LaneInfo lane;
-        lane.lane_id = lane_id;
-        lane.padding_frame_ptr = padding_frame.data();
-        lane.padding_frame_size = padding_frame.size();
-        lane.actual_size = data.size();
-        // Store pointer to external data instead of copying
-        lane.data_ptr = data.data();
-        lane.data_size = data.size();
+    /// Transpose all lanes into pre-allocated output buffer
+    /// @return Reference to internal interleaved buffer
+    const fl::vector<uint8_t>& transpose();
 
-        mLanes.push_back(lane);
-        mNumLanes++;
-        mMaxLaneSize = fl::fl_max(mMaxLaneSize, data.size());
-    }
-
-    // Transpose all lanes into pre-allocated output buffer
-    // Output buffer must be pre-allocated by caller
-    // Returns pointer to internal interleaved buffer for convenience
-    const fl::vector<uint8_t>& transpose() {
-        if (mLanes.empty()) {
-            mInterleavedBuffer.clear();
-            return mInterleavedBuffer;
-        }
-
-        // Interleave the lanes directly into member buffer
-        interleaveLanes();
-
-        return mInterleavedBuffer;
-    }
-
-    // Reset the transposer to prepare for a new frame
-    // Does NOT deallocate - preserves buffer capacity for reuse
-    void reset() {
-        mLanes.clear();
-        mMaxLaneSize = 0;
-        mNumLanes = 0;
-        // Don't clear mInterleavedBuffer - keep capacity for reuse
-    }
+    /// Reset the transposer to prepare for a new frame
+    /// @note Does NOT deallocate - preserves buffer capacity for reuse
+    void reset();
 
 private:
     struct LaneInfo {
@@ -173,105 +136,21 @@ private:
     uint8_t mNumLanes;
     fl::vector<uint8_t> mInterleavedBuffer;  // Reusable output buffer
 
-    // Get byte from lane at given index, handling padding automatically
-    // If index is in padding region, returns padding frame byte
-    // If index is in data region, returns actual data byte
-    inline uint8_t getLaneByte(const LaneInfo& lane, size_t byte_idx) const {
-        // Calculate padding needed for this lane
-        size_t padding_bytes = mMaxLaneSize - lane.data_size;
-
-        // If we're in the padding region (prepended to beginning)
-        if (byte_idx < padding_bytes) {
-            // Return padding frame byte (repeating pattern)
-            if (lane.padding_frame_size > 0 && lane.padding_frame_ptr != nullptr) {
-                return lane.padding_frame_ptr[byte_idx % lane.padding_frame_size];
-            }
-            return 0x00;  // Fallback to zero
-        }
-
-        // We're in the data region
-        size_t data_idx = byte_idx - padding_bytes;
-        if (data_idx < lane.data_size) {
-            return lane.data_ptr[data_idx];
-        }
-
-        // Should never reach here if mMaxLaneSize is correct
-        return 0x00;
-    }
+    /// Get byte from lane at given index, handling padding automatically
+    uint8_t getLaneByte(const LaneInfo& lane, size_t byte_idx) const;
 
     /// Optimized bit interleaving using direct bit extraction
-    ///
-    /// This function provides 2-3× performance improvement over nested loops
-    /// by directly extracting and combining 2-bit pairs from each input byte.
-    ///
-    /// Algorithm choice rationale:
-    /// - Direct bit extraction is simple, correct, and compiler-friendly
-    /// - Avoids complex parallel bit-spreading tricks that can be error-prone
-    /// - Compiler optimizes this to efficient register operations
-    /// - Fully unit-tested with exact bit position verification
-    ///
     /// @param dest Output buffer (must have space for 4 bytes)
     /// @param a Lane 0 input byte
     /// @param b Lane 1 input byte
     /// @param c Lane 2 input byte
     /// @param d Lane 3 input byte
-    static inline void interleave_byte_optimized(uint8_t* dest,
-                                                  uint8_t a, uint8_t b,
-                                                  uint8_t c, uint8_t d) {
-        // Each output byte contains 2 bits from each input lane
-        // Output format: [d1 d0 c1 c0 b1 b0 a1 a0]
-        // where a=lane0, b=lane1, c=lane2, d=lane3
+    static void interleave_byte_optimized(uint8_t* dest,
+                                          uint8_t a, uint8_t b,
+                                          uint8_t c, uint8_t d);
 
-        // Extract and combine 2-bit pairs from each lane
-        dest[0] = ((a >> 6) & 0x03) | (((b >> 6) & 0x03) << 2) |
-                  (((c >> 6) & 0x03) << 4) | (((d >> 6) & 0x03) << 6);
-        dest[1] = ((a >> 4) & 0x03) | (((b >> 4) & 0x03) << 2) |
-                  (((c >> 4) & 0x03) << 4) | (((d >> 4) & 0x03) << 6);
-        dest[2] = ((a >> 2) & 0x03) | (((b >> 2) & 0x03) << 2) |
-                  (((c >> 2) & 0x03) << 4) | (((d >> 2) & 0x03) << 6);
-        dest[3] = ( a       & 0x03) | (( b       & 0x03) << 2) |
-                  (( c       & 0x03) << 4) | (( d       & 0x03) << 6);
-    }
-
-    // Bit-interleave all lanes into member buffer (reused across frames)
-    // Quad-SPI format: each output byte contains 2 bits from each of 4 lanes
-    // Bit order: [D7 C7 B7 A7 D6 C6 B6 A6] where A,B,C,D are lanes 0-3
-    void interleaveLanes() {
-        // Calculate output buffer size
-        // Each input byte generates 4 output bytes (2 bits per lane × 4 lanes = 8 bits per output byte)
-        size_t output_size = mMaxLaneSize * 4;
-
-        // Resize only if needed (preserves capacity on subsequent calls)
-        if (mInterleavedBuffer.size() != output_size) {
-            mInterleavedBuffer.resize(output_size);
-        }
-
-        // Default padding byte for empty lane slots
-        uint8_t default_padding = 0x00;
-        if (mLanes.size() > 0 && mLanes[0].padding_frame_size > 0 && mLanes[0].padding_frame_ptr != nullptr) {
-            default_padding = mLanes[0].padding_frame_ptr[0];
-        }
-
-        // Process each input byte with optimized interleaving
-        for (size_t byte_idx = 0; byte_idx < mMaxLaneSize; byte_idx++) {
-            uint8_t lane_bytes[4];
-
-            // Gather bytes from each lane (handles padding automatically)
-            for (size_t lane = 0; lane < 4; lane++) {
-                if (lane < mLanes.size()) {
-                    lane_bytes[lane] = getLaneByte(mLanes[lane], byte_idx);
-                } else {
-                    lane_bytes[lane] = default_padding;
-                }
-            }
-
-            // Interleave this byte from all 4 lanes (produces 4 output bytes)
-            // Uses optimized function for 2-3× performance improvement
-            interleave_byte_optimized(&mInterleavedBuffer[byte_idx * 4],
-                                      lane_bytes[0], lane_bytes[1],
-                                      lane_bytes[2], lane_bytes[3]);
-        }
-    }
+    /// Bit-interleave all lanes into member buffer
+    void interleaveLanes();
 };
 
 }  // namespace fl
