@@ -8,8 +8,11 @@
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
+// PCH-compatible include order: Arduino.h and FastLED.h must come first
 #include <Arduino.h>
-#include <stdio.h>
+#include "FastLED.h"
+
+// Now we can include other headers and do platform checks
 #include "fl/sketch_macros.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
@@ -18,6 +21,8 @@ void setup() {}
 void loop() {}
 #else
 
+// Include remaining headers after FastLED.h and platform check
+#include <stdio.h>
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
@@ -25,11 +30,11 @@ void loop() {}
 #include "fl/screenmap.h"
 #include "fl/slice.h"
 #include "fl/ui.h"
-#include "FastLED.h"
 #include "sensors/pir.h"
 #include "fl/sstream.h"
 #include "fl/assert.h"
 
+// Defines come after all includes
 #define LED_PIN 2
 #define COLOR_ORDER GRB  // Color order matters for a real device, web-compiler will ignore this.
 #define NUM_LEDS 250

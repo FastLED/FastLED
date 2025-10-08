@@ -1638,17 +1638,17 @@ class Compiler:
                 if stripped.startswith("/*") and "*/" in stripped:
                     continue
 
-                # Check for FastLED.h include (various formats)
-                if "#include" in stripped and (
-                    "FastLED.h" in stripped
-                    or '"FastLED.h"' in stripped
-                    or "<FastLED.h>" in stripped
-                ):
+                # Check for FastLED.h include (any quote style)
+                if stripped.startswith("#include") and "FastLED.h" in stripped:
                     return True
 
                 # Check for problematic constructs before FastLED.h
+                # Allow Arduino.h before FastLED.h, but nothing else (any quote style)
+                is_include = stripped.startswith("#include")
+                is_arduino_include = is_include and "Arduino.h" in stripped
+
                 problematic_patterns = [
-                    stripped.startswith("#include"),  # Any other include
+                    is_include and not is_arduino_include,  # Any include except Arduino.h
                     stripped.startswith("#define"),  # Any define
                     stripped.startswith("#ifdef"),  # Conditional compilation
                     stripped.startswith("#ifndef"),  # Conditional compilation
