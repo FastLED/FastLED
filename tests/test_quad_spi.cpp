@@ -26,6 +26,7 @@ private:
     fl::vector<uint8_t> mInterleavedDMABuffer;
     size_t mMaxLaneBytes = 0;
     uint8_t mNumLanes = 0;
+    bool mFinalized = false;
 
 public:
     QuadSPITestController() = default;
@@ -57,6 +58,35 @@ public:
     }
 
     void finalize() {
+        if (mFinalized) {
+            return;
+        }
+
+        // Check for empty lanes (like real controller)
+        if (mLaneBuffers.empty()) {
+            return;  // Don't finalize
+        }
+
+        // Check if all buffers are empty
+        bool has_data = false;
+        for (const auto& buf : mLaneBuffers) {
+            if (!buf.empty()) {
+                has_data = true;
+                break;
+            }
+        }
+        if (!has_data) {
+            return;  // Don't finalize
+        }
+
+        // Check for DMA size limits (like real controller)
+        constexpr size_t MAX_DMA_TRANSFER = 65536;
+        size_t total_size = mMaxLaneBytes * 4;
+        if (total_size > MAX_DMA_TRANSFER) {
+            mMaxLaneBytes = MAX_DMA_TRANSFER / 4;
+        }
+
+        // Pad all lanes to max size
         for (size_t i = 0; i < mLaneBuffers.size(); ++i) {
             if (mLaneBuffers[i].size() < mMaxLaneBytes) {
                 mLaneBuffers[i].resize(mMaxLaneBytes, mPaddingBytes[i]);
@@ -64,6 +94,7 @@ public:
         }
 
         mInterleavedDMABuffer.resize(mMaxLaneBytes * 4);
+        mFinalized = true;
     }
 
     fl::vector<uint8_t>* getLaneBuffer(uint8_t lane_id) {
@@ -92,6 +123,10 @@ public:
 
     uint8_t getNumLanes() const { return mNumLanes; }
     size_t getMaxLaneBytes() const { return mMaxLaneBytes; }
+
+    bool isFinalized() const {
+        return mFinalized;
+    }
 
     MockQuadSPIDriver& getMockDriver() { return mMockDriver; }
 };
@@ -681,9 +716,13 @@ TEST_CASE("QuadSPI: Mock driver lane extraction with padding") {
     driver.transmitDMA(interleaved.data(), interleaved.size());
 
     auto extracted = driver.extractLanes(4, 3);
-    CHECK_EQ(extracted[0][0], 0xAA);
+    // Padding now goes at BEGINNING, so lane 0 layout: [0xFF, 0xFF, 0xAA]
+    CHECK_EQ(extracted[0][0], 0xFF);  // APA102 padding at beginning
     CHECK_EQ(extracted[0][1], 0xFF);  // APA102 padding
-    CHECK_EQ(extracted[1][2], 0x00);  // LPD8806 padding
+    CHECK_EQ(extracted[0][2], 0xAA);  // Original data at end
+    CHECK_EQ(extracted[1][0], 0x00);  // LPD8806 padding at beginning
+    CHECK_EQ(extracted[1][1], 0xBB);  // Original data
+    CHECK_EQ(extracted[1][2], 0xCC);  // Original data
 }
 
 TEST_CASE("QuadSPI: Mock driver dual-SPI mode") {
@@ -915,8 +954,11 @@ TEST_CASE("QuadSPI: Integration - 4-lane APA102 different lengths") {
     CHECK(mock_driver.isTransmissionActive());
 
     auto extracted = mock_driver.extractLanes(4, max_lane_size);
+
+    // Padding now goes at BEGINNING, so lanes have: [padding...][original data]
+    size_t padding0 = max_lane_size - lane0_data.size();
     for (size_t i = 0; i < lane0_data.size(); ++i) {
-        CHECK_EQ(extracted[0][i], lane0_data[i]);
+        CHECK_EQ(extracted[0][padding0 + i], lane0_data[i]);
     }
 }
 
@@ -1021,11 +1063,17 @@ TEST_CASE("QuadSPI: Integration - Dual-SPI mode (2 lanes)") {
     size_t max_size = lane1.size();
     auto extracted = mock.extractLanes(4, max_size);
 
-    for (size_t i = 0; i < lane0.size(); ++i) {
-        CHECK_EQ(extracted[0][i], lane0[i]);
-    }
-    for (size_t i = lane0.size(); i < max_size; ++i) {
+    // Padding now goes at BEGINNING
+    size_t padding0 = max_size - lane0.size();
+
+    // Check padding at beginning of lane 0
+    for (size_t i = 0; i < padding0; ++i) {
         CHECK_EQ(extracted[0][i], 0xFF);
+    }
+
+    // Check original data at end of lane 0
+    for (size_t i = 0; i < lane0.size(); ++i) {
+        CHECK_EQ(extracted[0][padding0 + i], lane0[i]);
     }
 }
 
@@ -1212,4 +1260,450 @@ TEST_CASE("QuadSPI: Performance - Cache-friendly sequential access") {
     });
 
     CHECK(final_time < 1000);  // Very lenient - just checking it's not pathologically slow
+}
+
+// ============================================================================
+// Optimized bit-spreading algorithm tests
+// ============================================================================
+
+TEST_CASE("QuadSPI: Optimized bit spreading - exact bit positions") {
+    // This test verifies the EXACT bit positions in the output
+    // Uses distinct bit patterns for each lane to verify correct interleaving
+    QuadSPITransposer transposer;
+
+    // Use bit patterns where only specific 2-bit pairs are set
+    fl::vector<uint8_t> lane0 = {0xC0};  // 11000000 (bits 7:6 = 11, rest 00)
+    fl::vector<uint8_t> lane1 = {0x30};  // 00110000 (bits 5:4 = 11, rest 00)
+    fl::vector<uint8_t> lane2 = {0x0C};  // 00001100 (bits 3:2 = 11, rest 00)
+    fl::vector<uint8_t> lane3 = {0x03};  // 00000011 (bits 1:0 = 11, rest 00)
+
+    transposer.addLane(0, lane0, 0x00);
+    transposer.addLane(1, lane1, 0x00);
+    transposer.addLane(2, lane2, 0x00);
+    transposer.addLane(3, lane3, 0x00);
+
+    auto result = transposer.transpose();
+    CHECK_EQ(result.size(), 4);
+
+    // Verify exact bit positions in output
+    // Each output byte format: [d1 d0 c1 c0 b1 b0 a1 a0]
+    // where a=lane0, b=lane1, c=lane2, d=lane3
+
+    // Output[0]: bits 7:6 from each lane
+    //   lane3[7:6]=00, lane2[7:6]=00, lane1[7:6]=00, lane0[7:6]=11
+    //   Expected: 0b00_00_00_11 = 0x03
+    CHECK_EQ(result[0], 0x03);
+
+    // Output[1]: bits 5:4 from each lane
+    //   lane3[5:4]=00, lane2[5:4]=00, lane1[5:4]=11, lane0[5:4]=00
+    //   Expected: 0b00_00_11_00 = 0x0C
+    CHECK_EQ(result[1], 0x0C);
+
+    // Output[2]: bits 3:2 from each lane
+    //   lane3[3:2]=00, lane2[3:2]=11, lane1[3:2]=00, lane0[3:2]=00
+    //   Expected: 0b00_11_00_00 = 0x30
+    CHECK_EQ(result[2], 0x30);
+
+    // Output[3]: bits 1:0 from each lane
+    //   lane3[1:0]=11, lane2[1:0]=00, lane1[1:0]=00, lane0[1:0]=00
+    //   Expected: 0b11_00_00_00 = 0xC0
+    CHECK_EQ(result[3], 0xC0);
+}
+
+TEST_CASE("QuadSPI: Optimized bit spreading - known patterns") {
+    QuadSPITransposer transposer;
+
+    // Test 1: All 0xAA (10101010)
+    fl::vector<uint8_t> lane_aa = {0xAA};
+    transposer.addLane(0, lane_aa, 0x00);
+    transposer.addLane(1, lane_aa, 0x00);
+    transposer.addLane(2, lane_aa, 0x00);
+    transposer.addLane(3, lane_aa, 0x00);
+
+    auto result_aa = transposer.transpose();
+    CHECK_EQ(result_aa.size(), 4);
+    // All lanes identical should produce specific pattern
+    CHECK_EQ(result_aa[0], result_aa[1]);
+    CHECK_EQ(result_aa[1], result_aa[2]);
+    CHECK_EQ(result_aa[2], result_aa[3]);
+}
+
+TEST_CASE("QuadSPI: Optimized bit spreading - alternating lanes") {
+    QuadSPITransposer transposer;
+
+    // Test 2: Alternating 0xFF and 0x00
+    fl::vector<uint8_t> lane_ff = {0xFF};
+    fl::vector<uint8_t> lane_00 = {0x00};
+    transposer.addLane(0, lane_ff, 0x00);
+    transposer.addLane(1, lane_00, 0x00);
+    transposer.addLane(2, lane_ff, 0x00);
+    transposer.addLane(3, lane_00, 0x00);
+
+    auto result_alt = transposer.transpose();
+    CHECK_EQ(result_alt.size(), 4);
+
+    // Verify lanes can be extracted
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(result_alt.data(), result_alt.size());
+    auto extracted = driver.extractLanes(4, 1);
+    CHECK_EQ(extracted[0][0], 0xFF);
+    CHECK_EQ(extracted[1][0], 0x00);
+    CHECK_EQ(extracted[2][0], 0xFF);
+    CHECK_EQ(extracted[3][0], 0x00);
+}
+
+TEST_CASE("QuadSPI: Optimized bit spreading - correctness check") {
+    // Test known bit patterns and verify output
+    QuadSPITransposer transposer;
+
+    fl::vector<uint8_t> lane0 = {0x12};  // 00010010
+    fl::vector<uint8_t> lane1 = {0x34};  // 00110100
+    fl::vector<uint8_t> lane2 = {0x56};  // 01010110
+    fl::vector<uint8_t> lane3 = {0x78};  // 01111000
+
+    transposer.addLane(0, lane0, 0x00);
+    transposer.addLane(1, lane1, 0x00);
+    transposer.addLane(2, lane2, 0x00);
+    transposer.addLane(3, lane3, 0x00);
+
+    auto result = transposer.transpose();
+    CHECK_EQ(result.size(), 4);
+
+    // Verify by extracting lanes back
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(result.data(), result.size());
+    auto extracted = driver.extractLanes(4, 1);
+    CHECK_EQ(extracted[0][0], 0x12);
+    CHECK_EQ(extracted[1][0], 0x34);
+    CHECK_EQ(extracted[2][0], 0x56);
+    CHECK_EQ(extracted[3][0], 0x78);
+}
+
+TEST_CASE("QuadSPI: Optimized bit spreading - large buffer") {
+    // Test with larger buffer to verify performance improvement
+    const size_t NUM_BYTES = 1000;  // Simulate 100 LEDs * 3 bytes + overhead
+    fl::vector<uint8_t> large_buffer(NUM_BYTES, 0xAA);
+
+    QuadSPITransposer transposer;
+    transposer.addLane(0, large_buffer, 0x00);
+    transposer.addLane(1, large_buffer, 0x00);
+    transposer.addLane(2, large_buffer, 0x00);
+    transposer.addLane(3, large_buffer, 0x00);
+
+    auto result = transposer.transpose();
+
+    // Verify output size is correct
+    CHECK_EQ(result.size(), NUM_BYTES * 4);
+
+    // Verify correctness by checking extracted lanes
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(result.data(), result.size());
+    auto extracted = driver.extractLanes(4, NUM_BYTES);
+    for (size_t i = 0; i < NUM_BYTES; i++) {
+        CHECK_EQ(extracted[0][i], 0xAA);
+        CHECK_EQ(extracted[1][i], 0xAA);
+        CHECK_EQ(extracted[2][i], 0xAA);
+        CHECK_EQ(extracted[3][i], 0xAA);
+    }
+}
+
+TEST_CASE("QuadSPI: Optimized bit spreading - mixed patterns") {
+    // Test with different patterns on each lane
+    fl::vector<uint8_t> lane0 = {0x11, 0x22, 0x33};
+    fl::vector<uint8_t> lane1 = {0x44, 0x55, 0x66};
+    fl::vector<uint8_t> lane2 = {0x77, 0x88, 0x99};
+    fl::vector<uint8_t> lane3 = {0xAA, 0xBB, 0xCC};
+
+    QuadSPITransposer transposer;
+    transposer.addLane(0, lane0, 0x00);
+    transposer.addLane(1, lane1, 0x00);
+    transposer.addLane(2, lane2, 0x00);
+    transposer.addLane(3, lane3, 0x00);
+
+    auto result = transposer.transpose();
+    CHECK_EQ(result.size(), 12);  // 3 bytes * 4 = 12 output bytes
+
+    // Verify correctness
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(result.data(), result.size());
+    auto extracted = driver.extractLanes(4, 3);
+    CHECK_EQ(extracted[0][0], 0x11);
+    CHECK_EQ(extracted[0][1], 0x22);
+    CHECK_EQ(extracted[0][2], 0x33);
+    CHECK_EQ(extracted[1][0], 0x44);
+    CHECK_EQ(extracted[2][1], 0x88);
+    CHECK_EQ(extracted[3][2], 0xCC);
+}
+
+// ============================================================================
+// Buffer validation tests
+// ============================================================================
+
+TEST_CASE("QuadSPI: Buffer validation - empty lanes") {
+    QuadSPIController<2, 10000000> controller;
+    controller.begin();
+
+    // Finalize with no lanes should fail gracefully
+    controller.finalize();
+    CHECK(!controller.isFinalized());
+}
+
+TEST_CASE("QuadSPI: Buffer validation - exceeds DMA limit") {
+    QuadSPIController<2, 10000000> controller;
+    controller.begin();
+
+    // Create buffer larger than DMA limit (would be 70KB * 4 = 280KB > 256KB)
+    // This should trigger truncation
+    controller.addLane<APA102Controller<1, 2, RGB>>(0, 23000);  // ~70KB
+
+    controller.finalize();
+
+    // Should truncate to DMA limit (65536 / 4 = 16384 bytes max per lane)
+    CHECK(controller.isFinalized());
+    CHECK(controller.getMaxLaneBytes() <= 16384);
+}
+
+TEST_CASE("QuadSPI: Buffer validation - mismatched sizes") {
+    QuadSPIController<2, 10000000> controller;
+    controller.begin();
+
+    // Different LED counts per lane - should pad shorter lanes
+    controller.addLane<APA102Controller<1, 2, RGB>>(0, 25);   // Small
+    controller.addLane<APA102Controller<3, 4, RGB>>(1, 100);  // Large
+
+    controller.finalize();
+
+    // All lanes should be padded to max size
+    CHECK(controller.isFinalized());
+    size_t max_bytes = controller.getMaxLaneBytes();
+    CHECK(max_bytes == APA102Controller<1, 2, RGB>::calculateBytes(100));
+
+    // Verify both lanes have same size
+    auto* buf0 = controller.getLaneBuffer(0);
+    auto* buf1 = controller.getLaneBuffer(1);
+    CHECK_EQ(buf0->size(), max_bytes);
+    CHECK_EQ(buf1->size(), max_bytes);
+}
+
+TEST_CASE("QuadSPI: Buffer validation - all empty capture buffers") {
+    QuadSPIController<2, 10000000> controller;
+    controller.begin();
+
+    // Add lanes with 0 LEDs - still creates small buffers for protocol overhead
+    controller.addLane<APA102Controller<1, 2, RGB>>(0, 0);
+    controller.addLane<APA102Controller<3, 4, RGB>>(1, 0);
+
+    controller.finalize();
+
+    // Should finalize even with 0 LEDs (protocol overhead bytes still present)
+    CHECK(controller.isFinalized());
+    // But max bytes should be very small
+    CHECK(controller.getMaxLaneBytes() < 20);
+}
+
+TEST_CASE("QuadSPI: Buffer validation - mixed empty and valid lanes") {
+    QuadSPIController<2, 10000000> controller;
+    controller.begin();
+
+    // One valid lane, one with 0 LEDs
+    controller.addLane<APA102Controller<1, 2, RGB>>(0, 100);
+    controller.addLane<APA102Controller<3, 4, RGB>>(1, 0);
+
+    controller.finalize();
+
+    // Should finalize - at least one lane has data
+    CHECK(controller.isFinalized());
+}
+
+// ============================================================================
+// APA102 Padding Tests - Different Strip Lengths
+// ============================================================================
+
+TEST_CASE("QuadSPI: APA102 padding - different strip lengths padded to same size") {
+    // Test that strips of different lengths (1, 3, 7, 13 LEDs) are all
+    // padded to the same size in the interleaved format
+    QuadSPITransposer transposer;
+
+    // Calculate byte sizes for each LED count using APA102 protocol
+    // Formula: 4 (start frame) + (num_leds * 4) + (4 * ((num_leds / 32) + 1)) (end frame)
+    size_t bytes_1_led = APA102Controller<1, 2, RGB>::calculateBytes(1);    // 12 bytes
+    size_t bytes_3_leds = APA102Controller<1, 2, RGB>::calculateBytes(3);   // 20 bytes
+    size_t bytes_7_leds = APA102Controller<1, 2, RGB>::calculateBytes(7);   // 36 bytes
+    size_t bytes_13_leds = APA102Controller<1, 2, RGB>::calculateBytes(13); // 60 bytes
+
+    // Verify our understanding of the formula
+    CHECK_EQ(bytes_1_led, 12);
+    CHECK_EQ(bytes_3_leds, 20);
+    CHECK_EQ(bytes_7_leds, 36);
+    CHECK_EQ(bytes_13_leds, 60);
+
+    // Create lane data with different lengths
+    fl::vector<uint8_t> lane0_data(bytes_13_leds, 0xAA); // 13 LEDs (longest)
+    fl::vector<uint8_t> lane1_data(bytes_7_leds, 0xBB);  // 7 LEDs
+    fl::vector<uint8_t> lane2_data(bytes_3_leds, 0xCC);  // 3 LEDs
+    fl::vector<uint8_t> lane3_data(bytes_1_led, 0xDD);   // 1 LED (shortest)
+
+    // Get black LED frame for APA102
+    auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
+    CHECK_EQ(padding_frame.size(), 4);
+
+    // Add lanes to transposer
+    transposer.addLane(0, lane0_data, padding_frame);
+    transposer.addLane(1, lane1_data, padding_frame);
+    transposer.addLane(2, lane2_data, padding_frame);
+    transposer.addLane(3, lane3_data, padding_frame);
+
+    // Perform transpose
+    auto interleaved = transposer.transpose();
+
+    // Verify output size: max_lane_bytes * 4
+    size_t expected_size = bytes_13_leds * 4;
+    CHECK_EQ(interleaved.size(), expected_size);
+
+    // Extract lanes back using mock driver
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(interleaved.data(), interleaved.size());
+    auto extracted = driver.extractLanes(4, bytes_13_leds);
+
+    // Verify all lanes are same size after extraction
+    CHECK_EQ(extracted[0].size(), bytes_13_leds);
+    CHECK_EQ(extracted[1].size(), bytes_13_leds);
+    CHECK_EQ(extracted[2].size(), bytes_13_leds);
+    CHECK_EQ(extracted[3].size(), bytes_13_leds);
+
+    // Verify original data in each lane (no padding needed for longest)
+    for (size_t i = 0; i < bytes_13_leds; i++) {
+        CHECK_EQ(extracted[0][i], 0xAA); // Lane 0: full data
+    }
+
+    // Verify black LED padding at BEGINNING, original data at END
+
+    // Lane 1: padding + original data
+    size_t pad1 = bytes_13_leds - bytes_7_leds;
+    for (size_t i = 0; i < pad1; i++) {
+        CHECK_EQ(extracted[1][i], padding_frame[i % padding_frame.size()]); // Black LED padding
+    }
+    for (size_t i = 0; i < bytes_7_leds; i++) {
+        CHECK_EQ(extracted[1][pad1 + i], 0xBB); // Original data
+    }
+
+    // Lane 2: padding + original data
+    size_t pad2 = bytes_13_leds - bytes_3_leds;
+    for (size_t i = 0; i < pad2; i++) {
+        CHECK_EQ(extracted[2][i], padding_frame[i % padding_frame.size()]); // Black LED padding
+    }
+    for (size_t i = 0; i < bytes_3_leds; i++) {
+        CHECK_EQ(extracted[2][pad2 + i], 0xCC); // Original data
+    }
+
+    // Lane 3: padding + original data
+    size_t pad3 = bytes_13_leds - bytes_1_led;
+    for (size_t i = 0; i < pad3; i++) {
+        CHECK_EQ(extracted[3][i], padding_frame[i % padding_frame.size()]); // Black LED padding
+    }
+    for (size_t i = 0; i < bytes_1_led; i++) {
+        CHECK_EQ(extracted[3][pad3 + i], 0xDD); // Original data
+    }
+}
+
+TEST_CASE("QuadSPI: APA102 padding - verify black LED padding source") {
+    // Test that padding comes from controller's getPaddingLEDFrame()
+    // and uses black LED frames for synchronized latching
+    QuadSPITransposer transposer;
+
+    // Create two lanes of different lengths
+    size_t bytes_5_leds = APA102Controller<1, 2, RGB>::calculateBytes(5);   // 28 bytes
+    size_t bytes_10_leds = APA102Controller<1, 2, RGB>::calculateBytes(10); // 48 bytes
+
+    fl::vector<uint8_t> lane0_data(bytes_10_leds, 0x11); // Longer
+    fl::vector<uint8_t> lane1_data(bytes_5_leds, 0x22);  // Shorter
+
+    // Get black LED frame from APA102 controller
+    auto apa102_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
+    CHECK_EQ(apa102_frame.size(), 4); // 4 bytes per LED
+    CHECK_EQ(apa102_frame[0], 0xE0);  // Brightness = 0
+    CHECK_EQ(apa102_frame[1], 0x00);  // Blue = 0
+    CHECK_EQ(apa102_frame[2], 0x00);  // Green = 0
+    CHECK_EQ(apa102_frame[3], 0x00);  // Red = 0
+
+    // Add lanes with black LED padding
+    transposer.addLane(0, lane0_data, apa102_frame);
+    transposer.addLane(1, lane1_data, apa102_frame);
+    transposer.addLane(2, fl::vector<uint8_t>(), apa102_frame); // Empty lane
+    transposer.addLane(3, fl::vector<uint8_t>(), apa102_frame); // Empty lane
+
+    auto interleaved = transposer.transpose();
+
+    // Extract and verify padding
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(interleaved.data(), interleaved.size());
+    auto extracted = driver.extractLanes(4, bytes_10_leds);
+
+    size_t padding_bytes = bytes_10_leds - bytes_5_leds;
+
+    // Lane 1: verify black LED padding at BEGINNING
+    for (size_t i = 0; i < padding_bytes; i++) {
+        uint8_t expected = apa102_frame[i % apa102_frame.size()];
+        CHECK_EQ(extracted[1][i], expected);
+    }
+
+    // Lane 1: verify original data at END
+    for (size_t i = 0; i < bytes_5_leds; i++) {
+        CHECK_EQ(extracted[1][padding_bytes + i], 0x22);
+    }
+
+    // Lanes 2 and 3: completely padded with repeating black LED frames
+    for (size_t i = 0; i < bytes_10_leds; i++) {
+        uint8_t expected = apa102_frame[i % apa102_frame.size()];
+        CHECK_EQ(extracted[2][i], expected);
+        CHECK_EQ(extracted[3][i], expected);
+    }
+}
+
+TEST_CASE("QuadSPI: APA102 padding - verify black LED padding at the BEGINNING") {
+    // Test that black LED padding appears at the BEGINNING of shorter strips
+    // for synchronized latching (all strips finish transmitting simultaneously)
+    QuadSPITransposer transposer;
+
+    size_t bytes_2_leds = APA102Controller<1, 2, RGB>::calculateBytes(2);  // 16 bytes
+    size_t bytes_6_leds = APA102Controller<1, 2, RGB>::calculateBytes(6);  // 32 bytes
+
+    // Create lane with distinctive pattern: 0x01, 0x02, 0x03, ...
+    fl::vector<uint8_t> short_lane;
+    for (size_t i = 0; i < bytes_2_leds; i++) {
+        short_lane.push_back(static_cast<uint8_t>(i + 1));
+    }
+
+    fl::vector<uint8_t> long_lane(bytes_6_leds, 0xEE);
+
+    auto padding_frame = APA102Controller<1, 2, RGB>::getPaddingLEDFrame();
+
+    transposer.addLane(0, long_lane, padding_frame);
+    transposer.addLane(1, short_lane, padding_frame);
+    transposer.addLane(2, fl::vector<uint8_t>(), padding_frame);
+    transposer.addLane(3, fl::vector<uint8_t>(), padding_frame);
+
+    auto interleaved = transposer.transpose();
+
+    MockQuadSPIDriver driver;
+    driver.transmitDMA(interleaved.data(), interleaved.size());
+    auto extracted = driver.extractLanes(4, bytes_6_leds);
+
+    // Verify short lane has:
+    // - Black LED padding at the BEGINNING
+    // - Original data at the END
+
+    size_t padding_bytes = bytes_6_leds - bytes_2_leds;
+
+    // Check black LED padding is at the beginning
+    // Black LED frame: {0xE0, 0x00, 0x00, 0x00} (repeated as needed)
+    for (size_t i = 0; i < padding_bytes; i++) {
+        uint8_t expected = padding_frame[i % padding_frame.size()];
+        CHECK_EQ(extracted[1][i], expected);
+    }
+
+    // Check original data is at the end
+    for (size_t i = 0; i < bytes_2_leds; i++) {
+        CHECK_EQ(extracted[1][padding_bytes + i], static_cast<uint8_t>(i + 1));
+    }
 }

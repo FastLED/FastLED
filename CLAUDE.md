@@ -42,8 +42,11 @@ This project uses directory-specific agent guidelines. See:
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Use proper warning macros** from `fl/compiler_control.h`
-- **Use `fl::printf`** for formatted output (available in the project) - never use `::printf`
-- **Use `FL_WARN`** for warnings (available in the project)
+- **Debug and Warning Output**:
+  - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
+  - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
+  - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead
+  - Note: FL_DBG and FL_WARN use stream-style `<<` operator, NOT printf-style formatting
 - **Follow existing code patterns** and naming conventions
 
 ### Python Code Standards

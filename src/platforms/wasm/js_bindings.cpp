@@ -327,7 +327,7 @@ static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenma
 
     // Instead of calling JavaScript directly, just print for now
     // JavaScript will poll for this data or receive it through events
-    fl::printf("Canvas map data: %s\n", jsonBuffer.c_str());
+    FL_DBG("Canvas map data: " << jsonBuffer.c_str());
 }
 
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {

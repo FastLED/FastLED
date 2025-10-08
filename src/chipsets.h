@@ -335,6 +335,24 @@ public:
 	/// @returns 0x00 (latch continuation byte)
 	static constexpr fl::u8 getPaddingByte() { return 0x00; }
 
+	/// Get a black LED frame for synchronized latching
+	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
+	/// @returns Black LED frame (invisible LED: GRB with MSB set)
+	static fl::span<const fl::u8> getPaddingLEDFrame() {
+		static const fl::u8 frame[] = {
+			0x80,  // Green = 0 (with MSB=1)
+			0x80,  // Red = 0 (with MSB=1)
+			0x80   // Blue = 0 (with MSB=1)
+		};
+		return fl::span<const fl::u8>(frame, 3);
+	}
+
+	/// Get the size of the padding LED frame in bytes
+	/// @returns 3 bytes per LED for LPD8806
+	static constexpr size_t getPaddingLEDFrameSize() {
+		return 3;
+	}
+
 	/// Calculate total byte count for LPD8806 protocol
 	/// Used for quad-SPI buffer pre-allocation
 	/// @param num_leds Number of LEDs in the strip
@@ -388,6 +406,24 @@ public:
 	/// Used for quad-SPI lane padding when strips have different lengths
 	/// @returns 0x00 (no protocol state)
 	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+
+	/// Get a black LED frame for synchronized latching
+	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
+	/// @returns Black LED frame (invisible LED: RGB all zero)
+	static fl::span<const fl::u8> getPaddingLEDFrame() {
+		static const fl::u8 frame[] = {
+			0x00,  // Red = 0
+			0x00,  // Green = 0
+			0x00   // Blue = 0
+		};
+		return fl::span<const fl::u8>(frame, 3);
+	}
+
+	/// Get the size of the padding LED frame in bytes
+	/// @returns 3 bytes per LED for WS2801
+	static constexpr size_t getPaddingLEDFrameSize() {
+		return 3;
+	}
 
 	/// Calculate total byte count for WS2801 protocol
 	/// Used for quad-SPI buffer pre-allocation
@@ -629,7 +665,30 @@ public:
 	/// Get the protocol-safe padding byte for APA102
 	/// Used for quad-SPI lane padding when strips have different lengths
 	/// @returns 0xFF (end frame continuation byte)
+	/// @deprecated Use getPaddingLEDFrame() for synchronized latching
 	static constexpr fl::u8 getPaddingByte() { return 0xFF; }
+
+	/// Get padding LED frame for synchronized latching in quad-SPI
+	/// Returns a black LED frame to prepend to shorter strips, ensuring
+	/// all strips finish transmitting simultaneously for synchronized updates
+	/// @returns Black LED frame (4 bytes: brightness=0, RGB=0,0,0)
+	static fl::span<const fl::u8> getPaddingLEDFrame() {
+		// APA102 LED frame format: [111BBBBB][B][G][R]
+		// Black LED: 0xE0 (brightness=0), RGB=0,0,0
+		static const fl::u8 frame[] = {
+			0xE0,  // Brightness byte (111 00000 = brightness 0)
+			0x00,  // Blue = 0
+			0x00,  // Green = 0
+			0x00   // Red = 0
+		};
+		return fl::span<const fl::u8>(frame, 4);
+	}
+
+	/// Get size of padding LED frame in bytes
+	/// @returns 4 (APA102 uses 4 bytes per LED)
+	static constexpr size_t getPaddingLEDFrameSize() {
+		return 4;
+	}
 
 	/// Calculate total byte count for APA102 protocol
 	/// Used for quad-SPI buffer pre-allocation
@@ -802,6 +861,25 @@ public:
 	/// Used for quad-SPI lane padding when strips have different lengths
 	/// @returns 0x00 (boundary byte)
 	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+
+	/// Get a black LED frame for synchronized latching
+	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
+	/// @returns Black LED frame (invisible LED: flag byte + BGR all zero)
+	static fl::span<const fl::u8> getPaddingLEDFrame() {
+		static const fl::u8 frame[] = {
+			0xFF,  // Flag byte for RGB=0,0,0
+			0x00,  // Blue = 0
+			0x00,  // Green = 0
+			0x00   // Red = 0
+		};
+		return fl::span<const fl::u8>(frame, 4);
+	}
+
+	/// Get the size of the padding LED frame in bytes
+	/// @returns 4 bytes per LED for P9813
+	static constexpr size_t getPaddingLEDFrameSize() {
+		return 4;
+	}
 
 	/// Calculate total byte count for P9813 protocol
 	/// Used for quad-SPI buffer pre-allocation
