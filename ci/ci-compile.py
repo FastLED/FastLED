@@ -104,7 +104,17 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     )
 
     if image_check.returncode != 0:
-        # Image doesn't exist, build it
+        # Image doesn't exist
+        if not args.build:
+            # Fail with helpful message if --build not specified
+            print(f"❌ Docker image for {board_name} is not built yet.")
+            print(f"")
+            print(f"To build the image (can take up to 30 minutes):")
+            print(f"  bash compile --docker --build {board_name} {examples[0]}")
+            print(f"")
+            return 1
+
+        # Build the image
         print(f"Building Docker image for platform: {board_name}")
         build_cmd = [
             sys.executable,
@@ -448,6 +458,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "--docker",
         action="store_true",
         help="Run compilation inside Docker container with pre-cached dependencies",
+    )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="Build Docker image if it doesn't exist (use with --docker)",
     )
     parser.add_argument(
         "--extra-packages",
