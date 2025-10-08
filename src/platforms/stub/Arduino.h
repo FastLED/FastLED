@@ -9,22 +9,18 @@
 #define ARDUINO 1
 #endif
 
+// FastLED headers only - NO stdlib headers
 #include "fl/str.h"
-#include <algorithm>
-#include <random>
 #include "fl/stdint.h"
-#include <stdio.h>
-#include <string>
 #include "fl/ostream.h"
-
 #include "fl/namespace.h"
-// Arduino timing functions - provided by time_stub.h
 #include "time_stub.h"
 #include "fl/math_macros.h"
 #include "fl/math.h"
 
 FASTLED_USING_NAMESPACE
 
+// Custom min/max to avoid <algorithm> include
 template <typename T>
 T min(T a, T b) {
     return a < b ? a : b;

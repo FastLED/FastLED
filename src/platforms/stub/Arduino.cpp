@@ -4,6 +4,10 @@
 
 #include "./Arduino.h"  // ok include
 
+// Stdlib headers - kept out of Arduino.h for faster compilation
+#include <random>
+#include <stdio.h>
+
 // fl namespace functions
 namespace fl {
 
