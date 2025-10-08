@@ -4,7 +4,7 @@
 
 #include "fl/deprecated.h"
 #include "fl/namespace.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 
 namespace fl {
 

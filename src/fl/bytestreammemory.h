@@ -3,7 +3,7 @@
 #include "fl/stdint.h"
 
 #include "fl/namespace.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 
 #include "fl/bytestream.h"
 #include "fl/circular_buffer.h"

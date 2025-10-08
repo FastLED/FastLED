@@ -5,6 +5,7 @@
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/async.h"
+#include "fl/unique_ptr.h"  // For make_unique
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>

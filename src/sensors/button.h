@@ -4,7 +4,7 @@
 
 #include "fl/function_list.h"
 #include "fl/namespace.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/ui.h"
 #include "sensors/digital_pin.h"
 

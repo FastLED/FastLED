@@ -4,7 +4,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/shared_ptr.h"
-#include "fl/memory.h"
+#include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/string.h"
 #include "fl/compiler_control.h"
 #include "fl/has_include.h"

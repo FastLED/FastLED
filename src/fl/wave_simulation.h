@@ -21,7 +21,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/wave_simulation_real.h"
 
 #include "fl/grid.h"
-#include "fl/memory.h"
+#include "fl/unique_ptr.h"  // For unique_ptr
 #include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

@@ -3,7 +3,7 @@
 #include "fl/stdint.h"
 
 #include "digital_pin.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/ui.h"
 #include "fl/time_alpha.h"
 

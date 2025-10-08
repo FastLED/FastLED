@@ -16,7 +16,7 @@ Based on works and code by Shawn Silverman.
 #include "fl/vector.h"
 #include "fl/warn.h"
 
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

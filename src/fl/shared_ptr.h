@@ -466,4 +466,22 @@ shared_ptr<T> reinterpret_pointer_cast(const shared_ptr<Y>& other) noexcept {
     return shared_ptr<T>(ptr, other.control_block_, detail::make_shared_tag{});
 }
 
-} // namespace fl 
+} // namespace fl
+
+// Smart pointer typedef macros
+// These create convenient typedefs like FooPtr = fl::shared_ptr<Foo>
+
+// Forward declares a class and creates a shared_ptr typedef
+// Example: FASTLED_SMART_PTR(Foo) -> creates FooPtr as fl::shared_ptr<Foo>
+#define FASTLED_SMART_PTR(type)                                                \
+    class type;                                                                \
+    using type##Ptr = fl::shared_ptr<type>;
+
+// Same as FASTLED_SMART_PTR but for structs
+#define FASTLED_SMART_PTR_STRUCT(type)                                         \
+    struct type;                                                               \
+    using type##Ptr = fl::shared_ptr<type>;
+
+// Creates typedef without forward declaration (for template instantiations)
+// Example: using FooInt = Foo<int>; FASTLED_SMART_PTR_NO_FWD(FooInt)
+#define FASTLED_SMART_PTR_NO_FWD(type) using type##Ptr = fl::shared_ptr<type>; 

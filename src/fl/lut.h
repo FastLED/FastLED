@@ -6,8 +6,8 @@ LUT - Look up table implementation for various types.
 
 #include "fl/allocator.h"
 #include "fl/force_inline.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR_NO_FWD macro
-#include "fl/shared_ptr.h"  // Only need shared_ptr, not all of memory.h (saves ~20ms)
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/unique_ptr.h"  // For fl::unique_ptr<T>
 #include "fl/stdint.h"
 
 #include "fl/int.h"

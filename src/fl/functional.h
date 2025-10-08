@@ -4,9 +4,6 @@
 
 namespace fl {
 
-template <typename T>
-class Ptr; // Forward declare Ptr to avoid header inclusion
-
 template <typename T, typename Deleter>
 class unique_ptr; // Forward declare unique_ptr to avoid header inclusion
 
@@ -29,9 +26,6 @@ struct is_pointer_like : false_type {};
 
 template <typename T>
 struct is_pointer_like<T*> : true_type {};
-
-template <typename T>
-struct is_pointer_like<fl::Ptr<T>> : true_type {};
 
 template <typename T, typename Deleter>
 struct is_pointer_like<fl::unique_ptr<T, Deleter>> : true_type {};

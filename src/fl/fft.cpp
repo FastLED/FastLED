@@ -4,7 +4,7 @@
 #include "fl/fft_impl.h"
 #include "fl/hash_map_lru.h"
 #include "fl/int.h"
-#include "fl/memory.h"
+#include "fl/shared_ptr.h"  // For shared_ptr
 
 namespace fl {
 

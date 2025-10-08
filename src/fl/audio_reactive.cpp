@@ -2,7 +2,7 @@
 #include "fl/math.h"
 #include "fl/span.h"
 #include "fl/int.h"
-#include "fl/memory.h"
+#include "fl/unique_ptr.h"  // For unique_ptr
 #include <math.h>
 
 namespace fl {

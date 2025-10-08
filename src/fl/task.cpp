@@ -2,6 +2,7 @@
 #include "fl/async.h"
 #include "fl/time.h"
 #include "fl/sstream.h"
+#include "fl/unique_ptr.h"  // For make_unique
 
 namespace fl {
 

@@ -7,7 +7,8 @@
 #include "fl/stdint.h"
 
 #include "FastLED.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/xymap.h"
 #include "fx/fx2d.h"
 #include "fx/time.h"

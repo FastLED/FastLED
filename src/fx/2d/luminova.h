@@ -6,7 +6,8 @@
 #include "fl/blur.h"
 #include "fl/clamp.h"
 #include "fl/math.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/vector.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"

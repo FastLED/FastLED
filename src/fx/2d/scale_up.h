@@ -12,7 +12,8 @@
 #include "fl/stdint.h"
 
 #include "fl/upscale.h"
-#include "fl/memory.h"
+#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/vector.h"
 #include "fl/xymap.h"
 #include "fx/fx2d.h"

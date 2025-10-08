@@ -1,4 +1,5 @@
 #include "fl/codec/jpeg.h"
+#include "fl/unique_ptr.h"  // For make_unique
 #include "third_party/TJpg_Decoder/driver.h"
 #include "fl/utility.h"
 #include "fl/vector.h"

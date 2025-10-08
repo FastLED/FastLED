@@ -252,4 +252,19 @@ bool operator!=(fl::nullptr_t, const unique_ptr<T, Deleter>& ptr) noexcept {
     return static_cast<bool>(ptr);
 }
 
-} // namespace fl 
+// make_unique function for consistency with std::make_unique
+template<typename T, typename... Args>
+typename fl::enable_if<!fl::is_array<T>::value, unique_ptr<T>>::type
+make_unique(Args&&... args) {
+    return unique_ptr<T>(new T(fl::forward<Args>(args)...));
+}
+
+// make_unique for arrays
+template<typename T>
+typename fl::enable_if<fl::is_array<T>::value, unique_ptr<T>>::type
+make_unique(fl::size_t size) {
+    typedef typename fl::remove_extent<T>::type U;
+    return unique_ptr<T>(new U[size]());
+}
+
+} // namespace fl

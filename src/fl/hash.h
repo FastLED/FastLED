@@ -176,13 +176,6 @@ template <typename T> struct Hash<fl::shared_ptr<T>> {
     }
 };
 
-template <typename T> struct Hash<fl::WeakPtr<T>> {
-    u32 operator()(const fl::WeakPtr<T> &key) const noexcept {
-        fl::uptr val = key.ptr_value();
-        return MurmurHash3_x86_32(&val, sizeof(fl::uptr));
-    }
-};
-
 template<> struct Hash<float> {
     u32 operator()(const float key) const noexcept {
         u32 ikey = fl::bit_cast<u32>(key);
