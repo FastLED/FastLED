@@ -152,15 +152,28 @@ inline fl::string format_float(float value, int precision) {
     for (int i = 0; i < precision; ++i) {
         multiplier *= 10;
     }
-    
-    int scaled = static_cast<int>(value * multiplier + 0.5f);
+
+    // Handle rounding correctly for both positive and negative numbers
+    float scaled_float = value * multiplier;
+    int scaled;
+    if (scaled_float >= 0) {
+        scaled = static_cast<int>(scaled_float + 0.5f);
+    } else {
+        scaled = static_cast<int>(scaled_float - 0.5f);
+    }
+
     int int_part = scaled / multiplier;
     int frac_part = scaled % multiplier;
-    
+
+    // For negative numbers, frac_part will be negative, so take absolute value
+    if (frac_part < 0) {
+        frac_part = -frac_part;
+    }
+
     StrStream stream;
     stream << int_part;
     stream << ".";
-    
+
     // Pad fractional part with leading zeros if needed
     int temp_multiplier = multiplier / 10;
     while (temp_multiplier > frac_part && temp_multiplier > 1) {
@@ -170,7 +183,7 @@ inline fl::string format_float(float value, int precision) {
     if (frac_part > 0) {
         stream << frac_part;
     }
-    
+
     return stream.str();
 }
 

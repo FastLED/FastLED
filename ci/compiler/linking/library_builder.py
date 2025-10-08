@@ -88,16 +88,18 @@ def create_fastled_library(
 
     # Compile all FastLED sources to object files
     fastled_sources = get_fastled_core_sources()
+    third_party_sources = get_third_party_sources()
+    all_sources = fastled_sources + third_party_sources
     fastled_objects: List[Path] = []
 
     obj_dir = fastled_build_dir / "obj"
     obj_dir.mkdir(exist_ok=True)
 
-    log_timing(f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files...")
+    log_timing(f"[LIBRARY] Compiling {len(all_sources)} FastLED source files...")
 
     # Compile each source file
     futures: List[tuple[Future[Result], Path, Path]] = []
-    for cpp_file in fastled_sources:
+    for cpp_file in all_sources:
         # Create unique object file name by including relative path to prevent collisions
         # Convert path separators to underscores to create valid filename
         src_dir = Path("src")
@@ -139,7 +141,7 @@ def create_fastled_library(
             )
 
     log_timing(
-        f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"
+        f"[LIBRARY] Successfully compiled {compiled_count}/{len(all_sources)} FastLED sources"
     )
 
     # FAIL FAST: If any source files failed to compile, abort immediately

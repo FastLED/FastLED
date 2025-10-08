@@ -56,11 +56,10 @@ TEST_CASE("Simple JSON test") {
     
     // Test serialization
     string jsonStr = obj.to_string();
+    printf("DEBUG: Generated JSON string: '%s'\n", jsonStr.c_str());
+    printf("DEBUG: JSON string length: %zu\n", jsonStr.length());
     CHECK_FALSE(jsonStr.empty());
-    
-    // Print the serialized JSON for debugging
-    printf("Serialized JSON: %s\n", jsonStr.c_str());
-    
+
     // Test parsing
     fl::Json parsed = fl::Json::parse(jsonStr);
     CHECK(parsed.has_value());
