@@ -6,8 +6,6 @@
 // This file does coarse platform detection and delegates to platform-specific headers
 // for fine-grained detection and configuration.
 
-namespace fl {
-
 // Coarse platform detection - delegate to platform-specific headers
 #if defined(FASTLED_TESTING)
     // Testing mode: Use stub platform with mock driver
@@ -16,9 +14,12 @@ namespace fl {
 #elif defined(ESP32)
     // ESP32 family: Delegate to ESP-specific platform header
     #include "platforms/esp/quad_spi_platform_esp.h"
+#endif
 
-#else
-    // No hardware Quad-SPI support
+namespace fl {
+
+// Fallback for platforms without hardware Quad-SPI support
+#if !defined(FASTLED_HAS_QUAD_SPI)
     #define FASTLED_HAS_QUAD_SPI 0
     #define FASTLED_QUAD_SPI_MAX_LANES 0
     #define FASTLED_QUAD_SPI_NUM_BUSES 0
