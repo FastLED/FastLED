@@ -227,7 +227,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
         case 'd':
         case 'i':
             if (fl::is_integral<T>::value) {
-                stream << arg;
+                stream << static_cast<int>(arg);
             } else {
                 stream << "<type_error>";
             }
@@ -262,7 +262,7 @@ void format_arg(StrStream& stream, const FormatSpec& spec, const T& arg) {
                 if (spec.precision >= 0) {
                     stream << format_float(static_cast<float>(arg), spec.precision);
                 } else {
-                    stream << arg;
+                    stream << static_cast<float>(arg);
                 }
             } else {
                 stream << "<type_error>";
