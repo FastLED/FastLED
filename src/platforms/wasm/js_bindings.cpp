@@ -84,43 +84,42 @@ EMSCRIPTEN_KEEPALIVE void* getFrameData(int* dataSize) {
 EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     fl::ActiveStripData& active_strips = fl::ActiveStripData::Instance();
     const auto& screenMaps = active_strips.getScreenMaps();
-    
+
     // Create screenMap JSON with expected structure (legacy-compatible)
-    FLArduinoJson::JsonDocument doc;
-    auto root = doc.to<FLArduinoJson::JsonObject>();
-    auto stripsObj = root["strips"].to<FLArduinoJson::JsonObject>();
-    
+    fl::Json root = fl::Json::object();
+    fl::Json stripsObj = fl::Json::object();
+
     // Track global bounds for absMax/absMin calculation
     float globalMinX = FLT_MAX, globalMinY = FLT_MAX;
     float globalMaxX = -FLT_MAX, globalMaxY = -FLT_MAX;
     bool hasData = false;
-    
+
     // Get screenMap data
     for (const auto &[stripIndex, screenMap] : screenMaps) {
         // Create strip object with expected structure (legacy-compatible)
-        auto stripMapObj = stripsObj[std::to_string(stripIndex)].to<FLArduinoJson::JsonObject>();
-        
-        auto mapObj = stripMapObj["map"].to<FLArduinoJson::JsonObject>();
-        auto xArray = mapObj["x"].to<FLArduinoJson::JsonArray>();
-        auto yArray = mapObj["y"].to<FLArduinoJson::JsonArray>();
-        
+        fl::Json stripMapObj = fl::Json::object();
+
+        fl::Json mapObj = fl::Json::object();
+        fl::Json xArray = fl::Json::array();
+        fl::Json yArray = fl::Json::array();
+
         // Track strip-specific bounds for min/max arrays
         float stripMinX = FLT_MAX, stripMinY = FLT_MAX;
         float stripMaxX = -FLT_MAX, stripMaxY = -FLT_MAX;
-        
+
         for (uint32_t i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;
             float y = screenMap[i].y;
-            
-            xArray.add(x);
-            yArray.add(y);
-            
+
+            xArray.push_back(fl::Json(x));
+            yArray.push_back(fl::Json(y));
+
             // Update strip bounds
             if (x < stripMinX) stripMinX = x;
             if (x > stripMaxX) stripMaxX = x;
             if (y < stripMinY) stripMinY = y;
             if (y > stripMaxY) stripMaxY = y;
-            
+
             // Update global bounds
             if (x < globalMinX) globalMinX = x;
             if (x > globalMaxX) globalMaxX = x;
@@ -128,51 +127,67 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
             if (y > globalMaxY) globalMaxY = y;
             hasData = true;
         }
-        
+
+        mapObj.set("x", xArray);
+        mapObj.set("y", yArray);
+        stripMapObj.set("map", mapObj);
+
         // Add legacy-compatible min/max arrays for this strip
         if (screenMap.getLength() > 0) {
-            auto minArray = stripMapObj["min"].to<FLArduinoJson::JsonArray>();
-            auto maxArray = stripMapObj["max"].to<FLArduinoJson::JsonArray>();
-            
-            minArray.add(stripMinX);
-            minArray.add(stripMinY);
-            maxArray.add(stripMaxX);
-            maxArray.add(stripMaxY);
+            fl::Json minArray = fl::Json::array();
+            fl::Json maxArray = fl::Json::array();
+
+            minArray.push_back(fl::Json(stripMinX));
+            minArray.push_back(fl::Json(stripMinY));
+            maxArray.push_back(fl::Json(stripMaxX));
+            maxArray.push_back(fl::Json(stripMaxY));
+
+            stripMapObj.set("min", minArray);
+            stripMapObj.set("max", maxArray);
         }
-        
+
         // Add diameter
-        stripMapObj["diameter"] = screenMap.getDiameter();
+        stripMapObj.set("diameter", screenMap.getDiameter());
+
+        stripsObj.set(fl::to_string(stripIndex), stripMapObj);
     }
-    
+
+    root.set("strips", stripsObj);
+
     // Add global absMin and absMax arrays if we have data
     if (hasData) {
-        auto absMinArray = root["absMin"].to<FLArduinoJson::JsonArray>();
-        auto absMaxArray = root["absMax"].to<FLArduinoJson::JsonArray>();
-        
-        absMinArray.add(globalMinX);
-        absMinArray.add(globalMinY);
-        absMaxArray.add(globalMaxX);
-        absMaxArray.add(globalMaxY);
+        fl::Json absMinArray = fl::Json::array();
+        fl::Json absMaxArray = fl::Json::array();
+
+        absMinArray.push_back(fl::Json(globalMinX));
+        absMinArray.push_back(fl::Json(globalMinY));
+        absMaxArray.push_back(fl::Json(globalMaxX));
+        absMaxArray.push_back(fl::Json(globalMaxY));
+
+        root.set("absMin", absMinArray);
+        root.set("absMax", absMaxArray);
     } else {
         // Provide default bounds if no data
-        auto absMinArray = root["absMin"].to<FLArduinoJson::JsonArray>();
-        auto absMaxArray = root["absMax"].to<FLArduinoJson::JsonArray>();
-        
-        absMinArray.add(0.0f);
-        absMinArray.add(0.0f);
-        absMaxArray.add(0.0f);
-        absMaxArray.add(0.0f);
+        fl::Json absMinArray = fl::Json::array();
+        fl::Json absMaxArray = fl::Json::array();
+
+        absMinArray.push_back(fl::Json(0.0f));
+        absMinArray.push_back(fl::Json(0.0f));
+        absMaxArray.push_back(fl::Json(0.0f));
+        absMaxArray.push_back(fl::Json(0.0f));
+
+        root.set("absMin", absMinArray);
+        root.set("absMax", absMaxArray);
     }
-    
+
     // Serialize to JSON
-    fl::Str json_str;
-    serializeJson(doc, json_str);
-    
+    fl::Str json_str = root.to_string();
+
     // Allocate and return data pointer
     char* buffer = (char*)malloc(json_str.length() + 1);
     strcpy(buffer, json_str.c_str());
     *dataSize = json_str.length();
-    
+
     return buffer;
 }
 
@@ -233,19 +248,18 @@ namespace fl {
  */
 EMSCRIPTEN_KEEPALIVE void* getStripUpdateData(int stripId, int* dataSize) {
     // Generate basic strip update JSON
-    FLArduinoJson::JsonDocument doc;
-    doc["strip_id"] = stripId;
-    doc["event"] = "strip_update";
-    doc["timestamp"] = millis();
-    
-    Str jsonBuffer;
-    serializeJson(doc, jsonBuffer);
-    
+    fl::Json doc = fl::Json::object();
+    doc.set("strip_id", stripId);
+    doc.set("event", "strip_update");
+    doc.set("timestamp", static_cast<int>(millis()));
+
+    fl::Str jsonBuffer = doc.to_string();
+
     // Allocate and return data pointer
     char* buffer = (char*)malloc(jsonBuffer.length() + 1);
     strcpy(buffer, jsonBuffer.c_str());
     *dataSize = jsonBuffer.length();
-    
+
     return buffer;
 }
 
@@ -264,18 +278,17 @@ EMSCRIPTEN_KEEPALIVE void notifyStripAdded(int stripId, int numLeds) {
  */
 EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
     // Export basic UI update structure
-    FLArduinoJson::JsonDocument doc;
-    doc["event"] = "ui_update";
-    doc["timestamp"] = millis();
-    
-    Str jsonBuffer;
-    serializeJson(doc, jsonBuffer);
-    
+    fl::Json doc = fl::Json::object();
+    doc.set("event", "ui_update");
+    doc.set("timestamp", static_cast<int>(millis()));
+
+    fl::Str jsonBuffer = doc.to_string();
+
     // Allocate and return data pointer
     char* buffer = (char*)malloc(jsonBuffer.length() + 1);
     strcpy(buffer, jsonBuffer.c_str());
     *dataSize = jsonBuffer.length();
-    
+
     return buffer;
 }
 
@@ -284,29 +297,35 @@ EMSCRIPTEN_KEEPALIVE void* getUiUpdateData(int* dataSize) {
  */
 static void _jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
     // Export canvas size data as JSON for JavaScript to process
-    FLArduinoJson::JsonDocument doc;
-    doc["strip_id"] = cledcontoller_id;
-    doc["event"] = "set_canvas_map";
-    auto map = doc["map"].to<FLArduinoJson::JsonObject>();
-    doc["length"] = screenmap.getLength();
-    auto x = map["x"].to<FLArduinoJson::JsonArray>();
-    auto y = map["y"].to<FLArduinoJson::JsonArray>();
+    fl::Json doc = fl::Json::object();
+    doc.set("strip_id", cledcontoller_id);
+    doc.set("event", "set_canvas_map");
+    doc.set("length", static_cast<int>(screenmap.getLength()));
+
+    fl::Json map = fl::Json::object();
+    fl::Json xArray = fl::Json::array();
+    fl::Json yArray = fl::Json::array();
+
     for (uint32_t i = 0; i < screenmap.getLength(); i++) {
-        x.add(screenmap[i].x);
-        y.add(screenmap[i].y);
+        xArray.push_back(fl::Json(screenmap[i].x));
+        yArray.push_back(fl::Json(screenmap[i].y));
     }
+
+    map.set("x", xArray);
+    map.set("y", yArray);
+    doc.set("map", map);
+
     // add diameter.
     float diameter = screenmap.getDiameter();
     if (diameter > 0.0f) {
-        doc["diameter"] = diameter;
+        doc.set("diameter", diameter);
     }
-    
-    Str jsonBuffer;
-    serializeJson(doc, jsonBuffer);
-    
+
+    fl::Str jsonBuffer = doc.to_string();
+
     // Instead of calling JavaScript directly, just print for now
     // JavaScript will poll for this data or receive it through events
-    printf("Canvas map data: %s\n", jsonBuffer.c_str());
+    fl::printf("Canvas map data: %s\n", jsonBuffer.c_str());
 }
 
 void jsSetCanvasSize(int cledcontoller_id, const fl::ScreenMap &screenmap) {
