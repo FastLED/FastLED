@@ -264,6 +264,42 @@ USE_CLANG = False
 # Using optimized Python API
 
 
+def _calculate_library_config_hash(
+    defines: List[str], compiler_args: List[str], compiler_cmd: str
+) -> str:
+    """
+    Calculate a hash representing the library build configuration.
+
+    This tracks changes to compiler settings that affect library compilation.
+    If any of these change, the library must be rebuilt even if source files haven't changed.
+
+    Args:
+        defines: List of preprocessor defines (e.g., ["FASTLED_FORCE_NAMESPACE=1"])
+        compiler_args: List of compiler arguments
+        compiler_cmd: Compiler command string
+
+    Returns:
+        SHA256 hash (first 16 chars) of the combined configuration
+    """
+    # Sort defines and args for deterministic hashing
+    sorted_defines = sorted(defines)
+    sorted_args = sorted(compiler_args)
+
+    # Combine all configuration into a single string
+    config_parts = [
+        f"compiler:{compiler_cmd}",
+        f"defines:{' '.join(sorted_defines)}",
+        f"args:{' '.join(sorted_args)}",
+    ]
+    combined = "|".join(config_parts)
+
+    # Calculate SHA256 hash
+    hash_sha256 = hashlib.sha256()
+    hash_sha256.update(combined.encode("utf-8"))
+
+    return hash_sha256.hexdigest()[:16]  # Use first 16 chars for readability
+
+
 def get_unit_test_fastled_sources() -> list[Path]:
     """Get essential FastLED .cpp files for unit test library creation (optimized paradigm)."""
     # Always work from project root
@@ -318,17 +354,24 @@ def get_unit_test_fastled_sources() -> list[Path]:
 
 
 def _should_rebuild_library(
-    lib_file: Path, fastled_sources: list[Path], cache_file: Path
+    lib_file: Path,
+    fastled_sources: list[Path],
+    cache_file: Path,
+    config_hash: str,
+    config_hash_file: Path,
 ) -> bool:
     """
-    Check if FastLED library needs to be rebuilt based on source file changes.
+    Check if FastLED library needs to be rebuilt based on source file changes or config changes.
 
     Uses fingerprint cache to detect changes in source files, similar to PCH system.
+    Also tracks compilation configuration (defines, flags) via config hash.
 
     Args:
         lib_file: Path to the FastLED library file (libfastled.a)
         fastled_sources: List of FastLED source files to check
         cache_file: Path to fingerprint cache file
+        config_hash: Current configuration hash (from compiler settings)
+        config_hash_file: Path to stored configuration hash file
 
     Returns:
         True if library should be rebuilt, False if cache is valid
@@ -336,6 +379,29 @@ def _should_rebuild_library(
     # If library file doesn't exist, need to build
     if not lib_file.exists():
         print("[LIBRARY CACHE] Library file doesn't exist, rebuilding required")
+        return True
+
+    # CRITICAL: Check if compilation configuration has changed
+    # This catches changes to defines, compiler flags, etc.
+    if config_hash_file.exists():
+        try:
+            with open(config_hash_file, "r") as f:
+                cached_config_hash = f.read().strip()
+
+            if cached_config_hash != config_hash:
+                print(
+                    f"[LIBRARY CACHE] Compilation config changed (cached: {cached_config_hash}, current: {config_hash}) - library rebuild required"
+                )
+                return True
+            else:
+                print(f"[LIBRARY CACHE] Compilation config unchanged ({config_hash})")
+        except (IOError, OSError) as e:
+            print(
+                f"[LIBRARY CACHE] Failed to read config hash file: {e} - library rebuild required"
+            )
+            return True
+    else:
+        print("[LIBRARY CACHE] No config hash file found - library rebuild required")
         return True
 
     # Get library file modification time as baseline
@@ -384,13 +450,7 @@ def create_unit_test_fastled_library(
 
     # Set up fingerprint cache file
     cache_file = fastled_build_dir / "library_fingerprint_cache.json"
-
-    # Check if library needs rebuilding using fingerprint cache
-    if not clean and not _should_rebuild_library(lib_file, fastled_sources, cache_file):
-        print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
-        return lib_file
-
-    print("[LIBRARY] Creating FastLED static library with proper compiler flags...")
+    config_hash_file = fastled_build_dir / "libfastled.a.config_hash"
 
     # Create a proper FastLED compiler (NOT unit test compiler) for the library
     # This ensures the library is compiled without FASTLED_FORCE_NAMESPACE=1
@@ -425,6 +485,24 @@ def create_unit_test_fastled_library(
     finally:
         # Restore original working directory
         os.chdir(original_cwd)
+
+    # Calculate configuration hash AFTER all compiler settings are finalized
+    # This hash tracks defines, compiler args, and compiler command
+    config_hash = _calculate_library_config_hash(
+        library_compiler.settings.defines or [],
+        library_compiler.settings.compiler_args or [],
+        library_compiler.settings.compiler,
+    )
+    print(f"[LIBRARY CACHE] Current configuration hash: {config_hash}")
+
+    # Check if library needs rebuilding using fingerprint cache AND config hash
+    if not clean and not _should_rebuild_library(
+        lib_file, fastled_sources, cache_file, config_hash, config_hash_file
+    ):
+        print(f"[LIBRARY] Using existing FastLED library: {lib_file}")
+        return lib_file
+
+    print("[LIBRARY] Creating FastLED static library with proper compiler flags...")
 
     # FastLED sources already obtained for cache checking above
     fastled_objects: list[Path] = []
@@ -638,6 +716,17 @@ def create_unit_test_fastled_library(
     if not archive_result.ok:
         print(f"[LIBRARY] ERROR: Library creation failed: {archive_result.stderr}")
         return None
+
+    # Save the configuration hash to file for future cache validation
+    try:
+        with open(config_hash_file, "w") as f:
+            f.write(config_hash)
+        print(
+            f"[LIBRARY CACHE] Saved configuration hash ({config_hash}) to {config_hash_file.name}"
+        )
+    except (IOError, OSError) as e:
+        print(f"[LIBRARY CACHE] WARNING: Failed to save config hash: {e}")
+        # Non-fatal error - library is still created successfully
 
     print(f"[LIBRARY] SUCCESS: FastLED library created: {lib_file}")
     return lib_file
