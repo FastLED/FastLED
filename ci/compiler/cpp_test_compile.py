@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # pyright: reportUnknownMemberType=false, reportReturnType=false, reportMissingParameterType=false
+import _thread
 import argparse
 import hashlib
 import json
@@ -23,6 +24,7 @@ from .clang_compiler import (
     Compiler,
     CompilerOptions,
     LinkOptions,
+    Result,
     test_clang_accessibility,
 )
 from .test_example_compilation import create_fastled_compiler
@@ -407,43 +409,137 @@ def create_unit_test_fastled_library(
     obj_dir = fastled_build_dir / "obj"
     obj_dir.mkdir(exist_ok=True)
 
-    print(f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files...")
-
-    # Compile each source file with optimized naming (same as examples)
-    futures: List[Tuple[Any, ...]] = []
+    # Use unity chunk compilation for faster builds
+    use_unity_chunks = True
     project_root = Path(__file__).parent.parent.parent
     src_dir = project_root / "src"
 
-    for cpp_file in fastled_sources:
-        # Create unique object file name by including relative path to prevent collisions
-        # Convert path separators to underscores to create valid filename
-        if cpp_file.is_relative_to(src_dir):
-            rel_path = cpp_file.relative_to(src_dir)
-        else:
-            rel_path = cpp_file
+    if use_unity_chunks:
+        from ci.compiler.unity_archive import partition_by_subdirectory
 
-        # Replace path separators with underscores for unique object file names
-        obj_name = str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
-        obj_file = obj_dir / obj_name
-        future = library_compiler.compile_cpp_file(cpp_file, obj_file)
-        futures.append((future, obj_file, cpp_file))
+        print(
+            f"[LIBRARY] Using unity chunk compilation for {len(fastled_sources)} source files..."
+        )
 
-    # Wait for compilation to complete
-    compiled_count = 0
-    for future, obj_file, cpp_file in futures:
-        try:
-            result = future.result()
-            if result.ok:
-                fastled_objects.append(obj_file)
-                compiled_count += 1
-            else:
-                print(
-                    f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}..."
-                )
-        except Exception as e:
+        # Sort sources deterministically
+        fastled_sources_sorted = sorted(fastled_sources, key=lambda p: p.as_posix())
+
+        # Partition by subdirectory
+        partitions = partition_by_subdirectory(fastled_sources_sorted)
+        print(f"[LIBRARY] Partitioned into {len(partitions)} subdirectory-based chunks")
+
+        unity_dir = fastled_build_dir / "unity"
+        unity_dir.mkdir(exist_ok=True)
+
+        # Compile each unity chunk
+        compile_opts = CompilerOptions(
+            include_path=library_compiler.settings.include_path,
+            compiler=library_compiler.settings.compiler,
+            defines=library_compiler.settings.defines,
+            std_version=library_compiler.settings.std_version,
+            compiler_args=library_compiler.settings.compiler_args,
+            use_pch=False,
+            additional_flags=["-c"],
+            parallel=True,
+        )
+
+        compiled_count = 0
+        failed_count = 0
+
+        # Submit all chunks for parallel compilation
+        unity_futures: List[Tuple[Future[Result], int, int, Path]] = []
+        for i, chunk_files in enumerate(partitions):
+            if not chunk_files:
+                continue
+
+            unity_cpp = unity_dir / f"unity_chunk{i + 1}.cpp"
             print(
-                f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}"
+                f"[LIBRARY] Submitting unity chunk {i + 1}/{len(partitions)} ({len(chunk_files)} files) for compilation..."
             )
+
+            # Compile unity chunk asynchronously for parallel compilation
+            future = library_compiler.compile_unity(
+                compile_opts, chunk_files, unity_cpp
+            )
+            unity_futures.append((future, i + 1, len(chunk_files), unity_cpp))
+
+        # Wait for all chunks to complete
+        print(f"[LIBRARY] Compiling {len(unity_futures)} unity chunks in parallel...")
+        for future, chunk_num, file_count, unity_cpp in unity_futures:
+            try:
+                result = future.result()
+
+                if result.ok:
+                    unity_obj = unity_cpp.with_suffix(".o")
+                    fastled_objects.append(unity_obj)
+                    compiled_count += file_count
+                    print(
+                        f"[LIBRARY] SUCCESS: Unity chunk {chunk_num} compiled ({file_count} files)"
+                    )
+                else:
+                    failed_count += file_count
+                    print(
+                        f"[LIBRARY] ERROR: Unity chunk {chunk_num} failed: {result.stderr[:500]}..."
+                    )
+            except (KeyboardInterrupt, Exception):
+                # Cancel all pending futures immediately without waiting
+                for f, _, _, _ in unity_futures:
+                    f.cancel()
+                _thread.interrupt_main()
+                raise
+
+        print(
+            f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources via {len(partitions)} unity chunks"
+        )
+
+        # FAIL FAST: If any unity chunk failed, abort immediately
+        if failed_count > 0:
+            raise Exception(
+                f"CRITICAL: {failed_count} FastLED source files failed to compile in unity chunks. "
+                f"This indicates a serious build environment issue."
+            )
+
+    else:
+        # Original individual file compilation (fallback)
+        print(
+            f"[LIBRARY] Compiling {len(fastled_sources)} FastLED source files individually..."
+        )
+
+        # Compile each source file with optimized naming (same as examples)
+        futures: List[Tuple[Any, ...]] = []
+
+        for cpp_file in fastled_sources:
+            # Create unique object file name by including relative path to prevent collisions
+            # Convert path separators to underscores to create valid filename
+            if cpp_file.is_relative_to(src_dir):
+                rel_path = cpp_file.relative_to(src_dir)
+            else:
+                rel_path = cpp_file
+
+            # Replace path separators with underscores for unique object file names
+            obj_name = (
+                str(rel_path.with_suffix(".o")).replace("/", "_").replace("\\", "_")
+            )
+            obj_file = obj_dir / obj_name
+            future = library_compiler.compile_cpp_file(cpp_file, obj_file)
+            futures.append((future, obj_file, cpp_file))
+
+        # Wait for compilation to complete
+        compiled_count = 0
+        for future, obj_file, cpp_file in futures:
+            try:
+                result = future.result()
+                if result.ok:
+                    fastled_objects.append(obj_file)
+                    compiled_count += 1
+                else:
+                    print(
+                        f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}..."
+                    )
+            except Exception as e:
+                print(
+                    f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}"
+                )
 
     print(
         f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"

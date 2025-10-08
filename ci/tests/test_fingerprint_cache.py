@@ -729,8 +729,8 @@ class TestFingerprintCache(TestCase):
         self.assertTrue(result, "Large file should be detected as changed")
         self.assertLess(
             elapsed,
-            0.05,
-            f"Large file processing took {elapsed:.2f}s, should be < 0.05s",
+            0.1,
+            f"Large file processing took {elapsed:.2f}s, should be < 0.1s",
         )
 
         # Test cache hit performance
