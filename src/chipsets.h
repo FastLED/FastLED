@@ -328,6 +328,23 @@ protected:
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(pixels, &mSPI);
 	}
+
+public:
+	/// Get the protocol-safe padding byte for LPD8806
+	/// Used for quad-SPI lane padding when strips have different lengths
+	/// @returns 0x00 (latch continuation byte)
+	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+
+	/// Calculate total byte count for LPD8806 protocol
+	/// Used for quad-SPI buffer pre-allocation
+	/// @param num_leds Number of LEDs in the strip
+	/// @returns Total bytes needed (RGB data + latch bytes)
+	static constexpr size_t calculateBytes(size_t num_leds) {
+		// LPD8806 protocol:
+		// - LED data: 3 bytes per LED (GRB with high bit set)
+		// - Latch: ((num_leds * 3 + 63) / 64) bytes of 0x00
+		return (num_leds * 3) + ((num_leds * 3 + 63) / 64);
+	}
 };
 
 
@@ -364,6 +381,23 @@ protected:
 		mWaitDelay.wait();
 		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels, NULL);
 		mWaitDelay.mark();
+	}
+
+public:
+	/// Get the protocol-safe padding byte for WS2801
+	/// Used for quad-SPI lane padding when strips have different lengths
+	/// @returns 0x00 (no protocol state)
+	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+
+	/// Calculate total byte count for WS2801 protocol
+	/// Used for quad-SPI buffer pre-allocation
+	/// @param num_leds Number of LEDs in the strip
+	/// @returns Total bytes needed (RGB data only, no overhead)
+	static constexpr size_t calculateBytes(size_t num_leds) {
+		// WS2801 protocol:
+		// - LED data: 3 bytes per LED (RGB)
+		// - No frame overhead (latch is timing-based, not data-based)
+		return num_leds * 3;
 	}
 };
 
@@ -590,6 +624,24 @@ private:
 		mSPI.waitFully();
 		mSPI.release();
 	}
+
+public:
+	/// Get the protocol-safe padding byte for APA102
+	/// Used for quad-SPI lane padding when strips have different lengths
+	/// @returns 0xFF (end frame continuation byte)
+	static constexpr fl::u8 getPaddingByte() { return 0xFF; }
+
+	/// Calculate total byte count for APA102 protocol
+	/// Used for quad-SPI buffer pre-allocation
+	/// @param num_leds Number of LEDs in the strip
+	/// @returns Total bytes needed (start frame + LED data + end frame)
+	static constexpr size_t calculateBytes(size_t num_leds) {
+		// APA102 protocol:
+		// - Start frame: 4 bytes (0x00000000)
+		// - LED data: 4 bytes per LED (brightness + RGB)
+		// - End frame: (num_leds / 32) + 1 DWords = 4 * ((num_leds / 32) + 1) bytes
+		return 4 + (num_leds * 4) + (4 * ((num_leds / 32) + 1));
+	}
 };
 
 /// APA102 high definition controller class.
@@ -745,6 +797,23 @@ protected:
 		mSPI.release();
 	}
 
+public:
+	/// Get the protocol-safe padding byte for P9813
+	/// Used for quad-SPI lane padding when strips have different lengths
+	/// @returns 0x00 (boundary byte)
+	static constexpr fl::u8 getPaddingByte() { return 0x00; }
+
+	/// Calculate total byte count for P9813 protocol
+	/// Used for quad-SPI buffer pre-allocation
+	/// @param num_leds Number of LEDs in the strip
+	/// @returns Total bytes needed (boundaries + LED data)
+	static constexpr size_t calculateBytes(size_t num_leds) {
+		// P9813 protocol:
+		// - Start boundary: 4 bytes (0x00000000)
+		// - LED data: 4 bytes per LED (flag byte + BGR)
+		// - End boundary: 4 bytes (0x00000000)
+		return 4 + (num_leds * 4) + 4;
+	}
 };
 
 
