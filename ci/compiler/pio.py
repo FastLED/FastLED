@@ -2031,6 +2031,8 @@ class PioCompiler(Compiler):
             "80m",
             "--flash-size",
             "4MB",
+            "--pad-to-size",
+            "4MB",
             bootloader_offset,
             str(bootloader_bin),
             "0x8000",
