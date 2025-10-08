@@ -39,7 +39,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sketch: [Blink, BlinkParallel]
+        sketch: [BlinkParallel]
 
     steps:
       - name: Checkout code
