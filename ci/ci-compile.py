@@ -262,8 +262,25 @@ exit $EXIT_CODE
     print(f"Executing: bash compile {board_name} {example_name}")
     print()
 
-    # Stream output in real-time
-    result = subprocess.run(exec_cmd)
+    # Stream output in real-time with unbuffered I/O
+    # Use Popen to ensure proper streaming without buffering issues
+    sys.stdout.flush()
+    sys.stderr.flush()
+    process = subprocess.Popen(
+        exec_cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        bufsize=1,  # Line buffered
+        universal_newlines=True,
+    )
+
+    # Stream output line by line
+    if process.stdout:
+        for line in process.stdout:
+            print(line, end="", flush=True)
+
+    returncode = process.wait()
+    result = subprocess.CompletedProcess(exec_cmd, returncode, stdout="", stderr="")
 
     # Pause container immediately after compilation
     # This keeps the container state but frees resources
