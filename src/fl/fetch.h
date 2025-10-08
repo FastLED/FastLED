@@ -70,12 +70,12 @@ namespace fl {
 // Forward declarations
 class fetch_options;
 class FetchManager;
+class response;
 
 #ifdef __EMSCRIPTEN__
 // Forward declarations for WASM-specific types (defined in platforms/wasm/js_fetch.h)
 class WasmFetchRequest;
 class WasmFetch;
-using FetchResponseCallback = fl::function<void(const response&)>;
 extern WasmFetch wasm_fetch;
 #endif
 
