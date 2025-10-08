@@ -427,7 +427,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                     #ifdef FASTLED_ESP32_PARLIO_DLOGGING
                     if (led == 0 && bit >= 5) {
                         char buf[64];
-                        fl::snprintf(buf, sizeof(buf), "    LED[0] bit[%d]: byte=0x%02x", bit, output_byte);
+                        fl::snprintf(buf, sizeof(buf), "    LED[0] bit[%d]: byte=0x%02x", int(bit), int(output_byte));
                         FASTLED_DBG(buf);
                     }
                     #endif
@@ -478,7 +478,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                     #ifdef FASTLED_ESP32_PARLIO_DLOGGING
                     if (led == 0 && output_pos == 0 && bit >= 5) {
                         char buf[64];
-                        fl::snprintf(buf, sizeof(buf), "    LED[0] color[%d] bit[%d]: byte=0x%02x", output_pos, bit, output_byte);
+                        fl::snprintf(buf, sizeof(buf), "    LED[0] color[%d] bit[%d]: byte=0x%02x", int(output_pos), int(bit), int(output_byte));
                         FASTLED_DBG(buf);
                     }
                     #endif
