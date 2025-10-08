@@ -58,16 +58,8 @@ void setup() {
     Serial.println("Hardware: ESP32 with 4× APA102 LED strips");
     Serial.println();
 
-    // NOTE: Quad-SPI implementation is in progress
-    // For now, this will use standard controllers
-    // Future versions will automatically detect shared clock pins
-    // and enable hardware Quad-SPI acceleration
-
-    // Add LED strips (currently uses standard SPI)
-    // When Quad-SPI is fully implemented, FastLED will automatically
-    // detect that all strips share the same clock pin and enable
-    // hardware quad-SPI mode for parallel transmission
-
+    // Add LED strips - FastLED automatically detects shared clock pins
+    // and enables hardware Quad-SPI for parallel transmission
     FastLED.addLeds<APA102, DATA_PIN_0, CLOCK_PIN, RGB>(leds_lane0, NUM_LEDS_LANE_0);
     FastLED.addLeds<APA102, DATA_PIN_1, CLOCK_PIN, RGB>(leds_lane1, NUM_LEDS_LANE_1);
     FastLED.addLeds<APA102, DATA_PIN_2, CLOCK_PIN, RGB>(leds_lane2, NUM_LEDS_LANE_2);
@@ -102,9 +94,8 @@ void loop() {
     // Lane 3: Rainbow with opposite direction
     fill_rainbow(leds_lane3, NUM_LEDS_LANE_3, hue + 192, 7);
 
-    // Show all strips
-    // When Quad-SPI is fully implemented, this single call will
-    // transmit all 4 strips in parallel via hardware DMA
+    // Show all strips - transmits all 4 strips in parallel via hardware DMA
+    // Zero CPU overhead during transmission thanks to Quad-SPI
     FastLED.show();
 
     hue++;

@@ -148,21 +148,12 @@ TEST_CASE("SPIBusManager: Quad-SPI promotion with 3 devices") {
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
 
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32P4)
-        // ESP32 platforms support Quad-SPI
-        CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
-        CHECK(result == true);
-        CHECK(manager.isDeviceEnabled(h1));
-        CHECK(manager.isDeviceEnabled(h2));
-        CHECK(manager.isDeviceEnabled(h3));
-    #else
-        // Other platforms: promotion fails, keep first device
-        CHECK(bus->bus_type == SPIBusType::SINGLE_SPI);
-        CHECK(result == false);
-        CHECK(manager.isDeviceEnabled(h1));
-        CHECK_FALSE(manager.isDeviceEnabled(h2));
-        CHECK_FALSE(manager.isDeviceEnabled(h3));
-    #endif
+    // Quad-SPI should be promoted for 3 devices
+    CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+    CHECK(result == true);
+    CHECK(manager.isDeviceEnabled(h1));
+    CHECK(manager.isDeviceEnabled(h2));
+    CHECK(manager.isDeviceEnabled(h3));
 }
 
 TEST_CASE("SPIBusManager: Quad-SPI promotion with 4 devices") {
@@ -180,18 +171,13 @@ TEST_CASE("SPIBusManager: Quad-SPI promotion with 4 devices") {
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
 
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32P4)
-        // ESP32 platforms support Quad-SPI
-        CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
-        CHECK(result == true);
-        CHECK(manager.isDeviceEnabled(h1));
-        CHECK(manager.isDeviceEnabled(h2));
-        CHECK(manager.isDeviceEnabled(h3));
-        CHECK(manager.isDeviceEnabled(h4));
-    #else
-        // Other platforms: promotion fails
-        CHECK(result == false);
-    #endif
+    // Quad-SPI should be promoted for 4 devices
+    CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+    CHECK(result == true);
+    CHECK(manager.isDeviceEnabled(h1));
+    CHECK(manager.isDeviceEnabled(h2));
+    CHECK(manager.isDeviceEnabled(h3));
+    CHECK(manager.isDeviceEnabled(h4));
 }
 
 TEST_CASE("SPIBusManager: Conflict resolution - 2 devices, no multi-SPI") {
@@ -207,13 +193,11 @@ TEST_CASE("SPIBusManager: Conflict resolution - 2 devices, no multi-SPI") {
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
 
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32P4)
-        // ESP32: Should try Quad-SPI (but only 2 devices)
-        // Current implementation promotes 3-4 devices to Quad
-        // For 2 devices, should use Dual-SPI (not implemented yet)
-        // So it will fail and disable second device
-        CHECK_FALSE(manager.isDeviceEnabled(h2));
-    #endif
+    // Should try Quad-SPI (but only 2 devices)
+    // Current implementation promotes 3-4 devices to Quad
+    // For 2 devices, should use Dual-SPI (not implemented yet)
+    // So it will fail and disable second device
+    CHECK_FALSE(manager.isDeviceEnabled(h2));
 
     // First device should always be enabled
     CHECK(manager.isDeviceEnabled(h1));
@@ -282,15 +266,13 @@ TEST_CASE("SPIBusManager: Multiple buses with mixed device counts") {
     REQUIRE(bus1 != nullptr);
     CHECK(bus1->bus_type == SPIBusType::SINGLE_SPI);
 
-    #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32P4)
-        // Bus 2: Should be Quad-SPI
-        const SPIBusInfo* bus2 = manager.getBusInfo(h2_1.bus_id);
-        REQUIRE(bus2 != nullptr);
-        CHECK(bus2->bus_type == SPIBusType::QUAD_SPI);
-        CHECK(manager.isDeviceEnabled(h2_1));
-        CHECK(manager.isDeviceEnabled(h2_2));
-        CHECK(manager.isDeviceEnabled(h2_3));
-    #endif
+    // Bus 2: Should be Quad-SPI
+    const SPIBusInfo* bus2 = manager.getBusInfo(h2_1.bus_id);
+    REQUIRE(bus2 != nullptr);
+    CHECK(bus2->bus_type == SPIBusType::QUAD_SPI);
+    CHECK(manager.isDeviceEnabled(h2_1));
+    CHECK(manager.isDeviceEnabled(h2_2));
+    CHECK(manager.isDeviceEnabled(h2_3));
 }
 
 TEST_CASE("SPIBusManager: getBusInfo with invalid bus_id") {
@@ -319,4 +301,233 @@ TEST_CASE("SPIBusManager: Device info tracking") {
     CHECK(bus->devices[1].clock_pin == 14);
     CHECK(bus->devices[1].data_pin == 27);
     CHECK(bus->devices[1].controller == &ctrl2);
+}
+
+TEST_CASE("SPIBusManager: Device unregistration") {
+    SPIBusManager manager;
+
+    MockController ctrl(1);
+    SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+
+    CHECK(handle.is_valid);
+    CHECK(manager.isDeviceEnabled(handle));
+
+    // Unregister the device
+    bool result = manager.unregisterDevice(handle);
+
+    CHECK(result);
+    CHECK_FALSE(manager.isDeviceEnabled(handle));
+}
+
+TEST_CASE("SPIBusManager: Unregister with invalid handle") {
+    SPIBusManager manager;
+
+    SPIBusHandle invalid_handle;  // Invalid by default
+    bool result = manager.unregisterDevice(invalid_handle);
+
+    CHECK_FALSE(result);
+}
+
+TEST_CASE("SPIBusManager: Quad-SPI release when all devices unregistered") {
+    SPIBusManager manager;
+
+    MockController ctrl1(1), ctrl2(2), ctrl3(3);
+
+    // Register 3 devices for Quad-SPI
+    SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
+    SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
+    SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+
+    manager.initialize();
+
+    const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
+    REQUIRE(bus != nullptr);
+
+    // Should be Quad-SPI initially
+    CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+    CHECK(bus->is_initialized);
+
+    // Unregister devices one by one
+    manager.unregisterDevice(h1);
+    CHECK(bus->is_initialized);  // Still initialized (2 devices left)
+
+    manager.unregisterDevice(h2);
+    CHECK(bus->is_initialized);  // Still initialized (1 device left)
+
+    manager.unregisterDevice(h3);
+    // After last device is unregistered, bus should be released
+    CHECK_FALSE(bus->is_initialized);
+    CHECK(bus->bus_type == SPIBusType::SOFT_SPI);  // Reset to default
+    CHECK(bus->hw_controller == nullptr);  // Hardware released
+}
+
+TEST_CASE("SPIBusManager: Partial unregistration - Quad-SPI remains active") {
+    SPIBusManager manager;
+
+    MockController ctrl1(1), ctrl2(2), ctrl3(3), ctrl4(4);
+
+    // Register 4 devices for Quad-SPI
+    SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
+    SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
+    SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+    SPIBusHandle h4 = manager.registerDevice(14, 25, &ctrl4);
+
+    manager.initialize();
+
+    const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
+    REQUIRE(bus != nullptr);
+
+    CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+
+    // Unregister 2 devices (2 remain)
+    manager.unregisterDevice(h3);
+    manager.unregisterDevice(h4);
+
+    // Quad-SPI should still be active (2 devices left)
+    CHECK(bus->is_initialized);
+    CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+
+    // First 2 devices should still be enabled
+    CHECK(manager.isDeviceEnabled(h1));
+    CHECK(manager.isDeviceEnabled(h2));
+
+    // Last 2 devices should be deallocated
+    CHECK_FALSE(manager.isDeviceEnabled(h3));
+    CHECK_FALSE(manager.isDeviceEnabled(h4));
+}
+
+TEST_CASE("SPIBusManager: Double unregistration is safe") {
+    SPIBusManager manager;
+
+    MockController ctrl(1);
+    SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+
+    // First unregister should succeed
+    bool result1 = manager.unregisterDevice(handle);
+    CHECK(result1);
+
+    // Second unregister should fail gracefully (already deallocated)
+    bool result2 = manager.unregisterDevice(handle);
+    CHECK_FALSE(result2);
+}
+
+TEST_CASE("SPIBusManager: Quad-SPI controller reuse after release") {
+    SPIBusManager manager;
+
+    // First batch: Register 3 devices, initialize Quad-SPI
+    {
+        MockController ctrl1(1), ctrl2(2), ctrl3(3);
+
+        SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
+        SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
+        SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+
+        manager.initialize();
+
+        const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
+        REQUIRE(bus != nullptr);
+        CHECK(bus->bus_type == SPIBusType::QUAD_SPI);
+        CHECK(bus->is_initialized);
+
+        // Store the controller pointer for comparison
+        void* first_controller = bus->hw_controller;
+        CHECK(first_controller != nullptr);
+
+        // Unregister all devices
+        manager.unregisterDevice(h1);
+        manager.unregisterDevice(h2);
+        manager.unregisterDevice(h3);
+
+        // Bus should be released
+        CHECK_FALSE(bus->is_initialized);
+        CHECK(bus->hw_controller == nullptr);
+    }
+
+    // Second batch: Register 4 new devices on a different clock pin
+    // This should get a fresh Quad-SPI controller (possibly the same one that was released)
+    {
+        MockController ctrl4(4), ctrl5(5), ctrl6(6), ctrl7(7);
+
+        SPIBusHandle h4 = manager.registerDevice(18, 19, &ctrl4);  // Different clock pin!
+        SPIBusHandle h5 = manager.registerDevice(18, 20, &ctrl5);
+        SPIBusHandle h6 = manager.registerDevice(18, 21, &ctrl6);
+        SPIBusHandle h7 = manager.registerDevice(18, 22, &ctrl7);
+
+        // Need to initialize this new bus
+        manager.initialize();
+
+        const SPIBusInfo* bus2 = manager.getBusInfo(h4.bus_id);
+        REQUIRE(bus2 != nullptr);
+        CHECK(bus2->bus_type == SPIBusType::QUAD_SPI);
+        CHECK(bus2->is_initialized);
+        CHECK(bus2->hw_controller != nullptr);  // Should have a valid controller
+
+        // The controller should be successfully initialized (reused from the pool)
+        // We can't directly test if it's the same instance, but we verify it works
+
+        // Cleanup
+        manager.unregisterDevice(h4);
+        manager.unregisterDevice(h5);
+        manager.unregisterDevice(h6);
+        manager.unregisterDevice(h7);
+
+        CHECK_FALSE(bus2->is_initialized);
+    }
+}
+
+TEST_CASE("SPIBusManager: Multiple buses can share Quad-SPI controllers") {
+    SPIBusManager manager;
+
+    // Mock platform can handle 2 Quad-SPI groups simultaneously
+    MockController ctrls[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+
+    // Bus 1: 3 devices on clock pin 14
+    SPIBusHandle b1_h1 = manager.registerDevice(14, 13, &ctrls[0]);
+    SPIBusHandle b1_h2 = manager.registerDevice(14, 27, &ctrls[1]);
+    SPIBusHandle b1_h3 = manager.registerDevice(14, 33, &ctrls[2]);
+
+    // Bus 2: 4 devices on clock pin 18
+    SPIBusHandle b2_h1 = manager.registerDevice(18, 19, &ctrls[3]);
+    SPIBusHandle b2_h2 = manager.registerDevice(18, 20, &ctrls[4]);
+    SPIBusHandle b2_h3 = manager.registerDevice(18, 21, &ctrls[5]);
+    SPIBusHandle b2_h4 = manager.registerDevice(18, 22, &ctrls[6]);
+
+    manager.initialize();
+
+    const SPIBusInfo* bus1 = manager.getBusInfo(b1_h1.bus_id);
+    const SPIBusInfo* bus2 = manager.getBusInfo(b2_h1.bus_id);
+
+    REQUIRE(bus1 != nullptr);
+    REQUIRE(bus2 != nullptr);
+
+    // Both should be Quad-SPI
+    CHECK(bus1->bus_type == SPIBusType::QUAD_SPI);
+    CHECK(bus2->bus_type == SPIBusType::QUAD_SPI);
+
+    // Both should be initialized
+    CHECK(bus1->is_initialized);
+    CHECK(bus2->is_initialized);
+
+    // They should have different hardware controllers (different SPI peripherals)
+    CHECK(bus1->hw_controller != nullptr);
+    CHECK(bus2->hw_controller != nullptr);
+    CHECK(bus1->hw_controller != bus2->hw_controller);  // Different peripherals
+
+    // Cleanup first bus
+    manager.unregisterDevice(b1_h1);
+    manager.unregisterDevice(b1_h2);
+    manager.unregisterDevice(b1_h3);
+
+    // First bus should be released, second should still be active
+    CHECK_FALSE(bus1->is_initialized);
+    CHECK(bus2->is_initialized);
+
+    // Cleanup second bus
+    manager.unregisterDevice(b2_h1);
+    manager.unregisterDevice(b2_h2);
+    manager.unregisterDevice(b2_h3);
+    manager.unregisterDevice(b2_h4);
+
+    // Both should now be released
+    CHECK_FALSE(bus2->is_initialized);
 }
