@@ -1,7 +1,7 @@
 #include "driver.h"
 #include "fl/time.h"
 #include "fl/warn.h"
-#include "fl/printf.h"
+#include "fl/stdio.h"
 #include <string.h>
 
 namespace fl {

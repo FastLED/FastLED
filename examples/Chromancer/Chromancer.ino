@@ -25,7 +25,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/warn.h"
-#include "fl/printf.h"
+#include "fl/stdio.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
