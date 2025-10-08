@@ -1,0 +1,97 @@
+name: Header Compilation Performance
+
+on:
+  push:
+    branches: [master, main]
+    paths:
+      - 'src/**/*.h'
+      - 'src/**/*.hpp'
+      - '.github/workflows/header-perf.yml'
+  pull_request:
+    paths:
+      - 'src/**/*.h'
+      - 'src/**/*.hpp'
+
+jobs:
+  header-perf:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Clang
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-17
+
+      - name: Run compilation performance analysis
+        id: perf
+        run: |
+          python ci/perf/compile_perf.py \
+            --compiler=clang++-17 \
+            --output=text \
+            --save-trace \
+            --threshold=50 | tee perf-report.txt
+        continue-on-error: true
+
+      - name: Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: compilation-perf-report
+          path: |
+            perf-report.txt
+            ci/perf/test_compile.json
+
+      - name: Extract metrics for PR comment
+        if: github.event_name == 'pull_request'
+        run: |
+          python ci/perf/compile_perf.py \
+            --compiler=clang++-17 \
+            --output=json > perf-metrics.json
+
+      - name: Comment on PR
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const metrics = JSON.parse(fs.readFileSync('perf-metrics.json', 'utf8'));
+
+            const body = `## 📊 Header Compilation Performance
+
+            **Total Time:** ${metrics.total_time.toFixed(2)}ms
+
+            ### Top 5 Slowest Headers
+            ${metrics.top_headers.slice(0, 5).map((h, i) =>
+              `${i+1}. \`${h.name}\` - ${h.time.toFixed(2)}ms`
+            ).join('\n')}
+
+            ### Warnings
+            ${metrics.warnings.length > 0 ?
+              metrics.warnings.map(w => `⚠️ ${w}`).join('\n') :
+              '✅ No performance warnings'}
+
+            <details>
+            <summary>Full Report</summary>
+
+            \`\`\`
+            ${fs.readFileSync('perf-report.txt', 'utf8')}
+            \`\`\`
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Check performance thresholds
+        run: |
+          # Exit with error if any header exceeds threshold
+          python ci/perf/compile_perf.py --compiler=clang++-17 --check-thresholds

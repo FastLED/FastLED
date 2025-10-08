@@ -1,0 +1,11 @@
+{
+  "total_compile_time_ms": 2000,
+  "header_warning_threshold_ms": 50,
+  "header_error_threshold_ms": 150,
+  "template_instantiation_percent": 15,
+  "known_slow_headers": {
+    "fl/str.h": 130,
+    "controller.h": 85,
+    "comment": "These are known to be slow and tracked"
+  }
+}
