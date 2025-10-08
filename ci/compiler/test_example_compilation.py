@@ -1036,7 +1036,7 @@ class CompilationTestRunner:
         self.log_timing(
             f"[PERF] Parallel compilation: {parallel_status} (managed by compiler)"
         )
-        self.log_timing("[PERF] Direct compilation enabled (no CMake overhead)")
+        self.log_timing("[PERF] Direct compilation enabled")
 
         if self.config.verbose:
             print(f"[VERBOSE] Starting compilation with configuration:")

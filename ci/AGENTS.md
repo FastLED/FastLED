@@ -113,19 +113,15 @@ Background agents may use individual linting scripts when needed:
 # Fast Python API (default)
 bash test --unit --verbose  # Uses PCH optimization
 
-# Disable PCH if needed  
-bash test --unit --no-pch --verbose
-
-# Legacy CMake system (8x slower)
-bash test --unit --legacy --verbose  
+# Disable PCH if needed
+bash test --unit --no-pch --verbose  
 ```
 
 **Available Build Options:**
-- `--no-pch` - Disable precompiled headers 
+- `--no-pch` - Disable precompiled headers
 - `--clang` - Use Clang compiler (recommended for speed)
 - `--clean` - Force full rebuild
 - `--verbose` - Show detailed compilation output
-- `--legacy` - Use old CMake system (discouraged)
 
 **Platform Compilation:**
 ```bash
@@ -150,19 +146,18 @@ uv run ci/wasm_compile.py examples/Blink -b --open
 ## Build Troubleshooting
 
 **For Linker Issues:**
-1. Check `tests/cmake/LinkerCompatibility.cmake` first
-2. Look for lld-link detection and compatibility functions
-3. Check GNU→MSVC flag translation logic
-4. Verify warning suppression settings
+1. Check linker detection and compatibility in test build scripts
+2. Review GNU→MSVC flag translation logic
+3. Verify warning suppression settings
 
 **For Compiler Issues:**
-1. Check `tests/cmake/CompilerDetection.cmake` for detection logic
-2. Review `tests/cmake/CompilerFlags.cmake` for flag conflicts
-3. Verify optimization settings in `OptimizationSettings.cmake`
+1. Check compiler detection logic in build scripts
+2. Review compiler flags for conflicts
+3. Verify optimization settings
 
 **For Build Performance:**
-1. Check `tests/cmake/ParallelBuild.cmake` for parallel settings
-2. Review LTO configuration in `OptimizationSettings.cmake`
+1. Check parallel build configuration
+2. Review LTO settings
 3. Verify linker selection (mold, lld, default)
 
 ## 🚨 Critical User Feedback Corrections

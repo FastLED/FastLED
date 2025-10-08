@@ -242,7 +242,7 @@ USE_ZIG = False
 USE_CLANG = False
 
 
-# Legacy CMake helper functions removed - using optimized Python API
+# Using optimized Python API
 
 
 def get_unit_test_fastled_sources() -> list[Path]:
@@ -788,7 +788,7 @@ def compile_unit_tests_python_api(
     clean: bool = False,
     debug: bool = False,
 ) -> bool:
-    """Compile unit tests using the fast Python API instead of CMake.
+    """Compile unit tests using the fast Python API.
 
     Returns:
         bool: True if all tests compiled and linked successfully, False otherwise

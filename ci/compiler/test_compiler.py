@@ -3,7 +3,7 @@
 FastLED Test Build System - Python Compiler API Integration
 
 This module provides a high-performance test compilation system built on the proven
-ci.util.ci.util.clang_compiler API that delivers 8x faster build times compared to CMake.
+ci.util.ci.util.clang_compiler API that delivers 8x faster build times.
 
 Key Features:
 - Parallel test compilation using ThreadPoolExecutor
@@ -265,8 +265,7 @@ class FastLEDTestCompiler:
         """
         Discover test_*.cpp files using proven patterns.
 
-        Uses the same file discovery patterns as the existing CMake system
-        to ensure 100% compatibility with current test discovery logic.
+        Uses proven file discovery patterns to ensure compatibility.
         """
         tests_dir = Path(PROJECT_ROOT) / "tests"
         test_files: List[Path] = []
@@ -491,7 +490,7 @@ class FastLEDTestCompiler:
         """Link each test to executable using proven linking API"""
         print(f"Linking {len(compiled_objects)} test executables...")
 
-        # First, build a complete FastLED library similar to CMake approach
+        # First, build a complete FastLED library
         fastled_lib_path = self._build_fastled_library()
 
         # Compile doctest_main.cpp once for all tests (provides main function and doctest implementation)
@@ -679,7 +678,7 @@ class FastLEDTestCompiler:
             return False
 
     def _build_fastled_library(self) -> Path:
-        """Build a complete FastLED static library like CMake does"""
+        """Build a complete FastLED static library"""
         print("Building FastLED static library...")
 
         # Define library path

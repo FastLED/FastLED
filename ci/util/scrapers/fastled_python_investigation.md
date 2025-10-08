@@ -14,7 +14,7 @@ The project already includes comprehensive dependencies for development and test
 - **FastLED**: `fastled>=1.2.26` - the FastLED Python package
 - **FastLED WASM**: `fastled-wasm` - WebAssembly support
 - **HTTP Client**: `httpx` - for HTTP requests
-- **Build Tools**: `uv`, `ziglang`, `ninja`, `cmake`
+- **Build Tools**: `uv`, `ziglang`, `ninja`
 - **Code Quality**: `ruff`, `mypy`, `pyright`, `clang-format`, `isort`, `black`
 
 ### Existing Playwright Implementation (`ci/wasm_test.py`)

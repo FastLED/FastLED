@@ -438,7 +438,7 @@ def _execute_test_files(
 
     Args:
         files: List of test file names
-        test_dir: Directory containing tests (for CMake) or empty string (for Python API)
+        test_dir: Directory containing tests or empty string (for Python API)
         failed_tests: List to collect failed tests
         specific_test: Specific test name if filtering
         test_paths: Dict mapping file names to full paths (for Python API)

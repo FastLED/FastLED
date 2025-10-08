@@ -192,13 +192,13 @@ uv run mcp_server.py
 **Ubuntu/Debian**:
 ```bash
 sudo apt-get update
-sudo apt-get install -y libunwind-dev build-essential cmake
+sudo apt-get install -y libunwind-dev build-essential
 ```
 
 **CentOS/RHEL/Fedora**:
 ```bash
-sudo yum install -y libunwind-devel gcc-c++ cmake  # CentOS/RHEL  
-sudo dnf install -y libunwind-devel gcc-c++ cmake  # Fedora
+sudo yum install -y libunwind-devel gcc-c++  # CentOS/RHEL
+sudo dnf install -y libunwind-devel gcc-c++  # Fedora
 ```
 
 **macOS**:
@@ -215,17 +215,10 @@ brew install libunwind
 The build system automatically detects and configures the best available option.
 
 ### Testing Stack Traces
+Stack trace testing is integrated into the main test suite. Use the crash handler tests via the standard test runner:
+
 ```bash
-cd tests
-cmake . && make crash_test_standalone crash_test_execinfo
-
-# Test libunwind version
-./.build/bin/crash_test_standalone manual   # Manual stack trace
-./.build/bin/crash_test_standalone nullptr  # Crash test
-
-# Test execinfo version  
-./.build/bin/crash_test_execinfo manual     # Manual stack trace
-./.build/bin/crash_test_execinfo nullptr    # Crash test
+bash test crash_test  # Run crash handler tests
 ```
 
 ### Using in Code
@@ -241,7 +234,7 @@ int main() {
 
 ## Testing Infrastructure
 
-**Test Configuration**: `tests/cmake/TestConfiguration.cmake`
+**Test Configuration**: Python-based build system in `ci/compiler/`
 - Defines test targets and dependencies
 - Configures test execution parameters
 - Sets up coverage and profiling
@@ -261,16 +254,14 @@ bash test --unit --verbose  # Uses PCH optimization
 # Disable PCH if needed  
 bash test --unit --no-pch --verbose
 
-# Legacy CMake system (8x slower)
-bash test --unit --legacy --verbose  
+# Note: --legacy flag removed (no longer supported)  
 ```
 
 **Available Build Options:**
-- `--no-pch` - Disable precompiled headers 
+- `--no-pch` - Disable precompiled headers
 - `--clang` - Use Clang compiler (recommended for speed)
 - `--clean` - Force full rebuild
 - `--verbose` - Show detailed compilation output
-- `--legacy` - Use old CMake system (discouraged)
 
 ## Memory Refresh Rule
 **🚨 ALL AGENTS: Read tests/AGENTS.md before concluding testing work to refresh memory about current test execution requirements and validation rules.**

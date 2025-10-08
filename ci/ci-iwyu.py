@@ -81,7 +81,7 @@ def check_iwyu_available() -> bool:
 
 
 def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
-    """Run IWYU on the C++ test suite using CMake integration"""
+    """Run IWYU on the C++ test suite"""
     here = Path(__file__).parent
     project_root = here.parent
 
@@ -93,7 +93,7 @@ def run_iwyu_on_cpp_tests(args: argparse.Namespace) -> int:
         "run",
         "test.py",
         "--cpp",
-        "--check",  # This enables IWYU via CMake
+        "--check",  # This enables IWYU
         "--clang",
         "--no-interactive",
     ]
