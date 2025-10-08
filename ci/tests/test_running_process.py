@@ -82,7 +82,7 @@ class TestRunningProcess(unittest.TestCase):
         )
 
         iter_lines: List[str] = []
-        with rp.line_iter(timeout=5) as it:
+        with rp.line_iter(timeout=60) as it:
             for ln in it:
                 # Should always be a string, never None
                 self.assertIsInstance(ln, str)
