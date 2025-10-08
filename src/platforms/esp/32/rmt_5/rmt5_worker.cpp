@@ -389,7 +389,7 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
         if (mCur < mNumBytes) {
             convertByteToRmt(mPixelData[mCur], pItem);
             pItem += 8;
-            mCur++;
+            mCur = mCur + 1;  // Avoid deprecated ++ on volatile
         } else {
             // End marker - zero duration signals end of transmission
             pItem->val = 0;

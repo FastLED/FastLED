@@ -80,10 +80,9 @@ public:
                 LED_CHIPSET::T1(), LED_CHIPSET::T2(), LED_CHIPSET::T3(),
                 N_BIT, 1000000, 80000000, true
             );
-            // Only perform division when override is non-zero (already checked by if constexpr)
-            constexpr uint32_t override_hz = LCD_PCLK_HZ_OVERRIDE;
-            result.pclk_hz = override_hz;
-            result.slot_ns = 1000000000UL / override_hz;
+            // Use override frequency (ternary guards against div-by-zero warning)
+            result.pclk_hz = LCD_PCLK_HZ_OVERRIDE;
+            result.slot_ns = (LCD_PCLK_HZ_OVERRIDE > 0) ? (1000000000UL / LCD_PCLK_HZ_OVERRIDE) : 0;
             return result;
         }
 
