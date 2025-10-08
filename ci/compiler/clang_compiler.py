@@ -1623,14 +1623,14 @@ class Compiler:
             lines = content.split("\n")
 
             for line in lines:
-                # Strip whitespace and comments for analysis
+                # Strip whitespace for analysis
                 stripped = line.strip()
 
                 # Skip empty lines
                 if not stripped:
                     continue
 
-                # Skip single-line comments
+                # Skip single-line comments (entire line is a comment)
                 if stripped.startswith("//"):
                     continue
 
@@ -1638,27 +1638,39 @@ class Compiler:
                 if stripped.startswith("/*") and "*/" in stripped:
                     continue
 
+                # Remove inline comments for checking directives
+                # Handle both // and /* */ style inline comments
+                code_part = stripped
+                if "//" in code_part:
+                    code_part = code_part.split("//")[0].strip()
+                if "/*" in code_part:
+                    code_part = code_part.split("/*")[0].strip()
+
+                # After removing comments, if nothing left, skip
+                if not code_part:
+                    continue
+
                 # Check for FastLED.h include (any quote style)
-                if stripped.startswith("#include") and "FastLED.h" in stripped:
+                if code_part.startswith("#include") and "FastLED.h" in code_part:
                     return True
 
                 # Check for problematic constructs before FastLED.h
                 # Allow Arduino.h before FastLED.h, but nothing else (any quote style)
-                is_include = stripped.startswith("#include")
-                is_arduino_include = is_include and "Arduino.h" in stripped
+                is_include = code_part.startswith("#include")
+                is_arduino_include = is_include and "Arduino.h" in code_part
 
                 problematic_patterns = [
                     is_include
                     and not is_arduino_include,  # Any include except Arduino.h
-                    stripped.startswith("#define"),  # Any define
-                    stripped.startswith("#ifdef"),  # Conditional compilation
-                    stripped.startswith("#ifndef"),  # Conditional compilation
-                    stripped.startswith("#if "),  # Conditional compilation
-                    stripped.startswith("#pragma"),  # Pragma directives
-                    stripped.startswith("using "),  # Using declarations
-                    stripped.startswith("namespace"),  # Namespace declarations
-                    "=" in stripped
-                    and not stripped.startswith("//"),  # Variable assignments
+                    code_part.startswith("#define"),  # Any define (after removing comments)
+                    code_part.startswith("#ifdef"),  # Conditional compilation
+                    code_part.startswith("#ifndef"),  # Conditional compilation
+                    code_part.startswith("#if "),  # Conditional compilation
+                    code_part.startswith("#pragma"),  # Pragma directives
+                    code_part.startswith("using "),  # Using declarations
+                    code_part.startswith("namespace"),  # Namespace declarations
+                    "=" in code_part
+                    and not code_part.startswith("//"),  # Variable assignments
                 ]
 
                 if any(problematic_patterns):

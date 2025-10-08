@@ -9,9 +9,13 @@
 //  For Dan.
 //
 
-#define FASTLED_ALLOW_INTERRUPTS 0
+// FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include <FastLED.h>
 FASTLED_USING_NAMESPACE
+
+// Note: FASTLED_ALLOW_INTERRUPTS improves performance on AVR platforms
+// Commented out to enable precompiled headers for faster compilation
+// #define FASTLED_ALLOW_INTERRUPTS 0
 
 #define DATA_PIN            3
 #define NUM_LEDS            60

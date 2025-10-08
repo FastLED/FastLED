@@ -15,9 +15,12 @@
 //  For Dan.
 //
 
-
-#define FASTLED_ALLOW_INTERRUPTS 0
+// FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include <FastLED.h>
+
+// Note: FASTLED_ALLOW_INTERRUPTS improves performance on AVR platforms
+// Commented out to enable precompiled headers for faster compilation
+// #define FASTLED_ALLOW_INTERRUPTS 0
 #include "fx/1d/pacifica.h"
 #include "fl/screenmap.h"
 #include "defs.h"  // for ENABLE_SKETCH
