@@ -4,7 +4,7 @@
 #define USE_FASTLED
 #endif  // USE_FASTLED
 
-#define COLOR_ORDER_RBG
+#define COLOR_ORDER_RGB
 
 #include "src/I2SClockLessLedDriveresp32s3.h"
 
