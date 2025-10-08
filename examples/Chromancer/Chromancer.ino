@@ -25,6 +25,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/warn.h"
+#include "fl/printf.h"
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
 // Platform does not have enough memory
@@ -207,7 +208,7 @@ void setup() {
     fl::fl_map<fl::string, ScreenMap> segmentMaps;
     ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
-    printf("Parsed %d segment maps\n", int(segmentMaps.size()));
+    fl::printf("Parsed %d segment maps\n", int(segmentMaps.size()));
     for (auto kv : segmentMaps) {
         Serial.print(kv.first.c_str());
         Serial.print(" ");

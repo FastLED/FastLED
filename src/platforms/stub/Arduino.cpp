@@ -6,7 +6,8 @@
 
 // Stdlib headers - kept out of Arduino.h for faster compilation
 #include <random>
-#include <stdio.h>
+
+#include "fl/printf.h"
 
 // fl namespace functions
 namespace fl {

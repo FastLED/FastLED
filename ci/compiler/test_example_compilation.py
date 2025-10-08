@@ -1894,6 +1894,8 @@ class CompilationTestRunner:
                 # Also analyze .cpp files for this example
                 cpp_files = compiler.find_cpp_files_for_example(ino_file)
                 for cpp_file in cpp_files:
+                    has_fastled: bool
+                    is_pch_compatible: bool
                     has_fastled, is_pch_compatible = (
                         compiler.analyze_file_for_pch_compatibility(cpp_file)
                     )
