@@ -73,6 +73,10 @@ FASTLED_NAMESPACE_BEGIN
 	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
 	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
 	#define FASTLED_ESP32_SPI_BUS FSPI
+#elif CONFIG_IDF_TARGET_ESP32P4
+	#pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS FSPI
 #else // Configuration for other ESP32 variants
 	#ifndef FASTLED_ESP32_SPI_BUS
 	#pragma message "Setting ESP32 SPI bus to VSPI by default"
