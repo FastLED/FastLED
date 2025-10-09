@@ -226,9 +226,11 @@ set -e
 # Sync host directories to container working directory if they exist
 if command -v rsync &> /dev/null; then
     echo "Syncing directories from host..."
-    [ -d "/host/src" ] && rsync -a --delete /host/src/ /fastled/src/
-    [ -d "/host/examples" ] && rsync -a --delete /host/examples/ /fastled/examples/
-    [ -d "/host/ci" ] && rsync -a --delete /host/ci/ /fastled/ci/
+    # Use --checksum to compare file contents instead of timestamps
+    # This ensures changes are detected even when timestamps are unreliable across host/container filesystems
+    [ -d "/host/src" ] && rsync -a --checksum --delete /host/src/ /fastled/src/
+    [ -d "/host/examples" ] && rsync -a --checksum --delete /host/examples/ /fastled/examples/
+    [ -d "/host/ci" ] && rsync -a --checksum --delete /host/ci/ /fastled/ci/
     echo "Directory sync complete"
 else
     echo "Warning: rsync not available, skipping directory sync"
