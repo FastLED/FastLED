@@ -7,9 +7,7 @@
 
 #include "rmt5_worker.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp32-hal.h"
 #include "esp_intr_alloc.h"
@@ -20,9 +18,7 @@ extern "C" {
 #include "rom/ets_sys.h"  // For ets_printf (ISR-safe logging)
 #include "esp_log.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #include "fl/force_inline.h"
 #include "fl/assert.h"

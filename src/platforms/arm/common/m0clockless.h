@@ -1,11 +1,11 @@
 #ifndef __INC_M0_CLOCKLESS_H
 #define __INC_M0_CLOCKLESS_H
 
+#include "fl/compiler_control.h"
+
 #include "fl/stdint.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 
 // Some platforms have a missing definition for SysTick, in that
@@ -30,9 +30,7 @@ typedef struct {
 // END SysTick DEFINITION
 
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 
 struct M0ClocklessData {

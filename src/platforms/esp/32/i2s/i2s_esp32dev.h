@@ -1,13 +1,12 @@
 #pragma once
+#include "fl/compiler_control.h"
 #include "fl/stdint.h"
 
 #include "fl/namespace.h"
 
 
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "platforms/esp/esp_version.h"
 
@@ -43,9 +42,7 @@ extern "C" {
 #define F_CPU_MHZ (F_CPU / 1000000L)
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 
 // TODO: this is in like 2 places. Consolidate.

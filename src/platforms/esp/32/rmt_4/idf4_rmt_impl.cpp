@@ -4,6 +4,8 @@
 #ifndef FASTLED_ESP32_I2S
 #define FASTLED_INTERNAL
 
+#include "fl/compiler_control.h"
+
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_ESP32_HAS_RMT && !FASTLED_RMT5
@@ -20,10 +22,7 @@
 #include "platforms/esp/32/clock_cycles.h"
 #include "freertos/semphr.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp32-hal.h"
 // ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
@@ -45,9 +44,7 @@ extern "C"
 #include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #ifndef IRAM_ATTR  // Fix for Arduino Cloud Compiler
 #warning "IRAM_ATTR not defined, are you in the Arduino Cloud compiler?, disbaling IRAM_ATTR."
@@ -140,17 +137,12 @@ namespace {
 #define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (portMAX_DELAY)
 #endif
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+FL_EXTERN_C_BEGIN
 
     extern void spi_flash_op_lock(void);
     extern void spi_flash_op_unlock(void);
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #define FASTLED_INTERNAL
 

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 // Defines a timer_millis for led_sysdefs_avr.h
 
 // Please don't use this code, it's mostly to make certain platforms compile.
@@ -32,13 +33,9 @@
 
 #define ABS(x) ((x) < 0 ? -(x) : (x))
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 volatile unsigned long timer_millis = 0;
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 ISR(TCA0_OVF_vect)
 {

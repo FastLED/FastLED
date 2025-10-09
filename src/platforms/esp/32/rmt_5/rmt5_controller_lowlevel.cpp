@@ -1,5 +1,7 @@
 #ifdef ESP32
 
+#include "fl/compiler_control.h"
+
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
@@ -7,17 +9,13 @@
 #include "rmt5_controller_lowlevel.h"
 #include "rmt5_worker_pool.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp_log.h"
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"

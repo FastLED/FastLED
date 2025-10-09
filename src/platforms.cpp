@@ -36,9 +36,7 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
 
     uint32_t isrCount;
 
-    #ifdef __cplusplus
-        extern "C" {
-    #endif
+    FL_EXTERN_C_BEGIN
             // NOTE: Update platforms.cpp in root of FastLED library if this changes        
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE0)
                 void PWM0_IRQHandler(void) { ++isrCount; PWM_Arbiter<0>::isr_handler(); }
@@ -52,9 +50,7 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
             #if defined(FASTLED_NRF52_ENABLE_PWM_INSTANCE3)
                 void PWM3_IRQHandler(void) { ++isrCount; PWM_Arbiter<3>::isr_handler(); }
             #endif
-    #ifdef __cplusplus
-        }
-    #endif
+    FL_EXTERN_C_END
 
 #endif // defined(NRF52_SERIES)
 

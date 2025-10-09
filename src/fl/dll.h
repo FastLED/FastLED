@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 /// @file dll.h
 /// FastLED dynamic library interface - lightweight header for external callers
 
@@ -11,9 +12,7 @@
 
 #include "export.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 /// Call the sketch's setup() function
 /// @note This is the C ABI export for external sketch runners
@@ -23,9 +22,7 @@ FASTLED_EXPORT void sketch_setup(void);
 /// @note This is the C ABI export for external sketch runners
 FASTLED_EXPORT void sketch_loop(void);
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 // ================================================================================================
 // IMPLEMENTATIONS (when building FastLED as shared library)

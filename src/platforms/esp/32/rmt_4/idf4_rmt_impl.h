@@ -1,6 +1,7 @@
 
 #pragma once
 
+#include "fl/compiler_control.h"
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 
@@ -14,10 +15,7 @@
 #include "idf4_rmt.h"
 #include "platforms/esp/32/clock_cycles.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp32-hal.h"
 // ESP_IDF_VERSION_MAJOR is defined in ESP-IDF v3.3 or later
@@ -39,9 +37,7 @@ extern "C"
 #include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"

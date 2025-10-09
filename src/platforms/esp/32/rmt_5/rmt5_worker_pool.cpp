@@ -1,5 +1,7 @@
 #ifdef ESP32
 
+#include "fl/compiler_control.h"
+
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
@@ -8,17 +10,13 @@
 
 #include <Arduino.h>  // ok include - needed for delayMicroseconds()
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp_log.h"
 #include "freertos/task.h"
 #include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"

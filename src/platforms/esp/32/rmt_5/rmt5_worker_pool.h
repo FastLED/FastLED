@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 #ifdef ESP32
 
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -13,17 +14,13 @@
 #include "rmt5_worker.h"
 #include "rmt5_worker_oneshot.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
 #include "soc/soc_caps.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 namespace fl {
 

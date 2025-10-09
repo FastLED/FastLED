@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-S3 (Xtensa LX7)
 //
 // This file provides assembly interrupt service routine (ISR) shims for
@@ -17,9 +18,7 @@
 #include "esp_intr_alloc.h"
 #include "hal/interrupt_coreasm.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 //=============================================================================
 // XTENSA LX7 ARCHITECTURE CONTEXT (ESP32-S3)
@@ -506,6 +505,4 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
  *   -mlongcalls  # Required for IRAM function calls
  */
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END

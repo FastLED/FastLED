@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 #ifdef ESP32
 
 #include "third_party/espressif/led_strip/src/enabled.h"
@@ -9,15 +10,11 @@
 #include "fl/stdint.h"
 #include "fl/namespace.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "driver/gpio.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 namespace fl {
 

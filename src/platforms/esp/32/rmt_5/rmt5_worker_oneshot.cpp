@@ -1,14 +1,14 @@
 #ifdef ESP32
 
+#include "fl/compiler_control.h"
+
 #include "third_party/espressif/led_strip/src/enabled.h"
 
 #if FASTLED_RMT5
 
 #include "rmt5_worker_oneshot.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp32-hal.h"
 #include "driver/gpio.h"
@@ -17,9 +17,7 @@ extern "C" {
 #include "rom/gpio.h"
 #include "esp_log.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #include "fl/force_inline.h"
 #include "fl/assert.h"

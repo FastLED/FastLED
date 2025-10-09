@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/compiler_control.h"
 // Assembly Shims for High-Priority Interrupts on ESP32-C3/C6 (RISC-V)
 //
 // This file provides interrupt service routine (ISR) shims for high-priority
@@ -17,9 +18,7 @@
 #include "esp_intr_alloc.h"
 #include "riscv/interrupt.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 //=============================================================================
 // RISC-V ARCHITECTURE CONTEXT (ESP32-C3/C6)
@@ -850,6 +849,4 @@ extern void riscv_critical_isr(void);  // Optional assembly handler
  * Status: Partially verified - priority level restrictions need clarification
  */
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END

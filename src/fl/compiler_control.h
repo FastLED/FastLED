@@ -144,3 +144,14 @@
 #ifndef FL_LINK_WEAK
 #define FL_LINK_WEAK __attribute__((weak))
 #endif
+
+// C linkage macros for compatibility with C++ name mangling
+#ifdef __cplusplus
+  #define FL_EXTERN_C_BEGIN extern "C" {
+  #define FL_EXTERN_C_END   }
+  #define FL_EXTERN_C       extern "C"
+#else
+  #define FL_EXTERN_C_BEGIN
+  #define FL_EXTERN_C_END
+  #define FL_EXTERN_C
+#endif
