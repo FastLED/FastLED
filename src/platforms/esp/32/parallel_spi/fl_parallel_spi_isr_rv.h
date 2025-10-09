@@ -7,8 +7,8 @@
   License: MIT (FastLED)
 */
 
-#ifndef FL_PARALLEL_SPI_ISR_RV_S_H
-#define FL_PARALLEL_SPI_ISR_RV_S_H
+#ifndef FL_PARALLEL_SPI_ISR_RV_H
+#define FL_PARALLEL_SPI_ISR_RV_H
 
 #include <stdint.h>
 
@@ -94,6 +94,10 @@ void fl_spi_set_total_bytes(uint16_t n);
 void fl_spi_set_data_byte(uint16_t i, uint8_t v);
 void fl_spi_set_lut_entry(uint8_t v, uint32_t set_m, uint32_t clr_m);
 
+/* --- Direct LUT array access (main thread) --------------------------------- */
+PinMaskEntry* fl_spi_get_lut_array(void);  /* Returns mutable reference to 256-entry LUT */
+uint8_t*      fl_spi_get_data_array(void); /* Returns mutable reference to 256-byte data buffer */
+
 /* --- Timing and control ---------------------------------------------------- */
 void fl_spi_visibility_delay_us(uint32_t approx_us);
 void fl_spi_arm(void);
@@ -120,4 +124,4 @@ uint16_t fl_spi_get_validation_event_count(void);
 }
 #endif
 
-#endif /* FL_PARALLEL_SPI_ISR_RV_S_H */
+#endif /* FL_PARALLEL_SPI_ISR_RV_H */

@@ -3,7 +3,7 @@
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
-#include "fl_parallel_spi_isr_rv.S.h"
+#include "fl_parallel_spi_isr_rv.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
 // C++ wrapper types for GPIO events (provides type safety and convenience methods)
@@ -191,6 +191,33 @@ public:
      */
     static void resetState() {
         fl_spi_reset_state();
+    }
+
+    /**
+     * Get mutable reference to LUT array (256 entries)
+     * Allows direct initialization without individual setLUTEntry calls
+     *
+     * Example:
+     *   PinMaskEntry* lut = spi.getLUTArray();
+     *   for (int v = 0; v < 256; v++) {
+     *       lut[v].set_mask = ...;
+     *       lut[v].clear_mask = ...;
+     *   }
+     */
+    static PinMaskEntry* getLUTArray() {
+        return fl_spi_get_lut_array();
+    }
+
+    /**
+     * Get mutable reference to data buffer array (256 bytes)
+     * Allows direct buffer access without individual setDataByte calls
+     *
+     * Example:
+     *   uint8_t* data = spi.getDataArray();
+     *   memcpy(data, source, length);
+     */
+    static uint8_t* getDataArray() {
+        return fl_spi_get_data_array();
     }
 
 #ifdef FL_SPI_ISR_VALIDATE

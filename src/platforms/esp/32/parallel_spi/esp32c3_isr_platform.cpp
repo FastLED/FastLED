@@ -19,7 +19,7 @@ extern "C" {
 #endif
 
 #include "fl/compiler_control.h"
-#include "fl_parallel_spi_isr_rv.S.h"
+#include "fl_parallel_spi_isr_rv.h"
 
 #define PARALLEL_SPI_TAG "parallel_spi_c3"
 

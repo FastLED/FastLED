@@ -32,13 +32,11 @@ using namespace fl;
 // Test data buffer - simple pattern
 static uint8_t testData[TEST_DATA_SIZE];
 
-// Lookup tables for parallel pin mapping
-static uint32_t setMasks[256];
-static uint32_t clearMasks[256];
-
 void initializePinMappingLUT() {
-    // Initialize pin mapping lookup tables
+    // Initialize pin mapping lookup tables directly in ISR state
     // For this test, map bits to GPIOs 0-7 for data, GPIO8 for clock
+    PinMaskEntry* lut = ParallelSPI_ESP32C3::getLUTArray();
+
     for (int v = 0; v < 256; v++) {
         uint32_t setMask = 0;
         uint32_t clearMask = 0;
@@ -52,8 +50,8 @@ void initializePinMappingLUT() {
             }
         }
 
-        setMasks[v] = setMask;
-        clearMasks[v] = clearMask;
+        lut[v].set_mask = setMask;
+        lut[v].clear_mask = clearMask;
     }
 }
 
@@ -127,9 +125,8 @@ void loop() {
     Serial.print("  Clock mask set: GPIO");
     Serial.println(CLOCK_PIN);
 
-    // Load lookup tables
-    spi.loadLUT(setMasks, clearMasks);
-    Serial.println("  LUT loaded");
+    // LUT is already initialized in global ISR state
+    Serial.println("  LUT already initialized in ISR state");
 
     // Load test data
     spi.loadBuffer(testData, TEST_DATA_SIZE);

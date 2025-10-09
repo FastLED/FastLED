@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
-#include "fl_parallel_spi_isr_rv.S.h"
+#include "fl_parallel_spi_isr_rv.h"
 
 // All implementation uses C linkage for clean assembly generation
 extern "C" {
@@ -98,6 +98,15 @@ void fl_spi_reset_state(void) {
 #ifdef FL_SPI_ISR_VALIDATE
   g_isr_state.validation_event_count = 0;
 #endif
+}
+
+/* Direct array accessors (main thread) */
+PinMaskEntry* fl_spi_get_lut_array(void) {
+  return g_isr_state.pin_lookup_table;
+}
+
+uint8_t* fl_spi_get_data_array(void) {
+  return g_isr_state.spi_data_bytes;
 }
 
 #ifdef FL_SPI_ISR_VALIDATE
