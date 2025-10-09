@@ -12,6 +12,14 @@
 #include <esp_err.h>
 #include <cstring>
 
+// Determine SPI3_HOST availability based on IDF target
+// Only ESP32 classic, S2, S3, and P4 have SPI3_HOST
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
+    #define FASTLED_ESP32_HAS_SPI3_HOST 1
+#else
+    #define FASTLED_ESP32_HAS_SPI3_HOST 0
+#endif
+
 namespace fl {
 
 // ============================================================================
@@ -83,11 +91,13 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     // Convert platform-agnostic bus_num to ESP32 SPI host
     if (bus_num == 2) {
         mHost = SPI2_HOST;
-#if !defined(ESP32C3) && !defined(ESP32C2) && !defined(ESP32C6) && !defined(ESP32H2)
-    } else if (bus_num == 3) {
+    }
+#if FASTLED_ESP32_HAS_SPI3_HOST
+    else if (bus_num == 3) {
         mHost = SPI3_HOST;
+    }
 #endif
-    } else {
+    else {
         return false;  // Invalid bus number
     }
 
@@ -235,28 +245,14 @@ void SPIQuadESP32::cleanup() {
 fl::vector<SPIQuad*> SPIQuad::createInstances() {
     fl::vector<SPIQuad*> controllers;
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3)
-    // ESP32 classic/S2/S3: 2 SPI buses (HSPI/bus 2, VSPI/bus 3)
-    // Each bus supports full quad-SPI (4 data lines)
-    static SPIQuadESP32 controller2(2, "HSPI");  // Bus 2 (HSPI) - static lifetime
-    static SPIQuadESP32 controller3(3, "VSPI");  // Bus 3 (VSPI) - static lifetime
-    controllers.push_back(&controller2);
-    controllers.push_back(&controller3);
-
-#elif defined(ESP32C3) || defined(ESP32C2) || defined(ESP32C6) || defined(ESP32H2)
-    // ESP32-C3/C2/C6/H2: 1 SPI bus (bus 2)
-    // Supports dual-SPI only (2 data lines max)
+    // Bus 2 is available on all ESP32 platforms
     static SPIQuadESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
     controllers.push_back(&controller2);
 
-#elif defined(ESP32P4)
-    // ESP32-P4: 2 SPI buses
-    // Supports octal-SPI (8 data lines) - future enhancement
-    static SPIQuadESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
+#if FASTLED_ESP32_HAS_SPI3_HOST
+    // Bus 3 is only available on ESP32 classic, S2, S3, and P4
     static SPIQuadESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
-    controllers.push_back(&controller2);
     controllers.push_back(&controller3);
-
 #endif
 
     return controllers;

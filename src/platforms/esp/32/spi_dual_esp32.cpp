@@ -11,6 +11,14 @@
 #include <esp_heap_caps.h>
 #include <esp_err.h>
 #include <cstring>
+#include "soc/soc_caps.h"
+
+// Determine SPI3_HOST availability using SOC capability macro
+// SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available
+// SPI3_HOST is available when SOC_SPI_PERIPH_NUM > 2 (SPI1, SPI2, SPI3)
+#ifndef SOC_SPI_PERIPH_NUM
+    #define SOC_SPI_PERIPH_NUM 2  // Default to 2 for older ESP-IDF versions
+#endif
 
 namespace fl {
 
@@ -83,11 +91,13 @@ bool SPIDualESP32::begin(const SPIDual::Config& config) {
     // Convert platform-agnostic bus_num to ESP32 SPI host
     if (bus_num == 2) {
         mHost = SPI2_HOST;
-#if !defined(ESP32C3) && !defined(ESP32C2) && !defined(ESP32C6) && !defined(ESP32H2)
-    } else if (bus_num == 3) {
+    }
+#if SOC_SPI_PERIPH_NUM > 2
+    else if (bus_num == 3) {
         mHost = SPI3_HOST;
+    }
 #endif
-    } else {
+    else {
         return false;  // Invalid bus number
     }
 
@@ -223,28 +233,14 @@ void SPIDualESP32::cleanup() {
 fl::vector<SPIDual*> SPIDual::createInstances() {
     fl::vector<SPIDual*> controllers;
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3)
-    // ESP32 classic/S2/S3: 2 SPI buses (HSPI/bus 2, VSPI/bus 3)
-    // Each bus supports dual-SPI (2 data lines)
-    static SPIDualESP32 controller2(2, "HSPI");  // Bus 2 (HSPI) - static lifetime
-    static SPIDualESP32 controller3(3, "VSPI");  // Bus 3 (VSPI) - static lifetime
-    controllers.push_back(&controller2);
-    controllers.push_back(&controller3);
-
-#elif defined(ESP32C3) || defined(ESP32C2) || defined(ESP32C6) || defined(ESP32H2)
-    // ESP32-C3/C2/C6/H2: 1 SPI bus (bus 2)
-    // Supports dual-SPI (2 data lines max)
+    // Bus 2 is available on all ESP32 platforms
     static SPIDualESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
     controllers.push_back(&controller2);
 
-#elif defined(ESP32P4)
-    // ESP32-P4: 2 SPI buses
-    // Supports up to octal-SPI, but dual works too
-    static SPIDualESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
+#if SOC_SPI_PERIPH_NUM > 2
+    // Bus 3 is only available when SOC has more than 2 SPI peripherals
     static SPIDualESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
-    controllers.push_back(&controller2);
     controllers.push_back(&controller3);
-
 #endif
 
     return controllers;
