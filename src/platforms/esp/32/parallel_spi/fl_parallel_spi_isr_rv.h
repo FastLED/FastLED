@@ -11,10 +11,9 @@
 #define FL_PARALLEL_SPI_ISR_RV_H
 
 #include <stdint.h>
+#include "fl/compiler_control.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 /* --- Status bits (publish-only: ISR writes; main reads) --------------------- */
 enum {
@@ -120,8 +119,6 @@ const FastLED_GPIO_Event* fl_spi_get_validation_events(void);
 uint16_t fl_spi_get_validation_event_count(void);
 #endif
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
 #endif /* FL_PARALLEL_SPI_ISR_RV_H */

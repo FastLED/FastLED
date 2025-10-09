@@ -3,10 +3,9 @@
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C2)
 
 #include "sdkconfig.h"
+#include "fl/compiler_control.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+FL_EXTERN_C_BEGIN
 
 #include "esp_intr_alloc.h"
 #include "driver/gptimer.h"
@@ -14,11 +13,8 @@ extern "C" {
 #include "soc/soc.h"
 #include "hal/timer_ll.h"
 
-#ifdef __cplusplus
-}
-#endif
+FL_EXTERN_C_END
 
-#include "fl/compiler_control.h"
 #include "fl_parallel_spi_isr_rv.h"
 
 #define PARALLEL_SPI_TAG "parallel_spi_c3"
@@ -50,7 +46,7 @@ FL_DISABLE_WARNING_POP
  * @param timer_hz Timer frequency in Hz (should be 2× target SPI bit rate)
  * @return 0 on success, ESP error code on failure
  */
-extern "C" int fl_spi_platform_isr_start(uint32_t timer_hz) {
+FL_EXTERN_C int fl_spi_platform_isr_start(uint32_t timer_hz) {
     if (s_timer != nullptr) {
         ESP_LOGW(PARALLEL_SPI_TAG, "Timer already initialized");
         return -1;
@@ -126,7 +122,7 @@ extern "C" int fl_spi_platform_isr_start(uint32_t timer_hz) {
 /**
  * Stop ISR and timer
  */
-extern "C" void fl_spi_platform_isr_stop(void) {
+FL_EXTERN_C void fl_spi_platform_isr_stop(void) {
     if (s_timer != nullptr) {
         gptimer_stop(s_timer);
         gptimer_disable(s_timer);

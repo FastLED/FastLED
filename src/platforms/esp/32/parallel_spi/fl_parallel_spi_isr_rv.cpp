@@ -31,10 +31,11 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include "fl/compiler_control.h"
 #include "fl_parallel_spi_isr_rv.h"
 
 // All implementation uses C linkage for clean assembly generation
-extern "C" {
+FL_EXTERN_C_BEGIN
 
 /* --- MMIO helpers: ESP32-C3/C2 AHB GPIO write-one-to-set/clear ------------- */
 /* If you need to override for a different target, compile with:
@@ -202,4 +203,4 @@ void fl_parallel_spi_isr(void) {
   }
 }
 
-} // extern "C"
+FL_EXTERN_C_END
