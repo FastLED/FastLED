@@ -46,7 +46,12 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "WebFetch(domain:emscripten.org)"
+      "WebFetch(domain:emscripten.org)",
+      "Bash(gh:*)",
+      "Bash(gh run:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run download:*)",
+      "Bash(gh workflow:*)"
     ],
     "deny": []
   }

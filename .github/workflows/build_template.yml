@@ -127,6 +127,7 @@ jobs:
           uv run platformio --version
 
       - name: Build FastLED examples with "./compile --no-interactive  ${{ inputs.args }}"
+        id: build_examples
         working-directory: trusted
         run: |
           set -o pipefail
@@ -136,7 +137,6 @@ jobs:
 
       - name: Build summary and failure logs
         if: always()
-        continue-on-error: true
         working-directory: trusted
         run: |
           echo "############################################"
@@ -150,6 +150,7 @@ jobs:
           echo "############################################"
           fail_dir="failures"
           if [ -d "$fail_dir" ] && ls "$fail_dir"/*.log >/dev/null 2>&1; then
+            # Failures exist - print them and exit with error
             for f in "$fail_dir"/*.log; do
               echo "----------------------"
               echo "$(basename "$f")"
@@ -158,6 +159,8 @@ jobs:
               cat "$f"
               echo ""
             done
+            echo "BUILD FAILED: See failure logs above"
+            exit 1
           else
             echo "ALL EXAMPLES SUCCESSFULLY COMPILED"
           fi
