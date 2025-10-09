@@ -323,7 +323,7 @@ public:
 
         // Transpose lanes into interleaved format
         const char* error = nullptr;
-        if (!SPITransposerQuad::transpose(lanes, max_size,
+        if (!SPITransposerQuad::transpose(lanes[0], lanes[1], lanes[2], lanes[3],
                                           fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
             FL_WARN("SPI Bus Manager: Transpose failed - " << (error ? error : "unknown error"));
             // Clear buffers and bail

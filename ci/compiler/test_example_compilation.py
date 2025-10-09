@@ -365,9 +365,7 @@ def link_examples_with_cache(
         no_parallel = os.getenv("NO_PARALLEL") == "1"
 
     # Hash cache with (mtime, size) for performance optimization
-    def calculate_file_hash_cached(
-        file_path: Path, hash_cache: Dict[str, str]
-    ) -> str:
+    def calculate_file_hash_cached(file_path: Path, hash_cache: Dict[str, str]) -> str:
         """Calculate file hash with (mtime, size) caching for speed.
 
         Uses modification time and file size as cache key - standard build system approach.
@@ -409,6 +407,9 @@ def link_examples_with_cache(
         failed_count = 0
         cache_hits = 0
         cache_misses = 0
+
+        # Initialize hash cache for (mtime, size) based caching - shared across all threads
+        hash_cache: Dict[str, str] = {}
 
         # Phase 1: Prepare all examples and submit main.cpp compilations in parallel
         example_infos: List[ExampleCacheInfo] = []
@@ -458,19 +459,20 @@ def link_examples_with_cache(
             f"[LINKING] Parallel cache key calculation for {len(example_infos)} examples..."
         )
 
-        for example_info in example_infos[
-            :
-        ]:  # Use slice to allow removal during iteration
+        # Submit all cache key calculation tasks in parallel
+        def calculate_cache_info(
+            example_info: ExampleCacheInfo,
+        ) -> tuple[ExampleCacheInfo, Optional[str]]:
+            """Calculate cache key for an example. Returns (example_info, error_msg)."""
             try:
+                # Wait for main.cpp compilation to complete
                 main_result: Result = example_info.main_compile_future.result()
 
                 if not main_result.ok:
-                    log_timing(
-                        f"[LINKING] FAILED: {example_info.executable_name}: Failed to compile main.cpp: {main_result.stderr[:100]}..."
+                    error_msg = (
+                        f"Failed to compile main.cpp: {main_result.stderr[:100]}..."
                     )
-                    failed_count += 1
-                    example_infos.remove(example_info)
-                    continue
+                    return (example_info, error_msg)
 
                 # Update example info with complete information
                 example_info.all_obj_files = example_info.obj_files + [
@@ -478,24 +480,61 @@ def link_examples_with_cache(
                 ]
                 linker_args = get_platform_linker_args()
                 example_info.cache_key = calculate_multiple_objects_cache_key(
-                    example_info.all_obj_files, fastled_lib, linker_args
+                    example_info.all_obj_files, fastled_lib, linker_args, hash_cache
                 )
                 example_info.cached_exe = get_cached_executable(
                     example_info.example_name, example_info.cache_key
                 )
                 example_info.is_cache_hit = example_info.cached_exe is not None
 
+                return (example_info, None)
+
             except Exception as e:
-                log_timing(
-                    f"[LINKING] FAILED: {example_info.executable_name}: Exception during preparation: {e}"
-                )
-                failed_count += 1
-                example_infos.remove(example_info)
-                if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                return (example_info, f"Exception during preparation: {e}")
+
+        # Process all examples in parallel
+        with concurrent.futures.ThreadPoolExecutor(
+            max_workers=min(len(example_infos), 8)
+        ) as executor:
+            cache_futures = {
+                executor.submit(calculate_cache_info, info): info
+                for info in example_infos
+            }
+
+            # Collect results
+            successful_infos: List[ExampleCacheInfo] = []
+            for future in concurrent.futures.as_completed(cache_futures):
+                example_info = cache_futures[future]
+                try:
+                    updated_info, error_msg = future.result()
+                    if error_msg:
+                        log_timing(
+                            f"[LINKING] FAILED: {updated_info.executable_name}: {error_msg}"
+                        )
+                        failed_count += 1
+                        if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                            log_timing(
+                                f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}) during preparation. Aborting."
+                            )
+                            break
+                    else:
+                        successful_infos.append(updated_info)
+                except Exception as e:
                     log_timing(
-                        f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}) during preparation. Aborting."
+                        f"[LINKING] FAILED: {example_info.executable_name}: Exception in future: {e}"
                     )
-                    return linked_count, failed_count, cache_hits, cache_misses
+                    failed_count += 1
+                    if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                        log_timing(
+                            f"[LINKING] Reached failure threshold ({MAX_FAILURES_BEFORE_ABORT}) during preparation. Aborting."
+                        )
+                        break
+
+            # Update example_infos with only successful ones
+            example_infos = successful_infos
+
+            if failed_count >= MAX_FAILURES_BEFORE_ABORT:
+                return linked_count, failed_count, cache_hits, cache_misses
 
         # Phase 3: Separate cache hits from cache misses
         cache_hit_examples = [info for info in example_infos if info.is_cache_hit]
@@ -642,7 +681,10 @@ def link_examples_with_cache(
         return hash_sha256.hexdigest()
 
     def calculate_multiple_objects_cache_key(
-        obj_files: List[Path], fastled_lib: Path, linker_args: List[str], hash_cache: Dict[str, str]
+        obj_files: List[Path],
+        fastled_lib: Path,
+        linker_args: List[str],
+        hash_cache: Dict[str, str],
     ) -> str:
         """
         Calculate cache key for multiple object files linking.
@@ -712,6 +754,9 @@ def link_examples_with_cache(
     if no_parallel:
         log_timing("[LINKING] Serial cache detection (--no-parallel specified)")
 
+        # Initialize hash cache for (mtime, size) based caching
+        hash_cache: Dict[str, str] = {}
+
         # Original serial processing
         for ino_file, obj_files in object_file_map.items():
             example_name = ino_file.parent.name
@@ -753,7 +798,7 @@ def link_examples_with_cache(
 
                 # Calculate cache key using the same algorithm as FastLEDTestCompiler
                 cache_key = calculate_multiple_objects_cache_key(
-                    all_obj_files, fastled_lib, linker_args
+                    all_obj_files, fastled_lib, linker_args, hash_cache
                 )
 
                 # Check for cached executable
