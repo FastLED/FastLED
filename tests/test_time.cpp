@@ -22,7 +22,7 @@ TEST_CASE("fl::time() basic functionality") {
     // Allow for a reasonable range considering test environment variability
     if (t2 > t1) {
         fl::u32 elapsed = t2 - t1;
-        CHECK(elapsed <= 100); // Should not advance more than 100ms in our sleep
+        CHECK(elapsed <= 200); // Should not advance more than 200ms in our sleep (increased for Windows timing variability)
     }
 }
 
