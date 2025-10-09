@@ -340,11 +340,15 @@ public:
 		release();
 	}
 
-	/// Write an array of data to the SPI interface. 
+	/// Write an array of data to the SPI interface.
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
 	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
+	/// Finalize transmission (no-op for software SPI)
+	/// This method exists for compatibility with hardware SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 
 	/// Write LED pixel data to the SPI interface. 
 	/// Data is written in groups of three, re-ordered per the RGB_ORDER.

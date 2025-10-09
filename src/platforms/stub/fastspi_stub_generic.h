@@ -22,6 +22,7 @@ public:
     void release() {}
     void writeByte(uint8_t byte) { FASTLED_UNUSED(byte); }
     void writeWord(uint16_t word) { FASTLED_UNUSED(word); }
+    static void finalizeTransmission() { }
 };
 
 

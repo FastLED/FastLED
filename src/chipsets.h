@@ -515,15 +515,8 @@ template <
 	uint32_t END_FRAME = 0xFF000000
 >
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
-	// ESP32: Use proxy for automatic Single/Quad-SPI routing
-	#include "platforms/esp/32/spi_device_proxy.h"
-	fl::SPIDeviceProxy<DATA_PIN, CLOCK_PIN, SPI_SPEED> mSPI;
-#else
-	// Other platforms: Use standard SPI output
 	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
-#endif
 
 	void startBoundary() {
 		mSPI.writeWord(START_FRAME >> 16);
@@ -651,10 +644,8 @@ private:
 		mSPI.waitFully();
 		mSPI.release();
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
-		// ESP32: Flush buffered Quad-SPI writes
+		// Finalize transmission (no-op on non-ESP32, flushes Quad-SPI on ESP32)
 		mSPI.finalizeTransmission();
-#endif
 	}
 
 	inline void showPixelsGammaBitShift(PixelController<RGB_ORDER> & pixels) {
@@ -672,10 +663,8 @@ private:
 		mSPI.waitFully();
 		mSPI.release();
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
-		// ESP32: Flush buffered Quad-SPI writes
+		// Finalize transmission (no-op on non-ESP32, flushes Quad-SPI on ESP32)
 		mSPI.finalizeTransmission();
-#endif
 	}
 
 public:

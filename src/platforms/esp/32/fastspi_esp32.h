@@ -191,6 +191,11 @@ public:
 	// default version of writing a block of data out to the SPI port, with no data modifications being made
 	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
+	/// Finalize transmission (no-op for standard ESP32 SPI)
+	/// This method exists for compatibility with Quad-SPI implementations
+	/// For standard single-line SPI, no additional operations are needed
+	static void finalizeTransmission() { }
+
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
 		m_ledSPI.transfer(b);
