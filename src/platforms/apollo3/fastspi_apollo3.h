@@ -41,6 +41,9 @@ public:
 	// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
 
+	// finalize the transmission (no-op for Apollo3)
+	static void finalizeTransmission() { }
+
 	// write a byte as bits
 	static void writeByte(uint8_t b) {
 		writeBit<7>(b);
