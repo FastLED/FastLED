@@ -11,11 +11,11 @@
 /// - 4× separate data lines (one per strip)
 ///
 /// Wiring:
-/// - Clock: GPIO 18 (shared by all 4 strips)
-/// - Data Lane 0: GPIO 23 (MOSI/D0)
-/// - Data Lane 1: GPIO 19 (MISO/D1)
-/// - Data Lane 2: GPIO 22 (WP/D2)
-/// - Data Lane 3: GPIO 21 (HD/D3)
+/// - Clock: GPIO 12 (shared by all 4 strips)
+/// - Data Lane 0: GPIO 11 (MOSI/D0)
+/// - Data Lane 1: GPIO 13 (MISO/D1)
+/// - Data Lane 2: GPIO 14 (WP/D2)
+/// - Data Lane 3: GPIO 10 (HD/D3)
 ///
 /// Performance:
 /// - 4×100 LEDs transmitted in ~0.08ms @ 40 MHz
@@ -30,12 +30,12 @@
 // Only compile if Quad-SPI is available on this platform
 #if FASTLED_HAS_QUAD_SPI
 
-// Pin definitions
-#define CLOCK_PIN 18
-#define DATA_PIN_0 23
-#define DATA_PIN_1 19
-#define DATA_PIN_2 22
-#define DATA_PIN_3 21
+// Pin definitions (ESP32-S3 HSPI default pins)
+#define CLOCK_PIN 12
+#define DATA_PIN_0 11
+#define DATA_PIN_1 13
+#define DATA_PIN_2 14
+#define DATA_PIN_3 10
 
 // LED strip configuration
 #define NUM_LEDS_LANE_0 60

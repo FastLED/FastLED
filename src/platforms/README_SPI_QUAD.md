@@ -115,16 +115,16 @@ D3:      ──0───1───1───0───0───1───1─�
 All 4 LED strips share a **single clock line** but have **separate data lines**:
 
 ```
-ESP32
-  CLK (GPIO 18) ──┬────────> Strip 1 Clock
+ESP32/ESP32-S3
+  CLK (GPIO 12) ──┬────────> Strip 1 Clock
                   ├────────> Strip 2 Clock
                   ├────────> Strip 3 Clock
                   └────────> Strip 4 Clock
 
-  D0  (GPIO 23) ──────────> Strip 1 Data
-  D1  (GPIO 19) ──────────> Strip 2 Data
-  D2  (GPIO 22) ──────────> Strip 3 Data
-  D3  (GPIO 21) ──────────> Strip 4 Data
+  D0  (GPIO 11) ──────────> Strip 1 Data
+  D1  (GPIO 13) ──────────> Strip 2 Data
+  D2  (GPIO 14) ──────────> Strip 3 Data
+  D3  (GPIO 10) ──────────> Strip 4 Data
 ```
 
 ---
@@ -529,7 +529,7 @@ Just add multiple strips with the **same clock pin**:
 ```cpp
 #include <FastLED.h>
 
-#define CLOCK_PIN 18
+#define CLOCK_PIN 12
 #define NUM_LEDS 100
 
 CRGB leds_strip1[NUM_LEDS];
@@ -538,12 +538,12 @@ CRGB leds_strip3[NUM_LEDS];
 CRGB leds_strip4[NUM_LEDS];
 
 void setup() {
-    // Add 4 strips sharing clock pin 18
+    // Add 4 strips sharing clock pin 12
     // FastLED auto-detects and enables Quad-SPI
-    FastLED.addLeds<APA102, 23, CLOCK_PIN>(leds_strip1, NUM_LEDS);
-    FastLED.addLeds<APA102, 19, CLOCK_PIN>(leds_strip2, NUM_LEDS);
-    FastLED.addLeds<APA102, 22, CLOCK_PIN>(leds_strip3, NUM_LEDS);
-    FastLED.addLeds<APA102, 21, CLOCK_PIN>(leds_strip4, NUM_LEDS);
+    FastLED.addLeds<APA102, 11, CLOCK_PIN>(leds_strip1, NUM_LEDS);
+    FastLED.addLeds<APA102, 13, CLOCK_PIN>(leds_strip2, NUM_LEDS);
+    FastLED.addLeds<APA102, 14, CLOCK_PIN>(leds_strip3, NUM_LEDS);
+    FastLED.addLeds<APA102, 10, CLOCK_PIN>(leds_strip4, NUM_LEDS);
 }
 
 void loop() {
@@ -580,11 +580,11 @@ void setup() {
     fl::SPIQuad::Config config;
     config.bus_num = 2;              // HSPI
     config.clock_speed_hz = 40000000; // 40 MHz
-    config.clock_pin = 18;
-    config.data0_pin = 23;
-    config.data1_pin = 19;
-    config.data2_pin = 22;
-    config.data3_pin = 21;
+    config.clock_pin = 12;
+    config.data0_pin = 11;
+    config.data1_pin = 13;
+    config.data2_pin = 14;
+    config.data3_pin = 10;
 
     if (!quad->begin(config)) {
         Serial.println("Failed to initialize Quad-SPI");

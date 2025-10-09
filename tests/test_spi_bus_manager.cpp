@@ -255,11 +255,11 @@ TEST_CASE("SPIBusManager: Multiple buses with mixed device counts") {
 
     // Bus 3: Two devices on pin 22 (Dual-SPI candidate)
     SPIBusHandle h3_1 = manager.registerDevice(22, 23, &ctrls[4]);
-    SPIBusHandle h3_2 = manager.registerDevice(22, 24, &ctrls[5]);
+    (void)manager.registerDevice(22, 24, &ctrls[5]);
 
     CHECK(manager.getNumBuses() == 3);
 
-    bool result = manager.initialize();
+    (void)manager.initialize();
 
     // Bus 1: Should be single SPI
     const SPIBusInfo* bus1 = manager.getBusInfo(h1.bus_id);
@@ -288,7 +288,7 @@ TEST_CASE("SPIBusManager: Device info tracking") {
     MockController ctrl1(1), ctrl2(2);
 
     SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
+    (void)manager.registerDevice(14, 27, &ctrl2);
 
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);

@@ -83,8 +83,10 @@ bool SPIDualESP32::begin(const SPIDual::Config& config) {
     // Convert platform-agnostic bus_num to ESP32 SPI host
     if (bus_num == 2) {
         mHost = SPI2_HOST;
+#if !defined(ESP32C3) && !defined(ESP32C2) && !defined(ESP32C6) && !defined(ESP32H2)
     } else if (bus_num == 3) {
         mHost = SPI3_HOST;
+#endif
     } else {
         return false;  // Invalid bus number
     }

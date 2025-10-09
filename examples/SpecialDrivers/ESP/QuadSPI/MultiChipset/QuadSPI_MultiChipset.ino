@@ -14,11 +14,11 @@
 ///   * Lane 3: APA102 (Dotstar) - 100 LEDs
 ///
 /// Wiring:
-/// - Clock: GPIO 18 (shared by all strips - ensure compatible clock speeds!)
-/// - Data Lane 0: GPIO 23 (MOSI/D0) - APA102
-/// - Data Lane 1: GPIO 19 (MISO/D1) - LPD8806
-/// - Data Lane 2: GPIO 22 (WP/D2) - WS2801
-/// - Data Lane 3: GPIO 21 (HD/D3) - APA102
+/// - Clock: GPIO 12 (shared by all strips - ensure compatible clock speeds!)
+/// - Data Lane 0: GPIO 11 (MOSI/D0) - APA102
+/// - Data Lane 1: GPIO 13 (MISO/D1) - LPD8806
+/// - Data Lane 2: GPIO 14 (WP/D2) - WS2801
+/// - Data Lane 3: GPIO 10 (HD/D3) - APA102
 ///
 /// Important Notes:
 /// - All chipsets must tolerate the same clock speed
@@ -36,13 +36,13 @@
 // Only compile if Quad-SPI is available on this platform
 #if FASTLED_HAS_QUAD_SPI
 
-// Pin definitions
-#define CLOCK_PIN 18
+// Pin definitions (ESP32-S3 HSPI default pins)
+#define CLOCK_PIN 12
 
-#define DATA_PIN_0 23  // APA102
-#define DATA_PIN_1 19  // LPD8806
-#define DATA_PIN_2 22  // WS2801
-#define DATA_PIN_3 21  // APA102
+#define DATA_PIN_0 11  // APA102
+#define DATA_PIN_1 13  // LPD8806
+#define DATA_PIN_2 14  // WS2801
+#define DATA_PIN_3 10  // APA102
 
 // LED counts for each strip
 #define NUM_LEDS_LANE_0 60   // APA102
