@@ -41,7 +41,7 @@ public:
 	// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
 
-	// finalize the transmission (no-op for Apollo3)
+	// finalize transmission (no-op on Apollo3, exists for compatibility with ESP32 Quad-SPI)
 	static void finalizeTransmission() { }
 
 	// write a byte as bits
