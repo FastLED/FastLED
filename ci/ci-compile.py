@@ -219,6 +219,11 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     # Replicate the full entrypoint logic since docker exec bypasses the entrypoint
     example_name = examples[0] if examples else "Blink"
 
+    # Build the compile command with optional flags
+    compile_cmd = f"bash compile {board_name} {example_name}"
+    if args.defines:
+        compile_cmd += f" --defines {args.defines}"
+
     # Full entrypoint logic: sync files, compile, handle artifacts
     entrypoint_logic = f"""
 set -e
@@ -237,7 +242,7 @@ else
 fi
 
 # Execute the compile command
-bash compile {board_name} {example_name}
+{compile_cmd}
 EXIT_CODE=$?
 
 # If /fastled/output is mounted and compilation succeeded, copy build artifacts
@@ -271,7 +276,7 @@ exit $EXIT_CODE
         entrypoint_logic,
     ]
 
-    print(f"Executing: bash compile {board_name} {example_name}")
+    print(f"Executing: {compile_cmd}")
     print()
 
     # Stream output in real-time with unbuffered I/O
