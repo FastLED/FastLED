@@ -34,7 +34,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        sketch: [BlinkParallel]
+        sketch: [BlinkParallel, SpecialDrivers/ESP/ParallelSPI/Esp32C3_SPI_ISR]
     uses: ./.github/workflows/qemu_template.yml
     with:
       platform: esp32c3
