@@ -691,13 +691,21 @@ def create_unit_test_fastled_library(
                     fastled_objects.append(obj_file)
                     compiled_count += 1
                 else:
+                    display_path = (
+                        cpp_file.relative_to(src_dir)
+                        if cpp_file.is_relative_to(src_dir)
+                        else cpp_file.name
+                    )
                     print(
-                        f"[LIBRARY] WARNING: Failed to compile {cpp_file.relative_to(src_dir)}: {result.stderr[:100]}..."
+                        f"[LIBRARY] WARNING: Failed to compile {display_path}: {result.stderr[:100]}..."
                     )
             except Exception as e:
-                print(
-                    f"[LIBRARY] WARNING: Exception compiling {cpp_file.relative_to(src_dir)}: {e}"
+                display_path = (
+                    cpp_file.relative_to(src_dir)
+                    if cpp_file.is_relative_to(src_dir)
+                    else cpp_file.name
                 )
+                print(f"[LIBRARY] WARNING: Exception compiling {display_path}: {e}")
 
     print(
         f"[LIBRARY] Successfully compiled {compiled_count}/{len(fastled_sources)} FastLED sources"

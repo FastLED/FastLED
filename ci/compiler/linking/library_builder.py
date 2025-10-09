@@ -126,19 +126,33 @@ def create_fastled_library(
                 fastled_objects.append(obj_file)
                 compiled_count += 1
                 if verbose:
-                    log_timing(
-                        f"[LIBRARY] SUCCESS: {cpp_file.relative_to(Path('src'))}"
+                    src_dir_check = Path("src")
+                    display_path = (
+                        cpp_file.relative_to(src_dir_check)
+                        if cpp_file.is_relative_to(src_dir_check)
+                        else cpp_file.name
                     )
+                    log_timing(f"[LIBRARY] SUCCESS: {display_path}")
             else:
                 failed_count += 1
+                src_dir_check = Path("src")
+                display_path = (
+                    cpp_file.relative_to(src_dir_check)
+                    if cpp_file.is_relative_to(src_dir_check)
+                    else cpp_file.name
+                )
                 log_timing(
-                    f"[LIBRARY] ERROR: Failed to compile {cpp_file.relative_to(Path('src'))}: {result.stderr[:300]}..."
+                    f"[LIBRARY] ERROR: Failed to compile {display_path}: {result.stderr[:300]}..."
                 )
         except Exception as e:
             failed_count += 1
-            log_timing(
-                f"[LIBRARY] ERROR: Exception compiling {cpp_file.relative_to(Path('src'))}: {e}"
+            src_dir_check = Path("src")
+            display_path = (
+                cpp_file.relative_to(src_dir_check)
+                if cpp_file.is_relative_to(src_dir_check)
+                else cpp_file.name
             )
+            log_timing(f"[LIBRARY] ERROR: Exception compiling {display_path}: {e}")
 
     log_timing(
         f"[LIBRARY] Successfully compiled {compiled_count}/{len(all_sources)} FastLED sources"
