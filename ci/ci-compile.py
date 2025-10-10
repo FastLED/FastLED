@@ -138,6 +138,10 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
             image_name,
         ]
 
+        # Pass --build flag if requested
+        if build_requested:
+            build_cmd.append("--build")
+
         # Pass --no-cache flag if requested
         if hasattr(args, "docker_no_cache") and args.docker_no_cache:
             build_cmd.append("--no-cache")

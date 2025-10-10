@@ -86,6 +86,12 @@ Examples:
         "--no-cache", action="store_true", help="Build Docker image without using cache"
     )
 
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="Force rebuild of base and target images (uses cache unless --no-cache specified)",
+    )
+
     args = parser.parse_args()
 
     # Validation: --framework requires --platform
@@ -176,12 +182,13 @@ def check_docker_image_exists(image_name: str) -> bool:
         raise
 
 
-def build_base_image(no_cache: bool = False) -> None:
+def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> None:
     """
     Build the fastled-platformio base image if it doesn't exist.
 
     Args:
         no_cache: Whether to disable Docker cache
+        force_rebuild: Whether to force rebuild even if image exists
 
     Raises:
         subprocess.CalledProcessError: If docker build fails
@@ -189,7 +196,11 @@ def build_base_image(no_cache: bool = False) -> None:
     base_image_name = "fastled-platformio:latest"
 
     # Check if base image exists
-    if check_docker_image_exists(base_image_name) and not no_cache:
+    if (
+        check_docker_image_exists(base_image_name)
+        and not no_cache
+        and not force_rebuild
+    ):
         print(f"Base image {base_image_name} already exists, skipping build")
         print()
         return
@@ -412,7 +423,8 @@ def _main_impl() -> int:
 
     # Build base image first if it doesn't exist
     try:
-        build_base_image(args.no_cache)
+        force_rebuild = hasattr(args, "build") and args.build
+        build_base_image(args.no_cache, force_rebuild=force_rebuild)
     except (subprocess.CalledProcessError, FileNotFoundError):
         return 1
 
