@@ -2,19 +2,16 @@
 
 #include "fl/thread.h"
 #include "fl/int.h"
-#include "fl/align.h"
 
 #if FASTLED_MULTITHREADED
-#include <atomic>
+#include "platforms/atomic.h"
 #endif
 
 namespace fl {
 
-
-
 #if FASTLED_MULTITHREADED
 template <typename T>
-using atomic = std::atomic<T>;  // okay std namespace
+using atomic = AtomicReal<T>;
 #else
 template <typename T> class AtomicFake;
 template <typename T>
@@ -154,7 +151,7 @@ template <typename T> class AtomicFake {
     }
     
   private:
-    FL_ALIGN_AS(T) T mValue;
+    T mValue;
 };
 
 } // namespace fl
