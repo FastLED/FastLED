@@ -24,6 +24,9 @@
 ///
 /// @note This feature requires ESP32/S2/S3. Not supported on other platforms.
 
+// ESP32-only example - do not compile on other platforms
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+
 #include <FastLED.h>
 #include "platforms/quad_spi_platform.h"
 
@@ -145,3 +148,11 @@ void setup() {}
 void loop() {}
 
 #endif  // FASTLED_HAS_QUAD_SPI
+
+#else  // !ESP32
+
+// Stub functions for non-ESP32 platforms
+void setup() {}
+void loop() {}
+
+#endif  // ESP32
