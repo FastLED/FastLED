@@ -1,63 +1,36 @@
 #pragma once
 
-#include "fl/has_include.h"
-
-// Include math headers with better ESP32C2 compatibility
-#ifndef FASTLED_HAS_EXP
-#if FL_HAS_INCLUDE(<cmath>)
-  #define FASTLED_HAS_EXP 1
-  #include <cmath>  // ok include
-#elif FL_HAS_INCLUDE(<math.h>)
-  #define FASTLED_HAS_EXP 1
-  #include <math.h>  // ok include
-#else
-  #define FASTLED_HAS_EXP 0
-#endif
-#endif  // !FASTLED_HAS_EXP
-
-
 #include "fl/clamp.h"
 #include "fl/map_range.h"
 #include "fl/math_macros.h"
 
 namespace fl {
 
+// Forward declarations of implementation functions defined in math.cpp
+float floor_impl(float value);
+double floor_impl(double value);
+float ceil_impl(float value);
+double ceil_impl(double value);
+float exp_impl(float value);
+double exp_impl(double value);
+
 template <typename T> inline T floor(T value) {
     if (value >= 0) {
         return static_cast<T>(static_cast<int>(value));
     }
-    return static_cast<T>(::floor(static_cast<float>(value)));
+    return static_cast<T>(floor_impl(static_cast<float>(value)));
 }
 
 template <typename T> inline T ceil(T value) {
     if (value <= 0) {
         return static_cast<T>(static_cast<int>(value));
     }
-    return static_cast<T>(::ceil(static_cast<float>(value)));
+    return static_cast<T>(ceil_impl(static_cast<float>(value)));
 }
 
-// Exponential function - binds to standard library exp if available
+// Exponential function using custom implementation
 template <typename T> inline T exp(T value) {
-#if FASTLED_HAS_EXP
-    return static_cast<T>(::exp(static_cast<double>(value)));
-#else
-    // Fallback implementation using Taylor series approximation
-    // e^x ≈ 1 + x + x²/2! + x³/3! + x⁴/4! + x⁵/5! + ...
-    // This is a simple approximation for small values
-    double x = static_cast<double>(value);
-    if (x > 10.0)
-        return static_cast<T>(22026.465794806718); // e^10 approx
-    if (x < -10.0)
-        return static_cast<T>(0.0000453999297625); // e^-10 approx
-
-    double result = 1.0;
-    double term = 1.0;
-    for (int i = 1; i < 10; ++i) {
-        term *= x / i;
-        result += term;
-    }
-    return static_cast<T>(result);
-#endif
+    return static_cast<T>(exp_impl(static_cast<double>(value)));
 }
 
 // Constexpr version for compile-time evaluation (compatible with older C++
