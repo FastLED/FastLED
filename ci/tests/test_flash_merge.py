@@ -6,37 +6,41 @@ from pathlib import Path
 
 import pytest
 
+from ci.compiler.esp32_artifacts import ArtifactSet, ESP32FlashImageBuilder
+
 
 def test_create_flash_manual_merge_esp32():
     """Test manual flash merge for ESP32 (bootloader at 0x1000)."""
-    # Import the function
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
-    )
-    assert spec is not None, "Could not load module spec"
-    ci_compile = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None, "Module spec has no loader"
-    spec.loader.exec_module(ci_compile)
 
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         test_dir = Path(tmpdir)
 
         # Create fake binary files
-        (test_dir / "bootloader.bin").write_bytes(
-            b"\xe9" + b"\x00" * 100
-        )  # ESP32 magic
-        (test_dir / "partitions.bin").write_bytes(b"\xaa" * 100)
-        (test_dir / "boot_app0.bin").write_bytes(b"\xbb" * 100)
-        (test_dir / "firmware.bin").write_bytes(b"\xcc" * 1000)
+        bootloader_path = test_dir / "bootloader.bin"
+        partitions_path = test_dir / "partitions.bin"
+        boot_app0_path = test_dir / "boot_app0.bin"
+        firmware_path = test_dir / "firmware.bin"
+
+        bootloader_path.write_bytes(b"\xe9" + b"\x00" * 100)  # ESP32 magic
+        partitions_path.write_bytes(b"\xaa" * 100)
+        boot_app0_path.write_bytes(b"\xbb" * 100)
+        firmware_path.write_bytes(b"\xcc" * 1000)
+
+        # Create artifact set
+        artifacts = ArtifactSet(
+            firmware=firmware_path,
+            bootloader=bootloader_path,
+            partitions_bin=partitions_path,
+            boot_app0=boot_app0_path,
+        )
 
         # Test ESP32 (bootloader at 0x1000)
-        result = ci_compile._create_flash_manual_merge(test_dir, "esp32dev", 4)
+        builder = ESP32FlashImageBuilder("esp32dev", artifacts)
+        flash_bin = test_dir / "flash.bin"
+        result = builder.create_merged_image(flash_bin, flash_size_mb=4)
         assert result is True, "Flash merge should succeed"
 
-        flash_bin = test_dir / "flash.bin"
         assert flash_bin.exists(), "flash.bin should be created"
 
         # Verify flash size
@@ -66,34 +70,35 @@ def test_create_flash_manual_merge_esp32():
 
 def test_create_flash_manual_merge_esp32c3():
     """Test manual flash merge for ESP32-C3 (bootloader at 0x0)."""
-    # Import the function
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
-    )
-    assert spec is not None, "Could not load module spec"
-    ci_compile = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None, "Module spec has no loader"
-    spec.loader.exec_module(ci_compile)
-
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         test_dir = Path(tmpdir)
 
         # Create fake binary files
-        (test_dir / "bootloader.bin").write_bytes(
-            b"\xe9" + b"\x00" * 100
-        )  # ESP32 magic
-        (test_dir / "partitions.bin").write_bytes(b"\xaa" * 100)
-        (test_dir / "boot_app0.bin").write_bytes(b"\xbb" * 100)
-        (test_dir / "firmware.bin").write_bytes(b"\xcc" * 1000)
+        bootloader_path = test_dir / "bootloader.bin"
+        partitions_path = test_dir / "partitions.bin"
+        boot_app0_path = test_dir / "boot_app0.bin"
+        firmware_path = test_dir / "firmware.bin"
+
+        bootloader_path.write_bytes(b"\xe9" + b"\x00" * 100)  # ESP32 magic
+        partitions_path.write_bytes(b"\xaa" * 100)
+        boot_app0_path.write_bytes(b"\xbb" * 100)
+        firmware_path.write_bytes(b"\xcc" * 1000)
+
+        # Create artifact set
+        artifacts = ArtifactSet(
+            firmware=firmware_path,
+            bootloader=bootloader_path,
+            partitions_bin=partitions_path,
+            boot_app0=boot_app0_path,
+        )
 
         # Test ESP32-C3 (bootloader at 0x0)
-        result = ci_compile._create_flash_manual_merge(test_dir, "esp32c3", 4)
+        builder = ESP32FlashImageBuilder("esp32c3", artifacts)
+        flash_bin = test_dir / "flash.bin"
+        result = builder.create_merged_image(flash_bin, flash_size_mb=4)
         assert result is True, "Flash merge should succeed"
 
-        flash_bin = test_dir / "flash.bin"
         assert flash_bin.exists(), "flash.bin should be created"
 
         # Verify flash size
@@ -123,34 +128,35 @@ def test_create_flash_manual_merge_esp32c3():
 
 def test_create_flash_manual_merge_esp32s3():
     """Test manual flash merge for ESP32-S3 (bootloader at 0x0)."""
-    # Import the function
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
-    )
-    assert spec is not None, "Could not load module spec"
-    ci_compile = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None, "Module spec has no loader"
-    spec.loader.exec_module(ci_compile)
-
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         test_dir = Path(tmpdir)
 
         # Create fake binary files
-        (test_dir / "bootloader.bin").write_bytes(
-            b"\xe9" + b"\x00" * 100
-        )  # ESP32 magic
-        (test_dir / "partitions.bin").write_bytes(b"\xaa" * 100)
-        (test_dir / "boot_app0.bin").write_bytes(b"\xbb" * 100)
-        (test_dir / "firmware.bin").write_bytes(b"\xcc" * 1000)
+        bootloader_path = test_dir / "bootloader.bin"
+        partitions_path = test_dir / "partitions.bin"
+        boot_app0_path = test_dir / "boot_app0.bin"
+        firmware_path = test_dir / "firmware.bin"
+
+        bootloader_path.write_bytes(b"\xe9" + b"\x00" * 100)  # ESP32 magic
+        partitions_path.write_bytes(b"\xaa" * 100)
+        boot_app0_path.write_bytes(b"\xbb" * 100)
+        firmware_path.write_bytes(b"\xcc" * 1000)
+
+        # Create artifact set
+        artifacts = ArtifactSet(
+            firmware=firmware_path,
+            bootloader=bootloader_path,
+            partitions_bin=partitions_path,
+            boot_app0=boot_app0_path,
+        )
 
         # Test ESP32-S3 (bootloader at 0x0)
-        result = ci_compile._create_flash_manual_merge(test_dir, "esp32s3", 4)
+        builder = ESP32FlashImageBuilder("esp32s3", artifacts)
+        flash_bin = test_dir / "flash.bin"
+        result = builder.create_merged_image(flash_bin, flash_size_mb=4)
         assert result is True, "Flash merge should succeed"
 
-        flash_bin = test_dir / "flash.bin"
         assert flash_bin.exists(), "flash.bin should be created"
 
         # Check bootloader at 0x0
@@ -162,28 +168,28 @@ def test_create_flash_manual_merge_esp32s3():
 
 def test_create_flash_manual_merge_missing_files():
     """Test manual flash merge with missing files."""
-    # Import the function
-    import importlib.util
-
-    spec = importlib.util.spec_from_file_location(
-        "ci_compile", Path(__file__).parent.parent / "ci-compile.py"
-    )
-    assert spec is not None, "Could not load module spec"
-    ci_compile = importlib.util.module_from_spec(spec)
-    assert spec.loader is not None, "Module spec has no loader"
-    spec.loader.exec_module(ci_compile)
-
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
         test_dir = Path(tmpdir)
 
-        # Create only some files
-        (test_dir / "bootloader.bin").write_bytes(b"\xe9" + b"\x00" * 100)
+        # Create only bootloader file
+        bootloader_path = test_dir / "bootloader.bin"
+        bootloader_path.write_bytes(b"\xe9" + b"\x00" * 100)
         # Missing: partitions.bin, boot_app0.bin, firmware.bin
 
-        # Should still succeed but with warnings
-        result = ci_compile._create_flash_manual_merge(test_dir, "esp32dev", 4)
-        assert result is True, "Flash merge should succeed even with missing files"
+        # Create artifact set with missing files
+        artifacts = ArtifactSet(
+            bootloader=bootloader_path,
+            # Missing required files
+        )
+
+        # Should raise error due to missing required files
+        builder = ESP32FlashImageBuilder("esp32dev", artifacts)
+        flash_bin = test_dir / "flash.bin"
+
+        # This should raise ValueError due to missing required files
+        with pytest.raises(ValueError, match="Missing required files"):
+            builder.create_merged_image(flash_bin, flash_size_mb=4)
 
 
 if __name__ == "__main__":
