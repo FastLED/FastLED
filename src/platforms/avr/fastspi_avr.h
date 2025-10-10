@@ -138,6 +138,11 @@ public:
 
 	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
+	/// Finalize transmission (no-op for AVR USART1 SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
+
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
 	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
@@ -310,6 +315,11 @@ public:
 		waitFully();
 		release();
 	}
+
+	/// Finalize transmission (no-op for AVR USART0 SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 };
 
 #endif
@@ -470,6 +480,11 @@ public:
 		D::postBlock(len);
 		release();
 	}
+
+	/// Finalize transmission (no-op for AVR Hardware SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 };
 
 #endif
@@ -651,6 +666,11 @@ public:
 		waitFully();
 		release();
 	}
+
+	/// Finalize transmission (no-op for AVR Hardware SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 };
 #elif defined(SPSR0)
 
@@ -829,6 +849,11 @@ public:
 		waitFully();
 		release();
 	}
+
+	/// Finalize transmission (no-op for AVR Hardware SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 };
 #endif
 

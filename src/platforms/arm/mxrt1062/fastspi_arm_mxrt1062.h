@@ -131,6 +131,11 @@ public:
 		release();
 	}
 
+	/// Finalize transmission (no-op for Teensy 4.x SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
+
 };
 
 

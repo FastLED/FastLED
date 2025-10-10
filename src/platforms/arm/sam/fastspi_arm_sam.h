@@ -155,6 +155,11 @@ public:
 		D::postBlock(len);
 		release();
 	}
+
+	/// Finalize transmission (no-op for SAM SPI)
+	/// This method exists for compatibility with other SPI implementations
+	/// that may need to flush buffers or perform post-transmission operations
+	static void finalizeTransmission() { }
 };
 
 #endif
