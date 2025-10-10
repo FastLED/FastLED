@@ -298,6 +298,11 @@
             nrf_spim_enable(FASTLED_NRF52_SPIM);
         }
 
+        /// Finalize transmission (no-op for NRF52 SPI)
+        /// This method exists for compatibility with other SPI implementations
+        /// that may need to flush buffers or perform post-transmission operations
+        static void finalizeTransmission() { }
+
         /// write out pixel data from the given PixelController object, including select, release, and waiting
         template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
             select();
