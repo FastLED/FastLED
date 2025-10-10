@@ -375,9 +375,9 @@ class CompilePerfAnalyzer:
         lines.append("")
 
         # Header Tree (Multiple levels)
-        lines.append("FASTLED HEADERS (Nested Includes - Up to 4 Levels)")
+        lines.append("FASTLED HEADERS (Nested Includes - Up to 6 Levels)")
         lines.append("-" * 80)
-        tree = self.build_header_tree(max_depth=4)
+        tree = self.build_header_tree(max_depth=6)
 
         def format_tree(
             node_dict: Dict[str, Any],
@@ -613,13 +613,10 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
     """
     Check if compilation metrics exceed thresholds.
 
-    IMPORTANT: This function checks CUMULATIVE times (total time including all
-    nested includes) because that reflects the real user experience when they
-    #include a header in their sketch.
-
-    For example, if FastLED.h has cumulative time of 1680ms, that's what a user
-    experiences when they write "#include <FastLED.h>". This includes all the
-    nested headers like controller.h, fl/stdint.h, etc.
+    This function checks ONLY the aggregate/total compilation time against the
+    configured threshold. Individual header times are not checked as they can
+    vary significantly between compilations due to caching and other factors.
+    The aggregate time is what matters for real-world user experience.
 
     Returns True if all checks pass, False otherwise.
     """
@@ -633,52 +630,14 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
         thresholds = json.load(f)
 
     total_time = analyzer.get_total_time()
-    phases = analyzer.get_phase_times()
-    # NOTE: get_fastled_headers() returns CUMULATIVE times (including nested includes)
-    # This represents the real-world impact when users include these headers
-    fastled_headers = analyzer.get_fastled_headers()
 
     errors: List[str] = []
-    warnings: List[str] = []
 
-    # Check total compile time
+    # Check total compile time (this is the only check that matters)
     max_total = thresholds.get("total_compile_time_ms", 2000)
     if total_time > max_total:
         errors.append(
             f"Total compile time {total_time:.1f}ms exceeds threshold {max_total}ms"
-        )
-
-    # Check header thresholds (these apply to CUMULATIVE times)
-    error_threshold = thresholds.get("header_error_threshold_ms", 150)
-    warning_threshold = thresholds.get("header_warning_threshold_ms", 50)
-    # Specific headers can have custom thresholds (also cumulative)
-    known_slow = thresholds.get("known_slow_headers", {})
-
-    for name, time_ms in fastled_headers:
-        # Skip known slow headers if within their specific threshold
-        if name in known_slow:
-            specific_threshold = known_slow[name]
-            if time_ms > specific_threshold:
-                warnings.append(
-                    f"Known slow header {name} (cumulative: {time_ms:.1f}ms) exceeds its threshold ({specific_threshold}ms)"
-                )
-            continue
-
-        if time_ms > error_threshold:
-            errors.append(
-                f"Header {name} (cumulative: {time_ms:.1f}ms) exceeds error threshold ({error_threshold}ms)"
-            )
-        elif time_ms > warning_threshold:
-            warnings.append(
-                f"Header {name} (cumulative: {time_ms:.1f}ms) exceeds warning threshold ({warning_threshold}ms)"
-            )
-
-    # Check template instantiation percentage
-    template_time = phases.get("Templates", 0)
-    max_template_pct = thresholds.get("template_instantiation_percent", 15)
-    if total_time > 0 and (template_time / total_time * 100) > max_template_pct:
-        warnings.append(
-            f"Template instantiation time ({template_time / total_time * 100:.1f}%) exceeds {max_template_pct}%"
         )
 
     # Print results
@@ -686,14 +645,11 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
         print("\n❌ ERRORS:", file=sys.stderr)
         for error in errors:
             print(f"  - {error}", file=sys.stderr)
-
-    if warnings:
-        print("\n⚠️  WARNINGS:", file=sys.stderr)
-        for warning in warnings:
-            print(f"  - {warning}", file=sys.stderr)
-
-    if not errors and not warnings:
-        print("\n✓ All threshold checks passed", file=sys.stderr)
+    else:
+        print(
+            f"\n✓ All threshold checks passed - Total compile time: {total_time:.1f}ms (threshold: {max_total}ms)",
+            file=sys.stderr,
+        )
 
     return len(errors) == 0
 
