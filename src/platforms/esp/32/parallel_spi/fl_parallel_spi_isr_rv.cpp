@@ -29,6 +29,10 @@
   License: MIT (FastLED)
 */
 
+#include "fl/sketch_macros.h"
+
+#if SKETCH_HAS_LOTS_OF_MEMORY
+
 #include <stdint.h>
 #include <stddef.h>
 #include "fl/compiler_control.h"
@@ -204,3 +208,6 @@ void fl_parallel_spi_isr(void) {
 }
 
 FL_EXTERN_C_END
+
+
+#endif  // SKETCH_HAS_LOTS_OF_MEMORY
