@@ -474,29 +474,34 @@ def compile_with_trace(
         ]
     )
 
-    print(f"Compiling with: {' '.join(cmd)}")
+    print(f"Compiling with: {' '.join(cmd)}", file=sys.stderr)
 
     try:
         result = subprocess.run(cmd, capture_output=True, text=True, timeout=60)
 
         if result.returncode != 0:
-            print(f"Compilation failed:")
-            print(result.stderr)
+            print(f"Compilation failed:", file=sys.stderr)
+            print(result.stderr, file=sys.stderr)
             sys.exit(1)
 
         if not trace_file.exists():
-            print(f"Error: Trace file not generated at {trace_file}")
-            print("Make sure your compiler supports -ftime-trace (Clang 9+)")
+            print(f"Error: Trace file not generated at {trace_file}", file=sys.stderr)
+            print(
+                "Make sure your compiler supports -ftime-trace (Clang 9+)",
+                file=sys.stderr,
+            )
             sys.exit(1)
 
         return trace_file
 
     except subprocess.TimeoutExpired:
-        print("Compilation timed out after 60 seconds")
+        print("Compilation timed out after 60 seconds", file=sys.stderr)
         sys.exit(1)
     except FileNotFoundError:
-        print(f"Error: Compiler '{compiler}' not found")
-        print("Please specify the correct compiler with --compiler=PATH")
+        print(f"Error: Compiler '{compiler}' not found", file=sys.stderr)
+        print(
+            "Please specify the correct compiler with --compiler=PATH", file=sys.stderr
+        )
         sys.exit(1)
 
 
@@ -507,7 +512,9 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
     Returns True if all checks pass, False otherwise.
     """
     if not thresholds_file.exists():
-        print(f"Warning: Thresholds file not found at {thresholds_file}")
+        print(
+            f"Warning: Thresholds file not found at {thresholds_file}", file=sys.stderr
+        )
         return True
 
     with open(thresholds_file, "r") as f:
@@ -561,17 +568,17 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
 
     # Print results
     if errors:
-        print("\n❌ ERRORS:")
+        print("\n❌ ERRORS:", file=sys.stderr)
         for error in errors:
-            print(f"  - {error}")
+            print(f"  - {error}", file=sys.stderr)
 
     if warnings:
-        print("\n⚠️  WARNINGS:")
+        print("\n⚠️  WARNINGS:", file=sys.stderr)
         for warning in warnings:
-            print(f"  - {warning}")
+            print(f"  - {warning}", file=sys.stderr)
 
     if not errors and not warnings:
-        print("\n✓ All threshold checks passed")
+        print("\n✓ All threshold checks passed", file=sys.stderr)
 
     return len(errors) == 0
 
@@ -615,15 +622,15 @@ def main() -> None:
     os.environ["COMPILER"] = compiler
 
     # Compile with trace
-    print("Compiling test file with -ftime-trace...")
+    print("Compiling test file with -ftime-trace...", file=sys.stderr)
     trace_file = compile_with_trace(
         source_file, compiler, include_dir=project_root / "src"
     )
 
-    print(f"Trace file generated: {trace_file}")
+    print(f"Trace file generated: {trace_file}", file=sys.stderr)
 
     # Parse trace
-    print("Analyzing trace data...")
+    print("Analyzing trace data...", file=sys.stderr)
     analyzer = CompilePerfAnalyzer(str(trace_file))
 
     # Check thresholds if requested
