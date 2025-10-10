@@ -35,7 +35,7 @@ public:
         int8_t data1_pin;          ///< D1/MISO GPIO pin (-1 = unused)
         int8_t data2_pin;          ///< D2/WP GPIO pin (-1 = unused)
         int8_t data3_pin;          ///< D3/HD GPIO pin (-1 = unused)
-        size_t max_transfer_sz;    ///< Max bytes per transfer
+        uint32_t max_transfer_sz;  ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
