@@ -23,6 +23,7 @@
 // Include fl/int.h to get FastLED integer types (u8, u16, i8, etc.)
 // This defines types using primitive types which compiles faster than <stdint.h>
 #include "fl/int.h"
+#include "fl/cstddef.h"
 
 
 // Define standard integer type names as aliases to FastLED types in global namespace
