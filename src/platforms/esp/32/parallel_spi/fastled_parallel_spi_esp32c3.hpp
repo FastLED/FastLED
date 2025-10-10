@@ -239,5 +239,3 @@ public:
 };
 
 }  // namespace fl
-
-#endif // __cplusplus
