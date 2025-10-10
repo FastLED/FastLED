@@ -548,6 +548,8 @@ def create_integration_test_process(
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
     """Create a process to compile the uno tests without starting it"""
+    from ci.util.docker_helper import should_use_docker_for_board
+
     cmd = [
         "uv",
         "run",
@@ -559,6 +561,13 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         "Blink",
         "--no-interactive",
     ]
+
+    # Auto-optimize: use Docker if available and image exists
+    use_docker, reason = should_use_docker_for_board("uno", verbose=False)
+    if use_docker:
+        cmd.append("--docker")
+        print(f"✓ Using Docker for uno compilation (faster builds)")
+
     return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
 
 

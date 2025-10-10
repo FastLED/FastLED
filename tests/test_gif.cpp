@@ -78,7 +78,6 @@ TEST_CASE("GIF file loading and decoding") {
 
                 // Expected layout: red-white-blue-black (2x2) - same as JPEG test
                 // Allow tolerance for GIF compression artifacts
-                const int tolerance = 50;
 
                 // Pixel 0: Red (high R, low G/B)
                 CHECK_MESSAGE(pixels[0].r > 150, "Red pixel should have high red value, got: " << (int)pixels[0].r);

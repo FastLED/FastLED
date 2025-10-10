@@ -2,6 +2,41 @@
 
 This directory contains tools for tracking FastLED header compilation performance using Clang's `-ftime-trace` feature.
 
+## Understanding Timing Measurements
+
+This tool reports **two types** of timing measurements. Understanding the difference is critical:
+
+### 📊 Cumulative Time (Total Include Time)
+**This is what we check against thresholds** because it represents the real user experience.
+
+- **What it measures**: The TOTAL time from when the compiler starts processing a header until it finishes, INCLUDING all nested headers it includes recursively
+- **Example**: When FastLED.h shows 1680ms cumulative time:
+  - FastLED.h itself: ~276ms
+  - Plus controller.h: ~856ms
+  - Plus fl/stdint.h: ~588ms
+  - Plus all other nested includes
+  - **Total = 1680ms** (what the user experiences)
+- **Why it matters**: When a user writes `#include <FastLED.h>`, they wait for the full cumulative time. This is the real-world impact.
+- **Used for**: Threshold checking, performance targets, user experience metrics
+
+### 🔬 Direct Time (Header-Only Time)
+For detailed analysis and debugging only. NOT used for threshold checking.
+
+- **What it measures**: ONLY the time spent processing the header's own content, EXCLUDING nested includes
+- **Example**: FastLED.h direct time ~276ms = just parsing FastLED.h code itself
+- **Why it matters**: Helps identify which specific header has complex code vs. which just includes many other headers
+- **Used for**: Debugging, identifying optimization targets
+
+### Why We Check Cumulative Time
+
+**The thresholds in `thresholds.json` check CUMULATIVE times** because:
+1. ✅ Reflects real user experience when including headers
+2. ✅ Matches what developers see during compilation
+3. ✅ Includes cost of all dependencies (the complete picture)
+4. ✅ Prevents "death by a thousand cuts" (many small slow includes)
+
+**Example**: If FastLED.h cumulative time is 1680ms, that's what a user experiences. We set the threshold to 2000ms max to ensure reasonable compile times in user sketches.
+
 ## Quick Start
 
 ```bash
@@ -53,13 +88,21 @@ The `.github/workflows/header-perf.yml` workflow:
 
 ## Thresholds
 
-Current thresholds from `thresholds.json`:
+Current thresholds from `thresholds.json` (ALL thresholds check **CUMULATIVE** times):
 
-- **Total compile time**: 2000ms
-- **Header warning threshold**: 50ms
-- **Header error threshold**: 150ms
+- **Total compile time**: 2000ms max
+- **Header warning threshold**: 50ms cumulative (warns if any header's total include time exceeds this)
+- **Header error threshold**: 150ms cumulative (fails if any header's total include time exceeds this)
 - **Template instantiation**: <15% of total time
-- **Known slow headers**: Tracked separately (e.g., fl/str.h, controller.h)
+- **Known slow headers**: Specific cumulative thresholds for headers we're actively tracking:
+  - `FastLED.h`: 2000ms cumulative (main user-facing header)
+  - `controller.h`: 900ms cumulative
+  - `cpixel_ledcontroller.h`: 900ms cumulative
+  - `pixeltypes.h`: 800ms cumulative
+  - `fl/str.h`: 650ms cumulative
+  - `crgb.hpp`: 650ms cumulative
+
+**Note**: All thresholds are for cumulative times (including nested headers) to reflect real user compilation experience.
 
 ## Example Output
 

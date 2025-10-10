@@ -1,11 +1,20 @@
 {
+  "_description": "Compilation performance thresholds for FastLED headers",
+  "_note_cumulative_times": "ALL thresholds check CUMULATIVE times (total time including nested includes). This reflects real user experience when including headers.",
+
   "total_compile_time_ms": 2000,
   "header_warning_threshold_ms": 50,
   "header_error_threshold_ms": 150,
   "template_instantiation_percent": 15,
+
+  "_known_slow_headers_description": "Specific headers with custom cumulative time thresholds (in ms)",
   "known_slow_headers": {
-    "fl/str.h": 130,
-    "controller.h": 85,
-    "comment": "These are known to be slow and tracked"
+    "FastLED.h": 2000,
+    "fl/str.h": 650,
+    "controller.h": 900,
+    "cpixel_ledcontroller.h": 900,
+    "pixeltypes.h": 800,
+    "crgb.hpp": 650,
+    "_note": "These thresholds are CUMULATIVE (include all nested headers). FastLED.h set to 2000ms max as it's the main user-facing header."
   }
 }

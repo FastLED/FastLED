@@ -2,6 +2,32 @@
 """
 Compile performance profiling for FastLED headers.
 
+This script analyzes compilation time using Clang's -ftime-trace feature and
+reports two types of timing measurements:
+
+TIMING MEASUREMENT TYPES:
+-------------------------
+1. CUMULATIVE TIME (Total Include Time):
+   - Measures the TOTAL time from when the compiler starts processing a header
+     until it finishes, INCLUDING all nested headers it includes
+   - Example: FastLED.h cumulative time = time for FastLED.h itself + all its
+     includes (controller.h, fl/stdint.h, etc.) + all their nested includes
+   - This represents the REAL WORLD impact on user sketch compilation
+   - Used for threshold checking (reflects actual user experience)
+
+2. DIRECT TIME (Header-Only Time):
+   - Measures ONLY the time spent processing the header's own content,
+     EXCLUDING nested includes
+   - Example: FastLED.h direct time = only time parsing FastLED.h code itself
+   - Useful for identifying which specific header has complex code
+   - Displayed in reports for detailed analysis
+
+WHY WE CHECK CUMULATIVE TIME:
+-----------------------------
+When a user includes FastLED.h in their sketch, they experience the full
+cumulative time including all nested dependencies. This is what matters for
+developer experience, so thresholds are checked against cumulative times.
+
 Usage:
     python ci/perf/compile_perf.py [--output=json|text] [--save-trace]
 
@@ -140,10 +166,14 @@ class CompilePerfAnalyzer:
         """
         Get header parse times with nesting information.
 
+        IMPORTANT: Returns CUMULATIVE time (total time including all nested includes).
+        This is the full duration from when the compiler starts processing the header
+        until it finishes, including all headers it includes recursively.
+
         Returns:
             Dict mapping header name to:
             {
-                'time': float,        # milliseconds
+                'time': float,        # CUMULATIVE milliseconds (includes nested headers)
                 'path': str,          # full path
                 'depth': int,         # nesting level
                 'parent': str,        # parent header
@@ -207,7 +237,13 @@ class CompilePerfAnalyzer:
         return headers
 
     def get_fastled_headers(self) -> List[Tuple[str, float]]:
-        """Get all FastLED-specific headers (src/fl/*, src/*.h)."""
+        """
+        Get all FastLED-specific headers with their CUMULATIVE compile times.
+
+        Returns list of (header_name, cumulative_time_ms) tuples sorted by time.
+        Cumulative time includes all nested headers, representing the real cost
+        to users when they #include that header.
+        """
         headers = self.get_header_times()
         fastled_headers: List[Tuple[str, float]] = []
 
@@ -577,6 +613,14 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
     """
     Check if compilation metrics exceed thresholds.
 
+    IMPORTANT: This function checks CUMULATIVE times (total time including all
+    nested includes) because that reflects the real user experience when they
+    #include a header in their sketch.
+
+    For example, if FastLED.h has cumulative time of 1680ms, that's what a user
+    experiences when they write "#include <FastLED.h>". This includes all the
+    nested headers like controller.h, fl/stdint.h, etc.
+
     Returns True if all checks pass, False otherwise.
     """
     if not thresholds_file.exists():
@@ -590,6 +634,8 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
 
     total_time = analyzer.get_total_time()
     phases = analyzer.get_phase_times()
+    # NOTE: get_fastled_headers() returns CUMULATIVE times (including nested includes)
+    # This represents the real-world impact when users include these headers
     fastled_headers = analyzer.get_fastled_headers()
 
     errors: List[str] = []
@@ -602,9 +648,10 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
             f"Total compile time {total_time:.1f}ms exceeds threshold {max_total}ms"
         )
 
-    # Check header thresholds
+    # Check header thresholds (these apply to CUMULATIVE times)
     error_threshold = thresholds.get("header_error_threshold_ms", 150)
     warning_threshold = thresholds.get("header_warning_threshold_ms", 50)
+    # Specific headers can have custom thresholds (also cumulative)
     known_slow = thresholds.get("known_slow_headers", {})
 
     for name, time_ms in fastled_headers:
@@ -613,17 +660,17 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
             specific_threshold = known_slow[name]
             if time_ms > specific_threshold:
                 warnings.append(
-                    f"Known slow header {name} ({time_ms:.1f}ms) exceeds its threshold ({specific_threshold}ms)"
+                    f"Known slow header {name} (cumulative: {time_ms:.1f}ms) exceeds its threshold ({specific_threshold}ms)"
                 )
             continue
 
         if time_ms > error_threshold:
             errors.append(
-                f"Header {name} ({time_ms:.1f}ms) exceeds error threshold ({error_threshold}ms)"
+                f"Header {name} (cumulative: {time_ms:.1f}ms) exceeds error threshold ({error_threshold}ms)"
             )
         elif time_ms > warning_threshold:
             warnings.append(
-                f"Header {name} ({time_ms:.1f}ms) exceeds warning threshold ({warning_threshold}ms)"
+                f"Header {name} (cumulative: {time_ms:.1f}ms) exceeds warning threshold ({warning_threshold}ms)"
             )
 
     # Check template instantiation percentage
