@@ -16,8 +16,8 @@
 
 #if IS_ESP32_C3
 
-// Enable validation buffer for testing
-#define FL_SPI_ISR_VALIDATE
+// Note: FL_SPI_ISR_VALIDATE can be defined via build flags for validation testing
+// If not defined, the example will run without validation checks
 
 #include "platforms/esp/32/parallel_spi/fastled_parallel_spi_esp32c3.hpp"
 
@@ -99,8 +99,9 @@ void loop() {
     if (iteration >= NUM_TEST_ITERATIONS) {
         // Test complete, just idle
         if (!testComplete) {
-            Serial.print("✓ GPIO event log validation complete");
-            Serial.println();
+#ifdef FL_SPI_ISR_VALIDATE
+            Serial.println("✓ GPIO event log validation complete");
+#endif
             Serial.print("Test finished - completed ");
             Serial.print(iteration);
             Serial.println(" iterations");

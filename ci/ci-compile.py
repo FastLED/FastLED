@@ -47,6 +47,11 @@ def red_text(text: str) -> str:
     return f"\033[31m{text}\033[0m"
 
 
+def yellow_text(text: str) -> str:
+    """Return text in yellow color."""
+    return f"\033[33m{text}\033[0m"
+
+
 def handle_docker_compilation(args: argparse.Namespace) -> int:
     """
     Handle Docker compilation workflow.
@@ -1460,6 +1465,18 @@ def main() -> int:
     defines: List[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
+
+    # Check if we're compiling Esp32C3_SPI_ISR and auto-enable validation
+    for example in examples:
+        if "Esp32C3_SPI_ISR" in example:
+            if "FL_SPI_ISR_VALIDATE" not in defines:
+                defines.append("FL_SPI_ISR_VALIDATE")
+                print(
+                    yellow_text(
+                        "⚠️  Auto-enabling FL_SPI_ISR_VALIDATE for Esp32C3_SPI_ISR validation testing"
+                    )
+                )
+            break
 
     # Set up extra packages
     extra_packages: Optional[List[str]] = None

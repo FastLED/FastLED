@@ -1,8 +1,11 @@
 // esp32c3_isr_platform.cpp — ESP32-C3 platform ISR and timer setup
 
-#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C2)
+#if defined(ESP32)
 
 #include "sdkconfig.h"
+
+#if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C2) || defined(ARDUINO_ESP32C3_DEV) || defined(ARDUINO_ESP32C2_DEV)
+
 #include "fl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN
@@ -21,15 +24,13 @@ FL_EXTERN_C_END
 
 // Static handles
 static gptimer_handle_t s_timer = nullptr;
-static esp_intr_handle_t s_intr_handle = nullptr;
+static intr_handle_t s_intr_handle = nullptr;
 
 /**
  * Timer alarm callback - calls the ISR
  * This runs in ISR context and must be IRAM-safe
  */
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
+static bool timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
     (void)timer;
     (void)edata;
     (void)user_ctx;
@@ -39,7 +40,6 @@ static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer
 
     return false;  // Don't yield from ISR
 }
-FL_DISABLE_WARNING_POP
 
 /**
  * Platform-specific ISR setup for ESP32-C3
@@ -138,3 +138,4 @@ FL_EXTERN_C void fl_spi_platform_isr_stop(void) {
 }
 
 #endif // CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C2
+#endif // ESP32
