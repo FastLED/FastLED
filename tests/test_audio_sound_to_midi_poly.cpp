@@ -17,9 +17,6 @@ using namespace fl::third_party;
 // Mary Had a Little Lamb melody constants
 static constexpr float MARY_SAMPLE_RATE = 16000.0f; // Match FastLED default
 static constexpr int MARY_FRAME_SIZE = 512;         // Match FastLED default
-static constexpr float MARY_NOTE_DURATION_SEC = 0.25f; // Quarter note duration
-static constexpr int MARY_FRAMES_PER_NOTE = static_cast<int>(MARY_SAMPLE_RATE * MARY_NOTE_DURATION_SEC / MARY_FRAME_SIZE);
-static constexpr int MARY_SILENCE_FRAMES = 4;       // Frames of silence between notes
 
 // MIDI note numbers for Mary Had a Little Lamb
 static constexpr uint8_t MIDI_C4 = 60;
@@ -44,17 +41,6 @@ static constexpr uint8_t MARY_MELODY[] = {
     MIDI_D4, MIDI_D4, MIDI_E4, MIDI_D4, MIDI_C4  // Mary had a little lamb
 };
 static constexpr int MARY_MELODY_LENGTH = sizeof(MARY_MELODY) / sizeof(MARY_MELODY[0]);
-
-// Frequency lookup for melody
-static const float MARY_FREQUENCIES[] = {
-    FREQ_E4, FREQ_D4, FREQ_C4, FREQ_D4,
-    FREQ_E4, FREQ_E4, FREQ_E4,
-    FREQ_D4, FREQ_D4, FREQ_D4,
-    FREQ_E4, FREQ_G4, FREQ_G4,
-    FREQ_E4, FREQ_D4, FREQ_C4, FREQ_D4,
-    FREQ_E4, FREQ_E4, FREQ_E4, FREQ_E4,
-    FREQ_D4, FREQ_D4, FREQ_E4, FREQ_D4, FREQ_C4
-};
 
 // Helper: Generate a multi-tone sine wave (sum of multiple frequencies)
 static void generateMultiTone(float* buffer, int n, const float* freqs, int numFreqs, float sample_rate) {

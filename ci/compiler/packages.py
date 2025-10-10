@@ -29,6 +29,7 @@ from urllib.request import urlopen
 import httpx
 from pydantic import (
     BaseModel,
+    ConfigDict,
     EmailStr,
     Field,
     HttpUrl,
@@ -65,10 +66,11 @@ class Help(BaseModel):
 
     online: HttpUrl = Field(description="URL to online help resources")
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {"online": "https://github.com/espressif/arduino-esp32"}
         }
+    )
 
 
 class Board(BaseModel):
@@ -87,8 +89,8 @@ class Board(BaseModel):
             raise ValueError("Board name cannot be empty or whitespace")
         return v.strip()
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "name": "ESP32 Dev Module",
                 "properties": {
@@ -98,6 +100,7 @@ class Board(BaseModel):
                 },
             }
         }
+    )
 
 
 class ToolDependency(BaseModel):
@@ -118,14 +121,15 @@ class ToolDependency(BaseModel):
         # Allow flexible versioning (semantic, date-based, etc.)
         return v.strip()
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "packager": "esp32",
                 "name": "xtensa-esp32-elf-gcc",
                 "version": "esp-2021r2-patch5-8.4.0",
             }
         }
+    )
 
 
 class Platform(BaseModel):
@@ -190,9 +194,9 @@ class Platform(BaseModel):
             )
         return v
 
-    class Config:
-        allow_population_by_field_name = True
-        schema_extra: Dict[str, Any] = {
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_schema_extra={
             "example": {
                 "name": "ESP32 Arduino",
                 "architecture": "esp32",
@@ -205,7 +209,8 @@ class Platform(BaseModel):
                 "boards": [],
                 "toolsDependencies": [],
             }
-        }
+        },
+    )
 
 
 class SystemDownload(BaseModel):
@@ -246,9 +251,9 @@ class SystemDownload(BaseModel):
             raise ValueError("Host identifier cannot be empty")
         return v.strip()
 
-    class Config:
-        allow_population_by_field_name = True
-        schema_extra = {
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_schema_extra={
             "example": {
                 "host": "x86_64-pc-linux-gnu",
                 "url": "https://github.com/espressif/crosstool-NG/releases/download/esp-2021r2-patch5/xtensa-esp32-elf-gcc8_4_0-esp-2021r2-patch5-linux-amd64.tar.gz",
@@ -256,7 +261,8 @@ class SystemDownload(BaseModel):
                 "checksum": "SHA-256:abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
                 "size": "150000000",
             }
-        }
+        },
+    )
 
 
 class Tool(BaseModel):
@@ -288,8 +294,8 @@ class Tool(BaseModel):
         """Get list of compatible host systems"""
         return [system.host for system in self.systems]
 
-    class Config:
-        schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "name": "xtensa-esp32-elf-gcc",
                 "version": "esp-2021r2-patch5-8.4.0",
@@ -304,6 +310,7 @@ class Tool(BaseModel):
                 ],
             }
         }
+    )
 
 
 class Package(BaseModel):
@@ -373,9 +380,9 @@ class Package(BaseModel):
         # Simple version sorting - can be enhanced with proper semver parsing
         return sorted(versions)[-1]
 
-    class Config:
-        allow_population_by_field_name = True
-        schema_extra: Dict[str, Any] = {
+    model_config = ConfigDict(
+        populate_by_name=True,
+        json_schema_extra={
             "example": {
                 "name": "esp32",
                 "maintainer": "Espressif Systems",
@@ -385,7 +392,8 @@ class Package(BaseModel):
                 "platforms": [],
                 "tools": [],
             }
-        }
+        },
+    )
 
 
 class PackageIndex(BaseModel):
@@ -501,9 +509,9 @@ class PackageManagerConfig(BaseModel):
             raise ValueError(f"Cache path exists but is not a directory: {v}")
         return v
 
-    class Config:
-        validate_assignment = True
-        schema_extra = {
+    model_config = ConfigDict(
+        validate_assignment=True,
+        json_schema_extra={
             "example": {
                 "cache_dir": "~/.arduino_packages",
                 "sources": [
@@ -514,7 +522,8 @@ class PackageManagerConfig(BaseModel):
                 "verify_checksums": True,
                 "allow_insecure": False,
             }
-        }
+        },
+    )
 
 
 # Utility Functions for Enhanced Functionality
