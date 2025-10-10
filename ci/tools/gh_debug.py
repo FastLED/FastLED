@@ -20,9 +20,11 @@ Features:
 
 import argparse
 import json
+import os
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
@@ -30,7 +32,16 @@ from typing import Dict, List, Optional, Set, Tuple
 class GitHubDebugger:
     """Debug GitHub Actions failures efficiently."""
 
-    # Error patterns to detect
+    # Critical error patterns - actual compilation failures
+    CRITICAL_PATTERNS = [
+        r"\.(cpp|h|c|ino):\d+:\d+: error:",  # Compiler errors with file:line:col
+        r"static assertion failed",
+        r"compilation terminated",
+        r"undefined reference",
+        r"fatal error:",
+    ]
+
+    # General error patterns
     ERROR_PATTERNS = [
         r"error:",
         r"Error compiling",
@@ -42,6 +53,12 @@ class GitHubDebugger:
         r"Test.*failed",
         r"Error \d+",
         r"^\s*\^\s*$",  # Compiler error markers (^)
+    ]
+
+    # Patterns to exclude from critical error count (tool warnings, not build failures)
+    EXCLUDE_PATTERNS = [
+        r"esp_idf_size: error: unrecognized arguments",
+        r"Warning: esp-idf-size exited with code",
     ]
 
     def __init__(self, run_id: str, max_errors: int = 10, context_lines: int = 5):
@@ -56,7 +73,9 @@ class GitHubDebugger:
         self.max_errors = max_errors
         self.context_lines = context_lines
         self.repo = self._get_repo()
-        self.errors_found: List[Dict[str, str]] = []
+        self.critical_errors: List[Dict[str, str]] = []
+        self.warnings: List[Dict[str, str]] = []
+        self.log_file: Optional[Path] = None
 
     def _extract_run_id(self, run_input: str) -> str:
         """Extract run ID from URL or return as-is if already an ID."""
@@ -133,65 +152,99 @@ class GitHubDebugger:
             print(f"Error getting failed jobs: {e}", file=sys.stderr)
             return []
 
-    def stream_job_logs(self, job_id: str, job_name: str) -> None:
-        """Stream and filter job logs for errors.
+    def download_logs(self) -> Optional[Path]:
+        """Download logs to .logs/gh/ directory for analysis.
 
-        Args:
-            job_id: GitHub job ID
-            job_name: Human-readable job name
+        Returns:
+            Path to downloaded log file, or None if download failed
         """
-        print(f"\n{'=' * 80}")
-        print(f"Analyzing job: {job_name} (ID: {job_id})")
-        print(f"{'=' * 80}\n")
+        # Create .logs/gh/ directory
+        log_dir = Path(".logs/gh")
+        log_dir.mkdir(parents=True, exist_ok=True)
+
+        log_file = log_dir / f"run_{self.run_id}.txt"
+
+        # Check if log already exists and is recent (< 1 hour old)
+        if log_file.exists():
+            age_seconds: float = log_file.stat().st_ctime
+            if time.time() - age_seconds < 3600:
+                print(f"Using cached log file: {log_file}")
+                return log_file
+
+        print(f"Downloading logs to: {log_file}")
 
         try:
-            # Use gh api to stream logs
-            # Pipe through grep to filter first, then process
-            api_path = f"/repos/{self.repo}/actions/jobs/{job_id}/logs"
-
-            # Build grep pattern for all error patterns
-            grep_pattern = "|".join(f"({p})" for p in self.ERROR_PATTERNS)
-
-            # Stream logs, grep for errors with context
-            cmd = [
-                "gh",
-                "api",
-                api_path,
-                "--paginate",
-            ]
-
-            print(f"Fetching logs (this may take a moment)...\n")
-
-            # Run command and capture output
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+            # Download logs using gh run view
+            result = subprocess.run(
+                ["gh", "run", "view", self.run_id, "--log"],
+                capture_output=True,
                 text=True,
+                check=True,
+                timeout=300,  # 5 minute timeout
             )
 
-            if process.stdout is None:
-                print("Error: Could not open subprocess stdout", file=sys.stderr)
-                return
+            # Save to file
+            with open(log_file, "w", encoding="utf-8") as f:
+                f.write(result.stdout)
+
+            print(f"Log downloaded successfully ({len(result.stdout)} bytes)\n")
+            return log_file
+
+        except subprocess.TimeoutExpired:
+            print("Error: Log download timed out", file=sys.stderr)
+            return None
+        except Exception as e:
+            print(f"Error downloading logs: {e}", file=sys.stderr)
+            return None
+
+    def analyze_logs(self, log_file: Path) -> None:
+        """Analyze downloaded logs for errors.
+
+        Args:
+            log_file: Path to downloaded log file
+        """
+        print(f"Analyzing logs from: {log_file}\n")
+
+        try:
+            with open(log_file, "r", encoding="utf-8") as f:
+                lines = f.readlines()
 
             # Process logs line by line
             error_buffer: List[str] = []
             context_buffer: List[str] = []
             in_error_context = False
             lines_after_error = 0
+            current_job = "Unknown"
 
-            for line in process.stdout:
+            for line in lines:
                 line = line.rstrip()
+
+                # Extract job name from log line
+                job_match = re.match(r"^([\w\s/]+)\t", line)
+                if job_match:
+                    current_job = job_match.group(1).strip()
 
                 # Keep context buffer
                 context_buffer.append(line)
                 if len(context_buffer) > self.context_lines:
                     context_buffer.pop(0)
 
+                # Check if line should be excluded (tool warnings)
+                is_excluded = any(
+                    re.search(pattern, line, re.IGNORECASE)
+                    for pattern in self.EXCLUDE_PATTERNS
+                )
+
                 # Check if line matches error pattern
                 is_error = any(
                     re.search(pattern, line, re.IGNORECASE)
                     for pattern in self.ERROR_PATTERNS
+                )
+
+                # Check if line matches critical pattern
+                is_critical = any(
+                    re.search(pattern, line, re.IGNORECASE)
+                    for pattern in self.CRITICAL_PATTERNS
                 )
 
                 if is_error and not in_error_context:
@@ -209,55 +262,103 @@ class GitHubDebugger:
                     # Check if we've collected enough context
                     if lines_after_error >= self.context_lines:
                         # Save this error block
-                        self._save_error_block(job_name, error_buffer)
+                        if is_excluded or (
+                            not is_critical
+                            and any(
+                                re.search(p, "\n".join(error_buffer), re.IGNORECASE)
+                                for p in self.EXCLUDE_PATTERNS
+                            )
+                        ):
+                            # This is a tool warning, not a critical error
+                            self._save_error_block(
+                                current_job, error_buffer, is_critical=False
+                            )
+                        else:
+                            # This is a critical error
+                            self._save_error_block(
+                                current_job, error_buffer, is_critical=True
+                            )
+
                         error_buffer = []
                         in_error_context = False
 
-                        # Check if we've collected enough errors
-                        if len(self.errors_found) >= self.max_errors:
+                        # Check if we've collected enough CRITICAL errors
+                        if len(self.critical_errors) >= self.max_errors:
                             print(
-                                f"\n[Stopping after {self.max_errors} errors to avoid processing entire log]"
+                                f"\n[Stopping after {self.max_errors} critical errors]"
                             )
-                            process.terminate()
                             break
 
             # Save any remaining error in buffer
             if error_buffer:
-                self._save_error_block(job_name, error_buffer)
+                self._save_error_block(current_job, error_buffer, is_critical=False)
 
-            # Wait for process to complete
-            process.wait(timeout=5)
-
-        except subprocess.TimeoutExpired:
-            print("\nLog fetching timed out", file=sys.stderr)
         except Exception as e:
-            print(f"\nError streaming logs: {e}", file=sys.stderr)
+            print(f"\nError analyzing logs: {e}", file=sys.stderr)
 
-    def _save_error_block(self, job_name: str, lines: List[str]) -> None:
-        """Save an error block to the collection."""
-        self.errors_found.append(
-            {
-                "job": job_name,
-                "content": "\n".join(lines),
-            }
-        )
+    def _save_error_block(
+        self, job_name: str, lines: List[str], is_critical: bool = True
+    ) -> None:
+        """Save an error block to the collection.
+
+        Args:
+            job_name: Name of the job
+            lines: Error context lines
+            is_critical: Whether this is a critical error or just a warning
+        """
+        error_block = {
+            "job": job_name,
+            "content": "\n".join(lines),
+        }
+
+        if is_critical:
+            self.critical_errors.append(error_block)
+        else:
+            self.warnings.append(error_block)
 
     def print_summary(self) -> None:
         """Print summary of errors found."""
-        if not self.errors_found:
+        if not self.critical_errors and not self.warnings:
             print("\n" + "=" * 80)
             print("No errors found in logs!")
             print("=" * 80)
             return
 
         print("\n" + "=" * 80)
-        print(f"SUMMARY: Found {len(self.errors_found)} error(s)")
+        if self.critical_errors:
+            print(f"CRITICAL ERRORS: Found {len(self.critical_errors)} error(s)")
+        if self.warnings:
+            print(f"WARNINGS: Found {len(self.warnings)} warning(s)")
         print("=" * 80 + "\n")
 
-        for i, error in enumerate(self.errors_found, 1):
-            print(f"--- Error {i}/{len(self.errors_found)} in {error['job']} ---")
-            print(error["content"])
-            print()
+        # Show critical errors first
+        if self.critical_errors:
+            print("=" * 80)
+            print("CRITICAL ERRORS (Build Failures)")
+            print("=" * 80 + "\n")
+            for i, error in enumerate(self.critical_errors, 1):
+                print(
+                    f"--- Critical Error {i}/{len(self.critical_errors)} in {error['job']} ---"
+                )
+                print(error["content"])
+                print()
+
+        # Show warnings if no critical errors, or if there are few warnings
+        if self.warnings and (not self.critical_errors or len(self.warnings) <= 5):
+            print("=" * 80)
+            print("WARNINGS (Non-Critical)")
+            print("=" * 80 + "\n")
+            for i, warning in enumerate(self.warnings[:5], 1):
+                print(
+                    f"--- Warning {i}/{min(len(self.warnings), 5)} in {warning['job']} ---"
+                )
+                print(warning["content"])
+                print()
+            if len(self.warnings) > 5:
+                print(
+                    f"... and {len(self.warnings) - 5} more warnings (check log file for details)"
+                )
+                print()
 
     def debug(self) -> None:
         """Run the debugging process."""
@@ -279,21 +380,26 @@ class GitHubDebugger:
         for job in failed_jobs:
             print(f"  - {job['name']} ({job['conclusion']})")
 
-        # Process each failed job
-        for job in failed_jobs:
-            if not job["id"]:
-                print(f"\nSkipping {job['name']} - no job ID", file=sys.stderr)
-                continue
+        # Download logs
+        print()
+        log_file = self.download_logs()
+        if not log_file:
+            print("Failed to download logs. Cannot continue analysis.", file=sys.stderr)
+            return
 
-            self.stream_job_logs(job["id"], job["name"])
+        self.log_file = log_file
 
-            # Stop if we have enough errors
-            if len(self.errors_found) >= self.max_errors:
-                print(f"\nCollected {self.max_errors} errors. Stopping analysis.")
-                break
+        # Analyze logs
+        self.analyze_logs(log_file)
 
         # Print summary
         self.print_summary()
+
+        # Show log file location at the end
+        if self.log_file:
+            print("=" * 80)
+            print(f"Full logs saved to: {self.log_file}")
+            print("=" * 80)
 
 
 def main():

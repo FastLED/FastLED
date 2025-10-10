@@ -50,6 +50,7 @@ activate
 temp
 .tools_cache
 .cache
+.logs
 ci/ci/scrapers/screenshot
 tests/CMakeFiles
 CMakeCache.txt
