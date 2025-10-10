@@ -11,13 +11,13 @@
 #include <esp_heap_caps.h>
 #include <esp_err.h>
 #include <cstring>
+#include "soc/soc_caps.h"
 
-// Determine SPI3_HOST availability based on IDF target
-// Only ESP32 classic, S2, S3, and P4 have SPI3_HOST
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
-    #define FASTLED_ESP32_HAS_SPI3_HOST 1
-#else
-    #define FASTLED_ESP32_HAS_SPI3_HOST 0
+// Determine SPI3_HOST availability using SOC capability macro
+// SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available
+// SPI3_HOST is available when SOC_SPI_PERIPH_NUM > 2 (SPI1, SPI2, SPI3)
+#ifndef SOC_SPI_PERIPH_NUM
+    #define SOC_SPI_PERIPH_NUM 2  // Default to 2 for older ESP-IDF versions
 #endif
 
 namespace fl {
@@ -92,7 +92,7 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     if (bus_num == 2) {
         mHost = SPI2_HOST;
     }
-#if FASTLED_ESP32_HAS_SPI3_HOST
+#if SOC_SPI_PERIPH_NUM > 2
     else if (bus_num == 3) {
         mHost = SPI3_HOST;
     }
@@ -249,8 +249,8 @@ fl::vector<SPIQuad*> SPIQuad::createInstances() {
     static SPIQuadESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
     controllers.push_back(&controller2);
 
-#if FASTLED_ESP32_HAS_SPI3_HOST
-    // Bus 3 is only available on ESP32 classic, S2, S3, and P4
+#if SOC_SPI_PERIPH_NUM > 2
+    // Bus 3 is only available when SOC has more than 2 SPI peripherals
     static SPIQuadESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
     controllers.push_back(&controller3);
 #endif
