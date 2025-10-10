@@ -23,16 +23,14 @@ typedef long ptrdiff_t;
 #endif
 
 // FastLED equivalent of std::max_align_t
+// Use union approach (like standard library implementations) for fast compilation
 #ifndef FL_MAX_ALIGN_T_DEFINED
 #define FL_MAX_ALIGN_T_DEFINED
-#ifdef __BIGGEST_ALIGNMENT__
-typedef struct {
-    alignas(__BIGGEST_ALIGNMENT__) char __max_align_placeholder;
+typedef union {
+    long long ll;
+    long double ld;
+    void* p;
 } max_align_t;
-#else
-// Fallback for compilers that don't support __BIGGEST_ALIGNMENT__
-typedef long double max_align_t;
-#endif
 #endif
 
 } // namespace fl 
