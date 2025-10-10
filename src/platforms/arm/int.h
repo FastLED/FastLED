@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
-
 namespace fl {
     // ARM platforms (32-bit): short is 16-bit, long is 32-bit
     // uint32_t resolves to 'unsigned long' on most ARM toolchains
@@ -16,14 +13,13 @@ namespace fl {
     // - STM32F1 (Maple Mini and similar)
     // - Arduino GIGA R1 (STM32H747)
     // - Nordic nRF52 family (nRF52832, nRF52840, etc.)
-    typedef int16_t i16;
-    typedef uint16_t u16;
-    typedef int32_t i32;
-    typedef uint32_t u32;
-    typedef int64_t i64;
-    typedef uint64_t u64;
-    // size_t is unsigned long on ARM (32-bit)
-    typedef size_t size;
-    // uintptr_t is unsigned long on ARM (32-bit pointers)
-    typedef uintptr_t uptr;
+    typedef short i16;
+    typedef unsigned short u16;
+    typedef long i32;
+    typedef unsigned long u32;
+    typedef long long i64;
+    typedef unsigned long long u64;
+    // ARM is 32-bit: pointers and size are 32-bit (use unsigned long to match stdint)
+    typedef unsigned long size;   // size_t equivalent
+    typedef unsigned long uptr;   // uintptr_t equivalent
 } 

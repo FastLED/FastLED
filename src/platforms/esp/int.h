@@ -1,32 +1,28 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
-
 #ifdef __cplusplus
 namespace fl {
-    // ESP platforms (ESP8266/ESP32): Like ARM platforms, uint32_t and int32_t are 'unsigned long' and 'long'
-    // This matches the Xtensa toolchain behavior similar to ARM toolchains
+    // ESP platforms (ESP8266/ESP32): Xtensa and RISC-V toolchains
+    // 32-bit platforms: short is 16-bit, long is 32-bit
+    // Like ARM platforms, 32-bit types use 'long' to match uint32_t/int32_t
     typedef short i16;
     typedef unsigned short u16;
-    //typedef long i32;
-    //typedef unsigned long u32;
-    typedef int32_t i32;
-    typedef uint32_t u32;
+    typedef long i32;
+    typedef unsigned long u32;
     typedef long long i64;
     typedef unsigned long long u64;
-    // Use standard types directly to ensure exact compatibility
-    typedef size_t size;
-    typedef uintptr_t uptr;
+    // ESP32 is 32-bit: pointers are 32-bit
+    typedef unsigned long size;   // size_t equivalent (32-bit on ESP)
+    typedef unsigned long uptr;   // uintptr_t equivalent (32-bit on ESP)
 }
 #else
 // C language compatibility - define types in global namespace
 typedef short i16;
 typedef unsigned short u16;
-typedef int32_t i32;
-typedef uint32_t u32;
+typedef long i32;
+typedef unsigned long u32;
 typedef long long i64;
 typedef unsigned long long u64;
-typedef size_t size;
-typedef uintptr_t uptr;
+typedef unsigned long size;
+typedef unsigned long uptr;
 #endif
