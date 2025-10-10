@@ -238,8 +238,9 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     uint32_t poll_count = 0;
     uint32_t config_fail_count = 0;  // Track consecutive configuration failures
     const uint32_t MAX_CONFIG_RETRIES = 10;  // Limit retries before aborting
+    const uint32_t MAX_POLL_ITERATIONS = 50000;  // 5 seconds at 100µs per iteration
 
-    while (true) {
+    while (poll_count < MAX_POLL_ITERATIONS) {
         poll_count++;
         // Short delay before retry
         delayMicroseconds(100);
@@ -321,6 +322,21 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
                 static_cast<unsigned int>(poll_count / 10));
         }
     }
+
+    // Timeout reached - no worker became available
+    ESP_LOGE(RMT5_POOL_TAG, "");
+    ESP_LOGE(RMT5_POOL_TAG, "========================================");
+    ESP_LOGE(RMT5_POOL_TAG, "WORKER ACQUISITION TIMEOUT");
+    ESP_LOGE(RMT5_POOL_TAG, "========================================");
+    ESP_LOGE(RMT5_POOL_TAG, "Failed to acquire worker for GPIO %d after %u ms",
+             (int)pin, static_cast<unsigned int>(poll_count / 10));
+    ESP_LOGE(RMT5_POOL_TAG, "Available workers: 0 (all %d workers are busy)",
+             static_cast<int>(mDoubleBufferWorkers.size() + mOneShotWorkers.size()));
+    ESP_LOGE(RMT5_POOL_TAG, "This usually indicates too many LED strips for available RMT channels");
+    ESP_LOGE(RMT5_POOL_TAG, "========================================");
+    ESP_LOGE(RMT5_POOL_TAG, "");
+
+    return nullptr;
 }
 
 void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {

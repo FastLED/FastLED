@@ -79,7 +79,7 @@ def run_qemu_tests(args: TestArgs) -> None:
     """Run examples in QEMU emulation using Docker."""
     from pathlib import Path
 
-    from ci.dockerfiles.qemu_esp32_docker import DockerQEMURunner
+    from ci.docker.qemu_esp32_docker import DockerQEMURunner
     from ci.util.running_process import RunningProcess
 
     if not args.qemu or len(args.qemu) < 1:

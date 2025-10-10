@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 from typing import Optional, Union
 
-from ci.dockerfiles.qemu_esp32_docker import DockerQEMURunner
+from ci.docker.qemu_esp32_docker import DockerQEMURunner
 
 
 class QEMUTestIntegration:
@@ -140,7 +140,7 @@ def integrate_with_test_framework():
     integration_code = """
 # Docker QEMU integration
 try:
-    from ci.dockerfiles.qemu_test_integration import QEMUTestIntegration
+    from ci.docker.qemu_test_integration import QEMUTestIntegration
     DOCKER_QEMU_AVAILABLE = True
 except ImportError:
     DOCKER_QEMU_AVAILABLE = False

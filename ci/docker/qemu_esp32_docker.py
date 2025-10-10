@@ -18,7 +18,7 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from ci.dockerfiles.DockerManager import DockerManager
+from ci.docker.DockerManager import DockerManager
 from ci.util.running_process import RunningProcess
 
 

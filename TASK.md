@@ -29,7 +29,7 @@ Docker-based QEMU for local builds currently does not work. However, we have imp
      ```
 
 ### What's Not Working
-1. **Docker-based QEMU** (`ci/dockerfiles/qemu_esp32_docker.py`)
+1. **Docker-based QEMU** (`ci/docker/qemu_esp32_docker.py`)
    - Docker isolation issues on Windows/Git Bash
    - Path conversion problems
    - Container startup/cleanup issues
@@ -75,7 +75,7 @@ Docker-based QEMU for local builds currently does not work. However, we have imp
     uv run ci/ci-compile.py esp32c3 --docker --examples BlinkParallel --merged-bin -o qemu-build/merged.bin --defines FASTLED_ESP32_IS_QEMU
 
     # Run in Docker QEMU (BLOCKED - need espressif/idf image)
-    uv run ci/dockerfiles/qemu_esp32_docker.py qemu-build/merged.bin --machine esp32c3 --timeout 120
+    uv run ci/docker/qemu_esp32_docker.py qemu-build/merged.bin --machine esp32c3 --timeout 120
     ```
 
 - [ ] **Step 2.3**: Verify output matches GitHub Actions ⚠️ BLOCKED
@@ -123,7 +123,7 @@ Docker-based QEMU for local builds currently does not work. However, we have imp
 - [ ] **Step 4.4**: Update documentation
   - Update `ci/AGENTS.md` with QEMU testing instructions
   - Update `CLAUDE.md` Quick Reference with QEMU commands
-  - Add README in `ci/dockerfiles/` if needed
+  - Add README in `ci/docker/` if needed
 
 ## Success Criteria
 
@@ -146,7 +146,7 @@ Docker-based QEMU for local builds currently does not work. However, we have imp
 
 ## Key Files to Modify
 
-1. **`ci/dockerfiles/qemu_esp32_docker.py`** - Docker QEMU runner
+1. **`ci/docker/qemu_esp32_docker.py`** - Docker QEMU runner
    - Lines 264-321: ESP32-C3 machine type configuration
    - Lines 331-453: Container execution logic
 
@@ -157,7 +157,7 @@ Docker-based QEMU for local builds currently does not work. However, we have imp
 3. **Documentation**:
    - `CLAUDE.md` - User-facing quick reference
    - `ci/AGENTS.md` - Build system instructions
-   - `ci/dockerfiles/README.md` - Docker QEMU documentation
+   - `ci/docker/README.qemu.md` - Docker QEMU documentation
 
 ## Notes
 
@@ -230,7 +230,7 @@ uv run test.py --qemu esp32c3 BlinkParallel
   - Lines 226-229: Pass --merged-bin and -o flags to container
   - Lines 296-297: UTF-8 encoding for Windows Docker output
   - Lines 308-338: Copy artifacts from container to host
-- `ci/dockerfiles/qemu_esp32_docker.py`: ESP32-C3 QEMU support
+- `ci/docker/qemu_esp32_docker.py`: ESP32-C3 QEMU support
   - Line 265: Fixed RISC-V QEMU binary path (qemu-riscv32 not qemu-xtensa)
   - Lines 480-485, 504: Added --machine parameter
 - `test.py`: QEMU test integration with merged binaries

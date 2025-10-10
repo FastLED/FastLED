@@ -17,30 +17,35 @@ The Docker QEMU solution provides:
 - `DockerManager.py` - Docker container management utilities
 - `qemu_esp32_docker.py` - Main Docker QEMU runner script
 - `qemu_test_integration.py` - Integration with existing test framework
-- `Dockerfile.qemu-esp32` - Full ESP-IDF + QEMU environment
-- `Dockerfile.qemu-esp32-lite` - Lightweight QEMU-only environment
-- `docker-compose.yml` - Docker Compose configuration
+
+### Docker Images
+
+The QEMU runner uses the official **`espressif/idf:latest`** Docker image from Docker Hub, which includes:
+- Complete ESP-IDF toolchain
+- QEMU binaries for ESP32, ESP32-C3, ESP32-S3
+- All necessary development tools
+
+No custom Dockerfiles needed - everything runs using the official Espressif image.
 
 ## Usage
 
 ### Quick Start
 
-1. **Run a firmware test with Docker:**
+1. **Run QEMU tests via test.py (recommended):**
+   ```bash
+   uv run test.py --qemu esp32c3 BlinkParallel
+   ```
+
+2. **Run a firmware test with Docker directly:**
    ```bash
    uv run ci/docker/qemu_esp32_docker.py path/to/firmware.bin
    ```
 
-2. **Run with specific timeout and interrupt pattern:**
+3. **Run with specific timeout and interrupt pattern:**
    ```bash
    uv run ci/docker/qemu_esp32_docker.py firmware.bin \
      --timeout 60 \
      --interrupt-regex "Test passed"
-   ```
-
-3. **Use docker-compose:**
-   ```bash
-   cd ci/docker
-   FIRMWARE_DIR=../../.pio/build/esp32dev docker-compose up qemu-esp32
    ```
 
 ### Integration with Test Framework
@@ -58,42 +63,14 @@ uv run ci/docker/qemu_test_integration.py test --firmware path/to/firmware.bin
 uv run ci/docker/qemu_test_integration.py test --firmware firmware.bin --docker
 ```
 
-### Building Docker Images
+### Docker Image Used
 
-```bash
-# Build lightweight image
-docker build -f Dockerfile.qemu-esp32-lite -t fastled/qemu-esp32:lite .
-
-# Build full ESP-IDF image
-docker build -f Dockerfile.qemu-esp32 -t fastled/qemu-esp32:full .
-
-# Or use docker-compose
-docker-compose build
-```
-
-## Docker Images
-
-### Pre-built Images
-
-The runner can use pre-built images:
-- `espressif/qemu:esp-develop-8.2.0-20240122` (Official Espressif image)
-- `mluis/qemu-esp32:latest` (Community image)
-
-### Custom Images
-
-Two Dockerfiles are provided:
-
-1. **Dockerfile.qemu-esp32-lite** (Recommended)
-   - Minimal Ubuntu base
-   - QEMU binaries only
-   - ~200MB image size
-   - Fast startup
-
-2. **Dockerfile.qemu-esp32**
-   - Full ESP-IDF environment
-   - Development tools included
-   - ~2GB image size
-   - Complete toolchain
+The QEMU runner automatically pulls and uses:
+- **`espressif/idf:latest`** (~11.6GB) - Official Espressif ESP-IDF Docker image
+  - Includes complete ESP-IDF toolchain
+  - QEMU binaries for all ESP32 variants (ESP32, ESP32-C3, ESP32-S3)
+  - Development and debugging tools
+  - Automatically pulled on first use
 
 ## Features
 
@@ -181,20 +158,22 @@ uv run ci/docker/qemu_test_integration.py test \
 
 ### Adding New ESP32 Variants
 
-1. Update Dockerfiles with new ROM files
-2. Add machine type to runner scripts
-3. Test with sample firmware
+1. Add machine type mapping to `qemu_esp32_docker.py` (lines 319-331)
+2. Add QEMU binary path if different architecture (RISC-V vs Xtensa)
+3. Update test.py machine type detection (lines 182-190)
+4. Test with sample firmware
 
 ### Debugging
 
-Run interactively:
+Run interactively with extended timeout:
 ```bash
-uv run ci/docker/qemu_esp32_docker.py firmware.bin --interactive
+uv run ci/docker/qemu_esp32_docker.py firmware.bin --interactive --timeout 300
 ```
 
-Enable verbose output:
+Check QEMU output logs:
 ```bash
-docker-compose up qemu-esp32-interactive
+# Output is saved to qemu_output.log by default
+cat qemu_output.log
 ```
 
 ## Performance

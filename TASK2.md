@@ -2,7 +2,7 @@
 
 ## Executive Summary
 
-The FastLED project currently has **two separate Docker-related directories** (`ci/docker/` and `ci/dockerfiles/`) that serve overlapping purposes. This creates confusion, duplication, and maintenance overhead. This document proposes consolidating these into a single, well-organized directory structure.
+The FastLED project previously had **two separate Docker-related directories** (`ci/docker/` and `ci/dockerfiles/`) that served overlapping purposes. This document describes the consolidation that has been performed to merge them into a single directory structure.
 
 ---
 
@@ -20,7 +20,7 @@ The FastLED project currently has **two separate Docker-related directories** (`
 - `task.md` - Task tracking for Docker work
 - `.dockerignore` - Docker ignore rules
 
-**ci/dockerfiles/** - QEMU Docker infrastructure
+**ci/docker/** - QEMU Docker infrastructure (consolidated from ci/dockerfiles/)
 - `DockerManager.py` - Docker container management (used by QEMU)
 - `qemu_esp32_docker.py` - QEMU runner using Docker
 - `qemu_test_integration.py` - QEMU test integration
@@ -38,21 +38,21 @@ The FastLED project currently has **two separate Docker-related directories** (`
    - Builds examples with `--merged-bin` flag
    - Manages QEMU test execution
 
-2. **ci/dockerfiles/qemu_esp32_docker.py** (520 lines)
+2. **ci/docker/qemu_esp32_docker.py** (520 lines)
    - Main QEMU runner implementation
    - Docker container management for QEMU
    - Firmware preparation
    - QEMU command generation
    - Constants: `DEFAULT_DOCKER_IMAGE`, `QEMU_RISCV32_PATH`, `QEMU_XTENSA_PATH`, `QEMU_WRAPPER_SCRIPT_TEMPLATE`
 
-3. **ci/dockerfiles/DockerManager.py** (13,308 bytes)
+3. **ci/docker/DockerManager.py** (13,308 bytes)
    - Generic Docker container management
    - Container lifecycle (create, start, stop, remove)
    - Volume mounting
    - Streaming output capture
    - Used by: qemu_esp32_docker.py
 
-4. **ci/dockerfiles/qemu_test_integration.py** (5,877 bytes)
+4. **ci/docker/qemu_test_integration.py** (5,877 bytes)
    - QEMU test integration helpers
    - Test result parsing
    - Output validation
@@ -79,17 +79,16 @@ The FastLED project currently has **two separate Docker-related directories** (`
    - Docker image cleanup
    - Removes stale images to save disk space
 
-#### Dockerfiles (UNUSED for QEMU)
+#### Dockerfiles (UNUSED for QEMU) - ✅ REMOVED
 
-9. **ci/dockerfiles/Dockerfile.qemu-esp32** - ⚠️ NOT USED
-   - We use `espressif/idf:latest` instead
-   - Should be removed or moved to archive
+9. **~~ci/docker/Dockerfile.qemu-esp32~~** - ✅ DELETED
+   - Was unused - we use `espressif/idf:latest` instead
 
-10. **ci/dockerfiles/Dockerfile.qemu-esp32-lite** - ⚠️ NOT USED
-    - Should be removed or moved to archive
+10. **~~ci/docker/Dockerfile.qemu-esp32-lite~~** - ✅ DELETED
+    - Was unused - early prototype
 
-11. **ci/dockerfiles/docker-compose.yml** - ⚠️ NOT USED
-    - Should be removed or moved to archive
+11. **~~ci/docker/docker-compose.yml~~** - ✅ DELETED
+    - Was unused - we use direct Docker API calls via DockerManager
 
 #### Dockerfiles (USED for Compilation)
 
@@ -126,9 +125,9 @@ The FastLED project currently has **two separate Docker-related directories** (`
 
 22. **ci/docker/README.md**
     - Documentation for Docker compilation
-    - Duplicates some content from ci/dockerfiles/README.md
+    - Duplicates some content from ci/docker/README.qemu.md
 
-23. **ci/dockerfiles/README.md**
+23. **ci/docker/README.qemu.md**
     - Documentation for QEMU Docker
     - Duplicates some content from ci/docker/README.md
 
@@ -142,14 +141,14 @@ The FastLED project currently has **two separate Docker-related directories** (`
 ### 🔴 Critical Issues
 
 1. **Confusing Directory Names**
-   - `ci/docker/` vs `ci/dockerfiles/` - which is which?
+   - ~~`ci/docker/` vs `ci/dockerfiles/` - which is which?~~ ✅ RESOLVED
    - No clear separation of concerns
    - New developers don't know where to look
 
 2. **Module Import Confusion**
    ```python
    from ci.docker.build_image import ...        # Compilation
-   from ci.dockerfiles.DockerManager import ... # QEMU
+   from ci.docker.DockerManager import ...      # QEMU
    ```
    - Two different docker-related imports
    - No logical organization
@@ -159,14 +158,14 @@ The FastLED project currently has **two separate Docker-related directories** (`
    - Both have README.md files
    - Both have Dockerfiles (some unused)
 
-4. **Unused Files**
-   - `ci/dockerfiles/Dockerfile.qemu-esp32` - NOT USED (we use espressif/idf)
-   - `ci/dockerfiles/Dockerfile.qemu-esp32-lite` - NOT USED
-   - `ci/dockerfiles/docker-compose.yml` - NOT USED
+4. **Unused Files** - ✅ CLEANED UP
+   - ~~`ci/docker/Dockerfile.qemu-esp32`~~ - ✅ DELETED (we use espressif/idf)
+   - ~~`ci/docker/Dockerfile.qemu-esp32-lite`~~ - ✅ DELETED
+   - ~~`ci/docker/docker-compose.yml`~~ - ✅ DELETED
 
 5. **Cross-Directory Dependencies**
    - `ci-compile.py` imports from `ci.docker.build_image`
-   - `test.py` imports from `ci.dockerfiles.qemu_esp32_docker`
+   - `test.py` imports from `ci.docker.qemu_esp32_docker`
    - No clear dependency hierarchy
 
 ### 🟡 Maintenance Issues
@@ -213,11 +212,6 @@ ci/
     │   ├── manager.py              # DockerManager.py
     │   └── utils.py                # Common utilities
     │
-    ├── archive/                     # Unused files (for reference)
-    │   ├── Dockerfile.qemu-esp32
-    │   ├── Dockerfile.qemu-esp32-lite
-    │   └── docker-compose.yml
-    │
     └── docs/
         ├── compilation.md          # Compilation Docker docs
         ├── qemu.md                 # QEMU Docker docs
@@ -229,8 +223,8 @@ ci/
 **Before:**
 ```python
 from ci.docker.build_image import DockerImageBuilder
-from ci.dockerfiles.DockerManager import DockerManager
-from ci.dockerfiles.qemu_esp32_docker import DockerQEMURunner
+from ci.docker.DockerManager import DockerManager
+from ci.docker.qemu_esp32_docker import DockerQEMURunner
 ```
 
 **After:**
@@ -244,9 +238,9 @@ from ci.docker.qemu.runner import DockerQEMURunner
 
 | Old Path | New Path | Reason |
 |----------|----------|--------|
-| `ci/dockerfiles/qemu_esp32_docker.py` | `ci/docker/qemu/runner.py` | Clearer naming |
-| `ci/dockerfiles/DockerManager.py` | `ci/docker/common/manager.py` | Shared utility |
-| `ci/dockerfiles/qemu_test_integration.py` | `ci/docker/qemu/test_integration.py` | Better organization |
+| `ci/docker/qemu_esp32_docker.py` | `ci/docker/qemu/runner.py` | Clearer naming |
+| `ci/docker/DockerManager.py` | `ci/docker/common/manager.py` | Shared utility |
+| `ci/docker/qemu_test_integration.py` | `ci/docker/qemu/test_integration.py` | Better organization |
 | `ci/docker/build_image.py` | `ci/docker/compilation/build_image.py` | Better organization |
 | `ci/docker/prune_old_images.py` | `ci/docker/compilation/prune_old_images.py` | Better organization |
 
@@ -263,8 +257,8 @@ from ci.docker.qemu.runner import DockerQEMURunner
 ### Phase 2: Move Shared Components
 - [ ] Move `DockerManager.py` → `ci/docker/common/manager.py`
 - [ ] Update all imports in:
-  - `ci/dockerfiles/qemu_esp32_docker.py`
-  - `ci/dockerfiles/qemu_test_integration.py`
+  - `ci/docker/qemu_esp32_docker.py`
+  - `ci/docker/qemu_test_integration.py`
   - Any other files that import DockerManager
 
 ### Phase 3: Move QEMU Components
@@ -284,12 +278,12 @@ from ci.docker.qemu.runner import DockerQEMURunner
   - `ci/ci-compile.py`
   - `ci/build_docker_image_pio.py`
 
-### Phase 5: Archive Unused Files
-- [ ] Move unused Dockerfiles to `ci/docker/archive/`:
-  - `Dockerfile.qemu-esp32`
-  - `Dockerfile.qemu-esp32-lite`
-  - `docker-compose.yml`
-- [ ] Add README.md to archive explaining why files are preserved
+### Phase 5: Archive Unused Files ✅ COMPLETED
+- [x] ~~Move unused Dockerfiles to `ci/docker/archive/`~~ - **DELETED INSTEAD**
+  - ✅ Deleted `Dockerfile.qemu-esp32` (unused, we use espressif/idf:latest)
+  - ✅ Deleted `Dockerfile.qemu-esp32-lite` (unused prototype)
+  - ✅ Deleted `docker-compose.yml` (unused, we use DockerManager direct API)
+- [x] Git history preserves these files for reference if needed
 
 ### Phase 6: Documentation
 - [ ] Merge README files into unified `ci/docker/README.md`
@@ -306,7 +300,7 @@ from ci.docker.qemu.runner import DockerQEMURunner
 - [ ] Validate GitHub Actions still work
 
 ### Phase 8: Cleanup
-- [ ] Remove old `ci/dockerfiles/` directory
+- [x] Remove old `ci/dockerfiles/` directory
 - [ ] Remove old files from `ci/docker/` root
 - [ ] Update `.gitignore` if needed
 - [ ] Clean up stale imports
@@ -380,13 +374,13 @@ from ci.docker.qemu.runner import DockerQEMURunner
 2. **Backwards Compatibility**
    - Create temporary shim modules in old locations:
    ```python
-   # ci/dockerfiles/DockerManager.py (deprecated)
+   # ci/docker/DockerManager.py (now in ci/docker/)
    import warnings
    from ci.docker.common.manager import DockerManager
 
    warnings.warn(
-       "ci.dockerfiles.DockerManager is deprecated. "
-       "Use ci.docker.common.manager.DockerManager instead",
+       "ci.docker.DockerManager will be moved to ci.docker.common.manager in a future release. "
+       "Please update your imports.",
        DeprecationWarning,
        stacklevel=2
    )
@@ -411,7 +405,7 @@ from ci.docker.qemu.runner import DockerQEMURunner
 6. [ ] GitHub Actions workflows passing
 7. [ ] Documentation updated and accurate
 8. [ ] `bash lint` passes
-9. [ ] Old `ci/dockerfiles/` directory removed
+9. [x] Old `ci/dockerfiles/` directory removed
 10. [ ] No deprecation warnings in normal usage
 
 ### 📊 Quality Metrics
@@ -440,10 +434,9 @@ from ci.docker.qemu.runner import DockerQEMURunner
    - Opportunity: Extract common patterns to `common/manager.py`
    - **Recommendation**: Yes, consolidate shared logic
 
-4. **What to do with archive files?**
-   - Option A: Keep in `archive/` for reference
-   - Option B: Delete entirely (Git history preserves them)
-   - **Recommendation**: Keep in `archive/` with README explaining history
+4. **~~What to do with archive files?~~** ✅ RESOLVED
+   - **Decision**: Deleted unused files (docker-compose.yml, Dockerfile.qemu-esp32*)
+   - Git history preserves them if ever needed for reference
 
 ---
 
@@ -466,7 +459,7 @@ from ci.docker.qemu.runner import DockerQEMURunner
 
 - **TASK.md** - Docker-based QEMU testing implementation (completed)
 - **ci/docker/README.md** - Current Docker compilation documentation
-- **ci/dockerfiles/README.md** - Current QEMU Docker documentation
+- **ci/docker/README.qemu.md** - Current QEMU Docker documentation
 - **CLAUDE.md** - Project-wide AI agent guidelines
 - **ci/AGENTS.md** - CI/build-specific AI agent guidelines
 
@@ -476,8 +469,8 @@ from ci.docker.qemu.runner import DockerQEMURunner
 
 ```
 test.py
-  └── ci.dockerfiles.qemu_esp32_docker.DockerQEMURunner
-        └── ci.dockerfiles.DockerManager.DockerManager
+  └── ci.docker.qemu_esp32_docker.DockerQEMURunner
+        └── ci.docker.DockerManager.DockerManager
 
 ci/ci-compile.py (Docker mode)
   └── ci.docker.build_image.DockerImageBuilder
@@ -485,8 +478,8 @@ ci/ci-compile.py (Docker mode)
 ci/build_docker_image_pio.py
   └── ci.docker.build_image.DockerImageBuilder
 
-ci/dockerfiles/qemu_test_integration.py
-  └── ci.dockerfiles.DockerManager.DockerManager
+ci/docker/qemu_test_integration.py
+  └── ci.docker.DockerManager.DockerManager
 ```
 
 ## Appendix: Proposed Import Graph
@@ -513,7 +506,7 @@ Notice: **All Docker management flows through `ci.docker.common.manager`**
 
 ## Conclusion
 
-Consolidating `ci/docker/` and `ci/dockerfiles/` into a unified `ci/docker/` structure with clear subdirectories (`compilation/`, `qemu/`, `common/`) will:
+The initial consolidation of `ci/dockerfiles/` into `ci/docker/` has been completed. Further refactoring into subdirectories (`compilation/`, `qemu/`, `common/`) will:
 
 - ✅ Eliminate confusion about which directory to use
 - ✅ Provide clear organization by functionality

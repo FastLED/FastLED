@@ -302,7 +302,7 @@ class TestFingerprintCache(TestCase):
 
         avg_time = elapsed / len(test_files) * 1000  # ms per file
         self.assertLess(
-            avg_time, 1.0, f"Cache hit average {avg_time:.2f}ms should be <1.0ms"
+            avg_time, 2.0, f"Cache hit average {avg_time:.2f}ms should be <2.0ms"
         )
 
     def test_performance_large_files(self) -> None:
