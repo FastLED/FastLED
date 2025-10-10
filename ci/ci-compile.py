@@ -1468,7 +1468,7 @@ def main() -> int:
 
     # Check if we're compiling Esp32C3_SPI_ISR and auto-enable validation
     for example in examples:
-        if "Esp32C3_SPI_ISR" in example:
+        if "Esp32C3_SPI_ISR" in example and len(examples) == 1:
             if "FL_SPI_ISR_VALIDATE" not in defines:
                 defines.append("FL_SPI_ISR_VALIDATE")
                 print(
