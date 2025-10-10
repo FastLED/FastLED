@@ -12,9 +12,12 @@ import unittest
 from pathlib import Path
 from typing import List, Union
 
+import pytest
+
 from ci.util.running_process import EndOfStream, RunningProcess
 
 
+@pytest.mark.serial
 class TestRunningProcess(unittest.TestCase):
     def test_sanity(self: "TestRunningProcess") -> None:
         """Run a trivial command and validate output streaming and exit code.
@@ -111,6 +114,7 @@ class _UpperFormatter:
         self.end_called = True
 
 
+@pytest.mark.serial
 class TestRunningProcessAdditional(unittest.TestCase):
     def test_timeout_and_kill(self: "TestRunningProcessAdditional") -> None:
         """Process exceeding timeout should be killed and raise TimeoutError."""

@@ -64,6 +64,7 @@ from ci.compiler.clang_compiler import (
     link_program_sync,
     load_build_flags_from_toml,
 )
+from ci.compiler.link_cache_gc import load_policy_from_toml, run_link_cache_gc
 
 
 @dataclass
@@ -310,6 +311,24 @@ class FastLEDTestCompiler:
         example compilation that deliver 4x+ performance improvements.
         """
         compile_start = time.time()
+
+        # Run link cache garbage collection before compilation
+        try:
+            cache_dir = self.build_dir / "link_cache"
+            if cache_dir.exists():
+                toml_path = self.project_root / "ci" / "build_unit.toml"
+                policy = load_policy_from_toml(toml_path)
+                print("[CACHE GC] Running link cache garbage collection...")
+                stats = run_link_cache_gc(
+                    cache_dir=cache_dir, policy=policy, verbose=False
+                )
+                if stats.files_removed > 0:
+                    print(
+                        f"[CACHE GC] Cleaned {stats.files_removed} files ({stats.bytes_freed / (1024 * 1024):.1f} MB)"
+                    )
+        except Exception as e:
+            # Non-fatal: log warning and continue
+            print(f"[CACHE GC] Warning: Cache GC failed: {e}")
 
         # If specific_test is not provided in the method call, use the one from discover_test_files
         test_files = self.discover_test_files(specific_test)

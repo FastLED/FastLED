@@ -261,6 +261,29 @@ compiler_args = [
     # No additional args currently needed - all flags come from [all] and other sections
 ]
 
+[cache]
+# ================================================================================================
+# LINK CACHE GARBAGE COLLECTION POLICY
+# ================================================================================================
+# Configuration for automatic cleanup of .build/link_cache/ directory to prevent unbounded growth.
+# The link cache stores compiled executables to speed up incremental builds.
+
+# Maximum number of cached versions to keep per example/test
+# Each code change creates a new cache entry; this limits how many old versions we keep
+max_versions_per_example = 3
+
+# Maximum age in days for cached entries
+# Entries older than this will be removed during GC (unless they're the last version for an example)
+max_age_days = 7
+
+# Maximum total cache size in megabytes
+# If cache exceeds this size, oldest entries are removed first
+max_total_size_mb = 1024  # 1GB
+
+# Always preserve at least one version per example (safety feature)
+# Even if it exceeds age/size limits, keep the most recent version
+preserve_at_least_one = true
+
 [linking.unix]
 # ================================================================================================
 # UNIX-SPECIFIC LINKING FLAGS
@@ -272,7 +295,7 @@ flags = [
     "-pthread",                                 # POSIX threads support
     "-lm",                                     # Math library
     "-ldl",                                    # Dynamic loading library
-    
+
     # Platform-specific libraries (added as needed)
     # Note: Additional platform-specific flags can be added here
 ]

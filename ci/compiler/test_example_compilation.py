@@ -47,6 +47,7 @@ from ci.compiler.clang_compiler import (
 from ci.compiler.compilation.compiler_factory import create_fastled_compiler
 from ci.compiler.compilation.simple_compiler import compile_examples_simple
 from ci.compiler.compilation.unity_compiler import compile_examples_unity
+from ci.compiler.link_cache_gc import load_policy_from_toml, run_link_cache_gc
 from ci.compiler.linking.library_builder import (
     create_fastled_library,
     get_fastled_core_sources,
@@ -886,6 +887,27 @@ class CompilationTestRunner:
         """Initialize the compiler and get system information."""
         self.log_timing("==> FastLED Example Compilation Test (SIMPLE BUILD SYSTEM)")
         self.log_timing("=" * 70)
+
+        # Run link cache garbage collection
+        if not self.config.clean_build:  # Skip GC if doing a clean build
+            try:
+                cache_dir = Path(".build/link_cache")
+                if cache_dir.exists():
+                    toml_path = Path.cwd() / "ci" / "build_unit.toml"
+                    policy = load_policy_from_toml(toml_path)
+                    self.log_timing(
+                        "[CACHE GC] Running link cache garbage collection..."
+                    )
+                    stats = run_link_cache_gc(
+                        cache_dir=cache_dir, policy=policy, verbose=False
+                    )
+                    if stats.files_removed > 0:
+                        self.log_timing(
+                            f"[CACHE GC] Cleaned {stats.files_removed} files ({stats.bytes_freed / (1024 * 1024):.1f} MB)"
+                        )
+            except Exception as e:
+                # Non-fatal: log warning and continue
+                self.log_timing(f"[CACHE GC] Warning: Cache GC failed: {e}")
 
         # Get system information
         self.log_timing("Getting system information...")

@@ -27,6 +27,7 @@ from .clang_compiler import (
     Result,
     test_clang_accessibility,
 )
+from .link_cache_gc import load_policy_from_toml, run_link_cache_gc
 from .test_example_compilation import create_fastled_compiler
 
 
@@ -914,6 +915,26 @@ def compile_unit_tests_python_api(
     print("=" * 60)
     print("COMPILING UNIT TESTS WITH PYTHON API")
     print("=" * 60)
+
+    # Run link cache garbage collection before compilation
+    if not clean:  # Skip GC if doing a clean build
+        try:
+            cache_dir = Path(".build/link_cache")
+            if cache_dir.exists():
+                project_root = Path(__file__).parent.parent.parent
+                toml_path = project_root / "ci" / "build_unit.toml"
+                policy = load_policy_from_toml(toml_path)
+                print("[CACHE GC] Running link cache garbage collection...")
+                stats = run_link_cache_gc(
+                    cache_dir=cache_dir, policy=policy, verbose=False
+                )
+                if stats.files_removed > 0:
+                    print(
+                        f"[CACHE GC] Cleaned {stats.files_removed} files ({stats.bytes_freed / (1024 * 1024):.1f} MB)"
+                    )
+        except Exception as e:
+            # Non-fatal: log warning and continue
+            print(f"[CACHE GC] Warning: Cache GC failed: {e}")
 
     if clean:
         print("Cleaning build directory...")

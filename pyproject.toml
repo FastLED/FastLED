@@ -178,6 +178,7 @@ taskListTokens = ["TODO", "FIXME", "BUG", "HACK", "NOTE"]
 [tool.pytest.ini_options]
 markers = [
     "full: marks tests as requiring the full test suite (deselected during quick Python-only runs)",
+    "serial: marks tests as requiring serial execution (no parallel execution)",
 ]
 
 [[tool.pyright.executionEnvironments]]

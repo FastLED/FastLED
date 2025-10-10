@@ -21,10 +21,16 @@ def pytest_addoption(parser: Parser) -> None:
 def pytest_configure(config: Config) -> None:
     """Register custom markers."""
     config.addinivalue_line("markers", "slow: mark test as slow to run")
+    config.addinivalue_line(
+        "markers", "serial: mark test to run serially (not in parallel)"
+    )
 
 
 def pytest_collection_modifyitems(config: Config, items: List[Item]) -> None:
-    """Skip slow tests by default unless --runslow is given."""
+    """Skip slow tests by default unless --runslow is given.
+
+    Also marks serial tests to prevent parallel execution.
+    """
     if config.getoption("--runslow"):
         # --runslow given in cli: do not skip slow tests
         return
@@ -33,3 +39,6 @@ def pytest_collection_modifyitems(config: Config, items: List[Item]) -> None:
     for item in items:
         if "slow" in item.keywords:
             item.add_marker(skip_slow)
+        # Mark serial tests to prevent parallel execution
+        if "serial" in item.keywords:
+            item.add_marker(pytest.mark.xdist_group(name="serial"))
