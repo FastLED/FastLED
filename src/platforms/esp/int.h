@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
+#ifdef __cplusplus
 namespace fl {
     // ESP platforms (ESP8266/ESP32): Like ARM platforms, uint32_t and int32_t are 'unsigned long' and 'long'
     // This matches the Xtensa toolchain behavior similar to ARM toolchains
@@ -18,3 +19,14 @@ namespace fl {
     typedef size_t size;
     typedef uintptr_t uptr;
 }
+#else
+// C language compatibility - define types in global namespace
+typedef short i16;
+typedef unsigned short u16;
+typedef int32_t i32;
+typedef uint32_t u32;
+typedef long long i64;
+typedef unsigned long long u64;
+typedef size_t size;
+typedef uintptr_t uptr;
+#endif
