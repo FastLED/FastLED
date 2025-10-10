@@ -22,6 +22,67 @@ from ci.dockerfiles.DockerManager import DockerManager
 from ci.util.running_process import RunningProcess
 
 
+# Docker image constants
+DEFAULT_DOCKER_IMAGE = "espressif/idf:latest"
+ALTERNATIVE_DOCKER_IMAGE = "espressif/idf:latest"
+FALLBACK_DOCKER_IMAGE = "espressif/idf:release-v5.2"
+
+# QEMU binary paths inside espressif/idf Docker container
+QEMU_RISCV32_PATH = "/opt/esp/tools/qemu-riscv32/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-riscv32"
+QEMU_XTENSA_PATH = (
+    "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-xtensa"
+)
+
+# QEMU wrapper script template (formatted at runtime)
+QEMU_WRAPPER_SCRIPT_TEMPLATE = """#!/bin/bash
+set -e
+echo "Starting {echo_target} QEMU emulation..."
+echo "Firmware: {firmware_path}"
+echo "Machine: {qemu_machine}"
+echo "QEMU system: {qemu_system}"
+echo "Container: $(cat /etc/os-release | head -1)"
+
+# Check if firmware file exists
+if [ ! -f "{firmware_path}" ]; then
+    echo "ERROR: Firmware file not found: {firmware_path}"
+    exit 1
+fi
+
+# Check firmware size
+FIRMWARE_SIZE=$(stat -c%s "{firmware_path}")
+echo "Firmware size: $FIRMWARE_SIZE bytes"
+
+# Copy firmware to writable location since QEMU needs write access
+cp "{firmware_path}" /tmp/flash.bin
+echo "Copied firmware to writable location: /tmp/flash.bin"
+
+# Try different QEMU configurations depending on machine type
+if [ "{qemu_machine}" = "esp32c3" ]; then
+    # ESP32C3 uses RISC-V architecture
+    echo "Running {qemu_system} for {qemu_machine}"
+    {qemu_system} \\
+        -nographic \\
+        -machine {qemu_machine} \\
+        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
+        -monitor none \\
+        -serial mon:stdio
+else
+    # ESP32 uses Xtensa architecture
+    echo "Running {qemu_system} for {qemu_machine}"
+    {qemu_system} \\
+        -nographic \\
+        -machine {qemu_machine} \\
+        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
+        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
+        -monitor none \\
+        -serial mon:stdio
+fi
+
+echo "QEMU execution completed"
+exit 0
+"""
+
+
 def get_docker_env() -> Dict[str, str]:
     """Get environment for Docker commands, handling Git Bash/MSYS2 path conversion."""
     env = os.environ.copy()
@@ -80,18 +141,14 @@ def run_docker_command_no_fail(cmd: List[str]) -> int:
 class DockerQEMURunner:
     """Runner for ESP32 QEMU emulation using Docker containers."""
 
-    DEFAULT_IMAGE = "espressif/idf:latest"
-    ALTERNATIVE_IMAGE = "espressif/idf:latest"
-    FALLBACK_IMAGE = "espressif/idf:release-v5.2"
-
     def __init__(self, docker_image: Optional[str] = None):
         """Initialize Docker QEMU runner.
 
         Args:
-            docker_image: Docker image to use, defaults to espressif/qemu
+            docker_image: Docker image to use, defaults to espressif/idf
         """
         self.docker_manager = DockerManager()
-        self.docker_image = docker_image or self.DEFAULT_IMAGE
+        self.docker_image = docker_image or DEFAULT_DOCKER_IMAGE
         self.container_name = None
         # Use Linux-style paths for all containers since we're using Ubuntu/Alpine
         self.firmware_mount_path = "/workspace/firmware"
@@ -131,17 +188,17 @@ class DockerQEMURunner:
                 print(f"Image {self.docker_image} already available locally")
         except subprocess.CalledProcessError as e:
             print(f"Warning: Failed to pull image {self.docker_image}: {e}")
-            if self.docker_image == self.DEFAULT_IMAGE:
-                print(f"Trying alternative image: {self.ALTERNATIVE_IMAGE}")
-                self.docker_image = self.ALTERNATIVE_IMAGE
+            if self.docker_image == DEFAULT_DOCKER_IMAGE:
+                print(f"Trying alternative image: {ALTERNATIVE_DOCKER_IMAGE}")
+                self.docker_image = ALTERNATIVE_DOCKER_IMAGE
                 try:
                     print(f"Pulling alternative Docker image: {self.docker_image}")
                     run_docker_command_streaming(["docker", "pull", self.docker_image])
                     print(f"Successfully pulled {self.docker_image}")
                 except subprocess.CalledProcessError as e2:
                     print(f"Failed to pull alternative image: {e2}")
-                    print(f"Trying fallback image: {self.FALLBACK_IMAGE}")
-                    self.docker_image = self.FALLBACK_IMAGE
+                    print(f"Trying fallback image: {FALLBACK_DOCKER_IMAGE}")
+                    self.docker_image = FALLBACK_DOCKER_IMAGE
                     try:
                         print(f"Pulling fallback Docker image: {self.docker_image}")
                         run_docker_command_streaming(
@@ -262,67 +319,26 @@ class DockerQEMURunner:
 
         # Determine QEMU system and machine based on target
         if machine == "esp32c3":
-            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-riscv32"
+            qemu_system = QEMU_RISCV32_PATH
             qemu_machine = "esp32c3"
             echo_target = "ESP32C3"
         elif machine == "esp32s3":
-            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-xtensa"
+            qemu_system = QEMU_XTENSA_PATH
             qemu_machine = "esp32s3"
             echo_target = "ESP32S3"
         else:
             # Default to ESP32 (Xtensa)
-            qemu_system = "/opt/esp/tools/qemu-xtensa/esp_develop_9.2.2_20250817/qemu/bin/qemu-system-xtensa"
+            qemu_system = QEMU_XTENSA_PATH
             qemu_machine = "esp32"
             echo_target = "ESP32"
 
-        # Use container's QEMU with proper configuration
-        wrapper_script = f'''#!/bin/bash
-set -e
-echo "Starting {echo_target} QEMU emulation..."
-echo "Firmware: {firmware_path}"
-echo "Machine: {qemu_machine}"
-echo "QEMU system: {qemu_system}"
-echo "Container: $(cat /etc/os-release | head -1)"
-
-# Check if firmware file exists
-if [ ! -f "{firmware_path}" ]; then
-    echo "ERROR: Firmware file not found: {firmware_path}"
-    exit 1
-fi
-
-# Check firmware size
-FIRMWARE_SIZE=$(stat -c%s "{firmware_path}")
-echo "Firmware size: $FIRMWARE_SIZE bytes"
-
-# Copy firmware to writable location since QEMU needs write access
-cp "{firmware_path}" /tmp/flash.bin
-echo "Copied firmware to writable location: /tmp/flash.bin"
-
-# Try different QEMU configurations depending on machine type
-if [ "{qemu_machine}" = "esp32c3" ]; then
-    # ESP32C3 uses RISC-V architecture
-    echo "Running {qemu_system} for {qemu_machine}"
-    {qemu_system} \\
-        -nographic \\
-        -machine {qemu_machine} \\
-        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
-        -monitor none \\
-        -serial mon:stdio
-else
-    # ESP32 uses Xtensa architecture
-    echo "Running {qemu_system} for {qemu_machine}"
-    {qemu_system} \\
-        -nographic \\
-        -machine {qemu_machine} \\
-        -drive file="/tmp/flash.bin",if=mtd,format=raw \\
-        -global driver=timer.esp32.timg,property=wdt_disable,value=true \\
-        -monitor none \\
-        -serial mon:stdio
-fi
-
-echo "QEMU execution completed"
-exit 0
-'''
+        # Format the wrapper script template with runtime values
+        wrapper_script = QEMU_WRAPPER_SCRIPT_TEMPLATE.format(
+            echo_target=echo_target,
+            firmware_path=firmware_path,
+            qemu_machine=qemu_machine,
+            qemu_system=qemu_system,
+        )
 
         cmd = ["bash", "-c", wrapper_script]
 
@@ -462,7 +478,7 @@ def main():
     parser.add_argument(
         "--docker-image",
         type=str,
-        help=f"Docker image to use (default: {DockerQEMURunner.DEFAULT_IMAGE})",
+        help=f"Docker image to use (default: {DEFAULT_DOCKER_IMAGE})",
     )
     parser.add_argument(
         "--flash-size", type=int, default=4, help="Flash size in MB (default: 4)"
@@ -477,6 +493,12 @@ def main():
         "--interactive", action="store_true", help="Run in interactive mode"
     )
     parser.add_argument("--output-file", type=str, help="File to write QEMU output to")
+    parser.add_argument(
+        "--machine",
+        type=str,
+        default="esp32",
+        help="QEMU machine type: esp32, esp32c3, esp32s3 (default: esp32)",
+    )
 
     args = parser.parse_args()
 
@@ -495,6 +517,7 @@ def main():
         interrupt_regex=args.interrupt_regex,
         interactive=args.interactive,
         output_file=args.output_file,
+        machine=args.machine,
     )
 
 

@@ -126,10 +126,26 @@ def run_qemu_tests(args: TestArgs) -> None:
         print(f"\n--- Testing {example} ---")
 
         try:
-            # Build the example for the specified platform
-            print(f"Building {example} for {platform}...")
+            # Build the example for the specified platform with merged binary for QEMU
+            print(f"Building {example} for {platform} with merged binary...")
+            # Use Docker compilation on Windows to avoid toolchain issues
+            build_cmd = [
+                "uv",
+                "run",
+                "ci/ci-compile.py",
+                platform,
+                "--examples",
+                example,
+                "--merged-bin",
+                "-o",
+                "qemu-build/merged.bin",
+                "--defines",
+                "FASTLED_ESP32_IS_QEMU",
+            ]
+            if sys.platform == "win32":
+                build_cmd.append("--docker")
             build_proc = RunningProcess(
-                ["uv", "run", "ci/ci-compile.py", platform, "--examples", example],
+                build_cmd,
                 timeout=600,
                 auto_run=True,
             )
@@ -147,19 +163,17 @@ def run_qemu_tests(args: TestArgs) -> None:
 
             print(f"Build successful for {example}")
 
-            # Check if build artifacts exist
-            build_dir = Path(f".build/pio/{platform}")
-            if not build_dir.exists():
-                print(f"Build directory not found: {build_dir}")
+            # Check if merged binary exists
+            merged_bin_path = Path("qemu-build/merged.bin")
+            if not merged_bin_path.exists():
+                print(f"Merged binary not found: {merged_bin_path}")
                 failure_count += 1
                 continue
 
-            print(f"Build artifacts found in {build_dir}")
+            print(f"Merged binary found: {merged_bin_path}")
 
             # Run in QEMU using Docker
             print(f"Running {example} in Docker QEMU...")
-            # Use the nested PlatformIO build directory path
-            pio_build_dir = build_dir / ".pio" / "build" / platform
 
             # Set up interrupt regex pattern
             interrupt_regex = "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
@@ -175,9 +189,9 @@ def run_qemu_tests(args: TestArgs) -> None:
             else:
                 machine_type = "esp32"
 
-            # Run QEMU in Docker
+            # Run QEMU in Docker with merged binary
             qemu_returncode = docker_runner.run(
-                firmware_path=pio_build_dir,
+                firmware_path=merged_bin_path,
                 timeout=30,
                 flash_size=4,
                 interrupt_regex=interrupt_regex,

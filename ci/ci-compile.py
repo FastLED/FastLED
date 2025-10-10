@@ -223,6 +223,10 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
     compile_cmd = f"bash compile {board_name} {example_name}"
     if args.defines:
         compile_cmd += f" --defines {args.defines}"
+    if hasattr(args, "merged_bin") and args.merged_bin:
+        compile_cmd += " --merged-bin"
+    if hasattr(args, "out") and args.out:
+        compile_cmd += f" -o {args.out}"
 
     # Full entrypoint logic: sync files, compile, handle artifacts
     entrypoint_logic = f"""
@@ -289,6 +293,8 @@ exit $EXIT_CODE
         stderr=subprocess.STDOUT,
         bufsize=1,  # Line buffered
         universal_newlines=True,
+        encoding="utf-8",
+        errors="replace",  # Replace invalid UTF-8 with replacement character
     )
 
     # Stream output line by line
@@ -298,6 +304,38 @@ exit $EXIT_CODE
 
     returncode = process.wait()
     result = subprocess.CompletedProcess(exec_cmd, returncode, stdout="", stderr="")
+
+    # Copy output artifacts from container to host if compilation succeeded and -o flag was used
+    if returncode == 0 and hasattr(args, "out") and args.out:
+        output_path = args.out
+        # Determine the directory to copy
+        if output_path.endswith(".bin"):
+            # Output is a file, copy its parent directory
+            output_dir = str(Path(output_path).parent)
+        else:
+            # Output is already a directory
+            output_dir = output_path
+
+        # Create the output directory on host if needed
+        Path(output_dir).mkdir(parents=True, exist_ok=True)
+
+        print()
+        print(f"Copying build artifacts from container to host...")
+
+        # Copy the entire output directory from container to host
+        # Use docker cp to copy from /fastled/{output_dir}/ to {project_root}/{output_dir}/
+        container_path = f"{container_name}:/fastled/{output_dir}/."
+        host_path = str(Path(project_root) / output_dir)
+
+        copy_cmd = ["docker", "cp", container_path, host_path]
+        copy_result = subprocess.run(copy_cmd, capture_output=True, text=True)
+
+        if copy_result.returncode == 0:
+            print(f"✅ Build artifacts copied to {host_path}")
+        else:
+            print(f"⚠️  Warning: Could not copy artifacts from container")
+            if copy_result.stderr:
+                print(f"   Error: {copy_result.stderr}")
 
     # Pause container immediately after compilation
     # This keeps the container state but frees resources
