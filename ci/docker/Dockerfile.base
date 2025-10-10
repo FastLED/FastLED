@@ -20,6 +20,7 @@ RUN apt-get update && \
         unzip \
         rsync \
         bash \
+        bc \
     && rm -rf /var/lib/apt/lists/*
 
 # Install UV (handles all Python/package management)

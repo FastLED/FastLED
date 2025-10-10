@@ -109,19 +109,26 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
         ["docker", "image", "inspect", image_name], capture_output=True, text=True
     )
 
-    if image_check.returncode != 0:
-        # Image doesn't exist
-        if not args.build:
-            # Fail with helpful message if --build not specified
-            print(f"❌ Docker image for {board_name} is not built yet.")
-            print(f"")
-            print(f"To build the image (can take up to 30 minutes):")
-            print(f"  bash compile --docker --build {board_name} {examples[0]}")
-            print(f"")
-            return 1
+    image_exists = image_check.returncode == 0
+    build_requested = args.build
+
+    # Determine if a build is necessary
+    # Build if --build is requested, or if the image doesn't exist
+    if build_requested or not image_exists:
+        if build_requested and image_exists:
+            print(f"Rebuilding existing Docker image for {board_name}...")
+        elif not image_exists:
+            # Fail with a helpful message if --build not specified
+            if not build_requested:
+                print(f"❌ Docker image for {board_name} is not built yet.")
+                print(f"")
+                print(f"To build the image (can take up to 30 minutes):")
+                print(f"  bash compile --docker --build {board_name} {examples[0]}")
+                print(f"")
+                return 1
+            print(f"Building Docker image for platform: {board_name}")
 
         # Build the image
-        print(f"Building Docker image for platform: {board_name}")
         build_cmd = [
             sys.executable,
             "ci/build_docker_image_pio.py",
@@ -130,6 +137,10 @@ def handle_docker_compilation(args: argparse.Namespace) -> int:
             "--image-name",
             image_name,
         ]
+
+        # Pass --no-cache flag if requested
+        if hasattr(args, "docker_no_cache") and args.docker_no_cache:
+            build_cmd.append("--no-cache")
 
         result = subprocess.run(build_cmd)
         if result.returncode != 0:
@@ -578,6 +589,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "--build",
         action="store_true",
         help="Build Docker image if it doesn't exist (use with --docker)",
+    )
+    parser.add_argument(
+        "--docker-no-cache",
+        action="store_true",
+        help="Disable Docker cache during image build (use with --docker --build)",
     )
     parser.add_argument(
         "--local",
