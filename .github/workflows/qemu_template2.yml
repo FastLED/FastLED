@@ -1,0 +1,311 @@
+name: ESP32 QEMU Test Template v2 (Merged-Bin)
+
+on:
+  workflow_call:
+    inputs:
+      platform:
+        description: 'ESP32 platform to test (esp32dev, esp32c3, etc.)'
+        required: true
+        type: string
+      platform_display:
+        description: 'Display name for the platform (e.g., ESP32-DEV, ESP32-C3)'
+        required: true
+        type: string
+      sketch:
+        description: 'Arduino sketch/example to test (e.g., BlinkParallel, Blink, etc.)'
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  actions: read
+  id-token: write
+  pull-requests: read
+
+jobs:
+  qemu_test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout trusted base branch code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch || 'master' }}
+          path: trusted
+
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          path: pr-code
+
+      - name: Merge safe source files from PR
+        run: |
+          # Copy ONLY safe source files from PR, never executable scripts
+          if [ -d "pr-code/src" ]; then
+            cp -r pr-code/src/* trusted/src/ 2>/dev/null || true
+          fi
+          if [ -d "pr-code/examples" ]; then
+            cp -r pr-code/examples/* trusted/examples/ 2>/dev/null || true
+          fi
+          if [ -f "pr-code/platformio.ini" ]; then
+            cp pr-code/platformio.ini trusted/
+          fi
+          if [ -f "pr-code/library.json" ]; then
+            cp pr-code/library.json trusted/
+          fi
+          if [ -f "pr-code/library.properties" ]; then
+            cp pr-code/library.properties trusted/
+          fi
+          if [ -f "pr-code/CMakeLists.txt" ]; then
+            cp pr-code/CMakeLists.txt trusted/
+          fi
+        shell: bash
+
+      - name: Set working directory to trusted
+        run: echo "GITHUB_WORKSPACE=$GITHUB_WORKSPACE/trusted" >> $GITHUB_ENV
+
+      - name: Pin python version
+        working-directory: trusted
+        run: |
+          echo "3.11" >> .python-version
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0"
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: "trusted/.python-version"
+
+      - name: Install Dependencies
+        working-directory: trusted
+        run: |
+          # Install Python dependencies needed for compilation
+          uv sync
+          # Install esptool for flash image creation
+          uv pip install esptool
+
+      - name: Create build directory for QEMU
+        working-directory: trusted
+        run: |
+          mkdir -p qemu-build
+          echo "Created qemu-build directory for ${{ inputs.platform }} binaries"
+
+      - name: Build ${{ inputs.platform }} firmware with merged binary
+        working-directory: trusted
+        run: |
+          echo "=== Building ${{ inputs.sketch }} for ${{ inputs.platform }} with merged-bin ==="
+          echo "Build command:"
+          echo "  uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }} --merged-bin -o qemu-build/merged.bin"
+
+          set -x
+          uv run ci/ci-compile.py ${{ inputs.platform }} \
+            --examples ${{ inputs.sketch }} \
+            --merged-bin \
+            -o qemu-build/merged.bin \
+            --defines FASTLED_ESP32_IS_QEMU \
+            --verbose
+          set +x
+
+          echo "=== Build Complete ==="
+
+          # Copy ELF file for backtrace decoding
+          echo "=== Copying ELF file for debugging ==="
+          PIO_BUILD_DIR=".build/pio/${{ inputs.platform }}"
+          PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/${{ inputs.platform }}"
+
+          if [ -f "$PIO_ARTIFACTS_DIR/firmware.elf" ]; then
+            cp "$PIO_ARTIFACTS_DIR/firmware.elf" qemu-build/
+            echo "✅ Copied firmware.elf from artifacts directory"
+          elif [ -f "$PIO_BUILD_DIR/firmware.elf" ]; then
+            cp "$PIO_BUILD_DIR/firmware.elf" qemu-build/
+            echo "✅ Copied firmware.elf from build directory"
+          else
+            ELF_FILE=$(find "$PIO_BUILD_DIR" -name "firmware.elf" 2>/dev/null | head -1)
+            if [ -n "$ELF_FILE" ]; then
+              cp "$ELF_FILE" qemu-build/firmware.elf
+              echo "✅ Found and copied firmware.elf from $ELF_FILE"
+            else
+              echo "⚠️  firmware.elf not found - backtrace decoding will not be available"
+            fi
+          fi
+
+          # Copy build_info.json for addr2line tool path lookup
+          echo "=== Copying build_info.json for backtrace decoding ==="
+          if [ -f "$PIO_BUILD_DIR/build_info.json" ]; then
+            cp "$PIO_BUILD_DIR/build_info.json" qemu-build/
+            echo "✅ Copied build_info.json from build directory"
+          else
+            echo "⚠️  build_info.json not found - will use default addr2line search"
+          fi
+
+          echo "=== Final qemu-build contents ==="
+          ls -la qemu-build/
+
+      - name: Verify merged binary
+        working-directory: trusted
+        run: |
+          echo "=== Binary Validation ==="
+
+          if [ ! -f qemu-build/merged.bin ]; then
+            echo "❌ Merged binary not found!"
+            echo "Build directory contents:"
+            ls -laR .build/${{ inputs.platform }} || true
+            exit 1
+          fi
+
+          echo "✅ Merged binary exists"
+
+          # Check size
+          SIZE=$(stat -c%s qemu-build/merged.bin)
+          echo "Binary size: $SIZE bytes"
+
+          if [ $SIZE -lt 100000 ]; then
+            echo "❌ Binary too small: $SIZE bytes"
+            exit 1
+          fi
+
+          # Check ESP32 application magic byte at offset 0x10000 (application location)
+          MAGIC=$(xxd -s 0x10000 -p -l 1 qemu-build/merged.bin)
+          if [ "$MAGIC" = "e9" ]; then
+            echo "✅ Valid ESP32 application magic byte (0xE9) at offset 0x10000"
+          else
+            echo "❌ Invalid magic byte at 0x10000: 0x$MAGIC (expected 0xE9)"
+            exit 1
+          fi
+
+          # Show hex dump at application location
+          echo "=== Binary Header at 0x10000 (application location, first 32 bytes) ==="
+          xxd -s 0x10000 -l 32 qemu-build/merged.bin
+
+          # MD5 checksum
+          echo "=== Binary Checksum ==="
+          md5sum qemu-build/merged.bin
+
+          echo "=== Final qemu-build contents ==="
+          ls -la qemu-build/
+
+      - name: Map platform to chip name
+        id: chip_mapping
+        run: |
+          # Map PlatformIO platform names to QEMU chip names
+          # esp32dev -> esp32 (esp32dev is PlatformIO name, esp32 is chip name)
+          PLATFORM="${{ inputs.platform }}"
+          case "$PLATFORM" in
+            esp32dev|esp32wroom|esp32_i2s_ws2812)
+              CHIP="esp32"
+              ;;
+            esp32c3)
+              CHIP="esp32c3"
+              ;;
+            esp32s3)
+              CHIP="esp32s3"
+              ;;
+            esp32p4)
+              CHIP="esp32p4"
+              ;;
+            *)
+              echo "Unknown platform: $PLATFORM, defaulting to esp32"
+              CHIP="esp32"
+              ;;
+          esac
+          echo "chip=$CHIP" >> $GITHUB_OUTPUT
+          echo "Mapped platform '$PLATFORM' to chip '$CHIP'"
+        shell: bash
+
+      - name: Run ${{ inputs.platform_display }} in QEMU
+        id: qemu
+        uses: tobozo/esp32-qemu-sim@v2.1.0
+        with:
+          flash-image: trusted/qemu-build/merged.bin
+          chip: "${{ steps.chip_mapping.outputs.chip }}"
+          qemu-timeout: "120"
+          timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
+          debug: true
+
+      - name: Display QEMU output
+        if: always()
+        run: |
+          echo "=== QEMU Results ==="
+          echo "Conclusion: ${{ steps.qemu.conclusion }}"
+          echo "Outcome: ${{ steps.qemu.outcome }}"
+
+          if [ -f logs.txt ]; then
+            echo "=== QEMU Output (first 100 lines) ==="
+            head -100 logs.txt
+
+            echo "=== Output Summary ==="
+            echo "Total lines: $(wc -l < logs.txt)"
+            echo "Boot messages: $(grep -c 'rst:' logs.txt || echo 0)"
+            echo "Setup messages: $(grep -c 'setup starting' logs.txt || echo 0)"
+            echo "Loop iterations: $(grep -c 'Starting loop iteration' logs.txt || echo 0)"
+          fi
+
+      - name: Validate ${{ inputs.sketch }} output
+        run: |
+          echo "=== Validating ${{ inputs.sketch }} output ==="
+
+          if [ ! -f logs.txt ]; then
+            echo "❌ No QEMU output found"
+            exit 1
+          fi
+
+          # Check for crash patterns
+          if grep -q "guru meditation\|abort()" logs.txt; then
+            echo "❌ QEMU crashed!"
+            grep -A 10 "guru meditation\|abort()" logs.txt
+            exit 1
+          fi
+
+          # Check for expected output
+          if grep -q "${{ inputs.sketch }} setup starting" logs.txt; then
+            echo "✅ Setup message found"
+          else
+            echo "❌ Setup message not found"
+            exit 1
+          fi
+
+          echo "=== Validation complete ==="
+      - name: Generate artifact name
+        id: artifact_name
+        if: always()
+        run: |
+          SKETCH_NAME="${{ inputs.sketch }}"
+          ARTIFACT_SKETCH="${SKETCH_NAME////-}"
+          echo "sketch=$ARTIFACT_SKETCH" >> $GITHUB_OUTPUT
+        shell: bash
+
+
+      - name: Upload QEMU logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
+          path: |
+            logs.txt
+            trusted/qemu-build/
+          include-hidden-files: true
+
+      - name: Upload QEMU logs on success
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
+          path: logs.txt
+
+      - name: Summary
+        if: always()
+        run: |
+          echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
+          echo "Platform: ${{ inputs.platform }} (merged-bin)"
+          echo "Sketch: ${{ inputs.sketch }}"
+          echo "Status: ${{ job.status }}"
+
+          if [ -f logs.txt ]; then
+            echo "QEMU output lines: $(wc -l < logs.txt)"
+          fi

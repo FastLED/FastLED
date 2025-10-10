@@ -1,4 +1,4 @@
-name: ESP32-DEV QEMU Test
+name: ESP32-DEV QEMU Test (Merged-Bin v2)
 
 on:
   workflow_dispatch:
@@ -14,7 +14,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32dev_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_template2.yml'
   pull_request:
     branches: [master]
     paths:
@@ -27,11 +27,11 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32dev_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_template2.yml'
 
 jobs:
   esp32dev_qemu_test:
-    uses: ./.github/workflows/qemu_template.yml
+    uses: ./.github/workflows/qemu_template2.yml
     with:
       platform: esp32dev
       platform_display: ESP32-DEV
