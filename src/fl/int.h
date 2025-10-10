@@ -2,9 +2,8 @@
 
 
 /// IMPORTANT!
-/// This file MUST not
-
-#include "fl/stdint.h"  // For uintptr_t and size_t
+/// This file MUST NOT include "fl/stdint.h" to prevent circular inclusion.
+/// fl/stdint.h includes this file.
 
 // Platform-specific integer type definitions
 // This includes platform-specific 16/32/64-bit types
