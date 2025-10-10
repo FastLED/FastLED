@@ -375,9 +375,9 @@ class CompilePerfAnalyzer:
         lines.append("")
 
         # Header Tree (Multiple levels)
-        lines.append("FASTLED HEADERS (Nested Includes - Up to 6 Levels)")
+        lines.append("FASTLED HEADERS (Nested Includes - Up to 8 Levels)")
         lines.append("-" * 80)
-        tree = self.build_header_tree(max_depth=6)
+        tree = self.build_header_tree(max_depth=8)
 
         def format_tree(
             node_dict: Dict[str, Any],
