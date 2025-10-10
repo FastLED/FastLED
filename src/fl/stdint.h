@@ -40,3 +40,33 @@ typedef fl::i64 int64_t;
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::ptrdiff_t ptrdiff_t;
+
+#ifndef INT16_MIN
+#define INT16_MIN   (-32768)
+#endif
+#ifndef INT16_MAX
+#define INT16_MAX   32767
+#endif
+#ifndef UINT16_MAX
+#define UINT16_MAX  65535U
+#endif
+
+#ifndef INT32_MIN
+#define INT32_MIN   (-2147483647 - 1)
+#endif
+#ifndef INT32_MAX
+#define INT32_MAX   2147483647
+#endif
+#ifndef UINT32_MAX
+#define UINT32_MAX  4294967295U
+#endif
+
+#ifndef INT64_MIN
+#define INT64_MIN   (-9223372036854775807LL - 1)
+#endif
+#ifndef INT64_MAX
+#define INT64_MAX   9223372036854775807LL
+#endif
+#ifndef UINT64_MAX
+#define UINT64_MAX  18446744073709551615ULL
+#endif

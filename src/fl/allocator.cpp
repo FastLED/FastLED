@@ -4,6 +4,7 @@
 #include "fl/namespace.h"
 #include "fl/int.h"
 #include "fl/thread_local.h"
+#include "fl/cstddef.h"
 
 #ifdef ESP32
 #include "esp_heap_caps.h"
