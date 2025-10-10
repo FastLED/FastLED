@@ -235,11 +235,28 @@ set -e
 # Sync host directories to container working directory if they exist
 if command -v rsync &> /dev/null; then
     echo "Syncing directories from host..."
+
+    # Define rsync exclude patterns for build artifacts
+    RSYNC_EXCLUDES="--exclude=**/__pycache__ --exclude=.build/ --exclude=.pio/ --exclude=*.pyc"
+
     # Use --checksum to compare file contents instead of timestamps
     # This ensures changes are detected even when timestamps are unreliable across host/container filesystems
-    [ -d "/host/src" ] && rsync -a --checksum --delete /host/src/ /fastled/src/
-    [ -d "/host/examples" ] && rsync -a --checksum --delete /host/examples/ /fastled/examples/
-    [ -d "/host/ci" ] && rsync -a --checksum --delete /host/ci/ /fastled/ci/
+
+    if [ -d "/host/src" ]; then
+        echo "  → syncing src/..."
+        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/src/ /fastled/src/
+    fi
+
+    if [ -d "/host/examples" ]; then
+        echo "  → syncing examples/..."
+        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/examples/ /fastled/examples/
+    fi
+
+    if [ -d "/host/ci" ]; then
+        echo "  → syncing ci/..."
+        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/ci/ /fastled/ci/
+    fi
+
     echo "Directory sync complete"
 else
     echo "Warning: rsync not available, skipping directory sync"
