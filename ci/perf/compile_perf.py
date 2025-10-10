@@ -40,9 +40,35 @@ class CompilePerfAnalyzer:
         self.instantiate_events: List[Dict[str, Any]] = []
         self.phase_events: Dict[str, Dict[str, Any]] = {}
 
+        # First pass: collect all events
+        # Second pass: match begin/end pairs for async events
+        begin_events: Dict[int, Dict[str, Any]] = {}
+
         for event in self.events:
             name = event.get("name", "")
+            phase = event.get("ph", "")
 
+            # Handle async begin/end pairs (Source events use this)
+            if phase == "b":
+                # Store begin event by its ID
+                event_id = event.get("id", 0)
+                begin_events[event_id] = event
+                continue
+            elif phase == "e":
+                # Match with begin event and create complete event
+                event_id = event.get("id", 0)
+                if event_id in begin_events:
+                    begin = begin_events[event_id]
+                    # Create complete event with duration
+                    complete = begin.copy()
+                    complete["dur"] = event.get("ts", 0) - begin.get("ts", 0)
+                    complete["ph"] = "X"  # Mark as complete
+                    event = complete  # Use this for further processing
+                    del begin_events[event_id]
+                else:
+                    continue
+
+            # Now process the event (either originally complete or made complete)
             if name == "Source":
                 self.source_events.append(event)
             elif name.startswith("Parse"):
@@ -225,33 +251,32 @@ class CompilePerfAnalyzer:
         operations.sort(key=lambda x: x[2], reverse=True)
         return operations[:n]
 
-    def build_header_tree(self) -> Dict[str, Any]:
-        """Build nested tree of header includes up to 2 levels deep."""
-        headers = self.get_header_times(max_depth=2)
+    def build_header_tree(self, max_depth: int = 3) -> Dict[str, Any]:
+        """Build nested tree of header includes up to max_depth levels deep."""
+        headers = self.get_header_times(max_depth=max_depth + 1)
+
+        def build_subtree(header_name: str, current_depth: int) -> Dict[str, Any]:
+            """Recursively build tree for a header and its children."""
+            if header_name not in headers:
+                return {"time": 0, "children": {}}
+
+            info = headers[header_name]
+            node: Dict[str, Any] = {"time": info["time"], "children": {}}
+
+            # Only recurse if we haven't hit max depth
+            if current_depth < max_depth:
+                for child_name in info["children"]:
+                    node["children"][child_name] = build_subtree(
+                        child_name, current_depth + 1
+                    )
+
+            return node
 
         # Find root headers (depth 0 or 1)
         tree: Dict[str, Any] = {}
-
         for name, info in headers.items():
             if info["depth"] <= 1:
-                tree[name] = {"time": info["time"], "children": {}}
-
-                # Add children
-                for child_name in info["children"]:
-                    if child_name in headers:
-                        child_info = headers[child_name]
-                        tree[name]["children"][child_name] = {
-                            "time": child_info["time"],
-                            "children": {},
-                        }
-
-                        # Add grandchildren
-                        for grandchild_name in child_info["children"]:
-                            if grandchild_name in headers:
-                                grandchild_info = headers[grandchild_name]
-                                tree[name]["children"][child_name]["children"][
-                                    grandchild_name
-                                ] = {"time": grandchild_info["time"]}
+                tree[name] = build_subtree(name, 0)
 
         return tree
 
@@ -313,31 +338,74 @@ class CompilePerfAnalyzer:
             lines.append(f"  {time_ms:6.1f} ms - {name}{flag}")
         lines.append("")
 
-        # Header Tree (Level 2)
-        lines.append("FASTLED HEADERS (Level 2 - Nested Includes)")
+        # Header Tree (Multiple levels)
+        lines.append("FASTLED HEADERS (Nested Includes - Up to 4 Levels)")
         lines.append("-" * 80)
-        tree = self.build_header_tree()
+        tree = self.build_header_tree(max_depth=4)
 
-        # Show top level headers with their children
-        sorted_tree = sorted(tree.items(), key=lambda x: x[1]["time"], reverse=True)
-        for root_name, root_info in sorted_tree[:10]:
-            if root_info["time"] > 5.0:  # Only show significant headers
-                lines.append(f"{root_name} ({root_info['time']:.1f}ms)")
+        def format_tree(
+            node_dict: Dict[str, Any],
+            prefix: str = "",
+            is_last: bool = True,
+            depth: int = 0,
+            max_children: int = 5,
+        ) -> List[str]:
+            """Recursively format tree structure."""
+            result: List[str] = []
 
-                children = sorted(
-                    root_info["children"].items(),
-                    key=lambda x: x[1]["time"],
-                    reverse=True,
-                )
-                for i, (child_name, child_info) in enumerate(children[:5]):
-                    is_last = i == len(children[:5]) - 1
-                    prefix = "  └─" if is_last else "  ├─"
-                    lines.append(
-                        f"{prefix} {child_info['time']:6.1f} ms - {child_name}"
+            # Sort children by time
+            children = sorted(
+                node_dict.items(),
+                key=lambda x: x[1]["time"],
+                reverse=True,
+            )
+
+            # Limit children shown at each level
+            children = children[:max_children]
+
+            for i, (name, info) in enumerate(children):
+                is_last_child = i == len(children) - 1
+
+                # Format current node
+                if depth == 0:
+                    # Root level - no prefix
+                    result.append(f"{name} ({info['time']:.1f}ms)")
+                else:
+                    # Child levels - use tree formatting
+                    connector = "└─" if is_last_child else "├─"
+                    result.append(
+                        f"{prefix}{connector} {info['time']:6.1f} ms - {name}"
                     )
 
-                if root_info["children"]:
-                    lines.append("")
+                # Recurse for children
+                if info["children"]:
+                    # Determine prefix for next level
+                    if depth == 0:
+                        next_prefix = "  "
+                    else:
+                        extension = "  " if is_last_child else "│ "
+                        next_prefix = prefix + extension
+
+                    result.extend(
+                        format_tree(
+                            info["children"],
+                            prefix=next_prefix,
+                            is_last=is_last_child,
+                            depth=depth + 1,
+                            max_children=max_children,
+                        )
+                    )
+
+            return result
+
+        # Show top level headers with their nested children
+        sorted_tree = sorted(tree.items(), key=lambda x: x[1]["time"], reverse=True)
+        top_headers = {k: v for k, v in sorted_tree[:10] if v["time"] > 5.0}
+
+        for line in format_tree(top_headers, depth=0):
+            lines.append(line)
+
+        lines.append("")
 
         # Top 20 Slowest Operations
         lines.append("TOP 20 SLOWEST OPERATIONS")

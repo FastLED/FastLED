@@ -53,7 +53,8 @@
       "Bash(gh run download:*)",
       "Bash(gh workflow:*)",
       "Bash(awk:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(command:*)"
     ],
     "deny": []
   }
