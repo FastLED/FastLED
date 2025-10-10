@@ -2,6 +2,8 @@
 /// @brief   PJRCSpectrumAnalyzer example with platform detection
 /// @example PJRCSpectrumAnalyzer.ino
 
+// USE_OCTOWS2811 must be defined before FastLED.h to enable OCTOWS2811 support
+#define USE_OCTOWS2811
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
 
