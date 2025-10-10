@@ -43,6 +43,7 @@ dependencies = [
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
     "fastled>=1.4.48",
+    "running-process @ file:///C:/Users/niteris/dev/running-process",
 ]
 
 [build-system]
@@ -52,6 +53,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build]
 packages = ["ci"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
 
 [tool.ruff]
 exclude = ["ci/tmp", "ci/wasm", "scripts", "native"]

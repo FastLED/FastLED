@@ -13,8 +13,8 @@ from pathlib import Path
 from typing import List, Union
 
 import pytest
-
-from ci.util.running_process import EndOfStream, RunningProcess
+from running_process import RunningProcess
+from running_process.process_output_reader import EndOfStream
 
 
 @pytest.mark.serial
@@ -40,7 +40,6 @@ class TestRunningProcess(unittest.TestCase):
             check=False,
             auto_run=True,
             timeout=30,
-            enable_stack_trace=True,
             on_complete=None,
             output_formatter=None,
         )
@@ -79,7 +78,6 @@ class TestRunningProcess(unittest.TestCase):
             check=False,
             auto_run=True,
             timeout=10,
-            enable_stack_trace=False,
             on_complete=None,
             output_formatter=None,
         )
@@ -133,7 +131,6 @@ class TestRunningProcessAdditional(unittest.TestCase):
             check=False,
             auto_run=True,
             timeout=1,
-            enable_stack_trace=True,
             on_complete=None,
             output_formatter=None,
         )
@@ -174,8 +171,7 @@ class TestRunningProcessAdditional(unittest.TestCase):
             cwd=Path(".").absolute(),
             check=False,
             auto_run=True,
-            timeout=10,
-            enable_stack_trace=False,
+            timeout=30,  # Increased from 10 to match test_sanity; uv startup can be slow in CI
             on_complete=None,
             output_formatter=formatter,
         )

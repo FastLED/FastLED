@@ -79,8 +79,9 @@ def run_qemu_tests(args: TestArgs) -> None:
     """Run examples in QEMU emulation using Docker."""
     from pathlib import Path
 
+    from running_process import RunningProcess
+
     from ci.docker.qemu_esp32_docker import DockerQEMURunner
-    from ci.util.running_process import RunningProcess
 
     if not args.qemu or len(args.qemu) < 1:
         print("Error: --qemu requires a platform (e.g., esp32s3)")
@@ -461,7 +462,8 @@ def main() -> None:
             # Check if we need to use sequential execution to avoid resource conflicts
             if not args.unit and not args.examples and not args.py and args.full:
                 # Full test mode - use RunningProcessGroup for dependency-based execution
-                from ci.util.running_process import RunningProcess
+                from running_process import RunningProcess
+
                 from ci.util.running_process_group import (
                     ExecutionMode,
                     ProcessExecutionConfig,

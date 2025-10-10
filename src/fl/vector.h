@@ -27,7 +27,7 @@ struct FL_ALIGN InlinedMemoryBlock {
     enum {
         kTotalBytes = N * sizeof(T),
         kExtraSize =
-            (kTotalBytes % alignof(max_align_t)) ? (alignof(max_align_t) - (kTotalBytes % alignof(max_align_t))) : 0,
+            (kTotalBytes % alignof(fl::max_align_t)) ? (alignof(fl::max_align_t) - (kTotalBytes % alignof(fl::max_align_t))) : 0,
         // Fix: calculate total bytes first, then convert to MemoryType units
         kTotalBytesAligned = kTotalBytes + kExtraSize,
         kBlockSize = (kTotalBytesAligned + sizeof(MemoryType) - 1) / sizeof(MemoryType),

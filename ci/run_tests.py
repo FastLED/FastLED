@@ -16,7 +16,8 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Optional
 
-from ci.util.running_process import RunningProcess
+from running_process import RunningProcess
+
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -278,7 +279,6 @@ def run_test(
             shell=False,
             auto_run=True,
             timeout=timeout,
-            enable_stack_trace=enable_stack_trace,
         )
 
         with process.line_iter(timeout=30) as it:

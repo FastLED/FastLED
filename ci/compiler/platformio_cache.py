@@ -31,9 +31,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union, cast
 
 import fasteners
 import httpx
+from running_process import RunningProcess
 
 from ci.compiler.platformio_ini import PlatformIOIni
-from ci.util.running_process import RunningProcess
 from ci.util.url_utils import sanitize_url_for_path
 
 

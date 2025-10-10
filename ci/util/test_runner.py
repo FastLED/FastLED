@@ -19,10 +19,11 @@ from pathlib import Path
 from queue import Queue
 from typing import Any, Callable, List, Optional, Pattern, Protocol, cast
 
+from running_process import RunningProcess
+from running_process.process_output_reader import EndOfStream
 from typeguard import typechecked
 
 from ci.util.color_output import print_cache_hit
-from ci.util.running_process import EndOfStream, RunningProcess
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -392,7 +393,6 @@ def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
         "uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py",
         shell=True,
         auto_run=False,  # Don't auto-start - will be started in parallel later
-        enable_stack_trace=enable_stack_trace,
     )
 
 
@@ -402,7 +402,6 @@ def create_std_namespace_check_process(enable_stack_trace: bool) -> RunningProce
         "uv run python ci/lint_cpp/test_no_std_namespace.py",
         shell=True,
         auto_run=False,  # Don't auto-start - will be started in parallel later
-        enable_stack_trace=enable_stack_trace,
     )
 
 
@@ -462,7 +461,6 @@ def create_unit_test_process(
 
     return RunningProcess(
         cmd_str,
-        enable_stack_trace=enable_stack_trace,
         timeout=_TIMEOUT,  # 2 minutes timeout
         auto_run=True,
     )
@@ -498,9 +496,7 @@ def create_examples_test_process(
 
     cmd_str = subprocess.list2cmdline(cmd)
 
-    return RunningProcess(
-        cmd_str, auto_run=False, enable_stack_trace=enable_stack_trace, timeout=timeout
-    )
+    return RunningProcess(cmd_str, auto_run=False, timeout=timeout)
 
 
 def create_python_test_process(
@@ -528,7 +524,6 @@ def create_python_test_process(
     return RunningProcess(
         cmd_str,
         auto_run=False,  # Don't auto-start - will be started in parallel later
-        enable_stack_trace=False,  # Always disable stack traces for Python tests
         timeout=_TIMEOUT,  # 2 minute timeout for Python tests
     )
 
@@ -543,7 +538,7 @@ def create_integration_test_process(
         cmd.extend(["-k", "TestFullProgramLinking"])
     if args.verbose:
         cmd.append("-v")
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=False)
 
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
@@ -568,7 +563,7 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         cmd.append("--docker")
         print(f"✓ Using Docker for uno compilation (faster builds)")
 
-    return RunningProcess(cmd, auto_run=False, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=False)
 
 
 def get_cpp_test_processes(
@@ -1044,7 +1039,7 @@ def _run_processes_parallel(
     for proc in processes:
         cmd_str = proc.get_command_str()
         if proc.proc is None:  # Only start if not already running
-            proc.run()
+            proc.start()
             print(f"Started: {cmd_str}")
         else:
             print(f"Process already running: {cmd_str}")

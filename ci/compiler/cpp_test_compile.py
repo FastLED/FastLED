@@ -14,8 +14,9 @@ from concurrent.futures import Future
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
+from running_process import RunningProcess
+
 from ci.util.paths import PROJECT_ROOT
-from ci.util.running_process import RunningProcess
 from ci.util.test_args import parse_args as parse_global_test_args
 
 from ..ci.fingerprint_cache import FingerprintCache

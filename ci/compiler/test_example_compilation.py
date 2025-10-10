@@ -37,6 +37,9 @@ _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 120
 
 # Add the parent directory to Python path for imports
 # Import the proven Compiler infrastructure
+from running_process import RunningProcess
+from running_process.process_output_reader import EndOfStream
+
 from ci.compiler.clang_compiler import (
     BuildFlags,
     Compiler,
@@ -75,7 +78,6 @@ from ci.compiler.utils.toml_parser import (
     extract_stub_platform_include_paths_from_toml,
     load_build_flags_toml,
 )
-from ci.util.running_process import EndOfStream, RunningProcess
 
 
 # Abort threshold to prevent flooding logs with repeated failures
@@ -1359,7 +1361,6 @@ class CompilationTestRunner:
                 cwd=example_dir.absolute(),
                 check=False,
                 auto_run=True,
-                enable_stack_trace=True,
                 on_complete=None,
                 output_formatter=None,
             )

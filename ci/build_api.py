@@ -40,6 +40,8 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Set, Tuple
 
+from running_process.running_process import subprocess_run
+
 from ci.ci.fingerprint_cache import FingerprintCache
 from ci.compiler.clang_compiler import (
     BuildFlags,
@@ -49,7 +51,6 @@ from ci.compiler.clang_compiler import (
 )
 from ci.compiler.test_example_compilation import get_fastled_core_sources
 from ci.util.paths import PROJECT_ROOT
-from ci.util.running_process import subprocess_run
 
 
 class BuildType(Enum):
@@ -439,7 +440,6 @@ class BuildAPI:
                 cwd=None,
                 check=True,
                 timeout=900,
-                enable_stack_trace=False,
             )
             return True
         except subprocess.CalledProcessError as e:
@@ -610,7 +610,6 @@ class BuildAPI:
                 cwd=None,
                 check=True,
                 timeout=900,
-                enable_stack_trace=False,
             )
             return True
         except subprocess.CalledProcessError as e:

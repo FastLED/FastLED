@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include "fl/cstddef.h"
 #include "fl/inplacenew.h"
 #include "fl/memfill.h"
 #include "fl/type_traits.h"
@@ -64,7 +65,7 @@ template <typename T> class allocator {
     using reference = T&;
     using const_reference = const T&;
     using size_type = fl::size;
-    using difference_type = ptrdiff_t;
+    using difference_type = fl::ptrdiff_t;
     
     // Rebind allocator to type U
     template <typename U>
@@ -130,7 +131,7 @@ template <typename T> class allocator_psram {
         using reference = T&;
         using const_reference = const T&;
         using size_type = fl::size;
-        using difference_type = ptrdiff_t;
+        using difference_type = fl::ptrdiff_t;
     
         // Rebind allocator to type U
         template <typename U>
@@ -426,7 +427,7 @@ public:
     using reference = T&;
     using const_reference = const T&;
     using size_type = fl::size;
-    using difference_type = ptrdiff_t;
+    using difference_type = fl::ptrdiff_t;
 
     // Rebind allocator to type U
     template <typename U>
@@ -544,7 +545,7 @@ public:
     using reference = T&;
     using const_reference = const T&;
     using size_type = fl::size;
-    using difference_type = ptrdiff_t;
+    using difference_type = fl::ptrdiff_t;
 
     // Rebind allocator to type U
     template <typename U>

@@ -39,7 +39,7 @@ class DockerManager:
             import re
             import time
 
-            from ci.util.running_process import RunningProcess
+            from running_process import RunningProcess
 
             proc = RunningProcess(full_command, env=env, auto_run=True)
             pattern_found = False

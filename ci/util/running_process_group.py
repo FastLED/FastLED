@@ -18,7 +18,8 @@ from datetime import datetime, timedelta
 from enum import Enum
 from typing import Dict, List, Optional, cast
 
-from ci.util.running_process import RunningProcess
+from running_process import RunningProcess
+
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -208,7 +209,7 @@ class RunningProcessGroup:
         for proc in self.processes:
             cmd_str = proc.get_command_str()
             if proc.proc is None:  # Only start if not already running
-                proc.run()
+                proc.start()
                 print(f"Started: {cmd_str}", flush=True)
             else:
                 print(f"Process already running: {cmd_str}", flush=True)
@@ -589,7 +590,7 @@ class RunningProcessGroup:
 
                 # Start the process if not already running
                 if process.proc is None:
-                    process.run()
+                    process.start()
 
                 try:
                     exit_code = process.wait()
@@ -662,7 +663,7 @@ class RunningProcessGroup:
 
                 # Start the process if not already running
                 if process.proc is None:
-                    process.run()
+                    process.start()
 
                 try:
                     exit_code = process.wait()

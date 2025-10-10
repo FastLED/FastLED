@@ -4,7 +4,8 @@ import sys
 from pathlib import Path
 from typing import Any, List
 
-from ci.util.running_process import RunningProcess
+from running_process import RunningProcess
+
 from ci.util.test_types import TestArgs
 
 
@@ -62,7 +63,7 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
         "Blink",
         "--no-interactive",
     ]
-    return RunningProcess(cmd, auto_run=True, enable_stack_trace=enable_stack_trace)
+    return RunningProcess(cmd, auto_run=True)
 
 
 def run_command(cmd: List[str], **kwargs: Any) -> None:

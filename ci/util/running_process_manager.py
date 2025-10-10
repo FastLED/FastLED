@@ -4,7 +4,7 @@ import threading
 from typing import List
 
 # Import at runtime since this module is part of util package and used broadly
-from ci.util.running_process import RunningProcess
+from running_process import RunningProcess
 
 
 class RunningProcessManager:

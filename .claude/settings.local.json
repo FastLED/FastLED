@@ -54,7 +54,9 @@
       "Bash(gh workflow:*)",
       "Bash(awk:*)",
       "Bash(python3:*)",
-      "Bash(command:*)"
+      "Bash(command:*)",
+      "Read(//c/Users/niteris/dev/running-process/src/**)",
+      "Read(//c/Users/niteris/dev/running-process/**)"
     ],
     "deny": []
   }

@@ -18,8 +18,9 @@ import time
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from running_process import RunningProcess
+
 from ci.docker.DockerManager import DockerManager
-from ci.util.running_process import RunningProcess
 
 
 # Docker image constants
