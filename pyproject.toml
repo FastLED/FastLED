@@ -43,7 +43,7 @@ dependencies = [
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
     "fastled>=1.4.48",
-    "running-process @ file:///C:/Users/niteris/dev/running-process",
+    "running-process>=1.0.6",
 ]
 
 [build-system]
