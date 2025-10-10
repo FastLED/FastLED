@@ -21,7 +21,7 @@
 //
 // This example code is in the public domain.
 
-// USE_OCTOWS2811 is now defined in the .ino file before FastLED.h
+#define USE_OCTOWS2811
 #include <OctoWS2811.h>
 #include <FastLED.h>
 #include <Audio.h>
