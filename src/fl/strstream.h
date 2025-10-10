@@ -17,27 +17,70 @@ template <fl::u32 N> class BitsetFixed;
 class bitset_dynamic;
 template <fl::u32 N> class BitsetInlined;
 
-template <typename T> struct StrStreamHelper {
-    static void append(string &str, const T &n) { str.append(n); }
-};
+//-----------------------------------------------------------------------------
+// Helper to determine target type for integer conversion based on size/signedness
+//-----------------------------------------------------------------------------
+namespace strstream_detail {
+    // Determines which fl:: type to cast to for display
+    template<typename T, fl::size Size = sizeof(T), bool IsSigned = fl::is_signed<T>::value>
+    struct cast_target;
 
-template <> struct StrStreamHelper<int> {
-    static void append(string &str, const int &n) { str.append(fl::i32(n)); }
-};
+    // 1-byte unsigned → u16 (ergonomic: displays uint8_t as number, not char)
+    template<typename T> struct cast_target<T, 1, false> { using type = fl::u16; };
 
-template <> struct StrStreamHelper<fl::u8> {
-    static void append(string &str, const fl::u8 &n) { str.append(fl::u16(n)); }
-};
+    // 1-byte signed → i8
+    template<typename T> struct cast_target<T, 1, true> { using type = fl::i8; };
 
-template <> struct StrStreamHelper<char> {
-    static void append(string &str, const char &n) { str.append(n); }  // Append as character, not number
-};
+    // 2-byte unsigned → u16
+    template<typename T> struct cast_target<T, 2, false> { using type = fl::u16; };
 
-template <> struct StrStreamHelper<unsigned int> {
-    static void append(string &str, const unsigned int &n) {
-        str.append(fl::u32(n));
+    // 2-byte signed → i16
+    template<typename T> struct cast_target<T, 2, true> { using type = fl::i16; };
+
+    // 4-byte unsigned → u32
+    template<typename T> struct cast_target<T, 4, false> { using type = fl::u32; };
+
+    // 4-byte signed → i32
+    template<typename T> struct cast_target<T, 4, true> { using type = fl::i32; };
+
+    // 8-byte unsigned → u64
+    template<typename T> struct cast_target<T, 8, false> { using type = fl::u64; };
+
+    // 8-byte signed → i64
+    template<typename T> struct cast_target<T, 8, true> { using type = fl::i64; };
+}
+
+//-----------------------------------------------------------------------------
+// Macro for generating fundamental integer type overloads with SFINAE collision prevention
+//-----------------------------------------------------------------------------
+// Each fundamental type checks it's distinct from 'char' and all previously-defined types
+// This prevents ambiguous overloads on platforms where types alias (e.g., AVR: int==short)
+// Note: We use variadic macros to handle commas in template arguments
+#define STRSTREAM_INT_OVERLOAD(TYPE, ...) \
+    template<typename T> \
+    typename fl::enable_if< \
+        fl::is_same<T, TYPE>::value && \
+        !fl::is_same<TYPE, char>::value && \
+        !fl::is_same<T, char>::value && \
+        (__VA_ARGS__), \
+        StrStream& \
+    >::type operator<<(T n) { \
+        using target_t = typename strstream_detail::cast_target<TYPE>::type; \
+        mStr.append(static_cast<target_t>(n)); \
+        return *this; \
     }
-};
+
+#define FAKESTRSTREAM_INT_OVERLOAD(TYPE, ...) \
+    template<typename T> \
+    typename fl::enable_if< \
+        fl::is_same<T, TYPE>::value && \
+        !fl::is_same<TYPE, char>::value && \
+        !fl::is_same<T, char>::value && \
+        (__VA_ARGS__), \
+        FakeStrStream& \
+    >::type operator<<(T) { \
+        return *this; \
+    }
 
 class StrStream {
   public:
@@ -132,12 +175,26 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(const char &c) {
+    // Non-template overload for char - takes by value to ensure priority over templates
+    StrStream &operator<<(char c) {
         if (mTreatCharAsInt) {
-            StrStreamHelper<int>::append(mStr, c);
+            mStr.append(fl::i32(c));
         } else {
-            StrStreamHelper<char>::append(mStr, c);
+            mStr.append(c);
         }
+        return *this;
+    }
+
+    // Non-template overloads for signed/unsigned char to avoid template resolution issues
+    StrStream &operator<<(signed char n) {
+        using target_t = typename strstream_detail::cast_target<signed char>::type;
+        mStr.append(static_cast<target_t>(n));
+        return *this;
+    }
+
+    StrStream &operator<<(unsigned char n) {
+        using target_t = typename strstream_detail::cast_target<unsigned char>::type;
+        mStr.append(static_cast<target_t>(n));
         return *this;
     }
 
@@ -171,57 +228,84 @@ class StrStream {
         return *this;
     }
 
-    StrStream &operator<<(const fl::u8 &n) {
-        if (mTreatCharAsInt) {
-            mStr.append(fl::u16(n));
-        } else {
-            mStr.append(n);
-        }
-        return *this;
-    }
+    //-------------------------------------------------------------------------
+    // Fundamental integer type overloads with SFINAE collision prevention
+    //-------------------------------------------------------------------------
+    // Each type checks it's distinct from 'char' and all previously-defined types
+    // Ordering matters: define in sequence so SFINAE excludes platform-specific aliases
+    //
+    // NOTE: We deliberately skip signed char and unsigned char because they may alias
+    // with 'char' on some platforms, and we want the explicit char overload to handle
+    // char types. Users passing signed/unsigned char will get them cast to larger types
+    // via the 1-byte cast_target logic.
 
-    StrStream &operator<<(const fl::i16 &n) {
-        mStr.append(n);
-        return *this;
-    }
+    // short - first integer type overload
+    STRSTREAM_INT_OVERLOAD(short,
+        !fl::is_same<short, signed char>::value &&
+        !fl::is_same<short, unsigned char>::value)
 
-    StrStream &operator<<(const fl::i32 &n) {
-        mStr.append(n);
-        return *this;
-    }
+    // unsigned short - check not same as previous types
+    STRSTREAM_INT_OVERLOAD(unsigned short,
+        !fl::is_same<unsigned short, signed char>::value &&
+        !fl::is_same<unsigned short, unsigned char>::value &&
+        !fl::is_same<unsigned short, short>::value)
 
-    StrStream &operator<<(const fl::u32 &n) {
-        mStr.append(n);
-        return *this;
-    }
+    // int - check not same as any previous types (on AVR: int==short)
+    STRSTREAM_INT_OVERLOAD(int,
+        !fl::is_same<int, signed char>::value &&
+        !fl::is_same<int, unsigned char>::value &&
+        !fl::is_same<int, short>::value &&
+        !fl::is_same<int, unsigned short>::value)
 
-    StrStream &operator<<(const fl::u64 &n) {
-        mStr.append(n);
-        return *this;
-    }
+    // unsigned int - check not same as previous types
+    STRSTREAM_INT_OVERLOAD(unsigned int,
+        !fl::is_same<unsigned int, signed char>::value &&
+        !fl::is_same<unsigned int, unsigned char>::value &&
+        !fl::is_same<unsigned int, short>::value &&
+        !fl::is_same<unsigned int, unsigned short>::value &&
+        !fl::is_same<unsigned int, int>::value)
 
-    StrStream &operator<<(const long long &n) {
-        mStr.append(static_cast<fl::i64>(n));
-        return *this;
-    }
+    // long - check not same as previous types (may alias to int or long long)
+    STRSTREAM_INT_OVERLOAD(long,
+        !fl::is_same<long, signed char>::value &&
+        !fl::is_same<long, unsigned char>::value &&
+        !fl::is_same<long, short>::value &&
+        !fl::is_same<long, unsigned short>::value &&
+        !fl::is_same<long, int>::value &&
+        !fl::is_same<long, unsigned int>::value)
 
+    // unsigned long - check not same as previous types
+    STRSTREAM_INT_OVERLOAD(unsigned long,
+        !fl::is_same<unsigned long, signed char>::value &&
+        !fl::is_same<unsigned long, unsigned char>::value &&
+        !fl::is_same<unsigned long, short>::value &&
+        !fl::is_same<unsigned long, unsigned short>::value &&
+        !fl::is_same<unsigned long, int>::value &&
+        !fl::is_same<unsigned long, unsigned int>::value &&
+        !fl::is_same<unsigned long, long>::value)
 
-    // Unified handler for fl:: namespace size-like unsigned integer types and int
-    // This handles fl::size, fl::u16 from the fl:: namespace, and int type
-    template<typename T>
-    typename fl::enable_if<
-        fl::is_same<T, fl::size>::value ||
-        fl::is_same<T, fl::u16>::value ||
-        fl::is_same<T, int>::value,
-        StrStream&
-    >::type operator<<(T n) {
-        if (fl::is_same<T, int>::value) {
-            mStr.append(fl::i32(n));
-        } else {
-            mStr.append(fl::u32(n));
-        }
-        return *this;
-    }
+    // long long - check not same as previous types (may alias to long on some platforms)
+    STRSTREAM_INT_OVERLOAD(long long,
+        !fl::is_same<long long, signed char>::value &&
+        !fl::is_same<long long, unsigned char>::value &&
+        !fl::is_same<long long, short>::value &&
+        !fl::is_same<long long, unsigned short>::value &&
+        !fl::is_same<long long, int>::value &&
+        !fl::is_same<long long, unsigned int>::value &&
+        !fl::is_same<long long, long>::value &&
+        !fl::is_same<long long, unsigned long>::value)
+
+    // unsigned long long - check not same as previous types
+    STRSTREAM_INT_OVERLOAD(unsigned long long,
+        !fl::is_same<unsigned long long, signed char>::value &&
+        !fl::is_same<unsigned long long, unsigned char>::value &&
+        !fl::is_same<unsigned long long, short>::value &&
+        !fl::is_same<unsigned long long, unsigned short>::value &&
+        !fl::is_same<unsigned long long, int>::value &&
+        !fl::is_same<unsigned long long, unsigned int>::value &&
+        !fl::is_same<unsigned long long, long>::value &&
+        !fl::is_same<unsigned long long, unsigned long>::value &&
+        !fl::is_same<unsigned long long, long long>::value)
 
     // assignment operator completely replaces the current string
     StrStream &operator=(const string &str) {
@@ -252,8 +336,6 @@ class StrStream {
 
 class FakeStrStream {
   public:
-    template <typename T> FakeStrStream &operator<<(const T &) { return *this; }
-
     FakeStrStream &operator<<(const char *) { return *this; }
 
     template<fl::size N>
@@ -264,28 +346,83 @@ class FakeStrStream {
     FakeStrStream &operator<<(const CRGB &) { return *this; }
     FakeStrStream &operator<<(const string &) { return *this; }
     FakeStrStream &operator<<(char) { return *this; }
+    FakeStrStream &operator<<(signed char) { return *this; }
+    FakeStrStream &operator<<(unsigned char) { return *this; }
 
     // bool support to match StrStream interface
     FakeStrStream &operator<<(bool) { return *this; }
 
-    // Unified template for fl:: namespace types and int to avoid conflicts on AVR
-    template<typename T>
-    typename fl::enable_if<
-        fl::is_same<T, fl::size>::value ||
-        fl::is_same<T, fl::u16>::value ||
-        fl::is_same<T, int>::value,
-        FakeStrStream&
-    >::type operator<<(T) { return *this; }
+    FakeStrStream &operator<<(float) { return *this; }
+    FakeStrStream &operator<<(double) { return *this; }
 
-    FakeStrStream &operator<<(fl::u8) { return *this; }
-    FakeStrStream &operator<<(fl::i16) { return *this; }
-    FakeStrStream &operator<<(fl::i32) { return *this; }
-    FakeStrStream &operator<<(fl::u32) { return *this; }
+    //-------------------------------------------------------------------------
+    // Fundamental integer type overloads with SFINAE collision prevention
+    //-------------------------------------------------------------------------
+    // Mirror StrStream's integer handling for API compatibility
+    // NOTE: Skip signed/unsigned char - handled by explicit non-template overloads above
+
+    FAKESTRSTREAM_INT_OVERLOAD(short,
+        !fl::is_same<short, signed char>::value &&
+        !fl::is_same<short, unsigned char>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(unsigned short,
+        !fl::is_same<unsigned short, signed char>::value &&
+        !fl::is_same<unsigned short, unsigned char>::value &&
+        !fl::is_same<unsigned short, short>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(int,
+        !fl::is_same<int, signed char>::value &&
+        !fl::is_same<int, unsigned char>::value &&
+        !fl::is_same<int, short>::value &&
+        !fl::is_same<int, unsigned short>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(unsigned int,
+        !fl::is_same<unsigned int, signed char>::value &&
+        !fl::is_same<unsigned int, unsigned char>::value &&
+        !fl::is_same<unsigned int, short>::value &&
+        !fl::is_same<unsigned int, unsigned short>::value &&
+        !fl::is_same<unsigned int, int>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(long,
+        !fl::is_same<long, signed char>::value &&
+        !fl::is_same<long, unsigned char>::value &&
+        !fl::is_same<long, short>::value &&
+        !fl::is_same<long, unsigned short>::value &&
+        !fl::is_same<long, int>::value &&
+        !fl::is_same<long, unsigned int>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(unsigned long,
+        !fl::is_same<unsigned long, signed char>::value &&
+        !fl::is_same<unsigned long, unsigned char>::value &&
+        !fl::is_same<unsigned long, short>::value &&
+        !fl::is_same<unsigned long, unsigned short>::value &&
+        !fl::is_same<unsigned long, int>::value &&
+        !fl::is_same<unsigned long, unsigned int>::value &&
+        !fl::is_same<unsigned long, long>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(long long,
+        !fl::is_same<long long, signed char>::value &&
+        !fl::is_same<long long, unsigned char>::value &&
+        !fl::is_same<long long, short>::value &&
+        !fl::is_same<long long, unsigned short>::value &&
+        !fl::is_same<long long, int>::value &&
+        !fl::is_same<long long, unsigned int>::value &&
+        !fl::is_same<long long, long>::value &&
+        !fl::is_same<long long, unsigned long>::value)
+
+    FAKESTRSTREAM_INT_OVERLOAD(unsigned long long,
+        !fl::is_same<unsigned long long, signed char>::value &&
+        !fl::is_same<unsigned long long, unsigned char>::value &&
+        !fl::is_same<unsigned long long, short>::value &&
+        !fl::is_same<unsigned long long, unsigned short>::value &&
+        !fl::is_same<unsigned long long, int>::value &&
+        !fl::is_same<unsigned long long, unsigned int>::value &&
+        !fl::is_same<unsigned long long, long>::value &&
+        !fl::is_same<unsigned long long, unsigned long>::value &&
+        !fl::is_same<unsigned long long, long long>::value)
 
     FakeStrStream &operator=(const string &) { return *this; }
     FakeStrStream &operator=(const CRGB &) { return *this; }
-    FakeStrStream &operator=(fl::u16) { return *this; }
-    FakeStrStream &operator=(fl::u8) { return *this; }
     FakeStrStream &operator=(char) { return *this; }
 };
 

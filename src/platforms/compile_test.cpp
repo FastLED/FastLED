@@ -40,6 +40,52 @@ FL_DISABLE_WARNING(unused-parameter)
 #endif
 
 namespace fl {
+
+// Test that StrStream and FakeStrStream can accept all fundamental integer types
+// This ensures SFINAE collision prevention works across all platforms
+static void test_strstream_integer_operators() {
+    fl::StrStream ss;
+    fl::FakeStrStream fss;
+
+    // Test all fundamental integer types - ensures no ambiguous overloads
+    char c = 'a'; ss << c; fss << c;
+    signed char sc = 1; ss << sc; fss << sc;
+    unsigned char uc = 2; ss << uc; fss << uc;
+    short s = 3; ss << s; fss << s;
+    unsigned short us = 4; ss << us; fss << us;
+    int i = 5; ss << i; fss << i;
+    unsigned int ui = 6; ss << ui; fss << ui;
+    long l = 7; ss << l; fss << l;
+    unsigned long ul = 8; ss << ul; fss << ul;
+    long long ll = 9; ss << ll; fss << ll;
+    unsigned long long ull = 10; ss << ull; fss << ull;
+
+    // Test fl:: types (which are typedefs to fundamental types)
+    fl::i8 i8v = 11; ss << i8v; fss << i8v;
+    fl::u8 u8v = 12; ss << u8v; fss << u8v;
+    fl::i16 i16v = 13; ss << i16v; fss << i16v;
+    fl::u16 u16v = 14; ss << u16v; fss << u16v;
+    fl::i32 i32v = 15; ss << i32v; fss << i32v;
+    fl::u32 u32v = 16; ss << u32v; fss << u32v;
+    fl::i64 i64v = 17; ss << i64v; fss << i64v;
+    fl::u64 u64v = 18; ss << u64v; fss << u64v;
+    fl::size sz = 19; ss << sz; fss << sz;
+
+    // Test chaining multiple types
+    ss << sc << uc << s << us << i << ui << l << ul << ll << ull;
+    fss << sc << uc << s << us << i << ui << l << ul << ll << ull;
+
+    // Test with stdint types (should match fl:: types)
+    int8_t i8_std = 20; ss << i8_std; fss << i8_std;
+    uint8_t u8_std = 21; ss << u8_std; fss << u8_std;
+    int16_t i16_std = 22; ss << i16_std; fss << i16_std;
+    uint16_t u16_std = 23; ss << u16_std; fss << u16_std;
+    int32_t i32_std = 24; ss << i32_std; fss << i32_std;
+    uint32_t u32_std = 25; ss << u32_std; fss << u32_std;
+    int64_t i64_std = 26; ss << i64_std; fss << i64_std;
+    uint64_t u64_std = 27; ss << u64_std; fss << u64_std;
+}
+
 // This file contains only compile-time tests.
 // The platform-specific test functions are called to trigger
 // any compile-time errors if the platform is not configured correctly.
@@ -53,6 +99,9 @@ static void compile_tests() {
     static_assert(fl::is_same<i8, int8_t>::value, "i8 must be the same type as int8_t");
     static_assert(fl::is_same<size, size_t>::value, "size must be the same type as size_t");
     static_assert(fl::is_same<uptr, uintptr_t>::value, "uptr must be the same type as uintptr_t");
+
+    // Test StrStream integer operator overloads
+    test_strstream_integer_operators();
 
     // Size assertions for FastLED integer types
     static_assert(sizeof(i8) == 1, "i8 must be exactly 1 byte");
