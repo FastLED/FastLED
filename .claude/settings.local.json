@@ -55,8 +55,9 @@
       "Bash(awk:*)",
       "Bash(python3:*)",
       "Bash(command:*)",
-      "Read(//c/Users/niteris/dev/running-process/src/**)",
-      "Read(//c/Users/niteris/dev/running-process/**)"
+      "Bash(gcc:*)",
+      "Bash(g++:*)",
+      "WebFetch(domain:gcc.gnu.org)"
     ],
     "deny": []
   }
