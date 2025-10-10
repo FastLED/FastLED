@@ -7,7 +7,19 @@ Pull GitHub Actions logs for a workflow run, parse them to identify errors, and 
 
 Arguments: ${1:-}
 
-Use the 'gh-debug-agent' sub-agent to:
+**Primary Method (Recommended)**: Use the Python script for efficient log analysis:
+```bash
+uv run ci/tools/gh_debug.py ${1:-}
+```
+
+This script:
+- Streams logs instead of downloading full files (avoids 55MB+ downloads)
+- Filters for errors in real-time
+- Stops after finding 10 errors (configurable with --max-errors)
+- Shows context around each error (5 lines before/after, configurable with --context)
+- Handles timeouts gracefully
+
+**Fallback Method**: If the Python script fails, use the 'gh-debug-agent' sub-agent with:
 
 ## Smart Log Fetching Strategy (AVOID downloading full 55MB+ logs)
 
@@ -16,9 +28,11 @@ Use the 'gh-debug-agent' sub-agent to:
    - Parse output to identify which jobs and steps failed
 
 2. **For each failed step, use targeted log extraction**:
-   - Use `gh run view <run-id> --log --job <job-id>` and pipe through `tail -n 1000` to get last 1000 lines
-   - Or use `gh api` with `/repos/{owner}/{repo}/actions/jobs/{job_id}/logs` and extract tail
+   - **IMPORTANT**: Filter BEFORE limiting to avoid processing huge logs
+   - Use `gh api /repos/FastLED/FastLED/actions/jobs/{job_id}/logs | grep -E "(error:|FAILED|Assertion|undefined reference|Error compiling|Test.*failed)" -A 10 -B 5 | tail -n 500`
+   - This filters first (fast), then limits output (avoids timeout)
    - Prioritize steps named "Build summary and failure logs" as they contain consolidated error info
+   - Use timeout of 3 minutes for log fetching commands
 
 3. **Parse logs to identify**:
    - Compilation errors (look for "error:", "undefined reference", "no such file")
