@@ -1,10 +1,5 @@
 #pragma once
 
-
-#ifdef FASTLED_TESTING
-#include <cstddef>  // ok include
-#endif
-
 namespace fl {
 
 // FastLED equivalent of std::nullptr_t
