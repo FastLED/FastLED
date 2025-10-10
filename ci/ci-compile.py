@@ -242,21 +242,68 @@ if command -v rsync &> /dev/null; then
     # Use --checksum to compare file contents instead of timestamps
     # This ensures changes are detected even when timestamps are unreliable across host/container filesystems
 
+    # Start timing the entire sync phase
+    SYNC_START=$(date +%s.%N)
+
+    # Create temp files for timing results to avoid race conditions in output
+    TMPDIR=$(mktemp -d)
+
+    # Run all syncs in parallel, each writing its timing to a temp file
     if [ -d "/host/src" ]; then
         echo "  → syncing src/..."
-        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/src/ /fastled/src/
+        (
+            START=$(date +%s.%N)
+            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/src/ /fastled/src/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/src.time"
+        ) &
     fi
 
     if [ -d "/host/examples" ]; then
         echo "  → syncing examples/..."
-        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/examples/ /fastled/examples/
+        (
+            START=$(date +%s.%N)
+            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/examples/ /fastled/examples/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/examples.time"
+        ) &
     fi
 
     if [ -d "/host/ci" ]; then
         echo "  → syncing ci/..."
-        time rsync -a --checksum --delete $RSYNC_EXCLUDES /host/ci/ /fastled/ci/
+        (
+            START=$(date +%s.%N)
+            rsync -a --checksum --delete $RSYNC_EXCLUDES /host/ci/ /fastled/ci/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/ci.time"
+        ) &
     fi
 
+    # Wait for all parallel syncs to complete
+    wait
+
+    # Calculate and display total sync time
+    SYNC_END=$(date +%s.%N)
+    SYNC_TIME=$(echo "$SYNC_END - $SYNC_START" | bc)
+
+    # Print individual times in deterministic order
+    if [ -f "$TMPDIR/src.time" ]; then
+        printf "  ✓ src/ synced in %.3fs\n" $(cat "$TMPDIR/src.time")
+    fi
+    if [ -f "$TMPDIR/examples.time" ]; then
+        printf "  ✓ examples/ synced in %.3fs\n" $(cat "$TMPDIR/examples.time")
+    fi
+    if [ -f "$TMPDIR/ci.time" ]; then
+        printf "  ✓ ci/ synced in %.3fs\n" $(cat "$TMPDIR/ci.time")
+    fi
+
+    printf "  ─────────────────────────────\n"
+    printf "  Total sync time: %.3fs\n" $SYNC_TIME
+
+    # Cleanup temp files
+    rm -rf "$TMPDIR"
+
+    echo ""
     echo "Directory sync complete"
 else
     echo "Warning: rsync not available, skipping directory sync"
