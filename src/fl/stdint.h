@@ -38,3 +38,4 @@ typedef fl::u64 uint64_t;
 typedef fl::i64 int64_t;
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
+typedef fl::ptrdiff_t ptrdiff_t;
