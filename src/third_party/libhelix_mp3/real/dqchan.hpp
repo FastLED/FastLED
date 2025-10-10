@@ -133,9 +133,9 @@ int32_t pow2frac[8] = {
 static int DequantBlock(int *inbuf, int *outbuf, int num, int scale)
 {
 	int tab4[4];
-	int scalef, scalei, shift;
-	int sx, x, y;
-	int mask = 0;
+	int32_t scalef, scalei, shift;
+	int32_t sx, x, y;
+	int32_t mask = 0;
 	const int32_t *tab16, *coef;
 
 	tab16 = pow43_14[scale & 0x3];
@@ -204,8 +204,8 @@ static int DequantBlock(int *inbuf, int *outbuf, int num, int scale)
 			/* integer scale */
 			if (shift < 0) {
 				shift = -shift;
-				if (y > (0x7fffffff >> shift))
-					y = 0x7fffffff;		/* clip */
+				if (y > ((int32_t)0x7fffffff >> shift))
+					y = (int32_t)0x7fffffff;		/* clip */
 				else
 					y <<= shift;
 			} else {

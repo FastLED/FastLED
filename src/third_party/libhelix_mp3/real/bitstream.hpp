@@ -58,7 +58,7 @@
  *
  * Return:      none
  **************************************************************************************/
-void SetBitstreamPointer(BitStreamInfo *bsi, int nBytes, const unsigned char *buf)
+void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf)
 {
 	/* init bitstream */
 	bsi->bytePtr = buf;
@@ -87,14 +87,14 @@ void SetBitstreamPointer(BitStreamInfo *bsi, int nBytes, const unsigned char *bu
  **************************************************************************************/
 static __inline void RefillBitstreamCache(BitStreamInfo *bsi)
 {
-	int nBytes = bsi->nBytes;
+	int32_t nBytes = bsi->nBytes;
 
 	/* optimize for common case, independent of machine endian-ness */
 	if (nBytes >= 4) {
-		bsi->iCache  = (*bsi->bytePtr++) << 24;
-		bsi->iCache |= (*bsi->bytePtr++) << 16;
-		bsi->iCache |= (*bsi->bytePtr++) <<  8;
-		bsi->iCache |= (*bsi->bytePtr++);
+		bsi->iCache  = ((uint32_t)(*bsi->bytePtr++)) << 24;
+		bsi->iCache |= ((uint32_t)(*bsi->bytePtr++)) << 16;
+		bsi->iCache |= ((uint32_t)(*bsi->bytePtr++)) <<  8;
+		bsi->iCache |= ((uint32_t)(*bsi->bytePtr++));
 		bsi->cachedBits = 32;
 		bsi->nBytes -= 4;
 	} else {
@@ -127,9 +127,9 @@ static __inline void RefillBitstreamCache(BitStreamInfo *bsi)
  *
  * TODO:        optimize for ARM
  **************************************************************************************/
-unsigned int GetBits(BitStreamInfo *bsi, int nBits)
+uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits)
 {
-	unsigned int data, lowBits;
+	uint32_t data, lowBits;
 
 	nBits &= 0x1f;							/* nBits mod 32 to avoid unpredictable results like >> by negative amount */
 	data = bsi->iCache >> (31 - nBits);		/* unsigned >> so zero-extend */
@@ -142,7 +142,7 @@ unsigned int GetBits(BitStreamInfo *bsi, int nBits)
 		lowBits = -bsi->cachedBits;
 		RefillBitstreamCache(bsi);
 		data |= bsi->iCache >> (32 - lowBits);		/* get the low-order bits */
-	
+
 		bsi->cachedBits -= lowBits;			/* how many bits have we drawn from the cache so far */
 		bsi->iCache <<= lowBits;			/* left-justify cache */
 	}
@@ -163,9 +163,9 @@ unsigned int GetBits(BitStreamInfo *bsi, int nBits)
  *
  * Return:      number of bits read from bitstream, as offset from startBuf:startOffset
  **************************************************************************************/
-int CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int startOffset)
+int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset)
 {
-	int bitsUsed;
+	int32_t bitsUsed;
 
 	bitsUsed  = (bsi->bytePtr - startBuf) * 8;
 	bitsUsed -= bsi->cachedBits;

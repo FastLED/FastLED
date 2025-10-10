@@ -67,11 +67,11 @@
 
 static __inline short ClipToShort(int x, int fracBits)
 {
-	int sign;
-	
+	int32_t sign;
+
 	/* assumes you've already rounded (x += (1 << (fracBits-1))) */
 	x >>= fracBits;
-	
+
 	/* Ken's trick: clips to [-32768, 32767] */
 	sign = x >> 31;
 	if (sign != (x >> 15))
@@ -128,7 +128,7 @@ void PolyphaseMono(short *pcm, int *vbuf, const int32_t *coefBase)
 	int vLo, vHi, c1, c2;
 	Word64 sum1L, sum2L, rndVal;
 
-	rndVal = (Word64)( 1 << (DEF_NFRACBITS - 1 + (32 - CSHIFT)) );
+	rndVal = (Word64)( (int64_t)1 << (DEF_NFRACBITS - 1 + (32 - CSHIFT)) );
 
 	/* special case, output sample 0 */
 	coef = coefBase;
@@ -241,7 +241,7 @@ void PolyphaseStereo(short *pcm, int *vbuf, const int32_t *coefBase)
 	int vLo, vHi, c1, c2;
 	Word64 sum1L, sum2L, sum1R, sum2R, rndVal;
 
-	rndVal = (Word64)( 1 << (DEF_NFRACBITS - 1 + (32 - CSHIFT)) );
+	rndVal = (Word64)( (int64_t)1 << (DEF_NFRACBITS - 1 + (32 - CSHIFT)) );
 
 	/* special case, output sample 0 */
 	coef = coefBase;

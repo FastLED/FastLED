@@ -65,7 +65,7 @@
 
 /* clip to range [-2^n, 2^n - 1] */
 #define CLIP_2N(y, n) { \
-	int sign = (y) >> 31;  \
+	int32_t sign = (y) >> 31;  \
 	if (sign != (y) >> (n))  { \
 		(y) = sign ^ ((1 << (n)) - 1); \
 	} \
@@ -127,9 +127,9 @@ typedef enum {
 
 typedef struct _BitStreamInfo {
 	const unsigned char *bytePtr;
-	unsigned int iCache;
-	int cachedBits;
-	int nBytes;
+	uint32_t iCache;
+	int32_t cachedBits;
+	int32_t nBytes;
 } BitStreamInfo;
 
 typedef struct _FrameHeader {
@@ -256,9 +256,9 @@ typedef struct _SubbandInfo {
 } SubbandInfo;
 
 /* bitstream.c */
-void SetBitstreamPointer(BitStreamInfo *bsi, int nBytes, const unsigned char *buf);
-unsigned int GetBits(BitStreamInfo *bsi, int nBits);
-int CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int startOffset);
+void SetBitstreamPointer(BitStreamInfo *bsi, int32_t nBytes, const unsigned char *buf);
+uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits);
+int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset);
 
 /* dequant.c, dqchan.c, stproc.c */
 int DequantChannel(int *sampleBuf, int *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 

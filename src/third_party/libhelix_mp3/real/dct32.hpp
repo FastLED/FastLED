@@ -144,10 +144,10 @@ static const int32_t dcttab[48] = {
 // about 1ms faster in RAM
 void FDCT32(int *buf, int *dest, int offset, int oddBlock, int gb)
 {
-    int i, s, tmp, es;
+    int32_t i, s, tmp, es;
     const int32_t *cptr = dcttab;
-    int a0, a1, a2, a3, a4, a5, a6, a7;
-    int b0, b1, b2, b3, b4, b5, b6, b7;
+    int32_t a0, a1, a2, a3, a4, a5, a6, a7;
+    int32_t b0, b1, b2, b3, b4, b5, b6, b7;
 	int *d;
 
 	/* scaling - ensure at least 6 guard bits for DCT 
