@@ -6,19 +6,19 @@
 /// requirements and padding bytes, all handled automatically.
 ///
 /// Hardware Requirements:
-/// - ESP32, ESP32-S2, or ESP32-S3 board
+/// - ESP32 variant (ESP32, S2, S3, C3, P4, H2)
 /// - Mixed LED strips:
 ///   * Lane 0: APA102 (Dotstar) - 60 LEDs
 ///   * Lane 1: LPD8806 - 40 LEDs
 ///   * Lane 2: WS2801 - 80 LEDs
 ///   * Lane 3: APA102 (Dotstar) - 100 LEDs
 ///
-/// Wiring:
-/// - Clock: GPIO 12 (shared by all strips - ensure compatible clock speeds!)
-/// - Data Lane 0: GPIO 11 (MOSI/D0) - APA102
-/// - Data Lane 1: GPIO 13 (MISO/D1) - LPD8806
-/// - Data Lane 2: GPIO 14 (WP/D2) - WS2801
-/// - Data Lane 3: GPIO 10 (HD/D3) - APA102
+/// Wiring (automatically selected based on ESP32 variant):
+/// ESP32:    CLK=14, D0=13 (APA102), D1=12 (LPD8806), D2=2 (WS2801), D3=4 (APA102)
+/// ESP32-S2: CLK=12, D0=11 (APA102), D1=13 (LPD8806), D2=14 (WS2801), D3=9 (APA102)
+/// ESP32-S3: CLK=12, D0=11 (APA102), D1=13 (LPD8806), D2=14 (WS2801), D3=9 (APA102)
+/// ESP32-C3: CLK=6,  D0=7  (APA102), D1=2  (LPD8806), D2=5  (WS2801), D3=4 (APA102)
+/// ESP32-P4: CLK=9,  D0=8  (APA102), D1=10 (LPD8806), D2=11 (WS2801), D3=6 (APA102)
 ///
 /// Important Notes:
 /// - All chipsets must tolerate the same clock speed
@@ -36,13 +36,48 @@
 // Only compile if Quad-SPI is available on this platform
 #if FASTLED_HAS_QUAD_SPI
 
-// Pin definitions (ESP32-S3 HSPI default pins)
-#define CLOCK_PIN 12
+// Pin definitions - hardware QuadSPI pins per ESP32 variant
+// These use the IO_MUX pins for optimal performance (up to 80MHz)
+#if CONFIG_IDF_TARGET_ESP32
+// ESP32 (original) - Using HSPI (SPI2) QuadSPI pins
+#define CLOCK_PIN 14   // HSPI CLK
+#define DATA_PIN_0 13  // APA102 - HSPI MOSI (D0)
+#define DATA_PIN_1 12  // LPD8806 - HSPI MISO (D1)
+#define DATA_PIN_2 2   // WS2801 - HSPI WP (D2)
+#define DATA_PIN_3 4   // APA102 - HSPI HD (D3)
 
-#define DATA_PIN_0 11  // APA102
-#define DATA_PIN_1 13  // LPD8806
-#define DATA_PIN_2 14  // WS2801
-#define DATA_PIN_3 10  // APA102
+#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+// ESP32-S2/S3 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 12   // SPI2 CLK
+#define DATA_PIN_0 11  // APA102 - SPI2 MOSI (D0)
+#define DATA_PIN_1 13  // LPD8806 - SPI2 MISO (D1)
+#define DATA_PIN_2 14  // WS2801 - SPI2 WP (D2)
+#define DATA_PIN_3 9   // APA102 - SPI2 HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32C3
+// ESP32-C3 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 6    // SPI2 CLK
+#define DATA_PIN_0 7   // APA102 - SPI2 MOSI (D0)
+#define DATA_PIN_1 2   // LPD8806 - SPI2 MISO (D1)
+#define DATA_PIN_2 5   // WS2801 - SPI2 WP (D2)
+#define DATA_PIN_3 4   // APA102 - SPI2 HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32P4
+// ESP32-P4 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 9    // SPI2 CLK
+#define DATA_PIN_0 8   // APA102 - SPI2 MOSI (D0)
+#define DATA_PIN_1 10  // LPD8806 - SPI2 MISO (D1)
+#define DATA_PIN_2 11  // WS2801 - SPI2 WP (D2)
+#define DATA_PIN_3 6   // APA102 - SPI2 HD (D3)
+
+#else
+// Fallback for unknown variants - use VSPI-like pins
+#define CLOCK_PIN 18
+#define DATA_PIN_0 23  // APA102
+#define DATA_PIN_1 19  // LPD8806
+#define DATA_PIN_2 22  // WS2801
+#define DATA_PIN_3 21  // APA102
+#endif
 
 // LED counts for each strip
 #define NUM_LEDS_LANE_0 60   // APA102

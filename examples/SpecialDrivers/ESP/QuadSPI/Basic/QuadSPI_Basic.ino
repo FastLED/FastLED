@@ -5,17 +5,17 @@
 /// ESP32's hardware Quad-SPI peripheral with DMA for zero CPU overhead.
 ///
 /// Hardware Requirements:
-/// - ESP32, ESP32-S2, or ESP32-S3 board
+/// - ESP32 variant (ESP32, S2, S3, C3, P4, H2)
 /// - 4× APA102 (Dotstar) LED strips
 /// - Shared clock line connected to all 4 strips
 /// - 4× separate data lines (one per strip)
 ///
-/// Wiring:
-/// - Clock: GPIO 12 (shared by all 4 strips)
-/// - Data Lane 0: GPIO 11 (MOSI/D0)
-/// - Data Lane 1: GPIO 13 (MISO/D1)
-/// - Data Lane 2: GPIO 14 (WP/D2)
-/// - Data Lane 3: GPIO 10 (HD/D3)
+/// Wiring (automatically selected based on ESP32 variant):
+/// ESP32:    CLK=14, D0=13, D1=12, D2=2,  D3=4  (HSPI pins)
+/// ESP32-S2: CLK=12, D0=11, D1=13, D2=14, D3=9  (SPI2 pins)
+/// ESP32-S3: CLK=12, D0=11, D1=13, D2=14, D3=9  (SPI2 pins)
+/// ESP32-C3: CLK=6,  D0=7,  D1=2,  D2=5,  D3=4  (SPI2 pins)
+/// ESP32-P4: CLK=9,  D0=8,  D1=10, D2=11, D3=6  (SPI2 pins)
 ///
 /// Performance:
 /// - 4×100 LEDs transmitted in ~0.08ms @ 40 MHz
@@ -30,12 +30,48 @@
 // Only compile if Quad-SPI is available on this platform
 #if FASTLED_HAS_QUAD_SPI
 
-// Pin definitions (ESP32-S3 HSPI default pins)
-#define CLOCK_PIN 12
-#define DATA_PIN_0 11
-#define DATA_PIN_1 13
-#define DATA_PIN_2 14
-#define DATA_PIN_3 10
+// Pin definitions - hardware QuadSPI pins per ESP32 variant
+// These use the IO_MUX pins for optimal performance (up to 80MHz)
+#if CONFIG_IDF_TARGET_ESP32
+// ESP32 (original) - Using HSPI (SPI2) QuadSPI pins
+#define CLOCK_PIN 14   // HSPI CLK
+#define DATA_PIN_0 13  // HSPI MOSI (D0)
+#define DATA_PIN_1 12  // HSPI MISO (D1)
+#define DATA_PIN_2 2   // HSPI WP (D2)
+#define DATA_PIN_3 4   // HSPI HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32S2 || CONFIG_IDF_TARGET_ESP32S3
+// ESP32-S2/S3 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 12   // SPI2 CLK
+#define DATA_PIN_0 11  // SPI2 MOSI (D0)
+#define DATA_PIN_1 13  // SPI2 MISO (D1)
+#define DATA_PIN_2 14  // SPI2 WP (D2)
+#define DATA_PIN_3 9   // SPI2 HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32C3
+// ESP32-C3 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 6    // SPI2 CLK
+#define DATA_PIN_0 7   // SPI2 MOSI (D0)
+#define DATA_PIN_1 2   // SPI2 MISO (D1)
+#define DATA_PIN_2 5   // SPI2 WP (D2)
+#define DATA_PIN_3 4   // SPI2 HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32P4
+// ESP32-P4 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 9    // SPI2 CLK
+#define DATA_PIN_0 8   // SPI2 MOSI (D0)
+#define DATA_PIN_1 10  // SPI2 MISO (D1)
+#define DATA_PIN_2 11  // SPI2 WP (D2)
+#define DATA_PIN_3 6   // SPI2 HD (D3)
+
+#else
+// Fallback for unknown variants - use VSPI-like pins
+#define CLOCK_PIN 18
+#define DATA_PIN_0 23
+#define DATA_PIN_1 19
+#define DATA_PIN_2 22
+#define DATA_PIN_3 21
+#endif
 
 // LED strip configuration
 #define NUM_LEDS_LANE_0 60

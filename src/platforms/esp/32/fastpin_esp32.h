@@ -93,7 +93,7 @@ public:
 // 40 GPIO pins. ESPIDF defined 24, 28-31 as invalid and 34-39 as readonly
 // GPIO 6-11 used by default for SPI flash.  GPIO 20 is invalid.
 // NOTE: GPIO 1 & 3 commonly used for UART and may cause flashes when uploading.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(6) | _FL_BIT(7) | _FL_BIT(8) | _FL_BIT(9) | _FL_BIT(10) | _FL_BIT(20))
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(6) | _FL_BIT(7) | _FL_BIT(8) | _FL_BIT(9) | _FL_BIT(10) | _FL_BIT(11) | _FL_BIT(20))
 
 #elif CONFIG_IDF_TARGET_ESP32C3
 // 22 GPIO pins. ESPIDF defines all pins as valid
