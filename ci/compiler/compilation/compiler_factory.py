@@ -68,12 +68,19 @@ def create_fastled_compiler(
     # Combine base args with TOML flags
     all_args: List[str] = base_args + toml_flags
 
-    # PCH output path in build cache directory (persistent)
+    # PCH configuration using shared PCH builder
     pch_output_path = None
+    pch_header_content = None
     if use_pch:
-        cache_dir = Path(".build") / "cache"
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        pch_output_path = str(cache_dir / "fastled_pch.hpp.pch")
+        from ci.compiler.compilation.shared_pch import get_pch_config_for_examples
+
+        pch_output_path, pch_header_content = get_pch_config_for_examples(
+            use_shared=True
+        )
+        print(f"[PCH] Examples using shared precompiled headers: {pch_output_path}")
+        print(
+            f"[PCH] Shared PCH includes common FastLED headers for faster compilation"
+        )
 
     # Determine compiler command (with or without cache)
     compiler_cmd = "python -m ziglang c++"
@@ -91,6 +98,7 @@ def create_fastled_compiler(
         compiler_args=final_args,
         use_pch=use_pch,
         pch_output_path=pch_output_path,
+        pch_header_content=pch_header_content,
         parallel=parallel,
     )
     # Load build flags from TOML

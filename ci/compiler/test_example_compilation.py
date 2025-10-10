@@ -1222,17 +1222,20 @@ class CompilationTestRunner:
         linking_start = time.time()
 
         try:
-            # Create FastLED static library
-            self.log_timing("[LINKING] Creating FastLED static library...")
-            fastled_build_dir = Path(".build/fastled")
-            fastled_build_dir.mkdir(parents=True, exist_ok=True)
+            # Create shared FastLED static library (unified with unit tests)
+            self.log_timing("[LINKING] Creating shared FastLED static library...")
+            from ci.compiler.linking.shared_library import create_shared_fastled_library
 
-            fastled_lib = create_fastled_library(
-                compiler,
-                fastled_build_dir,
-                self.log_timing,
+            fastled_lib = create_shared_fastled_library(
+                clean=self.config.clean_build,
+                use_pch=not self.config.disable_pch,
                 verbose=self.config.verbose,
             )
+
+            if not fastled_lib:
+                raise RuntimeError("Failed to create shared FastLED library")
+
+            self.log_timing(f"[LINKING] Shared library ready: {fastled_lib}")
 
             # Link examples
             self.log_timing("[LINKING] Linking example programs...")

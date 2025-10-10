@@ -435,11 +435,42 @@ def _should_rebuild_library(
 def create_unit_test_fastled_library(
     clean: bool = False, use_pch: bool = True
 ) -> Path | None:
-    """Create libfastled.a static library specifically for unit tests with FASTLED_FORCE_NAMESPACE=1.
+    """Create shared libfastled.a for unit tests (now uses shared library builder).
 
-    CRITICAL: Unit tests need their own separate library from examples because they use
-    different compilation flags. Unit tests require FASTLED_FORCE_NAMESPACE=1 to put
-    all symbols in the fl:: namespace that the tests expect.
+    This function now delegates to the shared library builder, which creates a
+    single libfastled.a at .build/shared/libfastled.a that serves both unit tests
+    and examples. The library is compiled with FASTLED_TESTING=1 to include test
+    utilities. The fl:: namespace is resolved at compile-time when compiling test
+    source files (via FASTLED_FORCE_NAMESPACE=1 in build_unit.toml).
+    """
+
+    # Import the shared library builder
+    from ci.compiler.linking.shared_library import create_shared_fastled_library
+
+    # Delegate to shared library builder
+    print("[UNIT TESTS] Using shared FastLED library builder...")
+    lib_file = create_shared_fastled_library(
+        clean=clean, use_pch=use_pch, verbose=False
+    )
+
+    if lib_file:
+        print(f"[UNIT TESTS] Shared library ready: {lib_file}")
+
+    return lib_file
+
+
+def create_unit_test_fastled_library_old(
+    clean: bool = False, use_pch: bool = True
+) -> Path | None:
+    """OLD: Create libfastled.a static library for unit tests with FASTLED_TESTING=1.
+
+    DEPRECATED: This function is kept for reference but should not be used.
+    Use create_unit_test_fastled_library() instead, which delegates to the
+    shared library builder.
+
+    The library is compiled with FASTLED_TESTING=1 to include test utility functions
+    like MockTimeProvider. The fl:: namespace is resolved at compile-time when
+    compiling test source files (via FASTLED_FORCE_NAMESPACE=1 in build_unit.toml).
     """
 
     # Unit tests get their own separate library directory under .build/unit/
@@ -455,8 +486,8 @@ def create_unit_test_fastled_library(
     config_hash_file = fastled_build_dir / "libfastled.a.config_hash"
 
     # Create a proper FastLED compiler (NOT unit test compiler) for the library
-    # This ensures the library is compiled without FASTLED_FORCE_NAMESPACE=1
-    print("[LIBRARY] Creating FastLED library compiler (without unit test flags)...")
+    # This ensures the library is compiled with minimal special flags
+    print("[LIBRARY] Creating FastLED library compiler...")
 
     # Save current directory and change to project root for create_fastled_compiler
     import os
@@ -475,10 +506,6 @@ def create_unit_test_fastled_library(
         # CRITICAL: Add required defines for unit test library compilation
         if library_compiler.settings.defines is None:
             library_compiler.settings.defines = []
-
-        # Add FASTLED_FORCE_NAMESPACE=1 to export symbols in fl:: namespace
-        library_compiler.settings.defines.append("FASTLED_FORCE_NAMESPACE=1")
-        print("[LIBRARY] Added FASTLED_FORCE_NAMESPACE=1 to library compiler")
 
         # Add FASTLED_TESTING=1 to include MockTimeProvider and test utility functions
         library_compiler.settings.defines.append("FASTLED_TESTING=1")
@@ -826,50 +853,18 @@ def create_unit_test_compiler(
 
     # Note: DWARF flags are added above conditionally when debug=True
 
-    # PCH configuration with unit test specific headers
+    # PCH configuration using shared PCH builder
     pch_output_path = None
     pch_header_content = None
     if use_pch:
-        cache_dir = current_dir / ".build" / "cache"
-        cache_dir.mkdir(parents=True, exist_ok=True)
-        pch_output_path = str(cache_dir / "fastled_unit_test_pch.hpp.pch")
+        from ci.compiler.compilation.shared_pch import get_pch_config_for_unit_tests
 
-        # Unit test specific PCH header content
-        pch_header_content = """// FastLED Unit Test PCH - Common headers for faster test compilation
-#pragma once
-
-// Core test framework
-#include "test.h"
-
-// Core FastLED headers that are used in nearly all unit tests
-#include "FastLED.h"
-
-// Common C++ standard library headers used in tests
-#include <string>
-#include <vector>
-#include <stdio.h>
-#include <cstdint>
-#include <cmath>
-#include <cassert>
-#include <iostream>
-#include <memory>
-
-// Platform headers for stub environment
-#include "platforms/stub/fastled_stub.h"
-
-// Commonly tested FastLED components
-#include "lib8tion.h"
-#include "colorutils.h"
-#include "hsv2rgb.h"
-#include "fl/math.h"
-#include "fl/vector.h"
-
-// Using namespace to match test files
-using namespace fl;
-"""
-        print(f"[PCH] Unit tests will use precompiled headers: {pch_output_path}")
+        pch_output_path, pch_header_content = get_pch_config_for_unit_tests(
+            use_shared=True
+        )
+        print(f"[PCH] Unit tests using shared precompiled headers: {pch_output_path}")
         print(
-            f"[PCH] PCH includes: test.h, FastLED.h, lib8tion.h, colorutils.h, and more"
+            f"[PCH] Shared PCH includes: test.h, FastLED.h, lib8tion.h, colorutils.h, and more"
         )
     else:
         print("[PCH] Precompiled headers disabled for unit tests")
