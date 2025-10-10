@@ -104,7 +104,7 @@ jobs:
 
       - name: Install UV for python and npm packages
         run: |
-          pip install uv fastled
+          pip install uv fastled --upgrade
           npm install -g live-server
 
       - name: Verify live-server installation
