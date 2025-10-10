@@ -34,7 +34,7 @@ from .test_example_compilation import create_fastled_compiler
 # Configure logging
 logger = logging.getLogger(__name__)
 
-BUILD_DIR = PROJECT_ROOT / "tests" / ".build"
+BUILD_DIR = PROJECT_ROOT / ".build" / "compiler"
 BUILD_DIR.mkdir(parents=True, exist_ok=True)
 CACHE_DIR = PROJECT_ROOT / ".cache"
 CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -173,7 +173,7 @@ def calculate_link_cache_key(
 
 def get_link_cache_dir() -> Path:
     """Get the link cache directory (same as examples)"""
-    cache_dir = Path(".build/link_cache")
+    cache_dir = PROJECT_ROOT / ".build" / "link_cache"
     cache_dir.mkdir(parents=True, exist_ok=True)
     return cache_dir
 
@@ -441,8 +441,8 @@ def create_unit_test_fastled_library(
     all symbols in the fl:: namespace that the tests expect.
     """
 
-    # Unit tests get their own separate library directory under .build/fastled/unit/
-    fastled_build_dir = BUILD_DIR.parent / ".build" / "fastled" / "unit"
+    # Unit tests get their own separate library directory under .build/unit/
+    fastled_build_dir = PROJECT_ROOT / ".build" / "unit"
     fastled_build_dir.mkdir(parents=True, exist_ok=True)
     lib_file = fastled_build_dir / "libfastled.a"
 
@@ -919,7 +919,7 @@ def compile_unit_tests_python_api(
     # Run link cache garbage collection before compilation
     if not clean:  # Skip GC if doing a clean build
         try:
-            cache_dir = Path(".build/link_cache")
+            cache_dir = PROJECT_ROOT / ".build" / "link_cache"
             if cache_dir.exists():
                 project_root = Path(__file__).parent.parent.parent
                 toml_path = project_root / "ci" / "build_unit.toml"
