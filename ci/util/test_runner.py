@@ -543,8 +543,6 @@ def create_integration_test_process(
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
     """Create a process to compile the uno tests without starting it"""
-    from ci.util.docker_helper import should_use_docker_for_board
-
     cmd = [
         "uv",
         "run",
@@ -557,13 +555,12 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         "--no-interactive",
     ]
 
-    # Auto-optimize: use Docker if available and image exists
-    use_docker, reason = should_use_docker_for_board("uno", verbose=False)
-    if use_docker:
-        cmd.append("--docker")
-        print(f"✓ Using Docker for uno compilation (faster builds)")
+    # Let ci-compile.py handle Docker auto-detection internally
+    # It will use Docker if available + image exists, otherwise falls back to native mode
 
-    return RunningProcess(cmd, auto_run=False)
+    # Use 15 minute timeout for platform compilation (as per CLAUDE.md guidelines)
+    # Docker compilation may take longer during initial rsync sync without producing output
+    return RunningProcess(cmd, auto_run=False, timeout=900)
 
 
 def get_cpp_test_processes(

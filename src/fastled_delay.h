@@ -3,10 +3,14 @@
 #ifndef __INC_FL_DELAY_H
 #define __INC_FL_DELAY_H
 
-#include "FastLED.h"
 #include "fl/types.h"
 #include "fl/force_inline.h"
 #include "fl/int.h"
+#include "fl/namespace.h"
+
+// Note: micros() is used in inline templates below but not declared here.
+// It will be provided by platform headers (Arduino.h, etc.) included via led_sysdefs.h
+// when FastLED.h includes this file. The actual declaration varies by platform.
 
 /// @file fastled_delay.h
 /// Utility functions and classes for managing delay cycles
@@ -94,7 +98,7 @@ template<fl::cycle_t CYCLES> inline void delaycycles_min1() {
 // TODO: ARM version of _delaycycles_
 
 // usable definition
-#if defined(FASTLED_AVR)
+#if defined(__AVR__)
 // worker template - this will nop for LOOP * 3 + PAD cycles total
 template<int LOOP, fl::cycle_t PAD> inline void _delaycycles_AVR() {
 	delaycycles<PAD>();
