@@ -34,6 +34,7 @@ from ci.boards import ALL, Board, create_board
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import PioCompiler
 from ci.docker.build_image import extract_architecture
+from ci.util.docker_helper import should_use_docker_for_board
 
 
 def green_text(text: str) -> str:
@@ -572,6 +573,11 @@ def parse_args(args: Optional[list[str]] = None) -> argparse.Namespace:
         "--build",
         action="store_true",
         help="Build Docker image if it doesn't exist (use with --docker)",
+    )
+    parser.add_argument(
+        "--local",
+        action="store_true",
+        help="Force local/native compilation, disabling Docker even if available",
     )
     parser.add_argument(
         "--extra-packages",
@@ -1291,6 +1297,27 @@ def main() -> int:
     if args.supported_boards:
         print(",".join(get_default_boards()))
         return 0
+
+    # Auto-detect Docker availability if neither --docker nor --local is specified
+    if (
+        not args.docker
+        and not args.local
+        and not os.environ.get("FASTLED_DOCKER")
+        and args.boards
+    ):
+        # Only auto-detect for single board compilation
+        boards_names = args.boards.split(",")
+        if len(boards_names) == 1:
+            board_name = boards_names[0]
+            use_docker, reason = should_use_docker_for_board(board_name, verbose=False)
+            if use_docker:
+                print(
+                    green_text(
+                        f"🐳 Docker detected and will be used for faster compilation"
+                    )
+                )
+                print("   Use --local to force native compilation instead")
+                args.docker = True
 
     # Handle Docker compilation mode
     # Skip if already running inside Docker (FASTLED_DOCKER env var is set)
