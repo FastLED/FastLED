@@ -1,4 +1,12 @@
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_SHIFT_COUNT_OVERFLOW
+FL_DISABLE_WARNING_OVERFLOW
+
 #define PL_MPEG_IMPLEMENTATION
 #define PLM_NO_STDIO
 #include "third_party/pl_mpeg/src/pl_mpeg.h"
+
+FL_DISABLE_WARNING_POP
 

@@ -10,6 +10,10 @@
 #include "fl/assert.h"
 #include "fl/stdint.h"
 #include "fl/allocator.h"
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_SHIFT_COUNT_OVERFLOW
 
 #include "lzw.h"
 
@@ -616,3 +620,5 @@ lzw_result lzw_decode_map(struct lzw_ctx *ctx,
 
 } // namespace third_party
 } // namespace fl
+
+FL_DISABLE_WARNING_POP

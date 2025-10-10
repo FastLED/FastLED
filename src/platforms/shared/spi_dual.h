@@ -41,7 +41,12 @@ public:
             , clock_pin(-1)
             , data0_pin(-1)
             , data1_pin(-1)
-            , max_transfer_sz(65536) {}
+#ifdef __AVR__
+            , max_transfer_sz(32768)  // 16-bit size_t on AVR, use smaller value
+#else
+            , max_transfer_sz(65536)  // 32/64-bit size_t on other platforms
+#endif
+            {}
     };
 
     /// Initialize SPI peripheral with given configuration

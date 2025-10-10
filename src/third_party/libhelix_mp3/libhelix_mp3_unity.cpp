@@ -40,6 +40,13 @@
  * unit for faster builds and better optimization opportunities.
  **************************************************************************************/
 
+#include "fl/compiler_control.h"
+
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_SHIFT_COUNT_OVERFLOW
+FL_DISABLE_WARNING_OVERFLOW
+FL_DISABLE_WARNING_SIGN_COMPARE
+
 // Real subdirectory implementation files
 #include "real/bitstream.hpp"
 #include "real/buffers.hpp"
@@ -58,3 +65,5 @@
 // Main implementation files
 #include "mp3tabs.hpp"
 #include "mp3dec.hpp"
+
+FL_DISABLE_WARNING_POP

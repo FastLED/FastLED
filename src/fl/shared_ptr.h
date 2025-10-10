@@ -7,6 +7,7 @@
 #include "fl/cstddef.h"
 #include "fl/bit_cast.h"
 #include "fl/atomic.h"
+#include "fl/compiler_control.h"
 
 
 namespace fl {
@@ -346,7 +347,13 @@ private:
 // make_shared with optimized inlined storage
 template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
+    FL_DISABLE_WARNING_PUSH
+    #ifdef __AVR__
+    // AVR GCC doesn't support -Waligned-new, suppress the warning differently
+    #pragma GCC diagnostic ignored "-Waligned-new="
+    #endif
     T* obj = new T(fl::forward<Args>(args)...);
+    FL_DISABLE_WARNING_POP
     auto* control = new detail::ControlBlock<T>(obj);
     //FASTLED_WARN("make_shared created object at " << obj 
     //          << " with control block at " << control);
@@ -357,7 +364,13 @@ shared_ptr<T> make_shared(Args&&... args) {
 
 template<typename T, typename Deleter, typename... Args>
 shared_ptr<T> make_shared_with_deleter(Deleter d, Args&&... args) {
+    FL_DISABLE_WARNING_PUSH
+    #ifdef __AVR__
+    // AVR GCC doesn't support -Waligned-new, suppress the warning differently
+    #pragma GCC diagnostic ignored "-Waligned-new="
+    #endif
     T* obj = new T(fl::forward<Args>(args)...);
+    FL_DISABLE_WARNING_POP
     auto* control = new detail::ControlBlock<T, Deleter>(obj, d);
     //new(control->get_object()) T(fl::forward<Args>(args)...);
     //control->object_constructed = true;
