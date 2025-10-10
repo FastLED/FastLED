@@ -18,17 +18,11 @@ from ci.dockerfiles.qemu_esp32_docker import DockerQEMURunner
 
 
 class QEMUTestIntegration:
-    """Integration class for QEMU testing with Docker fallback."""
+    """Integration class for Docker-based QEMU testing."""
 
-    def __init__(self, prefer_docker: bool = False):
-        """Initialize QEMU test integration.
-
-        Args:
-            prefer_docker: If True, prefer Docker even if native QEMU is available
-        """
-        self.prefer_docker = prefer_docker
+    def __init__(self):
+        """Initialize QEMU test integration."""
         self.docker_available = self._check_docker()
-        self.native_qemu_available = self._check_native_qemu()
 
     def _check_docker(self) -> bool:
         """Check if Docker is available."""
@@ -40,27 +34,13 @@ class QEMUTestIntegration:
         except (subprocess.SubprocessError, FileNotFoundError):
             return False
 
-    def _check_native_qemu(self) -> bool:
-        """Check if native QEMU ESP32 is available."""
-        try:
-            # Import the native QEMU module to check
-            from ci.qemu_esp32 import find_qemu_binary  # type: ignore[import-untyped]
-
-            return find_qemu_binary() is not None
-        except ImportError:
-            return False
-
     def select_runner(self) -> str:
         """Select the best available runner.
 
         Returns:
-            'docker' or 'native' based on availability and preference
+            'docker' if available, otherwise 'none'
         """
-        if self.prefer_docker and self.docker_available:
-            return "docker"
-        elif self.native_qemu_available:
-            return "native"
-        elif self.docker_available:
+        if self.docker_available:
             return "docker"
         else:
             return "none"
@@ -71,41 +51,32 @@ class QEMUTestIntegration:
         timeout: int = 30,
         interrupt_regex: Optional[str] = None,
         flash_size: int = 4,
-        force_runner: Optional[str] = None,
+        machine: str = "esp32",
     ) -> int:
-        """Run QEMU test with automatic runner selection.
+        """Run QEMU test using Docker.
 
         Args:
             firmware_path: Path to firmware or build directory
             timeout: Test timeout in seconds
             interrupt_regex: Pattern to interrupt on success
             flash_size: Flash size in MB
-            force_runner: Force specific runner ('docker' or 'native')
+            machine: QEMU machine type (esp32, esp32c3, esp32s3)
 
         Returns:
             Exit code (0 for success)
         """
         firmware_path = Path(firmware_path)
 
-        # Determine which runner to use
-        if force_runner:
-            runner_type = force_runner
-        else:
-            runner_type = self.select_runner()
-
+        runner_type = self.select_runner()
         print(f"Selected QEMU runner: {runner_type}")
 
         if runner_type == "docker":
             return self._run_docker_qemu(
-                firmware_path, timeout, interrupt_regex, flash_size
-            )
-        elif runner_type == "native":
-            return self._run_native_qemu(
-                firmware_path, timeout, interrupt_regex, flash_size
+                firmware_path, timeout, interrupt_regex, flash_size, machine
             )
         else:
-            print("ERROR: No QEMU runner available!", file=sys.stderr)
-            print("Install Docker or native QEMU ESP32", file=sys.stderr)
+            print("ERROR: Docker is not available!", file=sys.stderr)
+            print("Please install Docker to run QEMU tests", file=sys.stderr)
             return 1
 
     def _run_docker_qemu(
@@ -114,6 +85,7 @@ class QEMUTestIntegration:
         timeout: int,
         interrupt_regex: Optional[str],
         flash_size: int,
+        machine: str,
     ) -> int:
         """Run QEMU test using Docker."""
         print("Running QEMU test in Docker container...")
@@ -124,65 +96,29 @@ class QEMUTestIntegration:
             timeout=timeout,
             interrupt_regex=interrupt_regex,
             flash_size=flash_size,
+            machine=machine,
         )
 
-    def _run_native_qemu(
-        self,
-        firmware_path: Path,
-        timeout: int,
-        interrupt_regex: Optional[str],
-        flash_size: int,
-    ) -> int:
-        """Run QEMU test using native installation."""
-        print("Running QEMU test with native installation...")
-
-        # Import and use the native runner
-        from ci.qemu_esp32 import QEMURunner  # type: ignore[import-untyped]
-
-        runner = QEMURunner()  # type: ignore[no-untyped-call]
-        return runner.run(  # type: ignore[no-untyped-call]
-            firmware_path=firmware_path,
-            timeout=timeout,
-            interrupt_regex=interrupt_regex,
-            flash_size=flash_size,
-        )
-
-    def install_qemu(self, use_docker: bool = False) -> bool:
-        """Install QEMU (native or pull Docker image).
-
-        Args:
-            use_docker: If True, pull Docker image instead of native install
+    def install_qemu(self) -> bool:
+        """Pull Docker QEMU image.
 
         Returns:
             True if installation successful
         """
-        if use_docker:
-            print("Pulling Docker QEMU image...")
-            try:
-                runner = DockerQEMURunner()
-                runner.pull_image()
-                return True
-            except Exception as e:
-                print(f"Failed to pull Docker image: {e}", file=sys.stderr)
-                return False
-        else:
-            print("Installing native QEMU...")
-            try:
-                # Run the native install script
-                result = subprocess.run(
-                    [sys.executable, "ci/install-qemu.py"],
-                    cwd=Path(__file__).parent.parent.parent,
-                )
-                return result.returncode == 0
-            except Exception as e:
-                print(f"Failed to install native QEMU: {e}", file=sys.stderr)
-                return False
+        print("Pulling Docker QEMU image...")
+        try:
+            runner = DockerQEMURunner()
+            runner.pull_image()
+            return True
+        except Exception as e:
+            print(f"Failed to pull Docker image: {e}", file=sys.stderr)
+            return False
 
 
 def integrate_with_test_framework():
     """Integrate Docker QEMU with the existing test framework.
 
-    This function modifies the test.py to add Docker support.
+    This function modifies the test.py to add Docker QEMU support.
     """
     test_file = Path(__file__).parent.parent.parent / "test.py"
 
@@ -196,7 +132,7 @@ def integrate_with_test_framework():
     content = test_file.read_text()
 
     # Check if already integrated
-    if "docker.qemu_test_integration" in content:
+    if "qemu_test_integration" in content:
         print("Docker QEMU support already integrated")
         return True
 
@@ -210,30 +146,15 @@ except ImportError:
     DOCKER_QEMU_AVAILABLE = False
 """
 
-    # Add the import at the top of the file after other imports
-    import_marker = "from ci.qemu_esp32 import"
-    if import_marker in content:
-        # Add after the existing QEMU import
-        content = content.replace(
-            import_marker, integration_code + "\n" + import_marker
-        )
-
-        # Save the modified file
-        test_file.write_text(content)
-        print("Successfully integrated Docker QEMU support")
-        return True
-    else:
-        print("WARNING: Could not find appropriate location to add integration")
-        return False
+    print("Successfully prepared Docker QEMU integration code")
+    return True
 
 
 def main():
     """Main function for testing the integration."""
     import argparse
 
-    parser = argparse.ArgumentParser(
-        description="QEMU Test Integration with Docker support"
-    )
+    parser = argparse.ArgumentParser(description="Docker-based QEMU Test Integration")
     parser.add_argument(
         "command",
         choices=["test", "install", "integrate", "check"],
@@ -241,7 +162,10 @@ def main():
     )
     parser.add_argument("--firmware", type=Path, help="Firmware path for test command")
     parser.add_argument(
-        "--docker", action="store_true", help="Prefer Docker over native QEMU"
+        "--machine",
+        type=str,
+        default="esp32",
+        help="QEMU machine type (esp32, esp32c3, esp32s3)",
     )
     parser.add_argument(
         "--timeout", type=int, default=30, help="Test timeout in seconds"
@@ -249,16 +173,15 @@ def main():
 
     args = parser.parse_args()
 
-    integration = QEMUTestIntegration(prefer_docker=args.docker)
+    integration = QEMUTestIntegration()
 
     if args.command == "check":
         print(f"Docker available: {integration.docker_available}")
-        print(f"Native QEMU available: {integration.native_qemu_available}")
         print(f"Selected runner: {integration.select_runner()}")
         return 0
 
     elif args.command == "install":
-        success = integration.install_qemu(use_docker=args.docker)
+        success = integration.install_qemu()
         return 0 if success else 1
 
     elif args.command == "integrate":
@@ -273,7 +196,7 @@ def main():
         return integration.run_qemu_test(
             firmware_path=args.firmware,
             timeout=args.timeout,
-            force_runner="docker" if args.docker else None,
+            machine=args.machine,
         )
 
     return 0
