@@ -9,6 +9,7 @@
 // This includes platform-specific 16/32/64-bit types
 #include "platforms/int.h"
 
+#ifdef __cplusplus
 namespace fl {
     // 8-bit types - char is reliably 8 bits on all supported platforms
     // These must be defined BEFORE platform includes so fractional types can use them
@@ -20,9 +21,15 @@ namespace fl {
     // uptr (pointer type) and size (size type) are defined per-platform
 
 }
+#else
+// C language compatibility - define types in global namespace
+typedef signed char i8;
+typedef unsigned char u8;
+typedef unsigned int uint;
+#endif
 
 
-
+#ifdef __cplusplus
 namespace fl {
     ///////////////////////////////////////////////////////////////////////
     ///
@@ -91,3 +98,18 @@ using fl::accum1616;
 using fl::saccum1516;
 using fl::accum124;
 using fl::saccum114;
+#else
+// C language compatibility - define fractional types in global namespace
+typedef u8   fract8;
+typedef i8   sfract7;
+typedef u16  fract16;
+typedef i32  sfract31;
+typedef u32  fract32;
+typedef i16  sfract15;
+typedef u16  accum88;
+typedef i16  saccum78;
+typedef u32  accum1616;
+typedef i32  saccum1516;
+typedef u16  accum124;
+typedef i32  saccum114;
+#endif
