@@ -2,13 +2,7 @@
 #include "fl/time.h"
 #include "fl/warn.h"
 #include "fl/stdio.h"
-#include "fl/compiler_control.h"
 #include <string.h>
-
-FL_DISABLE_WARNING_PUSH
-#if defined(__GNUC__) && !defined(__AVR__) && (__GNUC__ >= 7)
-FL_DISABLE_WARNING(aligned-new)
-#endif
 
 namespace fl {
 namespace third_party {
@@ -394,5 +388,3 @@ TJpgInstanceDecoderPtr createTJpgInstanceDecoder() {
 
 } // namespace third_party
 } // namespace fl
-
-FL_DISABLE_WARNING_POP
