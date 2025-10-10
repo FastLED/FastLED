@@ -663,7 +663,7 @@ jobs:
           if echo "${{ inputs.sketch }}" | grep -q "Parlio"; then
             SKETCH_PATTERN="FastLED ESP32-P4 PARLIO"
           elif echo "${{ inputs.sketch }}" | grep -q "LCD_I80"; then
-            SKETCH_PATTERN="LCD_I80\|LCD I80"
+            SKETCH_PATTERN="LCD_I80|LCD I80"
           else
             SKETCH_PATTERN="${{ inputs.sketch }} setup starting"
           fi
@@ -683,10 +683,10 @@ jobs:
           # Show matching lines from log
           echo ""
           echo "=== Matching setup/initialization messages ==="
-          grep -E "$SKETCH_PATTERN\|Initialized.*LED strips\|Setup complete\|Ready!\|Starting loop iteration" qemu_output.log || echo "(no additional messages)"
+          grep -E "$SKETCH_PATTERN|Initialized.*LED strips|Setup complete|Ready!|Starting loop iteration" qemu_output.log || echo "(no additional messages)"
 
           # Check for LED strip initialization (optional)
-          if grep -q "Initialized.*LED strips\|Ready!" qemu_output.log; then
+          if grep -q -E "Initialized.*LED strips|Ready!" qemu_output.log; then
             echo "✅ LED strip/driver initialization detected"
           else
             echo "⚠️  LED strip initialization message not found (may be normal for this sketch)"
@@ -755,6 +755,6 @@ jobs:
           echo "Status: ${{ job.status }}"
           if [ -f "qemu_output.log" ]; then
             echo "QEMU output lines: $(wc -l < qemu_output.log)"
-            echo "Debug message count: $(grep -c '${{ inputs.sketch }} setup starting\|Starting loop iteration' qemu_output.log || echo 0)"
+            echo "Debug message count: $(grep -c -E '${{ inputs.sketch }} setup starting|Starting loop iteration' qemu_output.log || echo 0)"
             echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
           fi
