@@ -12,6 +12,7 @@
   || defined(__MK20DX256__) \
   || defined(STM32F1) \
   || defined(ESP8266) \
+  || defined(CONFIG_IDF_TARGET_ESP32C2) \
   || defined(ARDUINO_ARCH_RENESAS_UNO) \
   || defined(ARDUINO_BLUEPILL_F103C8)
 #define SKETCH_HAS_LOTS_OF_MEMORY 0

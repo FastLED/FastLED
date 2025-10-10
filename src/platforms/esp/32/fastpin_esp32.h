@@ -134,8 +134,10 @@ public:
 // GPIO 15-21 are typically reserved for SPI0/1 flash communication.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17) | _FL_BIT(18) | _FL_BIT(19) | _FL_BIT(20) | _FL_BIT(21))
 #elif CONFIG_IDF_TARGET_ESP32C2
-#warning ESP32-C2 chip variant is in beta support.  Only pins defined by ESP-IDF will be masked.
-#define FASTLED_UNUSABLE_PIN_MASK (0ULL)
+// 21 GPIO pins (GPIO 0-20). ESPIDF defines all pins as valid.
+// GPIO 12-17 are typically reserved for SPI flash and not recommended for other uses.
+// NOTE: ESP32-C2 is a low-memory device - complex examples may not compile
+#define FASTLED_UNUSABLE_PIN_MASK (0ULL | _FL_BIT(12) | _FL_BIT(13) | _FL_BIT(14) | _FL_BIT(15) | _FL_BIT(16) | _FL_BIT(17))
 #else
 #warning Unknown ESP32 chip variant.  Only pins defined by ESP-IDF will be masked.
 #define FASTLED_UNUSABLE_PIN_MASK (0ULL)
