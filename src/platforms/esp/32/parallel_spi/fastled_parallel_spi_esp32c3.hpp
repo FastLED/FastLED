@@ -3,6 +3,7 @@
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
+#include <stddef.h>  // For offsetof
 #include "fl_parallel_spi_isr_rv.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
