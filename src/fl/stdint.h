@@ -21,6 +21,6 @@ typedef fl::uptr uintptr_t;
 #else
 // C language compatibility - types are already defined in global namespace by fl/int.h
 // Include standard headers to ensure compatibility
-#include <stdint.h>
-#include <stddef.h>
+#include <stdint.h>  // ok include
+#include <stddef.h>  // ok include
 #endif
