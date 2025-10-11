@@ -1,0 +1,94 @@
+name: Docker Compiler Build Template
+
+on:
+  workflow_call:
+    secrets:
+      env_vars:
+        required: true
+    inputs:
+      runs_on:
+        required: true
+        type: string
+      platform:
+        required: true
+        type: string
+      dockerfile:
+        required: true
+        type: string
+      tag:
+        default: latest
+        type: string
+      platform_name:
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+    runs-on: ${{ inputs.runs_on }}
+    env:
+      env_vars: ${{ secrets.env_vars }}
+    steps:
+    - name: Decode credentials as environment variables
+      id: check
+      run: |
+        for i in $env_vars; do
+            i=$(echo $i | sed 's/=.*//g')=$(echo ${i#*=} | base64 -di | base64 -di)
+            echo ::add-mask::${i#*=}
+            printf '%s\n' "$i" >> $GITHUB_ENV
+        done
+
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Prepare
+      run: |
+        platform=${{ inputs.platform }}
+        echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+    - name: Docker meta
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.docker_registry_image }}
+        tags: |
+          type=raw,value=${{inputs.tag}},enable={{is_default_branch}}
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Login to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ env.docker_username }}
+        password: ${{ env.docker_password }}
+
+    - name: Build and push by digest
+      id: build
+      uses: docker/build-push-action@v6
+      with:
+        platforms: ${{ inputs.platform }}
+        context: ./ci/docker
+        file: ./ci/docker/${{ inputs.dockerfile }}
+        labels: ${{ steps.meta.outputs.labels }}
+        outputs: type=image,name=${{ env.docker_registry_image }},push-by-digest=true,name-canonical=true,push=true
+        build-args: |
+          PLATFORM_NAME=${{ inputs.platform_name }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max,compression=zstd
+
+    - name: Export digest
+      run: |
+        mkdir -p /tmp/digests
+        digest="${{ steps.build.outputs.digest }}"
+        touch "/tmp/digests/${digest#sha256:}"
+
+    - name: Upload digest
+      uses: actions/upload-artifact@v4
+      with:
+        name: digests-${{ env.PLATFORM_PAIR }}
+        path: /tmp/digests/*
+        if-no-files-found: error
+        retention-days: 1

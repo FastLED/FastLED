@@ -1,4 +1,13 @@
-# FastLED PlatformIO Docker Build System
+# FastLED PlatformIO Docker Build Systems
+
+FastLED provides **two complementary Docker build systems**:
+
+1. **Local Development Images** (this document) - For developers building locally
+2. **CI/CD Published Images** (see [DOCKER_DESIGN.md](DOCKER_DESIGN.md)) - Pre-built images on Docker Hub
+
+---
+
+## Local Development Images
 
 **Local development tool for cross-platform compilation with pre-cached dependencies.**
 
@@ -460,11 +469,114 @@ This Docker system is designed for **local development**, not for CI:
 - Debugging platform-specific issues
 - Development on machines without toolchains
 
+## CI/CD Published Images (Docker Hub)
+
+FastLED also provides **pre-built Docker images on Docker Hub** for CI/CD and production use.
+
+### Quick Start with Published Images
+
+```bash
+# Pull and use pre-built images (no local build needed!)
+bash compile uno Blink --docker
+bash compile esp32s3 Blink --docker
+bash compile teensy41 Blink --docker
+```
+
+These images are:
+- **Multi-board**: Each image caches toolchains for ALL boards in its platform family
+- **Multi-arch**: Built for both linux/amd64 and linux/arm64
+- **Auto-updated**: Rebuilt daily at 2:00 AM UTC
+
+### Available Published Images
+
+| Platform | Docker Image | Cached Boards |
+|----------|--------------|---------------|
+| AVR | `niteris/fastled-compiler-avr-uno:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, ATtiny1604, ATtiny1616 |
+| ESP | `niteris/fastled-compiler-esp:latest` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
+| Teensy | `niteris/fastled-compiler-teensy-teensy41:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
+| STM32 | `niteris/fastled-compiler-stm32-bluepill:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
+| RP2040 | `niteris/fastled-compiler-rp2040-rpipico:latest` | rpipico, rpipico2 |
+| NRF52 | `niteris/fastled-compiler-nrf52-nrf52840_dk:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
+| SAM | `niteris/fastled-compiler-sam-due:latest` | due, digix |
+
+### Key Features
+
+- **Multi-board caching**: Each platform image contains pre-cached toolchains for ALL boards in its family
+- **Instant compilation**: Any board in the family compiles immediately (zero downloads)
+- **Multi-architecture**: Supports both x86 and ARM hosts
+- **Daily updates**: Images rebuild nightly with latest FastLED release
+
+### Example Usage
+
+```bash
+# Any AVR board compiles instantly using the same image
+bash compile uno Blink --docker
+bash compile attiny85 Blink --docker
+bash compile nano_every Blink --docker
+
+# All ESP32 variants use the same image
+bash compile esp32dev Blink --docker
+bash compile esp32s3 Blink --docker
+bash compile esp32c6 Blink --docker
+```
+
+### Implementation Details
+
+Platform→boards mapping is defined in `ci/docker/build_platforms.py`:
+
+```python
+DOCKER_PLATFORMS = {
+    "avr": ["uno", "attiny85", "nano_every", ...],
+    "esp": ["esp32dev", "esp32s3", "esp32c3", ...],
+    # ... etc
+}
+```
+
+During image build, `ci/docker/build.sh`:
+1. Receives platform name (e.g., "uno")
+2. Looks up platform family ("avr")
+3. Gets all boards for platform
+4. Compiles each board to pre-cache toolchains
+
+Result: One Docker image contains toolchains for entire platform family!
+
+### Documentation
+
+For complete details on the CI/CD Docker system:
+- **[DOCKER_DESIGN.md](DOCKER_DESIGN.md)** - Architecture, naming conventions, build schedule
+- **[build_platforms.py](build_platforms.py)** - Platform→boards mapping (source of truth)
+
+---
+
+## Comparison: Local vs Published Images
+
+| Feature | Local Development | CI/CD Published |
+|---------|------------------|-----------------|
+| **Purpose** | Development/testing | Production/CI |
+| **Location** | Built locally | Docker Hub |
+| **Naming** | Hash-based (`fastled-platformio-uno-abc123`) | Semantic (`niteris/fastled-compiler-avr-uno:latest`) |
+| **Boards per image** | One board | Multiple boards (family) |
+| **Build trigger** | Manual | Daily (2 AM UTC) |
+| **FastLED source** | GitHub release | GitHub release |
+| **Cache invalidation** | Automatic (hash) | Time-based (daily) |
+| **Best for** | Local cross-platform dev | CI/CD, production builds |
+
+---
+
 ## See Also
 
-- `ci/build_docker_image_pio.py` - Build script source code
-- `ci/docker/Dockerfile.template` - Platform-specific Dockerfile
-- `ci/docker/Dockerfile.base` - Base image Dockerfile
-- `ci/docker/prune_old_images.py` - Cleanup script
-- `ci/boards.py` - Platform configurations
+### Local Development
+- `ci/build_docker_image_pio.py` - Build script for local images
+- `ci/docker/prune_old_images.py` - Cleanup script for local images
+
+### CI/CD Published Images
+- `ci/docker/build_platforms.py` - Platform→boards mapping
+- `ci/docker/DOCKER_DESIGN.md` - Complete CI/CD system documentation
+- `.github/workflows/build_docker_compiler_*.yml` - GitHub Actions workflows
+
+### Shared
+- `ci/docker/Dockerfile.template` - Platform-specific Dockerfile (used by both systems)
+- `ci/docker/Dockerfile.base` - Base image Dockerfile (used by both systems)
+- `ci/docker/build.sh` - Multi-board build script (used by CI/CD)
+- `ci/boards.py` - Platform configurations (used by both systems)
 - `ci/AGENTS.md` - CI/build system documentation
