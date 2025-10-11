@@ -142,12 +142,46 @@ case "$COMMAND" in
             generate_platformio_ini
         fi
 
-        # Run compile command to:
+        # Get list of boards to compile for this platform family
+        # This pre-caches toolchains for ALL boards in the family
+        echo "Looking up platform family for: $PLATFORM_NAME"
+        BOARDS=$(python3 -c "
+import sys
+sys.path.insert(0, '/fastled')
+from ci.docker.build_platforms import BOARD_TO_PLATFORM, DOCKER_PLATFORMS
+
+# Get platform family from board name
+platform = BOARD_TO_PLATFORM.get('$PLATFORM_NAME')
+if platform:
+    # Found platform family - compile all boards in family
+    boards = DOCKER_PLATFORMS[platform]
+    print(' '.join(boards))
+else:
+    # Not in mapping - just compile the single board
+    print('$PLATFORM_NAME')
+" 2>&1)
+
+        if [ $? -ne 0 ]; then
+            echo "Warning: Failed to get board list, falling back to single board: $PLATFORM_NAME"
+            BOARDS="$PLATFORM_NAME"
+        fi
+
+        echo "Boards to pre-cache: $BOARDS"
+
+        # Run compile command for each board to:
         # 1. Download any remaining framework files
-        # 2. Validate that everything works
-        # 3. Warm up the build cache
-        bash compile "$PLATFORM_NAME" Blink
-        echo "Compilation layer ready"
+        # 2. Pre-cache platform-specific toolchains
+        # 3. Validate that everything works
+        for board in $BOARDS; do
+            echo ""
+            echo ">>> Pre-caching toolchain for board: $board"
+            bash compile "$board" Blink
+            if [ $? -ne 0 ]; then
+                echo "Warning: Failed to compile $board, continuing..."
+            fi
+        done
+
+        echo "Compilation layer ready - cached $(echo $BOARDS | wc -w) board(s)"
         ;;
 
     legacy|*)

@@ -1,0 +1,548 @@
+name: Build and Push Docker Compiler Platform Images
+
+# This workflow builds ALL platform Docker images in parallel.
+# Each platform image pre-caches toolchains for MULTIPLE boards in that family.
+#
+# Platform→Boards mapping is defined in ci/docker/build_platforms.py:
+#   platform_name: uno       → builds AVR platform (uno, attiny85, attiny88, nano_every, etc.)
+#   platform_name: esp32dev  → builds ESP platform (esp32dev, esp32s3, esp32c3, esp8266, etc.)
+#   platform_name: teensy41  → builds Teensy platform (teensy30, teensy31, teensy40, teensy41, teensylc)
+#   platform_name: bluepill  → builds STM32 platform (bluepill, blackpill, maple_mini, giga_r1, etc.)
+#   platform_name: rpipico   → builds RP2040 platform (rpipico, rpipico2)
+#   platform_name: nrf52840_dk → builds NRF52 platform (nrf52840_dk, adafruit boards, xiaoblesense)
+#   platform_name: due       → builds SAM platform (due, digix)
+#
+# During build, ci/docker/build.sh:
+#   1. Looks up platform_name in build_platforms.py (uno → "avr")
+#   2. Gets all boards for that platform (["uno", "attiny85", ...])
+#   3. Compiles each board to pre-cache all toolchains
+#
+# Result: Each Docker image contains cached toolchains for ALL boards in its family!
+
+on:
+  schedule:
+    - cron: '0 3 * * *'  # Executes every day at 3:00 AM UTC (1 hour after base image)
+  workflow_dispatch:  # Allow manual triggering
+    inputs:
+      delay_minutes:
+        description: 'Delay before starting (minutes)'
+        required: false
+        default: '0'
+
+jobs:
+  # Optional delay to allow base image to settle in registry
+  wait-for-base:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Wait for base image to settle
+        if: github.event.inputs.delay_minutes != '0'
+        run: |
+          echo "Waiting ${{ github.event.inputs.delay_minutes }} minutes for base image to settle in registry..."
+          sleep $((${{ github.event.inputs.delay_minutes }} * 60))
+
+  credentials:
+    needs: wait-for-base
+    if: always()  # Run even if wait-for-base is skipped
+    runs-on: ubuntu-latest
+    outputs:
+      docker_username: ${{ steps.credentials.outputs.docker_username }}
+      docker_password: ${{ steps.credentials.outputs.docker_password }}
+      registry_avr: ${{ steps.credentials.outputs.registry_avr }}
+      registry_esp: ${{ steps.credentials.outputs.registry_esp }}
+      registry_teensy: ${{ steps.credentials.outputs.registry_teensy }}
+      registry_stm32: ${{ steps.credentials.outputs.registry_stm32 }}
+      registry_rp2040: ${{ steps.credentials.outputs.registry_rp2040 }}
+      registry_nrf52: ${{ steps.credentials.outputs.registry_nrf52 }}
+      registry_sam: ${{ steps.credentials.outputs.registry_sam }}
+    steps:
+      - name: Output encoded credentials
+        id: credentials
+        env:
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+        run: |
+          echo "docker_username=$(echo $docker_username | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_avr=$(echo 'niteris/fastled-compiler-avr-uno' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo 'niteris/fastled-compiler-esp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_teensy=$(echo 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32=$(echo 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo 'niteris/fastled-compiler-rp2040-rpipico' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_nrf52=$(echo 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam=$(echo 'niteris/fastled-compiler-sam-due' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+
+  # AVR Platform (uno, attiny85, attiny88, nano_every, etc.)
+  build-avr-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: uno
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_avr }}
+
+  build-avr-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: uno
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_avr }}
+
+  merge-avr:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-avr-amd64, build-avr-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-avr-uno
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-avr-uno@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-avr-uno:latest
+
+  # ESP Platform (esp32dev, esp32s3, esp32c3, esp32c6, esp8266, etc.)
+  build-esp-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: esp32dev
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp }}
+
+  build-esp-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: esp32dev
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp }}
+
+  merge-esp:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-esp-amd64, build-esp-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-esp
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-esp@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-esp:latest
+
+  # Teensy Platform (teensy30, teensy31, teensy40, teensy41, teensylc)
+  build-teensy-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: teensy41
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_teensy }}
+
+  build-teensy-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: teensy41
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_teensy }}
+
+  merge-teensy:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-teensy-amd64, build-teensy-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-teensy-teensy41
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-teensy-teensy41@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-teensy-teensy41:latest
+
+  # STM32 Platform (bluepill, blackpill, maple_mini, giga_r1, etc.)
+  build-stm32-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: bluepill
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32 }}
+
+  build-stm32-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: bluepill
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32 }}
+
+  merge-stm32:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-stm32-amd64, build-stm32-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-stm32-bluepill
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-stm32-bluepill@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-stm32-bluepill:latest
+
+  # RP2040 Platform (rpipico, rpipico2)
+  build-rp2040-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: rpipico
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_rp2040 }}
+
+  build-rp2040-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: rpipico
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_rp2040 }}
+
+  merge-rp2040:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-rp2040-amd64, build-rp2040-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-rp2040-rpipico
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-rp2040-rpipico@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-rp2040-rpipico:latest
+
+  # NRF52 Platform (nrf52840_dk, adafruit boards, xiaoblesense)
+  build-nrf52-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: nrf52840_dk
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_nrf52 }}
+
+  build-nrf52-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: nrf52840_dk
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_nrf52 }}
+
+  merge-nrf52:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-nrf52-amd64, build-nrf52-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-nrf52-nrf52840_dk
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-nrf52-nrf52840_dk@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-nrf52-nrf52840_dk:latest
+
+  # SAM Platform (due, digix)
+  build-sam-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.template
+      platform_name: due
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_sam }}
+
+  build-sam-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.template
+      platform_name: due
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_sam }}
+
+  merge-sam:
+    runs-on: ubuntu-24.04
+    needs: [credentials, build-sam-amd64, build-sam-arm]
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: niteris/fastled-compiler-sam-due
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf 'niteris/fastled-compiler-sam-due@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect niteris/fastled-compiler-sam-due:latest

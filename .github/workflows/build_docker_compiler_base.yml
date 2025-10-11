@@ -1,0 +1,123 @@
+name: Build and Push Docker Compiler Base Image
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # Executes every day at 2:00 AM UTC
+
+env:
+  REGISTRY_IMAGE: niteris/fastled-compiler-base
+
+jobs:
+  check-if-changed:
+    runs-on: ubuntu-24.04
+    outputs:
+      should_run: ${{ steps.check.outputs.should_run }}
+    steps:
+      - name: Check workflow repo changes
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: check
+        run: |
+          # Always run on schedule
+          echo "should_run=true" >> $GITHUB_OUTPUT
+
+  credentials:
+    needs: check-if-changed
+    if: needs.check-if-changed.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    outputs:
+      docker_username: ${{ steps.credentials.outputs.docker_username }}
+      docker_password: ${{ steps.credentials.outputs.docker_password }}
+      registry_image: ${{ steps.credentials.outputs.registry_image }}
+    steps:
+      - name: Output encoded credentials
+        id: credentials
+        env:
+          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          registry_image: ${{ env.REGISTRY_IMAGE }}
+        run: |
+          echo "docker_username=$(echo $docker_username | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_image=$(echo $registry_image | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+
+
+  build-amd64:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04
+      platform: linux/amd64
+      dockerfile: Dockerfile.base
+      tag: latest
+    secrets:
+        env_vars: |
+          docker_username=${{ needs.credentials.outputs.docker_username  }}
+          docker_password=${{ needs.credentials.outputs.docker_password  }}
+          docker_registry_image=${{ needs.credentials.outputs.registry_image  }}
+
+  build-arm:
+    needs: credentials
+    uses: ./.github/workflows/template_build_docker_compiler.yml
+    with:
+      runs_on: ubuntu-24.04-arm
+      platform: linux/arm64
+      dockerfile: Dockerfile.base
+      tag: latest
+    secrets:
+        env_vars: |
+          docker_username=${{ needs.credentials.outputs.docker_username  }}
+          docker_password=${{ needs.credentials.outputs.docker_password  }}
+          docker_registry_image=${{ needs.credentials.outputs.registry_image  }}
+
+
+  merge:
+    runs-on: ubuntu-24.04
+    needs:
+      - check-if-changed
+      - credentials
+      - build-amd64
+      - build-arm
+    if: needs.check-if-changed.outputs.should_run == 'true'
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY_IMAGE }}
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.REGISTRY_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.REGISTRY_IMAGE }}:${{ steps.meta.outputs.version }}
+
+      - name: Trigger platform images build
+        run: |
+          gh workflow run build_docker_compiler_platforms.yml -f delay_minutes=10
+        env:
+          GH_TOKEN: ${{ github.token }}
