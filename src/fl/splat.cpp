@@ -17,8 +17,8 @@ Tile2x2_u8 splat(vec2f xy) {
     float y = xy.y;
 
     // 2) integer cell indices
-    i16 cx = static_cast<i16>(floorf(x));
-    i16 cy = static_cast<i16>(floorf(y));
+    i16 cx = static_cast<i16>(fl::floor(x));
+    i16 cy = static_cast<i16>(fl::floor(y));
 
     // 3) fractional offsets in [0..1)
     float fx = x - cx;

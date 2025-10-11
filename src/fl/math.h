@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/clamp.h"
-#include "fl/map_range.h"
 #include "fl/math_macros.h"
 
 namespace fl {
@@ -15,6 +14,10 @@ float exp_impl(float value);
 double exp_impl(double value);
 float sqrt_impl(float value);
 double sqrt_impl(double value);
+float sin_impl(float value);
+double sin_impl(double value);
+float cos_impl(float value);
+double cos_impl(double value);
 
 template <typename T> inline T floor(T value) {
     if (value >= 0) {
@@ -38,6 +41,24 @@ template <typename T> inline T exp(T value) {
 // Square root using Newton-Raphson method
 template <typename T> inline T sqrt(T value) {
     return static_cast<T>(sqrt_impl(static_cast<float>(value)));
+}
+
+// Floating point modulo operation: fmod(x, y) = x - floor(x/y) * y
+// This is compatible with platforms that don't have fmodf() in their math library
+template <typename T> inline T fmod(T x, T y) {
+    if (y == 0) {
+        return static_cast<T>(0);  // Avoid division by zero
+    }
+    return x - floor(x / y) * y;
+}
+
+// Trigonometric functions
+template <typename T> inline T sin(T value) {
+    return static_cast<T>(sin_impl(static_cast<float>(value)));
+}
+
+template <typename T> inline T cos(T value) {
+    return static_cast<T>(cos_impl(static_cast<float>(value)));
 }
 
 // Constexpr version for compile-time evaluation (compatible with older C++
@@ -66,3 +87,7 @@ constexpr int ceil_constexpr(float value) {
 // }
 
 } // namespace fl
+
+// Include map_range.h at the end to avoid circular dependency issues
+// geometry.h (included by map_range.h) uses fl::sqrt which must be defined first
+#include "fl/map_range.h"
