@@ -152,11 +152,11 @@ void loop() {
     const int number_of_steps = numberOfSteps.value();
     raster.reset();
     // float factor = s_prev_alpha;  // 0->1.f
-    // factor = MIN(factor/4.0f, 0.05f);
+    // factor = FL_MIN(factor/4.0f, 0.05f);
 
     float diff = curr_alpha - s_prev_alpha;
     diff *= 1.0f;
-    float factor = MAX(s_prev_alpha - diff, 0.f);
+    float factor = FL_MAX(s_prev_alpha - diff, 0.f);
 
     for (int i = 0; i < number_of_steps; ++i) {
         float a =

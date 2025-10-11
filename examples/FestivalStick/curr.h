@@ -28,6 +28,7 @@ Workflow:
 #include "fl/corkscrew.h"
 #include "fl/grid.h"
 #include "fl/leds.h"
+#include "fl/math_macros.h"
 #include "fl/screenmap.h"
 #include "fl/sstream.h"
 #include "fl/warn.h"
@@ -703,8 +704,8 @@ void processWaveAutoTrigger(uint32_t now) {
             uint32_t max_interval = (uint32_t)(3000 * speed);  // Maximum 3000ms * speed
             
             // Ensure valid range
-            uint32_t min = MIN(min_interval, max_interval);
-            uint32_t max = MAX(min_interval, max_interval);
+            uint32_t min = FL_MIN(min_interval, max_interval);
+            uint32_t max = FL_MAX(min_interval, max_interval);
             if (min >= max) max = min + 1;
             
             nextWaveTrigger = now + random16(min, max);

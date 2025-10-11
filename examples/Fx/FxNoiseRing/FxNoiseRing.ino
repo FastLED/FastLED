@@ -103,9 +103,9 @@ void draw(uint32_t now) {
 
         // Shift back to 8-bit space.
         u8 hue = noise >> 8;
-        u8 sat = MAX(128, noise2 >> 8);
+        u8 sat = FL_MAX(128, noise2 >> 8);
         u8 val = noise4;
-        // leds[i] = CHSV(noise >> 8, MAX(128, noise2 >> 8), noise4);
+        // leds[i] = CHSV(noise >> 8, FL_MAX(128, noise2 >> 8), noise4);
         leds[i] = CHSV(hue, sat, val);
     }
 }

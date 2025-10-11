@@ -194,7 +194,7 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
         
         // Apply noise floor
         magnitude = magnitude / 100.0f;  // Normalize from dB
-        magnitude = MAX(0.0f, magnitude - noiseFloor.value());
+        magnitude = FL_MAX(0.0f, magnitude - noiseFloor.value());
         
         // Smooth the FFT
         fftSmooth[band] = fftSmooth[band] * 0.8f + magnitude * 0.2f;
@@ -207,7 +207,7 @@ void drawSpectrumBars(FFTBins* fft, float /* peak */) {
         int barHeight = magnitude * HEIGHT;
         int xStart = band * barWidth;
         
-        for (int x = 0; x < MAX(barWidth, 1); x++) {
+        for (int x = 0; x < FL_MAX(barWidth, 1); x++) {
             for (int y = 0; y < barHeight; y++) {
                 uint8_t colorIndex = fl::map_range<float, uint8_t>(
                     float(y) / HEIGHT, 0, 1, 0, 255
@@ -243,11 +243,11 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
         if (band >= fft->bins_db.size()) continue;
         
         float magnitude = fft->bins_db[band] / 100.0f;
-        magnitude = MAX(0.0f, magnitude - noiseFloor.value());
+        magnitude = FL_MAX(0.0f, magnitude - noiseFloor.value());
         magnitude *= audioGain.value() * autoGainValue;
         magnitude = fl::clamp(magnitude, 0.0f, 1.0f);
         
-        int radius = magnitude * (MIN(WIDTH, HEIGHT) / 2);
+        int radius = magnitude * (FL_MIN(WIDTH, HEIGHT) / 2);
         
         for (int r = 0; r < radius; r++) {
             int x = centerX + (r * cosf(angle * PI / 180.0f));
@@ -344,7 +344,7 @@ void drawVUMeter(float rms, float peak) {
     
     // RMS level bar
     int rmsWidth = rms * WIDTH * audioGain.value() * autoGainValue;
-    rmsWidth = MIN(rmsWidth, WIDTH);
+    rmsWidth = FL_MIN(rmsWidth, WIDTH);
     
     for (int x = 0; x < rmsWidth; x++) {
         for (int y = HEIGHT/3; y < 2*HEIGHT/3; y++) {
@@ -358,7 +358,7 @@ void drawVUMeter(float rms, float peak) {
     
     // Peak indicator
     int peakX = peak * WIDTH * audioGain.value() * autoGainValue;
-    peakX = MIN(peakX, WIDTH - 1);
+    peakX = FL_MIN(peakX, WIDTH - 1);
     
     for (int y = HEIGHT/4; y < 3*HEIGHT/4; y++) {
         int ledIndex = xyMap(peakX, y);
@@ -411,14 +411,14 @@ void drawFireEffect(float peak) {
     
     // Add heat at bottom based on audio
     int heat = 100 + (peak * 155 * audioGain.value() * autoGainValue);
-    heat = MIN(heat, 255);
+    heat = FL_MIN(heat, 255);
     
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
             // Simple gradient from bottom to top
             int heatLevel = heat * (HEIGHT - y) / HEIGHT;
             heatLevel = heatLevel * random(80, 120) / 100;  // Add randomness
-            heatLevel = MIN(heatLevel, 255);
+            heatLevel = FL_MIN(heatLevel, 255);
             
             int ledIndex = xyMap(x, y);
             if (ledIndex >= 0 && ledIndex < NUM_LEDS) {

@@ -340,8 +340,8 @@ void processAutoTrigger(uint32_t now) {
             uint32_t max_rand = 2000 * speed;  // Maximum interval (milliseconds)
 
             // Ensure min is actually less than max (handles edge cases)
-            uint32_t min = MIN(min_rand, max_rand);
-            uint32_t max = MAX(min_rand, max_rand);
+            uint32_t min = FL_MIN(min_rand, max_rand);
+            uint32_t max = FL_MAX(min_rand, max_rand);
             
             // Ensure min and max aren't equal (would cause random() to crash)
             if (min == max) {
