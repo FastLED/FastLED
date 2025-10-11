@@ -82,7 +82,7 @@ jobs:
         working-directory: trusted
         run: |
           set -o pipefail
-          ./compile --no-interactive ${{ inputs.args }}| tee build.log
+          ./compile --no-interactive --max-failures 3 ${{ inputs.args }} | tee build.log
         shell: bash
 
       - name: Print out build_info.json

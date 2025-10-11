@@ -37,6 +37,7 @@ class CompilationConfig:
     output_path: Optional[Path] = None
     merged_bin: bool = False
     log_failures: Optional[Path] = None
+    max_failures: Optional[int] = None
 
     # Docker options
     docker_build: bool = False
@@ -85,6 +86,12 @@ class CompilationConfig:
                 )
             if len(self.boards) != 1 or self.boards[0].board_name != "wasm":
                 errors.append("WASM compilation requires board='wasm'")
+
+        # Validate max_failures
+        if self.max_failures is not None and self.max_failures <= 0:
+            errors.append(
+                f"--max-failures must be a positive integer, got {self.max_failures}"
+            )
 
         return errors
 
@@ -208,6 +215,12 @@ class CompilationArgumentParser:
             type=str,
             help="Directory to write per-example failure logs (created on first failure)",
         )
+        parser.add_argument(
+            "--max-failures",
+            type=int,
+            help="Stop compilation after N failures (counts each failed example). "
+            "If not specified, all boards will be compiled regardless of failures.",
+        )
 
         # Workflow options
         parser.add_argument(
@@ -280,6 +293,7 @@ class CompilationArgumentParser:
             output_path=Path(args.out) if args.out else None,
             merged_bin=args.merged_bin,
             log_failures=Path(args.log_failures) if args.log_failures else None,
+            max_failures=args.max_failures if hasattr(args, "max_failures") else None,
             docker_build=args.build,
             wasm_run=args.run,
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,

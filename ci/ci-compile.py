@@ -114,6 +114,8 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
         compile_cmd += " --merged-bin"
     if config.output_path:
         compile_cmd += f" -o {config.output_path}"
+    if config.max_failures is not None:
+        compile_cmd += f" --max-failures {config.max_failures}"
 
     # Run compilation
     result = orchestrator.run_compilation(compile_cmd, stream_output=True)
@@ -187,6 +189,7 @@ def main() -> int:
             output_path=config.output_path,
             merged_bin=config.merged_bin,
             log_failures=config.log_failures,
+            max_failures=config.max_failures,
             docker_build=config.docker_build,
             wasm_run=config.wasm_run,
             global_cache_dir=config.global_cache_dir,
@@ -223,6 +226,7 @@ def main() -> int:
                 output_path=config.output_path,
                 merged_bin=config.merged_bin,
                 log_failures=config.log_failures,
+                max_failures=config.max_failures,
                 docker_build=config.docker_build,
                 wasm_run=config.wasm_run,
                 global_cache_dir=config.global_cache_dir,
@@ -307,6 +311,7 @@ def main() -> int:
     compilation_errors: List[str] = []
     failed_example_names: List[str] = []
     failure_logs_dir: Optional[Path] = config.log_failures
+    stopped_early: bool = False
 
     # Compile for each board
     for board in boards:
@@ -362,6 +367,20 @@ def main() -> int:
                     print(f"{'-' * 60}")
                     # Print the collected output for this sketch
                     print(sketch.output)
+
+            # Check if we've reached max failures and should stop early
+            if (
+                config.max_failures is not None
+                and len(failed_example_names) >= config.max_failures
+            ):
+                stopped_early = True
+                print(
+                    yellow_text(
+                        f"\n⚠️  Stopping compilation after {len(failed_example_names)} failures (--max-failures={config.max_failures})"
+                    )
+                )
+                break
+
             # Continue with other boards instead of stopping
         else:
             # Compilation succeeded - handle -o/--out option if specified
@@ -406,6 +425,13 @@ def main() -> int:
                 # print(f"  {name}")
                 # same but in red
                 print(red_text(f"  {name}"))
+            print("")
+        if stopped_early:
+            print(
+                yellow_text(
+                    f"⚠️  Compilation stopped early after {len(failed_example_names)} failures (--max-failures={config.max_failures})"
+                )
+            )
             print("")
         return 1
     else:
