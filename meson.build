@@ -162,7 +162,7 @@ unit_test_link_args = []
 if build_machine.system() == 'windows'
   cpp_compiler = meson.get_compiler('cpp')
 
-  # Clang/Zig-specific linker flags (matches ci/build_unit.toml [windows] link_flags)
+  # Clang/Zig-specific linker flags (matches ci/build_unit.toml [windows] link_flags + [test] link_flags)
   if cpp_compiler.get_id() in ['clang', 'clang-cl']
     unit_test_link_args = [
       '-mconsole',              # Console application
