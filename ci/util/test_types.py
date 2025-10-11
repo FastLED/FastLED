@@ -87,6 +87,7 @@ class TestArgs:
     debug: bool = False  # Enable debug mode for unit tests
     qemu: Optional[list[str]] = None  # Run examples in QEMU emulation
     no_fingerprint: bool = False  # Disable fingerprint caching
+    meson: bool = False  # Use Meson build system instead of Python build
 
 
 @typechecked

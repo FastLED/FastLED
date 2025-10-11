@@ -1421,6 +1421,28 @@ def runner(
     print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
     print(f"[TEST_RUNNER] Example files changed: {examples_change}")
     print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
+
+    # Handle meson build system if requested
+    if args.meson:
+        from ci.util.meson_runner import run_meson_build_and_test
+        from ci.util.paths import PROJECT_ROOT
+
+        build_dir = PROJECT_ROOT / ".build" / "meson"
+        test_name = args.test if args.test else None
+
+        success = run_meson_build_and_test(
+            source_dir=PROJECT_ROOT,
+            build_dir=build_dir,
+            test_name=test_name,
+            clean=args.clean,
+            verbose=args.verbose,
+        )
+
+        if not success:
+            sys.exit(1)
+
+        return
+
     try:
         # Determine test categories
         test_categories = determine_test_categories(args)
