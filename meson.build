@@ -46,6 +46,10 @@ stub_sources = run_command('python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp") if p.name != "stub_main.cpp"))',
   check: false, capture: true)
 
+fl_sources = run_command('python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").glob("*.cpp")))',
+  check: false, capture: true)
+
 # Add found sources if any
 if lib8tion_sources.returncode() == 0 and lib8tion_sources.stdout().strip() != ''
   fastled_sources += files(lib8tion_sources.stdout().strip().split('\n'))
@@ -55,7 +59,11 @@ if stub_sources.returncode() == 0 and stub_sources.stdout().strip() != ''
   fastled_sources += files(stub_sources.stdout().strip().split('\n'))
 endif
 
-# Compile flags for unit tests
+if fl_sources.returncode() == 0 and fl_sources.stdout().strip() != ''
+  fastled_sources += files(fl_sources.stdout().strip().split('\n'))
+endif
+
+# Compile flags for unit tests (base flags)
 unit_test_compile_args = [
   '-DFASTLED_UNIT_TEST=1',
   '-DFASTLED_USE_PROGMEM=0',
@@ -85,14 +93,38 @@ unit_test_compile_args = [
   '-fno-rtti',
   '-fno-omit-frame-pointer',
   '-fno-strict-aliasing',
+  '-Werror=unused-variable',
   '-O0',
-  '-g0'
+  '-g'
 ]
+
+# Windows-specific compiler flags (matches ci/build_unit.toml [windows] section)
+if build_machine.system() == 'windows'
+  unit_test_compile_args += [
+    '--target=x86_64-windows-gnu',  # Explicit GNU target for MSYS2/MinGW compatibility
+    '-fuse-ld=lld-link',            # Use lld-link (MSVC-compatible linker)
+    '-DNOMINMAX',                   # Prevent Windows min/max macros
+    '-DWIN32_LEAN_AND_MEAN',        # Reduce Windows header conflicts
+  ]
+endif
 
 # Link arguments
 unit_test_link_args = []
 if build_machine.system() == 'windows'
-  unit_test_link_args = ['-ldbghelp', '-lpsapi']
+  # Windows-specific linker flags (matches ci/build_unit.toml [windows] link_flags)
+  unit_test_link_args = [
+    '-mconsole',              # Console application
+    '-nodefaultlibs',         # Don't automatically include default libraries
+    '-unwindlib=libunwind',   # Use Clang's libunwind (avoid MinGW unwind)
+    '-nostdlib++',            # Don't auto-link standard C++ library
+    '-lc++',                  # Manually link libc++ (Clang's C++ standard library)
+    '-lkernel32',             # Windows kernel functions
+    '-luser32',               # Windows user interface
+    '-lgdi32',                # Graphics device interface
+    '-ladvapi32',             # Advanced Windows API
+    '-ldbghelp',              # Debug helper (for stack traces)
+    '-lpsapi',                # Process status API
+  ]
 else
   unit_test_link_args = ['-pthread']
 endif
