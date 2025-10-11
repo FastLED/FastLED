@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Meson build system integration for FastLED unit tests."""
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -53,9 +54,46 @@ def setup_meson_build(
         print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", str(build_dir)]
 
+    # Set compiler environment variables to use zig
+    # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
+    # Create wrapper scripts for meson since it expects single executables
+    wrapper_dir = build_dir / "compiler_wrappers"
+    wrapper_dir.mkdir(parents=True, exist_ok=True)
+
+    is_windows = sys.platform.startswith("win") or os.name == "nt"
+
+    if is_windows:
+        # Windows: Create .cmd wrappers
+        cc_wrapper = wrapper_dir / "zig-cc.cmd"
+        cxx_wrapper = wrapper_dir / "zig-cxx.cmd"
+        cc_wrapper.write_text("@echo off\npython -m ziglang cc %*\n", encoding="utf-8")
+        cxx_wrapper.write_text(
+            "@echo off\npython -m ziglang c++ %*\n", encoding="utf-8"
+        )
+    else:
+        # Unix/Linux/macOS: Create shell script wrappers
+        cc_wrapper = wrapper_dir / "zig-cc"
+        cxx_wrapper = wrapper_dir / "zig-cxx"
+        cc_wrapper.write_text(
+            '#!/bin/sh\nexec python -m ziglang cc "$@"\n', encoding="utf-8"
+        )
+        cxx_wrapper.write_text(
+            '#!/bin/sh\nexec python -m ziglang c++ "$@"\n', encoding="utf-8"
+        )
+        # Make executable on Unix-like systems
+        cc_wrapper.chmod(0o755)
+        cxx_wrapper.chmod(0o755)
+
+    env = os.environ.copy()
+    env["CC"] = str(cc_wrapper)
+    env["CXX"] = str(cxx_wrapper)
+    print(
+        f"[MESON] Using zig compiler via wrappers: CC={cc_wrapper.name}, CXX={cxx_wrapper.name}"
+    )
+
     try:
         result = subprocess.run(
-            cmd, cwd=source_dir, capture_output=True, text=True, timeout=60
+            cmd, cwd=source_dir, capture_output=True, text=True, timeout=60, env=env
         )
 
         if result.returncode != 0:
