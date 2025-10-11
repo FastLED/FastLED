@@ -7,7 +7,6 @@
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #endif
-#include <math.h>
 
 using namespace fl;
 using namespace fl::third_party;
@@ -48,7 +47,7 @@ static void generateMultiTone(float* buffer, int n, const float* freqs, int numF
         buffer[i] = 0.0f;
         for (int f = 0; f < numFreqs; ++f) {
             float phase = 2.0f * FL_M_PI * freqs[f] * i / sample_rate;
-            buffer[i] += 0.3f * sinf(phase); // Scale per-tone to avoid clipping
+            buffer[i] += 0.3f * fl::sinf(phase); // Scale per-tone to avoid clipping
         }
     }
 }
@@ -225,7 +224,7 @@ TEST_CASE("SoundToMIDI Poly - Filters out harmonics") {
     for (int i = 0; i < 512; ++i) {
         float phase1 = 2.0f * FL_M_PI * 440.0f * i / 16000.0f;
         float phase2 = 2.0f * FL_M_PI * 880.0f * i / 16000.0f;
-        frame[i] = 0.4f * sinf(phase1) + 0.2f * sinf(phase2); // Second harmonic weaker
+        frame[i] = 0.4f * fl::sinf(phase1) + 0.2f * fl::sinf(phase2); // Second harmonic weaker
     }
 
     for (int i = 0; i < 5; ++i) {
@@ -262,7 +261,7 @@ TEST_CASE("SoundToMIDI Poly - Velocity reflects relative amplitude") {
     for (int i = 0; i < 512; ++i) {
         float phase1 = 2.0f * FL_M_PI * 440.0f * i / 16000.0f;
         float phase2 = 2.0f * FL_M_PI * 659.25f * i / 16000.0f;
-        frame[i] = 0.4f * sinf(phase1) + 0.1f * sinf(phase2); // A4 louder
+        frame[i] = 0.4f * fl::sinf(phase1) + 0.1f * fl::sinf(phase2); // A4 louder
     }
 
     for (int i = 0; i < 5; ++i) {

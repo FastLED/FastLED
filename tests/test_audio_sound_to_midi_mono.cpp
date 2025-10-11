@@ -7,7 +7,6 @@
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #endif
-#include <math.h>
 
 using namespace fl;
 using namespace fl::third_party;
@@ -16,7 +15,7 @@ using namespace fl::third_party;
 static void generateSineWave(float* buffer, int n, float freq_hz, float sample_rate) {
     for (int i = 0; i < n; ++i) {
         float phase = 2.0f * FL_M_PI * freq_hz * i / sample_rate;
-        buffer[i] = 0.5f * sinf(phase);
+        buffer[i] = 0.5f * fl::sinf(phase);
     }
 }
 
@@ -170,7 +169,7 @@ TEST_CASE("SoundToMIDI Mono - Low amplitude below gate is ignored") {
     float frame[512];
     for (int i = 0; i < 512; ++i) {
         float phase = 2.0f * FL_M_PI * 440.0f * i / 16000.0f;
-        frame[i] = 0.001f * sinf(phase); // Very quiet
+        frame[i] = 0.001f * fl::sinf(phase); // Very quiet
     }
 
     for (int i = 0; i < 10; ++i) {

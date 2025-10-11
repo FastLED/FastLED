@@ -71,8 +71,8 @@ License CC BY-NC 3.0
 //     * FL_ANIMARTRIX_USES_FAST_MATH 1: 90ms
 
 
-#define FL_SIN_F(x) sinf(x)
-#define FL_COS_F(x) cosf(x)
+#define FL_SIN_F(x) fl::sinf(x)
+#define FL_COS_F(x) fl::cosf(x)
 
 
 #if FL_ANIMARTRIX_USES_FAST_MATH
@@ -277,12 +277,12 @@ class ANIMartRIX {
 
     float pnoise(float x, float y, float z) {
 
-        int X = (int)floorf(x) & 255, /* FIND UNIT CUBE THAT */
-            Y = (int)floorf(y) & 255, /* CONTAINS POINT.     */
-            Z = (int)floorf(z) & 255;
-        x -= floorf(x); /* FIND RELATIVE X,Y,Z */
-        y -= floorf(y); /* OF POINT IN CUBE.   */
-        z -= floorf(z);
+        int X = (int)fl::floorf(x) & 255, /* FIND UNIT CUBE THAT */
+            Y = (int)fl::floorf(y) & 255, /* CONTAINS POINT.     */
+            Z = (int)fl::floorf(z) & 255;
+        x -= fl::floorf(x); /* FIND RELATIVE X,Y,Z */
+        y -= fl::floorf(y); /* OF POINT IN CUBE.   */
+        z -= fl::floorf(z);
         float u = fade(x), /* COMPUTE FADE CURVES */
             v = fade(y),   /* FOR EACH OF X,Y,Z.  */
             w = fade(z);
@@ -315,7 +315,7 @@ class ANIMartRIX {
                              timings.ratio[i]; // continously rising offsets,
                                                // returns 0 to max_float
 
-            move.radial[i] = fmodf(move.linear[i],
+            move.radial[i] = fl::fmodf(move.linear[i],
                                    2 * PI); // angle offsets for continous
                                             // rotation, returns    0 to 2 * PI
 
@@ -775,7 +775,7 @@ class ANIMartRIX {
                 animation.scale_x = 0.07;
                 animation.scale_y = 0.07;
                 animation.scale_z = 0.1;
-                animation.dist = 5 * sqrtf(distance[x][y]);
+                animation.dist = 5 * fl::sqrtf(distance[x][y]);
                 animation.offset_y = move.linear[0];
                 animation.offset_x = 0;
                 animation.z = 0;
@@ -785,7 +785,7 @@ class ANIMartRIX {
                 animation.scale_x = 0.07;
                 animation.scale_y = 0.07;
                 animation.scale_z = 0.1;
-                animation.dist = 4 * sqrtf(distance[x][y]);
+                animation.dist = 4 * fl::sqrtf(distance[x][y]);
                 animation.offset_y = move.linear[0];
                 animation.offset_x = 0;
                 animation.z = 0;
@@ -823,7 +823,7 @@ class ANIMartRIX {
             for (int y = 0; y < num_y; y++) {
 
                 // describe and render animation layers
-                animation.dist = powf(distance[x][y], 0.5);
+                animation.dist = fl::powf(distance[x][y], 0.5);
                 animation.angle = polar_theta[x][y] + move.radial[0];
                 animation.scale_x = 0.07;
                 animation.scale_y = 0.07;
@@ -834,7 +834,7 @@ class ANIMartRIX {
                 animation.z = 0;
                 float show1 = render_value(animation);
 
-                animation.dist = powf(distance[x][y], 0.6);
+                animation.dist = fl::powf(distance[x][y], 0.6);
                 animation.angle = polar_theta[x][y] + move.noise_angle[2];
                 animation.scale_x = 0.07;
                 animation.scale_y = 0.07;
@@ -1507,7 +1507,7 @@ class ANIMartRIX {
             for (int y = 0; y < num_y; y++) {
 
                 animation.dist =
-                    sqrtf(distance[x][y]) * 0.7 * (move.directional[0] + 1.5);
+                    fl::sqrtf(distance[x][y]) * 0.7 * (move.directional[0] + 1.5);
                 animation.angle =
                     polar_theta[x][y] - move.radial[0] + distance[x][y] / 5;
 
@@ -1621,7 +1621,7 @@ class ANIMartRIX {
                 animation.dist = distance[x][y];
                 animation.angle = polar_theta[x][y] + move.radial[0] +
                                   move.noise_angle[0] + move.noise_angle[3];
-                animation.z = (sqrtf(animation.dist)); // - 10 * move.linear[0];
+                animation.z = (fl::sqrtf(animation.dist)); // - 10 * move.linear[0];
                 animation.scale_x = 0.1;
                 animation.scale_y = 0.1;
                 animation.offset_z = 10;
@@ -1678,7 +1678,7 @@ class ANIMartRIX {
                 animation.angle = polar_theta[x][y] + move.radial[0] +
                                   move.noise_angle[0] + move.noise_angle[3] +
                                   move.noise_angle[1];
-                animation.z = (sqrtf(animation.dist)); // - 10 * move.linear[0];
+                animation.z = (fl::sqrtf(animation.dist)); // - 10 * move.linear[0];
                 animation.scale_x = 0.1;
                 animation.scale_y = 0.1;
                 animation.offset_z = 10;
@@ -1737,7 +1737,7 @@ class ANIMartRIX {
                 animation.angle = polar_theta[x][y] + move.radial[0] +
                                   move.noise_angle[0] + move.noise_angle[3] +
                                   move.noise_angle[1];
-                animation.z = (sqrtf(animation.dist)); // - 10 * move.linear[0];
+                animation.z = (fl::sqrtf(animation.dist)); // - 10 * move.linear[0];
                 animation.scale_x = 0.1;
                 animation.scale_y = 0.1;
                 animation.offset_z = 10;
@@ -1796,7 +1796,7 @@ class ANIMartRIX {
                 animation.angle = polar_theta[x][y] + move.radial[0] +
                                   move.noise_angle[0] + move.noise_angle[3] +
                                   move.noise_angle[1];
-                animation.z = 3 + sqrtf(animation.dist);
+                animation.z = 3 + fl::sqrtf(animation.dist);
                 animation.scale_x = 0.1;
                 animation.scale_y = 0.1;
                 animation.offset_z = 10;
@@ -1854,7 +1854,7 @@ class ANIMartRIX {
                 animation.angle = polar_theta[x][y] + move.radial[0] +
                                   move.noise_angle[0] + move.noise_angle[3] +
                                   move.noise_angle[1];
-                animation.z = 3 + sqrtf(animation.dist);
+                animation.z = 3 + fl::sqrtf(animation.dist);
                 animation.scale_x = 0.05;
                 animation.scale_y = 0.05;
                 animation.offset_z = 10;

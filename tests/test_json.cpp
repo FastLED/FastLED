@@ -161,7 +161,7 @@ TEST_CASE("FLArduinoJson Integration Tests") {
         auto scientificValue = scientificJson.as_double();
         REQUIRE(scientificValue.has_value());
         // Use approximate comparison for floating point values
-        CHECK(fabs(*scientificValue - 0.000123) < 1e-10);
+        CHECK(fl::fabs(*scientificValue - 0.000123) < 1e-10);
         
         // Test negative float
         fl::Json negativeFloatJson = fl::Json::parse("-2.5");

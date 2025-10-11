@@ -6,7 +6,6 @@
 #include "fl/codec/mp3.h"
 #include "fl/file_system.h"
 #include "fl/stdio.h"
-#include <math.h>
 #ifdef FASTLED_TESTING
 #include "platforms/stub/fs_stub.hpp"
 #endif
@@ -305,7 +304,7 @@ TEST_CASE("BeatDetector - Callback mechanisms") {
     for (int i = 0; i < 512; ++i) {
         // 440 Hz sine wave
         float phase = 2.0f * FL_M_PI * 440.0f * i / 44100.0f;
-        test_signal[i] = 0.5f * ::sin(phase);
+        test_signal[i] = 0.5f * fl::sinf(phase);
     }
 
     detector.processFrame(test_signal.data(), 512);

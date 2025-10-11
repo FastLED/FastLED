@@ -7,7 +7,6 @@
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
 #include "fl/math_macros.h"
-#include <math.h>
 
 #include "fl/namespace.h"
 FASTLED_USING_NAMESPACE
@@ -70,7 +69,7 @@ TEST_CASE("bit equivalence") {
 }
 
 TEST_CASE("sqrt16") {
-    float f = sqrt(.5) * 0xff;
+    float f = fl::sqrt(.5) * 0xff;
     uint8_t result = sqrt16(map8_to_16(0xff / 2));
     CHECK_EQ(int(f), result);
     CHECK_EQ(sqrt8(0xff / 2), result);

@@ -23,7 +23,7 @@
     do {                                                                       \
         float _a = (a);                                                        \
         float _b = (b);                                                        \
-        float _diff = fabsf(_a - _b);                                          \
+        float _diff = fl::fabsf(_a - _b);                                      \
         bool _result = _diff <= (epsilon);                                     \
         if (!_result) {                                                        \
             printf("CHECK_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a,     \
@@ -36,7 +36,7 @@
     do {                                                                       \
         float _a = (a);                                                        \
         float _b = (b);                                                        \
-        float _diff = fabsf(_a - _b);                                          \
+        float _diff = fl::fabsf(_a - _b);                                      \
         bool _result = _diff <= (epsilon);                                     \
         if (!_result) {                                                        \
             printf("REQUIRE_CLOSE failed: |%f - %f| = %f > %f\n", (float)_a,   \

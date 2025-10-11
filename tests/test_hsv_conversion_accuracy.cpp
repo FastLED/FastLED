@@ -57,7 +57,7 @@ static float calculateRGBDeviation(const CRGB& original, const CRGB& converted) 
     float dr = float(original.r) - float(converted.r);
     float dg = float(original.g) - float(converted.g);
     float db = float(original.b) - float(converted.b);
-    return sqrtf(dr*dr + dg*dg + db*db);
+    return fl::sqrtf(dr*dr + dg*dg + db*db);
 }
 
 // Test a specific conversion function with RGB -> HSV -> RGB round trip
