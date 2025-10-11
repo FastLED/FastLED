@@ -39,9 +39,19 @@ typedef short int16_t;
 // This ensures we match the platform's type sizes correctly
 typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
+
+// Guard against redefinition for platforms (like Teensy 4.x) where system
+// headers are included before FastLED and already define these types.
+// If types match exactly, the guard prevents duplicate typedef errors.
+#ifndef _SIZE_T
 typedef fl::size size_t;
+#endif
+#ifndef _UINTPTR_T_DECLARED
 typedef fl::uptr uintptr_t;
+#endif
+#ifndef _PTRDIFF_T_DECLARED
 typedef fl::ptrdiff ptrdiff_t;
+#endif
 
 typedef unsigned long long uint64_t;
 typedef long long int64_t;
