@@ -11,6 +11,7 @@
 #include "fastled_delay.h"
 #include "fl/force_inline.h"
 #include "fl/int.h"
+#include "pixel_controller.h"
 
 FASTLED_NAMESPACE_BEGIN
 
