@@ -118,8 +118,8 @@ foreach test_name : test_names
     install: false
   )
 
-  # Register test
-  test(test_name, test_exe)
+  # Register test with project root as working directory
+  test(test_name, test_exe, workdir: meson.project_source_root())
 endforeach
 
 # Build test_example_compilation separately (has its own main)
@@ -131,4 +131,4 @@ test_example_compilation = executable('test_example_compilation',
   link_with: [fastled_lib],
   install: false
 )
-test('test_example_compilation', test_example_compilation)
+test('test_example_compilation', test_example_compilation, workdir: meson.project_source_root())

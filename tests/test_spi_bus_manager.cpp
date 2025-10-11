@@ -188,7 +188,7 @@ TEST_CASE("SPIBusManager: Conflict resolution - 2 devices, no multi-SPI") {
     SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
     SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
 
-    bool result = manager.initialize();
+    (void)manager.initialize();
 
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
