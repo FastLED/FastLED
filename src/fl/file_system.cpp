@@ -87,8 +87,17 @@ public:
         if (!decoder_ || !hasValidFrame_) {
             return false;
         }
-        // Check if we have enough bytes remaining in current frame or if we can get next frame
-        return (currentPos_ < frameSize_) || decoder_->hasMoreFrames();
+        // Check if we have enough bytes remaining in current frame
+        fl::size bytesAvailableInCurrentFrame = (currentPos_ < frameSize_) ? (frameSize_ - currentPos_) : 0;
+
+        // If we have enough in current frame, return true
+        if (bytesAvailableInCurrentFrame >= bytesRequested) {
+            return true;
+        }
+
+        // If not enough in current frame, check if we can get more frames
+        // (simplified check - we know each frame has frameSize_ bytes)
+        return decoder_->hasMoreFrames();
     }
 
     fl::size read(fl::u8* dst, fl::size bytesToRead) override {
