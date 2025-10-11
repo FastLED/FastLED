@@ -78,8 +78,8 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 
     for (int i = 0; i < numLeds; ++i) {
         float angle = startAngle + (i * totalAngle) / divisor;
-        float x = radius * cos(angle) * 2;
-        float y = radius * sin(angle) * 2;
+        float x = radius * fl::cos(angle) * 2;
+        float y = radius * fl::sin(angle) * 2;
         screenMap[i] = {x, y};
     }
 

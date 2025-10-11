@@ -25,25 +25,54 @@
 #include "fl/int.h"
 #include "fl/cstddef.h"
 
+// On Arduino platforms, the system headers will define these types
+// We must use the system definitions to avoid conflicts
+#if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
+    // Arduino platform - use system stdint.h
+    #include <stdint.h>  // ok include - required for Arduino compatibility
+#else
+    // Non-Arduino platforms - define our own types for faster compilation
+    // IMPORTANT: Only define these if system headers haven't already defined them
+    //            Guard against redefinition conflicts with system <stdint.h>
+    
+    // Check if system stdint.h has already been included
+    // If so, skip our typedefs to avoid conflicts
+    #if !defined(_STDINT_H) && !defined(_STDINT_H_) && !defined(_STDINT) && !defined(__STDINT_H) && !defined(_GCC_STDINT_H) && !defined(_GCC_WRAP_STDINT_H)
+    
+    // Only define basic integer types if system headers haven't
+    typedef unsigned char uint8_t;
+    typedef signed char int8_t;
+    typedef unsigned short uint16_t;
+    typedef short int16_t;
+    typedef fl::u32 uint32_t;
+    typedef fl::i32 int32_t;
+    typedef fl::u64 uint64_t;
+    typedef fl::i64 int64_t;
+    
+    #endif // !defined(_STDINT_H) && ...
+#endif // defined(ARDUINO)
 
-// Define standard integer type names using raw primitive types
-// This avoids the slow <stdint.h> include while maintaining compatibility
-// IMPORTANT: Use raw primitive types (not fl:: typedefs) to match system headers exactly
-//            This allows duplicate typedefs when system headers are also included
-typedef unsigned char uint8_t;
-typedef signed char int8_t;
-typedef unsigned short uint16_t;
-typedef short int16_t;
+// Define size_t, uintptr_t, ptrdiff_t using fl:: types
+// Only define these if not already defined by system headers
+// On Arduino platforms, these are already defined by system headers
 
-// Define standard types using fl:: types from platform-specific int.h
-// This ensures we match the platform's type sizes correctly
-typedef fl::u32 uint32_t;
-typedef fl::i32 int32_t;
-typedef fl::u64 uint64_t;
-typedef fl::i64 int64_t;
-typedef fl::size size_t;
-typedef fl::uptr uintptr_t;
-typedef fl::ptrdiff ptrdiff_t;
+#if !defined(ARDUINO) || defined(__EMSCRIPTEN__)
+    // Non-Arduino platforms - define our own types
+    #ifndef _SIZE_T_DEFINED
+    typedef fl::size size_t;
+    #define _SIZE_T_DEFINED
+    #endif
+    
+    #ifndef _UINTPTR_T_DEFINED  
+    typedef fl::uptr uintptr_t;
+    #define _UINTPTR_T_DEFINED
+    #endif
+    
+    #ifndef _PTRDIFF_T_DEFINED
+    typedef fl::ptrdiff ptrdiff_t;
+    #define _PTRDIFF_T_DEFINED
+    #endif
+#endif // !defined(ARDUINO) || defined(__EMSCRIPTEN__)
 
 // stdint.h limit macros
 // These match the standard stdint.h definitions

@@ -109,4 +109,87 @@ double sqrt_impl(double value) {
     return guess;
 }
 
+// Standalone sin implementation using Taylor series
+// sin(x) ≈ x - x³/3! + x⁵/5! - x⁷/7! + ...
+float sin_impl(float x) {
+    // Reduce angle to [-π, π] range
+    const float PI = 3.14159265358979323846f;
+    const float TWO_PI = 2.0f * PI;
+    
+    while (x > PI) x -= TWO_PI;
+    while (x < -PI) x += TWO_PI;
+    
+    // Taylor series approximation
+    float result = x;
+    float term = x;
+    float x_squared = x * x;
+    
+    // Calculate up to x^9 term for reasonable accuracy
+    for (int i = 1; i <= 4; ++i) {
+        term *= -x_squared / ((2 * i) * (2 * i + 1));
+        result += term;
+    }
+    
+    return result;
+}
+
+double sin_impl(double x) {
+    const double PI = 3.14159265358979323846;
+    const double TWO_PI = 2.0 * PI;
+    
+    while (x > PI) x -= TWO_PI;
+    while (x < -PI) x += TWO_PI;
+    
+    double result = x;
+    double term = x;
+    double x_squared = x * x;
+    
+    for (int i = 1; i <= 6; ++i) {
+        term *= -x_squared / ((2 * i) * (2 * i + 1));
+        result += term;
+    }
+    
+    return result;
+}
+
+// Standalone cos implementation using Taylor series
+// cos(x) ≈ 1 - x²/2! + x⁴/4! - x⁶/6! + ...
+float cos_impl(float x) {
+    const float PI = 3.14159265358979323846f;
+    const float TWO_PI = 2.0f * PI;
+    
+    while (x > PI) x -= TWO_PI;
+    while (x < -PI) x += TWO_PI;
+    
+    float result = 1.0f;
+    float term = 1.0f;
+    float x_squared = x * x;
+    
+    for (int i = 1; i <= 4; ++i) {
+        term *= -x_squared / ((2 * i - 1) * (2 * i));
+        result += term;
+    }
+    
+    return result;
+}
+
+double cos_impl(double x) {
+    const double PI = 3.14159265358979323846;
+    const double TWO_PI = 2.0 * PI;
+    
+    while (x > PI) x -= TWO_PI;
+    while (x < -PI) x += TWO_PI;
+    
+    double result = 1.0;
+    double term = 1.0;
+    double x_squared = x * x;
+    
+    for (int i = 1; i <= 6; ++i) {
+        term *= -x_squared / ((2 * i - 1) * (2 * i));
+        result += term;
+    }
+    
+    return result;
+}
+
 } // namespace fl
