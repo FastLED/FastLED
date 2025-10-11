@@ -30,7 +30,7 @@ from typing import Dict, List, Optional
 
 # Import board configuration
 from ci.boards import create_board
-from ci.docker.build_image import extract_architecture, generate_config_hash
+from ci.docker.build_image import generate_config_hash
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -361,8 +361,8 @@ def _main_impl() -> int:
             print(f"Error: {e}", file=sys.stderr)
             return 1
 
-        # Extract architecture
-        architecture = extract_architecture(platform_name)
+        # Use board name directly - no architecture mapping needed
+        architecture = platform_name
 
     elif args.platformio_ini:
         print(f"Mode B: Building from existing INI file ({args.platformio_ini})")
@@ -387,7 +387,8 @@ def _main_impl() -> int:
             if line.strip().startswith("[env:"):
                 env_name = line.strip()[5:-1]  # Extract name between [env: and ]
                 platform_name = env_name
-                architecture = extract_architecture(platform_name)
+                # Use board name directly - no architecture mapping needed
+                architecture = platform_name
                 break
     else:
         # This should never happen due to argparse validation, but helps type checker
@@ -410,11 +411,9 @@ def _main_impl() -> int:
         image_name = args.image_name
     else:
         if config_hash:
-            image_name = (
-                f"fastled-platformio-{architecture}-{platform_name}-{config_hash}"
-            )
+            image_name = f"fastled-platformio-{platform_name}-{config_hash}"
         else:
-            image_name = f"fastled-platformio-{architecture}-{platform_name}"
+            image_name = f"fastled-platformio-{platform_name}"
 
     print(f"Image name: {image_name}")
     if config_hash and not args.image_name:

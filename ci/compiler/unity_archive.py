@@ -59,7 +59,10 @@ def partition_by_subdirectory(files: List[Path]) -> List[List[Path]]:
     """
     from collections import defaultdict
 
-    project_root = Path.cwd()
+    # Use PROJECT_ROOT instead of Path.cwd() to handle cases where cwd != project root
+    from ci.util.paths import PROJECT_ROOT
+
+    project_root = PROJECT_ROOT
     src_dir = project_root / "src"
 
     # Group files by subdirectory

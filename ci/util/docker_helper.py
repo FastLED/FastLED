@@ -8,7 +8,7 @@ whether Docker should be used for compilation based on system configuration.
 import subprocess
 from typing import Optional
 
-from ci.docker.build_image import extract_architecture, generate_config_hash
+from ci.docker.build_image import generate_config_hash
 
 
 def is_docker_available() -> bool:
@@ -37,15 +37,14 @@ def get_docker_image_name(board_name: str) -> str:
         board_name: Name of the board (e.g., 'uno', 'esp32dev')
 
     Returns:
-        Docker image name (e.g., 'fastled-platformio-avr-uno-abc12345')
+        Docker image name (e.g., 'fastled-platformio-uno-abc12345')
 
     Raises:
         ValueError: If board configuration cannot be determined
     """
     try:
-        architecture = extract_architecture(board_name)
         config_hash = generate_config_hash(board_name)
-        return f"fastled-platformio-{architecture}-{board_name}-{config_hash}"
+        return f"fastled-platformio-{board_name}-{config_hash}"
     except Exception as e:
         raise ValueError(
             f"Failed to determine Docker image name for board '{board_name}': {e}"

@@ -37,64 +37,21 @@ def get_platformio_version() -> str:
 
 
 def extract_architecture(board_name: str) -> str:
-    """Extract architecture name from board platform.
+    """Return board name directly - no mapping needed.
+
+    This function previously mapped board names to architecture names via a large
+    lookup table, but that mapping was unnecessary. The board name is already
+    unique and is passed through correctly to compilation commands.
 
     Args:
-        board_name: Name of the board (e.g., 'uno', 'esp32s3')
+        board_name: Name of the board (e.g., 'uno', 'esp32s3', 'esp8266')
 
     Returns:
-        Architecture name for Docker image naming (e.g., 'avr', 'esp32')
-
-    Raises:
-        ValueError: If board not found or platform cannot be determined
+        The board name itself (used for Docker image naming)
     """
-    try:
-        board = create_board(board_name, no_project_options=True)
-    except Exception as e:
-        raise ValueError(f"Failed to create board '{board_name}': {e}") from e
-
-    platform = board.platform
-    if not platform:
-        raise ValueError(f"Board '{board_name}' has no platform defined")
-
-    # Map platform URLs/names to architecture names
-    platform_lower = platform.lower()
-
-    # Handle GitHub URLs and package names
-    if "atmelavr" in platform_lower or "platform-atmelavr" in platform_lower:
-        return "avr"
-    elif "atmelsam" in platform_lower or "platform-atmelsam" in platform_lower:
-        return "sam"
-    elif "espressif32" in platform_lower or "platform-espressif32" in platform_lower:
-        return "esp32"
-    elif (
-        "espressif8266" in platform_lower or "platform-espressif8266" in platform_lower
-    ):
-        return "esp8266"
-    elif "ststm32" in platform_lower or "platform-ststm32" in platform_lower:
-        return "stm32"
-    elif "teensy" in platform_lower or "platform-teensy" in platform_lower:
-        return "teensy"
-    elif "nordicnrf52" in platform_lower or "platform-nordicnrf52" in platform_lower:
-        return "nrf52"
-    elif "raspberrypi" in platform_lower or "platform-raspberrypi" in platform_lower:
-        return "rp2040"
-    elif "renesas" in platform_lower or "platform-renesas" in platform_lower:
-        return "renesas"
-    elif "native" in platform_lower:
-        return "native"
-    elif (
-        "siliconlabsefm32" in platform_lower
-        or "platform-siliconlabsefm32" in platform_lower
-    ):
-        return "efm32"
-    else:
-        # Fallback: try to extract from platform name
-        # Handle cases like "platform/native" -> "native"
-        parts = platform.split("/")
-        if len(parts) > 1:
-            return parts[-1].replace("platform-", "")
-        return platform.replace("platform-", "").replace("platformio/", "")
+    # Simply return the board name - no mapping table needed
+    # The board name is already unique and works correctly for compilation
+    return board_name
 
 
 def generate_config_hash(board_name: str, framework: Optional[str] = None) -> str:
