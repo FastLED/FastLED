@@ -1422,8 +1422,15 @@ def runner(
     print(f"[TEST_RUNNER] Example files changed: {examples_change}")
     print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
 
-    # Handle meson build system if requested
-    if args.meson:
+    # Determine test categories first to check if we should use meson
+    test_categories = determine_test_categories(args)
+
+    # Use meson build system by default for unit and examples tests (unless --no-meson is specified)
+    should_use_meson = (
+        test_categories.unit or test_categories.examples
+    ) and not args.no_meson
+
+    if should_use_meson:
         from ci.util.meson_runner import run_meson_build_and_test
         from ci.util.paths import PROJECT_ROOT
 
@@ -1444,8 +1451,7 @@ def runner(
         return
 
     try:
-        # Determine test categories
-        test_categories = determine_test_categories(args)
+        # Test categories already determined above (for meson check)
         # Handle stack trace flags: --stack-trace overrides --no-stack-trace, default is enabled
         if args.stack_trace:
             enable_stack_trace = True
