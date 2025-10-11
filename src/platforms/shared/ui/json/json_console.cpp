@@ -10,6 +10,7 @@
 #include "fl/algorithm.h"
 #include "fl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"
+#include <stdlib.h>
 
 namespace fl {
 
