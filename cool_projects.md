@@ -35,3 +35,6 @@
  
 * ESP Flix - Mpeg1 decoder and player
   * https://github.com/rossumur/espflix
+
+* ESP32 Project
+  * https://www.reddit.com/r/esp32/s/4wcqmmjSZM
