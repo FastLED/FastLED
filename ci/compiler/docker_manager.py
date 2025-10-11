@@ -182,6 +182,19 @@ if command -v rsync &> /dev/null; then
     # Create temp files for timing results to avoid race conditions in output
     TMPDIR=$(mktemp -d)
 
+    # Sync project-root pyproject.toml if present
+    if [ -f "/host/pyproject.toml" ]; then
+        echo "  → syncing pyproject.toml"
+        (
+            START=$(date +%s.%N)
+            # Copy single file to /fastled root. No --delete needed for single-file.
+            # --checksum ensures content-based update even with skewed timestamps.
+            rsync -a --checksum /host/pyproject.toml /fastled/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/pyproject.time"
+        ) &
+    fi
+
     # Run all syncs in parallel, each writing its timing to a temp file
     if [ -d "/host/src" ]; then
         echo "  → syncing src/..."
@@ -221,6 +234,11 @@ if command -v rsync &> /dev/null; then
     SYNC_TIME=$(echo "$SYNC_END - $SYNC_START" | bc)
 
     # Print individual times in deterministic order
+
+    if [ -f "$TMPDIR/pyproject.time" ]; then
+        printf "  ✓ pyproject.toml synced in %.3fs\\n" $(cat "$TMPDIR/pyproject.time")
+    fi
+
     if [ -f "$TMPDIR/src.time" ]; then
         printf "  ✓ src/ synced in %.3fs\\n" $(cat "$TMPDIR/src.time")
     fi
