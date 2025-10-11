@@ -1,0 +1,10 @@
+# FastLED Meson Build Options
+
+option('fastled_unity', type: 'feature', value: 'enabled',
+  description: 'Enable unity builds for faster compilation')
+
+option('fastled_unity_size', type: 'integer', value: 20,
+  description: 'Number of files per unity translation unit (balance speed vs parallelism)')
+
+option('use_pch', type: 'boolean', value: true,
+  description: 'Use precompiled headers for faster compilation')
