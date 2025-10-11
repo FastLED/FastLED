@@ -36,7 +36,7 @@ This project uses directory-specific agent guidelines. See:
 - **Python**: Always use `uv run python script.py` (never just `python`)
 - **Stay in project root** - never `cd` to subdirectories
 - **Git-bash compatibility**: Prefix commands with space: `bash test`
-- **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3 Blink`)
+- **Platform compilation timeout**: Use minimum 15 minute timeout for platform builds (e.g., `bash compile --docker esp32s3`)
 
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`

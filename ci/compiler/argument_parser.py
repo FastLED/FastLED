@@ -324,13 +324,22 @@ class CompilationArgumentParser:
         return boards
 
     def _resolve_examples(self, args: argparse.Namespace) -> List[str]:
-        """Resolve examples from arguments."""
+        """Resolve examples from arguments.
+
+        Special keyword 'all' compiles all examples.
+        If no examples specified, defaults to ['Blink'].
+        """
         if args.positional_examples:
             examples = [self._normalize_example(ex) for ex in args.positional_examples]
         elif args.examples:
             examples = [self._normalize_example(ex) for ex in args.examples.split(",")]
         else:
-            # Return all examples
+            # Default to Blink if no examples specified
+            examples = ["Blink"]
+
+        # Check for special 'all' keyword
+        if "all" in examples:
+            # Remove 'all' keyword and discover all examples
             examples = self._discover_all_examples()
 
         # Apply exclusions

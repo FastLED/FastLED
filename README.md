@@ -736,8 +736,8 @@ Zero pain setup - can be done from command line in seconds with `uv` or `python`
 
 **Steps:**
 1. Fork the repository on GitHub
-2. Clone your fork locally: `git clone https://github.com/yourusername/FastLED.git`  
-3. Test compilation: `bash compile` (select your target platform)
+2. Clone your fork locally: `git clone https://github.com/yourusername/FastLED.git`
+3. Test compilation: `bash compile <platform>` (e.g., `bash compile uno` compiles Blink by default)
 4. Make your changes and test
 5. Push to your fork and create a pull request
 

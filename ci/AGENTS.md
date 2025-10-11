@@ -125,10 +125,18 @@ bash test --unit --no-pch --verbose
 
 **Platform Compilation:**
 ```bash
-# Compile examples for specific platforms
-uv run ci/ci-compile.py uno --examples Blink
-uv run ci/ci-compile.py esp32dev --examples Blink
-uv run ci/ci-compile.py teensy31 --examples Blink
+# Compile Blink (default) for specific platforms
+uv run ci/ci-compile.py uno
+uv run ci/ci-compile.py esp32dev
+uv run ci/ci-compile.py teensy31
+
+# Compile specific examples
+uv run ci/ci-compile.py uno --examples ColorPalette
+uv run ci/ci-compile.py esp32dev --examples Blink,Apa102HD
+
+# Compile ALL examples (use 'all' keyword)
+uv run ci/ci-compile.py uno all
+uv run ci/ci-compile.py esp32dev all
 ```
 
 **WASM Compilation:**
@@ -185,9 +193,9 @@ Use leading space for git-bash compatibility:
 
 **Generate Build Info:**
 ```bash
-# Compile a platform to generate build_info.json
-uv run ci/ci-compile.py uno --examples Blink
-uv run ci/ci-compile.py esp32dev --examples Blink
+# Compile a platform to generate build_info.json (Blink is compiled by default)
+uv run ci/ci-compile.py uno
+uv run ci/ci-compile.py esp32dev
 ```
 
 **Analyze Platform Defines:**

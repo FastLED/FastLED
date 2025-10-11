@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: xiaoblesense_adafruit
+      args: xiaoblesense_adafruit all

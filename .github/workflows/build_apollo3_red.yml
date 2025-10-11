@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: apollo3_red
+      args: apollo3_red all

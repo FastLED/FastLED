@@ -13,7 +13,7 @@ The FastLED compiler cli can be invoked at the project root.
 ```bash (MacOS/Linux, windows us git-bsh or compile.bat)
 git clone https://github.com/fastled/fastled
 cd fastled
-./compile uno --examples Blink  # linux/macos/git-bash
+./compile uno  # Compiles Blink by default (linux/macos/git-bash)
 # compile.bat  # Windows.
 ```
 
@@ -29,12 +29,21 @@ cd fastled
 ````
 
 
-### Testing a bunch of platforms at once.
+### Testing platforms and examples
 
-```
-./compile teensy41,teensy40 --examples Blink
+By default, `./compile <board>` compiles the Blink example. You can specify different examples or use the `all` keyword to compile all examples:
+
+```bash
+# Compile Blink (default)
+./compile uno
+
+# Compile specific examples
+./compile teensy41,teensy40 --examples ColorPalette
 ./compile esp32dev,esp32s3,esp32c3,esp32c6,esp32s2 --examples Blink,Apa102HD
-./compiles uno,digix,attiny85 --examples Blink,Apa102HD 
+
+# Compile ALL examples (use 'all' keyword)
+./compile uno all
+./compile esp32dev all
 ```
 
 ## Unit Tests

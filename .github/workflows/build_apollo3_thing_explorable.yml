@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: apollo3_thing_explorable
+      args: apollo3_thing_explorable all

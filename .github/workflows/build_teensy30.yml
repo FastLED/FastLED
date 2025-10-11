@@ -50,4 +50,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: teensy30
+      args: teensy30 all

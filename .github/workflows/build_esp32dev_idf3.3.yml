@@ -40,4 +40,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32dev_idf33
+      args: esp32dev_idf33 all

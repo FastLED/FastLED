@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: hy_tinystm103tb
+      args: hy_tinystm103tb all

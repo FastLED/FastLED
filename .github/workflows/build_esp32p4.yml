@@ -40,4 +40,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: esp32p4
+      args: esp32p4 all

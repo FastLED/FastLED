@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: uno_r4_wifi
+      args: uno_r4_wifi all
