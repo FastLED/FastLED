@@ -82,36 +82,36 @@ static void AntiAlias(int *x, int nBfly)
 		x += 18;
 
 		a0 = x[-1];			c0 = *c;	c++;	b0 = x[0];		c1 = *c;	c++;
-		x[-1] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[0] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-1] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[0] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-2];			c0 = *c;	c++;	b0 = x[1];		c1 = *c;	c++;
-		x[-2] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[1] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
-		
+		x[-2] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[1] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
+
 		a0 = x[-3];			c0 = *c;	c++;	b0 = x[2];		c1 = *c;	c++;
-		x[-3] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[2] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-3] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[2] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-4];			c0 = *c;	c++;	b0 = x[3];		c1 = *c;	c++;
-		x[-4] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[3] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-4] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[3] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-5];			c0 = *c;	c++;	b0 = x[4];		c1 = *c;	c++;
-		x[-5] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[4] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-5] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[4] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-6];			c0 = *c;	c++;	b0 = x[5];		c1 = *c;	c++;
-		x[-6] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[5] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-6] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[5] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-7];			c0 = *c;	c++;	b0 = x[6];		c1 = *c;	c++;
-		x[-7] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[6] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-7] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[6] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 
 		a0 = x[-8];			c0 = *c;	c++;	b0 = x[7];		c1 = *c;	c++;
-		x[-8] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
-		x[7] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
+		x[-8] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) * 2;
+		x[7] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) * 2;
 	}
 }
 
@@ -221,15 +221,15 @@ static int FreqInvertRescale(int *y, int *xPrev, int blockIdx, int es)
 		if (blockIdx & 0x01) {
 			/* frequency invert */
 			for (i = 0; i < 18; i+=2) {
-				d = *y;		CLIP_2N(d, 31 - es);	*y = d << es;	mOut |= FASTABS(*y);	y += NBANDS;
-				d = -*y;	CLIP_2N(d, 31 - es);	*y = d << es;	mOut |= FASTABS(*y);	y += NBANDS;
-				d = *xPrev;	CLIP_2N(d, 31 - es);	*xPrev++ = d << es;
+				d = *y;		CLIP_2N(d, 31 - es);	*y = static_cast<int>(static_cast<unsigned int>(d) << es);	mOut |= FASTABS(*y);	y += NBANDS;
+				d = -*y;	CLIP_2N(d, 31 - es);	*y = static_cast<int>(static_cast<unsigned int>(d) << es);	mOut |= FASTABS(*y);	y += NBANDS;
+				d = *xPrev;	CLIP_2N(d, 31 - es);	*xPrev++ = static_cast<int>(static_cast<unsigned int>(d) << es);
 			}
 		} else {
 			for (i = 0; i < 18; i+=2) {
-				d = *y;		CLIP_2N(d, 31 - es);	*y = d << es;	mOut |= FASTABS(*y);	y += NBANDS;
-				d = *y;		CLIP_2N(d, 31 - es);	*y = d << es;	mOut |= FASTABS(*y);	y += NBANDS;
-				d = *xPrev;	CLIP_2N(d, 31 - es);	*xPrev++ = d << es;
+				d = *y;		CLIP_2N(d, 31 - es);	*y = static_cast<int>(static_cast<unsigned int>(d) << es);	mOut |= FASTABS(*y);	y += NBANDS;
+				d = *y;		CLIP_2N(d, 31 - es);	*y = static_cast<int>(static_cast<unsigned int>(d) << es);	mOut |= FASTABS(*y);	y += NBANDS;
+				d = *xPrev;	CLIP_2N(d, 31 - es);	*xPrev++ = static_cast<int>(static_cast<unsigned int>(d) << es);
 			}
 		}
 		return mOut;
@@ -297,14 +297,14 @@ static __inline void idct9(int *x)
 	m12 = MULSHIFT32(c9_4, a9);
 
 	a12 = x[0] +  (x[6] >> 1);
-	a13 = a12  +  ((int)((unsigned int)m1 << 1));
-	a14 = a12  -  ((int)((unsigned int)m1 << 1));
+	a13 = a12  +  (  m1 * 2);
+	a14 = a12  -  (  m1 * 2);
 	a15 = a1   +  ( a11 >> 1);
-	a16 = ((int)((unsigned int)m5 << 1)) + ((int)((unsigned int)m6 << 1));
-	a17 = ((int)((unsigned int)m7 << 1)) - ((int)((unsigned int)m8 << 1));
+	a16 = ( m5 * 2) + (m6 * 2);
+	a17 = ( m7 * 2) - (m8 * 2);
 	a18 = a16 + a17;
-	a19 = ((int)((unsigned int)m9 << 1)) + ((int)((unsigned int)m10 << 1));
-	a20 = ((int)((unsigned int)m11 << 1)) - ((int)((unsigned int)m12 << 1));
+	a19 = ( m9 * 2) + (m10 * 2);
+	a20 = (m11 * 2) - (m12 * 2);
 
 	a21 = a20 - a19;
 	a22 = a13 + a16;
@@ -315,13 +315,13 @@ static __inline void idct9(int *x)
 	a27 = a13 - a18;
 
 	x0 = a22 + a19;			x[0] = x0;
-	x1 = a15 + ((int)((unsigned int)m3 << 1));	x[1] = x1;
+	x1 = a15 + (m3 * 2);	x[1] = x1;
 	x2 = a24 + a20;			x[2] = x2;
 	x3 = a26 - a21;			x[3] = x3;
 	x4 = a1 - a11;			x[4] = x4;
 	x5 = a27 + a21;			x[5] = x5;
 	x6 = a25 - a20;			x[6] = x6;
-	x7 = a15 - ((int)((unsigned int)m3 << 1));	x[7] = x7;
+	x7 = a15 - (m3 * 2);	x[7] = x7;
 	x8 = a23 - a19;			x[8] = x8;
 }
 
@@ -428,8 +428,8 @@ static int IMDCT36(int *xCurr, int *xPrev, int *y, int btCurr, int btPrev, int b
 			(*xPrev++) = xe + xo;			/* symmetry - xPrev[i] = xPrev[17-i] for long blocks */
 			t = s - d;
 
-			yLo = (d + (MULSHIFT32(t, *wp++) << 2));
-			yHi = (s + (MULSHIFT32(t, *wp++) << 2));
+			yLo = (d + (MULSHIFT32(t, *wp++) * 4));
+			yHi = (s + (MULSHIFT32(t, *wp++) * 4));
 			y[(i)*NBANDS]    = 	yLo;
 			y[(17-i)*NBANDS] =  yHi;
 			mOut |= FASTABS(yLo);
@@ -450,9 +450,9 @@ static int IMDCT36(int *xCurr, int *xPrev, int *y, int btCurr, int btPrev, int b
 
 			d = xe - xo;
 			(*xPrev++) = xe + xo;	/* symmetry - xPrev[i] = xPrev[17-i] for long blocks */
-			
-			yLo = (int)((unsigned int)(xPrevWin[i]    + MULSHIFT32(d, wp[i])) << 2);
-			yHi = (int)((unsigned int)(xPrevWin[17-i] + MULSHIFT32(d, wp[17-i])) << 2);
+
+			yLo = (xPrevWin[i]    + MULSHIFT32(d, wp[i])) * 4;
+			yHi = (xPrevWin[17-i] + MULSHIFT32(d, wp[17-i])) * 4;
 			y[(i)*NBANDS]    = yLo;
 			y[(17-i)*NBANDS] = yHi;
 			mOut |= FASTABS(yLo);
@@ -492,21 +492,21 @@ static __inline void imdct12 (int *x, int *out)
 	x0 >>= 1;
 	x1 >>= 1;
 
-	a0 = (int)((unsigned int)(MULSHIFT32(c3_0, x2)) << 1);
+	a0 = MULSHIFT32(c3_0, x2) * 2;
 	a1 = x0 + (x4 >> 1);
 	a2 = x0 - x4;
 	x0 = a1 + a0;
 	x2 = a2;
 	x4 = a1 - a0;
 
-	a0 = (int)((unsigned int)(MULSHIFT32(c3_0, x3)) << 1);
+	a0 = MULSHIFT32(c3_0, x3) * 2;
 	a1 = x1 + (x5 >> 1);
 	a2 = x1 - x5;
 
 	/* cos window odd samples, mul by 2, eat sign bit */
-	x1 = (int)((unsigned int)(MULSHIFT32(c6[0], a1 + a0)) << 2);
-	x3 = (int)((unsigned int)(MULSHIFT32(c6[1], a2)) << 2);
-	x5 = (int)((unsigned int)(MULSHIFT32(c6[2], a1 - a0)) << 2);
+	x1 = MULSHIFT32(c6[0], a1 + a0) * 4;
+	x3 = MULSHIFT32(c6[1], a2) * 4;
+	x5 = MULSHIFT32(c6[2], a1 - a0) * 4;
 
 	*out = x0 + x1;	out++;
 	*out = x2 + x3;	out++;
@@ -570,17 +570,17 @@ static int IMDCT12x3(int *xCurr, int *xPrev, int *y, int btPrev, int blockIdx, i
 	wp = imdctWin[2];
 	mOut = 0;
 	for (i = 0; i < 3; i++) {
-		yLo = (xPrevWin[ 0+i] << 2);
+		yLo = (xPrevWin[ 0+i] * 4);
 		mOut |= FASTABS(yLo);	y[( 0+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[ 3+i] << 2);
+		yLo = (xPrevWin[ 3+i] * 4);
 		mOut |= FASTABS(yLo);	y[( 3+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[ 6+i] << 2) + (MULSHIFT32(wp[0+i], xBuf[3+i]));	
+		yLo = (xPrevWin[ 6+i] * 4) + (MULSHIFT32(wp[0+i], xBuf[3+i]));
 		mOut |= FASTABS(yLo);	y[( 6+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[ 9+i] << 2) + (MULSHIFT32(wp[3+i], xBuf[5-i]));	
+		yLo = (xPrevWin[ 9+i] * 4) + (MULSHIFT32(wp[3+i], xBuf[5-i]));
 		mOut |= FASTABS(yLo);	y[( 9+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[12+i] << 2) + (MULSHIFT32(wp[6+i], xBuf[2-i]) + MULSHIFT32(wp[0+i], xBuf[(6+3)+i]));	
+		yLo = (xPrevWin[12+i] * 4) + (MULSHIFT32(wp[6+i], xBuf[2-i]) + MULSHIFT32(wp[0+i], xBuf[(6+3)+i]));
 		mOut |= FASTABS(yLo);	y[(12+i)*NBANDS] = yLo;
-		yLo = (xPrevWin[15+i] << 2) + (MULSHIFT32(wp[9+i], xBuf[0+i]) + MULSHIFT32(wp[3+i], xBuf[(6+5)-i]));	
+		yLo = (xPrevWin[15+i] * 4) + (MULSHIFT32(wp[9+i], xBuf[0+i]) + MULSHIFT32(wp[3+i], xBuf[(6+5)-i]));
 		mOut |= FASTABS(yLo);	y[(15+i)*NBANDS] = yLo;
 	}
 
@@ -671,16 +671,16 @@ static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], Si
 		WinPrevious(xPrev, xPrevWin, prevWinIdx);
 
 		nonZero = 0;
-		fiBit = i << 31;
+		fiBit = static_cast<int>((static_cast<unsigned int>(i) & 1U) << 31);
 		for (j = 0; j < 9; j++) {
-			xp = xPrevWin[2*j+0] << 2;	/* << 2 temp for scaling */
+			xp = xPrevWin[2*j+0] * 4;	/* * 4 temp for scaling */
 			nonZero |= xp;
 			y[2*j+0][i] = xp;
 			mOut |= FASTABS(xp);
 
 			/* frequency inversion on odd blocks/odd samples (flip sign if i odd, j odd) */
-			xp = xPrevWin[2*j+1] << 2;
-			xp = (xp ^ (fiBit >> 31)) + (i & 0x01);	
+			xp = xPrevWin[2*j+1] * 4;
+			xp = (xp ^ (fiBit >> 31)) + (i & 0x01);
 			nonZero |= xp;
 			y[2*j+1][i] = xp;
 			mOut |= FASTABS(xp);
