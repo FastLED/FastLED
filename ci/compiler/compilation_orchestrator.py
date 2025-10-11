@@ -6,7 +6,7 @@ It handles compilation workflow, result collection, and statistics reporting.
 """
 
 import time
-from concurrent.futures import Future
+from concurrent.futures import Future, as_completed
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional
@@ -25,6 +25,7 @@ class BoardCompilationResult:
 
     ok: bool
     sketch_results: List[SketchResult]
+    stopped_early: bool = False
 
 
 def compile_board_examples(
@@ -37,6 +38,7 @@ def compile_board_examples(
     merged_bin: bool = False,
     merged_bin_output: Optional[Path] = None,
     extra_packages: Optional[List[str]] = None,
+    max_failures: Optional[int] = None,
 ) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
 
