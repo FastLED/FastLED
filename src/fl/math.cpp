@@ -71,43 +71,13 @@ double exp_impl_double(double value) {
     return result;
 }
 
-// Standalone sqrt implementation using Newton-Raphson method
-// sqrt(x) = y where y*y = x
-// Iterative formula: y_new = (y + x/y) / 2
+// Square root implementations using standard library
 float sqrt_impl_float(float value) {
-    if (value < 0.0f)
-        return 0.0f; // or NaN, but 0 is safer for embedded
-    if (value == 0.0f)
-        return 0.0f;
-
-    // Initial guess using bit manipulation for fast approximation
-    float guess = value * 0.5f;
-    if (guess == 0.0f)
-        guess = value;
-
-    // Newton-Raphson iterations (5 iterations gives good accuracy)
-    for (int i = 0; i < 5; ++i) {
-        guess = (guess + value / guess) * 0.5f;
-    }
-    return guess;
+    return ::sqrtf(value);
 }
 
 double sqrt_impl_double(double value) {
-    if (value < 0.0)
-        return 0.0; // or NaN, but 0 is safer for embedded
-    if (value == 0.0)
-        return 0.0;
-
-    // Initial guess
-    double guess = value * 0.5;
-    if (guess == 0.0)
-        guess = value;
-
-    // Newton-Raphson iterations (6 iterations for double precision)
-    for (int i = 0; i < 6; ++i) {
-        guess = (guess + value / guess) * 0.5;
-    }
-    return guess;
+    return ::sqrt(value);
 }
 
 // Sine implementations using standard library
