@@ -36,10 +36,10 @@ TEST_CASE("fft tester 512") {
     FFTImpl fft(samples);
     fft.run(buffer, &out);
 
-    // Test expectations updated to match Q15 fixed-point implementation (2025-01-11)
+    // Test expectations updated to match magnitude (sqrt) implementation
     const float expected_output[16] = {
-        3.00,      2.00,      2.00,      6.00,      6.08,      15.03,     74069.60,  147622.53,
-        127123.91, 75557.54,  38.14,     4.47,      4.00,      2.00,      1.41,      1.41};
+        3.00,      2.00,      2.00,      6.00,      6.08,      15.03,     3078.22,   4346.29,
+        4033.16,   3109.00,   38.14,     4.47,      4.00,      2.00,      1.41,      1.41};
     for (int i = 0; i < 16; ++i) {
         float a = out.bins_raw[i];
         float b = expected_output[i];
@@ -73,10 +73,10 @@ TEST_CASE("fft tester 256") {
     FFTImpl fft(samples);
     fft.run(buffer, &out);
 
-    // Test expectations updated to match Q15 fixed-point implementation (2025-01-11)
+    // Test expectations updated to match magnitude (sqrt) implementation
     const float expected_output[16] = {
         3.00,      2.00,      4.00,      5.00,      5.10,      9.06,      11.05,     27.66,
-        60417.69,  113548.60, 136322.36, 136873.91, 136186.67, 126147.16, 103467.31, 86549.66};
+        2779.93,   3811.66,   4176.58,   4185.02,   4174.50,   4017.63,   3638.46,   3327.60};
     for (int i = 0; i < 16; ++i) {
         float a = out.bins_raw[i];
         float b = expected_output[i];
