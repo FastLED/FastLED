@@ -16,6 +16,7 @@
 /// ESP32-S3: CLK=12, D0=11, D1=13, D2=14, D3=9  (SPI2 pins)
 /// ESP32-C3: CLK=6,  D0=7,  D1=2,  D2=5,  D3=4  (SPI2 pins)
 /// ESP32-P4: CLK=9,  D0=8,  D1=10, D2=11, D3=6  (SPI2 pins)
+/// ESP32-H2: CLK=4,  D0=5,  D1=0,  D2=2,  D3=3  (SPI2 pins)
 ///
 /// Performance:
 /// - 4×100 LEDs transmitted in ~0.08ms @ 40 MHz
@@ -66,6 +67,14 @@
 #define DATA_PIN_1 10  // SPI2 MISO (D1)
 #define DATA_PIN_2 11  // SPI2 WP (D2)
 #define DATA_PIN_3 6   // SPI2 HD (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32H2
+// ESP32-H2 - Using SPI2 QuadSPI pins
+#define CLOCK_PIN 4    // SPI2 CLK
+#define DATA_PIN_0 5   // SPI2 MOSI (D0)
+#define DATA_PIN_1 0   // SPI2 MISO (D1)
+#define DATA_PIN_2 2   // SPI2 WP (D2)
+#define DATA_PIN_3 3   // SPI2 HD (D3)
 
 #else
 // Fallback for unknown variants - use VSPI-like pins
