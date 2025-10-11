@@ -40,7 +40,7 @@ void LinePath::set(const LinePathParams &p) { params() = p; }
 
 vec2f CirclePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the unit circle [-1, 1]
-    float t = alpha * 2.0f * PI;
+    float t = alpha * 2.0f * FL_PI;
     float x = cosf(t);
     float y = sinf(t);
     return vec2f(x, y);
@@ -53,7 +53,7 @@ HeartPath::HeartPath() {}
 vec2f HeartPath::compute(float alpha) {
     // Parametric equation for a heart shape
     // α in [0,1] → (x,y) on the heart curve
-    float t = alpha * 2.0f * PI;
+    float t = alpha * 2.0f * FL_PI;
 
     // Heart formula based on a modified cardioid with improved aesthetics
     float x = 16.0f * powf(sinf(t), 3);
@@ -87,7 +87,7 @@ vec2f ArchimedeanSpiralPath::compute(float alpha) {
     // α in [0,1] → (x,y) on the spiral curve
 
     // Calculate the angle based on the number of turns
-    float theta = alpha * 2.0f * PI * mTurns;
+    float theta = alpha * 2.0f * FL_PI * mTurns;
 
     // Calculate the radius at this angle (grows linearly with angle)
     // Scale by alpha to ensure we start at center and grow outward
@@ -114,12 +114,12 @@ vec2f RosePath::compute(float alpha) {
     // α in [0,1] → (x,y) on the rose curve
 
     // Map alpha to the full range needed for the rose
-    // For a complete rose, we need to go through k*PI radians where k is:
+    // For a complete rose, we need to go through k*FL_PI radians where k is:
     // - k = n if n is odd and d is 1
     // - k = 2n if n is even and d is 1
     // - k = n*d if n and d are coprime
-    // For simplicity, we'll use 2*PI*n as a good approximation
-    float theta = alpha * 2.0f * PI * params().n;
+    // For simplicity, we'll use 2*FL_PI*n as a good approximation
+    float theta = alpha * 2.0f * FL_PI * params().n;
 
     // Calculate the radius using the rose formula: r = cos(n*θ/d)
     // We use cosine for a rose that starts with a petal at theta=0
@@ -145,7 +145,7 @@ vec2f PhyllotaxisPath::compute(float alpha) {
 
     // use the golden angle in radians:
     //    π * (3 – √5) ≈ 2.399963229728653
-    constexpr float goldenAngle = PI * (3.0f - 1.6180339887498948f);
+    constexpr float goldenAngle = FL_PI * (3.0f - 1.6180339887498948f);
 
     // normalized radius [0…1]: sqrt(n/N) gives uniform point density
     float r = sqrtf(n / N);

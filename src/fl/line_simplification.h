@@ -33,7 +33,7 @@ template <typename NumberT = float> class LineSimplifier {
     using Point = fl::vec2<NumberT>;
     using VectorPoint = fl::vector<Point>;
 
-    LineSimplifier() : mMinDistance(EPSILON_F) {}
+    LineSimplifier() : mMinDistance(FL_EPSILON_F) {}
     LineSimplifier(const LineSimplifier &other) = default;
     LineSimplifier &operator=(const LineSimplifier &other) = default;
     LineSimplifier(LineSimplifier &&other) = default;
@@ -66,7 +66,7 @@ template <typename NumberT = float> class LineSimplifier {
         VectorType &poly = *_poly;
         keep.assign(poly.size(), 1);
         const int n = poly.size();
-        NumberT bestErr = INFINITY_DOUBLE;
+        NumberT bestErr = FL_INFINITY_DOUBLE;
         int bestIdx = -1;
 
         // scan all interior “alive” points

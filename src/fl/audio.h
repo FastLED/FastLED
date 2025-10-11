@@ -92,7 +92,7 @@ class SoundLevelMeter {
 
     /// reset so the next quiet block will re-initialize your floor
     void resetFloor() {
-        dbfs_floor_global_ = INFINITY_DOUBLE; // infinity<double>
+        dbfs_floor_global_ = FL_INFINITY_DOUBLE; // infinity<double>
         offset_ = 0.0;
     }
 

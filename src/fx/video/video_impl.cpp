@@ -13,7 +13,7 @@ VideoImpl::VideoImpl(size_t pixelsPerFrame, float fpsVideo,
                      size_t nFramesInBuffer)
     : mPixelsPerFrame(pixelsPerFrame),
       mFrameInterpolator(
-          fl::make_shared<FrameInterpolator>(MAX(1, nFramesInBuffer), fpsVideo)) {}
+          fl::make_shared<FrameInterpolator>(FL_MAX(1, nFramesInBuffer), fpsVideo)) {}
 
 void VideoImpl::pause(fl::u32 now) {
     if (!mTime) {

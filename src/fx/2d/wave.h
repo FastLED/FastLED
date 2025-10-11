@@ -288,7 +288,7 @@ class WaveFx : public Fx2d {
     void addf(size_t x, size_t y, float value) {
         // Add a value at the given coordinates in the wave simulation.
         float sum = value + mWaveSim.getf(x, y);
-        mWaveSim.setf(x, y, MIN(1.0f, sum));
+        mWaveSim.setf(x, y, FL_MIN(1.0f, sum));
     }
 
     /// @brief Get wave amplitude as 8-bit value

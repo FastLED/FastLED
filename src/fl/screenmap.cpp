@@ -63,14 +63,14 @@ ScreenMap ScreenMap::Circle(int numLeds, float cm_between_leds,
 
     // radius from LED spacing
     float circumference = numLeds * cm_between_leds;
-    float radius = circumference / (2 * PI);
+    float radius = circumference / (2 * FL_PI);
 
     // how big an arc we light vs leave dark
-    float totalAngle = completion * 2 * PI;
-    float gapAngle = 2 * PI - totalAngle;
+    float totalAngle = completion * 2 * FL_PI;
+    float gapAngle = 2 * FL_PI - totalAngle;
 
     // shift so the dark gap is centered at the bottom (–π/2)
-    float startAngle = -PI / 2 + gapAngle / 2.0f;
+    float startAngle = -FL_PI / 2 + gapAngle / 2.0f;
 
     // if partial, land last LED exactly at startAngle+totalAngle
     float divisor =
@@ -209,7 +209,7 @@ bool ScreenMap::ParseJson(const char *jsonStrScreenMap,
             }
         }
 
-        auto n = MIN(x_array.size(), y_array.size());
+        auto n = FL_MIN(x_array.size(), y_array.size());
         if (n != x_array.size() || n != y_array.size()) {
             if (n != x_array.size()) {
             }
@@ -410,10 +410,10 @@ vec2f ScreenMap::getBounds() const {
 
     for (u32 i = 1; i < length; i++) {
         const vec2f &p = lut[i];
-        minX = MIN(minX, p.x);
-        maxX = MAX(maxX, p.x);
-        minY = MIN(minY, p.y);
-        maxY = MAX(maxY, p.y);
+        minX = FL_MIN(minX, p.x);
+        maxX = FL_MAX(maxX, p.x);
+        minY = FL_MIN(minY, p.y);
+        maxY = FL_MAX(maxY, p.y);
     }
 
     return {maxX - minX, maxY - minY};

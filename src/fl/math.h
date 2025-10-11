@@ -13,6 +13,8 @@ float ceil_impl(float value);
 double ceil_impl(double value);
 float exp_impl(float value);
 double exp_impl(double value);
+float sqrt_impl(float value);
+double sqrt_impl(double value);
 
 template <typename T> inline T floor(T value) {
     if (value >= 0) {
@@ -31,6 +33,11 @@ template <typename T> inline T ceil(T value) {
 // Exponential function using custom implementation
 template <typename T> inline T exp(T value) {
     return static_cast<T>(exp_impl(static_cast<double>(value)));
+}
+
+// Square root using Newton-Raphson method
+template <typename T> inline T sqrt(T value) {
+    return static_cast<T>(sqrt_impl(static_cast<float>(value)));
 }
 
 // Constexpr version for compile-time evaluation (compatible with older C++

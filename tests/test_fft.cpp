@@ -26,7 +26,7 @@ TEST_CASE("fft tester 512") {
     const int n = 512;
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
-        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * PI * 10);
+        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
         float sin_x = sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
@@ -45,7 +45,7 @@ TEST_CASE("fft tester 512") {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
         float a = out.bins_raw[i];
         float b = expected_output[i];
-        bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
+        bool almost_equal = FL_ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
@@ -64,7 +64,7 @@ TEST_CASE("fft tester 256") {
     const int n = 256;
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
-        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * PI * 10);
+        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
         float sin_x = sin(rot);
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
@@ -83,7 +83,7 @@ TEST_CASE("fft tester 256") {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
         float a = out.bins_raw[i];
         float b = expected_output[i];
-        bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
+        bool almost_equal = FL_ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);
@@ -102,7 +102,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
     const int n = 256;
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
-        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * PI * 10);
+        float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
         float sin_x = sin(rot);
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
@@ -129,7 +129,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
         // CHECK(out[i] == Approx(expected_output[i]).epsilon(0.1));
         float a = out.bins_raw[i];
         float b = expected_output[i];
-        bool almost_equal = ALMOST_EQUAL(a, b, 0.1);
+        bool almost_equal = FL_ALMOST_EQUAL(a, b, 0.1);
         if (!almost_equal) {
             FASTLED_WARN("FFTImpl output mismatch at index " << i << ": " << a
                                                          << " != " << b);

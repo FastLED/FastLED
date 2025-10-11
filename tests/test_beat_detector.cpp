@@ -304,7 +304,7 @@ TEST_CASE("BeatDetector - Callback mechanisms") {
     fl::vector<float> test_signal(512);
     for (int i = 0; i < 512; ++i) {
         // 440 Hz sine wave
-        float phase = 2.0f * M_PI * 440.0f * i / 44100.0f;
+        float phase = 2.0f * FL_M_PI * 440.0f * i / 44100.0f;
         test_signal[i] = 0.5f * ::sin(phase);
     }
 

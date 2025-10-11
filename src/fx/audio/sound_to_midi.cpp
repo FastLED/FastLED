@@ -77,7 +77,7 @@ inline void fft(const float* input, int N, fl::vector<fl::pair<float, float>>& o
 
   // FFT butterfly stages
   for (int len = 2; len <= N; len <<= 1) {
-    float theta = -2.0f * M_PI / (float)len;
+    float theta = -2.0f * FL_M_PI / (float)len;
     float wlen_re = cosf(theta);
     float wlen_im = sinf(theta);
     for (int i = 0; i < N; i += len) {
@@ -114,13 +114,13 @@ inline void applyWindow(float* signal, int N, WindowType windowType) {
       case WindowType::None:
         break;
       case WindowType::Hann:
-        w = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+        w = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
         break;
       case WindowType::Hamming:
-        w = 0.54f - 0.46f * cosf(2.0f * M_PI * t);
+        w = 0.54f - 0.46f * cosf(2.0f * FL_M_PI * t);
         break;
       case WindowType::Blackman:
-        w = 0.42f - 0.5f * cosf(2.0f * M_PI * t) + 0.08f * cosf(4.0f * M_PI * t);
+        w = 0.42f - 0.5f * cosf(2.0f * FL_M_PI * t) + 0.08f * cosf(4.0f * FL_M_PI * t);
         break;
     }
     signal[i] *= w;
@@ -451,7 +451,7 @@ SoundToMIDIMono::SoundToMIDIMono(const SoundToMIDI& cfg)
     _windowCoeffs.resize(_cfg.frame_size);
     for (int i = 0; i < _cfg.frame_size; ++i) {
       float t = (float)i / (float)(_cfg.frame_size - 1);
-      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
     }
   }
 
@@ -721,7 +721,7 @@ SoundToMIDIPoly::SoundToMIDIPoly(const SoundToMIDI& cfg)
     _windowCoeffs.resize(_cfg.frame_size);
     for (int i = 0; i < _cfg.frame_size; ++i) {
       float t = (float)i / (float)(_cfg.frame_size - 1);
-      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
     }
   }
 
@@ -1461,15 +1461,15 @@ void SoundToMIDISliding::initWindow() {
 
     switch (mSlideCfg.window) {
       case SlidingCfg::Window::Hann:
-        mWindow[i] = 0.5f * (1.0f - cosf(2.0f * M_PI * t));
+        mWindow[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
         break;
 
       case SlidingCfg::Window::Hamming:
-        mWindow[i] = 0.54f - 0.46f * cosf(2.0f * M_PI * t);
+        mWindow[i] = 0.54f - 0.46f * cosf(2.0f * FL_M_PI * t);
         break;
 
       case SlidingCfg::Window::Blackman:
-        mWindow[i] = 0.42f - 0.5f * cosf(2.0f * M_PI * t) + 0.08f * cosf(4.0f * M_PI * t);
+        mWindow[i] = 0.42f - 0.5f * cosf(2.0f * FL_M_PI * t) + 0.08f * cosf(4.0f * FL_M_PI * t);
         break;
     }
   }

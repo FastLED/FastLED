@@ -113,8 +113,8 @@ template <typename T, typename V> struct map_range_math<T, vec2<V>> {
     }
 };
 
-inline bool equals(float a, float b) { return ALMOST_EQUAL_FLOAT(a, b); }
-inline bool equals(double d, double d2) { return ALMOST_EQUAL_DOUBLE(d, d2); }
+inline bool equals(float a, float b) { return FL_ALMOST_EQUAL_FLOAT(a, b); }
+inline bool equals(double d, double d2) { return FL_ALMOST_EQUAL_DOUBLE(d, d2); }
 
 } // namespace map_range_detail
 

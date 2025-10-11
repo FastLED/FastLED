@@ -79,7 +79,7 @@ bool RectangularDrawBuffer::onQueuingDone() {
 u32 RectangularDrawBuffer::getMaxBytesInStrip() const {
     u32 max_bytes = 0;
     for (auto it = mDrawList.begin(); it != mDrawList.end(); ++it) {
-        max_bytes = MAX(max_bytes, it->mNumBytes);
+        max_bytes = FL_MAX(max_bytes, it->mNumBytes);
     }
     return max_bytes;
 }

@@ -47,7 +47,7 @@ struct VisitorFill {
         //     indices.size() == output.size(),
         //     "Gradient::fill: indices and output must be the same size"
         //     "\nSize was" << indices.size() << " and " << output.size());
-        n = MIN(indices.size(), output.size());
+        n = FL_MIN(indices.size(), output.size());
     }
     void accept(const CRGBPalette16 *palette) {
         for (fl::size i = 0; i < n; ++i) {

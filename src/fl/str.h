@@ -252,7 +252,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size newLen = mLength + n;
         if (mHeapData && mHeapData.use_count() <= 1) {
             if (!mHeapData->hasCapacity(newLen)) {
-                fl::size grow_length = MAX(3, newLen * 3 / 2);
+                fl::size grow_length = FL_MAX(3, newLen * 3 / 2);
                 mHeapData->grow(grow_length); // Grow by 50%
             }
             memcpy(mHeapData->data() + mLength, str, n);

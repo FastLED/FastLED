@@ -12,8 +12,8 @@
 #define FASTLED_HAS_BLOCKLESS 1
 
 #define PORT_MASK (((1<<LANES)-1) & 0x0000FFFFL)
-#define MIN(X,Y) (((X)<(Y)) ? (X):(Y))
-#define USED_LANES (MIN(LANES,4))
+#define FL_MIN(X,Y) (((X)<(Y)) ? (X):(Y))
+#define USED_LANES (FL_MIN(LANES,4))
 #define REAL_FIRST_PIN 12
 #define LAST_PIN (12 + USED_LANES - 1)
 

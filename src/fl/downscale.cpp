@@ -116,14 +116,14 @@ void downscaleArbitrary(const CRGB *src, const XYMap &srcXY, CRGB *dst,
                 // Calculate vertical overlap in Q8.8
                 fl::u32 sy0 = sy * FP_ONE;
                 fl::u32 sy1 = (sy + 1) * FP_ONE;
-                fl::u32 y_overlap = MIN(dstY1, sy1) - MAX(dstY0, sy0);
+                fl::u32 y_overlap = FL_MIN(dstY1, sy1) - FL_MAX(dstY0, sy0);
                 if (y_overlap == 0)
                     continue;
 
                 for (fl::u16 sx = srcX_start; sx < srcX_end; ++sx) {
                     fl::u32 sx0 = sx * FP_ONE;
                     fl::u32 sx1 = (sx + 1) * FP_ONE;
-                    fl::u32 x_overlap = MIN(dstX1, sx1) - MAX(dstX0, sx0);
+                    fl::u32 x_overlap = FL_MIN(dstX1, sx1) - FL_MAX(dstX0, sx0);
                     if (x_overlap == 0)
                         continue;
 

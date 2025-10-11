@@ -29,7 +29,7 @@ TEST_CASE("AudioReactive basic functionality") {
     
     for (int i = 0; i < 1000; ++i) {
         // Generate a simple sine wave sample
-        float phase = 2.0f * M_PI * 1000.0f * i / 22050.0f; // 1kHz
+        float phase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f; // 1kHz
         int16_t sample = static_cast<int16_t>(8000.0f * sinf(phase));
         samples.push_back(sample);
     }
@@ -112,7 +112,7 @@ TEST_CASE("AudioReactive enhanced beat detection") {
     
     for (int i = 0; i < 1000; ++i) {
         // Generate a low frequency sine wave (80Hz - should map to bass bins)
-        float phase = 2.0f * M_PI * 80.0f * i / 22050.0f;
+        float phase = 2.0f * FL_M_PI * 80.0f * i / 22050.0f;
         int16_t sample = static_cast<int16_t>(16000.0f * sinf(phase));
         bassySamples.push_back(sample);
     }
@@ -152,9 +152,9 @@ TEST_CASE("AudioReactive multi-band beat detection") {
     
     for (int i = 0; i < 1000; ++i) {
         // Create a multi-frequency signal that should trigger beats
-        float bassPhase = 2.0f * M_PI * 60.0f * i / 22050.0f;   // Bass
-        float midPhase = 2.0f * M_PI * 1000.0f * i / 22050.0f;  // Mid
-        float treblePhase = 2.0f * M_PI * 5000.0f * i / 22050.0f; // Treble
+        float bassPhase = 2.0f * FL_M_PI * 60.0f * i / 22050.0f;   // Bass
+        float midPhase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f;  // Mid
+        float treblePhase = 2.0f * FL_M_PI * 5000.0f * i / 22050.0f; // Treble
         
         float amplitude = 20000.0f; // High amplitude to trigger beats
         float combined = sinf(bassPhase) + sinf(midPhase) + sinf(treblePhase);
@@ -199,14 +199,14 @@ TEST_CASE("AudioReactive spectral flux detection") {
     
     // First sample - single frequency
     for (int i = 0; i < 1000; ++i) {
-        float phase = 2.0f * M_PI * 440.0f * i / 22050.0f; // A note
+        float phase = 2.0f * FL_M_PI * 440.0f * i / 22050.0f; // A note
         int16_t sample = static_cast<int16_t>(8000.0f * sinf(phase));
         sample1.push_back(sample);
     }
     
     // Second sample - different frequency (should create spectral flux)
     for (int i = 0; i < 1000; ++i) {
-        float phase = 2.0f * M_PI * 880.0f * i / 22050.0f; // A note one octave higher
+        float phase = 2.0f * FL_M_PI * 880.0f * i / 22050.0f; // A note one octave higher
         int16_t sample = static_cast<int16_t>(8000.0f * sinf(phase));
         sample2.push_back(sample);
     }
@@ -246,7 +246,7 @@ TEST_CASE("AudioReactive perceptual weighting") {
     samples.reserve(1000);
     
     for (int i = 0; i < 1000; ++i) {
-        float phase = 2.0f * M_PI * 1000.0f * i / 22050.0f;
+        float phase = 2.0f * FL_M_PI * 1000.0f * i / 22050.0f;
         int16_t sample = static_cast<int16_t>(8000.0f * sinf(phase));
         samples.push_back(sample);
     }

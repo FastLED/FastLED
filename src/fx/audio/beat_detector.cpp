@@ -120,7 +120,7 @@ inline void fft_magnitude(const float* input, int N, float* magnitude_out) {
 
     // FFT butterfly stages
     for (int len = 2; len <= N; len <<= 1) {
-        float theta = -2.0f * M_PI / static_cast<float>(len);
+        float theta = -2.0f * FL_M_PI / static_cast<float>(len);
         float wlen_re = ::cos(theta);
         float wlen_im = ::sin(theta);
         for (int i = 0; i < N; i += len) {
@@ -197,8 +197,8 @@ fl::vector<fl::pair<int, int>> computeMelBands(int num_bands, float fmin, float 
         int bin_high = freqToBin(hz_high, fft_size, sample_rate);
 
         // Clamp to valid range
-        bin_low = MAX(0, MIN(bin_low, fft_size / 2));
-        bin_high = MAX(0, MIN(bin_high, fft_size / 2));
+        bin_low = FL_MAX(0, FL_MIN(bin_low, fft_size / 2));
+        bin_high = FL_MAX(0, FL_MIN(bin_high, fft_size / 2));
 
         if (bin_low < bin_high) {
             bands.push_back(fl::make_pair(bin_low, bin_high));
@@ -277,7 +277,7 @@ float OnsetDetectionProcessor::processTimeDomain(const float* frame, int n) {
         energy += frame[i] * frame[i];
     }
 
-    float novelty = MAX(0.0f, energy - _lastEnergy);
+    float novelty = FL_MAX(0.0f, energy - _lastEnergy);
     _lastEnergy = energy;
     return novelty;
 }
@@ -355,7 +355,7 @@ float OnsetDetectionProcessor::computeSpectralFlux(const float* mag, int size) {
     float flux = 0.0f;
     for (int k = 0; k < size; ++k) {
         float diff = mag[k] - prev[k];
-        flux += MAX(0.0f, diff);
+        flux += FL_MAX(0.0f, diff);
     }
 
     return flux;
@@ -382,7 +382,7 @@ float OnsetDetectionProcessor::computeSuperFlux(const float* mag, int size) {
     float flux = 0.0f;
     for (int k = 0; k < size; ++k) {
         float diff = mag[k] - filtered[k];
-        flux += MAX(0.0f, diff);
+        flux += FL_MAX(0.0f, diff);
     }
 
     return flux;
@@ -412,13 +412,13 @@ float OnsetDetectionProcessor::computeMultiBand(const float* mag, int size) {
         int bin_low = freqToBin(band.low_hz, _cfg.fft_size, _cfg.sample_rate_hz);
         int bin_high = freqToBin(band.high_hz, _cfg.fft_size, _cfg.sample_rate_hz);
 
-        bin_low = MAX(0, MIN(bin_low, size - 1));
-        bin_high = MAX(0, MIN(bin_high, size));
+        bin_low = FL_MAX(0, FL_MIN(bin_low, size - 1));
+        bin_high = FL_MAX(0, FL_MIN(bin_high, size));
 
         float band_flux = 0.0f;
         for (int k = bin_low; k < bin_high; ++k) {
             float diff = mag[k] - prev[k];
-            band_flux += MAX(0.0f, diff);
+            band_flux += FL_MAX(0.0f, diff);
         }
 
         total_novelty += band.weight * band_flux;
@@ -430,7 +430,7 @@ float OnsetDetectionProcessor::computeMultiBand(const float* mag, int size) {
 void OnsetDetectionProcessor::applyAdaptiveWhitening(float* mag, int size) {
     // Update running maximum for each bin
     for (int k = 0; k < size; ++k) {
-        _runningMax[k] = MAX(mag[k], _cfg.whitening_alpha * _runningMax[k]);
+        _runningMax[k] = FL_MAX(mag[k], _cfg.whitening_alpha * _runningMax[k]);
 
         // Normalize by running maximum
         if (_runningMax[k] > 1e-6f) {
@@ -456,8 +456,8 @@ void OnsetDetectionProcessor::applyMaximumFilter(float* mag, int size, int radiu
     // Apply maximum filter
     for (int i = 0; i < size; ++i) {
         float max_val = temp[i];
-        for (int j = MAX(0, i - radius); j <= MIN(size - 1, i + radius); ++j) {
-            max_val = MAX(max_val, temp[j]);
+        for (int j = FL_MAX(0, i - radius); j <= FL_MIN(size - 1, i + radius); ++j) {
+            max_val = FL_MAX(max_val, temp[j]);
         }
         mag[i] = max_val;
     }
@@ -721,7 +721,7 @@ void TempoTracker::updateTempoEstimate() {
 
     // Compute autocorrelation of ODF
     float acf[MAX_ACF_LAG];
-    int max_lag = MIN(MAX_ACF_LAG, _odfHistoryCount / 2);
+    int max_lag = FL_MIN(MAX_ACF_LAG, _odfHistoryCount / 2);
     computeAutocorrelation(acf, max_lag);
 
     // Apply comb filter if enabled
@@ -743,7 +743,7 @@ void TempoTracker::updateTempoEstimate() {
 
 void TempoTracker::computeAutocorrelation(float* acf, int max_lag) {
     // Compute autocorrelation using sliding window
-    int window_size = MIN(_odfHistoryCount,
+    int window_size = FL_MIN(_odfHistoryCount,
                               static_cast<int>(_cfg.tempo_acf_window_sec * _cfg.sample_rate_hz / _cfg.hop_size));
 
     for (int lag = 0; lag < max_lag; ++lag) {
@@ -808,8 +808,8 @@ int TempoTracker::findPeakLag(const float* acf, int max_lag) const {
     int min_lag = bpmToLag(_cfg.tempo_max_bpm);
     int max_lag_constrained = bpmToLag(_cfg.tempo_min_bpm);
 
-    min_lag = MAX(1, MIN(min_lag, max_lag));
-    max_lag_constrained = MIN(max_lag_constrained, max_lag);
+    min_lag = FL_MAX(1, FL_MIN(min_lag, max_lag));
+    max_lag_constrained = FL_MIN(max_lag_constrained, max_lag);
 
     int peak_lag = min_lag;
     float peak_val = acf[min_lag];
@@ -897,7 +897,7 @@ void BeatDetector::processFrame(const float* frame, int n) {
         }
 
         // Copy input frame and zero-pad if necessary
-        int copy_size = MIN(n, _cfg.fft_size);
+        int copy_size = FL_MIN(n, _cfg.fft_size);
         for (int i = 0; i < copy_size; ++i) {
             padded_frame[i] = frame[i];
         }
@@ -933,7 +933,7 @@ void BeatDetector::processFrame(const float* frame, int n) {
         }
 
         // Notify tempo change
-        if (ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
+        if (FL_ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
             _lastTempoBPM = beat.bpm;
             if (onTempoChange) {
                 onTempoChange(beat.bpm, beat.confidence);
@@ -966,7 +966,7 @@ void BeatDetector::processSpectrum(const float* magnitude_spectrum, int spectrum
         }
 
         // Notify tempo change
-        if (ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
+        if (FL_ABS(beat.bpm - _lastTempoBPM) > 1.0f) {
             _lastTempoBPM = beat.bpm;
             if (onTempoChange) {
                 onTempoChange(beat.bpm, beat.confidence);

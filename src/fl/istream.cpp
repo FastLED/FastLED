@@ -307,7 +307,7 @@ istream_real& istream_real::operator>>(float& f) {
         // Check if parsing was successful by checking for valid float
         // toFloat() returns 0.0f for invalid input, but we need to distinguish 
         // between actual 0.0f and parse failure
-        if (ALMOST_EQUAL_FLOAT(f, 0.0f) && token != "0" && token != "0.0" && token != "0." && token.find("0") != 0) {
+        if (FL_ALMOST_EQUAL_FLOAT(f, 0.0f) && token != "0" && token != "0.0" && token != "0." && token.find("0") != 0) {
             failed_ = true;
         }
     } else {
@@ -323,7 +323,7 @@ istream_real& istream_real::operator>>(double& d) {
         float f = token.toFloat();
         d = static_cast<double>(f);
         // Check if parsing was successful (same logic as float)
-        if (ALMOST_EQUAL_FLOAT(f, 0.0f) && token != "0" && token != "0.0" && token != "0." && token.find("0") != 0) {
+        if (FL_ALMOST_EQUAL_FLOAT(f, 0.0f) && token != "0" && token != "0.0" && token != "0." && token.find("0") != 0) {
             failed_ = true;
         }
     } else {

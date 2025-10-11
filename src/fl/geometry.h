@@ -153,11 +153,11 @@ template <typename T> struct vec3 {
     }
 
     vec3 getMax(const vec3 &p) const {
-        return vec3(MAX(x, p.x), MAX(y, p.y), MAX(z, p.z));
+        return vec3(FL_MAX(x, p.x), FL_MAX(y, p.y), FL_MAX(z, p.z));
     }
 
     vec3 getMin(const vec3 &p) const {
-        return vec3(MIN(x, p.x), MIN(y, p.y), MIN(z, p.z));
+        return vec3(FL_MIN(x, p.x), FL_MIN(y, p.y), FL_MIN(z, p.z));
     }
 
     template <typename U> vec3<U> cast() const {
@@ -165,18 +165,18 @@ template <typename T> struct vec3 {
     }
 
     template <typename U> vec3 getMax(const vec3<U> &p) const {
-        return vec3<U>(MAX(x, p.x), MAX(y, p.y), MAX(z, p.z));
+        return vec3<U>(FL_MAX(x, p.x), FL_MAX(y, p.y), FL_MAX(z, p.z));
     }
 
     template <typename U> vec3 getMin(const vec3<U> &p) const {
-        return vec3<U>(MIN(x, p.x), MIN(y, p.y), MIN(z, p.z));
+        return vec3<U>(FL_MIN(x, p.x), FL_MIN(y, p.y), FL_MIN(z, p.z));
     }
 
     T distance(const vec3 &p) const {
         T dx = x - p.x;
         T dy = y - p.y;
         T dz = z - p.z;
-        return sqrt(dx * dx + dy * dy + dz * dz);
+        return fl::sqrt(dx * dx + dy * dy + dz * dz);
     }
 
     bool is_zero() const { return (x == 0 && y == 0 && z == 0); }
@@ -305,26 +305,26 @@ template <typename T> struct vec2 {
         return (x != p.x || y != p.y);
     }
 
-    vec2 getMax(const vec2 &p) const { return vec2(MAX(x, p.x), MAX(y, p.y)); }
+    vec2 getMax(const vec2 &p) const { return vec2(FL_MAX(x, p.x), FL_MAX(y, p.y)); }
 
-    vec2 getMin(const vec2 &p) const { return vec2(MIN(x, p.x), MIN(y, p.y)); }
+    vec2 getMin(const vec2 &p) const { return vec2(FL_MIN(x, p.x), FL_MIN(y, p.y)); }
 
     template <typename U> vec2<U> cast() const {
         return vec2<U>(static_cast<U>(x), static_cast<U>(y));
     }
 
     template <typename U> vec2 getMax(const vec2<U> &p) const {
-        return vec2<U>(MAX(x, p.x), MAX(y, p.y));
+        return vec2<U>(FL_MAX(x, p.x), FL_MAX(y, p.y));
     }
 
     template <typename U> vec2 getMin(const vec2<U> &p) const {
-        return vec2<U>(MIN(x, p.x), MIN(y, p.y));
+        return vec2<U>(FL_MIN(x, p.x), FL_MIN(y, p.y));
     }
 
     T distance(const vec2 &p) const {
         T dx = x - p.x;
         T dy = y - p.y;
-        return sqrt(dx * dx + dy * dy);
+        return fl::sqrt(dx * dx + dy * dy);
     }
 
     bool is_zero() const { return (x == 0 && y == 0); }
@@ -393,7 +393,7 @@ template <typename T> struct line_xy {
             out_proj = a;
             dx = p.x - a.x;
             dy = p.y - a.y;
-            return sqrt(dx * dx + dy * dy);
+            return fl::sqrt(dx * dx + dy * dy);
         }
 
         // Project point p onto the line segment, computing parameter t
@@ -411,7 +411,7 @@ template <typename T> struct line_xy {
 
         dx = p.x - out_proj.x;
         dy = p.y - out_proj.y;
-        return sqrt(dx * dx + dy * dy);
+        return fl::sqrt(dx * dx + dy * dy);
     }
 };
 
@@ -444,10 +444,10 @@ template <typename T> struct rect {
     }
 
     void expand(T x, T y) {
-        mMin.x = MIN(mMin.x, x);
-        mMin.y = MIN(mMin.y, y);
-        mMax.x = MAX(mMax.x, x);
-        mMax.y = MAX(mMax.y, y);
+        mMin.x = FL_MIN(mMin.x, x);
+        mMin.y = FL_MIN(mMin.y, y);
+        mMax.x = FL_MAX(mMax.x, x);
+        mMax.y = FL_MAX(mMax.y, y);
     }
 
     bool contains(const vec2<T> &p) const {

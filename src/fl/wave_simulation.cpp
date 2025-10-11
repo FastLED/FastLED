@@ -10,7 +10,7 @@
 namespace {
 
 fl::u8 half_duplex_blend_sqrt_q15(fl::u16 x) {
-    x = MIN(x, 32767); // Q15
+    x = FL_MIN(x, 32767); // Q15
     const int Q = 15;
     fl::u32 X = (fl::u32)x << Q; // promote to Q30
     fl::u32 y = (1u << Q);        // start at “1.0” in Q15
@@ -23,7 +23,7 @@ fl::u8 half_duplex_blend_sqrt_q15(fl::u16 x) {
 }
 
 fl::u8 half_duplex_blend_linear(fl::u16 x) {
-    x = MIN(x, 32767); // Q15
+    x = FL_MIN(x, 32767); // Q15
     x *= 2;
     return x >> 8;
 }
@@ -79,7 +79,7 @@ i16 WaveSimulation2D::geti16(fl::size x, fl::size y) const {
     if (!has(x, y))
         return 0;    
     i32 sum = 0;
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     for (u32 j = 0; j < mult; ++j) {
         for (u32 i = 0; i < mult; ++i) {
             u32 xx = x * mult + i;
@@ -106,7 +106,7 @@ i16 WaveSimulation2D::geti16Previous(fl::size x, fl::size y) const {
     if (!has(x, y))
         return 0;
     i32 sum = 0;
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     for (u32 j = 0; j < mult; ++j) {
         for (u32 i = 0; i < mult; ++i) {
             sum +=
@@ -153,7 +153,7 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
     if (!has(x, y))
         return;
 
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
 
     // radius in pixels of your diamond
     int rad = static_cast<int>(mult) / 2;
@@ -164,7 +164,7 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
             int dx = static_cast<int>(i) - rad;
             int dy = static_cast<int>(j) - rad;
             // keep only those points whose Manhattan distance ≤ rad
-            if (ABS(dx) + ABS(dy) > rad) {
+            if (FL_ABS(dx) + FL_ABS(dy) > rad) {
                 continue;
             }
             fl::size xx = x * mult + i;
@@ -183,8 +183,8 @@ void WaveSimulation2D::seti16(fl::size x, fl::size y, i16 v16) {
                         } else {
                             // if the magnitude of the new pt is greater than what
                             // was already there, then overwrite.
-                            u16 abs_pt = static_cast<u16>(ABS(pt));
-                            u16 abs_v16 = static_cast<u16>(ABS(v16));
+                            u16 abs_pt = static_cast<u16>(FL_ABS(pt));
+                            u16 abs_v16 = static_cast<u16>(FL_ABS(v16));
                             if (abs_v16 > abs_pt) {
                                 pt = v16;
                             }
@@ -292,7 +292,7 @@ float WaveSimulation1D::getf(fl::size x) const {
     if (!has(x))
         return 0.0f;
     float sum = 0.0f;
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     for (u32 i = 0; i < mult; ++i) {
         sum += mSim->getf(x * mult + i);
     }
@@ -302,7 +302,7 @@ float WaveSimulation1D::getf(fl::size x) const {
 i16 WaveSimulation1D::geti16(fl::size x) const {
     if (!has(x))
         return 0;
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     i32 sum = 0;
     for (u32 i = 0; i < mult; ++i) {
         sum += mSim->geti16(x * mult + i);
@@ -313,7 +313,7 @@ i16 WaveSimulation1D::geti16(fl::size x) const {
 i16 WaveSimulation1D::geti16Previous(fl::size x) const {
     if (!has(x))
         return 0;
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     i32 sum = 0;
     for (u32 i = 0; i < mult; ++i) {
         sum += mSim->geti16Previous(x * mult + i);
@@ -370,7 +370,7 @@ void WaveSimulation1D::setf(fl::size x, float value) {
     if (!has(x))
         return;
     value = fl::clamp(value, -1.0f, 1.0f);
-    u8 mult = MAX(1, mMultiplier);
+    u8 mult = FL_MAX(1, mMultiplier);
     for (u32 i = 0; i < mult; ++i) {
         mSim->set(x * mult + i, value);
     }

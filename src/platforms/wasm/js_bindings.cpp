@@ -92,8 +92,8 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
     fl::Json stripsObj = fl::Json::object();
 
     // Track global bounds for absMax/absMin calculation
-    float globalMinX = FLT_MAX, globalMinY = FLT_MAX;
-    float globalMaxX = -FLT_MAX, globalMaxY = -FLT_MAX;
+    float globalMinX = FL_FLT_MAX, globalMinY = FL_FLT_MAX;
+    float globalMaxX = -FL_FLT_MAX, globalMaxY = -FL_FLT_MAX;
     bool hasData = false;
 
     // Get screenMap data
@@ -106,8 +106,8 @@ EMSCRIPTEN_KEEPALIVE void* getScreenMapData(int* dataSize) {
         fl::Json yArray = fl::Json::array();
 
         // Track strip-specific bounds for min/max arrays
-        float stripMinX = FLT_MAX, stripMinY = FLT_MAX;
-        float stripMaxX = -FLT_MAX, stripMaxY = -FLT_MAX;
+        float stripMinX = FL_FLT_MAX, stripMinY = FL_FLT_MAX;
+        float stripMaxX = -FL_FLT_MAX, stripMaxY = -FL_FLT_MAX;
 
         for (uint32_t i = 0; i < screenMap.getLength(); i++) {
             float x = screenMap[i].x;

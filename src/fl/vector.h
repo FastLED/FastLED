@@ -326,7 +326,7 @@ class FL_ALIGN FixedVector {
 
     void swap(FixedVector<T, N> &other) {
         if (this != &other) {
-            const fl::size max_size = MAX(current_size, other.current_size);
+            const fl::size max_size = FL_MAX(current_size, other.current_size);
             for (fl::size i = 0; i < max_size; ++i) {
                 fl::swap(memory()[i], other.memory()[i]);
             }

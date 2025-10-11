@@ -51,7 +51,7 @@ class UISlider : public UIElement {
     float value_normalized() const {
         float min = mImpl.getMin();
         float max = mImpl.getMax();
-        if (ALMOST_EQUAL(max, min, 0.0001f)) {
+        if (FL_ALMOST_EQUAL(max, min, 0.0001f)) {
             return 0;
         }
         return (value() - min) / (max - min);

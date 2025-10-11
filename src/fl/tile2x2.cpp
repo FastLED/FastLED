@@ -101,10 +101,10 @@ Tile2x2_u8_wrap::Tile2x2_u8_wrap(const Tile2x2_u8 &from, u16 width,
 
 u8 Tile2x2_u8::maxValue() const {
     u8 max = 0;
-    max = MAX(max, at(0, 0));
-    max = MAX(max, at(0, 1));
-    max = MAX(max, at(1, 0));
-    max = MAX(max, at(1, 1));
+    max = FL_MAX(max, at(0, 0));
+    max = FL_MAX(max, at(0, 1));
+    max = FL_MAX(max, at(1, 0));
+    max = FL_MAX(max, at(1, 1));
     return max;
 }
 
@@ -112,7 +112,7 @@ Tile2x2_u8 Tile2x2_u8::MaxTile(const Tile2x2_u8 &a, const Tile2x2_u8 &b) {
     Tile2x2_u8 result;
     for (int x = 0; x < 2; ++x) {
         for (int y = 0; y < 2; ++y) {
-            result.at(x, y) = MAX(a.at(x, y), b.at(x, y));
+            result.at(x, y) = FL_MAX(a.at(x, y), b.at(x, y));
         }
     }
     return result;

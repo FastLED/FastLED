@@ -10,7 +10,7 @@
 #include "lib8tion/random8.h"
 #include "noise.h"
 
-// Include here so that #define PI used in Arduino.h does not produce a warning.
+// Include here so that #define FL_PI used in Arduino.h does not produce a warning.
 #include "scale_up.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.

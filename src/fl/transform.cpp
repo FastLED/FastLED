@@ -32,7 +32,7 @@ vec2f TransformFloatImpl::transform(const vec2f &xy) const {
     const bool has_rotation = (rotation != 0.0f);
 
     if (has_rotation) {
-        float radians = rotation * 2 * PI;
+        float radians = rotation * 2 * FL_PI;
         float cos_theta = cosf(radians);
         float sin_theta = sinf(radians);
         float x_rotated = x * cos_theta - y * sin_theta;
@@ -133,7 +133,7 @@ vec2<alpha16> Transform16::transform(const vec2<alpha16> &xy) const {
     return out;
 }
 
-float TransformFloatImpl::scale() const { return MIN(scale_x, scale_y); }
+float TransformFloatImpl::scale() const { return FL_MIN(scale_x, scale_y); }
 
 void TransformFloatImpl::set_scale(float scale) {
     scale_x = scale;
@@ -147,11 +147,11 @@ bool TransformFloatImpl::is_identity() const {
 
 Matrix3x3f TransformFloat::compile() const {
     Matrix3x3f out;
-    out.m[0][0] = scale_x() * cosf(rotation() * 2.0f * PI);
-    out.m[0][1] = -scale_y() * sinf(rotation() * 2.0f * PI);
+    out.m[0][0] = scale_x() * cosf(rotation() * 2.0f * FL_PI);
+    out.m[0][1] = -scale_y() * sinf(rotation() * 2.0f * FL_PI);
     out.m[0][2] = offset_x();
-    out.m[1][0] = scale_x() * sinf(rotation() * 2.0f * PI);
-    out.m[1][1] = scale_y() * cosf(rotation() * 2.0f * PI);
+    out.m[1][0] = scale_x() * sinf(rotation() * 2.0f * FL_PI);
+    out.m[1][1] = scale_y() * cosf(rotation() * 2.0f * FL_PI);
     out.m[1][2] = offset_y();
     out.m[2][2] = 1.0f;
     return out;

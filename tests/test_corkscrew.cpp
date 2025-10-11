@@ -46,8 +46,8 @@ TEST_CASE("Corkscrew Circle10 test") {
     float min_height = 999.0f;
     for (uint16_t i = 0; i < corkscrew_festival.size(); ++i) {
         vec2f pos = corkscrew_festival.at_no_wrap(i);
-        max_height = MAX(max_height, pos.y);
-        min_height = MIN(min_height, pos.y);
+        max_height = FL_MAX(max_height, pos.y);
+        min_height = FL_MIN(min_height, pos.y);
     }
     
     // LEDs should span from 0 to height-1
@@ -368,8 +368,8 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
         vec2f screenMapPos = screenMap[i];
         
         // Positions should match exactly (both are wrapped)
-        REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.x, screenMapPos.x));
-        REQUIRE(ALMOST_EQUAL_FLOAT(corkscrewPos.y, screenMapPos.y));
+        REQUIRE(FL_ALMOST_EQUAL_FLOAT(corkscrewPos.x, screenMapPos.x));
+        REQUIRE(FL_ALMOST_EQUAL_FLOAT(corkscrewPos.y, screenMapPos.y));
     }
     
     // Test that different LED indices have different positions (at least some of them)
@@ -377,7 +377,7 @@ TEST_CASE("Corkscrew ScreenMap functionality") {
     for (uint16_t i = 1; i < 8; ++i) {
         vec2f pos0 = screenMap[0];
         vec2f posI = screenMap[i];
-        if (!ALMOST_EQUAL_FLOAT(pos0.x, posI.x) || !ALMOST_EQUAL_FLOAT(pos0.y, posI.y)) {
+        if (!FL_ALMOST_EQUAL_FLOAT(pos0.x, posI.x) || !FL_ALMOST_EQUAL_FLOAT(pos0.y, posI.y)) {
             positions_differ = true;
             break;
         }
@@ -493,7 +493,7 @@ TEST_CASE("Corkscrew Enhanced Gap - Specific user test: 2 LEDs, 1 turn, 1.0f gap
     REQUIRE(pos1_wrapped.x < static_cast<float>(width));
     
     // The key test: total height should not exceed the specified turns
-    float maxHeight = MAX(pos0_unwrapped.y, pos1_unwrapped.y);
+    float maxHeight = FL_MAX(pos0_unwrapped.y, pos1_unwrapped.y);
     REQUIRE(maxHeight <= 1.0f + 0.1f); // Small tolerance for floating point
     
     // LEDs should have different unwrapped positions due to gap
@@ -544,19 +544,19 @@ TEST_CASE("Corkscrew gap test with 3 LEDs") {
     // - LED2: unwrapped (6,2), wrapped (0,2) - wraps back to 0 as expected
     
     // Test unwrapped positions (what the user specified)
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos0_unwrap.x, 0.0f)); // LED0 at unwrapped w=0
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos1_unwrap.x, 3.0f)); // LED1 at unwrapped w=3.0 ✓
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos2_unwrap.x, 6.0f)); // LED2 at unwrapped w=6.0
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos0_unwrap.x, 0.0f)); // LED0 at unwrapped w=0
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos1_unwrap.x, 3.0f)); // LED1 at unwrapped w=3.0 ✓
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos2_unwrap.x, 6.0f)); // LED2 at unwrapped w=6.0
     
     // Test wrapped positions - all LEDs wrap back to w=0 due to width=3
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos0.x, 0.0f)); // LED0 wrapped w=0
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos1.x, 0.0f)); // LED1 wrapped w=0 (3.0 % 3 = 0) 
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos2.x, 0.0f)); // LED2 wrapped w=0 (6.0 % 3 = 0)
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos0.x, 0.0f)); // LED0 wrapped w=0
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos1.x, 0.0f)); // LED1 wrapped w=0 (3.0 % 3 = 0) 
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos2.x, 0.0f)); // LED2 wrapped w=0 (6.0 % 3 = 0)
     
     // Height positions should increase by 1 for each LED (one turn per 3 width units)
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos0_unwrap.y, 0.0f)); // LED0 height
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos1_unwrap.y, 1.0f)); // LED1 height  
-    REQUIRE(ALMOST_EQUAL_FLOAT(pos2_unwrap.y, 2.0f)); // LED2 height
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos0_unwrap.y, 0.0f)); // LED0 height
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos1_unwrap.y, 1.0f)); // LED1 height  
+    REQUIRE(FL_ALMOST_EQUAL_FLOAT(pos2_unwrap.y, 2.0f)); // LED2 height
 }
 
 TEST_CASE("Corkscrew caching functionality") {

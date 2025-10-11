@@ -214,7 +214,7 @@ class ANIMartRIX {
 
         this->num_x = w;
         this->num_y = h;
-        this->radial_filter_radius = MIN(w,h) * 0.65;
+        this->radial_filter_radius = FL_MIN(w,h) * 0.65;
         render_polar_lookup_table(
             (num_x / 2) - 0.5,
             (num_y / 2) - 0.5); // precalculate all polar coordinates

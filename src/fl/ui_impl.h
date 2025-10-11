@@ -55,7 +55,7 @@ class UISliderImpl {
     // If step is -1, it will be calculated as (max - min) / 100
     UISliderImpl(const char *name, float value = 128.0f, float min = 1,
                  float max = 255, float step = -1.f)
-        : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
+        : mValue(value), mMin(FL_MIN(min, max)), mMax(FL_MAX(min, max)) {
         FASTLED_UNUSED(name);
         FASTLED_UNUSED(step);
         if (value < min) {
@@ -69,7 +69,7 @@ class UISliderImpl {
     float value() const { return mValue; }
     float getMax() const { return mMax; }
     float getMin() const { return mMin; }
-    void setValue(float value) { mValue = MAX(mMin, MIN(mMax, value)); }
+    void setValue(float value) { mValue = FL_MAX(mMin, FL_MIN(mMax, value)); }
     operator float() const { return mValue; }
     operator u8() const { return static_cast<u8>(mValue); }
     operator u16() const { return static_cast<u16>(mValue); }
@@ -158,12 +158,12 @@ class UINumberFieldImpl {
   public:
     UINumberFieldImpl(const char *name, double value, double min = 0,
                       double max = 100)
-        : mValue(value), mMin(MIN(min, max)), mMax(MAX(min, max)) {
+        : mValue(value), mMin(FL_MIN(min, max)), mMax(FL_MAX(min, max)) {
         FASTLED_UNUSED(name);
     }
     ~UINumberFieldImpl() {}
     double value() const { return mValue; }
-    void setValue(double value) { mValue = MAX(mMin, MIN(mMax, value)); }
+    void setValue(double value) { mValue = FL_MAX(mMin, FL_MIN(mMax, value)); }
     operator double() const { return mValue; }
     operator int() const { return static_cast<int>(mValue); }
     UINumberFieldImpl &operator=(double value) {

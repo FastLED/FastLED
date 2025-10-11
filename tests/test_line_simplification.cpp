@@ -118,7 +118,7 @@ TEST_CASE("Iteratively find the closest point") {
         }
         thresh += 0.01f;
     }
-    REQUIRE(ALMOST_EQUAL(thresh, 0.5f, 0.01f));
+    REQUIRE(FL_ALMOST_EQUAL(thresh, 0.5f, 0.01f));
 }
 
 

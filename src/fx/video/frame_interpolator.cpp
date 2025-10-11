@@ -15,7 +15,7 @@ namespace fl {
 
 FrameInterpolator::FrameInterpolator(size_t nframes, float fps)
     : mFrameTracker(fps) {
-    size_t capacity = MAX(1, nframes);
+    size_t capacity = FL_MAX(1, nframes);
     mFrames.setMaxSize(capacity);
 }
 

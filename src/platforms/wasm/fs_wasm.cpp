@@ -72,7 +72,7 @@ class FileData {
     void append(const uint8_t *data, size_t len) {
         fl::lock_guard<fl::mutex> lock(mMutex);
         mData.insert(mData.end(), data, data + len);
-        mCapacity = MAX(mCapacity, mData.size());
+        mCapacity = FL_MAX(mCapacity, mData.size());
     }
 
     size_t read(size_t pos, uint8_t *dst, size_t len) {
@@ -81,7 +81,7 @@ class FileData {
             return 0;
         }
         size_t bytesAvailable = mData.size() - pos;
-        size_t bytesToActuallyRead = MIN(len, bytesAvailable);
+        size_t bytesToActuallyRead = FL_MIN(len, bytesAvailable);
         auto begin_it = mData.begin() + pos;
         auto end_it = begin_it + bytesToActuallyRead;
         std::copy(begin_it, end_it, dst);

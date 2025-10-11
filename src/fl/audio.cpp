@@ -141,7 +141,7 @@ float AudioSample::rms() const {
 
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)
     : spl_floor_(spl_floor), smoothing_alpha_(smoothing_alpha),
-      dbfs_floor_global_(INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
+      dbfs_floor_global_(FL_INFINITY_DOUBLE), offset_(0.0), current_dbfs_(0.0),
       current_spl_(spl_floor) {}
 
 void SoundLevelMeter::processBlock(const fl::i16 *samples, fl::size count) {

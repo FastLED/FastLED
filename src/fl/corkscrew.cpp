@@ -141,7 +141,7 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     // Use the splat function to convert the vec2f to a Tile2x2_u8
     float i_floor = floorf(i);
     float i_ceil = ceilf(i);
-    if (ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
+    if (FL_ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
         // If the index is the same, just return the splat of that index
         vec2f position = at_no_wrap(static_cast<fl::u16>(i_floor));
         return splat(position);
@@ -271,8 +271,8 @@ void Corkscrew::readFrom(const fl::Grid<CRGB>& source_grid, bool use_multi_sampl
                       static_cast<fl::i16>(rect_pos.y + 0.5f));
         
         // Clamp coordinates to grid bounds
-        coord.x = MAX(0, MIN(coord.x, static_cast<fl::i16>(source_grid.width()) - 1));
-        coord.y = MAX(0, MIN(coord.y, static_cast<fl::i16>(source_grid.height()) - 1));
+        coord.x = FL_MAX(0, FL_MIN(coord.x, static_cast<fl::i16>(source_grid.width()) - 1));
+        coord.y = FL_MAX(0, FL_MIN(coord.y, static_cast<fl::i16>(source_grid.height()) - 1));
         
         // Sample from the source fl::Grid using its at() method
         CRGB sampled_color = source_grid.at(coord.x, coord.y);
@@ -381,8 +381,8 @@ void Corkscrew::draw(bool use_multi_sampling) {
                           static_cast<fl::i16>(rect_pos.y + 0.5f));
             
             // Clamp coordinates to surface bounds
-            coord.x = MAX(0, MIN(coord.x, static_cast<fl::i16>(source_surface->width()) - 1));
-            coord.y = MAX(0, MIN(coord.y, static_cast<fl::i16>(source_surface->height()) - 1));
+            coord.x = FL_MAX(0, FL_MIN(coord.x, static_cast<fl::i16>(source_surface->width()) - 1));
+            coord.y = FL_MAX(0, FL_MIN(coord.y, static_cast<fl::i16>(source_surface->height()) - 1));
             
             // Sample from the source surface
             CRGB sampled_color = source_surface->at(coord.x, coord.y);

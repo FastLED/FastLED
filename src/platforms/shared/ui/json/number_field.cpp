@@ -98,7 +98,7 @@ void JsonNumberFieldImpl::setValue(float value) {
     mInternal->setValue(value);
     
     // If value actually changed, mark this component as changed for polling
-    if (!ALMOST_EQUAL_FLOAT(mInternal->value(), oldValue)) {
+    if (!FL_ALMOST_EQUAL_FLOAT(mInternal->value(), oldValue)) {
         mInternal->markChanged();
     }
 }
@@ -117,13 +117,13 @@ JsonNumberFieldImpl &JsonNumberFieldImpl::operator=(int value) {
     return *this;
 }
 
-bool JsonNumberFieldImpl::operator==(float v) const { return ALMOST_EQUAL_FLOAT(value(), v); }
+bool JsonNumberFieldImpl::operator==(float v) const { return FL_ALMOST_EQUAL_FLOAT(value(), v); }
 
-bool JsonNumberFieldImpl::operator==(int v) const { return ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
+bool JsonNumberFieldImpl::operator==(int v) const { return FL_ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
 
-bool JsonNumberFieldImpl::operator!=(float v) const { return !ALMOST_EQUAL_FLOAT(value(), v); }
+bool JsonNumberFieldImpl::operator!=(float v) const { return !FL_ALMOST_EQUAL_FLOAT(value(), v); }
 
-bool JsonNumberFieldImpl::operator!=(int v) const { return !ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
+bool JsonNumberFieldImpl::operator!=(int v) const { return !FL_ALMOST_EQUAL_FLOAT(value(), static_cast<float>(v)); }
 
 } // namespace fl
 
