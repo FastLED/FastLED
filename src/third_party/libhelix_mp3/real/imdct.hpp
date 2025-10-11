@@ -82,36 +82,36 @@ static void AntiAlias(int *x, int nBfly)
 		x += 18;
 
 		a0 = x[-1];			c0 = *c;	c++;	b0 = x[0];		c1 = *c;	c++;
-		x[-1] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[0] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-1] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[0] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-2];			c0 = *c;	c++;	b0 = x[1];		c1 = *c;	c++;
-		x[-2] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[1] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-2] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[1] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 		
 		a0 = x[-3];			c0 = *c;	c++;	b0 = x[2];		c1 = *c;	c++;
-		x[-3] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[2] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-3] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[2] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-4];			c0 = *c;	c++;	b0 = x[3];		c1 = *c;	c++;
-		x[-4] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[3] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-4] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[3] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-5];			c0 = *c;	c++;	b0 = x[4];		c1 = *c;	c++;
-		x[-5] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[4] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-5] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[4] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-6];			c0 = *c;	c++;	b0 = x[5];		c1 = *c;	c++;
-		x[-6] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[5] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-6] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[5] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-7];			c0 = *c;	c++;	b0 = x[6];		c1 = *c;	c++;
-		x[-7] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[6] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-7] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[6] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 
 		a0 = x[-8];			c0 = *c;	c++;	b0 = x[7];		c1 = *c;	c++;
-		x[-8] = (MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1;	
-		x[7] =  (MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1;
+		x[-8] = (int)((unsigned int)(MULSHIFT32(c0, a0) - MULSHIFT32(c1, b0)) << 1);
+		x[7] =  (int)((unsigned int)(MULSHIFT32(c0, b0) + MULSHIFT32(c1, a0)) << 1);
 	}
 }
 
@@ -297,14 +297,14 @@ static __inline void idct9(int *x)
 	m12 = MULSHIFT32(c9_4, a9);
 
 	a12 = x[0] +  (x[6] >> 1);
-	a13 = a12  +  (  m1 << 1);
-	a14 = a12  -  (  m1 << 1);
+	a13 = a12  +  ((int)((unsigned int)m1 << 1));
+	a14 = a12  -  ((int)((unsigned int)m1 << 1));
 	a15 = a1   +  ( a11 >> 1);
-	a16 = ( m5 << 1) + (m6 << 1);
-	a17 = ( m7 << 1) - (m8 << 1);
+	a16 = ((int)((unsigned int)m5 << 1)) + ((int)((unsigned int)m6 << 1));
+	a17 = ((int)((unsigned int)m7 << 1)) - ((int)((unsigned int)m8 << 1));
 	a18 = a16 + a17;
-	a19 = ( m9 << 1) + (m10 << 1);
-	a20 = (m11 << 1) - (m12 << 1);
+	a19 = ((int)((unsigned int)m9 << 1)) + ((int)((unsigned int)m10 << 1));
+	a20 = ((int)((unsigned int)m11 << 1)) - ((int)((unsigned int)m12 << 1));
 
 	a21 = a20 - a19;
 	a22 = a13 + a16;
@@ -315,13 +315,13 @@ static __inline void idct9(int *x)
 	a27 = a13 - a18;
 
 	x0 = a22 + a19;			x[0] = x0;
-	x1 = a15 + (m3 << 1);	x[1] = x1;
+	x1 = a15 + ((int)((unsigned int)m3 << 1));	x[1] = x1;
 	x2 = a24 + a20;			x[2] = x2;
 	x3 = a26 - a21;			x[3] = x3;
 	x4 = a1 - a11;			x[4] = x4;
 	x5 = a27 + a21;			x[5] = x5;
 	x6 = a25 - a20;			x[6] = x6;
-	x7 = a15 - (m3 << 1);	x[7] = x7;
+	x7 = a15 - ((int)((unsigned int)m3 << 1));	x[7] = x7;
 	x8 = a23 - a19;			x[8] = x8;
 }
 
@@ -451,8 +451,8 @@ static int IMDCT36(int *xCurr, int *xPrev, int *y, int btCurr, int btPrev, int b
 			d = xe - xo;
 			(*xPrev++) = xe + xo;	/* symmetry - xPrev[i] = xPrev[17-i] for long blocks */
 			
-			yLo = (xPrevWin[i]    + MULSHIFT32(d, wp[i])) << 2;
-			yHi = (xPrevWin[17-i] + MULSHIFT32(d, wp[17-i])) << 2;
+			yLo = (int)((unsigned int)(xPrevWin[i]    + MULSHIFT32(d, wp[i])) << 2);
+			yHi = (int)((unsigned int)(xPrevWin[17-i] + MULSHIFT32(d, wp[17-i])) << 2);
 			y[(i)*NBANDS]    = yLo;
 			y[(17-i)*NBANDS] = yHi;
 			mOut |= FASTABS(yLo);
@@ -492,21 +492,21 @@ static __inline void imdct12 (int *x, int *out)
 	x0 >>= 1;
 	x1 >>= 1;
 
-	a0 = MULSHIFT32(c3_0, x2) << 1;
+	a0 = (int)((unsigned int)(MULSHIFT32(c3_0, x2)) << 1);
 	a1 = x0 + (x4 >> 1);
 	a2 = x0 - x4;
 	x0 = a1 + a0;
 	x2 = a2;
 	x4 = a1 - a0;
 
-	a0 = MULSHIFT32(c3_0, x3) << 1;
+	a0 = (int)((unsigned int)(MULSHIFT32(c3_0, x3)) << 1);
 	a1 = x1 + (x5 >> 1);
 	a2 = x1 - x5;
 
 	/* cos window odd samples, mul by 2, eat sign bit */
-	x1 = MULSHIFT32(c6[0], a1 + a0) << 2;			
-	x3 = MULSHIFT32(c6[1], a2) << 2;
-	x5 = MULSHIFT32(c6[2], a1 - a0) << 2;
+	x1 = (int)((unsigned int)(MULSHIFT32(c6[0], a1 + a0)) << 2);
+	x3 = (int)((unsigned int)(MULSHIFT32(c6[1], a2)) << 2);
+	x5 = (int)((unsigned int)(MULSHIFT32(c6[2], a1 - a0)) << 2);
 
 	*out = x0 + x1;	out++;
 	*out = x2 + x3;	out++;
