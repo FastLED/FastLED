@@ -191,6 +191,7 @@ def main() -> int:
             log_failures=config.log_failures,
             max_failures=config.max_failures,
             docker_build=config.docker_build,
+            force_local=config.force_local,
             wasm_run=config.wasm_run,
             global_cache_dir=config.global_cache_dir,
         )
@@ -199,6 +200,7 @@ def main() -> int:
     # and not already running inside Docker
     if (
         config.workflow == WorkflowType.NATIVE
+        and not config.force_local
         and not os.environ.get("FASTLED_DOCKER")
         and config.boards
         and len(config.boards) == 1
@@ -228,6 +230,7 @@ def main() -> int:
                 log_failures=config.log_failures,
                 max_failures=config.max_failures,
                 docker_build=config.docker_build,
+                force_local=config.force_local,
                 wasm_run=config.wasm_run,
                 global_cache_dir=config.global_cache_dir,
             )

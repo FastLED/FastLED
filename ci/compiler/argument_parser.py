@@ -41,6 +41,7 @@ class CompilationConfig:
 
     # Docker options
     docker_build: bool = False
+    force_local: bool = False  # True when --local explicitly specified
 
     # WASM options
     wasm_run: bool = False
@@ -295,6 +296,7 @@ class CompilationArgumentParser:
             log_failures=Path(args.log_failures) if args.log_failures else None,
             max_failures=args.max_failures if hasattr(args, "max_failures") else None,
             docker_build=args.build,
+            force_local=args.local,
             wasm_run=args.run,
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,
         )
