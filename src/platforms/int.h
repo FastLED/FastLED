@@ -6,7 +6,9 @@
 #include "platforms/arm/is_arm.h"
 
 
-#if defined(ESP32)
+#if defined(ESP8266)
+    #include "platforms/esp/int_8266.h"
+#elif defined(ESP32)
     #include "platforms/esp/int.h"
 #elif defined(__AVR__)
     #include "platforms/avr/int.h"

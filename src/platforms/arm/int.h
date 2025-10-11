@@ -22,4 +22,5 @@ namespace fl {
     // ARM is 32-bit: pointers and size are 32-bit (use unsigned long to match stdint)
     typedef unsigned long size;   // size_t equivalent
     typedef unsigned long uptr;   // uintptr_t equivalent
+    typedef long ptrdiff;         // ptrdiff_t equivalent
 } 
