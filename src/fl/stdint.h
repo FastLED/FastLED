@@ -39,12 +39,11 @@ typedef short int16_t;
 // This ensures we match the platform's type sizes correctly
 typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
+typedef fl::u64 uint64_t;
+typedef fl::i64 int64_t;
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::ptrdiff ptrdiff_t;
-
-typedef unsigned long long uint64_t;
-typedef long long int64_t;
 
 // stdint.h limit macros
 // These match the standard stdint.h definitions
