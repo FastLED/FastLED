@@ -1425,12 +1425,8 @@ def runner(
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
 
-    # Use meson build system by default for unit and examples tests (unless --no-meson is specified)
-    should_use_meson = (
-        test_categories.unit or test_categories.examples
-    ) and not args.no_meson
-
-    if should_use_meson:
+    # Always use Meson build system for unit tests (Python build system has been removed)
+    if test_categories.unit:
         from ci.util.meson_runner import run_meson_build_and_test
         from ci.util.paths import PROJECT_ROOT
 

@@ -155,11 +155,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Disable fingerprint caching for tests (force rebuild/rerun)",
     )
-    parser.add_argument(
-        "--no-meson",
-        action="store_true",
-        help="Disable Meson build system (default is to use Meson for unit/examples tests)",
-    )
 
     parsed_args = parser.parse_args(args)
 
@@ -191,7 +186,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         debug=parsed_args.debug,
         qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
-        no_meson=parsed_args.no_meson,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided
