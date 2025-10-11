@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional
 
+from ci.util.build_lock import libfastled_build_lock
+
 
 def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
@@ -262,10 +264,15 @@ def run_meson_build_and_test(
         else:
             meson_test_name = test_name
 
-    # Compile
-    if not compile_meson(
-        build_dir, target=meson_test_name if meson_test_name else None
-    ):
+    # Compile with build lock to prevent conflicts with example builds
+    try:
+        with libfastled_build_lock(timeout=600):  # 10 minute timeout
+            if not compile_meson(
+                build_dir, target=meson_test_name if meson_test_name else None
+            ):
+                return False
+    except TimeoutError as e:
+        print(f"[MESON] {e}", file=sys.stderr)
         return False
 
     # Run tests

@@ -35,7 +35,7 @@ foreach board : common_boards
         target_name = 'example-@0@-@1@'.format(example.to_lower(), board)
         run_target(target_name,
             command: [uv_exe, 'run', compile_script, board, example, '--local'],
-            depends: []
+            depends: [fastled_lib]  # Ensure libfastled.a is built first
         )
     endforeach
 endforeach
@@ -46,7 +46,7 @@ foreach board : common_boards
     target_name = 'examples-all-@0@'.format(board)
     run_target(target_name,
         command: [uv_exe, 'run', compile_script, board, '--local'],
-        depends: []
+        depends: [fastled_lib]  # Ensure libfastled.a is built first
     )
 endforeach
 
@@ -54,7 +54,7 @@ endforeach
 # Usage: ninja -C builddir examples-default
 run_target('examples-default',
     command: [uv_exe, 'run', compile_script, '--local'],
-    depends: []
+    depends: [fastled_lib]  # Ensure libfastled.a is built first
 )
 
 # Create target to compile a single example for all common boards
@@ -64,7 +64,7 @@ foreach example : common_examples
     board_list = ','.join(common_boards)
     run_target(target_name,
         command: [uv_exe, 'run', compile_script, board_list, example, '--local'],
-        depends: []
+        depends: [fastled_lib]  # Ensure libfastled.a is built first
     )
 endforeach
 
