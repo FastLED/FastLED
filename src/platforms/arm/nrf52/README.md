@@ -9,7 +9,8 @@ Nordic nRF52 family support.
 - `clockless_arm_nrf52.h`: Clockless driver.
 - `arbiter_nrf52.h`: PWM arbitration utility (selects/guards PWM instances for drivers).
 - `led_sysdefs_arm_nrf52.h`: System defines for nRF52.
-- `malloc_wrappers.cpp`: Weak malloc/free wrappers for Adafruit framework compatibility.
+
+Note: Weak malloc/free wrappers for Adafruit framework compatibility are in `src/platforms.cpp`.
 
 Notes:
 - Requires `CLOCKLESS_FREQUENCY` definition in many setups; PWM resources may be shared and must be arbitrated.
@@ -57,7 +58,7 @@ It's purely a build system artifact from how the Adafruit framework is structure
 
 ### The Solution: Weak Symbols
 
-`malloc_wrappers.cpp` provides weak (`__attribute__((weak))`) implementations that:
+Weak (`__attribute__((weak))`) implementations in `src/platforms.cpp` provide:
 
 1. **When framework provides wrappers:**
    - Framework's strong symbols override our weak ones

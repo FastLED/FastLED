@@ -54,6 +54,46 @@ FL_LINK_WEAK volatile unsigned long timer_millis = 0;
 
 #endif // defined(NRF52_SERIES)
 
+// Malloc wrappers for nRF52 platforms
+// The Adafruit nRF52 Arduino framework adds --wrap=malloc linker flags for thread-safe
+// memory allocation. These weak wrappers ensure the linker finds the required symbols.
+#if defined(__NRF52__) || defined(NRF52) || defined(ARDUINO_NRF52_ADAFRUIT)
+
+#include <stdlib.h>
+
+extern "C" {
+    // Forward declarations for the "real" functions (original libc implementations)
+    void* __real_malloc(size_t size);
+    void __real_free(void* ptr);
+    void* __real_realloc(void* ptr, size_t size);
+    void* __real_calloc(size_t nmemb, size_t size);
+
+    // Weak wrapper implementations - these are used ONLY if the framework
+    // doesn't provide its own strong implementations. They simply pass through
+    // to the real functions with zero overhead.
+
+    __attribute__((weak))
+    void* __wrap_malloc(size_t size) {
+        return __real_malloc(size);
+    }
+
+    __attribute__((weak))
+    void __wrap_free(void* ptr) {
+        __real_free(ptr);
+    }
+
+    __attribute__((weak))
+    void* __wrap_realloc(void* ptr, size_t size) {
+        return __real_realloc(ptr, size);
+    }
+
+    __attribute__((weak))
+    void* __wrap_calloc(size_t nmemb, size_t size) {
+        return __real_calloc(nmemb, size);
+    }
+}
+
+#endif // nRF52 malloc wrappers
 
 
 // FASTLED_NAMESPACE_BEGIN
