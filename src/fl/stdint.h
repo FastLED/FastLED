@@ -40,16 +40,18 @@ typedef short int16_t;
 typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
 
-// Guard against redefinition for platforms (like Teensy 4.x) where system
-// headers are included before FastLED and already define these types.
-// If types match exactly, the guard prevents duplicate typedef errors.
-#ifndef _SIZE_T
+// For size_t, uintptr_t, ptrdiff_t: Use raw primitive types to allow
+// redefinition when system headers define the same types with same primitives.
+// Teensy 4.x needs unsigned int/int, other ARM platforms need unsigned long/long.
+#if defined(__IMXRT1062__)
+// Teensy 4.0/4.1: Match system headers exactly (unsigned int/int)
+typedef unsigned int size_t;
+typedef unsigned int uintptr_t;
+typedef int ptrdiff_t;
+#else
+// Other platforms: Use fl:: types which resolve to appropriate primitives
 typedef fl::size size_t;
-#endif
-#ifndef _UINTPTR_T_DECLARED
 typedef fl::uptr uintptr_t;
-#endif
-#ifndef _PTRDIFF_T_DECLARED
 typedef fl::ptrdiff ptrdiff_t;
 #endif
 
