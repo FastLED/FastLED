@@ -24,9 +24,6 @@
 #include "fl/compiler_control.h"
 
 
-#include "FastLED.h"  // Problematic.
-
-
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SIGN_CONVERSION
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION

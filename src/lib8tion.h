@@ -3,7 +3,6 @@
 #ifndef __INC_LIB8TION_H
 #define __INC_LIB8TION_H
 
-#include "FastLED.h"
 #include "lib8tion/types.h"
 #include "fl/deprecated.h"
 
