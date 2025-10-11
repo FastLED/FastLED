@@ -1,0 +1,7 @@
+/* Minimal retro look */
+#title { text-align: center; color: cyan; }
+#tb-line1 { color: white; }
+#tb-line2 { color: #a8a8a8; }
+Screen { background: #000000; }
+Footer { background: #111111; color: #cccccc; }
+Header { background: #111111; color: #00ffff; }

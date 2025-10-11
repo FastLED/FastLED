@@ -32,6 +32,7 @@ dependencies = [
     "compiledb>=0.10.7",
     "pathspec>=0.12.1",
     "rich>=14.1.0",
+    "textual>=1.0.0",
     "emoji>=2.14.1",
     "pydantic[email]>=2.0.0",
     "dirsync>=2.2.6",
