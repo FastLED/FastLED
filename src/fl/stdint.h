@@ -39,21 +39,9 @@ typedef short int16_t;
 // This ensures we match the platform's type sizes correctly
 typedef fl::u32 uint32_t;
 typedef fl::i32 int32_t;
-
-// For size_t, uintptr_t, ptrdiff_t: Use raw primitive types to allow
-// redefinition when system headers define the same types with same primitives.
-// Teensy 4.x needs unsigned int/int, other ARM platforms need unsigned long/long.
-#if defined(__IMXRT1062__)
-// Teensy 4.0/4.1: Match system headers exactly (unsigned int/int)
-typedef unsigned int size_t;
-typedef unsigned int uintptr_t;
-typedef int ptrdiff_t;
-#else
-// Other platforms: Use fl:: types which resolve to appropriate primitives
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::ptrdiff ptrdiff_t;
-#endif
 
 typedef unsigned long long uint64_t;
 typedef long long int64_t;
