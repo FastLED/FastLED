@@ -5,6 +5,7 @@
 #include "./Keyboard.h"
 #include "./dprint.h"
 #include "fl/unused.h"
+#include "fl/math.h"
 
 Key::Key() : on_(false), sustained_(false), sustain_pedal_on_(false),
              velocity_(0), idx_(0), event_time_(0) {}
@@ -86,7 +87,7 @@ void Key::UpdateIntensity(uint32_t now_ms, uint32_t delta_ms) {
         // Time flexible decay function. Stays accurate
         // even as the frame rate changes.
         // Formula: A = Pe^(r*t)
-        intensity_ = intensity_ * fl::exp(-delta_s * kRate);
+        intensity_ = intensity_ * fl::expf(-delta_s * kRate);
       } else {
         // Quickly fade at the bottom end of the transition.
         const float kRate = .05f;
@@ -99,7 +100,7 @@ void Key::UpdateIntensity(uint32_t now_ms, uint32_t delta_ms) {
         // Time flexible decay function. Stays accurate
         // even as the frame rate changes.
         // Formula: A = Pe^(r*t)
-        intensity_ = intensity_ * fl::exp(-delta_s * kRate);
+        intensity_ = intensity_ * fl::expf(-delta_s * kRate);
       } else {
         // Quickly fade at the bottom end of the transition.
         const float kRate = 2.0f;
