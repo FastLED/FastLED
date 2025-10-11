@@ -14,7 +14,7 @@ Based on works and code by Shawn Silverman.
 
 #include "fl/stdint.h"
 
-#include "fl/math_macros.h" // if needed for MAX/MIN macros
+#include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
 #include "fl/namespace.h"
 #include "fl/unique_ptr.h"
 #include "fl/warn.h"
