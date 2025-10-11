@@ -12,8 +12,11 @@
     #include "platforms/esp/int.h"
 #elif defined(__AVR__)
     #include "platforms/avr/int.h"
+#elif defined(__IMXRT1062__)
+    // Teensy 4.0/4.1 (IMXRT1062 Cortex-M7) - needs special handling for system headers
+    #include "platforms/arm/mxrt1062/int.h"
 #elif defined(FASTLED_ARM)
-    // All ARM platforms (Due, Teensy, STM32, nRF52, Apollo3, etc.)
+    // All other ARM platforms (Due, Teensy 3.x, STM32, nRF52, Apollo3, etc.)
     #include "platforms/arm/int.h"
 #elif defined(__EMSCRIPTEN__)
     // WebAssembly / Emscripten
