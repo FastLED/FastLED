@@ -144,7 +144,7 @@ bool detectBeat(float energy) {
     beatVariance /= 20.0f;
     
     // Detect beat
-    float threshold = beatAverage + (beatSensitivity.value() * sqrt(beatVariance));
+    float threshold = beatAverage + (beatSensitivity.value() * fl::sqrt(beatVariance));
     uint32_t currentTime = millis();
     
     if (energy > threshold && (currentTime - lastBeatTime) > 80) {
@@ -250,8 +250,8 @@ void drawRadialSpectrum(FFTBins* fft, float /* peak */) {
         int radius = magnitude * (FL_MIN(WIDTH, HEIGHT) / 2);
         
         for (int r = 0; r < radius; r++) {
-            int x = centerX + (r * cosf(angle * PI / 180.0f));
-            int y = centerY + (r * sinf(angle * PI / 180.0f));
+            int x = centerX + (r * fl::cosf(angle * FL_PI / 180.0f));
+            int y = centerY + (r * fl::sinf(angle * FL_PI / 180.0f));
             
             if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT) {
                 uint8_t colorIndex = fl::map_range<int, uint8_t>(r, 0, radius, 255, 0);
@@ -280,17 +280,17 @@ void drawWaveform(const Slice<const int16_t>& pcm, float /* peak */) {
         float sample = float(pcm[sampleIndex]) / 32768.0f;  // Normalize to -1.0 to 1.0
         
         // Apply logarithmic scaling to prevent saturation
-        float absSample = fabsf(sample);
+        float absSample = fl::fabsf(sample);
         float logAmplitude = 0.0f;
-        
+
         if (absSample > 0.001f) {  // Avoid log(0)
             // Logarithmic compression: log10(1 + gain * sample)
             float scaledSample = absSample * audioGain.value() * autoGainValue;
-            logAmplitude = log10f(1.0f + scaledSample * 9.0f) / log10f(10.0f);  // Normalize to 0-1
+            logAmplitude = fl::log10f(1.0f + scaledSample * 9.0f) / fl::log10f(10.0f);  // Normalize to 0-1
         }
-        
+
         // Apply smooth sensitivity curve
-        logAmplitude = powf(logAmplitude, 0.7f);  // Gamma correction for better visual response
+        logAmplitude = fl::powf(logAmplitude, 0.7f);  // Gamma correction for better visual response
         
         // Calculate amplitude in pixels
         int amplitude = int(logAmplitude * (HEIGHT / 2));
@@ -437,10 +437,10 @@ void drawPlasmaWave(float peak) {
     
     for (int x = 0; x < WIDTH; x++) {
         for (int y = 0; y < HEIGHT; y++) {
-            float value = sinf(x * 0.1f + time) + 
-                         sinf(y * 0.1f - time) +
-                         sinf((x + y) * 0.1f + time) +
-                         sinf(sqrtf(x * x + y * y) * 0.1f - time);
+            float value = fl::sinf(x * 0.1f + time) +
+                         fl::sinf(y * 0.1f - time) +
+                         fl::sinf((x + y) * 0.1f + time) +
+                         fl::sinf(fl::sqrtf(x * x + y * y) * 0.1f - time);
             
             value = (value + 4) / 8;  // Normalize to 0-1
             value *= audioGain.value() * autoGainValue;
@@ -531,7 +531,7 @@ void loop() {
         // Calculate peak
         int32_t maxSample = 0;
         for (size_t i = 0; i < sample.pcm().size(); i++) {
-            int32_t absSample = fabsf(sample.pcm()[i]);
+            int32_t absSample = fl::fabsf(sample.pcm()[i]);
             if (absSample > maxSample) {
                 maxSample = absSample;
             }

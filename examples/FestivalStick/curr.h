@@ -430,7 +430,7 @@ float get_position(uint32_t now) {
         float elapsedSeconds = float(now - lastUpdateTime) / 1000.0f;
         float increment = elapsedSeconds * speed.value() *
                           0.3f; // Make it 1/20th the original speed
-        currentPosition = fmodf(currentPosition + increment, 1.0f);
+        currentPosition = fl::fmodf(currentPosition + increment, 1.0f);
         lastUpdateTime = now;
         return currentPosition;
     } else {
@@ -468,16 +468,16 @@ void fillFrameBufferNoise() {
     for(int x = 0; x < width; x++) {
         for(int y = 0; y < height; y++) {
             // Convert rectangular coordinates to cylindrical coordinates
-            // Map x to angle (0 to 2*PI), y remains as height
-            float angle = (float(x) / float(width)) * 2.0f * PI;
+            // Map x to angle (0 to 2*FL_PI), y remains as height
+            float angle = (float(x) / float(width)) * 2.0f * FL_PI;
             
             // Convert cylindrical coordinates to cartesian for noise sampling
             // Use the noise_scale to control the cylinder size in noise space
             float cylinder_radius = noise_scale; // Use the existing noise_scale parameter
             
             // Calculate cartesian coordinates on the cylinder surface
-            float noise_x_cyl = cos(angle) * cylinder_radius;
-            float noise_y_cyl = sin(angle) * cylinder_radius;
+            float noise_x_cyl = fl::cos(angle) * cylinder_radius;
+            float noise_y_cyl = fl::sin(angle) * cylinder_radius;
             float noise_z_height = float(y) * noise_scale; // Height component
             
             // Apply time-based offsets

@@ -186,7 +186,7 @@ void loop() {
             // Pulse frequency based on BPM
             float period_ms = (60000.0f / currentBPM);
             float phase = fmod(millis(), period_ms) / period_ms;
-            uint8_t brightness = (sin(phase * 2.0f * PI) + 1.0f) * 32.0f;
+            uint8_t brightness = (fl::sin(phase * 2.0f * FL_PI) + 1.0f) * 32.0f;
 
             CRGB idleColor = getBPMColor(currentBPM);
             idleColor.fadeToBlackBy(255 - brightness);

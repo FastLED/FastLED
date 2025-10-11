@@ -71,10 +71,10 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
     float width_cm = args.width_cm;
 
     const float circumference = leds_per_turn;
-    const float radius = circumference / (2.0 * PI);      // radius in mm
-    const float angle_per_led = 2.0 * PI / leds_per_turn; // degrees per LED
+    const float radius = circumference / (2.0 * FL_PI);      // radius in mm
+    const float angle_per_led = 2.0 * FL_PI / leds_per_turn; // degrees per LED
     const float total_angle_radians = angle_per_led * num_leds;
-    const float total_turns = total_angle_radians / (2.0 * PI); // total turns
+    const float total_turns = total_angle_radians / (2.0 * FL_PI); // total turns
     const float height_per_turn_cm = width_cm; // 10cm height per turn
     const float height_per_led =
         height_per_turn_cm /
@@ -87,8 +87,8 @@ fl::vector<vec3f> makeCorkScrew(corkscrew_args args = corkscrew_args()) {
         float height = (i / leds_per_turn) * height_per_turn_cm; // height in cm
 
         // Calculate the x, y, z coordinates for the corkscrew
-        float x = radius * cos(angle); // x coordinate
-        float z = radius * sin(angle); // y coordinate
+        float x = radius * fl::cos(angle); // x coordinate
+        float z = radius * fl::sin(angle); // y coordinate
         float y = height;              // z coordinate
 
         // Store the 3D coordinates in the vector
@@ -110,8 +110,8 @@ fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
 
 
     const float circumference = leds_per_turn;
-    const float radius = circumference / (2.0 * PI);      // radius in mm
-    const float angle_per_led = 2.0 * PI / leds_per_turn; // degrees per LED
+    const float radius = circumference / (2.0 * FL_PI);      // radius in mm
+    const float angle_per_led = 2.0 * FL_PI / leds_per_turn; // degrees per LED
     const float height_per_turn_cm = width_cm; // 10cm height per turn
     const float height_per_led =
         height_per_turn_cm /
@@ -124,8 +124,8 @@ fl::ScreenMap makeScreenMap(corkscrew_args args = corkscrew_args()) {
         float r = radius + 10 + i * height_per_led; // height in cm
 
         // Calculate the x, y coordinates for the corkscrew
-        float x = r * cos(angle); // x coordinate
-        float y = r * sin(angle); // y coordinate
+        float x = r * fl::cos(angle); // x coordinate
+        float y = r * fl::sin(angle); // y coordinate
 
         // Store the 2D coordinates in the vector
         points[i] = vec2f(x, y);

@@ -59,7 +59,7 @@ float CalcLuminance(float time_delta_ms,
     float brigthness_factor = 0.0f;
     
     if (kUseLedCurtin) {
-      brigthness_factor = sqrt(sqrt(key.orig_color_.v_));
+      brigthness_factor = fl::sqrt(fl::sqrt(key.orig_color_.v_));
     } else {
       //brigthness_factor = key.orig_color_.v_ * key.orig_color_.v_;
       brigthness_factor = key.orig_color_.v_;
@@ -188,7 +188,7 @@ void Painter::PaintVuNotes(uint32_t /*now_ms*/,
     }
     
     const int pixel_count = led_column_table[i];
-    const int draw_pixel_count = ceil(pixel_count * sqrt(key.curr_color_.v_));
+    const int draw_pixel_count = fl::ceil(pixel_count * fl::sqrt(key.curr_color_.v_));
     
     const int black_pixel_count = pixel_count - draw_pixel_count;
     const Color3i& c = *led_rope->GetIterator(i);
@@ -369,13 +369,13 @@ void Painter::VegasVisualizer(const KeyboardState& keyboard,
     uint32_t painted_lights = 0;
     
     // % of lights that are active.
-    const float active_lights_factor = led_column_table[i] * sqrt(key.curr_color_.v_);
+    const float active_lights_factor = led_column_table[i] * fl::sqrt(key.curr_color_.v_);
     const float inactive_lights_factor = 1.0f - active_lights_factor;
     const float taper_point_1 = inactive_lights_factor / 2.0f;
     const float taper_point_2 = taper_point_1 + active_lights_factor; 
     
-    const int taper_idx_1 = static_cast<int>(floor(taper_point_1 * led_column_table[i]));
-    const int taper_idx_2 = static_cast<int>(floor(taper_point_2 * led_column_table[i]));
+    const int taper_idx_1 = static_cast<int>(fl::floor(taper_point_1 * led_column_table[i]));
+    const int taper_idx_2 = static_cast<int>(fl::floor(taper_point_2 * led_column_table[i]));
     
     const Color3i c = key.curr_color_.ToRGB();
     
@@ -458,7 +458,7 @@ void Painter::PaintVuSpaceInvaders(uint32_t /*now_ms*/,
     const Key& key = keyboard.keys_[i];
     
     const int pixel_count = led_column_table[i];
-    const int draw_pixel_count = ceil(pixel_count * sqrt(key.curr_color_.v_));
+    const int draw_pixel_count = fl::ceil(pixel_count * fl::sqrt(key.curr_color_.v_));
     
     const int black_pixel_count = pixel_count - draw_pixel_count;
     
