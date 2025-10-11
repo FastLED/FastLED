@@ -64,7 +64,8 @@ inline std::string get_symbol_with_gdb(DWORD64 address) {
     
     // Calculate file offset by subtracting module base
     DWORD64 fileOffset = address - (DWORD64)hModule;
-    
+    (void)fileOffset;  // Currently unused, but may be needed for future debug output
+
     // Get module filename
     char modulePath[MAX_PATH];
     if (!GetModuleFileNameA(hModule, modulePath, MAX_PATH)) {
