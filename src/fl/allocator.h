@@ -1,7 +1,5 @@
 #pragma once
 
-#include <stdlib.h>
-#include <string.h>
 #include "fl/cstddef.h"
 #include "fl/inplacenew.h"
 #include "fl/memfill.h"
@@ -199,7 +197,7 @@ private:
         
         ~Slab() {
             if (memory) {
-                free(memory);
+                Free(memory);
             }
         }
     };
@@ -209,18 +207,18 @@ private:
     fl::size total_deallocated_;
 
     Slab* createSlab() {
-        Slab* slab = static_cast<Slab*>(malloc(sizeof(Slab)));
+        Slab* slab = static_cast<Slab*>(Malloc(sizeof(Slab)));
         if (!slab) {
             return nullptr;
         }
-        
+
         // Use placement new to properly initialize the Slab
         new(slab) Slab();
-        
-        slab->memory = static_cast<u8*>(malloc(SLAB_MEMORY_SIZE));
+
+        slab->memory = static_cast<u8*>(Malloc(SLAB_MEMORY_SIZE));
         if (!slab->memory) {
             slab->~Slab();
-            free(slab);
+            Free(slab);
             return nullptr;
         }
         
@@ -357,7 +355,7 @@ public:
         }
         
         // Fall back to regular malloc for large allocations
-        ptr = malloc(sizeof(T) * n);
+        ptr = Malloc(sizeof(T) * n);
         if (ptr) {
             fl::memfill(ptr, 0, sizeof(T) * n);
         }
@@ -385,7 +383,7 @@ public:
         
         if (!found_in_slab) {
             // This was allocated with regular malloc
-            free(ptr);
+            Free(ptr);
         }
     }
 
@@ -408,7 +406,7 @@ public:
         while (slabs_) {
             Slab* next = slabs_->next;
             slabs_->~Slab();
-            free(slabs_);
+            Free(slabs_);
             slabs_ = next;
         }
         total_allocated_ = 0;

@@ -11,6 +11,7 @@ Uses the 'fasteners' library for cross-platform file locking.
 import time
 from contextlib import contextmanager
 from pathlib import Path
+from types import TracebackType
 from typing import Generator, Optional
 
 import fasteners
@@ -70,7 +71,12 @@ class BuildLock:
             raise TimeoutError("Failed to acquire build lock")
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> None:
         """Context manager exit."""
         self.release()
 
@@ -80,9 +86,7 @@ class BuildLock:
 
 
 @contextmanager
-def libfastled_build_lock(
-    timeout: float = 300.0
-) -> Generator[BuildLock, None, None]:
+def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, None]:
     """
     Context manager for acquiring libfastled build lock.
 
@@ -126,13 +130,13 @@ if __name__ == "__main__":
         "--duration",
         type=float,
         default=5.0,
-        help="How long to hold the lock (seconds)"
+        help="How long to hold the lock (seconds)",
     )
     parser.add_argument(
         "--timeout",
         type=float,
         default=10.0,
-        help="Maximum time to wait for lock (seconds)"
+        help="Maximum time to wait for lock (seconds)",
     )
 
     args = parser.parse_args()

@@ -117,7 +117,9 @@ def compile_for_board_and_example(
 
     # Acquire build lock before compiling (PlatformIO builds its own libfastled.a)
     try:
-        with libfastled_build_lock(timeout=900):  # 15 minute timeout for platform builds
+        with libfastled_build_lock(
+            timeout=900
+        ):  # 15 minute timeout for platform builds
             # Start timing for the process
             start_time = time.time()
 
