@@ -788,7 +788,6 @@ def create_unit_test_compiler(
     # Unit test specific defines
     unit_test_defines = [
         "FASTLED_UNIT_TEST=1",
-        "FASTLED_FORCE_NAMESPACE=1",
         "FASTLED_USE_PROGMEM=0",
         "STUB_PLATFORM",
         "ARDUINO=10808",
