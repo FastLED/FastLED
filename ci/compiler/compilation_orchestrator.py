@@ -121,19 +121,42 @@ def compile_board_examples(
 
         # Wait for completion and collect results
         results: List[SketchResult] = []
+        failure_count = 0
+        stopped_early = False
 
-        for future in futures:
+        # Use as_completed to process results as they finish (faster failure detection)
+        for future in as_completed(futures):
             try:
                 result = future.result()
                 results.append(result)
+
+                # Track failures
+                if not result.success:
+                    failure_count += 1
+
                 # SUCCESS/FAILED messages are printed by worker threads
+
+                # Check if we've hit the max_failures threshold
+                if max_failures is not None and failure_count >= max_failures:
+                    stopped_early = True
+                    print(
+                        f"\n⚠️  Reached failure threshold ({failure_count} failures, max={max_failures}). "
+                        f"Cancelling remaining builds..."
+                    )
+                    # Cancel all remaining futures
+                    compiler.cancel_all()
+                    for f in futures:
+                        if not f.done():
+                            f.cancel()
+                    break
+
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected, cancelling builds")
                 compiler.cancel_all()
                 import _thread
 
-                for future in futures:
-                    future.cancel()
+                for f in futures:
+                    f.cancel()
 
                 _thread.interrupt_main()
                 raise
@@ -149,9 +172,22 @@ def compile_board_examples(
                         example="<exception>",
                     )
                 )
+                failure_count += 1
                 print(f"EXCEPTION during build: {e}")
                 # Cleanup
                 compiler.cancel_all()
+
+                # Check max_failures after exception too
+                if max_failures is not None and failure_count >= max_failures:
+                    stopped_early = True
+                    print(
+                        f"\n⚠️  Reached failure threshold ({failure_count} failures, max={max_failures}). "
+                        f"Cancelling remaining builds..."
+                    )
+                    for f in futures:
+                        if not f.done():
+                            f.cancel()
+                    break
 
         # Show compiler statistics after all builds complete
         try:
@@ -165,12 +201,10 @@ def compile_board_examples(
         except Exception as e:
             print(f"Warning: Could not retrieve compiler statistics: {e}")
 
-        any_failures = False
-        for r in results:
-            if not r.success:
-                any_failures = True
-                break
-        return BoardCompilationResult(ok=not any_failures, sketch_results=results)
+        any_failures = failure_count > 0
+        return BoardCompilationResult(
+            ok=not any_failures, sketch_results=results, stopped_early=stopped_early
+        )
     except KeyboardInterrupt:
         print("Keyboard interrupt detected, cancelling builds")
         import _thread

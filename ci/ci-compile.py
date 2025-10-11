@@ -330,6 +330,7 @@ def main() -> int:
             merged_bin=config.merged_bin,
             merged_bin_output=merged_bin_output,
             extra_packages=config.extra_packages if config.extra_packages else None,
+            max_failures=config.max_failures,
         )
 
         if not result.ok:
@@ -368,17 +369,9 @@ def main() -> int:
                     # Print the collected output for this sketch
                     print(sketch.output)
 
-            # Check if we've reached max failures and should stop early
-            if (
-                config.max_failures is not None
-                and len(failed_example_names) >= config.max_failures
-            ):
+            # Check if compilation stopped early due to max_failures
+            if result.stopped_early:
                 stopped_early = True
-                print(
-                    yellow_text(
-                        f"\n⚠️  Stopping compilation after {len(failed_example_names)} failures (--max-failures={config.max_failures})"
-                    )
-                )
                 break
 
             # Continue with other boards instead of stopping
