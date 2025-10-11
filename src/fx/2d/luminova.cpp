@@ -116,8 +116,8 @@ void Luminova::draw(DrawContext context) {
         p.a += (n2c) / 9.0f;
 
         float aa = p.a * static_cast<float>(p.f);
-        p.x += ::cosf(aa);
-        p.y += ::sinf(aa);
+        p.x += fl::cosf(aa);
+        p.y += fl::sinf(aa);
 
         plotSoftDot(context.leds, p.x, p.y, p.s);
     }
