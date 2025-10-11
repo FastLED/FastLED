@@ -348,7 +348,7 @@ template<typename T, typename... Args>
 shared_ptr<T> make_shared(Args&&... args) {
     T* obj = new T(fl::forward<Args>(args)...);
     auto* control = new detail::ControlBlock<T>(obj);
-    //FASTLED_WARN("make_shared created object at " << obj 
+    //FASTLED_WARN("make_shared created object at " << obj
     //          << " with control block at " << control);
     //new(control->get_object()) T(fl::forward<Args>(args)...);
     //control->object_constructed = true;

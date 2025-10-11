@@ -40,7 +40,12 @@ private:
     // Embedded state structure to avoid any global dependencies
     struct EmbeddedTJpgState {
         // Workspace for TJpg decoder (must be aligned)
+        // On AVR, alignment beyond 1 byte causes issues with new operator
+#ifdef __AVR__
+        fl::u8 workspace[4096];
+#else
         fl::u8 workspace[4096] __attribute__((aligned(4)));
+#endif
 
         // Input stream management
         const fl::u8* array_data = nullptr;
