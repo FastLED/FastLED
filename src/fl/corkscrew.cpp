@@ -113,7 +113,7 @@ vec2f Corkscrew::at_no_wrap(fl::u16 i) const {
     // }
 
     // now wrap the x-position
-    //position.x = fmodf(position.x, static_cast<float>(mState.width));
+    //position.x = fl::fmodf(position.x, static_cast<float>(mState.width));
     
     return position;
 }
@@ -123,7 +123,7 @@ vec2f Corkscrew::at_exact(fl::u16 i) const {
     vec2f position = at_no_wrap(i);
     
     // Apply cylindrical wrapping to the x-position (like at_wrap does)
-    position.x = fmodf(position.x, static_cast<float>(mWidth));
+    position.x = fl::fmodf(position.x, static_cast<float>(mWidth));
     
     return position;
 }
@@ -139,8 +139,8 @@ Tile2x2_u8 Corkscrew::at_splat_extrapolate(float i) const {
     }
     
     // Use the splat function to convert the vec2f to a Tile2x2_u8
-    float i_floor = floorf(i);
-    float i_ceil = ceilf(i);
+    float i_floor = fl::floorf(i);
+    float i_ceil = fl::ceilf(i);
     if (FL_ALMOST_EQUAL_FLOAT(i_floor, i_ceil)) {
         // If the index is the same, just return the splat of that index
         vec2f position = at_no_wrap(static_cast<fl::u16>(i_floor));
@@ -186,7 +186,7 @@ Tile2x2_u8_wrap Corkscrew::calculateTileAtWrap(float i) const {
             // is mapped to the correct position on the cylinder.
             vec2<u16> pos = origin + vec2<u16>(x, y);
             // now wrap the x-position
-            pos.x = fmodf(pos.x, static_cast<float>(mWidth));
+            pos.x = fl::fmodf(pos.x, static_cast<float>(mWidth));
             data[x][y] = {pos, tile.at(x, y)};
         }
     }

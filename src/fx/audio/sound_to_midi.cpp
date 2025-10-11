@@ -16,7 +16,7 @@ struct NotePeak {
 
 inline int hz_to_midi(float f) {
   // log2(x) = log(x) / log(2)
-  return (int)lroundf(69.0f + 12.0f * (logf(f / 440.0f) / logf(2.0f)));
+  return (int)fl::lroundf(69.0f + 12.0f * (fl::logf(f / 440.0f) / fl::logf(2.0f)));
 }
 
 inline float clamp01(float v) {
@@ -28,12 +28,12 @@ inline float compute_rms(const float* x, int n) {
   for (int i = 0; i < n; ++i) {
     acc += (double)x[i] * (double)x[i];
   }
-  return sqrtf((float)(acc / (double)n));
+  return fl::sqrtf((float)(acc / (double)n));
 }
 
 inline uint8_t amp_to_velocity(float rms, float gain, uint8_t floorV) {
   float v = clamp01(rms * gain);
-  int vel = (int)lroundf(floorV + v * (127 - floorV));
+  int vel = (int)fl::lroundf(floorV + v * (127 - floorV));
   if (vel < 1) vel = 1;
   if (vel > 127) vel = 127;
   return (uint8_t)vel;
@@ -78,8 +78,8 @@ inline void fft(const float* input, int N, fl::vector<fl::pair<float, float>>& o
   // FFT butterfly stages
   for (int len = 2; len <= N; len <<= 1) {
     float theta = -2.0f * FL_M_PI / (float)len;
-    float wlen_re = cosf(theta);
-    float wlen_im = sinf(theta);
+    float wlen_re = fl::cosf(theta);
+    float wlen_im = fl::sinf(theta);
     for (int i = 0; i < N; i += len) {
       float w_re = 1.0f;
       float w_im = 0.0f;
@@ -114,13 +114,13 @@ inline void applyWindow(float* signal, int N, WindowType windowType) {
       case WindowType::None:
         break;
       case WindowType::Hann:
-        w = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
+        w = 0.5f * (1.0f - fl::cosf(2.0f * FL_M_PI * t));
         break;
       case WindowType::Hamming:
-        w = 0.54f - 0.46f * cosf(2.0f * FL_M_PI * t);
+        w = 0.54f - 0.46f * fl::cosf(2.0f * FL_M_PI * t);
         break;
       case WindowType::Blackman:
-        w = 0.42f - 0.5f * cosf(2.0f * FL_M_PI * t) + 0.08f * cosf(4.0f * FL_M_PI * t);
+        w = 0.42f - 0.5f * fl::cosf(2.0f * FL_M_PI * t) + 0.08f * fl::cosf(4.0f * FL_M_PI * t);
         break;
     }
     signal[i] *= w;
@@ -129,19 +129,19 @@ inline void applyWindow(float* signal, int N, WindowType windowType) {
 
 // Apply spectral tilt (linear EQ) to magnitude spectrum
 inline void applySpectralTilt(fl::vector<float>& mag, float db_per_decade, float sr, int N) {
-  if (fabsf(db_per_decade) < 1e-6f) return;
+  if (fl::fabsf(db_per_decade) < 1e-6f) return;
 
   // Convert dB/decade to linear slope per bin
   // f_nyquist = sr/2, number of decades from DC to Nyquist
   float f_nyquist = sr / 2.0f;
-  float decades = log10f(f_nyquist / 1.0f); // Decades from 1 Hz to Nyquist
+  float decades = fl::log10f(f_nyquist / 1.0f); // Decades from 1 Hz to Nyquist
 
   for (size_t i = 1; i < mag.size(); ++i) {
     float freq = (float)i * sr / (float)N;
     if (freq < 1.0f) freq = 1.0f;
-    float decades_from_ref = log10f(freq / 1.0f);
+    float decades_from_ref = fl::log10f(freq / 1.0f);
     float gain_db = db_per_decade * decades_from_ref / decades;
-    float gain_linear = powf(10.0f, gain_db / 20.0f);
+    float gain_linear = fl::powf(10.0f, gain_db / 20.0f);
     mag[i] *= gain_linear;
   }
 }
@@ -186,7 +186,7 @@ inline void applySmoothing(fl::vector<float>& mag, SmoothingMode mode) {
 // Parabolic interpolation for sub-bin accuracy
 inline float parabolicInterp(float y_minus1, float y0, float y_plus1, int bin0) {
   float denom = (y_minus1 - 2.0f*y0 + y_plus1);
-  if (fabsf(denom) < 1e-12f) return (float)bin0;
+  if (fl::fabsf(denom) < 1e-12f) return (float)bin0;
 
   float delta = 0.5f * (y_minus1 - y_plus1) / denom;
   // Clamp delta to reasonable range
@@ -219,7 +219,7 @@ inline fl::vector<NotePeak> detectPolyphonicNotes(
   for (int i = 0; i < halfN; ++i) {
     float re = spectrum[i].first;
     float im = spectrum[i].second;
-    mag[i] = sqrtf(re*re + im*im);
+    mag[i] = fl::sqrtf(re*re + im*im);
   }
 
   // Apply spectral tilt
@@ -229,13 +229,13 @@ inline fl::vector<NotePeak> detectPolyphonicNotes(
   applySmoothing(mag, cfg.smoothing_mode);
 
   // Determine frequency bin range for fmin to fmax
-  int binMin = (int)floorf(fmin * N / sr);
-  int binMax = (int)ceilf(fmax * N / sr);
+  int binMin = (int)fl::floorf(fmin * N / sr);
+  int binMax = (int)fl::ceilf(fmax * N / sr);
   if (binMin < 1) binMin = 1;               // start from 1 to skip DC
   if (binMax > halfN - 1) binMax = halfN - 1;
 
   // Convert threshold from dB to linear
-  float threshold_linear = powf(10.0f, cfg.peak_threshold_db / 20.0f);
+  float threshold_linear = fl::powf(10.0f, cfg.peak_threshold_db / 20.0f);
 
   // Find local peaks above threshold in the specified range
   struct PeakInfo {
@@ -296,14 +296,14 @@ inline fl::vector<NotePeak> detectPolyphonicNotes(
 
         // Check if fq is approximately an integer multiple of f0
         float ratio = fq / f0;
-        int harmonic_num = (int)lroundf(ratio);
+        int harmonic_num = (int)fl::lroundf(ratio);
 
         if (harmonic_num >= 2 && harmonic_num <= 8) {
           // Calculate frequency difference in cents
           float expected_freq = f0 * harmonic_num;
-          float cents_diff = 1200.0f * (logf(fq / expected_freq) / logf(2.0f));
+          float cents_diff = 1200.0f * (fl::logf(fq / expected_freq) / fl::logf(2.0f));
 
-          if (fabsf(cents_diff) < cfg.harmonic_tolerance_cents) {
+          if (fl::fabsf(cents_diff) < cfg.harmonic_tolerance_cents) {
             // fq is likely a harmonic of f0
             // Check energy ratio: harmonic should be weaker than fundamental (or similar)
             if (peaks[q].mag < peaks[p].mag * cfg.harmonic_energy_ratio_max) {
@@ -346,8 +346,8 @@ PitchDetector::PitchDetector() {
 }
 
 PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, float fmax) {
-  int tauMin = (int)floorf(sr / fmax);
-  int tauMax = (int)ceilf(sr / fmin);
+  int tauMin = (int)fl::floorf(sr / fmax);
+  int tauMax = (int)fl::ceilf(sr / fmin);
   if (tauMin < 2) tauMin = 2;
   if (tauMax >= N - 1) tauMax = N - 2;
   if (tauMax > MAX_TAU) tauMax = MAX_TAU;
@@ -403,11 +403,11 @@ PitchResult PitchDetector::detect(const float* x, int N, float sr, float fmin, f
   if (t0 > 1 && t0 < tauMax) {
     float a = _cmnd[t0 - 1], b = _cmnd[t0], c = _cmnd[t0 + 1];
     float denom = (a - 2 * b + c);
-    if (fabsf(denom) > 1e-12f) {
+    if (fl::fabsf(denom) > 1e-12f) {
       float delta = 0.5f * (a - c) / denom;
       float t = (float)t0 + delta;
       if (t >= 2 && t <= tauMax - 1) {
-        tauEst = (int)lroundf(t);
+        tauEst = (int)fl::lroundf(t);
       }
     }
   }
@@ -451,7 +451,7 @@ SoundToMIDIMono::SoundToMIDIMono(const SoundToMIDI& cfg)
     _windowCoeffs.resize(_cfg.frame_size);
     for (int i = 0; i < _cfg.frame_size; ++i) {
       float t = (float)i / (float)(_cfg.frame_size - 1);
-      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
+      _windowCoeffs[i] = 0.5f * (1.0f - fl::cosf(2.0f * FL_M_PI * t));
     }
   }
 
@@ -721,7 +721,7 @@ SoundToMIDIPoly::SoundToMIDIPoly(const SoundToMIDI& cfg)
     _windowCoeffs.resize(_cfg.frame_size);
     for (int i = 0; i < _cfg.frame_size; ++i) {
       float t = (float)i / (float)(_cfg.frame_size - 1);
-      _windowCoeffs[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
+      _windowCoeffs[i] = 0.5f * (1.0f - fl::cosf(2.0f * FL_M_PI * t));
     }
   }
 
@@ -909,7 +909,7 @@ void SoundToMIDIPoly::processFrameInternal(const float* frame) {
           for (const NotePeak& np : notes) {
             if (np.midi == note) {
               // Convert MIDI back to Hz for tracking (MIDI 69 = A4 = 440Hz)
-              _peakMemory[note].freq_hz = 440.0f * powf(2.0f, (note - 69) / 12.0f);
+              _peakMemory[note].freq_hz = 440.0f * fl::powf(2.0f, (note - 69) / 12.0f);
               _peakMemory[note].magnitude = np.magnitude;
               _peakMemory[note].frames_absent = 0;
               break;
@@ -933,7 +933,7 @@ void SoundToMIDIPoly::processFrameInternal(const float* frame) {
               }
             }
             float velNorm = clamp01(globalNorm * relAmp);
-            int vel = (int)lroundf(_cfg.vel_floor + velNorm * (127 - _cfg.vel_floor));
+            int vel = (int)fl::lroundf(_cfg.vel_floor + velNorm * (127 - _cfg.vel_floor));
             if (vel < 1) vel = 1;
             if (vel > 127) vel = 127;
             if (onNoteOn) onNoteOn((uint8_t)note, (uint8_t)vel);
@@ -1075,7 +1075,7 @@ void SoundToMIDIMono::updateJitterTracking(float freq_hz) {
 
   if (_autoTuneState.prev_pitch_valid && freq_hz > 0) {
     // Calculate pitch variance (semitone difference)
-    float semitone_diff = 12.0f * (logf(freq_hz / _autoTuneState.prev_pitch_hz) / logf(2.0f));
+    float semitone_diff = 12.0f * (fl::logf(freq_hz / _autoTuneState.prev_pitch_hz) / fl::logf(2.0f));
     float variance = semitone_diff * semitone_diff;
 
     const float alpha = 0.1f;
@@ -1133,7 +1133,7 @@ void SoundToMIDIMono::updateNoteDuration(bool note_started, bool note_ended) {
 }
 
 void SoundToMIDIMono::notifyParamChange(const char* name, float old_val, float new_val) {
-  if (_autoTuneCallback && fabsf(new_val - old_val) > 1e-6f) {
+  if (_autoTuneCallback && fl::fabsf(new_val - old_val) > 1e-6f) {
     _autoTuneCallback(name, old_val, new_val);
   }
 }
@@ -1288,7 +1288,7 @@ void SoundToMIDIPoly::updateNoiseFloor(float rms, int num_peaks, const fl::vecto
         }
       }
       float median_mag = sorted[sorted.size() / 2];
-      float median_db = 20.0f * log10f(median_mag + 1e-12f);
+      float median_db = 20.0f * fl::log10f(median_mag + 1e-12f);
 
       _autoTuneState.noise_mag_db_est = _autoTuneState.noise_mag_db_est * (1.0f - alpha) + median_db * alpha;
     }
@@ -1314,7 +1314,7 @@ void SoundToMIDIPoly::updateOctaveStatistics(const fl::vector<int>& notes) {
 }
 
 void SoundToMIDIPoly::notifyParamChange(const char* name, float old_val, float new_val) {
-  if (_autoTuneCallback && fabsf(new_val - old_val) > 1e-6f) {
+  if (_autoTuneCallback && fl::fabsf(new_val - old_val) > 1e-6f) {
     _autoTuneCallback(name, old_val, new_val);
   }
 }
@@ -1461,15 +1461,15 @@ void SoundToMIDISliding::initWindow() {
 
     switch (mSlideCfg.window) {
       case SlidingCfg::Window::Hann:
-        mWindow[i] = 0.5f * (1.0f - cosf(2.0f * FL_M_PI * t));
+        mWindow[i] = 0.5f * (1.0f - fl::cosf(2.0f * FL_M_PI * t));
         break;
 
       case SlidingCfg::Window::Hamming:
-        mWindow[i] = 0.54f - 0.46f * cosf(2.0f * FL_M_PI * t);
+        mWindow[i] = 0.54f - 0.46f * fl::cosf(2.0f * FL_M_PI * t);
         break;
 
       case SlidingCfg::Window::Blackman:
-        mWindow[i] = 0.42f - 0.5f * cosf(2.0f * FL_M_PI * t) + 0.08f * cosf(4.0f * FL_M_PI * t);
+        mWindow[i] = 0.42f - 0.5f * fl::cosf(2.0f * FL_M_PI * t) + 0.08f * fl::cosf(4.0f * FL_M_PI * t);
         break;
     }
   }

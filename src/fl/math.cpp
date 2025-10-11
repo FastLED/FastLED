@@ -1,4 +1,5 @@
 #include "fl/math.h"
+#include <math.h>
 
 namespace fl {
 
@@ -107,6 +108,78 @@ double sqrt_impl(double value) {
         guess = (guess + value / guess) * 0.5;
     }
     return guess;
+}
+
+// Sine implementations using standard library
+float sin_impl(float value) {
+    return ::sinf(value);
+}
+
+double sin_impl(double value) {
+    return ::sin(value);
+}
+
+// Cosine implementations using standard library
+float cos_impl(float value) {
+    return ::cosf(value);
+}
+
+double cos_impl(double value) {
+    return ::cos(value);
+}
+
+// Natural logarithm implementations using standard library
+float log_impl(float value) {
+    return ::logf(value);
+}
+
+double log_impl(double value) {
+    return ::log(value);
+}
+
+// Base-10 logarithm implementations using standard library
+float log10_impl(float value) {
+    return ::log10f(value);
+}
+
+double log10_impl(double value) {
+    return ::log10(value);
+}
+
+// Power implementations using standard library
+float pow_impl(float base, float exponent) {
+    return ::powf(base, exponent);
+}
+
+double pow_impl(double base, double exponent) {
+    return ::pow(base, exponent);
+}
+
+// Absolute value implementations using standard library
+float fabs_impl(float value) {
+    return ::fabsf(value);
+}
+
+double fabs_impl(double value) {
+    return ::fabs(value);
+}
+
+// Round to nearest long integer implementations using standard library
+long lround_impl(float value) {
+    return ::lroundf(value);
+}
+
+long lround_impl(double value) {
+    return ::lround(value);
+}
+
+// Floating-point modulo implementations using standard library
+float fmod_impl(float x, float y) {
+    return ::fmodf(x, y);
+}
+
+double fmod_impl(double x, double y) {
+    return ::fmod(x, y);
 }
 
 } // namespace fl
