@@ -198,3 +198,6 @@ fastled_lib = static_library('fastled',
 
 # Build tests subdirectory
 subdir('tests')
+
+# Build examples subdirectory (provides meson targets for example compilation)
+subdir('examples')

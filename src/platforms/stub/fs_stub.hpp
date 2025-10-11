@@ -7,6 +7,7 @@
 #include "fl/file_system.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"
+#include <algorithm>
 #include <fstream>
 #include <cerrno>
 #include <cstdio>
