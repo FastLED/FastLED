@@ -5,7 +5,7 @@
 # (e.g., avr-gcc for Arduino Uno, xtensa-esp32-elf-gcc for ESP32, etc.)
 
 # Use FastLED PlatformIO base image (contains uv, PlatformIO, and all Python dependencies)
-FROM fastled-platformio:latest
+FROM niteris/fastled-compiler-base:latest
 
 # Accept platform name as build argument
 ARG PLATFORM_NAME
