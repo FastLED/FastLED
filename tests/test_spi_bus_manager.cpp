@@ -254,7 +254,7 @@ TEST_CASE("SPIBusManager: Multiple buses with mixed device counts") {
     SPIBusHandle h2_3 = manager.registerDevice(18, 21, &ctrls[3]);
 
     // Bus 3: Two devices on pin 22 (Dual-SPI candidate)
-    SPIBusHandle h3_1 = manager.registerDevice(22, 23, &ctrls[4]);
+    (void)manager.registerDevice(22, 23, &ctrls[4]);
     (void)manager.registerDevice(22, 24, &ctrls[5]);
 
     CHECK(manager.getNumBuses() == 3);
