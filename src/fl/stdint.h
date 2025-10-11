@@ -26,14 +26,16 @@
 #include "fl/cstddef.h"
 
 
-// Define standard integer type names using raw primitive types
+// Define standard integer type names
 // This avoids the slow <stdint.h> include while maintaining compatibility
-// IMPORTANT: Use raw primitive types (not fl:: typedefs) to match system headers exactly
-//            This allows duplicate typedefs when system headers are also included
+// 8-bit types use raw primitives to match system headers exactly (allows duplicate typedefs)
 typedef unsigned char uint8_t;
 typedef signed char int8_t;
-typedef unsigned short uint16_t;
-typedef short int16_t;
+
+// 16-bit types use platform-specific fl:: types to handle platform differences
+// (AVR: int is 16-bit, most others: short is 16-bit)
+typedef fl::u16 uint16_t;
+typedef fl::i16 int16_t;
 
 // Define standard types using fl:: types from platform-specific int.h
 // This ensures we match the platform's type sizes correctly
