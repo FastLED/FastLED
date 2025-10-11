@@ -3,7 +3,6 @@
 /// @file cpixel_ledcontroller.h
 /// defines the templated version of the CLEDController class
 
-#include "FastLED.h"
 #include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "color.h"

@@ -3,8 +3,6 @@
 #ifndef __INC_LED_SYSDEFS_H
 #define __INC_LED_SYSDEFS_H
 
-#include "FastLED.h"
-
 #include "fastled_config.h"
 
 // Include ARM platform detection before any ARM headers

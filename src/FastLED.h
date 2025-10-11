@@ -79,6 +79,8 @@
 #include "fastled_delay.h"
 #include "bitswap.h"
 
+#include "lib8tion.h"
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi_types.h"
@@ -86,8 +88,6 @@
 
 #include "platforms.h"
 #include "fastled_progmem.h"
-
-#include "lib8tion.h"
 #include "pixeltypes.h"
 #include "hsv2rgb.h"
 #include "colorutils.h"
