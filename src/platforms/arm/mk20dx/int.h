@@ -27,8 +27,10 @@ namespace fl {
     // Match Teensy 3.x system header types exactly:
     // - size_t is defined as unsigned int in stddef.h (line 209)
     // - uintptr_t is defined as __uintptr_t (unsigned int) in sys/_stdint.h (line 82)
+    // - intptr_t is defined as __intptr_t (int) in sys/_stdint.h
     // - ptrdiff_t is defined as int in stddef.h (line 143)
     typedef unsigned int size;    // size_t equivalent for Teensy 3.x
     typedef unsigned int uptr;    // uintptr_t equivalent for Teensy 3.x
+    typedef int iptr;             // intptr_t equivalent for Teensy 3.x
     typedef int ptrdiff;          // ptrdiff_t equivalent for Teensy 3.x
 }

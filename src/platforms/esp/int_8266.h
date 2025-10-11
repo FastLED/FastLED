@@ -14,6 +14,7 @@ namespace fl {
     // ESP8266: size_t and pointers are 32-bit using 'unsigned int'
     typedef unsigned int size;
     typedef unsigned int uptr;
+    typedef int iptr;
     typedef int ptrdiff;
 }
 #else
@@ -26,5 +27,6 @@ typedef long long i64;
 typedef unsigned long long u64;
 typedef unsigned int size;
 typedef unsigned int uptr;
+typedef int iptr;
 typedef int ptrdiff;
 #endif

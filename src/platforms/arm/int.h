@@ -19,8 +19,11 @@ namespace fl {
     typedef unsigned long u32;
     typedef long long i64;
     typedef unsigned long long u64;
-    // ARM is 32-bit: pointers and size are 32-bit (use unsigned long to match stdint)
-    typedef unsigned long size;   // size_t equivalent
-    typedef unsigned long uptr;   // uintptr_t equivalent
-    typedef long ptrdiff;         // ptrdiff_t equivalent
+    // ARM is 32-bit: pointers and size are 32-bit
+    // Note: On ARM toolchains, size_t and uintptr_t are typically unsigned int (not unsigned long)
+    // and ptrdiff_t is typically int (not long)
+    typedef unsigned int size;    // size_t equivalent
+    typedef unsigned int uptr;    // uintptr_t equivalent
+    typedef int iptr;             // intptr_t equivalent
+    typedef int ptrdiff;          // ptrdiff_t equivalent
 } 

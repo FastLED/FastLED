@@ -13,11 +13,13 @@ namespace fl {
     #if defined(__wasm64__) || defined(__wasm64)
         typedef unsigned long long size;
         typedef unsigned long long uptr;
+        typedef long long iptr;
         typedef long long ptrdiff;
     #else
         // WASM32 (default)
         typedef unsigned int size;
         typedef unsigned int uptr;
+        typedef int iptr;
         typedef int ptrdiff;
     #endif
 }

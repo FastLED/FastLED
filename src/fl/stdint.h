@@ -45,6 +45,7 @@ typedef fl::u64 uint64_t;
 typedef fl::i64 int64_t;
 typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
+typedef fl::iptr intptr_t;
 typedef fl::ptrdiff ptrdiff_t;
 
 // stdint.h limit macros

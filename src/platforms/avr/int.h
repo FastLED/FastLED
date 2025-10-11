@@ -11,5 +11,6 @@ namespace fl {
     // AVR is 8-bit: pointers are 16-bit
     typedef unsigned int size;   // size_t equivalent (16-bit on AVR)
     typedef unsigned int uptr;   // uintptr_t equivalent (16-bit on AVR)
+    typedef int iptr;            // intptr_t equivalent (16-bit on AVR)
     typedef int ptrdiff;         // ptrdiff_t equivalent (16-bit on AVR)
 }

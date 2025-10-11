@@ -15,11 +15,13 @@ namespace fl {
     // ESP32-P4 is 64-bit: pointers are 64-bit
     typedef unsigned long long size;   // size_t equivalent (64-bit on ESP32-P4)
     typedef unsigned long long uptr;   // uintptr_t equivalent (64-bit on ESP32-P4)
+    typedef long long iptr;            // intptr_t equivalent (64-bit on ESP32-P4)
     typedef long long ptrdiff;         // ptrdiff_t equivalent (signed pointer diff, 64-bit)
 #else
     // ESP32 is 32-bit: pointers are 32-bit
     typedef unsigned long size;   // size_t equivalent (32-bit on ESP)
     typedef unsigned long uptr;   // uintptr_t equivalent (32-bit on ESP)
+    typedef long iptr;            // intptr_t equivalent (32-bit on ESP)
     typedef long ptrdiff;          // ptrdiff_t equivalent (signed pointer diff, 32-bit)
 #endif
 }
@@ -34,10 +36,12 @@ typedef unsigned long long u64;
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 typedef unsigned long long size;
 typedef unsigned long long uptr;
+typedef long long iptr;
 typedef long long ptrdiff;
 #else
 typedef unsigned long size;
 typedef unsigned long uptr;
+typedef long iptr;
 typedef long ptrdiff;
 #endif
 #endif
