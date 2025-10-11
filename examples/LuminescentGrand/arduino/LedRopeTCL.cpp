@@ -8,6 +8,7 @@
 #include "FastLED.h"
 #include "fl/dbg.h"
 #include "fl/ui.h"
+#include "fl/math_macros.h"
 
 #include "../shared/color.h"
 #include "../shared/framebuffer.h"
@@ -163,7 +164,7 @@ void LedRopeTCL::DrawRepeat(const int* value_array, int array_length) {
   
   // Make sure that the number of colors to repeat does not exceed the length
   // of the rope.
-  const int len = MIN(array_length, frame_buffer_.length());
+  const int len = FL_MIN(array_length, frame_buffer_.length());
 
   for (int i = 0; i < len; ++i) {
      const Color3i* cur_color = GetIterator(i);  // Current color.
