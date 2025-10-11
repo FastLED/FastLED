@@ -4,7 +4,7 @@
 namespace fl {
 
 // Standalone floor implementation for float
-float floor_impl(float value) {
+float floor_impl_float(float value) {
     if (value >= 0.0f) {
         return static_cast<float>(static_cast<int>(value));
     }
@@ -13,7 +13,7 @@ float floor_impl(float value) {
 }
 
 // Standalone floor implementation for double
-double floor_impl(double value) {
+double floor_impl_double(double value) {
     if (value >= 0.0) {
         return static_cast<double>(static_cast<long long>(value));
     }
@@ -22,7 +22,7 @@ double floor_impl(double value) {
 }
 
 // Standalone ceil implementation for float
-float ceil_impl(float value) {
+float ceil_impl_float(float value) {
     if (value <= 0.0f) {
         return static_cast<float>(static_cast<int>(value));
     }
@@ -31,7 +31,7 @@ float ceil_impl(float value) {
 }
 
 // Standalone ceil implementation for double
-double ceil_impl(double value) {
+double ceil_impl_double(double value) {
     if (value <= 0.0) {
         return static_cast<double>(static_cast<long long>(value));
     }
@@ -41,7 +41,7 @@ double ceil_impl(double value) {
 
 // Standalone exp implementation using Taylor series
 // e^x ≈ 1 + x + x²/2! + x³/3! + x⁴/4! + ...
-float exp_impl(float value) {
+float exp_impl_float(float value) {
     if (value > 10.0f)
         return 22026.465794806718f; // e^10 approx
     if (value < -10.0f)
@@ -56,7 +56,7 @@ float exp_impl(float value) {
     return result;
 }
 
-double exp_impl(double value) {
+double exp_impl_double(double value) {
     if (value > 10.0)
         return 22026.465794806718; // e^10 approx
     if (value < -10.0)
@@ -74,7 +74,7 @@ double exp_impl(double value) {
 // Standalone sqrt implementation using Newton-Raphson method
 // sqrt(x) = y where y*y = x
 // Iterative formula: y_new = (y + x/y) / 2
-float sqrt_impl(float value) {
+float sqrt_impl_float(float value) {
     if (value < 0.0f)
         return 0.0f; // or NaN, but 0 is safer for embedded
     if (value == 0.0f)
@@ -92,7 +92,7 @@ float sqrt_impl(float value) {
     return guess;
 }
 
-double sqrt_impl(double value) {
+double sqrt_impl_double(double value) {
     if (value < 0.0)
         return 0.0; // or NaN, but 0 is safer for embedded
     if (value == 0.0)
@@ -111,74 +111,74 @@ double sqrt_impl(double value) {
 }
 
 // Sine implementations using standard library
-float sin_impl(float value) {
+float sin_impl_float(float value) {
     return ::sinf(value);
 }
 
-double sin_impl(double value) {
+double sin_impl_double(double value) {
     return ::sin(value);
 }
 
 // Cosine implementations using standard library
-float cos_impl(float value) {
+float cos_impl_float(float value) {
     return ::cosf(value);
 }
 
-double cos_impl(double value) {
+double cos_impl_double(double value) {
     return ::cos(value);
 }
 
 // Natural logarithm implementations using standard library
-float log_impl(float value) {
+float log_impl_float(float value) {
     return ::logf(value);
 }
 
-double log_impl(double value) {
+double log_impl_double(double value) {
     return ::log(value);
 }
 
 // Base-10 logarithm implementations using standard library
-float log10_impl(float value) {
+float log10_impl_float(float value) {
     return ::log10f(value);
 }
 
-double log10_impl(double value) {
+double log10_impl_double(double value) {
     return ::log10(value);
 }
 
 // Power implementations using standard library
-float pow_impl(float base, float exponent) {
+float pow_impl_float(float base, float exponent) {
     return ::powf(base, exponent);
 }
 
-double pow_impl(double base, double exponent) {
+double pow_impl_double(double base, double exponent) {
     return ::pow(base, exponent);
 }
 
 // Absolute value implementations using standard library
-float fabs_impl(float value) {
+float fabs_impl_float(float value) {
     return ::fabsf(value);
 }
 
-double fabs_impl(double value) {
+double fabs_impl_double(double value) {
     return ::fabs(value);
 }
 
 // Round to nearest long integer implementations using standard library
-long lround_impl(float value) {
+long lround_impl_float(float value) {
     return ::lroundf(value);
 }
 
-long lround_impl(double value) {
+long lround_impl_double(double value) {
     return ::lround(value);
 }
 
 // Floating-point modulo implementations using standard library
-float fmod_impl(float x, float y) {
+float fmod_impl_float(float x, float y) {
     return ::fmodf(x, y);
 }
 
-double fmod_impl(double x, double y) {
+double fmod_impl_double(double x, double y) {
     return ::fmod(x, y);
 }
 
