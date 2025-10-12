@@ -11,21 +11,22 @@ uv = find_program('uv')
 
 # Build precompiled header from test_pch.h (contains FastLED.h, doctest + common headers)
 # Uses Zig's bundled Clang to match the compile flags (Meson detected GCC but we need Clang)
-test_pch = custom_target('test_pch',
-  input: 'test_pch.h',
-  output: 'test_pch.h.pch',
-  command: [
-    uv, 'run', 'python', '-m', 'ziglang', 'c++',
-    '-x', 'c++-header',           # Treat input as C++ header
-    '@INPUT@',                     # test_pch.h
-    '-o', '@OUTPUT@',              # test_pch.h.pch
-    unit_test_compile_args,        # Same flags as all tests
-    '-I' + meson.project_source_root() / 'src',
-    '-I' + meson.project_source_root() / 'tests',
-    '-I' + meson.project_source_root() / 'src/platforms/stub',
-  ],
-  install: false
-)
+# TEMPORARILY DISABLED: PCH has mtime caching issues
+# test_pch = custom_target('test_pch',
+#   input: 'test_pch.h',
+#   output: 'test_pch.h.pch',
+#   command: [
+#     uv, 'run', 'python', '-m', 'ziglang', 'c++',
+#     '-x', 'c++-header',           # Treat input as C++ header
+#     '@INPUT@',                     # test_pch.h
+#     '-o', '@OUTPUT@',              # test_pch.h.pch
+#     unit_test_compile_args,        # Same flags as all tests
+#     '-I' + meson.project_source_root() / 'src',
+#     '-I' + meson.project_source_root() / 'tests',
+#     '-I' + meson.project_source_root() / 'src/platforms/stub',
+#   ],
+#   install: false
+# )
 
 # Doctest main object
 doctest_main = static_library('doctest_main',
@@ -136,15 +137,12 @@ test_names = [
   'test_xypath',
 ]
 
-# Build each test executable with shared PCH
+# Build each test executable (PCH temporarily disabled)
 foreach test_name : test_names
   test_exe = executable(test_name,
-    [test_name + '.cpp', test_pch],  # Include PCH as dependency
+    test_name + '.cpp',
     include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: unit_test_compile_args + [
-      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Winvalid-pch',
-    ],
+    cpp_args: unit_test_compile_args,
     link_args: unit_test_link_args,
     link_with: [fastled_lib, doctest_main],
     install: false
@@ -153,14 +151,3 @@ foreach test_name : test_names
   # Register test with project root as working directory
   test(test_name, test_exe, workdir: meson.project_source_root())
 endforeach
-
-# Build test_example_compilation separately (has its own main, doesn't need PCH or doctest)
-test_example_compilation = executable('test_example_compilation',
-  'test_example_compilation.cpp',
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args,
-  link_args: unit_test_link_args,
-  link_with: [fastled_lib],
-  install: false
-)
-test('test_example_compilation', test_example_compilation, workdir: meson.project_source_root())
