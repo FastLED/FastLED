@@ -1,5 +1,17 @@
 #pragma once
 
+// For ESP32 IDF < 4.0, we need to include system headers early to get __int32_t/__uint32_t
+// This must happen before we define fl:: types to avoid typedef conflicts
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+  #include "../esp/esp_version.h"
+  #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
+    // IDF 3.3 defines __int32_t and __uint32_t in system headers
+    // We must use these exact types to match system's uint32_t/int32_t typedefs
+    // Include minimal header that defines these internal types
+    #include <sys/types.h>
+  #endif
+#endif
+
 #ifdef __cplusplus
 namespace fl {
     // ESP platforms: Xtensa and RISC-V toolchains
@@ -11,23 +23,17 @@ namespace fl {
     typedef long long i64;
     typedef unsigned long long u64;
 
-    // 32-bit types: Use compiler built-ins to match system stdint.h exactly
-    // __INT32_TYPE__ and __UINT32_TYPE__ are defined by GCC and vary by toolchain/IDF version
-    // This ensures our types match the system's __int32_t and __uint32_t
-    //
-    // Special handling for ESP32 IDF < 4.0 (including 3.3):
-    // On these versions, Arduino.h includes system stdint.h which defines uint32_t/int32_t
-    // as typedefs of __uint32_t/__int32_t. We must use the same base types to avoid
-    // "conflicting declaration" errors when fl/stdint.h creates its typedefs.
+    // 32-bit types: Match system stdint.h types exactly to prevent typedef conflicts
+    // On ESP32 IDF < 4.0, system defines: typedef __int32_t int32_t
+    // We must use __int32_t for fl::i32 so our typedef is identical
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
   #include "../esp/esp_version.h"
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
-    // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
-    // This matches what system stdint.h uses, preventing typedef conflicts
-    #include <stdint.h>  // Provides __int32_t and __uint32_t
+    // IDF 3.3: Use system __int32_t/__uint32_t types to match system's int32_t/uint32_t
     typedef __int32_t i32;
     typedef __uint32_t u32;
   #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
+    // IDF 4.0+: Use compiler built-ins
     typedef __INT32_TYPE__ i32;
     typedef __UINT32_TYPE__ u32;
   #else
@@ -127,13 +133,11 @@ typedef unsigned short u16;
 typedef long long i64;
 typedef unsigned long long u64;
 
-// 32-bit types: Use compiler built-ins to match system stdint.h exactly
-// Special handling for ESP32 IDF < 4.0 (same as C++ section above)
+// 32-bit types: Match system stdint.h types exactly (same logic as C++ section)
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
   #include "../esp/esp_version.h"
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
-    // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
-    #include <stdint.h>  // Provides __int32_t and __uint32_t
+    // IDF 3.3: Use system __int32_t/__uint32_t types
     typedef __int32_t i32;
     typedef __uint32_t u32;
   #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
@@ -147,6 +151,7 @@ typedef unsigned long long u64;
     typedef __INT32_TYPE__ i32;
     typedef __UINT32_TYPE__ u32;
 #else
+    // Fallback if compiler doesn't define these (shouldn't happen on modern GCC)
     typedef int i32;
     typedef unsigned int u32;
 #endif

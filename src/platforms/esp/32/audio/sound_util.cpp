@@ -34,7 +34,7 @@ namespace {
             1.0f / kCoefficient; // Maybe faster to precompute this.
         const float kInverseIntercept = 1.0f / kIntercept;
         double outd =
-            std::log(rms_loudness * kInverseIntercept) * kInverseCoefficient;
+            fl::log(rms_loudness * kInverseIntercept) * kInverseCoefficient;
         return static_cast<float>(outd);
     }
 }
@@ -58,7 +58,7 @@ float SoundUtil::rms(const i16 *samples, size_t num_samples) {
         sum_of_squares += samples[i] * samples[i];
     }
     double mean_square = static_cast<double>(sum_of_squares) / num_samples;
-    return static_cast<float>(std::sqrt(mean_square));
+    return static_cast<float>(fl::sqrt(mean_square));
 }
 
 } // namespace fl
