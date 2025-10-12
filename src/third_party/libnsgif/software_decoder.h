@@ -7,6 +7,7 @@
 #include "fl/str.h"
 #include "fl/stdint.h"
 #include "fl/scoped_array.h"
+#include "fl/vector.h"
 #include "fx/frame.h"
 
 // Include the actual nsgif header
@@ -47,6 +48,9 @@ namespace third_party {
         bool ready_;
         bool hasError_;
         bool dataComplete_;
+
+        // Data buffer - libnsgif requires all data to be contiguous
+        fl::vector<fl::u8> dataBuffer_;
 
         // Animation state
         fl::u32 currentFrameIndex_;

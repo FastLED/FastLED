@@ -57,6 +57,7 @@ void SoftwareGifDecoder::end() {
     currentFrameIndex_ = 0;
     endOfStream_ = false;
     errorMessage_.clear();
+    dataBuffer_.clear();
 }
 
 bool SoftwareGifDecoder::hasError(fl::string* msg) const {
@@ -234,7 +235,7 @@ bool SoftwareGifDecoder::loadMoreData() {
         return false;
     }
 
-    // Read available data from stream
+    // Read available data from stream in chunks and accumulate
     const fl::size bufferSize = 4096; // Read in chunks
     fl::u8 buffer[bufferSize];
     fl::size bytesRead = stream_->read(buffer, bufferSize);
@@ -246,8 +247,14 @@ bool SoftwareGifDecoder::loadMoreData() {
         return false;
     }
 
-    // Feed data to libnsgif
-    nsgif_error result = nsgif_data_scan(gif_, bytesRead, buffer);
+    // Append new data to accumulated buffer
+    // libnsgif requires ALL data to be provided in each call to nsgif_data_scan
+    fl::size oldSize = dataBuffer_.size();
+    dataBuffer_.resize(oldSize + bytesRead);
+    memcpy(dataBuffer_.data() + oldSize, buffer, bytesRead);
+
+    // Feed ALL accumulated data to libnsgif
+    nsgif_error result = nsgif_data_scan(gif_, dataBuffer_.size(), dataBuffer_.data());
 
     // Check if we've read less than requested (likely end of stream)
     if (bytesRead < bufferSize) {
