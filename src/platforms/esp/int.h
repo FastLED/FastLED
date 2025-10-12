@@ -45,12 +45,13 @@ namespace fl {
     // Pointer and size types vary by platform
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
     // ============================================================
-    // ESP32-P4: 64-bit RISC-V platform
+    // ESP32-P4: 32-bit RISC-V platform (RV32)
+    // Dual-core 400 MHz + single-core 40 MHz low-power RISC-V
     // ============================================================
-    typedef unsigned long long size;   // size_t equivalent (64-bit)
-    typedef unsigned long long uptr;   // uintptr_t equivalent (64-bit)
-    typedef long long iptr;            // intptr_t equivalent (64-bit)
-    typedef long long ptrdiff;         // ptrdiff_t equivalent (64-bit)
+    typedef unsigned int size;     // unsigned int matches __SIZE_TYPE__
+    typedef unsigned int uptr;     // unsigned int matches __uintptr_t
+    typedef int iptr;              // int matches __intptr_t
+    typedef int ptrdiff;           // int matches __PTRDIFF_TYPE__
 
 #elif defined(CONFIG_IDF_TARGET_ESP32)
     // ============================================================
@@ -150,11 +151,11 @@ typedef unsigned long long u64;
 
 // Platform-specific pointer and size types
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
-    // ESP32-P4: 64-bit RISC-V
-    typedef unsigned long long size;
-    typedef unsigned long long uptr;
-    typedef long long iptr;
-    typedef long long ptrdiff;
+    // ESP32-P4: 32-bit RISC-V (RV32)
+    typedef unsigned int size;
+    typedef unsigned int uptr;
+    typedef int iptr;
+    typedef int ptrdiff;
 
 #elif defined(CONFIG_IDF_TARGET_ESP32)
     // ESP32 (original): 32-bit Xtensa LX6
