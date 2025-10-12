@@ -179,7 +179,7 @@ def run_meson_test(
     Returns:
         True if all tests passed, False otherwise
     """
-    cmd = ["meson", "test", "-C", str(build_dir)]
+    cmd = ["meson", "test", "-C", str(build_dir), "--print-errorlogs"]
 
     if verbose:
         cmd.append("-v")
