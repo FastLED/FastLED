@@ -85,15 +85,15 @@ class FFTContext {
         // begin transform
         for (int i = 0; i < m_cq_cfg.bands; ++i) {
             // Q15 fixed-point values from kiss_fft: int16_t where 32768 = 1.0
-            int16_t real = cq[i].r;
-            int16_t imag = cq[i].i;
-            // Calculate magnitude using double precision to avoid overflow
-            double r2 = double(real) * double(real);
-            double i2 = double(imag) * double(imag);
-            float magnitude = float(sqrt(r2 + i2));
+            // Widen to 32-bit to preserve fixed-point scaling during multiplication
+            i32 real = cq[i].r;
+            i32 imag = cq[i].i;
+            // Calculate magnitude - multiply as integers to preserve Q15 scaling
+            float r2 = float(real * real);
+            float i2 = float(imag * imag);
+            float magnitude = sqrt(r2 + i2);
 
-            // No scaling applied - the CQ kernel's fixed-point implementation
-            // produces values that are already in the correct relative scale.
+            // Integer multiplication preserves the Q15 fixed-point scale.
             // Test expectations have been updated to match this implementation.
 
             float magnitude_db = 20 * log10(magnitude);
