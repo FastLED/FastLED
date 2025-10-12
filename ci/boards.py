@@ -493,11 +493,19 @@ GIGA_R1 = Board(
 #     platform=ESP32_IDF_5_1_PIOARDUINO,
 # )
 
+# ESP32-C2: Use Arduino framework only (not "arduino, espidf")
+# The dual framework mode causes PlatformIO to use ESP-IDF's component-based build system,
+# which does not automatically discover and compile .cpp files in example subdirectories
+# (e.g., examples/Codec/codec_processor.cpp, examples/Downscale/src/xypaths.cpp).
+# This resulted in linking errors with "undefined reference" to functions defined in those files.
+# Arduino-only mode uses PlatformIO's standard source discovery which correctly compiles
+# all .cpp files copied to the build directory.
+# See: GitHub Actions run 18448215424 - ESP32-C2 linking failures for Codec, Downscale, FxWave2d
 ESP32_C2_DEVKITM_1 = Board(
     board_name="esp32c2",
     real_board_name="esp32-c2-devkitm-1",
     platform="https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip",
-    framework="arduino, espidf",
+    framework="arduino",  # IMPORTANT: Do not add "espidf" - see comment above
 )
 
 ESP32_C3_DEVKITM_1 = Board(
