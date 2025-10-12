@@ -138,52 +138,32 @@ unit_test_compile_args = [
   '-g'
 ]
 
-# Windows-specific compiler flags (matches ci/build_unit.toml [windows] section)
+# Windows-specific compiler flags (Clang only, targeting x86_64-windows-gnu)
 if build_machine.system() == 'windows'
-  cpp_compiler = meson.get_compiler('cpp')
-
-  # Add common Windows defines for all compilers
   unit_test_compile_args += [
     '-DNOMINMAX',                   # Prevent Windows min/max macros
     '-DWIN32_LEAN_AND_MEAN',        # Reduce Windows header conflicts
+    '--target=x86_64-windows-gnu',  # Explicit GNU target for MSYS2/MinGW compatibility
+    '-fuse-ld=lld-link',            # Use lld-link (MSVC-compatible linker)
   ]
-
-  # Clang/Zig-specific flags
-  if cpp_compiler.get_id() in ['clang', 'clang-cl']
-    unit_test_compile_args += [
-      '--target=x86_64-windows-gnu',  # Explicit GNU target for MSYS2/MinGW compatibility
-      '-fuse-ld=lld-link',            # Use lld-link (MSVC-compatible linker)
-    ]
-  endif
 endif
 
-# Link arguments
+# Link arguments (Clang only, targeting x86_64-windows-gnu)
 unit_test_link_args = []
 if build_machine.system() == 'windows'
-  cpp_compiler = meson.get_compiler('cpp')
-
-  # Clang/Zig-specific linker flags (matches ci/build_unit.toml [windows] link_flags + [test] link_flags)
-  if cpp_compiler.get_id() in ['clang', 'clang-cl']
-    unit_test_link_args = [
-      '-mconsole',              # Console application
-      '-nodefaultlibs',         # Don't automatically include default libraries
-      '-unwindlib=libunwind',   # Use Clang's libunwind (avoid MinGW unwind)
-      '-nostdlib++',            # Don't auto-link standard C++ library
-      '-lc++',                  # Manually link libc++ (Clang's C++ standard library)
-      '-lkernel32',             # Windows kernel functions
-      '-luser32',               # Windows user interface
-      '-lgdi32',                # Graphics device interface
-      '-ladvapi32',             # Advanced Windows API
-      '-ldbghelp',              # Debug helper (for stack traces)
-      '-lpsapi',                # Process status API
-    ]
-  else
-    # GCC/MinGW linker flags
-    unit_test_link_args = [
-      '-ldbghelp',              # Debug helper (for stack traces)
-      '-lpsapi',                # Process status API
-    ]
-  endif
+  unit_test_link_args = [
+    '-mconsole',              # Console application
+    '-nodefaultlibs',         # Don't automatically include default libraries
+    '-unwindlib=libunwind',   # Use Clang's libunwind (avoid MinGW unwind)
+    '-nostdlib++',            # Don't auto-link standard C++ library
+    '-lc++',                  # Manually link libc++ (Clang's C++ standard library)
+    '-lkernel32',             # Windows kernel functions
+    '-luser32',               # Windows user interface
+    '-lgdi32',                # Graphics device interface
+    '-ladvapi32',             # Advanced Windows API
+    '-ldbghelp',              # Debug helper (for stack traces)
+    '-lpsapi',                # Process status API
+  ]
 else
   unit_test_link_args = ['-pthread']
 endif
