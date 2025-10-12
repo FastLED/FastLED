@@ -11,22 +11,23 @@ uv = find_program('uv')
 
 # Build precompiled header from test_pch.h (contains FastLED.h, doctest + common headers)
 # Uses Zig's bundled Clang to match the compile flags (Meson detected GCC but we need Clang)
-# TEMPORARILY DISABLED: PCH has mtime caching issues
-# test_pch = custom_target('test_pch',
-#   input: 'test_pch.h',
-#   output: 'test_pch.h.pch',
-#   command: [
-#     uv, 'run', 'python', '-m', 'ziglang', 'c++',
-#     '-x', 'c++-header',           # Treat input as C++ header
-#     '@INPUT@',                     # test_pch.h
-#     '-o', '@OUTPUT@',              # test_pch.h.pch
-#     unit_test_compile_args,        # Same flags as all tests
-#     '-I' + meson.project_source_root() / 'src',
-#     '-I' + meson.project_source_root() / 'tests',
-#     '-I' + meson.project_source_root() / 'src/platforms/stub',
-#   ],
-#   install: false
-# )
+test_pch = custom_target('test_pch',
+  input: 'test_pch.h',
+  output: ['test_pch.h.pch', 'test_pch.h.d'],
+  depfile: 'test_pch.h.d',
+  command: [
+    uv, 'run', 'python', '-m', 'ziglang', 'c++',
+    '-x', 'c++-header',           # Treat input as C++ header
+    '@INPUT@',                     # test_pch.h
+    '-o', '@OUTPUT0@',             # test_pch.h.pch
+    '-MD', '-MF', '@OUTPUT1@',     # Generate dependency file
+    unit_test_compile_args,        # Same flags as all tests
+    '-I' + meson.project_source_root() / 'src',
+    '-I' + meson.project_source_root() / 'tests',
+    '-I' + meson.project_source_root() / 'src/platforms/stub',
+  ],
+  install: false
+)
 
 # Doctest main object
 doctest_main = static_library('doctest_main',
@@ -137,12 +138,15 @@ test_names = [
   'test_xypath',
 ]
 
-# Build each test executable (PCH temporarily disabled)
+# Build each test executable with shared PCH
 foreach test_name : test_names
   test_exe = executable(test_name,
-    test_name + '.cpp',
+    [test_name + '.cpp', test_pch[0]],  # Include PCH as dependency (first output)
     include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: unit_test_compile_args,
+    cpp_args: unit_test_compile_args + [
+      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+      '-Winvalid-pch',
+    ],
     link_args: unit_test_link_args,
     link_with: [fastled_lib, doctest_main],
     install: false
