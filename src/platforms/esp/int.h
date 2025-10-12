@@ -14,7 +14,26 @@ namespace fl {
     // 32-bit types: Use compiler built-ins to match system stdint.h exactly
     // __INT32_TYPE__ and __UINT32_TYPE__ are defined by GCC and vary by toolchain/IDF version
     // This ensures our types match the system's __int32_t and __uint32_t
-#if defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
+    //
+    // Special handling for ESP32 IDF < 4.0 (including 3.3):
+    // On these versions, Arduino.h includes system stdint.h which defines uint32_t/int32_t
+    // as typedefs of __uint32_t/__int32_t. We must use the same base types to avoid
+    // "conflicting declaration" errors when fl/stdint.h creates its typedefs.
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+  #include "../esp/esp_version.h"
+  #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
+    // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
+    // This matches what system stdint.h uses, preventing typedef conflicts
+    typedef __int32_t i32;
+    typedef __uint32_t u32;
+  #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
+    typedef __INT32_TYPE__ i32;
+    typedef __UINT32_TYPE__ u32;
+  #else
+    typedef int i32;
+    typedef unsigned int u32;
+  #endif
+#elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
     typedef __INT32_TYPE__ i32;
     typedef __UINT32_TYPE__ u32;
 #else
@@ -107,7 +126,21 @@ typedef long long i64;
 typedef unsigned long long u64;
 
 // 32-bit types: Use compiler built-ins to match system stdint.h exactly
-#if defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
+// Special handling for ESP32 IDF < 4.0 (same as C++ section above)
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+  #include "../esp/esp_version.h"
+  #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
+    // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
+    typedef __int32_t i32;
+    typedef __uint32_t u32;
+  #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
+    typedef __INT32_TYPE__ i32;
+    typedef __UINT32_TYPE__ u32;
+  #else
+    typedef int i32;
+    typedef unsigned int u32;
+  #endif
+#elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
     typedef __INT32_TYPE__ i32;
     typedef __UINT32_TYPE__ u32;
 #else
