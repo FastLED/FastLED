@@ -5,6 +5,7 @@
 #include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/colorutils.h"
+#include "fl/math_macros.h"
 
 #include "fl/fill.h"
 #include "fl/blur.h"
@@ -22,10 +23,6 @@
 #define FUNCTION_FILL_GRADIENT_RGB(a,b,c,d) fl::fill_gradient_RGB(a,b,c,d)
 #define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) fl::fill_gradient_RGB(a,b,c,d,e)
 #define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) fl::fill_gradient_RGB(a,b,c,d,e,f)
-
-#ifndef abs
-#include <stdlib.h>
-#endif
 
 
 #include "fl/namespace.h"
@@ -134,7 +131,7 @@ public:
 
     /// Get the size of this set
     /// @return the size of the set, in number of LEDs
-    int size() { return abs(len); }
+    int size() { return FL_ABS(len); }
 
     /// Whether or not this set goes backwards
     /// @return whether or not the set is backwards
