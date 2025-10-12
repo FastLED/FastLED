@@ -20,6 +20,144 @@
 // time reductions across large projects with many translation units.
 ///////////////////////////////////////////////////////////////////////////////
 
+///////////////////////////////////////////////////////////////////////////////
+// ⚠️  TYPEDEF CONFLICT RESOLUTION - READ THIS IF YOU GET COMPILATION ERRORS
+///////////////////////////////////////////////////////////////////////////////
+//
+// IF YOU ENCOUNTER: "error: conflicting declaration 'typedef ...'"
+// ➜ DO NOT modify this file!
+// ➜ See fl/int.h for the complete troubleshooting guide
+// ➜ Summary: Fix must go in src/platforms/{platform}/int.h
+//
+// ============================================================================
+// WHY TYPEDEF CONFLICTS HAPPEN
+// ============================================================================
+//
+// This file creates standard C/C++ types by wrapping FastLED's platform types:
+//
+//   typedef fl::u32 uint32_t;    // FastLED's definition (this file)
+//   typedef __uint32_t uint32_t; // System header's definition
+//
+// Conflict occurs when fl::u32 ≠ __uint32_t (different base types)
+// No conflict when fl::u32 = __uint32_t (identical typedefs are allowed)
+//
+// ============================================================================
+// HOW THIS FILE WORKS
+// ============================================================================
+//
+// 1. Includes fl/int.h (which includes platform-specific type definitions)
+// 2. Creates standard type names as typedefs of fl:: types:
+//      typedef fl::u32 uint32_t;
+//      typedef fl::size size_t;
+//      typedef fl::uptr uintptr_t;
+//
+// The typedefs below are INTENTIONALLY simple and should NEVER be modified.
+// They create a clean mapping from fl:: types to standard names.
+//
+// ============================================================================
+// CONFLICT RESOLUTION PATTERN
+// ============================================================================
+//
+// ❌ DO NOT add #ifdef guards to this file
+// ❌ DO NOT change the typedef statements here
+// ❌ DO NOT modify fl/int.h
+// ✅ DO modify src/platforms/{platform}/int.h
+//
+// EXAMPLE: ESP32 IDF 3.3 uint32_t Conflict
+//
+// ERROR:
+//   error: conflicting declaration 'typedef fl::u32 uint32_t'
+//   note: previous declaration as 'typedef __uint32_t uint32_t'
+//
+// CAUSE:
+//   System header: typedef __uint32_t uint32_t;
+//   This file:     typedef fl::u32 uint32_t;
+//   Problem:       fl::u32 was defined as __UINT32_TYPE__ (= unsigned int)
+//                  but system uses __uint32_t (different type)
+//
+// SOLUTION (in src/platforms/esp/int.h):
+//   Changed:  typedef __UINT32_TYPE__ u32;  // Was: unsigned int
+//   To:       typedef __uint32_t u32;       // Now: matches system exactly
+//
+// RESULT:
+//   This file:     typedef fl::u32 uint32_t;
+//   Expands to:    typedef __uint32_t uint32_t;  // fl::u32 = __uint32_t
+//   System header: typedef __uint32_t uint32_t;
+//   Both typedefs are IDENTICAL → No conflict!
+//
+// ============================================================================
+// EXAMPLE: Teensy 4.1 size_t Conflict
+// ============================================================================
+//
+// ERROR:
+//   error: conflicting declaration 'typedef fl::size size_t'
+//   note: previous declaration as 'typedef unsigned int size_t'
+//
+// CAUSE:
+//   System header: typedef unsigned int size_t;
+//   This file:     typedef fl::size size_t;
+//   Problem:       fl::size was defined as unsigned long (wrong!)
+//
+// SOLUTION:
+//   Created platform-specific file: src/platforms/arm/mxrt1062/int.h
+//   Changed:  typedef unsigned long size;   // Was: wrong type
+//   To:       typedef unsigned int size;    // Now: matches Teensy 4.x system headers
+//
+// RESULT:
+//   This file:     typedef fl::size size_t;
+//   Expands to:    typedef unsigned int size_t;  // fl::size = unsigned int
+//   System header: typedef unsigned int size_t;
+//   Both typedefs are IDENTICAL → No conflict!
+//
+// ============================================================================
+// WHERE TO FIX CONFLICTS
+// ============================================================================
+//
+// Platform-specific type files (modify these, not this file):
+//
+//   ESP32/ESP8266:     src/platforms/esp/int.h
+//                      src/platforms/esp/int_8266.h
+//   AVR (Arduino):     src/platforms/avr/int.h
+//   ARM (general):     src/platforms/arm/int.h
+//   Teensy 4.x:        src/platforms/arm/mxrt1062/int.h
+//   Teensy 3.x:        src/platforms/arm/mk20dx/int.h
+//   WebAssembly:       src/platforms/wasm/int.h
+//   Desktop/Generic:   src/platforms/shared/int.h
+//
+// ============================================================================
+// STEP-BY-STEP FIX GUIDE
+// ============================================================================
+//
+// 1. Read the error message to identify conflicting type (uint32_t, size_t, etc.)
+// 2. Note what base type the system uses (e.g., __uint32_t vs unsigned int)
+// 3. Find your platform's int.h file from the list above
+// 4. Modify the fl:: type to use the same base type as the system
+// 5. Add version checks if needed (see ESP32 IDF 3.3 example in fl/int.h)
+// 6. Apply to BOTH C++ (namespace fl) and C sections if present
+// 7. Test compilation
+//
+// ============================================================================
+// LEARN FROM PAST FIXES
+// ============================================================================
+//
+// Research commands:
+//   git log --oneline --all -- 'src/platforms/**/int*.h'
+//   git show 32b3c80  # ESP32 IDF 3.3 fix
+//   git show 4788f81  # Teensy 4.1 fix
+//
+// Detailed troubleshooting guide: see src/fl/int.h (top of file)
+//
+// ============================================================================
+// KEY PRINCIPLE
+// ============================================================================
+//
+// This file is a THIN WRAPPER that creates standard names for FastLED types.
+// When conflicts occur, we don't change the wrapper - we change the underlying
+// platform types to match the system. This maintains FastLED's fast compilation
+// while ensuring perfect compatibility with system headers.
+//
+///////////////////////////////////////////////////////////////////////////////
+
 // Include fl/int.h to get FastLED integer types (u8, u16, i8, etc.)
 // This defines types using primitive types which compiles faster than <stdint.h>
 #include "fl/int.h"
