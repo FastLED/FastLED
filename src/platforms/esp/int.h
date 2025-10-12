@@ -24,6 +24,7 @@ namespace fl {
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
     // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
     // This matches what system stdint.h uses, preventing typedef conflicts
+    #include <stdint.h>  // Provides __int32_t and __uint32_t
     typedef __int32_t i32;
     typedef __uint32_t u32;
   #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
@@ -132,6 +133,7 @@ typedef unsigned long long u64;
   #include "../esp/esp_version.h"
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
     // IDF 3.3 or unknown: Use system __int32_t/__uint32_t types directly
+    #include <stdint.h>  // Provides __int32_t and __uint32_t
     typedef __int32_t i32;
     typedef __uint32_t u32;
   #elif defined(__INT32_TYPE__) && defined(__UINT32_TYPE__)
