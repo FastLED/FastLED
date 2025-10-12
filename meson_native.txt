@@ -1,0 +1,19 @@
+# ============================================================================
+# Meson Native Build Configuration for FastLED
+# ============================================================================
+# This file configures Meson to use Zig's bundled Clang toolchain, which
+# provides consistent cross-platform builds and matches the Python build system.
+
+[binaries]
+c = ['@DIRNAME@/.venv/Scripts/python.exe', '@DIRNAME@/.meson/zig-cc.py']
+cpp = ['@DIRNAME@/.venv/Scripts/python.exe', '@DIRNAME@/.meson/zig-cxx.py']
+ar = ['@DIRNAME@/.venv/Scripts/python.exe', '@DIRNAME@/.meson/zig-ar.py']
+
+[host_machine]
+system = 'windows'
+cpu_family = 'x86_64'
+cpu = 'x86_64'
+endian = 'little'
+
+[properties]
+# No additional properties needed - compiler flags are in meson.build

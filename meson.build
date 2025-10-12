@@ -1,7 +1,7 @@
 project('fastled', 'cpp',
   version: '6.0.0',
   default_options: [
-    'cpp_std=gnu++17',
+    'cpp_std=c++17',  # Use c++17 instead of gnu++17 - we add -std=gnu++17 in compile args
     'warning_level=2',
     'werror=false',
     'buildtype=debug'
@@ -105,6 +105,7 @@ endif
 
 # Compile flags for unit tests (base flags)
 unit_test_compile_args = [
+  '-std=gnu++17',                # GNU C++17 standard (must be first to override Meson's default)
   '-DFASTLED_UNIT_TEST=1',
   '-DFASTLED_USE_PROGMEM=0',
   '-DSTUB_PLATFORM',
