@@ -64,12 +64,15 @@ def setup_meson_build(
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
-    # Check for thin archive support via environment variable
-    use_thin_archives = os.environ.get("FASTLED_USE_THIN_ARCHIVES") == "1"
+    # Thin archives enabled by default for deterministic builds
+    # Set FASTLED_DISABLE_THIN_ARCHIVES=1 to disable if needed
+    use_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES") != "1"
     thin_flag = " --thin" if use_thin_archives else ""
 
-    if use_thin_archives:
-        print("[MESON] Thin archives enabled (FASTLED_USE_THIN_ARCHIVES=1)")
+    if not use_thin_archives:
+        print("[MESON] ⚠️  Thin archives disabled (FASTLED_DISABLE_THIN_ARCHIVES=1)")
+    else:
+        print("[MESON] ✅ Thin archives enabled (default)")
 
     if is_windows:
         # Windows: Create .cmd wrappers

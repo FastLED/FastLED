@@ -230,12 +230,12 @@ link_flags = [
 # Flags for creating static libraries (.a files) with deterministic builds.
 # Using Zig's unified toolchain (ziglang ar) which supports deterministic builds on all platforms.
 #
-# NOTE: Meson automatically uses thin archives (csrDT) when it detects llvm-ar.
+# Thin archives are ENABLED BY DEFAULT for deterministic builds.
 # Thin archives store file references (~100 bytes) instead of copying object files (can be MBs).
 # This reduces disk usage and speeds up archive creation.
 #
-# To enable thin archives for non-Meson builds, set: FASTLED_USE_THIN_ARCHIVES=1
-# The environment variable causes the AR wrapper in ci/util/meson_runner.py to add the --thin flag.
+# To disable thin archives if needed, set: FASTLED_DISABLE_THIN_ARCHIVES=1
+# The environment variable causes the AR wrapper in ci/util/meson_runner.py to skip the --thin flag.
 
 flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
 
