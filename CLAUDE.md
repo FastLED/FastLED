@@ -19,6 +19,13 @@ This project uses directory-specific agent guidelines. See:
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
 
+### Git Historian (Code Search)
+- `/git-historian keyword1 keyword2` - Search codebase and recent git history for keywords
+- `/git-historian "error handling" config` - Search for multi-word phrases (use quotes)
+- `/git-historian memory leak --paths src tests` - Limit search to specific directories
+- Searches both current code AND last 10 commits' diffs in under 4 seconds
+- Returns file locations with matching lines + historical context from commits
+
 ### QEMU Commands
 - `uv run ci/install-qemu.py` - Install QEMU for ESP32 emulation (standalone)
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
