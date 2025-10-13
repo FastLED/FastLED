@@ -18,6 +18,7 @@ dependencies = [
     "uv",
     "ziglang",
     "ninja",
+    "meson",
     "cmake",
     "download",
     "playwright",

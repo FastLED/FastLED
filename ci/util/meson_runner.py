@@ -256,13 +256,15 @@ def run_meson_build_and_test(
     if not setup_meson_build(source_dir, build_dir, reconfigure=False):
         return False
 
-    # Convert test name to executable name (add test_ prefix if needed)
+    # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
     meson_test_name = None
     if test_name:
-        if not test_name.startswith("test_"):
-            meson_test_name = f"test_{test_name}"
+        # Convert to lowercase to match Meson target naming convention
+        test_name_lower = test_name.lower()
+        if not test_name_lower.startswith("test_"):
+            meson_test_name = f"test_{test_name_lower}"
         else:
-            meson_test_name = test_name
+            meson_test_name = test_name_lower
 
     # Compile with build lock to prevent conflicts with example builds
     try:
