@@ -41,13 +41,13 @@
     #define SPI_DMA_CH_AUTO 1
 #endif
 
-// ESP-IDF 3.3 compatibility: Ensure SPI host constants are defined
-// These should come from driver/spi_common.h but we'll provide fallbacks
+// ESP-IDF compatibility: Ensure SPI host constants are defined
+// Modern IDF uses SPI2_HOST/SPI3_HOST, older versions may not have them
 #ifndef SPI2_HOST
-    #define SPI2_HOST HSPI_HOST
+    #define SPI2_HOST ((spi_host_device_t)1)
 #endif
 #ifndef SPI3_HOST
-    #define SPI3_HOST VSPI_HOST
+    #define SPI3_HOST ((spi_host_device_t)2)
 #endif
 
 namespace fl {
