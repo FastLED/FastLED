@@ -64,6 +64,13 @@ def setup_meson_build(
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
+    # Check for thin archive support via environment variable
+    use_thin_archives = os.environ.get("FASTLED_USE_THIN_ARCHIVES") == "1"
+    thin_flag = " --thin" if use_thin_archives else ""
+
+    if use_thin_archives:
+        print("[MESON] Thin archives enabled (FASTLED_USE_THIN_ARCHIVES=1)")
+
     if is_windows:
         # Windows: Create .cmd wrappers
         cc_wrapper = wrapper_dir / "zig-cc.cmd"
@@ -73,7 +80,9 @@ def setup_meson_build(
         cxx_wrapper.write_text(
             "@echo off\npython -m ziglang c++ %*\n", encoding="utf-8"
         )
-        ar_wrapper.write_text("@echo off\npython -m ziglang ar %*\n", encoding="utf-8")
+        ar_wrapper.write_text(
+            f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
+        )
     else:
         # Unix/Linux/macOS: Create shell script wrappers
         cc_wrapper = wrapper_dir / "zig-cc"
@@ -86,7 +95,7 @@ def setup_meson_build(
             '#!/bin/sh\nexec python -m ziglang c++ "$@"\n', encoding="utf-8"
         )
         ar_wrapper.write_text(
-            '#!/bin/sh\nexec python -m ziglang ar "$@"\n', encoding="utf-8"
+            f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n', encoding="utf-8"
         )
         # Make executable on Unix-like systems
         cc_wrapper.chmod(0o755)

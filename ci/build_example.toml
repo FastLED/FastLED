@@ -163,6 +163,10 @@ compiler_args = [
 # ================================================================================================
 # Flags for creating static libraries (.a files) with deterministic builds.
 # Using Zig's unified toolchain (ziglang ar) which supports deterministic builds on all platforms.
+#
+# NOTE: Thin archives can be enabled by setting: FASTLED_USE_THIN_ARCHIVES=1
+# Thin archives store file references (~100 bytes) instead of copying object files (can be MBs).
+# This reduces disk usage and speeds up archive creation, but requires object files to remain in place.
 
 flags = "rcsD"  # r=insert, c=create if needed, s=write symbol table, D=deterministic (zero timestamps)
 

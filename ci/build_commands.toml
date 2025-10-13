@@ -29,4 +29,5 @@ ranlib = ["uv", "run", "python", "-m", "ziglang", "ranlib"]
 
 [archive]
 # Required by BuildFlags.parse; not used for compile-commands generation
+# NOTE: Thin archives can be enabled via FASTLED_USE_THIN_ARCHIVES=1 environment variable
 flags = "rcsD"
