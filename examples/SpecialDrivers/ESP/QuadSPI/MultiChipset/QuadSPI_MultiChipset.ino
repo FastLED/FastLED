@@ -20,6 +20,8 @@
 /// ESP32-C3: CLK=6,  D0=7  (APA102), D1=2  (LPD8806), D2=5  (WS2801), D3=4 (APA102)
 /// ESP32-P4: CLK=9,  D0=8  (APA102), D1=10 (LPD8806), D2=11 (WS2801), D3=6 (APA102)
 /// ESP32-H2: CLK=4,  D0=5  (APA102), D1=0  (LPD8806), D2=2  (WS2801), D3=3 (APA102)
+/// ESP32-C5: CLK=12, D0=11 (APA102), D1=5  (LPD8806), D2=4  (WS2801), D3=3 (APA102)
+/// ESP32-C6: CLK=6,  D0=7  (APA102), D1=2  (LPD8806), D2=5  (WS2801), D3=4 (APA102)
 ///
 /// Important Notes:
 /// - All chipsets must tolerate the same clock speed
@@ -82,13 +84,30 @@
 #define DATA_PIN_2 2   // WS2801 - SPI2 WP (D2)
 #define DATA_PIN_3 3   // APA102 - SPI2 HD (D3)
 
+#elif CONFIG_IDF_TARGET_ESP32C5
+// ESP32-C5 - Using safe GPIO pins (avoid flash pins 15-22, USB pins 13-14)
+#define CLOCK_PIN 12   // Safe GPIO
+#define DATA_PIN_0 11  // APA102 - Safe GPIO (D0)
+#define DATA_PIN_1 5   // LPD8806 - Safe GPIO (D1)
+#define DATA_PIN_2 4   // WS2801 - Safe GPIO (D2)
+#define DATA_PIN_3 3   // APA102 - Safe GPIO (D3)
+
+#elif CONFIG_IDF_TARGET_ESP32C6
+// ESP32-C6 - Using SPI2 QuadSPI IO_MUX pins (optimal performance)
+#define CLOCK_PIN 6    // SPI2 CLK (FSPICLK)
+#define DATA_PIN_0 7   // APA102 - SPI2 MOSI (FSPID/D0)
+#define DATA_PIN_1 2   // LPD8806 - SPI2 MISO (FSPIQ/D1)
+#define DATA_PIN_2 5   // WS2801 - SPI2 WP (FSPIWP/D2)
+#define DATA_PIN_3 4   // APA102 - SPI2 HD (FSPIHD/D3)
+
 #else
-// Fallback for unknown variants - use VSPI-like pins
-#define CLOCK_PIN 18
-#define DATA_PIN_0 23  // APA102
-#define DATA_PIN_1 19  // LPD8806
-#define DATA_PIN_2 22  // WS2801
-#define DATA_PIN_3 21  // APA102
+// Fallback for unknown variants - use safe pins that avoid common issues
+// Avoid pins 18, 21, 22 which may conflict with flash on some variants
+#define CLOCK_PIN 14
+#define DATA_PIN_0 13  // APA102
+#define DATA_PIN_1 12  // LPD8806
+#define DATA_PIN_2 27  // WS2801
+#define DATA_PIN_3 26  // APA102
 #endif
 
 // LED counts for each strip
