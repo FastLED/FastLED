@@ -83,6 +83,7 @@ test_names = [
   'test_jpeg',
   'test_lcd50',
   'test_line_simplification',
+  'test_list',
   'test_lut',
   'test_malloc_hooks',
   'test_map',
