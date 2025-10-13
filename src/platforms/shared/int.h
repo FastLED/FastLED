@@ -8,10 +8,10 @@ namespace fl {
     typedef unsigned int u32;
 
     // LP64 model (Linux/Unix x86_64): long is 64-bit
-    // Note: Use long long for i64/u64 to match system headers (int64_t is long long, not long)
+    // Note: Use long (not long long) for i64/u64 to match system headers on LP64
     #if defined(__LP64__) || defined(_LP64)
-        typedef long long i64;
-        typedef unsigned long long u64;
+        typedef long i64;
+        typedef unsigned long u64;
         typedef unsigned long size;
         typedef unsigned long uptr;
         typedef long iptr;
