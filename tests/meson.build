@@ -98,6 +98,7 @@ test_names = [
   'test_printf',
   'test_promise',
   'test_quad_spi',
+  # Note: test_parallel_spi_isr_quad built separately below
   'test_queue',
   'test_raster',
   'test_rbtree',
@@ -155,3 +156,99 @@ foreach test_name : test_names
   # Register test with project root as working directory
   test(test_name, test_exe, workdir: meson.project_source_root())
 endforeach
+
+# Special build for test_parallel_spi_isr_quad - needs host simulation sources
+# compiled with FASTLED_SPI_HOST_SIMULATION flag. Also needs to compile ISR engine
+# with simulation flag to avoid MMIO writes on host.
+test_parallel_spi_isr_quad_exe = executable('test_parallel_spi_isr_quad',
+  [
+    'test_parallel_spi_isr_quad.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    test_pch[0]
+  ],
+  include_directories: [src_dir, tests_dir, stub_dir],
+  cpp_args: unit_test_compile_args + [
+    '-DFASTLED_SPI_HOST_SIMULATION',
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Winvalid-pch',
+  ],
+  link_args: unit_test_link_args,
+  link_with: [fastled_lib, doctest_main],
+  install: false
+)
+
+test('test_parallel_spi_isr_quad', test_parallel_spi_isr_quad_exe, workdir: meson.project_source_root())
+
+# Special build for test_parallel_spi_isr_dual - needs host simulation sources
+# compiled with FASTLED_SPI_HOST_SIMULATION flag. Also needs to compile ISR engine
+# with simulation flag to avoid MMIO writes on host.
+test_parallel_spi_isr_dual_exe = executable('test_parallel_spi_isr_dual',
+  [
+    'test_parallel_spi_isr_dual.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    test_pch[0]
+  ],
+  include_directories: [src_dir, tests_dir, stub_dir],
+  cpp_args: unit_test_compile_args + [
+    '-DFASTLED_SPI_HOST_SIMULATION',
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Winvalid-pch',
+  ],
+  link_args: unit_test_link_args,
+  link_with: [fastled_lib, doctest_main],
+  install: false
+)
+
+test('test_parallel_spi_isr_dual', test_parallel_spi_isr_dual_exe, workdir: meson.project_source_root())
+
+# Special build for test_parallel_spi_isr_single - needs host simulation sources
+# compiled with FASTLED_SPI_HOST_SIMULATION flag. Also needs to compile ISR engine
+# with simulation flag to avoid MMIO writes on host.
+test_parallel_spi_isr_single_exe = executable('test_parallel_spi_isr_single',
+  [
+    'test_parallel_spi_isr_single.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    test_pch[0]
+  ],
+  include_directories: [src_dir, tests_dir, stub_dir],
+  cpp_args: unit_test_compile_args + [
+    '-DFASTLED_SPI_HOST_SIMULATION',
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Winvalid-pch',
+  ],
+  link_args: unit_test_link_args,
+  link_with: [fastled_lib, doctest_main],
+  install: false
+)
+
+test('test_parallel_spi_isr_single', test_parallel_spi_isr_single_exe, workdir: meson.project_source_root())
+
+# Special build for test_parallel_spi_isr_octo - needs host simulation sources
+# compiled with FASTLED_SPI_HOST_SIMULATION flag. Also needs to compile ISR engine
+# with simulation flag to avoid MMIO writes on host.
+test_parallel_spi_isr_octo_exe = executable('test_parallel_spi_isr_octo',
+  [
+    'test_parallel_spi_isr_octo.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    test_pch[0]
+  ],
+  include_directories: [src_dir, tests_dir, stub_dir],
+  cpp_args: unit_test_compile_args + [
+    '-DFASTLED_SPI_HOST_SIMULATION',
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Winvalid-pch',
+  ],
+  link_args: unit_test_link_args,
+  link_with: [fastled_lib, doctest_main],
+  install: false
+)
+
+test('test_parallel_spi_isr_octo', test_parallel_spi_isr_octo_exe, workdir: meson.project_source_root())

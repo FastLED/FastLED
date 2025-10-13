@@ -57,6 +57,10 @@ shared_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp")))',
   check: false, capture: true)
 
+esp_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/esp").rglob("*.cpp")))',
+  check: false, capture: true)
+
 third_party_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/third_party").rglob("*.cpp")))',
   check: false, capture: true)
@@ -88,6 +92,10 @@ endif
 
 if shared_sources.returncode() == 0 and shared_sources.stdout().strip() != ''
   fastled_sources += files(shared_sources.stdout().strip().split('\n'))
+endif
+
+if esp_sources.returncode() == 0 and esp_sources.stdout().strip() != ''
+  fastled_sources += files(esp_sources.stdout().strip().split('\n'))
 endif
 
 if third_party_sources.returncode() == 0 and third_party_sources.stdout().strip() != ''

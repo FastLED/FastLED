@@ -37,26 +37,10 @@
 #include <stddef.h>
 #include "fl/compiler_control.h"
 #include "fl_parallel_spi_isr_rv.h"
+#include "fl_parallel_spi_platform.h"
 
 // All implementation uses C linkage for clean assembly generation
 FL_EXTERN_C_BEGIN
-
-/* --- MMIO helpers: ESP32-C3/C2 AHB GPIO write-one-to-set/clear ------------- */
-/* If you need to override for a different target, compile with:
-   -DFASTLED_GPIO_W1TS_ADDR=0xXXXXXXXX -DFASTLED_GPIO_W1TC_ADDR=0xYYYYYYYY     */
-#ifndef FASTLED_GPIO_W1TS_ADDR
-#define FASTLED_GPIO_W1TS_ADDR 0x60004008u
-#endif
-#ifndef FASTLED_GPIO_W1TC_ADDR
-#define FASTLED_GPIO_W1TC_ADDR 0x6000400Cu
-#endif
-
-static inline void gpio_write_one_to_set(uint32_t value) {
-  *(volatile uint32_t*)(uintptr_t)FASTLED_GPIO_W1TS_ADDR = value;
-}
-static inline void gpio_write_one_to_clear(uint32_t value) {
-  *(volatile uint32_t*)(uintptr_t)FASTLED_GPIO_W1TC_ADDR = value;
-}
 
 /* Single instance (internal linkage). Provide accessors below for host code. */
 static FastLED_SPI_ISR_State g_isr_state;
@@ -152,9 +136,23 @@ void fl_parallel_spi_isr(void) {
 #endif
   }
 
-  /* 2) Nothing to send? return fast. */
+  /* 2) Nothing to send? Mark as done and return (but only if we're not in phase 1). */
   if (g_isr_state.current_position >= g_isr_state.total_bytes_to_send) {
-    return;
+    /* If we're in phase 1, we need to complete it (raise clock high) before returning */
+    if (g_isr_state.clock_phase == 0) {
+      /* Phase 0: No more bytes to send, mark as done */
+      if (g_isr_state.status_flags & FASTLED_STATUS_BUSY) {
+        uint32_t s = g_isr_state.status_flags;
+        s &= ~FASTLED_STATUS_BUSY;
+        s |=  FASTLED_STATUS_DONE;
+        g_isr_state.status_flags = s;
+#ifdef FL_SPI_ISR_VALIDATE
+        fl_spi_log_event(FASTLED_GPIO_EVENT_STATE_DONE, g_isr_state.current_position);
+#endif
+      }
+      return;
+    }
+    /* Phase 1: Fall through to complete the clock high cycle */
   }
 
   /* 3) Two-phase engine */
@@ -176,8 +174,8 @@ void fl_parallel_spi_isr(void) {
     fl_spi_log_event(FASTLED_GPIO_EVENT_CLOCK_LOW, g_isr_state.clock_pin_mask);
 #endif
 
-    gpio_write_one_to_set(pins_to_set);      /* data-high bits */
-    gpio_write_one_to_clear(pins_to_clear);  /* data-low bits + CLK low */
+    FL_GPIO_WRITE_SET(pins_to_set);      /* data-high bits */
+    FL_GPIO_WRITE_CLEAR(pins_to_clear);  /* data-low bits + CLK low */
 
     g_isr_state.clock_phase = 1;
     return;
@@ -188,7 +186,7 @@ void fl_parallel_spi_isr(void) {
     fl_spi_log_event(FASTLED_GPIO_EVENT_CLOCK_HIGH, g_isr_state.clock_pin_mask);
 #endif
 
-    gpio_write_one_to_set(g_isr_state.clock_pin_mask);
+    FL_GPIO_WRITE_SET(g_isr_state.clock_pin_mask);
 
     /* If we've emitted the last byte, this rise completes the burst. */
     if (g_isr_state.current_position >= g_isr_state.total_bytes_to_send) {
