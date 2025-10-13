@@ -48,7 +48,6 @@ using fl::map;
 
 long random(long min, long max);
 long random(long max);
-long random();
 int analogRead(int);
 
 

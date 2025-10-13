@@ -42,13 +42,6 @@ long random(long max) {
     return random(0, max);
 }
 
-long random() {
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<long> dis;
-    return dis(gen);
-}
-
 int analogRead(int) {
     return random(0, 1023);
 }
