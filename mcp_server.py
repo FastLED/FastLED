@@ -493,7 +493,7 @@ async def list_tools() -> List[Tool]:
                         "default": False
                     },
                     "check_dev": {
-                        "type": "boolean", 
+                        "type": "boolean",
                         "description": "Also scan dev directory for Arduino.h includes",
                         "default": False
                     },
@@ -503,6 +503,28 @@ async def list_tools() -> List[Tool]:
                         "default": True
                     }
                 }
+            }
+        ),
+        Tool(
+            name="git_historian",
+            description="Search codebase and git history for keywords. Combines working tree search (via ripgrep/git grep) and git history search (last 10 commits) to provide compact context for AI assistants. Returns results in under 4 seconds with both current code state and historical changes.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "keywords": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "List of keywords to search for (supports regex patterns)",
+                        "minItems": 1
+                    },
+                    "paths": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Target directories to search (relative to repo root). If empty, searches entire repository.",
+                        "default": []
+                    }
+                },
+                "required": ["keywords"]
             }
         )
     ]
@@ -548,6 +570,8 @@ async def call_tool(name: str, arguments: Dict[str, Any]) -> Any:
             return await run_fastled_web_compiler(arguments, project_root)
         elif name == "validate_arduino_includes":
             return await validate_arduino_includes(arguments, project_root)
+        elif name == "git_historian":
+            return await git_historian(arguments, project_root)
         else:
             return CallToolResult(
                 content=[TextContent(type="text", text=f"Unknown tool: {name}")],
@@ -2507,6 +2531,49 @@ async def run_fastled_web_compiler(arguments: Dict[str, Any], project_root: Path
         except:
             pass
 
+async def git_historian(arguments: Dict[str, Any], project_root: Path) -> CallToolResult:
+    """Search codebase and git history for keywords."""
+    from ci.util.git_historian import query  # type: ignore
+
+    keywords = arguments.get("keywords", [])
+    paths_str = arguments.get("paths", [])
+
+    # Convert path strings to Path objects
+    paths = [Path(p) for p in paths_str]
+
+    # Run the query
+    try:
+        contexts = query(keywords, paths)
+
+        if not contexts:
+            result_text = f"No results found for keywords: {', '.join(keywords)}\n"
+            if paths:
+                result_text += f"Searched in: {', '.join(str(p) for p in paths)}\n"
+            return CallToolResult(
+                content=[TextContent(type="text", text=result_text)]
+            )
+
+        result_text = f"Git Historian Results for keywords: {', '.join(keywords)}\n"
+        result_text += "=" * 70 + "\n\n"
+
+        if paths:
+            result_text += f"Searched in: {', '.join(str(p) for p in paths)}\n\n"
+
+        result_text += f"Found {len(contexts)} context(s):\n\n"
+
+        for i, ctx in enumerate(contexts, 1):
+            result_text += f"--- Context {i} ---\n"
+            result_text += ctx + "\n\n"
+
+        return CallToolResult(
+            content=[TextContent(type="text", text=result_text)]
+        )
+    except Exception as e:
+        return CallToolResult(
+            content=[TextContent(type="text", text=f"Error running git_historian: {str(e)}")],
+            isError=True
+        )
+
 async def run_command(cmd: List[str], cwd: Path) -> str:
     """Run a shell command and return its output."""
     try:
@@ -2516,13 +2583,13 @@ async def run_command(cmd: List[str], cwd: Path) -> str:
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.STDOUT
         )
-        
+
         stdout_bytes, _ = await process.communicate()
         stdout = stdout_bytes.decode('utf-8', errors='replace') if stdout_bytes else ""
-        
+
         if process.returncode != 0:
             return f"Command failed with exit code {process.returncode}:\n{stdout}"
-        
+
         return stdout
     except Exception as e:
         return f"Error running command: {str(e)}"
