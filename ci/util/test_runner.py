@@ -469,34 +469,16 @@ def create_unit_test_process(
 def create_examples_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
-    """Create an examples test process without starting it"""
-    cmd = ["uv", "run", "python", "-u", "ci/compiler/test_example_compilation.py"]
-    if args.examples is not None:
-        cmd.extend(args.examples)
-    if args.clean:
-        cmd.append("--clean")
-    if args.no_pch:
-        cmd.append("--no-pch")
-    if args.unity:
-        cmd.append("--unity")
-    if args.full and args.examples is not None:
-        cmd.append("--full")
-    elif args.examples is not None:
-        # Auto-enable full mode for examples to include execution
-        cmd.append("--full")
-    if args.no_parallel:
-        cmd.append("--no-parallel")
-    if args.verbose:
-        cmd.append("--verbose")
+    """
+    Create an examples test process without starting it
 
-    # Use longer timeout for no-parallel mode since sequential compilation takes much longer
-    timeout = (
-        1800 if args.no_parallel else 600
-    )  # 30 minutes for sequential, 10 minutes for parallel
-
-    cmd_str = subprocess.list2cmdline(cmd)
-
-    return RunningProcess(cmd_str, auto_run=False, timeout=timeout)
+    NOTE: Examples are now compiled using ci-compile.py (via create_compile_uno_test_process).
+    This function is deprecated but kept for backwards compatibility during transition.
+    It now delegates to the uno compilation test which covers example compilation.
+    """
+    # Examples are now tested via uno compilation (ci-compile.py)
+    # Return the uno compilation process instead
+    return create_compile_uno_test_process(enable_stack_trace)
 
 
 def create_python_test_process(
@@ -1501,20 +1483,16 @@ def runner(
             )
             skipped_timings.append(_create_skipped_timing("python_tests"))
 
-        # Add example tests if needed and example files have changed
+        # Examples are now compiled via uno compilation test (ci-compile.py)
+        # The uno compilation test above already covers example compilation
+        # So we just track skipped status if needed
         if (
-            test_categories.examples or test_categories.examples_only
-        ) and examples_change:
-            processes.append(create_examples_test_process(args, enable_stack_trace))
-        elif (
             test_categories.examples or test_categories.examples_only
         ) and not examples_change:
             print_cache_hit(
                 "Fingerprint cache valid - skipping example tests (no changes detected in example-related files)"
             )
-            skipped_timings.append(
-                _create_skipped_timing("test_example_compilation.py")
-            )
+            skipped_timings.append(_create_skipped_timing("uno_compilation"))
 
         # Determine if we'll run in parallel
         will_run_parallel = not bool(os.environ.get("NO_PARALLEL"))
