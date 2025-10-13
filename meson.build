@@ -37,36 +37,39 @@ fastled_sources = files(
 # This mimics what the Python build system does
 fs = import('fs')
 
+# Find uv for running Python commands
+uv_prog = find_program('uv', required: true)
+
 # Find additional sources in subdirectories
-lib8tion_sources = run_command('python', '-c',
+lib8tion_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/lib8tion").glob("*.cpp")))',
   check: false, capture: true)
 
-stub_sources = run_command('python', '-c',
+stub_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp") if p.name != "stub_main.cpp"))',
   check: false, capture: true)
 
-fl_sources = run_command('python', '-c',
+fl_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").glob("*.cpp")))',
   check: false, capture: true)
 
-shared_sources = run_command('python', '-c',
+shared_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp")))',
   check: false, capture: true)
 
-third_party_sources = run_command('python', '-c',
+third_party_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/third_party").rglob("*.cpp")))',
   check: false, capture: true)
 
-codec_sources = run_command('python', '-c',
+codec_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl/codec").glob("*.cpp")))',
   check: false, capture: true)
 
-fx_sources = run_command('python', '-c',
+fx_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fx").rglob("*.cpp")))',
   check: false, capture: true)
 
-sensors_sources = run_command('python', '-c',
+sensors_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/sensors").glob("*.cpp")))',
   check: false, capture: true)
 

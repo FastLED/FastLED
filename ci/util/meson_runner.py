@@ -68,29 +68,37 @@ def setup_meson_build(
         # Windows: Create .cmd wrappers
         cc_wrapper = wrapper_dir / "zig-cc.cmd"
         cxx_wrapper = wrapper_dir / "zig-cxx.cmd"
+        ar_wrapper = wrapper_dir / "zig-ar.cmd"
         cc_wrapper.write_text("@echo off\npython -m ziglang cc %*\n", encoding="utf-8")
         cxx_wrapper.write_text(
             "@echo off\npython -m ziglang c++ %*\n", encoding="utf-8"
         )
+        ar_wrapper.write_text("@echo off\npython -m ziglang ar %*\n", encoding="utf-8")
     else:
         # Unix/Linux/macOS: Create shell script wrappers
         cc_wrapper = wrapper_dir / "zig-cc"
         cxx_wrapper = wrapper_dir / "zig-cxx"
+        ar_wrapper = wrapper_dir / "zig-ar"
         cc_wrapper.write_text(
             '#!/bin/sh\nexec python -m ziglang cc "$@"\n', encoding="utf-8"
         )
         cxx_wrapper.write_text(
             '#!/bin/sh\nexec python -m ziglang c++ "$@"\n', encoding="utf-8"
         )
+        ar_wrapper.write_text(
+            '#!/bin/sh\nexec python -m ziglang ar "$@"\n', encoding="utf-8"
+        )
         # Make executable on Unix-like systems
         cc_wrapper.chmod(0o755)
         cxx_wrapper.chmod(0o755)
+        ar_wrapper.chmod(0o755)
 
     env = os.environ.copy()
     env["CC"] = str(cc_wrapper)
     env["CXX"] = str(cxx_wrapper)
+    env["AR"] = str(ar_wrapper)
     print(
-        f"[MESON] Using zig compiler via wrappers: CC={cc_wrapper.name}, CXX={cxx_wrapper.name}"
+        f"[MESON] Using zig compiler via wrappers: CC={cc_wrapper.name}, CXX={cxx_wrapper.name}, AR={ar_wrapper.name}"
     )
 
     try:
