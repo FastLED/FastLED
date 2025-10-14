@@ -216,7 +216,10 @@ class DockerQEMURunner:
         Returns:
             Docker Hub registry image name (e.g., 'niteris/fastled-compiler-esp')
         """
-        from ci.docker.build_platforms import get_docker_image_name, get_platform_for_board
+        from ci.docker.build_platforms import (
+            get_docker_image_name,
+            get_platform_for_board,
+        )
 
         # Get platform family (e.g., 'esp32dev' -> 'esp')
         platform_family = get_platform_for_board(platform)

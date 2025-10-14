@@ -41,6 +41,7 @@ class DockerManager:
             import time
 
             from running_process import RunningProcess
+            from running_process.process_output_reader import EndOfStream
 
             proc = RunningProcess(full_command, env=env, auto_run=True)
             pattern_found = False
@@ -69,22 +70,24 @@ class DockerManager:
                             break
 
                         # Try to get next line with short timeout
-                        line = proc.readline(timeout=line_timeout)
-                        if line is None:
+                        line_or_eos = proc.get_next_line(timeout=line_timeout)
+                        if isinstance(line_or_eos, EndOfStream):
                             # Process has ended
                             break
 
-                        # Process the line
-                        print(line)
+                        # Process the line (line_or_eos is str at this point)
+                        print(line_or_eos)
 
                         # Write to output file if specified
                         if output_handle:
-                            output_handle.write(line + "\n")
+                            output_handle.write(line_or_eos + "\n")
                             output_handle.flush()  # Ensure immediate write
 
                         # Check for interrupt pattern (for informational purposes only)
-                        if interrupt_pattern and re.search(interrupt_pattern, line):
-                            print(f"Pattern detected: {line}")
+                        if interrupt_pattern and re.search(
+                            interrupt_pattern, line_or_eos
+                        ):
+                            print(f"Pattern detected: {line_or_eos}")
                             pattern_found = True
 
                     except Exception as line_ex:
@@ -110,7 +113,9 @@ class DockerManager:
                             env=env,
                         )
                         if stop_proc.returncode != 0:
-                            print(f"Warning: docker stop returned {stop_proc.returncode}")
+                            print(
+                                f"Warning: docker stop returned {stop_proc.returncode}"
+                            )
                     except Exception as e:
                         print(f"Warning: Failed to stop container: {e}")
 

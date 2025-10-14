@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include "fl_parallel_spi_isr_rv.h"
 
+#ifndef SPI_ISR_SOFTWARE_BITBANG_FORCED_ON
+#warning "DualSPI_ISR_ESP32C3 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
+#endif
+
 namespace fl {
 
 /**
