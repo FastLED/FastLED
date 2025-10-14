@@ -42,30 +42,20 @@ def setup_meson_build(
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
 
-    # Disable thin archives when using zig compiler (zig linker doesn't support them)
-    # This prevents "unexpected token in LD script: literal: '!<thin>'" errors
-    use_thin_archives = False
-
-    # If build exists and we're disabling thin archives, remove any existing thin archives
-    # to prevent linker errors when reusing the build directory
-    if already_configured and not use_thin_archives:
-        libfastled_archive = build_dir / "libfastled.a"
-        if libfastled_archive.exists():
-            # Check if it's a thin archive by reading first few bytes
-            try:
-                with open(libfastled_archive, "rb") as f:
-                    header = f.read(8)
-                    if header == b"!<thin>\n":
-                        print(
-                            "[MESON] ⚠️  Removing incompatible thin archive: libfastled.a"
-                        )
-                        libfastled_archive.unlink()
-            except Exception as e:
-                print(f"[MESON] Warning: Could not check archive format: {e}")
+    # Enable thin archives now that we use LLD linker (which supports them)
+    # Thin archives are much faster and smaller than regular archives
+    # Note: This only works because meson.build specifies -fuse-ld=lld
+    use_thin_archives = True
 
     if already_configured and not reconfigure:
         print(f"[MESON] Build directory already configured: {build_dir}")
         return True
+
+    # Set compiler environment variables to use zig
+    # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
+    # Create wrapper scripts for meson since it expects single executables
+    wrapper_dir = build_dir / "compiler_wrappers"
+    wrapper_dir.mkdir(parents=True, exist_ok=True)
 
     cmd: List[str] = []
     if already_configured and reconfigure:
@@ -77,21 +67,13 @@ def setup_meson_build(
         print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", str(build_dir)]
 
-    # Set compiler environment variables to use zig
-    # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
-    # Create wrapper scripts for meson since it expects single executables
-    wrapper_dir = build_dir / "compiler_wrappers"
-    wrapper_dir.mkdir(parents=True, exist_ok=True)
-
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
-    # use_thin_archives is set earlier (line 47) to False for zig compatibility
+    # Thin archives are enabled by default (faster builds, smaller disk usage)
+    # This works because meson.build uses -fuse-ld=lld (LLD supports thin archives)
     thin_flag = " --thin" if use_thin_archives else ""
 
-    if not use_thin_archives:
-        print("[MESON] ⚠️  Thin archives disabled (zig linker incompatibility)")
-    else:
-        print("[MESON] ✅ Thin archives enabled (default)")
+    print("[MESON] ✅ Thin archives enabled (using LLD linker)")
 
     if is_windows:
         # Windows: Create .cmd wrappers
@@ -117,7 +99,8 @@ def setup_meson_build(
             '#!/bin/sh\nexec python -m ziglang c++ "$@"\n', encoding="utf-8"
         )
         ar_wrapper.write_text(
-            f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n', encoding="utf-8"
+            f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
+            encoding="utf-8",
         )
         # Make executable on Unix-like systems
         cc_wrapper.chmod(0o755)
