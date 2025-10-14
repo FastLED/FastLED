@@ -87,9 +87,7 @@ class DockerManager:
                             output_handle.flush()  # Ensure immediate write
 
                         # Check for interrupt pattern (for informational purposes only)
-                        if interrupt_pattern and re.search(
-                            interrupt_pattern, line
-                        ):
+                        if interrupt_pattern and re.search(interrupt_pattern, line):
                             print(f"Pattern detected: {line}")
                             pattern_found = True
 

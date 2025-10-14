@@ -17,9 +17,11 @@ namespace fl {
         typedef long long ptrdiff;
     #else
         // WASM32 (default)
-        typedef unsigned int size;
-        typedef unsigned int uptr;
-        typedef int iptr;
-        typedef int ptrdiff;
+        // Note: Emscripten uses 'long' for intptr_t and ptrdiff_t (both 32-bit)
+        // to match system headers, even though 'int' is also 32-bit
+        typedef unsigned long size;
+        typedef unsigned long uptr;
+        typedef long iptr;
+        typedef long ptrdiff;
     #endif
 }

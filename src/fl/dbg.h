@@ -65,3 +65,9 @@ inline const char *fastled_file_offset(const char *file) {
     if (COND)                                                                  \
     FASTLED_DBG(MSG)
 #endif // FASTLED_DBG_IF
+
+// Short-form aliases for convenience (following pattern from warn.h)
+#ifndef FL_DBG
+#define FL_DBG FASTLED_DBG
+#define FL_DBG_IF FASTLED_DBG_IF
+#endif
