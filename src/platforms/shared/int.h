@@ -7,9 +7,18 @@ namespace fl {
     typedef int i32;
     typedef unsigned int u32;
 
-    // LP64 model (Linux/Unix x86_64): long is 64-bit
-    // Note: Use long (not long long) for i64/u64 to match system headers on LP64
-    #if defined(__LP64__) || defined(_LP64)
+    // LP64 model detection - but macOS differs from Linux!
+    // macOS: uint64_t is 'unsigned long long' even in LP64 mode
+    // Linux: uint64_t is 'unsigned long' in LP64 mode
+    #if defined(__APPLE__) && (defined(__LP64__) || defined(_LP64))
+        typedef long long i64;
+        typedef unsigned long long u64;
+        typedef unsigned long size;        // size_t is unsigned long on macOS LP64
+        typedef unsigned long uptr;        // uintptr_t is unsigned long on macOS LP64
+        typedef long iptr;
+        typedef long ptrdiff;
+    #elif defined(__LP64__) || defined(_LP64)
+        // Linux/Unix LP64: long is 64-bit
         typedef long i64;
         typedef unsigned long u64;
         typedef unsigned long size;
