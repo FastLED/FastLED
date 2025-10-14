@@ -1,45 +1,24 @@
 #pragma once
 
-namespace fl {
-    // Default platform (desktop/generic): assume short 16-bit, int 32-bit
-    typedef short i16;
-    typedef unsigned short u16;
-    typedef int i32;
-    typedef unsigned int u32;
+// Desktop/generic platform integer type definitions
+// Dispatches to platform-specific files for macOS, Linux, Windows, etc.
+//
+// IMPORTANT: macOS and Linux LP64 systems define uint64_t differently:
+// - macOS: uint64_t is 'unsigned long long' (even in 64-bit mode)
+// - Linux: uint64_t is 'unsigned long' (in 64-bit LP64 mode)
+//
+// See individual platform files for details.
 
-    // LP64 model detection - but macOS differs from Linux!
-    // macOS: uint64_t is 'unsigned long long' even in LP64 mode
-    // Linux: uint64_t is 'unsigned long' in LP64 mode
-    #if defined(__APPLE__) && (defined(__LP64__) || defined(_LP64))
-        typedef long long i64;
-        typedef unsigned long long u64;
-        typedef unsigned long size;        // size_t is unsigned long on macOS LP64
-        typedef unsigned long uptr;        // uintptr_t is unsigned long on macOS LP64
-        typedef long iptr;
-        typedef long ptrdiff;
-    #elif defined(__LP64__) || defined(_LP64)
-        // Linux/Unix LP64: long is 64-bit
-        typedef long i64;
-        typedef unsigned long u64;
-        typedef unsigned long size;
-        typedef unsigned long uptr;
-        typedef long iptr;
-        typedef long ptrdiff;
-    // Windows x86_64 (LLP64 model): long long is 64-bit, long is 32-bit
-    #elif defined(_WIN64) || defined(_M_AMD64)
-        typedef long long i64;
-        typedef unsigned long long u64;
-        typedef unsigned long long size;
-        typedef unsigned long long uptr;
-        typedef long long iptr;
-        typedef long long ptrdiff;
-    // 32-bit platforms
-    #else
-        typedef long long i64;
-        typedef unsigned long long u64;
-        typedef unsigned long size;
-        typedef unsigned long uptr;
-        typedef long iptr;
-        typedef long ptrdiff;
-    #endif
-}
+#if defined(__APPLE__)
+    // macOS (all versions)
+    #include "platforms/shared/int_macos.h"
+#elif defined(_WIN32) || defined(_WIN64) || defined(_MSC_VER)
+    // Windows (all versions)
+    #include "platforms/shared/int_windows.h"
+#elif defined(__linux__) && (defined(__LP64__) || defined(_LP64))
+    // Linux LP64 (64-bit Linux)
+    #include "platforms/shared/int_linux.h"
+#else
+    // Generic/32-bit/unknown platforms
+    #include "platforms/shared/int_generic.h"
+#endif
