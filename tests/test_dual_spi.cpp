@@ -324,3 +324,135 @@ TEST_CASE("SPIDual: Extract lanes from interleaved data") {
 }
 
 #endif  // FASTLED_TESTING
+
+// ============================================================================
+// Blocking SPI Implementation Tests
+// ============================================================================
+
+#define FASTLED_SPI_HOST_SIMULATION
+#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_dual.hpp"
+
+TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {
+    DualSPI_Blocking_ESP32 spi;
+
+    // Configure pins (2 data + 1 clock)
+    spi.setPinMapping(0, 1, 8);  // Data pins 0,1, Clock pin 8
+
+    // Load test data
+    uint8_t testData[8] = {0x00, 0x01, 0x02, 0x03, 0x01, 0x02, 0x00, 0x03};
+    spi.loadBuffer(testData, 8);
+
+    // Verify buffer loaded
+    CHECK_EQ(spi.getBufferLength(), 8);
+    CHECK(spi.getBuffer() == testData);
+}
+
+TEST_CASE("SPIBlocking Dual: LUT initialization") {
+    DualSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(5, 6, 10);  // Data pins 5,6, Clock pin 10
+
+    PinMaskEntry* lut = spi.getLUTArray();
+
+    // Verify LUT entries for 2-bit patterns
+    // 0x00 (00) - Both pins low
+    CHECK_EQ(lut[0x00].set_mask, 0u);
+    CHECK_EQ(lut[0x00].clear_mask, (1u << 5) | (1u << 6));
+
+    // 0x01 (01) - D0 high, D1 low
+    CHECK_EQ(lut[0x01].set_mask, (1u << 5));
+    CHECK_EQ(lut[0x01].clear_mask, (1u << 6));
+
+    // 0x02 (10) - D0 low, D1 high
+    CHECK_EQ(lut[0x02].set_mask, (1u << 6));
+    CHECK_EQ(lut[0x02].clear_mask, (1u << 5));
+
+    // 0x03 (11) - Both pins high
+    CHECK_EQ(lut[0x03].set_mask, (1u << 5) | (1u << 6));
+    CHECK_EQ(lut[0x03].clear_mask, 0u);
+
+    // Upper 6 bits should be ignored
+    // 0xFF should be same as 0x03
+    CHECK_EQ(lut[0xFF].set_mask, (1u << 5) | (1u << 6));
+    CHECK_EQ(lut[0xFF].clear_mask, 0u);
+}
+
+TEST_CASE("SPIBlocking Dual: Empty buffer handling") {
+    DualSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(0, 1, 8);
+
+    // Transmit with no buffer should not crash
+    spi.transmit();
+
+    // Load empty buffer
+    uint8_t testData[1];
+    spi.loadBuffer(testData, 0);
+    spi.transmit();  // Should handle gracefully
+}
+
+TEST_CASE("SPIBlocking Dual: Maximum buffer size") {
+    DualSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(0, 1, 8);
+
+    uint8_t largeBuffer[300];
+    for (int i = 0; i < 300; i++) {
+        largeBuffer[i] = (i & 0x03);  // 2-bit pattern
+    }
+
+    // Should truncate to 256
+    spi.loadBuffer(largeBuffer, 300);
+    CHECK_EQ(spi.getBufferLength(), 256);
+}
+
+TEST_CASE("SPIBlocking Dual: Multiple pin configurations") {
+    // Test different pin configurations for dual-lane
+    for (uint8_t d0 = 0; d0 < 5; d0++) {
+        for (uint8_t d1 = 5; d1 < 10; d1++) {
+            for (uint8_t clk = 10; clk < 12; clk++) {
+                DualSPI_Blocking_ESP32 spi;
+                spi.setPinMapping(d0, d1, clk);
+
+                PinMaskEntry* lut = spi.getLUTArray();
+
+                // Verify 4 fundamental patterns
+                // 0x00 (00) - Both pins low
+                CHECK_EQ(lut[0x00].set_mask, 0u);
+                CHECK_EQ(lut[0x00].clear_mask, (1u << d0) | (1u << d1));
+
+                // 0x01 (01) - D0 high, D1 low
+                CHECK_EQ(lut[0x01].set_mask, (1u << d0));
+                CHECK_EQ(lut[0x01].clear_mask, (1u << d1));
+
+                // 0x02 (10) - D0 low, D1 high
+                CHECK_EQ(lut[0x02].set_mask, (1u << d1));
+                CHECK_EQ(lut[0x02].clear_mask, (1u << d0));
+
+                // 0x03 (11) - Both pins high
+                CHECK_EQ(lut[0x03].set_mask, (1u << d0) | (1u << d1));
+                CHECK_EQ(lut[0x03].clear_mask, 0u);
+            }
+        }
+    }
+}
+
+TEST_CASE("SPIBlocking Dual: Pattern consistency") {
+    DualSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(2, 3, 8);
+
+    PinMaskEntry* lut = spi.getLUTArray();
+
+    // All entries with same lower 2 bits should have same masks
+    // Check a few examples across the 256 entries
+    for (int pattern = 0; pattern < 4; pattern++) {
+        uint32_t expectedSet = lut[pattern].set_mask;
+        uint32_t expectedClear = lut[pattern].clear_mask;
+
+        // Test multiple byte values with same lower 2 bits
+        for (int offset = 0; offset < 256; offset += 4) {
+            int byteValue = pattern + offset;
+            if (byteValue >= 256) break;
+
+            CHECK_EQ(lut[byteValue].set_mask, expectedSet);
+            CHECK_EQ(lut[byteValue].clear_mask, expectedClear);
+        }
+    }
+}

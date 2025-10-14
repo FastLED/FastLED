@@ -265,3 +265,92 @@ TEST_CASE("SPISingle: Reset clears transmission history") {
 }
 
 #endif  // FASTLED_TESTING
+
+// ============================================================================
+// Blocking SPI Implementation Tests
+// ============================================================================
+
+#define FASTLED_SPI_HOST_SIMULATION
+#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_single.hpp"
+
+TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
+    SingleSPI_Blocking_ESP32 spi;
+
+    // Configure pins
+    spi.setPinMapping(0, 8);  // Data pin 0, Clock pin 8
+
+    // Load test data
+    uint8_t testData[8] = {0x00, 0x01, 0x00, 0x01, 0x01, 0x01, 0x00, 0x00};
+    spi.loadBuffer(testData, 8);
+
+    // Verify buffer loaded
+    CHECK_EQ(spi.getBufferLength(), 8);
+    CHECK(spi.getBuffer() == testData);
+}
+
+TEST_CASE("SPIBlocking Single: LUT initialization") {
+    SingleSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(5, 10);  // Data pin 5, Clock pin 10
+
+    PinMaskEntry* lut = spi.getLUTArray();
+
+    // Verify LUT entries for bit 0
+    // When byte value has bit 0 clear, data pin should be cleared
+    CHECK_EQ(lut[0x00].set_mask, 0u);
+    CHECK_EQ(lut[0x00].clear_mask, (1u << 5));
+
+    // When byte value has bit 0 set, data pin should be set
+    CHECK_EQ(lut[0x01].set_mask, (1u << 5));
+    CHECK_EQ(lut[0x01].clear_mask, 0u);
+
+    // Upper 7 bits should be ignored - same as 0x01
+    CHECK_EQ(lut[0xFF].set_mask, (1u << 5));
+    CHECK_EQ(lut[0xFF].clear_mask, 0u);
+
+    // Even values (bit 0 clear) should clear pin
+    CHECK_EQ(lut[0xAA].set_mask, 0u);
+    CHECK_EQ(lut[0xAA].clear_mask, (1u << 5));
+}
+
+TEST_CASE("SPIBlocking Single: Empty buffer handling") {
+    SingleSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(0, 8);
+
+    // Transmit with no buffer should not crash
+    spi.transmit();
+
+    // Load empty buffer
+    uint8_t testData[1];
+    spi.loadBuffer(testData, 0);
+    spi.transmit();  // Should handle gracefully
+}
+
+TEST_CASE("SPIBlocking Single: Maximum buffer size") {
+    SingleSPI_Blocking_ESP32 spi;
+    spi.setPinMapping(0, 8);
+
+    uint8_t largeBuffer[300];
+    for (int i = 0; i < 300; i++) {
+        largeBuffer[i] = (i & 1);  // Alternating pattern
+    }
+
+    // Should truncate to 256
+    spi.loadBuffer(largeBuffer, 300);
+    CHECK_EQ(spi.getBufferLength(), 256);
+}
+
+TEST_CASE("SPIBlocking Single: Multiple pin configurations") {
+    // Test different pin configurations
+    for (uint8_t dataPin = 0; dataPin < 10; dataPin++) {
+        for (uint8_t clkPin = 10; clkPin < 15; clkPin++) {
+            SingleSPI_Blocking_ESP32 spi;
+            spi.setPinMapping(dataPin, clkPin);
+
+            PinMaskEntry* lut = spi.getLUTArray();
+
+            // Verify data pin mask in LUT
+            CHECK_EQ(lut[0x01].set_mask, (1u << dataPin));
+            CHECK_EQ(lut[0x00].clear_mask, (1u << dataPin));
+        }
+    }
+}

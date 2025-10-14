@@ -123,6 +123,43 @@ FastLED 3.10.4
       * Fallback when hardware SPI buses exhausted
       * Low-level debugging with ring buffer GPIO event inspection
     * **Complete documentation**: [src/platforms/esp/32/parallel_spi/README.md](src/platforms/esp/32/parallel_spi/README.md)
+  * **NEW: Main Thread Blocking Software SPI for ESP32** (ESP32-C2/C3/C6/H2): Inline bit-banging without ISR overhead
+    * **Three width variants** using same bit-banging logic as ISR implementation but running directly on main thread:
+      * **Single-SPI (1-way)**: 1 data pin - simple inline bit-banging
+      * **Dual-SPI (2-way)**: 2 data pins - dual-lane parallel inline bit-banging
+      * **Quad-SPI (4-way)**: 4 data pins - quad-lane parallel inline bit-banging
+    * **Main thread blocking architecture**:
+      * Same GPIO bit-banging logic as ISR implementation
+      * Runs inline on main thread (no ISR context switching)
+      * Simple blocking API - transmit() blocks until complete
+      * No interrupt overhead or scheduling delays
+      * Better timing precision (no interrupt jitter)
+    * **Performance characteristics**:
+      * Higher effective throughput than ISR due to no interrupt overhead
+      * Lower latency (no ISR entry/exit overhead)
+      * More predictable timing (inline execution, no interrupt scheduling)
+      * Trade-off: blocking during transmission (main thread waits)
+    * **Use case selection**:
+      * **Use Blocking SPI** when:
+        * Simple LED update pattern
+        * Lower overhead needed (no ISR complexity)
+        * Blocking during LED update is acceptable
+        * More predictable timing required
+      * **Use ISR SPI** when:
+        * Non-blocking LED updates needed
+        * Main thread must remain responsive
+        * Complex application with multiple tasks
+    * **Arduino examples** for all variants:
+      * [Esp32C3_SingleSPI_Blocking/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_SingleSPI_Blocking/) - 1-way example
+      * [Esp32C3_DualSPI_Blocking/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_DualSPI_Blocking/) - 2-way example
+      * [Esp32C3_QuadSPI_Blocking/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_QuadSPI_Blocking/) - 4-way example
+    * **Testing**:
+      * 18 unit tests passing across all width variants
+      * Host simulation with GPIO event capture
+      * WASM compilation validated for all examples
+    * **API classes**: `SingleSPI_Blocking_ESP32`, `DualSPI_Blocking_ESP32`, `QuadSPI_Blocking_ESP32`
+    * **Coexists with ISR implementation**: Both ISR and blocking available - choose based on your needs
+    * **Complete documentation**: [src/platforms/esp/32/parallel_spi/README.md](src/platforms/esp/32/parallel_spi/README.md), [examples/SpecialDrivers/ESP/ParallelSPI/README.md](examples/SpecialDrivers/ESP/ParallelSPI/README.md)
   * **ezWS2812 Hardware-Accelerated Drivers for Silicon Labs MG24**: Optimized WS2812 controllers imported from Silicon Labs
     * Resolves GitHub issue #1891: Platform support for Seeed Xiao MG24 Sense and other EFR32MG24-based boards
     * Added `EZWS2812_GPIO`: Always-available GPIO controller with cycle-accurate timing for 39MHz and 78MHz CPUs
