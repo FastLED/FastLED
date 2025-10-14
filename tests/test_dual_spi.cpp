@@ -329,7 +329,6 @@ TEST_CASE("SPIDual: Extract lanes from interleaved data") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#define FASTLED_SPI_HOST_SIMULATION
 #include "platforms/esp/32/parallel_spi/parallel_spi_blocking_dual.hpp"
 
 TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {

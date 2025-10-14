@@ -214,7 +214,6 @@ TEST_CASE("SPITransposerQuad: Multi-byte lanes") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#define FASTLED_SPI_HOST_SIMULATION
 #include "platforms/esp/32/parallel_spi/parallel_spi_blocking_quad.hpp"
 
 TEST_CASE("SPIBlocking Quad: Basic initialization and configuration") {

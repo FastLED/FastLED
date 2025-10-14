@@ -270,7 +270,6 @@ TEST_CASE("SPISingle: Reset clears transmission history") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#define FASTLED_SPI_HOST_SIMULATION
 #include "platforms/esp/32/parallel_spi/parallel_spi_blocking_single.hpp"
 
 TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
