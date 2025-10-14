@@ -303,12 +303,12 @@ void kf_work(
     where 
     p[i] * m[i] = m[i-1]
     m0 = n                  */
-static 
+static
 void kf_factor(int n,int * facbuf)
 {
     int p=4;
     double floor_sqrt;
-    floor_sqrt = floor( sqrt((double)n) );
+    floor_sqrt = floor( fl::sqrt((double)n) );
 
     /*factor out powers of 4, powers of 2, then any remaining primes */
     do {
