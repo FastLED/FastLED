@@ -3,6 +3,8 @@ import subprocess
 import sys
 from typing import Any, Dict, List, Optional
 
+from running_process.process_output_reader import EndOfStream
+
 
 class DockerManager:
     def __init__(self):
@@ -70,24 +72,25 @@ class DockerManager:
                             break
 
                         # Try to get next line with short timeout
-                        line_or_eos = proc.get_next_line(timeout=line_timeout)
-                        if isinstance(line_or_eos, EndOfStream):
+                        result = proc.get_next_line(timeout=line_timeout)
+                        if isinstance(result, EndOfStream):
                             # Process has ended
                             break
 
-                        # Process the line (line_or_eos is str at this point)
-                        print(line_or_eos)
+                        # Process the line
+                        line: str = result
+                        print(line)
 
                         # Write to output file if specified
                         if output_handle:
-                            output_handle.write(line_or_eos + "\n")
+                            output_handle.write(line + "\n")
                             output_handle.flush()  # Ensure immediate write
 
                         # Check for interrupt pattern (for informational purposes only)
                         if interrupt_pattern and re.search(
-                            interrupt_pattern, line_or_eos
+                            interrupt_pattern, line
                         ):
-                            print(f"Pattern detected: {line_or_eos}")
+                            print(f"Pattern detected: {line}")
                             pattern_found = True
 
                     except Exception as line_ex:

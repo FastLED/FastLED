@@ -62,9 +62,7 @@ public:
     virtual bool begin(const ParlioDriverConfig& config, uint16_t num_leds) = 0;
     virtual void end() = 0;
     virtual void set_strip(uint8_t channel, CRGB* leds) = 0;
-    virtual void show_grb() = 0;
-    virtual void show_rgb() = 0;
-    virtual void show_bgr() = 0;
+    virtual void show() = 0;
     virtual void wait() = 0;
     virtual bool is_initialized() const = 0;
 };
@@ -110,10 +108,8 @@ public:
     void set_strip(uint8_t channel, CRGB* leds) override;
 
     /// @brief Show LED data - transmit to all strips
-    ///
-    /// @tparam RGB_ORDER Color order (e.g., GRB, RGB, BGR)
-    template<EOrder RGB_ORDER = GRB>
-    void show();
+    /// Assumes data in CRGB buffer is already in correct RGB order
+    void show() override;
 
     /// @brief Wait for current transmission to complete
     void wait() override;
@@ -121,32 +117,15 @@ public:
     /// @brief Check if driver is initialized
     bool is_initialized() const override;
 
-    /// @brief Virtual show methods for base class interface
-    void show_grb() override;
-    void show_rgb() override;
-    void show_bgr() override;
-
 private:
     /// @brief Pack LED data into PARLIO format
     ///
-    /// For each LED position and each of 24 color bits (in specified order, MSB-first):
+    /// For each LED position and each of 24 color bits (RGB order, MSB-first):
     /// - Collect the same bit position from all DATA_WIDTH strips
     /// - Pack into single output byte
     ///
-    /// @tparam RGB_ORDER Color order for output (GRB for WS2812)
-    template<EOrder RGB_ORDER>
+    /// Assumes CRGB data is already in correct RGB order (r=offset 0, g=offset 1, b=offset 2)
     void pack_data();
-
-    /// @brief Map output position to CRGB byte offset
-    ///
-    /// CRGB is stored in memory as: struct { uint8_t r, g, b; }
-    /// So byte offsets are: r=0, g=1, b=2
-    ///
-    /// @tparam RGB_ORDER Desired output color order
-    /// @param output_pos Position in output stream (0, 1, or 2)
-    /// @return Byte offset into CRGB structure
-    template<EOrder RGB_ORDER>
-    static constexpr uint8_t get_crgb_byte_offset(uint8_t output_pos);
 
     /// @brief PARLIO TX completion callback
     static bool IRAM_ATTR parlio_tx_done_callback(parlio_tx_unit_handle_t tx_unit,

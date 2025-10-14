@@ -141,8 +141,8 @@ public:
             }
         }
 
-        // Show and wait
-        mDriver->show_grb();
+        // Show and wait (data is already in correct RGB order from PixelController)
+        mDriver->show();
         mDriver->wait();
     }
 

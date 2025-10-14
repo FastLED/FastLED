@@ -267,7 +267,6 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::set_strip(uint8_t channel, CRGB* leds
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
-template<EOrder RGB_ORDER>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     PARLIO_DLOG("show() called");
 
@@ -296,7 +295,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
 
     // Pack LED data into DMA buffer(s)
     PARLIO_DLOG("Packing LED data...");
-    pack_data<RGB_ORDER>();
+    pack_data();
 
     // Configure transmission
     parlio_transmit_config_t tx_config = {};
@@ -356,22 +355,6 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::is_initialized() const {
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
-void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show_grb() {
-    show<GRB>();
-}
-
-template <uint8_t DATA_WIDTH, typename CHIPSET>
-void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show_rgb() {
-    show<RGB>();
-}
-
-template <uint8_t DATA_WIDTH, typename CHIPSET>
-void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show_bgr() {
-    show<BGR>();
-}
-
-template <uint8_t DATA_WIDTH, typename CHIPSET>
-template<EOrder RGB_ORDER>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
     // Always show basic pack_data info (not just debug mode)
     FASTLED_DBG("PARLIO pack_data:");
@@ -384,14 +367,13 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
 
     if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
         PARLIO_DLOG("Using BREAK_PER_COLOR packing strategy");
-        // Pack data into 3 separate sub-buffers (one per color component)
+        // Pack data into 3 separate sub-buffers (one per color component: R, G, B)
         // This ensures DMA gaps only occur at color boundaries
         // TODO: See top of file for WLED-MM-P4 style buffer breaking strategy
-        for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
-            // Get which CRGB byte to output at this position
-            uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
+        for (uint8_t color_idx = 0; color_idx < 3; color_idx++) {
+            // CRGB memory layout: r=0, g=1, b=2 (always RGB order)
             size_t byte_idx = 0;
-            PARLIO_DLOG("  Color component " << int(output_pos) << " (CRGB offset " << int(crgb_offset) << ")");
+            PARLIO_DLOG("  Color component " << int(color_idx) << " (CRGB offset " << int(color_idx) << ")");
 
             for (uint16_t led = 0; led < num_leds_; led++) {
                 // Process 8 bits of this color byte (MSB first)
@@ -402,7 +384,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                     for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
                         if (strips_[channel]) {
                             const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                            uint8_t channel_byte = channel_data[crgb_offset];
+                            uint8_t channel_byte = channel_data[color_idx];
                             uint8_t bit_val = (channel_byte >> bit) & 0x01;
                             // Position bit based on DATA_WIDTH (use upper bits for < 8)
                             if (DATA_WIDTH >= 8) {
@@ -421,7 +403,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                         }
                     }
 
-                    dma_sub_buffers_[output_pos][byte_idx++] = output_byte;
+                    dma_sub_buffers_[color_idx][byte_idx++] = output_byte;
 
                     // Log first few bytes for debugging
                     #ifdef FASTLED_ESP32_PARLIO_DLOGGING
@@ -440,11 +422,8 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
         size_t byte_idx = 0;
 
         for (uint16_t led = 0; led < num_leds_; led++) {
-            // Process each of 3 color bytes in the specified output order
-            for (uint8_t output_pos = 0; output_pos < 3; output_pos++) {
-                // Get which CRGB byte to output at this position
-                uint8_t crgb_offset = get_crgb_byte_offset<RGB_ORDER>(output_pos);
-
+            // Process each of 3 color bytes in RGB order (r=0, g=1, b=2)
+            for (uint8_t color_idx = 0; color_idx < 3; color_idx++) {
                 // Process 8 bits of this byte (MSB first)
                 for (int8_t bit = 7; bit >= 0; bit--) {
                     uint8_t output_byte = 0;
@@ -453,7 +432,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                     for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
                         if (strips_[channel]) {
                             const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                            uint8_t channel_byte = channel_data[crgb_offset];
+                            uint8_t channel_byte = channel_data[color_idx];
                             uint8_t bit_val = (channel_byte >> bit) & 0x01;
                             // Position bit based on DATA_WIDTH (use upper bits for < 8)
                             if (DATA_WIDTH >= 8) {
@@ -476,9 +455,9 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
 
                     // Log first few bytes for debugging
                     #ifdef FASTLED_ESP32_PARLIO_DLOGGING
-                    if (led == 0 && output_pos == 0 && bit >= 5) {
+                    if (led == 0 && color_idx == 0 && bit >= 5) {
                         char buf[64];
-                        fl::snprintf(buf, sizeof(buf), "    LED[0] color[%d] bit[%d]: byte=0x%02x", int(output_pos), int(bit), int(output_byte));
+                        fl::snprintf(buf, sizeof(buf), "    LED[0] color[%d] bit[%d]: byte=0x%02x", int(color_idx), int(bit), int(output_byte));
                         FASTLED_DBG(buf);
                     }
                     #endif
@@ -487,24 +466,6 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
         }
     }
     PARLIO_DLOG("pack_data() completed");
-}
-
-template <uint8_t DATA_WIDTH, typename CHIPSET>
-template<EOrder RGB_ORDER>
-constexpr uint8_t ParlioLedDriver<DATA_WIDTH, CHIPSET>::get_crgb_byte_offset(uint8_t output_pos) {
-    if constexpr (RGB_ORDER == GRB) {
-        // Output: G, R, B -> byte offsets: 1, 0, 2
-        return (output_pos == 0) ? 1 : (output_pos == 1) ? 0 : 2;
-    } else if constexpr (RGB_ORDER == RGB) {
-        // Output: R, G, B -> byte offsets: 0, 1, 2
-        return output_pos;
-    } else if constexpr (RGB_ORDER == BGR) {
-        // Output: B, G, R -> byte offsets: 2, 1, 0
-        return (output_pos == 0) ? 2 : (output_pos == 1) ? 1 : 0;
-    } else {
-        // Default to RGB
-        return output_pos;
-    }
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
