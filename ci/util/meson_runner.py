@@ -42,6 +42,27 @@ def setup_meson_build(
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
 
+    # Disable thin archives when using zig compiler (zig linker doesn't support them)
+    # This prevents "unexpected token in LD script: literal: '!<thin>'" errors
+    use_thin_archives = False
+
+    # If build exists and we're disabling thin archives, remove any existing thin archives
+    # to prevent linker errors when reusing the build directory
+    if already_configured and not use_thin_archives:
+        libfastled_archive = build_dir / "libfastled.a"
+        if libfastled_archive.exists():
+            # Check if it's a thin archive by reading first few bytes
+            try:
+                with open(libfastled_archive, "rb") as f:
+                    header = f.read(8)
+                    if header == b"!<thin>\n":
+                        print(
+                            "[MESON] ⚠️  Removing incompatible thin archive: libfastled.a"
+                        )
+                        libfastled_archive.unlink()
+            except Exception as e:
+                print(f"[MESON] Warning: Could not check archive format: {e}")
+
     if already_configured and not reconfigure:
         print(f"[MESON] Build directory already configured: {build_dir}")
         return True
@@ -64,15 +85,7 @@ def setup_meson_build(
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
-    # Thin archives enabled by default for deterministic builds
-    # EXCEPT when using zig - zig's linker doesn't support thin archives
-    # Set FASTLED_DISABLE_THIN_ARCHIVES=1 to force disable if needed
-    use_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES") != "1"
-
-    # Disable thin archives when using zig compiler (zig linker doesn't support them)
-    # This prevents "unexpected token in LD script: literal: '!<thin>'" errors
-    use_thin_archives = False
-
+    # use_thin_archives is set earlier (line 47) to False for zig compatibility
     thin_flag = " --thin" if use_thin_archives else ""
 
     if not use_thin_archives:
