@@ -30,6 +30,7 @@
 // ESP32-only example - do not compile on other platforms
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
+#include <Arduino.h>
 #include <FastLED.h>
 #include "platforms/quad_spi_platform.h"
 
