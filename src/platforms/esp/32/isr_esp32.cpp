@@ -4,6 +4,9 @@
   ESP32-specific implementation of the cross-platform ISR API.
   Supports ESP32, ESP32-S2, ESP32-S3 (Xtensa) and ESP32-C3, ESP32-C6 (RISC-V).
 
+  Note: This implementation requires ESP-IDF 5.0+ for the gptimer API.
+        On older ESP-IDF versions, the null ISR implementation is used instead.
+
   License: MIT (FastLED)
 */
 
@@ -13,8 +16,16 @@
 #include "fl/compiler_control.h"
 #include "fl/namespace.h"
 
+// Include ESP-IDF headers to get version macros
 FL_EXTERN_C_BEGIN
 #include "esp_attr.h"
+FL_EXTERN_C_END
+
+// Only compile this implementation for ESP-IDF 5.0+
+// The gptimer API is not available in ESP-IDF 4.x
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+
+FL_EXTERN_C_BEGIN
 #include "esp_intr_alloc.h"
 #include "driver/gptimer.h"
 #include "esp_log.h"
@@ -460,5 +471,7 @@ IsrImpl& IsrImpl::get_instance() {
 
 } // namespace isr
 } // namespace fl
+
+#endif // ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
 
 #endif // ESP32

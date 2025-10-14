@@ -14,6 +14,11 @@
 #include "fl/compiler_control.h"
 #include "fl/namespace.h"
 
+// Get ESP-IDF version macros if on ESP32
+#if defined(ESP32)
+    #include "platforms/esp/32/led_sysdefs_esp32.h"
+#endif
+
 namespace fl {
 namespace isr {
 
@@ -103,7 +108,20 @@ public:
 
 // Only provide weak symbol if no platform implementation is available
 // On Windows, weak symbols don't work reliably, so we use conditional compilation
-#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL) && !defined(ESP32)
+// Note: ESP32 with ESP-IDF < 5.0 also uses the null implementation (no gptimer API)
+#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL)
+    // For ESP32 platforms, check if we need the null implementation (ESP-IDF < 5.0)
+    #if !defined(ESP32)
+        // Not ESP32 - provide null implementation
+    #elif defined(ESP32) && ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
+        // ESP32 with old ESP-IDF - provide null implementation
+    #else
+        // ESP32 with ESP-IDF >= 5.0 - skip null implementation (platform provides it)
+        #define SKIP_NULL_ISR_IMPL
+    #endif
+#endif
+
+#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL) && !defined(SKIP_NULL_ISR_IMPL)
 
 /**
  * Default factory that returns the null implementation.

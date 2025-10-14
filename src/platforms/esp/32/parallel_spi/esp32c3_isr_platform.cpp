@@ -12,6 +12,7 @@
 
 FL_EXTERN_C_BEGIN
 
+#include "esp_attr.h"
 #include "esp_log.h"
 
 FL_EXTERN_C_END
