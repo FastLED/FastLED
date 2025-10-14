@@ -115,7 +115,7 @@ def setup_meson_build(
 
     try:
         result = subprocess.run(
-            cmd, cwd=source_dir, capture_output=True, text=True, timeout=60, env=env
+            cmd, cwd=source_dir, capture_output=True, text=True, timeout=600, env=env
         )
 
         if result.returncode != 0:
@@ -131,7 +131,7 @@ def setup_meson_build(
         return True
 
     except subprocess.TimeoutExpired:
-        print("[MESON] Setup timed out after 60 seconds", file=sys.stderr)
+        print("[MESON] Setup timed out after 600 seconds", file=sys.stderr)
         return False
     except Exception as e:
         print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
