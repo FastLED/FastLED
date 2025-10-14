@@ -27,7 +27,7 @@ TEST_CASE("fft tester 512") {
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
         float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
-        float sin_x = sin(rot);
+        float sin_x = fl::sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
     FFTBins out(16);
@@ -63,7 +63,7 @@ TEST_CASE("fft tester 256") {
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
         float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
-        float sin_x = sin(rot);
+        float sin_x = fl::sin(rot);
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
@@ -100,7 +100,7 @@ TEST_CASE("fft tester 256 with 64 bands") {
     // fill in with a sine wave
     for (int i = 0; i < n; ++i) {
         float rot = fl::map_range<float, float>(i, 0, n - 1, 0, 2 * FL_PI * 10);
-        float sin_x = sin(rot);
+        float sin_x = fl::sin(rot);
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }

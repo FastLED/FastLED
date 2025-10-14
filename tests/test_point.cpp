@@ -9,7 +9,7 @@ using namespace fl;
 
 #define REQUIRE_APPROX(a, b, tolerance) \
     do { \
-        if (fabs((a - b)) > (tolerance)) { \
+        if (fl::fabs((a - b)) > (tolerance)) { \
             std::cerr << "REQUIRE_APPROX failed: " << #a << " = " << (a) \
                       << ", " << #b << " = " << (b) \
                       << ", tolerance = " << (tolerance) << std::endl; \
