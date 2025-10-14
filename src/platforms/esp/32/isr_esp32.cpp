@@ -14,6 +14,7 @@
 #include "fl/namespace.h"
 
 FL_EXTERN_C_BEGIN
+#include "esp_attr.h"
 #include "esp_intr_alloc.h"
 #include "driver/gptimer.h"
 #include "esp_log.h"
