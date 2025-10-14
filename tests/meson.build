@@ -143,8 +143,14 @@ test_names = [
 
 # Build each test executable with shared PCH
 foreach test_name : test_names
+  # Some tests need additional source files for ESP32 parallel SPI host simulation
+  test_sources = [test_name + '.cpp', test_pch[0]]
+  if test_name in ['test_dual_spi', 'test_quad_spi', 'test_single_spi']
+    test_sources += [meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp']
+  endif
+
   test_exe = executable(test_name,
-    [test_name + '.cpp', test_pch[0]],  # Include PCH as dependency (first output)
+    test_sources,
     include_directories: [src_dir, tests_dir, stub_dir],
     cpp_args: unit_test_compile_args + [
       '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
