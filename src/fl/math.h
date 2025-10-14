@@ -31,30 +31,6 @@ long lround_impl_double(double value);
 float fmod_impl_float(float x, float y);
 double fmod_impl_double(double x, double y);
 
-template <typename T> inline T floor(T value) {
-    if (value >= 0) {
-        return static_cast<T>(static_cast<int>(value));
-    }
-    return static_cast<T>(floor_impl_float(static_cast<float>(value)));
-}
-
-template <typename T> inline T ceil(T value) {
-    if (value <= 0) {
-        return static_cast<T>(static_cast<int>(value));
-    }
-    return static_cast<T>(ceil_impl_float(static_cast<float>(value)));
-}
-
-// Exponential function using custom implementation
-template <typename T> inline T exp(T value) {
-    return static_cast<T>(exp_impl_double(static_cast<double>(value)));
-}
-
-// Square root using Newton-Raphson method
-template <typename T> inline T sqrt(T value) {
-    return static_cast<T>(sqrt_impl_float(static_cast<float>(value)));
-}
-
 // Constexpr version for compile-time evaluation (compatible with older C++
 // standards)
 constexpr int ceil_constexpr(float value) {
@@ -68,64 +44,50 @@ constexpr int ceil_constexpr(float value) {
 
 // Floor functions
 inline float floorf(float value) { return floor_impl_float(value); }
-inline float floor(float value) { return floor_impl_float(value); }
 inline double floor(double value) { return floor_impl_double(value); }
 
 // Ceiling functions
 inline float ceilf(float value) { return ceil_impl_float(value); }
-inline float ceil(float value) { return ceil_impl_float(value); }
 inline double ceil(double value) { return ceil_impl_double(value); }
 
 // Square root functions
 inline float sqrtf(float value) { return sqrt_impl_float(value); }
-inline float sqrt(float value) { return sqrt_impl_float(value); }
 inline double sqrt(double value) { return sqrt_impl_double(value); }
 
 // Exponential functions
 inline float expf(float value) { return exp_impl_float(value); }
-inline float exp(float value) { return exp_impl_float(value); }
 inline double exp(double value) { return exp_impl_double(value); }
 
 // Sine functions
 inline float sinf(float value) { return sin_impl_float(value); }
-inline float sin(float value) { return sin_impl_float(value); }
 inline double sin(double value) { return sin_impl_double(value); }
 
 // Cosine functions
 inline float cosf(float value) { return cos_impl_float(value); }
-inline float cos(float value) { return cos_impl_float(value); }
 inline double cos(double value) { return cos_impl_double(value); }
 
 // Natural logarithm functions
 inline float logf(float value) { return log_impl_float(value); }
-inline float log(float value) { return log_impl_float(value); }
 inline double log(double value) { return log_impl_double(value); }
 
 // Base-10 logarithm functions
 inline float log10f(float value) { return log10_impl_float(value); }
-inline float log10(float value) { return log10_impl_float(value); }
 inline double log10(double value) { return log10_impl_double(value); }
 
 // Power functions
 inline float powf(float base, float exponent) { return pow_impl_float(base, exponent); }
-inline float pow(float base, float exponent) { return pow_impl_float(base, exponent); }
-inline float pow(float base, double exponent) { return pow_impl_float(base, static_cast<float>(exponent)); }
 inline double pow(double base, double exponent) { return pow_impl_double(base, exponent); }
 
 // Absolute value functions (floating point)
 inline float fabsf(float value) { return fabs_impl_float(value); }
-inline float fabs(float value) { return fabs_impl_float(value); }
 inline double fabs(double value) { return fabs_impl_double(value); }
 
 // Round to nearest long integer
 inline long lroundf(float value) { return lround_impl_float(value); }
-inline long lround(float value) { return lround_impl_float(value); }
 inline long lround(double value) { return lround_impl_double(value); }
 
 // Floating-point modulo (remainder)
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }
-inline float fmod(float x, float y) { return fmod_impl_float(x, y); }
-inline float fmod(float x, double y) { return fmod_impl_float(x, static_cast<float>(y)); }
 inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
 
 // Arduino will define this in the global namespace as macros, so we can't
