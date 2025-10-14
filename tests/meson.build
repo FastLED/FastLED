@@ -145,17 +145,20 @@ test_names = [
 foreach test_name : test_names
   # Some tests need additional source files for ESP32 parallel SPI host simulation
   test_sources = [test_name + '.cpp', test_pch[0]]
+  test_cpp_args = unit_test_compile_args + [
+    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+    '-Winvalid-pch',
+  ]
+
   if test_name in ['test_dual_spi', 'test_quad_spi', 'test_single_spi']
     test_sources += [meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp']
+    test_cpp_args += ['-DFASTLED_SPI_HOST_SIMULATION']
   endif
 
   test_exe = executable(test_name,
     test_sources,
     include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: unit_test_compile_args + [
-      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Winvalid-pch',
-    ],
+    cpp_args: test_cpp_args,
     link_args: unit_test_link_args,
     link_with: [fastled_lib, doctest_main],
     install: false
