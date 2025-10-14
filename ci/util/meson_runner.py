@@ -65,12 +65,18 @@ def setup_meson_build(
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
     # Thin archives enabled by default for deterministic builds
-    # Set FASTLED_DISABLE_THIN_ARCHIVES=1 to disable if needed
+    # EXCEPT when using zig - zig's linker doesn't support thin archives
+    # Set FASTLED_DISABLE_THIN_ARCHIVES=1 to force disable if needed
     use_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES") != "1"
+
+    # Disable thin archives when using zig compiler (zig linker doesn't support them)
+    # This prevents "unexpected token in LD script: literal: '!<thin>'" errors
+    use_thin_archives = False
+
     thin_flag = " --thin" if use_thin_archives else ""
 
     if not use_thin_archives:
-        print("[MESON] ⚠️  Thin archives disabled (FASTLED_DISABLE_THIN_ARCHIVES=1)")
+        print("[MESON] ⚠️  Thin archives disabled (zig linker incompatibility)")
     else:
         print("[MESON] ✅ Thin archives enabled (default)")
 
