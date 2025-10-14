@@ -2,7 +2,6 @@
 
 
 #include "fl/stdint.h"
-#include <string.h>
 
 #include "fl/allocator.h"
 #include "fl/initializer_list.h"

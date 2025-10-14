@@ -9,9 +9,6 @@ This will keep the memory from growing during multiple inserts
 and removals.
 */
 
-// #include <cstddef>
-// #include <iterator>
-
 #include "fl/assert.h"
 #include "fl/bitset.h"
 #include "fl/clamp.h"

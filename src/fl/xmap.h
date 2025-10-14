@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include <string.h>
 
 #include "fl/force_inline.h"
 #include "fl/lut.h"

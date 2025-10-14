@@ -6,9 +6,7 @@
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/int.h"
-#include <math.h>
 #include "fl/stdint.h"
-#include "fl/span.h"
 
 namespace fl {
 
@@ -27,7 +25,7 @@ class AudioSample {
     AudioSample(const AudioSample &other) : mImpl(other.mImpl) {}
     AudioSample(AudioSampleImplPtr impl) : mImpl(impl) {}
     ~AudioSample();
-    
+
     // Constructor that takes raw audio data and handles pooling internally
     AudioSample(fl::span<const fl::i16> span, fl::u32 timestamp = 0);
 
@@ -78,7 +76,7 @@ class SoundLevelMeter {
         processBlock(samples.data(), samples.size());
     }
 
-    /// @returns most recent block’s level in dBFS (≤ 0)
+    /// @returns most recent block's level in dBFS (≤ 0)
     double getDBFS() const { return current_dbfs_; }
 
     /// @returns calibrated estimate in dB SPL
@@ -101,8 +99,8 @@ class SoundLevelMeter {
     double smoothing_alpha_;   // 0 = pure min, >0 = slow adapt
     double dbfs_floor_global_; // lowest dBFS seen so far
     double offset_;            // spl_floor_ − dbfs_floor_global_
-    double current_dbfs_;      // last block’s dBFS
-    double current_spl_;       // last block’s estimated SPL
+    double current_dbfs_;      // last block's dBFS
+    double current_spl_;       // last block's estimated SPL
 };
 
 // Implementation details.
@@ -121,7 +119,7 @@ class AudioSampleImpl {
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
     fl::u32 timestamp() const { return mTimestamp; }
-    
+
     // For object pool - reset internal state for reuse
     void reset() {
         mSignedPcm.clear();

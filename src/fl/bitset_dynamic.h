@@ -2,7 +2,6 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
-#include <string.h> // for memcpy
 
 #include "fl/math_macros.h"
 #include "fl/memfill.h"
@@ -42,7 +41,7 @@ class bitset_dynamic {
     bitset_dynamic(const bitset_dynamic &other) {
         if (other._size > 0) {
             resize(other._size);
-            memcpy(_blocks, other._blocks, _block_count * sizeof(block_type));
+            fl::memcopy(_blocks, other._blocks, _block_count * sizeof(block_type));
         }
     }
 
@@ -60,7 +59,7 @@ class bitset_dynamic {
         if (this != &other) {
             if (other._size > 0) {
                 resize(other._size);
-                memcpy(_blocks, other._blocks,
+                fl::memcopy(_blocks, other._blocks,
                        _block_count * sizeof(block_type));
             } else {
                 clear();
@@ -129,7 +128,7 @@ class bitset_dynamic {
 
             if (_blocks) {
                 fl::u32 copy_blocks = FL_MIN(_block_count, new_block_count);
-                memcpy(new_blocks, _blocks, copy_blocks * sizeof(block_type));
+                fl::memcopy(new_blocks, _blocks, copy_blocks * sizeof(block_type));
             }
 
             delete[] _blocks;
@@ -393,7 +392,7 @@ class bitset_dynamic {
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            memcpy(result._blocks + min_blocks, _blocks + min_blocks,
+            fl::memcopy(result._blocks + min_blocks, _blocks + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 
@@ -416,7 +415,7 @@ class bitset_dynamic {
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            memcpy(result._blocks + min_blocks, _blocks + min_blocks,
+            fl::memcopy(result._blocks + min_blocks, _blocks + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 

@@ -4,7 +4,6 @@
 #include "fl/namespace.h"
 #include "fl/force_inline.h"
 #include "fl/pair.h"
-#include <string.h>
 
 #include "crgb.h"
 #include "fl/clamp.h"

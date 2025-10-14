@@ -3,8 +3,8 @@
 
 
 #if defined(FASTLED_TESTING) || defined(__EMSCRIPTEN__)
-// max_align_t and alignof
-#include <cstddef>  // ok include
+// alignof is a built-in keyword in C++11, no header needed
+// max_align_t is not used in this file
 #endif
 
 #ifdef __EMSCRIPTEN__

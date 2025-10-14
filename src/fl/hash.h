@@ -6,7 +6,6 @@
 #include "fl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/memfill.h"
-#include <string.h>
 #include "fl/compiler_control.h"
 
 namespace fl {

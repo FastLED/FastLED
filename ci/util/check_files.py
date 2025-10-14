@@ -206,12 +206,17 @@ def collect_files_to_check(
                         file_path = os.path.join(root, file)
                         files_to_check.append(file_path)
 
-    # Also check the main src directory files (not subdirectories)
-    for file in os.listdir(SRC_ROOT):
-        file_path = os.path.join(SRC_ROOT, file)
-        if os.path.isfile(file_path) and any(
-            file_path.endswith(ext) for ext in extensions
-        ):
-            files_to_check.append(file_path)
+    # Only add main src directory files if SRC_ROOT itself is in test_directories
+    # This prevents unintentionally including src/*.{cpp,h} when testing subdirectories
+    src_root_str = str(SRC_ROOT)
+    if src_root_str in test_directories or any(
+        d == src_root_str for d in test_directories
+    ):
+        for file in os.listdir(SRC_ROOT):
+            file_path = os.path.join(SRC_ROOT, file)
+            if os.path.isfile(file_path) and any(
+                file_path.endswith(ext) for ext in extensions
+            ):
+                files_to_check.append(file_path)
 
     return files_to_check
