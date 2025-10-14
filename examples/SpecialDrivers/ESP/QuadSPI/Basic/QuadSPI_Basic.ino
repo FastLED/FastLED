@@ -27,11 +27,13 @@
 ///
 /// @note This feature requires ESP32/S2/S3. Not supported on other platforms.
 
+#include <Arduino.h>
+#include <FastLED.h>
+
 // ESP32-only example - do not compile on other platforms
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
-#include <Arduino.h>
-#include <FastLED.h>
+
 #include "platforms/quad_spi_platform.h"
 
 // Only compile if Quad-SPI is available on this platform
