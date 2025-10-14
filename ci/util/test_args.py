@@ -155,6 +155,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         action="store_true",
         help="Disable fingerprint caching for tests (force rebuild/rerun)",
     )
+    parser.add_argument(
+        "--build",
+        action="store_true",
+        help="Build Docker images if missing (use with --qemu)",
+    )
 
     parsed_args = parser.parse_args(args)
 
@@ -186,6 +191,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         debug=parsed_args.debug,
         qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
+        build=parsed_args.build,
     )
 
     # Auto-enable --py or --cpp mode when a specific test is provided

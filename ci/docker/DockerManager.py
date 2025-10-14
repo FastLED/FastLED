@@ -17,6 +17,7 @@ class DockerManager:
         timeout: Optional[int] = None,
         interrupt_pattern: Optional[str] = None,
         output_file: Optional[str] = None,
+        container_name: Optional[str] = None,
     ) -> subprocess.CompletedProcess[str]:
         full_command = ["docker"] + command
         print(f"Executing Docker command: {' '.join(full_command)}")
@@ -55,8 +56,25 @@ class DockerManager:
                     print(f"Warning: Could not open output file {output_file}: {e}")
 
             try:
-                with proc.line_iter(timeout=None) as it:
-                    for line in it:
+                # Use a reasonable line timeout (1 second) so we can check the overall timeout frequently
+                line_timeout = 1.0
+                while True:
+                    try:
+                        # Check timeout before trying to read next line
+                        if timeout and (time.time() - start_time) > timeout:
+                            print(
+                                f"Timeout reached ({timeout}s), terminating container..."
+                            )
+                            timeout_occurred = True
+                            break
+
+                        # Try to get next line with short timeout
+                        line = proc.readline(timeout=line_timeout)
+                        if line is None:
+                            # Process has ended
+                            break
+
+                        # Process the line
                         print(line)
 
                         # Write to output file if specified
@@ -69,16 +87,40 @@ class DockerManager:
                             print(f"Pattern detected: {line}")
                             pattern_found = True
 
-                        # Check timeout
+                    except Exception as line_ex:
+                        # Timeout waiting for line or other error - check overall timeout
                         if timeout and (time.time() - start_time) > timeout:
                             print(
                                 f"Timeout reached ({timeout}s), terminating container..."
                             )
                             timeout_occurred = True
                             break
+                        # Otherwise continue waiting for more output
+                        continue
 
-                # Wait for process to complete
-                returncode = proc.wait()
+                # If timeout occurred, stop the Docker container
+                if timeout_occurred and container_name:
+                    print(f"Stopping Docker container: {container_name}")
+                    try:
+                        # Stop the container - this will cause the docker run command to exit
+                        stop_proc = subprocess.run(
+                            ["docker", "stop", container_name],
+                            capture_output=True,
+                            timeout=10,
+                            env=env,
+                        )
+                        if stop_proc.returncode != 0:
+                            print(f"Warning: docker stop returned {stop_proc.returncode}")
+                    except Exception as e:
+                        print(f"Warning: Failed to stop container: {e}")
+
+                # Wait for process to complete (with short timeout if we stopped the container)
+                try:
+                    returncode = proc.wait(timeout=10 if timeout_occurred else None)
+                except Exception as e:
+                    print(f"Warning: wait() failed: {e}")
+                    # If wait fails, assume success since we hit timeout
+                    returncode = 0 if timeout_occurred else 1
 
                 # Handle timeout case: return success (0) for timeouts as per requirement
                 if timeout_occurred:
@@ -218,6 +260,7 @@ class DockerManager:
             timeout=timeout,
             interrupt_pattern=interrupt_pattern,
             output_file=output_file,
+            container_name=name,
         )
         return result.returncode
 

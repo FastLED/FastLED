@@ -115,9 +115,72 @@ def run_qemu_tests(args: TestArgs) -> None:
 
     # Check if Docker is available
     if not docker_runner.check_docker_available():
-        print("ERROR: Docker is not available or not running")
-        print("Please install Docker and ensure it's running")
+        print("❌ ERROR: Docker is not available or not running")
+        print()
+        print("Please install Docker Desktop and ensure it's running:")
+        print("  https://www.docker.com/products/docker-desktop")
+        print()
         sys.exit(1)
+
+    # Check if board Docker image exists (needed for compilation)
+    board_image = docker_runner.get_board_image_name(platform)
+    image_exists = docker_runner.check_image_exists(board_image)
+
+    if not image_exists:
+        print(f"❌ Docker image for {platform} not found locally")
+        print()
+
+        # Try pulling from Docker Hub registry first
+        print(f"Attempting to pull prebuilt image from Docker Hub...")
+        pull_success = docker_runner.pull_and_tag_board_image(platform)
+
+        if pull_success:
+            print(f"✅ Successfully pulled and configured Docker image")
+            print()
+            image_exists = True
+        else:
+            # Pull failed - show build options
+            print()
+            print(f"❌ Could not pull image from Docker Hub")
+            print()
+            print("Options:")
+            print(f"  1. Build and test in one command:")
+            print(
+                f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
+            )
+            print()
+            print(f"  2. Build image separately (takes ~30 minutes):")
+            print(f"     bash compile --docker --build {platform} Blink")
+            print()
+
+            # Check if we should auto-build
+            if args.build:
+                # Auto-build mode
+                print("Auto-build enabled (--build flag)")
+                print()
+                build_result = docker_runner.build_board_image(platform, progress=True)
+                if build_result != 0:
+                    print(f"❌ Failed to build Docker image for {platform}")
+                    sys.exit(1)
+            elif args.interactive:
+                # Interactive prompt mode
+                response = (
+                    input(f"Docker image missing. Build now? [y/N]: ").strip().lower()
+                )
+                if response in ["y", "yes"]:
+                    print()
+                    build_result = docker_runner.build_board_image(
+                        platform, progress=True
+                    )
+                    if build_result != 0:
+                        print(f"❌ Failed to build Docker image for {platform}")
+                        sys.exit(1)
+                else:
+                    print("Build cancelled. Please build the image manually.")
+                    sys.exit(1)
+            else:
+                # Non-interactive mode - just exit with error
+                sys.exit(1)
 
     success_count = 0
     failure_count = 0

@@ -335,8 +335,20 @@ class ESP32ArtifactManager:
         return copier.copy_for_qemu(output_dir, self.board_name)
 
     def _resolve_output_dir(self, output_path: str) -> Path:
-        """Resolve output path to directory."""
+        """Resolve output path to directory, making relative paths absolute."""
         path = Path(output_path)
+
+        # Extract directory from the path
         if output_path.endswith(".bin"):
-            return path.parent
-        return path
+            dir_path = path.parent
+        else:
+            dir_path = path
+
+        # If path is relative, resolve it against project root
+        if not dir_path.is_absolute():
+            # build_dir is like: /fastled/.build/pio/esp32dev
+            # Project root is 3 levels up from build_dir
+            project_root = self.build_dir.parent.parent.parent
+            dir_path = project_root / dir_path
+
+        return dir_path

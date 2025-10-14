@@ -165,6 +165,174 @@ class DockerQEMURunner:
         except (Exception, FileNotFoundError):
             return False
 
+    def check_image_exists(self, image_name: str) -> bool:
+        """Check if Docker image exists locally.
+
+        Args:
+            image_name: Name of the Docker image to check
+
+        Returns:
+            True if image exists, False otherwise
+        """
+        try:
+            proc = RunningProcess(
+                ["docker", "images", "-q", image_name],
+                env=get_docker_env(),
+                auto_run=True,
+            )
+            stdout_lines: List[str] = []
+            with proc.line_iter(timeout=None) as it:
+                for line in it:
+                    stdout_lines.append(line)
+            result_stdout = "\n".join(stdout_lines)
+            return bool(result_stdout.strip())
+        except Exception:
+            return False
+
+    def get_board_image_name(self, platform: str) -> str:
+        """Get Docker image name for board platform.
+
+        Args:
+            platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
+
+        Returns:
+            Docker image name following FastLED convention
+        """
+        from ci.docker.build_image import generate_config_hash
+
+        try:
+            config_hash = generate_config_hash(platform)
+            return f"fastled-platformio-{platform}-{config_hash}"
+        except Exception:
+            # Fallback if hash generation fails
+            return f"fastled-platformio-{platform}"
+
+    def get_registry_image_name(self, platform: str) -> str:
+        """Get Docker Hub registry image name for board platform.
+
+        Args:
+            platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
+
+        Returns:
+            Docker Hub registry image name (e.g., 'niteris/fastled-compiler-esp')
+        """
+        from ci.docker.build_platforms import get_docker_image_name, get_platform_for_board
+
+        # Get platform family (e.g., 'esp32dev' -> 'esp')
+        platform_family = get_platform_for_board(platform)
+        if not platform_family:
+            # Fallback: try direct platform name
+            return f"niteris/fastled-compiler-{platform}"
+
+        # Get registry image name (e.g., 'niteris/fastled-compiler-esp')
+        return get_docker_image_name(platform_family, platform)
+
+    def pull_and_tag_board_image(self, platform: str) -> bool:
+        """Try to pull board image from Docker Hub registry and tag it locally.
+
+        Args:
+            platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
+
+        Returns:
+            True if pull and tag succeeded, False otherwise
+        """
+        registry_image = self.get_registry_image_name(platform)
+        local_image = self.get_board_image_name(platform)
+
+        print(f"🔍 Attempting to pull from Docker Hub: {registry_image}")
+        print(f"   This may take a few minutes on first run...")
+        print()
+
+        try:
+            # Pull from Docker Hub
+            pull_cmd = ["docker", "pull", registry_image]
+            proc = RunningProcess(pull_cmd, env=get_docker_env(), auto_run=True)
+
+            # Stream pull output
+            with proc.line_iter(timeout=None) as it:
+                for line in it:
+                    print(line)
+
+            returncode = proc.wait()
+
+            if returncode != 0:
+                print(f"❌ Failed to pull image from Docker Hub")
+                return False
+
+            print()
+            print(f"✅ Successfully pulled {registry_image}")
+            print(f"   Tagging as local image: {local_image}")
+
+            # Tag the pulled image with local name
+            tag_cmd = ["docker", "tag", registry_image, local_image]
+            tag_proc = RunningProcess(tag_cmd, env=get_docker_env(), auto_run=True)
+            tag_returncode = tag_proc.wait()
+
+            if tag_returncode != 0:
+                print(f"❌ Failed to tag pulled image")
+                return False
+
+            print(f"✅ Image ready for use")
+            print()
+            return True
+
+        except Exception as e:
+            print(f"❌ Error pulling from registry: {e}")
+            return False
+
+    def build_board_image(self, platform: str, progress: bool = True) -> int:
+        """Build Docker image for platform using ci-compile.py logic.
+
+        Args:
+            platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
+            progress: Whether to show progress indicators
+
+        Returns:
+            Exit code (0 for success, non-zero for failure)
+        """
+        if progress:
+            print(f"🔨 Building Docker image for {platform}...")
+            print("   This will take approximately 30 minutes")
+            print("   Progress will be shown below:")
+            print()
+
+        # Build command: uv run ci/ci-compile.py --docker --build {platform} Blink
+        build_cmd = [
+            "uv",
+            "run",
+            "ci/ci-compile.py",
+            platform,
+            "--examples",
+            "Blink",
+            "--docker",
+            "--build",
+        ]
+
+        proc = RunningProcess(
+            build_cmd,
+            env=get_docker_env(),
+            timeout=1800000,  # 30 minutes in milliseconds
+            auto_run=True,
+        )
+
+        # Stream build output
+        with proc.line_iter(timeout=None) as it:
+            for line in it:
+                print(line)
+
+        returncode = proc.wait()
+
+        if returncode == 0 and progress:
+            print()
+            print(f"✅ Docker image for {platform} built successfully")
+            print()
+        elif returncode != 0:
+            print()
+            print(f"❌ Failed to build Docker image for {platform}")
+            print()
+
+        return returncode
+
     def pull_image(self):
         """Pull the Docker image if not already available."""
         print(f"Ensuring Docker image {self.docker_image} is available...")
