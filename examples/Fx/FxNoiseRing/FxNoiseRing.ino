@@ -87,8 +87,8 @@ void draw(uint32_t now) {
         // in the 16-bit space and then mapping it back to 8-bit space.
         // All the constants were experimentally determined.
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
-        float x = cos(angle);
-        float y = sin(angle);
+        float x = fl::cos(angle);
+        float y = fl::sin(angle);
         x *= 0xffff * scale.as<double>();
         y *= 0xffff * scale.as<double>();
         uint16_t noise = inoise16(x, y, now);

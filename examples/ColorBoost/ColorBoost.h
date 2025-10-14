@@ -128,9 +128,9 @@ void rainbowWave() {
                 float g = original_color.g / 255.f;
                 float b = original_color.b / 255.f;
 
-                r = pow(r, 2.0);
-                g = pow(g, 2.0);
-                b = pow(b, 2.0);
+                r = fl::pow(r, 2.0f);
+                g = fl::pow(g, 2.0f);
+                b = fl::pow(b, 2.0f);
 
                 r = r * 255.f;
                 g = g * 255.f;
