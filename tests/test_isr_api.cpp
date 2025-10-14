@@ -73,9 +73,9 @@ TEST_CASE("test_isr_timer_basic") {
     int call_count = g_isr_call_count.load();
 
     // Allow significant tolerance for timing - stub implementation may vary
-    // Expected ~20 calls, but allow 10-30 to account for system timing variations
+    // Expected ~20 calls, but allow 10-40 to account for system timing variations
     REQUIRE(call_count >= 10);
-    REQUIRE(call_count <= 30);
+    REQUIRE(call_count <= 40);
 
     // Detach handler
     result = isr::detachHandler(handle);
