@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from ci.util.build_lock import libfastled_build_lock
 
@@ -19,6 +19,37 @@ def check_meson_installed() -> bool:
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
+
+
+def detect_system_llvm_tools() -> Tuple[bool, bool]:
+    """
+    Detect if system has LLD and LLVM-AR that support thin archives.
+
+    Returns:
+        Tuple of (has_lld, has_llvm_ar)
+    """
+    has_lld = False
+    has_llvm_ar = False
+
+    # Check for system lld (not zig's bundled lld)
+    try:
+        result = subprocess.run(
+            ["lld", "--version"], capture_output=True, text=True, timeout=5
+        )
+        if result.returncode == 0:
+            has_lld = True
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+
+    # Check for llvm-ar with thin archive support
+    try:
+        result = subprocess.run(["llvm-ar", "--help"], capture_output=True, timeout=5)
+        if result.returncode == 0 and b"thin" in result.stdout:
+            has_llvm_ar = True
+    except (subprocess.SubprocessError, FileNotFoundError):
+        pass
+
+    return has_lld, has_llvm_ar
 
 
 def setup_meson_build(
@@ -42,10 +73,14 @@ def setup_meson_build(
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
 
-    # Enable thin archives now that we use LLD linker (which supports them)
-    # Thin archives are much faster and smaller than regular archives
-    # Note: This only works because meson.build specifies -fuse-ld=lld
-    use_thin_archives = True
+    # Detect system LLVM tools
+    has_lld, has_llvm_ar = detect_system_llvm_tools()
+
+    # Enable thin archives if:
+    # 1. System has LLVM tools that support thin archives (both lld and llvm-ar)
+    # 2. Not explicitly disabled via FASTLED_DISABLE_THIN_ARCHIVES=1
+    disable_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES", "0") == "1"
+    use_thin_archives = (has_lld and has_llvm_ar) and not disable_thin_archives
 
     if already_configured and not reconfigure:
         print(f"[MESON] Build directory already configured: {build_dir}")
@@ -69,11 +104,19 @@ def setup_meson_build(
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
-    # Thin archives are enabled by default (faster builds, smaller disk usage)
-    # This works because meson.build uses -fuse-ld=lld (LLD supports thin archives)
+    # Thin archives configuration (faster builds, smaller disk usage when supported)
     thin_flag = " --thin" if use_thin_archives else ""
 
-    print("[MESON] ✅ Thin archives enabled (using LLD linker)")
+    if use_thin_archives:
+        print("[MESON] ✅ Thin archives enabled (using system LLVM tools)")
+    else:
+        if not (has_lld and has_llvm_ar):
+            print("[MESON] ℹ️  Thin archives disabled (system LLVM tools not available)")
+        else:
+            print("[MESON] ℹ️  Thin archives disabled (explicitly disabled)")
+
+    # Use system tools when available for thin archives, otherwise use zig
+    use_system_ar = use_thin_archives and has_llvm_ar
 
     if is_windows:
         # Windows: Create .cmd wrappers
@@ -84,9 +127,16 @@ def setup_meson_build(
         cxx_wrapper.write_text(
             "@echo off\npython -m ziglang c++ %*\n", encoding="utf-8"
         )
-        ar_wrapper.write_text(
-            f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
-        )
+        if use_system_ar:
+            # Use system llvm-ar with thin archives support
+            ar_wrapper.write_text(
+                f"@echo off\nllvm-ar{thin_flag} %*\n", encoding="utf-8"
+            )
+        else:
+            # Use zig's ar
+            ar_wrapper.write_text(
+                f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
+            )
     else:
         # Unix/Linux/macOS: Create shell script wrappers
         cc_wrapper = wrapper_dir / "zig-cc"
@@ -98,10 +148,18 @@ def setup_meson_build(
         cxx_wrapper.write_text(
             '#!/bin/sh\nexec python -m ziglang c++ "$@"\n', encoding="utf-8"
         )
-        ar_wrapper.write_text(
-            f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
-            encoding="utf-8",
-        )
+        if use_system_ar:
+            # Use system llvm-ar with thin archives support
+            ar_wrapper.write_text(
+                f'#!/bin/sh\nexec llvm-ar{thin_flag} "$@"\n',
+                encoding="utf-8",
+            )
+        else:
+            # Use zig's ar
+            ar_wrapper.write_text(
+                f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
+                encoding="utf-8",
+            )
         # Make executable on Unix-like systems
         cc_wrapper.chmod(0o755)
         cxx_wrapper.chmod(0o755)
@@ -111,9 +169,19 @@ def setup_meson_build(
     env["CC"] = str(cc_wrapper)
     env["CXX"] = str(cxx_wrapper)
     env["AR"] = str(ar_wrapper)
-    print(
-        f"[MESON] Using zig compiler via wrappers: CC={cc_wrapper.name}, CXX={cxx_wrapper.name}, AR={ar_wrapper.name}"
-    )
+
+    ar_tool = "llvm-ar" if use_system_ar else "zig ar"
+    print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
+
+    # Add linker flags if using system lld for thin archives
+    if use_thin_archives and has_lld:
+        # Add -fuse-ld=lld to link with system lld instead of zig's bundled lld
+        # This is added via environment variable for meson
+        if "LDFLAGS" in env:
+            env["LDFLAGS"] = f"{env['LDFLAGS']} -fuse-ld=lld"
+        else:
+            env["LDFLAGS"] = "-fuse-ld=lld"
+        print(f"[MESON] Using system lld for linking (supports thin archives)")
 
     try:
         result = subprocess.run(

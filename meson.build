@@ -167,12 +167,8 @@ if build_machine.system() == 'windows'
     '--target=x86_64-windows-gnu',  # Explicit GNU target for MSYS2/MinGW compatibility
     '-fuse-ld=lld-link',            # Use lld-link (MSVC-compatible linker)
   ]
-else
-  # Unix/Linux/macOS: Use LLD linker (zig's default linker doesn't support thin archives)
-  unit_test_compile_args += [
-    '-fuse-ld=lld',                 # Use LLVM's LLD linker (supports thin archives)
-  ]
 endif
+# Note: -fuse-ld=lld removed for Unix/Linux - zig uses its own bundled lld and ignores this flag
 
 # Link arguments (Clang only, targeting x86_64-windows-gnu)
 unit_test_link_args = []
@@ -191,11 +187,11 @@ if build_machine.system() == 'windows'
     '-lpsapi',                # Process status API
   ]
 else
-  # Unix/Linux/macOS: Use LLD linker (zig's default linker doesn't support thin archives)
+  # Unix/Linux/macOS: Standard pthread linking
   unit_test_link_args = [
     '-pthread',
-    '-fuse-ld=lld',          # Use LLVM's LLD linker (supports thin archives)
   ]
+  # Note: -fuse-ld=lld removed - zig uses its own bundled lld and ignores this flag
 endif
 
 # Build FastLED static library for tests
