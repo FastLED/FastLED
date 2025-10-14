@@ -21,7 +21,7 @@ FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
 FL_EXTERN_C_END
 
-#include "fl/fl_assert.h"
+#include "fl/assert.h"
 #include "fl/dbg.h"
 
 namespace fl {
