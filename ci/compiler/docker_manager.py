@@ -35,15 +35,56 @@ class DockerConfig:
 
     @classmethod
     def from_board(cls, board_name: str, project_root: Path) -> "DockerConfig":
-        """Factory method to create config from board name."""
-        from ci.docker.build_image import generate_config_hash
+        """Factory method to create config from board name.
+
+        Maps boards to their platform family Docker images.
+        Each platform family (AVR, ESP, Teensy, etc.) has ONE Docker image that
+        contains pre-cached toolchains for ALL boards in that family.
+
+        All platform images use the :latest tag since they contain all necessary
+        toolchains for all boards in the platform family.
+
+        Examples:
+            uno -> fastled-compiler-avr-uno:latest
+            esp32s3 -> fastled-compiler-esp-esp32dev:latest
+            esp32c3 -> fastled-compiler-esp-esp32dev:latest
+            teensy41 -> fastled-compiler-teensy-teensy41:latest
+        """
+        from ci.docker.build_platforms import (
+            get_docker_image_name,
+            get_platform_for_board,
+        )
 
         try:
-            config_hash = generate_config_hash(board_name)
-            image_name = f"fastled-platformio-{board_name}-{config_hash}"
-        except Exception:
-            # Fallback if hash generation fails
-            image_name = f"fastled-platformio-{board_name}"
+            # Look up which platform family this board belongs to
+            platform = get_platform_for_board(board_name)
+
+            if platform:
+                # Get the platform family image name (e.g., niteris/fastled-compiler-esp-esp32dev)
+                # This returns the full image name without tag, which includes the representative board
+                platform_image = get_docker_image_name(platform)
+                # Remove the registry prefix if present (get_docker_image_name includes 'niteris/')
+                if "/" in platform_image:
+                    image_base = platform_image.split("/", 1)[1]
+                else:
+                    image_base = platform_image
+
+                # All platform images use :latest tag
+                # The platform image already contains toolchains for all boards in the family
+                image_name = f"{image_base}:latest"
+            else:
+                # Board not in platform mapping - generate ad-hoc name
+                from ci.docker.build_image import extract_architecture
+
+                arch = extract_architecture(board_name)
+                image_name = f"fastled-compiler-{arch}-{board_name}:latest"
+
+        except Exception as e:
+            # Fallback if lookups fail
+            print(
+                f"Warning: Could not map board to platform image for {board_name}: {e}"
+            )
+            image_name = f"fastled-compiler-{board_name}:latest"
 
         container_name = f"fastled-{board_name}"
 
@@ -331,22 +372,34 @@ class DockerCompilationOrchestrator:
             return True  # Image exists
 
         if not build_if_missing:
-            print(f"❌ Docker image for {self.config.board_name} is not built yet.")
+            print(f"❌ Docker image {self.config.image_name} not found locally.")
             print(f"")
-            print(f"To build the image (can take up to 30 minutes):")
+            print(f"Option 1: Pull from registry (fastest):")
+            print(f"  docker pull {self.config.image_name}")
+            print(f"")
+            print(f"Option 2: Build locally (can take 15-30 minutes):")
             print(f"  bash compile --docker --build {self.config.board_name} <example>")
             print(f"")
             return False
 
         # Build the image
-        print(f"Building Docker image for platform: {self.config.board_name}")
+        print(f"Building Docker image: {self.config.image_name}")
+        print(f"This may take 15-30 minutes depending on the platform...")
+
+        # Parse image name to extract base name (without tag)
+        image_parts = self.config.image_name.split(":")
+        image_base = image_parts[0]
+        image_tag = image_parts[1] if len(image_parts) > 1 else "latest"
+
         build_cmd = [
             sys.executable,
             "ci/build_docker_image_pio.py",
             "--platform",
             self.config.board_name,
             "--image-name",
-            self.config.image_name,
+            image_base,
+            "--tag",
+            image_tag,
         ]
 
         result = subprocess.run(build_cmd)

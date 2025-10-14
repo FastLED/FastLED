@@ -30,7 +30,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "ATtiny1616",
     ],
     # ESP Platform - All Espressif chips (ESP32 + ESP8266)
-    # Image: niteris/fastled-compiler-esp:latest
+    # Image: niteris/fastled-compiler-esp-esp32dev:latest
     # Platform: espressif32, espressif8266
     # IDF versions: Mixed (pioarduino provides latest)
     "esp": [
@@ -51,11 +51,11 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # Despite differences (3.x = M4, 4.x = M7), toolchains are small enough
     # to cache all variants in one image
     "teensy": [
-        "teensylc",
-        "teensy30",
-        "teensy31",
+        "teensy41",  # Representative board (most capable, used in image name)
         "teensy40",
-        "teensy41",
+        "teensy31",
+        "teensy30",
+        "teensylc",
     ],
     # STM32 Platform - Various STM32 boards
     # Image: niteris/fastled-compiler-stm32-bluepill:latest
@@ -139,6 +139,9 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
     """
     Get the Docker image name for a platform family.
 
+    Uses consistent naming: niteris/fastled-compiler-{platform}-{board}
+    For platforms with a single representative board, use first board in list.
+
     Args:
         platform: Platform family name (e.g., "avr", "esp")
         board: Representative board name (optional, inferred if not provided)
@@ -149,13 +152,11 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
     Example:
         >>> get_docker_image_name("avr", "uno")
         'niteris/fastled-compiler-avr-uno'
-        >>> get_docker_image_name("esp")
-        'niteris/fastled-compiler-esp'
+        >>> get_docker_image_name("esp", "esp32dev")
+        'niteris/fastled-compiler-esp-esp32dev'
+        >>> get_docker_image_name("teensy", "teensy41")
+        'niteris/fastled-compiler-teensy-teensy41'
     """
-    if platform == "esp":
-        # ESP platform doesn't include board name
-        return "niteris/fastled-compiler-esp"
-
     # Use provided board or first board in platform
     if board is None:
         boards = get_boards_for_platform(platform)
@@ -163,11 +164,7 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
             return f"niteris/fastled-compiler-{platform}"
         board = boards[0]
 
-    # Special case for teensy (includes board name)
-    if platform == "teensy":
-        return f"niteris/fastled-compiler-teensy-{board}"
-
-    # Standard naming: platform-board
+    # Consistent naming for all platforms: niteris/fastled-compiler-{platform}-{board}
     return f"niteris/fastled-compiler-{platform}-{board}"
 
 

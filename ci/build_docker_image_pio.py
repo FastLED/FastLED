@@ -92,6 +92,13 @@ Examples:
         help="Force rebuild of base and target images (uses cache unless --no-cache specified)",
     )
 
+    parser.add_argument(
+        "--tag",
+        type=str,
+        default=None,
+        help="Docker image tag (default: auto-generated from platform, e.g., 'idf5.4', 'latest')",
+    )
+
     args = parser.parse_args()
 
     # Validation: --framework requires --platform
@@ -184,7 +191,7 @@ def check_docker_image_exists(image_name: str) -> bool:
 
 def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> None:
     """
-    Build the fastled-platformio base image if it doesn't exist.
+    Build the fastled-compiler-base base image if it doesn't exist.
 
     Args:
         no_cache: Whether to disable Docker cache
@@ -193,7 +200,7 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
     Raises:
         subprocess.CalledProcessError: If docker build fails
     """
-    base_image_name = "fastled-platformio:latest"
+    base_image_name = "fastled-compiler-base:latest"
 
     # Check if base image exists
     if (
@@ -408,16 +415,29 @@ def _main_impl() -> int:
 
     # Generate image name if not provided
     if args.image_name:
+        # User provided custom name - use as-is
         image_name = args.image_name
     else:
-        if config_hash:
-            image_name = f"fastled-platformio-{platform_name}-{config_hash}"
-        else:
-            image_name = f"fastled-platformio-{platform_name}"
+        # Use new naming convention: fastled-compiler-{arch}-{board}:{tag}
+        from ci.docker.build_image import extract_architecture, generate_docker_tag
+
+        try:
+            arch = extract_architecture(platform_name)
+            # Use provided tag or auto-generate
+            if args.tag:
+                tag = args.tag
+            else:
+                tag = generate_docker_tag(platform_name)
+            image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
+        except Exception as e:
+            # Fallback to simple naming if extraction fails
+            print(f"Warning: Could not generate semantic name: {e}", file=sys.stderr)
+            tag = args.tag if args.tag else "latest"
+            image_name = f"fastled-compiler-{platform_name}:{tag}"
 
     print(f"Image name: {image_name}")
     if config_hash and not args.image_name:
-        print(f"Config hash: {config_hash}")
+        print(f"Config hash: {config_hash} (for reference)")
     print()
 
     # Build base image first if it doesn't exist

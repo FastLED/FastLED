@@ -64,7 +64,7 @@ jobs:
           echo "docker_username=$(echo $docker_username | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_avr=$(echo 'niteris/fastled-compiler-avr-uno' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp=$(echo 'niteris/fastled-compiler-esp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_teensy=$(echo 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_stm32=$(echo 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_rp2040=$(echo 'niteris/fastled-compiler-rp2040-rpipico' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
@@ -188,7 +188,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: niteris/fastled-compiler-esp
+          images: niteris/fastled-compiler-esp-esp32dev
           tags: type=raw,value=latest
 
       - name: Login to Docker Hub
@@ -201,11 +201,11 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'niteris/fastled-compiler-esp@sha256:%s ' *)
+            $(printf 'niteris/fastled-compiler-esp-esp32dev@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect niteris/fastled-compiler-esp:latest
+          docker buildx imagetools inspect niteris/fastled-compiler-esp-esp32dev:latest
 
   # Teensy Platform (teensy30, teensy31, teensy40, teensy41, teensylc)
   build-teensy-amd64:
