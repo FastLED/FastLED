@@ -259,6 +259,7 @@ Threads, synchronization, async primitives, eventing, and callable utilities.
 - Async primitives: `promise.h`, `promise_result.h`, `task.h`, `async.h`
 - Functional: `function.h`, `function_list.h`, `functional.h`
 - Events and engine hooks: `engine_events.h`
+- Interrupt service routines: `isr.h`
 
 Per‑header quick descriptions:
 
@@ -273,6 +274,7 @@ Per‑header quick descriptions:
 - `function_list.h`: Multicast list of callables with simple invoke semantics.
 - `functional.h`: Adapters, binders, and predicates for composing callables.
 - `engine_events.h`: Event channel definitions for engine‑style systems.
+- `isr.h`: Cross-platform interrupt service routine (ISR) attachment API for timer and GPIO interrupts.
 
 ### 5) I/O, JSON, and text/formatting
 
@@ -372,6 +374,7 @@ void register_handlers() {
 
 - Threads and synchronization: `thread.h`, `mutex.h`, `thread_local.h`
 - Async primitives: `promise.h`, `promise_result.h`, `task.h`
+- Interrupt service routines: `isr.h`
 
 Why: Lightweight foundations for parallel work or async orchestration where supported.
 
@@ -380,6 +383,172 @@ Why: Lightweight foundations for parallel work or async orchestration where supp
 
 fl::promise<int> compute_async(); // returns a moveable wrapper around a future-like result
 ```
+
+### Interrupt Service Routines (ISR)
+
+- Cross-platform ISR API: `isr.h`
+
+Why: Unified interrupt handling across ESP32, Teensy, AVR, STM32, and other platforms. Provides timer-based and GPIO-based interrupt attachment with consistent configuration and lifecycle management.
+
+**Key features:**
+- Timer-based interrupts with configurable frequencies (platform-dependent range)
+- GPIO-based external interrupts with edge/level triggering
+- Priority control and platform-specific flags
+- Enable/disable without detachment
+- User data context passing
+- Platform capabilities query (frequency ranges, priority levels)
+
+**Platform support:**
+- ESP32 (Xtensa/RISC-V): Hardware timer groups, 1 Hz - 80 MHz, priorities 1-7
+- Teensy: IntervalTimer, up to ~150 kHz
+- AVR: Timer1, frequency via prescaler
+- STM32: Hardware timers with NVIC priorities
+- Stub: Software simulation for testing
+
+Basic timer interrupt example:
+
+```cpp
+#include "fl/isr.h"
+
+// Counter updated from ISR (use atomic or volatile for shared state)
+static volatile uint32_t tick_count = 0;
+
+// ISR handler - must be fast and IRAM-safe on ESP32
+static void my_timer_isr(void* user_data) {
+    tick_count++;
+}
+
+void setup() {
+    // Configure a 1 kHz (1000 Hz) timer interrupt
+    fl::isr::isr_config_t config;
+    config.handler = my_timer_isr;
+    config.user_data = nullptr;
+    config.frequency_hz = 1000;  // 1 kHz
+    config.priority = fl::isr::ISR_PRIORITY_MEDIUM;
+    config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;  // Required for ESP32
+
+    fl::isr::isr_handle_t handle;
+    int result = fl::isr::attachTimerHandler(config, &handle);
+
+    if (result == 0) {
+        // ISR is now active
+        FL_DBG("Timer ISR attached successfully");
+    } else {
+        FL_WARN("Failed to attach ISR: " << fl::isr::getErrorString(result));
+    }
+}
+```
+
+Advanced example with user data and enable/disable:
+
+```cpp
+#include "fl/isr.h"
+
+struct ISRContext {
+    volatile uint32_t count;
+    volatile uint32_t max_count;
+};
+
+static void counting_isr(void* user_data) {
+    ISRContext* ctx = static_cast<ISRContext*>(user_data);
+    if (ctx->count < ctx->max_count) {
+        ctx->count++;
+    }
+}
+
+void example_with_control() {
+    ISRContext ctx = { 0, 1000 };
+
+    // Configure 10 kHz timer with user context
+    fl::isr::isr_config_t config;
+    config.handler = counting_isr;
+    config.user_data = &ctx;
+    config.frequency_hz = 10000;  // 10 kHz
+    config.priority = fl::isr::ISR_PRIORITY_HIGH;
+    config.flags = fl::isr::ISR_FLAG_IRAM_SAFE;
+
+    fl::isr::isr_handle_t handle;
+    if (fl::isr::attachTimerHandler(config, &handle) == 0) {
+        // Run for a while
+        delay(100);
+
+        // Temporarily disable ISR
+        fl::isr::disableHandler(handle);
+        FL_DBG("ISR disabled, count: " << ctx.count);
+
+        delay(100);
+
+        // Re-enable ISR
+        fl::isr::enableHandler(handle);
+        FL_DBG("ISR re-enabled");
+
+        delay(100);
+
+        // Clean up when done
+        fl::isr::detachHandler(handle);
+        FL_DBG("Final count: " << ctx.count);
+    }
+}
+```
+
+GPIO interrupt example:
+
+```cpp
+#include "fl/isr.h"
+
+static void button_isr(void* user_data) {
+    // Handle button press (keep this fast!)
+    FL_DBG("Button pressed!");
+}
+
+void setup_gpio_interrupt() {
+    fl::isr::isr_config_t config;
+    config.handler = button_isr;
+    config.user_data = nullptr;
+    config.priority = fl::isr::ISR_PRIORITY_MEDIUM;
+    config.flags = fl::isr::ISR_FLAG_EDGE_RISING;  // Trigger on rising edge
+
+    fl::isr::isr_handle_t handle;
+    uint8_t button_pin = 2;  // GPIO pin number
+
+    if (fl::isr::attachExternalHandler(button_pin, config, &handle) == 0) {
+        FL_DBG("Button ISR attached to pin " << button_pin);
+    }
+}
+```
+
+Platform capability queries:
+
+```cpp
+#include "fl/isr.h"
+
+void print_platform_info() {
+    FL_DBG("Platform: " << fl::isr::getPlatformName());
+    FL_DBG("Max timer frequency: " << fl::isr::getMaxTimerFrequency() << " Hz");
+    FL_DBG("Min timer frequency: " << fl::isr::getMinTimerFrequency() << " Hz");
+    FL_DBG("Max priority: " << fl::isr::getMaxPriority());
+
+    if (fl::isr::requiresAssemblyHandler(fl::isr::ISR_PRIORITY_MAX)) {
+        FL_DBG("Maximum priority requires assembly handler");
+    }
+}
+```
+
+**Important ISR handler requirements:**
+- Must execute quickly (typically <10μs)
+- No blocking operations (no delay, sleep, or waiting for locks)
+- No dynamic memory allocation (malloc/free)
+- On ESP32: mark as IRAM-safe and use `ISR_FLAG_IRAM_SAFE` flag
+- Use atomic types or proper synchronization for shared state
+- Platform-specific restrictions may apply (see `fl/isr.h` for details)
+
+**Priority guidelines:**
+- `ISR_PRIORITY_LOW` (1): Non-critical background tasks
+- `ISR_PRIORITY_MEDIUM` (2): Normal LED timing operations
+- `ISR_PRIORITY_HIGH` (3): Critical timing-sensitive operations (recommended max)
+- `ISR_PRIORITY_CRITICAL` (4+): Experimental, may require assembly on some platforms
+
+See `src/fl/isr.h` for complete API documentation and platform-specific configuration flags.
 
 ### Math, Random, and DSP
 

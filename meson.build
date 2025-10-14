@@ -49,6 +49,10 @@ stub_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp") if p.name != "stub_main.cpp"))',
   check: false, capture: true)
 
+platforms_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms").glob("*.cpp")))',
+  check: false, capture: true)
+
 fl_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").glob("*.cpp")))',
   check: false, capture: true)
@@ -84,6 +88,10 @@ endif
 
 if stub_sources.returncode() == 0 and stub_sources.stdout().strip() != ''
   fastled_sources += files(stub_sources.stdout().strip().split('\n'))
+endif
+
+if platforms_sources.returncode() == 0 and platforms_sources.stdout().strip() != ''
+  fastled_sources += files(platforms_sources.stdout().strip().split('\n'))
 endif
 
 if fl_sources.returncode() == 0 and fl_sources.stdout().strip() != ''

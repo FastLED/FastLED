@@ -75,4 +75,4 @@ tests/x64/
 tests/bin
 qemu_output.log
 gdb*.txt
-qemu-build
+qemu-buildtest_output.txt
