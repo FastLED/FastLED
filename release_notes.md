@@ -72,6 +72,57 @@ FastLED 3.10.4
     * Updated example Esp32S3I2SDemo to use GPIO1 instead of GPIO19 as safe default
     * Pins now marked as unusable in `FASTLED_UNUSABLE_PIN_MASK` for ESP32-S2/S3
     * Protection applies to both I2S and new LCD drivers
+  * **NEW: Cross-Platform ISR (Interrupt Service Routine) API** (`fl/isr.h`): Unified interrupt handling across all platforms
+    * **Platform-independent ISR attachment** for timer and GPIO interrupts with consistent configuration
+    * **Supported platforms**: ESP32 (Xtensa/RISC-V), Teensy, AVR, STM32, plus stub implementation for testing
+    * **Key features**:
+      * Timer-based interrupts: Configurable frequencies (1 Hz - 80 MHz on ESP32, platform-dependent elsewhere)
+      * GPIO-based external interrupts: Edge/level triggering with configurable priorities
+      * Enable/disable without detachment for runtime control
+      * User data context passing to ISR handlers
+      * Platform capability queries (frequency ranges, priority levels, assembly requirements)
+    * **Priority management**: Abstract priority levels (LOW/MEDIUM/HIGH/CRITICAL/MAX) map to platform-specific values
+    * **ESP32 specifics**: Hardware timer groups, 1 Hz - 80 MHz, priorities 1-7, IRAM-safe flag support
+    * **Usage**: `fl::isr::attachTimerHandler(config, &handle)` / `fl::isr::attachExternalHandler(pin, config, &handle)`
+    * **Documentation**: Complete API reference with examples in [src/fl/isr.h](src/fl/isr.h) and [src/fl/README.md](src/fl/README.md#interrupt-service-routines-isr)
+    * **Testing**: Software simulation via stub platform for deterministic unit testing
+  * **NEW: Multi-Width Software SPI ISR Implementation for ESP32 RISC-V** (ESP32-C2/C3/C6/H2): High-performance interrupt-driven parallel soft-SPI
+    * **Four width variants** sharing a unified ISR core engine for maximum code reuse:
+      * **Single-SPI (1-way)**: 1 data pin - baseline testing and simple applications
+      * **Dual-SPI (2-way)**: 2 data pins - matches hardware Dual-SPI topology on ESP32-C2/C3/C6/H2
+      * **Quad-SPI (4-way)**: 4 data pins - matches hardware Quad-SPI topology on ESP32/S2/S3/P4
+      * **Octo-SPI (8-way)**: 8 data pins - maximum parallelism for driving 8 LED strips simultaneously
+    * **Unified ISR core architecture** (`fl_parallel_spi_isr_rv.h/cpp`):
+      * Single C-based ISR engine reused across all width variants (1/2/4/8-way)
+      * Only LUT (Look-Up Table) initialization differs per width - highly maintainable design
+      * 256-entry LUT maps byte values to GPIO SET/CLEAR masks for zero-branching operation
+      * Zero volatile reads (write-only GPIO) eliminates memory stalls
+      * Minimal jitter with predictable execution time
+    * **Performance characteristics**:
+      * Typical configuration: 1.6 MHz timer → 800 kHz SPI bit rate
+      * ~100 kB/s per data pin throughput
+      * Configurable timing via timer frequency adjustment
+    * **Platform abstraction layer** enables identical code to run on ESP32 hardware and host simulation:
+      * ESP32: Direct MMIO writes to GPIO registers (W1TS/W1TC)
+      * Host: Ring buffer capture for deterministic testing
+      * Manual tick control for unit tests
+    * **Comprehensive testing infrastructure**:
+      * 26 unit tests passing across all width variants
+      * Host simulation with ring buffer GPIO event capture
+      * Manual ISR tick control for deterministic test results
+      * Tests verify clock toggling, data patterns, multi-byte sequences, and edge cases
+    * **Arduino examples** for all variants:
+      * [Esp32C3_SingleSPI_ISR/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_SingleSPI_ISR/) - 1-way example
+      * [Esp32C3_DualSPI_ISR/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_DualSPI_ISR/) - 2-way example
+      * [Esp32C3_QuadSPI_ISR/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_QuadSPI_ISR/) - 4-way example
+      * [Esp32C3_SPI_ISR/](examples/SpecialDrivers/ESP/ParallelSPI/Esp32C3_SPI_ISR/) - 8-way example
+    * **SPIBusManager integration**: Software ISR acts as fallback when hardware SPI unavailable or exhausted
+    * **Primary use cases**:
+      * Host-side unit testing with software simulation
+      * Validation of ISR logic before hardware deployment
+      * Fallback when hardware SPI buses exhausted
+      * Low-level debugging with ring buffer GPIO event inspection
+    * **Complete documentation**: [src/platforms/esp/32/parallel_spi/README.md](src/platforms/esp/32/parallel_spi/README.md)
   * **ezWS2812 Hardware-Accelerated Drivers for Silicon Labs MG24**: Optimized WS2812 controllers imported from Silicon Labs
     * Resolves GitHub issue #1891: Platform support for Seeed Xiao MG24 Sense and other EFR32MG24-based boards
     * Added `EZWS2812_GPIO`: Always-available GPIO controller with cycle-accurate timing for 39MHz and 78MHz CPUs
