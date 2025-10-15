@@ -5,6 +5,7 @@
 #include "fl/clamp.h"
 #include "fl/geometry.h"
 #include "fl/allocator.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -16,12 +17,78 @@ template <typename T, fl::size INLINED_SIZE> class InlinedVector;
 
 template <typename T, fl::size N> class array;
 
+// Special value to indicate dynamic extent (runtime-determined size)
+constexpr fl::size dynamic_extent = fl::size(-1);
+
+// Forward declaration for static extent specialization
+template <typename T, fl::size Extent> class Slice;
+
+// ======= SFINAE TRAITS FOR GENERIC CONTAINER SUPPORT =======
+// Detect if a type has .data() method
+template <typename T>
+class has_data_method {
+  private:
+    typedef fl::u8 yes;
+    typedef fl::u16 no;
+
+    template <typename C>
+    static yes test(decltype(&C::data));
+
+    template <typename>
+    static no test(...);
+
+  public:
+    static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(yes);
+};
+
+// Detect if a type has .size() method
+template <typename T>
+class has_size_method {
+  private:
+    typedef fl::u8 yes;
+    typedef fl::u16 no;
+
+    template <typename C>
+    static yes test(decltype(&C::size));
+
+    template <typename>
+    static no test(...);
+
+  public:
+    static constexpr bool value = sizeof(test<T>(nullptr)) == sizeof(yes);
+};
+
+// Combined check for containers with both .data() and .size()
+template <typename T>
+struct has_data_and_size {
+    static constexpr bool value = has_data_method<T>::value && has_size_method<T>::value;
+};
+
 // Slice<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
 // length parameter.
 // It works just like an array of objects, but it also knows its length.
-template <typename T> class Slice {
+//
+// This is the dynamic extent specialization (Extent == dynamic_extent).
+template <typename T> class Slice<T, dynamic_extent> {
   public:
+    // ======= STANDARD CONTAINER TYPE ALIASES =======
+    using element_type = T;
+    using value_type = typename fl::remove_cv<T>::type;
+    using size_type = fl::size;
+    using difference_type = fl::i32;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using iterator = T*;
+    using const_iterator = const T*;
+    using reverse_iterator = T*;
+    using const_reverse_iterator = const T*;
+
+    static constexpr fl::size extent = dynamic_extent;
+
+    // ======= CONSTRUCTORS =======
     Slice() : mData(nullptr), mSize(0) {}
     Slice(T *data, fl::size size) : mData(data), mSize(size) {}
 
@@ -66,7 +133,26 @@ template <typename T> class Slice {
     Slice(InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
+    // ======= GENERIC CONTAINER CONSTRUCTOR =======
+    // Generic constructor for any container with .data() and .size()
+    // Uses SFINAE to only enable for appropriate containers
+    // This excludes Slice itself and already-specialized containers
+    template<typename Container>
+    Slice(Container& c, typename fl::enable_if<
+        has_data_and_size<Container>::value &&
+        !fl::is_same<typename fl::decay<Container>::type, Slice<T, dynamic_extent>>::value &&
+        !fl::is_base_of<Slice<T, dynamic_extent>, Container>::value
+    >::type* = nullptr)
+        : mData(c.data()), mSize(c.size()) {}
 
+    // Const version for const containers
+    template<typename Container>
+    Slice(const Container& c, typename fl::enable_if<
+        has_data_and_size<Container>::value &&
+        !fl::is_same<typename fl::decay<Container>::type, Slice<T, dynamic_extent>>::value &&
+        !fl::is_base_of<Slice<T, dynamic_extent>, Container>::value
+    >::type* = nullptr)
+        : mData(c.data()), mSize(c.size()) {}
 
     // ======= FL::ARRAY CONVERSIONS =======
     // fl::array<T> -> Slice<T>
@@ -116,8 +202,8 @@ template <typename T> class Slice {
         return *this;
     }
 
-    // Automatic promotion to const Slice<const T>
-    operator Slice<const T>() const { return Slice<const T>(mData, mSize); }
+    // Automatic promotion to const Slice<const T, dynamic_extent>
+    operator Slice<const T, dynamic_extent>() const { return Slice<const T, dynamic_extent>(mData, mSize); }
 
     T &operator[](fl::size index) {
         // No bounds checking in embedded environment
@@ -129,26 +215,80 @@ template <typename T> class Slice {
         return mData[index];
     }
 
-    T *begin() const { return mData; }
+    // ======= ITERATORS =======
+    iterator begin() { return mData; }
+    const_iterator begin() const { return mData; }
+    const_iterator cbegin() const { return mData; }
 
-    T *end() const { return mData + mSize; }
+    iterator end() { return mData + mSize; }
+    const_iterator end() const { return mData + mSize; }
+    const_iterator cend() const { return mData + mSize; }
 
+    reverse_iterator rbegin() { return mData + mSize - 1; }
+    const_reverse_iterator rbegin() const { return mData + mSize - 1; }
+    const_reverse_iterator crbegin() const { return mData + mSize - 1; }
+
+    reverse_iterator rend() { return mData - 1; }
+    const_reverse_iterator rend() const { return mData - 1; }
+    const_reverse_iterator crend() const { return mData - 1; }
+
+    // ======= SIZE AND ACCESS =======
     fl::size length() const { return mSize; }
+    fl::size size() const { return mSize; }
+    fl::size size_bytes() const { return mSize * sizeof(T); }
 
     const T *data() const { return mData; }
-
     T *data() { return mData; }
 
-    fl::size size() const { return mSize; }
-
-    Slice<T> slice(fl::size start, fl::size end) const {
+    // ======= SUBVIEWS =======
+    // Runtime-sized subviews (existing slice methods)
+    Slice<T, dynamic_extent> slice(fl::size start, fl::size end) const {
         // No bounds checking in embedded environment
-        return Slice<T>(mData + start, end - start);
+        return Slice<T, dynamic_extent>(mData + start, end - start);
     }
 
-    Slice<T> slice(fl::size start) const {
+    Slice<T, dynamic_extent> slice(fl::size start) const {
         // No bounds checking in embedded environment
-        return Slice<T>(mData + start, mSize - start);
+        return Slice<T, dynamic_extent>(mData + start, mSize - start);
+    }
+
+    // std::span-compatible subspan (runtime version)
+    Slice<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
+        if (count == dynamic_extent) {
+            return Slice<T, dynamic_extent>(mData + offset, mSize - offset);
+        }
+        return Slice<T, dynamic_extent>(mData + offset, count);
+    }
+
+    // Compile-time sized first N elements - returns static extent span
+    template<fl::size N>
+    Slice<T, N> first() const {
+        return Slice<T, N>(mData, N);
+    }
+
+    // Runtime-sized first count elements
+    Slice<T, dynamic_extent> first(fl::size count) const {
+        return Slice<T, dynamic_extent>(mData, count);
+    }
+
+    // Compile-time sized last N elements - returns static extent span
+    template<fl::size N>
+    Slice<T, N> last() const {
+        return Slice<T, N>(mData + mSize - N, N);
+    }
+
+    // Runtime-sized last count elements
+    Slice<T, dynamic_extent> last(fl::size count) const {
+        return Slice<T, dynamic_extent>(mData + mSize - count, count);
+    }
+
+    // Compile-time sized subspan - returns static extent span
+    template<fl::size Offset, fl::size Count = dynamic_extent>
+    Slice<T, Count> subspan() const {
+        if (Count == dynamic_extent) {
+            return Slice<T, dynamic_extent>(mData + Offset, mSize - Offset);
+        }
+        return Slice<T, Count>(mData + Offset, Count);
     }
 
     // Find the first occurrence of a value in the slice
@@ -190,10 +330,246 @@ template <typename T> class Slice {
 
     bool empty() const { return mSize == 0; }
 
+    // ======= COMPARISON OPERATORS =======
+    // Lexicographical comparison - compares element by element
+    bool operator==(const Slice<T, dynamic_extent>& other) const {
+        if (mSize != other.mSize) return false;
+        for (fl::size i = 0; i < mSize; ++i) {
+            if (!(mData[i] == other.mData[i])) return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const Slice<T, dynamic_extent>& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const Slice<T, dynamic_extent>& other) const {
+        fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
+        for (fl::size i = 0; i < min_size; ++i) {
+            if (mData[i] < other.mData[i]) return true;
+            if (other.mData[i] < mData[i]) return false;
+        }
+        return mSize < other.mSize;
+    }
+
+    bool operator<=(const Slice<T, dynamic_extent>& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>(const Slice<T, dynamic_extent>& other) const {
+        return other < *this;
+    }
+
+    bool operator>=(const Slice<T, dynamic_extent>& other) const {
+        return !(*this < other);
+    }
+
   private:
     T *mData;
     fl::size mSize;
 };
+
+// ======= STATIC EXTENT SPECIALIZATION =======
+// Slice with compile-time known size (static extent)
+// This specialization stores size at compile-time, reducing runtime overhead
+template <typename T, fl::size Extent> class Slice {
+  public:
+    // ======= STANDARD CONTAINER TYPE ALIASES =======
+    using element_type = T;
+    using value_type = typename fl::remove_cv<T>::type;
+    using size_type = fl::size;
+    using difference_type = fl::i32;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using iterator = T*;
+    using const_iterator = const T*;
+    using reverse_iterator = T*;
+    using const_reverse_iterator = const T*;
+
+    static constexpr fl::size extent = Extent;
+
+    // ======= CONSTRUCTORS =======
+    Slice() : mData(nullptr) {}
+    Slice(T *data, fl::size size) : mData(data) {
+        // In debug builds, could assert size == Extent
+        (void)size; // Suppress unused parameter warning
+    }
+
+    // Constructor from pointer only (size is known at compile-time)
+    explicit Slice(T *data) : mData(data) {}
+
+    // Constructor from C-array with matching size
+    Slice(T (&array)[Extent]) : mData(array) {}
+
+    // Copy constructor
+    Slice(const Slice &other) : mData(other.mData) {}
+
+    Slice &operator=(const Slice &other) {
+        mData = other.mData;
+        return *this;
+    }
+
+    // Automatic promotion to const Slice<const T, Extent>
+    operator Slice<const T, Extent>() const { return Slice<const T, Extent>(mData, Extent); }
+
+    // Conversion to dynamic extent
+    operator Slice<T, dynamic_extent>() const { return Slice<T, dynamic_extent>(mData, Extent); }
+
+    // ======= ELEMENT ACCESS =======
+    T &operator[](fl::size index) {
+        return mData[index];
+    }
+
+    const T &operator[](fl::size index) const {
+        return mData[index];
+    }
+
+    // ======= ITERATORS =======
+    iterator begin() { return mData; }
+    const_iterator begin() const { return mData; }
+    const_iterator cbegin() const { return mData; }
+
+    iterator end() { return mData + Extent; }
+    const_iterator end() const { return mData + Extent; }
+    const_iterator cend() const { return mData + Extent; }
+
+    reverse_iterator rbegin() { return mData + Extent - 1; }
+    const_reverse_iterator rbegin() const { return mData + Extent - 1; }
+    const_reverse_iterator crbegin() const { return mData + Extent - 1; }
+
+    reverse_iterator rend() { return mData - 1; }
+    const_reverse_iterator rend() const { return mData - 1; }
+    const_reverse_iterator crend() const { return mData - 1; }
+
+    // ======= SIZE AND ACCESS =======
+    constexpr fl::size length() const { return Extent; }
+    constexpr fl::size size() const { return Extent; }
+    constexpr fl::size size_bytes() const { return Extent * sizeof(T); }
+
+    const T *data() const { return mData; }
+    T *data() { return mData; }
+
+    // ======= SUBVIEWS =======
+    // Compile-time sized first N elements
+    template<fl::size N>
+    Slice<T, N> first() const {
+        return Slice<T, N>(mData);
+    }
+
+    // Runtime-sized first count elements
+    Slice<T, dynamic_extent> first(fl::size count) const {
+        return Slice<T, dynamic_extent>(mData, count);
+    }
+
+    // Compile-time sized last N elements
+    template<fl::size N>
+    Slice<T, N> last() const {
+        return Slice<T, N>(mData + Extent - N);
+    }
+
+    // Runtime-sized last count elements
+    Slice<T, dynamic_extent> last(fl::size count) const {
+        return Slice<T, dynamic_extent>(mData + Extent - count, count);
+    }
+
+    // Compile-time sized subspan
+    template<fl::size Offset, fl::size Count = dynamic_extent>
+    Slice<T, Count> subspan() const {
+        if (Count == dynamic_extent) {
+            return Slice<T, Extent - Offset>(mData + Offset);
+        }
+        return Slice<T, Count>(mData + Offset);
+    }
+
+    // Runtime subspan
+    Slice<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
+        if (count == dynamic_extent) {
+            return Slice<T, dynamic_extent>(mData + offset, Extent - offset);
+        }
+        return Slice<T, dynamic_extent>(mData + offset, count);
+    }
+
+    T &front() { return *mData; }
+    const T &front() const { return *mData; }
+
+    T &back() { return *(mData + Extent - 1); }
+    const T &back() const { return *(mData + Extent - 1); }
+
+    constexpr bool empty() const { return Extent == 0; }
+
+    // ======= COMPARISON OPERATORS =======
+    bool operator==(const Slice<T, Extent>& other) const {
+        for (fl::size i = 0; i < Extent; ++i) {
+            if (!(mData[i] == other.mData[i])) return false;
+        }
+        return true;
+    }
+
+    bool operator!=(const Slice<T, Extent>& other) const {
+        return !(*this == other);
+    }
+
+    bool operator<(const Slice<T, Extent>& other) const {
+        for (fl::size i = 0; i < Extent; ++i) {
+            if (mData[i] < other.mData[i]) return true;
+            if (other.mData[i] < mData[i]) return false;
+        }
+        return false; // Equal when all elements are equal
+    }
+
+    bool operator<=(const Slice<T, Extent>& other) const {
+        return !(other < *this);
+    }
+
+    bool operator>(const Slice<T, Extent>& other) const {
+        return other < *this;
+    }
+
+    bool operator>=(const Slice<T, Extent>& other) const {
+        return !(*this < other);
+    }
+
+  private:
+    T *mData;
+    // Note: No mSize member - size is known at compile-time via Extent
+};
+
+// ======= BYTE VIEW CONVERSION FUNCTIONS =======
+// Convert span to read-only byte view
+template<typename T, fl::size Extent>
+Slice<const fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_bytes(const Slice<T, Extent>& s) {
+    if (Extent == dynamic_extent) {
+        return Slice<const fl::u8, dynamic_extent>(
+            reinterpret_cast<const fl::u8*>(s.data()),
+            s.size_bytes()
+        );
+    } else {
+        return Slice<const fl::u8, Extent * sizeof(T)>(
+            reinterpret_cast<const fl::u8*>(s.data())
+        );
+    }
+}
+
+// Convert span to writable byte view
+template<typename T, fl::size Extent>
+Slice<fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_writable_bytes(Slice<T, Extent>& s) {
+    if (Extent == dynamic_extent) {
+        return Slice<fl::u8, dynamic_extent>(
+            reinterpret_cast<fl::u8*>(s.data()),
+            s.size_bytes()
+        );
+    } else {
+        return Slice<fl::u8, Extent * sizeof(T)>(
+            reinterpret_cast<fl::u8*>(s.data())
+        );
+    }
+}
+
 template <typename T> class MatrixSlice {
   public:
     // represents a window into a matrix
