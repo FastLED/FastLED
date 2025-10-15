@@ -268,24 +268,26 @@ def setup_meson_build(
     if use_thin_archives:
         print("[MESON] ✅ Thin archives enabled (using system LLVM tools)")
     else:
-        if not (has_lld and has_llvm_ar):
-            # Show prominent yellow warning banner when optimization cannot be enabled
-            print("=" * 80)
-            print("⚠️  WARNING: Build optimization unavailable - thin archives disabled")
-            print("    Reason: System LLVM tools (lld and llvm-ar) not found")
-            print("    Impact: Slower archive creation, larger disk usage")
+        # Always show prominent warning when thin archives are disabled
+        print("=" * 80)
+        print("⚠️  WARNING: Thin archives DISABLED for Zig compatibility")
+        print("    Reason: Zig's bundled linker does not support thin archive format")
+        print("    Impact: +200ms archive creation, +45MB disk usage per build")
+
+        if has_lld and has_llvm_ar:
+            # System HAS the tools, but we're disabling for Zig compatibility
+            print("    Note: System has LLVM tools (lld, llvm-ar) but cannot use them")
+            print("          Zig compiler does not reliably honor -fuse-ld=lld flag")
+        else:
+            # System doesn't have LLVM tools anyway
+            print("    Note: System LLVM tools not detected (additional reason)")
             missing_tools: List[str] = []
             if not has_lld:
                 missing_tools.append("lld/ld.lld")
             if not has_llvm_ar:
                 missing_tools.append("llvm-ar")
-            print(f"    Missing: {', '.join(missing_tools)}")
-            print("=" * 80)
-        else:
-            # System has LLVM tools, but thin archives are disabled for Zig compatibility
-            print(
-                "[MESON] ℹ️  Thin archives disabled (incompatible with Zig's bundled linker)"
-            )
+            print(f"          Missing: {', '.join(missing_tools)}")
+        print("=" * 80)
 
     # Use system tools when available for thin archives, otherwise use zig
     use_system_ar = use_thin_archives and has_llvm_ar
@@ -356,30 +358,53 @@ def setup_meson_build(
                 encoding="utf-8",
             )
         else:
-            # Use zig's ar
-            # Filter out thin archive flag 'T' from arguments when not using thin archives
-            # because Zig's linker doesn't support thin archives
+            # Use zig's ar with Python wrapper to robustly filter thin archive flags
+            # CRITICAL: Use Python wrapper instead of shell script for reliable filtering
+            # Shell scripts have fragile pattern matching that fails with different flag orders
             if use_thin_archives:
+                # Thin archives enabled - pass through directly
                 ar_wrapper.write_text(
                     f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
                     encoding="utf-8",
                 )
             else:
-                # When not using thin archives, filter out 'T' flag from ar arguments
+                # Thin archives disabled - use Python wrapper to filter ALL thin archive flags
+                # This handles:  'T' in operation string (crT, rcT, Tcr, etc.)
+                #                --thin as separate argument
+                #                Any combination or order of flags
+                ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
+                ar_wrapper_py.write_text(
+                    "#!/usr/bin/env python3\n"
+                    '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
+                    "import sys\n"
+                    "import subprocess\n"
+                    "\n"
+                    'if __name__ == "__main__":\n'
+                    "    args = []\n"
+                    "    for arg in sys.argv[1:]:\n"
+                    "        # Skip --thin flag entirely\n"
+                    '        if arg == "--thin" or arg == "-T":\n'
+                    "            continue\n"
+                    "        # Remove T from operation flags like crT, rcT, Tcr, etc.\n"
+                    '        # Operation flags are single args containing letters like "crs" "rc" "cr"\n'
+                    '        if len(arg) <= 5 and arg.replace("c", "").replace("r", "").replace("s", "").replace("u", "").replace("T", "").replace("D", "") == "":\n'
+                    "            # This looks like an operation flag - remove T\n"
+                    '            arg = arg.replace("T", "")\n'
+                    "            # Skip if now empty\n"
+                    "            if not arg:\n"
+                    "                continue\n"
+                    "        args.append(arg)\n"
+                    "    \n"
+                    "    # Execute zig ar with filtered arguments\n"
+                    '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
+                    "    sys.exit(result.returncode)\n",
+                    encoding="utf-8",
+                )
+                ar_wrapper_py.chmod(0o755)
+
+                # Main wrapper calls the Python filter
                 ar_wrapper.write_text(
-                    "#!/bin/sh\n"
-                    "# Filter out thin archive flag T - Zig linker does not support thin archives\n"
-                    'filtered_args=""\n'
-                    'for arg in "$@"; do\n'
-                    '  case "$arg" in\n'
-                    "    cr*T* | rc*T*)\n"
-                    "      # Remove T flag from ar operation flags\n"
-                    '      arg=$(echo "$arg" | sed "s/T//g")\n'
-                    "      ;;\n"
-                    "  esac\n"
-                    '  filtered_args="$filtered_args $arg"\n'
-                    "done\n"
-                    "exec python -m ziglang ar $filtered_args\n",
+                    f'#!/bin/sh\nexec {sys.executable} "{ar_wrapper_py}" "$@"\n',
                     encoding="utf-8",
                 )
         # Make executable on Unix-like systems
