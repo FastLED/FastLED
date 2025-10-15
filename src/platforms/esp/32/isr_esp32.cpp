@@ -140,13 +140,16 @@ public:
         // Create general purpose timer
         // For high frequencies (>1MHz), we need higher resolution to avoid rounding to 0
         // Choose resolution dynamically based on requested frequency
+        //
+        // IMPORTANT: ESP32 timer hardware requires clock divider >= 2
+        // With 80MHz source clock, max resolution is 40MHz (80MHz / 2 = 40MHz)
         uint32_t timer_resolution_hz;
         uint64_t alarm_count;
 
         if (config.frequency_hz > 1000000) {
-            // For frequencies > 1MHz, use higher resolution (e.g., 10MHz or 80MHz)
-            // Use 80MHz (APB clock) for maximum precision
-            timer_resolution_hz = 80000000;
+            // For frequencies > 1MHz, use higher resolution
+            // Cap at 40MHz to ensure divider >= 2 (80MHz / 40MHz = 2)
+            timer_resolution_hz = 40000000;
             alarm_count = timer_resolution_hz / config.frequency_hz;
         } else {
             // For lower frequencies, 1MHz resolution is sufficient
@@ -450,7 +453,7 @@ public:
     }
 
     uint32_t getMaxTimerFrequency() override {
-        return 80000000;  // 80 MHz (APB clock)
+        return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
     }
 
     uint32_t getMinTimerFrequency() override {
