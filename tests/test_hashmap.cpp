@@ -992,7 +992,10 @@ TEST_CASE("Copy assignment operator - self assignment") {
     m.insert(2, "two");
 
     // Self assignment
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
     m = m;
+    FL_DISABLE_WARNING_POP
 
     // Should be unchanged
     REQUIRE_EQ(m.size(), 2u);

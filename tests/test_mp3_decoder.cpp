@@ -30,7 +30,7 @@ TEST_CASE("Mp3HelixDecoder basic decode test") {
     fl::u8 invalid_data[] = {0xFF, 0xFB, 0x90, 0x00};
 
     int frames = 0;
-    decoder.decode(invalid_data, sizeof(invalid_data), [&](const Mp3Frame& frame) {
+    decoder.decode(invalid_data, sizeof(invalid_data), [&](const Mp3Frame&) {
         frames++;
     });
 
@@ -46,7 +46,7 @@ TEST_CASE("Mp3HelixDecoder empty data") {
     fl::u8 empty_data[] = {};
 
     int frames = 0;
-    decoder.decode(empty_data, 0, [&](const Mp3Frame& frame) {
+    decoder.decode(empty_data, 0, [&](const Mp3Frame&) {
         frames++;
     });
 
