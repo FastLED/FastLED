@@ -14,7 +14,9 @@ namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
     mRgb.resize(pixels_count);
-    fl::memfill((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+    if (pixels_count > 0) {
+        fl::memfill((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+    }
 }
 
 Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, fl::u32 timestamp)
@@ -25,7 +27,7 @@ Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, 
 
     if (pixels && width > 0 && height > 0) {
         convertPixelsToRgb(pixels, format);
-    } else {
+    } else if (mPixelsCount > 0) {
         fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
@@ -95,7 +97,11 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
     }
 }
 
-void Frame::clear() { fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB)); }
+void Frame::clear() {
+    if (mPixelsCount > 0 && !mRgb.empty()) {
+        fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+    }
+}
 
 void Frame::interpolate(const Frame &frame1, const Frame &frame2,
                         uint8_t amountofFrame2, CRGB *pixels) {
@@ -172,7 +178,9 @@ void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
         }
         default: {
             // Fallback: fill with black
-            fl::memfill((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
+            if (mPixelsCount > 0 && !mRgb.empty()) {
+                fl::memfill((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
+            }
             break;
         }
     }
