@@ -44,10 +44,9 @@ void print_startup_info() {
     Serial.print("*********************************************\n");
     Serial.print("* TeensyParallel.ino                        *\n");
     Serial.print("*********************************************\n");
-    Serial.printf(
-        "CPU speed: %d MHz   Temp: %.1f C  %.1f F   Serial baud: %.1f MHz\n",
-        F_CPU_ACTUAL / 1000000, tempmonGetTemp(),
-        tempmonGetTemp() * 9.0 / 5.0 + 32, 800000 * 1.6 / 1000000.0);
+    FL_DBG("CPU speed: " << (F_CPU_ACTUAL / 1000000) << " MHz   Temp: " << tempmonGetTemp()
+           << " C  " << (tempmonGetTemp() * 9.0 / 5.0 + 32) << " F   Serial baud: "
+           << (800000 * 1.6 / 1000000.0) << " MHz");
 }
 
 void setup() {

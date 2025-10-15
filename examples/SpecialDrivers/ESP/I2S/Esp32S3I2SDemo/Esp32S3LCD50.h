@@ -99,30 +99,26 @@ void setup_lcd() {
 
     // Print diagnostic information
     Serial.println("\nDriver Configuration:");
-    Serial.printf("  Chipset: %s\n", fl::WS2812ChipsetTiming::name());
-    Serial.printf("  PCLK: %u Hz (%u MHz)\n",
-                  lcd_driver.getPclkHz(), lcd_driver.getPclkHz() / 1000000);
-    Serial.printf("  Slot duration: %u ns\n",
-                  lcd_driver.getPclkHz() > 0 ? 1000000000UL / lcd_driver.getPclkHz() : 0);
-    Serial.printf("  Slots per bit: %u\n", lcd_driver.getSlotsPerBit());
-    Serial.printf("  Buffer size: %u bytes (%u KB)\n",
-                  lcd_driver.getBufferSize(), lcd_driver.getBufferSize() / 1024);
-    Serial.printf("  Estimated frame time: %u µs\n", lcd_driver.getFrameTimeUs());
+    FL_DBG("  Chipset: " << fl::WS2812ChipsetTiming::name());
+    FL_DBG("  PCLK: " << lcd_driver.getPclkHz() << " Hz (" << lcd_driver.getPclkHz() / 1000000 << " MHz)");
+    FL_DBG("  Slot duration: " << (lcd_driver.getPclkHz() > 0 ? 1000000000UL / lcd_driver.getPclkHz() : 0) << " ns");
+    FL_DBG("  Slots per bit: " << lcd_driver.getSlotsPerBit());
+    FL_DBG("  Buffer size: " << lcd_driver.getBufferSize() << " bytes (" << lcd_driver.getBufferSize() / 1024 << " KB)");
+    FL_DBG("  Estimated frame time: " << lcd_driver.getFrameTimeUs() << " µs");
 
     uint32_t T1, T2, T3;
     lcd_driver.getActualTiming(T1, T2, T3);
-    Serial.printf("\nTiming (actual):\n");
-    Serial.printf("  T1: %u ns (target: %u ns)\n", T1, fl::WS2812ChipsetTiming::T1());
-    Serial.printf("  T1+T2: %u ns (target: %u ns)\n", T1 + T2,
-                  fl::WS2812ChipsetTiming::T1() + fl::WS2812ChipsetTiming::T2());
-    Serial.printf("  T3: %u ns (target: %u ns)\n", T3, fl::WS2812ChipsetTiming::T3());
+    FL_DBG("\nTiming (actual):");
+    FL_DBG("  T1: " << T1 << " ns (target: " << fl::WS2812ChipsetTiming::T1() << " ns)");
+    FL_DBG("  T1+T2: " << (T1 + T2) << " ns (target: " << (fl::WS2812ChipsetTiming::T1() + fl::WS2812ChipsetTiming::T2()) << " ns)");
+    FL_DBG("  T3: " << T3 << " ns (target: " << fl::WS2812ChipsetTiming::T3() << " ns)");
 
     float err_T1, err_T2, err_T3;
     lcd_driver.getTimingError(err_T1, err_T2, err_T3);
-    Serial.printf("\nTiming errors:\n");
-    Serial.printf("  T1: %.1f%%\n", err_T1 * 100.0f);
-    Serial.printf("  T1+T2: %.1f%%\n", err_T2 * 100.0f);
-    Serial.printf("  T3: %.1f%%\n", err_T3 * 100.0f);
+    FL_DBG("\nTiming errors:");
+    FL_DBG("  T1: " << (err_T1 * 100.0f) << "%");
+    FL_DBG("  T1+T2: " << (err_T2 * 100.0f) << "%");
+    FL_DBG("  T3: " << (err_T3 * 100.0f) << "%");
 
     Serial.println("\nStarting animation...\n");
 }
@@ -157,7 +153,7 @@ void loop() {
     uint32_t now = millis();
     if (now - last_fps_print >= 1000) {
         float fps = frame_count * 1000.0f / (now - last_fps_print);
-        Serial.printf("FPS: %.1f (frame %u)\n", fps, frame_count);
+        FL_DBG("FPS: " << fps << " (frame " << frame_count << ")");
         last_fps_print = now;
         frame_count = 0;
     }
