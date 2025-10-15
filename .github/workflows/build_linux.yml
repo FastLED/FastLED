@@ -84,6 +84,16 @@ jobs:
       - name: Install UV
         run: pip install uv
 
+      - name: Install LLVM Tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y lld llvm
+          # Create symlink for easier detection
+          sudo ln -sf /usr/bin/ld.lld /usr/bin/lld || true
+          # Verify installation
+          llvm-ar --version
+          ld.lld --version
+
       - name: Run Native Build
         working-directory: trusted
         run: |
