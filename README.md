@@ -295,6 +295,7 @@ After installing the Arduino IDE, add FastLED through the Library Manager:
 |---------------------|------------------|---------------|-----------------|
 | [API Reference](http://fastled.io/docs) | [Reddit r/FastLED](https://www.reddit.com/r/FastLED/) | [GitHub Issues](http://fastled.io/issues) | [Live Demos](https://zackees.github.io/fastled-wasm/) |
 | [Doxygen Docs](https://fastled.io/docs/files.html) | 1000s of users & solutions | Bug reports & feature requests | [GitHub Examples](examples) |
+| [**Cookbook**](cookbook/README.md) | Practical guides & recipes | | [100+ Example Sketches](examples) |
 
 **Need Help?** Visit [r/FastLED](https://reddit.com/r/FastLED) - thousands of knowledgeable users and extensive solution history!
 

@@ -1,0 +1,25 @@
+{
+  "session_id": "6d6a96c0-4a7a-4af2-a9b1-2887ed98ab78",
+  "start_time": 1760562373.199453,
+  "start_time_readable": "2025-10-15 14:06:13",
+  "prompt": "Read loop.md and do the next task",
+  "total_iterations": 50,
+  "current_iteration": 1,
+  "completed": false,
+  "end_time": null,
+  "end_time_readable": null,
+  "duration_seconds": null,
+  "iterations": [
+    {
+      "iteration": 1,
+      "start_time": 1760562373.2002888,
+      "start_time_readable": "2025-10-15 14:06:13",
+      "end_time": null,
+      "end_time_readable": null,
+      "duration_seconds": null,
+      "exit_code": null,
+      "error": null
+    }
+  ],
+  "error": null
+}
