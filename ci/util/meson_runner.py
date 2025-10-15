@@ -87,18 +87,24 @@ def setup_meson_build(
     disable_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES", "0") == "1"
     use_thin_archives = (has_lld and has_llvm_ar) and not disable_thin_archives
 
-    if already_configured and not reconfigure:
-        print(f"[MESON] Build directory already configured: {build_dir}")
-        return True
-
     # Set compiler environment variables to use zig
     # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
     # Create wrapper scripts for meson since it expects single executables
+    # IMPORTANT: Always recreate wrappers to ensure thin archive flags match current detection
     wrapper_dir = build_dir / "compiler_wrappers"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
 
+    # Determine if we need to run meson setup/reconfigure
+    # We skip meson setup only if already configured and not reconfiguring
+    # But we still recreate wrappers above to maintain consistency
+    skip_meson_setup = already_configured and not reconfigure
+
     cmd: List[str] = []
-    if already_configured and reconfigure:
+    if skip_meson_setup:
+        # Build already configured, just recreate wrappers (done above)
+        print(f"[MESON] Build directory already configured: {build_dir}")
+        print(f"[MESON] Recreated compiler wrappers with current thin archive settings")
+    elif already_configured and reconfigure:
         # Reconfigure existing build
         print(f"[MESON] Reconfiguring build directory: {build_dir}")
         cmd = ["meson", "setup", "--reconfigure", str(build_dir)]
@@ -200,6 +206,10 @@ def setup_meson_build(
     linker_tool = "system lld" if (use_thin_archives and has_lld) else "zig lld"
     print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
     print(f"[MESON] Using linker: {linker_tool}")
+
+    # If we're skipping meson setup (already configured), return early now that wrappers are recreated
+    if skip_meson_setup:
+        return True
 
     try:
         result = subprocess.run(
