@@ -22,6 +22,7 @@
 /// ESP32-H2: CLK=4,  D0=5  (APA102), D1=0  (LPD8806), D2=2  (WS2801), D3=3 (APA102)
 /// ESP32-C5: CLK=12, D0=11 (APA102), D1=5  (LPD8806), D2=4  (WS2801), D3=3 (APA102)
 /// ESP32-C6: CLK=6,  D0=7  (APA102), D1=2  (LPD8806), D2=5  (WS2801), D3=4 (APA102)
+/// ESP32-C2: CLK=10, D0=0  (APA102), D1=1  (LPD8806), D2=2  (WS2801), D3=3 (APA102)
 ///
 /// Important Notes:
 /// - All chipsets must tolerate the same clock speed
@@ -102,6 +103,14 @@
 #define DATA_PIN_1 2   // LPD8806 - SPI2 MISO (FSPIQ/D1)
 #define DATA_PIN_2 5   // WS2801 - SPI2 WP (FSPIWP/D2)
 #define DATA_PIN_3 4   // APA102 - SPI2 HD (FSPIHD/D3)
+
+#elif CONFIG_IDF_TARGET_ESP32C2
+// ESP32-C2 - Using safe GPIO pins (only GPIO 0-20 available, avoid flash pins 11-17)
+#define CLOCK_PIN 10   // Safe GPIO
+#define DATA_PIN_0 0   // APA102 - Safe GPIO (D0)
+#define DATA_PIN_1 1   // LPD8806 - Safe GPIO (D1)
+#define DATA_PIN_2 2   // WS2801 - Safe GPIO (D2)
+#define DATA_PIN_3 3   // APA102 - Safe GPIO (D3)
 
 #else
 // Fallback for unknown variants - use safe pins that avoid common issues

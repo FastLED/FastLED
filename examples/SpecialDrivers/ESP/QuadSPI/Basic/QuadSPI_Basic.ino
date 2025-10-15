@@ -19,6 +19,7 @@
 /// ESP32-H2: CLK=4,  D0=5,  D1=0,  D2=2,  D3=3  (SPI2 pins)
 /// ESP32-C5: CLK=12, D0=11, D1=5,  D2=4,  D3=3  (Safe GPIO, avoid flash pins)
 /// ESP32-C6: CLK=6,  D0=7,  D1=2,  D2=5,  D3=4  (SPI2 IO_MUX pins)
+/// ESP32-C2: CLK=10, D0=0,  D1=1,  D2=2,  D3=3  (Safe GPIO, avoid flash pins 11-17)
 ///
 /// Performance:
 /// - 4×100 LEDs transmitted in ~0.08ms @ 40 MHz
@@ -96,6 +97,14 @@
 #define DATA_PIN_1 2   // SPI2 MISO (FSPIQ/D1)
 #define DATA_PIN_2 5   // SPI2 WP (FSPIWP/D2)
 #define DATA_PIN_3 4   // SPI2 HD (FSPIHD/D3)
+
+#elif CONFIG_IDF_TARGET_ESP32C2
+// ESP32-C2 - Using safe GPIO pins (only GPIO 0-20 available, avoid flash pins 11-17)
+#define CLOCK_PIN 10   // Safe GPIO
+#define DATA_PIN_0 0   // Safe GPIO (D0)
+#define DATA_PIN_1 1   // Safe GPIO (D1)
+#define DATA_PIN_2 2   // Safe GPIO (D2)
+#define DATA_PIN_3 3   // Safe GPIO (D3)
 
 #else
 // Fallback for unknown variants - use safe pins that avoid common issues

@@ -122,6 +122,11 @@ CRGB blueLeds[NUM_LEDS_PER_STRIP];
     #define PIN_RED   0
     #define PIN_GREEN 1
     #define PIN_BLUE  4
+  #elif defined(CONFIG_IDF_TARGET_ESP32C2)
+    // ESP32-C2: Only GPIO 0-20 available. Avoid flash pins 11-17, strapping pins 8, 9
+    #define PIN_RED   0
+    #define PIN_GREEN 1
+    #define PIN_BLUE  2
   #else
     // ESP32 classic (WROOM-32, WROVER, etc): Avoid strapping and flash pins
     #define PIN_RED   13
