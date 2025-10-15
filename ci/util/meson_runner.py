@@ -245,7 +245,7 @@ def setup_meson_build(
             env=env,
         )
 
-        returncode = proc.wait()
+        returncode = proc.wait(echo=True)
 
         if returncode != 0:
             print(
@@ -291,7 +291,7 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
             env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        returncode = proc.wait()
+        returncode = proc.wait(echo=True)
 
         if returncode != 0:
             print(
@@ -344,7 +344,7 @@ def run_meson_test(
             env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        returncode = proc.wait()
+        returncode = proc.wait(echo=True)
 
         if returncode != 0:
             print(
