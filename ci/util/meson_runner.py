@@ -352,8 +352,39 @@ def setup_meson_build(
     print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
     print(f"[MESON] Using linker: {linker_tool}")
 
-    # If we're skipping meson setup (already configured), return early now that wrappers are recreated
+    # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:
+        # CRITICAL FIX: Check if libfastled.a exists as a thin archive
+        # If we've disabled thin archives but a thin archive exists from a previous build,
+        # we must delete it to force a rebuild. Otherwise the linker will fail.
+        libfastled_a = build_dir / "libfastled.a"
+        if libfastled_a.exists():
+            try:
+                # Read first 8 bytes to check for thin archive magic header
+                with open(libfastled_a, "rb") as f:
+                    header = f.read(8)
+                    is_thin_archive = header == b"!<thin>\n"
+
+                if is_thin_archive and not use_thin_archives:
+                    # Thin archive exists but we've disabled thin archives
+                    # Delete it to force rebuild with regular archive
+                    print("[MESON] ⚠️  Detected thin archive from previous build")
+                    print(
+                        "[MESON] 🗑️  Deleting libfastled.a to force rebuild with regular archive"
+                    )
+                    libfastled_a.unlink()
+                elif not is_thin_archive and use_thin_archives:
+                    # Regular archive exists but we've enabled thin archives
+                    # Delete it to force rebuild with thin archive
+                    print("[MESON] ℹ️  Detected regular archive from previous build")
+                    print(
+                        "[MESON] 🗑️  Deleting libfastled.a to force rebuild with thin archive"
+                    )
+                    libfastled_a.unlink()
+            except (OSError, IOError) as e:
+                # If we can't read/delete, that's okay - build will handle it
+                print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
+                pass
         return True
 
     # Run meson setup using RunningProcess for proper streaming output
