@@ -186,9 +186,30 @@ def setup_meson_build(
             )
         else:
             # Use zig's ar
-            ar_wrapper.write_text(
-                f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
-            )
+            # Filter out thin archive flag 'T' from arguments when not using thin archives
+            # because Zig's linker doesn't support thin archives
+            if use_thin_archives:
+                ar_wrapper.write_text(
+                    f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
+                )
+            else:
+                # When not using thin archives, filter out 'T' flag from ar arguments
+                ar_wrapper.write_text(
+                    "@echo off\n"
+                    "setlocal enabledelayedexpansion\n"
+                    'set "filtered_args="\n'
+                    "for %%a in (%*) do (\n"
+                    '  set "arg=%%a"\n'
+                    '  echo !arg! | findstr /r "^cr.*T.*$ ^rc.*T.*$" >nul\n'
+                    "  if !errorlevel! equ 0 (\n"
+                    "    REM Remove T flag from ar operation flags\n"
+                    '    set "arg=!arg:T=!"\n'
+                    "  )\n"
+                    '  set "filtered_args=!filtered_args! !arg!"\n'
+                    ")\n"
+                    "python -m ziglang ar %filtered_args%\n",
+                    encoding="utf-8",
+                )
     else:
         # Unix/Linux/macOS: Create shell script wrappers
         cc_wrapper = wrapper_dir / "zig-cc"
@@ -210,10 +231,31 @@ def setup_meson_build(
             )
         else:
             # Use zig's ar
-            ar_wrapper.write_text(
-                f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
-                encoding="utf-8",
-            )
+            # Filter out thin archive flag 'T' from arguments when not using thin archives
+            # because Zig's linker doesn't support thin archives
+            if use_thin_archives:
+                ar_wrapper.write_text(
+                    f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
+                    encoding="utf-8",
+                )
+            else:
+                # When not using thin archives, filter out 'T' flag from ar arguments
+                ar_wrapper.write_text(
+                    "#!/bin/sh\n"
+                    "# Filter out thin archive flag T - Zig linker does not support thin archives\n"
+                    'filtered_args=""\n'
+                    'for arg in "$@"; do\n'
+                    '  case "$arg" in\n'
+                    "    cr*T* | rc*T*)\n"
+                    "      # Remove T flag from ar operation flags\n"
+                    '      arg=$(echo "$arg" | sed "s/T//g")\n'
+                    "      ;;\n"
+                    "  esac\n"
+                    '  filtered_args="$filtered_args $arg"\n'
+                    "done\n"
+                    "exec python -m ziglang ar $filtered_args\n",
+                    encoding="utf-8",
+                )
         # Make executable on Unix-like systems
         cc_wrapper.chmod(0o755)
         cxx_wrapper.chmod(0o755)

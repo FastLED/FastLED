@@ -14,7 +14,17 @@ if __name__ == "__main__":
         # Fallback to system python when not in a virtual environment
         python_exe = "C:/tools/python13/python.exe"
 
+    # Filter out thin archive flag 'T' from ar arguments
+    # Zig's linker doesn't support thin archives, so we convert them to regular archives
+    args = []
+    for arg in sys.argv[1:]:
+        # If this is an ar flag argument (starts with 'cr' or similar), remove 'T'
+        if arg.startswith('cr') or arg.startswith('rc'):
+            # Remove 'T' flag which creates thin archives
+            arg = arg.replace('T', '')
+        args.append(arg)
+
     result = subprocess.run(
-        [python_exe, "-m", "ziglang", "ar"] + sys.argv[1:]
+        [python_exe, "-m", "ziglang", "ar"] + args
     )
     sys.exit(result.returncode)
