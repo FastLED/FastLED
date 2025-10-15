@@ -306,9 +306,19 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     // Set looping if requested
     fl::third_party::plm_set_loop(decoderData_->plmpeg, config_.looping ? 1 : 0);
 
+    // Set up video decode callback BEFORE any decoding to ensure callbacks work
+    fl::third_party::plm_set_video_decode_callback(decoderData_->plmpeg,
+        SoftwareMpeg1Decoder::videoDecodeCallback, this);
+
     // Try to get headers - for multiplexed streams with audio, this may require decoding
     // some frames before audio headers are found
+    // Note: Video callback must be set first so we can capture frame dimensions
     if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
+        // Temporarily allocate a minimal buffer for header decoding
+        // We'll reallocate properly once we know dimensions
+        fl::size temp_buffer_size = 1920 * 1080 * 3; // Max reasonable size for header decode
+        decoderData_->rgbFrameBuffer.reset(new fl::u8[temp_buffer_size]);
+
         // Decode one frame to get headers
         fl::third_party::plm_decode(decoderData_->plmpeg, decoderData_->targetFrameDuration);
     }
@@ -333,10 +343,7 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
         return false;
     }
 
-    // Set up video decode callback
-    fl::third_party::plm_set_video_decode_callback(decoderData_->plmpeg,
-        SoftwareMpeg1Decoder::videoDecodeCallback, this);
-
+    // Now allocate properly sized buffers based on actual video dimensions
     allocateFrameBuffers();
     decoderData_->initialized = true;
     decoderData_->headerParsed = true;
