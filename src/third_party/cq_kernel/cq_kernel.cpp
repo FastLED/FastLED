@@ -15,6 +15,7 @@
 #include <math.h>
 #include <string.h>
 #include "cq_kernel.h"
+#include "fft_precision.h"
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
@@ -24,28 +25,28 @@
 void _generate_guassian(kiss_fft_scalar window[], int N);
 
 void _generate_center_freqs(float freq[], int bands, float fmin, float fmax){
-    float m = log(fmax/fmin);
-    for(int i = 0; i < bands; i++) freq[i] = fmin*exp(m*i/(bands-1));
+    fft_float_t m = FFT_LOG(fmax/fmin);
+    for(int i = 0; i < bands; i++) freq[i] = fmin*FFT_EXP(m*i/(bands-1));
 }
 
 void _generate_hamming(kiss_fft_scalar window[], int N){
-    float a0 = 0.54;
+    fft_float_t a0 = 0.54;
     for(int i = 0; i < N; i++){
         #ifdef FIXED_POINT  // If fixed_point, represent hamming window with integers
-        window[i] = SAMP_MAX*(a0-(1-a0)*cos(2*M_PI*i/(N-1)));
+        window[i] = SAMP_MAX*(a0-(1-a0)*FFT_COS(2*M_PI*i/(N-1)));
         #else               // Else if floating point, represent hamming window as-is
-        window[i] = a0-(1-a0)*cos(2*M_PI*i/(N-1));
+        window[i] = a0-(1-a0)*FFT_COS(2*M_PI*i/(N-1));
         #endif
     }
 }
 
 void _generate_guassian(kiss_fft_scalar window[], int N){
-    float sigma = 0.5; // makes a window accurate to -30dB from peak, but smaller sigma is more accurate
+    fft_float_t sigma = 0.5; // makes a window accurate to -30dB from peak, but smaller sigma is more accurate
     for(int i = 0; i < N; i++){
         #ifdef FIXED_POINT  // If fixed_point, represent window with integers
-        window[i] = SAMP_MAX*exp(-0.5*pow((i-N/2.0)/(sigma*N/2.0), 2));
+        window[i] = SAMP_MAX*FFT_EXP(-0.5*FFT_POW((i-N/2.0)/(sigma*N/2.0), 2.0));
         #else               // Else if floating point, represent window as-is
-        window[i] = exp(-0.5*pow((i-N/2.0)/(sigma*N/2.0), 2));
+        window[i] = FFT_EXP(-0.5*FFT_POW((i-N/2.0)/(sigma*N/2.0), 2.0));
         #endif
     }
 }
@@ -66,7 +67,7 @@ void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type
     }
 
     // Fills window with f Hz wave sampled at fs Hz
-    for(int i = 0; i < N; i++) time_K[i] *= cos(2*M_PI*(f/fs)*(i-N/2));
+    for(int i = 0; i < N; i++) time_K[i] *= FFT_COS(2*M_PI*(f/fs)*(i-N/2));
 
     #ifdef FIXED_POINT // If using fixed point, just scale inversely to N after FFT (don't normalize)
     kiss_fftr(cfg, time_K, kernel); // Outputs garbage for Q31
@@ -83,7 +84,7 @@ void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type
 }
 
 kiss_fft_scalar _mag(kiss_fft_cpx x){
-    return sqrt(x.r*x.r+x.i*x.i);
+    return FFT_SQRT(x.r*x.r+x.i*x.i);
 }
 
 struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){

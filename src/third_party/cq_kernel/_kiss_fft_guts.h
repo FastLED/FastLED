@@ -122,17 +122,22 @@ struct kiss_fft_state{
 
 
 #ifdef FIXED_POINT
-#  define KISS_FFT_COS(phase)  fl::floor(.5+SAMP_MAX * fl::cos (phase))
-#  define KISS_FFT_SIN(phase)  fl::floor(.5+SAMP_MAX * fl::sin (phase))
+#  define KISS_FFT_COS(phase)  fl::floor(.5+SAMP_MAX * FFT_COS(phase))
+#  define KISS_FFT_SIN(phase)  fl::floor(.5+SAMP_MAX * FFT_SIN(phase))
 #  define HALF_OF(x) ((x)>>1)
 #elif defined(USE_SIMD)
-#  define KISS_FFT_COS(phase) _mm_set1_ps( fl::cos(phase) )
-#  define KISS_FFT_SIN(phase) _mm_set1_ps( fl::sin(phase) )
+#  define KISS_FFT_COS(phase) _mm_set1_ps( FFT_COS(phase) )
+#  define KISS_FFT_SIN(phase) _mm_set1_ps( FFT_SIN(phase) )
 #  define HALF_OF(x) ((x)*_mm_set1_ps(.5))
 #else
-#  define KISS_FFT_COS(phase) (kiss_fft_scalar) fl::cos(phase)
-#  define KISS_FFT_SIN(phase) (kiss_fft_scalar) fl::sin(phase)
-#  define HALF_OF(x) ((x)*.5)
+// Use precision-aware math functions from fft_precision.h
+#  define KISS_FFT_COS(phase) (kiss_fft_scalar) FFT_COS(phase)
+#  define KISS_FFT_SIN(phase) (kiss_fft_scalar) FFT_SIN(phase)
+#  if FASTLED_FFT_PRECISION == FASTLED_FFT_FLOAT
+#    define HALF_OF(x) ((x)*0.5f)
+#  else // FASTLED_FFT_DOUBLE or FASTLED_FFT_FIXED16
+#    define HALF_OF(x) ((x)*0.5)
+#  endif
 #endif
 
 #define  kf_cexp(x,phase) \
