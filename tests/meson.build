@@ -139,6 +139,7 @@ test_names = [
   'test_weak_ptr',
   'test_xymap',
   'test_xypath',
+  'test_esp32_riscv_interrupts',
 ]
 
 # Build each test executable with shared PCH

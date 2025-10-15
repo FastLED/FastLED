@@ -79,8 +79,8 @@ FL_EXTERN_C_BEGIN
  *
  * Key Differences from Xtensa:
  * 1. No fixed priority levels - all priorities are software-configurable (1-7)
- * 2. C handlers can be used at any priority with IRAM_ATTR
- * 3. No assembly requirement for high-priority interrupts
+ * 2. C handlers work at priority 1-3 with IRAM_ATTR (same as Xtensa)
+ * 3. Priority 4-7 requires assembly (same as Xtensa per ESP-IDF docs)
  * 4. Standard RISC-V trap/return mechanism (mret instruction)
  * 5. Custom interrupt controller handles arbitration (NOT PLIC)
  * 6. ESP-IDF provides complete interrupt management (no manual claim/complete)
@@ -128,9 +128,10 @@ FL_EXTERN_C_BEGIN
  *               Requires bypassing official RMT driver
  *               NOT supported by standard FastLED RMT integration
  *               Level 7 may be NMI on some implementations
+ *               REQUIRES ASSEMBLY handlers (per ESP-IDF docs, same as Xtensa)
  *
- * Unlike Xtensa, there's no hard cutoff where assembly is required.
- * All levels can use C handlers with proper IRAM placement.
+ * CRITICAL: ESP-IDF docs state that levels 4+ require assembly handlers on
+ * BOTH Xtensa AND RISC-V. Handlers must be NULL for levels >3.
  *
  * IMPORTANT: Official FastLED RMT driver uses rmt_tx_channel_config_t which
  * only accepts intr_priority values 1-3. Higher levels require custom
@@ -185,14 +186,23 @@ FL_EXTERN_C_BEGIN
 /*
  * C Interrupt Handlers for FastLED
  *
- * Unlike Xtensa, RISC-V allows C handlers at any priority level.
- * These functions must be:
+ * CRITICAL: Like Xtensa, RISC-V ALSO requires assembly handlers for priority levels 4+.
+ *
+ * According to official ESP-IDF documentation (v5.0+):
+ * "Levels 1-3 can be handled in C. For levels 4-6... High level interrupts...
+ *  Need to be handled in assembly."
+ * "Handlers must be NULL when an interrupt of level >3 is requested, because
+ *  these types of interrupts aren't C-callable."
+ *
+ * This applies to BOTH Xtensa AND RISC-V architectures on ESP32 platforms.
+ *
+ * C handlers (priority 1-3) must be:
  * 1. Marked with IRAM_ATTR (placed in IRAM, not flash)
  * 2. Keep execution time minimal for high priorities
- * 3. Use PLIC claim/complete protocol for external interrupts
- * 4. No printf/malloc in high-priority handlers (good practice)
+ * 3. No printf/malloc in handlers (good practice)
+ * 4. Use ESP-IDF APIs (no manual PLIC operations needed)
  *
- * The compiler generates proper entry/exit sequences automatically.
+ * The compiler generates proper entry/exit sequences automatically for levels 1-3.
  */
 
 // Official FastLED handler (priority 1-3) - RECOMMENDED
