@@ -636,6 +636,15 @@ BLUEPILL = Board(
     platform="ststm32",
 )
 
+# STM32F103CB variant with 128KB flash (double the C8's 64KB)
+# Fully compatible with BluePill F103C8 but with more flash memory
+# Supports Roger Clark STM32 core and STM32duino
+BLUEPILL_F103CB = Board(
+    board_name="bluepill_f103cb",
+    real_board_name="bluepill_f103cb",
+    platform="ststm32",
+)
+
 # maple_mini_b20
 MAPLE_MINI = Board(
     board_name="maple_mini",
