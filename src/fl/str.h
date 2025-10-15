@@ -161,6 +161,52 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
     }
     StrN(const StrN &other) { copy(other); }
+
+    // Move constructor (C++11 compatibility)
+    // Steals resources from other, leaving it in a valid but empty state
+    StrN(StrN&& other) noexcept
+        : mLength(other.mLength), mHeapData(fl::move(other.mHeapData)) {
+        // If other was using inline data, copy it
+        if (!other.mHeapData) {
+            memcpy(mInlineData, other.mInlineData, SIZE);
+        }
+        // Leave other in a valid empty state
+        other.mLength = 0;
+        other.mInlineData[0] = '\0';
+    }
+
+    // Iterator range constructor (std::string compatibility)
+    // Constructs string from iterator range [first, last)
+    // This enables construction from any iterator pair including:
+    // - Character arrays: StrN(arr, arr + N)
+    // - Other strings: StrN(other.begin(), other.end())
+    // - Partial ranges: StrN(str.begin() + 2, str.begin() + 7)
+    template <typename InputIt>
+    StrN(InputIt first, InputIt last) : StrN() {
+        // Delegate to assign() which has all the logic
+        assign(first, last);
+    }
+
+    // Move assignment operator (C++11 compatibility)
+    // Steals resources from other, leaving it in a valid but empty state
+    StrN& operator=(StrN&& other) noexcept {
+        if (this != &other) {
+            // Steal other's resources
+            mLength = other.mLength;
+            mHeapData = fl::move(other.mHeapData);
+
+            // If other was using inline data, copy it
+            if (!other.mHeapData) {
+                memcpy(mInlineData, other.mInlineData, SIZE);
+            }
+
+            // Leave other in a valid empty state
+            other.mLength = 0;
+            other.mInlineData[0] = '\0';
+        }
+        return *this;
+    }
+
     void copy(const char *str) {
         fl::size len = strlen(str);
         mLength = len;
@@ -195,6 +241,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     }
     // cppcheck-suppress-end
 
+    // Assignment operations (std::string compatibility)
+    // Assign from raw buffer with explicit length
     void assign(const char* str, fl::size len) {
         mLength = len;
         if (len + 1 <= SIZE) {
@@ -205,6 +253,112 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             mHeapData->copy(str, len);
             mHeapData->data()[len] = '\0';
         }
+    }
+
+    // Assign from another string (copy assignment)
+    template <fl::size M>
+    StrN& assign(const StrN<M>& str) {
+        copy(str);
+        return *this;
+    }
+
+    // Assign from substring [pos, pos+count) of str
+    template <fl::size M>
+    StrN& assign(const StrN<M>& str, fl::size pos, fl::size count = npos) {
+        if (pos >= str.size()) {
+            // Position out of bounds - assign empty string
+            clear();
+            return *this;
+        }
+
+        // Calculate actual count to assign
+        fl::size actualCount = count;
+        if (actualCount == npos || pos + actualCount > str.size()) {
+            actualCount = str.size() - pos;
+        }
+
+        // Use existing copy logic
+        copy(str.c_str() + pos, actualCount);
+        return *this;
+    }
+
+    // Assign count copies of character c
+    StrN& assign(fl::size count, char c) {
+        if (count == 0) {
+            clear();
+            return *this;
+        }
+
+        mLength = count;
+
+        // Check if result fits in inline buffer
+        if (count + 1 <= SIZE) {
+            for (fl::size i = 0; i < count; ++i) {
+                mInlineData[i] = c;
+            }
+            mInlineData[count] = '\0';
+            mHeapData.reset();
+        } else {
+            // Need heap allocation
+            mHeapData = fl::make_shared<StringHolder>(count);
+            if (mHeapData) {
+                for (fl::size i = 0; i < count; ++i) {
+                    mHeapData->data()[i] = c;
+                }
+                mHeapData->data()[count] = '\0';
+            }
+        }
+        return *this;
+    }
+
+    // Assign from moved string (move assignment via assign)
+    // This provides an alternative to operator=(StrN&&) for explicit move semantics
+    StrN& assign(StrN&& str) noexcept {
+        // Delegate to move assignment operator
+        *this = fl::move(str);
+        return *this;
+    }
+
+    // Assign from iterator range [first, last)
+    // This enables construction from any iterator pair
+    template <typename InputIt>
+    StrN& assign(InputIt first, InputIt last) {
+        // Clear existing content
+        clear();
+
+        // Calculate length by iterating
+        fl::size len = 0;
+        for (auto it = first; it != last; ++it) {
+            ++len;
+        }
+
+        if (len == 0) {
+            return *this;
+        }
+
+        // Reserve space
+        mLength = len;
+
+        // Check if result fits in inline buffer
+        if (len + 1 <= SIZE) {
+            fl::size i = 0;
+            for (auto it = first; it != last; ++it, ++i) {
+                mInlineData[i] = *it;
+            }
+            mInlineData[len] = '\0';
+            mHeapData.reset();
+        } else {
+            // Need heap allocation
+            mHeapData = fl::make_shared<StringHolder>(len);
+            if (mHeapData) {
+                fl::size i = 0;
+                for (auto it = first; it != last; ++it, ++i) {
+                    mHeapData->data()[i] = *it;
+                }
+                mHeapData->data()[len] = '\0';
+            }
+        }
+        return *this;
     }
 
     bool operator==(const StrN &other) const {
@@ -347,6 +501,31 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         return c_str()[index];
     }
 
+    // Bounds-checked element access (std::string compatibility)
+    // Unlike operator[], at() provides more explicit error handling for out-of-bounds access
+    char& at(fl::size pos) {
+        if (pos >= mLength) {
+            // Out of bounds access
+            // In std::string, this would throw std::out_of_range
+            // For fl::string (embedded-friendly), we return a dummy reference
+            // Could also use FL_WARN here for debug builds
+            static char dummy = '\0';
+            return dummy;
+        }
+        return c_str_mutable()[pos];
+    }
+
+    const char& at(fl::size pos) const {
+        if (pos >= mLength) {
+            // Out of bounds access
+            // In std::string, this would throw std::out_of_range
+            // For fl::string (embedded-friendly), we return a dummy reference
+            static char dummy = '\0';
+            return dummy;
+        }
+        return c_str()[pos];
+    }
+
     bool empty() const { return mLength == 0; }
 
     // Iterator support for range-based for loops
@@ -357,7 +536,32 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     const char* cbegin() const { return c_str(); }
     const char* cend() const { return c_str() + mLength; }
 
-    // Append method
+    // Reverse iterator support (std::string compatibility)
+    // Note: These return raw pointers pointing to elements in reverse order
+    // rbegin() points to the last element, rend() points to one-before-first
+    // Use with caution: decrement to move forward in reverse iteration
+    char* rbegin() {
+        return empty() ? nullptr : (c_str_mutable() + mLength - 1);
+    }
+    char* rend() {
+        return empty() ? nullptr : (c_str_mutable() - 1);
+    }
+    const char* rbegin() const {
+        return empty() ? nullptr : (c_str() + mLength - 1);
+    }
+    const char* rend() const {
+        return empty() ? nullptr : (c_str() - 1);
+    }
+    const char* crbegin() const {
+        return rbegin();
+    }
+    const char* crend() const {
+        return rend();
+    }
+
+    // Comparison operators (std::string compatibility)
+    // Provide lexicographical comparison for StrN instances
+    // These work with StrN instances of the same or different template sizes
 
     bool operator<(const StrN &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
@@ -365,6 +569,30 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     template <fl::size M> bool operator<(const StrN<M> &other) const {
         return strcmp(c_str(), other.c_str()) < 0;
+    }
+
+    bool operator>(const StrN &other) const {
+        return strcmp(c_str(), other.c_str()) > 0;
+    }
+
+    template <fl::size M> bool operator>(const StrN<M> &other) const {
+        return strcmp(c_str(), other.c_str()) > 0;
+    }
+
+    bool operator<=(const StrN &other) const {
+        return strcmp(c_str(), other.c_str()) <= 0;
+    }
+
+    template <fl::size M> bool operator<=(const StrN<M> &other) const {
+        return strcmp(c_str(), other.c_str()) <= 0;
+    }
+
+    bool operator>=(const StrN &other) const {
+        return strcmp(c_str(), other.c_str()) >= 0;
+    }
+
+    template <fl::size M> bool operator>=(const StrN<M> &other) const {
+        return strcmp(c_str(), other.c_str()) >= 0;
     }
 
     void reserve(fl::size newCapacity) {
@@ -397,6 +625,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     void clear(bool freeMemory = false) {
         mLength = 0;
+        // Ensure null termination for c_str()
+        c_str_mutable()[0] = '\0';
         if (freeMemory && mHeapData) {
             mHeapData.reset();
         }
@@ -463,6 +693,322 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     template<fl::size M>
     fl::size find(const StrN<M>& other, fl::size start_pos) const {
         return find(other.c_str(), start_pos);
+    }
+
+    // Reverse find operations (std::string compatibility)
+    // Find last occurrence of character c starting at or before pos
+    fl::size rfind(char c, fl::size pos = npos) const {
+        if (mLength == 0) {
+            return npos;
+        }
+        // If pos is npos or beyond end, start from last character
+        fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+
+        const char* str = c_str();
+        // Search backwards from searchPos
+        for (fl::size i = searchPos + 1; i > 0; --i) {
+            if (str[i - 1] == c) {
+                return i - 1;
+            }
+        }
+        return npos;
+    }
+
+    // Find last occurrence of substring starting at or before pos
+    fl::size rfind(const char* s, fl::size pos, fl::size count) const {
+        if (!s || count == 0) {
+            // Empty string matches at pos (or end if pos > mLength)
+            if (count == 0) {
+                return (pos > mLength) ? mLength : pos;
+            }
+            return npos;
+        }
+        if (count > mLength) {
+            return npos;
+        }
+
+        // Calculate the maximum starting position for a match
+        // The match must start at a position where start + count <= mLength
+        // And the match must start at or before position pos
+        fl::size maxStart = mLength - count;  // Last possible starting position
+        fl::size searchStart = (pos >= mLength || pos == npos) ? maxStart : pos;
+
+        // The match at position searchStart must end at searchStart + count - 1
+        // So if searchStart + count > mLength, we need to reduce searchStart
+        if (searchStart + count > mLength) {
+            searchStart = maxStart;
+        }
+
+        const char* str = c_str();
+        // Search backwards from searchStart
+        for (fl::size i = searchStart + 1; i > 0; --i) {
+            fl::size idx = i - 1;
+            if (idx + count > mLength) {
+                continue;
+            }
+            bool match = true;
+            for (fl::size j = 0; j < count; ++j) {
+                if (str[idx + j] != s[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return idx;
+            }
+        }
+        return npos;
+    }
+
+    // Find last occurrence of null-terminated string starting at or before pos
+    fl::size rfind(const char* s, fl::size pos = npos) const {
+        if (!s) {
+            return npos;
+        }
+        return rfind(s, pos, strlen(s));
+    }
+
+    // Find last occurrence of another string starting at or before pos
+    template<fl::size M>
+    fl::size rfind(const StrN<M>& str, fl::size pos = npos) const {
+        return rfind(str.c_str(), pos, str.size());
+    }
+
+    // Find first of operations (std::string compatibility)
+    // Find first occurrence of any character from the set starting at pos
+    fl::size find_first_of(char c, fl::size pos = 0) const {
+        // Single character: delegate to find()
+        return find(c, pos);
+    }
+
+    // Find first occurrence of any character from the set [s, s+count) starting at pos
+    fl::size find_first_of(const char* s, fl::size pos, fl::size count) const {
+        if (!s || count == 0) {
+            return npos;
+        }
+        if (pos >= mLength) {
+            return npos;
+        }
+
+        const char* str = c_str();
+        // Search forward from pos
+        for (fl::size i = pos; i < mLength; ++i) {
+            // Check if character at position i matches any character in the set
+            for (fl::size j = 0; j < count; ++j) {
+                if (str[i] == s[j]) {
+                    return i;
+                }
+            }
+        }
+        return npos;
+    }
+
+    // Find first occurrence of any character from null-terminated string s starting at pos
+    fl::size find_first_of(const char* s, fl::size pos = 0) const {
+        if (!s) {
+            return npos;
+        }
+        return find_first_of(s, pos, strlen(s));
+    }
+
+    // Find first occurrence of any character from string str starting at pos
+    template<fl::size M>
+    fl::size find_first_of(const StrN<M>& str, fl::size pos = 0) const {
+        return find_first_of(str.c_str(), pos, str.size());
+    }
+
+    // Find last of operations (std::string compatibility)
+    // Find last occurrence of any character from the set starting at or before pos
+    fl::size find_last_of(char c, fl::size pos = npos) const {
+        // Single character: delegate to rfind()
+        return rfind(c, pos);
+    }
+
+    // Find last occurrence of any character from the set [s, s+count) starting at or before pos
+    fl::size find_last_of(const char* s, fl::size pos, fl::size count) const {
+        if (!s || count == 0) {
+            return npos;
+        }
+        if (mLength == 0) {
+            return npos;
+        }
+
+        // If pos is npos or beyond end, start from last character
+        fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+
+        const char* str = c_str();
+        // Search backward from searchPos
+        for (fl::size i = searchPos + 1; i > 0; --i) {
+            // Check if character at position i-1 matches any character in the set
+            for (fl::size j = 0; j < count; ++j) {
+                if (str[i - 1] == s[j]) {
+                    return i - 1;
+                }
+            }
+        }
+        return npos;
+    }
+
+    // Find last occurrence of any character from null-terminated string s starting at or before pos
+    fl::size find_last_of(const char* s, fl::size pos = npos) const {
+        if (!s) {
+            return npos;
+        }
+        return find_last_of(s, pos, strlen(s));
+    }
+
+    // Find last occurrence of any character from string str starting at or before pos
+    template<fl::size M>
+    fl::size find_last_of(const StrN<M>& str, fl::size pos = npos) const {
+        return find_last_of(str.c_str(), pos, str.size());
+    }
+
+    // Find first not of operations (std::string compatibility)
+    // Find first character NOT matching c starting at pos
+    fl::size find_first_not_of(char c, fl::size pos = 0) const {
+        if (pos >= mLength) {
+            return npos;
+        }
+
+        const char* str = c_str();
+        // Search forward from pos for first character that doesn't match c
+        for (fl::size i = pos; i < mLength; ++i) {
+            if (str[i] != c) {
+                return i;
+            }
+        }
+        return npos;
+    }
+
+    // Find first character NOT in the set [s, s+count) starting at pos
+    fl::size find_first_not_of(const char* s, fl::size pos, fl::size count) const {
+        if (!s) {
+            // Null pointer: every character is "not in the set"
+            return (pos < mLength) ? pos : npos;
+        }
+        if (count == 0) {
+            // Empty set: every character is "not in the set"
+            return (pos < mLength) ? pos : npos;
+        }
+        if (pos >= mLength) {
+            return npos;
+        }
+
+        const char* str = c_str();
+        // Search forward from pos
+        for (fl::size i = pos; i < mLength; ++i) {
+            bool found_in_set = false;
+            // Check if character at position i matches any character in the set
+            for (fl::size j = 0; j < count; ++j) {
+                if (str[i] == s[j]) {
+                    found_in_set = true;
+                    break;
+                }
+            }
+            // If character is NOT in the set, return its position
+            if (!found_in_set) {
+                return i;
+            }
+        }
+        return npos;
+    }
+
+    // Find first character NOT in null-terminated string s starting at pos
+    fl::size find_first_not_of(const char* s, fl::size pos = 0) const {
+        if (!s) {
+            // Null pointer: every character is "not in the set"
+            return (pos < mLength) ? pos : npos;
+        }
+        return find_first_not_of(s, pos, strlen(s));
+    }
+
+    // Find first character NOT in string str starting at pos
+    template<fl::size M>
+    fl::size find_first_not_of(const StrN<M>& str, fl::size pos = 0) const {
+        return find_first_not_of(str.c_str(), pos, str.size());
+    }
+
+    // Find last not of operations (std::string compatibility)
+    // Find last character NOT matching c starting at or before pos
+    fl::size find_last_not_of(char c, fl::size pos = npos) const {
+        if (mLength == 0) {
+            return npos;
+        }
+
+        // If pos is npos or beyond end, start from last character
+        fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+
+        const char* str = c_str();
+        // Search backward from searchPos
+        for (fl::size i = searchPos + 1; i > 0; --i) {
+            if (str[i - 1] != c) {
+                return i - 1;
+            }
+        }
+        return npos;
+    }
+
+    // Find last character NOT in the set [s, s+count) starting at or before pos
+    fl::size find_last_not_of(const char* s, fl::size pos, fl::size count) const {
+        if (!s) {
+            // Null pointer: every character is "not in the set"
+            if (mLength == 0) {
+                return npos;
+            }
+            fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+            return searchPos;
+        }
+        if (count == 0) {
+            // Empty set: every character is "not in the set"
+            if (mLength == 0) {
+                return npos;
+            }
+            fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+            return searchPos;
+        }
+        if (mLength == 0) {
+            return npos;
+        }
+
+        // If pos is npos or beyond end, start from last character
+        fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+
+        const char* str = c_str();
+        // Search backward from searchPos
+        for (fl::size i = searchPos + 1; i > 0; --i) {
+            bool found_in_set = false;
+            // Check if character at position i-1 matches any character in the set
+            for (fl::size j = 0; j < count; ++j) {
+                if (str[i - 1] == s[j]) {
+                    found_in_set = true;
+                    break;
+                }
+            }
+            // If character is NOT in the set, return its position
+            if (!found_in_set) {
+                return i - 1;
+            }
+        }
+        return npos;
+    }
+
+    // Find last character NOT in null-terminated string s starting at or before pos
+    fl::size find_last_not_of(const char* s, fl::size pos = npos) const {
+        if (!s) {
+            // Null pointer: every character is "not in the set"
+            if (mLength == 0) {
+                return npos;
+            }
+            fl::size searchPos = (pos >= mLength || pos == npos) ? (mLength - 1) : pos;
+            return searchPos;
+        }
+        return find_last_not_of(s, pos, strlen(s));
+    }
+
+    // Find last character NOT in string str starting at or before pos
+    template<fl::size M>
+    fl::size find_last_not_of(const StrN<M>& str, fl::size pos = npos) const {
+        return find_last_not_of(str.c_str(), pos, str.size());
     }
 
     // Contains methods for C++23 compatibility
@@ -570,6 +1116,559 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         }
     }
 
+    // Insert operations (std::string compatibility)
+    // Insert count copies of character ch at position pos
+    StrN& insert(fl::size pos, fl::size count, char ch) {
+        if (pos > mLength) {
+            pos = mLength;  // Clamp to valid range
+        }
+        if (count == 0) {
+            return *this;
+        }
+
+        fl::size newLen = mLength + count;
+
+        // Handle COW: if shared, make a copy
+        if (mHeapData && mHeapData.use_count() > 1) {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                // Copy data before insertion point
+                if (pos > 0) {
+                    memcpy(newData->data(), mHeapData->data(), pos);
+                }
+                // Insert new characters
+                for (fl::size i = 0; i < count; ++i) {
+                    newData->data()[pos + i] = ch;
+                }
+                // Copy data after insertion point
+                if (pos < mLength) {
+                    memcpy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+            return *this;
+        }
+
+        // Check if result fits in inline buffer
+        if (newLen + 1 <= SIZE && !mHeapData) {
+            // Shift existing data right
+            if (pos < mLength) {
+                memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
+            }
+            // Insert new characters
+            for (fl::size i = 0; i < count; ++i) {
+                mInlineData[pos + i] = ch;
+            }
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        if (mHeapData && mHeapData.use_count() <= 1 && mHeapData->hasCapacity(newLen)) {
+            // Can insert in place
+            char* data = mHeapData->data();
+            if (pos < mLength) {
+                memmove(data + pos + count, data + pos, mLength - pos);
+            }
+            for (fl::size i = 0; i < count; ++i) {
+                data[pos + i] = ch;
+            }
+            mLength = newLen;
+            data[mLength] = '\0';
+        } else {
+            // Need new allocation
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                const char* src = c_str();
+                // Copy data before insertion point
+                if (pos > 0) {
+                    memcpy(newData->data(), src, pos);
+                }
+                // Insert new characters
+                for (fl::size i = 0; i < count; ++i) {
+                    newData->data()[pos + i] = ch;
+                }
+                // Copy data after insertion point
+                if (pos < mLength) {
+                    memcpy(newData->data() + pos + count, src + pos, mLength - pos);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+        }
+        return *this;
+    }
+
+    // Insert null-terminated string at position pos
+    StrN& insert(fl::size pos, const char* s) {
+        if (!s) {
+            return *this;
+        }
+        return insert(pos, s, strlen(s));
+    }
+
+    // Insert first count characters of s at position pos
+    StrN& insert(fl::size pos, const char* s, fl::size count) {
+        if (!s || count == 0) {
+            return *this;
+        }
+        if (pos > mLength) {
+            pos = mLength;
+        }
+
+        fl::size newLen = mLength + count;
+
+        // Handle COW: if shared, make a copy
+        if (mHeapData && mHeapData.use_count() > 1) {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                if (pos > 0) {
+                    memcpy(newData->data(), mHeapData->data(), pos);
+                }
+                memcpy(newData->data() + pos, s, count);
+                if (pos < mLength) {
+                    memcpy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+            return *this;
+        }
+
+        // Check if result fits in inline buffer
+        if (newLen + 1 <= SIZE && !mHeapData) {
+            if (pos < mLength) {
+                memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
+            }
+            memcpy(mInlineData + pos, s, count);
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        if (mHeapData && mHeapData.use_count() <= 1 && mHeapData->hasCapacity(newLen)) {
+            char* data = mHeapData->data();
+            if (pos < mLength) {
+                memmove(data + pos + count, data + pos, mLength - pos);
+            }
+            memcpy(data + pos, s, count);
+            mLength = newLen;
+            data[mLength] = '\0';
+        } else {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                const char* src = c_str();
+                if (pos > 0) {
+                    memcpy(newData->data(), src, pos);
+                }
+                memcpy(newData->data() + pos, s, count);
+                if (pos < mLength) {
+                    memcpy(newData->data() + pos + count, src + pos, mLength - pos);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+        }
+        return *this;
+    }
+
+    // Insert string str at position pos
+    template <fl::size M>
+    StrN& insert(fl::size pos, const StrN<M>& str) {
+        return insert(pos, str.c_str(), str.size());
+    }
+
+    // Insert substring of str at position pos
+    template <fl::size M>
+    StrN& insert(fl::size pos, const StrN<M>& str, fl::size pos2, fl::size count = npos) {
+        if (pos2 >= str.size()) {
+            return *this;
+        }
+        fl::size actualCount = count;
+        if (actualCount == npos || pos2 + actualCount > str.size()) {
+            actualCount = str.size() - pos2;
+        }
+        return insert(pos, str.c_str() + pos2, actualCount);
+    }
+
+    // Iterator-based insert operations
+    // Note: Disabled for now to avoid ambiguity with index-based insert
+    // These can be added later with better type disambiguation
+    // char* insert(char* it_pos, char ch);
+    // char* insert(char* it_pos, fl::size count, char ch);
+
+    // Erase operations (std::string compatibility)
+    // Erase count characters starting at pos (default: erase everything from pos to end)
+    StrN& erase(fl::size pos = 0, fl::size count = npos) {
+        if (pos >= mLength) {
+            // Position out of bounds - no-op
+            return *this;
+        }
+
+        // Calculate actual number of characters to erase
+        fl::size actualCount = count;
+        if (actualCount == npos || pos + actualCount > mLength) {
+            actualCount = mLength - pos;
+        }
+
+        if (actualCount == 0) {
+            return *this;
+        }
+
+        // Handle COW: if shared, make a copy first
+        if (mHeapData && mHeapData.use_count() > 1) {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(mLength - actualCount);
+            if (newData) {
+                // Copy data before erase point
+                if (pos > 0) {
+                    memcpy(newData->data(), mHeapData->data(), pos);
+                }
+                // Copy data after erase range
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memcpy(newData->data() + pos, mHeapData->data() + pos + actualCount, remainingLen);
+                }
+                mLength = mLength - actualCount;
+                newData->data()[mLength] = '\0';
+                mHeapData = newData;
+            }
+            return *this;
+        }
+
+        // Shift data left to fill gap
+        fl::size remainingLen = mLength - pos - actualCount;
+        if (remainingLen > 0) {
+            char* data = c_str_mutable();
+            memmove(data + pos, data + pos + actualCount, remainingLen);
+        }
+
+        mLength -= actualCount;
+        c_str_mutable()[mLength] = '\0';
+
+        return *this;
+    }
+
+    // Iterator-based erase operations
+    // Note: These are commented out to avoid ambiguity with index-based erase
+    // The issue is that erase(0) is ambiguous: 0 can be fl::size or char* (nullptr)
+    // These can be added later with better type disambiguation (SFINAE/enable_if)
+
+    /*
+    // Erase character at iterator position
+    // Returns iterator to the character following the erased character
+    char* erase(char* it_pos) {
+        if (!it_pos) {
+            return end();
+        }
+
+        const char* str_begin = c_str();
+        const char* str_end = str_begin + mLength;
+
+        // Check if iterator is within valid range
+        if (it_pos < str_begin || it_pos >= str_end) {
+            return end();
+        }
+
+        fl::size pos = it_pos - str_begin;
+        erase(pos, 1);
+
+        // Return iterator to next element (which is now at the same position)
+        return begin() + pos;
+    }
+
+    // Erase range [first, last)
+    // Returns iterator to the character following the last erased character
+    char* erase(char* first, char* last) {
+        if (!first || !last || first >= last) {
+            return end();
+        }
+
+        const char* str_begin = c_str();
+        const char* str_end = str_begin + mLength;
+
+        // Clamp iterators to valid range
+        if (first < str_begin) {
+            first = begin();
+        }
+        if (last > str_end) {
+            last = end();
+        }
+        if (first >= str_end) {
+            return end();
+        }
+
+        fl::size pos = first - str_begin;
+        fl::size count = last - first;
+
+        erase(pos, count);
+
+        // Return iterator to next element
+        return begin() + pos;
+    }
+    */
+
+    // Replace operations (std::string compatibility)
+    // Replace count characters starting at pos with string str
+    template <fl::size M>
+    StrN& replace(fl::size pos, fl::size count, const StrN<M>& str) {
+        return replace(pos, count, str.c_str(), str.size());
+    }
+
+    // Replace count characters starting at pos with substring of str
+    template <fl::size M>
+    StrN& replace(fl::size pos, fl::size count, const StrN<M>& str,
+                  fl::size pos2, fl::size count2 = npos) {
+        if (pos2 >= str.size()) {
+            return erase(pos, count);
+        }
+        fl::size actualCount2 = count2;
+        if (actualCount2 == npos || pos2 + actualCount2 > str.size()) {
+            actualCount2 = str.size() - pos2;
+        }
+        return replace(pos, count, str.c_str() + pos2, actualCount2);
+    }
+
+    // Replace count characters starting at pos with first count2 chars of s
+    StrN& replace(fl::size pos, fl::size count, const char* s, fl::size count2) {
+        if (pos > mLength) {
+            // Position out of bounds - no-op
+            return *this;
+        }
+        if (!s) {
+            return erase(pos, count);
+        }
+
+        // Calculate actual number of characters to replace
+        fl::size actualCount = count;
+        if (actualCount == npos || pos + actualCount > mLength) {
+            actualCount = mLength - pos;
+        }
+
+        // Calculate final length
+        fl::size newLen = mLength - actualCount + count2;
+
+        // Handle COW: if shared, make a copy with new size
+        if (mHeapData && mHeapData.use_count() > 1) {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                // Copy data before replacement point
+                if (pos > 0) {
+                    memcpy(newData->data(), mHeapData->data(), pos);
+                }
+                // Copy replacement data
+                memcpy(newData->data() + pos, s, count2);
+                // Copy data after replacement range
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memcpy(newData->data() + pos + count2,
+                           mHeapData->data() + pos + actualCount,
+                           remainingLen);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+            return *this;
+        }
+
+        // Check if result fits in inline buffer
+        if (newLen + 1 <= SIZE && !mHeapData) {
+            // Shift data if necessary
+            if (count2 != actualCount) {
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memmove(mInlineData + pos + count2,
+                            mInlineData + pos + actualCount,
+                            remainingLen);
+                }
+            }
+            // Copy replacement data
+            memcpy(mInlineData + pos, s, count2);
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        if (mHeapData && mHeapData.use_count() <= 1 && mHeapData->hasCapacity(newLen)) {
+            // Can replace in place
+            char* data = mHeapData->data();
+            if (count2 != actualCount) {
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memmove(data + pos + count2,
+                            data + pos + actualCount,
+                            remainingLen);
+                }
+            }
+            memcpy(data + pos, s, count2);
+            mLength = newLen;
+            data[mLength] = '\0';
+        } else {
+            // Need new allocation
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                const char* src = c_str();
+                // Copy data before replacement point
+                if (pos > 0) {
+                    memcpy(newData->data(), src, pos);
+                }
+                // Copy replacement data
+                memcpy(newData->data() + pos, s, count2);
+                // Copy data after replacement range
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memcpy(newData->data() + pos + count2,
+                           src + pos + actualCount,
+                           remainingLen);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+        }
+        return *this;
+    }
+
+    // Replace count characters starting at pos with null-terminated s
+    StrN& replace(fl::size pos, fl::size count, const char* s) {
+        if (!s) {
+            return erase(pos, count);
+        }
+        return replace(pos, count, s, strlen(s));
+    }
+
+    // Replace count characters starting at pos with count2 copies of ch
+    StrN& replace(fl::size pos, fl::size count, fl::size count2, char ch) {
+        if (pos > mLength) {
+            return *this;
+        }
+
+        // Calculate actual number of characters to replace
+        fl::size actualCount = count;
+        if (actualCount == npos || pos + actualCount > mLength) {
+            actualCount = mLength - pos;
+        }
+
+        // Calculate final length
+        fl::size newLen = mLength - actualCount + count2;
+
+        // Handle COW: if shared, make a copy with new size
+        if (mHeapData && mHeapData.use_count() > 1) {
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                // Copy data before replacement point
+                if (pos > 0) {
+                    memcpy(newData->data(), mHeapData->data(), pos);
+                }
+                // Fill with replacement character
+                for (fl::size i = 0; i < count2; ++i) {
+                    newData->data()[pos + i] = ch;
+                }
+                // Copy data after replacement range
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memcpy(newData->data() + pos + count2,
+                           mHeapData->data() + pos + actualCount,
+                           remainingLen);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+            return *this;
+        }
+
+        // Check if result fits in inline buffer
+        if (newLen + 1 <= SIZE && !mHeapData) {
+            // Shift data if necessary
+            if (count2 != actualCount) {
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memmove(mInlineData + pos + count2,
+                            mInlineData + pos + actualCount,
+                            remainingLen);
+                }
+            }
+            // Fill with replacement character
+            for (fl::size i = 0; i < count2; ++i) {
+                mInlineData[pos + i] = ch;
+            }
+            mLength = newLen;
+            mInlineData[mLength] = '\0';
+            return *this;
+        }
+
+        // Need heap allocation or have unshared heap
+        if (mHeapData && mHeapData.use_count() <= 1 && mHeapData->hasCapacity(newLen)) {
+            // Can replace in place
+            char* data = mHeapData->data();
+            if (count2 != actualCount) {
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memmove(data + pos + count2,
+                            data + pos + actualCount,
+                            remainingLen);
+                }
+            }
+            for (fl::size i = 0; i < count2; ++i) {
+                data[pos + i] = ch;
+            }
+            mLength = newLen;
+            data[mLength] = '\0';
+        } else {
+            // Need new allocation
+            StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
+            if (newData) {
+                const char* src = c_str();
+                // Copy data before replacement point
+                if (pos > 0) {
+                    memcpy(newData->data(), src, pos);
+                }
+                // Fill with replacement character
+                for (fl::size i = 0; i < count2; ++i) {
+                    newData->data()[pos + i] = ch;
+                }
+                // Copy data after replacement range
+                fl::size remainingLen = mLength - pos - actualCount;
+                if (remainingLen > 0) {
+                    memcpy(newData->data() + pos + count2,
+                           src + pos + actualCount,
+                           remainingLen);
+                }
+                newData->data()[newLen] = '\0';
+                mHeapData = newData;
+                mLength = newLen;
+            }
+        }
+        return *this;
+    }
+
+    // Iterator-based replace operations
+    // Note: Disabled for now to avoid ambiguity issues (same as insert/erase)
+    // These can be added later with better type disambiguation
+    /*
+    // Replace range [first, last) with string str
+    template <fl::size M>
+    StrN& replace(char* first, char* last, const StrN<M>& str);
+
+    // Replace range [first, last) with first count chars of s
+    StrN& replace(char* first, char* last, const char* s, fl::size count);
+
+    // Replace range [first, last) with null-terminated s
+    StrN& replace(char* first, char* last, const char* s);
+
+    // Replace range [first, last) with count copies of ch
+    StrN& replace(char* first, char* last, fl::size count, char ch);
+    */
+
     StrN trim() const {
         StrN out;
         fl::size start = 0;
@@ -585,6 +1684,257 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     float toFloat() const {
         return StringFormatter::parseFloat(c_str(), mLength);
+    }
+
+    // Three-way comparison operations (std::string compatibility)
+    // Returns <0 if this<other, 0 if equal, >0 if this>other
+    // This provides lexicographical comparison like strcmp
+
+    // Compare with another string
+    template<fl::size M>
+    int compare(const StrN<M>& str) const {
+        return strcmp(c_str(), str.c_str());
+    }
+
+    // Compare substring [pos1, pos1+count1) with str
+    template<fl::size M>
+    int compare(fl::size pos1, fl::size count1, const StrN<M>& str) const {
+        if (pos1 > mLength) {
+            // Position out of bounds - comparing empty string with str
+            // Empty string is less than non-empty string
+            return str.empty() ? 0 : -1;
+        }
+
+        // Calculate actual count to compare from this string
+        fl::size actualCount1 = count1;
+        if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+            actualCount1 = mLength - pos1;
+        }
+
+        // Use strncmp to compare actualCount1 characters from this string with all of str
+        fl::size minLen = (actualCount1 < str.size()) ? actualCount1 : str.size();
+        int result = strncmp(c_str() + pos1, str.c_str(), minLen);
+
+        if (result != 0) {
+            return result;
+        }
+
+        // If compared portions are equal, the shorter one is "less than"
+        if (actualCount1 < str.size()) {
+            return -1;  // this substring is shorter
+        } else if (actualCount1 > str.size()) {
+            return 1;   // this substring is longer
+        }
+        return 0;  // Equal
+    }
+
+    // Compare substring [pos1, pos1+count1) with substring [pos2, pos2+count2) of str
+    template<fl::size M>
+    int compare(fl::size pos1, fl::size count1, const StrN<M>& str,
+                fl::size pos2, fl::size count2 = npos) const {
+        if (pos1 > mLength || pos2 >= str.size()) {
+            // Out of bounds - treat as comparing empty substrings
+            if (pos1 > mLength && pos2 >= str.size()) {
+                return 0;  // Both empty
+            } else if (pos1 > mLength) {
+                return -1;  // This is empty, other is not
+            } else {
+                return 1;   // Other is empty, this is not
+            }
+        }
+
+        // Calculate actual counts
+        fl::size actualCount1 = count1;
+        if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+            actualCount1 = mLength - pos1;
+        }
+
+        fl::size actualCount2 = count2;
+        if (actualCount2 == npos || pos2 + actualCount2 > str.size()) {
+            actualCount2 = str.size() - pos2;
+        }
+
+        // Compare the substrings
+        fl::size minLen = (actualCount1 < actualCount2) ? actualCount1 : actualCount2;
+        int result = strncmp(c_str() + pos1, str.c_str() + pos2, minLen);
+
+        if (result != 0) {
+            return result;
+        }
+
+        // If compared portions are equal, the shorter one is "less than"
+        if (actualCount1 < actualCount2) {
+            return -1;
+        } else if (actualCount1 > actualCount2) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // Compare with C-string
+    int compare(const char* s) const {
+        if (!s) {
+            // Null pointer: non-empty string is greater than null
+            return mLength > 0 ? 1 : 0;
+        }
+        return strcmp(c_str(), s);
+    }
+
+    // Compare substring [pos1, pos1+count1) with C-string s
+    int compare(fl::size pos1, fl::size count1, const char* s) const {
+        if (!s) {
+            // Null pointer comparison
+            if (pos1 >= mLength) {
+                return 0;  // Both empty
+            }
+            fl::size actualCount1 = count1;
+            if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+                actualCount1 = mLength - pos1;
+            }
+            return (actualCount1 > 0) ? 1 : 0;
+        }
+
+        if (pos1 > mLength) {
+            // Position out of bounds - comparing empty with s
+            return (s[0] == '\0') ? 0 : -1;
+        }
+
+        // Calculate actual count
+        fl::size actualCount1 = count1;
+        if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+            actualCount1 = mLength - pos1;
+        }
+
+        // Compare actualCount1 characters from this string with all of s
+        fl::size sLen = strlen(s);
+        fl::size minLen = (actualCount1 < sLen) ? actualCount1 : sLen;
+        int result = strncmp(c_str() + pos1, s, minLen);
+
+        if (result != 0) {
+            return result;
+        }
+
+        // If compared portions are equal, the shorter one is "less than"
+        if (actualCount1 < sLen) {
+            return -1;
+        } else if (actualCount1 > sLen) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // Compare substring [pos1, pos1+count1) with first count2 characters of C-string s
+    int compare(fl::size pos1, fl::size count1, const char* s, fl::size count2) const {
+        if (!s) {
+            // Null pointer comparison
+            if (pos1 >= mLength) {
+                return (count2 == 0) ? 0 : -1;
+            }
+            fl::size actualCount1 = count1;
+            if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+                actualCount1 = mLength - pos1;
+            }
+            return (actualCount1 > 0) ? 1 : ((count2 == 0) ? 0 : -1);
+        }
+
+        if (pos1 > mLength) {
+            // Position out of bounds - comparing empty with s
+            return (count2 == 0) ? 0 : -1;
+        }
+
+        // Calculate actual count from this string
+        fl::size actualCount1 = count1;
+        if (actualCount1 == npos || pos1 + actualCount1 > mLength) {
+            actualCount1 = mLength - pos1;
+        }
+
+        // Compare the substrings
+        fl::size minLen = (actualCount1 < count2) ? actualCount1 : count2;
+        int result = strncmp(c_str() + pos1, s, minLen);
+
+        if (result != 0) {
+            return result;
+        }
+
+        // If compared portions are equal, the shorter one is "less than"
+        if (actualCount1 < count2) {
+            return -1;
+        } else if (actualCount1 > count2) {
+            return 1;
+        }
+        return 0;
+    }
+
+    // Copy substring to external buffer (std::string compatibility)
+    // Copies substring starting at pos with length count to dest
+    // Returns the number of characters copied
+    // Note: Unlike c_str(), this does NOT null-terminate the destination buffer
+    fl::size copy(char* dest, fl::size count, fl::size pos = 0) const {
+        if (!dest) {
+            return 0;
+        }
+        if (pos >= mLength) {
+            // Position out of bounds - no characters to copy
+            return 0;
+        }
+
+        // Calculate actual number of characters to copy
+        fl::size actualCount = count;
+        if (actualCount > mLength - pos) {
+            actualCount = mLength - pos;
+        }
+
+        // Copy characters to destination buffer
+        if (actualCount > 0) {
+            memcpy(dest, c_str() + pos, actualCount);
+        }
+
+        return actualCount;
+    }
+
+    // Maximum possible string size (std::string compatibility)
+    // Returns theoretical maximum size that a string could have
+    // This is less than npos to leave room for npos as a sentinel value
+    fl::size max_size() const {
+        // Return conservative maximum to avoid overflow
+        // For 32-bit: ~2GB, for 64-bit: limited by available memory
+        return (npos / 2) - 1;
+    }
+
+    // Reduce capacity to fit current size (std::string compatibility)
+    // This is a non-binding request to reduce memory usage
+    // Useful after many erases or when downsizing a string
+    void shrink_to_fit() {
+        // If using heap data
+        if (mHeapData) {
+            // Check if we're the sole owner (use_count == 1)
+            if (mHeapData.use_count() > 1) {
+                // Shared data - can't shrink without affecting others
+                return;
+            }
+
+            // Check if current capacity is larger than needed
+            if (mHeapData->capacity() <= mLength + 1) {
+                // Already tight - no need to shrink
+                return;
+            }
+
+            // Check if string now fits in inline buffer
+            if (mLength + 1 <= SIZE) {
+                // Copy to inline buffer and release heap
+                memcpy(mInlineData, mHeapData->data(), mLength + 1);
+                mHeapData.reset();
+                return;
+            }
+
+            // Reallocate heap to exact size needed
+            StringHolderPtr newData = fl::make_shared<StringHolder>(mLength);
+            if (newData) {
+                memcpy(newData->data(), mHeapData->data(), mLength + 1);
+                mHeapData = newData;
+            }
+        }
+        // If using inline buffer, already at minimum capacity
     }
 
   private:
