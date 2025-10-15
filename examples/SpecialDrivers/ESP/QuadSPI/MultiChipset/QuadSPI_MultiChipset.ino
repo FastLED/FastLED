@@ -156,11 +156,11 @@ void setup() {
     FastLED.addLeds<APA102, DATA_PIN_3, CLOCK_PIN, RGB, SPI_SPEED>(leds_lane3, NUM_LEDS_LANE_3);
 
     Serial.println("LED strips initialized:");
-    Serial.printf("  Lane 0: %d LEDs (APA102) on pin %d\n", NUM_LEDS_LANE_0, DATA_PIN_0);
-    Serial.printf("  Lane 1: %d LEDs (LPD8806) on pin %d\n", NUM_LEDS_LANE_1, DATA_PIN_1);
-    Serial.printf("  Lane 2: %d LEDs (WS2801) on pin %d\n", NUM_LEDS_LANE_2, DATA_PIN_2);
-    Serial.printf("  Lane 3: %d LEDs (APA102) on pin %d\n", NUM_LEDS_LANE_3, DATA_PIN_3);
-    Serial.printf("  Shared Clock: pin %d @ 2 MHz\n", CLOCK_PIN);
+    Serial.print("  Lane 0: "); Serial.print(NUM_LEDS_LANE_0); Serial.print(" LEDs (APA102) on pin "); Serial.println(DATA_PIN_0);
+    Serial.print("  Lane 1: "); Serial.print(NUM_LEDS_LANE_1); Serial.print(" LEDs (LPD8806) on pin "); Serial.println(DATA_PIN_1);
+    Serial.print("  Lane 2: "); Serial.print(NUM_LEDS_LANE_2); Serial.print(" LEDs (WS2801) on pin "); Serial.println(DATA_PIN_2);
+    Serial.print("  Lane 3: "); Serial.print(NUM_LEDS_LANE_3); Serial.print(" LEDs (APA102) on pin "); Serial.println(DATA_PIN_3);
+    Serial.print("  Shared Clock: pin "); Serial.print(CLOCK_PIN); Serial.println(" @ 2 MHz");
     Serial.println();
 
     Serial.println("Protocol-safe padding bytes:");

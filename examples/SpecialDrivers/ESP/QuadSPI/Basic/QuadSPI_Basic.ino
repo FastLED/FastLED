@@ -145,11 +145,11 @@ void setup() {
     FastLED.addLeds<APA102, DATA_PIN_3, CLOCK_PIN, RGB>(leds_lane3, NUM_LEDS_LANE_3);
 
     Serial.println("LED strips initialized:");
-    Serial.printf("  Lane 0: %d LEDs on pin %d\n", NUM_LEDS_LANE_0, DATA_PIN_0);
-    Serial.printf("  Lane 1: %d LEDs on pin %d\n", NUM_LEDS_LANE_1, DATA_PIN_1);
-    Serial.printf("  Lane 2: %d LEDs on pin %d\n", NUM_LEDS_LANE_2, DATA_PIN_2);
-    Serial.printf("  Lane 3: %d LEDs on pin %d\n", NUM_LEDS_LANE_3, DATA_PIN_3);
-    Serial.printf("  Shared Clock: pin %d\n", CLOCK_PIN);
+    Serial.print("  Lane 0: "); Serial.print(NUM_LEDS_LANE_0); Serial.print(" LEDs on pin "); Serial.println(DATA_PIN_0);
+    Serial.print("  Lane 1: "); Serial.print(NUM_LEDS_LANE_1); Serial.print(" LEDs on pin "); Serial.println(DATA_PIN_1);
+    Serial.print("  Lane 2: "); Serial.print(NUM_LEDS_LANE_2); Serial.print(" LEDs on pin "); Serial.println(DATA_PIN_2);
+    Serial.print("  Lane 3: "); Serial.print(NUM_LEDS_LANE_3); Serial.print(" LEDs on pin "); Serial.println(DATA_PIN_3);
+    Serial.print("  Shared Clock: pin "); Serial.println(CLOCK_PIN);
     Serial.println();
 
     Serial.println("Starting rainbow animation...");

@@ -27,8 +27,8 @@ class SerialPrintfChecker(FileContentChecker):
         if not file_path.startswith(str(EXAMPLES_ROOT)):
             return False
 
-        # Check file extension - only .h, .cpp, .hpp files
-        if not file_path.endswith((".cpp", ".h", ".hpp")):
+        # Check file extension - .h, .cpp, .hpp, and .ino files
+        if not file_path.endswith((".cpp", ".h", ".hpp", ".ino")):
             return False
 
         return True
@@ -74,9 +74,9 @@ def _test_no_serial_printf(
     on_fail: Callable[[str], None],
 ) -> None:
     """Searches through the example files to check for Serial.printf usage."""
-    # Collect files to check - only .h, .cpp, .hpp files
+    # Collect files to check - .h, .cpp, .hpp, and .ino files
     files_to_check = collect_files_to_check(
-        test_directories, extensions=[".h", ".cpp", ".hpp"]
+        test_directories, extensions=[".h", ".cpp", ".hpp", ".ino"]
     )
 
     # Create processor and checker
