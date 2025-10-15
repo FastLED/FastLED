@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 from typing import List, Optional, Tuple
 
+from running_process import RunningProcess
+
 from ci.util.build_lock import libfastled_build_lock
 
 
@@ -14,7 +16,12 @@ def check_meson_installed() -> bool:
     """Check if Meson is installed and accessible."""
     try:
         result = subprocess.run(
-            ["meson", "--version"], capture_output=True, text=True, timeout=5
+            ["meson", "--version"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=5,
         )
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError):
@@ -37,7 +44,12 @@ def detect_system_llvm_tools() -> Tuple[bool, bool]:
     for lld_cmd in ["lld", "ld.lld"]:
         try:
             result = subprocess.run(
-                [lld_cmd, "--version"], capture_output=True, text=True, timeout=5
+                [lld_cmd, "--version"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=5,
             )
             if result.returncode == 0:
                 has_lld = True
@@ -46,13 +58,21 @@ def detect_system_llvm_tools() -> Tuple[bool, bool]:
             continue
 
     # Check for llvm-ar with thin archive support
-    # The workflow creates a symlink to the unversioned 'llvm-ar' command
-    try:
-        result = subprocess.run(["llvm-ar", "--help"], capture_output=True, timeout=5)
-        if result.returncode == 0 and b"thin" in result.stdout:
-            has_llvm_ar = True
-    except (subprocess.SubprocessError, FileNotFoundError):
-        pass
+    # Try unversioned first, then common versioned variants (llvm-ar-20, llvm-ar-19, etc.)
+    for ar_cmd in ["llvm-ar", "llvm-ar-20", "llvm-ar-19", "llvm-ar-18"]:
+        try:
+            result = subprocess.run(
+                [ar_cmd, "--help"],
+                capture_output=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=5,
+            )
+            if result.returncode == 0 and "thin" in result.stdout.lower():
+                has_llvm_ar = True
+                break
+        except (subprocess.SubprocessError, FileNotFoundError):
+            continue
 
     return has_lld, has_llvm_ar
 
@@ -89,21 +109,23 @@ def setup_meson_build(
 
     # Set compiler environment variables to use zig
     # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
+    # Determine if we need to run meson setup/reconfigure
+    # We skip meson setup only if already configured and not reconfiguring
+    skip_meson_setup = already_configured and not reconfigure
+
     # Create wrapper scripts for meson since it expects single executables
     # IMPORTANT: Always recreate wrappers to ensure thin archive flags match current detection
+    # This happens before the skip check so wrappers are always up-to-date
     wrapper_dir = build_dir / "compiler_wrappers"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
 
-    # Determine if we need to run meson setup/reconfigure
-    # We skip meson setup only if already configured and not reconfiguring
-    # But we still recreate wrappers above to maintain consistency
-    skip_meson_setup = already_configured and not reconfigure
-
-    cmd: List[str] = []
+    cmd: Optional[List[str]] = None
     if skip_meson_setup:
-        # Build already configured, just recreate wrappers (done above)
+        # Build already configured, wrappers will be recreated below
         print(f"[MESON] Build directory already configured: {build_dir}")
-        print(f"[MESON] Recreated compiler wrappers with current thin archive settings")
+        print(
+            f"[MESON] Recreating compiler wrappers with current thin archive settings"
+        )
     elif already_configured and reconfigure:
         # Reconfigure existing build
         print(f"[MESON] Reconfiguring build directory: {build_dir}")
@@ -211,26 +233,29 @@ def setup_meson_build(
     if skip_meson_setup:
         return True
 
+    # Run meson setup using RunningProcess for proper streaming output
+    assert cmd is not None, "cmd should be set when not skipping meson setup"
     try:
-        result = subprocess.run(
-            cmd, cwd=source_dir, capture_output=True, text=True, timeout=600, env=env
+        proc = RunningProcess(
+            cmd,
+            cwd=source_dir,
+            timeout=600,
+            auto_run=True,
+            check=False,  # We'll check returncode manually
+            env=env,
         )
 
-        if result.returncode != 0:
-            print(f"[MESON] Setup failed:")
-            print(result.stdout)
-            print(result.stderr, file=sys.stderr)
+        returncode = proc.wait()
+
+        if returncode != 0:
+            print(
+                f"[MESON] Setup failed with return code {returncode}", file=sys.stderr
+            )
             return False
 
         print(f"[MESON] Setup successful")
-        if result.stdout:
-            print(result.stdout)
-
         return True
 
-    except subprocess.TimeoutExpired:
-        print("[MESON] Setup timed out after 600 seconds", file=sys.stderr)
-        return False
     except Exception as e:
         print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
         return False
@@ -256,28 +281,28 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
         print(f"[MESON] Compiling all targets...")
 
     try:
-        result = subprocess.run(
+        # Use RunningProcess for streaming output
+        # Inherit environment to ensure compiler wrappers are available
+        proc = RunningProcess(
             cmd,
-            capture_output=True,
-            text=True,
             timeout=600,  # 10 minute timeout for compilation
+            auto_run=True,
+            check=False,  # We'll check returncode manually
+            env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        if result.returncode != 0:
-            print(f"[MESON] Compilation failed:")
-            print(result.stdout)
-            print(result.stderr, file=sys.stderr)
+        returncode = proc.wait()
+
+        if returncode != 0:
+            print(
+                f"[MESON] Compilation failed with return code {returncode}",
+                file=sys.stderr,
+            )
             return False
 
         print(f"[MESON] Compilation successful")
-        if result.stdout:
-            print(result.stdout)
-
         return True
 
-    except subprocess.TimeoutExpired:
-        print("[MESON] Compilation timed out after 600 seconds", file=sys.stderr)
-        return False
     except Exception as e:
         print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
         return False
@@ -309,29 +334,27 @@ def run_meson_test(
         print(f"[MESON] Running all tests...")
 
     try:
-        result = subprocess.run(
+        # Use RunningProcess for streaming output
+        # Inherit environment to ensure compiler wrappers are available
+        proc = RunningProcess(
             cmd,
-            capture_output=True,
-            text=True,
             timeout=600,  # 10 minute timeout for tests
+            auto_run=True,
+            check=False,  # We'll check returncode manually
+            env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        # Always print output for tests
-        if result.stdout:
-            print(result.stdout)
+        returncode = proc.wait()
 
-        if result.returncode != 0:
-            print(f"[MESON] Tests failed:")
-            if result.stderr:
-                print(result.stderr, file=sys.stderr)
+        if returncode != 0:
+            print(
+                f"[MESON] Tests failed with return code {returncode}", file=sys.stderr
+            )
             return False
 
         print(f"[MESON] All tests passed")
         return True
 
-    except subprocess.TimeoutExpired:
-        print("[MESON] Tests timed out after 600 seconds", file=sys.stderr)
-        return False
     except Exception as e:
         print(f"[MESON] Test execution failed with exception: {e}", file=sys.stderr)
         return False
