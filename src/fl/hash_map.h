@@ -13,6 +13,7 @@ and removals.
 #include "fl/bitset.h"
 #include "fl/clamp.h"
 #include "fl/hash.h"
+#include "fl/initializer_list.h"
 #include "fl/map_range.h"
 #include "fl/optional.h"
 #include "fl/pair.h"
@@ -64,6 +65,109 @@ class FL_ALIGN HashMap {
           _tombstones(0), _occupied(next_power_of_two(initial_capacity)),
           _deleted(next_power_of_two(initial_capacity)) {
         setLoadFactor(max_load);
+    }
+
+    // Copy constructor
+    HashMap(const HashMap& other)
+        : _buckets(other._buckets.size()), _size(0), _tombstones(0),
+          mLoadFactor(other.mLoadFactor), _occupied(other._buckets.size()),
+          _deleted(other._buckets.size()), _hash(other._hash), _equal(other._equal) {
+        // Copy all occupied entries using insert to properly hash them
+        for (fl::size i = 0; i < other._buckets.size(); ++i) {
+            if (other.is_occupied(i)) {
+                insert(other._buckets[i].key, other._buckets[i].value);
+            }
+        }
+    }
+
+    // Move constructor
+    HashMap(HashMap&& other)
+        : _buckets(fl::move(other._buckets)), _size(other._size),
+          _tombstones(other._tombstones), mLoadFactor(other.mLoadFactor),
+          _occupied(fl::move(other._occupied)), _deleted(fl::move(other._deleted)),
+          _hash(fl::move(other._hash)), _equal(fl::move(other._equal)) {
+        // Reset other to valid empty state
+        other._size = 0;
+        other._tombstones = 0;
+    }
+
+    // Range constructor
+    template<typename InputIt>
+    HashMap(InputIt first, InputIt last)
+        : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+        insert(first, last);
+    }
+
+    // Initializer list constructor
+    HashMap(fl::initializer_list<pair<Key, T>> init)
+        : HashMap(FASTLED_HASHMAP_INLINED_COUNT, 0.7f) {
+        insert(init);
+    }
+
+    // Constructor with hash/equal/allocator parameters
+    HashMap(fl::size n, const Hash& hf, const KeyEqual& eq)
+        : _buckets(next_power_of_two(n)), _size(0), _tombstones(0),
+          _occupied(next_power_of_two(n)), _deleted(next_power_of_two(n)),
+          _hash(hf), _equal(eq) {
+        setLoadFactor(0.7f);
+    }
+
+    // Copy assignment operator
+    HashMap& operator=(const HashMap& other) {
+        if (this != &other) {
+            // Clear current content
+            clear();
+
+            // Resize if necessary
+            if (_buckets.size() != other._buckets.size()) {
+                _buckets.clear();
+                _buckets.assign(other._buckets.size(), Entry{});
+                _occupied.reset();
+                _occupied.resize(other._buckets.size());
+                _deleted.reset();
+                _deleted.resize(other._buckets.size());
+            }
+
+            // Copy all occupied entries
+            for (fl::size i = 0; i < other._buckets.size(); ++i) {
+                if (other.is_occupied(i)) {
+                    _buckets[i] = other._buckets[i];
+                    mark_occupied(i);
+                    ++_size;
+                }
+            }
+
+            mLoadFactor = other.mLoadFactor;
+            _hash = other._hash;
+            _equal = other._equal;
+        }
+        return *this;
+    }
+
+    // Move assignment operator
+    HashMap& operator=(HashMap&& other) {
+        if (this != &other) {
+            _buckets = fl::move(other._buckets);
+            _size = other._size;
+            _tombstones = other._tombstones;
+            mLoadFactor = other.mLoadFactor;
+            _occupied = fl::move(other._occupied);
+            _deleted = fl::move(other._deleted);
+            _hash = fl::move(other._hash);
+            _equal = fl::move(other._equal);
+
+            // Reset other to valid empty state
+            other._size = 0;
+            other._tombstones = 0;
+        }
+        return *this;
+    }
+
+    // Initializer list assignment operator
+    HashMap& operator=(fl::initializer_list<pair<Key, T>> init) {
+        clear();
+        insert(init);
+        return *this;
     }
 
     void setLoadFactor(float f) {
@@ -227,8 +331,9 @@ class FL_ALIGN HashMap {
         return NeedsRehash(_size, _buckets.size(), _tombstones, mLoadFactor);
     }
 
-    // insert or overwrite
-    void insert(const Key &key, const T &value) {
+    // insert or overwrite - returns pair<iterator, bool>
+    // iterator points to element, bool is true if inserted, false if updated
+    pair<iterator, bool> insert(const Key &key, const T &value) {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             // if half the buckets are tombstones, rehash inline to prevent
@@ -236,7 +341,7 @@ class FL_ALIGN HashMap {
             if (_tombstones > _size) {
                 rehash_inline_no_resize();
             } else {
-                rehash(_buckets.size() * 2);
+                rehash_internal(_buckets.size() * 2);
             }
         }
         fl::size idx;
@@ -254,10 +359,12 @@ class FL_ALIGN HashMap {
                                             << idx << " which is " << npos());
             _buckets[idx].value = value;
         }
+        return {iterator(this, idx), is_new};
     }
 
-    // Move version of insert
-    void insert(Key &&key, T &&value) {
+    // Move version of insert - returns pair<iterator, bool>
+    // iterator points to element, bool is true if inserted, false if updated
+    pair<iterator, bool> insert(Key &&key, T &&value) {
         const bool will_rehash = needs_rehash();
         if (will_rehash) {
             // if half the buckets are tombstones, rehash inline to prevent
@@ -265,7 +372,7 @@ class FL_ALIGN HashMap {
             if (_tombstones > _size) {
                 rehash_inline_no_resize();
             } else {
-                rehash(_buckets.size() * 2);
+                rehash_internal(_buckets.size() * 2);
             }
         }
         fl::size idx;
@@ -283,6 +390,164 @@ class FL_ALIGN HashMap {
                                             << idx << " which is " << npos());
             _buckets[idx].value = fl::move(value);
         }
+        return {iterator(this, idx), is_new};
+    }
+
+    // Pair-based insert (const) - std::unordered_map compatible
+    // Insert a pair<const Key, T> or pair<Key, T>
+    pair<iterator, bool> insert(const pair<Key, T> &kv) {
+        return insert(kv.first, kv.second);
+    }
+
+    // Pair-based insert (move) - std::unordered_map compatible
+    // Insert a pair<const Key, T> or pair<Key, T> with move semantics
+    pair<iterator, bool> insert(pair<Key, T> &&kv) {
+        return insert(fl::move(kv.first), fl::move(kv.second));
+    }
+
+    // Range insert - insert elements from iterator range [first, last)
+    // std::unordered_map compatible
+    template<typename InputIt>
+    void insert(InputIt first, InputIt last) {
+        for (; first != last; ++first) {
+            insert(*first);  // Uses pair-based insert
+        }
+    }
+
+    // Initializer list insert - std::unordered_map compatible
+    // Insert elements from an initializer list like: m.insert({{1, "a"}, {2, "b"}})
+    void insert(fl::initializer_list<pair<Key, T>> init) {
+        for (const auto& kv : init) {
+            insert(kv);  // Uses pair-based insert
+        }
+    }
+
+    // insert_or_assign() - C++17: insert new element or update existing
+    // Returns pair<iterator, bool> where bool is true if inserted, false if updated
+    pair<iterator, bool> insert_or_assign(const Key &key, T &&value) {
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            if (_tombstones > _size) {
+                rehash_inline_no_resize();
+            } else {
+                rehash_internal(_buckets.size() * 2);
+            }
+        }
+        fl::size idx;
+        bool is_new;
+        fl::pair<fl::size, bool> p = find_slot(key);
+        idx = p.first;
+        is_new = p.second;
+        if (is_new) {
+            _buckets[idx].key = key;
+            _buckets[idx].value = fl::move(value);
+            mark_occupied(idx);
+            ++_size;
+        } else {
+            FASTLED_ASSERT(idx != npos(), "HashMap::insert_or_assign: invalid index");
+            _buckets[idx].value = fl::move(value);
+        }
+        return {iterator(this, idx), is_new};
+    }
+
+    // insert_or_assign() with move key - C++17
+    pair<iterator, bool> insert_or_assign(Key &&key, T &&value) {
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            if (_tombstones > _size) {
+                rehash_inline_no_resize();
+            } else {
+                rehash_internal(_buckets.size() * 2);
+            }
+        }
+        fl::size idx;
+        bool is_new;
+        fl::pair<fl::size, bool> p = find_slot(key);
+        idx = p.first;
+        is_new = p.second;
+        if (is_new) {
+            _buckets[idx].key = fl::move(key);
+            _buckets[idx].value = fl::move(value);
+            mark_occupied(idx);
+            ++_size;
+        } else {
+            FASTLED_ASSERT(idx != npos(), "HashMap::insert_or_assign: invalid index");
+            _buckets[idx].value = fl::move(value);
+        }
+        return {iterator(this, idx), is_new};
+    }
+
+    // emplace() - construct element in-place from arguments
+    // For pairs, accepts (key, value) arguments to construct pair<Key, T>
+    template<typename... Args>
+    pair<iterator, bool> emplace(Args&&... args) {
+        // Construct a pair from the arguments
+        pair<Key, T> kv(fl::forward<Args>(args)...);
+        // Use move-based insert since we just constructed this pair
+        return insert(fl::move(kv));
+    }
+
+    // emplace_hint() - construct element in-place with hint
+    // Hint is ignored for hash maps (no spatial locality benefits)
+    template<typename... Args>
+    iterator emplace_hint(const_iterator hint, Args&&... args) {
+        (void)hint;  // Hint is ignored in hash maps
+        return emplace(fl::forward<Args>(args)...).first;
+    }
+
+    // try_emplace() - C++17: emplace only if key doesn't exist
+    // Advantage: doesn't move key if element already exists
+    template<typename... Args>
+    pair<iterator, bool> try_emplace(const Key& k, Args&&... args) {
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            if (_tombstones > _size) {
+                rehash_inline_no_resize();
+            } else {
+                rehash_internal(_buckets.size() * 2);
+            }
+        }
+        fl::size idx;
+        bool is_new;
+        fl::pair<fl::size, bool> p = find_slot(k);
+        idx = p.first;
+        is_new = p.second;
+        if (is_new) {
+            // Key doesn't exist, construct in place
+            _buckets[idx].key = k;
+            _buckets[idx].value = T(fl::forward<Args>(args)...);
+            mark_occupied(idx);
+            ++_size;
+        }
+        // If not new, key already exists - don't construct value, just return existing iterator
+        return {iterator(this, idx), is_new};
+    }
+
+    // try_emplace() with move key - C++17
+    template<typename... Args>
+    pair<iterator, bool> try_emplace(Key&& k, Args&&... args) {
+        const bool will_rehash = needs_rehash();
+        if (will_rehash) {
+            if (_tombstones > _size) {
+                rehash_inline_no_resize();
+            } else {
+                rehash_internal(_buckets.size() * 2);
+            }
+        }
+        fl::size idx;
+        bool is_new;
+        fl::pair<fl::size, bool> p = find_slot(k);
+        idx = p.first;
+        is_new = p.second;
+        if (is_new) {
+            // Key doesn't exist, construct in place with moved key
+            _buckets[idx].key = fl::move(k);
+            _buckets[idx].value = T(fl::forward<Args>(args)...);
+            mark_occupied(idx);
+            ++_size;
+        }
+        // If not new, key already exists - don't move key or construct value
+        return {iterator(this, idx), is_new};
     }
 
     // remove key; returns true if removed
@@ -303,16 +568,41 @@ class FL_ALIGN HashMap {
         if (it == end() || it._map != this) {
             return end(); // Invalid iterator
         }
-        
+
         // Mark the current position as deleted
         mark_deleted(it._idx);
         --_size;
         ++_tombstones;
-        
+
         // Advance to next valid element and return iterator to it
         ++it._idx;
         it.advance_to_occupied();
         return it;
+    }
+
+    // Range erase - erase elements in range [first, last)
+    iterator erase(const_iterator first, const_iterator last) {
+        if (first._map != this || last._map != this) {
+            return end(); // Invalid iterators
+        }
+
+        // Erase each element in the range
+        // We need to convert const_iterator to iterator for the return value
+        iterator current(this, first._idx);
+        current.advance_to_occupied();
+
+        while (current != end() && current._idx < last._idx) {
+            fl::size idx_to_erase = current._idx;
+            ++current;
+            current.advance_to_occupied();
+
+            // Erase the element at idx_to_erase
+            mark_deleted(idx_to_erase);
+            --_size;
+            ++_tombstones;
+        }
+
+        return current;
     }
 
     void clear() {
@@ -320,6 +610,19 @@ class FL_ALIGN HashMap {
         _occupied.reset();
         _deleted.reset();
         _size = _tombstones = 0;
+    }
+
+    // swap() - swap contents with another HashMap
+    void swap(HashMap& other) {
+        // Swap all member variables
+        _buckets.swap(other._buckets);
+        fl::swap(_size, other._size);
+        fl::swap(_tombstones, other._tombstones);
+        fl::swap(mLoadFactor, other.mLoadFactor);
+        fl::swap(_occupied, other._occupied);
+        fl::swap(_deleted, other._deleted);
+        fl::swap(_hash, other._hash);
+        fl::swap(_equal, other._equal);
     }
 
     // find pointer to value or nullptr
@@ -348,6 +651,45 @@ class FL_ALIGN HashMap {
         return idx != npos();
     }
 
+    // at() - bounds-checked access, asserts if key not found
+    T &at(const Key &key) {
+        T* value = find_value(key);
+        FASTLED_ASSERT(value != nullptr, "HashMap::at: key not found");
+        return *value;
+    }
+
+    const T &at(const Key &key) const {
+        const T* value = find_value(key);
+        FASTLED_ASSERT(value != nullptr, "HashMap::at: key not found");
+        return *value;
+    }
+
+    // count() - returns 0 or 1 (unordered_map has unique keys)
+    fl::size count(const Key &key) const {
+        return contains(key) ? 1 : 0;
+    }
+
+    // equal_range() - returns pair of iterators [it, it+1) or [end, end)
+    pair<iterator, iterator> equal_range(const Key &key) {
+        iterator it = find(key);
+        if (it == end()) {
+            return {end(), end()};
+        }
+        iterator next = it;
+        ++next;
+        return {it, next};
+    }
+
+    pair<const_iterator, const_iterator> equal_range(const Key &key) const {
+        const_iterator it = find(key);
+        if (it == end()) {
+            return {end(), end()};
+        }
+        const_iterator next = it;
+        ++next;
+        return {it, next};
+    }
+
     // access or default-construct
     T &operator[](const Key &key) {
         fl::size idx;
@@ -366,11 +708,11 @@ class FL_ALIGN HashMap {
                 if (_tombstones >= _buckets.size() / 2) {
                     rehash_inline_no_resize();
                 } else {
-                    rehash(_buckets.size() * 2);
+                    rehash_internal(_buckets.size() * 2);
                 }
             } else {
                 // Force a rehash with double size if needs_rehash() doesn't detect the issue
-                rehash(_buckets.size() * 2);
+                rehash_internal(_buckets.size() * 2);
             }
             
             // Try find_slot again after resize
@@ -399,7 +741,75 @@ class FL_ALIGN HashMap {
     bool empty() const { return _size == 0; }
     fl::size capacity() const { return _buckets.size(); }
 
+    // max_size() - theoretical maximum size
+    fl::size max_size() const {
+        // Return the maximum value that fl::size can hold, divided by the size of Entry
+        // to be conservative about memory limits
+        return static_cast<fl::size>(-1) / sizeof(Entry);
+    }
 
+    // hash_function() - return the hash functor
+    Hash hash_function() const { return _hash; }
+
+    // key_eq() - return the key equality predicate
+    KeyEqual key_eq() const { return _equal; }
+
+    // Hash Policy Interface
+
+    // load_factor() - current load factor (size / bucket_count)
+    float load_factor() const {
+        if (_buckets.size() == 0) {
+            return 0.0f;
+        }
+        return static_cast<float>(_size) / static_cast<float>(_buckets.size());
+    }
+
+    // max_load_factor() - get maximum load factor
+    float max_load_factor() const {
+        // mLoadFactor is stored as u8 (0-255) representing 0.0-1.0
+        return static_cast<float>(mLoadFactor) / 255.0f;
+    }
+
+    // max_load_factor(float ml) - set maximum load factor
+    void max_load_factor(float ml) {
+        setLoadFactor(ml);
+    }
+
+    // bucket_count() - number of buckets
+    fl::size bucket_count() const {
+        return _buckets.size();
+    }
+
+    // rehash(size_type n) - change number of buckets to at least n
+    void rehash(fl::size n) {
+        // Ensure n is at least as large as the current number of elements
+        fl::size min_buckets = _size;
+        if (n < min_buckets) {
+            n = min_buckets;
+        }
+
+        // Only rehash if we need more buckets than we currently have
+        if (n > _buckets.size()) {
+            rehash_internal(n);
+        }
+        // If n <= current bucket count, do nothing (std::unordered_map behavior)
+    }
+
+    // reserve(size_type n) - reserve capacity for at least n elements
+    void reserve(fl::size n) {
+        // Calculate required buckets to hold n elements without exceeding load factor
+        float max_lf = max_load_factor();
+        if (max_lf <= 0.0f) {
+            max_lf = 0.7f; // Default if somehow zero
+        }
+        // Required buckets = ceil(n / max_load_factor)
+        fl::size required_buckets = static_cast<fl::size>(
+            static_cast<float>(n) / max_lf + 0.999999f // Add almost 1 to simulate ceil
+        );
+        if (required_buckets > _buckets.size()) {
+            rehash(required_buckets);
+        }
+    }
 
   private:
     static fl::size npos() {
@@ -581,7 +991,7 @@ class FL_ALIGN HashMap {
         return npos();
     }
 
-    void rehash(fl::size new_cap) {
+    void rehash_internal(fl::size new_cap) {
         new_cap = next_power_of_two(new_cap);
         fl::vector_inlined<Entry, INLINED_COUNT> old;
         fl::bitset<1024> old_occupied = _occupied;
