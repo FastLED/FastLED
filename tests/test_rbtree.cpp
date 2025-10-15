@@ -735,6 +735,142 @@ TEST_CASE("MapRedBlackTree - Edge Cases") {
     }
 }
 
+TEST_CASE("MapRedBlackTree vs std::map - Reverse Iterator Operations") {
+    std::map<int, fl::string> std_map;
+    fl::MapRedBlackTree<int, fl::string> rb_tree;
+
+    // Insert test data in different order to test sorting
+    std::vector<std::pair<int, fl::string>> test_data = {
+        {3, "three"}, {1, "one"}, {4, "four"}, {2, "two"}, {5, "five"}
+    };
+
+    for (const auto& item : test_data) {
+        std_map.insert(item);
+        rb_tree.insert(fl::pair<int, fl::string>(item.first, item.second));
+    }
+
+    SUBCASE("Reverse iteration order") {
+        std::vector<int> std_order;
+        std::vector<int> rb_order;
+
+        // std::map reverse iteration
+        for (auto it = std_map.rbegin(); it != std_map.rend(); ++it) {
+            std_order.push_back(it->first);
+        }
+
+        // fl::MapRedBlackTree reverse iteration
+        for (auto it = rb_tree.rbegin(); it != rb_tree.rend(); ++it) {
+            rb_order.push_back(it->first);
+        }
+
+        CHECK(std_order == rb_order);
+        CHECK(std_order == std::vector<int>{5, 4, 3, 2, 1}); // Should be reverse sorted
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    SUBCASE("rbegin() and rend() iterators") {
+        CHECK((std_map.rbegin() == std_map.rend()) == (rb_tree.rbegin() == rb_tree.rend()));
+        if (!std_map.empty()) {
+            CHECK(std_map.rbegin()->first == rb_tree.rbegin()->first);
+            CHECK(std_map.rbegin()->second == rb_tree.rbegin()->second);
+            // rbegin() should point to the maximum element
+            CHECK(rb_tree.rbegin()->first == 5);
+        }
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    SUBCASE("Reverse iterator increment") {
+        auto std_it = std_map.rbegin();
+        auto rb_it = rb_tree.rbegin();
+
+        ++std_it; // Move from 5 to 4
+        ++rb_it;
+
+        CHECK(std_it->first == rb_it->first);
+        CHECK(std_it->second == rb_it->second);
+        CHECK(rb_it->first == 4);
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    SUBCASE("Reverse iterator decrement") {
+        auto std_it = std_map.rend();
+        auto rb_it = rb_tree.rend();
+
+        --std_it; // Should give us the minimum element (1)
+        --rb_it;
+
+        CHECK(std_it->first == rb_it->first);
+        CHECK(std_it->second == rb_it->second);
+        CHECK(rb_it->first == 1);
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    SUBCASE("Const reverse iterators (crbegin/crend)") {
+        const auto& const_std_map = std_map;
+        const auto& const_rb_tree = rb_tree;
+
+        std::vector<int> std_order;
+        std::vector<int> rb_order;
+
+        for (auto it = const_std_map.crbegin(); it != const_std_map.crend(); ++it) {
+            std_order.push_back(it->first);
+        }
+
+        for (auto it = const_rb_tree.crbegin(); it != const_rb_tree.crend(); ++it) {
+            rb_order.push_back(it->first);
+        }
+
+        CHECK(std_order == rb_order);
+        CHECK(std_order == std::vector<int>{5, 4, 3, 2, 1});
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+
+    SUBCASE("Empty tree reverse iterators") {
+        fl::MapRedBlackTree<int, fl::string> empty_tree;
+        std::map<int, fl::string> empty_std_map;
+
+        CHECK((empty_tree.rbegin() == empty_tree.rend()) == (empty_std_map.rbegin() == empty_std_map.rend()));
+        CHECK(empty_tree.rbegin() == empty_tree.rend());
+        CHECK(validate_red_black_properties(empty_tree));
+    }
+
+    SUBCASE("Single element reverse iteration") {
+        fl::MapRedBlackTree<int, fl::string> single_tree;
+        std::map<int, fl::string> single_std_map;
+
+        single_tree[42] = "answer";
+        single_std_map[42] = "answer";
+
+        CHECK(single_tree.rbegin()->first == single_std_map.rbegin()->first);
+        CHECK(single_tree.rbegin()->first == 42);
+
+        auto it = single_tree.rbegin();
+        ++it;
+        CHECK(it == single_tree.rend());
+        CHECK(validate_red_black_properties(single_tree));
+    }
+
+    SUBCASE("Reverse iteration matches forward iteration in reverse") {
+        std::vector<int> forward_order;
+        std::vector<int> reverse_order;
+
+        // Forward iteration
+        for (const auto& pair : rb_tree) {
+            forward_order.push_back(pair.first);
+        }
+
+        // Reverse iteration
+        for (auto it = rb_tree.rbegin(); it != rb_tree.rend(); ++it) {
+            reverse_order.push_back(it->first);
+        }
+
+        // Reverse the forward order and it should match reverse order
+        std::reverse(forward_order.begin(), forward_order.end());
+        CHECK(forward_order == reverse_order);
+        CHECK(validate_red_black_properties(rb_tree));
+    }
+}
+
 #if 0  // Flip this to true to run the stress tests
 // -----------------------------------------------------------------------------
 // Additional Comprehensive Stress Tests

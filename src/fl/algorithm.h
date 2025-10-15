@@ -139,6 +139,45 @@ bool equal(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2,
     return first1 == last1 && first2 == last2;
 }
 
+// Lexicographical comparison - compares two ranges element by element
+// Returns true if the first range is lexicographically less than the second
+template <typename Iterator1, typename Iterator2>
+bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2) {
+    while (first1 != last1 && first2 != last2) {
+        if (*first1 < *first2) {
+            return true;
+        }
+        if (*first2 < *first1) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    // If we've exhausted first1 but not first2, first1 is less
+    // If we've exhausted both, they're equal (return false)
+    // If we've exhausted first2 but not first1, first2 is less (return false)
+    return (first1 == last1) && (first2 != last2);
+}
+
+// Lexicographical comparison with custom comparator
+template <typename Iterator1, typename Iterator2, typename Compare>
+bool lexicographical_compare(Iterator1 first1, Iterator1 last1, Iterator2 first2, Iterator2 last2, Compare comp) {
+    while (first1 != last1 && first2 != last2) {
+        if (comp(*first1, *first2)) {
+            return true;
+        }
+        if (comp(*first2, *first1)) {
+            return false;
+        }
+        ++first1;
+        ++first2;
+    }
+    // If we've exhausted first1 but not first2, first1 is less
+    // If we've exhausted both, they're equal (return false)
+    // If we've exhausted first2 but not first1, first2 is less (return false)
+    return (first1 == last1) && (first2 != last2);
+}
+
 template <typename Container1, typename Container2>
 bool equal_container(const Container1& c1, const Container2& c2) {
     fl::size size1 = c1.size();
