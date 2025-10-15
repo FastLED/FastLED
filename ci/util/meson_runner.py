@@ -189,9 +189,49 @@ def setup_meson_build(
 
     # Set compiler environment variables to use zig
     # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
+
+    # ============================================================================
+    # CRITICAL: Check if thin archive configuration has changed
+    # ============================================================================
+    # When Meson is configured, it caches the AR tool path and flags in its
+    # build files. If we previously configured with thin archives enabled but
+    # now have them disabled (or vice versa), we MUST reconfigure Meson.
+    # Otherwise, Meson will continue using the old AR tool/settings.
+    #
+    # We use a marker file to track the last successful thin archive setting.
+    # If it doesn't match the current setting, we force a reconfigure.
+    # ============================================================================
+    thin_archive_marker = build_dir / ".thin_archive_config"
+    force_reconfigure = False
+
+    if already_configured:
+        # Check if thin archive setting has changed since last configure
+        if thin_archive_marker.exists():
+            try:
+                last_thin_setting = thin_archive_marker.read_text().strip() == "True"
+                if last_thin_setting != use_thin_archives:
+                    print(
+                        f"[MESON] ⚠️  Thin archive setting changed: {last_thin_setting} → {use_thin_archives}"
+                    )
+                    print(
+                        "[MESON] 🔄 Forcing reconfigure to update AR tool configuration"
+                    )
+                    force_reconfigure = True
+            except (OSError, IOError):
+                # If we can't read the marker, force reconfigure to be safe
+                print(
+                    "[MESON] ⚠️  Could not read thin archive marker, forcing reconfigure"
+                )
+                force_reconfigure = True
+        else:
+            # No marker file exists from previous configure - create one after setup
+            # This can happen on first run after updating to this version
+            print("[MESON] ℹ️  No thin archive marker found, will create after setup")
+
     # Determine if we need to run meson setup/reconfigure
-    # We skip meson setup only if already configured and not reconfiguring
-    skip_meson_setup = already_configured and not reconfigure
+    # We skip meson setup only if already configured, not explicitly reconfiguring,
+    # AND thin archive settings haven't changed
+    skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
 
     # Create wrapper scripts for meson since it expects single executables
     # IMPORTANT: Always recreate wrappers to ensure thin archive flags match current detection
@@ -206,9 +246,14 @@ def setup_meson_build(
         print(
             f"[MESON] Recreating compiler wrappers with current thin archive settings"
         )
-    elif already_configured and reconfigure:
-        # Reconfigure existing build
-        print(f"[MESON] Reconfiguring build directory: {build_dir}")
+    elif already_configured and (reconfigure or force_reconfigure):
+        # Reconfigure existing build (explicitly requested or forced by thin archive change)
+        reason = (
+            "forced by thin archive change"
+            if force_reconfigure
+            else "explicitly requested"
+        )
+        print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
         cmd = ["meson", "setup", "--reconfigure", str(build_dir)]
     else:
         # Initial setup
@@ -408,6 +453,15 @@ def setup_meson_build(
             return False
 
         print(f"[MESON] Setup successful")
+
+        # Write marker file to track thin archive setting for future runs
+        try:
+            thin_archive_marker.write_text(str(use_thin_archives), encoding="utf-8")
+            print(f"[MESON] ✅ Saved thin archive configuration: {use_thin_archives}")
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            print(f"[MESON] Warning: Could not write thin archive marker: {e}")
+
         return True
 
     except Exception as e:
