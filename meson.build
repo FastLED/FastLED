@@ -190,6 +190,7 @@ else
   # Unix/Linux/macOS: Standard pthread linking
   unit_test_link_args = [
     '-pthread',
+    '-rdynamic',  # Export symbols for backtrace_symbols() in crash handler
   ]
   # Note: -fuse-ld=lld removed - zig uses its own bundled lld and ignores this flag
 endif
