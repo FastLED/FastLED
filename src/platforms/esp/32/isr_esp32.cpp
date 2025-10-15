@@ -138,10 +138,34 @@ public:
         handle_data->user_data = config.user_data;
 
         // Create general purpose timer
+        // For high frequencies (>1MHz), we need higher resolution to avoid rounding to 0
+        // Choose resolution dynamically based on requested frequency
+        uint32_t timer_resolution_hz;
+        uint64_t alarm_count;
+
+        if (config.frequency_hz > 1000000) {
+            // For frequencies > 1MHz, use higher resolution (e.g., 10MHz or 80MHz)
+            // Use 80MHz (APB clock) for maximum precision
+            timer_resolution_hz = 80000000;
+            alarm_count = timer_resolution_hz / config.frequency_hz;
+        } else {
+            // For lower frequencies, 1MHz resolution is sufficient
+            timer_resolution_hz = 1000000;
+            alarm_count = timer_resolution_hz / config.frequency_hz;
+        }
+
+        // Ensure alarm_count is at least 1 to avoid ESP_ERR_INVALID_ARG
+        if (alarm_count == 0) {
+            FL_WARN("attachTimerHandler: frequency too high (" << config.frequency_hz
+                    << " Hz), maximum is " << timer_resolution_hz << " Hz");
+            delete handle_data;
+            return -2;  // Invalid frequency
+        }
+
         gptimer_config_t timer_config = {};
         timer_config.clk_src = GPTIMER_CLK_SRC_DEFAULT;
         timer_config.direction = GPTIMER_COUNT_UP;
-        timer_config.resolution_hz = 1000000;  // 1MHz resolution (1us per tick)
+        timer_config.resolution_hz = timer_resolution_hz;
 
         esp_err_t ret = gptimer_new_timer(&timer_config, &handle_data->timer_handle);
         if (ret != ESP_OK) {
@@ -150,15 +174,13 @@ public:
             return -4;  // Timer creation failed
         }
 
-        // Calculate alarm period from frequency
-        uint64_t alarm_period_us = 1000000ULL / config.frequency_hz;
-
-        FL_DBG("Timer config: " << config.frequency_hz << " Hz → " << alarm_period_us << " us period");
+        FL_DBG("Timer config: " << config.frequency_hz << " Hz using "
+               << timer_resolution_hz << " Hz resolution → " << alarm_count << " ticks");
 
         // Configure alarm
         gptimer_alarm_config_t alarm_config = {};
         alarm_config.reload_count = 0;
-        alarm_config.alarm_count = alarm_period_us;
+        alarm_config.alarm_count = alarm_count;
         alarm_config.flags.auto_reload_on_alarm = !(config.flags & ISR_FLAG_ONE_SHOT);
 
         ret = gptimer_set_alarm_action(handle_data->timer_handle, &alarm_config);
