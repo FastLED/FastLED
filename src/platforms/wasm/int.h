@@ -20,29 +20,13 @@ namespace fl {
         typedef long long iptr;
         typedef long long ptrdiff;
     #else
-        // WASM32 (default): Use compiler builtins to match system headers
-        #ifdef __SIZE_TYPE__
-            typedef __SIZE_TYPE__ size;
-        #else
-            typedef unsigned long size;  // Fallback
-        #endif
-
-        #ifdef __UINTPTR_TYPE__
-            typedef __UINTPTR_TYPE__ uptr;
-        #else
-            typedef unsigned long uptr;  // Fallback
-        #endif
-
-        #ifdef __INTPTR_TYPE__
-            typedef __INTPTR_TYPE__ iptr;
-        #else
-            typedef long iptr;  // Fallback
-        #endif
-
-        #ifdef __PTRDIFF_TYPE__
-            typedef __PTRDIFF_TYPE__ ptrdiff;
-        #else
-            typedef long ptrdiff;  // Fallback
-        #endif
+        // WASM32 (default): Use exact types to match emscripten system headers
+        // Note: Emscripten's system headers define these as 'unsigned long' and 'long',
+        // even though compiler builtins like __SIZE_TYPE__ report 'unsigned int'.
+        // We must match the actual system header definitions to avoid typedef conflicts.
+        typedef unsigned long size;
+        typedef unsigned long uptr;
+        typedef long iptr;
+        typedef long ptrdiff;
     #endif
 }
