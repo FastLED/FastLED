@@ -21,7 +21,7 @@ template <typename T, fl::size N> class array;
 constexpr fl::size dynamic_extent = fl::size(-1);
 
 // Forward declaration for static extent specialization
-template <typename T, fl::size Extent> class Slice;
+template <typename T, fl::size Extent = dynamic_extent> class span;
 
 // ======= SFINAE TRAITS FOR GENERIC CONTAINER SUPPORT =======
 // Detect if a type has .data() method
@@ -64,13 +64,13 @@ struct has_data_and_size {
     static constexpr bool value = has_data_method<T>::value && has_size_method<T>::value;
 };
 
-// Slice<int> is equivalent to int* with a length. It is used to pass around
+// span<int> is equivalent to int* with a length. It is used to pass around
 // arrays of integers with a length, without needing to pass around a separate
 // length parameter.
 // It works just like an array of objects, but it also knows its length.
 //
 // This is the dynamic extent specialization (Extent == dynamic_extent).
-template <typename T> class Slice<T, dynamic_extent> {
+template <typename T> class span<T, dynamic_extent> {
   public:
     // ======= STANDARD CONTAINER TYPE ALIASES =======
     using element_type = T;
@@ -89,121 +89,121 @@ template <typename T> class Slice<T, dynamic_extent> {
     static constexpr fl::size extent = dynamic_extent;
 
     // ======= CONSTRUCTORS =======
-    Slice() : mData(nullptr), mSize(0) {}
-    Slice(T *data, fl::size size) : mData(data), mSize(size) {}
+    span() : mData(nullptr), mSize(0) {}
+    span(T *data, fl::size size) : mData(data), mSize(size) {}
 
     // ======= CONTAINER CONSTRUCTORS =======
     // Simple constructors that work for all cases
     template<typename Alloc>
-    Slice(const HeapVector<T, Alloc> &vector)
+    span(const HeapVector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>
-    Slice(const FixedVector<T, INLINED_SIZE> &vector)
+    span(const FixedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>
-    Slice(const InlinedVector<T, INLINED_SIZE> &vector)
+    span(const InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     // Additional constructors for const conversion (U -> const U)
     template<typename U, typename Alloc>
-    Slice(const HeapVector<U, Alloc> &vector)
+    span(const HeapVector<U, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template<typename U, fl::size INLINED_SIZE>
-    Slice(const FixedVector<U, INLINED_SIZE> &vector)
+    span(const FixedVector<U, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template<typename U, fl::size INLINED_SIZE>
-    Slice(const InlinedVector<U, INLINED_SIZE> &vector)
+    span(const InlinedVector<U, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     // ======= NON-CONST CONTAINER CONVERSIONS =======
     // Non-const versions for mutable spans
     template<typename Alloc>
-    Slice(HeapVector<T, Alloc> &vector)
+    span(HeapVector<T, Alloc> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>
-    Slice(FixedVector<T, INLINED_SIZE> &vector)
+    span(FixedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     template <fl::size INLINED_SIZE>
-    Slice(InlinedVector<T, INLINED_SIZE> &vector)
+    span(InlinedVector<T, INLINED_SIZE> &vector)
         : mData(vector.data()), mSize(vector.size()) {}
 
     // ======= GENERIC CONTAINER CONSTRUCTOR =======
     // Generic constructor for any container with .data() and .size()
     // Uses SFINAE to only enable for appropriate containers
-    // This excludes Slice itself and already-specialized containers
+    // This excludes span itself and already-specialized containers
     template<typename Container>
-    Slice(Container& c, typename fl::enable_if<
+    span(Container& c, typename fl::enable_if<
         has_data_and_size<Container>::value &&
-        !fl::is_same<typename fl::decay<Container>::type, Slice<T, dynamic_extent>>::value &&
-        !fl::is_base_of<Slice<T, dynamic_extent>, Container>::value
+        !fl::is_same<typename fl::decay<Container>::type, span<T, dynamic_extent>>::value &&
+        !fl::is_base_of<span<T, dynamic_extent>, Container>::value
     >::type* = nullptr)
         : mData(c.data()), mSize(c.size()) {}
 
     // Const version for const containers
     template<typename Container>
-    Slice(const Container& c, typename fl::enable_if<
+    span(const Container& c, typename fl::enable_if<
         has_data_and_size<Container>::value &&
-        !fl::is_same<typename fl::decay<Container>::type, Slice<T, dynamic_extent>>::value &&
-        !fl::is_base_of<Slice<T, dynamic_extent>, Container>::value
+        !fl::is_same<typename fl::decay<Container>::type, span<T, dynamic_extent>>::value &&
+        !fl::is_base_of<span<T, dynamic_extent>, Container>::value
     >::type* = nullptr)
         : mData(c.data()), mSize(c.size()) {}
 
     // ======= FL::ARRAY CONVERSIONS =======
-    // fl::array<T> -> Slice<T>
+    // fl::array<T> -> span<T>
     template <fl::size N>
-    Slice(const array<T, N> &arr)
+    span(const array<T, N> &arr)
         : mData(arr.data()), mSize(N) {}
 
     template <fl::size N>
-    Slice(array<T, N> &arr)
+    span(array<T, N> &arr)
         : mData(arr.data()), mSize(N) {}
 
-    // fl::array<U> -> Slice<T> (for type conversions like U -> const U)
+    // fl::array<U> -> span<T> (for type conversions like U -> const U)
     template <typename U, fl::size N>
-    Slice(const array<U, N> &arr)
+    span(const array<U, N> &arr)
         : mData(arr.data()), mSize(N) {}
 
     template <typename U, fl::size N>
-    Slice(array<U, N> &arr)
+    span(array<U, N> &arr)
         : mData(arr.data()), mSize(N) {}
 
     // ======= C-STYLE ARRAY CONVERSIONS =======
-    // T[] -> Slice<T>
+    // T[] -> span<T>
     template <fl::size ARRAYSIZE>
-    Slice(T (&array)[ARRAYSIZE]) 
+    span(T (&array)[ARRAYSIZE]) 
         : mData(array), mSize(ARRAYSIZE) {}
 
-    // U[] -> Slice<T> (for type conversions like U -> const U)
+    // U[] -> span<T> (for type conversions like U -> const U)
     template <typename U, fl::size ARRAYSIZE>
-    Slice(U (&array)[ARRAYSIZE]) 
+    span(U (&array)[ARRAYSIZE]) 
         : mData(array), mSize(ARRAYSIZE) {}
 
-    // const U[] -> Slice<T> (for const arrays)
+    // const U[] -> span<T> (for const arrays)
     template <typename U, fl::size ARRAYSIZE>
-    Slice(const U (&array)[ARRAYSIZE]) 
+    span(const U (&array)[ARRAYSIZE]) 
         : mData(array), mSize(ARRAYSIZE) {}
 
     // ======= ITERATOR CONVERSIONS =======
     template <typename Iterator>
-    Slice(Iterator begin, Iterator end)
+    span(Iterator begin, Iterator end)
         : mData(&(*begin)), mSize(end - begin) {}
 
-    Slice(const Slice &other) : mData(other.mData), mSize(other.mSize) {}
+    span(const span &other) : mData(other.mData), mSize(other.mSize) {}
 
-    Slice &operator=(const Slice &other) {
+    span &operator=(const span &other) {
         mData = other.mData;
         mSize = other.mSize;
         return *this;
     }
 
-    // Automatic promotion to const Slice<const T, dynamic_extent>
-    operator Slice<const T, dynamic_extent>() const { return Slice<const T, dynamic_extent>(mData, mSize); }
+    // Automatic promotion to const span<const T, dynamic_extent>
+    operator span<const T, dynamic_extent>() const { return span<const T, dynamic_extent>(mData, mSize); }
 
     T &operator[](fl::size index) {
         // No bounds checking in embedded environment
@@ -242,53 +242,53 @@ template <typename T> class Slice<T, dynamic_extent> {
 
     // ======= SUBVIEWS =======
     // Runtime-sized subviews (existing slice methods)
-    Slice<T, dynamic_extent> slice(fl::size start, fl::size end) const {
+    span<T, dynamic_extent> slice(fl::size start, fl::size end) const {
         // No bounds checking in embedded environment
-        return Slice<T, dynamic_extent>(mData + start, end - start);
+        return span<T, dynamic_extent>(mData + start, end - start);
     }
 
-    Slice<T, dynamic_extent> slice(fl::size start) const {
+    span<T, dynamic_extent> slice(fl::size start) const {
         // No bounds checking in embedded environment
-        return Slice<T, dynamic_extent>(mData + start, mSize - start);
+        return span<T, dynamic_extent>(mData + start, mSize - start);
     }
 
     // std::span-compatible subspan (runtime version)
-    Slice<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
+    span<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
         if (count == dynamic_extent) {
-            return Slice<T, dynamic_extent>(mData + offset, mSize - offset);
+            return span<T, dynamic_extent>(mData + offset, mSize - offset);
         }
-        return Slice<T, dynamic_extent>(mData + offset, count);
+        return span<T, dynamic_extent>(mData + offset, count);
     }
 
     // Compile-time sized first N elements - returns static extent span
     template<fl::size N>
-    Slice<T, N> first() const {
-        return Slice<T, N>(mData, N);
+    span<T, N> first() const {
+        return span<T, N>(mData, N);
     }
 
     // Runtime-sized first count elements
-    Slice<T, dynamic_extent> first(fl::size count) const {
-        return Slice<T, dynamic_extent>(mData, count);
+    span<T, dynamic_extent> first(fl::size count) const {
+        return span<T, dynamic_extent>(mData, count);
     }
 
     // Compile-time sized last N elements - returns static extent span
     template<fl::size N>
-    Slice<T, N> last() const {
-        return Slice<T, N>(mData + mSize - N, N);
+    span<T, N> last() const {
+        return span<T, N>(mData + mSize - N, N);
     }
 
     // Runtime-sized last count elements
-    Slice<T, dynamic_extent> last(fl::size count) const {
-        return Slice<T, dynamic_extent>(mData + mSize - count, count);
+    span<T, dynamic_extent> last(fl::size count) const {
+        return span<T, dynamic_extent>(mData + mSize - count, count);
     }
 
     // Compile-time sized subspan - returns static extent span
     template<fl::size Offset, fl::size Count = dynamic_extent>
-    Slice<T, Count> subspan() const {
+    span<T, Count> subspan() const {
         if (Count == dynamic_extent) {
-            return Slice<T, dynamic_extent>(mData + Offset, mSize - Offset);
+            return span<T, dynamic_extent>(mData + Offset, mSize - Offset);
         }
-        return Slice<T, Count>(mData + Offset, Count);
+        return span<T, Count>(mData + Offset, Count);
     }
 
     // Find the first occurrence of a value in the slice
@@ -332,7 +332,7 @@ template <typename T> class Slice<T, dynamic_extent> {
 
     // ======= COMPARISON OPERATORS =======
     // Lexicographical comparison - compares element by element
-    bool operator==(const Slice<T, dynamic_extent>& other) const {
+    bool operator==(const span<T, dynamic_extent>& other) const {
         if (mSize != other.mSize) return false;
         for (fl::size i = 0; i < mSize; ++i) {
             if (!(mData[i] == other.mData[i])) return false;
@@ -340,11 +340,11 @@ template <typename T> class Slice<T, dynamic_extent> {
         return true;
     }
 
-    bool operator!=(const Slice<T, dynamic_extent>& other) const {
+    bool operator!=(const span<T, dynamic_extent>& other) const {
         return !(*this == other);
     }
 
-    bool operator<(const Slice<T, dynamic_extent>& other) const {
+    bool operator<(const span<T, dynamic_extent>& other) const {
         fl::size min_size = mSize < other.mSize ? mSize : other.mSize;
         for (fl::size i = 0; i < min_size; ++i) {
             if (mData[i] < other.mData[i]) return true;
@@ -353,15 +353,15 @@ template <typename T> class Slice<T, dynamic_extent> {
         return mSize < other.mSize;
     }
 
-    bool operator<=(const Slice<T, dynamic_extent>& other) const {
+    bool operator<=(const span<T, dynamic_extent>& other) const {
         return !(other < *this);
     }
 
-    bool operator>(const Slice<T, dynamic_extent>& other) const {
+    bool operator>(const span<T, dynamic_extent>& other) const {
         return other < *this;
     }
 
-    bool operator>=(const Slice<T, dynamic_extent>& other) const {
+    bool operator>=(const span<T, dynamic_extent>& other) const {
         return !(*this < other);
     }
 
@@ -371,9 +371,9 @@ template <typename T> class Slice<T, dynamic_extent> {
 };
 
 // ======= STATIC EXTENT SPECIALIZATION =======
-// Slice with compile-time known size (static extent)
+// span with compile-time known size (static extent)
 // This specialization stores size at compile-time, reducing runtime overhead
-template <typename T, fl::size Extent> class Slice {
+template <typename T, fl::size Extent> class span {
   public:
     // ======= STANDARD CONTAINER TYPE ALIASES =======
     using element_type = T;
@@ -392,31 +392,31 @@ template <typename T, fl::size Extent> class Slice {
     static constexpr fl::size extent = Extent;
 
     // ======= CONSTRUCTORS =======
-    Slice() : mData(nullptr) {}
-    Slice(T *data, fl::size size) : mData(data) {
+    span() : mData(nullptr) {}
+    span(T *data, fl::size size) : mData(data) {
         // In debug builds, could assert size == Extent
         (void)size; // Suppress unused parameter warning
     }
 
     // Constructor from pointer only (size is known at compile-time)
-    explicit Slice(T *data) : mData(data) {}
+    explicit span(T *data) : mData(data) {}
 
     // Constructor from C-array with matching size
-    Slice(T (&array)[Extent]) : mData(array) {}
+    span(T (&array)[Extent]) : mData(array) {}
 
     // Copy constructor
-    Slice(const Slice &other) : mData(other.mData) {}
+    span(const span &other) : mData(other.mData) {}
 
-    Slice &operator=(const Slice &other) {
+    span &operator=(const span &other) {
         mData = other.mData;
         return *this;
     }
 
-    // Automatic promotion to const Slice<const T, Extent>
-    operator Slice<const T, Extent>() const { return Slice<const T, Extent>(mData, Extent); }
+    // Automatic promotion to const span<const T, Extent>
+    operator span<const T, Extent>() const { return span<const T, Extent>(mData, Extent); }
 
     // Conversion to dynamic extent
-    operator Slice<T, dynamic_extent>() const { return Slice<T, dynamic_extent>(mData, Extent); }
+    operator span<T, dynamic_extent>() const { return span<T, dynamic_extent>(mData, Extent); }
 
     // ======= ELEMENT ACCESS =======
     T &operator[](fl::size index) {
@@ -455,41 +455,41 @@ template <typename T, fl::size Extent> class Slice {
     // ======= SUBVIEWS =======
     // Compile-time sized first N elements
     template<fl::size N>
-    Slice<T, N> first() const {
-        return Slice<T, N>(mData);
+    span<T, N> first() const {
+        return span<T, N>(mData);
     }
 
     // Runtime-sized first count elements
-    Slice<T, dynamic_extent> first(fl::size count) const {
-        return Slice<T, dynamic_extent>(mData, count);
+    span<T, dynamic_extent> first(fl::size count) const {
+        return span<T, dynamic_extent>(mData, count);
     }
 
     // Compile-time sized last N elements
     template<fl::size N>
-    Slice<T, N> last() const {
-        return Slice<T, N>(mData + Extent - N);
+    span<T, N> last() const {
+        return span<T, N>(mData + Extent - N);
     }
 
     // Runtime-sized last count elements
-    Slice<T, dynamic_extent> last(fl::size count) const {
-        return Slice<T, dynamic_extent>(mData + Extent - count, count);
+    span<T, dynamic_extent> last(fl::size count) const {
+        return span<T, dynamic_extent>(mData + Extent - count, count);
     }
 
     // Compile-time sized subspan
     template<fl::size Offset, fl::size Count = dynamic_extent>
-    Slice<T, Count> subspan() const {
+    span<T, Count> subspan() const {
         if (Count == dynamic_extent) {
-            return Slice<T, Extent - Offset>(mData + Offset);
+            return span<T, Extent - Offset>(mData + Offset);
         }
-        return Slice<T, Count>(mData + Offset);
+        return span<T, Count>(mData + Offset);
     }
 
     // Runtime subspan
-    Slice<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
+    span<T, dynamic_extent> subspan(fl::size offset, fl::size count = dynamic_extent) const {
         if (count == dynamic_extent) {
-            return Slice<T, dynamic_extent>(mData + offset, Extent - offset);
+            return span<T, dynamic_extent>(mData + offset, Extent - offset);
         }
-        return Slice<T, dynamic_extent>(mData + offset, count);
+        return span<T, dynamic_extent>(mData + offset, count);
     }
 
     T &front() { return *mData; }
@@ -501,18 +501,18 @@ template <typename T, fl::size Extent> class Slice {
     constexpr bool empty() const { return Extent == 0; }
 
     // ======= COMPARISON OPERATORS =======
-    bool operator==(const Slice<T, Extent>& other) const {
+    bool operator==(const span<T, Extent>& other) const {
         for (fl::size i = 0; i < Extent; ++i) {
             if (!(mData[i] == other.mData[i])) return false;
         }
         return true;
     }
 
-    bool operator!=(const Slice<T, Extent>& other) const {
+    bool operator!=(const span<T, Extent>& other) const {
         return !(*this == other);
     }
 
-    bool operator<(const Slice<T, Extent>& other) const {
+    bool operator<(const span<T, Extent>& other) const {
         for (fl::size i = 0; i < Extent; ++i) {
             if (mData[i] < other.mData[i]) return true;
             if (other.mData[i] < mData[i]) return false;
@@ -520,15 +520,15 @@ template <typename T, fl::size Extent> class Slice {
         return false; // Equal when all elements are equal
     }
 
-    bool operator<=(const Slice<T, Extent>& other) const {
+    bool operator<=(const span<T, Extent>& other) const {
         return !(other < *this);
     }
 
-    bool operator>(const Slice<T, Extent>& other) const {
+    bool operator>(const span<T, Extent>& other) const {
         return other < *this;
     }
 
-    bool operator>=(const Slice<T, Extent>& other) const {
+    bool operator>=(const span<T, Extent>& other) const {
         return !(*this < other);
     }
 
@@ -540,15 +540,15 @@ template <typename T, fl::size Extent> class Slice {
 // ======= BYTE VIEW CONVERSION FUNCTIONS =======
 // Convert span to read-only byte view
 template<typename T, fl::size Extent>
-Slice<const fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
-as_bytes(const Slice<T, Extent>& s) {
+span<const fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_bytes(const span<T, Extent>& s) {
     if (Extent == dynamic_extent) {
-        return Slice<const fl::u8, dynamic_extent>(
+        return span<const fl::u8, dynamic_extent>(
             reinterpret_cast<const fl::u8*>(s.data()),
             s.size_bytes()
         );
     } else {
-        return Slice<const fl::u8, Extent * sizeof(T)>(
+        return span<const fl::u8, Extent * sizeof(T)>(
             reinterpret_cast<const fl::u8*>(s.data())
         );
     }
@@ -556,15 +556,15 @@ as_bytes(const Slice<T, Extent>& s) {
 
 // Convert span to writable byte view
 template<typename T, fl::size Extent>
-Slice<fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
-as_writable_bytes(Slice<T, Extent>& s) {
+span<fl::u8, (Extent == dynamic_extent) ? dynamic_extent : (Extent * sizeof(T))>
+as_writable_bytes(span<T, Extent>& s) {
     if (Extent == dynamic_extent) {
-        return Slice<fl::u8, dynamic_extent>(
+        return span<fl::u8, dynamic_extent>(
             reinterpret_cast<fl::u8*>(s.data()),
             s.size_bytes()
         );
     } else {
-        return Slice<fl::u8, Extent * sizeof(T)>(
+        return span<fl::u8, Extent * sizeof(T)>(
             reinterpret_cast<fl::u8*>(s.data())
         );
     }

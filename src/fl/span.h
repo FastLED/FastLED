@@ -4,9 +4,9 @@
 
 namespace fl {
 
-// span is an alias for Slice - provides std::span-like API
+// Slice is an alias for span - provides backward compatibility
 // Default to dynamic extent for backward compatibility
 template<typename T, fl::size Extent = fl::dynamic_extent>
-using span = Slice<T, Extent>;
+using Slice = span<T, Extent>;
 
 };

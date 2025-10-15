@@ -44,7 +44,7 @@ class Json;
 template <typename T> struct rect;
 template <typename T> struct vec2;
 template <typename T> struct vec3;
-template <typename T, fl::size Extent = fl::dynamic_extent> class Slice;
+template <typename T, fl::size Extent> class span;
 template <typename T, typename Allocator> class HeapVector;
 template <typename T, fl::size N> class InlinedVector;
 template <typename T, fl::size N> class FixedVector;
