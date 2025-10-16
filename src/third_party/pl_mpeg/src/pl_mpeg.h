@@ -478,7 +478,7 @@ plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact);
 // The default size for buffers created from files or by the high-level API
 
 #ifndef PLM_BUFFER_DEFAULT_SIZE
-#define PLM_BUFFER_DEFAULT_SIZE (128 * 1024)
+#define PLM_BUFFER_DEFAULT_SIZE (128L * 1024L)
 #endif
 
 #ifndef PLM_NO_STDIO
@@ -2014,10 +2014,10 @@ double plm_demux_get_duration(plm_demux_t *self, int type) {
 	size_t previous_pos = plm_buffer_tell(self->buffer);
 	int previous_start_code = self->start_code;
 	
-	// Find last video PTS. Start searching 64kb from the end and go further 
+	// Find last video PTS. Start searching 64kb from the end and go further
 	// back if needed.
-	long start_range = 64 * 1024;
-	long max_range = 4096 * 1024;
+	long start_range = 64L * 1024L;
+	long max_range = 4096L * 1024L;
 	for (long range = start_range; range <= max_range; range *= 2) {
 		long seek_pos = file_size - range;
 		if (seek_pos < 0) {
@@ -2230,11 +2230,11 @@ plm_packet_t *plm_demux_decode(plm_demux_t *self) {
 }
 
 double plm_demux_decode_time(plm_demux_t *self) {
-	int64_t clock = plm_buffer_read(self->buffer, 3) << 30;
+	int64_t clock = (int64_t)plm_buffer_read(self->buffer, 3) << 30;
 	plm_buffer_skip(self->buffer, 1);
-	clock |= plm_buffer_read(self->buffer, 15) << 15;
+	clock |= (int64_t)plm_buffer_read(self->buffer, 15) << 15;
 	plm_buffer_skip(self->buffer, 1);
-	clock |= plm_buffer_read(self->buffer, 15);
+	clock |= (int64_t)plm_buffer_read(self->buffer, 15);
 	plm_buffer_skip(self->buffer, 1);
 	return (double)clock / 90000.0;
 }

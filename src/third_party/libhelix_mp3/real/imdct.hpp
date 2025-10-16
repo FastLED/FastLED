@@ -297,14 +297,14 @@ static __inline void idct9(int *x)
 	m12 = MULSHIFT32(c9_4, a9);
 
 	a12 = x[0] +  (x[6] >> 1);
-	a13 = a12  +  (  m1 * 2);
-	a14 = a12  -  (  m1 * 2);
+	a13 = a12  +  (  m1 * 2L);
+	a14 = a12  -  (  m1 * 2L);
 	a15 = a1   +  ( a11 >> 1);
-	a16 = ( m5 * 2) + (m6 * 2);
-	a17 = ( m7 * 2) - (m8 * 2);
+	a16 = ( m5 * 2L) + (m6 * 2L);
+	a17 = ( m7 * 2L) - (m8 * 2L);
 	a18 = a16 + a17;
-	a19 = ( m9 * 2) + (m10 * 2);
-	a20 = (m11 * 2) - (m12 * 2);
+	a19 = ( m9 * 2L) + (m10 * 2L);
+	a20 = (m11 * 2L) - (m12 * 2L);
 
 	a21 = a20 - a19;
 	a22 = a13 + a16;
@@ -315,13 +315,13 @@ static __inline void idct9(int *x)
 	a27 = a13 - a18;
 
 	x0 = a22 + a19;			x[0] = x0;
-	x1 = a15 + (m3 * 2);	x[1] = x1;
+	x1 = a15 + (m3 * 2L);	x[1] = x1;
 	x2 = a24 + a20;			x[2] = x2;
 	x3 = a26 - a21;			x[3] = x3;
 	x4 = a1 - a11;			x[4] = x4;
 	x5 = a27 + a21;			x[5] = x5;
 	x6 = a25 - a20;			x[6] = x6;
-	x7 = a15 - (m3 * 2);	x[7] = x7;
+	x7 = a15 - (m3 * 2L);	x[7] = x7;
 	x8 = a23 - a19;			x[8] = x8;
 }
 
@@ -492,14 +492,14 @@ static __inline void imdct12 (int *x, int *out)
 	x0 >>= 1;
 	x1 >>= 1;
 
-	a0 = MULSHIFT32(c3_0, x2) * 2;
+	a0 = MULSHIFT32(c3_0, x2) * 2L;
 	a1 = x0 + (x4 >> 1);
 	a2 = x0 - x4;
 	x0 = a1 + a0;
 	x2 = a2;
 	x4 = a1 - a0;
 
-	a0 = MULSHIFT32(c3_0, x3) * 2;
+	a0 = MULSHIFT32(c3_0, x3) * 2L;
 	a1 = x1 + (x5 >> 1);
 	a2 = x1 - x5;
 

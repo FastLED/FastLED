@@ -67,17 +67,18 @@
 
 static __inline short ClipToShort(int x, int fracBits)
 {
+	int32_t x32 = (int32_t)x;
 	int32_t sign;
 
 	/* assumes you've already rounded (x += (1 << (fracBits-1))) */
-	x >>= fracBits;
+	x32 >>= fracBits;
 
 	/* Ken's trick: clips to [-32768, 32767] */
-	sign = x >> 31;
-	if (sign != (x >> 15))
-		x = sign ^ ((1 << 15) - 1);
+	sign = x32 >> 31;
+	if (sign != (x32 >> 15))
+		x32 = sign ^ ((1L << 15) - 1);
 
-	return (short)x;
+	return (short)x32;
 }
 
 #define MC0M(x)	{ \

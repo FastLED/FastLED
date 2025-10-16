@@ -109,12 +109,12 @@ int Dequantize(MP3DecInfo *mp3DecInfo, int gr)
 	 */
 	if (fh->modeExt && (hi->gb[0] < 1 || hi->gb[1] < 1)) {
 		for (i = 0; i < hi->nonZeroBound[0]; i++) {
-			if (hi->huffDecBuf[0][i] < (int32_t)-0x3fffffff)	 hi->huffDecBuf[0][i] = (int32_t)-0x3fffffff;
-			if (hi->huffDecBuf[0][i] >  (int32_t)0x3fffffff)	 hi->huffDecBuf[0][i] =  (int32_t)0x3fffffff;
+			if (hi->huffDecBuf[0][i] < (int32_t)-0x3fffffffL)  hi->huffDecBuf[0][i] = (int32_t)-0x3fffffffL;
+			if (hi->huffDecBuf[0][i] >  (int32_t)0x3fffffffL)  hi->huffDecBuf[0][i] =  (int32_t)0x3fffffffL;
 		}
 		for (i = 0; i < hi->nonZeroBound[1]; i++) {
-			if (hi->huffDecBuf[1][i] < (int32_t)-0x3fffffff)	 hi->huffDecBuf[1][i] = (int32_t)-0x3fffffff;
-			if (hi->huffDecBuf[1][i] >  (int32_t)0x3fffffff)	 hi->huffDecBuf[1][i] =  (int32_t)0x3fffffff;
+			if (hi->huffDecBuf[1][i] < (int32_t)-0x3fffffffL)  hi->huffDecBuf[1][i] = (int32_t)-0x3fffffffL;
+			if (hi->huffDecBuf[1][i] >  (int32_t)0x3fffffffL)  hi->huffDecBuf[1][i] =  (int32_t)0x3fffffffL;
 		}
 	}
 

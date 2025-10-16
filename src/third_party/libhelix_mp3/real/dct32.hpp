@@ -185,13 +185,13 @@ void FDCT32(int *buf, int *dest, int offset, int oddBlock, int gb)
 		a1 = b1 + b2;		a2 = MULSHIFT32(*cptr,   b1 - b2) * 4;
 		a5 = b5 + b6;	    a6 = MULSHIFT32(*cptr++, b6 - b5) * 4;
 
-		b0 = a0 + a1;	    b1 = MULSHIFT32(COS4_0, a0 - a1) * 2;
-		b2 = a2 + a3;	    b3 = MULSHIFT32(COS4_0, a3 - a2) * 2;
+		b0 = a0 + a1;	    b1 = MULSHIFT32(COS4_0, a0 - a1) * 2L;
+		b2 = a2 + a3;	    b3 = MULSHIFT32(COS4_0, a3 - a2) * 2L;
 		buf[0] = b0;	    buf[1] = b1;
 		buf[2] = b2 + b3;	buf[3] = b3;
 
-		b4 = a4 + a5;	    b5 = MULSHIFT32(COS4_0, a4 - a5) * 2;
-		b6 = a6 + a7;	    b7 = MULSHIFT32(COS4_0, a7 - a6) * 2;
+		b4 = a4 + a5;	    b5 = MULSHIFT32(COS4_0, a4 - a5) * 2L;
+		b6 = a6 + a7;	    b7 = MULSHIFT32(COS4_0, a7 - a6) * 2L;
 		b6 += b7;
 		buf[4] = b4 + b6;	buf[5] = b5 + b7;
 		buf[6] = b5 + b6;	buf[7] = b7;
