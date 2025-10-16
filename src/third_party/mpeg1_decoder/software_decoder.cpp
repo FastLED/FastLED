@@ -316,7 +316,7 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     if (!fl::third_party::plm_has_headers(decoderData_->plmpeg)) {
         // Temporarily allocate a minimal buffer for header decoding
         // We'll reallocate properly once we know dimensions
-        fl::size temp_buffer_size = 1920 * 1080 * 3; // Max reasonable size for header decode
+        fl::size temp_buffer_size = 1920ul * 1080ul * 3ul; // Max reasonable size for header decode
         decoderData_->rgbFrameBuffer.reset(new fl::u8[temp_buffer_size]);
 
         // Decode one frame to get headers

@@ -77,11 +77,11 @@ constexpr uint32_t ISR_FLAG_ONE_SHOT      = (1u << 5);  // One-shot timer (vs au
 constexpr uint32_t ISR_FLAG_MANUAL_TICK   = (1u << 6);  // Manual tick mode (simulation/testing)
 
 // ESP32-specific flags
-constexpr uint32_t ISR_FLAG_ESP_SHARED    = (1u << 16); // Shared interrupt (ESP32)
-constexpr uint32_t ISR_FLAG_ESP_LOWMED    = (1u << 17); // Low/medium priority shared (ESP32)
+constexpr uint32_t ISR_FLAG_ESP_SHARED    = (1ul << 16); // Shared interrupt (ESP32)
+constexpr uint32_t ISR_FLAG_ESP_LOWMED    = (1ul << 17); // Low/medium priority shared (ESP32)
 
 // STM32-specific flags
-constexpr uint32_t ISR_FLAG_STM32_PREEMPT = (1u << 18); // Use preemption priority (STM32)
+constexpr uint32_t ISR_FLAG_STM32_PREEMPT = (1ul << 18); // Use preemption priority (STM32)
 
 // =============================================================================
 // ISR Handle Type

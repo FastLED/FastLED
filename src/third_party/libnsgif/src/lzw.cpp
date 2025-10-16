@@ -173,9 +173,9 @@ static inline lzw_result lzw__read_code(
 	if (ctx->sb_bit + 24 <= ctx->sb_bit_count) {
 		/* Fast path: read three bytes from this sub-block */
 		const uint8_t *data = ctx->sb_data + (ctx->sb_bit >> 3);
-		code |= *data++ <<  0;
-		code |= *data++ <<  8;
-		code |= *data   << 16;
+		code |= static_cast<uint32_t>(*data++) <<  0;
+		code |= static_cast<uint32_t>(*data++) <<  8;
+		code |= static_cast<uint32_t>(*data)   << 16;
 		ctx->sb_bit += code_size;
 	} else {
 		/* Slow path: code spans sub-blocks */

@@ -51,7 +51,7 @@ void isr_thread_func(ISRContext* ctx) {
     // Signal that thread has started
     ctx->started.store(true, std::memory_order_release);
 
-    auto interval = std::chrono::nanoseconds(1'000'000'000 / ctx->timer_hz);
+    auto interval = std::chrono::nanoseconds(1000000000 / ctx->timer_hz);
     uint32_t tick_count = 0;
 
     while (ctx->running.load(std::memory_order_acquire)) {
