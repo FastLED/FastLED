@@ -5,6 +5,7 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
+#include "fl/force_inline.h"
 
 namespace fl {
 
@@ -48,42 +49,42 @@ struct hsv8 {
     /// Array access operator to index into the hsv8 object
     /// @param x the index to retrieve (0-2)
     /// @returns the hsv8::raw value for the given index
-    inline fl::u8& operator[] (fl::u8 x) __attribute__((always_inline))
+    FASTLED_FORCE_INLINE fl::u8& operator[] (fl::u8 x)
     {
         return raw[x];
     }
 
     /// @copydoc operator[]
-    inline const fl::u8& operator[] (fl::u8 x) const __attribute__((always_inline))
+    FASTLED_FORCE_INLINE const fl::u8& operator[] (fl::u8 x) const
     {
         return raw[x];
     }
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr inline hsv8() __attribute__((always_inline)): h(0), s(0), v(0) { }
+    constexpr hsv8(): h(0), s(0), v(0) { }
 
     /// Allow construction from hue, saturation, and value
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    constexpr inline hsv8( fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
+    constexpr hsv8( fl::u8 ih, fl::u8 is, fl::u8 iv)
         : h(ih), s(is), v(iv)
     {
     }
 
     /// Allow copy construction
-    constexpr inline hsv8(const hsv8& rhs) noexcept : h(rhs.h), s(rhs.s), v(rhs.v) { }
+    constexpr hsv8(const hsv8& rhs) noexcept : h(rhs.h), s(rhs.s), v(rhs.v) { }
 
     /// Allow copy construction
-    inline hsv8& operator= (const hsv8& rhs) __attribute__((always_inline)) = default;
+    hsv8& operator= (const hsv8& rhs) = default;
 
     /// Assign new HSV values
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
     /// @returns reference to the hsv8 object
-    inline hsv8& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline__))
+    FASTLED_FORCE_INLINE hsv8& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv)
     {
         h = ih;
         s = is;
