@@ -83,6 +83,7 @@ test_names = [
   'test_istream',
   'test_jpeg',
   'test_lcd50',
+  'test_limits',
   'test_line_simplification',
   'test_list',
   'test_lut',
