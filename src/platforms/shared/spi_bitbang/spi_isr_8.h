@@ -3,7 +3,7 @@
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
-#include <stddef.h>  // For offsetof
+#include "fl/cstddef.h"
 #include "spi_isr_engine.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
@@ -30,11 +30,12 @@ struct GPIOEvent {
 };
 
 // Verify memory layout matches between C and C++ structures
+// Use FL_OFFSETOF macro (defined in fl/cstddef.h) instead of <stddef.h>
 static_assert(sizeof(GPIOEvent) == sizeof(FastLED_GPIO_Event),
               "C++ GPIOEvent must match C FastLED_GPIO_Event layout");
-static_assert(offsetof(GPIOEvent, event_type) == offsetof(FastLED_GPIO_Event, event_type),
+static_assert(FL_OFFSETOF(GPIOEvent, event_type) == FL_OFFSETOF(FastLED_GPIO_Event, event_type),
               "event_type offset must match");
-static_assert(offsetof(GPIOEvent, payload) == offsetof(FastLED_GPIO_Event, payload),
+static_assert(FL_OFFSETOF(GPIOEvent, payload) == FL_OFFSETOF(FastLED_GPIO_Event, payload),
               "payload offset must match");
 #endif
 

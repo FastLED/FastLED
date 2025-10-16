@@ -26,23 +26,35 @@ using atomic_i32 = atomic<fl::i32>;
 
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 
+// Forward declare memory_order enum (defined in platforms/shared/atomic.h for real atomics)
+#if !FASTLED_MULTITHREADED
+enum memory_order {
+    memory_order_relaxed,
+    memory_order_acquire,
+    memory_order_release,
+    memory_order_acq_rel,
+    memory_order_seq_cst
+};
+#endif
+
 template <typename T> class AtomicFake {
   public:
     AtomicFake() : mValue{} {}
     explicit AtomicFake(T value) : mValue(value) {}
-    
+
     // Non-copyable and non-movable
     AtomicFake(const AtomicFake&) = delete;
     AtomicFake& operator=(const AtomicFake&) = delete;
     AtomicFake(AtomicFake&&) = delete;
     AtomicFake& operator=(AtomicFake&&) = delete;
-    
+
     // Basic atomic operations - fake implementation (not actually atomic)
-    T load() const {
+    // Memory order parameters are accepted but ignored (no-op in single-threaded mode)
+    T load(memory_order = memory_order_seq_cst) const {
         return mValue;
     }
-    
-    void store(T value) {
+
+    void store(T value, memory_order = memory_order_seq_cst) {
         mValue = value;
     }
     

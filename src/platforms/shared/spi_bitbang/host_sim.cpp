@@ -11,9 +11,8 @@
 
 #include "spi_platform.h"
 #include "host_sim.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include <string.h>
-#include <stdbool.h>
 
 /* Ring buffer for capturing GPIO events */
 #define FL_GPIO_SIM_RING_SIZE 4096

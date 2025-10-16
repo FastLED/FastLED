@@ -220,7 +220,7 @@ class TestNoBannedHeaders(unittest.TestCase):
         )
 
     def test_no_banned_headers_src(self) -> None:
-        """Searches through fx/ and sensors/ directories for banned headers."""
+        """Searches through fx/, sensors/, and platforms/shared/ directories for banned headers."""
 
         def on_fail(msg: str) -> None:
             self.fail(
@@ -232,6 +232,7 @@ class TestNoBannedHeaders(unittest.TestCase):
         test_directories = [
             os.path.join(SRC_ROOT, "fx"),
             os.path.join(SRC_ROOT, "sensors"),
+            os.path.join(SRC_ROOT, "platforms", "shared"),
         ]
         _test_no_banned_headers(
             test_directories=test_directories,

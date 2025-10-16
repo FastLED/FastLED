@@ -33,8 +33,7 @@
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
 
-#include <stdint.h>
-#include <stddef.h>
+#include "fl/stdint.h"
 #include "fl/compiler_control.h"
 #include "spi_isr_engine.h"
 #include "spi_platform.h"

@@ -14,18 +14,19 @@
 
 #include "spi_isr_engine.h"
 #include "host_sim.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #ifndef FASTLED_SPI_MANUAL_TICK
 // Thread-based mode: Use real-time ISR emulation
-#include <thread>
-#include <chrono>
-#include <atomic>
-#include <mutex>
+#include <thread>   // ok include (no fl/thread.h wrapper available)
+#include <chrono>   // ok include (no fl/chrono.h available)
+#include <atomic>   // ok include (for std::atomic_thread_fence)
+#include "fl/atomic.h"
+#include "fl/mutex.h"
 #include "fl/vector.h"
 
 // Simple printf-style debugging for thread mode
-#include <stdio.h>
+#include "fl/stdio.h"
 #define ISR_DBG(...) printf("[ISR_THREAD] " __VA_ARGS__)
 
 namespace {
@@ -33,8 +34,8 @@ namespace {
 /* ISR context for thread-based execution */
 struct ISRContext {
     uint32_t timer_hz;
-    std::atomic<bool> running;
-    std::atomic<bool> started;  // Signals when thread has begun execution
+    fl::atomic<bool> running;
+    fl::atomic<bool> started;  // Signals when thread has begun execution
     std::thread thread;
 
     ISRContext(uint32_t hz) : timer_hz(hz), running(false), started(false) {}
@@ -42,19 +43,19 @@ struct ISRContext {
 
 /* Global ISR registry (for multi-instance support) */
 fl::HeapVector<ISRContext*> g_isr_contexts;
-std::mutex g_isr_mutex;
+fl::mutex g_isr_mutex;
 
 /* Thread function that runs the ISR at configured frequency */
 void isr_thread_func(ISRContext* ctx) {
     ISR_DBG("Thread started, frequency: %u Hz\n", ctx->timer_hz);
 
     // Signal that thread has started
-    ctx->started.store(true, std::memory_order_release);
+    ctx->started.store(true, fl::memory_order_release);
 
     auto interval = std::chrono::nanoseconds(1000000000 / ctx->timer_hz);
     uint32_t tick_count = 0;
 
-    while (ctx->running.load(std::memory_order_acquire)) {
+    while (ctx->running.load(fl::memory_order_acquire)) {
         auto start = std::chrono::steady_clock::now();
 
         // Acquire fence: ensure we see latest doorbell value from main thread
@@ -92,7 +93,7 @@ extern "C" {
 /* Start timer (launches ISR thread) */
 int fl_spi_platform_isr_start(uint32_t timer_hz) {
     ISR_DBG("fl_spi_platform_isr_start called, frequency: %u Hz\n", timer_hz);
-    std::lock_guard<std::mutex> lock(g_isr_mutex);
+    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
 
     fl_gpio_sim_init();
 
@@ -104,7 +105,7 @@ int fl_spi_platform_isr_start(uint32_t timer_hz) {
     ctx->thread = std::thread(isr_thread_func, ctx);
 
     // Wait for thread to actually start (prevents race condition)
-    while (!ctx->started.load(std::memory_order_acquire)) {
+    while (!ctx->started.load(fl::memory_order_acquire)) {
         std::this_thread::yield();
     }
     ISR_DBG("Thread confirmed started\n");
@@ -117,7 +118,7 @@ int fl_spi_platform_isr_start(uint32_t timer_hz) {
 /* Stop timer (joins ISR thread) */
 void fl_spi_platform_isr_stop(void) {
     ISR_DBG("fl_spi_platform_isr_stop called, contexts count: %zu\n", g_isr_contexts.size());
-    std::lock_guard<std::mutex> lock(g_isr_mutex);
+    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
 
     for (auto* ctx : g_isr_contexts) {
         ISR_DBG("Stopping thread...\n");
@@ -135,12 +136,12 @@ void fl_spi_platform_isr_stop(void) {
 
 /* Query timer state */
 bool fl_spi_host_timer_is_running(void) {
-    std::lock_guard<std::mutex> lock(g_isr_mutex);
+    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
     return !g_isr_contexts.empty();
 }
 
 uint32_t fl_spi_host_timer_get_hz(void) {
-    std::lock_guard<std::mutex> lock(g_isr_mutex);
+    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
     if (!g_isr_contexts.empty()) {
         return g_isr_contexts[0]->timer_hz;
     }

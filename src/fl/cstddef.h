@@ -33,4 +33,11 @@ typedef union {
 } max_align_t;
 #endif
 
-} // namespace fl 
+} // namespace fl
+
+// FastLED equivalent of offsetof macro (stddef.h)
+// Computes byte offset of a member within a struct/class at compile time
+// Uses compiler builtin to avoid including <stddef.h>
+#ifndef FL_OFFSETOF
+#define FL_OFFSETOF(type, member) __builtin_offsetof(type, member)
+#endif 

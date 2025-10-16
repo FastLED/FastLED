@@ -35,14 +35,16 @@ public:
     AtomicReal(AtomicReal&&) = delete;
     AtomicReal& operator=(AtomicReal&&) = delete;
 
-    // Load operation
-    T load() const {
-        return __atomic_load_n(&mValue, __ATOMIC_ACQUIRE);
+    // Load operation with configurable memory ordering
+    // Default to acquire semantics for backward compatibility
+    T load(int order = memory_order_acquire) const {
+        return __atomic_load_n(&mValue, order);
     }
 
-    // Store operation
-    void store(T value) {
-        __atomic_store_n(&mValue, value, __ATOMIC_RELEASE);
+    // Store operation with configurable memory ordering
+    // Default to release semantics for backward compatibility
+    void store(T value, int order = memory_order_release) {
+        __atomic_store_n(&mValue, value, order);
     }
 
     // Pre-increment: ++atomic

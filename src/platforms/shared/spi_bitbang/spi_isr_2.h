@@ -3,7 +3,6 @@
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
-#include <stddef.h>
 #include "spi_isr_engine.h"
 
 #ifndef SPI_ISR_SOFTWARE_BITBANG_FORCED_ON

@@ -13,7 +13,7 @@
 #ifndef FL_PARALLEL_SPI_PLATFORM_H
 #define FL_PARALLEL_SPI_PLATFORM_H
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "fl/compiler_control.h"
 
 FL_EXTERN_C_BEGIN

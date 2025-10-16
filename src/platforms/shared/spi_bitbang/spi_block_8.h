@@ -3,7 +3,6 @@
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
-#include <stddef.h>
 #include "spi_isr_engine.h"
 #include "spi_platform.h"
 
