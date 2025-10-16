@@ -35,6 +35,10 @@ public:
         int8_t data1_pin;          ///< D1/MISO GPIO pin (-1 = unused)
         int8_t data2_pin;          ///< D2/WP GPIO pin (-1 = unused)
         int8_t data3_pin;          ///< D3/HD GPIO pin (-1 = unused)
+        int8_t data4_pin;          ///< D4 GPIO pin (-1 = unused, octal mode only)
+        int8_t data5_pin;          ///< D5 GPIO pin (-1 = unused, octal mode only)
+        int8_t data6_pin;          ///< D6 GPIO pin (-1 = unused, octal mode only)
+        int8_t data7_pin;          ///< D7 GPIO pin (-1 = unused, octal mode only)
         uint32_t max_transfer_sz;  ///< Max bytes per transfer
 
         Config()
@@ -45,6 +49,10 @@ public:
             , data1_pin(-1)
             , data2_pin(-1)
             , data3_pin(-1)
+            , data4_pin(-1)
+            , data5_pin(-1)
+            , data6_pin(-1)
+            , data7_pin(-1)
             , max_transfer_sz(65536) {}
     };
 

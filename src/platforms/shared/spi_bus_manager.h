@@ -305,32 +305,63 @@ public:
             return;  // No data to transmit
         }
 
-        // Prepare lane data for transposer
-        fl::optional<SPITransposerQuad::LaneData> lanes[4];
-        for (uint8_t i = 0; i < bus.num_devices && i < 4; i++) {
-            if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
-                // TODO: Add proper padding frame support (chipset-specific black LED patterns)
-                // For now, use empty padding (will pad with zeros)
-                lanes[i] = SPITransposerQuad::LaneData{
-                    fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                    fl::span<const uint8_t>()  // No padding frame yet
-                };
-            }
-        }
+        // Determine if we're using 8-lane (octal) or 4-lane (quad) mode
+        bool is_octal = (bus.num_devices > 4 && bus.num_devices <= 8);
 
-        // Allocate interleaved buffer (4× max lane size)
-        bus.interleaved_buffer.resize(max_size * 4);
-
-        // Transpose lanes into interleaved format
         const char* error = nullptr;
-        if (!SPITransposerQuad::transpose(lanes[0], lanes[1], lanes[2], lanes[3],
-                                          fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
-            FL_WARN("SPI Bus Manager: Transpose failed - " << (error ? error : "unknown error"));
-            // Clear buffers and bail
-            for (auto& lane_buffer : bus.lane_buffers) {
-                lane_buffer.clear();
+        if (is_octal) {
+            // Prepare 8-lane data for transposer
+            fl::optional<SPITransposerQuad::LaneData> lanes[8];
+            for (uint8_t i = 0; i < bus.num_devices && i < 8; i++) {
+                if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
+                    // TODO: Add proper padding frame support (chipset-specific black LED patterns)
+                    // For now, use empty padding (will pad with zeros)
+                    lanes[i] = SPITransposerQuad::LaneData{
+                        fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                        fl::span<const uint8_t>()  // No padding frame yet
+                    };
+                }
             }
-            return;
+
+            // Allocate interleaved buffer (8× max lane size)
+            bus.interleaved_buffer.resize(max_size * 8);
+
+            // Transpose lanes into interleaved format
+            if (!SPITransposerQuad::transpose8(lanes, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+                FL_WARN("SPI Bus Manager: Octal transpose failed - " << (error ? error : "unknown error"));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+        } else {
+            // Prepare 4-lane data for transposer
+            fl::optional<SPITransposerQuad::LaneData> lanes[4];
+            for (uint8_t i = 0; i < bus.num_devices && i < 4; i++) {
+                if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
+                    // TODO: Add proper padding frame support (chipset-specific black LED patterns)
+                    // For now, use empty padding (will pad with zeros)
+                    lanes[i] = SPITransposerQuad::LaneData{
+                        fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                        fl::span<const uint8_t>()  // No padding frame yet
+                    };
+                }
+            }
+
+            // Allocate interleaved buffer (4× max lane size)
+            bus.interleaved_buffer.resize(max_size * 4);
+
+            // Transpose lanes into interleaved format
+            if (!SPITransposerQuad::transpose(lanes[0], lanes[1], lanes[2], lanes[3],
+                                              fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+                FL_WARN("SPI Bus Manager: Quad transpose failed - " << (error ? error : "unknown error"));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
         }
 
         // Transmit via Quad-SPI hardware
@@ -519,11 +550,66 @@ private:
             #endif
 
         } else if (bus.num_devices >= 5 && bus.num_devices <= 8 &&
-                   max_type == SPIBusType::QUAD_SPI) {
-            // ESP32-P4 supports 8 lanes (octal SPI)
-            // TODO: Implement OctalSPIController
-            bus.error_message = "Octal-SPI not yet implemented";
+                   static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::QUAD_SPI)) {
+            // ESP32-P4 supports 8 lanes (octal SPI using SPIQuad interface)
+            bus.bus_type = SPIBusType::QUAD_SPI;  // Uses same interface, but with 8 lanes
+
+            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
+            // Get available Quad-SPI controllers and find one we can use
+            const auto& controllers = SPIQuad::getAll();
+            if (controllers.empty()) {
+                bus.error_message = "No Octal-SPI controllers available on this platform";
+                return false;
+            }
+
+            // Try each controller until we find one that works
+            SPIQuad* octal_ctrl = nullptr;
+            for (auto* ctrl : controllers) {
+                if (!ctrl->isInitialized()) {
+                    octal_ctrl = ctrl;
+                    break;
+                }
+            }
+
+            if (!octal_ctrl) {
+                bus.error_message = "All Octal-SPI controllers already in use";
+                return false;
+            }
+
+            // Configure Octal-SPI (8 data lines)
+            SPIQuad::Config config;
+            config.bus_num = static_cast<uint8_t>(octal_ctrl->getBusId());
+            config.clock_speed_hz = 20000000;  // 20 MHz default (conservative)
+            config.clock_pin = bus.clock_pin;
+            config.data0_pin = bus.devices[0].data_pin;
+            config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
+            config.data2_pin = (bus.num_devices > 2) ? bus.devices[2].data_pin : -1;
+            config.data3_pin = (bus.num_devices > 3) ? bus.devices[3].data_pin : -1;
+            config.data4_pin = (bus.num_devices > 4) ? bus.devices[4].data_pin : -1;
+            config.data5_pin = (bus.num_devices > 5) ? bus.devices[5].data_pin : -1;
+            config.data6_pin = (bus.num_devices > 6) ? bus.devices[6].data_pin : -1;
+            config.data7_pin = (bus.num_devices > 7) ? bus.devices[7].data_pin : -1;
+            config.max_transfer_sz = 65536;  // 64KB default
+
+            // Initialize the controller
+            if (!octal_ctrl->begin(config)) {
+                bus.error_message = "Failed to initialize Octal-SPI controller";
+                return false;
+            }
+
+            // Store controller pointer and SPI bus number
+            bus.hw_controller = octal_ctrl;
+            bus.spi_bus_num = config.bus_num;
+
+            // Initialize lane buffers
+            bus.lane_buffers.resize(bus.num_devices);
+
+            bus.is_initialized = true;
+            return true;
+            #else
+            bus.error_message = "Octal-SPI not supported on this platform";
             return false;
+            #endif
         }
 
         bus.error_message = "Multi-SPI not supported on this platform";

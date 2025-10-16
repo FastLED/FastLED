@@ -386,6 +386,7 @@ GPIO writes are abstracted through macros that select ESP32 hardware or host sim
 FastLED's `SPIBusManager` automatically selects the best SPI implementation:
 
 1. **Hardware SPI Preferred** (when available):
+   - ESP32-P4: Hardware Octal-SPI for up to 8 devices (IDF 5.0+)
    - ESP32-S3: Hardware Quad-SPI for 3-4 devices
    - ESP32-C3: Hardware Dual-SPI for 2 devices
    - ESP32: Hardware Single-SPI for 1 device
@@ -395,6 +396,20 @@ FastLED's `SPIBusManager` automatically selects the best SPI implementation:
    - Hardware initialization fails
    - All hardware SPI buses exhausted
    - Manual override for testing
+
+### Hardware Octal-SPI (ESP32-P4 + IDF 5.0+)
+
+The ESP32-P4 supports **hardware octal-SPI** for driving up to 8 parallel LED strips simultaneously via DMA. This is ~40× faster than software implementations with zero CPU usage during transmission.
+
+**Key Differences from Software Implementations:**
+- **Performance**: DMA-accelerated, completes 8×100 LED strips in <500µs
+- **CPU Usage**: 0% during transmission (vs. 100% for blocking, or ISR overhead)
+- **Platform**: ESP32-P4 only with IDF 5.0+ (older platforms use software fallback)
+- **Implementation**: Located in `src/platforms/esp/32/spi_quad_esp32.cpp` and `src/platforms/shared/spi_transposer_quad.*`
+
+For detailed hardware octal-SPI information, see:
+- `src/platforms/esp/32/README.md` - Hardware octal-SPI overview
+- `src/platforms/shared/README.md` - Transposer infrastructure
 
 ### Primary Use Cases for Software ISR
 

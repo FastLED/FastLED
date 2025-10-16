@@ -72,6 +72,7 @@ private:
     spi_transaction_t mTransaction;
     bool mTransactionActive;
     bool mInitialized;
+    uint8_t mActiveLanes;
 
     SPIQuadESP32(const SPIQuadESP32&) = delete;
     SPIQuadESP32& operator=(const SPIQuadESP32&) = delete;
@@ -87,7 +88,8 @@ SPIQuadESP32::SPIQuadESP32(int bus_id, const char* name)
     , mSPIHandle(nullptr)
     , mHost(SPI2_HOST)
     , mTransactionActive(false)
-    , mInitialized(false) {
+    , mInitialized(false)
+    , mActiveLanes(1) {
     memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
@@ -122,10 +124,14 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     }
 
     // Count active data pins to determine SPI mode
-    uint8_t active_lanes = 1;  // data0 always present
-    if (config.data1_pin >= 0) active_lanes++;
-    if (config.data2_pin >= 0) active_lanes++;
-    if (config.data3_pin >= 0) active_lanes++;
+    mActiveLanes = 1;  // data0 always present
+    if (config.data1_pin >= 0) mActiveLanes++;
+    if (config.data2_pin >= 0) mActiveLanes++;
+    if (config.data3_pin >= 0) mActiveLanes++;
+    if (config.data4_pin >= 0) mActiveLanes++;
+    if (config.data5_pin >= 0) mActiveLanes++;
+    if (config.data6_pin >= 0) mActiveLanes++;
+    if (config.data7_pin >= 0) mActiveLanes++;
 
     // Configure SPI bus with appropriate mode flags
     spi_bus_config_t bus_config = {};
@@ -134,13 +140,27 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     bus_config.sclk_io_num = config.clock_pin;
     bus_config.quadwp_io_num = config.data2_pin;  // -1 if unused
     bus_config.quadhd_io_num = config.data3_pin;  // -1 if unused
+
+    // Configure octal pins if ESP-IDF 5.x and pins are specified
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    bus_config.data4_io_num = config.data4_pin;  // -1 if unused
+    bus_config.data5_io_num = config.data5_pin;  // -1 if unused
+    bus_config.data6_io_num = config.data6_pin;  // -1 if unused
+    bus_config.data7_io_num = config.data7_pin;  // -1 if unused
+    #endif
+
     bus_config.max_transfer_sz = config.max_transfer_sz;
 
     // Set flags based on active lane count
     bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
-    if (active_lanes >= 4) {
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    if (mActiveLanes >= 8) {
+        bus_config.flags |= SPICOMMON_BUSFLAG_OCTAL;
+    } else
+    #endif
+    if (mActiveLanes >= 4) {
         bus_config.flags |= SPICOMMON_BUSFLAG_QUAD;
-    } else if (active_lanes >= 2) {
+    } else if (mActiveLanes >= 2) {
         bus_config.flags |= SPICOMMON_BUSFLAG_DUAL;
     }
     // else: standard SPI (1 data line)
@@ -192,7 +212,21 @@ bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
 
     // Configure transaction
     memset(&mTransaction, 0, sizeof(mTransaction));
-    mTransaction.flags = SPI_TRANS_MODE_QIO;  // Quad I/O mode
+
+    // Set transaction mode based on lane count
+    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    if (mActiveLanes >= 8) {
+        mTransaction.flags = SPI_TRANS_MODE_OCT;  // Octal I/O mode
+    } else
+    #endif
+    if (mActiveLanes >= 4) {
+        mTransaction.flags = SPI_TRANS_MODE_QIO;  // Quad I/O mode
+    } else if (mActiveLanes >= 2) {
+        mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
+    } else {
+        mTransaction.flags = 0;  // Standard SPI mode
+    }
+
     mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
     mTransaction.tx_buffer = buffer.data();
 

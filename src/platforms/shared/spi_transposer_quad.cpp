@@ -109,4 +109,78 @@ uint8_t SPITransposerQuad::getLaneByte(const LaneData& lane, size_t byte_idx, si
     return 0x00;
 }
 
+bool SPITransposerQuad::transpose8(const fl::optional<LaneData> lanes[8],
+                                     fl::span<uint8_t> output,
+                                     const char** error) {
+    // Validate output buffer size (must be divisible by 8)
+    if (output.size() % 8 != 0) {
+        if (error) {
+            *error = "Output buffer size must be divisible by 8";
+        }
+        return false;
+    }
+
+    // Calculate max lane size from output buffer
+    const size_t max_size = output.size() / 8;
+
+    // Handle empty case
+    if (max_size == 0) {
+        if (error) {
+            *error = nullptr;  // No error, just empty
+        }
+        return true;
+    }
+
+    // Determine default padding byte from first available lane
+    uint8_t default_padding = 0x00;
+    for (size_t i = 0; i < 8; i++) {
+        if (lanes[i].has_value() && !lanes[i]->padding_frame.empty()) {
+            default_padding = lanes[i]->padding_frame[0];
+            break;
+        }
+    }
+
+    // Process each input byte with optimized interleaving
+    for (size_t byte_idx = 0; byte_idx < max_size; byte_idx++) {
+        uint8_t lane_bytes[8];
+
+        // Gather bytes from each lane (handles padding automatically)
+        for (size_t lane = 0; lane < 8; lane++) {
+            if (lanes[lane].has_value()) {
+                lane_bytes[lane] = getLaneByte(*lanes[lane], byte_idx, max_size);
+            } else {
+                // Empty lane - use default padding
+                lane_bytes[lane] = default_padding;
+            }
+        }
+
+        // Interleave this byte from all 8 lanes (produces 8 output bytes)
+        interleave_byte_octal(&output[byte_idx * 8], lane_bytes);
+    }
+
+    if (error) {
+        *error = nullptr;  // Success, no error
+    }
+    return true;
+}
+
+void SPITransposerQuad::interleave_byte_octal(uint8_t* dest, const uint8_t lane_bytes[8]) {
+    // Each output byte contains 1 bit from each of the 8 lanes
+    // Output format for each byte: [L7_bitN L6_bitN L5_bitN L4_bitN L3_bitN L2_bitN L1_bitN L0_bitN]
+    // where N goes from 7 (MSB) down to 0 (LSB)
+
+    // Process each bit position (7 = MSB, 0 = LSB)
+    for (int bit_pos = 7; bit_pos >= 0; bit_pos--) {
+        uint8_t output_byte = 0;
+
+        // Extract bit from each lane and pack into output byte
+        for (int lane = 0; lane < 8; lane++) {
+            uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
+            output_byte |= (bit << lane);
+        }
+
+        dest[7 - bit_pos] = output_byte;
+    }
+}
+
 }  // namespace fl

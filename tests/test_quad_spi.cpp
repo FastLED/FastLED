@@ -382,3 +382,173 @@ TEST_CASE("SPIBlocking Quad: Pattern consistency") {
         }
     }
 }
+
+// ============================================================================
+// 8-Lane Octal-SPI Transpose Tests
+// ============================================================================
+
+TEST_CASE("SPITransposerQuad: 8-lane basic bit interleaving - single byte") {
+    // Test 8-lane interleaving with known bit patterns
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data[8];
+    vector<uint8_t> padding = {0x00};
+
+    // Create 8 lanes with distinct patterns
+    lane_data[0] = {0x01};  // 00000001
+    lane_data[1] = {0x02};  // 00000010
+    lane_data[2] = {0x04};  // 00000100
+    lane_data[3] = {0x08};  // 00001000
+    lane_data[4] = {0x10};  // 00010000
+    lane_data[5] = {0x20};  // 00100000
+    lane_data[6] = {0x40};  // 01000000
+    lane_data[7] = {0x80};  // 10000000
+
+    for (int i = 0; i < 8; i++) {
+        lanes[i] = SPITransposerQuad::LaneData{lane_data[i], padding};
+    }
+
+    vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+    CHECK_EQ(output.size(), 8);
+
+    // Each output byte should have 1 bit from each lane
+    // Output[0] has MSB (bit 7) from each lane: 10000000 (only L7 has bit 7 set)
+    CHECK_EQ(output[0], 0b10000000);
+    // Output[1] has bit 6 from each lane: 01000000 (only L6 has bit 6 set)
+    CHECK_EQ(output[1], 0b01000000);
+    // Output[2] has bit 5 from each lane: 00100000 (only L5 has bit 5 set)
+    CHECK_EQ(output[2], 0b00100000);
+    // Output[3] has bit 4 from each lane: 00010000 (only L4 has bit 4 set)
+    CHECK_EQ(output[3], 0b00010000);
+    // Output[4] has bit 3 from each lane: 00001000 (only L3 has bit 3 set)
+    CHECK_EQ(output[4], 0b00001000);
+    // Output[5] has bit 2 from each lane: 00000100 (only L2 has bit 2 set)
+    CHECK_EQ(output[5], 0b00000100);
+    // Output[6] has bit 1 from each lane: 00000010 (only L1 has bit 1 set)
+    CHECK_EQ(output[6], 0b00000010);
+    // Output[7] has bit 0 (LSB) from each lane: 00000001 (only L0 has bit 0 set)
+    CHECK_EQ(output[7], 0b00000001);
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane equal length lanes") {
+    // All 8 lanes same size, no padding needed
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data[8];
+    vector<uint8_t> padding = {0x00};
+
+    for (int i = 0; i < 8; i++) {
+        lane_data[i] = {static_cast<uint8_t>(0xA0 + i), static_cast<uint8_t>(0xB0 + i)};
+        lanes[i] = SPITransposerQuad::LaneData{lane_data[i], padding};
+    }
+
+    vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+    CHECK_EQ(output.size(), 16);
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane different length lanes with padding") {
+    // Different lane lengths: should pad shorter lanes at beginning
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data[8];
+    vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};  // APA102-style padding
+
+    // Create lanes with varying lengths
+    lane_data[0] = {0xAA, 0xBB, 0xCC};  // 3 bytes (max)
+    lane_data[1] = {0xDD, 0xEE};         // 2 bytes
+    lane_data[2] = {0xFF};               // 1 byte
+    // lanes[3-7] empty
+
+    for (int i = 0; i < 3; i++) {
+        lanes[i] = SPITransposerQuad::LaneData{lane_data[i], padding};
+    }
+    for (int i = 3; i < 8; i++) {
+        lanes[i] = SPITransposerQuad::LaneData{lane_data[i], padding};
+    }
+
+    vector<uint8_t> output(24);  // 3 bytes * 8 = 24 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane empty lanes use nullopt") {
+    // Only 4 lanes used (remaining should be treated as empty)
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data[4];
+    vector<uint8_t> padding = {0x00};
+
+    for (int i = 0; i < 4; i++) {
+        lane_data[i] = {0xAA, 0xBB};
+        lanes[i] = SPITransposerQuad::LaneData{lane_data[i], padding};
+    }
+    // lanes[4-7] remain uninitialized (nullopt)
+
+    vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane output buffer validation - not divisible by 8") {
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data = {0xAA};
+    vector<uint8_t> padding = {0x00};
+
+    lanes[0] = SPITransposerQuad::LaneData{lane_data, padding};
+
+    vector<uint8_t> output(10);  // Not divisible by 8
+    const char* error = nullptr;
+    bool success = SPITransposerQuad::transpose8(lanes, output, &error);
+
+    CHECK_FALSE(success);
+    CHECK(error != nullptr);
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane all ones and zeros pattern") {
+    // Test with alternating 0xFF and 0x00 on all 8 lanes
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_ff = {0xFF};
+    vector<uint8_t> lane_00 = {0x00};
+    vector<uint8_t> padding = {0x00};
+
+    for (int i = 0; i < 8; i++) {
+        if (i % 2 == 0) {
+            lanes[i] = SPITransposerQuad::LaneData{lane_ff, padding};
+        } else {
+            lanes[i] = SPITransposerQuad::LaneData{lane_00, padding};
+        }
+    }
+
+    vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+    // Each output byte should have alternating bits: 01010101
+    for (int i = 0; i < 8; i++) {
+        CHECK_EQ(output[i], 0b01010101);
+    }
+}
+
+TEST_CASE("SPITransposerQuad: 8-lane multi-byte realistic data") {
+    // Test with realistic multi-byte data across all 8 lanes
+    fl::optional<SPITransposerQuad::LaneData> lanes[8];
+    vector<uint8_t> lane_data[8];
+    vector<uint8_t> padding = {0x00};
+
+    for (int lane = 0; lane < 8; lane++) {
+        for (int byte = 0; byte < 10; byte++) {
+            lane_data[lane].push_back(static_cast<uint8_t>(lane * 16 + byte));
+        }
+        lanes[lane] = SPITransposerQuad::LaneData{lane_data[lane], padding};
+    }
+
+    vector<uint8_t> output(80);  // 10 bytes * 8 = 80 output bytes
+    bool success = SPITransposerQuad::transpose8(lanes, output, nullptr);
+
+    CHECK(success);
+    CHECK_EQ(output.size(), 80);
+}
