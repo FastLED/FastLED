@@ -114,8 +114,9 @@ class AudioSampleImpl {
     template <typename It> void assign(It begin, It end, fl::u32 timestamp) {
         mSignedPcm.assign(begin, end);
         mTimestamp = timestamp;
-        // calculate zero crossings
+        // Pre-compute zero crossings and RMS for O(1) access
         initZeroCrossings();
+        initRms();
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
     fl::u32 timestamp() const { return mTimestamp; }
@@ -124,6 +125,7 @@ class AudioSampleImpl {
     void reset() {
         mSignedPcm.clear();
         mZeroCrossings = 0;
+        mRms = 0.0f;
         mTimestamp = 0;
     }
 
@@ -136,6 +138,7 @@ class AudioSampleImpl {
     // signals to reject or accept a sound signal.
     //
     // Returns: a value -> [0.0f, 1.0f)
+    // O(1) - pre-computed in constructor
     float zcf() const {
         const fl::size n = pcm().size();
         if (n < 2) {
@@ -143,6 +146,10 @@ class AudioSampleImpl {
         }
         return float(mZeroCrossings) / static_cast<float>(n - 1);
     }
+
+    // Root mean square amplitude of the audio signal
+    // Returns: RMS value (pre-computed, O(1) access)
+    float rms() const { return mRms; }
 
   private:
     void initZeroCrossings() {
@@ -159,8 +166,23 @@ class AudioSampleImpl {
         }
     }
 
+    void initRms() {
+        if (mSignedPcm.empty()) {
+            mRms = 0.0f;
+            return;
+        }
+        fl::u64 sum_sq = 0;
+        const int N = mSignedPcm.size();
+        for (int i = 0; i < N; ++i) {
+            fl::i32 x32 = fl::i32(mSignedPcm[i]);
+            sum_sq += x32 * x32;
+        }
+        mRms = sqrtf(float(sum_sq) / N);
+    }
+
     VectorPCM mSignedPcm;
     fl::i16 mZeroCrossings = 0;
+    float mRms = 0.0f;  // Pre-computed RMS value
     fl::u32 mTimestamp = 0;
 };
 

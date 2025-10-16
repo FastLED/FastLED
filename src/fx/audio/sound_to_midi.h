@@ -205,6 +205,22 @@ struct PitchResult {
   float confidence;   ///< Detection confidence level [0-1] (higher = more confident)
 };
 
+// ---------- MIDI Note Events ----------
+/// @brief Note-on event with timestamp
+struct NoteOnEvent {
+  uint8_t note;           ///< MIDI note number (0-127)
+  uint8_t velocity;       ///< MIDI velocity (1-127)
+  float timestamp_ms;     ///< Timestamp in milliseconds when note was detected
+  uint32_t frame_index;   ///< Frame number when note was detected
+};
+
+/// @brief Note-off event with timestamp
+struct NoteOffEvent {
+  uint8_t note;           ///< MIDI note number (0-127)
+  float timestamp_ms;     ///< Timestamp in milliseconds when note ended
+  uint32_t frame_index;   ///< Frame number when note ended
+};
+
 // ---------- Auto-Tuning State ----------
 /// @brief Internal state for auto-tuning algorithm
 struct AutoTuneState {
@@ -286,13 +302,12 @@ public:
   virtual ~SoundToMIDIBase() = default;
 
   /// @brief Callback invoked when a new note starts
-  /// @param note MIDI note number (0-127)
-  /// @param velocity MIDI velocity (1-127)
-  function<void(uint8_t note, uint8_t velocity)> onNoteOn;
+  /// @param event Note-on event with timestamp and frame information
+  function<void(const NoteOnEvent& event)> onNoteOn;
 
   /// @brief Callback invoked when a note ends
-  /// @param note MIDI note number (0-127)
-  function<void(uint8_t note)> onNoteOff;
+  /// @param event Note-off event with timestamp and frame information
+  function<void(const NoteOffEvent& event)> onNoteOff;
 
   /// @brief Process an audio frame and generate MIDI events
   /// @param frame Pointer to audio samples (normalized float array, typically -1.0 to +1.0)
@@ -670,8 +685,8 @@ private:
   fl::function<void(uint8_t)> mUserNoteOff;
 
   // Underlying engines (only one will be used)
-  SoundToMIDIMono* mMonoEngine = nullptr;
-  SoundToMIDIPoly* mPolyEngine = nullptr;
+  fl::shared_ptr<SoundToMIDIMono> mMonoEngine;
+  fl::shared_ptr<SoundToMIDIPoly> mPolyEngine;
 
   // Helper methods
   void initWindow();

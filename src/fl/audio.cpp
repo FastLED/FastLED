@@ -125,18 +125,12 @@ fl::u32 AudioSample::timestamp() const {
     return 0;
 }
 
+// O(1) - returns pre-computed cached value
 float AudioSample::rms() const {
     if (!isValid()) {
         return 0.0f;
     }
-    fl::u64 sum_sq = 0;
-    const int N = size();
-    for (int i = 0; i < N; ++i) {
-        fl::i32 x32 = fl::i32(pcm()[i]);
-        sum_sq += x32 * x32;
-    }
-    float rms = sqrtf(float(sum_sq) / N);
-    return rms;
+    return mImpl->rms();
 }
 
 SoundLevelMeter::SoundLevelMeter(double spl_floor, double smoothing_alpha)

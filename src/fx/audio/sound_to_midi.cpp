@@ -2,6 +2,7 @@
 #include "fl/math.h"
 #include "fl/vector.h"
 #include "fl/pair.h"
+#include "fl/ptr.h"
 
 namespace fl {
 
@@ -1427,7 +1428,7 @@ SoundToMIDISliding::SoundToMIDISliding(const SoundToMIDI& baseCfg, const Sliding
 
   // Create appropriate engine
   if (mUsePoly) {
-    mPolyEngine = new SoundToMIDIPoly(baseCfg);
+    mPolyEngine = fl::make_shared<SoundToMIDIPoly>(baseCfg);
 
     // Only intercept callbacks if K-of-M is enabled
     if (mSlideCfg.enable_k_of_m) {
@@ -1439,7 +1440,7 @@ SoundToMIDISliding::SoundToMIDISliding(const SoundToMIDI& baseCfg, const Sliding
       };
     }
   } else {
-    mMonoEngine = new SoundToMIDIMono(baseCfg);
+    mMonoEngine = fl::make_shared<SoundToMIDIMono>(baseCfg);
 
     // Only intercept callbacks if K-of-M is enabled
     if (mSlideCfg.enable_k_of_m) {
