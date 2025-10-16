@@ -110,6 +110,7 @@ test_names = [
   'test_set_inlined',
   'test_shared_ptr',
   'test_single_spi',
+  'test_spi_block_8',
   'test_sketch_runner',
   'test_slab_multi_alloc',
   'test_slice',
@@ -152,7 +153,7 @@ foreach test_name : test_names
   ]
 
   if test_name in ['test_dual_spi', 'test_quad_spi', 'test_single_spi']
-    test_sources += [meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp']
+    test_sources += [meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp']
     test_cpp_args += ['-DFASTLED_SPI_HOST_SIMULATION']
   endif
 
@@ -182,9 +183,9 @@ endforeach
 test_parallel_spi_isr_manual_exe = executable('test_parallel_spi_isr_manual',
   [
     'test_parallel_spi_isr.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
     test_pch[0]
   ],
   include_directories: [src_dir, tests_dir, stub_dir],
@@ -205,9 +206,9 @@ test('test_parallel_spi_isr_manual', test_parallel_spi_isr_manual_exe, workdir: 
 test_parallel_spi_isr_thread_exe = executable('test_parallel_spi_isr_thread',
   [
     'test_parallel_spi_isr.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.cpp',
-    meson.project_source_root() / 'src/platforms/esp/32/parallel_spi/fl_parallel_spi_host_timer.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
     test_pch[0]
   ],
   include_directories: [src_dir, tests_dir, stub_dir],

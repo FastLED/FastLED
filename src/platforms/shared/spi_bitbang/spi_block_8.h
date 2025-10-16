@@ -1,16 +1,16 @@
-// parallel_spi_blocking_dual.hpp — 2-way Dual-SPI Blocking driver (inline bit-banging)
+// spi_block_8.h — 8-way Octal-SPI Blocking driver (inline bit-banging, platform-agnostic)
 #pragma once
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include <stddef.h>
-#include "fl_parallel_spi_isr_rv.h"
-#include "fl_parallel_spi_platform.h"
+#include "spi_isr_engine.h"
+#include "spi_platform.h"
 
 namespace fl {
 
 /**
- * DualSPI_Blocking_ESP32 - 2-way (dual-pin) blocking soft-SPI driver
+ * SpiBlock8 - 8-way (octal-pin) blocking soft-SPI driver (platform-agnostic bitbanging)
  *
  * This is a main-thread blocking implementation that uses inline bit-banging
  * with the same GPIO manipulation logic as the ISR-based implementation.
@@ -38,14 +38,15 @@ namespace fl {
  *
  * Architecture:
  * - Uses same bit-banging logic as ISR implementation
- * - 256-entry LUT maps byte values to 2-pin GPIO masks
- * - Only uses lower 2 bits of byte value (upper 6 bits ignored)
+ * - 256-entry LUT maps byte values to 8-pin GPIO masks
+ * - All 8 bits of each byte value are used
  * - Direct GPIO MMIO writes (same as ISR)
  * - Two-phase bit transmission (data+CLK_LOW, then CLK_HIGH)
  *
  * Typical Usage:
- *   DualSPI_Blocking_ESP32 spi;
- *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_clk);
+ *   SpiBlock8 spi;
+ *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_d2, gpio_d3,
+ *                     gpio_d4, gpio_d5, gpio_d6, gpio_d7, gpio_clk);
  *   spi.loadBuffer(data, len);
  *   spi.transmit();  // Blocks until complete
  *
@@ -55,51 +56,69 @@ namespace fl {
  * - Better timing precision (inline execution)
  *
  * Test Patterns:
- * - 0x00: Both pins low (00)
- * - 0x01: D0 high, D1 low (01)
- * - 0x02: D0 low, D1 high (10)
- * - 0x03: Both pins high (11)
+ * - 0x00: All pins low (00000000)
+ * - 0x01: D0 high, others low (00000001)
+ * - 0x02: D1 high, others low (00000010)
+ * - 0x03: D0+D1 high (00000011)
+ * - 0x0F: D0-D3 high (00001111)
+ * - 0x55: D0+D2+D4+D6 high (01010101)
+ * - 0xAA: D1+D3+D5+D7 high (10101010)
+ * - 0xF0: D4-D7 high (11110000)
+ * - 0xFF: All pins high (11111111)
  */
-class DualSPI_Blocking_ESP32 {
+class SpiBlock8 {
 public:
-    /// Maximum pins per lane (dual = 2)
-    static constexpr int NUM_DATA_PINS = 2;
+    /// Maximum pins per lane (octal = 8)
+    static constexpr int NUM_DATA_PINS = 8;
 
     /// Maximum buffer size
     static constexpr uint16_t MAX_BUFFER_SIZE = 256;
 
-    DualSPI_Blocking_ESP32() = default;
-    ~DualSPI_Blocking_ESP32() = default;
+    SpiBlock8() = default;
+    ~SpiBlock8() = default;
 
     /**
-     * Configure pin mapping for 2 data pins + 1 clock
+     * Configure pin mapping for 8 data pins + 1 clock
      * @param d0 GPIO number for data bit 0 (LSB)
-     * @param d1 GPIO number for data bit 1 (MSB)
+     * @param d1 GPIO number for data bit 1
+     * @param d2 GPIO number for data bit 2
+     * @param d3 GPIO number for data bit 3
+     * @param d4 GPIO number for data bit 4
+     * @param d5 GPIO number for data bit 5
+     * @param d6 GPIO number for data bit 6
+     * @param d7 GPIO number for data bit 7 (MSB)
      * @param clk GPIO number for clock pin
      *
      * Initializes the 256-entry LUT to map byte values to GPIO masks
      * for the specified data pins.
      */
-    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t clk) {
+    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3,
+                       uint8_t d4, uint8_t d5, uint8_t d6, uint8_t d7,
+                       uint8_t clk) {
         // Store clock mask
         mClockMask = 1u << clk;
 
         // Build data pin masks array
         uint32_t dataPinMasks[NUM_DATA_PINS] = {
             1u << d0,  // Bit 0 (LSB)
-            1u << d1   // Bit 1 (MSB)
+            1u << d1,  // Bit 1
+            1u << d2,  // Bit 2
+            1u << d3,  // Bit 3
+            1u << d4,  // Bit 4
+            1u << d5,  // Bit 5
+            1u << d6,  // Bit 6
+            1u << d7   // Bit 7 (MSB)
         };
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
-        // - Extract lower 2 bits
-        // - Map each bit to corresponding GPIO pin
+        // - Map all 8 bits to corresponding GPIO pins
         // - Generate set_mask (pins to set high) and clear_mask (pins to clear low)
         for (int byteValue = 0; byteValue < 256; byteValue++) {
             uint32_t setMask = 0;
             uint32_t clearMask = 0;
 
-            // Only process lower 2 bits (upper 6 bits ignored)
+            // Process all 8 bits
             for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
                 if (byteValue & (1 << bitPos)) {
                     setMask |= dataPinMasks[bitPos];
@@ -118,8 +137,8 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      *
-     * Each byte in the buffer represents 2 parallel bits to output.
-     * Only the lower 2 bits of each byte are used.
+     * Each byte in the buffer represents 8 parallel bits to output.
+     * All 8 bits of each byte are used.
      */
     void loadBuffer(const uint8_t* data, uint16_t n) {
         if (!data) return;
@@ -185,5 +204,9 @@ private:
     const uint8_t* mBuffer = nullptr;  ///< Data buffer pointer
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
+
+// Backward-compatible type alias (for future migration if needed)
+// Note: There was no previous OctalSPI_Blocking_ESP32 class, so this is optional
+// using OctalSPI_Blocking_ESP32 [[deprecated("Use SpiBlock8 instead")]] = SpiBlock8;
 
 }  // namespace fl

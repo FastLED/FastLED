@@ -270,10 +270,10 @@ TEST_CASE("SPISingle: Reset clears transmission history") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_single.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_1.h"
 
 TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
-    SingleSPI_Blocking_ESP32 spi;
+    SpiBlock1 spi;
 
     // Configure pins
     spi.setPinMapping(0, 8);  // Data pin 0, Clock pin 8
@@ -288,7 +288,7 @@ TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Single: LUT initialization") {
-    SingleSPI_Blocking_ESP32 spi;
+    SpiBlock1 spi;
     spi.setPinMapping(5, 10);  // Data pin 5, Clock pin 10
 
     PinMaskEntry* lut = spi.getLUTArray();
@@ -312,7 +312,7 @@ TEST_CASE("SPIBlocking Single: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Single: Empty buffer handling") {
-    SingleSPI_Blocking_ESP32 spi;
+    SpiBlock1 spi;
     spi.setPinMapping(0, 8);
 
     // Transmit with no buffer should not crash
@@ -325,7 +325,7 @@ TEST_CASE("SPIBlocking Single: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Single: Maximum buffer size") {
-    SingleSPI_Blocking_ESP32 spi;
+    SpiBlock1 spi;
     spi.setPinMapping(0, 8);
 
     uint8_t largeBuffer[300];
@@ -342,7 +342,7 @@ TEST_CASE("SPIBlocking Single: Multiple pin configurations") {
     // Test different pin configurations
     for (uint8_t dataPin = 0; dataPin < 10; dataPin++) {
         for (uint8_t clkPin = 10; clkPin < 15; clkPin++) {
-            SingleSPI_Blocking_ESP32 spi;
+            SpiBlock1 spi;
             spi.setPinMapping(dataPin, clkPin);
 
             PinMaskEntry* lut = spi.getLUTArray();

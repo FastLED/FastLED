@@ -6,9 +6,10 @@
 #include <stdint.h>
 #include <stddef.h>
 
-// Platform-specific includes for Quad-SPI support
+// Platform-specific includes for Quad-SPI and Octal-SPI support
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
-#include "platforms/shared/spi_quad.h"
+#include "platforms/shared/spi_hw_4.h"
+#include "platforms/shared/spi_hw_8.h"
 #include "platforms/shared/spi_transposer_quad.h"
 #endif
 
@@ -262,8 +263,16 @@ public:
             case SPIBusType::QUAD_SPI: {
                 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
                 if (bus.hw_controller) {
-                    SPIQuad* quad = static_cast<SPIQuad*>(bus.hw_controller);
-                    quad->waitComplete();
+                    // Determine if this is 4-lane or 8-lane based on device count
+                    if (bus.num_devices > 4) {
+                        // 8-lane (Octal-SPI)
+                        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+                        octal->waitComplete();
+                    } else {
+                        // 4-lane (Quad-SPI)
+                        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+                        quad->waitComplete();
+                    }
                 }
                 #endif
                 break;
@@ -291,7 +300,8 @@ public:
             return;
         }
 
-        SPIQuad* quad = static_cast<SPIQuad*>(bus.hw_controller);
+        // Determine if this is 4-lane or 8-lane based on device count
+        bool is_octal_mode = (bus.num_devices > 4);
 
         // Find maximum lane size
         size_t max_size = 0;
@@ -364,12 +374,26 @@ public:
             }
         }
 
-        // Transmit via Quad-SPI hardware
-        if (!quad->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer))) {
-            FL_WARN("SPI Bus Manager: Quad-SPI transmit failed");
+        // Transmit via Quad-SPI or Octal-SPI hardware
+        bool transmit_ok = false;
+        if (is_octal_mode) {
+            // 8-lane (Octal-SPI)
+            SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+            transmit_ok = octal->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            if (transmit_ok) {
+                octal->waitComplete();
+            }
         } else {
-            // Wait for completion
-            quad->waitComplete();
+            // 4-lane (Quad-SPI)
+            SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+            transmit_ok = quad->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            if (transmit_ok) {
+                quad->waitComplete();
+            }
+        }
+
+        if (!transmit_ok) {
+            FL_WARN("SPI Bus Manager: " << (is_octal_mode ? "Octal" : "Quad") << "-SPI transmit failed");
         }
 
         // Clear lane buffers for next frame
@@ -551,19 +575,19 @@ private:
 
         } else if (bus.num_devices >= 5 && bus.num_devices <= 8 &&
                    static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::QUAD_SPI)) {
-            // ESP32-P4 supports 8 lanes (octal SPI using SPIQuad interface)
-            bus.bus_type = SPIBusType::QUAD_SPI;  // Uses same interface, but with 8 lanes
+            // ESP32-P4 supports 8 lanes (octal SPI using SpiHw8 interface)
+            bus.bus_type = SPIBusType::QUAD_SPI;  // Reuses enum value, but with 8-lane controller
 
             #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
-            // Get available Quad-SPI controllers and find one we can use
-            const auto& controllers = SPIQuad::getAll();
+            // Get available Octal-SPI controllers (8-lane)
+            const auto& controllers = SpiHw8::getAll();
             if (controllers.empty()) {
-                bus.error_message = "No Octal-SPI controllers available on this platform";
+                bus.error_message = "No Octal-SPI (8-lane) controllers available on this platform";
                 return false;
             }
 
             // Try each controller until we find one that works
-            SPIQuad* octal_ctrl = nullptr;
+            SpiHw8* octal_ctrl = nullptr;
             for (auto* ctrl : controllers) {
                 if (!ctrl->isInitialized()) {
                     octal_ctrl = ctrl;
@@ -572,12 +596,12 @@ private:
             }
 
             if (!octal_ctrl) {
-                bus.error_message = "All Octal-SPI controllers already in use";
+                bus.error_message = "All Octal-SPI (8-lane) controllers already in use";
                 return false;
             }
 
             // Configure Octal-SPI (8 data lines)
-            SPIQuad::Config config;
+            SpiHw8::Config config;
             config.bus_num = static_cast<uint8_t>(octal_ctrl->getBusId());
             config.clock_speed_hz = 20000000;  // 20 MHz default (conservative)
             config.clock_pin = bus.clock_pin;
@@ -593,7 +617,7 @@ private:
 
             // Initialize the controller
             if (!octal_ctrl->begin(config)) {
-                bus.error_message = "Failed to initialize Octal-SPI controller";
+                bus.error_message = "Failed to initialize Octal-SPI (8-lane) controller";
                 return false;
             }
 
@@ -652,10 +676,18 @@ private:
         }
 
         #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
-        // Release Quad-SPI controller
+        // Release Quad-SPI or Octal-SPI controller
         if (bus.bus_type == SPIBusType::QUAD_SPI && bus.hw_controller) {
-            SPIQuad* quad = static_cast<SPIQuad*>(bus.hw_controller);
-            quad->end();  // Shutdown SPI peripheral
+            // Determine if this is 4-lane or 8-lane based on device count
+            if (bus.num_devices > 4) {
+                // 8-lane (Octal-SPI)
+                SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+                octal->end();  // Shutdown SPI peripheral
+            } else {
+                // 4-lane (Quad-SPI)
+                SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+                quad->end();  // Shutdown SPI peripheral
+            }
             bus.hw_controller = nullptr;
         }
         #endif

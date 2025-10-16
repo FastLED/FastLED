@@ -1,27 +1,27 @@
-/// @file spi_dual_esp32.cpp
-/// @brief ESP32 implementation of Dual-SPI
+/// @file spi_hw_8_esp32.cpp
+/// @brief ESP32 implementation of 8-lane (Octal) SPI
 ///
-/// This file provides the SPIDualESP32 class and factory for ESP32 platforms.
+/// This file provides the SpiHw8ESP32 class and factory for ESP32 platforms.
 /// All class definition and implementation is contained in this single file.
+///
+/// Octal-SPI (8-lane) support requires ESP-IDF 5.0+ and ESP32-P4 or similar
+/// hardware with sufficient data lines.
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
-#include "platforms/shared/spi_dual.h"
+#include "platforms/shared/spi_hw_8.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
 #include <cstring>
 
 // Include soc_caps.h if available (ESP-IDF 4.0+)
-// Older versions (like IDF 3.3) don't have this header
 #include "fl/has_include.h"
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include "soc/soc_caps.h"
 #endif
 
 // Determine SPI3_HOST availability using SOC capability macro
-// SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available
-// SPI3_HOST is available when SOC_SPI_PERIPH_NUM > 2 (SPI1, SPI2, SPI3)
 #ifndef SOC_SPI_PERIPH_NUM
     #define SOC_SPI_PERIPH_NUM 2  // Default to 2 for older ESP-IDF versions
 #endif
@@ -32,7 +32,6 @@
 #endif
 
 // ESP-IDF compatibility: Ensure SPI host constants are defined
-// Modern IDF uses SPI2_HOST/SPI3_HOST, older versions may not have them
 #ifndef SPI2_HOST
     #define SPI2_HOST ((spi_host_device_t)1)
 #endif
@@ -42,18 +41,21 @@
 
 namespace fl {
 
+// Only compile 8-lane support if ESP-IDF 5.0+ is available
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+
 // ============================================================================
-// SPIDualESP32 Class Definition
+// SpiHw8ESP32 Class Definition
 // ============================================================================
 
-/// ESP32 hardware for Dual-SPI DMA transmission
-/// Implements SPIDual interface for ESP-IDF SPI peripheral
-class SPIDualESP32 : public SPIDual {
+/// ESP32 hardware for 8-lane (Octal) SPI DMA transmission
+/// Implements SpiHw8 interface for ESP-IDF SPI peripheral (ESP-IDF 5.0+)
+class SpiHw8ESP32 : public SpiHw8 {
 public:
-    explicit SPIDualESP32(int bus_id = -1, const char* name = "Unknown");
-    ~SPIDualESP32();
+    explicit SpiHw8ESP32(int bus_id = -1, const char* name = "Unknown");
+    ~SpiHw8ESP32();
 
-    bool begin(const SPIDual::Config& config) override;
+    bool begin(const SpiHw8::Config& config) override;
     void end() override;
     bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
@@ -73,15 +75,15 @@ private:
     bool mTransactionActive;
     bool mInitialized;
 
-    SPIDualESP32(const SPIDualESP32&) = delete;
-    SPIDualESP32& operator=(const SPIDualESP32&) = delete;
+    SpiHw8ESP32(const SpiHw8ESP32&) = delete;
+    SpiHw8ESP32& operator=(const SpiHw8ESP32&) = delete;
 };
 
 // ============================================================================
-// SPIDualESP32 Implementation
+// SpiHw8ESP32 Implementation
 // ============================================================================
 
-SPIDualESP32::SPIDualESP32(int bus_id, const char* name)
+SpiHw8ESP32::SpiHw8ESP32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mSPIHandle(nullptr)
@@ -91,11 +93,11 @@ SPIDualESP32::SPIDualESP32(int bus_id, const char* name)
     memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
-SPIDualESP32::~SPIDualESP32() {
+SpiHw8ESP32::~SpiHw8ESP32() {
     cleanup();
 }
 
-bool SPIDualESP32::begin(const SPIDual::Config& config) {
+bool SpiHw8ESP32::begin(const SpiHw8::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -121,17 +123,29 @@ bool SPIDualESP32::begin(const SPIDual::Config& config) {
         return false;  // Invalid bus number
     }
 
-    // Configure SPI bus for dual mode
+    // Validate that all 8 data pins are specified
+    if (config.data0_pin < 0 || config.data1_pin < 0 ||
+        config.data2_pin < 0 || config.data3_pin < 0 ||
+        config.data4_pin < 0 || config.data5_pin < 0 ||
+        config.data6_pin < 0 || config.data7_pin < 0) {
+        return false;  // 8-lane SPI requires all 8 data pins
+    }
+
+    // Configure SPI bus with octal mode
     spi_bus_config_t bus_config = {};
     bus_config.mosi_io_num = config.data0_pin;
     bus_config.miso_io_num = config.data1_pin;
     bus_config.sclk_io_num = config.clock_pin;
-    bus_config.quadwp_io_num = -1;  // Not used for dual mode
-    bus_config.quadhd_io_num = -1;  // Not used for dual mode
+    bus_config.quadwp_io_num = config.data2_pin;
+    bus_config.quadhd_io_num = config.data3_pin;
+    bus_config.data4_io_num = config.data4_pin;
+    bus_config.data5_io_num = config.data5_pin;
+    bus_config.data6_io_num = config.data6_pin;
+    bus_config.data7_io_num = config.data7_pin;
     bus_config.max_transfer_sz = config.max_transfer_sz;
 
-    // Set dual mode flag
-    bus_config.flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_DUAL;
+    // Set octal mode flags
+    bus_config.flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_OCTAL;
 
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
@@ -160,11 +174,11 @@ bool SPIDualESP32::begin(const SPIDual::Config& config) {
     return true;
 }
 
-void SPIDualESP32::end() {
+void SpiHw8ESP32::end() {
     cleanup();
 }
 
-bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw8ESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -178,9 +192,9 @@ bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
         return true;  // Nothing to transmit
     }
 
-    // Configure transaction
+    // Configure transaction for octal mode
     memset(&mTransaction, 0, sizeof(mTransaction));
-    mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
+    mTransaction.flags = SPI_TRANS_MODE_OCT;  // Octal I/O mode
     mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
     mTransaction.tx_buffer = buffer.data();
 
@@ -194,7 +208,7 @@ bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPIDualESP32::waitComplete(uint32_t timeout_ms) {
+bool SpiHw8ESP32::waitComplete(uint32_t timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -210,23 +224,23 @@ bool SPIDualESP32::waitComplete(uint32_t timeout_ms) {
     return (ret == ESP_OK);
 }
 
-bool SPIDualESP32::isBusy() const {
+bool SpiHw8ESP32::isBusy() const {
     return mTransactionActive;
 }
 
-bool SPIDualESP32::isInitialized() const {
+bool SpiHw8ESP32::isInitialized() const {
     return mInitialized;
 }
 
-int SPIDualESP32::getBusId() const {
+int SpiHw8ESP32::getBusId() const {
     return mBusId;
 }
 
-const char* SPIDualESP32::getName() const {
+const char* SpiHw8ESP32::getName() const {
     return mName;
 }
 
-void SPIDualESP32::cleanup() {
+void SpiHw8ESP32::cleanup() {
     if (mInitialized) {
         // Wait for any pending transmission
         if (mTransactionActive) {
@@ -244,24 +258,33 @@ void SPIDualESP32::cleanup() {
     }
 }
 
+#endif  // ESP_IDF_VERSION >= 5.0.0
+
 // ============================================================================
 // Factory Implementation
 // ============================================================================
 
-/// ESP32 factory override - returns available SPI bus instances
+/// ESP32 factory override - returns available 8-lane SPI bus instances
 /// Strong definition overrides weak default
-fl::vector<SPIDual*> SPIDual::createInstances() {
-    fl::vector<SPIDual*> controllers;
+fl::vector<SpiHw8*> SpiHw8::createInstances() {
+    fl::vector<SpiHw8*> controllers;
+
+#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
+    // Octal-SPI is only available on ESP-IDF 5.0+
+    // Note: Not all ESP32 variants support octal mode even with IDF 5.0+
+    // ESP32-P4 and some newer chips support it
 
     // Bus 2 is available on all ESP32 platforms
-    static SPIDualESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
+    static SpiHw8ESP32 controller2(2, "SPI2_OCTAL");  // Bus 2 - static lifetime
     controllers.push_back(&controller2);
 
 #if SOC_SPI_PERIPH_NUM > 2
     // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SPIDualESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
+    static SpiHw8ESP32 controller3(3, "SPI3_OCTAL");  // Bus 3 - static lifetime
     controllers.push_back(&controller3);
 #endif
+
+#endif  // ESP_IDF_VERSION >= 5.0.0
 
     return controllers;
 }

@@ -12,8 +12,8 @@
 
 #ifdef FASTLED_SPI_HOST_SIMULATION
 
-#include "fl_parallel_spi_isr_rv.h"
-#include "fl_parallel_spi_host_sim.h"
+#include "spi_isr_engine.h"
+#include "host_sim.h"
 #include <stdint.h>
 
 #ifndef FASTLED_SPI_MANUAL_TICK

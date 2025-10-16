@@ -1,24 +1,24 @@
-/// @file spi_single.cpp
-/// @brief Default (weak) implementation of Single-SPI factory
+/// @file spi_hw_2.cpp
+/// @brief Default (weak) implementation of 2-lane hardware SPI factory
 ///
 /// This provides a weak default implementation that returns an empty vector.
 /// Platform-specific implementations (ESP32, RP2040, etc.) override this
 /// with their own strong definitions.
 
-#include "platforms/shared/spi_single.h"
+#include "platforms/shared/spi_hw_2.h"
 #include "fl/compiler_control.h"
 
 namespace fl {
 
 #ifndef FASTLED_TESTING  // Skip weak default when testing (stub provides strong definition)
 
-/// Weak default factory - returns empty vector (no Single-SPI support)
+/// Weak default factory - returns empty vector (no 2-lane SPI support)
 /// Platform-specific implementations override this function
 FL_LINK_WEAK
-fl::vector<SPISingle*> SPISingle::createInstances() {
-    // Default: no Single-SPI available
+fl::vector<SpiHw2*> SpiHw2::createInstances() {
+    // Default: no 2-lane hardware SPI available
     // Platform implementations will override this with their own strong definition
-    return fl::vector<SPISingle*>();
+    return fl::vector<SpiHw2*>();
 }
 
 #endif  // FASTLED_TESTING

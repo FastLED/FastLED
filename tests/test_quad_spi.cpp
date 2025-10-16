@@ -214,10 +214,10 @@ TEST_CASE("SPITransposerQuad: Multi-byte lanes") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_quad.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_4.h"
 
 TEST_CASE("SPIBlocking Quad: Basic initialization and configuration") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
 
     // Configure pins (4 data + 1 clock)
     spi.setPinMapping(0, 1, 2, 3, 8);  // Data pins 0,1,2,3, Clock pin 8
@@ -235,7 +235,7 @@ TEST_CASE("SPIBlocking Quad: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Quad: LUT initialization") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
     spi.setPinMapping(5, 6, 7, 8, 10);  // Data pins 5,6,7,8, Clock pin 10
 
     PinMaskEntry* lut = spi.getLUTArray();
@@ -276,7 +276,7 @@ TEST_CASE("SPIBlocking Quad: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Quad: Empty buffer handling") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
     spi.setPinMapping(0, 1, 2, 3, 8);
 
     // Transmit with no buffer should not crash
@@ -289,7 +289,7 @@ TEST_CASE("SPIBlocking Quad: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Quad: Maximum buffer size") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
     spi.setPinMapping(0, 1, 2, 3, 8);
 
     uint8_t largeBuffer[300];
@@ -303,7 +303,7 @@ TEST_CASE("SPIBlocking Quad: Maximum buffer size") {
 }
 
 TEST_CASE("SPIBlocking Quad: All 16 patterns") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
     spi.setPinMapping(2, 3, 4, 5, 10);
 
     PinMaskEntry* lut = spi.getLUTArray();
@@ -332,7 +332,7 @@ TEST_CASE("SPIBlocking Quad: Multiple pin configurations") {
     // Test a subset of pin configurations for quad-lane
     for (uint8_t d0 = 0; d0 < 3; d0++) {
         for (uint8_t d1 = 3; d1 < 5; d1++) {
-            QuadSPI_Blocking_ESP32 spi;
+            SpiBlock4 spi;
             uint8_t d2 = d1 + 1;
             uint8_t d3 = d2 + 1;
             uint8_t clk = 10;
@@ -361,7 +361,7 @@ TEST_CASE("SPIBlocking Quad: Multiple pin configurations") {
 }
 
 TEST_CASE("SPIBlocking Quad: Pattern consistency") {
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
     spi.setPinMapping(1, 2, 3, 4, 9);
 
     PinMaskEntry* lut = spi.getLUTArray();

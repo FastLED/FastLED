@@ -17,7 +17,7 @@ FL_EXTERN_C_BEGIN
 
 FL_EXTERN_C_END
 
-#include "fl_parallel_spi_isr_rv.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 
 #define PARALLEL_SPI_TAG "parallel_spi_c3"
 

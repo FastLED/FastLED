@@ -93,23 +93,24 @@
 /// @see QuadSPIController for the full ESP32 hardware integration
 /// @see fl/quad_spi_platform.h for platform detection macros
 
-#include "fl/span.h"
-#include "fl/optional.h"
+#include "spi_transposer.h"
 
 namespace fl {
 
-/// Stateless bit-interleaving transposer for Quad-SPI parallel LED transmission
+/// @deprecated Use SPITransposer::transpose4() or SPITransposer::transpose8() instead
+///
+/// Backward-compatible wrapper for Quad-SPI bit-interleaving.
+/// This class now delegates to the unified SPITransposer implementation.
 ///
 /// Pure functional design: no instance state, all data provided by caller.
 /// Memory management is the caller's responsibility.
 class SPITransposerQuad {
 public:
     /// Lane data structure: payload + padding frame
-    struct LaneData {
-        fl::span<const uint8_t> payload;        ///< Actual LED data for this lane
-        fl::span<const uint8_t> padding_frame;  ///< Black LED frame for padding (repeating pattern)
-    };
+    using LaneData = SPITransposer::LaneData;
 
+    /// @deprecated Use SPITransposer::transpose4() instead
+    ///
     /// Transpose up to 4 lanes of data into interleaved quad-SPI format
     ///
     /// @param lane0 Lane 0 data (use fl::nullopt for unused lane)
@@ -123,6 +124,7 @@ public:
     /// @note Output buffer size determines max lane size: max_size = output.size() / 4
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
+    [[deprecated("Use SPITransposer::transpose4() instead")]]
     static bool transpose(const fl::optional<LaneData>& lane0,
                          const fl::optional<LaneData>& lane1,
                          const fl::optional<LaneData>& lane2,
@@ -130,6 +132,8 @@ public:
                          fl::span<uint8_t> output,
                          const char** error = nullptr);
 
+    /// @deprecated Use SPITransposer::transpose8() instead
+    ///
     /// Transpose up to 8 lanes of data into interleaved octal-SPI format
     ///
     /// @param lanes Array of 8 lane data (use fl::nullopt for unused lanes)
@@ -140,32 +144,10 @@ public:
     /// @note Output buffer size determines max lane size: max_size = output.size() / 8
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
+    [[deprecated("Use SPITransposer::transpose8() instead")]]
     static bool transpose8(const fl::optional<LaneData> lanes[8],
                           fl::span<uint8_t> output,
                           const char** error = nullptr);
-
-private:
-    /// Optimized bit interleaving using direct bit extraction (4 lanes)
-    /// @param dest Output buffer (must have space for 4 bytes)
-    /// @param a Lane 0 input byte
-    /// @param b Lane 1 input byte
-    /// @param c Lane 2 input byte
-    /// @param d Lane 3 input byte
-    static void interleave_byte_optimized(uint8_t* dest,
-                                          uint8_t a, uint8_t b,
-                                          uint8_t c, uint8_t d);
-
-    /// Optimized bit interleaving for 8 lanes (octal mode)
-    /// @param dest Output buffer (must have space for 8 bytes)
-    /// @param lane_bytes Array of 8 input bytes (one per lane)
-    static void interleave_byte_octal(uint8_t* dest, const uint8_t lane_bytes[8]);
-
-    /// Get byte from lane at given index, handling padding automatically
-    /// @param lane Lane data (payload + padding frame)
-    /// @param byte_idx Byte index in the padded output
-    /// @param max_size Maximum lane size (for padding calculation)
-    /// @return Byte value (from data or padding)
-    static uint8_t getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size);
 };
 
 }  // namespace fl

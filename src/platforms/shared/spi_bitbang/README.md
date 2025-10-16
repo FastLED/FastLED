@@ -44,17 +44,18 @@ Both implementations share the **same bit-banging logic** and **256-entry LUT de
                  │                           │
      ┌───────────▼────────────────────────┐ │
      │   ISR Width Wrappers               │ │
-     │  - SingleSPI_ISR_ESP32C3  (1-way)  │ │
-     │  - DualSPI_ISR_ESP32C3    (2-way)  │ │
-     │  - QuadSPI_ISR_ESP32C3    (4-way)  │ │
-     │  - FastLEDParallelSPI_... (8-way)  │ │
+     │  - SpiIsr1  (1-way)                │ │
+     │  - SpiIsr2  (2-way)                │ │
+     │  - SpiIsr4  (4-way)                │ │
+     │  - SpiIsr8  (8-way) ✨             │ │
      └────────────────────────────────────┘ │
                                             │
               ┌─────────────────────────────▼────────────┐
               │   Blocking Width Wrappers                │
-              │  - SingleSPI_Blocking_ESP32  (1-way) ✅  │
-              │  - DualSPI_Blocking_ESP32    (2-way) ✅  │
-              │  - QuadSPI_Blocking_ESP32    (4-way) ✅  │
+              │  - SpiBlock1  (1-way) ✅                 │
+              │  - SpiBlock2  (2-way) ✅                 │
+              │  - SpiBlock4  (4-way) ✅                 │
+              │  - SpiBlock8  (8-way) ✨ NEW!           │
               └──────────────────────────────────────────┘
 ```
 
@@ -64,19 +65,19 @@ Both implementations share the **same bit-banging logic** and **256-entry LUT de
 
 | Width | Data Pins | Clock | Class Name | Header File |
 |-------|-----------|-------|------------|-------------|
-| 1-way | 1 (D0) | 1 | `SingleSPI_ISR_ESP32C3` | `parallel_spi_isr_single_esp32c3.hpp` |
-| 2-way | 2 (D0-D1) | 1 | `DualSPI_ISR_ESP32C3` | `parallel_spi_isr_dual_esp32c3.hpp` |
-| 4-way | 4 (D0-D3) | 1 | `QuadSPI_ISR_ESP32C3` | `parallel_spi_isr_quad_esp32c3.hpp` |
-| 8-way | 8 (D0-D7) | 1 | `FastLEDParallelSPI_ESP32C3` | `fastled_parallel_spi_esp32c3.hpp` |
+| 1-way | 1 (D0) | 1 | `SpiIsr1` | `spi_isr_1.h` |
+| 2-way | 2 (D0-D1) | 1 | `SpiIsr2` | `spi_isr_2.h` |
+| 4-way | 4 (D0-D3) | 1 | `SpiIsr4` | `spi_isr_4.h` |
+| 8-way | 8 (D0-D7) | 1 | `SpiIsr8` | `spi_isr_8.h` |
 
 ### Blocking Implementations (Inline, Main Thread)
 
 | Width | Data Pins | Clock | Class Name | Header File |
 |-------|-----------|-------|------------|-------------|
-| 1-way | 1 (D0) | 1 | `SingleSPI_Blocking_ESP32` | `parallel_spi_blocking_single.hpp` |
-| 2-way | 2 (D0-D1) | 1 | `DualSPI_Blocking_ESP32` | `parallel_spi_blocking_dual.hpp` |
-| 4-way | 4 (D0-D3) | 1 | `QuadSPI_Blocking_ESP32` | `parallel_spi_blocking_quad.hpp` |
-| 8-way | 8 (D0-D7) | 1 | *Future* | *Not yet implemented* |
+| 1-way | 1 (D0) | 1 | `SpiBlock1` | `spi_block_1.h` |
+| 2-way | 2 (D0-D1) | 1 | `SpiBlock2` | `spi_block_2.h` |
+| 4-way | 4 (D0-D3) | 1 | `SpiBlock4` | `spi_block_4.h` |
+| 8-way | 8 (D0-D7) | 1 | `SpiBlock8` ✨ | `spi_block_8.h` ✨ |
 
 ### When to Use Each Width
 
@@ -103,39 +104,40 @@ Both implementations share the **same bit-banging logic** and **256-entry LUT de
 ## 🔑 Key Files
 
 ### ISR Implementation
-- **`fl_parallel_spi_isr_rv.h`** - C interface for ISR engine
-- **`fl_parallel_spi_isr_rv.cpp`** - RISC-V optimized ISR implementation
-- **`parallel_spi_isr_single_esp32c3.hpp`** - 1-way ISR wrapper
-- **`parallel_spi_isr_dual_esp32c3.hpp`** - 2-way ISR wrapper
-- **`parallel_spi_isr_quad_esp32c3.hpp`** - 4-way ISR wrapper
-- **`fastled_parallel_spi_esp32c3.hpp`** - 8-way ISR wrapper
+- **`spi_isr_engine.h`** - C interface for ISR engine (formerly `fl_parallel_spi_isr_rv.h`)
+- **`spi_isr_engine.cpp`** - RISC-V optimized ISR implementation
+- **`spi_isr_1.h`** - 1-way ISR wrapper (formerly `parallel_spi_isr_single_esp32c3.hpp`)
+- **`spi_isr_2.h`** - 2-way ISR wrapper (formerly `parallel_spi_isr_dual_esp32c3.hpp`)
+- **`spi_isr_4.h`** - 4-way ISR wrapper (formerly `parallel_spi_isr_quad_esp32c3.hpp`)
+- **`spi_isr_8.h`** - 8-way ISR wrapper ✨ (formerly `fastled_parallel_spi_esp32c3.hpp`)
 
 ### Blocking Implementation
-- **`parallel_spi_blocking_single.hpp`** - 1-way blocking inline bit-banger
-- **`parallel_spi_blocking_dual.hpp`** - 2-way blocking inline bit-banger
-- **`parallel_spi_blocking_quad.hpp`** - 4-way blocking inline bit-banger
+- **`spi_block_1.h`** - 1-way blocking inline bit-banger (formerly `parallel_spi_blocking_single.hpp`)
+- **`spi_block_2.h`** - 2-way blocking inline bit-banger (formerly `parallel_spi_blocking_dual.hpp`)
+- **`spi_block_4.h`** - 4-way blocking inline bit-banger (formerly `parallel_spi_blocking_quad.hpp`)
+- **`spi_block_8.h`** - 8-way blocking inline bit-banger ✨ (NEW!)
 
 ### Platform Support
-- **`fl_parallel_spi_platform.h`** - Platform abstraction layer (ESP32 vs host)
-- **`esp32c3_isr_platform.cpp`** - ESP32-C3/C2 platform-specific code
+- **`spi_platform.h`** - Platform abstraction layer (ESP32 vs host)
+- **`../esp/32/spi_platform_esp32.cpp`** - ESP32 platform-specific implementation
 
 ### Host Simulation (Testing)
-- **`fl_parallel_spi_host_sim.h`** - Host simulation API
-- **`fl_parallel_spi_host_sim.cpp`** - Ring buffer capture for GPIO events
-- **`fl_parallel_spi_host_timer.cpp`** - Timer simulation for testing
+- **`host_sim.h`** - Host simulation API (formerly `fl_parallel_spi_host_sim.h`)
+- **`host_sim.cpp`** - Ring buffer capture for GPIO events
+- **`host_timer.cpp`** - Timer simulation for testing
 
 ## 🚀 Usage Examples
 
 ### Blocking SPI (Simpler API, Inline Execution)
 
 ```cpp
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_quad.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_4.h"
 
 using namespace fl;
 
 void setup() {
-    // Create Quad-SPI blocking driver instance
-    QuadSPI_Blocking_ESP32 spi;
+    // Create 4-way SPI blocking driver instance
+    SpiBlock4 spi;
 
     // Configure pin mapping (4 data pins + 1 clock)
     spi.setPinMapping(0, 1, 2, 3, 8);  // D0-D3 = GPIO0-3, CLK = GPIO8
@@ -154,13 +156,13 @@ void setup() {
 ### ISR-Based SPI (Async, Non-Blocking)
 
 ```cpp
-#include "platforms/esp/32/parallel_spi/parallel_spi_isr_quad_esp32c3.hpp"
+#include "platforms/shared/spi_bitbang/spi_isr_4.h"
 
 using namespace fl;
 
 void setup() {
-    // Create Quad-SPI ISR driver instance
-    QuadSPI_ISR_ESP32C3 spi;
+    // Create 4-way SPI ISR driver instance
+    SpiIsr4 spi;
 
     // Configure pin mapping (4 data pins + 1 clock)
     spi.setPinMapping(0, 1, 2, 3, 8);  // D0-D3 = GPIO0-3, CLK = GPIO8
@@ -173,7 +175,7 @@ void setup() {
     spi.setupISR(1600000);
 
     // Wait for memory visibility
-    QuadSPI_ISR_ESP32C3::visibilityDelayUs(10);
+    SpiIsr4::visibilityDelayUs(10);
 
     // Start transfer (non-blocking - ISR handles transmission)
     spi.arm();
@@ -405,7 +407,7 @@ The ESP32-P4 supports **hardware octal-SPI** for driving up to 8 parallel LED st
 - **Performance**: DMA-accelerated, completes 8×100 LED strips in <500µs
 - **CPU Usage**: 0% during transmission (vs. 100% for blocking, or ISR overhead)
 - **Platform**: ESP32-P4 only with IDF 5.0+ (older platforms use software fallback)
-- **Implementation**: Located in `src/platforms/esp/32/spi_quad_esp32.cpp` and `src/platforms/shared/spi_transposer_quad.*`
+- **Implementation**: Located in `src/platforms/esp/32/spi_hw_8_esp32.cpp` and `src/platforms/shared/spi_transposer.*`
 
 For detailed hardware octal-SPI information, see:
 - `src/platforms/esp/32/README.md` - Hardware octal-SPI overview

@@ -9,8 +9,8 @@
 
 #ifdef FASTLED_SPI_HOST_SIMULATION
 
-#include "fl_parallel_spi_platform.h"
-#include "fl_parallel_spi_host_sim.h"
+#include "spi_platform.h"
+#include "host_sim.h"
 #include <stdint.h>
 #include <string.h>
 #include <stdbool.h>

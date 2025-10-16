@@ -1,85 +1,82 @@
-// parallel_spi_isr_dual_esp32c3.hpp — 2-way Dual-SPI ISR wrapper for ESP32-C3/C2
+// spi_isr_4.h — 4-way Quad-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include <stddef.h>
-#include "fl_parallel_spi_isr_rv.h"
+#include "spi_isr_engine.h"
 
 #ifndef SPI_ISR_SOFTWARE_BITBANG_FORCED_ON
-#warning "DualSPI_ISR_ESP32C3 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
+#warning "SpiIsr4 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
 #endif
 
 namespace fl {
 
 /**
- * DualSPI_ISR_ESP32C3 - 2-way parallel soft-SPI ISR driver for ESP32-C3/C2
+ * SpiIsr4 - 4-way parallel soft-SPI ISR driver (platform-agnostic bitbanging)
  *
- * This class provides a simplified 2-pin variant of the parallel SPI ISR driver,
- * specifically designed to match hardware Dual-SPI architecture (2 data + 1 clock).
+ * This class provides a simplified 4-pin variant of the parallel SPI ISR driver,
+ * specifically designed to match hardware Quad-SPI architecture (4 data + 1 clock).
  *
- * Key Differences from 4-way QuadSPI and 8-way ParallelSPI:
- * - Only 2 data pins (instead of 4 or 8)
- * - Simplified LUT initialization (only 4 unique states)
- * - Direct mapping to hardware Dual-SPI topology
- * - Ideal for testing hardware Dual-SPI implementations
- * - Useful for platforms with limited GPIO availability
+ * Key Differences from 8-way SpiIsr8:
+ * - Only 4 data pins (instead of 8)
+ * - Simplified LUT initialization (only 16 unique states)
+ * - Direct mapping to hardware Quad-SPI topology
+ * - Ideal for testing hardware Quad-SPI implementations
  *
  * Architecture:
  * - Reuses the same ISR code (fl_parallel_spi_isr_rv.h/cpp)
- * - 256-entry LUT maps byte values to 2-pin GPIO masks
- * - Only uses lower 2 bits of byte value (upper 6 bits ignored)
+ * - 256-entry LUT maps byte values to 4-pin GPIO masks
+ * - Only uses lower 4 bits of byte value (upper 4 bits ignored)
  * - ISR operates at highest priority for minimal jitter
  *
  * Typical Usage:
- *   DualSPI_ISR_ESP32C3 spi;
- *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_clk);
+ *   SpiIsr4 spi;
+ *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_d2, gpio_d3, gpio_clk);
  *   spi.setupISR(1600000);  // 1.6MHz timer = 800kHz SPI
  *   spi.loadBuffer(data, len);
  *   spi.arm();
  *   while(spi.isBusy()) { }
  *   spi.stopISR();
- *
- * Test Patterns:
- * - 0x00: Both pins low (00)
- * - 0x01: D0 high, D1 low (01)
- * - 0x02: D0 low, D1 high (10)
- * - 0x03: Both pins high (11)
  */
-class DualSPI_ISR_ESP32C3 {
+class SpiIsr4 {
 public:
     /// Status bit definitions
     static constexpr uint32_t STATUS_BUSY = 1u;
     static constexpr uint32_t STATUS_DONE = 2u;
 
-    /// Maximum pins per lane (dual = 2)
-    static constexpr int NUM_DATA_PINS = 2;
+    /// Maximum pins per lane (quad = 4)
+    static constexpr int NUM_DATA_PINS = 4;
 
-    DualSPI_ISR_ESP32C3() = default;
-    ~DualSPI_ISR_ESP32C3() = default;
+    SpiIsr4() = default;
+    ~SpiIsr4() = default;
 
     /**
-     * Configure pin mapping for 2 data pins + 1 clock
+     * Configure pin mapping for 4 data pins + 1 clock
      * @param d0 GPIO number for data bit 0 (LSB)
-     * @param d1 GPIO number for data bit 1 (MSB)
+     * @param d1 GPIO number for data bit 1
+     * @param d2 GPIO number for data bit 2
+     * @param d3 GPIO number for data bit 3 (MSB)
      * @param clk GPIO number for clock pin
      *
      * Automatically initializes the 256-entry LUT to map byte values
-     * to GPIO masks for the 2 specified data pins.
+     * to GPIO masks for the 4 specified data pins.
      */
-    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t clk) {
+    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t clk) {
         // Store clock mask
         fl_spi_set_clock_mask(1u << clk);
 
         // Build pin masks array
         uint32_t dataPinMasks[NUM_DATA_PINS] = {
             1u << d0,  // Bit 0
-            1u << d1   // Bit 1
+            1u << d1,  // Bit 1
+            1u << d2,  // Bit 2
+            1u << d3   // Bit 3
         };
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
-        // - Extract lower 2 bits
+        // - Extract lower 4 bits
         // - Map each bit to corresponding GPIO pin
         // - Generate set_mask (pins to set high) and clear_mask (pins to clear low)
         PinMaskEntry* lut = fl_spi_get_lut_array();
@@ -88,7 +85,7 @@ public:
             uint32_t setMask = 0;
             uint32_t clearMask = 0;
 
-            // Only process lower 2 bits (upper 6 bits ignored)
+            // Only process lower 4 bits (upper 4 bits ignored)
             for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
                 if (byteValue & (1 << bitPos)) {
                     setMask |= dataPinMasks[bitPos];
@@ -104,14 +101,14 @@ public:
 
     /**
      * Alternative: Configure pin mapping using clock mask directly
-     * @param d0-d1 GPIO numbers for data pins
+     * @param d0-d3 GPIO numbers for data pins
      * @param clockMask Pre-computed GPIO mask for clock pin (e.g., 1 << 8)
      */
-    void setPinMappingWithMask(uint8_t d0, uint8_t d1, uint32_t clockMask) {
+    void setPinMappingWithMask(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint32_t clockMask) {
         fl_spi_set_clock_mask(clockMask);
 
         uint32_t dataPinMasks[NUM_DATA_PINS] = {
-            1u << d0, 1u << d1
+            1u << d0, 1u << d1, 1u << d2, 1u << d3
         };
 
         PinMaskEntry* lut = fl_spi_get_lut_array();
@@ -137,8 +134,8 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      *
-     * Each byte in the buffer represents 2 parallel bits to output.
-     * Only the lower 2 bits of each byte are used.
+     * Each byte in the buffer represents 4 parallel bits to output.
+     * Only the lower 4 bits of each byte are used.
      */
     void loadBuffer(const uint8_t* data, uint16_t n) {
         if (!data) return;
@@ -271,5 +268,8 @@ public:
     }
 #endif
 };
+
+// Backward-compatible type alias (deprecated)
+using QuadSPI_ISR_ESP32C3 [[deprecated("Use SpiIsr4 instead of QuadSPI_ISR_ESP32C3")]] = SpiIsr4;
 
 }  // namespace fl

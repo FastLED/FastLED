@@ -15,7 +15,7 @@
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
-#include "platforms/shared/spi_single.h"
+#include "platforms/shared/spi_hw_1.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -60,12 +60,12 @@ namespace fl {
 /// Implements SPISingle interface for ESP-IDF SPI peripheral
 ///
 /// **COMPATIBILITY WARNING**: transmitAsync() is currently BLOCKING
-class SPISingleESP32 : public SPISingle {
+class SPISingleESP32 : public SpiHw1 {
 public:
     explicit SPISingleESP32(int bus_id = -1, const char* name = "Unknown");
     ~SPISingleESP32();
 
-    bool begin(const SPISingle::Config& config) override;
+    bool begin(const SpiHw1::Config& config) override;
     void end() override;
     bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
@@ -103,7 +103,7 @@ SPISingleESP32::~SPISingleESP32() {
     cleanup();
 }
 
-bool SPISingleESP32::begin(const SPISingle::Config& config) {
+bool SPISingleESP32::begin(const SpiHw1::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -241,8 +241,8 @@ void SPISingleESP32::cleanup() {
 
 /// ESP32 factory override - returns available SPI bus instances
 /// Strong definition overrides weak default
-fl::vector<SPISingle*> SPISingle::createInstances() {
-    fl::vector<SPISingle*> controllers;
+fl::vector<SpiHw1*> SpiHw1::createInstances() {
+    fl::vector<SpiHw1*> controllers;
 
     // Bus 2 is available on all ESP32 platforms
     static SPISingleESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime

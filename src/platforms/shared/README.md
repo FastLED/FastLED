@@ -10,31 +10,43 @@ Common, platform‑agnostic components used by multiple targets (data export, UI
 
 Shared platform code includes multi-lane SPI transposer infrastructure supporting 1/2/4/8 parallel data lanes:
 
-### SPI Transposer (spi_transposer_quad.*)
-Bit-interleaving engine for parallel SPI transmission. Transposes sequential pixel data into parallel bitstreams for simultaneous multi-strip output.
+### Unified SPI Transposer (spi_transposer.*)
+**NEW**: Unified bit-interleaving engine for all parallel SPI widths. Transposes sequential pixel data into parallel bitstreams for simultaneous multi-strip output.
 
 **Supported Widths:**
 - 1-lane (single-SPI)
-- 2-lane (dual-SPI)
-- 4-lane (quad-SPI)
-- 8-lane (octo-SPI) ✨ New in ESP32-P4 hardware implementation
+- 2-lane (dual-SPI) via `transpose2()`
+- 4-lane (quad-SPI) via `transpose4()`
+- 8-lane (octo-SPI) via `transpose8()` ✨
 
 **Key Features:**
-- Automatic width detection based on configured data pins
-- Optimized bit-interleaving algorithms for each width
-- Platform-agnostic (used by both hardware and software implementations)
-- Zero-copy operation where possible
+- **Single unified API**: All transpose operations in `SPITransposer` class
+- **Consistent naming**: `transpose2()`, `transpose4()`, `transpose8()` methods
+- **Optimized algorithms**: Width-specific interleaving for each configuration
+- **Platform-agnostic**: Used by both hardware and software implementations
+- **Zero-copy operation**: Efficient memory handling
 
-### SPI Configuration (spi_quad.h)
-Platform-independent SPI configuration API:
+**Legacy Compatibility:**
+- `spi_transposer_dual.*` - Deprecated wrappers for 2-lane (calls `transpose2()`)
+- `spi_transposer_quad.*` - Deprecated wrappers for 4-lane/8-lane (calls `transpose4()`/`transpose8()`)
 
+### SPI Hardware Interfaces
+Platform-independent SPI configuration APIs organized by lane count:
+
+**Interfaces:**
+- `spi_hw_1.h` - Single-lane SPI (`SpiHw1`)
+- `spi_hw_2.h` - Dual-lane SPI (`SpiHw2`)
+- `spi_hw_4.h` - 4-lane SPI (`SpiHw4`)
+- `spi_hw_8.h` - 8-lane SPI (`SpiHw8`) ✨ **NEW**
+
+**Example Configuration:**
 ```cpp
 namespace fl {
-struct SPIQuad {
+struct SpiHw8 {
     struct Config {
-        uint8_t data0, data1, data2, data3;  // Quad-SPI pins
-        uint8_t data4, data5, data6, data7;  // Octo-SPI pins (ESP32-P4)
-        uint8_t clock;
+        uint8_t data0, data1, data2, data3;  // First 4 data pins
+        uint8_t data4, data5, data6, data7;  // Next 4 data pins (8-lane)
+        uint8_t clock;                        // Shared clock pin
         // ... other config
     };
 };
@@ -42,19 +54,19 @@ struct SPIQuad {
 ```
 
 **Configuration supports:**
-- Variable width (1-8 data pins)
+- Explicit lane count per interface (no ambiguity)
 - Clock pin assignment
 - Hardware vs software fallback selection
 - Per-platform capabilities detection
 
 ### Hardware vs Software
-The transposer is used by both:
+The transposer and interfaces are used by both:
 - **Hardware SPI** (ESP32-P4 octal, ESP32 quad): DMA-accelerated, ~40× faster
-- **Software SPI** (ESP32-C3 ISR/blocking): Bit-banged fallback for all platforms
+- **Software SPI** (bitbang ISR/blocking): Platform-agnostic fallback for all platforms
 
 See platform-specific READMEs for implementation details:
-- `src/platforms/esp/32/README.md` - ESP32 hardware octal-SPI
-- `src/platforms/esp/32/parallel_spi/README.md` - Software multi-width SPI
+- `src/platforms/esp/32/README.md` - ESP32 hardware multi-lane SPI
+- `src/platforms/shared/spi_bitbang/README.md` - Software multi-width SPI
 
 ## Behavior and integration
 - `ActiveStripData` listens to `EngineEvents` to clear and publish per‑frame data; exposes legacy and new JSON creators and parsing helpers, plus on‑demand screenmap updates.

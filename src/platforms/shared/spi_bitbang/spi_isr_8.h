@@ -1,10 +1,10 @@
-// fastled_parallel_spi_esp32c3.hpp — C++ binds for the parallel soft-SPI ISR engine
+// spi_isr_8.h — 8-way parallel soft-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include <stddef.h>  // For offsetof
-#include "fl_parallel_spi_isr_rv.h"
+#include "spi_isr_engine.h"
 
 #ifdef FL_SPI_ISR_VALIDATE
 // C++ wrapper types for GPIO events (provides type safety and convenience methods)
@@ -41,21 +41,20 @@ static_assert(offsetof(GPIOEvent, payload) == offsetof(FastLED_GPIO_Event, paylo
 namespace fl {
 
 /**
- * ParallelSPI_ESP32C3 - High-priority parallel soft-SPI driver for ESP32-C3
+ * SpiIsr8 - High-priority 8-way parallel soft-SPI ISR driver (platform-agnostic bitbanging)
  *
- * This class provides a zero-volatile-read ISR-based parallel SPI implementation
- * optimized for ESP32-C3 RISC-V architecture. It can operate at the highest
- * available interrupt priority level for minimal jitter.
+ * This class provides a zero-volatile-read ISR-based parallel SPI implementation.
+ * It can operate at the highest available interrupt priority level for minimal jitter.
  *
  * Features:
  * - 8-bit parallel data output + 1 clock pin
  * - ISR performs only MMIO writes (no volatile reads)
  * - Edge-triggered doorbell for producer/consumer synchronization
  * - Two-phase bit engine (data+CLK low, then CLK high)
- * - Configurable interrupt priority (Level 3 official, 4-7 experimental)
+ * - Platform-agnostic via abstraction layer
  *
  * Usage:
- *   ParallelSPI_ESP32C3 spi;
+ *   SpiIsr8 spi;
  *   spi.setClockMask(1 << 8);  // Clock on GPIO8
  *   spi.loadLUT(setMasks, clearMasks);  // Pin mapping
  *   spi.setupISR(1600000);  // 1.6MHz timer (800kHz SPI)
@@ -64,14 +63,14 @@ namespace fl {
  *   while(spi.isBusy()) { }
  *   spi.stopISR();
  */
-class ParallelSPI_ESP32C3 {
+class SpiIsr8 {
 public:
     /// Status bit definitions
     static constexpr uint32_t STATUS_BUSY = 1u;
     static constexpr uint32_t STATUS_DONE = 2u;
 
-    ParallelSPI_ESP32C3() = default;
-    ~ParallelSPI_ESP32C3() = default;
+    SpiIsr8() = default;
+    ~SpiIsr8() = default;
 
     /**
      * Configure GPIO clock mask (single bit for clock pin)
@@ -238,5 +237,8 @@ public:
     }
 #endif
 };
+
+// Backward-compatible type alias (deprecated)
+using ParallelSPI_ESP32C3 [[deprecated("Use SpiIsr8 instead of ParallelSPI_ESP32C3")]] = SpiIsr8;
 
 }  // namespace fl

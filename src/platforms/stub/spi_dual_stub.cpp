@@ -16,7 +16,7 @@ SPIDualStub::SPIDualStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPIDualStub::begin(const SPIDual::Config& config) {
+bool SPIDualStub::begin(const SpiHw2::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -141,8 +141,8 @@ fl::vector<fl::vector<uint8_t>> SPIDualStub::extractLanes(uint8_t num_lanes, siz
 // Factory Implementation (Weak Linkage for Testing)
 // ============================================================================
 
-fl::vector<SPIDual*> SPIDual::createInstances() {
-    fl::vector<SPIDual*> controllers;
+fl::vector<SpiHw2*> SpiHw2::createInstances() {
+    fl::vector<SpiHw2*> controllers;
 
     // Create two mock controllers for testing
     static SPIDualStub controller0(0, "MockDual0");

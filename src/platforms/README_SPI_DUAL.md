@@ -115,14 +115,14 @@ ESP32
 
 ## Core Components
 
-### 1. SPIDual (Platform Interface)
+### 1. SpiHw2 (Platform Interface)
 
-**Location:** `src/platforms/shared/spi_dual.h`
+**Location:** `src/platforms/shared/spi_hw_2.h`
 
 Abstract interface that platform implementations must provide:
 
 ```cpp
-class SPIDual {
+class SpiHw2 {
 public:
     struct Config {
         uint8_t bus_num;           // SPI bus (2 or 3 on ESP32)
@@ -141,7 +141,7 @@ public:
     virtual bool isInitialized() const = 0;
 
     // Factory method (platform-specific override)
-    static const fl::vector<SPIDual*>& getAll();
+    static const fl::vector<SpiHw2*>& getAll();
 };
 ```
 
@@ -152,28 +152,33 @@ public:
 - **Auto-detection:** `begin()` configures dual mode based on active pins
 - **Singleton instances:** `getAll()` returns static lifetime controllers
 
-### 2. SPITransposerDual (Bit-Interleaving Logic)
+### 2. SPITransposer (Unified Bit-Interleaving Logic)
 
-**Location:** `src/platforms/shared/spi_transposer_dual.h`
+**Location:** `src/platforms/shared/spi_transposer.h`
 
-Stateless transposer that converts per-lane data into interleaved format:
+Unified stateless transposer that converts per-lane data into interleaved format for all widths:
 
 ```cpp
-class SPITransposerDual {
+class SPITransposer {
 public:
     struct LaneData {
         fl::span<const uint8_t> payload;        // Actual LED data
         fl::span<const uint8_t> padding_frame;  // Black LED frame for padding
     };
 
-    static bool transpose(
+    /// Transpose 2 lanes (Dual-SPI)
+    static bool transpose2(
         const fl::optional<LaneData>& lane0,
         const fl::optional<LaneData>& lane1,
         fl::span<uint8_t> output,
         const char** error = nullptr
     );
+
+    // Also available: transpose4() and transpose8() for other widths
 };
 ```
+
+**Note:** Legacy `SPITransposerDual::transpose()` is maintained as a deprecated wrapper that calls `SPITransposer::transpose2()`.
 
 **Pure Functional Design:**
 
@@ -182,14 +187,14 @@ public:
 - Idempotent - same input always produces same output
 - Thread-safe (no shared mutable state)
 
-### 3. SPIDualESP32 (ESP32 Implementation)
+### 3. SpiHw2ESP32 (ESP32 Implementation)
 
-**Location:** `src/platforms/esp/32/spi_dual_esp32.cpp`
+**Location:** `src/platforms/esp/32/spi_hw_2_esp32.cpp`
 
 ESP32 hardware implementation using ESP-IDF SPI master driver:
 
 ```cpp
-class SPIDualESP32 : public SPIDual {
+class SpiHw2ESP32 : public SpiHw2 {
 private:
     spi_device_handle_t mSPIHandle;
     spi_host_device_t mHost;  // SPI2_HOST or SPI3_HOST
@@ -410,26 +415,26 @@ void loop() {
 }
 ```
 
-### Advanced: Direct SPIDual Usage
+### Advanced: Direct SpiHw2 Usage
 
 For low-level control:
 
 ```cpp
-#include "platforms/shared/spi_dual.h"
-#include "platforms/shared/spi_transposer_dual.h"
+#include "platforms/shared/spi_hw_2.h"
+#include "platforms/shared/spi_transposer.h"
 
 void setup() {
     // Get available Dual-SPI controllers
-    const auto& controllers = fl::SPIDual::getAll();
+    const auto& controllers = fl::SpiHw2::getAll();
     if (controllers.empty()) {
         Serial.println("No Dual-SPI hardware available");
         return;
     }
 
-    fl::SPIDual* dual = controllers[0];
+    fl::SpiHw2* dual = controllers[0];
 
     // Configure hardware
-    fl::SPIDual::Config config;
+    fl::SpiHw2::Config config;
     config.bus_num = 2;              // HSPI
     config.clock_speed_hz = 40000000; // 40 MHz
     config.clock_pin = 18;
@@ -445,13 +450,13 @@ void setup() {
     fl::vector<uint8_t> lane0_data = {0xFF, 0x00, 0x00};  // Red LED
     fl::vector<uint8_t> lane1_data = {0xFF, 0xFF, 0x00};  // Green LED
 
-    fl::optional<fl::SPITransposerDual::LaneData> lane0 =
-        fl::SPITransposerDual::LaneData{
+    fl::optional<fl::SPITransposer::LaneData> lane0 =
+        fl::SPITransposer::LaneData{
             fl::span<const uint8_t>(lane0_data.data(), lane0_data.size()),
             fl::span<const uint8_t>()  // No padding
         };
-    fl::optional<fl::SPITransposerDual::LaneData> lane1 =
-        fl::SPITransposerDual::LaneData{
+    fl::optional<fl::SPITransposer::LaneData> lane1 =
+        fl::SPITransposer::LaneData{
             fl::span<const uint8_t>(lane1_data.data(), lane1_data.size()),
             fl::span<const uint8_t>()
         };
@@ -461,8 +466,8 @@ void setup() {
     fl::vector<uint8_t> output(max_size * 2);
 
     const char* error = nullptr;
-    if (fl::SPITransposerDual::transpose(lane0, lane1,
-                                         fl::span<uint8_t>(output), &error)) {
+    if (fl::SPITransposer::transpose2(lane0, lane1,
+                                      fl::span<uint8_t>(output), &error)) {
         dual->transmitAsync(fl::span<const uint8_t>(output));
         dual->waitComplete();
     } else {
@@ -477,7 +482,7 @@ Check if Dual-SPI is available:
 
 ```cpp
 // Runtime check (actual hardware)
-const auto& controllers = fl::SPIDual::getAll();
+const auto& controllers = fl::SpiHw2::getAll();
 if (!controllers.empty()) {
     Serial.printf("Found %d Dual-SPI controllers:\n", controllers.size());
     for (const auto& ctrl : controllers) {
@@ -569,8 +574,8 @@ FastLED's Dual-SPI system provides **efficient parallel LED control** through:
 
 ## References
 
-- **SPIDual Interface:** `src/platforms/shared/spi_dual.h`
-- **Transposer:** `src/platforms/shared/spi_transposer_dual.h`
-- **ESP32 Implementation:** `src/platforms/esp/32/spi_dual_esp32.cpp`
-- **Platform Detection:** `src/platforms/dual_spi_platform.h` (to be created)
+- **SpiHw2 Interface:** `src/platforms/shared/spi_hw_2.h`
+- **Unified Transposer:** `src/platforms/shared/spi_transposer.h`
+- **Legacy Transposer (deprecated):** `src/platforms/shared/spi_transposer_dual.h`
+- **ESP32 Implementation:** `src/platforms/esp/32/spi_hw_2_esp32.cpp`
 - **Tests:** `tests/test_dual_spi.cpp`

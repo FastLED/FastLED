@@ -15,7 +15,7 @@ SPISingleStub::SPISingleStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPISingleStub::begin(const SPISingle::Config& config) {
+bool SPISingleStub::begin(const SpiHw1::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -100,8 +100,8 @@ void SPISingleStub::reset() {
 // Factory Implementation (Weak Linkage for Testing)
 // ============================================================================
 
-fl::vector<SPISingle*> SPISingle::createInstances() {
-    fl::vector<SPISingle*> controllers;
+fl::vector<SpiHw1*> SpiHw1::createInstances() {
+    fl::vector<SpiHw1*> controllers;
 
     // Create two mock controllers for testing
     static SPISingleStub controller0(0, "MockSingle0");

@@ -1,12 +1,20 @@
 #pragma once
 
-/// @file spi_quad.h
-/// @brief Platform-agnostic Quad-SPI interface
+/// @file spi_hw_1.h
+/// @brief Platform-agnostic 1-lane hardware SPI interface
 ///
-/// This file defines the abstract interface that all platform-specific
-/// Quad-SPI hardware must implement. It enables the generic
-/// QuadSPIDevice to work across different platforms (ESP32, RP2040, etc.)
-/// without knowing platform-specific implementation details.
+/// This file defines the abstract interface for 1-lane (single-lane) SPI hardware.
+/// Platform-specific implementations (ESP32, RP2040, etc.) inherit from this
+/// interface to provide hardware SPI support.
+///
+/// **IMPORTANT COMPATIBILITY NOTE:**
+/// This implementation currently uses BLOCKING transmitAsync() for backwards
+/// compatibility with existing code. While the interface appears async, the
+/// transmission completes synchronously before returning.
+///
+/// TODO: Convert to true async DMA implementation in the future.
+/// This requires careful testing to ensure no regressions in existing code
+/// that relies on the blocking behavior.
 
 #include "fl/namespace.h"
 #include "fl/vector.h"
@@ -16,70 +24,61 @@
 
 namespace fl {
 
-class SPIQuad;
+class SpiHw1;
 
-/// Abstract interface for platform-specific Quad-SPI hardware
+/// Abstract interface for platform-specific 1-lane hardware SPI
 ///
 /// Platform implementations (ESP32, RP2040, etc.) inherit from this interface
 /// and provide concrete implementations of all virtual methods.
-class SPIQuad {
+///
+/// Naming: "SpiHw1" = SPI Hardware 1-lane
+class SpiHw1 {
 public:
-    virtual ~SPIQuad() = default;
+    virtual ~SpiHw1() = default;
 
     /// Platform-agnostic configuration structure
     struct Config {
         uint8_t bus_num;           ///< SPI bus number (platform-specific numbering)
         uint32_t clock_speed_hz;   ///< Clock frequency in Hz
         int8_t clock_pin;          ///< SCK GPIO pin
-        int8_t data0_pin;          ///< D0/MOSI GPIO pin
-        int8_t data1_pin;          ///< D1/MISO GPIO pin (-1 = unused)
-        int8_t data2_pin;          ///< D2/WP GPIO pin (-1 = unused)
-        int8_t data3_pin;          ///< D3/HD GPIO pin (-1 = unused)
-        int8_t data4_pin;          ///< D4 GPIO pin (-1 = unused, octal mode only)
-        int8_t data5_pin;          ///< D5 GPIO pin (-1 = unused, octal mode only)
-        int8_t data6_pin;          ///< D6 GPIO pin (-1 = unused, octal mode only)
-        int8_t data7_pin;          ///< D7 GPIO pin (-1 = unused, octal mode only)
-        uint32_t max_transfer_sz;  ///< Max bytes per transfer
+        int8_t data_pin;           ///< MOSI GPIO pin
+        size_t max_transfer_sz;    ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
             , clock_speed_hz(20000000)
             , clock_pin(-1)
-            , data0_pin(-1)
-            , data1_pin(-1)
-            , data2_pin(-1)
-            , data3_pin(-1)
-            , data4_pin(-1)
-            , data5_pin(-1)
-            , data6_pin(-1)
-            , data7_pin(-1)
+            , data_pin(-1)
             , max_transfer_sz(65536) {}
     };
 
     /// Initialize SPI peripheral with given configuration
     /// @param config Hardware configuration
     /// @returns true on success, false on error
-    /// @note Implementation should auto-detect dual/quad mode based on active pins
     virtual bool begin(const Config& config) = 0;
 
     /// Shutdown SPI peripheral and release resources
     /// @note Should wait for any pending transmissions to complete
     virtual void end() = 0;
 
-    /// Queue asynchronous DMA transmission (non-blocking)
-    /// @param buffer Data buffer to transmit (platform handles DMA requirements internally)
-    /// @returns true if queued successfully, false on error
-    /// @note Platform implementations handle DMA buffer allocation/alignment internally
-    /// @note Buffer must remain valid until waitComplete() returns
+    /// Queue transmission (currently BLOCKING for backwards compatibility)
+    /// @param buffer Data buffer to transmit
+    /// @returns true if transmitted successfully, false on error
+    /// @note **COMPATIBILITY WARNING**: Despite the "Async" name, this is currently
+    ///       BLOCKING and will not return until transmission completes.
+    /// @note TODO: Convert to true async DMA implementation in the future.
+    /// @note Buffer must remain valid until waitComplete() returns (currently immediate)
     virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
+    /// @note Currently returns immediately as transmitAsync() is blocking
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
+    /// @note Currently always returns false as transmitAsync() is blocking
     virtual bool isBusy() const = 0;
 
     /// Get initialization status
@@ -96,14 +95,14 @@ public:
     /// @note Returns "Unknown" if not assigned
     virtual const char* getName() const = 0;
 
-    /// Get all available Quad-SPI devices on this platform
+    /// Get all available 1-lane hardware SPI devices on this platform
     /// @returns Reference to static vector of available devices
     /// @note Cached - only allocates once on first call
     /// @note Thread-safe via C++11 static local initialization
-    /// @note Returns empty vector if platform doesn't support Quad-SPI
+    /// @note Returns empty vector if platform doesn't support hardware SPI
     /// @note Returns bare pointers - instances are alive forever (static lifetime)
-    static const fl::vector<SPIQuad*>& getAll() {
-        static fl::vector<SPIQuad*> instances = createInstances();
+    static const fl::vector<SpiHw1*>& getAll() {
+        static fl::vector<SpiHw1*> instances = createInstances();
         return instances;
     }
 
@@ -111,7 +110,10 @@ private:
     /// Platform-specific factory implementation (weak linkage)
     /// Each platform overrides this with strong definition
     /// @returns Vector of platform-specific instances
-    static fl::vector<SPIQuad*> createInstances();
+    static fl::vector<SpiHw1*> createInstances();
 };
+
+/// @deprecated Use SpiHw1 instead of SPISingle
+using SPISingle [[deprecated("Use SpiHw1 instead of SPISingle")]] = SpiHw1;
 
 }  // namespace fl

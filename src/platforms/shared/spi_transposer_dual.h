@@ -90,23 +90,24 @@
 /// @see DualSPIController for the full ESP32 hardware integration
 /// @see fl/dual_spi_platform.h for platform detection macros
 
-#include "fl/span.h"
-#include "fl/optional.h"
+#include "spi_transposer.h"
 
 namespace fl {
 
-/// Stateless bit-interleaving transposer for Dual-SPI parallel LED transmission
+/// @deprecated Use SPITransposer::transpose2() instead
+///
+/// Backward-compatible wrapper for Dual-SPI bit-interleaving.
+/// This class now delegates to the unified SPITransposer implementation.
 ///
 /// Pure functional design: no instance state, all data provided by caller.
 /// Memory management is the caller's responsibility.
 class SPITransposerDual {
 public:
     /// Lane data structure: payload + padding frame
-    struct LaneData {
-        fl::span<const uint8_t> payload;        ///< Actual LED data for this lane
-        fl::span<const uint8_t> padding_frame;  ///< Black LED frame for padding (repeating pattern)
-    };
+    using LaneData = SPITransposer::LaneData;
 
+    /// @deprecated Use SPITransposer::transpose2() instead
+    ///
     /// Transpose up to 2 lanes of data into interleaved dual-SPI format
     ///
     /// @param lane0 Lane 0 data (use fl::nullopt for unused lane)
@@ -118,25 +119,11 @@ public:
     /// @note Output buffer size determines max lane size: max_size = output.size() / 2
     /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
     /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
+    [[deprecated("Use SPITransposer::transpose2() instead")]]
     static bool transpose(const fl::optional<LaneData>& lane0,
                          const fl::optional<LaneData>& lane1,
                          fl::span<uint8_t> output,
                          const char** error = nullptr);
-
-private:
-    /// Optimized bit interleaving using direct bit extraction
-    /// @param dest Output buffer (must have space for 2 bytes)
-    /// @param a Lane 0 input byte
-    /// @param b Lane 1 input byte
-    static void interleave_byte_optimized(uint8_t* dest,
-                                          uint8_t a, uint8_t b);
-
-    /// Get byte from lane at given index, handling padding automatically
-    /// @param lane Lane data (payload + padding frame)
-    /// @param byte_idx Byte index in the padded output
-    /// @param max_size Maximum lane size (for padding calculation)
-    /// @return Byte value (from data or padding)
-    static uint8_t getLaneByte(const LaneData& lane, size_t byte_idx, size_t max_size);
 };
 
 }  // namespace fl

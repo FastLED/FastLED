@@ -36,8 +36,8 @@
 #include <stdint.h>
 #include <stddef.h>
 #include "fl/compiler_control.h"
-#include "fl_parallel_spi_isr_rv.h"
-#include "fl_parallel_spi_platform.h"
+#include "spi_isr_engine.h"
+#include "spi_platform.h"
 
 // For thread-safe memory synchronization in host simulation thread mode
 #if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)

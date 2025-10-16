@@ -1,16 +1,16 @@
-// parallel_spi_blocking_single.hpp — 1-way Single-SPI Blocking driver (inline bit-banging)
+// spi_block_4.h — 4-way Quad-SPI Blocking driver (inline bit-banging, platform-agnostic)
 #pragma once
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include <stddef.h>
-#include "fl_parallel_spi_isr_rv.h"
-#include "fl_parallel_spi_platform.h"
+#include "spi_isr_engine.h"
+#include "spi_platform.h"
 
 namespace fl {
 
 /**
- * SingleSPI_Blocking_ESP32 - 1-way (single-pin) blocking soft-SPI driver
+ * SpiBlock4 - 4-way (quad-pin) blocking soft-SPI driver (platform-agnostic bitbanging)
  *
  * This is a main-thread blocking implementation that uses inline bit-banging
  * with the same GPIO manipulation logic as the ISR-based implementation.
@@ -38,14 +38,14 @@ namespace fl {
  *
  * Architecture:
  * - Uses same bit-banging logic as ISR implementation
- * - 256-entry LUT maps byte values to 1-pin GPIO masks
- * - Only uses bit 0 of byte value (upper 7 bits ignored)
+ * - 256-entry LUT maps byte values to 4-pin GPIO masks
+ * - Only uses lower 4 bits of byte value (upper 4 bits ignored)
  * - Direct GPIO MMIO writes (same as ISR)
  * - Two-phase bit transmission (data+CLK_LOW, then CLK_HIGH)
  *
  * Typical Usage:
- *   SingleSPI_Blocking_ESP32 spi;
- *   spi.setPinMapping(gpio_data, gpio_clk);
+ *   SpiBlock4 spi;
+ *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_d2, gpio_d3, gpio_clk);
  *   spi.loadBuffer(data, len);
  *   spi.transmit();  // Blocks until complete
  *
@@ -53,49 +53,79 @@ namespace fl {
  * - Higher throughput than ISR due to no interrupt overhead
  * - Lower latency (no interrupt context switch)
  * - Better timing precision (inline execution)
+ *
+ * Test Patterns:
+ * - 0x00: All pins low (0000)
+ * - 0x01: D0 high, others low (0001)
+ * - 0x02: D1 high, others low (0010)
+ * - 0x03: D0+D1 high, D2+D3 low (0011)
+ * - 0x04: D2 high, others low (0100)
+ * - 0x05: D0+D2 high, D1+D3 low (0101)
+ * - 0x06: D1+D2 high, D0+D3 low (0110)
+ * - 0x07: D0+D1+D2 high, D3 low (0111)
+ * - 0x08: D3 high, others low (1000)
+ * - 0x09: D0+D3 high, D1+D2 low (1001)
+ * - 0x0A: D1+D3 high, D0+D2 low (1010)
+ * - 0x0B: D0+D1+D3 high, D2 low (1011)
+ * - 0x0C: D2+D3 high, D0+D1 low (1100)
+ * - 0x0D: D0+D2+D3 high, D1 low (1101)
+ * - 0x0E: D1+D2+D3 high, D0 low (1110)
+ * - 0x0F: All pins high (1111)
  */
-class SingleSPI_Blocking_ESP32 {
+class SpiBlock4 {
 public:
-    /// Maximum pins per lane (single = 1)
-    static constexpr int NUM_DATA_PINS = 1;
+    /// Maximum pins per lane (quad = 4)
+    static constexpr int NUM_DATA_PINS = 4;
 
     /// Maximum buffer size
     static constexpr uint16_t MAX_BUFFER_SIZE = 256;
 
-    SingleSPI_Blocking_ESP32() = default;
-    ~SingleSPI_Blocking_ESP32() = default;
+    SpiBlock4() = default;
+    ~SpiBlock4() = default;
 
     /**
-     * Configure pin mapping for 1 data pin + 1 clock
-     * @param data GPIO number for data pin
+     * Configure pin mapping for 4 data pins + 1 clock
+     * @param d0 GPIO number for data bit 0 (LSB)
+     * @param d1 GPIO number for data bit 1
+     * @param d2 GPIO number for data bit 2
+     * @param d3 GPIO number for data bit 3 (MSB)
      * @param clk GPIO number for clock pin
      *
      * Initializes the 256-entry LUT to map byte values to GPIO masks
-     * for the specified data pin.
+     * for the specified data pins.
      */
-    void setPinMapping(uint8_t data, uint8_t clk) {
+    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t d2, uint8_t d3, uint8_t clk) {
         // Store clock mask
         mClockMask = 1u << clk;
 
-        // Build data pin mask
-        uint32_t dataPinMask = 1u << data;
+        // Build data pin masks array
+        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+            1u << d0,  // Bit 0 (LSB)
+            1u << d1,  // Bit 1
+            1u << d2,  // Bit 2
+            1u << d3   // Bit 3 (MSB)
+        };
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
-        // - Extract bit 0
-        // - Map to GPIO pin
-        // - Generate set_mask (pin to set high) or clear_mask (pin to clear low)
+        // - Extract lower 4 bits
+        // - Map each bit to corresponding GPIO pin
+        // - Generate set_mask (pins to set high) and clear_mask (pins to clear low)
         for (int byteValue = 0; byteValue < 256; byteValue++) {
-            // Only process bit 0 (upper 7 bits ignored)
-            if (byteValue & 1) {
-                // Bit 0 is set - set data pin high
-                mLUT[byteValue].set_mask = dataPinMask;
-                mLUT[byteValue].clear_mask = 0;
-            } else {
-                // Bit 0 is clear - clear data pin low
-                mLUT[byteValue].set_mask = 0;
-                mLUT[byteValue].clear_mask = dataPinMask;
+            uint32_t setMask = 0;
+            uint32_t clearMask = 0;
+
+            // Only process lower 4 bits (upper 4 bits ignored)
+            for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
+                if (byteValue & (1 << bitPos)) {
+                    setMask |= dataPinMasks[bitPos];
+                } else {
+                    clearMask |= dataPinMasks[bitPos];
+                }
             }
+
+            mLUT[byteValue].set_mask = setMask;
+            mLUT[byteValue].clear_mask = clearMask;
         }
     }
 
@@ -104,8 +134,8 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      *
-     * Each byte in the buffer represents 1 bit to output on the data pin.
-     * Only bit 0 of each byte is used.
+     * Each byte in the buffer represents 4 parallel bits to output.
+     * Only the lower 4 bits of each byte are used.
      */
     void loadBuffer(const uint8_t* data, uint16_t n) {
         if (!data) return;
@@ -171,5 +201,8 @@ private:
     const uint8_t* mBuffer = nullptr;  ///< Data buffer pointer
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
+
+// Backward-compatible type alias (deprecated)
+using QuadSPI_Blocking_ESP32 [[deprecated("Use SpiBlock4 instead of QuadSPI_Blocking_ESP32")]] = SpiBlock4;
 
 }  // namespace fl

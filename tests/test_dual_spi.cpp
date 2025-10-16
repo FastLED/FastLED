@@ -329,10 +329,10 @@ TEST_CASE("SPIDual: Extract lanes from interleaved data") {
 // Blocking SPI Implementation Tests
 // ============================================================================
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_dual.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_2.h"
 
 TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
 
     // Configure pins (2 data + 1 clock)
     spi.setPinMapping(0, 1, 8);  // Data pins 0,1, Clock pin 8
@@ -347,7 +347,7 @@ TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Dual: LUT initialization") {
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(5, 6, 10);  // Data pins 5,6, Clock pin 10
 
     PinMaskEntry* lut = spi.getLUTArray();
@@ -376,7 +376,7 @@ TEST_CASE("SPIBlocking Dual: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Dual: Empty buffer handling") {
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(0, 1, 8);
 
     // Transmit with no buffer should not crash
@@ -389,7 +389,7 @@ TEST_CASE("SPIBlocking Dual: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Dual: Maximum buffer size") {
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(0, 1, 8);
 
     uint8_t largeBuffer[300];
@@ -407,7 +407,7 @@ TEST_CASE("SPIBlocking Dual: Multiple pin configurations") {
     for (uint8_t d0 = 0; d0 < 5; d0++) {
         for (uint8_t d1 = 5; d1 < 10; d1++) {
             for (uint8_t clk = 10; clk < 12; clk++) {
-                DualSPI_Blocking_ESP32 spi;
+                SpiBlock2 spi;
                 spi.setPinMapping(d0, d1, clk);
 
                 PinMaskEntry* lut = spi.getLUTArray();
@@ -434,7 +434,7 @@ TEST_CASE("SPIBlocking Dual: Multiple pin configurations") {
 }
 
 TEST_CASE("SPIBlocking Dual: Pattern consistency") {
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(2, 3, 8);
 
     PinMaskEntry* lut = spi.getLUTArray();

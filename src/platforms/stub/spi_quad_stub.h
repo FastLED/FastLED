@@ -6,20 +6,20 @@
 
 #pragma once
 
-#include "platforms/shared/spi_quad.h"
+#include "platforms/shared/spi_hw_4.h"
 
 #ifdef FASTLED_TESTING
 
 namespace fl {
 
 /// Mock Quad-SPI driver for testing without real hardware
-/// Implements SPIQuad interface with data capture for validation
-class SPIQuadStub : public SPIQuad {
+/// Implements SpiHw4 interface with data capture for validation
+class SPIQuadStub : public SpiHw4 {
 public:
     explicit SPIQuadStub(int bus_id = -1, const char* name = "MockSPI");
     ~SPIQuadStub() override = default;
 
-    bool begin(const SPIQuad::Config& config) override;
+    bool begin(const SpiHw4::Config& config) override;
     void end() override;
     bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
@@ -48,10 +48,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SPIQuad* to SPIQuadStub* for test inspection
-/// @param driver SPIQuad pointer (must be from test environment)
+/// Cast SpiHw4* to SPIQuadStub* for test inspection
+/// @param driver SpiHw4 pointer (must be from test environment)
 /// @returns SPIQuadStub pointer, or nullptr if cast fails
-inline SPIQuadStub* toStub(SPIQuad* driver) {
+/// @note Also works with SPIQuad* (deprecated alias) due to type aliasing
+inline SPIQuadStub* toStub(SpiHw4* driver) {
     return static_cast<SPIQuadStub*>(driver);
 }
 

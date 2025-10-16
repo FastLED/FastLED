@@ -1,10 +1,21 @@
-# FastLED Quad-SPI Platform Design
+# FastLED Multi-Lane SPI Platform Design (4-Lane & 8-Lane)
+
+## ⚠️ Important: 4-Lane and 8-Lane Split
+
+FastLED now provides **separate interfaces** for 4-lane (`SpiHw4`) and 8-lane (`SpiHw8`) hardware SPI. This split provides:
+
+- **Clear separation**: `SpiHw4` handles exactly 4 lanes, `SpiHw8` handles exactly 8 lanes
+- **Type safety**: Compile-time detection of incorrect configurations
+- **Platform flexibility**: Platforms can declare 4-lane and 8-lane support independently
+- **Future scalability**: Established pattern for 16-lane (`SpiHw16`) and beyond
+
+**Breaking Change:** `SpiHw4::Config` no longer includes `data4_pin` through `data7_pin`. For 8-lane support, use `SpiHw8` instead.
 
 ## Table of Contents
 
 1. [Overview](#overview)
 2. [Architecture](#architecture)
-3. [How Quad-SPI Works](#how-quad-spi-works)
+3. [How Multi-Lane SPI Works](#how-multi-lane-spi-works)
 4. [Core Components](#core-components)
 5. [Bit-Interleaving Algorithm](#bit-interleaving-algorithm)
 6. [Platform Support](#platform-support)
@@ -17,9 +28,9 @@
 
 ## Overview
 
-FastLED's Quad-SPI system enables **parallel LED strip control** by driving up to 4 LED strips simultaneously using a single SPI hardware peripheral. This achieves:
+FastLED's Multi-Lane SPI system enables **parallel LED strip control** by driving up to 4 or 8 LED strips simultaneously using a single SPI hardware peripheral. This achieves:
 
-- **27× faster transmission** compared to sequential software SPI
+- **Up to 50× faster transmission** compared to sequential software SPI
 - **0% CPU usage** during transmission (hardware DMA-driven)
 - **Synchronized updates** across all parallel strips
 - **Transparent integration** - works with existing FastLED API
@@ -131,14 +142,15 @@ ESP32/ESP32-S3
 
 ## Core Components
 
-### 1. SPIQuad (Platform Interface)
+### 1. SpiHw4 and SpiHw8 (Platform Interfaces)
 
-**Location:** `src/platforms/shared/spi_quad.h`
+**Locations:** `src/platforms/shared/spi_hw_4.h` and `src/platforms/shared/spi_hw_8.h`
 
-Abstract interface that platform implementations must provide:
+Abstract interfaces that platform implementations must provide:
 
+**4-Lane Interface (SpiHw4):**
 ```cpp
-class SPIQuad {
+class SpiHw4 {
 public:
     struct Config {
         uint8_t bus_num;           // SPI bus (2 or 3 on ESP32)
@@ -159,7 +171,33 @@ public:
     virtual bool isInitialized() const = 0;
 
     // Factory method (platform-specific override)
-    static const fl::vector<SPIQuad*>& getAll();
+    static const fl::vector<SpiHw4*>& getAll();
+};
+```
+
+**8-Lane Interface (SpiHw8):**
+```cpp
+class SpiHw8 {
+public:
+    struct Config {
+        uint8_t bus_num;           // SPI bus (2 or 3 on ESP32)
+        uint32_t clock_speed_hz;   // Clock frequency (e.g., 40 MHz)
+        int8_t clock_pin;          // Shared clock GPIO
+        int8_t data0_pin, data1_pin, data2_pin, data3_pin;  // First 4 data pins
+        int8_t data4_pin, data5_pin, data6_pin, data7_pin;  // Next 4 data pins
+        size_t max_transfer_sz;    // Max DMA buffer size
+    };
+
+    // Same methods as SpiHw4
+    virtual bool begin(const Config& config) = 0;
+    virtual void end() = 0;
+    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
+    virtual bool isBusy() const = 0;
+    virtual bool isInitialized() const = 0;
+
+    // Factory method (platform-specific override)
+    static const fl::vector<SpiHw8*>& getAll();
 };
 ```
 
@@ -167,31 +205,46 @@ public:
 
 - **Async DMA:** `transmitAsync()` queues non-blocking transmission
 - **Platform handles DMA buffers:** User provides data, platform manages DMA allocation
-- **Auto-detection:** `begin()` detects dual/quad mode based on active pins
+- **Explicit interfaces:** Separate interfaces make capabilities clear at compile-time
+- **Auto-detection:** `begin()` detects active lane count (1/2/4 for SpiHw4, always 8 for SpiHw8)
 - **Singleton instances:** `getAll()` returns static lifetime controllers
 
-### 2. SPITransposerQuad (Bit-Interleaving Logic)
+### 2. SPITransposer (Unified Bit-Interleaving Logic)
 
-**Location:** `src/platforms/shared/spi_transposer_quad.h`
+**Location:** `src/platforms/shared/spi_transposer.h`
 
-Stateless transposer that converts per-lane data into interleaved format:
+Unified stateless transposer that converts per-lane data into interleaved format for all widths:
 
 ```cpp
-class SPITransposerQuad {
+class SPITransposer {
 public:
     struct LaneData {
         fl::span<const uint8_t> payload;        // Actual LED data
         fl::span<const uint8_t> padding_frame;  // Black LED frame for padding
     };
 
-    static bool transpose(
-        const fl::optional<LaneData> lanes[4],
-        size_t max_size,
+    /// Transpose 4 lanes (Quad-SPI)
+    static bool transpose4(
+        const fl::optional<LaneData>& lane0,
+        const fl::optional<LaneData>& lane1,
+        const fl::optional<LaneData>& lane2,
+        const fl::optional<LaneData>& lane3,
         fl::span<uint8_t> output,
         const char** error = nullptr
     );
+
+    /// Transpose 8 lanes (Octal-SPI)
+    static bool transpose8(
+        const fl::optional<LaneData> lanes[8],
+        fl::span<uint8_t> output,
+        const char** error = nullptr
+    );
+
+    // Also available: transpose2() for dual-SPI
 };
 ```
+
+**Note:** Legacy `SPITransposerQuad::transpose()` and `SPITransposerQuad::transpose8()` are maintained as deprecated wrappers.
 
 **Pure Functional Design:**
 
@@ -200,27 +253,53 @@ public:
 - Idempotent - same input always produces same output
 - Thread-safe (no shared mutable state)
 
-### 3. SPIQuadESP32 (ESP32 Implementation)
+### 3. ESP32 Implementations (Split by Lane Count)
 
-**Location:** `src/platforms/esp/32/spi_quad_esp32.cpp`
+**4-Lane Implementation:**
+- **Location:** `src/platforms/esp/32/spi_hw_4_esp32.cpp`
+- **Class:** `SpiHw4ESP32`
+- **Platforms:** ESP32, ESP32-S2, ESP32-S3, ESP32-C3 (limited to 2 lanes), ESP32-P4
 
-ESP32 hardware implementation using ESP-IDF SPI master driver:
+**8-Lane Implementation:**
+- **Location:** `src/platforms/esp/32/spi_hw_8_esp32.cpp`
+- **Class:** `SpiHw8ESP32`
+- **Platform:** ESP32-P4 only (requires ESP-IDF 5.0+)
+
+ESP32 hardware implementations using ESP-IDF SPI master driver:
 
 ```cpp
-class SPIQuadESP32 : public SPIQuad {
+class SpiHw4ESP32 : public SpiHw4 {
 private:
     spi_device_handle_t mSPIHandle;
     spi_host_device_t mHost;  // SPI2_HOST or SPI3_HOST
     spi_transaction_t mTransaction;
     bool mTransactionActive;
+    uint8_t mActiveLanes;  // Auto-detected: 1, 2, or 4
+};
+
+class SpiHw8ESP32 : public SpiHw8 {
+private:
+    spi_device_handle_t mSPIHandle;
+    spi_host_device_t mHost;  // SPI2_HOST or SPI3_HOST
+    spi_transaction_t mTransaction;
+    bool mTransactionActive;
+    // Always uses 8 lanes (octal mode)
 };
 ```
 
 **Platform-Specific Details:**
 
-- **ESP32/S2/S3:** 2 buses (HSPI/bus 2, VSPI/bus 3), 4 data lines each
-- **ESP32-C3/C2/C6/H2:** 1 bus (SPI2), 2 data lines (dual-SPI only)
-- **ESP32-P4:** 2 buses, supports 8 data lines (octal-SPI, future)
+- **ESP32/S2/S3:** 2 buses (HSPI/bus 2, VSPI/bus 3)
+  - `SpiHw4`: Supports 1/2/4 lanes (auto-detected)
+  - `SpiHw8`: Not available (ESP-IDF 5.0+ octal support required)
+
+- **ESP32-C3/C2/C6/H2:** 1 bus (SPI2)
+  - `SpiHw4`: Supports 1/2 lanes only (hardware limitation)
+  - `SpiHw8`: Not available
+
+- **ESP32-P4:** 2 buses, supports both 4-lane and 8-lane
+  - `SpiHw4`: Supports 1/2/4 lanes (auto-detected)
+  - `SpiHw8`: Supports 8 lanes (octal-SPI via ESP-IDF 5.0+)
 
 ### 4. SPIBusManager (Middleware)
 
@@ -861,10 +940,12 @@ FastLED's Quad-SPI system provides **high-performance parallel LED control** thr
 
 ## References
 
-- **SPIQuad Interface:** `src/platforms/shared/spi_quad.h`
-- **Transposer:** `src/platforms/shared/spi_transposer_quad.h`
-- **ESP32 Implementation:** `src/platforms/esp/32/spi_quad_esp32.cpp`
+- **SpiHw4 Interface:** `src/platforms/shared/spi_hw_4.h`
+- **SpiHw8 Interface:** `src/platforms/shared/spi_hw_8.h` ✨ NEW
+- **Unified Transposer:** `src/platforms/shared/spi_transposer.h` ✨ NEW
+- **Legacy Transposer (deprecated):** `src/platforms/shared/spi_transposer_quad.h`
+- **ESP32 4-Lane Implementation:** `src/platforms/esp/32/spi_hw_4_esp32.cpp`
+- **ESP32 8-Lane Implementation:** `src/platforms/esp/32/spi_hw_8_esp32.cpp` ✨ NEW
 - **Bus Manager:** `src/platforms/shared/spi_bus_manager.h`
-- **Platform Detection:** `src/platforms/quad_spi_platform.h`
-- **Tests:** `tests/test_quad_spi.cpp`
+- **Tests:** `tests/test_quad_spi.cpp` (tests both 4-lane and 8-lane)
 - **Example:** `examples/SpecialDrivers/ESP/QuadSPI/Basic/QuadSPI_Basic.ino`

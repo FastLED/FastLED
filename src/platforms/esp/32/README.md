@@ -120,47 +120,59 @@ Additional I2S defines and guidance:
 
 Unless otherwise noted, all defines should be placed before including `FastLED.h` in your sketch.
 
-## Hardware Octal-SPI Support (ESP32-P4)
+## Hardware Multi-Lane SPI Support
 
-ESP32-P4 with ESP-IDF 5.0+ supports **hardware octal-SPI** for driving up to 8 parallel LED strips simultaneously via DMA-accelerated transmission.
+FastLED provides hardware-accelerated multi-lane SPI for parallel LED strip control via DMA.
 
-### Key Features
-- **Automatic Mode Selection**: Hardware driver auto-detects and switches between 1/2/4/8 lane modes based on pin configuration
-- **Version Safety**: All octal code guarded with ESP-IDF 5.x version checks
-- **Graceful Fallback**: Older platforms automatically fall back to software implementation
-- **Zero CPU Usage**: DMA handles transmission (~40× faster than software)
+### Supported Configurations
 
-### Hardware Requirements
-- **Platform**: ESP32-P4
-- **ESP-IDF**: Version 5.0.0 or higher
+**1-Lane, 2-Lane, 4-Lane (All ESP32 variants):**
+- **Interfaces**: `SpiHw1`, `SpiHw2`, `SpiHw4`
+- **Files**: `spi_hw_1_esp32.cpp`, `spi_hw_2_esp32.cpp`, `spi_hw_4_esp32.cpp`
+- **Platforms**: ESP32, ESP32-S2, ESP32-S3, ESP32-C3, ESP32-P4
+- **ESP-IDF**: 3.3+ (any version)
+
+**8-Lane (Octal-SPI - ESP32-P4 only):**
+- **Interface**: `SpiHw8`
+- **File**: `spi_hw_8_esp32.cpp`
+- **Platform**: ESP32-P4 only
+- **ESP-IDF**: 5.0.0 or higher required
 - **Pins**: Up to 8 data pins (D0-D7) + 1 clock pin
 
-### Expected Performance
+### Key Features
+- **Automatic Mode Selection**: Hardware driver auto-detects lane count (1/2/4/8) based on pin configuration
+- **Version Safety**: 8-lane code guarded with ESP-IDF 5.x version checks
+- **Graceful Fallback**: Older platforms/IDF versions automatically fall back to software implementation
+- **Zero CPU Usage**: DMA handles transmission (~40× faster than software)
+- **Separate Interfaces**: Clean separation between 4-lane (`SpiHw4`) and 8-lane (`SpiHw8`)
+
+### Expected Performance (8-Lane)
 - **Speed**: ~40× faster than software octo-SPI
 - **Transmission**: 8×100 LED strips in <500µs
 - **CPU Usage**: 0% during transmission (DMA handles everything)
 
-### Implementation Details
-The octal-SPI implementation extends the existing quad-SPI infrastructure:
-- `src/platforms/shared/spi_quad.h`: Extended `SPIQuad::Config` to support 8 data pins
-- `src/platforms/esp/32/spi_quad_esp32.cpp`: Updated hardware driver for octal mode detection
-- `src/platforms/shared/spi_transposer_quad.*`: Implements 8-lane bit-interleaving
-- `src/platforms/shared/spi_bus_manager.h`: Integrated octal controller support
+### Implementation Files
+Hardware SPI implementations are organized by lane count:
+- `spi_hw_1_esp32.cpp` - 1-lane (Single) SPI
+- `spi_hw_2_esp32.cpp` - 2-lane (Dual) SPI
+- `spi_hw_4_esp32.cpp` - 4-lane (Quad) SPI
+- `spi_hw_8_esp32.cpp` - 8-lane (Octal) SPI (ESP32-P4 + IDF 5.0+)
+
+Shared infrastructure:
+- `src/platforms/shared/spi_hw_*.h` - Platform-agnostic interfaces
+- `src/platforms/shared/spi_transposer.*` - Unified bit-interleaving for all widths
+- `src/platforms/shared/spi_bus_manager.h` - Automatic multi-lane detection
 
 ### Testing
-51 unit tests validate the implementation:
-- 44 existing quad-SPI tests (regression prevention)
-- 7 new octal-SPI specific tests
-
-Run tests with:
-```bash
-uv run test.py test_quad_spi
-```
+Comprehensive unit tests validate all lane configurations:
+- 1-lane, 2-lane tests: `uv run test.py test_single_spi test_dual_spi`
+- 4-lane, 8-lane tests: `uv run test.py test_quad_spi`
 
 ### Notes
-- All existing 1/2/4-lane modes remain fully functional
+- All lane configurations (1/2/4) work on all ESP32 variants
+- 8-lane requires ESP32-P4 with ESP-IDF 5.0+
 - Implementation is backward-compatible with existing platforms
-- On non-P4 platforms or IDF <5.0, software fallback is used automatically
+- On unsupported platforms, software bitbang fallback is used automatically
 
 ## RMT backends (IDF4 vs IDF5) and how to select
 

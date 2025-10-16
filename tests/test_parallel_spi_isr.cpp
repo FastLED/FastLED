@@ -17,8 +17,8 @@
 
 // Note: FASTLED_SPI_HOST_SIMULATION defined via build system (meson.build)
 #include "test.h"
-#include "platforms/esp/32/parallel_spi/fl_parallel_spi_isr_rv.h"
-#include "platforms/esp/32/parallel_spi/fl_parallel_spi_host_sim.h"
+#include "platforms/shared/spi_bitbang/spi_isr_engine.h"
+#include "platforms/shared/spi_bitbang/host_sim.h"
 
 #ifndef FASTLED_SPI_MANUAL_TICK
 #include <thread>

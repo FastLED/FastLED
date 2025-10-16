@@ -1,40 +1,39 @@
-// parallel_spi_isr_single_esp32c3.hpp — 1-way Single-SPI ISR wrapper for ESP32-C3/C2
+// spi_isr_2.h — 2-way Dual-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include <stddef.h>
-#include "fl_parallel_spi_isr_rv.h"
+#include "spi_isr_engine.h"
 
 #ifndef SPI_ISR_SOFTWARE_BITBANG_FORCED_ON
-#warning "SingleSPI_ISR_ESP32C3 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
+#warning "SpiIsr2 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
 #endif
 
 namespace fl {
 
 /**
- * SingleSPI_ISR_ESP32C3 - 1-way (single-pin) soft-SPI ISR driver for ESP32-C3/C2
+ * SpiIsr2 - 2-way parallel soft-SPI ISR driver (platform-agnostic bitbanging)
  *
- * This is the simplest variant of the parallel SPI ISR driver, using only
- * 1 data pin + 1 clock pin. Ideal for baseline testing and validation of the
- * ISR engine.
+ * This class provides a simplified 2-pin variant of the parallel SPI ISR driver,
+ * specifically designed to match hardware Dual-SPI architecture (2 data + 1 clock).
  *
- * Key Differences from multi-way variants:
- * - Only 1 data pin (instead of 2, 4, or 8)
- * - Simplest LUT initialization (only 2 unique states: 0 or 1)
- * - Perfect for debugging and understanding ISR behavior
- * - Can be used for actual single-strip LED control
- * - Lowest GPIO requirements (just 2 pins total)
+ * Key Differences from 4-way QuadSPI and 8-way ParallelSPI:
+ * - Only 2 data pins (instead of 4 or 8)
+ * - Simplified LUT initialization (only 4 unique states)
+ * - Direct mapping to hardware Dual-SPI topology
+ * - Ideal for testing hardware Dual-SPI implementations
+ * - Useful for platforms with limited GPIO availability
  *
  * Architecture:
  * - Reuses the same ISR code (fl_parallel_spi_isr_rv.h/cpp)
- * - 256-entry LUT maps byte values to 1-pin GPIO masks
- * - Only uses bit 0 of byte value (upper 7 bits ignored)
+ * - 256-entry LUT maps byte values to 2-pin GPIO masks
+ * - Only uses lower 2 bits of byte value (upper 6 bits ignored)
  * - ISR operates at highest priority for minimal jitter
  *
  * Typical Usage:
- *   SingleSPI_ISR_ESP32C3 spi;
- *   spi.setPinMapping(gpio_data, gpio_clk);
+ *   SpiIsr2 spi;
+ *   spi.setPinMapping(gpio_d0, gpio_d1, gpio_clk);
  *   spi.setupISR(1600000);  // 1.6MHz timer = 800kHz SPI
  *   spi.loadBuffer(data, len);
  *   spi.arm();
@@ -42,78 +41,94 @@ namespace fl {
  *   spi.stopISR();
  *
  * Test Patterns:
- * - 0x00: Data pin low (0)
- * - 0x01: Data pin high (1)
- * - 0xAA: Alternating 0/1 pattern (tests multiple bytes)
- * - 0xFF: All ones
+ * - 0x00: Both pins low (00)
+ * - 0x01: D0 high, D1 low (01)
+ * - 0x02: D0 low, D1 high (10)
+ * - 0x03: Both pins high (11)
  */
-class SingleSPI_ISR_ESP32C3 {
+class SpiIsr2 {
 public:
     /// Status bit definitions
     static constexpr uint32_t STATUS_BUSY = 1u;
     static constexpr uint32_t STATUS_DONE = 2u;
 
-    /// Maximum pins per lane (single = 1)
-    static constexpr int NUM_DATA_PINS = 1;
+    /// Maximum pins per lane (dual = 2)
+    static constexpr int NUM_DATA_PINS = 2;
 
-    SingleSPI_ISR_ESP32C3() = default;
-    ~SingleSPI_ISR_ESP32C3() = default;
+    SpiIsr2() = default;
+    ~SpiIsr2() = default;
 
     /**
-     * Configure pin mapping for 1 data pin + 1 clock
-     * @param data GPIO number for data pin
+     * Configure pin mapping for 2 data pins + 1 clock
+     * @param d0 GPIO number for data bit 0 (LSB)
+     * @param d1 GPIO number for data bit 1 (MSB)
      * @param clk GPIO number for clock pin
      *
      * Automatically initializes the 256-entry LUT to map byte values
-     * to GPIO mask for the specified data pin.
+     * to GPIO masks for the 2 specified data pins.
      */
-    void setPinMapping(uint8_t data, uint8_t clk) {
+    void setPinMapping(uint8_t d0, uint8_t d1, uint8_t clk) {
         // Store clock mask
         fl_spi_set_clock_mask(1u << clk);
 
-        // Build pin mask
-        uint32_t dataPinMask = 1u << data;
+        // Build pin masks array
+        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+            1u << d0,  // Bit 0
+            1u << d1   // Bit 1
+        };
 
         // Initialize 256-entry LUT
         // For each possible byte value (0-255):
-        // - Extract bit 0
-        // - Map to GPIO pin
-        // - Generate set_mask (pin to set high) or clear_mask (pin to clear low)
+        // - Extract lower 2 bits
+        // - Map each bit to corresponding GPIO pin
+        // - Generate set_mask (pins to set high) and clear_mask (pins to clear low)
         PinMaskEntry* lut = fl_spi_get_lut_array();
 
         for (int byteValue = 0; byteValue < 256; byteValue++) {
-            // Only process bit 0 (upper 7 bits ignored)
-            if (byteValue & 1) {
-                // Bit 0 is set - set data pin high
-                lut[byteValue].set_mask = dataPinMask;
-                lut[byteValue].clear_mask = 0;
-            } else {
-                // Bit 0 is clear - clear data pin low
-                lut[byteValue].set_mask = 0;
-                lut[byteValue].clear_mask = dataPinMask;
+            uint32_t setMask = 0;
+            uint32_t clearMask = 0;
+
+            // Only process lower 2 bits (upper 6 bits ignored)
+            for (int bitPos = 0; bitPos < NUM_DATA_PINS; bitPos++) {
+                if (byteValue & (1 << bitPos)) {
+                    setMask |= dataPinMasks[bitPos];
+                } else {
+                    clearMask |= dataPinMasks[bitPos];
+                }
             }
+
+            lut[byteValue].set_mask = setMask;
+            lut[byteValue].clear_mask = clearMask;
         }
     }
 
     /**
      * Alternative: Configure pin mapping using clock mask directly
-     * @param data GPIO number for data pin
+     * @param d0-d1 GPIO numbers for data pins
      * @param clockMask Pre-computed GPIO mask for clock pin (e.g., 1 << 8)
      */
-    void setPinMappingWithMask(uint8_t data, uint32_t clockMask) {
+    void setPinMappingWithMask(uint8_t d0, uint8_t d1, uint32_t clockMask) {
         fl_spi_set_clock_mask(clockMask);
 
-        uint32_t dataPinMask = 1u << data;
+        uint32_t dataPinMasks[NUM_DATA_PINS] = {
+            1u << d0, 1u << d1
+        };
 
         PinMaskEntry* lut = fl_spi_get_lut_array();
         for (int v = 0; v < 256; v++) {
-            if (v & 1) {
-                lut[v].set_mask = dataPinMask;
-                lut[v].clear_mask = 0;
-            } else {
-                lut[v].set_mask = 0;
-                lut[v].clear_mask = dataPinMask;
+            uint32_t setMask = 0;
+            uint32_t clearMask = 0;
+
+            for (int b = 0; b < NUM_DATA_PINS; b++) {
+                if (v & (1 << b)) {
+                    setMask |= dataPinMasks[b];
+                } else {
+                    clearMask |= dataPinMasks[b];
+                }
             }
+
+            lut[v].set_mask = setMask;
+            lut[v].clear_mask = clearMask;
         }
     }
 
@@ -122,8 +137,8 @@ public:
      * @param data Pointer to data bytes
      * @param n Number of bytes (max 256)
      *
-     * Each byte in the buffer represents 1 bit to output on the data pin.
-     * Only bit 0 of each byte is used.
+     * Each byte in the buffer represents 2 parallel bits to output.
+     * Only the lower 2 bits of each byte are used.
      */
     void loadBuffer(const uint8_t* data, uint16_t n) {
         if (!data) return;
@@ -256,5 +271,8 @@ public:
     }
 #endif
 };
+
+// Backward-compatible type alias (deprecated)
+using DualSPI_ISR_ESP32C3 [[deprecated("Use SpiIsr2 instead of DualSPI_ISR_ESP32C3")]] = SpiIsr2;
 
 }  // namespace fl

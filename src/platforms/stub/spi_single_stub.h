@@ -6,20 +6,20 @@
 
 #pragma once
 
-#include "platforms/shared/spi_single.h"
+#include "platforms/shared/spi_hw_1.h"
 
 #ifdef FASTLED_TESTING
 
 namespace fl {
 
 /// Mock Single-SPI driver for testing without real hardware
-/// Implements SPISingle interface with data capture for validation
-class SPISingleStub : public SPISingle {
+/// Implements SpiHw1 interface with data capture for validation
+class SPISingleStub : public SpiHw1 {
 public:
     explicit SPISingleStub(int bus_id = -1, const char* name = "MockSPI");
     ~SPISingleStub() override = default;
 
-    bool begin(const SPISingle::Config& config) override;
+    bool begin(const SpiHw1::Config& config) override;
     void end() override;
     bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
@@ -43,10 +43,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SPISingle* to SPISingleStub* for test inspection
-/// @param driver SPISingle pointer (must be from test environment)
+/// Cast SpiHw1* to SPISingleStub* for test inspection
+/// @param driver SpiHw1 pointer (must be from test environment)
 /// @returns SPISingleStub pointer, or nullptr if cast fails
-inline SPISingleStub* toStub(SPISingle* driver) {
+/// @note Also works with SPISingle* (deprecated alias) due to type aliasing
+inline SPISingleStub* toStub(SpiHw1* driver) {
     return static_cast<SPISingleStub*>(driver);
 }
 

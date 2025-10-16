@@ -1,19 +1,12 @@
 #pragma once
 
-/// @file spi_single.h
-/// @brief Platform-agnostic Single-SPI interface (backwards compatibility layer)
+/// @file spi_hw_2.h
+/// @brief Platform-agnostic 2-lane hardware SPI interface
 ///
-/// This file defines the abstract interface for single-lane SPI hardware.
-/// It provides a backwards-compatible proxy layer for existing SPI implementations.
-///
-/// **IMPORTANT COMPATIBILITY NOTE:**
-/// This implementation currently uses BLOCKING transmitAsync() for backwards
-/// compatibility with existing code. While the interface appears async, the
-/// transmission completes synchronously before returning.
-///
-/// TODO: Convert to true async DMA implementation in the future.
-/// This requires careful testing to ensure no regressions in existing code
-/// that relies on the blocking behavior.
+/// This file defines the abstract interface that all platform-specific
+/// 2-lane (dual-lane) SPI hardware must implement. It enables the generic
+/// DualSPIDevice to work across different platforms (ESP32, RP2040, etc.)
+/// without knowing platform-specific implementation details.
 
 #include "fl/namespace.h"
 #include "fl/vector.h"
@@ -23,61 +16,60 @@
 
 namespace fl {
 
-class SPISingle;
+class SpiHw2;
 
-/// Abstract interface for platform-specific Single-SPI hardware
+/// Abstract interface for platform-specific 2-lane hardware SPI
 ///
 /// Platform implementations (ESP32, RP2040, etc.) inherit from this interface
 /// and provide concrete implementations of all virtual methods.
 ///
-/// This serves as a backwards-compatible proxy layer for existing SPI code.
-class SPISingle {
+/// Naming: "SpiHw2" = SPI Hardware 2-lane
+class SpiHw2 {
 public:
-    virtual ~SPISingle() = default;
+    virtual ~SpiHw2() = default;
 
     /// Platform-agnostic configuration structure
     struct Config {
         uint8_t bus_num;           ///< SPI bus number (platform-specific numbering)
         uint32_t clock_speed_hz;   ///< Clock frequency in Hz
         int8_t clock_pin;          ///< SCK GPIO pin
-        int8_t data_pin;           ///< MOSI GPIO pin
+        int8_t data0_pin;          ///< D0/MOSI GPIO pin
+        int8_t data1_pin;          ///< D1/MISO GPIO pin
         size_t max_transfer_sz;    ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
             , clock_speed_hz(20000000)
             , clock_pin(-1)
-            , data_pin(-1)
+            , data0_pin(-1)
+            , data1_pin(-1)
             , max_transfer_sz(65536) {}
     };
 
     /// Initialize SPI peripheral with given configuration
     /// @param config Hardware configuration
     /// @returns true on success, false on error
+    /// @note Implementation should configure dual mode based on active pins
     virtual bool begin(const Config& config) = 0;
 
     /// Shutdown SPI peripheral and release resources
     /// @note Should wait for any pending transmissions to complete
     virtual void end() = 0;
 
-    /// Queue transmission (currently BLOCKING for backwards compatibility)
-    /// @param buffer Data buffer to transmit
-    /// @returns true if transmitted successfully, false on error
-    /// @note **COMPATIBILITY WARNING**: Despite the "Async" name, this is currently
-    ///       BLOCKING and will not return until transmission completes.
-    /// @note TODO: Convert to true async DMA implementation in the future.
-    /// @note Buffer must remain valid until waitComplete() returns (currently immediate)
+    /// Queue asynchronous DMA transmission (non-blocking)
+    /// @param buffer Data buffer to transmit (platform handles DMA requirements internally)
+    /// @returns true if queued successfully, false on error
+    /// @note Platform implementations handle DMA buffer allocation/alignment internally
+    /// @note Buffer must remain valid until waitComplete() returns
     virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
-    /// @note Currently returns immediately as transmitAsync() is blocking
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
-    /// @note Currently always returns false as transmitAsync() is blocking
     virtual bool isBusy() const = 0;
 
     /// Get initialization status
@@ -94,14 +86,14 @@ public:
     /// @note Returns "Unknown" if not assigned
     virtual const char* getName() const = 0;
 
-    /// Get all available Single-SPI devices on this platform
+    /// Get all available 2-lane hardware SPI devices on this platform
     /// @returns Reference to static vector of available devices
     /// @note Cached - only allocates once on first call
     /// @note Thread-safe via C++11 static local initialization
-    /// @note Returns empty vector if platform doesn't support Single-SPI
+    /// @note Returns empty vector if platform doesn't support 2-lane SPI
     /// @note Returns bare pointers - instances are alive forever (static lifetime)
-    static const fl::vector<SPISingle*>& getAll() {
-        static fl::vector<SPISingle*> instances = createInstances();
+    static const fl::vector<SpiHw2*>& getAll() {
+        static fl::vector<SpiHw2*> instances = createInstances();
         return instances;
     }
 
@@ -109,7 +101,10 @@ private:
     /// Platform-specific factory implementation (weak linkage)
     /// Each platform overrides this with strong definition
     /// @returns Vector of platform-specific instances
-    static fl::vector<SPISingle*> createInstances();
+    static fl::vector<SpiHw2*> createInstances();
 };
+
+/// @deprecated Use SpiHw2 instead of SPIDual
+using SPIDual [[deprecated("Use SpiHw2 instead of SPIDual")]] = SpiHw2;
 
 }  // namespace fl

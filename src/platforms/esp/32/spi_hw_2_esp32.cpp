@@ -1,12 +1,12 @@
-/// @file spi_quad_esp32.cpp
-/// @brief ESP32 implementation of Quad-SPI
+/// @file spi_dual_esp32.cpp
+/// @brief ESP32 implementation of Dual-SPI
 ///
-/// This file provides the SPIQuadESP32 class and factory for ESP32 platforms.
+/// This file provides the SPIDualESP32 class and factory for ESP32 platforms.
 /// All class definition and implementation is contained in this single file.
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
-#include "platforms/shared/spi_quad.h"
+#include "platforms/shared/spi_hw_2.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -43,17 +43,17 @@
 namespace fl {
 
 // ============================================================================
-// SPIQuadESP32 Class Definition
+// SPIDualESP32 Class Definition
 // ============================================================================
 
-/// ESP32 hardware for Quad-SPI DMA transmission
-/// Implements SPIQuad interface for ESP-IDF SPI peripheral
-class SPIQuadESP32 : public SPIQuad {
+/// ESP32 hardware for Dual-SPI DMA transmission
+/// Implements SPIDual interface for ESP-IDF SPI peripheral
+class SPIDualESP32 : public SpiHw2 {
 public:
-    explicit SPIQuadESP32(int bus_id = -1, const char* name = "Unknown");
-    ~SPIQuadESP32();
+    explicit SPIDualESP32(int bus_id = -1, const char* name = "Unknown");
+    ~SPIDualESP32();
 
-    bool begin(const SPIQuad::Config& config) override;
+    bool begin(const SpiHw2::Config& config) override;
     void end() override;
     bool transmitAsync(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
@@ -72,32 +72,30 @@ private:
     spi_transaction_t mTransaction;
     bool mTransactionActive;
     bool mInitialized;
-    uint8_t mActiveLanes;
 
-    SPIQuadESP32(const SPIQuadESP32&) = delete;
-    SPIQuadESP32& operator=(const SPIQuadESP32&) = delete;
+    SPIDualESP32(const SPIDualESP32&) = delete;
+    SPIDualESP32& operator=(const SPIDualESP32&) = delete;
 };
 
 // ============================================================================
-// SPIQuadESP32 Implementation
+// SPIDualESP32 Implementation
 // ============================================================================
 
-SPIQuadESP32::SPIQuadESP32(int bus_id, const char* name)
+SPIDualESP32::SPIDualESP32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mSPIHandle(nullptr)
     , mHost(SPI2_HOST)
     , mTransactionActive(false)
-    , mInitialized(false)
-    , mActiveLanes(1) {
+    , mInitialized(false) {
     memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
-SPIQuadESP32::~SPIQuadESP32() {
+SPIDualESP32::~SPIDualESP32() {
     cleanup();
 }
 
-bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
+bool SPIDualESP32::begin(const SpiHw2::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -123,47 +121,17 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
         return false;  // Invalid bus number
     }
 
-    // Count active data pins to determine SPI mode
-    mActiveLanes = 1;  // data0 always present
-    if (config.data1_pin >= 0) mActiveLanes++;
-    if (config.data2_pin >= 0) mActiveLanes++;
-    if (config.data3_pin >= 0) mActiveLanes++;
-    if (config.data4_pin >= 0) mActiveLanes++;
-    if (config.data5_pin >= 0) mActiveLanes++;
-    if (config.data6_pin >= 0) mActiveLanes++;
-    if (config.data7_pin >= 0) mActiveLanes++;
-
-    // Configure SPI bus with appropriate mode flags
+    // Configure SPI bus for dual mode
     spi_bus_config_t bus_config = {};
     bus_config.mosi_io_num = config.data0_pin;
-    bus_config.miso_io_num = config.data1_pin;  // -1 if unused
+    bus_config.miso_io_num = config.data1_pin;
     bus_config.sclk_io_num = config.clock_pin;
-    bus_config.quadwp_io_num = config.data2_pin;  // -1 if unused
-    bus_config.quadhd_io_num = config.data3_pin;  // -1 if unused
-
-    // Configure octal pins if ESP-IDF 5.x and pins are specified
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    bus_config.data4_io_num = config.data4_pin;  // -1 if unused
-    bus_config.data5_io_num = config.data5_pin;  // -1 if unused
-    bus_config.data6_io_num = config.data6_pin;  // -1 if unused
-    bus_config.data7_io_num = config.data7_pin;  // -1 if unused
-    #endif
-
+    bus_config.quadwp_io_num = -1;  // Not used for dual mode
+    bus_config.quadhd_io_num = -1;  // Not used for dual mode
     bus_config.max_transfer_sz = config.max_transfer_sz;
 
-    // Set flags based on active lane count
-    bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    if (mActiveLanes >= 8) {
-        bus_config.flags |= SPICOMMON_BUSFLAG_OCTAL;
-    } else
-    #endif
-    if (mActiveLanes >= 4) {
-        bus_config.flags |= SPICOMMON_BUSFLAG_QUAD;
-    } else if (mActiveLanes >= 2) {
-        bus_config.flags |= SPICOMMON_BUSFLAG_DUAL;
-    }
-    // else: standard SPI (1 data line)
+    // Set dual mode flag
+    bus_config.flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_DUAL;
 
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
@@ -192,11 +160,11 @@ bool SPIQuadESP32::begin(const SPIQuad::Config& config) {
     return true;
 }
 
-void SPIQuadESP32::end() {
+void SPIDualESP32::end() {
     cleanup();
 }
 
-bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -212,21 +180,7 @@ bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
 
     // Configure transaction
     memset(&mTransaction, 0, sizeof(mTransaction));
-
-    // Set transaction mode based on lane count
-    #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    if (mActiveLanes >= 8) {
-        mTransaction.flags = SPI_TRANS_MODE_OCT;  // Octal I/O mode
-    } else
-    #endif
-    if (mActiveLanes >= 4) {
-        mTransaction.flags = SPI_TRANS_MODE_QIO;  // Quad I/O mode
-    } else if (mActiveLanes >= 2) {
-        mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
-    } else {
-        mTransaction.flags = 0;  // Standard SPI mode
-    }
-
+    mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
     mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
     mTransaction.tx_buffer = buffer.data();
 
@@ -240,7 +194,7 @@ bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPIQuadESP32::waitComplete(uint32_t timeout_ms) {
+bool SPIDualESP32::waitComplete(uint32_t timeout_ms) {
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
@@ -256,23 +210,23 @@ bool SPIQuadESP32::waitComplete(uint32_t timeout_ms) {
     return (ret == ESP_OK);
 }
 
-bool SPIQuadESP32::isBusy() const {
+bool SPIDualESP32::isBusy() const {
     return mTransactionActive;
 }
 
-bool SPIQuadESP32::isInitialized() const {
+bool SPIDualESP32::isInitialized() const {
     return mInitialized;
 }
 
-int SPIQuadESP32::getBusId() const {
+int SPIDualESP32::getBusId() const {
     return mBusId;
 }
 
-const char* SPIQuadESP32::getName() const {
+const char* SPIDualESP32::getName() const {
     return mName;
 }
 
-void SPIQuadESP32::cleanup() {
+void SPIDualESP32::cleanup() {
     if (mInitialized) {
         // Wait for any pending transmission
         if (mTransactionActive) {
@@ -296,16 +250,16 @@ void SPIQuadESP32::cleanup() {
 
 /// ESP32 factory override - returns available SPI bus instances
 /// Strong definition overrides weak default
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
-    fl::vector<SPIQuad*> controllers;
+fl::vector<SpiHw2*> SpiHw2::createInstances() {
+    fl::vector<SpiHw2*> controllers;
 
     // Bus 2 is available on all ESP32 platforms
-    static SPIQuadESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
+    static SPIDualESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
     controllers.push_back(&controller2);
 
 #if SOC_SPI_PERIPH_NUM > 2
     // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SPIQuadESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
+    static SPIDualESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
     controllers.push_back(&controller3);
 #endif
 
