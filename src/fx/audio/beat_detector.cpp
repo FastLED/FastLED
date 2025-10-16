@@ -13,6 +13,7 @@
 #include "fl/math.h"
 #include "fl/algorithm.h"
 #include "fl/stdio.h"
+#include "fl/compiler_control.h"
 #include <math.h>
 
 namespace fl {
@@ -50,6 +51,8 @@ void initializeLookupTables() {
 }
 
 // Fast log10 lookup
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(unused-function)
 inline float fastLog10(float x) {
     if (x <= 0.0f) return -100.0f;
     if (x >= 1.0f) return ::log10(x);
@@ -58,12 +61,7 @@ inline float fastLog10(float x) {
     if (idx >= LOG10_LUT_SIZE) idx = LOG10_LUT_SIZE - 1;
     return g_log10_lut[idx];
 }
-
-// Convert magnitude to dB (unused, but kept for future use)
-inline float magnitudeToDB(float mag) {
-    (void)mag;  // Suppress unused parameter warning
-    return 20.0f * fastLog10(mag);
-}
+FL_DISABLE_WARNING_POP
 
 // Fast Rayleigh weight lookup
 inline float fastRayleighWeight(float x) {

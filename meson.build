@@ -154,6 +154,7 @@ unit_test_compile_args = [
   '-fno-omit-frame-pointer',
   '-fno-strict-aliasing',
   '-Werror=unused-variable',
+  '-Werror=unused-function',
   '-O0',
   '-g'
 ]
