@@ -155,7 +155,7 @@ foreach test_name : test_names
 
   if test_name in ['test_dual_spi', 'test_quad_spi', 'test_single_spi']
     test_sources += [meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp']
-    test_cpp_args += ['-DFASTLED_SPI_HOST_SIMULATION']
+    # FASTLED_SPI_HOST_SIMULATION is auto-enabled by spi_platform.h when STUB_PLATFORM is defined
   endif
 
   test_exe = executable(test_name,
@@ -191,7 +191,7 @@ test_parallel_spi_isr_manual_exe = executable('test_parallel_spi_isr_manual',
   ],
   include_directories: [src_dir, tests_dir, stub_dir],
   cpp_args: unit_test_compile_args + [
-    '-DFASTLED_SPI_HOST_SIMULATION',
+    # FASTLED_SPI_HOST_SIMULATION is auto-enabled by spi_platform.h when STUB_PLATFORM is defined
     '-DFASTLED_SPI_MANUAL_TICK',
     '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
     '-Winvalid-pch',
@@ -214,7 +214,7 @@ test_parallel_spi_isr_thread_exe = executable('test_parallel_spi_isr_thread',
   ],
   include_directories: [src_dir, tests_dir, stub_dir],
   cpp_args: unit_test_compile_args + [
-    '-DFASTLED_SPI_HOST_SIMULATION',
+    # FASTLED_SPI_HOST_SIMULATION is auto-enabled by spi_platform.h when STUB_PLATFORM is defined
     '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
     '-Winvalid-pch',
   ],

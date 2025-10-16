@@ -16,6 +16,11 @@
 #include "fl/stdint.h"
 #include "fl/compiler_control.h"
 
+/* Auto-enable host simulation mode on stub platform */
+#if defined(STUB_PLATFORM) && !defined(FASTLED_SPI_HOST_SIMULATION)
+#define FASTLED_SPI_HOST_SIMULATION 1
+#endif
+
 FL_EXTERN_C_BEGIN
 
 /* Platform-specific GPIO write functions */

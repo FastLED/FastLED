@@ -15,7 +15,7 @@
   License: MIT (FastLED)
 */
 
-// Note: FASTLED_SPI_HOST_SIMULATION defined via build system (meson.build)
+// Note: FASTLED_SPI_HOST_SIMULATION is auto-enabled when STUB_PLATFORM is detected
 #include "test.h"
 #include "platforms/shared/spi_bitbang/spi_isr_engine.h"
 #include "platforms/shared/spi_bitbang/host_sim.h"

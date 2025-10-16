@@ -10,6 +10,11 @@
 #ifndef FL_PARALLEL_SPI_HOST_SIM_H
 #define FL_PARALLEL_SPI_HOST_SIM_H
 
+/* Auto-enable host simulation mode on stub platform */
+#if defined(STUB_PLATFORM) && !defined(FASTLED_SPI_HOST_SIMULATION)
+#define FASTLED_SPI_HOST_SIMULATION 1
+#endif
+
 #ifdef FASTLED_SPI_HOST_SIMULATION
 
 #include "fl/stdint.h"

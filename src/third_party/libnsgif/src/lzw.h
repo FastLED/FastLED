@@ -10,7 +10,7 @@
 #ifndef LZW_H_
 #define LZW_H_
 
-#include "fl/stdint.h"
+#include "fl/int.h"
 
 namespace fl {
 namespace third_party {
@@ -72,10 +72,10 @@ void lzw_context_destroy(
  */
 lzw_result lzw_decode_init(
 		struct lzw_ctx *ctx,
-		uint8_t minimum_code_size,
-		const uint8_t *input_data,
-		size_t input_length,
-		size_t input_pos);
+		fl::u8 minimum_code_size,
+		const fl::u8 *input_data,
+		fl::size input_length,
+		fl::size input_pos);
 
 /**
  * Read input codes until end of LZW context owned output buffer.
@@ -89,8 +89,8 @@ lzw_result lzw_decode_init(
  * \return LZW_OK on success, or appropriate error code otherwise.
  */
 lzw_result lzw_decode(struct lzw_ctx *ctx,
-		const uint8_t **const output_data,
-		uint32_t *output_written);
+		const fl::u8 **const output_data,
+		fl::u32 *output_written);
 
 /**
  * Initialise an LZW decompression context for decoding to colour map values.
@@ -111,12 +111,12 @@ lzw_result lzw_decode(struct lzw_ctx *ctx,
  */
 lzw_result lzw_decode_init_map(
 		struct lzw_ctx *ctx,
-		uint8_t minimum_code_size,
-		uint32_t transparency_idx,
-		const uint32_t *colour_table,
-		const uint8_t *input_data,
-		size_t input_length,
-		size_t input_pos);
+		fl::u8 minimum_code_size,
+		fl::u32 transparency_idx,
+		const fl::u32 *colour_table,
+		const fl::u8 *input_data,
+		fl::size input_length,
+		fl::size input_pos);
 
 /**
  * Read LZW codes into client buffer, mapping output to colours.
@@ -135,9 +135,9 @@ lzw_result lzw_decode_init_map(
  * \return LZW_OK on success, or appropriate error code otherwise.
  */
 lzw_result lzw_decode_map(struct lzw_ctx *ctx,
-		uint32_t *output_data,
-		uint32_t output_length,
-		uint32_t *output_written);
+		fl::u32 *output_data,
+		fl::u32 output_length,
+		fl::u32 *output_written);
 
 } // namespace third_party
 } // namespace fl

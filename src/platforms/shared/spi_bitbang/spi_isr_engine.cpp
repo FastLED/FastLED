@@ -31,12 +31,17 @@
 
 #include "fl/sketch_macros.h"
 
-#if SKETCH_HAS_LOTS_OF_MEMORY
+// Include platform header first to enable auto-detection of FASTLED_SPI_HOST_SIMULATION
+#include "spi_platform.h"
+
+// Only compile for real embedded platforms OR when explicitly building for host simulation tests
+// On STUB_PLATFORM (meson unit test builds), this is compiled directly into test executables
+// with FASTLED_SPI_HOST_SIMULATION auto-enabled, not into the library.
+#if SKETCH_HAS_LOTS_OF_MEMORY && (!defined(STUB_PLATFORM) || defined(FASTLED_SPI_HOST_SIMULATION))
 
 #include "fl/stdint.h"
 #include "fl/compiler_control.h"
 #include "spi_isr_engine.h"
-#include "spi_platform.h"
 
 // For thread-safe memory synchronization in host simulation thread mode
 #if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)
@@ -224,4 +229,4 @@ void fl_parallel_spi_isr(void) {
 FL_EXTERN_C_END
 
 
-#endif  // SKETCH_HAS_LOTS_OF_MEMORY
+#endif  // SKETCH_HAS_LOTS_OF_MEMORY && (!defined(STUB_PLATFORM) || defined(FASTLED_SPI_HOST_SIMULATION))

@@ -15,15 +15,14 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/int.h"
 #include <stdbool.h>
-#include <inttypes.h>
 
 namespace fl {
 namespace third_party {
 
 /** Representation of infinity. */
-#define NSGIF_INFINITE (UINT32_MAX)
+#define NSGIF_INFINITE (0xFFFFFFFFU)
 
 /** Maximum colour table size */
 #define NSGIF_MAX_COLOURS 256
@@ -43,13 +42,13 @@ typedef struct nsgif nsgif_t;
  */
 typedef struct nsgif_rect {
 	/** x co-ordinate of redraw rectangle, left */
-	uint32_t x0;
+	fl::u32 x0;
 	/** y co-ordinate of redraw rectangle, top */
-	uint32_t y0;
+	fl::u32 y0;
 	/** x co-ordinate of redraw rectangle, right */
-	uint32_t x1;
+	fl::u32 x1;
 	/** y co-ordinate of redraw rectangle, bottom */
-	uint32_t y1;
+	fl::u32 y1;
 } nsgif_rect_t;
 
 /**
@@ -195,14 +194,14 @@ typedef struct nsgif_bitmap_cb_vt {
 	/**
 	 * Get pointer to pixel buffer in a bitmap.
 	 *
-	 * The pixel buffer must be `(width + N) * height * sizeof(uint32_t)`.
+	 * The pixel buffer must be `(width + N) * height * sizeof(fl::u32)`.
 	 * Where `N` is any number greater than or equal to 0.
-	 * Note that the returned pointer to uint8_t must be 4-byte aligned.
+	 * Note that the returned pointer to fl::u8 must be 4-byte aligned.
 	 *
 	 * \param[in]  bitmap  The bitmap.
 	 * \return pointer to bitmap's pixel buffer.
 	 */
-	uint8_t* (*get_buffer)(nsgif_bitmap_t *bitmap);
+	fl::u8* (*get_buffer)(nsgif_bitmap_t *bitmap);
 
 	/* The following functions are optional. */
 
@@ -238,7 +237,7 @@ typedef struct nsgif_bitmap_cb_vt {
 	 *
 	 * \param[in]  bitmap  The bitmap.
 	 */
-	uint32_t (*get_rowspan)(nsgif_bitmap_t *bitmap);
+	fl::u32 (*get_rowspan)(nsgif_bitmap_t *bitmap);
 } nsgif_bitmap_cb_vt;
 
 /**
@@ -301,8 +300,8 @@ void nsgif_destroy(nsgif_t *gif);
  */
 nsgif_error nsgif_data_scan(
 		nsgif_t *gif,
-		size_t size,
-		const uint8_t *data);
+		fl::size size,
+		const fl::u8 *data);
 
 /**
  * Tell libnsgif that all the gif data has been provided.
@@ -343,8 +342,8 @@ void nsgif_data_complete(
 nsgif_error nsgif_frame_prepare(
 		nsgif_t *gif,
 		nsgif_rect_t *area,
-		uint32_t *delay_cs,
-		uint32_t *frame_new);
+		fl::u32 *delay_cs,
+		fl::u32 *frame_new);
 
 /**
  * Decodes a GIF frame.
@@ -358,7 +357,7 @@ nsgif_error nsgif_frame_prepare(
  */
 nsgif_error nsgif_frame_decode(
 		nsgif_t *gif,
-		uint32_t frame,
+		fl::u32 frame,
 		nsgif_bitmap_t **bitmap);
 
 /**
@@ -381,15 +380,15 @@ nsgif_error nsgif_reset(
  */
 typedef struct nsgif_info {
 	/** width of GIF (may increase during decoding) */
-	uint32_t width;
+	fl::u32 width;
 	/** height of GIF (may increase during decoding) */
-	uint32_t height;
+	fl::u32 height;
 	/** number of frames decoded */
-	uint32_t frame_count;
+	fl::u32 frame_count;
 	/** number of times to play animation (zero means loop forever) */
 	int loop_max;
 	/** background colour in same pixel format as \ref nsgif_bitmap_t. */
-	uint32_t background;
+	fl::u32 background;
 	/** whether the GIF has a global colour table */
 	bool global_palette;
 } nsgif_info_t;
@@ -429,9 +428,9 @@ typedef struct nsgif_frame_info {
 	/** whether the frame is interlaced */
 	bool interlaced;
 	/** Disposal method for previous frame; affects plotting */
-	uint8_t disposal;
+	fl::u8 disposal;
 	/** delay (in cs) before animating the frame */
-	uint32_t delay;
+	fl::u32 delay;
 
 	/** Frame's redraw rectangle. */
 	nsgif_rect_t rect;
@@ -456,7 +455,7 @@ const nsgif_info_t *nsgif_get_info(const nsgif_t *gif);
  */
 const nsgif_frame_info_t *nsgif_get_frame_info(
 		const nsgif_t *gif,
-		uint32_t frame);
+		fl::u32 frame);
 
 /**
  * Get the global colour palette.
@@ -472,8 +471,8 @@ const nsgif_frame_info_t *nsgif_get_frame_info(
  */
 void nsgif_global_palette(
 		const nsgif_t *gif,
-		uint32_t table[NSGIF_MAX_COLOURS],
-		size_t *entries);
+		fl::u32 table[NSGIF_MAX_COLOURS],
+		fl::size *entries);
 
 /**
  * Get the local colour palette for a frame.
@@ -491,9 +490,9 @@ void nsgif_global_palette(
  */
 bool nsgif_local_palette(
 		const nsgif_t *gif,
-		uint32_t frame,
-		uint32_t table[NSGIF_MAX_COLOURS],
-		size_t *entries);
+		fl::u32 frame,
+		fl::u32 table[NSGIF_MAX_COLOURS],
+		fl::size *entries);
 
 /**
  * Configure handling of small frame delays.
@@ -523,8 +522,8 @@ bool nsgif_local_palette(
  */
 void nsgif_set_frame_delay_behaviour(
 		nsgif_t *gif,
-		uint16_t delay_min,
-		uint16_t delay_default);
+		fl::u16 delay_min,
+		fl::u16 delay_default);
 
 } // namespace third_party
 } // namespace fl

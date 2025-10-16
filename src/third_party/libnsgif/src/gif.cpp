@@ -9,7 +9,7 @@
  */
 
 #include "fl/assert.h"
-#include "fl/stdint.h"
+#include "fl/int.h"
 #include "fl/allocator.h"
 #include "fl/memfill.h"
 #include <string.h>
@@ -19,14 +19,6 @@
 
 namespace fl {
 namespace third_party {
-
-// Import LZW functions and types
-using fl::third_party::lzw_result;
-using fl::third_party::lzw_ctx;
-using fl::third_party::lzw_context_create;
-using fl::third_party::lzw_context_destroy;
-using fl::third_party::lzw_decode_init_map;
-using fl::third_party::lzw_decode_map;
 
 /** Default minimum allowable frame delay in cs. */
 #define NSGIF_FRAME_DELAY_MIN 2
@@ -43,7 +35,7 @@ typedef struct nsgif_frame {
 	struct nsgif_frame_info info;
 
 	/** offset (in bytes) to the GIF frame data */
-	size_t frame_offset;
+	fl::size frame_offset;
 	/** whether the frame has previously been decoded. */
 	bool decoded;
 	/** whether the frame is totally opaque */
@@ -52,24 +44,24 @@ typedef struct nsgif_frame {
 	bool redraw_required;
 
 	/** Amount of LZW data found in scan */
-	uint32_t lzw_data_length;
+	fl::u32 lzw_data_length;
 
 	/** the index designating a transparent pixel */
-	uint32_t transparency_index;
+	fl::u32 transparency_index;
 
 	/** offset to frame colour table */
-	uint32_t colour_table_offset;
+	fl::u32 colour_table_offset;
 
 	/* Frame flags */
-	uint32_t flags;
+	fl::u32 flags;
 } nsgif_frame;
 
 /** Pixel format: colour component order. */
 struct nsgif_colour_layout {
-	uint8_t r; /**< Byte offset within pixel to red component. */
-	uint8_t g; /**< Byte offset within pixel to green component. */
-	uint8_t b; /**< Byte offset within pixel to blue component. */
-	uint8_t a; /**< Byte offset within pixel to alpha component. */
+	fl::u8 r; /**< Byte offset within pixel to red component. */
+	fl::u8 g; /**< Byte offset within pixel to green component. */
+	fl::u8 b; /**< Byte offset within pixel to blue component. */
+	fl::u8 a; /**< Byte offset within pixel to alpha component. */
 };
 
 /** GIF animation data */
@@ -83,26 +75,26 @@ struct nsgif {
 	/** decoded frames */
 	nsgif_frame *frames;
 	/** current frame */
-	uint32_t frame;
+	fl::u32 frame;
 	/** current frame decoded to bitmap */
-	uint32_t decoded_frame;
+	fl::u32 decoded_frame;
 
 	/** currently decoded image; stored as bitmap from bitmap_create callback */
 	nsgif_bitmap_t *frame_image;
 	/** Row span of frame_image in pixels. */
-	uint32_t rowspan;
+	fl::u32 rowspan;
 
 	/** Minimum allowable frame delay. */
-	uint16_t delay_min;
+	fl::u16 delay_min;
 
 	/** Frame delay to apply when delay is less than \ref delay_min. */
-	uint16_t delay_default;
+	fl::u16 delay_default;
 
 	/** number of animation loops so far */
 	int loop_count;
 
 	/** number of frames partially decoded */
-	uint32_t frame_count_partial;
+	fl::u32 frame_count_partial;
 
 	/**
 	 * Whether all the GIF data has been supplied, or if there may be
@@ -111,34 +103,34 @@ struct nsgif {
 	bool data_complete;
 
 	/** pointer to GIF data */
-	const uint8_t *buf;
+	const fl::u8 *buf;
 	/** current index into GIF data */
-	size_t buf_pos;
+	fl::size buf_pos;
 	/** total number of bytes of GIF data available */
-	size_t buf_len;
+	fl::size buf_len;
 
 	/** current number of frame holders */
-	uint32_t frame_holders;
+	fl::u32 frame_holders;
 	/** background index */
-	uint32_t bg_index;
+	fl::u32 bg_index;
 	/** image aspect ratio (ignored) */
-	uint32_t aspect_ratio;
+	fl::u32 aspect_ratio;
 	/** size of global colour table (in entries) */
-	uint32_t colour_table_size;
+	fl::u32 colour_table_size;
 
 	/** current colour table */
-	uint32_t *colour_table;
+	fl::u32 *colour_table;
 	/** Client's colour component order. */
 	struct nsgif_colour_layout colour_layout;
 	/** global colour table */
-	uint32_t global_colour_table[NSGIF_MAX_COLOURS];
+	fl::u32 global_colour_table[NSGIF_MAX_COLOURS];
 	/** local colour table */
-	uint32_t local_colour_table[NSGIF_MAX_COLOURS];
+	fl::u32 local_colour_table[NSGIF_MAX_COLOURS];
 
 	/** previous frame for NSGIF_FRAME_RESTORE */
 	void *prev_frame;
 	/** previous frame index */
-	uint32_t prev_index;
+	fl::u32 prev_index;
 };
 
 /**
@@ -212,8 +204,8 @@ static nsgif_error nsgif__error_from_lzw(lzw_result l_res)
  */
 static nsgif_error nsgif__initialise_sprite(
 		struct nsgif *gif,
-		uint32_t width,
-		uint32_t height)
+		fl::u32 width,
+		fl::u32 height)
 {
 	/* Already allocated? */
 	if (gif->frame_image) {
@@ -235,7 +227,7 @@ static nsgif_error nsgif__initialise_sprite(
  * \param[in]  gif  The gif object we're decoding.
  * \return Client pixel buffer for rendering into.
  */
-static inline uint32_t* nsgif__bitmap_get(
+static inline fl::u32* nsgif__bitmap_get(
 		struct nsgif *gif)
 {
 	nsgif_error ret;
@@ -253,7 +245,7 @@ static inline uint32_t* nsgif__bitmap_get(
 
 	/* Get the frame data */
 	FL_ASSERT(gif->bitmap.get_buffer, "GIF bitmap get_buffer function required");
-	return reinterpret_cast<uint32_t*>(gif->bitmap.get_buffer(gif->frame_image));
+	return reinterpret_cast<fl::u32*>(gif->bitmap.get_buffer(gif->frame_image));
 }
 
 /**
@@ -306,12 +298,12 @@ static inline bool nsgif__bitmap_get_opaque(
 
 static void nsgif__record_frame(
 		struct nsgif *gif,
-		const uint32_t *bitmap)
+		const fl::u32 *bitmap)
 {
-	size_t pixel_bytes = sizeof(*bitmap);
-	size_t height = gif->info.height;
-	size_t width  = gif->info.width;
-	uint32_t *prev_frame;
+	fl::size pixel_bytes = sizeof(*bitmap);
+	fl::size height = gif->info.height;
+	fl::size width  = gif->info.width;
+	fl::u32 *prev_frame;
 
 	if (gif->decoded_frame == NSGIF_FRAME_INVALID ||
 	    gif->decoded_frame == gif->prev_index) {
@@ -325,13 +317,13 @@ static void nsgif__record_frame(
 	}
 
 	if (gif->prev_frame == NULL) {
-		prev_frame = static_cast<uint32_t*>(fl::Malloc(width * height * pixel_bytes));
+		prev_frame = static_cast<fl::u32*>(fl::Malloc(width * height * pixel_bytes));
 		if (prev_frame == NULL) {
 			return;
 		}
 		gif->prev_frame = prev_frame;
 	} else {
-		prev_frame = static_cast<uint32_t*>(gif->prev_frame);
+		prev_frame = static_cast<fl::u32*>(gif->prev_frame);
 	}
 
 	fl::memcopy(prev_frame, bitmap, width * height * pixel_bytes);
@@ -342,12 +334,12 @@ static void nsgif__record_frame(
 
 static nsgif_error nsgif__recover_frame(
 		const struct nsgif *gif,
-		uint32_t *bitmap)
+		fl::u32 *bitmap)
 {
-	const uint32_t *prev_frame = static_cast<const uint32_t*>(gif->prev_frame);
-	size_t pixel_bytes = sizeof(*bitmap);
-	size_t height = gif->info.height;
-	size_t width  = gif->info.width;
+	const fl::u32 *prev_frame = static_cast<const fl::u32*>(gif->prev_frame);
+	fl::size pixel_bytes = sizeof(*bitmap);
+	fl::size height = gif->info.height;
+	fl::size width  = gif->info.width;
 
 	fl::memcopy(bitmap, prev_frame, height * width * pixel_bytes);
 
@@ -367,7 +359,7 @@ static nsgif_error nsgif__recover_frame(
  * \param[in,out] step       Current step starting with 24, updated on exit.
  * \return true if there is a row to process, false at the end of the frame.
  */
-static inline bool nsgif__deinterlace(uint32_t height, uint32_t *y, uint8_t *step)
+static inline bool nsgif__deinterlace(fl::u32 height, fl::u32 *y, fl::u8 *step)
 {
 	*y += *step & 0xf;
 
@@ -396,8 +388,8 @@ static inline bool nsgif__deinterlace(uint32_t height, uint32_t *y, uint8_t *ste
  * \param[in,out] step       Current step starting with 24, updated on exit.
  * \return true if there is a row to process, false at the end of the frame.
  */
-static inline bool nsgif__next_row(uint32_t interlace,
-		uint32_t height, uint32_t *y, uint8_t *step)
+static inline bool nsgif__next_row(fl::u32 interlace,
+		fl::u32 height, fl::u32 *y, fl::u8 *step)
 {
 	if (!interlace) {
 		return (++*y != height);
@@ -415,12 +407,12 @@ static inline bool nsgif__next_row(uint32_t interlace,
  * \return the amount the frame needs to be clipped to fit the image in given
  *         dimension.
  */
-static inline uint32_t gif__clip(
-		uint32_t frame_off,
-		uint32_t frame_dim,
-		uint32_t image_ext)
+static inline fl::u32 gif__clip(
+		fl::u32 frame_off,
+		fl::u32 frame_dim,
+		fl::u32 image_ext)
 {
-	uint32_t frame_ext = frame_off + frame_dim;
+	fl::u32 frame_ext = frame_off + frame_dim;
 
 	if (frame_ext <= image_ext) {
 		return 0;
@@ -437,11 +429,11 @@ static inline uint32_t gif__clip(
  * \param[in,out] pos        Position in decoded pixel value data.
  */
 static inline void gif__jump_data(
-		uint32_t *skip,
-		uint32_t *available,
-		const uint8_t **pos)
+		fl::u32 *skip,
+		fl::u32 *available,
+		const fl::u8 **pos)
 {
-	uint32_t jump = (*skip < *available) ? *skip : *available;
+	fl::u32 jump = (*skip < *available) ? *skip : *available;
 
 	*skip -= jump;
 	*available -= jump;
@@ -450,25 +442,25 @@ static inline void gif__jump_data(
 
 static nsgif_error nsgif__decode_complex(
 		struct nsgif *gif,
-		uint32_t width,
-		uint32_t height,
-		uint32_t offset_x,
-		uint32_t offset_y,
-		uint32_t interlace,
-		const uint8_t *data,
-		uint32_t transparency_index,
-		uint32_t * frame_data,
-		uint32_t * colour_table)
+		fl::u32 width,
+		fl::u32 height,
+		fl::u32 offset_x,
+		fl::u32 offset_y,
+		fl::u32 interlace,
+		const fl::u8 *data,
+		fl::u32 transparency_index,
+		fl::u32 * frame_data,
+		fl::u32 * colour_table)
 {
 	lzw_result res;
 	nsgif_error ret = NSGIF_OK;
-	uint32_t clip_x = gif__clip(offset_x, width, gif->info.width);
-	uint32_t clip_y = gif__clip(offset_y, height, gif->info.height);
-	const uint8_t *uncompressed;
-	uint32_t available = 0;
-	uint8_t step = 24;
-	uint32_t skip = 0;
-	uint32_t y = 0;
+	fl::u32 clip_x = gif__clip(offset_x, width, gif->info.width);
+	fl::u32 clip_y = gif__clip(offset_y, height, gif->info.height);
+	const fl::u8 *uncompressed;
+	fl::u32 available = 0;
+	fl::u8 step = 24;
+	fl::u32 skip = 0;
+	fl::u32 y = 0;
 
 	if (offset_x >= gif->info.width ||
 	    offset_y >= gif->info.height) {
@@ -491,8 +483,8 @@ static nsgif_error nsgif__decode_complex(
 	}
 
 	do {
-		uint32_t x;
-		uint32_t *frame_scanline;
+		fl::u32 x;
+		fl::u32 *frame_scanline;
 
 		frame_scanline = frame_data + offset_x +
 				(y + offset_y) * gif->rowspan;
@@ -530,7 +522,7 @@ static nsgif_error nsgif__decode_complex(
 				}
 			} else {
 				while (row_available-- > 0) {
-					uint32_t colour;
+					fl::u32 colour;
 					colour = *uncompressed++;
 					if (colour != transparency_index) {
 						*frame_scanline =
@@ -550,15 +542,15 @@ static nsgif_error nsgif__decode_complex(
 
 static nsgif_error nsgif__decode_simple(
 		struct nsgif *gif,
-		uint32_t height,
-		uint32_t offset_y,
-		const uint8_t *data,
-		uint32_t transparency_index,
-		uint32_t * frame_data,
-		uint32_t * colour_table)
+		fl::u32 height,
+		fl::u32 offset_y,
+		const fl::u8 *data,
+		fl::u32 transparency_index,
+		fl::u32 * frame_data,
+		fl::u32 * colour_table)
 {
-	uint32_t pixels;
-	uint32_t written = 0;
+	fl::u32 pixels;
+	fl::u32 written = 0;
 	nsgif_error ret = NSGIF_OK;
 	lzw_result res;
 
@@ -610,16 +602,16 @@ static nsgif_error nsgif__decode_simple(
 static inline nsgif_error nsgif__decode(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t *data,
-		uint32_t * frame_data)
+		const fl::u8 *data,
+		fl::u32 * frame_data)
 {
 	nsgif_error ret;
-	uint32_t width  = frame->info.rect.x1 - frame->info.rect.x0;
-	uint32_t height = frame->info.rect.y1 - frame->info.rect.y0;
-	uint32_t offset_x = frame->info.rect.x0;
-	uint32_t offset_y = frame->info.rect.y0;
-	uint32_t transparency_index = frame->transparency_index;
-	uint32_t * colour_table = gif->colour_table;
+	fl::u32 width  = frame->info.rect.x1 - frame->info.rect.x0;
+	fl::u32 height = frame->info.rect.y1 - frame->info.rect.y0;
+	fl::u32 offset_x = frame->info.rect.x0;
+	fl::u32 offset_y = frame->info.rect.y0;
+	fl::u32 transparency_index = frame->transparency_index;
+	fl::u32 * colour_table = gif->colour_table;
 
 	if (frame->info.interlaced == false && offset_x == 0 &&
 			width == gif->info.width &&
@@ -652,21 +644,21 @@ static inline nsgif_error nsgif__decode(
 static void nsgif__restore_bg(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		uint32_t *bitmap)
+		fl::u32 *bitmap)
 {
-	size_t pixel_bytes = sizeof(*bitmap);
+	fl::size pixel_bytes = sizeof(*bitmap);
 
 	if (frame == NULL) {
-		size_t width  = gif->info.width;
-		size_t height = gif->info.height;
+		fl::size width  = gif->info.width;
+		fl::size height = gif->info.height;
 
 		fl::memfill(bitmap, NSGIF_TRANSPARENT_COLOUR,
 				width * height * pixel_bytes);
 	} else {
-		uint32_t width  = frame->info.rect.x1 - frame->info.rect.x0;
-		uint32_t height = frame->info.rect.y1 - frame->info.rect.y0;
-		uint32_t offset_x = frame->info.rect.x0;
-		uint32_t offset_y = frame->info.rect.y0;
+		fl::u32 width  = frame->info.rect.x1 - frame->info.rect.x0;
+		fl::u32 height = frame->info.rect.y1 - frame->info.rect.y0;
+		fl::u32 offset_x = frame->info.rect.x0;
+		fl::u32 offset_y = frame->info.rect.y0;
 
 		if (frame->info.display == false ||
 		    frame->info.rect.x0 >= gif->info.width ||
@@ -678,17 +670,17 @@ static void nsgif__restore_bg(
 		height -= gif__clip(offset_y, height, gif->info.height);
 
 		if (frame->info.transparency) {
-			for (uint32_t y = 0; y < height; y++) {
-				uint32_t *scanline = bitmap + offset_x +
+			for (fl::u32 y = 0; y < height; y++) {
+				fl::u32 *scanline = bitmap + offset_x +
 						(offset_y + y) * gif->info.width;
 				fl::memfill(scanline, NSGIF_TRANSPARENT_COLOUR,
 						width * pixel_bytes);
 			}
 		} else {
-			for (uint32_t y = 0; y < height; y++) {
-				uint32_t *scanline = bitmap + offset_x +
+			for (fl::u32 y = 0; y < height; y++) {
+				fl::u32 *scanline = bitmap + offset_x +
 						(offset_y + y) * gif->info.width;
-				for (uint32_t x = 0; x < width; x++) {
+				for (fl::u32 x = 0; x < width; x++) {
 					scanline[x] = gif->info.background;
 				}
 			}
@@ -699,11 +691,11 @@ static void nsgif__restore_bg(
 static nsgif_error nsgif__update_bitmap(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t *data,
-		uint32_t frame_idx)
+		const fl::u8 *data,
+		fl::u32 frame_idx)
 {
 	nsgif_error ret;
-	uint32_t *bitmap;
+	fl::u32 *bitmap;
 
 	gif->decoded_frame = frame_idx;
 
@@ -760,8 +752,8 @@ static nsgif_error nsgif__update_bitmap(
  */
 static nsgif_error nsgif__parse_extension_graphic_control(
 		struct nsgif_frame *frame,
-		const uint8_t *data,
-		size_t len)
+		const fl::u8 *data,
+		fl::size len)
 {
 	enum {
 		GIF_MASK_TRANSPARENCY = 0x01,
@@ -819,8 +811,8 @@ static nsgif_error nsgif__parse_extension_graphic_control(
  * \return true if extension is a loop count extension.
  */
 static bool nsgif__app_ext_is_loop_count(
-		const uint8_t *data,
-		size_t len)
+		const fl::u8 *data,
+		fl::size len)
 {
 	enum {
 		EXT_LOOP_COUNT_BLOCK_SIZE = 0x0b,
@@ -850,8 +842,8 @@ static bool nsgif__app_ext_is_loop_count(
  */
 static nsgif_error nsgif__parse_extension_application(
 		struct nsgif *gif,
-		const uint8_t *data,
-		size_t len)
+		const fl::u8 *data,
+		fl::size len)
 {
 	/* 14-byte+ Application Extension is:
 	 *
@@ -901,7 +893,7 @@ static nsgif_error nsgif__parse_extension_application(
 static nsgif_error nsgif__parse_frame_extensions(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t **pos,
+		const fl::u8 **pos,
 		bool decode)
 {
 	enum {
@@ -911,8 +903,8 @@ static nsgif_error nsgif__parse_frame_extensions(
 		GIF_EXT_PLAIN_TEXT      = 0x01,
 		GIF_EXT_APPLICATION     = 0xff,
 	};
-	const uint8_t *nsgif_data = *pos;
-	const uint8_t *nsgif_end = gif->buf + gif->buf_len;
+	const fl::u8 *nsgif_data = *pos;
+	const fl::u8 *nsgif_end = gif->buf + gif->buf_len;
 	int nsgif_bytes = nsgif_end - nsgif_data;
 
 	/* Initialise the extensions */
@@ -1020,11 +1012,11 @@ static nsgif_error nsgif__parse_frame_extensions(
 static nsgif_error nsgif__parse_image_descriptor(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t **pos,
+		const fl::u8 **pos,
 		bool decode)
 {
-	const uint8_t *data = *pos;
-	size_t len = gif->buf + gif->buf_len - data;
+	const fl::u8 *data = *pos;
+	fl::size len = gif->buf + gif->buf_len - data;
 	enum {
 		NSGIF_IMAGE_DESCRIPTOR_LEN = 10u,
 		NSGIF_IMAGE_SEPARATOR      = 0x2Cu,
@@ -1039,7 +1031,7 @@ static nsgif_error nsgif__parse_image_descriptor(
 	}
 
 	if (decode) {
-		uint32_t x, y, w, h;
+		fl::u32 x, y, w, h;
 
 		if (data[0] != NSGIF_IMAGE_SEPARATOR) {
 			return NSGIF_ERR_DATA_FRAME;
@@ -1082,12 +1074,12 @@ static nsgif_error nsgif__parse_image_descriptor(
  * \param[in] data                  Raw colour table data.
  */
 static void nsgif__colour_table_decode(
-		uint32_t colour_table[NSGIF_MAX_COLOURS],
+		fl::u32 colour_table[NSGIF_MAX_COLOURS],
 		const struct nsgif_colour_layout *layout,
-		size_t colour_table_entries,
-		const uint8_t *data)
+		fl::size colour_table_entries,
+		const fl::u8 *data)
 {
-	uint8_t *entry = (uint8_t *)colour_table;
+	fl::u8 *entry = (fl::u8 *)colour_table;
 
 	while (colour_table_entries--) {
 		/* Gif colour map contents are r,g,b.
@@ -1101,7 +1093,7 @@ static void nsgif__colour_table_decode(
 		entry[layout->b] = *data++;
 		entry[layout->a] = 0xff;
 
-		entry += sizeof(uint32_t);
+		entry += sizeof(fl::u32);
 	}
 }
 
@@ -1118,12 +1110,12 @@ static void nsgif__colour_table_decode(
  * \return NSGIF_OK on success, appropriate error otherwise.
  */
 static inline nsgif_error nsgif__colour_table_extract(
-		uint32_t colour_table[NSGIF_MAX_COLOURS],
+		fl::u32 colour_table[NSGIF_MAX_COLOURS],
 		const struct nsgif_colour_layout *layout,
-		size_t colour_table_entries,
-		const uint8_t *data,
-		size_t data_len,
-		size_t *used,
+		fl::size colour_table_entries,
+		const fl::u8 *data,
+		fl::size data_len,
+		fl::size *used,
 		bool decode)
 {
 	if (data_len < colour_table_entries * 3) {
@@ -1153,13 +1145,13 @@ static inline nsgif_error nsgif__colour_table_extract(
 static nsgif_error nsgif__parse_colour_table(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t **pos,
+		const fl::u8 **pos,
 		bool decode)
 {
 	nsgif_error ret;
-	const uint8_t *data = *pos;
-	size_t len = gif->buf + gif->buf_len - data;
-	size_t used_bytes;
+	const fl::u8 *data = *pos;
+	fl::size len = gif->buf + gif->buf_len - data;
+	fl::size used_bytes;
 
 	FL_ASSERT(gif != NULL, "GIF object required");
 	FL_ASSERT(frame != NULL, "Frame object required");
@@ -1205,13 +1197,13 @@ static nsgif_error nsgif__parse_colour_table(
 static nsgif_error nsgif__parse_image_data(
 		struct nsgif *gif,
 		struct nsgif_frame *frame,
-		const uint8_t **pos,
+		const fl::u8 **pos,
 		bool decode)
 {
-	const uint8_t *data = *pos;
-	size_t len = gif->buf + gif->buf_len - data;
-	uint32_t frame_idx = frame - gif->frames;
-	uint8_t minimum_code_size;
+	const fl::u8 *data = *pos;
+	fl::size len = gif->buf + gif->buf_len - data;
+	fl::u32 frame_idx = frame - gif->frames;
+	fl::u8 minimum_code_size;
 	nsgif_error ret;
 
 	FL_ASSERT(gif != NULL, "GIF object required");
@@ -1242,7 +1234,7 @@ static nsgif_error nsgif__parse_image_data(
 	if (decode) {
 		ret = nsgif__update_bitmap(gif, frame, data, frame_idx);
 	} else {
-		uint32_t block_size = 0;
+		fl::u32 block_size = 0;
 
 		/* Skip the minimum code size. */
 		data++;
@@ -1277,7 +1269,7 @@ static nsgif_error nsgif__parse_image_data(
 
 static struct nsgif_frame *nsgif__get_frame(
 		struct nsgif *gif,
-		uint32_t frame_idx)
+		fl::u32 frame_idx)
 {
 	struct nsgif_frame *frame;
 
@@ -1285,7 +1277,7 @@ static struct nsgif_frame *nsgif__get_frame(
 		frame = &gif->frames[frame_idx];
 	} else {
 		/* Allocate more memory */
-		size_t count = frame_idx + 1;
+		fl::size count = frame_idx + 1;
 		struct nsgif_frame *temp;
 
 		temp = static_cast<struct nsgif_frame*>(fl::Malloc(count * sizeof(*frame)));
@@ -1327,12 +1319,12 @@ static struct nsgif_frame *nsgif__get_frame(
 */
 static nsgif_error nsgif__process_frame(
 		struct nsgif *gif,
-		uint32_t frame_idx,
+		fl::u32 frame_idx,
 		bool decode)
 {
 	nsgif_error ret;
-	const uint8_t *pos;
-	const uint8_t *end;
+	const fl::u8 *pos;
+	const fl::u8 *end;
 	struct nsgif_frame *frame;
 
 	frame = nsgif__get_frame(gif, frame_idx);
@@ -1425,15 +1417,15 @@ void nsgif_destroy(nsgif_t *gif)
 /**
  * Check whether the host is little endian.
  *
- * Checks whether least significant bit is in the first byte of a `uint16_t`.
+ * Checks whether least significant bit is in the first byte of a `fl::u16`.
  *
  * \return true if host is little endian.
  */
 static inline bool nsgif__host_is_little_endian(void)
 {
-	const uint16_t test = 1;
+	const fl::u16 test = 1;
 
-	return ((const uint8_t *) &test)[0];
+	return ((const fl::u8 *) &test)[0];
 }
 
 static struct nsgif_colour_layout nsgif__bitmap_fmt_to_colour_layout(
@@ -1526,8 +1518,8 @@ nsgif_error nsgif_create(
 /* exported function documented in nsgif.h */
 void nsgif_set_frame_delay_behaviour(
 		nsgif_t *gif,
-		uint16_t delay_min,
-		uint16_t delay_default)
+		fl::u16 delay_min,
+		fl::u16 delay_default)
 {
 	gif->delay_min = delay_min;
 	gif->delay_default = delay_default;
@@ -1548,11 +1540,11 @@ void nsgif_set_frame_delay_behaviour(
  */
 static nsgif_error nsgif__parse_header(
 		struct nsgif *gif,
-		const uint8_t **pos,
+		const fl::u8 **pos,
 		bool strict)
 {
-	const uint8_t *data = *pos;
-	size_t len = gif->buf + gif->buf_len - data;
+	const fl::u8 *data = *pos;
+	fl::size len = gif->buf + gif->buf_len - data;
 
 	if (len < 6) {
 		return NSGIF_ERR_END_OF_DATA;
@@ -1596,10 +1588,10 @@ static nsgif_error nsgif__parse_header(
  */
 static nsgif_error nsgif__parse_logical_screen_descriptor(
 		struct nsgif *gif,
-		const uint8_t **pos)
+		const fl::u8 **pos)
 {
-	const uint8_t *data = *pos;
-	size_t len = gif->buf + gif->buf_len - data;
+	const fl::u8 *data = *pos;
+	fl::size len = gif->buf + gif->buf_len - data;
 
 	if (len < 7) {
 		return NSGIF_ERR_END_OF_DATA;
@@ -1620,12 +1612,12 @@ static nsgif_error nsgif__parse_logical_screen_descriptor(
 /* exported function documented in nsgif.h */
 nsgif_error nsgif_data_scan(
 		nsgif_t *gif,
-		size_t size,
-		const uint8_t *data)
+		fl::size size,
+		const fl::u8 *data)
 {
-	const uint8_t *nsgif_data;
+	const fl::u8 *nsgif_data;
 	nsgif_error ret;
-	uint32_t frames;
+	fl::u32 frames;
 
 	if (gif->data_complete) {
 		return NSGIF_ERR_DATA_COMPLETE;
@@ -1706,8 +1698,8 @@ nsgif_error nsgif_data_scan(
 	if (gif->global_colour_table[0] == NSGIF_PROCESS_COLOURS) {
 		/* Check for a global colour map signified by bit 7 */
 		if (gif->info.global_palette) {
-			size_t remaining = gif->buf + gif->buf_len - nsgif_data;
-			size_t used;
+			fl::size remaining = gif->buf + gif->buf_len - nsgif_data;
+			fl::size used;
 
 			ret = nsgif__colour_table_extract(
 					gif->global_colour_table,
@@ -1723,7 +1715,7 @@ nsgif_error nsgif_data_scan(
 		} else {
 			/* Create a default colour table with the first two
 			 * colours as black and white. */
-			uint8_t *entry = (uint8_t *)gif->global_colour_table;
+			fl::u8 *entry = (fl::u8 *)gif->global_colour_table;
 
 			/* Black */
 			entry[gif->colour_layout.r] = 0x00;
@@ -1731,7 +1723,7 @@ nsgif_error nsgif_data_scan(
 			entry[gif->colour_layout.b] = 0x00;
 			entry[gif->colour_layout.a] = 0xFF;
 
-			entry += sizeof(uint32_t);
+			entry += sizeof(fl::u32);
 
 			/* White */
 			entry[gif->colour_layout.r] = 0xFF;
@@ -1744,7 +1736,7 @@ nsgif_error nsgif_data_scan(
 
 		if (gif->info.global_palette &&
 		    gif->bg_index < gif->colour_table_size) {
-			size_t bg_idx = gif->bg_index;
+			fl::size bg_idx = gif->bg_index;
 			gif->info.background = gif->global_colour_table[bg_idx];
 		} else {
 			gif->info.background = gif->global_colour_table[0];
@@ -1778,10 +1770,10 @@ void nsgif_data_complete(
 		nsgif_t *gif)
 {
 	if (gif->data_complete == false) {
-		uint32_t start = gif->info.frame_count;
-		uint32_t end = gif->frame_count_partial;
+		fl::u32 start = gif->info.frame_count;
+		fl::u32 end = gif->frame_count_partial;
 
-		for (uint32_t f = start; f < end; f++) {
+		for (fl::u32 f = start; f < end; f++) {
 			nsgif_frame *frame = &gif->frames[f];
 
 			if (frame->lzw_data_length > 0) {
@@ -1821,12 +1813,12 @@ static void nsgif__redraw_rect_extend(
 	}
 }
 
-static uint32_t nsgif__frame_next(
+static fl::u32 nsgif__frame_next(
 		const nsgif_t *gif,
 		bool partial,
-		uint32_t frame)
+		fl::u32 frame)
 {
-	uint32_t frames = partial ?
+	fl::u32 frames = partial ?
 			gif->frame_count_partial :
 			gif->info.frame_count;
 
@@ -1840,10 +1832,10 @@ static uint32_t nsgif__frame_next(
 
 static nsgif_error nsgif__next_displayable_frame(
 		const nsgif_t *gif,
-		uint32_t *frame,
-		uint32_t *delay)
+		fl::u32 *frame,
+		fl::u32 *delay)
 {
-	uint32_t next = *frame;
+	fl::u32 next = *frame;
 
 	do {
 		next = nsgif__frame_next(gif, false, next);
@@ -1887,13 +1879,13 @@ nsgif_error nsgif_reset(
 nsgif_error nsgif_frame_prepare(
 		nsgif_t *gif,
 		nsgif_rect_t *area,
-		uint32_t *delay_cs,
-		uint32_t *frame_new)
+		fl::u32 *delay_cs,
+		fl::u32 *frame_new)
 {
 	nsgif_error ret;
 	nsgif_rect_t rect = {0, 0, 0, 0};
-	uint32_t delay = 0;
-	uint32_t frame = gif->frame;
+	fl::u32 delay = 0;
+	fl::u32 frame = gif->frame;
 
 	if (gif->frame != NSGIF_FRAME_INVALID &&
 	    gif->frame < gif->info.frame_count &&
@@ -1922,7 +1914,7 @@ nsgif_error nsgif_frame_prepare(
 		if (gif->info.frame_count == 1) {
 			delay = NSGIF_INFINITE;
 		} else if (gif->info.loop_max != 0) {
-			uint32_t frame_next = frame;
+			fl::u32 frame_next = frame;
 
 			ret = nsgif__next_displayable_frame(gif,
 					&frame_next, NULL);
@@ -1957,10 +1949,10 @@ nsgif_error nsgif_frame_prepare(
 /* exported function documented in nsgif.h */
 nsgif_error nsgif_frame_decode(
 		nsgif_t *gif,
-		uint32_t frame,
+		fl::u32 frame,
 		nsgif_bitmap_t **bitmap)
 {
-	uint32_t start_frame;
+	fl::u32 start_frame;
 	nsgif_error ret = NSGIF_OK;
 
 	if (frame >= gif->info.frame_count) {
@@ -1980,7 +1972,7 @@ nsgif_error nsgif_frame_decode(
 				gif, false, gif->decoded_frame);
 	}
 
-	for (uint32_t f = start_frame; f <= frame; f++) {
+	for (fl::u32 f = start_frame; f <= frame; f++) {
 		ret = nsgif__process_frame(gif, f, true);
 		if (ret != NSGIF_OK) {
 			return ret;
@@ -2000,7 +1992,7 @@ const nsgif_info_t *nsgif_get_info(const nsgif_t *gif)
 /* exported function documented in nsgif.h */
 const nsgif_frame_info_t *nsgif_get_frame_info(
 		const nsgif_t *gif,
-		uint32_t frame)
+		fl::u32 frame)
 {
 	if (frame >= gif->info.frame_count) {
 		return NULL;
@@ -2012,10 +2004,10 @@ const nsgif_frame_info_t *nsgif_get_frame_info(
 /* exported function documented in nsgif.h */
 void nsgif_global_palette(
 		const nsgif_t *gif,
-		uint32_t table[NSGIF_MAX_COLOURS],
-		size_t *entries)
+		fl::u32 table[NSGIF_MAX_COLOURS],
+		fl::size *entries)
 {
-	size_t len = sizeof(*table) * NSGIF_MAX_COLOURS;
+	fl::size len = sizeof(*table) * NSGIF_MAX_COLOURS;
 
 	fl::memcopy(table, gif->global_colour_table, len);
 	*entries = gif->colour_table_size;
@@ -2024,9 +2016,9 @@ void nsgif_global_palette(
 /* exported function documented in nsgif.h */
 bool nsgif_local_palette(
 		const nsgif_t *gif,
-		uint32_t frame,
-		uint32_t table[NSGIF_MAX_COLOURS],
-		size_t *entries)
+		fl::u32 frame,
+		fl::u32 table[NSGIF_MAX_COLOURS],
+		fl::size *entries)
 {
 	const nsgif_frame *f;
 
