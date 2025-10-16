@@ -4,7 +4,8 @@ project('fastled', 'cpp',
     'cpp_std=c++17',  # Use c++17 instead of gnu++17 - we add -std=gnu++17 in compile args
     'warning_level=2',
     'werror=false',
-    'buildtype=debug'
+    'buildtype=debug',
+    'unity=on'       # Enable unity builds for faster compilation (default: 20 files per chunk)
   ]
 )
 
