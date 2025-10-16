@@ -6,27 +6,27 @@
 
 namespace fl {
 
-void fill_solid(struct CRGB *targetArray, int numToFill,
-                const struct CRGB &color) {
+void fill_solid(CRGB *targetArray, int numToFill,
+                const CRGB &color) {
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = color;
     }
 }
 
-void fill_solid(struct CHSV *targetArray, int numToFill,
-                const struct CHSV &color) {
+void fill_solid(CHSV *targetArray, int numToFill,
+                const CHSV &color) {
     for (int i = 0; i < numToFill; ++i) {
         targetArray[i] = color;
     }
 }
 
-// void fill_solid( struct CRGB* targetArray, int numToFill,
-// 				 const struct CHSV& hsvColor)
+// void fill_solid( CRGB* targetArray, int numToFill,
+// 				 const CHSV& hsvColor)
 // {
 // 	fill_solid<CRGB>( targetArray, numToFill, (CRGB) hsvColor);
 // }
 
-void fill_rainbow(struct CRGB *targetArray, int numToFill, u8 initialhue,
+void fill_rainbow(CRGB *targetArray, int numToFill, u8 initialhue,
                   u8 deltahue) {
     CHSV hsv;
     hsv.hue = initialhue;
@@ -38,7 +38,7 @@ void fill_rainbow(struct CRGB *targetArray, int numToFill, u8 initialhue,
     }
 }
 
-void fill_rainbow(struct CHSV *targetArray, int numToFill, u8 initialhue,
+void fill_rainbow(CHSV *targetArray, int numToFill, u8 initialhue,
                   u8 deltahue) {
     CHSV hsv;
     hsv.hue = initialhue;
@@ -50,7 +50,7 @@ void fill_rainbow(struct CHSV *targetArray, int numToFill, u8 initialhue,
     }
 }
 
-void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
+void fill_rainbow_circular(CRGB *targetArray, int numToFill,
                            u8 initialhue, bool reversed) {
     if (numToFill == 0)
         return; // avoiding div/0
@@ -77,7 +77,7 @@ void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
     }
 }
 
-void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
+void fill_rainbow_circular(CHSV *targetArray, int numToFill,
                            u8 initialhue, bool reversed) {
     if (numToFill == 0)
         return; // avoiding div/0

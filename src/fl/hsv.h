@@ -12,7 +12,7 @@ namespace fl {
 /// @{
 
 /// Representation of an HSV pixel (hue, saturation, value (aka brightness)).
-struct CHSV {
+struct hsv8 {
     union {
         struct {
             union {
@@ -45,9 +45,9 @@ struct CHSV {
         fl::u8 raw[3];
     };
 
-    /// Array access operator to index into the CHSV object
+    /// Array access operator to index into the hsv8 object
     /// @param x the index to retrieve (0-2)
-    /// @returns the CHSV::raw value for the given index
+    /// @returns the hsv8::raw value for the given index
     inline fl::u8& operator[] (fl::u8 x) __attribute__((always_inline))
     {
         return raw[x];
@@ -61,29 +61,29 @@ struct CHSV {
 
     /// Default constructor
     /// @warning Default values are UNITIALIZED!
-    constexpr inline CHSV() __attribute__((always_inline)): h(0), s(0), v(0) { }
+    constexpr inline hsv8() __attribute__((always_inline)): h(0), s(0), v(0) { }
 
     /// Allow construction from hue, saturation, and value
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    constexpr inline CHSV( fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
+    constexpr inline hsv8( fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
         : h(ih), s(is), v(iv)
     {
     }
 
     /// Allow copy construction
-    constexpr inline CHSV(const CHSV& rhs) noexcept : h(rhs.h), s(rhs.s), v(rhs.v) { }
+    constexpr inline hsv8(const hsv8& rhs) noexcept : h(rhs.h), s(rhs.s), v(rhs.v) { }
 
     /// Allow copy construction
-    inline CHSV& operator= (const CHSV& rhs) __attribute__((always_inline)) = default;
+    inline hsv8& operator= (const hsv8& rhs) __attribute__((always_inline)) = default;
 
     /// Assign new HSV values
     /// @param ih input hue
     /// @param is input saturation
     /// @param iv input value
-    /// @returns reference to the CHSV object
-    inline CHSV& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline))
+    /// @returns reference to the hsv8 object
+    inline hsv8& setHSV(fl::u8 ih, fl::u8 is, fl::u8 iv) __attribute__((always_inline__))
     {
         h = ih;
         s = is;
@@ -92,7 +92,7 @@ struct CHSV {
     }
 };
 
-/// Pre-defined hue values for CHSV objects
+/// Pre-defined hue values for hsv8 objects
 typedef enum {
     HUE_RED = 0,       ///< Red (0°)
     HUE_ORANGE = 32,   ///< Orange (45°)

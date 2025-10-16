@@ -9,8 +9,11 @@
 #include "fl/xymap.h"
 #include "fl/vector.h"
 
+// Forward declare fl::rgb8 outside the FastLED namespace
+namespace fl { struct rgb8; }
+
 FASTLED_NAMESPACE_BEGIN
-struct CRGB;
+using CRGB = fl::rgb8;  // CRGB is now a typedef
 FASTLED_NAMESPACE_END
 
 namespace fl {

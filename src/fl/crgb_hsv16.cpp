@@ -1,31 +1,32 @@
 /// @file crgb_hsv16.cpp
-/// HSV16-dependent methods for CRGB - only linked when HSV16 functionality is used
+/// HSV16-dependent methods for rgb8 (CRGB) - only linked when HSV16 functionality is used
 
 #define FASTLED_INTERNAL
 #include "crgb.h"
 #include "fl/hsv16.h"
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+// Implementations are in fl namespace since rgb8 is defined there
+namespace fl {
 
-CRGB CRGB::colorBoost(fl::EaseType saturation_function, fl::EaseType luminance_function) const {
-    fl::HSV16 hsv(*this);
+rgb8 rgb8::colorBoost(EaseType saturation_function, EaseType luminance_function) const {
+    HSV16 hsv(*this);
     return hsv.colorBoost(saturation_function, luminance_function);
 }
 
-void CRGB::colorBoost(const CRGB* src, CRGB* dst, size_t count, fl::EaseType saturation_function, fl::EaseType luminance_function) {
+void rgb8::colorBoost(const rgb8* src, rgb8* dst, size_t count, EaseType saturation_function, EaseType luminance_function) {
     for (size_t i = 0; i < count; i++) {
         dst[i] = src[i].colorBoost(saturation_function, luminance_function);
     }
 }
 
-fl::HSV16 CRGB::toHSV16() const {
-    return fl::HSV16(*this);
+HSV16 rgb8::toHSV16() const {
+    return HSV16(*this);
 }
 
-// Constructor implementation for HSV16 -> CRGB automatic conversion
-CRGB::CRGB(const fl::HSV16& rhs) {
+// Constructor implementation for HSV16 -> rgb8 automatic conversion
+rgb8::rgb8(const HSV16& rhs) {
     *this = rhs.ToRGB();
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -32,12 +32,12 @@ namespace fl {
 /// @param targetArray a pointer to the LED array to fill
 /// @param numToFill the number of LEDs to fill in the array
 /// @param color the color to fill with
-void fill_solid(struct CRGB *targetArray, int numToFill,
-                const struct CRGB &color);
+void fill_solid(CRGB *targetArray, int numToFill,
+                const CRGB &color);
 
 /// @copydoc fill_solid()
-void fill_solid(struct CHSV *targetArray, int numToFill,
-                const struct CHSV &color);
+void fill_solid(CHSV *targetArray, int numToFill,
+                const CHSV &color);
 
 /// Fill a range of LEDs with a rainbow of colors.
 /// The colors making up the rainbow are at full saturation and full
@@ -46,11 +46,11 @@ void fill_solid(struct CHSV *targetArray, int numToFill,
 /// @param numToFill the number of LEDs to fill in the array
 /// @param initialhue the starting hue for the rainbow
 /// @param deltahue how many hue values to advance for each LED
-void fill_rainbow(struct CRGB *targetArray, int numToFill, fl::u8 initialhue,
+void fill_rainbow(CRGB *targetArray, int numToFill, fl::u8 initialhue,
                   fl::u8 deltahue = 5);
 
 /// @copydoc fill_rainbow()
-void fill_rainbow(struct CHSV *targetArray, int numToFill, fl::u8 initialhue,
+void fill_rainbow(CHSV *targetArray, int numToFill, fl::u8 initialhue,
                   fl::u8 deltahue = 5);
 
 /// Fill a range of LEDs with a rainbow of colors, so that the hues
@@ -61,11 +61,11 @@ void fill_rainbow(struct CHSV *targetArray, int numToFill, fl::u8 initialhue,
 /// @param numToFill the number of LEDs to fill in the array
 /// @param initialhue the starting hue for the rainbow
 /// @param reversed whether to progress through the rainbow hues backwards
-void fill_rainbow_circular(struct CRGB *targetArray, int numToFill,
+void fill_rainbow_circular(CRGB *targetArray, int numToFill,
                            fl::u8 initialhue, bool reversed = false);
 
 /// @copydoc fill_rainbow_circular()
-void fill_rainbow_circular(struct CHSV *targetArray, int numToFill,
+void fill_rainbow_circular(CHSV *targetArray, int numToFill,
                            fl::u8 initialhue, bool reversed = false);
 
 /// Fill a range of LEDs with a smooth HSV gradient between two HSV colors.

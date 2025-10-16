@@ -13,17 +13,17 @@
 FASTLED_NAMESPACE_BEGIN
 
 /// HSV to RGB implementation in raw C, platform independent
-void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb);
 /// HSV to RGB implementation in raw C, for the AVR platform only
-void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb);
+void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb);
 
 #if defined(__AVR__) && !defined( LIB8_ATTINY )
-void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 {
     hsv2rgb_raw_avr( hsv, rgb);
 }
 #else
-void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 {
     hsv2rgb_raw_C( hsv, rgb);
 }
@@ -42,13 +42,13 @@ void hsv2rgb_raw(const struct CHSV & hsv, struct CRGB & rgb)
 #define HSV_SECTION_3 (0x40)
 
 /// Inline version of hsv2rgb_spectrum which returns a CRGB object.
-CRGB hsv2rgb_spectrum( const struct CHSV& hsv) {
+CRGB hsv2rgb_spectrum( const CHSV& hsv) {
     CRGB rgb;
     hsv2rgb_spectrum(hsv, rgb);
     return rgb;
 }
 
-void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
 {
     // Convert hue, saturation and brightness ( HSV/HSB ) to RGB
     // "Dimming" is used on saturation and brightness to make
@@ -137,7 +137,7 @@ void hsv2rgb_raw_C (const struct CHSV & hsv, struct CRGB & rgb)
 
 
 #if defined(__AVR__) && !defined( LIB8_ATTINY )
-void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
+void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 {
     uint8_t hue, saturation, value;
 
@@ -233,7 +233,7 @@ void hsv2rgb_raw_avr(const struct CHSV & hsv, struct CRGB & rgb)
 
 #endif
 
-void hsv2rgb_spectrum( const struct CHSV& hsv, CRGB& rgb)
+void hsv2rgb_spectrum( const CHSV& hsv, CRGB& rgb)
 {
     CHSV hsv2(hsv);
     hsv2.hue = scale8( hsv2.hue, 191);
@@ -258,7 +258,7 @@ void hsv2rgb_spectrum( const struct CHSV& hsv, CRGB& rgb)
 #define K85  85
 /// @endcond
 
-CRGB hsv2rgb_rainbow( const struct CHSV& hsv) {
+CRGB hsv2rgb_rainbow( const CHSV& hsv) {
     CRGB rgb;
     hsv2rgb_rainbow(hsv, rgb);
     return rgb;
@@ -491,7 +491,7 @@ void hsv2rgb_rainbow( const CHSV& hsv, CRGB& rgb)
     rgb.b = b;
 }
 
-void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
+void hsv2rgb_fullspectrum( const CHSV& hsv, CRGB& rgb) {
   const auto f = [](const int n, const uint8_t h) -> unsigned int {
     constexpr int kZero = 0 << 8;
     constexpr int kOne  = 1 << 8;
@@ -510,32 +510,32 @@ void hsv2rgb_fullspectrum( const struct CHSV& hsv, CRGB& rgb) {
 }
 
 /// Inline version of hsv2rgb_fullspectrum which returns a CRGB object.
-CRGB hsv2rgb_fullspectrum( const struct CHSV& hsv) {
+CRGB hsv2rgb_fullspectrum( const CHSV& hsv) {
     CRGB rgb;
     hsv2rgb_fullspectrum(hsv, rgb);
     return rgb;
 }
 
 
-void hsv2rgb_raw(const struct CHSV * phsv, struct CRGB * prgb, int numLeds) {
+void hsv2rgb_raw(const CHSV * phsv, CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_raw(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_rainbow( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+void hsv2rgb_rainbow( const CHSV* phsv, CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_rainbow(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_spectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+void hsv2rgb_spectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
     for(int i = 0; i < numLeds; ++i) {
         hsv2rgb_spectrum(phsv[i], prgb[i]);
     }
 }
 
-void hsv2rgb_fullspectrum( const struct CHSV* phsv, struct CRGB * prgb, int numLeds) {
+void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds) {
     for (int i = 0; i < numLeds; ++i) {
         hsv2rgb_fullspectrum(phsv[i], prgb[i]);
     }

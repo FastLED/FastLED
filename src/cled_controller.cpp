@@ -25,7 +25,7 @@ void CLEDController::clearLedDataInternal(int nLeds) {
     if(m_Data) {
         nLeds = (nLeds < 0) ? m_nLeds : nLeds;
         nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
-        fl::memfill((void*)m_Data, 0, sizeof(struct CRGB) * nLeds);
+        fl::memfill((void*)m_Data, 0, sizeof(CRGB) * nLeds);
     }
 
 }

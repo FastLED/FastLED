@@ -19,8 +19,11 @@ only a small number of pixels are set.
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
 
+// Forward declare fl::rgb8 outside the FastLED namespace
+namespace fl { struct rgb8; }
+
 FASTLED_NAMESPACE_BEGIN
-struct CRGB;
+using CRGB = fl::rgb8;  // CRGB is now a typedef
 FASTLED_NAMESPACE_END
 
 #ifndef FASTLED_RASTER_SPARSE_INLINED_COUNT

@@ -29,7 +29,7 @@ namespace fl {
                                 FL_UNUSED(brightness);
                                }
 
-        virtual void show(const struct CRGB *data, int nLeds,
+        virtual void show(const CRGB *data, int nLeds,
                           uint8_t brightness) override {
                             FL_UNUSED(data);
                             FL_UNUSED(nLeds);

@@ -25,8 +25,11 @@
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
+// Forward declare fl::rgb8 outside the FastLED namespace
+namespace fl { struct rgb8; }
+
 FASTLED_NAMESPACE_BEGIN
-struct CRGB;
+using CRGB = fl::rgb8;  // CRGB is now a typedef
 FASTLED_NAMESPACE_END;
 
 namespace fl { // Mandatory namespace for this class since it has name

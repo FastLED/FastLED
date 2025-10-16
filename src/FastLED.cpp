@@ -108,7 +108,7 @@ CRGB* CFastLED::leds() {
 }
 
 CLEDController &CFastLED::addLeds(CLEDController *pLed,
-								  struct CRGB *data,
+								  CRGB *data,
 								  int nLedsOrOffset, int nLedsIfOffset) {
 	int nOffset = (nLedsIfOffset > 0) ? nLedsOrOffset : 0;
 	int nLeds = (nLedsIfOffset > 0) ? nLedsIfOffset : nLedsOrOffset;
@@ -206,7 +206,7 @@ CLEDController & CFastLED::operator[](int x) {
 	}
 }
 
-void CFastLED::showColor(const struct CRGB & color, uint8_t scale) {
+void CFastLED::showColor(const CRGB & color, uint8_t scale) {
 	while(m_nMinMicros && ((micros()-lastshow) < m_nMinMicros));
 	lastshow = micros();
 
@@ -278,7 +278,7 @@ void CFastLED::delay(unsigned long ms) {
 	while((millis()-start) < ms);
 }
 
-void CFastLED::setTemperature(const struct CRGB & temp) {
+void CFastLED::setTemperature(const CRGB & temp) {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setTemperature(temp);
@@ -286,7 +286,7 @@ void CFastLED::setTemperature(const struct CRGB & temp) {
 	}
 }
 
-void CFastLED::setCorrection(const struct CRGB & correction) {
+void CFastLED::setCorrection(const CRGB & correction) {
 	CLEDController *pCur = CLEDController::head();
 	while(pCur) {
 		pCur->setCorrection(correction);

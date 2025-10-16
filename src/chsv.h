@@ -11,7 +11,8 @@ Legacy header. Prefer to use fl/hsv.h instead.
 
 
 
-using fl::CHSV;
+// Backward compatibility: bring fl::hsv8 into global namespace as CHSV
+using CHSV = fl::hsv8;
 using fl::HSVHue;
 using fl::HUE_RED;
 using fl::HUE_ORANGE;

@@ -58,7 +58,7 @@ public:
     /// @param data the rgb data to write out to the strip
     /// @param nLeds the number of LEDs being written out
     /// @param scale the rgb scaling to apply to each led before writing it out
-    virtual void show(const struct CRGB *data, int nLeds, fl::u8 brightness) = 0;
+    virtual void show(const CRGB *data, int nLeds, fl::u8 brightness) = 0;
 
 
     Rgbw mRgbMode = RgbwInvalid::value();
@@ -103,27 +103,27 @@ public:
 
     ColorAdjustment getAdjustmentData(fl::u8 brightness);
 
-    /// @copybrief show(const struct CRGB*, int, CRGB)
+    /// @copybrief show(const CRGB*, int, CRGB)
     ///
     /// Will scale for color correction and temperature. Can accept LED data not attached to this controller.
     /// @param data the LED data to write to the strip
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
-    /// @see show(const struct CRGB*, int, CRGB)
-    void showInternal(const struct CRGB *data, int nLeds, fl::u8 brightness) {
+    /// @see show(const CRGB*, int, CRGB)
+    void showInternal(const CRGB *data, int nLeds, fl::u8 brightness) {
         if (m_enabled) {
            show(data, nLeds,brightness);
         }
     }
 
-    /// @copybrief showColor(const struct CRGB&, int, CRGB)
+    /// @copybrief showColor(const CRGB&, int, CRGB)
     ///
     /// Will scale for color correction and temperature. Can accept LED data not attached to this controller.
     /// @param data the CRGB color to set the LEDs to
     /// @param nLeds the number of LEDs in the data array
     /// @param brightness the brightness of the LEDs
-    /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColorInternal(const struct CRGB &data, int nLeds, fl::u8 brightness) {
+    /// @see showColor(const CRGB&, int, CRGB)
+    void showColorInternal(const CRGB &data, int nLeds, fl::u8 brightness) {
         if (m_enabled) {
             showColor(data, nLeds, brightness);
         }
@@ -131,19 +131,19 @@ public:
 
     /// Write the data to the LEDs managed by this controller
     /// @param brightness the brightness of the LEDs
-    /// @see show(const struct CRGB*, int, fl::u8)
+    /// @see show(const CRGB*, int, fl::u8)
     void showLedsInternal(fl::u8 brightness) {
         if (m_enabled) {
             show(m_Data, m_nLeds, brightness);
         }
     }
 
-    /// @copybrief showColor(const struct CRGB&, int, CRGB)
+    /// @copybrief showColor(const CRGB&, int, CRGB)
     ///
     /// @param data the CRGB color to set the LEDs to
     /// @param brightness the brightness of the LEDs
-    /// @see showColor(const struct CRGB&, int, CRGB)
-    void showColorInternal(const struct CRGB & data, fl::u8 brightness) {
+    /// @see showColor(const CRGB&, int, CRGB)
+    void showColorInternal(const CRGB & data, fl::u8 brightness) {
         if (m_enabled) {
             showColor(data, m_nLeds, brightness);
         }
