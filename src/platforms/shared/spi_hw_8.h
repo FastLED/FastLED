@@ -14,8 +14,7 @@
 #include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/span.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "fl/stdint.h"
 
 namespace fl {
 

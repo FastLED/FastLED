@@ -102,7 +102,6 @@
 #include "fl/engine_events.h"
 
 #include "fl/leds.h"
-#include "fl/int.h"
 
 FASTLED_NAMESPACE_BEGIN
 

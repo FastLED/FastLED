@@ -5,8 +5,6 @@
 
 #include "fl/types.h"
 #include "fl/force_inline.h"
-#include "fl/int.h"
-#include "fl/namespace.h"
 
 // Note: micros() is used in inline templates below but not declared here.
 // It will be provided by platform headers (Arduino.h, etc.) included via led_sysdefs.h
