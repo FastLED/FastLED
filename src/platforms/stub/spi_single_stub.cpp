@@ -7,7 +7,7 @@
 
 namespace fl {
 
-SPISingleStub::SPISingleStub(int bus_id, const char* name)
+SpiHw1Stub::SpiHw1Stub(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
@@ -15,7 +15,7 @@ SPISingleStub::SPISingleStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPISingleStub::begin(const SpiHw1::Config& config) {
+bool SpiHw1Stub::begin(const SpiHw1::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -30,12 +30,12 @@ bool SPISingleStub::begin(const SpiHw1::Config& config) {
     return true;
 }
 
-void SPISingleStub::end() {
+void SpiHw1Stub::end() {
     mInitialized = false;
     mLastBuffer.clear();
 }
 
-bool SPISingleStub::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw1Stub::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -57,41 +57,41 @@ bool SPISingleStub::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPISingleStub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw1Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in stub (transmission already complete)
     return true;
 }
 
-bool SPISingleStub::isBusy() const {
+bool SpiHw1Stub::isBusy() const {
     // Never busy since transmission is blocking
     return false;
 }
 
-bool SPISingleStub::isInitialized() const {
+bool SpiHw1Stub::isInitialized() const {
     return mInitialized;
 }
 
-int SPISingleStub::getBusId() const {
+int SpiHw1Stub::getBusId() const {
     return mBusId;
 }
 
-const char* SPISingleStub::getName() const {
+const char* SpiHw1Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SPISingleStub::getLastTransmission() const {
+const fl::vector<uint8_t>& SpiHw1Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SPISingleStub::getTransmissionCount() const {
+uint32_t SpiHw1Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SPISingleStub::getClockSpeed() const {
+uint32_t SpiHw1Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
-void SPISingleStub::reset() {
+void SpiHw1Stub::reset() {
     mLastBuffer.clear();
     mTransmitCount = 0;
 }
@@ -104,8 +104,8 @@ fl::vector<SpiHw1*> SpiHw1::createInstances() {
     fl::vector<SpiHw1*> controllers;
 
     // Create two mock controllers for testing
-    static SPISingleStub controller0(0, "MockSingle0");
-    static SPISingleStub controller1(1, "MockSingle1");
+    static SpiHw1Stub controller0(0, "MockSingle0");
+    static SpiHw1Stub controller1(1, "MockSingle1");
 
     controllers.push_back(&controller0);
     controllers.push_back(&controller1);

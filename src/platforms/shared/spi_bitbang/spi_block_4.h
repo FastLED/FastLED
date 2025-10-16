@@ -201,7 +201,4 @@ private:
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
 
-// Backward-compatible type alias (deprecated)
-using QuadSPI_Blocking_ESP32 [[deprecated("Use SpiBlock4 instead of QuadSPI_Blocking_ESP32")]] = SpiBlock4;
-
 }  // namespace fl

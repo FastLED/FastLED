@@ -11,10 +11,10 @@
 namespace fl {
 
 // ============================================================================
-// SPIQuadStub Implementation
+// SpiHw4Stub Implementation
 // ============================================================================
 
-SPIQuadStub::SPIQuadStub(int bus_id, const char* name)
+SpiHw4Stub::SpiHw4Stub(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
@@ -23,7 +23,7 @@ SPIQuadStub::SPIQuadStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPIQuadStub::begin(const SpiHw4::Config& config) {
+bool SpiHw4Stub::begin(const SpiHw4::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -38,13 +38,13 @@ bool SPIQuadStub::begin(const SpiHw4::Config& config) {
     return true;
 }
 
-void SPIQuadStub::end() {
+void SpiHw4Stub::end() {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
 }
 
-bool SPIQuadStub::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw4Stub::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -66,51 +66,51 @@ bool SPIQuadStub::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPIQuadStub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw4Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
     return true;  // Always succeeds instantly
 }
 
-bool SPIQuadStub::isBusy() const {
+bool SpiHw4Stub::isBusy() const {
     return mBusy;
 }
 
-bool SPIQuadStub::isInitialized() const {
+bool SpiHw4Stub::isInitialized() const {
     return mInitialized;
 }
 
-int SPIQuadStub::getBusId() const {
+int SpiHw4Stub::getBusId() const {
     return mBusId;
 }
 
-const char* SPIQuadStub::getName() const {
+const char* SpiHw4Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SPIQuadStub::getLastTransmission() const {
+const fl::vector<uint8_t>& SpiHw4Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SPIQuadStub::getTransmissionCount() const {
+uint32_t SpiHw4Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SPIQuadStub::getClockSpeed() const {
+uint32_t SpiHw4Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
-bool SPIQuadStub::isTransmissionActive() const {
+bool SpiHw4Stub::isTransmissionActive() const {
     return mBusy;
 }
 
-void SPIQuadStub::reset() {
+void SpiHw4Stub::reset() {
     mLastBuffer.clear();
     mTransmitCount = 0;
     mBusy = false;
 }
 
-fl::vector<fl::vector<uint8_t>> SPIQuadStub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
+fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
     fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
 
     // Pre-allocate per-lane buffers
@@ -153,8 +153,8 @@ fl::vector<SpiHw4*> SpiHw4::createInstances() {
     fl::vector<SpiHw4*> controllers;
 
     // Provide 2 mock SPI buses for testing
-    static SPIQuadStub controller2(2, "MockSPI2");  // Bus 2 - static lifetime
-    static SPIQuadStub controller3(3, "MockSPI3");  // Bus 3 - static lifetime
+    static SpiHw4Stub controller2(2, "MockSPI2");  // Bus 2 - static lifetime
+    static SpiHw4Stub controller3(3, "MockSPI3");  // Bus 3 - static lifetime
 
     controllers.push_back(&controller2);
     controllers.push_back(&controller3);

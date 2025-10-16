@@ -268,7 +268,4 @@ public:
 #endif
 };
 
-// Backward-compatible type alias (deprecated)
-using QuadSPI_ISR_ESP32C3 [[deprecated("Use SpiIsr4 instead of QuadSPI_ISR_ESP32C3")]] = SpiIsr4;
-
 }  // namespace fl

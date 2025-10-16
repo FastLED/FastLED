@@ -112,7 +112,4 @@ private:
     static fl::vector<SpiHw1*> createInstances();
 };
 
-/// @deprecated Use SpiHw1 instead of SPISingle
-using SPISingle [[deprecated("Use SpiHw1 instead of SPISingle")]] = SpiHw1;
-
 }  // namespace fl

@@ -14,10 +14,10 @@ namespace fl {
 
 /// Mock Quad-SPI driver for testing without real hardware
 /// Implements SpiHw4 interface with data capture for validation
-class SPIQuadStub : public SpiHw4 {
+class SpiHw4Stub : public SpiHw4 {
 public:
-    explicit SPIQuadStub(int bus_id = -1, const char* name = "MockSPI");
-    ~SPIQuadStub() override = default;
+    explicit SpiHw4Stub(int bus_id = -1, const char* name = "MockSPI");
+    ~SpiHw4Stub() override = default;
 
     bool begin(const SpiHw4::Config& config) override;
     void end() override;
@@ -48,12 +48,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SpiHw4* to SPIQuadStub* for test inspection
+/// Cast SpiHw4* to SpiHw4Stub* for test inspection
 /// @param driver SpiHw4 pointer (must be from test environment)
-/// @returns SPIQuadStub pointer, or nullptr if cast fails
-/// @note Also works with SPIQuad* (deprecated alias) due to type aliasing
-inline SPIQuadStub* toStub(SpiHw4* driver) {
-    return static_cast<SPIQuadStub*>(driver);
+/// @returns SpiHw4Stub pointer, or nullptr if cast fails
+inline SpiHw4Stub* toStub(SpiHw4* driver) {
+    return static_cast<SpiHw4Stub*>(driver);
 }
 
 }  // namespace fl

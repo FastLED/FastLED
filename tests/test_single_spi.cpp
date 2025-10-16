@@ -12,14 +12,14 @@ using namespace fl;
 // Hardware Interface Tests
 // ============================================================================
 
-TEST_CASE("SPISingle: Hardware initialization") {
-    const auto& controllers = SPISingle::getAll();
+TEST_CASE("SpiHw1: Hardware initialization") {
+    const auto& controllers = SpiHw1::getAll();
     CHECK(controllers.size() > 0);
 
-    SPISingle* single = controllers[0];
+    SpiHw1* single = controllers[0];
     CHECK(single != nullptr);
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -33,11 +33,11 @@ TEST_CASE("SPISingle: Hardware initialization") {
     CHECK_FALSE(single->isInitialized());
 }
 
-TEST_CASE("SPISingle: Blocking transmission behavior") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Blocking transmission behavior") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -60,11 +60,11 @@ TEST_CASE("SPISingle: Blocking transmission behavior") {
     single->end();
 }
 
-TEST_CASE("SPISingle: Empty buffer transmission") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Empty buffer transmission") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
 
@@ -74,11 +74,11 @@ TEST_CASE("SPISingle: Empty buffer transmission") {
     single->end();
 }
 
-TEST_CASE("SPISingle: Multiple transmissions") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Multiple transmissions") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
 
@@ -95,9 +95,9 @@ TEST_CASE("SPISingle: Multiple transmissions") {
     single->end();
 }
 
-TEST_CASE("SPISingle: Transmission without initialization fails") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingleStub* stub = toStub(controllers[0]);
+TEST_CASE("SpiHw1: Transmission without initialization fails") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1Stub* stub = toStub(controllers[0]);
 
     stub->reset();
     stub->end();  // Ensure not initialized
@@ -106,14 +106,14 @@ TEST_CASE("SPISingle: Transmission without initialization fails") {
     CHECK_FALSE(stub->transmitAsync(fl::span<const uint8_t>(data)));
 }
 
-TEST_CASE("SPISingle: Stub inspection") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingleStub* stub = toStub(controllers[0]);
+TEST_CASE("SpiHw1: Stub inspection") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1Stub* stub = toStub(controllers[0]);
     CHECK(stub != nullptr);
 
     stub->reset();
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 20000000;
     CHECK(stub->begin(config));
@@ -134,13 +134,13 @@ TEST_CASE("SPISingle: Stub inspection") {
     stub->end();
 }
 
-TEST_CASE("SPISingle: Transmission count tracking") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingleStub* stub = toStub(controllers[0]);
+TEST_CASE("SpiHw1: Transmission count tracking") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1Stub* stub = toStub(controllers[0]);
 
     stub->reset();
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     CHECK(stub->begin(config));
 
     CHECK_EQ(stub->getTransmissionCount(), 0);
@@ -161,11 +161,11 @@ TEST_CASE("SPISingle: Transmission count tracking") {
     stub->end();
 }
 
-TEST_CASE("SPISingle: Bus ID validation") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Bus ID validation") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
     CHECK_EQ(single->getBusId(), 0);
@@ -173,9 +173,9 @@ TEST_CASE("SPISingle: Bus ID validation") {
     single->end();
 }
 
-TEST_CASE("SPISingle: Name retrieval") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Name retrieval") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
     const char* name = single->getName();
     CHECK(name != nullptr);
@@ -183,8 +183,8 @@ TEST_CASE("SPISingle: Name retrieval") {
     CHECK(strlen(name) > 0);
 }
 
-TEST_CASE("SPISingle: Multiple controllers available") {
-    const auto& controllers = SPISingle::getAll();
+TEST_CASE("SpiHw1: Multiple controllers available") {
+    const auto& controllers = SpiHw1::getAll();
 
     // Should have at least 2 mock controllers in test environment
     CHECK(controllers.size() >= 2);
@@ -196,13 +196,13 @@ TEST_CASE("SPISingle: Multiple controllers available") {
     }
 }
 
-TEST_CASE("SPISingle: Large data transmission") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingleStub* stub = toStub(controllers[0]);
+TEST_CASE("SpiHw1: Large data transmission") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1Stub* stub = toStub(controllers[0]);
 
     stub->reset();
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     CHECK(stub->begin(config));
 
     // Create large data buffer
@@ -224,11 +224,11 @@ TEST_CASE("SPISingle: Large data transmission") {
     stub->end();
 }
 
-TEST_CASE("SPISingle: Configuration parameter validation") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingle* single = controllers[0];
+TEST_CASE("SpiHw1: Configuration parameter validation") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1* single = controllers[0];
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 10000000;  // 10 MHz
     config.clock_pin = 14;
@@ -241,13 +241,13 @@ TEST_CASE("SPISingle: Configuration parameter validation") {
     single->end();
 }
 
-TEST_CASE("SPISingle: Reset clears transmission history") {
-    const auto& controllers = SPISingle::getAll();
-    SPISingleStub* stub = toStub(controllers[0]);
+TEST_CASE("SpiHw1: Reset clears transmission history") {
+    const auto& controllers = SpiHw1::getAll();
+    SpiHw1Stub* stub = toStub(controllers[0]);
 
     stub->reset();
 
-    SPISingle::Config config;
+    SpiHw1::Config config;
     CHECK(stub->begin(config));
 
     vector<uint8_t> data = {0xFF, 0xEE, 0xDD};

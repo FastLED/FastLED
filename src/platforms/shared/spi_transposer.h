@@ -96,9 +96,6 @@
 /// - **Transpose time**: ~25-100µs depending on lane count and data size
 /// - **Transmission time**: Hardware DMA, zero CPU usage during transfer
 /// - **Optimization**: Direct bit extraction provides optimal performance
-///
-/// @see SPITransposerDual for backward-compatible 2-way API (deprecated wrapper)
-/// @see SPITransposerQuad for backward-compatible 4-way API (deprecated wrapper)
 
 #include "fl/span.h"
 #include "fl/optional.h"

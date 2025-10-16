@@ -56,14 +56,14 @@ The Dual-SPI system uses a **layered architecture** that separates concerns:
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│              SPITransposerDual (stateless)                  │
-│  • Bit-interleaving algorithm                               │
+│              SPITransposer (unified)                        │
+│  • Bit-interleaving algorithm (transpose2() for dual)       │
 │  • Lane padding synchronization                             │
 │  • Pure functional design                                   │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│           SPIDual (platform interface)                      │
+│           SpiHw2 (platform interface)                       │
 │  • Abstract hardware interface                              │
 │  • Platform-agnostic API                                    │
 └────────────────────────┬────────────────────────────────────┘
@@ -71,7 +71,7 @@ The Dual-SPI system uses a **layered architecture** that separates concerns:
          ┌───────────────┼───────────────┐
          │               │               │
 ┌────────▼────────┐ ┌───▼──────────┐ ┌──▼─────────────┐
-│  SPIDualESP32   │ │ SPIDualStub  │ │ Future: RP2040 │
+│  SpiHw2ESP32    │ │ SpiHw2Stub   │ │ Future: RP2040 │
 │  (ESP-IDF impl) │ │ (test mock)  │ │   STM32, etc.  │
 └─────────────────┘ └──────────────┘ └────────────────┘
 ```
@@ -178,7 +178,7 @@ public:
 };
 ```
 
-**Note:** Legacy `SPITransposerDual::transpose()` is maintained as a deprecated wrapper that calls `SPITransposer::transpose2()`.
+**Unified API:** The `SPITransposer` class provides `transpose2()` for dual-lane transposition, replacing the legacy `SPITransposerDual` wrapper that has been removed.
 
 **Pure Functional Design:**
 
@@ -329,7 +329,7 @@ Each chipset has its own black LED format:
 | ESP32-C2 | ✅ Implemented | 1 (SPI2) | 2 | Dual-SPI only |
 | ESP32-C6 | ✅ Implemented | 1 (SPI2) | 2 | Dual-SPI only |
 | ESP32-P4 | ✅ Implemented | 2 | 2 | Dual-SPI supported |
-| Testing  | ✅ Mock driver | N/A | 2 | `SPIDualStub` for tests |
+| Testing  | ✅ Mock driver | N/A | 2 | `SpiHw2Stub` for tests |
 
 ### Future Platforms
 
@@ -495,7 +495,7 @@ if (!controllers.empty()) {
 
 ## Testing
 
-### Mock Driver (SPIDualStub)
+### Mock Driver (SpiHw2Stub)
 
 **Location:** `src/platforms/stub/spi_dual_stub.h`
 
@@ -504,8 +504,8 @@ Test-only implementation that captures transmissions:
 ```cpp
 #ifdef FASTLED_TESTING
 
-auto controllers = fl::SPIDual::getAll();
-fl::SPIDualStub* stub = fl::toStub(controllers[0]);
+auto controllers = fl::SpiHw2::getAll();
+fl::SpiHw2Stub* stub = fl::toStub(controllers[0]);
 
 // Perform transmission
 stub->transmitAsync(data);
@@ -576,6 +576,6 @@ FastLED's Dual-SPI system provides **efficient parallel LED control** through:
 
 - **SpiHw2 Interface:** `src/platforms/shared/spi_hw_2.h`
 - **Unified Transposer:** `src/platforms/shared/spi_transposer.h`
-- **Legacy Transposer (deprecated):** `src/platforms/shared/spi_transposer_dual.h`
 - **ESP32 Implementation:** `src/platforms/esp/32/spi_hw_2_esp32.cpp`
+- **Mock Driver:** `src/platforms/stub/spi_dual_stub.h`
 - **Tests:** `tests/test_dual_spi.cpp`

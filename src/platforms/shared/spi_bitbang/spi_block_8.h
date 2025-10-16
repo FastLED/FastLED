@@ -204,8 +204,4 @@ private:
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
 
-// Backward-compatible type alias (for future migration if needed)
-// Note: There was no previous OctalSPI_Blocking_ESP32 class, so this is optional
-// using OctalSPI_Blocking_ESP32 [[deprecated("Use SpiBlock8 instead")]] = SpiBlock8;
-
 }  // namespace fl

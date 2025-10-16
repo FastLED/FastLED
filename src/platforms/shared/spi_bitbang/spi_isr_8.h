@@ -239,7 +239,4 @@ public:
 #endif
 };
 
-// Backward-compatible type alias (deprecated)
-using ParallelSPI_ESP32C3 [[deprecated("Use SpiIsr8 instead of ParallelSPI_ESP32C3")]] = SpiIsr8;
-
 }  // namespace fl

@@ -14,10 +14,10 @@ namespace fl {
 
 /// Mock Single-SPI driver for testing without real hardware
 /// Implements SpiHw1 interface with data capture for validation
-class SPISingleStub : public SpiHw1 {
+class SpiHw1Stub : public SpiHw1 {
 public:
-    explicit SPISingleStub(int bus_id = -1, const char* name = "MockSPI");
-    ~SPISingleStub() override = default;
+    explicit SpiHw1Stub(int bus_id = -1, const char* name = "MockSPI");
+    ~SpiHw1Stub() override = default;
 
     bool begin(const SpiHw1::Config& config) override;
     void end() override;
@@ -43,12 +43,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SpiHw1* to SPISingleStub* for test inspection
+/// Cast SpiHw1* to SpiHw1Stub* for test inspection
 /// @param driver SpiHw1 pointer (must be from test environment)
-/// @returns SPISingleStub pointer, or nullptr if cast fails
-/// @note Also works with SPISingle* (deprecated alias) due to type aliasing
-inline SPISingleStub* toStub(SpiHw1* driver) {
-    return static_cast<SPISingleStub*>(driver);
+/// @returns SpiHw1Stub pointer, or nullptr if cast fails
+inline SpiHw1Stub* toStub(SpiHw1* driver) {
+    return static_cast<SpiHw1Stub*>(driver);
 }
 
 }  // namespace fl

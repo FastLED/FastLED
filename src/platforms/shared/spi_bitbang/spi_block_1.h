@@ -171,7 +171,4 @@ private:
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
 
-// Backward-compatible type alias (deprecated)
-using SingleSPI_Blocking_ESP32 [[deprecated("Use SpiBlock1 instead of SingleSPI_Blocking_ESP32")]] = SpiBlock1;
-
 }  // namespace fl

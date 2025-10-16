@@ -70,14 +70,14 @@ The Quad-SPI system uses a **layered architecture** that separates concerns:
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│              SPITransposerQuad (stateless)                  │
-│  • Bit-interleaving algorithm                               │
+│              SPITransposer (unified)                        │
+│  • Bit-interleaving algorithm (transpose4() for quad)       │
 │  • Lane padding synchronization                             │
 │  • Pure functional design                                   │
 └────────────────────────┬────────────────────────────────────┘
                          │
 ┌────────────────────────▼────────────────────────────────────┐
-│           SPIQuad (platform interface)                      │
+│           SpiHw4 (platform interface)                       │
 │  • Abstract hardware interface                              │
 │  • Platform-agnostic API                                    │
 └────────────────────────┬────────────────────────────────────┘
@@ -85,7 +85,7 @@ The Quad-SPI system uses a **layered architecture** that separates concerns:
          ┌───────────────┼───────────────┐
          │               │               │
 ┌────────▼────────┐ ┌───▼──────────┐ ┌──▼─────────────┐
-│  SPIQuadESP32   │ │ SPIQuadStub  │ │ Future: RP2040 │
+│  SpiHw4ESP32    │ │ SpiHw4Stub   │ │ Future: RP2040 │
 │  (ESP-IDF impl) │ │ (test mock)  │ │   STM32, etc.  │
 └─────────────────┘ └──────────────┘ └────────────────┘
 ```
@@ -244,7 +244,7 @@ public:
 };
 ```
 
-**Note:** Legacy `SPITransposerQuad::transpose()` and `SPITransposerQuad::transpose8()` are maintained as deprecated wrappers.
+**Unified API:** The `SPITransposer` class provides `transpose4()` and `transpose8()` for quad and octal-lane transposition, replacing the legacy `SPITransposerQuad` wrapper that has been removed.
 
 **Pure Functional Design:**
 
@@ -510,7 +510,7 @@ static uint8_t getLaneByte(const LaneData& lane,
 | ESP32-C2 | ✅ Implemented | 1 (SPI2) | 2 (dual-SPI) | No quad support |
 | ESP32-C6 | ✅ Implemented | 1 (SPI2) | 2 (dual-SPI) | No quad support |
 | ESP32-P4 | ⚠️ Partial | 2 | 8 (octal-SPI) | Future enhancement |
-| Testing  | ✅ Mock driver | N/A | 4 | `SPIQuadStub` for tests |
+| Testing  | ✅ Mock driver | N/A | 4 | `SpiHw4Stub` for tests |
 
 ### Future Platforms
 
@@ -526,15 +526,15 @@ static uint8_t getLaneByte(const LaneData& lane,
 
 **Example:**
 ```cpp
-// src/platforms/rp2040/spi_quad_rp2040.cpp
+// src/platforms/rp2040/spi_hw_4_rp2040.cpp
 #ifdef ARDUINO_ARCH_RP2040
 
-class SPIQuadRP2040 : public SPIQuad {
+class SpiHw4RP2040 : public SpiHw4 {
     // Implement interface using RP2040 PIO
 };
 
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
-    static SPIQuadRP2040 controller0(0, "PIO0");
+fl::vector<SpiHw4*> SpiHw4::createInstances() {
+    static SpiHw4RP2040 controller0(0, "PIO0");
     return {&controller0};
 }
 
@@ -637,26 +637,26 @@ void loop() {
 }
 ```
 
-### Advanced: Direct SPIQuad Usage
+### Advanced: Direct SpiHw4 Usage
 
 For low-level control:
 
 ```cpp
-#include "platforms/shared/spi_quad.h"
-#include "platforms/shared/spi_transposer_quad.h"
+#include "platforms/shared/spi_hw_4.h"
+#include "platforms/shared/spi_transposer.h"
 
 void setup() {
     // Get available Quad-SPI controllers
-    const auto& controllers = fl::SPIQuad::getAll();
+    const auto& controllers = fl::SpiHw4::getAll();
     if (controllers.empty()) {
         Serial.println("No Quad-SPI hardware available");
         return;
     }
 
-    fl::SPIQuad* quad = controllers[0];
+    fl::SpiHw4* quad = controllers[0];
 
     // Configure hardware
-    fl::SPIQuad::Config config;
+    fl::SpiHw4::Config config;
     config.bus_num = 2;              // HSPI
     config.clock_speed_hz = 40000000; // 40 MHz
     config.clock_pin = 12;
@@ -674,12 +674,12 @@ void setup() {
     fl::vector<uint8_t> lane0_data = {0xFF, 0x00, 0x00};  // Red LED
     fl::vector<uint8_t> lane1_data = {0xFF, 0xFF, 0x00};  // Green LED
 
-    fl::optional<fl::SPITransposerQuad::LaneData> lanes[4];
-    lanes[0] = fl::SPITransposerQuad::LaneData{
+    fl::optional<fl::SPITransposer::LaneData> lanes[4];
+    lanes[0] = fl::SPITransposer::LaneData{
         fl::span<const uint8_t>(lane0_data.data(), lane0_data.size()),
         fl::span<const uint8_t>()  // No padding
     };
-    lanes[1] = fl::SPITransposerQuad::LaneData{
+    lanes[1] = fl::SPITransposer::LaneData{
         fl::span<const uint8_t>(lane1_data.data(), lane1_data.size()),
         fl::span<const uint8_t>()
     };
@@ -689,8 +689,8 @@ void setup() {
     fl::vector<uint8_t> output(max_size * 4);
 
     const char* error = nullptr;
-    if (fl::SPITransposerQuad::transpose(lanes, max_size,
-                                         fl::span<uint8_t>(output), &error)) {
+    if (fl::SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3],
+                                      fl::span<uint8_t>(output), &error)) {
         quad->transmitAsync(fl::span<const uint8_t>(output));
         quad->waitComplete();
     } else {
@@ -712,7 +712,7 @@ Check if Quad-SPI is available:
 #endif
 
 // Runtime check (actual hardware)
-const auto& controllers = fl::SPIQuad::getAll();
+const auto& controllers = fl::SpiHw4::getAll();
 if (!controllers.empty()) {
     Serial.printf("Found %d Quad-SPI controllers:\n", controllers.size());
     for (const auto& ctrl : controllers) {
@@ -738,11 +738,11 @@ if (!controllers.empty()) {
 
 ### Thread Safety
 
-**SPITransposerQuad:**
+**SPITransposer:**
 - Pure functional, thread-safe (no shared state)
-- Multiple threads can call `transpose()` simultaneously
+- Multiple threads can call `transpose4()` simultaneously
 
-**SPIQuad Implementations:**
+**SpiHw4 Implementations:**
 - Not thread-safe (single hardware peripheral)
 - Caller must serialize `transmitAsync()` calls
 - `waitComplete()` must be called before next transmission
@@ -797,19 +797,19 @@ Platforms override factory via weak linkage:
 
 **Default (no hardware):**
 ```cpp
-// src/platforms/shared/spi_quad.cpp
+// src/platforms/shared/spi_hw_4.cpp
 FL_LINK_WEAK
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
+fl::vector<SpiHw4*> SpiHw4::createInstances() {
     return {};  // Empty vector
 }
 ```
 
 **ESP32 override (strong definition):**
 ```cpp
-// src/platforms/esp/32/spi_quad_esp32.cpp
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
-    static SPIQuadESP32 controller2(2, "HSPI");
-    static SPIQuadESP32 controller3(3, "VSPI");
+// src/platforms/esp/32/spi_hw_4_esp32.cpp
+fl::vector<SpiHw4*> SpiHw4::createInstances() {
+    static SpiHw4ESP32 controller2(2, "HSPI");
+    static SpiHw4ESP32 controller3(3, "VSPI");
     return {&controller2, &controller3};
 }
 ```
@@ -820,7 +820,7 @@ Linker picks strong definition when ESP32 code is linked.
 
 ## Testing
 
-### Mock Driver (SPIQuadStub)
+### Mock Driver (SpiHw4Stub)
 
 **Location:** `src/platforms/stub/spi_quad_stub.h`
 
@@ -829,8 +829,8 @@ Test-only implementation that captures transmissions:
 ```cpp
 #ifdef FASTLED_TESTING
 
-auto controllers = fl::SPIQuad::getAll();
-fl::SPIQuadStub* stub = fl::toStub(controllers[0]);
+auto controllers = fl::SpiHw4::getAll();
+fl::SpiHw4Stub* stub = fl::toStub(controllers[0]);
 
 // Perform transmission
 stub->transmitAsync(data);
@@ -891,7 +891,7 @@ uv run test.py --qemu esp32s3
 **Inspect transmitted data:**
 ```cpp
 // In testing environment
-fl::SPIQuadStub* stub = fl::toStub(quad);
+fl::SpiHw4Stub* stub = fl::toStub(quad);
 const auto& data = stub->getLastTransmission();
 
 for (size_t i = 0; i < data.size(); i += 4) {
@@ -943,9 +943,9 @@ FastLED's Quad-SPI system provides **high-performance parallel LED control** thr
 - **SpiHw4 Interface:** `src/platforms/shared/spi_hw_4.h`
 - **SpiHw8 Interface:** `src/platforms/shared/spi_hw_8.h` ✨ NEW
 - **Unified Transposer:** `src/platforms/shared/spi_transposer.h` ✨ NEW
-- **Legacy Transposer (deprecated):** `src/platforms/shared/spi_transposer_quad.h`
 - **ESP32 4-Lane Implementation:** `src/platforms/esp/32/spi_hw_4_esp32.cpp`
 - **ESP32 8-Lane Implementation:** `src/platforms/esp/32/spi_hw_8_esp32.cpp` ✨ NEW
+- **Mock Drivers:** `src/platforms/stub/spi_quad_stub.h`, `src/platforms/stub/spi_octal_stub.h`
 - **Bus Manager:** `src/platforms/shared/spi_bus_manager.h`
 - **Tests:** `tests/test_quad_spi.cpp` (tests both 4-lane and 8-lane)
 - **Example:** `examples/SpecialDrivers/ESP/QuadSPI/Basic/QuadSPI_Basic.ino`

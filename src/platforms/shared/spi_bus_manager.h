@@ -10,7 +10,6 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
 #include "platforms/shared/spi_transposer.h"
-#include "platforms/shared/spi_transposer_quad.h"
 #endif
 
 namespace fl {
@@ -321,12 +320,12 @@ public:
         const char* error = nullptr;
         if (is_octal) {
             // Prepare 8-lane data for transposer
-            fl::optional<SPITransposerQuad::LaneData> lanes[8];
+            fl::optional<SPITransposer::LaneData> lanes[8];
             for (uint8_t i = 0; i < bus.num_devices && i < 8; i++) {
                 if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                     // TODO: Add proper padding frame support (chipset-specific black LED patterns)
                     // For now, use empty padding (will pad with zeros)
-                    lanes[i] = SPITransposerQuad::LaneData{
+                    lanes[i] = SPITransposer::LaneData{
                         fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
                         fl::span<const uint8_t>()  // No padding frame yet
                     };
@@ -347,12 +346,12 @@ public:
             }
         } else {
             // Prepare 4-lane data for transposer
-            fl::optional<SPITransposerQuad::LaneData> lanes[4];
+            fl::optional<SPITransposer::LaneData> lanes[4];
             for (uint8_t i = 0; i < bus.num_devices && i < 4; i++) {
                 if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
                     // TODO: Add proper padding frame support (chipset-specific black LED patterns)
                     // For now, use empty padding (will pad with zeros)
-                    lanes[i] = SPITransposerQuad::LaneData{
+                    lanes[i] = SPITransposer::LaneData{
                         fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
                         fl::span<const uint8_t>()  // No padding frame yet
                     };

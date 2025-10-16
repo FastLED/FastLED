@@ -7,7 +7,7 @@
 
 namespace fl {
 
-SPIDualStub::SPIDualStub(int bus_id, const char* name)
+SpiHw2Stub::SpiHw2Stub(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
@@ -16,7 +16,7 @@ SPIDualStub::SPIDualStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPIDualStub::begin(const SpiHw2::Config& config) {
+bool SpiHw2Stub::begin(const SpiHw2::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -31,13 +31,13 @@ bool SPIDualStub::begin(const SpiHw2::Config& config) {
     return true;
 }
 
-void SPIDualStub::end() {
+void SpiHw2Stub::end() {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
 }
 
-bool SPIDualStub::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw2Stub::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -59,51 +59,51 @@ bool SPIDualStub::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPIDualStub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw2Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in stub
     mBusy = false;
     return true;
 }
 
-bool SPIDualStub::isBusy() const {
+bool SpiHw2Stub::isBusy() const {
     return mBusy;
 }
 
-bool SPIDualStub::isInitialized() const {
+bool SpiHw2Stub::isInitialized() const {
     return mInitialized;
 }
 
-int SPIDualStub::getBusId() const {
+int SpiHw2Stub::getBusId() const {
     return mBusId;
 }
 
-const char* SPIDualStub::getName() const {
+const char* SpiHw2Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SPIDualStub::getLastTransmission() const {
+const fl::vector<uint8_t>& SpiHw2Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SPIDualStub::getTransmissionCount() const {
+uint32_t SpiHw2Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SPIDualStub::getClockSpeed() const {
+uint32_t SpiHw2Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
-bool SPIDualStub::isTransmissionActive() const {
+bool SpiHw2Stub::isTransmissionActive() const {
     return mBusy;
 }
 
-void SPIDualStub::reset() {
+void SpiHw2Stub::reset() {
     mLastBuffer.clear();
     mTransmitCount = 0;
     mBusy = false;
 }
 
-fl::vector<fl::vector<uint8_t>> SPIDualStub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
+fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
     fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
 
     if (num_lanes != 2) {
@@ -145,8 +145,8 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
     fl::vector<SpiHw2*> controllers;
 
     // Create two mock controllers for testing
-    static SPIDualStub controller0(0, "MockDual0");
-    static SPIDualStub controller1(1, "MockDual1");
+    static SpiHw2Stub controller0(0, "MockDual0");
+    static SpiHw2Stub controller1(1, "MockDual1");
 
     controllers.push_back(&controller0);
     controllers.push_back(&controller1);

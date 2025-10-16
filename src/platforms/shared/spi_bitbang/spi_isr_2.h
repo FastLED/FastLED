@@ -271,7 +271,4 @@ public:
 #endif
 };
 
-// Backward-compatible type alias (deprecated)
-using DualSPI_ISR_ESP32C3 [[deprecated("Use SpiIsr2 instead of DualSPI_ISR_ESP32C3")]] = SpiIsr2;
-
 }  // namespace fl

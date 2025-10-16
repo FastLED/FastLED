@@ -14,10 +14,10 @@ namespace fl {
 
 /// Mock 8-lane (Octal) SPI driver for testing without real hardware
 /// Implements SpiHw8 interface with data capture for validation
-class SPIOctalStub : public SpiHw8 {
+class SpiHw8Stub : public SpiHw8 {
 public:
-    explicit SPIOctalStub(int bus_id = -1, const char* name = "MockOctalSPI");
-    ~SPIOctalStub() override = default;
+    explicit SpiHw8Stub(int bus_id = -1, const char* name = "MockOctalSPI");
+    ~SpiHw8Stub() override = default;
 
     bool begin(const SpiHw8::Config& config) override;
     void end() override;
@@ -48,11 +48,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SpiHw8* to SPIOctalStub* for test inspection
+/// Cast SpiHw8* to SpiHw8Stub* for test inspection
 /// @param driver SpiHw8 pointer (must be from test environment)
-/// @returns SPIOctalStub pointer, or nullptr if cast fails
-inline SPIOctalStub* toStub(SpiHw8* driver) {
-    return static_cast<SPIOctalStub*>(driver);
+/// @returns SpiHw8Stub pointer, or nullptr if cast fails
+inline SpiHw8Stub* toStub(SpiHw8* driver) {
+    return static_cast<SpiHw8Stub*>(driver);
 }
 
 }  // namespace fl

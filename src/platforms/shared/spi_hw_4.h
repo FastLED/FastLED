@@ -110,7 +110,4 @@ private:
     static fl::vector<SpiHw4*> createInstances();
 };
 
-/// @deprecated Use SpiHw4 instead of SPIQuad
-using SPIQuad [[deprecated("Use SpiHw4 instead of SPIQuad")]] = SpiHw4;
-
 }  // namespace fl

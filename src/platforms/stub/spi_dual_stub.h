@@ -14,10 +14,10 @@ namespace fl {
 
 /// Mock Dual-SPI driver for testing without real hardware
 /// Implements SpiHw2 interface with data capture for validation
-class SPIDualStub : public SpiHw2 {
+class SpiHw2Stub : public SpiHw2 {
 public:
-    explicit SPIDualStub(int bus_id = -1, const char* name = "MockSPI");
-    ~SPIDualStub() override = default;
+    explicit SpiHw2Stub(int bus_id = -1, const char* name = "MockSPI");
+    ~SpiHw2Stub() override = default;
 
     bool begin(const SpiHw2::Config& config) override;
     void end() override;
@@ -48,12 +48,11 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 };
 
-/// Cast SpiHw2* to SPIDualStub* for test inspection
+/// Cast SpiHw2* to SpiHw2Stub* for test inspection
 /// @param driver SpiHw2 pointer (must be from test environment)
-/// @returns SPIDualStub pointer, or nullptr if cast fails
-/// @note Also works with SPIDual* (deprecated alias) due to type aliasing
-inline SPIDualStub* toStub(SpiHw2* driver) {
-    return static_cast<SPIDualStub*>(driver);
+/// @returns SpiHw2Stub pointer, or nullptr if cast fails
+inline SpiHw2Stub* toStub(SpiHw2* driver) {
+    return static_cast<SpiHw2Stub*>(driver);
 }
 
 }  // namespace fl

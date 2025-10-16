@@ -11,10 +11,10 @@
 namespace fl {
 
 // ============================================================================
-// SPIOctalStub Implementation
+// SpiHw8Stub Implementation
 // ============================================================================
 
-SPIOctalStub::SPIOctalStub(int bus_id, const char* name)
+SpiHw8Stub::SpiHw8Stub(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mInitialized(false)
@@ -23,7 +23,7 @@ SPIOctalStub::SPIOctalStub(int bus_id, const char* name)
     , mTransmitCount(0) {
 }
 
-bool SPIOctalStub::begin(const SpiHw8::Config& config) {
+bool SpiHw8Stub::begin(const SpiHw8::Config& config) {
     if (mInitialized) {
         return true;  // Already initialized
     }
@@ -38,13 +38,13 @@ bool SPIOctalStub::begin(const SpiHw8::Config& config) {
     return true;
 }
 
-void SPIOctalStub::end() {
+void SpiHw8Stub::end() {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
 }
 
-bool SPIOctalStub::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw8Stub::transmitAsync(fl::span<const uint8_t> buffer) {
     if (!mInitialized) {
         return false;
     }
@@ -66,51 +66,51 @@ bool SPIOctalStub::transmitAsync(fl::span<const uint8_t> buffer) {
     return true;
 }
 
-bool SPIOctalStub::waitComplete(uint32_t timeout_ms) {
+bool SpiHw8Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
     return true;  // Always succeeds instantly
 }
 
-bool SPIOctalStub::isBusy() const {
+bool SpiHw8Stub::isBusy() const {
     return mBusy;
 }
 
-bool SPIOctalStub::isInitialized() const {
+bool SpiHw8Stub::isInitialized() const {
     return mInitialized;
 }
 
-int SPIOctalStub::getBusId() const {
+int SpiHw8Stub::getBusId() const {
     return mBusId;
 }
 
-const char* SPIOctalStub::getName() const {
+const char* SpiHw8Stub::getName() const {
     return mName;
 }
 
-const fl::vector<uint8_t>& SPIOctalStub::getLastTransmission() const {
+const fl::vector<uint8_t>& SpiHw8Stub::getLastTransmission() const {
     return mLastBuffer;
 }
 
-uint32_t SPIOctalStub::getTransmissionCount() const {
+uint32_t SpiHw8Stub::getTransmissionCount() const {
     return mTransmitCount;
 }
 
-uint32_t SPIOctalStub::getClockSpeed() const {
+uint32_t SpiHw8Stub::getClockSpeed() const {
     return mClockSpeed;
 }
 
-bool SPIOctalStub::isTransmissionActive() const {
+bool SpiHw8Stub::isTransmissionActive() const {
     return mBusy;
 }
 
-void SPIOctalStub::reset() {
+void SpiHw8Stub::reset() {
     mLastBuffer.clear();
     mTransmitCount = 0;
     mBusy = false;
 }
 
-fl::vector<fl::vector<uint8_t>> SPIOctalStub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
+fl::vector<fl::vector<uint8_t>> SpiHw8Stub::extractLanes(uint8_t num_lanes, size_t bytes_per_lane) const {
     fl::vector<fl::vector<uint8_t>> lanes(num_lanes);
 
     // Pre-allocate per-lane buffers
@@ -153,8 +153,8 @@ fl::vector<SpiHw8*> SpiHw8::createInstances() {
     fl::vector<SpiHw8*> controllers;
 
     // Provide 2 mock 8-lane SPI buses for testing
-    static SPIOctalStub controller2(2, "MockOctalSPI2");  // Bus 2 - static lifetime
-    static SPIOctalStub controller3(3, "MockOctalSPI3");  // Bus 3 - static lifetime
+    static SpiHw8Stub controller2(2, "MockOctalSPI2");  // Bus 2 - static lifetime
+    static SpiHw8Stub controller3(3, "MockOctalSPI3");  // Bus 3 - static lifetime
 
     controllers.push_back(&controller2);
     controllers.push_back(&controller3);

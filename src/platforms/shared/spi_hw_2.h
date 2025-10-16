@@ -103,7 +103,4 @@ private:
     static fl::vector<SpiHw2*> createInstances();
 };
 
-/// @deprecated Use SpiHw2 instead of SPIDual
-using SPIDual [[deprecated("Use SpiHw2 instead of SPIDual")]] = SpiHw2;
-
 }  // namespace fl
