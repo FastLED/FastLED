@@ -30,7 +30,7 @@
 
 #if IS_ESP32_C3
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_quad.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_4.h"
 
 // Test parameters - 4-way Quad-SPI configuration
 #define TEST_DATA_SIZE 16  // 16 bytes to exercise all 16 possible 4-bit patterns
@@ -135,7 +135,7 @@ void loop() {
     Serial.println("========================================");
 
     // Create Quad-SPI blocking driver instance
-    QuadSPI_Blocking_ESP32 spi;
+    SpiBlock4 spi;
 
     Serial.println("  Configuring Quad-SPI blocking driver...");
 

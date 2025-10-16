@@ -19,7 +19,7 @@
 // Note: FL_SPI_ISR_VALIDATE can be defined via build flags for validation testing
 // If not defined, the example will run without validation checks
 
-#include "platforms/esp/32/parallel_spi/fastled_parallel_spi_esp32c3.hpp"
+#include "platforms/shared/spi_bitbang/spi_isr_8.h"
 
 // Test parameters
 #define TEST_DATA_SIZE 4  // Very short sequence for validation testing
@@ -35,7 +35,7 @@ static uint8_t testData[TEST_DATA_SIZE];
 void initializePinMappingLUT() {
     // Initialize pin mapping lookup tables directly in ISR state
     // For this test, map bits to GPIOs 0-7 for data, GPIO8 for clock
-    PinMaskEntry* lut = ParallelSPI_ESP32C3::getLUTArray();
+    PinMaskEntry* lut = SpiIsr8::getLUTArray();
 
     for (int v = 0; v < 256; v++) {
         uint32_t setMask = 0;
@@ -117,7 +117,7 @@ void loop() {
     Serial.println(iteration);
 
     // Create SPI driver instance
-    ParallelSPI_ESP32C3 spi;
+    SpiIsr8 spi;
 
     Serial.println("  Configuring SPI driver...");
 
@@ -148,7 +148,7 @@ void loop() {
 
     // Add visibility delay
     Serial.println("  Waiting for memory visibility...");
-    ParallelSPI_ESP32C3::visibilityDelayUs(10);
+    SpiIsr8::visibilityDelayUs(10);
 
     // Arm the transfer
     Serial.println("  Arming transfer...");
@@ -175,8 +175,8 @@ void loop() {
 #ifdef FL_SPI_ISR_VALIDATE
     // Inspect GPIO event log
     Serial.println("  === GPIO EVENT LOG VALIDATION ===");
-    const GPIOEvent* events = ParallelSPI_ESP32C3::getValidationEvents();
-    uint16_t eventCount = ParallelSPI_ESP32C3::getValidationEventCount();
+    const SpiIsr8::GPIOEvent* events = SpiIsr8::getValidationEventsTyped();
+    uint16_t eventCount = SpiIsr8::getValidationEventCount();
 
     Serial.print("  Total GPIO events captured: ");
     Serial.print(eventCount);
@@ -204,20 +204,20 @@ void loop() {
 
     for (uint16_t i = 0; i < eventCount; i++) {
         switch (events[i].type()) {
-            case GPIOEventType::StateStart:
-            case GPIOEventType::StateDone:
+            case SpiIsr8::GPIOEventType::StateStart:
+            case SpiIsr8::GPIOEventType::StateDone:
                 stateEvents++;
                 break;
-            case GPIOEventType::SetBits:
+            case SpiIsr8::GPIOEventType::SetBits:
                 setBitEvents++;
                 break;
-            case GPIOEventType::ClearBits:
+            case SpiIsr8::GPIOEventType::ClearBits:
                 clearBitEvents++;
                 break;
-            case GPIOEventType::ClockLow:
+            case SpiIsr8::GPIOEventType::ClockLow:
                 clockLowEvents++;
                 break;
-            case GPIOEventType::ClockHigh:
+            case SpiIsr8::GPIOEventType::ClockHigh:
                 clockHighEvents++;
                 break;
         }
@@ -273,17 +273,17 @@ void loop() {
         Serial.print("] ");
 
         switch (events[i].type()) {
-            case GPIOEventType::StateStart:
+            case SpiIsr8::GPIOEventType::StateStart:
                 Serial.print("STATE_START (bytes=");
                 Serial.print(events[i].payload.state_info);
                 Serial.println(")");
                 break;
-            case GPIOEventType::StateDone:
+            case SpiIsr8::GPIOEventType::StateDone:
                 Serial.print("STATE_DONE (pos=");
                 Serial.print(events[i].payload.state_info);
                 Serial.println(")");
                 break;
-            case GPIOEventType::SetBits:
+            case SpiIsr8::GPIOEventType::SetBits:
                 Serial.print("SET_BITS mask=0x");
                 Serial.print(events[i].payload.gpio_mask, HEX);
                 Serial.print(" (binary: ");
@@ -292,7 +292,7 @@ void loop() {
                 }
                 Serial.println(")");
                 break;
-            case GPIOEventType::ClearBits:
+            case SpiIsr8::GPIOEventType::ClearBits:
                 Serial.print("CLEAR_BITS mask=0x");
                 Serial.print(events[i].payload.gpio_mask, HEX);
                 Serial.print(" (binary: ");
@@ -301,11 +301,11 @@ void loop() {
                 }
                 Serial.println(")");
                 break;
-            case GPIOEventType::ClockLow:
+            case SpiIsr8::GPIOEventType::ClockLow:
                 Serial.print("CLOCK_LOW mask=0x");
                 Serial.println(events[i].payload.gpio_mask, HEX);
                 break;
-            case GPIOEventType::ClockHigh:
+            case SpiIsr8::GPIOEventType::ClockHigh:
                 Serial.print("CLOCK_HIGH mask=0x");
                 Serial.println(events[i].payload.gpio_mask, HEX);
                 break;

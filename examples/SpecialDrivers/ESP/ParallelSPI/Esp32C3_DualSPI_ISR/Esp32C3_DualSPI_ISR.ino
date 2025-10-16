@@ -27,7 +27,7 @@
 // Note: FL_SPI_ISR_VALIDATE can be defined via build flags for validation testing
 // If not defined, the example will run without validation checks
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_isr_dual_esp32c3.hpp"
+#include "platforms/shared/spi_bitbang/spi_isr_2.h"
 
 // Test parameters - 2-way Dual-SPI configuration
 #define TEST_DATA_SIZE 8  // Short sequence for validation testing
@@ -125,7 +125,7 @@ void loop() {
     Serial.println("========================================");
 
     // Create Dual-SPI driver instance
-    DualSPI_ISR_ESP32C3 spi;
+    SpiIsr2 spi;
 
     Serial.println("  Configuring Dual-SPI driver...");
 
@@ -152,7 +152,7 @@ void loop() {
 
     // Add visibility delay
     Serial.println("  Waiting for memory visibility...");
-    DualSPI_ISR_ESP32C3::visibilityDelayUs(10);
+    SpiIsr2::visibilityDelayUs(10);
 
     // Arm the transfer
     Serial.println("  Arming transfer...");
@@ -180,7 +180,7 @@ void loop() {
     // Inspect GPIO event log
     Serial.println("");
     Serial.println("  === GPIO EVENT LOG VALIDATION ===");
-    const DualSPI_ISR_ESP32C3::GPIOEvent* events = spi.getValidationEventsTyped();
+    const SpiIsr2::GPIOEvent* events = spi.getValidationEventsTyped();
     uint16_t eventCount = spi.getValidationEventCount();
 
     Serial.print("  Total GPIO events captured: ");
@@ -210,7 +210,7 @@ void loop() {
     uint16_t clockHighEvents = 0;
 
     for (uint16_t i = 0; i < eventCount; i++) {
-        using GPIOEventType = DualSPI_ISR_ESP32C3::GPIOEventType;
+        using GPIOEventType = SpiIsr2::GPIOEventType;
         switch (events[i].type()) {
             case GPIOEventType::StateStart:
             case GPIOEventType::StateDone:
@@ -247,13 +247,13 @@ void loop() {
     bool sequenceValid = true;
 
     // First event should be STATE_START
-    if (eventCount > 0 && events[0].type() != DualSPI_ISR_ESP32C3::GPIOEventType::StateStart) {
+    if (eventCount > 0 && events[0].type() != SpiIsr2::GPIOEventType::StateStart) {
         Serial.println("  ERROR: First event is not STATE_START");
         sequenceValid = false;
     }
 
     // Last event should be STATE_DONE
-    if (eventCount > 1 && events[eventCount - 1].type() != DualSPI_ISR_ESP32C3::GPIOEventType::StateDone) {
+    if (eventCount > 1 && events[eventCount - 1].type() != SpiIsr2::GPIOEventType::StateDone) {
         Serial.println("  ERROR: Last event is not STATE_DONE");
         sequenceValid = false;
     }
@@ -290,7 +290,7 @@ void loop() {
         Serial.print(i);
         Serial.print("] ");
 
-        using GPIOEventType = DualSPI_ISR_ESP32C3::GPIOEventType;
+        using GPIOEventType = SpiIsr2::GPIOEventType;
         switch (events[i].type()) {
             case GPIOEventType::StateStart:
                 Serial.print("STATE_START (bytes=");

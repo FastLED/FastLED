@@ -30,7 +30,7 @@
 
 #if IS_ESP32_C3
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_blocking_dual.hpp"
+#include "platforms/shared/spi_bitbang/spi_block_2.h"
 
 // Test parameters - 2-way Dual-SPI configuration
 #define TEST_DATA_SIZE 8  // Short sequence for testing
@@ -121,7 +121,7 @@ void loop() {
     Serial.println("========================================");
 
     // Create Dual-SPI blocking driver instance
-    DualSPI_Blocking_ESP32 spi;
+    SpiBlock2 spi;
 
     Serial.println("  Configuring Dual-SPI blocking driver...");
 

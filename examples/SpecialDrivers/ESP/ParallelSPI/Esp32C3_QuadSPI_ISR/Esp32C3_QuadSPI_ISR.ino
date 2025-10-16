@@ -27,7 +27,7 @@
 // Note: FL_SPI_ISR_VALIDATE can be defined via build flags for validation testing
 // If not defined, the example will run without validation checks
 
-#include "platforms/esp/32/parallel_spi/parallel_spi_isr_quad_esp32c3.hpp"
+#include "platforms/shared/spi_bitbang/spi_isr_4.h"
 
 // Test parameters - 4-way Quad-SPI configuration
 #define TEST_DATA_SIZE 8  // Short sequence for validation testing
@@ -131,7 +131,7 @@ void loop() {
     Serial.println("========================================");
 
     // Create Quad-SPI driver instance
-    QuadSPI_ISR_ESP32C3 spi;
+    SpiIsr4 spi;
 
     Serial.println("  Configuring Quad-SPI driver...");
 
@@ -158,7 +158,7 @@ void loop() {
 
     // Add visibility delay
     Serial.println("  Waiting for memory visibility...");
-    QuadSPI_ISR_ESP32C3::visibilityDelayUs(10);
+    SpiIsr4::visibilityDelayUs(10);
 
     // Arm the transfer
     Serial.println("  Arming transfer...");
@@ -186,7 +186,7 @@ void loop() {
     // Inspect GPIO event log
     Serial.println("");
     Serial.println("  === GPIO EVENT LOG VALIDATION ===");
-    const QuadSPI_ISR_ESP32C3::GPIOEvent* events = spi.getValidationEventsTyped();
+    const SpiIsr4::GPIOEvent* events = spi.getValidationEventsTyped();
     uint16_t eventCount = spi.getValidationEventCount();
 
     Serial.print("  Total GPIO events captured: ");
@@ -216,7 +216,7 @@ void loop() {
     uint16_t clockHighEvents = 0;
 
     for (uint16_t i = 0; i < eventCount; i++) {
-        using GPIOEventType = QuadSPI_ISR_ESP32C3::GPIOEventType;
+        using GPIOEventType = SpiIsr4::GPIOEventType;
         switch (events[i].type()) {
             case GPIOEventType::StateStart:
             case GPIOEventType::StateDone:
@@ -253,13 +253,13 @@ void loop() {
     bool sequenceValid = true;
 
     // First event should be STATE_START
-    if (eventCount > 0 && events[0].type() != QuadSPI_ISR_ESP32C3::GPIOEventType::StateStart) {
+    if (eventCount > 0 && events[0].type() != SpiIsr4::GPIOEventType::StateStart) {
         Serial.println("  ERROR: First event is not STATE_START");
         sequenceValid = false;
     }
 
     // Last event should be STATE_DONE
-    if (eventCount > 1 && events[eventCount - 1].type() != QuadSPI_ISR_ESP32C3::GPIOEventType::StateDone) {
+    if (eventCount > 1 && events[eventCount - 1].type() != SpiIsr4::GPIOEventType::StateDone) {
         Serial.println("  ERROR: Last event is not STATE_DONE");
         sequenceValid = false;
     }
@@ -296,7 +296,7 @@ void loop() {
         Serial.print(i);
         Serial.print("] ");
 
-        using GPIOEventType = QuadSPI_ISR_ESP32C3::GPIOEventType;
+        using GPIOEventType = SpiIsr4::GPIOEventType;
         switch (events[i].type()) {
             case GPIOEventType::StateStart:
                 Serial.print("STATE_START (bytes=");
