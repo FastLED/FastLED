@@ -77,7 +77,7 @@ bool PixelStream::readFrame(Frame *frame) {
         if (!framesRemaining()) {
             return false;
         }
-        size_t n = mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3);
+        size_t n = mFileHandle->readRGB8(frame->rgb(), mbytesPerFrame / 3);
         DBG("pos: " << mFileHandle->pos());
         return n * 3 == size_t(mbytesPerFrame);
     }
@@ -109,7 +109,7 @@ bool PixelStream::readFrameAt(fl::u32 frameNumber, Frame *frame) {
             return false;
         }
         size_t read =
-            mFileHandle->readCRGB(frame->rgb(), mbytesPerFrame / 3) * 3;
+            mFileHandle->readRGB8(frame->rgb(), mbytesPerFrame / 3) * 3;
         // DBG("read: " << read);
         // DBG("pos: " << mFileHandle->Position());
 

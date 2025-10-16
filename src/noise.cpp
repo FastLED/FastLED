@@ -903,11 +903,9 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
       }
 
       if(blend) {
-        // Safer blending to avoid potential undefined behavior
-        CRGB temp = leds[wb+pos];
-        temp.nscale8(128); // Scale by 50%
-        led.nscale8(128);
-        leds[wb+pos] = temp + led;
+        // Safer blending using shift-and-add to avoid ambiguous operator+
+        leds[wb+pos] >>= 1;
+        leds[wb+pos] += (led >>= 1);
       } else {
         leds[wb+pos] = led;
       }

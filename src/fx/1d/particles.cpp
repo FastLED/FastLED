@@ -145,9 +145,9 @@ void Particles1d::Particle::draw(CRGB* leds, u32 now, u16 numLeds) {
     // Sub-pixel rendering
     int i = (int)pos;
     float frac = pos - i;
-    if (i >= 0 && i < numLeds)
+    if (i >= 0 && i < (int)numLeds)
         leds[i] += color.nscale8(255 * (1.0f - frac));
-    if (i + 1 >= 0 && i + 1 < numLeds && frac > 0)
+    if (i + 1 >= 0 && i + 1 < (int)numLeds && frac > 0)
         leds[i + 1] += color.nscale8(255 * frac);
 }
 
