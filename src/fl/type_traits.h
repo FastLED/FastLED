@@ -14,9 +14,10 @@ namespace fl { // mandatory namespace to prevent name collision with
                // std::enable_if.
 
 // Define integral_constant as base for true_type and false_type
+// Using enum instead of static constexpr to avoid ODR-use issues in C++11
 template <typename T, T v>
 struct integral_constant {
-    static constexpr T value = v;
+    enum : T { value = v };
     using value_type = T;
     using type = integral_constant;
     constexpr operator value_type() const noexcept { return value; }
@@ -68,7 +69,8 @@ template <typename Base, typename Derived> struct is_base_of {
     };
 
   public:
-    static constexpr bool value = (kSizeDerived == sizeof(yes));
+    // Use enum instead of static constexpr to avoid ODR-use issues in C++11
+    enum : bool { value = (kSizeDerived == sizeof(yes)) };
 };
 
 // Define is_base_of_v for compatibility with pre-C++14
@@ -79,12 +81,12 @@ template <typename Base, typename Derived> struct is_base_of_v_helper {
 
 // Define is_same trait
 template <typename T, typename U> struct is_same {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 // Specialization for when T and U are the same type
 template <typename T> struct is_same<T, T> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Define is_same_v for compatibility with variable templates
@@ -107,15 +109,15 @@ using conditional_t = typename conditional<B, T, F>::type;
 
 // Define is_array trait
 template <typename T> struct is_array {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename T> struct is_array<T[]> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename T, fl::size N> struct is_array<T[N]> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Define remove_extent trait
@@ -133,26 +135,26 @@ template <typename T, fl::size N> struct remove_extent<T[N]> {
 
 // Define is_function trait
 template <typename T> struct is_function {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename Ret, typename... Args> struct is_function<Ret(Args...)> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename Ret, typename... Args>
 struct is_function<Ret(Args...) const> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename Ret, typename... Args>
 struct is_function<Ret(Args...) volatile> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename Ret, typename... Args>
 struct is_function<Ret(Args...) const volatile> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Define add_pointer trait
@@ -181,29 +183,29 @@ template <typename T> struct remove_const<const T> {
 
 // Define is_const trait
 template <typename T> struct is_const {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename T> struct is_const<const T> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Define is_lvalue_reference trait
 template <typename T> struct is_lvalue_reference {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename T> struct is_lvalue_reference<T &> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Define is_void trait
 template <typename T> struct is_void {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <> struct is_void<void> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Implementation of forward
@@ -256,54 +258,54 @@ template <typename T> using decay_t = typename decay<T>::type;
 
 // Define is_pod trait (basic implementation)
 template <typename T> struct is_pod {
-    static constexpr bool value = false; // Default to false for safety
+    enum : bool { value = false }; // Default to false for safety
 };
 
 // Specializations for fundamental types
 template <> struct is_pod<bool> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<signed char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<unsigned char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<short> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<unsigned short> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<int> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<unsigned int> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<unsigned long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<long long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<unsigned long long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<float> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_pod<long double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 // Helper struct for is_pod_v (similar to other _v helpers)
@@ -322,60 +324,60 @@ template <typename C, typename Ret, typename... A>
 struct is_member_function_pointer<Ret (C::*)(A...) const>;
 
 template <typename T> struct is_member_function_pointer {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename C, typename Ret, typename... A>
 struct is_member_function_pointer<Ret (C::*)(A...)> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename C, typename Ret, typename... A>
 struct is_member_function_pointer<Ret (C::*)(A...) const> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 //-------------------------------------------------------------------------------
 // is_integral trait (built-in integer types only)
 //-------------------------------------------------------------------------------
 template <typename T> struct is_integral {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 template <> struct is_integral<bool> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<signed char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<unsigned char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<short> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<unsigned short> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<int> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<unsigned int> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<unsigned long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<long long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_integral<unsigned long long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename T> struct is_integral<const T> {
@@ -394,16 +396,16 @@ template <typename T> struct is_integral<T &> {
 // is_floating_point trait
 //-------------------------------------------------------------------------------
 template <typename T> struct is_floating_point {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 template <> struct is_floating_point<float> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_floating_point<double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_floating_point<long double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 
 template <typename T> struct is_floating_point<const T> {
@@ -422,31 +424,31 @@ template <typename T> struct is_floating_point<T &> {
 // is_signed trait
 //-------------------------------------------------------------------------------
 template <typename T> struct is_signed {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 template <> struct is_signed<signed char> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<short> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<int> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<long long> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<float> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 template <> struct is_signed<long double> {
-    static constexpr bool value = true;
+    enum : bool { value = true };
 };
 // Note: sized integer types (i8, i16, i32, int64_t) are typedefs
 // for the basic types above, so they automatically inherit these specializations
@@ -455,52 +457,52 @@ template <> struct is_signed<long double> {
 // Type size ranking for promotion rules
 //-------------------------------------------------------------------------------
 template <typename T> struct type_rank {
-    static constexpr int value = 0;
+    enum : int { value = 0 };
 };
 template <> struct type_rank<bool> {
-    static constexpr int value = 1;
+    enum : int { value = 1 };
 };
 template <> struct type_rank<signed char> {
-    static constexpr int value = 2;
+    enum : int { value = 2 };
 };
 template <> struct type_rank<unsigned char> {
-    static constexpr int value = 2;
+    enum : int { value = 2 };
 };
 template <> struct type_rank<char> {
-    static constexpr int value = 2;
+    enum : int { value = 2 };
 };
 template <> struct type_rank<short> {
-    static constexpr int value = 3;
+    enum : int { value = 3 };
 };
 template <> struct type_rank<unsigned short> {
-    static constexpr int value = 3;
+    enum : int { value = 3 };
 };
 template <> struct type_rank<int> {
-    static constexpr int value = 4;
+    enum : int { value = 4 };
 };
 template <> struct type_rank<unsigned int> {
-    static constexpr int value = 4;
+    enum : int { value = 4 };
 };
 template <> struct type_rank<long> {
-    static constexpr int value = 5;
+    enum : int { value = 5 };
 };
 template <> struct type_rank<unsigned long> {
-    static constexpr int value = 5;
+    enum : int { value = 5 };
 };
 template <> struct type_rank<long long> {
-    static constexpr int value = 6;
+    enum : int { value = 6 };
 };
 template <> struct type_rank<unsigned long long> {
-    static constexpr int value = 6;
+    enum : int { value = 6 };
 };
 template <> struct type_rank<float> {
-    static constexpr int value = 10;
+    enum : int { value = 10 };
 };
 template <> struct type_rank<double> {
-    static constexpr int value = 11;
+    enum : int { value = 11 };
 };
 template <> struct type_rank<long double> {
-    static constexpr int value = 12;
+    enum : int { value = 12 };
 };
 // Note: sized integer types (i8, i16, i32, int64_t) are typedefs
 // for the basic types above, so they automatically inherit these specializations
@@ -718,7 +720,7 @@ template <typename T> void swap_by_copy(T &a, T &b) {
 template <typename T, typename... Types> struct contains_type;
 
 template <typename T> struct contains_type<T> {
-    static constexpr bool value = false;
+    enum : bool { value = false };
 };
 
 template <typename T, typename U, typename... Rest>
@@ -731,7 +733,7 @@ struct contains_type<T, U, Rest...> {
 template <typename... Types> struct max_size;
 
 template <> struct max_size<> {
-    static constexpr fl::size value = 0;
+    enum : fl::size { value = 0 };
 };
 
 template <typename T, typename... Rest> struct max_size<T, Rest...> {
@@ -744,7 +746,7 @@ template <typename T, typename... Rest> struct max_size<T, Rest...> {
 template <typename... Types> struct max_align;
 
 template <> struct max_align<> {
-    static constexpr fl::size value = 1;
+    enum : fl::size { value = 1 };
 };
 
 template <typename T, typename... Rest> struct max_align<T, Rest...> {
@@ -756,10 +758,13 @@ template <typename T, typename... Rest> struct max_align<T, Rest...> {
 // alignment_of trait
 template <typename T>
 struct alignment_of {
-    static constexpr fl::size value = alignof(T);
+    enum : fl::size { value = alignof(T) };
 };
 
 
+
+// C++11 requires out-of-class definitions for static constexpr members that are ODR-used
+// These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols
 
 } // namespace fl
 

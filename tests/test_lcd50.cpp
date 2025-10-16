@@ -336,6 +336,8 @@ TEST_CASE("ClocklessTiming::is_timing_acceptable") {
     }
 }
 
+// Complex constexpr requires C++14
+#if __cplusplus >= 201402L
 TEST_CASE("ClocklessTiming - constexpr evaluation") {
     // Verify that calculations can happen at compile time
     constexpr auto result = ClocklessTiming::calculate_optimal_pclk(
@@ -358,6 +360,7 @@ TEST_CASE("ClocklessTiming - constexpr evaluation") {
     );
     static_assert(frame_time > 0, "Frame time should be positive");
 }
+#endif // __cplusplus >= 201402L
 
 TEST_CASE("ClocklessTiming - memory efficiency comparison") {
     // Compare memory usage for different approaches

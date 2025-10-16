@@ -33,7 +33,14 @@ template<typename T>
 struct tuple_size;
 
 template<typename... Ts>
-struct tuple_size< tuple<Ts...> > : integral_constant<size_t, sizeof...(Ts)> {};
+struct tuple_size< tuple<Ts...> > {
+    // Use enum instead of static constexpr to avoid ODR-use issues in C++11
+    enum : size_t { value = sizeof...(Ts) };
+    using value_type = size_t;
+    using type = tuple_size;
+    constexpr operator value_type() const noexcept { return value; }
+    constexpr value_type operator()() const noexcept { return value; }
+};
 
 // tuple_element
 template<size_t I, typename Tuple>
@@ -93,5 +100,10 @@ tuple<typename fl::decay<Ts>::type...>
 make_tuple(Ts&&... args) {
     return tuple<typename fl::decay<Ts>::type...>(fl::forward<Ts>(args)...);
 }
+
+// C++11 requires out-of-class definitions for static constexpr members that are ODR-used
+// tuple_size<tuple<Ts...>>::value is inherited from integral_constant<size_t, sizeof...(Ts)>
+// which means we need to define integral_constant<T, v>::value
+// This is actually defined in type_traits.h where integral_constant is declared
 
 } // namespace fl

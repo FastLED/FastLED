@@ -584,6 +584,8 @@ TEST_CASE("std::map vs fl::fl_map - Move Constructor and Move Assignment") {
     }
 }
 
+// insert_or_assign() requires C++17
+#if __cplusplus >= 201703L
 TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
     SUBCASE("Insert new key with lvalue") {
         std::map<int, fl::string> std_map;
@@ -708,6 +710,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         CHECK(maps_equal(std_map, fl_map));
     }
 }
+#endif // __cplusplus >= 201703L
 
 // Helper class to track construction calls
 class ConstructionCounter {
@@ -769,6 +772,8 @@ int ConstructionCounter::default_construction_count = 0;
 int ConstructionCounter::copy_construction_count = 0;
 int ConstructionCounter::move_construction_count = 0;
 
+// try_emplace() requires C++17
+#if __cplusplus >= 201703L
 TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
     SUBCASE("Insert new key - value should be constructed") {
         std::map<int, fl::string> std_map;
@@ -926,6 +931,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         CHECK(maps_equal(std_map, fl_map));
     }
 }
+#endif // __cplusplus >= 201703L
 
 TEST_CASE("std::map vs fl::fl_map - Range Insert") {
     std::map<int, fl::string> std_map;

@@ -12,11 +12,11 @@
 
 #include "fl/isr.h"
 #include "fl/namespace.h"
+#include "fl/unique_ptr.h"
+#include "fl/atomic.h"
 
 #include <chrono>
 #include <thread>
-#include <atomic>
-#include <memory>
 
 // Simple logging for stub platform (avoid FL_WARN/FL_DBG due to exception issues)
 #include <iostream>
@@ -30,14 +30,14 @@ namespace isr {
 // =============================================================================
 
 struct stub_isr_handle_data {
-    std::unique_ptr<std::thread> timer_thread;  // Thread for timer simulation
-    std::atomic<bool> should_stop;              // Stop flag for thread
-    std::atomic<bool> is_enabled;               // Current enable state
-    isr_handler_t user_handler;                 // User handler function
-    void* user_data;                            // User context
-    uint32_t frequency_hz;                      // Timer frequency
-    bool is_one_shot;                           // One-shot vs auto-reload
-    bool is_timer;                              // true = timer, false = external
+    fl::unique_ptr<std::thread> timer_thread;  // Thread for timer simulation
+    fl::atomic<bool> should_stop;              // Stop flag for thread
+    fl::atomic<bool> is_enabled;               // Current enable state
+    isr_handler_t user_handler;                // User handler function
+    void* user_data;                           // User context
+    uint32_t frequency_hz;                     // Timer frequency
+    bool is_one_shot;                          // One-shot vs auto-reload
+    bool is_timer;                             // true = timer, false = external
 
     stub_isr_handle_data()
         : should_stop(false)
@@ -133,7 +133,7 @@ public:
 
         // Start timer thread (unless manual tick mode)
         if (!(config.flags & ISR_FLAG_MANUAL_TICK)) {
-            handle_data->timer_thread = std::make_unique<std::thread>(timer_thread_func, handle_data);
+            handle_data->timer_thread = fl::make_unique<std::thread>(timer_thread_func, handle_data);
             if (!handle_data->timer_thread) {
                 STUB_LOG("attachTimerHandler: failed to create timer thread");
                 delete handle_data;

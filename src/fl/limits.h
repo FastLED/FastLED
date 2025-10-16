@@ -77,15 +77,15 @@ namespace detail {
 // Primary template - default numeric_limits for unknown types
 template <typename T>
 struct numeric_limits {
-    static constexpr bool is_specialized = false;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = false;
-    static constexpr bool is_exact = false;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
-    static constexpr int digits = 0;
-    static constexpr int digits10 = 0;
+    enum : bool { is_specialized = false };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = false };
+    enum : bool { is_exact = false };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
+    enum : int { digits = 0 };
+    enum : int { digits10 = 0 };
 
     static constexpr T min() noexcept { return T(); }
     static constexpr T max() noexcept { return T(); }
@@ -101,15 +101,15 @@ struct numeric_limits {
 // Specialization for bool
 template <>
 struct numeric_limits<bool> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
-    static constexpr int digits = 1;
-    static constexpr int digits10 = 0;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
+    enum : int { digits = 1 };
+    enum : int { digits10 = 0 };
 
     static constexpr bool min() noexcept { return false; }
     static constexpr bool max() noexcept { return true; }
@@ -121,13 +121,13 @@ struct numeric_limits<bool> {
 // Specialization for char
 template <>
 struct numeric_limits<char> {
-    static constexpr bool is_specialized = true;
+    enum : bool { is_specialized = true };
     static constexpr bool is_signed = (char(-1) < char(0));
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<char>;
     static constexpr int digits10 = detail::integer_digits10<char>;
 
@@ -141,13 +141,13 @@ struct numeric_limits<char> {
 // Specialization for signed char (i8)
 template <>
 struct numeric_limits<signed char> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<signed char>;
     static constexpr int digits10 = detail::integer_digits10<signed char>;
 
@@ -161,13 +161,13 @@ struct numeric_limits<signed char> {
 // Specialization for unsigned char (u8)
 template <>
 struct numeric_limits<unsigned char> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<unsigned char>;
     static constexpr int digits10 = detail::integer_digits10<unsigned char>;
 
@@ -181,13 +181,13 @@ struct numeric_limits<unsigned char> {
 // Specialization for short (i16)
 template <>
 struct numeric_limits<short> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<short>;
     static constexpr int digits10 = detail::integer_digits10<short>;
 
@@ -201,13 +201,13 @@ struct numeric_limits<short> {
 // Specialization for unsigned short (u16)
 template <>
 struct numeric_limits<unsigned short> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<unsigned short>;
     static constexpr int digits10 = detail::integer_digits10<unsigned short>;
 
@@ -221,13 +221,13 @@ struct numeric_limits<unsigned short> {
 // Specialization for int
 template <>
 struct numeric_limits<int> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     // int can be 16-bit (AVR) or 32-bit (most platforms) depending on platform
     static constexpr int digits = detail::integer_digits<int>;
     static constexpr int digits10 = detail::integer_digits10<int>;
@@ -246,13 +246,13 @@ struct numeric_limits<int> {
 // Specialization for unsigned int
 template <>
 struct numeric_limits<unsigned int> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     // unsigned int can be 16-bit (AVR) or 32-bit (most platforms) depending on platform
     static constexpr int digits = detail::integer_digits<unsigned int>;
     static constexpr int digits10 = detail::integer_digits10<unsigned int>;
@@ -271,13 +271,13 @@ struct numeric_limits<unsigned int> {
 // Specialization for long
 template <>
 struct numeric_limits<long> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     // long can be 32-bit or 64-bit depending on platform
     static constexpr int digits = detail::integer_digits<long>;
     static constexpr int digits10 = detail::integer_digits10<long>;
@@ -296,13 +296,13 @@ struct numeric_limits<long> {
 // Specialization for unsigned long
 template <>
 struct numeric_limits<unsigned long> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     // unsigned long can be 32-bit or 64-bit depending on platform
     static constexpr int digits = detail::integer_digits<unsigned long>;
     static constexpr int digits10 = detail::integer_digits10<unsigned long>;
@@ -321,13 +321,13 @@ struct numeric_limits<unsigned long> {
 // Specialization for long long (i64)
 template <>
 struct numeric_limits<long long> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<long long>;
     static constexpr int digits10 = detail::integer_digits10<long long>;
 
@@ -341,13 +341,13 @@ struct numeric_limits<long long> {
 // Specialization for unsigned long long (u64)
 template <>
 struct numeric_limits<unsigned long long> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = false;
-    static constexpr bool is_integer = true;
-    static constexpr bool is_exact = true;
-    static constexpr bool has_infinity = false;
-    static constexpr bool has_quiet_NaN = false;
-    static constexpr bool has_signaling_NaN = false;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = false };
+    enum : bool { is_integer = true };
+    enum : bool { is_exact = true };
+    enum : bool { has_infinity = false };
+    enum : bool { has_quiet_NaN = false };
+    enum : bool { has_signaling_NaN = false };
     static constexpr int digits = detail::integer_digits<unsigned long long>;
     static constexpr int digits10 = detail::integer_digits10<unsigned long long>;
 
@@ -361,15 +361,15 @@ struct numeric_limits<unsigned long long> {
 // Specialization for float
 template <>
 struct numeric_limits<float> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = false;
-    static constexpr bool is_exact = false;
-    static constexpr bool has_infinity = true;
-    static constexpr bool has_quiet_NaN = true;
-    static constexpr bool has_signaling_NaN = true;
-    static constexpr int digits = 24;       // FLT_MANT_DIG
-    static constexpr int digits10 = 6;      // FLT_DIG
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = false };
+    enum : bool { is_exact = false };
+    enum : bool { has_infinity = true };
+    enum : bool { has_quiet_NaN = true };
+    enum : bool { has_signaling_NaN = true };
+    enum : int { digits = 24 };       // FLT_MANT_DIG
+    enum : int { digits10 = 6 };      // FLT_DIG
     static constexpr int max_digits10 = 9;  // Maximum digits for round-trip
     static constexpr int max_exponent = 128;   // FLT_MAX_EXP
     static constexpr int max_exponent10 = 38;  // FLT_MAX_10_EXP
@@ -397,15 +397,15 @@ struct numeric_limits<float> {
 // Specialization for double
 template <>
 struct numeric_limits<double> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = false;
-    static constexpr bool is_exact = false;
-    static constexpr bool has_infinity = true;
-    static constexpr bool has_quiet_NaN = true;
-    static constexpr bool has_signaling_NaN = true;
-    static constexpr int digits = 53;       // DBL_MANT_DIG
-    static constexpr int digits10 = 15;     // DBL_DIG
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = false };
+    enum : bool { is_exact = false };
+    enum : bool { has_infinity = true };
+    enum : bool { has_quiet_NaN = true };
+    enum : bool { has_signaling_NaN = true };
+    enum : int { digits = 53 };       // DBL_MANT_DIG
+    enum : int { digits10 = 15 };     // DBL_DIG
     static constexpr int max_digits10 = 17; // Maximum digits for round-trip
     static constexpr int max_exponent = 1024;   // DBL_MAX_EXP
     static constexpr int max_exponent10 = 308;  // DBL_MAX_10_EXP
@@ -433,13 +433,13 @@ struct numeric_limits<double> {
 // Specialization for long double
 template <>
 struct numeric_limits<long double> {
-    static constexpr bool is_specialized = true;
-    static constexpr bool is_signed = true;
-    static constexpr bool is_integer = false;
-    static constexpr bool is_exact = false;
-    static constexpr bool has_infinity = true;
-    static constexpr bool has_quiet_NaN = true;
-    static constexpr bool has_signaling_NaN = true;
+    enum : bool { is_specialized = true };
+    enum : bool { is_signed = true };
+    enum : bool { is_integer = false };
+    enum : bool { is_exact = false };
+    enum : bool { has_infinity = true };
+    enum : bool { has_quiet_NaN = true };
+    enum : bool { has_signaling_NaN = true };
     // long double precision varies by platform (64-bit, 80-bit, or 128-bit)
     static constexpr int digits = sizeof(long double) == 16 ? 113 :
                                   sizeof(long double) == 12 ? 64 : 53;
@@ -488,5 +488,8 @@ struct numeric_limits<long double> {
                4.9406564584124654e-324L;
     }
 };
+
+// C++11 requires out-of-class definitions for static constexpr members that are ODR-used
+// These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols
 
 } // namespace fl

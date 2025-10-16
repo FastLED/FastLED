@@ -2,6 +2,7 @@
 
 #include "fl/functional.h"
 #include "fl/vector.h"
+#include "fl/type_traits.h"
 
 namespace fl {
 
@@ -45,7 +46,8 @@ void push_heap(Iterator first, Iterator last, Compare comp) {
 }
 
 template <typename Iterator> void push_heap(Iterator first, Iterator last) {
-    push_heap(first, last, [](const auto &a, const auto &b) { return a < b; });
+    using value_type = typename fl::remove_reference<decltype(*first)>::type;
+    push_heap(first, last, [](const value_type &a, const value_type &b) { return a < b; });
 }
 
 template <typename Iterator, typename Compare>
@@ -59,7 +61,8 @@ void pop_heap(Iterator first, Iterator last, Compare comp) {
 }
 
 template <typename Iterator> void pop_heap(Iterator first, Iterator last) {
-    pop_heap(first, last, [](const auto &a, const auto &b) { return a < b; });
+    using value_type = typename fl::remove_reference<decltype(*first)>::type;
+    pop_heap(first, last, [](const value_type &a, const value_type &b) { return a < b; });
 }
 
 template <typename T, typename Compare = fl::less<T>,

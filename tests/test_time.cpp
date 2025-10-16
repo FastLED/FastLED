@@ -41,7 +41,7 @@ TEST_CASE("fl::time() monotonic behavior") {
 TEST_CASE("fl::time() return type consistency") {
     // Test that the function returns the expected type
     auto result = fl::time();
-    static_assert(std::is_same_v<decltype(result), fl::u32>, 
+    static_assert(std::is_same<decltype(result), fl::u32>::value,
                   "fl::time() should return fl::u32");
     
     // Test that it's compatible with arithmetic operations

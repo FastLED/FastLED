@@ -204,4 +204,7 @@ private:
     uint16_t mBufferLen = 0;           ///< Buffer length
 };
 
+// C++11 requires out-of-class definitions for static constexpr members that are ODR-used
+// These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols
+
 }  // namespace fl
