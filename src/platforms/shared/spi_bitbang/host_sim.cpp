@@ -7,10 +7,10 @@
   License: MIT (FastLED)
 */
 
-#ifdef FASTLED_SPI_HOST_SIMULATION
-
 #include "spi_platform.h"
 #include "host_sim.h"
+
+#ifdef FASTLED_SPI_HOST_SIMULATION
 #include "fl/stdint.h"
 #include <string.h>
 

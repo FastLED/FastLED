@@ -153,10 +153,8 @@ foreach test_name : test_names
     '-Winvalid-pch',
   ]
 
-  if test_name in ['test_dual_spi', 'test_quad_spi', 'test_single_spi']
-    test_sources += [meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp']
-    # FASTLED_SPI_HOST_SIMULATION is auto-enabled by spi_platform.h when STUB_PLATFORM is defined
-  endif
+  # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
+  # No need to add it explicitly to individual tests anymore
 
   test_exe = executable(test_name,
     test_sources,
@@ -185,7 +183,6 @@ test_parallel_spi_isr_manual_exe = executable('test_parallel_spi_isr_manual',
   [
     'test_parallel_spi_isr.cpp',
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
     test_pch[0]
   ],
@@ -208,7 +205,6 @@ test_parallel_spi_isr_thread_exe = executable('test_parallel_spi_isr_thread',
   [
     'test_parallel_spi_isr.cpp',
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
     test_pch[0]
   ],
