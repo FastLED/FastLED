@@ -1,6 +1,8 @@
-#ifndef __INC_LED_SYSDEFS_ARM_RP2040_H
-#define __INC_LED_SYSDEFS_ARM_RP2040_H
+#ifndef __INC_LED_SYSDEFS_RP_COMMON_H
+#define __INC_LED_SYSDEFS_RP_COMMON_H
 
+// Common LED system defines for all RP2xxx platforms (RP2040, RP2350, etc.)
+// Platform-specific files should include this and add platform-specific F_CPU defaults
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wignored-qualifiers"
@@ -35,16 +37,8 @@
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
-// #define F_CPU clock_get_hz(clk_sys) // can't use runtime function call
-// is the boot-time value in another var already for any platforms?
-// it doesn't seem to be, so hardcode the sdk default of 125 MHz
-#ifndef F_CPU
-#ifdef VARIANT_MCK
-#define F_CPU VARIANT_MCK
-#else
-#define F_CPU 125000000
-#endif
-#endif
+// F_CPU is platform-specific and should be defined by the including platform header
+// RP2040: 125 MHz, RP2350: 150 MHz
 
 #ifndef VARIANT_MCK
 #define VARIANT_MCK F_CPU
@@ -109,5 +103,4 @@ static uint32_t saved_interrupt_status;
 
 #pragma GCC diagnostic pop
 
-
-#endif // __INC_LED_SYSDEFS_ARM_RP2040_H
+#endif // __INC_LED_SYSDEFS_RP_COMMON_H

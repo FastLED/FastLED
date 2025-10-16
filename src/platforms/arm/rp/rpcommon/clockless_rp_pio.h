@@ -1,10 +1,10 @@
-#ifndef __INC_CLOCKLESS_ARM_RP2040
-#define __INC_CLOCKLESS_ARM_RP2040
+#ifndef __INC_CLOCKLESS_RP_PIO_COMMON
+#define __INC_CLOCKLESS_RP_PIO_COMMON
 
 #include "hardware/structs/sio.h"
 
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
-#include "../common/m0clockless.h"
+#include "../../common/m0clockless.h"
 #endif
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
@@ -148,7 +148,7 @@ public:
         // find an unclaimed PIO state machine and upload the clockless program if possible
         // there's two PIO instances, each with four state machines, so this should usually work out fine
 		const PIO pios[NUM_PIOS] = { pio0, pio1 };
-	#elif defined(PICO_RP2350)
+	#elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
 		// RP2350 features three PIO instances!
 		const PIO pios[NUM_PIOS] = { pio0, pio1, pio2 };
 	#endif
@@ -332,4 +332,4 @@ public:
 FASTLED_NAMESPACE_END
 
 
-#endif // __INC_CLOCKLESS_ARM_RP2040
+#endif // __INC_CLOCKLESS_RP_PIO_COMMON

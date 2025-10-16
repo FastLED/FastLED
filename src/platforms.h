@@ -36,9 +36,12 @@
 #include "platforms/arm/d21/fastled_arm_d21.h"
 #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #include "platforms/arm/d51/fastled_arm_d51.h"
-#elif defined(ARDUINO_ARCH_RP2040) // not sure a pico-sdk define for this
+#elif defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+// RP2350 (Raspberry Pi Pico 2)
+#include "platforms/arm/rp/rp2350/fastled_arm_rp2350.h"
+#elif defined(ARDUINO_ARCH_RP2040) || defined(PICO_RP2040)
 // RP2040 (Raspberry Pi Pico etc)
-#include "platforms/arm/rp2040/fastled_arm_rp2040.h"
+#include "platforms/arm/rp/rp2040/fastled_arm_rp2040.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/fastled_esp8266.h"
 #elif defined(ESP32)

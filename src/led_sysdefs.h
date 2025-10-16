@@ -43,7 +43,7 @@
 #include "platforms/arm/d51/led_sysdefs_arm_d51.h"
 #elif defined(ARDUINO_ARCH_RP2040) // not sure a pico-sdk define for this
 // RP2040 (Raspberry Pi Pico etc)
-#include "platforms/arm/rp2040/led_sysdefs_arm_rp2040.h"
+#include "platforms/arm/rp/rp2040/led_sysdefs_arm_rp2040.h"
 #elif defined(ESP8266)
 #include "platforms/esp/8266/led_sysdefs_esp8266.h"
 #elif defined(ESP32)
