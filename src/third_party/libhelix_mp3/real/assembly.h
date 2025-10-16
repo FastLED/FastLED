@@ -490,7 +490,16 @@ static __inline int CLZ(int x)
 
 #else
 
+// Suppress the pragma message warning - this is expected for non-optimized platforms
+#if defined(__clang__) || defined(__GNUC__)
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wpragma-messages"
+    #pragma GCC diagnostic ignored "-W#pragma-messages"
+#endif
 #pragma message "Using default platform in assembly.h. Consider optimizing."
+#if defined(__clang__) || defined(__GNUC__)
+    #pragma GCC diagnostic pop
+#endif
 
 typedef long long Word64;
 

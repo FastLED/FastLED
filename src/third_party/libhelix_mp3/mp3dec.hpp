@@ -357,9 +357,9 @@ int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *byte
 		*bytesLeft -= (mp3DecInfo->nSlots);
 	} else {
 		/* out of data - assume last or truncated frame */
-		if (mp3DecInfo->nSlots > *bytesLeft) {
+		if (mp3DecInfo->nSlots > (int)*bytesLeft) {
 			MP3ClearBadFrame(mp3DecInfo, outbuf);
-			return ERR_MP3_INDATA_UNDERFLOW;	
+			return ERR_MP3_INDATA_UNDERFLOW;
 		}
 
 #ifdef PROFILE
