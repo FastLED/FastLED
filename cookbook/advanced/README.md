@@ -5,9 +5,11 @@ This section covers advanced techniques and patterns for creating sophisticated 
 ## Contents
 
 - [2D/Matrix Operations](matrix.md) - Working with LED matrices and grids, including XY mapping and 2D patterns
-- [Audio Reactive Patterns](audio.md) - Creating visualizations that respond to audio input
 - [Multiple Strip Coordination](multi-strip.md) - Controlling and synchronizing multiple LED strips
 - [Performance Optimization](optimization.md) - Tips and techniques for smooth, efficient animations
+
+### Experimental Features (Not Production Ready)
+- [Audio Reactive Patterns](audio.md) - ⚠️ Experimental audio visualization features (alpha quality, APIs subject to change)
 
 ## Overview
 

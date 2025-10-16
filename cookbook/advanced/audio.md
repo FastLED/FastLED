@@ -1,5 +1,7 @@
 # Audio Reactive Patterns
 
+> **⚠️ EXPERIMENTAL**: This documentation covers experimental audio features currently in development. The FastLED beat detection APIs were introduced in October 2025 and are still evolving. Code examples shown here demonstrate general audio-reactive concepts but may not reflect the final API.
+
 Create LED visualizations that respond to audio input. This guide covers reading audio signals and creating reactive effects.
 
 ## Basic Audio Setup

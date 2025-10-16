@@ -177,7 +177,120 @@ if (pos >= 0 && pos < NUM_LEDS) {
 }
 ```
 
+## Array Manipulation
+
+### Classical LED Drawing Techniques
+
+FastLED builds on classical LED programming techniques where you directly manipulate pixel arrays. Understanding these fundamentals is essential for creating any LED effect.
+
+#### Direct Pixel Addressing
+
+The most basic form of LED control - setting individual pixels:
+
+```cpp
+void drawPixel(int position, CRGB color) {
+    if (position >= 0 && position < NUM_LEDS) {
+        leds[position] = color;
+    }
+}
+
+// Usage
+drawPixel(10, CRGB::Red);
+drawPixel(15, CRGB(0, 255, 128));
+```
+
+#### Drawing Lines
+
+Create lines by setting consecutive LEDs:
+
+```cpp
+void drawLine(int start, int end, CRGB color) {
+    if (start > end) {
+        int temp = start;
+        start = end;
+        end = temp;
+    }
+
+    for (int i = start; i <= end && i < NUM_LEDS; i++) {
+        leds[i] = color;
+    }
+}
+
+// Draw a red line from LED 5 to LED 20
+drawLine(5, 20, CRGB::Red);
+```
+
+#### XY Coordinate Mapping for Matrices
+
+For 2D LED matrices, convert X,Y coordinates to array indices:
+
+```cpp
+#define MATRIX_WIDTH 16
+#define MATRIX_HEIGHT 16
+
+uint16_t XY(uint8_t x, uint8_t y) {
+    if (x >= MATRIX_WIDTH || y >= MATRIX_HEIGHT) return 0;
+
+    // Serpentine (zigzag) layout - most common wiring pattern
+    if (y & 0x01) {
+        // Odd rows run backwards
+        return (y * MATRIX_WIDTH) + (MATRIX_WIDTH - 1 - x);
+    } else {
+        // Even rows run forwards
+        return (y * MATRIX_WIDTH) + x;
+    }
+}
+
+// Draw a pixel at X=5, Y=10
+leds[XY(5, 10)] = CRGB::Blue;
+
+// Draw a horizontal line
+for (int x = 0; x < MATRIX_WIDTH; x++) {
+    leds[XY(x, 8)] = CRGB::Green;
+}
+```
+
+#### Blending and Layering
+
+Combine colors rather than replacing them:
+
+```cpp
+// Additive blending (brightens)
+leds[i] += CRGB(20, 20, 20);
+
+// Averaging (mix colors)
+CRGB color1 = leds[i];
+CRGB color2 = CRGB::Blue;
+leds[i] = blend(color1, color2, 128);  // 50% blend
+```
+
+#### Classical Pattern: Scanning/Larson Scanner
+
+The classic "Cylon eye" or "KITT" effect:
+
+```cpp
+void larsonScanner() {
+    static int pos = 0;
+    static int direction = 1;
+
+    // Fade all LEDs
+    fadeToBlackBy(leds, NUM_LEDS, 20);
+
+    // Draw the scanner
+    leds[pos] = CRGB::Red;
+
+    // Move position
+    pos += direction;
+    if (pos >= NUM_LEDS - 1 || pos <= 0) {
+        direction = -direction;
+    }
+}
+```
+
+These classical techniques form the foundation of all LED programming - from simple strips to complex 2D and 3D installations. See [2D/Matrix Operations](../advanced/matrix.md) for more advanced spatial mapping techniques.
+
 ## Next Steps
 
 - [Color Theory](color-theory.md) - Learn about RGB vs HSV
 - [Basic Patterns](../basic-patterns/) - Use arrays to create patterns
+- [2D/Matrix Operations](../advanced/matrix.md) - Advanced XY mapping and matrix effects

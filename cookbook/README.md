@@ -27,6 +27,13 @@ Start creating your first LED animations and effects.
 - [Chases and Scanners](basic-patterns/chases.md)
 - [Rainbow Effects](basic-patterns/rainbow.md)
 
+### [Classical LED Drawing](core-concepts/led-structures.md#array-manipulation)
+Learn fundamental pixel manipulation techniques.
+- Direct pixel addressing: `leds[i] = CRGB::Red`
+- Array-based control and LED mapping
+- XY coordinate mapping for matrix layouts
+- Basic drawing primitives for LED strips and grids
+
 ### [Intermediate Techniques](intermediate/)
 Level up with more advanced programming techniques.
 - [Color Palettes](intermediate/palettes.md)
@@ -37,7 +44,6 @@ Level up with more advanced programming techniques.
 ### [Advanced Effects](advanced/)
 Create professional-grade LED installations and effects.
 - [2D/Matrix Operations](advanced/matrix.md)
-- [Audio Reactive Patterns](advanced/audio.md)
 - [Multiple Strip Coordination](advanced/multi-strip.md)
 - [Performance Optimization](advanced/optimization.md)
 
