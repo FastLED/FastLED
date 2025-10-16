@@ -26,6 +26,12 @@ void loop() {
 
 **✅ Works on Arduino, ESP32, Teensy, Raspberry Pi, and 50+ other platforms**
 
+## 📖 Just Getting Started?
+
+**[See our Cookbook for tutorials and walkthroughs →](cookbook/README.md)**
+
+The FastLED Cookbook provides practical guides, step-by-step examples, and copy-paste recipes to help you create stunning LED effects - from your first blink to advanced animations.
+
 ## 🚀 Why FastLED?
 
 | **Massive Scale** | **Tiny Footprint** | **Background Rendering** | **Universal** |
