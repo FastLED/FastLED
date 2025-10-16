@@ -9,12 +9,7 @@
 #include "fl/xymap.h"
 #include "fl/vector.h"
 
-// Forward declare fl::rgb8 outside the FastLED namespace
-namespace fl { struct rgb8; }
-
-FASTLED_NAMESPACE_BEGIN
-using CRGB = fl::rgb8;  // CRGB is now a typedef
-FASTLED_NAMESPACE_END
+#include "fl/rgb8.h"
 
 namespace fl {
 
@@ -62,7 +57,7 @@ class Tile2x2_u8 {
     rect<u16> bounds() const;
 
     // Draws the subpixel tile to the led array.
-    void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
+    void draw(const rgb8 &color, const XYMap &xymap, rgb8 *out) const;
 
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.

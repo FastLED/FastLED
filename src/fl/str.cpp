@@ -152,7 +152,18 @@ void string::compileTimeAssertions() {
                   "must be through a build define and not an include define.");
 }
 
-string &string::append(const CRGB &rgb) {
+string &string::append(const rgb8 &rgb) {
+    append("rgb8(");
+    append(rgb.r);
+    append(",");
+    append(rgb.g);
+    append(",");
+    append(rgb.b);
+    append(")");
+    return *this;
+}
+
+string &string::appendCRGB(const rgb8 &rgb) {
     append("CRGB(");
     append(rgb.r);
     append(",");

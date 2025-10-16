@@ -31,12 +31,9 @@ const char* getTestFileSystemRoot();
 
 } // namespace fl
 
-// Forward declare fl::rgb8 outside the FastLED namespace
-namespace fl { struct rgb8; }
-
-FASTLED_NAMESPACE_BEGIN
-using CRGB = fl::rgb8;  // CRGB is now a typedef
-FASTLED_NAMESPACE_END
+#include "fl/rgb8.h"
+#include "fl/deprecated.h"
+#include "crgb.h"
 
 namespace fl {
 
@@ -102,8 +99,15 @@ class FileHandle {
     virtual bool valid() const = 0;
 
     // convenience functions
-    fl::size readCRGB(CRGB *dst, fl::size n) {
+    // New preferred method using rgb8
+    fl::size readRGB8(rgb8 *dst, fl::size n) {
         return read((fl::u8 *)dst, n * 3) / 3;
+    }
+
+    // Deprecated: Use readRGB8 instead
+    FL_DEPRECATED("Use readRGB8(rgb8* dst, ...) instead")
+    fl::size readCRGB(rgb8 *dst, fl::size n) {
+        return readRGB8(dst, n);
     }
 };
 

@@ -35,7 +35,7 @@ void Tile2x2_u8::Rasterize(const span<const Tile2x2_u8> &tiles,
     out_raster->rasterize(tiles);
 }
 
-void Tile2x2_u8::draw(const CRGB &color, const XYMap &xymap, CRGB *out) const {
+void Tile2x2_u8::draw(const rgb8 &color, const XYMap &xymap, rgb8 *out) const {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }

@@ -19,12 +19,7 @@ only a small number of pixels are set.
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
 
-// Forward declare fl::rgb8 outside the FastLED namespace
-namespace fl { struct rgb8; }
-
-FASTLED_NAMESPACE_BEGIN
-using CRGB = fl::rgb8;  // CRGB is now a typedef
-FASTLED_NAMESPACE_END
+#include "fl/rgb8.h"
 
 #ifndef FASTLED_RASTER_SPARSE_INLINED_COUNT
 #define FASTLED_RASTER_SPARSE_INLINED_COUNT 128
@@ -150,10 +145,10 @@ class XYRasterU8Sparse {
     u16 width() const { return bounds().width(); }
     u16 height() const { return bounds().height(); }
 
-    void draw(const CRGB &color, const XYMap &xymap, CRGB *out);
-    void draw(const CRGB &color, Leds *leds);
+    void draw(const rgb8 &color, const XYMap &xymap, rgb8 *out);
+    void draw(const rgb8 &color, Leds *leds);
 
-    void drawGradient(const Gradient &gradient, const XYMap &xymap, CRGB *out);
+    void drawGradient(const Gradient &gradient, const XYMap &xymap, rgb8 *out);
     void drawGradient(const Gradient &gradient, Leds *leds);
 
     // Inlined, yet customizable drawing access. This will only send you
@@ -235,29 +230,29 @@ class XYRasterU8Sparse {
 
 namespace fl {
 
-// A raster of CRGB values. This is a sparse raster, meaning that it will
+// A raster of rgb8 values. This is a sparse raster, meaning that it will
 // only store the values that are set.
-class XYRasterSparse_CRGB {
+class XYRasterSparse_RGB8 {
   public:
-    XYRasterSparse_CRGB() = default;
-    XYRasterSparse_CRGB(u16 width, u16 height) {
+    XYRasterSparse_RGB8() = default;
+    XYRasterSparse_RGB8(u16 width, u16 height) {
         setBounds(rect<u16>(0, 0, width, height));
     }
-    XYRasterSparse_CRGB(const XYRasterSparse_CRGB &) = default;
-    XYRasterSparse_CRGB &operator=(XYRasterSparse_CRGB &&) = default;
-    XYRasterSparse_CRGB(XYRasterSparse_CRGB &&) = default;
-    XYRasterSparse_CRGB &operator=(XYRasterSparse_CRGB &) = default;
+    XYRasterSparse_RGB8(const XYRasterSparse_RGB8 &) = default;
+    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &&) = default;
+    XYRasterSparse_RGB8(XYRasterSparse_RGB8 &&) = default;
+    XYRasterSparse_RGB8 &operator=(XYRasterSparse_RGB8 &) = default;
 
-    XYRasterSparse_CRGB &reset() {
+    XYRasterSparse_RGB8 &reset() {
         mSparseGrid.clear();
         mCache.clear();
         return *this;
     }
 
-    XYRasterSparse_CRGB &clear() { return reset(); }
+    XYRasterSparse_RGB8 &clear() { return reset(); }
 
-    // Rasterizes point with a CRGB color value
-    void rasterize(const vec2<u16> &pt, const CRGB &color) {
+    // Rasterizes point with a rgb8 color value
+    void rasterize(const vec2<u16> &pt, const rgb8 &color) {
         write(pt, color);
     }
 
@@ -270,8 +265,8 @@ class XYRasterSparse_CRGB {
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<u16>, CRGB>::iterator;
-    using const_iterator = fl::HashMap<vec2<u16>, CRGB>::const_iterator;
+    using iterator = fl::HashMap<vec2<u16>, rgb8>::iterator;
+    using const_iterator = fl::HashMap<vec2<u16>, rgb8>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -280,12 +275,12 @@ class XYRasterSparse_CRGB {
     fl::size size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    pair<bool, CRGB> at(u16 x, u16 y) const {
-        const CRGB *val = mSparseGrid.find_value(vec2<u16>(x, y));
+    pair<bool, rgb8> at(u16 x, u16 y) const {
+        const rgb8 *val = mSparseGrid.find_value(vec2<u16>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
-        return {false, CRGB::Black};
+        return {false, rgb8::Black};
     }
 
     rect<u16> bounds() const {
@@ -330,7 +325,7 @@ class XYRasterSparse_CRGB {
     u16 width() const { return bounds().width(); }
     u16 height() const { return bounds().height(); }
 
-    void draw(const XYMap &xymap, CRGB *out);
+    void draw(const XYMap &xymap, rgb8 *out);
     void draw(Leds *leds);
 
     // Inlined, yet customizable drawing access. This will only send you
@@ -343,7 +338,7 @@ class XYRasterSparse_CRGB {
                 continue;
             }
             u32 index = xymap(pt.x, pt.y);
-            const CRGB &color = it.second;
+            const rgb8 &color = it.second;
             // Only draw non-black pixels (since black represents "no data")
             if (color.r != 0 || color.g != 0 || color.b != 0) {
                 visitor.draw(pt, index, color);
@@ -353,17 +348,17 @@ class XYRasterSparse_CRGB {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<u16> &pt, const CRGB &color) {
-        CRGB **cached = mCache.find_value(pt);
+    void write(const vec2<u16> &pt, const rgb8 &color) {
+        rgb8 **cached = mCache.find_value(pt);
         if (cached) {
-            CRGB *val = *cached;
-            // For CRGB, we'll replace the existing color (blend could be added later)
+            rgb8 *val = *cached;
+            // For rgb8, we'll replace the existing color (blend could be added later)
             *val = color;
             return;
         }
         if (mCache.size() <= kMaxCacheSize) {
             // cache it.
-            CRGB *v = mSparseGrid.find_value(pt);
+            rgb8 *v = mSparseGrid.find_value(pt);
             if (v == nullptr) {
                 if (mSparseGrid.needs_rehash()) {
                     // mSparseGrid is about to rehash, so we need to clear the
@@ -386,7 +381,7 @@ class XYRasterSparse_CRGB {
 
   private:
     using Key = vec2<u16>;
-    using Value = CRGB;
+    using Value = rgb8;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
@@ -394,10 +389,13 @@ class XYRasterSparse_CRGB {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<u16>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<u16>, rgb8 *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<u16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;
 };
+
+// Backwards compatibility typedef
+using XYRasterSparse_CRGB = XYRasterSparse_RGB8;
 
 } // namespace fl

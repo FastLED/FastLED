@@ -20,17 +20,12 @@
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/force_inline.h"
+#include "fl/deprecated.h"
 
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif
 
-// Forward declare fl::rgb8 outside the FastLED namespace
-namespace fl { struct rgb8; }
-
-FASTLED_NAMESPACE_BEGIN
-using CRGB = fl::rgb8;  // CRGB is now a typedef
-FASTLED_NAMESPACE_END;
 
 namespace fl { // Mandatory namespace for this class since it has name
                // collisions.
@@ -69,6 +64,11 @@ template <fl::u32 N> class BitsetInlined;
 class XYMap;
 
 struct FFTBins;
+struct rgb8;
+
+} // namespace fl
+
+namespace fl {
 
 // A copy on write string class. Fast to copy from another
 // Str object as read only pointers are shared. If the size
@@ -2209,7 +2209,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    string &append(const CRGB &c);
+    string &append(const rgb8 &c);
+
+    // Deprecated: Use append(const rgb8&) instead
+    // This version outputs "CRGB(...)" for backwards compatibility
+    FL_DEPRECATED("Use append(const rgb8&) instead - outputs 'rgb8(...)' format")
+    string &appendCRGB(const rgb8 &c);
 
     string &append(const float &_val) {
         // round to nearest hundredth
