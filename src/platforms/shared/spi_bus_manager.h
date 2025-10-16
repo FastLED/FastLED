@@ -5,11 +5,22 @@
 #include "fl/warn.h"
 #include "fl/stdint.h"
 
-// Platform-specific includes for Quad-SPI and Octal-SPI support
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
-#include "platforms/shared/spi_hw_4.h"
-#include "platforms/shared/spi_hw_8.h"
+// Platform-specific includes for multi-lane SPI support
+#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(FASTLED_TESTING)
+#include "platforms/shared/spi_hw_2.h"  // Dual-SPI (ESP32-C series)
+#include "platforms/shared/spi_hw_4.h"  // Quad-SPI (ESP32/S/P series)
+#include "platforms/shared/spi_hw_8.h"  // Octal-SPI (ESP32-P4)
 #include "platforms/shared/spi_transposer.h"
+#endif
+
+// NRF52 support for Dual-SPI and Quad-SPI
+#if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+#include "platforms/shared/spi_hw_2.h"
+#include "platforms/shared/spi_transposer.h"
+// NRF52840/833 also support Quad-SPI (4 SPIM peripherals)
+#if defined(NRF52840) || defined(NRF52833)
+#include "platforms/shared/spi_hw_4.h"
+#endif
 #endif
 
 namespace fl {
@@ -217,8 +228,17 @@ public:
             }
 
             case SPIBusType::DUAL_SPI: {
-                // DualSPIController handles interleaving
-                // TODO: Implement dual SPI transmission (future)
+                // Buffer data for this lane - will be interleaved in finalizeTransmission()
+                // Ensure lane_buffers is sized correctly
+                if (bus.lane_buffers.size() <= handle.lane_id) {
+                    bus.lane_buffers.resize(handle.lane_id + 1);
+                }
+
+                // Append data to this lane's buffer
+                fl::vector<uint8_t>& lane_buffer = bus.lane_buffers[handle.lane_id];
+                for (size_t i = 0; i < length; i++) {
+                    lane_buffer.push_back(data[i]);
+                }
                 break;
             }
 
@@ -259,8 +279,18 @@ public:
 
         // Route to appropriate backend
         switch (bus.bus_type) {
+            case SPIBusType::DUAL_SPI: {
+                #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+                if (bus.hw_controller) {
+                    // 2-lane (Dual-SPI)
+                    SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
+                    dual->waitComplete();
+                }
+                #endif
+                break;
+            }
             case SPIBusType::QUAD_SPI: {
-                #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
+                #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
                 if (bus.hw_controller) {
                     // Determine if this is 4-lane or 8-lane based on device count
                     if (bus.num_devices > 4) {
@@ -281,7 +311,7 @@ public:
         }
     }
 
-    /// Finalize transmission - flush buffered data for Quad-SPI
+    /// Finalize transmission - flush buffered data for Dual-SPI and Quad-SPI
     /// This performs the bit-interleaving and DMA transmission
     /// @param handle Device handle from registerDevice()
     void finalizeTransmission(SPIBusHandle handle) {
@@ -290,11 +320,82 @@ public:
         }
 
         SPIBusInfo& bus = mBuses[handle.bus_id];
-        if (!bus.is_initialized || bus.bus_type != SPIBusType::QUAD_SPI) {
-            return;  // Only needed for Quad-SPI
+        if (!bus.is_initialized) {
+            return;
         }
 
-        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
+        // Only needed for Dual-SPI and Quad-SPI
+        if (bus.bus_type != SPIBusType::DUAL_SPI && bus.bus_type != SPIBusType::QUAD_SPI) {
+            return;
+        }
+
+        // Handle Dual-SPI (ESP32-C series and NRF52)
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+        if (bus.bus_type == SPIBusType::DUAL_SPI) {
+            if (!bus.hw_controller) {
+                return;
+            }
+
+            // Find maximum lane size
+            size_t max_size = 0;
+            for (uint8_t i = 0; i < bus.num_devices && i < 2; i++) {
+                if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
+                    max_size = fl::fl_max(max_size, bus.lane_buffers[i].size());
+                }
+            }
+
+            if (max_size == 0) {
+                return;  // No data to transmit
+            }
+
+            // Prepare 2-lane data for transposer
+            fl::optional<SPITransposer::LaneData> lane0, lane1;
+            if (bus.num_devices > 0 && bus.devices[0].is_enabled && 0 < bus.lane_buffers.size()) {
+                lane0 = SPITransposer::LaneData{
+                    fl::span<const uint8_t>(bus.lane_buffers[0].data(), bus.lane_buffers[0].size()),
+                    fl::span<const uint8_t>()  // No padding frame yet
+                };
+            }
+            if (bus.num_devices > 1 && bus.devices[1].is_enabled && 1 < bus.lane_buffers.size()) {
+                lane1 = SPITransposer::LaneData{
+                    fl::span<const uint8_t>(bus.lane_buffers[1].data(), bus.lane_buffers[1].size()),
+                    fl::span<const uint8_t>()  // No padding frame yet
+                };
+            }
+
+            // Allocate interleaved buffer (2× max lane size)
+            bus.interleaved_buffer.resize(max_size * 2);
+
+            // Transpose lanes into interleaved format
+            const char* error = nullptr;
+            if (!SPITransposer::transpose2(lane0, lane1, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+                FL_WARN("SPI Bus Manager: Dual transpose failed - " << (error ? error : "unknown error"));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+
+            // Transmit via Dual-SPI hardware
+            SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
+            bool transmit_ok = dual->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            if (transmit_ok) {
+                dual->waitComplete();
+            } else {
+                FL_WARN("SPI Bus Manager: Dual-SPI transmit failed");
+            }
+
+            // Clear lane buffers for next frame
+            for (auto& lane_buffer : bus.lane_buffers) {
+                lane_buffer.clear();
+            }
+            return;
+        }
+        #endif
+
+        // Handle Quad-SPI (ESP32 and NRF52840/833)
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
         if (!bus.hw_controller) {
             return;
         }
@@ -509,16 +610,66 @@ private:
         // Determine which multi-SPI type to use
         if (bus.num_devices == 2 && static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::DUAL_SPI)) {
             bus.bus_type = SPIBusType::DUAL_SPI;
-            // TODO: Create DualSPIController
-            // bus.hw_controller = new DualSPIController<...>();
-            bus.error_message = "Dual-SPI not yet implemented";
-            return false;  // Not implemented yet
+
+            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+            // Get available Dual-SPI controllers and find one we can use
+            const auto& controllers = SpiHw2::getAll();
+            if (controllers.empty()) {
+                bus.error_message = "No Dual-SPI controllers available on this platform";
+                return false;
+            }
+
+            // Try each controller until we find one that works
+            SpiHw2* dual_ctrl = nullptr;
+            for (auto* ctrl : controllers) {
+                if (!ctrl->isInitialized()) {
+                    dual_ctrl = ctrl;
+                    break;
+                }
+            }
+
+            if (!dual_ctrl) {
+                bus.error_message = "All Dual-SPI controllers already in use";
+                return false;
+            }
+
+            // Configure Dual-SPI with platform-specific clock speeds
+            SpiHw2::Config config;
+            config.bus_num = static_cast<uint8_t>(dual_ctrl->getBusId());
+            #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+                config.clock_speed_hz = 8000000;  // 8 MHz (nRF52 max for SPIM0-2)
+            #else
+                config.clock_speed_hz = 20000000;  // 20 MHz default for ESP32
+            #endif
+            config.clock_pin = bus.clock_pin;
+            config.data0_pin = bus.devices[0].data_pin;
+            config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
+
+            // Initialize the controller
+            if (!dual_ctrl->begin(config)) {
+                bus.error_message = "Failed to initialize Dual-SPI controller";
+                return false;
+            }
+
+            // Store controller pointer and SPI bus number
+            bus.hw_controller = dual_ctrl;
+            bus.spi_bus_num = config.bus_num;
+
+            // Initialize lane buffers
+            bus.lane_buffers.resize(bus.num_devices);
+
+            bus.is_initialized = true;
+            return true;
+            #else
+            bus.error_message = "Dual-SPI not supported on this platform";
+            return false;
+            #endif
 
         } else if (bus.num_devices >= 3 && bus.num_devices <= 4 &&
                    static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::QUAD_SPI)) {
             bus.bus_type = SPIBusType::QUAD_SPI;
 
-            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
+            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
             // Get available Quad-SPI controllers and find one we can use
             const auto& controllers = SpiHw4::getAll();
             if (controllers.empty()) {
@@ -527,7 +678,7 @@ private:
             }
 
             // Try each controller until we find one that works
-            // (ESP32/S2/S3 have 2 buses, C series have 1)
+            // (ESP32/S2/S3 have 2 buses, C series have 1, NRF52840/833 have 1)
             SpiHw4* quad_ctrl = nullptr;
             for (auto* ctrl : controllers) {
                 if (!ctrl->isInitialized()) {
@@ -674,7 +825,16 @@ private:
             return;  // Nothing to release
         }
 
-        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+        // Release Dual-SPI controller (ESP32-C series and NRF52)
+        if (bus.bus_type == SPIBusType::DUAL_SPI && bus.hw_controller) {
+            SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
+            dual->end();  // Shutdown SPI peripheral
+            bus.hw_controller = nullptr;
+        }
+        #endif
+
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
         // Release Quad-SPI or Octal-SPI controller
         if (bus.bus_type == SPIBusType::QUAD_SPI && bus.hw_controller) {
             // Determine if this is 4-lane or 8-lane based on device count
@@ -708,6 +868,12 @@ private:
             return SPIBusType::QUAD_SPI;
         #elif defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2)
             // ESP32-C series supports Dual-SPI
+            return SPIBusType::DUAL_SPI;
+        #elif defined(NRF52840) || defined(NRF52833)
+            // nRF52840/833 has 4 SPIM peripherals (supports Quad-SPI)
+            return SPIBusType::QUAD_SPI;
+        #elif defined(NRF52832) || defined(NRF52810) || defined(NRF52)
+            // nRF52832/810 has 3 SPIM peripherals (limit to Dual-SPI)
             return SPIBusType::DUAL_SPI;
         #else
             // Other platforms: single SPI only
