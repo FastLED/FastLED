@@ -10,6 +10,7 @@
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
 #include "platforms/shared/spi_hw_4.h"
 #include "platforms/shared/spi_hw_8.h"
+#include "platforms/shared/spi_transposer.h"
 #include "platforms/shared/spi_transposer_quad.h"
 #endif
 
@@ -337,7 +338,7 @@ public:
             bus.interleaved_buffer.resize(max_size * 8);
 
             // Transpose lanes into interleaved format
-            if (!SPITransposerQuad::transpose8(lanes, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+            if (!SPITransposer::transpose8(lanes, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
                 FL_WARN("SPI Bus Manager: Octal transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
@@ -363,8 +364,8 @@ public:
             bus.interleaved_buffer.resize(max_size * 4);
 
             // Transpose lanes into interleaved format
-            if (!SPITransposerQuad::transpose(lanes[0], lanes[1], lanes[2], lanes[3],
-                                              fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+            if (!SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3],
+                                           fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
                 FL_WARN("SPI Bus Manager: Quad transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
@@ -521,7 +522,7 @@ private:
 
             #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(FASTLED_TESTING)
             // Get available Quad-SPI controllers and find one we can use
-            const auto& controllers = SPIQuad::getAll();
+            const auto& controllers = SpiHw4::getAll();
             if (controllers.empty()) {
                 bus.error_message = "No Quad-SPI controllers available on this platform";
                 return false;
@@ -529,7 +530,7 @@ private:
 
             // Try each controller until we find one that works
             // (ESP32/S2/S3 have 2 buses, C series have 1)
-            SPIQuad* quad_ctrl = nullptr;
+            SpiHw4* quad_ctrl = nullptr;
             for (auto* ctrl : controllers) {
                 if (!ctrl->isInitialized()) {
                     quad_ctrl = ctrl;
@@ -543,7 +544,7 @@ private:
             }
 
             // Configure Quad-SPI
-            SPIQuad::Config config;
+            SpiHw4::Config config;
             config.bus_num = static_cast<uint8_t>(quad_ctrl->getBusId());
             config.clock_speed_hz = 20000000;  // 20 MHz default (conservative)
             config.clock_pin = bus.clock_pin;
