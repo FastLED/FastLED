@@ -14,7 +14,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32s3_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_docker_template.yml'
   pull_request:
     branches: [master]
     paths:
@@ -27,18 +27,18 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32s3_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_docker_template.yml'
 
 jobs:
   esp32s3_qemu_rmt:
-    uses: ./.github/workflows/qemu_template.yml
+    uses: ./.github/workflows/qemu_docker_template.yml
     with:
       platform: esp32s3
       platform_display: ESP32-S3
       sketch: BlinkParallel
 
   esp32s3_qemu_lcd:
-    uses: ./.github/workflows/qemu_template.yml
+    uses: ./.github/workflows/qemu_docker_template.yml
     with:
       platform: esp32s3
       platform_display: ESP32-S3

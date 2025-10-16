@@ -1,4 +1,4 @@
-name: ESP32 QEMU Test Template v2 (Merged-Bin)
+name: ESP32 QEMU Test Template (Docker)
 
 on:
   workflow_call:
@@ -218,52 +218,97 @@ jobs:
           echo "Mapped platform '$PLATFORM' to chip '$CHIP'"
         shell: bash
 
-      - name: Run ${{ inputs.platform_display }} in QEMU
+      - name: Run ${{ inputs.platform_display }} in QEMU using Docker
         id: qemu
-        uses: tobozo/esp32-qemu-sim@v2.1.0
-        with:
-          flash-image: trusted/qemu-build/merged.bin
-          chip: "${{ steps.chip_mapping.outputs.chip }}"
-          qemu-timeout: "120"
-          timeout-interrupt-regex: "Test finished.*completed.*iterations|Starting loop iteration 2"
-          debug: true
+        working-directory: trusted
+        run: |
+          echo "=== Running QEMU via Docker ==="
+          echo "Platform: ${{ inputs.platform }}"
+          echo "Chip: ${{ steps.chip_mapping.outputs.chip }}"
+          echo "Firmware: qemu-build/merged.bin"
+          echo ""
+
+          # Run QEMU using the local Docker runner
+          uv run python -c "
+          import sys
+          from pathlib import Path
+          from ci.docker.qemu_esp32_docker import DockerQEMURunner
+
+          print('Initializing Docker QEMU runner...')
+          runner = DockerQEMURunner()
+
+          firmware_path = Path('qemu-build/merged.bin').absolute()
+          print(f'Firmware path: {firmware_path}')
+          print(f'Firmware exists: {firmware_path.exists()}')
+          print('')
+
+          print('Starting QEMU execution...')
+          exit_code = runner.run(
+              firmware_path=firmware_path,
+              timeout=120,
+              machine='${{ steps.chip_mapping.outputs.chip }}',
+              interrupt_regex=r'Test finished.*completed.*iterations|Starting loop iteration 2',
+              output_file='qemu_output.log'
+          )
+
+          print('')
+          print(f'QEMU execution completed with exit code: {exit_code}')
+          sys.exit(exit_code)
+          "
+
+          QEMU_EXIT_CODE=$?
+          echo "qemu_exit_code=$QEMU_EXIT_CODE" >> $GITHUB_OUTPUT
+
+          # Check if output file was created
+          if [ -f "qemu_output.log" ]; then
+            echo "✅ QEMU output file created ($(wc -l < qemu_output.log) lines)"
+          else
+            echo "❌ QEMU output file not found"
+            exit 1
+          fi
+
+          exit $QEMU_EXIT_CODE
+        shell: bash
 
       - name: Display QEMU output
         if: always()
+        working-directory: trusted
         run: |
           echo "=== QEMU Results ==="
-          echo "Conclusion: ${{ steps.qemu.conclusion }}"
-          echo "Outcome: ${{ steps.qemu.outcome }}"
+          echo "Exit code: ${{ steps.qemu.outputs.qemu_exit_code }}"
 
-          if [ -f logs.txt ]; then
+          if [ -f qemu_output.log ]; then
             echo "=== QEMU Output (first 100 lines) ==="
-            head -100 logs.txt
+            head -100 qemu_output.log
 
             echo "=== Output Summary ==="
-            echo "Total lines: $(wc -l < logs.txt)"
-            echo "Boot messages: $(grep -c 'rst:' logs.txt || echo 0)"
-            echo "Setup messages: $(grep -c 'setup starting' logs.txt || echo 0)"
-            echo "Loop iterations: $(grep -c 'Starting loop iteration' logs.txt || echo 0)"
+            echo "Total lines: $(wc -l < qemu_output.log)"
+            echo "Boot messages: $(grep -c 'rst:' qemu_output.log || echo 0)"
+            echo "Setup messages: $(grep -c 'setup starting' qemu_output.log || echo 0)"
+            echo "Loop iterations: $(grep -c 'Starting loop iteration' qemu_output.log || echo 0)"
+          else
+            echo "❌ No QEMU output file found"
           fi
 
       - name: Validate ${{ inputs.sketch }} output
+        working-directory: trusted
         run: |
           echo "=== Validating ${{ inputs.sketch }} output ==="
 
-          if [ ! -f logs.txt ]; then
+          if [ ! -f qemu_output.log ]; then
             echo "❌ No QEMU output found"
             exit 1
           fi
 
           # Check for crash patterns
-          if grep -q "guru meditation\|abort()" logs.txt; then
+          if grep -q "guru meditation\|abort()" qemu_output.log; then
             echo "❌ QEMU crashed!"
-            grep -A 10 "guru meditation\|abort()" logs.txt
+            grep -A 10 "guru meditation\|abort()" qemu_output.log
             exit 1
           fi
 
           # Check for expected output
-          if grep -q "${{ inputs.sketch }} setup starting" logs.txt; then
+          if grep -q "${{ inputs.sketch }} setup starting" qemu_output.log; then
             echo "✅ Setup message found"
           else
             echo "❌ Setup message not found"
@@ -271,6 +316,7 @@ jobs:
           fi
 
           echo "=== Validation complete ==="
+
       - name: Generate artifact name
         id: artifact_name
         if: always()
@@ -280,14 +326,13 @@ jobs:
           echo "sketch=$ARTIFACT_SKETCH" >> $GITHUB_OUTPUT
         shell: bash
 
-
       - name: Upload QEMU logs on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-failure-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: |
-            logs.txt
+            trusted/qemu_output.log
             trusted/qemu-build/
           include-hidden-files: true
 
@@ -296,16 +341,17 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.platform }}-qemu-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
-          path: logs.txt
+          path: trusted/qemu_output.log
 
       - name: Summary
         if: always()
+        working-directory: trusted
         run: |
           echo "=== ${{ inputs.platform_display }} QEMU Test Summary ==="
-          echo "Platform: ${{ inputs.platform }} (merged-bin)"
+          echo "Platform: ${{ inputs.platform }} (Docker-based)"
           echo "Sketch: ${{ inputs.sketch }}"
           echo "Status: ${{ job.status }}"
 
-          if [ -f logs.txt ]; then
-            echo "QEMU output lines: $(wc -l < logs.txt)"
+          if [ -f qemu_output.log ]; then
+            echo "QEMU output lines: $(wc -l < qemu_output.log)"
           fi

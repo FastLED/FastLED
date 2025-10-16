@@ -14,7 +14,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32c3_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_docker_template.yml'
   pull_request:
     branches: [master]
     paths:
@@ -27,7 +27,7 @@ on:
       - 'CMakeLists.txt'
       - 'library.json'
       - '.github/workflows/qemu_esp32c3_test.yml'
-      - '.github/workflows/qemu_template.yml'
+      - '.github/workflows/qemu_docker_template.yml'
 
 jobs:
   esp32c3_qemu_test:
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         sketch: [BlinkParallel, SpecialDrivers/ESP/ParallelSPI/Esp32C3_SPI_ISR]
-    uses: ./.github/workflows/qemu_template.yml
+    uses: ./.github/workflows/qemu_docker_template.yml
     with:
       platform: esp32c3
       platform_display: ESP32-C3
