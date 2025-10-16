@@ -21,17 +21,17 @@
 #elif defined(NRF52_SERIES) || defined(NRF52840_XXAA)
 #include "platforms/arm/nrf52/led_sysdefs_arm_nrf52.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
-// Include k20/T3 headers
-#include "platforms/arm/k20/led_sysdefs_arm_k20.h"
+// Teensy 3.0/3.1/3.2 (MK20DX Cortex-M4)
+#include "platforms/arm/teensy/teensy31_32/led_sysdefs_arm_k20.h"
 #elif defined(__MK66FX1M0__) || defined(__MK64FX512__)
-// Include k66/T3.6 headers
-#include "platforms/arm/k66/led_sysdefs_arm_k66.h"
+// Teensy 3.5/3.6 (MK64/MK66 Cortex-M4)
+#include "platforms/arm/teensy/teensy36/led_sysdefs_arm_k66.h"
 #elif defined(__MKL26Z64__)
-// Include kl26/T-LC headers
-#include "platforms/arm/kl26/led_sysdefs_arm_kl26.h"
+// Teensy LC (MKL26Z64 Cortex-M0+)
+#include "platforms/arm/teensy/teensy_lc/led_sysdefs_arm_kl26.h"
 #elif defined(__IMXRT1062__)
-// teensy4
-#include "platforms/arm/mxrt1062/led_sysdefs_arm_mxrt1062.h"
+// Teensy 4.0/4.1 (IMXRT1062 Cortex-M7)
+#include "platforms/arm/teensy/teensy4_common/led_sysdefs_arm_mxrt1062.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/led_sysdefs_arm_sam.h"

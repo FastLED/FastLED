@@ -14,11 +14,11 @@
     #include "platforms/avr/int.h"
 #elif defined(__IMXRT1062__)
     // Teensy 4.0/4.1 (IMXRT1062 Cortex-M7) - needs special handling for system headers
-    #include "platforms/arm/mxrt1062/int.h"
+    #include "platforms/arm/teensy/teensy4_common/int.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MKL26Z64__)
     // Teensy 3.x family (MK20DX/MKL26Z Cortex-M4/M0+) - needs special handling for system headers
     // - Teensy 3.0 (MK20DX128), Teensy 3.1/3.2 (MK20DX256), Teensy LC (MKL26Z64)
-    #include "platforms/arm/mk20dx/int.h"
+    #include "platforms/arm/teensy/teensy3_common/int.h"
 #elif defined(FASTLED_ARM)
     // All other ARM platforms (Due, STM32, nRF52, Apollo3, etc.)
     #include "platforms/arm/int.h"

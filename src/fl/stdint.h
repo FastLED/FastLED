@@ -99,7 +99,7 @@
 //   Problem:       fl::size was defined as unsigned long (wrong!)
 //
 // SOLUTION:
-//   Created platform-specific file: src/platforms/arm/mxrt1062/int.h
+//   Created platform-specific file: src/platforms/arm/teensy/teensy4_common/int.h
 //   Changed:  typedef unsigned long size;   // Was: wrong type
 //   To:       typedef unsigned int size;    // Now: matches Teensy 4.x system headers
 //
@@ -119,8 +119,8 @@
 //                      src/platforms/esp/int_8266.h
 //   AVR (Arduino):     src/platforms/avr/int.h
 //   ARM (general):     src/platforms/arm/int.h
-//   Teensy 4.x:        src/platforms/arm/mxrt1062/int.h
-//   Teensy 3.x:        src/platforms/arm/mk20dx/int.h
+//   Teensy 4.x:        src/platforms/arm/teensy/teensy4_common/int.h
+//   Teensy 3.x:        src/platforms/arm/teensy/teensy3_common/int.h
 //   WebAssembly:       src/platforms/wasm/int.h
 //   Desktop/Generic:   src/platforms/shared/int.h
 //

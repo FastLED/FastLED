@@ -16,17 +16,17 @@
 #elif defined(NRF52_SERIES)
 #include "platforms/arm/nrf52/fastled_arm_nrf52.h"
 #elif defined(__MK20DX128__) || defined(__MK20DX256__)
-// Include k20/T3 headers
-#include "platforms/arm/k20/fastled_arm_k20.h"
+// Teensy 3.0/3.1/3.2 (MK20DX Cortex-M4)
+#include "platforms/arm/teensy/teensy31_32/fastled_arm_k20.h"
 #elif defined(__MK66FX1M0__) || defined(__MK64FX512__)
-// Include k66/T3.6 headers
-#include "platforms/arm/k66/fastled_arm_k66.h"
+// Teensy 3.5/3.6 (MK64/MK66 Cortex-M4)
+#include "platforms/arm/teensy/teensy36/fastled_arm_k66.h"
 #elif defined(__MKL26Z64__)
-// Include kl26/T-LC headers
-#include "platforms/arm/kl26/fastled_arm_kl26.h"
+// Teensy LC (MKL26Z64 Cortex-M0+)
+#include "platforms/arm/teensy/teensy_lc/fastled_arm_kl26.h"
 #elif defined(__IMXRT1062__)
-// teensy4
-#include "platforms/arm/mxrt1062/fastled_arm_mxrt1062.h"
+// Teensy 4.0/4.1 (IMXRT1062 Cortex-M7)
+#include "platforms/arm/teensy/teensy4_common/fastled_arm_mxrt1062.h"
 #elif defined(__SAM3X8E__)
 // Include sam/due headers
 #include "platforms/arm/sam/fastled_arm_sam.h"

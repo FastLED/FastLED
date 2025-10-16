@@ -85,7 +85,7 @@
 //   Result: unsigned int != unsigned long → CONFLICT!
 //
 // SOLUTION:
-//   Created new platform-specific file: src/platforms/arm/mxrt1062/int.h
+//   Created new platform-specific file: src/platforms/arm/teensy/teensy4_common/int.h
 //   typedef unsigned int size;  // Matches Teensy 4.x system headers exactly
 //
 // RESULT:
@@ -105,8 +105,8 @@
 //                      src/platforms/esp/int_8266.h (ESP8266 specific)
 //   AVR (Arduino):     src/platforms/avr/int.h
 //   ARM (general):     src/platforms/arm/int.h
-//   Teensy 4.x:        src/platforms/arm/mxrt1062/int.h
-//   Teensy 3.x:        src/platforms/arm/mk20dx/int.h
+//   Teensy 4.x:        src/platforms/arm/teensy/teensy4_common/int.h
+//   Teensy 3.x:        src/platforms/arm/teensy/teensy3_common/int.h
 //   WebAssembly:       src/platforms/wasm/int.h
 //   Desktop/Generic:   src/platforms/shared/int.h
 //
