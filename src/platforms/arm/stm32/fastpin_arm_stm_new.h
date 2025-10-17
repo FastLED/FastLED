@@ -3,7 +3,7 @@
 #include "fl/stdint.h"
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found
@@ -157,5 +157,4 @@ _DEFPIN_ARM(PB1, 1, B);
 
 #endif
 
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

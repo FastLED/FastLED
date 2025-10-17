@@ -3,7 +3,7 @@
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /*
  * STM32 Hardware SPI Driver
@@ -250,7 +250,7 @@ public:
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI
 

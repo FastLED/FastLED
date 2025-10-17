@@ -3,7 +3,7 @@
 
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 
 #define _R(T) struct __gen_struct_ ## T
@@ -66,6 +66,4 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
 
-
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

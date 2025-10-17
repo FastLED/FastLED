@@ -1,7 +1,7 @@
 #ifndef __INC_CLOCKLESS_ARM_STM32_H
 #define __INC_CLOCKLESS_ARM_STM32_H
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
 
@@ -128,6 +128,6 @@ protected:
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif
