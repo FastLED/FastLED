@@ -43,11 +43,14 @@ inline const char *fastled_file_offset(const char *file) {
 #define FASTLED_FORCE_DBG 1
 #endif
 
+// Reusable no-op macro for disabled debug output - avoids linker symbol pollution
+#define FL_DBG_NO_OP(X) do { if (false) { fl::FakeStrStream() << X; } } while(0)
+
 // Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
 #if !defined(FASTLED_FORCE_DBG) || !SKETCH_HAS_LOTS_OF_MEMORY
 // By default, debug printing is disabled to prevent memory bloat in simple applications
 #define FASTLED_HAS_DBG 0
-#define _FASTLED_DGB(X) do { if (false) { fl::println(""); } } while(0)  // No-op that handles << operator
+#define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
 #else
 // Explicit debug mode enabled - uses fl::println()
 #define FASTLED_HAS_DBG 1
@@ -70,4 +73,11 @@ inline const char *fastled_file_offset(const char *file) {
 #ifndef FL_DBG
 #define FL_DBG FASTLED_DBG
 #define FL_DBG_IF FASTLED_DBG_IF
+#endif
+
+// SPI-specific debug tracing with conditional compilation
+#ifdef FASTLED_DBG_SPI_ENABLED
+    #define FL_DBG_SPI FL_WARN
+#else
+    #define FL_DBG_SPI(X) FL_DBG_NO_OP(X)
 #endif

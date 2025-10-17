@@ -100,7 +100,18 @@ SPIQuadESP32::~SPIQuadESP32() {
 }
 
 bool SPIQuadESP32::begin(const SpiHw4::Config& config) {
+    FL_DBG_SPI("SPIQuadESP32::begin - Initializing Quad SPI");
+    FL_DBG_SPI("Configuration Details:");
+    FL_DBG_SPI("  Bus Number: " << static_cast<int>(config.bus_num));
+    FL_DBG_SPI("  Clock Pin: " << config.clock_pin);
+    FL_DBG_SPI("  Data0 Pin: " << config.data0_pin);
+    FL_DBG_SPI("  Data1 Pin: " << config.data1_pin);
+    FL_DBG_SPI("  Data2 Pin: " << config.data2_pin);
+    FL_DBG_SPI("  Data3 Pin: " << config.data3_pin);
+    FL_DBG_SPI("  Clock Speed: " << config.clock_speed_hz);
+
     if (mInitialized) {
+        FL_DBG_SPI("SPIQuadESP32::begin - Already initialized, skipping");
         return true;  // Already initialized
     }
 
@@ -149,11 +160,16 @@ bool SPIQuadESP32::begin(const SpiHw4::Config& config) {
     }
     // else: standard SPI (1 data line)
 
+    FL_DBG_SPI("SPIQuadESP32::begin - Active Lanes: " << static_cast<int>(mActiveLanes));
+    FL_DBG_SPI("Bus Config Flags: " << std::hex << bus_config.flags << std::dec);
+
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK) {
+        FL_DBG_SPI("SPIQuadESP32::begin - Bus initialization FAILED. ESP Error: " << esp_err_to_name(ret));
         return false;
     }
+    FL_DBG_SPI("SPIQuadESP32::begin - Bus initialization successful");
 
     // Configure SPI device
     spi_device_interface_config_t dev_config = {};
@@ -163,16 +179,24 @@ bool SPIQuadESP32::begin(const SpiHw4::Config& config) {
     dev_config.queue_size = 7;  // Allow up to 7 queued transactions
     dev_config.flags = SPI_DEVICE_HALFDUPLEX;  // Transmit-only mode
 
+    FL_DBG_SPI("SPIQuadESP32::begin - Configuring device:");
+    FL_DBG_SPI("  Mode: 0");
+    FL_DBG_SPI("  Clock Speed: " << dev_config.clock_speed_hz);
+    FL_DBG_SPI("  Queue Size: " << dev_config.queue_size);
+
     // Add device to bus
     ret = spi_bus_add_device(mHost, &dev_config, &mSPIHandle);
     if (ret != ESP_OK) {
+        FL_DBG_SPI("SPIQuadESP32::begin - Device addition FAILED. ESP Error: " << esp_err_to_name(ret));
         spi_bus_free(mHost);
         return false;
     }
+    FL_DBG_SPI("SPIQuadESP32::begin - Device added successfully");
 
     mInitialized = true;
     mTransactionActive = false;
 
+    FL_DBG_SPI("SPIQuadESP32::begin - Quad SPI initialization SUCCESSFUL");
     return true;
 }
 
@@ -276,18 +300,24 @@ void SPIQuadESP32::cleanup() {
 /// ESP32 factory override - returns available SPI bus instances
 /// Strong definition overrides weak default
 fl::vector<SpiHw4*> SpiHw4::createInstances() {
+    FL_DBG_SPI("SpiHw4::createInstances - Creating SPI Quad controllers");
+    FL_DBG_SPI("SPI Peripheral Count: " << SOC_SPI_PERIPH_NUM);
+
     fl::vector<SpiHw4*> controllers;
 
     // Bus 2 is available on all ESP32 platforms
-    static SPIQuadESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
+    static SPIQuadESP32 controller2(2, "SPI2");
+    FL_DBG_SPI("Adding SPI2 Controller");
     controllers.push_back(&controller2);
 
 #if SOC_SPI_PERIPH_NUM > 2
     // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SPIQuadESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
+    static SPIQuadESP32 controller3(3, "SPI3");
+    FL_DBG_SPI("Adding SPI3 Controller");
     controllers.push_back(&controller3);
 #endif
 
+    FL_DBG_SPI("Created " << controllers.size() << " SPI Quad controllers");
     return controllers;
 }
 
