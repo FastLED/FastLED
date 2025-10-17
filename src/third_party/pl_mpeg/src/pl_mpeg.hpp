@@ -146,7 +146,7 @@ See below for detailed the API documentation.
 #define PLM_NO_STDIO
 
 #include "pl_mpeg.h"
-
+#include "fl/malloc.h"
 
 
 // Include headers outside the namespace to avoid conflicts
@@ -169,9 +169,9 @@ See below for detailed the API documentation.
 #endif
 
 #ifndef PLM_MALLOC
-	#define PLM_MALLOC(sz) malloc(sz)
-	#define PLM_FREE(p) free(p)
-	#define PLM_REALLOC(p, sz) realloc(p, sz)
+	#define PLM_MALLOC(sz) fl::malloc(sz)
+	#define PLM_FREE(p) fl::free(p)
+	#define PLM_REALLOC(p, sz) fl::realloc(p, sz)
 #endif
 
 #define PLM_UNUSED(expr) (void)(expr)

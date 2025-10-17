@@ -24,7 +24,7 @@ uv_prog = find_program('uv', required: true)
 
 # Recursively find all .cpp files in src directory
 fastled_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src").rglob("*.cpp")))',
+  'import pathlib; print("\\n".join(str(p) for p in list(pathlib.Path("src").rglob("*.cpp")) + list(pathlib.Path("fl").rglob("*.cpp"))))',
   check: true, capture: true).stdout().strip().split('\n')
 
 # Compile flags for unit tests (base flags)
