@@ -512,6 +512,79 @@ static uint8_t getLaneByte(const LaneData& lane,
 | ESP32-P4 | ⚠️ Partial | 2 | 8 (octal-SPI) | Future enhancement |
 | Testing  | ✅ Mock driver | N/A | 4 | `SpiHw4Stub` for tests |
 
+### ESP32 Multi-Lane SPI Feature Breakdown
+
+#### S-Series (Xtensa, High-Performance)
+
+| Feature | ESP32 | ESP32-S2 | ESP32-S3 |
+|---------|-------|----------|----------|
+| **Architecture** | Xtensa LX6 | Xtensa LX7 | Xtensa LX7 |
+| **SPI Buses** | 2 (HSPI, VSPI) | 2 (FSPI, HSPI) | 2 (FSPI, HSPI) |
+| **User Single-Lane SPI** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **User Dual-SPI (2-lane)** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **User Quad-SPI (4-lane)** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **RMT Peripheral** | ✅ 8 channels | ❌ No | ✅ 4 channels |
+| **I2S Parallel** | ✅ Yes | ❌ No | ✅ Yes (with LCD_CAM) |
+| **Max Lanes Per Bus** | 4 | 4 | 4 |
+| **DMA Support** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **Flash DIO/QIO** | ✅ Internal only | ✅ Internal only | ✅ Internal only |
+
+#### C-Series (RISC-V, Low-Power)
+
+| Feature | ESP32-C2 | ESP32-C3 | ESP32-C6 |
+|---------|----------|----------|----------|
+| **Architecture** | RISC-V RV32IMC | RISC-V RV32IMC | RISC-V RV32IMC |
+| **User SPI Buses** | 1 (SPI2 only) | 1 (SPI2 only) | 1 (SPI2 only) |
+| **Total SPI Peripherals** | 2 (SPI1 reserved, SPI2 user) | 2 (SPI1 reserved, SPI2 user) | 2 (SPI1 reserved, SPI2 user) |
+| **User Single-Lane SPI** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **User Dual-SPI (2-lane)** | ✅ Yes | ✅ Yes | ✅ Yes |
+| **User Quad-SPI (4-lane)** | ❌ No | ❌ No | ❌ No |
+| **RMT Peripheral** | ❌ No | ❌ No | ✅ 2 channels |
+| **I2S Parallel** | ❌ No | ❌ No | ❌ No |
+| **Max Lanes Per Bus** | 2 | 2 | 2 |
+| **DMA Support** | ✅ Yes (dual-SPI) | ✅ Yes (dual-SPI) | ✅ Yes (dual-SPI) |
+| **Flash DIO/QIO** | ✅ Internal only | ✅ Internal only | ✅ Internal only |
+
+#### Development & Future Chips
+
+| Feature | ESP32-P4 | ESP32-H2 |
+|---------|----------|----------|
+| **Architecture** | Xtensa LX7 | RISC-V RV32IMC |
+| **SPI Buses** | 2 (HSPI, VSPI) | 1 (SPI2 only) |
+| **User Single-Lane SPI** | ✅ Yes | ✅ Yes |
+| **User Dual-SPI (2-lane)** | ⚙️ Via PARLIO | ✅ Yes |
+| **User Quad-SPI (4-lane)** | ⚙️ Via PARLIO | ❌ No |
+| **User Octal-SPI (8-lane)** | ✅ Yes (PARLIO) | ❌ No |
+| **Parallel I/O (PARLIO)** | ✅ Yes (replaces LCD_CAM) | ❌ No |
+| **RMT Peripheral** | ✅ 8 channels | ❌ No |
+| **I2S Parallel** | ❌ No (PARLIO replaces it) | ❌ No |
+| **Max Lanes (SPI)** | 4 (via PARLIO) | 2 |
+| **Max Lanes (PARLIO)** | 8 | N/A |
+| **DMA Support** | ✅ Yes | ✅ Yes (dual-SPI) |
+| **Flash DIO/QIO** | ✅ Internal only | ✅ Internal only |
+| **True OSPI (flash/PSRAM)** | ✅ Yes | ❌ No |
+
+**Key Notes:**
+
+- **S-Series (S2, S3):** Xtensa architecture, 2 user SPI buses → full quad-SPI capable
+  - S2 lacks RMT, must use SPI for LED control
+  - S3 has both RMT and SPI options
+- **C-Series (C2, C3, C6):** RISC-V architecture, 1 user SPI bus (SPI2 only) → dual-SPI maximum
+  - SPI1 is reserved internally, not available to user applications
+  - C2: No RMT, Arduino framework only
+  - C3: No RMT, Arduino framework only
+  - C6: Has RMT, supports both Arduino and IDF frameworks
+- **ESP32-P4:** Next-gen hybrid architecture with **PARLIO** (Parallel I/O) peripheral
+  - PARLIO enables 8-lane emulation for user-mode octal-SPI
+  - OSPI is distinct and used internally for flash/PSRAM only
+  - Replaces legacy LCD_CAM peripheral
+- **ESP32-H2:** RISC-V variant, 1 user SPI bus (SPI2 only, dual-SPI max), no PARLIO
+
+**SPI Capability Summary:**
+- **Full Quad-SPI:** ESP32, S2, S3 (2 user buses × 4 lanes each = 8 total lanes)
+- **Dual-SPI Only:** C2, C3, C6, H2 (1 user bus × 2 lanes max = 2 total lanes)
+- **Octal-SPI:** P4 only (via PARLIO peripheral, 8 lanes)
+
 ### Future Platforms
 
 - **RP2040:** PIO-based implementation (custom state machines)
