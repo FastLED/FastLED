@@ -88,7 +88,7 @@ Particles1d::Particle::Particle() : pos(0), baseVel(0), active(false) {}
 float Particles1d::Particle::getPower(u32 now) const {
     if (!active || !lifetime) return 0.0f;
     float power = 1.0f - (float)(now - birthTime) / lifetime;
-    return constrain(power, 0.0f, 1.0f);
+    return fl::clamp(power, 0.0f, 1.0f);
 }
 
 void Particles1d::Particle::spawn(u16 numLeds) {
