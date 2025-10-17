@@ -33,7 +33,7 @@ public:
     using allocator_type = Allocator;
 
     // Red-Black Tree colors
-    enum Color { RED, BLACK };
+    enum class Color { kRed, kBlack };
 
 private:
     struct RBNode {
@@ -43,7 +43,7 @@ private:
         RBNode* right;
         RBNode* parent;
 
-        RBNode(const value_type& val, Color c = RED, RBNode* p = nullptr)
+        RBNode(const value_type& val, Color c = Color::kRed, RBNode* p = nullptr)
             : data(val), color(c), left(nullptr), right(nullptr), parent(p) {}
         
         template<typename... Args>
@@ -96,42 +96,42 @@ private:
     }
 
     void insertFixup(RBNode* z) {
-        while (z->parent != nullptr && z->parent->parent != nullptr && z->parent->color == RED) {
+        while (z->parent != nullptr && z->parent->parent != nullptr && z->parent->color == Color::kRed) {
             if (z->parent == z->parent->parent->left) {
                 RBNode* y = z->parent->parent->right;
-                if (y != nullptr && y->color == RED) {
-                    z->parent->color = BLACK;
-                    y->color = BLACK;
-                    z->parent->parent->color = RED;
+                if (y != nullptr && y->color == Color::kRed) {
+                    z->parent->color = Color::kBlack;
+                    y->color = Color::kBlack;
+                    z->parent->parent->color = Color::kRed;
                     z = z->parent->parent;
                 } else {
                     if (z == z->parent->right) {
                         z = z->parent;
                         rotateLeft(z);
                     }
-                    z->parent->color = BLACK;
-                    z->parent->parent->color = RED;
+                    z->parent->color = Color::kBlack;
+                    z->parent->parent->color = Color::kRed;
                     rotateRight(z->parent->parent);
                 }
             } else {
                 RBNode* y = z->parent->parent->left;
-                if (y != nullptr && y->color == RED) {
-                    z->parent->color = BLACK;
-                    y->color = BLACK;
-                    z->parent->parent->color = RED;
+                if (y != nullptr && y->color == Color::kRed) {
+                    z->parent->color = Color::kBlack;
+                    y->color = Color::kBlack;
+                    z->parent->parent->color = Color::kRed;
                     z = z->parent->parent;
                 } else {
                     if (z == z->parent->left) {
                         z = z->parent;
                         rotateRight(z);
                     }
-                    z->parent->color = BLACK;
-                    z->parent->parent->color = RED;
+                    z->parent->color = Color::kBlack;
+                    z->parent->parent->color = Color::kRed;
                     rotateLeft(z->parent->parent);
                 }
             }
         }
-        root_->color = BLACK;
+        root_->color = Color::kBlack;
     }
 
     void transplant(RBNode* u, RBNode* v) {
@@ -163,60 +163,60 @@ private:
 
     // Fixed to properly use xParent when x is nullptr; removes unused parameter warning and centralizes erase fixup
     void deleteFixup(RBNode* x, RBNode* xParent) {
-        while ((x != root_) && (x == nullptr || x->color == BLACK)) {
+        while ((x != root_) && (x == nullptr || x->color == Color::kBlack)) {
             if (x == (xParent ? xParent->left : nullptr)) {
                 RBNode* w = xParent ? xParent->right : nullptr;
-                if (w && w->color == RED) {
-                    w->color = BLACK;
-                    if (xParent) { xParent->color = RED; rotateLeft(xParent); }
+                if (w && w->color == Color::kRed) {
+                    w->color = Color::kBlack;
+                    if (xParent) { xParent->color = Color::kRed; rotateLeft(xParent); }
                     w = xParent ? xParent->right : nullptr;
                 }
-                bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
-                bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
+                bool wLeftBlack = (!w || !w->left || w->left->color == Color::kBlack);
+                bool wRightBlack = (!w || !w->right || w->right->color == Color::kBlack);
                 if (wLeftBlack && wRightBlack) {
-                    if (w) w->color = RED;
+                    if (w) w->color = Color::kRed;
                     x = xParent;
                     xParent = xParent ? xParent->parent : nullptr;
                 } else {
-                    if (!w || (w->right == nullptr || w->right->color == BLACK)) {
-                        if (w && w->left) w->left->color = BLACK;
-                        if (w) { w->color = RED; rotateRight(w); }
+                    if (!w || (w->right == nullptr || w->right->color == Color::kBlack)) {
+                        if (w && w->left) w->left->color = Color::kBlack;
+                        if (w) { w->color = Color::kRed; rotateRight(w); }
                         w = xParent ? xParent->right : nullptr;
                     }
-                    if (w) w->color = xParent ? xParent->color : BLACK;
-                    if (xParent) xParent->color = BLACK;
-                    if (w && w->right) w->right->color = BLACK;
+                    if (w) w->color = xParent ? xParent->color : Color::kBlack;
+                    if (xParent) xParent->color = Color::kBlack;
+                    if (w && w->right) w->right->color = Color::kBlack;
                     if (xParent) rotateLeft(xParent);
                     x = root_;
                 }
             } else {
                 RBNode* w = xParent ? xParent->left : nullptr;
-                if (w && w->color == RED) {
-                    w->color = BLACK;
-                    if (xParent) { xParent->color = RED; rotateRight(xParent); }
+                if (w && w->color == Color::kRed) {
+                    w->color = Color::kBlack;
+                    if (xParent) { xParent->color = Color::kRed; rotateRight(xParent); }
                     w = xParent ? xParent->left : nullptr;
                 }
-                bool wRightBlack = (!w || !w->right || w->right->color == BLACK);
-                bool wLeftBlack = (!w || !w->left || w->left->color == BLACK);
+                bool wRightBlack = (!w || !w->right || w->right->color == Color::kBlack);
+                bool wLeftBlack = (!w || !w->left || w->left->color == Color::kBlack);
                 if (wRightBlack && wLeftBlack) {
-                    if (w) w->color = RED;
+                    if (w) w->color = Color::kRed;
                     x = xParent;
                     xParent = xParent ? xParent->parent : nullptr;
                 } else {
-                    if (!w || (w->left == nullptr || w->left->color == BLACK)) {
-                        if (w && w->right) w->right->color = BLACK;
-                        if (w) { w->color = RED; rotateLeft(w); }
+                    if (!w || (w->left == nullptr || w->left->color == Color::kBlack)) {
+                        if (w && w->right) w->right->color = Color::kBlack;
+                        if (w) { w->color = Color::kRed; rotateLeft(w); }
                         w = xParent ? xParent->left : nullptr;
                     }
-                    if (w) w->color = xParent ? xParent->color : BLACK;
-                    if (xParent) xParent->color = BLACK;
-                    if (w && w->left) w->left->color = BLACK;
+                    if (w) w->color = xParent ? xParent->color : Color::kBlack;
+                    if (xParent) xParent->color = Color::kBlack;
+                    if (w && w->left) w->left->color = Color::kBlack;
                     if (xParent) rotateRight(xParent);
                     x = root_;
                 }
             }
         }
-        if (x) x->color = BLACK;
+        if (x) x->color = Color::kBlack;
     }
 
     RBNode* findNode(const value_type& value) const {
@@ -278,7 +278,7 @@ private:
             return fl::pair<iterator, bool>(iterator(nullptr, this), false);
         }
         
-        alloc_.construct(newNode, fl::forward<U>(value), RED, parent);
+        alloc_.construct(newNode, fl::forward<U>(value), Color::kRed, parent);
         
         if (parent == nullptr) {
             root_ = newNode;
@@ -871,7 +871,7 @@ public:
         alloc_.deallocate(nodeToDelete, 1);
         --size_;
         
-        if (originalColor == BLACK) {
+        if (originalColor == Color::kBlack) {
             deleteFixup(x, xParent);
         }
         
