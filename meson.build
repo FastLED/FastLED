@@ -59,7 +59,7 @@ fl_sources = run_command(uv_prog, 'run', 'python', '-c',
   check: false, capture: true)
 
 shared_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp")))',
+  'import pathlib; excluded = {"spi_isr_engine.cpp", "host_timer.cpp"}; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp") if p.name not in excluded))',
   check: false, capture: true)
 
 esp_sources = run_command(uv_prog, 'run', 'python', '-c',
