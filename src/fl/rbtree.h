@@ -9,6 +9,15 @@
 #include "fl/pair.h"
 #include "fl/type_traits.h"
 
+// Protect this header from short, global macros like BLACK that some
+// third-party libraries (e.g. Adafruit_SSD1306) may define for backwards
+// compatibility. Save and undef them here so the enum below parses correctly.
+#if defined(BLACK)
+#  pragma push_macro("BLACK")
+#  undef BLACK
+#  define FASTLED_RBTREE_SAVED_BLACK
+#endif
+
 namespace fl {
 
 // Generic Red-Black Tree implementation
@@ -1534,3 +1543,9 @@ public:
 };
 
 } // namespace fl
+
+// Redefine the global macros we potentially removed at the beginning
+#if defined(FASTLED_RBTREE_SAVED_BLACK)
+#  pragma pop_macro("BLACK")
+#  undef FASTLED_RBTREE_SAVED_BLACK
+#endif
