@@ -457,52 +457,52 @@ template <> struct is_signed<long double> {
 // Type size ranking for promotion rules
 //-------------------------------------------------------------------------------
 template <typename T> struct type_rank {
-    enum : int { value = 0 };
+    static constexpr int value = 0;
 };
 template <> struct type_rank<bool> {
-    enum : int { value = 1 };
+    static constexpr int value = 1;
 };
 template <> struct type_rank<signed char> {
-    enum : int { value = 2 };
+    static constexpr int value = 2;
 };
 template <> struct type_rank<unsigned char> {
-    enum : int { value = 2 };
+    static constexpr int value = 2;
 };
 template <> struct type_rank<char> {
-    enum : int { value = 2 };
+    static constexpr int value = 2;
 };
 template <> struct type_rank<short> {
-    enum : int { value = 3 };
+    static constexpr int value = 3;
 };
 template <> struct type_rank<unsigned short> {
-    enum : int { value = 3 };
+    static constexpr int value = 3;
 };
 template <> struct type_rank<int> {
-    enum : int { value = 4 };
+    static constexpr int value = 4;
 };
 template <> struct type_rank<unsigned int> {
-    enum : int { value = 4 };
+    static constexpr int value = 4;
 };
 template <> struct type_rank<long> {
-    enum : int { value = 5 };
+    static constexpr int value = 5;
 };
 template <> struct type_rank<unsigned long> {
-    enum : int { value = 5 };
+    static constexpr int value = 5;
 };
 template <> struct type_rank<long long> {
-    enum : int { value = 6 };
+    static constexpr int value = 6;
 };
 template <> struct type_rank<unsigned long long> {
-    enum : int { value = 6 };
+    static constexpr int value = 6;
 };
 template <> struct type_rank<float> {
-    enum : int { value = 10 };
+    static constexpr int value = 10;
 };
 template <> struct type_rank<double> {
-    enum : int { value = 11 };
+    static constexpr int value = 11;
 };
 template <> struct type_rank<long double> {
-    enum : int { value = 12 };
+    static constexpr int value = 12;
 };
 // Note: sized integer types (i8, i16, i32, int64_t) are typedefs
 // for the basic types above, so they automatically inherit these specializations
