@@ -56,6 +56,7 @@ test_names = [
   'test_codec',
   'test_corkscrew',
   'test_dbg',
+  'test_delay_ns',
   'test_deque',
   'test_downscale',
   'test_dual_spi',

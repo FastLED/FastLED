@@ -1,0 +1,21 @@
+#pragma once
+
+#ifndef __INC_FASTLED_PLATFORMS_DELAY_GENERIC_H
+#define __INC_FASTLED_PLATFORMS_DELAY_GENERIC_H
+
+#include "fl/types.h"
+#include "fl/force_inline.h"
+
+/// @file platforms/delay_generic.h
+/// Generic fallback nanosecond-precision delay utilities for unsupported platforms
+
+/// Generic fallback: use tight NOP loop
+FASTLED_FORCE_INLINE void delay_cycles_generic(fl::u32 cycles) {
+  // Simple loop - not ideal but works on any platform
+  while (cycles > 0) {
+    __asm__ __volatile__("nop\n");
+    cycles--;
+  }
+}
+
+#endif // __INC_FASTLED_PLATFORMS_DELAY_GENERIC_H
