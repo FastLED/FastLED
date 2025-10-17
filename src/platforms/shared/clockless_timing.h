@@ -13,6 +13,15 @@
 #include "fl/stdint.h"
 #include "fl/math_macros.h"
 
+// C++11 constexpr functions cannot have local variables or multiple return statements.
+// These restrictions were relaxed in C++14. Since we target C++11 for AVR compatibility,
+// we disable constexpr for these complex functions.
+#if __cplusplus >= 201402L
+#define FL_CONSTEXPR14 constexpr
+#else
+#define FL_CONSTEXPR14 inline
+#endif
+
 namespace fl {
 
 // ============================================================================
@@ -126,7 +135,7 @@ public:
     /// @param max_pclk_hz Maximum PCLK frequency (Hz)
     /// @param round_to_mhz If true, round result to nearest MHz
     /// @return ClocklessTimingResult with calculated values and errors
-    static constexpr ClocklessTimingResult calculate_optimal_pclk(
+    static FL_CONSTEXPR14 ClocklessTimingResult calculate_optimal_pclk(
         uint32_t T1_ns,
         uint32_t T2_ns,
         uint32_t T3_ns,
@@ -229,7 +238,7 @@ public:
     /// @param latch_us Latch gap duration in microseconds
     /// @param slot_ns Duration of each slot in nanoseconds
     /// @return Buffer size in bytes
-    static constexpr size_t calculate_buffer_size(
+    static FL_CONSTEXPR14 size_t calculate_buffer_size(
         uint32_t num_leds,
         uint32_t bits_per_led,
         uint32_t words_per_bit,
@@ -254,7 +263,7 @@ public:
     /// @param slot_ns Duration of each slot in nanoseconds
     /// @param latch_us Latch gap duration in microseconds
     /// @return Frame time in microseconds
-    static constexpr uint32_t calculate_frame_time_us(
+    static FL_CONSTEXPR14 uint32_t calculate_frame_time_us(
         uint32_t num_leds,
         uint32_t bits_per_led,
         uint32_t words_per_bit,
@@ -273,7 +282,7 @@ public:
     /// @param result ClocklessTimingResult to validate
     /// @param max_error_fraction Maximum acceptable error (e.g., 0.05 for 5%)
     /// @return True if all timing errors are within tolerance
-    static constexpr bool is_timing_acceptable(
+    static FL_CONSTEXPR14 bool is_timing_acceptable(
         const ClocklessTimingResult& result,
         float max_error_fraction = 0.30f  // 30% default (WS28xx are tolerant)
     ) {
@@ -290,7 +299,7 @@ private:
     /// @param actual Actual measured/calculated value
     /// @param target Target desired value
     /// @return Relative error as fraction (e.g., 0.05 = 5% error)
-    static constexpr float calculate_error(uint32_t actual, uint32_t target) {
+    static FL_CONSTEXPR14 float calculate_error(uint32_t actual, uint32_t target) {
         if (target == 0) return 0.0f;
 
         int32_t diff = (int32_t)actual - (int32_t)target;

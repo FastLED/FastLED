@@ -178,8 +178,8 @@ TEST_CASE("SPITransposerDual: Multi-byte lanes") {
 
 TEST_CASE("SPITransposerDual: Verify bit-level interleaving") {
     // Detailed verification of bit interleaving logic
-    vector<uint8_t> lane0 = {0b11001010};  // 0xCA
-    vector<uint8_t> lane1 = {0b01010011};  // 0x53
+    vector<uint8_t> lane0 = {0xCA};  // 11001010
+    vector<uint8_t> lane1 = {0x53};  // 01010011
 
     vector<uint8_t> padding = {0x00};
     auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});

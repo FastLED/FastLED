@@ -163,7 +163,7 @@ TEST_CASE("numeric_limits constexpr compatibility") {
 
         // Verify values (these checks happen at compile time)
         // int can be 16-bit (AVR) or 32-bit (most platforms)
-        if constexpr (sizeof(int) == 4) {
+        if (sizeof(int) == 4) {
             CHECK(int_max == 2147483647);
             CHECK(int_min == -2147483647 - 1);
         } else {
@@ -191,7 +191,7 @@ TEST_CASE("numeric_limits digits and precision") {
         CHECK(fl::numeric_limits<u64>::digits == 64); // 64 value bits
 
         // int/unsigned int can vary by platform (16-bit on AVR, 32-bit elsewhere)
-        if constexpr (sizeof(int) == 4) {
+        if (sizeof(int) == 4) {
             CHECK(fl::numeric_limits<int>::digits == 31);
             CHECK(fl::numeric_limits<unsigned int>::digits == 32);
         } else {
