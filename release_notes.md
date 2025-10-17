@@ -33,11 +33,18 @@ FastLED 3.10.4
     * Enable by creating `fl::ParlioLedDriver` instance (see example)
     * Example: [examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/](examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/)
     * ESP32-P4 only - uses dedicated parallel I/O peripheral
-  * **ESP32-S2/S3 LCD Driver (Beta)**: Production-ready LCD_CAM peripheral driver for parallel LED strips
+  * **ESP32-S3/P4 LCD I80 Driver (Beta)**: Production-ready LCD_CAM peripheral driver for parallel LED strips
+    * Uses LCD_CAM peripheral in I80 interface mode (ESP32-S3 and ESP32-P4 only)
     * Alternative to I2S driver with Serial.print() debugging support
     * Up to 16 parallel WS28xx strips with automatic chipset timing optimization
     * Enable with `#define FASTLED_ESP32_LCD_DRIVER` before including FastLED.h
-    * Same memory efficiency as I2S: 144 KB per 1000 LEDs
+    * Memory efficiency: 144 KB per 1000 LEDs (3-word encoding, 6 bytes per bit)
+    * PCLK frequency range: 1-80 MHz with automatic optimization
+    * Platform support validated:
+      * ✅ **ESP32-S3**: Fully supported (LCD_CAM peripheral with I80 mode)
+      * ✅ **ESP32-P4**: Fully supported (LCD_CAM peripheral with I80 mode)
+      * ❌ **ESP32-S2**: Explicitly blocked (LCD_CAM unavailable, USB-JTAG pin conflicts)
+      * ❌ **ESP32-C2/C3/C5/C6**: LCD_CAM peripheral not available on RISC-V variants
     * Example: [examples/SpecialDrivers/ESP/LCD_I80/](examples/SpecialDrivers/ESP/LCD_I80/)
   * **NEW: Fx2dTo1d - Sample 2D Effects into 1D LED Strips**: Reusable component for sampling any Fx2d effect into a 1D strip
     * Generic adapter class that wraps any Fx2d effect and samples it using a ScreenMap
@@ -50,20 +57,40 @@ FastLED 3.10.4
     * Example use case: Sample a circular ring from Animartrix rectangular grid (see examples/AnimartrixRing/)
     * Works naturally with FxEngine and all existing Fx infrastructure
     * New files: [src/fx/fx2d_to_1d.h](src/fx/fx2d_to_1d.h), [src/fx/fx2d_to_1d.cpp](src/fx/fx2d_to_1d.cpp)
-  * **NEW: ESP32-S2/S3 LCD Driver**: Memory-efficient parallel LED driver using LCD_CAM peripheral
-    * High-performance alternative to I2S driver for ESP32-S2 and ESP32-S3
-    * Up to 16 parallel WS28xx LED strips with automatic chipset timing optimization
-    * Enable with `#define FASTLED_ESP32_LCD_DRIVER` before including FastLED.h
-    * Key advantages over I2S driver:
+  * **NEW: ESP32 LCD Drivers**: Two distinct parallel LED drivers using LCD peripherals
+    * **LCD I80 Driver** (ESP32-S3/P4): Uses LCD_CAM peripheral in I80 interface mode
+      * Enable with `#define FASTLED_ESP32_LCD_DRIVER` before including FastLED.h
+      * Up to 16 parallel WS28xx LED strips with automatic chipset timing optimization
+      * Memory: 144 KB per 1000 LEDs (3-word encoding: 6 bytes per bit)
+      * PCLK frequency: 1-80 MHz with automatic per-chipset optimization
+      * Platform support:
+        * ✅ ESP32-S3: Primary platform (LCD_CAM peripheral)
+        * ✅ ESP32-P4: Full support (LCD_CAM + optional RGB LCD controller)
+        * ❌ ESP32-S2: Blocked (USB-JTAG pin conflicts, LCD_CAM unavailable)
+        * ❌ ESP32-C2/C3/C5/C6: LCD_CAM not available on RISC-V chips
+      * Example: [examples/SpecialDrivers/ESP/LCD_I80/](examples/SpecialDrivers/ESP/LCD_I80/)
+    * **LCD RGB Driver** (ESP32-P4 only): Uses dedicated RGB LCD controller peripheral
+      * Enable with `#define FASTLED_ESP32_LCD_RGB_DRIVER` before including FastLED.h
+      * Up to 16 parallel WS28xx LED strips
+      * Memory: 192 KB per 1000 LEDs (4-pixel encoding: 8 bytes per bit)
+      * PCLK frequency: 1-40 MHz with automatic optimization
+      * Uses HSYNC/VSYNC/DE/DISP signals for frame synchronization
+      * Platform support:
+        * ✅ ESP32-P4: Exclusive (dedicated RGB LCD controller hardware)
+        * ❌ All other ESP32 variants: RGB LCD controller not available
+      * Example: [examples/SpecialDrivers/ESP/LCD_RGB/](examples/SpecialDrivers/ESP/LCD_RGB/)
+    * **Key advantages over I2S driver:**
       * Serial.print() debugging works (doesn't interfere with LCD peripheral)
-      * Automatic PCLK frequency optimization per chipset (WS2812, WS2811, WS2816, SK6812, etc.)
+      * Automatic PCLK frequency optimization per chipset (WS2812, WS2811, WS2816, SK6812)
       * Template-based chipset support with compile-time timing validation
-      * Same memory efficiency as I2S: 144 KB per 1000 LEDs (3-word-per-bit encoding)
-    * Uses RectangularDrawBuffer pattern matching I2S/ObjectFLED drivers
-    * Runtime validation prevents mixing different chipsets (e.g., WS2812 + WS2816)
-    * Compile-time and runtime GPIO19/20 protection for USB-JTAG safety
-    * Example: [examples/Esp32S3I80/](examples/Esp32S3I80/)
-    * **Recommended for new ESP32-S2/S3 projects** over I2S driver
+      * Double-buffered DMA transfers for smooth operation
+    * **Architecture features:**
+      * Uses modular LcdDriverBase with type-safe templates
+      * Runtime validation prevents mixing different chipsets (e.g., WS2812 + WS2816)
+      * Compile-time and runtime GPIO19/20 protection for USB-JTAG safety (S3)
+      * Automatic pin validation with platform-specific reserved pin checking
+    * **Recommended for new ESP32-S3 projects** over I2S driver
+    * **ESP32-P4 can use both drivers simultaneously** (32 parallel strips total)
   * **ESP32-S2/S3 USB-JTAG Pin Protection**: Added safeguards to prevent using GPIO19/GPIO20 for LED output
     * GPIO19 and GPIO20 are reserved for USB-JTAG interface on ESP32-S2/S3
     * Using these pins for LED output breaks USB flashing capability requiring UART adapter recovery
