@@ -801,6 +801,41 @@ MGM240S = Board(
     framework="arduino",
 )
 
+# SAMD21 boards (Cortex-M0+ @ 48 MHz)
+ADAFRUIT_FEATHER_M0 = Board(
+    board_name="adafruit_feather_m0",
+    platform="atmelsam",
+    framework="arduino",
+)
+
+ARDUINO_ZERO = Board(
+    board_name="zero",
+    real_board_name="zeroUSB",
+    platform="atmelsam",
+    framework="arduino",
+)
+
+# SAMD51 boards (Cortex-M4F @ 120 MHz)
+ADAFRUIT_FEATHER_M4 = Board(
+    board_name="adafruit_feather_m4",
+    platform="atmelsam",
+    framework="arduino",
+    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
+    defines=[
+        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
+    ],
+)
+
+ADAFRUIT_GRAND_CENTRAL_M4 = Board(
+    board_name="adafruit_grand_central_m4",
+    platform="atmelsam",
+    framework="arduino",
+    lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
+    defines=[
+        "FASTLED_USES_ARDUINO_AUDIO_INPUT=0",  # Disable Arduino audio (I2S not available)
+    ],
+)
+
 
 def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names

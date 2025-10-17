@@ -164,5 +164,200 @@ public:
 
 #endif
 
+// SAMD21/SAMD51 SERCOM-based SPI implementation
+#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+
+#include <Arduino.h>  // ok include
+#include <wiring_private.h>
+
+template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
+class SAMDHardwareSPIOutput {
+private:
+	Sercom* m_SPI;
+	Selectable *m_pSelect;
+	uint8_t m_sercom_num;
+	bool m_initialized;
+
+	static inline void waitForEmpty(Sercom* spi) {
+		while (!spi->SPI.INTFLAG.bit.DRE);
+	}
+
+	static inline void waitForComplete(Sercom* spi) {
+		while (!spi->SPI.INTFLAG.bit.TXC);
+	}
+
+public:
+	SAMDHardwareSPIOutput() : m_SPI(nullptr), m_pSelect(nullptr), m_sercom_num(0), m_initialized(false) {}
+	SAMDHardwareSPIOutput(Selectable *pSelect) : m_SPI(nullptr), m_pSelect(pSelect), m_sercom_num(0), m_initialized(false) {}
+
+	// set the object representing the selectable
+	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
+
+	// Helper to get SERCOM instance from Arduino's SPI object
+	// On SAMD, the default SPI object uses a specific SERCOM
+	// We'll use Arduino's built-in SPI functionality if available
+	void init() {
+		if (m_initialized) {
+			return;
+		}
+
+		// Use Arduino's built-in SPI library for SAMD
+		// This leverages the proper SERCOM already configured by the Arduino core
+		::SPI.begin();
+
+		// Get the SERCOM instance used by Arduino's SPI
+		// Note: Different boards use different SERCOM units:
+		// - Arduino Zero: SERCOM4
+		// - Feather M0: SERCOM4
+		// - Feather M4: SERCOM1
+		// We rely on Arduino core's pin definitions
+
+		#if defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+		    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+		// SAMD51 - Arduino core typically uses SERCOM1 or specific board SERCOM
+		// Use the SPI peripheral that Arduino configured
+		m_SPI = &(::SPI);
+		#elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || \
+		      defined(__SAMD21E17A__) || defined(__SAMD21E18A__)
+		// SAMD21 - Arduino core typically uses SERCOM4
+		m_SPI = &(::SPI);
+		#endif
+
+		// Configure SPI settings
+		// Clock divider maps to SPI frequency
+		// Default Arduino SPI uses 4MHz, we can adjust based on _SPI_CLOCK_DIVIDER
+		uint32_t clock_hz = F_CPU / _SPI_CLOCK_DIVIDER;
+		if (clock_hz > 24000000) clock_hz = 24000000;  // Max 24MHz for safety
+
+		::SPI.beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
+		::SPI.endTransaction();
+
+		m_initialized = true;
+	}
+
+	// latch the CS select
+	void inline select() __attribute__((always_inline)) {
+		if(m_pSelect != NULL) {
+			m_pSelect->select();
+		}
+		if (m_initialized) {
+			uint32_t clock_hz = F_CPU / _SPI_CLOCK_DIVIDER;
+			if (clock_hz > 24000000) clock_hz = 24000000;
+			::SPI.beginTransaction(SPISettings(clock_hz, MSBFIRST, SPI_MODE0));
+		}
+	}
+
+	// release the CS select
+	void inline release() __attribute__((always_inline)) {
+		if (m_initialized) {
+			::SPI.endTransaction();
+		}
+		if(m_pSelect != NULL) {
+			m_pSelect->release();
+		}
+	}
+
+	// wait until all queued up data has been written
+	void waitFully() {
+		// Arduino SPI is blocking, so no need to wait
+	}
+
+	// write a byte out via SPI (returns immediately on writing register)
+	static void writeByte(uint8_t b) {
+		::SPI.transfer(b);
+	}
+
+	// write a word out via SPI (returns immediately on writing register)
+	static void writeWord(uint16_t w) {
+		::SPI.transfer16(w);
+	}
+
+	// A raw set of writing byte values, assumes setup/init/waiting done elsewhere
+	static void writeBytesValueRaw(uint8_t value, int len) {
+		while(len--) { writeByte(value); }
+	}
+
+	// A full cycle of writing a value for len bytes, including select, release, and waiting
+	void writeBytesValue(uint8_t value, int len) {
+		select();
+		writeBytesValueRaw(value, len);
+		release();
+	}
+
+	template <class D> void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+		uint8_t *end = data + len;
+		select();
+		while(data != end) {
+			writeByte(D::adjust(*data++));
+		}
+		D::postBlock(len);
+		waitFully();
+		release();
+	}
+
+	void writeBytes(FASTLED_REGISTER uint8_t *data, int len) {
+		writeBytes<DATA_NOP>(data, len);
+	}
+
+	// write a single bit out, which bit from the passed in byte is determined by template parameter
+	template <uint8_t BIT> inline void writeBit(uint8_t b) {
+		// For bit-banging, we need to temporarily disable SPI and use GPIO
+		::SPI.endTransaction();
+
+		pinMode(_DATA_PIN, OUTPUT);
+		pinMode(_CLOCK_PIN, OUTPUT);
+
+		if(b & (1 << BIT)) {
+			digitalWrite(_DATA_PIN, HIGH);
+		} else {
+			digitalWrite(_DATA_PIN, LOW);
+		}
+
+		digitalWrite(_CLOCK_PIN, HIGH);
+		digitalWrite(_CLOCK_PIN, LOW);
+
+		// Re-initialize pins for SPI
+		::SPI.begin();
+	}
+
+	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+		select();
+		int len = pixels.mLen;
+
+		if(FLAGS & FLAG_START_BIT) {
+			// For chipsets that need a start bit (e.g., APA102)
+			while(pixels.has(1)) {
+				// Write 9 bits: 1 start bit + 8 data bits
+				// Since we can't do 9-bit SPI easily, we'll use two bytes
+				uint16_t word = (1<<8) | D::adjust(pixels.loadAndScale0());
+				writeWord(word);
+				writeByte(D::adjust(pixels.loadAndScale1()));
+				writeByte(D::adjust(pixels.loadAndScale2()));
+				pixels.advanceData();
+				pixels.stepDithering();
+			}
+		} else {
+			while(pixels.has(1)) {
+				writeByte(D::adjust(pixels.loadAndScale0()));
+				writeByte(D::adjust(pixels.loadAndScale1()));
+				writeByte(D::adjust(pixels.loadAndScale2()));
+				pixels.advanceData();
+				pixels.stepDithering();
+			}
+		}
+		D::postBlock(len);
+		release();
+	}
+
+	/// Finalize transmission (no-op for SAMD SPI using Arduino core)
+	/// This method exists for compatibility with other SPI implementations
+	static void finalizeTransmission() { }
+};
+
+#endif  // SAMD21/SAMD51
+
 FASTLED_NAMESPACE_END
 #endif

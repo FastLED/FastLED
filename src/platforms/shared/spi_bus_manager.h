@@ -23,6 +23,14 @@
 #endif
 #endif
 
+// SAMD platform includes for Dual/Quad-SPI support
+#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/shared/spi_hw_2.h"
+#include "platforms/shared/spi_hw_4.h"
+#endif
+
 namespace fl {
 
 /// SPI bus configuration types
@@ -280,7 +288,10 @@ public:
         // Route to appropriate backend
         switch (bus.bus_type) {
             case SPIBusType::DUAL_SPI: {
-                #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+                #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
+                    defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+                    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+                    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
                 if (bus.hw_controller) {
                     // 2-lane (Dual-SPI)
                     SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
@@ -321,20 +332,25 @@ public:
 
         SPIBusInfo& bus = mBuses[handle.bus_id];
         if (!bus.is_initialized) {
-            return;
+            return;  // Bus not initialized
         }
 
-        // Only needed for Dual-SPI and Quad-SPI
+        // Only needed for multi-SPI modes (Dual-SPI, Quad-SPI, Octal-SPI)
         if (bus.bus_type != SPIBusType::DUAL_SPI && bus.bus_type != SPIBusType::QUAD_SPI) {
             return;
         }
 
-        // Handle Dual-SPI (ESP32-C series and NRF52)
-        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+        // Handle Dual-SPI (ESP32-C series, NRF52, and SAMD)
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
+            defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+            defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+            defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
         if (bus.bus_type == SPIBusType::DUAL_SPI) {
             if (!bus.hw_controller) {
                 return;
             }
+
+            SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
 
             // Find maximum lane size
             size_t max_size = 0;
@@ -348,7 +364,22 @@ public:
                 return;  // No data to transmit
             }
 
-            // Prepare 2-lane data for transposer
+            #if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+                defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+                defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+            // For SAMD Dual-SPI, we currently use single-lane transmission
+            // TODO: Implement true dual-lane with transposer when hardware approach is finalized
+            // For now, transmit lane 0 data directly
+            if (bus.lane_buffers.size() > 0 && !bus.lane_buffers[0].empty()) {
+                bool transmit_ok = dual->transmitAsync(fl::span<const uint8_t>(bus.lane_buffers[0]));
+                if (transmit_ok) {
+                    dual->waitComplete();
+                } else {
+                    FL_WARN("SPI Bus Manager: SAMD Dual-SPI transmit failed");
+                }
+            }
+            #else
+            // Prepare 2-lane data for transposer (ESP32 and NRF52)
             fl::optional<SPITransposer::LaneData> lane0, lane1;
             if (bus.num_devices > 0 && bus.devices[0].is_enabled && 0 < bus.lane_buffers.size()) {
                 lane0 = SPITransposer::LaneData{
@@ -378,13 +409,13 @@ public:
             }
 
             // Transmit via Dual-SPI hardware
-            SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
             bool transmit_ok = dual->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
             if (transmit_ok) {
                 dual->waitComplete();
             } else {
                 FL_WARN("SPI Bus Manager: Dual-SPI transmit failed");
             }
+            #endif
 
             // Clear lane buffers for next frame
             for (auto& lane_buffer : bus.lane_buffers) {
@@ -394,7 +425,7 @@ public:
         }
         #endif
 
-        // Handle Quad-SPI (ESP32 and NRF52840/833)
+        // Handle Quad-SPI (ESP32 and NRF52840/833) and Octal-SPI
         #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
         if (!bus.hw_controller) {
             return;
@@ -611,7 +642,10 @@ private:
         if (bus.num_devices == 2 && static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::DUAL_SPI)) {
             bus.bus_type = SPIBusType::DUAL_SPI;
 
-            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
+            #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
+                defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+                defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+                defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
             // Get available Dual-SPI controllers and find one we can use
             const auto& controllers = SpiHw2::getAll();
             if (controllers.empty()) {
@@ -638,6 +672,11 @@ private:
             config.bus_num = static_cast<uint8_t>(dual_ctrl->getBusId());
             #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
                 config.clock_speed_hz = 8000000;  // 8 MHz (nRF52 max for SPIM0-2)
+            #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+                  defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+                  defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+                config.clock_speed_hz = 10000000;  // 10 MHz (conservative for SAMD)
+                config.max_transfer_sz = 16384;    // 16KB default (SAMD has limited RAM)
             #else
                 config.clock_speed_hz = 20000000;  // 20 MHz default for ESP32
             #endif
@@ -825,17 +864,20 @@ private:
             return;  // Nothing to release
         }
 
-        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
-        // Release Dual-SPI controller (ESP32-C series and NRF52)
+        // Release Dual-SPI controller (ESP32, NRF52, and SAMD)
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C2) || defined(ESP32C3) || defined(ESP32C6) || defined(ESP32H2) || defined(ESP32P4) || defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833) || \
+            defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+            defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+            defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
         if (bus.bus_type == SPIBusType::DUAL_SPI && bus.hw_controller) {
             SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
-            dual->end();  // Shutdown SPI peripheral
+            dual->end();  // Shutdown SPI/SERCOM peripheral
             bus.hw_controller = nullptr;
         }
         #endif
 
+        // Release Quad-SPI or Octal-SPI controller (ESP32 and NRF52840/833)
         #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || defined(NRF52840) || defined(NRF52833) || defined(FASTLED_TESTING)
-        // Release Quad-SPI or Octal-SPI controller
         if (bus.bus_type == SPIBusType::QUAD_SPI && bus.hw_controller) {
             // Determine if this is 4-lane or 8-lane based on device count
             if (bus.num_devices > 4) {
@@ -874,6 +916,15 @@ private:
             return SPIBusType::QUAD_SPI;
         #elif defined(NRF52832) || defined(NRF52810) || defined(NRF52)
             // nRF52832/810 has 3 SPIM peripherals (limit to Dual-SPI)
+            return SPIBusType::DUAL_SPI;
+        #elif defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
+              defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+            // SAMD51 supports Dual-SPI (via SERCOM) and Quad-SPI (via QSPI peripheral)
+            // Currently Dual-SPI is implemented, Quad-SPI pending
+            return SPIBusType::DUAL_SPI;
+        #elif defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+              defined(__SAMD21E18A__)
+            // SAMD21 supports Dual-SPI (via SERCOM)
             return SPIBusType::DUAL_SPI;
         #else
             // Other platforms: single SPI only

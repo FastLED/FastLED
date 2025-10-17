@@ -15,7 +15,9 @@ namespace fl {
 // Simple compile-time flag for example compilation
 // This only indicates that the SPIQuad API is available, not actual hardware support
 // Use SPIQuad::getAll() at runtime to check for actual hardware controllers
-#if defined(FASTLED_TESTING) || defined(ESP32)
+#if defined(FASTLED_TESTING) || defined(ESP32) || \
+    defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
+    defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
     #define FASTLED_HAS_QUAD_SPI_API 1
 #else
     #define FASTLED_HAS_QUAD_SPI_API 0
