@@ -10,6 +10,8 @@
   License: MIT (FastLED)
 */
 
+#include "spi_platform.h"  // Defines FASTLED_SPI_HOST_SIMULATION when STUB_PLATFORM is set
+
 #ifdef FASTLED_SPI_HOST_SIMULATION
 
 #include "spi_isr_engine.h"
