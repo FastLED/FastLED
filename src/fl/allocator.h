@@ -64,22 +64,44 @@ template <typename T> class allocator {
     using const_reference = const T&;
     using size_type = fl::size;
     using difference_type = fl::ptrdiff_t;
-    
+
     // Rebind allocator to type U
     template <typename U>
     struct rebind {
         using other = allocator<U>;
     };
-    
+
     // Default constructor
     allocator() noexcept {}
-    
+
     // Copy constructor
     template <typename U>
     allocator(const allocator<U>&) noexcept {}
-    
+
     // Destructor
     ~allocator() noexcept {}
+
+    // TODO(performance): Consider using realloc() for more efficient memory resizing
+    // Potential benefits:
+    // - Reduced memory copying
+    // - Potential performance improvements for growing/shrinking allocations
+    // - Possible memory fragmentation reduction
+    //
+    // Challenges to address:
+    // - Ensuring zero-initialization for new memory regions
+    // - Handling allocation failure
+    // - Maintaining C++ object lifetime semantics
+    //
+    // Experimental implementation might look like:
+    // ```
+    // T* ptr = static_cast<T*>(realloc(existing_ptr, new_size));
+    // if (ptr) {
+    //     // Zero-initialize any newly allocated memory
+    //     if (new_size > old_size) {
+    //         fl::memfill(ptr + old_size, 0, new_size - old_size);
+    //     }
+    // }
+    // ```
 
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
