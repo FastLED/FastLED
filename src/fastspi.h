@@ -11,7 +11,7 @@
 #include "controller.h"
 #include "lib8tion.h"
 
-#include "fastspi_bitbang.h"
+#include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
 
 
@@ -50,12 +50,12 @@ class SPIOutput : public fl::StubSPIOutput {};
 #if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32)
 /// Hardware SPI output
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 /// Software SPI output
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SoftwareSPIOutput : public AVRSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SoftwareSPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 

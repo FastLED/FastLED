@@ -1,10 +1,15 @@
 #pragma once
 
-/// @file fastspi_bitbang.h
-/// Software SPI (aka bit-banging) support
+/// @file generic_software_spi.h
+/// Generic cross-platform software SPI (bit-banging) implementation
+///
+/// @note Historical note: This class was previously named AVRSoftwareSPIOutput and lived in
+///       src/fastspi_bitbang.h. It was renamed to GenericSoftwareSPIOutput and moved here to
+///       better reflect its cross-platform nature. The old AVRSoftwareSPIOutput name was
+///       misleading as this implementation works on all platforms, not just AVR.
 
-#ifndef __INC_FASTSPI_BITBANG_H
-#define __INC_FASTSPI_BITBANG_H
+#ifndef __INC_PLATFORMS_SHARED_SPI_BITBANG_GENERIC_SOFTWARE_SPI_H
+#define __INC_PLATFORMS_SHARED_SPI_BITBANG_GENERIC_SOFTWARE_SPI_H
 
 #include "FastLED.h"
 
@@ -17,15 +22,16 @@ FASTLED_NAMESPACE_BEGIN
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/// Software SPI (aka bit-banging) support
-/// Includes aggressive optimizations for when the clock and data pin are on the same port. 
+/// Generic software SPI (bit-banging) implementation that works on all platforms
+/// Includes aggressive optimizations for when the clock and data pin are on the same port.
 /// @tparam DATA_PIN pin number of the SPI data pin.
 /// @tparam CLOCK_PIN pin number of the SPI clock pin.
 /// @tparam SPI_SPEED speed of the bus. Determines the delay times between pin writes.
-/// @note Although this is named with the "AVR" prefix, this will work on any platform. Theoretically. 
-/// @todo Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future. 
+/// @note This is a cross-platform software SPI implementation that works on any platform.
+/// @note Previously named AVRSoftwareSPIOutput (legacy name from when FastLED was AVR-focused)
+/// @todo Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future.
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, fl::u32 SPI_SPEED>
-class AVRSoftwareSPIOutput {
+class GenericSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the ::Pin definition because on AVR these
 	// are pointers to 8 bit values, while on ARM they are 32 bit
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
@@ -39,15 +45,15 @@ class AVRSoftwareSPIOutput {
 
 public:
 	/// Default constructor
-	AVRSoftwareSPIOutput() { m_pSelect = NULL; }
+	GenericSoftwareSPIOutput() { m_pSelect = NULL; }
 	/// Constructor with selectable for SPI chip select
-	AVRSoftwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
+	GenericSoftwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	/// Set the pointer for the SPI chip select
 	/// @param pSelect pointer to chip select control
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
-	/// Set the clock/data pins to output and make sure the chip select is released. 
+	/// Set the clock/data pins to output and make sure the chip select is released.
 	void init() {
 		// set the pins to output and make sure the select is released (which apparently means hi?  This is a bit
 		// confusing to me)
@@ -56,25 +62,25 @@ public:
 		release();
 	}
 
-	/// Stop the SPI output. 
+	/// Stop the SPI output.
 	/// Pretty much a NOP with software, as there's no registers to kick
 	static void stop() { }
 
-	/// Wait until the SPI subsystem is ready for more data to write. 
-	/// A NOP when bitbanging. 
+	/// Wait until the SPI subsystem is ready for more data to write.
+	/// A NOP when bitbanging.
 	static void wait() __attribute__((always_inline)) { }
-	/// @copydoc AVRSoftwareSPIOutput::wait()
+	/// @copydoc GenericSoftwareSPIOutput::wait()
 	static void waitFully() __attribute__((always_inline)) { wait(); }
 
-	/// Write a single byte over SPI without waiting. 
+	/// Write a single byte over SPI without waiting.
 	static void writeByteNoWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); }
-	/// Write a single byte over SPI and wait afterwards. 
+	/// Write a single byte over SPI and wait afterwards.
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
-	/// Write a word (two bytes) over SPI. 
+	/// Write a word (two bytes) over SPI.
 	static void writeWord(fl::u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
-	/// Write a single byte over SPI. 
+	/// Write a single byte over SPI.
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.
 	static void writeByte(uint8_t b) {
 		writeBit<7>(b);
@@ -243,7 +249,7 @@ public:
 	/// Release the SPI chip select line
 	void release() { if(m_pSelect != NULL) { m_pSelect->release(); } } // FastPin<SELECT_PIN>::lo(); }
 
-	/// Write multiple bytes of the given value over SPI. 
+	/// Write multiple bytes of the given value over SPI.
 	/// Useful for quickly flushing, say, a line of 0's down the line.
 	/// @param value the value to write to the bus
 	/// @param len how many copies of the value to write
@@ -253,8 +259,8 @@ public:
 		release();
 	}
 
-	/// Write multiple bytes of the given value over SPI, without selecting the interface. 
-	/// @copydetails AVRSoftwareSPIOutput::writeBytesValue(uint8_t, int)
+	/// Write multiple bytes of the given value over SPI, without selecting the interface.
+	/// @copydetails GenericSoftwareSPIOutput::writeBytesValue(uint8_t, int)
 	static void writeBytesValueRaw(uint8_t value, int len) {
 #ifdef FAST_SPI_INTERRUPTS_WRITE_PINS
 		// TODO: Weird things may happen if software bitbanging SPI output and other pins on the output reigsters are being twiddled.  Need
@@ -292,7 +298,7 @@ public:
 #endif
 	}
 
-	/// Write an array of data to the SPI interface. 
+	/// Write an array of data to the SPI interface.
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @param data pointer to data to write
 	/// @param len number of bytes to write
@@ -351,7 +357,7 @@ public:
 	/// that may need to flush buffers or perform post-transmission operations
 	static void finalizeTransmission() { }
 
-	/// Write LED pixel data to the SPI interface. 
+	/// Write LED pixel data to the SPI interface.
 	/// Data is written in groups of three, re-ordered per the RGB_ORDER.
 	/// @tparam FLAGS Option flags, such as ::FLAG_START_BIT
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
