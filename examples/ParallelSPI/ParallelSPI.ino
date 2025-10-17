@@ -212,5 +212,8 @@ void loop() {
         frameCount++;
     }
 }
+#else
+void setup() {}
+void loop() {}
 
 #endif // defined(FASTLED_STUB_PLATFORM)
