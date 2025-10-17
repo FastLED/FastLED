@@ -4,7 +4,8 @@ project('fastled', 'cpp',
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
     'werror=false',
-    'buildtype=debug'
+    'buildtype=debug',
+    'unity=off'  # Disable Unity builds to prevent generating multiple compilation units
   ]
 )
 
