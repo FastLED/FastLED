@@ -412,25 +412,22 @@ void SPIDualSAMD21::cleanup() {
 // Factory Implementation
 // ============================================================================
 
-/// SAMD21 factory override - returns available SPI bus instances
-/// Strong definition overrides weak default
+/// SAMD21 factory override - returns empty (Dual-SPI not yet supported)
+///
+/// IMPORTANT: SAMD21 Dual-SPI is NOT YET IMPLEMENTED!
+/// The current implementation only supports single-lane SPI transmission.
+/// True dual-lane requires one of these approaches:
+///   - SERCOM + TCC Timer with event system synchronization
+///   - Dual SERCOM with shared GCLK and DMA
+///   - Hybrid SERCOM + GPIO bit-banging
+///
+/// Until true dual-lane is implemented, SAMD21 should not claim Dual-SPI support.
+/// This allows the bus manager to correctly fall back to single-lane SPI.
+///
+/// Strong definition overrides weak default (which also returns empty vector).
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    fl::vector<SpiHw2*> controllers;
-
-    // SAMD21 has 6 SERCOM peripherals
-    // Create instances for commonly used SERCOM units
-    // Note: Some may be reserved for standard SPI/I2C/UART in Arduino
-
-    static SPIDualSAMD21 controller0(0, "SERCOM0");
-    controllers.push_back(&controller0);
-
-    static SPIDualSAMD21 controller1(1, "SERCOM1");
-    controllers.push_back(&controller1);
-
-    static SPIDualSAMD21 controller2(2, "SERCOM2");
-    controllers.push_back(&controller2);
-
-    return controllers;
+    // Return empty - SAMD21 does not support true Dual-SPI yet
+    return fl::vector<SpiHw2*>();
 }
 
 }  // namespace fl

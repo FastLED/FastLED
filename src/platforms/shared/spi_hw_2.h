@@ -34,7 +34,7 @@ public:
         int8_t clock_pin;          ///< SCK GPIO pin
         int8_t data0_pin;          ///< D0/MOSI GPIO pin
         int8_t data1_pin;          ///< D1/MISO GPIO pin
-        size_t max_transfer_sz;    ///< Max bytes per transfer
+        uint32_t max_transfer_sz;  ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
@@ -42,7 +42,7 @@ public:
             , clock_pin(-1)
             , data0_pin(-1)
             , data1_pin(-1)
-            , max_transfer_sz(65535) {}
+            , max_transfer_sz(65536) {}
     };
 
     /// Initialize SPI peripheral with given configuration
