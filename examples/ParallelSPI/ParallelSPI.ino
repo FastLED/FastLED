@@ -58,18 +58,18 @@
 
 // Shared clock pin for ALL strips - this is critical for parallel mode!
 // Recommendation for ESP32: Use GPIO 18, 19, or 23 (standard SPI clock pins)
-#define CLOCK_PIN 18
+#define LED_CLOCK_PIN 18
 
 // Data pin assignments (edit if needed for your board)
 // Recommendation for ESP32: Avoid strapping pins 0, 2, 15
-#define DATA_PIN_0 4   // Strip 0 data pin
-#define DATA_PIN_1 5   // Strip 1 data pin
-#define DATA_PIN_2 12  // Strip 2 data pin (only used if NUM_STRIPS >= 4)
-#define DATA_PIN_3 13  // Strip 3 data pin (only used if NUM_STRIPS >= 4)
-#define DATA_PIN_4 16  // Strip 4 data pin (only used if NUM_STRIPS >= 8)
-#define DATA_PIN_5 17  // Strip 5 data pin (only used if NUM_STRIPS >= 8)
-#define DATA_PIN_6 21  // Strip 6 data pin (only used if NUM_STRIPS >= 8)
-#define DATA_PIN_7 22  // Strip 7 data pin (only used if NUM_STRIPS >= 8)
+#define LED_DATA_PIN_0 4   // Strip 0 data pin
+#define LED_DATA_PIN_1 5   // Strip 1 data pin
+#define LED_DATA_PIN_2 12  // Strip 2 data pin (only used if NUM_STRIPS >= 4)
+#define LED_DATA_PIN_3 13  // Strip 3 data pin (only used if NUM_STRIPS >= 4)
+#define LED_DATA_PIN_4 16  // Strip 4 data pin (only used if NUM_STRIPS >= 8)
+#define LED_DATA_PIN_5 17  // Strip 5 data pin (only used if NUM_STRIPS >= 8)
+#define LED_DATA_PIN_6 21  // Strip 6 data pin (only used if NUM_STRIPS >= 8)
+#define LED_DATA_PIN_7 22  // Strip 7 data pin (only used if NUM_STRIPS >= 8)
 
 #include <FastLED.h>
 
@@ -100,7 +100,7 @@ void setup() {
     Serial.print("LEDs per strip: ");
     Serial.println(NUM_LEDS);
     Serial.print("Clock pin: GPIO");
-    Serial.println(CLOCK_PIN);
+    Serial.println(LED_CLOCK_PIN);
 
     // ========================================================================
     // Register LED strips with FastLED
@@ -110,28 +110,28 @@ void setup() {
     // The hardware will automatically send data to all strips simultaneously.
 
     #if NUM_STRIPS >= 2
-        FastLED.addLeds<APA102, DATA_PIN_0, CLOCK_PIN, BGR>(leds[0], NUM_LEDS);
-        FastLED.addLeds<APA102, DATA_PIN_1, CLOCK_PIN, BGR>(leds[1], NUM_LEDS);
-        Serial.println("Strip 0: Data=GPIO" + String(DATA_PIN_0) + ", Clock=GPIO" + String(CLOCK_PIN));
-        Serial.println("Strip 1: Data=GPIO" + String(DATA_PIN_1) + ", Clock=GPIO" + String(CLOCK_PIN));
+        FastLED.addLeds<APA102, LED_DATA_PIN_0, LED_CLOCK_PIN, BGR>(leds[0], NUM_LEDS);
+        FastLED.addLeds<APA102, LED_DATA_PIN_1, LED_CLOCK_PIN, BGR>(leds[1], NUM_LEDS);
+        Serial.println("Strip 0: Data=GPIO" + String(LED_DATA_PIN_0) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
+        Serial.println("Strip 1: Data=GPIO" + String(LED_DATA_PIN_1) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
     #endif
 
     #if NUM_STRIPS >= 4
-        FastLED.addLeds<APA102, DATA_PIN_2, CLOCK_PIN, BGR>(leds[2], NUM_LEDS);
-        FastLED.addLeds<APA102, DATA_PIN_3, CLOCK_PIN, BGR>(leds[3], NUM_LEDS);
-        Serial.println("Strip 2: Data=GPIO" + String(DATA_PIN_2) + ", Clock=GPIO" + String(CLOCK_PIN));
-        Serial.println("Strip 3: Data=GPIO" + String(DATA_PIN_3) + ", Clock=GPIO" + String(CLOCK_PIN));
+        FastLED.addLeds<APA102, LED_DATA_PIN_2, LED_CLOCK_PIN, BGR>(leds[2], NUM_LEDS);
+        FastLED.addLeds<APA102, LED_DATA_PIN_3, LED_CLOCK_PIN, BGR>(leds[3], NUM_LEDS);
+        Serial.println("Strip 2: Data=GPIO" + String(LED_DATA_PIN_2) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
+        Serial.println("Strip 3: Data=GPIO" + String(LED_DATA_PIN_3) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
     #endif
 
     #if NUM_STRIPS >= 8
-        FastLED.addLeds<APA102, DATA_PIN_4, CLOCK_PIN, BGR>(leds[4], NUM_LEDS);
-        FastLED.addLeds<APA102, DATA_PIN_5, CLOCK_PIN, BGR>(leds[5], NUM_LEDS);
-        FastLED.addLeds<APA102, DATA_PIN_6, CLOCK_PIN, BGR>(leds[6], NUM_LEDS);
-        FastLED.addLeds<APA102, DATA_PIN_7, CLOCK_PIN, BGR>(leds[7], NUM_LEDS);
-        Serial.println("Strip 4: Data=GPIO" + String(DATA_PIN_4) + ", Clock=GPIO" + String(CLOCK_PIN));
-        Serial.println("Strip 5: Data=GPIO" + String(DATA_PIN_5) + ", Clock=GPIO" + String(CLOCK_PIN));
-        Serial.println("Strip 6: Data=GPIO" + String(DATA_PIN_6) + ", Clock=GPIO" + String(CLOCK_PIN));
-        Serial.println("Strip 7: Data=GPIO" + String(DATA_PIN_7) + ", Clock=GPIO" + String(CLOCK_PIN));
+        FastLED.addLeds<APA102, LED_DATA_PIN_4, LED_CLOCK_PIN, BGR>(leds[4], NUM_LEDS);
+        FastLED.addLeds<APA102, LED_DATA_PIN_5, LED_CLOCK_PIN, BGR>(leds[5], NUM_LEDS);
+        FastLED.addLeds<APA102, LED_DATA_PIN_6, LED_CLOCK_PIN, BGR>(leds[6], NUM_LEDS);
+        FastLED.addLeds<APA102, LED_DATA_PIN_7, LED_CLOCK_PIN, BGR>(leds[7], NUM_LEDS);
+        Serial.println("Strip 4: Data=GPIO" + String(LED_DATA_PIN_4) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
+        Serial.println("Strip 5: Data=GPIO" + String(LED_DATA_PIN_5) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
+        Serial.println("Strip 6: Data=GPIO" + String(LED_DATA_PIN_6) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
+        Serial.println("Strip 7: Data=GPIO" + String(LED_DATA_PIN_7) + ", Clock=GPIO" + String(LED_CLOCK_PIN));
     #endif
 
     Serial.println("================================");
