@@ -74,11 +74,6 @@ constexpr int numeric_limits<double>::max_exponent10;
 constexpr int numeric_limits<double>::min_exponent;
 constexpr int numeric_limits<double>::min_exponent10;
 
-// long double - static constexpr members (use template expressions)
-constexpr int numeric_limits<long double>::digits;
-constexpr int numeric_limits<long double>::digits10;
-constexpr int numeric_limits<long double>::max_digits10;
-
 // type_rank - static constexpr members
 template <typename T> constexpr int type_rank<T>::value;
 constexpr int type_rank<bool>::value;
@@ -95,7 +90,6 @@ constexpr int type_rank<long long>::value;
 constexpr int type_rank<unsigned long long>::value;
 constexpr int type_rank<float>::value;
 constexpr int type_rank<double>::value;
-constexpr int type_rank<long double>::value;
 
 // SpiBlock8
 constexpr int SpiBlock8::NUM_DATA_PINS;

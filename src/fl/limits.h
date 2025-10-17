@@ -449,66 +449,6 @@ struct numeric_limits<double> {
     static constexpr double denorm_min() noexcept { return 4.9406564584124654e-324; }  // DBL_TRUE_MIN
 };
 
-// Specialization for long double
-template <>
-struct numeric_limits<long double> {
-    enum : bool { is_specialized = true };
-    enum : bool { is_signed = true };
-    enum : bool { is_integer = false };
-    enum : bool { is_exact = false };
-    enum : bool { has_infinity = true };
-    enum : bool { has_quiet_NaN = true };
-    enum : bool { has_signaling_NaN = true };
-    // long double precision varies by platform (64-bit, 80-bit, or 128-bit)
-    static constexpr int digits = sizeof(long double) == 16 ? 113 :
-                                  sizeof(long double) == 12 ? 64 : 53;
-    static constexpr int digits10 = sizeof(long double) == 16 ? 33 :
-                                    sizeof(long double) == 12 ? 18 : 15;
-    static constexpr int max_digits10 = sizeof(long double) == 16 ? 36 :
-                                        sizeof(long double) == 12 ? 21 : 17;
-
-    static constexpr long double min() noexcept {
-        // LDBL_MIN - varies by platform
-        return sizeof(long double) == 16 ? 3.36210314311209350626e-4932L :
-               sizeof(long double) == 12 ? 3.36210314311209350626e-4932L :
-               2.2250738585072014e-308L;
-    }
-    static constexpr long double max() noexcept {
-        // LDBL_MAX - varies by platform
-        return sizeof(long double) == 16 ? 1.18973149535723176502e+4932L :
-               sizeof(long double) == 12 ? 1.18973149535723176502e+4932L :
-               1.7976931348623157e+308L;
-    }
-    static constexpr long double lowest() noexcept { return -max(); }
-    static constexpr long double epsilon() noexcept {
-        // LDBL_EPSILON - varies by platform
-        return sizeof(long double) == 16 ? 1.92592994438723585305e-34L :
-               sizeof(long double) == 12 ? 1.08420217248550443401e-19L :
-               2.2204460492503131e-16L;
-    }
-    static constexpr long double round_error() noexcept { return 0.5L; }
-
-    static constexpr long double infinity() noexcept {
-        return __builtin_huge_vall();
-    }
-    static constexpr long double quiet_NaN() noexcept {
-        return __builtin_nanl("");
-    }
-    static constexpr long double signaling_NaN() noexcept {
-        return __builtin_nansl("");
-    }
-    static constexpr long double denorm_min() noexcept {
-        // Conservative denorm_min - platform-specific
-        // 128-bit: theoretical minimum is ~3.6e-4951 but may not be representable on all platforms
-        // 80-bit: ~3.6e-4951
-        // 64-bit (same as double): ~4.9e-324
-        return sizeof(long double) == 16 ? 3.64519953188247460253e-4951L :
-               sizeof(long double) == 12 ? 3.64519953188247460253e-4951L :
-               4.9406564584124654e-324L;
-    }
-};
-
-// C++11 requires out-of-class definitions for static constexpr members that are ODR-used
-// These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols
+// long double specialization removed
 
 } // namespace fl
