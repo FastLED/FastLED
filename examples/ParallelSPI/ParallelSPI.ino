@@ -73,6 +73,9 @@
 
 #include <FastLED.h>
 
+// This example is only compiled for stub platform or ESP32
+#if defined(FASTLED_STUB_PLATFORM)
+
 // Validate configuration
 #if NUM_STRIPS != 2 && NUM_STRIPS != 4 && NUM_STRIPS != 8
     #error "NUM_STRIPS must be 2, 4, or 8"
@@ -209,3 +212,5 @@ void loop() {
         frameCount++;
     }
 }
+
+#endif // defined(FASTLED_STUB_PLATFORM)
