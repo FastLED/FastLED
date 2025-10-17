@@ -14,17 +14,36 @@ namespace fl {
 // Helper template to compute integer limits based on size and signedness
 namespace detail {
     // Compute number of value bits (excludes sign bit for signed types)
+    // C++11 compatible: use constexpr function instead of variable template
     template<typename T>
-    static constexpr int integer_digits = (sizeof(T) * 8) - (T(-1) < T(0) ? 1 : 0);
+    constexpr int integer_digits_func() {
+        return (sizeof(T) * 8) - (T(-1) < T(0) ? 1 : 0);
+    }
+
+    template<typename T>
+    struct integer_digits_helper {
+        static constexpr int value = (sizeof(T) * 8) - (T(-1) < T(0) ? 1 : 0);
+    };
 
     // Compute digits10: floor(log10(2^digits))
     // For 8 bits: 2, 16 bits: 4, 32 bits: 9, 64 bits: 19
+    // C++11 compatible: use constexpr function instead of variable template
     template<typename T>
-    static constexpr int integer_digits10 =
-        sizeof(T) == 1 ? 2 :
-        sizeof(T) == 2 ? 4 :
-        sizeof(T) == 4 ? 9 :
-        sizeof(T) == 8 ? 19 : 0;
+    constexpr int integer_digits10_func() {
+        return sizeof(T) == 1 ? 2 :
+               sizeof(T) == 2 ? 4 :
+               sizeof(T) == 4 ? 9 :
+               sizeof(T) == 8 ? 19 : 0;
+    }
+
+    template<typename T>
+    struct integer_digits10_helper {
+        static constexpr int value =
+            sizeof(T) == 1 ? 2 :
+            sizeof(T) == 2 ? 4 :
+            sizeof(T) == 4 ? 9 :
+            sizeof(T) == 8 ? 19 : 0;
+    };
 
     // Compute minimum value based on signedness
     template<typename T, bool IsSigned = (T(-1) < T(0))>
@@ -128,8 +147,8 @@ struct numeric_limits<char> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<char>;
-    static constexpr int digits10 = detail::integer_digits10<char>;
+    static constexpr int digits = detail::integer_digits_helper<char>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<char>::value;
 
     static constexpr char min() noexcept { return detail::integer_min_helper<char>::value(); }
     static constexpr char max() noexcept { return detail::integer_max_helper<char>::value(); }
@@ -148,8 +167,8 @@ struct numeric_limits<signed char> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<signed char>;
-    static constexpr int digits10 = detail::integer_digits10<signed char>;
+    static constexpr int digits = detail::integer_digits_helper<signed char>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<signed char>::value;
 
     static constexpr signed char min() noexcept { return detail::integer_min_helper<signed char>::value(); }
     static constexpr signed char max() noexcept { return detail::integer_max_helper<signed char>::value(); }
@@ -168,8 +187,8 @@ struct numeric_limits<unsigned char> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<unsigned char>;
-    static constexpr int digits10 = detail::integer_digits10<unsigned char>;
+    static constexpr int digits = detail::integer_digits_helper<unsigned char>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<unsigned char>::value;
 
     static constexpr unsigned char min() noexcept { return detail::integer_min_helper<unsigned char>::value(); }
     static constexpr unsigned char max() noexcept { return detail::integer_max_helper<unsigned char>::value(); }
@@ -188,8 +207,8 @@ struct numeric_limits<short> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<short>;
-    static constexpr int digits10 = detail::integer_digits10<short>;
+    static constexpr int digits = detail::integer_digits_helper<short>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<short>::value;
 
     static constexpr short min() noexcept { return detail::integer_min_helper<short>::value(); }
     static constexpr short max() noexcept { return detail::integer_max_helper<short>::value(); }
@@ -208,8 +227,8 @@ struct numeric_limits<unsigned short> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<unsigned short>;
-    static constexpr int digits10 = detail::integer_digits10<unsigned short>;
+    static constexpr int digits = detail::integer_digits_helper<unsigned short>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<unsigned short>::value;
 
     static constexpr unsigned short min() noexcept { return detail::integer_min_helper<unsigned short>::value(); }
     static constexpr unsigned short max() noexcept { return detail::integer_max_helper<unsigned short>::value(); }
@@ -229,8 +248,8 @@ struct numeric_limits<int> {
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
     // int can be 16-bit (AVR) or 32-bit (most platforms) depending on platform
-    static constexpr int digits = detail::integer_digits<int>;
-    static constexpr int digits10 = detail::integer_digits10<int>;
+    static constexpr int digits = detail::integer_digits_helper<int>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<int>::value;
 
     static constexpr int min() noexcept {
         return detail::integer_min_helper<int>::value();
@@ -254,8 +273,8 @@ struct numeric_limits<unsigned int> {
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
     // unsigned int can be 16-bit (AVR) or 32-bit (most platforms) depending on platform
-    static constexpr int digits = detail::integer_digits<unsigned int>;
-    static constexpr int digits10 = detail::integer_digits10<unsigned int>;
+    static constexpr int digits = detail::integer_digits_helper<unsigned int>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<unsigned int>::value;
 
     static constexpr unsigned int min() noexcept {
         return detail::integer_min_helper<unsigned int>::value();
@@ -279,8 +298,8 @@ struct numeric_limits<long> {
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
     // long can be 32-bit or 64-bit depending on platform
-    static constexpr int digits = detail::integer_digits<long>;
-    static constexpr int digits10 = detail::integer_digits10<long>;
+    static constexpr int digits = detail::integer_digits_helper<long>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<long>::value;
 
     static constexpr long min() noexcept {
         return detail::integer_min_helper<long>::value();
@@ -304,8 +323,8 @@ struct numeric_limits<unsigned long> {
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
     // unsigned long can be 32-bit or 64-bit depending on platform
-    static constexpr int digits = detail::integer_digits<unsigned long>;
-    static constexpr int digits10 = detail::integer_digits10<unsigned long>;
+    static constexpr int digits = detail::integer_digits_helper<unsigned long>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<unsigned long>::value;
 
     static constexpr unsigned long min() noexcept {
         return detail::integer_min_helper<unsigned long>::value();
@@ -328,8 +347,8 @@ struct numeric_limits<long long> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<long long>;
-    static constexpr int digits10 = detail::integer_digits10<long long>;
+    static constexpr int digits = detail::integer_digits_helper<long long>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<long long>::value;
 
     static constexpr long long min() noexcept { return detail::integer_min_helper<long long>::value(); }
     static constexpr long long max() noexcept { return detail::integer_max_helper<long long>::value(); }
@@ -348,8 +367,8 @@ struct numeric_limits<unsigned long long> {
     enum : bool { has_infinity = false };
     enum : bool { has_quiet_NaN = false };
     enum : bool { has_signaling_NaN = false };
-    static constexpr int digits = detail::integer_digits<unsigned long long>;
-    static constexpr int digits10 = detail::integer_digits10<unsigned long long>;
+    static constexpr int digits = detail::integer_digits_helper<unsigned long long>::value;
+    static constexpr int digits10 = detail::integer_digits10_helper<unsigned long long>::value;
 
     static constexpr unsigned long long min() noexcept { return detail::integer_min_helper<unsigned long long>::value(); }
     static constexpr unsigned long long max() noexcept { return detail::integer_max_helper<unsigned long long>::value(); }

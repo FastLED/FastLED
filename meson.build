@@ -156,6 +156,8 @@ unit_test_compile_args = [
   '-fno-strict-aliasing',
   '-Werror=unused-variable',
   '-Werror=unused-function',
+  '-Werror=c++14-extensions',  # Enforce C++11 compatibility
+  '-Werror=c++17-extensions',  # Enforce C++11 compatibility
   '-O0',
   '-g'
 ]

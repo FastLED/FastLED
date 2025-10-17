@@ -135,7 +135,7 @@ fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size
 
         // Extract 2 bits for each lane
         for (uint8_t lane = 0; lane < num_lanes && lane < 4; ++lane) {
-            uint8_t bits = (interleaved_byte >> (lane * 2)) & 0b11;
+            uint8_t bits = (interleaved_byte >> (lane * 2)) & 3;
             lanes[lane][in_byte_idx] |= (bits << ((3 - nibble_idx) * 2));
         }
     }

@@ -32,10 +32,10 @@ TEST_CASE("SPITransposer: Basic bit interleaving - single byte") {
     // Verify interleaving: each output byte has 2 bits from each lane
     // Format: [lane3[1:0] lane2[1:0] lane1[1:0] lane0[1:0]] for each 2-bit group
     // Lane0=0x12, Lane1=0x34, Lane2=0x56, Lane3=0x78
-    CHECK_EQ(output[0], 0b01010000);  // bits 7:6 -> 01_01_00_00
+    CHECK_EQ(output[0], 0x50);  // bits 7:6 -> 01_01_00_00
     CHECK_EQ(output[1], 221);  // bits 5:4 -> 11_01_11_01 (actual output)
     CHECK_EQ(output[2], 148);  // bits 3:2 (actual output)
-    CHECK_EQ(output[3], 0b00100010);  // bits 1:0 -> 00_10_00_10
+    CHECK_EQ(output[3], 0x22);  // bits 1:0 -> 00_10_00_10
 }
 
 TEST_CASE("SPITransposer: Equal length lanes - 4 lanes") {
@@ -158,10 +158,10 @@ TEST_CASE("SPITransposer: Alternating patterns - 0xFF and 0x00") {
 
     CHECK(success);
     // Each output byte should have alternating bit pairs: 00_11_00_11
-    CHECK_EQ(output[0], 0b00110011);
-    CHECK_EQ(output[1], 0b00110011);
-    CHECK_EQ(output[2], 0b00110011);
-    CHECK_EQ(output[3], 0b00110011);
+    CHECK_EQ(output[0], 0x33);
+    CHECK_EQ(output[1], 0x33);
+    CHECK_EQ(output[2], 0x33);
+    CHECK_EQ(output[3], 0x33);
 }
 
 TEST_CASE("SPITransposer: Identical lanes - 0xAA pattern") {
@@ -415,21 +415,21 @@ TEST_CASE("SPITransposer: 8-lane basic bit interleaving - single byte") {
 
     // Each output byte should have 1 bit from each lane
     // Output[0] has MSB (bit 7) from each lane: 10000000 (only L7 has bit 7 set)
-    CHECK_EQ(output[0], 0b10000000);
+    CHECK_EQ(output[0], 0x80);
     // Output[1] has bit 6 from each lane: 01000000 (only L6 has bit 6 set)
-    CHECK_EQ(output[1], 0b01000000);
+    CHECK_EQ(output[1], 0x40);
     // Output[2] has bit 5 from each lane: 00100000 (only L5 has bit 5 set)
-    CHECK_EQ(output[2], 0b00100000);
+    CHECK_EQ(output[2], 0x20);
     // Output[3] has bit 4 from each lane: 00010000 (only L4 has bit 4 set)
-    CHECK_EQ(output[3], 0b00010000);
+    CHECK_EQ(output[3], 0x10);
     // Output[4] has bit 3 from each lane: 00001000 (only L3 has bit 3 set)
-    CHECK_EQ(output[4], 0b00001000);
+    CHECK_EQ(output[4], 0x08);
     // Output[5] has bit 2 from each lane: 00000100 (only L2 has bit 2 set)
-    CHECK_EQ(output[5], 0b00000100);
+    CHECK_EQ(output[5], 0x04);
     // Output[6] has bit 1 from each lane: 00000010 (only L1 has bit 1 set)
-    CHECK_EQ(output[6], 0b00000010);
+    CHECK_EQ(output[6], 0x02);
     // Output[7] has bit 0 (LSB) from each lane: 00000001 (only L0 has bit 0 set)
-    CHECK_EQ(output[7], 0b00000001);
+    CHECK_EQ(output[7], 0x01);
 }
 
 TEST_CASE("SPITransposer: 8-lane equal length lanes") {
@@ -529,7 +529,7 @@ TEST_CASE("SPITransposer: 8-lane all ones and zeros pattern") {
     CHECK(success);
     // Each output byte should have alternating bits: 01010101
     for (int i = 0; i < 8; i++) {
-        CHECK_EQ(output[i], 0b01010101);
+        CHECK_EQ(output[i], 0x55);
     }
 }
 
