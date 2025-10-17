@@ -11,5 +11,4 @@
 
 #ifdef FASTLED_ESP8266_UART
 #include "fastled_esp8266_uart.h"
-#include "fastled_esp8266_uart.cpp"
 #endif
