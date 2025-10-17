@@ -207,13 +207,13 @@
 /// https://github.com/FastLED/FastLED/issues/2088
 
 // Platform-specific implementations
-#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__)
+#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__) || defined(__SAMD51__) || defined(__SAME51__)
 #define UCS7604_HAS_CONTROLLER 1
-#include "../platforms/arm/common/m0clockless.h"
-#include "eorder.h"
-#include "fastpin.h"
-#include "led_controller.h"
-#include "fl/force_inline.h"
+#include "../../platforms/arm/common/m0clockless.h"
+#include "../eorder.h"
+#include "../../fastpin.h"
+#include "../../cled_controller.h"
+#include "../force_inline.h"
 
 namespace fl {
 
@@ -223,6 +223,14 @@ enum UCS7604Mode {
     UCS7604_MODE_16BIT_800KHZ = 0x8B,  ///< 16-bit depth, 800 kHz, RGBW mode (default)
     UCS7604_MODE_16BIT_1600KHZ = 0x9B  ///< 16-bit depth, 1.6 MHz, RGBW mode
 };
+
+}  // namespace fl
+
+#endif // Platform check for UCS7604 support
+
+#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__)
+
+namespace fl {
 
 /// @brief UCS7604 controller for ARM M0 platforms (SAMD21)
 /// @tparam DATA_PIN The GPIO pin for data output
@@ -385,8 +393,11 @@ protected:
     }
 };
 
+}  // namespace fl
+
 #elif defined(__SAMD51__) || defined(__SAME51__)
-#define UCS7604_HAS_CONTROLLER 1
+
+namespace fl {
 
 /// @brief UCS7604 controller for ARM M0+ platforms (SAMD51)
 /// Same implementation as SAMD21 version
