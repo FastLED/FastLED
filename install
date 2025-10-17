@@ -41,18 +41,6 @@ fi
 
 echo "Setting up C++ development environment..."
 
-# Setup LLVM toolchain on Linux and Windows (msys/cygwin)
-if [[ "$OSTYPE" == "linux-gnu"* || "$OSTYPE" == "msys"* || "$OSTYPE" == "cygwin"* ]]; then
-    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        echo "Setting up LLVM toolchain for Linux..."
-    else
-        echo "Setting up LLVM toolchain for Windows..."
-    fi
-    uv run python ci/setup-llvm.py .cache/cc
-else
-    echo "Skipping LLVM setup (this platform is not Linux or Windows/msys)."
-fi
-
 # Build tests to generate compile_commands.json for clangd
 echo "Building C++ tests to generate compile_commands.json..."
 uv run -m ci.compiler.cpp_test_run --compile-only --clang --test test_function

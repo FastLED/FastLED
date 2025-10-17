@@ -114,33 +114,9 @@ jobs:
           echo "$(brew --prefix llvm)/bin" >> $GITHUB_PATH
         shell: bash
 
-      # Note: Linux and Windows use Python's llvm-installer package via ./install script
-
       - name: Install
         working-directory: trusted
         run: ./install
-        shell: bash
-
-      - name: Add LLVM tools to PATH
-        working-directory: trusted
-        run: |
-          # Find the LLVM bin directory (it's in a versioned subdirectory of .cache/cc)
-          # On Linux: .cache/cc/llvm-X.Y.Z-linux-x86_64/bin
-          # On Windows: .cache/cc/bin (hard links created by setup-llvm.py)
-          # On macOS: system LLVM from brew
-          LLVM_BIN=""
-          if [ -d ".cache/cc" ]; then
-            # Try to find LLVM bin using helper script
-            LLVM_BIN=$(python ci/find-llvm-bin.py 2>/dev/null || echo "")
-          fi
-
-          if [ -n "$LLVM_BIN" ] && [ -d "$LLVM_BIN" ]; then
-            echo "Found LLVM bin directory: $LLVM_BIN"
-            echo "$LLVM_BIN" >> $GITHUB_PATH
-          else
-            echo "Warning: Could not find LLVM bin directory in .cache/cc"
-            echo "This may cause thin archives to be disabled"
-          fi
         shell: bash
 
       - name: No namespace after headers
