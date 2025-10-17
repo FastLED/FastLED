@@ -29,8 +29,6 @@
 #include "fl/stdio.h"
 #define ISR_DBG(...) printf("[ISR_THREAD] " __VA_ARGS__)
 
-namespace {
-
 /* ISR context for thread-based execution */
 struct ISRContext {
     uint32_t timer_hz;
@@ -42,11 +40,18 @@ struct ISRContext {
 };
 
 /* Global ISR registry (for multi-instance support) */
-fl::HeapVector<ISRContext*> g_isr_contexts;
-fl::mutex g_isr_mutex;
+static fl::HeapVector<ISRContext*>& get_isr_contexts() {
+    static fl::HeapVector<ISRContext*> contexts;
+    return contexts;
+}
+
+static fl::mutex& get_isr_mutex() {
+    static fl::mutex mtx;
+    return mtx;
+}
 
 /* Thread function that runs the ISR at configured frequency */
-void isr_thread_func(ISRContext* ctx) {
+static void isr_thread_func(ISRContext* ctx) {
     ISR_DBG("Thread started, frequency: %u Hz\n", ctx->timer_hz);
 
     // Signal that thread has started
@@ -86,14 +91,12 @@ void isr_thread_func(ISRContext* ctx) {
     ISR_DBG("Thread stopped after %u ticks\n", tick_count);
 }
 
-}  // anonymous namespace
-
 extern "C" {
 
 /* Start timer (launches ISR thread) */
 int fl_spi_platform_isr_start(uint32_t timer_hz) {
     ISR_DBG("fl_spi_platform_isr_start called, frequency: %u Hz\n", timer_hz);
-    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
+    fl::lock_guard<fl::mutex> lock(get_isr_mutex());
 
     fl_gpio_sim_init();
 
@@ -110,17 +113,17 @@ int fl_spi_platform_isr_start(uint32_t timer_hz) {
     }
     ISR_DBG("Thread confirmed started\n");
 
-    g_isr_contexts.push_back(ctx);
-    ISR_DBG("Thread launched, contexts count: %zu\n", g_isr_contexts.size());
+    get_isr_contexts().push_back(ctx);
+    ISR_DBG("Thread launched, contexts count: %zu\n", get_isr_contexts().size());
     return 0;  /* Success */
 }
 
 /* Stop timer (joins ISR thread) */
 void fl_spi_platform_isr_stop(void) {
-    ISR_DBG("fl_spi_platform_isr_stop called, contexts count: %zu\n", g_isr_contexts.size());
-    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
+    ISR_DBG("fl_spi_platform_isr_stop called, contexts count: %zu\n", get_isr_contexts().size());
+    fl::lock_guard<fl::mutex> lock(get_isr_mutex());
 
-    for (auto* ctx : g_isr_contexts) {
+    for (auto* ctx : get_isr_contexts()) {
         ISR_DBG("Stopping thread...\n");
         ctx->running.store(false);
         if (ctx->thread.joinable()) {
@@ -130,20 +133,20 @@ void fl_spi_platform_isr_stop(void) {
         }
         delete ctx;
     }
-    g_isr_contexts.clear();
+    get_isr_contexts().clear();
     ISR_DBG("All threads stopped and cleared\n");
 }
 
 /* Query timer state */
 bool fl_spi_host_timer_is_running(void) {
-    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
-    return !g_isr_contexts.empty();
+    fl::lock_guard<fl::mutex> lock(get_isr_mutex());
+    return !get_isr_contexts().empty();
 }
 
 uint32_t fl_spi_host_timer_get_hz(void) {
-    fl::lock_guard<fl::mutex> lock(g_isr_mutex);
-    if (!g_isr_contexts.empty()) {
-        return g_isr_contexts[0]->timer_hz;
+    fl::lock_guard<fl::mutex> lock(get_isr_mutex());
+    if (!get_isr_contexts().empty()) {
+        return get_isr_contexts()[0]->timer_hz;
     }
     return 0;
 }

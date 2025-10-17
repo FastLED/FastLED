@@ -180,7 +180,7 @@ TEST_CASE("SPIBusManager: Quad-SPI promotion with 4 devices") {
     CHECK(manager.isDeviceEnabled(h4));
 }
 
-TEST_CASE("SPIBusManager: Conflict resolution - 2 devices, no multi-SPI") {
+TEST_CASE("SPIBusManager: Dual-SPI promotion with 2 devices") {
     SPIBusManager manager;
 
     MockController ctrl1(1), ctrl2(2);
@@ -188,19 +188,16 @@ TEST_CASE("SPIBusManager: Conflict resolution - 2 devices, no multi-SPI") {
     SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
     SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
 
-    (void)manager.initialize();
+    bool result = manager.initialize();
 
     const SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
 
-    // Should try Quad-SPI (but only 2 devices)
-    // Current implementation promotes 3-4 devices to Quad
-    // For 2 devices, should use Dual-SPI (not implemented yet)
-    // So it will fail and disable second device
-    CHECK_FALSE(manager.isDeviceEnabled(h2));
-
-    // First device should always be enabled
+    // Dual-SPI should be promoted for 2 devices
+    CHECK(bus->bus_type == SPIBusType::DUAL_SPI);
+    CHECK(result == true);
     CHECK(manager.isDeviceEnabled(h1));
+    CHECK(manager.isDeviceEnabled(h2));
 }
 
 TEST_CASE("SPIBusManager: Reset functionality") {

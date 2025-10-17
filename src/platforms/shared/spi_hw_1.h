@@ -41,14 +41,14 @@ public:
         uint32_t clock_speed_hz;   ///< Clock frequency in Hz
         int8_t clock_pin;          ///< SCK GPIO pin
         int8_t data_pin;           ///< MOSI GPIO pin
-        size_t max_transfer_sz;    ///< Max bytes per transfer
+        uint32_t max_transfer_sz;  ///< Max bytes per transfer
 
         Config()
             : bus_num(0)
             , clock_speed_hz(20000000)
             , clock_pin(-1)
             , data_pin(-1)
-            , max_transfer_sz(65535) {}
+            , max_transfer_sz(65536) {}
     };
 
     /// Initialize SPI peripheral with given configuration
