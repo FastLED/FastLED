@@ -13,7 +13,7 @@ void setup() {}
 void loop() {}
 #else
 
-#include "fx/audio/beat_detector.h"
+#include "fx/audio/advanced/beat_detector_edm.h"
 #include "fl/ui.h"
 
 using namespace fl;

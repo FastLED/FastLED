@@ -1,5 +1,10 @@
 FastLED 3.10.4
 ==============
+  * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects
+    * 20 components (3 core + 17 detectors): Beat, Tempo, Frequency Bands, Energy, Transient, Note, Downbeat, Dynamics, Pitch, Silence, Vocal, Percussion, Chord, Key, Mood, Buildup, Drop
+    * AudioContext pattern: FFT computed once and shared across all detectors with lazy evaluation
+    * Callback-based API with lazy instantiation
+    * See [src/fl/audio/](src/fl/audio/) and [README](src/fl/audio/README.md)
   * **NEW: UCS7604 RGBW Chipset Support (BETA)**: 16-bit RGBW LED driver for ARM M0/M0+ platforms
     * High-resolution 4-channel LED driver with configurable bit depth (8/12/14/16-bit) and dual data rates (800kHz/1.6MHz)
     * Currently supported on ARM M0/M0+ platforms (SAMD21/SAMD51)

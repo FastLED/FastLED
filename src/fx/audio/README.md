@@ -2,24 +2,96 @@
 
 Real-time audio processing modules for FastLED, optimized for embedded platforms (ESP32).
 
-## Overview
+## Directory Organization
 
-This directory contains two main audio processing modules:
+**Current Location:** `fx/audio/`
 
-1. **Beat Detector** - Real-time beat detection and tempo tracking for Electronic Dance Music (EDM)
-2. **Sound to MIDI** - Monophonic and polyphonic pitch detection with MIDI event generation
+This directory contains **high-level audio effects and detectors**:
 
-Both modules are designed for real-time operation on resource-constrained platforms with minimal latency and CPU overhead.
+- **`audio_processor.h/cpp`** - High-level facade for easy orchestration of all detectors
+- **`detectors/`** - All audio detector implementations (beat, vocal, percussion, chord, key, mood, etc.)
+- **`advanced/`** - Advanced signal processing modules (sound-to-midi, etc.)
+
+**For low-level infrastructure**, see:
+- **`fl/audio/`** - AudioContext (shared FFT caching), AudioDetector (base class), core primitives
+- **`fl/audio/README.md`** - Infrastructure documentation
 
 ---
 
-## Beat Detector
+## Overview
 
-**Files:** `beat_detector.h`, `beat_detector.cpp`
+This directory contains audio processing modules for creating music-reactive LED effects:
+
+### Main Modules
+
+1. **AudioProcessor** - High-level facade for easy detector orchestration (`audio_processor.h`)
+2. **Beat Detector** - Real-time beat detection and tempo tracking for EDM (`detectors/beat.h`)
+3. **Sound to MIDI** - Monophonic/polyphonic pitch detection with MIDI events (`sound_to_midi.h`)
+4. **17+ Audio Detectors** - Vocal, percussion, chord, key, mood, buildup, drop, and more (`detectors/`)
+
+All modules are designed for real-time operation on resource-constrained platforms with minimal latency and CPU overhead.
+
+---
+
+## Quick Start with AudioProcessor
+
+The easiest way to use audio detection is through the **AudioProcessor** facade:
+
+```cpp
+#include "fx/audio/audio_processor.h"
+
+fl::AudioProcessor audio;
+
+void setup() {
+    // Register callbacks for events you care about
+    audio.onBeat([]() {
+        // Flash on beat
+        fill_solid(leds, NUM_LEDS, CRGB::White);
+    });
+
+    audio.onVocal([](bool active) {
+        // Change color when vocals detected
+        if (active) {
+            fill_solid(leds, NUM_LEDS, CRGB::Purple);
+        }
+    });
+
+    audio.onKick([]() {
+        // React to kick drum
+        leds[0] = CRGB::Red;
+    });
+}
+
+void loop() {
+    while (fl::AudioSample sample = audioInput.next()) {
+        audio.update(sample);  // Updates all registered detectors
+    }
+    FastLED.show();
+}
+```
+
+**See `fx/audio/audio_processor.h` for the complete API with 40+ event callbacks.**
+
+---
+
+## Individual Detector Modules
+
+---
+
+## Beat Detector (Simple)
+
+**Files:** `detectors/beat.h`, `detectors/beat.cpp`
+
+Simple beat detector using the AudioContext pattern for shared FFT computation.
+
+**For advanced EDM beat detection**, see:
+- **`advanced/beat_detector_edm.h`** - SuperFlux-based onset detection with comb filter tempo tracking
+- Optimized for Electronic Dance Music with configurable parameters
+- 988 lines of advanced signal processing algorithms
 
 ### What is it?
 
-The Beat Detector is a complete real-time beat detection and tempo tracking system optimized for Electronic Dance Music (EDM). It analyzes incoming audio and detects when beats occur, estimates the tempo (BPM), and provides callbacks for onset and beat events.
+The simple Beat Detector provides basic rhythmic pulse detection using shared FFT computation from AudioContext. For production use, consider the advanced EDM beat detector in `advanced/`.
 
 ### Key Features
 
@@ -83,7 +155,7 @@ Estimates the tempo (BPM) and predicts beat times:
 ### Quick Start
 
 ```cpp
-#include "fx/audio/beat_detector.h"
+#include "fx/audio/advanced/beat_detector_edm.h"
 
 // Create configuration (EDM defaults)
 BeatDetectorConfig cfg;
@@ -268,7 +340,7 @@ See `examples/BeatDetection/BeatDetection.ino` for a complete example with LED v
 
 ## Sound to MIDI
 
-**Files:** `sound_to_midi.h`, `sound_to_midi.cpp`
+**Files:** `advanced/sound_to_midi.h`, `advanced/sound_to_midi.cpp`
 
 ### What is it?
 
@@ -332,7 +404,7 @@ Uses **FFT-based spectral peak detection**:
 ### Quick Start - Monophonic
 
 ```cpp
-#include "fx/audio/sound_to_midi.h"
+#include "fx/audio/advanced/sound_to_midi.h"
 
 // Create configuration with sliding window and auto-tuning
 SoundToMIDI cfg;

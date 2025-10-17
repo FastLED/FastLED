@@ -2,7 +2,7 @@
 
 #if SKETCH_HAS_LOTS_OF_MEMORY
 
-#include "fx/audio/beat_detector.h"
+#include "fx/audio/advanced/beat_detector_edm.h"
 #include "fl/codec/mp3.h"
 #include "fl/file_system.h"
 #include "fl/stdio.h"
