@@ -27,6 +27,7 @@ compiler_flags = [
     "-fpermissive",
     "-Wall",
     "-Wextra",
+    "-Werror=c++14-extensions",  # Error on C++14 features when using older standards
     "-Wno-deprecated-register",  # Suppress 'register' keyword warnings for C++17 compatibility
     "-Wno-backslash-newline-escape",  # Suppress backslash newline escape warnings
     "-fno-exceptions",
