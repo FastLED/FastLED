@@ -3,7 +3,7 @@
 #include "fl/codec/common.h"
 #include "fl/vector.h"
 #include "fl/shared_ptr.h"
-#include "third_party/pl_mpeg/driver.h"
+#include "third_party/pl_mpeg/src/pl_mpeg.h"
 
 namespace fl {
 namespace third_party {

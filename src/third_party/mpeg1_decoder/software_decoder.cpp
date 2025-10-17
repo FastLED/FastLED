@@ -4,18 +4,15 @@
 #include "fl/compiler_control.h"
 
 // Include stdio for FILE type needed by pl_mpeg
-#include <stdio.h>  // ok include
-#include <string.h>  // for memcpy (C header for Arduino compatibility)
+#include "fl/stdio.h"
 
-// Suppress warnings from pl_mpeg for embedded systems
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(overflow)
-FL_DISABLE_WARNING(narrowing)
-FL_DISABLE_WARNING(shift-count-overflow)
 
-#include "third_party/pl_mpeg/driver.h"
+// Declare pl_mpeg types and function prototypes manually
+// Forward declarations and types from driver.h
+#include "third_party/pl_mpeg/src/pl_mpeg.hpp"
 
-FL_DISABLE_WARNING_POP
+
+
 
 namespace fl {
 namespace third_party {

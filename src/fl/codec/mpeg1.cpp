@@ -60,7 +60,7 @@ Mpeg1Info Mpeg1::parseMpeg1Info(fl::span<const fl::u8> data, fl::string* error_m
     // For detailed parsing, we need to use the actual decoder to extract metadata
     // Since MPEG1 headers are complex, we'll use a temporary decoder instance
     Mpeg1Config tempConfig;
-    tempConfig.mode = third_party::Mpeg1Config::SingleFrame;
+    tempConfig.mode = Mpeg1Config::SingleFrame;
     tempConfig.skipAudio = true;
 
     auto decoder = fl::make_shared<third_party::SoftwareMpeg1Decoder>(tempConfig);
