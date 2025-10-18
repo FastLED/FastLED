@@ -108,3 +108,7 @@ inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
 // }
 
 } // namespace fl
+
+// Include C math header to provide global namespace math functions for third-party code
+// This ensures ::sin(), ::cos(), etc. are available as expected
+#include <math.h>
