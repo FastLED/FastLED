@@ -13,6 +13,16 @@
 #include "fl/namespace.h"
 #include "fl/math_macros.h"
 
+// Include centralized LED chipset timing definitions
+// These provide unified nanosecond-based T1, T2, T3 timing for all supported chipsets
+#include "fl/chipsets/led_timing.h"
+
+// Include legacy AVR-specific timing definitions (FMUL-based)
+// Used for backward compatibility with existing AVR clockless drivers
+#ifdef __AVR__
+#include "platforms/avr/led_timing_legacy_avr.h"
+#endif
+
 // Include UCS7604 controller
 #include "fl/chipsets/ucs7604.h"  // optional.
 
@@ -961,7 +971,7 @@ protected:
 
 #ifdef FASTLED_HAS_CLOCKLESS
 /// @defgroup ClocklessChipsets Clockless Chipsets
-/// These chipsets have only a single data line. 
+/// These chipsets have only a single data line.
 ///
 /// The clockless chipset controllers use the same base class
 /// and the same protocol, but with varying timing periods.
@@ -974,12 +984,15 @@ protected:
 ///   At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
 ///   @endcode
 ///
-/// The units used for T1, T2, and T3 is nanoseconds.  
+/// The units used for T1, T2, and T3 is nanoseconds.
 ///
 /// For 8MHz/16MHz/24MHz frequencies, these values are also guaranteed
 /// to be integral multiples of an 8MHz clock (125ns increments).
 ///
 /// @note The base class, ClocklessController, is platform-specific.
+/// @note Centralized timing definitions are available in:
+///   - fl::chipsets::led_timing.h - Nanosecond-based T1, T2, T3 definitions for all chipsets
+///   - fl::platforms::avr::led_timing_legacy_avr.h - Legacy AVR FMUL-based definitions (backward compat)
 /// @{
 
 // Allow clock that clockless controller is based on to have different
@@ -996,8 +1009,16 @@ protected:
 /// @see Notes in @ref ClocklessChipsets
 #define FMUL (CLOCKLESS_FREQUENCY/8000000)
 
+/// @note AVR FMUL-based controllers (below) use platform-specific timing optimizations
+/// that have been validated on AVR processors at 8/16/24MHz. These values represent
+/// tested approximations for AVR platforms and should NOT be changed to match the
+/// nanosecond values in fl::chipsets::led_timing.h, as they may introduce timing
+/// regressions. For reference timing values, see TIMING_* constants in led_timing.h.
+
 /// GE8822 controller class.
 /// @copydetails WS2812Controller800Khz
+/// @note Timing: 3*FMUL, 5*FMUL, 3*FMUL (FMUL-based AVR approximation)
+/// @see TIMING_GE8822_800KHZ in fl::chipsets::led_timing.h (350, 660, 350 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
 class GE8822Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 3 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER, 4> {};
 
@@ -1015,6 +1036,8 @@ class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_P
 /// WS2812 controller class @ 800 KHz.
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
+/// @note Timing: 2*FMUL, 5*FMUL, 3*FMUL (FMUL-based AVR approximation)
+/// @see TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, 2 * FMUL, 5 * FMUL, 3 * FMUL, RGB_ORDER> {};
 #endif
@@ -1230,45 +1253,55 @@ using UCS7604 = UCS7604Controller800Khz<DATA_PIN, RGB_ORDER>;
 //  print("T3: ", T3)
 
 
-// GE8822 - 350ns 660ns 350ns
+/// GE8822 controller @ 800 kHz - references centralized timing from fl::TIMING_GE8822_800KHZ
+/// @see TIMING_GE8822_800KHZ in fl::chipsets::led_timing.h (350, 660, 350 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GE8822Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(660), C_NS(350), RGB_ORDER, 4> {};
+class GE8822Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_GE8822_800KHZ.T1), C_NS(fl::TIMING_GE8822_800KHZ.T2), C_NS(fl::TIMING_GE8822_800KHZ.T3), RGB_ORDER, 4, false, fl::TIMING_GE8822_800KHZ.RESET> {};
 
-// GW6205@400khz - 800ns, 800ns, 800ns
+/// GW6205 controller @ 400 kHz - references centralized timing from fl::TIMING_GW6205_400KHZ
+/// @see TIMING_GW6205_400KHZ in fl::chipsets::led_timing.h (800, 800, 800 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(800), C_NS(800), C_NS(800), RGB_ORDER, 4> {};
+class GW6205Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_GW6205_400KHZ.T1), C_NS(fl::TIMING_GW6205_400KHZ.T2), C_NS(fl::TIMING_GW6205_400KHZ.T3), RGB_ORDER, 4, false, fl::TIMING_GW6205_400KHZ.RESET> {};
 
-// GW6205@400khz - 400ns, 400ns, 400ns
+/// GW6205 controller @ 800 kHz - references centralized timing from fl::TIMING_GW6205_800KHZ
+/// @see TIMING_GW6205_800KHZ in fl::chipsets::led_timing.h (400, 400, 400 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(400), C_NS(400), RGB_ORDER, 4> {};
+class GW6205Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_GW6205_800KHZ.T1), C_NS(fl::TIMING_GW6205_800KHZ.T2), C_NS(fl::TIMING_GW6205_800KHZ.T3), RGB_ORDER, 4, false, fl::TIMING_GW6205_800KHZ.RESET> {};
 
-// UCS1903 - 500ns, 1500ns, 500ns
+/// UCS1903 controller @ 400 kHz - references centralized timing from fl::TIMING_UCS1903_400KHZ
+/// @see TIMING_UCS1903_400KHZ in fl::chipsets::led_timing.h (500, 1500, 500 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(500), C_NS(1500), C_NS(500), RGB_ORDER> {};
+class UCS1903Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_UCS1903_400KHZ.T1), C_NS(fl::TIMING_UCS1903_400KHZ.T2), C_NS(fl::TIMING_UCS1903_400KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_UCS1903_400KHZ.RESET> {};
 
-// UCS1903B - 400ns, 450ns, 450ns
+/// UCS1903B controller @ 800 kHz - references centralized timing from fl::TIMING_UCS1903B_800KHZ
+/// @see TIMING_UCS1903B_800KHZ in fl::chipsets::led_timing.h (400, 450, 450 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(450), C_NS(450), RGB_ORDER> {};
+class UCS1903BController800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_UCS1903B_800KHZ.T1), C_NS(fl::TIMING_UCS1903B_800KHZ.T2), C_NS(fl::TIMING_UCS1903B_800KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_UCS1903B_800KHZ.RESET> {};
 
-// UCS1904 - 400ns, 400ns, 450ns
+/// UCS1904 controller @ 800 kHz - references centralized timing from fl::TIMING_UCS1904_800KHZ
+/// @see TIMING_UCS1904_800KHZ in fl::chipsets::led_timing.h (400, 400, 450 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1904Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(400), C_NS(400), C_NS(450), RGB_ORDER> {};
+class UCS1904Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_UCS1904_800KHZ.T1), C_NS(fl::TIMING_UCS1904_800KHZ.T2), C_NS(fl::TIMING_UCS1904_800KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_UCS1904_800KHZ.RESET> {};
 
-// UCS2903 - 250ns, 750ns, 250ns
+/// UCS2903 controller - references centralized timing from fl::TIMING_UCS2903
+/// @see TIMING_UCS2903 in fl::chipsets::led_timing.h (250, 750, 250 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS2903Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(250), C_NS(750), C_NS(250), RGB_ORDER> {};
+class UCS2903Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_UCS2903.T1), C_NS(fl::TIMING_UCS2903.T2), C_NS(fl::TIMING_UCS2903.T3), RGB_ORDER, 0, false, fl::TIMING_UCS2903.RESET> {};
 
-// TM1809 - 350ns, 350ns, 550ns
+/// TM1809 controller @ 800 kHz - references centralized timing from fl::TIMING_TM1809_800KHZ
+/// @see TIMING_TM1809_800KHZ in fl::chipsets::led_timing.h (350, 350, 450 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(350), C_NS(450), RGB_ORDER> {};
+class TM1809Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_TM1809_800KHZ.T1), C_NS(fl::TIMING_TM1809_800KHZ.T2), C_NS(fl::TIMING_TM1809_800KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_TM1809_800KHZ.RESET> {};
 
-// WS2811 - 320ns, 320ns, 640ns
+/// WS2811 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812_800KHZ_LEGACY
+/// @see TIMING_WS2812_800KHZ_LEGACY in fl::chipsets::led_timing.h (320, 320, 640 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(320), C_NS_WS2811(320), C_NS_WS2811(640), RGB_ORDER> {};
+class WS2811Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(fl::TIMING_WS2812_800KHZ_LEGACY.T1), C_NS_WS2811(fl::TIMING_WS2812_800KHZ_LEGACY.T2), C_NS_WS2811(fl::TIMING_WS2812_800KHZ_LEGACY.T3), RGB_ORDER, 0, false, fl::TIMING_WS2812_800KHZ_LEGACY.RESET> {};
 
-// WS2813 - 320ns, 320ns, 640ns
+/// WS2813 controller - references centralized timing from fl::TIMING_WS2813
+/// @see TIMING_WS2813 in fl::chipsets::led_timing.h (320, 320, 640 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2813(320), C_NS_WS2813(320), C_NS_WS2813(640), RGB_ORDER> {};
+class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2813(fl::TIMING_WS2813.T1), C_NS_WS2813(fl::TIMING_WS2813.T2), C_NS_WS2813(fl::TIMING_WS2813.T3), RGB_ORDER, 0, false, fl::TIMING_WS2813.RESET> {};
 
 #ifndef FASTLED_WS2812_T1
 #define FASTLED_WS2812_T1 250
@@ -1284,6 +1317,10 @@ class WS2813Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS28
 
 
 
+/// WS2812 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812_800KHZ
+/// @note Timing: 250ns, 625ns, 375ns (overclockable via FASTLED_OVERCLOCK_WS2812)
+/// @see TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
+/// @note Timings can be overridden at compile time using FASTLED_WS2812_T1, FASTLED_WS2812_T2, FASTLED_WS2812_T3
 #if !FASTLED_WS2812_HAS_SPECIAL_DRIVER
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<
@@ -1291,59 +1328,80 @@ class WS2812Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<
 	C_NS_WS2812(FASTLED_WS2812_T1),
 	C_NS_WS2812(FASTLED_WS2812_T2),
 	C_NS_WS2812(FASTLED_WS2812_T3),
-	RGB_ORDER> {};
+	RGB_ORDER,
+	0,
+	false,
+	fl::TIMING_WS2812_800KHZ.RESET> {};
 #endif
 
-// WS2811@400khz - 800ns, 800ns, 900ns
+/// WS2811 controller @ 400 kHz - references centralized timing from fl::TIMING_WS2811_400KHZ
+/// @see TIMING_WS2811_400KHZ in fl::chipsets::led_timing.h (800, 800, 900 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(800), C_NS_WS2811(800), C_NS_WS2811(900), RGB_ORDER> {};
+class WS2811Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2811(fl::TIMING_WS2811_400KHZ.T1), C_NS_WS2811(fl::TIMING_WS2811_400KHZ.T2), C_NS_WS2811(fl::TIMING_WS2811_400KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_WS2811_400KHZ.RESET> {};
 
+/// WS2815 controller - references centralized timing from fl::TIMING_WS2815
+/// @see TIMING_WS2815 in fl::chipsets::led_timing.h (250, 1090, 550 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2815Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2815(250), C_NS_WS2815(1090), C_NS_WS2815(550), RGB_ORDER> {};
+class WS2815Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_WS2815(fl::TIMING_WS2815.T1), C_NS_WS2815(fl::TIMING_WS2815.T2), C_NS_WS2815(fl::TIMING_WS2815.T3), RGB_ORDER, 0, false, fl::TIMING_WS2815.RESET> {};
 
-// 750NS, 750NS, 750NS
+/// TM1803 controller @ 400 kHz - references centralized timing from fl::TIMING_TM1803_400KHZ
+/// @see TIMING_TM1803_400KHZ in fl::chipsets::led_timing.h (700, 1100, 700 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(700), C_NS(1100), C_NS(700), RGB_ORDER> {};
+class TM1803Controller400Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_TM1803_400KHZ.T1), C_NS(fl::TIMING_TM1803_400KHZ.T2), C_NS(fl::TIMING_TM1803_400KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_TM1803_400KHZ.RESET> {};
 
+/// TM1829 controller @ 800 kHz - references centralized timing from fl::TIMING_TM1829_800KHZ
+/// @see TIMING_TM1829_800KHZ in fl::chipsets::led_timing.h (340, 340, 550 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(340), C_NS(340), C_NS(550), RGB_ORDER, 0, true, 500> {};
+class TM1829Controller800Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_TM1829_800KHZ.T1), C_NS(fl::TIMING_TM1829_800KHZ.T2), C_NS(fl::TIMING_TM1829_800KHZ.T3), RGB_ORDER, 0, true, 500> {};
 
+/// TM1829 controller @ 1600 kHz - references centralized timing from fl::TIMING_TM1829_1600KHZ
+/// @see TIMING_TM1829_1600KHZ in fl::chipsets::led_timing.h (100, 300, 200 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller1600Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(100), C_NS(300), C_NS(200), RGB_ORDER, 0, true, 500> {};
+class TM1829Controller1600Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_TM1829_1600KHZ.T1), C_NS(fl::TIMING_TM1829_1600KHZ.T2), C_NS(fl::TIMING_TM1829_1600KHZ.T3), RGB_ORDER, 0, true, 500> {};
 
+/// LPD1886 controller @ 1250 kHz - references centralized timing from fl::TIMING_LPD1886_1250KHZ
+/// @see TIMING_LPD1886_1250KHZ in fl::chipsets::led_timing.h (200, 400, 200 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER, 4> {};
+class LPD1886Controller1250Khz : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_LPD1886_1250KHZ.T1), C_NS(fl::TIMING_LPD1886_1250KHZ.T2), C_NS(fl::TIMING_LPD1886_1250KHZ.T3), RGB_ORDER, 4, false, fl::TIMING_LPD1886_1250KHZ.RESET> {};
 
+/// LPD1886 controller @ 1250 kHz (8-bit) - references centralized timing from fl::TIMING_LPD1886_1250KHZ
+/// @see TIMING_LPD1886_1250KHZ in fl::chipsets::led_timing.h (200, 400, 200 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(200), C_NS(400), C_NS(200), RGB_ORDER> {};
+class LPD1886Controller1250Khz_8bit : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_LPD1886_1250KHZ.T1), C_NS(fl::TIMING_LPD1886_1250KHZ.T2), C_NS(fl::TIMING_LPD1886_1250KHZ.T3), RGB_ORDER, 0, false, fl::TIMING_LPD1886_1250KHZ.RESET> {};
 
 
+/// SK6822 controller - references centralized timing from fl::TIMING_SK6822
+/// @see TIMING_SK6822 in fl::chipsets::led_timing.h (375, 1000, 375 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6822Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6822(375), C_NS_SK6822(1000), C_NS_SK6822(375), RGB_ORDER> {};
+class SK6822Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6822(fl::TIMING_SK6822.T1), C_NS_SK6822(fl::TIMING_SK6822.T2), C_NS_SK6822(fl::TIMING_SK6822.T3), RGB_ORDER, 0, false, fl::TIMING_SK6822.RESET> {};
 
+/// SK6812 controller - references centralized timing from fl::TIMING_SK6812
+/// @see TIMING_SK6812 in fl::chipsets::led_timing.h (300, 600, 300 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6812Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6812(300), C_NS_SK6812(300), C_NS_SK6812(600), RGB_ORDER> {};
+class SK6812Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS_SK6812(fl::TIMING_SK6812.T1), C_NS_SK6812(fl::TIMING_SK6812.T2), C_NS_SK6812(fl::TIMING_SK6812.T3), RGB_ORDER, 0, false, fl::TIMING_SK6812.RESET> {};
 
+/// SM16703 controller - references centralized timing from fl::TIMING_SM16703
+/// @see TIMING_SM16703 in fl::chipsets::led_timing.h (300, 600, 300 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16703Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(300), C_NS(600), C_NS(300), RGB_ORDER> {};
+class SM16703Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_SM16703.T1), C_NS(fl::TIMING_SM16703.T2), C_NS(fl::TIMING_SM16703.T3), RGB_ORDER, 0, false, fl::TIMING_SM16703.RESET> {};
 
+/// PL9823 controller - references centralized timing from fl::TIMING_PL9823
+/// @see TIMING_PL9823 in fl::chipsets::led_timing.h (350, 1010, 350 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class PL9823Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(350), C_NS(1010), C_NS(350), RGB_ORDER> {};
+class PL9823Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_PL9823.T1), C_NS(fl::TIMING_PL9823.T2), C_NS(fl::TIMING_PL9823.T3), RGB_ORDER, 0, false, fl::TIMING_PL9823.RESET> {};
 
-// UCS1912 - Note, never been tested, this is according to the datasheet
+/// UCS1912 controller - references centralized timing from fl::TIMING_UCS1912
+/// @note Never been tested, this is according to the datasheet
+/// @see TIMING_UCS1912 in fl::chipsets::led_timing.h (250, 1000, 350 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(250), C_NS(1000), C_NS(350), RGB_ORDER> {};
+class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_UCS1912.T1), C_NS(fl::TIMING_UCS1912.T2), C_NS(fl::TIMING_UCS1912.T3), RGB_ORDER, 0, false, fl::TIMING_UCS1912.RESET> {};
 
-// NEW LED! Help us test it!
-// Under developement.
-// SM16824E - 300ns, 900ns, 0ns
-//   * T0H: .3
-//   * T0L: .9
-//   * T1H: .9
-//   * T1L: .3
-//   * TRST: 200
+/// SM16824E controller - references centralized timing from fl::TIMING_SM16824E
+/// @note NEW LED! Help us test it! Under development.
+/// Timing: T0H=.3μs, T0L=.9μs, T1H=.9μs, T1L=.3μs, TRST=200μs
+/// @see TIMING_SM16824E in fl::chipsets::led_timing.h (300, 900, 100 ns)
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(300), C_NS(900), C_NS(100), RGB_ORDER, 0, false, 200> {};
+class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, C_NS(fl::TIMING_SM16824E.T1), C_NS(fl::TIMING_SM16824E.T2), C_NS(fl::TIMING_SM16824E.T3), RGB_ORDER, 0, false, fl::TIMING_SM16824E.RESET> {};
 #endif
 /// @} ClocklessChipsets
 
