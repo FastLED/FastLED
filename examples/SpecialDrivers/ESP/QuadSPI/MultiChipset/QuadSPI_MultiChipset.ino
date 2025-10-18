@@ -41,6 +41,8 @@
 /// which triggers malloc errors on NRF52), but it does NOT traverse into .cpp
 /// files the same way. By keeping implementation in .cpp, we avoid these issues.
 
+// @filter: (platform is esp32)
+
 #include "quad_spi_multichipset.h"
 
 void setup() {

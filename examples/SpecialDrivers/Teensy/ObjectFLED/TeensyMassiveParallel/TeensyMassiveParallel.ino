@@ -11,8 +11,6 @@
 /// @reddit: reddit.com/u/Tiny_Structure_7
 /// The FastLED code was written by Zach Vorhies
 
-#if defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
+// @filter: (platform is teensy) and (target is Teensy40 or Teensy41)
+
 #include "./TeensyMassiveParallel.h"
-#else
-#include "platforms/sketch_fake.hpp"
-#endif

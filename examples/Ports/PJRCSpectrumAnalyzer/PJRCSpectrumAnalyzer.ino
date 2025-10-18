@@ -1,3 +1,5 @@
+// @filter: (platform is teensy) and ((platform is teensy35) or (platform is teensy36) or (platform is teensy40) or (platform is teensy41))
+
 /// @file    PJRCSpectrumAnalyzer.ino
 /// @brief   PJRCSpectrumAnalyzer example with platform detection
 /// @example PJRCSpectrumAnalyzer.ino
@@ -10,9 +12,4 @@
 //   - Teensy 4.0/4.1 (__IMXRT1062__)
 // NOT supported on: Teensy 3.0/3.1/3.2 (insufficient RAM), Teensy LC (no OctoWS2811)
 
-#if defined(TEENSYDUINO) && \
-    (defined(__IMXRT1062__) || defined(__MK64FX512__) || defined(__MK66FX1M0__))
 #include "PJRCSpectrumAnalyzer.h"
-#else
-#include "platforms/sketch_fake.hpp"
-#endif

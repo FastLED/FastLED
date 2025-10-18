@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    Sound2Midi.ino
 /// @brief   Real-time sound to MIDI conversion with histogram visualization
 /// @example Sound2Midi.ino
@@ -11,12 +13,6 @@
 
 /*
 #include <FastLED.h>
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
 
 #include <Arduino.h>
 #include "fl/ui.h"
@@ -503,5 +499,4 @@ void loop() {
 
 FL_DISABLE_WARNING_POP
 
-#endif
 */

@@ -23,6 +23,8 @@
 /// - Memory: ~2400 bytes for 4 × 100 LEDs
 /// - Resources saved: 3 PIO state machines, 3 DMA channels
 
+// @filter: (platform is rp2040)
+
 #include <FastLED.h>
 #include <fl/compiler_control.h>
 

@@ -1,11 +1,9 @@
+// @filter: (platform is esp8266)
+
 // ESP8266 UART Driver Test Example
 // Demonstrates the opt-in UART-based WS2812 driver for ESP8266
 // This driver improves stability under Wi-Fi load by using hardware UART
 // instead of bit-banging.
-
-#if !defined(ESP8266) && !defined(ARDUINO_ARCH_ESP8266)
-#include "platforms/sketch_fake.hpp"
-#else
 
 #define FASTLED_ESP8266_UART  // Enable UART driver before including FastLED
 #include <FastLED.h>
@@ -28,5 +26,3 @@ void loop() {
     FastLED.show();
     delay(10);
 }
-
-#endif // ESP8266
