@@ -67,7 +67,7 @@
 #include "parallel_transpose.h"
 
 // Hardware headers for RP2040/RP2350
-#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
+#if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
