@@ -150,12 +150,14 @@ def audit_memory_classification():
 
     if errors:
         print("ERRORS (Classification Mismatch):")
+        error: str
         for error in errors:
             print(f"  ✗ {error}")
         print()
 
     if warnings:
         print("WARNINGS:")
+        warning: str
         for warning in warnings:
             print(f"  ⚠️  {warning}")
         print()

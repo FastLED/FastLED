@@ -130,12 +130,14 @@ def main() -> int:
     # Print results
     if errors:
         print("ERRORS:")
+        error: str
         for error in errors:
             print(f"  ✗ {error}")
         print()
 
     if warnings:
         print("WARNINGS:")
+        warning: str
         for warning in warnings:
             print(f"  ⚠️  {warning}")
         print()

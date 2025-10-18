@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    MultiArrays.ino
 /// @brief   Demonstrates how to use multiple LED strips, each with their own data
 /// @example MultiArrays.ino
@@ -84,9 +86,6 @@
  */
 
 #include <FastLED.h>
-#include "fl/sketch_macros.h"
-
-#if SKETCH_HAS_LOTS_OF_MEMORY
 
 #define NUM_LEDS_PER_STRIP 60
 CRGB redLeds[NUM_LEDS_PER_STRIP];
@@ -197,10 +196,3 @@ void loop() {
     delay(100);
   }
 }
-
-#else
-
-void setup() {}
-void loop() {}
-
-#endif
