@@ -110,10 +110,19 @@ void RmtController5LowLevel::onBeforeShow() {
 void RmtController5LowLevel::onEndShow() {
     // Acquire worker with hybrid mode selection (may block if N > K and all workers busy)
     // Worker is pre-configured based on strip size and timing parameters
+    // Create a ChipsetTiming struct from stored timing values
+    const fl::ChipsetTiming timing = {
+        static_cast<uint32_t>(mT1),
+        static_cast<uint32_t>(mT2),
+        static_cast<uint32_t>(mT3),
+        static_cast<uint32_t>(mResetNs / 1000),  // Convert nanoseconds to microseconds
+        "custom"
+    };
+
     IRmtWorkerBase* worker = RmtWorkerPool::getInstance().acquireWorker(
         mPixelDataSize,
         mPin,
-        mT1, mT2, mT3,
+        timing,
         mResetNs
     );
 
