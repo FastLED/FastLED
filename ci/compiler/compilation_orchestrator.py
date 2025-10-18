@@ -9,7 +9,7 @@ import time
 from concurrent.futures import Future, as_completed
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from typeguard import typechecked
 

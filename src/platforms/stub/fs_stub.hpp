@@ -7,10 +7,9 @@
 #include "fl/file_system.h"
 #include "fl/namespace.h"
 #include "fl/memory.h"
-#include <algorithm>
-#include <fstream>
-#include <cerrno>
-#include <cstdio>
+#include <algorithm>  // For std::replace in path conversion
+#include <fstream>    // For file I/O operations
+#include <cstdio>     // For file operations
 #ifdef _WIN32
   #include <direct.h>
   #include <io.h>

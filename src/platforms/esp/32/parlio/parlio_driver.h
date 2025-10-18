@@ -18,8 +18,7 @@
 
 #include "sdkconfig.h"
 
-#include <stdint.h>
-#include <string.h>
+#include "fl/stdint.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "esp_heap_caps.h"

@@ -13,7 +13,7 @@
 //       The assembly directives and implementation need to be researched and
 //       validated for Xtensa LX7 architecture before use.
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "soc/soc.h"
 #include "esp_intr_alloc.h"
 #include "hal/interrupt_coreasm.h"

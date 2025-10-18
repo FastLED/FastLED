@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
 #include "em_gpio.h"

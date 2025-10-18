@@ -27,10 +27,9 @@
 #include <emscripten.h>
 #include <emscripten/emscripten.h>
 #include <emscripten/html5.h>
-#include <cfloat>
+#include <cfloat> // ok include
 #include <string>
-#include <cstring>
-#include <cstdlib>
+#include <cstring> // ok include
 
 #include "js_bindings.h"
 

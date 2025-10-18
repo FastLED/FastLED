@@ -70,8 +70,9 @@ BANNED_HEADERS_COMMON = [
 
 BANNED_HEADERS_CORE = BANNED_HEADERS_COMMON + BANNED_HEADERS_ESP + ["Arduino.h"]
 
-# Banned headers for platforms directory - specifically checking for Arduino.h
-BANNED_HEADERS_PLATFORMS = ["Arduino.h"]
+# Banned headers for platforms directory - no stdlib headers allowed in .h files
+# Platform headers should use fl/ alternatives just like core FastLED code
+BANNED_HEADERS_PLATFORMS = BANNED_HEADERS_COMMON
 
 
 class BannedHeadersChecker(FileContentChecker):
@@ -197,6 +198,30 @@ class BannedHeadersChecker(FileContentChecker):
         if "/platforms/" in file_path.replace("\\", "/"):
             if header == "Arduino.h":
                 return True
+
+        # Testing stub implementations need stdlib headers for file/thread operations
+        if "/stub/" in file_path.replace("\\", "/") or "/wasm/" in file_path.replace(
+            "\\", "/"
+        ):
+            # fs_stub.hpp needs algorithm, fstream, cstdio for test filesystem
+            if "fs_stub" in file_path and header in {"algorithm", "fstream", "cstdio"}:
+                return True
+            # isr_stub.cpp and time_stub.cpp need chrono, thread, iostream for testing
+            if ("isr_stub" in file_path or "time_stub" in file_path) and header in {
+                "chrono",
+                "thread",
+                "iostream",
+            }:
+                return True
+            # WASM platform implementations need stdlib headers for I/O and threading
+            if "/wasm/" in file_path.replace("\\", "/"):
+                # WASM platform headers need vector, cstdio, stdio.h for platform-specific implementation
+                if file_path.endswith(".h"):
+                    if header in {"vector", "cstdio", "stdio.h"}:
+                        return True
+                # WASM timer.cpp needs thread and cmath for timer implementation
+                elif "timer.cpp" in file_path and header in {"thread", "cmath"}:
+                    return True
 
         # FX audio/video files need math.h for specialized calculations
         if "/fx/" in file_path.replace("\\", "/"):
@@ -405,15 +430,23 @@ class TestNoBannedHeaders(unittest.TestCase):
         )
 
     def test_no_banned_headers_platforms(self) -> None:
-        """Searches through the platforms directory to check for Arduino.h usage."""
+        """Searches through the platforms directory to enforce no stdlib headers in .h files.
+
+        Platform headers must use fl/ alternatives, just like core FastLED code.
+        This ensures platform implementations are consistent with library standards.
+        """
 
         def on_fail(msg: str) -> None:
             self.fail(
-                msg + "\n"
-                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+                msg + "\n\n"
+                "Policy for src/platforms/**/*.h files:\n"
+                "- .h/.hpp files: NEVER allow stdlib headers (must use fl/ alternatives)\n"
+                "- .cpp files: Use '// ok include' comment at the end of line to bypass\n"
+                "Platform implementations must follow the same standards as core FastLED code.\n"
+                "See HEADER_RECOMMENDATIONS for suggested replacements."
             )
 
-        # Test the platforms directory specifically for Arduino.h
+        # Test the platforms directory with strict rules for .h files
         test_directories = [
             os.path.join(SRC_ROOT, "platforms"),
         ]
@@ -421,6 +454,7 @@ class TestNoBannedHeaders(unittest.TestCase):
             test_directories=test_directories,
             banned_headers_list=BANNED_HEADERS_PLATFORMS,
             on_fail=on_fail,
+            strict_mode=False,  # Allow bypass in .cpp files, but never in .h files
         )
 
     def test_no_banned_headers_third_party(self) -> None:

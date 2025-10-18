@@ -38,8 +38,7 @@
 
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/warn.h"
-#include <cstdlib>
-#include <cstring>
+#include <cstring> // ok include
 
 // TODO: Include STM32 HAL headers when implementing hardware initialization
 // #ifdef HAL_TIM_MODULE_ENABLED

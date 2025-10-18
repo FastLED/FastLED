@@ -32,8 +32,7 @@
 #include <stm32_def.h>
 #endif
 
-#include <cstdlib>
-#include <cstring>
+#include <cstring> // ok include
 
 namespace fl {
 

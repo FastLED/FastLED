@@ -13,7 +13,7 @@ FL_EXTERN_C_BEGIN
 
 #include "esp_log.h"
 #include <stdlib.h>
-#include <string.h>
+#include <string.h> // ok include
 
 FL_EXTERN_C_END
 

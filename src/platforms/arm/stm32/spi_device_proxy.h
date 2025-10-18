@@ -20,8 +20,8 @@
 #include "fl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/stm32/fastspi_arm_stm32.h"
-#include <stdint.h>
-#include <stddef.h>
+#include "fl/stdint.h"
+#include "fl/stddef.h"
 
 namespace fl {
 

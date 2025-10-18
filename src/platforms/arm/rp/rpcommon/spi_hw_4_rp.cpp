@@ -14,8 +14,7 @@
 #include "hardware/pio.h"
 #include "pio_asm.h"
 #include "fl/warn.h"
-#include <cstdlib>
-#include <cstring>
+#include <cstring> // ok include
 
 namespace fl {
 

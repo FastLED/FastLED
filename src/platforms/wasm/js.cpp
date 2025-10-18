@@ -12,9 +12,9 @@
 #include <emscripten/emscripten.h> // Include Emscripten headers
 #include <emscripten/html5.h>
 
-#include <memory>
+#include <memory> // ok include
 #include "fl/stdint.h"
-#include <stdio.h>
+#include <stdio.h> // ok include
 #include <string>
 
 #include "active_strip_data.h"

@@ -21,7 +21,7 @@
 
 #include "sdkconfig.h"
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "platforms/esp/esp_version.h"
 
 #include "crgb.h"

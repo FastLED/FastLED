@@ -27,7 +27,7 @@ def has_platform_guards(content: str) -> Tuple[bool, List[str]]:
         Tuple of (has_guards: bool, guard_types: List[str])
         guard_types examples: ['SKETCH_HAS_LOTS_OF_MEMORY', 'ESP32', 'esp32s3']
     """
-    guard_patterns = [
+    guard_patterns: List[str] = [
         r"#if\s+!?SKETCH_HAS_LOTS_OF_MEMORY",
         r"#ifdef?\s+(ESP32|ESP8266|__AVR__|TEENSY|RP2040|STM32)",
         r"#if\s+defined\((ESP32|ESP8266|__AVR__|TEENSY|RP2040|STM32)",

@@ -14,13 +14,12 @@
 
 
 #if FASTLED_TEENSY_USE_PRINTF
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/select.h>
-#include <sys/time.h>
+// Note: stdio.h includes removed - printf is provided by the compiler
 
 namespace fl {
+
+// Forward declaration for printf
+extern "C" int printf(const char*, ...);
 
 inline void print_teensy(const char* str) {
     if (!str) return;

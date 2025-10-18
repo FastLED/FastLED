@@ -37,8 +37,7 @@
 // Define this to enable software GPIO bitbanging mode for testing
 // #define FASTLED_STM32_DUALSPI_SOFTWARE_MODE 1
 
-#include <cstdlib>
-#include <cstring>
+#include <cstring> // ok include
 
 namespace fl {
 

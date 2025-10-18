@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stddef.h>
-#include <string.h>
+#include "fl/stddef.h"
 
 // We meed to define a missing _write function for the Teensy LC.
 // This regardless of whether the user prints or not, because of the SD card
@@ -11,12 +10,16 @@
 #if defined(ARDUINO)
 
 #include <Arduino.h> // ok include
-#include <unistd.h>
-#include <cerrno>
-#undef errno
-extern int errno;
-// ^^^^ Add these 4 lines to your includes
 
+// Builtin strlen implementation
+inline size_t _fl_strlen(const char* str) {
+    size_t len = 0;
+    while (str && *str++) len++;
+    return len;
+}
+
+// errno definition (typically EBADF = 9)
+extern int errno;
 
 extern "C" {
 int _write(int file, const void *buf, size_t len) {
@@ -28,10 +31,11 @@ int _write(int file, const void *buf, size_t len) {
   Print *out;
 
   // Send both stdout and stderr to stdPrint
-  if (file == STDOUT_FILENO || file == STDERR_FILENO) {
+  // Note: STDOUT_FILENO=1, STDERR_FILENO=2, STDIN_FILENO=0
+  if (file == 1 || file == 2) {  // STDOUT or STDERR
     out = stdPrint;
-  } else if (file == STDIN_FILENO) {
-    errno = EBADF;
+  } else if (file == 0) {  // STDIN
+    errno = 9;  // EBADF
     return -1;
   } else {
     out = (Print *)file;
@@ -45,7 +49,7 @@ int _write(int file, const void *buf, size_t len) {
 }  // extern "C"
 
 inline int _platform_write(const char* str) {
-    return _write(STDOUT_FILENO, str, strlen(str));
+    return _write(1, str, _fl_strlen(str));  // 1 = STDOUT_FILENO
 }
 
 #else

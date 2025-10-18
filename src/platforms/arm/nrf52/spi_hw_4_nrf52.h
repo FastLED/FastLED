@@ -34,8 +34,8 @@
 #include <nrfx_ppi.h>
 
 #include "fl/warn.h"
-#include <cstdlib>
-#include <cstring>
+#include "fl/stddef.h"
+#include "fl/str.h"
 
 namespace fl {
 

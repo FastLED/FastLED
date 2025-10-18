@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string.h>  // for standard memcpy
 #include "fl/int.h"  // for FastLED integer types
+#include "fl/memcopy.h"  // for memcpy (FastLED equivalent)
 
 // Guard against PROGMEM redefinition on platforms that have their own definition
 #if !defined(PROGMEM) && !defined(__IMXRT1062__) && !defined(__MK20DX128__) && !defined(__MK20DX256__) && !defined(__MK66FX1M0__) && !defined(__MK64FX512__) && !defined(__MKL26Z64__)
@@ -19,11 +19,11 @@
 #endif
 
 // Private helper function for safe memory copying to avoid strict aliasing issues
-// This uses standard memcpy but is scoped locally to avoid conflicts
+// This uses fl::memcopy (FastLED equivalent) instead of standard memcpy
 template<typename T>
 static inline T fl_progmem_safe_read(const void* addr) {
     T result;
-    memcpy(&result, addr, sizeof(T));
+    fl::memcopy(&result, addr, sizeof(T));
     return result;
 }
 

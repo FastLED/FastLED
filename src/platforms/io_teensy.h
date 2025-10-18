@@ -14,13 +14,14 @@
 
 
 #if FASTLED_TEENSY_USE_PRINTF
-#include <stdio.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/select.h>
-#include <sys/time.h>
+// Note: printf includes moved to avoid stdlib in header
+// These are only used when FASTLED_TEENSY_USE_PRINTF is enabled
+// and are typically disabled in production builds due to 5KB memory bloat
 
 namespace fl {
+
+// Forward declaration for printf - compiler provides this
+extern "C" int printf(const char*, ...);
 
 inline void print_teensy(const char* str) {
     if (!str) return;

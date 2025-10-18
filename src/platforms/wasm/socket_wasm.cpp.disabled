@@ -5,7 +5,6 @@
 #include "socket_wasm.h"
 #include "fl/str.h"
 #include <cstring>
-#include <cstdlib>
 #include <cstdio>  // For snprintf
 #include <errno.h>
 

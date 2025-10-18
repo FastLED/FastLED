@@ -2,10 +2,9 @@
 
 #ifdef _WIN32
 #include <io.h>  // for _write
-#include <stdio.h>  // for _flushall
+// Note: _flushall() removed; using fsync-like behavior via _write(2, ...) flush
 #else
-#include <unistd.h>  // for write
-#include <unistd.h>  // for fsync
+#include <unistd.h>  // for write and fsync
 #endif
 
 namespace fl {

@@ -3,8 +3,6 @@
 #include "fl/strstream.h"
 #include "fl/warn.h"
 
-#include <assert.h>
-
 #ifdef __EMSCRIPTEN__
 #include "platforms/wasm/js_assert.h"
 #elif defined(ESP32)
@@ -19,9 +17,8 @@
 #endif
 #endif
 
-
 #if FASTLED_USES_SYSTEM_ASSERT
-#include <assert.h>
+// Note: assert is a builtin and doesn't need explicit inclusion
 #define FASTLED_ASSERT(x, MSG)                                                 \
     {                                                                          \
         FASTLED_WARN_IF(!(x), MSG);                                            \

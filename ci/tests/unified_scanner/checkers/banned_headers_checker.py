@@ -111,8 +111,9 @@ class BannedHeadersChecker(BaseChecker):
     # Platform-specific: Arduino.h should only be in platforms/, not core
     BANNED_HEADERS_CORE: Set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
 
-    # For platforms/ directory: only ban Arduino.h
-    BANNED_HEADERS_PLATFORMS: Set[str] = {"Arduino.h"}
+    # For platforms/ directory: ban all stdlib headers (same as CORE)
+    # Platform headers must use fl/ alternatives like core FastLED code
+    BANNED_HEADERS_PLATFORMS: Set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
 
     def name(self) -> str:
         return "banned-headers"
@@ -140,6 +141,7 @@ class BannedHeadersChecker(BaseChecker):
             return set()  # Don't ban anything in examples
 
         # Check if in platforms/ directory
+        # Platform headers must use fl/ alternatives just like core code
         if "platforms" in path_parts:
             return self.BANNED_HEADERS_PLATFORMS
 
