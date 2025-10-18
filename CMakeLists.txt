@@ -13,7 +13,7 @@ file(GLOB FastLED_FX_SRCS "src/fx/*.cpp" "src/fx/**/*.cpp")
 
 file(GLOB ESP32_SRCS "src/platforms/esp/32/*.cpp" "src/platforms/esp/32/rmt_5/*.cpp")
 file(GLOB ESP32_THIRD_PARTY_SRCS "src/third_party/**/src/*.c" "src/third_party/**/src/*.cpp")
-file(GLOB ESP32_LED_STRIP_SRCS "src/third_party/espressif/led_strip/src/*.c")
+file(GLOB ESP32_LED_STRIP_SRCS "src/third_party/espressif/led_strip/src/*.cpp")
 
 # Combine all source files into a single list
 list(APPEND FastLED_SRCS ${FastLED_FL_SRCS} ${FastLED_SENSORS_SRCS} ${FastLED_FX_SRCS} ${ESP32_SRCS} ${ESP32_THIRD_PARTY_SRCS} ${ESP32_LED_STRIP_SRCS} ${FastLED_PLATFORM_ARDUINO_SRCS})

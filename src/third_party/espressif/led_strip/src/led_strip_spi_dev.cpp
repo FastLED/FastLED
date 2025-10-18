@@ -109,33 +109,33 @@ static esp_err_t led_strip_spi_set_pixel_rgbw(led_strip_t *strip, uint32_t index
 static esp_err_t spi_led_strip_refresh_async(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
-    
+
     // Wait for any pending transaction to complete before starting a new one
     if (spi_strip->trans_pending) {
         spi_transaction_t* trans_ptr;
         spi_device_get_trans_result(spi_strip->spi_device, &trans_ptr, pdMS_TO_TICKS(1000));
         spi_strip->trans_pending = false;
     }
-    
+
     // Initialize the transaction object stored in the controller
     memset(&spi_strip->tx_trans, 0, sizeof(spi_strip->tx_trans));
     spi_strip->tx_trans.length = spi_strip->strip_len * spi_strip->bytes_per_pixel * SPI_BITS_PER_COLOR_BYTE;
     spi_strip->tx_trans.tx_buffer = spi_strip->pixel_buf;
     spi_strip->tx_trans.rx_buffer = NULL;
-    
+
     // Queue the transaction
     esp_err_t ret = spi_device_queue_trans(spi_strip->spi_device, &spi_strip->tx_trans, portMAX_DELAY);
     if (ret == ESP_OK) {
         spi_strip->trans_pending = true;
     }
-    
+
     return ret;
 }
 
 static esp_err_t spi_led_strip_refresh_wait_done(led_strip_t *strip)
 {
     led_strip_spi_obj *spi_strip = __containerof(strip, led_strip_spi_obj, base);
-    
+
     // Only wait if there's a pending transaction
     if (spi_strip->trans_pending) {
         spi_transaction_t* trans_ptr;
@@ -145,7 +145,7 @@ static esp_err_t spi_led_strip_refresh_wait_done(led_strip_t *strip)
         }
         return ret;
     }
-    
+
     return ESP_OK;
 }
 

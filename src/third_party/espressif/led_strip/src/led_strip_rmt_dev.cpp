@@ -168,7 +168,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     uint8_t bytes_per_pixel = component_fmt.format.num_components;
     rmt_strip = calloc(1, sizeof(led_strip_rmt_obj));
     ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
-    
+
     // Check if external pixel buffer is provided
     if (led_config->external_pixel_buf != NULL) {
         // Use the external pixel buffer provided by caller
