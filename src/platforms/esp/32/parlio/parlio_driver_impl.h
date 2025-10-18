@@ -388,20 +388,11 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                             const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
                             uint8_t channel_byte = channel_data[color_idx];
                             uint8_t bit_val = (channel_byte >> bit) & 0x01;
-                            // Position bit based on DATA_WIDTH (use upper bits for < 8)
-                            if (DATA_WIDTH >= 8) {
-                                // MSB mode: bit N → GPIO N
-                                output_byte |= (bit_val << channel);
-                            } else if (DATA_WIDTH == 4) {
-                                // Use upper nibble (bits 4-7): bit 4 → GPIO 0, bit 5 → GPIO 1, etc.
-                                output_byte |= (bit_val << (4 + channel));
-                            } else if (DATA_WIDTH == 2) {
-                                // Use bits 6-7
-                                output_byte |= (bit_val << (6 + channel));
-                            } else if (DATA_WIDTH == 1) {
-                                // Use bit 7
-                                output_byte |= (bit_val << 7);
-                            }
+                            // Position bit based on channel number
+                            // PARLIO hardware maps output_byte bits directly to GPIO pins:
+                            // - output_byte bit N → GPIO data_gpio_nums[N]
+                            // So we place each channel's data at bit position equal to channel number
+                            output_byte |= (bit_val << channel);
                         }
                     }
 
@@ -436,20 +427,11 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                             const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
                             uint8_t channel_byte = channel_data[color_idx];
                             uint8_t bit_val = (channel_byte >> bit) & 0x01;
-                            // Position bit based on DATA_WIDTH (use upper bits for < 8)
-                            if (DATA_WIDTH >= 8) {
-                                // MSB mode: bit N → GPIO N
-                                output_byte |= (bit_val << channel);
-                            } else if (DATA_WIDTH == 4) {
-                                // Use upper nibble (bits 4-7): bit 4 → GPIO 0, bit 5 → GPIO 1, etc.
-                                output_byte |= (bit_val << (4 + channel));
-                            } else if (DATA_WIDTH == 2) {
-                                // Use bits 6-7
-                                output_byte |= (bit_val << (6 + channel));
-                            } else if (DATA_WIDTH == 1) {
-                                // Use bit 7
-                                output_byte |= (bit_val << 7);
-                            }
+                            // Position bit based on channel number
+                            // PARLIO hardware maps output_byte bits directly to GPIO pins:
+                            // - output_byte bit N → GPIO data_gpio_nums[N]
+                            // So we place each channel's data at bit position equal to channel number
+                            output_byte |= (bit_val << channel);
                         }
                     }
 
