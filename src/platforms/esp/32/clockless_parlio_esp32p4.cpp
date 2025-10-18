@@ -68,6 +68,11 @@ public:
         bool drawlist_changed = mRectDrawBuffer.mDrawListChangedThisFrame;
         bool needs_validation = !mDriver.get() || drawlist_changed;
 
+        FASTLED_DBG("PARLIO Group showPixelsOnceThisFrame:");
+        FASTLED_DBG("  drawlist_changed: " << (drawlist_changed ? "true" : "false"));
+        FASTLED_DBG("  needs_validation: " << (needs_validation ? "true" : "false"));
+        FASTLED_DBG("  mDrawList.size(): " << (int)mRectDrawBuffer.mDrawList.size());
+
         if (needs_validation) {
             mDriver.reset();
 
@@ -76,6 +81,7 @@ public:
             for (auto it = mRectDrawBuffer.mDrawList.begin();
                  it != mRectDrawBuffer.mDrawList.end(); ++it) {
                 pinList.push_back(it->mPin);
+                FASTLED_DBG("  Added pin " << (int)it->mPin << " with " << (int)it->mNumBytes << " bytes");
             }
 
             // Get buffer info
@@ -85,8 +91,13 @@ public:
             mRectDrawBuffer.getBlockInfo(&num_strips, &bytes_per_strip, &total_bytes);
             int num_leds_per_strip = bytes_per_strip / 3;
 
+            FASTLED_DBG("  num_strips: " << (int)num_strips);
+            FASTLED_DBG("  bytes_per_strip: " << (int)bytes_per_strip);
+            FASTLED_DBG("  num_leds_per_strip: " << num_leds_per_strip);
+
             // Auto-select optimal width
             uint8_t optimal_width = selectOptimalWidth(num_strips);
+            FASTLED_DBG("  optimal_width selected: " << (int)optimal_width);
 
             // Instantiate driver based on width
             switch (optimal_width) {
@@ -161,9 +172,11 @@ private:
 namespace fl {
 
 void Parlio_Esp32P4::beginShowLeds(int data_pin, int nleds) {
+    FASTLED_DBG("PARLIO Parlio_Esp32P4::beginShowLeds called with data_pin=" << data_pin << ", nleds=" << nleds);
     ParlioEsp32P4_Group& group = ParlioEsp32P4_Group::getInstance();
     group.onQueuingStart();
     group.addObject(data_pin, nleds, false);
+    FASTLED_DBG("  After addObject, drawList.size()=" << (int)group.mRectDrawBuffer.mDrawList.size());
 }
 
 void Parlio_Esp32P4::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
