@@ -44,7 +44,7 @@ struct M0ClocklessData {
 };
 
 
-template<int HI_OFFSET, int LO_OFFSET, const ChipsetTiming& TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
+template<int HI_OFFSET, int LO_OFFSET, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
   // Extract timing values at compile-time
   static constexpr uint32_t T1 = TIMING.T1;

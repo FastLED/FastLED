@@ -70,7 +70,7 @@ public:
     bool isAvailable() const override { return mAvailable; }
 
     // Configuration (called before each transmission)
-    bool configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) override;
+    bool configure(gpio_num_t pin, const fl::ChipsetTiming& TIMING, uint32_t reset_ns) override;
 
     // Transmission control
     void transmit(const uint8_t* pixel_data, int num_bytes) override;

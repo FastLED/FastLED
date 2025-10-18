@@ -107,7 +107,7 @@ struct NeoPixelBusColorFeature<GBR> {
 /// @tparam XTRA0 extra parameter (ignored, for template compatibility)
 /// @tparam FLIP flip parameter (ignored, for template compatibility)
 /// @tparam WAIT_TIME wait time parameter (ignored, for template compatibility)
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class NeoPixelBusLikeClocklessT : public CPixelLEDController<RGB_ORDER> {
 public:
@@ -270,7 +270,7 @@ protected:
 /// @tparam FLIP flip parameter (ignored, for template compatibility)
 /// @tparam WAIT_TIME wait time parameter (ignored, for template compatibility)
 /// @see https://github.com/Makuna/NeoPixelBus
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessController : public NeoPixelBusLikeClocklessT<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME> {
 public:
@@ -294,7 +294,7 @@ public:
 /// @tparam T2 timing parameter (ignored, for template compatibility) 
 /// @tparam T3 timing parameter (ignored, for template compatibility)
 /// @tparam RGB_ORDER the RGB ordering for the LEDs
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class NeoPixelBusRGBWController : public CPixelLEDController<RGB_ORDER> {
 public:

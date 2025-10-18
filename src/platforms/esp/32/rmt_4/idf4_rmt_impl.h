@@ -109,7 +109,7 @@ public:
     // -- Constructor
     //    Mainly just stores the template parameters from the LEDController as
     //    member variables.
-    ESP32RMTController(int DATA_PIN, const ChipsetTiming& TIMING, int maxChannel, bool built_in_driver);
+    ESP32RMTController(int DATA_PIN, const fl::ChipsetTiming& TIMING, int maxChannel, bool built_in_driver);
 
     // -- Show this string of pixels
     //    This is the main entry point for the pixel controller

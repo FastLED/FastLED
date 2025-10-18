@@ -93,7 +93,7 @@ int pgcd(int smallest, int precision, int a, int b, int c);
  *  a "0" bit is encoded by setting the pin HIGH to T1 ns, then LOW for T2+T3 ns
  *
  */
-void i2s_define_bit_patterns(const ChipsetTiming& TIMING);
+void i2s_define_bit_patterns(const fl::ChipsetTiming& TIMING);
 bool i2s_is_initialized();
 void i2s_init(int i2s_device);
 void i2s_clear_dma_buffer(uint32_t *buf);  // warning, this function assumes length.

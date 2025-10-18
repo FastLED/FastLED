@@ -31,7 +31,7 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        const ChipsetTiming& TIMING,
+        const fl::ChipsetTiming& TIMING,
         DmaMode dma_mode,
         int RESET_US = 280);  // ChipsetTiming contains T1, T2, T3 values. See led_timing.h for TIMING_* constants. RESET_US defaults to 280µs for WS2812 compatibility 
 

@@ -23,7 +23,7 @@ namespace fl {
 ///
 /// Usage:
 /// ```cpp
-/// template <const ChipsetTiming& TIMING, EOrder RGB_ORDER>
+/// template <const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER>
 /// class ClocklessController {
 ///     static constexpr uint32_t T1 = TimingTraits<TIMING>::T1;
 ///     static constexpr uint32_t T2 = TimingTraits<TIMING>::T2;
@@ -31,7 +31,7 @@ namespace fl {
 ///     // ... use T1, T2, T3 in template instantiations
 /// };
 /// ```
-template <const ChipsetTiming& TIMING>
+template <const fl::ChipsetTiming& TIMING>
 struct TimingTraits {
     /// @brief High time for bit 0 (nanoseconds)
     static constexpr uint32_t T1 = TIMING.T1;

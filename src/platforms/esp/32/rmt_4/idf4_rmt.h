@@ -145,7 +145,7 @@ public:
     RmtController(const RmtController &) = delete;
     RmtController(
         int DATA_PIN,
-        const ChipsetTiming& TIMING,
+        const fl::ChipsetTiming& TIMING,
         int maxChannel,
         bool built_in_driver);
     ~RmtController();

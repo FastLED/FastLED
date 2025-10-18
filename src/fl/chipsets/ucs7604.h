@@ -260,7 +260,7 @@ namespace fl {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     static constexpr uint32_t T1 = TIMING.T1;
