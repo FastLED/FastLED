@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxEngine.ino
 /// @brief   Demonstrates FxEngine for switching between effects
 /// @example FxEngine.ino
@@ -9,13 +11,6 @@
 /// 4. When the compiler is done a web page will open.
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
-#include "FastLED.h"
-
-#include "fl/sketch_macros.h"
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-#include "platforms/sketch_fake.hpp"
-#else
-
 #include <FastLED.h>
 using namespace fl;
 
@@ -76,5 +71,3 @@ void loop() {
     fxEngine.draw(millis(), leds);
     FastLED.show();
 }
-
-#endif  // SKETCH_HAS_LOTS_OF_MEMORY

@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxNoisePlusPalette.ino
 /// @brief   Noise plus palette effect with XYMap
 /// @example FxNoisePlusPalette.ino
@@ -9,14 +11,6 @@
 /// 4. When the compiler is done a web page will open.
 
 #include <FastLED.h>
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Don't compile this for AVR microcontrollers (like Arduino Uno) because they typically 
-// don't have enough memory to handle this complex animation.
-// Instead, we provide empty setup/loop functions so the sketch will compile but do nothing.
-void setup() {}
-void loop() {}
-#else  // For all other platforms with more memory (ESP32, Teensy, etc.)
 #include "fx/2d/noisepalette.h"
 #include "fl/ui.h"
 
@@ -97,5 +91,3 @@ void loop() {
     noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
 }
-
-#endif  // End of the non-AVR code section

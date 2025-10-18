@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    SdCard.ino
 /// @brief   Demonstrates playing a video on FastLED.
 /// @author  Zach Vorhies
@@ -9,18 +11,6 @@
 /// 4. When the compiler is done a web page will open.
 
 #include "FastLED.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-void setup() {
-  // put your setup code here, to run once:
-}
-
-void loop() {
-  // put your main code here, to run repeatedly:
-}
-#else
-
-
 #include "Arduino.h"
 
 #include "fx/2d/noisepalette.h"
@@ -132,5 +122,3 @@ void loop() {
     vid.draw(now, leds);
     FastLED.show();
 }
-
-#endif

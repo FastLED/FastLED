@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxGfx2Video.ino
 /// @brief   Demonstrates graphics to video conversion
 /// @example FxGfx2Video.ino
@@ -7,24 +9,9 @@
 /// 2. cd into this examples page.
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
-
-/// @file    Gfx2Video.ino
-/// @brief   Demonstrates drawing to a frame buffer, which is used as source video for the memory player.
-///          The render pattern is alternating black/red pixels as a checkerboard.
-/// @example VideoTest.ino
-
-
-#ifndef COMPILE_VIDEO_STREAM
-#if defined(__AVR__)
-// This has grown too large for the AVR to handle.
-#define COMPILE_VIDEO_STREAM 0
-#else
-#define COMPILE_VIDEO_STREAM 1
-#endif
-#endif // COMPILE_VIDEO_STREAM
-
-#if COMPILE_VIDEO_STREAM
-
+///
+/// The render pattern is alternating black/red pixels as a checkerboard.
+/// Demonstrates drawing to a frame buffer, which is used as source video for the memory player.
 
 #include <FastLED.h>
 #include "fl/bytestreammemory.h"
@@ -101,7 +88,3 @@ void loop() {
     FastLED.show();
     delay(20); // Adjust this delay to control frame rate
 }
-#else
-void setup() {}
-void loop() {}
-#endif // COMPILE_VIDEO_STREAM

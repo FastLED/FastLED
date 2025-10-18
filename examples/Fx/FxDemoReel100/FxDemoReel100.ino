@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxDemoReel100.ino
 /// @brief   DemoReel100 effects collection with ScreenMap
 /// @example FxDemoReel100.ino
@@ -11,14 +13,6 @@
 #include <FastLED.h>
 #include "fx/1d/demoreel100.h"
 #include "fl/screenmap.h"
-#include "defs.h"  // for NUM_LEDS
-
-
-#if !HAS_ENOUGH_MEMORY
-void setup() {}
-void loop() {}
-#else
-
 
 using namespace fl;
 
@@ -44,7 +38,7 @@ DemoReel100Ptr demoReel = fl::make_shared<DemoReel100>(NUM_LEDS);
 
 void setup() {
   ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS);
-  
+
   // tell FastLED about the LED strip configuration
   FastLED.addLeds<LED_TYPE,DATA_PIN,COLOR_ORDER>(leds, NUM_LEDS, 2.0f)
     .setCorrection(TypicalLEDStrip)
@@ -61,10 +55,7 @@ void loop()
     demoReel->draw(Fx::DrawContext(millis(), leds));
 
     // send the 'leds' array out to the actual LED strip
-    FastLED.show();  
+    FastLED.show();
     // insert a delay to keep the framerate modest
-    FastLED.delay(1000/FRAMES_PER_SECOND); 
+    FastLED.delay(1000/FRAMES_PER_SECOND);
 }
-
-
-#endif // HAS_ENOUGH_MEMORY

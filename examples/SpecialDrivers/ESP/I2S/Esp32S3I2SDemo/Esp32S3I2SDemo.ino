@@ -1,4 +1,5 @@
 
+// @filter: (platform is esp32) and (target is -DESP32S3)
 
 #ifndef ESP32
 #define IS_ESP32_S3 0

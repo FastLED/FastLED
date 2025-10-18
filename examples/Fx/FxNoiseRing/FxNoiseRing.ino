@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxNoiseRing.ino
 /// @brief   Noise effect on circular ring with ScreenMap
 /// @example FxNoiseRing.ino
@@ -13,15 +15,6 @@
 #include "FastLED.h"
 
 // Now we can include other headers and do platform checks
-#include "fl/sketch_macros.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
-
-// Include remaining headers after FastLED.h and platform check
 #include <stdio.h>
 #include "fl/json.h"
 #include "fl/math_macros.h"
@@ -121,5 +114,3 @@ void loop() {
 
     FastLED.show();
 }
-
-#endif

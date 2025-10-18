@@ -1,6 +1,8 @@
 /// @file Esp32P4Parlio.ino
 /// @brief ESP32-P4 PARLIO parallel driver example
 
+// @filter: (target is -DESP32P4)
+
 #ifndef ESP32
 #define IS_ESP32_P4 0
 #else
