@@ -42,7 +42,7 @@
 
 // Helper macro for 32-bit type selection based on IDF version
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
-  #include "../esp/esp_version.h"
+  // esp_version.h already included above, use its definitions here
   #if !defined(ESP_IDF_VERSION) || !ESP_IDF_VERSION_4_OR_HIGHER
     // IDF 3.3: Use system __int32_t/__uint32_t types to match system's int32_t/uint32_t
     #define PLATFORM_INT32_CONDITIONAL_CHOOSE \

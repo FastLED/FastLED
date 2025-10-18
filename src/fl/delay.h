@@ -4,7 +4,8 @@
 #define __INC_FL_DELAY_H
 
 /// @file fl/delay.h
-/// Nanosecond-precision delay utilities for FastLED
+/// Comprehensive delay utilities for FastLED
+/// Includes nanosecond-precision delays, cycle counting, and microsecond delays
 
 #include "fl/types.h"
 #include "fl/force_inline.h"
@@ -30,6 +31,26 @@
 #include "platforms/arm/stm32/delay.h"
 #else
 #include "platforms/delay_generic.h"
+#endif
+
+// ============================================================================
+// Platform-specific cycle delay includes
+// ============================================================================
+
+// ESP32 core has its own definition of NOP, so undef it first
+#ifdef ESP32
+#undef NOP
+#undef NOP2
+#endif
+
+// Include platform-specific cycle delay implementations
+#if defined(__AVR__)
+#include "platforms/avr/delay_cycles.h"
+#elif defined(ESP32)
+#include "platforms/shared/delay_cycles_generic.h"
+#include "platforms/esp/delay_cycles_esp32.h"
+#else
+#include "platforms/shared/delay_cycles_generic.h"
 #endif
 
 namespace fl {
@@ -207,15 +228,118 @@ inline void delayNanoseconds(fl::u32 ns, fl::u32 hz) {
 }
 
 // ============================================================================
-// Template specializations for common nanosecond values
+// Clock cycle-counted delay loop (delaycycles)
 // ============================================================================
+
+/// Forward declaration of delaycycles template
+/// @tparam CYCLES the number of clock cycles to delay
+/// @note No delay is applied if CYCLES is less than or equal to zero.
+/// Platform-specific implementations are in platforms/*/delay_cycles.h
+template<cycle_t CYCLES> inline void delaycycles();
+
+/// A variant of delaycycles that will always delay at least one cycle
+/// @tparam CYCLES the number of clock cycles to delay
+template<cycle_t CYCLES> inline void delaycycles_min1() {
+  delaycycles<1>();
+  delaycycles<CYCLES - 1>();
+}
+
+// ============================================================================
+// Template specializations for delaycycles
+// ============================================================================
+// These pre-instantiated specializations optimize compilation time and code size
+// for common cycle counts.
+//
+// To reduce compilation time in projects that don't use small cycle delays,
+// define FASTLED_NO_DELAY_SPECIALIZATIONS before including FastLED.h:
+//
+// @code
+// #define FASTLED_NO_DELAY_SPECIALIZATIONS
+// #include "FastLED.h"
+// @endcode
 
 /// @cond DOXYGEN_SKIP
 
-// Common timing values for LED protocols (WS2812, etc.)
-// These specializations are not used - the primary template handles all cases
+// Specializations for small negative and zero cycles
+template<> FASTLED_FORCE_INLINE void delaycycles<-10>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-9>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-8>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-7>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-6>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-5>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-4>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-3>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-2>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-1>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<0>() {}
+
+// Specializations for small positive cycles
+template<> FASTLED_FORCE_INLINE void delaycycles<1>() { FL_NOP; }
+template<> FASTLED_FORCE_INLINE void delaycycles<2>() { FL_NOP2; }
+template<> FASTLED_FORCE_INLINE void delaycycles<3>() {
+  FL_NOP;
+  FL_NOP2;
+}
+template<> FASTLED_FORCE_INLINE void delaycycles<4>() {
+  FL_NOP2;
+  FL_NOP2;
+}
+template<> FASTLED_FORCE_INLINE void delaycycles<5>() {
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP;
+}
+
+// Specialization for a gigantic amount of cycles on ESP32
+#if defined(ESP32)
+template<> FASTLED_FORCE_INLINE void delaycycles<4294966398>() {
+	// specialization for a gigantic amount of cycles, apparently this is needed
+	// or esp32 will blow the stack with cycles = 4294966398.
+	const fl::u32 termination = 4294966398 / 10;
+	const fl::u32 remainder = 4294966398 % 10;
+	for (fl::u32 i = 0; i < termination; i++) {
+		FL_NOP; FL_NOP; FL_NOP; FL_NOP; FL_NOP;
+		FL_NOP; FL_NOP; FL_NOP; FL_NOP; FL_NOP;
+	}
+
+	// remainder
+	switch (remainder) {
+		case 9: FL_NOP;
+		case 8: FL_NOP;
+		case 7: FL_NOP;
+		case 6: FL_NOP;
+		case 5: FL_NOP;
+		case 4: FL_NOP;
+		case 3: FL_NOP;
+		case 2: FL_NOP;
+		case 1: FL_NOP;
+	}
+}
+#endif
 
 /// @endcond
+
+// ============================================================================
+// Millisecond and Microsecond delay wrappers
+// ============================================================================
+
+/// Delay for a given number of milliseconds
+/// @param ms Milliseconds to delay
+/// @note Uses platform-provided delay() function (from Arduino, led_sysdefs, or platform layer)
+/// Implementation provided in delay.cpp
+void delay(u32 ms);
+
+/// Delay for a given number of microseconds
+/// @param us Microseconds to delay
+/// @note Uses platform-provided delayMicroseconds() function (from Arduino, led_sysdefs, or platform layer)
+/// Implementation provided in delay.cpp
+void delayMicroseconds(u32 us);
+
+/// Alias for delayMicroseconds (shorter name for convenience)
+/// @param us Microseconds to delay
+inline void delayMicros(u32 us) {
+  delayMicroseconds(us);
+}
 
 }  // namespace fl
 

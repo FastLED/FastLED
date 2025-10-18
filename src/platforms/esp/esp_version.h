@@ -15,6 +15,13 @@
 // available, then define any missing pieces. This prevents incorrect
 // feature detection such as compiling legacy polyfills on newer IDF.
 
+// PERFORMANCE OPTIMIZATION: Cache FL_HAS_INCLUDE() results to avoid expensive
+// preprocessor header searches. FL_HAS_INCLUDE triggers header searches which
+// are slow when included multiple times. This guard ensures these checks only
+// happen once per compilation unit.
+#ifndef FASTLED_ESP_VERSION_CACHED
+#define FASTLED_ESP_VERSION_CACHED
+
 #include "fl/has_include.h"
 
 // Prefer official version header when available (Arduino-ESP32 / ESP-IDF 4+)
@@ -26,6 +33,8 @@
 #if FL_HAS_INCLUDE("sdkconfig.h")
 #include "sdkconfig.h"
 #endif
+
+#endif // FASTLED_ESP_VERSION_CACHED
 
 // Provide safe defaults for very old environments that define nothing
 #ifndef ESP_IDF_VERSION_MAJOR
