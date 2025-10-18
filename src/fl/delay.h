@@ -10,8 +10,6 @@
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
 
-namespace fl {
-
 // ============================================================================
 // Platform-specific includes (must be outside detail namespace)
 // ============================================================================
@@ -32,6 +30,17 @@ namespace fl {
 #include "platforms/arm/stm32/delay.h"
 #else
 #include "platforms/delay_generic.h"
+#endif
+
+namespace fl {
+
+// ============================================================================
+// Forward declarations
+// ============================================================================
+
+#if defined(ESP32)
+/// Get the current ESP32 CPU frequency at runtime
+u32 esp_clk_cpu_freq_impl();
 #endif
 
 namespace detail {
@@ -120,8 +129,7 @@ FASTLED_FORCE_INLINE void delayNanoseconds() {
 inline void delayNanoseconds(fl::u32 ns) {
   // Query runtime clock frequency
 #if defined(ESP32)
-  extern "C" fl::u32 esp_clk_cpu_freq();
-  fl::u32 hz = esp_clk_cpu_freq();
+  fl::u32 hz = esp_clk_cpu_freq_impl();
 #elif defined(ARDUINO_ARCH_RP2040)
   // RP2040 clock is fixed at 125 MHz in normal mode
   fl::u32 hz = 125000000UL;
