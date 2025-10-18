@@ -158,6 +158,67 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 }
 #endif
 
+/// Calculate the remainder of one unsigned 8-bit
+/// value divided by another, aka A % M. (C implementation)
+/// Implemented by repeated subtraction, which is
+/// very compact, and very fast if A is "probably"
+/// less than M.  If A is a large multiple of M,
+/// the loop has to execute multiple times.
+/// @param a dividend byte
+/// @param m divisor byte
+/// @returns remainder of a / m (i.e. a % m)
+LIB8STATIC_ALWAYS_INLINE uint8_t mod8(uint8_t a, uint8_t m) {
+    while (a >= m)
+        a -= m;
+    return a;
+}
+
+/// Add two numbers, and calculate the modulo
+/// of the sum and a third number, M. (C implementation)
+/// In other words, it returns (A+B) % M.
+/// It is designed as a compact mechanism for
+/// incrementing a "mode" switch and wrapping
+/// around back to "mode 0" when the switch
+/// goes past the end of the available range.
+/// e.g. if you have seven modes, this switches
+/// to the next one and wraps around if needed:
+///   @code{.cpp}
+///   mode = addmod8( mode, 1, 7);
+///   @endcode
+/// @param a dividend byte
+/// @param b value to add to the dividend
+/// @param m divisor byte
+/// @returns remainder of (a + b) / m
+LIB8STATIC uint8_t addmod8(uint8_t a, uint8_t b, uint8_t m) {
+    a += b;
+    while (a >= m)
+        a -= m;
+    return a;
+}
+
+/// Subtract two numbers, and calculate the modulo
+/// of the difference and a third number, M. (C implementation)
+/// In other words, it returns (A-B) % M.
+/// It is designed as a compact mechanism for
+/// decrementing a "mode" switch and wrapping
+/// around back to "mode 0" when the switch
+/// goes past the start of the available range.
+/// e.g. if you have seven modes, this switches
+/// to the previous one and wraps around if needed:
+///   @code{.cpp}
+///   mode = submod8( mode, 1, 7);
+///   @endcode
+/// @param a dividend byte
+/// @param b value to subtract from the dividend
+/// @param m divisor byte
+/// @returns remainder of (a - b) / m
+LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
+    a -= b;
+    while (a >= m)
+        a -= m;
+    return a;
+}
+
 /// @} Math_C
 
 FL_DISABLE_WARNING_POP
