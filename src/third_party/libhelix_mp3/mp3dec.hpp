@@ -46,6 +46,13 @@
 // Note: These use unsigned int for compatibility with third-party code
 // The actual implementations use the fl:: namespace versions
 //#include "hlxclib/string.h"		/* for memmove, memcpy (can replace with different implementations if desired) */
+
+// Forward declarations of C standard library functions (without including cstring)
+extern "C" {
+    void* memcpy(void* dst, const void* src, unsigned long num);
+    void* memmove(void* dst, const void* src, unsigned long num);
+}
+
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 
 

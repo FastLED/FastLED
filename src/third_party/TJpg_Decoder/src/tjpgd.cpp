@@ -26,6 +26,7 @@
 
 // Include standard library headers outside namespace to avoid conflicts
 #include <stdlib.h>
+#include <cstring> // ok include
 #include "fl/string.h"
 
 #include "tjpgd.h"

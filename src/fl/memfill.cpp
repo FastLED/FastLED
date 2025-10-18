@@ -1,38 +1,48 @@
 #include "fl/memfill.h"
-#include <cstring>  // ok include
 
 namespace fl {
 
-void* memfill_impl(void* ptr, int value, fl::size num) {
-    return memset(ptr, value, num);
+void* memfill(void* ptr, int value, fl::size num) noexcept {
+    return __builtin_memset(ptr, value, num);
 }
 
-void* memcopy_impl(void* dst, const void* src, fl::size num) {
-    return memcpy(dst, src, num);
+void* memcopy(void* dst, const void* src, fl::size num) noexcept {
+    return __builtin_memcpy(dst, src, num);
 }
 
-fl::size strlen(const char* str) {
-    return ::strlen(str);
+void* memmove(void* dst, const void* src, fl::size num) noexcept {
+    return __builtin_memmove(dst, src, num);
 }
 
-void* memmove_impl(void* dst, const void* src, fl::size num) {
-    return memmove(dst, src, num);
+const char* strstr(const char* haystack, const char* needle) noexcept {
+    // Manual implementation without cstring
+    if (!needle || needle[0] == '\0') {
+        return haystack;
+    }
+    for (; *haystack; ++haystack) {
+        const char* h = haystack;
+        const char* n = needle;
+        while (*h && *n && *h == *n) {
+            ++h;
+            ++n;
+        }
+        if (*n == '\0') {
+            return haystack;
+        }
+    }
+    return nullptr;
 }
 
-int strcmp(const char* s1, const char* s2) {
-    return ::strcmp(s1, s2);
-}
-
-const char* strstr(const char* haystack, const char* needle) {
-    return ::strstr(haystack, needle);
-}
-
-int strncmp(const char* s1, const char* s2, fl::size n) {
-    return ::strncmp(s1, s2, n);
-}
-
-void* memmove(void* dst, const void* src, fl::size num) {
-    return ::memmove(dst, src, num);
+int strncmp(const char* s1, const char* s2, fl::size n) noexcept {
+    for (fl::size i = 0; i < n; ++i) {
+        if (s1[i] != s2[i]) {
+            return (unsigned char)s1[i] - (unsigned char)s2[i];
+        }
+        if (s1[i] == '\0') {
+            return 0;
+        }
+    }
+    return 0;
 }
 
 } // namespace fl

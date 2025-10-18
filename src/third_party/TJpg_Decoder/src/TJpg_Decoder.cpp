@@ -9,6 +9,7 @@ https://github.com/Bodmer/TJpg_Decoder
 
 #include "TJpg_Decoder.h"
 #include "fl/unused.h"
+#include <cstring> // ok include
 
 namespace fl {
 namespace third_party {
