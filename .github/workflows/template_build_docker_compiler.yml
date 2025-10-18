@@ -34,10 +34,12 @@ jobs:
     - name: Decode credentials as environment variables
       id: check
       run: |
-        for i in $env_vars; do
-            i=$(echo $i | sed 's/=.*//g')=$(echo ${i#*=} | base64 -di | base64 -di)
-            echo ::add-mask::${i#*=}
-            printf '%s\n' "$i" >> $GITHUB_ENV
+        for line in $env_vars; do
+            key=$(echo "$line" | sed 's/=.*//g')
+            encoded_value=$(echo "$line" | sed 's/^[^=]*=//')
+            value=$(echo "$encoded_value" | base64 -d)
+            echo "::add-mask::$value"
+            echo "$key=$value" >> $GITHUB_ENV
         done
 
     - name: Checkout repository

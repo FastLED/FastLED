@@ -39,9 +39,9 @@ jobs:
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
           registry_image: ${{ env.REGISTRY_IMAGE }}
         run: |
-          echo "docker_username=$(echo $docker_username | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_image=$(echo $registry_image | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo -n "$docker_password" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_image=$(echo -n "$registry_image" | base64 -w0)" >> $GITHUB_OUTPUT
 
 
   build-amd64:
@@ -88,6 +88,15 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3

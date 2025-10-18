@@ -61,15 +61,15 @@ jobs:
           docker_username: ${{ secrets.DOCKER_USERNAME }}
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "docker_username=$(echo $docker_username | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_avr=$(echo 'niteris/fastled-compiler-avr-uno' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp=$(echo 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_teensy=$(echo 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_stm32=$(echo 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_rp2040=$(echo 'niteris/fastled-compiler-rp2040-rpipico' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_nrf52=$(echo 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_sam=$(echo 'niteris/fastled-compiler-sam-due' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo -n "$docker_password" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr-uno' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp2040-rpipico' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0)" >> $GITHUB_OUTPUT
 
   # AVR Platform (uno, attiny85, attiny88, nano_every, etc.)
   build-avr-amd64:
@@ -112,6 +112,15 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -181,6 +190,15 @@ jobs:
           pattern: digests-*
           merge-multiple: true
 
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -248,6 +266,15 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -317,6 +344,15 @@ jobs:
           pattern: digests-*
           merge-multiple: true
 
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -384,6 +420,15 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -453,6 +498,15 @@ jobs:
           pattern: digests-*
           merge-multiple: true
 
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -520,6 +574,15 @@ jobs:
           path: /tmp/digests
           pattern: digests-*
           merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
