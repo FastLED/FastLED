@@ -7,6 +7,7 @@
 #include "pixel_iterator.h"
 #include "fl/stdint.h"
 #include "fl/namespace.h"
+#include "fl/chipsets/led_timing.h"
 
 namespace fl {
 
@@ -30,9 +31,9 @@ public:
     RmtController5(const RmtController5 &) = delete;
     RmtController5(
         int DATA_PIN,
-        int T1, int T2, int T3,
+        const ChipsetTiming& TIMING,
         DmaMode dma_mode,
-        int RESET_US = 280);  // FastLED bit timings. See embedded python script in chipsets.h for how to calculate these. RESET_US defaults to 280µs for WS2812 compatibility 
+        int RESET_US = 280);  // ChipsetTiming contains T1, T2, T3 values. See led_timing.h for TIMING_* constants. RESET_US defaults to 280µs for WS2812 compatibility 
 
     ~RmtController5();
 

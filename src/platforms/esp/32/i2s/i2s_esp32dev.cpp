@@ -15,6 +15,7 @@
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "fl/memfill.h"
+#include "fl/chipsets/led_timing.h"
 #include <string.h> // for memset
 
 #include "platforms/esp/esp_version.h"
@@ -191,7 +192,11 @@ static void transpose32(uint8_t *pixels, uint8_t *bits) {
     // transpose8rS32(& pixels[24], 1, 4, & bits[3]);  Can only use 24 bits
 }
 
-void i2s_define_bit_patterns(int T1, int T2, int T3) {
+void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
+    // Extract timing values from struct
+    int T1 = TIMING.T1;
+    int T2 = TIMING.T2;
+    int T3 = TIMING.T3;
 
     // -- First, convert back to ns from CPU clocks
     uint32_t T1ns = ESPCLKS_TO_NS(T1);

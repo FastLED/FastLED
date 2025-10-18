@@ -2,6 +2,7 @@
 #define __INC_BLOCK_CLOCKLESS_ARM_K20_H
 
 #include "fl/namespace.h"
+#include "fl/chipsets/timing_traits.h"
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
 // See clockless.h for detailed info on how the template parameters are used.
@@ -20,8 +21,11 @@
 
 FASTLED_NAMESPACE_BEGIN
 
-template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
+template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
+	static constexpr uint32_t T1 = TIMING.T1;
+	static constexpr uint32_t T2 = TIMING.T2;
+	static constexpr uint32_t T3 = TIMING.T3;
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
@@ -191,8 +195,11 @@ public:
 #define PMASK_HI (PMASK>>8 & 0xFF)
 #define PMASK_LO (PMASK & 0xFF)
 
-template <uint8_t LANES, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t LANES, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PMASK> {
+	static constexpr uint32_t T1 = TIMING.T1;
+	static constexpr uint32_t T2 = TIMING.T2;
+	static constexpr uint32_t T3 = TIMING.T3;
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_t data_t;
 

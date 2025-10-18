@@ -5,6 +5,7 @@
 #include "../../lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 #include "../../fl/force_inline.h"
+#include "../../fl/chipsets/timing_traits.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -139,8 +140,13 @@ static uint8_t gTimeErrorAccum256ths;
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+	// Extract timing values from struct
+	static constexpr uint32_t T1 = TIMING.T1;
+	static constexpr uint32_t T2 = TIMING.T2;
+	static constexpr uint32_t T3 = TIMING.T3;
+
 	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;

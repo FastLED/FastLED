@@ -18,10 +18,16 @@
 
 
 #include "../common/m0clockless.h"
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 75>
+#include "fl/chipsets/timing_traits.h"
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 75>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPinBB<DATA_PIN>::port_t data_t;
+
+    // Extract timing values from ChipsetTiming struct at compile-time
+    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T3 = TIMING.T3;
 
     data_t mPinMask;
     data_ptr_t mPort;
@@ -72,7 +78,7 @@ public:
         LED_TIMER->SHORTS = TIMER_SHORTS_COMPARE0_CLEAR_Msk;
         LED_TIMER->TASKS_START = 1;
 
-        int ret = showLedData<4,8,T1,T2,T3,RGB_ORDER,WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+        int ret = showLedData<4,8,TIMING,RGB_ORDER,WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
 
         LED_TIMER->TASKS_STOP = 1;
         return ret; // 0x00FFFFFF - _VAL;

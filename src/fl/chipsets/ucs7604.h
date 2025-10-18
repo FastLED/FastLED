@@ -5,6 +5,7 @@
 
 #include "pixeltypes.h"
 #include "pixel_controller.h"
+#include "timing_traits.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -259,28 +260,15 @@ namespace fl {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-///
-/// # Timing Tolerance Research:
-/// The configurable PREAMBLE_DELAY_US parameter enables research into timing tolerance:
-/// - Default (260µs): Conservative timing from prototype implementation
-/// - Minimum (0µs): Verify protocol is flexible with no inter-chunk delays
-/// - Extended (500µs-10000µs): Confirm upper tolerance bounds
-/// - Asymmetric: Test different delays between chunk1→chunk2 and chunk2→data
-///
-/// **Safe Operating Range Rationale:**
-/// - Minimum: 0µs allows verification of protocol flexibility
-/// - Maximum: 10000µs (10ms) covers practical delay testing without unrealistic overhead
-/// - Constraint: Prevents accidental misuse (e.g., millisecond vs microsecond confusion)
-/// - Enforcement: static_assert at compile-time prevents invalid configurations
-///
-/// See task.md section "Task 2.4: Preamble Timing Tolerance" for research methodology.
-/// Iteration 7 validated that both 0µs (minimal) and 260µs (default) produce valid results.
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
-          UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280,
-          uint32_t PREAMBLE_DELAY_US = 260>
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+          UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
+    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T3 = TIMING.T3;
+
     // Reference to the generic clockless driver for transmitting preambles
-    typedef ClocklessBlockController<DATA_PIN, T1, T2, T3, RGB_ORDER, 0, false, WAIT_TIME>
+    typedef ClocklessBlockController<DATA_PIN, TIMING, RGB_ORDER, 0, false, WAIT_TIME>
             ClocklessDriver;
 
     CMinWait<WAIT_TIME> mWait;
@@ -288,14 +276,6 @@ class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     // UCS7604 preamble configuration
     static constexpr uint8_t CHUNK1_LEN = 8;
     static constexpr uint8_t CHUNK2_LEN = 7;
-    // Convert microseconds template parameter to nanoseconds for delayNanoseconds<>()
-    // Use uint64_t to prevent overflow when PREAMBLE_DELAY_US > ~4294 microseconds
-    static constexpr uint64_t PREAMBLE_DELAY_NS = static_cast<uint64_t>(PREAMBLE_DELAY_US) * 1000ULL;
-
-    // Static assertion to validate PREAMBLE_DELAY_US is within practical operating range
-    // Allows 0µs (minimum) to 10000µs (10ms maximum) per task.md timing tolerance research
-    static_assert(PREAMBLE_DELAY_US <= 10000,
-                  "PREAMBLE_DELAY_US must be <= 10000 microseconds for practical timing tolerance");
 
     // Chunk 1: Framing header (fixed pattern)
     const uint8_t mChunk1[CHUNK1_LEN] = {
@@ -400,15 +380,13 @@ protected:
     /// @brief Internal method to show RGB pixel data with UCS7604 preambles
     /// @param pixels The pixel controller
     ///
-    /// Transmits: chunk1 → delay → chunk2 → delay → pixel data
+    /// Transmits: chunk1 → chunk2 → pixel data
     FASTLED_FORCE_INLINE void sendUCS7604Frame(PixelController<RGB_ORDER>& pixels) {
         // Send chunk 1 (framing header)
         sendPreambleChunk(mChunk1, CHUNK1_LEN);
-        fl::delayNanoseconds<PREAMBLE_DELAY_NS>();
 
         // Send chunk 2 (configuration)
         sendPreambleChunk(mChunk2, CHUNK2_LEN);
-        fl::delayNanoseconds<PREAMBLE_DELAY_NS>();
 
         // Send pixel data using the generic clockless driver
         ClocklessDriver::sendPixelData(pixels);
@@ -426,44 +404,31 @@ protected:
 /// @{
 
 /// Standard UCS7604 at 800kHz with default 260µs preamble delays
+/// (Phase 4 refactoring: using unified ChipsetTiming API)
 typedef fl::UCS7604Controller<
     6,  // DATA_PIN example (use your GPIO pin)
-    250, 625, 375,  // T1, T2, T3 for WS2812-compatible 800kHz timing
+    fl::TIMING_UCS7604_800KHZ,
     GRB,  // RGB_ORDER
     fl::UCS7604_MODE_16BIT_800KHZ,
-    280,  // WAIT_TIME (280µs reset)
-    260   // PREAMBLE_DELAY_US (default)
+    280   // WAIT_TIME (280µs reset)
 > UCS7604_800KHZ_Standard;
 
-/// UCS7604 with zero preamble delays for timing tolerance testing
-/// (Phase 3 research: verify protocol works with minimal delays)
+/// UCS7604 8-bit mode at 800kHz for reduced color depth requirements
 typedef fl::UCS7604Controller<
     6,  // DATA_PIN example
-    250, 625, 375,
+    fl::TIMING_UCS7604_800KHZ,
     GRB,
-    fl::UCS7604_MODE_16BIT_800KHZ,
-    280,
-    0    // PREAMBLE_DELAY_US = 0µs (testing minimal delays)
-> UCS7604_800KHZ_NoDelay;
+    fl::UCS7604_MODE_8BIT_800KHZ,
+    280
+> UCS7604_800KHZ_8bit;
 
-/// UCS7604 with extended preamble delays (500µs) for timing margin testing
+/// UCS7604 high-speed mode at 1.6MHz for enhanced refresh rates
 typedef fl::UCS7604Controller<
     6,  // DATA_PIN example
-    250, 625, 375,
-    GRB,
-    fl::UCS7604_MODE_16BIT_800KHZ,
-    280,
-    500   // PREAMBLE_DELAY_US = 500µs (extended timing)
-> UCS7604_800KHZ_Extended;
-
-/// UCS7604 high-speed mode at 1.6MHz with default delays
-typedef fl::UCS7604Controller<
-    6,  // DATA_PIN example
-    125, 312, 188,  // T1, T2, T3 for 1.6MHz timing (50% of 800kHz)
+    fl::TIMING_UCS7604_1600KHZ,
     GRB,
     fl::UCS7604_MODE_16BIT_1600KHZ,
-    280,
-    260   // PREAMBLE_DELAY_US (default)
+    280
 > UCS7604_1600KHZ_Standard;
 
 /// @}
@@ -476,10 +441,10 @@ typedef fl::UCS7604Controller<
 /// CRGB leds[NUM_LEDS];
 ///
 /// void setup() {
-///     // 16-bit mode @ 800kHz with default 260µs preamble delays
+///     // 16-bit mode @ 800kHz using ChipsetTiming API
 ///     FastLED.addLeds<fl::UCS7604Controller<
 ///         DATA_PIN,
-///         250, 625, 375,  // 800kHz WS2812-compatible timing
+///         fl::TIMING_UCS7604_800KHZ,
 ///         GRB,
 ///         fl::UCS7604_MODE_16BIT_800KHZ
 ///     >, CRGB>(leds, NUM_LEDS);
@@ -492,29 +457,14 @@ typedef fl::UCS7604Controller<
 /// }
 /// ```
 
-/// @example Timing Tolerance Testing (Zero Delay)
-/// ```cpp
-/// // Test if UCS7604 protocol works with minimal preamble delays
-/// FastLED.addLeds<fl::UCS7604Controller<
-///     6,
-///     250, 625, 375,
-///     GRB,
-///     fl::UCS7604_MODE_16BIT_800KHZ,
-///     280,
-///     0  // PREAMBLE_DELAY_US = 0µs for Phase 3 testing
-/// >, CRGB>(leds, NUM_LEDS);
-/// ```
-
 /// @example High-Speed Mode (1.6MHz)
 /// ```cpp
-/// // Experimental high-speed mode (requires validation with hardware)
+/// // High-speed mode (experimental, requires validation with hardware)
 /// FastLED.addLeds<fl::UCS7604Controller<
-///     6,
-///     125, 312, 188,  // 1.6MHz timing (50% of 800kHz)
+///     DATA_PIN,
+///     fl::TIMING_UCS7604_1600KHZ,
 ///     GRB,
-///     fl::UCS7604_MODE_16BIT_1600KHZ,
-///     280,
-///     260  // Default delay
+///     fl::UCS7604_MODE_16BIT_1600KHZ
 /// >, CRGB>(leds, NUM_LEDS);
 /// ```
 

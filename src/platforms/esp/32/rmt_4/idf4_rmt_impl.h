@@ -14,6 +14,7 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "platforms/esp/32/clock_cycles.h"
+#include "fl/chipsets/led_timing.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -108,7 +109,7 @@ public:
     // -- Constructor
     //    Mainly just stores the template parameters from the LEDController as
     //    member variables.
-    ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver);
+    ESP32RMTController(int DATA_PIN, const ChipsetTiming& TIMING, int maxChannel, bool built_in_driver);
 
     // -- Show this string of pixels
     //    This is the main entry point for the pixel controller

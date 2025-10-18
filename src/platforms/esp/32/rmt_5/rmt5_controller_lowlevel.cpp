@@ -19,6 +19,7 @@ FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"
+#include "fl/chipsets/led_timing.h"
 
 #define RMT5_CONTROLLER_TAG "rmt5_controller_lowlevel"
 
@@ -26,13 +27,13 @@ namespace fl {
 
 RmtController5LowLevel::RmtController5LowLevel(
     int DATA_PIN,
-    int T1, int T2, int T3,
+    const ChipsetTiming& TIMING,
     int RESET_US
 )
     : mPin(static_cast<gpio_num_t>(DATA_PIN))
-    , mT1(T1)
-    , mT2(T2)
-    , mT3(T3)
+    , mT1(TIMING.T1)
+    , mT2(TIMING.T2)
+    , mT3(TIMING.T3)
     , mResetNs(RESET_US * 1000)  // Convert microseconds to nanoseconds
     , mPixelData(nullptr)
     , mPixelDataSize(0)

@@ -5,6 +5,8 @@
 
 #include "fl/stdint.h"
 
+#include "fl/chipsets/timing_traits.h"
+
 FL_EXTERN_C_BEGIN
 
 
@@ -42,8 +44,13 @@ struct M0ClocklessData {
 };
 
 
-template<int HI_OFFSET, int LO_OFFSET, int T1, int T2, int T3, EOrder RGB_ORDER, int WAIT_TIME>int
+template<int HI_OFFSET, int LO_OFFSET, const ChipsetTiming& TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
+  // Extract timing values at compile-time
+  static constexpr uint32_t T1 = TIMING.T1;
+  static constexpr uint32_t T2 = TIMING.T2;
+  static constexpr uint32_t T3 = TIMING.T3;
+
   // Lo register variables
   FASTLED_REGISTER uint32_t scratch=0;
   FASTLED_REGISTER struct M0ClocklessData *base = pData;

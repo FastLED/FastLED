@@ -19,6 +19,7 @@
 #include "fastpin.h"
 #include "fl/delay.h"
 #include "fl/compiler_control.h"
+#include "fl/chipsets/timing_traits.h"
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
@@ -29,9 +30,7 @@ FASTLED_NAMESPACE_BEGIN
 ///
 /// Template parameters:
 /// - DATA_PIN: GPIO pin for data line (e.g., 5 for GPIO5)
-/// - T1: Time in nanoseconds for '1' bit first pulse (high part)
-/// - T2: Time in nanoseconds for '1' bit second pulse (low part)
-/// - T3: Time in nanoseconds for '0' bit pulse (low part)
+/// - TIMING: ChipsetTiming struct with T1, T2, T3 timing values in nanoseconds
 /// - RGB_ORDER: Color byte ordering (RGB, GBR, etc.)
 /// - XTRA0: Extra delay parameter (for future use)
 /// - FLIP: Whether to flip data lines (for inverted logic)
@@ -51,10 +50,15 @@ FASTLED_NAMESPACE_BEGIN
 ///   - Delay T3 nanoseconds
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
 {
 private:
+    // Extract timing values from struct
+    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T3 = TIMING.T3;
+
     // Verify pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
 
