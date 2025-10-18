@@ -27,78 +27,13 @@ namespace fl {
 // ============================================================================
 
 void delayNanoseconds(fl::u32 ns) {
-  // Query runtime clock frequency
-#if defined(ESP32)
-  fl::u32 hz = esp_clk_cpu_freq_impl();
-#elif defined(ARDUINO_ARCH_RP2040)
-  // RP2040 clock is fixed at 125 MHz in normal mode
-  fl::u32 hz = 125000000UL;
-#elif defined(NRF52_SERIES)
-  // nRF52 typically runs at 64 MHz
-  fl::u32 hz = 64000000UL;
-#elif defined(ARDUINO_ARCH_SAMD)
-  // SAMD uses F_CPU if defined
-  #if defined(F_CPU)
-  fl::u32 hz = F_CPU;
-  #else
-  fl::u32 hz = 48000000UL;  // SAMD21 default
-  #endif
-#else
-  // Fallback to F_CPU (most platforms)
-  #if defined(F_CPU)
-  fl::u32 hz = F_CPU;
-  #else
-  fl::u32 hz = 16000000UL;
-  #endif
-#endif
-
-  fl::u32 cycles = detail::cycles_from_ns(ns, hz);
-
-  if (cycles == 0) return;
-
-  // Platform-specific implementation
-#if defined(ARDUINO_ARCH_AVR)
-  delay_cycles_avr_nop(cycles);
-#elif defined(ESP32) && !defined(ESP32C3) && !defined(ESP32C6)
-  delay_cycles_ccount(cycles);
-#elif defined(ESP32C3) || defined(ESP32C6)
-  delay_cycles_mcycle(cycles);
-#elif defined(ARDUINO_ARCH_RP2040)
-  delay_cycles_pico(cycles);
-#elif defined(NRF52_SERIES)
-  delay_cycles_dwt(cycles);
-#elif defined(ARDUINO_ARCH_SAMD)
-  delay_cycles_dwt_samd(cycles);
-#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-  delay_cycles_dwt_arm(cycles);
-#else
-  delay_cycles_generic(cycles);
-#endif
+  // Call platform-specific implementation with auto-detected frequency
+  delayNanoseconds_impl(ns);
 }
 
 void delayNanoseconds(fl::u32 ns, fl::u32 hz) {
-  fl::u32 cycles = detail::cycles_from_ns(ns, hz);
-
-  if (cycles == 0) return;
-
-  // Platform-specific implementation
-#if defined(ARDUINO_ARCH_AVR)
-  delay_cycles_avr_nop(cycles);
-#elif defined(ESP32) && !defined(ESP32C3) && !defined(ESP32C6)
-  delay_cycles_ccount(cycles);
-#elif defined(ESP32C3) || defined(ESP32C6)
-  delay_cycles_mcycle(cycles);
-#elif defined(ARDUINO_ARCH_RP2040)
-  delay_cycles_pico(cycles);
-#elif defined(NRF52_SERIES)
-  delay_cycles_dwt(cycles);
-#elif defined(ARDUINO_ARCH_SAMD)
-  delay_cycles_dwt_samd(cycles);
-#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-  delay_cycles_dwt_arm(cycles);
-#else
-  delay_cycles_generic(cycles);
-#endif
+  // Call platform-specific implementation with explicit frequency
+  delayNanoseconds_impl(ns, hz);
 }
 
 // ============================================================================

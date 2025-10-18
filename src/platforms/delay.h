@@ -9,6 +9,21 @@
 /// platform-specific delay and delay_cycles headers.
 
 #include "fl/types.h"
+#include "fl/force_inline.h"
+
+namespace fl {
+
+// Forward declarations for platform-specific delay implementations
+/// Platform-specific implementation of nanosecond delay with runtime frequency
+/// @param ns Number of nanoseconds
+/// @param hz CPU frequency in Hz
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz);
+
+/// Platform-specific implementation of nanosecond delay with auto-detected frequency
+/// @param ns Number of nanoseconds
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
+
+}  // namespace fl
 
 // ============================================================================
 // Platform-specific nanosecond-precision delay includes

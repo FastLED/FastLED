@@ -26,4 +26,28 @@ inline void delay_cycles_avr_nop(fl::u32 cycles) {
   }
 }
 
+namespace fl {
+
+/// Platform-specific implementation of nanosecond delay with runtime frequency (AVR)
+/// @param ns Number of nanoseconds
+/// @param hz CPU frequency in Hz
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz) {
+  fl::u32 cycles = cycles_from_ns_avr(ns, hz);
+  if (cycles == 0) return;
+  delay_cycles_avr_nop(cycles);
+}
+
+/// Platform-specific implementation of nanosecond delay with auto-detected frequency (AVR)
+/// @param ns Number of nanoseconds
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns) {
+  #if defined(F_CPU)
+  fl::u32 hz = F_CPU;
+  #else
+  fl::u32 hz = 16000000UL;  // Default to 16 MHz
+  #endif
+  delayNanoseconds_impl(ns, hz);
+}
+
+}  // namespace fl
+
 #endif // __INC_FASTLED_PLATFORMS_AVR_DELAY_H
