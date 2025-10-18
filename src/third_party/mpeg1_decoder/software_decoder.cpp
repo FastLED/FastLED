@@ -2,6 +2,7 @@
 #include "fl/utility.h"
 #include "fl/str.h"
 #include "fl/compiler_control.h"
+#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
 
 // Include stdio for FILE type needed by pl_mpeg
 #include "fl/stdio.h"
@@ -277,7 +278,7 @@ bool SoftwareMpeg1Decoder::initializeDecoder() {
     // Copy to our buffer
     decoderData_->totalSize = tempBuffer.size();
     decoderData_->inputBuffer.reset(new fl::u8[decoderData_->totalSize]);
-    memcpy(decoderData_->inputBuffer.get(), tempBuffer.data(), decoderData_->totalSize);
+    fl::memcopy(decoderData_->inputBuffer.get(), tempBuffer.data(), decoderData_->totalSize);
 
     // Create pl_mpeg instance with memory buffer
     decoderData_->plmpeg = fl::third_party::plm_create_with_memory(

@@ -18,11 +18,12 @@
 #endif
 
 #if FASTLED_USES_SYSTEM_ASSERT
-// Note: assert is a builtin and doesn't need explicit inclusion
+// Note: We use FASTLED_WARN_IF instead of assert() to avoid needing to include
+// <cassert> in this header file (which is in strict no-stdlib-headers mode).
+// The warning will still be issued in testing builds.
 #define FASTLED_ASSERT(x, MSG)                                                 \
     {                                                                          \
         FASTLED_WARN_IF(!(x), MSG);                                            \
-        assert(x);                                                             \
     }
 #else
 #define FASTLED_ASSERT(x, MSG) FASTLED_WARN_IF(!(x), MSG)

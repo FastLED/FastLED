@@ -1,6 +1,8 @@
 #include "software_decoder.h"
 #include "fl/scoped_array.h"
 #include "fl/string.h"
+#include "fl/str.h"
+#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
 
 namespace fl {
 namespace third_party {
@@ -251,7 +253,7 @@ bool SoftwareGifDecoder::loadMoreData() {
     // libnsgif requires ALL data to be provided in each call to nsgif_data_scan
     fl::size oldSize = dataBuffer_.size();
     dataBuffer_.resize(oldSize + bytesRead);
-    memcpy(dataBuffer_.data() + oldSize, buffer, bytesRead);
+    fl::memcopy(dataBuffer_.data() + oldSize, buffer, bytesRead);
 
     // Feed ALL accumulated data to libnsgif
     nsgif_error result = nsgif_data_scan(gif_, dataBuffer_.size(), dataBuffer_.data());

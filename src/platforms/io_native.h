@@ -2,7 +2,6 @@
 
 #ifdef _WIN32
 #include <io.h>  // for _write
-// Note: _flushall() removed; using fsync-like behavior via _write(2, ...) flush
 #else
 #include <unistd.h>  // for write and fsync
 #endif
@@ -12,19 +11,18 @@ namespace fl {
 // Print functions
 inline void print_native(const char* str, bool flush=true) {
     if (!str) return;
-    
+
     // Native/Testing: Use direct system calls to stderr
     // Calculate length without strlen()
     size_t len = 0;
     const char* p = str;
     while (*p++) len++;
-    
+
 #ifdef _WIN32
-    // Windows version
+    // Windows version: _write to stderr (2 is stderr file descriptor)
+    // Note: _write performs native I/O and doesn't require additional flushing
     _write(2, str, len);  // 2 = stderr
-    if (flush) {
-        _flushall();
-    }
+    (void)flush;  // flush parameter unused on Windows with direct _write
 #else
     // Unix/Linux version
     ::write(2, str, len);  // 2 = stderr

@@ -9,6 +9,7 @@
 #include "lib8tion.h"
 #include "fl/namespace.h"
 #include "fl/force_inline.h"
+#include "fl/scale8.h"
 
 #include "fl/compiler_control.h"
 
@@ -21,8 +22,10 @@ FL_DISABLE_WARNING_SIGN_CONVERSION
 
 #if FASTLED_IS_USING_NAMESPACE
 #define FUNCTION_SCALE8(a,b) FASTLED_NAMESPACE::scale8(a,b)
+#define FUNCTION_SCALE8_CONSTEXPR(a,b) FASTLED_NAMESPACE::scale8_constexpr(a,b)
 #else
 #define FUNCTION_SCALE8(a,b) ::scale8(a,b)
+#define FUNCTION_SCALE8_CONSTEXPR(a,b) ::scale8_constexpr(a,b)
 #endif
 
 FASTLED_NAMESPACE_BEGIN
@@ -111,9 +114,9 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator-- (int )
 constexpr CRGB CRGB::nscale8_constexpr(const CRGB scaledown) const
 {
     return CRGB(
-        scale8_constexpr(r, scaledown.r),
-        scale8_constexpr(g, scaledown.g),
-        scale8_constexpr(b, scaledown.b)
+        (((uint16_t)r) * (1 + (uint16_t)(scaledown.r))) >> 8,
+        (((uint16_t)g) * (1 + (uint16_t)(scaledown.g))) >> 8,
+        (((uint16_t)b) * (1 + (uint16_t)(scaledown.b))) >> 8
     );
 }
 
