@@ -41,7 +41,10 @@
  * mp3dec.c - platform-independent top level MP3 decoder API
  **************************************************************************************/
 
-#include "string.h"
+// Forward declarations for memory operations
+// (can be replaced with different implementations if desired)
+// Note: These use unsigned int for compatibility with third-party code
+// The actual implementations use the fl:: namespace versions
 //#include "hlxclib/string.h"		/* for memmove, memcpy (can replace with different implementations if desired) */
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 

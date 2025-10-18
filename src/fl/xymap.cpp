@@ -1,7 +1,6 @@
 
 #include "fl/stdint.h"
-#include <string.h>
-
+#include "fl/memfill.h"
 #include "fl/clamp.h"
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
@@ -43,8 +42,8 @@ XYMap XYMap::constructWithLookUpTable(u16 width, u16 height,
                                       u16 offset) {
     XYMap out(width, height, kLookUpTable);
     out.mLookUpTable = fl::make_shared<LUT16>(width * height);
-    memcpy(out.mLookUpTable->getDataMutable(), lookUpTable,
-           width * height * sizeof(u16));
+    fl::memcopy(out.mLookUpTable->getDataMutable(), lookUpTable,
+                width * height * sizeof(u16));
     out.mOffset = offset;
     return out;
 }

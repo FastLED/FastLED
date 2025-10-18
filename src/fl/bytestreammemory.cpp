@@ -1,4 +1,3 @@
-#include <string.h>
 #include "fl/int.h"
 
 #include "fl/bytestreammemory.h"

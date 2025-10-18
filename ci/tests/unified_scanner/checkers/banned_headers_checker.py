@@ -51,6 +51,7 @@ class BannedHeadersChecker(BaseChecker):
         "stdint.h",
         "stddef.h",
         "cstddef",
+        "string.h",  # Ban C string.h - use fl/str.h instead
         "type_traits",
         "new",  # Ban <new> except for placement new in inplacenew.h
     }
@@ -97,6 +98,7 @@ class BannedHeadersChecker(BaseChecker):
         "stdint.h": "fl/stdint.h",
         "stddef.h": "fl/stddef.h",
         "cstddef": "fl/stddef.h",
+        "string.h": "fl/str.h (or use extern declarations for memset/memcpy if only C functions needed)",
         "type_traits": "fl/type_traits.h",
         "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
     }

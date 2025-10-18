@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string.h>
-
+#include "fl/memfill.h"
 #include "crgb.h"
 #include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
@@ -76,7 +75,7 @@ class Frame {
 };
 
 inline void Frame::copy(const Frame &other) {
-    memcpy(mRgb.data(), other.mRgb.data(), other.mPixelsCount * sizeof(CRGB));
+    fl::memcopy(mRgb.data(), other.mRgb.data(), other.mPixelsCount * sizeof(CRGB));
 }
 
 } // namespace fl

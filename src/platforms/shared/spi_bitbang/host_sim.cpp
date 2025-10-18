@@ -12,7 +12,7 @@
 
 #ifdef FASTLED_SPI_HOST_SIMULATION
 #include "fl/stdint.h"
-#include <string.h>
+#include "fl/memfill.h"
 
 /* Ring buffer for capturing GPIO events */
 #define FL_GPIO_SIM_RING_SIZE 4096
@@ -31,7 +31,7 @@ extern "C" {
 
 /* Initialize ring buffer */
 void fl_gpio_sim_init(void) {
-    memset(&g_gpio_ring, 0, sizeof(g_gpio_ring));
+    fl::memfill(&g_gpio_ring, 0, sizeof(g_gpio_ring));
 }
 
 /* Capture SET event */

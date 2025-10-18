@@ -2,7 +2,6 @@
 #include "fl/json.h"
 #include "fl/json.h"
 #include "platforms/shared/ui/json/ui.h"
-#include <string.h>
 
 #if FASTLED_ENABLE_JSON
 

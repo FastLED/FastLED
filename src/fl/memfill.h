@@ -1,8 +1,16 @@
 #pragma once
 
-#include <string.h>  // for standard memset fallback
-
 #include "fl/int.h"
+
+// Forward declarations instead of including <string.h>
+// to avoid heavy C standard library header overhead
+extern "C" {
+    void* memset(void* ptr, int value, fl::size num);
+    void* memcpy(void* dst, const void* src, fl::size num);
+    void* memmove(void* dst, const void* src, fl::size num);
+    char* strstr(const char* haystack, const char* needle);
+    int strncmp(const char* s1, const char* s2, fl::size n);
+}
 
 namespace fl {
 
@@ -30,6 +38,17 @@ inline void* memfill(T* ptr, int value, fl::size num) {
 inline void* memcopy(void* dst, const void* src, fl::size num) {
     return ::memcpy(dst, src, num);
 }
+
+
+// fl::memmove - wrapper for memmove (C library function)
+void* memmove(void* dst, const void* src, fl::size num);
+
+// fl::strstr - wrapper for strstr (C library function)
+// Note: Returns char* for C compatibility, cast to const if needed
+const char* strstr(const char* haystack, const char* needle);
+
+// fl::strncmp - wrapper for strncmp (C library function)
+int strncmp(const char* s1, const char* s2, fl::size n);
 
 
 

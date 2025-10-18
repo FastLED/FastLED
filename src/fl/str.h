@@ -5,7 +5,13 @@
 
 
 #include "fl/int.h"
-#include <string.h>
+#include "fl/memfill.h"
+
+// Forward declarations for string comparison functions
+extern "C" {
+    fl::size strlen(const char* str);
+    int strcmp(const char* str1, const char* str2);
+}
 
 #ifdef __EMSCRIPTEN__
 #include <string>
@@ -143,7 +149,7 @@ class StringHolder {
         if ((len + 1) > mCapacity) {
             return false;
         }
-        memcpy(mData, str, len);
+        fl::memcopy(mData, str, len);
         mData[len] = '\0';
         mLength = len;
         return true;
@@ -174,7 +180,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size len = strlen(str);
         mLength = len;         // Length is without null terminator
         if (len + 1 <= SIZE) { // Check capacity including null
-            memcpy(mInlineData, str, len + 1); // Copy including null
+            fl::memcopy(mInlineData, str, len + 1); // Copy including null
             mHeapData.reset();
         } else {
             mHeapData = fl::make_shared<StringHolder>(str);
@@ -188,7 +194,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         : mLength(other.mLength), mHeapData(fl::move(other.mHeapData)) {
         // If other was using inline data, copy it
         if (!other.mHeapData) {
-            memcpy(mInlineData, other.mInlineData, SIZE);
+            fl::memcopy(mInlineData, other.mInlineData, SIZE);
         }
         // Leave other in a valid empty state
         other.mLength = 0;
@@ -217,7 +223,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
             // If other was using inline data, copy it
             if (!other.mHeapData) {
-                memcpy(mInlineData, other.mInlineData, SIZE);
+                fl::memcopy(mInlineData, other.mInlineData, SIZE);
             }
 
             // Leave other in a valid empty state
@@ -231,7 +237,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size len = strlen(str);
         mLength = len;
         if (len + 1 <= SIZE) {
-            memcpy(mInlineData, str, len + 1);
+            fl::memcopy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
             if (mHeapData && mHeapData.use_count() <= 1) {
@@ -266,7 +272,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     void assign(const char* str, fl::size len) {
         mLength = len;
         if (len + 1 <= SIZE) {
-            memcpy(mInlineData, str, len + 1);
+            fl::memcopy(mInlineData, str, len + 1);
             mHeapData.reset();
         } else {
             mHeapData = fl::make_shared<StringHolder>(str, len);
@@ -403,7 +409,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
     template <fl::size M> void copy(const StrN<M> &other) {
         fl::size len = other.size();
         if (len + 1 <= SIZE) {
-            memcpy(mInlineData, other.c_str(), len + 1);
+            fl::memcopy(mInlineData, other.c_str(), len + 1);
             mHeapData.reset();
         } else {
             if (other.mHeapData) {
@@ -429,13 +435,13 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 fl::size grow_length = FL_MAX(3, newLen * 3 / 2);
                 mHeapData->grow(grow_length); // Grow by 50%
             }
-            memcpy(mHeapData->data() + mLength, str, n);
+            fl::memcopy(mHeapData->data() + mLength, str, n);
             mLength = newLen;
             mHeapData->data()[mLength] = '\0';
             return mLength;
         }
         if (newLen + 1 <= SIZE) {
-            memcpy(mInlineData + mLength, str, n);
+            fl::memcopy(mInlineData + mLength, str, n);
             mLength = newLen;
             mInlineData[mLength] = '\0';
             return mLength;
@@ -443,8 +449,8 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         mHeapData.reset();
         StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
         if (newData) {
-            memcpy(newData->data(), c_str(), mLength);
-            memcpy(newData->data() + mLength, str, n);
+            fl::memcopy(newData->data(), c_str(), mLength);
+            fl::memcopy(newData->data() + mLength, str, n);
             newData->data()[newLen] = '\0';
             mHeapData = newData;
             mLength = newLen;
@@ -637,7 +643,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         StringHolderPtr newData = fl::make_shared<StringHolder>(newCapacity);
         if (newData) {
             // Copy existing content
-            memcpy(newData->data(), c_str(), mLength);
+            fl::memcopy(newData->data(), c_str(), mLength);
             newData->data()[mLength] = '\0';
             mHeapData = newData;
         }
@@ -670,7 +676,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return npos;
         }
         auto begin = c_str();
-        const char* found = strstr(begin, substr);
+        const char* found = fl::strstr(begin, substr);
         if (found) {
             return found - begin;
         }
@@ -702,7 +708,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             return npos;
         }
         auto begin = c_str() + start_pos;
-        const char* found = strstr(begin, substr);
+        const char* found = fl::strstr(begin, substr);
         if (found) {
             return found - c_str();
         }
@@ -1054,7 +1060,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         if (prefix_len > mLength) {
             return false;
         }
-        return strncmp(c_str(), prefix, prefix_len) == 0;
+        return fl::strncmp(c_str(), prefix, prefix_len) == 0;
     }
 
     bool starts_with(char c) const {
@@ -1075,7 +1081,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         if (suffix_len > mLength) {
             return false;
         }
-        return strncmp(c_str() + mLength - suffix_len, suffix, suffix_len) == 0;
+        return fl::strncmp(c_str() + mLength - suffix_len, suffix, suffix_len) == 0;
     }
 
     bool ends_with(char c) const {
@@ -1154,7 +1160,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (newData) {
                 // Copy data before insertion point
                 if (pos > 0) {
-                    memcpy(newData->data(), mHeapData->data(), pos);
+                    fl::memcopy(newData->data(), mHeapData->data(), pos);
                 }
                 // Insert new characters
                 for (fl::size i = 0; i < count; ++i) {
@@ -1162,7 +1168,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 }
                 // Copy data after insertion point
                 if (pos < mLength) {
-                    memcpy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
+                    fl::memcopy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 mHeapData = newData;
@@ -1175,7 +1181,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         if (newLen + 1 <= SIZE && !mHeapData) {
             // Shift existing data right
             if (pos < mLength) {
-                memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
+                fl::memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
             }
             // Insert new characters
             for (fl::size i = 0; i < count; ++i) {
@@ -1191,7 +1197,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Can insert in place
             char* data = mHeapData->data();
             if (pos < mLength) {
-                memmove(data + pos + count, data + pos, mLength - pos);
+                fl::memmove(data + pos + count, data + pos, mLength - pos);
             }
             for (fl::size i = 0; i < count; ++i) {
                 data[pos + i] = ch;
@@ -1205,7 +1211,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 const char* src = c_str();
                 // Copy data before insertion point
                 if (pos > 0) {
-                    memcpy(newData->data(), src, pos);
+                    fl::memcopy(newData->data(), src, pos);
                 }
                 // Insert new characters
                 for (fl::size i = 0; i < count; ++i) {
@@ -1213,7 +1219,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 }
                 // Copy data after insertion point
                 if (pos < mLength) {
-                    memcpy(newData->data() + pos + count, src + pos, mLength - pos);
+                    fl::memcopy(newData->data() + pos + count, src + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 mHeapData = newData;
@@ -1247,11 +1253,11 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             StringHolderPtr newData = fl::make_shared<StringHolder>(newLen);
             if (newData) {
                 if (pos > 0) {
-                    memcpy(newData->data(), mHeapData->data(), pos);
+                    fl::memcopy(newData->data(), mHeapData->data(), pos);
                 }
-                memcpy(newData->data() + pos, s, count);
+                fl::memcopy(newData->data() + pos, s, count);
                 if (pos < mLength) {
-                    memcpy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
+                    fl::memcopy(newData->data() + pos + count, mHeapData->data() + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 mHeapData = newData;
@@ -1263,9 +1269,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Check if result fits in inline buffer
         if (newLen + 1 <= SIZE && !mHeapData) {
             if (pos < mLength) {
-                memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
+                fl::memmove(mInlineData + pos + count, mInlineData + pos, mLength - pos);
             }
-            memcpy(mInlineData + pos, s, count);
+            fl::memcopy(mInlineData + pos, s, count);
             mLength = newLen;
             mInlineData[mLength] = '\0';
             return *this;
@@ -1275,9 +1281,9 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         if (mHeapData && mHeapData.use_count() <= 1 && mHeapData->hasCapacity(newLen)) {
             char* data = mHeapData->data();
             if (pos < mLength) {
-                memmove(data + pos + count, data + pos, mLength - pos);
+                fl::memmove(data + pos + count, data + pos, mLength - pos);
             }
-            memcpy(data + pos, s, count);
+            fl::memcopy(data + pos, s, count);
             mLength = newLen;
             data[mLength] = '\0';
         } else {
@@ -1285,11 +1291,11 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (newData) {
                 const char* src = c_str();
                 if (pos > 0) {
-                    memcpy(newData->data(), src, pos);
+                    fl::memcopy(newData->data(), src, pos);
                 }
-                memcpy(newData->data() + pos, s, count);
+                fl::memcopy(newData->data() + pos, s, count);
                 if (pos < mLength) {
-                    memcpy(newData->data() + pos + count, src + pos, mLength - pos);
+                    fl::memcopy(newData->data() + pos + count, src + pos, mLength - pos);
                 }
                 newData->data()[newLen] = '\0';
                 mHeapData = newData;
@@ -1348,12 +1354,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (newData) {
                 // Copy data before erase point
                 if (pos > 0) {
-                    memcpy(newData->data(), mHeapData->data(), pos);
+                    fl::memcopy(newData->data(), mHeapData->data(), pos);
                 }
                 // Copy data after erase range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memcpy(newData->data() + pos, mHeapData->data() + pos + actualCount, remainingLen);
+                    fl::memcopy(newData->data() + pos, mHeapData->data() + pos + actualCount, remainingLen);
                 }
                 mLength = mLength - actualCount;
                 newData->data()[mLength] = '\0';
@@ -1366,7 +1372,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         fl::size remainingLen = mLength - pos - actualCount;
         if (remainingLen > 0) {
             char* data = c_str_mutable();
-            memmove(data + pos, data + pos + actualCount, remainingLen);
+            fl::memmove(data + pos, data + pos + actualCount, remainingLen);
         }
 
         mLength -= actualCount;
@@ -1480,14 +1486,14 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (newData) {
                 // Copy data before replacement point
                 if (pos > 0) {
-                    memcpy(newData->data(), mHeapData->data(), pos);
+                    fl::memcopy(newData->data(), mHeapData->data(), pos);
                 }
                 // Copy replacement data
-                memcpy(newData->data() + pos, s, count2);
+                fl::memcopy(newData->data() + pos, s, count2);
                 // Copy data after replacement range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memcpy(newData->data() + pos + count2,
+                    fl::memcopy(newData->data() + pos + count2,
                            mHeapData->data() + pos + actualCount,
                            remainingLen);
                 }
@@ -1504,13 +1510,13 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memmove(mInlineData + pos + count2,
+                    fl::memmove(mInlineData + pos + count2,
                             mInlineData + pos + actualCount,
                             remainingLen);
                 }
             }
             // Copy replacement data
-            memcpy(mInlineData + pos, s, count2);
+            fl::memcopy(mInlineData + pos, s, count2);
             mLength = newLen;
             mInlineData[mLength] = '\0';
             return *this;
@@ -1523,12 +1529,12 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memmove(data + pos + count2,
+                    fl::memmove(data + pos + count2,
                             data + pos + actualCount,
                             remainingLen);
                 }
             }
-            memcpy(data + pos, s, count2);
+            fl::memcopy(data + pos, s, count2);
             mLength = newLen;
             data[mLength] = '\0';
         } else {
@@ -1538,14 +1544,14 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 const char* src = c_str();
                 // Copy data before replacement point
                 if (pos > 0) {
-                    memcpy(newData->data(), src, pos);
+                    fl::memcopy(newData->data(), src, pos);
                 }
                 // Copy replacement data
-                memcpy(newData->data() + pos, s, count2);
+                fl::memcopy(newData->data() + pos, s, count2);
                 // Copy data after replacement range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memcpy(newData->data() + pos + count2,
+                    fl::memcopy(newData->data() + pos + count2,
                            src + pos + actualCount,
                            remainingLen);
                 }
@@ -1586,7 +1592,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (newData) {
                 // Copy data before replacement point
                 if (pos > 0) {
-                    memcpy(newData->data(), mHeapData->data(), pos);
+                    fl::memcopy(newData->data(), mHeapData->data(), pos);
                 }
                 // Fill with replacement character
                 for (fl::size i = 0; i < count2; ++i) {
@@ -1595,7 +1601,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 // Copy data after replacement range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memcpy(newData->data() + pos + count2,
+                    fl::memcopy(newData->data() + pos + count2,
                            mHeapData->data() + pos + actualCount,
                            remainingLen);
                 }
@@ -1612,7 +1618,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memmove(mInlineData + pos + count2,
+                    fl::memmove(mInlineData + pos + count2,
                             mInlineData + pos + actualCount,
                             remainingLen);
                 }
@@ -1633,7 +1639,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             if (count2 != actualCount) {
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memmove(data + pos + count2,
+                    fl::memmove(data + pos + count2,
                             data + pos + actualCount,
                             remainingLen);
                 }
@@ -1650,7 +1656,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 const char* src = c_str();
                 // Copy data before replacement point
                 if (pos > 0) {
-                    memcpy(newData->data(), src, pos);
+                    fl::memcopy(newData->data(), src, pos);
                 }
                 // Fill with replacement character
                 for (fl::size i = 0; i < count2; ++i) {
@@ -1659,7 +1665,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
                 // Copy data after replacement range
                 fl::size remainingLen = mLength - pos - actualCount;
                 if (remainingLen > 0) {
-                    memcpy(newData->data() + pos + count2,
+                    fl::memcopy(newData->data() + pos + count2,
                            src + pos + actualCount,
                            remainingLen);
                 }
@@ -1733,7 +1739,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Use strncmp to compare actualCount1 characters from this string with all of str
         fl::size minLen = (actualCount1 < str.size()) ? actualCount1 : str.size();
-        int result = strncmp(c_str() + pos1, str.c_str(), minLen);
+        int result = fl::strncmp(c_str() + pos1, str.c_str(), minLen);
 
         if (result != 0) {
             return result;
@@ -1776,7 +1782,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Compare the substrings
         fl::size minLen = (actualCount1 < actualCount2) ? actualCount1 : actualCount2;
-        int result = strncmp(c_str() + pos1, str.c_str() + pos2, minLen);
+        int result = fl::strncmp(c_str() + pos1, str.c_str() + pos2, minLen);
 
         if (result != 0) {
             return result;
@@ -1828,7 +1834,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
         // Compare actualCount1 characters from this string with all of s
         fl::size sLen = strlen(s);
         fl::size minLen = (actualCount1 < sLen) ? actualCount1 : sLen;
-        int result = strncmp(c_str() + pos1, s, minLen);
+        int result = fl::strncmp(c_str() + pos1, s, minLen);
 
         if (result != 0) {
             return result;
@@ -1870,7 +1876,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Compare the substrings
         fl::size minLen = (actualCount1 < count2) ? actualCount1 : count2;
-        int result = strncmp(c_str() + pos1, s, minLen);
+        int result = fl::strncmp(c_str() + pos1, s, minLen);
 
         if (result != 0) {
             return result;
@@ -1906,7 +1912,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
         // Copy characters to destination buffer
         if (actualCount > 0) {
-            memcpy(dest, c_str() + pos, actualCount);
+            fl::memcopy(dest, c_str() + pos, actualCount);
         }
 
         return actualCount;
@@ -1942,7 +1948,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Check if string now fits in inline buffer
             if (mLength + 1 <= SIZE) {
                 // Copy to inline buffer and release heap
-                memcpy(mInlineData, mHeapData->data(), mLength + 1);
+                fl::memcopy(mInlineData, mHeapData->data(), mLength + 1);
                 mHeapData.reset();
                 return;
             }
@@ -1950,7 +1956,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Reallocate heap to exact size needed
             StringHolderPtr newData = fl::make_shared<StringHolder>(mLength);
             if (newData) {
-                memcpy(newData->data(), mHeapData->data(), mLength + 1);
+                fl::memcopy(newData->data(), mHeapData->data(), mLength + 1);
                 mHeapData = newData;
             }
         }

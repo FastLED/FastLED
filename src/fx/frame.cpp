@@ -1,6 +1,4 @@
 
-#include <string.h>
-
 #include "crgb.h"
 #include "fl/allocator.h"
 #include "fl/dbg.h"
@@ -39,7 +37,7 @@ Frame::Frame(const Frame& other)
 
     mRgb.resize(mPixelsCount);
     if (!other.mRgb.empty()) {
-        memcpy(mRgb.data(), other.mRgb.data(), mPixelsCount * sizeof(CRGB));
+        fl::memcopy(mRgb.data(), other.mRgb.data(), mPixelsCount * sizeof(CRGB));
     }
 }
 
@@ -51,7 +49,7 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
     if (!mRgb.empty()) {
         switch (draw_mode) {
         case DRAW_MODE_OVERWRITE: {
-            memcpy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
+            fl::memcopy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
             break;
         }
         case DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS: {

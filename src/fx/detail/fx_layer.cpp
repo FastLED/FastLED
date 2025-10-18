@@ -1,7 +1,5 @@
 
 
-#include <string.h>
-
 #include "fx_layer.h"
 
 

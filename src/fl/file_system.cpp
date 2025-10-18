@@ -31,7 +31,7 @@
 #include "fl/codec/mpeg1.h"
 #include "fl/bytestream.h"
 #include "fl/math_macros.h" // for fl_min
-#include <string.h> // for memcpy
+#include "fl/memfill.h"
 
 namespace fl {
 
@@ -120,7 +120,7 @@ public:
 
             fl::size toRead = fl::fl_min(bytesToRead, remainingInFrame);
             if (toRead > 0 && currentFrame_ && currentFrame_->rgb()) {
-                memcpy(dst + totalRead, (fl::u8*)currentFrame_->rgb() + currentPos_, toRead);
+                fl::memcopy(dst + totalRead, (fl::u8*)currentFrame_->rgb() + currentPos_, toRead);
                 currentPos_ += toRead;
                 totalRead += toRead;
                 bytesToRead -= toRead;
