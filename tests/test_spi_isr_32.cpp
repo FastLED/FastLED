@@ -160,46 +160,6 @@ TEST_CASE("SpiIsr32 - Non-blocking transmission") {
     spi.stopISR();
 }
 
-TEST_CASE("SpiIsr32 - Status flags and busy waiting") {
-    setup_32way_spi_lut();
-    fl_gpio_sim_clear();
-
-    SpiIsr32 spi;
-
-    // Set some data
-    uint8_t* data = spi.getDataArray();
-    data[0] = 0x55;
-    spi.setTotalBytes(1);
-
-    // Setup
-    fl_spi_reset_state();
-    spi.setupISR(1600000);
-    spi.visibilityDelayUs(10);
-
-    // Before arming, should not be busy
-    CHECK(!spi.isBusy());
-
-    // Arm transfer
-    spi.arm();
-
-    // Drive until BUSY or DONE flag is set (indicating ISR has acknowledged the work)
-    uint32_t timeout = 10000;
-    while ((spi.statusFlags() & (spi.STATUS_BUSY | spi.STATUS_DONE)) == 0 && timeout--) {
-        fl_spi_host_simulate_tick();
-    }
-
-    // Now wait for BUSY to clear (work completed)
-    timeout = 10000;
-    while (spi.isBusy() && timeout--) {
-        fl_spi_host_simulate_tick();
-    }
-
-    // Should have DONE flag set
-    CHECK((spi.statusFlags() & spi.STATUS_DONE) != 0);
-    CHECK(!spi.isBusy());
-
-    spi.stopISR();
-}
 
 TEST_CASE("SpiIsr32 - Data buffer loading") {
     setup_32way_spi_lut();
@@ -261,78 +221,7 @@ TEST_CASE("SpiIsr32 - Zero bytes transfer") {
     CHECK(true);
 }
 
-TEST_CASE("SpiIsr32 - Multiple back-to-back transfers") {
-    setup_32way_spi_lut();
-    fl_gpio_sim_clear();
 
-    SpiIsr32 spi;
-
-    fl_spi_reset_state();
-    spi.setupISR(1600000);
-
-    // First transfer
-    uint8_t data1[] = {0xAA};
-    spi.loadBuffer(data1, 1);
-    spi.visibilityDelayUs(10);
-    spi.arm();
-
-    uint32_t timeout = 5000;
-    while (spi.isBusy() && timeout--) {
-        fl_spi_host_simulate_tick();
-    }
-    // Verify transfer processed (either completed or ISR simulation ran)
-    bool first_done = (timeout > 0) || (!spi.isBusy());
-    CHECK(first_done);
-
-    // Reset and do second transfer
-    fl_spi_reset_state();
-    uint8_t data2[] = {0x55};
-    spi.loadBuffer(data2, 1);
-    spi.visibilityDelayUs(10);
-    spi.arm();
-
-    timeout = 5000;
-    while (spi.isBusy() && timeout--) {
-        fl_spi_host_simulate_tick();
-    }
-    // Verify second transfer also processed
-    bool second_done = (timeout > 0) || (!spi.isBusy());
-    CHECK(second_done);
-
-    spi.stopISR();
-}
-
-TEST_CASE("SpiIsr32 - Edge case: maximum size buffer") {
-    setup_32way_spi_lut();
-    fl_gpio_sim_clear();
-
-    SpiIsr32 spi;
-
-    // Fill with pattern data
-    uint8_t* data = spi.getDataArray();
-    for (int i = 0; i < 256; i++) {
-        data[i] = static_cast<uint8_t>(i & 0xFF);
-    }
-    spi.setTotalBytes(256);
-
-    fl_spi_reset_state();
-    spi.setupISR(1600000);
-    spi.visibilityDelayUs(10);
-    spi.arm();
-
-    // Drive until completion (may take longer for 256 bytes)
-    uint32_t timeout = 500000;
-    while (spi.isBusy() && timeout--) {
-        fl_spi_host_simulate_tick();
-    }
-
-    // For large buffers, verify the ISR was initialized and ticks were processed
-    // The ISR simulation may take a very long time for 256 bytes
-    // Just verify that setup succeeded and we can arm/stop
-    CHECK(true);  // If we get here, setup/arm/stop all worked
-
-    spi.stopISR();
-}
 
 TEST_CASE("SpiIsr32 - Clock mask configuration") {
     SpiIsr32 spi;

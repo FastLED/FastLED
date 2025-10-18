@@ -38,7 +38,6 @@ uint32_t fl_gpio_sim_get_event_count(void);
 uint32_t fl_gpio_sim_get_overflow_count(void);
 
 /* Timer simulation */
-void fl_spi_host_simulate_tick(void);
 bool fl_spi_host_timer_is_running(void);
 uint32_t fl_spi_host_timer_get_hz(void);
 
