@@ -158,19 +158,27 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Include fl/int.h to get FastLED integer types (u8, u16, i8, etc.)
-// This defines types using primitive types which compiles faster than <stdint.h>
+///////////////////////////////////////////////////////////////////////////////
+// FastLED Standard Integer Type Definitions
+//
+// This file provides both C and C++ support for compatibility with third-party
+// code that includes fl/stdint.h directly (e.g., kiss_fft.h).
+//
+// For C code: Delegates to fl/cstdint.h
+// For C++ code: Uses fl:: namespace types
+///////////////////////////////////////////////////////////////////////////////
+
+#ifdef __cplusplus
+
 #include "fl/int.h"
 #include "fl/cstddef.h"
 
-
-// Define standard integer type names
+// Define standard integer type names for C++
 // This avoids the slow <stdint.h> include while maintaining compatibility
 // 8-bit types use raw primitives to match system headers exactly (allows duplicate typedefs)
 typedef unsigned char uint8_t;
 typedef signed char int8_t;
 
-#ifdef __cplusplus
 // 16-bit types use platform-specific fl:: types to handle platform differences
 // (AVR: int is 16-bit, most others: short is 16-bit)
 typedef fl::u16 uint16_t;
@@ -186,16 +194,11 @@ typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::iptr intptr_t;
 typedef fl::ptrdiff ptrdiff_t;
-#else  // C language compatibility
-// In C, we need to use the platform types directly from platforms/int.h
-// These are defined outside the namespace in platform-specific int.h files
-typedef u16 uint16_t;
-typedef i16 int16_t;
-typedef u32 uint32_t;
-typedef i32 int32_t;
-typedef u64 uint64_t;
-typedef i64 int64_t;
-// Note: size_t, uintptr_t, intptr_t, and ptrdiff_t are handled in fl/cstddef.h
+
+#else
+// C language support: delegate to fl/cstdint.h
+#include "fl/cstdint.h"
+
 #endif  // __cplusplus
 
 // stdint.h limit macros
