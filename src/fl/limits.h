@@ -387,18 +387,19 @@ struct numeric_limits<float> {
     enum : bool { has_infinity = true };
     enum : bool { has_quiet_NaN = true };
     enum : bool { has_signaling_NaN = true };
-    enum : int { digits = 24 };       // FLT_MANT_DIG
-    enum : int { digits10 = 6 };      // FLT_DIG
+    enum : int { digits = 24 };       // __FLT_MANT_DIG__ is typically 24
+    enum : int { digits10 = 6 };      // __FLT_DIG__ is typically 6
     static constexpr int max_digits10 = 9;  // Maximum digits for round-trip
-    static constexpr int max_exponent = 128;   // FLT_MAX_EXP
-    static constexpr int max_exponent10 = 38;  // FLT_MAX_10_EXP
-    static constexpr int min_exponent = -125;  // FLT_MIN_EXP
-    static constexpr int min_exponent10 = -37; // FLT_MIN_10_EXP
+    static constexpr int max_exponent = 128;   // __FLT_MAX_EXP__ is typically 128
+    static constexpr int max_exponent10 = 38;  // __FLT_MAX_10_EXP__ is typically 38
+    static constexpr int min_exponent = -125;  // __FLT_MIN_EXP__ is typically -125
+    static constexpr int min_exponent10 = -37; // __FLT_MIN_10_EXP__ is typically -37
 
-    static constexpr float min() noexcept { return 1.17549435e-38F; }  // FLT_MIN
-    static constexpr float max() noexcept { return 3.40282347e+38F; }  // FLT_MAX
-    static constexpr float lowest() noexcept { return -3.40282347e+38F; }
-    static constexpr float epsilon() noexcept { return 1.19209290e-07F; }  // FLT_EPSILON
+    // Use compiler built-in constants (GCC/Clang) instead of hardcoded literals
+    static constexpr float min() noexcept { return __FLT_MIN__; }
+    static constexpr float max() noexcept { return __FLT_MAX__; }
+    static constexpr float lowest() noexcept { return -__FLT_MAX__; }
+    static constexpr float epsilon() noexcept { return __FLT_EPSILON__; }
     static constexpr float round_error() noexcept { return 0.5F; }
 
     static constexpr float infinity() noexcept {
@@ -410,7 +411,10 @@ struct numeric_limits<float> {
     static constexpr float signaling_NaN() noexcept {
         return __builtin_nansf("");
     }
-    static constexpr float denorm_min() noexcept { return 1.40129846e-45F; }  // FLT_TRUE_MIN
+    // Use compiler built-in for denormalized minimum (platform-specific)
+    static constexpr float denorm_min() noexcept {
+        return __FLT_DENORM_MIN__;
+    }
 };
 
 // Specialization for double
@@ -423,18 +427,20 @@ struct numeric_limits<double> {
     enum : bool { has_infinity = true };
     enum : bool { has_quiet_NaN = true };
     enum : bool { has_signaling_NaN = true };
-    enum : int { digits = 53 };       // DBL_MANT_DIG
-    enum : int { digits10 = 15 };     // DBL_DIG
+    enum : int { digits = 53 };       // __DBL_MANT_DIG__ is typically 53
+    enum : int { digits10 = 15 };     // __DBL_DIG__ is typically 15
     static constexpr int max_digits10 = 17; // Maximum digits for round-trip
-    static constexpr int max_exponent = 1024;   // DBL_MAX_EXP
-    static constexpr int max_exponent10 = 308;  // DBL_MAX_10_EXP
-    static constexpr int min_exponent = -1021;  // DBL_MIN_EXP
-    static constexpr int min_exponent10 = -307; // DBL_MIN_10_EXP
+    static constexpr int max_exponent = 1024;   // __DBL_MAX_EXP__ is typically 1024
+    static constexpr int max_exponent10 = 308;  // __DBL_MAX_10_EXP__ is typically 308
+    static constexpr int min_exponent = -1021;  // __DBL_MIN_EXP__ is typically -1021
+    static constexpr int min_exponent10 = -307; // __DBL_MIN_10_EXP__ is typically -307
 
-    static constexpr double min() noexcept { return 2.2250738585072014e-308; }  // DBL_MIN
-    static constexpr double max() noexcept { return 1.7976931348623157e+308; }  // DBL_MAX
-    static constexpr double lowest() noexcept { return -1.7976931348623157e+308; }
-    static constexpr double epsilon() noexcept { return 2.2204460492503131e-16; }  // DBL_EPSILON
+    // Use compiler built-in constants (GCC/Clang) instead of hardcoded literals
+    // This avoids overflow warnings on platforms with strict compile-time float handling
+    static constexpr double min() noexcept { return __DBL_MIN__; }
+    static constexpr double max() noexcept { return __DBL_MAX__; }
+    static constexpr double lowest() noexcept { return -__DBL_MAX__; }
+    static constexpr double epsilon() noexcept { return __DBL_EPSILON__; }
     static constexpr double round_error() noexcept { return 0.5; }
 
     static constexpr double infinity() noexcept {
@@ -446,7 +452,10 @@ struct numeric_limits<double> {
     static constexpr double signaling_NaN() noexcept {
         return __builtin_nans("");
     }
-    static constexpr double denorm_min() noexcept { return 4.9406564584124654e-324; }  // DBL_TRUE_MIN
+    // Use compiler built-in for denormalized minimum (platform-specific)
+    static constexpr double denorm_min() noexcept {
+        return __DBL_DENORM_MIN__;
+    }
 };
 
 // long double specialization removed
