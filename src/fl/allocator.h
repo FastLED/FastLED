@@ -8,6 +8,7 @@
 #include "fl/bit_cast.h"
 #include "fl/stdint.h"
 #include "fl/bitset.h"
+#include "fl/malloc.h"
 
 #ifndef FASTLED_DEFAULT_SLAB_SIZE
 #define FASTLED_DEFAULT_SLAB_SIZE 8
@@ -279,7 +280,7 @@ public:
         return {ptr, ptr ? n : 0};
     }
 
-    // OPTIMIZED: reallocate() - in-place resize using ::realloc()
+    // OPTIMIZED: reallocate() - in-place resize using fl::realloc()
     // Returns the new pointer if successful, nullptr if not supported/failed
     // The caller (HeapVector) handles fallback to allocate-copy-deallocate
     pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
@@ -290,8 +291,8 @@ public:
             return nullptr;
         }
 
-        // Use ::realloc() for in-place resize
-        void* result = ::realloc(ptr, new_count * sizeof(T));
+        // Use fl::realloc() for in-place resize
+        void* result = fl::realloc(ptr, new_count * sizeof(T));
         if (!result) {
             return nullptr;  // Realloc failed
         }
