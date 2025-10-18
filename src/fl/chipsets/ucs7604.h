@@ -31,10 +31,10 @@
 /// # Protocol Structure
 ///
 /// The UCS7604 uses a unique **preamble-based protocol** that differs from standard WS2812-like chipsets.
-/// Data transmission consists of three sequential phases with timing-critical delays:
+/// Data transmission consists of three sequential phases with delays between them:
 ///
 /// ```
-/// [Chunk 1: 8 bytes] → [260µs delay] → [Chunk 2: 7 bytes] → [260µs delay] → [Pixel Data: N bytes]
+/// [Chunk 1: 8 bytes] → [delay] → [Chunk 2: 7 bytes] → [delay] → [Pixel Data: N bytes]
 /// ```
 ///
 /// ## Chunk 1 - Framing Header (8 bytes, always 800kHz)
@@ -85,7 +85,7 @@
 ///
 /// # Timing Requirements
 ///
-/// - **Preamble Delays**: 260µs between chunks (critical for protocol synchronization)
+/// - **Preamble Delays**: Delays between chunks appear to have flexible timing tolerance (tested with 0-260µs)
 /// - **Reset Time**: Standard latch delay after pixel data (typically 280µs, following WS2812 conventions)
 /// - **Bit Timing**: WS2812-compatible timing for actual bit transmission
 ///   - Uses standard T0H/T0L/T1H/T1L values
@@ -98,7 +98,7 @@
 ///
 /// Unlike standard WS2812/APA102 chipsets that use single-transmission protocols, UCS7604 requires:
 /// 1. Three separate transmissions (preamble1 → preamble2 → pixels)
-/// 2. Precise 260µs delays between transmissions
+/// 2. Delays between transmissions (timing tolerance to be determined)
 /// 3. Configuration data sent before every frame
 ///
 /// This preamble pattern appears **unique to UCS7604** among addressable LED chipsets. Research found:
@@ -184,7 +184,8 @@
 /// These questions require hardware testing with actual UCS7604 LEDs:
 /// 1. **12-bit and 14-bit modes**: How are these configured? Mixed depth per channel?
 /// 2. **Current control maximum**: Does `0x0F` truly cap at 60mA? Can higher values be used?
-/// 3. **Timing tolerance**: How strict are the 260µs delays? Acceptable range?
+/// 3. **Timing tolerance**: Partial answer - delays between chunks work with 0µs (zero delay works)
+///    Further investigation: What is the maximum timing skew? Acceptable range?
 /// 4. **1.6MHz reliability**: Does high-speed mode work reliably with long cable runs?
 /// 5. **Reset/latch time**: Minimum delay required after pixel data before next frame?
 /// 6. **Exact bit timing**: Precise T0H/T0L/T1H/T1L values for both 800kHz and 1.6MHz modes?
