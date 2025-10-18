@@ -13,7 +13,7 @@
 // limitations under the License.
 
 #include <math.h>
-#include <string.h>
+#include "fl/string.h"
 #include "cq_kernel.h"
 #include "fft_precision.h"
 

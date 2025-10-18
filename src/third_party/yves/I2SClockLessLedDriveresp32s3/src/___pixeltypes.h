@@ -1,5 +1,5 @@
 #include "fl/stdint.h"
-#include <string.h>
+#include "fl/string.h"
 
 #ifdef USE_FASTLED
 #include "FastLED.h"

@@ -19,7 +19,7 @@
 #include "esp_pm.h"
 #include "fl/stdint.h"
 #include "platforms/assert_defs.h"
-#include <string.h>
+#include "fl/string.h"
 // #include "esp_lcd_panel_io_interface.h"
 // #include "esp_lcd_panel_io.h"
 #include "driver/gpio.h"

@@ -5,7 +5,7 @@
 #define DEF_TJPGDEC
 
 // Include standard library headers outside namespace to avoid conflicts
-#include <string.h>
+#include "fl/string.h"
 #if !defined(_WIN32)	/* Embedded platform */
 #include "fl/stdint.h"
 #endif

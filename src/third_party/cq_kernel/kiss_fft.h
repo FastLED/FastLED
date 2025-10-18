@@ -13,7 +13,7 @@
 #include "fl/stdio.h"
 #include "fl/stdint.h"
 #include <math.h>
-#include <string.h>
+#include "fl/string.h"
 #include "fft_precision.h"
 
 // Configure FIXED_POINT based on precision mode

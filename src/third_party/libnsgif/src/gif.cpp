@@ -12,7 +12,7 @@
 #include "fl/int.h"
 #include "fl/allocator.h"
 #include "fl/memfill.h"
-#include <string.h>
+#include "fl/string.h"
 
 #include "lzw.h"
 #include "../include/nsgif.hpp"

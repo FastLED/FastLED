@@ -45,9 +45,9 @@
  *  the only file you'll need to change.
  **************************************************************************************/
 
-//#include "hlxclib/stdlib.h"		/* for malloc, free */ 
+//#include "hlxclib/stdlib.h"		/* for malloc, free */
 #include <stdlib.h>
-#include <string.h>
+#include "fl/string.h"
 #include "coder.h"
 #include "fl/stdint.h"
 

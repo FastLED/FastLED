@@ -2,7 +2,7 @@
 #include "fl/time.h"
 #include "fl/warn.h"
 #include "fl/stdio.h"
-#include <string.h>
+#include "fl/string.h"
 
 namespace fl {
 namespace third_party {

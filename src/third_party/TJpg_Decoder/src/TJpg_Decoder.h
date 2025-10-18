@@ -17,7 +17,7 @@ https://github.com/Bodmer/TJpg_Decoder
   #include "tjpgd.h"
   #include "fl/namespace.h"
   #include "fl/stdint.h"
-  #include <string.h>
+  #include "fl/string.h"
 
 namespace fl {
 namespace third_party {
