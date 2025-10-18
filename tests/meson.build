@@ -53,6 +53,7 @@ test_names = [
   'test_bitset',
   'test_bytestream',
   'test_circular_buffer',
+  'test_clockless_block_generic',
   'test_codec',
   'test_corkscrew',
   'test_dbg',
