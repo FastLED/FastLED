@@ -114,6 +114,8 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     } else {
         PARLIO_DLOG("Using MONOLITHIC buffer strategy");
         // Monolithic buffer (original implementation)
+        // Set sub_buffer_size for consistent logging (8 bytes per LED for one color component)
+        sub_buffer_size_ = num_leds * 8;
         dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
         if (!dma_buffer_) {
             FL_WARN("PARLIO: Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
