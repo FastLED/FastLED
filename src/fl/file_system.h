@@ -7,7 +7,7 @@
 
 #include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
-#include "fl/str.h"
+#include "fl/str_fwd.h"     // Lightweight forward declarations for string
 #include "fx/video.h"
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
