@@ -14,6 +14,7 @@
 #include "fl/stdint.h"
 #include "fl/math.h"
 #include "fl/string.h"
+#include "fl/malloc.h"
 #include "fft_precision.h"
 
 // Configure FIXED_POINT based on precision mode
@@ -55,9 +56,9 @@ extern "C" {
 # define kiss_fft_scalar __m128
 #define KISS_FFT_MALLOC(nbytes) _mm_malloc(nbytes,16)
 #define KISS_FFT_FREE _mm_free
-#else	
-#define KISS_FFT_MALLOC malloc
-#define KISS_FFT_FREE free
+#else
+#define KISS_FFT_MALLOC(nbytes) fl::malloc(nbytes)
+#define KISS_FFT_FREE(ptr) fl::free(ptr)
 #endif	
 
 

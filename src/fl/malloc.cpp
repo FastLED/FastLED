@@ -1,4 +1,5 @@
 #include "malloc.h"
+#include "fl/memfill.h"
 #include <stdlib.h>
 
 namespace fl {
@@ -9,6 +10,15 @@ namespace fl {
 
     void free(void* ptr) {
         ::free(ptr);
+    }
+
+    void* calloc(size_t nmemb, size_t size) {
+        size_t total_size = nmemb * size;
+        void* ptr = malloc(total_size);
+        if (ptr != nullptr) {
+            memfill(ptr, 0, total_size);
+        }
+        return ptr;
     }
 
     void* realloc(void* ptr, size_t new_size) {

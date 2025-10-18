@@ -14,6 +14,7 @@
 
 #include "fl/math.h"
 #include "fl/string.h"
+#include "fl/malloc.h"
 #include "cq_kernel.h"
 #include "fft_precision.h"
 
@@ -55,7 +56,7 @@ void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type
     // Generates window in the center and zero everywhere else
     float factor = f/fmin;
     int N_window = N/factor; // Scales inversely with frequency (see CQT paper)
-    kiss_fft_scalar *time_K = (kiss_fft_scalar*)calloc(N, sizeof(kiss_fft_scalar));
+    kiss_fft_scalar *time_K = (kiss_fft_scalar*)fl::calloc(N, sizeof(kiss_fft_scalar));
 
     switch(window_type){
         case HAMMING:
@@ -80,7 +81,7 @@ void _generate_kernel(kiss_fft_cpx kernel[], kiss_fftr_cfg cfg, enum window_type
     kiss_fftr(cfg, time_K, kernel);
     #endif
 
-    free(time_K);
+    fl::free(time_K);
 }
 
 kiss_fft_scalar _mag(kiss_fft_cpx x){
@@ -88,12 +89,12 @@ kiss_fft_scalar _mag(kiss_fft_cpx x){
 }
 
 struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
-    float *freq = (float*)malloc(cfg.bands * sizeof(float));
+    float *freq = (float*)fl::malloc(cfg.bands * sizeof(float));
     _generate_center_freqs(freq, cfg.bands, cfg.fmin, cfg.fmax);
 
     kiss_fftr_cfg fft_cfg = kiss_fftr_alloc(cfg.samples, 0, NULL, NULL);
-    struct sparse_arr* kernels = (struct sparse_arr*)malloc(cfg.bands*sizeof(struct sparse_arr));
-    kiss_fft_cpx *temp_kernel = (kiss_fft_cpx*)malloc(cfg.samples*sizeof(kiss_fft_cpx));
+    struct sparse_arr* kernels = (struct sparse_arr*)fl::malloc(cfg.bands*sizeof(struct sparse_arr));
+    kiss_fft_cpx *temp_kernel = (kiss_fft_cpx*)fl::malloc(cfg.samples*sizeof(kiss_fft_cpx));
 
     for(int i = 0; i < cfg.bands; i++){
         // Clears temp_kernel before calling _generate_kernel on it
@@ -107,7 +108,7 @@ struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
 
         // Generates sparse_arr holding n_elems sparse_arr_elem's
         kernels[i].n_elems = n_elems;
-        kernels[i].elems = (struct sparse_arr_elem*)malloc(n_elems*sizeof(struct sparse_arr_elem));
+        kernels[i].elems = (struct sparse_arr_elem*)fl::malloc(n_elems*sizeof(struct sparse_arr_elem));
 
         // Generates sparse_arr_elem's from complex values counted before
         int k = 0;
@@ -120,22 +121,22 @@ struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
         }
     }
 
-    free(fft_cfg);
-    free(temp_kernel);
-    free(freq);
+    fl::free(fft_cfg);
+    fl::free(temp_kernel);
+    fl::free(freq);
 
     return kernels;
 }
 
 struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kernel_cfg cfg){
-    struct sparse_arr *new_ptr = (struct sparse_arr*)malloc(cfg.bands*sizeof(struct sparse_arr));
+    struct sparse_arr *new_ptr = (struct sparse_arr*)fl::malloc(cfg.bands*sizeof(struct sparse_arr));
     for(int i = 0; i < cfg.bands; i++){
         new_ptr[i].n_elems = old_ptr[i].n_elems;
-        new_ptr[i].elems = (struct sparse_arr_elem*)malloc(old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
+        new_ptr[i].elems = (struct sparse_arr_elem*)fl::malloc(old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
         memcpy(new_ptr[i].elems, old_ptr[i].elems, old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
-        free(old_ptr[i].elems);
+        fl::free(old_ptr[i].elems);
     }
-    free(old_ptr);
+    fl::free(old_ptr);
     return new_ptr;
 }
 
@@ -150,6 +151,6 @@ void apply_kernels(kiss_fft_cpx fft[], kiss_fft_cpx cq[], struct sparse_arr kern
 }
 
 void free_kernels(struct sparse_arr *kernels, struct cq_kernel_cfg cfg){
-    for(int i = 0; i < cfg.bands; i++) free(kernels[i].elems);
-    free(kernels);
+    for(int i = 0; i < cfg.bands; i++) fl::free(kernels[i].elems);
+    fl::free(kernels);
 } 

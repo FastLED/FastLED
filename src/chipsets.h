@@ -26,8 +26,12 @@
 // Include UCS7604 controller
 #include "fl/chipsets/ucs7604.h"  // optional.
 
-// Conditional namespace handling - ClocklessController is always in fl namespace
+// Conditional namespace handling for WASM builds
+#ifdef FASTLED_FORCE_NAMESPACE
 #define FASTLED_CLOCKLESS_CONTROLLER fl::ClocklessController
+#else
+#define FASTLED_CLOCKLESS_CONTROLLER ClocklessController
+#endif
 
 // Legacy macro for backward compatibility with old API
 // Old API: FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, T1_VAL, T2_VAL, T3_VAL, RGB_ORDER, XTRA0, FLIP, RESET_VAL>

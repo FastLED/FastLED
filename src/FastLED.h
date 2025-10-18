@@ -564,6 +564,14 @@ public:
 	/// @} Adding SPI based controllers
 
 #ifdef FASTLED_HAS_CLOCKLESS
+	/// @brief Helper to unwrap controller pointer and call base addLeds
+	/// This explicit helper function aids AVR GCC with template-dependent type resolution
+	/// during two-phase name lookup, solving compilation issues on older compiler versions.
+	template<typename ControllerType>
+	static inline CLEDController& addLedsImpl(ControllerType* controller, CRGB *data, int nLedsOrOffset, int nLedsIfOffset) {
+		CLEDController* pLed = static_cast<CLEDController*>(controller);
+		return addLeds(pLed, data, nLedsOrOffset, nLedsIfOffset);
+	}
 	/// @name Adding 3-wire led controllers
 	/// Add a clockless (aka 3-wire, also DMX) based CLEDController instance to the world.
 	///
@@ -589,21 +597,21 @@ public:
 	template<template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, EOrder RGB_ORDER>
 	static CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
-		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN>
 	static CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB> c;
-		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
 	template<template<fl::u8 DATA_PIN> class CHIPSET, fl::u8 DATA_PIN>
 	static CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN> c;
-		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
+		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	template<template<fl::u8 DATA_PIN> class CHIPSET, fl::u8 DATA_PIN>
