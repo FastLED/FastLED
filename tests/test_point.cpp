@@ -13,7 +13,7 @@ using namespace fl;
             std::cerr << "REQUIRE_APPROX failed: " << #a << " = " << (a) \
                       << ", " << #b << " = " << (b) \
                       << ", tolerance = " << (tolerance) << std::endl; \
-            exit(1); \
+            fl::exit(1); \
         } \
     } while (0)
 
