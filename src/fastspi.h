@@ -14,8 +14,19 @@
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
 
+// Include platform-specific SPI device proxy headers
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 #include "platforms/esp/32/spi_device_proxy.h"
+#elif defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/mxrt1062/spi_device_proxy.h"
+#elif defined(NRF51)
+#include "platforms/arm/nrf52/spi_device_proxy.h"
+#elif defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/spi_device_proxy.h"
+#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/sam/spi_device_proxy.h"
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+#include "platforms/arm/stm32/spi_device_proxy.h"
 #endif
 
 
@@ -63,14 +74,14 @@ class SoftwareSPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN,
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
-#if defined(NRF51) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#if defined(NRF51)
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public NRF51SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
-#if defined(NRF52_SERIES) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#if defined(NRF52_SERIES)
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 #endif
 
 #if defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
@@ -94,32 +105,20 @@ class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
-
-#if defined(SPI2_DATA)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI_DATA, SPI2_CLOCK, SPI_SPEED, 0x4002C000> {};
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<SPI2_DATA, SPI_CLOCK, SPI_SPEED, 0x4002C000> {};
-#endif
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
 
 #elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+// Specialized templates for each SPI peripheral on Teensy 4.x
+// These provide the SPIClass reference and index required by SPIDeviceProxy
+template<fl::u32 _SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED, SPI, 0> {};
 
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI, 0> {};
+template<fl::u32 _SPI_SPEED>
+class SPIOutput<SPI1_DATA, SPI1_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI1_DATA, SPI1_CLOCK, _SPI_SPEED, SPI1, 1> {};
 
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI1_DATA, SPI1_CLOCK, SPI_SPEED, SPI1, 1> {};
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED> : public Teensy4HardwareSPIOutput<SPI2_DATA, SPI2_CLOCK, SPI_SPEED, SPI2, 2> {};
+template<fl::u32 _SPI_SPEED>
+class SPIOutput<SPI2_DATA, SPI2_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI2_DATA, SPI2_CLOCK, _SPI_SPEED, SPI2, 2> {};
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
 
@@ -140,10 +139,10 @@ DECLARE_SPI1(0,20);
 DECLARE_SPI1(1,20);
 DECLARE_SPI1(21,20);
 
-#elif defined(__SAM3X8E__)
+#elif defined(__SAM3X8E__) || defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
 
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public SAMHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
 
 #elif defined(AVR_HARDWARE_SPI)
 

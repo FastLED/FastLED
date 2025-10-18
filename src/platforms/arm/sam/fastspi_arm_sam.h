@@ -170,6 +170,7 @@ public:
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 
 #include <Arduino.h>  // ok include
+#include <SPI.h>  // ok include
 #include <wiring_private.h>
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>

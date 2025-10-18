@@ -146,7 +146,7 @@ public:
 
     /// Write single byte
     /// Mirrors SAMHardwareSPIOutput::writeByte()
-    static void writeByte(uint8_t b) {
+    void writeByte(uint8_t b) {
         if (!mInitialized || !mInTransaction) {
             return;
         }
@@ -163,7 +163,7 @@ public:
 
     /// Write 16-bit word
     /// Mirrors SAMHardwareSPIOutput::writeWord()
-    static void writeWord(uint16_t w) {
+    void writeWord(uint16_t w) {
         if (mSingleSPI) {
             mSingleSPI->writeWord(w);
         } else {
