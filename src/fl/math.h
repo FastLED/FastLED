@@ -30,6 +30,18 @@ long lround_impl_float(float value);
 long lround_impl_double(double value);
 float fmod_impl_float(float x, float y);
 double fmod_impl_double(double x, double y);
+float atan2_impl_float(float y, float x);
+double atan2_impl_double(double y, double x);
+float hypot_impl_float(float x, float y);
+double hypot_impl_double(double x, double y);
+float atan_impl_float(float value);
+double atan_impl_double(double value);
+float asin_impl_float(float value);
+double asin_impl_double(double value);
+float acos_impl_float(float value);
+double acos_impl_double(double value);
+float tan_impl_float(float value);
+double tan_impl_double(double value);
 
 // Constexpr version for compile-time evaluation (compatible with older C++
 // standards)
@@ -90,6 +102,30 @@ inline long lround(double value) { return lround_impl_double(value); }
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }
 inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
 
+// Inverse tangent functions (atan2)
+inline float atan2f(float y, float x) { return atan2_impl_float(y, x); }
+inline double atan2(double y, double x) { return atan2_impl_double(y, x); }
+
+// Hypotenuse calculation
+inline float hypotf(float x, float y) { return hypot_impl_float(x, y); }
+inline double hypot(double x, double y) { return hypot_impl_double(x, y); }
+
+// Inverse tangent functions (atan)
+inline float atanf(float value) { return atan_impl_float(value); }
+inline double atan(double value) { return atan_impl_double(value); }
+
+// Inverse sine functions (asin)
+inline float asinf(float value) { return asin_impl_float(value); }
+inline double asin(double value) { return asin_impl_double(value); }
+
+// Inverse cosine functions (acos)
+inline float acosf(float value) { return acos_impl_float(value); }
+inline double acos(double value) { return acos_impl_double(value); }
+
+// Tangent functions (tan)
+inline float tanf(float value) { return tan_impl_float(value); }
+inline double tan(double value) { return tan_impl_double(value); }
+
 // Arduino will define this in the global namespace as macros, so we can't
 // define them ourselves.
 // template <typename T>
@@ -108,7 +144,3 @@ inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
 // }
 
 } // namespace fl
-
-// Include C math header to provide global namespace math functions for third-party code
-// This ensures ::sin(), ::cos(), etc. are available as expected
-#include <math.h>

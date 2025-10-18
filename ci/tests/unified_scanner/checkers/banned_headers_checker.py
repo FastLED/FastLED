@@ -1,6 +1,6 @@
 # pyright: reportUnknownMemberType=false
 from pathlib import Path
-from typing import List, Set
+from typing import Dict, List, Optional, Set
 
 from ..base_checker import BaseChecker
 from ..result import CheckResult
@@ -36,6 +36,7 @@ class BannedHeadersChecker(BaseChecker):
         "typeinfo",
         "ctime",
         "cmath",
+        "math.h",
         "complex",
         "valarray",
         "cfloat",
@@ -52,6 +53,52 @@ class BannedHeadersChecker(BaseChecker):
         "cstddef",
         "type_traits",
         "new",  # Ban <new> except for placement new in inplacenew.h
+    }
+
+    # Recommendations: map banned headers to their fl:: alternatives
+    HEADER_RECOMMENDATIONS: Dict[str, str] = {
+        "pthread.h": "fl/thread.h or fl/mutex.h (depending on what you need)",
+        "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
+        "iostream": "fl/str.h or fl/strstream.h",
+        "stdio.h": "fl/str.h for string operations",
+        "cstdio": "fl/str.h for string operations",
+        "cstdlib": "fl/string operations or fl/vector.h",
+        "vector": "fl/vector.h",
+        "list": "fl/vector.h (or implement with custom data structure)",
+        "map": "fl/map.h (check fl/unordered_map.h for hash-based)",
+        "set": "fl/set.h",
+        "queue": "fl/vector.h with manual queue semantics",
+        "deque": "fl/vector.h",
+        "algorithm": "fl/algorithm.h or fl/sort.h",
+        "memory": "fl/shared_ptr.h or fl/unique_ptr.h",
+        "thread": "fl/thread.h",
+        "mutex": "fl/mutex.h",
+        "chrono": "fl/time.h",
+        "fstream": "fl/file.h or platform file operations",
+        "sstream": "fl/strstream.h",
+        "iomanip": "fl/str.h stream manipulators",
+        "exception": "Use error codes or fl/exceptions.h if available",
+        "stdexcept": "Use error codes instead",
+        "typeinfo": "Use fl/type_traits.h or RTTI if unavoidable",
+        "ctime": "fl/time.h",
+        "cmath": "fl/math.h",
+        "math.h": "fl/math.h",
+        "complex": "Custom complex number class or fl/geometry.h",
+        "valarray": "fl/vector.h",
+        "cfloat": "fl/numeric_limits.h or platform-specific headers",
+        "cassert": "FL_CHECK macros from fl/compiler_control.h",
+        "cerrno": "Error handling through return codes",
+        "cctype": "Character classification (implement if needed)",
+        "cwctype": "Wide character classification (implement if needed)",
+        "cstring": "fl/str.h",
+        "cwchar": "Wide character support (implement if needed)",
+        "cuchar": "Character support (implement if needed)",
+        "cstdint": "fl/stdint.h",
+        "stdint.h": "fl/stdint.h",
+        "stddef.h": "fl/stddef.h",
+        "cstddef": "fl/stddef.h",
+        "type_traits": "fl/type_traits.h",
+        "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
     }
 
     # ESP-specific banned headers (only if paranoid mode enabled)
@@ -109,6 +156,7 @@ class BannedHeadersChecker(BaseChecker):
     ) -> bool:
         """Check if this is an allowed exception to the banned header rule."""
         file_path_str = str(file_path)
+        file_path_normalized = file_path_str.replace("\\", "/")
 
         # Allow <new> in inplacenew.h for placement new operator
         if banned_header == "new" and "inplacenew.h" in file_path_str:
@@ -116,20 +164,20 @@ class BannedHeadersChecker(BaseChecker):
 
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
-        if "/fl/" in file_path_str.replace("\\", "/"):
+        if "/fl/" in file_path_normalized:
             # Allow iostream in stub_main.cpp for testing entry point
             if banned_header == "iostream" and "stub_main.cpp" in file_path_str:
                 return True
 
-            # Allow pthread.h in thread-local implementation
-            if banned_header == "pthread.h" and "thread_local" in file_path_str:
+            # Allow pthread.h in thread_local.h - needed for platform threading abstraction
+            if banned_header == "pthread.h" and "thread_local.h" in file_path_str:
                 return True
 
-            # Allow mutex in mutex.h multithreading implementation
+            # Allow mutex in mutex.h - this is the wrapper for platform mutex
             if banned_header == "mutex" and "mutex.h" in file_path_str:
                 return True
 
-            # Allow memory in thread_local.h for std::unique_ptr/shared_ptr (used with pthread)
+            # Allow memory in thread_local.h for std::unique_ptr/shared_ptr
             if banned_header == "memory" and "thread_local.h" in file_path_str:
                 return True
 
@@ -138,7 +186,28 @@ class BannedHeadersChecker(BaseChecker):
                 if banned_header in {"stdint.h", "Arduino.h", "chrono"}:
                     return True
 
+        # Platform-specific headers need Arduino.h
+        if "/platforms/" in file_path_normalized:
+            if banned_header == "Arduino.h":
+                return True
+
         return False
+
+    def _get_recommendation(self, banned_header: str) -> str:
+        """Get recommendation for a banned header."""
+        return self.HEADER_RECOMMENDATIONS.get(
+            banned_header, "Use fl/ alternatives instead of standard library headers"
+        )
+
+    def _should_allow_bypass(self, file_path: Path) -> bool:
+        """Check if file type allows 'ok include' bypass.
+
+        - .h files: NEVER allow bypass (header purity is critical)
+        - .cpp/.cc files: Allow bypass with '// ok include' comment
+        - .hpp files: Treat like .h files (never allow bypass)
+        """
+        file_path_str = str(file_path)
+        return file_path_str.endswith(".cpp") or file_path_str.endswith(".cc")
 
     def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
         results: List[CheckResult] = []
@@ -147,8 +216,10 @@ class BannedHeadersChecker(BaseChecker):
         # Get appropriate banned list for this file's location
         banned_headers = self._get_banned_headers_for_path(file_path)
 
-        # Check if in fl/ directory for strict enforcement
-        is_fl_dir = self._is_in_fl_directory(file_path)
+        # Determine if this file can use "// ok include" bypass
+        # Only .cpp/.cc files can bypass, never .h/.hpp files
+        can_bypass = self._should_allow_bypass(file_path)
+        file_extension = file_path.suffix
 
         for line_num, line in enumerate(lines, 1):
             stripped = line.strip()
@@ -169,17 +240,27 @@ class BannedHeadersChecker(BaseChecker):
                     if self._is_allowed_exception(file_path, banned, line):
                         continue
 
-                    # For fl/ directory: STRICT mode - no "// ok include" bypass allowed
-                    # For other directories: allow "// ok include" bypass
-                    if not is_fl_dir:
-                        if "// ok include" in line or "// OK include" in line:
-                            continue
+                    # Check if bypass is allowed and present
+                    has_bypass_comment = (
+                        "// ok include" in line or "// OK include" in line
+                    )
+                    if can_bypass and has_bypass_comment:
+                        continue
 
-                    # Generate appropriate error message
-                    if is_fl_dir:
-                        suggestion = f"Remove {banned}. fl/ directory headers must not use banned standard library headers."
+                    # Generate recommendation
+                    recommendation = self._get_recommendation(banned)
+
+                    # Build suggestion based on file type and bypass capability
+                    if file_extension in {".h", ".hpp"}:
+                        # Header files: NEVER allow bypass
+                        suggestion = (
+                            f"Use {recommendation} instead (banned in header files)"
+                        )
+                    elif can_bypass:
+                        # .cpp/.cc files: can bypass but should try to fix
+                        suggestion = f"Use {recommendation} instead (or add '// ok include' comment if necessary)"
                     else:
-                        suggestion = f"Remove {banned} or add '// ok include' comment if required"
+                        suggestion = f"Use {recommendation} instead"
 
                     results.append(
                         CheckResult(
@@ -187,7 +268,7 @@ class BannedHeadersChecker(BaseChecker):
                             file_path=str(file_path),
                             line_number=line_num,
                             severity="ERROR",
-                            message=f"Banned header: {banned}",
+                            message=f"Banned header '{banned}' in {file_extension} file",
                             suggestion=suggestion,
                         )
                     )

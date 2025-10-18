@@ -152,4 +152,58 @@ double fmod_impl_double(double x, double y) {
     return ::fmod(x, y);
 }
 
+// Inverse tangent 2 implementations (atan2) using standard library
+float atan2_impl_float(float y, float x) {
+    return ::atan2f(y, x);
+}
+
+double atan2_impl_double(double y, double x) {
+    return ::atan2(y, x);
+}
+
+// Hypotenuse implementations (hypot) using standard library
+float hypot_impl_float(float x, float y) {
+    return ::hypotf(x, y);
+}
+
+double hypot_impl_double(double x, double y) {
+    return ::hypot(x, y);
+}
+
+// Inverse tangent implementations (atan) using standard library
+float atan_impl_float(float value) {
+    return ::atanf(value);
+}
+
+double atan_impl_double(double value) {
+    return ::atan(value);
+}
+
+// Inverse sine implementations (asin) using standard library
+float asin_impl_float(float value) {
+    return ::asinf(value);
+}
+
+double asin_impl_double(double value) {
+    return ::asin(value);
+}
+
+// Inverse cosine implementations (acos) using standard library
+float acos_impl_float(float value) {
+    return ::acosf(value);
+}
+
+double acos_impl_double(double value) {
+    return ::acos(value);
+}
+
+// Tangent implementations (tan) using standard library
+float tan_impl_float(float value) {
+    return ::tanf(value);
+}
+
+double tan_impl_double(double value) {
+    return ::tan(value);
+}
+
 } // namespace fl

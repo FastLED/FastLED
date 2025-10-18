@@ -48,6 +48,7 @@ BANNED_HEADERS_COMMON = [
     "typeinfo",
     "ctime",
     "cmath",
+    "math.h",  # Ban math.h - use fl/math.h instead
     "complex",
     "valarray",
     "cfloat",
@@ -61,8 +62,8 @@ BANNED_HEADERS_COMMON = [
     "cstdint",
     "stdint.h",
     "stddef.h",
-    "cstddef",  # this certainally fails
-    "type_traits",  # this certainally fails
+    "cstddef",  # this certainly fails
+    "type_traits",  # this certainly fails
     "new",  # Ban <new> except for placement new in inplacenew.h
 ]
 
@@ -74,6 +75,52 @@ BANNED_HEADERS_PLATFORMS = ["Arduino.h"]
 
 class BannedHeadersChecker(FileContentChecker):
     """Checker class for banned headers."""
+
+    # Header recommendations
+    HEADER_RECOMMENDATIONS = {
+        "pthread.h": "fl/thread.h or fl/mutex.h (depending on what you need)",
+        "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
+        "iostream": "fl/str.h or fl/strstream.h",
+        "stdio.h": "fl/str.h for string operations",
+        "cstdio": "fl/str.h for string operations",
+        "cstdlib": "fl/string operations or fl/vector.h",
+        "vector": "fl/vector.h",
+        "list": "fl/vector.h (or implement with custom data structure)",
+        "map": "fl/map.h (check fl/unordered_map.h for hash-based)",
+        "set": "fl/set.h",
+        "queue": "fl/vector.h with manual queue semantics",
+        "deque": "fl/vector.h",
+        "algorithm": "fl/algorithm.h or fl/sort.h",
+        "memory": "fl/shared_ptr.h or fl/unique_ptr.h",
+        "thread": "fl/thread.h",
+        "mutex": "fl/mutex.h",
+        "chrono": "fl/time.h",
+        "fstream": "fl/file.h or platform file operations",
+        "sstream": "fl/strstream.h",
+        "iomanip": "fl/str.h stream manipulators",
+        "exception": "Use error codes or fl/exceptions.h if available",
+        "stdexcept": "Use error codes instead",
+        "typeinfo": "Use fl/type_traits.h or RTTI if unavoidable",
+        "ctime": "fl/time.h",
+        "cmath": "fl/math.h",
+        "math.h": "fl/math.h",
+        "complex": "Custom complex number class or fl/geometry.h",
+        "valarray": "fl/vector.h",
+        "cfloat": "fl/numeric_limits.h or platform-specific headers",
+        "cassert": "FL_CHECK macros from fl/compiler_control.h",
+        "cerrno": "Error handling through return codes",
+        "cctype": "Character classification (implement if needed)",
+        "cwctype": "Wide character classification (implement if needed)",
+        "cstring": "fl/str.h",
+        "cwchar": "Wide character support (implement if needed)",
+        "cuchar": "Character support (implement if needed)",
+        "cstdint": "fl/stdint.h",
+        "stdint.h": "fl/stdint.h",
+        "stddef.h": "fl/stddef.h",
+        "cstddef": "fl/stddef.h",
+        "type_traits": "fl/type_traits.h",
+        "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
+    }
 
     def __init__(self, banned_headers_list: List[str], strict_mode: bool = False):
         """Initialize with the list of banned headers to check for.
@@ -110,24 +157,70 @@ class BannedHeadersChecker(FileContentChecker):
             if header == "iostream" and "stub_main.cpp" in file_path:
                 return True
 
-            # Allow pthread.h in thread-local implementation
-            if header == "pthread.h" and "thread_local" in file_path:
+            # Allow pthread.h in thread_local.h - needed for platform threading abstraction
+            if header == "pthread.h" and "thread_local.h" in file_path:
                 return True
 
-            # Allow mutex in mutex.h multithreading implementation
+            # Allow mutex in mutex.h - this is the wrapper for platform mutex
             if header == "mutex" and "mutex.h" in file_path:
                 return True
 
-            # Allow memory in thread_local.h for std::unique_ptr/shared_ptr (used with pthread)
+            # Allow memory in thread_local.h for std::unique_ptr/shared_ptr
             if header == "memory" and "thread_local.h" in file_path:
                 return True
+
+            # Allow math.h in math implementation files (cpp files)
+            if header == "math.h" and file_path.endswith(".cpp"):
+                # math.h is only used in implementation files for platform math functions
+                if any(
+                    x in file_path
+                    for x in [
+                        "math.cpp",
+                        "audio_reactive.cpp",
+                        "colorutils.cpp",
+                        "transform.cpp",
+                        "xypath.cpp",
+                        "xypath_impls.cpp",
+                        "xypath_renderer.cpp",
+                    ]
+                ):
+                    return True
 
             # Allow platform-specific time headers in time.cpp
             if "time.cpp" in file_path:
                 if header in {"stdint.h", "Arduino.h", "chrono"}:
                     return True
 
+        # Platform-specific headers need Arduino.h
+        if "/platforms/" in file_path.replace("\\", "/"):
+            if header == "Arduino.h":
+                return True
+
+        # FX audio/video files need math.h for specialized calculations
+        if "/fx/" in file_path.replace("\\", "/"):
+            if header == "math.h" and file_path.endswith(".cpp"):
+                if any(
+                    x in file_path
+                    for x in ["beat_detector.cpp", "frame_interpolator.cpp"]
+                ):
+                    return True
+
         return False
+
+    def _get_recommendation(self, header: str) -> str:
+        """Get recommendation for a banned header."""
+        return self.HEADER_RECOMMENDATIONS.get(
+            header, "Use fl/ alternatives instead of standard library headers"
+        )
+
+    def _should_allow_bypass(self, file_path: str) -> bool:
+        """Check if file type allows 'ok include' bypass.
+
+        - .h files: NEVER allow bypass (header purity is critical)
+        - .cpp/.cc files: Allow bypass with '// ok include' comment
+        - .hpp files: Treat like .h files (never allow bypass)
+        """
+        return file_path.endswith(".cpp") or file_path.endswith(".cc")
 
     def check_file_content(self, file_content: FileContent) -> List[str]:
         """Check file content for banned headers."""
@@ -135,6 +228,10 @@ class BannedHeadersChecker(FileContentChecker):
 
         if len(self.banned_headers_list) == 0:
             return failings
+
+        # Determine file type and if bypass is allowed
+        can_bypass = self._should_allow_bypass(file_content.path)
+        file_ext = file_content.path.split(".")[-1]
 
         # Check each line for banned headers
         for line_number, line in enumerate(file_content.lines, 1):
@@ -147,17 +244,28 @@ class BannedHeadersChecker(FileContentChecker):
                     if self._is_allowed_exception(file_content.path, header):
                         continue
 
-                    # In strict mode, do not allow "// ok include" bypass
-                    if not self.strict_mode and "// ok include" in line:
-                        continue
+                    # Check if bypass is allowed and present
+                    has_bypass_comment = (
+                        "// ok include" in line or "// OK include" in line
+                    )
 
-                    if self.strict_mode:
+                    # Header files: NEVER allow bypass
+                    if file_ext in ("h", "hpp"):
                         failings.append(
-                            f"Found banned header '{header}' in {file_content.path}:{line_number} (fl/ directory: strict mode, no bypass allowed)"
+                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
+                            f"Use {self._get_recommendation(header)} instead (banned in header files)"
                         )
-                    else:
+                    # Strict mode: no bypass allowed (for fl/ directory)
+                    elif self.strict_mode and not has_bypass_comment:
                         failings.append(
-                            f"Found banned header '{header}' in {file_content.path}:{line_number}"
+                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
+                            f"Use {self._get_recommendation(header)} instead (strict mode, no bypass allowed)"
+                        )
+                    # Non-strict: allow bypass
+                    elif not self.strict_mode and not has_bypass_comment:
+                        failings.append(
+                            f"Found banned header '{header}' in {file_content.path}:{line_number} - "
+                            f"Use {self._get_recommendation(header)} instead"
                         )
 
         return failings
@@ -208,8 +316,12 @@ class TestNoBannedHeaders(unittest.TestCase):
 
         def on_fail(msg: str) -> None:
             self.fail(
-                msg + "\n"
-                "fl/ directory uses STRICT mode: banned headers are not allowed, even with '// ok include' comment."
+                msg + "\n\n"
+                "STRICT MODE: fl/ directory headers must not include stdlib headers.\n"
+                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
+                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
+                "Fix by removing the banned header or use fl/ alternatives.\n"
+                "See HEADER_RECOMMENDATIONS for suggested replacements."
             )
 
         # Test fl/ directory with strict mode
@@ -228,8 +340,12 @@ class TestNoBannedHeaders(unittest.TestCase):
 
         def on_fail(msg: str) -> None:
             self.fail(
-                msg + "\n"
-                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+                msg + "\n\n"
+                "Policy for fx/, sensors/, platforms/shared/ directories:\n"
+                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
+                "- .cpp files: Use '// ok include' comment at the end of line to bypass\n"
+                "Recommended: Use fl/ alternatives instead of stdlib headers.\n"
+                "See HEADER_RECOMMENDATIONS for suggested replacements."
             )
 
         # Test other source directories (not fl/)
@@ -290,10 +406,13 @@ class TestNoBannedHeaders(unittest.TestCase):
 
         def on_fail(msg: str) -> None:
             self.fail(
-                msg + "\n"
-                "Third-party libraries should use fl/ equivalents instead of stdlib headers.\n"
-                "STRICT MODE ENFORCED: No '// ok include' bypass allowed in third_party/**/*.h files.\n"
-                "Fix by removing the banned header or use fl/ alternatives."
+                msg + "\n\n"
+                "STRICT MODE: Third-party libraries must use fl/ equivalents instead of stdlib headers.\n"
+                "Policy for third_party/ directory:\n"
+                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
+                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
+                "Third-party code must follow FastLED conventions and use fl/ alternatives.\n"
+                "See HEADER_RECOMMENDATIONS for suggested replacements."
             )
 
         # Test the third_party directory

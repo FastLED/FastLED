@@ -27,7 +27,7 @@ License CC BY-NC 3.0
 */
 
 #include "fl/vector.h"
-#include <math.h> // ok include
+#include "fl/math.h"
 #include "fl/stdint.h"
 #include "fl/math_macros.h"
 
@@ -410,8 +410,8 @@ class ANIMartRIX {
                 float dx = xx - cx;
                 float dy = yy - cy;
 
-                distance[xx][yy] = hypotf(dx, dy);
-                polar_theta[xx][yy] = atan2f(dy, dx);
+                distance[xx][yy] = fl::hypotf(dx, dy);
+                polar_theta[xx][yy] = fl::atan2f(dy, dx);
             }
         }
     }

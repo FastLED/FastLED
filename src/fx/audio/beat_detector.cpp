@@ -14,7 +14,6 @@
 #include "fl/algorithm.h"
 #include "fl/stdio.h"
 #include "fl/compiler_control.h"
-#include <math.h>
 
 namespace fl {
 
@@ -36,7 +35,7 @@ void initializeLookupTables() {
     if (!g_log10_lut_initialized) {
         for (int i = 0; i < LOG10_LUT_SIZE; ++i) {
             float x = static_cast<float>(i) / static_cast<float>(LOG10_LUT_SIZE - 1);
-            g_log10_lut[i] = ::log10(x + 1e-10f);  // Avoid log(0)
+            g_log10_lut[i] = fl::log10f(x + 1e-10f);  // Avoid log(0)
         }
         g_log10_lut_initialized = true;
     }
@@ -55,7 +54,7 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(unused-function)
 inline float fastLog10(float x) {
     if (x <= 0.0f) return -100.0f;
-    if (x >= 1.0f) return ::log10(x);
+    if (x >= 1.0f) return fl::log10f(x);
 
     int idx = static_cast<int>(x * (LOG10_LUT_SIZE - 1));
     if (idx >= LOG10_LUT_SIZE) idx = LOG10_LUT_SIZE - 1;
@@ -119,8 +118,8 @@ inline void fft_magnitude(const float* input, int N, float* magnitude_out) {
     // FFT butterfly stages
     for (int len = 2; len <= N; len <<= 1) {
         float theta = -2.0f * FL_M_PI / static_cast<float>(len);
-        float wlen_re = ::cos(theta);
-        float wlen_im = ::sin(theta);
+        float wlen_re = fl::cosf(theta);
+        float wlen_im = fl::sinf(theta);
         for (int i = 0; i < N; i += len) {
             float w_re = 1.0f;
             float w_im = 0.0f;
@@ -148,7 +147,7 @@ inline void fft_magnitude(const float* input, int N, float* magnitude_out) {
     for (int i = 0; i < N / 2; ++i) {
         float real = temp_real[i];
         float imag = temp_imag[i];
-        magnitude_out[i] = ::sqrt(real * real + imag * imag);
+        magnitude_out[i] = fl::sqrtf(real * real + imag * imag);
     }
 }
 
@@ -170,12 +169,12 @@ fl::vector<fl::pair<int, int>> computeMelBands(int num_bands, float fmin, float 
 
     // Convert Hz to Mel scale: mel = 2595 * log10(1 + f/700)
     auto hzToMel = [](float hz) -> float {
-        return 2595.0f * ::log10(1.0f + hz / 700.0f);
+        return 2595.0f * fl::log10f(1.0f + hz / 700.0f);
     };
 
     // Convert Mel to Hz: hz = 700 * (10^(mel/2595) - 1)
     auto melToHz = [](float mel) -> float {
-        return 700.0f * ::pow(10.0f, mel / 2595.0f) - 1.0f;
+        return 700.0f * fl::powf(10.0f, mel / 2595.0f) - 1.0f;
     };
 
     float mel_min = hzToMel(fmin);
@@ -439,7 +438,7 @@ void OnsetDetectionProcessor::applyAdaptiveWhitening(float* mag, int size) {
 
 void OnsetDetectionProcessor::applyLogCompression(float* mag, int size) {
     for (int k = 0; k < size; ++k) {
-        mag[k] = ::log(1.0f + mag[k]);
+        mag[k] = fl::logf(1.0f + mag[k]);
     }
 }
 

@@ -59,13 +59,13 @@
     #define FFT_SQRT(x)  fl::sqrt((double)(x))
     #define FFT_POW(x,y) fl::pow((double)(x), (double)(y))
 #elif FASTLED_FFT_PRECISION == FASTLED_FFT_FIXED16
-    // Use standard library functions to maintain backward compatibility
-    #define FFT_COS(x)   ::cos((double)(x))
-    #define FFT_SIN(x)   ::sin((double)(x))
-    #define FFT_EXP(x)   ::exp((double)(x))
-    #define FFT_LOG(x)   ::log((double)(x))
-    #define FFT_SQRT(x)  ::sqrt((double)(x))
-    #define FFT_POW(x,y) ::pow((double)(x), (double)(y))
+    // Use fl:: namespace functions for consistency with FastLED conventions
+    #define FFT_COS(x)   fl::cos((double)(x))
+    #define FFT_SIN(x)   fl::sin((double)(x))
+    #define FFT_EXP(x)   fl::exp((double)(x))
+    #define FFT_LOG(x)   fl::log((double)(x))
+    #define FFT_SQRT(x)  fl::sqrt((double)(x))
+    #define FFT_POW(x,y) fl::pow((double)(x), (double)(y))
 #endif
 
 #endif // FFT_PRECISION_H
