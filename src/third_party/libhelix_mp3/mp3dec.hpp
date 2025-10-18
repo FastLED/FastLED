@@ -48,18 +48,6 @@
 
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 
-// Inline wrappers to bind third-party code to fl/ equivalents
-// These allow memcpy/memmove calls in third-party code to use fl:: implementations
-namespace {
-    inline void* memcpy(void* dst, const void* src, unsigned long num) {
-        return fl::memcopy(dst, src, static_cast<fl::size>(num));
-    }
-
-    inline void* memmove(void* dst, const void* src, unsigned long num) {
-        return fl::memmove(dst, src, static_cast<fl::size>(num));
-    }
-}
-
 
 //#define PROFILE
 #ifdef PROFILE
@@ -383,8 +371,8 @@ int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *byte
 		/* fill main data buffer with enough new data for this frame */
 		if (mp3DecInfo->mainDataBytes >= mp3DecInfo->mainDataBegin) {
 			/* adequate "old" main data available (i.e. bit reservoir) */
-			memmove(mp3DecInfo->mainBuf, mp3DecInfo->mainBuf + mp3DecInfo->mainDataBytes - mp3DecInfo->mainDataBegin, mp3DecInfo->mainDataBegin);
-			memcpy(mp3DecInfo->mainBuf + mp3DecInfo->mainDataBegin, *inbuf, mp3DecInfo->nSlots);
+			fl::memmove(mp3DecInfo->mainBuf, mp3DecInfo->mainBuf + mp3DecInfo->mainDataBytes - mp3DecInfo->mainDataBegin, static_cast<fl::size>(mp3DecInfo->mainDataBegin));
+			fl::memcopy(mp3DecInfo->mainBuf + mp3DecInfo->mainDataBegin, *inbuf, static_cast<fl::size>(mp3DecInfo->nSlots));
 
 			mp3DecInfo->mainDataBytes = mp3DecInfo->mainDataBegin + mp3DecInfo->nSlots;
 			*inbuf += mp3DecInfo->nSlots;
@@ -392,7 +380,7 @@ int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *byte
 			mainPtr = mp3DecInfo->mainBuf;
 		} else {
 			/* not enough data in bit reservoir from previous frames (perhaps starting in middle of file) */
-			memcpy(mp3DecInfo->mainBuf + mp3DecInfo->mainDataBytes, *inbuf, mp3DecInfo->nSlots);
+			fl::memcopy(mp3DecInfo->mainBuf + mp3DecInfo->mainDataBytes, *inbuf, static_cast<fl::size>(mp3DecInfo->nSlots));
 			mp3DecInfo->mainDataBytes += mp3DecInfo->nSlots;
 			*inbuf += mp3DecInfo->nSlots;
 			*bytesLeft -= (mp3DecInfo->nSlots);
