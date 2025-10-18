@@ -9,6 +9,7 @@
 #include "fl/type_traits.h"
 #include "fl/limits.h"
 #include "platforms/shared/spi_bitbang/spi_block_8.h"
+#include "platforms/shared/spi_bitbang/spi_block_16.h"
 
 namespace fl {
 
@@ -94,5 +95,9 @@ constexpr int type_rank<double>::value;
 // SpiBlock8
 constexpr int SpiBlock8::NUM_DATA_PINS;
 constexpr uint16_t SpiBlock8::MAX_BUFFER_SIZE;
+
+// SpiBlock16
+constexpr int SpiBlock16::NUM_DATA_PINS;
+constexpr uint16_t SpiBlock16::MAX_BUFFER_SIZE;
 
 } // namespace fl

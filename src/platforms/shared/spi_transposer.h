@@ -164,6 +164,20 @@ public:
                           fl::span<uint8_t> output,
                           const char** error = nullptr);
 
+    /// Transpose 16 lanes of data into interleaved hex-SPI format
+    ///
+    /// @param lanes Array of 16 lane data (use fl::nullopt for unused lanes)
+    /// @param output Output buffer to write interleaved data (size must be divisible by 16)
+    /// @param error Optional pointer to receive error message (set to nullptr if unused)
+    /// @return true on success, false if output buffer size is invalid
+    ///
+    /// @note Output buffer size determines max lane size: max_size = output.size() / 16
+    /// @note Shorter lanes are padded at the beginning with repeating padding_frame pattern
+    /// @note Empty lanes (nullopt) are filled with zeros or first lane's padding
+    static bool transpose16(const fl::optional<LaneData> lanes[16],
+                           fl::span<uint8_t> output,
+                           const char** error = nullptr);
+
 private:
     /// Optimized bit interleaving for 2 lanes (dual-SPI)
     /// @param dest Output buffer (must have space for 2 bytes)
@@ -183,6 +197,11 @@ private:
     /// @param dest Output buffer (must have space for 8 bytes)
     /// @param lane_bytes Array of 8 input bytes (one per lane)
     static void interleave_byte_8way(uint8_t* dest, const uint8_t lane_bytes[8]);
+
+    /// Optimized bit interleaving for 16 lanes (hex-SPI)
+    /// @param dest Output buffer (must have space for 16 bytes)
+    /// @param lane_bytes Array of 16 input bytes (one per lane)
+    static void interleave_byte_16way(uint8_t* dest, const uint8_t lane_bytes[16]);
 
     /// Get byte from lane at given index, handling padding automatically
     /// @param lane Lane data (payload + padding frame)

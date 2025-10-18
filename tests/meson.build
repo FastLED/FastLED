@@ -113,6 +113,7 @@ test_names = [
   'test_shared_ptr',
   'test_single_spi',
   'test_spi_block_8',
+  'test_spi_block_16',
   'test_sketch_runner',
   'test_slab_multi_alloc',
   'test_slice',

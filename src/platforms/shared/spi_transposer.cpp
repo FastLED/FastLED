@@ -244,6 +244,108 @@ void SPITransposer::interleave_byte_8way(uint8_t* dest, const uint8_t lane_bytes
 }
 
 // ============================================================================
+// 16-Way Transpose (Hex-SPI)
+// ============================================================================
+
+bool SPITransposer::transpose16(const fl::optional<LaneData> lanes[16],
+                                fl::span<uint8_t> output,
+                                const char** error) {
+    // Validate output buffer size (must be divisible by 16)
+    if (output.size() % 16 != 0) {
+        if (error) {
+            *error = "Output buffer size must be divisible by 16";
+        }
+        return false;
+    }
+
+    // Calculate max lane size from output buffer
+    const size_t max_size = output.size() / 16;
+
+    // Handle empty case
+    if (max_size == 0) {
+        if (error) {
+            *error = nullptr;  // No error, just empty
+        }
+        return true;
+    }
+
+    // Determine default padding byte from first available lane
+    uint8_t default_padding = 0x00;
+    for (size_t i = 0; i < 16; i++) {
+        if (lanes[i].has_value() && !lanes[i]->padding_frame.empty()) {
+            default_padding = lanes[i]->padding_frame[0];
+            break;
+        }
+    }
+
+    // Process each input byte with optimized interleaving
+    for (size_t byte_idx = 0; byte_idx < max_size; byte_idx++) {
+        uint8_t lane_bytes[16];
+
+        // Gather bytes from each lane (handles padding automatically)
+        for (size_t lane = 0; lane < 16; lane++) {
+            if (lanes[lane].has_value()) {
+                lane_bytes[lane] = getLaneByte(*lanes[lane], byte_idx, max_size);
+            } else {
+                // Empty lane - use default padding
+                lane_bytes[lane] = default_padding;
+            }
+        }
+
+        // Interleave this byte from all 16 lanes (produces 16 output bytes)
+        interleave_byte_16way(&output[byte_idx * 16], lane_bytes);
+    }
+
+    if (error) {
+        *error = nullptr;  // Success, no error
+    }
+    return true;
+}
+
+void SPITransposer::interleave_byte_16way(uint8_t* dest, const uint8_t lane_bytes[16]) {
+    // 16-way transpose: each input byte is split across 16 output bytes
+    // Each output byte N contains bit N from all 16 input lanes
+    // Output format: dest[N] = [L15_bitN L14_bitN ... L1_bitN L0_bitN]
+    // where N is the bit position (0-7 for a byte with 8 bits)
+    // We need 16 output bytes to handle 16 lanes, but each byte only has 8 bits
+
+    // Actually, for 16 lanes with 8 bits each:
+    // We output 16 bytes, where each byte contains 1 bit from each lane
+    // Byte 0 contains bit 7 from all 16 lanes
+    // Byte 1 contains bit 6 from all 16 lanes
+    // ... and so on for all 8 bit positions
+    // Plus 8 more bytes for lanes 8-15 with their own bits
+
+    // This creates a 16-byte output per input set
+    // For lanes 0-7 and 8-15, we need to split the output:
+    // dest[0-7]: bits from lanes 0-7
+    // dest[8-15]: bits from lanes 8-15
+
+    // Process bit positions 7 down to 0
+    for (int bit_pos = 7; bit_pos >= 0; bit_pos--) {
+        // Output byte for this bit position across lanes 0-7
+        uint8_t output_byte_lo = 0;
+        // Output byte for this bit position across lanes 8-15
+        uint8_t output_byte_hi = 0;
+
+        // Extract bit from lanes 0-7
+        for (int lane = 0; lane < 8; lane++) {
+            uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
+            output_byte_lo |= (bit << lane);
+        }
+
+        // Extract bit from lanes 8-15
+        for (int lane = 8; lane < 16; lane++) {
+            uint8_t bit = (lane_bytes[lane] >> bit_pos) & 0x01;
+            output_byte_hi |= (bit << (lane - 8));
+        }
+
+        dest[7 - bit_pos] = output_byte_lo;
+        dest[15 - bit_pos] = output_byte_hi;
+    }
+}
+
+// ============================================================================
 // Common Helper Functions
 // ============================================================================
 
