@@ -14,6 +14,10 @@
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
 
+#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/32/spi_device_proxy.h"
+#endif
+
 
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)

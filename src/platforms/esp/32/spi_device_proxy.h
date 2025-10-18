@@ -42,6 +42,7 @@ private:
     ESP32SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>* mSingleSPI;  // Owned single-SPI backend
     fl::vector<uint8_t> mWriteBuffer;        // Buffered writes (for Quad-SPI)
     bool mInitialized;                       // Whether init() was called
+    bool mBusInitialized;                    // Whether bus manager has been initialized
     bool mInTransaction;                     // Whether select() was called
 
 public:
@@ -51,6 +52,7 @@ public:
         , mBusManager(nullptr)
         , mSingleSPI(nullptr)
         , mInitialized(false)
+        , mBusInitialized(false)
         , mInTransaction(false)
     {
     }
@@ -91,19 +93,35 @@ public:
             return;
         }
 
-        // Initialize bus manager (idempotent - only runs once globally)
+        // IMPORTANT: DO NOT initialize bus manager here!
+        // We defer initialization until the first transmit() call (lazy initialization).
+        // This allows all devices on the same clock pin to register before the bus
+        // decides whether to use Single-SPI, Dual-SPI, or Quad-SPI mode.
+        // If we initialize here, the first device gets SINGLE_SPI mode before other
+        // devices have a chance to register, preventing promotion to multi-lane SPI.
+
+        mInitialized = true;
+    }
+
+    /// Initialize bus manager (lazy initialization)
+    /// Called on first transmit to allow all devices to register
+    void ensureBusInitialized() {
+        if (mBusInitialized || !mBusManager || !mHandle.is_valid) {
+            return;
+        }
+
+        // Initialize bus manager if not already done (idempotent)
         mBusManager->initialize();
+        mBusInitialized = true;
 
         // Check what backend we were assigned
         const SPIBusInfo* bus = mBusManager->getBusInfo(mHandle.bus_id);
-        if (bus && bus->bus_type == SPIBusType::SINGLE_SPI) {
+        if (bus && bus->bus_type == SPIBusType::SINGLE_SPI && !mSingleSPI) {
             // We're using single-SPI - create owned ESP32SPIOutput instance
             mSingleSPI = new ESP32SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED>();
             mSingleSPI->init();
         }
         // For Quad-SPI, bus manager handles hardware - we just buffer writes
-
-        mInitialized = true;
     }
 
     /// Begin SPI transaction
@@ -146,6 +164,9 @@ public:
             return;
         }
 
+        // Ensure bus is initialized on first transmit
+        ensureBusInitialized();
+
         // Route based on backend type
         if (mSingleSPI) {
             // Direct passthrough to single-SPI hardware
@@ -185,6 +206,9 @@ public:
         if (!mInitialized) {
             return;
         }
+
+        // Ensure bus is initialized
+        ensureBusInitialized();
 
         // Only needed for Quad-SPI (single-SPI writes directly)
         if (!mSingleSPI && !mWriteBuffer.empty()) {
