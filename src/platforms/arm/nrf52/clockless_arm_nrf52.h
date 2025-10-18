@@ -43,9 +43,9 @@ private:
 
     static const uint8_t  _BITS_PER_PIXEL   = (8 + _XTRA0) * 3; // NOTE: 3 means RGB only...
     static const uint16_t _PWM_BUFFER_COUNT = (_BITS_PER_PIXEL * FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING);
-    static const uint8_t  _T0H = ((uint16_t)(_T1        ));
-    static const uint8_t  _T1H = ((uint16_t)(_T1+_T2    ));
-    static const uint8_t  _TOP = ((uint16_t)(_T1+_T2+_T3));
+    static const uint16_t _T0H = ((uint16_t)(_T1        ));
+    static const uint16_t _T1H = ((uint16_t)(_T1+_T2    ));
+    static const uint16_t _TOP = ((uint16_t)(_T1+_T2+_T3));
 
     // may as well be static, as can only attach one LED string per _DATA_PIN....
     static uint16_t s_SequenceBuffer[_PWM_BUFFER_COUNT];
