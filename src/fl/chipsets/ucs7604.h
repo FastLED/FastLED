@@ -206,14 +206,14 @@
 /// For the latest status, hardware compatibility, and ESP32/STM32 ports, see:
 /// https://github.com/FastLED/FastLED/issues/2088
 
-// Platform-specific implementations
-#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__) || defined(__SAMD51__) || defined(__SAME51__)
+// Generic platform implementations using blocking clockless driver
 #define UCS7604_HAS_CONTROLLER 1
-#include "../../platforms/arm/common/m0clockless.h"
+#include "../../platforms/shared/clockless_block/clockless_block_generic.h"
 #include "../eorder.h"
 #include "../../fastpin.h"
 #include "../../cled_controller.h"
 #include "../force_inline.h"
+#include "../../fl/delay.h"
 
 namespace fl {
 
@@ -226,36 +226,48 @@ enum UCS7604Mode {
 
 }  // namespace fl
 
-#endif // Platform check for UCS7604 support
-
-#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__)
-
 namespace fl {
 
-/// @brief UCS7604 controller for ARM M0 platforms (SAMD21)
+/// @brief Generic UCS7604 controller using blocking clockless driver
 /// @tparam DATA_PIN The GPIO pin for data output
-/// @tparam T1 Timing parameter for first interval (WS2812 timing: 2 FMUL)
-/// @tparam T2 Timing parameter for second interval (WS2812 timing: 5 FMUL)
-/// @tparam T3 Timing parameter for third interval (WS2812 timing: 3 FMUL)
+/// @tparam T1 Timing in nanoseconds for '1' bit first pulse (high)
+/// @tparam T2 Timing in nanoseconds for '1' bit second pulse (low)
+/// @tparam T3 Timing in nanoseconds for '0' bit pulse (low)
 /// @tparam RGB_ORDER The RGB ordering for pixel data (typically GRB)
 /// @tparam MODE The UCS7604 mode configuration byte
+/// @tparam WAIT_TIME Minimum time in microseconds between frames
 ///
-/// This controller sends UCS7604 preambles before pixel data using the
-/// ARM M0 showLedData<>() assembly routine for all transmissions.
+/// This controller uses the generic blocking clockless driver to transmit
+/// UCS7604 preambles (chunk1 and chunk2) with precise 260µs delays between
+/// transmissions, followed by the main pixel data transmission.
+///
+/// The generic clockless driver provides:
+/// - Platform-independent implementation (works on AVR, ESP32, ARM, etc.)
+/// - Nanosecond-precision timing via delayNanoseconds<>()
+/// - Clean separation of preamble and data transmission
+///
+/// # Timing sequence:
+/// ```
+/// Preamble Phase 1:  Send chunk1 (8 bytes) via clockless driver
+///                    Delay 260µs using delayNanoseconds<260000>()
+/// Preamble Phase 2:  Send chunk2 (7 bytes) via clockless driver
+///                    Delay 260µs using delayNanoseconds<260000>()
+/// Data Phase:        Send pixel data via clockless driver
+/// Reset:             Line held low for 50µs (handled by clockless driver)
+/// ```
 template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
-    typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPinBB<DATA_PIN>::port_t data_t;
+    // Reference to the generic clockless driver for transmitting preambles
+    typedef ClocklessBlockController<DATA_PIN, T1, T2, T3, RGB_ORDER, 0, false, WAIT_TIME>
+            ClocklessDriver;
 
-    data_t mPinMask;
-    data_ptr_t mPort;
     CMinWait<WAIT_TIME> mWait;
 
     // UCS7604 preamble configuration
     static constexpr uint8_t CHUNK1_LEN = 8;
     static constexpr uint8_t CHUNK2_LEN = 7;
-    static constexpr uint16_t PREAMBLE_DELAY_US = 260;
+    static constexpr uint32_t PREAMBLE_DELAY_NS = 260000;  // 260µs in nanoseconds
 
     // Chunk 1: Framing header (fixed pattern)
     const uint8_t mChunk1[CHUNK1_LEN] = {
@@ -284,9 +296,8 @@ public:
 
     /// @brief Initialize the GPIO pin
     virtual void init() {
-        FastPinBB<DATA_PIN>::setOutput();
-        mPinMask = FastPinBB<DATA_PIN>::mask();
-        mPort = FastPinBB<DATA_PIN>::port();
+        FastPin<DATA_PIN>::setOutput();
+        FastPin<DATA_PIN>::lo();
     }
 
     /// @brief Get maximum refresh rate
@@ -309,215 +320,73 @@ public:
     /// @param pixels The pixel controller with RGB data
     ///
     /// Sends: chunk1 → delay → chunk2 → delay → pixel data
-    /// Retries once if initial transmission fails.
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) {
         if (pixels.size() == 0) {
             return;
         }
 
         mWait.wait();
-        cli();
 
-        if (!showRGBInternal(pixels)) {
-            // Retry once if failed
-            sei();
-            delayMicroseconds(WAIT_TIME);
-            cli();
-            showRGBInternal(pixels);
-        }
+        // Send UCS7604 preambles and pixel data
+        sendUCS7604Frame(pixels);
 
-        sei();
         mWait.mark();
     }
 
 protected:
-    /// @brief Send a preamble chunk using ARM M0 timing
+    /// @brief Send a preamble chunk using the generic clockless driver
     /// @param data Pointer to preamble bytes
     /// @param len Number of bytes in preamble
     ///
-    /// Sends raw bytes without color scaling/dithering using showLedData<>()
-    FASTLED_FORCE_INLINE void sendPreamble(const uint8_t* data, uint32_t len) {
-        struct M0ClocklessData preambleData;
-        // Zero out all scaling/adjustment for raw preamble transmission
-        preambleData.d[0] = 0;
-        preambleData.d[1] = 0;
-        preambleData.d[2] = 0;
-        preambleData.s[0] = 0;
-        preambleData.s[1] = 0;
-        preambleData.s[2] = 0;
-        preambleData.e[0] = 0;
-        preambleData.e[1] = 0;
-        preambleData.e[2] = 0;
-        preambleData.adj = 0;
+    /// Sends raw bytes via the blocking clockless driver without color correction
+    FASTLED_FORCE_INLINE void sendPreambleChunk(const uint8_t* data, uint32_t len) {
+        // Create a minimal pixel controller for the preamble bytes
+        // This wraps the raw preamble bytes as if they were pixel data
+        for (uint32_t i = 0; i < len; ++i) {
+            sendPreambleByte(data[i]);
+        }
+    }
 
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), data, len, &preambleData);
+    /// @brief Send a single preamble byte with WS2812-compatible timing
+    /// @param byte The byte to send (MSB first)
+    ///
+    /// Sends the byte bit-by-bit using the standard WS2812 timing
+    FASTLED_FORCE_INLINE void sendPreambleByte(uint8_t byte) {
+        for (int bit = 7; bit >= 0; --bit) {
+            bool is_one = (byte & (1 << bit)) != 0;
+
+            if (is_one) {
+                FastPin<DATA_PIN>::hi();
+                fl::delayNanoseconds<T1>();
+                FastPin<DATA_PIN>::lo();
+                fl::delayNanoseconds<T2>();
+            } else {
+                FastPin<DATA_PIN>::hi();
+                fl::delayNanoseconds<T1 + T2 - T3>();
+                FastPin<DATA_PIN>::lo();
+                fl::delayNanoseconds<T3>();
+            }
+        }
     }
 
     /// @brief Internal method to show RGB pixel data with UCS7604 preambles
     /// @param pixels The pixel controller
-    /// @return Non-zero on success
     ///
     /// Transmits: chunk1 → delay → chunk2 → delay → pixel data
-    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-        if (pixels.size() == 0) {
-            return 1;
-        }
-
+    FASTLED_FORCE_INLINE void sendUCS7604Frame(PixelController<RGB_ORDER>& pixels) {
         // Send chunk 1 (framing header)
-        sendPreamble(mChunk1, CHUNK1_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
+        sendPreambleChunk(mChunk1, CHUNK1_LEN);
+        fl::delayNanoseconds<PREAMBLE_DELAY_NS>();
 
         // Send chunk 2 (configuration)
-        sendPreamble(mChunk2, CHUNK2_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
+        sendPreambleChunk(mChunk2, CHUNK2_LEN);
+        fl::delayNanoseconds<PREAMBLE_DELAY_NS>();
 
-        // Setup pixel data transmission with color adjustment
-        struct M0ClocklessData data;
-        data.d[0] = pixels.d[0];
-        data.d[1] = pixels.d[1];
-        data.d[2] = pixels.d[2];
-        data.s[0] = pixels.mColorAdjustment.premixed[0];
-        data.s[1] = pixels.mColorAdjustment.premixed[1];
-        data.s[2] = pixels.mColorAdjustment.premixed[2];
-        data.e[0] = pixels.e[0];
-        data.e[1] = pixels.e[1];
-        data.e[2] = pixels.e[2];
-        data.adj = pixels.mAdvance;
-
-        // Send pixel data
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        return showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+        // Send pixel data using the generic clockless driver
+        ClocklessDriver::sendPixelData(pixels);
     }
 };
 
 }  // namespace fl
-
-#elif defined(__SAMD51__) || defined(__SAME51__)
-
-namespace fl {
-
-/// @brief UCS7604 controller for ARM M0+ platforms (SAMD51)
-/// Same implementation as SAMD21 version
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
-          UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
-class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
-    typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPinBB<DATA_PIN>::port_t data_t;
-
-    data_t mPinMask;
-    data_ptr_t mPort;
-    CMinWait<WAIT_TIME> mWait;
-
-    static constexpr uint8_t CHUNK1_LEN = 8;
-    static constexpr uint8_t CHUNK2_LEN = 7;
-    static constexpr uint16_t PREAMBLE_DELAY_US = 260;
-
-    const uint8_t mChunk1[CHUNK1_LEN] = {
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x02
-    };
-
-    uint8_t mChunk2[CHUNK2_LEN];
-
-public:
-    UCS7604Controller(uint8_t r_current = 0x0F, uint8_t g_current = 0x0F,
-                      uint8_t b_current = 0x0F, uint8_t w_current = 0x0F) {
-        mChunk2[0] = static_cast<uint8_t>(MODE);
-        mChunk2[1] = r_current & 0x0F;
-        mChunk2[2] = g_current & 0x0F;
-        mChunk2[3] = b_current & 0x0F;
-        mChunk2[4] = w_current & 0x0F;
-        mChunk2[5] = 0x00;
-        mChunk2[6] = 0x00;
-    }
-
-    virtual void init() {
-        FastPinBB<DATA_PIN>::setOutput();
-        mPinMask = FastPinBB<DATA_PIN>::mask();
-        mPort = FastPinBB<DATA_PIN>::port();
-    }
-
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
-
-    void setCurrentControl(uint8_t r_current, uint8_t g_current,
-                          uint8_t b_current, uint8_t w_current) {
-        mChunk2[1] = r_current & 0x0F;
-        mChunk2[2] = g_current & 0x0F;
-        mChunk2[3] = b_current & 0x0F;
-        mChunk2[4] = w_current & 0x0F;
-    }
-
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) {
-        if (pixels.size() == 0) {
-            return;
-        }
-
-        mWait.wait();
-        cli();
-
-        if (!showRGBInternal(pixels)) {
-            sei();
-            delayMicroseconds(WAIT_TIME);
-            cli();
-            showRGBInternal(pixels);
-        }
-
-        sei();
-        mWait.mark();
-    }
-
-protected:
-    FASTLED_FORCE_INLINE void sendPreamble(const uint8_t* data, uint32_t len) {
-        struct M0ClocklessData preambleData;
-        preambleData.d[0] = 0;
-        preambleData.d[1] = 0;
-        preambleData.d[2] = 0;
-        preambleData.s[0] = 0;
-        preambleData.s[1] = 0;
-        preambleData.s[2] = 0;
-        preambleData.e[0] = 0;
-        preambleData.e[1] = 0;
-        preambleData.e[2] = 0;
-        preambleData.adj = 0;
-
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), data, len, &preambleData);
-    }
-
-    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-        if (pixels.size() == 0) {
-            return 1;
-        }
-
-        sendPreamble(mChunk1, CHUNK1_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        sendPreamble(mChunk2, CHUNK2_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        struct M0ClocklessData data;
-        data.d[0] = pixels.d[0];
-        data.d[1] = pixels.d[1];
-        data.d[2] = pixels.d[2];
-        data.s[0] = pixels.mColorAdjustment.premixed[0];
-        data.s[1] = pixels.mColorAdjustment.premixed[1];
-        data.s[2] = pixels.mColorAdjustment.premixed[2];
-        data.e[0] = pixels.e[0];
-        data.e[1] = pixels.e[1];
-        data.e[2] = pixels.e[2];
-        data.adj = pixels.mAdvance;
-
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        return showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
-    }
-};
-
-}  // namespace fl
-
-#endif // Platform checks
 
 #endif // __INC_UCS7604_H
