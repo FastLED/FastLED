@@ -11,6 +11,7 @@
 #include "_kiss_fft_guts.h"
 #
 #include "fl/warn.h"
+#include "fl/malloc.h"
 
 struct kiss_fftr_state{
     kiss_fft_cfg substate;
@@ -133,7 +134,7 @@ void kiss_fftri(kiss_fftr_cfg st,const kiss_fft_cpx *freqdata,kiss_fft_scalar *t
     if (st->substate->inverse == 0) {
         //fprintf (stderr, "kiss fft usage error: improper alloc\n");
         FL_WARN("kiss fft usage error: improper alloc");
-        exit (1);
+        exit(1);
     }
 
     ncfft = st->substate->nfft;
