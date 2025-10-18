@@ -37,7 +37,6 @@ all the UI elements you see below.
 #include "fl/unused.h"
 #include "fx/time.h"
 #include "fl/function.h"
-#include "fx/audio/sound_to_midi.h"
 
 // Sketch.
 #include "fx_audio.h"

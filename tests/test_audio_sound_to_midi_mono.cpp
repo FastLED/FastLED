@@ -1,3 +1,5 @@
+// DISABLED: sound_to_midi module was removed in commit 806168ddc6
+#if 0
 #include "test.h"
 #include "fx/audio/sound_to_midi.h"
 #include "fl/math.h"
@@ -502,3 +504,4 @@ TEST_CASE("SoundToMIDI Sliding - 75% overlap improves stability") {
     CHECK_GT(noteOnCount, 0);
     CHECK_EQ(detectedNote, 69);
 }
+#endif

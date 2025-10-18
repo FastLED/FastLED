@@ -2,10 +2,14 @@
 /// @brief   Real-time sound to MIDI conversion with histogram visualization
 /// @example Sound2Midi.ino
 ///
+/// DISABLED: This sketch was disabled because the SoundToMIDI module was removed.
+/// See commit 806168ddc6 for details.
+///
 /// This sketch demonstrates real-time sound to MIDI conversion using the SoundToMIDI engine.
 /// It visualizes detected pitches as a 128x128 histogram where each note creates
 /// a colored streak that fades over time.
 
+/*
 #include <FastLED.h>
 
 #if !SKETCH_HAS_LOTS_OF_MEMORY
@@ -500,3 +504,4 @@ void loop() {
 FL_DISABLE_WARNING_POP
 
 #endif
+*/

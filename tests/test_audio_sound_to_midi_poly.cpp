@@ -1,3 +1,5 @@
+// DISABLED: sound_to_midi module was removed in commit 806168ddc6
+#if 0
 #include "test.h"
 #include "fx/audio/sound_to_midi.h"
 #include "fl/math.h"
@@ -749,3 +751,4 @@ TEST_CASE("SoundToMIDI Sliding Poly - Access to underlying poly engine") {
 
     CHECK(callbackInvoked); // Callback should have been called
 }
+#endif
