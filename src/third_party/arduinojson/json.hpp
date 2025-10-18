@@ -320,8 +320,8 @@ class DefaultAllocator : public Allocator {
 }  // namespace detail
 ARDUINOJSON_END_PUBLIC_NAMESPACE
 #if ARDUINOJSON_DEBUG
-#include <assert.h>  // ok include
-#  define ARDUINOJSON_ASSERT(X) assert(X)
+#include "fl/warn.h"  // Use FastLED's warning system instead of stdlib assert
+#  define ARDUINOJSON_ASSERT(X) FL_WARN_IF(!(X), "ArduinoJSON assertion failed")
 #else
 #  define ARDUINOJSON_ASSERT(X) ((void)0)
 #endif

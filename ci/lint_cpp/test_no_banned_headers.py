@@ -285,13 +285,15 @@ class TestNoBannedHeaders(unittest.TestCase):
         """Searches through third_party directory to check for stdlib headers.
 
         Third-party libraries should use fl/ alternatives instead of standard library headers.
+        STRICT MODE: No banned headers allowed in third_party/**/*.h files.
         """
 
         def on_fail(msg: str) -> None:
             self.fail(
                 msg + "\n"
                 "Third-party libraries should use fl/ equivalents instead of stdlib headers.\n"
-                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+                "STRICT MODE ENFORCED: No '// ok include' bypass allowed in third_party/**/*.h files.\n"
+                "Fix by removing the banned header or use fl/ alternatives."
             )
 
         # Test the third_party directory
@@ -302,7 +304,7 @@ class TestNoBannedHeaders(unittest.TestCase):
             test_directories=test_directories,
             banned_headers_list=BANNED_HEADERS_COMMON,
             on_fail=on_fail,
-            strict_mode=False,  # Allow "// ok include" bypass for third_party
+            strict_mode=True,  # STRICT mode - no "// ok include" bypass for third_party
         )
 
 
