@@ -15,6 +15,49 @@
 
 namespace fl {
 
+// Forward declaration for allocate_result
+template <typename Pointer, typename SizeType>
+struct allocation_result {
+    Pointer ptr;
+    SizeType count;  // Actual allocated count (may be > requested)
+};
+
+// Allocator traits for compile-time capability detection
+// Allows containers to use optimized code paths if allocators support them
+template <typename Allocator>
+struct allocator_traits {
+    using allocator_type = Allocator;
+    using value_type = typename Allocator::value_type;
+    using pointer = typename Allocator::pointer;
+    using size_type = typename Allocator::size_type;
+
+    // Detect if allocator has reallocate() method
+    // Allows in-place memory resizing for POD types without copy
+    template <typename A = Allocator, typename = void>
+    struct has_reallocate : fl::false_type {};
+
+    template <typename A>
+    struct has_reallocate<A, decltype((void)fl::declval<A>().reallocate(
+        fl::declval<typename A::pointer>(),
+        fl::declval<typename A::size_type>(),
+        fl::declval<typename A::size_type>()
+    ))> : fl::true_type {};
+
+    static constexpr bool has_reallocate_v = has_reallocate<Allocator>::value;
+
+    // Detect if allocator has allocate_at_least() method
+    // Allows allocator to return more memory than requested to reduce reallocations
+    template <typename A = Allocator, typename = void>
+    struct has_allocate_at_least : fl::false_type {};
+
+    template <typename A>
+    struct has_allocate_at_least<A, decltype((void)fl::declval<A>().allocate_at_least(
+        fl::declval<typename A::size_type>()
+    ))> : fl::true_type {};
+
+    static constexpr bool has_allocate_at_least_v = has_allocate_at_least<Allocator>::value;
+};
+
 // Test hooks for malloc/free operations
 #if defined(FASTLED_TESTING)
 // Interface class for malloc/free test hooks
@@ -81,27 +124,31 @@ template <typename T> class allocator {
     // Destructor
     ~allocator() noexcept {}
 
-    // TODO(performance): Consider using realloc() for more efficient memory resizing
-    // Potential benefits:
-    // - Reduced memory copying
-    // - Potential performance improvements for growing/shrinking allocations
-    // - Possible memory fragmentation reduction
-    //
-    // Challenges to address:
-    // - Ensuring zero-initialization for new memory regions
-    // - Handling allocation failure
-    // - Maintaining C++ object lifetime semantics
-    //
-    // Experimental implementation might look like:
-    // ```
-    // T* ptr = static_cast<T*>(realloc(existing_ptr, new_size));
-    // if (ptr) {
-    //     // Zero-initialize any newly allocated memory
-    //     if (new_size > old_size) {
-    //         fl::memfill(ptr + old_size, 0, new_size - old_size);
-    //     }
-    // }
-    // ```
+    // Optional: allocate_at_least() for optimized resizing
+    // Allows allocator to return more memory than requested to reduce reallocations
+    // Returns allocation_result with actual allocated count (may be > requested)
+    allocation_result<pointer, size_type> allocate_at_least(fl::size n) {
+        if (n == 0) {
+            return {nullptr, 0};
+        }
+        // Default implementation: just allocate exactly what's requested
+        // Specialized allocators may override to return more for efficiency
+        return {allocate(n), n};
+    }
+
+    // Optional: reallocate() for POD types that support in-place resizing
+    // Allows allocator to use realloc() for efficiency
+    // Only called if allocator_traits detects this method exists
+    // Returns nullptr on failure; caller must handle fallback
+    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
+        // Default implementation: no in-place realloc support
+        // Specialized allocators like allocator_realloc<T> override this
+        // to use fl::realloc() for POD types
+        FASTLED_UNUSED(ptr);
+        FASTLED_UNUSED(old_count);
+        FASTLED_UNUSED(new_count);
+        return nullptr;  // Signal: not supported, use standard allocate-copy-deallocate
+    }
 
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
@@ -142,6 +189,124 @@ template <typename T> class allocator {
         }
 };
 
+// Specialized allocator that supports in-place realloc() for efficient resizing
+// Uses ::realloc() (from stdlib) to potentially resize memory without copying
+// Works best with POD types; be cautious with types that have complex constructors
+//
+// Usage:
+//   fl::vector<int, fl::allocator_realloc<int>> vec;
+//   // Vector will use realloc() for resizing instead of allocate-copy-deallocate
+//
+template <typename T>
+class allocator_realloc {
+public:
+    // Type definitions required by STL
+    using value_type = T;
+    using pointer = T*;
+    using const_pointer = const T*;
+    using reference = T&;
+    using const_reference = const T&;
+    using size_type = fl::size;
+    using difference_type = fl::ptrdiff_t;
+
+    // Rebind allocator to type U
+    template <typename U>
+    struct rebind {
+        using other = allocator_realloc<U>;
+    };
+
+    // Default constructor
+    allocator_realloc() noexcept {}
+
+    // Copy constructor
+    template <typename U>
+    allocator_realloc(const allocator_realloc<U>&) noexcept {}
+
+    // Destructor
+    ~allocator_realloc() noexcept {}
+
+    // Standard allocate() - allocates new memory
+    T* allocate(fl::size n) {
+        if (n == 0) {
+            return nullptr;
+        }
+        fl::size size = sizeof(T) * n;
+        void *ptr = Malloc(size);
+        if (ptr == nullptr) {
+            return nullptr;
+        }
+        fl::memfill(ptr, 0, sizeof(T) * n);
+        return static_cast<T*>(ptr);
+    }
+
+    // Standard deallocate()
+    void deallocate(T* p, fl::size n) {
+        FASTLED_UNUSED(n);
+        if (p == nullptr) {
+            return;
+        }
+        Free(p);
+    }
+
+    // Standard construct()
+    template <typename U, typename... Args>
+    void construct(U* p, Args&&... args) {
+        if (p == nullptr) return;
+        new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
+    }
+
+    // Standard destroy()
+    template <typename U>
+    void destroy(U* p) {
+        if (p == nullptr) return;
+        p->~U();
+    }
+
+    // OPTIMIZED: allocate_at_least() - can return more than requested
+    // This gives the vector a hint to allocate extra space and reduce future reallocations
+    allocation_result<pointer, size_type> allocate_at_least(fl::size n) {
+        if (n == 0) {
+            return {nullptr, 0};
+        }
+        // Ask for 1.5x to reduce future reallocations
+        fl::size requested = (3 * n) / 2;
+        T* ptr = allocate(requested);
+        if (ptr) {
+            return {ptr, requested};
+        }
+        // Fallback: try exact size if 1.5x failed
+        ptr = allocate(n);
+        return {ptr, ptr ? n : 0};
+    }
+
+    // OPTIMIZED: reallocate() - in-place resize using ::realloc()
+    // Returns the new pointer if successful, nullptr if not supported/failed
+    // The caller (HeapVector) handles fallback to allocate-copy-deallocate
+    pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
+        if (new_count == 0) {
+            if (ptr) {
+                deallocate(ptr, old_count);
+            }
+            return nullptr;
+        }
+
+        // Use ::realloc() for in-place resize
+        void* result = ::realloc(ptr, new_count * sizeof(T));
+        if (!result) {
+            return nullptr;  // Realloc failed
+        }
+
+        T* new_ptr = static_cast<T*>(result);
+
+        // Zero-initialize any newly allocated memory
+        if (new_count > old_count) {
+            fl::memfill(new_ptr + old_count, 0, (new_count - old_count) * sizeof(T));
+        }
+
+        return new_ptr;
+    }
+};
+
 template <typename T> class allocator_psram {
     public:
         // Type definitions required by STL
@@ -179,19 +344,36 @@ template <typename T> class allocator_psram {
             PSRamAllocator<T>::Free(p);
             FASTLED_UNUSED(n);
         }
-    
+
         // Construct an object at the specified address
         template <typename U, typename... Args>
         void construct(U* p, Args&&... args) {
             if (p == nullptr) return;
             new(static_cast<void*>(p)) U(fl::forward<Args>(args)...);
         }
-    
+
         // Destroy an object at the specified address
         template <typename U>
         void destroy(U* p) {
             if (p == nullptr) return;
             p->~U();
+        }
+
+        // Optional: allocate_at_least() with default implementation
+        allocation_result<pointer, size_type> allocate_at_least(fl::size n) {
+            if (n == 0) {
+                return {nullptr, 0};
+            }
+            // Default: just allocate exactly what's requested
+            return {allocate(n), n};
+        }
+
+        // Optional: reallocate() - no-op for PSRAM
+        pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
+            FASTLED_UNUSED(ptr);
+            FASTLED_UNUSED(old_count);
+            FASTLED_UNUSED(new_count);
+            return nullptr;  // Signal: not supported
         }
 };
 

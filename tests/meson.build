@@ -46,6 +46,7 @@ test_names = [
   'test_allocator',
   'test_allocator_inlined',
   'test_allocator_inlined_slab',
+  'test_allocator_realloc',
   'test_allocator_slab',
   'test_async',
   'test_atomic',

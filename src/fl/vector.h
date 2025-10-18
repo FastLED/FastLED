@@ -432,26 +432,85 @@ class FL_ALIGN HeapVector {
             if (new_capacity < n) {
                 new_capacity = n;
             }
-            
-            T* new_array = mAlloc.allocate(new_capacity);
-            
-            // Move existing elements to new array
-            for (fl::size i = 0; i < mSize; ++i) {
-                mAlloc.construct(&new_array[i], fl::move(mArray[i]));
-            }
-            
-            // Clean up old array
-            if (mArray) {
-                for (fl::size i = 0; i < mSize; ++i) {
-                    mAlloc.destroy(&mArray[i]);
-                }
-                mAlloc.deallocate(mArray, mCapacity);
-            }
-            
-            mArray = new_array;
-            mCapacity = new_capacity;
+            ensure_size_impl(n, new_capacity);
         }
     }
+
+private:
+    // SFINAE helper: Try reallocate() path if allocator supports it
+    template <typename A = Allocator>
+    typename fl::enable_if<fl::allocator_traits<A>::has_reallocate_v, bool>::type
+    try_reallocate(fl::size new_capacity) {
+        T* reallocated = mAlloc.reallocate(mArray, mCapacity, new_capacity);
+        if (reallocated) {
+            mArray = reallocated;
+            mCapacity = new_capacity;
+            return true;  // Success!
+        }
+        return false;  // Not supported or failed
+    }
+
+    // Fallback: reallocate() not supported
+    template <typename A = Allocator>
+    typename fl::enable_if<!fl::allocator_traits<A>::has_reallocate_v, bool>::type
+    try_reallocate(fl::size new_capacity) {
+        FASTLED_UNUSED(new_capacity);
+        return false;
+    }
+
+    // SFINAE helper: Try allocate_at_least() path if allocator supports it
+    template <typename A = Allocator>
+    typename fl::enable_if<fl::allocator_traits<A>::has_allocate_at_least_v, T*>::type
+    allocate_new(fl::size new_capacity, fl::size& actual_capacity) {
+        auto result = mAlloc.allocate_at_least(new_capacity);
+        actual_capacity = result.count;
+        return result.ptr;
+    }
+
+    // Fallback: Use standard allocate()
+    template <typename A = Allocator>
+    typename fl::enable_if<!fl::allocator_traits<A>::has_allocate_at_least_v, T*>::type
+    allocate_new(fl::size new_capacity, fl::size& actual_capacity) {
+        actual_capacity = new_capacity;
+        return mAlloc.allocate(new_capacity);
+    }
+
+    // Implementation: Try optimized paths, fall back to standard if needed
+    void ensure_size_impl(fl::size n, fl::size new_capacity) {
+        FASTLED_UNUSED(n);
+        // PATH 1: Try optimized reallocate() if allocator supports it
+        // This avoids copying for POD types and moves memory in-place
+        if (try_reallocate<Allocator>(new_capacity)) {
+            return;  // Success! No need for copy
+        }
+
+        // PATH 2: Try allocate_at_least() or standard allocate()
+        // Allocator can return MORE than requested to reduce future reallocations
+        fl::size actual_capacity = new_capacity;
+        T* new_array = allocate_new<Allocator>(new_capacity, actual_capacity);
+
+        if (!new_array) {
+            return;  // Allocation failed
+        }
+
+        // Move existing elements to new array
+        for (fl::size i = 0; i < mSize; ++i) {
+            mAlloc.construct(&new_array[i], fl::move(mArray[i]));
+        }
+
+        // Clean up old array
+        if (mArray) {
+            for (fl::size i = 0; i < mSize; ++i) {
+                mAlloc.destroy(&mArray[i]);
+            }
+            mAlloc.deallocate(mArray, mCapacity);
+        }
+
+        mArray = new_array;
+        mCapacity = actual_capacity;  // Use actual allocated count
+    }
+
+public:
 
     void reserve(fl::size n) {
         if (n > mCapacity) {
