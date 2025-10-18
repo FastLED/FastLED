@@ -1,16 +1,20 @@
 import argparse
 import subprocess
 import sys
+from pathlib import Path
 from typing import List, Tuple
 
 from rich.console import Console
 from rich.panel import Panel
 
+from ci.boards import NATIVE
+from ci.compiler.board_example_utils import should_skip_example_for_board
+
 
 console = Console()
 
 
-def parse_args() -> Tuple[argparse.Namespace, list[str]]:
+def parse_args() -> Tuple[argparse.Namespace, List[str]]:
     parser = argparse.ArgumentParser(description="Compile wasm")
     parser.add_argument(
         "sketch_dir",
@@ -52,6 +56,30 @@ def main() -> int:
 
     # Extract example name from sketch_dir (e.g., "examples/Blink" -> "Blink")
     example_name = args.sketch_dir.split("/")[-1]
+
+    # Check if sketch is filtered out for native/WASM platform
+    try:
+        should_skip, reason = should_skip_example_for_board(NATIVE, example_name)
+        if should_skip:
+            console.print()
+            console.print(
+                f"[bold yellow]⚠️  WARNING:[/bold yellow] Example '{example_name}' is filtered for native/WASM platform"
+            )
+            console.print(f"[dim]Reason: {reason}[/dim]")
+            console.print()
+    except FileNotFoundError:
+        # Sketch file not found - skip check, compiler will handle it
+        pass
+    except ValueError as e:
+        # Filter syntax error - warn but continue
+        console.print(
+            f"[bold yellow]⚠️  WARNING:[/bold yellow] Error checking filters for '{example_name}': {e}"
+        )
+    except Exception as e:
+        # Unexpected error during filter check - log and continue
+        console.print(
+            f"[dim]Note: Could not verify filter compatibility ({type(e).__name__})[/dim]"
+        )
 
     # Print what we're going to do
     console.print()

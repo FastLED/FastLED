@@ -5,9 +5,10 @@ in the FastLED compilation system.
 """
 
 from pathlib import Path
-from typing import List
+from typing import List, Tuple
 
 from ci.boards import ALL, Board
+from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch
 
 
 def get_default_boards() -> List[str]:
@@ -129,3 +130,85 @@ def get_board_artifact_extension(board: Board) -> str:
 
     # Default to .hex for most microcontroller boards
     return ".hex"
+
+
+def get_example_ino_path(example: str) -> Path:
+    """Get the path to the .ino file for an example.
+
+    Args:
+        example: Example name (e.g., "Blink" or "Fx/FxWave2d")
+
+    Returns:
+        Path to the .ino file
+
+    Raises:
+        FileNotFoundError: If .ino file not found
+    """
+    project_root = Path(__file__).parent.parent.parent.resolve()
+    examples_dir = project_root / "examples"
+
+    # Handle both "Blink" and "examples/Blink" formats
+    if example.startswith("examples/"):
+        example = example[len("examples/") :]
+
+    # Find the .ino file in the example directory
+    example_dir = examples_dir / example
+    example_name = Path(example).name  # Get just the last part (e.g., "Blink" or "FxWave2d")
+    ino_file = example_dir / f"{example_name}.ino"
+
+    if not ino_file.exists():
+        raise FileNotFoundError(f"Example .ino file not found: {ino_file}")
+
+    return ino_file
+
+
+def should_skip_example_for_board(
+    board: Board, example: str
+) -> Tuple[bool, str]:
+    """Check if an example should be skipped for a specific board.
+
+    Parses the @filter/@end-filter block from the .ino file and determines
+    if compilation should be skipped based on board properties.
+
+    Args:
+        board: Board configuration
+        example: Example name
+
+    Returns:
+        Tuple of (skip: bool, reason: str)
+        - skip=True means don't compile for this board
+        - reason explains why (or empty string if not skipped)
+    """
+    try:
+        ino_path = get_example_ino_path(example)
+    except FileNotFoundError:
+        # If we can't find the .ino file, don't skip
+        return False, ""
+
+    sketch_filter = parse_filter_from_sketch(ino_path)
+    return should_skip_sketch(board, sketch_filter)
+
+
+def get_filtered_examples(board: Board, examples: List[str]) -> Tuple[List[str], List[Tuple[str, str]]]:
+    """Filter examples based on board capabilities.
+
+    Args:
+        board: Board configuration
+        examples: List of example names to filter
+
+    Returns:
+        Tuple of (included_examples, skipped_with_reasons)
+        - included_examples: List of examples that should be compiled
+        - skipped_with_reasons: List of (example_name, skip_reason) tuples
+    """
+    included = []
+    skipped = []
+
+    for example in examples:
+        should_skip, reason = should_skip_example_for_board(board, example)
+        if should_skip:
+            skipped.append((example, reason))
+        else:
+            included.append(example)
+
+    return included, skipped

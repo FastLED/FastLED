@@ -7,13 +7,14 @@ It handles compilation workflow, result collection, and statistics reporting.
 
 import time
 from concurrent.futures import Future, as_completed
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from typeguard import typechecked
 
 from ci.boards import Board
+from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import FastLEDPaths, PioCompiler
 
@@ -26,6 +27,7 @@ class BoardCompilationResult:
     ok: bool
     sketch_results: List[SketchResult]
     stopped_early: bool = False
+    skipped_examples: List[Tuple[str, str]] = field(default_factory=list)  # List of (example, reason) tuples
 
 
 def compile_board_examples(
@@ -66,6 +68,24 @@ def compile_board_examples(
     print(f"BUILD CACHE: {paths.build_cache_dir}")
     print(f"CORE DIR: {paths.core_dir}")
     print(f"PACKAGES DIR: {paths.packages_dir}")
+
+    # Filter examples based on @filter directives
+    filtered_examples, skipped_examples = get_filtered_examples(board, examples)
+
+    if skipped_examples:
+        print(f"\nFILTERED OUT {len(skipped_examples)} example(s):")
+        for example, reason in skipped_examples:
+            print(f"  - {example}: {reason}")
+
+    if filtered_examples:
+        print(f"COMPILING {len(filtered_examples)} example(s)...")
+        # Update examples to use only filtered ones
+        examples = filtered_examples
+    else:
+        print("No examples to compile after filtering")
+        print(f"{'=' * 60}")
+        # Return success with no compilation
+        return BoardCompilationResult(ok=True, sketch_results=[], skipped_examples=skipped_examples)
 
     print(f"{'=' * 60}")
 
@@ -203,7 +223,7 @@ def compile_board_examples(
 
         any_failures = failure_count > 0
         return BoardCompilationResult(
-            ok=not any_failures, sketch_results=results, stopped_early=stopped_early
+            ok=not any_failures, sketch_results=results, stopped_early=stopped_early, skipped_examples=skipped_examples
         )
     except KeyboardInterrupt:
         print("Keyboard interrupt detected, cancelling builds")
@@ -225,6 +245,7 @@ def compile_board_examples(
                     example="<setup>",
                 )
             ],
+            skipped_examples=skipped_examples,
         )
 
 

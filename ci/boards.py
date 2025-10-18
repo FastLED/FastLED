@@ -3,7 +3,7 @@
 import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, ClassVar, Dict, List, Set
 
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
@@ -33,7 +33,7 @@ APOLLO3_2_2_0 = "https://github.com/nigelb/platform-apollo3blue"
 
 # ALL will be auto populated in the Board constructor whenever a
 # board is defined.
-ALL: list["Board"] = []
+ALL: List["Board"] = []
 
 
 class Auto:
@@ -75,6 +75,165 @@ class Board:
     lib_ignore: list[str] | None = (
         None  # Libraries to ignore during compilation (e.g., ['I2S'] for UNO R4 WiFi)
     )
+
+    # Class-level mappings for platform/MCU classification (O(1) lookups)
+    _LOW_MEMORY_BOARDS: ClassVar[Set[str]] = {
+        # AVR ATmega
+        "uno",              # ATmega328P
+        "nano",             # ATmega328P
+        "nano_every",       # ATmega4809
+        "yun",              # ATmega32U4
+        # AVR ATtiny
+        "attiny85",         # __AVR_ATtiny85__
+        "attiny88",         # __AVR_ATtiny88__
+        "attiny1604",       # ARDUINO_attinyxy6/4
+        "attiny4313",       # ARDUINO_attinyxy4
+        "attiny1616",       # ARDUINO_attinyxy6
+        # Teensy low-memory
+        "teensylc",         # ARDUINO_TEENSYLC
+        "teensy30",         # ARDUINO_TEENSY30
+        "teensy31",         # __MK20DX256__ (256KB RAM)
+        # STM32F1
+        "bluepill",         # STM32F103C8
+        "bluepill_f103cb",  # STM32F103CB
+        "maple_mini",       # STM32F1
+        "hy_tinystm103tb",  # STM32F1
+        # ESP8266
+        "esp8266",
+        # Renesas UNO R4
+        "uno_r4_wifi",
+    }
+
+    _LOW_MEMORY_PLATFORMS: ClassVar[Set[str]] = {
+        "avr",          # All AVR boards
+        "renesas-ra",   # Renesas UNO R4
+    }
+
+    _PLATFORM_PATTERNS: ClassVar[List[tuple[str, str]]] = [
+        # (pattern, platform_family) - order matters, check most specific first
+        ("espressif32", "esp32"),
+        ("esp32", "esp32"),
+        ("esp8266", "esp8266"),
+        ("raspberrypi", "rp2040"),
+        ("rp2040", "rp2040"),
+        ("teensy", "teensy"),
+        ("ststm32", "stm32"),
+        ("stm32", "stm32"),
+        ("atmelsam", "arm"),
+        ("renesas-ra", "renesas"),
+        ("renesas", "renesas"),
+        ("nrf52", "nrf52"),
+        ("atmelavr", "avr"),
+        ("avr", "avr"),
+        ("native", "native"),
+        ("stub", "native"),
+    ]
+
+    _MCU_PATTERNS: ClassVar[List[tuple[str, str]]] = [
+        # (board_name_pattern, mcu_target) - most specific patterns first
+        # ESP32 variants
+        ("esp32_p4", "ESP32P4"),
+        ("esp32p4", "ESP32P4"),
+        ("esp32s3", "ESP32S3"),
+        ("esp32_s3", "ESP32S3"),
+        ("esp32s2", "ESP32S2"),
+        ("esp32_s2", "ESP32S2"),
+        ("esp32c6", "ESP32C6"),
+        ("esp32_c6", "ESP32C6"),
+        ("esp32c5", "ESP32C5"),
+        ("esp32_c5", "ESP32C5"),
+        ("esp32c3", "ESP32C3"),
+        ("esp32_c3", "ESP32C3"),
+        ("esp32c2", "ESP32C2"),
+        ("esp32_c2", "ESP32C2"),
+        ("esp32h2", "ESP32H2"),
+        ("esp32_h2", "ESP32H2"),
+        ("esp32", "ESP32"),
+        # ESP8266
+        ("esp8266", "ESP8266"),
+        # Teensy variants
+        ("teensy41", "Teensy41"),
+        ("teensy40", "Teensy40"),
+        ("teensy31", "Teensy31"),
+        ("teensy30", "Teensy30"),
+        ("teensy_lc", "TeensyLC"),
+        ("teensylc", "TeensyLC"),
+        # STM32 variants
+        ("bluepill_f103cb", "STM32F103CB"),
+        ("bluepill", "STM32F103C8"),
+        ("stm32f1", "STM32F1"),
+        # AVR variants
+        ("uno", "ATmega328P"),
+        ("nano", "ATmega328P"),
+        ("nano_every", "ATmega4809"),
+        ("attiny85", "ATtiny85"),
+        ("attiny88", "ATtiny88"),
+        ("attiny1604", "ATtiny1604"),
+        ("attiny4313", "ATtiny4313"),
+        ("attiny1616", "ATtiny1616"),
+        # RP2040 variants
+        ("pico2", "RP2350"),
+        ("rpi_pico2", "RP2350"),
+        ("xrp", "RP2350"),
+        ("pico", "RP2040"),
+        ("rpi_pico", "RP2040"),
+        # ARM variants
+        ("due", "ATSAM3X8E"),
+        ("giga_r1", "STM32H747"),
+        # NRF52 variants
+        ("nrf52840", "NRF52840"),
+        # Renesas
+        ("uno_r4_wifi", "RA4M1"),
+        ("uno_r4", "RA4M1"),
+    ]
+
+    _BOARD_TO_PLATFORM_FAMILY: ClassVar[Dict[str, str]] = {
+        # Direct board name to platform family mapping (fastest for exact matches)
+        "esp32dev": "esp32",
+        "esp32c2": "esp32",
+        "esp32c3": "esp32",
+        "esp32c5": "esp32",
+        "esp32c6": "esp32",
+        "esp32s2": "esp32",
+        "esp32s3": "esp32",
+        "esp32h2": "esp32",
+        "esp32p4": "esp32",
+        "esp8266": "esp8266",
+        "uno": "avr",
+        "nano": "avr",
+        "nano_every": "avr",
+        "attiny85": "avr",
+        "attiny88": "avr",
+        "attiny1604": "avr",
+        "attiny4313": "avr",
+        "attiny1616": "avr",
+        "yun": "avr",
+        "teensylc": "teensy",
+        "teensy30": "teensy",
+        "teensy31": "teensy",
+        "teensy40": "teensy",
+        "teensy41": "teensy",
+        "bluepill": "stm32",
+        "bluepill_f103cb": "stm32",
+        "maple_mini": "stm32",
+        "hy_tinystm103tb": "stm32",
+        "blackpill": "stm32",
+        "rpipico": "rp2040",
+        "rpipico2": "rp2040",
+        "due": "arm",
+        "digix": "arm",
+        "zero": "arm",
+        "adafruit_feather_m0": "arm",
+        "adafruit_feather_m4": "arm",
+        "adafruit_grand_central_m4": "arm",
+        "giga_r1": "arm",
+        "nrf52840_dk": "nrf52",
+        "adafruit_feather_nrf52840_sense": "nrf52",
+        "xiaoblesense": "nrf52",
+        "uno_r4_wifi": "renesas",
+        "native": "native",
+        "web": "native",
+    }
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
@@ -144,6 +303,83 @@ class Board:
                     return True
 
         return False
+
+    @property
+    def memory_class(self) -> str:
+        """Return memory class for this board: 'low' or 'high'.
+
+        Used by @filter directives to determine platform memory constraints.
+        Returns 'low' for memory-constrained platforms, 'high' for others.
+
+        Memory classification based on C++ sketch_macros.h SKETCH_HAS_LOTS_OF_MEMORY:
+        - Low-memory: AVR, STM32F1, ESP8266, Teensy LC/3.0/3.1, Renesas UNO R4
+        - High-memory: ESP32 family, RP2040, ARM (Due, Feather), Teensy 4.x, NRF52
+        """
+        # Check board name first (O(1) set lookup, highest priority)
+        if self.board_name in self._LOW_MEMORY_BOARDS:
+            return "low"
+
+        # Check platform family (O(1) set lookup)
+        if self.platform:
+            platform_lower = self.platform.lower()
+            for low_mem_platform in self._LOW_MEMORY_PLATFORMS:
+                if low_mem_platform in platform_lower:
+                    return "low"
+
+        # Check for specific MCU indicators
+        if self.board_build_mcu:
+            mcu_lower = self.board_build_mcu.lower()
+            if any(low_mcu in mcu_lower for low_mcu in ["avr", "stm32f1", "atmega328"]):
+                return "low"
+
+        # Default to high-memory for most modern boards
+        return "high"
+
+    @property
+    def platform_family(self) -> str:
+        """Return platform family for this board.
+
+        Used by @filter directives for platform-level filtering.
+        Examples: 'esp32', 'esp8266', 'avr', 'rp2040', 'teensy', 'stm32', 'arm', 'native'
+        """
+        if not self.board_name and not self.platform:
+            return "unknown"
+
+        # Try exact board name lookup first (O(1) dict lookup)
+        board_lower = self.board_name.lower()
+        if board_lower in self._BOARD_TO_PLATFORM_FAMILY:
+            return self._BOARD_TO_PLATFORM_FAMILY[board_lower]
+
+        # Check platform string with pattern matching
+        if self.platform:
+            platform_lower = self.platform.lower()
+            for pattern, family in self._PLATFORM_PATTERNS:
+                if pattern in platform_lower:
+                    return family
+
+        # Fallback: check board name patterns
+        for pattern, family in self._PLATFORM_PATTERNS:
+            if pattern in board_lower:
+                return family
+
+        # Default fallback
+        return "unknown"
+
+    def get_mcu_target(self) -> str | None:
+        """Return specific MCU target for this board (e.g., 'ESP32S3', 'ATmega328P').
+
+        Used by @filter directives for MCU-specific filtering.
+        Returns None if target cannot be determined.
+        """
+        board_lower = self.board_name.lower()
+
+        # Check patterns in order (most specific first)
+        for pattern, target in self._MCU_PATTERNS:
+            if pattern in board_lower:
+                return target
+
+        # No specific target for unknown boards
+        return None
 
     def clone(self) -> "Board":
         out = Board(
@@ -852,11 +1088,11 @@ _BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
 
 
 def create_board(board_name: str, no_project_options: bool = False) -> Board:
-    board: Board
     if no_project_options:
+        # Create a minimal board without project options
         board = Board(board_name=board_name, add_board_to_all=False)
-    if board_name not in _BOARD_MAP:
-        # empty board without any special overrides, assume platformio will know what to do with it.
+    elif board_name not in _BOARD_MAP:
+        # Empty board without any special overrides, assume platformio will know what to do with it
         board = Board(board_name=board_name, add_board_to_all=False)
     else:
         board = _BOARD_MAP[board_name]
