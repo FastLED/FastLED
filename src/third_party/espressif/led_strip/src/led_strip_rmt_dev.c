@@ -12,8 +12,8 @@
  *
  * SPDX-License-Identifier: Apache-2.0
  */
-#include <stdlib.h>
-#include <string.h>
+#include <stdlib.h>  // ok include - ESP IDF C code
+#include <string.h>  // ok include - ESP IDF C code
 #include <sys/cdefs.h>
 #include "esp_log.h"
 #include "esp_check.h"

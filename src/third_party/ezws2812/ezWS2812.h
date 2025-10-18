@@ -30,7 +30,7 @@
 #ifndef ezWS2812_h
 #define ezWS2812_h
 
-#include <Arduino.h>
+#include <Arduino.h>  // ok include - SPI driver hardware abstraction
 #include <SPI.h>
 
 namespace fl {

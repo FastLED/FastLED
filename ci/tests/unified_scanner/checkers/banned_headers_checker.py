@@ -72,11 +72,7 @@ class BannedHeadersChecker(BaseChecker):
         if file_path.suffix not in {".cpp", ".h", ".hpp", ".cc", ".ino"}:
             return False
 
-        # Skip third_party directories (they can use any headers)
-        path_str = str(file_path)
-        if "third_party" in path_str.replace("\\", "/").split("/"):
-            return False
-
+        # Check all files including third_party (they should also use fl/ alternatives)
         return True
 
     def _get_banned_headers_for_path(self, file_path: Path) -> Set[str]:
@@ -98,6 +94,8 @@ class BannedHeadersChecker(BaseChecker):
         if "platforms" in path_parts:
             return self.BANNED_HEADERS_PLATFORMS
 
+        # third_party directories must also follow the banned headers rule
+        # (they should use fl/ alternatives instead of stdlib headers)
         # Default: core source (includes Arduino.h ban)
         return self.BANNED_HEADERS_CORE
 
@@ -119,6 +117,10 @@ class BannedHeadersChecker(BaseChecker):
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
         if "/fl/" in file_path_str.replace("\\", "/"):
+            # Allow iostream in stub_main.cpp for testing entry point
+            if banned_header == "iostream" and "stub_main.cpp" in file_path_str:
+                return True
+
             # Allow pthread.h in thread-local implementation
             if banned_header == "pthread.h" and "thread_local" in file_path_str:
                 return True

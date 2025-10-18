@@ -5385,10 +5385,10 @@ class StringBuilder {
 };
 ARDUINOJSON_END_PRIVATE_NAMESPACE
 #if ARDUINOJSON_ENABLE_STD_STRING
-#include <string>
+#include <string>  // ok include - ArduinoJson library STL interface
 #endif
 #if ARDUINOJSON_ENABLE_STRING_VIEW
-#include <string_view>
+#include <string_view>  // ok include - ArduinoJson library STL interface
 #endif
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 template <typename T, typename Enable>

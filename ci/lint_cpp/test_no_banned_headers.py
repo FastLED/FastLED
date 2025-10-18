@@ -106,6 +106,10 @@ class BannedHeadersChecker(FileContentChecker):
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
         if "/fl/" in file_path.replace("\\", "/"):
+            # Allow iostream in stub_main.cpp for testing entry point
+            if header == "iostream" and "stub_main.cpp" in file_path:
+                return True
+
             # Allow pthread.h in thread-local implementation
             if header == "pthread.h" and "thread_local" in file_path:
                 return True
@@ -275,6 +279,30 @@ class TestNoBannedHeaders(unittest.TestCase):
             test_directories=test_directories,
             banned_headers_list=BANNED_HEADERS_PLATFORMS,
             on_fail=on_fail,
+        )
+
+    def test_no_banned_headers_third_party(self) -> None:
+        """Searches through third_party directory to check for stdlib headers.
+
+        Third-party libraries should use fl/ alternatives instead of standard library headers.
+        """
+
+        def on_fail(msg: str) -> None:
+            self.fail(
+                msg + "\n"
+                "Third-party libraries should use fl/ equivalents instead of stdlib headers.\n"
+                "You can add '// ok include' at the end of the line to silence this error for specific inclusions."
+            )
+
+        # Test the third_party directory
+        test_directories = [
+            os.path.join(SRC_ROOT, "third_party"),
+        ]
+        _test_no_banned_headers(
+            test_directories=test_directories,
+            banned_headers_list=BANNED_HEADERS_COMMON,
+            on_fail=on_fail,
+            strict_mode=False,  # Allow "// ok include" bypass for third_party
         )
 
 

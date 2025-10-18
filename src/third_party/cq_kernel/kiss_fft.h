@@ -9,10 +9,10 @@
 #ifndef KISS_FFT_H
 #define KISS_FFT_H
 
-#include <stdlib.h>
+#include "fl/cstdlib.h"
 #include "fl/stdio.h"
 #include "fl/stdint.h"
-#include <math.h>
+#include "fl/math.h"
 #include "fl/string.h"
 #include "fft_precision.h"
 

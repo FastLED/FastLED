@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include <math.h>
+#include "fl/math.h"
 #include "fl/string.h"
 #include "cq_kernel.h"
 #include "fft_precision.h"
