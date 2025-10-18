@@ -18,6 +18,7 @@
 #include "fl/namespace.h"
 #include "fastpin.h"
 #include "fl/delay.h"
+#include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
 #include "controller.h"

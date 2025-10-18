@@ -44,7 +44,9 @@
 #ifndef _MP3DEC_H
 #define _MP3DEC_H
 
+#if !defined(__AVR__)
 #include <cstddef>
+#endif
 #include "fl/cstddef.h"
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
