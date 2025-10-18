@@ -421,6 +421,35 @@ class FakeStrStream {
         !fl::is_same<unsigned long long, unsigned long>::value &&
         !fl::is_same<unsigned long long, long long>::value)
 
+    // Generic pointer and other type support for compatibility
+    FakeStrStream &operator<<(const void*) { return *this; }
+
+    // Support for strings/characters in arrays
+    template<fl::size N>
+    FakeStrStream &operator<<(const StrStream (&)[N]) { return *this; }
+
+    FakeStrStream &operator<<(const StrStream &) { return *this; }
+    FakeStrStream &operator<<(const Tile2x2_u8 &) { return *this; }
+    FakeStrStream &operator<<(const Tile2x2_u8_wrap &) { return *this; }
+    FakeStrStream &operator<<(const FFTBins &) { return *this; }
+
+    // Vector support
+    template<typename T>
+    FakeStrStream &operator<<(const vec2<T> &) { return *this; }
+
+    // HeapVector support
+    template<typename T, typename Alloc>
+    FakeStrStream &operator<<(const HeapVector<T, Alloc> &) { return *this; }
+
+    // Bitset support
+    template<fl::u32 N>
+    FakeStrStream &operator<<(const BitsetFixed<N> &) { return *this; }
+
+    FakeStrStream &operator<<(const bitset_dynamic &) { return *this; }
+
+    template<fl::u32 N>
+    FakeStrStream &operator<<(const BitsetInlined<N> &) { return *this; }
+
     FakeStrStream &operator=(const string &) { return *this; }
     FakeStrStream &operator=(const CRGB &) { return *this; }
     FakeStrStream &operator=(char) { return *this; }

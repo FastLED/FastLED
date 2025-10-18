@@ -9,6 +9,7 @@
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
 #include "platforms/shared/spi_hw_4.h"
+#include "fl/dbg.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -161,7 +162,7 @@ bool SPIQuadESP32::begin(const SpiHw4::Config& config) {
     // else: standard SPI (1 data line)
 
     FL_DBG_SPI("SPIQuadESP32::begin - Active Lanes: " << static_cast<int>(mActiveLanes));
-    FL_DBG_SPI("Bus Config Flags: " << std::hex << bus_config.flags << std::dec);
+    FL_DBG_SPI("Bus Config Flags: " << bus_config.flags);
 
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);

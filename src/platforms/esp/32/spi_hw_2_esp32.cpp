@@ -7,6 +7,7 @@
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
 #include "platforms/shared/spi_hw_2.h"
+#include "fl/dbg.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>

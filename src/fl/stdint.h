@@ -170,6 +170,7 @@
 typedef unsigned char uint8_t;
 typedef signed char int8_t;
 
+#ifdef __cplusplus
 // 16-bit types use platform-specific fl:: types to handle platform differences
 // (AVR: int is 16-bit, most others: short is 16-bit)
 typedef fl::u16 uint16_t;
@@ -185,6 +186,17 @@ typedef fl::size size_t;
 typedef fl::uptr uintptr_t;
 typedef fl::iptr intptr_t;
 typedef fl::ptrdiff ptrdiff_t;
+#else  // C language compatibility
+// In C, we need to use the platform types directly from platforms/int.h
+// These are defined outside the namespace in platform-specific int.h files
+typedef u16 uint16_t;
+typedef i16 int16_t;
+typedef u32 uint32_t;
+typedef i32 int32_t;
+typedef u64 uint64_t;
+typedef i64 int64_t;
+// Note: size_t, uintptr_t, intptr_t, and ptrdiff_t are handled in fl/cstddef.h
+#endif  // __cplusplus
 
 // stdint.h limit macros
 // These match the standard stdint.h definitions

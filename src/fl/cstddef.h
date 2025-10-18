@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef __cplusplus
 namespace fl {
 
 // FastLED equivalent of std::nullptr_t
@@ -43,6 +44,23 @@ typedef fl::size_t size_t;
 #ifndef ptrdiff_t
 typedef fl::ptrdiff_t ptrdiff_t;
 #endif
+#else  // !__cplusplus
+// C language compatibility - define types in global namespace
+#ifndef FL_SIZE_T_DEFINED
+#define FL_SIZE_T_DEFINED
+typedef __SIZE_TYPE__ size_t;
+#endif
+
+#ifndef FL_PTRDIFF_T_DEFINED
+#define FL_PTRDIFF_T_DEFINED
+#ifdef __PTRDIFF_TYPE__
+typedef __PTRDIFF_TYPE__ ptrdiff_t;
+#else
+// Fallback for compilers that don't define __PTRDIFF_TYPE__ (like older AVR-GCC)
+typedef long ptrdiff_t;
+#endif
+#endif
+#endif  // __cplusplus
 
 // FastLED equivalent of offsetof macro (stddef.h)
 // Computes byte offset of a member within a struct/class at compile time
