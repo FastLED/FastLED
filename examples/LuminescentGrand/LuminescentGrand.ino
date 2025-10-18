@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// This is a work in progress showcasing a complex MIDI keyboard
 /// visualizer.
 /// To run this compiler use
@@ -6,13 +8,6 @@
 /// > fastled
 
 #include "shared/defs.h"
-
-#if !ENABLE_SKETCH
-// avr can't compile this, neither can the esp8266.
-void setup() {}
-void loop() {}
-#else
-
 
 //#define DEBUG_PAINTER
 //#define DEBUG_KEYBOARD 1
@@ -95,7 +90,7 @@ void HandleNoteOff(byte channel, byte midi_note, byte velocity) {
 // This is uninmplemented because the test keyboard didn't
 // have this functionality. Right now the only thing it does is
 // print out that the key was pressed.
-void HandleAfterTouchPoly(byte channel, byte note, byte pressure) { 
+void HandleAfterTouchPoly(byte channel, byte note, byte pressure) {
   FL_UNUSED(channel);
   keyboard.HandleAfterTouchPoly(note, pressure);
 }
@@ -132,7 +127,7 @@ void setup() {
   //start serial with midi baudrate 31250
   // Initiate MIDI communications, listen to all channels
   MY_MIDI.begin(MIDI_CHANNEL_OMNI);
-  
+
   // Connect the HandleNoteOn function to the library, so it is called upon reception of a NoteOn.
   MY_MIDI.setHandleNoteOn(HandleNoteOn);
   MY_MIDI.setHandleNoteOff(HandleNoteOff);
@@ -199,16 +194,16 @@ void loop() {
   }
 
   DbgDoSimulatedKeyboardPress();
-  
+
   const unsigned long start_time = millis();
   // Each frame we call the midi processor 100 times to make sure that all notes
   // are processed.
   for (int i = 0; i < 100; ++i) {
     MY_MIDI.read();
   }
- 
+
   const unsigned long midi_time = millis() - start_time;
-  
+
   // Updates keyboard: releases sustained keys that.
 
   const uint32_t keyboard_time_start = millis();
@@ -218,13 +213,13 @@ void loop() {
   // durations.
   keyboard.Update(now_ms + delta_ms, delta_ms);
   const uint32_t keyboard_delta_time = millis() - keyboard_time_start;
-  
+
   ui_state ui_st = ui_update(now_ms, delta_ms);
 
   //dprint("vis selector = ");
   //dprintln(vis_state);
-  
-  
+
+
   // These int values are for desting the performance of the
   // app. If the app ever runs slow then set kShowFps to 1
   // in the settings.h file.
@@ -238,7 +233,7 @@ void loop() {
 
   const unsigned long paint_time = millis() - start_time;
   const unsigned long total_time = midi_time + paint_time + keyboard_delta_time;
-  
+
   if (kShowFps) {
     float fps = 1.0f/(float(total_time) / 1000.f);
     Serial.print("fps                  - "); Serial.println(fps);
@@ -254,6 +249,3 @@ void loop() {
 
   FastLED.show();
 }
-
-
-#endif  // __AVR__

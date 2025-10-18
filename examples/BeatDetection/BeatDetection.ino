@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    BeatDetection.ino
 /// @brief   Simple real-time beat detection for EDM with LED visualization
 /// @example BeatDetection.ino
@@ -6,12 +8,6 @@
 /// Visualizes beats and tempo on an LED strip - flashes on beat detection.
 
 #include <FastLED.h>
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
 
 #include "fx/audio/beat_detector.h"
 #include "fl/ui.h"
@@ -218,5 +214,3 @@ void loop() {
         Serial.println("============================");
     }
 }
-
-#endif

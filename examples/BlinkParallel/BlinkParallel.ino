@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    BlinkParallel.ino
 /// @brief   Shows parallel usage of WS2812 strips. Blinks once for red, twice for green, thrice for blue.
 /// @example BlinkParallel.ino
@@ -6,10 +8,6 @@
 #include "FastLED.h"
 
 #include "fl/sketch_macros.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-#include "platforms/sketch_fake.hpp"
-#else
 
 #include "FastLED.h"
 
@@ -113,5 +111,3 @@ void loop() {
   Serial.print("Time to fill and show for 2nd blocking (ms): ");
   Serial.println(diff);
 }
-
-#endif  // SKETCH_HAS_LOTS_OF_MEMORY

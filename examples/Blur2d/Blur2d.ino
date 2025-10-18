@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    Blur2d.ino
 /// @brief   Demonstrates 2D blur effects on LED matrix
 /// @example Blur2d.ino
@@ -20,13 +22,8 @@
 using namespace fl;
 
 
-#if SKETCH_HAS_LOTS_OF_MEMORY
 #define WIDTH 22
 #define HEIGHT 22
-#else
-#define WIDTH 12
-#define HEIGHT 12
-#endif
 
 #define NUM_LEDS (WIDTH * HEIGHT)
 #define BLUR_AMOUNT 172

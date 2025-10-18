@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    MirroringSample.ino
 /// @brief   Demonstrates how to use multiple LED strips, each with the same data
 /// @example MirroringSample.ino
@@ -13,12 +15,6 @@
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
-
-#include "fl/sketch_macros.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-#include "platforms/sketch_fake.hpp"
-#else
 
 #include <FastLED.h>
 
@@ -134,5 +130,3 @@ void loop() {
     delay(100);
   }
 }
-
-#endif // SKETCH_HAS_LOTS_OF_MEMORY

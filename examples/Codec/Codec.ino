@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 // codec.ino - Comprehensive Multimedia Codec Demonstration
 // Click buttons to decode JPEG, WebP, GIF, and MPEG1 formats
 // All media files embedded as PROGMEM data
@@ -6,8 +8,6 @@
 #include "fl/sketch_macros.h"
 #include "fl/ui.h"
 #include <string.h>
-
-#if SKETCH_HAS_LOTS_OF_MEMORY
 
 #include "fl/xymap.h"
 #include "inlined_data.h"
@@ -79,16 +79,3 @@ void loop() {
         CodecProcessor::processCodecWithTiming("MPEG1", []() { CodecProcessor::processMpeg1(); });
     }
 }
-
-#else
-
-void setup() {
-    Serial.begin(9600);
-    Serial.println("This sketch requires lots of memory and cannot run on low-memory devices");
-}
-
-void loop() {
-    delay(1000);
-}
-
-#endif

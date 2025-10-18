@@ -1,10 +1,12 @@
+// @filter: (memory is high)
+
 /// @file    Audio.ino
 /// @brief   Audio visualization example with XY mapping
 /// @example Audio.ino
 ///
 /// This sketch is fully compatible with the FastLED web compiler. To use it do the following:
 /// 1. Install Fastled: `pip install fastled`
-/// 2. cd into this examples page.  
+/// 2. cd into this examples page.
 /// 3. Run the FastLED web compiler at root: `fastled`
 /// 4. When the compiler is done a web page will open.
 
@@ -26,14 +28,8 @@ all the UI elements you see below.
 
 #include <FastLED.h>
 
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
 #ifdef SIMPLE_EXAMPLE
 #include "simple/simple.h"
 #else
 #include "advanced/advanced.h"
-#endif
 #endif

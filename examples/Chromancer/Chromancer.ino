@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    Chromancer.ino
 /// @brief   Hexagonal LED display visualization
 /// @example Chromancer.ino
@@ -26,24 +28,6 @@
 #include "fl/sketch_macros.h"
 #include "fl/warn.h"
 #include "fl/stdio.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-// Other platforms have weird issues. Will revisit this later.
-#include <Arduino.h>
-
-void setup() {
-    // Use Serial.println instead of FL_WARN to prevent optimization away
-    Serial.begin(115200);
-    Serial.println("Chromancer.ino: setup() - Platform has insufficient memory for full demo");
-}
-void loop() {
-    // Use Serial.println instead of FL_WARN to prevent optimization away
-    Serial.println("Chromancer.ino: loop() - Platform has insufficient memory for full demo");
-    delay(1000); // Prevent rapid printing
-}
-#else
-
 
 #include <FastLED.h>
 
@@ -89,7 +73,7 @@ constexpr int lengths[] = {
 // should support this as well but right now we don't
 CRGB leds0[lengths[BlackStrip]] = {};
 CRGB leds1[lengths[GreenStrip]] = {};
-CRGB leds2[lengths[RedStrip]] = {}; // Red 
+CRGB leds2[lengths[RedStrip]] = {}; // Red
 CRGB leds3[lengths[BlueStrip]] = {};
 CRGB *leds[] = {leds0, leds1, leds2, leds3};
 
@@ -182,7 +166,7 @@ UIDescription description("Take 6 seconds to boot up. Chromancer is a wall-mount
 UICheckbox allWhite("All White", false);
 
 UIButton simulatedHeartbeat("Simulated Heartbeat");
-UIButton triggerStarburst("Trigger Starburst"); 
+UIButton triggerStarburst("Trigger Starburst");
 UIButton triggerRainbowCube("Rainbow Cube");
 UIButton triggerBorderWave("Border Wave");
 UIButton triggerSpiral("Spiral Wave");
@@ -213,25 +197,25 @@ void setup() {
         Serial.print(kv.first.c_str());
         Serial.print(" ");
         Serial.println(kv.second.getLength());
-    } 
+    }
 
 
     // ScreenMap screenmaps[4];
     ScreenMap red, black, green, blue;
     bool ok = true;
-    
+
     auto red_it = segmentMaps.find("red_segment");
     ok = (red_it != segmentMaps.end()) && ok;
     if (red_it != segmentMaps.end()) red = red_it->second;
-    
+
     auto black_it = segmentMaps.find("back_segment");
     ok = (black_it != segmentMaps.end()) && ok;
     if (black_it != segmentMaps.end()) black = black_it->second;
-    
+
     auto green_it = segmentMaps.find("green_segment");
     ok = (green_it != segmentMaps.end()) && ok;
     if (green_it != segmentMaps.end()) green = green_it->second;
-    
+
     auto blue_it = segmentMaps.find("blue_segment");
     ok = (blue_it != segmentMaps.end()) && ok;
     if (blue_it != segmentMaps.end()) blue = blue_it->second;
@@ -301,12 +285,12 @@ void loop() {
     wasRainbowCubeClicked = bool(triggerRainbowCube);
     wasBorderWaveClicked = bool(triggerBorderWave);
     wasSpiralClicked = bool(triggerSpiral);
-    
+
     if (wasSpiralClicked) {
         // Trigger spiral wave effect from center
         unsigned int baseColor = random(0xFFFF);
         byte centerNode = 15; // Center node
-        
+
         // Create 6 ripples in a spiral pattern
         for (int i = 0; i < 6; i++) {
             if (nodeConnections[centerNode][i] >= 0) {
@@ -330,20 +314,20 @@ void loop() {
     if (wasBorderWaveClicked) {
         // Trigger immediate border wave effect
         unsigned int baseColor = random(0xFFFF);
-        
+
         // Start ripples from each border node in sequence
         for (int i = 0; i < numberOfBorderNodes; i++) {
             byte node = borderNodes[i];
             // Find an inward direction
             for (int dir = 0; dir < 6; dir++) {
-                if (nodeConnections[node][dir] >= 0 && 
+                if (nodeConnections[node][dir] >= 0 &&
                     !isNodeOnBorder(nodeConnections[node][dir])) {
                     for (int j = 0; j < numberOfRipples; j++) {
                         if (ripples[j].state == dead) {
                             ripples[j].start(
                                 node, dir,
                                 Adafruit_DotStar_ColorHSV(
-                                    baseColor + (0xFFFF / numberOfBorderNodes) * i, 
+                                    baseColor + (0xFFFF / numberOfBorderNodes) * i,
                                     255, 255),
                                 .4, 2000, 0);
                             break;
@@ -383,7 +367,7 @@ void loop() {
         // Trigger immediate starburst effect
         unsigned int baseColor = random(0xFFFF);
         byte behavior = random(2) ? alwaysTurnsLeft : alwaysTurnsRight;
-        
+
         for (int i = 0; i < 6; i++) {
             for (int j = 0; j < numberOfRipples; j++) {
                 if (ripples[j].state == dead) {
@@ -398,7 +382,7 @@ void loop() {
         }
         lastHeartbeat = millis();
     }
-    
+
     if (wasHeartbeatClicked) {
         // Trigger immediate heartbeat effect
         for (int i = 0; i < 6; i++) {
@@ -607,5 +591,3 @@ void loop() {
     //  Serial.print("Benchmark: ");
     //  Serial.println(millis() - benchmark);
 }
-
-#endif  // __AVR__

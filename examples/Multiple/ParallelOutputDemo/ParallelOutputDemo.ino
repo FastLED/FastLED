@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    ParallelOutputDemo.ino
 /// @brief   ParallelOutputDemo example with platform detection
 /// @example ParallelOutputDemo.ino

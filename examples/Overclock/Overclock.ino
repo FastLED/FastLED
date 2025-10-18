@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    Overclock.ino
 /// @brief   High performance LED display example
 /// @example Overclock.ino
@@ -11,16 +13,6 @@
 /// @brief   Demonstrates how to overclock a FastLED setup
 
 #include "FastLED.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// To effectively test the overclock feature we need
-// a large enough dataset to test against. Unfortunately
-// the avr platforms don't have enough memory so this example
-// is disabled for these platforms
-void setup() {}
-void loop() {}
-#else
-
 
 #define FASTLED_OVERCLOCK 1.1 // Overclocks by 10%, I've seen 25% work fine.
 
@@ -97,5 +89,3 @@ void loop() {
     noisePalette.draw(Fx::DrawContext(millis(), leds));
     FastLED.show();
 }
-
-#endif

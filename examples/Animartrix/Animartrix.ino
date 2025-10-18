@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    Animartrix.ino
 /// @brief   Demo of the Animatrix effects
 /// @example Animartrix.ino
@@ -33,7 +35,7 @@ using polor polar coordinates. The effects are very complex and powerful.
 
 #define FL_ANIMARTRIX_USES_FAST_MATH 1
 
-/* 
+/*
 Performence notes @64x64:
   * ESP32-S3:
     * FL_ANIMARTRIX_USES_FAST_MATH 0: 143ms
@@ -41,12 +43,6 @@ Performence notes @64x64:
 */
 
 #include "FastLED.h"
-
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-// Platform does not have enough memory
-void setup() {}
-void loop() {}
-#else
 
 
 // DRAW TIME: 7ms

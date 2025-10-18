@@ -1,14 +1,11 @@
+// @filter: (memory is high)
+
 // AnimartrixRing: Sample a circle from an Animartrix rectangular grid
 // This example generates a rectangular animation grid and samples a circular
 // region from it to display on a ring of LEDs using Fx2dTo1d.
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
-
-#include "fl/sketch_macros.h"
-#if !SKETCH_HAS_LOTS_OF_MEMORY
-#include "platforms/sketch_fake.hpp"
-#else
 
 #include <FastLED.h>
 #include "fl/math_macros.h"
@@ -98,74 +95,62 @@ uint8_t applyBrightnessCompression(float inputBrightnessPercent, uint8_t maxBrig
         return 255;
     } else if (inputBrightnessPercent < highThreshold) {
         // lowThreshold-highThreshold: linear dampening from 100% down to maxBrightnessPercent
-        // map lowThreshold->highThreshold input to 100%->maxBrightnessPercent output
         float range = highThreshold - lowThreshold;
-        float position = (inputBrightnessPercent - lowThreshold) / range; // 0.0 to 1.0
-        float outputPercent = 100.0f - (position * (100.0f - maxBrightnessPercent));
-        return uint8_t((outputPercent / 100.0f) * 255.0f);
+        float progress = (inputBrightnessPercent - lowThreshold) / range; // 0 to 1
+        float targetPercent = 100.0f - (progress * (100.0f - maxBrightnessPercent));
+        return static_cast<uint8_t>((targetPercent / 100.0f) * 255.0f);
     } else {
-        // Above highThreshold: cap at maxBrightness
+        // Above highThreshold: cap to maxBrightness
         return maxBrightness;
     }
 }
 
 void setup() {
     Serial.begin(115200);
-    FastLED.addLeds<WS2812B, DATA_PIN, GRB>(leds, NUM_LEDS).setScreenMap(screenmap);
-    FastLED.setBrightness(BRIGHTNESS);
+
+    // Setup LED strip
+    auto screenMapLocal = screenmap.clone();
+    screenMapLocal.setDiameter(0.5);
+    FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS)
+        .setCorrection(TypicalLEDStrip)
+        .setScreenMap(screenMapLocal);
+    FastLED.setBrightness(brightness);
+
+    // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
 
-    // Print available Animartrix animations
-    Serial.println("Available Animartrix animations:");
-    for (int i = 0; i < fl::getAnimartrixCount(); i++) {
-        fl::AnimartrixAnimInfo info = fl::getAnimartrixInfo(i);
-        Serial.print(i);
-        Serial.print(": ");
-        Serial.println(info.name);
-    }
+    // Setup animation selector callback
+    animationSelector.onChanged([](fl::UIDropdown &dropdown) {
+        int index = dropdown.as_int();
+        animartrix->fxSet(index);
+        Serial.print("Animation changed to: ");
+        Serial.println(index);
+    });
+
+    Serial.println("AnimartrixRing setup complete");
 }
 
 void loop() {
-    static int lastSelectedIndex = -1;
+    // Update animation
+    animartrix->setTimeScale(timeSpeed);
 
-    // Check if the dropdown selection has changed
-    int selectedIndex = animationSelector.as_int();
-    if (selectedIndex != lastSelectedIndex) {
-        currentAnimationIndex = selectedIndex;
-        animartrix->fxSet(currentAnimationIndex);
-
-        // Print the current animation name
-        fl::AnimartrixAnimInfo info = fl::getAnimartrixInfo(currentAnimationIndex);
-        Serial.print("Switching to: ");
-        Serial.println(info.name);
-
-        lastSelectedIndex = selectedIndex;
-    }
-
-    // Draw the effect (Fx2dTo1d handles 2D rendering and sampling)
-    fxEngine.setSpeed(timeSpeed);
+    // Draw the effect
     fxEngine.draw(millis(), leds);
 
-    // Apply brightness control
-    uint8_t finalBrightness;
-    if (autoBrightness.value()) {
-        // Apply automatic brightness compression based on average pixel brightness
-        float avgBrightnessPercent = getAverageBrightness(leds, NUM_LEDS);
-        uint8_t compressedBrightness = applyBrightnessCompression(
-            avgBrightnessPercent,
-            autoBrightnessMax.as_int(),
-            autoBrightnessLowThreshold.value(),
-            autoBrightnessHighThreshold.value()
+    // Calculate and apply auto brightness if enabled
+    if (autoBrightness) {
+        float avgBri = getAverageBrightness(leds, NUM_LEDS);
+        uint8_t newBri = applyBrightnessCompression(
+            avgBri,
+            static_cast<uint8_t>(autoBrightnessMax),
+            autoBrightnessLowThreshold,
+            autoBrightnessHighThreshold
         );
-        // Combine manual brightness control with automatic compression
-        finalBrightness = (brightness.as_int() * compressedBrightness) / 255;
+        FastLED.setBrightness(newBri);
     } else {
-        // Use manual brightness only
-        finalBrightness = brightness.as_int();
+        FastLED.setBrightness(static_cast<uint8_t>(brightness));
     }
-    FastLED.setBrightness(finalBrightness);
 
+    // Show the LEDs
     FastLED.show();
 }
-
-#endif  // SKETCH_HAS_LOTS_OF_MEMORY
