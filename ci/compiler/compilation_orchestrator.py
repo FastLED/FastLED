@@ -27,7 +27,9 @@ class BoardCompilationResult:
     ok: bool
     sketch_results: List[SketchResult]
     stopped_early: bool = False
-    skipped_examples: List[Tuple[str, str]] = field(default_factory=list)  # List of (example, reason) tuples
+    skipped_examples: List[Tuple[str, str]] = field(
+        default_factory=lambda: []
+    )  # List of (example, reason) tuples
 
 
 def compile_board_examples(
@@ -85,7 +87,9 @@ def compile_board_examples(
         print("No examples to compile after filtering")
         print(f"{'=' * 60}")
         # Return success with no compilation
-        return BoardCompilationResult(ok=True, sketch_results=[], skipped_examples=skipped_examples)
+        return BoardCompilationResult(
+            ok=True, sketch_results=[], skipped_examples=skipped_examples
+        )
 
     print(f"{'=' * 60}")
 
@@ -223,7 +227,10 @@ def compile_board_examples(
 
         any_failures = failure_count > 0
         return BoardCompilationResult(
-            ok=not any_failures, sketch_results=results, stopped_early=stopped_early, skipped_examples=skipped_examples
+            ok=not any_failures,
+            sketch_results=results,
+            stopped_early=stopped_early,
+            skipped_examples=skipped_examples,
         )
     except KeyboardInterrupt:
         print("Keyboard interrupt detected, cancelling builds")

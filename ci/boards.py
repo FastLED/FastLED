@@ -79,24 +79,24 @@ class Board:
     # Class-level mappings for platform/MCU classification (O(1) lookups)
     _LOW_MEMORY_BOARDS: ClassVar[Set[str]] = {
         # AVR ATmega
-        "uno",              # ATmega328P
-        "nano",             # ATmega328P
-        "nano_every",       # ATmega4809
-        "yun",              # ATmega32U4
+        "uno",  # ATmega328P
+        "nano",  # ATmega328P
+        "nano_every",  # ATmega4809
+        "yun",  # ATmega32U4
         # AVR ATtiny
-        "attiny85",         # __AVR_ATtiny85__
-        "attiny88",         # __AVR_ATtiny88__
-        "attiny1604",       # ARDUINO_attinyxy6/4
-        "attiny4313",       # ARDUINO_attinyxy4
-        "attiny1616",       # ARDUINO_attinyxy6
+        "attiny85",  # __AVR_ATtiny85__
+        "attiny88",  # __AVR_ATtiny88__
+        "attiny1604",  # ARDUINO_attinyxy6/4
+        "attiny4313",  # ARDUINO_attinyxy4
+        "attiny1616",  # ARDUINO_attinyxy6
         # Teensy low-memory
-        "teensylc",         # ARDUINO_TEENSYLC
-        "teensy30",         # ARDUINO_TEENSY30
-        "teensy31",         # __MK20DX256__ (256KB RAM)
+        "teensylc",  # ARDUINO_TEENSYLC
+        "teensy30",  # ARDUINO_TEENSY30
+        "teensy31",  # __MK20DX256__ (256KB RAM)
         # STM32F1
-        "bluepill",         # STM32F103C8
+        "bluepill",  # STM32F103C8
         "bluepill_f103cb",  # STM32F103CB
-        "maple_mini",       # STM32F1
+        "maple_mini",  # STM32F1
         "hy_tinystm103tb",  # STM32F1
         # ESP8266
         "esp8266",
@@ -105,8 +105,8 @@ class Board:
     }
 
     _LOW_MEMORY_PLATFORMS: ClassVar[Set[str]] = {
-        "avr",          # All AVR boards
-        "renesas-ra",   # Renesas UNO R4
+        "avr",  # All AVR boards
+        "renesas-ra",  # Renesas UNO R4
     }
 
     _PLATFORM_PATTERNS: ClassVar[List[tuple[str, str]]] = [

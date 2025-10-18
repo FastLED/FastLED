@@ -37,7 +37,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
         return "require:\n   - memory: high"
 
     # Pattern 2: Platform-specific guards
-    filters: Dict[str, List[str]] = {"require": [], "exclude": []}
+    filters: Dict[str, List[str]] = {"require": [], "exclude": []}  # type: Dict[str, List[str]]
 
     # Check for ESP32-S3 specific
     if match := re.search(
@@ -56,9 +56,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
         filters["require"].append("target: ESP32P4")
 
     # Check for ESP8266 specific
-    if re.search(
-        r"#if\s+!defined\(ESP8266\)|#ifndef\s+ESP8266", content, re.MULTILINE
-    ):
+    if re.search(r"#if\s+!defined\(ESP8266\)|#ifndef\s+ESP8266", content, re.MULTILINE):
         filters["require"].append("platform: esp8266")
     elif re.search(r"#ifdef\s+ESP8266", content, re.MULTILINE):
         filters["require"].append("platform: esp8266")
@@ -77,7 +75,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
             filters["require"].append("platform: esp32")
 
     # Build filter string
-    filter_parts = []
+    filter_parts: List[str] = []
     if filters["require"]:
         filter_parts.append("require:")
         for req in filters["require"]:
@@ -95,7 +93,8 @@ def extract_guard_filters(content: str) -> Optional[str]:
 
 def generate_filter_block(filters_str: str) -> str:
     """Generate full @filter block from filter directives."""
-    return f"// @filter\n// {filters_str.replace('\n', '\n// ')}\n// @end-filter"
+    replaced = filters_str.replace("\n", "\n// ")
+    return f"// @filter\n// {replaced}\n// @end-filter"
 
 
 def migrate_sketch(ino_path: Path, dry_run: bool = False) -> Tuple[bool, str]:
@@ -129,16 +128,16 @@ def migrate_sketch(ino_path: Path, dry_run: bool = False) -> Tuple[bool, str]:
     for i, line in enumerate(lines):
         if line.strip().startswith("//") or line.strip().startswith("#include"):
             insert_pos = i + 1
-        elif line.strip() and not line.strip().startswith("//") and not line.strip().startswith(
-            "#"
+        elif (
+            line.strip()
+            and not line.strip().startswith("//")
+            and not line.strip().startswith("#")
         ):
             break
 
     # Insert filter block
     new_lines = (
-        lines[:insert_pos]
-        + [""] + filter_block.split("\n") + [""]
-        + lines[insert_pos:]
+        lines[:insert_pos] + [""] + filter_block.split("\n") + [""] + lines[insert_pos:]
     )
     new_content = "\n".join(new_lines)
 

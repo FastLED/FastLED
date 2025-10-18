@@ -36,7 +36,7 @@ def has_platform_guards(content: str) -> Tuple[bool, List[str]]:
         r"#ifndef\s+(ESP32|ESP8266)",
     ]
 
-    matches = []
+    matches: List[str] = []
     for pattern in guard_patterns:
         if re.search(pattern, content, re.MULTILINE | re.IGNORECASE):
             matches.append(pattern)
@@ -50,7 +50,7 @@ def validate_sketch(ino_path: Path, examples_dir: Path) -> Tuple[bool, List[str]
     Returns:
         Tuple of (valid: bool, warnings: List[str])
     """
-    warnings = []
+    warnings: List[str] = []
     relative_path = ino_path.relative_to(examples_dir)
 
     try:
@@ -112,7 +112,7 @@ def main() -> int:
     print(f"Validating sketches in: {examples_dir}")
     print()
 
-    sketches = find_all_sketches(examples_dir)
+    sketches: List[Path] = find_all_sketches(examples_dir)
     print(f"Found {len(sketches)} sketch files\n")
 
     errors: List[str] = []

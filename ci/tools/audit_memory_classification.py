@@ -20,6 +20,7 @@ Source of Truth (C++ sketch_macros.h):
 
 import sys
 from pathlib import Path
+from typing import List, Set
 
 from ci.boards import ALL, Board
 
@@ -36,19 +37,16 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("attiny1604", "low"),
     ("attiny4313", "low"),
     ("attiny1616", "low"),
-
     # Teensy low-memory (per sketch_macros.h)
     ("teensy_lc", "low"),
     ("teensy30", "low"),
     ("teensy31", "low"),  # __MK20DX256__ - important!
-
     # STM32F1 (all low-memory)
     ("bluepill", "low"),
     ("bluepill_f103cb", "low"),
     ("maple_mini", "low"),
     ("hy_tinystm103tb", "low"),
     ("blackpill", "high"),  # STM32F4 - HIGH memory
-
     # ESP variants
     ("esp8266", "low"),
     ("esp32dev", "high"),
@@ -60,33 +58,30 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("esp32s2", "high"),
     ("esp32h2", "high"),
     ("esp32p4", "high"),
-
     # Teensy high-memory (Cortex-M4)
     ("teensy40", "high"),
     ("teensy41", "high"),
-
     # ARM Cortex boards (typically high-memory)
     ("due", "high"),
     ("digix", "high"),
     ("zero", "high"),
-    ("adafruit_feather_m0", "high"),  # SAMD21 with 32KB RAM - borderline but not in C++ low list
+    (
+        "adafruit_feather_m0",
+        "high",
+    ),  # SAMD21 with 32KB RAM - borderline but not in C++ low list
     ("adafruit_feather_m4", "high"),  # SAMD51 - definitely high
     ("adafruit_grand_central_m4", "high"),  # SAMD51 - definitely high
     ("giga_r1", "high"),  # STM32H747 - definitely high
-
     # RP2040
     ("rpipico", "high"),
     ("rpipico2", "high"),
-
     # NRF52
     ("nrf52840_dk", "high"),
     ("adafruit_feather_nrf52840_sense", "high"),
     ("xiaoblesense", "high"),
-
     # Renesas
     ("uno_r4_wifi", "low"),
     ("uno_r4_minima", "low"),
-
     # Native/Other
     ("native", "high"),
     ("web", "high"),
@@ -100,13 +95,13 @@ def audit_memory_classification():
     print("=" * 70)
     print()
 
-    errors = []
-    warnings = []
+    errors: List[str] = []
+    warnings: List[str] = []
     passed = 0
     total = 0
 
     # Check boards we have explicit expectations for
-    checked_boards = set()
+    checked_boards: Set[str] = set()
 
     for board in sorted(ALL, key=lambda b: b.board_name):
         total += 1
@@ -131,7 +126,9 @@ def audit_memory_classification():
 
         if expected is None:
             # No explicit expectation - just log board properties for review
-            print(f"ℹ️  {board_name:25} memory={actual:4}  platform={board.platform_family:10}  target={board.get_mcu_target() or 'N/A':15}")
+            print(
+                f"ℹ️  {board_name:25} memory={actual:4}  platform={board.platform_family:10}  target={board.get_mcu_target() or 'N/A':15}"
+            )
             continue
 
         if expected == actual:
@@ -165,9 +162,9 @@ def audit_memory_classification():
 
     # Check for boards in expectations that weren't found
     print("COVERAGE CHECK:")
-    found_boards = {board.board_name for board in ALL}
-    expected_boards = {name for name, _ in EXPECTED_MEMORY_BY_PATTERN}
-    missing_in_reality = expected_boards - found_boards
+    found_boards: Set[str] = {board.board_name for board in ALL}
+    expected_boards: Set[str] = {name for name, _ in EXPECTED_MEMORY_BY_PATTERN}
+    missing_in_reality: Set[str] = expected_boards - found_boards
 
     if missing_in_reality:
         print(f"  ⚠️  Expected boards NOT found in ALL: {missing_in_reality}")

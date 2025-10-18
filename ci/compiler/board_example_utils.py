@@ -153,7 +153,9 @@ def get_example_ino_path(example: str) -> Path:
 
     # Find the .ino file in the example directory
     example_dir = examples_dir / example
-    example_name = Path(example).name  # Get just the last part (e.g., "Blink" or "FxWave2d")
+    example_name = Path(
+        example
+    ).name  # Get just the last part (e.g., "Blink" or "FxWave2d")
     ino_file = example_dir / f"{example_name}.ino"
 
     if not ino_file.exists():
@@ -162,9 +164,7 @@ def get_example_ino_path(example: str) -> Path:
     return ino_file
 
 
-def should_skip_example_for_board(
-    board: Board, example: str
-) -> Tuple[bool, str]:
+def should_skip_example_for_board(board: Board, example: str) -> Tuple[bool, str]:
     """Check if an example should be skipped for a specific board.
 
     Parses the @filter/@end-filter block from the .ino file and determines
@@ -189,7 +189,9 @@ def should_skip_example_for_board(
     return should_skip_sketch(board, sketch_filter)
 
 
-def get_filtered_examples(board: Board, examples: List[str]) -> Tuple[List[str], List[Tuple[str, str]]]:
+def get_filtered_examples(
+    board: Board, examples: List[str]
+) -> Tuple[List[str], List[Tuple[str, str]]]:
     """Filter examples based on board capabilities.
 
     Args:
@@ -201,8 +203,8 @@ def get_filtered_examples(board: Board, examples: List[str]) -> Tuple[List[str],
         - included_examples: List of examples that should be compiled
         - skipped_with_reasons: List of (example_name, skip_reason) tuples
     """
-    included = []
-    skipped = []
+    included: List[str] = []
+    skipped: List[Tuple[str, str]] = []
 
     for example in examples:
         should_skip, reason = should_skip_example_for_board(board, example)

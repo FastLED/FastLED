@@ -39,8 +39,8 @@ from ci.boards import Board
 class SketchFilter:
     """Represents parsed @filter block from a sketch."""
 
-    require: Dict[str, List[str]] = field(default_factory=dict)
-    exclude: Dict[str, List[str]] = field(default_factory=dict)
+    require: Dict[str, List[str]] = field(default_factory=lambda: {})
+    exclude: Dict[str, List[str]] = field(default_factory=lambda: {})
 
     def is_empty(self) -> bool:
         """Check if filter has any constraints."""
@@ -100,7 +100,9 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
         target_dict = require if not is_negated else exclude
         target_dict.setdefault(key, []).append(value)
 
-    return SketchFilter(require=require, exclude=exclude) if (require or exclude) else None
+    return (
+        SketchFilter(require=require, exclude=exclude) if (require or exclude) else None
+    )
 
 
 def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
