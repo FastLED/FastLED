@@ -24,6 +24,7 @@
 /// - Resources saved: 3 PIO state machines, 3 DMA channels
 
 #include <FastLED.h>
+#include <fl/compiler_control.h>
 
 // ============================================================================
 // Configuration
@@ -71,7 +72,7 @@ void setup() {
     // Register all 4 strips with the controller
     for (int i = 0; i < 4; i++) {
         if (!controller.addStrip(i, leds[i], LEDS_PER_STRIP)) {
-            Serial.printf("ERROR: Failed to register strip %d\n", i);
+            FL_WARN("ERROR: Failed to register strip " << i);
             while (1) { delay(1000); }  // Halt on error
         }
     }
@@ -86,12 +87,11 @@ void setup() {
         while (1) { delay(1000); }  // Halt on error
     }
 
-    Serial.println("✓ Controller initialized successfully");
-    Serial.printf("  Base pin: GPIO %d\n", BASE_PIN);
-    Serial.printf("  Strips: 4\n");
-    Serial.printf("  LEDs per strip: %d\n", LEDS_PER_STRIP);
-    Serial.printf("  Total LEDs: %d\n", 4 * LEDS_PER_STRIP);
-    Serial.println();
+    FL_DBG("Controller initialized successfully");
+    FL_DBG("Base pin: GPIO " << BASE_PIN);
+    FL_DBG("Strips: 4");
+    FL_DBG("LEDs per strip: " << LEDS_PER_STRIP);
+    FL_DBG("Total LEDs: " << (4 * LEDS_PER_STRIP));
 }
 
 // ============================================================================
@@ -125,7 +125,7 @@ void loop() {
     static uint32_t last_stats = millis();
     if (millis() - last_stats > 5000) {
         last_stats = millis();
-        Serial.printf("Frame: %lu ms\n", elapsed);
+        FL_DBG("Frame: " << elapsed << " ms");
     }
 }
 
