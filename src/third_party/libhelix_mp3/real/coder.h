@@ -63,12 +63,30 @@
 #define MIN(a,b)	((a) < (b) ? (a) : (b))
 #endif
 
+/* Helper function for clipping to range [-2^n, 2^n - 1] */
+static __inline int32_t clip_2n_helper(int32_t val, int n) {
+	int32_t sign = val >> 31;
+	int32_t shifted;
+	int32_t mask;
+
+	if (n < 31) {
+		shifted = val >> n;
+		mask = (1 << n) - 1;
+	} else {
+		/* Handle edge case where n >= 31 */
+		shifted = sign;
+		mask = 0x7FFFFFFF;
+	}
+
+	if (sign != shifted) {
+		val = sign ^ mask;
+	}
+	return val;
+}
+
 /* clip to range [-2^n, 2^n - 1] */
 #define CLIP_2N(y, n) { \
-	int32_t sign = (y) >> 31;  \
-	if (sign != (y) >> (n))  { \
-		(y) = sign ^ ((1 << (n)) - 1); \
-	} \
+	(y) = clip_2n_helper((y), (n)); \
 }
 
 #define SIBYTES_MPEG1_MONO		17

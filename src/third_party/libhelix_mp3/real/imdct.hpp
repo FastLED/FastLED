@@ -285,16 +285,16 @@ static __inline void idct9(int *x)
 	a11 = a4 - x8;		/* ie x[2] - x[4] - x[8] */
 
 	/* do the << 1 as constant shifts where mX is actually used (free, no stall or extra inst.) */
-	m1 =  MULSHIFT32(c9_0, x3);
-	m3 =  MULSHIFT32(c9_0, a10);
-	m5 =  MULSHIFT32(c9_1, a5);
-	m6 =  MULSHIFT32(c9_2, a6);
-	m7 =  MULSHIFT32(c9_1, a8);
-	m8 =  MULSHIFT32(c9_2, a5);
-	m9 =  MULSHIFT32(c9_3, a9);
-	m10 = MULSHIFT32(c9_4, a7);
-	m11 = MULSHIFT32(c9_3, a3);
-	m12 = MULSHIFT32(c9_4, a9);
+	m1 =  (int32_t)MULSHIFT32(c9_0, x3);
+	m3 =  (int32_t)MULSHIFT32(c9_0, a10);
+	m5 =  (int32_t)MULSHIFT32(c9_1, a5);
+	m6 =  (int32_t)MULSHIFT32(c9_2, a6);
+	m7 =  (int32_t)MULSHIFT32(c9_1, a8);
+	m8 =  (int32_t)MULSHIFT32(c9_2, a5);
+	m9 =  (int32_t)MULSHIFT32(c9_3, a9);
+	m10 = (int32_t)MULSHIFT32(c9_4, a7);
+	m11 = (int32_t)MULSHIFT32(c9_3, a3);
+	m12 = (int32_t)MULSHIFT32(c9_4, a9);
 
 	a12 = x[0] +  (x[6] >> 1);
 	a13 = a12  +  (  m1 * 2L);
@@ -671,7 +671,9 @@ static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], Si
 		WinPrevious(xPrev, xPrevWin, prevWinIdx);
 
 		nonZero = 0;
-		fiBit = static_cast<int>((static_cast<unsigned int>(i) & 1U) << 31);
+		/* sign_bit = -1 for odd i, 0 for even i */
+		int32_t sign_bit = ((i & 1) ? (int32_t)(-1) : 0);
+		fiBit = (sign_bit & (int32_t)0x80000000);  /* Sign bit as 0x80000000 or 0 */
 		for (j = 0; j < 9; j++) {
 			xp = xPrevWin[2*j+0] * 4;	/* * 4 temp for scaling */
 			nonZero |= xp;
@@ -680,7 +682,7 @@ static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], Si
 
 			/* frequency inversion on odd blocks/odd samples (flip sign if i odd, j odd) */
 			xp = xPrevWin[2*j+1] * 4;
-			xp = (xp ^ (fiBit >> 31)) + (i & 0x01);
+			xp = (xp ^ sign_bit) + (i & 0x01);
 			nonZero |= xp;
 			y[2*j+1][i] = xp;
 			mOut |= FASTABS(xp);

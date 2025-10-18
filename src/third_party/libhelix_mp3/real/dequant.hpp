@@ -108,13 +108,16 @@ int Dequantize(MP3DecInfo *mp3DecInfo, int gr)
 	 * in practice this may never happen
 	 */
 	if (fh->modeExt && (hi->gb[0] < 1 || hi->gb[1] < 1)) {
+		/* Clip to range [-2^30+1, 2^30-1] */
+		const int32_t max_clip = (int32_t)0x3FFFFFFFL;  /* 2^30 - 1 */
+		const int32_t min_clip = (int32_t)(-0x40000000L); /* -(2^30) */
 		for (i = 0; i < hi->nonZeroBound[0]; i++) {
-			if (hi->huffDecBuf[0][i] < (int32_t)-0x3fffffffL)  hi->huffDecBuf[0][i] = (int32_t)-0x3fffffffL;
-			if (hi->huffDecBuf[0][i] >  (int32_t)0x3fffffffL)  hi->huffDecBuf[0][i] =  (int32_t)0x3fffffffL;
+			if (hi->huffDecBuf[0][i] < min_clip)  hi->huffDecBuf[0][i] = min_clip;
+			if (hi->huffDecBuf[0][i] > max_clip)  hi->huffDecBuf[0][i] = max_clip;
 		}
 		for (i = 0; i < hi->nonZeroBound[1]; i++) {
-			if (hi->huffDecBuf[1][i] < (int32_t)-0x3fffffffL)  hi->huffDecBuf[1][i] = (int32_t)-0x3fffffffL;
-			if (hi->huffDecBuf[1][i] >  (int32_t)0x3fffffffL)  hi->huffDecBuf[1][i] =  (int32_t)0x3fffffffL;
+			if (hi->huffDecBuf[1][i] < min_clip)  hi->huffDecBuf[1][i] = min_clip;
+			if (hi->huffDecBuf[1][i] > max_clip)  hi->huffDecBuf[1][i] = max_clip;
 		}
 	}
 

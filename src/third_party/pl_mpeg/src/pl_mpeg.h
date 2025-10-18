@@ -470,7 +470,7 @@ plm_frame_t *plm_seek_frame(plm_t *self, double time, int seek_exact);
 // The default size for buffers created from files or by the high-level API
 
 #ifndef PLM_BUFFER_DEFAULT_SIZE
-#define PLM_BUFFER_DEFAULT_SIZE (128L * 1024L)
+#define PLM_BUFFER_DEFAULT_SIZE (128U * 1024U)  /* 131072 bytes */
 #endif
 
 // #ifndef PLM_NO_STDIO
