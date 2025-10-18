@@ -46,7 +46,7 @@
  **************************************************************************************/
 
 #include "coder.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "assembly.h"
 
 // Compile C++ polyphase implementation unless ARM32 assembly is available

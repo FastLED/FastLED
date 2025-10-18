@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "esp_err.h"
 
 #ifdef __cplusplus

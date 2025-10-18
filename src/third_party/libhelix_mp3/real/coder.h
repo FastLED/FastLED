@@ -296,7 +296,7 @@ void PolyphaseStereo(short *pcm, int *vbuf, const int32_t *coefBase);
 #endif
 
 /* trigtabs.c */
-#include <stdint.h>
+#include "fl/stdint.h"
 extern const int32_t imdctWin[4][36];
 extern const int32_t ISFMpeg1[2][7];
 extern const int32_t ISFMpeg2[2][2][16];

@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 #ifdef __cplusplus
 extern "C" {

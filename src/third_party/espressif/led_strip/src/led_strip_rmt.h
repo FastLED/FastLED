@@ -5,7 +5,7 @@
  */
 #pragma once
 
-#include <stdint.h>
+#include "fl/stdint.h"
 #include "esp_err.h"
 #include "led_strip_types.h"
 #include "esp_idf_version.h"

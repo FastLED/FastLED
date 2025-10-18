@@ -49,7 +49,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "coder.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 /**************************************************************************************
  * Function:    ClearBuffer

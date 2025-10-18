@@ -7,7 +7,7 @@
 // Include standard library headers outside namespace to avoid conflicts
 #include <string.h>
 #if !defined(_WIN32)	/* Embedded platform */
-#include <stdint.h>
+#include "fl/stdint.h"
 #endif
 
 namespace fl {

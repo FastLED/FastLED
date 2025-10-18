@@ -43,7 +43,7 @@
 
 #include "coder.h"
 #include "assembly.h"
-#include <stdint.h>
+#include "fl/stdint.h"
 
 typedef int ARRAY3[3];	/* for short-block reordering */
 
