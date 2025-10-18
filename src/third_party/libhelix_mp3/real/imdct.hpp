@@ -624,7 +624,7 @@ static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], Si
 {
 	int xPrevWin[18], currWinIdx, prevWinIdx;
 	int i, j, nBlocksOut, nonZero, mOut;
-	int fiBit, xp;
+	int xp;
 
 	ASSERT(bc->nBlocksLong  <= NBANDS);
 	ASSERT(bc->nBlocksTotal <= NBANDS);
@@ -673,8 +673,7 @@ static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], Si
 		nonZero = 0;
 		/* sign_bit = -1 for odd i, 0 for even i */
 		int32_t sign_bit = ((i & 1) ? (int32_t)(-1) : 0);
-		fiBit = (sign_bit & (int32_t)0x80000000);  /* Sign bit as 0x80000000 or 0 */
-		for (j = 0; j < 9; j++) {
+			for (j = 0; j < 9; j++) {
 			xp = xPrevWin[2*j+0] * 4;	/* * 4 temp for scaling */
 			nonZero |= xp;
 			y[2*j+0][i] = xp;
