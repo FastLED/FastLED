@@ -2,6 +2,7 @@
 
 #ifdef __AVR__
 
+#include <avr/interrupt.h>
 #include "platforms/avr/interrupt.h"
 
 namespace fl {
