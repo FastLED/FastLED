@@ -141,6 +141,11 @@ class BannedHeadersChecker(BaseChecker):
         if "platforms" in path_parts:
             return self.BANNED_HEADERS_PLATFORMS
 
+        # lib8tion directories must also follow strict banned headers rule
+        # (they should use fl/ alternatives instead of stdlib headers)
+        if "lib8tion" in path_parts:
+            return self.BANNED_HEADERS_CORE
+
         # third_party directories must also follow the banned headers rule
         # (they should use fl/ alternatives instead of stdlib headers)
         # Default: core source (includes Arduino.h ban)
@@ -164,7 +169,7 @@ class BannedHeadersChecker(BaseChecker):
 
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
-        if "/fl/" in file_path_normalized:
+        if "/fl/" in file_path_normalized or "/src/fl/" in file_path_normalized:
             # Allow iostream in stub_main.cpp for testing entry point
             if banned_header == "iostream" and "stub_main.cpp" in file_path_str:
                 return True
@@ -181,6 +186,22 @@ class BannedHeadersChecker(BaseChecker):
             if banned_header == "memory" and "thread_local.h" in file_path_str:
                 return True
 
+            # Allow math.h in math implementation files (cpp files)
+            if banned_header == "math.h" and file_path_str.endswith(".cpp"):
+                if any(
+                    x in file_path_str
+                    for x in [
+                        "math.cpp",
+                        "audio_reactive.cpp",
+                        "colorutils.cpp",
+                        "transform.cpp",
+                        "xypath.cpp",
+                        "xypath_impls.cpp",
+                        "xypath_renderer.cpp",
+                    ]
+                ):
+                    return True
+
             # Allow platform-specific time headers in time.cpp
             if "time.cpp" in file_path_str:
                 if banned_header in {"stdint.h", "Arduino.h", "chrono"}:
@@ -188,6 +209,12 @@ class BannedHeadersChecker(BaseChecker):
 
         # Platform-specific headers need Arduino.h
         if "/platforms/" in file_path_normalized:
+            if banned_header == "Arduino.h":
+                return True
+
+        # Third-party libraries may need Arduino.h in some cases
+        if "/third_party/" in file_path_normalized:
+            # ArduinoJSON and other third-party libraries may reference Arduino.h
             if banned_header == "Arduino.h":
                 return True
 
@@ -199,14 +226,38 @@ class BannedHeadersChecker(BaseChecker):
             banned_header, "Use fl/ alternatives instead of standard library headers"
         )
 
+    def _is_strict_mode_directory(self, file_path: Path) -> bool:
+        """Check if file is in a strict mode directory (no bypass allowed).
+
+        Strict mode directories include:
+        - fl/ (FastLED library core)
+        - lib8tion/ (FastLED 8-bit math library)
+        - third_party/ (third-party libraries should follow FastLED conventions)
+        """
+        path_str = str(file_path).replace("\\", "/")
+        return any(
+            part in path_str
+            for part in [
+                "/fl/",
+                "/lib8tion/",
+                "/third_party/",
+                "/src/fl/",
+                "/src/lib8tion/",
+                "/src/third_party/",
+            ]
+        )
+
     def _should_allow_bypass(self, file_path: Path) -> bool:
         """Check if file type allows 'ok include' bypass.
 
         - .h files: NEVER allow bypass (header purity is critical)
-        - .cpp/.cc files: Allow bypass with '// ok include' comment
+        - .cpp/.cc files: Allow bypass with '// ok include' comment (unless in strict mode)
         - .hpp files: Treat like .h files (never allow bypass)
+        - Strict mode directories: NEVER allow bypass
         """
         file_path_str = str(file_path)
+        if self._is_strict_mode_directory(file_path):
+            return False  # Strict mode directories never allow bypass
         return file_path_str.endswith(".cpp") or file_path_str.endswith(".cc")
 
     def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
@@ -217,8 +268,9 @@ class BannedHeadersChecker(BaseChecker):
         banned_headers = self._get_banned_headers_for_path(file_path)
 
         # Determine if this file can use "// ok include" bypass
-        # Only .cpp/.cc files can bypass, never .h/.hpp files
+        # Only .cpp/.cc files can bypass, never .h/.hpp files (and never in strict mode)
         can_bypass = self._should_allow_bypass(file_path)
+        is_strict = self._is_strict_mode_directory(file_path)
         file_extension = file_path.suffix
 
         for line_num, line in enumerate(lines, 1):
@@ -256,6 +308,9 @@ class BannedHeadersChecker(BaseChecker):
                         suggestion = (
                             f"Use {recommendation} instead (banned in header files)"
                         )
+                    elif is_strict:
+                        # Strict mode directories: no bypass allowed
+                        suggestion = f"Use {recommendation} instead (strict mode, no bypass allowed)"
                     elif can_bypass:
                         # .cpp/.cc files: can bypass but should try to fix
                         suggestion = f"Use {recommendation} instead (or add '// ok include' comment if necessary)"

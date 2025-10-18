@@ -335,6 +335,30 @@ class TestNoBannedHeaders(unittest.TestCase):
             strict_mode=True,
         )
 
+    def test_no_banned_headers_lib8tion(self) -> None:
+        """Searches through lib8tion/ directory with STRICT enforcement - no bypass allowed."""
+
+        def on_fail(msg: str) -> None:
+            self.fail(
+                msg + "\n\n"
+                "STRICT MODE: lib8tion/ directory headers must not include stdlib headers.\n"
+                "- .h/.hpp files: NEVER allow stdlib headers (header purity is critical)\n"
+                "- .cpp files: STRICT mode - no '// ok include' bypass allowed\n"
+                "Fix by removing the banned header or use fl/ alternatives.\n"
+                "See HEADER_RECOMMENDATIONS for suggested replacements."
+            )
+
+        # Test lib8tion/ directory with strict mode
+        test_directories = [
+            os.path.join(SRC_ROOT, "lib8tion"),
+        ]
+        _test_no_banned_headers(
+            test_directories=test_directories,
+            banned_headers_list=BANNED_HEADERS_CORE,
+            on_fail=on_fail,
+            strict_mode=True,
+        )
+
     def test_no_banned_headers_src(self) -> None:
         """Searches through fx/, sensors/, and platforms/shared/ directories for banned headers."""
 
