@@ -208,12 +208,12 @@
 
 // Generic platform implementations using blocking clockless driver
 #define UCS7604_HAS_CONTROLLER 1
-#include "../../platforms/shared/clockless_block/clockless_block_generic.h"
-#include "../eorder.h"
-#include "../../fastpin.h"
-#include "../../cled_controller.h"
-#include "../force_inline.h"
-#include "../../fl/delay.h"
+#include "platforms/shared/clockless_block/clockless_block_generic.h"
+#include "fl/eorder.h"
+#include "fastpin.h"
+#include "cled_controller.h"
+#include "fl/force_inline.h"
+#include "fl/delay.h"
 
 namespace fl {
 
