@@ -43,17 +43,22 @@
 
 // Forward declarations for memory operations
 // (can be replaced with different implementations if desired)
-// Note: These use unsigned int for compatibility with third-party code
-// The actual implementations use the fl:: namespace versions
-//#include "hlxclib/string.h"		/* for memmove, memcpy (can replace with different implementations if desired) */
-
-// Forward declarations of C standard library functions (without including cstring)
-extern "C" {
-    void* memcpy(void* dst, const void* src, unsigned long num);
-    void* memmove(void* dst, const void* src, unsigned long num);
-}
+// Bind to fl/ equivalents instead of C standard library
+#include "fl/memfill.h"
 
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
+
+// Inline wrappers to bind third-party code to fl/ equivalents
+// These allow memcpy/memmove calls in third-party code to use fl:: implementations
+namespace {
+    inline void* memcpy(void* dst, const void* src, unsigned long num) {
+        return fl::memcopy(dst, src, static_cast<fl::size>(num));
+    }
+
+    inline void* memmove(void* dst, const void* src, unsigned long num) {
+        return fl::memmove(dst, src, static_cast<fl::size>(num));
+    }
+}
 
 
 //#define PROFILE
