@@ -6,8 +6,6 @@
 #ifndef __INC_FASTSPI_H
 #define __INC_FASTSPI_H
 
-#include "FastLED.h"
-
 #include "controller.h"
 #include "lib8tion.h"
 
@@ -29,7 +27,11 @@
 #include "platforms/arm/stm32/spi_device_proxy.h"
 #endif
 
-
+// Forward declaration for SPIDeviceProxy to avoid circular dependency issues
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+class SPIDeviceProxy;
+}
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
@@ -198,5 +200,8 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ArdunioCoreSPIOutput<SP
 #endif  // !defined(FASTLED_STUB_IMPL)
 
 FASTLED_NAMESPACE_END
+
+// Include FastLED.h at the end to avoid circular dependency issues
+#include "FastLED.h"
 
 #endif
