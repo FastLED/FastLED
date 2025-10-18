@@ -365,6 +365,60 @@ void StringFormatter::append(u16 val, StrN<64> *dst) {
     append(static_cast<u32>(val), dst);
 }
 
+// Hexadecimal (base 16) formatting
+void StringFormatter::appendHex(i32 val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::itoa(val, buf, 16);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendHex(u32 val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa32(val, buf, 16);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendHex(uint64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa64(val, buf, 16);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendHex(i16 val, StrN<64> *dst) {
+    appendHex(static_cast<i32>(val), dst);
+}
+
+void StringFormatter::appendHex(u16 val, StrN<64> *dst) {
+    appendHex(static_cast<u32>(val), dst);
+}
+
+// Octal (base 8) formatting
+void StringFormatter::appendOct(i32 val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::itoa(val, buf, 8);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendOct(u32 val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa32(val, buf, 8);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendOct(uint64_t val, StrN<64> *dst) {
+    char buf[63] = {0};
+    string_functions::utoa64(val, buf, 8);
+    dst->write(buf, strlen(buf));
+}
+
+void StringFormatter::appendOct(i16 val, StrN<64> *dst) {
+    appendOct(static_cast<i32>(val), dst);
+}
+
+void StringFormatter::appendOct(u16 val, StrN<64> *dst) {
+    appendOct(static_cast<u32>(val), dst);
+}
+
 float StringFormatter::parseFloat(const char *str, fl::size len) {
     return string_functions::atoff(str, len);
 }

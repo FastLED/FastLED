@@ -162,7 +162,7 @@ bool SPIQuadESP32::begin(const SpiHw4::Config& config) {
     // else: standard SPI (1 data line)
 
     FL_DBG_SPI("SPIQuadESP32::begin - Active Lanes: " << static_cast<int>(mActiveLanes));
-    FL_DBG_SPI("Bus Config Flags: " << bus_config.flags);
+    FL_DBG_SPI("Bus Config Flags: " << fl::hex << bus_config.flags << fl::dec);
 
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);

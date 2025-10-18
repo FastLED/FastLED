@@ -4,6 +4,7 @@
 #include "fl/str.h"
 #include "crgb.h"
 #include "str.h"
+#include "fl/ios.h"
 
 
 namespace fl {
@@ -329,9 +330,18 @@ class StrStream {
 
     void clear() { mStr.clear(); }
 
+    // Get current formatting base (10=decimal, 16=hex, 8=octal)
+    int getBase() const { return mBase; }
+
+    // Friend operators for manipulators
+    friend StrStream& operator<<(StrStream&, const hex_t&);
+    friend StrStream& operator<<(StrStream&, const dec_t&);
+    friend StrStream& operator<<(StrStream&, const oct_t&);
+
   private:
     string mStr;
     bool mTreatCharAsInt = false;  // Default to ASCII mode for readable text output
+    int mBase = 10;  // Default to decimal
 };
 
 class FakeStrStream {

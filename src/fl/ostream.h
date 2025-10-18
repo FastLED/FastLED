@@ -13,6 +13,7 @@ namespace fl {
 #include "fl/int.h"
 #include "fl/type_traits.h"
 #include "crgb.h"
+#include "fl/ios.h"
 
 namespace fl {
 
@@ -39,40 +40,11 @@ public:
         return *this;
     }
 
-    ostream& operator<<(fl::i8 n) {
-        string temp;
-        temp.append(fl::i16(n));
-        print(temp.c_str());
-        return *this;
-    }
-
-    ostream& operator<<(fl::u8 n) {
-        string temp;
-        temp.append(fl::u16(n));
-        print(temp.c_str());
-        return *this;
-    }
-
-    ostream& operator<<(fl::i16 n) {
-        string temp;
-        temp.append(n);
-        print(temp.c_str());
-        return *this;
-    }
-
-    ostream& operator<<(fl::i32 n) {
-        string temp;
-        temp.append(n);
-        print(temp.c_str());
-        return *this;
-    }
-
-    ostream& operator<<(fl::u32 n) {
-        string temp;
-        temp.append(n);
-        print(temp.c_str());
-        return *this;
-    }
+    ostream& operator<<(fl::i8 n);
+    ostream& operator<<(fl::u8 n);
+    ostream& operator<<(fl::i16 n);
+    ostream& operator<<(fl::i32 n);
+    ostream& operator<<(fl::u32 n);
 
     ostream& operator<<(float f) {
         string temp;
@@ -122,6 +94,17 @@ public:
         print(temp.c_str());
         return *this;
     }
+
+    // Get current formatting base (1=decimal, 16=hex, 8=octal)
+    int getBase() const { return mBase; }
+
+    // Friend operators for manipulators
+    friend ostream& operator<<(ostream&, const hex_t&);
+    friend ostream& operator<<(ostream&, const dec_t&);
+    friend ostream& operator<<(ostream&, const oct_t&);
+
+private:
+    int mBase = 10;  // Default to decimal
 };
 
 // Global cout instance for immediate output
@@ -136,5 +119,11 @@ inline ostream& operator<<(ostream& os, const endl_t&) {
     os << "\n";
     return os;
 }
+
+// hex, dec, oct manipulator implementations
+// (declared as friend functions in ostream class, implemented in ostream.cpp)
+ostream& operator<<(ostream& os, const hex_t&);
+ostream& operator<<(ostream& os, const dec_t&);
+ostream& operator<<(ostream& os, const oct_t&);
 
 } // namespace fl

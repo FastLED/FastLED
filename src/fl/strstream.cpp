@@ -40,4 +40,20 @@ StrStream &StrStream::operator<<(const Tile2x2_u8_wrap &tile) {
     return *this;
 }
 
+// Manipulator operator implementations (declared as friends in StrStream)
+StrStream& operator<<(StrStream& ss, const hex_t&) {
+    ss.mBase = 16;
+    return ss;
+}
+
+StrStream& operator<<(StrStream& ss, const dec_t&) {
+    ss.mBase = 10;
+    return ss;
+}
+
+StrStream& operator<<(StrStream& ss, const oct_t&) {
+    ss.mBase = 8;
+    return ss;
+}
+
 } // namespace fl
