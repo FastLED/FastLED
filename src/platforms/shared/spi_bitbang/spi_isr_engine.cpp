@@ -42,11 +42,8 @@
 #include "fl/stdint.h"
 #include "fl/compiler_control.h"
 #include "spi_isr_engine.h"
+#include "fl/atomic.h"
 
-// For thread-safe memory synchronization in host simulation thread mode
-#if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)
-#include <atomic>
-#endif
 
 // All implementation uses C linkage for clean assembly generation
 FL_EXTERN_C_BEGIN
@@ -68,18 +65,10 @@ void fl_spi_visibility_delay_us(uint32_t approx_us) {
 /* Arm: ring the doorbell AFTER payload & delay */
 void fl_spi_arm(void) {
   g_isr_state.doorbell_counter++;
-#if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)
-  // Release fence: ensure doorbell write is visible to ISR thread (thread mode only)
-  std::atomic_thread_fence(std::memory_order_release);
-#endif
 }
 
 /* Status accessors (main thread) */
 uint32_t fl_spi_status_flags(void) {
-#if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)
-  // Acquire fence: ensure we see latest status from ISR thread (thread mode only)
-  std::atomic_thread_fence(std::memory_order_acquire);
-#endif
   return g_isr_state.status_flags;
 }
 void fl_spi_ack_done(void) {
@@ -104,10 +93,7 @@ void fl_spi_reset_state(void) {
 #ifdef FL_SPI_ISR_VALIDATE
   g_isr_state.validation_event_count = 0;
 #endif
-#if defined(__cplusplus) && defined(FASTLED_SPI_HOST_SIMULATION) && !defined(FASTLED_SPI_MANUAL_TICK)
-  // Release fence: ensure reset is visible to ISR thread (thread mode only)
-  std::atomic_thread_fence(std::memory_order_release);
-#endif
+
 }
 
 /* Direct array accessors (main thread) */

@@ -2,10 +2,7 @@
   FastLED — Parallel Soft-SPI Host Timer Simulation
   --------------------------------------------------
   Timer simulation for host-side testing. Emulates ESP32 hardware timer ISR.
-
-  Two modes available:
-  1. Manual tick mode (FASTLED_SPI_MANUAL_TICK): Tests drive ISR via fl_spi_host_simulate_tick()
-  2. Thread mode (default): Automatic ISR execution in separate thread for real-time emulation
+  Uses thread-based automatic ISR execution in separate thread for real-time emulation.
 
   License: MIT (FastLED)
 */
@@ -18,7 +15,6 @@
 #include "host_sim.h"
 #include "fl/stdint.h"
 
-#ifndef FASTLED_SPI_MANUAL_TICK
 // Thread-based mode: Use real-time ISR emulation
 #include <thread>   // ok include (no fl/thread.h wrapper available)
 #include <chrono>   // ok include (no fl/chrono.h available)
@@ -154,48 +150,5 @@ uint32_t fl_spi_host_timer_get_hz(void) {
 }
 
 }  // extern "C"
-
-#else  // FASTLED_SPI_MANUAL_TICK
-
-/* Manual tick mode: Tests drive ISR manually for deterministic timing */
-
-static bool g_timer_running = false;
-static uint32_t g_timer_hz = 0;
-
-extern "C" {
-
-/* Start timer (initializes host simulation) */
-int fl_spi_platform_isr_start(uint32_t timer_hz) {
-    g_timer_hz = timer_hz;
-    g_timer_running = true;
-    fl_gpio_sim_init();
-    return 0;  /* Success */
-}
-
-/* Stop timer */
-void fl_spi_platform_isr_stop(void) {
-    g_timer_running = false;
-}
-
-/* Test harness calls this to simulate timer tick (mock ESP32 timer ISR) */
-void fl_spi_host_simulate_tick(void) {
-    if (g_timer_running) {
-        fl_parallel_spi_isr();  /* Call ISR (same code as ESP32) */
-        fl_gpio_sim_tick();     /* Advance time in ring buffer */
-    }
-}
-
-/* Query timer state */
-bool fl_spi_host_timer_is_running(void) {
-    return g_timer_running;
-}
-
-uint32_t fl_spi_host_timer_get_hz(void) {
-    return g_timer_hz;
-}
-
-}  // extern "C"
-
-#endif  // FASTLED_SPI_MANUAL_TICK
 
 #endif /* FASTLED_SPI_HOST_SIMULATION */
