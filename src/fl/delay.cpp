@@ -7,42 +7,10 @@
 #include "fl/compiler_control.h"
 
 // ============================================================================
-// Platform-specific includes
+// Platform-specific includes (centralized in platforms/delay.h)
 // ============================================================================
 
-#if defined(ARDUINO_ARCH_AVR)
-#include "platforms/avr/delay.h"
-#elif defined(ESP32) && !defined(ESP32C3) && !defined(ESP32C6)
-#include "platforms/esp/32/delay.h"
-#elif defined(ESP32C3) || defined(ESP32C6)
-#include "platforms/esp/32/delay_riscv.h"
-#elif defined(ARDUINO_ARCH_RP2040)
-#include "platforms/arm/rp/rp2040/delay.h"
-#elif defined(NRF52_SERIES)
-#include "platforms/arm/nrf52/delay.h"
-#elif defined(ARDUINO_ARCH_SAMD)
-#include "platforms/arm/d21/delay.h"
-#elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
-#include "platforms/arm/stm32/delay.h"
-#else
-#include "platforms/delay_generic.h"
-#endif
-
-// ESP32 core has its own definition of NOP, so undef it first
-#ifdef ESP32
-#undef NOP
-#undef NOP2
-#endif
-
-// Include platform-specific cycle delay implementations
-#if defined(__AVR__)
-#include "platforms/avr/delay_cycles.h"
-#elif defined(ESP32)
-#include "platforms/shared/delay_cycles_generic.h"
-#include "platforms/esp/delay_cycles_esp32.h"
-#else
-#include "platforms/shared/delay_cycles_generic.h"
-#endif
+#include "platforms/delay.h"
 
 // ============================================================================
 // Platform-provided delay functions (from Arduino or platform layer)
