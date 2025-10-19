@@ -146,6 +146,8 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     esp_err_t ret = ESP_OK;
     FASTLED_UNUSED(ret);
     ESP_GOTO_ON_FALSE(led_config && rmt_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
+
+    {  // Scope to avoid goto crossing initializations
     led_color_component_format_t component_fmt = led_config->color_component_format;
     // If R/G/B order is not specified, set default GRB order as fallback
     if (component_fmt.format_id == 0) {
@@ -166,7 +168,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     }
     // TODO: we assume each color component is 8 bits, may need to support other configurations in the future, e.g. 10bits per color component?
     uint8_t bytes_per_pixel = component_fmt.format.num_components;
-    rmt_strip = calloc(1, sizeof(led_strip_rmt_obj));
+    rmt_strip = static_cast<led_strip_rmt_obj*>(calloc(1, sizeof(led_strip_rmt_obj)));
     ESP_GOTO_ON_FALSE(rmt_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for rmt strip");
 
     // Check if external pixel buffer is provided
@@ -176,7 +178,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
         rmt_strip->pixel_buf_allocated_internally = false;
     } else {
         // Allocate our own pixel buffer
-        rmt_strip->pixel_buf = calloc(led_config->max_leds * bytes_per_pixel, sizeof(uint8_t));
+        rmt_strip->pixel_buf = static_cast<uint8_t*>(calloc(led_config->max_leds * bytes_per_pixel, sizeof(uint8_t)));
         ESP_GOTO_ON_FALSE(rmt_strip->pixel_buf, ESP_ERR_NO_MEM, err, TAG, "no mem for pixel buffer");
         rmt_strip->pixel_buf_allocated_internally = true;
     }
@@ -192,15 +194,14 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
     if (rmt_config->mem_block_symbols) {
         mem_block_symbols = rmt_config->mem_block_symbols;
     }
-    rmt_tx_channel_config_t rmt_chan_config = {
-        .clk_src = clk_src,
-        .gpio_num = led_config->strip_gpio_num,
-        .mem_block_symbols = mem_block_symbols,
-        .resolution_hz = resolution,
-        .trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE,
-        .flags.with_dma = rmt_config->flags.with_dma,
-        .flags.invert_out = led_config->flags.invert_out,
-    };
+    rmt_tx_channel_config_t rmt_chan_config = {};
+    rmt_chan_config.clk_src = clk_src;
+    rmt_chan_config.gpio_num = static_cast<gpio_num_t>(led_config->strip_gpio_num);
+    rmt_chan_config.mem_block_symbols = mem_block_symbols;
+    rmt_chan_config.resolution_hz = resolution;
+    rmt_chan_config.trans_queue_depth = LED_STRIP_RMT_DEFAULT_TRANS_QUEUE_SIZE;
+    rmt_chan_config.flags.with_dma = rmt_config->flags.with_dma;
+    rmt_chan_config.flags.invert_out = led_config->flags.invert_out;
     ESP_GOTO_ON_ERROR(rmt_new_tx_channel(&rmt_chan_config, &rmt_strip->rmt_chan), err, TAG, "create RMT TX channel failed");
 
     led_strip_encoder_config_t strip_encoder_conf = {
@@ -226,6 +227,7 @@ esp_err_t led_strip_new_rmt_device(const led_strip_config_t *led_config, const l
 
     *ret_strip = &rmt_strip->base;
     return ESP_OK;
+    }  // End scope
 err:
     if (rmt_strip) {
         if (rmt_strip->rmt_chan) {

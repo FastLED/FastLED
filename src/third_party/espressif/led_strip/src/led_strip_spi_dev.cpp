@@ -195,6 +195,8 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
     esp_err_t ret = ESP_OK;
     FASTLED_UNUSED(ret);
     ESP_GOTO_ON_FALSE(led_config && spi_config && ret_strip, ESP_ERR_INVALID_ARG, err, TAG, "invalid argument");
+
+    {  // Scope to avoid goto crossing initializations
     led_color_component_format_t component_fmt = led_config->color_component_format;
     // If R/G/B order is not specified, set default GRB order as fallback
     if (component_fmt.format_id == 0) {
@@ -220,7 +222,7 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
         // DMA buffer must be placed in internal SRAM
         mem_caps |= MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA;
     }
-    spi_strip = heap_caps_calloc(1, sizeof(led_strip_spi_obj) + led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE, mem_caps);
+    spi_strip = static_cast<led_strip_spi_obj*>(heap_caps_calloc(1, sizeof(led_strip_spi_obj) + led_config->max_leds * bytes_per_pixel * SPI_BYTES_PER_COLOR_BYTE, mem_caps));
 
     ESP_GOTO_ON_FALSE(spi_strip, ESP_ERR_NO_MEM, err, TAG, "no mem for spi strip");
 
@@ -246,17 +248,16 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
         esp_rom_gpio_connect_out_signal(led_config->strip_gpio_num, spi_periph_signal[spi_strip->spi_host].spid_out, true, false);
     }
 
-    spi_device_interface_config_t spi_dev_cfg = {
-        .clock_source = clk_src,
-        .command_bits = 0,
-        .address_bits = 0,
-        .dummy_bits = 0,
-        .clock_speed_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION,
-        .mode = 0,
-        //set -1 when CS is not used
-        .spics_io_num = -1,
-        .queue_size = LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE,
-    };
+    spi_device_interface_config_t spi_dev_cfg = {};
+    spi_dev_cfg.clock_source = clk_src;
+    spi_dev_cfg.command_bits = 0;
+    spi_dev_cfg.address_bits = 0;
+    spi_dev_cfg.dummy_bits = 0;
+    spi_dev_cfg.clock_speed_hz = LED_STRIP_SPI_DEFAULT_RESOLUTION;
+    spi_dev_cfg.mode = 0;
+    // set -1 when CS is not used
+    spi_dev_cfg.spics_io_num = -1;
+    spi_dev_cfg.queue_size = LED_STRIP_SPI_DEFAULT_TRANS_QUEUE_SIZE;
 
     ESP_GOTO_ON_ERROR(spi_bus_add_device(spi_strip->spi_host, &spi_dev_cfg, &spi_strip->spi_device), err, TAG, "Failed to add spi device");
     //ensure the reset time is enough
@@ -283,6 +284,7 @@ esp_err_t led_strip_new_spi_device(const led_strip_config_t *led_config, const l
 
     *ret_strip = &spi_strip->base;
     return ESP_OK;
+    }  // End scope
 err:
     if (spi_strip) {
         if (spi_strip->spi_device) {
