@@ -13,6 +13,11 @@
 #include "fl/str.h"
 #include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
 
+// Ensure NULL is defined (standard C macro)
+#ifndef NULL
+#define NULL 0
+#endif
+
 #include "fl/warn.h"
 #include "fl/malloc.h"
 #include "fl/exit.h"

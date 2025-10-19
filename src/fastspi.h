@@ -28,6 +28,9 @@
 #endif
 
 // Forward declaration for SPIDeviceProxy to avoid circular dependency issues
+// Include FastLED.h here to avoid circular dependency issues
+#include "FastLED.h"
+
 namespace fl {
 template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
 class SPIDeviceProxy;
@@ -200,8 +203,5 @@ class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ArdunioCoreSPIOutput<SP
 #endif  // !defined(FASTLED_STUB_IMPL)
 
 FASTLED_NAMESPACE_END
-
-// Include FastLED.h at the end to avoid circular dependency issues
-#include "FastLED.h"
 
 #endif

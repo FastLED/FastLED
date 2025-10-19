@@ -12,6 +12,9 @@
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
+#include "fl/rgb8.h"
+#include "fl/deprecated.h"
+#include "crgb.h"
 
 namespace fl {
 
@@ -30,10 +33,6 @@ const char* getTestFileSystemRoot();
 #endif
 
 } // namespace fl
-
-#include "fl/rgb8.h"
-#include "fl/deprecated.h"
-#include "crgb.h"
 
 namespace fl {
 

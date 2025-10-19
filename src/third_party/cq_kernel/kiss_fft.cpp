@@ -10,6 +10,11 @@
 #include "fl/str.h"
 #include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
 #include "_kiss_fft_guts.h"
+
+// Ensure NULL is defined (standard C macro)
+#ifndef NULL
+#define NULL 0
+#endif
 /* The guts header contains all the multiplication and addition macros that are defined for
  fixed or floating point complex numbers.  It also delares the kf_ internal functions.
  */

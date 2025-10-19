@@ -12,6 +12,9 @@
 #include "fl/force_inline.h"
 #include "fl/type_traits.h"
 #include "fl/ease.h"
+// Include color.h for LEDColorCorrection and ColorTemperature enums
+// These are needed for constexpr constructors and can't be forward-declared
+#include "../color.h"
 
 // Forward declarations
 namespace fl {
@@ -20,10 +23,6 @@ namespace fl {
     struct HSV16;
     struct hsv8;
 }
-
-// Include color.h for LEDColorCorrection and ColorTemperature enums
-// These are needed for constexpr constructors and can't be forward-declared
-#include "../color.h"
 
 namespace fl {
 

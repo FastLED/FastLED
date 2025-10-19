@@ -95,7 +95,7 @@ struct sparse_arr* generate_kernels(struct cq_kernel_cfg cfg){
     float *freq = (float*)fl::malloc(cfg.bands * sizeof(float));
     _generate_center_freqs(freq, cfg.bands, cfg.fmin, cfg.fmax);
 
-    kiss_fftr_cfg fft_cfg = kiss_fftr_alloc(cfg.samples, 0, NULL, NULL);
+    kiss_fftr_cfg fft_cfg = kiss_fftr_alloc(cfg.samples, 0, nullptr, nullptr);
     struct sparse_arr* kernels = (struct sparse_arr*)fl::malloc(cfg.bands*sizeof(struct sparse_arr));
     kiss_fft_cpx *temp_kernel = (kiss_fft_cpx*)fl::malloc(cfg.samples*sizeof(kiss_fft_cpx));
 

@@ -9,7 +9,8 @@
 /// @file platforms/esp/delay_cycles_esp32.h
 /// ESP32 platform-specific cycle-accurate delay specializations
 
-namespace fl {
+// Note: This file is intended to be included inside namespace fl
+// namespace fl {
 
 // ============================================================================
 // NOP macros for ESP32
@@ -70,6 +71,6 @@ FASTLED_FORCE_INLINE void delaycycles<4294966398>() {
   }
 }
 
-}  // namespace fl
+// }  // namespace fl (closed by including file)
 
 #endif  // __INC_FASTLED_PLATFORMS_ESP_DELAY_CYCLES_ESP32_H

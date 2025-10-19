@@ -33,8 +33,7 @@ FL_DISABLE_WARNING_SIGN_CONVERSION
 
 
 #if !defined(__AVR__)
-#include <string.h>
-// for memmove, memcpy, and memset if not defined here
+// memmove, memcpy, and memset are defined in lib8tion/memmove.h and fl/memfill.h
 #endif // end of !defined(__AVR__)
 
 

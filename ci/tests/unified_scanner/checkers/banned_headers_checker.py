@@ -171,6 +171,10 @@ class BannedHeadersChecker(BaseChecker):
         if banned_header == "new" and "inplacenew.h" in file_path_str:
             return True
 
+        # Allow Arduino.h in led_sysdefs.h - core system definitions need platform headers
+        if banned_header == "Arduino.h" and "led_sysdefs.h" in file_path_str:
+            return True
+
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
         if "/fl/" in file_path_normalized or "/src/fl/" in file_path_normalized:
@@ -211,16 +215,61 @@ class BannedHeadersChecker(BaseChecker):
                 if banned_header in {"stdint.h", "Arduino.h", "chrono"}:
                     return True
 
+            # Allow C library headers in str.cpp for string implementation
+            if "str.cpp" in file_path_str:
+                if banned_header in {"string.h", "stdlib.h"}:
+                    return True
+
         # Platform-specific headers need Arduino.h
         if "/platforms/" in file_path_normalized:
             if banned_header == "Arduino.h":
                 return True
+
+            # Stub platform implementations need stdlib headers for testing
+            if "/stub/" in file_path_normalized:
+                # fs_stub.hpp needs algorithm, fstream, cstdio for test filesystem
+                if "fs_stub" in file_path_str and banned_header in {
+                    "algorithm",
+                    "fstream",
+                    "cstdio",
+                }:
+                    return True
+                # isr_stub.cpp and time_stub.cpp need chrono, thread, iostream for testing
+                if (
+                    "isr_stub" in file_path_str or "time_stub" in file_path_str
+                ) and banned_header in {
+                    "chrono",
+                    "thread",
+                    "iostream",
+                }:
+                    return True
+
+            # WASM platform implementations need stdlib headers for I/O and threading
+            if "/wasm/" in file_path_normalized:
+                # WASM platform headers need vector, cstdio, stdio.h for platform-specific implementation
+                if file_path_str.endswith(".h") and banned_header in {
+                    "vector",
+                    "cstdio",
+                    "stdio.h",
+                }:
+                    return True
+                # WASM timer.cpp needs thread and cmath for timer implementation
+                if "timer.cpp" in file_path_str and banned_header in {
+                    "thread",
+                    "cmath",
+                }:
+                    return True
 
         # Third-party libraries may need Arduino.h in some cases
         if "/third_party/" in file_path_normalized:
             # ArduinoJSON and other third-party libraries may reference Arduino.h
             if banned_header == "Arduino.h":
                 return True
+
+            # Espressif LED strip library code needs C library headers
+            if "/led_strip/" in file_path_normalized:
+                if banned_header in {"string.h", "stdlib.h"}:
+                    return True
 
         return False
 

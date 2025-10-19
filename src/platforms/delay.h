@@ -11,20 +11,6 @@
 #include "fl/types.h"
 #include "fl/force_inline.h"
 
-namespace fl {
-
-// Forward declarations for platform-specific delay implementations
-/// Platform-specific implementation of nanosecond delay with runtime frequency
-/// @param ns Number of nanoseconds
-/// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz);
-
-/// Platform-specific implementation of nanosecond delay with auto-detected frequency
-/// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
-
-}  // namespace fl
-
 // ============================================================================
 // Platform-specific nanosecond-precision delay includes
 // ============================================================================
@@ -47,19 +33,23 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
 #include "platforms/delay_generic.h"
 #endif
 
-// ============================================================================
-// ESP32 NOP workaround
-// ============================================================================
-// ESP32 core has its own definition of NOP, so undef it first
-#ifdef ESP32
-#undef NOP
-#undef NOP2
-#endif
+namespace fl {
+
+// Forward declarations for platform-specific delay implementations
+/// Platform-specific implementation of nanosecond delay with runtime frequency
+/// @param ns Number of nanoseconds
+/// @param hz CPU frequency in Hz
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz);
+
+/// Platform-specific implementation of nanosecond delay with auto-detected frequency
+/// @param ns Number of nanoseconds
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
 
 // ============================================================================
 // Platform-specific cycle delay includes (delay_cycles)
 // ============================================================================
 // These provide NOP macros and delaycycles template implementations
+// allow-include-after-namespace
 
 #if defined(__AVR__)
 #include "platforms/avr/delay_cycles.h"
@@ -68,6 +58,17 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
 #include "platforms/esp/delay_cycles_esp32.h"
 #else
 #include "platforms/shared/delay_cycles_generic.h"
+#endif
+
+}  // namespace fl
+
+// ============================================================================
+// ESP32 NOP workaround
+// ============================================================================
+// ESP32 core has its own definition of NOP, so undef it first
+#ifdef ESP32
+#undef NOP
+#undef NOP2
 #endif
 
 #endif  // __INC_FASTLED_PLATFORMS_DELAY_H

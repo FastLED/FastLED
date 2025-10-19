@@ -9,7 +9,8 @@
 /// @file platforms/delay_cycles_generic.h
 /// Generic fallback cycle-accurate delay utilities for non-AVR platforms
 
-namespace fl {
+// Note: This file is intended to be included inside namespace fl
+// namespace fl {
 
 // ============================================================================
 // NOP macros for non-AVR platforms
@@ -38,6 +39,6 @@ FASTLED_FORCE_INLINE void delaycycles() {
   delaycycles<CYCLES - 1>();
 }
 
-}  // namespace fl
+// }  // namespace fl (closed by including file)
 
 #endif  // __INC_FASTLED_PLATFORMS_DELAY_CYCLES_GENERIC_H

@@ -153,6 +153,10 @@ class BannedHeadersChecker(FileContentChecker):
         if header == "new" and "inplacenew.h" in file_path:
             return True
 
+        # Allow Arduino.h in led_sysdefs.h - core system definitions need platform headers
+        if header == "Arduino.h" and "led_sysdefs.h" in file_path:
+            return True
+
         # For fl/ directory, allow specific platform headers that have no alternatives
         # These are genuinely needed for platform-specific implementations
         if "/fl/" in file_path.replace("\\", "/"):
@@ -194,9 +198,19 @@ class BannedHeadersChecker(FileContentChecker):
                 if header in {"stdint.h", "Arduino.h", "chrono"}:
                     return True
 
+            # Allow C library headers in str.cpp for string implementation
+            if "str.cpp" in file_path:
+                if header in {"string.h", "stdlib.h"}:
+                    return True
+
         # Platform-specific headers need Arduino.h
         if "/platforms/" in file_path.replace("\\", "/"):
             if header == "Arduino.h":
+                return True
+
+        # Espressif LED strip library code needs C library headers
+        if "/led_strip/" in file_path.replace("\\", "/"):
+            if header in {"string.h", "stdlib.h", "sys/cdefs.h"}:
                 return True
 
         # Testing stub implementations need stdlib headers for file/thread operations

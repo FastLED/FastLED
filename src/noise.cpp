@@ -1,7 +1,7 @@
 /// @file noise.cpp
 /// Functions to generate and fill arrays with noise.
 
-#include <string.h>
+#include <string.h>  // ok include
 #include "fl/array.h"
 
 

@@ -3,6 +3,14 @@
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
+// Check if STM32 HAL is available
+#if defined(HAL_SPI_MODULE_ENABLED)
+    #define FASTLED_STM32_USE_HAL 1
+    #include <SPI.h>
+#else
+    #define FASTLED_STM32_USE_HAL 0
+#endif
+
 namespace fl {
 
 /*
@@ -21,14 +29,6 @@ namespace fl {
  *
  * Supported SPI peripherals: SPI1, SPI2, SPI3 (availability varies by chip)
  */
-
-// Check if STM32 HAL is available
-#if defined(HAL_SPI_MODULE_ENABLED)
-    #define FASTLED_STM32_USE_HAL 1
-    #include <SPI.h>
-#else
-    #define FASTLED_STM32_USE_HAL 0
-#endif
 
 // STM32 SPI Output class template
 template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
