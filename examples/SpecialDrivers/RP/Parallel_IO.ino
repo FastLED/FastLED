@@ -27,10 +27,18 @@
 
 #include <FastLED.h>
 #include <fl/compiler_control.h>
+#include <platforms/arm/rp/rp2040/clockless_arm_rp2040.h>
 
 #if !defined(FASTLED_RP2040)
 #error "This sketch requires RP2040 platform (Raspberry Pi Pico or RP2350). Use bash compile rp2040 SpecialDrivers/RP instead."
 #endif
+
+// ============================================================================
+// Forward Declarations
+// ============================================================================
+
+/// Helper: Rotate array elements
+void rotate(CRGB* array, int length, uint8_t amount);
 
 // ============================================================================
 // Configuration
@@ -142,9 +150,9 @@ void loop() {
 void rotate(CRGB* array, int length, uint8_t amount) {
     amount = amount % length;  // Handle wrap-around
     CRGB temp[amount];
-    memcpy(temp, array + length - amount, amount * sizeof(CRGB));
-    memmove(array + amount, array, (length - amount) * sizeof(CRGB));
-    memcpy(array, temp, amount * sizeof(CRGB));
+    fl::memcpy(temp, array + length - amount, amount * sizeof(CRGB));
+    fl::memmove(array + amount, array, (length - amount) * sizeof(CRGB));
+    fl::memcpy(array, temp, amount * sizeof(CRGB));
 }
 
 // ============================================================================
