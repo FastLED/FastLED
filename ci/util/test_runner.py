@@ -1468,16 +1468,8 @@ def runner(
         processes.append(create_namespace_check_process(enable_stack_trace))
         processes.append(create_std_namespace_check_process(enable_stack_trace))
 
-        # Add unit tests if needed and C++ test files have changed
-        if (test_categories.unit or test_categories.unit_only) and cpp_test_change:
-            processes.append(create_unit_test_process(args, enable_stack_trace))
-        elif (
-            test_categories.unit or test_categories.unit_only
-        ) and not cpp_test_change:
-            print_cache_hit(
-                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in src/ or tests/ directories)"
-            )
-            skipped_timings.append(_create_skipped_timing("unit_tests"))
+        # Note: Unit tests are now exclusively handled by Meson (see lines 1412-1450)
+        # This avoids the call to the removed ci.compiler.cpp_test_run module
 
         # Add integration tests if needed
         if test_categories.integration or test_categories.integration_only:
