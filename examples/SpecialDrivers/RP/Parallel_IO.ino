@@ -28,6 +28,10 @@
 #include <FastLED.h>
 #include <fl/compiler_control.h>
 
+#if !defined(FASTLED_RP2040)
+#error "This sketch requires RP2040 platform (Raspberry Pi Pico or RP2350). Use bash compile rp2040 SpecialDrivers/RP instead."
+#endif
+
 // ============================================================================
 // Configuration
 // ============================================================================

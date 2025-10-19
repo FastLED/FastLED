@@ -12,8 +12,6 @@
 #include "fx/1d/cylon.h"
 #include "fl/screenmap.h"
 
-using namespace fl;
-
 // How many leds in your strip?
 #define NUM_LEDS 64 
 
@@ -26,16 +24,16 @@ using namespace fl;
 CRGB leds[NUM_LEDS];
 
 // Create a Cylon instance
-Cylon cylon(NUM_LEDS);
+fl::Cylon cylon(NUM_LEDS);
 
 void setup() {
-    ScreenMap screenMap = ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
+    fl::ScreenMap screenMap = fl::ScreenMap::DefaultStrip(NUM_LEDS, 1.5f, 0.5f);
     FastLED.addLeds<WS2812,DATA_PIN,RGB>(leds,NUM_LEDS).setRgbw().setScreenMap(screenMap);
     FastLED.setBrightness(84);
 }
 
-void loop() { 
-    cylon.draw(Fx::DrawContext(millis(), leds));
+void loop() {
+    cylon.draw(fl::Fx::DrawContext(millis(), leds));
     FastLED.show();
-    delay(cylon.delay_ms);
+    ::delay((unsigned long)cylon.delay_ms);
 }
