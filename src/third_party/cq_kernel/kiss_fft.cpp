@@ -6,6 +6,8 @@
  *  See COPYING file for more information.
  */
 
+#include <stddef.h>  // For NULL definition
+
 #include "fl/str.h"
 #include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
 #include "_kiss_fft_guts.h"

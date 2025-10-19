@@ -6,6 +6,8 @@
  *  See COPYING file for more information.
  */
 
+#include <stddef.h>  // For NULL definition
+
 #include "fl/stdio.h"
 #include "kiss_fftr.h"
 #include "_kiss_fft_guts.h"

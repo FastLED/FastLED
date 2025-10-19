@@ -165,10 +165,10 @@ TEST_CASE("StrStream integer type handling") {
 
         // Verify output contains expected values
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-10") != nullptr);
-        CHECK(strstr(result, "200") != nullptr);
-        CHECK(strstr(result, "-1000") != nullptr);
-        CHECK(strstr(result, "50000") != nullptr);
+        CHECK(fl::strstr(result, "-10") != nullptr);
+        CHECK(fl::strstr(result, "200") != nullptr);
+        CHECK(fl::strstr(result, "-1000") != nullptr);
+        CHECK(fl::strstr(result, "50000") != nullptr);
     }
 
     SUBCASE("fl:: types work correctly") {
@@ -185,10 +185,10 @@ TEST_CASE("StrStream integer type handling") {
         s << i32v << " " << u32v;
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-10") != nullptr);
-        CHECK(strstr(result, "200") != nullptr);
-        CHECK(strstr(result, "-1000") != nullptr);
-        CHECK(strstr(result, "50000") != nullptr);
+        CHECK(fl::strstr(result, "-10") != nullptr);
+        CHECK(fl::strstr(result, "200") != nullptr);
+        CHECK(fl::strstr(result, "-1000") != nullptr);
+        CHECK(fl::strstr(result, "50000") != nullptr);
     }
 
     SUBCASE("chaining multiple types") {
@@ -262,7 +262,7 @@ TEST_CASE("StrStream comprehensive fl:: integer types") {
         StrStream s;
         fl::size val = 12345;
         s << val;
-        CHECK(strstr(s.str().c_str(), "12345") != nullptr);
+        CHECK(fl::strstr(s.str().c_str(), "12345") != nullptr);
     }
 
     SUBCASE("fl::uptr") {
@@ -276,14 +276,14 @@ TEST_CASE("StrStream comprehensive fl:: integer types") {
         StrStream s;
         fl::iptr val = -5000;
         s << val;
-        CHECK(strstr(s.str().c_str(), "-5000") != nullptr);
+        CHECK(fl::strstr(s.str().c_str(), "-5000") != nullptr);
     }
 
     SUBCASE("fl::ptrdiff") {
         StrStream s;
         fl::ptrdiff val = -1234;
         s << val;
-        CHECK(strstr(s.str().c_str(), "-1234") != nullptr);
+        CHECK(fl::strstr(s.str().c_str(), "-1234") != nullptr);
     }
 
     SUBCASE("fl::uint") {
@@ -349,14 +349,14 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         StrStream s;
         long val = -1000000L;
         s << val;
-        CHECK(strstr(s.str().c_str(), "-1000000") != nullptr);
+        CHECK(fl::strstr(s.str().c_str(), "-1000000") != nullptr);
     }
 
     SUBCASE("unsigned long") {
         StrStream s;
         unsigned long val = 4000000000UL;
         s << val;
-        CHECK(strstr(s.str().c_str(), "4000000000") != nullptr);
+        CHECK(fl::strstr(s.str().c_str(), "4000000000") != nullptr);
     }
 
     SUBCASE("long long") {
@@ -477,10 +477,10 @@ TEST_CASE("StrStream mixed type chains") {
           << fl::u64(1000000000ULL);
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-10") != nullptr);
-        CHECK(strstr(result, "50000") != nullptr);
-        CHECK(strstr(result, "-100000") != nullptr);
-        CHECK(strstr(result, "1000000000") != nullptr);
+        CHECK(fl::strstr(result, "-10") != nullptr);
+        CHECK(fl::strstr(result, "50000") != nullptr);
+        CHECK(fl::strstr(result, "-100000") != nullptr);
+        CHECK(fl::strstr(result, "1000000000") != nullptr);
     }
 
     SUBCASE("mixed fundamental types") {
@@ -491,10 +491,10 @@ TEST_CASE("StrStream mixed type chains") {
           << (unsigned long long)(1000000000ULL);
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-10") != nullptr);
-        CHECK(strstr(result, "50000") != nullptr);
-        CHECK(strstr(result, "-100000") != nullptr);
-        CHECK(strstr(result, "1000000000") != nullptr);
+        CHECK(fl::strstr(result, "-10") != nullptr);
+        CHECK(fl::strstr(result, "50000") != nullptr);
+        CHECK(fl::strstr(result, "-100000") != nullptr);
+        CHECK(fl::strstr(result, "1000000000") != nullptr);
     }
 
     SUBCASE("fl:: and fundamental types mixed") {
@@ -505,9 +505,9 @@ TEST_CASE("StrStream mixed type chains") {
           << (unsigned long)(4000000000UL);
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-10") != nullptr);
-        CHECK(strstr(result, "-1000") != nullptr);
-        CHECK(strstr(result, "4000000") != nullptr);
+        CHECK(fl::strstr(result, "-10") != nullptr);
+        CHECK(fl::strstr(result, "-1000") != nullptr);
+        CHECK(fl::strstr(result, "4000000") != nullptr);
     }
 }
 
@@ -543,10 +543,10 @@ TEST_CASE("StrStream edge value testing") {
         s << fl::u32(4294967295U);              // max u32
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "-2147483647") != nullptr);
-        CHECK(strstr(result, "2147483647") != nullptr);
-        CHECK(strstr(result, "0") != nullptr);
-        CHECK(strstr(result, "4294967295") != nullptr);
+        CHECK(fl::strstr(result, "-2147483647") != nullptr);
+        CHECK(fl::strstr(result, "2147483647") != nullptr);
+        CHECK(fl::strstr(result, "0") != nullptr);
+        CHECK(fl::strstr(result, "4294967295") != nullptr);
     }
 }
 
@@ -560,9 +560,9 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         s << ci32 << " " << cu32 << " " << ci16;
         CHECK(s.str().size() > 0);
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "100") != nullptr);
-        CHECK(strstr(result, "200") != nullptr);
-        CHECK(strstr(result, "300") != nullptr);
+        CHECK(fl::strstr(result, "100") != nullptr);
+        CHECK(fl::strstr(result, "200") != nullptr);
+        CHECK(fl::strstr(result, "300") != nullptr);
     }
 
     SUBCASE("volatile integer types") {
@@ -573,8 +573,8 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         s << vu32 << " " << vi16;
         CHECK(s.str().size() > 0);
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "200") != nullptr);
-        CHECK(strstr(result, "-300") != nullptr);
+        CHECK(fl::strstr(result, "200") != nullptr);
+        CHECK(fl::strstr(result, "-300") != nullptr);
     }
 
     SUBCASE("const volatile integer types") {
@@ -585,8 +585,8 @@ TEST_CASE("StrStream const and volatile qualifiers") {
         s << cvi16 << " " << cvu8;
         CHECK(s.str().size() > 0);
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "300") != nullptr);
-        CHECK(strstr(result, "255") != nullptr);
+        CHECK(fl::strstr(result, "300") != nullptr);
+        CHECK(fl::strstr(result, "255") != nullptr);
     }
 }
 
@@ -722,8 +722,8 @@ TEST_CASE("StrStream platform-specific aliased types") {
         CHECK(s.str().size() > 0);
 
         const char* result = s.str().c_str();
-        CHECK(strstr(result, "100") != nullptr);
-        CHECK(strstr(result, "100000") != nullptr);
+        CHECK(fl::strstr(result, "100") != nullptr);
+        CHECK(fl::strstr(result, "100000") != nullptr);
     }
 
     SUBCASE("pointer-sized types") {
