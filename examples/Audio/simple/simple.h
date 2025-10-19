@@ -169,7 +169,7 @@ void shiftUp() {
     for (int y = HEIGHT - 1; y > 0; --y) {
         CRGB* row1 = &framebuffer[frameBufferXY(0, y)];
         CRGB* row2 = &framebuffer[frameBufferXY(0, y - 1)];
-        memcpy(row1, row2, WIDTH * sizeof(CRGB));
+        fl::memcpy(row1, row2, WIDTH * sizeof(CRGB));
     }
     CRGB* row = &framebuffer[frameBufferXY(0, 0)];
     fl::memfill(row, 0, sizeof(CRGB) * WIDTH);
