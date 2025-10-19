@@ -1,0 +1,118 @@
+name: Include-What-You-Use (IWYU) Check
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'src/**'
+      - 'tests/**'
+      - 'ci/**'
+      - '.github/workflows/iwyu.yml'
+      - 'CMakeLists.txt'
+      - 'test.py'
+      - 'test'
+
+permissions:
+  contents: read        # Required to checkout code
+  actions: read         # Required for artifact operations
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  iwyu-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: "**/pyproject.toml"
+          version: "0.8.0"
+
+      - name: Install system dependencies (Ubuntu)
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq \
+            build-essential \
+            cmake \
+            llvm-19 \
+            clang-19 \
+            libclang-19-dev \
+            iwyu
+          # Update LLVM/Clang alternatives to use version 19
+          sudo update-alternatives --install /usr/bin/clang clang /usr/bin/clang-19 100
+          sudo update-alternatives --install /usr/bin/clang++ clang++ /usr/bin/clang++-19 100
+          sudo update-alternatives --install /usr/bin/llvm-config llvm-config /usr/bin/llvm-config-19 100
+        shell: bash
+
+      - name: Verify IWYU installation
+        run: |
+          include-what-you-use --version
+          which include-what-you-use
+          echo "IWYU binary location: $(which include-what-you-use)"
+        shell: bash
+
+      - name: Install FastLED dependencies
+        run: ./install
+        shell: bash
+
+      - name: Run IWYU on C++ test suite
+        run: |
+          echo "Running IWYU analysis on C++ test suite..."
+          uv run ci/ci-iwyu.py --verbose
+        shell: bash
+        continue-on-error: false
+
+      - name: Generate IWYU report
+        if: always()
+        run: |
+          echo "=========================================="
+          echo "IWYU Check Status: Success"
+          echo "=========================================="
+          echo ""
+          echo "Include-What-You-Use analysis completed on:"
+          echo "  - C++ test suite files"
+          echo "  - Using mapping files:"
+          echo "    - ci/iwyu/fastled.imp"
+          echo "    - ci/iwyu/stdlib.imp"
+          echo ""
+          echo "For more details, run locally:"
+          echo "  uv run ci/ci-iwyu.py --verbose"
+          echo ""
+        shell: bash
+
+      - name: IWYU Check failed
+        if: failure()
+        run: |
+          echo "=========================================="
+          echo "IWYU Check Status: Failed"
+          echo "=========================================="
+          echo ""
+          echo "Include-What-You-Use found issues in your code."
+          echo "This could mean:"
+          echo "  - Missing #include directives"
+          echo "  - Unnecessary #include directives"
+          echo "  - Using forward declarations instead of includes"
+          echo ""
+          echo "To fix locally:"
+          echo "  uv run ci/ci-iwyu.py --verbose"
+          echo ""
+          echo "For automatic fixes (may require review):"
+          echo "  uv run ci/ci-iwyu.py --fix"
+          echo ""
+          exit 1
+        shell: bash
