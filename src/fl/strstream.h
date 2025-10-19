@@ -460,6 +460,11 @@ class FakeStrStream {
     template<fl::u32 N>
     FakeStrStream &operator<<(const BitsetInlined<N> &) { return *this; }
 
+    // Support for hex and dec formatters
+    FakeStrStream &operator<<(const hex_t &) { return *this; }
+    FakeStrStream &operator<<(const dec_t &) { return *this; }
+    FakeStrStream &operator<<(const oct_t &) { return *this; }
+
     FakeStrStream &operator=(const string &) { return *this; }
     FakeStrStream &operator=(const CRGB &) { return *this; }
     FakeStrStream &operator=(char) { return *this; }
