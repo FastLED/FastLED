@@ -142,7 +142,7 @@ def get_example_ino_path(example: str) -> Path:
         Path to the .ino file
 
     Raises:
-        FileNotFoundError: If .ino file not found
+        FileNotFoundError: If .ino file not found or multiple .ino files found
     """
     project_root = Path(__file__).parent.parent.parent.resolve()
     examples_dir = project_root / "examples"
@@ -158,10 +158,24 @@ def get_example_ino_path(example: str) -> Path:
     ).name  # Get just the last part (e.g., "Blink" or "FxWave2d")
     ino_file = example_dir / f"{example_name}.ino"
 
-    if not ino_file.exists():
-        raise FileNotFoundError(f"Example .ino file not found: {ino_file}")
+    if ino_file.exists():
+        return ino_file
 
-    return ino_file
+    # If the expected filename doesn't exist, search for any .ino file in the directory
+    if example_dir.exists() and example_dir.is_dir():
+        ino_files = list(example_dir.glob("*.ino"))
+        if len(ino_files) == 1:
+            # Exactly one .ino file found, use it
+            return ino_files[0]
+        elif len(ino_files) > 1:
+            # Multiple .ino files - ambiguous, raise error
+            raise FileNotFoundError(
+                f"Example directory '{example}' contains multiple .ino files: "
+                f"{[f.name for f in ino_files]}. Cannot determine which to use."
+            )
+        # else: no .ino files found, will raise below
+
+    raise FileNotFoundError(f"Example .ino file not found: {ino_file}")
 
 
 def should_skip_example_for_board(board: Board, example: str) -> Tuple[bool, str]:
