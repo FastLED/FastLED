@@ -7,8 +7,7 @@
  * Copyright 2021 Michael Drake <tlsa@netsurf-browser.org>
  */
 
-#include <stddef.h>  // For NULL definition
-
+#include "fl/cstddef.h"
 #include "fl/assert.h"
 #include "fl/int.h"
 #include "fl/allocator.h"

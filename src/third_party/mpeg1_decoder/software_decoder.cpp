@@ -1,4 +1,5 @@
 #include "software_decoder.h"
+#include "fl/cstddef.h"
 #include "fl/utility.h"
 #include "fl/str.h"
 #include "fl/compiler_control.h"

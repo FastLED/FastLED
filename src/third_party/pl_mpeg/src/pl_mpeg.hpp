@@ -11,6 +11,7 @@ Dominic Szablewski - https://phoboslab.org
 // library to create the implementation.
 
 #define PL_MPEG_IMPLEMENTATION
+#include "fl/cstddef.h"
 #include "plmpeg.h"
 
 // This function gets called for each decoded video frame

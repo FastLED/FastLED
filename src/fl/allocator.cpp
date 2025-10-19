@@ -5,6 +5,7 @@
 #include "fl/cstddef.h"
 #include "fl/cstdlib.h"
 #include "fl/str.h"
+#include "fl/memfill.h"
 
 #ifdef ESP32
 #include "esp_heap_caps.h"
