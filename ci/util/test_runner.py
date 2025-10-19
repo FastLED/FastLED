@@ -1408,7 +1408,8 @@ def runner(
     test_categories = determine_test_categories(args)
 
     # Always use Meson build system for unit tests (Python build system has been removed)
-    if test_categories.unit:
+    # Only return early if unit tests are the ONLY thing running (unit_only mode)
+    if test_categories.unit_only:
         from ci.util.meson_runner import run_meson_build_and_test
         from ci.util.paths import PROJECT_ROOT
 
@@ -1427,6 +1428,27 @@ def runner(
             sys.exit(1)
 
         return
+
+    # For mixed test modes (unit + examples, etc.), run unit tests via Meson but continue to other tests
+    if test_categories.unit and not test_categories.unit_only:
+        from ci.util.meson_runner import run_meson_build_and_test
+        from ci.util.paths import PROJECT_ROOT
+
+        build_dir = PROJECT_ROOT / ".build" / "meson"
+        test_name = args.test if args.test else None
+
+        success = run_meson_build_and_test(
+            source_dir=PROJECT_ROOT,
+            build_dir=build_dir,
+            test_name=test_name,
+            clean=args.clean,
+            verbose=args.verbose,
+        )
+
+        if not success:
+            sys.exit(1)
+
+        # Continue to run other tests (examples, Python, etc.) - don't return
 
     try:
         # Test categories already determined above (for meson check)
