@@ -79,7 +79,7 @@ void *PSRamAllocate(fl::size size, bool zero) {
 
     void *ptr = Alloc(size);
     if (ptr && zero) {
-        memset(ptr, 0, size);
+        fl::memfill(ptr, 0, size);
     }
     
 #if defined(FASTLED_TESTING)
