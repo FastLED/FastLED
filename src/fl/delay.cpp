@@ -111,20 +111,7 @@ void delayMicroseconds(u32 us) {
   ::delayMicroseconds((unsigned int)us);
 }
 
-#if defined(ESP32)
-// ============================================================================
-// ESP32 CPU frequency query (C interop)
-// ============================================================================
 
-extern "C" {
-  uint32_t esp_clk_cpu_freq();
-}
-
-/// Get the current ESP32 CPU frequency at runtime
-uint32_t esp_clk_cpu_freq_impl() {
-  return ::esp_clk_cpu_freq();
-}
-
-#endif  // defined(ESP32)
 
 }  // namespace fl
+
