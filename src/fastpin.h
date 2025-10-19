@@ -413,7 +413,7 @@ public:
 	/// @copydoc Pin::loval()
 	static port_t loval() __attribute__ ((always_inline)) { return 0;}
 	/// @copydoc Pin::port()
-	static port_ptr_t  port() __attribute__ ((always_inline)) { return NULL; }
+	static port_ptr_t  port() __attribute__ ((always_inline)) { return nullptr; }
 	/// @copydoc Pin::mask()
 	static port_t mask() __attribute__ ((always_inline)) { return 0; }
 };
@@ -436,7 +436,7 @@ template<fl::u8 port> struct __FL_PORT_INFO {
 	/// Gets the name of the port, as a C-string
 	static const char *portName() { return "--"; }
 	/// Gets the raw address of the port
-	static const void *portAddr() { return NULL; }
+	static const void *portAddr() { return nullptr; }
 };
 
 

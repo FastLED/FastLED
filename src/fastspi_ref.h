@@ -21,7 +21,7 @@ class REFHardwareSPIOutput {
 
 public:
 	/// Default Constructor
-	SAMHardwareSPIOutput() { m_pSelect = NULL; }
+	SAMHardwareSPIOutput() { m_pSelect = nullptr; }
 
 	/// Constructor with selectable
 	SAMHArdwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
@@ -33,10 +33,10 @@ public:
 	void init() { /* TODO */ }
 
 	/// latch the CS select
-	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } }
+	void inline select() __attribute__((always_inline)) { if(m_pSelect != nullptr) { m_pSelect->select(); } }
 
 	/// release the CS select
-	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } }
+	void inline release() __attribute__((always_inline)) { if(m_pSelect != nullptr) { m_pSelect->release(); } }
 
 	/// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
@@ -78,7 +78,7 @@ public:
 
 	/// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	/// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
 		while(data != end) {
 			if(FLAGS & FLAG_START_BIT) {

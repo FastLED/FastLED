@@ -66,7 +66,7 @@ uint8_t get_brightness();
 
 /// Pointer to the matrix object when using the Smart Matrix Library
 /// @see https://github.com/pixelmatix/SmartMatrix
-void *pSmartMatrix = NULL;
+void *pSmartMatrix = nullptr;
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
@@ -75,8 +75,8 @@ CFastLED FastLED;  // global constructor allowed in this case.
 
 FL_DISABLE_WARNING_POP
 
-CLEDController *CLEDController::m_pHead = NULL;
-CLEDController *CLEDController::m_pTail = NULL;
+CLEDController *CLEDController::m_pHead = nullptr;
+CLEDController *CLEDController::m_pTail = nullptr;
 static fl::u32 lastshow = 0;
 
 /// Global frame counter, used for debugging ESP implementations
@@ -94,7 +94,7 @@ CFastLED::CFastLED() {
 	// m_nControllers = 0;
 	m_Scale = 255;
 	m_nFPS = 0;
-	m_pPowerFunc = NULL;
+	m_pPowerFunc = nullptr;
 	m_nPowerData = 0xFFFFFFFF;
 	m_nMinMicros = 0;
 }
@@ -199,7 +199,7 @@ CLEDController & CFastLED::operator[](int x) {
 	while(x-- && pCur) {
 		pCur = pCur->next();
 	}
-	if(pCur == NULL) {
+	if(pCur == nullptr) {
 		return *(CLEDController::head());
 	} else {
 		return *pCur;

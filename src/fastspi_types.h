@@ -47,9 +47,9 @@ public:
     /// @returns input byte rescaled using ::scale8(uint8_t, uint8_t)
     static FASTLED_FORCE_INLINE uint8_t adjust(FASTLED_REGISTER uint8_t data, FASTLED_REGISTER uint8_t scale) { return scale8(data, scale); }
 
-    /// Hook called after a block of data is written to the output. 
+    /// Hook called after a block of data is written to the output.
     /// In this dummy version, no action is performed.
-    static FASTLED_FORCE_INLINE void postBlock(int /* len */, void* context = NULL) {
+    static FASTLED_FORCE_INLINE void postBlock(int /* len */, void* context = nullptr) {
         FASTLED_UNUSED(context);
     }
 };

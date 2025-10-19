@@ -23,7 +23,7 @@ class NOPSPIOutput {
 
 public:
 	/// Default Constructor
-	NOPSPIOutput() { m_pSelect = NULL; }
+	NOPSPIOutput() { m_pSelect = nullptr; }
 
 	/// Constructor with selectable
 	NOPSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
@@ -64,7 +64,7 @@ public:
 	template <fl::u8 BIT> inline static void writeBit(fl::u8 b) { /* TODO */ }
 
 	/// write out pixel data from the given PixelController object
-	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) { /* TODO */ }
+	template <fl::u8 FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) { /* TODO */ }
 
 };
 

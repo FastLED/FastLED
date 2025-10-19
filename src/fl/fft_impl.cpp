@@ -49,7 +49,7 @@ class FFTContext {
         m_cq_cfg.fmax = fmax;
         m_cq_cfg.fs = sample_rate;
         m_cq_cfg.min_val = MIN_VAL;
-        m_fftr_cfg = kiss_fftr_alloc(samples, 0, NULL, NULL);
+        m_fftr_cfg = kiss_fftr_alloc(samples, 0, nullptr, nullptr);
         if (!m_fftr_cfg) {
             FASTLED_WARN("Failed to allocate FFTImpl context");
             return;

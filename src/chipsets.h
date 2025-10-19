@@ -323,7 +323,7 @@ class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
 	public:
 		// LPD8806 spec wants the high bit of every rgb data byte sent out to be set.
 		FASTLED_FORCE_INLINE static fl::u8 adjust(FASTLED_REGISTER fl::u8 data) { return ((data>>1) | 0x80) + ((data && (data<254)) & 0x01); }
-		FASTLED_FORCE_INLINE static void postBlock(int len, void* context = NULL) {
+		FASTLED_FORCE_INLINE static void postBlock(int len, void* context = nullptr) {
 			SPI* pSPI = static_cast<SPI*>(context);
 			pSPI->writeBytesValueRaw(0, ((len*3+63)>>6));
 		}
@@ -413,7 +413,7 @@ protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWaitDelay.wait();
-		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels, NULL);
+		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels, nullptr);
 		mWaitDelay.mark();
 	}
 
@@ -961,7 +961,7 @@ protected:
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, NULL);
+		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, nullptr);
 		writeHeader();
 	}
 
