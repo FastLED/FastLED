@@ -8,7 +8,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/dbg.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -90,7 +90,7 @@ SPIDualESP32::SPIDualESP32(int bus_id, const char* name)
     , mHost(SPI2_HOST)
     , mTransactionActive(false)
     , mInitialized(false) {
-    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
+    fl::memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
 SPIDualESP32::~SPIDualESP32() {
@@ -200,7 +200,7 @@ bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     }
 
     // Configure transaction
-    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
+    fl::memset(&mTransaction, 0, sizeof(mTransaction));
     mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
     mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
     mTransaction.tx_buffer = buffer.data();

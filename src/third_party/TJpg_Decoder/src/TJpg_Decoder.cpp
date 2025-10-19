@@ -10,7 +10,7 @@ https://github.com/Bodmer/TJpg_Decoder
 #include "TJpg_Decoder.h"
 #include "fl/unused.h"
 #include "fl/str.h"
-#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
+#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 namespace fl {
 namespace third_party {
@@ -94,7 +94,7 @@ size_t TJpg_Decoder::jd_input(JDEC* jdec, uint8_t* buf, size_t len)
     }
 
     // If buf is valid then copy len bytes to buffer
-    if (buf) fl::memcopy(buf, (const uint8_t *)(thisPtr->array_data + thisPtr->array_index), len);
+    if (buf) fl::memcpy(buf, (const uint8_t *)(thisPtr->array_data + thisPtr->array_index), len);
 
     // Move pointer
     thisPtr->array_index += len;

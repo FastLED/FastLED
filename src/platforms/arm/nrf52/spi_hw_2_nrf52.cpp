@@ -7,7 +7,7 @@
 #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
 
 #include "spi_hw_2_nrf52.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 namespace fl {
 
@@ -201,8 +201,8 @@ bool SPIDualNRF52::transmitAsync(fl::span<const uint8_t> buffer) {
 
     // Copy pre-transposed data to DMA buffers
     // First half -> lane 0, second half -> lane 1
-    fl::memcopy(mLane0Buffer, buffer.data(), bytes_per_lane);
-    fl::memcopy(mLane1Buffer, buffer.data() + bytes_per_lane, bytes_per_lane);
+    fl::memcpy(mLane0Buffer, buffer.data(), bytes_per_lane);
+    fl::memcpy(mLane1Buffer, buffer.data() + bytes_per_lane, bytes_per_lane);
 
     // Configure SPIM0 transmission (lane 0)
     nrf_spim_tx_buffer_set(mSPIM0, mLane0Buffer, bytes_per_lane);

@@ -15,7 +15,7 @@
 #include "pio_asm.h"
 #include "fl/warn.h"
 #include <cstring> // ok include
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 namespace fl {
 
@@ -384,7 +384,7 @@ bool SPIDualRP2040::transmitAsync(fl::span<const uint8_t> buffer) {
 
     // Pack bytes into dual-lane format
     uint32_t* word_buffer = (uint32_t*)mDMABuffer;
-    fl::memfill(word_buffer, 0, buffer_size_bytes);  // Clear buffer
+    fl::memset(word_buffer, 0, buffer_size_bytes);  // Clear buffer
 
     for (size_t i = 0; i < byte_count; i += 2) {
         uint8_t byte0 = buffer[i];

@@ -4,14 +4,14 @@
 #include "fl/stdio.h"
 #include "fl/string.h"
 #include "fl/str.h"
-#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
+#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 namespace fl {
 namespace third_party {
 
 TJpgInstanceDecoder::TJpgInstanceDecoder() {
-    fl::memfill(&embedded_tjpg_, 0, sizeof(embedded_tjpg_));
-    fl::memfill(&progressive_state_, 0, sizeof(progressive_state_));
+    fl::memset(&embedded_tjpg_, 0, sizeof(embedded_tjpg_));
+    fl::memset(&progressive_state_, 0, sizeof(progressive_state_));
     embedded_tjpg_.decoder_instance = this;
 }
 
@@ -62,7 +62,7 @@ bool TJpgInstanceDecoder::readStreamData() {
 
         fl::size old_size = temp_buffer.size();
         temp_buffer.resize(old_size + bytes_read);
-        fl::memcopy(temp_buffer.data() + old_size, chunk, bytes_read);
+        fl::memcpy(temp_buffer.data() + old_size, chunk, bytes_read);
     }
 
     input_size_ = temp_buffer.size();
@@ -72,7 +72,7 @@ bool TJpgInstanceDecoder::readStreamData() {
     }
 
     input_buffer_.reset(new fl::u8[input_size_]);
-    fl::memcopy(input_buffer_.get(), temp_buffer.data(), input_size_);
+    fl::memcpy(input_buffer_.get(), temp_buffer.data(), input_size_);
 
     // Set up embedded state for input
     embedded_tjpg_.array_data = input_buffer_.get();
@@ -126,7 +126,7 @@ bool TJpgInstanceDecoder::initializeDecoder() {
 
     // Initialize progressive state if needed
     if (use_progressive_) {
-        fl::memcopy(&progressive_state_.base, jdec, sizeof(JDEC));
+        fl::memcpy(&progressive_state_.base, jdec, sizeof(JDEC));
         progressive_state_.current_mcu_x = 0;
         progressive_state_.current_mcu_y = 0;
         progressive_state_.mcus_processed = 0;
@@ -272,7 +272,7 @@ void TJpgInstanceDecoder::allocateFrameBuffer(fl::u16 width, fl::u16 height) {
     frame_buffer_size_ = static_cast<fl::size>(width) * height * getBytesPerPixel();
     if (frame_buffer_size_ > 0) {
         frame_buffer_.reset(new fl::u8[frame_buffer_size_]);
-        fl::memfill(frame_buffer_.get(), 0, frame_buffer_size_);
+        fl::memset(frame_buffer_.get(), 0, frame_buffer_size_);
     }
 }
 
@@ -306,7 +306,7 @@ fl::size TJpgInstanceDecoder::inputCallback(JDEC* jd, fl::u8* buff, fl::size nby
     fl::size to_read = (nbyte < remaining) ? nbyte : remaining;
 
     if (buff) {
-        fl::memcopy(buff, state->array_data + state->array_index, to_read);
+        fl::memcpy(buff, state->array_data + state->array_index, to_read);
     }
 
     state->array_index += to_read;

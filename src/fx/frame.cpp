@@ -7,13 +7,13 @@
 #include "fl/xymap.h"
 #include "frame.h"
 
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {
     mRgb.resize(pixels_count);
     if (pixels_count > 0) {
-        fl::memfill((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
+        fl::memset((uint8_t*)mRgb.data(), 0, pixels_count * sizeof(CRGB));
     }
 }
 
@@ -26,7 +26,7 @@ Frame::Frame(fl::u8* pixels, fl::u16 width, fl::u16 height, PixelFormat format, 
     if (pixels && width > 0 && height > 0) {
         convertPixelsToRgb(pixels, format);
     } else if (mPixelsCount > 0) {
-        fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+        fl::memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
 
@@ -37,7 +37,7 @@ Frame::Frame(const Frame& other)
 
     mRgb.resize(mPixelsCount);
     if (!other.mRgb.empty()) {
-        fl::memcopy(mRgb.data(), other.mRgb.data(), mPixelsCount * sizeof(CRGB));
+        fl::memcpy(mRgb.data(), other.mRgb.data(), mPixelsCount * sizeof(CRGB));
     }
 }
 
@@ -49,7 +49,7 @@ void Frame::draw(CRGB *leds, DrawMode draw_mode) const {
     if (!mRgb.empty()) {
         switch (draw_mode) {
         case DRAW_MODE_OVERWRITE: {
-            fl::memcopy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
+            fl::memcpy(leds, mRgb.data(), mPixelsCount * sizeof(CRGB));
             break;
         }
         case DRAW_MODE_BLEND_BY_MAX_BRIGHTNESS: {
@@ -97,7 +97,7 @@ void Frame::drawXY(CRGB *leds, const XYMap &xyMap, DrawMode draw_mode) const {
 
 void Frame::clear() {
     if (mPixelsCount > 0 && !mRgb.empty()) {
-        fl::memfill((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
+        fl::memset((uint8_t*)mRgb.data(), 0, mPixelsCount * sizeof(CRGB));
     }
 }
 
@@ -177,7 +177,7 @@ void Frame::convertPixelsToRgb(fl::u8* pixels, PixelFormat format) {
         default: {
             // Fallback: fill with black
             if (mPixelsCount > 0 && !mRgb.empty()) {
-                fl::memfill((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
+                fl::memset((uint8_t*)rgbData, 0, mPixelsCount * sizeof(CRGB));
             }
             break;
         }

@@ -7,7 +7,7 @@
 #include "fl/initializer_list.h"
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/namespace.h"
 #include "fl/allocator.h"
 #include "fl/scoped_ptr.h"
@@ -32,7 +32,7 @@ struct FL_ALIGN InlinedMemoryBlock {
     };
 
     InlinedMemoryBlock() {
-        fl::memfill(mMemoryBlock, 0, sizeof(mMemoryBlock));
+        fl::memset(mMemoryBlock, 0, sizeof(mMemoryBlock));
 #ifdef FASTLED_TESTING
         __data = memory();
 #endif
@@ -261,7 +261,7 @@ class FL_ALIGN FixedVector {
                 (p)->~T(); // Destroy the current element
                 // Clear the memory
                 void *vp = static_cast<void *>(p);
-                fl::memfill(vp, 0, sizeof(T));
+                fl::memset(vp, 0, sizeof(T));
                 new (p) T(fl::move(temp)); // Use move constructor
             }
             ++current_size;
@@ -281,7 +281,7 @@ class FL_ALIGN FixedVector {
                 (p)->~T(); // Destroy the current element
                 // Clear the memory
                 void *vp = static_cast<void *>(p);
-                fl::memfill(vp, 0, sizeof(T));
+                fl::memset(vp, 0, sizeof(T));
                 new (p) T(fl::move(temp)); // Use move constructor
             }
             ++current_size;

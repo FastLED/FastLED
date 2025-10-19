@@ -14,7 +14,7 @@
 #include "i2s_esp32dev.h"
 #include "fl/namespace.h"
 #include "fl/stdint.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/chipsets/led_timing.h"
 #include <string.h> // ok include // for memset
 
@@ -99,7 +99,7 @@ static DMABuffer *allocateDMABuffer(int bytes) {
         (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
 
     b->buffer = (uint8_t *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
-    fl::memfill(b->buffer, 0, bytes);
+    fl::memset(b->buffer, 0, bytes);
 
     b->descriptor.length = bytes;
     b->descriptor.size = bytes;
@@ -345,8 +345,8 @@ void i2s_define_bit_patterns(const fl::ChipsetTiming& TIMING) {
         ++i;
     }
 
-    fl::memfill(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
-    fl::memfill(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
+    fl::memset(gPixelRow, 0, NUM_COLOR_CHANNELS * 32);
+    fl::memset(gPixelBits, 0, NUM_COLOR_CHANNELS * 32);
 }
 
 bool i2s_is_initialized() { return gInitializedI2sInitialized; }

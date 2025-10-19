@@ -17,7 +17,7 @@
 #include "fl/string.h"
 #include "fl/malloc.h"
 #include "fl/str.h"
-#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
+#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "cq_kernel.h"
 #include "fft_precision.h"
 
@@ -136,7 +136,7 @@ struct sparse_arr* reallocate_kernels(struct sparse_arr *old_ptr, struct cq_kern
     for(int i = 0; i < cfg.bands; i++){
         new_ptr[i].n_elems = old_ptr[i].n_elems;
         new_ptr[i].elems = (struct sparse_arr_elem*)fl::malloc(old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
-        fl::memcopy(new_ptr[i].elems, old_ptr[i].elems, old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
+        fl::memcpy(new_ptr[i].elems, old_ptr[i].elems, old_ptr[i].n_elems*sizeof(struct sparse_arr_elem));
         fl::free(old_ptr[i].elems);
     }
     fl::free(old_ptr);

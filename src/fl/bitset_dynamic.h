@@ -4,7 +4,7 @@
 #include "fl/int.h"
 
 #include "fl/math_macros.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/compiler_control.h"
 
 namespace fl {
@@ -41,7 +41,7 @@ class bitset_dynamic {
     bitset_dynamic(const bitset_dynamic &other) {
         if (other._size > 0) {
             resize(other._size);
-            fl::memcopy(_blocks, other._blocks, _block_count * sizeof(block_type));
+            fl::memcpy(_blocks, other._blocks, _block_count * sizeof(block_type));
         }
     }
 
@@ -59,7 +59,7 @@ class bitset_dynamic {
         if (this != &other) {
             if (other._size > 0) {
                 resize(other._size);
-                fl::memcopy(_blocks, other._blocks,
+                fl::memcpy(_blocks, other._blocks,
                        _block_count * sizeof(block_type));
             } else {
                 clear();
@@ -124,11 +124,11 @@ class bitset_dynamic {
 
         if (new_block_count != _block_count) {
             block_type *new_blocks = new block_type[new_block_count];
-            fl::memfill(new_blocks, 0, new_block_count * sizeof(block_type));
+            fl::memset(new_blocks, 0, new_block_count * sizeof(block_type));
 
             if (_blocks) {
                 fl::u32 copy_blocks = FL_MIN(_block_count, new_block_count);
-                fl::memcopy(new_blocks, _blocks, copy_blocks * sizeof(block_type));
+                fl::memcpy(new_blocks, _blocks, copy_blocks * sizeof(block_type));
             }
 
             delete[] _blocks;
@@ -162,7 +162,7 @@ class bitset_dynamic {
     FL_DISABLE_WARNING_NULL_DEREFERENCE
     void reset() noexcept {
         if (_blocks && _block_count > 0) {
-            fl::memfill(_blocks, 0, _block_count * sizeof(block_type));
+            fl::memset(_blocks, 0, _block_count * sizeof(block_type));
         }
     }
     FL_DISABLE_WARNING_POP
@@ -392,7 +392,7 @@ class bitset_dynamic {
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            fl::memcopy(result._blocks + min_blocks, _blocks + min_blocks,
+            fl::memcpy(result._blocks + min_blocks, _blocks + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 
@@ -415,7 +415,7 @@ class bitset_dynamic {
 
         // Copy remaining blocks from the larger bitset
         if (_block_count > min_blocks) {
-            fl::memcopy(result._blocks + min_blocks, _blocks + min_blocks,
+            fl::memcpy(result._blocks + min_blocks, _blocks + min_blocks,
                    (_block_count - min_blocks) * sizeof(block_type));
         }
 

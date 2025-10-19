@@ -27,7 +27,7 @@
 // Include standard library headers outside namespace to avoid conflicts
 #include "fl/cstdlib.h"
 #include "fl/str.h"
-#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
+#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "fl/string.h"
 
 #include "tjpgd.h"
@@ -254,12 +254,12 @@ static JRESULT create_huffman_tbl (	/* 0:OK, !0:Failed */
 				tbl_ac = (uint16_t*)alloc_pool(jd, HUFF_LEN * sizeof (uint16_t));	/* LUT for AC elements */
 				if (!tbl_ac) return JDR_MEM1;		/* Err: not enough memory */
 				jd->hufflut_ac[num] = tbl_ac;
-				fl::memfill(tbl_ac, 0xFF, HUFF_LEN * sizeof (uint16_t));		/* Default value (0xFFFF: may be long code) */
+				fl::memset(tbl_ac, 0xFF, HUFF_LEN * sizeof (uint16_t));		/* Default value (0xFFFF: may be long code) */
 			} else {
 				tbl_dc = (uint8_t*)alloc_pool(jd, HUFF_LEN * sizeof (uint8_t));	/* LUT for AC elements */
 				if (!tbl_dc) return JDR_MEM1;		/* Err: not enough memory */
 				jd->hufflut_dc[num] = tbl_dc;
-				fl::memfill(tbl_dc, 0xFF, HUFF_LEN * sizeof (uint8_t));		/* Default value (0xFF: may be long code) */
+				fl::memset(tbl_dc, 0xFF, HUFF_LEN * sizeof (uint8_t));		/* Default value (0xFF: may be long code) */
 			}
 			for (i = b = 0; b < HUFF_BIT; b++) {	/* Create LUT */
 				for (j = pb[b]; j; j--) {
@@ -748,7 +748,7 @@ static JRESULT mcu_load (
 			tmp[0] = d * dqf[0] >> 8;				/* De-quantize, apply scale factor of Arai algorithm and descale 8 bits */
 
 			/* Extract following 63 AC elements from input stream */
-			fl::memfill(&tmp[1], 0, 63 * sizeof (int32_t));	/* Initialize all AC elements */
+			fl::memset(&tmp[1], 0, 63 * sizeof (int32_t));	/* Initialize all AC elements */
 			z = 1;		/* Top of the AC elements (in zigzag-order) */
 			do {
 				d = huffext(jd, id, 1);				/* Extract a huffman coded value (zero runs and bit length) */
@@ -773,7 +773,7 @@ static JRESULT mcu_load (
 					if (JD_FASTDECODE >= 1) {
 						for (i = 0; i < 64; bp[i++] = d) ;
 					} else {
-						fl::memfill(bp, d, 64);
+						fl::memset(bp, d, 64);
 					}
 				} else {
 					block_idct(tmp, bp);	/* Apply IDCT and store the block to the MCU buffer */
@@ -999,7 +999,7 @@ JRESULT jd_prepare (
 	JRESULT rc;
 
   uint8_t tmp = jd->swap; // Copy the swap flag
-	fl::memfill(jd, 0, sizeof (JDEC));	/* Clear decompression object (this might be a problem if machine's null pointer is not all bits zero) */
+	fl::memset(jd, 0, sizeof (JDEC));	/* Clear decompression object (this might be a problem if machine's null pointer is not all bits zero) */
 	jd->pool = pool;		/* Work memroy */
 	jd->sz_pool = sz_pool;	/* Size of given work memory */
 	jd->infunc = infunc;	/* Stream input function */

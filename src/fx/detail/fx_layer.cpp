@@ -3,7 +3,7 @@
 #include "fx_layer.h"
 
 
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 namespace fl {
 
@@ -22,7 +22,7 @@ void FxLayer::draw(fl::u32 now) {
 
     if (!running) {
         // Clear the frame
-        fl::memfill((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
+        fl::memset((uint8_t*)frame->rgb(), 0, frame->size() * sizeof(CRGB));
         fx->resume(now);
         running = true;
     }

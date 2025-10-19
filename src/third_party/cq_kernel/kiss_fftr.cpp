@@ -11,7 +11,7 @@
 #include "kiss_fftr.h"
 #include "_kiss_fft_guts.h"
 #include "fl/str.h"
-#include "fl/memfill.h"  // for fl::memfill() and fl::memcopy()
+#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 // Ensure NULL is defined (standard C macro)
 #ifndef NULL

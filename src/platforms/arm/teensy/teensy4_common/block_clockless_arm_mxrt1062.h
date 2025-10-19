@@ -41,7 +41,7 @@ public:
 
     virtual void init() {
         // pre-initialize
-        fl::memfill(m_bitOffsets,0,16);
+        fl::memset(m_bitOffsets,0,16);
         m_nActualLanes = 0;
         m_nLowBit = 33;
         m_nHighBit = 0;

@@ -5,7 +5,7 @@
 
 #include "parlio_driver.h"
 #include "esp_err.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 // Compile-time debug logging control
 // Enable with: build_flags = -DFASTLED_ESP32_PARLIO_DLOGGING
@@ -109,7 +109,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
                 }
                 return false;
             }
-            fl::memfill(dma_sub_buffers_[i], 0, sub_buffer_size_);
+            fl::memset(dma_sub_buffers_[i], 0, sub_buffer_size_);
             PARLIO_DLOG("Sub-buffer " << i << " allocated successfully at " << (void*)dma_sub_buffers_[i]);
         }
     } else {
@@ -122,7 +122,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
             FL_WARN("PARLIO: Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
             return false;
         }
-        fl::memfill(dma_buffer_, 0, buffer_size_);
+        fl::memset(dma_buffer_, 0, buffer_size_);
         PARLIO_DLOG("Monolithic buffer allocated successfully at " << (void*)dma_buffer_);
     }
 

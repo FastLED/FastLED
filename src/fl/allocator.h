@@ -2,7 +2,7 @@
 
 #include "fl/cstddef.h"
 #include "fl/inplacenew.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/type_traits.h"
 #include "fl/unused.h"
 #include "fl/bit_cast.h"
@@ -163,7 +163,7 @@ template <typename T> class allocator {
         if (ptr == nullptr) {
             return nullptr; // Handle allocation failure
         }
-        fl::memfill(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
+        fl::memset(ptr, 0, sizeof(T) * n); // Zero-initialize the memory
         return static_cast<T*>(ptr);
     }
 
@@ -236,7 +236,7 @@ public:
         if (ptr == nullptr) {
             return nullptr;
         }
-        fl::memfill(ptr, 0, sizeof(T) * n);
+        fl::memset(ptr, 0, sizeof(T) * n);
         return static_cast<T*>(ptr);
     }
 
@@ -301,7 +301,7 @@ public:
 
         // Zero-initialize any newly allocated memory
         if (new_count > old_count) {
-            fl::memfill(new_ptr + old_count, 0, (new_count - old_count) * sizeof(T));
+            fl::memset(new_ptr + old_count, 0, (new_count - old_count) * sizeof(T));
         }
 
         return new_ptr;
@@ -555,14 +555,14 @@ public:
         // Try to allocate from slab first
         void* ptr = allocateFromSlab(n);
         if (ptr) {
-            fl::memfill(ptr, 0, sizeof(T) * n);
+            fl::memset(ptr, 0, sizeof(T) * n);
             return static_cast<T*>(ptr);
         }
         
         // Fall back to regular malloc for large allocations
         ptr = Malloc(sizeof(T) * n);
         if (ptr) {
-            fl::memfill(ptr, 0, sizeof(T) * n);
+            fl::memset(ptr, 0, sizeof(T) * n);
         }
         return static_cast<T*>(ptr);
     }
@@ -730,7 +730,7 @@ private:
         alignas(T) u8 data[N * sizeof(T)];
         
         InlinedStorage() {
-            fl::memfill(data, 0, sizeof(data));
+            fl::memset(data, 0, sizeof(data));
         }
     };
     

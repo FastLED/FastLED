@@ -2,7 +2,7 @@
 #include <string.h>  // ok include - for strcmp
 #include "fl/str.h"
 #include "fl/stdio.h"  // For fl::snprintf
-#include "fl/memfill.h"  // For fl::memcopy
+#include "fl/cstring.h"  // For fl::memcpy
 
 #include "crgb.h"
 #include "fl/fft.h"
@@ -26,7 +26,7 @@ StringHolder::StringHolder(const char *str) {
     mLength = strlen(str);   // Don't include null terminator in length
     mCapacity = mLength + 1; // Capacity includes null terminator
     mData = new char[mCapacity];
-    fl::memcopy(mData, str, mLength);
+    fl::memcpy(mData, str, mLength);
     mData[mLength] = '\0';
 }
 
@@ -45,7 +45,7 @@ StringHolder::StringHolder(const char *str, fl::size length) {
     mData = (char *)malloc(length + 1);
     if (mData) {
         mLength = length;
-        fl::memcopy(mData, str, mLength);
+        fl::memcpy(mData, str, mLength);
         mData[mLength] = '\0';
     } else {
         mLength = 0;
@@ -73,7 +73,7 @@ void StringHolder::grow(fl::size newLength) {
         // handle re-allocation failure.
         char *newData = (char *)malloc(newLength + 1);
         if (newData) {
-            fl::memcopy(newData, mData, mLength + 1);
+            fl::memcpy(newData, mData, mLength + 1);
             free(mData);
             mData = newData;
             mLength = newLength;
@@ -138,9 +138,9 @@ void string::swap(string &other) {
     if (this != &other) {
         fl::swap(mLength, other.mLength);
         char temp[FASTLED_STR_INLINED_SIZE];
-        fl::memcopy(temp, mInlineData, FASTLED_STR_INLINED_SIZE);
-        fl::memcopy(mInlineData, other.mInlineData, FASTLED_STR_INLINED_SIZE);
-        fl::memcopy(other.mInlineData, temp, FASTLED_STR_INLINED_SIZE);
+        fl::memcpy(temp, mInlineData, FASTLED_STR_INLINED_SIZE);
+        fl::memcpy(mInlineData, other.mInlineData, FASTLED_STR_INLINED_SIZE);
+        fl::memcpy(other.mInlineData, temp, FASTLED_STR_INLINED_SIZE);
         fl::swap(mHeapData, other.mHeapData);
     }
 }
@@ -188,7 +188,7 @@ static void ftoa(float value, char *buffer, int precision = 2) {
     // Copy to buffer
     fl::size len = result.length();
     if (len > 63) len = 63; // Leave room for null terminator
-    fl::memcopy(buffer, result.c_str(), len);
+    fl::memcpy(buffer, result.c_str(), len);
     buffer[len] = '\0';
 }
 

@@ -26,7 +26,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/namespace.h"
 
 // Include STM32 HAL headers if available
@@ -342,8 +342,8 @@ bool SPIDualSTM32::transmitAsync(fl::span<const uint8_t> buffer) {
     }
 
     // Clear buffers
-    fl::memfill(mDMABuffer0, 0, buffer_size_per_lane);
-    fl::memfill(mDMABuffer1, 0, buffer_size_per_lane);
+    fl::memset(mDMABuffer0, 0, buffer_size_per_lane);
+    fl::memset(mDMABuffer1, 0, buffer_size_per_lane);
 
     // Interleave bits across two lanes
     interleaveBits(buffer.data(), byte_count,

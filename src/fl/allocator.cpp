@@ -5,7 +5,7 @@
 #include "fl/cstddef.h"
 #include "fl/cstdlib.h"
 #include "fl/str.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 #ifdef ESP32
 #include "esp_heap_caps.h"
@@ -80,7 +80,7 @@ void *PSRamAllocate(fl::size size, bool zero) {
 
     void *ptr = Alloc(size);
     if (ptr && zero) {
-        fl::memfill(ptr, 0, size);
+        fl::memset(ptr, 0, size);
     }
     
 #if defined(FASTLED_TESTING)

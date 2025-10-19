@@ -12,7 +12,7 @@
 #include "fl/assert.h"
 #include "fl/int.h"
 #include "fl/allocator.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/string.h"
 #include "fl/str.h"
 
@@ -328,7 +328,7 @@ static void nsgif__record_frame(
 		prev_frame = static_cast<fl::u32*>(gif->prev_frame);
 	}
 
-	fl::memcopy(prev_frame, bitmap, width * height * pixel_bytes);
+	fl::memcpy(prev_frame, bitmap, width * height * pixel_bytes);
 
 	gif->prev_frame  = prev_frame;
 	gif->prev_index  = gif->decoded_frame;
@@ -343,7 +343,7 @@ static nsgif_error nsgif__recover_frame(
 	fl::size height = gif->info.height;
 	fl::size width  = gif->info.width;
 
-	fl::memcopy(bitmap, prev_frame, height * width * pixel_bytes);
+	fl::memcpy(bitmap, prev_frame, height * width * pixel_bytes);
 
 	return NSGIF_OK;
 }
@@ -654,7 +654,7 @@ static void nsgif__restore_bg(
 		fl::size width  = gif->info.width;
 		fl::size height = gif->info.height;
 
-		fl::memfill(bitmap, NSGIF_TRANSPARENT_COLOUR,
+		fl::memset(bitmap, NSGIF_TRANSPARENT_COLOUR,
 				width * height * pixel_bytes);
 	} else {
 		fl::u32 width  = frame->info.rect.x1 - frame->info.rect.x0;
@@ -675,7 +675,7 @@ static void nsgif__restore_bg(
 			for (fl::u32 y = 0; y < height; y++) {
 				fl::u32 *scanline = bitmap + offset_x +
 						(offset_y + y) * gif->info.width;
-				fl::memfill(scanline, NSGIF_TRANSPARENT_COLOUR,
+				fl::memset(scanline, NSGIF_TRANSPARENT_COLOUR,
 						width * pixel_bytes);
 			}
 		} else {
@@ -1287,7 +1287,7 @@ static struct nsgif_frame *nsgif__get_frame(
 			return nullptr;
 		}
 		if (gif->frames) {
-			fl::memcopy(temp, gif->frames, gif->frame_holders * sizeof(*frame));
+			fl::memcpy(temp, gif->frames, gif->frame_holders * sizeof(*frame));
 			fl::Free(gif->frames);
 		}
 		gif->frames = temp;
@@ -1498,7 +1498,7 @@ nsgif_error nsgif_create(
 
 	gif = static_cast<nsgif_t*>(fl::Malloc(sizeof(*gif)));
 	if (gif) {
-		fl::memfill(gif, 0, sizeof(*gif));
+		fl::memset(gif, 0, sizeof(*gif));
 	}
 	if (gif == nullptr) {
 		return NSGIF_ERR_OOM;
@@ -2011,7 +2011,7 @@ void nsgif_global_palette(
 {
 	fl::size len = sizeof(*table) * NSGIF_MAX_COLOURS;
 
-	fl::memcopy(table, gif->global_colour_table, len);
+	fl::memcpy(table, gif->global_colour_table, len);
 	*entries = gif->colour_table_size;
 }
 

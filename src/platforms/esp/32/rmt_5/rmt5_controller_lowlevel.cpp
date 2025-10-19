@@ -3,7 +3,7 @@
 #include "fl/compiler_control.h"
 
 #include "third_party/espressif/led_strip/src/enabled.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 #if FASTLED_RMT5
 
@@ -167,7 +167,7 @@ void RmtController5LowLevel::ensurePixelBufferCapacity(int required_bytes) {
 
     // Copy existing data if any
     if (mPixelData && mPixelDataSize > 0) {
-        fl::memcopy(new_buffer, mPixelData, mPixelDataSize);
+        fl::memcpy(new_buffer, mPixelData, mPixelDataSize);
     }
 
     // Free old buffer

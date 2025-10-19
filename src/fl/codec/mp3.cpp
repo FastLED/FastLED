@@ -1,5 +1,5 @@
 #include "fl/codec/mp3.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 // Include Helix MP3 decoder C API
 extern "C" {
@@ -15,7 +15,7 @@ constexpr fl::size MAX_PCM_SAMPLES = 2304;
 // Mp3HelixDecoder implementation
 Mp3HelixDecoder::Mp3HelixDecoder()
     : mPcmBuffer(nullptr), mDecoder(nullptr) {
-    fl::memfill(&mFrameInfo, 0, sizeof(mFrameInfo));
+    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
 Mp3HelixDecoder::~Mp3HelixDecoder() {
@@ -55,7 +55,7 @@ void Mp3HelixDecoder::reset() {
         mPcmBuffer = nullptr;
     }
 
-    fl::memfill(&mFrameInfo, 0, sizeof(mFrameInfo));
+    fl::memset(&mFrameInfo, 0, sizeof(mFrameInfo));
 }
 
 int Mp3HelixDecoder::findSyncWord(const fl::u8* buf, fl::size len) {

@@ -6,7 +6,7 @@
 
 #include "cled_controller.h"
 
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 FASTLED_NAMESPACE_BEGIN
 
 CLEDController::~CLEDController() = default;
@@ -25,7 +25,7 @@ void CLEDController::clearLedDataInternal(int nLeds) {
     if(m_Data) {
         nLeds = (nLeds < 0) ? m_nLeds : nLeds;
         nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
-        fl::memfill((void*)m_Data, 0, sizeof(CRGB) * nLeds);
+        fl::memset((void*)m_Data, 0, sizeof(CRGB) * nLeds);
     }
 
 }

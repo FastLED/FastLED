@@ -19,7 +19,7 @@
 #pragma GCC diagnostic pop
 
 #include "pio_gen.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #endif
 
 /*
@@ -280,7 +280,7 @@ public:
             dma_buf_size = req_buf_size;
             
             // fill with zeroes to ensure XTRA0s are really zero without needing extra work
-            fl::memfill(dma_buf, 0, dma_buf_size * 4);
+            fl::memset(dma_buf, 0, dma_buf_size * 4);
         }
         
         unsigned int bitpos = 0;

@@ -3,7 +3,7 @@
 #include "fl/type_traits.h"
 #include "fl/compiler_control.h"
 #include "fl/variant.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include "fl/type_traits.h"
 #include "fl/inplacenew.h"
 #include "fl/bit_cast.h"
@@ -91,7 +91,7 @@ private:
                          "Lambda/functor requires stricter alignment than storage provides");
             
             // Initialize the entire storage to zero to avoid copying uninitialized memory
-            fl::memfill(bytes, 0, kInlineLambdaSize);
+            fl::memset(bytes, 0, kInlineLambdaSize);
             
             // Construct the lambda/functor in-place
             new (bytes) Function(fl::move(f));
@@ -106,13 +106,13 @@ private:
             : invoker(other.invoker), destructor(other.destructor) {
             // This is tricky - we need to copy the stored object
             // For now, we'll use memcopy (works for trivially copyable types)
-            fl::memcopy(bytes, other.bytes, kInlineLambdaSize);
+            fl::memcpy(bytes, other.bytes, kInlineLambdaSize);
         }
         
         // Move constructor
         InlinedLambda(InlinedLambda&& other) 
             : invoker(other.invoker), destructor(other.destructor) {
-            fl::memcopy(bytes, other.bytes, kInlineLambdaSize);
+            fl::memcpy(bytes, other.bytes, kInlineLambdaSize);
             // Reset the other object to prevent double destruction
             other.destructor = nullptr;
         }
@@ -128,7 +128,7 @@ private:
             // Use placement new to safely access the stored lambda
             alignas(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
             // Copy the lambda from storage
-            fl::memcopy(temp_storage, storage.bytes, sizeof(FUNCTOR));
+            fl::memcpy(temp_storage, storage.bytes, sizeof(FUNCTOR));
             // Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)
             FUNCTOR* f = static_cast<FUNCTOR*>(static_cast<void*>(temp_storage));
             // Invoke the lambda
@@ -177,7 +177,7 @@ private:
             // Store the member function pointer as raw bytes
             static_assert(sizeof(mf) <= sizeof(member_func_storage), 
                          "Member function pointer too large");
-            fl::memcopy(member_func_storage.bytes, &mf, sizeof(mf));
+            fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
             // Set the invoker to a function that knows how to cast back and call
             invoker = &invoke_nonconst_member<C>;
         }
@@ -186,7 +186,7 @@ private:
         static R invoke_nonconst_member(void* obj, const MemberFuncStorage& mfp, Args... args) {
             C* typed_obj = static_cast<C*>(obj);
             R (C::*typed_mf)(Args...);
-            fl::memcopy(&typed_mf, mfp.bytes, sizeof(typed_mf));
+            fl::memcpy(&typed_mf, mfp.bytes, sizeof(typed_mf));
             return (typed_obj->*typed_mf)(args...);
         }
         
@@ -213,7 +213,7 @@ private:
             // Store the member function pointer as raw bytes
             static_assert(sizeof(mf) <= sizeof(member_func_storage), 
                          "Member function pointer too large");
-            fl::memcopy(member_func_storage.bytes, &mf, sizeof(mf));
+            fl::memcpy(member_func_storage.bytes, &mf, sizeof(mf));
             // Set the invoker to a function that knows how to cast back and call
             invoker = &invoke_const_member<C>;
         }
@@ -222,7 +222,7 @@ private:
         static R invoke_const_member(const void* obj, const MemberFuncStorage& mfp, Args... args) {
             const C* typed_obj = static_cast<const C*>(obj);
             R (C::*typed_mf)(Args...) const;
-            fl::memcopy(&typed_mf, mfp.bytes, sizeof(typed_mf));
+            fl::memcpy(&typed_mf, mfp.bytes, sizeof(typed_mf));
             return (typed_obj->*typed_mf)(args...);
         }
         

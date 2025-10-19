@@ -10,7 +10,7 @@
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/dbg.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -94,7 +94,7 @@ SPIQuadESP32::SPIQuadESP32(int bus_id, const char* name)
     , mTransactionActive(false)
     , mInitialized(false)
     , mActiveLanes(1) {
-    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
+    fl::memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
 SPIQuadESP32::~SPIQuadESP32() {
@@ -221,7 +221,7 @@ bool SPIQuadESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     }
 
     // Configure transaction
-    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
+    fl::memset(&mTransaction, 0, sizeof(mTransaction));
 
     // Set transaction mode based on lane count (1-4 lanes)
     if (mActiveLanes >= 4) {

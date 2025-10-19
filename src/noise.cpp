@@ -10,7 +10,7 @@
 #include "FastLED.h"
 
 
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
 #pragma GCC diagnostic push
@@ -838,8 +838,8 @@ void fill_noise8(CRGB *leds, int num_leds,
         FASTLED_STACK_ARRAY(uint8_t, V, LedsPer);
         FASTLED_STACK_ARRAY(uint8_t, H, LedsPer);
 
-        fl::memfill(V, 0, LedsPer);
-        fl::memfill(H, 0, LedsPer);
+        fl::memset(V, 0, LedsPer);
+        fl::memset(H, 0, LedsPer);
 
         fill_raw_noise8(V, LedsPer, octaves, x, scale, time);
         fill_raw_noise8(H, LedsPer, hue_octaves, hue_x, hue_scale, time);
@@ -864,8 +864,8 @@ void fill_noise16(CRGB *leds, int num_leds,
         FASTLED_STACK_ARRAY(uint8_t, V, LedsPer);
         FASTLED_STACK_ARRAY(uint8_t, H, LedsPer);
 
-        fl::memfill(V, 0, LedsPer);
-        fl::memfill(H, 0, LedsPer);
+        fl::memset(V, 0, LedsPer);
+        fl::memset(H, 0, LedsPer);
 
         fill_raw_noise16into8(V, LedsPer, octaves, x, scale, time);
         fill_raw_noise8(H, LedsPer, hue_octaves, hue_x, hue_scale, time);
@@ -884,8 +884,8 @@ void fill_2dnoise8(CRGB *leds, int width, int height, bool serpentine,
   FASTLED_STACK_ARRAY(uint8_t, V, array_size);
   FASTLED_STACK_ARRAY(uint8_t, H, array_size);
 
-  fl::memfill(V,0,height*width);
-  fl::memfill(H,0,height*width);
+  fl::memset(V,0,height*width);
+  fl::memset(H,0,height*width);
 
   fill_raw_2dnoise8((uint8_t*)V,width,height,octaves,x,xscale,y,yscale,time);
   fill_raw_2dnoise8((uint8_t*)H,width,height,hue_octaves,hue_x,hue_xscale,hue_y,hue_yscale,hue_time);
@@ -921,8 +921,8 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   FASTLED_STACK_ARRAY(uint8_t, V, height*width);
   FASTLED_STACK_ARRAY(uint8_t, H, height*width);
   
-  fl::memfill(V,0,height*width);
-  fl::memfill(H,0,height*width);
+  fl::memset(V,0,height*width);
+  fl::memset(H,0,height*width);
 
   fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,q44(2,0),171,1,x,xscale,y,yscale,time);
   // fill_raw_2dnoise16into8((uint8_t*)V,width,height,octaves,x,xscale,y,yscale,time);

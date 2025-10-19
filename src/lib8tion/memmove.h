@@ -14,11 +14,11 @@ void * memcpy8 ( void * dst, const void * src, uint16_t num )  __attribute__ ((n
 void * memset8 ( void * ptr, uint8_t value, uint16_t num ) __attribute__ ((noinline)) ;  ///< Faster alternative to memset() on AVR
 }
 #else
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 // on non-AVR platforms, these names just call standard libc.
 #define memmove8 memmove
-#define memcpy8 fl::memcopy
-#define memset8 fl::memfill
+#define memcpy8 fl::memcpy
+#define memset8 fl::memset
 #endif
 
 /// @} FastMemory
