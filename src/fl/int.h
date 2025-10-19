@@ -237,9 +237,7 @@ namespace fl {
     typedef i32   saccum114;  ///< no direct ANSI counterpart. 1 bit int, 14 bits fraction
 }
 
-namespace fl {    
-    // Size assertions moved to src/platforms/compile_test.cpp.hpp
-}
+// Size assertions moved to src/platforms/compile_test.cpp.hpp
 
 // Make fractional types available in global namespace
 using fl::fract8;
