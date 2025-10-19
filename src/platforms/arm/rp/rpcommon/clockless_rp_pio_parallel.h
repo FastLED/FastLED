@@ -235,7 +235,7 @@ private:
                 fl::u8* dest = padded_rgb + (strip * max_leds_ * 3);
                 const fl::u8* src = reinterpret_cast<const fl::u8*>(strips_[strip].leds);
                 fl::u32 copy_bytes = strips_[strip].num_leds * 3;
-                memcpy(dest, src, copy_bytes);
+                fl::memcopy(dest, src, copy_bytes);
             }
         }
 
