@@ -150,9 +150,9 @@ void loop() {
 void rotate(CRGB* array, int length, uint8_t amount) {
     amount = amount % length;  // Handle wrap-around
     CRGB temp[amount];
-    fl::memcpy(temp, array + length - amount, amount * sizeof(CRGB));
+    fl::memcopy(temp, array + length - amount, amount * sizeof(CRGB));
     fl::memmove(array + amount, array, (length - amount) * sizeof(CRGB));
-    fl::memcpy(array, temp, amount * sizeof(CRGB));
+    fl::memcopy(array, temp, amount * sizeof(CRGB));
 }
 
 // ============================================================================

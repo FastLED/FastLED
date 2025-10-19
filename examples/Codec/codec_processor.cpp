@@ -60,7 +60,7 @@ void processJpeg() {
 
     // Copy data from PROGMEM to RAM
     fl::vector<fl::u8> jpegData(CodecData::sampleJpegDataLength);
-    fl::memcpy(jpegData.data(), CodecData::sampleJpegData, CodecData::sampleJpegDataLength);
+    fl::memcopy(jpegData.data(), CodecData::sampleJpegData, CodecData::sampleJpegDataLength);
 
     // Configure JPEG decoder
     fl::JpegConfig config;
@@ -94,7 +94,7 @@ void processGif() {
 
     // Copy data from PROGMEM to RAM
     fl::vector<fl::u8> gifData(CodecData::sampleGifDataLength);
-    fl::memcpy(gifData.data(), CodecData::sampleGifData, CodecData::sampleGifDataLength);
+    fl::memcopy(gifData.data(), CodecData::sampleGifData, CodecData::sampleGifDataLength);
 
     // Configure GIF decoder
     fl::GifConfig config;
@@ -155,7 +155,7 @@ void processMpeg1() {
 
     // Copy data from PROGMEM to RAM
     fl::vector<fl::u8> mpegData(CodecData::sampleMpeg1DataLength);
-    fl::memcpy(mpegData.data(), CodecData::sampleMpeg1Data, CodecData::sampleMpeg1DataLength);
+    fl::memcopy(mpegData.data(), CodecData::sampleMpeg1Data, CodecData::sampleMpeg1DataLength);
 
     // Configure MPEG1 decoder
     fl::Mpeg1Config config;
