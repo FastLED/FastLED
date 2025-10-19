@@ -15,6 +15,7 @@
 #include "pio_asm.h"
 #include "fl/warn.h"
 #include <cstring> // ok include
+#include "fl/memfill.h"
 
 namespace fl {
 
@@ -402,7 +403,7 @@ bool SpiHw8RP2040::transmitAsync(fl::span<const uint8_t> buffer) {
 
     // Pack bytes into octal-lane format
     uint32_t* word_buffer = (uint32_t*)mDMABuffer;
-    memset(word_buffer, 0, buffer_size_bytes);  // Clear buffer
+    fl::memfill(word_buffer, 0, buffer_size_bytes);  // Clear buffer
 
     for (size_t i = 0; i < byte_count; i += 4) {
         uint8_t byte0 = buffer[i];

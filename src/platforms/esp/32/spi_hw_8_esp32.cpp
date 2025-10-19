@@ -13,6 +13,7 @@
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
+#include "fl/memfill.h"
 #include <cstring> // ok include
 
 // Include soc_caps.h if available (ESP-IDF 4.0+)
@@ -90,7 +91,7 @@ SpiHw8ESP32::SpiHw8ESP32(int bus_id, const char* name)
     , mHost(SPI2_HOST)
     , mTransactionActive(false)
     , mInitialized(false) {
-    memset(&mTransaction, 0, sizeof(mTransaction));
+    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
 }
 
 SpiHw8ESP32::~SpiHw8ESP32() {
@@ -193,7 +194,7 @@ bool SpiHw8ESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     }
 
     // Configure transaction for octal mode
-    memset(&mTransaction, 0, sizeof(mTransaction));
+    fl::memfill(&mTransaction, 0, sizeof(mTransaction));
     mTransaction.flags = SPI_TRANS_MODE_OCT;  // Octal I/O mode
     mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
     mTransaction.tx_buffer = buffer.data();

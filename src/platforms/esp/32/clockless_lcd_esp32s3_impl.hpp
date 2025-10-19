@@ -6,6 +6,7 @@
 
 #include "esp_log.h"
 #include "platforms/assert_defs.h"
+#include "fl/memfill.h"
 
 #define LCD_TAG "FastLED_LCD"
 
@@ -211,7 +212,7 @@ bool LcdLedDriver<CHIPSET>::begin(const LcdDriverConfig& config, int leds_per_st
         }
 
         // Initialize buffer with zeros (latch gap pre-filled)
-        memset(buffers_[i], 0, buffer_size_);
+        fl::memfill(buffers_[i], 0, buffer_size_);
     }
 
     ESP_LOGI(LCD_TAG, "Allocated 2 buffers at %p, %p", buffers_[0], buffers_[1]);

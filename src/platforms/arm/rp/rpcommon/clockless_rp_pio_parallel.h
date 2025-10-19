@@ -71,6 +71,7 @@
 #include "hardware/pio.h"
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
+#include "fl/memfill.h"
 #endif
 
 FASTLED_NAMESPACE_BEGIN
@@ -121,7 +122,7 @@ public:
         : pio_(nullptr), sm_(-1), dma_chan_(-1),
           transpose_buffer_(nullptr), buffer_size_(0), max_leds_(0)
     {
-        memset(strips_, 0, sizeof(strips_));
+        fl::memfill(strips_, 0, sizeof(strips_));
     }
 
     ~ParallelClocklessController() {
@@ -226,7 +227,7 @@ private:
         }
 
         // Clear to black (0,0,0)
-        memset(padded_rgb, 0, padded_size);
+        fl::memfill(padded_rgb, 0, padded_size);
 
         // Copy LED data from each strip
         for (fl::u8 strip = 0; strip < NUM_STRIPS; strip++) {

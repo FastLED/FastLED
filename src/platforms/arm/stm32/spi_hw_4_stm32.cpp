@@ -26,6 +26,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
 #include "fl/namespace.h"
+#include "fl/memfill.h"
 
 // Include STM32 HAL headers if available
 #ifdef HAL_TIM_MODULE_ENABLED
@@ -416,10 +417,10 @@ bool SPIQuadSTM32::transmitAsync(fl::span<const uint8_t> buffer) {
     }
 
     // Clear buffers
-    memset(mDMABuffer0, 0, buffer_size_per_lane);
-    memset(mDMABuffer1, 0, buffer_size_per_lane);
-    memset(mDMABuffer2, 0, buffer_size_per_lane);
-    memset(mDMABuffer3, 0, buffer_size_per_lane);
+    fl::memfill(mDMABuffer0, 0, buffer_size_per_lane);
+    fl::memfill(mDMABuffer1, 0, buffer_size_per_lane);
+    fl::memfill(mDMABuffer2, 0, buffer_size_per_lane);
+    fl::memfill(mDMABuffer3, 0, buffer_size_per_lane);
 
     // Interleave bits across four lanes
     interleaveBits(buffer.data(), byte_count,

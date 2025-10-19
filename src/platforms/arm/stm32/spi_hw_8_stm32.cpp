@@ -25,6 +25,7 @@
 /// - STM32H7 (H743, H750) - 100 MHz GPIO, 2 MDMA controllers
 /// - STM32G4 (G431, G474) - 170 MHz GPIO, 2 DMA controllers
 /// - STM32U5 (U575, U585) - 160 MHz GPIO, 4 GPDMA controllers
+#include "fl/memfill.h"
 ///
 /// DMA CHANNEL REQUIREMENTS:
 /// Each octal-SPI controller requires 8 DMA channels (one per data lane).
@@ -339,7 +340,7 @@ void SPIOctalSTM32::interleaveBits(fl::span<const uint8_t> buffer) {
 
     // Clear all DMA buffers
     for (int lane = 0; lane < 8; ++lane) {
-        memset(mDMABuffers[lane], 0, mDMABufferSize);
+        fl::memfill(mDMABuffers[lane], 0, mDMABufferSize);
     }
 
     // Interleave bits across lanes
