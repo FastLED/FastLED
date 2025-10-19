@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include <stddef.h>  // For NULL definition
+
 #include "fl/math.h"
 #include "fl/string.h"
 #include "fl/malloc.h"

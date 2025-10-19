@@ -151,6 +151,8 @@ See below for detailed the API documentation.
 
 // Include headers outside the namespace to avoid conflicts
 
+#include <stddef.h>  // For NULL definition
+
 #include "fl/stdint.h"
 #include "fl/math.h"
 #include "fl/math_macros.h"

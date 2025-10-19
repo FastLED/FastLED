@@ -8,6 +8,8 @@
  *                http://www.opensource.org/licenses/mit-license.php
  */
 
+#include <stddef.h>  // For NULL definition
+
 #include "fl/assert.h"
 #include "fl/int.h"
 #include "fl/allocator.h"
