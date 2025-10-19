@@ -9,7 +9,8 @@
 /// @file platforms/avr/delay_cycles.h
 /// AVR platform-specific cycle-accurate delay utilities
 
-namespace fl {
+// Note: This file is intended to be included inside namespace fl
+// namespace fl {
 
 // ============================================================================
 // NOP macro for AVR
@@ -54,6 +55,6 @@ FASTLED_FORCE_INLINE void delaycycles() {
   _delaycycles_avr<CYCLES / 3, CYCLES % 3>();
 }
 
-}  // namespace fl
+// }  // namespace fl (closed by including file)
 
 #endif  // __INC_FASTLED_PLATFORMS_AVR_DELAY_CYCLES_H
