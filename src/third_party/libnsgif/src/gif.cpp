@@ -216,7 +216,7 @@ static nsgif_error nsgif__initialise_sprite(
 
 	FL_ASSERT(gif->bitmap.create, "GIF bitmap create function required");
 	gif->frame_image = gif->bitmap.create(width, height);
-	if (gif->frame_image == NULL) {
+	if (gif->frame_image == nullptr) {
 		return NSGIF_ERR_OOM;
 	}
 
@@ -237,7 +237,7 @@ static inline fl::u32* nsgif__bitmap_get(
 	/* Make sure we have a buffer to decode to. */
 	ret = nsgif__initialise_sprite(gif, gif->info.width, gif->info.height);
 	if (ret != NSGIF_OK) {
-		return NULL;
+		return nullptr;
 	}
 
 	gif->rowspan = gif->info.width;
@@ -314,13 +314,13 @@ static void nsgif__record_frame(
 	}
 
 	bitmap = nsgif__bitmap_get(gif);
-	if (bitmap == NULL) {
+	if (bitmap == nullptr) {
 		return;
 	}
 
-	if (gif->prev_frame == NULL) {
+	if (gif->prev_frame == nullptr) {
 		prev_frame = static_cast<fl::u32*>(fl::Malloc(width * height * pixel_bytes));
-		if (prev_frame == NULL) {
+		if (prev_frame == nullptr) {
 			return;
 		}
 		gif->prev_frame = prev_frame;
@@ -650,7 +650,7 @@ static void nsgif__restore_bg(
 {
 	fl::size pixel_bytes = sizeof(*bitmap);
 
-	if (frame == NULL) {
+	if (frame == nullptr) {
 		fl::size width  = gif->info.width;
 		fl::size height = gif->info.height;
 
@@ -702,14 +702,14 @@ static nsgif_error nsgif__update_bitmap(
 	gif->decoded_frame = frame_idx;
 
 	bitmap = nsgif__bitmap_get(gif);
-	if (bitmap == NULL) {
+	if (bitmap == nullptr) {
 		return NSGIF_ERR_OOM;
 	}
 
 	/* Handle any bitmap clearing/restoration required before decoding this
 	 * frame. */
 	if (frame_idx == 0 || gif->decoded_frame == NSGIF_FRAME_INVALID) {
-		nsgif__restore_bg(gif, NULL, bitmap);
+		nsgif__restore_bg(gif, nullptr, bitmap);
 
 	} else {
 		struct nsgif_frame *prev = &gif->frames[frame_idx - 1];
@@ -1025,8 +1025,8 @@ static nsgif_error nsgif__parse_image_descriptor(
 		NSGIF_MASK_INTERLACE       = 0x40u,
 	};
 
-	FL_ASSERT(gif != NULL, "GIF object required");
-	FL_ASSERT(frame != NULL, "Frame object required");
+	FL_ASSERT(gif != nullptr, "GIF object required");
+	FL_ASSERT(frame != nullptr, "Frame object required");
 
 	if (len < NSGIF_IMAGE_DESCRIPTOR_LEN) {
 		return NSGIF_ERR_END_OF_DATA;
@@ -1155,8 +1155,8 @@ static nsgif_error nsgif__parse_colour_table(
 	fl::size len = gif->buf + gif->buf_len - data;
 	fl::size used_bytes;
 
-	FL_ASSERT(gif != NULL, "GIF object required");
-	FL_ASSERT(frame != NULL, "Frame object required");
+	FL_ASSERT(gif != nullptr, "GIF object required");
+	FL_ASSERT(frame != nullptr, "Frame object required");
 
 	if ((frame->flags & NSGIF_COLOUR_TABLE_MASK) == 0) {
 		gif->colour_table = gif->global_colour_table;
@@ -1208,8 +1208,8 @@ static nsgif_error nsgif__parse_image_data(
 	fl::u8 minimum_code_size;
 	nsgif_error ret;
 
-	FL_ASSERT(gif != NULL, "GIF object required");
-	FL_ASSERT(frame != NULL, "Frame object required");
+	FL_ASSERT(gif != nullptr, "GIF object required");
+	FL_ASSERT(frame != nullptr, "Frame object required");
 
 	if (!decode) {
 		gif->frame_count_partial = frame_idx + 1;
@@ -1283,8 +1283,8 @@ static struct nsgif_frame *nsgif__get_frame(
 		struct nsgif_frame *temp;
 
 		temp = static_cast<struct nsgif_frame*>(fl::Malloc(count * sizeof(*frame)));
-		if (temp == NULL) {
-			return NULL;
+		if (temp == nullptr) {
+			return nullptr;
 		}
 		if (gif->frames) {
 			fl::memcopy(temp, gif->frames, gif->frame_holders * sizeof(*frame));
@@ -1330,7 +1330,7 @@ static nsgif_error nsgif__process_frame(
 	struct nsgif_frame *frame;
 
 	frame = nsgif__get_frame(gif, frame_idx);
-	if (frame == NULL) {
+	if (frame == nullptr) {
 		return NSGIF_ERR_OOM;
 	}
 
@@ -1393,7 +1393,7 @@ cleanup:
 /* exported function documented in nsgif.h */
 void nsgif_destroy(nsgif_t *gif)
 {
-	if (gif == NULL) {
+	if (gif == nullptr) {
 		return;
 	}
 
@@ -1401,17 +1401,17 @@ void nsgif_destroy(nsgif_t *gif)
 	if (gif->frame_image) {
 		FL_ASSERT(gif->bitmap.destroy, "GIF bitmap destroy function required");
 		gif->bitmap.destroy(gif->frame_image);
-		gif->frame_image = NULL;
+		gif->frame_image = nullptr;
 	}
 
 	fl::Free(gif->frames);
-	gif->frames = NULL;
+	gif->frames = nullptr;
 
 	fl::Free(gif->prev_frame);
-	gif->prev_frame = NULL;
+	gif->prev_frame = nullptr;
 
 	lzw_context_destroy(static_cast<struct lzw_ctx*>(gif->lzw_ctx));
-	gif->lzw_ctx = NULL;
+	gif->lzw_ctx = nullptr;
 
 	fl::Free(gif);
 }
@@ -1500,7 +1500,7 @@ nsgif_error nsgif_create(
 	if (gif) {
 		fl::memfill(gif, 0, sizeof(*gif));
 	}
-	if (gif == NULL) {
+	if (gif == nullptr) {
 		return NSGIF_ERR_OOM;
 	}
 
@@ -1637,8 +1637,8 @@ nsgif_error nsgif_data_scan(
 		/* We want everything to be NULL before we start so we've no
 		 * chance of freeing bad pointers (paranoia)
 		 */
-		gif->frame_image = NULL;
-		gif->frames = NULL;
+		gif->frame_image = nullptr;
+		gif->frames = nullptr;
 		gif->frame_holders = 0;
 
 		/* The caller may have been lazy and not reset any values */
@@ -1745,7 +1745,7 @@ nsgif_error nsgif_data_scan(
 		}
 	}
 
-	if (gif->lzw_ctx == NULL) {
+	if (gif->lzw_ctx == nullptr) {
 		struct lzw_ctx *lzw_ctx_ptr;
 		lzw_result res = lzw_context_create(&lzw_ctx_ptr);
 		gif->lzw_ctx = lzw_ctx_ptr;
@@ -1849,7 +1849,7 @@ static nsgif_error nsgif__next_displayable_frame(
 			return NSGIF_ERR_FRAME_DISPLAY;
 		}
 
-		if (delay != NULL) {
+		if (delay != nullptr) {
 			*delay += gif->frames[next].info.delay;
 		}
 
@@ -1919,7 +1919,7 @@ nsgif_error nsgif_frame_prepare(
 			fl::u32 frame_next = frame;
 
 			ret = nsgif__next_displayable_frame(gif,
-					&frame_next, NULL);
+					&frame_next, nullptr);
 			if (ret != NSGIF_OK) {
 				return ret;
 			}
@@ -1997,7 +1997,7 @@ const nsgif_frame_info_t *nsgif_get_frame_info(
 		fl::u32 frame)
 {
 	if (frame >= gif->info.frame_count) {
-		return NULL;
+		return nullptr;
 	}
 
 	return &gif->frames[frame].info;
@@ -2055,7 +2055,7 @@ const char *nsgif_strerror(nsgif_error err)
 		"Animation complete",                  /* NSGIF_ERR_ANIMATION_END */
 	};
 
-	if (err >= NSGIF_ARRAY_LEN(str) || str[err] == NULL) {
+	if (err >= NSGIF_ARRAY_LEN(str) || str[err] == nullptr) {
 		return "Unknown error";
 	}
 
@@ -2073,7 +2073,7 @@ const char *nsgif_str_disposal(enum nsgif_disposal disposal)
 		"Restore quirk",      /* NSGIF_DISPOSAL_RESTORE_QUIRK */
 	};
 
-	if (disposal >= NSGIF_ARRAY_LEN(str) || str[disposal] == NULL) {
+	if (disposal >= NSGIF_ARRAY_LEN(str) || str[disposal] == nullptr) {
 		return "Unspecified";
 	}
 

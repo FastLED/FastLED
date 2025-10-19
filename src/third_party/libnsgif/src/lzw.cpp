@@ -103,7 +103,7 @@ struct lzw_ctx {
 lzw_result lzw_context_create(struct lzw_ctx **ctx)
 {
 	struct lzw_ctx *c = static_cast<struct lzw_ctx*>(fl::Malloc(sizeof(*c)));
-	if (c == NULL) {
+	if (c == nullptr) {
 		return LZW_NO_MEM;
 	}
 
@@ -313,7 +313,7 @@ lzw_result lzw_decode_init(
 
 	ctx->has_transparency = false;
 	ctx->transparency_idx = 0;
-	ctx->colour_map = NULL;
+	ctx->colour_map = nullptr;
 
 	return LZW_OK;
 }
@@ -330,7 +330,7 @@ lzw_result lzw_decode_init_map(
 {
 	lzw_result res;
 
-	if (colour_table == NULL) {
+	if (colour_table == nullptr) {
 		return LZW_BAD_PARAM;
 	}
 
@@ -594,7 +594,7 @@ lzw_result lzw_decode_map(struct lzw_ctx *ctx,
 {
 	*output_written = 0;
 
-	if (ctx->colour_map == NULL) {
+	if (ctx->colour_map == nullptr) {
 		return LZW_NO_COLOUR;
 	}
 
