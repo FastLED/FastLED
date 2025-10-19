@@ -9,6 +9,7 @@
 #include "fl/math_macros.h"
 #include "fl/math.h"
 #include "fl/warn.h"
+#include "fl/memfill.h"
 
 namespace {
 
@@ -259,7 +260,7 @@ void Painter::PaintVuMidNotesFade(uint32_t /*delta_ms*/,
   struct F {
     static DrawPoints Generate(int n_led, float factor) {
       DrawPoints out;
-      memset(&out, 0, sizeof(out));
+      fl::memfill(&out, 0, sizeof(out));
       if (n_led == 0 || factor == 0.0f) {
         out.n_black0 = n_led;
         return out;
