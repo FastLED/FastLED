@@ -32,7 +32,7 @@
 #include "FastLED.h"
 
 namespace fl {
-template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_RATE, SPIClass & SPIObject, int SPI_INDEX>
 class SPIDeviceProxy;
 }
 

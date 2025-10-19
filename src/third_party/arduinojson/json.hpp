@@ -288,6 +288,7 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #include "fl/cstddef.h"
 #include "fl/stdint.h"
 #include <stdlib.h>
+#include "fl/str.h"
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {
  public:
