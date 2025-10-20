@@ -10,8 +10,8 @@
 
 
 /// Stub SPI output - no-op implementation for testing/simulation
-template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public StubSPIOutput {};
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+class SPIOutput : public fl::StubSPIOutput {};
 
 
 #endif

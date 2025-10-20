@@ -54,8 +54,8 @@ template <> struct StringMaker<CRGB> {
     }
 };
 
-template <> struct StringMaker<Str> {
-    static String convert(const Str &value) { return value.c_str(); }
+template <> struct StringMaker<fl::Str> {
+    static String convert(const fl::Str &value) { return value.c_str(); }
 };
 
 template <typename T> struct StringMaker<fl::optional<T>> {
@@ -64,8 +64,8 @@ template <typename T> struct StringMaker<fl::optional<T>> {
     }
 };
 
-template <typename T> struct StringMaker<vec2<T>> {
-    static String convert(const vec2<T> &value) {
+template <typename T> struct StringMaker<fl::vec2<T>> {
+    static String convert(const fl::vec2<T> &value) {
         fl::string out;
         out += "vec2(";
         out += value.x;
@@ -76,16 +76,16 @@ template <typename T> struct StringMaker<vec2<T>> {
     }
 };
 
-template <> struct StringMaker<Tile2x2_u8> {
-    static String convert(const Tile2x2_u8 &value) {
+template <> struct StringMaker<fl::Tile2x2_u8> {
+    static String convert(const fl::Tile2x2_u8 &value) {
         fl::StrStream out;
         out << "Tile2x2_u8(" << value.origin() << ")";
         return out.c_str();
     }
 };
 
-template <typename T> struct StringMaker<rect<T>> {
-    static String convert(const rect<T> &value) {
+template <typename T> struct StringMaker<fl::rect<T>> {
+    static String convert(const fl::rect<T> &value) {
         fl::string out;
         out += "rect(";
         out += " (";

@@ -353,13 +353,13 @@ struct PixelController {
     /// @param pc reference to the pixel controller
     /// @param b the color byte to dither
     /// @see PixelController::d
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & pc, uint8_t b) { return b ? qadd8(b, pc.d[RO(SLOT)]) : 0; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & pc, uint8_t b) { return b ? fl::qadd8(b, pc.d[RO(SLOT)]) : 0; }
     
     /// Calculate a dither value
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
     /// @param b the color byte to dither
     /// @param d dither data
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? qadd8(b,d) : 0; }
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? fl::qadd8(b,d) : 0; }
 
     /// Scale a value using the per-channel scale data
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
@@ -530,9 +530,9 @@ struct PixelController {
         // Note that the WS2816 has a 4 bit gamma correction built in. To improve things this algorithm may
         // change in the future with a partial gamma correction that is completed by the chipset gamma
         // correction.
-        uint16_t r16 = map8_to_16(mData[0]);
-        uint16_t g16 = map8_to_16(mData[1]);
-        uint16_t b16 = map8_to_16(mData[2]);
+        uint16_t r16 = fl::map8_to_16(mData[0]);
+        uint16_t g16 = fl::map8_to_16(mData[1]);
+        uint16_t b16 = fl::map8_to_16(mData[2]);
         if (r16 || g16 || b16) {
     #if FASTLED_HD_COLOR_MIXING
             uint8_t brightness = mColorAdjustment.brightness;

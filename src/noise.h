@@ -161,7 +161,7 @@ void fill_raw_noise16into8(uint8_t *pData, uint8_t num_points, uint8_t octaves, 
 /// @param y y-axis coordinate on noise map (2D)
 /// @param scaley the scale (distance) between y points when filling in noise
 /// @param time the time position for the noise field
-void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time);
+void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, fl::q44 freq44, fract8 amplitude, int skip, uint16_t x, int16_t scalex, uint16_t y, int16_t scaley, uint16_t time);
 void fill_raw_2dnoise8(uint8_t *pData, int width, int height, uint8_t octaves, uint16_t x, int scalex, uint16_t y, int scaley, uint16_t time);
 
 
@@ -186,14 +186,14 @@ void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octa
 /// @param freq88 starting octave frequency
 /// @param amplitude noise amplitude
 /// @param skip how many noise maps to skip over, incremented recursively per octave
-void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, q88 freq88, fract16 amplitude, int skip, uint32_t x, int32_t scalex, uint32_t y, int32_t scaley, uint32_t time);
+void fill_raw_2dnoise16(uint16_t *pData, int width, int height, uint8_t octaves, fl::q88 freq88, fract16 amplitude, int skip, uint32_t x, int32_t scalex, uint32_t y, int32_t scaley, uint32_t time);
 
 /// Fill a 2D 8-bit buffer with noise, using inoise16() 
 /// @copydetails fill_raw_2dnoise8(uint8_t*, int, int, uint8_t, uint16_t, int16_t, uint16_t, int16_t, uint16_t)
 /// @param freq44 starting octave frequency
 /// @param amplitude noise amplitude
 /// @param skip how many noise maps to skip over, incremented recursively per octave
-void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, q44 freq44, fract8 amplitude, int skip, uint32_t x, int32_t scalex, uint32_t y, int32_t scaley, uint32_t time);
+void fill_raw_2dnoise16into8(uint8_t *pData, int width, int height, uint8_t octaves, fl::q44 freq44, fract8 amplitude, int skip, uint32_t x, int32_t scalex, uint32_t y, int32_t scaley, uint32_t time);
 
 /// @} Raw Fill Functions
 

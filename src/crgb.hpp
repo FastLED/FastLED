@@ -25,17 +25,17 @@ FL_DISABLE_WARNING_SIGN_CONVERSION
 
 FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (uint8_t d )
 {
-    r = qadd8( r, d);
-    g = qadd8( g, d);
-    b = qadd8( b, d);
+    r = fl::qadd8( r, d);
+    g = fl::qadd8( g, d);
+    b = fl::qadd8( b, d);
     return *this;
 }
 
 FASTLED_FORCE_INLINE CRGB& CRGB::operator-= (const CRGB& rhs )
 {
-    r = qsub8( r, rhs.r);
-    g = qsub8( g, rhs.g);
-    b = qsub8( b, rhs.b);
+    r = fl::qsub8( r, rhs.r);
+    g = fl::qsub8( g, rhs.g);
+    b = fl::qsub8( b, rhs.b);
     return *this;
 }
 
@@ -56,17 +56,17 @@ FASTLED_FORCE_INLINE CRGB CRGB::operator++ (int )
 
 FASTLED_FORCE_INLINE CRGB& CRGB::subtractFromRGB(uint8_t d)
 {
-    r = qsub8( r, d);
-    g = qsub8( g, d);
-    b = qsub8( b, d);
+    r = fl::qsub8( r, d);
+    g = fl::qsub8( g, d);
+    b = fl::qsub8( b, d);
     return *this;
 }
 
 FASTLED_FORCE_INLINE CRGB& CRGB::operator*= (uint8_t d )
 {
-    r = qmul8( r, d);
-    g = qmul8( g, d);
-    b = qmul8( b, d);
+    r = fl::qmul8( r, d);
+    g = fl::qmul8( g, d);
+    b = fl::qmul8( b, d);
     return *this;
 }
 
@@ -180,25 +180,25 @@ FASTLED_FORCE_INLINE CRGB CRGB::lerp16( const CRGB& other, fract16 frac) const
 /// @copydoc CRGB::operator+=
 FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2)
 {
-    return CRGB( qadd8( p1.r, p2.r),
-                 qadd8( p1.g, p2.g),
-                 qadd8( p1.b, p2.b));
+    return CRGB( fl::qadd8( p1.r, p2.r),
+                 fl::qadd8( p1.g, p2.g),
+                 fl::qadd8( p1.b, p2.b));
 }
 
 /// @copydoc CRGB::operator-=
 FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2)
 {
-    return CRGB( qsub8( p1.r, p2.r),
-                 qsub8( p1.g, p2.g),
-                 qsub8( p1.b, p2.b));
+    return CRGB( fl::qsub8( p1.r, p2.r),
+                 fl::qsub8( p1.g, p2.g),
+                 fl::qsub8( p1.b, p2.b));
 }
 
 /// @copydoc CRGB::operator*=
 FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, uint8_t d)
 {
-    return CRGB( qmul8( p1.r, d),
-                 qmul8( p1.g, d),
-                 qmul8( p1.b, d));
+    return CRGB( fl::qmul8( p1.r, d),
+                 fl::qmul8( p1.g, d),
+                 fl::qmul8( p1.b, d));
 }
 
 /// Scale using CRGB::nscale8_video()
