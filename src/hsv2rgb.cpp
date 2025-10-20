@@ -5,7 +5,7 @@
 #define FASTLED_INTERNAL
 #include "fl/stdint.h"
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/math_macros.h"
 
 #include "hsv2rgb.h"

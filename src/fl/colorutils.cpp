@@ -9,7 +9,7 @@
 #include <math.h>
 #include "fl/stdint.h"
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/assert.h"
 #include "fl/colorutils.h"
 #include "fl/unused.h"

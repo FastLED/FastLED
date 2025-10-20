@@ -15,7 +15,7 @@
 #define CONFIG_FREERTOS_ENABLE_BACKWARD_COMPATIBILITY 1
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #include "third_party/yves/I2SClockLessLedDriveresp32s3/driver.h"
 

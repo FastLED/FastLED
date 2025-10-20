@@ -2,7 +2,7 @@
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "colorutils.h"
 #include "colorpalettes.h"
 /// @file colorpalettes.cpp

@@ -1,5 +1,5 @@
 #define FASTLED_INTERNAL  
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/int.h"
 #include "fl/stdint.h"
 #include "fl/type_traits.h"

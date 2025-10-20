@@ -2,7 +2,7 @@
 /// Implements simplex noise functions
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 // This file implements simplex noise, which is an improved Perlin noise. This
 // implementation is a fixed-point version that avoids all uses of floating

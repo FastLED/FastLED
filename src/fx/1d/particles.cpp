@@ -1,5 +1,5 @@
 #include "particles.h"
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 namespace fl {
 

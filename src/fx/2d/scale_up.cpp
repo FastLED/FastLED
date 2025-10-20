@@ -2,7 +2,7 @@
 #include "fl/stdint.h"
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/upscale.h"
 #include "fl/memory.h"
 #include "fl/xymap.h"

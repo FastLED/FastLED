@@ -10,7 +10,7 @@
 #if __has_include("hal/lcd_hal.h") && __has_include("soc/lcd_periph.h")
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #include "crgb.h"
 #include "eorder.h"

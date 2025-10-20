@@ -14,7 +14,7 @@
 // Inlines the rmt_set_tx_intr_en function to avoid the overhead of a function call
 #define INLINE_RMT_SET_TX_INTR_DISABLE 0
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/force_inline.h"
 #include "fl/assert.h"
 #include "platforms/esp/32/rmt_4/idf4_rmt.h"

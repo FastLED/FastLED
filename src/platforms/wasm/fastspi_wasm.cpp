@@ -2,7 +2,7 @@
 
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #include "platforms/wasm/fastspi_wasm.h"
 

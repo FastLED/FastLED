@@ -10,7 +10,7 @@
 #define FASTLED_INTERNAL
 
 #include "idf4_rmt.h"
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "idf4_rmt_impl.h"
 
 void RmtController::init(int pin, bool built_in_driver) {

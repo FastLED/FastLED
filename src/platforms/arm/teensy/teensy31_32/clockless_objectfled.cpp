@@ -2,7 +2,7 @@
 
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #include "third_party/object_fled/src/ObjectFLED.h"
 

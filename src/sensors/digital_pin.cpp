@@ -21,7 +21,7 @@
 #else
 // Fallback
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/fastpin.h"
 #endif
 

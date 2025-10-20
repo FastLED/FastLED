@@ -4,7 +4,7 @@
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 
 #define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #include "crgb.h"
 #include "eorder.h"
