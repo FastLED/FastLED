@@ -3,13 +3,30 @@
 
 #include "../common/m0clockless.h"
 #include "fl/namespace.h"
+#include "fl/chipsets/timing_traits.h"
 #include "eorder.h"
 
 FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+/// @brief ARM D21 (SAMD21) Clockless LED Controller
+/// @tparam DATA_PIN Pin number for data line output
+/// @tparam TIMING ChipsetTiming structure containing T1, T2, T3, and RESET values
+/// @tparam RGB_ORDER Color order (RGB, GRB, etc.)
+/// @tparam XTRA0 Additional parameter for platform-specific needs
+/// @tparam FLIP Flip the output bit order if true
+/// @tparam WAIT_TIME Wait time between updates in microseconds
+///
+/// Example usage with named timing constant:
+/// @code
+///   ClocklessController<5, TIMING_WS2812_800KHZ, GRB> controller;
+/// @endcode
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+    // Extract timing values from struct at compile-time
+    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T3 = TIMING.T3;
     typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPinBB<DATA_PIN>::port_t data_t;
 
@@ -56,7 +73,7 @@ public:
         data.adj = pixels.mAdvance;
 
         typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        return showLedData<8,4,T1,T2,T3,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+        return showLedData<8,4,TIMING,RGB_ORDER, WAIT_TIME>(portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
     }
 
 };

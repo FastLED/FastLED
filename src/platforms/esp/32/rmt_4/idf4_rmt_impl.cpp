@@ -20,6 +20,7 @@
 #include "platforms/esp/32/rmt_4/idf4_rmt.h"
 #include "platforms/esp/32/rmt_4/idf4_rmt_impl.h"
 #include "platforms/esp/32/clock_cycles.h"
+#include "fl/chipsets/led_timing.h"
 #include "freertos/semphr.h"
 
 FL_EXTERN_C_BEGIN
@@ -267,7 +268,7 @@ void GiveGTX_sem()
     }
 }
 
-ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int maxChannel, bool built_in_driver)
+ESP32RMTController::ESP32RMTController(int DATA_PIN, const ChipsetTiming& TIMING, int maxChannel, bool built_in_driver)
     : mPixelData(0),
       mSize(0),
       mCur(0),
@@ -278,6 +279,11 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, int T1, int T2, int T3, int
       mCurPulse(0),
       mBuiltInDriver(built_in_driver)
 {
+    // -- Extract timing values from struct
+    uint32_t T1 = TIMING.T1;
+    uint32_t T2 = TIMING.T2;
+    uint32_t T3 = TIMING.T3;
+
     // -- Store the max channel and mem blocks parameters
     gMaxChannel = maxChannel;
     gMemBlocks = FASTLED_RMT_MEM_BLOCKS;

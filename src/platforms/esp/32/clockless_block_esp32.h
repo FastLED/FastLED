@@ -8,6 +8,7 @@
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
 #include "fl/force_inline.h"
+#include "fl/chipsets/timing_traits.h"
 
 #define FASTLED_HAS_BLOCKLESS 1
 
@@ -43,10 +44,14 @@ FASTLED_FORCE_INLINE void interrupt_lock()  {
 	// TODO: imlement interrupt_lock?
 }
 
-template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
     typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<FIRST_PIN>::port_t data_t;
+
+    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T3 = TIMING.T3;
 
 	// Verify that the pin is valid
 	static_assert(FastPin<FIRST_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");

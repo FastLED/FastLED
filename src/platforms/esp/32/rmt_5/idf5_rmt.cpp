@@ -16,6 +16,7 @@
 #include "fl/assert.h"
 #include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)
 #include "fl/namespace.h"
+#include "fl/chipsets/led_timing.h"
 #include "strip_rmt.h"
 
 
@@ -24,8 +25,8 @@
 namespace fl {
 
 
-RmtController5::RmtController5(int DATA_PIN, int T1, int T2, int T3, RmtController5::DmaMode dma_mode, int RESET_US)
-        : mPin(DATA_PIN), mT1(T1), mT2(T2), mT3(T3), mResetUs(RESET_US), mDmaMode(dma_mode) {
+RmtController5::RmtController5(int DATA_PIN, const ChipsetTiming& TIMING, RmtController5::DmaMode dma_mode, int RESET_US)
+        : mPin(DATA_PIN), mT1(TIMING.T1), mT2(TIMING.T2), mT3(TIMING.T3), mResetUs(RESET_US), mDmaMode(dma_mode) {
 }
 
 RmtController5::~RmtController5() {

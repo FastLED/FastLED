@@ -30,8 +30,6 @@ NAMESPACE_PATTERN = re.compile(
         namespace\s+\w+     # namespace followed by identifier
         |                   # OR
         namespace\s*\{      # namespace followed by optional whitespace and {
-        |                   # OR
-        FASTLED_NAMESPACE_BEGIN  # FastLED namespace macro
     )
 """,
     re.VERBOSE,

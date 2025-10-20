@@ -1,6 +1,7 @@
 #ifndef __INC_CLOCKLESS_RP_PIO_COMMON
 #define __INC_CLOCKLESS_RP_PIO_COMMON
 
+#include "fl/chipsets/timing_traits.h"
 #include "hardware/structs/sio.h"
 
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
@@ -59,16 +60,20 @@ static inline void __isr clockless_dma_complete_handler() {
 static bool clockless_isr_installed = false;
 #endif
 
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+    static constexpr int T1 = TIMING.T1;
+    static constexpr int T2 = TIMING.T2;
+    static constexpr int T3 = TIMING.T3;
+
 #if FASTLED_RP2040_CLOCKLESS_PIO
     int dma_channel = -1;
     void *dma_buf = nullptr;
     size_t dma_buf_size = 0;
-    
+
     float pio_clock_multiplier;
     int T1_mult, T2_mult, T3_mult;
-    
+
     // increase wait time by time taken to send 4 words (to flush PIO TX buffer)
     CMinWait<WAIT_TIME + ( ((T1 + T2 + T3) * 32 * 4) / (CLOCKLESS_FREQUENCY / 1000000) )> mWait;
     
@@ -323,7 +328,7 @@ public:
         const int portClrOff = (uint32_t)&sio_hw->gpio_clr - (uint32_t)&sio_hw->gpio_out;
         
         cli();
-        showLedData<portSetOff, portClrOff, T1, T2, T3, RGB_ORDER, WAIT_TIME>(portBase, pin::mask(), pixels.mData, pixels.mLen, &data);
+        showLedData<portSetOff, portClrOff, TIMING, RGB_ORDER, WAIT_TIME>(portBase, pin::mask(), pixels.mData, pixels.mLen, &data);
         sei();
     }
 #endif

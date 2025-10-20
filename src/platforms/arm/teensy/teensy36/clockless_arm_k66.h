@@ -1,6 +1,8 @@
 #ifndef __INC_CLOCKLESS_ARM_K66_H
 #define __INC_CLOCKLESS_ARM_K66_H
 
+#include "fl/chipsets/timing_traits.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
@@ -9,8 +11,11 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+	static constexpr uint32_t T1 = TIMING.T1;
+	static constexpr uint32_t T2 = TIMING.T2;
+	static constexpr uint32_t T3 = TIMING.T3;
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 

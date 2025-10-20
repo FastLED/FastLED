@@ -1,6 +1,7 @@
 #pragma once
 #include "fl/compiler_control.h"
 #include "fl/stdint.h"
+#include "fl/chipsets/led_timing.h"
 
 #include "fl/namespace.h"
 
@@ -85,14 +86,14 @@ int pgcd(int smallest, int precision, int a, int b, int c);
 /** Compute pules/bit patterns
  *
  *  This is Yves Bazin's mad code for computing the pulse pattern
- *  and clock timing given the target signal given by T1, T2, and
- *  T3. In general, these parameters are interpreted as follows:
+ *  and clock timing given the target signal given by ChipsetTiming.
+ *  In general, T1, T2, and T3 parameters are interpreted as follows:
  *
  *  a "1" bit is encoded by setting the pin HIGH to T1+T2 ns, then LOW for T3 ns
  *  a "0" bit is encoded by setting the pin HIGH to T1 ns, then LOW for T2+T3 ns
  *
  */
-void i2s_define_bit_patterns(int T1, int T2, int T3);
+void i2s_define_bit_patterns(const ChipsetTiming& TIMING);
 bool i2s_is_initialized();
 void i2s_init(int i2s_device);
 void i2s_clear_dma_buffer(uint32_t *buf);  // warning, this function assumes length.

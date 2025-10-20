@@ -12,6 +12,7 @@
 #include "fl/singleton.h"
 #include "pixel_controller.h"
 #include "pixel_iterator.h"
+#include "fl/chipsets/timing_traits.h"
 
 #include "active_strip_data.h"
 
@@ -21,7 +22,7 @@ namespace fl {
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB,
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
   public:
