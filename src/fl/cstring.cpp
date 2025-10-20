@@ -56,6 +56,46 @@ const char* strstr(const char* haystack, const char* needle) noexcept {
     return ::strstr(haystack, needle);
 }
 
+char* strchr(char* s, int c) noexcept {
+    return ::strchr(s, c);
+}
+
+const char* strchr(const char* s, int c) noexcept {
+    return ::strchr(s, c);
+}
+
+char* strrchr(char* s, int c) noexcept {
+    return ::strrchr(s, c);
+}
+
+const char* strrchr(const char* s, int c) noexcept {
+    return ::strrchr(s, c);
+}
+
+size_t strspn(const char* s1, const char* s2) noexcept {
+    return ::strspn(s1, s2);
+}
+
+size_t strcspn(const char* s1, const char* s2) noexcept {
+    return ::strcspn(s1, s2);
+}
+
+char* strpbrk(char* s1, const char* s2) noexcept {
+    return ::strpbrk(s1, s2);
+}
+
+const char* strpbrk(const char* s1, const char* s2) noexcept {
+    return ::strpbrk(s1, s2);
+}
+
+char* strtok(char* s1, const char* s2) noexcept {
+    return ::strtok(s1, s2);
+}
+
+char* strerror(int errnum) noexcept {
+    return ::strerror(errnum);
+}
+
 // ============================================================================
 // Memory Functions
 // ============================================================================

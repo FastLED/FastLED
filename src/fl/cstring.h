@@ -42,6 +42,36 @@ char* strncat(char* dest, const char* src, size_t n) noexcept;
 // fl::strstr - wrapper for strstr
 const char* strstr(const char* haystack, const char* needle) noexcept;
 
+// fl::strchr - wrapper for strchr (find first occurrence of character)
+char* strchr(char* s, int c) noexcept;
+
+// fl::strchr - const version wrapper for strchr
+const char* strchr(const char* s, int c) noexcept;
+
+// fl::strrchr - wrapper for strrchr (find last occurrence of character)
+char* strrchr(char* s, int c) noexcept;
+
+// fl::strrchr - const version wrapper for strrchr
+const char* strrchr(const char* s, int c) noexcept;
+
+// fl::strspn - wrapper for strspn (length of initial segment matching characters)
+size_t strspn(const char* s1, const char* s2) noexcept;
+
+// fl::strcspn - wrapper for strcspn (length of initial segment not matching characters)
+size_t strcspn(const char* s1, const char* s2) noexcept;
+
+// fl::strpbrk - wrapper for strpbrk (find first occurrence of any character from set)
+char* strpbrk(char* s1, const char* s2) noexcept;
+
+// fl::strpbrk - const version wrapper for strpbrk
+const char* strpbrk(const char* s1, const char* s2) noexcept;
+
+// fl::strtok - wrapper for strtok (tokenize string, note: not thread-safe)
+char* strtok(char* s1, const char* s2) noexcept;
+
+// fl::strerror - wrapper for strerror (convert error number to string)
+char* strerror(int errnum) noexcept;
+
 // ============================================================================
 // Memory Functions
 // ============================================================================
