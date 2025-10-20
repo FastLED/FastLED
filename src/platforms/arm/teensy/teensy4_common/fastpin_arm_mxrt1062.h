@@ -2,6 +2,9 @@
 #define __FASTPIN_ARM_MXRT1062_H
 
 #include "fl/force_inline.h"
+// Include fastpin_base.h for reg32_t and ptr_reg32_t typedefs
+// This reopens namespace fl but typedefs will still be in scope
+#include "fl/fastpin_base.h"
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -84,6 +87,6 @@ _FL_DEFPIN(36,13,8); _FL_DEFPIN(37,12,8); _FL_DEFPIN(38,17,8); _FL_DEFPIN(39,16,
 
 #endif // defined FASTLED_TEENSY4
 
-#endif // FASTLED_FORCE_SOFTWARE_PINSs
+#endif // FASTLED_FORCE_SOFTWARE_PINS
 }  // namespace fl
 #endif

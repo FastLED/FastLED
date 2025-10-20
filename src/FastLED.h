@@ -623,7 +623,7 @@ public:
 #if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
 	template<fl::u8 NUM_LANES, template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB>
 	static ::CLEDController &addLeds(CRGB *data, int nLeds) {
-		static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
+		static fl::__FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
 		return addLeds(&c, data, nLeds);
 	}
 #endif

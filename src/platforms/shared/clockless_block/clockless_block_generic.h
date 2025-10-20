@@ -59,7 +59,7 @@ private:
     static constexpr uint32_t T3 = TIMING.T3;
 
     // Verify pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
+    static_assert(fl::FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
 
     // Static timing assertions for protocol sanity
     static_assert(T1 > 0, "T1 (first pulse) must be positive");
@@ -73,9 +73,9 @@ private:
 public:
     virtual void init() {
         // Initialize pin as output
-        FastPin<DATA_PIN>::setOutput();
+        fl::FastPin<DATA_PIN>::setOutput();
         // Ensure line starts low (idle state)
-        FastPin<DATA_PIN>::lo();
+        fl::FastPin<DATA_PIN>::lo();
     }
 
     virtual uint16_t getMaxRefreshRate() const {
@@ -125,7 +125,7 @@ private:
 
         // Send reset code: line low for at least 50µs
         // (WS2812/SK6812 datasheet requirement)
-        FastPin<DATA_PIN>::lo();
+        fl::FastPin<DATA_PIN>::lo();
         fl::delayNanoseconds<50000>();  // 50 microseconds
     }
 
@@ -148,12 +148,12 @@ private:
     FASTLED_FORCE_INLINE static void sendBit1()
     {
         // Set line HIGH
-        FastPin<DATA_PIN>::hi();
+        fl::FastPin<DATA_PIN>::hi();
         // Hold high for T1 nanoseconds
         fl::delayNanoseconds<T1>();
 
         // Set line LOW
-        FastPin<DATA_PIN>::lo();
+        fl::FastPin<DATA_PIN>::lo();
         // Hold low for T2 nanoseconds
         fl::delayNanoseconds<T2>();
     }
@@ -162,13 +162,13 @@ private:
     FASTLED_FORCE_INLINE static void sendBit0()
     {
         // Set line HIGH
-        FastPin<DATA_PIN>::hi();
+        fl::FastPin<DATA_PIN>::hi();
         // For a '0' bit: high time is (T1 + T2 - T3)
         // This ensures total cycle time is still (T1 + T2)
         fl::delayNanoseconds<T1 + T2 - T3>();
 
         // Set line LOW
-        FastPin<DATA_PIN>::lo();
+        fl::FastPin<DATA_PIN>::lo();
         // Hold low for T3 nanoseconds
         fl::delayNanoseconds<T3>();
     }

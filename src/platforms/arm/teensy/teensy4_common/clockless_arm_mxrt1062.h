@@ -2,6 +2,7 @@
 #define __INC_CLOCKLESS_ARM_MXRT1062_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
 // See clockless.h for detailed info on how the template parameters are used.

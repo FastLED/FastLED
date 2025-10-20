@@ -3,6 +3,7 @@
 
 #if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
 #include <SPI.h>
+#include "fastspi_types.h"
 
 namespace fl {
 

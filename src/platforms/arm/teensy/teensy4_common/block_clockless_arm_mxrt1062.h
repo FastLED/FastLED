@@ -2,6 +2,7 @@
 #define __INC_BLOCK_CLOCKLESS_ARM_MXRT1062_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
 // See clockless.h for detailed info on how the template parameters are used.
@@ -31,9 +32,9 @@ public:
     // pin ends a block sequence, then break out of the switch as well
     #define _BLOCK_PIN(P) case P: {                             \
         if(m_nActualLanes == LANES) break;                      \
-        FastPin<P>::setOutput();                                \
-        m_bitOffsets[m_nActualLanes++] = FastPin<P>::pinbit();  \
-        m_nWriteMask |= FastPin<P>::mask();                     \
+        fl::FastPin<P>::setOutput();                            \
+        m_bitOffsets[m_nActualLanes++] = fl::FastPin<P>::pinbit();  \
+        m_nWriteMask |= fl::FastPin<P>::mask();                 \
         if( P == 27 || P == 7 || P == 30) break;                \
     }
 
@@ -133,18 +134,18 @@ public:
         for(uint32_t i = 8; i > 0;) {
             --i;
             while(ARM_DWT_CYCCNT < next_mark);
-            *FastPin<FIRST_PIN>::sport() = m_nWriteMask;
+            *fl::FastPin<FIRST_PIN>::sport() = m_nWriteMask;
             next_mark = ARM_DWT_CYCCNT + m_offsets[0];
 
             uint32_t out = (b2.bg[3][i] << 24) | (b2.bg[2][i] << 16) | (b2.bg[1][i] << 8) | b2.bg[0][i];
 
             out = ((~out) & m_nWriteMask);
             while((next_mark - ARM_DWT_CYCCNT) > m_offsets[1]);
-            *FastPin<FIRST_PIN>::cport() = out;
+            *fl::FastPin<FIRST_PIN>::cport() = out;
 
             out = m_nWriteMask;
             while((next_mark - ARM_DWT_CYCCNT) > m_offsets[2]);
-            *FastPin<FIRST_PIN>::cport() = out;
+            *fl::FastPin<FIRST_PIN>::cport() = out;
 
             // Read and store up to two bytes
             if (x < m_nActualLanes) {
@@ -205,7 +206,7 @@ public:
     }
 };
 
-template<template<uint8_t DATA_PIN, EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, int NUM_LANES, EOrder RGB_ORDER=GRB>
+template<template<uint8_t DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, uint8_t DATA_PIN, int NUM_LANES, fl::EOrder RGB_ORDER=GRB>
 class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN,CHIPSET<DATA_PIN,RGB_ORDER>::__TIMING(),RGB_ORDER,CHIPSET<DATA_PIN,RGB_ORDER>::__XTRA0(),CHIPSET<DATA_PIN,RGB_ORDER>::__FLIP(),CHIPSET<DATA_PIN,RGB_ORDER>::__WAIT_TIME()> {};
 
 #define __FASTLED_HAS_FIBCC 1

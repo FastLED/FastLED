@@ -6,6 +6,7 @@
 #include "pixeltypes.h"
 #include "pixel_controller.h"
 #include "timing_traits.h"
+#include "fl/fastpin.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -260,7 +261,7 @@ namespace fl {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB,
+template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, fl::EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     static constexpr uint32_t T1 = TIMING.T1;
@@ -268,7 +269,7 @@ class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     static constexpr uint32_t T3 = TIMING.T3;
 
     // Reference to the generic clockless driver for transmitting preambles
-    typedef ClocklessBlockController<DATA_PIN, TIMING, RGB_ORDER, 0, false, WAIT_TIME>
+    typedef fl::ClocklessBlockController<DATA_PIN, TIMING, RGB_ORDER, 0, false, WAIT_TIME>
             ClocklessDriver;
 
     CMinWait<WAIT_TIME> mWait;
