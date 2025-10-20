@@ -35,8 +35,6 @@ class NamespaceIncludeChecker(BaseChecker):
         re.VERBOSE,
     )
 
-    ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
-
     def name(self) -> str:
         return "namespace-include-order"
 
@@ -62,11 +60,6 @@ class NamespaceIncludeChecker(BaseChecker):
         results: List[CheckResult] = []
         lines = content.split("\n")
 
-        # Check if the file has the allow directive
-        for line in lines:
-            if self.ALLOW_DIRECTIVE_PATTERN.search(line):
-                return []  # Return empty list if directive is found
-
         namespace_started = False
         namespace_line = None
 
@@ -86,7 +79,7 @@ class NamespaceIncludeChecker(BaseChecker):
                         line_number=line_num,
                         severity="ERROR",
                         message=f"#include directive found after namespace declaration (line {namespace_line})",
-                        suggestion="Move all #include directives before namespace declarations or add '// allow-include-after-namespace' comment",
+                        suggestion="Move all #include directives before namespace declarations",
                     )
                 )
 

@@ -1,8 +1,19 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
 
+// Includes must come before all namespace declarations
 #if defined(__SAM3X8E__)
+#endif
 
+#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include <Arduino.h>
+#include <SPI.h>
+#include <wiring_private.h>
+#endif
+
+#if defined(__SAM3X8E__)
 namespace fl {
 #define m_SPI ((Spi*)SPI0)
 
@@ -169,10 +180,6 @@ public:
 #if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
     defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-
-#include <Arduino.h>
-#include <SPI.h>
-#include <wiring_private.h>
 
 namespace fl {
 

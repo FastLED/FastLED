@@ -80,8 +80,8 @@ def find_includes_after_namespace(
 
         # Compiled regex patterns for validation (only used after fast string search)
         using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
+        namespace_open_pattern = re.compile(r"^\s*namespace\s+\w+\s*\{")
         include_pattern = re.compile(r"^\s*#\s*include")
-        namespace_ok_pattern = re.compile(r"//\s*namespace\s+ok\b")
 
         def truncate_snippet(text: str, max_len: int = 50) -> str:
             """Truncate text to max_len characters."""
@@ -98,22 +98,25 @@ def find_includes_after_namespace(
             if not line or line.startswith("//") or line.startswith("/*"):
                 continue
 
+            # Check for closing namespace brace - reset namespace tracking
+            if current_namespace and line.startswith("}"):
+                current_namespace = None
+
             # Fast string search for "using namespace" before regex validation
             if "using namespace" in line:
                 if using_namespace_pattern.match(line):
                     current_namespace = (i, truncate_snippet(original_line))
 
+            # Fast string search for "namespace X {" before regex validation
+            if "namespace" in line and "{" in line:
+                if namespace_open_pattern.match(line):
+                    current_namespace = (i, truncate_snippet(original_line))
+
             # Fast string search for "#include" before regex validation
             if current_namespace and "#include" in line:
                 if include_pattern.match(line):
-                    # Fast string search for suppression comment before regex validation
-                    has_suppression = False
-                    if "namespace ok" in original_line:
-                        has_suppression = namespace_ok_pattern.search(original_line)
-
-                    if not has_suppression:
-                        include_snippet = truncate_snippet(original_line)
-                        violations.append((i, include_snippet, current_namespace))
+                    include_snippet = truncate_snippet(original_line)
+                    violations.append((i, include_snippet, current_namespace))
 
         # Second pass: if we found violations, verify with bracket counting
         if violations:
@@ -223,9 +226,6 @@ def main() -> None:
 
         print(
             "💡 Fix: Move all #include directives before using namespace declarations"
-        )
-        print(
-            "   Or add '// namespace ok' to the end of specific include lines to suppress this warning"
         )
         sys.exit(1)
     else:

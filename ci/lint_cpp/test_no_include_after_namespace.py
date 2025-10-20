@@ -166,16 +166,8 @@ class TestNoIncludeAfterNamespace(unittest.TestCase):
             )
 
     def test_no_includes_after_namespace_in_tests(self) -> None:
-        """Check that tests/ directory doesn't have includes after namespace declarations (excluding third-party test frameworks)."""
+        """Check that tests/ directory doesn't have includes after namespace declarations."""
         violations = scan_cpp_files(str(TESTS_ROOT))
-
-        # Filter out known third-party test infrastructure files
-        third_party_test_files = {"doctest.h", "crash_handler.h"}
-        violations = {
-            path: issues
-            for path, issues in violations.items()
-            if not any(filename in path for filename in third_party_test_files)
-        }
 
         if violations:
             msg = "Found includes after namespace declarations in tests/:\n"

@@ -67,6 +67,9 @@
 #include <OctoWS2811.h>
 #endif
 
+// Convenience includes for sketch inclusion
+#include "fl/async.h"
+#include "fl/sketch_macros.h"
 
 
 #include "fl/force_inline.h"
@@ -105,17 +108,6 @@
 #include "fl/engine_events.h"
 
 #include "fl/leds.h"
-
-
-// Backdoor to get the size of the CLedController object. The one place
-// that includes this just uses extern to declare the function.
-namespace fl {
-fl::u16 cled_contoller_size();
-}  // namespace fl
-
-
-// The convenience includes below come after namespace declaration but are
-// intended for sketch inclusion and are intentionally placed here
 
 /// LED chipsets with SPI interface
 enum ESPIChipsets {
@@ -1012,7 +1004,6 @@ using fl_string = fl::string;
 #endif
 
 #if FASTLED_LOOP_RUNS_ASYNC == 1
-#include "fl/async.h" // namespace ok
 // The loop is set as a macro that re-defines the user loop function
 // to sketch_loop()
 #define loop() \
@@ -1021,5 +1012,8 @@ using fl_string = fl::string;
      void sketch_loop()
 #endif
 
-
-#include "fl/sketch_macros.h" // namespace ok
+// Backdoor to get the size of the CLedController object. The one place
+// that includes this just uses extern to declare the function.
+namespace fl {
+fl::u16 cled_contoller_size();
+}  // namespace fl
