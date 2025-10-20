@@ -1249,4 +1249,31 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 
 #endif
 
+// Bring common math functions and types into global scope for backward compatibility
+using fl::qadd8;
+using fl::qsub8;
+using fl::qadd7;
+using fl::qmul8;
+using fl::add8;
+using fl::add8to16;
+using fl::sub8;
+using fl::avg8;
+using fl::avg16;
+using fl::avg8r;
+using fl::avg16r;
+using fl::avg7;
+using fl::avg15;
+using fl::mul8;
+using fl::abs8;
+using fl::blend8;
+using fl::mod8;
+using fl::addmod8;
+using fl::submod8;
+using fl::sqrt16;
+using fl::sqrt8;
+using fl::q44;
+using fl::q62;
+using fl::q88;
+using fl::q124;
+
 FL_DISABLE_WARNING_POP

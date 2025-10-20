@@ -9,7 +9,7 @@
 
 TEST_CASE("test bitset") {
     // default‐constructed bitset is empty
-    bitset_fixed<10> bs;
+    fl::bitset_fixed<10> bs;
     REQUIRE_EQ(bs.none(), true);
     REQUIRE_EQ(bs.count(), 0);
     REQUIRE_EQ(bs.size(), 10);
@@ -33,7 +33,7 @@ TEST_CASE("test bitset") {
     REQUIRE_EQ(bs.test(2), false);
 
     // flip all bits
-    bitset_fixed<5> bs2;
+    fl::bitset_fixed<5> bs2;
     for (size_t i = 0; i < 5; ++i)
         bs2.set(i, (i % 2) == 0);
     auto bs2_flipped = ~bs2;
@@ -41,7 +41,7 @@ TEST_CASE("test bitset") {
         REQUIRE_EQ(bs2_flipped.test(i), !bs2.test(i));
 
     // all() and count()
-    bitset_fixed<4> bs3;
+    fl::bitset_fixed<4> bs3;
     for (size_t i = 0; i < 4; ++i)
         bs3.set(i);
     REQUIRE_EQ(bs3.all(), true);
@@ -52,7 +52,7 @@ TEST_CASE("test bitset") {
     REQUIRE_EQ(bs3.count(), 4);
 
     // bitwise AND, OR, XOR
-    bitset_fixed<4> a, b;
+    fl::bitset_fixed<4> a, b;
     a.set(0); a.set(2);
     b.set(1); b.set(2);
 
@@ -76,34 +76,34 @@ TEST_CASE("test bitset") {
     REQUIRE_EQ(a.none(), true);
     
     // Test expected size of bitset_fixed
-    REQUIRE_EQ(bitset_fixed<8>().size(), 8);
-    REQUIRE_EQ(bitset_fixed<16>().size(), 16);
-    REQUIRE_EQ(bitset_fixed<32>().size(), 32);
-    REQUIRE_EQ(bitset_fixed<64>().size(), 64);
-    REQUIRE_EQ(bitset_fixed<100>().size(), 100);
-    REQUIRE_EQ(bitset_fixed<1000>().size(), 1000);
+    REQUIRE_EQ(fl::bitset_fixed<8>().size(), 8);
+    REQUIRE_EQ(fl::bitset_fixed<16>().size(), 16);
+    REQUIRE_EQ(fl::bitset_fixed<32>().size(), 32);
+    REQUIRE_EQ(fl::bitset_fixed<64>().size(), 64);
+    REQUIRE_EQ(fl::bitset_fixed<100>().size(), 100);
+    REQUIRE_EQ(fl::bitset_fixed<1000>().size(), 1000);
     
     // Test memory size of bitset_fixed class (sizeof)
-    // For bitset_fixed<8>, we expect 1 uint16_t block (2 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<8>), 2);
+    // For fl::bitset_fixed<8>, we expect 1 uint16_t block (2 bytes)
+    REQUIRE_EQ(sizeof(fl::bitset_fixed<8>), 2);
     
-    // For bitset_fixed<16>, we expect 1 uint16_t block (2 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<16>), 2);
+    // For fl::bitset_fixed<16>, we expect 1 uint16_t block (2 bytes)
+    REQUIRE_EQ(sizeof(fl::bitset_fixed<16>), 2);
     
-    // For bitset_fixed<17>, we expect 2 uint16_t blocks (4 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<17>), 4);
+    // For fl::bitset_fixed<17>, we expect 2 uint16_t blocks (4 bytes)
+    REQUIRE_EQ(sizeof(fl::bitset_fixed<17>), 4);
     
-    // For bitset_fixed<32>, we expect 2 uint16_t blocks (4 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<32>), 4);
+    // For fl::bitset_fixed<32>, we expect 2 uint16_t blocks (4 bytes)
+    REQUIRE_EQ(sizeof(fl::bitset_fixed<32>), 4);
     
-    // For bitset_fixed<33>, we expect 3 uint16_t blocks (6 bytes)
-    REQUIRE_EQ(sizeof(bitset_fixed<33>), 6);
+    // For fl::bitset_fixed<33>, we expect 3 uint16_t blocks (6 bytes)
+    REQUIRE_EQ(sizeof(fl::bitset_fixed<33>), 6);
 }
 
 
 TEST_CASE("compare fixed and dynamic bitsets") {
     // Test that fixed and dynamic bitsets behave the same
-    bitset_fixed<10> fixed_bs;
+    fl::bitset_fixed<10> fixed_bs;
     fl::bitset_dynamic dynamic_bs(10);
     
     // Set the same bits in both
@@ -128,7 +128,7 @@ TEST_CASE("compare fixed and dynamic bitsets") {
 
 TEST_CASE("test bitset_dynamic") {
     // default-constructed bitset is empty
-    bitset_dynamic bs;
+    fl::bitset_dynamic bs;
     REQUIRE_EQ(bs.size(), 0);
     REQUIRE_EQ(bs.none(), true);
     REQUIRE_EQ(bs.count(), 0);
@@ -170,7 +170,7 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(bs.count(), 0);
     
     // test with larger sizes that span multiple blocks
-    bitset_dynamic large_bs(100);
+    fl::bitset_dynamic large_bs(100);
     large_bs.set(0);
     large_bs.set(63);
     large_bs.set(64);
@@ -182,7 +182,7 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(large_bs.test(99), true);
     
     // flip all bits
-    bitset_dynamic bs2(5);
+    fl::bitset_dynamic bs2(5);
     for (size_t i = 0; i < 5; ++i)
         bs2.set(i, (i % 2) == 0);
     
@@ -191,7 +191,7 @@ TEST_CASE("test bitset_dynamic") {
         REQUIRE_EQ(bs2.test(i), !((i % 2) == 0));
     
     // all() and count()
-    bitset_dynamic bs3(4);
+    fl::bitset_dynamic bs3(4);
     for (size_t i = 0; i < 4; ++i)
         bs3.set(i);
     REQUIRE_EQ(bs3.all(), true);
@@ -202,7 +202,7 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(bs3.count(), 4);
     
     // bitwise AND, OR, XOR
-    bitset_dynamic a(4), b(4);
+    fl::bitset_dynamic a(4), b(4);
     a.set(0); a.set(2);
     b.set(1); b.set(2);
     
@@ -227,18 +227,18 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(b.none(), true);
     
     // copy constructor
-    bitset_dynamic original(10);
+    fl::bitset_dynamic original(10);
     original.set(3);
     original.set(7);
     
-    bitset_dynamic copy(original);
+    fl::bitset_dynamic copy(original);
     REQUIRE_EQ(copy.size(), 10);
     REQUIRE_EQ(copy.test(3), true);
     REQUIRE_EQ(copy.test(7), true);
     REQUIRE_EQ(copy.count(), 2);
     
     // move constructor
-    bitset_dynamic moved(fl::move(copy));
+    fl::bitset_dynamic moved(fl::move(copy));
     REQUIRE_EQ(moved.size(), 10);
     REQUIRE_EQ(moved.test(3), true);
     REQUIRE_EQ(moved.test(7), true);
@@ -246,7 +246,7 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(copy.size(), 0); // moved from should be empty
     
     // assignment operator
-    bitset_dynamic assigned = original;
+    fl::bitset_dynamic assigned = original;
     REQUIRE_EQ(assigned.size(), 10);
     REQUIRE_EQ(assigned.test(3), true);
     REQUIRE_EQ(assigned.test(7), true);
@@ -257,9 +257,9 @@ TEST_CASE("test bitset_dynamic") {
     REQUIRE_EQ(assigned.none(), true);
     
     // Test memory size changes with resize
-    bitset_dynamic small_bs(8);
-    bitset_dynamic medium_bs(65);
-    bitset_dynamic large_bs2(129);
+    fl::bitset_dynamic small_bs(8);
+    fl::bitset_dynamic medium_bs(65);
+    fl::bitset_dynamic large_bs2(129);
     
     // These sizes should match the fixed bitset tests
     REQUIRE_EQ(small_bs.size(), 8);
@@ -270,7 +270,7 @@ TEST_CASE("test bitset_dynamic") {
 
 TEST_CASE("test bitset_fixed find_first") {
     // Test find_first for true bits
-    bitset_fixed<64> bs;
+    fl::bitset_fixed<64> bs;
     
     // Initially no bits are set, so find_first(true) should return -1
     REQUIRE_EQ(bs.find_first(true), -1);
@@ -299,13 +299,13 @@ TEST_CASE("test bitset_fixed find_first") {
     REQUIRE_EQ(bs.find_first(false), 0);
     
     // Test with larger bitset
-    bitset_fixed<128> bs2;
+    fl::bitset_fixed<128> bs2;
     bs2.set(100);
     REQUIRE_EQ(bs2.find_first(true), 100);
     REQUIRE_EQ(bs2.find_first(false), 0);
     
     // Test edge case: all bits set
-    bitset_fixed<8> bs3;
+    fl::bitset_fixed<8> bs3;
     for (fl::u32 i = 0; i < 8; ++i) {
         bs3.set(i);
     }
@@ -313,14 +313,14 @@ TEST_CASE("test bitset_fixed find_first") {
     REQUIRE_EQ(bs3.find_first(false), -1);
     
     // Test edge case: no bits set
-    bitset_fixed<8> bs4;
+    fl::bitset_fixed<8> bs4;
     REQUIRE_EQ(bs4.find_first(true), -1);
     REQUIRE_EQ(bs4.find_first(false), 0);
 }
 
 TEST_CASE("test bitset_dynamic find_first") {
     // Test find_first for dynamic bitset
-    bitset_dynamic bs(64);
+    fl::bitset_dynamic bs(64);
     
     // Initially no bits are set, so find_first(true) should return -1
     REQUIRE_EQ(bs.find_first(true), -1);
@@ -349,7 +349,7 @@ TEST_CASE("test bitset_dynamic find_first") {
     REQUIRE_EQ(bs.find_first(false), 0);
     
     // Test with all bits set
-    bitset_dynamic bs2(16);
+    fl::bitset_dynamic bs2(16);
     for (fl::u32 i = 0; i < 16; ++i) {
         bs2.set(i);
     }
@@ -357,7 +357,7 @@ TEST_CASE("test bitset_dynamic find_first") {
     REQUIRE_EQ(bs2.find_first(false), -1);
     
     // Test with no bits set
-    bitset_dynamic bs3(16);
+    fl::bitset_dynamic bs3(16);
     REQUIRE_EQ(bs3.find_first(true), -1);
     REQUIRE_EQ(bs3.find_first(false), 0);
 }
@@ -415,7 +415,7 @@ TEST_CASE("test bitset_inlined find_first") {
 
 TEST_CASE("test bitset_fixed find_run") {
     // Test interesting patterns
-    bitset_fixed<32> bs;
+    fl::bitset_fixed<32> bs;
     // Set pattern: 0001 1001 0111 1100 0000 1111 0000 0011
     bs.set(3);
     bs.set(4);

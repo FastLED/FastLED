@@ -74,7 +74,7 @@ TEST_CASE("Simple JSON test") {
     // Test accessing values
     CHECK(parsed.contains("key1"));
     CHECK(parsed["key1"].is_string());
-    CHECK(parsed["key1"].as_or(string("")) == "value1");
+    CHECK(parsed["key1"].as_or(fl::string("")) == "value1");
     
     CHECK(parsed.contains("key2"));
     CHECK(parsed["key2"].is_int());
@@ -101,8 +101,8 @@ TEST_CASE("Json as_or test") {
     
     fl::Json stringJson("hello");
     CHECK(stringJson.is_string());
-    CHECK(stringJson.as_or(string("")) == "hello");
-    CHECK(stringJson.as_or(string("world")) == "hello"); // Should still be "hello", not fallback
+    CHECK(stringJson.as_or(fl::string("")) == "hello");
+    CHECK(stringJson.as_or(fl::string("world")) == "hello"); // Should still be "hello", not fallback
     
     fl::Json boolJson(true);
     CHECK(boolJson.is_bool());
@@ -113,7 +113,7 @@ TEST_CASE("Json as_or test") {
     fl::Json nullJson;
     CHECK(nullJson.is_null());
     CHECK(nullJson.as_or(int64_t(100)) == 100); // Should use fallback
-    CHECK(nullJson.as_or(string("default")) == "default"); // Should use fallback
+    CHECK(nullJson.as_or(fl::string("default")) == "default"); // Should use fallback
     CHECK_CLOSE(nullJson.as_or(5.5), 5.5, 1e-6); // Should use fallback
     CHECK(nullJson.as_or(false) == false); // Should use fallback
     

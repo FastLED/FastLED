@@ -50,7 +50,7 @@ TEST_CASE("fl::promise - Static Factory Methods") {
     }
     
     SUBCASE("reject() creates rejected promise") {
-        auto p = fl::promise<int>::reject(Error("Test error"));
+        auto p = fl::promise<int>::reject(fl::Error("Test error"));
         CHECK(p.valid());
         CHECK(p.is_completed());
         CHECK(!p.is_resolved());
@@ -97,7 +97,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         auto p = fl::promise<int>::create();
         CHECK(!p.is_completed());
         
-        bool success = p.complete_with_error(Error("Test error"));
+        bool success = p.complete_with_error(fl::Error("Test error"));
         CHECK(success);
         CHECK(p.is_completed());
         CHECK(!p.is_resolved());
@@ -131,7 +131,7 @@ TEST_CASE("fl::promise - Producer Interface") {
         CHECK_EQ(p.value(), 42); // Value unchanged
         
         // Trying to complete with error should also fail
-        bool third = p.complete_with_error(Error("Should not work"));
+        bool third = p.complete_with_error(fl::Error("Should not work"));
         CHECK(!third);
         CHECK(p.is_resolved()); // Still resolved, not rejected
     }
@@ -173,7 +173,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         bool callback_called = false;
         fl::string received_error;
         
-        auto p = fl::promise<int>::reject(Error("Test error"));
+        auto p = fl::promise<int>::reject(fl::Error("Test error"));
         p.catch_([&](const Error& err) {
             callback_called = true;
             received_error = err.message;
@@ -195,7 +195,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         
         CHECK(!callback_called); // Should not be called yet
         
-        p.complete_with_error(Error("Async error"));
+        p.complete_with_error(fl::Error("Async error"));
         CHECK(callback_called);
         CHECK_EQ(received_error, "Async error");
     }
@@ -422,7 +422,7 @@ TEST_CASE("fl::promise - Edge Cases") {
         
         // Methods should safely handle invalid state
         CHECK(!invalid.complete_with_value(42));
-        CHECK(!invalid.complete_with_error(Error("error")));
+        CHECK(!invalid.complete_with_error(fl::Error("error")));
         
         // Chaining should return reference even for invalid promise
         auto& ref = invalid.then([](const int&) {}).catch_([](const Error&) {});
@@ -551,7 +551,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
     }
     
     SUBCASE("value access on error in release builds") {
-        PromiseResult<int> result(Error("Test error"));
+        PromiseResult<int> result(fl::Error("Test error"));
         
         CHECK(!result.ok());
         
@@ -604,7 +604,7 @@ TEST_CASE("fl::PromiseResult - Error Access") {
     
     SUBCASE("error_message convenience method") {
         // Test with error
-        PromiseResult<int> error_result(Error("Connection failed"));
+        PromiseResult<int> error_result(fl::Error("Connection failed"));
         CHECK_EQ(error_result.error_message(), "Connection failed");
         
         // Test with success
@@ -616,7 +616,7 @@ TEST_CASE("fl::PromiseResult - Error Access") {
 TEST_CASE("fl::PromiseResult - Type Conversions") {
     SUBCASE("boolean conversion") {
         PromiseResult<int> success(42);
-        PromiseResult<int> failure(Error("Error"));
+        PromiseResult<int> failure(fl::Error("Error"));
         
         // Test explicit bool conversion
         CHECK(static_cast<bool>(success));

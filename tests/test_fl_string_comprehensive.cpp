@@ -619,9 +619,9 @@ TEST_CASE("fl::string - Compatibility with std::string patterns") {
     SUBCASE("String container behavior") {
         // Test that fl::string can be used like std::string in containers
         fl::vector<string> strings;
-        strings.push_back(string("First"));
-        strings.push_back(string("Second"));
-        strings.push_back(string("Third"));
+        strings.push_back(fl::string("First"));
+        strings.push_back(fl::string("Second"));
+        strings.push_back(fl::string("Third"));
         
         CHECK(strings.size() == 3);
         CHECK(strings[0] == "First");

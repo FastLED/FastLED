@@ -51,3 +51,9 @@ typedef qfx<uint16_t, 12,4> q124;
 
 /// @} FractionalTypes
 }  // namespace fl
+
+// Bring fractional types into global scope for backward compatibility
+using fl::q44;
+using fl::q62;
+using fl::q88;
+using fl::q124;

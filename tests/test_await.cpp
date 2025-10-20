@@ -13,7 +13,7 @@ TEST_CASE("fl::await_top_level - Basic Operations") {
     }
     
     SUBCASE("await_top_level rejected promise returns error") {
-        auto promise = fl::promise<int>::reject(Error("Test error"));
+        auto promise = fl::promise<int>::reject(fl::Error("Test error"));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
         
         CHECK(!result.ok());
@@ -62,7 +62,7 @@ TEST_CASE("fl::await_top_level - Asynchronous Completion") {
         bool promise_completed = false;
         
         // Complete the promise with an error
-        promise.complete_with_error(Error("Async error"));
+        promise.complete_with_error(fl::Error("Async error"));
         promise_completed = true;
         
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
@@ -104,7 +104,7 @@ TEST_CASE("fl::await_top_level - Different Value Types") {
 TEST_CASE("fl::await_top_level - Error Handling") {
     SUBCASE("await_top_level preserves error message") {
         fl::string error_msg = "Detailed error message";
-        auto promise = fl::promise<int>::reject(Error(error_msg));
+        auto promise = fl::promise<int>::reject(fl::Error(error_msg));
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
         
         CHECK(!result.ok());
@@ -112,7 +112,7 @@ TEST_CASE("fl::await_top_level - Error Handling") {
     }
     
     SUBCASE("await_top_level with custom error") {
-        Error custom_error("Custom error with details");
+        fl::Error custom_error("Custom error with details");
         auto promise = fl::promise<fl::string>::reject(custom_error);
         auto result = fl::await_top_level(promise);  // Type automatically deduced!
         
@@ -125,7 +125,7 @@ TEST_CASE("fl::await_top_level - Multiple Awaits") {
     SUBCASE("multiple awaits on different promises") {
         auto promise1 = fl::promise<int>::resolve(10);
         auto promise2 = fl::promise<int>::resolve(20);
-        auto promise3 = fl::promise<int>::reject(Error("Error in promise 3"));
+        auto promise3 = fl::promise<int>::reject(fl::Error("Error in promise 3"));
         
         auto result1 = fl::await_top_level(promise1);  // Type automatically deduced!
         auto result2 = fl::await_top_level(promise2);  // Type automatically deduced!
@@ -164,7 +164,7 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
         auto success_promise = fl::promise<int>::resolve(42);
         auto success_result = fl::await_top_level(success_promise);
         
-        auto error_promise = fl::promise<int>::reject(Error("Error"));
+        auto error_promise = fl::promise<int>::reject(fl::Error("Error"));
         auto error_result = fl::await_top_level(error_promise);
         
         // Test boolean conversion (should work like ok())
@@ -180,7 +180,7 @@ TEST_CASE("fl::await_top_level - Boolean Conversion and Convenience") {
         auto success_promise = fl::promise<int>::resolve(42);
         auto success_result = fl::await_top_level(success_promise);
         
-        auto error_promise = fl::promise<int>::reject(Error("Test error"));
+        auto error_promise = fl::promise<int>::reject(fl::Error("Test error"));
         auto error_result = fl::await_top_level(error_promise);
         
         // Test error_message convenience method

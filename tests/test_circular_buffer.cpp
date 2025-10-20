@@ -7,7 +7,7 @@
 #include "fl/circular_buffer.h"
 
 TEST_CASE("circular_buffer basic operations") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     CHECK(buffer.empty());
     CHECK_EQ(buffer.size(), 0);
@@ -31,7 +31,7 @@ TEST_CASE("circular_buffer basic operations") {
 }
 
 TEST_CASE("circular_buffer operator[]") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     CHECK(buffer.empty());
     CHECK_EQ(buffer.size(), 0);
@@ -51,7 +51,7 @@ TEST_CASE("circular_buffer operator[]") {
 }
 
 TEST_CASE("circular_buffer overflow behavior") {
-    CircularBuffer<int> buffer(3);
+    fl::CircularBuffer<int> buffer(3);
 
     buffer.push_back(1);
     buffer.push_back(2);
@@ -76,7 +76,7 @@ TEST_CASE("circular_buffer overflow behavior") {
 }
 
 TEST_CASE("circular_buffer edge cases") {
-    CircularBuffer<int> buffer(1);
+    fl::CircularBuffer<int> buffer(1);
 
     CHECK(buffer.empty());
     CHECK_FALSE(buffer.full());
@@ -97,7 +97,7 @@ TEST_CASE("circular_buffer edge cases") {
 }
 
 TEST_CASE("circular_buffer clear operation") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     buffer.push_back(1);
     buffer.push_back(2);
@@ -116,7 +116,7 @@ TEST_CASE("circular_buffer clear operation") {
 }
 
 TEST_CASE("circular_buffer indexing") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     buffer.push_back(10);
     buffer.push_back(20);
@@ -141,7 +141,7 @@ TEST_CASE("circular_buffer with custom type") {
         bool operator==(const CustomType& other) const { return value == other.value; }
     };
 
-    CircularBuffer<CustomType> buffer(3);
+    fl::CircularBuffer<CustomType> buffer(3);
 
     buffer.push_back(CustomType(1));
     buffer.push_back(CustomType(2));
@@ -162,7 +162,7 @@ TEST_CASE("circular_buffer with custom type") {
 }
 
 TEST_CASE("circular_buffer writing to full buffer") {
-    CircularBuffer<int> buffer(3);
+    fl::CircularBuffer<int> buffer(3);
 
     // Fill the buffer
     buffer.push_back(1);
@@ -212,7 +212,7 @@ TEST_CASE("circular_buffer writing to full buffer") {
 #if 1
 
 TEST_CASE("circular_buffer zero capacity") {
-    CircularBuffer<int> buffer(0);
+    fl::CircularBuffer<int> buffer(0);
 
     CHECK(buffer.empty());
     CHECK(buffer.full());
@@ -241,7 +241,7 @@ TEST_CASE("circular_buffer zero capacity") {
 
 
 TEST_CASE("circular_buffer pop_back operation") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     buffer.push_back(1);
     buffer.push_back(2);
@@ -267,7 +267,7 @@ TEST_CASE("circular_buffer pop_back operation") {
 }
 
 TEST_CASE("circular_buffer push_front operation") {
-    CircularBuffer<int> buffer(3);
+    fl::CircularBuffer<int> buffer(3);
 
     buffer.push_front(1);
     buffer.push_front(2);
@@ -293,7 +293,7 @@ TEST_CASE("circular_buffer push_front operation") {
 }
 
 TEST_CASE("circular_buffer large data block operations") {
-    CircularBuffer<int> buffer(100);
+    fl::CircularBuffer<int> buffer(100);
 
     // Test adding a large block of data (10x buffer capacity)
     const size_t large_data_size = 1000;
@@ -322,7 +322,7 @@ TEST_CASE("circular_buffer large data block operations") {
 }
 
 TEST_CASE("circular_buffer stress test with rapid operations") {
-    CircularBuffer<int> buffer(50);
+    fl::CircularBuffer<int> buffer(50);
 
     // Stress test: rapid push/pop operations
     const size_t stress_iterations = 1000; // Reduced from 10000
@@ -365,7 +365,7 @@ TEST_CASE("circular_buffer stress test with rapid operations") {
 }
 
 TEST_CASE("circular_buffer wraparound integrity test") {
-    CircularBuffer<int> buffer(7); // Prime number for interesting wraparound behavior
+    fl::CircularBuffer<int> buffer(7); // Prime number for interesting wraparound behavior
 
     // Fill buffer multiple times to test wraparound
     const size_t cycles = 20; // Reduced from 100
@@ -396,7 +396,7 @@ TEST_CASE("circular_buffer wraparound integrity test") {
 }
 
 TEST_CASE("circular_buffer bulk operations without overflow") {
-    CircularBuffer<int> buffer(1000);
+    fl::CircularBuffer<int> buffer(1000);
 
     // Test 1: Add elements in chunks
     const size_t chunk_size = 250;
@@ -444,7 +444,7 @@ TEST_CASE("circular_buffer bulk operations without overflow") {
 }
 
 TEST_CASE("circular_buffer edge case with maximum indices") {
-    CircularBuffer<int> buffer(5);
+    fl::CircularBuffer<int> buffer(5);
 
     // Test that internal index calculations don't overflow
     // by simulating many wraparounds
@@ -478,7 +478,7 @@ TEST_CASE("circular_buffer edge case with maximum indices") {
 }
 
 TEST_CASE("circular_buffer memory safety with alternating operations") {
-    CircularBuffer<int> buffer(10);
+    fl::CircularBuffer<int> buffer(10);
 
     // Pattern that could potentially cause memory issues if buffer logic is wrong
     for (size_t iteration = 0; iteration < 100; ++iteration) { // Reduced from 1000

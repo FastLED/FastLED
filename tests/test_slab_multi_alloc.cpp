@@ -4,7 +4,7 @@
 
 TEST_CASE("SlabAllocator - Multi-allocation support") {
     SUBCASE("Small multi-allocation (3 objects)") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Allocate 3 objects at once
         int* ptr = allocator.allocate(3);
@@ -29,7 +29,7 @@ TEST_CASE("SlabAllocator - Multi-allocation support") {
     }
     
     SUBCASE("Medium multi-allocation (5 objects)") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Allocate 5 objects at once
         int* ptr = allocator.allocate(5);
@@ -49,7 +49,7 @@ TEST_CASE("SlabAllocator - Multi-allocation support") {
     }
     
     SUBCASE("Large multi-allocation fallback (100 objects)") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Allocate 100 objects - should fallback to malloc
         int* ptr = allocator.allocate(100);
@@ -73,7 +73,7 @@ TEST_CASE("SlabAllocator - Multi-allocation support") {
     }
     
     SUBCASE("Mixed single and multi-allocations") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Allocate single objects first
         int* single1 = allocator.allocate(1);
@@ -106,7 +106,7 @@ TEST_CASE("SlabAllocator - Multi-allocation support") {
     }
     
     SUBCASE("Contiguous allocation verification") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Allocate 4 contiguous objects
         int* ptr = allocator.allocate(4);

@@ -17,7 +17,7 @@ struct TestObject {
 };
 
 TEST_CASE("SlabAllocator - Basic functionality") {
-    using TestAllocator = SlabAllocator<TestObject, 8>;
+    using TestAllocator = fl::SlabAllocator<TestObject, 8>;
     
     SUBCASE("Single allocation and deallocation") {
         TestAllocator allocator;
@@ -56,7 +56,7 @@ TEST_CASE("SlabAllocator - Basic functionality") {
 }
 
 TEST_CASE("SlabAllocator - Memory layout verification") {
-    using SmallAllocator = SlabAllocator<uint32_t, 16>;
+    using SmallAllocator = fl::SlabAllocator<uint32_t, 16>;
     SmallAllocator allocator;
     
     SUBCASE("Basic memory layout") {
@@ -83,7 +83,7 @@ TEST_CASE("SlabAllocator - Memory layout verification") {
 }
 
 TEST_CASE("SlabAllocator - Edge cases") {
-    using EdgeAllocator = SlabAllocator<char, 8>;
+    using EdgeAllocator = fl::SlabAllocator<char, 8>;
     EdgeAllocator allocator;
     
     SUBCASE("Null pointer deallocation") {

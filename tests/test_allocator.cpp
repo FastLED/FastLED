@@ -20,7 +20,7 @@ TEST_CASE("Allocator - Integration tests") {
         // Test basic functionality across different allocator types
         
         // SlabAllocator
-        SlabAllocator<int, 8> slab_alloc;
+        fl::SlabAllocator<int, 8> slab_alloc;
         int* slab_ptr = slab_alloc.allocate();
         REQUIRE(slab_ptr != nullptr);
         *slab_ptr = 100;
@@ -47,7 +47,7 @@ TEST_CASE("Allocator - Integration tests") {
 
 TEST_CASE("Allocator - Multi-allocation support") {
     SUBCASE("SlabAllocator multi-allocation") {
-        SlabAllocator<int, 8> allocator;
+        fl::SlabAllocator<int, 8> allocator;
         
         // Test single allocation
         int* single_ptr = allocator.allocate(1);
@@ -128,7 +128,7 @@ TEST_CASE("Allocator - Copy and move semantics") {
 
 TEST_CASE("Allocator - Performance and stress tests") {
     SUBCASE("SlabAllocator performance") {
-        SlabAllocator<TestObject, 16> allocator;
+        fl::SlabAllocator<TestObject, 16> allocator;
         
         fl::vector<TestObject*> ptrs;
         const size_t num_allocs = 32;  // More than one slab

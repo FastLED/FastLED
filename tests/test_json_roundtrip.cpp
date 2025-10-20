@@ -16,7 +16,7 @@ TEST_CASE("JSON Round Trip Serialization Test") {
     CHECK(parsedJson.contains("value"));
     
     // Check values
-    CHECK_EQ(parsedJson["name"].as_or(string("")), "bob");
+    CHECK_EQ(parsedJson["name"].as_or(fl::string("")), "bob");
     CHECK_EQ(parsedJson["value"].as_or(0), 21);
     
     // 2. Serialize it back to a string
@@ -35,6 +35,6 @@ TEST_CASE("JSON Round Trip Serialization Test") {
     CHECK(reparsedJson.is_object());
     CHECK(reparsedJson.contains("name"));
     CHECK(reparsedJson.contains("value"));
-    CHECK_EQ(reparsedJson["name"].as_or(string("")), "bob");
+    CHECK_EQ(reparsedJson["name"].as_or(fl::string("")), "bob");
     CHECK_EQ(reparsedJson["value"].as_or(0), 21);
 }
