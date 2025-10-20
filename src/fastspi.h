@@ -159,8 +159,11 @@ template<fl::u32 _SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
 
 #elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
-// Specialized templates for each SPI peripheral on Teensy 4.x
-// These provide the SPIClass reference and index required by SPIDeviceProxy
+// Generic fallback for generic pins on Teensy 4
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
+class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+
+// Specialization for hardware SPI pins
 template<fl::u32 _SPI_SPEED>
 class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED, SPI, 0> {};
 
