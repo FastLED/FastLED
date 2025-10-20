@@ -765,8 +765,6 @@ struct alignment_of {
 // C++11 requires out-of-class definitions for static constexpr members that are ODR-used
 // These definitions are in src/fl/static_constexpr_defs.cpp to avoid duplicate symbols
 
-} // namespace fl
-
 // For comparison operators that return bool against pod data. The class obj
 // will need to supply the comparison operator for the pod type. This example
 // will show how to define a comparison operator for a class that can be
@@ -776,13 +774,15 @@ struct alignment_of {
 //   be compared MyClass obj; return obj >= 0;
 #define FASTLED_DEFINE_POD_COMPARISON_OPERATOR(CLASS, OP)                      \
     template <typename T, typename U>                                          \
-    typename fl::enable_if<                                                    \
-        fl::is_same<U, CLASS>::value && fl::is_pod<T>::value, bool>::type      \
+    typename enable_if<                                                        \
+        is_same<U, CLASS>::value && is_pod<T>::value, bool>::type             \
     operator OP(const T &pod, const CLASS &obj) {                              \
         return pod OP obj;                                                     \
     }                                                                          \
     template <typename T>                                                      \
-    typename fl::enable_if<fl::is_pod<T>::value, bool>::type operator OP(      \
+    typename enable_if<is_pod<T>::value, bool>::type operator OP(             \
         const CLASS &obj, const T &pod) {                                      \
         return obj OP pod;                                                     \
     }
+
+} // namespace fl
