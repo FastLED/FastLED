@@ -11,8 +11,7 @@ FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
-// Note: FASTLED_NAMESPACE_BEGIN is not used here because this file is included
-// inside an already-open namespace from fl/scale8.h
+namespace fl {
 
 /// @file scale8.h
 /// C language implementations of 8-bit scaling functions.
@@ -117,4 +116,5 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 
 /// @} Scaling_C
 
+}  // namespace fl
 FL_DISABLE_WARNING_POP

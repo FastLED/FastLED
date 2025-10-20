@@ -11,8 +11,7 @@ FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
-// Note: FASTLED_NAMESPACE_BEGIN is not used here because this file is included
-// inside an already-open namespace from fl/math8.h
+namespace fl {
 
 /// @file math8.h
 /// AVR assembly language implementations of 8-bit math functions.
@@ -383,4 +382,5 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
 
 /// @} Math_AVR
 
+}  // namespace fl
 FL_DISABLE_WARNING_POP
