@@ -3,7 +3,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for the teensy4
 // See clockless.h for detailed info on how the template parameters are used.
@@ -214,6 +214,6 @@ class __FIBCC : public FlexibleInlineBlockClocklessController<NUM_LANES,DATA_PIN
 
 #endif //defined(FASTLED_TEENSY4)
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif

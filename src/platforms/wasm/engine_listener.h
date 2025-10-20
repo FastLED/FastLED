@@ -5,9 +5,9 @@
 #include "fl/engine_events.h"
 #include "fl/namespace.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 class CLEDController;
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 
 namespace fl {

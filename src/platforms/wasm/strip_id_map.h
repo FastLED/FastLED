@@ -7,9 +7,9 @@
 #include "fl/namespace.h"
 #include "fl/singleton.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 uint16_t cled_contoller_size();  // Forward declaration from FastLED.h
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 // Define a reasonable maximum number of strips
 

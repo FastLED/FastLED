@@ -12,9 +12,9 @@
 #define FASTLED_ALL_PINS_HARDWARE_SPI
 
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 class CLEDController;
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 namespace fl {
 

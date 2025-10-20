@@ -9,7 +9,7 @@
 
 #include "fl/namespace.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 // Initialize GPIO clock (needed for Silicon Labs devices)
 void _mgm240_gpio_init() {
@@ -20,6 +20,6 @@ void _mgm240_gpio_init() {
     }
 }
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif // MGM240 target check

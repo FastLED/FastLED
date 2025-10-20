@@ -5,7 +5,7 @@
 #include <SmartMatrix.h>
 #include "fl/namespace.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 extern SmartMatrix *pSmartMatrix;
 
@@ -48,7 +48,7 @@ public:
     }
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif
 

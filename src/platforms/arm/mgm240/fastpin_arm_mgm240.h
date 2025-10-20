@@ -22,7 +22,7 @@
 #include "fl/namespace.h"
 #include "fl/unused.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 /// Forward declaration of base FastPin template
 template<uint8_t PIN> class FastPin;
@@ -189,4 +189,4 @@ _FL_DEFPIN(25, 3, D, (1 << 3));   // D25 - PD03
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-}  // namespace fl
+FASTLED_NAMESPACE_END

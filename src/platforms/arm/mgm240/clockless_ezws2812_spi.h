@@ -25,7 +25,7 @@
 #include "third_party/ezws2812/ezWS2812.h"
 #endif
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 #ifdef FASTLED_USES_EZWS2812_SPI
 
@@ -144,4 +144,4 @@ using EZWS2812_SPI = ClocklessController_ezWS2812_SPI<RGB_ORDER>;
 
 #endif // FASTLED_USES_EZWS2812_SPI
 
-}  // namespace fl
+FASTLED_NAMESPACE_END

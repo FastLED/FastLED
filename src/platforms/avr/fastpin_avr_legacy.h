@@ -13,7 +13,7 @@
 #include "fl/namespace.h"
 #include "avr_pin.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -497,5 +497,5 @@ _FL_DEFPIN(52, 7, F);
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 

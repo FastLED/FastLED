@@ -5,7 +5,7 @@
 
 #include "fl/namespace.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 template<int DATA_PIN, EOrder RGB_ORDER>
 class CWS2812SerialController : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
@@ -43,7 +43,7 @@ public:
 
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif // USE_WS2812SERIAL
 #endif // __INC_WS2812SERIAL_CONTROLLER_H

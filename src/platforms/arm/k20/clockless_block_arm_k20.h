@@ -19,7 +19,7 @@
 
 #include <kinetis.h>
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 /// @brief ARM K20 (Teensy 3.0/3.1) Block Clockless LED Controller
 /// @tparam LANES Number of parallel data lines
@@ -344,7 +344,7 @@ public:
 	}
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif
 

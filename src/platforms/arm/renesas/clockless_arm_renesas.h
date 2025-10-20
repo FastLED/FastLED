@@ -3,7 +3,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for RA4M1 (Cortex M4)
 // See clockless.h for detailed info on how the template parameters are used.
@@ -128,6 +128,6 @@ protected:
 	}
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif

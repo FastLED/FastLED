@@ -19,7 +19,7 @@
 #include "platforms/arm/mgm240/clockless_ezws2812_39mhz.h"
 #include "platforms/arm/mgm240/clockless_ezws2812_78mhz.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 /// @brief Auto-selecting ezWS2812 GPIO controller
 ///
@@ -107,4 +107,4 @@ using EZWS2812_GPIO_39MHZ = ClocklessController_ezWS2812_GPIO_39MHz<DATA_PIN, RG
 template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_78MHZ = ClocklessController_ezWS2812_GPIO_78MHz<DATA_PIN, RGB_ORDER>;
 
-}  // namespace fl
+FASTLED_NAMESPACE_END

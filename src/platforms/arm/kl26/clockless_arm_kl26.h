@@ -6,7 +6,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "eorder.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
@@ -68,7 +68,7 @@ public:
 
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 
 #endif // __INC_CLOCKLESS_ARM_KL26

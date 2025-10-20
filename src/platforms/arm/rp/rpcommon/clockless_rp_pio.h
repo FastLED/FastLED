@@ -42,7 +42,7 @@
  * to avoid this becoming an issue.
  */
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 #define FASTLED_HAS_CLOCKLESS 1
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
@@ -335,7 +335,7 @@ public:
 
 };
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 
 #endif // __INC_CLOCKLESS_RP_PIO_COMMON

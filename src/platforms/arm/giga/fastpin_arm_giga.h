@@ -5,7 +5,7 @@
 #include "fl/namespace.h"
 #include "armpin.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 #if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile GPIO_TypeDef * r() { return T; } };
@@ -203,6 +203,6 @@ _FL_DEFPIN(41, 7, K);
 
 #endif // ARDUINO_GIGA || ARDUINO_GIGA_M7
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
 
 #endif // __INC_FASTPIN_ARM_STM32

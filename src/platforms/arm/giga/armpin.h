@@ -3,7 +3,7 @@
 
 #include "fl/namespace.h"
 
-namespace fl {
+FASTLED_NAMESPACE_BEGIN
 
 #define _R(T) struct __gen_struct_ ## T
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
@@ -47,4 +47,4 @@ public:
 
 
 
-}  // namespace fl
+FASTLED_NAMESPACE_END
