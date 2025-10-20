@@ -143,7 +143,7 @@ enum OWS2811 { OCTOWS2811,OCTOWS2811_400, OCTOWS2813};
 enum SWS2812 { WS2812SERIAL };
 
 #ifdef HAS_PIXIE
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
 #endif
 
 #ifdef FASTLED_HAS_CLOCKLESS
@@ -158,163 +158,163 @@ template<fl::u8 DATA_PIN> class NEOPIXEL : public WS2812Controller800Khz<DATA_PI
 
 /// @brief SM16703 controller class.
 /// @copydetails SM16703Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER> 
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> 
 class SM16703 : public SM16703Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief SM16824E controller class.
 /// @copydetails SM16824EController
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER> 
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> 
 class SM16824E : public SM16824EController<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1829 controller class.
 /// @copydetails TM1829Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1829 : public TM1829Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1812 controller class.
 /// @copydetails TM1809Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1812 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1809 controller class.
 /// @copydetails TM1809Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1809 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1804 controller class.
 /// @copydetails TM1809Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1804 : public TM1809Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief TM1803 controller class.
 /// @copydetails TM1803Controller400Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class TM1803 : public TM1803Controller400Khz<DATA_PIN, RGB_ORDER> {}; 
 
 /// @brief UCS1903 controller class.
 /// @copydetails UCS1903Controller400Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS1903 : public UCS1903Controller400Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief UCS1903B controller class.
 /// @copydetails UCS1903BController800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS1903B : public UCS1903BController800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief UCS1904 controller class.
 /// @copydetails UCS1904Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief UCS2903 controller class.
 /// @copydetails UCS2903Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2812 controller class.
 /// @copydetails WS2812Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2812 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2815 controller class.
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2815 : public WS2815Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2816 controller class.
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template <fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2816 : public WS2816Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2852 controller class.
 /// @copydetails WS2812Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2812B controller class.
 /// @copydetails WS2812Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief GS1903 controller class.
 /// @copydetails WS2812Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class GS1903 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief SK6812 controller class.
 /// @copydetails SK6812Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class SK6812 : public SK6812Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief SK6822 controller class.
 /// @copydetails SK6822Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class SK6822 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief APA106 controller class.
 /// @copydetails SK6822Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class APA106 : public SK6822Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief PL9823 controller class.
 /// @copydetails PL9823Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class PL9823 : public PL9823Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2811 controller class.
 /// @copydetails WS2811Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2811 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2813 controller class.
 /// @copydetails WS2813Controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2813 : public WS2813Controller<DATA_PIN, RGB_ORDER> {};
 
 /// @brief APA104 controller class.
 /// @copydetails WS2811Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class APA104 : public WS2811Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief WS2811_400 controller class.
 /// @copydetails WS2811Controller400Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2811_400 : public WS2811Controller400Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief GE8822 controller class.
 /// @copydetails GE8822Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class GE8822 : public GE8822Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief GW6205 controller class.
 /// @copydetails GW6205Controller800Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class GW6205 : public GW6205Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief GW6205_400 controller class.
 /// @copydetails GW6205Controller400Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class GW6205_400 : public GW6205Controller400Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief LPD1886 controller class.
 /// @copydetails LPD1886Controller1250Khz
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class LPD1886 : public LPD1886Controller1250Khz<DATA_PIN, RGB_ORDER> {};
 
 /// @brief LPD1886_8BIT controller class.
 /// @copydetails LPD1886Controller1250Khz_8bit
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class LPD1886_8BIT : public LPD1886Controller1250Khz_8bit<DATA_PIN, RGB_ORDER> {};
 
 /// @brief UCS1912 controller class.
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER>
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS1912 : public UCS1912Controller<DATA_PIN, RGB_ORDER> {};
 
 #if defined(DmxSimple_h) || defined(FASTLED_DOXYGEN)
 /// @copydoc DMXSimpleController
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleController<DATA_PIN, RGB_ORDER> {};
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class DMXSIMPLE : public DMXSimpleController<DATA_PIN, RGB_ORDER> {};
 #endif
 #if defined(DmxSerial_h) || defined(FASTLED_DOXYGEN)
 /// @copydoc DMXSerialController
-template<EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDER> {};
+template<fl::EOrder RGB_ORDER> class DMXSERIAL : public DMXSerialController<RGB_ORDER> {};
 #endif
 #endif
 /// @} ClocklessChipsets
@@ -454,12 +454,12 @@ public:
 		    static const bool IS_VALID = true;                                                     \
 			typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN> ControllerType;                          \
 			/* Controller type with RGB_ORDER specified */                                         \
-			template<EOrder RGB_ORDER>															   \
+			template<fl::EOrder RGB_ORDER>															   \
 			struct CONTROLLER_CLASS_WITH_ORDER {                                                   \
 				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER> ControllerType;           \
 			};                                                                                     \
 			/* Controller type with RGB_ORDER and spi frequency specified */                       \
-			template<EOrder RGB_ORDER, fl::u32 FREQ>                                              \
+			template<fl::EOrder RGB_ORDER, fl::u32 FREQ>                                              \
 			struct CONTROLLER_CLASS_WITH_ORDER_AND_FREQ {                                          \
 				typedef CONTROLLER_CLASS<DATA_PIN, CLOCK_PIN, RGB_ORDER, FREQ> ControllerType;     \
 			};                                                                                     \
@@ -492,7 +492,7 @@ public:
 	/// Stubbed out platforms have unique challenges in faking out the SPI based controllers.
 	/// Therefore for these platforms we will always delegate to the WS2812 clockless controller.
 	/// This is fine because the clockless controllers on the stubbed out platforms are fake anyways.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		// Always USE WS2812 clockless controller since it's the common path.
 		return addLeds<WS2812, DATA_PIN, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
@@ -506,7 +506,7 @@ public:
 
 
 	// The addLeds function using ChipsetHelper
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Always USE WS2812 clockless controller since it's the common path.
 		return addLeds<WS2812, DATA_PIN, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
@@ -516,7 +516,7 @@ public:
 
 
 	/// Add an SPI based CLEDController instance to the world.
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE > ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		// Instantiate the controller using ClockedChipsetHelper
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		typedef typename CHIP::template CONTROLLER_CLASS_WITH_ORDER_AND_FREQ<RGB_ORDER, SPI_DATA_RATE>::ControllerType ControllerTypeWithFreq;
@@ -536,7 +536,7 @@ public:
 
 
 	// The addLeds function using ChipsetHelper
-	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER>
+	template<ESPIChipsets CHIPSET, fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, fl::EOrder RGB_ORDER>
 	::CLEDController& addLeds(CRGB* data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		typedef ClockedChipsetHelper<CHIPSET, DATA_PIN, CLOCK_PIN> CHIP;
 		static_assert(CHIP::IS_VALID, "Unsupported chipset");
@@ -552,11 +552,11 @@ public:
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<ESPIChipsets CHIPSET, EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	template<ESPIChipsets CHIPSET, fl::EOrder RGB_ORDER, fl::u32 SPI_DATA_RATE> static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		return addLeds<CHIPSET, SPI_DATA, SPI_CLOCK, RGB_ORDER, SPI_DATA_RATE>(data, nLedsOrOffset, nLedsIfOffset);
 	}
 
@@ -594,14 +594,14 @@ public:
 	/// @{
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, EOrder RGB_ORDER>
+	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB_ORDER> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8, fl::EOrder> class CHIPSET, fl::u8 DATA_PIN>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN, RGB> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -615,13 +615,13 @@ public:
 	}
 
 	template<template<fl::u8 DATA_PIN> class CHIPSET, fl::u8 DATA_PIN>
-	static ::CLEDController &addLeds(class fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
+	static ::CLEDController &addLeds(fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		CRGB* rgb = leds;
 		return addLeds<CHIPSET, DATA_PIN>(rgb, nLedsOrOffset, nLedsIfOffset);
 	}
 
 #if defined(__FASTLED_HAS_FIBCC) && (__FASTLED_HAS_FIBCC == 1)
-	template<fl::u8 NUM_LANES, template<fl::u8 DATA_PIN, EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, EOrder RGB_ORDER=RGB>
+	template<fl::u8 NUM_LANES, template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB>
 	static ::CLEDController &addLeds(CRGB *data, int nLeds) {
 		static __FIBCC<CHIPSET, DATA_PIN, NUM_LANES, RGB_ORDER> c;
 		return addLeds(&c, data, nLeds);
@@ -629,7 +629,7 @@ public:
 #endif
 
 	#ifdef FASTSPI_USE_DMX_SIMPLE
-	template<EClocklessChipsets CHIPSET, fl::u8 DATA_PIN, EOrder RGB_ORDER=RGB>
+	template<EClocklessChipsets CHIPSET, fl::u8 DATA_PIN, fl::EOrder RGB_ORDER=RGB>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		switch(CHIPSET) {
@@ -662,14 +662,14 @@ public:
 	/// @{
 
 	/// Add a 3rd party library based CLEDController instance to the world.
-	template<template<EOrder RGB_ORDER> class CHIPSET, EOrder RGB_ORDER>
+	template<template<fl::EOrder RGB_ORDER> class CHIPSET, fl::EOrder RGB_ORDER>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB_ORDER> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
 	/// Add a 3rd party library based CLEDController instance to the world.
-	template<template<EOrder RGB_ORDER> class CHIPSET>
+	template<template<fl::EOrder RGB_ORDER> class CHIPSET>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<RGB> c;
 		return addLeds(&c, data, nLedsOrOffset, nLedsIfOffset);
@@ -679,7 +679,7 @@ public:
 	/// Add a OCTOWS2811 based CLEDController instance to the world.
 	/// @see https://www.pjrc.com/teensy/td_libs_OctoWS2811.html
 	/// @see https://github.com/PaulStoffregen/OctoWS2811
-	template<OWS2811 CHIPSET, EOrder RGB_ORDER>
+	template<OWS2811 CHIPSET, fl::EOrder RGB_ORDER>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		switch(CHIPSET) {
@@ -706,7 +706,7 @@ public:
 	/// Add a WS2812Serial library based CLEDController instance to the world.
 	/// @see https://www.pjrc.com/non-blocking-ws2812-led-library/
 	/// @see https://github.com/PaulStoffregen/WS2812Serial
-	template<SWS2812 CHIPSET, int DATA_PIN, EOrder RGB_ORDER>
+	template<SWS2812 CHIPSET, int DATA_PIN, fl::EOrder RGB_ORDER>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0)
 	{
 		static CWS2812SerialController<DATA_PIN,RGB_ORDER> controller;
@@ -752,7 +752,7 @@ public:
 	/// @{
 
 	/// Add a block based parallel output CLEDController instance to the world.
-	template<EBlockChipsets CHIPSET, int NUM_LANES, EOrder RGB_ORDER>
+	template<EBlockChipsets CHIPSET, int NUM_LANES, fl::EOrder RGB_ORDER>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		switch(CHIPSET) {
 		#ifdef PORTA_FIRST_PIN
@@ -1015,5 +1015,5 @@ using fl_string = fl::string;
 // Backdoor to get the size of the CLedController object. The one place
 // that includes this just uses extern to declare the function.
 namespace fl {
-fl::u16 cled_contoller_size();
+u16 cled_contoller_size();
 }  // namespace fl
