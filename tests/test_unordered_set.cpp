@@ -7,7 +7,7 @@
 
 
 TEST_CASE("Empty set properties") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     REQUIRE_EQ(s.size(), 0u);
     REQUIRE(s.empty());
     REQUIRE(s.find(42) == s.end());
@@ -16,7 +16,7 @@ TEST_CASE("Empty set properties") {
 }
 
 TEST_CASE("Single insert and lookup") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     s.insert(10);
     REQUIRE_EQ(s.size(), 1u);
     REQUIRE(!s.empty());
@@ -30,7 +30,7 @@ TEST_CASE("Single insert and lookup") {
 }
 
 TEST_CASE("Insert duplicate key does not increase size") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     s.insert(5);
     REQUIRE_EQ(s.size(), 1u);
     
@@ -41,7 +41,7 @@ TEST_CASE("Insert duplicate key does not increase size") {
 }
 
 TEST_CASE("Multiple distinct inserts and lookups") {
-    HashSet<char> s;
+    fl::HashSet<char> s;
     
     // Insert multiple elements
     for (char c = 'a'; c <= 'j'; ++c) {
@@ -60,7 +60,7 @@ TEST_CASE("Multiple distinct inserts and lookups") {
 }
 
 TEST_CASE("Erase behavior") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     s.insert(5);
     s.insert(10);
     s.insert(15);
@@ -85,7 +85,7 @@ TEST_CASE("Erase behavior") {
 }
 
 TEST_CASE("Re-insert after erase") {
-    HashSet<int> s(4);  // Small initial capacity
+    fl::HashSet<int> s(4);  // Small initial capacity
     s.insert(1);
     s.erase(1);
     REQUIRE(s.find(1) == s.end());
@@ -98,7 +98,7 @@ TEST_CASE("Re-insert after erase") {
 }
 
 TEST_CASE("Clear resets set") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     for (int i = 0; i < 5; ++i) {
         s.insert(i);
     }
@@ -120,7 +120,7 @@ TEST_CASE("Clear resets set") {
 }
 
 TEST_CASE("Stress test with many elements and rehashing") {
-    HashSet<int> s(1);  // Start with minimal capacity to force rehashing
+    fl::HashSet<int> s(1);  // Start with minimal capacity to force rehashing
     const int N = 100;
     
     // Insert many elements
@@ -138,7 +138,7 @@ TEST_CASE("Stress test with many elements and rehashing") {
 }
 
 TEST_CASE("Iterator functionality") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     fl::size expected_size = 0;
     
     // Insert some elements
@@ -168,7 +168,7 @@ TEST_CASE("Iterator functionality") {
 }
 
 TEST_CASE("Const iterator functionality") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     for (int i = 1; i <= 5; ++i) {
         s.insert(i);
     }
@@ -187,7 +187,7 @@ TEST_CASE("Const iterator functionality") {
 }
 
 TEST_CASE("Range-based for loop") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     for (int i = 10; i < 15; ++i) {
         s.insert(i);
     }
@@ -210,7 +210,7 @@ TEST_CASE("Range-based for loop") {
 }
 
 TEST_CASE("String elements") {
-    HashSet<fl::string> s;
+    fl::HashSet<fl::string> s;
     
     s.insert("hello");
     s.insert("world");
@@ -231,7 +231,7 @@ TEST_CASE("String elements") {
 }
 
 TEST_CASE("Capacity management") {
-    HashSet<int> s(16, 0.75f);  // Initial capacity 16, load factor 0.75
+    fl::HashSet<int> s(16, 0.75f);  // Initial capacity 16, load factor 0.75
     
     // Initial state
     REQUIRE_EQ(s.size(), 0u);
@@ -273,7 +273,7 @@ TEST_CASE("Custom hash and equality") {
         }
     };
     
-    HashSet<fl::string, CaseInsensitiveHash, CaseInsensitiveEqual> s;
+    fl::HashSet<fl::string, CaseInsensitiveHash, CaseInsensitiveEqual> s;
     
     s.insert("Hello");
     s.insert("WORLD");
@@ -295,7 +295,7 @@ TEST_CASE("Custom hash and equality") {
 }
 
 TEST_CASE("Equivalence with std::unordered_set for basic operations") {
-    HashSet<int> custom_set;
+    fl::HashSet<int> custom_set;
     std::unordered_set<int> std_set;
     
     // Test insertion
@@ -332,7 +332,7 @@ TEST_CASE("Equivalence with std::unordered_set for basic operations") {
 }
 
 TEST_CASE("Edge cases") {
-    HashSet<int> s;
+    fl::HashSet<int> s;
     
     // Test with negative numbers
     s.insert(-1);
@@ -347,7 +347,7 @@ TEST_CASE("Edge cases") {
     REQUIRE(s.find(100) != s.end());
     
     // Test erasing from single-element set
-    HashSet<int> single;
+    fl::HashSet<int> single;
     single.insert(42);
     REQUIRE_EQ(single.size(), 1u);
     single.erase(42);
@@ -355,7 +355,7 @@ TEST_CASE("Edge cases") {
     REQUIRE(single.empty());
     
     // Test multiple operations on same element
-    HashSet<int> multi;
+    fl::HashSet<int> multi;
     multi.insert(1);
     multi.insert(1);  // duplicate
     multi.erase(1);
@@ -366,7 +366,7 @@ TEST_CASE("Edge cases") {
 }
 
 TEST_CASE("Large scale operations with deletion patterns") {
-    HashSet<int> s(8);  // Start small to test rehashing behavior
+    fl::HashSet<int> s(8);  // Start small to test rehashing behavior
     
     // Insert and selectively delete to trigger rehashing behaviors
     for (int i = 0; i < 20; ++i) {

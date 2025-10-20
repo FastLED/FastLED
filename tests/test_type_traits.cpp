@@ -21,32 +21,32 @@ TEST_CASE("is_base_of") {
     CHECK_FALSE(fl::is_base_of<Derived, Base>::value);
 }
 
-TEST_CASE("is_integral<T> value") {
+TEST_CASE("fl::is_integral<T> value") {
     // Test with integral types
-    REQUIRE(is_integral<bool>::value);
-    REQUIRE(is_integral<char>::value);
-    REQUIRE(is_integral<signed char>::value);
-    REQUIRE(is_integral<unsigned char>::value);
-    REQUIRE(is_integral<int>::value);
-    REQUIRE(is_integral<unsigned int>::value);
-    REQUIRE(is_integral<short>::value);
-    REQUIRE(is_integral<long>::value);
-    REQUIRE(is_integral<long long>::value);
+    REQUIRE(fl::is_integral<bool>::value);
+    REQUIRE(fl::is_integral<char>::value);
+    REQUIRE(fl::is_integral<signed char>::value);
+    REQUIRE(fl::is_integral<unsigned char>::value);
+    REQUIRE(fl::is_integral<int>::value);
+    REQUIRE(fl::is_integral<unsigned int>::value);
+    REQUIRE(fl::is_integral<short>::value);
+    REQUIRE(fl::is_integral<long>::value);
+    REQUIRE(fl::is_integral<long long>::value);
 
     // Test with sized types
-    REQUIRE(is_integral<int8_t>::value);
-    REQUIRE(is_integral<uint8_t>::value);
-    REQUIRE(is_integral<int16_t>::value);
-    REQUIRE(is_integral<uint16_t>::value);
-    REQUIRE(is_integral<int32_t>::value);
-    REQUIRE(is_integral<uint32_t>::value);
-    REQUIRE(is_integral<int64_t>::value);
-    REQUIRE(is_integral<uint64_t>::value);
+    REQUIRE(fl::is_integral<int8_t>::value);
+    REQUIRE(fl::is_integral<uint8_t>::value);
+    REQUIRE(fl::is_integral<int16_t>::value);
+    REQUIRE(fl::is_integral<uint16_t>::value);
+    REQUIRE(fl::is_integral<int32_t>::value);
+    REQUIRE(fl::is_integral<uint32_t>::value);
+    REQUIRE(fl::is_integral<int64_t>::value);
+    REQUIRE(fl::is_integral<uint64_t>::value);
 
     // Test with non-integral types
-    REQUIRE_FALSE(is_integral<float>::value);
-    REQUIRE_FALSE(is_integral<double>::value);
-    REQUIRE_FALSE(is_integral<char *>::value);
+    REQUIRE_FALSE(fl::is_integral<float>::value);
+    REQUIRE_FALSE(fl::is_integral<double>::value);
+    REQUIRE_FALSE(fl::is_integral<char *>::value);
 }
 
 TEST_CASE("Test fl::move") {

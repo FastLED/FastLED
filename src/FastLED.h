@@ -107,7 +107,7 @@
 // Backdoor to get the size of the CLedController object. The one place
 // that includes this just uses extern to declare the function.
 namespace fl {
-fl::u16 cled_contoller_size();
+u16 cled_contoller_size();
 }  // namespace fl
 
 /// LED chipsets with SPI interface
@@ -922,6 +922,7 @@ extern CFastLED FastLED;
 /////////////////////////// Convenience includes for sketches ///////////////////////////
 
 #if !defined(FASTLED_INTERNAL) && !defined(FASTLED_LEAN_AND_MEAN)
+// allow-include-after-namespace
 
 #include "fl/str.h"   // Awesome Str class that has stack allocation and heap overflow, copy on write.
 #include "fl/xymap.h"  // XYMap class for mapping 2D coordinates on seperintine matrices.
@@ -1005,7 +1006,7 @@ using fl_string = fl::string;
 #endif
 
 #if FASTLED_LOOP_RUNS_ASYNC == 1
-#include "fl/async.h" // namespace ok
+#include "fl/async.h"
 // The loop is set as a macro that re-defines the user loop function
 // to sketch_loop()
 #define loop() \
@@ -1015,4 +1016,4 @@ using fl_string = fl::string;
 #endif
 
 
-#include "fl/sketch_macros.h" // namespace ok
+#include "fl/sketch_macros.h"

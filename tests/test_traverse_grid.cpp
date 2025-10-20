@@ -17,8 +17,8 @@ struct CollectingVisitor {
 
 TEST_CASE("Traverse grid") {
     SUBCASE("Horizontal line") {
-        vec2f start{1.2f, 2.5f};
-        vec2f end{5.7f, 2.5f};
+        fl::vec2f start{1.2f, 2.5f};
+        fl::vec2f end{5.7f, 2.5f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -30,8 +30,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Vertical line") {
-        vec2f start{3.4f, 1.1f};
-        vec2f end{3.4f, 4.9f};
+        fl::vec2f start{3.4f, 1.1f};
+        fl::vec2f end{3.4f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -44,8 +44,8 @@ TEST_CASE("Traverse grid") {
 
 
     SUBCASE("Forward diagonal") {
-        vec2f start{1.1f, 1.1f};
-        vec2f end{4.9f, 4.9f};
+        fl::vec2f start{1.1f, 1.1f};
+        fl::vec2f end{4.9f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -61,8 +61,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Backward diagonal") {
-        vec2f start{4.9f, 1.1f};
-        vec2f end{1.1f, 4.9f};
+        fl::vec2f start{4.9f, 1.1f};
+        fl::vec2f end{1.1f, 4.9f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);
@@ -78,8 +78,8 @@ TEST_CASE("Traverse grid") {
     }
 
     SUBCASE("Single cell") {
-        vec2f start{2.2f, 3.3f};
-        vec2f end{2.2f, 3.3f};
+        fl::vec2f start{2.2f, 3.3f};
+        fl::vec2f end{2.2f, 3.3f};
 
         CollectingVisitor visitor;
         traverseGridSegment(start, end, visitor);

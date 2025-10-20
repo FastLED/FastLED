@@ -88,15 +88,15 @@ TEST_CASE("Priority Queue with Custom Comparator") {
     vec.push_back(3);
     
     // Use our custom heap functions with a custom comparator
-    push_heap(vec.begin(), vec.end(), MinHeapCompare());
+    fl::push_heap(vec.begin(), vec.end(), MinHeapCompare());
     CHECK(vec[0] == 3); // Min element should be at the top
     
     vec.push_back(1);
-    push_heap(vec.begin(), vec.end(), MinHeapCompare());
+    fl::push_heap(vec.begin(), vec.end(), MinHeapCompare());
     CHECK(vec[0] == 1); // New min element
     
     // Test pop_heap with custom comparator
-    pop_heap(vec.begin(), vec.end(), MinHeapCompare());
+    fl::pop_heap(vec.begin(), vec.end(), MinHeapCompare());
     CHECK(vec[0] == 3); // Next min element
     vec.pop_back(); // Remove the element we popped to the end
 }

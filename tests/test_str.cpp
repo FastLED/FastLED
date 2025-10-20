@@ -11,15 +11,15 @@
 
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
-        Str s1;
+        fl::Str s1;
         CHECK(s1.size() == 0);
         CHECK(s1.c_str()[0] == '\0');
 
-        Str s2("hello");
+        fl::Str s2("hello");
         CHECK(s2.size() == 5);
         CHECK(fl::strcmp(s2.c_str(), "hello") == 0);
 
-        Str s3 = s2;
+        fl::Str s3 = s2;
         CHECK(s3.size() == 5);
         CHECK(fl::strcmp(s3.c_str(), "hello") == 0);
 
@@ -29,23 +29,23 @@ TEST_CASE("Str basic operations") {
     }
 
     SUBCASE("Comparison operators") {
-        Str s1("hello");
-        Str s2("hello");
-        Str s3("world");
+        fl::Str s1("hello");
+        fl::Str s2("hello");
+        fl::Str s3("world");
 
         CHECK(s1 == s2);
         CHECK(s1 != s3);
     }
 
     SUBCASE("Indexing") {
-        Str s("hello");
+        fl::Str s("hello");
         CHECK(s[0] == 'h');
         CHECK(s[4] == 'o');
         CHECK(s[5] == '\0');  // Null terminator
     }
 
     SUBCASE("Append") {
-        Str s("hello");
+        fl::Str s("hello");
         s.append(" world");
         CHECK(s.size() == 11);
         CHECK(fl::strcmp(s.c_str(), "hello world") == 0);
@@ -53,13 +53,13 @@ TEST_CASE("Str basic operations") {
 
     SUBCASE("CRGB to Str") {
         CRGB c(255, 0, 0);
-        Str s = c.toString();
+        fl::Str s = c.toString();
         CHECK_EQ(s, "CRGB(255,0,0)");
     }
 
     SUBCASE("Copy-on-write behavior") {
-        Str s1("hello");
-        Str s2 = s1;
+        fl::Str s1("hello");
+        fl::Str s2 = s1;
         s2.append(" world");
         CHECK(fl::strcmp(s1.c_str(), "hello") == 0);
         CHECK(fl::strcmp(s2.c_str(), "hello world") == 0);
@@ -68,7 +68,7 @@ TEST_CASE("Str basic operations") {
 
 
 TEST_CASE("Str::reserve") {
-    Str s;
+    fl::Str s;
     s.reserve(10);
     CHECK(s.size() == 0);
     CHECK(s.capacity() >= 10);
@@ -87,9 +87,9 @@ TEST_CASE("Str::reserve") {
 }
 
 TEST_CASE("Str with fl::FixedVector") {
-    fl::FixedVector<Str, 10> vec;
-    vec.push_back(Str("hello"));
-    vec.push_back(Str("world"));
+    fl::FixedVector<fl::Str, 10> vec;
+    vec.push_back(fl::Str("hello"));
+    vec.push_back(fl::Str("world"));
 
     CHECK(vec.size() == 2);
     CHECK(fl::strcmp(vec[0].c_str(), "hello") == 0);
@@ -98,11 +98,11 @@ TEST_CASE("Str with fl::FixedVector") {
 
 TEST_CASE("Str with long strings") {
     const char* long_string = "This is a very long string that exceeds the inline buffer size and should be allocated on the heap";
-    Str s(long_string);
+    fl::Str s(long_string);
     CHECK(s.size() == fl::strlen(long_string));
     CHECK(fl::strcmp(s.c_str(), long_string) == 0);
 
-    Str s2 = s;
+    fl::Str s2 = s;
     CHECK(s2.size() == fl::strlen(long_string));
     CHECK(fl::strcmp(s2.c_str(), long_string) == 0);
 
@@ -113,13 +113,13 @@ TEST_CASE("Str with long strings") {
 TEST_CASE("Str overflowing inline data") {
     SUBCASE("Construction with long string") {
         std::string long_string(FASTLED_STR_INLINED_SIZE + 10, 'a');  // Create a string longer than the inline buffer
-        Str s(long_string.c_str());
+        fl::Str s(long_string.c_str());
         CHECK(s.size() == long_string.length());
         CHECK(fl::strcmp(s.c_str(), long_string.c_str()) == 0);
     }
 
     SUBCASE("Appending to overflow") {
-        Str s("Short string");
+        fl::Str s("Short string");
         std::string append_string(FASTLED_STR_INLINED_SIZE, 'b');  // String to append that will cause overflow
         s.append(append_string.c_str());
         CHECK(s.size() == fl::strlen("Short string") + append_string.length());
@@ -129,8 +129,8 @@ TEST_CASE("Str overflowing inline data") {
 
     SUBCASE("Copy on write with long string") {
         std::string long_string(FASTLED_STR_INLINED_SIZE + 20, 'c');
-        Str s1(long_string.c_str());
-        Str s2 = s1;
+        fl::Str s1(long_string.c_str());
+        fl::Str s2 = s1;
         CHECK(s1.size() == s2.size());
         CHECK(fl::strcmp(s1.c_str(), s2.c_str()) == 0);
 
@@ -2639,61 +2639,61 @@ TEST_CASE("String compare operations") {
     // Like strcmp, provides three-way comparison for lexicographical ordering
 
     SUBCASE("compare with equal strings") {
-        string s1 = "hello";
-        string s2 = "hello";
+        fl::string s1 = "hello";
+        fl::string s2 = "hello";
         CHECK(s1.compare(s2) == 0);
         CHECK(s2.compare(s1) == 0);
     }
 
     SUBCASE("compare with different strings") {
-        string s1 = "abc";
-        string s2 = "def";
+        fl::string s1 = "abc";
+        fl::string s2 = "def";
         CHECK(s1.compare(s2) < 0);  // "abc" < "def"
         CHECK(s2.compare(s1) > 0);  // "def" > "abc"
     }
 
     SUBCASE("compare empty strings") {
-        string s1 = "";
-        string s2 = "";
+        fl::string s1 = "";
+        fl::string s2 = "";
         CHECK(s1.compare(s2) == 0);
 
-        string s3 = "hello";
+        fl::string s3 = "hello";
         CHECK(s1.compare(s3) < 0);  // Empty < non-empty
         CHECK(s3.compare(s1) > 0);  // Non-empty > empty
     }
 
     SUBCASE("compare with C-string") {
-        string s = "hello";
+        fl::string s = "hello";
         CHECK(s.compare("hello") == 0);
         CHECK(s.compare("world") < 0);  // "hello" < "world"
         CHECK(s.compare("abc") > 0);    // "hello" > "abc"
     }
 
     SUBCASE("compare with null C-string") {
-        string s = "hello";
+        fl::string s = "hello";
         CHECK(s.compare(nullptr) > 0);  // Non-empty > null
 
-        string empty = "";
+        fl::string empty = "";
         CHECK(empty.compare(nullptr) == 0);  // Empty == null
     }
 
     SUBCASE("compare prefix strings") {
-        string s1 = "hello";
-        string s2 = "hello world";
+        fl::string s1 = "hello";
+        fl::string s2 = "hello world";
         CHECK(s1.compare(s2) < 0);  // Shorter prefix < longer
         CHECK(s2.compare(s1) > 0);  // Longer > shorter prefix
     }
 
     SUBCASE("compare case sensitivity") {
-        string s1 = "Hello";
-        string s2 = "hello";
+        fl::string s1 = "Hello";
+        fl::string s2 = "hello";
         CHECK(s1.compare(s2) < 0);  // 'H' (72) < 'h' (104)
         CHECK(s2.compare(s1) > 0);
     }
 
     SUBCASE("compare substring with another string") {
-        string s1 = "hello world";
-        string s2 = "world";
+        fl::string s1 = "hello world";
+        fl::string s2 = "world";
         // Compare substring [6, 11) with "world"
         CHECK(s1.compare(6, 5, s2) == 0);
 
@@ -2702,29 +2702,29 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare substring with npos count") {
-        string s = "hello world";
-        string s2 = "world";
+        fl::string s = "hello world";
+        fl::string s2 = "world";
         // npos means "until end of string"
-        CHECK(s.compare(6, string::npos, s2) == 0);
+        CHECK(s.compare(6, fl::string::npos, s2) == 0);
     }
 
     SUBCASE("compare substring exceeding length") {
-        string s = "hello";
-        string s2 = "hello world";
+        fl::string s = "hello";
+        fl::string s2 = "hello world";
         // Compare all of s with s2 (count is limited to available chars)
         CHECK(s.compare(0, 100, s2) < 0);  // "hello" < "hello world"
     }
 
     SUBCASE("compare substring with C-string") {
-        string s = "hello world";
+        fl::string s = "hello world";
         CHECK(s.compare(0, 5, "hello") == 0);
         CHECK(s.compare(6, 5, "world") == 0);
         CHECK(s.compare(0, 5, "world") < 0);  // "hello" < "world"
     }
 
     SUBCASE("compare substring with substring") {
-        string s1 = "prefix_data_suffix";
-        string s2 = "other_data_end";
+        fl::string s1 = "prefix_data_suffix";
+        fl::string s2 = "other_data_end";
         // Compare "data" from s1 with "data" from s2
         CHECK(s1.compare(7, 4, s2, 6, 4) == 0);
 
@@ -2733,22 +2733,22 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare substring with npos in second string") {
-        string s1 = "hello_world";
-        string s2 = "world_is_beautiful";
+        fl::string s1 = "hello_world";
+        fl::string s2 = "world_is_beautiful";
         // Compare "world" from s1 with "world_is_beautiful" from s2
-        CHECK(s1.compare(6, 5, s2, 0, string::npos) < 0);  // "world" < "world_is_beautiful"
+        CHECK(s1.compare(6, 5, s2, 0, fl::string::npos) < 0);  // "world" < "world_is_beautiful"
     }
 
     SUBCASE("compare out of bounds position") {
-        string s1 = "hello";
-        string s2 = "world";
+        fl::string s1 = "hello";
+        fl::string s2 = "world";
         // Out of bounds position returns comparison with empty string
         CHECK(s1.compare(100, 5, s2) < 0);  // "" < "world"
         CHECK(s2.compare(100, 5, "") == 0);  // "" == ""
     }
 
     SUBCASE("compare with count2 for C-string") {
-        string s = "hello";
+        fl::string s = "hello";
         // Compare with first 3 chars of "hello world"
         CHECK(s.compare(0, 3, "hello world", 3) == 0);  // "hel" == "hel"
 
@@ -2760,25 +2760,25 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare substring length mismatch") {
-        string s1 = "testing";
-        string s2 = "test";
+        fl::string s1 = "testing";
+        fl::string s2 = "test";
         // When actual compared portions are equal but lengths differ, shorter is "less"
         CHECK(s1.compare(0, 4, s2, 0, 4) == 0);  // "test" == "test"
         CHECK(s1.compare(0, 7, s2, 0, 4) > 0);   // "testing" > "test"
     }
 
     SUBCASE("compare with zero count") {
-        string s1 = "hello";
-        string s2 = "world";
+        fl::string s1 = "hello";
+        fl::string s2 = "world";
         // Zero count means comparing empty strings
         CHECK(s1.compare(0, 0, s2, 0, 0) == 0);  // "" == ""
         CHECK(s1.compare(2, 0, s2, 3, 0) == 0);  // "" == ""
     }
 
     SUBCASE("compare for sorting") {
-        string s1 = "apple";
-        string s2 = "banana";
-        string s3 = "cherry";
+        fl::string s1 = "apple";
+        fl::string s2 = "banana";
+        fl::string s3 = "cherry";
 
         CHECK(s1.compare(s2) < 0);
         CHECK(s2.compare(s3) < 0);
@@ -2789,44 +2789,44 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare with special characters") {
-        string s1 = "hello!";
-        string s2 = "hello?";
+        fl::string s1 = "hello!";
+        fl::string s2 = "hello?";
         CHECK(s1.compare(s2) < 0);  // '!' (33) < '?' (63)
 
-        string s3 = "hello\n";
-        string s4 = "hello\t";
+        fl::string s3 = "hello\n";
+        fl::string s4 = "hello\t";
         CHECK(s3.compare(s4) > 0);  // '\n' (10) > '\t' (9), so s3 > s4
     }
 
     SUBCASE("compare numbers as strings") {
-        string s1 = "10";
-        string s2 = "9";
+        fl::string s1 = "10";
+        fl::string s2 = "9";
         // Lexicographical: '1' < '9', so "10" < "9"
         CHECK(s1.compare(s2) < 0);
 
-        string s3 = "100";
-        string s4 = "99";
+        fl::string s3 = "100";
+        fl::string s4 = "99";
         CHECK(s3.compare(s4) < 0);  // '1' < '9'
     }
 
     SUBCASE("compare position at string boundary") {
-        string s = "hello";
+        fl::string s = "hello";
         // Position at length() is valid (points to empty substring)
         CHECK(s.compare(5, 0, "") == 0);
         CHECK(s.compare(5, 0, "x") < 0);  // "" < "x"
     }
 
     SUBCASE("compare entire string via substring") {
-        string s1 = "hello world";
-        string s2 = "hello world";
+        fl::string s1 = "hello world";
+        fl::string s2 = "hello world";
         // These should be equivalent
-        CHECK(s1.compare(s2) == s1.compare(0, string::npos, s2));
+        CHECK(s1.compare(s2) == s1.compare(0, fl::string::npos, s2));
         CHECK(s1.compare(s2) == s1.compare(0, s1.length(), s2, 0, s2.length()));
     }
 
     SUBCASE("compare after string modifications") {
-        string s1 = "hello";
-        string s2 = "hello";
+        fl::string s1 = "hello";
+        fl::string s2 = "hello";
         CHECK(s1.compare(s2) == 0);
 
         s1.append(" world");
@@ -2837,9 +2837,9 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare consistency with equality operators") {
-        string s1 = "test";
-        string s2 = "test";
-        string s3 = "other";
+        fl::string s1 = "test";
+        fl::string s2 = "test";
+        fl::string s3 = "other";
 
         // compare() == 0 should match operator==
         CHECK((s1.compare(s2) == 0) == (s1 == s2));
@@ -2850,23 +2850,23 @@ TEST_CASE("String compare operations") {
     }
 
     SUBCASE("compare with repeated characters") {
-        string s1 = "aaaa";
-        string s2 = "aaab";
+        fl::string s1 = "aaaa";
+        fl::string s2 = "aaab";
         CHECK(s1.compare(s2) < 0);  // Last char: 'a' < 'b'
 
-        string s3 = "aaa";
+        fl::string s3 = "aaa";
         CHECK(s1.compare(s3) > 0);  // "aaaa" > "aaa"
     }
 
     SUBCASE("compare middle substrings") {
-        string s = "the quick brown fox jumps";
+        fl::string s = "the quick brown fox jumps";
         CHECK(s.compare(4, 5, "quick") == 0);
         CHECK(s.compare(10, 5, "brown") == 0);
         CHECK(s.compare(20, 5, "jumps") == 0);
     }
 
     SUBCASE("compare overlapping substrings of same string") {
-        string s = "abcdefgh";
+        fl::string s = "abcdefgh";
         // Compare "abc" with "def"
         CHECK(s.compare(0, 3, s, 3, 3) < 0);  // "abc" < "def"
 

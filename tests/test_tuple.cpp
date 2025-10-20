@@ -6,7 +6,7 @@ TEST_CASE("BasicTupleCreation") {
     auto t = fl::make_tuple(42, "hello", 3.14f);
     
     REQUIRE_EQ(42, fl::get<0>(t));
-    REQUIRE_EQ(std::fl::string("hello"), std::fl::string(fl::get<1>(t)));
+    REQUIRE_EQ(fl::string("hello"), fl::string(fl::get<1>(t)));
     REQUIRE_EQ(3.14f, fl::get<2>(t));
 }
 

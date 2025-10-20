@@ -22,8 +22,8 @@
 
 
 TEST_CASE("LinePath") {
-    LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
-    vec2f xy = path.compute(0.5f);
+    fl::LinePath path(0.0f, 0.0f, 1.0f, 1.0f);
+    fl::vec2<float> xy = path.compute(0.5f);
     REQUIRE(xy.x == 0.5f);
     REQUIRE(xy.y == 0.5f);
 
@@ -38,35 +38,35 @@ TEST_CASE("LinePath") {
 
 TEST_CASE("LinePath at_subpixel") {
     // Tests that we can get the correct subpixel values at center point 0,0
-    auto line = fl::make_shared<LinePath>(-1.0f, -1.0f, 1.0f, -1.0f);
-    XYPath path(line);
+    auto line = fl::make_shared<fl::LinePath>(-1.0f, -1.0f, 1.0f, -1.0f);
+    fl::XYPath path(line);
     path.setDrawBounds(2,2);
-    Tile2x2_u8 tile = path.at_subpixel(0);
-    REQUIRE_EQ(vec2<uint16_t>(0, 0), tile.origin());
+    fl::Tile2x2_u8 tile = path.at_subpixel(0);
+    REQUIRE_EQ(fl::vec2<uint16_t>(0, 0), tile.origin());
     MESSAGE_TILE(tile);
     REQUIRE_EQ(255, tile.at(0, 0));
 }
 
 TEST_CASE("LinePath simple float sweep") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    auto point = fl::make_shared<LinePath>(0, 1.f, 1.f, 1.f);
-    XYPath path(point);
+    auto point = fl::make_shared<fl::LinePath>(0, 1.f, 1.f, 1.f);
+    fl::XYPath path(point);
     auto xy = path.at(0);
     //MESSAGE_TILE(tile);
-    REQUIRE_EQ(xy, vec2f(0.0f, 1.f));
+    REQUIRE_EQ(xy, fl::vec2<float>(0.0f, 1.f));
     xy = path.at(1);
-    REQUIRE_EQ(xy, vec2f(1.f, 1.f));
+    REQUIRE_EQ(xy, fl::vec2<float>(1.f, 1.f));
 }
 
 TEST_CASE("Point at exactly the middle") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    auto point = fl::make_shared<PointPath>(0.0, 0.0);  // Right in middle.
-    XYPath path(point);
+    auto point = fl::make_shared<fl::PointPath>(0.0, 0.0);  // Right in middle.
+    fl::XYPath path(point);
     path.setDrawBounds(2,2);
     // auto xy = path.at(0);
     fl::Tile2x2_u8 sp = path.at_subpixel(0);
     //MESSAGE_TILE(tile);
-    // REQUIRE_EQ(vec2f(0.0f, 0.f), sp);
+    // REQUIRE_EQ(fl::vec2(0.0f, 0.f), sp);
     // print out
     auto origin = sp.origin();
     MESSAGE("Origin: " << origin.x << ", " << origin.y);
@@ -85,33 +85,33 @@ TEST_CASE("Point at exactly the middle") {
 
 TEST_CASE("LinePath simple sweep in draw bounds") {
     // Tests that we can get the correct gaussian values at center point 0,0
-    auto point = fl::make_shared<LinePath>(-1.f, -1.f, 1.f, -1.f);
-    XYPath path(point);
+    auto point = fl::make_shared<fl::LinePath>(-1.f, -1.f, 1.f, -1.f);
+    fl::XYPath path(point);
     int width = 2;
     path.setDrawBounds(width, width);
     auto begin = path.at(0);
     auto end = path.at(1);
-    REQUIRE_EQ(vec2f(0.5f, 0.5f), begin);
-    REQUIRE_EQ(vec2f(1.5f, 0.5f), end);
+    REQUIRE_EQ(fl::vec2<float>(0.5f, 0.5f), begin);
+    REQUIRE_EQ(fl::vec2<float>(1.5f, 0.5f), end);
 }
 
 TEST_CASE("LinePath at_subpixel moves x") {
     // Tests that we can get the correct subpixel.
-    auto point = fl::make_shared<LinePath>(-1.f, -1.f, 1.f, -1.f);
-    XYPath path(point);
+    auto point = fl::make_shared<fl::LinePath>(-1.f, -1.f, 1.f, -1.f);
+    fl::XYPath path(point);
     path.setDrawBounds(3, 3);
-    Tile2x2_u8 tile = path.at_subpixel(0.0f);
+    fl::Tile2x2_u8 tile = path.at_subpixel(0.0f);
     // MESSAGE_TILE(tile);
-    REQUIRE_EQ(tile.origin(), vec2<uint16_t>(0, 0));
+    REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(0, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
     tile = path.at_subpixel(1.0f);
-    REQUIRE_EQ(tile.origin(), vec2<uint16_t>(2, 0));
+    REQUIRE_EQ(tile.origin(), fl::vec2<uint16_t>(2, 0));
     REQUIRE_EQ(tile.at(0, 0), 255);
 }
 
 
 TEST_CASE("Test HeartPath") {
-    HeartPathPtr heart = fl::make_shared<HeartPath>();
+    fl::HeartPathPtr heart = fl::make_shared<fl::HeartPath>();
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -123,7 +123,7 @@ TEST_CASE("Test HeartPath") {
     const int num_samples = 100;
     for (int i = 0; i < num_samples; i++) {
         float alpha = static_cast<float>(i) / (num_samples - 1);
-        vec2f point = heart->compute(alpha);
+        fl::vec2<float> point = heart->compute(alpha);
         
         // Update min/max values
         min_x = FL_MIN(min_x, point.x);
@@ -150,7 +150,7 @@ TEST_CASE("Test HeartPath") {
 }
 
 TEST_CASE("Test ArchimedeanSpiralPath") {
-    ArchimedeanSpiralPathPtr spiral = fl::make_shared<ArchimedeanSpiralPath>(3, 1.0f);
+    fl::ArchimedeanSpiralPathPtr spiral = fl::make_shared<fl::ArchimedeanSpiralPath>(3, 1.0f);
     
     // Track min and max values to help with scaling
     float min_x = 1.0f;
@@ -162,7 +162,7 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
     const int num_samples = 100;
     for (int i = 0; i < num_samples; i++) {
         float alpha = static_cast<float>(i) / (num_samples - 1);
-        vec2f point = spiral->compute(alpha);
+        fl::vec2<float> point = spiral->compute(alpha);
         
         // Update min/max values
         min_x = FL_MIN(min_x, point.x);
@@ -191,7 +191,7 @@ TEST_CASE("Test ArchimedeanSpiralPath") {
 TEST_CASE("Test RosePath") {
     // Test with different petal configurations
     SUBCASE("3-petal rose") {
-        RosePathPtr rose = fl::make_shared<RosePath>(3, 1);
+        fl::RosePathPtr rose = fl::make_shared<fl::RosePath>(3, 1);
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;
@@ -203,7 +203,7 @@ TEST_CASE("Test RosePath") {
         const int num_samples = 100;
         for (int i = 0; i < num_samples; i++) {
             float alpha = static_cast<float>(i) / (num_samples - 1);
-            vec2f point = rose->compute(alpha);
+            fl::vec2<float> point = rose->compute(alpha);
             
             // Update min/max values
             min_x = FL_MIN(min_x, point.x);
@@ -230,7 +230,7 @@ TEST_CASE("Test RosePath") {
     }
     
     SUBCASE("4-petal rose") {
-        RosePathPtr rose = fl::make_shared<RosePath>(2, 1);  // n=2 gives 4 petals
+        fl::RosePathPtr rose = fl::make_shared<fl::RosePath>(2, 1);  // n=2 gives 4 petals
         
         // Track min and max values to help with scaling
         float min_x = 1.0f;
@@ -242,7 +242,7 @@ TEST_CASE("Test RosePath") {
         const int num_samples = 100;
         for (int i = 0; i < num_samples; i++) {
             float alpha = static_cast<float>(i) / (num_samples - 1);
-            vec2f point = rose->compute(alpha);
+            fl::vec2<float> point = rose->compute(alpha);
             
             // Update min/max values
             min_x = FL_MIN(min_x, point.x);
@@ -260,24 +260,24 @@ TEST_CASE("Test RosePath") {
 }
 
 TEST_CASE("Check complex types") {
-    HeapVector<XYPathPtr> paths;
-    XYPathPtr circle = XYPath::NewCirclePath();
+    fl::HeapVector<fl::XYPathPtr> paths;
+    fl::XYPathPtr circle = fl::XYPath::NewCirclePath();
     paths.push_back(circle);
     
     // Add heart path to the tests
-    XYPathPtr heart = XYPath::NewHeartPath();
+    fl::XYPathPtr heart = fl::XYPath::NewHeartPath();
     paths.push_back(heart);
     
     // Add spiral path to the tests
-    XYPathPtr spiral = XYPath::NewArchimedeanSpiralPath();
+    fl::XYPathPtr spiral = fl::XYPath::NewArchimedeanSpiralPath();
     paths.push_back(spiral);
     
     // Add rose path to the tests
-    XYPathPtr rose = XYPath::NewRosePath();
+    fl::XYPathPtr rose = fl::XYPath::NewRosePath();
     paths.push_back(rose);
     
     // Add phyllotaxis path to the tests
-    XYPathPtr phyllotaxis = XYPath::NewPhyllotaxisPath();
+    fl::XYPathPtr phyllotaxis = fl::XYPath::NewPhyllotaxisPath();
     paths.push_back(phyllotaxis);
     
     // paths.push_back(fl::make_intrusive<LissajousPath>());
@@ -288,7 +288,7 @@ TEST_CASE("Check complex types") {
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = FL_MIN(1.f, alpha);
-                vec2f xy = path->at(alpha);
+                fl::vec2<float> xy = path->at(alpha);
                 REQUIRE(xy.x >= -1.0f);
                 REQUIRE(xy.x <= 1.0f);
                 REQUIRE(xy.y >= -1.0f);
@@ -301,13 +301,13 @@ TEST_CASE("Check complex types") {
     }
 
     SUBCASE("Check float point range with transform to -8,8") {
-        TransformFloat tx;
+        fl::TransformFloat tx;
         tx.set_scale(4.0f);
 
         for (auto &path : paths) {
             for (float alpha = 0.0f; true; alpha += 0.01f) {
                 alpha = FL_MIN(1.f, alpha);
-                vec2f xy = path->at(alpha, tx);
+                fl::vec2<float> xy = path->at(alpha, tx);
                 REQUIRE_GE(xy.x, -4.0f);
                 REQUIRE_LE(xy.x, 4.0f);
                 REQUIRE_GE(xy.y, -4.0f);

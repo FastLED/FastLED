@@ -74,7 +74,7 @@ TEST_CASE("UI Bug - Memory Corruption") {
     
     // // Verify that the new component is properly serialized
     // CHECK(!capturedJsonOutput.empty());
-    // CHECK(capturedJsonOutput.find("NewTitle") != fl::string::npos);
+    // CHECK(capturedJsonOutput.find("NewTitle") != fl::fl::string::npos);
     
     // // Test component destruction with pending updates
     // {
@@ -110,5 +110,5 @@ TEST_CASE("UI Bug - Memory Corruption") {
     // fl::JsonDescriptionImpl finalDescription("Final verification description");
     // fl::processJsonUiPendingUpdates();
     // CHECK(!capturedJsonOutput.empty());
-    // CHECK(capturedJsonOutput.find("Final verification description") != fl::string::npos);
+    // CHECK(capturedJsonOutput.find("Final verification description") != fl::fl::string::npos);
 }

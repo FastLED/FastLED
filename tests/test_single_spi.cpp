@@ -12,13 +12,13 @@
 // ============================================================================
 
 TEST_CASE("SpiHw1: Hardware initialization") {
-    const auto& controllers = SpiHw1::getAll();
+    const auto& controllers = fl::SpiHw1::getAll();
     CHECK(controllers.size() > 0);
 
-    SpiHw1* single = controllers[0];
+    fl::SpiHw1* single = controllers[0];
     CHECK(single != nullptr);
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -33,10 +33,10 @@ TEST_CASE("SpiHw1: Hardware initialization") {
 }
 
 TEST_CASE("SpiHw1: Blocking transmission behavior") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -44,7 +44,7 @@ TEST_CASE("SpiHw1: Blocking transmission behavior") {
 
     CHECK(single->begin(config));
 
-    vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
+    fl::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
 
     // transmitAsync should be BLOCKING - completes immediately
     CHECK(single->transmitAsync(fl::span<const uint8_t>(data)));
@@ -60,34 +60,34 @@ TEST_CASE("SpiHw1: Blocking transmission behavior") {
 }
 
 TEST_CASE("SpiHw1: Empty buffer transmission") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
 
-    vector<uint8_t> empty_data;
+    fl::vector<uint8_t> empty_data;
     CHECK(single->transmitAsync(fl::span<const uint8_t>(empty_data)));
 
     single->end();
 }
 
 TEST_CASE("SpiHw1: Multiple transmissions") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
 
     // First transmission
-    vector<uint8_t> data1 = {0xAA, 0xBB};
+    fl::vector<uint8_t> data1 = {0xAA, 0xBB};
     CHECK(single->transmitAsync(fl::span<const uint8_t>(data1)));
     CHECK_FALSE(single->isBusy());  // Blocking, so not busy
 
     // Second transmission (should work immediately since first is complete)
-    vector<uint8_t> data2 = {0xCC, 0xDD};
+    fl::vector<uint8_t> data2 = {0xCC, 0xDD};
     CHECK(single->transmitAsync(fl::span<const uint8_t>(data2)));
     CHECK_FALSE(single->isBusy());
 
@@ -95,30 +95,30 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
 }
 
 TEST_CASE("SpiHw1: Transmission without initialization fails") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1Stub* stub = toStub(controllers[0]);
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1Stub* stub = fl::toStub(controllers[0]);
 
     stub->reset();
     stub->end();  // Ensure not initialized
 
-    vector<uint8_t> data = {0x12, 0x34};
+    fl::vector<uint8_t> data = {0x12, 0x34};
     CHECK_FALSE(stub->transmitAsync(fl::span<const uint8_t>(data)));
 }
 
 TEST_CASE("SpiHw1: Stub inspection") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1Stub* stub = toStub(controllers[0]);
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1Stub* stub = fl::toStub(controllers[0]);
     CHECK(stub != nullptr);
 
     stub->reset();
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 20000000;
     CHECK(stub->begin(config));
     CHECK_EQ(stub->getClockSpeed(), 20000000);
 
-    vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
+    fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
     CHECK(stub->transmitAsync(fl::span<const uint8_t>(test_data)));
 
     const auto& transmitted = stub->getLastTransmission();
@@ -134,17 +134,17 @@ TEST_CASE("SpiHw1: Stub inspection") {
 }
 
 TEST_CASE("SpiHw1: Transmission count tracking") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1Stub* stub = toStub(controllers[0]);
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1Stub* stub = fl::toStub(controllers[0]);
 
     stub->reset();
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     CHECK(stub->begin(config));
 
     CHECK_EQ(stub->getTransmissionCount(), 0);
 
-    vector<uint8_t> data = {0x11, 0x22};
+    fl::vector<uint8_t> data = {0x11, 0x22};
     stub->transmitAsync(fl::span<const uint8_t>(data));
     CHECK_EQ(stub->getTransmissionCount(), 1);
 
@@ -161,10 +161,10 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
 }
 
 TEST_CASE("SpiHw1: Bus ID validation") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     CHECK(single->begin(config));
     CHECK_EQ(single->getBusId(), 0);
@@ -173,8 +173,8 @@ TEST_CASE("SpiHw1: Bus ID validation") {
 }
 
 TEST_CASE("SpiHw1: Name retrieval") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
     const char* name = single->getName();
     CHECK(name != nullptr);
@@ -183,7 +183,7 @@ TEST_CASE("SpiHw1: Name retrieval") {
 }
 
 TEST_CASE("SpiHw1: Multiple controllers available") {
-    const auto& controllers = SpiHw1::getAll();
+    const auto& controllers = fl::SpiHw1::getAll();
 
     // Should have at least 2 mock controllers in test environment
     CHECK(controllers.size() >= 2);
@@ -196,16 +196,16 @@ TEST_CASE("SpiHw1: Multiple controllers available") {
 }
 
 TEST_CASE("SpiHw1: Large data transmission") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1Stub* stub = toStub(controllers[0]);
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1Stub* stub = fl::toStub(controllers[0]);
 
     stub->reset();
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     CHECK(stub->begin(config));
 
     // Create large data buffer
-    vector<uint8_t> large_data;
+    fl::vector<uint8_t> large_data;
     for (size_t i = 0; i < 1000; ++i) {
         large_data.push_back(static_cast<uint8_t>(i & 0xFF));
     }
@@ -224,10 +224,10 @@ TEST_CASE("SpiHw1: Large data transmission") {
 }
 
 TEST_CASE("SpiHw1: Configuration parameter validation") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1* single = controllers[0];
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1* single = controllers[0];
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 10000000;  // 10 MHz
     config.clock_pin = 14;
@@ -241,15 +241,15 @@ TEST_CASE("SpiHw1: Configuration parameter validation") {
 }
 
 TEST_CASE("SpiHw1: Reset clears transmission history") {
-    const auto& controllers = SpiHw1::getAll();
-    SpiHw1Stub* stub = toStub(controllers[0]);
+    const auto& controllers = fl::SpiHw1::getAll();
+    fl::SpiHw1Stub* stub = fl::toStub(controllers[0]);
 
     stub->reset();
 
-    SpiHw1::Config config;
+    fl::SpiHw1::Config config;
     CHECK(stub->begin(config));
 
-    vector<uint8_t> data = {0xFF, 0xEE, 0xDD};
+    fl::vector<uint8_t> data = {0xFF, 0xEE, 0xDD};
     stub->transmitAsync(fl::span<const uint8_t>(data));
 
     CHECK_EQ(stub->getTransmissionCount(), 1);
@@ -272,7 +272,7 @@ TEST_CASE("SpiHw1: Reset clears transmission history") {
 #include "platforms/shared/spi_bitbang/spi_block_1.h"
 
 TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
-    SpiBlock1 spi;
+    fl::SpiBlock1 spi;
 
     // Configure pins
     spi.setPinMapping(0, 8);  // Data pin 0, Clock pin 8
@@ -287,10 +287,10 @@ TEST_CASE("SPIBlocking Single: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Single: LUT initialization") {
-    SpiBlock1 spi;
+    fl::SpiBlock1 spi;
     spi.setPinMapping(5, 10);  // Data pin 5, Clock pin 10
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    ::PinMaskEntry* lut = spi.getLUTArray();
 
     // Verify LUT entries for bit 0
     // When byte value has bit 0 clear, data pin should be cleared
@@ -311,7 +311,7 @@ TEST_CASE("SPIBlocking Single: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Single: Empty buffer handling") {
-    SpiBlock1 spi;
+    fl::SpiBlock1 spi;
     spi.setPinMapping(0, 8);
 
     // Transmit with no buffer should not crash
@@ -324,7 +324,7 @@ TEST_CASE("SPIBlocking Single: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Single: Maximum buffer size") {
-    SpiBlock1 spi;
+    fl::SpiBlock1 spi;
     spi.setPinMapping(0, 8);
 
     uint8_t largeBuffer[300];
@@ -341,10 +341,10 @@ TEST_CASE("SPIBlocking Single: Multiple pin configurations") {
     // Test different pin configurations
     for (uint8_t dataPin = 0; dataPin < 10; dataPin++) {
         for (uint8_t clkPin = 10; clkPin < 15; clkPin++) {
-            SpiBlock1 spi;
+            fl::SpiBlock1 spi;
             spi.setPinMapping(dataPin, clkPin);
 
-            PinMaskEntry* lut = spi.getLUTArray();
+            ::PinMaskEntry* lut = spi.getLUTArray();
 
             // Verify data pin mask in LUT
             CHECK_EQ(lut[0x01].set_mask, (1u << dataPin));

@@ -7,18 +7,18 @@
 
 
 // Helper function to set up filesystem for codec tests
-static FileSystem setupCodecFilesystem() {
-    setTestFileSystemRoot("tests");
-    FileSystem fs;
+static fl::FileSystem setupCodecFilesystem() {
+    fl::setTestFileSystemRoot("tests");
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
     return fs;
 }
 
 TEST_CASE("MPEG1 file loading and decoding") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
         // Test that we can load the MPEG1 file from filesystem
-        FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+        fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
         REQUIRE(handle != nullptr);
         REQUIRE(handle->valid());
 
@@ -74,16 +74,16 @@ TEST_CASE("MPEG1 file loading and decoding") {
             CHECK_EQ(pixels[3].b, 36);
         };
 
-        auto verifyFrameDimensions = [](const Frame& frame) {
+        auto verifyFrameDimensions = [](const fl::Frame& frame) {
             return frame.isValid() && frame.getWidth() == 2 && frame.getHeight() == 2;
         };
 
         auto testMpeg1Decoding = [&]() {
-            Mpeg1Config config;
-            config.mode = Mpeg1Config::SingleFrame;
+            fl::Mpeg1Config config;
+            config.mode = fl::Mpeg1Config::SingleFrame;
 
             fl::string error_msg;
-            auto decoder = Mpeg1::createDecoder(config, &error_msg);
+            auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
             if (!decoder) {
                 MESSAGE("MPEG1 decoder creation failed: " << error_msg);
                 return;
@@ -101,13 +101,13 @@ TEST_CASE("MPEG1 file loading and decoding") {
 
             // Decode first frame
             auto result = decoder->decode();
-            if (result != DecodeResult::Success) {
+            if (result != fl::DecodeResult::Success) {
                 MESSAGE("Failed to decode first frame, result: " << static_cast<int>(result));
                 decoder->end();
                 return;
             }
 
-            Frame frame0 = decoder->getCurrentFrame();
+            fl::Frame frame0 = decoder->getCurrentFrame();
             if (!verifyFrameDimensions(frame0)) {
                 MESSAGE("First frame is not valid or wrong dimensions");
                 decoder->end();
@@ -123,10 +123,10 @@ TEST_CASE("MPEG1 file loading and decoding") {
             // Decode second frame if available
             if (decoder->hasMoreFrames()) {
                 result = decoder->decode();
-                if (result != DecodeResult::Success) {
+                if (result != fl::DecodeResult::Success) {
                     MESSAGE("Failed to decode second frame, result: " << static_cast<int>(result));
                 } else {
-                    Frame frame1 = decoder->getCurrentFrame();
+                    fl::Frame frame1 = decoder->getCurrentFrame();
                     if (!verifyFrameDimensions(frame1)) {
                         MESSAGE("Second frame is not valid or wrong dimensions");
                     } else {
@@ -142,7 +142,7 @@ TEST_CASE("MPEG1 file loading and decoding") {
         };
 
         // Test MPEG1 decoder
-        if (!Mpeg1::isSupported()) {
+        if (!fl::Mpeg1::isSupported()) {
             MESSAGE("MPEG1 decoder not supported on this platform");
         } else {
             testMpeg1Decoding();
@@ -153,12 +153,12 @@ TEST_CASE("MPEG1 file loading and decoding") {
 }
 
 TEST_CASE("MPEG1 decoder error handling") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     SUBCASE("null ByteStream") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         CHECK_FALSE(decoder->begin(nullptr));
@@ -166,9 +166,9 @@ TEST_CASE("MPEG1 decoder error handling") {
     }
 
     SUBCASE("empty ByteStream") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto empty_stream = fl::make_shared<fl::ByteStreamMemory>(0);
@@ -181,9 +181,9 @@ TEST_CASE("MPEG1 decoder error handling") {
     }
 
     SUBCASE("invalid MPEG1 data") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         // Create stream with invalid data (not MPEG1 format)
@@ -197,7 +197,7 @@ TEST_CASE("MPEG1 decoder error handling") {
 
     SUBCASE("truncated MPEG1 data") {
         // Load the valid MPEG1 file but truncate it
-        FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+        fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
         REQUIRE(handle != nullptr);
 
         fl::size file_size = handle->size();
@@ -205,9 +205,9 @@ TEST_CASE("MPEG1 decoder error handling") {
         handle->read(file_data.data(), file_data.size());
         handle->close();
 
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_data.size());
@@ -219,7 +219,7 @@ TEST_CASE("MPEG1 decoder error handling") {
             // This is actually expected behavior - pl_mpeg handles partial streams gracefully
             auto result = decoder->decode();
             // Either success (partial decode) or failure is acceptable
-            CHECK((result == DecodeResult::Success || result == DecodeResult::Error || result == DecodeResult::EndOfStream));
+            CHECK((result == fl::DecodeResult::Success || result == fl::DecodeResult::Error || result == fl::DecodeResult::EndOfStream));
         } else {
             CHECK(decoder->hasError());
         }
@@ -229,10 +229,10 @@ TEST_CASE("MPEG1 decoder error handling") {
 }
 
 TEST_CASE("MPEG1 configuration options") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     // Load valid MPEG1 data
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -241,82 +241,82 @@ TEST_CASE("MPEG1 configuration options") {
     handle->close();
 
     SUBCASE("SingleFrame mode") {
-        Mpeg1Config config;
-        config.mode = Mpeg1Config::SingleFrame;
+        fl::Mpeg1Config config;
+        config.mode = fl::Mpeg1Config::SingleFrame;
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
         stream->write(file_data.data(), file_size);
 
         CHECK(decoder->begin(stream));
-        CHECK(decoder->decode() == DecodeResult::Success);
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
 
-        Frame frame = decoder->getCurrentFrame();
+        fl::Frame frame = decoder->getCurrentFrame();
         CHECK(frame.isValid());
         CHECK_EQ(frame.getWidth(), 2);
         CHECK_EQ(frame.getHeight(), 2);
     }
 
     SUBCASE("Streaming mode with buffering") {
-        Mpeg1Config config;
-        config.mode = Mpeg1Config::Streaming;
+        fl::Mpeg1Config config;
+        config.mode = fl::Mpeg1Config::Streaming;
         config.immediateMode = false;
         config.bufferFrames = 3;
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
         stream->write(file_data.data(), file_size);
 
         CHECK(decoder->begin(stream));
-        CHECK(decoder->decode() == DecodeResult::Success);
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
 
-        Frame frame = decoder->getCurrentFrame();
+        fl::Frame frame = decoder->getCurrentFrame();
         CHECK(frame.isValid());
     }
 
     SUBCASE("Custom frame rate") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.targetFps = 15;
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
         stream->write(file_data.data(), file_size);
 
         CHECK(decoder->begin(stream));
-        CHECK(decoder->decode() == DecodeResult::Success);
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
     }
 
     SUBCASE("Audio disabled (default)") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = true; // This should be default
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
         stream->write(file_data.data(), file_size);
 
         CHECK(decoder->begin(stream));
-        CHECK(decoder->decode() == DecodeResult::Success);
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
     }
 
     fs.end();
 }
 
 TEST_CASE("MPEG1 decoder properties and metadata") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -324,9 +324,9 @@ TEST_CASE("MPEG1 decoder properties and metadata") {
     handle->read(file_data.data(), file_size);
     handle->close();
 
-    Mpeg1Config config;
+    fl::Mpeg1Config config;
     fl::string error_msg;
-    auto decoder = Mpeg1::createDecoder(config, &error_msg);
+    auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     REQUIRE(decoder);
 
     auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -337,8 +337,8 @@ TEST_CASE("MPEG1 decoder properties and metadata") {
     SUBCASE("Video properties") {
         // Check that we can get video properties after initialization
         // Note: dynamic_cast requires RTTI which is disabled, so we'll test via frame properties
-        CHECK(decoder->decode() == DecodeResult::Success);
-        Frame test_frame = decoder->getCurrentFrame();
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
+        fl::Frame test_frame = decoder->getCurrentFrame();
         if (test_frame.isValid()) {
             CHECK_EQ(test_frame.getWidth(), 2);
             CHECK_EQ(test_frame.getHeight(), 2);
@@ -361,12 +361,12 @@ TEST_CASE("MPEG1 decoder properties and metadata") {
         CHECK(decoder->hasMoreFrames());
 
         // Decode first frame
-        CHECK(decoder->decode() == DecodeResult::Success);
+        CHECK(decoder->decode() == fl::DecodeResult::Success);
         CHECK_EQ(decoder->getCurrentFrameIndex(), 1);
 
         // Should still have more frames
         if (decoder->hasMoreFrames()) {
-            CHECK(decoder->decode() == DecodeResult::Success);
+            CHECK(decoder->decode() == fl::DecodeResult::Success);
             CHECK_EQ(decoder->getCurrentFrameIndex(), 2);
         }
     }
@@ -378,9 +378,9 @@ TEST_CASE("MPEG1 decoder properties and metadata") {
 }
 
 TEST_CASE("MPEG1 frame data validation") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -388,26 +388,26 @@ TEST_CASE("MPEG1 frame data validation") {
     handle->read(file_data.data(), file_size);
     handle->close();
 
-    Mpeg1Config config;
-    config.mode = Mpeg1Config::SingleFrame;
+    fl::Mpeg1Config config;
+    config.mode = fl::Mpeg1Config::SingleFrame;
 
     fl::string error_msg;
-    auto decoder = Mpeg1::createDecoder(config, &error_msg);
+    auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     REQUIRE(decoder);
 
     auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
     stream->write(file_data.data(), file_size);
 
     CHECK(decoder->begin(stream));
-    CHECK(decoder->decode() == DecodeResult::Success);
+    CHECK(decoder->decode() == fl::DecodeResult::Success);
 
-    Frame frame = decoder->getCurrentFrame();
+    fl::Frame frame = decoder->getCurrentFrame();
     REQUIRE(frame.isValid());
 
     SUBCASE("Frame properties") {
         CHECK_EQ(frame.getWidth(), 2);
         CHECK_EQ(frame.getHeight(), 2);
-        CHECK_EQ(frame.getFormat(), PixelFormat::RGB888);
+        CHECK_EQ(frame.getFormat(), fl::PixelFormat::RGB888);
         CHECK_GE(frame.getTimestamp(), 0); // Should have valid timestamp (may be 0 for first frame)
     }
 
@@ -451,9 +451,9 @@ TEST_CASE("MPEG1 frame data validation") {
 }
 
 TEST_CASE("MPEG1 multi-frame sequence validation") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -461,11 +461,11 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
     handle->read(file_data.data(), file_size);
     handle->close();
 
-    Mpeg1Config config;
-    config.mode = Mpeg1Config::Streaming;
+    fl::Mpeg1Config config;
+    config.mode = fl::Mpeg1Config::Streaming;
 
     fl::string error_msg;
-    auto decoder = Mpeg1::createDecoder(config, &error_msg);
+    auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
     REQUIRE(decoder);
 
     auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -473,13 +473,13 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
 
     CHECK(decoder->begin(stream));
 
-    fl::vector<Frame> decoded_frames;
-    DecodeResult result;
+    fl::vector<fl::Frame> decoded_frames;
+    fl::DecodeResult result;
     int frame_count = 0;
 
     // Decode all available frames
-    while ((result = decoder->decode()) == DecodeResult::Success && frame_count < 10) {
-        Frame frame = decoder->getCurrentFrame();
+    while ((result = decoder->decode()) == fl::DecodeResult::Success && frame_count < 10) {
+        fl::Frame frame = decoder->getCurrentFrame();
         if (frame.isValid()) {
             decoded_frames.push_back(frame);
             frame_count++;
@@ -487,7 +487,7 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
     }
 
     CHECK_GT(decoded_frames.size(), 0);
-    bool valid_result = (result == DecodeResult::EndOfStream) || (result == DecodeResult::Success);
+    bool valid_result = (result == fl::DecodeResult::EndOfStream) || (result == fl::DecodeResult::Success);
     CHECK(valid_result);
 
     // Verify frame properties are consistent
@@ -495,7 +495,7 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
         CHECK(frame.isValid());
         CHECK_EQ(frame.getWidth(), 2);
         CHECK_EQ(frame.getHeight(), 2);
-        CHECK_EQ(frame.getFormat(), PixelFormat::RGB888);
+        CHECK_EQ(frame.getFormat(), fl::PixelFormat::RGB888);
 
         const CRGB* pixels = frame.rgb();
         CHECK(pixels != nullptr);
@@ -513,10 +513,10 @@ TEST_CASE("MPEG1 multi-frame sequence validation") {
 }
 
 TEST_CASE("MPEG1 metadata parsing without decoding") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     // Test that we can load the MPEG1 file from filesystem
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -531,7 +531,7 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
     // Test MPEG1 metadata parsing
     fl::string error_msg;
     fl::span<const fl::u8> data(file_data.data(), file_size);
-    Mpeg1Info info = Mpeg1::parseMpeg1Info(data, &error_msg);
+    fl::Mpeg1Info info = fl::Mpeg1::parseMpeg1Info(data, &error_msg);
 
     // The metadata parsing should succeed
     CHECK_MESSAGE(info.isValid, "MPEG1 metadata parsing failed: " << error_msg);
@@ -563,7 +563,7 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
         fl::span<const fl::u8> empty_span(empty_data.data(), 0);
         fl::string empty_error;
 
-        Mpeg1Info empty_info = Mpeg1::parseMpeg1Info(empty_span, &empty_error);
+        fl::Mpeg1Info empty_info = fl::Mpeg1::parseMpeg1Info(empty_span, &empty_error);
         CHECK_FALSE(empty_info.isValid);
         CHECK_FALSE(empty_error.empty());
         MESSAGE("Empty data error: " << empty_error);
@@ -574,7 +574,7 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
         fl::span<const fl::u8> small_span(small_data.data(), small_data.size());
         fl::string small_error;
 
-        Mpeg1Info small_info = Mpeg1::parseMpeg1Info(small_span, &small_error);
+        fl::Mpeg1Info small_info = fl::Mpeg1::parseMpeg1Info(small_span, &small_error);
         CHECK_FALSE(small_info.isValid);
         CHECK_FALSE(small_error.empty());
         MESSAGE("Small data error: " << small_error);
@@ -585,7 +585,7 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
         fl::span<const fl::u8> invalid_span(invalid_data.data(), invalid_data.size());
         fl::string invalid_error;
 
-        Mpeg1Info invalid_info = Mpeg1::parseMpeg1Info(invalid_span, &invalid_error);
+        fl::Mpeg1Info invalid_info = fl::Mpeg1::parseMpeg1Info(invalid_span, &invalid_error);
         CHECK_FALSE(invalid_info.isValid);
         CHECK_FALSE(invalid_error.empty());
         MESSAGE("Invalid stream error: " << invalid_error);
@@ -596,10 +596,10 @@ TEST_CASE("MPEG1 metadata parsing without decoding") {
 }
 
 TEST_CASE("MPEG1 audio extraction") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     // Load valid MPEG1 data with audio
-    FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.mpeg");
     REQUIRE(handle != nullptr);
 
     fl::size file_size = handle->size();
@@ -608,14 +608,14 @@ TEST_CASE("MPEG1 audio extraction") {
     handle->close();
 
     SUBCASE("Audio callback receives samples") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = false;  // Enable audio
 
         // Track audio samples received
         int audio_frames_received = 0;
         int total_audio_samples = 0;
 
-        config.audioCallback = [&](const AudioSample& sample) {
+        config.audioCallback = [&](const fl::AudioSample& sample) {
             audio_frames_received++;
             total_audio_samples += sample.size();
 
@@ -630,7 +630,7 @@ TEST_CASE("MPEG1 audio extraction") {
         };
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -639,9 +639,9 @@ TEST_CASE("MPEG1 audio extraction") {
         CHECK(decoder->begin(stream));
 
         // Decode frames (this should also trigger audio callbacks if present)
-        DecodeResult result;
+        fl::DecodeResult result;
         int frames_decoded = 0;
-        while ((result = decoder->decode()) == DecodeResult::Success && frames_decoded < 10) {
+        while ((result = decoder->decode()) == fl::DecodeResult::Success && frames_decoded < 10) {
             frames_decoded++;
         }
 
@@ -661,17 +661,17 @@ TEST_CASE("MPEG1 audio extraction") {
     }
 
     SUBCASE("Audio disabled via skipAudio flag") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = true;  // Disable audio
 
         int audio_frames_received = 0;
-        config.audioCallback = [&](const AudioSample& sample) {
+        config.audioCallback = [&](const fl::AudioSample& sample) {
             (void)sample;
             audio_frames_received++;
         };
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -691,12 +691,12 @@ TEST_CASE("MPEG1 audio extraction") {
     }
 
     SUBCASE("Audio disabled via empty callback") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = false;
         // audioCallback is default-constructed (empty)
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -706,19 +706,19 @@ TEST_CASE("MPEG1 audio extraction") {
 
         // Decode some frames - should not crash even without audio callback
         for (int i = 0; i < 5 && decoder->hasMoreFrames(); i++) {
-            DecodeResult res = decoder->decode();
-            CHECK((res == DecodeResult::Success || res == DecodeResult::EndOfStream));
+            fl::DecodeResult res = decoder->decode();
+            CHECK((res == fl::DecodeResult::Success || res == fl::DecodeResult::EndOfStream));
         }
 
         decoder->end();
     }
 
     SUBCASE("Dynamic audio callback setting") {
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = false;
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(file_size);
@@ -728,7 +728,7 @@ TEST_CASE("MPEG1 audio extraction") {
 
         // Set audio callback after initialization
         int audio_frames_received = 0;
-        decoder->setAudioCallback([&](const AudioSample& sample) {
+        decoder->setAudioCallback([&](const fl::AudioSample& sample) {
             (void)sample;
             audio_frames_received++;
         });
@@ -748,7 +748,7 @@ TEST_CASE("MPEG1 audio extraction") {
 
     SUBCASE("Audio and video both decode from multiplexed stream") {
         // Load MPEG1 file with both audio and video
-        FileHandlePtr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
+        fl::FileHandlePtr av_handle = fs.openRead("data/codec/test_audio_video.mpg");
         REQUIRE(av_handle != nullptr);
 
         fl::size av_file_size = av_handle->size();
@@ -756,7 +756,7 @@ TEST_CASE("MPEG1 audio extraction") {
         av_handle->read(av_file_data.data(), av_file_size);
         av_handle->close();
 
-        Mpeg1Config config;
+        fl::Mpeg1Config config;
         config.skipAudio = false;  // Enable audio
 
         // Track both audio and video
@@ -764,7 +764,7 @@ TEST_CASE("MPEG1 audio extraction") {
         int video_frames_decoded = 0;
         int total_audio_samples = 0;
 
-        config.audioCallback = [&](const AudioSample& sample) {
+        config.audioCallback = [&](const fl::AudioSample& sample) {
             audio_frames_received++;
             total_audio_samples += sample.size();
 
@@ -779,7 +779,7 @@ TEST_CASE("MPEG1 audio extraction") {
         };
 
         fl::string error_msg;
-        auto decoder = Mpeg1::createDecoder(config, &error_msg);
+        auto decoder = fl::Mpeg1::createDecoder(config, &error_msg);
         REQUIRE(decoder);
 
         auto stream = fl::make_shared<fl::ByteStreamMemory>(av_file_size);
@@ -794,25 +794,25 @@ TEST_CASE("MPEG1 audio extraction") {
         CHECK(began);
 
         // Decode frames - audio will be detected once we hit audio packets
-        DecodeResult result;
+        fl::DecodeResult result;
         int decode_attempts = 0;
         while (decode_attempts < 50 && video_frames_decoded < 30) {
             result = decoder->decode();
             decode_attempts++;
 
-            if (result == DecodeResult::Success) {
-                Frame frame = decoder->getCurrentFrame();
+            if (result == fl::DecodeResult::Success) {
+                fl::Frame frame = decoder->getCurrentFrame();
                 if (frame.isValid()) {
                     video_frames_decoded++;
 
                     // Verify video frame properties
                     CHECK_EQ(frame.getWidth(), 2);
                     CHECK_EQ(frame.getHeight(), 2);
-                    CHECK_EQ(frame.getFormat(), PixelFormat::RGB888);
+                    CHECK_EQ(frame.getFormat(), fl::PixelFormat::RGB888);
                 }
-            } else if (result == DecodeResult::EndOfStream) {
+            } else if (result == fl::DecodeResult::EndOfStream) {
                 break;
-            } else if (result == DecodeResult::Error) {
+            } else if (result == fl::DecodeResult::Error) {
                 break;
             }
         }

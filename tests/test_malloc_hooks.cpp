@@ -9,7 +9,7 @@ static fl::vector_inlined<fl::size, 1000> gMallocSizes;
 static fl::vector_inlined<void*, 1000> gFreeCalls;
 
 // Test hook implementation class
-class TestMallocFreeHook : public MallocFreeHook {
+class TestMallocFreeHook : public fl::MallocFreeHook {
 public:
     void onMalloc(void* ptr, fl::size size) override {
         gMallocCalls.push_back(ptr);
@@ -187,7 +187,7 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         fl::vector<fl::size> newMallocSizes;
         fl::vector<void*> newFreeCalls;
         
-        class NewTestHook : public MallocFreeHook {
+        class NewTestHook : public fl::MallocFreeHook {
         public:
             NewTestHook(fl::vector<void*>& mallocCalls, fl::vector<fl::size>& mallocSizes, fl::vector<void*>& freeCalls)
                 : mMallocCalls(mallocCalls), mMallocSizes(mallocSizes), mFreeCalls(freeCalls) {}

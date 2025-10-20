@@ -8,10 +8,10 @@
 
 TEST_CASE("splat simple test") {
     // Define a simple input coordinate
-    vec2f input(0, 0);
+    fl::vec2f input(0, 0);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     REQUIRE(result.bounds().mMin.x == 0);
     REQUIRE(result.bounds().mMin.y == 0);
@@ -28,10 +28,10 @@ TEST_CASE("splat simple test") {
 
 TEST_CASE("splat test for input (0.0, 0.5)") {
     // Define the input coordinate
-    vec2f input(0.0f, 0.5f);
+    fl::vec2f input(0.0f, 0.5f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 0);
@@ -48,10 +48,10 @@ TEST_CASE("splat test for input (0.0, 0.5)") {
 
 TEST_CASE("splat test for input (0.0, 0.99)") {
     // Define the input coordinate
-    vec2f input(0.0f, 0.99f);
+    fl::vec2f input(0.0f, 0.99f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 0);
@@ -68,10 +68,10 @@ TEST_CASE("splat test for input (0.0, 0.99)") {
 
 TEST_CASE("splat test for input (0.0, 1.0)") {
     // Define the input coordinate
-    vec2f input(0.0f, 1.0f);
+    fl::vec2f input(0.0f, 1.0f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 0);
@@ -88,10 +88,10 @@ TEST_CASE("splat test for input (0.0, 1.0)") {
 
 TEST_CASE("splat test for input (0.5, 0.0)") {
     // Define the input coordinate
-    vec2f input(0.5f, 0.0f);
+    fl::vec2f input(0.5f, 0.0f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 0);
@@ -108,10 +108,10 @@ TEST_CASE("splat test for input (0.5, 0.0)") {
 
 TEST_CASE("splat test for input (0.99, 0.0)") {
     // Define the input coordinate
-    vec2f input(0.99f, 0.0f);
+    fl::vec2f input(0.99f, 0.0f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 0);
@@ -128,10 +128,10 @@ TEST_CASE("splat test for input (0.99, 0.0)") {
 
 TEST_CASE("splat test for input (1.0, 0.0)") {
     // Define the input coordinate
-    vec2f input(1.0f, 0.0f);
+    fl::vec2f input(1.0f, 0.0f);
 
     // Call the splat function
-    Tile2x2_u8 result = splat(input);
+    fl::Tile2x2_u8 result = fl::splat(input);
 
     // Verify the bounds of the tile
     REQUIRE(result.bounds().mMin.x == 1);

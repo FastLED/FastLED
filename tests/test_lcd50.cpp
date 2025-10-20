@@ -316,7 +316,7 @@ TEST_CASE("fl::ClocklessTiming::is_timing_acceptable") {
     }
 
     SUBCASE("Invalid result") {
-        ClocklessTimingResult result = {};
+        fl::ClocklessTimingResult result = {};
         result.valid = false;
 
         CHECK_FALSE(fl::ClocklessTiming::is_timing_acceptable(result));

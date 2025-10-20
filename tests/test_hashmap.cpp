@@ -376,7 +376,7 @@ TEST_CASE("insert(pair) - const pair insert") {
     fl::HashMap<int, fl::Str> m;
 
     // Insert using pair
-    fl::pair<int, Str> p1(5, "hello");
+    fl::pair<int, fl::Str> p1(5, "hello");
     auto result1 = m.insert(p1);
     REQUIRE(result1.second == true);  // was inserted
     REQUIRE(result1.first != m.end());
@@ -385,14 +385,14 @@ TEST_CASE("insert(pair) - const pair insert") {
     REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with pair
-    fl::pair<int, Str> p2(5, "world");
+    fl::pair<int, fl::Str> p2(5, "world");
     auto result2 = m.insert(p2);
     REQUIRE(result2.second == false);  // not inserted (updated)
     REQUIRE_EQ((*result2.first).second, "world");
     REQUIRE_EQ(m.size(), 1u);
 
     // Insert new key with pair
-    fl::pair<int, Str> p3(10, "foo");
+    fl::pair<int, fl::Str> p3(10, "foo");
     auto result3 = m.insert(p3);
     REQUIRE(result3.second == true);  // was inserted
     REQUIRE_EQ((*result3.first).first, 10);
@@ -404,7 +404,7 @@ TEST_CASE("insert(pair) - move pair insert") {
     fl::HashMap<int, fl::Str> m;
 
     // Insert using moved pair
-    fl::pair<int, Str> p1(7, "movable");
+    fl::pair<int, fl::Str> p1(7, "movable");
     auto result1 = m.insert(fl::move(p1));
     REQUIRE(result1.second == true);
     REQUIRE(result1.first != m.end());
@@ -413,7 +413,7 @@ TEST_CASE("insert(pair) - move pair insert") {
     REQUIRE_EQ(m.size(), 1u);
 
     // Insert duplicate key with moved pair
-    fl::pair<int, Str> p2(7, "replaced");
+    fl::pair<int, fl::Str> p2(7, "replaced");
     auto result2 = m.insert(fl::move(p2));
     REQUIRE(result2.second == false);  // not inserted (updated)
     REQUIRE_EQ((*result2.first).second, "replaced");
@@ -440,11 +440,11 @@ TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
     fl::HashMap<int, fl::Str> m;
 
     // Create a vector of pairs to insert
-    fl::vector<fl::pair<int, Str>> pairs;
-    pairs.push_back(fl::pair<int, Str>(1, "one"));
-    pairs.push_back(fl::pair<int, Str>(2, "two"));
-    pairs.push_back(fl::pair<int, Str>(3, "three"));
-    pairs.push_back(fl::pair<int, Str>(4, "four"));
+    fl::vector<fl::pair<int, fl::Str>> pairs;
+    pairs.push_back(fl::pair<int, fl::Str>(1, "one"));
+    pairs.push_back(fl::pair<int, fl::Str>(2, "two"));
+    pairs.push_back(fl::pair<int, fl::Str>(3, "three"));
+    pairs.push_back(fl::pair<int, fl::Str>(4, "four"));
 
     // Insert range of pairs
     m.insert(pairs.begin(), pairs.end());
@@ -457,9 +457,9 @@ TEST_CASE("insert(InputIt first, InputIt last) - range insert") {
     REQUIRE_EQ(m[4], "four");
 
     // Insert range with duplicate keys (should update values)
-    fl::vector<fl::pair<int, Str>> more_pairs;
-    more_pairs.push_back(fl::pair<int, Str>(2, "TWO"));  // duplicate
-    more_pairs.push_back(fl::pair<int, Str>(5, "five")); // new
+    fl::vector<fl::pair<int, fl::Str>> more_pairs;
+    more_pairs.push_back(fl::pair<int, fl::Str>(2, "TWO"));  // duplicate
+    more_pairs.push_back(fl::pair<int, fl::Str>(5, "five")); // new
 
     m.insert(more_pairs.begin(), more_pairs.end());
 
@@ -874,10 +874,10 @@ TEST_CASE("Move constructor - empty map") {
 }
 
 TEST_CASE("Range constructor - from vector") {
-    fl::vector<fl::pair<int, Str>> pairs;
-    pairs.push_back(fl::pair<int, Str>(1, "one"));
-    pairs.push_back(fl::pair<int, Str>(2, "two"));
-    pairs.push_back(fl::pair<int, Str>(3, "three"));
+    fl::vector<fl::pair<int, fl::Str>> pairs;
+    pairs.push_back(fl::pair<int, fl::Str>(1, "one"));
+    pairs.push_back(fl::pair<int, fl::Str>(2, "two"));
+    pairs.push_back(fl::pair<int, fl::Str>(3, "three"));
 
     // Construct from range
     fl::HashMap<int, fl::Str> m(pairs.begin(), pairs.end());

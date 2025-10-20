@@ -10,9 +10,9 @@
 
 TEST_CASE("Test Line Simplification") {
     // default‐constructed bitset is empty
-    LineSimplifier<float> ls;
+    fl::LineSimplifier<float> ls;
     ls.setMinimumDistance(0.1f);
-    fl::vector<vec2<float>> points;
+    fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f});
     points.push_back({1.0f, 1.0f});
     points.push_back({2.0f, 2.0f});
@@ -21,40 +21,40 @@ TEST_CASE("Test Line Simplification") {
     ls.simplifyInplace(&points);
     REQUIRE_EQ(2,
                points.size()); // Only 2 points on co-linear line should remain.
-    REQUIRE_EQ(vec2<float>(0.0f, 0.0f), points[0]);
-    REQUIRE_EQ(vec2<float>(4.0f, 4.0f), points[1]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 0.0f), points[0]);
+    REQUIRE_EQ(fl::vec2<float>(4.0f, 4.0f), points[1]);
 }
 
 TEST_CASE("Test simple triangle") {
-    LineSimplifier<float> ls;
+    fl::LineSimplifier<float> ls;
 
-    fl::vector<vec2<float>> points;
+    fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f}); // First point of triangle
     points.push_back({0.5f, 0.5f});
     points.push_back({0.0f, 1.0f});
     float exceeds_thresh = 0.49f;
     float under_thresh = 0.51f;
     ls.setMinimumDistance(exceeds_thresh);
-    fl::vector<vec2<float>> output;
+    fl::vector<fl::vec2<float>> output;
     ls.simplify(points, &output);
     REQUIRE_EQ(3, output.size());
-    REQUIRE_EQ(vec2<float>(0.0f, 0.0f), output[0]);
-    REQUIRE_EQ(vec2<float>(0.5f, 0.5f), output[1]);
-    REQUIRE_EQ(vec2<float>(0.0f, 1.0f), output[2]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 0.0f), output[0]);
+    REQUIRE_EQ(fl::vec2<float>(0.5f, 0.5f), output[1]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 1.0f), output[2]);
 
     ls.setMinimumDistance(under_thresh);
     ls.simplify(points, &output);
     REQUIRE_EQ(2, output.size());
-    REQUIRE_EQ(vec2<float>(0.0f, 0.0f), output[0]);
-    REQUIRE_EQ(vec2<float>(0.0f, 1.0f), output[1]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 0.0f), output[0]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 1.0f), output[1]);
 }
 
 TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
-    LineSimplifier<float> ls;
+    fl::LineSimplifier<float> ls;
 
     // Test with a triangle shape - non-collinear points
     ls.setMinimumDistance(0.5f);
-    fl::vector<vec2<float>> points1;
+    fl::vector<fl::vec2<float>> points1;
     points1.push_back({0.0f, 0.0f}); // First point of triangle
     points1.push_back({0.3f, 0.3f}); // Should be filtered out (distance < 0.5)
     points1.push_back({1.0f, 1.0f}); // Second point of triangle
@@ -62,14 +62,14 @@ TEST_CASE("Test Line Simplification with Different Distance Thresholds") {
     points1.push_back({0.0f, 2.0f}); // Third point of triangle
     ls.simplifyInplace(&points1);
     REQUIRE_EQ(3, points1.size()); // Triangle vertices should remain
-    REQUIRE_EQ(vec2<float>(0.0f, 0.0f), points1[0]);
-    REQUIRE_EQ(vec2<float>(1.0f, 1.0f), points1[1]);
-    REQUIRE_EQ(vec2<float>(0.0f, 2.0f), points1[2]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 0.0f), points1[0]);
+    REQUIRE_EQ(fl::vec2<float>(1.0f, 1.0f), points1[1]);
+    REQUIRE_EQ(fl::vec2<float>(0.0f, 2.0f), points1[2]);
 }
 
 TEST_CASE("Test Line Simplification with Complex Shape") {
     // SUBCASE("at threshold") {
-    //     LineSimplifier<float> ls;
+    //     fl::LineSimplifier<float> ls;
     //     // Test with a more complex shape and smaller threshold
     //     ls.setMinimumDistance(0.1f);
     //     fl::vector<vec2<float>> points2;
@@ -85,24 +85,24 @@ TEST_CASE("Test Line Simplification with Complex Shape") {
     // };
 
     SUBCASE("Above threshold") {
-        LineSimplifier<float> ls;
+        fl::LineSimplifier<float> ls;
         // Test with a more complex shape and larger threshold
         ls.setMinimumDistance(0.101f);
-        fl::vector<vec2<float>> points3;
+        fl::vector<fl::vec2<float>> points3;
         points3.push_back({0.0f, 0.0f}); // Start point
         points3.push_back({0.1f, 0.1f}); // Filtered out
         points3.push_back({0.0f, 0.3f}); // Filtered out
         points3.push_back({0.0f, 1.0f}); // Should be kept (distance > 0.5)
         ls.simplifyInplace(&points3);
         REQUIRE_EQ(2, points3.size());
-        REQUIRE_EQ(vec2<float>(0.0f, 0.0f), points3[0]);
-        REQUIRE_EQ(vec2<float>(0.0f, 1.0f), points3[1]);
+        REQUIRE_EQ(fl::vec2<float>(0.0f, 0.0f), points3[0]);
+        REQUIRE_EQ(fl::vec2<float>(0.0f, 1.0f), points3[1]);
     };
 }
 
 TEST_CASE("Iteratively find the closest point") {
-    LineSimplifier<float> ls;
-    fl::vector<vec2<float>> points;
+    fl::LineSimplifier<float> ls;
+    fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f}); // First point of triangle
     points.push_back({0.5f, 0.5f});
     points.push_back({0.0f, 1.0f});
@@ -110,7 +110,7 @@ TEST_CASE("Iteratively find the closest point") {
     float thresh = 0.0;
     while (true) {
         ls.setMinimumDistance(thresh);
-        fl::vector<vec2<float>> output;
+        fl::vector<fl::vec2<float>> output;
         ls.simplify(points, &output);
         if (output.size() == 2) {
             break;
@@ -123,8 +123,8 @@ TEST_CASE("Iteratively find the closest point") {
 
 
 TEST_CASE("Binary search the the threshold that gives 3 points") {
-    LineSimplifierExact<float> ls;
-    fl::vector<vec2<float>> points;
+    fl::LineSimplifierExact<float> ls;
+    fl::vector<fl::vec2<float>> points;
     points.push_back({0.0f, 0.0f}); // First point of triangle
     points.push_back({0.5f, 0.5f});
     points.push_back({0.0f, 1.0f});
@@ -133,7 +133,7 @@ TEST_CASE("Binary search the the threshold that gives 3 points") {
 
     ls.setCount(3);
 
-    fl::vector<vec2<float>> out;
+    fl::vector<fl::vec2<float>> out;
 
     ls.simplify(points, &out);
     REQUIRE_EQ(3, out.size());
@@ -142,16 +142,16 @@ TEST_CASE("Binary search the the threshold that gives 3 points") {
 
 
 TEST_CASE("Known bad") {
-    fl::vector<vec2<float>> points;
+    fl::vector<fl::vec2<float>> points;
     points.push_back({-3136.439941f, 2546.339844f});
     points.push_back({4580.994141f, -3516.982422f});
     points.push_back({-1228.554688f, -5104.814453f});
     points.push_back({-8806.442383f, 3895.103516f});
     points.push_back({-2039.114746f, 1878.047852f});
 
-    LineSimplifierExact<float> ls;
+    fl::LineSimplifierExact<float> ls;
     ls.setCount(3);
-    fl::vector<vec2<float>> out;
+    fl::vector<fl::vec2<float>> out;
     ls.simplify(points, &out);
 
     MESSAGE("Output points: " << out.size());
@@ -170,8 +170,8 @@ TEST_CASE("Known bad") {
 //     std::uniform_real_distribution<float> dist(-10000.0f, 10000.0f);
 
 //     for (int trial = 0; trial < kTrials; ++trial) {
-//         LineSimplifierExact<float> ls;
-//         fl::vector<vec2<float>> points;
+//         fl::LineSimplifierExact<float> ls;
+//         fl::vector<fl::vec2<float>> points;
 
 //         for (int i = 0; i < kInputPoints; ++i) {
 //             points.push_back({dist(rng), dist(rng)});
@@ -179,7 +179,7 @@ TEST_CASE("Known bad") {
 
 //         ls.setCount(kTargetPoints);
 
-//         fl::vector<vec2<float>> out;
+//         fl::vector<fl::vec2<float>> out;
 //         ls.simplify(points, &out);
 
 

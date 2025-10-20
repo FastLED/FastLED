@@ -1,7 +1,7 @@
 /*
-  FastLED — SpiIsr32 Unit Tests (32-way interrupt-driven SPI)
+  FastLED — fl::SpiIsr32 Unit Tests (32-way interrupt-driven SPI)
   -----------------------------------------------------------
-  Tests the SpiIsr32 C++ wrapper class with various configurations.
+  Tests the fl::SpiIsr32 C++ wrapper class with various configurations.
 
   Test coverage:
   - Pin mapping initialization with 32 pins
@@ -87,14 +87,14 @@ void setup_32way_spi_lut() {
 }  // namespace
 
 // ============================================================================
-// SpiIsr32 Tests
+// fl::SpiIsr32 Tests
 // ============================================================================
 
 TEST_CASE("SpiIsr32 - Pin mapping initialization with 32 pins") {
     setup_32way_spi_lut();
 
     // Verify that the LUT array is properly initialized
-    PinMaskEntry* lut = SpiIsr32::getLUTArray();
+    PinMaskEntry* lut = fl::SpiIsr32::getLUTArray();
     REQUIRE(lut != nullptr);
 
     // Check boundary values
@@ -113,7 +113,7 @@ TEST_CASE("SpiIsr32 - LUT generation for byte values") {
     setup_32way_spi_lut();
 
     // Test specific patterns
-    PinMaskEntry* lut = SpiIsr32::getLUTArray();
+    PinMaskEntry* lut = fl::SpiIsr32::getLUTArray();
 
     // 0x00 - all bits low
     CHECK(lut[0x00].set_mask == 0);
@@ -135,7 +135,7 @@ TEST_CASE("SpiIsr32 - LUT generation for byte values") {
 TEST_CASE("SpiIsr32 - Non-blocking transmission") {
     setup_32way_spi_lut();
 
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Prepare test data
     uint8_t test_data[] = {0x00, 0xFF};
@@ -163,7 +163,7 @@ TEST_CASE("SpiIsr32 - Non-blocking transmission") {
 TEST_CASE("SpiIsr32 - Data buffer loading") {
     setup_32way_spi_lut();
 
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Test loading via loadBuffer
     uint8_t test_data[] = {0x11, 0x22, 0x33, 0x44};
@@ -178,7 +178,7 @@ TEST_CASE("SpiIsr32 - Data buffer loading") {
 }
 
 TEST_CASE("SpiIsr32 - LUT bulk loading") {
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Create test LUT
     uint32_t setMasks[256];
@@ -193,14 +193,14 @@ TEST_CASE("SpiIsr32 - LUT bulk loading") {
     spi.loadLUT(setMasks, clearMasks, 256);
 
     // Verify
-    PinMaskEntry* lut = SpiIsr32::getLUTArray();
+    PinMaskEntry* lut = fl::SpiIsr32::getLUTArray();
     CHECK(lut[0x55].set_mask == (0x55 << 1));
 }
 
 TEST_CASE("SpiIsr32 - Zero bytes transfer") {
     setup_32way_spi_lut();
 
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Set zero bytes to transfer
     spi.setTotalBytes(0);
@@ -223,7 +223,7 @@ TEST_CASE("SpiIsr32 - Zero bytes transfer") {
 
 
 TEST_CASE("SpiIsr32 - Clock mask configuration") {
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Configure clock on GPIO31 (fits in 32-bit mask)
     spi.setClockMask(1u << 31);
@@ -244,7 +244,7 @@ TEST_CASE("SpiIsr32 - Visibility delay and ISR setup") {
     setup_32way_spi_lut();
     fl_gpio_sim_clear();
 
-    SpiIsr32 spi;
+    fl::SpiIsr32 spi;
 
     // Setup should succeed
     fl_spi_reset_state();

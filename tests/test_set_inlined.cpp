@@ -17,8 +17,8 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
 
     SUBCASE("Set has inlined elements") {
         fl::set_inlined<int, 5> set;
-        uptr ptr_begin = fl::ptr_to_int(&set);
-        uptr ptr_end = ptr_begin + sizeof(set);
+        fl::uptr ptr_begin = fl::ptr_to_int(&set);
+        fl::uptr ptr_end = ptr_begin + sizeof(set);
 
         set.insert(1);
         set.insert(2);
@@ -28,7 +28,7 @@ TEST_CASE("fl::set_inlined - Basic functionality") {
 
         // now make sure that the element addresses are in the right place
         for (auto it = set.begin(); it != set.end(); ++it) {
-            uptr ptr = fl::ptr_to_int(&*it);
+            fl::uptr ptr = fl::ptr_to_int(&*it);
             CHECK_GE(ptr, ptr_begin);
             CHECK_LT(ptr, ptr_end);
         }

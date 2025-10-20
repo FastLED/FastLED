@@ -339,7 +339,7 @@ TEST_CASE("SortedVector") {
 
 
     SUBCASE("Insert maintains order") {
-        SortedHeapVector<int, Less> vec;
+        fl::SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -353,7 +353,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Erase removes element") {
-        SortedHeapVector<int, Less> vec;
+        fl::SortedHeapVector<int, Less> vec;
         vec.insert(3);
         vec.insert(1);
         vec.insert(4);
@@ -371,7 +371,7 @@ TEST_CASE("SortedVector") {
     }
 
     SUBCASE("Insert when full") {
-        SortedHeapVector<int, Less> vec;
+        fl::SortedHeapVector<int, Less> vec;
         vec.setMaxSize(5);
         // Fill the vector to capacity
         vec.insert(1);
@@ -380,16 +380,16 @@ TEST_CASE("SortedVector") {
         vec.insert(4);
         vec.insert(5);  // Max size is 5
 
-        InsertResult result;
+        fl::InsertResult result;
         vec.insert(6, &result);  // Try to insert into full vector
         
-        CHECK_EQ(InsertResult::kMaxSize, result);  // Should return false
+        CHECK_EQ(fl::InsertResult::kMaxSize, result);  // Should return false
         CHECK(vec.size() == 5);  // Size shouldn't change
         CHECK(vec[4] == 5);  // Last element should still be 5
     }
 
     SUBCASE("Erase from empty") {
-        SortedHeapVector<int, Less> vec;
+        fl::SortedHeapVector<int, Less> vec;
         bool ok = vec.erase(1);  // Try to erase from empty vector
         CHECK(!ok);  // Should return false
         CHECK(vec.size() == 0);  // Should still be empty
@@ -409,7 +409,7 @@ TEST_CASE("SortedVector") {
 
 TEST_CASE("HeapVector") {
     SUBCASE("resize") {
-        HeapVector<int> vec;
+        fl::HeapVector<int> vec;
         vec.resize(5);
         CHECK(vec.size() == 5);
         CHECK(vec.capacity() >= 5);

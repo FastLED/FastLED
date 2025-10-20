@@ -11,19 +11,19 @@
 
 TEST_CASE("SPITransposer: Basic bit interleaving - single byte") {
     // Test the core interleaving algorithm with known bit patterns
-    vector<uint8_t> lane0 = {0x12};  // 00010010
-    vector<uint8_t> lane1 = {0x34};  // 00110100
-    vector<uint8_t> lane2 = {0x56};  // 01010110
-    vector<uint8_t> lane3 = {0x78};  // 01111000
+    fl::vector<uint8_t> lane0 = {0x12};  // 00010010
+    fl::vector<uint8_t> lane1 = {0x34};  // 00110100
+    fl::vector<uint8_t> lane2 = {0x56};  // 01010110
+    fl::vector<uint8_t> lane3 = {0x78};  // 01111000
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane2, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane3, padding});
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane2, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane3, padding});
 
-    vector<uint8_t> output(4);
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(4);
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 4);
@@ -39,19 +39,19 @@ TEST_CASE("SPITransposer: Basic bit interleaving - single byte") {
 
 TEST_CASE("SPITransposer: Equal length lanes - 4 lanes") {
     // All lanes same size, no padding needed
-    vector<uint8_t> lane0 = {0xAA, 0xBB};
-    vector<uint8_t> lane1 = {0xCC, 0xDD};
-    vector<uint8_t> lane2 = {0xEE, 0xFF};
-    vector<uint8_t> lane3 = {0x11, 0x22};
+    fl::vector<uint8_t> lane0 = {0xAA, 0xBB};
+    fl::vector<uint8_t> lane1 = {0xCC, 0xDD};
+    fl::vector<uint8_t> lane2 = {0xEE, 0xFF};
+    fl::vector<uint8_t> lane3 = {0x11, 0x22};
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane2, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane3, padding});
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane2, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane3, padding});
 
-    vector<uint8_t> output(8);  // 2 bytes * 4 = 8
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(8);  // 2 bytes * 4 = 8
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 8);
@@ -60,19 +60,19 @@ TEST_CASE("SPITransposer: Equal length lanes - 4 lanes") {
 TEST_CASE("SPITransposer: Different length lanes - padding at beginning") {
     // Lane 0: 3 bytes, Lane 1: 2 bytes, Lane 2: 1 byte, Lane 3: empty
     // Max = 3, so lane1 gets 1 byte padding, lane2 gets 2, lane3 gets 3
-    vector<uint8_t> lane0 = {0xAA, 0xBB, 0xCC};
-    vector<uint8_t> lane1 = {0xDD, 0xEE};
-    vector<uint8_t> lane2 = {0xFF};
-    vector<uint8_t> lane3;  // Empty
+    fl::vector<uint8_t> lane0 = {0xAA, 0xBB, 0xCC};
+    fl::vector<uint8_t> lane1 = {0xDD, 0xEE};
+    fl::vector<uint8_t> lane2 = {0xFF};
+    fl::vector<uint8_t> lane3;  // Empty
 
-    vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};  // APA102-style
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane2, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane3, padding});
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};  // APA102-style
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane2, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane3, padding});
 
-    vector<uint8_t> output(12);  // 3 bytes * 4 = 12
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(12);  // 3 bytes * 4 = 12
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     // Padding should be at the beginning of shorter lanes
@@ -80,17 +80,17 @@ TEST_CASE("SPITransposer: Different length lanes - padding at beginning") {
 
 TEST_CASE("SPITransposer: Repeating padding pattern") {
     // Test that padding frames repeat when padding_bytes > padding_frame.size()
-    vector<uint8_t> lane0 = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};  // 6 bytes (max)
-    vector<uint8_t> lane1 = {0x11};  // 1 byte, needs 5 bytes of padding
+    fl::vector<uint8_t> lane0 = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF};  // 6 bytes (max)
+    fl::vector<uint8_t> lane1 = {0x11};  // 1 byte, needs 5 bytes of padding
 
-    vector<uint8_t> padding = {0xE0, 0x00};  // 2-byte repeating pattern
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>();
-    auto lane3_opt = optional<SPITransposer::LaneData>();
+    fl::vector<uint8_t> padding = {0xE0, 0x00};  // 2-byte repeating pattern
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>();
 
-    vector<uint8_t> output(24);  // 6 bytes * 4 = 24
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(24);  // 6 bytes * 4 = 24
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     // Lane 1 should have padding: 0xE0, 0x00, 0xE0, 0x00, 0xE0, then data: 0x11
@@ -98,62 +98,62 @@ TEST_CASE("SPITransposer: Repeating padding pattern") {
 
 TEST_CASE("SPITransposer: Empty lanes use nullopt") {
     // Only 2 lanes used (dual-SPI mode)
-    vector<uint8_t> lane0 = {0xAA, 0xBB};
-    vector<uint8_t> lane1 = {0xCC, 0xDD};
+    fl::vector<uint8_t> lane0 = {0xAA, 0xBB};
+    fl::vector<uint8_t> lane1 = {0xCC, 0xDD};
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>();  // Empty
-    auto lane3_opt = optional<SPITransposer::LaneData>();  // Empty
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>();  // Empty
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>();  // Empty
 
-    vector<uint8_t> output(8);  // 2 bytes * 4 = 8
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(8);  // 2 bytes * 4 = 8
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     // Empty lanes should be filled with default padding (0x00 from lane0)
 }
 
 TEST_CASE("SPITransposer: All lanes empty") {
-    auto lane0_opt = optional<SPITransposer::LaneData>();
-    auto lane1_opt = optional<SPITransposer::LaneData>();
-    auto lane2_opt = optional<SPITransposer::LaneData>();
-    auto lane3_opt = optional<SPITransposer::LaneData>();
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>();
 
-    vector<uint8_t> output(0);  // Empty output
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(0);  // Empty output
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
 }
 
 TEST_CASE("SPITransposer: Output buffer validation - not divisible by 4") {
-    vector<uint8_t> lane0 = {0xAA};
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>();
-    auto lane2_opt = optional<SPITransposer::LaneData>();
-    auto lane3_opt = optional<SPITransposer::LaneData>();
+    fl::vector<uint8_t> lane0 = {0xAA};
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>();
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>();
 
-    vector<uint8_t> output(5);  // Not divisible by 4
+    fl::vector<uint8_t> output(5);  // Not divisible by 4
     const char* error = nullptr;
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, &error);
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, &error);
 
     CHECK_FALSE(success);
     CHECK(error != nullptr);
 }
 
 TEST_CASE("SPITransposer: Alternating patterns - 0xFF and 0x00") {
-    vector<uint8_t> lane_ff = {0xFF};
-    vector<uint8_t> lane_00 = {0x00};
+    fl::vector<uint8_t> lane_ff = {0xFF};
+    fl::vector<uint8_t> lane_00 = {0x00};
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_ff, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_00, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_ff, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_00, padding});
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_ff, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_00, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_ff, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_00, padding});
 
-    vector<uint8_t> output(4);
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(4);
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     // Each output byte should have alternating bit pairs: 00_11_00_11
@@ -164,16 +164,16 @@ TEST_CASE("SPITransposer: Alternating patterns - 0xFF and 0x00") {
 }
 
 TEST_CASE("SPITransposer: Identical lanes - 0xAA pattern") {
-    vector<uint8_t> lane_aa = {0xAA};  // 10101010
+    fl::vector<uint8_t> lane_aa = {0xAA};  // 10101010
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_aa, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_aa, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_aa, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane_aa, padding});
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_aa, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_aa, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_aa, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane_aa, padding});
 
-    vector<uint8_t> output(4);
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(4);
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     // All lanes identical should produce: 10_10_10_10 for each bit pair
@@ -184,10 +184,10 @@ TEST_CASE("SPITransposer: Identical lanes - 0xAA pattern") {
 
 TEST_CASE("SPITransposer: Multi-byte lanes") {
     // Test with realistic multi-byte data
-    vector<uint8_t> lane0;
-    vector<uint8_t> lane1;
-    vector<uint8_t> lane2;
-    vector<uint8_t> lane3;
+    fl::vector<uint8_t> lane0;
+    fl::vector<uint8_t> lane1;
+    fl::vector<uint8_t> lane2;
+    fl::vector<uint8_t> lane3;
 
     for (int i = 0; i < 10; ++i) {
         lane0.push_back(0x00 + i);
@@ -196,14 +196,14 @@ TEST_CASE("SPITransposer: Multi-byte lanes") {
         lane3.push_back(0x30 + i);
     }
 
-    vector<uint8_t> padding = {0x00};
-    auto lane0_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane0, padding});
-    auto lane1_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane1, padding});
-    auto lane2_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane2, padding});
-    auto lane3_opt = optional<SPITransposer::LaneData>(SPITransposer::LaneData{lane3, padding});
+    fl::vector<uint8_t> padding = {0x00};
+    auto lane0_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane0, padding});
+    auto lane1_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane1, padding});
+    auto lane2_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane2, padding});
+    auto lane3_opt = fl::optional<fl::SPITransposer::LaneData>(fl::SPITransposer::LaneData{lane3, padding});
 
-    vector<uint8_t> output(40);  // 10 bytes * 4 = 40
-    bool success = SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
+    fl::vector<uint8_t> output(40);  // 10 bytes * 4 = 40
+    bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 40);
@@ -216,7 +216,7 @@ TEST_CASE("SPITransposer: Multi-byte lanes") {
 #include "platforms/shared/spi_bitbang/spi_block_4.h"
 
 TEST_CASE("SPIBlocking Quad: Basic initialization and configuration") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
 
     // Configure pins (4 data + 1 clock)
     spi.setPinMapping(0, 1, 2, 3, 8);  // Data pins 0,1,2,3, Clock pin 8
@@ -234,10 +234,10 @@ TEST_CASE("SPIBlocking Quad: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Quad: LUT initialization") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
     spi.setPinMapping(5, 6, 7, 8, 10);  // Data pins 5,6,7,8, Clock pin 10
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    auto lut = spi.getLUTArray();
 
     // Verify LUT entries for 4-bit patterns
     // 0x00 (0000) - All pins low
@@ -275,7 +275,7 @@ TEST_CASE("SPIBlocking Quad: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Quad: Empty buffer handling") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
     spi.setPinMapping(0, 1, 2, 3, 8);
 
     // Transmit with no buffer should not crash
@@ -288,7 +288,7 @@ TEST_CASE("SPIBlocking Quad: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Quad: Maximum buffer size") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
     spi.setPinMapping(0, 1, 2, 3, 8);
 
     uint8_t largeBuffer[300];
@@ -302,10 +302,10 @@ TEST_CASE("SPIBlocking Quad: Maximum buffer size") {
 }
 
 TEST_CASE("SPIBlocking Quad: All 16 patterns") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
     spi.setPinMapping(2, 3, 4, 5, 10);
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    auto lut = spi.getLUTArray();
 
     // Verify all 16 fundamental 4-bit patterns
     for (int pattern = 0; pattern < 16; pattern++) {
@@ -331,13 +331,13 @@ TEST_CASE("SPIBlocking Quad: Multiple pin configurations") {
     // Test a subset of pin configurations for quad-lane
     for (uint8_t d0 = 0; d0 < 3; d0++) {
         for (uint8_t d1 = 3; d1 < 5; d1++) {
-            SpiBlock4 spi;
+            fl::SpiBlock4 spi;
             uint8_t d2 = d1 + 1;
             uint8_t d3 = d2 + 1;
             uint8_t clk = 10;
             spi.setPinMapping(d0, d1, d2, d3, clk);
 
-            PinMaskEntry* lut = spi.getLUTArray();
+            auto lut = spi.getLUTArray();
 
             // Verify fundamental patterns
             // 0x00 (0000) - All pins low
@@ -360,10 +360,10 @@ TEST_CASE("SPIBlocking Quad: Multiple pin configurations") {
 }
 
 TEST_CASE("SPIBlocking Quad: Pattern consistency") {
-    SpiBlock4 spi;
+    fl::SpiBlock4 spi;
     spi.setPinMapping(1, 2, 3, 4, 9);
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    auto lut = spi.getLUTArray();
 
     // All entries with same lower 4 bits should have same masks
     // Check all 16 patterns across the 256 entries
@@ -388,9 +388,9 @@ TEST_CASE("SPIBlocking Quad: Pattern consistency") {
 
 TEST_CASE("SPITransposer: 8-lane basic bit interleaving - single byte") {
     // Test 8-lane interleaving with known bit patterns
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data[8];
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data[8];
+    fl::vector<uint8_t> padding = {0x00};
 
     // Create 8 lanes with distinct patterns
     lane_data[0] = {0x01};  // 00000001
@@ -403,11 +403,11 @@ TEST_CASE("SPITransposer: 8-lane basic bit interleaving - single byte") {
     lane_data[7] = {0x80};  // 10000000
 
     for (int i = 0; i < 8; i++) {
-        lanes[i] = SPITransposer::LaneData{lane_data[i], padding};
+        lanes[i] = fl::SPITransposer::LaneData{lane_data[i], padding};
     }
 
-    vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 8);
@@ -433,17 +433,17 @@ TEST_CASE("SPITransposer: 8-lane basic bit interleaving - single byte") {
 
 TEST_CASE("SPITransposer: 8-lane equal length lanes") {
     // All 8 lanes same size, no padding needed
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data[8];
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data[8];
+    fl::vector<uint8_t> padding = {0x00};
 
     for (int i = 0; i < 8; i++) {
         lane_data[i] = {static_cast<uint8_t>(0xA0 + i), static_cast<uint8_t>(0xB0 + i)};
-        lanes[i] = SPITransposer::LaneData{lane_data[i], padding};
+        lanes[i] = fl::SPITransposer::LaneData{lane_data[i], padding};
     }
 
-    vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 16);
@@ -451,9 +451,9 @@ TEST_CASE("SPITransposer: 8-lane equal length lanes") {
 
 TEST_CASE("SPITransposer: 8-lane different length lanes with padding") {
     // Different lane lengths: should pad shorter lanes at beginning
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data[8];
-    vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};  // APA102-style padding
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data[8];
+    fl::vector<uint8_t> padding = {0xE0, 0x00, 0x00, 0x00};  // APA102-style padding
 
     // Create lanes with varying lengths
     lane_data[0] = {0xAA, 0xBB, 0xCC};  // 3 bytes (max)
@@ -462,46 +462,46 @@ TEST_CASE("SPITransposer: 8-lane different length lanes with padding") {
     // lanes[3-7] empty
 
     for (int i = 0; i < 3; i++) {
-        lanes[i] = SPITransposer::LaneData{lane_data[i], padding};
+        lanes[i] = fl::SPITransposer::LaneData{lane_data[i], padding};
     }
     for (int i = 3; i < 8; i++) {
-        lanes[i] = SPITransposer::LaneData{lane_data[i], padding};
+        lanes[i] = fl::SPITransposer::LaneData{lane_data[i], padding};
     }
 
-    vector<uint8_t> output(24);  // 3 bytes * 8 = 24 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(24);  // 3 bytes * 8 = 24 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
 }
 
 TEST_CASE("SPITransposer: 8-lane empty lanes use nullopt") {
     // Only 4 lanes used (remaining should be treated as empty)
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data[4];
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data[4];
+    fl::vector<uint8_t> padding = {0x00};
 
     for (int i = 0; i < 4; i++) {
         lane_data[i] = {0xAA, 0xBB};
-        lanes[i] = SPITransposer::LaneData{lane_data[i], padding};
+        lanes[i] = fl::SPITransposer::LaneData{lane_data[i], padding};
     }
     // lanes[4-7] remain uninitialized (nullopt)
 
-    vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(16);  // 2 bytes * 8 = 16 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
 }
 
 TEST_CASE("SPITransposer: 8-lane output buffer validation - not divisible by 8") {
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data = {0xAA};
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data = {0xAA};
+    fl::vector<uint8_t> padding = {0x00};
 
-    lanes[0] = SPITransposer::LaneData{lane_data, padding};
+    lanes[0] = fl::SPITransposer::LaneData{lane_data, padding};
 
-    vector<uint8_t> output(10);  // Not divisible by 8
+    fl::vector<uint8_t> output(10);  // Not divisible by 8
     const char* error = nullptr;
-    bool success = SPITransposer::transpose8(lanes, output, &error);
+    bool success = fl::SPITransposer::transpose8(lanes, output, &error);
 
     CHECK_FALSE(success);
     CHECK(error != nullptr);
@@ -509,21 +509,21 @@ TEST_CASE("SPITransposer: 8-lane output buffer validation - not divisible by 8")
 
 TEST_CASE("SPITransposer: 8-lane all ones and zeros pattern") {
     // Test with alternating 0xFF and 0x00 on all 8 lanes
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_ff = {0xFF};
-    vector<uint8_t> lane_00 = {0x00};
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_ff = {0xFF};
+    fl::vector<uint8_t> lane_00 = {0x00};
+    fl::vector<uint8_t> padding = {0x00};
 
     for (int i = 0; i < 8; i++) {
         if (i % 2 == 0) {
-            lanes[i] = SPITransposer::LaneData{lane_ff, padding};
+            lanes[i] = fl::SPITransposer::LaneData{lane_ff, padding};
         } else {
-            lanes[i] = SPITransposer::LaneData{lane_00, padding};
+            lanes[i] = fl::SPITransposer::LaneData{lane_00, padding};
         }
     }
 
-    vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(8);  // 1 byte * 8 = 8 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
     // Each output byte should have alternating bits: 01010101
@@ -534,19 +534,19 @@ TEST_CASE("SPITransposer: 8-lane all ones and zeros pattern") {
 
 TEST_CASE("SPITransposer: 8-lane multi-byte realistic data") {
     // Test with realistic multi-byte data across all 8 lanes
-    fl::optional<SPITransposer::LaneData> lanes[8];
-    vector<uint8_t> lane_data[8];
-    vector<uint8_t> padding = {0x00};
+    fl::optional<fl::SPITransposer::LaneData> lanes[8];
+    fl::vector<uint8_t> lane_data[8];
+    fl::vector<uint8_t> padding = {0x00};
 
     for (int lane = 0; lane < 8; lane++) {
         for (int byte = 0; byte < 10; byte++) {
             lane_data[lane].push_back(static_cast<uint8_t>(lane * 16 + byte));
         }
-        lanes[lane] = SPITransposer::LaneData{lane_data[lane], padding};
+        lanes[lane] = fl::SPITransposer::LaneData{lane_data[lane], padding};
     }
 
-    vector<uint8_t> output(80);  // 10 bytes * 8 = 80 output bytes
-    bool success = SPITransposer::transpose8(lanes, output, nullptr);
+    fl::vector<uint8_t> output(80);  // 10 bytes * 8 = 80 output bytes
+    bool success = fl::SPITransposer::transpose8(lanes, output, nullptr);
 
     CHECK(success);
     CHECK_EQ(output.size(), 80);

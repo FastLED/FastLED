@@ -29,7 +29,7 @@
 // ============================================================================
 
 TEST_CASE("SpiBlock32 - Pin mapping initialization with 32 pins") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     // Configure 32 data pins and 1 clock pin
     // Using GPIO0-30 for data (31 pins) and GPIO31 for clock to fit in 32-bit mask
@@ -42,7 +42,7 @@ TEST_CASE("SpiBlock32 - Pin mapping initialization with 32 pins") {
     );
 
     // Verify LUT was initialized
-    PinMaskEntry* lut = spi.getLUTArray();
+    ::PinMaskEntry* lut = spi.getLUTArray();
     REQUIRE(lut != nullptr);
 
     // Value 0x00 should have no set bits and clear bits for all data pins
@@ -55,7 +55,7 @@ TEST_CASE("SpiBlock32 - Pin mapping initialization with 32 pins") {
 }
 
 TEST_CASE("SpiBlock32 - LUT generation for byte values") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     // Configure pins with unique GPIO numbers
     // Use GPIO 0-31 for all pins to ensure no collisions
@@ -67,7 +67,7 @@ TEST_CASE("SpiBlock32 - LUT generation for byte values") {
         2  // Clock on GPIO2 (overlaps with D2 for this test)
     );
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    ::PinMaskEntry* lut = spi.getLUTArray();
 
     // Test 0x00 - all bits low (setMask should be 0)
     CHECK(lut[0x00].set_mask == 0);
@@ -92,7 +92,7 @@ TEST_CASE("SpiBlock32 - LUT generation for byte values") {
 }
 
 TEST_CASE("SpiBlock32 - Buffer loading") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -112,7 +112,7 @@ TEST_CASE("SpiBlock32 - Buffer loading") {
 }
 
 TEST_CASE("SpiBlock32 - Transmission execution") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
     fl_gpio_sim_clear();
 
     spi.setPinMapping(
@@ -135,7 +135,7 @@ TEST_CASE("SpiBlock32 - Transmission execution") {
 }
 
 TEST_CASE("SpiBlock32 - LUT entry verification") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     // Use GPIO pins 0-31, with D31 using GPIO31 to avoid duplication
     // Clock overlaps on GPIO4 (test only, acceptable for verification)
@@ -147,7 +147,7 @@ TEST_CASE("SpiBlock32 - LUT entry verification") {
         4  // Clock on GPIO4 (overlaps with D4 for test purposes)
     );
 
-    PinMaskEntry* lut = spi.getLUTArray();
+    ::PinMaskEntry* lut = spi.getLUTArray();
 
     // Verify all 256 entries generate valid masks for the first 256 byte values
     for (int v = 0; v < 256; v++) {
@@ -171,7 +171,7 @@ TEST_CASE("SpiBlock32 - LUT entry verification") {
 }
 
 TEST_CASE("SpiBlock32 - GPIO state changes during transmission") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
     fl_gpio_sim_clear();
 
     spi.setPinMapping(
@@ -194,7 +194,7 @@ TEST_CASE("SpiBlock32 - GPIO state changes during transmission") {
 }
 
 TEST_CASE("SpiBlock32 - Empty buffer handling") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -215,7 +215,7 @@ TEST_CASE("SpiBlock32 - Empty buffer handling") {
 }
 
 TEST_CASE("SpiBlock32 - Maximum size buffer") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -243,7 +243,7 @@ TEST_CASE("SpiBlock32 - Maximum size buffer") {
 }
 
 TEST_CASE("SpiBlock32 - Buffer truncation at max size") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -266,7 +266,7 @@ TEST_CASE("SpiBlock32 - Buffer truncation at max size") {
 }
 
 TEST_CASE("SpiBlock32 - Null pointer handling") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -286,7 +286,7 @@ TEST_CASE("SpiBlock32 - Null pointer handling") {
 }
 
 TEST_CASE("SpiBlock32 - Different pin configurations") {
-    SpiBlock32 spi1, spi2;
+    fl::SpiBlock32 spi1, spi2;
 
     // Configure first SPI with GPIO 0-30
     spi1.setPinMapping(
@@ -307,8 +307,8 @@ TEST_CASE("SpiBlock32 - Different pin configurations") {
     );
 
     // Verify both configurations have valid LUT entries
-    PinMaskEntry* lut1 = spi1.getLUTArray();
-    PinMaskEntry* lut2 = spi2.getLUTArray();
+    ::PinMaskEntry* lut1 = spi1.getLUTArray();
+    ::PinMaskEntry* lut2 = spi2.getLUTArray();
 
     CHECK(lut1 != nullptr);
     CHECK(lut2 != nullptr);
@@ -318,7 +318,7 @@ TEST_CASE("SpiBlock32 - Different pin configurations") {
 }
 
 TEST_CASE("SpiBlock32 - Repeated transmission with same buffer") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
     fl_gpio_sim_clear();
 
     spi.setPinMapping(
@@ -342,7 +342,7 @@ TEST_CASE("SpiBlock32 - Repeated transmission with same buffer") {
 }
 
 TEST_CASE("SpiBlock32 - All zeros pattern") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7
@@ -362,7 +362,7 @@ TEST_CASE("SpiBlock32 - All zeros pattern") {
 }
 
 TEST_CASE("SpiBlock32 - All ones pattern") {
-    SpiBlock32 spi;
+    fl::SpiBlock32 spi;
 
     spi.setPinMapping(
         0, 1, 2, 3, 4, 5, 6, 7,      // D0-D7

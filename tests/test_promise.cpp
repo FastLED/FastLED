@@ -59,7 +59,7 @@ TEST_CASE("fl::promise - Static Factory Methods") {
     }
     
     SUBCASE("reject() with Error object") {
-        Error err("Custom error");
+        fl::Error err("Custom error");
         auto p = fl::promise<int>::reject(err);
         CHECK(p.valid());
         CHECK(p.is_completed());
@@ -107,7 +107,7 @@ TEST_CASE("fl::promise - Producer Interface") {
     
     SUBCASE("complete_with_error() with Error object") {
         auto p = fl::promise<int>::create();
-        Error err("Custom error");
+        fl::Error err("Custom error");
         
         bool success = p.complete_with_error(err);
         CHECK(success);
@@ -174,7 +174,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         fl::string received_error;
         
         auto p = fl::promise<int>::reject(fl::Error("Test error"));
-        p.catch_([&](const Error& err) {
+        p.catch_([&](const fl::Error& err) {
             callback_called = true;
             received_error = err.message;
         });
@@ -188,7 +188,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         fl::string received_error;
         
         auto p = fl::promise<int>::create();
-        p.catch_([&](const Error& err) {
+        p.catch_([&](const fl::Error& err) {
             callback_called = true;
             received_error = err.message;
         });
@@ -207,7 +207,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         auto& ref = p.then([](const int& value) {
             FL_UNUSED(value);
             // Success callback
-        }).catch_([](const Error& err) {
+        }).catch_([](const fl::Error& err) {
             FL_UNUSED(err);
             // Error callback  
         });
@@ -220,7 +220,7 @@ TEST_CASE("fl::promise - Callback Interface") {
         auto p = fl::promise<int>::create();
         
         // Should be able to chain
-        auto& ref = p.catch_([](const Error& err) {
+        auto& ref = p.catch_([](const fl::Error& err) {
             FL_UNUSED(err);
             // Error callback
         }).then([](const int& value) {
@@ -240,7 +240,7 @@ TEST_CASE("fl::promise - Update and Callback Processing") {
         
         auto p = fl::promise<int>::create();
         p.then([&](const int& value) { FL_UNUSED(value); then_called = true; });
-        p.catch_([&](const Error& err) { FL_UNUSED(err); catch_called = true; });
+        p.catch_([&](const fl::Error& err) { FL_UNUSED(err); catch_called = true; });
         
         // Complete and then update
         p.complete_with_value(42);
@@ -362,21 +362,21 @@ TEST_CASE("fl::promise - Move Semantics") {
 
 TEST_CASE("fl::promise - Convenience Functions") {
     SUBCASE("make_resolved_promise() works") {
-        auto p = make_resolved_promise(42);
+        auto p = fl::make_resolved_promise(42);
         CHECK(p.valid());
         CHECK(p.is_resolved());
         CHECK_EQ(p.value(), 42);
     }
     
     SUBCASE("make_rejected_promise() with string works") {
-        auto p = make_rejected_promise<int>("Test error");
+        auto p = fl::make_rejected_promise<int>("Test error");
         CHECK(p.valid());
         CHECK(p.is_rejected());
         CHECK_EQ(p.error().message, "Test error");
     }
     
     SUBCASE("make_rejected_promise() with const char* works") {
-        auto p = make_rejected_promise<int>("C string error");
+        auto p = fl::make_rejected_promise<int>("C string error");
         CHECK(p.valid());
         CHECK(p.is_rejected());
         CHECK_EQ(p.error().message, "C string error");
@@ -385,24 +385,24 @@ TEST_CASE("fl::promise - Convenience Functions") {
 
 TEST_CASE("fl::promise - Error Type") {
     SUBCASE("Error default constructor") {
-        Error err;
+        fl::Error err;
         CHECK(err.message.empty());
     }
     
     SUBCASE("Error with string") {
         fl::string msg = "Test message";
-        Error err(msg);
+        fl::Error err(msg);
         CHECK_EQ(err.message, "Test message");
     }
     
     SUBCASE("Error with const char*") {
-        Error err("C string message");
+        fl::Error err("C string message");
         CHECK_EQ(err.message, "C string message");
     }
     
     SUBCASE("Error with move string") {
         fl::string msg = "Move message";
-        Error err(fl::move(msg));
+        fl::Error err(fl::move(msg));
         CHECK_EQ(err.message, "Move message");
     }
 }
@@ -425,7 +425,7 @@ TEST_CASE("fl::promise - Edge Cases") {
         CHECK(!invalid.complete_with_error(fl::Error("error")));
         
         // Chaining should return reference even for invalid promise
-        auto& ref = invalid.then([](const int&) {}).catch_([](const Error&) {});
+        auto& ref = invalid.then([](const int&) {}).catch_([](const fl::Error&) {});
         CHECK(&ref == &invalid);
     }
     
@@ -503,7 +503,7 @@ TEST_CASE("fl::promise - Complex Types") {
 
 TEST_CASE("fl::PromiseResult - Basic Construction") {
     SUBCASE("construct with success value") {
-        PromiseResult<int> result(42);
+        fl::PromiseResult<int> result(42);
         
         CHECK(result.ok());
         CHECK(static_cast<bool>(result));
@@ -512,8 +512,8 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
     }
     
     SUBCASE("construct with error") {
-        Error err("Test error");
-        PromiseResult<int> result(err);
+        fl::Error err("Test error");
+        fl::PromiseResult<int> result(err);
         
         CHECK(!result.ok());
         CHECK(!static_cast<bool>(result));
@@ -523,7 +523,7 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
     
     SUBCASE("construct with move semantics") {
         fl::string text = "Hello World";
-        PromiseResult<fl::string> result(fl::move(text));
+        fl::PromiseResult<fl::string> result(fl::move(text));
         
         CHECK(result.ok());
         CHECK_EQ(result.value(), "Hello World");
@@ -532,12 +532,12 @@ TEST_CASE("fl::PromiseResult - Basic Construction") {
 
 TEST_CASE("fl::PromiseResult - Value Access") {
     SUBCASE("safe value access on success") {
-        PromiseResult<int> result(100);
+        fl::PromiseResult<int> result(100);
         
         CHECK(result.ok());
         
         // Test const access
-        const PromiseResult<int>& const_result = result;
+        const fl::PromiseResult<int>& const_result = result;
         const int& const_value = const_result.value();
         CHECK_EQ(const_value, 100);
         
@@ -551,7 +551,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
     }
     
     SUBCASE("value access on error in release builds") {
-        PromiseResult<int> result(fl::Error("Test error"));
+        fl::PromiseResult<int> result(fl::Error("Test error"));
         
         CHECK(!result.ok());
         
@@ -566,7 +566,7 @@ TEST_CASE("fl::PromiseResult - Value Access") {
     }
     
     SUBCASE("string value access") {
-        PromiseResult<fl::string> result(fl::string("Test"));
+        fl::PromiseResult<fl::string> result(fl::string("Test"));
         
         CHECK(result.ok());
         CHECK_EQ(result.value(), "Test");
@@ -579,24 +579,24 @@ TEST_CASE("fl::PromiseResult - Value Access") {
 
 TEST_CASE("fl::PromiseResult - Error Access") {
     SUBCASE("safe error access on error") {
-        Error original_error("Network timeout");
-        PromiseResult<int> result(original_error);
+        fl::Error original_error("Network timeout");
+        fl::PromiseResult<int> result(original_error);
         
         CHECK(!result.ok());
         
-        const Error& error = result.error();
+        const fl::Error& error = result.error();
         CHECK_EQ(error.message, "Network timeout");
     }
     
     SUBCASE("error access on success in release builds") {
-        PromiseResult<int> result(42);
+        fl::PromiseResult<int> result(42);
         
         CHECK(result.ok());
         
         // In release builds, this should return a static descriptive error
         // In debug builds, this would crash (which we can't test automatically)
         #ifndef DEBUG
-            const Error& error = result.error();
+            const fl::Error& error = result.error();
             // Should return a descriptive error message
             CHECK(error.message.find("success value") != fl::string::npos);
         #endif
@@ -604,19 +604,19 @@ TEST_CASE("fl::PromiseResult - Error Access") {
     
     SUBCASE("error_message convenience method") {
         // Test with error
-        PromiseResult<int> error_result(fl::Error("Connection failed"));
+        fl::PromiseResult<int> error_result(fl::Error("Connection failed"));
         CHECK_EQ(error_result.error_message(), "Connection failed");
         
         // Test with success
-        PromiseResult<int> success_result(42);
+        fl::PromiseResult<int> success_result(42);
         CHECK_EQ(success_result.error_message(), "");
     }
 }
 
 TEST_CASE("fl::PromiseResult - Type Conversions") {
     SUBCASE("boolean conversion") {
-        PromiseResult<int> success(42);
-        PromiseResult<int> failure(fl::Error("Error"));
+        fl::PromiseResult<int> success(42);
+        fl::PromiseResult<int> failure(fl::Error("Error"));
         
         // Test explicit bool conversion
         CHECK(static_cast<bool>(success));
@@ -637,7 +637,7 @@ TEST_CASE("fl::PromiseResult - Type Conversions") {
     }
     
     SUBCASE("variant access") {
-        PromiseResult<int> result(42);
+        fl::PromiseResult<int> result(42);
         
         const auto& variant = result.variant();
         CHECK(variant.is<int>());
@@ -647,30 +647,30 @@ TEST_CASE("fl::PromiseResult - Type Conversions") {
 
 TEST_CASE("fl::PromiseResult - Helper Functions") {
     SUBCASE("make_success") {
-        auto result1 = make_success(42);
+        auto result1 = fl::make_success(42);
         CHECK(result1.ok());
         CHECK_EQ(result1.value(), 42);
         
         fl::string text = "Hello";
-        auto result2 = make_success(fl::move(text));
+        auto result2 = fl::make_success(fl::move(text));
         CHECK(result2.ok());
         CHECK_EQ(result2.value(), "Hello");
     }
     
     SUBCASE("make_error with Error object") {
-        Error err("Custom error");
-        auto result = make_error<int>(err);
+        fl::Error err("Custom error");
+        auto result = fl::make_error<int>(err);
         
         CHECK(!result.ok());
         CHECK_EQ(result.error().message, "Custom error");
     }
     
     SUBCASE("make_error with string") {
-        auto result1 = make_error<int>(fl::string("String error"));
+        auto result1 = fl::make_error<int>(fl::string("String error"));
         CHECK(!result1.ok());
         CHECK_EQ(result1.error().message, "String error");
         
-        auto result2 = make_error<int>("C-string error");
+        auto result2 = fl::make_error<int>("C-string error");
         CHECK(!result2.ok());
         CHECK_EQ(result2.error().message, "C-string error");
     }
@@ -691,7 +691,7 @@ TEST_CASE("fl::PromiseResult - Complex Types") {
         };
         
         TestStruct original{42, "test"};
-        PromiseResult<TestStruct> result(original);
+        fl::PromiseResult<TestStruct> result(original);
         
         CHECK(result.ok());
         
@@ -709,8 +709,8 @@ TEST_CASE("fl::PromiseResult - Complex Types") {
 
 TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
     SUBCASE("copy construction") {
-        PromiseResult<int> original(42);
-        PromiseResult<int> copy(original);
+        fl::PromiseResult<int> original(42);
+        fl::PromiseResult<int> copy(original);
         
         CHECK(copy.ok());
         CHECK_EQ(copy.value(), 42);
@@ -722,8 +722,8 @@ TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
     }
     
     SUBCASE("copy assignment") {
-        PromiseResult<int> original(42);
-        PromiseResult<int> copy = make_error<int>("temp");
+        fl::PromiseResult<int> original(42);
+        fl::PromiseResult<int> copy = fl::make_error<int>("temp");
         
         copy = original;
         
@@ -733,8 +733,8 @@ TEST_CASE("fl::PromiseResult - Copy and Move Semantics") {
     
     SUBCASE("move construction") {
         fl::string text = "Move me";
-        PromiseResult<fl::string> original(fl::move(text));
-        PromiseResult<fl::string> moved(fl::move(original));
+        fl::PromiseResult<fl::string> original(fl::move(text));
+        fl::PromiseResult<fl::string> moved(fl::move(original));
         
         CHECK(moved.ok());
         CHECK_EQ(moved.value(), "Move me");

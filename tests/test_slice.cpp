@@ -12,14 +12,14 @@
 
 
 TEST_CASE("vector slice") {
-    HeapVector<int> vec;
+    fl::HeapVector<int> vec;
 
     vec.push_back(1);
     vec.push_back(2);
     vec.push_back(3);
     vec.push_back(4);
 
-    Slice<int> slice(vec.data(), vec.size());
+    fl::Slice<int> slice(vec.data(), vec.size());
 
     REQUIRE_EQ(slice.length(), 4);
     REQUIRE_EQ(slice[0], 1);
@@ -27,7 +27,7 @@ TEST_CASE("vector slice") {
     REQUIRE_EQ(slice[2], 3);
     REQUIRE_EQ(slice[3], 4);
 
-    Slice<int> slice2 = slice.slice(1, 3);
+    fl::Slice<int> slice2 = slice.slice(1, 3);
     REQUIRE_EQ(slice2.length(), 2);
     REQUIRE_EQ(slice2[0], 2);
     REQUIRE_EQ(slice2[1], 3);
@@ -42,7 +42,7 @@ TEST_CASE("fl::span<T> alias functionality") {
         vec.push_back(20);
         vec.push_back(30);
         
-        // Test that span<T> and Slice<T> are interchangeable
+        // Test that span<T> and fl::Slice<T> are interchangeable
         fl::span<int> span1(vec);
         fl::Slice<int> slice1(vec);
         
@@ -553,7 +553,7 @@ TEST_CASE("matrix compile") {
     int data[2][2] = {{1, 2}, {3, 4}};
 
     // Window from (0,0) up to (1,1)
-    MatrixSlice<int> slice(&data[0][0], // data pointer
+    fl::MatrixSlice<int> slice(&data[0][0], // data pointer
                            2,           // data width
                            2,           // data height
                            0, 0,        // bottom-left x,y
@@ -568,7 +568,7 @@ TEST_CASE("matrix slice returns correct values") {
     int data[2][2] = {{1, 2}, {3, 4}};
 
     // Window from (0,0) up to (1,1)
-    MatrixSlice<int> slice(&data[0][0], // data pointer
+    fl::MatrixSlice<int> slice(&data[0][0], // data pointer
                            2,           // data width
                            2,           // data height
                            0, 0,        // bottom-left x,y
@@ -593,7 +593,7 @@ TEST_CASE("4x4 matrix slice returns correct values") {
         {1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}, {13, 14, 15, 16}};
 
     // Take a 2×2 window from (1,1) up to (2,2)
-    MatrixSlice<int> slice(&data[0][0], // data pointer
+    fl::MatrixSlice<int> slice(&data[0][0], // data pointer
                            4,           // data width
                            4,           // data height
                            1, 1,        // bottom-left x,y

@@ -281,14 +281,14 @@ TEST_CASE("fl::string - String Operations") {
         CHECK(s.find('o') == 4); // first occurrence
         CHECK(s.find('l') == 2); // first occurrence
         CHECK(s.find('d') == 10);
-        CHECK(s.find('x') == string::npos);
+        CHECK(s.find('x') == fl::string::npos);
     }
 
     SUBCASE("find() - substring") {
         fl::string s("Hello World Hello");
         CHECK(s.find("Hello") == 0);
         CHECK(s.find("World") == 6);
-        CHECK(s.find("xyz") == string::npos);
+        CHECK(s.find("xyz") == fl::string::npos);
         CHECK(s.find("") == 0); // empty string found at position 0
     }
 
@@ -300,7 +300,7 @@ TEST_CASE("fl::string - String Operations") {
         CHECK_EQ(4, scheme_end);  // Position of "://"
         
         auto path_start = url.find('/', 7);  // Find '/' after position 7
-        CHECK_EQ(string::npos, path_start);  // No path in this URL
+        CHECK_EQ(fl::string::npos, path_start);  // No path in this URL
         
         // Test with URL that has a path
         fl::string url_with_path("http://example.com/path");
@@ -310,15 +310,15 @@ TEST_CASE("fl::string - String Operations") {
 
     SUBCASE("find() - edge cases") {
         fl::string s("abc");
-        CHECK(s.find("abcd") == string::npos); // substring longer than string
+        CHECK(s.find("abcd") == fl::string::npos); // substring longer than string
         
         fl::string empty_str;
-        CHECK(empty_str.find('a') == string::npos);
+        CHECK(empty_str.find('a') == fl::string::npos);
         CHECK(empty_str.find("") == 0); // empty string in empty string
     }
 
     SUBCASE("npos constant") {
-        CHECK(string::npos == static_cast<size_t>(-1));
+        CHECK(fl::string::npos == static_cast<size_t>(-1));
     }
 }
 
@@ -618,7 +618,7 @@ TEST_CASE("fl::string - Compatibility with std::string patterns") {
 
     SUBCASE("String container behavior") {
         // Test that fl::string can be used like std::string in containers
-        fl::vector<string> strings;
+        fl::vector<fl::string> strings;
         strings.push_back(fl::string("First"));
         strings.push_back(fl::string("Second"));
         strings.push_back(fl::string("Third"));

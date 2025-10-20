@@ -8,7 +8,7 @@
 
 TEST_CASE("Test transition ramp") {
     // total latch = 100 ms, ramp‑up = 10 ms, ramp‑down = 10 ms
-    TimeRamp ramp(10, 100, 10);
+    fl::TimeRamp ramp(10, 100, 10);
     uint32_t t0 = 0;
     ramp.trigger(t0);
 
@@ -51,7 +51,7 @@ TEST_CASE("Test transition ramp") {
 }
 
 TEST_CASE("Real world Bug") {
-    TimeRamp transition = TimeRamp(500, 0, 500);
+    fl::TimeRamp transition = fl::TimeRamp(500, 0, 500);
 
     uint8_t value = transition.update8(0);
     CHECK(value == 0);
