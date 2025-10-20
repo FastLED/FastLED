@@ -58,7 +58,7 @@ jobs:
       - name: Output encoded credentials
         id: credentials
         env:
-          docker_username: ${{ secrets.DOCKER_USERNAME }}
+          docker_username: niteris
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
           echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT

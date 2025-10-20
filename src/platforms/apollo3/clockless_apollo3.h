@@ -3,7 +3,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_APOLLO3)
 
@@ -28,7 +28,7 @@ __attribute__ ((always_inline)) inline static uint32_t __am_hal_systick_count() 
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t DATA_PIN, ChipsetTiming TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -185,6 +185,6 @@ protected:
 
 #endif
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif
