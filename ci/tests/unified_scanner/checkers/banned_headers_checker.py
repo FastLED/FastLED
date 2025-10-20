@@ -220,6 +220,11 @@ class BannedHeadersChecker(BaseChecker):
                 if banned_header in {"string.h", "stdlib.h"}:
                     return True
 
+            # Allow C library headers in cstring.cpp for C string wrapping
+            if "cstring.cpp" in file_path_str:
+                if banned_header in {"string.h", "stdlib.h"}:
+                    return True
+
         # Platform-specific headers need Arduino.h
         if "/platforms/" in file_path_normalized:
             if banned_header == "Arduino.h":
