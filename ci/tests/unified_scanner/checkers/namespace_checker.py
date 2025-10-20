@@ -18,20 +18,6 @@ class NamespaceIncludeChecker(BaseChecker):
             namespace\s+\w+     # namespace followed by identifier
             |                   # OR
             namespace\s*\{      # namespace followed by optional whitespace and {
-            |                   # OR
-            FASTLED_NAMESPACE_BEGIN  # FastLED namespace macro
-        )
-    """,
-        re.VERBOSE,
-    )
-
-    NAMESPACE_END_PATTERN = re.compile(
-        r"""
-        ^\s*                    # Start of line with optional whitespace
-        (                       # Capture group for namespace end patterns
-            FASTLED_NAMESPACE_END  # FastLED namespace end macro
-            |                   # OR
-            ^\s*\}              # Closing brace (namespace end)
         )
     """,
         re.VERBOSE,
@@ -89,11 +75,6 @@ class NamespaceIncludeChecker(BaseChecker):
             if self.NAMESPACE_PATTERN.match(line):
                 namespace_started = True
                 namespace_line = line_num
-                continue
-
-            # Check if we're exiting a namespace
-            if self.NAMESPACE_END_PATTERN.match(line):
-                namespace_started = False
                 continue
 
             # Check for includes after namespace started

@@ -7,15 +7,6 @@
 #include "fl/namespace.h"
 #include "fl/compiler_control.h"
 
-// Select appropriate implementation based on platform configuration
-#if defined(__AVR__)
-// AVR is slow - use assembly-optimized version for performance
-#include "platforms/avr/math8.h"
-#else
-// All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
-#include "platforms/shared/math8.h"
-#endif
-
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
@@ -39,6 +30,15 @@ FASTLED_NAMESPACE_BEGIN
 /// results in smaller and faster code than the equivalent
 /// program using plain "C" arithmetic and logic.
 /// @{
+
+// Select appropriate implementation based on platform configuration
+#if defined(__AVR__)
+// AVR is slow - use assembly-optimized version for performance
+#include "platforms/avr/math8.h"
+#else
+// All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
+#include "platforms/shared/math8.h"
+#endif
 
 // Note: mod8(), addmod8(), and submod8() are now defined in
 // platforms/avr/math8.h or platforms/shared/math8.h

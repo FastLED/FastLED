@@ -15,6 +15,7 @@
 #include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "fl/cstring.h"
+#include "fl/chipsets/led_timing.h"
 #include <string.h> // ok include // for memset
 
 #include "platforms/esp/esp_version.h"

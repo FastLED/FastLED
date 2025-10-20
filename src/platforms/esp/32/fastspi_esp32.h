@@ -3,7 +3,6 @@
 
 #include "fl/namespace.h"
 #include "crgb.h"
-#include <SPI.h>
 
 // When enabled, use the bulk transfer mode to speed up SPI writes and avoid
 // lock contention.
@@ -16,6 +15,8 @@
 #endif
 
 FASTLED_NAMESPACE_BEGIN
+
+#include <SPI.h>
 
 /*
  * ESP32 Hardware SPI Driver
@@ -58,6 +59,8 @@ FASTLED_NAMESPACE_BEGIN
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+#include<SPI.h>
 
 // Conditional compilation for ESP32 variants with different SPI support
 // Handle the transition from old (VSPI/HSPI) to new (SPI2/SPI3) constant names in Arduino framework 3.1.0+

@@ -1,13 +1,10 @@
 #ifndef __INC_FASTSPI_ARM_MXRT1062_H
 #define __INC_FASTSPI_ARM_MXRT1062_H
 
-#if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
-#include <SPI.h>
-#endif
-
 FASTLED_NAMESPACE_BEGIN
 
 #if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+#include <SPI.h>
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject, int _SPI_INDEX>
 class Teensy4HardwareSPIOutput {
