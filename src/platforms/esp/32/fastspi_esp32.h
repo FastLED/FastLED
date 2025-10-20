@@ -88,9 +88,9 @@ FASTLED_NAMESPACE_BEGIN
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #elif CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
-	#pragma message "Targeting ESP32-C3/C6, using SPI2 for hardware SPI support."
+	#pragma message "Targeting ESP32-C3/C6, using FSPI for hardware SPI support."
 	#undef FASTLED_ESP32_SPI_BUS
-	#define FASTLED_ESP32_SPI_BUS SPI2
+	#define FASTLED_ESP32_SPI_BUS FSPI
 #else // Configuration for standard ESP32 variants
 	#ifndef FASTLED_ESP32_SPI_BUS
 	#pragma message "Setting ESP32 SPI bus to default"
@@ -114,7 +114,7 @@ FASTLED_NAMESPACE_BEGIN
     static int8_t spiMiso = 12;
     static int8_t spiMosi = 13;
     static int8_t spiCs = 15;
-#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2/S3 can re-route to arbitrary pins
+#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2/S3/C3/C6 can re-route to arbitrary pins
     #define spiMosi DATA_PIN
     #define spiClk CLOCK_PIN
     #define spiMiso -1
