@@ -31,7 +31,7 @@ namespace fl {
 ///     // ... use T1, T2, T3 in template instantiations
 /// };
 /// ```
-template <const fl::ChipsetTiming& TIMING>
+template <const ChipsetTiming& TIMING>
 struct TimingTraits {
     /// @brief High time for bit 0 (nanoseconds)
     static constexpr uint32_t T1 = TIMING.T1;

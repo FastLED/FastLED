@@ -241,8 +241,8 @@ public:
     bool is_connected() const override;
     SocketState get_state() const override;
     
-    fl::size read(fl::span<fl::u8> buffer) override;
-    fl::size write(fl::span<const fl::u8> data) override;
+    fl::size read(fl::span<u8> buffer) override;
+    fl::size write(fl::span<const u8> data) override;
     fl::size available() const override;
     void flush() override;
     
@@ -251,8 +251,8 @@ public:
     void set_non_blocking(bool non_blocking) override;
     bool is_non_blocking() const override;
     
-    void set_timeout(fl::u32 timeout_ms) override;
-    fl::u32 get_timeout() const override;
+    void set_timeout(u32 timeout_ms) override;
+    u32 get_timeout() const override;
     void set_keep_alive(bool enable) override;
     void set_nodelay(bool enable) override;
     
@@ -284,7 +284,7 @@ private:
     int mLocalPort = 0;
     int mSocketHandle = -1;
     bool mIsNonBlocking = false;
-    fl::u32 mTimeout = 5000;
+    u32 mTimeout = 5000;
     
     // Internal helper methods
     SocketError translate_errno_to_socket_error(int error_code);

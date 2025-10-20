@@ -15,7 +15,7 @@
 FASTLED_NAMESPACE_BEGIN
 
 
-template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:

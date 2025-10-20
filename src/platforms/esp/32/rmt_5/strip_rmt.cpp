@@ -154,7 +154,7 @@ public:
         }
     }
 
-    fl::u32 numPixels() override
+    u32 numPixels() override
     {
         return mLedCount;
     }

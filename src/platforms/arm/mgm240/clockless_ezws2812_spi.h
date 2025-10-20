@@ -45,25 +45,25 @@ template<EOrder RGB_ORDER = GRB>
 class ClocklessController_ezWS2812_SPI : public CPixelLEDController<RGB_ORDER> {
 private:
     fl::third_party::ezWS2812* mDriver;
-    fl::u16 mNumLeds;
+    u16 mNumLeds;
     bool mOwnsDriver;
 
     /// @brief Convert WS2812 bit to SPI signal for '1' bit
     /// @return SPI byte pattern for logical '1'
-    FASTLED_FORCE_INLINE fl::u8 spi_one() const {
+    FASTLED_FORCE_INLINE u8 spi_one() const {
         return 0xFC; // 11111100 - long high pulse for '1'
     }
 
     /// @brief Convert WS2812 bit to SPI signal for '0' bit
     /// @return SPI byte pattern for logical '0'
-    FASTLED_FORCE_INLINE fl::u8 spi_zero() const {
+    FASTLED_FORCE_INLINE u8 spi_zero() const {
         return 0x80; // 10000000 - short high pulse for '0'
     }
 
     /// @brief Convert 8-bit color value to SPI bit pattern array
     /// @param color 8-bit color channel value
     /// @param buffer Output buffer for SPI bytes (8 bytes)
-    FASTLED_FORCE_INLINE void colorToSPI(fl::u8 color, fl::u8* buffer) const {
+    FASTLED_FORCE_INLINE void colorToSPI(u8 color, u8* buffer) const {
         // Convert each bit to SPI pattern (MSB first)
         buffer[0] = (color & 0x80) ? spi_one() : spi_zero(); // bit 7
         buffer[1] = (color & 0x40) ? spi_one() : spi_zero(); // bit 6
@@ -93,7 +93,7 @@ public:
     }
 
     /// @brief Get maximum refresh rate
-    virtual fl::u16 getMaxRefreshRate() const override {
+    virtual u16 getMaxRefreshRate() const override {
         return 1000; // SPI allows high refresh rates
     }
 
@@ -110,13 +110,13 @@ protected:
         }
 
         // Pre-allocate SPI buffer for one pixel (3 colors × 8 bits = 24 SPI bytes)
-        fl::u8 spi_buffer[24];
+        u8 spi_buffer[24];
 
         // Process all pixels directly via SPI
         while (pixels.has(1)) {
-            fl::u8 r = pixels.loadAndScale0();
-            fl::u8 g = pixels.loadAndScale1();
-            fl::u8 b = pixels.loadAndScale2();
+            u8 r = pixels.loadAndScale0();
+            u8 g = pixels.loadAndScale1();
+            u8 b = pixels.loadAndScale2();
 
             // Convert to SPI bit patterns (GRB order for WS2812)
             colorToSPI(g, &spi_buffer[0]);  // Green first (8 SPI bytes)

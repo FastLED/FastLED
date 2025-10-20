@@ -40,28 +40,28 @@ namespace fl {
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
-constexpr fl::u32 cycles_from_ns_samd(fl::u32 ns, fl::u32 hz) {
+constexpr u32 cycles_from_ns_samd(u32 ns, u32 hz) {
   // Round up: cycles = ceil(ns * hz / 1e9)
   // Using: (ns * hz + 999'999'999) / 1'000'000'000
-  return ((fl::u64)ns * (fl::u64)hz + 999999999UL) / 1000000000UL;
+  return ((u64)ns * (u64)hz + 999999999UL) / 1000000000UL;
 }
 
 /// Platform-specific implementation of nanosecond delay with runtime frequency (SAMD)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz) {
-  fl::u32 cycles = cycles_from_ns_samd(ns, hz);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) {
+  u32 cycles = cycles_from_ns_samd(ns, hz);
   if (cycles == 0) return;
   delay_cycles_dwt_samd(cycles);
 }
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (SAMD)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns) {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
   #if defined(F_CPU)
-  fl::u32 hz = F_CPU;
+  u32 hz = F_CPU;
   #else
-  fl::u32 hz = 48000000UL;  // SAMD21 default
+  u32 hz = 48000000UL;  // SAMD21 default
   #endif
   delayNanoseconds_impl(ns, hz);
 }

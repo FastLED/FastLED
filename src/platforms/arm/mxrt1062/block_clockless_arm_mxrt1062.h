@@ -10,7 +10,7 @@ FASTLED_NAMESPACE_BEGIN
 #if defined(FASTLED_TEENSY4)
 
 #define __FL_T4_MASK ((1<<(LANES))-1)
-template <uint8_t LANES, int FIRST_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class FlexibleInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, __FL_T4_MASK> {
     // Extract timing values from ChipsetTiming struct at compile-time
     static constexpr uint32_t T1 = TIMING.T1;

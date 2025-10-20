@@ -34,7 +34,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @code
 ///   InlineBlockClocklessController<8, 15, TIMING_WS2812_800KHZ, GRB> controller;
 /// @endcode
-template <uint8_t LANES, int FIRST_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
+template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
 	// Extract timing values from struct at compile-time
 	static constexpr uint32_t T1 = TIMING.T1;

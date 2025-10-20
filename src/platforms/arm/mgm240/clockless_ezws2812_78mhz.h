@@ -44,7 +44,7 @@ FASTLED_NAMESPACE_BEGIN
 ///
 /// @tparam DATA_PIN GPIO pin number for LED data
 /// @tparam RGB_ORDER Color channel ordering (typically GRB for WS2812)
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class ClocklessController_ezWS2812_GPIO_78MHz : public CPixelLEDController<RGB_ORDER> {
 
     /// @note IMPLEMENTATION ROADMAP for generic T1/T2/T3 support:
@@ -59,7 +59,7 @@ class ClocklessController_ezWS2812_GPIO_78MHz : public CPixelLEDController<RGB_O
     /// TM1809 (T1=350ns, T2=350ns, T3=450ns), and all other clockless chipsets.
 
 private:
-    fl::u16 mNumLeds;
+    u16 mNumLeds;
 
     /// @brief Send '1' bit - optimized for 78MHz
     /// 0.8µs high (~62 cycles), 0.45µs low (~35 cycles)
@@ -111,7 +111,7 @@ private:
 
     /// @brief Send byte with MSB first - optimized tight loop
     /// @param byte_value 8-bit value to send
-    FASTLED_FORCE_INLINE void sendByte(fl::u8 byte_value) const {
+    FASTLED_FORCE_INLINE void sendByte(u8 byte_value) const {
         // Unrolled loop for maximum performance
         if (byte_value & 0x80) send1(); else send0(); // bit 7
         if (byte_value & 0x40) send1(); else send0(); // bit 6
@@ -127,7 +127,7 @@ private:
     /// @param r Red channel value
     /// @param g Green channel value
     /// @param b Blue channel value
-    FASTLED_FORCE_INLINE void sendPixel(fl::u8 r, fl::u8 g, fl::u8 b) const {
+    FASTLED_FORCE_INLINE void sendPixel(u8 r, u8 g, u8 b) const {
         sendByte(g); // Green first
         sendByte(r); // Red second
         sendByte(b); // Blue third
@@ -144,7 +144,7 @@ public:
     }
 
     /// @brief Get maximum refresh rate
-    virtual fl::u16 getMaxRefreshRate() const override {
+    virtual u16 getMaxRefreshRate() const override {
         return 500; // Slightly higher rate for faster CPU
     }
 
@@ -159,9 +159,9 @@ protected:
 
         // Process all pixels in tight loop
         while (pixels.has(1)) {
-            fl::u8 r = pixels.loadAndScale0();
-            fl::u8 g = pixels.loadAndScale1();
-            fl::u8 b = pixels.loadAndScale2();
+            u8 r = pixels.loadAndScale0();
+            u8 g = pixels.loadAndScale1();
+            u8 b = pixels.loadAndScale2();
 
             sendPixel(r, g, b);
 
@@ -180,7 +180,7 @@ protected:
 /// @brief Convenient typedef for 78MHz MGM240/MG24 GPIO controller
 /// @tparam DATA_PIN GPIO pin number for LED data
 /// @tparam RGB_ORDER Color channel ordering (typically GRB for WS2812)
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_78MHz = ClocklessController_ezWS2812_GPIO_78MHz<DATA_PIN, RGB_ORDER>;
 
 FASTLED_NAMESPACE_END

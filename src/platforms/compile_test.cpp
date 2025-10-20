@@ -61,14 +61,14 @@ static void test_strstream_integer_operators() {
     unsigned long long ull = 10; ss << ull; fss << ull;
 
     // Test fl:: types (which are typedefs to fundamental types)
-    fl::i8 i8v = 11; ss << i8v; fss << i8v;
-    fl::u8 u8v = 12; ss << u8v; fss << u8v;
-    fl::i16 i16v = 13; ss << i16v; fss << i16v;
-    fl::u16 u16v = 14; ss << u16v; fss << u16v;
-    fl::i32 i32v = 15; ss << i32v; fss << i32v;
-    fl::u32 u32v = 16; ss << u32v; fss << u32v;
-    fl::i64 i64v = 17; ss << i64v; fss << i64v;
-    fl::u64 u64v = 18; ss << u64v; fss << u64v;
+    i8 i8v = 11; ss << i8v; fss << i8v;
+    u8 u8v = 12; ss << u8v; fss << u8v;
+    i16 i16v = 13; ss << i16v; fss << i16v;
+    u16 u16v = 14; ss << u16v; fss << u16v;
+    i32 i32v = 15; ss << i32v; fss << i32v;
+    u32 u32v = 16; ss << u32v; fss << u32v;
+    i64 i64v = 17; ss << i64v; fss << i64v;
+    u64 u64v = 18; ss << u64v; fss << u64v;
     fl::size sz = 19; ss << sz; fss << sz;
 
     // Test chaining multiple types

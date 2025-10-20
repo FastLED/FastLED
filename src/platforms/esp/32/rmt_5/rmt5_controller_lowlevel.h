@@ -49,7 +49,7 @@ public:
     // Constructor
     RmtController5LowLevel(
         int DATA_PIN,
-        const fl::ChipsetTiming& TIMING,
+        const ChipsetTiming& TIMING,
         int RESET_US = 280  // WS2812 default reset time
     );
 

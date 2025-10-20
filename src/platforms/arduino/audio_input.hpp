@@ -115,7 +115,7 @@ public:
             return AudioSample();  // Invalid sample
         }
 
-        fl::i16 buffer[I2S_AUDIO_BUFFER_LEN];
+        i16 buffer[I2S_AUDIO_BUFFER_LEN];
         size_t samples_read = 0;
 
         // Read samples using standard Arduino I2S API
@@ -132,7 +132,7 @@ public:
             return AudioSample();  // No data read
         }
 
-        samples_read = bytes_read / sizeof(fl::i16);
+        samples_read = bytes_read / sizeof(i16);
 
         if (samples_read == 0) {
             return AudioSample();  // No samples read
@@ -158,12 +158,12 @@ public:
         }
 
         // Calculate timestamp based on sample rate and total samples read
-        fl::u32 timestamp_ms = static_cast<fl::u32>((mTotalSamplesRead * 1000ULL) / mConfig.mSampleRate);
+        u32 timestamp_ms = static_cast<u32>((mTotalSamplesRead * 1000ULL) / mConfig.mSampleRate);
 
         // Update total samples counter
         mTotalSamplesRead += samples_read;
 
-        fl::span<const fl::i16> data(buffer, samples_read);
+        fl::span<const i16> data(buffer, samples_read);
         return AudioSample(data, timestamp_ms);
     }
 
@@ -172,7 +172,7 @@ private:
     bool mHasError;
     fl::string mErrorMessage;
     bool mInitialized;
-    fl::u64 mTotalSamplesRead;
+    u64 mTotalSamplesRead;
 
     int convertCommFormatToMode(I2SCommFormat format) {
         // Map FastLED I2S formats to Arduino I2S modes

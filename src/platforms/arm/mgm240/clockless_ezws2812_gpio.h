@@ -38,7 +38,7 @@ FASTLED_NAMESPACE_BEGIN
 ///
 /// @tparam DATA_PIN GPIO pin number for LED data
 /// @tparam RGB_ORDER Color channel ordering (typically GRB for WS2812)
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 class ClocklessController_ezWS2812_GPIO_Auto : public CPixelLEDController<RGB_ORDER> {
 public:
     // Select implementation based on CPU frequency
@@ -65,7 +65,7 @@ public:
     }
 
     /// @brief Get maximum refresh rate
-    virtual fl::u16 getMaxRefreshRate() const override {
+    virtual u16 getMaxRefreshRate() const override {
         return mImpl.getMaxRefreshRate();
     }
 
@@ -91,7 +91,7 @@ protected:
 ///
 /// @tparam DATA_PIN GPIO pin number for LED data
 /// @tparam RGB_ORDER Color channel ordering (typically GRB for WS2812)
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO = ClocklessController_ezWS2812_GPIO_Auto<DATA_PIN, RGB_ORDER>;
 
 /// @brief Direct access to frequency-specific controllers
@@ -100,11 +100,11 @@ using EZWS2812_GPIO = ClocklessController_ezWS2812_GPIO_Auto<DATA_PIN, RGB_ORDER
 /// implementation regardless of F_CPU setting.
 
 /// @brief 39MHz optimized GPIO controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_39MHZ = ClocklessController_ezWS2812_GPIO_39MHz<DATA_PIN, RGB_ORDER>;
 
 /// @brief 78MHz optimized GPIO controller
-template<fl::u8 DATA_PIN, EOrder RGB_ORDER = GRB>
+template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_78MHZ = ClocklessController_ezWS2812_GPIO_78MHz<DATA_PIN, RGB_ORDER>;
 
 FASTLED_NAMESPACE_END

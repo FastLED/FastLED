@@ -10,14 +10,13 @@
 
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// Declare SPI0 specializations (base address 0x40076000)
-#define DECLARE_SPI0(__DATA,__CLOCK) template<fl::u32 SPI_SPEED>\
+#define DECLARE_SPI0(__DATA,__CLOCK) template<u32 SPI_SPEED>\
  class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40076000> {};
 
 /// Declare SPI1 specializations (base address 0x40077000)
-#define DECLARE_SPI1(__DATA,__CLOCK) template<fl::u32 SPI_SPEED>\
+#define DECLARE_SPI1(__DATA,__CLOCK) template<u32 SPI_SPEED>\
   class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40077000> {};
 
 // SPI0 pins: Data pin 7, 8, 11, 12 with clock pin 13 or 14
@@ -35,7 +34,6 @@ DECLARE_SPI1(0,20);
 DECLARE_SPI1(1,20);
 DECLARE_SPI1(21,20);
 
-FASTLED_NAMESPACE_END
 
 #endif  // Teensy LC with hardware SPI
 

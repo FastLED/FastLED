@@ -94,13 +94,13 @@ FASTLED_NAMESPACE_BEGIN
 ///
 /// @see transpose8x1_MSB() in bitswap.h
 FASTLED_FORCE_INLINE void transpose_8strips(
-    const fl::u8* const input[8],
-    fl::u8* output,
-    fl::u16 num_leds
+    const u8* const input[8],
+    u8* output,
+    u16 num_leds
 ) {
     // Process each LED
-    for (fl::u16 led = 0; led < num_leds; led++) {
-        fl::u8 temp_input[8];
+    for (u16 led = 0; led < num_leds; led++) {
+        u8 temp_input[8];
 
         // Process each color channel (R, G, B)
         for (int color = 0; color < 3; color++) {
@@ -143,16 +143,16 @@ FASTLED_FORCE_INLINE void transpose_8strips(
 /// @note Output buffer must be pre-allocated by caller
 /// @note Upper 4 bits of each output byte are zero
 FASTLED_FORCE_INLINE void transpose_4strips(
-    const fl::u8* const input[4],
-    fl::u8* output,
-    fl::u16 num_leds
+    const u8* const input[4],
+    u8* output,
+    u16 num_leds
 ) {
     // Process each LED
-    for (fl::u16 led = 0; led < num_leds; led++) {
+    for (u16 led = 0; led < num_leds; led++) {
         // Process each color channel (R, G, B)
         for (int color = 0; color < 3; color++) {
             // Collect one byte from each strip for this color
-            fl::u8 strip_bytes[4];
+            u8 strip_bytes[4];
             for (int strip = 0; strip < 4; strip++) {
                 strip_bytes[strip] = input[strip][led * 3 + color];
             }
@@ -160,7 +160,7 @@ FASTLED_FORCE_INLINE void transpose_4strips(
             // Transpose: extract each bit position from all 4 strips
             // Output MSB-first (bit 7 first, then 6, 5, ..., 0)
             for (int bit = 7; bit >= 0; bit--) {
-                fl::u8 output_byte = 0;
+                u8 output_byte = 0;
                 // Pack bits from all 4 strips into lower 4 bits
                 for (int strip = 0; strip < 4; strip++) {
                     output_byte |= ((strip_bytes[strip] >> bit) & 1) << strip;
@@ -193,23 +193,23 @@ FASTLED_FORCE_INLINE void transpose_4strips(
 /// @note Output buffer must be pre-allocated by caller
 /// @note Upper 6 bits of each output byte are zero
 FASTLED_FORCE_INLINE void transpose_2strips(
-    const fl::u8* const input[2],
-    fl::u8* output,
-    fl::u16 num_leds
+    const u8* const input[2],
+    u8* output,
+    u16 num_leds
 ) {
     // Process each LED
-    for (fl::u16 led = 0; led < num_leds; led++) {
+    for (u16 led = 0; led < num_leds; led++) {
         // Process each color channel (R, G, B)
         for (int color = 0; color < 3; color++) {
             // Collect one byte from each strip for this color
-            fl::u8 strip_bytes[2];
+            u8 strip_bytes[2];
             strip_bytes[0] = input[0][led * 3 + color];
             strip_bytes[1] = input[1][led * 3 + color];
 
             // Transpose: extract each bit position from both strips
             // Output MSB-first (bit 7 first, then 6, 5, ..., 0)
             for (int bit = 7; bit >= 0; bit--) {
-                fl::u8 output_byte =
+                u8 output_byte =
                     ((strip_bytes[0] >> bit) & 1) |
                     (((strip_bytes[1] >> bit) & 1) << 1);
                 *output++ = output_byte;
@@ -230,7 +230,7 @@ FASTLED_FORCE_INLINE void transpose_2strips(
 /// @note For 8 strips: all 8 bits of each byte are used
 /// @note For 4 strips: lower 4 bits used, upper 4 bits zero
 /// @note For 2 strips: lower 2 bits used, upper 6 bits zero
-FASTLED_FORCE_INLINE fl::u32 calculate_transpose_buffer_size(fl::u16 num_leds) {
+FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds) {
     return num_leds * 24;  // 24 bytes per LED (3 colors × 8 bits each)
 }
 
@@ -245,10 +245,10 @@ FASTLED_FORCE_INLINE fl::u32 calculate_transpose_buffer_size(fl::u16 num_leds) {
 /// @param num_leds Number of LEDs per strip
 /// @return true if successful, false if invalid strip count
 inline bool transpose_strips(
-    fl::u8 num_strips,
-    const fl::u8* const* input,
-    fl::u8* output,
-    fl::u16 num_leds
+    u8 num_strips,
+    const u8* const* input,
+    u8* output,
+    u16 num_leds
 ) {
     switch (num_strips) {
         case 8:

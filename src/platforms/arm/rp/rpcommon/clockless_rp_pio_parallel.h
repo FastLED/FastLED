@@ -85,8 +85,8 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam T3_NS Reset pulse time in nanoseconds
 /// @tparam RGB_ORDER Color order (GRB, RGB, etc.)
 template <
-    fl::u8 BASE_PIN,
-    fl::u8 NUM_STRIPS,
+    u8 BASE_PIN,
+    u8 NUM_STRIPS,
     int T1_NS,
     int T2_NS,
     int T3_NS,
@@ -100,19 +100,19 @@ private:
     // Strip information
     struct StripInfo {
         CRGB* leds;
-        fl::u16 num_leds;
+        u16 num_leds;
         bool enabled;
     };
 
     StripInfo strips_[NUM_STRIPS];
-    fl::u16 max_leds_;
+    u16 max_leds_;
 
     // Hardware state
     PIO pio_;
-    fl::u32 sm_;
-    fl::i32 dma_chan_;
-    fl::u8* transpose_buffer_;
-    fl::u32 buffer_size_;
+    u32 sm_;
+    i32 dma_chan_;
+    u8* transpose_buffer_;
+    u32 buffer_size_;
 
     // Timing
     CMinWait<WAIT_TIME + ((T1_NS + T2_NS + T3_NS) * 32 * 4) / 1000> mWait;
@@ -134,7 +134,7 @@ public:
     /// @param leds Pointer to CRGB array
     /// @param num_leds Number of LEDs
     /// @return true if successful
-    bool addStrip(fl::u8 lane, CRGB* leds, fl::u16 num_leds) {
+    bool addStrip(u8 lane, CRGB* leds, u16 num_leds) {
         if (lane >= NUM_STRIPS || leds == nullptr) {
             return false;
         }
@@ -156,7 +156,7 @@ public:
 
         // Allocate transposition buffer
         buffer_size_ = max_leds_ * 24;
-        transpose_buffer_ = reinterpret_cast<fl::u8*>(malloc(buffer_size_));
+        transpose_buffer_ = reinterpret_cast<u8*>(malloc(buffer_size_));
         if (transpose_buffer_ == nullptr) {
             return false;
         }
@@ -212,7 +212,7 @@ public:
 
     /// @brief Get maximum refresh rate
     /// @return Maximum FPS
-    virtual fl::u16 getMaxRefreshRate() const {
+    virtual u16 getMaxRefreshRate() const {
         return 400;
     }
 
@@ -220,8 +220,8 @@ private:
     /// @brief Prepare bit-transposed data from LED buffers
     void prepareTransposedData() {
         // Allocate temporary buffer for padded RGB data
-        fl::u32 padded_size = max_leds_ * 3 * NUM_STRIPS;
-        fl::u8* padded_rgb = reinterpret_cast<fl::u8*>(malloc(padded_size));
+        u32 padded_size = max_leds_ * 3 * NUM_STRIPS;
+        u8* padded_rgb = reinterpret_cast<u8*>(malloc(padded_size));
         if (padded_rgb == nullptr) {
             return;
         }
@@ -230,18 +230,18 @@ private:
         fl::memset(padded_rgb, 0, padded_size);
 
         // Copy LED data from each strip
-        for (fl::u8 strip = 0; strip < NUM_STRIPS; strip++) {
+        for (u8 strip = 0; strip < NUM_STRIPS; strip++) {
             if (strips_[strip].enabled && strips_[strip].leds) {
-                fl::u8* dest = padded_rgb + (strip * max_leds_ * 3);
-                const fl::u8* src = reinterpret_cast<const fl::u8*>(strips_[strip].leds);
-                fl::u32 copy_bytes = strips_[strip].num_leds * 3;
+                u8* dest = padded_rgb + (strip * max_leds_ * 3);
+                const u8* src = reinterpret_cast<const u8*>(strips_[strip].leds);
+                u32 copy_bytes = strips_[strip].num_leds * 3;
                 fl::memcpy(dest, src, copy_bytes);
             }
         }
 
         // Build array of pointers for transpose function
-        const fl::u8* strip_ptrs[NUM_STRIPS];
-        for (fl::u8 i = 0; i < NUM_STRIPS; i++) {
+        const u8* strip_ptrs[NUM_STRIPS];
+        for (u8 i = 0; i < NUM_STRIPS; i++) {
             strip_ptrs[i] = padded_rgb + (i * max_leds_ * 3);
         }
 
@@ -249,19 +249,19 @@ private:
         switch (NUM_STRIPS) {
             case 8:
                 transpose_8strips(
-                    reinterpret_cast<const fl::u8* const*>(strip_ptrs),
+                    reinterpret_cast<const u8* const*>(strip_ptrs),
                     transpose_buffer_, max_leds_
                 );
                 break;
             case 4:
                 transpose_4strips(
-                    reinterpret_cast<const fl::u8* const*>(strip_ptrs),
+                    reinterpret_cast<const u8* const*>(strip_ptrs),
                     transpose_buffer_, max_leds_
                 );
                 break;
             case 2:
                 transpose_2strips(
-                    reinterpret_cast<const fl::u8* const*>(strip_ptrs),
+                    reinterpret_cast<const u8* const*>(strip_ptrs),
                     transpose_buffer_, max_leds_
                 );
                 break;

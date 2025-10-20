@@ -151,7 +151,7 @@ static int gNumStarted = 0;
 //    For now, we require all strips to be the same chipset, so these
 //    are global variables.
 
-template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     // -- Store the GPIO pin

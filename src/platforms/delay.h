@@ -39,11 +39,11 @@ namespace fl {
 /// Platform-specific implementation of nanosecond delay with runtime frequency
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz);
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns);
 
 // ============================================================================
 // Platform-specific cycle delay includes (delay_cycles)

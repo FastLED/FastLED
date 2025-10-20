@@ -62,7 +62,7 @@ public:
     IRmtWorkerBase* acquireWorker(
         int num_bytes,
         gpio_num_t pin,
-        const fl::ChipsetTiming& TIMING,
+        const ChipsetTiming& TIMING,
         uint32_t reset_ns
     );
 

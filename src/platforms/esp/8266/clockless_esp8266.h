@@ -22,7 +22,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;

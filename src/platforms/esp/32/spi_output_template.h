@@ -10,14 +10,12 @@
 
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// ESP32 hardware SPI output
 /// Routes to appropriate SPI backend via SPIDeviceProxy
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
+class SPIOutput : public SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
-FASTLED_NAMESPACE_END
 
 #endif  // ESP32 variants
 

@@ -81,12 +81,12 @@ class I2S_Audio : public IAudioInput {
         }
         
         // Calculate timestamp based on sample rate and total samples read
-        fl::u32 timestamp_ms = static_cast<fl::u32>((mTotalSamplesRead * 1000ULL) / mStdConfig.mSampleRate);
+        u32 timestamp_ms = static_cast<u32>((mTotalSamplesRead * 1000ULL) / mStdConfig.mSampleRate);
         
         // Update total samples counter
         mTotalSamplesRead += samples_read;
 
-        fl::span<const fl::i16> data(buf, samples_read);
+        fl::span<const i16> data(buf, samples_read);
         
         // Create AudioSample with pooled AudioSampleImpl (pooling handled internally)
         return AudioSample(data, timestamp_ms);
@@ -97,7 +97,7 @@ class I2S_Audio : public IAudioInput {
     bool mHasError;
     fl::string mErrorMessage;
     fl::optional<I2SContext> mI2sContextOpt;
-    fl::u64 mTotalSamplesRead;
+    u64 mTotalSamplesRead;
 };
 
 #endif // FASTLED_ESP32_I2S_SUPPORTED

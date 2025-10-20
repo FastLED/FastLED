@@ -31,19 +31,19 @@ namespace fl {
 /// Platform-specific implementation of nanosecond delay with runtime frequency (AVR)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz) {
-  fl::u32 cycles = cycles_from_ns_avr(ns, hz);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) {
+  u32 cycles = cycles_from_ns_avr(ns, hz);
   if (cycles == 0) return;
   delay_cycles_avr_nop(cycles);
 }
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (AVR)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns) {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
   #if defined(F_CPU)
-  fl::u32 hz = F_CPU;
+  u32 hz = F_CPU;
   #else
-  fl::u32 hz = 16000000UL;  // Default to 16 MHz
+  u32 hz = 16000000UL;  // Default to 16 MHz
   #endif
   delayNanoseconds_impl(ns, hz);
 }

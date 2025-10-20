@@ -52,7 +52,7 @@ public:
         return size_;
     }
 
-    fl::size read(fl::u8 *dst, fl::size bytesToRead) override {
+    fl::size read(u8 *dst, fl::size bytesToRead) override {
         if (!file_.is_open() || pos_ >= size_) {
             return 0;
         }

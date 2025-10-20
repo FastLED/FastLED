@@ -11,7 +11,7 @@ FASTLED_NAMESPACE_BEGIN
 
 // Template for new-style API accepting ChipsetTiming reference
 // This is the primary template
-template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() { }

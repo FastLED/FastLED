@@ -8,12 +8,10 @@
 
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// Stub SPI output - no-op implementation for testing/simulation
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::StubSPIOutput {};
+template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
+class SPIOutput : public StubSPIOutput {};
 
-FASTLED_NAMESPACE_END
 
 #endif

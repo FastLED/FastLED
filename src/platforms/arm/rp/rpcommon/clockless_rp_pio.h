@@ -60,7 +60,7 @@ static inline void __isr clockless_dma_complete_handler() {
 static bool clockless_isr_installed = false;
 #endif
 
-template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     static constexpr int T1 = TIMING.T1;
     static constexpr int T2 = TIMING.T2;

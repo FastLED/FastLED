@@ -19,7 +19,7 @@
 extern uint32_t isrCount;
 
 
-template <uint8_t _DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder _RGB_ORDER = RGB, int _XTRA0 = 0, bool _FLIP = false, int _WAIT_TIME_MICROSECONDS = 10>
+template <uint8_t _DATA_PIN, const ChipsetTiming& TIMING, EOrder _RGB_ORDER = RGB, int _XTRA0 = 0, bool _FLIP = false, int _WAIT_TIME_MICROSECONDS = 10>
 class ClocklessController : public CPixelLEDController<_RGB_ORDER> {
     static constexpr int _T1 = TIMING.T1;
     static constexpr int _T2 = TIMING.T2;
@@ -323,13 +323,13 @@ public:
 
 };
 
-template <uint8_t _DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
+template <uint8_t _DATA_PIN, const ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, TIMING, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferValidElements = 0;
-template <uint8_t _DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
+template <uint8_t _DATA_PIN, const ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint32_t volatile ClocklessController<_DATA_PIN, TIMING, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBufferInUse = 0;
-template <uint8_t _DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
+template <uint8_t _DATA_PIN, const ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 uint16_t ClocklessController<_DATA_PIN, TIMING, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::s_SequenceBuffer[_PWM_BUFFER_COUNT];
-template <uint8_t _DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
+template <uint8_t _DATA_PIN, const ChipsetTiming& TIMING, EOrder _RGB_ORDER, int _XTRA0, bool _FLIP, int _WAIT_TIME_MICROSECONDS>
 CMinWait<_WAIT_TIME_MICROSECONDS> ClocklessController<_DATA_PIN, TIMING, _RGB_ORDER, _XTRA0, _FLIP, _WAIT_TIME_MICROSECONDS>::mWait;
 
 /* nrf_pwm solution

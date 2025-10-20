@@ -72,7 +72,7 @@ public:
     bool isAvailable() const override { return mAvailable; }
 
     // Configuration (called before each transmission)
-    bool configure(gpio_num_t pin, const fl::ChipsetTiming& TIMING, uint32_t reset_ns) override;
+    bool configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) override;
 
     // One-shot transmission (pre-encodes entire buffer)
     void transmit(const uint8_t* pixel_data, int num_bytes) override;

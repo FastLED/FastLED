@@ -29,10 +29,10 @@ namespace fl {
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
-constexpr fl::u32 cycles_from_ns_esp32(fl::u32 ns, fl::u32 hz) {
+constexpr u32 cycles_from_ns_esp32(u32 ns, u32 hz) {
   // Round up: cycles = ceil(ns * hz / 1e9)
   // Using: (ns * hz + 999'999'999) / 1'000'000'000
-  return ((fl::u64)ns * (fl::u64)hz + 999999999UL) / 1000000000UL;
+  return ((u64)ns * (u64)hz + 999999999UL) / 1000000000UL;
 }
 
 /// Forward declaration for runtime frequency query
@@ -41,16 +41,16 @@ extern u32 esp_clk_cpu_freq_impl();
 /// Platform-specific implementation of nanosecond delay with runtime frequency (ESP32)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz) {
-  fl::u32 cycles = cycles_from_ns_esp32(ns, hz);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) {
+  u32 cycles = cycles_from_ns_esp32(ns, hz);
   if (cycles == 0) return;
   delay_cycles_ccount(cycles);
 }
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (ESP32)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns) {
-  fl::u32 hz = esp_clk_cpu_freq_impl();
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
+  u32 hz = esp_clk_cpu_freq_impl();
   delayNanoseconds_impl(ns, hz);
 }
 

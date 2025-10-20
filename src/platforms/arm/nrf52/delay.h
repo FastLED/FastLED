@@ -41,26 +41,26 @@ namespace fl {
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
 /// @return Number of cycles (rounded up)
-constexpr fl::u32 cycles_from_ns_nrf52(fl::u32 ns, fl::u32 hz) {
+constexpr u32 cycles_from_ns_nrf52(u32 ns, u32 hz) {
   // Round up: cycles = ceil(ns * hz / 1e9)
   // Using: (ns * hz + 999'999'999) / 1'000'000'000
-  return ((fl::u64)ns * (fl::u64)hz + 999999999UL) / 1000000000UL;
+  return ((u64)ns * (u64)hz + 999999999UL) / 1000000000UL;
 }
 
 /// Platform-specific implementation of nanosecond delay with runtime frequency (nRF52)
 /// @param ns Number of nanoseconds
 /// @param hz CPU frequency in Hz
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns, fl::u32 hz) {
-  fl::u32 cycles = cycles_from_ns_nrf52(ns, hz);
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz) {
+  u32 cycles = cycles_from_ns_nrf52(ns, hz);
   if (cycles == 0) return;
   delay_cycles_dwt(cycles);
 }
 
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency (nRF52)
 /// @param ns Number of nanoseconds
-FASTLED_FORCE_INLINE void delayNanoseconds_impl(fl::u32 ns) {
+FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns) {
   // nRF52 typically runs at 64 MHz
-  constexpr fl::u32 hz = 64000000UL;
+  constexpr u32 hz = 64000000UL;
   delayNanoseconds_impl(ns, hz);
 }
 

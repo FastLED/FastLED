@@ -195,7 +195,7 @@ public:
         return OutputIterator(this, mLedCount);
     }
 
-    fl::u32 numPixels() override
+    u32 numPixels() override
     {
         return mLedCount;
     }
@@ -205,7 +205,7 @@ private:
     led_strip_handle_t mStrip;
     bool mDrawIssued = false;
     bool mIsRgbw;
-    fl::u32 mLedCount = 0;
+    u32 mLedCount = 0;
 };
 
 

@@ -10,14 +10,12 @@
 
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// STM32 hardware SPI output
 /// Routes to SPIDeviceProxy for hardware SPI management
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
+class SPIOutput : public SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
 
-FASTLED_NAMESPACE_END
 
 #endif  // STM32 variants
 

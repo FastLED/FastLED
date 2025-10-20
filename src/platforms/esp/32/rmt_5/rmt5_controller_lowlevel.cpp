@@ -112,7 +112,7 @@ void RmtController5LowLevel::onEndShow() {
     // Acquire worker with hybrid mode selection (may block if N > K and all workers busy)
     // Worker is pre-configured based on strip size and timing parameters
     // Create a ChipsetTiming struct from stored timing values
-    const fl::ChipsetTiming timing = {
+    const ChipsetTiming timing = {
         static_cast<uint32_t>(mT1),
         static_cast<uint32_t>(mT2),
         static_cast<uint32_t>(mT3),

@@ -45,7 +45,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @tparam FLIP Bit order flip flag
 /// @tparam WAIT_TIME Minimum wait time between updates (microseconds)
 
-template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
     static constexpr uint32_t T1 = TIMING.T1;
     static constexpr uint32_t T2 = TIMING.T2;

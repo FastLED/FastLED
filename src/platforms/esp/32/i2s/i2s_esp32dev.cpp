@@ -192,7 +192,7 @@ static void transpose32(uint8_t *pixels, uint8_t *bits) {
     // transpose8rS32(& pixels[24], 1, 4, & bits[3]);  Can only use 24 bits
 }
 
-void i2s_define_bit_patterns(const fl::ChipsetTiming& TIMING) {
+void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
     // Extract timing values from struct
     int T1 = TIMING.T1;
     int T2 = TIMING.T2;

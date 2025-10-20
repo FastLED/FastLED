@@ -177,28 +177,28 @@ FL_INLINE_CONSTEXPR ChipsetTiming TIMING_UCS7604_1600KHZ = {125, 312, 188, 280, 
 /// @brief Get total bit period (T1 + T2 + T3) in nanoseconds
 /// @param timing Chipset timing structure
 /// @return Total bit period in nanoseconds
-constexpr uint32_t get_bit_period_ns(const fl::ChipsetTiming& timing) {
+constexpr uint32_t get_bit_period_ns(const ChipsetTiming& timing) {
     return timing.T1 + timing.T2 + timing.T3;
 }
 
 /// @brief Extract T1 (high time for bit 0) from timing constant
 /// @param timing Chipset timing structure
 /// @return T1 value in nanoseconds
-constexpr uint32_t get_timing_t1(const fl::ChipsetTiming& timing) {
+constexpr uint32_t get_timing_t1(const ChipsetTiming& timing) {
     return timing.T1;
 }
 
 /// @brief Extract T2 (additional high time for bit 1) from timing constant
 /// @param timing Chipset timing structure
 /// @return T2 value in nanoseconds
-constexpr uint32_t get_timing_t2(const fl::ChipsetTiming& timing) {
+constexpr uint32_t get_timing_t2(const ChipsetTiming& timing) {
     return timing.T2;
 }
 
 /// @brief Extract T3 (low tail duration) from timing constant
 /// @param timing Chipset timing structure
 /// @return T3 value in nanoseconds
-constexpr uint32_t get_timing_t3(const fl::ChipsetTiming& timing) {
+constexpr uint32_t get_timing_t3(const ChipsetTiming& timing) {
     return timing.T3;
 }
 

@@ -10,17 +10,15 @@
 
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// Generic fallback for generic pins on Teensy 3
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
+template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
 class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
 
 /// Specialization for hardware SPI pins
-template<fl::u32 _SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
+template<u32 _SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
 
-FASTLED_NAMESPACE_END
 
 #endif  // Teensy3 with hardware SPI
 

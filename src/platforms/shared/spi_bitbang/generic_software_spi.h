@@ -30,7 +30,7 @@ FASTLED_NAMESPACE_BEGIN
 /// @note This is a cross-platform software SPI implementation that works on any platform.
 /// @note Previously named AVRSoftwareSPIOutput (legacy name from when FastLED was AVR-focused)
 /// @todo Replace the select pin definition with a set of pins, to allow using mux hardware for routing in the future.
-template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, fl::u32 SPI_SPEED>
+template <uint8_t DATA_PIN, uint8_t CLOCK_PIN, u32 SPI_SPEED>
 class GenericSoftwareSPIOutput {
 	// The data types for pointers to the pin port - typedef'd here from the ::Pin definition because on AVR these
 	// are pointers to 8 bit values, while on ARM they are 32 bit
@@ -78,7 +78,7 @@ public:
 	static void writeBytePostWait(uint8_t b) __attribute__((always_inline)) { writeByte(b); wait(); }
 
 	/// Write a word (two bytes) over SPI.
-	static void writeWord(fl::u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
+	static void writeWord(u16 w) __attribute__((always_inline)) { writeByte(w>>8); writeByte(w&0xFF); }
 
 	/// Write a single byte over SPI.
 	/// Naive implelentation, simply calls writeBit() on the 8 bits in the byte.
