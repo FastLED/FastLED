@@ -56,11 +56,7 @@ extern "C" FL_LINK_WEAK int atexit(void (* /*func*/ )()) { return 0; }
 extern "C" void yield(void) { }
 #endif
 
-namespace fl {
-fl::u16 cled_contoller_size() {
-	return sizeof(CLEDController);
-}
-}  // namespace fl
+// Implementation of cled_contoller_size() moved to src/fl/fastled_internal.cpp
 
 uint8_t get_brightness();
 

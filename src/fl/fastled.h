@@ -100,3 +100,12 @@
 /// Hardware pin definitions
 #include "../fastpin.h"
 
+// ============================================================================
+// INTERNAL UTILITY DECLARATIONS
+// ============================================================================
+
+namespace fl {
+/// Get the size of the CLEDController object for introspection
+u16 cled_contoller_size();
+}  // namespace fl
+

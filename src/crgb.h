@@ -70,25 +70,4 @@ FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV& hsv, CRGB& rgb)
 // HSV conversion implementations for fl::rgb8
 // These must be defined after CRGB and CHSV typedefs are established
 // and after hsv2rgb_dispatch is defined
-namespace fl {
-
-FASTLED_FORCE_INLINE rgb8::rgb8(const hsv8& rhs) {
-    hsv2rgb_dispatch(rhs, *this);
-}
-
-FASTLED_FORCE_INLINE rgb8& rgb8::setHSV(u8 hue, u8 sat, u8 val) {
-    hsv2rgb_dispatch(hsv8(hue, sat, val), *this);
-    return *this;
-}
-
-FASTLED_FORCE_INLINE rgb8& rgb8::setHue(u8 hue) {
-    hsv2rgb_dispatch(hsv8(hue, 255, 255), *this);
-    return *this;
-}
-
-FASTLED_FORCE_INLINE rgb8& rgb8::operator=(const hsv8& rhs) {
-    hsv2rgb_dispatch(rhs, *this);
-    return *this;
-}
-
-}  // namespace fl
+// Note: Implementation moved to src/fl/rgb8.cpp to comply with namespace rules

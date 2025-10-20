@@ -1014,6 +1014,4 @@ using fl_string = fl::string;
 
 // Backdoor to get the size of the CLedController object. The one place
 // that includes this just uses extern to declare the function.
-namespace fl {
-u16 cled_contoller_size();
-}  // namespace fl
+// Declaration moved to src/fl/fastled.h
