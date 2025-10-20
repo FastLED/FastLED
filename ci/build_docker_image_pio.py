@@ -31,6 +31,7 @@ from typing import Dict, List, Optional
 # Import board configuration
 from ci.boards import create_board
 from ci.docker.build_image import generate_config_hash
+from ci.util.docker_helper import get_docker_command
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -178,7 +179,7 @@ def check_docker_image_exists(image_name: str) -> bool:
     """
     try:
         result = subprocess.run(
-            ["docker", "image", "inspect", image_name],
+            [get_docker_command(), "image", "inspect", image_name],
             capture_output=True,
             text=True,
             check=False,
@@ -246,7 +247,7 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
             shutil.copy(uv_lock_path, temp_path / "uv.lock")
 
         # Build docker command
-        cmd = ["docker", "build"]
+        cmd = [get_docker_command(), "build"]
 
         if no_cache:
             cmd.append("--no-cache")
@@ -295,7 +296,7 @@ def build_docker_image(
         subprocess.CalledProcessError: If docker build fails
     """
     # Build docker command
-    cmd = ["docker", "build"]
+    cmd = [get_docker_command(), "build"]
 
     if no_cache:
         cmd.append("--no-cache")

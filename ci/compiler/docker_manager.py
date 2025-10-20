@@ -12,6 +12,8 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
+from ci.util.docker_helper import get_docker_command
+
 
 class ContainerState(Enum):
     """Docker container states."""
@@ -111,7 +113,12 @@ class DockerContainerManager:
         try:
             # Check if container exists
             result = subprocess.run(
-                ["docker", "container", "inspect", self.config.container_name],
+                [
+                    get_docker_command(),
+                    "container",
+                    "inspect",
+                    self.config.container_name,
+                ],
                 capture_output=True,
                 text=True,
                 timeout=10,
@@ -122,7 +129,7 @@ class DockerContainerManager:
             # Parse state from output
             state_result = subprocess.run(
                 [
-                    "docker",
+                    get_docker_command(),
                     "inspect",
                     "-f",
                     "{{.State.Running}} {{.State.Paused}}",
@@ -152,7 +159,7 @@ class DockerContainerManager:
         env["MSYS_NO_PATHCONV"] = "1"
 
         cmd = [
-            "docker",
+            get_docker_command(),
             "create",
             "--name",
             self.config.container_name,
@@ -183,7 +190,7 @@ class DockerContainerManager:
             if state == ContainerState.STOPPED:
                 print(f"Starting container: {self.config.container_name}")
                 result = subprocess.run(
-                    ["docker", "start", self.config.container_name],
+                    [get_docker_command(), "start", self.config.container_name],
                     timeout=30,
                 )
                 if result.returncode != 0:
@@ -191,7 +198,7 @@ class DockerContainerManager:
             elif state == ContainerState.PAUSED:
                 print(f"Unpausing container: {self.config.container_name}")
                 result = subprocess.run(
-                    ["docker", "unpause", self.config.container_name],
+                    [get_docker_command(), "unpause", self.config.container_name],
                     timeout=30,
                 )
                 if result.returncode != 0:
@@ -387,7 +394,7 @@ class DockerCompilationOrchestrator:
         """Ensure Docker image exists, optionally building it."""
         try:
             result = subprocess.run(
-                ["docker", "image", "inspect", self.config.image_name],
+                [get_docker_command(), "image", "inspect", self.config.image_name],
                 capture_output=True,
                 text=True,
                 timeout=10,

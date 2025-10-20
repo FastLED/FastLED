@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ci.docker.qemu_esp32_docker import DockerQEMURunner
+from ci.util.docker_helper import get_docker_command
 
 
 class QEMUTestIntegration:
@@ -28,7 +29,7 @@ class QEMUTestIntegration:
         """Check if Docker is available."""
         try:
             result = subprocess.run(
-                ["docker", "version"], capture_output=True, timeout=5
+                [get_docker_command(), "version"], capture_output=True, timeout=5
             )
             return result.returncode == 0
         except (subprocess.SubprocessError, FileNotFoundError):

@@ -27,6 +27,8 @@ import sys
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Set, cast
 
+from ci.util.docker_helper import get_docker_command
+
 
 def parse_arguments() -> argparse.Namespace:
     """Parse and validate command-line arguments."""
@@ -87,7 +89,7 @@ def get_fastled_images() -> List[Dict[str, Any]]:
     try:
         result = subprocess.run(
             [
-                "docker",
+                get_docker_command(),
                 "images",
                 "--format",
                 "{{.Repository}}:{{.Tag}}\t{{.CreatedAt}}\t{{.Size}}",
@@ -265,7 +267,7 @@ def delete_image(image_name: str, tag: str, force: bool) -> bool:
 
     try:
         subprocess.run(
-            ["docker", "rmi", full_name],
+            [get_docker_command(), "rmi", full_name],
             capture_output=True,
             text=True,
             check=True,

@@ -5,6 +5,8 @@ from typing import Any, Dict, List, Optional
 
 from running_process.process_output_reader import EndOfStream
 
+from ci.util.docker_helper import get_docker_command
+
 
 class DockerManager:
     def __init__(self):
@@ -21,7 +23,8 @@ class DockerManager:
         output_file: Optional[str] = None,
         container_name: Optional[str] = None,
     ) -> subprocess.CompletedProcess[str]:
-        full_command = ["docker"] + command
+        docker_cmd = get_docker_command()
+        full_command = [docker_cmd] + command
         print(f"Executing Docker command: {' '.join(full_command)}")
 
         # Set environment to prevent MSYS2/Git Bash path conversion on Windows

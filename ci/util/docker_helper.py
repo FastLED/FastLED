@@ -14,23 +14,92 @@ from typing import Optional, Tuple
 from ci.docker.build_image import generate_config_hash
 
 
-def is_docker_installed() -> bool:
-    """Check if Docker is installed (may not be running).
+# Cache for docker executable path
+_docker_executable_cache: Optional[str] = None
+
+
+def get_docker_command() -> str:
+    """Get the docker command to use (as a string).
 
     Returns:
-        True if Docker executable is found, False otherwise
+        The path to the docker executable, or "docker" if not found (will fail later with clear error)
     """
+    docker_exe = find_docker_executable()
+    return docker_exe if docker_exe else "docker"
+
+
+def find_docker_executable() -> Optional[str]:
+    """Find the docker executable with fallback paths.
+
+    Attempts to find docker in this order:
+    1. Standard PATH using `where` (Windows) or `which` (Unix)
+    2. Common Docker Desktop installation paths
+    3. Common Linux/macOS installation paths
+
+    Returns:
+        Path to docker executable if found, None otherwise
+    """
+    global _docker_executable_cache
+
+    if _docker_executable_cache is not None:
+        return _docker_executable_cache
+
+    # Try standard PATH first
     try:
-        # Try to find docker in PATH
         result = subprocess.run(
             ["where", "docker"] if sys.platform == "win32" else ["which", "docker"],
             capture_output=True,
             text=True,
             timeout=5,
         )
-        return result.returncode == 0
+        if result.returncode == 0:
+            docker_path = result.stdout.strip().split("\n")[
+                0
+            ]  # First result on Windows (where returns multiple)
+            if docker_path:
+                _docker_executable_cache = docker_path
+                return docker_path
     except Exception:
-        return False
+        pass
+
+    # Try common Docker Desktop paths on Windows
+    if sys.platform == "win32":
+        common_paths = [
+            r"C:\Program Files\Docker\Docker\resources\bin\docker.exe",
+            r"C:\Program Files (x86)\Docker\Docker\resources\bin\docker.exe",
+            os.path.expanduser(
+                r"~\AppData\Local\Docker\Docker\resources\bin\docker.exe"
+            ),
+            r"C:\Program Files\Docker\Docker\docker.exe",
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                _docker_executable_cache = path
+                return path
+
+    # Try common paths on macOS/Linux
+    if sys.platform in ("darwin", "linux"):
+        common_paths = [
+            "/usr/local/bin/docker",
+            "/usr/bin/docker",
+            "/opt/docker/bin/docker",
+            os.path.expanduser("~/.docker/bin/docker"),
+        ]
+        for path in common_paths:
+            if os.path.exists(path):
+                _docker_executable_cache = path
+                return path
+
+    return None
+
+
+def is_docker_installed() -> bool:
+    """Check if Docker is installed (may not be running).
+
+    Returns:
+        True if Docker executable is found, False otherwise
+    """
+    return find_docker_executable() is not None
 
 
 def is_docker_available() -> bool:
@@ -40,8 +109,12 @@ def is_docker_available() -> bool:
         True if Docker is available, False otherwise
     """
     try:
+        docker_exe = find_docker_executable()
+        if not docker_exe:
+            return False
+
         result = subprocess.run(
-            ["docker", "version"],
+            [docker_exe, "version"],
             capture_output=True,
             text=True,
             check=False,
@@ -247,9 +320,13 @@ def is_docker_image_available(board_name: str) -> bool:
         True if Docker image exists locally, False otherwise
     """
     try:
+        docker_exe = find_docker_executable()
+        if not docker_exe:
+            return False
+
         image_name = get_docker_image_name(board_name)
         result = subprocess.run(
-            ["docker", "image", "inspect", image_name],
+            [docker_exe, "image", "inspect", image_name],
             capture_output=True,
             text=True,
             check=False,
