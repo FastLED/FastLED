@@ -808,7 +808,7 @@ class MemoryPoolList {
       newPools = allocator->allocate(newCapacity * sizeof(Pool));
       if (!newPools)
         return false;
-      ::memcpy(newPools, preallocatedPools_, sizeof(preallocatedPools_));
+      fl::memcpy(newPools, preallocatedPools_, sizeof(preallocatedPools_));
     } else {
       newPools = allocator->reallocate(pools_, newCapacity * sizeof(Pool));
       if (!newPools)
@@ -1087,7 +1087,7 @@ class JsonString {
       return false;
     if (!rhs.data_)
       return false;
-    return memcmp(lhs.data_, rhs.data_, lhs.size_) == 0;
+    return fl::memcmp(lhs.data_, rhs.data_, lhs.size_) == 0;
   }
   friend bool operator!=(JsonString lhs, JsonString rhs) {
     return !(lhs == rhs);
@@ -4372,7 +4372,7 @@ struct RawComparer : ComparerBase {
   explicit RawComparer(RawString rhs) : rhs_(rhs) {}
   CompareResult visit(RawString lhs) {
     size_t size = rhs_.size() < lhs.size() ? rhs_.size() : lhs.size();
-    int n = memcmp(lhs.data(), rhs_.data(), size);
+    int n = fl::memcmp(lhs.data(), rhs_.data(), size);
     if (n < 0)
       return COMPARE_RESULT_LESS;
     else if (n > 0)
@@ -4564,7 +4564,7 @@ inline size_t copyArray(JsonVariantConst src, char (&dst)[N]) {
   size_t len = N - 1;
   if (len > s.size())
     len = s.size();
-  memcpy(dst, s.c_str(), len);
+  fl::memcpy(dst, s.c_str(), len);
   dst[len] = 0;
   return 1;
 }
@@ -7349,7 +7349,7 @@ struct Converter<MsgPackBinary> : private detail::VariantAttorney {
           default:
             ARDUINOJSON_ASSERT(false);
         }
-        memcpy(ptr + headerSize, src.data(), src.size());
+        fl::memcpy(ptr + headerSize, src.data(), src.size());
         data->setRawString(str);
         return;
       }
@@ -7714,7 +7714,7 @@ class MsgPackDeserializer {
     char* p = stringBuffer_.reserve(totalSize);
     if (!p)
       return DeserializationError::NoMemory;
-    memcpy(p, header, headerSize);
+    fl::memcpy(p, header, headerSize);
     auto err = readBytes(p + headerSize, n);
     if (err)
       return err;
@@ -7896,7 +7896,7 @@ struct Converter<MsgPackExtension> : private detail::VariantAttorney {
         for (uint8_t i = 0; i < sizeBytes; i++)
           *ptr++ = uint8_t(src.size() >> (sizeBytes - i - 1) * 8 & 0xff);
         *ptr++ = uint8_t(src.type());
-        memcpy(ptr, src.data(), src.size());
+        fl::memcpy(ptr, src.data(), src.size());
         data->setRawString(str);
         return;
       }
