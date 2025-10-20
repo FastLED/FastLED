@@ -109,26 +109,34 @@ class DockerContainerManager:
     def get_container_state(self) -> ContainerState:
         """Query current container state without side effects."""
         # Check if container exists
-        result = subprocess.run(
-            ["docker", "container", "inspect", self.config.container_name],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "container", "inspect", self.config.container_name],
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            return ContainerState.NOT_EXISTS
+
         if result.returncode != 0:
             return ContainerState.NOT_EXISTS
 
         # Parse state from output
-        state_result = subprocess.run(
-            [
-                "docker",
-                "inspect",
-                "-f",
-                "{{.State.Running}} {{.State.Paused}}",
-                self.config.container_name,
-            ],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            state_result = subprocess.run(
+                [
+                    "docker",
+                    "inspect",
+                    "-f",
+                    "{{.State.Running}} {{.State.Paused}}",
+                    self.config.container_name,
+                ],
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            return ContainerState.NOT_EXISTS
+
         parts = state_result.stdout.strip().split()
         is_running = parts[0] == "true"
         is_paused = parts[1] == "true" if len(parts) > 1 else False
@@ -160,8 +168,11 @@ class DockerContainerManager:
             "/dev/null",
         ]
 
-        result = subprocess.run(cmd, env=env)
-        return result.returncode == 0
+        try:
+            result = subprocess.run(cmd, env=env)
+            return result.returncode == 0
+        except FileNotFoundError:
+            return False
 
     def transition_to_running(self) -> bool:
         """Ensure container is in running state."""
@@ -175,13 +186,21 @@ class DockerContainerManager:
 
         if state == ContainerState.STOPPED:
             print(f"Starting container: {self.config.container_name}")
-            result = subprocess.run(["docker", "start", self.config.container_name])
-            if result.returncode != 0:
+            try:
+                result = subprocess.run(["docker", "start", self.config.container_name])
+                if result.returncode != 0:
+                    return False
+            except FileNotFoundError:
                 return False
         elif state == ContainerState.PAUSED:
             print(f"Unpausing container: {self.config.container_name}")
-            result = subprocess.run(["docker", "unpause", self.config.container_name])
-            if result.returncode != 0:
+            try:
+                result = subprocess.run(
+                    ["docker", "unpause", self.config.container_name]
+                )
+                if result.returncode != 0:
+                    return False
+            except FileNotFoundError:
                 return False
         else:
             print(f"✓ Using existing container: {self.config.container_name}")
@@ -190,12 +209,15 @@ class DockerContainerManager:
 
     def pause(self) -> bool:
         """Pause the container to free resources."""
-        result = subprocess.run(
-            ["docker", "pause", self.config.container_name],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        return result.returncode == 0
+        try:
+            result = subprocess.run(
+                ["docker", "pause", self.config.container_name],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+            )
+            return result.returncode == 0
+        except FileNotFoundError:
+            return False
 
 
 class DockerEntrypointBuilder:
@@ -361,11 +383,20 @@ class DockerCompilationOrchestrator:
 
     def ensure_image_exists(self, build_if_missing: bool = False) -> bool:
         """Ensure Docker image exists, optionally building it."""
-        result = subprocess.run(
-            ["docker", "image", "inspect", self.config.image_name],
-            capture_output=True,
-            text=True,
-        )
+        try:
+            result = subprocess.run(
+                ["docker", "image", "inspect", self.config.image_name],
+                capture_output=True,
+                text=True,
+            )
+        except FileNotFoundError:
+            print(f"❌ Docker is not installed or not found in PATH")
+            print(f"")
+            print(f"Please install Docker and try again.")
+            print(f"Alternatively, use --local to force native compilation:")
+            print(f"  bash compile --local {self.config.board_name} <example>")
+            print(f"")
+            return False
 
         if result.returncode == 0:
             print(f"✓ Using existing Docker image: {self.config.image_name}")
@@ -447,22 +478,27 @@ class DockerCompilationOrchestrator:
         """Execute command with real-time output streaming."""
         sys.stdout.flush()
         sys.stderr.flush()
-        process = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            bufsize=1,  # Line buffered
-            universal_newlines=True,
-            encoding="utf-8",
-            errors="replace",  # Replace invalid UTF-8 with replacement character
-        )
+        try:
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                bufsize=1,  # Line buffered
+                universal_newlines=True,
+                encoding="utf-8",
+                errors="replace",  # Replace invalid UTF-8 with replacement character
+            )
 
-        if process.stdout:
-            for line in process.stdout:
-                print(line, end="", flush=True)
+            if process.stdout:
+                for line in process.stdout:
+                    print(line, end="", flush=True)
 
-        returncode = process.wait()
-        return subprocess.CompletedProcess[str](cmd, returncode, stdout="", stderr="")
+            returncode = process.wait()
+            return subprocess.CompletedProcess[str](
+                cmd, returncode, stdout="", stderr=""
+            )
+        except FileNotFoundError:
+            return subprocess.CompletedProcess[str](cmd, 1, stdout="", stderr="")
 
     def copy_artifacts(self, container_path: str, host_path: Path) -> bool:
         """Copy artifacts from container to host."""
@@ -478,13 +514,17 @@ class DockerCompilationOrchestrator:
             str(host_path),
         ]
 
-        result = subprocess.run(copy_cmd, capture_output=True, text=True)
+        try:
+            result = subprocess.run(copy_cmd, capture_output=True, text=True)
 
-        if result.returncode == 0:
-            print(f"✅ Build artifacts copied to {host_path}")
-            return True
-        else:
-            print(f"⚠️  Warning: Could not copy artifacts from container")
-            if result.stderr:
-                print(f"   Error: {result.stderr}")
+            if result.returncode == 0:
+                print(f"✅ Build artifacts copied to {host_path}")
+                return True
+            else:
+                print(f"⚠️  Warning: Could not copy artifacts from container")
+                if result.stderr:
+                    print(f"   Error: {result.stderr}")
+                return False
+        except FileNotFoundError:
+            print(f"⚠️  Warning: Docker not found - could not copy artifacts")
             return False
