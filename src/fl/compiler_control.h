@@ -155,3 +155,13 @@
   #define FL_EXTERN_C_END
   #define FL_EXTERN_C
 #endif
+
+// Inline constexpr macro for C++11/17 compatibility
+// In C++17+, constexpr variables are implicitly inline (external linkage)
+// In C++11/14, constexpr variables have internal linkage by default
+// This macro ensures external linkage in C++17+ while maintaining compatibility
+#if __cplusplus >= 201703L
+  #define FL_INLINE_CONSTEXPR inline constexpr
+#else
+  #define FL_INLINE_CONSTEXPR constexpr
+#endif

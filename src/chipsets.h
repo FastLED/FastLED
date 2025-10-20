@@ -12,6 +12,7 @@
 #include "eorder.h"
 #include "fl/namespace.h"
 #include "fl/math_macros.h"
+#include "fl/compiler_control.h"
 
 // Include centralized LED chipset timing definitions
 // These provide unified nanosecond-based T1, T2, T3 timing for all supported chipsets
@@ -1021,6 +1022,14 @@ protected:
 /// nanosecond values in fl::chipsets::led_timing.h, as they may introduce timing
 /// regressions. For reference timing values, see TIMING_* constants in led_timing.h.
 
+// Suppress -Wsubobject-linkage warning for controller template instantiations.
+// In C++11/14, constexpr variables have internal linkage, which causes the compiler
+// to warn when they are used in base classes of externally-linked templates. The macro
+// FL_INLINE_CONSTEXPR adds explicit 'inline' in C++17+ to resolve this, but for C++11
+// compatibility we suppress the warning here.
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING(subobject-linkage)
+
 /// GE8822 controller class.
 /// @copydetails WS2812Controller800Khz
 /// @note Timing: 350ns, 660ns, 350ns (nanosecond-based timing)
@@ -1401,6 +1410,7 @@ class UCS1912Controller : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, fl::TIMI
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = RGB>
 class SM16824EController : public FASTLED_CLOCKLESS_CONTROLLER<DATA_PIN, fl::TIMING_SM16824E, RGB_ORDER, 0, false> {};
 #endif
+FL_DISABLE_WARNING_POP
 /// @} ClocklessChipsets
 
 
