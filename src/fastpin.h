@@ -440,21 +440,21 @@ template<fl::u8 port> struct __FL_PORT_INFO {
 };
 
 
-/// Macro to create the instantiations for defined ports. 
+/// Macro to create the instantiations for defined ports.
 /// We're going to abuse this later for auto discovery of pin/port mappings
-/// for new variants.  
+/// for new variants.
 /// Use this for ports that are numeric in nature, e.g. GPIO0, GPIO1, etc.
 /// @param L the number of the port
 /// @param BASE the data type for the register
 #define _FL_DEFINE_PORT(L, BASE) template<> struct __FL_PORT_INFO<L> { \
+	typedef BASE __t_baseType;  \
 	static bool hasPort() { return 1; } \
 	static const char *portName() { return #L; } \
-	typedef BASE __t_baseType;  \
 	static const void *portAddr() { return (void*)&__t_baseType::r(); } };
 
-/// Macro to create the instantiations for defined ports. 
+/// Macro to create the instantiations for defined ports.
 /// We're going to abuse this later for auto discovery of pin/port mappings
-/// for new variants.  
+/// for new variants.
 /// Use this for ports that are letters. The first parameter will be the
 /// letter, the second parameter will be an integer/counter of some kind.
 /// This is because attempts to turn macro parameters into character constants
@@ -463,9 +463,9 @@ template<fl::u8 port> struct __FL_PORT_INFO {
 /// @param LC an integer counter
 /// @param BASE the data type for the register
 #define _FL_DEFINE_PORT3(L, LC, BASE) template<> struct __FL_PORT_INFO<LC> { \
+	typedef BASE __t_baseType;  \
 	static bool hasPort() { return 1; } \
 	static const char *portName() { return #L; } \
-	typedef BASE __t_baseType;  \
 	static const void *portAddr() { return (void*)&__t_baseType::r(); } };
 
 FASTLED_NAMESPACE_END
