@@ -15,7 +15,7 @@
 /// - Supports compile-time and runtime timing values
 /// - Full interrupt support (can block entire MCU)
 
-#include "fastpin.h"
+#include "fl/fastpin.h"
 #include "fl/delay.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
@@ -23,6 +23,7 @@
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
+
 namespace fl {
 /// Generic blocking clockless controller
 ///

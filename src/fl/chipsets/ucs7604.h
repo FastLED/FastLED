@@ -212,7 +212,7 @@
 #define UCS7604_HAS_CONTROLLER 1
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
 #include "fl/eorder.h"
-#include "fastpin.h"
+#include "fl/fastpin.h"
 #include "cled_controller.h"
 #include "fl/force_inline.h"
 #include "fl/delay.h"

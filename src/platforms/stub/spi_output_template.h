@@ -7,6 +7,7 @@
 #define __INC_PLATFORMS_STUB_SPI_OUTPUT_TEMPLATE_H
 
 #include "fl/int.h"
+#include "fastspi_stub_generic.h"
 
 
 /// Stub SPI output - no-op implementation for testing/simulation

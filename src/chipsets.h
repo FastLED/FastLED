@@ -28,7 +28,9 @@
 
 // Platform-specific clockless controller
 // This must be included before using ClocklessControllerImpl
-#if defined(ESP32)
+#if defined(FASTLED_STUB_IMPL)
+  #include "platforms/stub/clockless_stub_generic.h"
+#elif defined(ESP32)
   #include "platforms/esp/32/clockless_rmt_esp32.h"
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"

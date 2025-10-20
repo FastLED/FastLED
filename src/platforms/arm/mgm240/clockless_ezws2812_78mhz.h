@@ -11,7 +11,7 @@
 #include "pixel_controller.h"
 #include "eorder.h"
 #include "fl/force_inline.h"
-#include "fastpin.h"
+#include "fl/fastpin.h"
 
 // Check if we're on the right platform
 #if !defined(ARDUINO_ARCH_SILABS)

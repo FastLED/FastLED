@@ -4,7 +4,7 @@
     
 #include "FastLED.h"
 
-#include "fastpin.h"
+#include "fl/fastpin.h"
 #include "fl/strstream.h"
 #include "fl/warn.h"
 #include "fl/assert.h"

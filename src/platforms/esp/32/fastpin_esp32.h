@@ -4,7 +4,7 @@
 
 #include "fl/register.h"
 #include "platforms/esp/esp_version.h"
-#include "fastpin.h"
+#include "fl/fastpin.h"
 namespace fl {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
