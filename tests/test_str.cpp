@@ -9,9 +9,6 @@
 #include "crgb.h"
 #include <sstream>
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("Str basic operations") {
     SUBCASE("Construction and assignment") {
         Str s1;

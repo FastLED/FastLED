@@ -21,9 +21,7 @@
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, LANE_MASK> {
 	static constexpr uint32_t T1 = TIMING.T1;
@@ -347,9 +345,7 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif
 
 #endif

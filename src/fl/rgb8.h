@@ -7,7 +7,6 @@
 #include "fl/int.h"
 
 #include "hsv.h"
-#include "fl/namespace.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
 #include "fl/type_traits.h"

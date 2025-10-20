@@ -1,7 +1,6 @@
 // spi_block_16.h — 16-way Hex-SPI Blocking driver (inline bit-banging, platform-agnostic)
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "spi_isr_engine.h"
 #include "spi_platform.h"

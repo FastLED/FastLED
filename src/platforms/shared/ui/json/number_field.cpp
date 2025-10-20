@@ -1,7 +1,6 @@
 #include "fl/json.h"
 #include "fl/json.h"
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
 #include "platforms/shared/ui/json/number_field.h"
 #include "ui_internal.h"
 #include "platforms/shared/ui/json/ui.h"

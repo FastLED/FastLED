@@ -8,9 +8,7 @@
 // TODO: add alternative pins for SPI1
 // TODO: add SPI2 output
 //
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 // Version 1.20 renamed SPI_t to KINETISK_SPI_t
@@ -469,7 +467,5 @@ public:
 	static void finalizeTransmission() { }
 };
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

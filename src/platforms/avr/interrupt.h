@@ -3,8 +3,6 @@
 /// AVR-specific interrupt control interface
 /// Minimal bindings to cli() and sei() instructions
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// Disable interrupts on AVR

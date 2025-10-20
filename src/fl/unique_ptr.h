@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/type_traits.h"
 #include "fl/utility.h"       // for fl::move, fl::forward, fl::swap
 #include "fl/stdint.h"        // for fl::size_t

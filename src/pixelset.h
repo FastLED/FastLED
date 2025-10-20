@@ -2,7 +2,6 @@
 
 
 #include "fl/force_inline.h"
-#include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/colorutils.h"
 #include "fl/math_macros.h"
@@ -24,10 +23,6 @@
 #define FUNCTION_FILL_GRADIENT_RGB3(a,b,c,d,e) fl::fill_gradient_RGB(a,b,c,d,e)
 #define FUNCTION_FILL_GRADIENT_RGB4(a,b,c,d,e,f) fl::fill_gradient_RGB(a,b,c,d,e,f)
 
-
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
 
 template<class PIXEL_TYPE>
 class CPixelView;
@@ -511,7 +506,7 @@ public:
 
 /// @} PixelSet
 
-FASTLED_NAMESPACE_END
+
 
 #undef FUNCTION_FILL_RAINBOW
 #undef FUNCTION_NAPPLY_GAMMA

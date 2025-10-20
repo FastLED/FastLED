@@ -43,7 +43,6 @@
 /// #endif
 /// @endcode
 
-#include "fl/namespace.h"
 #include "fl/int.h"
 
 #ifdef FASTLED_TESTING

@@ -3,7 +3,6 @@
 #include "fl/stdint.h"
 
 #include "fl/geometry.h"
-#include "fl/namespace.h"
 #include "fl/pair.h"
 #include "fl/span.h"
 #include "fl/xymap.h"

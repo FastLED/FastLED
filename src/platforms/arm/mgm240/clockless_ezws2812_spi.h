@@ -9,7 +9,6 @@
 /// IMPORTANT: This controller consumes a hardware SPI peripheral and must be
 /// explicitly enabled with #define FASTLED_USES_EZWS2812_SPI
 
-#include "fl/namespace.h"
 #include "controller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
@@ -24,9 +23,7 @@
 #ifdef FASTLED_USES_EZWS2812_SPI
 #include "third_party/ezws2812/ezWS2812.h"
 #endif
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #ifdef FASTLED_USES_EZWS2812_SPI
 
 /// @brief ezWS2812 SPI controller for FastLED
@@ -143,5 +140,4 @@ template<EOrder RGB_ORDER = GRB>
 using EZWS2812_SPI = ClocklessController_ezWS2812_SPI<RGB_ORDER>;
 
 #endif // FASTLED_USES_EZWS2812_SPI
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

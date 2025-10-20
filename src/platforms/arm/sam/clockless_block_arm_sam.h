@@ -2,9 +2,7 @@
 #define __INC_BLOCK_CLOCKLESS_H
 
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 // Base template for clockless controllers.  These controllers have 3 control points in their cycle for each bit.  The first point
@@ -182,7 +180,5 @@ public:
 };
 
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

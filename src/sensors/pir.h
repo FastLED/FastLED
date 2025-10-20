@@ -7,9 +7,6 @@
 #include "fl/ui.h"
 #include "fl/time_alpha.h"
 
-#include "fl/namespace.h"
-
-
 namespace fl {
 
 // A passive infrared sensor common on amazon.

@@ -6,9 +6,6 @@
 #include "test.h"
 #include "fl/splat.h"
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("splat simple test") {
     // Define a simple input coordinate
     vec2f input(0, 0);

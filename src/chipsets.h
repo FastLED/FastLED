@@ -10,7 +10,6 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/namespace.h"
 #include "fl/math_macros.h"
 #include "fl/compiler_control.h"
 
@@ -100,7 +99,6 @@ using ClocklessControllerImpl = ClocklessController<DATA_PIN, TIMING, RGB_ORDER,
 
 #define HAS_PIXIE
 
-FASTLED_NAMESPACE_BEGIN
 
 /// Adafruit Pixie controller class
 /// @tparam DATA_PIN the pin to write data out on
@@ -146,7 +144,6 @@ protected:
 // 	}
 // };
 
-FASTLED_NAMESPACE_END
 #endif
 #endif
 
@@ -181,7 +178,7 @@ FASTLED_NAMESPACE_END
 ///
 /// @note The base CONTROLLER must use RGB ordering (no internal reordering).
 /// Color channel reordering is handled by this wrapper class via RGB_ORDER.
-FASTLED_NAMESPACE_BEGIN
+
 
 template <
 	typename CONTROLLER,
@@ -1586,5 +1583,3 @@ using EZWS2812_SPI = ClocklessController_ezWS2812_SPI<RGB_ORDER>;
 /// @} SilabsChipsets
 
 /// @} Chipsets
-
-FASTLED_NAMESPACE_END

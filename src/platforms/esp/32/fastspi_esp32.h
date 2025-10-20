@@ -1,7 +1,6 @@
 #pragma once
 #pragma message "ESP32 Hardware SPI support added"
 
-#include "fl/namespace.h"
 #include "crgb.h"
 
 // When enabled, use the bulk transfer mode to speed up SPI writes and avoid
@@ -13,9 +12,7 @@
 #ifndef FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE
 #define FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE 64
 #endif
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #include <SPI.h>
 
 /*
@@ -276,5 +273,4 @@ public:
 		#endif
 	}
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

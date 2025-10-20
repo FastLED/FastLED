@@ -13,8 +13,6 @@
 #include "lib8tion/intmap.h"
 #include "test.h"
 
-#include "fl/namespace.h"
-
 #define FPS 30
 #define FRAME_TIME 1000 / FPS
 #define VIDEO_WIDTH 10

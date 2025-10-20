@@ -57,7 +57,6 @@ License CC BY-NC 3.0
 
 #include "crgb.h"
 #include "fl/force_inline.h"
-#include "fl/namespace.h"
 #include "fl/math.h"
 #include "fl/compiler_control.h"
 
@@ -104,8 +103,6 @@ FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
 
 namespace animartrix_detail {
-FASTLED_USING_NAMESPACE
-
 struct render_parameters {
 
     // TODO float center_x = (num_x / 2) - 0.5;   // center of the matrix

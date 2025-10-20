@@ -9,7 +9,6 @@
 
 #include "crgb.h"
 #include "fl/dbg.h"
-#include "fl/namespace.h"
 #include "fl/memory.h"
 #include "fl/unique_ptr.h"
 #include "fl/xymap.h"

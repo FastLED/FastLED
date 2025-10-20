@@ -1,14 +1,11 @@
 #include "test.h"
 #include "fl/json.h"
-#include "fl/namespace.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "FastLED.h"
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("ActiveStripData JSON Round-Trip Test") {
     FL_WARN("Testing ActiveStripData JSON round-trip...");
     

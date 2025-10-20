@@ -59,7 +59,7 @@
 // Forward declare fl::rgb8 outside the FastLED namespace
 namespace fl { struct rgb8; }
 
-FASTLED_NAMESPACE_BEGIN
+
 
 //struct CRGB;  // CRGB is now a typedef in crgb.h, not a struct
 using CRGB = fl::rgb8;  // Bring the typedef into this namespace for consistency
@@ -186,7 +186,7 @@ void hsv2rgb_fullspectrum( const CHSV* phsv, CRGB * prgb, int numLeds);
 CHSV rgb2hsv_approximate( const CRGB& rgb);
 
 
-FASTLED_NAMESPACE_END
+
 
 ///@} HSV2RGB
 

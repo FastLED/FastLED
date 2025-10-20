@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 template <typename T> class Ptr; // Forward declaration

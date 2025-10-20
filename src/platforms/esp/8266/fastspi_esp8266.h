@@ -1,12 +1,8 @@
 #pragma once
 #pragma message "ESP8266 Hardware SPI support added"
 
-#include "fl/namespace.h"
-
 #include <SPI.h>
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /*
  * ESP8266 Hardware SPI Driver
  *
@@ -148,5 +144,4 @@ public:
 		release();
 	}
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

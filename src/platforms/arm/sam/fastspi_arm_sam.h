@@ -1,8 +1,6 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(__SAM3X8E__)
 #define m_SPI ((Spi*)SPI0)
 
@@ -359,6 +357,5 @@ public:
 };
 
 #endif  // SAMD21/SAMD51
-
-FASTLED_NAMESPACE_END
+}  // namespace fl
 #endif

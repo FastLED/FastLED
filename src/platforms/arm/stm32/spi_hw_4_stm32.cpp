@@ -25,7 +25,6 @@
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
-#include "fl/namespace.h"
 #include "fl/cstring.h"
 
 // Include STM32 HAL headers if available

@@ -3,8 +3,6 @@
 /// ARM Cortex-M interrupt control interface
 /// Minimal bindings using PRIMASK register
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// Disable interrupts on ARM Cortex-M

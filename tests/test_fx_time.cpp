@@ -5,12 +5,8 @@
 
 #include "test.h"
 #include "fx/time.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("TimeWarp basic functionality") {
-    FASTLED_USING_NAMESPACE;
 
     SUBCASE("Initialization and normal time progression") {
         TimeWarp tw(1000, 1.0f); // 1000 ms is the start time, speed is set at 1x

@@ -15,7 +15,6 @@
 
 #include "fl/assert.h"
 #include "fl/convert.h"  // for convert_fastled_timings_to_timedeltas(...)
-#include "fl/namespace.h"
 #include "fl/chipsets/led_timing.h"
 #include "strip_rmt.h"
 

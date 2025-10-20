@@ -2,9 +2,7 @@
 #define __INC_CLOCKLESS_ARM_D51
 
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 // Definition for a single channel clockless controller for SAMD51
 // See clockless.h for detailed info on how the template parameters are used.
 #define ARM_DEMCR               (*(volatile uint32_t *)0xE000EDFC) // Debug Exception and Monitor Control
@@ -140,7 +138,5 @@ protected:
 		return ARM_DWT_CYCCNT;
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

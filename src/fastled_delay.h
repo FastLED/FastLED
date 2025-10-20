@@ -15,7 +15,7 @@
 /// Utility functions and classes for managing delay cycles
 /// @deprecated Use fl/delay.h for new code
 
-FASTLED_NAMESPACE_BEGIN
+
 
 
 #if (!defined(NO_MINIMUM_WAIT) || (NO_MINIMUM_WAIT==0))
@@ -94,6 +94,5 @@ using fl::delaycycles_min1;
 
 /// @}
 
-FASTLED_NAMESPACE_END
 
 #endif

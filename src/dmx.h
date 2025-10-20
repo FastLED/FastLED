@@ -17,7 +17,6 @@
 /// Flag set when the DmxSimple library is included
 #define HAS_DMX_SIMPLE
 
-FASTLED_NAMESPACE_BEGIN
 
 /// DMX512 based LED controller class, using the DmxSimple library
 /// @tparam DATA_PIN the data pin for the output of the DMX bus
@@ -44,7 +43,7 @@ protected:
 	}
 };
 
-FASTLED_NAMESPACE_END
+
 
 #endif
 
@@ -54,7 +53,7 @@ FASTLED_NAMESPACE_END
 /// Flag set when the DMXSerial library is included
 #define HAS_DMX_SERIAL
 
-FASTLED_NAMESPACE_BEGIN
+
 
 /// DMX512 based LED controller class, using the DMXSerial library
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
@@ -79,10 +78,9 @@ public:
 	}
 };
 
-FASTLED_NAMESPACE_END
+
 
 /// @} DMXControllers
 /// @} Chipsets
 
 #endif
-

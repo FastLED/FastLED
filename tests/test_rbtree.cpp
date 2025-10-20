@@ -7,9 +7,6 @@
 #include <climits>
 #include "fl/rbtree.h"
 #include "fl/string.h"
-#include "fl/namespace.h"
-
-
 // Helper function to compare red-black tree with std::map
 template<typename StdMap, typename RBTree>
 bool maps_equal(const StdMap& std_map, const RBTree& rb_tree) {

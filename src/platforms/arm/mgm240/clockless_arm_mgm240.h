@@ -1,13 +1,10 @@
 #pragma once
 
 // Include required FastLED headers
-#include "fl/namespace.h"
 #include "eorder.h"
 #include "fastled_delay.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 // ARM Cortex-M33 DWT (Data Watchpoint and Trace) registers for cycle-accurate timing
 #define ARM_DEMCR               (*(volatile uint32_t *)0xE000EDFC) // Debug Exception and Monitor Control
 #define ARM_DEMCR_TRCENA                (1 << 24)        // Enable debugging & monitoring blocks
@@ -175,5 +172,4 @@ protected:
     }
 
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

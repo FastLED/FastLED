@@ -2,15 +2,13 @@
 
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 
 #if defined(ARDUNIO_CORE_SPI)
 #endif
 
 #if defined(ARDUNIO_CORE_SPI)
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_RATE, SPIClass & _SPIObject>
 class ArdunioCoreSPIOutput {
 
@@ -105,8 +103,5 @@ public:
 	static void finalizeTransmission() { }
 
 };
-
-FASTLED_NAMESPACE_END
-
-
+}  // namespace fl
 #endif

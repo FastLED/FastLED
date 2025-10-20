@@ -2,7 +2,6 @@
 
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/hash_map.h"
 #include "fl/allocator.h"

@@ -1,10 +1,6 @@
 #ifndef __INC_FASTSPI_ARM_H
 #define __INC_FASTSPI_ARM_H
-
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
 // Version 1.20 renamed SPI_t to KINETISK_SPI_t
@@ -465,7 +461,5 @@ public:
 	static void finalizeTransmission() { }
 };
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

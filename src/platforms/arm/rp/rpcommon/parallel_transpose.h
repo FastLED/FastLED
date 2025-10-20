@@ -63,13 +63,10 @@
 /// @see parallel_pio_program.h for PIO program that consumes this data
 /// @see bitswap.h for the underlying transpose8x1_MSB() implementation
 
-#include "fl/namespace.h"
 #include "fl/int.h"
 #include "fl/force_inline.h"
 #include "bitswap.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief Transpose 8 LED strips into parallel bit format
 ///
 /// This function transposes 8 LED strips from standard byte-sequential format
@@ -264,5 +261,4 @@ inline bool transpose_strips(
             return false;  // Invalid strip count
     }
 }
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

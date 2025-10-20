@@ -27,7 +27,6 @@
 
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/namespace.h"
 #include "fl/stdio.h"
 #include "platforms/shared/clockless_timing.h"
 

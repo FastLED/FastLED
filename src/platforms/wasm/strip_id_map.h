@@ -4,16 +4,11 @@
 #include <stdio.h>
 
 #include "fl/map.h"
-#include "fl/namespace.h"
 #include "fl/singleton.h"
 
-FASTLED_NAMESPACE_BEGIN
-uint16_t cled_contoller_size();  // Forward declaration from FastLED.h
-FASTLED_NAMESPACE_END
-
-// Define a reasonable maximum number of strips
-
 namespace fl {
+
+fl::u16 cled_contoller_size();  // Forward declaration from FastLED.h
 
 class CLEDController;
 

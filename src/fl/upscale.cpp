@@ -5,7 +5,6 @@
 #include "fl/stdint.h"
 
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "fl/upscale.h"
 #include "fl/xymap.h"
 

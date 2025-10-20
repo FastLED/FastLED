@@ -12,7 +12,6 @@
 #include "freertos/semphr.h"
 
 #include "i2s_esp32dev.h"
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "fl/cstring.h"
 #include "fl/chipsets/led_timing.h"
@@ -26,12 +25,7 @@
 #include "soc/gpio_periph.h"
 #define gpio_matrix_out esp_rom_gpio_connect_out_signal
 #endif
-
-
-
-FASTLED_NAMESPACE_BEGIN
-
-
+namespace fl {
 // -- I2S clock
 #define I2S_BASE_CLK (80000000L)
 #define I2S_MAX_CLK                                                            \
@@ -562,9 +556,7 @@ void i2s_transpose_and_encode(int channel, uint32_t has_data_mask,
         }
     }
 }
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif // ifdef CONFIG_IDF_TARGET_ESP32
 
 #endif // ifdef ESP32

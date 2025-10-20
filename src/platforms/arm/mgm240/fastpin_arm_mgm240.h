@@ -19,11 +19,8 @@
 #include "em_cmu.h"
 
 #include "fl/force_inline.h"
-#include "fl/namespace.h"
 #include "fl/unused.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// Forward declaration of base FastPin template
 template<uint8_t PIN> class FastPin;
 
@@ -188,5 +185,4 @@ _FL_DEFPIN(24, 2, D, (1 << 2));   // D24 - PD02
 _FL_DEFPIN(25, 3, D, (1 << 3));   // D25 - PD03
 
 #define HAS_HARDWARE_PIN_SUPPORT
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

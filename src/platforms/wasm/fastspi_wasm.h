@@ -7,15 +7,10 @@
 #include "fl/vector.h"
 #include "fl/stdint.h"
 #include "platforms/wasm/engine_listener.h"
-#include "fl/namespace.h"
-
 #define FASTLED_ALL_PINS_HARDWARE_SPI
-
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 class CLEDController;
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 namespace fl {
 
 

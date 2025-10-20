@@ -3,7 +3,6 @@
 #include "fl/stdint.h"
 
 #include "fl/clamp.h"
-#include "fl/namespace.h"
 #include "fl/wave_simulation.h"
 #include "fl/int.h"
 

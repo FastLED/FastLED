@@ -19,7 +19,6 @@
 #include "fl/int.h"
 #include "fl/bit_cast.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -33,6 +32,9 @@ FASTLED_NAMESPACE_BEGIN
 /// most people won't be seeing/using these objects directly at all.
 /// @note That the methods for eventual checking of background writing of data (I'm looking at you, Teensy 3.0 DMA controller!)
 /// are not yet implemented.
+
+namespace fl {
+
 class CLEDController {
 protected:
     friend class CFastLED;
@@ -278,4 +280,7 @@ public:
     virtual fl::u16 getMaxRefreshRate() const { return 0; }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
+
+// Backward compatibility: bring fl::CLEDController into global namespace
+using CLEDController = fl::CLEDController;

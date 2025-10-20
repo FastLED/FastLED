@@ -8,7 +8,6 @@
 /// DualSPIDevice to work across different platforms (ESP32, RP2040, etc.)
 /// without knowing platform-specific implementation details.
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"

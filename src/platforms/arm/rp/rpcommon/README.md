@@ -175,11 +175,10 @@ Data:  GPIO 3, 5, 7, 9, 11, 13, 15, 17
 **Defines**:
 ```cpp
 // Interrupt control
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 inline void interrupts() { /* enable interrupts */ }
 inline void noInterrupts() { /* disable interrupts */ }
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 // Delay functions (if not provided by framework)
 #ifndef delay
 #define delay(ms) /* platform delay */

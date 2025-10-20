@@ -1,13 +1,9 @@
 #pragma once
 
 #include "fastled_progmem.h"
-#include "fl/namespace.h"
-
 // font courtesy of https://github.com/idispatch/raster-fonts
 // copied from the WLED project
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 static const unsigned char console_font_5x12[] FL_PROGMEM = {
 
 // code points 0-31 and 127-255 are commented out to save memory, they contain extra characters (CP437),
@@ -4109,5 +4105,4 @@ static const unsigned char console_font_5x12[] FL_PROGMEM = {
     // 0x00,  /* 00000 */
     // 0x00,  /* 00000 */
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

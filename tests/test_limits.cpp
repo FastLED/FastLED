@@ -3,10 +3,7 @@
 
 #include "doctest.h"
 #include "fl/limits.h"
-#include "fl/namespace.h"
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("numeric_limits basic properties") {
     SUBCASE("int is specialized") {
         CHECK(fl::numeric_limits<int>::is_specialized);

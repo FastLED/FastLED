@@ -6,9 +6,6 @@
 #include "test.h"
 #include "fl/dbg.h"
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("fastled_file_offset") {
     const char* src = "src/fl/dbg.h";
     const char* result = fastled_file_offset(src);

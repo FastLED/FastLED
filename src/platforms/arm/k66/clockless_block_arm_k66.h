@@ -21,9 +21,7 @@
 #define USED_LANES ((FIRST_PIN!=15) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief ARM K66 (Teensy 3.6) Block Clockless LED Controller
 /// @tparam LANES Number of parallel data lines
 /// @tparam FIRST_PIN First pin number (determines port)
@@ -358,9 +356,7 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif
 
 #endif

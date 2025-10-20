@@ -7,10 +7,6 @@
 Legacy header. Prefer to use fl/hsv.h instead.
 */
 #include "fl/hsv.h"
-#include "fl/namespace.h"
-
-
-
 // Backward compatibility: bring fl::hsv8 into global namespace as CHSV
 using CHSV = fl::hsv8;
 using fl::HSVHue;

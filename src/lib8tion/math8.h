@@ -4,7 +4,6 @@
 #include "scale8.h"
 #include "lib8tion/lib8static.h"
 #include "intmap.h"
-#include "fl/namespace.h"
 #include "fl/compiler_control.h"
 
 #include "fl/math8.h"

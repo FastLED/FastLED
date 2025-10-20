@@ -3,7 +3,6 @@
 #include "fl/stdint.h"
 
 #include "fl/deprecated.h"
-#include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 
 namespace fl {

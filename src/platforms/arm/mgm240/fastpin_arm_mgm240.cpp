@@ -6,11 +6,7 @@
 // Include Silicon Labs EMLIB GPIO for direct register access
 #include "em_gpio.h"
 #include "em_cmu.h"
-
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 // Initialize GPIO clock (needed for Silicon Labs devices)
 void _mgm240_gpio_init() {
     static bool initialized = false;
@@ -19,7 +15,5 @@ void _mgm240_gpio_init() {
         initialized = true;
     }
 }
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif // MGM240 target check

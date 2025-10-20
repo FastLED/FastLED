@@ -15,7 +15,6 @@
 /// - Supports compile-time and runtime timing values
 /// - Full interrupt support (can block entire MCU)
 
-#include "fl/namespace.h"
 #include "fastpin.h"
 #include "fl/delay.h"
 #include "fl/chipsets/led_timing.h"
@@ -24,9 +23,7 @@
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// Generic blocking clockless controller
 ///
 /// Template parameters:
@@ -175,7 +172,5 @@ private:
         fl::delayNanoseconds<T3>();
     }
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif  // __INC_CLOCKLESS_BLOCK_GENERIC_H

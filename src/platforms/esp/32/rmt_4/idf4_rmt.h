@@ -110,16 +110,11 @@
 #endif
 #define CONFIG_RMT_SUPPRESS_DEPRECATE_WARN 1
 
-#include "fl/namespace.h"
 #include "eorder.h"
 #include "rgbw.h"
 #include "pixel_iterator.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
-
-
+namespace fl {
 // NOT CURRENTLY IMPLEMENTED:
 // -- Set to true to print debugging information about timing
 //    Useful for finding out if timing is being messed up by other things
@@ -163,5 +158,4 @@ private:
     void loadPixelDataForStreamEncoding(PixelIterator& pixels);
     ESP32RMTController *pImpl = nullptr;
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

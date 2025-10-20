@@ -13,8 +13,6 @@
 #include "pixel_controller.h"
 #include "cled_controller.h"
 
-FASTLED_NAMESPACE_BEGIN
-
 
 
 /// Template extension of the CLEDController class
@@ -68,4 +66,3 @@ public:
 };
 
 
-FASTLED_NAMESPACE_END

@@ -7,7 +7,7 @@
 /// @file power_mgt.h
 /// Functions to limit the power used by FastLED
 
-FASTLED_NAMESPACE_BEGIN
+
 
 /// @defgroup Power Power Management Functions
 /// Functions to limit the amount of power used by FastLED
@@ -103,4 +103,4 @@ uint8_t  calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u
 
 /// @} Power
 
-FASTLED_NAMESPACE_END
+

@@ -2,7 +2,6 @@
 
 #include "crgb.h"
 #include "fl/map.h"
-#include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/ui.h"
 #include "fl/xymap.h"

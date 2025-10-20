@@ -21,12 +21,7 @@
 #include "fl/json.h"
 
 #include "fl/ui.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
-
-
+using namespace fl;
 TEST_CASE("UI Bug - Memory Corruption") {
     // This test simulates the conditions that might lead to memory corruption
     // in the UI system, particularly when components are destroyed while 

@@ -4,7 +4,6 @@
 #include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
-#include "fl/namespace.h"
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH

@@ -8,7 +8,6 @@
 
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/namespace.h"
 #include "fl/singleton.h"
 #include "pixel_controller.h"
 #include "pixel_iterator.h"

@@ -15,7 +15,6 @@
 #endif
 
 #include "led_sysdefs_esp8266.h"
-#include "fl/namespace.h"
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
@@ -26,9 +25,7 @@
 class HardwareSerial;
 extern HardwareSerial Serial1;
 extern "C" void delayMicroseconds(unsigned int us);
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 // UART-based WS2812/WS2811 driver for ESP8266 (UART1, TX on GPIO2).
 // Initial implementation: RGB only; RGBW can be added by extending encode loop.
 template<EOrder RGB_ORDER = GRB>
@@ -164,7 +161,5 @@ void UARTController_ESP8266<RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &p
     uartFlush();
     delayMicroseconds(mResetUs);
 }
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif // ARDUINO_ARCH_ESP8266 || ESP8266

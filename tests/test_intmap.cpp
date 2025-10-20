@@ -4,9 +4,7 @@
 
 #include "test.h"
 #include "lib8tion/intmap.h"
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("map8_to_16") {
     CHECK_EQ(map8_to_16(0), 0);
     CHECK_EQ(map8_to_16(1), 0x101);

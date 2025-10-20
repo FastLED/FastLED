@@ -41,7 +41,6 @@
 ///     });
 /// @endcode
 
-#include "fl/namespace.h"
 #include "fl/function.h"
 #include "fl/string.h"
 #include "fl/shared_ptr.h"

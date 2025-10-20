@@ -14,8 +14,6 @@
 
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
-#include "fl/namespace.h"
-
 // Include ESP-IDF headers to get version macros
 FL_EXTERN_C_BEGIN
 #include "esp_attr.h"

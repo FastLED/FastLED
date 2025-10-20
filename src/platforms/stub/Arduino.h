@@ -13,13 +13,9 @@
 #include "fl/str.h"
 #include "fl/stdint.h"
 #include "fl/ostream.h"
-#include "fl/namespace.h"
 #include "time_stub.h"
 #include "fl/math_macros.h"
 #include "fl/math.h"
-
-FASTLED_USING_NAMESPACE
-
 // Custom min/max to avoid <algorithm> include
 template <typename T>
 T min(T a, T b) {

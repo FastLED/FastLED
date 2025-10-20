@@ -3,10 +3,7 @@
 
 #ifdef SmartMatrix_h
 #include <SmartMatrix.h>
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 extern SmartMatrix *pSmartMatrix;
 
 // note - dmx simple must be included before FastSPI for this code to be enabled
@@ -47,9 +44,7 @@ public:
         }
     }
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif
 
 #endif

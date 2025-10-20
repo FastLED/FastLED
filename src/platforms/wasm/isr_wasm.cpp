@@ -17,8 +17,6 @@
 #include "fl/isr.h"
 #include "fl/compiler_control.h"
 #include "fl/assert.h"
-#include "fl/namespace.h"
-
 namespace fl {
 namespace isr {
 

@@ -2,7 +2,6 @@
 
 #include "fl/codec/idecoder.h"
 #include "fl/codec/common.h"
-#include "fl/namespace.h"
 #include "fl/shared_ptr.h"
 #include "fl/str.h"
 #include "fl/stdint.h"

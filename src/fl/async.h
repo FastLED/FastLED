@@ -42,7 +42,6 @@
 /// }
 /// @endcode
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/function.h"
 #include "fl/ptr.h"

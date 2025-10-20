@@ -16,7 +16,6 @@
 /// This requires careful testing to ensure no regressions in existing code
 /// that relies on the blocking behavior.
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"

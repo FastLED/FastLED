@@ -12,8 +12,6 @@
 #include <application.h>
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
-
 // reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq(); __disable_fault_irq();
 #define sei() __enable_irq(); __enable_fault_irq();

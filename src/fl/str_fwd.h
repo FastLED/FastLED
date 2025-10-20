@@ -7,8 +7,6 @@
 /// in function signatures or type declarations.
 
 #include "fl/int.h"
-#include "fl/namespace.h"
-
 #ifndef FASTLED_STR_INLINED_SIZE
 #define FASTLED_STR_INLINED_SIZE 64
 #endif

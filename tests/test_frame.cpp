@@ -7,10 +7,7 @@
 #include "fx/frame.h"
 #include <cstdlib>
 #include "fl/allocator.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 namespace {
     int allocation_count = 0;
 

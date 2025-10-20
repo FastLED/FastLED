@@ -2,7 +2,6 @@
 #include "crgb.h"
 #include "fl/allocator.h"
 #include "fl/dbg.h"
-#include "fl/namespace.h"
 #include "fl/warn.h"
 #include "fl/xymap.h"
 #include "frame.h"

@@ -11,8 +11,7 @@
 
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include <FastLED.h>
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 // Note: FASTLED_ALLOW_INTERRUPTS improves performance on AVR platforms
 // Commented out to enable precompiled headers for faster compilation
 // #define FASTLED_ALLOW_INTERRUPTS 0

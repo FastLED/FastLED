@@ -8,7 +8,6 @@
 #include "fl/insert_result.h"
 #include "fl/math_macros.h"
 #include "fl/cstring.h"
-#include "fl/namespace.h"
 #include "fl/allocator.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"

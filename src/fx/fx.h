@@ -5,7 +5,6 @@
 #include "crgb.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
-#include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/str.h"
 #include "fl/unused.h"

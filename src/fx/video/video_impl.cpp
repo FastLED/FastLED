@@ -4,7 +4,6 @@
 
 #include "fl/assert.h"
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
 #include "fl/warn.h"
 
 namespace fl {

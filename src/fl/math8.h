@@ -4,16 +4,13 @@
 #include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
-#include "fl/namespace.h"
 #include "fl/compiler_control.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @file math8.h
 /// Fast, efficient 8-bit math functions specifically
 /// designed for high-performance LED programming.
@@ -81,7 +78,5 @@ LIB8STATIC_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
 
 /// @} Math
 /// @} lib8tion
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 FL_DISABLE_WARNING_POP

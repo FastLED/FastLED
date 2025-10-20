@@ -2,8 +2,6 @@
 
 #include "fl/hash_map.h"
 #include "fl/mutex.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 /**

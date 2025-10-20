@@ -1,7 +1,6 @@
 // spi_isr_2.h — 2-way Dual-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "spi_isr_engine.h"
 

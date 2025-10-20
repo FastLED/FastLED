@@ -3,12 +3,9 @@
 #include "fl/stdint.h"
 
 #include "fl/register.h"
-#include "fl/namespace.h"
 #include "platforms/esp/esp_version.h"
 #include "fastpin.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpragmas"
 #pragma GCC diagnostic ignored "-Wvolatile"
@@ -188,5 +185,4 @@ _FL_DEFPIN(60); _FL_DEFPIN(61); _FL_DEFPIN(62); _FL_DEFPIN(63);
 #define HAS_HARDWARE_PIN_SUPPORT
 
 #pragma GCC diagnostic pop
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -9,17 +9,14 @@
 #include "cled_controller.h"
 #include "platforms/wasm/strip_id_map.h"
 #include "fl/unused.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 struct FakeSpi {
     int value = 0;
 };
 
 // Create a fake WASM CLEDController that matches the WASM platform interface
 namespace fl {
-    class FakeCLedController : public ::CLEDController {
+    class FakeCLedController : public fl::CLEDController {
       public:
         FakeSpi fake_spi;
         virtual void showColor(const CRGB &data, int nLeds,

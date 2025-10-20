@@ -12,7 +12,6 @@
 #include "FastLED.h"
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// A nop/stub class, mostly to show the SPI methods that are needed/used by the various SPI chipset implementations.  Should
 /// be used as a definition for the set of methods that the spi implementation classes should use (since C++ doesn't support the
@@ -68,7 +67,6 @@ public:
 
 };
 
-FASTLED_NAMESPACE_END
 
 #endif
 #endif

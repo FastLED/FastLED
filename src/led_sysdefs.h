@@ -84,8 +84,6 @@
 #error "This platform isn't recognized by FastLED... yet.  See comments in FastLED/led_sysdefs.h for options."
 #endif
 
-#include "fl/namespace.h"
-
 /// Clock cycles per microsecond. 
 /// Calculated using the F_CPU preprocessor define
 #define CLKS_PER_US (F_CPU/1000000)

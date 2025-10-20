@@ -5,11 +5,7 @@
 
 #include "test.h"
 #include "fl/screenmap.h"
-
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 using fl::string;
 
 TEST_CASE("ScreenMap basic functionality") {

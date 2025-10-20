@@ -21,11 +21,7 @@
 
 #include "rgbw.h"
 #include "fl/warn.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
-
+namespace fl {
 static const char *STRIP_SPI_TAG = "strip_spi";
 
 led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_model, spi_host_device_t spi_bus, bool with_dma)
@@ -259,9 +255,7 @@ ISpiStripWs2812* ISpiStripWs2812::Create(int pin, uint32_t led_count, bool is_rg
     uint32_t size_as_rgb = Rgbw::size_as_rgb(led_count);
     return new SpiStripWs2812(pin, size_as_rgb, spi_bus, dma_mode);
 }
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif  // FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 #endif  // ESP32

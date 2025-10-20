@@ -16,7 +16,6 @@
 // Other implementation dependencies
 #include "fl/math.h"
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 

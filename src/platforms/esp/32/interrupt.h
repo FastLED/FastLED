@@ -3,8 +3,6 @@
 /// ESP32-specific interrupt control interface
 /// Minimal bindings to FreeRTOS portDISABLE_INTERRUPTS/portENABLE_INTERRUPTS
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// Disable interrupts on ESP32

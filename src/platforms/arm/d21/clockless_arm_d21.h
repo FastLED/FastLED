@@ -2,11 +2,9 @@
 #define __INC_CLOCKLESS_ARM_D21
 
 #include "../common/m0clockless.h"
-#include "fl/namespace.h"
 #include "fl/chipsets/timing_traits.h"
 #include "eorder.h"
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 
 /// @brief ARM D21 (SAMD21) Clockless LED Controller
@@ -77,8 +75,5 @@ public:
     }
 
 };
-
-FASTLED_NAMESPACE_END
-
-
+}  // namespace fl
 #endif // __INC_CLOCKLESS_ARM_D21

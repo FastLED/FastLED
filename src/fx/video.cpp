@@ -16,8 +16,6 @@
 using fl::ByteStreamPtr;
 using fl::FileHandlePtr;
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 FASTLED_SMART_PTR(PixelStream);

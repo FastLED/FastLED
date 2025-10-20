@@ -5,9 +5,6 @@
 #include "fl/map.h"
 #include "fl/string.h"
 #include "fl/vector.h"
-#include "fl/namespace.h"
-
-
 // Helper function to compare map contents
 template<typename StdMap, typename FlMap>
 bool maps_equal(const StdMap& std_map, const FlMap& fl_map) {

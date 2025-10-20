@@ -1,5 +1,4 @@
 #include "fl/allocator.h"
-#include "fl/namespace.h"
 #include "fl/int.h"
 #include "fl/thread_local.h"
 #include "fl/cstddef.h"

@@ -11,8 +11,6 @@
 #include "FastLED.h"
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
-
 /// A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of
 /// the method implementations should provide a starting point, even if they're not the most efficient to start with
 template <fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
@@ -98,7 +96,6 @@ public:
 
 };
 
-FASTLED_NAMESPACE_END
 
 #endif
 

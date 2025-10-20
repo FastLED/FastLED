@@ -3,13 +3,10 @@
 #include "fl/stdint.h"
 
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "lib8tion/qfx.h"
 
 /// @file noise.h
 /// Functions to generate and fill arrays with noise.
-
-FASTLED_NAMESPACE_BEGIN
 
 /// @defgroup Noise Noise Functions
 /// Functions to generate and fill arrays with noise. 
@@ -266,5 +263,3 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 
 /// @} NoiseFill
 /// @} Noise
-
-FASTLED_NAMESPACE_END

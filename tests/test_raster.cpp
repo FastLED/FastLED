@@ -8,10 +8,6 @@
 #include "fl/tile2x2.h"
 #include "fl/xypath.h"
 
-#include "fl/namespace.h"
-
-
-
 TEST_CASE("XYRasterU8SparseTest should match bounds of pixels draw area") {
     XYPathPtr path = XYPath::NewLinePath(-1, -1, 1, 1);
     path->setDrawBounds(4,4);

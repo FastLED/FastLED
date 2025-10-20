@@ -2,12 +2,8 @@
 /// Unit tests for generic blocking clockless LED controller
 
 #include "test.h"
-#include "fl/namespace.h"
-
 // Test that the header compiles and includes are correct
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
-
-namespace fl {
 
 TEST_SUITE("ClocklessBlockGeneric") {
 
@@ -81,17 +77,17 @@ TEST_SUITE("ClocklessBlockGeneric") {
     }
 
     TEST_CASE("Nanosecond Delay Support") {
-        // Test that nanosecond delays are properly supported via fl::delayNanoseconds
-        // The implementation uses fl::delayNanoseconds which should work on all platforms
+        // Test that nanosecond delays are properly supported via ::delayNanoseconds
+        // The implementation uses ::delayNanoseconds which should work on all platforms
 
         // Test WS2812B T1 delay (600ns)
-        // This would be: fl::delayNanoseconds<600>();
+        // This would be: ::delayNanoseconds<600>();
 
         // Test WS2812B T2 delay (650ns)
-        // This would be: fl::delayNanoseconds<650>();
+        // This would be: ::delayNanoseconds<650>();
 
         // Test SK6812 timing (300ns, 900ns, 600ns)
-        // These would use fl::delayNanoseconds<300>(), etc.
+        // These would use ::delayNanoseconds<300>(), etc.
 
         CHECK(true);
     }
@@ -134,17 +130,17 @@ TEST_SUITE("ClocklessBlockGeneric") {
 
         // Create a custom controller that simulates WS2812 timing
         // without requiring real GPIO pins
-        class WS2812SimController : public fl::CPixelLEDController<fl::RGB> {
+        class WS2812SimController : public CPixelLEDController<RGB> {
         private:
             // Simulate sending a single bit with WS2812B timing
             static void sendBit1Sim() {
                 // T1 + T2 nanoseconds for a '1' bit = 1250ns
-                fl::delayNanoseconds<1250>();
+                ::delayNanoseconds<1250>();
             }
 
             static void sendBit0Sim() {
                 // (T1 + T2) nanoseconds for a '0' bit = 1250ns
-                fl::delayNanoseconds<1250>();
+                ::delayNanoseconds<1250>();
             }
 
             static void sendByteSim(uint8_t byte) {
@@ -162,7 +158,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         public:
             void init() override { }
 
-            void showPixels(fl::PixelController<fl::RGB>& pixels) override {
+            void showPixels(PixelController<RGB>& pixels) override {
                 // Send all pixel data
                 if (pixels.mLen > 0) {
                     uint16_t pixel_count = pixels.mLen;
@@ -174,7 +170,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
                     }
 
                     // Send reset code: 50µs low time
-                    fl::delayNanoseconds<50000>();
+                    ::delayNanoseconds<50000>();
                 }
             }
 
@@ -184,9 +180,9 @@ TEST_SUITE("ClocklessBlockGeneric") {
         };
 
         // Create pixel data for 100 LEDs
-        fl::CRGB pixels[100];
+        CRGB pixels[100];
         for (int i = 0; i < 100; ++i) {
-            pixels[i] = fl::CRGB(0xFF, 0x00, 0xFF);  // Magenta LEDs (tests 1s and 0s)
+            pixels[i] = CRGB(0xFF, 0x00, 0xFF);  // Magenta LEDs (tests 1s and 0s)
         }
 
         // Get the start time in milliseconds
@@ -215,11 +211,11 @@ TEST_SUITE("ClocklessBlockGeneric") {
         // - T3: 600ns
         // - Total bit time: 1200ns
 
-        class SK6812SimController : public fl::CPixelLEDController<fl::RGB> {
+        class SK6812SimController : public CPixelLEDController<RGB> {
         private:
             static void sendBitSim() {
                 // SK6812: 1200ns per bit
-                fl::delayNanoseconds<1200>();
+                ::delayNanoseconds<1200>();
             }
 
             static void sendByteSim(uint8_t /* byte */) {
@@ -232,7 +228,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
         public:
             void init() override { }
 
-            void showPixels(fl::PixelController<fl::RGB>& pixels) override {
+            void showPixels(PixelController<RGB>& pixels) override {
                 if (pixels.mLen > 0) {
                     uint16_t pixel_count = pixels.mLen;
                     uint8_t *data = (uint8_t *)pixels.mData;
@@ -242,7 +238,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
                     }
 
                     // Reset code: 50µs
-                    fl::delayNanoseconds<50000>();
+                    ::delayNanoseconds<50000>();
                 }
             }
 
@@ -251,9 +247,9 @@ TEST_SUITE("ClocklessBlockGeneric") {
             }
         };
 
-        fl::CRGB pixels[100];
+        CRGB pixels[100];
         for (int i = 0; i < 100; ++i) {
-            pixels[i] = fl::CRGB(0x00, 0xFF, 0x00);  // Green
+            pixels[i] = CRGB(0x00, 0xFF, 0x00);  // Green
         }
 
         uint32_t start_time = millis();
@@ -271,9 +267,7 @@ TEST_SUITE("ClocklessBlockGeneric") {
 
 }  // TEST_SUITE
 
-}  // namespace fl
-
 // Note: The generic clockless block controller is now fully implemented and tested.
 // It supports all platforms (AVR, ESP32, ARM, etc.) using nanosecond-precision
-// delays via the fl::delayNanoseconds() utilities. The stub platform provides
+// delays via the ::delayNanoseconds() utilities. The stub platform provides
 // a realistic test environment with accurate timing simulation.

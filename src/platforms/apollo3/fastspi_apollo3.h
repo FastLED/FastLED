@@ -6,9 +6,7 @@
 // It can run slightly faster than the default fastpin (bit banging).
 
 #include "FastLED.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_APOLLO3)
 
 #define FASTLED_ALL_PINS_HARDWARE_SPI
@@ -131,7 +129,5 @@ public:
 };
 
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

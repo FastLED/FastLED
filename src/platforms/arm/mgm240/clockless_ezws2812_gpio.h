@@ -7,7 +7,6 @@
 /// based on the CPU frequency (F_CPU). It includes both 39MHz and 78MHz
 /// optimized implementations and chooses the correct one at compile time.
 
-#include "fl/namespace.h"
 #include "eorder.h"
 
 // Check if we're on the right platform
@@ -18,9 +17,7 @@
 // Include frequency-specific implementations
 #include "platforms/arm/mgm240/clockless_ezws2812_39mhz.h"
 #include "platforms/arm/mgm240/clockless_ezws2812_78mhz.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief Auto-selecting ezWS2812 GPIO controller
 ///
 /// This controller template automatically selects the optimal implementation
@@ -106,5 +103,4 @@ using EZWS2812_GPIO_39MHZ = ClocklessController_ezWS2812_GPIO_39MHz<DATA_PIN, RG
 /// @brief 78MHz optimized GPIO controller
 template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_78MHZ = ClocklessController_ezWS2812_GPIO_78MHz<DATA_PIN, RGB_ORDER>;
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -1,7 +1,6 @@
 #ifndef __INC_BLOCK_CLOCKLESS_ARM_K20_H
 #define __INC_BLOCK_CLOCKLESS_ARM_K20_H
 
-#include "fl/namespace.h"
 #include "fl/chipsets/timing_traits.h"
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
@@ -18,9 +17,7 @@
 #define USED_LANES ((FIRST_PIN==2) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief ARM K20 (Teensy 3.0/3.1) Block Clockless LED Controller
 /// @tparam LANES Number of parallel data lines
 /// @tparam FIRST_PIN First pin number (determines port)
@@ -343,9 +340,7 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif
 
 #endif

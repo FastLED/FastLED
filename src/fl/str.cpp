@@ -6,7 +6,6 @@
 
 #include "crgb.h"
 #include "fl/fft.h"
-#include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "fl/json.h"

@@ -12,7 +12,6 @@
 
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 
 namespace fl {

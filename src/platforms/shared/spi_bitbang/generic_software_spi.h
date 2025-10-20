@@ -17,9 +17,7 @@
 #include "fl/force_inline.h"
 #include "fl/int.h"
 #include "pixel_controller.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Generic software SPI (bit-banging) implementation that works on all platforms
@@ -429,7 +427,5 @@ public:
 		release();
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

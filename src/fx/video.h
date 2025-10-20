@@ -2,7 +2,6 @@
 
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/str.h"
 #include "fx/fx1d.h"
@@ -10,11 +9,9 @@
 
 // Forward declare fl::rgb8 outside the FastLED namespace
 namespace fl { struct rgb8; }
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 using CRGB = fl::rgb8;  // CRGB is now a typedef
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 namespace fl {
 
 // Forward declare classes

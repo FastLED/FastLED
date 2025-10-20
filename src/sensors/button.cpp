@@ -5,7 +5,6 @@
 #include "fl/ui.h"
 
 #include "fl/assert.h"
-#include "fl/namespace.h"
 #include "sensors/button.h"
 #include "sensors/digital_pin.h"
 

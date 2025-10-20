@@ -5,10 +5,6 @@
 #define FASTLED_INTERNAL
 #include "FastLED.h"
 #include "power_mgt.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
 // POWER MANAGEMENT
 
 /// @name Power Usage Values
@@ -193,4 +189,3 @@ void delay_at_max_brightness_for_power( uint16_t ms)
     FastLED.delay(ms);
 }
 
-FASTLED_NAMESPACE_END

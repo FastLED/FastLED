@@ -5,7 +5,6 @@
 #include "fl/initializer_list.h"
 #include "fl/inplacenew.h"
 #include "fl/move.h"
-#include "fl/namespace.h"
 #include "fl/type_traits.h"
 
 namespace fl {

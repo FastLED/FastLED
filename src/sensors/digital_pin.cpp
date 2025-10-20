@@ -5,7 +5,6 @@
 #include "fl/shared_ptr.h"  // For make_shared
 #include "fl/referent.h"    // For Referent base class
 
-#include "fl/namespace.h"
 #include "digital_pin.h"
 
 

@@ -107,12 +107,9 @@
 
 #include "eorder.h"
 #include "platforms/esp/32/i2s/i2s_esp32dev.h"
-#include "fl/namespace.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 #define NUM_COLOR_CHANNELS 3
 
@@ -346,5 +343,4 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
         i2s_stop();
     }
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

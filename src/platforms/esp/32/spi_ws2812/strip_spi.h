@@ -2,10 +2,7 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 class ISpiStripWs2812 {
   public:
     enum SpiHostMode {
@@ -66,5 +63,4 @@ protected:
     virtual void setPixel(uint32_t index, uint8_t red, uint8_t green,
                           uint8_t blue) = 0;
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

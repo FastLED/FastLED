@@ -12,8 +12,6 @@
 ///     fl::interrupts();     // Enable interrupts
 /// @endcode
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// Disable interrupts

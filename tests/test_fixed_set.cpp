@@ -3,11 +3,7 @@
 #include "test.h"
 #include "test.h"
 #include "fl/set.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
-
+using namespace fl;
 TEST_CASE("FixedSet operations") {
     fl::FixedSet<int, 5> set;
 

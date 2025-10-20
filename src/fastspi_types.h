@@ -7,10 +7,7 @@
 #define __INC_FASTSPI_TYPES_H
 
 #include "fl/force_inline.h"
-#include "fl/namespace.h"
 #include "fl/unused.h"
-
-FASTLED_NAMESPACE_BEGIN
 
 /// @name Byte Re-Order Macros
 /// Some helper macros for getting at mis-ordered byte values.
@@ -83,7 +80,5 @@ public:
 /// Max SPI data rate
 /// @todo Unused. Remove?
 #define MAX_DATA_RATE 0
-
-FASTLED_NAMESPACE_END
 
 #endif

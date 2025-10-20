@@ -7,7 +7,6 @@
 /// value of type T or an Error. It provides convenient ok() checking and safe
 /// value access with assertions on misuse.
 
-#include "fl/namespace.h"
 #include "fl/variant.h"
 #include "fl/promise.h"  // For Error type
 

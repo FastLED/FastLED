@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FastLED.h"
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fx/fx1d.h"
 

@@ -3,7 +3,6 @@
 
 #include "fl/stdint.h"
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/vector.h"

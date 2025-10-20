@@ -2,7 +2,6 @@
 #include "fl/json.h"
 #include "fl/map.h"
 #include "fl/mutex.h"
-#include "fl/namespace.h"
 #include "ui_manager.h"
 #include "fl/compiler_control.h"
 #include "fl/warn.h"

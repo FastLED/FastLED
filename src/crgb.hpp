@@ -7,11 +7,13 @@
 #include "chsv.h"
 #include "crgb.h"
 #include "lib8tion.h"
-#include "fl/namespace.h"
 #include "fl/force_inline.h"
 #include "fl/scale8.h"
 
 #include "fl/compiler_control.h"
+
+// Define namespace-aware scale8 macro
+#define FUNCTION_SCALE8(a,b) fl::scale8(a,b)
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -20,15 +22,6 @@ FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 FL_DISABLE_WARNING_FLOAT_CONVERSION
 FL_DISABLE_WARNING_SIGN_CONVERSION
 
-#if FASTLED_IS_USING_NAMESPACE
-#define FUNCTION_SCALE8(a,b) FASTLED_NAMESPACE::scale8(a,b)
-#define FUNCTION_SCALE8_CONSTEXPR(a,b) FASTLED_NAMESPACE::scale8_constexpr(a,b)
-#else
-#define FUNCTION_SCALE8(a,b) ::scale8(a,b)
-#define FUNCTION_SCALE8_CONSTEXPR(a,b) ::scale8_constexpr(a,b)
-#endif
-
-FASTLED_NAMESPACE_BEGIN
 
 FASTLED_FORCE_INLINE CRGB& CRGB::addToRGB (uint8_t d )
 {
@@ -216,7 +209,6 @@ FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, uint8_t d)
     return retval;
 }
 
-FASTLED_NAMESPACE_END
 
 #undef FUNCTION_SCALE8
 

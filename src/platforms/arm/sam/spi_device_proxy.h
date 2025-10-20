@@ -19,7 +19,6 @@
     defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/sam/fastspi_arm_sam.h"

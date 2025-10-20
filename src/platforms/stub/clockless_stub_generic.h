@@ -1,12 +1,9 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "eorder.h"
 #include "fl/unused.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 
 // Template for new-style API accepting ChipsetTiming reference
@@ -34,6 +31,4 @@ protected:
 		FASTLED_UNUSED(pixels);
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl

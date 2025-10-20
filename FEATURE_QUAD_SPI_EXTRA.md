@@ -757,7 +757,6 @@ private:
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3)
 
-#include "fl/namespace.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>

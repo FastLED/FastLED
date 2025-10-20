@@ -4,7 +4,6 @@
 #include "fl/cstring.h"
 
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/vector.h"
 #include "fx/detail/fx_layer.h"

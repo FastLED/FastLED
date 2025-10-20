@@ -2,12 +2,9 @@
 
 #include "fl/stdint.h"
 #include "eorder.h"
-#include "fl/namespace.h"
 #include "fl/register.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
@@ -167,5 +164,4 @@ protected:
 		return __clock_cycles() - start;
 	}
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

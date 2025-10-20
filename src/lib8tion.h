@@ -240,10 +240,6 @@ FL_DISABLE_WARNING_SIGN_CONVERSION
 
 
 
-
-FASTLED_NAMESPACE_BEGIN
-
-
 ///////////////////////////////////////////////////////////////////////
 ///
 /// @defgroup FloatConversions Float-to-Fixed and Fixed-to-Float Conversions
@@ -1250,8 +1246,6 @@ typedef CEveryNTimePeriods<uint8_t,hours8> CEveryNHours;
 /// @ingroup Timekeeping
 #define USE_GET_MILLISECOND_TIMER
 #endif
-
-FASTLED_NAMESPACE_END
 
 #endif
 

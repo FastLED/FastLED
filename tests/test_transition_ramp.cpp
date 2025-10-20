@@ -1,7 +1,6 @@
 // test_transition_ramp.cpp
 // g++ --std=c++11 test_transition_ramp.cpp
 
-#include "fl/namespace.h"
 #include "fl/time_alpha.h"
 #include "test.h"
 #include <cstdint>

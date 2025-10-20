@@ -1,7 +1,6 @@
 #ifndef __INC_BLOCK_CLOCKLESS_ARM_K20_H
 #define __INC_BLOCK_CLOCKLESS_ARM_K20_H
 
-#include "fl/namespace.h"
 #include "fl/chipsets/timing_traits.h"
 
 // Definition for a single channel clockless controller for the k20 family of chips, like that used in the teensy 3.0/3.1
@@ -18,9 +17,7 @@
 #define USED_LANES ((FIRST_PIN==2) ? FL_MIN(LANES,8) : FL_MIN(LANES,12))
 
 #include <kinetis.h>
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
 	static constexpr uint32_t T1 = TIMING.T1;
@@ -332,9 +329,7 @@ public:
 		return ARM_DWT_CYCCNT;
 	}
 };
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif
 
 #endif

@@ -9,7 +9,6 @@
 
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "fl/math_macros.h"
 

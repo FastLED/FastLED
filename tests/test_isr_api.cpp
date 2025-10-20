@@ -7,16 +7,13 @@
 */
 
 #define FASTLED_INTERNAL 1
-#include "fl/namespace.h"
 #include "fl/isr.h"
 #include "test.h"
 
 #include <atomic>
 #include <chrono>
 #include <thread>
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 // Test counters
 static std::atomic<int> g_isr_call_count{0};
 static std::atomic<uint32_t> g_isr_user_data_value{0};

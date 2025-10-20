@@ -14,7 +14,6 @@
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/esp/32/fastspi_esp32.h"

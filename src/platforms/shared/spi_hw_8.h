@@ -11,7 +11,6 @@
 /// This interface was split from SpiHw4 to provide clean separation between
 /// 4-lane and 8-lane hardware capabilities.
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"

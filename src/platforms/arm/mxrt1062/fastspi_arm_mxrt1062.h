@@ -1,8 +1,6 @@
 #ifndef __INC_FASTSPI_ARM_MXRT1062_H
 #define __INC_FASTSPI_ARM_MXRT1062_H
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
 #include <SPI.h>
 
@@ -140,6 +138,5 @@ public:
 
 
 #endif
-
-FASTLED_NAMESPACE_END
+}  // namespace fl
 #endif

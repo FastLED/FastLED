@@ -3,10 +3,6 @@
 #include "fl/stdint.h"
 #include "fl/chipsets/led_timing.h"
 
-#include "fl/namespace.h"
-
-
-
 FL_EXTERN_C_BEGIN
 
 #include "platforms/esp/esp_version.h"
@@ -61,11 +57,7 @@ FL_EXTERN_C_END
 
 
 #define NUM_COLOR_CHANNELS 3
-
-
-FASTLED_NAMESPACE_BEGIN
-
-
+namespace fl {
 struct DMABuffer {
     lldesc_t descriptor;
     uint8_t *buffer;
@@ -106,5 +98,4 @@ void i2s_begin();
 void i2s_wait();
 void i2s_setup_pin(int pin, int offset);
 void i2s_transpose_and_encode(int channel, uint32_t has_data_mask, volatile uint32_t *buf);
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

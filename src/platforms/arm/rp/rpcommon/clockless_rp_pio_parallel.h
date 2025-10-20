@@ -60,7 +60,6 @@
 /// - Invalid: GPIO 2,4,6,8 (non-consecutive)
 
 #include "fl/compiler_control.h"
-#include "fl/namespace.h"
 #include "fl/int.h"
 #include "crgb.h"
 #include "pixel_controller.h"
@@ -73,9 +72,7 @@
 #include "hardware/gpio.h"
 #include "fl/cstring.h"
 #endif
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief Parallel clockless LED controller for RP2040/RP2350
 ///
 /// @tparam BASE_PIN Starting GPIO pin
@@ -289,5 +286,4 @@ private:
         }
     }
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

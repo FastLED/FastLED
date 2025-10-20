@@ -2,10 +2,7 @@
 #define __INC_FASTPIN_APOLLO3_H
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -167,7 +164,5 @@ _FL_DEFPIN(30, 43); _FL_DEFPIN(31, 44); _FL_DEFPIN(32, 47);
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif // __INC_FASTPIN_AVR_H

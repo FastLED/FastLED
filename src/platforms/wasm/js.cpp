@@ -21,7 +21,6 @@
 #include "engine_listener.h"
 #include "fl/dbg.h"
 #include "fl/map.h"
-#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/str.h"
 #include "js.h"

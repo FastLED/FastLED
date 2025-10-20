@@ -11,7 +11,6 @@
 #if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
 
 #include "fl/isr.h"
-#include "fl/namespace.h"
 #include "fl/unique_ptr.h"
 #include "fl/atomic.h"
 

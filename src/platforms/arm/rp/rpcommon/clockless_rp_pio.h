@@ -41,8 +41,7 @@
  * and users can adapt other code to use DMA_IRQ_1 and/or adopt shared handlers
  * to avoid this becoming an issue.
  */
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
@@ -334,8 +333,5 @@ public:
 #endif
 
 };
-
-FASTLED_NAMESPACE_END
-
-
+}  // namespace fl
 #endif // __INC_CLOCKLESS_RP_PIO_COMMON

@@ -2,7 +2,6 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
 #include "clock_cycles.h"
 #include "esp_intr_alloc.h"
 #include "eorder.h"
@@ -24,9 +23,7 @@
 #define PORTD_FIRST_PIN 12
 #define PORTA_FIRST_PIN 14
 #define PORTB_FIRST_PIN 16
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
@@ -205,6 +202,5 @@ public:
 	return __clock_cycles() - _start;
     }
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl
 #endif

@@ -2,7 +2,6 @@
 #define __INC_CLOCKLESS_BLOCK_ESP8266_H
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
 #include "fl/register.h"
 #include "fl/math_macros.h"
 #include "eorder.h"
@@ -16,9 +15,7 @@
 #define USED_LANES (FL_MIN(LANES, 6))
 #define PORT_MASK (((1 << USED_LANES)-1) & 0x0000FFFFL)
 #define PIN_MASK FIX_BITS(PORT_MASK)
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
@@ -166,6 +163,5 @@ public:
 		return __clock_cycles() - _start;
 	}
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl
 #endif

@@ -5,9 +5,7 @@
 #include "test.h"
 #include <cmath>
 #include <cstdlib>
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 // Common array of easing types with names used across multiple test cases
 static const fl::pair<fl::EaseType, const char*> ALL_EASING_TYPES[10] = {
     {fl::EASE_NONE, "EASE_NONE"},

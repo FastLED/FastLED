@@ -51,7 +51,6 @@
 /// }
 /// @endcode
 
-#include "fl/namespace.h"
 #include "fl/promise.h"
 #include "fl/string.h"
 #include "fl/vector.h"

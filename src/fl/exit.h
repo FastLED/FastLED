@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// @brief No-op exit function for embedded systems

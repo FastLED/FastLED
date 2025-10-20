@@ -10,10 +10,9 @@
 #include "fl/downscale.h"
 #include "lib8tion/math8.h"
 
-#include "fl/namespace.h"
 #include "fl/int.h"
 
-FASTLED_NAMESPACE_BEGIN
+
 
 fl::string CRGB::toString() const {
     fl::string out;
@@ -114,4 +113,3 @@ CRGB &CRGB::fadeToBlackBy(uint8_t fadefactor) {
     return *this;
 }
 
-FASTLED_NAMESPACE_END

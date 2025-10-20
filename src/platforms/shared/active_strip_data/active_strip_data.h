@@ -2,17 +2,13 @@
 
 #include "fl/engine_events.h"
 #include "fl/map.h"
-#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/singleton.h"
 #include "fl/span.h"
 #include "fl/id_tracker.h"
-
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 class CLEDController;
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 namespace fl {
 
 

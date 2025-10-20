@@ -8,8 +8,6 @@
 
 #include "fl/stdint.h"
 #include "crgb.h"
-#include "fl/namespace.h"
-
 // Data alignment for PSRAM transfers
 #ifndef LCD_DRIVER_PSRAM_DATA_ALIGNMENT
 #define LCD_DRIVER_PSRAM_DATA_ALIGNMENT 64

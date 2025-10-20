@@ -1,8 +1,6 @@
 #ifndef __INC_FASTPIN_ARM_RENESAS_H
 #define __INC_FASTPIN_ARM_RENESAS_H
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -132,8 +130,5 @@ _FL_DEFPIN(21, BSP_IO_PORT_00_PIN_14, R_PORT0_BASE );_FL_DEFPIN(22, BSP_IO_PORT_
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
-
-FASTLED_NAMESPACE_END
-
-
+}  // namespace fl
 #endif // __INC_FASTPIN_ARM_RENESAS_H

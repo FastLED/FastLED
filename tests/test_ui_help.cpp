@@ -1,17 +1,13 @@
 #include "test.h"
 
 #include "fl/json.h"
-#include "fl/namespace.h"
-
 #if FASTLED_ENABLE_JSON
 
 #include "platforms/shared/ui/json/ui_internal.h"
 #include "platforms/shared/ui/json/ui_manager.h"
 #include "platforms/shared/ui/json/help.h"
 #include "fl/ui.h"
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("JsonHelpImpl basic functionality") {
     fl::string markdownContent = "# Test Help\n\nThis is a **test** help text with *emphasis* and `code`.";
     

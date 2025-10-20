@@ -6,8 +6,6 @@
 #include "fl/lut.h"
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 FASTLED_FORCE_INLINE u16 x_linear(u16 x, u16 length) {

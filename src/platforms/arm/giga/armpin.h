@@ -1,10 +1,6 @@
 #pragma once
 #include "fl/stdint.h"
-
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #define _R(T) struct __gen_struct_ ## T
 #define _FL_DEFPIN(PIN, BIT, L) template<> class FastPin<PIN> : public _ARMPIN<PIN, BIT, 1 << BIT, _R(GPIO ## L)> {};
 
@@ -44,7 +40,4 @@ public:
 
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
 };
-
-
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

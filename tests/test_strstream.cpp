@@ -41,9 +41,6 @@
 #include "crgb.h"
 #include <sstream>
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("StrStream basic operations") {
     SUBCASE("Construction and assignment") {
         StrStream s;

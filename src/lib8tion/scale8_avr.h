@@ -2,7 +2,6 @@
 
 #include "lib8tion/config.h"
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "fastled_config.h"
 #include "lib8static.h"
 #include "fl/compiler_control.h"

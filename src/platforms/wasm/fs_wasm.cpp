@@ -45,7 +45,6 @@
 #include "fl/file_system.h"
 #include "fl/json.h"
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
 #include "fl/memory.h"
 #include "fl/str.h"
 #include "fl/warn.h"
@@ -258,9 +257,7 @@ FileDataPtr _createIfNotExists(const Str &path, size_t len) {
 }
 
 } // namespace fl
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 extern "C" {
 
 EMSCRIPTEN_KEEPALIVE bool jsInjectFile(const char *path, const uint8_t *data,

@@ -16,7 +16,6 @@
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
 #include "lib8tion/scale8.h"
-#include "fl/namespace.h"
 #include "eorder.h"
 #include "dither_mode.h"
 #include "pixel_iterator.h"
@@ -30,7 +29,7 @@ FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 
-FASTLED_NAMESPACE_BEGIN
+
 
 
 /// Gets the assigned color channel for a byte's position in the output,
@@ -608,7 +607,6 @@ struct PixelController {
 };
 
 
-FASTLED_NAMESPACE_END
 
 
 FL_DISABLE_WARNING_POP

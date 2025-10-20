@@ -6,9 +6,6 @@
 #include "test.h"
 #include "fl/circular_buffer.h"
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("circular_buffer basic operations") {
     CircularBuffer<int> buffer(5);
 

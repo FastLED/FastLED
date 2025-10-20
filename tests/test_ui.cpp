@@ -20,10 +20,7 @@
 #include <cstring>
 #include "fl/json.h"
 #include "fl/unused.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 class MockJsonUiInternal : public fl::JsonUiInternal {
 public:
     MockJsonUiInternal(const fl::string& name) : fl::JsonUiInternal(name) {}

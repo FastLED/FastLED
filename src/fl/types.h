@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/int.h"
 
 namespace fl {

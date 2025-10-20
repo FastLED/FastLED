@@ -56,11 +56,11 @@ extern "C" FL_LINK_WEAK int atexit(void (* /*func*/ )()) { return 0; }
 extern "C" void yield(void) { }
 #endif
 
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 fl::u16 cled_contoller_size() {
 	return sizeof(CLEDController);
 }
+}  // namespace fl
 
 uint8_t get_brightness();
 
@@ -423,4 +423,4 @@ namespace __cxxabiv1
 }
 #endif
 
-FASTLED_NAMESPACE_END
+

@@ -3,7 +3,6 @@
 #include "fl/compiler_control.h"
 #include "lib8tion/config.h"
 #include "crgb.h"
-#include "fl/namespace.h"
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
 
@@ -11,9 +10,7 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @file scale8.h
 /// Fast, efficient 8-bit scaling functions specifically
 /// designed for high-performance LED programming.
@@ -232,7 +229,5 @@ LIB8STATIC uint8_t brighten8_lin(uint8_t x) {
 
 /// @} Dimming
 /// @} lib8tion
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 FL_DISABLE_WARNING_POP

@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include "fl/namespace.h"
-
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 #include "platforms/null_progmem.h"
 #elif defined(ESP8266)

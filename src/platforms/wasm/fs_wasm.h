@@ -4,7 +4,6 @@
 #include <string>
 
 #include "fl/file_system.h"
-#include "fl/namespace.h"
 #include "fl/memory.h"
 #include "fl/span.h"
 

@@ -2,8 +2,6 @@
 
 #include "fl/deque.h"
 #include "fl/move.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 /// @brief A first-in, first-out (FIFO) queue container adapter

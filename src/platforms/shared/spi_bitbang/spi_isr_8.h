@@ -1,7 +1,6 @@
 // spi_isr_8.h — 8-way parallel soft-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "fl/cstddef.h"
 #include "spi_isr_engine.h"

@@ -1,10 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 struct FASTLED_ESP_IO {
     volatile uint32_t _GPO;
     volatile uint32_t _GPOS;
@@ -99,5 +96,4 @@ _FL_DEFPIN(8,15); _FL_DEFPIN(9,3); _FL_DEFPIN(10,1);
 #endif
 
 #define HAS_HARDWARE_PIN_SUPPORT
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

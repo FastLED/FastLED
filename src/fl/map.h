@@ -5,7 +5,6 @@
 #include "fl/assert.h"
 #include "fl/comparators.h"
 #include "fl/insert_result.h"
-#include "fl/namespace.h"
 #include "fl/pair.h"
 #include "fl/type_traits.h"
 #include "fl/type_traits.h"

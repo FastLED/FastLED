@@ -16,7 +16,6 @@
     defined(STM32F2XX) || defined(STM32F4) || defined(STM32L4) || \
     defined(STM32H7) || defined(STM32G4) || defined(STM32U5)
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/stm32/fastspi_arm_stm32.h"

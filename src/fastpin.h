@@ -22,7 +22,7 @@
 /// @file fastpin.h
 /// Class base definitions for defining fast pin access
 
-FASTLED_NAMESPACE_BEGIN
+
 
 /// Constant for "not a pin"
 /// @todo Unused, remove? 
@@ -468,7 +468,6 @@ template<fl::u8 port> struct __FL_PORT_INFO {
 	static const char *portName() { return #L; } \
 	static const void *portAddr() { return (void*)&__t_baseType::r(); } };
 
-FASTLED_NAMESPACE_END
 
 #pragma GCC diagnostic pop
 

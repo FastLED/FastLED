@@ -10,7 +10,6 @@
 /// @file bitswap.h
 /// Functions for doing a rotation of bits/bytes used by parallel output
 
-FASTLED_NAMESPACE_BEGIN
 
 
 #if defined(FASTLED_ARM) || defined(FASTLED_ESP8266) || defined(FASTLED_DOXYGEN)
@@ -290,7 +289,5 @@ FASTLED_FORCE_INLINE void transpose8(unsigned char *A, unsigned char *B) {
 }
 
 #endif
-
-FASTLED_NAMESPACE_END
 
 #endif

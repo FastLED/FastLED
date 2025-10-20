@@ -8,7 +8,6 @@
 #if FASTLED_RMT5
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
 #include "fl/chipsets/timing_traits.h"
 
 FL_EXTERN_C_BEGIN

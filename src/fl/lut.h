@@ -12,8 +12,6 @@ LUT - Look up table implementation for various types.
 
 #include "fl/int.h"
 #include "fl/geometry.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 // LUT holds a look up table to map data from one

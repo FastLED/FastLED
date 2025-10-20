@@ -49,9 +49,7 @@
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
 #define FASTLED_RMT_BUILTIN_DRIVER false
 #endif
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 // Not used.
 //#define NUM_COLOR_CHANNELS 3
@@ -111,5 +109,4 @@ protected:
         mRMTController.showPixels(iterator);
     }
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -10,7 +10,6 @@
 #include "fx/time.h"
 #include "test.h"
 
-#include "fl/namespace.h"
 #include "fl/scoped_array.h"
 #include "fl/ostream.h"
 

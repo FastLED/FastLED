@@ -5,9 +5,7 @@
 #include <algorithm>
 #include <numeric>
 #include <cmath>
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 struct AccuracyStats {
     float average;
     float median;

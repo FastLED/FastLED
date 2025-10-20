@@ -10,7 +10,6 @@
 ///
 /// For 8-lane (octal) SPI support, see spi_hw_8.h
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"

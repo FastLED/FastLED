@@ -2,9 +2,7 @@
 #define __FASTPIN_ARM_MXRT1062_H
 
 #include "fl/force_inline.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -87,7 +85,5 @@ _FL_DEFPIN(36,13,8); _FL_DEFPIN(37,12,8); _FL_DEFPIN(38,17,8); _FL_DEFPIN(39,16,
 #endif // defined FASTLED_TEENSY4
 
 #endif // FASTLED_FORCE_SOFTWARE_PINSs
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

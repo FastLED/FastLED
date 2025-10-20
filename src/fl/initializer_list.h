@@ -3,8 +3,6 @@
 #pragma once
 
 
-#include "fl/namespace.h"
-
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists
 #if defined(__AVR__)

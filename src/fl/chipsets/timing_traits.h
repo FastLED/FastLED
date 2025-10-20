@@ -9,8 +9,6 @@
 #pragma once
 
 #include "led_timing.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 // ============================================================================

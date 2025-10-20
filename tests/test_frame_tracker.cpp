@@ -7,11 +7,7 @@
 #include "test.h"
 #include "fx/frame.h"
 #include "fx/video/frame_tracker.h"
-#include "fl/namespace.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("FrameTracker basic frame advancement") {
     FrameTracker tracker(1.0f);  // 1fps == 1000ms per frame
     uint32_t currentFrame, nextFrame;

@@ -5,11 +5,9 @@
 #pragma once
 
 #include "fl/rgb8.h"
-#include "fl/namespace.h"
 #include "chsv.h"
 #include "hsv2rgb.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 // Whether to allow HD_COLOR_MIXING
 #ifndef FASTLED_HD_COLOR_MIXING
@@ -68,7 +66,6 @@ FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV& hsv, CRGB& rgb)
 #endif
 }
 
-FASTLED_NAMESPACE_END
 
 // HSV conversion implementations for fl::rgb8
 // These must be defined after CRGB and CHSV typedefs are established

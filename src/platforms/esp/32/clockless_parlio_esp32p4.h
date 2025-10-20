@@ -29,8 +29,6 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
-#include "fl/namespace.h"
-
 // Include the PARLIO driver
 #include "parlio/parlio_driver.h"
 

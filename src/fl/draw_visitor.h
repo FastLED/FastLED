@@ -6,7 +6,6 @@
 #include "crgb.h"
 #include "fl/geometry.h"
 #include "fl/gradient.h"
-#include "fl/namespace.h"
 #include "fl/unused.h"
 #include "fl/xymap.h"
 #include "fl/move.h"

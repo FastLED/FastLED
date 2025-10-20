@@ -2,11 +2,9 @@
 #define __INC_CLOCKLESS_ARM_KL26
 
 #include "../../common/m0clockless.h"
-#include "fl/namespace.h"
 #include "eorder.h"
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 
 template <uint8_t DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
@@ -65,8 +63,5 @@ public:
 
 
 };
-
-FASTLED_NAMESPACE_END
-
-
+}  // namespace fl
 #endif // __INC_CLOCKLESS_ARM_KL26

@@ -7,11 +7,7 @@
 #include "lib8tion/scale8.h"
 #include "lib8tion/intmap.h"
 #include "fl/math_macros.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
-
+using namespace fl;
 TEST_CASE("scale16") {
     CHECK_EQ(scale16(0, 0), 0);
     CHECK_EQ(scale16(0, 1), 0);

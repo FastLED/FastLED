@@ -2,9 +2,7 @@
 #define __INC_CLOCKLESS_ARM_K66_H
 
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 // Definition for a single channel clockless controller for the k66 family of chips, like that used in the teensy 3.6
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
@@ -123,7 +121,5 @@ protected:
 	}
 };
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

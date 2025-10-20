@@ -605,7 +605,5 @@ protected:
 };
 
 #endif
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif

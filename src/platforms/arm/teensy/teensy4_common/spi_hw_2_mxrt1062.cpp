@@ -10,7 +10,6 @@
 #if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
 
 #include "platforms/shared/spi_hw_2.h"
-#include "fl/namespace.h"
 #include "fl/warn.h"
 #include <SPI.h>
 #include <imxrt.h>

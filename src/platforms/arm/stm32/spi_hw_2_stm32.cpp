@@ -27,8 +27,6 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
 #include "fl/cstring.h"
-#include "fl/namespace.h"
-
 // Include STM32 HAL headers if available
 #ifdef HAL_TIM_MODULE_ENABLED
 #include <stm32_def.h>

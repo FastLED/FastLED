@@ -10,7 +10,6 @@
 
 #include "hsv2rgb.h"
 
-FASTLED_NAMESPACE_BEGIN
 
 /// HSV to RGB implementation in raw C, platform independent
 void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb);
@@ -737,5 +736,3 @@ CHSV rgb2hsv_approximate( const CRGB& rgb)
 //   252,0,126
 //   252,252,0
 //   252,252,126
-
-FASTLED_NAMESPACE_END

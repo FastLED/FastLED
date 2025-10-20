@@ -25,7 +25,6 @@
 #endif
 
 #include "fl/json.h"
-#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/unused.h"
 #include "fl/codec/mpeg1.h"

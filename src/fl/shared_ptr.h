@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/type_traits.h"
 #include "fl/utility.h"
 #include "fl/stdint.h"

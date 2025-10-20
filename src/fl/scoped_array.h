@@ -2,7 +2,6 @@
 
 #include "fl/allocator.h"
 #include "fl/inplacenew.h"
-#include "fl/namespace.h"
 #include "fl/deprecated.h"
 #include "fl/cstddef.h"
 

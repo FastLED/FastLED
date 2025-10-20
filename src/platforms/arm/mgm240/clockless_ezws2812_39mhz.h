@@ -7,7 +7,6 @@
 /// specifically optimized for 39MHz CPU frequency. All timing calculations are
 /// pre-computed to avoid runtime overhead.
 
-#include "fl/namespace.h"
 #include "controller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
@@ -18,9 +17,7 @@
 #if !defined(ARDUINO_ARCH_SILABS)
 #error "ezWS2812 GPIO 39MHz controller is only available for Silicon Labs MGM240/MG24 platforms"
 #endif
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @brief ezWS2812 GPIO controller optimized for 39MHz CPUs
 ///
 /// This controller uses direct GPIO manipulation with pre-computed timing
@@ -170,5 +167,4 @@ protected:
 /// @tparam RGB_ORDER Color channel ordering (typically GRB for WS2812)
 template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_39MHz = ClocklessController_ezWS2812_GPIO_39MHz<DATA_PIN, RGB_ORDER>;
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

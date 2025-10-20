@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fl/singleton.h"
 #include "fl/vector.h"
@@ -12,12 +11,9 @@
 #define FASTLED_HAS_ENGINE_EVENTS SKETCH_HAS_LOTS_OF_MEMORY
 #endif // FASTLED_HAS_ENGINE_EVENTS
 
-FASTLED_NAMESPACE_BEGIN
-class CLEDController;
-FASTLED_NAMESPACE_END
-
-
 namespace fl {
+
+class CLEDController;  // forward declaration
 
 class EngineEvents {
   public:

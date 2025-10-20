@@ -5,7 +5,6 @@
 /// Re-implementation of Arduino core functions
 /// @deprecated No longer used
 
-FASTLED_USING_NAMESPACE
 
 #if 0
 
@@ -239,4 +238,3 @@ void init()
 #endif
 
 #endif
-

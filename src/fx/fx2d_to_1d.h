@@ -2,7 +2,6 @@
 
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
 #include "fl/screenmap.h"
 #include "fx/fx1d.h"
 #include "fx/fx2d.h"

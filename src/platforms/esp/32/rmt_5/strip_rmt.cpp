@@ -14,8 +14,6 @@
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"
-#include "fl/namespace.h"
-
 #define AUTO_MEMORY_BLOCK_SIZE 0
 
 namespace fl {

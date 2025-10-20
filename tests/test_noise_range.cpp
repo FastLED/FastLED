@@ -1,10 +1,7 @@
 #include "test.h"
 #include "noise.h"
 #include "fl/stdint.h"
-#include "fl/namespace.h"
-
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 TEST_CASE("Noise Range Analysis") {
     // Test 1D noise function
     uint8_t min_1d = 255;

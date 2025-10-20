@@ -2,9 +2,7 @@
 #define __FASTPIN_ARM_KL26_H
 
 #include "fl/force_inline.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -84,7 +82,5 @@ _FL_DEFPIN(24, 20, E); _FL_DEFPIN(25, 21, E); _FL_DEFPIN(26, 30, E);
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl
 #endif // __INC_FASTPIN_ARM_K20

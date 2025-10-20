@@ -3,12 +3,9 @@
 
 #pragma once
 
-#include "fl/namespace.h"
 #include "lib8static.h"
 #include "fl/stdint.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @addtogroup lib8tion
 /// @{
 
@@ -62,5 +59,4 @@ LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
 
 /// @} intmap
 /// @} lib8tion
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

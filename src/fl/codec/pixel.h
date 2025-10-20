@@ -1,8 +1,6 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 // Color formats for decoded output

@@ -5,10 +5,7 @@
 
 #include "fl/stdint.h"
 #include "fl/int.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 /// @addtogroup lib8tion
 /// @{
 
@@ -43,5 +40,4 @@ typedef union {
 
 /// @} FractionalTypes
 /// @} lib8tion
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

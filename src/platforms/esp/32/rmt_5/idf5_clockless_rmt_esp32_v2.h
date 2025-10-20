@@ -9,13 +9,9 @@
 #include "eorder.h"
 #include "pixel_iterator.h"
 #include "rmt5_controller_lowlevel.h"  // V2: Use new worker pool driver
-#include "fl/namespace.h"
 #include "fl/chipsets/led_timing.h"    // Must be before timing_traits.h
 #include "fl/chipsets/timing_traits.h"
-
-FASTLED_NAMESPACE_BEGIN
-
-
+namespace fl {
 template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
@@ -55,5 +51,4 @@ protected:
         mRMTController.showPixels();
     }
 };
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -7,11 +7,6 @@
 #include "noise.h"
 
 #include "fl/math_macros.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
-
 // Simple noise generator for 1-d waves. Default values will give good results
 // for most cases.
 struct NoiseGenerator {
@@ -33,4 +28,3 @@ struct NoiseGenerator {
     }
 };
 
-FASTLED_NAMESPACE_END

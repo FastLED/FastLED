@@ -1,6 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"

@@ -17,10 +17,7 @@
 #include "fx/2d/scale_up.h"
 #include "fx/2d/redsquare.h"
 #include "fx/video.h"
-
-#include "fl/namespace.h"
-FASTLED_USING_NAMESPACE
-
+using namespace fl;
 uint16_t XY(uint8_t, uint8_t);  // declaration to fix compiler warning.
 
 // To satisfy the linker, we must also define uint16_t XY( uint8_t, uint8_t);

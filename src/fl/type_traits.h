@@ -6,7 +6,6 @@ Provides eanble_if and is_derived for compilers before C++14.
 
 #include "fl/stdint.h"
 
-#include "fl/namespace.h"
 #include "fl/move.h"
 #include "fl/int.h"
 

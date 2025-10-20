@@ -1,7 +1,6 @@
 // spi_isr_1.h — 1-way Single-SPI ISR wrapper (platform-agnostic bitbanging)
 #pragma once
 
-#include "fl/namespace.h"
 #include "fl/stdint.h"
 #include "spi_isr_engine.h"
 

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/strstream.h"
-#include "fl/namespace.h"
 #include "fl/type_traits.h"
 #include "fl/str.h"
 #include "fl/int.h"

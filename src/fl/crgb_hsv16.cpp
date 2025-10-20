@@ -4,8 +4,6 @@
 #define FASTLED_INTERNAL
 #include "crgb.h"
 #include "fl/hsv16.h"
-#include "fl/namespace.h"
-
 // Implementations are in fl namespace since rgb8 is defined there
 namespace fl {
 

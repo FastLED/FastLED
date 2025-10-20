@@ -1,11 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
-
-FASTLED_NAMESPACE_BEGIN
-
-
+namespace fl {
 /// @addtogroup FractionalTypes
 /// @{
 
@@ -54,5 +50,4 @@ typedef qfx<uint16_t, 8,8> q88;
 typedef qfx<uint16_t, 12,4> q124;
 
 /// @} FractionalTypes
-
-FASTLED_NAMESPACE_END
+}  // namespace fl

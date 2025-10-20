@@ -25,7 +25,6 @@
 /// Reads a single byte from the p array
 #define NOISE_P(x) FL_PGM_READ_BYTE_NEAR(noise_detail::p + x)
 
-FASTLED_NAMESPACE_BEGIN
 
 namespace noise_detail {
 
@@ -953,6 +952,5 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   }
 }
 
-FASTLED_NAMESPACE_END
 
 #pragma GCC diagnostic pop

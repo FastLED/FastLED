@@ -6,9 +6,6 @@
 #include "fl/bytestreammemory.h"
 #include "fx/video/pixel_stream.h"
 
-#include "fl/namespace.h"
-
-
 TEST_CASE("ByteStreamMemory basic operations") {
 
     SUBCASE("Write and read single byte") {

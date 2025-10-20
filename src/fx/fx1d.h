@@ -3,7 +3,6 @@
 #include "fl/stdint.h"
 
 #include "fl/int.h"
-#include "fl/namespace.h"
 #include "fl/xmap.h"
 #include "fx/fx.h"
 

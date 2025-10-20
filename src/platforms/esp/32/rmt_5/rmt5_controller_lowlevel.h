@@ -9,7 +9,6 @@
 
 #include "pixel_iterator.h"
 #include "fl/stdint.h"
-#include "fl/namespace.h"
 #include "fl/chipsets/led_timing.h"
 #include "rmt5_worker_base.h"
 

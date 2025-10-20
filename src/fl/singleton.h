@@ -1,7 +1,5 @@
 #pragma once
 
-#include "fl/namespace.h"
-
 namespace fl {
 
 // A templated singleton class, parameterized by the type of the singleton and

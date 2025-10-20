@@ -10,11 +10,8 @@
 // This god-header is too big and AI will stumble trying to generate the correct
 // edits.
 
-#include "fl/namespace.h"
 #include "avr_pin.h"
-
-FASTLED_NAMESPACE_BEGIN
-
+namespace fl {
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #warning "Software pin support forced, pin access will be slightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -496,6 +493,4 @@ _FL_DEFPIN(52, 7, F);
 #endif
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
-
-FASTLED_NAMESPACE_END
-
+}  // namespace fl

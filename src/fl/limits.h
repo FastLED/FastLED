@@ -7,8 +7,6 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 */
 
 #include "fl/stdint.h"
-#include "fl/namespace.h"
-
 namespace fl {
 
 // Helper template to compute integer limits based on size and signedness

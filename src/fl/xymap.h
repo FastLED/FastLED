@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/namespace.h"
 #include "fl/force_inline.h"
 #include "fl/pair.h"
 
