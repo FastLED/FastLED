@@ -1,0 +1,12 @@
+/// @file platforms/esp/fastpin_esp.h
+/// ESP platform fastpin dispatcher
+///
+/// Selects the appropriate fastpin implementation for ESP8266 or ESP32 variants.
+
+#pragma once
+
+#if defined(ESP32)
+    #include "platforms/esp/32/fastpin_esp32.h"
+#elif defined(ESP8266)
+    #include "platforms/esp/8266/fastpin_esp8266.h"
+#endif
