@@ -83,7 +83,7 @@ fl::string Particles1d::fxName() const {
 }
 
 // Particle methods
-Particles1d::Particle::Particle() : pos(0), baseVel(0), active(false) {}
+Particles1d::Particle::Particle() : pos(0), baseVel(0), birthTime(0), lifetime(0), active(false) {}
 
 float Particles1d::Particle::getPower(u32 now) const {
     if (!active || !lifetime) return 0.0f;
