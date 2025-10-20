@@ -114,7 +114,6 @@
 #include "eorder.h"
 #include "rgbw.h"
 #include "pixel_iterator.h"
-#include "fl/chipsets/timing_traits.h"
 
 FASTLED_NAMESPACE_BEGIN
 
@@ -145,7 +144,7 @@ public:
     RmtController(const RmtController &) = delete;
     RmtController(
         int DATA_PIN,
-        const ChipsetTiming& TIMING,
+        int T1, int T2, int T3,  // Bit timings.
         int maxChannel,
         bool built_in_driver);
     ~RmtController();

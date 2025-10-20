@@ -7,7 +7,6 @@
 #include "fl/math_macros.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
-#include "fl/chipsets/timing_traits.h"
 
 #define FASTLED_HAS_BLOCKLESS 1
 
@@ -24,14 +23,10 @@ extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
 #endif
 
-template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t LANES, int FIRST_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
-
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
 
 	CMinWait<WAIT_TIME> mWait;
 

@@ -10,7 +10,6 @@
 #include "fl/stdint.h"
 #include "fl/namespace.h"
 #include "fl/vector.h"
-#include "fl/chipsets/led_timing.h"
 #include "rmt5_worker_base.h"
 #include "rmt5_worker.h"
 #include "rmt5_worker_oneshot.h"
@@ -62,7 +61,7 @@ public:
     IRmtWorkerBase* acquireWorker(
         int num_bytes,
         gpio_num_t pin,
-        const ChipsetTiming& TIMING,
+        int t1, int t2, int t3,
         uint32_t reset_ns
     );
 

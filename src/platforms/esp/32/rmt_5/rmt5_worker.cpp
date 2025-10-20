@@ -196,13 +196,8 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     return true;
 }
 
-bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) {
-    // Extract timing values from struct
-    uint32_t t1 = TIMING.T1;
-    uint32_t t2 = TIMING.T2;
-    uint32_t t3 = TIMING.T3;
-
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%lu, t2=%lu, t3=%lu, reset_ns=%lu",
+bool RmtWorker::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) {
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu",
              mWorkerId, (int)pin, t1, t2, t3, reset_ns);
 
     // Create channel on first configure

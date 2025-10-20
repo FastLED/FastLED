@@ -9,7 +9,6 @@
 
 #include "fl/stdint.h"
 #include "fl/namespace.h"
-#include "fl/chipsets/timing_traits.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -36,7 +35,7 @@ public:
     virtual bool isAvailable() const = 0;
 
     // Configuration
-    virtual bool configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) = 0;
+    virtual bool configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) = 0;
 
     // Transmission
     virtual void transmit(const uint8_t* pixel_data, int num_bytes) = 0;

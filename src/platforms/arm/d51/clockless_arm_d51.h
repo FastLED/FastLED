@@ -1,8 +1,6 @@
 #ifndef __INC_CLOCKLESS_ARM_D51
 #define __INC_CLOCKLESS_ARM_D51
 
-#include "fl/chipsets/timing_traits.h"
-
 FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for SAMD51
@@ -16,24 +14,8 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-/// @brief ARM D51 (SAMD51) Clockless LED Controller
-/// @tparam DATA_PIN Pin number for data line output
-/// @tparam TIMING ChipsetTiming structure containing T1, T2, T3, and RESET values
-/// @tparam RGB_ORDER Color order (RGB, GRB, etc.)
-/// @tparam XTRA0 Additional parameter for platform-specific needs
-/// @tparam FLIP Flip the output bit order if true
-/// @tparam WAIT_TIME Wait time between updates in microseconds
-///
-/// Example usage with named timing constant:
-/// @code
-///   ClocklessController<5, TIMING_WS2812_800KHZ, GRB> controller;
-/// @endcode
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-	// Extract timing values from struct at compile-time
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 

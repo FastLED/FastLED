@@ -1,8 +1,6 @@
 #ifndef __INC_CLOCKLESS_ARM_GIGA
 #define __INC_CLOCKLESS_ARM_GIGA
 
-#include "fl/chipsets/timing_traits.h"
-
 FASTLED_NAMESPACE_BEGIN
 
 // Definition for a single channel clockless controller for GIGA M7
@@ -16,15 +14,10 @@ FASTLED_NAMESPACE_BEGIN
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
-
-	// Extract timing values from ChipsetTiming struct at compile-time
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
 
 	data_t mPinMask;
 	data_ptr_t mPort;

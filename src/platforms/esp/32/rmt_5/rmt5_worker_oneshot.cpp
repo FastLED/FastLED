@@ -152,12 +152,7 @@ bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
     return true;
 }
 
-bool RmtWorkerOneShot::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) {
-    // Extract timing values from struct
-    uint32_t t1 = TIMING.T1;
-    uint32_t t2 = TIMING.T2;
-    uint32_t t3 = TIMING.T3;
-
+bool RmtWorkerOneShot::configure(gpio_num_t pin, int t1, int t2, int t3, uint32_t reset_ns) {
     // Create channel on first configure
     if (mChannel == nullptr) {
         if (!createChannel(pin)) {

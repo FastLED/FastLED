@@ -20,7 +20,6 @@ FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"
-#include "fl/chipsets/led_timing.h"
 
 #define RMT5_POOL_TAG "rmt5_worker_pool"
 
@@ -126,21 +125,16 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     int num_bytes,
     gpio_num_t pin,
-    const ChipsetTiming& TIMING,
+    int t1, int t2, int t3,
     uint32_t reset_ns
 ) {
-    // Extract timing values from struct
-    uint32_t t1 = TIMING.T1;
-    uint32_t t2 = TIMING.T2;
-    uint32_t t3 = TIMING.T3;
-
     ESP_LOGE(RMT5_POOL_TAG, "");
     ESP_LOGE(RMT5_POOL_TAG, "========================================");
     ESP_LOGE(RMT5_POOL_TAG, "=== acquireWorker() ENTRY ===");
     ESP_LOGE(RMT5_POOL_TAG, "========================================");
     ESP_LOGE(RMT5_POOL_TAG, "num_bytes=%d (%d LEDs)", num_bytes, num_bytes / 3);
     ESP_LOGE(RMT5_POOL_TAG, "pin=%d", (int)pin);
-    ESP_LOGE(RMT5_POOL_TAG, "t1=%lu, t2=%lu, t3=%lu", t1, t2, t3);
+    ESP_LOGE(RMT5_POOL_TAG, "t1=%d, t2=%d, t3=%d", t1, t2, t3);
     ESP_LOGE(RMT5_POOL_TAG, "reset_ns=%lu", reset_ns);
     ESP_LOGE(RMT5_POOL_TAG, "");
 
@@ -204,7 +198,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         // Configure the worker before returning
         ESP_LOGE(RMT5_POOL_TAG, "Calling worker->configure(pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu)...",
                  (int)pin, t1, t2, t3, reset_ns);
-        if (!worker->configure(pin, TIMING, reset_ns)) {
+        if (!worker->configure(pin, t1, t2, t3, reset_ns)) {
             ESP_LOGE(RMT5_POOL_TAG, "worker->configure() FAILED!");
 
             // Configuration failed (likely channel creation failed due to exhaustion)
@@ -275,7 +269,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
             ESP_LOGE(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
 
             ESP_LOGE(RMT5_POOL_TAG, "Configuring worker in retry path...");
-            if (worker->configure(pin, TIMING, reset_ns)) {
+            if (worker->configure(pin, t1, t2, t3, reset_ns)) {
                 ESP_LOGE(RMT5_POOL_TAG, "worker->configure() SUCCESS in retry path!");
 
                 // Success - track channel creation only if this is a NEW channel

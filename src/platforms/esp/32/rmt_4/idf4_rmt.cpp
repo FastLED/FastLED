@@ -18,9 +18,9 @@ void RmtController::init(int pin, bool built_in_driver) {
     ESP32RMTController::init(_pin, built_in_driver);
 }
 
-RmtController::RmtController(int DATA_PIN, const ChipsetTiming& TIMING,
+RmtController::RmtController(int DATA_PIN, int T1, int T2, int T3,
                              int maxChannel, bool built_in_driver) {
-    pImpl = new ESP32RMTController(DATA_PIN, TIMING, maxChannel,
+    pImpl = new ESP32RMTController(DATA_PIN, T1, T2, T3, maxChannel,
                                    built_in_driver);
 }
 RmtController::~RmtController() { delete pImpl; }

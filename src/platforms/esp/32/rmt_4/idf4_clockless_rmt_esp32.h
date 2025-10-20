@@ -41,7 +41,6 @@
 #include "platforms/esp/esp_version.h"
 #include "pixel_iterator.h"
 #include "idf4_rmt.h"
-#include "fl/chipsets/timing_traits.h"
 
 
 
@@ -71,15 +70,10 @@ FASTLED_NAMESPACE_BEGIN
 #endif
 #endif
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+template <int DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Extract timing values from struct (for reference/debugging)
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
-
     // -- The actual controller object for ESP32
     RmtController mRMTController;
 
@@ -89,7 +83,7 @@ private:
 public:
     ClocklessController()
         : mRMTController(
-            DATA_PIN, TIMING,
+            DATA_PIN, T1, T2, T3,
             FASTLED_RMT_MAX_CHANNELS,
             FASTLED_RMT_BUILTIN_DRIVER
         )

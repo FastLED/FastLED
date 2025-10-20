@@ -10,7 +10,6 @@
 #include "pixel_iterator.h"
 #include "fl/stdint.h"
 #include "fl/namespace.h"
-#include "fl/chipsets/led_timing.h"
 #include "rmt5_worker_base.h"
 
 FL_EXTERN_C_BEGIN
@@ -49,7 +48,7 @@ public:
     // Constructor
     RmtController5LowLevel(
         int DATA_PIN,
-        const ChipsetTiming& TIMING,
+        int T1, int T2, int T3,
         int RESET_US = 280  // WS2812 default reset time
     );
 
