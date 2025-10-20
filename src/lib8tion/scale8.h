@@ -26,6 +26,8 @@ using fl::cleanup_R1;
 using fl::scale16by8;
 using fl::scale16;
 using fl::nscale8x3_constexpr;
+using fl::dim8_raw;
+using fl::brighten8_raw;
 
 /// @} Scaling
 /// @} lib8tion

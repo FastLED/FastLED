@@ -1275,5 +1275,6 @@ using fl::q44;
 using fl::q62;
 using fl::q88;
 using fl::q124;
+using fl::dim8_raw;
 
 FL_DISABLE_WARNING_POP
