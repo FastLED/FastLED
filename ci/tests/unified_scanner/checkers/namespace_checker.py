@@ -54,6 +54,10 @@ class NamespaceIncludeChecker(BaseChecker):
             if pattern in str(file_path):
                 return False
 
+        # Skip third-party test frameworks
+        if "doctest.h" in str(file_path):
+            return False
+
         return file_path.suffix in {".cpp", ".h", ".hpp", ".cc", ".ino"}
 
     def check_file(self, file_path: Path, content: str) -> List[CheckResult]:

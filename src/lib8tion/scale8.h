@@ -25,7 +25,6 @@ using fl::nscale8_video_LEAVING_R1_DIRTY;
 using fl::cleanup_R1;
 using fl::scale16by8;
 using fl::scale16;
-using fl::scale8_constexpr;
 using fl::nscale8x3_constexpr;
 
 /// @} Scaling

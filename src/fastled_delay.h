@@ -65,10 +65,13 @@ public:
 /// For backwards compatibility, delaycycles is available through fl/delay.h
 /// which is included at the top of this file. New code should use
 /// fl::delaycycles<CYCLES>() from fl/delay.h.
+///
+/// Note: The using declarations below are commented out to avoid conflicts
+/// with the generic delaycycles template implementation that gets included
+/// via platforms/delay.h. Users should access delaycycles via the fl:: namespace.
 
-// Bring fl::delaycycles and fl::delaycycles_min1 into the FASTLED_NAMESPACE for backwards compatibility
-using fl::delaycycles;
-using fl::delaycycles_min1;
+// using fl::delaycycles;
+// using fl::delaycycles_min1;
 
 /// @}
 
