@@ -1,8 +1,8 @@
 #pragma once
 
-#include "fl/inplacenew.h"  // for fl::move, fl::forward, in‐place new
 #include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
 #include "fl/bit_cast.h"    // for safe type-punning
+#include "fl/new.h"   // for placement new operator (must be before namespace fl)
 
 namespace fl {
 

@@ -2,10 +2,11 @@
 
 #pragma once
 
-#include "fl/inplacenew.h"
 #include "fl/cstring.h"
 #include "fl/type_traits.h"
 #include "fl/bit_cast.h"
+#include "fl/new.h"   // for placement new operator
+#include "fl/allocator.h"
 
 #include "fl/initializer_list.h"
 #include "fl/has_include.h"
