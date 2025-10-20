@@ -51,7 +51,7 @@ FASTLED_NAMESPACE_BEGIN
 ///   - Delay T3 nanoseconds
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
 {
 private:
@@ -128,7 +128,7 @@ private:
         // Send reset code: line low for at least 50µs
         // (WS2812/SK6812 datasheet requirement)
         FastPin<DATA_PIN>::lo();
-        delayNanoseconds<50000>();  // 50 microseconds
+        fl::delayNanoseconds<50000>();  // 50 microseconds
     }
 
     /// Send a single byte with bit-by-bit timing
@@ -152,12 +152,12 @@ private:
         // Set line HIGH
         FastPin<DATA_PIN>::hi();
         // Hold high for T1 nanoseconds
-        delayNanoseconds<T1>();
+        fl::delayNanoseconds<T1>();
 
         // Set line LOW
         FastPin<DATA_PIN>::lo();
         // Hold low for T2 nanoseconds
-        delayNanoseconds<T2>();
+        fl::delayNanoseconds<T2>();
     }
 
     /// Send a '0' bit with modified timing
@@ -167,12 +167,12 @@ private:
         FastPin<DATA_PIN>::hi();
         // For a '0' bit: high time is (T1 + T2 - T3)
         // This ensures total cycle time is still (T1 + T2)
-        delayNanoseconds<T1 + T2 - T3>();
+        fl::delayNanoseconds<T1 + T2 - T3>();
 
         // Set line LOW
         FastPin<DATA_PIN>::lo();
         // Hold low for T3 nanoseconds
-        delayNanoseconds<T3>();
+        fl::delayNanoseconds<T3>();
     }
 };
 
