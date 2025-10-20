@@ -19,7 +19,7 @@
 #error "ezWS2812 GPIO 78MHz controller is only available for Silicon Labs MGM240/MG24 platforms"
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief ezWS2812 GPIO controller optimized for 78MHz CPUs
 ///
@@ -183,4 +183,4 @@ protected:
 template<u8 DATA_PIN, EOrder RGB_ORDER = GRB>
 using EZWS2812_GPIO_78MHz = ClocklessController_ezWS2812_GPIO_78MHz<DATA_PIN, RGB_ORDER>;
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

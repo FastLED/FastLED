@@ -1,7 +1,7 @@
 #ifndef __INC_FASTSPI_AVR_H
 #define __INC_FASTSPI_AVR_H
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -861,7 +861,7 @@ public:
 // #define FASTLED_FORCE_SOFTWARE_SPI
 #endif
 
-FASTLED_NAMESPACE_END;
+}  // namespace fl
 
 
 #endif

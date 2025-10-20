@@ -5,7 +5,7 @@
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
@@ -93,6 +93,6 @@ _FL_DEFPIN(46); _FL_DEFPIN(47);
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif // __FASTPIN_ARM_RP2040_H

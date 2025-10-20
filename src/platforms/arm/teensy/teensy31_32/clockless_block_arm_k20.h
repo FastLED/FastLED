@@ -19,7 +19,7 @@
 
 #include <kinetis.h>
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 40>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
@@ -333,7 +333,7 @@ public:
 	}
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif
 

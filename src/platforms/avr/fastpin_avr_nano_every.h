@@ -6,7 +6,7 @@
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -98,4 +98,4 @@ _FL_DEFPIN(20, 4, D); _FL_DEFPIN(21, 5, D); _FL_DEFPIN(22, 2, A);
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

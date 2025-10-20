@@ -6,7 +6,7 @@
 #include "fastled_delay.h"
 #include "fl/chipsets/timing_traits.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // ARM Cortex-M33 DWT (Data Watchpoint and Trace) registers for cycle-accurate timing
 #define ARM_DEMCR               (*(volatile uint32_t *)0xE000EDFC) // Debug Exception and Monitor Control
@@ -176,4 +176,4 @@ protected:
 
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

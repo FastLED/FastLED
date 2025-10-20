@@ -1,7 +1,16 @@
 #ifndef __INC_FASTSPI_ARM_SAM_H
 #define __INC_FASTSPI_ARM_SAM_H
 
-FASTLED_NAMESPACE_BEGIN
+// SAMD21/SAMD51 includes (moved before namespace)
+#if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
+    defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include <Arduino.h>  // ok include
+#include <SPI.h>  // ok include
+#include <wiring_private.h>
+#endif
+
+namespace fl {
 
 #if defined(__SAM3X8E__)
 #define m_SPI ((Spi*)SPI0)
@@ -168,10 +177,6 @@ public:
 #if defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
     defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || \
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-
-#include <Arduino.h>  // ok include
-#include <SPI.h>  // ok include
-#include <wiring_private.h>
 
 template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
 class SAMDHardwareSPIOutput {
@@ -360,5 +365,5 @@ public:
 
 #endif  // SAMD21/SAMD51
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 #endif

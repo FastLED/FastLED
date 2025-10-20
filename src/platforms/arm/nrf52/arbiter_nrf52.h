@@ -5,7 +5,7 @@
 
 #include "led_sysdefs_arm_nrf52.h"
 
-//FASTLED_NAMESPACE_BEGIN
+//namespace fl {
 
 typedef void (*FASTLED_NRF52_PWM_INTERRUPT_HANDLER)();
 
@@ -108,7 +108,7 @@ template <uint32_t _PWM_ID> IRQn_Type    const                            PWM_Ar
 template <uint32_t _PWM_ID> uint32_t                                      PWM_Arbiter<_PWM_ID>::s_PwmInUse  = 0;
 template <uint32_t _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = nullptr;
 
-//FASTLED_NAMESPACE_END
+//}  // namespace fl
 
 #endif // NRF52_SERIES
 #endif // __INC_ARBITER_NRF52

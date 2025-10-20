@@ -3,7 +3,7 @@
 
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
@@ -466,6 +466,6 @@ public:
 };
 #endif
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif

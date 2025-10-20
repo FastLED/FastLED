@@ -74,7 +74,7 @@
 #include "fl/cstring.h"
 #endif
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief Parallel clockless LED controller for RP2040/RP2350
 ///
@@ -290,4 +290,4 @@ private:
     }
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

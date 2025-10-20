@@ -22,7 +22,7 @@
 
 #include <kinetis.h>
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief ARM K66 (Teensy 3.6) Block Clockless LED Controller
 /// @tparam LANES Number of parallel data lines
@@ -359,7 +359,7 @@ public:
 	}
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif
 

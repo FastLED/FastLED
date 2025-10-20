@@ -3,7 +3,7 @@
 
 #include "fl/force_inline.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
@@ -133,7 +133,7 @@ _FL_DEFPIN(110, 29, B); _FL_DEFPIN(111, 30, B); _FL_DEFPIN(112, 31, B); _FL_DEFP
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 
 #endif // __INC_FASTPIN_ARM_SAM_H

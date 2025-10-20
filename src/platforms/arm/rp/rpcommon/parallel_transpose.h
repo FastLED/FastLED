@@ -68,7 +68,7 @@
 #include "fl/force_inline.h"
 #include "bitswap.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 /// @brief Transpose 8 LED strips into parallel bit format
 ///
@@ -265,4 +265,4 @@ inline bool transpose_strips(
     }
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

@@ -8,7 +8,7 @@
 #include "../../fl/chipsets/led_timing.h"
 #include "../../fl/chipsets/timing_traits.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_AVR)
 
@@ -606,6 +606,6 @@ protected:
 
 #endif
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif

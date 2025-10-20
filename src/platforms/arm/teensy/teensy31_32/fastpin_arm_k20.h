@@ -4,7 +4,7 @@
 #include "fl/force_inline.h"
 #include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -118,6 +118,6 @@ _FL_DEFPIN(32, 18, B); _FL_DEFPIN(33, 4, A);
 
 #endif // FASTLED_FORCE_SOFTWARE_PINS
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
 
 #endif // __INC_FASTPIN_ARM_K20

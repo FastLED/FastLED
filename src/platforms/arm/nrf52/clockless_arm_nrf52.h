@@ -5,7 +5,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 
-//FASTLED_NAMESPACE_BEGIN
+//namespace fl {
 
 #define FASTLED_HAS_CLOCKLESS 1
 #define FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING 144 // TODO: Figure out how to safely let this be calller-defined....
@@ -389,7 +389,7 @@ CMinWait<_WAIT_TIME_MICROSECONDS> ClocklessController<_DATA_PIN, TIMING, _RGB_OR
 //         color correction, dithering, etc. ....
 */
 
-//FASTLED_NAMESPACE_END
+//}  // namespace fl
 
 #endif // NRF52_SERIES
 #endif // __INC_CLOCKLESS_ARM_NRF52
