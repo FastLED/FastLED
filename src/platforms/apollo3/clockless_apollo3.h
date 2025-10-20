@@ -1,7 +1,6 @@
 #ifndef __INC_CLOCKLESS_APOLLO3_H
 #define __INC_CLOCKLESS_APOLLO3_H
 
-#include "fl/chipsets/timing_traits.h"
 
 namespace fl {
 

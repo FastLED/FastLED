@@ -14,7 +14,6 @@
 #include "FastLED.h"
 #include "idf4_rmt.h"
 #include "platforms/esp/32/clock_cycles.h"
-#include "fl/chipsets/led_timing.h"
 
 FL_EXTERN_C_BEGIN
 

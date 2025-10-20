@@ -7,6 +7,13 @@
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
 
+// Select appropriate implementation based on platform configuration
+#if defined(__AVR__)
+#include "platforms/avr/scale8.h"
+#else
+#include "platforms/shared/scale8.h"
+#endif
+
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
@@ -30,13 +37,6 @@ FASTLED_NAMESPACE_BEGIN
 /// results in smaller and faster code than the equivalent
 /// program using plain "C" arithmetic and logic.
 /// @{
-
-// Select appropriate implementation based on platform configuration
-#if defined(__AVR__)
-#include "platforms/avr/scale8.h"
-#else
-#include "platforms/shared/scale8.h"
-#endif
 
 /// @defgroup ScalingDirty Scaling Functions that Leave R1 Dirty
 /// These functions are more efficient for scaling multiple

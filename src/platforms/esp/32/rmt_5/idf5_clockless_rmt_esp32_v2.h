@@ -10,8 +10,6 @@
 #include "pixel_iterator.h"
 #include "rmt5_controller_lowlevel.h"  // V2: Use new worker pool driver
 #include "fl/namespace.h"
-#include "fl/chipsets/led_timing.h"    // Must be before timing_traits.h
-#include "fl/chipsets/timing_traits.h"
 
 FASTLED_NAMESPACE_BEGIN
 

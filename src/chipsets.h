@@ -16,13 +16,7 @@
 
 // Include centralized LED chipset timing definitions
 // These provide unified nanosecond-based T1, T2, T3 timing for all supported chipsets
-#include "fl/chipsets/led_timing.h"
 
-// Include legacy AVR-specific timing definitions (FMUL-based)
-// Used for backward compatibility with existing AVR clockless drivers
-#ifdef __AVR__
-#include "platforms/avr/led_timing_legacy_avr.h"
-#endif
 
 // Include UCS7604 controller
 #include "fl/chipsets/ucs7604.h"  // optional.

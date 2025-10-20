@@ -5,8 +5,6 @@
 #include "../../lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
 #include "../../fl/force_inline.h"
-#include "../../fl/chipsets/led_timing.h"
-#include "../../fl/chipsets/timing_traits.h"
 
 namespace fl {
 

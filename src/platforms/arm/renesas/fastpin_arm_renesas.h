@@ -1,6 +1,8 @@
 #ifndef __INC_FASTPIN_ARM_RENESAS_H
 #define __INC_FASTPIN_ARM_RENESAS_H
 
+#include "bsp_api.h"
+
 FASTLED_NAMESPACE_BEGIN
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
@@ -9,8 +11,6 @@ FASTLED_NAMESPACE_BEGIN
 #undef HAS_HARDWARE_PIN_SUPPORT
 
 #else
-
-#include "bsp_api.h"
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this
 /// uses the full port GPIO registers.  In theory, in some way, bit-band register access -should- be faster, however I have found

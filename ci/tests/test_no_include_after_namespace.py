@@ -51,6 +51,18 @@ INCLUDE_PATTERN = re.compile(
 
 ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
 
+NAMESPACE_END_PATTERN = re.compile(
+    r"""
+    ^\s*                    # Start of line with optional whitespace
+    (                       # Capture group for namespace end patterns
+        FASTLED_NAMESPACE_END  # FastLED namespace end macro
+        |                   # OR
+        ^\s*\}              # Closing brace (namespace end)
+    )
+""",
+    re.VERBOSE,
+)
+
 
 def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
     """
@@ -83,6 +95,11 @@ def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
         # Check if we're entering a namespace
         if NAMESPACE_PATTERN.match(line):
             namespace_started = True
+            continue
+
+        # Check if we're exiting a namespace
+        if NAMESPACE_END_PATTERN.match(line):
+            namespace_started = False
             continue
 
         # Check for includes after namespace started
