@@ -31,20 +31,42 @@
 // Include FastLED.h here to avoid circular dependency issues
 #include "FastLED.h"
 
-// Only declare SPIDeviceProxy template on platforms that support it
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4) || \
-    (defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)) || \
-    defined(NRF51) || defined(NRF52_SERIES) || \
-    defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
-    defined(__SAMD51P19A__) || defined(__SAMD51P20A__) || \
-    defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+// Platform-specific forward declarations for SPIDeviceProxy
+#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+class SPIDeviceProxy;
+}
+#endif
 
+#if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
 namespace fl {
 template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_RATE, SPIClass & SPIObject, int SPI_INDEX>
 class SPIDeviceProxy;
 }
+#endif
 
+#if defined(NRF51) || defined(NRF52_SERIES)
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+class SPIDeviceProxy;
+}
+#endif
+
+#if defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+    defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
+    defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_CLOCK_DIVIDER>
+class SPIDeviceProxy;
+}
+#endif
+
+#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+class SPIDeviceProxy;
+}
 #endif
 
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
