@@ -11,12 +11,13 @@
     defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 
 #include "fl/int.h"
+#include "spi_device_proxy.h"
 
 
 /// SAM3X8E / SAMD21 / SAMD51 hardware SPI output
 /// Routes to SPIDeviceProxy for transparent single/dual/quad SPI management
 template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 
 #endif  // SAM/SAMD

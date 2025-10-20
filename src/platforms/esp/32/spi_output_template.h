@@ -9,12 +9,13 @@
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
 #include "fl/int.h"
+#include "spi_device_proxy.h"
 
 
 /// ESP32 hardware SPI output
 /// Routes to appropriate SPI backend via SPIDeviceProxy
 template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
+class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 
 #endif  // ESP32 variants

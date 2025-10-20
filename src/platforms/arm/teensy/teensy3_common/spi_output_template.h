@@ -9,6 +9,7 @@
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI) && defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #include "fl/int.h"
+#include "spi_device_proxy.h"
 
 
 /// Generic fallback for generic pins on Teensy 3
@@ -17,7 +18,7 @@ class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SP
 
 /// Specialization for hardware SPI pins
 template<u32 _SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
 
 
 #endif  // Teensy3 with hardware SPI
