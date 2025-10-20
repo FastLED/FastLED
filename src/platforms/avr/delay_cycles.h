@@ -26,14 +26,14 @@
 // ============================================================================
 
 /// Forward declaration
-template<cycle_t CYCLES>
+template<fl::cycle_t CYCLES>
 inline void delaycycles();
 
 /// AVR-specific worker template for cycle delays
 /// This template uses a loop to generate the desired cycle count
 /// @tparam LOOP number of loop iterations (each iteration is 3 cycles)
 /// @tparam PAD additional padding cycles (0-2)
-template<int LOOP, cycle_t PAD>
+template<int LOOP, fl::cycle_t PAD>
 inline void _delaycycles_avr() {
   delaycycles<PAD>();
   // The loop below generates 3 cycles * LOOP:
@@ -50,7 +50,7 @@ inline void _delaycycles_avr() {
 }
 
 /// Delay for N clock cycles (AVR implementation)
-template<cycle_t CYCLES>
+template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() {
   _delaycycles_avr<CYCLES / 3, CYCLES % 3>();
 }

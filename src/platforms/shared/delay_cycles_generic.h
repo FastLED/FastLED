@@ -26,14 +26,14 @@
 // ============================================================================
 
 /// Forward declaration
-template<cycle_t CYCLES>
+template<fl::cycle_t CYCLES>
 inline void delaycycles();
 
 /// Delay for N clock cycles (generic NOP-based implementation)
 /// Uses NOP instructions to create minimal delays
 /// Note: This is a naive implementation using NOPs
 /// Platform-specific versions can provide more efficient implementations
-template<cycle_t CYCLES>
+template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() {
   FL_NOP;
   delaycycles<CYCLES - 1>();

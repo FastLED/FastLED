@@ -26,7 +26,7 @@
 // ============================================================================
 
 /// Forward declaration
-template<cycle_t CYCLES>
+template<fl::cycle_t CYCLES>
 inline void delaycycles();
 
 /// ESP32 specialization for very large cycle counts

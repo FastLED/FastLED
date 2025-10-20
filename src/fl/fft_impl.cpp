@@ -10,11 +10,10 @@
 #define FASTLED_INTERNAL 1
 #endif
 
-#include "FastLED.h"
-
 #include "third_party/cq_kernel/cq_kernel.h"
 #include "third_party/cq_kernel/kiss_fftr.h"
 
+#include "fl/alloca.h"
 #include "fl/array.h"
 #include "fl/audio.h"
 #include "fl/fft.h"
