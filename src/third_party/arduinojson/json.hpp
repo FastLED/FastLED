@@ -289,6 +289,7 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #include "fl/cstring.h"
 #include "fl/stdint.h"
 #include "fl/cstdlib.h"
+#include "fl/malloc.h"
 #include "fl/str.h"
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {
@@ -303,13 +304,13 @@ namespace detail {
 class DefaultAllocator : public Allocator {
  public:
   void* allocate(size_t size) override {
-    return malloc(size);
+    return fl::malloc(size);
   }
   void deallocate(void* ptr) override {
-    free(ptr);
+    fl::free(ptr);
   }
   void* reallocate(void* ptr, size_t new_size) override {
-    return realloc(ptr, new_size);
+    return fl::realloc(ptr, new_size);
   }
   static Allocator* instance() {
     static DefaultAllocator allocator;
@@ -702,8 +703,8 @@ class MemoryPoolList {
   MemoryPoolList& operator=(MemoryPoolList&& src) {
     ARDUINOJSON_ASSERT(count_ == 0);
     if (src.pools_ == src.preallocatedPools_) {
-      memcpy(preallocatedPools_, src.preallocatedPools_,
-             sizeof(preallocatedPools_));
+      fl::memcpy(preallocatedPools_, src.preallocatedPools_,
+                 sizeof(preallocatedPools_));
       pools_ = preallocatedPools_;
     } else {
       pools_ = src.pools_;
@@ -867,7 +868,7 @@ struct StringNode {
   char data[1];
   static constexpr size_t maxLength = numeric_limits<length_type>::highest();
   static constexpr size_t sizeForLength(size_t n) {
-    return n + 1 + offsetof(StringNode, data);
+    return n + 1 + FL_OFFSETOF(StringNode, data);
   }
   static StringNode* create(size_t length, Allocator* allocator) {
     if (length > maxLength)
