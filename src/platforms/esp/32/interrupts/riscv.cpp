@@ -34,7 +34,7 @@ esp_err_t fastled_riscv_install_interrupt(
         return ESP_ERR_INVALID_ARG;
     }
 
-    if (handler == NULL || handle == NULL) {
+    if (handler == nullptr || handle == nullptr) {
         FL_DBG("Invalid arguments: handler=" << (void*)handler <<
                " handle=" << (void*)handle);
         return ESP_ERR_INVALID_ARG;
@@ -106,7 +106,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
 
     // CRITICAL: According to official ESP-IDF documentation, priority levels 4-7
     // require ASSEMBLY handlers on BOTH Xtensa AND RISC-V architectures.
-    // The ESP-IDF docs state: "handlers must be NULL when an interrupt of level >3
+    // The ESP-IDF docs state: "handlers must be nullptr when an interrupt of level >3
     // is requested, because these types of interrupts aren't C-callable."
     //
     // This function CANNOT work as written because:
@@ -117,7 +117,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     // TODO: Implement RISC-V assembly interrupt stubs (*.S files) if Level 4+
     // is proven necessary. For now, use priority 3 with official driver.
     FL_WARN("CANNOT INSTALL: Priority 4-7 requires ASSEMBLY handlers (not C)");
-    FL_WARN("ESP-IDF docs: handlers must be NULL for levels >3");
+    FL_WARN("ESP-IDF docs: handlers must be nullptr for levels >3");
     FL_WARN("Use fastled_riscv_install_official_interrupt() for priority 1-3");
 
     return ESP_ERR_NOT_SUPPORTED;

@@ -131,7 +131,7 @@ FL_EXTERN_C_BEGIN
  *               REQUIRES ASSEMBLY handlers (per ESP-IDF docs, same as Xtensa)
  *
  * CRITICAL: ESP-IDF docs state that levels 4+ require assembly handlers on
- * BOTH Xtensa AND RISC-V. Handlers must be NULL for levels >3.
+ * BOTH Xtensa AND RISC-V. Handlers must be nullptr for levels >3.
  *
  * IMPORTANT: Official FastLED RMT driver uses rmt_tx_channel_config_t which
  * only accepts intr_priority values 1-3. Higher levels require custom
@@ -191,7 +191,7 @@ FL_EXTERN_C_BEGIN
  * According to official ESP-IDF documentation (v5.0+):
  * "Levels 1-3 can be handled in C. For levels 4-6... High level interrupts...
  *  Need to be handled in assembly."
- * "Handlers must be NULL when an interrupt of level >3 is requested, because
+ * "Handlers must be nullptr when an interrupt of level >3 is requested, because
  *  these types of interrupts aren't C-callable."
  *
  * This applies to BOTH Xtensa AND RISC-V architectures on ESP32 platforms.
@@ -308,7 +308,7 @@ static inline void fastled_plic_complete(uint32_t interrupt_id) {
  *       ETS_RMT_INTR_SOURCE,
  *       FASTLED_RISCV_PRIORITY_RECOMMENDED,
  *       my_rmt_handler,
- *       NULL,
+ *       nullptr,
  *       &rmt_handle);
  */
 esp_err_t fastled_riscv_install_interrupt(
@@ -481,7 +481,7 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
  * esp_intr_handle_t handle;
  * esp_intr_alloc(ETS_RMT_INTR_SOURCE,
  *                ESP_INTR_FLAG_IRAM,
- *                my_rmt_isr, NULL, &handle);
+ *                my_rmt_isr, nullptr, &handle);
  */
 
 //=============================================================================

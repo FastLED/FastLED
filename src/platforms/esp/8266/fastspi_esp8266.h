@@ -47,7 +47,7 @@ class ESP8266SPIOutput {
 	Selectable 	*m_pSelect;
 
 public:
-	ESP8266SPIOutput() { m_pSelect = NULL; }
+	ESP8266SPIOutput() { m_pSelect = nullptr; }
 	ESP8266SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -81,12 +81,12 @@ public:
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() { 
 		SPI.beginTransaction(SPISettings(3200000, MSBFIRST, SPI_MODE0));
-		if(m_pSelect != NULL) { m_pSelect->select(); } 
+		if(m_pSelect != nullptr) { m_pSelect->select(); } 
 	} 
 
 	// release the SPI line
 	void release() { 
-		if(m_pSelect != NULL) { m_pSelect->release(); } 
+		if(m_pSelect != nullptr) { m_pSelect->release(); } 
 		SPI.endTransaction();
 	}
 
@@ -131,7 +131,7 @@ public:
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning of each grouping, as well as a class specifying a per
 	// byte of data modification to be made.  (See DATA_NOP above)
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
 		int len = pixels.mLen;
 		while(pixels.has(1)) {

@@ -23,7 +23,7 @@ class Teensy4HardwareSPIOutput {
 	}
 
 public:
-	Teensy4HardwareSPIOutput() { m_pSelect = NULL; m_bitCount = 0;}
+	Teensy4HardwareSPIOutput() { m_pSelect = nullptr; m_bitCount = 0;}
 	Teensy4HardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; m_bitCount = 0;}
 
 	// set the object representing the selectable -- ignore for now
@@ -36,12 +36,12 @@ public:
 	void inline select() __attribute__((always_inline)) {
 		// begin the SPI transaction
 		_SPIObject.beginTransaction(SPISettings(_SPI_CLOCK_RATE, MSBFIRST, SPI_MODE0));
-		if(m_pSelect != NULL) { m_pSelect->select(); }
+		if(m_pSelect != nullptr) { m_pSelect->select(); }
 	}
 
 	// release the CS select
 	void inline release() __attribute__((always_inline)) {
-		if(m_pSelect != NULL) { m_pSelect->release(); }
+		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		_SPIObject.endTransaction();
 	}
 
@@ -112,7 +112,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
     int len = pixels.mLen;
 

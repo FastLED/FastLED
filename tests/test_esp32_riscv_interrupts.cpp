@@ -53,26 +53,26 @@ TEST_CASE("riscv_interrupt_constants") {
 TEST_CASE("riscv_interrupt_install_validation") {
     // Test parameter validation for interrupt installation
 
-    esp_intr_handle_t handle = NULL;
+    esp_intr_handle_t handle = nullptr;
 
     // Test invalid priority (too low)
     esp_err_t err = fastled_riscv_install_interrupt(
-        0, 0, test_interrupt_handler, NULL, &handle);
+        0, 0, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_INVALID_ARG);
 
     // Test invalid priority (too high)
     err = fastled_riscv_install_interrupt(
-        0, 8, test_interrupt_handler, NULL, &handle);
+        0, 8, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_INVALID_ARG);
 
-    // Test NULL handler
+    // Test nullptr handler
     err = fastled_riscv_install_interrupt(
-        0, 3, NULL, NULL, &handle);
+        0, 3, nullptr, nullptr, &handle);
     CHECK(err == ESP_ERR_INVALID_ARG);
 
-    // Test NULL handle pointer
+    // Test nullptr handle pointer
     err = fastled_riscv_install_interrupt(
-        0, 3, test_interrupt_handler, NULL, NULL);
+        0, 3, test_interrupt_handler, nullptr, nullptr);
     CHECK(err == ESP_ERR_INVALID_ARG);
 }
 
@@ -81,26 +81,26 @@ TEST_CASE("riscv_experimental_interrupt_validation") {
     // NOTE: Experimental interrupts (priority 4-7) are NOT SUPPORTED because
     // they require assembly handlers per ESP-IDF documentation.
 
-    esp_intr_handle_t handle = NULL;
+    esp_intr_handle_t handle = nullptr;
 
     // Priority too low for experimental (should be 4-7)
     esp_err_t err = fastled_riscv_install_experimental_interrupt(
-        0, 3, test_interrupt_handler, NULL, &handle);
+        0, 3, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_INVALID_ARG);
 
     // Priority too high
     err = fastled_riscv_install_experimental_interrupt(
-        0, 8, test_interrupt_handler, NULL, &handle);
+        0, 8, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_INVALID_ARG);
 
     // Valid priority range (4-7) should return ESP_ERR_NOT_SUPPORTED
     // because assembly handlers are required but not implemented
     err = fastled_riscv_install_experimental_interrupt(
-        0, 4, test_interrupt_handler, NULL, &handle);
+        0, 4, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_NOT_SUPPORTED);
 
     err = fastled_riscv_install_experimental_interrupt(
-        0, 7, test_interrupt_handler, NULL, &handle);
+        0, 7, test_interrupt_handler, nullptr, &handle);
     CHECK(err == ESP_ERR_NOT_SUPPORTED);
 }
 
@@ -149,11 +149,11 @@ TEST_CASE("riscv_handler_functions_exist") {
     void (*rmt_official_handler)(void*) = fastled_riscv_rmt_official_handler;
     void (*rmt_experimental_handler)(void*) = fastled_riscv_rmt_experimental_handler;
 
-    // Verify they're not NULL
-    CHECK(official_handler != NULL);
-    CHECK(experimental_handler != NULL);
-    CHECK(rmt_official_handler != NULL);
-    CHECK(rmt_experimental_handler != NULL);
+    // Verify they're not nullptr
+    CHECK(official_handler != nullptr);
+    CHECK(experimental_handler != nullptr);
+    CHECK(rmt_official_handler != nullptr);
+    CHECK(rmt_experimental_handler != nullptr);
 }
 
 TEST_CASE("riscv_interrupt_trampoline_macro") {
@@ -172,11 +172,11 @@ TEST_CASE("riscv_interrupt_trampoline_macro") {
 
     // Verify trampoline exists and can be called
     void (*trampoline_ptr)(void*) = test_trampoline;
-    CHECK(trampoline_ptr != NULL);
+    CHECK(trampoline_ptr != nullptr);
 
     // Call trampoline (should work without crashing)
     // Note: Can't actually verify call count since lambda capture doesn't work with C trampoline
-    test_trampoline(NULL);
+    test_trampoline(nullptr);
 }
 
 #else

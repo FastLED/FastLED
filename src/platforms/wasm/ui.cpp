@@ -56,7 +56,7 @@ static bool& getUiSystemInitialized() {
 
 // Add a periodic check function that can be called from JavaScript
 extern "C" void checkUpdateEngineState() {
-    FL_WARN("*** ASYNC PERIODIC CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    FL_WARN("*** ASYNC PERIODIC CHECK: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
     FL_WARN("*** ASYNC PERIODIC CHECK: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false"));
 }
 
@@ -68,7 +68,7 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
     // FL_WARN("*** jsUpdateUiComponents ASYNC ENTRY ***");
     // FL_WARN("*** jsUpdateUiComponents ASYNC RECEIVED JSON: " << jsonStr.c_str());
     // FL_WARN("*** jsUpdateUiComponents ASYNC JSON LENGTH: " << jsonStr.length());
-    // FL_WARN("*** jsUpdateUiComponents ASYNC ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    // FL_WARN("*** jsUpdateUiComponents ASYNC ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
     
     // Only initialize if not already initialized - don't force reinitialization
     if (!getUiSystemInitialized()) {
@@ -76,7 +76,7 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
         ensureWasmUiSystemInitialized();
     }
     
-    //FL_WARN("*** jsUpdateUiComponents ASYNC AFTER INIT: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    //FL_WARN("*** jsUpdateUiComponents ASYNC AFTER INIT: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
     
     if (getUpdateEngineState()) {
         //FL_WARN("*** ASYNC WASM CALLING BACKEND WITH JSON: " << jsonStr.c_str());
@@ -97,14 +97,14 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
         getUiSystemInitialized() = false;  // Force reinitialization
         ensureWasmUiSystemInitialized();
         
-        FL_WARN("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+        FL_WARN("*** ASYNC AFTER EMERGENCY REINIT: g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
         
         if (getUpdateEngineState()) {
             FL_WARN("*** ASYNC EMERGENCY REINIT SUCCESSFUL - retrying JSON processing");
             getUpdateEngineState()(jsonStr.c_str());
             FL_WARN("*** ASYNC EMERGENCY RETRY COMPLETED SUCCESSFULLY");
         } else {
-            FL_WARN("*** ASYNC EMERGENCY REINIT FAILED - g_updateEngineState still NULL");
+            FL_WARN("*** ASYNC EMERGENCY REINIT FAILED - g_updateEngineState still nullptr");
             return; // Early return on failure
         }
     }
@@ -116,7 +116,7 @@ void jsUpdateUiComponents(const std::string &jsonStr) {
  */
 void ensureWasmUiSystemInitialized() {
     // FL_WARN("*** ASYNC CODE UPDATE VERIFICATION: This message confirms the C++ code has been rebuilt! ***");
-    // FL_WARN("*** ensureWasmUiSystemInitialized ASYNC ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "NULL"));
+    // FL_WARN("*** ensureWasmUiSystemInitialized ASYNC ENTRY: g_uiSystemInitialized=" << (getUiSystemInitialized() ? "true" : "false") << ", g_updateEngineState=" << (getUpdateEngineState() ? "VALID" : "nullptr"));
     
     // Return early if already initialized - CRITICAL FIX
     if (getUiSystemInitialized()) {
@@ -204,7 +204,7 @@ extern "C" {
     EMSCRIPTEN_KEEPALIVE void jsUpdateUiComponents(const char* jsonStr) {
         // Input validation with early return
         if (!jsonStr) {
-            FL_WARN("*** ASYNC C BINDING: Received NULL jsonStr");
+            FL_WARN("*** ASYNC C BINDING: Received nullptr jsonStr");
             return;
         }
         

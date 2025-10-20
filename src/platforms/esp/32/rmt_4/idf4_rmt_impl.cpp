@@ -190,14 +190,14 @@ static int gNumDone = 0;
 static int gNext = 0;
 
 static portMUX_TYPE rmt_spinlock = portMUX_INITIALIZER_UNLOCKED;
-static intr_handle_t gRMT_intr_handle = NULL;
+static intr_handle_t gRMT_intr_handle = nullptr;
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
 #if tskKERNEL_VERSION_MAJOR >= 7
-static SemaphoreHandle_t gTX_sem = NULL;
+static SemaphoreHandle_t gTX_sem = nullptr;
 #else
-static xSemaphoreHandle gTX_sem = NULL;
+static xSemaphoreHandle gTX_sem = nullptr;
 #endif
 
 // -- Make sure we can't call show() too quickly
@@ -260,7 +260,7 @@ FASTLED_FORCE_INLINE void IRAM_ATTR convert_byte_to_rmt(
 
 void GiveGTX_sem()
 {
-    if (gTX_sem != NULL)
+    if (gTX_sem != nullptr)
     {
         // stop waiting for more
         gNumDone = gNumControllers;
@@ -353,7 +353,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 
     for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
     {
-        gOnChannel[i] = NULL;
+        gOnChannel[i] = nullptr;
 
         // -- RMT configuration for transmission
         rmt_config_t rmt_tx;
@@ -390,7 +390,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
     }
 
     // -- Create a semaphore to block execution until all the controllers are done
-    if (gTX_sem == NULL)
+    if (gTX_sem == nullptr)
     {
         gTX_sem = xSemaphoreCreateBinary();
         xSemaphoreGive(gTX_sem);
@@ -402,7 +402,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
         //    interrupt handler must work for all different kinds of
         //    strips, so it delegates to the refill function for each
         //    specific instantiation of ClocklessController.
-        if (gRMT_intr_handle == NULL)
+        if (gRMT_intr_handle == nullptr)
         {
             esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, ESP32RMTController::interruptHandler, 0, &gRMT_intr_handle);
         }
@@ -472,7 +472,7 @@ void ESP32RMTController::showPixels()
             // find a free channel
             for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
             {
-              if(gOnChannel[i] == NULL)
+              if(gOnChannel[i] == nullptr)
               {
                   ESP32RMTController::startNext(i);
                   continue;
@@ -792,7 +792,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
     // -- Turn off the interrupts
     _rmt_set_tx_intr_disable(channel);
 
-    gOnChannel[channel] = NULL;
+    gOnChannel[channel] = nullptr;
     gNumDone++;
 
     if (gUseBuiltInDriver)
@@ -843,7 +843,7 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 #endif
 
         ESP32RMTController *pController = gOnChannel[channel];
-        if (pController != NULL)
+        if (pController != nullptr)
         {
             if (intr_st & BIT(tx_next_bit))
             {

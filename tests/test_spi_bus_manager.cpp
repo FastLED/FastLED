@@ -74,7 +74,7 @@ TEST_CASE("SPIBusManager: Multiple devices on different clock pins") {
     CHECK(manager.getNumBuses() == 3);
 }
 
-TEST_CASE("SPIBusManager: NULL controller registration") {
+TEST_CASE("SPIBusManager: nullptr controller registration") {
     SPIBusManager manager;
 
     SPIBusHandle handle = manager.registerDevice(14, 13, nullptr);

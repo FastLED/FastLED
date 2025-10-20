@@ -35,7 +35,7 @@ public:
 
     inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
     inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
-    inline static port_ptr_t port() __attribute__ ((always_inline)) { return NULL; }
+    inline static port_ptr_t port() __attribute__ ((always_inline)) { return nullptr; }
     inline static port_t mask() __attribute__ ((always_inline)) { return 0; }
 };
 

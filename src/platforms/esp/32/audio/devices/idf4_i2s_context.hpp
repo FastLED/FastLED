@@ -90,7 +90,7 @@ I2SContext make_context(const AudioConfigI2S &config) {
 
 I2SContext i2s_audio_init(const AudioConfigI2S &config) {
     I2SContext ctx = make_context(config);
-    i2s_driver_install(ctx.i2s_port, &ctx.i2s_config, 0, NULL);
+    i2s_driver_install(ctx.i2s_port, &ctx.i2s_config, 0, nullptr);
     i2s_set_pin(ctx.i2s_port, &ctx.pin_config);
     i2s_zero_dma_buffer(ctx.i2s_port);
     return ctx;

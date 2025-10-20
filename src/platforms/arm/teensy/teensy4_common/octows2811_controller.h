@@ -13,7 +13,7 @@ class COctoWS2811Controller : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
   uint8_t *drawbuffer,*framebuffer;
 
   void _init(int nLeds) {
-    if(pocto == NULL) {
+    if(pocto == nullptr) {
       drawbuffer = (uint8_t*)malloc(nLeds * 8 * 3);
       framebuffer = (uint8_t*)malloc(nLeds * 8 * 3);
 
@@ -27,7 +27,7 @@ class COctoWS2811Controller : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
     }
   }
 public:
-  COctoWS2811Controller() { pocto = NULL; }
+  COctoWS2811Controller() { pocto = nullptr; }
   virtual int size() { return CLEDController::size() * 8; }
 
   virtual void init() { /* do nothing yet */ }

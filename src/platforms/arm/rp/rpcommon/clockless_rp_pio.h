@@ -206,7 +206,7 @@ public:
         dma_channel_configure(dma_channel,
                               &channel_config,
                               &pio->txf[sm],
-                              NULL,   // address set when making transfer
+                              nullptr,   // address set when making transfer
                               1,      // count set when making transfer
                               false); // don't trigger now
         

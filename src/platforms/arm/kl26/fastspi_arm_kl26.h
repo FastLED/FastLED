@@ -135,7 +135,7 @@ class ARMHardwareSPIOutput {
   }
 
 public:
-  ARMHardwareSPIOutput() { m_pSelect = NULL; }
+  ARMHardwareSPIOutput() { m_pSelect = nullptr; }
   ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
   // set the object representing the selectable
@@ -163,7 +163,7 @@ public:
 
   // latch the CS select
   void inline select() __attribute__((always_inline)) {
-    if(m_pSelect != NULL) { m_pSelect->select(); }
+    if(m_pSelect != nullptr) { m_pSelect->select(); }
     setSPIRate();
     enable_pins();
   }
@@ -172,7 +172,7 @@ public:
   // release the CS select
   void inline release() __attribute__((always_inline)) {
     disable_pins();
-    if(m_pSelect != NULL) { m_pSelect->release(); }
+    if(m_pSelect != nullptr) { m_pSelect->release(); }
   }
 
   // Wait for the world to be clear
@@ -222,7 +222,7 @@ public:
   void writeBytes(FASTLED_REGISTER uint8_t *data, int len) { writeBytes<DATA_NOP>(data, len); }
 
 
-  template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+  template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
     int len = pixels.mLen;
 
     select();

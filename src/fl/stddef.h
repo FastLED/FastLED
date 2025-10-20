@@ -14,9 +14,9 @@
 
 #include "fl/cstddef.h"
 
-// Provide NULL for third-party code that needs it
+// Provide NULL definition for third-party code that needs it
 #ifndef NULL
-#define NULL nullptr
+#define NULL (void*)0
 #endif
 
 #else

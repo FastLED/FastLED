@@ -62,7 +62,7 @@ static int CLOCK_DIVIDER_N;
 static int CLOCK_DIVIDER_A;
 static int CLOCK_DIVIDER_B;
 // -- Interrupt handler
-static intr_handle_t gI2S_intr_handle = NULL;
+static intr_handle_t gI2S_intr_handle = nullptr;
 
 // -- I2S goes to these pins until we remap them using the GPIO matrix
 static int i2s_base_pin_index;
@@ -86,9 +86,9 @@ DMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
 #if tskKERNEL_VERSION_MAJOR >= 7
-static SemaphoreHandle_t gTX_semaphore = NULL;
+static SemaphoreHandle_t gTX_semaphore = nullptr;
 #else
-static xSemaphoreHandle gTX_semaphore = NULL;
+static xSemaphoreHandle gTX_semaphore = nullptr;
 #endif
 
 // -- One-time I2S initialization
@@ -437,7 +437,7 @@ void i2s_init(int i2s_device) {
 
     // -- Create a semaphore to block execution until all the controllers are
     // done
-    if (gTX_semaphore == NULL) {
+    if (gTX_semaphore == nullptr) {
         gTX_semaphore = xSemaphoreCreateBinary();
         xSemaphoreGive(gTX_semaphore);
     }

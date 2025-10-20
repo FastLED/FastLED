@@ -158,12 +158,12 @@ public:
 	// entirely, make it up to the caller to remember to lock/select the line?)
 	void select() { 
 		m_ledSPI.beginTransaction(SPISettings(SPI_SPEED, MSBFIRST, SPI_MODE0));
-		if(m_pSelect != NULL) { m_pSelect->select(); } 
+		if(m_pSelect != nullptr) { m_pSelect->select(); } 
 	} 
 
 	// release the SPI line
 	void release() { 
-		if(m_pSelect != NULL) { m_pSelect->release(); } 
+		if(m_pSelect != nullptr) { m_pSelect->release(); } 
 		m_ledSPI.endTransaction();
 	}
 

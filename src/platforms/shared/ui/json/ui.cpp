@@ -22,7 +22,7 @@ static fl::unique_ptr<JsonUiManager>& getInternalManager() {
 }
 
 JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
-    // FL_WARN("setJsonUiHandlers: ENTRY - updateJsHandler is " << (updateJsHandler ? "VALID" : "NULL/EMPTY"));
+    // FL_WARN("setJsonUiHandlers: ENTRY - updateJsHandler is " << (updateJsHandler ? "VALID" : "nullptr/EMPTY"));
     
     // Create internal JsonUiManager only if updateJsHandler is valid (not empty)
     if (updateJsHandler) {
@@ -58,20 +58,20 @@ JsonUiUpdateInput setJsonUiHandlers(const JsonUiUpdateOutput& updateJsHandler) {
         // FL_WARN("setJsonUiHandlers: Creating and returning updateEngineState lambda");
         auto result = fl::function<void(const char*)>([](const char* jsonStr) {
             // FL_WARN("*** updateEngineState lambda CALLED ***");
-            // FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "NULL"));
+            // FL_WARN("*** updateEngineState lambda ENTRY: jsonStr=" << (jsonStr ? jsonStr : "nullptr"));
             // FL_WARN("*** updateEngineState lambda JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
             auto& manager = getInternalManager();
             // FL_WARN("*** updateEngineState lambda: manager pointer=" << manager.get());
             if (manager) {
                 // FL_WARN("*** updateEngineState lambda: manager exists, calling updateUiComponents");
-                // FL_WARN("*** updateEngineState lambda: PASSING JSON TO MANAGER: " << (jsonStr ? jsonStr : "NULL"));
+                // FL_WARN("*** updateEngineState lambda: PASSING JSON TO MANAGER: " << (jsonStr ? jsonStr : "nullptr"));
                 manager->updateUiComponents(jsonStr);
                 // FL_WARN("*** updateEngineState lambda: updateUiComponents completed");
             } else {
                 FL_WARN("*** updateEngineState lambda: NO MANAGER EXISTS!");
             }
         });
-        // FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "NULL") << ")");
+        // FL_WARN("setJsonUiHandlers: updateEngineState lambda created, returning it (is " << (result ? "VALID" : "nullptr") << ")");
         return result;
     } else {
         // No updateJs handler, clear any existing internal manager

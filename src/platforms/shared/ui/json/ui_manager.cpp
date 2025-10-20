@@ -152,16 +152,16 @@ JsonUiInternalPtr JsonUiManager::findUiComponent(const char* id_or_name) {
 
 void JsonUiManager::updateUiComponents(const char* jsonStr) {
     //FL_WARN("*** JsonUiManager::updateUiComponents ENTRY ***");
-    // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "NULL"));
+    // FL_WARN("*** INCOMING JSON: " << (jsonStr ? jsonStr : "nullptr"));
     // FL_WARN("*** JSON LENGTH: " << (jsonStr ? strlen(jsonStr) : 0));
     // FL_WARN("*** CURRENT COMPONENT COUNT: " << mComponents.size());
     
     if (!jsonStr) {
-        FL_ASSERT(false, "*** JsonUiManager::updateUiComponents: NULL JSON string provided");
+        FL_ASSERT(false, "*** JsonUiManager::updateUiComponents: nullptr JSON string provided");
         return;
     }
 
-    // FL_WARN("*** BACKEND RECEIVED UI UPDATE: " << (jsonStr ? jsonStr : "NULL"));
+    // FL_WARN("*** BACKEND RECEIVED UI UPDATE: " << (jsonStr ? jsonStr : "nullptr"));
     // FL_WARN("*** JsonUiManager pointer: " << this);
     // FL_WARN("*** BEFORE: mHasPendingUpdate=" << (mHasPendingUpdate ? "true" : "false"));
     

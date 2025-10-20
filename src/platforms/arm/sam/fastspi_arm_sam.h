@@ -32,7 +32,7 @@ class SAMHardwareSPIOutput {
 	}
 
 public:
-	SAMHardwareSPIOutput() { m_pSelect = NULL; }
+	SAMHardwareSPIOutput() { m_pSelect = nullptr; }
 	SAMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
 	// set the object representing the selectable
@@ -70,10 +70,10 @@ public:
 	}
 
 	// latch the CS select
-	void inline select() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->select(); } }
+	void inline select() __attribute__((always_inline)) { if(m_pSelect != nullptr) { m_pSelect->select(); } }
 
 	// release the CS select
-	void inline release() __attribute__((always_inline)) { if(m_pSelect != NULL) { m_pSelect->release(); } }
+	void inline release() __attribute__((always_inline)) { if(m_pSelect != nullptr) { m_pSelect->release(); } }
 
 	// wait until all queued up data has been written
 	void waitFully() { while((m_SPI->SPI_SR & SPI_SR_TXEMPTY) == 0); }
@@ -131,7 +131,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
 		int len = pixels.mLen;
 
@@ -240,7 +240,7 @@ public:
 
 	// latch the CS select
 	void inline select() __attribute__((always_inline)) {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->select();
 		}
 		if (m_initialized) {
@@ -255,7 +255,7 @@ public:
 		if (m_initialized) {
 			::SPI.endTransaction();
 		}
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->release();
 		}
 	}
@@ -324,7 +324,7 @@ public:
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
 		int len = pixels.mLen;
 

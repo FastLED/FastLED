@@ -25,7 +25,7 @@ class AVRUSART1SPIOutput {
 	Selectable *m_pSelect;
 
 public:
-	AVRUSART1SPIOutput() { m_pSelect = NULL; }
+	AVRUSART1SPIOutput() { m_pSelect = nullptr; }
 	AVRUSART1SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -95,7 +95,7 @@ public:
 	void disable_pins() { }
 
 	void select() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->select();
 		}
 		enable_pins();
@@ -103,7 +103,7 @@ public:
 	}
 
 	void release() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->release();
 		}
 		disable_pins();
@@ -145,7 +145,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -177,7 +177,7 @@ class AVRUSART0SPIOutput {
 	Selectable *m_pSelect;
 
 public:
-	AVRUSART0SPIOutput() { m_pSelect = NULL; }
+	AVRUSART0SPIOutput() { m_pSelect = nullptr; }
 	AVRUSART0SPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -246,7 +246,7 @@ public:
 	void disable_pins() { }
 
 	void select() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->select();
 		}
 		enable_pins();
@@ -254,7 +254,7 @@ public:
 	}
 
 	void release() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->release();
 		}
 		disable_pins();
@@ -291,7 +291,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -331,7 +331,7 @@ class AVRHardwareSPIOutput {
 	Selectable *m_pSelect;
 
 public:
-	AVRHardwareSPIOutput() { m_pSelect = NULL; }
+	AVRHardwareSPIOutput() { m_pSelect = nullptr; }
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -412,7 +412,7 @@ public:
 	void disable_pins() { }
 
 	void select() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->select();
 		}
 		enable_pins();
@@ -420,7 +420,7 @@ public:
 	}
 
 	void release() {
-		if(m_pSelect != NULL) {
+		if(m_pSelect != nullptr) {
 			m_pSelect->release();
 		}
 		disable_pins();
@@ -457,7 +457,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -508,7 +508,7 @@ class AVRHardwareSPIOutput {
 	bool mWait;
 
 public:
-	AVRHardwareSPIOutput() { m_pSelect = NULL; mWait = false;}
+	AVRHardwareSPIOutput() { m_pSelect = nullptr; mWait = false;}
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -603,13 +603,13 @@ public:
 	}
 
 	void select() {
-		if(m_pSelect != NULL) { m_pSelect->select(); }
+		if(m_pSelect != nullptr) { m_pSelect->select(); }
 		enable_pins();
 		setSPIRate();
 	}
 
 	void release() {
-		if(m_pSelect != NULL) { m_pSelect->release(); }
+		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		disable_pins();
 	}
 
@@ -642,7 +642,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 
@@ -691,7 +691,7 @@ class AVRHardwareSPIOutput {
 	bool mWait;
 
 public:
-	AVRHardwareSPIOutput() { m_pSelect = NULL; mWait = false;}
+	AVRHardwareSPIOutput() { m_pSelect = nullptr; mWait = false;}
 	AVRHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -786,13 +786,13 @@ public:
 	}
 
 	void select() {
-		if(m_pSelect != NULL) { m_pSelect->select(); }
+		if(m_pSelect != nullptr) { m_pSelect->select(); }
 		enable_pins();
 		setSPIRate();
 	}
 
 	void release() {
-		if(m_pSelect != NULL) { m_pSelect->release(); }
+		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		disable_pins();
 	}
 
@@ -825,7 +825,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		//setSPIRate();
 		int len = pixels.mLen;
 

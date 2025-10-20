@@ -98,7 +98,7 @@ public:
     /// @returns Handle to use for transmit operations
     SPIBusHandle registerDevice(uint8_t clock_pin, uint8_t data_pin, void* controller) {
         if (!controller) {
-            FL_WARN("SPIBusManager: NULL controller pointer");
+            FL_WARN("SPIBusManager: nullptr controller pointer");
             return SPIBusHandle();
         }
 

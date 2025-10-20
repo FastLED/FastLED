@@ -45,7 +45,7 @@ class GenericSoftwareSPIOutput {
 
 public:
 	/// Default constructor
-	GenericSoftwareSPIOutput() { m_pSelect = NULL; }
+	GenericSoftwareSPIOutput() { m_pSelect = nullptr; }
 	/// Constructor with selectable for SPI chip select
 	GenericSoftwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -244,10 +244,10 @@ public:
 	/// @par
 	/// @todo Move select responsibility out of the SPI classes entirely,
 	///       make it up to the caller to remember to lock/select the line?
-	void select() { if(m_pSelect != NULL) { m_pSelect->select(); } } // FastPin<SELECT_PIN>::hi(); }
+	void select() { if(m_pSelect != nullptr) { m_pSelect->select(); } } // FastPin<SELECT_PIN>::hi(); }
 
 	/// Release the SPI chip select line
-	void release() { if(m_pSelect != NULL) { m_pSelect->release(); } } // FastPin<SELECT_PIN>::lo(); }
+	void release() { if(m_pSelect != nullptr) { m_pSelect->release(); } } // FastPin<SELECT_PIN>::lo(); }
 
 	/// Write multiple bytes of the given value over SPI.
 	/// Useful for quickly flushing, say, a line of 0's down the line.
@@ -363,7 +363,7 @@ public:
 	/// @tparam D Per-byte modifier class, e.g. ::DATA_NOP
 	/// @tparam RGB_ORDER the rgb ordering for the LED data (e.g. what order red, green, and blue data is written out in)
 	/// @param pixels a ::PixelController with the LED data and modifier options
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER>  __attribute__((noinline)) void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		FASTLED_UNUSED(context);
 		select();
 		int len = pixels.mLen;

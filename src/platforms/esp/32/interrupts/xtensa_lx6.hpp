@@ -155,7 +155,7 @@ FL_EXTERN_C_BEGIN
  * Example installation (CUSTOM, not standard FastLED):
  *   esp_intr_alloc(ETS_RMT_INTR_SOURCE,
  *                  ESP_INTR_FLAG_LEVEL4 | ESP_INTR_FLAG_IRAM,
- *                  xt_highint4, NULL, &handle);
+ *                  xt_highint4, nullptr, &handle);
  */
 extern void xt_highint4(void);
 
@@ -214,7 +214,7 @@ void IRAM_ATTR fastled_esp32_level5_handler(void);
  *
  * Parameters:
  *   source: Interrupt source (e.g., ETS_RMT_INTR_SOURCE)
- *   arg: User argument passed to handler (can be NULL)
+ *   arg: User argument passed to handler (can be nullptr)
  *   handle: Pointer to store interrupt handle
  *
  * Returns: ESP_OK on success, error code on failure
@@ -222,7 +222,7 @@ void IRAM_ATTR fastled_esp32_level5_handler(void);
  * Example usage for RMT (STANDARD FastLED approach):
  *   esp_intr_handle_t rmt_intr_handle;
  *   esp_err_t err = fastled_esp32_install_level3_interrupt(
- *       ETS_RMT_INTR_SOURCE, NULL, &rmt_intr_handle);
+ *       ETS_RMT_INTR_SOURCE, nullptr, &rmt_intr_handle);
  */
 esp_err_t fastled_esp32_install_level3_interrupt(
     int source,
@@ -406,7 +406,7 @@ esp_err_t fastled_esp32_rmt_init_custom(
  * esp_intr_handle_t handle;
  * esp_intr_alloc(ETS_RMT_INTR_SOURCE,
  *                ESP_INTR_FLAG_LEVEL4 | ESP_INTR_FLAG_IRAM,
- *                my_rmt_isr, NULL, &handle);
+ *                my_rmt_isr, nullptr, &handle);
  */
 
 //=============================================================================

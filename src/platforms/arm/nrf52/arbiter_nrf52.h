@@ -106,7 +106,7 @@ template <uint32_t _PWM_ID> NRF_PWM_Type * const PWM_Arbiter<_PWM_ID>::s_PWM    
     ;
 template <uint32_t _PWM_ID> IRQn_Type    const                            PWM_Arbiter<_PWM_ID>::s_PWM_IRQ   = ((IRQn_Type)((uint8_t)((uint32_t)(s_PWM) >> 12)));
 template <uint32_t _PWM_ID> uint32_t                                      PWM_Arbiter<_PWM_ID>::s_PwmInUse  = 0;
-template <uint32_t _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = NULL;
+template <uint32_t _PWM_ID> FASTLED_NRF52_PWM_INTERRUPT_HANDLER volatile  PWM_Arbiter<_PWM_ID>::s_Isr       = nullptr;
 
 //FASTLED_NAMESPACE_END
 

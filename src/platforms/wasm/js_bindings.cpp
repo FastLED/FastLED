@@ -407,7 +407,7 @@ EMSCRIPTEN_KEEPALIVE void jsOnStripAdded(uintptr_t strip, uint32_t num_leds) {
  * Pure C++ UI Update Function - Simple data processing
  */
 EMSCRIPTEN_KEEPALIVE void updateJs(const char* jsonStr) {
-    printf("updateJs: ENTRY - PURE C++ VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "NULL");
+    printf("updateJs: ENTRY - PURE C++ VERSION - jsonStr=%s\n", jsonStr ? jsonStr : "nullptr");
     
     // Process UI input using pure C++ function
     ::processUiInput(jsonStr);

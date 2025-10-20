@@ -123,7 +123,7 @@ public:
         NRF_SPI0->ENABLE = 1;
     }
 
-    template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+    template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
         select();
         int len = pixels.mLen;
         while(pixels.has(1)) {

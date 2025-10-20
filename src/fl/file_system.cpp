@@ -180,7 +180,7 @@ class NullFileHandle : public FileHandle {
         return 0;
     }
     fl::size pos() const override { return 0; }
-    const char *path() const override { return "NULL FILE HANDLE"; }
+    const char *path() const override { return "nullptr FILE HANDLE"; }
     bool seek(fl::size pos) override {
         FASTLED_UNUSED(pos);
         return false;

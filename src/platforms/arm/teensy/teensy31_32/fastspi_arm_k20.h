@@ -243,7 +243,7 @@ class ARMHardwareSPIOutput {
 
 
 public:
-	ARMHardwareSPIOutput() { m_pSelect = NULL; }
+	ARMHardwareSPIOutput() { m_pSelect = nullptr; }
 	ARMHardwareSPIOutput(Selectable *pSelect) { m_pSelect = pSelect; }
 	void setSelect(Selectable *pSelect) { m_pSelect = pSelect; }
 
@@ -364,14 +364,14 @@ public:
 
 	void inline select() __attribute__((always_inline)) {
 		save_spi_state();
-		if(m_pSelect != NULL) { m_pSelect->select(); }
+		if(m_pSelect != nullptr) { m_pSelect->select(); }
 		setSPIRate();
 		enable_pins();
 	}
 
 	void inline release() __attribute__((always_inline)) {
 		disable_pins();
-		if(m_pSelect != NULL) { m_pSelect->release(); }
+		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		restore_spi_state();
 	}
 
@@ -405,7 +405,7 @@ public:
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template
 	// parameters indicate how many uint8_ts to skip at the beginning and/or end of each grouping
-	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = NULL) {
+	template <uint8_t FLAGS, class D, EOrder RGB_ORDER> void writePixels(PixelController<RGB_ORDER> pixels, void* context = nullptr) {
 		select();
 		int len = pixels.mLen;
 

@@ -13,7 +13,7 @@ class CWS2812SerialController : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
     uint8_t *drawbuffer,*framebuffer;
 
     void _init(int nLeds) {
-        if (pserial == NULL) {
+        if (pserial == nullptr) {
             drawbuffer = (uint8_t*)malloc(nLeds * 3);
             framebuffer = (uint8_t*)malloc(nLeds * 12);
             pserial = new WS2812Serial(nLeds, framebuffer, drawbuffer, DATA_PIN, WS2812_RGB);
@@ -22,7 +22,7 @@ class CWS2812SerialController : public CPixelLEDController<RGB_ORDER, 8, 0xFF> {
     }
 
 public:
-    CWS2812SerialController() { pserial = NULL; }
+    CWS2812SerialController() { pserial = nullptr; }
 
     virtual void init() { /* do nothing yet */ }
 

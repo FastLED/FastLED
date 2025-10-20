@@ -123,7 +123,7 @@ I2SContext i2s_audio_init(const AudioConfigI2S &config) {
     chan_cfg.dma_frame_num = I2S_AUDIO_BUFFER_LEN;
 
     // Create RX channel
-    esp_err_t ret = i2s_new_channel(&chan_cfg, NULL, &ctx.rx_handle);
+    esp_err_t ret = i2s_new_channel(&chan_cfg, nullptr, &ctx.rx_handle);
     FL_ASSERT(ret == ESP_OK, "Failed to create I2S channel");
 
     // Initialize channel with standard mode configuration

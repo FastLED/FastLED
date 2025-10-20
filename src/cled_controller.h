@@ -153,7 +153,7 @@ public:
     /// @returns CLEDController::m_pHead
     static CLEDController *head() { return m_pHead; }
 
-    /// Get the next controller in the linked list after this one.  Will return NULL at the end of the linked list.
+    /// Get the next controller in the linked list after this one.  Will return nullptr at the end of the linked list.
     /// @returns CLEDController::m_pNext
     CLEDController *next() { return m_pNext; }
 
