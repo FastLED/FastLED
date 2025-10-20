@@ -108,21 +108,18 @@ class DockerContainerManager:
 
     def get_container_state(self) -> ContainerState:
         """Query current container state without side effects."""
-        # Check if container exists
         try:
+            # Check if container exists
             result = subprocess.run(
                 ["docker", "container", "inspect", self.config.container_name],
                 capture_output=True,
                 text=True,
+                timeout=10,
             )
-        except FileNotFoundError:
-            return ContainerState.NOT_EXISTS
+            if result.returncode != 0:
+                return ContainerState.NOT_EXISTS
 
-        if result.returncode != 0:
-            return ContainerState.NOT_EXISTS
-
-        # Parse state from output
-        try:
+            # Parse state from output
             state_result = subprocess.run(
                 [
                     "docker",
@@ -133,20 +130,21 @@ class DockerContainerManager:
                 ],
                 capture_output=True,
                 text=True,
+                timeout=10,
             )
-        except FileNotFoundError:
+            parts = state_result.stdout.strip().split()
+            is_running = parts[0] == "true"
+            is_paused = parts[1] == "true" if len(parts) > 1 else False
+
+            if is_paused:
+                return ContainerState.PAUSED
+            elif is_running:
+                return ContainerState.RUNNING
+            else:
+                return ContainerState.STOPPED
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # If Docker is not available, we can't check state
             return ContainerState.NOT_EXISTS
-
-        parts = state_result.stdout.strip().split()
-        is_running = parts[0] == "true"
-        is_paused = parts[1] == "true" if len(parts) > 1 else False
-
-        if is_paused:
-            return ContainerState.PAUSED
-        elif is_running:
-            return ContainerState.RUNNING
-        else:
-            return ContainerState.STOPPED
 
     def create_container(self) -> bool:
         """Create a new container."""
@@ -168,44 +166,46 @@ class DockerContainerManager:
             "/dev/null",
         ]
 
-        try:
-            result = subprocess.run(cmd, env=env)
-            return result.returncode == 0
-        except FileNotFoundError:
-            return False
+        result = subprocess.run(cmd, env=env)
+        return result.returncode == 0
 
     def transition_to_running(self) -> bool:
         """Ensure container is in running state."""
-        state = self.get_container_state()
+        try:
+            state = self.get_container_state()
 
-        if state == ContainerState.NOT_EXISTS:
-            print(f"Creating new container: {self.config.container_name}")
-            if not self.create_container():
-                return False
-            state = ContainerState.STOPPED
-
-        if state == ContainerState.STOPPED:
-            print(f"Starting container: {self.config.container_name}")
-            try:
-                result = subprocess.run(["docker", "start", self.config.container_name])
-                if result.returncode != 0:
+            if state == ContainerState.NOT_EXISTS:
+                print(f"Creating new container: {self.config.container_name}")
+                if not self.create_container():
                     return False
-            except FileNotFoundError:
-                return False
-        elif state == ContainerState.PAUSED:
-            print(f"Unpausing container: {self.config.container_name}")
-            try:
+                state = ContainerState.STOPPED
+
+            if state == ContainerState.STOPPED:
+                print(f"Starting container: {self.config.container_name}")
                 result = subprocess.run(
-                    ["docker", "unpause", self.config.container_name]
+                    ["docker", "start", self.config.container_name],
+                    timeout=30,
                 )
                 if result.returncode != 0:
                     return False
-            except FileNotFoundError:
-                return False
-        else:
-            print(f"✓ Using existing container: {self.config.container_name}")
+            elif state == ContainerState.PAUSED:
+                print(f"Unpausing container: {self.config.container_name}")
+                result = subprocess.run(
+                    ["docker", "unpause", self.config.container_name],
+                    timeout=30,
+                )
+                if result.returncode != 0:
+                    return False
+            else:
+                print(f"✓ Using existing container: {self.config.container_name}")
 
-        return True
+            return True
+        except FileNotFoundError:
+            print("❌ Docker is not available. Please ensure Docker is running.")
+            return False
+        except subprocess.TimeoutExpired:
+            print("❌ Docker command timed out. Docker may not be responding.")
+            return False
 
     def pause(self) -> bool:
         """Pause the container to free resources."""
@@ -214,9 +214,11 @@ class DockerContainerManager:
                 ["docker", "pause", self.config.container_name],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
+                timeout=30,
             )
             return result.returncode == 0
-        except FileNotFoundError:
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # Silently fail if Docker is not available
             return False
 
 
@@ -388,117 +390,147 @@ class DockerCompilationOrchestrator:
                 ["docker", "image", "inspect", self.config.image_name],
                 capture_output=True,
                 text=True,
+                timeout=10,
             )
+
+            if result.returncode == 0:
+                print(f"✓ Using existing Docker image: {self.config.image_name}")
+                return True  # Image exists
+
+            if not build_if_missing:
+                print(f"❌ Docker image {self.config.image_name} not found locally.")
+                print(f"")
+                print(f"Option 1: Pull from registry (fastest):")
+                print(f"  docker pull {self.config.image_name}")
+                print(f"")
+                print(f"Option 2: Build locally (can take 15-30 minutes):")
+                print(
+                    f"  bash compile --docker --build {self.config.board_name} <example>"
+                )
+                print(f"")
+                return False
+
+            # Build the image
+            print(f"Building Docker image: {self.config.image_name}")
+            print(f"This may take 15-30 minutes depending on the platform...")
+
+            # Parse image name to extract base name (without tag)
+            image_parts = self.config.image_name.split(":")
+            image_base = image_parts[0]
+            image_tag = image_parts[1] if len(image_parts) > 1 else "latest"
+
+            build_cmd = [
+                sys.executable,
+                "ci/build_docker_image_pio.py",
+                "--platform",
+                self.config.board_name,
+                "--image-name",
+                image_base,
+                "--tag",
+                image_tag,
+            ]
+
+            result = subprocess.run(build_cmd)
+            return result.returncode == 0
         except FileNotFoundError:
-            print(f"❌ Docker is not installed or not found in PATH")
-            print(f"")
-            print(f"Please install Docker and try again.")
-            print(f"Alternatively, use --local to force native compilation:")
-            print(f"  bash compile --local {self.config.board_name} <example>")
-            print(f"")
+            # Docker command not found
+            return self._handle_docker_not_found()
+        except subprocess.TimeoutExpired:
+            print("❌ Docker command timed out. Docker may not be responding.")
+            print("")
+            print("Try restarting Docker or checking your system resources.")
+            return False
+        except Exception as e:
+            print(f"❌ Unexpected error checking Docker image: {e}")
             return False
 
-        if result.returncode == 0:
-            print(f"✓ Using existing Docker image: {self.config.image_name}")
-            return True  # Image exists
+    def _handle_docker_not_found(self) -> bool:
+        """Handle the case where Docker is not installed or running."""
+        from ci.util.docker_helper import attempt_start_docker
 
-        if not build_if_missing:
-            print(f"❌ Docker image {self.config.image_name} not found locally.")
-            print(f"")
-            print(f"Option 1: Pull from registry (fastest):")
-            print(f"  docker pull {self.config.image_name}")
-            print(f"")
-            print(f"Option 2: Build locally (can take 15-30 minutes):")
-            print(f"  bash compile --docker --build {self.config.board_name} <example>")
-            print(f"")
+        print("❌ Docker is not running or not installed")
+        print("")
+        print("Attempting to start Docker...")
+        print("")
+
+        success, message = attempt_start_docker()
+
+        if success:
+            print(f"✓ {message}")
+            print("")
+            return True
+        else:
+            print(f"ℹ  {message}")
+            print("")
+            print("Please ensure Docker is installed and running, then try again.")
+            print("Docker Desktop: https://www.docker.com/products/docker-desktop")
             return False
-
-        # Build the image
-        print(f"Building Docker image: {self.config.image_name}")
-        print(f"This may take 15-30 minutes depending on the platform...")
-
-        # Parse image name to extract base name (without tag)
-        image_parts = self.config.image_name.split(":")
-        image_base = image_parts[0]
-        image_tag = image_parts[1] if len(image_parts) > 1 else "latest"
-
-        build_cmd = [
-            sys.executable,
-            "ci/build_docker_image_pio.py",
-            "--platform",
-            self.config.board_name,
-            "--image-name",
-            image_base,
-            "--tag",
-            image_tag,
-        ]
-
-        result = subprocess.run(build_cmd)
-        return result.returncode == 0
 
     def run_compilation(
         self, compile_cmd: str, stream_output: bool = True
     ) -> "subprocess.CompletedProcess[str]":
         """Execute compilation inside container with proper setup."""
-        if not self.container.transition_to_running():
-            raise RuntimeError(
-                f"Failed to start container: {self.config.container_name}"
+        try:
+            if not self.container.transition_to_running():
+                raise RuntimeError(
+                    f"Failed to start container: {self.config.container_name}"
+                )
+
+            print()
+            print(f"Running compilation in container: {self.config.container_name}")
+            print()
+
+            # Build entrypoint script
+            entrypoint = DockerEntrypointBuilder.build_entrypoint(
+                compile_cmd, handle_artifacts=True
             )
 
-        print()
-        print(f"Running compilation in container: {self.config.container_name}")
-        print()
+            # Execute in container
+            exec_cmd = [
+                "docker",
+                "exec",
+                "-e",
+                "FASTLED_DOCKER=1",
+                self.config.container_name,
+                "bash",
+                "-c",
+                entrypoint,
+            ]
 
-        # Build entrypoint script
-        entrypoint = DockerEntrypointBuilder.build_entrypoint(
-            compile_cmd, handle_artifacts=True
-        )
+            print(f"Executing: {compile_cmd}")
+            print()
 
-        # Execute in container
-        exec_cmd = [
-            "docker",
-            "exec",
-            "-e",
-            "FASTLED_DOCKER=1",
-            self.config.container_name,
-            "bash",
-            "-c",
-            entrypoint,
-        ]
-
-        print(f"Executing: {compile_cmd}")
-        print()
-
-        if stream_output:
-            return self._stream_execution(exec_cmd)
-        else:
-            return subprocess.run(exec_cmd, capture_output=True, text=True)
+            if stream_output:
+                return self._stream_execution(exec_cmd)
+            else:
+                return subprocess.run(exec_cmd, capture_output=True, text=True)
+        except RuntimeError as e:
+            print(f"❌ {e}")
+            raise
+        except FileNotFoundError:
+            print("❌ Docker is not available. Please ensure Docker is running.")
+            raise RuntimeError("Docker not available") from None
 
     def _stream_execution(self, cmd: List[str]) -> "subprocess.CompletedProcess[str]":
         """Execute command with real-time output streaming."""
         sys.stdout.flush()
         sys.stderr.flush()
-        try:
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                bufsize=1,  # Line buffered
-                universal_newlines=True,
-                encoding="utf-8",
-                errors="replace",  # Replace invalid UTF-8 with replacement character
-            )
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            bufsize=1,  # Line buffered
+            universal_newlines=True,
+            encoding="utf-8",
+            errors="replace",  # Replace invalid UTF-8 with replacement character
+        )
 
-            if process.stdout:
-                for line in process.stdout:
-                    print(line, end="", flush=True)
+        if process.stdout:
+            for line in process.stdout:
+                print(line, end="", flush=True)
 
-            returncode = process.wait()
-            return subprocess.CompletedProcess[str](
-                cmd, returncode, stdout="", stderr=""
-            )
-        except FileNotFoundError:
-            return subprocess.CompletedProcess[str](cmd, 1, stdout="", stderr="")
+        returncode = process.wait()
+        return subprocess.CompletedProcess[str](cmd, returncode, stdout="", stderr="")
 
     def copy_artifacts(self, container_path: str, host_path: Path) -> bool:
         """Copy artifacts from container to host."""
@@ -514,17 +546,13 @@ class DockerCompilationOrchestrator:
             str(host_path),
         ]
 
-        try:
-            result = subprocess.run(copy_cmd, capture_output=True, text=True)
+        result = subprocess.run(copy_cmd, capture_output=True, text=True)
 
-            if result.returncode == 0:
-                print(f"✅ Build artifacts copied to {host_path}")
-                return True
-            else:
-                print(f"⚠️  Warning: Could not copy artifacts from container")
-                if result.stderr:
-                    print(f"   Error: {result.stderr}")
-                return False
-        except FileNotFoundError:
-            print(f"⚠️  Warning: Docker not found - could not copy artifacts")
+        if result.returncode == 0:
+            print(f"✅ Build artifacts copied to {host_path}")
+            return True
+        else:
+            print(f"⚠️  Warning: Could not copy artifacts from container")
+            if result.stderr:
+                print(f"   Error: {result.stderr}")
             return False
