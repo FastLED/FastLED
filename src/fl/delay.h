@@ -46,33 +46,36 @@ constexpr fl::u32 cycles_from_ns(fl::u32 ns, fl::u32 hz) {
 // Public API: delayNanoseconds
 // ============================================================================
 
+// Helper function to get compile-time CPU frequency
+constexpr fl::u32 get_cpu_frequency() {
+#if defined(F_CPU)
+  return F_CPU;
+#elif defined(CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ)
+  // ESP-IDF style (can be tuned via menuconfig)
+  return (fl::u32)CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ * 1000000UL;
+#elif defined(ESP32)
+  // Fallback for ESP32/ESP32-C3/ESP32-C6: assume 160 MHz (conservative default)
+  return 160000000UL;
+#elif defined(ARDUINO_ARCH_RP2040)
+  // RP2040: standard 125 MHz
+  return 125000000UL;
+#elif defined(NRF52_SERIES)
+  // nRF52: standard 64 MHz
+  return 64000000UL;
+#elif defined(ARDUINO_ARCH_SAMD)
+  // SAMD21: default 48 MHz, SAMD51: 120 MHz (use conservative default)
+  return 48000000UL;
+#else
+  // Fallback: assume 16 MHz (common Arduino)
+  return 16000000UL;
+#endif
+}
+
 /// Delay for a compile-time constant number of nanoseconds
 /// @tparam NS Number of nanoseconds (at compile-time)
 template<fl::u32 NS>
 FASTLED_FORCE_INLINE void delayNanoseconds() {
-  // Resolve platform clock frequency at compile-time
-#if defined(F_CPU)
-  constexpr fl::u32 HZ = F_CPU;
-#elif defined(CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ)
-  // ESP-IDF style (can be tuned via menuconfig)
-  constexpr fl::u32 HZ = (fl::u32)CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ * 1000000UL;
-#elif defined(ESP32)
-  // Fallback for ESP32: assume 160 MHz (conservative default)
-  constexpr fl::u32 HZ = 160000000UL;
-#elif defined(ARDUINO_ARCH_RP2040)
-  // RP2040: standard 125 MHz
-  constexpr fl::u32 HZ = 125000000UL;
-#elif defined(NRF52_SERIES)
-  // nRF52: standard 64 MHz
-  constexpr fl::u32 HZ = 64000000UL;
-#elif defined(ARDUINO_ARCH_SAMD)
-  // SAMD21: default 48 MHz, SAMD51: 120 MHz (use conservative default)
-  constexpr fl::u32 HZ = 48000000UL;
-#else
-  // Fallback: assume 16 MHz (common Arduino)
-  constexpr fl::u32 HZ = 16000000UL;
-#endif
-
+  constexpr fl::u32 HZ = get_cpu_frequency();
   constexpr fl::u32 cycles = detail::cycles_from_ns(NS, HZ);
 
   if (cycles == 0) {

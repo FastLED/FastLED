@@ -62,7 +62,17 @@ FASTLED_NAMESPACE_BEGIN
 
 #include<SPI.h>
 
-// Conditional compilation for ESP32-S3 to utilize its flexible SPI capabilities
+// Conditional compilation for ESP32 variants with different SPI support
+// Handle the transition from old (VSPI/HSPI) to new (SPI2/SPI3) constant names in Arduino framework 3.1.0+
+
+// First, try to detect if we're using new SPI constants or old ones
+// For framework 3.1.0+, SPI2 and SPI3 are defined; for older versions, VSPI and HSPI exist
+#ifdef SPI2
+  #define FASTLED_SPI_USES_NEW_CONSTANTS 1
+#else
+  #define FASTLED_SPI_USES_NEW_CONSTANTS 0
+#endif
+
 #if CONFIG_IDF_TARGET_ESP32S2
     // https://github.com/FastLED/FastLED/issues/1782
 	#undef FASTLED_ESP32_SPI_BUS
@@ -77,24 +87,34 @@ FASTLED_NAMESPACE_BEGIN
 	#pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
-#else // Configuration for other ESP32 variants
+#elif CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
+	#pragma message "Targeting ESP32-C3/C6, using SPI2 for hardware SPI support."
+	#undef FASTLED_ESP32_SPI_BUS
+	#define FASTLED_ESP32_SPI_BUS SPI2
+#else // Configuration for standard ESP32 variants
 	#ifndef FASTLED_ESP32_SPI_BUS
-	#pragma message "Setting ESP32 SPI bus to VSPI by default"
-	#define FASTLED_ESP32_SPI_BUS VSPI
+	#pragma message "Setting ESP32 SPI bus to default"
+	// Use new constant names if available (framework 3.1.0+), otherwise fall back to old names
+	#if FASTLED_SPI_USES_NEW_CONSTANTS
+		#define FASTLED_ESP32_SPI_BUS SPI2
+	#else
+		#define FASTLED_ESP32_SPI_BUS VSPI
+	#endif
 	#endif
 #endif
 
-#if FASTLED_ESP32_SPI_BUS == VSPI
+// Map SPI bus constants to pin assignments
+#if FASTLED_ESP32_SPI_BUS == VSPI || FASTLED_ESP32_SPI_BUS == SPI2
     static int8_t spiClk = 18;
     static int8_t spiMiso = 19;
     static int8_t spiMosi = 23;
     static int8_t spiCs = 5;
-#elif FASTLED_ESP32_SPI_BUS == HSPI
+#elif FASTLED_ESP32_SPI_BUS == HSPI || FASTLED_ESP32_SPI_BUS == SPI3
     static int8_t spiClk = 14;
     static int8_t spiMiso = 12;
     static int8_t spiMosi = 13;
     static int8_t spiCs = 15;
-#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2 can re-route to arbitrary pins
+#elif FASTLED_ESP32_SPI_BUS == FSPI  // ESP32S2/S3 can re-route to arbitrary pins
     #define spiMosi DATA_PIN
     #define spiClk CLOCK_PIN
     #define spiMiso -1
