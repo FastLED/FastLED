@@ -17,6 +17,7 @@ from ci.boards import Board
 from ci.compiler.board_example_utils import get_filtered_examples
 from ci.compiler.compiler import CacheType, SketchResult
 from ci.compiler.pio import FastLEDPaths, PioCompiler
+from ci.util.global_interrupt_handler import notify_main_thread
 
 
 @typechecked
@@ -177,13 +178,9 @@ def compile_board_examples(
             except KeyboardInterrupt:
                 print("Keyboard interrupt detected, cancelling builds")
                 compiler.cancel_all()
-                import _thread
-
                 for f in futures:
                     f.cancel()
-
-                _thread.interrupt_main()
-                raise
+                notify_main_thread()
             except Exception as e:
                 # Represent unexpected exception as a failed SketchResult for consistency
                 from pathlib import Path as _Path
@@ -234,10 +231,13 @@ def compile_board_examples(
         )
     except KeyboardInterrupt:
         print("Keyboard interrupt detected, cancelling builds")
-        import _thread
-
-        _thread.interrupt_main()
-        raise
+        notify_main_thread()
+        # Don't re-raise - notify_main_thread() already signaled the main thread
+        return BoardCompilationResult(
+            ok=False,
+            sketch_results=[],
+            skipped_examples=skipped_examples,
+        )
     except Exception as e:
         # Compiler could not be set up; return a single failed result to carry message
         from pathlib import Path as _Path

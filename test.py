@@ -13,6 +13,12 @@ from typing import Optional
 
 import psutil
 
+from ci.util.global_interrupt_handler import (
+    is_interrupted,
+    notify_main_thread,
+    signal_interrupt,
+    wait_for_cleanup,
+)
 from ci.util.running_process_manager import RunningProcessManagerSingleton
 from ci.util.test_args import parse_args
 from ci.util.test_commands import run_command
@@ -650,8 +656,15 @@ def main() -> None:
         sys.exit(0)
 
     except KeyboardInterrupt:
-        sys.exit(130)  # Standard Unix practice: 128 + SIGINT's signal number (2)
+        signal_interrupt()
+        wait_for_cleanup()
+        sys.exit(130)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        signal_interrupt()
+        wait_for_cleanup()
+        sys.exit(130)

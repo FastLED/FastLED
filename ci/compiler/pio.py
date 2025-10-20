@@ -29,6 +29,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.boards import ALL, Board, create_board
 from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
 from ci.util.create_build_dir import insert_tool_aliases
+from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
@@ -1403,10 +1404,7 @@ class PioCompiler(Compiler):
             cancelled.set()
             for future in futures:
                 future.cancel()
-            import _thread
-
-            _thread.interrupt_main()
-            raise
+            notify_main_thread()
         except Exception as e:
             print(f"Exception: {e}")
             for future in futures:
@@ -1465,7 +1463,7 @@ class PioCompiler(Compiler):
         except KeyboardInterrupt:
             print("KeyboardInterrupt: Cancelling build")
             running_process.terminate()
-            raise
+            notify_main_thread()
         except OSError as e:
             # Handle output encoding issues on Windows
             print(f"Output encoding issue: {e}")
@@ -1584,10 +1582,13 @@ class PioCompiler(Compiler):
         except KeyboardInterrupt:
             print("KeyboardInterrupt: Cancelling build")
             cancelled.set()
-            import _thread
-
-            _thread.interrupt_main()
-            raise
+            notify_main_thread()
+            return SketchResult(
+                success=False,
+                output="Build cancelled by user",
+                build_dir=self.build_dir,
+                example=example,
+            )
 
     def clean(self) -> None:
         """Clean build artifacts for this platform (acquire platform lock)."""

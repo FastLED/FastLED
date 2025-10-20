@@ -48,6 +48,10 @@ from ci.compiler.output_utils import (
     validate_output_path,
 )
 from ci.util.docker_helper import should_use_docker_for_board
+from ci.util.global_interrupt_handler import (
+    signal_interrupt,
+    wait_for_cleanup,
+)
 
 
 def handle_docker_compilation(config: CompilationConfig) -> int:
@@ -440,4 +444,6 @@ if __name__ == "__main__":
         sys.exit(main())
     except KeyboardInterrupt:
         print("\nInterrupted by user")
-        sys.exit(1)
+        signal_interrupt()
+        wait_for_cleanup()
+        sys.exit(130)
