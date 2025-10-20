@@ -54,7 +54,7 @@ TEST_CASE("Simple JSON test") {
     obj.set("nested", nested);
     
     // Test serialization
-    string jsonStr = obj.to_string();
+    fl::string jsonStr = obj.to_string();
     printf("DEBUG: Generated JSON string: '%s'\n", jsonStr.c_str());
     printf("DEBUG: JSON string length: %zu\n", jsonStr.length());
     CHECK_FALSE(jsonStr.empty());
@@ -397,23 +397,23 @@ TEST_CASE("Json2 Tests") {
     // Test ScreenMap serialization to fl::string
     SUBCASE("ScreenMap serialization to fl::string") {
         // Create test ScreenMaps
-        ScreenMap strip1(3, 0.5f);
+        fl::ScreenMap strip1(3, 0.5f);
         strip1.set(0, {0.0f, 0.0f});
         strip1.set(1, {1.0f, 0.0f});
         strip1.set(2, {2.0f, 0.0f});
         
-        ScreenMap strip2(3, 0.3f);
+        fl::ScreenMap strip2(3, 0.3f);
         strip2.set(0, {0.0f, 1.0f});
         strip2.set(1, {1.0f, 1.0f});
         strip2.set(2, {2.0f, 1.0f});
         
-        fl::fl_map<fl::string, ScreenMap> segmentMaps;
+        fl::fl_map<fl::string, fl::ScreenMap> segmentMaps;
         segmentMaps["strip1"] = strip1;
         segmentMaps["strip2"] = strip2;
         
         // Serialize to JSON using new json2 implementation
         fl::Json doc;
-        ScreenMap::toJson(segmentMaps, &doc);
+        fl::ScreenMap::toJson(segmentMaps, &doc);
         
         // First verify that the serialized JSON has the correct structure
         CHECK(doc.is_object());
@@ -443,20 +443,20 @@ TEST_CASE("Json2 Tests") {
         CHECK(parsedJson.contains("map"));
         
         // Parse it back using new json2 implementation
-        fl::fl_map<fl::string, ScreenMap> parsedSegmentMaps;
+        fl::fl_map<fl::string, fl::ScreenMap> parsedSegmentMaps;
         fl::string err;
-        bool result = ScreenMap::ParseJson(jsonBuffer.c_str(), &parsedSegmentMaps, &err);
+        bool result = fl::ScreenMap::ParseJson(jsonBuffer.c_str(), &parsedSegmentMaps, &err);
         
         CHECK(result);
         CHECK_EQ(parsedSegmentMaps.size(), 2);
         CHECK(parsedSegmentMaps.contains("strip1"));
         CHECK(parsedSegmentMaps.contains("strip2"));
         
-        ScreenMap parsedStrip1 = parsedSegmentMaps["strip1"];
+        fl::ScreenMap parsedStrip1 = parsedSegmentMaps["strip1"];
         CHECK_EQ(parsedStrip1.getLength(), 3);
         CHECK_EQ(parsedStrip1.getDiameter(), 0.5f);
         
-        ScreenMap parsedStrip2 = parsedSegmentMaps["strip2"];
+        fl::ScreenMap parsedStrip2 = parsedSegmentMaps["strip2"];
         CHECK_EQ(parsedStrip2.getLength(), 3);
         CHECK_CLOSE(parsedStrip2.getDiameter(), 0.3f, 0.001f);  // Use CHECK_CLOSE for floating-point comparison
         
@@ -480,21 +480,21 @@ TEST_CASE("Json2 Tests") {
     SUBCASE("ScreenMap deserialization from fl::string") {
         const char* jsonStr = R"({"map":{"strip1":{"x":[0,1,2],"y":[0,0,0],"diameter":0.5},"strip2":{"x":[0,1,2],"y":[1,1,1],"diameter":0.3}}})";
         
-        fl::fl_map<fl::string, ScreenMap> segmentMaps;
+        fl::fl_map<fl::string, fl::ScreenMap> segmentMaps;
         fl::string err;
         
-        bool result = ScreenMap::ParseJson(jsonStr, &segmentMaps, &err);
+        bool result = fl::ScreenMap::ParseJson(jsonStr, &segmentMaps, &err);
         
         CHECK(result);
         CHECK_EQ(segmentMaps.size(), 2);
         CHECK(segmentMaps.contains("strip1"));
         CHECK(segmentMaps.contains("strip2"));
         
-        ScreenMap strip1 = segmentMaps["strip1"];
+        fl::ScreenMap strip1 = segmentMaps["strip1"];
         CHECK_EQ(strip1.getLength(), 3);
         CHECK_EQ(strip1.getDiameter(), 0.5f);
         
-        ScreenMap strip2 = segmentMaps["strip2"];
+        fl::ScreenMap strip2 = segmentMaps["strip2"];
         CHECK_EQ(strip2.getLength(), 3);
         CHECK_EQ(strip2.getDiameter(), 0.3f);
         
@@ -591,7 +591,7 @@ TEST_CASE("JSON class array iterator") {
 
 TEST_CASE("Json String to Number Conversion") {
     SUBCASE("String \"5\" to int and float") {
-        Json json("5");
+        fl::Json json("5");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -625,7 +625,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("String integer to int") {
-        Json json("42");
+        fl::Json json("42");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -647,7 +647,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("String integer to float") {
-        Json json("42");
+        fl::Json json("42");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -666,7 +666,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("String float to int") {
-        Json json("5.7");
+        fl::Json json("5.7");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -681,7 +681,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("String float to float") {
-        Json json("5.5");
+        fl::Json json("5.5");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -700,7 +700,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("Invalid string to number") {
-        Json json("hello");
+        fl::Json json("hello");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -715,7 +715,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("Negative string number") {
-        Json json("-5");
+        fl::Json json("-5");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -733,7 +733,7 @@ TEST_CASE("Json String to Number Conversion") {
     }
     
     SUBCASE("String with spaces") {
-        Json json(" 5 ");
+        fl::Json json(" 5 ");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -752,7 +752,7 @@ TEST_CASE("Json String to Number Conversion") {
 
 TEST_CASE("Json Number to String Conversion") {
     SUBCASE("Integer to string") {
-        Json json(5);
+        fl::Json json(5);
         CHECK(json.is_int());
         CHECK_FALSE(json.is_string());
         CHECK_FALSE(json.is_double());
@@ -764,7 +764,7 @@ TEST_CASE("Json Number to String Conversion") {
     }
     
     SUBCASE("Float to string") {
-        Json json(5.7);
+        fl::Json json(5.7);
         CHECK(json.is_double());
         CHECK_FALSE(json.is_string());
         CHECK_FALSE(json.is_int());
@@ -777,7 +777,7 @@ TEST_CASE("Json Number to String Conversion") {
     
     SUBCASE("Boolean to string") {
         {
-            Json json(true);
+            fl::Json json(true);
             CHECK(json.is_bool());
             CHECK_FALSE(json.is_string());
             // Note: is_int() also returns true for booleans in the current implementation
@@ -790,7 +790,7 @@ TEST_CASE("Json Number to String Conversion") {
         }
         
         {
-            Json json(false);
+            fl::Json json(false);
             CHECK(json.is_bool());
             CHECK_FALSE(json.is_string());
             // Note: is_int() also returns true for booleans in the current implementation
@@ -804,7 +804,7 @@ TEST_CASE("Json Number to String Conversion") {
     }
     
     SUBCASE("Null to string") {
-        Json json(nullptr);
+        fl::Json json(nullptr);
         CHECK(json.is_null());
         CHECK_FALSE(json.is_string());
         // Note: is_int() also returns true for null in the current implementation
@@ -817,7 +817,7 @@ TEST_CASE("Json Number to String Conversion") {
     }
     
     SUBCASE("String to string") {
-        Json json("hello");
+        fl::Json json("hello");
         CHECK(json.is_string());
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -831,7 +831,7 @@ TEST_CASE("Json Number to String Conversion") {
     
     SUBCASE("Negative number to string") {
         {
-            Json json(-5);
+            fl::Json json(-5);
             CHECK(json.is_int());
             CHECK_FALSE(json.is_string());
             CHECK_FALSE(json.is_double());
@@ -843,7 +843,7 @@ TEST_CASE("Json Number to String Conversion") {
         }
         
         {
-            Json json(-5.7);
+            fl::Json json(-5.7);
             CHECK(json.is_double());
             CHECK_FALSE(json.is_string());
             CHECK_FALSE(json.is_int());
@@ -893,7 +893,7 @@ TEST_CASE("Json Float Data Parsing") {
     SUBCASE("Array of float values should become float data") {
         // Create JSON with array of float values that can't fit in any integer type
         fl::string jsonStr = "[100000.5, 200000.7, 300000.14159, 400000.1, 500000.5]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         // Print the type for debugging
         FASTLED_WARN("JSON type: " << (json.is_floats() ? "floats" : 
@@ -902,7 +902,7 @@ TEST_CASE("Json Float Data Parsing") {
                       json.is_array() ? "array" : "other"));
         
         CHECK(json.is_floats());
-        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular fl::JsonArray anymore
         CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_audio()); // Should not be audio data
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
@@ -927,7 +927,7 @@ TEST_CASE("Json Float Data Parsing") {
     SUBCASE("Array with values that can't be represented as floats should remain regular array") {
         // Create JSON with array containing values that can't be exactly represented as floats
         fl::string jsonStr = "[16777217.0, -16777217.0]"; // Beyond float precision
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_floats());
@@ -940,7 +940,7 @@ TEST_CASE("Json Float Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 2);
     }
@@ -948,7 +948,7 @@ TEST_CASE("Json Float Data Parsing") {
     SUBCASE("Array with non-numeric values should remain regular array") {
         // Create JSON with array containing non-numeric values
         fl::string jsonStr = "[100000.5, 200000.7, \"hello\", 400000.1]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_floats());
@@ -961,7 +961,7 @@ TEST_CASE("Json Float Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 4);
     }
@@ -969,7 +969,7 @@ TEST_CASE("Json Float Data Parsing") {
     SUBCASE("Empty array should remain regular array") {
         // Create JSON with empty array
         fl::string jsonStr = "[]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_floats());
@@ -982,7 +982,7 @@ TEST_CASE("Json Float Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 0);
     }
@@ -990,7 +990,7 @@ TEST_CASE("Json Float Data Parsing") {
     SUBCASE("Array with integers that fit in float but not in int16 should become float data") {
         // Create JSON with array of integers that don't fit in int16_t
         fl::string jsonStr = "[40000, 50000, 60000, 70000]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         // Print the type for debugging
         FASTLED_WARN("JSON type: " << (json.is_floats() ? "floats" : 
@@ -999,7 +999,7 @@ TEST_CASE("Json Float Data Parsing") {
                       json.is_array() ? "array" : "other"));
         
         CHECK(json.is_floats());
-        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular fl::JsonArray anymore
         CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_audio()); // Should not be audio data
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
@@ -1047,10 +1047,10 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Array of int16 values should become audio data") {
         // Create JSON with array of values that fit in int16_t but not uint8_t
         fl::string jsonStr = "[100, -200, 32767, -32768, 0]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_audio());
-        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular fl::JsonArray anymore
         CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_bytes()); // Should not be byte data
         CHECK_FALSE(json.is_int());
@@ -1073,12 +1073,12 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Array with boolean values should become byte data, not audio") {
         // Create JSON with array of boolean values (0s and 1s)
         fl::string jsonStr = "[1, 0, 1, 1, 0]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         // Should become byte data, not audio data
         CHECK(json.is_bytes());
         CHECK_FALSE(json.is_audio());
-        CHECK_FALSE(json.is_generic_array()); // Should not be regular JsonArray anymore
+        CHECK_FALSE(json.is_generic_array()); // Should not be regular fl::JsonArray anymore
         CHECK(json.is_array()); // Should still be an array (specialized type)
         CHECK_FALSE(json.is_int());
         CHECK_FALSE(json.is_double());
@@ -1095,7 +1095,7 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Array with values outside int16 range should remain regular array") {
         // Create JSON with array containing values outside int16_t range
         fl::string jsonStr = "[100, -200, 32768, -32769, 0]"; // 32768 and -32769 exceed int16_t range
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());  // All array types are handled by is_array()
         CHECK_FALSE(json.is_audio());
@@ -1107,7 +1107,7 @@ TEST_CASE("Json Audio Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 5);
     }
@@ -1115,7 +1115,7 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Array with non-integer values should remain regular array") {
         // Create JSON with array containing non-integer values
         fl::string jsonStr = "[100, -200, 3.14, 0]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());  // All array types are handled by is_array()
         CHECK_FALSE(json.is_audio());
@@ -1127,7 +1127,7 @@ TEST_CASE("Json Audio Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 4);
     }
@@ -1135,7 +1135,7 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Empty array should remain regular array") {
         // Create JSON with empty array
         fl::string jsonStr = "[]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
@@ -1147,7 +1147,7 @@ TEST_CASE("Json Audio Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 0);
     }
@@ -1155,7 +1155,7 @@ TEST_CASE("Json Audio Data Parsing") {
     SUBCASE("Mixed array with int16 values should remain regular array") {
         // Create JSON with mixed array (mix of int16 and non-int16 values)
         fl::string jsonStr = "[100, \"hello\", 32767]";
-        Json json = Json::parse(jsonStr);
+        fl::Json json = fl::Json::parse(jsonStr);
         
         CHECK(json.is_array());
         CHECK_FALSE(json.is_audio());
@@ -1167,7 +1167,7 @@ TEST_CASE("Json Audio Data Parsing") {
         CHECK_FALSE(json.is_null());
         
         // Test extraction of regular array
-        fl::optional<JsonArray> arrayData = json.as_array();
+        fl::optional<fl::JsonArray> arrayData = json.as_array();
         REQUIRE(arrayData);
         CHECK_EQ(arrayData->size(), 3);
     }

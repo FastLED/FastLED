@@ -26,7 +26,7 @@ static void ClearTrackingData() {
     gMallocCalls.clear();
     gMallocSizes.clear();
     gFreeCalls.clear();
-    // SetMallocFreeHook(nullptr);
+    // fl::SetMallocFreeHook(nullptr);
 }
 
 TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
@@ -38,34 +38,34 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         TestMallocFreeHook hook;
         
         // Set hook
-        SetMallocFreeHook(&hook);
+        fl::SetMallocFreeHook(&hook);
         
         // Clear hook
-        ClearMallocFreeHook();
+        fl::ClearMallocFreeHook();
         
         // Test that hooks are cleared by doing allocations that shouldn't trigger callbacks
         ClearTrackingData();
         
-        void* ptr1 = PSRamAllocate(100);
-        void* ptr2 = PSRamAllocate(200);
+        void* ptr1 = fl::PSRamAllocate(100);
+        void* ptr2 = fl::PSRamAllocate(200);
         
         CHECK(gMallocCalls.empty());
         CHECK(gMallocSizes.empty());
         
-        PSRamDeallocate(ptr1);
-        PSRamDeallocate(ptr2);
+        fl::PSRamDeallocate(ptr1);
+        fl::PSRamDeallocate(ptr2);
         
         CHECK(gFreeCalls.empty());
     }
     
     SUBCASE("Malloc hook is called after allocation") {
         TestMallocFreeHook hook;
-        SetMallocFreeHook(&hook);
+        fl::SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
-        // Test PSRamAllocate
-        void* ptr1 = PSRamAllocate(100);
+        // Test fl::PSRamAllocate
+        void* ptr1 = fl::PSRamAllocate(100);
         REQUIRE(ptr1 != nullptr);
         
         CHECK(gMallocCalls.size() == 1);
@@ -75,54 +75,54 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         
         // Test Malloc function
         ClearTrackingData();
-        Malloc(200);
+        fl::Malloc(200);
         
         CHECK(gMallocCalls.size() == 1);
         CHECK(gMallocSizes[0] == 200);
         
         // Cleanup
-        PSRamDeallocate(ptr1);
-        ClearMallocFreeHook();
+        fl::PSRamDeallocate(ptr1);
+        fl::ClearMallocFreeHook();
     }
     
     SUBCASE("Free hook is called before deallocation") {
         TestMallocFreeHook hook;
-        SetMallocFreeHook(&hook);
+        fl::SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
         // Allocate some memory
-        void* ptr1 = PSRamAllocate(100);
-        void* ptr2 = PSRamAllocate(200);
+        void* ptr1 = fl::PSRamAllocate(100);
+        void* ptr2 = fl::PSRamAllocate(200);
         
         // Clear malloc tracking for this test
         ClearTrackingData();
         
-        // Test PSRamDeallocate
-        PSRamDeallocate(ptr1);
+        // Test fl::PSRamDeallocate
+        fl::PSRamDeallocate(ptr1);
         
         CHECK(gFreeCalls.size() == 1);
         CHECK(gFreeCalls[0] == ptr1);
         
         // Test Free function
         ClearTrackingData();
-        Free(ptr2);
+        fl::Free(ptr2);
         
         CHECK(gFreeCalls.size() == 1);
         CHECK(gFreeCalls[0] == ptr2);
         
-        ClearMallocFreeHook();
+        fl::ClearMallocFreeHook();
     }
     
     SUBCASE("Both hooks work together") {
         TestMallocFreeHook hook;
-        SetMallocFreeHook(&hook);
+        fl::SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
         // Allocate memory
-        void* ptr1 = PSRamAllocate(150);
-        void* ptr2 = PSRamAllocate(250);
+        void* ptr1 = fl::PSRamAllocate(150);
+        void* ptr2 = fl::PSRamAllocate(250);
         
         CHECK(gMallocCalls.size() == 2);
         CHECK(gMallocSizes.size() == 2);
@@ -136,8 +136,8 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         gMallocSizes.clear();
         
         // Deallocate memory
-        PSRamDeallocate(ptr1);
-        PSRamDeallocate(ptr2);
+        fl::PSRamDeallocate(ptr1);
+        fl::PSRamDeallocate(ptr2);
         
         CHECK(gFreeCalls.size() == 2);
         CHECK(gFreeCalls[0] == ptr1);
@@ -147,38 +147,38 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         CHECK(gMallocCalls.empty());
         CHECK(gMallocSizes.empty());
         
-        ClearMallocFreeHook();
+        fl::ClearMallocFreeHook();
     }
     
     SUBCASE("Null pointer handling") {
         TestMallocFreeHook hook;
-        SetMallocFreeHook(&hook);
+        fl::SetMallocFreeHook(&hook);
         
         ClearTrackingData();
         
         // Test that hooks are not called for null pointer free
-        Free(nullptr);
+        fl::Free(nullptr);
         
         CHECK(gFreeCalls.empty());
         
         // Test that hooks are not called for zero-size allocation
-        void* ptr = PSRamAllocate(0);
+        void* ptr = fl::PSRamAllocate(0);
         if (ptr == nullptr) {
             CHECK(gMallocCalls.empty());
             CHECK(gMallocSizes.empty());
         }
         
-        ClearMallocFreeHook();
+        fl::ClearMallocFreeHook();
     }
     
     SUBCASE("Hook replacement") {
         // Create initial hook
         TestMallocFreeHook hook1;
-        SetMallocFreeHook(&hook1);
+        fl::SetMallocFreeHook(&hook1);
         
         ClearTrackingData();
         
-        void* ptr = PSRamAllocate(100);
+        void* ptr = fl::PSRamAllocate(100);
         
         CHECK(gMallocCalls.size() == 1);
         
@@ -208,9 +208,9 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         };
         
         NewTestHook hook2(newMallocCalls, newMallocSizes, newFreeCalls);
-        SetMallocFreeHook(&hook2);
+        fl::SetMallocFreeHook(&hook2);
         
-        void* ptr2 = PSRamAllocate(200);
+        void* ptr2 = fl::PSRamAllocate(200);
         
         // Original hook should not be called
         CHECK(gMallocCalls.size() == 1);
@@ -223,15 +223,15 @@ TEST_CASE("Malloc/Free Test Hooks - Basic functionality") {
         CHECK(newMallocSizes[0] == 200);
         
         // Cleanup
-        PSRamDeallocate(ptr);
-        PSRamDeallocate(ptr2);
-        ClearMallocFreeHook();
+        fl::PSRamDeallocate(ptr);
+        fl::PSRamDeallocate(ptr2);
+        fl::ClearMallocFreeHook();
     }
 }
 
 TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
     TestMallocFreeHook hook;
-    SetMallocFreeHook(&hook);
+    fl::SetMallocFreeHook(&hook);
     
     SUBCASE("Standard allocator integration") {
         ClearTrackingData();
@@ -281,5 +281,5 @@ TEST_CASE("Malloc/Free Test Hooks - Integration with allocators") {
         CHECK(gFreeCalls[0] == ptr);
     }
     
-    ClearMallocFreeHook();
+    fl::ClearMallocFreeHook();
 }

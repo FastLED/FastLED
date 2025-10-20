@@ -364,7 +364,7 @@ TEST_CASE("test bitset_dynamic find_first") {
 
 TEST_CASE("test bitset_inlined find_first") {
     // Test find_first for inlined bitset (uses fixed bitset internally for small sizes)
-    bitset<64> bs;
+    fl::bitset<64> bs;
     
     // Initially no bits are set, so find_first(true) should return -1
     REQUIRE_EQ(bs.find_first(true), -1);
@@ -393,7 +393,7 @@ TEST_CASE("test bitset_inlined find_first") {
     REQUIRE_EQ(bs.find_first(false), 0);
     
     // Test with all bits set
-    bitset<16> bs2;
+    fl::bitset<16> bs2;
     for (fl::u32 i = 0; i < 16; ++i) {
         bs2.set(i);
     }
@@ -401,12 +401,12 @@ TEST_CASE("test bitset_inlined find_first") {
     REQUIRE_EQ(bs2.find_first(false), -1);
     
     // Test with no bits set
-    bitset<16> bs3;
+    fl::bitset<16> bs3;
     REQUIRE_EQ(bs3.find_first(true), -1);
     REQUIRE_EQ(bs3.find_first(false), 0);
     
     // Test with larger size that uses dynamic bitset internally
-    bitset<300> bs4;
+    fl::bitset<300> bs4;
     bs4.set(150);
     REQUIRE_EQ(bs4.find_first(true), 150);
     REQUIRE_EQ(bs4.find_first(false), 0);

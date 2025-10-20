@@ -7,7 +7,7 @@ TEST_CASE("JSON Round Trip Serialization Test") {
     const char* initialJson = "{\"name\":\"bob\",\"value\":21}";
     
     // 1. Parse the JSON string into a Json document
-    Json parsedJson = Json::parse(initialJson);
+    fl::Json parsedJson = fl::Json::parse(initialJson);
     
     // Verify parsing was successful
     CHECK(parsedJson.has_value());
@@ -20,17 +20,17 @@ TEST_CASE("JSON Round Trip Serialization Test") {
     CHECK_EQ(parsedJson["value"].as_or(0), 21);
     
     // 2. Serialize it back to a string
-    string serializedJson = parsedJson.to_string();
+    fl::string serializedJson = parsedJson.to_string();
     
     // 3. Confirm that the string is the same (after normalization)
     // Since JSON serialization might reorder keys or add spaces, we'll normalize both strings
-    string normalizedInitial = Json::normalizeJsonString(initialJson);
-    string normalizedSerialized = Json::normalizeJsonString(serializedJson.c_str());
+    fl::string normalizedInitial = fl::Json::normalizeJsonString(initialJson);
+    fl::string normalizedSerialized = fl::Json::normalizeJsonString(serializedJson.c_str());
     
     CHECK_EQ(normalizedInitial, normalizedSerialized);
     
     // Also test with a more structured approach - parse the serialized string again
-    Json reparsedJson = Json::parse(serializedJson);
+    fl::Json reparsedJson = fl::Json::parse(serializedJson);
     CHECK(reparsedJson.has_value());
     CHECK(reparsedJson.is_object());
     CHECK(reparsedJson.contains("name"));

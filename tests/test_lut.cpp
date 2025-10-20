@@ -10,7 +10,7 @@
 
 
 TEST_CASE("LUT interp8") {
-    LUT<uint16_t> lut(2);
+    fl::LUT<uint16_t> lut(2);
     uint16_t* data = lut.getDataMutable();
     data[0] = 0;
     data[1] = 255;
@@ -26,7 +26,7 @@ TEST_CASE("LUT interp8") {
 }
 
 TEST_CASE("LUT interp16") {
-    LUT<uint16_t> lut(2);
+    fl::LUT<uint16_t> lut(2);
     uint16_t* data = lut.getDataMutable();
     data[0] = 0;
     data[1] = 255;
@@ -36,7 +36,7 @@ TEST_CASE("LUT interp16") {
 
     // Check the LUT interpolation for all values.
     for (int i = 0; i < 256; i++) {
-        uint16_t alpha16 = map8_to_16(i);
+        uint16_t alpha16 = fl::map8_to_16(i);
         CHECK_EQ(i, lut.interp16(alpha16));
     }
 }

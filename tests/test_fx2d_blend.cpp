@@ -23,7 +23,7 @@ class SolidColorFx2d : public fl::Fx2d {
 
     fl::string fxName() const override { return "SolidColorFx2d"; }
 
-    void draw(Fx::DrawContext context) override {
+    void draw(fl::Fx::DrawContext context) override {
         for (uint16_t i = 0; i < mXyMap.getTotal(); i++) {
             context.leds[i] = mColor;
         }
@@ -51,13 +51,13 @@ class TestFx2D : public fl::Fx2d {
 
     fl::string fxName() const override { return "TestFx2D"; }
 
-    void draw(Fx::DrawContext context) override {
+    void draw(fl::Fx::DrawContext context) override {
         for (uint16_t i = 0; i < mXyMap.getTotal(); i++) {
             context.leds[i] = mLeds[i];
         }
     }
 
-    scoped_array<CRGB> mLeds;
+    fl::scoped_array<CRGB> mLeds;
 };
 
 TEST_CASE("Test FX2d Layered Blending") {
@@ -76,7 +76,7 @@ TEST_CASE("Test FX2d Layered Blending") {
     CRGB led;
 
     // Draw the layered effect
-    Fx::DrawContext context(0, &led);
+    fl::Fx::DrawContext context(0, &led);
     context.now = 0;
     blendFx.draw(context);
 
@@ -112,14 +112,14 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         CRGB led[width * height] = {};
 
         // Draw the layered effect
-        Fx::DrawContext context(0, led);
+        fl::Fx::DrawContext context(0, led);
         context.now = 0;
         blendFx.draw(context);
 
-        cout << "Layered Effect Output: " << led[0].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[1].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[2].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[3].toString().c_str() << endl;
+        fl::cout << "Layered Effect Output: " << led[0].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[1].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[2].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[3].toString().c_str() << fl::endl;
 
         // Verify the result - should be blue
         CHECK(led[0].r == 0);
@@ -155,14 +155,14 @@ TEST_CASE("Test FX2d Layered with XYMap") {
         CRGB led[width * height] = {};
 
         // Draw the layered effect
-        Fx::DrawContext context(0, led);
+        fl::Fx::DrawContext context(0, led);
         context.now = 0;
         blendFx.draw(context);
 
-        cout << "Layered Effect Output: " << led[0].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[1].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[2].toString().c_str() << endl;
-        cout << "Layered Effect Output: " << led[3].toString().c_str() << endl;
+        fl::cout << "Layered Effect Output: " << led[0].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[1].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[2].toString().c_str() << fl::endl;
+        fl::cout << "Layered Effect Output: " << led[3].toString().c_str() << fl::endl;
 
         // Verify the result - should be blue
         CHECK(led[0].r == 0);

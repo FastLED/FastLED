@@ -33,27 +33,27 @@ TEST_CASE("FileSystem test with real hard drive") {
     std::string test_content = "Hello, FastLED filesystem test!";
 
     // Create test directory using stub filesystem utilities
-    REQUIRE(StubFileSystem::createDirectory(test_dir));
+    REQUIRE(fl::StubFileSystem::createDirectory(test_dir));
 
     // Create test file
     std::string full_path = test_dir;
     full_path.append("/");
     full_path.append(test_file);
-    REQUIRE(StubFileSystem::createTextFile(full_path, test_content));
+    REQUIRE(fl::StubFileSystem::createTextFile(full_path, test_content));
 
     // Set the test filesystem root
-    setTestFileSystemRoot(test_dir.c_str());
+    fl::setTestFileSystemRoot(test_dir.c_str());
 
     // Verify the root was set
-    CHECK_EQ(std::string(getTestFileSystemRoot()), test_dir);
+    CHECK_EQ(std::string(fl::getTestFileSystemRoot()), test_dir);
 
     // Create filesystem and test reading
-    FileSystem fs;
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5); // CS pin doesn't matter for test implementation
     REQUIRE(ok);
 
     // Try to read the test file
-    FileHandlePtr handle = fs.openRead(test_file.c_str());
+    fl::FileHandlePtr handle = fs.openRead(test_file.c_str());
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -82,8 +82,8 @@ TEST_CASE("FileSystem test with real hard drive") {
     fs.end();
 
     // Remove test files using stub filesystem utilities
-    StubFileSystem::removeFile(full_path);
-    StubFileSystem::removeDirectory(test_dir);
+    fl::StubFileSystem::removeFile(full_path);
+    fl::StubFileSystem::removeDirectory(test_dir);
 }
 
 TEST_CASE("FileSystem test with subdirectories") {
@@ -94,23 +94,23 @@ TEST_CASE("FileSystem test with subdirectories") {
     std::string test_content = "RGB video data here";
 
     // Create directories using stub filesystem utilities
-    REQUIRE(StubFileSystem::createDirectory(test_dir));
+    REQUIRE(fl::StubFileSystem::createDirectory(test_dir));
     std::string sub_dir_path = test_dir;
     sub_dir_path.append("/");
     sub_dir_path.append(sub_dir);
-    REQUIRE(StubFileSystem::createDirectory(sub_dir_path));
+    REQUIRE(fl::StubFileSystem::createDirectory(sub_dir_path));
 
     // Create test file in subdirectory
     std::string full_path = sub_dir_path;
     full_path.append("/");
     full_path.append(test_file);
-    REQUIRE(StubFileSystem::createTextFile(full_path, test_content));
+    REQUIRE(fl::StubFileSystem::createTextFile(full_path, test_content));
 
     // Set the test filesystem root
-    setTestFileSystemRoot(test_dir.c_str());
+    fl::setTestFileSystemRoot(test_dir.c_str());
 
     // Create filesystem and test reading from subdirectory
-    FileSystem fs;
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
 
@@ -118,7 +118,7 @@ TEST_CASE("FileSystem test with subdirectories") {
     std::string file_path = sub_dir;
     file_path.append("/");
     file_path.append(test_file);
-    FileHandlePtr handle = fs.openRead(file_path.c_str());
+    fl::FileHandlePtr handle = fs.openRead(file_path.c_str());
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -135,9 +135,9 @@ TEST_CASE("FileSystem test with subdirectories") {
     fs.end();
 
     // Remove test files and directories using stub filesystem utilities
-    StubFileSystem::removeFile(full_path);
-    StubFileSystem::removeDirectory(sub_dir_path);
-    StubFileSystem::removeDirectory(test_dir);
+    fl::StubFileSystem::removeFile(full_path);
+    fl::StubFileSystem::removeDirectory(sub_dir_path);
+    fl::StubFileSystem::removeDirectory(test_dir);
 }
 
 TEST_CASE("FileSystem test with text file reading") {
@@ -151,17 +151,17 @@ TEST_CASE("FileSystem test with text file reading") {
 })";
 
     // Create test directory and file using stub filesystem utilities
-    REQUIRE(StubFileSystem::createDirectory(test_dir));
+    REQUIRE(fl::StubFileSystem::createDirectory(test_dir));
     std::string full_path = test_dir;
     full_path.append("/");
     full_path.append(test_file);
-    REQUIRE(StubFileSystem::createTextFile(full_path, test_content));
+    REQUIRE(fl::StubFileSystem::createTextFile(full_path, test_content));
 
     // Set the test filesystem root
-    setTestFileSystemRoot(test_dir.c_str());
+    fl::setTestFileSystemRoot(test_dir.c_str());
 
     // Create filesystem and test text reading
-    FileSystem fs;
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
 
@@ -178,23 +178,23 @@ TEST_CASE("FileSystem test with text file reading") {
 
     // Clean up
     fs.end();
-    StubFileSystem::removeFile(full_path);
-    StubFileSystem::removeDirectory(test_dir);
+    fl::StubFileSystem::removeFile(full_path);
+    fl::StubFileSystem::removeDirectory(test_dir);
 }
 
 TEST_CASE("FileSystem test with binary file loading") {
     // Test loading a binary JPEG file to verify byte-accurate reading
 
     // Set the test filesystem root to the tests directory
-    setTestFileSystemRoot("tests");
+    fl::setTestFileSystemRoot("tests");
 
     // Create filesystem and test reading binary file
-    FileSystem fs;
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
 
     // Try to read the JPEG test file
-    FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 

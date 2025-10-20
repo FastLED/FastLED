@@ -5,7 +5,7 @@
 
 
 TEST_CASE("Simple Priority Queue") {
-    PriorityQueue<int> pq;
+    fl::PriorityQueue<int> pq;
     
     // Test empty queue
     CHECK(pq.empty());
@@ -58,7 +58,7 @@ TEST_CASE("Priority Queue with Custom Type") {
         }
     };
     
-    PriorityQueue<Task> pq;
+    fl::PriorityQueue<Task> pq;
     
     pq.push({1, "Low priority task"});
     pq.push({5, "Medium priority task"});
@@ -82,7 +82,7 @@ TEST_CASE("Priority Queue with Custom Comparator") {
     };
     
     // Create a min heap using custom heap operations
-    HeapVector<int> vec;
+    fl::HeapVector<int> vec;
     vec.push_back(5);
     vec.push_back(10);
     vec.push_back(3);

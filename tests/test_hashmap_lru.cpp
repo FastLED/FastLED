@@ -12,7 +12,7 @@
 
 TEST_CASE("Test HashMapLRU") {
     SUBCASE("Basic operations") {
-        HashMapLru<int, int> lru(3);
+        fl::HashMapLru<int, int> lru(3);
         
         // Test empty state
         CHECK(lru.empty());
@@ -49,7 +49,7 @@ TEST_CASE("Test HashMapLRU") {
     }
     
     SUBCASE("LRU eviction") {
-        HashMapLru<int, int> lru(3);
+        fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache
         lru.insert(1, 100);
@@ -79,7 +79,7 @@ TEST_CASE("Test HashMapLRU") {
     }
     
     SUBCASE("Operator[] LRU behavior") {
-        HashMapLru<int, int> lru(3);
+        fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache using operator[]
         lru[1] = 100;
@@ -101,7 +101,7 @@ TEST_CASE("Test HashMapLRU") {
     
     SUBCASE("Edge cases") {
         // Test with capacity 1
-        HashMapLru<int, int> tiny_lru(1);
+        fl::HashMapLru<int, int> tiny_lru(1);
         tiny_lru.insert(1, 100);
         CHECK(*tiny_lru.find_value(1) == 100);
         
@@ -111,7 +111,7 @@ TEST_CASE("Test HashMapLRU") {
         CHECK(*tiny_lru.find_value(2) == 200);
         
         // Test with string keys
-        HashMapLru<fl::string, int> str_lru(2);
+        fl::HashMapLru<fl::string, int> str_lru(2);
         str_lru.insert("one", 1);
         str_lru.insert("two", 2);
         CHECK(*str_lru.find_value("one") == 1);
@@ -125,7 +125,7 @@ TEST_CASE("Test HashMapLRU") {
     }
     
     SUBCASE("Update existing key") {
-        HashMapLru<int, int> lru(3);
+        fl::HashMapLru<int, int> lru(3);
         
         // Fill the cache
         lru.insert(1, 100);

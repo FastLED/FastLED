@@ -9,7 +9,7 @@
 TEST_CASE("ByteStreamMemory basic operations") {
 
     SUBCASE("Write and read single byte") {
-        ByteStreamMemory stream(10);  // Stream with 10 bytes capacity
+        fl::ByteStreamMemory stream(10);  // Stream with 10 bytes capacity
         uint8_t testByte = 42;
         CHECK(stream.write(&testByte, 1) == 1);
         
@@ -22,7 +22,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Write and read multiple bytes") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         CHECK(stream.write(testData, 5) == 5);
         
@@ -34,19 +34,19 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Attempt to read from empty stream") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t readByte = 0;
         CHECK(stream.read(&readByte, 1) == 0);
     }
 
     SUBCASE("Attempt to write beyond capacity") {
-        ByteStreamMemory stream(5);
+        fl::ByteStreamMemory stream(5);
         uint8_t testData[] = {1, 2, 3, 4, 5, 6};
         CHECK(stream.write(testData, 6) == 5);  // Should write up to capacity
     }
 
     SUBCASE("Attempt to read more than available data") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         CHECK(stream.write(testData, 3) == 3);
 
@@ -58,7 +58,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Multiple write and read operations") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData1[] = {1, 2, 3};
         uint8_t testData2[] = {4, 5};
         CHECK(stream.write(testData1, 3) == 3);
@@ -75,7 +75,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
 
 
     SUBCASE("Write after partial read") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         CHECK(stream.write(testData, 5) == 5);
 
@@ -97,7 +97,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Fill and empty stream multiple times") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[10];
         for (uint8_t i = 0; i < 10; ++i) {
             testData[i] = i;
@@ -120,7 +120,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Zero-length write and read") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         CHECK(stream.write(testData, 0) == 0);
 
@@ -129,13 +129,13 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Write and read with null pointers") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         CHECK(stream.write(static_cast<uint8_t*>(nullptr), 5) == 0);
         CHECK(stream.read(nullptr, 5) == 0);
     }
 
     SUBCASE("Boundary conditions") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[10];
         for (uint8_t i = 0; i < 10; ++i) {
             testData[i] = i;
@@ -153,7 +153,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Write with partial capacity") {
-        ByteStreamMemory stream(5);
+        fl::ByteStreamMemory stream(5);
         uint8_t testData[] = {1, 2, 3, 4, 5};
         CHECK(stream.write(testData, 5) == 5);
 
@@ -174,7 +174,7 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Read after buffer is reset") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         uint8_t testData[] = {1, 2, 3};
         CHECK(stream.write(testData, 3) == 3);
 
@@ -185,13 +185,13 @@ TEST_CASE("ByteStreamMemory basic operations") {
     }
 
     SUBCASE("Write zero bytes when buffer is full") {
-        ByteStreamMemory stream(0);  // Zero capacity
+        fl::ByteStreamMemory stream(0);  // Zero capacity
         uint8_t testByte = 42;
         CHECK(stream.write(&testByte, 1) == 0);  // Cannot write to zero-capacity buffer
     }
 
     SUBCASE("Sequential writes and reads") {
-        ByteStreamMemory stream(10);
+        fl::ByteStreamMemory stream(10);
         for (uint8_t i = 0; i < 10; ++i) {
             CHECK(stream.write(&i, 1) == 1);
         }
@@ -214,7 +214,7 @@ TEST_CASE("byte stream memory basic operations") {
     
     // Create a ByteStreamMemory
     const uint32_t BUFFER_SIZE = BYTES_PER_FRAME * 10; // Enough for 10 frames
-    ByteStreamMemoryPtr memoryStream = fl::make_shared<ByteStreamMemory>(BUFFER_SIZE);
+    fl::ByteStreamMemoryPtr memoryStream = fl::make_shared<fl::ByteStreamMemory>(BUFFER_SIZE);
 
     // Fill the ByteStreamMemory with test data
     uint8_t testData[BUFFER_SIZE];
@@ -224,12 +224,12 @@ TEST_CASE("byte stream memory basic operations") {
     memoryStream->write(testData, BUFFER_SIZE);
 
     // Create and initialize PixelStream
-    PixelStreamPtr stream = fl::make_shared<PixelStream>(BYTES_PER_FRAME);
+    fl::PixelStreamPtr stream = fl::make_shared<fl::PixelStream>(BYTES_PER_FRAME);
     bool initSuccess = stream->beginStream(memoryStream);
     REQUIRE(initSuccess);
 
     // Test basic properties
-    CHECK(stream->getType() == PixelStream::kStreaming);
+    CHECK(stream->getType() == fl::PixelStream::kStreaming);
     CHECK(stream->bytesPerFrame() == BYTES_PER_FRAME);
 
     // Read a pixel

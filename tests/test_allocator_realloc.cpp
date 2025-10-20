@@ -9,23 +9,23 @@
 TEST_CASE("Allocator Traits - Capability Detection") {
     SUBCASE("allocator_realloc has both capabilities") {
         // allocator_realloc should support both reallocate() and allocate_at_least()
-        static_assert(allocator_traits<allocator_realloc<int>>::has_reallocate_v,
+        static_assert(fl::allocator_traits<fl::allocator_realloc<int>>::has_reallocate_v,
                      "allocator_realloc should support reallocate()");
-        static_assert(allocator_traits<allocator_realloc<int>>::has_allocate_at_least_v,
+        static_assert(fl::allocator_traits<fl::allocator_realloc<int>>::has_allocate_at_least_v,
                      "allocator_realloc should support allocate_at_least()");
         CHECK(true);  // Compile-time checks passed
     }
 
     SUBCASE("base allocator<T> has allocate_at_least") {
         // Standard allocator should have allocate_at_least() (with default implementation)
-        static_assert(allocator_traits<allocator<int>>::has_allocate_at_least_v,
+        static_assert(fl::allocator_traits<fl::allocator<int>>::has_allocate_at_least_v,
                      "allocator<T> should support allocate_at_least()");
         CHECK(true);
     }
 
     SUBCASE("base allocator<T> has default reallocate") {
         // Standard allocator has reallocate() that returns nullptr (no-op)
-        static_assert(allocator_traits<allocator<int>>::has_reallocate_v,
+        static_assert(fl::allocator_traits<fl::allocator<int>>::has_reallocate_v,
                      "allocator<T> should have reallocate() method");
         CHECK(true);
     }
@@ -33,15 +33,15 @@ TEST_CASE("Allocator Traits - Capability Detection") {
     SUBCASE("allocator_psram capabilities") {
         // PSRam allocator may or may not have the optional methods
         // Just verify the traits can be queried without errors
-        (void)allocator_traits<allocator_psram<int>>::has_allocate_at_least_v;
-        (void)allocator_traits<allocator_psram<int>>::has_reallocate_v;
+        (void)fl::allocator_traits<fl::allocator_psram<int>>::has_allocate_at_least_v;
+        (void)fl::allocator_traits<fl::allocator_psram<int>>::has_reallocate_v;
         CHECK(true);  // Just checking it compiles
     }
 }
 
 TEST_CASE("allocator_realloc - Basic Functionality") {
     SUBCASE("Simple allocation and deallocation") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
         int* ptr = alloc.allocate(10);
         REQUIRE(ptr != nullptr);
 
@@ -59,13 +59,13 @@ TEST_CASE("allocator_realloc - Basic Functionality") {
     }
 
     SUBCASE("Zero allocation returns nullptr") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
         int* ptr = alloc.allocate(0);
         CHECK_EQ(ptr, nullptr);
     }
 
     SUBCASE("Multiple allocations") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
 
         int* ptr1 = alloc.allocate(5);
         int* ptr2 = alloc.allocate(3);
@@ -87,7 +87,7 @@ TEST_CASE("allocator_realloc - Basic Functionality") {
 
 TEST_CASE("allocator_realloc - allocate_at_least()") {
     SUBCASE("allocate_at_least returns >= requested size") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
 
         auto result = alloc.allocate_at_least(10);
         REQUIRE(result.ptr != nullptr);
@@ -106,7 +106,7 @@ TEST_CASE("allocator_realloc - allocate_at_least()") {
     }
 
     SUBCASE("allocate_at_least with zero returns empty result") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
         auto result = alloc.allocate_at_least(0);
         CHECK_EQ(result.ptr, nullptr);
         CHECK_EQ(result.count, 0);
@@ -115,7 +115,7 @@ TEST_CASE("allocator_realloc - allocate_at_least()") {
 
 TEST_CASE("allocator_realloc - reallocate()") {
     SUBCASE("Reallocate to larger size") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
 
         // Initial allocation
         int* ptr = alloc.allocate(5);
@@ -152,7 +152,7 @@ TEST_CASE("allocator_realloc - reallocate()") {
     }
 
     SUBCASE("Reallocate to smaller size") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
 
         int* ptr = alloc.allocate(20);
         REQUIRE(ptr != nullptr);
@@ -176,7 +176,7 @@ TEST_CASE("allocator_realloc - reallocate()") {
     }
 
     SUBCASE("Reallocate to zero size") {
-        allocator_realloc<int> alloc;
+        fl::allocator_realloc<int> alloc;
 
         int* ptr = alloc.allocate(10);
         REQUIRE(ptr != nullptr);
@@ -188,7 +188,7 @@ TEST_CASE("allocator_realloc - reallocate()") {
 
 TEST_CASE("Vector with allocator_realloc") {
     SUBCASE("Vector with allocator_realloc resizing") {
-        fl::vector<int, allocator_realloc<int>> vec;
+        fl::vector<int, fl::allocator_realloc<int>> vec;
 
         // Push back elements to trigger multiple reallocations
         for (int i = 0; i < 100; ++i) {
@@ -203,7 +203,7 @@ TEST_CASE("Vector with allocator_realloc") {
     }
 
     SUBCASE("Vector with POD types benefits from realloc") {
-        fl::vector<float, allocator_realloc<float>> vec;
+        fl::vector<float, fl::allocator_realloc<float>> vec;
 
         for (float i = 0.0f; i < 50.0f; ++i) {
             vec.push_back(i * 1.5f);
@@ -216,7 +216,7 @@ TEST_CASE("Vector with allocator_realloc") {
     }
 
     SUBCASE("Vector reserve and access") {
-        fl::vector<int, allocator_realloc<int>> vec;
+        fl::vector<int, fl::allocator_realloc<int>> vec;
 
         vec.reserve(100);
         REQUIRE(vec.capacity() >= 100);
@@ -258,15 +258,15 @@ TEST_CASE("allocator_traits - Type trait queries") {
     SUBCASE("Runtime trait queries") {
         // These should compile to constexpr true/false
         constexpr bool realloc_has_reallocate =
-            allocator_traits<allocator_realloc<int>>::has_reallocate_v;
+            fl::allocator_traits<fl::allocator_realloc<int>>::has_reallocate_v;
         constexpr bool realloc_has_at_least =
-            allocator_traits<allocator_realloc<int>>::has_allocate_at_least_v;
+            fl::allocator_traits<fl::allocator_realloc<int>>::has_allocate_at_least_v;
 
         CHECK(realloc_has_reallocate);
         CHECK(realloc_has_at_least);
 
         constexpr bool standard_has_at_least =
-            allocator_traits<allocator<int>>::has_allocate_at_least_v;
+            fl::allocator_traits<fl::allocator<int>>::has_allocate_at_least_v;
         CHECK(standard_has_at_least);
     }
 }
@@ -282,7 +282,7 @@ TEST_CASE("allocation_result structure") {
     }
 
     SUBCASE("allocation_result from allocator_realloc") {
-        allocator_realloc<float> alloc;
+        fl::allocator_realloc<float> alloc;
         auto result = alloc.allocate_at_least(20);
 
         CHECK_NE(result.ptr, nullptr);

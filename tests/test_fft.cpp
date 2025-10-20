@@ -27,10 +27,10 @@ TEST_CASE("fft tester 512") {
         float sin_x = fl::sin(rot);
         buffer[i] = int16_t(32767 * sin_x);
     }
-    FFTBins out(16);
+    fl::FFTBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFTImpl fft(samples);
+    fl::FFTImpl fft(samples);
     fft.run(buffer, &out);
 
     // Test expectations for different precision modes
@@ -82,10 +82,10 @@ TEST_CASE("fft tester 256") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    FFTBins out(16);
+    fl::FFTBins out(16);
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFTImpl fft(samples);
+    fl::FFTImpl fft(samples);
     fft.run(buffer, &out);
 
     // Test expectations for different precision modes
@@ -137,11 +137,11 @@ TEST_CASE("fft tester 256 with 64 bands") {
         auto v = int16_t(32767 * sin_x);
         buffer.push_back(v);
     }
-    FFTBins out(64);
+    fl::FFTBins out(64);
     // fft_unit_test(buffer, &out);
     const int samples = n;
-    FFT_Args args(samples, 64);
-    FFTImpl fft(args);
+    fl::FFT_Args args(samples, 64);
+    fl::FFTImpl fft(args);
     fft.run(buffer, &out);
 
     // Test expectations for different precision modes

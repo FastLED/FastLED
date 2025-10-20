@@ -58,7 +58,7 @@ TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
 
     fl::u8 test_data[] = {0xFF, 0xFB, 0x90, 0x00};
 
-    fl::vector<AudioSample> samples = decoder.decodeToAudioSamples(test_data, sizeof(test_data));
+    fl::vector<fl::AudioSample> samples = decoder.decodeToAudioSamples(test_data, sizeof(test_data));
 
     // With invalid/incomplete data, we expect zero samples
     CHECK(samples.size() >= 0);
@@ -66,13 +66,13 @@ TEST_CASE("Mp3HelixDecoder decodeToAudioSamples") {
 
 TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
     // Set up filesystem to point to tests/data directory
-    setTestFileSystemRoot("tests/data");
+    fl::setTestFileSystemRoot("tests/data");
 
-    FileSystem fs;
+    fl::FileSystem fs;
     CHECK(fs.beginSd(0)); // CS pin doesn't matter for test
 
     // Open the MP3 file
-    FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    fl::FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
     REQUIRE(file != nullptr);
     REQUIRE(file->valid());
 
@@ -116,15 +116,15 @@ TEST_CASE("Mp3HelixDecoder - Decode real MP3 file") {
            frames_decoded, total_samples, sample_rate, channels);
 }
 
-TEST_CASE("Mp3HelixDecoder - Convert to AudioSamples from real file") {
+TEST_CASE("Mp3HelixDecoder - Convert to fl::AudioSamples from real file") {
     // Set up filesystem to point to tests/data directory
-    setTestFileSystemRoot("tests/data");
+    fl::setTestFileSystemRoot("tests/data");
 
-    FileSystem fs;
+    fl::FileSystem fs;
     CHECK(fs.beginSd(0));
 
     // Open the MP3 file
-    FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
+    fl::FileHandlePtr file = fs.openRead("codec/jazzy_percussion.mp3");
     REQUIRE(file != nullptr);
 
     // Read entire file
@@ -134,11 +134,11 @@ TEST_CASE("Mp3HelixDecoder - Convert to AudioSamples from real file") {
     file->read(mp3_data.data(), file_size);
     file->close();
 
-    // Decode to AudioSamples
+    // Decode to fl::AudioSamples
     Mp3HelixDecoder decoder;
     CHECK(decoder.init());
 
-    fl::vector<AudioSample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
+    fl::vector<fl::AudioSample> samples = decoder.decodeToAudioSamples(mp3_data.data(), mp3_data.size());
 
     // Verify we got samples
     CHECK_GT(samples.size(), 0);
@@ -157,5 +157,5 @@ TEST_CASE("Mp3HelixDecoder - Convert to AudioSamples from real file") {
     }
     CHECK(has_non_zero);
 
-    printf("Converted MP3 to %zu AudioSamples\n", samples.size());
+    printf("Converted MP3 to %zu fl::AudioSamples\n", samples.size());
 }

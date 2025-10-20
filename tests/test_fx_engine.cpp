@@ -15,18 +15,18 @@
 
 FASTLED_SMART_PTR(MockFx);
 
-class MockFx : public Fx {
+class MockFx : public fl::Fx {
 public:
-    MockFx(uint16_t numLeds, CRGB color) : Fx(numLeds), mColor(color) {}
+    MockFx(uint16_t numLeds, CRGB color) : fl::Fx(numLeds), mColor(color) {}
 
-    void draw(DrawContext ctx) override {
+    void draw(fl::Fx::DrawContext ctx) override {
         mLastDrawTime = ctx.now;
         for (uint16_t i = 0; i < mNumLeds; ++i) {
             ctx.leds[i] = mColor;
         }
     }
 
-    Str fxName() const override { return "MockFx"; }
+    fl::Str fxName() const override { return "MockFx"; }
 
 private:
     CRGB mColor;
@@ -35,7 +35,7 @@ private:
 
 TEST_CASE("test_fx_engine") {
     constexpr uint16_t NUM_LEDS = 10;
-    FxEngine engine(NUM_LEDS, false);
+    fl::FxEngine engine(NUM_LEDS, false);
     CRGB leds[NUM_LEDS];
 
     MockFxPtr redFx = fl::make_shared<MockFx>(NUM_LEDS, CRGB::Red);
@@ -113,13 +113,13 @@ TEST_CASE("test_fx_engine") {
 TEST_CASE("test_transition") {
 
     SUBCASE("Initial state") {
-        Transition transition;
+        fl::Transition transition;
         CHECK(transition.getProgress(0) == 0);
         CHECK_FALSE(transition.isTransitioning(0));
     }
 
     SUBCASE("Start transition") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 1000);
         CHECK(transition.isTransitioning(100));
         CHECK(transition.isTransitioning(1099));
@@ -127,7 +127,7 @@ TEST_CASE("test_transition") {
     }
 
     SUBCASE("Progress calculation") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 1000);
         CHECK(transition.getProgress(100) == 0);
         CHECK(transition.getProgress(600) == 127);
@@ -135,19 +135,19 @@ TEST_CASE("test_transition") {
     }
 
     SUBCASE("Progress before start time") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 1000);
         CHECK(transition.getProgress(50) == 0);
     }
 
     SUBCASE("Progress after end time") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 1000);
         CHECK(transition.getProgress(1200) == 255);
     }
 
     SUBCASE("Multiple transitions") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 1000);
         CHECK(transition.isTransitioning(600));
         
@@ -158,7 +158,7 @@ TEST_CASE("test_transition") {
     }
 
     SUBCASE("Zero duration transition") {
-        Transition transition;
+        fl::Transition transition;
         transition.start(100, 0);
         CHECK_FALSE(transition.isTransitioning(100));
         CHECK(transition.getProgress(99) == 0);
@@ -174,7 +174,7 @@ class Fake2d : public Fx2d {
   public:
     Fake2d() : Fx2d(XYMap::constructRectangularGrid(1,1)) {}
 
-    void draw(DrawContext context) override {
+    void draw(fl::Fx::DrawContext context) override {
         CRGB c = mColors[mFrameCounter % mColors.size()];
         context.leds[0] = c;
         mFrameCounter++;
@@ -185,7 +185,7 @@ class Fake2d : public Fx2d {
         return true;
     }
 
-    Str fxName() const override { return "Fake2d"; }
+    fl::Str fxName() const override { return "Fake2d"; }
     uint8_t mFrameCounter = 0;
     FixedVector<CRGB, 5> mColors;
 };
@@ -197,7 +197,7 @@ TEST_CASE("test_fixed_fps") {
 
     CRGB leds[1];
     bool interpolate = true;
-    FxEngine engine(1, interpolate);
+    fl::FxEngine engine(1, interpolate);
     int id = engine.addFx(fake);
     CHECK_EQ(0, id);
     engine.draw(0, &leds[0]);

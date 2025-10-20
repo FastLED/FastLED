@@ -7,19 +7,19 @@
 
 
 // Helper function to set up filesystem for codec tests
-static FileSystem setupCodecFilesystem() {
-    setTestFileSystemRoot("tests");
-    FileSystem fs;
+static fl::FileSystem setupCodecFilesystem() {
+    fl::setTestFileSystemRoot("tests");
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
     return fs;
 }
 
 TEST_CASE("JPEG file loading and decoding") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     // Test that we can load the JPEG file from filesystem
-    FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.jpg");
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -40,14 +40,14 @@ TEST_CASE("JPEG file loading and decoding") {
     CHECK_EQ(file_data[file_size - 1], 0xD9);
 
     // Test JPEG decoder
-    if (Jpeg::isSupported()) {
-        JpegConfig config;
-        config.format = PixelFormat::RGB888;
-        config.quality = JpegConfig::Quality::High;  // Use 1:1 scaling for 2x2 test image
+    if (fl::Jpeg::isSupported()) {
+        fl::JpegConfig config;
+        config.format = fl::PixelFormat::RGB888;
+        config.quality = fl::JpegConfig::Quality::High;  // Use 1:1 scaling for 2x2 test image
 
         fl::string error_msg;
         fl::span<const fl::u8> data(file_data.data(), file_size);
-        FramePtr frame = Jpeg::decode(config, data, &error_msg);
+        fl::FramePtr frame = fl::Jpeg::decode(config, data, &error_msg);
 
         if (!frame) {
             MESSAGE("JPEG decode failed with error: " << error_msg);
@@ -58,7 +58,7 @@ TEST_CASE("JPEG file loading and decoding") {
             CHECK(frame->isValid());
             CHECK_EQ(frame->getWidth(), 2);
             CHECK_EQ(frame->getHeight(), 2);
-            CHECK_EQ(frame->getFormat(), PixelFormat::RGB888);
+            CHECK_EQ(frame->getFormat(), fl::PixelFormat::RGB888);
 
             // Expected layout: red-white-blue-black (2x2)
             // Verify pixel values match expected color pattern (JPEG compression affects exact values)

@@ -10,7 +10,7 @@
 
 
 TEST_CASE("Grid_int16_t") {
-    Grid<int16_t> grid(2, 2);
+    fl::Grid<int16_t> grid(2, 2);
     REQUIRE_EQ(grid.width(), 2);
     REQUIRE_EQ(grid.height(), 2);
     auto min_max = grid.minMax();

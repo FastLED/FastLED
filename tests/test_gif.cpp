@@ -7,18 +7,18 @@
 
 
 // Helper function to set up filesystem for codec tests
-static FileSystem setupCodecFilesystem() {
-    setTestFileSystemRoot("tests");
-    FileSystem fs;
+static fl::FileSystem setupCodecFilesystem() {
+    fl::setTestFileSystemRoot("tests");
+    fl::FileSystem fs;
     bool ok = fs.beginSd(5);
     REQUIRE(ok);
     return fs;
 }
 
 TEST_CASE("GIF file loading and decoding") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
         // Test that we can load the GIF file from filesystem
-        FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+        fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");
         REQUIRE(handle != nullptr);
         REQUIRE(handle->valid());
 
@@ -42,18 +42,18 @@ TEST_CASE("GIF file loading and decoding") {
         CHECK(valid_version);
 
         // Test GIF decoder if supported
-        if (!Gif::isSupported()) {
+        if (!fl::Gif::isSupported()) {
             MESSAGE("GIF decoder not supported on this platform");
             handle->close();
             return;
         }
 
-        GifConfig config;
-        config.mode = GifConfig::SingleFrame;
-        config.format = PixelFormat::RGB888;
+        fl::GifConfig config;
+        config.mode = fl::GifConfig::SingleFrame;
+        config.format = fl::PixelFormat::RGB888;
 
         fl::string error_msg;
-        auto decoder = Gif::createDecoder(config, &error_msg);
+        auto decoder = fl::Gif::createDecoder(config, &error_msg);
         REQUIRE_MESSAGE(decoder != nullptr, "GIF decoder creation failed: " << error_msg);
 
         // Create byte stream and begin decoding
@@ -63,8 +63,8 @@ TEST_CASE("GIF file loading and decoding") {
 
         // Decode first frame
         auto result = decoder->decode();
-        if (result == DecodeResult::Success) {
-            Frame frame0 = decoder->getCurrentFrame();
+        if (result == fl::DecodeResult::Success) {
+            fl::Frame frame0 = decoder->getCurrentFrame();
             if (frame0.isValid() && frame0.getWidth() == 2 && frame0.getHeight() == 2) {
                 const CRGB* pixels = frame0.rgb();
                 REQUIRE_MESSAGE(pixels != nullptr, "GIF frame pixels should not be null");
@@ -137,10 +137,10 @@ TEST_CASE("GIF file loading and decoding") {
 }
 
 TEST_CASE("GIF metadata parsing without decoding") {
-    FileSystem fs = setupCodecFilesystem();
+    fl::FileSystem fs = setupCodecFilesystem();
 
     // Test that we can load the GIF file from filesystem
-    FileHandlePtr handle = fs.openRead("data/codec/file.gif");
+    fl::FileHandlePtr handle = fs.openRead("data/codec/file.gif");
     REQUIRE(handle != nullptr);
     REQUIRE(handle->valid());
 
@@ -155,7 +155,7 @@ TEST_CASE("GIF metadata parsing without decoding") {
     // Test GIF metadata parsing
     fl::string error_msg;
     fl::span<const fl::u8> data(file_data.data(), file_size);
-    GifInfo info = Gif::parseGifInfo(data, &error_msg);
+    fl::GifInfo info = fl::Gif::parseGifInfo(data, &error_msg);
 
     // The metadata parsing should succeed
     CHECK_MESSAGE(info.isValid, "GIF metadata parsing failed: " << error_msg);
@@ -195,7 +195,7 @@ TEST_CASE("GIF metadata parsing without decoding") {
         fl::span<const fl::u8> empty_span(empty_data.data(), 0);
         fl::string empty_error;
 
-        GifInfo empty_info = Gif::parseGifInfo(empty_span, &empty_error);
+        fl::GifInfo empty_info = fl::Gif::parseGifInfo(empty_span, &empty_error);
         CHECK_FALSE(empty_info.isValid);
         CHECK_FALSE(empty_error.empty());
         MESSAGE("Empty data error: " << empty_error);
@@ -206,7 +206,7 @@ TEST_CASE("GIF metadata parsing without decoding") {
         fl::span<const fl::u8> small_span(small_data.data(), small_data.size());
         fl::string small_error;
 
-        GifInfo small_info = Gif::parseGifInfo(small_span, &small_error);
+        fl::GifInfo small_info = fl::Gif::parseGifInfo(small_span, &small_error);
         CHECK_FALSE(small_info.isValid);
         CHECK_FALSE(small_error.empty());
         MESSAGE("Small data error: " << small_error);
@@ -220,7 +220,7 @@ TEST_CASE("GIF metadata parsing without decoding") {
         fl::span<const fl::u8> invalid_span(invalid_data.data(), invalid_data.size());
         fl::string invalid_error;
 
-        GifInfo invalid_info = Gif::parseGifInfo(invalid_span, &invalid_error);
+        fl::GifInfo invalid_info = fl::Gif::parseGifInfo(invalid_span, &invalid_error);
         CHECK_FALSE(invalid_info.isValid);
         CHECK_FALSE(invalid_error.empty());
         MESSAGE("Invalid signature error: " << invalid_error);

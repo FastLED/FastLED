@@ -26,9 +26,9 @@ constexpr uint32_t SK6812_T2 = 600;   // ns
 constexpr uint32_t SK6812_T3 = 300;   // ns
 
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2812") {
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2812") {
     // Test WS2812 timing calculation with 3-word encoding
-    auto result = ClocklessTiming::calculate_optimal_pclk(
+    auto result = fl::ClocklessTiming::calculate_optimal_pclk(
         WS2812_T1, WS2812_T2, WS2812_T3,
         3  // 3 words per bit for memory efficiency
     );
@@ -68,8 +68,8 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2812") {
     CHECK(result.valid);
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2816") {
-    auto result = ClocklessTiming::calculate_optimal_pclk(
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2816") {
+    auto result = fl::ClocklessTiming::calculate_optimal_pclk(
         WS2816_T1, WS2816_T2, WS2816_T3, 3
     );
 
@@ -86,8 +86,8 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2816") {
     CHECK(result.valid);
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2811 slow variant") {
-    auto result = ClocklessTiming::calculate_optimal_pclk(
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - WS2811 slow variant") {
+    auto result = fl::ClocklessTiming::calculate_optimal_pclk(
         WS2811_T1, WS2811_T2, WS2811_T3, 3
     );
 
@@ -103,8 +103,8 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - WS2811 slow variant") {
     CHECK(result.valid);
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - SK6812 fast variant") {
-    auto result = ClocklessTiming::calculate_optimal_pclk(
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - SK6812 fast variant") {
+    auto result = fl::ClocklessTiming::calculate_optimal_pclk(
         SK6812_T1, SK6812_T2, SK6812_T3, 3
     );
 
@@ -120,32 +120,32 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - SK6812 fast variant") {
     CHECK(result.valid);
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - input validation") {
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - input validation") {
     SUBCASE("Zero T1") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(0, 700, 600, 3);
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(0, 700, 600, 3);
         CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero T2") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(350, 0, 600, 3);
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 0, 600, 3);
         CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero T3") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(350, 700, 0, 3);
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 700, 0, 3);
         CHECK_FALSE(result.valid);
     }
 
     SUBCASE("Zero n_words_per_bit") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(350, 700, 600, 0);
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(350, 700, 600, 0);
         CHECK_FALSE(result.valid);
     }
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
     SUBCASE("Minimum frequency clamp") {
         // Very slow protocol should clamp to minimum
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             10000, 10000, 10000,  // Extremely slow (30 µs total)
             3,
             1000000,  // 1 MHz min
@@ -157,7 +157,7 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
 
     SUBCASE("Maximum frequency clamp") {
         // Very fast protocol should clamp to maximum
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             10, 10, 10,  // Extremely fast (30 ns total)
             3,
             1000000,   // 1 MHz min
@@ -168,9 +168,9 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - frequency clamping") {
     }
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
     SUBCASE("With MHz rounding") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3,
             3,
             1000000,
@@ -183,7 +183,7 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
     }
 
     SUBCASE("Without MHz rounding") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3,
             3,
             1000000,
@@ -196,9 +196,9 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - rounding behavior") {
     }
 }
 
-TEST_CASE("ClocklessTiming::calculate_optimal_pclk - different word counts") {
+TEST_CASE("fl::ClocklessTiming::calculate_optimal_pclk - different word counts") {
     SUBCASE("2 words per bit") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 2
         );
         REQUIRE(result.valid);
@@ -209,7 +209,7 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - different word counts") {
     }
 
     SUBCASE("4 words per bit") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 4
         );
         REQUIRE(result.valid);
@@ -220,10 +220,10 @@ TEST_CASE("ClocklessTiming::calculate_optimal_pclk - different word counts") {
     }
 }
 
-TEST_CASE("ClocklessTiming::calculate_buffer_size") {
+TEST_CASE("fl::ClocklessTiming::calculate_buffer_size") {
     SUBCASE("Small strip") {
         // 100 LEDs, 24 bits, 3 words per bit, 300 µs latch, 500 ns slot
-        size_t size = ClocklessTiming::calculate_buffer_size(
+        size_t size = fl::ClocklessTiming::calculate_buffer_size(
             100,   // LEDs
             24,    // bits per LED
             3,     // words per bit
@@ -239,7 +239,7 @@ TEST_CASE("ClocklessTiming::calculate_buffer_size") {
 
     SUBCASE("Large strip") {
         // 1000 LEDs, 24 bits, 3 words per bit, 300 µs latch, 500 ns slot
-        size_t size = ClocklessTiming::calculate_buffer_size(
+        size_t size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, 3, 300, 500
         );
 
@@ -251,7 +251,7 @@ TEST_CASE("ClocklessTiming::calculate_buffer_size") {
 
     SUBCASE("RGBW LEDs") {
         // 500 LEDs, 32 bits (RGBW), 3 words per bit
-        size_t size = ClocklessTiming::calculate_buffer_size(
+        size_t size = fl::ClocklessTiming::calculate_buffer_size(
             500, 32, 3, 300, 500
         );
 
@@ -262,9 +262,9 @@ TEST_CASE("ClocklessTiming::calculate_buffer_size") {
     }
 }
 
-TEST_CASE("ClocklessTiming::calculate_frame_time_us") {
+TEST_CASE("fl::ClocklessTiming::calculate_frame_time_us") {
     SUBCASE("100 LEDs at 2 MHz") {
-        uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+        uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
             100,   // LEDs
             24,    // bits per LED
             3,     // words per bit
@@ -279,7 +279,7 @@ TEST_CASE("ClocklessTiming::calculate_frame_time_us") {
     }
 
     SUBCASE("1000 LEDs at 2 MHz") {
-        uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+        uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
             1000, 24, 3, 500, 300
         );
 
@@ -290,7 +290,7 @@ TEST_CASE("ClocklessTiming::calculate_frame_time_us") {
     }
 
     SUBCASE("FPS calculation") {
-        uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+        uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
             300, 24, 3, 500, 300
         );
 
@@ -303,9 +303,9 @@ TEST_CASE("ClocklessTiming::calculate_frame_time_us") {
     }
 }
 
-TEST_CASE("ClocklessTiming::is_timing_acceptable") {
+TEST_CASE("fl::ClocklessTiming::is_timing_acceptable") {
     SUBCASE("Good timing") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
         REQUIRE(result.valid);
@@ -319,18 +319,18 @@ TEST_CASE("ClocklessTiming::is_timing_acceptable") {
         ClocklessTimingResult result = {};
         result.valid = false;
 
-        CHECK_FALSE(ClocklessTiming::is_timing_acceptable(result));
+        CHECK_FALSE(fl::ClocklessTiming::is_timing_acceptable(result));
     }
 
     SUBCASE("Strict tolerance") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
         REQUIRE(result.valid);
 
         // With very strict tolerance, may or may not pass
         // (depends on how well the rounding works out)
-        bool acceptable_strict = ClocklessTiming::is_timing_acceptable(result, 0.05f);
+        bool acceptable_strict = fl::ClocklessTiming::is_timing_acceptable(result, 0.05f);
         CHECK((acceptable_strict || !acceptable_strict));  // Either outcome is valid
     }
 }
@@ -339,7 +339,7 @@ TEST_CASE("ClocklessTiming::is_timing_acceptable") {
 #if __cplusplus >= 201402L
 TEST_CASE("ClocklessTiming - constexpr evaluation") {
     // Verify that calculations can happen at compile time
-    constexpr auto result = ClocklessTiming::calculate_optimal_pclk(
+    constexpr auto result = fl::ClocklessTiming::calculate_optimal_pclk(
         350, 700, 600, 3
     );
 
@@ -348,13 +348,13 @@ TEST_CASE("ClocklessTiming - constexpr evaluation") {
     static_assert(result.pclk_hz > 0, "PCLK should be positive");
 
     // Verify constexpr buffer size calculation
-    constexpr size_t buffer_size = ClocklessTiming::calculate_buffer_size(
+    constexpr size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
         1000, 24, 3, 300, 500
     );
     static_assert(buffer_size > 0, "Buffer size should be positive");
 
     // Verify constexpr frame time calculation
-    constexpr uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+    constexpr uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
         1000, 24, 3, 500, 300
     );
     static_assert(frame_time > 0, "Frame time should be positive");
@@ -365,12 +365,12 @@ TEST_CASE("ClocklessTiming - memory efficiency comparison") {
     // Compare memory usage for different approaches
 
     SUBCASE("3-word encoding (memory-efficient)") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
         REQUIRE(result.valid);
 
-        size_t buffer_size = ClocklessTiming::calculate_buffer_size(
+        size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, result.n_bit, 300, result.slot_ns
         );
 
@@ -380,12 +380,12 @@ TEST_CASE("ClocklessTiming - memory efficiency comparison") {
     }
 
     SUBCASE("6-word encoding (higher precision)") {
-        auto result = ClocklessTiming::calculate_optimal_pclk(
+        auto result = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 6
         );
         REQUIRE(result.valid);
 
-        size_t buffer_size = ClocklessTiming::calculate_buffer_size(
+        size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, result.n_bit, 300, result.slot_ns
         );
 
@@ -397,16 +397,16 @@ TEST_CASE("ClocklessTiming - memory efficiency comparison") {
 
 TEST_CASE("ClocklessTiming - realistic scenarios") {
     SUBCASE("Scenario: Medium installation (300 LEDs per strip, 16 strips)") {
-        auto timing = ClocklessTiming::calculate_optimal_pclk(
+        auto timing = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
         REQUIRE(timing.valid);
 
-        size_t buffer_size = ClocklessTiming::calculate_buffer_size(
+        size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             300, 24, timing.n_bit, 300, timing.slot_ns
         );
 
-        uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+        uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
             300, 24, timing.n_bit, timing.slot_ns, 300
         );
 
@@ -416,16 +416,16 @@ TEST_CASE("ClocklessTiming - realistic scenarios") {
     }
 
     SUBCASE("Scenario: Large installation (1000 LEDs per strip)") {
-        auto timing = ClocklessTiming::calculate_optimal_pclk(
+        auto timing = fl::ClocklessTiming::calculate_optimal_pclk(
             WS2812_T1, WS2812_T2, WS2812_T3, 3
         );
         REQUIRE(timing.valid);
 
-        size_t buffer_size = ClocklessTiming::calculate_buffer_size(
+        size_t buffer_size = fl::ClocklessTiming::calculate_buffer_size(
             1000, 24, timing.n_bit, 300, timing.slot_ns
         );
 
-        uint32_t frame_time = ClocklessTiming::calculate_frame_time_us(
+        uint32_t frame_time = fl::ClocklessTiming::calculate_frame_time_us(
             1000, 24, timing.n_bit, timing.slot_ns, 300
         );
 
