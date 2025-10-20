@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/blur.h"
 #include "fl/clamp.h"
 #include "fl/math.h"

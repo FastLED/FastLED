@@ -608,13 +608,13 @@ public:
 	}
 
 	/// Add a clockless based CLEDController instance to the world.
-	template<template<fl::u8 DATA_PIN> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN>
 	static ::CLEDController &addLeds(CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		static CHIPSET<DATA_PIN> c;
 		return addLedsImpl(&c, data, nLedsOrOffset, nLedsIfOffset);
 	}
 
-	template<template<fl::u8 DATA_PIN> class CHIPSET, fl::u8 DATA_PIN>
+	template<template<fl::u8> class CHIPSET, fl::u8 DATA_PIN>
 	static ::CLEDController &addLeds(fl::Leds& leds, int nLedsOrOffset, int nLedsIfOffset = 0) {
 		CRGB* rgb = leds;
 		return addLeds<CHIPSET, DATA_PIN>(rgb, nLedsOrOffset, nLedsIfOffset);
