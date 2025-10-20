@@ -33,10 +33,10 @@ FASTLED_NAMESPACE_BEGIN
 
 // Select appropriate implementation based on platform configuration
 #if defined(__AVR__)
+// AVR is slow - use assembly-optimized version for performance
 #include "platforms/avr/math8.h"
-#elif defined(FASTLED_TEENSY3)
-#include "platforms/arm/math8.h"
 #else
+// All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
 #include "platforms/shared/math8.h"
 #endif
 

@@ -69,6 +69,13 @@ class SPIDeviceProxy;
 }
 #endif
 
+#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+namespace fl {
+template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
+class SPIDeviceProxy;
+}
+#endif
+
 #if defined(FASTLED_TEENSY3) && (F_CPU > 48000000)
 #define DATA_RATE_MHZ(X) (((48000000L / 1000000L) / X))
 #define DATA_RATE_KHZ(X) (((48000000L / 1000L) / X))
@@ -100,7 +107,7 @@ class SPIOutput : public fl::StubSPIOutput {};
 
 #else
 
-#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(__SAM3X8E__)
+#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(FASTLED_TEENSY3) && !defined(FASTLED_TEENSY4) && !defined(FASTLED_TEENSYLC) && !defined(NRF51) && !defined(NRF52_SERIES)
 /// Hardware SPI output
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
