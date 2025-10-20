@@ -26,6 +26,52 @@
 // Include UCS7604 controller
 #include "fl/chipsets/ucs7604.h"  // optional.
 
+// Include platform-specific SPIOutput template implementations
+// Each platform file defines the SPIOutput template for its platform
+// This must happen before any SPI chipset controllers (e.g., APA102, P9813)
+#if defined(FASTLED_STUB_IMPL)
+#include "platforms/stub/spi_output_template.h"
+
+#elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/32/spi_output_template.h"
+
+#elif defined(ESP8266)
+#include "platforms/esp/8266/spi_output_template.h"
+
+#elif defined(NRF51)
+#include "platforms/arm/nrf51/spi_output_template.h"
+
+#elif defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/spi_output_template.h"
+
+#elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#include "platforms/apollo3/spi_output_template.h"
+
+#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/teensy3_common/spi_output_template.h"
+
+#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/teensy4_common/spi_output_template.h"
+
+#elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
+
+#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+      defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
+      defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/sam/spi_output_template.h"
+
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+#include "platforms/arm/stm32/spi_output_template.h"
+
+#elif defined(AVR_HARDWARE_SPI) || defined(ARDUNIO_CORE_SPI)
+#include "platforms/avr/spi_output_template.h"
+
+#else
+// Fallback: Generic software SPI for unsupported platforms
+#include "platforms/shared/spi_bitbang/spi_output_template.h"
+#endif
+
 // Platform-specific clockless controller
 // This must be included before using ClocklessControllerImpl
 #if defined(FASTLED_STUB_IMPL)
@@ -321,7 +367,7 @@ class RGBWEmulatedController
 /// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(12)
 template <fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB,  uint32_t SPI_SPEED = DATA_RATE_MHZ(12) >
 class LPD8806Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 
 	class LPD8806_ADJUST {
 	public:
@@ -399,7 +445,7 @@ public:
 /// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(1)
 template <fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(1)>
 class WS2801Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 	CMinWait<1000>  mWaitDelay;
 
@@ -472,7 +518,7 @@ class WS2803Controller : public WS2801Controller<DATA_PIN, CLOCK_PIN, RGB_ORDER,
 /// @see Datasheet: https://cdn-shop.adafruit.com/datasheets/LPD6803.pdf
 template <fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(12)>
 class LPD6803Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() { mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); mSPI.writeByte(0); }
@@ -535,7 +581,7 @@ template <
 	uint32_t END_FRAME = 0xFF000000
 >
 class APA102Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void startBoundary() {
@@ -848,7 +894,7 @@ class HD107HDController : public APA102ControllerHD<
 /// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(10)
 template <fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(10)>
 class P9813Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void writeBoundary() { mSPI.writeWord(0); mSPI.writeWord(0); }
@@ -934,7 +980,7 @@ public:
 /// @tparam SPI_SPEED the clock divider used for these LEDs.  Set using the ::DATA_RATE_MHZ / ::DATA_RATE_KHZ macros.  Defaults to ::DATA_RATE_MHZ(16)
 template <fl::u8 DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = RGB, uint32_t SPI_SPEED = DATA_RATE_MHZ(16)>
 class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
-	typedef SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
 
 	void writeHeader() {

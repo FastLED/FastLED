@@ -4,16 +4,11 @@
 /// @brief Teensy 4 SPIOutput template definition
 
 #include "fl/int.h"
-#include "spi_device_proxy.h"
 
 namespace fl {
-
-#if defined(FASTLED_TEENSY4) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 
 /// Teensy 4 hardware SPI output for all pins
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public Teensy4HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-
-#endif  // Teensy 4 with FASTLED_ALL_PINS_HARDWARE_SPI
 
 }  // namespace fl

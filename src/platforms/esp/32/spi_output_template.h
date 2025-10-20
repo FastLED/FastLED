@@ -8,12 +8,8 @@
 
 namespace fl {
 
-#if defined(FASTLED_ESP32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-
 /// ESP32 hardware SPI output for all pins
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public ESP32HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-
-#endif  // ESP32 with FASTLED_ALL_PINS_HARDWARE_SPI
+class SPIOutput : public SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
 }  // namespace fl
