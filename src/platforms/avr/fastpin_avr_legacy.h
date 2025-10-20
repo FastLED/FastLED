@@ -11,6 +11,7 @@
 // edits.
 
 #include "avr_pin.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 #ifdef FASTLED_FORCE_SOFTWARE_PINS
 #warning "Software pin support forced, pin access will be slightly slower."
