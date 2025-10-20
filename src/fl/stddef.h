@@ -16,7 +16,7 @@
 
 // Provide NULL definition for third-party code that needs it
 #ifndef NULL
-#define NULL (void*)0
+#define NULL nullptr
 #endif
 
 #else
