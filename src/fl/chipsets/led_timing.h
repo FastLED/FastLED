@@ -40,65 +40,65 @@ struct ChipsetTiming {
 
 /// GE8822 RGB controller @ 800 kHz
 /// Timing: 350ns, 660ns, 350ns (total 1360ns)
-static constexpr ChipsetTiming TIMING_GE8822_800KHZ = {350, 660, 350, 0, "GE8822_800KHZ"};
+constexpr ChipsetTiming TIMING_GE8822_800KHZ = {350, 660, 350, 0, "GE8822_800KHZ"};
 
 /// WS2812 RGB controller @ 800 kHz (most common, overclockable)
 /// Timing: 250ns, 625ns, 375ns (total 1250ns, fast variant)
 /// Also available: 320ns, 320ns, 640ns (legacy variant)
-static constexpr ChipsetTiming TIMING_WS2812_800KHZ = {250, 625, 375, 280, "WS2812_800KHZ"};
-static constexpr ChipsetTiming TIMING_WS2812_800KHZ_LEGACY = {320, 320, 640, 280, "WS2812_800KHZ_LEGACY"};
+constexpr ChipsetTiming TIMING_WS2812_800KHZ = {250, 625, 375, 280, "WS2812_800KHZ"};
+constexpr ChipsetTiming TIMING_WS2812_800KHZ_LEGACY = {320, 320, 640, 280, "WS2812_800KHZ_LEGACY"};
 
 /// WS2813 RGB controller (same timing as WS2812)
 /// Timing: 320ns, 320ns, 640ns (total 1280ns)
-static constexpr ChipsetTiming TIMING_WS2813 = {320, 320, 640, 300, "WS2813"};
+constexpr ChipsetTiming TIMING_WS2813 = {320, 320, 640, 300, "WS2813"};
 
 /// SK6812 RGBW controller @ 800 kHz
 /// Timing: 300ns, 600ns, 300ns (total 1200ns)
-static constexpr ChipsetTiming TIMING_SK6812 = {300, 600, 300, 80, "SK6812"};
+constexpr ChipsetTiming TIMING_SK6812 = {300, 600, 300, 80, "SK6812"};
 
 /// SK6822 RGB controller @ 800 kHz
 /// Timing: 375ns, 1000ns, 375ns (total 1750ns)
-static constexpr ChipsetTiming TIMING_SK6822 = {375, 1000, 375, 0, "SK6822"};
+constexpr ChipsetTiming TIMING_SK6822 = {375, 1000, 375, 0, "SK6822"};
 
 /// UCS1903B controller @ 800 kHz
 /// Timing: 400ns, 450ns, 450ns (total 1300ns)
-static constexpr ChipsetTiming TIMING_UCS1903B_800KHZ = {400, 450, 450, 0, "UCS1903B_800KHZ"};
+constexpr ChipsetTiming TIMING_UCS1903B_800KHZ = {400, 450, 450, 0, "UCS1903B_800KHZ"};
 
 /// UCS1904 controller @ 800 kHz
 /// Timing: 400ns, 400ns, 450ns (total 1250ns)
-static constexpr ChipsetTiming TIMING_UCS1904_800KHZ = {400, 400, 450, 0, "UCS1904_800KHZ"};
+constexpr ChipsetTiming TIMING_UCS1904_800KHZ = {400, 400, 450, 0, "UCS1904_800KHZ"};
 
 /// UCS2903 controller @ 800 kHz
 /// Timing: 250ns, 750ns, 250ns (total 1250ns)
-static constexpr ChipsetTiming TIMING_UCS2903 = {250, 750, 250, 0, "UCS2903"};
+constexpr ChipsetTiming TIMING_UCS2903 = {250, 750, 250, 0, "UCS2903"};
 
 /// TM1809 RGB controller @ 800 kHz
 /// Timing: 350ns, 350ns, 450ns (total 1150ns)
-static constexpr ChipsetTiming TIMING_TM1809_800KHZ = {350, 350, 450, 0, "TM1809_800KHZ"};
+constexpr ChipsetTiming TIMING_TM1809_800KHZ = {350, 350, 450, 0, "TM1809_800KHZ"};
 
 /// TM1829 RGB controller @ 800 kHz
 /// Timing: 340ns, 340ns, 550ns (total 1230ns)
-static constexpr ChipsetTiming TIMING_TM1829_800KHZ = {340, 340, 550, 500, "TM1829_800KHZ"};
+constexpr ChipsetTiming TIMING_TM1829_800KHZ = {340, 340, 550, 500, "TM1829_800KHZ"};
 
 /// TM1829 RGB controller @ 1600 kHz (high-speed variant)
 /// Timing: 100ns, 300ns, 200ns (total 600ns)
-static constexpr ChipsetTiming TIMING_TM1829_1600KHZ = {100, 300, 200, 500, "TM1829_1600KHZ"};
+constexpr ChipsetTiming TIMING_TM1829_1600KHZ = {100, 300, 200, 500, "TM1829_1600KHZ"};
 
 /// LPD1886 RGB controller @ 1250 kHz
 /// Timing: 200ns, 400ns, 200ns (total 800ns)
-static constexpr ChipsetTiming TIMING_LPD1886_1250KHZ = {200, 400, 200, 0, "LPD1886_1250KHZ"};
+constexpr ChipsetTiming TIMING_LPD1886_1250KHZ = {200, 400, 200, 0, "LPD1886_1250KHZ"};
 
 /// PL9823 RGB controller @ 800 kHz
 /// Timing: 350ns, 1010ns, 350ns (total 1710ns)
-static constexpr ChipsetTiming TIMING_PL9823 = {350, 1010, 350, 0, "PL9823"};
+constexpr ChipsetTiming TIMING_PL9823 = {350, 1010, 350, 0, "PL9823"};
 
 /// SM16703 RGB controller @ 800 kHz
 /// Timing: 300ns, 600ns, 300ns (total 1200ns)
-static constexpr ChipsetTiming TIMING_SM16703 = {300, 600, 300, 0, "SM16703"};
+constexpr ChipsetTiming TIMING_SM16703 = {300, 600, 300, 0, "SM16703"};
 
 /// SM16824E RGB controller (high-speed variant)
 /// Timing: 300ns, 900ns, 100ns (total 1300ns)
-static constexpr ChipsetTiming TIMING_SM16824E = {300, 900, 100, 200, "SM16824E"};
+constexpr ChipsetTiming TIMING_SM16824E = {300, 900, 100, 200, "SM16824E"};
 
 // ============================================================================
 // Medium-Speed Chipsets (400kHz - 600kHz range)
@@ -106,31 +106,31 @@ static constexpr ChipsetTiming TIMING_SM16824E = {300, 900, 100, 200, "SM16824E"
 
 /// WS2811 RGB controller @ 400 kHz (slower variant)
 /// Timing: 800ns, 800ns, 900ns (total 2500ns)
-static constexpr ChipsetTiming TIMING_WS2811_400KHZ = {800, 800, 900, 50, "WS2811_400KHZ"};
+constexpr ChipsetTiming TIMING_WS2811_400KHZ = {800, 800, 900, 50, "WS2811_400KHZ"};
 
 /// WS2815 RGB controller @ 400 kHz
 /// Timing: 250ns, 1090ns, 550ns (total 1890ns) - Note: Can be overclocked to 800kHz
-static constexpr ChipsetTiming TIMING_WS2815 = {250, 1090, 550, 0, "WS2815"};
+constexpr ChipsetTiming TIMING_WS2815 = {250, 1090, 550, 0, "WS2815"};
 
 /// UCS1903 controller @ 400 kHz
 /// Timing: 500ns, 1500ns, 500ns (total 2500ns)
-static constexpr ChipsetTiming TIMING_UCS1903_400KHZ = {500, 1500, 500, 0, "UCS1903_400KHZ"};
+constexpr ChipsetTiming TIMING_UCS1903_400KHZ = {500, 1500, 500, 0, "UCS1903_400KHZ"};
 
 /// DP1903 controller @ 400 kHz
 /// Timing: Multiple variants available - see FMUL-based definitions
-static constexpr ChipsetTiming TIMING_DP1903_400KHZ = {800, 1600, 800, 0, "DP1903_400KHZ"};
+constexpr ChipsetTiming TIMING_DP1903_400KHZ = {800, 1600, 800, 0, "DP1903_400KHZ"};
 
 /// TM1803 controller @ 400 kHz
 /// Timing: 700ns, 1100ns, 700ns (total 2500ns)
-static constexpr ChipsetTiming TIMING_TM1803_400KHZ = {700, 1100, 700, 0, "TM1803_400KHZ"};
+constexpr ChipsetTiming TIMING_TM1803_400KHZ = {700, 1100, 700, 0, "TM1803_400KHZ"};
 
 /// GW6205 controller @ 400 kHz
 /// Timing: 800ns, 800ns, 800ns (total 2400ns)
-static constexpr ChipsetTiming TIMING_GW6205_400KHZ = {800, 800, 800, 0, "GW6205_400KHZ"};
+constexpr ChipsetTiming TIMING_GW6205_400KHZ = {800, 800, 800, 0, "GW6205_400KHZ"};
 
 /// UCS1912 controller @ 800 kHz
 /// Timing: 250ns, 1000ns, 350ns (total 1600ns)
-static constexpr ChipsetTiming TIMING_UCS1912 = {250, 1000, 350, 0, "UCS1912"};
+constexpr ChipsetTiming TIMING_UCS1912 = {250, 1000, 350, 0, "UCS1912"};
 
 // ============================================================================
 // Legacy/Special Chipsets
@@ -138,15 +138,15 @@ static constexpr ChipsetTiming TIMING_UCS1912 = {250, 1000, 350, 0, "UCS1912"};
 
 /// WS2811 RGB controller @ 800 kHz (fast variant)
 /// Timing: 500ns, 2000ns, 2000ns (total 4500ns) - Legacy definition
-static constexpr ChipsetTiming TIMING_WS2811_800KHZ_LEGACY = {500, 2000, 2000, 50, "WS2811_800KHZ_LEGACY"};
+constexpr ChipsetTiming TIMING_WS2811_800KHZ_LEGACY = {500, 2000, 2000, 50, "WS2811_800KHZ_LEGACY"};
 
 /// GW6205 controller @ 800 kHz (fast variant)
 /// Timing: 400ns, 400ns, 400ns (total 1200ns)
-static constexpr ChipsetTiming TIMING_GW6205_800KHZ = {400, 400, 400, 0, "GW6205_800KHZ"};
+constexpr ChipsetTiming TIMING_GW6205_800KHZ = {400, 400, 400, 0, "GW6205_800KHZ"};
 
 /// DP1903 controller @ 800 kHz
 /// Timing: 400ns, 1000ns, 400ns (total 1800ns)
-static constexpr ChipsetTiming TIMING_DP1903_800KHZ = {400, 1000, 400, 0, "DP1903_800KHZ"};
+constexpr ChipsetTiming TIMING_DP1903_800KHZ = {400, 1000, 400, 0, "DP1903_800KHZ"};
 
 // ============================================================================
 // RGBW Chipsets (16-bit color depth variants)
@@ -154,7 +154,7 @@ static constexpr ChipsetTiming TIMING_DP1903_800KHZ = {400, 1000, 400, 0, "DP190
 
 /// TM1814 RGBW controller @ 800 kHz
 /// Timing: 360ns, 600ns, 340ns (total 1300ns)
-static constexpr ChipsetTiming TIMING_TM1814 = {360, 600, 340, 300, "TM1814"};
+constexpr ChipsetTiming TIMING_TM1814 = {360, 600, 340, 300, "TM1814"};
 
 // ============================================================================
 // UCS7604 Special 16-Bit RGBW Controller
@@ -163,11 +163,11 @@ static constexpr ChipsetTiming TIMING_TM1814 = {360, 600, 340, 300, "TM1814"};
 /// UCS7604 RGBW controller @ 800 kHz (16-bit color depth)
 /// Timing: 250ns, 625ns, 375ns (WS2812-compatible timing)
 /// Special protocol with preamble support
-static constexpr ChipsetTiming TIMING_UCS7604_800KHZ = {250, 625, 375, 280, "UCS7604_800KHZ"};
+constexpr ChipsetTiming TIMING_UCS7604_800KHZ = {250, 625, 375, 280, "UCS7604_800KHZ"};
 
 /// UCS7604 RGBW controller @ 1600 kHz (16-bit color depth, high-speed)
 /// Timing: 125ns, 312ns, 188ns (half the 800kHz timings, roughly)
-static constexpr ChipsetTiming TIMING_UCS7604_1600KHZ = {125, 312, 188, 280, "UCS7604_1600KHZ"};
+constexpr ChipsetTiming TIMING_UCS7604_1600KHZ = {125, 312, 188, 280, "UCS7604_1600KHZ"};
 
 // ============================================================================
 // Helper Functions
