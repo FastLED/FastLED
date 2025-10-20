@@ -142,29 +142,9 @@ case "$COMMAND" in
             generate_platformio_ini
         fi
 
-        # Get list of boards to compile for this platform family
-        # This pre-caches toolchains for ALL boards in the family
-        echo "Looking up platform family for: $PLATFORM_NAME"
-        BOARDS=$(python3 -c "
-import sys
-sys.path.insert(0, '/fastled')
-from ci.docker.build_platforms import BOARD_TO_PLATFORM, DOCKER_PLATFORMS
-
-# Get platform family from board name
-platform = BOARD_TO_PLATFORM.get('$PLATFORM_NAME')
-if platform:
-    # Found platform family - compile all boards in family
-    boards = DOCKER_PLATFORMS[platform]
-    print(' '.join(boards))
-else:
-    # Not in mapping - just compile the single board
-    print('$PLATFORM_NAME')
-" 2>&1)
-
-        if [ $? -ne 0 ]; then
-            echo "Warning: Failed to get board list, falling back to single board: $PLATFORM_NAME"
-            BOARDS="$PLATFORM_NAME"
-        fi
+        # For now, just use the single board to simplify Docker compilation
+        # Full platform family pre-caching can be added later once import issues are resolved
+        BOARDS="$PLATFORM_NAME"
 
         echo "Boards to pre-cache: $BOARDS"
 

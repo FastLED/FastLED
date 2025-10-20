@@ -235,7 +235,19 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
         # Copy Dockerfile.base to temp directory
         import shutil
 
-        shutil.copy(base_dockerfile_path, temp_path / "Dockerfile")
+        # Read the Dockerfile and remove syntax header for Windows compatibility
+        with open(base_dockerfile_path, "r") as f:
+            dockerfile_content = f.read()
+
+        # Remove the syntax header if on Windows (Docker Desktop has issues with it)
+        if sys.platform == "win32" and dockerfile_content.startswith("# syntax="):
+            lines = dockerfile_content.split("\n")
+            # Remove first line if it's the syntax header
+            if lines[0].startswith("# syntax="):
+                dockerfile_content = "\n".join(lines[1:])
+
+        with open(temp_path / "Dockerfile", "w") as f:
+            f.write(dockerfile_content)
 
         # Copy pyproject.toml and uv.lock for Python dependency installation
         pyproject_path = project_root / "pyproject.toml"
@@ -258,8 +270,14 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
         print()
 
         # Run docker build with BuildKit enabled for cache mounts
+        # On Windows, disable BuildKit if it causes credential issues
         env = os.environ.copy()
-        env["DOCKER_BUILDKIT"] = "1"
+        if sys.platform == "win32":
+            # Disable BuildKit on Windows to avoid credential-related issues
+            env["DOCKER_BUILDKIT"] = "0"
+        else:
+            env["DOCKER_BUILDKIT"] = "1"
+
         try:
             subprocess.run(cmd, check=True, env=env)
             print()
@@ -295,6 +313,21 @@ def build_docker_image(
     Raises:
         subprocess.CalledProcessError: If docker build fails
     """
+    # Read the Dockerfile and remove syntax header for Windows compatibility
+    with open(dockerfile_path, "r") as f:
+        dockerfile_content = f.read()
+
+    # Remove the syntax header if on Windows (Docker Desktop has issues with it)
+    if sys.platform == "win32" and dockerfile_content.startswith("# syntax="):
+        lines = dockerfile_content.split("\n")
+        # Remove first line if it's the syntax header
+        if lines[0].startswith("# syntax="):
+            dockerfile_content = "\n".join(lines[1:])
+
+        # Rewrite the Dockerfile without the syntax header
+        with open(dockerfile_path, "w") as f:
+            f.write(dockerfile_content)
+
     # Build docker command
     cmd = [get_docker_command(), "build"]
 
@@ -323,8 +356,14 @@ def build_docker_image(
     print()
 
     # Run docker build with BuildKit enabled for cache mounts
+    # On Windows, disable BuildKit if it causes credential issues
     env = os.environ.copy()
-    env["DOCKER_BUILDKIT"] = "1"
+    if sys.platform == "win32":
+        # Disable BuildKit on Windows to avoid credential-related issues
+        env["DOCKER_BUILDKIT"] = "0"
+    else:
+        env["DOCKER_BUILDKIT"] = "1"
+
     try:
         subprocess.run(cmd, check=True, env=env)
         print()
