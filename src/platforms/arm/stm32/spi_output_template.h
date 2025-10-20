@@ -3,21 +3,17 @@
 /// @file spi_output_template.h
 /// @brief STM32 SPIOutput template definition
 
-#ifndef __INC_PLATFORMS_STM32_SPI_OUTPUT_TEMPLATE_H
-#define __INC_PLATFORMS_STM32_SPI_OUTPUT_TEMPLATE_H
-
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
-
 #include "fl/int.h"
 #include "spi_device_proxy.h"
 
+namespace fl {
 
-/// STM32 hardware SPI output
-/// Routes to SPIDeviceProxy for hardware SPI management
-template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+#if defined(FASTLED_STM32) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 
+/// STM32 hardware SPI output for all pins
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+class SPIOutput : public STM32HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
-#endif  // STM32 variants
+#endif  // STM32 with FASTLED_ALL_PINS_HARDWARE_SPI
 
-#endif
+}  // namespace fl

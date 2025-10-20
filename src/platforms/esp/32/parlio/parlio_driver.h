@@ -29,6 +29,7 @@
 #include "eorder.h"
 #include "fl/stdio.h"
 #include "platforms/shared/clockless_timing.h"
+#include "parlio_driver_impl.h"
 
 namespace fl {
 
@@ -141,9 +142,5 @@ private:
     SemaphoreHandle_t xfer_done_sem_; ///< Semaphore for transfer completion
     volatile bool dma_busy_;        ///< Flag indicating DMA transfer in progress
 };
-
-// Include template implementation
-// allow-include-after-namespace
-#include "parlio_driver_impl.h"
 
 }  // namespace fl

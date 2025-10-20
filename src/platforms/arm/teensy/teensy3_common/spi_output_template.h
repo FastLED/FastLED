@@ -1,26 +1,19 @@
 #pragma once
 
 /// @file spi_output_template.h
-/// @brief Teensy 3.x SPIOutput template definition
-
-#ifndef __INC_PLATFORMS_TEENSY3_SPI_OUTPUT_TEMPLATE_H
-#define __INC_PLATFORMS_TEENSY3_SPI_OUTPUT_TEMPLATE_H
-
-#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI) && defined(SPI_DATA) && defined(SPI_CLOCK)
+/// @brief Teensy 3 SPIOutput template definition
 
 #include "fl/int.h"
 #include "spi_device_proxy.h"
 
+namespace fl {
 
-/// Generic fallback for generic pins on Teensy 3
-template<u8 _DATA_PIN, u8 _CLOCK_PIN, u32 _SPI_SPEED>
-class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+#if defined(FASTLED_TEENSY3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 
-/// Specialization for hardware SPI pins
-template<u32 _SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
+/// Teensy 3 hardware SPI output for all pins
+template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
+class SPIOutput : public Teensy3HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
+#endif  // Teensy 3 with FASTLED_ALL_PINS_HARDWARE_SPI
 
-#endif  // Teensy3 with hardware SPI
-
-#endif
+}  // namespace fl

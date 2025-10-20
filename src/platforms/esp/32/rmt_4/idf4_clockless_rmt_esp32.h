@@ -49,12 +49,6 @@
 #ifndef FASTLED_RMT_BUILTIN_DRIVER
 #define FASTLED_RMT_BUILTIN_DRIVER false
 #endif
-namespace fl {
-// allow-include-after-namespace
-// Platform-specific headers are included conditionally below
-#define FASTLED_HAS_CLOCKLESS 1
-// Not used.
-//#define NUM_COLOR_CHANNELS 3
 
 // -- Max RMT TX channel
 #ifndef FASTLED_RMT_MAX_CHANNELS
@@ -70,6 +64,12 @@ namespace fl {
 #endif
 #endif
 #endif
+
+namespace fl {
+// Platform-specific headers are included conditionally below
+#define FASTLED_HAS_CLOCKLESS 1
+// Not used.
+//#define NUM_COLOR_CHANNELS 3
 
 template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>

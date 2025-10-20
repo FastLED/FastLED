@@ -1,6 +1,10 @@
 #pragma once
 
-// allow-include-after-namespace
+#include "fl/str.h"
+#include "fl/int.h"
+#include "fl/type_traits.h"
+#include "crgb.h"
+#include "fl/ios.h"
 
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 #ifndef FL_IO_H_INCLUDED
@@ -8,12 +12,6 @@ namespace fl {
     void print(const char* str);
 }
 #endif
-
-#include "fl/str.h"
-#include "fl/int.h"
-#include "fl/type_traits.h"
-#include "crgb.h"
-#include "fl/ios.h"
 
 namespace fl {
 

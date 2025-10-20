@@ -1,4 +1,4 @@
-// allow-include-after-namespace
+
 
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
@@ -117,6 +117,12 @@ FL_EXTERN_C_END
 #endif
 #endif
 
+#if ESP_IDF_VERSION_MAJOR >= 5
+// for gpio_matrix_out
+#include <rom/gpio.h>
+#include "fl/cstring.h"
+#endif
+
 namespace {
     bool gUseBuiltInDriver = false;
 }
@@ -210,10 +216,6 @@ int ESP32RMTController::gMemBlocks;
 
 #if ESP_IDF_VERSION_MAJOR >= 5
 
-// for gpio_matrix_out
-#include <rom/gpio.h>
-
-#include "fl/cstring.h"
 // copied from rmt_private.h with slight changes to match the idf 4.x syntax
 typedef struct
 {

@@ -12,8 +12,10 @@
 #ifndef FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE
 #define FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE 64
 #endif
-namespace fl {
+
 #include <SPI.h>
+
+namespace fl {
 
 /*
  * ESP32 Hardware SPI Driver
@@ -56,8 +58,6 @@ namespace fl {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-#include<SPI.h>
 
 // Conditional compilation for ESP32 variants with different SPI support
 // Handle the transition from old (VSPI/HSPI) to new (SPI2/SPI3) constant names in Arduino framework 3.1.0+

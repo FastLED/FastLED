@@ -33,6 +33,20 @@
 #include "platforms/delay_generic.h"
 #endif
 
+// ============================================================================
+// Platform-specific cycle delay includes (delay_cycles)
+// ============================================================================
+// These provide NOP macros and delaycycles template implementations
+
+#if defined(__AVR__)
+#include "platforms/avr/delay_cycles.h"
+#elif defined(ESP32)
+#include "platforms/shared/delay_cycles_generic.h"
+#include "platforms/esp/delay_cycles_esp32.h"
+#else
+#include "platforms/shared/delay_cycles_generic.h"
+#endif
+
 namespace fl {
 
 // Forward declarations for platform-specific delay implementations
@@ -44,21 +58,6 @@ FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns, u32 hz);
 /// Platform-specific implementation of nanosecond delay with auto-detected frequency
 /// @param ns Number of nanoseconds
 FASTLED_FORCE_INLINE void delayNanoseconds_impl(u32 ns);
-
-// ============================================================================
-// Platform-specific cycle delay includes (delay_cycles)
-// ============================================================================
-// These provide NOP macros and delaycycles template implementations
-// allow-include-after-namespace
-
-#if defined(__AVR__)
-#include "platforms/avr/delay_cycles.h"
-#elif defined(ESP32)
-#include "platforms/shared/delay_cycles_generic.h"
-#include "platforms/esp/delay_cycles_esp32.h"
-#else
-#include "platforms/shared/delay_cycles_generic.h"
-#endif
 
 }  // namespace fl
 

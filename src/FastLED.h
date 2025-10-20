@@ -113,7 +113,7 @@ namespace fl {
 fl::u16 cled_contoller_size();
 }  // namespace fl
 
-// allow-include-after-namespace
+
 // The convenience includes below come after namespace declaration but are
 // intended for sketch inclusion and are intentionally placed here
 

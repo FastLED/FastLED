@@ -1,7 +1,7 @@
 #ifndef CRASH_HANDLER_H
 #define CRASH_HANDLER_H
 
-// allow-include-after-namespace
+
 // Determine which crash handler implementation to use
 #ifdef _WIN32
     #include "crash_handler_win.h"

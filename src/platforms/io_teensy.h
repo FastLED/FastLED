@@ -1,7 +1,5 @@
 #pragma once
 
-// allow-include-after-namespace
-
 #ifndef FASTLED_TEENSY_USE_PRINTF
 // DISABLED: printf causes ~5KB memory bloat for simple applications like Blink
 // Users can manually enable with #define FASTLED_TEENSY_USE_PRINTF 1 if needed
@@ -12,6 +10,9 @@
 // #endif
 #endif  // !defined(FASTLED_TEENSY_USE_PRINTF)
 
+#if !FASTLED_TEENSY_USE_PRINTF
+#include "io_null.h"
+#endif
 
 #if FASTLED_TEENSY_USE_PRINTF
 // Note: printf includes moved to avoid stdlib in header
@@ -42,8 +43,6 @@ inline int read_teensy() {
 
 
 #else // !FASTLED_TEENSY_USE_PRINTF
-
-#include "io_null.h"
 
 namespace fl {
 inline void print_teensy(const char* str) {
