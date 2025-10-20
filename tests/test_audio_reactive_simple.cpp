@@ -4,7 +4,6 @@
 #include "fl/memory.h"
 #include "fl/circular_buffer.h"
 
-using namespace fl;
 
 TEST_CASE("AudioReactive basic functionality") {
     // Test basic initialization

@@ -4,7 +4,6 @@
 #include "fl/deque.h"
 #include "fl/initializer_list.h"
 
-using namespace fl;
 
 TEST_CASE("deque construction and basic operations") {
     fl::deque<int> dq;

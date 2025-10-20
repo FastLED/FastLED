@@ -5,7 +5,6 @@
 #include <set>
 #include <unordered_set>
 
-using namespace fl;
 
 TEST_CASE("Empty set properties") {
     HashSet<int> s;

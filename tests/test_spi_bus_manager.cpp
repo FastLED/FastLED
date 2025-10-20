@@ -1,7 +1,6 @@
 #include "doctest.h"
 #include "platforms/shared/spi_bus_manager.h"
 
-using namespace fl;
 
 // Mock controller for testing
 struct MockController {

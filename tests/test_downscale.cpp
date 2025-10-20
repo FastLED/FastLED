@@ -7,7 +7,6 @@
 #include "fl/dbg.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("downscale 2x2 to 1x1") {
 

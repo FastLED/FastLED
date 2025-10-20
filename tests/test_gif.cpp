@@ -5,7 +5,6 @@
 #include "fl/bytestreammemory.h"
 #include "platforms/stub/fs_stub.hpp"
 
-using namespace fl;
 
 // Helper function to set up filesystem for codec tests
 static FileSystem setupCodecFilesystem() {

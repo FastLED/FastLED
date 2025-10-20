@@ -16,7 +16,7 @@ namespace fl {
         size_t total_size = nmemb * size;
         void* ptr = malloc(total_size);
         if (ptr != nullptr) {
-            memfill(ptr, 0, total_size);
+            memset(ptr, 0, total_size);
         }
         return ptr;
     }

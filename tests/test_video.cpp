@@ -23,7 +23,6 @@
 
 FASTLED_SMART_PTR(FakeFileHandle);
 
-using namespace fl;
 
 class FakeFileHandle : public FileHandle {
   public:

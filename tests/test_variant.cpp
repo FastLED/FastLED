@@ -8,7 +8,6 @@
 #include "fl/shared_ptr.h"
 #include "fl/function.h"
 
-using namespace fl;
 
 // Test object that tracks construction/destruction for move semantics testing
 struct TrackedObject {

@@ -6,7 +6,7 @@
 
 #include "esp_log.h"
 #include "platforms/assert_defs.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 #define LCD_TAG "FastLED_LCD"
 

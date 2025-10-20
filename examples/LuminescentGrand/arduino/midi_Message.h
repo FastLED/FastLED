@@ -29,7 +29,7 @@
 
 #include "midi_Namespace.h"
 #include "midi_Defs.h"
-#include "fl/memfill.h"
+#include "fl/cstring.h"
 
 BEGIN_MIDI_NAMESPACE
 

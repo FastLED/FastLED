@@ -8,7 +8,6 @@
 
 
 
-using namespace fl;
 
 TEST_CASE("Grid_int16_t") {
     Grid<int16_t> grid(2, 2);

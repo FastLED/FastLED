@@ -9,7 +9,6 @@
 #include "fl/string.h"
 #include "fl/namespace.h"
 
-using namespace fl;
 
 // Helper function to compare red-black tree with std::map
 template<typename StdMap, typename RBTree>

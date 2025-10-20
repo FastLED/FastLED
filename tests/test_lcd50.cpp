@@ -7,7 +7,6 @@
 
 namespace {
 
-using namespace fl;
 
 // Known chipset timing values for reference
 constexpr uint32_t WS2812_T1 = 350;   // ns

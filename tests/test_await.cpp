@@ -2,7 +2,6 @@
 #include "fl/async.h"
 #include "fl/promise.h"
 
-using namespace fl;
 
 TEST_CASE("fl::await_top_level - Basic Operations") {
     SUBCASE("await_top_level resolved promise returns value") {

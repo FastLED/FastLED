@@ -3,7 +3,6 @@
 #include "fl/promise_result.h"
 #include "fl/unused.h"
 
-using namespace fl;
 
 TEST_CASE("fl::promise - Basic Operations") {
     SUBCASE("Default constructor creates invalid promise") {

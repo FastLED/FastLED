@@ -25,7 +25,6 @@
 #include "platforms/stub/fs_stub.hpp"
 #endif
 
-using namespace fl;
 
 TEST_CASE("FileSystem test with real hard drive") {
     // Create a temporary test directory and file

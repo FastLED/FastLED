@@ -10,7 +10,6 @@
 #include "fl/random.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("reverse an int list") {
     fl::vector<int> vec;

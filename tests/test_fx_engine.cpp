@@ -11,7 +11,6 @@
 #include "fl/vector.h"
 #include "FastLED.h"
 
-using namespace fl;
 
 
 FASTLED_SMART_PTR(MockFx);

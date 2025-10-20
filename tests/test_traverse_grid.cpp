@@ -7,7 +7,6 @@
 #include <utility>
 #include <iostream>
 
-using namespace fl;
 
 struct CollectingVisitor {
     std::set<std::pair<int, int>> visited;

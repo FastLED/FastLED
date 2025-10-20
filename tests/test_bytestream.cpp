@@ -8,7 +8,6 @@
 
 #include "fl/namespace.h"
 
-using namespace fl;
 
 TEST_CASE("ByteStreamMemory basic operations") {
 

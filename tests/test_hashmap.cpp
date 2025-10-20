@@ -9,7 +9,6 @@
 #include "fl/str.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("Empty map properties") {
     HashMap<int, int> m;

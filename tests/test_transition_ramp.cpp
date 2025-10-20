@@ -6,7 +6,6 @@
 #include "test.h"
 #include <cstdint>
 
-using namespace fl;
 
 TEST_CASE("Test transition ramp") {
     // total latch = 100 ms, ramp‑up = 10 ms, ramp‑down = 10 ms

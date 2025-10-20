@@ -4,7 +4,6 @@
 #include "fl/geometry.h"
 
 
-using namespace fl;
 
 
 #define REQUIRE_APPROX(a, b, tolerance) \

@@ -4,7 +4,6 @@
 #include "fl/allocator.h"
 #include "fl/vector.h"
 
-using namespace fl;
 
 TEST_CASE("allocator_inlined_slab - Basic functionality") {
     using TestAllocator = fl::allocator_inlined_slab<int, 3>;

@@ -3,7 +3,6 @@
 #include "test.h"
 #include "FastLED.h"
 
-using namespace fl;
 
 #ifdef FASTLED_TESTING
 #include "platforms/stub/spi_single_stub.h"
@@ -180,7 +179,7 @@ TEST_CASE("SpiHw1: Name retrieval") {
     const char* name = single->getName();
     CHECK(name != nullptr);
     // Just verify it's a valid string, don't check exact value
-    CHECK(strlen(name) > 0);
+    CHECK(fl::strlen(name) > 0);
 }
 
 TEST_CASE("SpiHw1: Multiple controllers available") {

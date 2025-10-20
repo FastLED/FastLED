@@ -5,7 +5,6 @@
 #include "rgbw.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("Rectangular Buffer") {
     RectangularDrawBuffer buffer;

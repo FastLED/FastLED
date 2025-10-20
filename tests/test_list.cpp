@@ -2,7 +2,6 @@
 #include "fl/list.h"
 #include "fl/initializer_list.h"
 
-using namespace fl;
 
 TEST_CASE("list basic operations") {
     fl::list<int> lst;

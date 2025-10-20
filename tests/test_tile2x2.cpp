@@ -8,7 +8,6 @@
 #include "fl/tile2x2.h"
 #include <string>
 
-using namespace fl;
 
 // Test basic Tile2x2_u8 functionality
 // Verifies that a 2x2 tile can be created and values can be set/retrieved correctly

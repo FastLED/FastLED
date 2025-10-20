@@ -8,7 +8,6 @@
 
 #include "fl/namespace.h"
 
-using namespace fl;
 
 TEST_CASE("splat simple test") {
     // Define a simple input coordinate

@@ -1,7 +1,6 @@
 #include "test.h"
 #include "fl/codec/pixel.h"
 
-using namespace fl;
 
 TEST_CASE("RGB565 to RGB888 conversion validation") {
     // This test doesn't need filesystem setup

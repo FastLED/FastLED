@@ -10,7 +10,6 @@
 #include "fl/string.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("vector slice") {
     HeapVector<int> vec;

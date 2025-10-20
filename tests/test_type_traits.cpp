@@ -6,7 +6,6 @@
 #include "fl/type_traits.h"
 #include "fl/unused.h"
 
-using namespace fl;
 
 // Forward declarations
 class TestClass;

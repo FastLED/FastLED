@@ -16,7 +16,6 @@
 //   FASTLED_FFT_FLOAT - 32-bit floating point
 //   FASTLED_FFT_DOUBLE - 64-bit floating point
 
-using namespace fl;
 
 
 TEST_CASE("fft tester 512") {

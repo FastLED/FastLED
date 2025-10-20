@@ -4,7 +4,6 @@
 #include "fl/allocator.h"
 #include "fl/vector.h"
 
-using namespace fl;
 
 // Test struct for general allocator testing
 struct TestObject {

@@ -14,7 +14,6 @@
 #include "fl/scoped_array.h"
 #include "fl/ostream.h"
 
-using namespace fl;
 
 // Simple test effect that fills with a solid color
 class SolidColorFx2d : public fl::Fx2d {

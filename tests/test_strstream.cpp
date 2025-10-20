@@ -43,7 +43,6 @@
 
 #include "fl/namespace.h"
 
-using namespace fl;
 
 TEST_CASE("StrStream basic operations") {
     SUBCASE("Construction and assignment") {
@@ -53,15 +52,15 @@ TEST_CASE("StrStream basic operations") {
 
         StrStream s2("hello");
         CHECK(s2.str().size() == 5);
-        CHECK(strcmp(s2.str().c_str(), "hello") == 0);
+        CHECK(fl::strcmp(s2.str().c_str(), "hello") == 0);
 
         StrStream s3 = s2;
         CHECK(s3.str().size() == 5);
-        CHECK(strcmp(s3.str().c_str(), "hello") == 0);
+        CHECK(fl::strcmp(s3.str().c_str(), "hello") == 0);
 
         s = "world";
         CHECK(s.str().size() == 5);
-        CHECK(strcmp(s.str().c_str(), "world") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "world") == 0);
     }
 
     SUBCASE("Comparison operators") {
@@ -84,7 +83,7 @@ TEST_CASE("StrStream basic operations") {
         StrStream s("hello");
         s << " world";
         CHECK(s.str().size() == 11);
-        CHECK(strcmp(s.str().c_str(), "hello world") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "hello world") == 0);
     }
 
     SUBCASE("CRGB to StrStream") {
@@ -92,7 +91,7 @@ TEST_CASE("StrStream basic operations") {
         StrStream s;
         s << c;
         CHECK(s.str().size() == 13);  // "rgb8(255,0,0)" is 13 chars
-        CHECK(strcmp(s.str().c_str(), "rgb8(255,0,0)") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "rgb8(255,0,0)") == 0);
     }
 }
 
@@ -102,7 +101,7 @@ TEST_CASE("StrStream integer type handling") {
         fl::u8 val = 65;  // ASCII 'A'
         s << val;
         // Should display as "65" (number), not "A" (character)
-        CHECK(strcmp(s.str().c_str(), "65") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("unsigned char displays as number") {
@@ -110,7 +109,7 @@ TEST_CASE("StrStream integer type handling") {
         unsigned char val = 65;
         s << val;
         // Should display as "65" (number) due to 1-byte unsigned → u16 cast
-        CHECK(strcmp(s.str().c_str(), "65") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("char and integer types compile") {
@@ -135,7 +134,7 @@ TEST_CASE("StrStream integer type handling") {
         // Test a type that's definitely not char
         short val = 65;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "65") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("char with mTreatCharAsInt") {
@@ -144,7 +143,7 @@ TEST_CASE("StrStream integer type handling") {
         char c = 65;
         s << c;
         // With mTreatCharAsInt=true, char should display as number
-        CHECK(strcmp(s.str().c_str(), "65") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "65") == 0);
     }
 
     SUBCASE("all fundamental integer types") {
@@ -196,7 +195,7 @@ TEST_CASE("StrStream integer type handling") {
         s << (short)1 << (long)2 << (unsigned char)3 << (int)4;
 
         // Should produce "1234"
-        CHECK(strcmp(s.str().c_str(), "1234") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "1234") == 0);
     }
 }
 
@@ -213,49 +212,49 @@ TEST_CASE("StrStream comprehensive fl:: integer types") {
         StrStream s;
         fl::u8 val = 200;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "200") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
     }
 
     SUBCASE("fl::i16") {
         StrStream s;
         fl::i16 val = -1000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-1000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
     }
 
     SUBCASE("fl::u16") {
         StrStream s;
         fl::u16 val = 50000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "50000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
     }
 
     SUBCASE("fl::i32") {
         StrStream s;
         fl::i32 val = -100000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-100000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
     }
 
     SUBCASE("fl::u32") {
         StrStream s;
         fl::u32 val = 4000000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "4000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
     }
 
     SUBCASE("fl::i64") {
         StrStream s;
         fl::i64 val = -1000000000LL;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-1000000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
     }
 
     SUBCASE("fl::u64") {
         StrStream s;
         fl::u64 val = 1000000000ULL;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "1000000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
     }
 
     SUBCASE("fl::size") {
@@ -290,7 +289,7 @@ TEST_CASE("StrStream comprehensive fl:: integer types") {
         StrStream s;
         fl::uint val = 999999;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "999999") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "999999") == 0);
     }
 }
 
@@ -314,35 +313,35 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         StrStream s;
         unsigned char val = 200;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "200") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "200") == 0);
     }
 
     SUBCASE("short") {
         StrStream s;
         short val = -1000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-1000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-1000") == 0);
     }
 
     SUBCASE("unsigned short") {
         StrStream s;
         unsigned short val = 50000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "50000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "50000") == 0);
     }
 
     SUBCASE("int") {
         StrStream s;
         int val = -100000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-100000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-100000") == 0);
     }
 
     SUBCASE("unsigned int") {
         StrStream s;
         unsigned int val = 4000000;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "4000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "4000000") == 0);
     }
 
     SUBCASE("long") {
@@ -363,14 +362,14 @@ TEST_CASE("StrStream comprehensive fundamental integer types") {
         StrStream s;
         long long val = -1000000000LL;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "-1000000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "-1000000000") == 0);
     }
 
     SUBCASE("unsigned long long") {
         StrStream s;
         unsigned long long val = 1000000000ULL;
         s << val;
-        CHECK(strcmp(s.str().c_str(), "1000000000") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "1000000000") == 0);
     }
 
     SUBCASE("bool") {
@@ -531,7 +530,7 @@ TEST_CASE("StrStream edge value testing") {
         s << fl::u16(65535);          // max u16
 
         const char* result = s.str().c_str();
-        CHECK(strcmp(result, "-32768 32767 0 65535") == 0);
+        CHECK(fl::strcmp(result, "-32768 32767 0 65535") == 0);
     }
 
     SUBCASE("32-bit edge values") {
@@ -597,7 +596,7 @@ TEST_CASE("StrStream reference types") {
         fl::i32& ref = val;
 
         s << ref;
-        CHECK(strcmp(s.str().c_str(), "100") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
     }
 
     SUBCASE("const references") {
@@ -606,7 +605,7 @@ TEST_CASE("StrStream reference types") {
         const fl::i32& cref = val;
 
         s << cref;
-        CHECK(strcmp(s.str().c_str(), "100") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "100") == 0);
     }
 
     SUBCASE("mixed references") {
@@ -617,7 +616,7 @@ TEST_CASE("StrStream reference types") {
         const fl::u16& cref2 = val2;
 
         s << ref1 << " " << cref2;
-        CHECK(strcmp(s.str().c_str(), "100 200") == 0);
+        CHECK(fl::strcmp(s.str().c_str(), "100 200") == 0);
     }
 }
 

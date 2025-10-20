@@ -300,7 +300,7 @@ TEST_CASE("fl::istream simple debug test") {
         
         CHECK(test_stream.good());
         CHECK(word.size() == 5);
-        CHECK(strcmp(word.c_str(), "Hello") == 0);
+        CHECK(fl::strcmp(word.c_str(), "Hello") == 0);
     }
     
     // Clean up handlers

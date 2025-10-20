@@ -8,7 +8,6 @@
 #include <unistd.h>  // for usleep
 #endif
 
-using namespace fl;
 
 TEST_CASE("ThreadLocal - basic functionality") {
     ThreadLocal<int> tls;

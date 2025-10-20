@@ -2,7 +2,6 @@
 #include "fl/allocator.h"
 #include "fl/vector.h"
 
-using namespace fl;
 
 // Global variables to track hook calls
 static fl::vector_inlined<void*, 1000> gMallocCalls;

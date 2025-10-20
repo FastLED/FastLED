@@ -7,7 +7,6 @@
 #include "fl/function.h"
 #include "fl/function_list.h"
 
-using namespace fl;
 
 
 // Free function for testing

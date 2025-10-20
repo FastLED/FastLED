@@ -4,7 +4,6 @@
 #include "fl/ptr.h"
 #include "fl/scoped_ptr.h"
 
-using namespace fl;
 
 // Test data and functions
 static int add(int a, int b) {

@@ -2,7 +2,6 @@
 
 #include "test.h"
 
-using namespace fl;
 
 // Test sketch implementation
 static int setup_call_count = 0;

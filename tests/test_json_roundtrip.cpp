@@ -1,7 +1,6 @@
 #include "test.h"
 #include "fl/json.h"
 
-using namespace fl;
 
 TEST_CASE("JSON Round Trip Serialization Test") {
     // Create the initial JSON string

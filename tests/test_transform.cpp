@@ -10,7 +10,6 @@
 #include "fl/unused.h"
 #include <string>
 
-using namespace fl;
 
 
 TEST_CASE("Transform16::ToBounds(max_value)") {

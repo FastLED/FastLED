@@ -7,7 +7,6 @@
 #include "fl/initializer_list.h"
 
 
-using namespace fl;
 
 TEST_CASE("Fixed vector simple") {
     fl::FixedVector<int, 5> vec;

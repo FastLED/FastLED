@@ -23,7 +23,6 @@
 #include "platforms/shared/spi_bitbang/spi_block_32.h"
 #include "platforms/shared/spi_bitbang/host_sim.h"
 
-using namespace fl;
 
 // ============================================================================
 // SpiBlock32 Tests

@@ -6,7 +6,6 @@
 #include "fl/math.h"
 #include "lib8tion/intmap.h"
 
-using namespace fl;
 
 TEST_CASE("RGB to HSV16 to RGB") {
 

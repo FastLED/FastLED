@@ -5,7 +5,6 @@
 #include "platforms/stub/fs_stub.hpp"
 #endif
 
-using namespace fl;
 using namespace fl::third_party;
 
 // Minimal valid MP3 frame header (Layer III, MPEG1, 44.1kHz, 128kbps, mono)

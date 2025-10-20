@@ -19,7 +19,6 @@
 #include "platforms/shared/spi_bitbang/spi_isr_32.h"
 #include "platforms/shared/spi_bitbang/host_sim.h"
 
-using namespace fl;
 
 namespace {
 

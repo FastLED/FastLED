@@ -8,7 +8,6 @@
 #include "fl/lut.h"
 
 
-using namespace fl;
 
 TEST_CASE("LUT interp8") {
     LUT<uint16_t> lut(2);

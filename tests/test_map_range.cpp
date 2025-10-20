@@ -7,7 +7,6 @@
 #include "fl/map_range.h"
 
 
-using namespace fl;
 
 TEST_CASE("map_range<uint8_t>") {
     

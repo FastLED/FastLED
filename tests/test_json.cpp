@@ -7,7 +7,6 @@
 #include "fl/screenmap.h"
 #include "fl/map.h"
 
-using namespace fl;
 
 
 TEST_CASE("Test simple JSON parsing") {

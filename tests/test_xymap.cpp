@@ -3,7 +3,6 @@
 #include "test.h"
 #include "FastLED.h"
 
-using namespace fl;
 
 namespace {
 // Helper to fill a LUT for serpentine layout

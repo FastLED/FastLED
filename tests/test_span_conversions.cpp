@@ -4,7 +4,6 @@
 #include "fl/vector.h"
 #include "fl/array.h"
 
-using namespace fl;
 
 TEST_CASE("fl::span explicit conversions work correctly") {
     SUBCASE("fl::vector to fl::span conversions") {

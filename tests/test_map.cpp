@@ -7,7 +7,6 @@
 #include "fl/vector.h"
 #include "fl/namespace.h"
 
-using namespace fl;
 
 // Helper function to compare map contents
 template<typename StdMap, typename FlMap>

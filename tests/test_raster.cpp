@@ -10,7 +10,6 @@
 
 #include "fl/namespace.h"
 
-using namespace fl;
 
 
 TEST_CASE("XYRasterU8SparseTest should match bounds of pixels draw area") {

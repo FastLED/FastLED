@@ -4,6 +4,7 @@
 
 #include "fl/stdint.h"
 #include <iostream>
+#include <cstring>  // Bring in C string functions first
 #include <set>
 #include <string>
 #include <vector>
@@ -44,8 +45,6 @@
         }                                                                      \
         REQUIRE(_result);                                                      \
     } while (0)
-
-using namespace fl;
 
 namespace doctest {
 template <> struct StringMaker<CRGB> {

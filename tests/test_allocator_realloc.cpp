@@ -5,7 +5,6 @@
 #include "fl/allocator.h"
 #include "fl/vector.h"
 
-using namespace fl;
 
 TEST_CASE("Allocator Traits - Capability Detection") {
     SUBCASE("allocator_realloc has both capabilities") {

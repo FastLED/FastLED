@@ -5,7 +5,6 @@
 #include "fl/bitset_dynamic.h"
 
 
-using namespace fl;
 
 
 TEST_CASE("test bitset") {

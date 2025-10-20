@@ -10,7 +10,6 @@
 #include "fl/unused.h"
 #include <string>
 
-using namespace fl;
 
 #define MESSAGE_TILE(TILE) \
     MESSAGE("\nTile:\n" \

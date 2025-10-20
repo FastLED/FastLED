@@ -3,7 +3,6 @@
 #include "test.h"
 #include "fl/priority_queue.h"
 
-using namespace fl;
 
 TEST_CASE("Simple Priority Queue") {
     PriorityQueue<int> pq;

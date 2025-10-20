@@ -6,7 +6,6 @@
 #include <cstring>
 #include <string>
 
-using namespace fl;
 
 TEST_CASE("fl::string - Construction and Assignment") {
     SUBCASE("Default construction") {
@@ -22,7 +21,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         string s("Hello, World!");
         CHECK(s.size() == 13);
         CHECK(s.length() == 13);
-        CHECK(strcmp(s.c_str(), "Hello, World!") == 0);
+        CHECK(fl::strcmp(s.c_str(), "Hello, World!") == 0);
         CHECK_FALSE(s.empty());
     }
 
@@ -37,7 +36,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         string s1("Original string");
         string s2(s1);
         CHECK(s2.size() == s1.size());
-        CHECK(strcmp(s2.c_str(), s1.c_str()) == 0);
+        CHECK(fl::strcmp(s2.c_str(), s1.c_str()) == 0);
         CHECK(s2 == s1);
     }
 
@@ -45,7 +44,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         string s;
         s = "Assigned string";
         CHECK(s.size() == 15);
-        CHECK(strcmp(s.c_str(), "Assigned string") == 0);
+        CHECK(fl::strcmp(s.c_str(), "Assigned string") == 0);
     }
 
     SUBCASE("Copy assignment") {
@@ -63,7 +62,7 @@ TEST_CASE("fl::string - Construction and Assignment") {
         FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
         s = s;
         FL_DISABLE_WARNING_POP
-        CHECK(strcmp(s.c_str(), "Self assignment test") == 0);
+        CHECK(fl::strcmp(s.c_str(), "Self assignment test") == 0);
     }
 }
 
@@ -76,7 +75,7 @@ TEST_CASE("fl::string - Element Access") {
         
         s[0] = 'h';
         CHECK(s[0] == 'h');
-        CHECK(strcmp(s.c_str(), "hello") == 0);
+        CHECK(fl::strcmp(s.c_str(), "hello") == 0);
     }
 
     SUBCASE("operator[] - const") {
@@ -105,7 +104,7 @@ TEST_CASE("fl::string - Element Access") {
 
     SUBCASE("c_str() and data()") {
         string s("Hello");
-        CHECK(strcmp(s.c_str(), "Hello") == 0);
+        CHECK(fl::strcmp(s.c_str(), "Hello") == 0);
         CHECK(s.c_str()[5] == '\0');
         
         // For fl::string, c_str() should always be null-terminated
@@ -243,15 +242,15 @@ TEST_CASE("fl::string - Substring Operations") {
         // Standard substr(pos, length) behavior
         // substr(0, 4) should return "http"
         string scheme = original.substr(0, 4);
-        CHECK(strcmp(scheme.c_str(), "http") == 0);
+        CHECK(fl::strcmp(scheme.c_str(), "http") == 0);
         
         // substr(7, 7) should return "fastled" (7 chars starting at pos 7)
         string host_part = original.substr(7, 7);
-        CHECK(strcmp(host_part.c_str(), "fastled") == 0);
+        CHECK(fl::strcmp(host_part.c_str(), "fastled") == 0);
         
         // substr(7) should return everything from position 7 onwards
         string from_host = original.substr(7);
-        CHECK(strcmp(from_host.c_str(), "fastled.io") == 0);
+        CHECK(fl::strcmp(from_host.c_str(), "fastled.io") == 0);
     }
 
     SUBCASE("substr() - edge cases") {
@@ -263,7 +262,7 @@ TEST_CASE("fl::string - Substring Operations") {
         
         // Length beyond end
         string partial = original.substr(15, 100);
-        CHECK(strcmp(partial.c_str(), "io") == 0);
+        CHECK(fl::strcmp(partial.c_str(), "io") == 0);
         
         // Zero length
         string zero_len = original.substr(5, 0);
@@ -406,14 +405,14 @@ TEST_CASE("fl::string - Stream Operations") {
         string result = oss.str();
         
         // Should be "http", not "104116116112" (ASCII values)
-        CHECK(strcmp(result.c_str(), "http") == 0);
+        CHECK(fl::strcmp(result.c_str(), "http") == 0);
         
         // Test with special characters
         string special("://");
         fl::StrStream oss2;
         oss2 << special;
         string result2 = oss2.str();
-        CHECK(strcmp(result2.c_str(), "://") == 0);
+        CHECK(fl::strcmp(result2.c_str(), "://") == 0);
     }
 
     SUBCASE("Stream output - complex") {
@@ -425,7 +424,7 @@ TEST_CASE("fl::string - Stream Operations") {
         fl::StrStream oss;
         oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
         string full_output = oss.str();
-        CHECK(strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
+        CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
     }
 }
 
@@ -477,7 +476,7 @@ TEST_CASE("fl::string - Inline vs Heap Storage") {
         string s(long_str.c_str());
         
         CHECK(s.size() == long_str.length());
-        CHECK(strcmp(s.c_str(), long_str.c_str()) == 0);
+        CHECK(fl::strcmp(s.c_str(), long_str.c_str()) == 0);
     }
 
     SUBCASE("Transition from inline to heap") {
@@ -710,29 +709,29 @@ TEST_CASE("fl::string - Comprehensive Integration Tests") {
         
         // Extract scheme
         string scheme = url.substr(0, 5);  // "https"
-        CHECK(strcmp(scheme.c_str(), "https") == 0);
+        CHECK(fl::strcmp(scheme.c_str(), "https") == 0);
         CHECK(scheme == "https");
         
         // Extract protocol separator  
         string proto_sep = url.substr(5, 3);  // "://"
-        CHECK(strcmp(proto_sep.c_str(), "://") == 0);
+        CHECK(fl::strcmp(proto_sep.c_str(), "://") == 0);
         CHECK(proto_sep == "://");
         
         // Extract host
         string host = url.substr(8, 9);  // "192.0.2.0"
-        CHECK(strcmp(host.c_str(), "192.0.2.0") == 0);
+        CHECK(fl::strcmp(host.c_str(), "192.0.2.0") == 0);
         CHECK(host == "192.0.2.0");
         
         // Extract path
         string path = url.substr(17);  // "/test"
-        CHECK(strcmp(path.c_str(), "/test") == 0);
+        CHECK(fl::strcmp(path.c_str(), "/test") == 0);
         CHECK(path == "/test");
         
         // Stream output test
         fl::StrStream oss;
         oss << "Scheme: " << scheme << ", Host: " << host << ", Path: " << path;
         string full_output = oss.str();
-        CHECK(strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
+        CHECK(fl::strcmp(full_output.c_str(), "Scheme: https, Host: 192.0.2.0, Path: /test") == 0);
     }
 }
 
@@ -757,7 +756,7 @@ TEST_CASE("fl::string - Regression Tests and Debug Scenarios") {
         // Debug: Check substring extraction (the failing operation)
         string scheme = test_url.substr(0, 4);
         CHECK_EQ(4, scheme.size());
-        CHECK(strcmp(scheme.c_str(), "http") == 0);
+        CHECK(fl::strcmp(scheme.c_str(), "http") == 0);
         
         // The critical test: equality comparison
         CHECK(scheme == "http");

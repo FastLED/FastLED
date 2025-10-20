@@ -5,7 +5,6 @@
 #include "fl/vector.h"
 #include <algorithm>
 
-using namespace fl;
 
 // Test struct for slab allocator testing
 struct TestObject {

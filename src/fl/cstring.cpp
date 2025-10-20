@@ -7,8 +7,16 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 #include "cstring.h"
+// Include C string headers for standard C library functions
+#include <string.h>  // ok include
+#include <stdlib.h>  // ok include
+
+// Include Arduino PROGMEM headers if on AVR
+#if defined(ARDUINO) && defined(__AVR__)
+#include <avr/pgmspace.h>
+#endif
+
 // C library string functions are available through the global namespace
-// without explicitly including <cstring> (they're typically in <cstdlib> or available globally)
 
 namespace fl {
 
@@ -79,6 +87,9 @@ const void* memchr(const void* s, int c, size_t n) noexcept {
 // ============================================================================
 // Arduino PROGMEM String Functions (platform-specific _P variants)
 // ============================================================================
+// Only available on platforms that support PROGMEM (AVR, some ARM boards)
+
+#if defined(ARDUINO) && defined(__AVR__)
 
 size_t strlen_P(detail::pgm_p s) noexcept {
     return ::strlen_P(reinterpret_cast<const char*>(s));
@@ -95,5 +106,7 @@ int memcmp_P(const void* a, detail::pgm_p b, size_t n) noexcept {
 void* memcpy_P(void* dest, detail::pgm_p src, size_t n) noexcept {
     return ::memcpy_P(dest, src, n);
 }
+
+#endif  // defined(ARDUINO) && defined(__AVR__)
 
 }  // namespace fl

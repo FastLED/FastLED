@@ -8,7 +8,6 @@
 
 #include "fl/namespace.h"
 
-using namespace fl;
 
 TEST_CASE("circular_buffer basic operations") {
     CircularBuffer<int> buffer(5);

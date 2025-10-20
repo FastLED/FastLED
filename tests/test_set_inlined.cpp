@@ -5,7 +5,6 @@
 #include "fl/bit_cast.h"
 #include <algorithm>
 
-using namespace fl;
 
 TEST_CASE("fl::set_inlined - Basic functionality") {
     

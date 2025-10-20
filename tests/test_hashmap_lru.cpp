@@ -9,7 +9,6 @@
 #include "fl/str.h"
 #include "test.h"
 
-using namespace fl;
 
 TEST_CASE("Test HashMapLRU") {
     SUBCASE("Basic operations") {

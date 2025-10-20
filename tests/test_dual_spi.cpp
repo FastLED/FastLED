@@ -4,7 +4,6 @@
 #include "FastLED.h"
 #include "platforms/shared/spi_transposer.h"
 
-using namespace fl;
 
 // ============================================================================
 // Core Transpose Tests - Bit Interleaving Correctness

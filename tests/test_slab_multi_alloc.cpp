@@ -1,7 +1,6 @@
 #include "doctest.h"
 #include "fl/allocator.h"
 
-using namespace fl;
 
 TEST_CASE("SlabAllocator - Multi-allocation support") {
     SUBCASE("Small multi-allocation (3 objects)") {

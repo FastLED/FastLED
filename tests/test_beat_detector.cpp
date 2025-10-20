@@ -10,7 +10,6 @@
 #include "platforms/stub/fs_stub.hpp"
 #endif
 
-using namespace fl;
 using namespace fl::third_party;
 
 TEST_CASE("BeatDetector - Basic initialization") {

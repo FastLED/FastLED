@@ -523,7 +523,7 @@ TEST_CASE("JsonConsole dump function") {
     
     // Helper function to check if string contains substring
     auto contains = [](const fl::string& str, const char* substr) {
-        return fl::strstr(str.c_str(), substr) != nullptr;
+        return fl::fl::strstr(str.c_str(), substr) != nullptr;
     };
     
     // Test 1: Uninitialized JsonConsole dump

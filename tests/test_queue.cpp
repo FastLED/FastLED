@@ -5,7 +5,6 @@
 #include "fl/vector.h"
 #include "fl/deque.h"
 
-using namespace fl;
 
 TEST_CASE("Basic Queue Operations") {
     fl::queue<int> q;

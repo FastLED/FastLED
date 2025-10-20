@@ -13,7 +13,6 @@
 
 #define NUM_LEDS 288
 
-using namespace fl;
 
 TEST_CASE("Corkscrew Circle10 test") {
     // Test basic dimensional calculations using Corkscrew objects directly

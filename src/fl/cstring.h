@@ -65,6 +65,20 @@ void* memchr(void* s, int c, size_t n) noexcept;
 const void* memchr(const void* s, int c, size_t n) noexcept;
 
 // ============================================================================
+// Legacy compatibility functions (aliases)
+// ============================================================================
+
+// fl::memfill - legacy name for memset
+inline void* memfill(void* s, int c, size_t n) noexcept {
+    return memset(s, c, n);
+}
+
+// fl::memcopy - legacy name for memcpy
+inline void* memcopy(void* dest, const void* src, size_t n) noexcept {
+    return memcpy(dest, src, n);
+}
+
+// ============================================================================
 // Arduino PROGMEM String Functions (platform-specific _P variants)
 // ============================================================================
 // These are used when strings are stored in program memory on embedded platforms
@@ -73,6 +87,9 @@ const void* memchr(const void* s, int c, size_t n) noexcept;
 namespace detail {
     typedef const void* pgm_p;
 }
+
+// Only declare PROGMEM functions on platforms that support them
+#if defined(ARDUINO) && defined(__AVR__)
 
 // fl::strlen_P - strlen for PROGMEM strings
 size_t strlen_P(detail::pgm_p s) noexcept;
@@ -85,5 +102,7 @@ int memcmp_P(const void* a, detail::pgm_p b, size_t n) noexcept;
 
 // fl::memcpy_P - memcpy from PROGMEM
 void* memcpy_P(void* dest, detail::pgm_p src, size_t n) noexcept;
+
+#endif  // defined(ARDUINO) && defined(__AVR__)
 
 }  // namespace fl

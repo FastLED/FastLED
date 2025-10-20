@@ -7,7 +7,6 @@
 #include "fl/line_simplification.h"
 #include "fl/warn.h"
 
-using namespace fl;
 
 TEST_CASE("Test Line Simplification") {
     // default‐constructed bitset is empty
