@@ -69,7 +69,7 @@ class SPIDeviceProxy;
 }
 #endif
 
-#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#if defined(FASTLED_TEENSY3)
 namespace fl {
 template<uint8_t DATA_PIN, uint8_t CLOCK_PIN, uint32_t SPI_SPEED>
 class SPIDeviceProxy;
@@ -107,7 +107,7 @@ class SPIOutput : public fl::StubSPIOutput {};
 
 #else
 
-#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(FASTLED_TEENSY3) && !defined(FASTLED_TEENSY4) && !defined(FASTLED_TEENSYLC) && !defined(NRF51) && !defined(NRF52_SERIES)
+#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(FASTLED_TEENSY3) && !defined(FASTLED_TEENSY4) && !defined(FASTLED_TEENSYLC)
 /// Hardware SPI output
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
@@ -150,8 +150,13 @@ class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVI
 #if defined(SPI_DATA) && defined(SPI_CLOCK)
 
 #if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+// Generic fallback for generic pins on Teensy 3
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
+
+// Specialization for hardware SPI pins
+template<fl::u32 _SPI_SPEED>
+class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
 
 #elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
 // Specialized templates for each SPI peripheral on Teensy 4.x
