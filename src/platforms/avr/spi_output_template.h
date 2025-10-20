@@ -4,6 +4,7 @@
 /// @brief AVR SPIOutput template definition
 
 #include "fl/int.h"
+#include "fastspi_avr.h"
 
 namespace fl {
 

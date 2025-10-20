@@ -81,7 +81,7 @@
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #elif defined(__AVR__)
-  // AVR clockless controllers are included implicitly
+  #include "platforms/avr/clockless_trinket.h"
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS

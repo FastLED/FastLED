@@ -1,5 +1,9 @@
 #ifndef __INC_FASTSPI_AVR_H
 #define __INC_FASTSPI_AVR_H
+
+#include "fastspi_types.h"
+#include "fl/delay.h"
+
 namespace fl {
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -859,7 +863,7 @@ public:
 // #define FASTLED_FORCE_SOFTWARE_SPI
 #endif
 
-FASTLED_NAMESPACE_END;
+}  // namespace fl
 
 
 #endif
