@@ -1,6 +1,7 @@
 #ifndef __INC_FASTSPI_ARM_MXRT1062_H
 #define __INC_FASTSPI_ARM_MXRT1062_H
 namespace fl {
+// allow-include-after-namespace
 #if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
 #include <SPI.h>
 

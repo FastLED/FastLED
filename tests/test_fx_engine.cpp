@@ -11,7 +11,7 @@
 #include "fl/vector.h"
 #include "FastLED.h"
 
-
+using namespace fl;
 
 FASTLED_SMART_PTR(MockFx);
 
@@ -56,7 +56,7 @@ TEST_CASE("test_fx_engine") {
             // CHECK(leds[i] == CRGB::Red);
             bool is_red = leds[i] == CRGB::Red;
             if (!is_red) {
-                fl::Str err = leds[i].toString();
+                Str err = leds[i].toString();
                 printf("leds[%d] is not red, was instead: %s\n", i, err.c_str());
                 CHECK(is_red);
             }
@@ -170,7 +170,7 @@ TEST_CASE("test_transition") {
 
 // Simple Fx2d object which writes a single red pixel to the first LED
 // with the red component being the intensity of the frame counter.
-class Fake2d : public fl::Fx2d {
+class Fake2d : public Fx2d {
   public:
     Fake2d() : Fx2d(XYMap::constructRectangularGrid(1,1)) {}
 
@@ -187,7 +187,7 @@ class Fake2d : public fl::Fx2d {
 
     fl::Str fxName() const override { return "Fake2d"; }
     uint8_t mFrameCounter = 0;
-    fl::FixedVector<CRGB, 5> mColors;
+    FixedVector<CRGB, 5> mColors;
 };
 
 TEST_CASE("test_fixed_fps") {

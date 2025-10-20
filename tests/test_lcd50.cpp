@@ -5,6 +5,8 @@
 #include "platforms/shared/clockless_timing.h"
 #include "crgb.h"
 
+using namespace fl;
+
 namespace {
 
 
@@ -316,7 +318,7 @@ TEST_CASE("fl::ClocklessTiming::is_timing_acceptable") {
     }
 
     SUBCASE("Invalid result") {
-        fl::ClocklessTimingResult result = {};
+        ClocklessTimingResult result = {};
         result.valid = false;
 
         CHECK_FALSE(fl::ClocklessTiming::is_timing_acceptable(result));

@@ -50,6 +50,8 @@
 #define FASTLED_RMT_BUILTIN_DRIVER false
 #endif
 namespace fl {
+// allow-include-after-namespace
+// Platform-specific headers are included conditionally below
 #define FASTLED_HAS_CLOCKLESS 1
 // Not used.
 //#define NUM_COLOR_CHANNELS 3

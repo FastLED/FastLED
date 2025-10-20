@@ -4,6 +4,7 @@
 #include "FastLED.h"
 #include "platforms/shared/spi_transposer.h"
 
+using namespace fl;
 
 // ============================================================================
 // Core Transpose Tests - Bit Interleaving Correctness
@@ -230,13 +231,13 @@ TEST_CASE("SPITransposerDual: Zero padding for missing lanes") {
 #include "platforms/stub/spi_dual_stub.h"
 
 TEST_CASE("SpiHw2: Hardware initialization") {
-    const auto& controllers = fl::SpiHw2::getAll();
+    const auto& controllers = SpiHw2::getAll();
     CHECK(controllers.size() > 0);
 
-    fl::SpiHw2* dual = controllers[0];
+    SpiHw2* dual = controllers[0];
     CHECK(dual != nullptr);
 
-    fl::SpiHw2::Config config;
+    SpiHw2::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -252,10 +253,10 @@ TEST_CASE("SpiHw2: Hardware initialization") {
 }
 
 TEST_CASE("SpiHw2: Async transmission") {
-    const auto& controllers = fl::SpiHw2::getAll();
-    fl::SpiHw2* dual = controllers[0];
+    const auto& controllers = SpiHw2::getAll();
+    SpiHw2* dual = controllers[0];
 
-    fl::SpiHw2::Config config;
+    SpiHw2::Config config;
     config.bus_num = 0;
     config.clock_speed_hz = 40000000;
     config.clock_pin = 18;
@@ -275,13 +276,13 @@ TEST_CASE("SpiHw2: Async transmission") {
 }
 
 TEST_CASE("SpiHw2: Stub inspection") {
-    const auto& controllers = fl::SpiHw2::getAll();
-    fl::SpiHw2Stub* stub = fl::toStub(controllers[0]);
+    const auto& controllers = SpiHw2::getAll();
+    SpiHw2Stub* stub = toStub(controllers[0]);
     CHECK(stub != nullptr);
 
     stub->reset();
 
-    fl::SpiHw2::Config config;
+    SpiHw2::Config config;
     config.bus_num = 0;
     CHECK(stub->begin(config));
 
@@ -297,12 +298,12 @@ TEST_CASE("SpiHw2: Stub inspection") {
 }
 
 TEST_CASE("SpiHw2: Extract lanes from interleaved data") {
-    const auto& controllers = fl::SpiHw2::getAll();
-    fl::SpiHw2Stub* stub = fl::toStub(controllers[0]);
+    const auto& controllers = SpiHw2::getAll();
+    SpiHw2Stub* stub = toStub(controllers[0]);
 
     stub->reset();
 
-    fl::SpiHw2::Config config;
+    SpiHw2::Config config;
     CHECK(stub->begin(config));
 
     // Create interleaved data manually
@@ -331,7 +332,7 @@ TEST_CASE("SpiHw2: Extract lanes from interleaved data") {
 #include "platforms/shared/spi_bitbang/spi_block_2.h"
 
 TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {
-    fl::SpiBlock2 spi;
+    SpiBlock2 spi;
 
     // Configure pins (2 data + 1 clock)
     spi.setPinMapping(0, 1, 8);  // Data pins 0,1, Clock pin 8
@@ -346,10 +347,10 @@ TEST_CASE("SPIBlocking Dual: Basic initialization and configuration") {
 }
 
 TEST_CASE("SPIBlocking Dual: LUT initialization") {
-    fl::SpiBlock2 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(5, 6, 10);  // Data pins 5,6, Clock pin 10
 
-    auto lut = spi.getLUTArray();
+    PinMaskEntry* lut = spi.getLUTArray();
 
     // Verify LUT entries for 2-bit patterns
     // 0x00 (00) - Both pins low
@@ -375,7 +376,7 @@ TEST_CASE("SPIBlocking Dual: LUT initialization") {
 }
 
 TEST_CASE("SPIBlocking Dual: Empty buffer handling") {
-    fl::SpiBlock2 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(0, 1, 8);
 
     // Transmit with no buffer should not crash
@@ -388,7 +389,7 @@ TEST_CASE("SPIBlocking Dual: Empty buffer handling") {
 }
 
 TEST_CASE("SPIBlocking Dual: Maximum buffer size") {
-    fl::SpiBlock2 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(0, 1, 8);
 
     uint8_t largeBuffer[300];
@@ -406,10 +407,10 @@ TEST_CASE("SPIBlocking Dual: Multiple pin configurations") {
     for (uint8_t d0 = 0; d0 < 5; d0++) {
         for (uint8_t d1 = 5; d1 < 10; d1++) {
             for (uint8_t clk = 10; clk < 12; clk++) {
-                fl::SpiBlock2 spi;
+                SpiBlock2 spi;
                 spi.setPinMapping(d0, d1, clk);
 
-                auto lut = spi.getLUTArray();
+                PinMaskEntry* lut = spi.getLUTArray();
 
                 // Verify 4 fundamental patterns
                 // 0x00 (00) - Both pins low
@@ -433,10 +434,10 @@ TEST_CASE("SPIBlocking Dual: Multiple pin configurations") {
 }
 
 TEST_CASE("SPIBlocking Dual: Pattern consistency") {
-    fl::SpiBlock2 spi;
+    SpiBlock2 spi;
     spi.setPinMapping(2, 3, 8);
 
-    auto lut = spi.getLUTArray();
+    PinMaskEntry* lut = spi.getLUTArray();
 
     // All entries with same lower 2 bits should have same masks
     // Check a few examples across the 256 entries

@@ -11,6 +11,8 @@ FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 namespace fl {
+// allow-include-after-namespace
+// Platform-specific implementations are conditionally included below
 /// @file scale8.h
 /// Fast, efficient 8-bit scaling functions specifically
 /// designed for high-performance LED programming.
