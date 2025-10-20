@@ -11,6 +11,7 @@ import platform
 import re
 import shutil
 import subprocess
+import sys
 import threading
 import time
 import urllib.request
@@ -762,10 +763,33 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
             dest_subdir.mkdir(parents=True, exist_ok=True)
             # Only pass content=True in Docker environments (content-based comparison)
             # On other systems, use default behavior (timestamp/size) by omitting the parameter
-            if os.environ.get("DOCKER_CONTAINER", "") != "":
-                sync(str(file_path), str(dest_subdir), "sync", purge=True, content=True)
-            else:
-                sync(str(file_path), str(dest_subdir), "sync", purge=True)
+            # On Windows, add retry logic for file locking issues
+            max_retries = 3 if sys.platform == "win32" else 1
+            retry_delay = 0.5  # seconds
+
+            for attempt in range(max_retries):
+                try:
+                    if os.environ.get("DOCKER_CONTAINER", "") != "":
+                        sync(
+                            str(file_path),
+                            str(dest_subdir),
+                            "sync",
+                            purge=True,
+                            content=True,
+                        )
+                    else:
+                        sync(str(file_path), str(dest_subdir), "sync", purge=True)
+                    break  # Success, exit retry loop
+                except OSError as e:
+                    # Handle Windows file locking errors (WinError 32)
+                    if sys.platform == "win32" and attempt < max_retries - 1:
+                        print(
+                            f"File access error syncing example subdirectory, retrying ({attempt + 1}/{max_retries}): {e}"
+                        )
+                        time.sleep(retry_delay)
+                    else:
+                        raise
+
             try:
                 rel_source = file_path.relative_to(Path.cwd())
                 rel_dest = dest_subdir.relative_to(Path.cwd())
@@ -849,10 +873,32 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
         # Use sync for better caching - purge=True removes extra files
         # Only pass content=True in Docker environments (content-based comparison)
         # On other systems, use default behavior (timestamp/size) by omitting the parameter
-        if os.environ.get("DOCKER_CONTAINER", "") != "":
-            sync(str(boards_src), str(boards_dst), "sync", purge=True, content=True)
-        else:
-            sync(str(boards_src), str(boards_dst), "sync", purge=True)
+        # On Windows, add retry logic for file locking issues
+        max_retries = 3 if sys.platform == "win32" else 1
+        retry_delay = 0.5  # seconds
+
+        for attempt in range(max_retries):
+            try:
+                if os.environ.get("DOCKER_CONTAINER", "") != "":
+                    sync(
+                        str(boards_src),
+                        str(boards_dst),
+                        "sync",
+                        purge=True,
+                        content=True,
+                    )
+                else:
+                    sync(str(boards_src), str(boards_dst), "sync", purge=True)
+                break  # Success, exit retry loop
+            except OSError as e:
+                # Handle Windows file locking errors (WinError 32)
+                if sys.platform == "win32" and attempt < max_retries - 1:
+                    print(
+                        f"File access error during boards sync, retrying ({attempt + 1}/{max_retries}): {e}"
+                    )
+                    time.sleep(retry_delay)
+                else:
+                    raise
     except Exception as e:
         warnings.warn(f"Failed to sync boards directory: {e}")
         return False
@@ -1028,29 +1074,75 @@ def _copy_fastled_library(project_root: Path, build_dir: Path) -> bool:
     lib_dir = build_dir / "lib" / "FastLED"
     lib_parent = build_dir / "lib"
 
-    # Remove existing FastLED directory if it exists
-    if lib_dir.exists():
-        if lib_dir.is_symlink():
-            lib_dir.unlink()
-        else:
-            shutil.rmtree(lib_dir)
-
-    # Create lib directory if it doesn't exist
-    lib_parent.mkdir(parents=True, exist_ok=True)
-
     # Copy src/ directory into lib/FastLED using dirsync for better caching
     fastled_src_path = project_root / "src"
     try:
+        # Create lib directory if it doesn't exist
+        lib_parent.mkdir(parents=True, exist_ok=True)
+
+        # Try to remove existing FastLED directory if it exists
+        # On Windows, files may be locked by antivirus or explorer, so handle gracefully
+        if lib_dir.exists():
+            if lib_dir.is_symlink():
+                lib_dir.unlink()
+            else:
+                # On Windows, add retry logic for rmtree since files may still be locked
+                # This can happen when antivirus software or explorer.exe still has handles open
+                max_rmtree_retries = 5 if sys.platform == "win32" else 1
+                rmtree_delay_ms = 100 if sys.platform == "win32" else 0
+
+                rmtree_failed = False
+                for rmtree_attempt in range(max_rmtree_retries):
+                    try:
+                        shutil.rmtree(lib_dir)
+                        break  # Success
+                    except OSError as e:
+                        rmtree_failed = True
+                        if (
+                            sys.platform == "win32"
+                            and rmtree_attempt < max_rmtree_retries - 1
+                        ):
+                            delay_seconds = rmtree_delay_ms / 1000.0
+                            time.sleep(delay_seconds)
+                        elif rmtree_attempt == max_rmtree_retries - 1:
+                            # On last attempt failure, just warn and continue with update instead
+                            print(
+                                f"Warning: Could not remove old FastLED library, will update existing: {e}"
+                            )
+                            break
+
         # Ensure target directory exists for dirsync
         lib_dir.mkdir(parents=True, exist_ok=True)
 
         # Use dirsync.sync for efficient incremental synchronization
         # Only pass content=True in Docker environments (content-based comparison)
         # On other systems, use default behavior (timestamp/size) by omitting the parameter
-        if os.environ.get("DOCKER_CONTAINER", "") != "":
-            sync(str(fastled_src_path), str(lib_dir), "sync", purge=True, content=True)
-        else:
-            sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
+        # On Windows, add retry logic for file locking issues
+        max_retries = 3 if sys.platform == "win32" else 1
+        retry_delay = 0.5  # seconds
+
+        for attempt in range(max_retries):
+            try:
+                if os.environ.get("DOCKER_CONTAINER", "") != "":
+                    sync(
+                        str(fastled_src_path),
+                        str(lib_dir),
+                        "sync",
+                        purge=True,
+                        content=True,
+                    )
+                else:
+                    sync(str(fastled_src_path), str(lib_dir), "sync", purge=True)
+                break  # Success, exit retry loop
+            except OSError as e:
+                # Handle Windows file locking errors (WinError 32)
+                if sys.platform == "win32" and attempt < max_retries - 1:
+                    print(
+                        f"File access error during sync, retrying ({attempt + 1}/{max_retries}): {e}"
+                    )
+                    time.sleep(retry_delay)
+                else:
+                    raise
 
         # Copy library.json to the root of lib/FastLED
         library_json_src = project_root / "library.json"
@@ -1211,6 +1303,14 @@ def _init_platformio_build(
             output=f"Failed to copy boards directory",
             build_dir=build_dir,
         )
+
+    # On Windows, force garbage collection and small delay to release all file handles
+    # This prevents file access errors when PlatformIO scans the libraries
+    if sys.platform == "win32":
+        import gc
+
+        gc.collect()
+        time.sleep(0.1)  # Give filesystem time to release handles
 
     # Create sdkconfig.defaults if framework has "espidf" in it for esp32c2 board
     frameworks = {f.strip() for f in (board.framework or "").split(",")}
@@ -1384,7 +1484,7 @@ class PioCompiler(Compiler):
             nonlocal count
             count -= 1
             if count == 0:
-                print(f"Releasing platform lock: {self.platform_lock.lock_file_path}")
+                print(f"Releasing platform lock: {self.platform_lock.lock_file_path}\n")
                 self.platform_lock.release()
 
         futures: list[Future[SketchResult]] = []
