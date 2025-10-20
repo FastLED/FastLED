@@ -1,31 +1,22 @@
 #pragma once
 
-// ESP32 has direct UART/puts for lightweight output, ESP8266 uses Arduino Serial
-#ifdef ESP32
-// Use low-level UART functions instead of ESP_LOG to avoid pulling in vfprintf
-// Note: Removed stdio.h and string.h includes - fputs and stdout are provided by the compiler
+// ESP32 and ESP8266 use Arduino Serial library for I/O
 #define IO_HAS_IMPL 1
-#else
-#define IO_HAS_IMPL 0
-#endif
 
 namespace fl {
 
-// Forward declarations for fputs and stdout from libc
-extern "C" {
-    struct FILE;
-    extern FILE* stdout;
-    int fputs(const char*, FILE*);
-}
-
-// Print functions using low-level UART instead of ESP_LOG
+// Print functions using Arduino Serial
 inline void print_esp(const char* str) {
     if (!str) return;
 
 #if IO_HAS_IMPL
-    // ESP32: Use direct UART write instead of ESP_LOGI to avoid vfprintf dependency
-    // This is much lighter than printf but still provides actual output
-    fputs(str, stdout);
+    // ESP32/ESP8266: Use Arduino Serial library
+    // This is lightweight and avoids POSIX stdio linker issues
+    #ifdef ARDUINO_H
+    if (Serial) {
+        Serial.print(str);
+    }
+    #endif
 #endif
 }
 
@@ -33,9 +24,12 @@ inline void println_esp(const char* str) {
     if (!str) return;
 
 #if IO_HAS_IMPL
-    // ESP32: Use direct UART write with newline
-    fputs(str, stdout);
-    fputs("\n", stdout);
+    // ESP32/ESP8266: Use Arduino Serial library with newline
+    #ifdef ARDUINO_H
+    if (Serial) {
+        Serial.println(str);
+    }
+    #endif
 #endif
 }
 
