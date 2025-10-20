@@ -76,7 +76,7 @@ template<> FASTLED_FORCE_INLINE void delaycycles<5>() {
 // Millisecond and Microsecond delay implementations
 // ============================================================================
 
-void delay(u32 ms) {
+void delayMillis(u32 ms) {
   ::delay((unsigned long)ms);
 }
 

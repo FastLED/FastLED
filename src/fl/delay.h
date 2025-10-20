@@ -135,7 +135,7 @@ template<cycle_t CYCLES> inline void delaycycles_min1() {
 
 /// Delay for a given number of milliseconds
 /// @param ms Milliseconds to delay
-void delay(u32 ms);
+void delayMillis(u32 ms);
 
 /// Delay for a given number of microseconds
 /// @param us Microseconds to delay
