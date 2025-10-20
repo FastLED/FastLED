@@ -8,7 +8,7 @@
 #include "../../fl/chipsets/led_timing.h"
 #include "../../fl/chipsets/timing_traits.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 #if defined(FASTLED_AVR)
 
@@ -141,7 +141,7 @@ static uint8_t gTimeErrorAccum256ths;
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
+template <uint8_t DATA_PIN, fl::ChipsetTiming TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Extract timing values from struct and convert from nanoseconds to clock cycles
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
