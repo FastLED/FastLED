@@ -75,6 +75,9 @@
 #include "fastled_config.h"
 #include "led_sysdefs.h"
 
+// Include the internal FastLED header (provides core types without cycles)
+#include "fl/fastled.h"
+
 // Utility functions
 #include "fastled_delay.h"
 #include "bitswap.h"

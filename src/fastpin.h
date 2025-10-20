@@ -3,7 +3,6 @@
 #ifndef __INC_FASTPIN_H
 #define __INC_FASTPIN_H
 
-#include "FastLED.h"
 #include "fl/compiler_control.h"
 
 #include "led_sysdefs.h"

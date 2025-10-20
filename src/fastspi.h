@@ -33,10 +33,10 @@
 #include "lib8tion.h"
 #include "platforms/shared/spi_bitbang/generic_software_spi.h"
 #include "fl/int.h"
-#include "FastLED.h"
 
-// Include platform-specific SPI device proxy implementations
+// Include platform-specific SPI device proxy implementations BEFORE FastLED.h
 // These provide the hardware SPI abstractions for each platform
+// This must happen before FastLED.h includes chipsets.h
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 #include "platforms/esp/32/spi_device_proxy.h"
 #elif defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
@@ -51,10 +51,11 @@
 #include "platforms/arm/stm32/spi_device_proxy.h"
 #endif
 
-// Include platform-specific SPIOutput template implementations
+// Include platform-specific SPIOutput template implementations BEFORE FastLED.h
 // Each of these files defines the SPIOutput template for its platform
 // NOTE: These files must NOT have their own namespace wrappers - they define
 // templates/classes at the global scope for use by FastLED
+// This must happen BEFORE FastLED.h includes chipsets.h
 #if defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/spi_output_template.h"
 
@@ -105,6 +106,12 @@
 #    endif
 #  endif
 #endif
+
+// NOW include the internal FastLED header, which defines core types without cycles
+// At this point, SPIOutput is already defined for the current platform
+// Note: We use fl/fastled.h instead of FastLED.h to avoid cyclic dependencies,
+// since this file is included by FastLED.h
+#include "fl/fastled.h"
 
 // ============================================================================
 // DATA RATE MACROS (platform-specific clock calculations)

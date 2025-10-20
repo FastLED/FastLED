@@ -3,9 +3,9 @@
 #ifndef __INC_BITSWAP_H
 #define __INC_BITSWAP_H
 
-#include "FastLED.h"
 #include "fl/force_inline.h"
 #include "fl/int.h"
+#include "fl/stdint.h"
 
 /// @file bitswap.h
 /// Functions for doing a rotation of bits/bytes used by parallel output

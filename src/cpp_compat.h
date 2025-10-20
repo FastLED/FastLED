@@ -6,8 +6,6 @@
 #ifndef __INC_CPP_COMPAT_H
 #define __INC_CPP_COMPAT_H
 
-#include "FastLED.h"
-
 #if __cplusplus <= 199711L
 
 /// Compile-time assertion checking, introduced in C++11
