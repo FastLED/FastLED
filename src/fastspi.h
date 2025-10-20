@@ -99,156 +99,65 @@ class SPIDeviceProxy;
 
 FASTLED_NAMESPACE_BEGIN
 
-#if defined(FASTLED_STUB_IMPL)
-
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::StubSPIOutput {};
-
-
-#else
-
-#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(FASTLED_TEENSY3) && !defined(FASTLED_TEENSY4) && !defined(FASTLED_TEENSYLC)
-/// Hardware SPI output
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
-
-/// Software SPI output
+/// Software SPI output (generic cross-platform bit-banging)
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SoftwareSPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
 
-#ifndef FASTLED_FORCE_SOFTWARE_SPI
+// Platform-specific SPIOutput template definitions
+// Each platform includes its own spi_output_template.h which defines the SPIOutput template
+// This eliminates platform-specific preprocessor logic from this file and makes it
+// easier to add/maintain platforms by editing their own platform directory files
 
-#if defined(NRF51)
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
+#if defined(FASTLED_STUB_IMPL)
+#include "platforms/stub/spi_output_template.h"
 
-#if defined(NRF52_SERIES)
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
+#elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/32/spi_output_template.h"
 
-#if defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public APOLLO3HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
+#elif defined(ESP8266)
+#include "platforms/esp/8266/spi_output_template.h"
 
-#if defined(ESP32)
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
+#elif defined(NRF51)
+#include "platforms/arm/nrf51/spi_output_template.h"
 
-#if defined(ESP8266) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
-class SPIOutput : public ESP8266SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
-#endif
+#elif defined(NRF52_SERIES)
+#include "platforms/arm/nrf52/spi_output_template.h"
 
+#elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
+#include "platforms/apollo3/spi_output_template.h"
 
-
-
-#if defined(SPI_DATA) && defined(SPI_CLOCK)
-
-#if defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
-// Generic fallback for generic pins on Teensy 3
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
-class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
-
-// Specialization for hardware SPI pins
-template<fl::u32 _SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED> {};
+#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/teensy3_common/spi_output_template.h"
 
 #elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
-// Generic fallback for generic pins on Teensy 4
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
-class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
-
-// Specialization for hardware SPI pins
-template<fl::u32 _SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI_DATA, SPI_CLOCK, _SPI_SPEED, SPI, 0> {};
-
-template<fl::u32 _SPI_SPEED>
-class SPIOutput<SPI1_DATA, SPI1_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI1_DATA, SPI1_CLOCK, _SPI_SPEED, SPI1, 1> {};
-
-template<fl::u32 _SPI_SPEED>
-class SPIOutput<SPI2_DATA, SPI2_CLOCK, _SPI_SPEED> : public fl::SPIDeviceProxy<SPI2_DATA, SPI2_CLOCK, _SPI_SPEED, SPI2, 2> {};
+#include "platforms/arm/teensy/teensy4_common/spi_output_template.h"
 
 #elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
 
-#define DECLARE_SPI0(__DATA,__CLOCK) template<fl::u32 SPI_SPEED>\
- class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40076000> {};
- #define DECLARE_SPI1(__DATA,__CLOCK) template<fl::u32 SPI_SPEED>\
-  class SPIOutput<__DATA, __CLOCK, SPI_SPEED> : public ARMHardwareSPIOutput<__DATA, __CLOCK, SPI_SPEED, 0x40077000> {};
+#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
+      defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
+      defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
+#include "platforms/arm/sam/spi_output_template.h"
 
-DECLARE_SPI0(7,13);
-DECLARE_SPI0(8,13);
-DECLARE_SPI0(11,13);
-DECLARE_SPI0(12,13);
-DECLARE_SPI0(7,14);
-DECLARE_SPI0(8,14);
-DECLARE_SPI0(11,14);
-DECLARE_SPI0(12,14);
-DECLARE_SPI1(0,20);
-DECLARE_SPI1(1,20);
-DECLARE_SPI1(21,20);
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+#include "platforms/arm/stm32/spi_output_template.h"
 
-#elif defined(__SAM3X8E__) || defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
-
-template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_SPEED>
-class SPIOutput : public fl::SPIDeviceProxy<_DATA_PIN, _CLOCK_PIN, _SPI_SPEED> {};
-
-#elif defined(AVR_HARDWARE_SPI)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public AVRHardwareSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> {};
-
-#if defined(SPI_UART0_DATA)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> : public AVRUSART0SPIOutput<SPI_UART0_DATA, SPI_UART0_CLOCK, SPI_SPEED> {};
-
-#endif
-
-#if defined(SPI_UART1_DATA)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> : public AVRUSART1SPIOutput<SPI_UART1_DATA, SPI_UART1_CLOCK, SPI_SPEED> {};
-
-#endif
-
-#elif defined(ARDUNIO_CORE_SPI)
-
-template<fl::u32 SPI_SPEED>
-class SPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED> : public ArdunioCoreSPIOutput<SPI_DATA, SPI_CLOCK, SPI_SPEED, SPI> {};
-
-#endif
+#elif defined(AVR_HARDWARE_SPI) || defined(ARDUNIO_CORE_SPI)
+#include "platforms/avr/spi_output_template.h"
 
 #else
-#  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32)
-#    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "WARNING: The SPI pins you chose have not been marked as hardware accelerated within the code base. All SPI access will default to bitbanged output. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA / MOSI / SCK / SS pin"
-#    else
-#      warning "The SPI pins you chose have not been marked as hardware accelerated within the code base. All SPI access will default to bitbanged output. Consult the data sheet for hardware spi pins designed for efficient SPI transfer, typically via DMA / MOSI / SCK / SS pins"
-#    endif
-#  endif
-#endif
+// Fallback: Generic software SPI for unsupported platforms
+#include "platforms/shared/spi_bitbang/spi_output_template.h"
 
-// #if defined(USART_DATA) && defined(USART_CLOCK)
-// template<uint32_t SPI_SPEED>
-// class AVRSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> : public AVRUSARTSPIOutput<USART_DATA, USART_CLOCK, SPI_SPEED> {};
-// #endif
-
-#else
 #  if !defined(FASTLED_INTERNAL) && !defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 #    ifdef FASTLED_HAS_PRAGMA_MESSAGE
-#      pragma message "Forcing software SPI - no hardware accelerated SPI for you!"
+#      pragma message "WARNING: No hardware SPI support for this platform. Using generic software SPI (bit-banging)."
 #    else
-#      warning "Forcing software SPI - no hardware accelerated SPI for you!"
+#      warning "WARNING: No hardware SPI support for this platform. Using generic software SPI (bit-banging)."
 #    endif
 #  endif
 #endif
-
-#endif  // !defined(FASTLED_STUB_IMPL)
 
 FASTLED_NAMESPACE_END
 
