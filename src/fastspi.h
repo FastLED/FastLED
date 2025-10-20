@@ -100,7 +100,7 @@ class SPIOutput : public fl::StubSPIOutput {};
 
 #else
 
-#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32)
+#if !defined(FASTLED_ALL_PINS_HARDWARE_SPI) && !defined(ESP32) && !defined(__SAM3X8E__)
 /// Hardware SPI output
 template<fl::u8 _DATA_PIN, fl::u8 _CLOCK_PIN, fl::u32 _SPI_CLOCK_DIVIDER>
 class SPIOutput : public GenericSoftwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER> {};
