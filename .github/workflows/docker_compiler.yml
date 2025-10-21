@@ -1,0 +1,280 @@
+name: Docker Compiler Images
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_base:
+        description: 'Skip base image build'
+        type: boolean
+        default: false
+      skip_platforms:
+        description: 'Skip platform images build'
+        type: boolean
+        default: false
+      delay_minutes:
+        description: 'Delay before building platforms (minutes)'
+        type: number
+        default: 10
+  schedule:
+    # Base image: monthly at 2:00 AM UTC
+    - cron: '0 2 1 * *'
+    # Platforms: monthly at 3:00 AM UTC (1 hour after base)
+    - cron: '0 3 1 * *'
+
+env:
+  BASE_IMAGE: niteris/fastled-compiler-base
+  PLATFORMS:
+    - name: avr
+      board: uno
+      registry: niteris/fastled-compiler-avr-uno
+    - name: esp
+      board: esp32dev
+      registry: niteris/fastled-compiler-esp-esp32dev
+    - name: teensy
+      board: teensy41
+      registry: niteris/fastled-compiler-teensy-teensy41
+    - name: stm32
+      board: bluepill
+      registry: niteris/fastled-compiler-stm32-bluepill
+    - name: rp2040
+      board: rp2040
+      registry: niteris/fastled-compiler-rp
+    - name: nrf52
+      board: nrf52840_dk
+      registry: niteris/fastled-compiler-nrf52-nrf52840_dk
+    - name: sam
+      board: due
+      registry: niteris/fastled-compiler-sam-due
+
+jobs:
+  credentials:
+    runs-on: ubuntu-latest
+    outputs:
+      docker_username: ${{ steps.credentials.outputs.docker_username }}
+      docker_password: ${{ steps.credentials.outputs.docker_password }}
+      registry_base: ${{ steps.credentials.outputs.registry_base }}
+      registry_avr: ${{ steps.credentials.outputs.registry_avr }}
+      registry_esp: ${{ steps.credentials.outputs.registry_esp }}
+      registry_teensy: ${{ steps.credentials.outputs.registry_teensy }}
+      registry_stm32: ${{ steps.credentials.outputs.registry_stm32 }}
+      registry_rp2040: ${{ steps.credentials.outputs.registry_rp2040 }}
+      registry_nrf52: ${{ steps.credentials.outputs.registry_nrf52 }}
+      registry_sam: ${{ steps.credentials.outputs.registry_sam }}
+    steps:
+      - name: Output encoded credentials
+        id: credentials
+        env:
+          docker_username: niteris
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          registry_base: ${{ env.BASE_IMAGE }}
+        run: |
+          echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo -n "$docker_password" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_base=$(echo -n "$registry_base" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr-uno' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0)" >> $GITHUB_OUTPUT
+
+  # ============================================================================
+  # BASE IMAGE BUILD
+  # ============================================================================
+  build-base:
+    if: github.event.inputs.skip_base != 'true'
+    needs: credentials
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.base
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_base }}
+
+  merge-base:
+    if: github.event.inputs.skip_base != 'true'
+    runs-on: ubuntu-24.04
+    needs: build-base
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BASE_IMAGE }}
+          tags: type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.BASE_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.BASE_IMAGE }}:latest
+
+  # ============================================================================
+  # PLATFORM IMAGES BUILD
+  # ============================================================================
+  wait-for-base:
+    if: github.event.inputs.skip_platforms != 'true'
+    runs-on: ubuntu-latest
+    needs: merge-base
+    steps:
+      - name: Wait for base image to settle
+        run: |
+          delay_minutes=${{ github.event.inputs.delay_minutes }}
+          if [ -z "$delay_minutes" ] || [ "$delay_minutes" = "null" ]; then
+            delay_minutes=10
+          fi
+          echo "Waiting ${delay_minutes} minutes for base image to settle in registry..."
+          sleep $((${delay_minutes} * 60))
+
+  build-platforms:
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - name: avr
+            board: uno
+            registry: registry_avr
+          - name: esp
+            board: esp32dev
+            registry: registry_esp
+          - name: teensy
+            board: teensy41
+            registry: registry_teensy
+          - name: stm32
+            board: bluepill
+            registry: registry_stm32
+          - name: rp2040
+            board: rp2040
+            registry: registry_rp2040
+          - name: nrf52
+            board: nrf52840_dk
+            registry: registry_nrf52
+          - name: sam
+            board: due
+            registry: registry_sam
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      platform_name: ${{ matrix.platform.board }}
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs[matrix.platform.registry] }}
+
+  merge-platforms:
+    if: github.event.inputs.skip_platforms != 'true'
+    runs-on: ubuntu-24.04
+    needs: build-platforms
+    strategy:
+      matrix:
+        platform:
+          - name: avr
+            registry: niteris/fastled-compiler-avr-uno
+          - name: esp
+            registry: niteris/fastled-compiler-esp-esp32dev
+          - name: teensy
+            registry: niteris/fastled-compiler-teensy-teensy41
+          - name: stm32
+            registry: niteris/fastled-compiler-stm32-bluepill
+          - name: rp2040
+            registry: niteris/fastled-compiler-rp
+          - name: nrf52
+            registry: niteris/fastled-compiler-nrf52-nrf52840_dk
+          - name: sam
+            registry: niteris/fastled-compiler-sam-due
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-*
+          merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ matrix.platform.registry }}
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ matrix.platform.registry }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ matrix.platform.registry }}:latest
