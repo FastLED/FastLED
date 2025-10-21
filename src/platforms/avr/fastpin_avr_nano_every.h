@@ -2,6 +2,7 @@
 
 #include <avr/io.h>
 #include "avr_pin.h"
+#include "fl/fastpin_base.h"
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"
 namespace fl {
