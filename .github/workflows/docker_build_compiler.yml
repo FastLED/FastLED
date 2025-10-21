@@ -37,7 +37,7 @@ jobs:
         for line in $env_vars; do
             key=$(echo "$line" | sed 's/=.*//g')
             encoded_value=$(echo "$line" | sed 's/^[^=]*=//')
-            value=$(echo "$encoded_value" | base64 -d)
+            value=$(echo "$encoded_value" | base64 -d | base64 -d)
             echo "::add-mask::$value"
             echo "$key=$value" >> $GITHUB_ENV
         done
@@ -64,7 +64,7 @@ jobs:
     - name: Login to Docker Hub
       uses: docker/login-action@v3
       with:
-        username: niteris
+        username: ${{ env.docker_username }}
         password: ${{ env.docker_password }}
 
     - name: Build and push by digest

@@ -38,15 +38,15 @@ jobs:
           docker_username: niteris
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
         run: |
-          echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "docker_password=$(echo -n "$docker_password" | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr-uno' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_username=$(echo -n "niteris" | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr-uno' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
   # ============================================================================
   # PLATFORM IMAGES BUILD
@@ -161,7 +161,7 @@ jobs:
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
+          username: niteris
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Create manifest list and push

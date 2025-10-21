@@ -33,9 +33,9 @@ jobs:
           docker_password: ${{ secrets.DOCKER_PASSWORD }}
           registry_base: ${{ env.BASE_IMAGE }}
         run: |
-          echo "docker_username=$(echo -n "$docker_username" | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "docker_password=$(echo -n "$docker_password" | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_base=$(echo -n "$registry_base" | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_username=$(echo -n "niteris" | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_base=$(echo $registry_base | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
   # ============================================================================
   # BASE IMAGE BUILD
