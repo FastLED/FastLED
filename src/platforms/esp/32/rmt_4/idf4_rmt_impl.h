@@ -51,6 +51,7 @@ FL_EXTERN_C_END
 
 
 // -- Forward reference
+namespace fl {
 class ESP32RMTController;
 
 class ESP32RMTController
@@ -165,6 +166,7 @@ private:
     // -- Get or create the pixel data buffer
     uint8_t *getPixelBuffer(int size_in_bytes);
 };
+}  // namespace fl
 
 
 #pragma GCC diagnostic pop

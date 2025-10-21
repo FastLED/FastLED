@@ -13,33 +13,33 @@
 #include "fl/fastled.h"
 #include "idf4_rmt_impl.h"
 
-void RmtController::init(int pin, bool built_in_driver) {
+void fl::RmtController::init(int pin, bool built_in_driver) {
     gpio_num_t _pin = static_cast<gpio_num_t>(pin);
     ESP32RMTController::init(_pin, built_in_driver);
 }
 
-RmtController::RmtController(int DATA_PIN, const ChipsetTiming& TIMING,
+fl::RmtController::RmtController(int DATA_PIN, const fl::ChipsetTiming& TIMING,
                              int maxChannel, bool built_in_driver) {
     pImpl = new ESP32RMTController(DATA_PIN, TIMING, maxChannel,
                                    built_in_driver);
 }
-RmtController::~RmtController() { delete pImpl; }
+fl::RmtController::~RmtController() { delete pImpl; }
 
-void RmtController::showPixels() { pImpl->showPixels(); }
+void fl::RmtController::showPixels() { pImpl->showPixels(); }
 
-void RmtController::ingest(uint8_t val) { pImpl->ingest(val); }
+void fl::RmtController::ingest(uint8_t val) { pImpl->ingest(val); }
 
-uint8_t *RmtController::getPixelBuffer(int size_in_bytes) {
+uint8_t *fl::RmtController::getPixelBuffer(int size_in_bytes) {
     return pImpl->getPixelBuffer(size_in_bytes);
 }
 
-bool RmtController::built_in_driver() { return pImpl->mBuiltInDriver; }
+bool fl::RmtController::built_in_driver() { return pImpl->mBuiltInDriver; }
 
-void RmtController::initPulseBuffer(int size_in_bytes) {
+void fl::RmtController::initPulseBuffer(int size_in_bytes) {
     pImpl->initPulseBuffer(size_in_bytes);
 }
 
-void RmtController::showPixels(PixelIterator &pixels) {
+void fl::RmtController::showPixels(PixelIterator &pixels) {
     if (built_in_driver()) {
         loadAllPixelsToRmtSymbolData(pixels);
     } else {
@@ -48,7 +48,7 @@ void RmtController::showPixels(PixelIterator &pixels) {
     showPixels();
 }
 
-void RmtController::loadAllPixelsToRmtSymbolData(PixelIterator &pixels) {
+void fl::RmtController::loadAllPixelsToRmtSymbolData(PixelIterator &pixels) {
     // -- Make sure the data buffer is allocated
     const bool is_rgbw = pixels.get_rgbw().active();
     const int bytes_per_pixel = is_rgbw ? 4 : 3;
@@ -81,7 +81,7 @@ void RmtController::loadAllPixelsToRmtSymbolData(PixelIterator &pixels) {
     }
 }
 
-void RmtController::loadPixelDataForStreamEncoding(PixelIterator &pixels) {
+void fl::RmtController::loadPixelDataForStreamEncoding(PixelIterator &pixels) {
     // -- Make sure the buffer is allocated
     const bool is_rgbw = pixels.get_rgbw().active();
     const int size_per_pixel = is_rgbw ? 4 : 3;

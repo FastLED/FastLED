@@ -179,16 +179,18 @@ FL_EXTERN_C_END
 #define ESP_TO_RMT_CYCLES(n) ((n) / (RMT_CYCLES_PER_ESP_CYCLE))
 
 // -- Forward reference
+namespace fl {
 class ESP32RMTController;
+}  // namespace fl
 
 // -- Array of all controllers
 //    This array is filled at the time controllers are registered
 //    (Usually when the sketch calls addLeds)
-static ESP32RMTController *gControllers[FASTLED_RMT_MAX_CONTROLLERS];
+static fl::ESP32RMTController *gControllers[FASTLED_RMT_MAX_CONTROLLERS];
 
 // -- Current set of active controllers, indexed by the RMT
 //    channel assigned to them.
-static ESP32RMTController *gOnChannel[FASTLED_RMT_MAX_CHANNELS];
+static fl::ESP32RMTController *gOnChannel[FASTLED_RMT_MAX_CHANNELS];
 
 static int gNumControllers = 0;
 static int gNumStarted = 0;
@@ -211,8 +213,8 @@ CMinWait<50> gWait;
 
 static bool gInitialized = false;
 // -- Stored values for FASTLED_RMT_MAX_CHANNELS and FASTLED_RMT_MEM_BLOCKS
-int ESP32RMTController::gMaxChannel;
-int ESP32RMTController::gMemBlocks;
+int fl::ESP32RMTController::gMaxChannel;
+int fl::ESP32RMTController::gMemBlocks;
 
 #if ESP_IDF_VERSION_MAJOR >= 5
 
@@ -270,7 +272,7 @@ void GiveGTX_sem()
     }
 }
 
-ESP32RMTController::ESP32RMTController(int DATA_PIN, const ChipsetTiming& TIMING, int maxChannel, bool built_in_driver)
+fl::ESP32RMTController::ESP32RMTController(int DATA_PIN, const fl::ChipsetTiming& TIMING, int maxChannel, bool built_in_driver)
     : mPixelData(0),
       mSize(0),
       mCur(0),
@@ -322,7 +324,7 @@ ESP32RMTController::ESP32RMTController(int DATA_PIN, const ChipsetTiming& TIMING
 // -- Get or create the buffer for the pixel data
 //    We can't allocate it ahead of time because we don't have
 //    the PixelController object until show is called.
-uint8_t *ESP32RMTController::getPixelBuffer(int size_in_bytes)
+uint8_t *fl::ESP32RMTController::getPixelBuffer(int size_in_bytes)
 {
     // -- Free the old buffer if it will be too small
     if (mPixelData != 0 and mBufSize < size_in_bytes)
@@ -346,14 +348,14 @@ uint8_t *ESP32RMTController::getPixelBuffer(int size_in_bytes)
 
 // -- Initialize RMT subsystem
 //    This only needs to be done once
-void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
+void fl::ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 {
     gUseBuiltInDriver = built_in_driver;
     if (gInitialized)
         return;
     esp_err_t espErr = ESP_OK;
 
-    for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
+    for (int i = 0; i < fl::ESP32RMTController::gMaxChannel; i += fl::ESP32RMTController::gMemBlocks)
     {
         gOnChannel[i] = nullptr;
 
@@ -363,7 +365,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
         rmt_tx.channel = rmt_channel_t(i);
         rmt_tx.rmt_mode = RMT_MODE_TX;
         rmt_tx.gpio_num = pin;
-        rmt_tx.mem_block_num = ESP32RMTController::gMemBlocks;
+        rmt_tx.mem_block_num = fl::ESP32RMTController::gMemBlocks;
         rmt_tx.clk_div = DIVIDER;
         rmt_tx.tx_config.loop_en = false;
         rmt_tx.tx_config.carrier_level = RMT_CARRIER_LEVEL_LOW;
@@ -406,7 +408,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
         //    specific instantiation of ClocklessController.
         if (gRMT_intr_handle == nullptr)
         {
-            esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, ESP32RMTController::interruptHandler, 0, &gRMT_intr_handle);
+            esp_intr_alloc(ETS_RMT_INTR_SOURCE, ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3, fl::ESP32RMTController::interruptHandler, 0, &gRMT_intr_handle);
         }
     }
 
@@ -416,7 +418,7 @@ void ESP32RMTController::init(gpio_num_t pin, bool built_in_driver)
 
 // -- Show this string of pixels
 //    This is the main entry point for the pixel controller
-void ESP32RMTController::showPixels()
+void fl::ESP32RMTController::showPixels()
 {
     if (gNumStarted == 0)
     {
@@ -448,7 +450,7 @@ void ESP32RMTController::showPixels()
         int channel = 0;
         while (channel < gMaxChannel && gNext < gNumControllers)
         {
-            ESP32RMTController::startNext(channel);
+            fl::ESP32RMTController::startNext(channel);
             // -- Important: when we use more than one memory block, we need to
             //    skip the channels that would otherwise overlap in memory.
             channel += gMemBlocks;
@@ -472,11 +474,11 @@ void ESP32RMTController::showPixels()
           if (gNext < gNumControllers) 
           {
             // find a free channel
-            for (int i = 0; i < ESP32RMTController::gMaxChannel; i += ESP32RMTController::gMemBlocks)
+            for (int i = 0; i < fl::ESP32RMTController::gMaxChannel; i += fl::ESP32RMTController::gMemBlocks)
             {
               if(gOnChannel[i] == nullptr)
               {
-                  ESP32RMTController::startNext(i);
+                  fl::ESP32RMTController::startNext(i);
                   continue;
               }
             }
@@ -501,11 +503,11 @@ void ESP32RMTController::showPixels()
 // -- Start up the next controller
 //    This method is static so that it can dispatch to the
 //    appropriate startOnChannel method of the given controller.
-void ESP32RMTController::startNext(int channel)
+void fl::ESP32RMTController::startNext(int channel)
 {
     if (gNext < gNumControllers)
     {
-        ESP32RMTController *pController = gControllers[gNext];
+        fl::ESP32RMTController *pController = gControllers[gNext];
         pController->startOnChannel(channel);
         gNext++;
     }
@@ -514,7 +516,7 @@ void ESP32RMTController::startNext(int channel)
 // -- Start this controller on the given channel
 //    This function just initiates the RMT write; it does not wait
 //    for it to finish.
-void ESP32RMTController::startOnChannel(int channel)
+void fl::ESP32RMTController::startOnChannel(int channel)
 {
     esp_err_t espErr = ESP_OK;
     // -- Assign this channel and configure the RMT
@@ -569,7 +571,7 @@ void ESP32RMTController::startOnChannel(int channel)
 
 // -- Start RMT transmission
 //    Setting this RMT flag is what actually kicks off the peripheral
-void ESP32RMTController::tx_start()
+void fl::ESP32RMTController::tx_start()
 {
     // rmt_tx_start(mRMT_channel, true);
     // Inline the code for rmt_tx_start, so it can be placed in IRAM
@@ -781,9 +783,9 @@ void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
 //    handler (below), or as a callback from the built-in
 //    interrupt handler. It is static because we don't know which
 //    controller is done until we look it up.
-void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
+void IRAM_ATTR fl::ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
 {
-    ESP32RMTController *pController = gOnChannel[channel];
+    fl::ESP32RMTController *pController = gOnChannel[channel];
 
     // -- Turn off output on the pin
     //    Otherwise the pin will stay connected to the RMT controller,
@@ -814,7 +816,7 @@ void IRAM_ATTR ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *ar
 //    This interrupt handler handles two cases: a controller is
 //    done writing its data, or a controller needs to fill the
 //    next half of the RMT buffer with data.
-void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
+void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
 {
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
@@ -844,7 +846,7 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 #error Not yet implemented for unknown ESP32 target
 #endif
 
-        ESP32RMTController *pController = gOnChannel[channel];
+        fl::ESP32RMTController *pController = gOnChannel[channel];
         if (pController != nullptr)
         {
             if (intr_st & BIT(tx_next_bit))
@@ -874,7 +876,7 @@ void IRAM_ATTR ESP32RMTController::interruptHandler(void *arg)
 //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
 //    Each data bit is represented by a 32-bit RMT item that specifies how
 //    long to hold the signal high, followed by how long to hold it low.
-void ESP32RMTController::fillNext(bool check_time)
+void fl::ESP32RMTController::fillNext(bool check_time)
 {
     uint32_t now = __clock_cycles();
     if (check_time)
@@ -945,7 +947,7 @@ void ESP32RMTController::fillNext(bool check_time)
 //    Set up the buffer that will hold all of the pulse items for this
 //    controller.
 //    This function is only used when the built-in RMT driver is chosen
-void ESP32RMTController::initPulseBuffer(int size_in_bytes)
+void fl::ESP32RMTController::initPulseBuffer(int size_in_bytes)
 {
     if (mBuffer == 0)
     {
@@ -958,7 +960,7 @@ void ESP32RMTController::initPulseBuffer(int size_in_bytes)
 
 // -- Convert a byte into RMT pulses
 //    This function is only used when the built-in RMT driver is chosen
-void ESP32RMTController::ingest(uint8_t byteval)
+void fl::ESP32RMTController::ingest(uint8_t byteval)
 {
     convert_byte_to_rmt(byteval, mZero.val, mOne.val, mBuffer + mCurPulse);
     mCurPulse += 8;
