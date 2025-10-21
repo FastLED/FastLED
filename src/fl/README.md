@@ -553,28 +553,26 @@ void print_platform_info() {
 
 See `src/fl/isr.h` for complete API documentation and platform-specific configuration flags.
 
-### Runtime Category-Based Logging
+### Category-Based Logging
 
-- Runtime logging system: `log.h`, integrated via `dbg.h`
+- Category logging system: `log.h`, integrated via `dbg.h`
 
-**What it is:** A hybrid compile-time + runtime selective logging system that enables detailed diagnostics for specific subsystems (SPI, RMT, VIDEO, I2S, LCD, UART, TIMING) with **zero overhead when disabled**. Unlike `FL_DBG` (general-purpose), category logging provides structured, runtime-toggleable diagnostics without recompilation.
+**What it is:** A compile-time selective logging system that enables detailed diagnostics for specific subsystems (SPI, RMT, I2S, GPIO, PIO, DMA, TIMER, and many more) with **zero overhead when disabled**. Unlike `FL_DBG` (general-purpose), category logging provides structured, category-specific diagnostics by enabling only the categories you need.
 
 **Key features:**
-- **Hybrid design**: Compile-time check (via preprocessor) + runtime toggle (via `LogState`)
+- **Compile-time control**: Enable/disable categories via preprocessor defines (`-DFASTLED_LOG_<CATEGORY>_ENABLED`)
 - **Zero overhead disabled**: Disabled categories compile to nothing (~0 bytes, ~0 cycles)
-- **Runtime toggle**: Enable/disable categories at runtime (when compiled in) without recompilation
 - **Stream formatting**: Same syntax as `FL_WARN`: `FL_LOG_SPI("msg: " << value)`
+- **No runtime state**: Clean, stateless implementation with zero memory overhead
 - **Platform-aware**: Uses `FL_WARN` internally, respects platform constraints and memory limits
-- **Minimal state**: 4 bytes total for all 7 categories (single bitfield)
 
-**Categories:**
+**Available categories:**
+
+Hardware interfaces:
 - `FL_LOG_SPI` - Serial Peripheral Interface operations
 - `FL_LOG_RMT` - ESP32 RMT peripheral
-- `FL_LOG_VIDEO` - Video/framebuffer operations
-- `FL_LOG_I2S` - I2S audio/data streaming
-- `FL_LOG_LCD` - LCD/parallel display operations
-- `FL_LOG_UART` - Serial/UART operations
-- `FL_LOG_TIMING` - Performance timing diagnostics
+- `FL_LOG_PARLIO` - ESP32-P4 parallel I/O
+
 
 **Comparison with alternatives:**
 
@@ -582,43 +580,11 @@ See `src/fl/isr.h` for complete API documentation and platform-specific configur
 |---------|----------|-----------|-----------|
 | Purpose | General debug | Critical warnings | Category diagnostics |
 | Selective enable | No (all-or-nothing) | No | Yes (per-category) |
-| Runtime toggle | No | No | Yes (when compiled) |
 | Default state | Memory-dependent | Always enabled | Always disabled |
-| Memory | ~5KB | Variable | ~4 bytes |
+| Memory | ~5KB | Variable | 0 bytes |
+| Control mechanism | Compile-time | N/A | Compile-time only |
 
-**Basic usage:**
-
-```cpp
-#include "FastLED.h"  // or #include "fl/log.h"
-
-void setup() {
-    Serial.begin(115200);
-    FastLED.addLeds<NEOPIXEL, 5>(leds, 60);
-
-    // Enable SPI diagnostics
-    fl::LogState::enable(fl::LogCategory::SPI);
-
-    // Enable multiple categories
-    fl::LogState::enable(fl::LogCategory::TIMING);
-    fl::LogState::enable(fl::LogCategory::VIDEO);
-}
-
-void loop() {
-    // FastLED operations will now log diagnostic messages
-    // Toggle at runtime:
-    if (Serial.available()) {
-        if (Serial.read() == 's') {
-            if (fl::LogState::isEnabled(fl::LogCategory::SPI)) {
-                fl::LogState::disable(fl::LogCategory::SPI);
-            } else {
-                fl::LogState::enable(fl::LogCategory::SPI);
-            }
-        }
-    }
-}
-```
-
-**How to include logging code:**
+**How to enable logging:**
 
 Add to `platformio.ini` or Arduino IDE build flags:
 
@@ -630,45 +596,16 @@ build_flags = -DFASTLED_LOG_SPI_ENABLED
 build_flags =
     -DFASTLED_LOG_SPI_ENABLED
     -DFASTLED_LOG_I2S_ENABLED
-    -DFASTLED_LOG_TIMING_ENABLED
+    -DFASTLED_LOG_TIMER_ENABLED
 
-# Enable all categories (debug builds)
-build_flags = -DFASTLED_LOG_ALL_ENABLED
-
-# Backward compatibility (old naming still works)
-build_flags = -DFASTLED_DBG_SPI_ENABLED
+# Enable multiple categories (alternative syntax)
+build_flags =
+    -DFASTLED_LOG_SPI_ENABLED
+    -DFASTLED_LOG_RMT_ENABLED
+    -DFASTLED_LOG_VIDEO_ENABLED
 ```
 
-**API Reference:**
-
-```cpp
-// Enable/disable a category
-fl::LogState::enable(fl::LogCategory::SPI);
-fl::LogState::disable(fl::LogCategory::SPI);
-
-// Check status
-if (fl::LogState::isEnabled(fl::LogCategory::SPI)) {
-    // Category is enabled
-}
-
-// Bulk control
-fl::LogState::enableAll();   // Enable all categories
-fl::LogState::disableAll();  // Disable all categories
-
-// Logging (same syntax as FL_WARN)
-FL_LOG_SPI("Initialized SPI at " << frequency << "Hz");
-FL_LOG_RMT("RMT buffer: " << buffer_size << " bytes");
-FL_LOG_TIMING("Frame took " << duration_us << " µs");
-```
-
-**Implementation details:**
-- Runtime state: Single `uint8_t` bitfield (0 = all disabled by default)
-- Zero-overhead disabled logs: Compile to `FL_DBG_NO_OP(...)` → eliminated by optimizer
-- Enabled logs: Runtime check via `LogState::isEnabled()` before output to `FL_WARN`
-- No dynamic allocation or complex state management
-- Safe for multi-threaded environments (atomic 8-bit operations)
-
-**Example: Adding logging to custom code**
+**Logging in your code:**
 
 ```cpp
 #include "fl/log.h"
@@ -684,7 +621,12 @@ void myCustomDriver::transmit(fl::span<const uint8_t> data) {
 }
 ```
 
-See `src/fl/LOG_SYSTEM.md` for complete documentation with advanced examples.
+**Implementation details:**
+- Pure compile-time control via preprocessor
+- Zero-overhead disabled logs: Compile to `FL_DBG_NO_OP(...)` → eliminated by optimizer
+- Enabled logs: Direct output to `FL_WARN`
+- No runtime state, no memory overhead, no performance cost
+- Users can implement their own runtime control if needed via wrapper functions
 
 ### Math, Random, and DSP
 
