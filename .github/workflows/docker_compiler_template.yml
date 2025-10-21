@@ -40,13 +40,13 @@ jobs:
         run: |
           echo "docker_username=$(echo -n "niteris" | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr-uno' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp2040' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
   # ============================================================================
   # PLATFORM IMAGES BUILD
@@ -65,32 +65,33 @@ jobs:
           sleep $((${delay_minutes} * 60))
 
   build-platforms:
+    name: Building niteris/fastled-compiler-${{ matrix.group }} (${{ matrix.arch.platform }})
     if: github.event.inputs.skip_platforms != 'true'
     needs: [credentials, wait-for-base]
     strategy:
       fail-fast: false
       matrix:
-        platform:
+        group:
           - name: avr
-            board: uno
+            platforms: uno,attiny85,attiny88,attiny1604,attiny1616,attiny4313,yun-32u4
             registry: registry_avr
           - name: esp
-            board: esp32dev
+            platforms: esp32dev,esp32c2,esp32c3,esp32c5,esp32c6,esp32h2,esp32p4,esp32s2,esp32s3,esp32wroom,esp8266
             registry: registry_esp
           - name: teensy
-            board: teensy41
+            platforms: teensy30,teensy31,teensy40,teensy41,teensyLC
             registry: registry_teensy
           - name: stm32
-            board: bluepill
+            platforms: bluepill,blackpill,stm103tb
             registry: registry_stm32
           - name: rp2040
-            board: rp2040
+            platforms: rp2040,rp2040_earle,rp2350,rp2350B
             registry: registry_rp2040
           - name: nrf52
-            board: nrf52840_dk
+            platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense
             registry: registry_nrf52
           - name: sam
-            board: due
+            platforms: due,digix,giga_r1
             registry: registry_sam
         arch:
           - runs_on: ubuntu-24.04
@@ -102,13 +103,14 @@ jobs:
       runs_on: ${{ matrix.arch.runs_on }}
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
-      platform_name: ${{ matrix.platform.board }}
+      group: ${{ matrix.group.name }}
+      platforms: ${{ matrix.group.platforms }}
       tag: latest
     secrets:
       env_vars: |
         docker_username=${{ needs.credentials.outputs.docker_username }}
         docker_password=${{ needs.credentials.outputs.docker_password }}
-        docker_registry_image=${{ needs.credentials.outputs[matrix.platform.registry] }}
+        docker_registry_image=${{ needs.credentials.outputs[matrix.group.registry] }}
 
   merge-platforms:
     if: github.event.inputs.skip_platforms != 'true'
@@ -116,21 +118,21 @@ jobs:
     needs: build-platforms
     strategy:
       matrix:
-        platform:
+        group:
           - name: avr
-            registry: niteris/fastled-compiler-avr-uno
+            registry: niteris/fastled-compiler-avr
           - name: esp
-            registry: niteris/fastled-compiler-esp-esp32dev
+            registry: niteris/fastled-compiler-esp
           - name: teensy
-            registry: niteris/fastled-compiler-teensy-teensy41
+            registry: niteris/fastled-compiler-teensy
           - name: stm32
-            registry: niteris/fastled-compiler-stm32-bluepill
+            registry: niteris/fastled-compiler-stm32
           - name: rp2040
-            registry: niteris/fastled-compiler-rp
+            registry: niteris/fastled-compiler-rp2040
           - name: nrf52
-            registry: niteris/fastled-compiler-nrf52-nrf52840_dk
+            registry: niteris/fastled-compiler-nrf52
           - name: sam
-            registry: niteris/fastled-compiler-sam-due
+            registry: niteris/fastled-compiler-sam
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4
@@ -155,7 +157,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ matrix.platform.registry }}
+          images: ${{ matrix.group.registry }}
           tags: type=raw,value=latest
 
       - name: Login to Docker Hub
@@ -168,8 +170,8 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ matrix.platform.registry }}@sha256:%s ' *)
+            $(printf '${{ matrix.group.registry }}@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect ${{ matrix.platform.registry }}:latest
+          docker buildx imagetools inspect ${{ matrix.group.registry }}:latest
