@@ -16,11 +16,16 @@ import subprocess
 import sys
 import tempfile
 import time
+from multiprocessing import Queue
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from ci.util.dependency_loader import DependencyManifest
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
+
+
+# Type alias for Queue results
+QueueResult = Tuple[str, Any]
 
 
 class CacheLintStressTest:
@@ -108,7 +113,7 @@ class CacheLintStressTest:
         return self.failed == 0
 
 
-def test_python_lint_cache_rapid_changes(test: CacheLintStressTest):
+def test_python_lint_cache_rapid_changes(test: CacheLintStressTest) -> None:
     """Test Python lint cache with rapid successive checks."""
     print("\n📋 TEST 1: Python Lint Cache - Rapid Checks")
     print("-" * 70)
@@ -151,7 +156,7 @@ def test_python_lint_cache_rapid_changes(test: CacheLintStressTest):
         test.pass_test(f"Rapid Python cache checks completed ({cache_hits}/5 hits)")
 
 
-def test_javascript_lint_cache(test: CacheLintStressTest):
+def test_javascript_lint_cache(test: CacheLintStressTest) -> None:
     """Test JavaScript lint cache."""
     print("\n📋 TEST 2: JavaScript Lint Cache")
     print("-" * 70)
@@ -180,7 +185,7 @@ def test_javascript_lint_cache(test: CacheLintStressTest):
         test.pass_test("JavaScript lint check (empty directory is okay)")
 
 
-def test_cpp_lint_cache_rapid_changes(test: CacheLintStressTest):
+def test_cpp_lint_cache_rapid_changes(test: CacheLintStressTest) -> None:
     """Test C++ lint cache with rapid changes and checks."""
     print("\n📋 TEST 3: C++ Lint Cache - Rapid Checks")
     print("-" * 70)
@@ -208,7 +213,7 @@ def test_cpp_lint_cache_rapid_changes(test: CacheLintStressTest):
         test.pass_test("C++ lint check working (may re-run if files changed)")
 
 
-def test_all_caches_consistency(test: CacheLintStressTest):
+def test_all_caches_consistency(test: CacheLintStressTest) -> None:
     """Test that all three lint caches work together consistently."""
     print("\n📋 TEST 4: Cross-Cache Consistency")
     print("-" * 70)
@@ -234,7 +239,7 @@ def test_all_caches_consistency(test: CacheLintStressTest):
         test.fail_test("Cross-cache consistency", f"Only {checks_passed} checks passed")
 
 
-def test_cache_file_storage(test: CacheLintStressTest):
+def test_cache_file_storage(test: CacheLintStressTest) -> None:
     """Verify cache files are stored correctly."""
     print("\n📋 TEST 5: Cache File Storage")
     print("-" * 70)
@@ -274,20 +279,20 @@ def test_cache_file_storage(test: CacheLintStressTest):
         test.pass_test("At least one cache file stored correctly")
 
 
-def test_manifest_completeness(test: CacheLintStressTest):
+def test_manifest_completeness(test: CacheLintStressTest) -> None:
     """Test that dependencies manifest is complete and accurate."""
     print("\n📋 TEST 6: Dependency Manifest Validation")
     print("-" * 70)
 
     try:
         # Check all required operations exist
-        required_ops = ["python_lint", "javascript_lint", "cpp_lint"]
-        found_ops = []
+        required_ops: List[str] = ["python_lint", "javascript_lint", "cpp_lint"]
+        found_ops: List[str] = []
 
         for op in required_ops:
             try:
                 config = test.manifest.get_operation(op)
-                globs = test.manifest.get_globs(op)
+                globs: List[Any] = test.manifest.get_globs(op)
                 if globs:
                     found_ops.append(op)
                     test.pass_test(
@@ -305,7 +310,7 @@ def test_manifest_completeness(test: CacheLintStressTest):
         test.fail_test("Manifest validation", str(e))
 
 
-def test_cache_performance_all_caches(test: CacheLintStressTest):
+def test_cache_performance_all_caches(test: CacheLintStressTest) -> None:
     """Test performance of cache checks across all lint types."""
     print("\n📋 TEST 7: Cache Performance Benchmark")
     print("-" * 70)
@@ -340,7 +345,7 @@ def test_cache_performance_all_caches(test: CacheLintStressTest):
             )
 
 
-def _concurrent_cache_check(cache_type, result_queue):
+def _concurrent_cache_check(cache_type: str, result_queue: Queue[QueueResult]) -> None:
     """Worker function for concurrent cache check (must be module-level for Windows pickling)."""
     try:
         result = subprocess.run(
@@ -356,14 +361,14 @@ def _concurrent_cache_check(cache_type, result_queue):
         result_queue.put(("error", str(e)))
 
 
-def test_concurrent_cache_access(test: CacheLintStressTest):
+def test_concurrent_cache_access(test: CacheLintStressTest) -> None:
     """Test concurrent cache access doesn't break anything."""
     print("\n📋 TEST 8: Concurrent Cache Access")
     print("-" * 70)
 
     # Run 3 concurrent cache checks
-    result_queue = multiprocessing.Queue()
-    processes = []
+    result_queue: Queue[QueueResult] = multiprocessing.Queue()
+    processes: List[multiprocessing.Process] = []
 
     for i in range(3):
         p = multiprocessing.Process(
@@ -377,7 +382,7 @@ def test_concurrent_cache_access(test: CacheLintStressTest):
         p.join(timeout=15)
 
     # Check results
-    results = []
+    results: List[QueueResult] = []
     while not result_queue.empty():
         results.append(result_queue.get())
 
@@ -387,7 +392,7 @@ def test_concurrent_cache_access(test: CacheLintStressTest):
         test.fail_test("Concurrent cache access", f"Only {len(results)}/3 completed")
 
 
-def main():
+def main() -> int:
     """Run all stress tests."""
     print("\n" + "=" * 70)
     print("COMPREHENSIVE LINT CACHE STRESS TEST SUITE")

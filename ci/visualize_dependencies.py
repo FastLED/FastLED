@@ -10,10 +10,10 @@ Provides multiple views:
 
 import json
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import Any, Dict, List, Set
 
 
-def load_manifest() -> Dict:
+def load_manifest() -> Dict[str, Any]:
     """Load the dependencies manifest."""
     # Try multiple locations in order of preference
     candidates = [
@@ -36,7 +36,7 @@ def load_manifest() -> Dict:
         return json.load(f)
 
 
-def print_by_operation(manifest: Dict):
+def print_by_operation(manifest: Dict[str, Any]) -> None:
     """Print all operations and their monitored files."""
     print("\n" + "=" * 80)
     print("DEPENDENCIES BY OPERATION - What does each operation monitor?")
@@ -68,7 +68,7 @@ def print_by_operation(manifest: Dict):
                 print(f"     ... and {len(tools) - 5} more")
 
 
-def print_by_file(manifest: Dict):
+def print_by_file(manifest: Dict[str, Any]) -> None:
     """Print which operations monitor which directories."""
     print("\n" + "=" * 80)
     print("DEPENDENCIES BY FILE - Which operations monitor each directory?")
@@ -90,16 +90,16 @@ def print_by_file(manifest: Dict):
             print(f"   (No operations monitor this)")
 
 
-def print_dependency_graph(manifest: Dict):
+def print_dependency_graph(manifest: Dict[str, Any]) -> None:
     """Print the dependency graph."""
     print("\n" + "=" * 80)
     print("DEPENDENCY GRAPH - Which operations depend on which?")
     print("=" * 80)
 
-    dep_graph = manifest.get("dependency_graph", {})
+    dep_graph: Dict[str, Any] = manifest.get("dependency_graph", {})
 
     for op_name, deps in dep_graph.items():
-        depends_on = deps.get("depends_on", [])
+        depends_on: List[str] = deps.get("depends_on", [])
         print(f"\n🔹 {op_name}")
         if depends_on:
             for dep in depends_on:
@@ -108,7 +108,7 @@ def print_dependency_graph(manifest: Dict):
             print(f"   (independent operation)")
 
 
-def print_quick_reference(manifest: Dict):
+def print_quick_reference(manifest: Dict[str, Any]) -> None:
     """Print a quick reference table."""
     print("\n" + "=" * 80)
     print("QUICK REFERENCE TABLE")
@@ -123,7 +123,7 @@ def print_quick_reference(manifest: Dict):
         print("{:<20} {:<40} {:<15}".format(op_name, desc, f"{globs_count} globs"))
 
 
-def print_statistics(manifest: Dict):
+def print_statistics(manifest: Dict[str, Any]) -> None:
     """Print statistics about the manifest."""
     print("\n" + "=" * 80)
     print("MANIFEST STATISTICS")

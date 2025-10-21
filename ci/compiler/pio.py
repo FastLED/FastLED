@@ -20,7 +20,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List
+from typing import Any, Callable, Dict, List, Set, Tuple
 
 import fasteners
 from dirsync import sync  # type: ignore
@@ -73,6 +73,8 @@ def _generate_build_info_json_from_existing_build(
             metadata_cmd,
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             cwd=build_dir,
             timeout=900,  # 15 minutes for platform builds
         )
@@ -115,9 +117,9 @@ def _apply_board_specific_config(
     platformio_ini_path: Path,
     example: str,
     paths: "FastLEDPaths",
-    additional_defines: list[str] | None = None,
-    additional_include_dirs: list[str] | None = None,
-    additional_libs: list[str] | None = None,
+    additional_defines: List[str] | None = None,
+    additional_include_dirs: List[str] | None = None,
+    additional_libs: List[str] | None = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
@@ -235,7 +237,12 @@ def _setup_ccache_environment(board_name: str) -> bool:
         import subprocess
 
         result = subprocess.run(
-            [ccache_path, "--show-stats"], capture_output=True, text=True, check=False
+            [ccache_path, "--show-stats"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
         )
         if result.returncode == 0:
             print("CCACHE Statistics:")
@@ -250,7 +257,7 @@ def _setup_ccache_environment(board_name: str) -> bool:
     return True
 
 
-def _copy_cache_build_script(build_dir: Path, cache_config: dict[str, str]) -> None:
+def _copy_cache_build_script(build_dir: Path, cache_config: Dict[str, str]) -> None:
     """Copy the standalone cache setup script and set environment variables for configuration."""
     import shutil
 
@@ -349,7 +356,7 @@ def _find_platform_path_from_board(
     return None
 
 
-def get_platform_required_packages(platform_path: Path) -> list[str]:
+def get_platform_required_packages(platform_path: Path) -> List[str]:
     """Extract required package names from platform.json."""
     import json
 
@@ -379,6 +386,8 @@ def get_installed_packages_from_pio() -> Dict[str, str]:
             ["pio", "pkg", "list", "--global"],
             capture_output=True,
             text=True,
+            encoding="utf-8",
+            errors="replace",
             check=False,
             timeout=30,
         )
@@ -403,7 +412,7 @@ def get_installed_packages_from_pio() -> Dict[str, str]:
 
 def detect_and_fix_corrupted_packages_dynamic(
     paths: "FastLEDPaths", board_name: str, platform_path: Path | None = None
-) -> Dict[str, bool]:
+) -> Dict[str, Any]:
     """Dynamically detect and fix corrupted packages based on platform requirements."""
     import shutil
 
@@ -420,7 +429,7 @@ def detect_and_fix_corrupted_packages_dynamic(
             "  Lock detection: psutil NOT available (install with: uv pip install psutil)"
         )
 
-    results: Dict[str, bool] = {}
+    results: Dict[str, Any] = {}
 
     # Get required packages from platform.json if available
     platform_packages = []
@@ -739,7 +748,7 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
     sketch_dir.mkdir(parents=True, exist_ok=True)
 
     # Copy all files and subdirectories from example directory to sketch subdirectory
-    ino_files: list[str] = []
+    ino_files: List[str] = []
     for file_path in example_path.iterdir():
         if "fastled_js" in str(file_path):
             # skip fastled_js output folder.
@@ -817,7 +826,7 @@ def _copy_example_source(project_root: Path, build_dir: Path, example: str) -> b
     return True
 
 
-def _generate_main_cpp(ino_files: list[str]) -> str:
+def _generate_main_cpp(ino_files: List[str]) -> str:
     """Generate stub main.cpp content that includes .ino files from sketch directory.
 
     Args:
@@ -826,7 +835,7 @@ def _generate_main_cpp(ino_files: list[str]) -> str:
     Returns:
         Content for main.cpp file
     """
-    includes: list[str] = []
+    includes: List[str] = []
     for ino_file in sorted(ino_files):
         includes.append(f"#include <Arduino.h>")
         includes.append(f'#include "sketch/{ino_file}"')
@@ -906,7 +915,7 @@ def _copy_boards_directory(project_root: Path, build_dir: Path) -> bool:
     return True
 
 
-def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, str]:
+def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> Dict[str, str]:
     """Get environment variables for compiler cache configuration."""
     if cache_type == CacheType.NO_CACHE:
         print("No compiler cache configured")
@@ -920,7 +929,7 @@ def _get_cache_build_flags(board_name: str, cache_type: CacheType) -> dict[str, 
         return {}
 
 
-def _get_sccache_build_flags(board_name: str) -> dict[str, str]:
+def _get_sccache_build_flags(board_name: str) -> Dict[str, str]:
     """Get build flags for SCCACHE configuration with xcache wrapper support."""
     import shutil
     from pathlib import Path
@@ -968,7 +977,7 @@ def _get_sccache_build_flags(board_name: str) -> dict[str, str]:
     return config
 
 
-def _get_ccache_build_flags(board_name: str) -> dict[str, str]:
+def _get_ccache_build_flags(board_name: str) -> Dict[str, str]:
     """Get environment variables for CCACHE configuration."""
     import shutil
 
@@ -1054,7 +1063,12 @@ def _setup_sccache_environment(board_name: str) -> bool:
         import subprocess
 
         result = subprocess.run(
-            [sccache_path, "--show-stats"], capture_output=True, text=True, check=False
+            [sccache_path, "--show-stats"],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            check=False,
         )
         if result.returncode == 0:
             print("SCCACHE Statistics:")
@@ -1174,9 +1188,9 @@ def _init_platformio_build(
     verbose: bool,
     example: str,
     paths: "FastLEDPaths",
-    additional_defines: list[str] | None = None,
-    additional_include_dirs: list[str] | None = None,
-    additional_libs: list[str] | None = None,
+    additional_defines: List[str] | None = None,
+    additional_include_dirs: List[str] | None = None,
+    additional_libs: List[str] | None = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
@@ -1331,7 +1345,7 @@ def _init_platformio_build(
     # No need to write it again
 
     # Run initial build with LDF enabled to set up the environment
-    run_cmd: list[str] = ["pio", "run", "--project-dir", str(build_dir)]
+    run_cmd: List[str] = ["pio", "run", "--project-dir", str(build_dir)]
     if verbose:
         run_cmd.append("--verbose")
 
@@ -1405,9 +1419,9 @@ class PioCompiler(Compiler):
         board: Board | str,
         verbose: bool,
         global_cache_dir: Path,
-        additional_defines: list[str] | None = None,
-        additional_include_dirs: list[str] | None = None,
-        additional_libs: list[str] | None = None,
+        additional_defines: List[str] | None = None,
+        additional_include_dirs: List[str] | None = None,
+        additional_libs: List[str] | None = None,
         cache_type: CacheType = CacheType.NO_CACHE,
     ) -> None:
         # Call parent constructor
@@ -1470,7 +1484,7 @@ class PioCompiler(Compiler):
         """Cancel all builds."""
         self.executor.shutdown(wait=False, cancel_futures=True)
 
-    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
+    def build(self, examples: List[str]) -> List[Future[SketchResult]]:
         """Build a list of examples with proper lock management."""
         if not examples:
             return []
@@ -1487,7 +1501,7 @@ class PioCompiler(Compiler):
                 print(f"Releasing platform lock: {self.platform_lock.lock_file_path}\n")
                 self.platform_lock.release()
 
-        futures: list[Future[SketchResult]] = []
+        futures: List[Future[SketchResult]] = []
 
         # Submit all builds
         self._global_package_lock.acquire()
@@ -1533,7 +1547,7 @@ class PioCompiler(Compiler):
         # Cache configuration is handled through build flags during initialization
 
         # Run PlatformIO build
-        run_cmd: list[str] = [
+        run_cmd: List[str] = [
             "pio",
             "run",
             "--project-dir",
@@ -1619,11 +1633,13 @@ class PioCompiler(Compiler):
                 [cache_path, "--show-stats"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 check=False,
             )
 
             if result.returncode == 0:
-                stats_lines: list[str] = []
+                stats_lines: List[str] = []
                 for line in result.stdout.strip().split("\n"):
                     if line.strip():
                         stats_lines.append(line)
@@ -1775,7 +1791,7 @@ class PioCompiler(Compiler):
                     return build_result
 
             # Run PlatformIO upload command
-            upload_cmd: list[str] = [
+            upload_cmd: List[str] = [
                 "pio",
                 "run",
                 "--project-dir",
@@ -1839,7 +1855,7 @@ class PioCompiler(Compiler):
                 )
                 print("📝 Press Ctrl+C to exit monitor")
 
-                monitor_cmd: list[str] = [
+                monitor_cmd: List[str] = [
                     "pio",
                     "device",
                     "monitor",
@@ -1885,7 +1901,7 @@ class PioCompiler(Compiler):
             # Only decrement the lock if it hasn't been released yet
             pass  # we used to release the platform lock here, but we disabled it
 
-    def check_usb_permissions(self) -> tuple[bool, str]:
+    def check_usb_permissions(self) -> Tuple[bool, str]:
         """Check if USB device access is properly configured on Linux.
 
         Checks multiple methods for USB device access:
@@ -1899,7 +1915,7 @@ class PioCompiler(Compiler):
         if platform.system() != "Linux":
             return True, "Not applicable on non-Linux systems"
 
-        access_methods: list[str] = []
+        access_methods: List[str] = []
 
         # Check 1: PlatformIO udev rules
         udev_rules_path = Path("/etc/udev/rules.d/99-platformio-udev.rules")
@@ -1933,10 +1949,16 @@ class PioCompiler(Compiler):
         else:
             return False, "No USB device access methods detected"
 
-    def _get_user_groups(self) -> list[str]:
+    def _get_user_groups(self) -> List[str]:
         """Get list of groups the current user belongs to."""
         try:
-            result = subprocess.run(["groups"], capture_output=True, text=True)
+            result = subprocess.run(
+                ["groups"],
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+            )
             if result.returncode == 0:
                 return result.stdout.strip().split()
             return []
@@ -1995,6 +2017,8 @@ class PioCompiler(Compiler):
                 ["sudo", "cp", temp_file, udev_rules_path],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
             )
 
             if result.returncode != 0:
@@ -2208,12 +2232,12 @@ class PioCompiler(Compiler):
 
 def run_pio_build(
     board: Board | str,
-    examples: list[str],
+    examples: List[str],
     verbose: bool = False,
-    additional_defines: list[str] | None = None,
-    additional_include_dirs: list[str] | None = None,
+    additional_defines: List[str] | None = None,
+    additional_include_dirs: List[str] | None = None,
     cache_type: CacheType = CacheType.NO_CACHE,
-) -> list[Future[SketchResult]]:
+) -> List[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.
 
     Args:

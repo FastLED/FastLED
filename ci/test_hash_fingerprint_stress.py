@@ -13,10 +13,15 @@ import shutil
 import tempfile
 import threading
 import time
+from multiprocessing import Queue
 from pathlib import Path
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
+
+
+# Type alias for Queue results
+QueueResult = Tuple[str, Any]
 
 
 class StressTestResults:
@@ -36,7 +41,7 @@ class StressTestResults:
         self.errors.append(f"{name}: {error}")
         print(f"  ❌ {name}: {error}")
 
-    def print_summary(self):
+    def print_summary(self) -> bool:
         print("\n" + "=" * 70)
         print(f"STRESS TEST RESULTS: {self.passed} passed, {self.failed} failed")
         print("=" * 70)
@@ -50,7 +55,7 @@ class StressTestResults:
 def create_test_files(test_dir: Path, count: int = 10) -> List[Path]:
     """Create test files in a temporary directory."""
     test_dir.mkdir(parents=True, exist_ok=True)
-    files = []
+    files: List[Path] = []
     for i in range(count):
         file_path = test_dir / f"test_file_{i}.txt"
         file_path.write_text(f"Content {i}\n")
@@ -58,7 +63,7 @@ def create_test_files(test_dir: Path, count: int = 10) -> List[Path]:
     return sorted(files)
 
 
-def test_basic_functionality(results: StressTestResults):
+def test_basic_functionality(results: StressTestResults) -> None:
     """Test basic cache operations."""
     print("\n📋 TEST 1: Basic Functionality")
     print("-" * 70)
@@ -105,7 +110,7 @@ def test_basic_functionality(results: StressTestResults):
             )
 
 
-def test_file_modification_during_processing(results: StressTestResults):
+def test_file_modification_during_processing(results: StressTestResults) -> None:
     """Test that files can be modified during processing without breaking cache."""
     print("\n📋 TEST 2: File Modification During Processing")
     print("-" * 70)
@@ -145,7 +150,9 @@ def test_file_modification_during_processing(results: StressTestResults):
             results.fail_test("Cache saved with fingerprint", "Cache info missing")
 
 
-def _concurrent_check_worker(cache_dir: Path, files: List[Path], result_queue):
+def _concurrent_check_worker(
+    cache_dir: Path, files: List[Path], result_queue: Queue[QueueResult]
+) -> None:
     """Worker function run in separate process. Must be top-level for pickling."""
     try:
         cache = HashFingerprintCache(cache_dir, "concurrent_test")
@@ -155,7 +162,7 @@ def _concurrent_check_worker(cache_dir: Path, files: List[Path], result_queue):
         result_queue.put(("error", str(e)))
 
 
-def test_concurrent_checks(results: StressTestResults):
+def test_concurrent_checks(results: StressTestResults) -> None:
     """Test multiple processes checking cache simultaneously."""
     print("\n📋 TEST 3: Concurrent Access (Multiple Processes)")
     print("-" * 70)
@@ -168,8 +175,8 @@ def test_concurrent_checks(results: StressTestResults):
         files = create_test_files(test_dir, 10)
 
         # Run 5 concurrent checks
-        result_queue = multiprocessing.Queue()
-        processes = []
+        result_queue: Queue[QueueResult] = multiprocessing.Queue()
+        processes: List[multiprocessing.Process] = []
 
         for i in range(5):
             p = multiprocessing.Process(
@@ -183,7 +190,7 @@ def test_concurrent_checks(results: StressTestResults):
             p.join(timeout=10)
 
         # Check results
-        results_collected = []
+        results_collected: List[QueueResult] = []
         while not result_queue.empty():
             status, result = result_queue.get()
             results_collected.append((status, result))
@@ -206,7 +213,7 @@ def test_concurrent_checks(results: StressTestResults):
             )
 
 
-def test_cross_process_pending_fingerprint(results: StressTestResults):
+def test_cross_process_pending_fingerprint(results: StressTestResults) -> None:
     """Test pending fingerprint works across process boundaries."""
     print("\n📋 TEST 4: Cross-Process Pending Fingerprint")
     print("-" * 70)
@@ -256,7 +263,7 @@ def test_cross_process_pending_fingerprint(results: StressTestResults):
             results.fail_test("Pending fingerprint cleanup", "File still exists")
 
 
-def test_invalidate_on_failure(results: StressTestResults):
+def test_invalidate_on_failure(results: StressTestResults) -> None:
     """Test cache invalidation on failure."""
     print("\n📋 TEST 5: Invalidate on Failure")
     print("-" * 70)
@@ -293,7 +300,7 @@ def test_invalidate_on_failure(results: StressTestResults):
             results.fail_test("Check after invalidation returns True", "Got False")
 
 
-def test_missing_files(results: StressTestResults):
+def test_missing_files(results: StressTestResults) -> None:
     """Test handling of missing files."""
     print("\n📋 TEST 6: Missing File Handling")
     print("-" * 70)
@@ -322,7 +329,7 @@ def test_missing_files(results: StressTestResults):
             results.fail_test("Cache detects missing file", "Got cache hit instead")
 
 
-def test_cache_corruption_recovery(results: StressTestResults):
+def test_cache_corruption_recovery(results: StressTestResults) -> None:
     """Test recovery from corrupted cache files."""
     print("\n📋 TEST 7: Cache Corruption Recovery")
     print("-" * 70)
@@ -358,7 +365,7 @@ def test_cache_corruption_recovery(results: StressTestResults):
             )
 
 
-def test_large_file_set_performance(results: StressTestResults):
+def test_large_file_set_performance(results: StressTestResults) -> None:
     """Test performance with many files."""
     print("\n📋 TEST 8: Large File Set Performance")
     print("-" * 70)
@@ -405,7 +412,7 @@ def test_large_file_set_performance(results: StressTestResults):
             )
 
 
-def test_race_condition_rapid_operations(results: StressTestResults):
+def test_race_condition_rapid_operations(results: StressTestResults) -> None:
     """Test rapid sequential operations don't cause race conditions."""
     print("\n📋 TEST 9: Race Condition - Rapid Sequential Operations")
     print("-" * 70)
@@ -435,7 +442,7 @@ def test_race_condition_rapid_operations(results: StressTestResults):
             results.fail_test("Rapid sequential operations", str(e))
 
 
-def test_timestamp_file_optional(results: StressTestResults):
+def test_timestamp_file_optional(results: StressTestResults) -> None:
     """Test that timestamp_file parameter is truly optional."""
     print("\n📋 TEST 10: Timestamp File Optional Parameter")
     print("-" * 70)
@@ -472,7 +479,7 @@ def test_timestamp_file_optional(results: StressTestResults):
             results.fail_test("Cache with timestamp_file", str(e))
 
 
-def main():
+def main() -> int:
     """Run all stress tests."""
     print("\n" + "=" * 70)
     print("HASHFINGERPRINTCACHE STRESS TEST SUITE")
