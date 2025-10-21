@@ -3,42 +3,84 @@
 # PlatformIO Platform-Specific Image for FastLED
 # This image builds on the base image and pre-caches platform-specific toolchains
 # (e.g., avr-gcc for Arduino Uno, xtensa-esp32-elf-gcc for ESP32, etc.)
+#
+# Key Changes (Externalized Arguments):
+# - No environment variable substitution - all arguments passed explicitly
+# - Each RUN layer is independent and self-contained
+# - Build logic in external build.sh script (not embedded in Dockerfile)
+# - Easier to debug: arguments are visible in each RUN command
 
 # Use FastLED compiler base image (contains uv, PlatformIO, and all Python dependencies)
 # This image is built by build_docker_image_pio.py
 FROM niteris/fastled-compiler-base:latest
 
-# Accept comma-delimited list of platforms/boards to compile for this group
-# This is required and passed from the GitHub Actions workflow
+# ==============================================================================
+# BUILD ARGUMENTS
+# ==============================================================================
+# PLATFORMS: Comma-delimited list of boards to pre-cache (e.g., "uno,esp32dev,teensy41")
+#            This is the ONLY required argument, passed from GitHub Actions workflow
 ARG PLATFORMS
-ENV PLATFORMS=${PLATFORMS}
 
-# NOTE: platformio.ini is NOT copied here - it's generated dynamically by build.sh
-# The build script will then compile each board in PLATFORMS to cache all build artifacts and toolchains
+# ==============================================================================
+# PLATFORM-INDEPENDENT SETUP
+# ==============================================================================
 
-# Copy build script for dependency caching
-# Using a script file makes Docker layer caching more deterministic
+# Copy build scripts for dependency caching
+# Using script files makes Docker layer caching more deterministic
 COPY build.sh /tmp/build.sh
 RUN chmod +x /tmp/build.sh
 
-# Multi-stage dependency installation for better Docker layer caching
-# Each RUN creates a separate cache layer that only invalidates when its specific dependency changes
+# Verify argument was passed
+RUN if [ -z "$PLATFORMS" ]; then \
+      echo "ERROR: PLATFORMS build argument not provided"; \
+      echo "Usage: docker build --build-arg PLATFORMS=uno,esp32dev ..."; \
+      exit 1; \
+    fi
 
-# LAYER 1: Install Platform (separate cache layer)
-# This installs the platform definition without default packages
-# Invalidates only when platform version/URL changes
-RUN /tmp/build.sh install-platform
+# ==============================================================================
+# LAYER 1: Install Platform Definitions (separate cache layer)
+# ==============================================================================
+# Purpose: Install PlatformIO platform definitions only (without packages)
+# Invalidates: Only when platform configuration changes
+# Argument: PLATFORMS=${PLATFORMS} (explicit, visible in history)
+#
+# Example flow for PLATFORMS="uno,esp32dev":
+#   - Generates platformio.ini for uno first
+#   - Extracts platform value (e.g., "atmelavr")
+#   - Installs platform definition via PlatformIO
+RUN echo "=== Layer 1: Installing platform definitions for boards: ${PLATFORMS} ===" && \
+    PLATFORMS="${PLATFORMS}" bash /tmp/build.sh install-platform
 
-# LAYER 2: Install Platform Packages (toolchains, compilers - separate cache layer)
-# This installs platform-specific toolchains and tools (e.g., avr-gcc, xtensa-esp32-elf-gcc)
-# Invalidates only when toolchain versions change
-RUN /tmp/build.sh install-packages
+# ==============================================================================
+# LAYER 2: Install Platform Packages - Toolchains & Compilers (separate cache layer)
+# ==============================================================================
+# Purpose: Install platform-specific toolchains (avr-gcc, xtensa-esp32-elf-gcc, etc.)
+# Invalidates: Only when toolchain versions change (independent from platform definition)
+# Argument: PLATFORMS=${PLATFORMS} (explicit, visible in history)
+#
+# This is where the heavy downloads happen:
+#   - avr-gcc for Arduino boards
+#   - xtensa-esp32-elf-gcc for ESP32 boards
+#   - arm-none-eabi-gcc for STM32/Teensy boards
+#   - etc.
+RUN echo "=== Layer 2: Installing platform packages for boards: ${PLATFORMS} ===" && \
+    PLATFORMS="${PLATFORMS}" bash /tmp/build.sh install-packages
 
-# LAYER 3: Warm up compilation (separate cache layer)
-# Run initial compilation to complete any remaining setup and validate everything works
-# This downloads any framework files needed during compilation
-# Pass PLATFORMS environment variable to enable multi-board compilation
-RUN PLATFORMS=${PLATFORMS} /tmp/build.sh compile
+# ==============================================================================
+# LAYER 3: Warm Up Compilation (separate cache layer)
+# ==============================================================================
+# Purpose: Run initial compilation for each board to cache all build artifacts
+# Invalidates: Only when FastLED source code changes
+# Argument: PLATFORMS=${PLATFORMS} (explicit, visible in history)
+#
+# This layer compiles the Blink example for each board in PLATFORMS to:
+#   1. Download any framework files needed during compilation
+#   2. Pre-cache compiler-generated artifacts
+#   3. Validate that everything works end-to-end
+#
+# Result: The image is ready for instant compilation (zero downloads at runtime)
+RUN echo "=== Layer 3: Warming up compilation for boards: ${PLATFORMS} ===" && \
+    PLATFORMS="${PLATFORMS}" bash /tmp/build.sh compile
 
 # The platform toolchains are now BAKED INTO the image at ~/.platformio
 # /fastled remains pristine with library source downloaded from GitHub
