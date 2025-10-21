@@ -115,6 +115,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: merge-base
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Trigger template workflow
         run: |
           gh workflow run docker_compiler_template.yml \

@@ -6,7 +6,7 @@
 
 # Use FastLED compiler base image (contains uv, PlatformIO, and all Python dependencies)
 # This image is built by build_docker_image_pio.py
-FROM fastled-compiler-base:latest
+FROM niteris/fastled-compiler-base:latest
 
 # Accept platform name as build argument
 ARG PLATFORM_NAME
