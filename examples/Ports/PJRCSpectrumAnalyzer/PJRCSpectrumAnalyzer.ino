@@ -1,4 +1,4 @@
-// @filter: (platform is teensy) and ((platform is teensy35) or (platform is teensy36) or (platform is teensy40) or (platform is teensy41))
+// @filter: (platform is teensy) and (memory is high)
 
 /// @file    PJRCSpectrumAnalyzer.ino
 /// @brief   PJRCSpectrumAnalyzer example with platform detection

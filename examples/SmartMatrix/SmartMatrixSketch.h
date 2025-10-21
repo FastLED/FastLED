@@ -9,6 +9,8 @@
    This SmartMatrix library is only available on Teensy boards at the moment.
    It can be found at https://github.com/pixelmatix/SmartMatrix
 */
+
+
 #include <SmartMatrix.h>
 #include <FastLED.h>
 
