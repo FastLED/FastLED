@@ -43,7 +43,7 @@ void loop() {
   // i2s api. You can delete this in your own sketch. It's only here for testing
   // purposes.
   if (false) {
-    int value = gCntBuffer;
+    int value = fl::gCntBuffer;
     value++;
   }
 }

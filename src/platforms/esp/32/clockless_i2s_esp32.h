@@ -109,6 +109,7 @@
 #include "platforms/esp/32/i2s/i2s_esp32dev.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 #define NUM_COLOR_CHANNELS 3

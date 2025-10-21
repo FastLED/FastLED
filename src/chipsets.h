@@ -77,7 +77,11 @@
 #if defined(FASTLED_STUB_IMPL)
   #include "platforms/stub/clockless_stub_generic.h"
 #elif defined(ESP32)
-  #include "platforms/esp/32/clockless_rmt_esp32.h"
+  #ifdef FASTLED_ESP32_I2S
+    #include "platforms/esp/32/clockless_i2s_esp32.h"
+  #else
+    #include "platforms/esp/32/clockless_rmt_esp32.h"
+  #endif
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #elif defined(__AVR__)
