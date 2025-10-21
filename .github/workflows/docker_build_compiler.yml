@@ -91,7 +91,7 @@ jobs:
         file: ./ci/docker/${{ inputs.dockerfile }}
         labels: ${{ steps.meta.outputs.labels }}
         outputs: type=image,name=${{ env.docker_registry_image }},push-by-digest=true,name-canonical=true,push=true
-        build-args: >
+        build-args: |
           PLATFORMS=${{ inputs.platforms }}
         cache-from: type=gha
         cache-to: type=gha,mode=max,compression=zstd
