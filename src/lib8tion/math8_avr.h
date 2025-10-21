@@ -248,23 +248,24 @@ LIB8STATIC_ALWAYS_INLINE int8_t abs8(int8_t i) {
 /// Blend a variable proportion of one byte to another (AVR assembly)
 #if (FASTLED_BLEND_FIXED == 1)
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint16_t partial;
+    uint16_t partial = 0;
     uint8_t result;
 
-    // 1 or 2 cycles depending on how the compiler optimises
-    partial = (a << 8) | b;
-
-    // 7 cycles
-    asm volatile("  mul %[a], %[amountOfB]        \n\t"
-                 "  sub %A[partial], r0           \n\t"
-                 "  sbc %B[partial], r1           \n\t"
-                 "  mul %[b], %[amountOfB]        \n\t"
-                 "  add %A[partial], r0           \n\t"
-                 "  adc %B[partial], r1           \n\t"
-                 "  clr __zero_reg__              \n\t"
-                 : [partial] "+r"(partial)
-                 : [amountOfB] "r"(amountOfB), [a] "r"(a), [b] "r"(b)
-                 : "r0", "r1");
+    // Use inline assembly to construct 16-bit value and perform blending
+    // This avoids generating illegal 32-bit 'or' instruction on ATtiny85
+    asm volatile(
+        "  mov %A[partial], %[b]           \n\t"  // Low byte = b
+        "  mov %B[partial], %[a]           \n\t"  // High byte = a
+        "  mul %[a], %[amountOfB]          \n\t"
+        "  sub %A[partial], r0             \n\t"
+        "  sbc %B[partial], r1             \n\t"
+        "  mul %[b], %[amountOfB]          \n\t"
+        "  add %A[partial], r0             \n\t"
+        "  adc %B[partial], r1             \n\t"
+        "  clr __zero_reg__                \n\t"
+        : [partial] "+r"(partial)
+        : [amountOfB] "r"(amountOfB), [a] "r"(a), [b] "r"(b)
+        : "r0", "r1");
 
     result = partial >> 8;
 
@@ -272,12 +273,12 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 }
 #else
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint16_t partial;
+    uint16_t partial = 0;
     uint8_t result;
 
     // non-SCALE8-fixed version
+    // Use inline assembly to avoid illegal 32-bit instructions on ATtiny85
 
-    // 7 cycles
     asm volatile(
         /* partial = b * amountOfB */
         "  mul %[b], %[amountOfB]        \n\t"
@@ -294,7 +295,7 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 
         "  clr __zero_reg__              \n\t"
 
-        : [partial] "=r"(partial), [amountOfB] "+r"(amountOfB)
+        : [partial] "+r"(partial), [amountOfB] "+r"(amountOfB)
         : [a] "r"(a), [b] "r"(b)
         : "r0", "r1");
 

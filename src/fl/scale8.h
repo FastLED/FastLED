@@ -7,7 +7,10 @@
 #include "lib8tion/lib8static.h"
 
 // Select appropriate implementation based on platform configuration
-#if defined(__AVR__)
+#if defined(LIB8_ATTINY)
+// ATtiny has very limited resources - use specialized assembly optimizations
+#include "platforms/attiny/scale8.h"
+#elif defined(__AVR__)
 #include "platforms/avr/scale8.h"
 #else
 #include "platforms/shared/scale8.h"

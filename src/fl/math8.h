@@ -7,7 +7,10 @@
 #include "fl/compiler_control.h"
 
 // Select appropriate implementation based on platform configuration
-#if defined(__AVR__)
+#if defined(LIB8_ATTINY)
+// ATtiny has very limited resources - use specialized assembly optimizations
+#include "platforms/attiny/math8.h"
+#elif defined(__AVR__)
 // AVR is slow - use assembly-optimized version for performance
 #include "platforms/avr/math8.h"
 #else
