@@ -129,7 +129,7 @@ def print_statistics(manifest: Dict[str, Any]) -> None:
     print("MANIFEST STATISTICS")
     print("=" * 80)
 
-    ops = manifest.get("operations", {})
+    ops: Dict[str, Any] = manifest.get("operations", {})
     total_globs = sum(len(op.get("globs", [])) for op in ops.values())
     total_excludes = sum(len(op.get("excludes", [])) for op in ops.values())
     total_tools = sum(len(op.get("tools", [])) for op in ops.values())
@@ -141,13 +141,17 @@ def print_statistics(manifest: Dict[str, Any]) -> None:
     print(f"   Total tools: {total_tools}")
 
     # Find largest operation
-    largest_op = max(ops.items(), key=lambda x: len(x[1].get("globs", [])))
+    largest_op: tuple[str, Any] = max(
+        ops.items(), key=lambda x: len(x[1].get("globs", []))
+    )
     print(f"\n📈 Largest operation:")
     print(f"   {largest_op[0]}: {len(largest_op[1].get('globs', []))} globs")
 
     # Find operations with most tools
-    tools_count = {op: len(config.get("tools", [])) for op, config in ops.items()}
-    most_tools = max(tools_count.items(), key=lambda x: x[1])
+    tools_count: Dict[str, int] = {
+        op: len(config.get("tools", [])) for op, config in ops.items()
+    }
+    most_tools: tuple[str, int] = max(tools_count.items(), key=lambda x: x[1])
     if most_tools[1] > 0:
         print(f"\n🔧 Most tools:")
         print(f"   {most_tools[0]}: {most_tools[1]} tools")

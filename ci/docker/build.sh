@@ -9,19 +9,25 @@ set -e
 
 cd /fastled
 
-# Check if PLATFORM_NAME is set
-if [ -z "$PLATFORM_NAME" ]; then
-    echo "Error: PLATFORM_NAME not set"
+# Check if PLATFORMS is set
+if [ -z "$PLATFORMS" ]; then
+    echo "Error: PLATFORMS not set"
     exit 1
 fi
+
+# Extract first board from PLATFORMS list as default for generate_platformio_ini
+FIRST_PLATFORM=$(echo "$PLATFORMS" | cut -d',' -f1 | xargs)
 
 # Parse command argument (default to legacy "compile all" behavior)
 COMMAND="${1:-legacy}"
 
-# Generate platformio.ini from PLATFORM_NAME using board configuration
+# Generate platformio.ini from a board using board configuration
 # This is the source of truth - platformio.ini is derived, not canonical
+# Usage: generate_platformio_ini [board_name]
+# If board_name is omitted, defaults to first board in PLATFORMS list
 generate_platformio_ini() {
-    echo "Generating platformio.ini from platform: $PLATFORM_NAME"
+    local board_name="${1:-$FIRST_PLATFORM}"
+    echo "Generating platformio.ini from board: $board_name"
 
     # Use Python to generate platformio.ini from board configuration
     python3 -c "
@@ -31,7 +37,7 @@ from ci.boards import create_board
 from pathlib import Path
 
 try:
-    board = create_board('$PLATFORM_NAME')
+    board = create_board('$board_name')
     project_root = '/fastled'
     ini_content = board.to_platformio_ini(
         include_platformio_section=True,
@@ -75,7 +81,7 @@ get_platform_packages_from_ini() {
 
 case "$COMMAND" in
     install-platform)
-        echo "=== LAYER 1: Installing platform definition for: $PLATFORM_NAME ==="
+        echo "=== LAYER 1: Installing platform definition for: $PLATFORMS ==="
 
         # Generate platformio.ini first
         generate_platformio_ini
@@ -96,7 +102,7 @@ case "$COMMAND" in
         ;;
 
     install-packages)
-        echo "=== LAYER 2: Installing platform packages (toolchains) for: $PLATFORM_NAME ==="
+        echo "=== LAYER 2: Installing platform packages (toolchains) for: $PLATFORMS ==="
 
         # Generate platformio.ini if not already present
         if [ ! -f "platformio.ini" ]; then
@@ -135,27 +141,7 @@ case "$COMMAND" in
         ;;
 
     compile)
-        echo "=== LAYER 3: Warming up compilation for: $PLATFORM_NAME ==="
-
-        # Check if PLATFORMS is set (comma-delimited list of boards to compile)
-        # If not set, fall back to looking up all boards for PLATFORM_NAME
-        if [ -z "$PLATFORMS" ]; then
-            echo "PLATFORMS not set, looking up boards for platform: $PLATFORM_NAME"
-            PLATFORMS=$(python3 -c "
-import sys
-sys.path.insert(0, '/fastled')
-try:
-    from ci.docker.build_platforms import get_boards_for_platform, get_platform_for_board
-    platform = get_platform_for_board('$PLATFORM_NAME')
-    if platform:
-        boards = get_boards_for_platform(platform)
-        print(','.join(boards))
-    else:
-        print('$PLATFORM_NAME')
-except:
-    print('$PLATFORM_NAME')
-" 2>/dev/null || echo "$PLATFORM_NAME")
-        fi
+        echo "=== LAYER 3: Warming up compilation for: $PLATFORMS ==="
 
         echo "Platforms/boards to compile: $PLATFORMS"
 
@@ -163,12 +149,15 @@ except:
         # 1. Download any remaining framework files
         # 2. Pre-cache platform-specific toolchains
         # 3. Validate that everything works
+        # NOTE: Boards are compiled sequentially (one at a time) to ensure each completes before the next starts
         IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"
         for board in "${BOARDS_ARRAY[@]}"; do
             board=$(echo "$board" | xargs)  # Trim whitespace
             echo ""
             echo ">>> Pre-caching toolchain for board: $board"
-            bash compile "$board" Blink
+            # Regenerate platformio.ini for each board to ensure correct configuration
+            generate_platformio_ini "$board"
+            NO_PARALLEL=1 bash compile "$board" Blink
             if [ $? -ne 0 ]; then
                 echo "Warning: Failed to compile $board, continuing..."
             fi
@@ -179,28 +168,10 @@ except:
 
     legacy|*)
         # Legacy behavior: do everything in one shot (backwards compatible)
-        echo "=== LEGACY MODE: Installing all dependencies for: $PLATFORM_NAME ==="
+        echo "=== LEGACY MODE: Installing all dependencies for: $PLATFORMS ==="
 
         # Generate platformio.ini first
         generate_platformio_ini
-
-        # Check if PLATFORMS is set; if not, look up boards for PLATFORM_NAME
-        if [ -z "$PLATFORMS" ]; then
-            PLATFORMS=$(python3 -c "
-import sys
-sys.path.insert(0, '/fastled')
-try:
-    from ci.docker.build_platforms import get_boards_for_platform, get_platform_for_board
-    platform = get_platform_for_board('$PLATFORM_NAME')
-    if platform:
-        boards = get_boards_for_platform(platform)
-        print(','.join(boards))
-    else:
-        print('$PLATFORM_NAME')
-except:
-    print('$PLATFORM_NAME')
-" 2>/dev/null || echo "$PLATFORM_NAME")
-        fi
 
         # Compile for each board
         IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"

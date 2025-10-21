@@ -15,16 +15,13 @@ import threading
 import time
 from multiprocessing import Queue
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import Any, List, Tuple
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 # Type alias for Queue results
 QueueResult = Tuple[str, Any]
-
-if TYPE_CHECKING:
-    from multiprocessing import Queue
 
 
 class StressTestResults:
@@ -154,7 +151,9 @@ def test_file_modification_during_processing(results: StressTestResults) -> None
 
 
 def _concurrent_check_worker(
-    cache_dir: Path, files: List[Path], result_queue: Queue[QueueResult]
+    cache_dir: Path,
+    files: List[Path],
+    result_queue: multiprocessing.Queue[Tuple[str, Any]],
 ) -> None:
     """Worker function run in separate process. Must be top-level for pickling."""
     try:
@@ -178,7 +177,7 @@ def test_concurrent_checks(results: StressTestResults) -> None:
         files = create_test_files(test_dir, 10)
 
         # Run 5 concurrent checks
-        result_queue: Queue[QueueResult] = multiprocessing.Queue()
+        result_queue: multiprocessing.Queue[Tuple[str, Any]] = multiprocessing.Queue()
         processes: List[multiprocessing.Process] = []
 
         for i in range(5):
@@ -193,7 +192,7 @@ def test_concurrent_checks(results: StressTestResults) -> None:
             p.join(timeout=10)
 
         # Check results
-        results_collected: List[QueueResult] = []
+        results_collected: List[Tuple[str, Any]] = []
         while not result_queue.empty():
             status, result = result_queue.get()
             results_collected.append((status, result))

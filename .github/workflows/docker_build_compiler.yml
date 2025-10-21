@@ -55,7 +55,6 @@ jobs:
       run: |
         platform=${{ inputs.platform }}
         echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
-        echo "PLATFORM_NAME=${{ inputs.group }}" >> $GITHUB_ENV
 
     - name: Display target Docker image
       run: |
@@ -92,9 +91,7 @@ jobs:
         file: ./ci/docker/${{ inputs.dockerfile }}
         labels: ${{ steps.meta.outputs.labels }}
         outputs: type=image,name=${{ env.docker_registry_image }},push-by-digest=true,name-canonical=true,push=true
-        build-args: |
-          PLATFORM_NAME=${{ env.PLATFORM_NAME }}
-          GROUP=${{ inputs.group }}
+        build-args: >
           PLATFORMS=${{ inputs.platforms }}
         cache-from: type=gha
         cache-to: type=gha,mode=max,compression=zstd

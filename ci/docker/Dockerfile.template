@@ -8,17 +8,13 @@
 # This image is built by build_docker_image_pio.py
 FROM niteris/fastled-compiler-base:latest
 
-# Accept platform name as build argument
-ARG PLATFORM_NAME
-ENV PLATFORM_NAME=${PLATFORM_NAME}
-
-# Accept optional comma-delimited list of platforms/boards to compile
-# If not provided, will be auto-detected from PLATFORM_NAME
+# Accept comma-delimited list of platforms/boards to compile for this group
+# This is required and passed from the GitHub Actions workflow
 ARG PLATFORMS
 ENV PLATFORMS=${PLATFORMS}
 
 # NOTE: platformio.ini is NOT copied here - it's generated dynamically by build.sh
-# from the PLATFORM_NAME using ci/boards.py (the source of truth)
+# The build script will then compile each board in PLATFORMS to cache all build artifacts and toolchains
 
 # Copy build script for dependency caching
 # Using a script file makes Docker layer caching more deterministic

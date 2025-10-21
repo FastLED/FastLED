@@ -18,7 +18,7 @@ import tempfile
 import time
 from multiprocessing import Queue
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, List, Tuple
+from typing import Any, Dict, List, Tuple
 
 from ci.util.dependency_loader import DependencyManifest
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
@@ -26,9 +26,6 @@ from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 # Type alias for Queue results
 QueueResult = Tuple[str, Any]
-
-if TYPE_CHECKING:
-    from multiprocessing import Queue
 
 
 class CacheLintStressTest:
@@ -289,7 +286,7 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
 
     try:
         # Check all required operations exist
-        required_ops: List[str] = ["python_lint", "javascript_lint", "cpp_lint"]
+        required_ops = ["python_lint", "javascript_lint", "cpp_lint"]
         found_ops: List[str] = []
 
         for op in required_ops:
@@ -348,7 +345,9 @@ def test_cache_performance_all_caches(test: CacheLintStressTest) -> None:
             )
 
 
-def _concurrent_cache_check(cache_type: str, result_queue: Queue[QueueResult]) -> None:
+def _concurrent_cache_check(
+    cache_type: str, result_queue: multiprocessing.Queue[Tuple[str, Any]]
+) -> None:
     """Worker function for concurrent cache check (must be module-level for Windows pickling)."""
     try:
         result = subprocess.run(
@@ -370,7 +369,7 @@ def test_concurrent_cache_access(test: CacheLintStressTest) -> None:
     print("-" * 70)
 
     # Run 3 concurrent cache checks
-    result_queue: Queue[QueueResult] = multiprocessing.Queue()
+    result_queue: multiprocessing.Queue[Tuple[str, Any]] = multiprocessing.Queue()
     processes: List[multiprocessing.Process] = []
 
     for i in range(3):
@@ -385,7 +384,7 @@ def test_concurrent_cache_access(test: CacheLintStressTest) -> None:
         p.join(timeout=15)
 
     # Check results
-    results: List[QueueResult] = []
+    results: List[Tuple[str, Any]] = []
     while not result_queue.empty():
         results.append(result_queue.get())
 
