@@ -218,7 +218,7 @@ class DockerContainerManager:
         """Pause the container to free resources."""
         try:
             result = subprocess.run(
-                ["docker", "pause", self.config.container_name],
+                [get_docker_command(), "pause", self.config.container_name],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
                 timeout=30,
@@ -439,14 +439,9 @@ class DockerCompilationOrchestrator:
 
             result = subprocess.run(build_cmd)
             return result.returncode == 0
-        except FileNotFoundError:
-            # Docker command not found
+        except (FileNotFoundError, subprocess.TimeoutExpired):
+            # Docker command not found or timed out - likely Docker is not running
             return self._handle_docker_not_found()
-        except subprocess.TimeoutExpired:
-            print("❌ Docker command timed out. Docker may not be responding.")
-            print("")
-            print("Try restarting Docker or checking your system resources.")
-            return False
         except Exception as e:
             print(f"❌ Unexpected error checking Docker image: {e}")
             return False
@@ -494,7 +489,7 @@ class DockerCompilationOrchestrator:
 
             # Execute in container
             exec_cmd = [
-                "docker",
+                get_docker_command(),
                 "exec",
                 "-e",
                 "FASTLED_DOCKER=1",
@@ -547,7 +542,7 @@ class DockerCompilationOrchestrator:
         print(f"Copying build artifacts from container to host...")
 
         copy_cmd = [
-            "docker",
+            get_docker_command(),
             "cp",
             f"{self.config.container_name}:{container_path}/.",
             str(host_path),
