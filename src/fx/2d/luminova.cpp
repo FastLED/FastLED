@@ -4,6 +4,16 @@
 
 #include "luminova.h"
 
+// Includes needed for implementation
+#include "fl/fastled.h"
+#include "fl/blur.h"
+#include "fl/clamp.h"
+#include "fl/math.h"
+#include "fl/xymap.h"
+#include "fl/vector.h"
+#include "crgb.h"
+#include "noise.h"
+
 namespace fl {
 
 Luminova::Luminova(const XYMap &xyMap, const Params &params)

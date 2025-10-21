@@ -2,7 +2,9 @@
 
 #include "fx_layer.h"
 
-
+#include "crgb.h"
+#include "fx/frame.h"
+#include "fx/fx.h"
 #include "fl/cstring.h"
 
 namespace fl {

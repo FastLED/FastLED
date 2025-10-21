@@ -2,16 +2,10 @@
 
 #include "fl/stdint.h"
 
-#include "fl/fastled.h"
-#include "fl/blur.h"
-#include "fl/clamp.h"
-#include "fl/math.h"
+#include "crgb.h"           // Needed for CRGB parameter types
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
-#include "fl/vector.h"
-#include "fl/xymap.h"
 #include "fx/fx2d.h"
-#include "noise.h"
 
 namespace fl {
 

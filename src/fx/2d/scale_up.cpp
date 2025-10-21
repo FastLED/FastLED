@@ -1,17 +1,14 @@
 
-#include "fl/stdint.h"
+#include "scale_up.h"
 
-#define FASTLED_INTERNAL
-#include "fl/fastled.h"
+#include "crgb.h"
+#include "fl/stdint.h"
 #include "fl/upscale.h"
 #include "fl/memory.h"
 #include "fl/xymap.h"
+#include "fl/vector.h"
+#include "fl/allocator.h"
 #include "fx/fx2d.h"
-#include "lib8tion/random8.h"
-#include "noise.h"
-
-// Include here so that #define FL_PI used in Arduino.h does not produce a warning.
-#include "scale_up.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.
 // If you are somehow running this on AVR then you probably want this if

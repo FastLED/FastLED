@@ -10,14 +10,14 @@ are blended by the the max luminance of the components.
 
 #include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
-#include "fl/vector.h"
-#include "fl/warn.h"
-#include "fl/xymap.h"
-#include "fx/frame.h"
-#include "fx/fx.h"
 #include "fx/fx2d.h"
 
+// Forward declarations to reduce header overhead
 namespace fl {
+class Frame;
+class XYMap;
+template<typename T, typename Allocator>
+class HeapVector;
 
 struct Blend2dParams {
     uint8_t blur_amount = 0;
@@ -56,8 +56,8 @@ class Blend2d : public Fx2d {
             : fx(fx), blur_amount(blur_amount), blur_passes(blur_passes) {}
     };
     HeapVector<Entry> mLayers;
-    FramePtr mFrame;
-    FramePtr mFrameTransform;
+    fl::shared_ptr<Frame> mFrame;
+    fl::shared_ptr<Frame> mFrameTransform;
     uint8_t mGlobalBlurAmount = 0;
     uint8_t mGlobalBlurPasses = 1;
 };

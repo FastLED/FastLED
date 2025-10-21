@@ -1,12 +1,18 @@
 #pragma once
 
-#include "fl/bytestream.h"
-#include "fl/file_system.h"
-#include "fx/video/frame_interpolator.h"
-#include "fx/video/pixel_stream.h"
 #include "fl/stdint.h"
+#include "crgb.h"
+#include "fl/ptr.h"
 
+// Forward declarations - actual includes moved to cpp
 namespace fl {
+class FileHandle;
+class ByteStream;
+class Frame;
+class FrameInterpolator;
+class PixelStream;
+class TimeWarp;
+
 FASTLED_SMART_PTR(FileHandle);
 FASTLED_SMART_PTR(ByteStream);
 } // namespace fl
@@ -16,6 +22,7 @@ namespace fl {
 FASTLED_SMART_PTR(VideoImpl);
 FASTLED_SMART_PTR(FrameInterpolator);
 FASTLED_SMART_PTR(PixelStream)
+FASTLED_SMART_PTR(TimeWarp);
 
 class VideoImpl {
   public:

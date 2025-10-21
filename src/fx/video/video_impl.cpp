@@ -5,6 +5,11 @@
 #include "fl/assert.h"
 #include "fl/math_macros.h"
 #include "fl/warn.h"
+#include "fl/bytestream.h"
+#include "fl/file_system.h"
+#include "fx/video/frame_interpolator.h"
+#include "fx/video/pixel_stream.h"
+#include "crgb.h"
 
 namespace fl {
 
