@@ -574,6 +574,7 @@ def compile_with_trace(
         [
             "-DFASTLED_INTERNAL",
             "-DFASTLED_TESTING",  # Use testing mode (simpler platform dependencies)
+            "-DFASTLED_STUB_IMPL",  # Use stub platform (all pins valid)
             "-Wno-everything",  # Suppress all warnings for cleaner output
         ]
     )
