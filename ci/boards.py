@@ -804,6 +804,7 @@ ADA_FEATHER_NRF52840_SENSE = Board(
     platform="nordicnrf52",
     defines=[
         "FASTLED_ALL_PINS_HARDWARE_SPI",
+        "FORCE_ALL_PINS_VALID",
     ],
 )
 

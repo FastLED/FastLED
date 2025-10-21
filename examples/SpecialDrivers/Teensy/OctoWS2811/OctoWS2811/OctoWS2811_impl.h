@@ -41,7 +41,7 @@ void colorWipe(int color, int wait)
   for (int i=0; i < NUM_LEDS; i++) {
     leds[i] = color;
     FastLED.show();
-    delayMicroseconds(wait);
+    ::delayMicroseconds((uint32_t)wait);
   }
 }
 
