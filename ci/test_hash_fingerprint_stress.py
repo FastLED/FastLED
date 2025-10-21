@@ -194,8 +194,11 @@ def test_concurrent_checks(results: StressTestResults) -> None:
         # Check results
         results_collected: List[Tuple[str, Any]] = []
         while not result_queue.empty():
-            status, result = result_queue.get()
-            results_collected.append((status, result))
+            item = result_queue.get()
+            if isinstance(item, tuple) and len(item) == 2:
+                status: str = item[0]
+                result: Any = item[1]
+                results_collected.append((status, result))
 
         if len(results_collected) == 5:
             results.pass_test("All 5 concurrent checks completed")

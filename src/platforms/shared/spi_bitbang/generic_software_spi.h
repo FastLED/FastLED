@@ -342,7 +342,7 @@ public:
 			// fl::FastPin<CLOCK_PIN>::lo();
 		}
 #endif
-		D::postBlock(len);
+		D::postBlock(len, this);
 		release();
 	}
 
@@ -424,7 +424,7 @@ public:
 			}
 		}
 #endif
-		D::postBlock(len);
+		D::postBlock(len, this);
 		release();
 	}
 };

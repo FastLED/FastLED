@@ -10,7 +10,7 @@ Provides multiple views:
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Set
+from typing import Any, Dict, List, Set, Tuple
 
 
 def load_manifest() -> Dict[str, Any]:
@@ -157,7 +157,7 @@ def print_statistics(manifest: Dict[str, Any]) -> None:
         print(f"   {most_tools[0]}: {most_tools[1]} tools")
 
 
-def main():
+def main() -> int:
     """Run the visualization."""
     try:
         manifest = load_manifest()
