@@ -5,10 +5,9 @@
 
 #include "fl/chipsets/timing_traits.h"
 
-#include "eorder.h"
 #include "fastled_delay.h"
-#include "fl/controller.h"
-#include "fl/pixel_controller.h"
+
+#include "eorder.h"
 namespace fl {
 
 #define FASTLED_HAS_CLOCKLESS 1

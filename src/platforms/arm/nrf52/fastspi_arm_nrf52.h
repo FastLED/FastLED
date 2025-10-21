@@ -3,12 +3,14 @@
 
 #include "fl/force_inline.h"
 #include "fl/fastpin_base.h"
+#include "fastspi_types.h"
+#include "fl/eorder.h"
+#include <nrf_spim.h>
+
 namespace fl {
 
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
-
-    #include <nrf_spim.h>
 
     #define FASTLED_ALL_PINS_HARDWARE_SPI
 
