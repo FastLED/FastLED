@@ -9,9 +9,8 @@
 /// @file platforms/arm/rp/rp2040/delay.h
 /// RP2040 platform-specific nanosecond-precision delay utilities
 
-/// RP2040: Pico SDK provides busy_wait_at_least_cycles
-/// or we can implement using the timer peripheral
-extern "C" void busy_wait_at_least_cycles(fl::u32);
+/// RP2040: Pico SDK provides busy_wait_at_least_cycles via pico.h
+/// included through Arduino.h, so we just wrap it
 
 FASTLED_FORCE_INLINE void delay_cycles_pico(fl::u32 cycles) {
   busy_wait_at_least_cycles(cycles);
