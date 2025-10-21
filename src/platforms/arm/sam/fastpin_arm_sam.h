@@ -44,6 +44,8 @@ public:
 	inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_PSOR::r(); }
 	inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_PCOR::r(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+
+	static constexpr bool validpin() { return true; }
 };
 
 
@@ -73,6 +75,8 @@ public:
 	inline static port_t loval() __attribute__ ((always_inline)) { return 0; }
 	inline static port_ptr_t port() __attribute__ ((always_inline)) { return _PDOR::template rx<_BIT>(); }
 	inline static port_t mask() __attribute__ ((always_inline)) { return 1; }
+
+	static constexpr bool validpin() { return true; }
 };
 
 #define GPIO_BITBAND_ADDR(reg, bit) (((uint32_t)&(reg) - 0x40000000) * 32 + (bit) * 4 + 0x42000000)

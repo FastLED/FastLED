@@ -2,6 +2,8 @@
 #define __INC_FASTSPI_ARM_SAM_H
 
 // Includes must come before all namespace declarations
+#include "../../../fastspi_types.h"
+
 #if defined(__SAM3X8E__)
 #endif
 
@@ -368,6 +370,7 @@ public:
 	static void finalizeTransmission() { }
 };
 
-#endif  // SAMD21/SAMD51
 }  // namespace fl
+#endif  // SAMD21/SAMD51
+
 #endif
