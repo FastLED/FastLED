@@ -14,7 +14,7 @@ niteris/fastled-compiler-base:latest
     ├── niteris/fastled-compiler-esp:latest
     ├── niteris/fastled-compiler-teensy-teensy41:latest
     ├── niteris/fastled-compiler-stm32-bluepill:latest
-    ├── niteris/fastled-compiler-rp2040-rpipico:latest
+    ├── niteris/fastled-compiler-rp:latest
     ├── niteris/fastled-compiler-nrf52-nrf52840_dk:latest
     └── niteris/fastled-compiler-sam-due:latest
 ```
@@ -69,7 +69,7 @@ Platform images are organized by **toolchain family**, not individual boards. Bo
 | **esp** | (varies by IDF) | `fastled-compiler-esp` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
 | **teensy** | teensy41 | `fastled-compiler-teensy-teensy41` | teensy30, teensy31, teensy40, teensy41, teensylc |
 | **stm32** | bluepill | `fastled-compiler-stm32-bluepill` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
-| **rp2040** | rpipico | `fastled-compiler-rp2040-rpipico` | rpipico, rpipico2 |
+| **rp2040** | rp2040 | `fastled-compiler-rp` | rp2040, rp2350 |
 | **nrf52** | nrf52840_dk | `fastled-compiler-nrf52-nrf52840_dk` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
 | **sam** | due | `fastled-compiler-sam-due` | due, digix |
 
@@ -155,7 +155,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  ├── esp (builds: esp32dev, esp32s3, esp32c3, esp32c6, etc.)
                  ├── teensy-teensy41 (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
                  ├── stm32-bluepill (builds: bluepill, blackpill, maple_mini, etc.)
-                 ├── rp2040-rpipico (builds: rpipico, rpipico2)
+                 ├── rp (builds: rp2040, rp2350)
                  ├── nrf52-nrf52840_dk (builds: nrf52840_dk, adafruit boards, xiaoblesense)
                  └── sam-due (builds: due, digix)
 ```
@@ -216,7 +216,7 @@ DOCKER_PLATFORMS = {
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
     "stm32": ["bluepill", "blackpill", "maple_mini",
               "hy_tinystm103tb", "giga_r1"],
-    "rp2040": ["rpipico", "rpipico2"],
+    "rp2040": ["rp2040", "rp2350"],
     "nrf52": ["nrf52840_dk", "adafruit_feather_nrf52840_sense",
               "xiaoblesense"],
     "sam": ["due", "digix"],

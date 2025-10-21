@@ -8,7 +8,7 @@ name: Build and Push Docker Compiler Platform Images
 #   platform_name: esp32dev  → builds ESP platform (esp32dev, esp32s3, esp32c3, esp8266, etc.)
 #   platform_name: teensy41  → builds Teensy platform (teensy30, teensy31, teensy40, teensy41, teensylc)
 #   platform_name: bluepill  → builds STM32 platform (bluepill, blackpill, maple_mini, giga_r1, etc.)
-#   platform_name: rpipico   → builds RP2040 platform (rpipico, rpipico2)
+#   platform_name: rp2040   → builds RP2040 platform (rp2040, rp2350)
 #   platform_name: nrf52840_dk → builds NRF52 platform (nrf52840_dk, adafruit boards, xiaoblesense)
 #   platform_name: due       → builds SAM platform (due, digix)
 #
@@ -67,7 +67,7 @@ jobs:
           echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp-esp32dev' | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy-teensy41' | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32-bluepill' | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp2040-rpipico' | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52-nrf52840_dk' | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam-due' | base64 -w0)" >> $GITHUB_OUTPUT
 
@@ -379,7 +379,7 @@ jobs:
         run: |
           docker buildx imagetools inspect niteris/fastled-compiler-stm32-bluepill:latest
 
-  # RP2040 Platform (rpipico, rpipico2)
+  # RP2040 Platform (rp2040, rp2350)
   build-rp2040-amd64:
     needs: credentials
     uses: ./.github/workflows/template_build_docker_compiler.yml
@@ -387,7 +387,7 @@ jobs:
       runs_on: ubuntu-24.04
       platform: linux/amd64
       dockerfile: Dockerfile.template
-      platform_name: rpipico
+      platform_name: rp2040
       tag: latest
     secrets:
       env_vars: |
@@ -402,7 +402,7 @@ jobs:
       runs_on: ubuntu-24.04-arm
       platform: linux/arm64
       dockerfile: Dockerfile.template
-      platform_name: rpipico
+      platform_name: rp2040
       tag: latest
     secrets:
       env_vars: |
@@ -437,7 +437,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: niteris/fastled-compiler-rp2040-rpipico
+          images: niteris/fastled-compiler-rp
           tags: type=raw,value=latest
 
       - name: Login to Docker Hub
@@ -450,11 +450,11 @@ jobs:
         working-directory: /tmp/digests
         run: |
           docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf 'niteris/fastled-compiler-rp2040-rpipico@sha256:%s ' *)
+            $(printf 'niteris/fastled-compiler-rp@sha256:%s ' *)
 
       - name: Inspect image
         run: |
-          docker buildx imagetools inspect niteris/fastled-compiler-rp2040-rpipico:latest
+          docker buildx imagetools inspect niteris/fastled-compiler-rp:latest
 
   # NRF52 Platform (nrf52840_dk, adafruit boards, xiaoblesense)
   build-nrf52-amd64:

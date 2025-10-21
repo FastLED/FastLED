@@ -272,7 +272,7 @@ The system supports all platforms defined in `ci/boards.py`:
 - `due`, `digix` (SAM)
 - `bluepill`, `blackpill`, `giga_r1` (STM32)
 - `teensy30`, `teensy40`, `teensy41` (Teensy)
-- `rpipico`, `rpipico2` (RP2040)
+- `rp2040`, `rp2350` (RP2040)
 - `nrf52840_dk`, `xiaoblesense` (nRF52)
 
 ### Other
@@ -495,7 +495,7 @@ These images are:
 | ESP | `niteris/fastled-compiler-esp:latest` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
 | Teensy | `niteris/fastled-compiler-teensy-teensy41:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
 | STM32 | `niteris/fastled-compiler-stm32-bluepill:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
-| RP2040 | `niteris/fastled-compiler-rp2040-rpipico:latest` | rpipico, rpipico2 |
+| RP | `niteris/fastled-compiler-rp:latest` | rp2040, rp2350 |
 | NRF52 | `niteris/fastled-compiler-nrf52-nrf52840_dk:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
 | SAM | `niteris/fastled-compiler-sam-due:latest` | due, digix |
 

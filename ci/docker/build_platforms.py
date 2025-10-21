@@ -68,11 +68,11 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "giga_r1",
     ],
     # RP2040 Platform - Raspberry Pi Pico family
-    # Image: niteris/fastled-compiler-rp2040-rpipico:latest
+    # Image: niteris/fastled-compiler-rp:latest
     # Platform: raspberrypi (maxgerhardt fork)
     "rp2040": [
-        "rpipico",
-        "rpipico2",
+        "rp2040",
+        "rp2350",
     ],
     # NRF52 Platform - Nordic nRF52 boards
     # Image: niteris/fastled-compiler-nrf52-nrf52840_dk:latest

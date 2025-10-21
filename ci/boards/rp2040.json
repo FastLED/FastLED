@@ -22,7 +22,7 @@
             ]
         ],
         "mcu": "rp2040",
-        "variant": "rpipico"
+        "variant": "rp2040"
     },
     "debug": {
         "jlink_device": "RP2040_M0_0",

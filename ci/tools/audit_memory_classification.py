@@ -73,8 +73,8 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("adafruit_grand_central_m4", "high"),  # SAMD51 - definitely high
     ("giga_r1", "high"),  # STM32H747 - definitely high
     # RP2040
-    ("rpipico", "high"),
-    ("rpipico2", "high"),
+    ("rp2040", "high"),
+    ("rp2350", "high"),
     # NRF52
     ("nrf52840_dk", "high"),
     ("adafruit_feather_nrf52840_sense", "high"),

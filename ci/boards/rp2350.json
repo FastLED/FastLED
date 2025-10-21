@@ -22,7 +22,7 @@
       ]
     ],
     "mcu": "rp2350",
-    "variant": "rpipico2"
+    "variant": "rp2350"
   },
   "debug": {
     "jlink_device": "RP2350_0",
