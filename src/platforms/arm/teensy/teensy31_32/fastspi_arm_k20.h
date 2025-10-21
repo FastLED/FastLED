@@ -1,5 +1,9 @@
 #ifndef __INC_FASTSPI_ARM_H
 #define __INC_FASTSPI_ARM_H
+
+#include "fastspi_types.h"
+#include "fl/delay.h"
+
 namespace fl {
 #if defined(FASTLED_TEENSY3) && defined(CORE_TEENSY)
 
