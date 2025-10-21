@@ -10,7 +10,7 @@ on:
       delay_minutes:
         description: 'Delay before building platforms (minutes)'
         type: number
-        default: 10
+        default: 0
   schedule:
     # Platforms: monthly at 3:00 AM UTC (1 hour after base)
     - cron: '0 3 1 * *'
