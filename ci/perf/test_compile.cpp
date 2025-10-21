@@ -1,4 +1,5 @@
 // Simple compilation test for performance tracking
+#define FASTLED_FORCE_SOFTWARE_PINS
 #include "FastLED.h"
 
 // Minimal main to ensure full compilation
