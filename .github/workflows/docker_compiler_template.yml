@@ -32,7 +32,7 @@ jobs:
       registry_esp: ${{ steps.credentials.outputs.registry_esp }}
       registry_teensy: ${{ steps.credentials.outputs.registry_teensy }}
       registry_stm32: ${{ steps.credentials.outputs.registry_stm32 }}
-      registry_rp2040: ${{ steps.credentials.outputs.registry_rp2040 }}
+      registry_rp: ${{ steps.credentials.outputs.registry_rp }}
       registry_nrf52: ${{ steps.credentials.outputs.registry_nrf52 }}
       registry_sam: ${{ steps.credentials.outputs.registry_sam }}
     steps:
@@ -48,7 +48,7 @@ jobs:
           echo "registry_esp=$(echo -n 'niteris/fastled-compiler-esp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_rp2040=$(echo -n 'niteris/fastled-compiler-rp2040' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_rp=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
@@ -88,9 +88,9 @@ jobs:
           - name: stm32
             platforms: bluepill,blackpill,stm103tb
             registry: registry_stm32
-          - name: rp2040
+          - name: rp
             platforms: rp2040,rp2040_earle,rp2350,rp2350B
-            registry: registry_rp2040
+            registry: registry_rp
           - name: nrf52
             platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense
             registry: registry_nrf52
@@ -131,8 +131,8 @@ jobs:
             registry: niteris/fastled-compiler-teensy
           - name: stm32
             registry: niteris/fastled-compiler-stm32
-          - name: rp2040
-            registry: niteris/fastled-compiler-rp2040
+          - name: rp
+            registry: niteris/fastled-compiler-rp
           - name: nrf52
             registry: niteris/fastled-compiler-nrf52
           - name: sam
