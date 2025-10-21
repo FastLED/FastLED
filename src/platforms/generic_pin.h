@@ -71,6 +71,8 @@ public:
 	/// Set the state of the output register
 	/// @param val the state to set the output register to
 	/// @note This function is not limited to the current pin! It modifies the entire register.
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING_VOLATILE
 	inline void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *mPort = val; }
 
 	/// Set the state of a port
@@ -86,6 +88,7 @@ public:
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	/// Get the pin mask
 	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+	FL_DISABLE_WARNING_POP
 
 	/// @copydoc Pin::hi()
 	virtual void select() override { hi(); }
