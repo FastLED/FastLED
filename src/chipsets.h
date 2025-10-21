@@ -396,7 +396,7 @@ protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		writePixelsToSPI<0, LPD8806_ADJUST, RGB_ORDER>(pixels, mSPI, &mSPI);
+		fl::writePixelsToSPI<0, LPD8806_ADJUST, RGB_ORDER>(pixels, mSPI, &mSPI);
 	}
 
 public:
@@ -467,7 +467,7 @@ protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWaitDelay.wait();
-		writePixelsToSPI<0, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
+		fl::writePixelsToSPI<0, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
 		mWaitDelay.mark();
 	}
 
@@ -1015,7 +1015,7 @@ protected:
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		writePixelsToSPI<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
+		fl::writePixelsToSPI<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
 		writeHeader();
 	}
 
