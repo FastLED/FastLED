@@ -5,6 +5,10 @@
 #include "fl/int.h"
 #include "fl/stdint.h"
 
+// Include category-based logging system
+#include "fl/log.h"
+
+
 // Forward declaration to avoid pulling in fl/io.h and causing fl/io.cpp to be compiled
 // This prevents ~5KB memory bloat for simple applications
 #ifndef FL_DBG_PRINTLN_DECLARED
@@ -75,8 +79,4 @@ inline const char *fastled_file_offset(const char *file) {
 #define FL_DBG_IF FASTLED_DBG_IF
 #endif
 
-// Include category-based logging system
-#include "fl/log.h"
 
-// Backward compatibility: FL_DBG_SPI now uses the new category logging system
-#define FL_DBG_SPI FL_LOG_SPI

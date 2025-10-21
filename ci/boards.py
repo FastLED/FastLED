@@ -803,6 +803,9 @@ ESP32_P4 = Board(
     real_board_name="esp32-p4-evboard",
     platform_needs_install=True,  # Install platform package to get the boards
     platform="https://github.com/pioarduino/platform-espressif32/releases/download/stable/platform-espressif32.zip",
+    # Use default framework (arduino,espidf) without specifying one explicitly
+    # The pioarduino platform has known issues with ESP32-P4 when using Arduino-only mode
+    # See: platform-espressif32 builder/frameworks/arduino.py has unhandled None values for FRAMEWORK_DIR and FRAMEWORK_LIB_DIR
 )
 
 ADA_FEATHER_NRF52840_SENSE = Board(

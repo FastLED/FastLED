@@ -459,7 +459,9 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
         package_name = package_dir.name
 
         # Check if matches problematic patterns
-        is_problematic = any(pattern in package_name.lower() for pattern in problematic_patterns)
+        is_problematic = any(
+            pattern in package_name.lower() for pattern in problematic_patterns
+        )
 
         if is_problematic:
             print(f"  Removing problematic package: {package_name}")
@@ -474,7 +476,9 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
                 print(f"    ✗ Error removing {package_name}: {e}")
 
     if cleaned:
-        print("  ✓ Package cleanup complete - PlatformIO will re-download on next build")
+        print(
+            "  ✓ Package cleanup complete - PlatformIO will re-download on next build"
+        )
 
     return cleaned
 
@@ -1619,9 +1623,9 @@ class PioCompiler(Compiler):
         max_attempts = 2
         for attempt in range(max_attempts):
             if attempt > 0:
-                print(f"\n{'='*60}")
+                print(f"\n{'=' * 60}")
                 print(f"RETRY ATTEMPT {attempt}/{max_attempts - 1}")
-                print(f"{'='*60}\n")
+                print(f"{'=' * 60}\n")
 
             # Run PlatformIO build
             run_cmd: List[str] = [
@@ -1682,11 +1686,7 @@ class PioCompiler(Compiler):
                 print(f"{red_color}FAILED: {example}{reset_color}")
 
             # If build failed with PackageException and we have retries left, attempt recovery
-            if (
-                not success
-                and has_package_exception
-                and attempt < max_attempts - 1
-            ):
+            if not success and has_package_exception and attempt < max_attempts - 1:
                 print(f"\nPackageException detected in build output")
                 if package_info:
                     print(f"Package info: {package_info}")
@@ -1705,7 +1705,9 @@ class PioCompiler(Compiler):
             # Build succeeded or no PackageException, return result
             # Generate build_info.json after successful build
             if success:
-                _generate_build_info_json_from_existing_build(self.build_dir, self.board)
+                _generate_build_info_json_from_existing_build(
+                    self.build_dir, self.board
+                )
 
             return SketchResult(
                 success=success,
