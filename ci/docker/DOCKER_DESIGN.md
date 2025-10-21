@@ -216,7 +216,7 @@ DOCKER_PLATFORMS = {
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
     "stm32": ["bluepill", "blackpill", "maple_mini",
               "hy_tinystm103tb", "giga_r1"],
-    "rp2040": ["rp2040", "rp2350"],
+    "rp": ["rp2040", "rp2350"],
     "nrf52": ["nrf52840_dk", "adafruit_feather_nrf52840_sense",
               "xiaoblesense"],
     "sam": ["due", "digix"],

@@ -31,12 +31,18 @@ if [ -z "$FASTLED_DOCKER" ]; then
     fi
 fi
 
-interactive_stmt=""
+show_boards_stmt=""
 # if no arguments
 if [ $# -eq 0 ]; then
-    # set interactive statement
-    interactive_stmt="--interactive"
+    # show supported boards list
+    show_boards_stmt="--supported-boards"
 fi
 
-echo -e "\nRunning uv run ci/ci-compile.py $interactive_stmt $@\n"
-uv run ci/ci-compile.py $interactive_stmt "$@"
+if [ -n "$show_boards_stmt" ]; then
+    echo -e "\nSupported boards:\n"
+    uv run ci/ci-compile.py $show_boards_stmt | tr ',' '\n' | sed 's/^/  /'
+    echo -e "\nUsage: bash compile <board> [--examples example1,example2]\n"
+else
+    echo -e "\nRunning uv run ci/ci-compile.py $@\n"
+    uv run ci/ci-compile.py "$@"
+fi

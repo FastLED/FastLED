@@ -86,7 +86,6 @@ class Board:
         # AVR ATtiny
         "attiny85",  # __AVR_ATtiny85__
         "attiny88",  # __AVR_ATtiny88__
-        "attiny1604",  # ARDUINO_attinyxy6/4
         "attiny4313",  # ARDUINO_attinyxy4
         "attiny1616",  # ARDUINO_attinyxy6
         # Teensy low-memory
@@ -168,7 +167,6 @@ class Board:
         ("nano_every", "ATmega4809"),
         ("attiny85", "ATtiny85"),
         ("attiny88", "ATtiny88"),
-        ("attiny1604", "ATtiny1604"),
         ("attiny4313", "ATtiny4313"),
         ("attiny1616", "ATtiny1616"),
         # RP2040 variants
@@ -208,7 +206,6 @@ class Board:
         "nano_every": "avr",
         "attiny85": "avr",
         "attiny88": "avr",
-        "attiny1604": "avr",
         "attiny4313": "avr",
         "attiny1616": "avr",
         "yun": "avr",

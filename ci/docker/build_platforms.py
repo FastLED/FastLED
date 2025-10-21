@@ -26,7 +26,6 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "attiny88",
         "attiny4313",
         "nano_every",
-        "attiny1604",
         "attiny1616",
     ],
     # ESP Platform - All Espressif chips (ESP32 + ESP8266)
@@ -67,12 +66,12 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "hy_tinystm103tb",
         "giga_r1",
     ],
-    # RP2040 Platform - Raspberry Pi Pico family
+    # RP Platform - Raspberry Pi Pico family
     # Image: niteris/fastled-compiler-rp:latest
-    # Platform: raspberrypi (maxgerhardt fork)
-    "rp2040": [
-        "rpipico",
-        "rpipico2",
+    # Platforms: raspberrypi (maxgerhardt fork)
+    "rp": [
+        "rp2040",
+        "rp2350",
     ],
     # NRF52 Platform - Nordic nRF52 boards
     # Image: niteris/fastled-compiler-nrf52-nrf52840_dk:latest
@@ -140,10 +139,10 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
     Get the Docker image name for a platform family.
 
     Uses consistent naming: niteris/fastled-compiler-{platform}-{board}
-    For platforms with a single representative board, use first board in list.
+    For aggregated platforms (e.g., "rp"), returns just niteris/fastled-compiler-{platform}
 
     Args:
-        platform: Platform family name (e.g., "avr", "esp")
+        platform: Platform family name (e.g., "avr", "esp", "rp")
         board: Representative board name (optional, inferred if not provided)
 
     Returns:
@@ -154,9 +153,13 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
         'niteris/fastled-compiler-avr-uno'
         >>> get_docker_image_name("esp", "esp32dev")
         'niteris/fastled-compiler-esp-esp32dev'
-        >>> get_docker_image_name("teensy", "teensy41")
-        'niteris/fastled-compiler-teensy-teensy41'
+        >>> get_docker_image_name("rp")
+        'niteris/fastled-compiler-rp'
     """
+    # Special case for aggregated platforms that don't have a board suffix
+    if platform == "rp":
+        return f"niteris/fastled-compiler-{platform}"
+
     # Use provided board or first board in platform
     if board is None:
         boards = get_boards_for_platform(platform)

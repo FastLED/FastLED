@@ -77,7 +77,7 @@ jobs:
       matrix:
         group:
           - name: avr
-            platforms: uno,attiny85,attiny88,attiny1604,attiny1616,attiny4313,yun-32u4
+            platforms: uno,attiny85,attiny88,attiny1616,attiny4313,yun-32u4
             registry: registry_avr
           - name: esp
             platforms: esp32dev,esp32c2,esp32c3,esp32c5,esp32c6,esp32h2,esp32p4,esp32s2,esp32s3,esp32wroom,esp8266
