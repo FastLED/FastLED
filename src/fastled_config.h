@@ -3,6 +3,13 @@
 /// @file fastled_config.h
 /// Contains definitions that can be used to configure FastLED at compile time
 
+/// @def FASTLED_ALL_PINS_VALID
+/// For stub platforms (testing, native compilation, WebAssembly), all pins are considered valid.
+/// This is automatically defined when FASTLED_STUB_IMPL or __EMSCRIPTEN__ is set.
+#if defined(FASTLED_STUB_IMPL) || defined(__EMSCRIPTEN__)
+    #define FASTLED_ALL_PINS_VALID
+#endif
+
 /// @def FASTLED_FORCE_SOFTWARE_PINS
 /// Use this option only for debugging pin access and forcing software pin access.  Forces use of `digitalWrite()`
 /// methods for pin access vs. direct hardware port access.

@@ -19,7 +19,7 @@
     // Stub implementation for testing and WebAssembly
     // Provides no-op Pin and FastPin<> implementations
     // For stub platforms, all pins are valid (no hardware constraints)
-    #define FASTLED_ALL_PINS_VALID
+    // Note: FASTLED_ALL_PINS_VALID is automatically defined in fastled_config.h
     #include "platforms/stub/fastpin_stub.h"
 
 #elif defined(ESP32)
