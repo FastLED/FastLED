@@ -43,8 +43,8 @@
 #elif defined(ARDUINO_ARCH_RENESAS)
     // Renesas RA4M1 (Arduino UNO R4)
     #include "platforms/arm/renesas/fastpin_arm_renesas.h"
-#elif defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
-    // Arduino GIGA (STM32H747)
+#elif defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || defined(STM32H7)
+    // Arduino GIGA (STM32H747) or any STM32H7 board with Arduino framework
     #include "platforms/arm/giga/fastpin_arm_giga.h"
 #elif defined(ARDUINO_ARCH_SILABS)
     // Silicon Labs EFM32 (MGM240P, etc.)

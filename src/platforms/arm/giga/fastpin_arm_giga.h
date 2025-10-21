@@ -4,7 +4,7 @@
 #include "fl/force_inline.h"
 #include "armpin.h"
 namespace fl {
-#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
+#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || defined(STM32H7)
 #define _RD32(T) struct __gen_struct_ ## T { static FASTLED_FORCE_INLINE volatile GPIO_TypeDef * r() { return T; } };
 #define _FL_IO(L,C) _RD32(GPIO ## L);
 
@@ -25,7 +25,7 @@ _FL_IO(J,9);
 _FL_IO(K,10);
 
 // Actual pin definitions
-#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7)
+#if defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || defined(STM32H7)
 #define MAX_PIN 102
 
 // PA0-PA15

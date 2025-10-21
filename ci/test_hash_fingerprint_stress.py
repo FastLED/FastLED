@@ -15,13 +15,16 @@ import threading
 import time
 from multiprocessing import Queue
 from pathlib import Path
-from typing import Any, List, Tuple
+from typing import TYPE_CHECKING, Any, List, Tuple
 
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 # Type alias for Queue results
 QueueResult = Tuple[str, Any]
+
+if TYPE_CHECKING:
+    from multiprocessing import Queue
 
 
 class StressTestResults:

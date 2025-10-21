@@ -24,9 +24,17 @@ class Pin : public Selectable {
 	/// Initialize the class by retrieving the register
 	/// pointers and bitmask.
 	void _init() {
+		#if defined(digitalPinToBitMask) && defined(portOutputRegister) && defined(portInputRegister)
+		// Use PINMAP functions if available
 		mPinMask = digitalPinToBitMask(mPin);
 		mPort = (volatile RwReg*)portOutputRegister(digitalPinToPort(mPin));
 		mInPort = (volatile RoReg*)portInputRegister(digitalPinToPort(mPin));
+		#else
+		// Fallback for platforms without PINMAP functions (e.g., STM32 Mbed Arduino)
+		mPinMask = 1;
+		mPort = nullptr;
+		mInPort = nullptr;
+		#endif
 	}
 
 public:
@@ -51,16 +59,25 @@ public:
 	/// Set the pin state to `HIGH`
 	FL_DISABLE_WARNING_PUSH
 	FL_DISABLE_WARNING_NULL_DEREFERENCE
-	inline void hi() __attribute__ ((always_inline)) { *mPort |= mPinMask; }
+	inline void hi() __attribute__ ((always_inline)) {
+		if (mPort) { *mPort |= mPinMask; }
+		else { digitalWrite(mPin, HIGH); }
+	}
 	/// Set the pin state to `LOW`
-	inline void lo() __attribute__ ((always_inline)) { *mPort &= ~mPinMask; }
+	inline void lo() __attribute__ ((always_inline)) {
+		if (mPort) { *mPort &= ~mPinMask; }
+		else { digitalWrite(mPin, LOW); }
+	}
 	FL_DISABLE_WARNING_POP
 
 	/// Toggle the pin twice to create a short pulse
 	inline void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
 	/// Toggle the pin.
 	/// If the pin was high, set it low. If was low, set it high.
-	inline void toggle() __attribute__ ((always_inline)) { *mInPort = mPinMask; }
+	inline void toggle() __attribute__ ((always_inline)) {
+		if (mInPort) { *mInPort = mPinMask; }
+		else { digitalWrite(mPin, !digitalRead(mPin)); }
+	}
 
 	/// Set the same pin on another port to `HIGH`
 	/// @param port the port to modify
@@ -81,9 +98,15 @@ public:
 	inline void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// Gets the state of the port with this pin `HIGH`
-	port_t hival() __attribute__ ((always_inline)) { return *mPort | mPinMask;  }
+	port_t hival() __attribute__ ((always_inline)) {
+		if (mPort) { return *mPort | mPinMask; }
+		else { return HIGH; }
+	}
 	/// Gets the state of the port with this pin `LOW`
-	port_t loval() __attribute__ ((always_inline)) { return *mPort & ~mPinMask; }
+	port_t loval() __attribute__ ((always_inline)) {
+		if (mPort) { return *mPort & ~mPinMask; }
+		else { return LOW; }
+	}
 	/// Get the output state of the port
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	/// Get the pin mask
@@ -95,7 +118,10 @@ public:
 	/// @copydoc Pin::lo()
 	virtual void release() override { lo(); }
 	/// Checks if the pin is currently `HIGH`
-	virtual bool isSelected() override { return (*mPort & mPinMask) == mPinMask; }
+	virtual bool isSelected() override {
+		if (mPort) { return (*mPort & mPinMask) == mPinMask; }
+		else { return digitalRead(mPin) == HIGH; }
+	}
 };
 
 /// I/O pin initially set to OUTPUT
