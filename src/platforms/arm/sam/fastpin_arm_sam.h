@@ -2,6 +2,9 @@
 #define __INC_FASTPIN_ARM_SAM_H
 
 #include "fl/force_inline.h"
+// Include fastpin_base.h for reg32_t and ptr_reg32_t typedefs
+// This reopens namespace fl but typedefs will still be in scope
+#include "fl/fastpin_base.h"
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
