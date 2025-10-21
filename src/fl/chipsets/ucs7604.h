@@ -366,14 +366,14 @@ protected:
 
             if (is_one) {
                 fl::FastPin<DATA_PIN>::hi();
-                delayNanoseconds<T1>();
+                fl::delayNanoseconds<T1>();
                 fl::FastPin<DATA_PIN>::lo();
-                delayNanoseconds<T2>();
+                fl::delayNanoseconds<T2>();
             } else {
                 fl::FastPin<DATA_PIN>::hi();
-                delayNanoseconds<T1 + T2 - T3>();
+                fl::delayNanoseconds<T1 + T2 - T3>();
                 fl::FastPin<DATA_PIN>::lo();
-                delayNanoseconds<T3>();
+                fl::delayNanoseconds<T3>();
             }
         }
     }

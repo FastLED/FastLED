@@ -20,6 +20,9 @@ public:
 	typedef volatile uint32_t * port_ptr_t;
 	typedef uint32_t port_t;
 
+	/// Check if this pin is valid for I/O operations
+	static constexpr bool validpin() { return true; }
+
 	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
 	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
 
@@ -49,6 +52,9 @@ template<uint8_t PIN, int _BIT, typename _PDOR, typename _PSOR, typename _PCOR, 
 public:
 	typedef volatile uint32_t * port_ptr_t;
 	typedef uint32_t port_t;
+
+	/// Check if this pin is valid for I/O operations
+	static constexpr bool validpin() { return true; }
 
 	inline static void setOutput() { pinMode(PIN, OUTPUT); } // TODO: perform MUX config { _PDDR::r() |= _MASK; }
 	inline static void setInput() { pinMode(PIN, INPUT); } // TODO: preform MUX config { _PDDR::r() &= ~_MASK; }
@@ -107,6 +113,22 @@ _FL_DEFPIN(32, 18, B); _FL_DEFPIN(33, 4, A);
 
 #define SPI2_DATA 7
 #define SPI2_CLOCK 14
+
+#define FASTLED_TEENSY3
+#define ARM_HARDWARE_SPI
+#define HAS_HARDWARE_PIN_SUPPORT
+#elif defined(__MK20DX128__) || defined(__MK20DX256__)
+// Fallback for when CORE_TEENSY is not defined but chip is Teensy 3.0/3.1/3.2
+#define MAX_PIN 33
+_FL_DEFPIN(0, 16, B); _FL_DEFPIN(1, 17, B); _FL_DEFPIN(2, 0, D); _FL_DEFPIN(3, 12, A);
+_FL_DEFPIN(4, 13, A); _FL_DEFPIN(5, 7, D); _FL_DEFPIN(6, 4, D); _FL_DEFPIN(7, 2, D);
+_FL_DEFPIN(8, 3, D); _FL_DEFPIN(9, 3, C); _FL_DEFPIN(10, 4, C); _FL_DEFPIN(11, 6, C);
+_FL_DEFPIN(12, 7, C); _FL_DEFPIN(13, 5, C); _FL_DEFPIN(14, 1, D); _FL_DEFPIN(15, 0, C);
+_FL_DEFPIN(16, 0, B); _FL_DEFPIN(17, 1, B); _FL_DEFPIN(18, 3, B); _FL_DEFPIN(19, 2, B);
+_FL_DEFPIN(20, 5, D); _FL_DEFPIN(21, 6, D); _FL_DEFPIN(22, 1, C); _FL_DEFPIN(23, 2, C);
+_FL_DEFPIN(24, 5, A); _FL_DEFPIN(25, 19, B); _FL_DEFPIN(26, 1, E); _FL_DEFPIN(27, 9, C);
+_FL_DEFPIN(28, 8, C); _FL_DEFPIN(29, 10, C); _FL_DEFPIN(30, 11, C); _FL_DEFPIN(31, 0, E);
+_FL_DEFPIN(32, 18, B); _FL_DEFPIN(33, 4, A);
 
 #define FASTLED_TEENSY3
 #define ARM_HARDWARE_SPI
