@@ -8,6 +8,7 @@
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 
 #define FASTLED_HAS_BLOCKLESS 1
 

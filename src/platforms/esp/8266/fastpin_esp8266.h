@@ -39,7 +39,12 @@ public:
     inline static port_t mask() __attribute__ ((always_inline)) { return MASK; }
 
     inline static bool isset() __attribute__ ((always_inline)) { return (PIN < 16) ? (GPO & MASK) : (GP16O & MASK); }
+
+    inline static constexpr bool validpin() { return true; }
 };
+
+// Forward declaration of FastPin template
+template<uint8_t PIN> class FastPin;
 
 #define _FL_DEFPIN(PIN, REAL_PIN) template<> class FastPin<PIN> : public _ESPPIN<REAL_PIN, (1<<(REAL_PIN & 0x0F))> {};
 

@@ -4,6 +4,7 @@
 #include "eorder.h"
 #include "fl/register.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 namespace fl {
 #ifdef FASTLED_DEBUG_COUNT_FRAME_RETRIES
 extern uint32_t _frame_cnt;
