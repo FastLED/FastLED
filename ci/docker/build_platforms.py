@@ -26,8 +26,8 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "attiny88",
         "attiny4313",
         "nano_every",
-        "ATtiny1604",
-        "ATtiny1616",
+        "attiny1604",
+        "attiny1616",
     ],
     # ESP Platform - All Espressif chips (ESP32 + ESP8266)
     # Image: niteris/fastled-compiler-esp-esp32dev:latest

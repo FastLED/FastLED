@@ -916,7 +916,7 @@ ATTINY88 = Board(
 
 # ATtiny1604
 ATTINY1604 = Board(
-    board_name="ATtiny1604",
+    board_name="attiny1604",
     platform="atmelmegaavr",
 )
 
@@ -927,7 +927,7 @@ ATTINY4313 = Board(
 )
 
 ATTINY1616 = Board(
-    board_name="ATtiny1616",
+    board_name="attiny1616",
     platform="atmelmegaavr",
 )
 
@@ -1107,9 +1107,22 @@ def create_board(board_name: str, no_project_options: bool = False) -> Board:
     if no_project_options:
         # Create a minimal board without project options
         board = Board(board_name=board_name, add_board_to_all=False)
-    elif board_name not in _BOARD_MAP:
-        # Empty board without any special overrides, assume platformio will know what to do with it
-        board = Board(board_name=board_name, add_board_to_all=False)
     else:
-        board = _BOARD_MAP[board_name]
+        # Try exact match first, then case-insensitive match
+        if board_name in _BOARD_MAP:
+            board = _BOARD_MAP[board_name]
+        else:
+            # Try case-insensitive match
+            board_name_lower = board_name.lower()
+            found_board = None
+            for registered_name, registered_board in _BOARD_MAP.items():
+                if registered_name.lower() == board_name_lower:
+                    found_board = registered_board
+                    break
+
+            if found_board:
+                board = found_board
+            else:
+                # Empty board without any special overrides, assume platformio will know what to do with it
+                board = Board(board_name=board_name, add_board_to_all=False)
     return board.clone()

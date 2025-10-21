@@ -210,7 +210,7 @@ The single source of truth for platform→boards relationships. This module defi
 ```python
 DOCKER_PLATFORMS = {
     "avr": ["uno", "yun", "attiny85", "attiny88", "attiny4313",
-            "nano_every", "ATtiny1604", "ATtiny1616"],
+            "nano_every", "attiny1604", "attiny1616"],
     "esp": ["esp32dev", "esp32s3", "esp32c3", "esp32c2", "esp32c5",
             "esp32c6", "esp32h2", "esp32p4", "esp32s2", "esp8266"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
@@ -316,7 +316,7 @@ docker build -f Dockerfile.template \
 **What happens**:
 - `build.sh` receives `PLATFORM_NAME=uno`
 - Looks up platform family in `build_platforms.py`: uno → "avr"
-- Gets all AVR boards: ["uno", "yun", "attiny85", "attiny88", "nano_every", "ATtiny1604", "ATtiny1616"]
+- Gets all AVR boards: ["uno", "yun", "attiny85", "attiny88", "nano_every", "attiny1604", "attiny1616"]
 - Compiles each board to pre-cache all AVR toolchains
 - Image contains cached toolchains for ALL AVR boards
 

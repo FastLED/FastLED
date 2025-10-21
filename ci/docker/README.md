@@ -262,7 +262,7 @@ The system supports all platforms defined in `ci/boards.py`:
 ### AVR
 - `uno`, `nano_every`, `yun`
 - `attiny85`, `attiny88`, `attiny4313`
-- `ATtiny1604`, `ATtiny1616` (megaAVR)
+- `attiny1604`, `attiny1616` (megaAVR)
 
 ### ESP32
 - `esp32dev`, `esp32s2`, `esp32s3`, `esp32c3`, `esp32c6`
@@ -491,7 +491,7 @@ These images are:
 
 | Platform | Docker Image | Cached Boards |
 |----------|--------------|---------------|
-| AVR | `niteris/fastled-compiler-avr-uno:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, ATtiny1604, ATtiny1616 |
+| AVR | `niteris/fastled-compiler-avr-uno:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
 | ESP | `niteris/fastled-compiler-esp:latest` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
 | Teensy | `niteris/fastled-compiler-teensy-teensy41:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
 | STM32 | `niteris/fastled-compiler-stm32-bluepill:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
