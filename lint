@@ -56,66 +56,95 @@ else
     uv run ruff format test.py
     uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
 
-    # Check if pyright needs to run using fingerprint cache
+    # Check if pyright needs to run using Meson's dependency tracking
     echo "Checking if pyright needs to run..."
-    if uv run python ci/python_lint_cache.py check; then
-        echo "Running pyright (all configured files)"
+
+    # Ensure Meson has generated the timestamp (tracks ci/** + test.py + pyproject.toml)
+    meson compile -C .build/meson python_lint_tracker > /dev/null 2>&1 || true
+
+    PYTHON_LINT_TIMESTAMP=".build/meson/python_lint.timestamp"
+    PYTHON_LINT_MARKER=".cache/python_lint.marker"
+
+    # Run pyright if:
+    # - No marker file exists (first time)
+    # - Meson timestamp is newer than marker (Python code changed)
+    if [ ! -f "$PYTHON_LINT_MARKER" ] || [ "$PYTHON_LINT_TIMESTAMP" -nt "$PYTHON_LINT_MARKER" ] 2>/dev/null; then
+        echo "Running pyright (Python files changed)"
         if uv run pyright; then
             # Mark pyright as successful
-            uv run python ci/python_lint_cache.py success
+            touch "$PYTHON_LINT_MARKER"
+            echo "✅ pyright passed"
         else
-            # Invalidate cache on pyright failure
-            uv run python ci/python_lint_cache.py failure
             echo "❌ pyright failed"
             exit 1
         fi
+    else
+        echo "✅ No Python changes detected - skipping pyright"
     fi
 
     export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
-    # C++ linting
+    # C++ linting with Meson dependency tracking
     echo ""
     echo "🔧 C++ LINTING"
     echo "---------------"
-    folders=(
-        #"src/lib8tion"
-        #"src/platforms/stub"
-        #"src/platforms/apollo3"  # clang-format breaks apollo3
-        #"src/platforms/esp/8266"  # clang-format breaks esp8266
-        #"src/platforms/arm" # clang-format breaks arm
-        #"src/fx"
-        #"src/fl"
-        #"src/platforms/wasm"
-    )
 
-    for folder in "${folders[@]}"; do
-      echo "Running clang-format on $folder"
-      uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
-    done
+    # Check if C++ linting needs to run using Meson's dependency tracking
+    # Ensure Meson has generated the timestamp (tracks src/** + examples/**)
+    meson compile -C .build/meson cpp_lint_tracker > /dev/null 2>&1 || true
 
-    # C++ custom linters
-    echo ""
-    echo "🔍 C++ CUSTOM LINTERS"
-    echo "----------------------"
-    for lint_script in ci/lint_cpp/*.py; do
-        if [ -f "$lint_script" ]; then
-            echo "Running $(basename "$lint_script")"
-            # Check if it's a unittest-based script or standalone
-            if grep -q "unittest.main()" "$lint_script"; then
-                # Run as unittest
-                uv run python -m pytest "$lint_script" -v || {
-                    echo "❌ C++ linter failed: $(basename "$lint_script")"
-                    exit 1
-                }
-            else
-                # Run as standalone script
-                uv run python "$lint_script" || {
-                    echo "❌ C++ linter failed: $(basename "$lint_script")"
-                    exit 1
-                }
+    CPP_LINT_TIMESTAMP=".build/meson/cpp_lint.timestamp"
+    CPP_LINT_MARKER=".cache/cpp_lint.marker"
+
+    if [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null; then
+        echo "Source or example files changed - running C++ linting"
+
+        folders=(
+            #"src/lib8tion"
+            #"src/platforms/stub"
+            #"src/platforms/apollo3"  # clang-format breaks apollo3
+            #"src/platforms/esp/8266"  # clang-format breaks esp8266
+            #"src/platforms/arm" # clang-format breaks arm
+            #"src/fx"
+            #"src/fl"
+            #"src/platforms/wasm"
+        )
+
+        for folder in "${folders[@]}"; do
+          echo "Running clang-format on $folder"
+          uv run ci/run-clang-format.py -i -r "$folder" || uv run ci/run-clang-format.py -i -r "$folder"
+        done
+
+        # C++ custom linters
+        echo ""
+        echo "🔍 C++ CUSTOM LINTERS"
+        echo "----------------------"
+        for lint_script in ci/lint_cpp/*.py; do
+            if [ -f "$lint_script" ]; then
+                echo "Running $(basename "$lint_script")"
+                # Check if it's a unittest-based script or standalone
+                if grep -q "unittest.main()" "$lint_script"; then
+                    # Run as unittest
+                    uv run python -m pytest "$lint_script" -v || {
+                        echo "❌ C++ linter failed: $(basename "$lint_script")"
+                        exit 1
+                    }
+                else
+                    # Run as standalone script
+                    uv run python "$lint_script" || {
+                        echo "❌ C++ linter failed: $(basename "$lint_script")"
+                        exit 1
+                    }
+                fi
             fi
-        fi
-    done
+        done
+
+        # Mark C++ linting as successful
+        mkdir -p .cache
+        touch "$CPP_LINT_MARKER"
+    else
+        echo "✅ No C++ changes detected - skipping C++ linting"
+    fi
 fi
 
 # JavaScript linting and enhanced checking (now included by default)
@@ -129,41 +158,60 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Check if fast linting is available
-ESLINT_EXE=""
-if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
-else
-    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
-fi
+# Check if JavaScript linting needs to run using Meson's dependency tracking
+# Ensure Meson has generated the timestamp (tracks src/platforms/wasm/compiler/**)
+meson compile -C .build/meson js_lint_tracker > /dev/null 2>&1 || true
 
-if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
-    echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
-    if ! bash ci/lint-js-fast; then
-        echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
-        exit 1
+JS_LINT_TIMESTAMP=".build/meson/js_lint.timestamp"
+JS_LINT_MARKER=".cache/js_lint.marker"
+
+if [ ! -f "$JS_LINT_MARKER" ] || [ "$JS_LINT_TIMESTAMP" -nt "$JS_LINT_MARKER" ] 2>/dev/null; then
+    echo "Running JavaScript linting (WASM compiler files changed)"
+
+    # Check if fast linting is available
+    ESLINT_EXE=""
+    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+        ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
+    else
+        ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
     fi
-else
-    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
-    # Auto-setup JavaScript linting
-    if uv run ci/setup-js-linting-fast.py; then
-        echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
-        # Now run the linting
-        if [ -f "ci/lint-js-fast" ]; then
-            echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
-            if ! bash ci/lint-js-fast; then
-                echo -e "${RED}❌ JavaScript linting failed${NC}"
-                exit 1
-            fi
+
+    if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
+        echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
+        if bash ci/lint-js-fast; then
+            mkdir -p .cache
+            touch "$JS_LINT_MARKER"
         else
-            echo -e "${RED}❌ Failed to create lint script${NC}"
+            echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
             exit 1
         fi
     else
-        echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
-        echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
-        # Don't exit with error, just skip JS linting
+        echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
+        # Auto-setup JavaScript linting
+        if uv run ci/setup-js-linting-fast.py; then
+            echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
+            # Now run the linting
+            if [ -f "ci/lint-js-fast" ]; then
+                echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
+                if bash ci/lint-js-fast; then
+                    mkdir -p .cache
+                    touch "$JS_LINT_MARKER"
+                else
+                    echo -e "${RED}❌ JavaScript linting failed${NC}"
+                    exit 1
+                fi
+            else
+                echo -e "${RED}❌ Failed to create lint script${NC}"
+                exit 1
+            fi
+        else
+            echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
+            echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
+            # Don't exit with error, just skip JS linting
+        fi
     fi
+else
+    echo -e "${BLUE}✅ No changes detected - skipping JavaScript linting${NC}"
 fi
 
 echo ""

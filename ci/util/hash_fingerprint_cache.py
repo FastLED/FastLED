@@ -25,16 +25,20 @@ class HashFingerprintCache:
     are validating and updating the same cache.
     """
 
-    def __init__(self, cache_dir: Path, subpath: str):
+    def __init__(
+        self, cache_dir: Path, subpath: str, timestamp_file: Optional[Path] = None
+    ):
         """
         Initialize hash fingerprint cache.
 
         Args:
             cache_dir: Base cache directory (e.g., Path(".cache"))
             subpath: Subdirectory name for this cache (e.g., "js_lint", "native_build")
+            timestamp_file: Optional path to write timestamp when changes are detected
         """
         self.cache_dir = cache_dir
         self.subpath = subpath
+        self.timestamp_file = timestamp_file
 
         # Create cache directory structure
         self.fingerprint_dir = cache_dir / "fingerprint"
@@ -113,6 +117,55 @@ class HashFingerprintCache:
                 pending_file.unlink()
             except OSError:
                 pass
+
+    def _write_timestamp_file(
+        self, timestamp: float, file_count: int, hash_value: str
+    ) -> None:
+        """
+        Write timestamp file when changes are detected.
+
+        Args:
+            timestamp: Unix timestamp of when changes were detected
+            file_count: Number of files monitored
+            hash_value: Current hash value
+        """
+        if self.timestamp_file is None:
+            return
+
+        try:
+            # Create parent directory if needed
+            self.timestamp_file.parent.mkdir(parents=True, exist_ok=True)
+
+            # Write timestamp data in JSON format
+            timestamp_data = {
+                "timestamp": timestamp,
+                "file_count": file_count,
+                "hash": hash_value,
+                "subpath": self.subpath,
+            }
+
+            with open(self.timestamp_file, "w") as f:
+                json.dump(timestamp_data, f, indent=2)
+        except OSError as e:
+            # Non-fatal error - log but don't fail
+            pass
+
+    def get_last_change_timestamp(self) -> Optional[float]:
+        """
+        Get the timestamp of the last detected change.
+
+        Returns:
+            Unix timestamp or None if no timestamp file exists
+        """
+        if self.timestamp_file is None or not self.timestamp_file.exists():
+            return None
+
+        try:
+            with open(self.timestamp_file, "r") as f:
+                data = json.load(f)
+                return data.get("timestamp")
+        except (json.JSONDecodeError, OSError):
+            return None
 
     def get_current_hash(self, file_paths: List[Path]) -> str:
         """
@@ -245,6 +298,14 @@ class HashFingerprintCache:
         lock = fasteners.InterProcessLock(self.lock_file)
         with lock:
             self._write_cache_data(fingerprint_data)
+
+            # Write timestamp file if configured
+            if fingerprint_data and self.timestamp_file is not None:
+                self._write_timestamp_file(
+                    timestamp=fingerprint_data.get("timestamp", time.time()),
+                    file_count=fingerprint_data.get("file_count", 0),
+                    hash_value=fingerprint_data.get("hash", ""),
+                )
 
         # Clean up stored fingerprints
         self._clear_pending_fingerprint()

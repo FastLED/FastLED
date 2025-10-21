@@ -1,0 +1,277 @@
+{
+  "version": "1.0",
+  "description": "Centralized dependency manifest for FastLED CI/linting/testing. Single source of truth for what each operation monitors.",
+  "project_root": ".",
+  "operations": {
+    "python_lint": {
+      "description": "Python linting with pyright type checking",
+      "cache_key": "python_lint",
+      "cache_file": ".cache/fingerprint/python_lint.json",
+      "pattern": "Python + Config",
+      "globs": [
+        "test.py",
+        "ci/**/*.py",
+        "pyproject.toml"
+      ],
+      "excludes": [
+        "ci/tmp/**",
+        "ci/wasm/**"
+      ],
+      "tools": [
+        "ruff check",
+        "ruff format",
+        "pyright"
+      ],
+      "script": "ci/python_lint_cache.py",
+      "lint_command": "bash lint"
+    },
+    "javascript_lint": {
+      "description": "JavaScript/TypeScript linting for WASM compiler",
+      "cache_key": "js_lint",
+      "cache_file": ".cache/fingerprint/js_lint.json",
+      "pattern": "src/platforms/wasm/compiler/**",
+      "globs": [
+        "src/platforms/wasm/compiler/**/*"
+      ],
+      "tools": [
+        "eslint"
+      ],
+      "script": "ci/js_lint_cache.py",
+      "lint_command": "bash lint --js"
+    },
+    "cpp_lint": {
+      "description": "C++ linting: clang-format + custom linters (namespace checks, include order, etc.)",
+      "cache_key": "cpp_lint",
+      "cache_file": ".cache/fingerprint/cpp_lint.json",
+      "pattern": "C++ Source + Examples",
+      "globs": [
+        "src/**/*.cpp",
+        "src/**/*.h",
+        "src/**/*.hpp",
+        "src/**/*.c",
+        "examples/**/*.ino",
+        "examples/**/*.cpp",
+        "examples/**/*.h",
+        "examples/**/*.hpp"
+      ],
+      "tools": [
+        "clang-format",
+        "check_namespace_includes.py",
+        "check_using_namespace.py",
+        "no_namespace_fl_declaration.py",
+        "no_using_namespace_fl_in_headers.py",
+        "test_no_banned_headers.py",
+        "test_no_cpp_includes.py",
+        "test_no_include_after_namespace.py",
+        "test_no_serial_printf.py",
+        "test_no_std_namespace.py"
+      ],
+      "script": "ci/cpp_lint_cache.py (TO CREATE)",
+      "lint_command": "bash lint (when cpp_lint_cache.py is created)"
+    },
+    "cpp_tests": {
+      "description": "C++ unit tests compilation and execution",
+      "cache_key": "cpp_test",
+      "cache_file": ".cache/fingerprint/cpp_test.json",
+      "pattern": "C++ Tests + Source (Tests depend on src/)",
+      "globs": [
+        "tests/**/*.cpp",
+        "tests/**/*.h",
+        "tests/**/*.hpp",
+        "tests/**/*.c",
+        "src/**/*.cpp",
+        "src/**/*.h",
+        "src/**/*.hpp",
+        "src/**/*.c"
+      ],
+      "tools": [
+        "doctest unit tests"
+      ],
+      "test_command": "uv run test.py --cpp"
+    },
+    "examples_compile": {
+      "description": "Example Arduino sketch compilation",
+      "cache_key": "examples",
+      "cache_file": ".cache/fingerprint/examples.json",
+      "pattern": "Examples + Source (Examples depend on src/)",
+      "globs": [
+        "examples/**/*.ino",
+        "examples/**/*.cpp",
+        "examples/**/*.h",
+        "examples/**/*.hpp",
+        "src/**/*.cpp",
+        "src/**/*.h",
+        "src/**/*.hpp",
+        "src/**/*.c"
+      ],
+      "tools": [
+        "platformio/Arduino toolchain"
+      ],
+      "test_command": "uv run test.py --examples"
+    },
+    "python_tests": {
+      "description": "Python test suite (test.py and related scripts)",
+      "cache_key": "python_test",
+      "cache_file": ".cache/fingerprint/python_test.json",
+      "pattern": "Python Tests + Config",
+      "globs": [
+        "test.py",
+        "ci/**/*.py",
+        "tests/**/*.py",
+        "pyproject.toml"
+      ],
+      "tools": [
+        "pytest"
+      ],
+      "test_command": "uv run test.py"
+    },
+    "src_code": {
+      "description": "Source code fingerprint for builds (used by build system)",
+      "cache_key": "src_code",
+      "cache_file": ".cache/fingerprint/src_code.json",
+      "timestamp_file": ".build/src_code.timestamp",
+      "pattern": "All C++ Source",
+      "globs": [
+        "src/**/*.cpp",
+        "src/**/*.h",
+        "src/**/*.hpp",
+        "src/**/*.c",
+        "fl/**/*.cpp",
+        "fl/**/*.h",
+        "fl/**/*.hpp",
+        "fl/**/*.c"
+      ],
+      "note": "Used by build system to trigger rebuilds. Separate from linting.",
+      "usage": "HashFingerprintCache with timestamp file for external tools"
+    }
+  },
+  "dependency_graph": {
+    "python_lint": {
+      "depends_on": [],
+      "triggers": []
+    },
+    "javascript_lint": {
+      "depends_on": [],
+      "triggers": []
+    },
+    "cpp_lint": {
+      "depends_on": [],
+      "triggers": []
+    },
+    "cpp_tests": {
+      "depends_on": [
+        "src_code"
+      ],
+      "triggers": []
+    },
+    "examples_compile": {
+      "depends_on": [
+        "src_code"
+      ],
+      "triggers": []
+    },
+    "python_tests": {
+      "depends_on": [],
+      "triggers": []
+    },
+    "src_code": {
+      "depends_on": [],
+      "note": "Base dependency for C++ operations"
+    }
+  },
+  "file_coverage": {
+    "description": "Which files are monitored by each operation",
+    "src": {
+      "monitored_by": [
+        "cpp_lint",
+        "cpp_tests",
+        "examples_compile",
+        "src_code"
+      ]
+    },
+    "examples": {
+      "monitored_by": [
+        "cpp_lint",
+        "examples_compile"
+      ]
+    },
+    "tests": {
+      "monitored_by": [
+        "cpp_tests",
+        "python_tests"
+      ]
+    },
+    "ci": {
+      "monitored_by": [
+        "python_lint",
+        "python_tests"
+      ]
+    },
+    "test.py": {
+      "monitored_by": [
+        "python_lint",
+        "python_tests"
+      ]
+    },
+    "pyproject.toml": {
+      "monitored_by": [
+        "python_lint",
+        "python_tests"
+      ]
+    },
+    "src/platforms/wasm/compiler": {
+      "monitored_by": [
+        "javascript_lint"
+      ]
+    }
+  },
+  "implementation_notes": {
+    "cache_pattern": "All caching uses HashFingerprintCache (SHA256 hash of file paths + mtimes) with file locking for safety",
+    "timestamp_files": "Optional .timestamp files written by HashFingerprintCache for external tool integration",
+    "marker_files": "Optional .marker files in .cache/ used by bash scripts to track last successful run",
+    "race_condition_safety": "Pre-computed fingerprints stored in pending files prevent corruption from file changes during processing",
+    "exclusions": "Handled by script logic (e.g., ci/tmp/, ci/wasm/ excluded from python_lint)"
+  },
+  "scripts_reference": {
+    "ci/python_lint_cache.py": {
+      "status": "exists",
+      "function": "get_python_files()",
+      "depends_on_manifest": false,
+      "should_migrate": true
+    },
+    "ci/js_lint_cache.py": {
+      "status": "exists",
+      "function": "get_directory_files()",
+      "depends_on_manifest": false,
+      "should_migrate": true
+    },
+    "ci/cpp_lint_cache.py": {
+      "status": "MISSING - needs creation",
+      "function": "get_cpp_files() - should include src/** + examples/**",
+      "template": "Copy from ci/python_lint_cache.py"
+    },
+    "ci/util/unified_test_cache.py": {
+      "status": "exists",
+      "functions": [
+        "get_src_code_files()",
+        "get_cpp_test_files()",
+        "get_examples_files()",
+        "get_python_test_files()"
+      ],
+      "depends_on_manifest": false,
+      "note": "Used by test.py for test caching"
+    },
+    "bash lint": {
+      "status": "exists",
+      "depends_on_manifest": false,
+      "should_migrate": true,
+      "note": "Currently uses Meson - should use cache scripts instead"
+    }
+  },
+  "migration_path": {
+    "step_1": "Create ci/cpp_lint_cache.py based on this manifest and python_lint_cache.py pattern",
+    "step_2": "Update bash lint to use ci/cpp_lint_cache.py check/success instead of Meson",
+    "step_3": "Remove Meson custom_target code (cpp_lint_tracker, python_lint_tracker, js_lint_tracker) from meson.build",
+    "step_4": "Optional: Update cache scripts to load globs from this JSON file for DRY principle"
+  }
+}

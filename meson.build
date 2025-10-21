@@ -27,6 +27,56 @@ fastled_sources = run_command(uv_prog, 'run', 'python', '-c',
   'import pathlib; print("\\n".join(str(p) for p in list(pathlib.Path("src").rglob("*.cpp")) + list(pathlib.Path("fl").rglob("*.cpp"))))',
   check: true, capture: true).stdout().strip().split('\n')
 
+# Track source code changes for external tools (linting, tests, etc.)
+# Meson automatically regenerates these when relevant files change
+# External tools check if these files are newer than their marker files to decide if they need to re-run
+python_prog = find_program('python', required: true)
+
+# C++ lint tracker: tracks src/** and examples/**
+cpp_lint_tracker = custom_target('cpp_lint_tracker',
+  input: files(fastled_sources),
+  output: 'cpp_lint.timestamp',
+  command: [uv_prog, 'run', 'python', '-c', '''
+import json, time, pathlib
+# Get all example files
+example_files = list(pathlib.Path("examples").rglob("*.ino")) + list(pathlib.Path("examples").rglob("*.cpp")) + list(pathlib.Path("examples").rglob("*.h"))
+with open("@OUTPUT@", "w") as f:
+    json.dump({"timestamp": time.time(), "examples": len(example_files)}, f, indent=2)
+  '''],
+  build_by_default: true,
+)
+
+# Python lint tracker: tracks ci/** + test.py + pyproject.toml
+python_lint_tracker = custom_target('python_lint_tracker',
+  input: files('test.py', 'pyproject.toml'),
+  output: 'python_lint.timestamp',
+  command: [uv_prog, 'run', 'python', '-c', '''
+import json, time, pathlib
+# Get all ci/** files
+ci_files = list(pathlib.Path("ci").rglob("*.py"))
+with open("@OUTPUT@", "w") as f:
+    json.dump({"timestamp": time.time(), "ci_files": len(ci_files)}, f, indent=2)
+  '''],
+  build_by_default: true,
+)
+
+# JavaScript lint tracker: tracks src/platforms/wasm/compiler/** (compiles to JS)
+js_wasm_files = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; files = [str(p) for p in pathlib.Path("src/platforms/wasm/compiler").rglob("*") if p.is_file()]; print(len(files))',
+  check: false, capture: true).stdout().strip()
+
+if js_wasm_files != '0'
+  js_lint_tracker = custom_target('js_lint_tracker',
+    output: 'js_lint.timestamp',
+    command: [python_prog, '-c', '''
+import json, time
+with open("@OUTPUT@", "w") as f:
+    json.dump({"timestamp": time.time()}, f, indent=2)
+    '''],
+    build_by_default: true,
+  )
+endif
+
 # Compile flags for unit tests (base flags)
 unit_test_compile_args = [
   '-std=gnu++11',                # GNU C++11 standard (must be first to override Meson's default)

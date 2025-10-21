@@ -16,11 +16,18 @@ from ci.util.test_types import FingerprintResult, fingerprint_code_base
 class UnifiedTestCache:
     """Unified safe cache for test.py operations."""
 
-    def __init__(self, cache_name: str, cache_dir: Optional[Path] = None):
+    def __init__(
+        self,
+        cache_name: str,
+        cache_dir: Optional[Path] = None,
+        timestamp_file: Optional[Path] = None,
+    ):
         if cache_dir is None:
             cache_dir = Path(".cache")
         cache_dir.mkdir(parents=True, exist_ok=True)
-        self.cache = HashFingerprintCache(cache_dir, cache_name)
+        self.cache = HashFingerprintCache(
+            cache_dir, cache_name, timestamp_file=timestamp_file
+        )
         self.cache_name = cache_name
 
     def check_needs_update(self, files_to_monitor: List[Path]) -> bool:
@@ -41,8 +48,14 @@ class UnifiedTestCache:
 
 
 def create_src_code_cache() -> UnifiedTestCache:
-    """Create cache for source code fingerprinting."""
-    return UnifiedTestCache("src_code")
+    """
+    Create cache for source code fingerprinting.
+
+    Writes timestamp file (.build/src_code.timestamp) when src/** changes.
+    This allows other tools to quickly check if rebuild is needed.
+    """
+    timestamp_file = Path(".build") / "src_code.timestamp"
+    return UnifiedTestCache("src_code", timestamp_file=timestamp_file)
 
 
 def create_cpp_test_cache() -> UnifiedTestCache:
