@@ -15,10 +15,9 @@
 // ============================================================================
 // Platform-provided delay functions (from Arduino or platform layer)
 // ============================================================================
-extern "C" {
-void delay(unsigned long ms);
-void delayMicroseconds(unsigned int us);
-}
+#ifdef ARDUINO
+#include "Arduino.h"  // ok include
+#endif
 
 namespace fl {
 
@@ -77,11 +76,15 @@ template<> FASTLED_FORCE_INLINE void delaycycles<5>() {
 // ============================================================================
 
 void delayMillis(u32 ms) {
+#ifdef ARDUINO
   ::delay((unsigned long)ms);
+#endif
 }
 
 void delayMicroseconds(u32 us) {
+#ifdef ARDUINO
   ::delayMicroseconds((unsigned int)us);
+#endif
 }
 
 
