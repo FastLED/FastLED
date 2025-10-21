@@ -69,7 +69,7 @@ jobs:
           sleep $((${delay_minutes} * 60))
 
   build-platforms:
-    name: Building niteris/fastled-compiler-${{ matrix.group.name }} (${{ matrix.arch.platform }})
+    name: 🔨 fastled-compiler-${{ matrix.group.name }}
     if: github.event.inputs.skip_platforms != 'true'
     needs: [credentials, wait-for-base]
     strategy:
