@@ -9,12 +9,9 @@
 /// @file platforms/arm/rp/rp2040/delay.h
 /// RP2040 platform-specific nanosecond-precision delay utilities
 
-/// RP2040: Pico SDK provides busy_wait_at_least_cycles via pico.h
-/// included through Arduino.h, so we just wrap it
-
-FASTLED_FORCE_INLINE void delay_cycles_pico(fl::u32 cycles) {
-  busy_wait_at_least_cycles(cycles);
-}
+/// Forward declaration for delay_cycles_pico
+/// Implementation is in delay.cpp which includes Arduino.h for Pico SDK access
+void delay_cycles_pico(fl::u32 cycles);
 
 namespace fl {
 
