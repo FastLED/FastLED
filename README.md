@@ -272,7 +272,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 Pre-built Docker images of PlatformIO optimized for compiling FastLED across all supported platforms:
 
-**Build Status:** [![Docker Build Base](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base.yml) [![Docker Build Platforms](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base_platforms.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base_platforms.yml)
+**Build Status:** [![Docker Build Base](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml) [![Docker Build Platforms](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml)
 
 **Platform Images:**
 
