@@ -117,7 +117,11 @@ template<fl::u8 PIN> class FastPin {
 	// You need to define a FastPin<> specialization
 	// or change what get's included for your particular build target.
 	// Keep in mind that these messages are cryptic, so it's best to define an invalid in type.
+#ifdef FASTLED_ALL_PINS_VALID
+	constexpr static bool validpin() { return true; }
+#else
 	constexpr static bool validpin() { return false; }
+#endif
 	constexpr static bool LowSpeedOnlyRecommended() {  // Some implementations assume this exists.
         // Caller must always determine if high speed use if allowed on a given pin,
         // because it depends on more than just the chip packaging ... it depends on entire board (and even system) design.

@@ -18,6 +18,8 @@
 #if defined(FASTLED_STUB_IMPL) || defined(__EMSCRIPTEN__)
     // Stub implementation for testing and WebAssembly
     // Provides no-op Pin and FastPin<> implementations
+    // For stub platforms, all pins are valid (no hardware constraints)
+    #define FASTLED_ALL_PINS_VALID
     #include "platforms/stub/fastpin_stub.h"
 
 #elif defined(ESP32)
