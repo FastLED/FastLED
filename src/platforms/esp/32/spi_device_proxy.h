@@ -183,6 +183,22 @@ public:
         writeByte(static_cast<uint8_t>(w & 0xFF));
     }
 
+    /// Write the same byte value repeatedly
+    /// Mirrors ESP32SPIOutput::writeBytesValueRaw()
+    void writeBytesValueRaw(uint8_t value, int len) {
+        for (int i = 0; i < len; i++) {
+            writeByte(value);
+        }
+    }
+
+    /// Write the same byte value repeatedly with select/release
+    /// Mirrors ESP32SPIOutput::writeBytesValue()
+    void writeBytesValue(uint8_t value, int len) {
+        select();
+        writeBytesValueRaw(value, len);
+        release();
+    }
+
     /// Write byte without wait (same as writeByte for proxy)
     void writeByteNoWait(uint8_t b) {
         writeByte(b);
