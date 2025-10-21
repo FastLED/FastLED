@@ -3,6 +3,12 @@
 
 #include "fl/stdint.h"
 #include "fl/fastpin_base.h"
+
+// Include Arduino core to get Apollo3 HAL function declarations
+#ifdef ARDUINO
+#include "Arduino.h"
+#endif
+
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."
@@ -19,16 +25,16 @@ public:
     inline static void setOutput() { pinMode(PIN, OUTPUT); am_hal_gpio_fastgpio_enable(PAD); }
     inline static void setInput() { am_hal_gpio_fastgpio_disable(PAD); pinMode(PIN, INPUT); }
 
-    inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fast_write(PAD, 0, 1); }
-    inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fast_write(PAD, 0, 0); }
+    inline static void hi() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_set(PAD); }
+    inline static void lo() __attribute__ ((always_inline)) { am_hal_gpio_fastgpio_clr(PAD); }
 
-    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { }
+    inline static void set(FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { if(val) { am_hal_gpio_fastgpio_set(PAD); } else { am_hal_gpio_fastgpio_clr(PAD); } }
     inline static void strobe() __attribute__ ((always_inline)) { toggle(); toggle(); }
-    inline static void toggle() __attribute__ ((always_inline)) { }
+    inline static void toggle() __attribute__ ((always_inline)) { if( am_hal_gpio_fastgpio_read(PAD)) { lo(); } else { hi(); } }
 
-    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
-    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { }
-    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { }
+    inline static void hi(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { hi(); }
+    inline static void lo(FASTLED_REGISTER port_ptr_t port) __attribute__ ((always_inline)) { lo(); }
+    inline static void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { set(val); }
 
     inline static port_t hival() __attribute__ ((always_inline)) { return 0; }
     inline static port_t loval() __attribute__ ((always_inline)) { return 0; }

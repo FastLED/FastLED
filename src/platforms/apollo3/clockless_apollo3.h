@@ -2,6 +2,12 @@
 #define __INC_CLOCKLESS_APOLLO3_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "../../fastled_delay.h"
+
+// Include Arduino core to get Apollo3 HAL function declarations
+#ifdef ARDUINO
+#include "Arduino.h"
+#endif
 
 namespace fl {
 

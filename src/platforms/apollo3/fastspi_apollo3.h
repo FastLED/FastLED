@@ -5,7 +5,9 @@
 // It uses fastgpio instead of actual SPI, which means you can use it on all pins.
 // It can run slightly faster than the default fastpin (bit banging).
 
-#include "FastLED.h"
+#include "fastspi_types.h"
+#include "fl/delay.h"
+
 namespace fl {
 #if defined(FASTLED_APOLLO3)
 
