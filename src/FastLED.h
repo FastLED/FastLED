@@ -784,11 +784,11 @@ public:
 				case UCS1903_PORTD: return addLeds(new InlineBlockClocklessController<NUM_LANES, PORTD_FIRST_PIN, fl::TIMING_UCS1903_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		#ifdef HAS_PORTDC
-				case WS2811_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2812_800KHZ_LEGACY, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-				case WS2811_400_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2811_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-        case WS2813_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2813, RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
-				case TM1803_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_TM1803_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
-				case UCS1903_PORTDC: return addLeds(new SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_UCS1903_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_PORTDC: return addLeds(new fl::SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2812_800KHZ_LEGACY, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case WS2811_400_PORTDC: return addLeds(new fl::SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2811_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+        case WS2813_PORTDC: return addLeds(new fl::SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_WS2813, RGB_ORDER, 0, false, 300>(), data, nLedsOrOffset, nLedsIfOffset);
+				case TM1803_PORTDC: return addLeds(new fl::SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_TM1803_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
+				case UCS1903_PORTDC: return addLeds(new fl::SixteenWayInlineBlockClocklessController<NUM_LANES, fl::TIMING_UCS1903_400KHZ, RGB_ORDER>(), data, nLedsOrOffset, nLedsIfOffset);
 		#endif
 		}
 	}
