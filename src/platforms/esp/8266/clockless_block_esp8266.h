@@ -23,14 +23,17 @@ extern uint32_t _frame_cnt;
 extern uint32_t _retry_cnt;
 #endif
 
-template <uint8_t LANES, int FIRST_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t LANES, int FIRST_PIN, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false>
 class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PORT_MASK> {
 	typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
+	enum : uint32_t {
+		T1 = TIMING::T1,
+		T2 = TIMING::T2,
+		T3 = TIMING::T3,
+		WAIT_TIME = TIMING::RESET
+	};
 
 	CMinWait<WAIT_TIME> mWait;
 
