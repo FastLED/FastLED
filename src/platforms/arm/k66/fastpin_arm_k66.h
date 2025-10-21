@@ -2,6 +2,7 @@
 #define __FASTPIN_ARM_K66_H
 
 #include "fl/force_inline.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be slightly slower."

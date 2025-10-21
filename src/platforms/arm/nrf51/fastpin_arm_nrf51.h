@@ -2,6 +2,7 @@
 #define __FASTPIN_ARM_NRF51_H
 
 #include "fl/force_inline.h"
+#include "fl/fastpin_base.h"
 
 #if defined(NRF51)
 /// Template definition for teensy 3.0 style ARM pins, providing direct access to the various GPIO registers.  Note that this

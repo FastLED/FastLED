@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 
 /// Template definition for STM32 style ARM pins, providing direct access to the various GPIO registers.  Note that this

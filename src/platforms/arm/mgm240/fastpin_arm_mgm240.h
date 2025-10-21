@@ -20,6 +20,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/unused.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 /// Forward declaration of base FastPin template
 template<uint8_t PIN> class FastPin;

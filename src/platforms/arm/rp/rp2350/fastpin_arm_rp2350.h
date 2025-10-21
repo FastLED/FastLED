@@ -4,6 +4,7 @@
 #include "pico.h"
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 // Forward declare FastPin template to support specializations below
 template<uint8_t PIN> class FastPin;

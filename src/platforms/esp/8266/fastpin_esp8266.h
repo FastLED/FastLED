@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
+#include "fl/fastpin_base.h"
 namespace fl {
 struct FASTLED_ESP_IO {
     volatile uint32_t _GPO;
