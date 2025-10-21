@@ -161,14 +161,6 @@
 
 // Inline constexpr macro for C++11/17 compatibility
 // In C++17+, constexpr variables are implicitly inline (external linkage)
-// In C++11/14, constexpr variables have internal linkage by default
-// Using weak + visibility attributes for C++11/14 forces external linkage
-// This is necessary for use as non-type template arguments AND in constexpr contexts
-#if __cplusplus >= 201703L
-  #define FL_INLINE_CONSTEXPR inline constexpr
-#else
-  // For C++11/14, use constexpr with weak + external visibility for external linkage
-  // The weak linkage ensures ODR compliance (only one definition linked)
-  // The external visibility ensures the symbol has external linkage
-  #define FL_INLINE_CONSTEXPR extern __attribute__((weak)) __attribute__((visibility("default"))) constexpr
-#endif
+// In C++11/14, we now use enum-based timing types instead of weak symbols
+// (see fl/chipsets/led_timing.h for enum-based TIMING_* definitions)
+#define FL_INLINE_CONSTEXPR inline constexpr

@@ -15,13 +15,13 @@ namespace fl {
 // TimingTraits - Extract timing values from ChipsetTiming at compile-time
 // ============================================================================
 
-/// @brief Compile-time trait to extract timing values from ChipsetTiming struct
-/// @tparam TIMING ChipsetTiming constant to extract values from
+/// @brief Compile-time trait to extract timing values from timing types
+/// @tparam TIMING Timing type with enum-based T1, T2, T3 values
 /// @note Provides constexpr static members for T1, T2, T3 timing values
 ///
 /// Usage:
 /// ```cpp
-/// template <const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER>
+/// template <typename TIMING, EOrder RGB_ORDER>
 /// class ClocklessController {
 ///     static constexpr uint32_t T1 = TimingTraits<TIMING>::T1;
 ///     static constexpr uint32_t T2 = TimingTraits<TIMING>::T2;
@@ -29,25 +29,22 @@ namespace fl {
 ///     // ... use T1, T2, T3 in template instantiations
 /// };
 /// ```
-template <const ChipsetTiming& TIMING>
+template <typename TIMING>
 struct TimingTraits {
     /// @brief High time for bit 0 (nanoseconds)
-    static constexpr uint32_t T1 = TIMING.T1;
+    static constexpr uint32_t T1 = TIMING::T1;
 
     /// @brief Additional high time for bit 1 (nanoseconds)
-    static constexpr uint32_t T2 = TIMING.T2;
+    static constexpr uint32_t T2 = TIMING::T2;
 
     /// @brief Low tail duration (nanoseconds)
-    static constexpr uint32_t T3 = TIMING.T3;
+    static constexpr uint32_t T3 = TIMING::T3;
 
     /// @brief Reset/latch time (microseconds)
-    static constexpr uint32_t RESET = TIMING.RESET;
+    static constexpr uint32_t RESET = TIMING::RESET;
 
     /// @brief Total bit period (T1 + T2 + T3) in nanoseconds
-    static constexpr uint32_t BIT_PERIOD = TIMING.T1 + TIMING.T2 + TIMING.T3;
-
-    /// @brief Get timing name
-    static constexpr const char* name() { return TIMING.name; }
+    static constexpr uint32_t BIT_PERIOD = TIMING::T1 + TIMING::T2 + TIMING::T3;
 };
 
 // ============================================================================

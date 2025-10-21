@@ -257,12 +257,14 @@ enum UCS7604Mode {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-template <fl::u8 DATA_PIN, const fl::ChipsetTiming& TIMING, fl::EOrder RGB_ORDER = GRB,
+template <fl::u8 DATA_PIN, typename TIMING, fl::EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
+    enum : uint32_t {
+        T1 = TIMING::T1,
+        T2 = TIMING::T2,
+        T3 = TIMING::T3
+    };
 
     // Reference to the generic clockless driver for transmitting preambles
     typedef fl::ClocklessBlockController<DATA_PIN, TIMING, RGB_ORDER, 0, false, WAIT_TIME>

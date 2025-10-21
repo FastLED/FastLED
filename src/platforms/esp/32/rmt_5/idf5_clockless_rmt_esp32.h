@@ -11,14 +11,16 @@
 #include "idf5_rmt.h"
 #include "fl/chipsets/timing_traits.h"
 namespace fl {
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Extract timing values from struct
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
+    // Reference timing values from the TIMING type
+    enum : uint32_t {
+        T1 = TIMING::T1,
+        T2 = TIMING::T2,
+        T3 = TIMING::T3
+    };
 
     // -- The actual controller object for ESP32
     fl::RmtController5 mRMTController;
@@ -32,7 +34,7 @@ private:
     }
 
 public:
-    ClocklessController(): mRMTController(DATA_PIN, TIMING, DefaultDmaMode(), WAIT_TIME)
+    ClocklessController(): mRMTController(DATA_PIN, to_runtime_timing<TIMING>(), DefaultDmaMode(), WAIT_TIME)
     {
     }
 

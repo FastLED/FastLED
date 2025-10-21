@@ -49,14 +49,16 @@ namespace fl {
 ///   - Delay T3 nanoseconds
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
-template <fl::u8 DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <fl::u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Extract timing values from struct
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
+    // Reference timing values from the TIMING type
+    enum : uint32_t {
+        T1 = TIMING::T1,
+        T2 = TIMING::T2,
+        T3 = TIMING::T3
+    };
 
     // Verify pin is valid
     // static_assert(fl::FastPin<DATA_PIN>::validpin(), "Invalid pin for clockless controller");
