@@ -172,10 +172,6 @@ class BannedHeadersChecker(FileContentChecker):
             if header == "mutex" and "mutex.h" in file_path:
                 return True
 
-            # Allow memory in thread_local.h for std::unique_ptr/shared_ptr
-            if header == "memory" and "thread_local.h" in file_path:
-                return True
-
             # Allow math.h in math implementation files (cpp files)
             if header == "math.h" and file_path.endswith(".cpp"):
                 # math.h is only used in implementation files for platform math functions
