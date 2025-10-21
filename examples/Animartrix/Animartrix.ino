@@ -162,6 +162,3 @@ void loop() {
     uint32_t end2 = millis();
     FL_WARN("*** SHOW + DRAW TIME: " << int(end2 - start) << "ms");
 }
-
-
-#endif  // __AVR__
