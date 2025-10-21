@@ -1,6 +1,11 @@
 #ifndef __INC_FASTPIN_ARM_RENESAS_H
 #define __INC_FASTPIN_ARM_RENESAS_H
 
+#include "fl/force_inline.h"
+// Include fastpin_base.h for template definitions
+// This reopens namespace fl but template will still be in scope
+#include "fl/fastpin_base.h"
+
 #if !defined(FASTLED_FORCE_SOFTWARE_PINS)
 #include "bsp_api.h"
 #endif
@@ -65,7 +70,6 @@ public:
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT->POSR; }
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT->PORR; }
     inline static port_t mask() __attribute__ ((always_inline)) { return digitalBspPinToBitMask(bspPin); }
-    inline static constexpr bool validpin() { return true; }
 
 };
 
