@@ -5,18 +5,10 @@
 
 #include "fl/types.h"
 #include "fl/force_inline.h"
+#include "platforms/delaycycles_generic.h"
 
 /// @file platforms/delay_generic.h
 /// Generic fallback nanosecond-precision delay utilities for unsupported platforms
-
-/// Generic fallback: use tight NOP loop
-FASTLED_FORCE_INLINE void delay_cycles_generic(fl::u32 cycles) {
-  // Simple loop - not ideal but works on any platform
-  while (cycles > 0) {
-    __asm__ __volatile__("nop\n");
-    cycles--;
-  }
-}
 
 namespace fl {
 

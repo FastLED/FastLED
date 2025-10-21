@@ -1,6 +1,9 @@
 /// @file fl/delay.cpp
 /// Implementation for delay utilities
 
+// Define this before including headers to prevent duplicate specializations in delay_cycles_generic.h
+#define FL_DELAY_CPP_SPECIALIZATIONS
+
 #include "fl/stdint.h"
 #include "fl/delay.h"
 #include "fl/types.h"

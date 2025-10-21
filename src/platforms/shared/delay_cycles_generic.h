@@ -29,6 +29,24 @@
 template<fl::cycle_t CYCLES>
 inline void delaycycles();
 
+// Base case specializations for non-positive cycles (to prevent infinite recursion)
+// These provide the minimum base cases to stop the recursive template from infinitely recursing.
+// All specializations (positive and non-positive cycles) are provided in fl/delay.cpp and linked at compile time.
+// Use #ifndef guard to allow delay.cpp to override these with its definitions
+#ifndef FL_DELAY_CPP_SPECIALIZATIONS
+template<> FASTLED_FORCE_INLINE void delaycycles<-10>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-9>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-8>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-7>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-6>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-5>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-4>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-3>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-2>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<-1>() {}
+template<> FASTLED_FORCE_INLINE void delaycycles<0>() {}
+#endif
+
 /// Delay for N clock cycles (generic NOP-based implementation)
 /// Uses NOP instructions to create minimal delays
 /// Note: This is a naive implementation using NOPs
