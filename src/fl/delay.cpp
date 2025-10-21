@@ -58,17 +58,20 @@ template<> FASTLED_FORCE_INLINE void delaycycles<-1>() {}
 template<> FASTLED_FORCE_INLINE void delaycycles<0>() {}
 
 // Specializations for small positive cycles
-template<> FASTLED_FORCE_INLINE void delaycycles<1>() { FL_NOP; }
-template<> FASTLED_FORCE_INLINE void delaycycles<2>() { FL_NOP2; }
-template<> FASTLED_FORCE_INLINE void delaycycles<3>() {
+// Note: These MUST NOT use FASTLED_FORCE_INLINE because with LTO enabled,
+// inline functions don't generate external symbols that the linker can resolve.
+// Using just inline or no storage class allows the linker to find these.
+template<> void delaycycles<1>() { FL_NOP; }
+template<> void delaycycles<2>() { FL_NOP2; }
+template<> void delaycycles<3>() {
   FL_NOP;
   FL_NOP2;
 }
-template<> FASTLED_FORCE_INLINE void delaycycles<4>() {
+template<> void delaycycles<4>() {
   FL_NOP2;
   FL_NOP2;
 }
-template<> FASTLED_FORCE_INLINE void delaycycles<5>() {
+template<> void delaycycles<5>() {
   FL_NOP2;
   FL_NOP2;
   FL_NOP;

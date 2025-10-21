@@ -50,6 +50,8 @@ inline void _delaycycles_avr() {
 }
 
 /// Delay for N clock cycles (AVR implementation)
+/// The base case specializations (0, 1, 2) are defined in fl/delay.cpp
+/// to ensure they are compiled once and available to the linker.
 template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() {
   _delaycycles_avr<CYCLES / 3, CYCLES % 3>();
