@@ -30,4 +30,6 @@ public:
     inline static port_ptr_t port() __attribute__((always_inline)) { return &_PORT::r(); }
 
     inline static port_t mask() __attribute__((always_inline)) { return _MASK; }
+
+    static constexpr bool validpin() { return true; }
 };
