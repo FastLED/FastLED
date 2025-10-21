@@ -34,7 +34,7 @@ void writePixelsToSPI(PixelController<RGB_ORDER> pixels, SPI_OUT& spi, void* con
     while(pixels.has(1)) {
         // Write start bit if FLAG_START_BIT is set
         if(FLAGS & FLAG_START_BIT) {
-            spi.writeBit<0>(1);
+            spi.template writeBit<0>(1);
         }
 
         // Convert and write RGB bytes
