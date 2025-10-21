@@ -31,7 +31,11 @@ from typing import Dict, List, Optional
 # Import board configuration
 from ci.boards import create_board
 from ci.docker.build_image import generate_config_hash
-from ci.util.docker_helper import get_docker_command
+from ci.util.docker_helper import (
+    attempt_start_docker,
+    get_docker_command,
+    is_docker_available,
+)
 
 
 def parse_arguments() -> argparse.Namespace:
@@ -215,6 +219,26 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
 
     print(f"Building base image: {base_image_name}")
     print()
+
+    # Ensure Docker is running before attempting to build
+    if not is_docker_available():
+        print("⚠️  Docker is not running. Attempting to start Docker Desktop...")
+        print()
+        success, message = attempt_start_docker()
+
+        if success:
+            print(f"✓ {message}")
+            print()
+        else:
+            print(f"❌ Failed to start Docker: {message}")
+            print()
+            print("Please start Docker Desktop manually and try again.")
+            print(
+                "Download Docker Desktop: https://www.docker.com/products/docker-desktop"
+            )
+            raise RuntimeError(
+                f"Docker is not available and could not be started automatically. {message}"
+            )
 
     # Find the base Dockerfile and project root
     base_dockerfile_path = Path(__file__).parent / "docker" / "Dockerfile.base"
