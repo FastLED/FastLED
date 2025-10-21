@@ -1,5 +1,5 @@
 #pragma once
-#pragma message "ESP32 Hardware SPI support added"
+// #pragma message "ESP32 Hardware SPI support added"
 
 #include "crgb.h"
 
@@ -75,22 +75,22 @@ namespace fl {
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #elif CONFIG_IDF_TARGET_ESP32S3
-	#pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
+	// #pragma message "Targeting ESP32S3, which has better SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	// I *think* we have to "fake" being FSPI... there might be a better way to do this.
 	// whatever the case, this "tricks" the pin assignment defines below into using DATA_PIN & CLOCK_PIN
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #elif CONFIG_IDF_TARGET_ESP32P4
-	#pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
+	// #pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #elif CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C6
-	#pragma message "Targeting ESP32-C3/C6, using FSPI for hardware SPI support."
+	// #pragma message "Targeting ESP32-C3/C6, using FSPI for hardware SPI support."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #else // Configuration for standard ESP32 variants
 	#ifndef FASTLED_ESP32_SPI_BUS
-	#pragma message "Setting ESP32 SPI bus to default"
+	// #pragma message "Setting ESP32 SPI bus to default"
 	// Use new constant names if available (framework 3.1.0+), otherwise fall back to old names
 	#if FASTLED_SPI_USES_NEW_CONSTANTS
 		#define FASTLED_ESP32_SPI_BUS SPI2
