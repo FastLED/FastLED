@@ -12,6 +12,11 @@ FROM fastled-compiler-base:latest
 ARG PLATFORM_NAME
 ENV PLATFORM_NAME=${PLATFORM_NAME}
 
+# Accept optional comma-delimited list of platforms/boards to compile
+# If not provided, will be auto-detected from PLATFORM_NAME
+ARG PLATFORMS
+ENV PLATFORMS=${PLATFORMS}
+
 # NOTE: platformio.ini is NOT copied here - it's generated dynamically by build.sh
 # from the PLATFORM_NAME using ci/boards.py (the source of truth)
 
@@ -36,7 +41,8 @@ RUN /tmp/build.sh install-packages
 # LAYER 3: Warm up compilation (separate cache layer)
 # Run initial compilation to complete any remaining setup and validate everything works
 # This downloads any framework files needed during compilation
-RUN /tmp/build.sh compile
+# Pass PLATFORMS environment variable to enable multi-board compilation
+RUN PLATFORMS=${PLATFORMS} /tmp/build.sh compile
 
 # The platform toolchains are now BAKED INTO the image at ~/.platformio
 # /fastled remains pristine with library source downloaded from GitHub

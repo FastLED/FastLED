@@ -137,22 +137,35 @@ case "$COMMAND" in
     compile)
         echo "=== LAYER 3: Warming up compilation for: $PLATFORM_NAME ==="
 
-        # Generate platformio.ini if not already present
-        if [ ! -f "platformio.ini" ]; then
-            generate_platformio_ini
+        # Check if PLATFORMS is set (comma-delimited list of boards to compile)
+        # If not set, fall back to looking up all boards for PLATFORM_NAME
+        if [ -z "$PLATFORMS" ]; then
+            echo "PLATFORMS not set, looking up boards for platform: $PLATFORM_NAME"
+            PLATFORMS=$(python3 -c "
+import sys
+sys.path.insert(0, '/fastled')
+try:
+    from ci.docker.build_platforms import get_boards_for_platform, get_platform_for_board
+    platform = get_platform_for_board('$PLATFORM_NAME')
+    if platform:
+        boards = get_boards_for_platform(platform)
+        print(','.join(boards))
+    else:
+        print('$PLATFORM_NAME')
+except:
+    print('$PLATFORM_NAME')
+" 2>/dev/null || echo "$PLATFORM_NAME")
         fi
 
-        # For now, just use the single board to simplify Docker compilation
-        # Full platform family pre-caching can be added later once import issues are resolved
-        BOARDS="$PLATFORM_NAME"
+        echo "Platforms/boards to compile: $PLATFORMS"
 
-        echo "Boards to pre-cache: $BOARDS"
-
-        # Run compile command for each board to:
+        # Run compile command for each platform/board to:
         # 1. Download any remaining framework files
         # 2. Pre-cache platform-specific toolchains
         # 3. Validate that everything works
-        for board in $BOARDS; do
+        IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"
+        for board in "${BOARDS_ARRAY[@]}"; do
+            board=$(echo "$board" | xargs)  # Trim whitespace
             echo ""
             echo ">>> Pre-caching toolchain for board: $board"
             bash compile "$board" Blink
@@ -161,7 +174,7 @@ case "$COMMAND" in
             fi
         done
 
-        echo "Compilation layer ready - cached $(echo $BOARDS | wc -w) board(s)"
+        echo "Compilation layer ready - cached ${#BOARDS_ARRAY[@]} board(s)"
         ;;
 
     legacy|*)
@@ -171,7 +184,30 @@ case "$COMMAND" in
         # Generate platformio.ini first
         generate_platformio_ini
 
-        bash compile "$PLATFORM_NAME" Blink
+        # Check if PLATFORMS is set; if not, look up boards for PLATFORM_NAME
+        if [ -z "$PLATFORMS" ]; then
+            PLATFORMS=$(python3 -c "
+import sys
+sys.path.insert(0, '/fastled')
+try:
+    from ci.docker.build_platforms import get_boards_for_platform, get_platform_for_board
+    platform = get_platform_for_board('$PLATFORM_NAME')
+    if platform:
+        boards = get_boards_for_platform(platform)
+        print(','.join(boards))
+    else:
+        print('$PLATFORM_NAME')
+except:
+    print('$PLATFORM_NAME')
+" 2>/dev/null || echo "$PLATFORM_NAME")
+        fi
+
+        # Compile for each board
+        IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"
+        for board in "${BOARDS_ARRAY[@]}"; do
+            board=$(echo "$board" | xargs)  # Trim whitespace
+            bash compile "$board" Blink
+        done
         ;;
 esac
 
