@@ -162,9 +162,13 @@
 // Inline constexpr macro for C++11/17 compatibility
 // In C++17+, constexpr variables are implicitly inline (external linkage)
 // In C++11/14, constexpr variables have internal linkage by default
-// This macro ensures external linkage in C++17+ while maintaining compatibility
+// Using weak + visibility attributes for C++11/14 forces external linkage
+// This is necessary for use as non-type template arguments AND in constexpr contexts
 #if __cplusplus >= 201703L
   #define FL_INLINE_CONSTEXPR inline constexpr
 #else
-  #define FL_INLINE_CONSTEXPR constexpr
+  // For C++11/14, use constexpr with weak + external visibility for external linkage
+  // The weak linkage ensures ODR compliance (only one definition linked)
+  // The external visibility ensures the symbol has external linkage
+  #define FL_INLINE_CONSTEXPR extern __attribute__((weak)) __attribute__((visibility("default"))) constexpr
 #endif
