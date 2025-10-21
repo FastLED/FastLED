@@ -1,6 +1,10 @@
 name: Docker Compiler Build Template
 
 on:
+  push:
+    paths:
+      - 'ci/docker/**'
+      - '.github/workflows/docker_build_compiler.yml'
   workflow_call:
     secrets:
       env_vars:
@@ -88,7 +92,7 @@ jobs:
         file: ./ci/docker/${{ inputs.dockerfile }}
         labels: ${{ steps.meta.outputs.labels }}
         outputs: type=image,name=${{ env.docker_registry_image }},push-by-digest=true,name-canonical=true,push=true
-        build-args: |
+        build-args: >
           PLATFORM_NAME=${{ env.PLATFORM_NAME }}
           GROUP=${{ inputs.group }}
           PLATFORMS=${{ inputs.platforms }}

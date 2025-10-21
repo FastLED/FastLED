@@ -1,6 +1,10 @@
 name: Docker Compiler Platforms
 
 on:
+  push:
+    paths:
+      - 'ci/docker/**'
+      - '.github/workflows/docker_compiler_template.yml'
   workflow_dispatch:
     inputs:
       skip_platforms:
@@ -65,7 +69,7 @@ jobs:
           sleep $((${delay_minutes} * 60))
 
   build-platforms:
-    name: Building niteris/fastled-compiler-${{ matrix.group }} (${{ matrix.arch.platform }})
+    name: Building niteris/fastled-compiler-${{ matrix.group.name }} (${{ matrix.arch.platform }})
     if: github.event.inputs.skip_platforms != 'true'
     needs: [credentials, wait-for-base]
     strategy:
