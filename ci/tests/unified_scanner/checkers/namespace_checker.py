@@ -35,6 +35,8 @@ class NamespaceIncludeChecker(BaseChecker):
         re.VERBOSE,
     )
 
+    ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
+
     def name(self) -> str:
         return "namespace-include-order"
 
@@ -76,6 +78,10 @@ class NamespaceIncludeChecker(BaseChecker):
 
             # Check for includes after namespace started
             if namespace_started and self.INCLUDE_PATTERN.match(line):
+                # Check if this line has the allow directive
+                if self.ALLOW_DIRECTIVE_PATTERN.search(line):
+                    continue  # Skip this include, it has the allow directive
+
                 results.append(
                     CheckResult(
                         checker_name=self.name(),
