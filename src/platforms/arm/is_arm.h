@@ -22,7 +22,7 @@
     defined(__MK20DX128__) || defined(__MK20DX256__) || \
     defined(__MKL26Z64__) || defined(__IMXRT1062__) || \
     /* Arduino Renesas UNO R4 */ \
-    defined(ARDUINO_ARCH_RENESAS_UNO) || \
+    defined(ARDUINO_ARCH_RENESAS) || \
     /* Arduino STM32H747 (GIGA) */ \
     defined(ARDUINO_GIGA) || defined(ARDUINO_GIGA_M7) || \
     /* Nordic nRF52 */ \

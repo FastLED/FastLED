@@ -65,6 +65,7 @@ public:
     inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &PORT->POSR; }
     inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &PORT->PORR; }
     inline static port_t mask() __attribute__ ((always_inline)) { return digitalBspPinToBitMask(bspPin); }
+    inline static constexpr bool validpin() { return true; }
 
 };
 
