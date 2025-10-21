@@ -20,8 +20,9 @@ name: Docker Push Comp Base
 # Result: Each Docker image contains cached toolchains for ALL boards in its family!
 
 on:
+  workflow_call:  # Triggered by other workflows
   schedule:
-    - cron: '0 3 * * *'  # Executes every day at 3:00 AM UTC (1 hour after base image)
+    - cron: '0 3 1 * *'  # Fallback: Executes monthly on 1st at 3:00 AM UTC (1 hour after base image)
   workflow_dispatch:  # Allow manual triggering
     inputs:
       delay_minutes:

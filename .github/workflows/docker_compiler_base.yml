@@ -1,8 +1,9 @@
 name: Docker Push Comp Base
 
 on:
+  workflow_call:  # Triggered by other workflows
   schedule:
-    - cron: '0 2 * * *'  # Executes every day at 2:00 AM UTC
+    - cron: '0 2 1 * *'  # Fallback: Executes monthly on 1st at 2:00 AM UTC
 
 env:
   REGISTRY_IMAGE: niteris/fastled-compiler-base
