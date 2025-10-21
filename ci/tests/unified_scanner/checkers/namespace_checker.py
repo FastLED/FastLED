@@ -78,9 +78,9 @@ class NamespaceIncludeChecker(BaseChecker):
 
             # Check for includes after namespace started
             if namespace_started and self.INCLUDE_PATTERN.match(line):
-                # Check if this line has the allow directive
+                # Check if this include has an allow directive
                 if self.ALLOW_DIRECTIVE_PATTERN.search(line):
-                    continue  # Skip this include, it has the allow directive
+                    continue  # Skip this violation
 
                 results.append(
                     CheckResult(
