@@ -1132,6 +1132,11 @@ class WS2813Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2811Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_400KHZ, RGB_ORDER> {};
 
+/// WS2811 controller class @ 800 KHz.
+/// @copydetails WS2812Controller800Khz
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2811Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_800KHZ_LEGACY, RGB_ORDER> {};
+
 /// SK6822 controller class.
 /// @copydetails WS2812Controller800Khz
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
