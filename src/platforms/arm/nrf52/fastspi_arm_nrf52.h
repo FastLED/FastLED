@@ -5,6 +5,7 @@
 #include "fl/fastpin_base.h"
 #include "fastspi_types.h"
 #include "fl/eorder.h"
+#include "fl/delay.h"
 #include <nrf_spim.h>
 
 namespace fl {
@@ -114,7 +115,7 @@ namespace fl {
         }
 
     public:
-        NRF52SPIOutput() {}
+        NRF52HardwareSPIOutput() {}
 
         // Low frequency GPIO is for signals with a frequency up to 10 kHz.  Lowest speed SPIM is 125kbps.
         static_assert(!FastPin<_DATA_PIN>::LowSpeedOnlyRecommended(),  "Invalid (low-speed only) pin specified");
@@ -296,9 +297,9 @@ namespace fl {
                 FastPin<_DATA_PIN>::lo();
             }
             // delay 1/2 cycle per SPI bit
-            delaycycles<_SPI_CLOCK_DIVIDER/2>();
+            fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
             FastPin<_CLOCK_PIN>::toggle();
-            delaycycles<_SPI_CLOCK_DIVIDER/2>();
+            fl::delaycycles<_SPI_CLOCK_DIVIDER/2>();
             FastPin<_CLOCK_PIN>::toggle();
             // re-enable the SPIM instance
             nrf_spim_enable(FASTLED_NRF52_SPIM);
@@ -336,13 +337,13 @@ namespace fl {
     // Static member definition and initialization using templates.
     // see https://stackoverflow.com/questions/3229883/static-member-initialization-in-a-class-template#answer-3229919
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    bool NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_InUse = false;
+    bool NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_InUse = false;
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    bool NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_NeedToWait = false;
+    bool NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_NeedToWait = false;
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    uint8_t NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_BufferIndex = 0;
+    uint8_t NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_BufferIndex = 0;
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    uint8_t NRF52SPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_Buffer[2][2] = {{0,0},{0,0}};
+    uint8_t NRF52HardwareSPIOutput<_DATA_PIN, _CLOCK_PIN, _SPI_CLOCK_DIVIDER>::s_Buffer[2][2] = {{0,0},{0,0}};
 
 #endif // #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
