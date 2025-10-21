@@ -71,8 +71,8 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # Image: niteris/fastled-compiler-rp:latest
     # Platform: raspberrypi (maxgerhardt fork)
     "rp2040": [
-        "rp2040",
-        "rp2350",
+        "rpipico",
+        "rpipico2",
     ],
     # NRF52 Platform - Nordic nRF52 boards
     # Image: niteris/fastled-compiler-nrf52-nrf52840_dk:latest

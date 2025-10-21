@@ -218,8 +218,8 @@ class Board:
         "maple_mini": "stm32",
         "hy_tinystm103tb": "stm32",
         "blackpill": "stm32",
-        "rp2040": "rp2040",
-        "rp2350": "rp2040",
+        "rpipico": "rp",
+        "rpipico2": "rp",
         "due": "arm",
         "digix": "arm",
         "zero": "arm",
@@ -862,7 +862,7 @@ NRF52840 = Board(
 )
 
 RPI_PICO = Board(
-    board_name="rp2040",
+    board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
@@ -872,7 +872,7 @@ RPI_PICO = Board(
 )
 
 RPI_PICO2 = Board(
-    board_name="rp2350",
+    board_name="rpipico2",
     real_board_name="rpipico",  # Use the existing Pico board definition until PlatformIO adds native Pico 2 support
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,  # Install platform package to get the boards

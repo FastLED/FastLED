@@ -71,15 +71,15 @@ jobs:
     with:
       args: "xiaoblesense_adafruit"
 
-  build_rp2040:
+  build_rpipico:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "rp2040"
+      args: "rpipico"
 
-  build_rp2350:
+  build_rpipico2:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "rp2350"
+      args: "rpipico2"
 
   build_uno_r4_wifi:
     uses: ./.github/workflows/build_template.yml
