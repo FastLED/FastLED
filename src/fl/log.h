@@ -31,7 +31,7 @@ namespace fl {
 /// Used with LogState::enable/disable/isEnabled to control logging at runtime.
 /// Each category corresponds to one bit in the LogState::sEnabledCategories bitfield.
 ///
-/// Memory: 4 bytes total for all 7 categories (stored in `sEnabledCategories`).
+/// Memory: 1 byte total for all 5 categories (stored in `sEnabledCategories`).
 ///
 /// Example:
 /// ```cpp
@@ -52,13 +52,11 @@ namespace fl {
 /// fl::LogState::disableAll();   // Turn off all categories
 /// ```
 enum class LogCategory : fl::u8 {
-    SPI = 0,      ///< Serial Peripheral Interface: bus initialization, register writes, transfers
+    SPI = 0,      ///< Serial Peripheral Interface: bus initialization, register writes, transfers; also timing/performance diagnostics
     RMT,          ///< ESP32 RMT peripheral: pulse generation, timing configuration
     VIDEO,        ///< Video/framebuffer: frame updates, memory allocation, scaling operations
     I2S,          ///< I2S audio/data streaming: buffer management, DMA status
     LCD,          ///< Parallel LCD/displays: command sequences, pixel transfers, timing
-    UART,         ///< Serial/UART operations: connection status, data flow, baud rate
-    TIMING,       ///< Timing/performance diagnostics: frame timing, ISR latency, bottlenecks
     END           ///< Marker for total count (must be last)
 };
 
@@ -166,14 +164,12 @@ private:
     /// Runtime state: one bit per category (0 = disabled by default)
     ///
     /// Bit layout:
-    ///   Bit 0: SPI    (1 << LogCategory::SPI)
-    ///   Bit 1: RMT    (1 << LogCategory::RMT)
-    ///   Bit 2: VIDEO  (1 << LogCategory::VIDEO)
-    ///   Bit 3: I2S    (1 << LogCategory::I2S)
-    ///   Bit 4: LCD    (1 << LogCategory::LCD)
-    ///   Bit 5: UART   (1 << LogCategory::UART)
-    ///   Bit 6: TIMING (1 << LogCategory::TIMING)
-    ///   Bit 7: unused
+    ///   Bit 0: SPI   (1 << LogCategory::SPI)
+    ///   Bit 1: RMT   (1 << LogCategory::RMT)
+    ///   Bit 2: VIDEO (1 << LogCategory::VIDEO)
+    ///   Bit 3: I2S   (1 << LogCategory::I2S)
+    ///   Bit 4: LCD   (1 << LogCategory::LCD)
+    ///   Bit 5-7: unused
     static fl::u8 sEnabledCategories;
 };
 
