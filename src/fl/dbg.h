@@ -75,9 +75,8 @@ inline const char *fastled_file_offset(const char *file) {
 #define FL_DBG_IF FASTLED_DBG_IF
 #endif
 
-// SPI-specific debug tracing with conditional compilation
-#ifdef FASTLED_DBG_SPI_ENABLED
-    #define FL_DBG_SPI FL_WARN
-#else
-    #define FL_DBG_SPI(X) FL_DBG_NO_OP(X)
-#endif
+// Include category-based logging system
+#include "fl/log.h"
+
+// Backward compatibility: FL_DBG_SPI now uses the new category logging system
+#define FL_DBG_SPI FL_LOG_SPI

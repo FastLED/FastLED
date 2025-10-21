@@ -115,7 +115,7 @@ Containers, views, algorithms, compile‑time utilities, memory/ownership, porta
 - Algorithms and helpers: `algorithm.h`, `transform.h`, `comparators.h`, `range_access.h`
 - Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`, `namespace.h`
 - Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `ptr.h`, `ptr_impl.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
-- Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `insert_result.h`, `singleton.h`
+- Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `insert_result.h`, `singleton.h`
 
 Per‑header quick descriptions:
 
@@ -166,7 +166,10 @@ Per‑header quick descriptions:
 - `virtual_if_not_avr.h`: Virtual specifier abstraction for AVR compatibility.
 - `has_define.h`: Preprocessor feature checks and conditional compilation helpers.
 - `register.h`: Register annotation shims for portability.
-- `warn.h`/`trace.h`/`dbg.h`: Logging, tracing, and diagnostics helpers.
+- `warn.h`: Always‑on warnings for issues detected at runtime (respects memory constraints).
+- `trace.h`: Platform tracing utilities for debugging and performance analysis.
+- `dbg.h`: General‑purpose debug output, controllable at compile-time via `FASTLED_FORCE_DBG`.
+- `log.h`: Category‑based runtime logging system for selective subsystem diagnostics (SPI, RMT, VIDEO, I2S, LCD, UART, TIMING) with zero overhead when disabled.
 - `assert.h`: Assertions suited for embedded/testing builds.
 - `unused.h`: Intentional unused variable/function annotations.
 - `export.h`/`dll.h`: Visibility/export macros for shared library boundaries.
@@ -549,6 +552,139 @@ void print_platform_info() {
 - `ISR_PRIORITY_CRITICAL` (4+): Experimental, may require assembly on some platforms
 
 See `src/fl/isr.h` for complete API documentation and platform-specific configuration flags.
+
+### Runtime Category-Based Logging
+
+- Runtime logging system: `log.h`, integrated via `dbg.h`
+
+**What it is:** A hybrid compile-time + runtime selective logging system that enables detailed diagnostics for specific subsystems (SPI, RMT, VIDEO, I2S, LCD, UART, TIMING) with **zero overhead when disabled**. Unlike `FL_DBG` (general-purpose), category logging provides structured, runtime-toggleable diagnostics without recompilation.
+
+**Key features:**
+- **Hybrid design**: Compile-time check (via preprocessor) + runtime toggle (via `LogState`)
+- **Zero overhead disabled**: Disabled categories compile to nothing (~0 bytes, ~0 cycles)
+- **Runtime toggle**: Enable/disable categories at runtime (when compiled in) without recompilation
+- **Stream formatting**: Same syntax as `FL_WARN`: `FL_LOG_SPI("msg: " << value)`
+- **Platform-aware**: Uses `FL_WARN` internally, respects platform constraints and memory limits
+- **Minimal state**: 4 bytes total for all 7 categories (single bitfield)
+
+**Categories:**
+- `FL_LOG_SPI` - Serial Peripheral Interface operations
+- `FL_LOG_RMT` - ESP32 RMT peripheral
+- `FL_LOG_VIDEO` - Video/framebuffer operations
+- `FL_LOG_I2S` - I2S audio/data streaming
+- `FL_LOG_LCD` - LCD/parallel display operations
+- `FL_LOG_UART` - Serial/UART operations
+- `FL_LOG_TIMING` - Performance timing diagnostics
+
+**Comparison with alternatives:**
+
+| Feature | `FL_DBG` | `FL_WARN` | `FL_LOG_*` |
+|---------|----------|-----------|-----------|
+| Purpose | General debug | Critical warnings | Category diagnostics |
+| Selective enable | No (all-or-nothing) | No | Yes (per-category) |
+| Runtime toggle | No | No | Yes (when compiled) |
+| Default state | Memory-dependent | Always enabled | Always disabled |
+| Memory | ~5KB | Variable | ~4 bytes |
+
+**Basic usage:**
+
+```cpp
+#include "FastLED.h"  // or #include "fl/log.h"
+
+void setup() {
+    Serial.begin(115200);
+    FastLED.addLeds<NEOPIXEL, 5>(leds, 60);
+
+    // Enable SPI diagnostics
+    fl::LogState::enable(fl::LogCategory::SPI);
+
+    // Enable multiple categories
+    fl::LogState::enable(fl::LogCategory::TIMING);
+    fl::LogState::enable(fl::LogCategory::VIDEO);
+}
+
+void loop() {
+    // FastLED operations will now log diagnostic messages
+    // Toggle at runtime:
+    if (Serial.available()) {
+        if (Serial.read() == 's') {
+            if (fl::LogState::isEnabled(fl::LogCategory::SPI)) {
+                fl::LogState::disable(fl::LogCategory::SPI);
+            } else {
+                fl::LogState::enable(fl::LogCategory::SPI);
+            }
+        }
+    }
+}
+```
+
+**How to include logging code:**
+
+Add to `platformio.ini` or Arduino IDE build flags:
+
+```ini
+# Enable SPI logging code
+build_flags = -DFASTLED_LOG_SPI_ENABLED
+
+# Enable multiple categories
+build_flags =
+    -DFASTLED_LOG_SPI_ENABLED
+    -DFASTLED_LOG_I2S_ENABLED
+    -DFASTLED_LOG_TIMING_ENABLED
+
+# Enable all categories (debug builds)
+build_flags = -DFASTLED_LOG_ALL_ENABLED
+
+# Backward compatibility (old naming still works)
+build_flags = -DFASTLED_DBG_SPI_ENABLED
+```
+
+**API Reference:**
+
+```cpp
+// Enable/disable a category
+fl::LogState::enable(fl::LogCategory::SPI);
+fl::LogState::disable(fl::LogCategory::SPI);
+
+// Check status
+if (fl::LogState::isEnabled(fl::LogCategory::SPI)) {
+    // Category is enabled
+}
+
+// Bulk control
+fl::LogState::enableAll();   // Enable all categories
+fl::LogState::disableAll();  // Disable all categories
+
+// Logging (same syntax as FL_WARN)
+FL_LOG_SPI("Initialized SPI at " << frequency << "Hz");
+FL_LOG_RMT("RMT buffer: " << buffer_size << " bytes");
+FL_LOG_TIMING("Frame took " << duration_us << " µs");
+```
+
+**Implementation details:**
+- Runtime state: Single `uint8_t` bitfield (0 = all disabled by default)
+- Zero-overhead disabled logs: Compile to `FL_DBG_NO_OP(...)` → eliminated by optimizer
+- Enabled logs: Runtime check via `LogState::isEnabled()` before output to `FL_WARN`
+- No dynamic allocation or complex state management
+- Safe for multi-threaded environments (atomic 8-bit operations)
+
+**Example: Adding logging to custom code**
+
+```cpp
+#include "fl/log.h"
+
+void myCustomDriver::initialize(uint32_t freq_hz) {
+    FL_LOG_I2S("I2S initialized");
+    FL_LOG_I2S("  Frequency: " << freq_hz << " Hz");
+    FL_LOG_I2S("  Buffer size: " << mBufferSize << " bytes");
+}
+
+void myCustomDriver::transmit(fl::span<const uint8_t> data) {
+    FL_LOG_I2S("Transmitting " << data.size() << " bytes");
+}
+```
+
+See `src/fl/LOG_SYSTEM.md` for complete documentation with advanced examples.
 
 ### Math, Random, and DSP
 

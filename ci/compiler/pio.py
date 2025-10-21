@@ -20,7 +20,7 @@ from concurrent.futures import Future, ThreadPoolExecutor
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Set, Tuple
+from typing import Any, Callable, Dict, List, Optional, Set, Tuple
 
 import fasteners
 from dirsync import sync  # type: ignore
@@ -408,6 +408,75 @@ def get_installed_packages_from_pio() -> Dict[str, str]:
     except Exception as e:
         print(f"Warning: Could not get installed packages: {e}")
         return {}
+
+
+def detect_package_exception_in_output(output: str) -> Tuple[bool, Optional[str]]:
+    """Detect PackageException errors in PlatformIO output.
+
+    Returns:
+        Tuple of (has_error, package_url_or_name)
+    """
+    if "PackageException" in output and "Could not install package" in output:
+        # Try to extract the package URL or name
+        match = re.search(
+            r"Could not install package\s*['\"]?([^'\"]+)['\"]?\s*for", output
+        )
+        if match:
+            return True, match.group(1)
+        return True, None
+    return False, None
+
+
+def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> bool:
+    """Aggressively clean PlatformIO packages cache to recover from download failures.
+
+    This removes all framework and toolchain packages to force re-download.
+    Returns True if any packages were cleaned.
+    """
+    from ci.util.lock_handler import force_remove_path
+
+    print("\n⚠️  Detected PackageException - Performing aggressive package cleanup...")
+    packages_dir = paths.packages_dir
+
+    if not packages_dir.exists():
+        print(f"Packages directory doesn't exist: {packages_dir}")
+        return False
+
+    cleaned = False
+
+    # List of package patterns that commonly cause issues
+    problematic_patterns = [
+        "framework-",  # All frameworks
+        "tool-",  # All tools
+        "esp32-arduino-libs",  # Specific ESP32 libs
+        "esptoolpy",  # ESP tool
+    ]
+
+    for package_dir in packages_dir.iterdir():
+        if not package_dir.is_dir():
+            continue
+
+        package_name = package_dir.name
+
+        # Check if matches problematic patterns
+        is_problematic = any(pattern in package_name.lower() for pattern in problematic_patterns)
+
+        if is_problematic:
+            print(f"  Removing problematic package: {package_name}")
+            try:
+                success = force_remove_path(package_dir, max_retries=5)
+                if success:
+                    print(f"    ✓ Removed {package_name}")
+                    cleaned = True
+                else:
+                    print(f"    ✗ Failed to remove {package_name}")
+            except Exception as e:
+                print(f"    ✗ Error removing {package_name}: {e}")
+
+    if cleaned:
+        print("  ✓ Package cleanup complete - PlatformIO will re-download on next build")
+
+    return cleaned
 
 
 def detect_and_fix_corrupted_packages_dynamic(
@@ -1546,67 +1615,109 @@ class PioCompiler(Compiler):
 
         # Cache configuration is handled through build flags during initialization
 
-        # Run PlatformIO build
-        run_cmd: List[str] = [
-            "pio",
-            "run",
-            "--project-dir",
-            str(self.build_dir),
-            "--disable-auto-clean",
-        ]
-        if self.verbose:
-            run_cmd.append("--verbose")
+        # Attempt build with retry on PackageException
+        max_attempts = 2
+        for attempt in range(max_attempts):
+            if attempt > 0:
+                print(f"\n{'='*60}")
+                print(f"RETRY ATTEMPT {attempt}/{max_attempts - 1}")
+                print(f"{'='*60}\n")
 
-        print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
+            # Run PlatformIO build
+            run_cmd: List[str] = [
+                "pio",
+                "run",
+                "--project-dir",
+                str(self.build_dir),
+                "--disable-auto-clean",
+            ]
+            if self.verbose:
+                run_cmd.append("--verbose")
 
-        # Create formatter for path substitution and timestamping
-        formatter = create_sketch_path_formatter(example)
+            print(f"Running command: {subprocess.list2cmdline(run_cmd)}")
 
-        running_process = RunningProcess(
-            run_cmd, cwd=self.build_dir, auto_run=True, output_formatter=formatter
-        )
-        try:
-            # Output is transformed by the formatter, but we need to print it
-            while line := running_process.get_next_line(
-                timeout=900
-            ):  # 15 minutes for platform builds
-                if isinstance(line, EndOfStream):
-                    break
-                # Print the transformed line
-                print(line)
-        except KeyboardInterrupt:
-            print("KeyboardInterrupt: Cancelling build")
-            running_process.terminate()
-            notify_main_thread()
-        except OSError as e:
-            # Handle output encoding issues on Windows
-            print(f"Output encoding issue: {e}")
-            pass
+            # Create formatter for path substitution and timestamping
+            formatter = create_sketch_path_formatter(example)
 
-        running_process.wait()
+            running_process = RunningProcess(
+                run_cmd, cwd=self.build_dir, auto_run=True, output_formatter=formatter
+            )
+            try:
+                # Output is transformed by the formatter, but we need to print it
+                while line := running_process.get_next_line(
+                    timeout=900
+                ):  # 15 minutes for platform builds
+                    if isinstance(line, EndOfStream):
+                        break
+                    # Print the transformed line
+                    print(line)
+            except KeyboardInterrupt:
+                print("KeyboardInterrupt: Cancelling build")
+                running_process.terminate()
+                notify_main_thread()
+                raise
+            except OSError as e:
+                # Handle output encoding issues on Windows
+                print(f"Output encoding issue: {e}")
+                pass
 
-        success = running_process.returncode == 0
+            running_process.wait()
 
-        # Print SUCCESS/FAILED message immediately in worker thread to avoid race conditions
-        if success:
-            green_color = "\033[32m"
-            reset_color = "\033[0m"
-            print(f"{green_color}SUCCESS: {example}{reset_color}")
-        else:
-            red_color = "\033[31m"
-            reset_color = "\033[0m"
-            print(f"{red_color}FAILED: {example}{reset_color}")
+            success = running_process.returncode == 0
+            output = running_process.stdout
 
-        # Check if build was successful
-        build_success = running_process.returncode == 0
+            # Check for PackageException in output
+            has_package_exception, package_info = detect_package_exception_in_output(
+                output
+            )
 
-        # Generate build_info.json after successful build
-        if build_success:
-            _generate_build_info_json_from_existing_build(self.build_dir, self.board)
+            # Print SUCCESS/FAILED message immediately in worker thread to avoid race conditions
+            if success:
+                green_color = "\033[32m"
+                reset_color = "\033[0m"
+                print(f"{green_color}SUCCESS: {example}{reset_color}")
+            else:
+                red_color = "\033[31m"
+                reset_color = "\033[0m"
+                print(f"{red_color}FAILED: {example}{reset_color}")
 
+            # If build failed with PackageException and we have retries left, attempt recovery
+            if (
+                not success
+                and has_package_exception
+                and attempt < max_attempts - 1
+            ):
+                print(f"\nPackageException detected in build output")
+                if package_info:
+                    print(f"Package info: {package_info}")
+
+                # Attempt aggressive cleanup and retry
+                paths = FastLEDPaths(self.board.board_name)
+                if aggressive_clean_pio_packages(paths, self.board.board_name):
+                    print("Retrying build after package cleanup...")
+                    continue  # Retry the build
+                else:
+                    print("Package cleanup did not remove any packages")
+                    # Still try again - maybe something else will help
+                    print("Retrying build anyway...")
+                    continue
+
+            # Build succeeded or no PackageException, return result
+            # Generate build_info.json after successful build
+            if success:
+                _generate_build_info_json_from_existing_build(self.build_dir, self.board)
+
+            return SketchResult(
+                success=success,
+                output=output,
+                build_dir=self.build_dir,
+                example=example,
+            )
+
+        # Should not reach here, but just in case
         return SketchResult(
-            success=success,
-            output=running_process.stdout,
+            success=False,
+            output="Build failed after all retry attempts",
             build_dir=self.build_dir,
             example=example,
         )
