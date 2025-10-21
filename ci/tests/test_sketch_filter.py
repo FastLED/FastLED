@@ -9,6 +9,7 @@ Tests the enhanced @filter syntax supporting:
 
 import tempfile
 from pathlib import Path
+from typing import Optional, Tuple
 
 import pytest
 
@@ -212,7 +213,7 @@ class TestParseOnelineFilterQuotes:
 class TestParseFilterFromSketchOneliners:
     """Test parsing @filter directives from sketch files."""
 
-    def _write_and_parse(self, sketch_content):
+    def _write_and_parse(self, sketch_content: str) -> Optional[SketchFilter]:
         """Helper to write sketch content and parse it."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".ino", delete=False) as f:
             f.write(sketch_content)
@@ -275,7 +276,7 @@ class TestParseFilterFromSketchOneliners:
 class TestParseFilterFromSketchYAML:
     """Test parsing YAML-style multi-line @filter blocks."""
 
-    def _write_and_parse(self, sketch_content):
+    def _write_and_parse(self, sketch_content: str) -> Optional[SketchFilter]:
         """Helper to write sketch content and parse it."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".ino", delete=False) as f:
             f.write(sketch_content)
@@ -351,7 +352,7 @@ class TestShouldSkipSketch:
     """Test sketch skip logic based on board and filter."""
 
     @pytest.fixture
-    def esp32_board(self):
+    def esp32_board(self) -> Board:
         """Create a mock ESP32 board."""
         from unittest.mock import MagicMock
 
@@ -362,7 +363,7 @@ class TestShouldSkipSketch:
         return board
 
     @pytest.fixture
-    def avr_board(self):
+    def avr_board(self) -> Board:
         """Create a mock AVR board (Arduino Uno)."""
         from unittest.mock import MagicMock
 
@@ -372,33 +373,33 @@ class TestShouldSkipSketch:
         board.get_mcu_target = MagicMock(return_value="ATmega328P")
         return board
 
-    def test_no_filter_should_not_skip(self, esp32_board):
+    def test_no_filter_should_not_skip(self, esp32_board: Board) -> None:
         """Sketch without filter should not be skipped."""
         should_skip, reason = should_skip_sketch(esp32_board, None)
         assert not should_skip
         assert reason == ""
 
-    def test_empty_filter_should_not_skip(self, esp32_board):
+    def test_empty_filter_should_not_skip(self, esp32_board: Board) -> None:
         """Empty filter should not skip."""
         filter_obj = SketchFilter()
         should_skip, reason = should_skip_sketch(esp32_board, filter_obj)
         assert not should_skip
         assert reason == ""
 
-    def test_require_high_memory_on_esp32(self, esp32_board):
+    def test_require_high_memory_on_esp32(self, esp32_board: Board) -> None:
         """ESP32 (high memory) should not be skipped for high memory requirement."""
         filter_obj = SketchFilter(require={"memory": ["high"]})
         should_skip, reason = should_skip_sketch(esp32_board, filter_obj)
         assert not should_skip
 
-    def test_require_high_memory_on_avr(self, avr_board):
+    def test_require_high_memory_on_avr(self, avr_board: Board) -> None:
         """AVR (low memory) should be skipped for high memory requirement."""
         filter_obj = SketchFilter(require={"memory": ["high"]})
         should_skip, reason = should_skip_sketch(avr_board, filter_obj)
         assert should_skip
         assert "high memory" in reason or "memory" in reason
 
-    def test_require_platform_esp32(self, esp32_board, avr_board):
+    def test_require_platform_esp32(self, esp32_board: Board, avr_board: Board) -> None:
         """ESP32 should compile, AVR should skip."""
         filter_obj = SketchFilter(require={"platform": ["esp32"]})
 
@@ -408,7 +409,7 @@ class TestShouldSkipSketch:
         assert not should_skip_esp32
         assert should_skip_avr
 
-    def test_exclude_platform_avr(self, esp32_board, avr_board):
+    def test_exclude_platform_avr(self, esp32_board: Board, avr_board: Board) -> None:
         """AVR should be excluded, ESP32 should compile."""
         filter_obj = SketchFilter(exclude={"platform": ["avr"]})
 
@@ -418,7 +419,7 @@ class TestShouldSkipSketch:
         assert not should_skip_esp32
         assert should_skip_avr
 
-    def test_glob_pattern_platform(self, esp32_board, avr_board):
+    def test_glob_pattern_platform(self, esp32_board: Board, avr_board: Board) -> None:
         """Glob pattern should match ESP32 variants."""
         filter_obj = SketchFilter(require={"platform": ["esp32*"]})
 

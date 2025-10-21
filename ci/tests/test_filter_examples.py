@@ -5,6 +5,7 @@ This script validates all the new @filter syntax styles with actual sketch files
 
 import tempfile
 from pathlib import Path
+from typing import Any, Dict, List
 
 import pytest
 
@@ -14,7 +15,7 @@ from ci.compiler.sketch_filter import parse_filter_from_sketch
 def test_example_sketches():
     """Test various @filter syntax styles with example sketches."""
 
-    examples = [
+    examples: List[Dict[str, Any]] = [
         # Style 1: Original - with colon and 'is' operator
         {
             "name": "Original with colon (backward compat)",
@@ -119,11 +120,12 @@ void loop() {}
         },
     ]
 
-    failed_examples = []
+    failed_examples: List[str] = []
 
     for example in examples:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".ino", delete=False) as f:
-            f.write(example["content"])
+            content: str = example["content"]
+            f.write(content)
             f.flush()
             temp_path = f.name
 
@@ -131,14 +133,15 @@ void loop() {}
             result = parse_filter_from_sketch(Path(temp_path))
 
             if result is None:
-                require = {}
-                exclude = {}
+                require: Dict[str, List[str]] = {}
+                exclude: Dict[str, List[str]] = {}
             else:
                 require = result.require
                 exclude = result.exclude
 
-            expected_require = example["expected"]["require"]
-            expected_exclude = example["expected"]["exclude"]
+            expected: Dict[str, Any] = example["expected"]
+            expected_require: Dict[str, List[str]] = expected["require"]
+            expected_exclude: Dict[str, List[str]] = expected["exclude"]
 
             if require != expected_require or exclude != expected_exclude:
                 failed_examples.append(
