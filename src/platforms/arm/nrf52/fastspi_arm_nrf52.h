@@ -1,6 +1,10 @@
 #ifndef __FASTSPI_ARM_NRF52_H
 #define __FASTSPI_ARM_NRF52_H
 
+#include "fl/force_inline.h"
+#include "fl/fastpin_base.h"
+namespace fl {
+
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
@@ -22,7 +26,7 @@
 
     /// SPI_CLOCK_DIVIDER is number of CPU clock cycles per SPI transmission bit?
     template <uint8_t _DATA_PIN, uint8_t _CLOCK_PIN, uint32_t _SPI_CLOCK_DIVIDER>
-    class NRF52SPIOutput {
+    class NRF52HardwareSPIOutput {
     private:
         // static variables -- always using same SPIM instance
         static bool s_InUse;
@@ -342,4 +346,6 @@
 
 
 
-#endif // #ifndef __FASTPIN_ARM_NRF52_H
+
+}  // namespace fl
+#endif // __FASTSPI_ARM_NRF52_H
