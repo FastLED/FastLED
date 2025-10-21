@@ -18,6 +18,8 @@
 #include "fl/int.h"
 #include "pixel_controller.h"
 namespace fl {
+// Forward declaration of FastPin template
+template<fl::u8 PIN> class FastPin;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /// Generic software SPI (bit-banging) implementation that works on all platforms

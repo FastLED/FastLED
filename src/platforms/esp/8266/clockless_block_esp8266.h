@@ -4,6 +4,7 @@
 #include "fl/stdint.h"
 #include "fl/register.h"
 #include "fl/math_macros.h"
+#include "fl/fastpin.h"
 #include "eorder.h"
 #include "transpose8x1_noinline.h"
 #include "fl/chipsets/timing_traits.h"
