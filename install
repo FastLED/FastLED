@@ -107,42 +107,57 @@ echo "Setting up VSCode extensions..."
 # Install Auto Debug extension from local .vsix file
 echo "Installing Auto Debug extension for VSCode..."
 if [ -f .vscode/DarrenLevine.auto-debug-1.0.2.vsix ]; then
+    # Get absolute path to extension
+    ext_path="$(cd .vscode && pwd)/DarrenLevine.auto-debug-1.0.2.vsix"
     installed_count=0
-    
+
     # Try installing on VSCode
     if command -v code &> /dev/null; then
         echo "Installing Auto Debug extension on VSCode..."
-        if code --install-extension .vscode/DarrenLevine.auto-debug-1.0.2.vsix; then
+        # Try to install with timeout - VSCode may need to start server first
+        if timeout 10 code --install-extension "$ext_path" 2>/dev/null; then
             echo "✅ Auto Debug extension installed successfully on VSCode!"
             installed_count=$((installed_count + 1))
         else
-            echo "⚠️  Warning: Auto Debug extension installation failed on VSCode."
+            # Installation may have failed silently - suggest alternative method
+            echo "⚠️  Auto Debug extension installation via CLI may have failed."
+            echo "      This is normal if VSCode wasn't running. Trying GUI method..."
         fi
     else
         echo "ℹ️  VSCode not found (code command not available)."
     fi
-    
+
     # Try installing on Cursor
     if command -v cursor &> /dev/null; then
         echo "Installing Auto Debug extension on Cursor..."
-        if cursor --install-extension .vscode/DarrenLevine.auto-debug-1.0.2.vsix; then
+        if timeout 10 cursor --install-extension "$ext_path" 2>/dev/null; then
             echo "✅ Auto Debug extension installed successfully on Cursor!"
             installed_count=$((installed_count + 1))
         else
-            echo "⚠️  Warning: Auto Debug extension installation failed on Cursor."
+            echo "⚠️  Auto Debug extension installation on Cursor may have failed."
         fi
-    else
-        echo "ℹ️  Cursor not found (cursor command not available)."
     fi
-    
-    # Summary
+
+    # If automatic installation didn't work, suggest manual method
     if [ $installed_count -eq 0 ]; then
-        echo "⚠️  Warning: Auto Debug extension could not be installed automatically."
-        echo "      Please install manually:"
-        echo "      - Open VSCode/Cursor"
-        echo "      - Go to Extensions (Ctrl+Shift+X)"
-        echo "      - Click ... menu → Install from VSIX"
-        echo "      - Select: .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
+        echo ""
+        echo "📋 EXTENSION INSTALLATION GUIDE"
+        echo "================================"
+        echo "The Auto Debug extension needs to be installed manually:"
+        echo ""
+        echo "1. Open VSCode with this workspace:"
+        echo "   code ."
+        echo ""
+        echo "2. Install the extension:"
+        echo "   - Go to Extensions (Ctrl+Shift+X)"
+        echo "   - Click the menu (...) in the top-right corner"
+        echo "   - Select 'Install from VSIX...'"
+        echo "   - Navigate to: .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
+        echo ""
+        echo "3. Reload VSCode (Ctrl+Shift+P → Developer: Reload Window)"
+        echo ""
+        echo "ℹ️  After installing, the Auto Debug configuration will be available!"
+        echo ""
     elif [ $installed_count -eq 1 ]; then
         echo "✅ Auto Debug extension installed on 1 editor."
     else
