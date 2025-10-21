@@ -1,4 +1,4 @@
-name: Build and Push Docker Compiler Base Image
+name: Docker Push Comp Base
 
 on:
   schedule:
@@ -127,6 +127,6 @@ jobs:
 
       - name: Trigger platform images build
         run: |
-          gh workflow run build_docker_compiler_platforms.yml -f delay_minutes=10
+          gh workflow run docker_compiler_base_platforms.yml -f delay_minutes=10
         env:
           GH_TOKEN: ${{ github.token }}

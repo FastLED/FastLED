@@ -1,4 +1,4 @@
-name: Build and Push Docker Compiler Platform Images
+name: Docker Push Comp Base
 
 # This workflow builds ALL platform Docker images in parallel.
 # Each platform image pre-caches toolchains for MULTIPLE boards in that family.

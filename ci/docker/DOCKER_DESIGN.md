@@ -176,12 +176,12 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
 
 **Three workflow files:**
 
-1. **`.github/workflows/build_docker_compiler_base.yml`**
+1. **`.github/workflows/docker_compiler_base.yml`**
    - Builds base image
    - Runs daily at 2:00 AM UTC
    - Triggers platform builds after completion
 
-2. **`.github/workflows/build_docker_compiler_platforms.yml`**
+2. **`.github/workflows/docker_compiler_base_platforms.yml`**
    - Single unified workflow building ALL platform images in parallel
    - Contains jobs for: avr, esp, teensy, stm32, rp2040, nrf52, sam
    - Triggered by base workflow (with 10 min delay)
@@ -268,7 +268,7 @@ The board will automatically be included in the next Docker build, and its toolc
 
 To add a new platform image:
 
-1. **Edit `.github/workflows/build_docker_compiler_platforms.yml`**:
+1. **Edit `.github/workflows/docker_compiler_base_platforms.yml`**:
    - Add new platform to credentials job outputs
    - Add new `build-<platform>-amd64` job
    - Add new `build-<platform>-arm` job
