@@ -305,8 +305,8 @@ public:
 
     /// @brief Initialize the GPIO pin
     virtual void init() {
-        FastPin<DATA_PIN>::setOutput();
-        FastPin<DATA_PIN>::lo();
+        fl::FastPin<DATA_PIN>::setOutput();
+        fl::FastPin<DATA_PIN>::lo();
     }
 
     /// @brief Get maximum refresh rate
@@ -365,14 +365,14 @@ protected:
             bool is_one = (byte & (1 << bit)) != 0;
 
             if (is_one) {
-                FastPin<DATA_PIN>::hi();
+                fl::FastPin<DATA_PIN>::hi();
                 delayNanoseconds<T1>();
-                FastPin<DATA_PIN>::lo();
+                fl::FastPin<DATA_PIN>::lo();
                 delayNanoseconds<T2>();
             } else {
-                FastPin<DATA_PIN>::hi();
+                fl::FastPin<DATA_PIN>::hi();
                 delayNanoseconds<T1 + T2 - T3>();
-                FastPin<DATA_PIN>::lo();
+                fl::FastPin<DATA_PIN>::lo();
                 delayNanoseconds<T3>();
             }
         }

@@ -64,6 +64,7 @@
 #include "crgb.h"
 #include "pixel_controller.h"
 #include "parallel_transpose.h"
+#include "fastled_delay.h"
 
 // Hardware headers for RP2040/RP2350
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)

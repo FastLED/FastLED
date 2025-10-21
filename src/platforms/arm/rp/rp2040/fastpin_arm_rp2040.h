@@ -5,6 +5,9 @@
 #include "hardware/gpio.h"
 #include "hardware/structs/sio.h"
 namespace fl {
+// Forward declare FastPin template to support specializations below
+template<uint8_t PIN> class FastPin;
+
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)
 #warning "Software pin support forced, pin access will be sloightly slower."
 #define NO_HARDWARE_PIN_SUPPORT
@@ -17,7 +20,9 @@ template<uint PIN, uint32_t _MASK> class _RP2040PIN {
 public:
   typedef volatile uint32_t * port_ptr_t;
   typedef uint32_t port_t;
-  
+
+  inline static constexpr bool validpin() { return true; }
+
   inline static void setOutput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_set = _MASK; }
   inline static void setInput() { gpio_set_function(PIN, GPIO_FUNC_SIO); sio_hw->gpio_oe_clr = _MASK; }
 

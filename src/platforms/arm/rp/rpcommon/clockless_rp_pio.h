@@ -3,6 +3,7 @@
 
 #include "fl/chipsets/timing_traits.h"
 #include "hardware/structs/sio.h"
+#include "fastled_delay.h"
 
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
 #include "../../common/m0clockless.h"
