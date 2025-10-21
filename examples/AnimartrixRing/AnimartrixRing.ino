@@ -109,7 +109,7 @@ void setup() {
     Serial.begin(115200);
 
     // Setup LED strip
-    auto screenMapLocal = screenmap.clone();
+    fl::ScreenMap screenMapLocal(screenmap);
     screenMapLocal.setDiameter(0.5);
     FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
@@ -132,7 +132,7 @@ void setup() {
 
 void loop() {
     // Update animation
-    animartrix->setTimeScale(timeSpeed);
+    fxEngine.setSpeed(timeSpeed);
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
