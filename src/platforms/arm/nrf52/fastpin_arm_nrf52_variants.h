@@ -4,6 +4,61 @@
 // use this to determine if found variant or not (avoid multiple boards at once)
 #undef __FASTPIN_ARM_NRF52_VARIANT_FOUND
 
+
+//
+// BOARD_PIN can be either the pin portion of a port.pin, or the combined NRF_GPIO_PIN_MAP() number.
+// For example both the following two defines refer to P1.15 (pin 47) as Arduino pin 3:
+//     _FL_DEFPIN(3, 15, 1);
+//     _FL_DEFPIN(3, 47, 1);
+//
+// Similarly, the following defines are all equivalent:
+//     _DEFPIN_ARM_IDENTITY_P1(47);
+//     _FL_DEFPIN(47, 15, 1);
+//     _FL_DEFPIN(47, 47, 1);
+//
+
+#define _FL_DEF_INVALID_PIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)                 \
+    template<> class fl::FastPin<ARDUINO_PIN> :              \
+    public fl::_INVALID_ARMPIN<                               \
+        0,                                                \
+        __generated_struct_NRF_P0,                        \
+        0,                                                \
+        0                                                 \
+        >                                                \
+    {}
+
+#define _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)   \
+    template<> class fl::FastPin<ARDUINO_PIN> :              \
+    public fl::_ARMPIN<                                      \
+        1u << (BOARD_PIN & 31u),                         \
+        __generated_struct_NRF_P ## BOARD_PORT,          \
+        (BOARD_PIN / 32),                                \
+        BOARD_PIN & 31u                                  \
+        >                                                \
+    {}
+
+#define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN)      \
+    template<> class fl::FastPin<ARDUINO_PIN> :       \
+    public fl::_ARMPIN<                               \
+        1u << (ARDUINO_PIN & 31u),                \
+        __generated_struct_NRF_P0,                \
+        0,                                        \
+        (ARDUINO_PIN & 31u) + 0                   \
+        >                                         \
+    {}
+
+#define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN)      \
+    template<> class fl::FastPin<ARDUINO_PIN> :       \
+    public fl::_ARMPIN<                               \
+        1u << (ARDUINO_PIN & 31u),                \
+        __generated_struct_NRF_P1,                \
+        1,                                        \
+        (ARDUINO_PIN & 31u) + 32                  \
+        >                                         \
+    {}
+
+
+
 // Adafruit Bluefruit nRF52832 Feather
 // From https://www.adafruit.com/package_adafruit_index.json
 #if defined (ARDUINO_NRF52832_FEATHER)

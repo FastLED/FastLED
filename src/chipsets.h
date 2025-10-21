@@ -26,6 +26,9 @@
 // Include UCS7604 controller
 #include "fl/chipsets/ucs7604.h"  // optional.
 
+// Include platform-independent SPI utilities
+#include "platforms/shared/spi_pixel_writer.h"
+
 // Include platform-specific SPIOutput template implementations
 // Each platform file defines the SPIOutput template for its platform
 // This must happen before any SPI chipset controllers (e.g., APA102, P9813)
@@ -393,7 +396,7 @@ protected:
 
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
-		mSPI.template writePixels<0, LPD8806_ADJUST, RGB_ORDER>(pixels, &mSPI);
+		writePixelsToSPI<0, LPD8806_ADJUST, RGB_ORDER>(pixels, mSPI, &mSPI);
 	}
 
 public:
@@ -464,7 +467,7 @@ protected:
 	/// @copydoc CPixelLEDController::showPixels()
 	virtual void showPixels(PixelController<RGB_ORDER> & pixels) {
 		mWaitDelay.wait();
-		mSPI.template writePixels<0, DATA_NOP, RGB_ORDER>(pixels, nullptr);
+		writePixelsToSPI<0, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
 		mWaitDelay.mark();
 	}
 
@@ -1012,7 +1015,7 @@ protected:
 		// Make sure the FLAG_START_BIT flag is set to ensure that an extra 1 bit is sent at the start
 		// of each triplet of bytes for rgb data
 		// writeHeader();
-		mSPI.template writePixels<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, nullptr);
+		writePixelsToSPI<FLAG_START_BIT, DATA_NOP, RGB_ORDER>(pixels, mSPI, nullptr);
 		writeHeader();
 	}
 
