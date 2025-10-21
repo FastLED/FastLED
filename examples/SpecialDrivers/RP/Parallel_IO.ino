@@ -29,8 +29,8 @@
 #include <fl/compiler_control.h>
 #include <platforms/arm/rp/rp2040/clockless_arm_rp2040.h>
 
-#if !defined(FASTLED_RP2040)
-#error "This sketch requires RP2040 platform (Raspberry Pi Pico or RP2350). Use bash compile rp2040 SpecialDrivers/RP instead."
+#if !defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_RP2350)
+#error "This sketch requires RP2040 or RP2350 platform (Raspberry Pi Pico or RP2350). Use bash compile rpipico SpecialDrivers/RP instead."
 #endif
 
 // ============================================================================
@@ -92,7 +92,8 @@ void setup() {
     }
 
     // Initialize the controller
-    if (!controller.init()) {
+    controller.init();
+    if (!controller.isInitialized()) {
         Serial.println("ERROR: Controller initialization failed!");
         Serial.println("Possible causes:");
         Serial.println("  - No free PIO state machine available");
@@ -130,7 +131,7 @@ void loop() {
     }
 
     // Display the data
-    controller.showPixels(0xFF);  // 255 = max brightness
+    controller.showLeds(0xFF);  // 255 = max brightness
 
     // Frame rate control (~50 FPS)
     delay(20);

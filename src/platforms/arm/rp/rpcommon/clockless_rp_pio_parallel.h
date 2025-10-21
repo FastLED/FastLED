@@ -123,6 +123,12 @@ public:
         fl::memset(strips_, 0, sizeof(strips_));
     }
 
+    /// @brief Check if the controller was successfully initialized
+    /// @return true if initialization successful
+    bool isInitialized() const {
+        return (pio_ != nullptr && dma_chan_ != -1 && transpose_buffer_ != nullptr);
+    }
+
     ~ParallelClocklessController() {
         cleanup();
     }
@@ -146,17 +152,16 @@ public:
     }
 
     /// @brief Initialize PIO, DMA, and buffers
-    /// @return true if initialization successful
-    virtual bool init() {
+    virtual void init() override {
         if (max_leds_ == 0) {
-            return false;
+            return;
         }
 
         // Allocate transposition buffer
         buffer_size_ = max_leds_ * 24;
         transpose_buffer_ = reinterpret_cast<u8*>(malloc(buffer_size_));
         if (transpose_buffer_ == nullptr) {
-            return false;
+            return;
         }
 
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
@@ -176,23 +181,21 @@ public:
         sm_ = pio_claim_unused_sm(pio_, false);
         if (sm_ == -1) {
             free(transpose_buffer_);
-            return false;
+            return;
         }
 
         dma_chan_ = dma_claim_unused_channel(false);
         if (dma_chan_ == -1) {
             pio_sm_unclaim(pio_, sm_);
             free(transpose_buffer_);
-            return false;
+            return;
         }
 #endif
-
-        return true;
     }
 
     /// @brief Output LED data to all strips
     /// @param pixels FastLED PixelController
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) {
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) override {
         if (pio_ == nullptr || transpose_buffer_ == nullptr) {
             return;
         }
