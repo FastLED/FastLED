@@ -802,12 +802,18 @@ ESP32_P4 = Board(
 ADA_FEATHER_NRF52840_SENSE = Board(
     board_name="adafruit_feather_nrf52840_sense",
     platform="nordicnrf52",
+    defines=[
+        "FASTLED_ALL_PINS_HARDWARE_SPI",
+    ],
 )
 
 XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     board_name="xiaoblesense_adafruit",
     platform="https://github.com/maxgerhardt/platform-nordicnrf52",
     platform_needs_install=True,  # Install platform package to get the boards
+    defines=[
+        "FASTLED_ALL_PINS_HARDWARE_SPI",
+    ],
 )
 
 # Alias: handle common misspelling without the trailing 't'
@@ -816,6 +822,9 @@ XIAOBLESENSE_ADAFRUI_ALIAS = Board(
     real_board_name="xiaoblesense_adafruit",  # map to the correct board name
     platform="https://github.com/maxgerhardt/platform-nordicnrf52",
     platform_needs_install=True,
+    defines=[
+        "FASTLED_ALL_PINS_HARDWARE_SPI",
+    ],
 )
 
 XIAOBLESENSE_NRF52 = Board(
@@ -823,6 +832,9 @@ XIAOBLESENSE_NRF52 = Board(
     real_board_name="xiaoble_adafruit",
     platform="https://github.com/maxgerhardt/platform-nordicnrf52",
     platform_needs_install=True,
+    defines=[
+        "FASTLED_ALL_PINS_HARDWARE_SPI",
+    ],
 )
 
 # Correct nRF52840 DK board definition
@@ -841,6 +853,7 @@ NRF52840 = Board(
     platform_packages="framework-arduinoadafruitnrf52@^1.10601.0",
     defines=[
         "FASTLED_USE_COMPILE_TESTS=0",
+        "FASTLED_ALL_PINS_HARDWARE_SPI",
     ],
     board_build_core="nRF5",  # Ensure correct core directory
 )

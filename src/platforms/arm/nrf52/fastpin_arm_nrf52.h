@@ -5,9 +5,6 @@
 // Include fastpin_base.h to get FastPin base template
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
-#include "fastpin_arm_nrf52_variants.h"
-
-namespace fl {
 
 /*
 //
@@ -79,6 +76,7 @@ namespace fl {
 */
 
 // manually define two structures, to avoid fighting with preprocessor macros
+// These are defined at global scope so they can be used by macros outside the namespace
 struct __generated_struct_NRF_P0 {
     FASTLED_NRF52_INLINE_ATTRIBUTE constexpr static uintptr_t r() {
         return NRF_P0_BASE;
@@ -92,6 +90,8 @@ struct __generated_struct_NRF_P1 {
     }
 };
 #endif
+
+namespace fl {
 
 
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
@@ -157,8 +157,10 @@ public:
         Serial.println("Pausing execution for 2 seconds.");
         delay(2000);  // Give time for the message to be printed.
     }
-    
+
 };
+
+}  // namespace fl
 
 //
 // BOARD_PIN can be either the pin portion of a port.pin, or the combined NRF_GPIO_PIN_MAP() number.
@@ -173,8 +175,8 @@ public:
 //
 
 #define _FL_DEF_INVALID_PIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)                 \
-    template<> class FastPin<ARDUINO_PIN> :              \
-    public _INVALID_ARMPIN<                               \
+    template<> class fl::FastPin<ARDUINO_PIN> :              \
+    public fl::_INVALID_ARMPIN<                               \
         0,                                                \
         __generated_struct_NRF_P0,                        \
         0,                                                \
@@ -183,8 +185,8 @@ public:
     {}
 
 #define _FL_DEFPIN(ARDUINO_PIN, BOARD_PIN, BOARD_PORT)   \
-    template<> class FastPin<ARDUINO_PIN> :              \
-    public _ARMPIN<                                      \
+    template<> class fl::FastPin<ARDUINO_PIN> :              \
+    public fl::_ARMPIN<                                      \
         1u << (BOARD_PIN & 31u),                         \
         __generated_struct_NRF_P ## BOARD_PORT,          \
         (BOARD_PIN / 32),                                \
@@ -193,8 +195,8 @@ public:
     {}
 
 #define _DEFPIN_ARM_IDENTITY_P0(ARDUINO_PIN)      \
-    template<> class FastPin<ARDUINO_PIN> :       \
-    public _ARMPIN<                               \
+    template<> class fl::FastPin<ARDUINO_PIN> :       \
+    public fl::_ARMPIN<                               \
         1u << (ARDUINO_PIN & 31u),                \
         __generated_struct_NRF_P0,                \
         0,                                        \
@@ -203,8 +205,8 @@ public:
     {}
 
 #define _DEFPIN_ARM_IDENTITY_P1(ARDUINO_PIN)      \
-    template<> class FastPin<ARDUINO_PIN> :       \
-    public _ARMPIN<                               \
+    template<> class fl::FastPin<ARDUINO_PIN> :       \
+    public fl::_ARMPIN<                               \
         1u << (ARDUINO_PIN & 31u),                \
         __generated_struct_NRF_P1,                \
         1,                                        \
@@ -215,6 +217,9 @@ public:
 
 
 #define HAS_HARDWARE_PIN_SUPPORT
+
+// Include board-specific pin variants after macro definitions
+#include "fastpin_arm_nrf52_variants.h"
 
 }  // namespace fl
 
