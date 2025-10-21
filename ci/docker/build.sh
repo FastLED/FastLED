@@ -151,6 +151,7 @@ case "$COMMAND" in
         # 3. Validate that everything works
         # NOTE: Boards are compiled sequentially (one at a time) to ensure each completes before the next starts
         IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"
+        failed_boards=()
         for board in "${BOARDS_ARRAY[@]}"; do
             board=$(echo "$board" | xargs)  # Trim whitespace
             echo ""
@@ -159,11 +160,30 @@ case "$COMMAND" in
             generate_platformio_ini "$board"
             NO_PARALLEL=1 bash compile "$board" Blink
             if [ $? -ne 0 ]; then
-                echo "Warning: Failed to compile $board, continuing..."
+                failed_boards+=("$board")
+                # Print red warning banner
+                echo ""
+                echo -e "\033[1;31m╔════════════════════════════════════════════════════════════════╗\033[0m"
+                echo -e "\033[1;31m║                    ⚠️  COMPILATION FAILED ⚠️                      \033[0m"
+                echo -e "\033[1;31m╠════════════════════════════════════════════════════════════════╣\033[0m"
+                echo -e "\033[1;31m║ Board: $board\033[0m"
+                echo -e "\033[1;31m║ This board will be skipped and compilation will continue        \033[0m"
+                echo -e "\033[1;31m╚════════════════════════════════════════════════════════════════╝\033[0m"
+                echo ""
             fi
         done
 
         echo "Compilation layer ready - cached ${#BOARDS_ARRAY[@]} board(s)"
+
+        # Print summary if any boards failed
+        if [ ${#failed_boards[@]} -gt 0 ]; then
+            echo ""
+            echo -e "\033[1;33m⚠️  Summary: ${#failed_boards[@]} board(s) failed to compile:\033[0m"
+            for failed_board in "${failed_boards[@]}"; do
+                echo -e "\033[1;31m  ✗ $failed_board\033[0m"
+            done
+            echo ""
+        fi
         ;;
 
     legacy|*)
@@ -175,10 +195,35 @@ case "$COMMAND" in
 
         # Compile for each board
         IFS=',' read -ra BOARDS_ARRAY <<< "$PLATFORMS"
+        failed_boards=()
         for board in "${BOARDS_ARRAY[@]}"; do
             board=$(echo "$board" | xargs)  # Trim whitespace
+            echo ""
+            echo ">>> Compiling board: $board"
             bash compile "$board" Blink
+            if [ $? -ne 0 ]; then
+                failed_boards+=("$board")
+                # Print red warning banner
+                echo ""
+                echo -e "\033[1;31m╔════════════════════════════════════════════════════════════════╗\033[0m"
+                echo -e "\033[1;31m║                    ⚠️  COMPILATION FAILED ⚠️                      \033[0m"
+                echo -e "\033[1;31m╠════════════════════════════════════════════════════════════════╣\033[0m"
+                echo -e "\033[1;31m║ Board: $board\033[0m"
+                echo -e "\033[1;31m║ This board will be skipped and compilation will continue        \033[0m"
+                echo -e "\033[1;31m╚════════════════════════════════════════════════════════════════╝\033[0m"
+                echo ""
+            fi
         done
+
+        # Print summary if any boards failed
+        if [ ${#failed_boards[@]} -gt 0 ]; then
+            echo ""
+            echo -e "\033[1;33m⚠️  Summary: ${#failed_boards[@]} board(s) failed to compile:\033[0m"
+            for failed_board in "${failed_boards[@]}"; do
+                echo -e "\033[1;31m  ✗ $failed_board\033[0m"
+            done
+            echo ""
+        fi
         ;;
 esac
 
