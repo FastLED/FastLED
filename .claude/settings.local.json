@@ -57,7 +57,8 @@
       "Bash(command:*)",
       "Bash(gcc:*)",
       "Bash(g++:*)",
-      "WebFetch(domain:gcc.gnu.org)"
+      "WebFetch(domain:gcc.gnu.org)",
+      "SlashCommand(/git-historian AVR delaycycles --paths src)"
     ],
     "deny": []
   }

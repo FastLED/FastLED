@@ -77,6 +77,24 @@ template<> void delaycycles<5>() {
   FL_NOP;
 }
 
+template<> void delaycycles<6>() {
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP2;
+}
+template<> void delaycycles<7>() {
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP;
+}
+template<> void delaycycles<8>() {
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP2;
+  FL_NOP2;
+}
+
 // ============================================================================
 // Millisecond and Microsecond delay implementations
 // ============================================================================

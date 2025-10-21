@@ -36,6 +36,9 @@
 #elif defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/arm/stm32/delaycycles.h"
+#elif defined(ARDUINO_ARCH_RENESAS) || defined(ARDUINO_ARCH_RENESAS_UNO) || defined(ARDUINO_ARCH_RENESAS_PORTENTA)
+#include "platforms/shared/delay_cycles_generic.h"
+#include "platforms/arm/renesas/delaycycles.h"
 #else
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/delaycycles_generic.h"
