@@ -19,6 +19,7 @@
 #include "platforms/esp/32/fastspi_esp32.h"
 #include "fl/stdint.h"
 #include "fl/stddef.h"
+#include "fl/log.h"
 
 namespace fl {
 
@@ -87,7 +88,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, this);
 
         if (!mHandle.is_valid) {
-            FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
+            FL_LOG_SPI("Failed to register with bus manager (pin "
                     << CLOCK_PIN << ":" << DATA_PIN << ")");
             return;
         }

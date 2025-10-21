@@ -6,6 +6,7 @@
 #include "parlio_driver.h"
 #include "esp_err.h"
 #include "fl/cstring.h"
+#include "fl/log.h"
 
 // Compile-time debug logging control
 // Enable with: build_flags = -DFASTLED_ESP32_PARLIO_DLOGGING
@@ -71,7 +72,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     PARLIO_DLOG("begin() called - DATA_WIDTH=" << int(DATA_WIDTH) << ", num_leds=" << num_leds);
 
     if (config.num_lanes != DATA_WIDTH) {
-        FL_WARN("PARLIO: Configuration error - num_lanes (" << int(config.num_lanes)
+        FL_LOG_PARLIO("Configuration error - num_lanes (" << int(config.num_lanes)
                 << ") does not match DATA_WIDTH (" << int(DATA_WIDTH) << ")");
         return false;
     }
@@ -103,7 +104,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
         for (int i = 0; i < 3; i++) {
             dma_sub_buffers_[i] = (uint8_t*)heap_caps_malloc(sub_buffer_size_, MALLOC_CAP_DMA);
             if (!dma_sub_buffers_[i]) {
-                FL_WARN("PARLIO: Failed to allocate DMA sub-buffer " << i << " (" << sub_buffer_size_ << " bytes)");
+                FL_LOG_PARLIO("Failed to allocate DMA sub-buffer " << i << " (" << sub_buffer_size_ << " bytes)");
                 // Clean up previously allocated buffers
                 for (int j = 0; j < i; j++) {
                     heap_caps_free(dma_sub_buffers_[j]);
@@ -121,7 +122,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
         sub_buffer_size_ = num_leds * 8;
         dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
         if (!dma_buffer_) {
-            FL_WARN("PARLIO: Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
+            FL_LOG_PARLIO("Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
             return false;
         }
         fl::memset(dma_buffer_, 0, buffer_size_);
@@ -131,7 +132,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     // Create semaphore for transfer completion
     xfer_done_sem_ = xSemaphoreCreateBinary();
     if (!xfer_done_sem_) {
-        FL_WARN("PARLIO: Failed to create semaphore");
+        FL_LOG_PARLIO("Failed to create semaphore");
         if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
             for (int i = 0; i < 3; i++) {
                 heap_caps_free(dma_sub_buffers_[i]);
@@ -181,8 +182,8 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     // Create PARLIO TX unit
     esp_err_t err = parlio_new_tx_unit(&parlio_config, &tx_unit_);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: parlio_new_tx_unit() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
-        FL_WARN("  Check GPIO pins - clk:" << config_.clk_gpio << ", data:["
+        FL_LOG_PARLIO("parlio_new_tx_unit() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+        FL_LOG_PARLIO("  Check GPIO pins - clk:" << config_.clk_gpio << ", data:["
                 << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << "]");
 
         vSemaphoreDelete(xfer_done_sem_);
@@ -210,7 +211,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     PARLIO_DLOG("Enabling PARLIO TX unit");
     err = parlio_tx_unit_enable(tx_unit_);
     if (err != ESP_OK) {
-        FL_WARN("PARLIO: parlio_tx_unit_enable() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+        FL_LOG_PARLIO("parlio_tx_unit_enable() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
 
         parlio_del_tx_unit(tx_unit_);
         vSemaphoreDelete(xfer_done_sem_);
@@ -267,7 +268,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::set_strip(uint8_t channel, CRGB* leds
         strips_[channel] = leds;
         PARLIO_DLOG("set_strip() - channel " << int(channel) << " registered at " << (void*)leds);
     } else {
-        FL_WARN("PARLIO: set_strip() - invalid channel " << int(channel) << " (DATA_WIDTH=" << int(DATA_WIDTH) << ")");
+        FL_LOG_PARLIO("set_strip() - invalid channel " << int(channel) << " (DATA_WIDTH=" << int(DATA_WIDTH) << ")");
     }
 }
 
@@ -276,19 +277,19 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     PARLIO_DLOG("show() called");
 
     if (!tx_unit_) {
-        FL_WARN("PARLIO: show() called but tx_unit_ not initialized");
+        FL_LOG_PARLIO("show() called but tx_unit_ not initialized");
         return;
     }
 
     // Verify buffers are allocated
     if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
         if (!dma_sub_buffers_[0] || !dma_sub_buffers_[1] || !dma_sub_buffers_[2]) {
-            FL_WARN("PARLIO: show() called but DMA sub-buffers not allocated");
+            FL_LOG_PARLIO("show() called but DMA sub-buffers not allocated");
             return;
         }
     } else {
         if (!dma_buffer_) {
-            FL_WARN("PARLIO: show() called but DMA buffer not allocated");
+            FL_LOG_PARLIO("show() called but DMA buffer not allocated");
             return;
         }
     }
@@ -317,7 +318,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
             esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_sub_buffers_[color], total_bits, &tx_config);
 
             if (err != ESP_OK) {
-                FL_WARN("PARLIO: parlio_tx_unit_transmit() failed for color " << color << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+                FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for color " << color << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
                 dma_busy_ = false;
                 xSemaphoreGive(xfer_done_sem_);
                 return;
@@ -337,7 +338,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
         esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_buffer_, total_bits, &tx_config);
 
         if (err != ESP_OK) {
-            FL_WARN("PARLIO: parlio_tx_unit_transmit() failed: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
             dma_busy_ = false;
             xSemaphoreGive(xfer_done_sem_);
         }

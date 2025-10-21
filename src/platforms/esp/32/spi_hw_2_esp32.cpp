@@ -8,6 +8,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/dbg.h"
+#include "fl/log.h"
 #include "fl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
@@ -98,16 +99,16 @@ SPIDualESP32::~SPIDualESP32() {
 }
 
 bool SPIDualESP32::begin(const SpiHw2::Config& config) {
-    FL_DBG_SPI("SPIDualESP32::begin - Initializing Dual SPI");
-    FL_DBG_SPI("Configuration Details:");
-    FL_DBG_SPI("  Bus Number: " << static_cast<int>(config.bus_num));
-    FL_DBG_SPI("  Clock Pin: " << config.clock_pin);
-    FL_DBG_SPI("  Data0 Pin: " << config.data0_pin);
-    FL_DBG_SPI("  Data1 Pin: " << config.data1_pin);
-    FL_DBG_SPI("  Clock Speed: " << config.clock_speed_hz);
+    FL_LOG_SPI("SPIDualESP32::begin - Initializing Dual SPI");
+    FL_LOG_SPI("Configuration Details:");
+    FL_LOG_SPI("  Bus Number: " << static_cast<int>(config.bus_num));
+    FL_LOG_SPI("  Clock Pin: " << config.clock_pin);
+    FL_LOG_SPI("  Data0 Pin: " << config.data0_pin);
+    FL_LOG_SPI("  Data1 Pin: " << config.data1_pin);
+    FL_LOG_SPI("  Clock Speed: " << config.clock_speed_hz);
 
     if (mInitialized) {
-        FL_DBG_SPI("SPIDualESP32::begin - Already initialized, skipping");
+        FL_LOG_SPI("SPIDualESP32::begin - Already initialized, skipping");
         return true;  // Already initialized
     }
 
@@ -147,10 +148,10 @@ bool SPIDualESP32::begin(const SpiHw2::Config& config) {
     // Initialize bus with auto DMA channel selection
     esp_err_t ret = spi_bus_initialize(mHost, &bus_config, SPI_DMA_CH_AUTO);
     if (ret != ESP_OK) {
-        FL_DBG_SPI("SPIDualESP32::begin - Bus initialization FAILED. ESP Error: " << esp_err_to_name(ret));
+        FL_LOG_SPI("SPIDualESP32::begin - Bus initialization FAILED. ESP Error: " << esp_err_to_name(ret));
         return false;
     }
-    FL_DBG_SPI("SPIDualESP32::begin - Bus initialization successful");
+    FL_LOG_SPI("SPIDualESP32::begin - Bus initialization successful");
 
     // Configure SPI device
     spi_device_interface_config_t dev_config = {};
@@ -160,24 +161,24 @@ bool SPIDualESP32::begin(const SpiHw2::Config& config) {
     dev_config.queue_size = 7;  // Allow up to 7 queued transactions
     dev_config.flags = SPI_DEVICE_HALFDUPLEX;  // Transmit-only mode
 
-    FL_DBG_SPI("SPIDualESP32::begin - Configuring device:");
-    FL_DBG_SPI("  Mode: 0");
-    FL_DBG_SPI("  Clock Speed: " << dev_config.clock_speed_hz);
-    FL_DBG_SPI("  Queue Size: " << dev_config.queue_size);
+    FL_LOG_SPI("SPIDualESP32::begin - Configuring device:");
+    FL_LOG_SPI("  Mode: 0");
+    FL_LOG_SPI("  Clock Speed: " << dev_config.clock_speed_hz);
+    FL_LOG_SPI("  Queue Size: " << dev_config.queue_size);
 
     // Add device to bus
     ret = spi_bus_add_device(mHost, &dev_config, &mSPIHandle);
     if (ret != ESP_OK) {
-        FL_DBG_SPI("SPIDualESP32::begin - Device addition FAILED. ESP Error: " << esp_err_to_name(ret));
+        FL_LOG_SPI("SPIDualESP32::begin - Device addition FAILED. ESP Error: " << esp_err_to_name(ret));
         spi_bus_free(mHost);
         return false;
     }
-    FL_DBG_SPI("SPIDualESP32::begin - Device added successfully");
+    FL_LOG_SPI("SPIDualESP32::begin - Device added successfully");
 
     mInitialized = true;
     mTransactionActive = false;
 
-    FL_DBG_SPI("SPIDualESP32::begin - Dual SPI initialization SUCCESSFUL");
+    FL_LOG_SPI("SPIDualESP32::begin - Dual SPI initialization SUCCESSFUL");
     return true;
 }
 
@@ -272,24 +273,24 @@ void SPIDualESP32::cleanup() {
 /// ESP32 factory override - returns available SPI bus instances
 /// Strong definition overrides weak default
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    FL_DBG_SPI("SpiHw2::createInstances - Creating SPI Dual controllers");
-    FL_DBG_SPI("SPI Peripheral Count: " << SOC_SPI_PERIPH_NUM);
+    FL_LOG_SPI("SpiHw2::createInstances - Creating SPI Dual controllers");
+    FL_LOG_SPI("SPI Peripheral Count: " << SOC_SPI_PERIPH_NUM);
 
     fl::vector<SpiHw2*> controllers;
 
     // Bus 2 is available on all ESP32 platforms
     static SPIDualESP32 controller2(2, "SPI2");
-    FL_DBG_SPI("Adding SPI2 Controller");
+    FL_LOG_SPI("Adding SPI2 Controller");
     controllers.push_back(&controller2);
 
 #if SOC_SPI_PERIPH_NUM > 2
     // Bus 3 is only available when SOC has more than 2 SPI peripherals
     static SPIDualESP32 controller3(3, "SPI3");
-    FL_DBG_SPI("Adding SPI3 Controller");
+    FL_LOG_SPI("Adding SPI3 Controller");
     controllers.push_back(&controller3);
 #endif
 
-    FL_DBG_SPI("Created " << controllers.size() << " SPI Dual controllers");
+    FL_LOG_SPI("Created " << controllers.size() << " SPI Dual controllers");
     return controllers;
 }
 

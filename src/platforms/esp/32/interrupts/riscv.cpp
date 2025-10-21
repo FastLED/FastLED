@@ -16,6 +16,7 @@
 #include "driver/rmt_tx.h"
 #include "soc/soc.h"
 #include "fl/dbg.h"
+#include "fl/log.h"
 
 //=============================================================================
 // INTERRUPT INSTALLATION HELPERS
@@ -29,13 +30,13 @@ esp_err_t fastled_riscv_install_interrupt(
     esp_intr_handle_t *handle
 ) {
     if (priority < 1 || priority > FASTLED_RISCV_MAX_PRIORITY) {
-        FL_DBG("Invalid priority level: " << priority <<
+        FL_LOG_INTERRUPT("Invalid priority level: " << priority <<
                " (must be 1-" << FASTLED_RISCV_MAX_PRIORITY << ")");
         return ESP_ERR_INVALID_ARG;
     }
 
     if (handler == nullptr || handle == nullptr) {
-        FL_DBG("Invalid arguments: handler=" << (void*)handler <<
+        FL_LOG_INTERRUPT("Invalid arguments: handler=" << (void*)handler <<
                " handle=" << (void*)handle);
         return ESP_ERR_INVALID_ARG;
     }
@@ -57,21 +58,21 @@ esp_err_t fastled_riscv_install_interrupt(
         case 6: flags |= ESP_INTR_FLAG_LEVEL6; break;
         case 7: flags |= ESP_INTR_FLAG_NMI; break; // Level 7 may be NMI
         default:
-            FL_DBG("Unsupported priority level: " << priority);
+            FL_LOG_INTERRUPT("Unsupported priority level: " << priority);
             return ESP_ERR_NOT_SUPPORTED;
     }
 
-    FL_DBG("Installing interrupt source=" << source <<
+    FL_LOG_INTERRUPT("Installing interrupt source=" << source <<
            " priority=" << priority << " flags=0x" << flags);
 
     esp_err_t err = esp_intr_alloc(source, flags, handler, arg, handle);
 
     if (err != ESP_OK) {
-        FL_WARN("Failed to allocate interrupt: " << esp_err_to_name(err));
+        FL_LOG_RMT("Failed to allocate interrupt: " << esp_err_to_name(err));
         return err;
     }
 
-    FL_DBG("Interrupt installed successfully");
+    FL_LOG_INTERRUPT("Interrupt installed successfully");
     return ESP_OK;
 }
 
@@ -81,7 +82,7 @@ esp_err_t fastled_riscv_install_official_interrupt(
     void *arg,
     esp_intr_handle_t *handle
 ) {
-    FL_DBG("Installing official FastLED interrupt (priority " <<
+    FL_LOG_INTERRUPT("Installing official FastLED interrupt (priority " <<
            FASTLED_RISCV_PRIORITY_RECOMMENDED << ")");
     return fastled_riscv_install_interrupt(
         source,
@@ -100,7 +101,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     esp_intr_handle_t *handle
 ) {
     if (priority < 4 || priority > 7) {
-        FL_WARN("Experimental priority must be 4-7, got " << priority);
+        FL_LOG_RMT("Experimental priority must be 4-7, got " << priority);
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -116,9 +117,9 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     //
     // TODO: Implement RISC-V assembly interrupt stubs (*.S files) if Level 4+
     // is proven necessary. For now, use priority 3 with official driver.
-    FL_WARN("CANNOT INSTALL: Priority 4-7 requires ASSEMBLY handlers (not C)");
-    FL_WARN("ESP-IDF docs: handlers must be nullptr for levels >3");
-    FL_WARN("Use fastled_riscv_install_official_interrupt() for priority 1-3");
+    FL_LOG_RMT("CANNOT INSTALL: Priority 4-7 requires ASSEMBLY handlers (not C)");
+    FL_LOG_RMT("ESP-IDF docs: handlers must be nullptr for levels >3");
+    FL_LOG_RMT("Use fastled_riscv_install_official_interrupt() for priority 1-3");
 
     return ESP_ERR_NOT_SUPPORTED;
 }
@@ -158,12 +159,12 @@ esp_err_t fastled_riscv_rmt_init_official(
     int priority_level
 ) {
     if (priority_level < 1 || priority_level > FASTLED_RISCV_PRIORITY_OFFICIAL_MAX) {
-        FL_WARN("Official RMT priority must be 1-" <<
+        FL_LOG_RMT("Official RMT priority must be 1-" <<
                 FASTLED_RISCV_PRIORITY_OFFICIAL_MAX << ", got " << priority_level);
         return ESP_ERR_INVALID_ARG;
     }
 
-    FL_DBG("Initializing RMT channel " << channel <<
+    FL_LOG_INTERRUPT("Initializing RMT channel " << channel <<
            " on GPIO " << gpio_num <<
            " with priority " << priority_level);
 
@@ -171,7 +172,7 @@ esp_err_t fastled_riscv_rmt_init_official(
     // This would use rmt_tx_channel_config_t with intr_priority field
     // For now, return not implemented
 
-    FL_WARN("fastled_riscv_rmt_init_official: NOT YET IMPLEMENTED");
+    FL_LOG_RMT("fastled_riscv_rmt_init_official: NOT YET IMPLEMENTED");
     return ESP_ERR_NOT_SUPPORTED;
 }
 
@@ -183,7 +184,7 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     int priority_level
 ) {
     if (priority_level < 4 || priority_level > 7) {
-        FL_WARN("Experimental RMT priority must be 4-7, got " << priority_level);
+        FL_LOG_RMT("Experimental RMT priority must be 4-7, got " << priority_level);
         return ESP_ERR_INVALID_ARG;
     }
 
@@ -200,8 +201,8 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     //
     // Recommendation: Use fastled_riscv_rmt_init_official() with priority 1-3.
     // Test if Level 3 double-buffering is sufficient before pursuing Level 4+.
-    FL_WARN("CANNOT IMPLEMENT: Priority 4-7 requires ASSEMBLY handlers");
-    FL_WARN("Use fastled_riscv_rmt_init_official() with priority 1-3 instead");
+    FL_LOG_RMT("CANNOT IMPLEMENT: Priority 4-7 requires ASSEMBLY handlers");
+    FL_LOG_RMT("Use fastled_riscv_rmt_init_official() with priority 1-3 instead");
     return ESP_ERR_NOT_SUPPORTED;
 }
 

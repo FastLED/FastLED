@@ -41,6 +41,7 @@ FL_EXTERN_C_BEGIN
 
 FL_EXTERN_C_END
 
+#include "fl/log.h"
 
 // TODO: this is in like 2 places. Consolidate.
 // override default NUM_DMA_BUFFERS if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS
