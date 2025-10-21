@@ -11,6 +11,8 @@
     #define FASTLED_STM32_USE_HAL 0
 #endif
 
+#include "fastspi_types.h"
+
 namespace fl {
 
 /*

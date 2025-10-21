@@ -2,6 +2,7 @@
 #define __INC_CLOCKLESS_ARM_STM32_H
 
 #include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 
 namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
