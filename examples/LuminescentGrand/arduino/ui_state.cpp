@@ -1,7 +1,3 @@
-#include "../shared/defs.h"
-
-
-#if ENABLE_SKETCH
 
 
 #include "./ui_state.h"
@@ -90,6 +86,3 @@ ui_state ui_update(uint32_t now_ms, uint32_t delta_ms) {
   out.which_visualizer = static_cast<Painter::VisState>(curr_val % Painter::kNumVisStates);
   return out;
 }
-
-
-#endif  // ENABLE_SKETCH

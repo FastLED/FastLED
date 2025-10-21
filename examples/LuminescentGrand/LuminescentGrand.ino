@@ -7,8 +7,6 @@
 /// Then go to your sketch directory and run
 /// > fastled
 
-#include "shared/defs.h"
-
 //#define DEBUG_PAINTER
 //#define DEBUG_KEYBOARD 1
 
