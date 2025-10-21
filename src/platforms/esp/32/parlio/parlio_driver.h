@@ -29,7 +29,6 @@
 #include "eorder.h"
 #include "fl/stdio.h"
 #include "platforms/shared/clockless_timing.h"
-#include "parlio_driver_impl.h"
 
 namespace fl {
 
@@ -65,6 +64,10 @@ public:
     virtual void wait() = 0;
     virtual bool is_initialized() const = 0;
 };
+
+/// @brief Forward declaration of PARLIO LED driver template
+template <uint8_t DATA_WIDTH, typename CHIPSET>
+class ParlioLedDriver;
 
 /// @brief PARLIO parallel LED driver with template-based configuration
 ///
@@ -144,3 +147,6 @@ private:
 };
 
 }  // namespace fl
+
+// Include template implementation after class definition
+#include "parlio_driver_impl.h"  // allow-include-after-namespace
