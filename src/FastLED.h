@@ -974,9 +974,8 @@ template<typename T> using fl_vector = fl::vector<T>;
 template<typename Key, typename Value, typename Compare = fl::less<Key>> using fl_map = fl::fl_map<Key, Value, Compare>;
 using fl_string = fl::string;
 
-// Delay function from fl:: namespace
-using fl::delayMicroseconds;
-using fl::delayMillis;
+// Note: delayMicroseconds and delayMillis are provided by Arduino core
+// The fl:: namespace versions are available for explicit use when needed
 
 #define FASTLED_TITLE(text) fl::UITitle g_title(text)
 #define FASTLED_DESCRIPTION(text) fl::UIDescription g_description(text)

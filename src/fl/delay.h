@@ -153,6 +153,37 @@ inline void delayMicros(u32 us) {
   delayMicroseconds(us);
 }
 
+/// Shorter alias for delayMillis
+/// @param ms Milliseconds to delay
+inline void delayMs(u32 ms) {
+  delayMillis(ms);
+}
+
+/// Shorter alias for delayMicroseconds
+/// @param us Microseconds to delay
+inline void delayUs(u32 us) {
+  delayMicroseconds(us);
+}
+
+/// Shorter alias for delayNanoseconds (template version)
+/// @tparam NS Number of nanoseconds (at compile-time)
+template<u32 NS> inline void delayNs() {
+  delayNanoseconds<NS>();
+}
+
+/// Shorter alias for delayNanoseconds (runtime version)
+/// @param ns Number of nanoseconds (runtime value)
+inline void delayNs(u32 ns) {
+  delayNanoseconds(ns);
+}
+
+/// Shorter alias for delayNanoseconds with explicit clock frequency
+/// @param ns Number of nanoseconds
+/// @param hz CPU frequency in Hz
+inline void delayNs(u32 ns, u32 hz) {
+  delayNanoseconds(ns, hz);
+}
+
 }  // namespace fl
 
 #endif // __INC_FL_DELAY_H
