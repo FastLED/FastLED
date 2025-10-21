@@ -172,11 +172,15 @@ class Board:
         ("attiny4313", "ATtiny4313"),
         ("attiny1616", "ATtiny1616"),
         # RP2040 variants
+        ("rp2350", "RP2350"),
+        ("rp2040", "RP2040"),
         ("pico2", "RP2350"),
         ("rpi_pico2", "RP2350"),
         ("xrp", "RP2350"),
+        ("rpipico2", "RP2350"),
         ("pico", "RP2040"),
         ("rpi_pico", "RP2040"),
+        ("rpipico", "RP2040"),
         # ARM variants
         ("due", "ATSAM3X8E"),
         ("giga_r1", "STM32H747"),
@@ -220,6 +224,8 @@ class Board:
         "blackpill": "stm32",
         "rpipico": "rp",
         "rpipico2": "rp",
+        "rp2040": "rp",
+        "rp2350": "rp",
         "due": "arm",
         "digix": "arm",
         "zero": "arm",
@@ -882,22 +888,10 @@ RPI_PICO2 = Board(
     board_build_filesystem_size="0.5m",
 )
 
-# Generic RP2040 board definition for use in CI/Docker builds
-# This is a catch-all definition for any RP2040-based board
+# Aliases for new RPXXXX naming convention (board_name -> new standardized name mapping)
+# These maintain backward compatibility with existing workflows and CI configurations
 RP2040 = Board(
     board_name="rp2040",
-    real_board_name="rpipico",  # Default to Raspberry Pi Pico
-    platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
-    platform_needs_install=True,
-    platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
-    framework="arduino",
-    board_build_core="earlephilhower",
-    board_build_filesystem_size="0.5m",
-)
-
-# Earle Philhower's RP2040 board variant
-RP2040_EARLE = Board(
-    board_name="rp2040_earle",
     real_board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,
@@ -907,22 +901,9 @@ RP2040_EARLE = Board(
     board_build_filesystem_size="0.5m",
 )
 
-# Generic RP2350 board definition (newer Raspberry Pi Pico 2)
 RP2350 = Board(
     board_name="rp2350",
-    real_board_name="rpipico2",  # Map to Pico 2 board definition
-    platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
-    platform_needs_install=True,
-    platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
-    framework="arduino",
-    board_build_core="earlephilhower",
-    board_build_filesystem_size="0.5m",
-)
-
-# RP2350B variant board definition
-RP2350B = Board(
-    board_name="rp2350B",
-    real_board_name="rpipico2",  # Map to Pico 2 board definition
+    real_board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
