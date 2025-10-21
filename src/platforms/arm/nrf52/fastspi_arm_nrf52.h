@@ -13,7 +13,9 @@ namespace fl {
 
 #ifndef FASTLED_FORCE_SOFTWARE_SPI
 
-    #define FASTLED_ALL_PINS_HARDWARE_SPI
+    #ifndef FASTLED_ALL_PINS_HARDWARE_SPI
+        #define FASTLED_ALL_PINS_HARDWARE_SPI
+    #endif
 
 
     // NRF52810 has SPIM0: Frequencies from 125kbps to 8Mbps

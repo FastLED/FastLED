@@ -814,6 +814,7 @@ XIAOBLESENSE_ADAFRUIT_NRF52 = Board(
     platform_needs_install=True,  # Install platform package to get the boards
     defines=[
         "FASTLED_ALL_PINS_HARDWARE_SPI",
+        "FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING",
     ],
 )
 
@@ -825,6 +826,7 @@ XIAOBLESENSE_ADAFRUI_ALIAS = Board(
     platform_needs_install=True,
     defines=[
         "FASTLED_ALL_PINS_HARDWARE_SPI",
+        "FASTLED_NRF52_SUPPRESS_UNTESTED_BOARD_WARNING",
     ],
 )
 
