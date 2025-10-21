@@ -31,6 +31,8 @@
 // Reference: https://github.com/FastLED/FastLED/issues/2095#issuecomment-3369337632
 // ============================================================================
 
+namespace fl {
+
 // Helper function to convert esp_err_t to readable string
 namespace detail {
 inline const char* parlio_err_to_str(esp_err_t err) {
@@ -468,3 +470,5 @@ bool IRAM_ATTR ParlioLedDriver<DATA_WIDTH, CHIPSET>::parlio_tx_done_callback(
 
     return high_priority_task_awoken == pdTRUE;
 }
+
+}  // namespace fl
