@@ -211,6 +211,11 @@ class BannedHeadersChecker(BaseChecker):
                 if banned_header in {"stdint.h", "Arduino.h", "chrono"}:
                     return True
 
+            # Allow Arduino.h in delay.cpp for platform-specific delay implementations
+            if "delay.cpp" in file_path_str:
+                if banned_header == "Arduino.h":
+                    return True
+
             # Allow C library headers in str.cpp for string implementation
             if "str.cpp" in file_path_str:
                 if banned_header in {"string.h", "stdlib.h"}:
