@@ -219,7 +219,9 @@ public:
 
 	// write a single bit out, which bit from the passed in byte is determined by template parameter
 	template <uint8_t BIT> inline void writeBit(uint8_t b) {
-		m_ledSPI.transfer(b);
+		// Test bit BIT in value b, send 0xFF if set, 0x00 if clear
+		// This matches the behavior of other platforms (AVR, ARM, etc.)
+		m_ledSPI.transfer((b & (1 << BIT)) ? 0xFF : 0x00);
 	}
 
 	// write a block of uint8_ts out in groups of three.  len is the total number of uint8_ts to write out.  The template

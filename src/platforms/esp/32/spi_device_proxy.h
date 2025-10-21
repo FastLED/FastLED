@@ -193,6 +193,19 @@ public:
         writeByte(b);
     }
 
+    /// Write a single bit (for hardware SPI, tests the specified bit and transmits 0xFF or 0x00)
+    /// Note: Hardware SPI transmits full bytes, not individual bits. This tests bit BIT
+    /// in the input byte and sends 0xFF if the bit is set, 0x00 if clear.
+    /// This matches the behavior of other platform implementations (AVR, ARM, etc.)
+    /// @tparam BIT the bit index in the byte to test
+    /// @param b the byte to test
+    template <uint8_t BIT = 0>
+    void writeBit(uint8_t b) {
+        // Test bit BIT in value b, send 0xFF if set, 0x00 if clear
+        // This matches the behavior of other platforms (AVR, ARM, etc.)
+        writeByte((b & (1 << BIT)) ? 0xFF : 0x00);
+    }
+
     /// Wait for SPI to be ready (NOP for buffered writes)
     static void wait() {}
     static void waitFully() {}

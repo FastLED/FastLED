@@ -210,11 +210,14 @@ public:
 #define PMASK_HI (PMASK>>8 & 0xFF)
 #define PMASK_LO (PMASK & 0xFF)
 
-template <uint8_t LANES, const ChipsetTiming& TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <uint8_t LANES, typename TIMING, EOrder RGB_ORDER = GRB, int XTRA0 = 0, bool FLIP = false>
 class SixteenWayInlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LANES, PMASK> {
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
+	enum : uint32_t {
+		T1 = TIMING::T1,
+		T2 = TIMING::T2,
+		T3 = TIMING::T3,
+		WAIT_TIME = TIMING::RESET
+	};
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<PORTC_FIRST_PIN>::port_t data_t;
 
