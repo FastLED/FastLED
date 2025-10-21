@@ -19,23 +19,23 @@
 /// ## Usage Example
 ///
 /// ```cpp
-/// #define NUM_STRIPS 4
+/// #define NUM_LANES 4
 /// #define LEDS_PER_STRIP 100
 /// #define BASE_PIN 2
 ///
 /// // Create LED arrays
-/// CRGB leds[NUM_STRIPS][LEDS_PER_STRIP];
+/// CRGB leds[NUM_LANES][LEDS_PER_STRIP];
 ///
 /// // Create controller with WS2812B timing
 /// ParallelClocklessController<
-///     BASE_PIN, NUM_STRIPS,
+///     BASE_PIN, NUM_LANES,
 ///     400, 850, 50000,  // T1, T2, T3 in nanoseconds
 ///     GRB
 /// > controller;
 ///
 /// void setup() {
 ///     // Register each strip
-///     for (int i = 0; i < NUM_STRIPS; i++) {
+///     for (int i = 0; i < NUM_LANES; i++) {
 ///         controller.addStrip(i, leds[i], LEDS_PER_STRIP);
 ///     }
 ///     controller.init();
@@ -77,14 +77,14 @@ namespace fl {
 /// @brief Parallel clockless LED controller for RP2040/RP2350
 ///
 /// @tparam BASE_PIN Starting GPIO pin
-/// @tparam NUM_STRIPS Number of parallel strips (2, 4, or 8)
+/// @tparam NUM_LANES Number of parallel lanes (2, 4, or 8)
 /// @tparam T1_NS High pulse time in nanoseconds
 /// @tparam T2_NS Low pulse time in nanoseconds
 /// @tparam T3_NS Reset pulse time in nanoseconds
 /// @tparam RGB_ORDER Color order (GRB, RGB, etc.)
 template <
     u8 BASE_PIN,
-    u8 NUM_STRIPS,
+    u8 NUM_LANES,
     int T1_NS,
     int T2_NS,
     int T3_NS,
@@ -102,7 +102,7 @@ private:
         bool enabled;
     };
 
-    StripInfo strips_[NUM_STRIPS];
+    StripInfo strips_[NUM_LANES];
     u16 max_leds_;
 
     // Hardware state
@@ -134,12 +134,12 @@ public:
     }
 
     /// @brief Register an LED strip
-    /// @param lane Strip lane (0 to NUM_STRIPS-1)
+    /// @param lane Strip lane (0 to NUM_LANES-1)
     /// @param leds Pointer to CRGB array
     /// @param num_leds Number of LEDs
     /// @return true if successful
     bool addStrip(u8 lane, CRGB* leds, u16 num_leds) {
-        if (lane >= NUM_STRIPS || leds == nullptr) {
+        if (lane >= NUM_LANES || leds == nullptr) {
             return false;
         }
         strips_[lane].leds = leds;
@@ -166,7 +166,7 @@ public:
 
 #if defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2350)
         // Initialize GPIO pins
-        for (int i = 0; i < NUM_STRIPS; i++) {
+        for (int i = 0; i < NUM_LANES; i++) {
             gpio_init(BASE_PIN + i);
             gpio_set_dir(BASE_PIN + i, GPIO_OUT);
         }
@@ -221,7 +221,7 @@ private:
     /// @brief Prepare bit-transposed data from LED buffers
     void prepareTransposedData() {
         // Allocate temporary buffer for padded RGB data
-        u32 padded_size = max_leds_ * 3 * NUM_STRIPS;
+        u32 padded_size = max_leds_ * 3 * NUM_LANES;
         u8* padded_rgb = reinterpret_cast<u8*>(malloc(padded_size));
         if (padded_rgb == nullptr) {
             return;
@@ -231,7 +231,7 @@ private:
         fl::memset(padded_rgb, 0, padded_size);
 
         // Copy LED data from each strip
-        for (u8 strip = 0; strip < NUM_STRIPS; strip++) {
+        for (u8 strip = 0; strip < NUM_LANES; strip++) {
             if (strips_[strip].enabled && strips_[strip].leds) {
                 u8* dest = padded_rgb + (strip * max_leds_ * 3);
                 const u8* src = reinterpret_cast<const u8*>(strips_[strip].leds);
@@ -241,13 +241,13 @@ private:
         }
 
         // Build array of pointers for transpose function
-        const u8* strip_ptrs[NUM_STRIPS];
-        for (u8 i = 0; i < NUM_STRIPS; i++) {
+        const u8* strip_ptrs[NUM_LANES];
+        for (u8 i = 0; i < NUM_LANES; i++) {
             strip_ptrs[i] = padded_rgb + (i * max_leds_ * 3);
         }
 
         // Transpose based on strip count
-        switch (NUM_STRIPS) {
+        switch (NUM_LANES) {
             case 8:
                 transpose_8strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
