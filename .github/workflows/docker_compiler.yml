@@ -57,6 +57,8 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.base
       tag: latest
+      group: base
+      platforms: linux/amd64,linux/arm64
     secrets:
       env_vars: |
         docker_username=${{ needs.credentials.outputs.docker_username }}
