@@ -126,6 +126,7 @@ test_names = [
   'test_splat',
   'test_str',
   'test_strip_id_map',
+  'test_sstring',
   'test_strstream',
   'test_task',
   'test_thread_local',
