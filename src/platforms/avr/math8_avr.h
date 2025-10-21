@@ -9,6 +9,8 @@ FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
+namespace fl {
+
 /// @file math8_avr.h
 /// AVR-specific optimized assembly implementations of 8-bit math functions.
 /// These implementations use the hardware MUL instruction (available on ATmega, not ATtiny).
@@ -125,5 +127,7 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 /// @} Math_AVR
 
 /// @} lib8tion
+
+}  // namespace fl
 
 FL_DISABLE_WARNING_POP
