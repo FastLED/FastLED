@@ -173,6 +173,55 @@ This list highlights commonly used examples. It is not exhaustive—browse the f
 
 ---
 
+## 🎯 Platform-Specific Filtering with @filter
+
+FastLED now supports flexible `@filter` directives in `.ino` sketch files for conditional compilation based on platform, memory, target, and board properties. This enables you to maintain platform-specific examples without duplicating code.
+
+### Supported Filter Syntax
+
+**One-liner format** (compact, flexible):
+```cpp
+// @filter (memory is high) and (platform is esp32s3)
+// @filter (mem is high) and (plat is esp32*)
+// @filter (mem: high) and (plat: esp32)
+// @filter (mem=high) and (plat=esp32)
+```
+
+**Multi-line YAML format** (explicit):
+```cpp
+// @filter
+//   - require:
+//     - platform: esp32s3
+//     - memory: high
+//   - exclude:
+//     - platform: avr
+// @end-filter
+```
+
+### Filter Features
+
+**Operators:**
+- `is` / `is not` - Exact match (supports wildcards with `*`)
+- `=` / `:` - Shorthand for `is`
+- `matches` - Regex/glob pattern match
+
+**Property shortcuts:**
+- `mem` → `memory`
+- `plat` → `platform`
+- `tgt` → `target`
+- `brd` → `board`
+
+**Logical operators:** `and`, `or`
+
+**Examples:**
+```cpp
+// @filter (platform is esp32*)
+// @filter (memory is not low)
+// @filter (target is -D__AVR__) or (board is uno)
+```
+
+---
+
 ## Quick Usage Notes
 
 - Always set the LED chipset, pin, color order, and `NUM_LEDS` to match your hardware:

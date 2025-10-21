@@ -2,7 +2,7 @@
 
 This module provides parsing and evaluation of @filter blocks in .ino files.
 
-Supports two syntaxes:
+Supports multiple syntaxes:
 
 YAML-style (multi-line):
     // @filter
@@ -13,17 +13,34 @@ YAML-style (multi-line):
     //   - target: esp32p4
     // @end-filter
 
-One-liner (compact):
-    // @filter: (platform is esp32s3) and (memory is high)
-    // @filter: (platform is esp32*) and (memory is high)
-    // @filter: (target is -D__AVR__) or (platform is rp2040)
+One-liner (compact) - Natural language styles:
+    // @filter (memory is high) and (platform is esp32s3)
+    // @filter (mem is high) and (plat is esp32*)
+    // @filter (memory: high) and (platform: esp32)
+    // @filter (mem=high) and (plat=esp32)
+    // @filter (mem:high) and (plat:esp32)
+    // @filter (target is -D__AVR__) or (board is uno)
+
+Optional colon after @filter - all styles work:
+    // @filter: (mem is high)
+    // @filter (mem is high)
+    // @filter: (mem=high)
+    // @filter (mem=high)
 
 One-liner operators:
 - is          : exact match (supports wildcards with *)
 - is not      : negation
+- =           : exact match (shorthand for 'is')
+- :           : exact match (shorthand for 'is')
 - matches     : regex/glob pattern match
 - and         : logical AND
 - or          : logical OR
+
+Property name shortcuts:
+- mem       : memory
+- plat      : platform
+- tgt       : target (for MCU target)
+- brd       : board
 """
 
 import fnmatch
@@ -47,16 +64,44 @@ class SketchFilter:
         return not self.require and not self.exclude
 
 
-def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
-    """Parse one-liner @filter syntax.
-
-    Examples:
-        @filter: (platform is esp32s3) and (memory is high)
-        @filter: (platform is esp32*) or (platform is rp2040)
-        @filter: (target is -D__AVR__) and (memory is low)
+def _normalize_property_name(key: str) -> str:
+    """Normalize property name shortcuts to full names.
 
     Args:
-        filter_line: Content after '@filter:' (without surrounding slashes)
+        key: Property name (full or shorthand)
+
+    Returns:
+        Normalized property name
+    """
+    key_lower = key.lower().strip()
+    shortcuts = {
+        "mem": "memory",
+        "plat": "platform",
+        "tgt": "target",
+        "brd": "board",
+    }
+    return shortcuts.get(key_lower, key_lower)
+
+
+def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
+    """Parse one-liner @filter syntax with multiple operator styles.
+
+    Examples - all equivalent:
+        // @filter (memory is high) and (platform is esp32s3)
+        // @filter (mem is high) and (plat is esp32s3)
+        // @filter (memory: high) and (platform: esp32s3)
+        // @filter (mem=high) and (plat=esp32s3)
+        // @filter (mem:high) and (plat:esp32s3)
+        // @filter (target is -D__AVR__) or (memory is low)
+
+    Supported operators:
+    - is, is not  : exact match with wildcards
+    - =           : shorthand for 'is'
+    - :           : shorthand for 'is'
+    - matches     : regex/glob match
+
+    Args:
+        filter_line: Content after '@filter' (without surrounding slashes/colon)
 
     Returns:
         SketchFilter object or None if parsing fails
@@ -68,25 +113,33 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
     require: Dict[str, List[str]] = {}
     exclude: Dict[str, List[str]] = {}
 
-    # Parse conditions: (KEY OP VALUE) and/or (KEY OP VALUE) ...
-    # Regex to match: (KEY OP VALUE)
-    condition_pattern = r"\(\s*(\w+)\s+(is\s+not|is|matches)\s+([^)]+)\)"
-    matches = re.findall(condition_pattern, filter_line)
-
-    if not matches:
-        return None
-
-    # Extract logical operators to understand structure
-    logic_pattern = r"\)\s*(and|or)\s*\("
-    logic_ops = re.findall(logic_pattern, filter_line)
+    # Pattern to match conditions in three formats:
+    # 1. (key is value) or (key is not value) or (key matches value)
+    # 2. (key = value) or (key=value)
+    # 3. (key : value) or (key:value)
+    # Pattern: (key OPERATOR value) where OPERATOR can be:
+    #   - word operators (requires space): 'is not', 'is', 'matches'
+    #   - symbol operators (optional space): '=' or ':'
+    condition_pattern = r"\(\s*(\w+)(?:\s+(is\s+not|is|matches)|\s*([=:]))\s*([^)]+)\)"
 
     # Parse each condition
-    for key, operator, value in matches:
+    found_any = False
+    for match in re.finditer(condition_pattern, filter_line):
+        key = match.group(1)
+        word_operator = match.group(2)  # is, is not, matches (or None)
+        symbol_operator = match.group(3)  # =, : (or None)
+        value = match.group(4)
+
         value = value.strip()
-        is_negated = operator == "is not"
-        is_regex = operator == "matches"
+
+        # Determine operator type
+        is_negated = False
+        if word_operator:
+            is_negated = word_operator == "is not"
+        # symbol operators (= and :) are treated as 'is'
 
         # Normalize key
+        key = _normalize_property_name(key)
         if key not in ("platform", "target", "memory", "board"):
             continue
 
@@ -99,16 +152,16 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
 
         target_dict = require if not is_negated else exclude
         target_dict.setdefault(key, []).append(value)
+        found_any = True
 
-    return (
-        SketchFilter(require=require, exclude=exclude) if (require or exclude) else None
-    )
+    return SketchFilter(require=require, exclude=exclude) if found_any else None
 
 
 def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
     """Parse @filter block from .ino file.
 
     Supports both YAML-style (multi-line) and one-liner syntax.
+    Colon after @filter is optional.
     Auto-detects format.
 
     Args:
@@ -125,17 +178,23 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
     except Exception:
         return None
 
-    # Try one-liner format first: // @filter: ...
-    oneline_match = re.search(r"//\s*@filter:\s*(.+?)$", content, re.MULTILINE)
+    # Try one-liner format first: // @filter: ... or // @filter ...
+    # Colon is optional, so match both @filter: and @filter followed by (
+    oneline_match = re.search(r"//\s*@filter\s*:?\s*\((.+?)$", content, re.MULTILINE)
     if oneline_match:
-        filter_line = oneline_match.group(1).strip()
-        result = parse_oneline_filter(filter_line)
-        if result:
-            return result
+        # Re-match to capture everything including the first condition
+        full_match = re.search(r"//\s*@filter\s*:?\s*(.+?)$", content, re.MULTILINE)
+        if full_match:
+            filter_line = full_match.group(1).strip()
+            result = parse_oneline_filter(filter_line)
+            if result:
+                return result
 
     # Fall back to YAML-style multi-line format
-    # Look for @filter ... @end-filter block
-    match = re.search(r"//\s*@filter\s*\n(.*?)//\s*@end-filter", content, re.DOTALL)
+    # Look for @filter ... @end-filter block (colon optional)
+    match = re.search(
+        r"//\s*@filter\s*:?\s*\n(.*?)//\s*@end-filter", content, re.DOTALL
+    )
     if not match:
         return None
 
@@ -168,7 +227,7 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
                     raise ValueError(f"Invalid filter directive: {line}")
 
                 key, values = rest.split(":", 1)
-                key = key.strip()
+                key = _normalize_property_name(key.strip())
                 values = values.strip()
 
                 # Split by | or , for OR logic
