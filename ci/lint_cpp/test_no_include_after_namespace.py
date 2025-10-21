@@ -48,6 +48,7 @@ INCLUDE_PATTERN = re.compile(
 )
 
 ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
+NOLINT_PATTERN = re.compile(r"//\s*nolint")
 
 
 def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
@@ -85,6 +86,9 @@ def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
 
         # Check for includes after namespace started
         if namespace_started and INCLUDE_PATTERN.match(line):
+            # Skip if the line has a // nolint comment
+            if NOLINT_PATTERN.search(line):
+                continue
             violations.append((i, line.rstrip("\n")))
 
     return violations

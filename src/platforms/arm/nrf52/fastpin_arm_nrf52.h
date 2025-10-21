@@ -93,7 +93,6 @@ struct __generated_struct_NRF_P1 {
 
 namespace fl {
 
-
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
 template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN  {
 public:
@@ -216,7 +215,7 @@ public:
 
 #define HAS_HARDWARE_PIN_SUPPORT
 
-// Include variant-specific pin definitions after macro definitions
-#include "fastpin_arm_nrf52_variants.h"  // allow-include-after-namespace
+// Include variant-specific pin definitions
+#include "fastpin_arm_nrf52_variants.h" // nolint
 
 #endif // #ifndef __FASTPIN_ARM_NRF52_H
