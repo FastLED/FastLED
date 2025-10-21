@@ -5,6 +5,7 @@
 // Include fastpin_base.h to get FastPin base template
 // This reopens namespace fl but typedefs will still be in scope
 #include "fl/fastpin_base.h"
+#include "fastpin_arm_nrf52_variants.h"
 
 /*
 //
@@ -217,10 +218,5 @@ public:
 
 
 #define HAS_HARDWARE_PIN_SUPPORT
-
-// Include board-specific pin variants after macro definitions
-#include "fastpin_arm_nrf52_variants.h"
-
-}  // namespace fl
 
 #endif // #ifndef __FASTPIN_ARM_NRF52_H

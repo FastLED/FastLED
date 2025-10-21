@@ -46,6 +46,7 @@
 
 /// Memory and type utilities
 #include "fl/bit_cast.h"
+#include "fl/cstring.h"
 
 // ============================================================================
 // CORE LED TYPE DEFINITIONS

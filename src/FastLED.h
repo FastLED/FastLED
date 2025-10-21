@@ -81,6 +81,14 @@
 // Include the internal FastLED header (provides core types without cycles)
 #include "fl/fastled.h"
 
+// ============================================================================
+// C STRING FUNCTION USING DECLARATIONS
+// ============================================================================
+
+/// Memory functions are available in fl:: namespace via fl/cstring.h
+/// Using declarations removed to avoid conflicts with system C headers
+/// Use fl::memset, fl::memcpy, fl::memmove, fl::memcopy directly
+
 // Utility functions
 #include "fastled_delay.h"
 #include "bitswap.h"
