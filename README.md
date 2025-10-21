@@ -272,6 +272,10 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 Pre-built Docker images of PlatformIO optimized for compiling FastLED across all supported platforms:
 
+**Build Status:** [![Docker Build Base](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base.yml) [![Docker Build Platforms](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base_platforms.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_base_platforms.yml)
+
+**Platform Images:**
+
 | **AVR** | **ESP** | **Teensy** | **STM32** | **RP2040** | **NRF52** | **SAM** |
 |---------|---------|------------|-----------|------------|-----------|---------|
 | [![fastled-compiler-avr-uno](https://img.shields.io/docker/v/niteris/fastled-compiler-avr-uno/latest?label=avr)](https://hub.docker.com/r/niteris/fastled-compiler-avr-uno) | [![fastled-compiler-esp-esp32dev](https://img.shields.io/docker/v/niteris/fastled-compiler-esp-esp32dev/latest?label=esp)](https://hub.docker.com/r/niteris/fastled-compiler-esp-esp32dev) | [![fastled-compiler-teensy-teensy41](https://img.shields.io/docker/v/niteris/fastled-compiler-teensy-teensy41/latest?label=teensy)](https://hub.docker.com/r/niteris/fastled-compiler-teensy-teensy41) | [![fastled-compiler-stm32-bluepill](https://img.shields.io/docker/v/niteris/fastled-compiler-stm32-bluepill/latest?label=stm32)](https://hub.docker.com/r/niteris/fastled-compiler-stm32-bluepill) | [![fastled-compiler-rp](https://img.shields.io/docker/v/niteris/fastled-compiler-rp/latest?label=rp2040)](https://hub.docker.com/r/niteris/fastled-compiler-rp) | [![fastled-compiler-nrf52-nrf52840_dk](https://img.shields.io/docker/v/niteris/fastled-compiler-nrf52-nrf52840_dk/latest?label=nrf52)](https://hub.docker.com/r/niteris/fastled-compiler-nrf52-nrf52840_dk) | [![fastled-compiler-sam-due](https://img.shields.io/docker/v/niteris/fastled-compiler-sam-due/latest?label=sam)](https://hub.docker.com/r/niteris/fastled-compiler-sam-due) |
