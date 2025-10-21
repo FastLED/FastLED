@@ -227,10 +227,6 @@ enum UCS7604Mode {
     UCS7604_MODE_16BIT_1600KHZ = 0x9B  ///< 16-bit depth, 1.6 MHz, RGBW mode
 };
 
-}  // namespace fl
-
-namespace fl {
-
 /// @brief Generic UCS7604 controller using blocking clockless driver
 /// @tparam DATA_PIN The GPIO pin for data output
 /// @tparam T1 Timing in nanoseconds for '1' bit first pulse (high)
@@ -261,7 +257,7 @@ namespace fl {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, fl::EOrder RGB_ORDER = GRB,
+template <fl::u8 DATA_PIN, const fl::ChipsetTiming& TIMING, fl::EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     static constexpr uint32_t T1 = TIMING.T1;

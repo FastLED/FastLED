@@ -49,7 +49,7 @@ namespace fl {
 ///   - Delay T3 nanoseconds
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
-template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <fl::u8 DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
 {
 private:
