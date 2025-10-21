@@ -24,6 +24,11 @@ public:
     typedef volatile uint16_t * port_ptr_t;
     typedef uint16_t port_t;
 
+    /// Pin is valid for use
+    constexpr static bool validpin() { return true; }
+    /// Low speed only recommended
+    constexpr static bool LowSpeedOnlyRecommended() { return false; }
+
     #define PORT ((R_PORT0_Type*)(_PORT))
     #define digitalBspPinToPort(P)		   (P >> 8)
     #define digitalBspPinToBitMask(P)      (1 << (P & 0xFF))
