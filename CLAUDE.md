@@ -31,6 +31,12 @@ This project uses directory-specific agent guidelines. See:
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
 - `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
 
+### Code Review
+- `/code_review` - Run specialized code review checks on changes
+  - Reviews src/, examples/, and ci/ changes against project standards
+  - Detects try-catch blocks in src/, evaluates new *.ino files for quality
+  - Enforces type annotations and KeyboardInterrupt handlers in Python
+
 ## Core Rules
 
 ### Git and Code Publishing (ALL AGENTS)
@@ -61,6 +67,9 @@ This project uses directory-specific agent guidelines. See:
 
 ### JavaScript Code Standards
 - **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
+
+### Code Review Rule
+**🚨 ALL AGENTS: After making code changes, run `/code_review` to validate changes. This ensures compliance with project standards.**
 
 ### Memory Refresh Rule
 **🚨 ALL AGENTS: Read the relevant AGENTS.md file before concluding work to refresh memory about current project rules and requirements.**
