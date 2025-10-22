@@ -93,12 +93,14 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
         // @filter (mem=high) and (plat=esp32s3)
         // @filter (mem:high) and (plat:esp32s3)
         // @filter (target is -D__AVR__) or (memory is low)
+        // @filter (platform is teensy) and not (board is teensylc)
 
     Supported operators:
     - is, is not  : exact match with wildcards
     - =           : shorthand for 'is'
     - :           : shorthand for 'is'
     - matches     : regex/glob match
+    - not         : prefix for negation
 
     Args:
         filter_line: Content after '@filter' (without surrounding slashes/colon)
@@ -137,6 +139,13 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
         if word_operator:
             is_negated = word_operator == "is not"
         # symbol operators (= and :) are treated as 'is'
+
+        # Check for 'not' prefix before this condition
+        # Look backwards from the match start position to find 'not' keyword
+        match_start = match.start()
+        prefix_text = filter_line[:match_start].rstrip()
+        if prefix_text.endswith("not"):
+            is_negated = not is_negated  # Toggle negation if 'not' prefix found
 
         # Normalize key
         key = _normalize_property_name(key)

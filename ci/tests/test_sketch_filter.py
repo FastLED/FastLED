@@ -478,6 +478,81 @@ some code
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
+    def test_not_prefix_negation(self):
+        """Test 'not' prefix for negation (e.g., 'not (board is teensylc)')."""
+        # Both syntaxes should be equivalent:
+        # 1. Using 'not' prefix: not (board is teensylc)
+        # 2. Using 'is not' operator: (board is not teensylc)
+
+        result1 = parse_oneline_filter("not (board is teensylc)")
+        result2 = parse_oneline_filter("(board is not teensylc)")
+
+        # Both should produce exclude condition for board=teensylc
+        assert result1 is not None
+        assert result2 is not None
+        assert result1.exclude == {"board": ["teensylc"]}
+        assert result2.exclude == {"board": ["teensylc"]}
+        assert result1.require == {}
+        assert result2.require == {}
+
+    def test_not_prefix_with_and(self):
+        """Test 'not' prefix in compound filter with 'and'."""
+        # Filter: (platform is teensy) and not (board is teensylc)
+        result = parse_oneline_filter(
+            "(platform is teensy) and not (board is teensylc)"
+        )
+
+        assert result is not None
+        assert result.require == {"platform": ["teensy"]}
+        assert result.exclude == {"board": ["teensylc"]}
+
+    def test_not_prefix_equivalence_with_is_not(self):
+        """Test that 'not' prefix is equivalent to 'is not' operator."""
+        # These three should all be equivalent
+        result1 = parse_oneline_filter("not (board is teensylc)")
+        result2 = parse_oneline_filter("(board is not teensylc)")
+        result3 = parse_oneline_filter(
+            "(platform is teensy) and not (board is teensylc)"
+        )
+        result4 = parse_oneline_filter(
+            "(platform is teensy) and (board is not teensylc)"
+        )
+
+        # result1 and result2 should match
+        assert result1.exclude == result2.exclude
+
+        # result3 and result4 should match
+        assert result3.require == result4.require
+        assert result3.exclude == result4.exclude
+
+    def test_should_skip_with_not_prefix_filter(self):
+        """Test that should_skip_sketch works with 'not' prefix filters."""
+        teensylc_board = Board(
+            board_name="teensylc",
+            platform="teensy",
+            framework="arduino",
+        )
+
+        teensy41_board = Board(
+            board_name="teensy41",
+            platform="teensy",
+            framework="arduino",
+        )
+
+        # Filter using 'not' prefix
+        filter_obj = parse_oneline_filter(
+            "(platform is teensy) and not (board is teensylc)"
+        )
+
+        # teensylc should be skipped
+        skip_teensy_lc, reason = should_skip_sketch(teensylc_board, filter_obj)
+        assert skip_teensy_lc is True
+        assert "teensylc" in reason or "board" in reason
+
+        # teensy41 should NOT be skipped
+        skip_teensy_41, reason = should_skip_sketch(teensy41_board, filter_obj)
+        assert skip_teensy_41 is False
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

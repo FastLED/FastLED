@@ -560,7 +560,11 @@ def _main_impl() -> int:
         ci_src = Path(__file__).parent
         ci_dest = temp_path / "ci"
         if ci_src.exists():
-            shutil.copytree(ci_src, ci_dest, ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"))
+            shutil.copytree(
+                ci_src,
+                ci_dest,
+                ignore=shutil.ignore_patterns("__pycache__", "*.pyc", ".pytest_cache"),
+            )
         else:
             print(f"Warning: ci directory not found at {ci_src}", file=sys.stderr)
 
