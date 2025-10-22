@@ -89,16 +89,24 @@ LIB8STATIC_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
 /// The rounding constant 128 (0x80) is added before shifting to implement
 /// nearest-neighbor rounding rather than truncation. This ensures 0x7F80
 /// rounds up to 0x80 instead of truncating down to 0x7F.
-/// The boundary check handles values near 0xFF to prevent overflow.
+/// Implemented as branchless code using conditional assignment: compiles to
+/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
+/// misprediction penalties.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 128) >> 8 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
-    if (x >= 0xff00) {
-        return 0xff;
-    }
-    return uint8_t((x + 128) >> 8);
+    // Compute the scaled-down value with rounding
+    // Branchless equivalent of the original:
+    //   if (x >= 0xff00) {
+    //       return 0xff;
+    //   }
+    //   return uint8_t((x + 128) >> 8);
+    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
+    // avoiding branch prediction penalties.
+    uint32_t result = (x + 128) >> 8;
+    return (x >= 0xff00) ? 0xff : (uint8_t)result;
 }
 
 /// @brief Maps a 32-bit value down to a 16-bit value.
@@ -110,16 +118,25 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 /// The rounding constant 32768 (0x8000) is added before shifting to implement
 /// nearest-neighbor rounding, ensuring proper rounding of midpoint values
 /// during the downscaling operation.
-/// The boundary check handles values near 0xFFFF to prevent overflow.
+/// Implemented as branchless code using conditional assignment: compiles to
+/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
+/// misprediction penalties.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 32768) >> 16 = 0.
 LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
-    if (x >= 0xffff0000) {
-        return 0xffff;
-    }
-    return uint16_t((x + 32768) >> 16);
+    // Compute the scaled-down value with rounding
+
+    // Branchless equivalent of the original:
+    //   if (x >= 0xffff0000) {
+    //       return 0xffff;
+    //   }
+    //   return uint16_t((x + 32768) >> 16);
+    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
+    // avoiding branch prediction penalties.
+    uint32_t result = (x + 32768) >> 16;
+    return (x >= 0xffff0000) ? 0xffff : (uint16_t)result;
 }
 
 /// @brief Maps a 32-bit value down to an 8-bit value.
@@ -131,16 +148,25 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
 /// The rounding constant 8388608 (0x800000) is added before shifting to implement
 /// nearest-neighbor rounding, ensuring proper rounding of midpoint values
 /// during the downscaling operation from 32-bit to 8-bit.
-/// The boundary check handles values near 0xFF to prevent overflow.
+/// Implemented as branchless code using conditional assignment: compiles to
+/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
+/// misprediction penalties.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 0x800000) >> 24 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
-    if (x >= 0xFF000000) {
-        return 0xff;
-    }
-    return uint8_t((x + 0x800000) >> 24);
+    // Compute the scaled-down value with rounding
+
+    // Branchless equivalent of the original:
+    //   if (x >= 0xFF000000) {
+    //       return 0xff;
+    //   }
+    //   return uint8_t((x + 0x800000) >> 24);
+    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
+    // avoiding branch prediction penalties.
+    uint32_t result = (x + 0x800000) >> 24;
+    return (x >= 0xFF000000) ? 0xff : (uint8_t)result;
 }
 
 /// @} intmap
