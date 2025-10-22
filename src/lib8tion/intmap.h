@@ -21,6 +21,7 @@
 
 #include "lib8static.h"
 #include "fl/stdint.h"
+#include "fl/sketch_macros.h"
 
 
 namespace fl {
@@ -97,16 +98,19 @@ LIB8STATIC_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 128) >> 8 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
-    // Compute the scaled-down value with rounding
-    // Branchless equivalent of the original:
-    //   if (x >= 0xff00) {
-    //       return 0xff;
-    //   }
-    //   return uint8_t((x + 128) >> 8);
-    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
-    // avoiding branch prediction penalties.
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
+    // use branched version since it's faster to skip the shift operation entirely when x >= 0xff00
+    if (x >= 0xff00) {
+        return 0xff;
+    }
+    return uint8_t((x + 128) >> 8);
+#else
+    // On modern CPUs with branch prediction, use ternary to compile to cmov
+    // (conditional move), avoiding branch misprediction penalties.
     uint8_t result = (x + 128) >> 8;
     return (x >= 0xff00) ? 0xff : result;
+#endif
 }
 
 /// @brief Maps a 32-bit value down to a 16-bit value.
@@ -126,16 +130,19 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 32768) >> 16 = 0.
 LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
-    // Compute the scaled-down value with rounding
-    // Branchless equivalent of the original:
-    //   if (x >= 0xffff0000) {
-    //       return 0xffff;
-    //   }
-    //   return uint16_t((x + 32768) >> 16);
-    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
-    // avoiding branch prediction penalties.
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
+    // use branched version since it's faster to skip the shift operation entirely when x >= 0xffff0000
+    if (x >= 0xffff0000) {
+        return 0xffff;
+    }
+    return uint16_t((x + 32768) >> 16);
+#else
+    // On modern CPUs with branch prediction, use ternary to compile to cmov
+    // (conditional move), avoiding branch misprediction penalties.
     uint16_t result = (x + 32768) >> 16;
     return (x >= 0xffff0000) ? 0xffff : result;
+#endif
 }
 
 /// @brief Maps a 32-bit value down to an 8-bit value.
@@ -155,16 +162,19 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
 ///       division while remaining integer-only. The zero case is handled naturally
 ///       by the rounding math: (0 + 0x800000) >> 24 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
-    // Compute the scaled-down value with rounding
-    // Branchless equivalent of the original:
-    //   if (x >= 0xFF000000) {
-    //       return 0xff;
-    //   }
-    //   return uint8_t((x + 0x800000) >> 24);
-    // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
-    // avoiding branch prediction penalties.
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
+    // use branched version since it's faster to skip the shift operation entirely when x >= 0xFF000000
+    if (x >= 0xFF000000) {
+        return 0xff;
+    }
+    return uint8_t((x + 0x800000) >> 24);
+#else
+    // On modern CPUs with branch prediction, use ternary to compile to cmov
+    // (conditional move), avoiding branch misprediction penalties.
     uint8_t result = (x + 0x800000) >> 24;
     return (x >= 0xFF000000) ? 0xff : result;
+#endif
 }
 
 /// @} intmap
