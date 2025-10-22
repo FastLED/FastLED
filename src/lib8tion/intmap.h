@@ -89,14 +89,12 @@ LIB8STATIC_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
 /// The rounding constant 128 (0x80) is added before shifting to implement
 /// nearest-neighbor rounding rather than truncation. This ensures 0x7F80
 /// rounds up to 0x80 instead of truncating down to 0x7F.
-/// Special cases handle boundary values (0 and 0xFF) to prevent overflow.
+/// The boundary check handles values near 0xFF to prevent overflow.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only.
+///       division while remaining integer-only. The zero case is handled naturally
+///       by the rounding math: (0 + 128) >> 8 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
-    if (x == 0) {
-        return 0;
-    }
     if (x >= 0xff00) {
         return 0xff;
     }
@@ -112,14 +110,12 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 /// The rounding constant 32768 (0x8000) is added before shifting to implement
 /// nearest-neighbor rounding, ensuring proper rounding of midpoint values
 /// during the downscaling operation.
-/// Special cases handle boundary values (0 and 0xFFFF) to prevent overflow.
+/// The boundary check handles values near 0xFFFF to prevent overflow.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only.
+///       division while remaining integer-only. The zero case is handled naturally
+///       by the rounding math: (0 + 32768) >> 16 = 0.
 LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
-    if (x == 0) {
-        return 0;
-    }
     if (x >= 0xffff0000) {
         return 0xffff;
     }
@@ -135,14 +131,12 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
 /// The rounding constant 8388608 (0x800000) is added before shifting to implement
 /// nearest-neighbor rounding, ensuring proper rounding of midpoint values
 /// during the downscaling operation from 32-bit to 8-bit.
-/// Special cases handle boundary values (0 and 0xFF) to prevent overflow.
+/// The boundary check handles values near 0xFF to prevent overflow.
 ///
 /// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only.
+///       division while remaining integer-only. The zero case is handled naturally
+///       by the rounding math: (0 + 0x800000) >> 24 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
-    if (x == 0) {
-        return 0;
-    }
     if (x >= 0xFF000000) {
         return 0xff;
     }
