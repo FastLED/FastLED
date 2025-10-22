@@ -10,7 +10,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         """Return a set with each non-empty, stripped line of the ini snippet."""
         return {line.strip() for line in ini.splitlines() if line.strip()}
 
-    def test_basic_fields(self):
+    def test_basic_fields(self) -> None:
         board = Board(board_name="uno", platform="atmelavr", framework="arduino")
         ini = board.to_platformio_ini()
         lines = self._ini_to_set(ini)
@@ -24,7 +24,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         # Should not reference internal attributes
         self.assertNotIn("platform_needs_install", ini)
 
-    def test_real_board_name(self):
+    def test_real_board_name(self) -> None:
         board = Board(
             board_name="esp32c3",
             real_board_name="esp32-c3-devkitm-1",
@@ -35,7 +35,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         self.assertIn("[env:esp32c3]", lines)
         self.assertIn("board = esp32-c3-devkitm-1", lines)
 
-    def test_flags(self):
+    def test_flags(self) -> None:
         board = Board(
             board_name="custom",
             defines=["FASTLED_TEST=1"],

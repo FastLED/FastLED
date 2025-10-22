@@ -380,7 +380,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
     # BASIC FUNCTIONALITY TESTS - Core URL Resolution Features
     # =============================================================================
 
-    def test_url_vs_shorthand_detection(self):
+    def test_url_vs_shorthand_detection(self) -> None:
         """Test basic URL detection vs shorthand name detection - NO MOCKS."""
         # debug_print(f"\n🔍 Testing URL vs shorthand name detection (REAL IMPLEMENTATION)")
 
@@ -425,7 +425,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"✅ URL detection works correctly for all test cases - REAL IMPLEMENTATION TESTED")
 
-    def test_basic_platform_shorthand_resolution(self):
+    def test_basic_platform_shorthand_resolution(self) -> None:
         """Test converting platform shorthand names to repository URLs using REAL PlatformIO CLI."""
         # debug_print(f"\n🏗️ Testing basic platform shorthand to URL conversion (REAL PlatformIO CLI)")
 
@@ -468,7 +468,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"🎉 All REAL platform shorthand resolutions successful - no mocks used!")
 
-    def test_url_passthrough_behavior(self):
+    def test_url_passthrough_behavior(self) -> None:
         """Test that existing URLs pass through unchanged - NO MOCKS NEEDED."""
         # debug_print(f"\n🔄 Testing URL passthrough behavior (REAL IMPLEMENTATION)")
 
@@ -504,7 +504,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
     # CACHING TESTS - Resolution Caching and TTL Behavior
     # =============================================================================
 
-    def test_resolution_caching_works(self):
+    def test_resolution_caching_works(self) -> None:
         """Test that platform resolution results are properly cached using REAL PlatformIO CLI."""
         # debug_print(f"\n🗄️ Testing resolution caching mechanism (REAL CLI CALLS)")
 
@@ -580,7 +580,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"🎉 Real caching mechanism works perfectly - tested with actual PlatformIO CLI!")
 
-    def test_cache_expiration_behavior(self):
+    def test_cache_expiration_behavior(self) -> None:
         """Test that cache entries expire after TTL and get refreshed."""
         # debug_print(f"\n⏰ Testing cache expiration and refresh behavior")
 
@@ -625,7 +625,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
     # EDGE CASE TESTS - Error Handling and Boundary Conditions
     # =============================================================================
 
-    def test_failed_resolution_handling(self):
+    def test_failed_resolution_handling(self) -> None:
         """Test graceful handling of failed resolution attempts."""
         # debug_print(f"\n🚨 Testing failed resolution error handling")
 
@@ -660,7 +660,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"🎉 All failure cases handled correctly")
 
-    def test_platform_url_resolution(self):
+    def test_platform_url_resolution(self) -> None:
         """Test resolving platform shorthand names to URLs."""
         # debug_print(f"\n🔍 Testing platform shorthand to URL resolution")
 
@@ -713,7 +713,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"🎉 All platform URL resolution tests passed!")
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_framework_url_resolution(self):
+    def test_framework_url_resolution(self) -> None:
         """Test resolving framework shorthand names to URLs."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -735,7 +735,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         self.assertEqual(resolved_url, test_url)
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_caching_functionality(self):
+    def test_caching_functionality(self) -> None:
         """Test that resolutions are cached and TTL works correctly."""
         # debug_print(f"\n🗄️ Testing platform resolution caching behavior")
 
@@ -803,7 +803,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         # debug_print(f"🎉 Platform resolution caching works correctly!")
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_cache_expiration(self):
+    def test_cache_expiration(self) -> None:
         """Test that cache entries expire after TTL."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -825,7 +825,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         self.assertFalse(pio_ini._is_platform_cached("espressif32"))
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_resolve_all_platform_urls(self):
+    def test_resolve_all_platform_urls(self) -> None:
         """Test resolving all platform URLs in the configuration."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -853,7 +853,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         )
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_resolve_all_framework_urls(self):
+    def test_resolve_all_framework_urls(self) -> None:
         """Test resolving all framework URLs in the configuration."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -871,7 +871,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
     # REMOVED: Duplicate test_failed_resolution_handling method that used legacy mocks
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_cache_invalidation(self):
+    def test_cache_invalidation(self) -> None:
         """Test cache invalidation functionality."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -897,7 +897,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         self.assertEqual(len(cache.frameworks), 0)
 
     @patch("ci.compiler.platformio_ini.subprocess.run")
-    def test_integration_with_optimize_method(self, mock_subprocess):  # type: ignore
+    def test_integration_with_optimize_method(self, mock_subprocess) -> None:  # type: ignore
         """Test integration with the optimize() method for end-to-end functionality."""
         # Create test configuration with shorthand names
         test_content = """[platformio]
@@ -943,7 +943,7 @@ framework = arduino
         )
 
     @unittest.skip("Skipped: depends on removed _create_mock_pio_command method")
-    def test_get_resolved_urls_cache_structure(self):
+    def test_get_resolved_urls_cache_structure(self) -> None:
         """Test the structure and contents of the resolved URLs cache."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -988,7 +988,9 @@ framework = arduino
 
     # Integration tests
     @patch("ci.compiler.platformio_ini.subprocess.run")
-    def test_shorthand_resolution_with_existing_cache_system(self, mock_subprocess):  # type: ignore
+    def test_shorthand_resolution_with_existing_cache_system(
+        self, mock_subprocess: Any
+    ) -> None:
         """Test that shorthand resolution works seamlessly with existing cache optimization."""
 
         self.test_ini.write_text(TEST_CONTENT_SHORTHAND_AND_URL)
@@ -1034,7 +1036,7 @@ framework = arduino
         # Verify cache operations were called for the unique URL
         mock_handle.assert_called()
 
-    def test_url_resolution_caching_behavior_integration(self):
+    def test_url_resolution_caching_behavior_integration(self) -> None:
         """Test that URL resolution results are cached correctly in integration."""
 
         self.test_ini.write_text(TEST_CONTENT_DUPLICATE_PLATFORM)
@@ -1074,7 +1076,7 @@ framework = arduino
         self.assertIn("espressif32", cache.platforms)
         # Note: arduino is a built-in framework so it won't be in the cache
 
-    def test_mixed_url_types_handling(self):
+    def test_mixed_url_types_handling(self) -> None:
         """Test handling of mixed URL types (shorthand, git URLs, zip URLs)."""
 
         self.test_ini.write_text(TEST_CONTENT_MIXED_URL_TYPES)
@@ -1123,7 +1125,7 @@ framework = arduino
         self.assertEqual(zip_url_platform, "file:///cached/path/extracted")
 
     # Multi-value resolution tests
-    def test_url_type_detection_methods(self):
+    def test_url_type_detection_methods(self) -> None:
         """Test URL type detection utility methods."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1150,7 +1152,7 @@ framework = arduino
         self.assertEqual(pio_ini._classify_url_type("/local/path/to/platform"), "file")
         self.assertEqual(pio_ini._classify_url_type("espressif32"), "unknown")
 
-    def test_enhanced_platform_resolution(self):
+    def test_enhanced_platform_resolution(self) -> None:
         """Test enhanced platform resolution returning multi-value dataclass."""
         # debug_print(f"\n🔬 Testing enhanced multi-value platform resolution")
 
@@ -1269,7 +1271,7 @@ framework = arduino
 
         # debug_print(f"🎉 Enhanced platform resolution test completed successfully!")
 
-    def test_enhanced_platform_resolution_with_zip_url(self):
+    def test_enhanced_platform_resolution_with_zip_url(self) -> None:
         """Test enhanced platform resolution with zip URL."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1299,7 +1301,7 @@ framework = arduino
             "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-2/platform-espressif32.zip",
         )
 
-    def test_enhanced_framework_resolution(self):
+    def test_enhanced_framework_resolution(self) -> None:
         """Test enhanced framework resolution returning multi-value dataclass."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1326,7 +1328,7 @@ framework = arduino
         self.assertEqual(resolution.title, "Arduino")
         self.assertEqual(resolution.description, "Arduino framework")
 
-    def test_enhanced_resolution_with_already_resolved_urls(self):
+    def test_enhanced_resolution_with_already_resolved_urls(self) -> None:
         """Test enhanced resolution handles already resolved URLs correctly."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1358,7 +1360,7 @@ framework = arduino
         self.assertIsNone(resolution.zip_url)
         self.assertEqual(resolution.local_path, local_path)
 
-    def test_enhanced_resolution_failure_handling(self):
+    def test_enhanced_resolution_failure_handling(self) -> None:
         """Test enhanced resolution failure handling."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1373,7 +1375,7 @@ framework = arduino
         resolution = pio_ini.resolve_framework_url_enhanced("nonexistent_framework")
         self.assertIsNone(resolution)
 
-    def test_enhanced_resolution_caching(self):
+    def test_enhanced_resolution_caching(self) -> None:
         """Test that enhanced resolution results are cached correctly."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1405,7 +1407,7 @@ framework = arduino
         self.assertEqual(resolution1.git_url, resolution2.git_url)
         self.assertEqual(resolution1.version, resolution2.version)
 
-    def test_package_info_dataclass(self):
+    def test_package_info_dataclass(self) -> None:
         """Test PackageInfo dataclass functionality."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -1432,7 +1434,7 @@ framework = arduino
         )
 
     @patch("ci.compiler.platformio_ini.subprocess.run")
-    def test_optimize_enhanced_method(self, mock_subprocess):  # type: ignore
+    def test_optimize_enhanced_method(self, mock_subprocess) -> None:  # type: ignore
         """Test the optimize_enhanced() method with multi-value resolution."""
         # Create test configuration with shorthand names
         test_content = """[platformio]
@@ -1485,7 +1487,7 @@ framework = arduino
         esp32_platform = pio_ini.get_option("env:esp32dev", "platform")
         self.assertEqual(esp32_platform, "file:///cached/path/extracted")
 
-    def test_backward_compatibility_with_enhanced_methods(self):
+    def test_backward_compatibility_with_enhanced_methods(self) -> None:
         """Test that enhanced methods maintain backward compatibility."""
         self.test_ini.write_text(BASIC_INI_WITH_SHORTHANDS)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)

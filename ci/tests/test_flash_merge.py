@@ -9,7 +9,7 @@ import pytest
 from ci.compiler.esp32_artifacts import ArtifactSet, ESP32FlashImageBuilder
 
 
-def test_create_flash_manual_merge_esp32():
+def test_create_flash_manual_merge_esp32() -> None:
     """Test manual flash merge for ESP32 (bootloader at 0x1000)."""
 
     # Create temporary directory
@@ -68,7 +68,7 @@ def test_create_flash_manual_merge_esp32():
             assert firmware_start == b"\xcc", "Firmware should be at offset 0x10000"
 
 
-def test_create_flash_manual_merge_esp32c3():
+def test_create_flash_manual_merge_esp32c3() -> None:
     """Test manual flash merge for ESP32-C3 (bootloader at 0x0)."""
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -126,7 +126,7 @@ def test_create_flash_manual_merge_esp32c3():
             assert firmware_start == b"\xcc", "Firmware should be at offset 0x10000"
 
 
-def test_create_flash_manual_merge_esp32s3():
+def test_create_flash_manual_merge_esp32s3() -> None:
     """Test manual flash merge for ESP32-S3 (bootloader at 0x0)."""
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -166,7 +166,7 @@ def test_create_flash_manual_merge_esp32s3():
             assert magic == b"\xe9", "Magic byte 0xE9 should be at offset 0x0"
 
 
-def test_create_flash_manual_merge_missing_files():
+def test_create_flash_manual_merge_missing_files() -> None:
     """Test manual flash merge with missing files."""
     # Create temporary directory
     with tempfile.TemporaryDirectory() as tmpdir:

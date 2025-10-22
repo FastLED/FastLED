@@ -189,3 +189,10 @@ markers = [
 root = "."
 pythonVersion = "3.11"
 pythonPlatform = "All"
+
+[[tool.pyright.executionEnvironments]]
+root = "ci/tests"
+pythonVersion = "3.11"
+pythonPlatform = "All"
+# Enforce return type annotations even for test methods
+reportMissingReturnType = "error"

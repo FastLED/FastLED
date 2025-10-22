@@ -26,28 +26,28 @@ from ci.compiler.sketch_filter import (
 class TestNormalizePropertyName:
     """Test property name normalization."""
 
-    def test_full_names_unchanged(self):
+    def test_full_names_unchanged(self) -> None:
         """Full property names should pass through unchanged."""
         assert _normalize_property_name("memory") == "memory"
         assert _normalize_property_name("platform") == "platform"
         assert _normalize_property_name("target") == "target"
         assert _normalize_property_name("board") == "board"
 
-    def test_shorthand_names(self):
+    def test_shorthand_names(self) -> None:
         """Shorthand names should be expanded to full names."""
         assert _normalize_property_name("mem") == "memory"
         assert _normalize_property_name("plat") == "platform"
         assert _normalize_property_name("tgt") == "target"
         assert _normalize_property_name("brd") == "board"
 
-    def test_case_insensitive(self):
+    def test_case_insensitive(self) -> None:
         """Property names should be case-insensitive."""
         assert _normalize_property_name("MEM") == "memory"
         assert _normalize_property_name("PLAT") == "platform"
         assert _normalize_property_name("Memory") == "memory"
         assert _normalize_property_name("PLATFORM") == "platform"
 
-    def test_whitespace_handling(self):
+    def test_whitespace_handling(self) -> None:
         """Should trim whitespace."""
         assert _normalize_property_name("  mem  ") == "memory"
         assert _normalize_property_name("\tplat\n") == "platform"
@@ -56,35 +56,35 @@ class TestNormalizePropertyName:
 class TestParseOnelineFilterOperators:
     """Test one-liner filter parsing with different operator styles."""
 
-    def test_is_operator(self):
+    def test_is_operator(self) -> None:
         """Test 'is' operator."""
         result = parse_oneline_filter("(memory is high)")
         assert result is not None
         assert result.require == {"memory": ["high"]}
         assert result.exclude == {}
 
-    def test_is_not_operator(self):
+    def test_is_not_operator(self) -> None:
         """Test 'is not' operator."""
         result = parse_oneline_filter("(memory is not low)")
         assert result is not None
         assert result.require == {}
         assert result.exclude == {"memory": ["low"]}
 
-    def test_equals_operator(self):
+    def test_equals_operator(self) -> None:
         """Test '=' operator as shorthand for 'is'."""
         result = parse_oneline_filter("(mem=high)")
         assert result is not None
         assert result.require == {"memory": ["high"]}
         assert result.exclude == {}
 
-    def test_colon_operator(self):
+    def test_colon_operator(self) -> None:
         """Test ':' operator as shorthand for 'is'."""
         result = parse_oneline_filter("(mem:high)")
         assert result is not None
         assert result.require == {"memory": ["high"]}
         assert result.exclude == {}
 
-    def test_all_operator_styles_equivalent(self):
+    def test_all_operator_styles_equivalent(self) -> None:
         """All three operator styles should produce equivalent results."""
         filters = [
             "(memory is high)",
@@ -109,28 +109,28 @@ class TestParseOnelineFilterOperators:
 class TestParseOnelineFilterShortcuts:
     """Test property name shortcuts in filters."""
 
-    def test_memory_shortcut(self):
+    def test_memory_shortcut(self) -> None:
         """Test 'mem' shortcut for 'memory'."""
         result = parse_oneline_filter("(mem is high)")
         assert result is not None
         assert "memory" in result.require
         assert result.require["memory"] == ["high"]
 
-    def test_platform_shortcut(self):
+    def test_platform_shortcut(self) -> None:
         """Test 'plat' shortcut for 'platform'."""
         result = parse_oneline_filter("(plat is esp32)")
         assert result is not None
         assert "platform" in result.require
         assert result.require["platform"] == ["esp32"]
 
-    def test_target_shortcut(self):
+    def test_target_shortcut(self) -> None:
         """Test 'tgt' shortcut for 'target'."""
         result = parse_oneline_filter("(tgt is ESP32S3)")
         assert result is not None
         assert "target" in result.require
         assert result.require["target"] == ["ESP32S3"]
 
-    def test_board_shortcut(self):
+    def test_board_shortcut(self) -> None:
         """Test 'brd' shortcut for 'board'."""
         result = parse_oneline_filter("(brd is uno)")
         assert result is not None
@@ -141,7 +141,7 @@ class TestParseOnelineFilterShortcuts:
 class TestParseOnelineFilterCompound:
     """Test compound filters with and/or logic."""
 
-    def test_and_logic(self):
+    def test_and_logic(self) -> None:
         """Test 'and' operator combining multiple conditions."""
         result = parse_oneline_filter("(mem is high) and (plat is esp32)")
         assert result is not None
@@ -150,7 +150,7 @@ class TestParseOnelineFilterCompound:
             "platform": ["esp32"],
         }
 
-    def test_or_in_exclude(self):
+    def test_or_in_exclude(self) -> None:
         """Test 'or' logic with negation (exclude)."""
         result = parse_oneline_filter("(plat is not esp8266) and (plat is not avr)")
         assert result is not None
@@ -158,14 +158,14 @@ class TestParseOnelineFilterCompound:
             "platform": ["esp8266", "avr"],
         }
 
-    def test_mixed_requires_and_excludes(self):
+    def test_mixed_requires_and_excludes(self) -> None:
         """Test mixture of require and exclude conditions."""
         result = parse_oneline_filter("(mem is high) and (plat is not avr)")
         assert result is not None
         assert result.require == {"memory": ["high"]}
         assert result.exclude == {"platform": ["avr"]}
 
-    def test_complex_filter(self):
+    def test_complex_filter(self) -> None:
         """Test complex filter with multiple conditions."""
         result = parse_oneline_filter(
             "(mem is high) and (plat is esp32*) and (tgt is not esp32p4)"
@@ -181,13 +181,13 @@ class TestParseOnelineFilterCompound:
 class TestParseOnelineFilterWildcards:
     """Test wildcard and glob patterns."""
 
-    def test_glob_pattern(self):
+    def test_glob_pattern(self) -> None:
         """Test glob pattern matching."""
         result = parse_oneline_filter("(plat is esp32*)")
         assert result is not None
         assert result.require == {"platform": ["esp32*"]}
 
-    def test_cpp_define_format(self):
+    def test_cpp_define_format(self) -> None:
         """Test C++ define format (-D prefix)."""
         result = parse_oneline_filter("(tgt is -D__AVR__)")
         assert result is not None
@@ -197,13 +197,13 @@ class TestParseOnelineFilterWildcards:
 class TestParseOnelineFilterQuotes:
     """Test quoted values in filters."""
 
-    def test_double_quotes(self):
+    def test_double_quotes(self) -> None:
         """Test double-quoted values."""
         result = parse_oneline_filter('(board is "uno")')
         assert result is not None
         assert result.require == {"board": ["uno"]}
 
-    def test_single_quotes(self):
+    def test_single_quotes(self) -> None:
         """Test single-quoted values."""
         result = parse_oneline_filter("(board is 'uno')")
         assert result is not None
@@ -225,35 +225,35 @@ class TestParseFilterFromSketchOneliners:
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
-    def test_filter_with_colon(self):
+    def test_filter_with_colon(self) -> None:
         """Test @filter: syntax with colon."""
         sketch_content = "// @filter: (mem is high)"
         result = self._write_and_parse(sketch_content)
         assert result is not None
         assert result.require == {"memory": ["high"]}
 
-    def test_filter_without_colon(self):
+    def test_filter_without_colon(self) -> None:
         """Test @filter syntax without colon."""
         sketch_content = "// @filter (mem is high)"
         result = self._write_and_parse(sketch_content)
         assert result is not None
         assert result.require == {"memory": ["high"]}
 
-    def test_filter_with_equals(self):
+    def test_filter_with_equals(self) -> None:
         """Test @filter with = operator."""
         sketch_content = "// @filter (mem=high)"
         result = self._write_and_parse(sketch_content)
         assert result is not None
         assert result.require == {"memory": ["high"]}
 
-    def test_filter_with_colon_operator(self):
+    def test_filter_with_colon_operator(self) -> None:
         """Test @filter with : operator."""
         sketch_content = "// @filter (mem:high)"
         result = self._write_and_parse(sketch_content)
         assert result is not None
         assert result.require == {"memory": ["high"]}
 
-    def test_filter_compound_logic(self):
+    def test_filter_compound_logic(self) -> None:
         """Test compound filter with multiple conditions."""
         sketch_content = (
             "// @filter (mem is high) and (plat is esp32*) and (tgt is not esp32p4)"
@@ -266,7 +266,7 @@ class TestParseFilterFromSketchOneliners:
         }
         assert result.exclude == {"target": ["esp32p4"]}
 
-    def test_no_filter(self):
+    def test_no_filter(self) -> None:
         """Test sketch without @filter."""
         sketch_content = "// Regular comment\nvoid setup() {}"
         result = self._write_and_parse(sketch_content)
@@ -288,7 +288,7 @@ class TestParseFilterFromSketchYAML:
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
-    def test_yaml_with_colon(self):
+    def test_yaml_with_colon(self) -> None:
         """Test YAML-style @filter: with colon."""
         sketch_content = """// @filter:
 // require:
@@ -303,7 +303,7 @@ class TestParseFilterFromSketchYAML:
             "platform": ["esp32"],
         }
 
-    def test_yaml_without_colon(self):
+    def test_yaml_without_colon(self) -> None:
         """Test YAML-style @filter without colon."""
         sketch_content = """// @filter
 // require:
@@ -318,7 +318,7 @@ class TestParseFilterFromSketchYAML:
             "platform": ["esp32"],
         }
 
-    def test_yaml_with_shortcuts(self):
+    def test_yaml_with_shortcuts(self) -> None:
         """Test YAML-style using property shortcuts."""
         sketch_content = """// @filter
 // require:
@@ -333,7 +333,7 @@ class TestParseFilterFromSketchYAML:
             "platform": ["esp32"],
         }
 
-    def test_yaml_with_exclude(self):
+    def test_yaml_with_exclude(self) -> None:
         """Test YAML-style with exclude section."""
         sketch_content = """// @filter
 // require:
@@ -433,32 +433,32 @@ class TestShouldSkipSketch:
 class TestEdgeCases:
     """Test edge cases and error handling."""
 
-    def test_empty_filter_line(self):
+    def test_empty_filter_line(self) -> None:
         """Empty filter line should return None."""
         result = parse_oneline_filter("")
         assert result is None
 
-    def test_whitespace_only(self):
+    def test_whitespace_only(self) -> None:
         """Whitespace-only filter should return None."""
         result = parse_oneline_filter("   ")
         assert result is None
 
-    def test_invalid_filter_syntax(self):
+    def test_invalid_filter_syntax(self) -> None:
         """Invalid syntax should return None."""
         result = parse_oneline_filter("memory high")  # Missing parentheses
         assert result is None
 
-    def test_unknown_property(self):
+    def test_unknown_property(self) -> None:
         """Unknown property should be ignored."""
         result = parse_oneline_filter("(unknown is value)")
         assert result is None  # No valid properties found
 
-    def test_unmatched_parenthesis(self):
+    def test_unmatched_parenthesis(self) -> None:
         """Unmatched parenthesis should be handled gracefully."""
         result = parse_oneline_filter("(memory is high")
         assert result is None  # Regex won't match
 
-    def test_multiple_filters_only_first_used(self):
+    def test_multiple_filters_only_first_used(self) -> None:
         """File with multiple @filter directives uses first match."""
         sketch_content = """
 // @filter (mem is high)
@@ -478,7 +478,7 @@ some code
         finally:
             Path(temp_path).unlink(missing_ok=True)
 
-    def test_not_prefix_negation(self):
+    def test_not_prefix_negation(self) -> None:
         """Test 'not' prefix for negation (e.g., 'not (board is teensylc)')."""
         # Both syntaxes should be equivalent:
         # 1. Using 'not' prefix: not (board is teensylc)
@@ -495,7 +495,7 @@ some code
         assert result1.require == {}
         assert result2.require == {}
 
-    def test_not_prefix_with_and(self):
+    def test_not_prefix_with_and(self) -> None:
         """Test 'not' prefix in compound filter with 'and'."""
         # Filter: (platform is teensy) and not (board is teensylc)
         result = parse_oneline_filter(
@@ -506,7 +506,7 @@ some code
         assert result.require == {"platform": ["teensy"]}
         assert result.exclude == {"board": ["teensylc"]}
 
-    def test_not_prefix_equivalence_with_is_not(self):
+    def test_not_prefix_equivalence_with_is_not(self) -> None:
         """Test that 'not' prefix is equivalent to 'is not' operator."""
         # These three should all be equivalent
         result1 = parse_oneline_filter("not (board is teensylc)")
@@ -525,7 +525,7 @@ some code
         assert result3.require == result4.require
         assert result3.exclude == result4.exclude
 
-    def test_should_skip_with_not_prefix_filter(self):
+    def test_should_skip_with_not_prefix_filter(self) -> None:
         """Test that should_skip_sketch works with 'not' prefix filters."""
         teensylc_board = Board(
             board_name="teensylc",
@@ -553,7 +553,7 @@ some code
         skip_teensy_41, reason = should_skip_sketch(teensy41_board, filter_obj)
         assert skip_teensy_41 is False
 
-    def test_case_insensitive_board_matching(self):
+    def test_case_insensitive_board_matching(self) -> None:
         """Test that board name matching is case-insensitive."""
         filter_obj = parse_oneline_filter(
             "(platform is teensy) and not (board is teensylc)"

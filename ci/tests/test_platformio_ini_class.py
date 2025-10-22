@@ -82,7 +82,7 @@ class TestPlatformIOIni(unittest.TestCase):
         if self.temp_dir.exists():
             shutil.rmtree(self.temp_dir)
 
-    def test_parse_and_dump(self):
+    def test_parse_and_dump(self) -> None:
         """Test basic parse and dump functionality."""
         # Create a test platformio.ini file
         self.test_ini.write_text(BASIC_INI_CONTENT)
@@ -134,7 +134,7 @@ class TestPlatformIOIni(unittest.TestCase):
         )
         self.assertEqual(pio_ini2.get_option("env:uno", "platform"), "atmelavr")
 
-    def test_validation(self):
+    def test_validation(self) -> None:
         """Test validation functionality."""
         # Create an invalid platformio.ini
         self.test_ini.write_text(INVALID_INI_CONTENT)
@@ -145,7 +145,7 @@ class TestPlatformIOIni(unittest.TestCase):
         self.assertIn("missing 'board' option", issues[0])
         self.assertIn("missing required 'platform' option", issues[1])
 
-    def test_dict_conversion(self):
+    def test_dict_conversion(self) -> None:
         """Test to_dict and from_dict functionality."""
         self.test_ini.write_text(DICT_TEST_INI_CONTENT)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -162,7 +162,7 @@ class TestPlatformIOIni(unittest.TestCase):
         self.assertEqual(pio_ini2.get_option("env:test", "board"), "esp32dev")
         self.assertEqual(pio_ini2.get_option("env:test", "platform"), "espressif32")
 
-    def test_string_representation(self):
+    def test_string_representation(self) -> None:
         """Test string representation."""
         self.test_ini.write_text(STRING_TEST_INI_CONTENT)
         pio_ini = PlatformIOIni.parseFile(self.test_ini)
@@ -172,7 +172,7 @@ class TestPlatformIOIni(unittest.TestCase):
         self.assertIn("src_dir = src", str_repr)
         self.assertIn("[env:test]", str_repr)
 
-    def test_static_parse_method(self):
+    def test_static_parse_method(self) -> None:
         """Test static parse factory method."""
         self.test_ini.write_text(PARSE_TEST_INI_CONTENT)
 
@@ -187,7 +187,7 @@ class TestPlatformIOIni(unittest.TestCase):
         # Verify file_path is set correctly
         self.assertEqual(pio_ini.file_path, self.test_ini)
 
-    def test_parse_string_method(self):
+    def test_parse_string_method(self) -> None:
         """Test static parseString factory method."""
         # Test static parseString method
         pio_ini = PlatformIOIni.parseString(PARSE_TEST_INI_CONTENT)
@@ -200,7 +200,7 @@ class TestPlatformIOIni(unittest.TestCase):
         # Verify file_path is None since parsed from string
         self.assertIsNone(pio_ini.file_path)
 
-    def test_optimize_method(self):
+    def test_optimize_method(self) -> None:
         """Test the optimize() method that downloads and caches packages."""
         # Create content with a real zip URL
         test_content = """[platformio]

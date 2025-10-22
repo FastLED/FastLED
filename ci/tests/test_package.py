@@ -31,13 +31,13 @@ from ci.compiler.packages import (
 class TestHelp:
     """Test Help model validation"""
 
-    def test_valid_help(self):
+    def test_valid_help(self) -> None:
         """Test valid help creation"""
         help_data = {"online": "https://github.com/espressif/arduino-esp32"}
         help_obj = Help(**help_data)  # type: ignore
         assert str(help_obj.online) == "https://github.com/espressif/arduino-esp32"
 
-    def test_invalid_url(self):
+    def test_invalid_url(self) -> None:
         """Test invalid URL validation"""
         with pytest.raises(ValidationError):
             Help(online="not-a-valid-url")  # type: ignore
@@ -46,7 +46,7 @@ class TestHelp:
 class TestBoard:
     """Test Board model validation"""
 
-    def test_valid_board(self):
+    def test_valid_board(self) -> None:
         """Test valid board creation"""
         board_data = {
             "name": "ESP32 Dev Module",
@@ -59,12 +59,12 @@ class TestBoard:
         assert board.name == "ESP32 Dev Module"
         assert board.properties["upload.tool"] == "esptool_py"
 
-    def test_empty_name_validation(self):
+    def test_empty_name_validation(self) -> None:
         """Test empty name validation"""
         with pytest.raises(ValidationError):
             Board(name="", properties={})
 
-    def test_name_trimming(self):
+    def test_name_trimming(self) -> None:
         """Test name trimming functionality"""
         board = Board(name="  ESP32 Dev Module  ", properties={})
         assert board.name == "ESP32 Dev Module"
@@ -73,7 +73,7 @@ class TestBoard:
 class TestSystemDownload:
     """Test SystemDownload model validation"""
 
-    def test_size_conversion_from_string(self):
+    def test_size_conversion_from_string(self) -> None:
         """Test size conversion from string bytes to MB"""
         system = SystemDownload(
             host="test-host",
@@ -84,7 +84,7 @@ class TestSystemDownload:
         )
         assert abs(system.size_mb - 50.0) < 0.1  # Should be ~50 MB
 
-    def test_invalid_checksum_format(self):
+    def test_invalid_checksum_format(self) -> None:
         """Test invalid checksum format validation"""
         with pytest.raises(ValidationError):
             SystemDownload(
@@ -99,7 +99,7 @@ class TestSystemDownload:
 class TestPlatform:
     """Test Platform model validation"""
 
-    def test_valid_platform(self):
+    def test_valid_platform(self) -> None:
         """Test valid platform creation"""
         platform_data: Dict[str, Any] = {
             "name": "ESP32 Arduino",
@@ -119,7 +119,7 @@ class TestPlatform:
         assert platform.architecture == "esp32"
         assert platform.size_mb == 50000000 / (1024 * 1024)
 
-    def test_invalid_archive_extension(self):
+    def test_invalid_archive_extension(self) -> None:
         """Test invalid archive extension validation"""
         with pytest.raises(ValidationError):
             Platform(
@@ -140,7 +140,7 @@ class TestPlatform:
 class TestPackageIndexParser:
     """Test PackageIndexParser functionality"""
 
-    def test_parse_valid_json(self):
+    def test_parse_valid_json(self) -> None:
         """Test parsing valid package index JSON"""
         valid_json: Dict[str, Any] = {
             "packages": [
@@ -161,7 +161,7 @@ class TestPackageIndexParser:
         assert len(package_index.packages) == 1
         assert package_index.packages[0].name == "test"
 
-    def test_parse_invalid_json(self):
+    def test_parse_invalid_json(self) -> None:
         """Test parsing invalid JSON"""
         parser = PackageIndexParser()
 
@@ -172,7 +172,7 @@ class TestPackageIndexParser:
 class TestUtilityFunctions:
     """Test utility functions"""
 
-    def test_format_size(self):
+    def test_format_size(self) -> None:
         """Test size formatting function"""
         # Test KB
         assert format_size(0.5) == "512.0 KB"
@@ -189,7 +189,7 @@ class TestUtilityFunctions:
 class TestRealDataParsing:
     """Test with real ESP32 package index data (if network available)"""
 
-    def test_esp32_package_parsing(self):
+    def test_esp32_package_parsing(self) -> None:
         """Test parsing real ESP32 package index"""
         ESP32_URL = "https://espressif.github.io/arduino-esp32/package_esp32_index.json"
 

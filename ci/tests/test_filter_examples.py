@@ -12,7 +12,7 @@ import pytest
 from ci.compiler.sketch_filter import parse_filter_from_sketch
 
 
-def test_example_sketches():
+def test_example_sketches() -> None:
     """Test various @filter syntax styles with example sketches."""
 
     examples: List[Dict[str, Any]] = [

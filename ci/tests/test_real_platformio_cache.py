@@ -48,7 +48,7 @@ class TestRealPlatformIOCache(unittest.TestCase):
         if self.platformio_ini.exists():
             self.platformio_ini.unlink()
 
-    def test_real_esp32_platform_download_and_transform(self):
+    def test_real_esp32_platform_download_and_transform(self) -> None:
         """Test with real ESP32 platform download - no mocks."""
         # Create simple platformio.ini with real ESP32 platform URL
         platformio_ini_content = PLATFORMIO_INI_TEMPLATE.format(
