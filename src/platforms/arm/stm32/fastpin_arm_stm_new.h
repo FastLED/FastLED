@@ -47,6 +47,8 @@ public:
   inline static port_ptr_t sport() __attribute__ ((always_inline)) { return &_GPIO::r()->BSRR; }
   inline static port_ptr_t cport() __attribute__ ((always_inline)) { return &_GPIO::r()->BRR; }
   inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+
+  static constexpr bool validpin() { return true; }
 };
 
 #define _R(T) struct __gen_struct_ ## T
