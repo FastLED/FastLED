@@ -26,6 +26,16 @@ namespace fl {
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/// Mixin base class that provides the default validpin() implementation for explicitly declared pins.
+/// All platform-specific pin classes (_ARMPIN, _ESPPIN, etc.) should inherit from this to indicate
+/// that explicitly defined pins are valid by default. Undefined pins use the default FastPin<>
+/// template which returns false.
+struct ValidPinBase {
+	/// All explicitly declared pins are valid by default
+	/// Platforms can override this in specific cases to mark pins as invalid (e.g., ground pins, UART pins)
+	static constexpr bool validpin() { return true; }
+};
+
 /// Abstract class for "selectable" things
 class Selectable {
 public:

@@ -95,7 +95,7 @@ struct __generated_struct_NRF_P1 {
 namespace fl {
 
 // The actual class template can then use a typename, for what is essentially a constexpr NRF_GPIO_Type*
-template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN  {
+template <uint32_t _MASK, typename _PORT, uint8_t _PORT_NUMBER, uint8_t _PIN_NUMBER> class _ARMPIN : public ValidPinBase {
 public:
     typedef volatile uint32_t * port_ptr_t;
     typedef uint32_t port_t;
