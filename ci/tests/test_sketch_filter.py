@@ -553,6 +553,33 @@ some code
         skip_teensy_41, reason = should_skip_sketch(teensy41_board, filter_obj)
         assert skip_teensy_41 is False
 
+    def test_case_insensitive_board_matching(self):
+        """Test that board name matching is case-insensitive."""
+        filter_obj = parse_oneline_filter(
+            "(platform is teensy) and not (board is teensylc)"
+        )
+
+        # Test various case combinations
+        test_cases = [
+            ("teensylc", True, "lowercase"),
+            ("TeensyLC", True, "PascalCase"),
+            ("TEENSYLC", True, "UPPERCASE"),
+            ("TeenSyLc", True, "MixedCase"),
+            ("teensy41", False, "different board (should not skip)"),
+        ]
+
+        for board_name, should_skip_expected, description in test_cases:
+            test_board = Board(
+                board_name=board_name,
+                platform="teensy",
+                framework="arduino",
+            )
+
+            skip, _ = should_skip_sketch(test_board, filter_obj)
+            assert skip == should_skip_expected, (
+                f"Failed for {description}: board='{board_name}'"
+            )
+
 
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])
