@@ -263,7 +263,8 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     asm volatile(
         // result.A-B  = i.A x scale.A
         "  mul %A[i], %A[scale]                 \n\t"
-        "  movw %A[result], r0                   \n\t"
+        "  mov %A[result], r0                    \n\t"
+        "  mov %B[result], r1                    \n\t"
         : [result] "=r"(result)
         : [i] "r"(i), [scale] "r"(scale)
         : "r0", "r1");
@@ -271,7 +272,8 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     asm volatile(
         // result.C-D  = i.B x scale.B
         "  mul %B[i], %B[scale]                 \n\t"
-        "  movw %C[result], r0                   \n\t"
+        "  mov %C[result], r0                    \n\t"
+        "  mov %D[result], r1                    \n\t"
         : [result] "+r"(result)
         : [i] "r"(i), [scale] "r"(scale)
         : "r0", "r1");
@@ -315,7 +317,8 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     asm volatile(
         // result.A-B  = i.A x scale.A
         "  mul %A[i], %A[scale]                 \n\t"
-        "  movw %A[result], r0                   \n\t"
+        "  mov %A[result], r0                    \n\t"
+        "  mov %B[result], r1                    \n\t"
 
         : [result] "=r"(result)
         : [i] "r"(i), [scale] "r"(scale)
@@ -324,7 +327,8 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
     asm volatile(
         // result.C-D  = i.B x scale.B
         "  mul %B[i], %B[scale]                 \n\t"
-        "  movw %C[result], r0                   \n\t"
+        "  mov %C[result], r0                    \n\t"
+        "  mov %D[result], r1                    \n\t"
         : [result] "+r"(result)
         : [i] "r"(i), [scale] "r"(scale)
         : "r0", "r1");

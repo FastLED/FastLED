@@ -251,7 +251,7 @@ def compile_board_example(
 
     try:
         # Build compile command
-        cmd = []
+        cmd: List[str] = []
 
         # Add NO_PARALLEL env var if not parallel
         if not parallel:
