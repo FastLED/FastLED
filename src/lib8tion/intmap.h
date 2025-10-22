@@ -105,8 +105,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
     //   return uint8_t((x + 128) >> 8);
     // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
     // avoiding branch prediction penalties.
-    uint32_t result = (x + 128) >> 8;
-    return (x >= 0xff00) ? 0xff : (uint8_t)result;
+    uint8_t result = (x + 128) >> 8;
+    return (x >= 0xff00) ? 0xff : result;
 }
 
 /// @brief Maps a 32-bit value down to a 16-bit value.
@@ -127,7 +127,6 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
 ///       by the rounding math: (0 + 32768) >> 16 = 0.
 LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
     // Compute the scaled-down value with rounding
-
     // Branchless equivalent of the original:
     //   if (x >= 0xffff0000) {
     //       return 0xffff;
@@ -135,8 +134,8 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
     //   return uint16_t((x + 32768) >> 16);
     // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
     // avoiding branch prediction penalties.
-    uint32_t result = (x + 32768) >> 16;
-    return (x >= 0xffff0000) ? 0xffff : (uint16_t)result;
+    uint16_t result = (x + 32768) >> 16;
+    return (x >= 0xffff0000) ? 0xffff : result;
 }
 
 /// @brief Maps a 32-bit value down to an 8-bit value.
@@ -157,7 +156,6 @@ LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
 ///       by the rounding math: (0 + 0x800000) >> 24 = 0.
 LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
     // Compute the scaled-down value with rounding
-
     // Branchless equivalent of the original:
     //   if (x >= 0xFF000000) {
     //       return 0xff;
@@ -165,8 +163,8 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
     //   return uint8_t((x + 0x800000) >> 24);
     // Uses ternary operator to compile to cmov (conditional move) on modern CPUs,
     // avoiding branch prediction penalties.
-    uint32_t result = (x + 0x800000) >> 24;
-    return (x >= 0xFF000000) ? 0xff : (uint8_t)result;
+    uint8_t result = (x + 0x800000) >> 24;
+    return (x >= 0xFF000000) ? 0xff : result;
 }
 
 /// @} intmap
