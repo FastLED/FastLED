@@ -143,7 +143,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
     if (x == 0) {
         return 0;
     }
-    if (x >= 0xffffff00) {
+    if (x >= 0xFF000000) {
         return 0xff;
     }
     return uint8_t((x + 0x800000) >> 24);
