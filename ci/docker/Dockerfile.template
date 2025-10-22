@@ -25,13 +25,10 @@ ARG PLATFORMS
 # PLATFORM-INDEPENDENT SETUP
 # ==============================================================================
 
-# Copy build scripts and Python modules for dependency caching
+# Copy build scripts for dependency caching
 # Using script files makes Docker layer caching more deterministic
 COPY build.sh /tmp/build.sh
 RUN chmod +x /tmp/build.sh
-
-# Copy ci/ directory so Python modules (ci.docker.*) are available
-COPY ci /fastled/ci
 
 # Verify argument was passed
 RUN if [ -z "$PLATFORMS" ]; then \
