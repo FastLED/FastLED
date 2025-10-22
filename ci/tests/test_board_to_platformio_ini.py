@@ -35,7 +35,7 @@ class TestBoardToPlatformioIni(unittest.TestCase):
         self.assertIn("[env:esp32c3]", lines)
         self.assertIn("board = esp32-c3-devkitm-1", lines)
 
-    def test_flags_and_unflags(self):
+    def test_flags(self):
         board = Board(
             board_name="custom",
             defines=["FASTLED_TEST=1"],

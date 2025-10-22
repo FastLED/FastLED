@@ -58,7 +58,6 @@ class Board:
         None  # Flash size for ESP32 boards (e.g., '4MB')
     )
     build_flags: list[str] | None = None  # Reserved for future use.
-    build_unflags: list[str] | None = None  # New: unflag options
     defines: list[str] | None = None
     customsdk: str | None = None
     board_partitions: str | None = None  # Reserved for future use.
@@ -429,11 +428,6 @@ class Board:
             for define in self.defines:
                 options.append(f"build_flags=-D{define}")
 
-        # Handle build_unflags
-        if self.build_unflags:
-            for uf in self.build_unflags:
-                options.append(f"build_unflags={uf}")
-
         # Handle explicit build_flags (added for native host compilation and other special cases)
         if self.build_flags:
             for bf in self.build_flags:
@@ -549,7 +543,7 @@ class Board:
         if self.board_partitions:
             lines.append(f"board_build.partitions = {self.board_partitions}")
 
-        # Build-time flags and unflags ---------------------------------------
+        # Build-time flags -------------------------------------------------
         build_flags_elements: list[str] = []
         if self.defines:
             build_flags_elements.extend(f"-D{define}" for define in self.defines)
@@ -573,11 +567,6 @@ class Board:
             lines.append("build_flags =")
             for flag in build_flags_elements:
                 lines.append(f"    {flag}")
-
-        if self.build_unflags:
-            # PlatformIO accepts multiple *build_unflags* separated by spaces.
-            # Emit a single line for readability.
-            lines.append(f"build_unflags = {' '.join(self.build_unflags)}")
 
         # Custom ESP-IDF sdkconfig override (ESP32-family boards)
         if self.customsdk:
@@ -772,7 +761,6 @@ ESP32_S3_DEVKITC_1 = Board(
     framework="arduino",
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="default.csv",  # Use default 4MB partition table for QEMU compatibility
-    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
 ESP32_S2_DEVKITM_1 = Board(
@@ -1054,15 +1042,13 @@ ATTINY85 = Board(
     framework="arduino",
 )
 
-# Seeed XIAO ESP32S3 board – same platform, needs FASTLED_RMT5 macro removal
+# Seeed XIAO ESP32S3 board – same platform
 XIAO_ESP32S3 = Board(
     board_name="seeed_xiao_esp32s3",
     real_board_name="seeed_xiao_esp32s3",
     platform=ESP32_IDF_5_4_PIOARDUINO,
     board_build_flash_size="4MB",  # Set to 4MB for QEMU compatibility (default is 8MB)
     board_partitions="default.csv",  # Use default 4MB partition table for QEMU compatibility
-    defines=None,
-    build_unflags=["-DFASTLED_RMT5=0", "-DFASTLED_RMT5"],
 )
 
 # STM32F4 Black Pill board - addresses GitHub issue #726
