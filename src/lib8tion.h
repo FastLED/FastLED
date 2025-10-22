@@ -28,7 +28,7 @@ FL_DISABLE_WARNING_SIGN_CONVERSION
 #include "lib8tion/lib8static.h"
 #include "lib8tion/qfx.h"
 #include "lib8tion/memmove.h"
-#include "lib8tion/config.h"
+#include "platforms/math8_config.h"
 #include "fl/ease.h"
 
 

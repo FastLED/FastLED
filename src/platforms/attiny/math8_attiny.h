@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib8tion/config.h"
+#include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
 
@@ -57,7 +57,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
         "  lsr %[j]                     \n\t"  /* Shift j right */
         "  lsr %[cnt]                   \n\t"  /* Shift counter */
         "  brcc LOOP_%=                 \n\t"  /* Loop if counter not zero */
-        "  jmp DONE_%=                  \n\t"
+        "  rjmp DONE_%=                 \n\t"
         "SATURATE_%=:                   \n\t"
         "  ldi %[result], 0xFF          \n\t"  /* Set result to 0xFF */
         "DONE_%=:                       \n\t"

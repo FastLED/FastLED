@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib8tion/config.h"
+#include "platforms/math8_config.h"
 #include "crgb.h"
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"

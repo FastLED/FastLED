@@ -4,6 +4,8 @@
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
 
+namespace fl {
+
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
@@ -11,7 +13,7 @@ FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 FL_DISABLE_WARNING_FLOAT_CONVERSION
 FL_DISABLE_WARNING_SIGN_CONVERSION
 
-// Note: This file is included inside an already-open namespace from fl/trig8.h
+// Note: This file opens its own namespace fl block
 
 /// @file trig8.h
 /// AVR assembly language implementations of trigonometry functions.
@@ -141,3 +143,5 @@ LIB8STATIC uint8_t cos8(uint8_t theta) { return sin8(theta + 64); }
 /// @} Trig_AVR
 
 FL_DISABLE_WARNING_POP
+
+}  // namespace fl

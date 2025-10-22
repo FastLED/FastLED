@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib8tion/config.h"
+#include "platforms/math8_config.h"
 #include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
@@ -99,7 +99,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
                  "adc %B[j], __zero_reg__      \n\t"
                  : [j] "+r"(j)
                  : [i] "r"(i));
-    return i;
+    return j;
 }
 
 /// Subtract one byte from another, 8-bit result (AVR assembly)

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "lib8tion/config.h"
+#include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
 
@@ -22,9 +22,10 @@ namespace fl {
 /// Fast AVR assembly implementations of 8-bit math operations (with hardware MUL)
 /// @{
 
-/// 8x8 bit multiplication, with 8-bit result (AVR assembly with MUL)
-/// Uses the hardware MUL instruction (2 cycle latency)
-/// ~10 cycles total
+/// 8x8 bit multiplication, with 8-bit result (AVR assembly with MUL or shift-and-add)
+/// Uses the hardware MUL instruction when available (2 cycle latency)
+/// ~10 cycles total, or ~32 cycles for shift-and-add on ATtiny
+#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
 LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
@@ -38,10 +39,30 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
         : "r0", "r1");
     return i;
 }
+#else
+// Fallback for platforms without hardware MUL (e.g., ATtiny)
+LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+    uint8_t result = 0;
+    uint8_t cnt = 0x80;
+    asm volatile(
+        "LOOP_%=:                       \n\t"
+        "  sbrc %[j], 0                 \n\t"  /* Check if bit is set */
+        "  add %[result], %[i]          \n\t"  /* Add i to result if bit is set */
+        "  ror %[result]                \n\t"  /* Rotate result right */
+        "  lsr %[j]                     \n\t"  /* Shift j right */
+        "  lsr %[cnt]                   \n\t"  /* Shift counter */
+        "  brcc LOOP_%=                 \n\t"  /* Loop if counter not zero */
+        : [result] "+r"(result), [cnt] "+r"(cnt)
+        : [i] "r"(i), [j] "r"(j)
+        :);
+    return result;
+}
+#endif
 
-/// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (AVR assembly with MUL)
+/// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (AVR assembly with MUL or shift-and-add)
 /// Uses hardware MUL with high-byte test for saturation detection
-/// ~15 cycles
+/// ~15 cycles, or ~40 cycles for shift-and-add on ATtiny
+#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
 LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
@@ -61,11 +82,36 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
         : "r0", "r1");
     return i;
 }
+#else
+// Fallback for platforms without hardware MUL (e.g., ATtiny)
+LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+    uint8_t result = 0;
+    uint8_t cnt = 0x80;
+    asm volatile(
+        "LOOP_%=:                       \n\t"
+        "  sbrc %[j], 0                 \n\t"  /* Check if bit is set */
+        "  add %[result], %[i]          \n\t"  /* Add i to result if bit is set */
+        "  brcs SATURATE_%=             \n\t"  /* If carry set, saturate */
+        "  ror %[result]                \n\t"  /* Rotate result right */
+        "  lsr %[j]                     \n\t"  /* Shift j right */
+        "  lsr %[cnt]                   \n\t"  /* Shift counter */
+        "  brcc LOOP_%=                 \n\t"  /* Loop if counter not zero */
+        "  rjmp DONE_%=                 \n\t"
+        "SATURATE_%=:                   \n\t"
+        "  ldi %[result], 0xFF          \n\t"  /* Set result to 0xFF */
+        "DONE_%=:                       \n\t"
+        : [result] "+d"(result), [cnt] "+r"(cnt)  /* d = r16-r31 for ldi */
+        : [i] "r"(i), [j] "r"(j)
+        :);
+    return result;
+}
+#endif
 
-/// Blend a variable proportion of one byte to another (AVR assembly with MUL)
+/// Blend a variable proportion of one byte to another (AVR assembly with MUL or shift-and-add)
 /// Computes: result = ((a * (255 - amountOfB)) + (b * amountOfB)) >> 8
-/// Uses two hardware MUL instructions
+/// Uses two hardware MUL instructions or shift-and-add fallback
 #if (FASTLED_BLEND_FIXED == 1)
+#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial = 0;
     uint8_t result;
@@ -91,6 +137,63 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
     return result;
 }
 #else
+// Fallback for platforms without hardware MUL (e.g., ATtiny)
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint16_t partial = 0;
+    uint8_t result;
+    uint8_t amountOfA = 255 - amountOfB;
+    uint8_t mult_cnt = 0x80;
+    uint8_t temp_work = 0;
+
+    // Use shift-and-add assembly for two 8x8->16 bit multiplies
+    asm volatile(
+        // Initialize partial to 0
+        "  mov %A[partial], __zero_reg__ \n\t"
+        "  mov %B[partial], __zero_reg__ \n\t"
+        "  mov %[temp_work], __zero_reg__ \n\t"
+        "  mov %[mult_cnt], 0x80         \n\t"
+
+        // Compute: partial = a * amountOfA (first multiply)
+        "MULT_A_%=:                      \n\t"
+        "  sbrc %[amountOfA], 0          \n\t"  // skip if bit 0 of amountOfA clear
+        "  add %[temp_work], %[a]        \n\t"  // add a to temp if bit set
+        "  adc %A[partial], __zero_reg__ \n\t"  // propagate carry to partial.low
+        "  adc %B[partial], __zero_reg__ \n\t"  // propagate carry to partial.high
+        "  ror %[temp_work]              \n\t"  // rotate temp right through carry
+        "  ror %A[partial]               \n\t"  // rotate partial.low right
+        "  ror %B[partial]               \n\t"  // rotate partial.high right
+        "  lsr %[amountOfA]              \n\t"  // shift amountOfA right
+        "  lsr %[mult_cnt]               \n\t"  // shift counter
+        "brcc MULT_A_%=                  \n\t"  // loop if counter not zero
+
+        // Now add: partial += b * amountOfB (second multiply)
+        "  mov %[mult_cnt], 0x80         \n\t"
+        "  mov %[temp_work], __zero_reg__ \n\t"
+
+        "MULT_B_%=:                      \n\t"
+        "  sbrc %[amountOfB], 0          \n\t"  // skip if bit 0 of amountOfB clear
+        "  add %[temp_work], %[b]        \n\t"  // add b to temp if bit set
+        "  adc %A[partial], __zero_reg__ \n\t"  // propagate carry to partial.low
+        "  adc %B[partial], __zero_reg__ \n\t"  // propagate carry to partial.high
+        "  ror %[temp_work]              \n\t"  // rotate temp right through carry
+        "  ror %A[partial]               \n\t"  // rotate partial.low right
+        "  ror %B[partial]               \n\t"  // rotate partial.high right
+        "  lsr %[amountOfB]              \n\t"  // shift amountOfB right
+        "  lsr %[mult_cnt]               \n\t"  // shift counter
+        "brcc MULT_B_%=                  \n\t"  // loop if counter not zero
+
+        : [partial] "+r"(partial), [temp_work] "+r"(temp_work),
+          [mult_cnt] "+r"(mult_cnt), [amountOfA] "+r"(amountOfA),
+          [amountOfB] "+r"(amountOfB)
+        : [a] "r"(a), [b] "r"(b)
+        :);
+
+    result = partial >> 8;
+    return result;
+}
+#endif
+#else
+#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial = 0;
     uint8_t result;
@@ -122,6 +225,62 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 
     return result;
 }
+#else
+// Fallback for platforms without hardware MUL (e.g., ATtiny)
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint16_t partial = 0;
+    uint8_t result;
+    uint8_t amountOfA = 255 - amountOfB;
+    uint8_t mult_cnt = 0x80;
+    uint8_t temp_work = 0;
+
+    // Use shift-and-add assembly for two 8x8->16 bit multiplies
+    asm volatile(
+        // Initialize partial to 0
+        "  mov %A[partial], __zero_reg__ \n\t"
+        "  mov %B[partial], __zero_reg__ \n\t"
+        "  mov %[temp_work], __zero_reg__ \n\t"
+        "  mov %[mult_cnt], 0x80         \n\t"
+
+        // Compute: partial = a * amountOfA (first multiply)
+        "MULT_A_%=:                      \n\t"
+        "  sbrc %[amountOfA], 0          \n\t"  // skip if bit 0 of amountOfA clear
+        "  add %[temp_work], %[a]        \n\t"  // add a to temp if bit set
+        "  adc %A[partial], __zero_reg__ \n\t"  // propagate carry to partial.low
+        "  adc %B[partial], __zero_reg__ \n\t"  // propagate carry to partial.high
+        "  ror %[temp_work]              \n\t"  // rotate temp right through carry
+        "  ror %A[partial]               \n\t"  // rotate partial.low right
+        "  ror %B[partial]               \n\t"  // rotate partial.high right
+        "  lsr %[amountOfA]              \n\t"  // shift amountOfA right
+        "  lsr %[mult_cnt]               \n\t"  // shift counter
+        "brcc MULT_A_%=                  \n\t"  // loop if counter not zero
+
+        // Now add: partial += b * amountOfB (second multiply)
+        "  mov %[mult_cnt], 0x80         \n\t"
+        "  mov %[temp_work], __zero_reg__ \n\t"
+
+        "MULT_B_%=:                      \n\t"
+        "  sbrc %[amountOfB], 0          \n\t"  // skip if bit 0 of amountOfB clear
+        "  add %[temp_work], %[b]        \n\t"  // add b to temp if bit set
+        "  adc %A[partial], __zero_reg__ \n\t"  // propagate carry to partial.low
+        "  adc %B[partial], __zero_reg__ \n\t"  // propagate carry to partial.high
+        "  ror %[temp_work]              \n\t"  // rotate temp right through carry
+        "  ror %A[partial]               \n\t"  // rotate partial.low right
+        "  ror %B[partial]               \n\t"  // rotate partial.high right
+        "  lsr %[amountOfB]              \n\t"  // shift amountOfB right
+        "  lsr %[mult_cnt]               \n\t"  // shift counter
+        "brcc MULT_B_%=                  \n\t"  // loop if counter not zero
+
+        : [partial] "+r"(partial), [temp_work] "+r"(temp_work),
+          [mult_cnt] "+r"(mult_cnt), [amountOfA] "+r"(amountOfA),
+          [amountOfB] "+r"(amountOfB)
+        : [a] "r"(a), [b] "r"(b)
+        :);
+
+    result = partial >> 8;
+    return result;
+}
+#endif
 #endif
 
 /// @} Math_AVR
