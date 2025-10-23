@@ -43,7 +43,7 @@ namespace fl {
 /// ```
 template <typename INT_FROM, typename INT_TO>
 inline INT_TO int_scale(typename fl::identity<INT_FROM>::type x) {
-    return fl::details::int_scale<INT_FROM, INT_TO>(x);
+    return fl::details::int_scale_impl<INT_FROM, INT_TO>::apply(x);
 }
 
 // Deprecated legacy unsigned functions that delegate to the new int_scale<FROM, TO>() template

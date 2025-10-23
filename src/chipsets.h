@@ -32,7 +32,7 @@
 // Include platform-specific SPIOutput template implementations
 // Each platform file defines the SPIOutput template for its platform
 // This must happen before any SPI chipset controllers (e.g., APA102, P9813)
-#if defined(FASTLED_STUB_IMPL)
+#if defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 #include "platforms/stub/spi_output_template.h"
 
 #elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
@@ -77,7 +77,7 @@
 
 // Platform-specific clockless controller
 // This must be included before using ClocklessControllerImpl
-#if defined(FASTLED_STUB_IMPL)
+#if defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
   #include "platforms/stub/clockless_stub_generic.h"
 #elif defined(ESP32)
   #ifdef FASTLED_ESP32_I2S

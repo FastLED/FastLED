@@ -7,7 +7,11 @@
 #define __INC_PLATFORMS_STUB_SPI_OUTPUT_TEMPLATE_H
 
 #include "fl/int.h"
+#ifndef __EMSCRIPTEN__
 #include "fastspi_stub_generic.h"
+#else
+#include "platforms/wasm/fastspi_wasm.h"
+#endif
 
 namespace fl {
 
