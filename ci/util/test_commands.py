@@ -11,22 +11,32 @@ from ci.util.test_types import TestArgs
 
 def build_cpp_test_command(args: TestArgs) -> str:
     """Build the C++ test command based on arguments"""
-    cmd_list = ["uv", "run", "python", "-m", "ci.compiler.cpp_test_run"]
+    # Use test.py with appropriate flags for C++ testing via Meson
+    cmd_list = ["uv", "run", "python", "test.py"]
+
+    # Always run C++ tests (unit tests)
+    cmd_list.append("--unit")
 
     if args.clang:
+        # Note: Meson uses Zig's bundled Clang, so --clang flag still applies
         cmd_list.append("--clang")
 
     if args.test:
-        cmd_list.append("--test")
+        # Pass specific test name
         cmd_list.append(args.test)
+
     if args.clean:
         cmd_list.append("--clean")
+
     if args.verbose:
-        cmd_list.append("--verbose")  # Always pass verbose flag when enabled
+        cmd_list.append("--verbose")
+
     if args.show_compile:
-        cmd_list.append("--show-compile")  # Pass show-compile flag
+        cmd_list.append("--show-compile")
+
     if args.show_link:
-        cmd_list.append("--show-link")  # Pass show-link flag
+        cmd_list.append("--show-link")
+
     if args.check:
         cmd_list.append("--check")
 

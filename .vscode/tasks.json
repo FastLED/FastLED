@@ -115,11 +115,11 @@
             "command": "uv",
             "args": [
                 "run",
-                "ci/cpp_test_run.py",
-                "--compile-only",
+                "python",
+                "test.py",
+                "${fileBasenameNoExtension}",
                 "--clang",
-                "--test",
-                "${fileBasenameNoExtension}"
+                "--clean"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -136,16 +136,16 @@
             "problemMatcher": [
                 "$gcc"
             ],
-            "detail": "Compile (but don't run) the test file for debugging",
+            "detail": "Compile (but don't run) the test file using Meson for debugging",
             "dependsOn": "Copy Compile Commands"
         },
         {
             "type": "shell",
             "label": "Copy Compile Commands",
-            "command": "cp",
+            "command": "sh",
             "args": [
-                "tests/.build/compile_commands.json",
-                "compile_commands.json"
+                "-c",
+                "if [ -f .build/meson/compile_commands.json ]; then cp .build/meson/compile_commands.json .; echo 'Copied compile_commands.json from Meson build'; else echo 'Warning: compile_commands.json not found'; fi"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -159,7 +159,7 @@
                 "showReuseMessage": false,
                 "clear": false
             },
-            "detail": "Copy compile_commands.json to project root for clangd"
+            "detail": "Copy compile_commands.json from Meson build to project root for clangd"
         },
         {
             "type": "shell",
