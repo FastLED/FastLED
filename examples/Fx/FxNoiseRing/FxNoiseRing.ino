@@ -16,8 +16,10 @@
 
 // Now we can include other headers and do platform checks
 #include <stdio.h>
+#include <algorithm>  // for std::max
 #include "fl/json.h"
 #include "fl/math_macros.h"
+#include "fl/math.h"
 #include "fl/warn.h"
 #include "noisegen.h"
 #include "fl/screenmap.h"
@@ -26,6 +28,7 @@
 #include "sensors/pir.h"
 #include "fl/sstream.h"
 #include "fl/assert.h"
+#include "noise.h"
 
 // Defines come after all includes
 #define LED_PIN 2
@@ -74,32 +77,28 @@ void setup() {
 void draw(uint32_t now) {
     double angle_offset = double(now) / 32000.0 * 2 * M_PI;
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
+
+    // get radius/zoom level from slider
+    float noise_radius = scale.as<float>();
+
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
-        // Sorry this is a little convoluted but we are applying noise
-        // in the 16-bit space and then mapping it back to 8-bit space.
-        // All the constants were experimentally determined.
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
-        float x = fl::cos(angle);
-        float y = fl::sin(angle);
-        x *= 0xffff * scale.as<double>();
-        y *= 0xffff * scale.as<double>();
-        uint16_t noise = inoise16(x, y, now);
-        uint16_t noise2 = inoise16(x, y, 0xfff + now);
-        uint16_t noise3 = inoise16(x, y, 0xffff + now);
-        noise3 = noise3 >> 8;
-        int16_t noise4 = map(noise3, 0, 255, -64, 255);
-        if (noise4 < 0) {  // Clamp negative values to 0.
-            noise4 = 0;
-        }
-        //ss << "noise: " << noise << " noise2: " << noise2 << " noise3: " << noise3 << " noise4: " << noise4 << "\n";
 
-        // Shift back to 8-bit space.
-        u8 hue = noise >> 8;
-        u8 sat = FL_MAX(128, noise2 >> 8);
-        u8 val = noise4;
-        // leds[i] = CHSV(noise >> 8, FL_MAX(128, noise2 >> 8), noise4);
-        leds[i] = CHSV(hue, sat, val);
+        // Use the new noiseRingHSV8 function to sample three z-slices for HSV components
+        CHSV hsv = noiseRingHSV8(angle, now, noise_radius);
+
+        // Apply same constraints as before: minimum saturation and adjusted value
+        hsv.s = std::max(128u, (unsigned)hsv.s);
+        // Apply value mapping similar to original: map from 0-255 to -64-255, clamp to 0-255
+        uint16_t val = hsv.v;
+        int16_t adjusted_val = map(val, 0, 255, -64, 255);
+        if (adjusted_val < 0) {
+            adjusted_val = 0;
+        }
+        hsv.v = adjusted_val;
+
+        leds[i] = hsv;
     }
 }
 

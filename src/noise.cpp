@@ -953,4 +953,61 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 }
 
 
+/// Ring noise functions - sample three z-slices for independent component evolution
+fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius) {
+  // Convert angle to cartesian coordinates
+  float x = fl::cos(angle);
+  float y = fl::sin(angle);
+
+  // Scale to noise coordinate space (0xFFFF range)
+  // radius controls the level of detail / zoom level
+  uint32_t nx = static_cast<uint32_t>(x * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>(y * radius * 0xffff);
+
+  // Sample three different z-slices for H, S, V components
+  // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
+  uint16_t h = inoise16(nx, ny, time);
+  uint16_t s = inoise16(nx, ny, time + 0x10000);
+  uint16_t v = inoise16(nx, ny, time + 0x20000);
+
+  return fl::HSV16(h, s, v);
+}
+
+fl::hsv8 noiseRingHSV8(float angle, uint32_t time, float radius) {
+  fl::HSV16 hsv16 = noiseRingHSV16(angle, time, radius);
+
+  // Scale 16-bit components down to 8-bit using bit shift with rounding
+  // This preserves the relative position in the value range
+  uint8_t h = (hsv16.h + 128) >> 8;
+  uint8_t s = (hsv16.s + 128) >> 8;
+  uint8_t v = (hsv16.v + 128) >> 8;
+
+  return fl::hsv8(h, s, v);
+}
+
+CRGB noiseRingCRGB(float angle, uint32_t time, float radius) {
+  // Convert angle to cartesian coordinates
+  float x = fl::cos(angle);
+  float y = fl::sin(angle);
+
+  // Scale to noise coordinate space (0xFFFF range)
+  // radius controls the level of detail / zoom level
+  uint32_t nx = static_cast<uint32_t>(x * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>(y * radius * 0xffff);
+
+  // Sample three different z-slices for R, G, B components (direct RGB)
+  // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
+  uint16_t r16 = inoise16(nx, ny, time);
+  uint16_t g16 = inoise16(nx, ny, time + 0x10000);
+  uint16_t b16 = inoise16(nx, ny, time + 0x20000);
+
+  // Scale down to 8-bit
+  uint8_t r = r16 >> 8;
+  uint8_t g = g16 >> 8;
+  uint8_t b = b16 >> 8;
+
+  return CRGB(r, g, b);
+}
+
+
 #pragma GCC diagnostic pop
