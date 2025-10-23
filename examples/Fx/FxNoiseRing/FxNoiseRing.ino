@@ -16,7 +16,6 @@
 
 // Now we can include other headers and do platform checks
 #include <stdio.h>
-#include <algorithm>  // for std::max
 #include "fl/json.h"
 #include "fl/math_macros.h"
 #include "fl/math.h"
