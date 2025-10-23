@@ -1,12 +1,13 @@
 /// @file intmap.h
 /// @brief Integer mapping functions between different integer sizes.
 ///
-/// This file re-exports the integer mapping functions from the platform-specific
-/// implementation into the fl namespace for backward compatibility.
+/// This file provides the generic int_scale<FROM, TO>() template function
+/// and deprecated legacy named functions that delegate to it for backward compatibility.
 
 #pragma once
 
 #include "platforms/intmap.h"
+#include "fl/deprecated.h"
 
 namespace fl {
 /// @addtogroup lib8tion
@@ -16,19 +17,78 @@ namespace fl {
 /// Maps a scalar from one integer size to another.
 /// @{
 
-// Bring platform implementations into fl namespace
-using fl::details::map8_to_16;
-using fl::details::smap8_to_16;
-using fl::details::map8_to_32;
-using fl::details::smap8_to_32;
-using fl::details::map16_to_32;
-using fl::details::smap16_to_32;
-using fl::details::map16_to_8;
-using fl::details::smap16_to_8;
-using fl::details::map32_to_16;
-using fl::details::smap32_to_16;
-using fl::details::map32_to_8;
-using fl::details::smap32_to_8;
+// Deprecated legacy functions that delegate to the new int_scale<FROM, TO>() template
+/// @deprecated Use int_scale<uint8_t, uint16_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint8_t, uint16_t>(x) instead")
+inline uint16_t map8_to_16(uint8_t x) {
+    return details::int_scale<uint8_t, uint16_t>(x);
+}
+
+/// @deprecated Use int_scale<int8_t, int16_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int8_t, int16_t>(x) instead")
+inline int16_t smap8_to_16(int8_t x) {
+    return details::int_scale<int8_t, int16_t>(x);
+}
+
+/// @deprecated Use int_scale<uint8_t, uint32_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint8_t, uint32_t>(x) instead")
+inline uint32_t map8_to_32(uint8_t x) {
+    return details::int_scale<uint8_t, uint32_t>(x);
+}
+
+/// @deprecated Use int_scale<int8_t, int32_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int8_t, int32_t>(x) instead")
+inline int32_t smap8_to_32(int8_t x) {
+    return details::int_scale<int8_t, int32_t>(x);
+}
+
+/// @deprecated Use int_scale<uint16_t, uint32_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint16_t, uint32_t>(x) instead")
+inline uint32_t map16_to_32(uint16_t x) {
+    return details::int_scale<uint16_t, uint32_t>(x);
+}
+
+/// @deprecated Use int_scale<int16_t, int32_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int16_t, int32_t>(x) instead")
+inline int32_t smap16_to_32(int16_t x) {
+    return details::int_scale<int16_t, int32_t>(x);
+}
+
+/// @deprecated Use int_scale<uint16_t, uint8_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint16_t, uint8_t>(x) instead")
+inline uint8_t map16_to_8(uint16_t x) {
+    return details::int_scale<uint16_t, uint8_t>(x);
+}
+
+/// @deprecated Use int_scale<int16_t, int8_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int16_t, int8_t>(x) instead")
+inline int8_t smap16_to_8(int16_t x) {
+    return details::int_scale<int16_t, int8_t>(x);
+}
+
+/// @deprecated Use int_scale<uint32_t, uint16_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint32_t, uint16_t>(x) instead")
+inline uint16_t map32_to_16(uint32_t x) {
+    return details::int_scale<uint32_t, uint16_t>(x);
+}
+
+/// @deprecated Use int_scale<int32_t, int16_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int32_t, int16_t>(x) instead")
+inline int16_t smap32_to_16(int32_t x) {
+    return details::int_scale<int32_t, int16_t>(x);
+}
+
+/// @deprecated Use int_scale<uint32_t, uint8_t>() instead
+FL_DEPRECATED("Use fl::int_scale<uint32_t, uint8_t>(x) instead")
+inline uint8_t map32_to_8(uint32_t x) {
+    return details::int_scale<uint32_t, uint8_t>(x);
+}
+
+/// @deprecated Use int_scale<int32_t, int8_t>() instead
+FL_DEPRECATED("Use fl::int_scale<int32_t, int8_t>(x) instead")
+inline int8_t smap32_to_8(int32_t x) {
+    return details::int_scale<int32_t, int8_t>(x);
+}
 
 /// @brief Generic integer scaling between different integer sizes.
 ///
