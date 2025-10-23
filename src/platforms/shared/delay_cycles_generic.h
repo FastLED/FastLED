@@ -48,13 +48,16 @@ template<> FASTLED_FORCE_INLINE void delaycycles<0>() {}
 #endif
 
 /// Delay for N clock cycles (generic NOP-based implementation)
-/// Uses NOP instructions to create minimal delays
-/// Note: This is a naive implementation using NOPs
-/// Platform-specific versions can provide more efficient implementations
+/// Uses binary splitting to minimize template instantiation depth
+/// Recursively splits the delay into two halves:
+/// delaycycles<N>() → delaycycles<N/2>() + delaycycles<N - N/2>()
+/// Base cases (0-50) are specialized in fl/delay.cpp for efficiency
 template<fl::cycle_t CYCLES>
 FASTLED_FORCE_INLINE void delaycycles() {
-  FL_NOP;
-  delaycycles<CYCLES - 1>();
+  constexpr fl::cycle_t HALF = CYCLES / 2;
+  constexpr fl::cycle_t REMAINDER = CYCLES - HALF;
+  delaycycles<HALF>();
+  delaycycles<REMAINDER>();
 }
 
 // }  // namespace fl (closed by including file)
