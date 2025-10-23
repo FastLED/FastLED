@@ -86,7 +86,7 @@ void draw(uint32_t now) {
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
 
         // Use the new noiseRingHSV8 function to sample three z-slices for HSV components
-        CHSV hsv = fl::noiseRingHSV8(angle, now, noise_radius);
+        CHSV hsv = noiseRingHSV8(angle, now, noise_radius);
 
         // Apply same constraints as before: minimum saturation and adjusted value
         hsv.s = FL_MAX(128u, (unsigned)hsv.s);

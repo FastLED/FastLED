@@ -45,7 +45,7 @@ HSV16 noiseRingHSV16(float angle, uint32_t time, float radius) {
   return HSV16(h, s, v);
 }
 
-hsv8 noiseRingHSV8(float angle, uint32_t time, float radius) {
+CHSV noiseRingHSV8(float angle, uint32_t time, float radius) {
   fl::HSV16 hsv16 = noiseRingHSV16(angle, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -54,7 +54,7 @@ hsv8 noiseRingHSV8(float angle, uint32_t time, float radius) {
   uint8_t s = (hsv16.s + 128) >> 8;
   uint8_t v = (hsv16.v + 128) >> 8;
 
-  return hsv8(h, s, v);
+  return CHSV(h, s, v);
 }
 
 CRGB noiseRingCRGB(float angle, uint32_t time, float radius) {
@@ -115,7 +115,7 @@ HSV16 noiseSphereHSV16(float angle, float phi, uint32_t time, float radius) {
   return HSV16(h, s, v);
 }
 
-hsv8 noiseSphereHSV8(float angle, float phi, uint32_t time, float radius) {
+CHSV noiseSphereHSV8(float angle, float phi, uint32_t time, float radius) {
   HSV16 hsv16 = noiseSphereHSV16(angle, phi, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -124,7 +124,7 @@ hsv8 noiseSphereHSV8(float angle, float phi, uint32_t time, float radius) {
   uint8_t s = (hsv16.s + 128) >> 8;
   uint8_t v = (hsv16.v + 128) >> 8;
 
-  return hsv8(h, s, v);
+  return CHSV(h, s, v);
 }
 
 CRGB noiseSphereCRGB(float angle, float phi, uint32_t time, float radius) {
@@ -190,7 +190,7 @@ HSV16 noiseCylinderHSV16(float angle, float height, uint32_t time, float radius)
   return HSV16(h, s, v);
 }
 
-hsv8 noiseCylinderHSV8(float angle, float height, uint32_t time, float radius) {
+CHSV noiseCylinderHSV8(float angle, float height, uint32_t time, float radius) {
   HSV16 hsv16 = noiseCylinderHSV16(angle, height, time, radius);
 
   // Scale 16-bit components down to 8-bit using bit shift with rounding
@@ -199,7 +199,7 @@ hsv8 noiseCylinderHSV8(float angle, float height, uint32_t time, float radius) {
   uint8_t s = (hsv16.s + 128) >> 8;
   uint8_t v = (hsv16.v + 128) >> 8;
 
-  return hsv8(h, s, v);
+  return CHSV(h, s, v);
 }
 
 CRGB noiseCylinderCRGB(float angle, float height, uint32_t time, float radius) {

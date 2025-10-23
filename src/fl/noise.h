@@ -1,5 +1,6 @@
 #pragma once
 
+#include "fl/hsv.h"
 #include "fl/hsv16.h"
 #include "chsv.h"
 #include "crgb.h"
@@ -48,7 +49,7 @@ fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius = 1.0f);
 /// @param time Animation time parameter
 /// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
 /// @return HSV8 (CHSV) color with 8-bit components
-fl::hsv8 noiseRingHSV8(float angle, uint32_t time, float radius = 1.0f);
+CHSV noiseRingHSV8(float angle, uint32_t time, float radius = 1.0f);
 
 /// Generate CRGB noise for a ring pattern.
 /// Samples three z-slices of 3D Perlin noise to create independent
@@ -85,7 +86,7 @@ fl::HSV16 noiseSphereHSV16(float angle, float phi, uint32_t time, float radius =
 /// @param time Animation time parameter
 /// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
 /// @return HSV8 (CHSV) color with 8-bit components
-fl::hsv8 noiseSphereHSV8(float angle, float phi, uint32_t time, float radius = 1.0f);
+CHSV noiseSphereHSV8(float angle, float phi, uint32_t time, float radius = 1.0f);
 
 /// Generate CRGB noise for a sphere pattern.
 /// Samples three z-slices of 3D Perlin noise to create independent
@@ -124,7 +125,7 @@ fl::HSV16 noiseCylinderHSV16(float angle, float height, uint32_t time, float rad
 /// @param time Animation time parameter
 /// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
 /// @return HSV8 (CHSV) color with 8-bit components
-fl::hsv8 noiseCylinderHSV8(float angle, float height, uint32_t time, float radius = 1.0f);
+CHSV noiseCylinderHSV8(float angle, float height, uint32_t time, float radius = 1.0f);
 
 /// Generate CRGB noise for a cylinder pattern.
 /// Samples three z-slices of 3D Perlin noise to create independent
