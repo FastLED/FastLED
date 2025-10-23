@@ -49,7 +49,7 @@ class CompilationConfig:
     # Advanced options
     global_cache_dir: Optional[Path] = None
     skip_filters: bool = (
-        False  # True when examples explicitly requested (override @filter directives)
+        False  # True to skip @filter directives (override platform/memory constraints)
     )
 
     def validate(self) -> List[str]:
@@ -173,6 +173,12 @@ class CompilationArgumentParser:
             "--exclude-examples", type=str, help="Examples that should be excluded"
         )
         parser.add_argument(
+            "--no-filter",
+            action="store_true",
+            help="Disable @filter directives (compile even if incompatible with board). "
+            "By default, 'all' respects filters and individual sketches bypass them.",
+        )
+        parser.add_argument(
             "--defines", type=str, help="Comma-separated list of compiler definitions"
         )
         parser.add_argument(
@@ -276,7 +282,7 @@ class CompilationArgumentParser:
         workflow = self._determine_workflow(boards, args.docker, args.local)
 
         # Resolve examples
-        examples, skip_filters = self._resolve_examples(args)
+        examples, skip_filters = self._resolve_examples(args, args.no_filter)
 
         # Parse other options
         defines: List[str] = args.defines.split(",") if args.defines else []
@@ -327,15 +333,17 @@ class CompilationArgumentParser:
 
         return boards
 
-    def _resolve_examples(self, args: argparse.Namespace) -> tuple[List[str], bool]:
+    def _resolve_examples(
+        self, args: argparse.Namespace, no_filter: bool = False
+    ) -> tuple[List[str], bool]:
         """Resolve examples from arguments.
 
         Special keyword 'all' compiles all examples.
         If no examples specified, defaults to ['Blink'].
 
         Returns:
-            Tuple of (examples, skip_filters) where skip_filters is True when
-            examples were explicitly requested (not from 'all' auto-discovery)
+            Tuple of (examples, skip_filters) where skip_filters is True when filters
+            should be bypassed (when specific sketches are requested or --no-filter is used)
         """
         # Track if 'all' was used for auto-discovery
         used_all_keyword = False
@@ -365,8 +373,11 @@ class CompilationArgumentParser:
             if not path.exists():
                 raise ValueError(f"Example not found: {example}")
 
-        # Skip filters only when examples were explicitly requested (not from 'all')
-        skip_filters = not used_all_keyword
+        # Determine filter behavior:
+        # - Use "all" keyword: apply filters (protect against incompatible examples)
+        # - Specific examples: skip filters (allow forcing specific sketches)
+        # - --no-filter flag: skip filters regardless (override all filter logic)
+        skip_filters = (not used_all_keyword) or no_filter
 
         return examples, skip_filters
 
