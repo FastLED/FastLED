@@ -1,28 +1,12 @@
 /// @file intmap.h
 /// @brief Integer mapping functions between different integer sizes.
 ///
-/// @details
-/// Maps scalar values between different integer sizes while preserving their
-/// relative position within their respective ranges (e.g., 50% of 8-bit range
-/// becomes 50% of 16-bit range).
-///
-/// @section intmap_scaling_up Scaling Up (8→16, 8→32, 16→32)
-/// Uses bit replication via multiplication. For example, an 8-bit value 0xAB
-/// becomes 0xABAB when scaled to 16-bit (multiply by 0x0101). This ensures
-/// that the maximum value (0xFF → 0xFFFF) and minimum (0x00 → 0x0000) map
-/// correctly without floating point operations.
-///
-/// @section intmap_scaling_down Scaling Down (16→8, 32→16)
-/// Uses right-shift with rounding to convert back to smaller sizes. The rounding
-/// constant (128 for 8-bit, 32768 for 16-bit) is added before shifting to achieve
-/// proper nearest-neighbor rounding rather than truncation.
+/// This file re-exports the integer mapping functions from the platform-specific
+/// implementation into the fl namespace for backward compatibility.
 
 #pragma once
 
-#include "lib8static.h"
-#include "fl/stdint.h"
-#include "fl/sketch_macros.h"
-
+#include "platforms/intmap.h"
 
 namespace fl {
 /// @addtogroup lib8tion
@@ -30,151 +14,48 @@ namespace fl {
 
 /// @defgroup intmap Integer Mapping Functions
 /// Maps a scalar from one integer size to another.
-///
-/// For example, a value representing 40% as an 8-bit unsigned integer would be
-/// `102 / 255`. Using `map8_to_16(uint8_t)` to convert that to a 16-bit
-/// unsigned integer would give you `26,214 / 65,535`, exactly 40% through the
-/// larger range.
-///
 /// @{
 
-/// @brief Maps an 8-bit value to a 16-bit value.
-/// @param x The 8-bit input value to scale up.
-/// @return The scaled 16-bit value preserving the relative position in the range.
+// Bring platform implementations into fl namespace
+using fl::details::map8_to_16;
+using fl::details::smap8_to_16;
+using fl::details::map8_to_32;
+using fl::details::smap8_to_32;
+using fl::details::map16_to_32;
+using fl::details::smap16_to_32;
+using fl::details::map16_to_8;
+using fl::details::smap16_to_8;
+using fl::details::map32_to_16;
+using fl::details::smap32_to_16;
+using fl::details::map32_to_8;
+using fl::details::smap32_to_8;
+
+/// @brief Generic integer scaling between different integer sizes.
+///
+/// @tparam INT_FROM Input integer type (must be explicitly specified)
+/// @tparam INT_TO Output integer type (uint8_t, int8_t, uint16_t, int16_t, uint32_t, int32_t)
+/// @param x The input value to scale
+/// @return The scaled value preserving relative position in range
 ///
 /// @details
-/// Scales to the larger range using bit replication via multiplication by 0x0101 (257).
-/// The byte is replicated: 0xAB → 0xABAB, which is equivalent to @c (x << 8) | x.
-/// Correctly maps both endpoints: 0x00 → 0x0000 and 0xFF → 0xFFFF.
+/// Requires explicit specification of BOTH input and output types to prevent
+/// implicit type conversions that could mask bugs. Uses bit replication for
+/// scaling up (8→16, 8→32, 16→32) and right-shift with rounding for
+/// scaling down (16→8, 32→16, 32→8).
 ///
-/// @note Performs no floating point operations; suitable for embedded systems.
-LIB8STATIC_ALWAYS_INLINE uint16_t map8_to_16(uint8_t x) {
-    return uint16_t(x) * 0x101;
-}
-
-/// @brief Maps an 8-bit value to a 32-bit value.
-/// @param x The 8-bit input value to scale up.
-/// @return The scaled 32-bit value preserving the relative position in the range.
+/// Supports all combinations of 8-bit, 16-bit, and 32-bit signed/unsigned types.
+/// Compile-time error for unsupported type conversions.
 ///
-/// @details
-/// Scales to the larger range using bit replication via multiplication by 0x01010101.
-/// The byte is replicated across all 4 bytes: 0xAB → 0xABABABAB.
-/// Correctly maps both endpoints: 0x00 → 0x00000000 and 0xFF → 0xFFFFFFFF.
-///
-/// @note Performs no floating point operations; suitable for embedded systems.
-LIB8STATIC_ALWAYS_INLINE uint32_t map8_to_32(uint8_t x) {
-    return uint32_t(x) * 0x1010101;
-}
-
-/// @brief Maps a 16-bit value to a 32-bit value.
-/// @param x The 16-bit input value to scale up.
-/// @return The scaled 32-bit value preserving the relative position in the range.
-///
-/// @details
-/// Scales to the larger range using bit replication via multiplication by 0x00010001 (65537).
-/// The word is replicated: 0xABCD → 0xABCDABCD.
-/// Correctly maps both endpoints: 0x0000 → 0x00000000 and 0xFFFF → 0xFFFFFFFF.
-///
-/// @note Performs no floating point operations; suitable for embedded systems.
-LIB8STATIC_ALWAYS_INLINE uint32_t map16_to_32(uint16_t x) {
-    return uint32_t(x) * 0x10001;
-}
-
-
-/// @brief Maps a 16-bit value down to an 8-bit value.
-/// @param x The 16-bit input value to scale down.
-/// @return The scaled 8-bit value preserving the relative position in the range.
-///
-/// @details
-/// Scales to the smaller range using right-shift with rounding by 8 bits.
-/// The rounding constant 128 (0x80) is added before shifting to implement
-/// nearest-neighbor rounding rather than truncation. This ensures 0x7F80
-/// rounds up to 0x80 instead of truncating down to 0x7F.
-/// Implemented as branchless code using conditional assignment: compiles to
-/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
-/// misprediction penalties.
-///
-/// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only. The zero case is handled naturally
-///       by the rounding math: (0 + 128) >> 8 = 0.
-LIB8STATIC_ALWAYS_INLINE uint8_t map16_to_8(uint16_t x) {
-#if SKETCH_HAS_LOTS_OF_MEMORY == 0
-    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
-    // use branched version since it's faster to skip the shift operation entirely when x >= 0xff00
-    if (x >= 0xff00) {
-        return 0xff;
-    }
-    return uint8_t((x + 128) >> 8);
-#else
-    // On modern CPUs with branch prediction, use ternary to compile to cmov
-    // (conditional move), avoiding branch misprediction penalties.
-    uint8_t result = (x + 128) >> 8;
-    return (x >= 0xff00) ? 0xff : result;
-#endif
-}
-
-/// @brief Maps a 32-bit value down to a 16-bit value.
-/// @param x The 32-bit input value to scale down.
-/// @return The scaled 16-bit value preserving the relative position in the range.
-///
-/// @details
-/// Scales to the smaller range using right-shift with rounding by 16 bits.
-/// The rounding constant 32768 (0x8000) is added before shifting to implement
-/// nearest-neighbor rounding, ensuring proper rounding of midpoint values
-/// during the downscaling operation.
-/// Implemented as branchless code using conditional assignment: compiles to
-/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
-/// misprediction penalties.
-///
-/// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only. The zero case is handled naturally
-///       by the rounding math: (0 + 32768) >> 16 = 0.
-LIB8STATIC_ALWAYS_INLINE uint16_t map32_to_16(uint32_t x) {
-#if SKETCH_HAS_LOTS_OF_MEMORY == 0
-    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
-    // use branched version since it's faster to skip the shift operation entirely when x >= 0xffff0000
-    if (x >= 0xffff0000) {
-        return 0xffff;
-    }
-    return uint16_t((x + 32768) >> 16);
-#else
-    // On modern CPUs with branch prediction, use ternary to compile to cmov
-    // (conditional move), avoiding branch misprediction penalties.
-    uint16_t result = (x + 32768) >> 16;
-    return (x >= 0xffff0000) ? 0xffff : result;
-#endif
-}
-
-/// @brief Maps a 32-bit value down to an 8-bit value.
-/// @param x The 32-bit input value to scale down.
-/// @return The scaled 8-bit value preserving the relative position in the range.
-///
-/// @details
-/// Scales to the smaller range using right-shift with rounding by 24 bits.
-/// The rounding constant 8388608 (0x800000) is added before shifting to implement
-/// nearest-neighbor rounding, ensuring proper rounding of midpoint values
-/// during the downscaling operation from 32-bit to 8-bit.
-/// Implemented as branchless code using conditional assignment: compiles to
-/// a conditional move (cmov) instruction on modern CPUs, avoiding branch
-/// misprediction penalties.
-///
-/// @note Tested to produce results nearly identical to double-precision floating-point
-///       division while remaining integer-only. The zero case is handled naturally
-///       by the rounding math: (0 + 0x800000) >> 24 = 0.
-LIB8STATIC_ALWAYS_INLINE uint8_t map32_to_8(uint32_t x) {
-#if SKETCH_HAS_LOTS_OF_MEMORY == 0
-    // On memory-constrained devices (typically with simple CPUs and no branch prediction),
-    // use branched version since it's faster to skip the shift operation entirely when x >= 0xFF000000
-    if (x >= 0xFF000000) {
-        return 0xff;
-    }
-    return uint8_t((x + 0x800000) >> 24);
-#else
-    // On modern CPUs with branch prediction, use ternary to compile to cmov
-    // (conditional move), avoiding branch misprediction penalties.
-    uint8_t result = (x + 0x800000) >> 24;
-    return (x >= 0xFF000000) ? 0xff : result;
-#endif
+/// @example
+/// ```cpp
+/// uint16_t y = fl::int_scale<uint8_t, uint16_t>(102);   // Explicit: 8→16
+/// int32_t z = fl::int_scale<int8_t, int32_t>(64);       // Explicit: 8→32
+/// uint8_t w = fl::int_scale<uint32_t, uint8_t>(0x80000000);  // Explicit: 32→8
+/// uint8_t noop = fl::int_scale<uint8_t, uint8_t>(255);   // Identity: no scaling
+/// ```
+template <typename INT_FROM, typename INT_TO>
+inline INT_TO int_scale(typename fl::identity<INT_FROM>::type x) {
+    return details::int_scale<INT_FROM, INT_TO>(x);
 }
 
 /// @} intmap

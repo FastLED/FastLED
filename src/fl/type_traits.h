@@ -27,6 +27,11 @@ struct integral_constant {
 using true_type = integral_constant<bool, true>;
 using false_type = integral_constant<bool, false>;
 
+// Define identity trait - prevents template argument deduction
+template <typename T> struct identity {
+    using type = T;
+};
+
 // Define add_rvalue_reference trait (remove_reference is already defined in move.h)
 template <typename T> struct add_rvalue_reference {
     using type = T&&;
