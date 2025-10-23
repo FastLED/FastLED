@@ -18,8 +18,8 @@ class ClocklessSpiWs2812Controller : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // -- Verify that the pin is valid
-    static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
-    fl::unique_ptr<ISpiStripWs2812> mLedStrip;
+    static_assert(fl::FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
+    fl::unique_ptr<fl::ISpiStripWs2812> mLedStrip;
 
 public:
     ClocklessSpiWs2812Controller() = default;
@@ -35,7 +35,7 @@ protected:
         const bool is_rgbw = rgbw.active();
         PixelIterator iterator = pixels.as_iterator(rgbw);
         if (!mLedStrip) {
-            auto strip = ISpiStripWs2812::Create(DATA_PIN, iterator.size(), is_rgbw);
+            auto strip = fl::ISpiStripWs2812::Create(DATA_PIN, iterator.size(), is_rgbw);
             mLedStrip.reset(strip);
         }
         else {

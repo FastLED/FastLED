@@ -85,7 +85,12 @@
   #ifdef FASTLED_ESP32_I2S
     #include "platforms/esp/32/clockless_i2s_esp32.h"
   #else
-    #include "platforms/esp/32/clockless_rmt_esp32.h"
+    #include "third_party/espressif/led_strip/src/enabled.h"
+    #if FASTLED_ESP32_HAS_RMT
+      #include "platforms/esp/32/clockless_rmt_esp32.h"
+    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
+      #include "platforms/esp/32/clockless_spi_esp32.h"
+    #endif
   #endif
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
