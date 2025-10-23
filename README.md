@@ -4,7 +4,7 @@
 
 Drive **30,000+ LEDs** on high-end devices • **Sub-$1 compatibility** on tiny chips • **Background rendering** for responsive apps • **Nearly every LED chipset supported** • [**#2 most popular Arduino library**](https://docs.arduino.cc/libraries/)
 
-[![Arduino's 2nd Most Popular Library](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED) [![Build Status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml) [![Unit Tests](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml) [![Header Compilation Performance](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml) [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
+[![Arduino's 2nd Most Popular Library](https://www.ardu-badge.com/badge/FastLED.svg)](https://www.ardu-badge.com/FastLED) [![Build Status](https://github.com/FastLED/FastLED/workflows/build/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build.yml) [![Unit Tests](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/build_unit_test.yml) [![Docker Compiler](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml) [![Documentation](https://img.shields.io/badge/Docs-Doxygen-blue.svg)](http://fastled.io/docs) [![Community](https://img.shields.io/badge/reddit-/r/FastLED-orange.svg?logo=reddit)](https://www.reddit.com/r/FastLED/)
 
 
 ## ⚡ Get Blinking in 30 Seconds
@@ -270,9 +270,7 @@ Update: max overclock has been reported at +70%: https://www.reddit.com/r/FastLE
 
 ## 🐳 Compiler
 
-Pre-built Docker images of PlatformIO optimized for compiling FastLED across all supported platforms:
-
-**Build Status:** [![Docker Build Base](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler.yml) [![Docker Build Platforms](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/docker_compiler_template.yml)
+Pre-built Docker images of PlatformIO optimized for compiling FastLED across all supported platforms with 4x daily updates.
 
 **Platform Images:**
 
@@ -281,6 +279,12 @@ Pre-built Docker images of PlatformIO optimized for compiling FastLED across all
 | [![fastled-compiler-avr-uno](https://img.shields.io/docker/v/niteris/fastled-compiler-avr-uno/latest?label=avr)](https://hub.docker.com/r/niteris/fastled-compiler-avr-uno) | [![fastled-compiler-esp-esp32dev](https://img.shields.io/docker/v/niteris/fastled-compiler-esp-esp32dev/latest?label=esp)](https://hub.docker.com/r/niteris/fastled-compiler-esp-esp32dev) | [![fastled-compiler-teensy-teensy41](https://img.shields.io/docker/v/niteris/fastled-compiler-teensy-teensy41/latest?label=teensy)](https://hub.docker.com/r/niteris/fastled-compiler-teensy-teensy41) | [![fastled-compiler-stm32-bluepill](https://img.shields.io/docker/v/niteris/fastled-compiler-stm32-bluepill/latest?label=stm32)](https://hub.docker.com/r/niteris/fastled-compiler-stm32-bluepill) | [![fastled-compiler-rp](https://img.shields.io/docker/v/niteris/fastled-compiler-rp/latest?label=rp2040)](https://hub.docker.com/r/niteris/fastled-compiler-rp) | [![fastled-compiler-nrf52-nrf52840_dk](https://img.shields.io/docker/v/niteris/fastled-compiler-nrf52-nrf52840_dk/latest?label=nrf52)](https://hub.docker.com/r/niteris/fastled-compiler-nrf52-nrf52840_dk) | [![fastled-compiler-sam-due](https://img.shields.io/docker/v/niteris/fastled-compiler-sam-due/latest?label=sam)](https://hub.docker.com/r/niteris/fastled-compiler-sam-due) |
 
 Each Docker image contains pre-cached toolchains for all boards in its platform family, enabling fast compilation without downloading dependencies for every build.
+
+### Header Compilation Performance
+
+[![Header Compilation Performance](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml/badge.svg)](https://github.com/FastLED/FastLED/actions/workflows/header-perf.yml)
+
+Tracks compilation speed and performance of FastLED header files across different platforms.
 
 ## 📦 Installation
 

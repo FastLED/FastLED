@@ -12,8 +12,8 @@ on:
         type: boolean
         default: true
   schedule:
-    # Base image: monthly at 2:00 AM UTC
-    - cron: '0 2 1 * *'
+    # Base image: 4x daily at 00:00, 06:00, 12:00, 18:00 UTC
+    - cron: '0 0,6,12,18 * * *'
 
 env:
   BASE_IMAGE: niteris/fastled-compiler-base
