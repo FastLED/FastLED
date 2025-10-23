@@ -230,10 +230,10 @@ link_flags = [
     # Disable Non-Essential Runtime Features for Speed
     "-sASSERTIONS=0",                       # Disable runtime assertions
     "-sSTACK_OVERFLOW_CHECK=0",             # Disable stack overflow checking
-    
+
     # Compatibility and Performance Options
     "-sWASM_BIGINT=0",                      # Disable BigInt for faster execution
-    "-sERROR_ON_UNDEFINED_SYMBOLS=0",       # Allow undefined symbols (faster linking)
+    "-sERROR_ON_UNDEFINED_SYMBOLS=1",       # Error on undefined symbols (was hiding missing addLeds)
 ]
 
 [build_modes.release]
