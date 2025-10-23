@@ -44,6 +44,7 @@ def compile_board_examples(
     merged_bin_output: Optional[Path] = None,
     extra_packages: Optional[List[str]] = None,
     max_failures: Optional[int] = None,
+    skip_filters: bool = False,
 ) -> BoardCompilationResult:
     """Compile examples for a single board using PioCompiler."""
 
@@ -72,8 +73,14 @@ def compile_board_examples(
     print(f"CORE DIR: {paths.core_dir}")
     print(f"PACKAGES DIR: {paths.packages_dir}")
 
-    # Filter examples based on @filter directives
-    filtered_examples, skipped_examples = get_filtered_examples(board, examples)
+    # Filter examples based on @filter directives (unless skip_filters is True)
+    if skip_filters:
+        # User explicitly requested these examples, so don't filter them
+        filtered_examples = examples
+        skipped_examples: List[Tuple[str, str]] = []
+    else:
+        # Apply filters to auto-discovered examples
+        filtered_examples, skipped_examples = get_filtered_examples(board, examples)
 
     if skipped_examples:
         print(f"\nFILTERED OUT {len(skipped_examples)} example(s):")

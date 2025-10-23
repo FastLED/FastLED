@@ -198,6 +198,7 @@ def main() -> int:
             force_local=config.force_local,
             wasm_run=config.wasm_run,
             global_cache_dir=config.global_cache_dir,
+            skip_filters=config.skip_filters,
         )
 
     # Auto-detect Docker availability if neither --docker nor --local is specified
@@ -237,6 +238,7 @@ def main() -> int:
                 force_local=config.force_local,
                 wasm_run=config.wasm_run,
                 global_cache_dir=config.global_cache_dir,
+                skip_filters=config.skip_filters,
             )
 
     # Handle Docker compilation mode
@@ -338,6 +340,7 @@ def main() -> int:
             merged_bin_output=merged_bin_output,
             extra_packages=config.extra_packages if config.extra_packages else None,
             max_failures=config.max_failures,
+            skip_filters=config.skip_filters,
         )
 
         if not result.ok:

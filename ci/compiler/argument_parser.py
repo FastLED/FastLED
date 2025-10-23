@@ -48,6 +48,9 @@ class CompilationConfig:
 
     # Advanced options
     global_cache_dir: Optional[Path] = None
+    skip_filters: bool = (
+        False  # True when examples explicitly requested (override @filter directives)
+    )
 
     def validate(self) -> List[str]:
         """Validate configuration and return list of error messages."""
@@ -273,7 +276,7 @@ class CompilationArgumentParser:
         workflow = self._determine_workflow(boards, args.docker, args.local)
 
         # Resolve examples
-        examples = self._resolve_examples(args)
+        examples, skip_filters = self._resolve_examples(args)
 
         # Parse other options
         defines: List[str] = args.defines.split(",") if args.defines else []
@@ -299,6 +302,7 @@ class CompilationArgumentParser:
             force_local=args.local,
             wasm_run=args.run,
             global_cache_dir=Path(args.global_cache) if args.global_cache else None,
+            skip_filters=skip_filters,
         )
 
     def _resolve_boards(self, board_spec: Optional[str]) -> List[Board]:
@@ -323,12 +327,19 @@ class CompilationArgumentParser:
 
         return boards
 
-    def _resolve_examples(self, args: argparse.Namespace) -> List[str]:
+    def _resolve_examples(self, args: argparse.Namespace) -> tuple[List[str], bool]:
         """Resolve examples from arguments.
 
         Special keyword 'all' compiles all examples.
         If no examples specified, defaults to ['Blink'].
+
+        Returns:
+            Tuple of (examples, skip_filters) where skip_filters is True when
+            examples were explicitly requested (not from 'all' auto-discovery)
         """
+        # Track if 'all' was used for auto-discovery
+        used_all_keyword = False
+
         if args.positional_examples:
             examples = [self._normalize_example(ex) for ex in args.positional_examples]
         elif args.examples:
@@ -340,6 +351,7 @@ class CompilationArgumentParser:
         # Check for special 'all' keyword
         if "all" in examples:
             # Remove 'all' keyword and discover all examples
+            used_all_keyword = True
             examples = self._discover_all_examples()
 
         # Apply exclusions
@@ -353,7 +365,10 @@ class CompilationArgumentParser:
             if not path.exists():
                 raise ValueError(f"Example not found: {example}")
 
-        return examples
+        # Skip filters only when examples were explicitly requested (not from 'all')
+        skip_filters = not used_all_keyword
+
+        return examples, skip_filters
 
     def _normalize_example(self, example: str) -> str:
         """Normalize example name (remove 'examples/' prefix)."""
