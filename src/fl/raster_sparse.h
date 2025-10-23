@@ -18,7 +18,7 @@ only a small number of pixels are set.
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
 
-#include "fl/rgb8.h"
+#include "crgb.h"
 
 #ifndef FASTLED_RASTER_SPARSE_INLINED_COUNT
 #define FASTLED_RASTER_SPARSE_INLINED_COUNT 128
@@ -144,10 +144,10 @@ class XYRasterU8Sparse {
     u16 width() const { return bounds().width(); }
     u16 height() const { return bounds().height(); }
 
-    void draw(const rgb8 &color, const XYMap &xymap, rgb8 *out);
-    void draw(const rgb8 &color, Leds *leds);
+    void draw(const CRGB &color, const XYMap &xymap, CRGB *out);
+    void draw(const CRGB &color, Leds *leds);
 
-    void drawGradient(const Gradient &gradient, const XYMap &xymap, rgb8 *out);
+    void drawGradient(const Gradient &gradient, const XYMap &xymap, CRGB *out);
     void drawGradient(const Gradient &gradient, Leds *leds);
 
     // Inlined, yet customizable drawing access. This will only send you
@@ -229,7 +229,7 @@ class XYRasterU8Sparse {
 
 namespace fl {
 
-// A raster of rgb8 values. This is a sparse raster, meaning that it will
+// A raster of CRGB values. This is a sparse raster, meaning that it will
 // only store the values that are set.
 class XYRasterSparse_RGB8 {
   public:
@@ -250,8 +250,8 @@ class XYRasterSparse_RGB8 {
 
     XYRasterSparse_RGB8 &clear() { return reset(); }
 
-    // Rasterizes point with a rgb8 color value
-    void rasterize(const vec2<u16> &pt, const rgb8 &color) {
+    // Rasterizes point with a CRGB color value
+    void rasterize(const vec2<u16> &pt, const CRGB &color) {
         write(pt, color);
     }
 
@@ -264,8 +264,8 @@ class XYRasterSparse_RGB8 {
         mAbsoluteBoundsSet = true;
     }
 
-    using iterator = fl::HashMap<vec2<u16>, rgb8>::iterator;
-    using const_iterator = fl::HashMap<vec2<u16>, rgb8>::const_iterator;
+    using iterator = fl::HashMap<vec2<u16>, CRGB>::iterator;
+    using const_iterator = fl::HashMap<vec2<u16>, CRGB>::const_iterator;
 
     iterator begin() { return mSparseGrid.begin(); }
     const_iterator begin() const { return mSparseGrid.begin(); }
@@ -274,12 +274,12 @@ class XYRasterSparse_RGB8 {
     fl::size size() const { return mSparseGrid.size(); }
     bool empty() const { return mSparseGrid.empty(); }
 
-    pair<bool, rgb8> at(u16 x, u16 y) const {
-        const rgb8 *val = mSparseGrid.find_value(vec2<u16>(x, y));
+    pair<bool, CRGB> at(u16 x, u16 y) const {
+        const CRGB *val = mSparseGrid.find_value(vec2<u16>(x, y));
         if (val != nullptr) {
             return {true, *val};
         }
-        return {false, rgb8::Black};
+        return {false, CRGB::Black};
     }
 
     rect<u16> bounds() const {
@@ -324,7 +324,7 @@ class XYRasterSparse_RGB8 {
     u16 width() const { return bounds().width(); }
     u16 height() const { return bounds().height(); }
 
-    void draw(const XYMap &xymap, rgb8 *out);
+    void draw(const XYMap &xymap, CRGB *out);
     void draw(Leds *leds);
 
     // Inlined, yet customizable drawing access. This will only send you
@@ -337,7 +337,7 @@ class XYRasterSparse_RGB8 {
                 continue;
             }
             u32 index = xymap(pt.x, pt.y);
-            const rgb8 &color = it.second;
+            const CRGB &color = it.second;
             // Only draw non-black pixels (since black represents "no data")
             if (color.r != 0 || color.g != 0 || color.b != 0) {
                 visitor.draw(pt, index, color);
@@ -347,17 +347,17 @@ class XYRasterSparse_RGB8 {
 
     static const int kMaxCacheSize = 8; // Max size for tiny cache.
 
-    void write(const vec2<u16> &pt, const rgb8 &color) {
-        rgb8 **cached = mCache.find_value(pt);
+    void write(const vec2<u16> &pt, const CRGB &color) {
+        CRGB **cached = mCache.find_value(pt);
         if (cached) {
-            rgb8 *val = *cached;
-            // For rgb8, we'll replace the existing color (blend could be added later)
+            CRGB *val = *cached;
+            // For CRGB, we'll replace the existing color (blend could be added later)
             *val = color;
             return;
         }
         if (mCache.size() <= kMaxCacheSize) {
             // cache it.
-            rgb8 *v = mSparseGrid.find_value(pt);
+            CRGB *v = mSparseGrid.find_value(pt);
             if (v == nullptr) {
                 if (mSparseGrid.needs_rehash()) {
                     // mSparseGrid is about to rehash, so we need to clear the
@@ -380,7 +380,7 @@ class XYRasterSparse_RGB8 {
 
   private:
     using Key = vec2<u16>;
-    using Value = rgb8;
+    using Value = CRGB;
     using HashKey = Hash<Key>;
     using EqualToKey = EqualTo<Key>;
     using FastHashKey = FastHash<Key>;
@@ -388,7 +388,7 @@ class XYRasterSparse_RGB8 {
                                      FASTLED_HASHMAP_INLINED_COUNT>;
     HashMapLarge mSparseGrid;
     // Small cache for the last N writes to help performance.
-    HashMap<vec2<u16>, rgb8 *, FastHashKey, EqualToKey, kMaxCacheSize>
+    HashMap<vec2<u16>, CRGB *, FastHashKey, EqualToKey, kMaxCacheSize>
         mCache;
     fl::rect<u16> mAbsoluteBounds;
     bool mAbsoluteBoundsSet = false;

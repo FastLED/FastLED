@@ -57,7 +57,7 @@
 /// @{
 
 //struct CRGB;  // CRGB is now a typedef in crgb.h, not a struct
-using CRGB = fl::rgb8;  // Bring the typedef into this namespace for consistency
+using CRGB = fl::CRGB;  // Bring the typedef into this namespace for consistency
 
 
 

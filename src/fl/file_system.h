@@ -11,7 +11,6 @@
 #include "fl/screenmap.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
-#include "fl/rgb8.h"
 #include "fl/deprecated.h"
 #include "crgb.h"
 
@@ -97,14 +96,14 @@ class FileHandle {
     virtual bool valid() const = 0;
 
     // convenience functions
-    // New preferred method using rgb8
-    fl::size readRGB8(rgb8 *dst, fl::size n) {
+    // New preferred method using CRGB
+    fl::size readRGB8(CRGB *dst, fl::size n) {
         return read((fl::u8 *)dst, n * 3) / 3;
     }
 
     // Deprecated: Use readRGB8 instead
-    FL_DEPRECATED("Use readRGB8(rgb8* dst, ...) instead")
-    fl::size readCRGB(rgb8 *dst, fl::size n) {
+    FL_DEPRECATED("Use readRGB8(CRGB* dst, ...) instead")
+    fl::size readCRGB(CRGB *dst, fl::size n) {
         return readRGB8(dst, n);
     }
 };

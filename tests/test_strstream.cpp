@@ -87,8 +87,8 @@ TEST_CASE("StrStream basic operations") {
         CRGB c(255, 0, 0);
         fl::StrStream s;
         s << c;
-        CHECK(s.str().size() == 13);  // "rgb8(255,0,0)" is 13 chars
-        CHECK(fl::strcmp(s.str().c_str(), "rgb8(255,0,0)") == 0);
+        CHECK(s.str().size() == 13);  // "CRGB(255,0,0)" is 13 chars
+        CHECK(fl::strcmp(s.str().c_str(), "CRGB(255,0,0)") == 0);
     }
 }
 

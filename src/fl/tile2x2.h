@@ -56,7 +56,7 @@ class Tile2x2_u8 {
     rect<u16> bounds() const;
 
     // Draws the subpixel tile to the led array.
-    void draw(const rgb8 &color, const XYMap &xymap, rgb8 *out) const;
+    void draw(const CRGB &color, const XYMap &xymap, CRGB *out) const;
 
     // Inlined, yet customizable drawing access. This will only send you pixels
     // that are within the bounds of the XYMap.

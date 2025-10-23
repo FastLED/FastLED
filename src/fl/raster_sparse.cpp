@@ -7,17 +7,17 @@
 
 namespace fl {
 
-void XYRasterU8Sparse::draw(const rgb8 &color, const XYMap &xymap, rgb8 *out) {
+void XYRasterU8Sparse::draw(const CRGB &color, const XYMap &xymap, CRGB *out) {
     XYDrawComposited visitor(color, xymap, out);
     draw(xymap, visitor);
 }
 
-void XYRasterU8Sparse::draw(const rgb8 &color, Leds *leds) {
+void XYRasterU8Sparse::draw(const CRGB &color, Leds *leds) {
     draw(color, leds->xymap(), leds->rgb());
 }
 
 void XYRasterU8Sparse::drawGradient(const Gradient &gradient,
-                                    const XYMap &xymap, rgb8 *out) {
+                                    const XYMap &xymap, CRGB *out) {
     XYDrawGradient visitor(gradient, xymap, out);
     draw(xymap, visitor);
 }
@@ -67,14 +67,14 @@ void XYRasterU8Sparse::rasterize_internal(const Tile2x2_u8 &tile,
 } // namespace fl
 
 // XYRasterSparse_RGB8 implementation
-void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, rgb8 *out) {
+void fl::XYRasterSparse_RGB8::draw(const XYMap &xymap, CRGB *out) {
     for (const auto &it : mSparseGrid) {
         auto pt = it.first;
         if (!xymap.has(pt.x, pt.y)) {
             continue;
         }
         u32 index = xymap(pt.x, pt.y);
-        const rgb8 &color = it.second;
+        const CRGB &color = it.second;
         // Only draw non-black pixels (since black represents "no data")
         if (color.r != 0 || color.g != 0 || color.b != 0) {
             out[index] = color;

@@ -1,4 +1,4 @@
-/// @file rgb8.h
+/// @file CRGB.h
 /// Defines the 8-bit red, green, and blue (RGB) pixel type in the fl namespace
 
 #pragma once
@@ -38,7 +38,7 @@ namespace fl {
 ///   - Examples: fill_rainbow(), nscale8_video(array, count, scale), fadeToBlackBy()
 /// - **See also**: fill_rainbow(), fill_gradient<>(), nscale8_video(), fadeLightBy(),
 ///   fadeToBlackBy(), blur1d(), blur2d() for high-performance batch operations
-struct rgb8 {
+struct CRGB {
     union {
         struct {
             union {
@@ -62,12 +62,12 @@ struct rgb8 {
         u8 raw[3];
     };
 
-    static rgb8 blend(const rgb8& p1, const rgb8& p2, fract8 amountOfP2);
-    static rgb8 blendAlphaMaxChannel(const rgb8& upper, const rgb8& lower);
+    static CRGB blend(const CRGB& p1, const CRGB& p2, fract8 amountOfP2);
+    static CRGB blendAlphaMaxChannel(const CRGB& upper, const CRGB& lower);
 
-    /// Downscale an rgb8 matrix (or strip) to the smaller size.
-    static void downscale(const rgb8* src, const XYMap& srcXY, rgb8* dst, const XYMap& dstXY);
-    static void upscale(const rgb8* src, const XYMap& srcXY, rgb8* dst, const XYMap& dstXY);
+    /// Downscale a CRGB matrix (or strip) to the smaller size.
+    static void downscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
+    static void upscale(const CRGB* src, const XYMap& srcXY, CRGB* dst, const XYMap& dstXY);
 
     // Are you using WS2812 (or other RGB8 LEDS) to display video?
     // Does it look washed out and under-saturated?
@@ -81,25 +81,25 @@ struct rgb8 {
     // This function converts to HSV16, boosts the saturation, and converts back to RGB8.
     // Note that when both boost_saturation and boost_contrast are true the resulting
     // pixel will be nearly the same as if you had used gamma correction pow = 2.0.
-    rgb8 colorBoost(EaseType saturation_function = EASE_NONE, EaseType luminance_function = EASE_NONE) const;
-    static void colorBoost(const rgb8* src, rgb8* dst, size_t count, EaseType saturation_function = EASE_NONE, EaseType luminance_function = EASE_NONE);
+    CRGB colorBoost(EaseType saturation_function = EASE_NONE, EaseType luminance_function = EASE_NONE) const;
+    static void colorBoost(const CRGB* src, CRGB* dst, size_t count, EaseType saturation_function = EASE_NONE, EaseType luminance_function = EASE_NONE);
 
-    // Want to do advanced color manipulation in HSV and write back to rgb8?
+    // Want to do advanced color manipulation in HSV and write back to CRGB?
     // You want to use HSV16, which is much better at preservering the color
     // space than hsv8.
     HSV16 toHSV16() const;
 
-    /// Array access operator to index into the rgb8 object
+    /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
-    /// @returns the rgb8::raw value for the given index
+    /// @returns the CRGB::raw value for the given index
     FASTLED_FORCE_INLINE u8& operator[] (u8 x)
     {
         return raw[x];
     }
 
-    /// Array access operator to index into the rgb8 object
+    /// Array access operator to index into the CRGB object
     /// @param x the index to retrieve (0-2)
-    /// @returns the rgb8::raw value for the given index
+    /// @returns the CRGB::raw value for the given index
     FASTLED_FORCE_INLINE const u8& operator[] (u8 x) const
     {
         return raw[x];
@@ -107,10 +107,10 @@ struct rgb8 {
 
     #if defined(__AVR__)
     // Saves a surprising amount of memory on AVR devices.
-    rgb8() = default;
+    CRGB() = default;
     #else
     /// Default constructor
-    FASTLED_FORCE_INLINE rgb8() {
+    FASTLED_FORCE_INLINE CRGB() {
         r = 0;
         g = 0;
         b = 0;
@@ -121,14 +121,14 @@ struct rgb8 {
     /// @param ir input red value
     /// @param ig input green value
     /// @param ib input blue value
-    constexpr rgb8(u8 ir, u8 ig, u8 ib) noexcept
+    constexpr CRGB(u8 ir, u8 ig, u8 ib) noexcept
         : r(ir), g(ig), b(ib)
     {
     }
 
     /// Allow construction from 32-bit (really 24-bit) bit 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    constexpr rgb8(u32 colorcode) noexcept
+    constexpr CRGB(u32 colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
@@ -142,34 +142,34 @@ struct rgb8 {
 
     /// Allow construction from a LEDColorCorrection enum
     /// @param colorcode an LEDColorCorrect enumeration value
-    constexpr rgb8(LEDColorCorrection colorcode) noexcept
+    constexpr CRGB(LEDColorCorrection colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow construction from a ColorTemperature enum
     /// @param colorcode an ColorTemperature enumeration value
-    constexpr rgb8(ColorTemperature colorcode) noexcept
+    constexpr CRGB(ColorTemperature colorcode) noexcept
     : r((colorcode >> 16) & 0xFF), g((colorcode >> 8) & 0xFF), b((colorcode >> 0) & 0xFF)
     {
     }
 
     /// Allow copy construction
-    FASTLED_FORCE_INLINE rgb8(const rgb8& rhs) = default;
+    FASTLED_FORCE_INLINE CRGB(const CRGB& rhs) = default;
 
     /// Allow construction from a hsv8 color
-    rgb8(const hsv8& rhs);
+    CRGB(const hsv8& rhs);
 
     /// Allow construction from a HSV16 color
-    /// Enables automatic conversion from HSV16 to rgb8
-    rgb8(const HSV16& rhs);
+    /// Enables automatic conversion from HSV16 to CRGB
+    CRGB(const HSV16& rhs);
 
     /// Allow assignment from one RGB struct to another
-    FASTLED_FORCE_INLINE rgb8& operator= (const rgb8& rhs) = default;
+    FASTLED_FORCE_INLINE CRGB& operator= (const CRGB& rhs) = default;
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE rgb8& operator= (const u32 colorcode)
+    FASTLED_FORCE_INLINE CRGB& operator= (const u32 colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -181,7 +181,7 @@ struct rgb8 {
     /// @param nr new red value
     /// @param ng new green value
     /// @param nb new blue value
-    FASTLED_FORCE_INLINE rgb8& setRGB (u8 nr, u8 ng, u8 nb)
+    FASTLED_FORCE_INLINE CRGB& setRGB (u8 nr, u8 ng, u8 nb)
     {
         r = nr;
         g = ng;
@@ -196,19 +196,19 @@ struct rgb8 {
     /// @note For array operations with many pixels, consider using fill_rainbow() or fill_gradient<>()
     /// in fl/fill.h instead, which are optimized for bulk HSV-to-RGB conversions and significantly
     /// faster on most platforms due to loop unrolling and SIMD opportunities.
-    FASTLED_FORCE_INLINE rgb8& setHSV (u8 hue, u8 sat, u8 val);
+    FASTLED_FORCE_INLINE CRGB& setHSV (u8 hue, u8 sat, u8 val);
 
     /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    FASTLED_FORCE_INLINE rgb8& setHue (u8 hue);
+    FASTLED_FORCE_INLINE CRGB& setHue (u8 hue);
 
     /// Allow assignment from HSV color
-    rgb8& operator= (const hsv8& rhs);
+    CRGB& operator= (const hsv8& rhs);
 
     /// Allow assignment from 32-bit (really 24-bit) 0xRRGGBB color code
     /// @param colorcode a packed 24 bit color code
-    FASTLED_FORCE_INLINE rgb8& setColorCode (u32 colorcode)
+    FASTLED_FORCE_INLINE CRGB& setColorCode (u32 colorcode)
     {
         r = (colorcode >> 16) & 0xFF;
         g = (colorcode >>  8) & 0xFF;
@@ -217,38 +217,38 @@ struct rgb8 {
     }
 
 
-    /// Add one rgb8 to another, saturating at 0xFF for each channel
-    rgb8& operator+= (const rgb8& rhs);
+    /// Add one CRGB to another, saturating at 0xFF for each channel
+    CRGB& operator+= (const CRGB& rhs);
 
     /// Add a constant to each channel, saturating at 0xFF.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
-    /// constant (e.g. rgb8::Red) and an 8-bit one (rgb8::Blue)
-    FASTLED_FORCE_INLINE rgb8& addToRGB (u8 d);
+    /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
+    FASTLED_FORCE_INLINE CRGB& addToRGB (u8 d);
 
-    /// Subtract one rgb8 from another, saturating at 0x00 for each channel
-    FASTLED_FORCE_INLINE rgb8& operator-= (const rgb8& rhs);
+    /// Subtract one CRGB from another, saturating at 0x00 for each channel
+    FASTLED_FORCE_INLINE CRGB& operator-= (const CRGB& rhs);
 
     /// Subtract a constant from each channel, saturating at 0x00.
     /// @note This is NOT an operator+= overload because the compiler
     /// can't usefully decide when it's being passed a 32-bit
-    /// constant (e.g. rgb8::Red) and an 8-bit one (rgb8::Blue)
-    FASTLED_FORCE_INLINE rgb8& subtractFromRGB(u8 d);
+    /// constant (e.g. CRGB::Red) and an 8-bit one (CRGB::Blue)
+    FASTLED_FORCE_INLINE CRGB& subtractFromRGB(u8 d);
 
     /// Subtract a constant of '1' from each channel, saturating at 0x00
-    FASTLED_FORCE_INLINE rgb8& operator-- ();
+    FASTLED_FORCE_INLINE CRGB& operator-- ();
 
     /// @copydoc operator--
-    FASTLED_FORCE_INLINE rgb8 operator-- (int );
+    FASTLED_FORCE_INLINE CRGB operator-- (int );
 
     /// Add a constant of '1' from each channel, saturating at 0xFF
-    FASTLED_FORCE_INLINE rgb8& operator++ ();
+    FASTLED_FORCE_INLINE CRGB& operator++ ();
 
     /// @copydoc operator++
-    FASTLED_FORCE_INLINE rgb8 operator++ (int );
+    FASTLED_FORCE_INLINE CRGB operator++ (int );
 
     /// Divide each of the channels by a constant
-    FASTLED_FORCE_INLINE rgb8& operator/= (u8 d )
+    FASTLED_FORCE_INLINE CRGB& operator/= (u8 d )
     {
         r /= d;
         g /= d;
@@ -257,7 +257,7 @@ struct rgb8 {
     }
 
     /// Right shift each of the channels by a constant
-    FASTLED_FORCE_INLINE rgb8& operator>>= (u8 d)
+    FASTLED_FORCE_INLINE CRGB& operator>>= (u8 d)
     {
         r >>= d;
         g >>= d;
@@ -267,54 +267,54 @@ struct rgb8 {
 
     /// Multiply each of the channels by a constant,
     /// saturating each channel at 0xFF.
-    FASTLED_FORCE_INLINE rgb8& operator*= (u8 d);
+    FASTLED_FORCE_INLINE CRGB& operator*= (u8 d);
 
     /// Scale down a RGB to N/256ths of it's current brightness using
     /// "video" dimming rules. "Video" dimming rules means that unless the scale factor
     /// is ZERO each channel is guaranteed NOT to dim down to zero.  If it's already
     /// nonzero, it'll stay nonzero, even if that means the hue shifts a little
     /// at low brightness levels.
-    /// @note For array operations with many pixels, use nscale8_video(rgb8*, size_t, u8) from
+    /// @note For array operations with many pixels, use nscale8_video(CRGB*, size_t, u8) from
     /// fl/colorutils.h instead, which is optimized for bulk scaling and can be 2-4x faster
     /// than per-pixel scaling due to compiler optimizations and register reuse patterns.
     /// @see nscale8x3_video
-    FASTLED_FORCE_INLINE rgb8& nscale8_video (u8 scaledown);
+    FASTLED_FORCE_INLINE CRGB& nscale8_video (u8 scaledown);
 
     /// %= is a synonym for nscale8_video().  Think of it is scaling down
     /// by "a percentage"
-    FASTLED_FORCE_INLINE rgb8& operator%= (u8 scaledown);
+    FASTLED_FORCE_INLINE CRGB& operator%= (u8 scaledown);
 
     /// fadeLightBy is a synonym for nscale8_video(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8_video() as (255 - fadefactor)
-    FASTLED_FORCE_INLINE rgb8& fadeLightBy (u8 fadefactor );
+    FASTLED_FORCE_INLINE CRGB& fadeLightBy (u8 fadefactor );
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see nscale8x3
-    rgb8& nscale8 (u8 scaledown );
+    CRGB& nscale8 (u8 scaledown );
 
     /// Scale down a RGB to N/256ths of its current brightness, using
     /// "plain math" dimming rules. "Plain math" dimming rules means that the low light
     /// levels may dim all the way to 100% black.
     /// @see ::scale8
-    FASTLED_FORCE_INLINE rgb8& nscale8 (const rgb8 & scaledown );
+    FASTLED_FORCE_INLINE CRGB& nscale8 (const CRGB & scaledown );
 
-    constexpr rgb8 nscale8_constexpr (const rgb8 scaledown ) const;
+    constexpr CRGB nscale8_constexpr (const CRGB scaledown ) const;
 
 
-    /// Return a rgb8 object that is a scaled down version of this object
-    FASTLED_FORCE_INLINE rgb8 scale8 (u8 scaledown ) const;
+    /// Return a CRGB object that is a scaled down version of this object
+    FASTLED_FORCE_INLINE CRGB scale8 (u8 scaledown ) const;
 
-    /// Return a rgb8 object that is a scaled down version of this object
-    FASTLED_FORCE_INLINE rgb8 scale8 (const rgb8 & scaledown ) const;
+    /// Return a CRGB object that is a scaled down version of this object
+    FASTLED_FORCE_INLINE CRGB scale8 (const CRGB & scaledown ) const;
 
     /// fadeToBlackBy is a synonym for nscale8(), as a fade instead of a scale
     /// @param fadefactor the amount to fade, sent to nscale8() as (255 - fadefactor)
-    rgb8& fadeToBlackBy (u8 fadefactor );
+    CRGB& fadeToBlackBy (u8 fadefactor );
 
     /// "or" operator brings each channel up to the higher of the two values
-    FASTLED_FORCE_INLINE rgb8& operator|= (const rgb8& rhs )
+    FASTLED_FORCE_INLINE CRGB& operator|= (const CRGB& rhs )
     {
         if( rhs.r > r) r = rhs.r;
         if( rhs.g > g) g = rhs.g;
@@ -323,7 +323,7 @@ struct rgb8 {
     }
 
     /// @copydoc operator|=
-    FASTLED_FORCE_INLINE rgb8& operator|= (u8 d )
+    FASTLED_FORCE_INLINE CRGB& operator|= (u8 d )
     {
         if( d > r) r = d;
         if( d > g) g = d;
@@ -332,7 +332,7 @@ struct rgb8 {
     }
 
     /// "and" operator brings each channel down to the lower of the two values
-    FASTLED_FORCE_INLINE rgb8& operator&= (const rgb8& rhs )
+    FASTLED_FORCE_INLINE CRGB& operator&= (const CRGB& rhs )
     {
         if( rhs.r < r) r = rhs.r;
         if( rhs.g < g) g = rhs.g;
@@ -341,7 +341,7 @@ struct rgb8 {
     }
 
     /// @copydoc operator&=
-    FASTLED_FORCE_INLINE rgb8& operator&= (u8 d )
+    FASTLED_FORCE_INLINE CRGB& operator&= (u8 d )
     {
         if( d < r) r = d;
         if( d < g) g = d;
@@ -349,13 +349,13 @@ struct rgb8 {
         return *this;
     }
 
-    /// This allows testing a rgb8 for zero-ness
+    /// This allows testing a CRGB for zero-ness
     constexpr explicit operator bool() const
     {
         return r || g || b;
     }
 
-    /// Converts a rgb8 to a 32-bit color having an alpha of 255.
+    /// Converts a CRGB to a 32-bit color having an alpha of 255.
     constexpr explicit operator u32() const
     {
         return u32(0xff000000) |
@@ -365,9 +365,9 @@ struct rgb8 {
     }
 
     /// Invert each channel
-    constexpr rgb8 operator-() const
+    constexpr CRGB operator-() const
     {
-        return rgb8(255 - r, 255 - g, 255 - b);
+        return CRGB(255 - r, 255 - g, 255 - b);
     }
 
 #if (defined SmartMatrix_h || defined SmartMatrix3_h)
@@ -384,8 +384,8 @@ struct rgb8 {
 
     string toString() const;
 
-    /// Get the "luma" of a rgb8 object. In other words, roughly how much
-    /// light the rgb8 pixel is putting out (from 0 to 255).
+    /// Get the "luma" of a CRGB object. In other words, roughly how much
+    /// light the CRGB pixel is putting out (from 0 to 255).
     u8 getLuma() const;
 
 
@@ -393,7 +393,7 @@ struct rgb8 {
     /// Get the average of the R, G, and B values
     FASTLED_FORCE_INLINE u8 getAverageLight() const;
 
-    /// Maximize the brightness of this rgb8 object.
+    /// Maximize the brightness of this CRGB object.
     /// This makes the individual color channels as bright as possible
     /// while keeping the same value differences between channels.
     /// @note This does not keep the same ratios between channels,
@@ -416,14 +416,14 @@ struct rgb8 {
     /// @param scale the scale value for the RGB data (i.e. brightness)
     /// @param colorCorrection color correction to apply
     /// @param colorTemperature color temperature to apply
-    /// @returns a rgb8 object representing the adjustment, including color correction and color temperature
-    static rgb8 computeAdjustment(u8 scale, const rgb8 & colorCorrection, const rgb8 & colorTemperature);
+    /// @returns a CRGB object representing the adjustment, including color correction and color temperature
+    static CRGB computeAdjustment(u8 scale, const CRGB & colorCorrection, const CRGB & colorTemperature);
 
-    /// Return a new rgb8 object after performing a linear interpolation between this object and the passed in object
-    rgb8 lerp8( const rgb8& other, fract8 amountOf2) const;
+    /// Return a new CRGB object after performing a linear interpolation between this object and the passed in object
+    CRGB lerp8( const CRGB& other, fract8 amountOf2) const;
 
     /// @copydoc lerp8
-    FASTLED_FORCE_INLINE rgb8 lerp16( const rgb8& other, fract16 frac) const;
+    FASTLED_FORCE_INLINE CRGB lerp16( const CRGB& other, fract16 frac) const;
     /// Returns 0 or 1, depending on the lowest bit of the sum of the color components.
     FASTLED_FORCE_INLINE u8 getParity()
     {
@@ -733,20 +733,20 @@ struct rgb8 {
 };
 
 
-/// Check if two rgb8 objects have the same color data
-FASTLED_FORCE_INLINE bool operator== (const rgb8& lhs, const rgb8& rhs)
+/// Check if two CRGB objects have the same color data
+FASTLED_FORCE_INLINE bool operator== (const CRGB& lhs, const CRGB& rhs)
 {
     return (lhs.r == rhs.r) && (lhs.g == rhs.g) && (lhs.b == rhs.b);
 }
 
-/// Check if two rgb8 objects do *not* have the same color data
-FASTLED_FORCE_INLINE bool operator!= (const rgb8& lhs, const rgb8& rhs)
+/// Check if two CRGB objects do *not* have the same color data
+FASTLED_FORCE_INLINE bool operator!= (const CRGB& lhs, const CRGB& rhs)
 {
     return !(lhs == rhs);
 }
 
-/// Check if the sum of the color channels in one rgb8 object is less than another
-FASTLED_FORCE_INLINE bool operator< (const rgb8& lhs, const rgb8& rhs)
+/// Check if the sum of the color channels in one CRGB object is less than another
+FASTLED_FORCE_INLINE bool operator< (const CRGB& lhs, const CRGB& rhs)
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -754,8 +754,8 @@ FASTLED_FORCE_INLINE bool operator< (const rgb8& lhs, const rgb8& rhs)
     return sl < sr;
 }
 
-/// Check if the sum of the color channels in one rgb8 object is greater than another
-FASTLED_FORCE_INLINE bool operator> (const rgb8& lhs, const rgb8& rhs)
+/// Check if the sum of the color channels in one CRGB object is greater than another
+FASTLED_FORCE_INLINE bool operator> (const CRGB& lhs, const CRGB& rhs)
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -763,8 +763,8 @@ FASTLED_FORCE_INLINE bool operator> (const rgb8& lhs, const rgb8& rhs)
     return sl > sr;
 }
 
-/// Check if the sum of the color channels in one rgb8 object is greater than or equal to another
-FASTLED_FORCE_INLINE bool operator>= (const rgb8& lhs, const rgb8& rhs)
+/// Check if the sum of the color channels in one CRGB object is greater than or equal to another
+FASTLED_FORCE_INLINE bool operator>= (const CRGB& lhs, const CRGB& rhs)
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -772,8 +772,8 @@ FASTLED_FORCE_INLINE bool operator>= (const rgb8& lhs, const rgb8& rhs)
     return sl >= sr;
 }
 
-/// Check if the sum of the color channels in one rgb8 object is less than or equal to another
-FASTLED_FORCE_INLINE bool operator<= (const rgb8& lhs, const rgb8& rhs)
+/// Check if the sum of the color channels in one CRGB object is less than or equal to another
+FASTLED_FORCE_INLINE bool operator<= (const CRGB& lhs, const CRGB& rhs)
 {
     u16 sl, sr;
     sl = lhs.r + lhs.g + lhs.b;
@@ -783,44 +783,44 @@ FASTLED_FORCE_INLINE bool operator<= (const rgb8& lhs, const rgb8& rhs)
 
 
 
-/// @copydoc rgb8::operator/=
-FASTLED_FORCE_INLINE rgb8 operator/( const rgb8& p1, u8 d)
+/// @copydoc CRGB::operator/=
+FASTLED_FORCE_INLINE CRGB operator/( const CRGB& p1, u8 d)
 {
-    return rgb8( p1.r/d, p1.g/d, p1.b/d);
+    return CRGB( p1.r/d, p1.g/d, p1.b/d);
 }
 
 
-/// Combine two rgb8 objects, taking the smallest value of each channel
-FASTLED_FORCE_INLINE rgb8 operator&( const rgb8& p1, const rgb8& p2)
+/// Combine two CRGB objects, taking the smallest value of each channel
+FASTLED_FORCE_INLINE CRGB operator&( const CRGB& p1, const CRGB& p2)
 {
-    return rgb8( p1.r < p2.r ? p1.r : p2.r,
+    return CRGB( p1.r < p2.r ? p1.r : p2.r,
                  p1.g < p2.g ? p1.g : p2.g,
                  p1.b < p2.b ? p1.b : p2.b);
 }
 
-/// Combine two rgb8 objects, taking the largest value of each channel
-FASTLED_FORCE_INLINE rgb8 operator|( const rgb8& p1, const rgb8& p2)
+/// Combine two CRGB objects, taking the largest value of each channel
+FASTLED_FORCE_INLINE CRGB operator|( const CRGB& p1, const CRGB& p2)
 {
-    return rgb8( p1.r > p2.r ? p1.r : p2.r,
+    return CRGB( p1.r > p2.r ? p1.r : p2.r,
                  p1.g > p2.g ? p1.g : p2.g,
                  p1.b > p2.b ? p1.b : p2.b);
 }
 
-/// @copydoc rgb8::operator+=
-FASTLED_FORCE_INLINE rgb8 operator+( const rgb8& p1, const rgb8& p2);
+/// @copydoc CRGB::operator+=
+FASTLED_FORCE_INLINE CRGB operator+( const CRGB& p1, const CRGB& p2);
 
-/// @copydoc rgb8::operator-=
-FASTLED_FORCE_INLINE rgb8 operator-( const rgb8& p1, const rgb8& p2);
+/// @copydoc CRGB::operator-=
+FASTLED_FORCE_INLINE CRGB operator-( const CRGB& p1, const CRGB& p2);
 
-/// @copydoc rgb8::operator*=
-FASTLED_FORCE_INLINE rgb8 operator*( const rgb8& p1, u8 d);
+/// @copydoc CRGB::operator*=
+FASTLED_FORCE_INLINE CRGB operator*( const CRGB& p1, u8 d);
 
-/// Scale using rgb8::nscale8_video()
-FASTLED_FORCE_INLINE rgb8 operator%( const rgb8& p1, u8 d);
+/// Scale using CRGB::nscale8_video()
+FASTLED_FORCE_INLINE CRGB operator%( const CRGB& p1, u8 d);
 
-/// @page rgb8_performance_guide RGB8 Performance Guide
+/// @page CRGB_performance_guide RGB8 Performance Guide
 ///
-/// The rgb8 struct provides both inline single-pixel operations and bulk array operations
+/// The CRGB struct provides both inline single-pixel operations and bulk array operations
 /// for optimal performance in different contexts.
 ///
 /// @section inline_patterns Inline (Single-Pixel) Patterns
@@ -832,10 +832,10 @@ FASTLED_FORCE_INLINE rgb8 operator%( const rgb8& p1, u8 d);
 ///
 /// **Example: Real-time color picker**
 /// @code
-/// rgb8 leds[NUM_LEDS];
+/// CRGB leds[NUM_LEDS];
 ///
 /// // Single pixel update - inline is appropriate
-/// leds[mouse_x] = rgb8(hsv8(mouse_hue, 255, 255));  // OK: Low latency for real-time input
+/// leds[mouse_x] = CRGB(hsv8(mouse_hue, 255, 255));  // OK: Low latency for real-time input
 /// leds[mouse_x].nscale8_video(brightness_slider);    // OK: Single-pixel adjustment
 /// @endcode
 ///
@@ -852,7 +852,7 @@ FASTLED_FORCE_INLINE rgb8 operator%( const rgb8& p1, u8 d);
 /// #include "fl/fill.h"
 /// #include "fl/colorutils.h"
 ///
-/// rgb8 leds[NUM_LEDS];
+/// CRGB leds[NUM_LEDS];
 ///
 /// // GOOD: Bulk initialization (fill_rainbow is 2-4x faster than loop with setHue())
 /// fill_rainbow(leds, NUM_LEDS, start_hue, delta_hue);
@@ -873,7 +873,7 @@ FASTLED_FORCE_INLINE rgb8 operator%( const rgb8& p1, u8 d);
 /// @code
 /// // BAD: Per-pixel HSV conversion in loop (slow)
 /// for(int i = 0; i < NUM_LEDS; i++) {
-///     leds[i] = rgb8(hsv8(hues[i], 255, 255));  // Calls hsv2rgb_rainbow N times
+///     leds[i] = CRGB(hsv8(hues[i], 255, 255));  // Calls hsv2rgb_rainbow N times
 /// }
 ///
 /// // GOOD: Use fill_rainbow or bulk operations instead

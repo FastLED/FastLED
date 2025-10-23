@@ -69,7 +69,7 @@ template <fl::u32 N> class BitsetInlined;
 class XYMap;
 
 struct FFTBins;
-struct rgb8;
+struct CRGB;
 
 } // namespace fl
 
@@ -2231,12 +2231,12 @@ class string : public StrN<FASTLED_STR_INLINED_SIZE> {
         return *this;
     }
 
-    string &append(const rgb8 &c);
+    string &append(const CRGB &c);
 
-    // Deprecated: Use append(const rgb8&) instead
+    // Deprecated: Use append(const CRGB&) instead
     // This version outputs "CRGB(...)" for backwards compatibility
-    FL_DEPRECATED("Use append(const rgb8&) instead - outputs 'rgb8(...)' format")
-    string &appendCRGB(const rgb8 &c);
+    FL_DEPRECATED("Use append(const CRGB&) instead - outputs 'CRGB(...)' format")
+    string &appendCRGB(const CRGB &c);
 
     string &append(const float &_val) {
         // round to nearest hundredth

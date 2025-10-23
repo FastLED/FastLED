@@ -1,6 +1,6 @@
 /// @file crgb.h
 /// Legacy header. Prefer to use fl/rgb8.h instead.
-/// Provides backward compatibility by aliasing fl::rgb8 as CRGB
+/// Provides backward compatibility by aliasing fl::CRGB as CRGB
 
 #pragma once
 
@@ -20,8 +20,10 @@
 #endif  // FASTLED_HD_COLOR_MIXING
 
 
-// Backward compatibility: bring fl::rgb8 into global namespace as CRGB
-using CRGB = fl::rgb8;
+// Backward compatibility: bring fl::CRGB into global namespace as CRGB
+// TODO: AI should scan the database and only use fl::CRGB exclusitively.
+// ::CRGB is a global space version from the frontier age of the embedded revolution.
+using CRGB = fl::CRGB;
 
 
 
@@ -67,7 +69,7 @@ FASTLED_FORCE_INLINE void hsv2rgb_dispatch( const CHSV& hsv, CRGB& rgb)
 }
 
 
-// HSV conversion implementations for fl::rgb8
+// HSV conversion implementations for fl::CRGB
 // These must be defined after CRGB and CHSV typedefs are established
 // and after hsv2rgb_dispatch is defined
 // Note: Implementation moved to src/fl/rgb8.cpp to comply with namespace rules

@@ -7,12 +7,11 @@
 #include "fx/fx1d.h"
 #include "fx/time.h"
 
-// Forward declare fl::rgb8 outside the FastLED namespace
-namespace fl { struct rgb8; }
+
 namespace fl {
-using CRGB = fl::rgb8;  // CRGB is now a typedef
-}  // namespace fl
-namespace fl {
+
+struct CRGB; 
+using CRGB = fl::CRGB;  // CRGB is now a typedef
 
 // Forward declare classes
 FASTLED_SMART_PTR(FileHandle);
