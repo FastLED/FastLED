@@ -101,4 +101,44 @@ CRGB noiseSphereCRGB(float angle, float phi, uint32_t time, float radius = 1.0f)
 
 /// @} Sphere Noise Functions
 
+
+/// @defgroup CylinderNoise Cylinder Noise Functions
+/// Convenience functions for generating noise on cylindrical surfaces.
+/// Each function samples three z-slices of the noise space to generate
+/// independent values for each color component (H/S/V or R/G/B).
+/// @{
+
+/// Generate HSV16 noise for a cylinder pattern.
+/// Samples three z-slices of 3D Perlin noise (at time, time+0x10000, time+0x20000)
+/// to create independent hue, saturation, and value components.
+/// Maps the angle around the circumference using sin/cos, and samples height directly.
+/// @param angle Position around the cylinder (radians, 0 to 2π)
+/// @param height Vertical position on the cylinder
+/// @param time Animation time parameter
+/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
+/// @return HSV16 color with 16-bit components
+fl::HSV16 noiseCylinderHSV16(float angle, float height, uint32_t time, float radius = 1.0f);
+
+/// Generate HSV8 (8-bit) noise for a cylinder pattern.
+/// Calls noiseCylinderHSV16() and scales each component down to 8-bit.
+/// @param angle Position around the cylinder (radians, 0 to 2π)
+/// @param height Vertical position on the cylinder
+/// @param time Animation time parameter
+/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
+/// @return HSV8 (CHSV) color with 8-bit components
+fl::hsv8 noiseCylinderHSV8(float angle, float height, uint32_t time, float radius = 1.0f);
+
+/// Generate CRGB noise for a cylinder pattern.
+/// Samples three z-slices of 3D Perlin noise to create independent
+/// red, green, and blue components (direct RGB, not HSV conversion).
+/// Maps the angle around the circumference using sin/cos, and samples height directly.
+/// @param angle Position around the cylinder (radians, 0 to 2π)
+/// @param height Vertical position on the cylinder
+/// @param time Animation time parameter
+/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
+/// @return CRGB color with 8-bit components
+CRGB noiseCylinderCRGB(float angle, float height, uint32_t time, float radius = 1.0f);
+
+/// @} Cylinder Noise Functions
+
 /// @} Shape Noise Functions

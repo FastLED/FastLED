@@ -98,6 +98,7 @@ test_names = [
   'test_mutex',
   'test_noise_range',
   'test_noise_ring',
+  'test_noise_cylinder',
   'test_ostream',
   'test_pixelview',
   'test_point',
@@ -154,8 +155,18 @@ test_names = [
 
 # Build each test executable with shared PCH
 foreach test_name : test_names
+  # Map test names to file paths (handle subdirectories)
+  test_file_map = {
+    'test_noise_range': 'noise/test_noise_range.cpp',
+    'test_noise_ring': 'noise/test_noise_ring.cpp',
+    'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
+  }
+
+  # Get the actual test file path
+  test_file = test_file_map.get(test_name, test_name + '.cpp')
+
   # Some tests need additional source files for ESP32 parallel SPI host simulation
-  test_sources = [test_name + '.cpp', test_pch[0]]
+  test_sources = [test_file, test_pch[0]]
   test_cpp_args = unit_test_compile_args + [
     '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
     '-Winvalid-pch',
