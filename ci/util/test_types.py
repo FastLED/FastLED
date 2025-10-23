@@ -76,7 +76,7 @@ class TestArgs:
     no_stack_trace: bool = False
     stack_trace: bool = False
     check: bool = False
-    examples: Optional[list[str]] = None
+    examples: Optional[List[str]] = None
     no_pch: bool = False
     unity: bool = False
     no_unity: bool = False  # Disable unity builds for cpp tests and examples
@@ -85,7 +85,7 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
-    qemu: Optional[list[str]] = None  # Run examples in QEMU emulation
+    qemu: Optional[List[str]] = None  # Run examples in QEMU emulation
     no_fingerprint: bool = False  # Disable fingerprint caching
     build: bool = False  # Build Docker images if missing (use with --qemu)
 
@@ -201,7 +201,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
             pass  # args.full is already False
 
         # Log what's running
-        enabled_tests: list[str] = []
+        enabled_tests: List[str] = []
         if args.unit:
             enabled_tests.append("unit tests")
         if args.examples is not None:
@@ -295,7 +295,7 @@ def fingerprint_code_base(
         patterns = glob.split(",")
 
         # Get all matching files
-        all_files: list[Path] = []
+        all_files: List[Path] = []
         for pattern in patterns:
             pattern = pattern.strip()
             all_files.extend(sorted(start_directory.glob(pattern)))
@@ -325,7 +325,7 @@ def fingerprint_code_base(
         return FingerprintResult(hash="", status=f"error: {str(e)}")
 
 
-def calculate_fingerprint(root_dir: Path | None = None) -> FingerprintResult:
+def calculate_fingerprint(root_dir: Optional[Path] = None) -> FingerprintResult:
     """
     Calculate the code base fingerprint.
 

@@ -218,10 +218,10 @@ class RunningProcessGroup:
         active_processes = self.processes.copy()
         start_time = time.time()
 
-        runner_timeouts: list[int] = [
+        runner_timeouts: List[int] = [
             p.timeout for p in self.processes if p.timeout is not None
         ]
-        global_timeout: int | None = self.config.timeout_seconds
+        global_timeout: Optional[int] = self.config.timeout_seconds
         if global_timeout is None and runner_timeouts:
             global_timeout = max(runner_timeouts) + 60  # Add 1 minute buffer
 
@@ -230,8 +230,8 @@ class RunningProcessGroup:
         stuck_process_timeout = self.config.stuck_timeout_seconds
 
         # Track failed processes for proper error reporting
-        failed_processes: list[str] = []  # Processes killed due to timeout/stuck
-        exit_failed_processes: list[
+        failed_processes: List[str] = []  # Processes killed due to timeout/stuck
+        exit_failed_processes: List[
             tuple[RunningProcess, int]
         ] = []  # Processes that failed with non-zero exit code
 
@@ -263,7 +263,7 @@ class RunningProcessGroup:
                     )
                     print("\033[91m###### ERROR ######\033[0m", flush=True)
                     print("Tests failed due to global timeout", flush=True)
-                    failures: list[TestFailureInfo] = []
+                    failures: List[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(
                             subprocess.list2cmdline(p.command)
@@ -339,7 +339,7 @@ class RunningProcessGroup:
             )
             for proc, exit_code in exit_failed_processes:
                 print(f"  - {proc.command} (exit code {exit_code})", flush=True)
-            failures: list[TestFailureInfo] = []
+            failures: List[TestFailureInfo] = []
             for proc, exit_code in exit_failed_processes:
                 # Extract error snippet from process output
                 error_snippet = extract_error_snippet(proc.accumulated_output)
@@ -365,7 +365,7 @@ class RunningProcessGroup:
             for cmd in failed_processes:
                 print(f"  - {cmd}", flush=True)
             print("Processes were killed due to timeout/stuck detection", flush=True)
-            failures: list[TestFailureInfo] = []
+            failures: List[TestFailureInfo] = []
             for cmd in failed_processes:
                 failures.append(
                     TestFailureInfo(
@@ -458,9 +458,9 @@ class RunningProcessGroup:
 
     def _handle_stuck_processes(
         self,
-        stuck_signals: list[StuckProcessSignal],
-        active_processes: list[RunningProcess],
-        failed_processes: list[str],
+        stuck_signals: List[StuckProcessSignal],
+        active_processes: List[RunningProcess],
+        failed_processes: List[str],
         stuck_monitor: ProcessStuckMonitor,
     ) -> None:
         """Handle processes that are detected as stuck."""
@@ -470,11 +470,11 @@ class RunningProcessGroup:
 
     def _build_failure_list(
         self,
-        exit_failed_processes: list[tuple[RunningProcess, int]],
-        failed_processes: list[str],
-    ) -> list[TestFailureInfo]:
+        exit_failed_processes: List[tuple[RunningProcess, int]],
+        failed_processes: List[str],
+    ) -> List[TestFailureInfo]:
         """Build a list of TestFailureInfo objects from failed processes."""
-        failures: list[TestFailureInfo] = []
+        failures: List[TestFailureInfo] = []
 
         for proc, exit_code in exit_failed_processes:
             error_snippet = extract_error_snippet(proc.accumulated_output)
@@ -507,9 +507,9 @@ class RunningProcessGroup:
 
     def _process_active_tests(
         self,
-        active_processes: list[RunningProcess],
-        exit_failed_processes: list[tuple[RunningProcess, int]],
-        failed_processes: list[str],
+        active_processes: List[RunningProcess],
+        exit_failed_processes: List[tuple[RunningProcess, int]],
+        failed_processes: List[str],
         completed_timings: List[ProcessTiming],
         stuck_monitor: Optional[ProcessStuckMonitor],
     ) -> bool:

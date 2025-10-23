@@ -4,7 +4,7 @@ import os
 import platform
 import subprocess
 from pathlib import Path
-from typing import Any, Protocol
+from typing import Any, Optional, Protocol
 
 
 # ruff: noqa: F821
@@ -15,7 +15,7 @@ Import("env")  # type: ignore # Import is provided by PlatformIO
 class PlatformIOEnv(Protocol):
     """Type information for PlatformIO environment."""
 
-    def get(self, key: str, default: str | None = None) -> str | None:
+    def get(self, key: str, default: Optional[str] = None) -> Optional[str]:
         """Get a value from the environment."""
         ...
 
@@ -33,7 +33,7 @@ def is_ccache_available() -> bool:
         return False
 
 
-def get_ccache_path() -> str | None:
+def get_ccache_path() -> Optional[str]:
     """Get the full path to ccache executable."""
     if platform.system() == "Windows":
         # On Windows, look in chocolatey's bin directory

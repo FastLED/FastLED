@@ -9,7 +9,7 @@ import subprocess
 import time
 from pathlib import Path
 from threading import Lock
-from typing import List
+from typing import List, Optional
 
 from ci.boards import Board  # type: ignore
 from ci.util.build_lock import libfastled_build_lock
@@ -38,9 +38,9 @@ def _fastled_js_is_parent_directory(p: Path) -> bool:
 def compile_for_board_and_example(
     board: Board,
     example: Path,
-    build_dir: str | None,
+    build_dir: Optional[str],
     verbose_on_failure: bool,
-    libs: list[str] | None,
+    libs: Optional[List[str]],
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
@@ -61,7 +61,7 @@ def compile_for_board_and_example(
     if srcdir.exists():
         shutil.rmtree(srcdir, ignore_errors=False)
     locked_print(f"*** Building example {example} for board {board_name} ***")
-    cwd: str | None = None
+    cwd: Optional[str] = None
     shell: bool = False
     # Copy all files from the example directory to the "src" directory
     for src_file in example.rglob("*"):
@@ -228,10 +228,10 @@ def compile_for_board_and_example(
 # Function to process task queues for each board
 def compile_examples(
     board: Board,
-    examples: list[Path],
-    build_dir: str | None,
+    examples: List[Path],
+    build_dir: Optional[str],
     verbose_on_failure: bool,
-    libs: list[str] | None,
+    libs: Optional[List[str]],
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement

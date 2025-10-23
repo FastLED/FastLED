@@ -9,7 +9,7 @@ import time
 from concurrent.futures import Future, ThreadPoolExecutor, as_completed
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 from ci.boards import Board  # type: ignore
 from ci.compiler.compile_for_board import compile_examples, errors_happened
@@ -39,20 +39,20 @@ def _banner_print(msg: str) -> None:
 
 @dataclass
 class ConcurrentRunArgs:
-    projects: list[Board]
-    examples: list[Path]
+    projects: List[Board]
+    examples: List[Path]
     skip_init: bool
-    defines: list[str]
-    customsdk: str | None
-    extra_packages: list[str]
-    libs: list[str] | None
-    build_dir: str | None
-    extra_scripts: str | None
-    cwd: str | None
-    board_dir: str | None
-    build_flags: list[str] | None
+    defines: List[str]
+    customsdk: Optional[str]
+    extra_packages: List[str]
+    libs: Optional[List[str]]
+    build_dir: Optional[str]
+    extra_scripts: Optional[str]
+    cwd: Optional[str]
+    board_dir: Optional[str]
+    build_flags: Optional[List[str]]
     verbose: bool = False
-    extra_examples: dict[Board, list[Path]] | None = None
+    extra_examples: Dict[Board, List[Path]] | None = None
     symbols: bool = False
 
 
@@ -70,10 +70,10 @@ def concurrent_run(
     cwd = args.cwd
     start_time = time.time()
     first_project = projects[0]
-    prev_cwd: str | None = None
+    prev_cwd: Optional[str] = None
     board_dir = args.board_dir
     libs = args.libs
-    extra_examples: dict[Board, list[Path]] = args.extra_examples or {}
+    extra_examples: Dict[Board, List[Path]] = args.extra_examples or {}
     if cwd:
         prev_cwd = os.getcwd()
         locked_print(f"Changing to directory {cwd}")
@@ -164,7 +164,7 @@ def concurrent_run(
     init_end_time = time.time()
     init_time = (init_end_time - start_time) / 60
     locked_print(f"\nAll build directories initialized in {init_time:.2f} minutes.")
-    errors: list[str] = []
+    errors: List[str] = []
     # Run the compilation process
     num_cpus = max(1, min(cpu_count(), len(projects)))
     with ThreadPoolExecutor(max_workers=num_cpus) as executor:

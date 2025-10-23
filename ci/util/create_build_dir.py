@@ -10,7 +10,7 @@ import subprocess
 import time
 import warnings
 from pathlib import Path
-from typing import Any, Callable, Dict
+from typing import Any, Callable, Dict, List, Optional
 
 from ci.boards import Board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -43,9 +43,9 @@ def _install_global_package(package: str) -> None:
 
 def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
     for board in meta_json.keys():
-        aliases: dict[str, str | None] = {}
+        aliases: Dict[str, Optional[str]] = {}
         cc_path_value = meta_json[board].get("cc_path")
-        resolved_cc_path: Path | None = None
+        resolved_cc_path: Optional[Path] = None
         if cc_path_value:
             try:
                 candidate = Path(str(cc_path_value))
@@ -63,7 +63,7 @@ def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
                 resolved_cc_path = None
 
         # Try to infer toolchain bin directory and prefix from either CC or GDB path
-        tool_bin_dir: Path | None = None
+        tool_bin_dir: Optional[Path] = None
         tool_prefix: str = ""
         tool_suffix: str = ""
 
@@ -243,14 +243,14 @@ def safe_file_removal(file_path: Path, max_retries: int) -> bool:
 
 def create_build_dir(
     board: Board,
-    defines: list[str],
-    customsdk: str | None,
+    defines: List[str],
+    customsdk: Optional[str],
     no_install_deps: bool,
-    extra_packages: list[str],
-    build_dir: str | None,
-    board_dir: str | None,
-    build_flags: list[str] | None,
-    extra_scripts: str | None,
+    extra_packages: List[str],
+    build_dir: Optional[str],
+    board_dir: Optional[str],
+    build_flags: Optional[List[str]],
+    extra_scripts: Optional[str],
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""
     import threading

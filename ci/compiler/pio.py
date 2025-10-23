@@ -117,9 +117,9 @@ def _apply_board_specific_config(
     platformio_ini_path: Path,
     example: str,
     paths: "FastLEDPaths",
-    additional_defines: List[str] | None = None,
-    additional_include_dirs: List[str] | None = None,
-    additional_libs: List[str] | None = None,
+    additional_defines: Optional[List[str]] = None,
+    additional_include_dirs: Optional[List[str]] = None,
+    additional_libs: Optional[List[str]] = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> bool:
     """Apply board-specific build configuration from Board class."""
@@ -303,7 +303,7 @@ def _copy_cache_build_script(build_dir: Path, cache_config: Dict[str, str]) -> N
 
 def _find_platform_path_from_board(
     board: "Board", paths: "FastLEDPaths"
-) -> Path | None:
+) -> Optional[Path]:
     """Find the platform path from board's platform URL using cache directory naming."""
     from ci.boards import Board
     from ci.util.url_utils import sanitize_url_for_path
@@ -484,7 +484,7 @@ def aggressive_clean_pio_packages(paths: "FastLEDPaths", board_name: str) -> boo
 
 
 def detect_and_fix_corrupted_packages_dynamic(
-    paths: "FastLEDPaths", board_name: str, platform_path: Path | None = None
+    paths: "FastLEDPaths", board_name: str, platform_path: Optional[Path] = None
 ) -> Dict[str, Any]:
     """Dynamically detect and fix corrupted packages based on platform requirements."""
     import shutil
@@ -598,7 +598,7 @@ def detect_and_fix_corrupted_packages_dynamic(
 class FastLEDPaths:
     """Centralized path management for FastLED board-specific directories and files."""
 
-    def __init__(self, board_name: str, project_root: Path | None = None) -> None:
+    def __init__(self, board_name: str, project_root: Optional[Path] = None) -> None:
         self.board_name = board_name
         self.project_root = project_root or _resolve_project_root()
         self.home_dir = Path.home()
@@ -606,7 +606,7 @@ class FastLEDPaths:
         # Base FastLED directory
         self.fastled_root = self.home_dir / ".fastled"
         # Initialize the optional cache directory override
-        self._global_platformio_cache_dir: Path | None = None
+        self._global_platformio_cache_dir: Optional[Path] = None
 
     @property
     def build_dir(self) -> Path:
@@ -1261,9 +1261,9 @@ def _init_platformio_build(
     verbose: bool,
     example: str,
     paths: "FastLEDPaths",
-    additional_defines: List[str] | None = None,
-    additional_include_dirs: List[str] | None = None,
-    additional_libs: List[str] | None = None,
+    additional_defines: Optional[List[str]] = None,
+    additional_include_dirs: Optional[List[str]] = None,
+    additional_libs: Optional[List[str]] = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> InitResult:
     """Initialize the PlatformIO build directory. Assumes lock is already held by caller."""
@@ -1492,9 +1492,9 @@ class PioCompiler(Compiler):
         board: Board | str,
         verbose: bool,
         global_cache_dir: Path,
-        additional_defines: List[str] | None = None,
-        additional_include_dirs: List[str] | None = None,
-        additional_libs: List[str] | None = None,
+        additional_defines: Optional[List[str]] = None,
+        additional_include_dirs: Optional[List[str]] = None,
+        additional_libs: Optional[List[str]] = None,
         cache_type: CacheType = CacheType.NO_CACHE,
     ) -> None:
         # Call parent constructor
@@ -1875,7 +1875,7 @@ class PioCompiler(Compiler):
             self._global_package_lock.release()
 
     def deploy(
-        self, example: str, upload_port: str | None = None, monitor: bool = False
+        self, example: str, upload_port: Optional[str] = None, monitor: bool = False
     ) -> SketchResult:
         """Deploy (upload) a specific example to the target device.
 
@@ -2169,7 +2169,7 @@ class PioCompiler(Compiler):
             for platform in supported_platforms
         )
 
-    def get_merged_bin_path(self, example: str) -> Path | None:
+    def get_merged_bin_path(self, example: str) -> Optional[Path]:
         """Get path to merged binary if it exists.
 
         Args:
@@ -2183,7 +2183,7 @@ class PioCompiler(Compiler):
         return merged_bin if merged_bin.exists() else None
 
     def build_with_merged_bin(
-        self, example: str, output_path: Path | None = None
+        self, example: str, output_path: Optional[Path] = None
     ) -> SketchResult:
         """Build example and generate merged binary.
 
@@ -2347,8 +2347,8 @@ def run_pio_build(
     board: Board | str,
     examples: List[str],
     verbose: bool = False,
-    additional_defines: List[str] | None = None,
-    additional_include_dirs: List[str] | None = None,
+    additional_defines: Optional[List[str]] = None,
+    additional_include_dirs: Optional[List[str]] = None,
     cache_type: CacheType = CacheType.NO_CACHE,
 ) -> List[Future[SketchResult]]:
     """Run build for specified examples and platform using new PlatformIO system.

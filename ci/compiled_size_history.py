@@ -7,7 +7,7 @@ import os
 import shutil
 import subprocess
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 
 import dateutil.parser  # type: ignore
 
@@ -61,7 +61,7 @@ def check_firmware_size(board: str) -> int:
     return int(size_in_bytes)
 
 
-def get_commit_hash() -> str | None:
+def get_commit_hash() -> Optional[str]:
     hash_command = "git rev-parse HEAD"
     output, error = run_command(hash_command)
     if error:
@@ -70,7 +70,7 @@ def get_commit_hash() -> str | None:
     return output.strip()
 
 
-def get_commit_date(commit_hash: str) -> str | None:
+def get_commit_date(commit_hash: str) -> Optional[str]:
     date_command = f"git show -s --format=%ci {commit_hash}"
     output, error = run_command(date_command)
     if error:
@@ -83,8 +83,8 @@ def main(
     board: str,
     num_commits: int,
     skip_step: int,
-    start_commit: str | None = None,
-    end_commit: str | None = None,
+    start_commit: Optional[str] = None,
+    end_commit: Optional[str] = None,
 ):
     # change to the script dir
     os.chdir(str(HERE))

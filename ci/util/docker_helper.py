@@ -25,6 +25,8 @@ def get_docker_command() -> str:
         The path to the docker executable, or "docker" if not found (will fail later with clear error)
     """
     docker_exe = find_docker_executable()
+    if sys.platform == "win32":
+        return "docker"
     return docker_exe if docker_exe else "docker"
 
 

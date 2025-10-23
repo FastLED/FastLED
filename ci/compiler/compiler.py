@@ -10,7 +10,7 @@ from concurrent.futures import Future
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any
+from typing import Any, List, Optional
 
 
 class CacheType(Enum):
@@ -43,7 +43,7 @@ class SketchResult(CompilerResult):
     """Result from sketch compilation."""
 
     example: str
-    merged_bin_path: Path | None = None
+    merged_bin_path: Optional[Path] = None
 
 
 class Compiler(ABC):
@@ -54,7 +54,7 @@ class Compiler(ABC):
         pass
 
     @abstractmethod
-    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
+    def build(self, examples: List[str]) -> List[Future[SketchResult]]:
         """Build a list of examples with proper resource management.
 
         Args:
@@ -77,7 +77,7 @@ class Compiler(ABC):
 
     @abstractmethod
     def deploy(
-        self, example: str, upload_port: str | None = None, monitor: bool = False
+        self, example: str, upload_port: Optional[str] = None, monitor: bool = False
     ) -> SketchResult:
         """Deploy (upload) a specific example to the target device.
 

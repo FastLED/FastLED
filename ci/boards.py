@@ -3,7 +3,7 @@
 import json
 from copy import deepcopy
 from dataclasses import dataclass
-from typing import Any, ClassVar, Dict, List, Set
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 
 # An open source version of the esp-idf 5.1 platform for the ESP32 that
@@ -43,35 +43,35 @@ class Auto:
 @dataclass
 class Board:
     board_name: str
-    real_board_name: str | None = None
-    platform: str | None = None
+    real_board_name: Optional[str] = None
+    platform: Optional[str] = None
     platform_needs_install: bool = False
     use_pio_run: bool = (
         False  # some platforms like esp32-c2-devkitm-1 will only work with pio run
     )
-    platform_packages: str | None = None
-    framework: str | None = None
-    board_build_mcu: str | None = None
-    board_build_core: str | None = None
-    board_build_filesystem_size: str | None = None
-    board_build_flash_size: str | None = (
+    platform_packages: Optional[str] = None
+    framework: Optional[str] = None
+    board_build_mcu: Optional[str] = None
+    board_build_core: Optional[str] = None
+    board_build_filesystem_size: Optional[str] = None
+    board_build_flash_size: Optional[str] = (
         None  # Flash size for ESP32 boards (e.g., '4MB')
     )
-    build_flags: list[str] | None = None  # Reserved for future use.
-    defines: list[str] | None = None
-    customsdk: str | None = None
-    board_partitions: str | None = None  # Reserved for future use.
+    build_flags: Optional[List[str]] = None  # Reserved for future use.
+    defines: Optional[List[str]] = None
+    customsdk: Optional[str] = None
+    board_partitions: Optional[str] = None  # Reserved for future use.
     no_board_spec: bool = (
         False  # For platforms like 'native' that don't need a board specification
     )
     add_board_to_all: bool = True
-    lib_compat_mode: str | None = (
+    lib_compat_mode: Optional[str] = (
         None  # Library compatibility mode (e.g., 'off' for native platform)
     )
-    lib_ldf_mode: str | None = (
+    lib_ldf_mode: Optional[str] = (
         None  # Library Dependency Finder mode (e.g., 'chain+' for enhanced dependency finding)
     )
-    lib_ignore: list[str] | None = (
+    lib_ignore: Optional[List[str]] = (
         None  # Libraries to ignore during compilation (e.g., ['I2S'] for UNO R4 WiFi)
     )
 
@@ -367,7 +367,7 @@ class Board:
         # Default fallback
         return "unknown"
 
-    def get_mcu_target(self) -> str | None:
+    def get_mcu_target(self) -> Optional[str]:
         """Return specific MCU target for this board (e.g., 'ESP32S3', 'ATmega328P').
 
         Used by @filter directives for MCU-specific filtering.
@@ -400,7 +400,7 @@ class Board:
         return self.real_board_name if self.real_board_name else self.board_name
 
     def to_dictionary(self) -> dict[str, list[str]]:
-        out: dict[str, list[str]] = {}
+        out: Dict[str, list[str]] = {}
         if self.real_board_name:
             out[self.board_name] = [f"board={self.real_board_name}"]
         options = out.setdefault(self.board_name, [])
@@ -455,15 +455,15 @@ class Board:
 
     def to_platformio_ini(
         self,
-        additional_defines: list[str] | None = None,
-        additional_include_dirs: list[str] | None = None,
-        additional_libs: list[str] | None = None,
+        additional_defines: Optional[List[str]] = None,
+        additional_include_dirs: Optional[List[str]] = None,
+        additional_libs: Optional[List[str]] = None,
         include_platformio_section: bool = False,
-        core_dir: str | None = None,
-        packages_dir: str | None = None,
-        project_root: str | None = None,
-        build_cache_dir: str | None = None,
-        extra_scripts: list[str] | None = None,
+        core_dir: Optional[str] = None,
+        packages_dir: Optional[str] = None,
+        project_root: Optional[str] = None,
+        build_cache_dir: Optional[str] = None,
+        extra_scripts: Optional[List[str]] = None,
     ) -> str:
         """Return a `platformio.ini` snippet representing this board.
 
@@ -484,7 +484,7 @@ class Board:
             packages_dir: PlatformIO packages directory path
             project_root: FastLED project root for lib_deps symlink
         """
-        lines: list[str] = []
+        lines: List[str] = []
 
         # Optional [platformio] section
         if include_platformio_section:
@@ -544,7 +544,7 @@ class Board:
             lines.append(f"board_build.partitions = {self.board_partitions}")
 
         # Build-time flags -------------------------------------------------
-        build_flags_elements: list[str] = []
+        build_flags_elements: List[str] = []
         if self.defines:
             build_flags_elements.extend(f"-D{define}" for define in self.defines)
 
@@ -1105,9 +1105,9 @@ ADAFRUIT_GRAND_CENTRAL_M4 = Board(
 )
 
 
-def _make_board_map(boards: list[Board]) -> dict[str, Board]:
+def _make_board_map(boards: List[Board]) -> dict[str, Board]:
     # make board map, but assert on duplicate board names
-    board_map: dict[str, Board] = {}
+    board_map: Dict[str, Board] = {}
     for board in boards:
         assert board.board_name not in board_map, (
             f"Duplicate board name: {board.board_name}"
@@ -1116,7 +1116,7 @@ def _make_board_map(boards: list[Board]) -> dict[str, Board]:
     return board_map
 
 
-_BOARD_MAP: dict[str, Board] = _make_board_map(ALL)
+_BOARD_MAP: Dict[str, Board] = _make_board_map(ALL)
 
 
 def create_board(board_name: str, no_project_options: bool = False) -> Board:

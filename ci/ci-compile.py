@@ -105,6 +105,11 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     if not orchestrator.ensure_image_exists(build_if_missing=config.docker_build):
         return 1
 
+    # Pass actual image name to container manager (may differ from config if local image exists)
+    actual_image_name = orchestrator._get_image_name()
+    if actual_image_name != docker_config.image_name:
+        container_mgr.set_image_name(actual_image_name)
+
     # Print container management info
     print()
     print(f"Managing Docker container: {docker_config.container_name}")

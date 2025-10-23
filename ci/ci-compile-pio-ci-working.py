@@ -12,7 +12,7 @@ import sys
 import time
 import warnings
 from pathlib import Path
-from typing import List, Set
+from typing import Dict, List, Optional, Set
 
 from ci.boards import Board, create_board  # type: ignore
 from ci.util.locked_print import locked_print
@@ -106,7 +106,7 @@ DEFAULT_EXAMPLES = [
     "WS2816",
 ]
 
-EXTRA_EXAMPLES: dict[Board, list[str]] = {
+EXTRA_EXAMPLES: Dict[Board, List[str]] = {
     # ESP32DEV: ["EspI2SDemo"],
     # ESP32_S3_DEVKITC_1: ["EspS3I2SDemo"],
 }
@@ -241,7 +241,7 @@ def choose_board_interactively(boards: List[str]) -> List[str]:
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
     print("[all]: All boards")
-    out: list[str] = []
+    out: List[str] = []
     while True:
         try:
             input_str = input(
@@ -277,9 +277,9 @@ def resolve_example_path(example: str) -> Path:
 
 def compile_with_pio_ci(
     board: Board,
-    example_paths: list[Path],
-    build_dir: str | None,
-    defines: list[str],
+    example_paths: List[Path],
+    build_dir: Optional[str],
+    defines: List[str],
     verbose: bool,
 ) -> tuple[bool, str]:
     """Compile examples for a board using pio ci command."""
@@ -302,7 +302,7 @@ def compile_with_pio_ci(
 
     locked_print(f"*** Compiling examples for board {board_name} using pio ci ***")
 
-    errors: list[str] = []
+    errors: List[str] = []
 
     for example_path in example_paths:
         locked_print(
@@ -424,7 +424,7 @@ def compile_with_pio_ci(
     return True, f"Successfully compiled all examples for {board_name}"
 
 
-def run_symbol_analysis(boards: list[Board]) -> None:
+def run_symbol_analysis(boards: List[Board]) -> None:
     """Run symbol analysis on compiled outputs if requested."""
     locked_print("\nRunning symbol analysis on compiled outputs...")
 
@@ -479,7 +479,7 @@ def main() -> int:
         boards_names = args.boards.split(",") if args.boards else DEFAULT_BOARDS_NAMES
 
     # Get board objects
-    boards: list[Board] = []
+    boards: List[Board] = []
     for board_name in boards_names:
         try:
             board = create_board(board_name, no_project_options=False)
@@ -508,7 +508,7 @@ def main() -> int:
         examples = [ex for ex in examples if ex not in exclude_examples]
 
     # Resolve example paths
-    example_paths: list[Path] = []
+    example_paths: List[Path] = []
     for example in examples:
         try:
             example_path = resolve_example_path(example)
@@ -518,7 +518,7 @@ def main() -> int:
             return 1
 
     # Add extra examples for specific boards
-    extra_examples: dict[Board, list[Path]] = {}
+    extra_examples: Dict[Board, List[Path]] = {}
     for board in boards:
         if board in EXTRA_EXAMPLES:
             board_examples = []
@@ -531,7 +531,7 @@ def main() -> int:
                 extra_examples[board] = board_examples
 
     # Set up defines
-    defines: list[str] = []
+    defines: List[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
 

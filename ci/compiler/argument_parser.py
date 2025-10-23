@@ -1,11 +1,12 @@
 """Argument parsing and configuration for FastLED compilation."""
 
 import argparse
+import os
 import sys
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from ci.boards import Board, create_board
 
@@ -335,7 +336,7 @@ class CompilationArgumentParser:
 
     def _resolve_examples(
         self, args: argparse.Namespace, no_filter: bool = False
-    ) -> tuple[List[str], bool]:
+    ) -> Tuple[List[str], bool]:
         """Resolve examples from arguments.
 
         Special keyword 'all' compiles all examples.
@@ -382,9 +383,25 @@ class CompilationArgumentParser:
         return examples, skip_filters
 
     def _normalize_example(self, example: str) -> str:
-        """Normalize example name (remove 'examples/' prefix)."""
+        """Normalize example name (remove 'examples/' prefix and handle case-insensitivity)."""
         if example.startswith("examples/"):
-            return example[len("examples/") :]
+            example = example[len("examples/") :]
+
+        # Try to find the actual directory, handling case-insensitivity
+        # Always iterate to get the canonical name, even if .exists() returns True
+        # (On case-insensitive filesystems like Windows, .exists() may return True for wrong-case paths)
+        example_lower = example.lower()
+        try:
+            if self.examples_dir.exists():
+                for item in self.examples_dir.iterdir():
+                    if item.is_dir() and item.name.lower() == example_lower:
+                        # Found the directory - return the actual canonical name
+                        return item.name
+        except (OSError, PermissionError):
+            # If we can't iterate the directory, fall through to return original
+            pass
+
+        # If no match found, return original (will fail validation later with clear error)
         return example
 
     def _discover_all_examples(self) -> List[str]:

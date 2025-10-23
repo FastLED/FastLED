@@ -63,30 +63,24 @@ class DockerConfig:
 
             if platform:
                 # Get the platform family image name (e.g., niteris/fastled-compiler-esp-esp32dev)
-                # This returns the full image name without tag, which includes the representative board
+                # This returns the full image name with registry prefix and representative board
                 platform_image = get_docker_image_name(platform)
-                # Remove the registry prefix if present (get_docker_image_name includes 'niteris/')
-                if "/" in platform_image:
-                    image_base = platform_image.split("/", 1)[1]
-                else:
-                    image_base = platform_image
-
-                # All platform images use :latest tag
-                # The platform image already contains toolchains for all boards in the family
-                image_name = f"{image_base}:latest"
+                # Keep the full registry prefix (niteris/) for Docker Hub compatibility
+                # Docker will automatically pull from the registry if image is not found locally
+                image_name = f"{platform_image}:latest"
             else:
-                # Board not in platform mapping - generate ad-hoc name
+                # Board not in platform mapping - generate ad-hoc name with registry prefix
                 from ci.docker.build_image import extract_architecture
 
                 arch = extract_architecture(board_name)
-                image_name = f"fastled-compiler-{arch}-{board_name}:latest"
+                image_name = f"niteris/fastled-compiler-{arch}-{board_name}:latest"
 
         except Exception as e:
             # Fallback if lookups fail
             print(
                 f"Warning: Could not map board to platform image for {board_name}: {e}"
             )
-            image_name = f"fastled-compiler-{board_name}:latest"
+            image_name = f"niteris/fastled-compiler-{board_name}:latest"
 
         container_name = f"fastled-{board_name}"
 
@@ -107,6 +101,15 @@ class DockerContainerManager:
 
     def __init__(self, config: DockerConfig):
         self.config = config
+        self._image_name_override: Optional[str] = None
+
+    def set_image_name(self, image_name: str) -> None:
+        """Override the image name to use (for cases where local image differs from config)."""
+        self._image_name_override = image_name
+
+    def _get_image_name(self) -> str:
+        """Get the image name to use for this container."""
+        return self._image_name_override or self.config.image_name
 
     def get_container_state(self) -> ContainerState:
         """Query current container state without side effects."""
@@ -167,7 +170,7 @@ class DockerContainerManager:
             f"{self.config.project_root}:{self.config.mount_target}:ro",
             "--stop-timeout",
             str(self.config.stop_timeout),
-            self.config.image_name,
+            self._get_image_name(),
             "tail",
             "-f",
             "/dev/null",
@@ -389,9 +392,22 @@ class DockerCompilationOrchestrator:
     def __init__(self, config: DockerConfig, container_mgr: DockerContainerManager):
         self.config = config
         self.container = container_mgr
+        self._actual_image_name: Optional[str] = (
+            None  # Tracks the actual image name found
+        )
+
+    def _get_image_name(self) -> str:
+        """Get the actual image name to use (may be different from config if local)."""
+        return self._actual_image_name or self.config.image_name
 
     def ensure_image_exists(self, build_if_missing: bool = False) -> bool:
-        """Ensure Docker image exists, optionally building it."""
+        """Ensure Docker image exists, optionally building it.
+
+        Attempts to:
+        1. Use existing local image (with or without registry prefix)
+        2. Pull from Docker registry (if not building)
+        3. Build locally (if build_if_missing=True)
+        """
         try:
             result = subprocess.run(
                 [get_docker_command(), "image", "inspect", self.config.image_name],
@@ -402,22 +418,57 @@ class DockerCompilationOrchestrator:
 
             if result.returncode == 0:
                 print(f"✓ Using existing Docker image: {self.config.image_name}")
-                return True  # Image exists
+                self._actual_image_name = self.config.image_name
+                return True  # Image exists locally
 
+            # Image not found - try without registry prefix (e.g., niteris/fastled-compiler-avr-uno -> fastled-compiler-avr-uno)
+            if "/" in self.config.image_name:
+                image_without_registry = self.config.image_name.split("/", 1)[1]
+                result = subprocess.run(
+                    [get_docker_command(), "image", "inspect", image_without_registry],
+                    capture_output=True,
+                    text=True,
+                    timeout=10,
+                )
+                if result.returncode == 0:
+                    print(
+                        f"✓ Using existing Docker image (local): {image_without_registry}"
+                    )
+                    self._actual_image_name = image_without_registry
+                    return True
+
+            # Image not found locally - try to pull from registry
+            print(f"Docker image {self.config.image_name} not found locally.")
+            print(f"Attempting to pull from registry...")
+            print()
+
+            pull_result = subprocess.run(
+                [get_docker_command(), "pull", self.config.image_name],
+                capture_output=True,
+                text=True,
+                timeout=600,  # 10 minute timeout for pull
+            )
+
+            if pull_result.returncode == 0:
+                print(f"✓ Successfully pulled Docker image: {self.config.image_name}")
+                return True
+
+            # Pull failed - show options
             if not build_if_missing:
-                print(f"❌ Docker image {self.config.image_name} not found locally.")
+                print(f"❌ Could not pull Docker image from registry.")
+                print(f"   Image: {self.config.image_name}")
                 print(f"")
-                print(f"Option 1: Pull from registry (fastest):")
-                print(f"  docker pull {self.config.image_name}")
+                print(f"Ensure the image exists on Docker Hub:")
+                print(f"  https://hub.docker.com/r/niteris")
                 print(f"")
-                print(f"Option 2: Build locally (can take 15-30 minutes):")
+                print(f"Or build locally with:")
                 print(
                     f"  bash compile --docker --build {self.config.board_name} <example>"
                 )
                 print(f"")
                 return False
 
-            # Build the image
+            # Build the image locally
             print(f"Building Docker image: {self.config.image_name}")
             print(f"This may take 15-30 minutes depending on the platform...")
 

@@ -359,7 +359,8 @@ def build_docker_image(
         cmd.append("--no-cache")
 
     # Add build arguments for platform name (used during dependency caching)
-    cmd.extend(["--build-arg", f"PLATFORM_NAME={platform_name}"])
+    # The Dockerfile template expects PLATFORMS (plural) argument
+    cmd.extend(["--build-arg", f"PLATFORMS={platform_name}"])
 
     # Add metadata labels
     cmd.extend(

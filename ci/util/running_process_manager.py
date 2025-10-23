@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import threading
-from typing import List
+from typing import List, Optional
 
 # Import at runtime since this module is part of util package and used broadly
 from running_process import RunningProcess
@@ -12,7 +12,7 @@ class RunningProcessManager:
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
-        self._processes: list[RunningProcess] = []
+        self._processes: List[RunningProcess] = []
 
     def register(self, proc: RunningProcess) -> None:
         with self._lock:
@@ -26,12 +26,12 @@ class RunningProcessManager:
             except ValueError:
                 pass
 
-    def list_active(self) -> list[RunningProcess]:
+    def list_active(self) -> List[RunningProcess]:
         with self._lock:
             return [p for p in self._processes if not p.finished]
 
     def dump_active(self) -> None:
-        active: list[RunningProcess] = self.list_active()
+        active: List[RunningProcess] = self.list_active()
         if not active:
             print("\nNO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
             return
@@ -41,7 +41,7 @@ class RunningProcessManager:
 
         now = time.time()
         for idx, p in enumerate(active, 1):
-            pid: int | None = None
+            pid: Optional[int] = None
             try:
                 if p.proc is not None:
                     pid = p.proc.pid

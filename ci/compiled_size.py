@@ -3,7 +3,7 @@ import json
 import re
 import subprocess
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 
 def _create_board_info(path: Path) -> Dict[str, Any]:
@@ -29,7 +29,7 @@ def _find_build_info(board: str) -> Path:
     )
 
 
-def _run_pio_size(build_dir: Path) -> int | None:
+def _run_pio_size(build_dir: Path) -> Optional[int]:
     try:
         # Try to compute size without building first
         result = subprocess.run(
@@ -68,7 +68,7 @@ def check_firmware_size(board: str) -> int:
     prog_path = Path(board_info["prog_path"])  # absolute or relative path
     base_path = prog_path.parent
     suffixes = [".bin", ".hex", ".uf2"]
-    firmware: Path | None = None
+    firmware: Optional[Path] = None
     for suffix in suffixes:
         candidate = base_path / f"firmware{suffix}"
         if candidate.exists():
