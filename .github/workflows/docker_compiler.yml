@@ -74,7 +74,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: /tmp/digests
-          pattern: digests-*
+          pattern: digests-base-*
           merge-multiple: true
 
       - name: Verify digests were downloaded
