@@ -7,7 +7,6 @@
 #pragma once
 
 #include "platforms/intmap.h"
-#include "fl/deprecated.h"
 #include "fl/math.h"
 
 namespace fl {
@@ -41,44 +40,39 @@ namespace fl {
 /// uint8_t w = fl::int_scale<uint32_t, uint8_t>(0x80000000);  // Explicit: 32→8
 /// uint8_t noop = fl::int_scale<uint8_t, uint8_t>(255);   // Identity: no scaling
 /// ```
-template <typename INT_FROM, typename INT_TO>
-inline INT_TO int_scale(typename fl::identity<INT_FROM>::type x) {
-    return fl::details::int_scale_impl<INT_FROM, INT_TO>::apply(x);
-}
 
 // Deprecated legacy unsigned functions that delegate to the new int_scale<FROM, TO>() template
 /// @deprecated Use int_scale<uint8_t, uint16_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint8_t, uint16_t>(x) instead")
+
 inline uint16_t map8_to_16(uint8_t x) {
     return fl::int_scale<uint8_t, uint16_t>(x);
 }
 
 /// @deprecated Use int_scale<uint8_t, uint32_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint8_t, uint32_t>(x) instead")
+
 inline uint32_t map8_to_32(uint8_t x) {
     return fl::int_scale<uint8_t, uint32_t>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint32_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint16_t, uint32_t>(x) instead")
+
 inline uint32_t map16_to_32(uint16_t x) {
     return fl::int_scale<uint16_t, uint32_t>(x);
 }
 
 /// @deprecated Use int_scale<uint16_t, uint8_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint16_t, uint8_t>(x) instead")
+
 inline uint8_t map16_to_8(uint16_t x) {
     return fl::int_scale<uint16_t, uint8_t>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint16_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint32_t, uint16_t>(x) instead")
+
 inline uint16_t map32_to_16(uint32_t x) {
     return fl::int_scale<uint32_t, uint16_t>(x);
 }
 
 /// @deprecated Use int_scale<uint32_t, uint8_t>() instead
-FL_DEPRECATED("Use fl::int_scale<uint32_t, uint8_t>(x) instead")
 inline uint8_t map32_to_8(uint32_t x) {
     return fl::int_scale<uint32_t, uint8_t>(x);
 }

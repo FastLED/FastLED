@@ -69,8 +69,8 @@ struct int_scale_impl {
     // This gets overridden by specializations for valid type pairs
     static INT_TO apply(INT_FROM) {
         // This will only be instantiated if no specialization matches
-        // Force a compile-time error with a descriptive message
-        static_assert(false, "int_scale: unsupported type conversion pair");
+        // Use dependent expression to delay assertion until instantiation
+        static_assert(fl::is_same<INT_FROM, void>::value, "int_scale: unsupported type conversion pair");
         return INT_TO(0);  // Never reached, but satisfies return type
     }
 };
@@ -660,4 +660,8 @@ LIB8STATIC_ALWAYS_INLINE int8_t smap32_to_8(int32_t x) {
 /// @} intmap
 /// @} lib8tion
 }  // namespace details
+
+// Bring int_scale into fl namespace for use by lib8tion/intmap.h
+using details::int_scale;
+
 }  // namespace fl
