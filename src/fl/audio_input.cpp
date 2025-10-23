@@ -17,6 +17,8 @@
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
   #if defined(ESP32) && !defined(ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #elif defined(__EMSCRIPTEN__)
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif FL_HAS_INCLUDE(<Arduino.h>)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 1
   #else
