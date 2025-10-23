@@ -1,3 +1,5 @@
+// @filter: (memory is high)
+
 /// @file    FxPride2015.ino
 /// @brief   Pride2015 effect with ScreenMap
 /// @example FxPride2015.ino
