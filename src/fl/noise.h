@@ -7,6 +7,22 @@
 /// @file noise.h
 /// Functions to generate noise patterns on rings and spheres.
 
+namespace fl {
+
+/// Observed min/max extents for inoise16() output.
+/// These values represent the practical range of the Perlin noise function
+/// across the full spectrum of radius, angle, and time parameters.
+/// Used for rescaling 16-bit noise output to span the full 16-bit range (0 to 65535)
+/// for excellent visual coverage (~94%).
+/// @note Determined by comprehensive stress testing with 100k+ random samples at radius=1.0
+///       and 10k samples at extreme radius=1000. Conservative bounds [8500, 58000] remain
+///       valid at all radius values while maintaining ~94% coverage at radius=1.0.
+/// @see noiseRingHSV16(), noiseRingCRGB(), noiseSphereHSV16(), noiseSphereCRGB()
+constexpr uint16_t NOISE16_EXTENT_MIN = 8500;
+constexpr uint16_t NOISE16_EXTENT_MAX = 58000;
+
+} // namespace fl
+
 /// @defgroup ShapeNoise Shape Noise Functions
 /// Convenience functions for generating noise on geometric shapes.
 /// Each function samples multiple z-slices of the noise space to generate

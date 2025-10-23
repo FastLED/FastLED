@@ -94,6 +94,30 @@ template <> struct map_range_math<u8, u8> {
     }
 };
 
+template <> struct map_range_math<u16, u16> {
+    static u16 map(u16 value, u16 in_min, u16 in_max,
+                        u16 out_min, u16 out_max) {
+        if (value == in_min) {
+            return out_min;
+        }
+        if (value == in_max) {
+            return out_max;
+        }
+        // Promote u16 to u32 for mapping to avoid overflow in multiplication.
+        u32 v32 = value;
+        u32 in_min32 = in_min;
+        u32 in_max32 = in_max;
+        u32 out_min32 = out_min;
+        u32 out_max32 = out_max;
+        u32 out32 = map_range<u32, u32>(v32, in_min32, in_max32,
+                                                      out_min32, out_max32);
+        if (out32 > 65535) {
+            out32 = 65535;
+        }
+        return static_cast<u16>(out32);
+    }
+};
+
 // partial specialization for U = vec2<V>
 template <typename T, typename V> struct map_range_math<T, vec2<V>> {
     static vec2<V> map(T value, T in_min, T in_max, vec2<V> out_min,

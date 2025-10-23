@@ -11,6 +11,7 @@
 
 
 #include "fl/cstring.h"
+#include "fl/map_range.h"
 // Compiler throws a warning about stack usage possibly being unbounded even
 // though bounds are checked, silence that so users don't see it
 #pragma GCC diagnostic push
@@ -952,6 +953,14 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
   }
 }
 
+/// Rescale raw inoise16() output to full 16-bit range [0, 65535]
+/// Curries in the global NOISE16_EXTENT_MIN/MAX extents for clean, reusable rescaling.
+/// @param raw_value Raw noise value from inoise16()
+/// @return Rescaled value spanning the full 16-bit range (0-65535)
+FASTLED_FORCE_INLINE uint16_t rescaleNoiseValue(uint16_t raw_value) {
+  return fl::map_range_clamped(raw_value, fl::NOISE16_EXTENT_MIN, fl::NOISE16_EXTENT_MAX,
+                               uint16_t(0), uint16_t(65535));
+}
 
 /// Ring noise functions - sample three z-slices for independent component evolution
 fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius) {
@@ -966,9 +975,14 @@ fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius) {
 
   // Sample three different z-slices for H, S, V components
   // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
-  uint16_t h = inoise16(nx, ny, time);
-  uint16_t s = inoise16(nx, ny, time + 0x10000);
-  uint16_t v = inoise16(nx, ny, time + 0x20000);
+  uint16_t h_raw = inoise16(nx, ny, time);
+  uint16_t s_raw = inoise16(nx, ny, time + 0x10000);
+  uint16_t v_raw = inoise16(nx, ny, time + 0x20000);
+
+  // Rescale from observed noise range to full 0-65535 range using global extents
+  uint16_t h = rescaleNoiseValue(h_raw);
+  uint16_t s = rescaleNoiseValue(s_raw);
+  uint16_t v = rescaleNoiseValue(v_raw);
 
   return fl::HSV16(h, s, v);
 }
@@ -997,9 +1011,14 @@ CRGB noiseRingCRGB(float angle, uint32_t time, float radius) {
 
   // Sample three different z-slices for R, G, B components (direct RGB)
   // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
-  uint16_t r16 = inoise16(nx, ny, time);
-  uint16_t g16 = inoise16(nx, ny, time + 0x10000);
-  uint16_t b16 = inoise16(nx, ny, time + 0x20000);
+  uint16_t r16_raw = inoise16(nx, ny, time);
+  uint16_t g16_raw = inoise16(nx, ny, time + 0x10000);
+  uint16_t b16_raw = inoise16(nx, ny, time + 0x20000);
+
+  // Rescale from observed noise range to full 0-65535 range using global extents
+  uint16_t r16 = rescaleNoiseValue(r16_raw);
+  uint16_t g16 = rescaleNoiseValue(g16_raw);
+  uint16_t b16 = rescaleNoiseValue(b16_raw);
 
   // Scale down to 8-bit
   uint8_t r = r16 >> 8;
