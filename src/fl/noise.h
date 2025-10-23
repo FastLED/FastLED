@@ -21,8 +21,6 @@ namespace fl {
 constexpr uint16_t NOISE16_EXTENT_MIN = 9000;
 constexpr uint16_t NOISE16_EXTENT_MAX = 59500;
 
-} // namespace fl
-
 /// @defgroup ShapeNoise Shape Noise Functions
 /// Convenience functions for generating noise on geometric shapes.
 /// Each function samples multiple z-slices of the noise space to generate
@@ -142,3 +140,5 @@ CRGB noiseCylinderCRGB(float angle, float height, uint32_t time, float radius = 
 /// @} Cylinder Noise Functions
 
 /// @} Shape Noise Functions
+
+} // namespace fl
