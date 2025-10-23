@@ -152,6 +152,26 @@ template<> void delaycycles<48>() { delaycycles<40>(); delaycycles<8>(); }
 template<> void delaycycles<49>() { delaycycles<40>(); delaycycles<9>(); }
 template<> void delaycycles<50>() { delaycycles<40>(); delaycycles<10>(); }
 
+// Additional specializations for common SPI timing delays
+template<> void delaycycles<14>() {
+  delaycycles<8>();
+  delaycycles<6>();
+}
+
+template<> void delaycycles<23>() {
+  delaycycles<8>();
+  delaycycles<8>();
+  delaycycles<7>();
+}
+
+template<> void delaycycles<37>() {
+  delaycycles<8>();
+  delaycycles<8>();
+  delaycycles<8>();
+  delaycycles<8>();
+  delaycycles<5>();
+}
+
 // ============================================================================
 // Millisecond and Microsecond delay implementations
 // ============================================================================
