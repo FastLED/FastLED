@@ -66,8 +66,8 @@
   #define FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
   // GCC doesn't have shorten-64-to-32 warning, use no-op
   #define FL_DISABLE_WARNING_SHORTEN_64_TO_32
-  // AVR-GCC doesn't recognize volatile warning, so disable it for AVR targets
-  #if defined(__AVR__)
+  // AVR-GCC and non-Clang compilers don't recognize volatile warning, so disable it for those targets
+  #if defined(__AVR__) || !defined(__clang__)
     #define FL_DISABLE_WARNING_VOLATILE
   #else
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)

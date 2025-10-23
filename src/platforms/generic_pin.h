@@ -98,19 +98,28 @@ public:
 	inline void fastset(FASTLED_REGISTER port_ptr_t port, FASTLED_REGISTER port_t val) __attribute__ ((always_inline)) { *port  = val; }
 
 	/// Gets the state of the port with this pin `HIGH`
-	port_t hival() __attribute__ ((always_inline)) {
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING(ignored-qualifiers)
+	volatile port_t hival() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort | mPinMask; }
 		else { return HIGH; }
 	}
+	FL_DISABLE_WARNING_POP
 	/// Gets the state of the port with this pin `LOW`
-	port_t loval() __attribute__ ((always_inline)) {
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING(ignored-qualifiers)
+	volatile port_t loval() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort & ~mPinMask; }
 		else { return LOW; }
 	}
+	FL_DISABLE_WARNING_POP
 	/// Get the output state of the port
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	/// Get the pin mask
-	port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+	FL_DISABLE_WARNING_PUSH
+	FL_DISABLE_WARNING(ignored-qualifiers)
+	volatile port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
+	FL_DISABLE_WARNING_POP
 	FL_DISABLE_WARNING_POP
 
 	/// @copydoc Pin::hi()
