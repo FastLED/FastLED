@@ -18,7 +18,7 @@
 // ============================================================================
 // Platform-provided delay functions (from Arduino or platform layer)
 // ============================================================================
-#ifdef ARDUINO
+#if defined(ARDUINO) && !defined(__EMSCRIPTEN__)
 #include "Arduino.h"  // ok include
 #endif
 

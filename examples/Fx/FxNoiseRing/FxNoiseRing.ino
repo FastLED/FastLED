@@ -28,7 +28,7 @@
 #include "sensors/pir.h"
 #include "fl/sstream.h"
 #include "fl/assert.h"
-#include "noise.h"
+#include "fl/noise.h"
 
 // Defines come after all includes
 #define LED_PIN 2
@@ -86,10 +86,10 @@ void draw(uint32_t now) {
         float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
 
         // Use the new noiseRingHSV8 function to sample three z-slices for HSV components
-        CHSV hsv = noiseRingHSV8(angle, now, noise_radius);
+        CHSV hsv = fl::noiseRingHSV8(angle, now, noise_radius);
 
         // Apply same constraints as before: minimum saturation and adjusted value
-        hsv.s = std::max(128u, (unsigned)hsv.s);
+        hsv.s = FL_MAX(128u, (unsigned)hsv.s);
         // Apply value mapping similar to original: map from 0-255 to -64-255, clamp to 0-255
         uint16_t val = hsv.v;
         int16_t adjusted_val = map(val, 0, 255, -64, 255);
