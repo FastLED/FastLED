@@ -146,6 +146,12 @@ _DEFPIN_ARM(PB12, 12, B);
 _DEFPIN_ARM(PB8, 8, B);
 _DEFPIN_ARM(PB1, 1, B);
 
+// Numeric pin definitions for Arduino compatibility (maps Arduino pin numbers to STM32 pins)
+_DEFPIN_ARM(1, 6, B);   // Arduino pin 1 -> PB6
+_DEFPIN_ARM(2, 5, B);   // Arduino pin 2 -> PB5
+_DEFPIN_ARM(3, 4, B);   // Arduino pin 3 -> PB4
+_DEFPIN_ARM(4, 3, B);   // Arduino pin 4 -> PB3
+
 // SPI2 MOSI
 #define SPI_DATA PB15
 // SPI2 SCK

@@ -14,7 +14,7 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#include "led_sysdefs.h"
+#include "../led_sysdefs.h"
 
 /// Constant for "not a pin"
 /// @todo Unused, remove?

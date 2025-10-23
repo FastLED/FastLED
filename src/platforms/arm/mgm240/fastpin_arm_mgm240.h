@@ -18,6 +18,7 @@
 #include "em_gpio.h"
 #include "em_cmu.h"
 
+#include "led_sysdefs.h"
 #include "fl/force_inline.h"
 #include "fl/unused.h"
 #include "fl/fastpin_base.h"

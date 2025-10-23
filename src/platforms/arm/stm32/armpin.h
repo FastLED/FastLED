@@ -63,6 +63,9 @@ public:
 #endif
 
     inline static port_t mask() __attribute__ ((always_inline)) { return _MASK; }
+
+    /// Check if this pin is valid for use with FastLED
+    static constexpr bool validpin() { return true; }
 };
 
 }  // namespace fl
