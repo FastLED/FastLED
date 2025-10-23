@@ -83,7 +83,7 @@ struct int_scale_impl {
 template <>
 struct int_scale_impl<uint8_t, uint16_t> {
     LIB8STATIC_ALWAYS_INLINE uint16_t apply(uint8_t x) {
-        return map8_to_16(x);
+        return uint16_t(x) * 0x101;
     }
 };
 
@@ -91,7 +91,7 @@ struct int_scale_impl<uint8_t, uint16_t> {
 template <>
 struct int_scale_impl<int8_t, int16_t> {
     LIB8STATIC_ALWAYS_INLINE int16_t apply(int8_t x) {
-        return smap8_to_16(x);
+        return int16_t(uint16_t(uint8_t(x)) * 0x101);
     }
 };
 
@@ -99,7 +99,7 @@ struct int_scale_impl<int8_t, int16_t> {
 template <>
 struct int_scale_impl<uint8_t, int16_t> {
     LIB8STATIC_ALWAYS_INLINE int16_t apply(uint8_t x) {
-        return int16_t(map8_to_16(x));
+        return int16_t(uint16_t(x) * 0x101);
     }
 };
 
@@ -107,7 +107,7 @@ struct int_scale_impl<uint8_t, int16_t> {
 template <>
 struct int_scale_impl<int8_t, uint16_t> {
     LIB8STATIC_ALWAYS_INLINE uint16_t apply(int8_t x) {
-        return uint16_t(map8_to_16(uint8_t(x)));
+        return uint16_t(uint8_t(x)) * 0x101;
     }
 };
 
@@ -115,7 +115,7 @@ struct int_scale_impl<int8_t, uint16_t> {
 template <>
 struct int_scale_impl<uint8_t, uint32_t> {
     LIB8STATIC_ALWAYS_INLINE uint32_t apply(uint8_t x) {
-        return map8_to_32(x);
+        return uint32_t(x) * 0x1010101;
     }
 };
 
@@ -123,7 +123,7 @@ struct int_scale_impl<uint8_t, uint32_t> {
 template <>
 struct int_scale_impl<int8_t, int32_t> {
     LIB8STATIC_ALWAYS_INLINE int32_t apply(int8_t x) {
-        return smap8_to_32(x);
+        return int32_t(uint32_t(uint8_t(x)) * 0x1010101);
     }
 };
 
@@ -131,7 +131,7 @@ struct int_scale_impl<int8_t, int32_t> {
 template <>
 struct int_scale_impl<uint8_t, int32_t> {
     LIB8STATIC_ALWAYS_INLINE int32_t apply(uint8_t x) {
-        return int32_t(map8_to_32(x));
+        return int32_t(uint32_t(x) * 0x1010101);
     }
 };
 
@@ -139,7 +139,7 @@ struct int_scale_impl<uint8_t, int32_t> {
 template <>
 struct int_scale_impl<int8_t, uint32_t> {
     LIB8STATIC_ALWAYS_INLINE uint32_t apply(int8_t x) {
-        return uint32_t(map8_to_32(uint8_t(x)));
+        return uint32_t(uint8_t(x)) * 0x1010101;
     }
 };
 
@@ -147,7 +147,7 @@ struct int_scale_impl<int8_t, uint32_t> {
 template <>
 struct int_scale_impl<uint16_t, uint32_t> {
     LIB8STATIC_ALWAYS_INLINE uint32_t apply(uint16_t x) {
-        return map16_to_32(x);
+        return uint32_t(x) * 0x10001;
     }
 };
 
@@ -155,7 +155,7 @@ struct int_scale_impl<uint16_t, uint32_t> {
 template <>
 struct int_scale_impl<int16_t, int32_t> {
     LIB8STATIC_ALWAYS_INLINE int32_t apply(int16_t x) {
-        return smap16_to_32(x);
+        return int32_t(uint32_t(uint16_t(x)) * 0x10001);
     }
 };
 
@@ -163,7 +163,7 @@ struct int_scale_impl<int16_t, int32_t> {
 template <>
 struct int_scale_impl<uint16_t, int32_t> {
     LIB8STATIC_ALWAYS_INLINE int32_t apply(uint16_t x) {
-        return int32_t(map16_to_32(x));
+        return int32_t(uint32_t(x) * 0x10001);
     }
 };
 
@@ -171,7 +171,7 @@ struct int_scale_impl<uint16_t, int32_t> {
 template <>
 struct int_scale_impl<int16_t, uint32_t> {
     LIB8STATIC_ALWAYS_INLINE uint32_t apply(int16_t x) {
-        return uint32_t(map16_to_32(uint16_t(x)));
+        return uint32_t(uint16_t(x)) * 0x10001;
     }
 };
 
@@ -183,7 +183,13 @@ struct int_scale_impl<int16_t, uint32_t> {
 template <>
 struct int_scale_impl<uint16_t, uint8_t> {
     LIB8STATIC_ALWAYS_INLINE uint8_t apply(uint16_t x) {
-        return map16_to_8(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xff00) return 0xff;
+        return uint8_t((x + 128) >> 8);
+#else
+        uint8_t result = (x + 128) >> 8;
+        return (x >= 0xff00) ? 0xff : result;
+#endif
     }
 };
 
@@ -191,7 +197,13 @@ struct int_scale_impl<uint16_t, uint8_t> {
 template <>
 struct int_scale_impl<int16_t, int8_t> {
     LIB8STATIC_ALWAYS_INLINE int8_t apply(int16_t x) {
-        return smap16_to_8(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7f80) return 127;
+        return int8_t((x + 128) >> 8);
+#else
+        uint8_t result = (uint16_t(x) + 128) >> 8;
+        return (x >= 0x7f80) ? 127 : int8_t(result);
+#endif
     }
 };
 
@@ -199,7 +211,13 @@ struct int_scale_impl<int16_t, int8_t> {
 template <>
 struct int_scale_impl<uint16_t, int8_t> {
     LIB8STATIC_ALWAYS_INLINE int8_t apply(uint16_t x) {
-        return int8_t(map16_to_8(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xff00) return 0xff;
+        return int8_t((x + 128) >> 8);
+#else
+        uint8_t result = (x + 128) >> 8;
+        return int8_t((x >= 0xff00) ? 0xff : result);
+#endif
     }
 };
 
@@ -207,7 +225,13 @@ struct int_scale_impl<uint16_t, int8_t> {
 template <>
 struct int_scale_impl<int16_t, uint8_t> {
     LIB8STATIC_ALWAYS_INLINE uint8_t apply(int16_t x) {
-        return uint8_t(smap16_to_8(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7f80) return 255;
+        return uint8_t((x + 128) >> 8);
+#else
+        uint8_t result = (uint16_t(x) + 128) >> 8;
+        return (x >= 0x7f80) ? 255 : result;
+#endif
     }
 };
 
@@ -215,7 +239,13 @@ struct int_scale_impl<int16_t, uint8_t> {
 template <>
 struct int_scale_impl<uint32_t, uint16_t> {
     LIB8STATIC_ALWAYS_INLINE uint16_t apply(uint32_t x) {
-        return map32_to_16(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xffff0000) return 0xffff;
+        return uint16_t((x + 32768) >> 16);
+#else
+        uint16_t result = (x + 32768) >> 16;
+        return (x >= 0xffff0000) ? 0xffff : result;
+#endif
     }
 };
 
@@ -223,7 +253,13 @@ struct int_scale_impl<uint32_t, uint16_t> {
 template <>
 struct int_scale_impl<int32_t, int16_t> {
     LIB8STATIC_ALWAYS_INLINE int16_t apply(int32_t x) {
-        return smap32_to_16(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7fff8000) return 32767;
+        return int16_t((x + 32768) >> 16);
+#else
+        uint16_t result = (uint32_t(x) + 32768) >> 16;
+        return (x >= 0x7fff8000) ? 32767 : int16_t(result);
+#endif
     }
 };
 
@@ -231,7 +267,13 @@ struct int_scale_impl<int32_t, int16_t> {
 template <>
 struct int_scale_impl<uint32_t, int16_t> {
     LIB8STATIC_ALWAYS_INLINE int16_t apply(uint32_t x) {
-        return int16_t(map32_to_16(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xffff0000) return 0xffff;
+        return int16_t((x + 32768) >> 16);
+#else
+        uint16_t result = (x + 32768) >> 16;
+        return int16_t((x >= 0xffff0000) ? 0xffff : result);
+#endif
     }
 };
 
@@ -239,7 +281,13 @@ struct int_scale_impl<uint32_t, int16_t> {
 template <>
 struct int_scale_impl<int32_t, uint16_t> {
     LIB8STATIC_ALWAYS_INLINE uint16_t apply(int32_t x) {
-        return uint16_t(smap32_to_16(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7fff8000) return 0xffff;
+        return uint16_t((x + 32768) >> 16);
+#else
+        uint16_t result = (uint32_t(x) + 32768) >> 16;
+        return (x >= 0x7fff8000) ? 0xffff : result;
+#endif
     }
 };
 
@@ -247,7 +295,13 @@ struct int_scale_impl<int32_t, uint16_t> {
 template <>
 struct int_scale_impl<uint32_t, uint8_t> {
     LIB8STATIC_ALWAYS_INLINE uint8_t apply(uint32_t x) {
-        return map32_to_8(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xFF000000) return 0xff;
+        return uint8_t((x + 0x800000) >> 24);
+#else
+        uint8_t result = (x + 0x800000) >> 24;
+        return (x >= 0xFF000000) ? 0xff : result;
+#endif
     }
 };
 
@@ -255,7 +309,13 @@ struct int_scale_impl<uint32_t, uint8_t> {
 template <>
 struct int_scale_impl<int32_t, int8_t> {
     LIB8STATIC_ALWAYS_INLINE int8_t apply(int32_t x) {
-        return smap32_to_8(x);
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7F000000) return 127;
+        return int8_t((x + 0x800000) >> 24);
+#else
+        uint8_t result = (uint32_t(x) + 0x800000) >> 24;
+        return (x >= 0x7F000000) ? 127 : int8_t(result);
+#endif
     }
 };
 
@@ -263,7 +323,13 @@ struct int_scale_impl<int32_t, int8_t> {
 template <>
 struct int_scale_impl<uint32_t, int8_t> {
     LIB8STATIC_ALWAYS_INLINE int8_t apply(uint32_t x) {
-        return int8_t(map32_to_8(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0xFF000000) return 0x7f;
+        return int8_t((x + 0x800000) >> 24);
+#else
+        uint8_t result = (x + 0x800000) >> 24;
+        return int8_t((x >= 0xFF000000) ? 0x7f : result);
+#endif
     }
 };
 
@@ -271,7 +337,13 @@ struct int_scale_impl<uint32_t, int8_t> {
 template <>
 struct int_scale_impl<int32_t, uint8_t> {
     LIB8STATIC_ALWAYS_INLINE uint8_t apply(int32_t x) {
-        return uint8_t(smap32_to_8(x));
+#if SKETCH_HAS_LOTS_OF_MEMORY == 0
+        if (x >= 0x7F000000) return 0xff;
+        return uint8_t((x + 0x800000) >> 24);
+#else
+        uint8_t result = (uint32_t(x) + 0x800000) >> 24;
+        return (x >= 0x7F000000) ? 0xff : result;
+#endif
     }
 };
 
