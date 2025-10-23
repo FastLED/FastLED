@@ -956,13 +956,13 @@ void fill_2dnoise16(CRGB *leds, int width, int height, bool serpentine,
 /// Ring noise functions - sample three z-slices for independent component evolution
 fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius) {
   // Convert angle to cartesian coordinates
-  float x = fl::cos(angle);
-  float y = fl::sin(angle);
+  float x = fl::cosf(angle);
+  float y = fl::sinf(angle);
 
-  // Scale to noise coordinate space (0xFFFF range)
-  // radius controls the level of detail / zoom level
-  uint32_t nx = static_cast<uint32_t>(x * radius * 0xffff);
-  uint32_t ny = static_cast<uint32_t>(y * radius * 0xffff);
+  // Map sin/cos values from [-1, 1] to [0, 0xFFFF]
+  // This ensures positive values for uint32_t conversion
+  uint32_t nx = static_cast<uint32_t>((x + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>((y + 1.0f) * 0.5f * radius * 0xffff);
 
   // Sample three different z-slices for H, S, V components
   // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
@@ -987,13 +987,13 @@ fl::hsv8 noiseRingHSV8(float angle, uint32_t time, float radius) {
 
 CRGB noiseRingCRGB(float angle, uint32_t time, float radius) {
   // Convert angle to cartesian coordinates
-  float x = fl::cos(angle);
-  float y = fl::sin(angle);
+  float x = fl::cosf(angle);
+  float y = fl::sinf(angle);
 
-  // Scale to noise coordinate space (0xFFFF range)
-  // radius controls the level of detail / zoom level
-  uint32_t nx = static_cast<uint32_t>(x * radius * 0xffff);
-  uint32_t ny = static_cast<uint32_t>(y * radius * 0xffff);
+  // Map sin/cos values from [-1, 1] to [0, 0xFFFF]
+  // This ensures positive values for uint32_t conversion
+  uint32_t nx = static_cast<uint32_t>((x + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>((y + 1.0f) * 0.5f * radius * 0xffff);
 
   // Sample three different z-slices for R, G, B components (direct RGB)
   // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
@@ -1005,6 +1005,78 @@ CRGB noiseRingCRGB(float angle, uint32_t time, float radius) {
   uint8_t r = r16 >> 8;
   uint8_t g = g16 >> 8;
   uint8_t b = b16 >> 8;
+
+  return CRGB(r, g, b);
+}
+
+
+/// Sphere noise functions - sample three z-slices for independent component evolution
+fl::HSV16 noiseSphereHSV16(float angle, float phi, uint32_t time, float radius) {
+  // Convert spherical coordinates to cartesian
+  // angle: azimuth (0 to 2π), phi: polar angle from north pole (0 to π)
+  // x = sin(phi) * cos(angle)
+  // y = sin(phi) * sin(angle)
+  // z = cos(phi)
+  float sin_phi = fl::sinf(phi);
+  float cos_phi = fl::cosf(phi);
+  float x = sin_phi * fl::cosf(angle);
+  float y = sin_phi * fl::sinf(angle);
+  float z = cos_phi;
+
+  // Map cartesian values from [-1, 1] to [0, 0xFFFF]
+  // This ensures positive values for uint32_t conversion
+  uint32_t nx = static_cast<uint32_t>((x + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>((y + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t nz = static_cast<uint32_t>((z + 1.0f) * 0.5f * radius * 0xffff);
+
+  // Sample three different t-slices for H, S, V components
+  // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
+  uint16_t h = inoise16(nx, ny, nz, time);
+  uint16_t s = inoise16(nx, ny, nz, time + 0x10000);
+  uint16_t v = inoise16(nx, ny, nz, time + 0x20000);
+
+  return fl::HSV16(h, s, v);
+}
+
+fl::hsv8 noiseSphereHSV8(float angle, float phi, uint32_t time, float radius) {
+  fl::HSV16 hsv16 = noiseSphereHSV16(angle, phi, time, radius);
+
+  // Scale 16-bit components down to 8-bit using bit shift with rounding
+  // This preserves the relative position in the value range
+  uint8_t h = (hsv16.h + 128) >> 8;
+  uint8_t s = (hsv16.s + 128) >> 8;
+  uint8_t v = (hsv16.v + 128) >> 8;
+
+  return fl::hsv8(h, s, v);
+}
+
+CRGB noiseSphereCRGB(float angle, float phi, uint32_t time, float radius) {
+  // Convert spherical coordinates to cartesian
+  // angle: azimuth (0 to 2π), phi: polar angle from north pole (0 to π)
+  // x = sin(phi) * cos(angle)
+  // y = sin(phi) * sin(angle)
+  // z = cos(phi)
+  float sin_phi = fl::sinf(phi);
+  float cos_phi = fl::cosf(phi);
+  float x = sin_phi * fl::cosf(angle);
+  float y = sin_phi * fl::sinf(angle);
+  float z = cos_phi;
+
+  // Map cartesian values from [-1, 1] to [0, 0xFFFF]
+  // This ensures positive values for uint32_t conversion
+  uint32_t nx = static_cast<uint32_t>((x + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t ny = static_cast<uint32_t>((y + 1.0f) * 0.5f * radius * 0xffff);
+  uint32_t nz = static_cast<uint32_t>((z + 1.0f) * 0.5f * radius * 0xffff);
+
+  // Sample three different t-slices for R, G, B components (direct RGB)
+  // Using offsets 0x0, 0x10000, 0x20000 to separate them in noise space
+  uint16_t r16 = inoise16(nx, ny, nz, time);
+  uint16_t g16 = inoise16(nx, ny, nz, time + 0x10000);
+  uint16_t b16 = inoise16(nx, ny, nz, time + 0x20000);
+
+  uint8_t r = fl::int_scale<uint16_t, uint8_t>(r16);
+  uint8_t g = fl::int_scale<uint16_t, uint8_t>(g16);
+  uint8_t b = fl::int_scale<uint16_t, uint8_t>(b16);
 
   return CRGB(r, g, b);
 }

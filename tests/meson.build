@@ -97,6 +97,7 @@ test_names = [
   'test_mpeg1',
   'test_mutex',
   'test_noise_range',
+  'test_noise_ring',
   'test_ostream',
   'test_pixelview',
   'test_point',

@@ -129,40 +129,9 @@ uint16_t snoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t w);
 /// @} 32-Bit Simplex Noise Functions
 
 
-/// @name Ring Noise Functions
-/// Convenience functions for generating noise on circular rings.
-/// Each function samples three z-slices of the noise space to generate
-/// independent values for each color component (H/S/V or R/G/B).
-/// @{
-
-/// Generate HSV16 noise for a ring pattern.
-/// Samples three z-slices of 3D Perlin noise (at time, time+0x10000, time+0x20000)
-/// to create independent hue, saturation, and value components.
-/// @param angle Position around the ring (radians, 0 to 2π)
-/// @param time Animation time parameter
-/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
-/// @return HSV16 color with 16-bit components
-fl::HSV16 noiseRingHSV16(float angle, uint32_t time, float radius = 1.0f);
-
-/// Generate HSV8 (8-bit) noise for a ring pattern.
-/// Calls noiseRingHSV16() and scales each component down to 8-bit.
-/// @param angle Position around the ring (radians, 0 to 2π)
-/// @param time Animation time parameter
-/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
-/// @return HSV8 (CHSV) color with 8-bit components
-fl::hsv8 noiseRingHSV8(float angle, uint32_t time, float radius = 1.0f);
-
-/// Generate CRGB noise for a ring pattern.
-/// Samples three z-slices of 3D Perlin noise to create independent
-/// red, green, and blue components (direct RGB, not HSV conversion).
-/// @param angle Position around the ring (radians, 0 to 2π)
-/// @param time Animation time parameter
-/// @param radius Noise zoom level (level of detail). Larger values = coarser pattern, smaller = more detail (default 1.0)
-/// @return CRGB color with 8-bit components
-CRGB noiseRingCRGB(float angle, uint32_t time, float radius = 1.0f);
-
-/// @} Ring Noise Functions
 /// @} NoiseGeneration
+
+#include "fl/noise.h"
 
 
 
