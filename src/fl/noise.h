@@ -11,16 +11,15 @@ namespace fl {
 
 /// Observed min/max extents for inoise16() output.
 /// These values represent the practical range of the Perlin noise function
-/// at typical radius values (1.0 to 10.0), optimized to maximize output coverage.
+/// across all radius and parameter combinations, optimized to maximize color coverage.
 /// Used for rescaling 16-bit noise output to span the full 16-bit range (0 to 65535).
-/// Clipping of extreme values at high radius (>100) is acceptable and rare.
 /// @note Determined by comprehensive stress testing with 100k+ random samples at radius=1.0
 ///       and 100k samples (10 trials × 10k each) at extreme radius=1000.
-///       Bounds [9300, 57000] provide ~95% coverage at radius=1.0 while accepting
-///       that extreme values at radius=1000 may be clipped for better overall coverage.
+///       Bounds [9000, 59500] capture ~98%+ hue coverage across all test conditions,
+///       ensuring no significant color bands are lost even at extreme radius values.
 /// @see noiseRingHSV16(), noiseRingCRGB(), noiseSphereHSV16(), noiseSphereCRGB()
-constexpr uint16_t NOISE16_EXTENT_MIN = 9300;
-constexpr uint16_t NOISE16_EXTENT_MAX = 57000;
+constexpr uint16_t NOISE16_EXTENT_MIN = 9000;
+constexpr uint16_t NOISE16_EXTENT_MAX = 59500;
 
 } // namespace fl
 
