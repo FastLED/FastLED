@@ -3,6 +3,7 @@
 #include "fl/singleton.h"
 #include "fl/engine_events.h"
 #include "fl/compiler_control.h"
+#include "fl/export.h"
 #include "fl/int.h"
 
 /// @file FastLED.cpp
@@ -124,7 +125,7 @@ CLEDController &CFastLED::addLeds(CLEDController *pLed,
 // static uninitialized gControllersData produces the smallest binary on attiny85.
 static void* gControllersData[MAX_CLED_CONTROLLERS];
 
-void CFastLED::show(uint8_t scale) {
+FL_KEEP_ALIVE void CFastLED::show(uint8_t scale) {
 #if !FASTLED_MANUAL_ENGINE_EVENTS
 	fl::EngineEvents::onBeginFrame();
 #endif
