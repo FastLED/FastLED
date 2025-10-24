@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // Router header for placement new operator - distributes to platform-specific implementations

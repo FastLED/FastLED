@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __INC_LED_SYSDEFS_STUB_H
 #define __INC_LED_SYSDEFS_STUB_H
 

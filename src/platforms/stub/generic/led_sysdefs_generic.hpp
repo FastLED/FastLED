@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "platforms/stub/led_sysdefs_stub.h"

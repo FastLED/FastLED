@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __FASTPIN_ARM_NRF52_VARIANTS_H
 #define __FASTPIN_ARM_NRF52_VARIANTS_H
 

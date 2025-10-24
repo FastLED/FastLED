@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI ISR C API (RISC-V / ESP32-C3/C2)
   -------------------------------------------------------------
   Type definitions and C API declarations for the parallel SPI ISR.

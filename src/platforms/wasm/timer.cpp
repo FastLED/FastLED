@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifdef __EMSCRIPTEN__
 
 // ⚠️⚠️⚠️ CRITICAL WARNING: C++ ↔ JavaScript TIMING BRIDGE - HANDLE WITH EXTREME CARE! ⚠️⚠️⚠️

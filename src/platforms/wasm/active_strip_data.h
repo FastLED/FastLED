@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // ⚠️⚠️⚠️ DEPRECATED: WASM-SPECIFIC ACTIVE STRIP DATA HEADER ⚠️⚠️⚠️

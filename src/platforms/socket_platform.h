@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 /// Socket Platform Delegation Header

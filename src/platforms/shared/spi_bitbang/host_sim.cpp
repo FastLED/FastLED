@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI Host Simulation Layer
   --------------------------------------------------
   Ring buffer implementation for capturing GPIO events during host-side testing.

@@ -1,6 +1,7 @@
 /// @file platforms/arm/rp/rp2040/delay.cpp
 /// RP2040 platform-specific delay implementation
 
+// ok no namespace fl
 #include "fl/types.h"
 
 #ifdef ARDUINO_ARCH_RP2040

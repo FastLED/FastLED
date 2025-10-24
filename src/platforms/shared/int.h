@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // Desktop/generic platform integer type definitions

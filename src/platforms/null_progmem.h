@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #include "fl/int.h"  // for FastLED integer types

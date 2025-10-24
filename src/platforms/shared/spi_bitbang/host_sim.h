@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI Host Simulation API
   ------------------------------------------------
   Public API for host simulation ring buffer and timer.

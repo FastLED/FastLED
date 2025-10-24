@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI Host Timer Simulation
   --------------------------------------------------
   Timer simulation for host-side testing. Emulates ESP32 hardware timer ISR.

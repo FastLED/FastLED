@@ -3,6 +3,7 @@
 ///
 /// Selects the appropriate fastpin implementation for ESP8266 or ESP32 variants.
 
+// ok no namespace fl
 #pragma once
 
 #if defined(ESP32)

@@ -1,4 +1,6 @@
 // Hierarchical include file for platforms/arm/ directory
+
+// ok no namespace fl
 #pragma once
 
 #ifdef FASTLED_ALL_SRC

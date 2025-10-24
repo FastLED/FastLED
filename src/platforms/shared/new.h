@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // Shared placement new operator - in global namespace

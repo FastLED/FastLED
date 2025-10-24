@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
  * Integration into FastLED ClocklessController
  * Copyright (c) 2024, Zach Vorhies
  * Copyright (c) 2018,2019,2020 Samuel Z. Guyer

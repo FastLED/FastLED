@@ -9,6 +9,7 @@
 /// - Platform-specific Pin class (runtime pin access)
 /// - Platform-specific FastPin<> specializations (compile-time pin access)
 
+// ok no namespace fl
 #pragma once
 
 // Platform-specific implementations

@@ -19,6 +19,8 @@
 // preprocessor header searches. FL_HAS_INCLUDE triggers header searches which
 // are slow when included multiple times. This guard ensures these checks only
 // happen once per compilation unit.
+
+// ok no namespace fl
 #ifndef FASTLED_ESP_VERSION_CACHED
 #define FASTLED_ESP_VERSION_CACHED
 

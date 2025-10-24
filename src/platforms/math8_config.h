@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // Auto-detect ATtiny platforms - must be included first

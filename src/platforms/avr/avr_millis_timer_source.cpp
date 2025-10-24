@@ -2,6 +2,7 @@
 // which is to just link in a weak symbol that will resolve the timer_millis
 // missing feature, or else implement it ourselves.
 
+// ok no namespace fl
 #ifdef __AVR__
 
 #ifdef FASTLED_DEFINE_AVR_MILLIS_TIMER0_IMPL

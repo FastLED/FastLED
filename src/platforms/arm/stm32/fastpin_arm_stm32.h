@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #if defined(FASTLED_FORCE_SOFTWARE_PINS)

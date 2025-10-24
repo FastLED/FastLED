@@ -1,6 +1,7 @@
 // Shared fallback implementation for Arduino examples that require specific platforms
 // This file provides a common fallback for examples that won't compile on all platforms
 
+// ok no namespace fl
 #include <FastLED.h>
 
 #define NUM_LEDS 60

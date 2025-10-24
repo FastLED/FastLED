@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #include "fastpin_esp8266.h"

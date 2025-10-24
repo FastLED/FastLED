@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI Platform Abstraction Layer
   -------------------------------------------------------
   Provides platform-specific GPIO write abstractions for the ISR engine.

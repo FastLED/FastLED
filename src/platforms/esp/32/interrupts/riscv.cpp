@@ -7,6 +7,8 @@
 // On other platforms (host, other ESP32 variants), this file is a no-op.
 
 // Only compile this file for ESP32-C3/C6 RISC-V platforms
+
+// ok no namespace fl
 #if defined(ESP32) && (defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6))
 
 #include "riscv.hpp"

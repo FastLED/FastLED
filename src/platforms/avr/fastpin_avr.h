@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 // NOTE: If you work on a platform in this file then please split it into it's own file

@@ -4,6 +4,7 @@
 /// Selects the appropriate fastpin implementation for different ARM-based
 /// microcontroller families (Teensy, Arduino, STM32, nRF, SAMD, RP2040, etc.)
 
+// ok no namespace fl
 #pragma once
 
 #if defined(NRF51)

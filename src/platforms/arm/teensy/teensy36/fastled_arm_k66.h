@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __INC_FASTLED_ARM_K66_H
 #define __INC_FASTLED_ARM_K66_H
 

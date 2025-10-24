@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __LED_SYSDEFS_ARM_NRF52
 #define __LED_SYSDEFS_ARM_NRF52
 

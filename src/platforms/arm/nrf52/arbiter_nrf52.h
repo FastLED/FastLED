@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __INC_ARBITER_NRF52
 #define __INC_ARBITER_NRF52
 

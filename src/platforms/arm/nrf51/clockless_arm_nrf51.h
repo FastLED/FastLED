@@ -1,3 +1,4 @@
+// ok no namespace fl
 #ifndef __INC_CLOCKLESS_ARM_NRF51
 #define __INC_CLOCKLESS_ARM_NRF51
 

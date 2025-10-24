@@ -1,5 +1,6 @@
 
 
+// ok no namespace fl
 #ifdef __EMSCRIPTEN__
 
 // ⚠️⚠️⚠️ WASM-SPECIFIC ACTIVE STRIP DATA WRAPPER ⚠️⚠️⚠️

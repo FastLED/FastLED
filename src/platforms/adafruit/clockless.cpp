@@ -1,4 +1,5 @@
 
+// ok no namespace fl
 #include "fl/has_include.h"
 
 #if FL_HAS_INCLUDE(<Adafruit_NeoPixel.h>)

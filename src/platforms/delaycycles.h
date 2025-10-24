@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #ifndef __INC_FASTLED_PLATFORMS_DELAYCYCLES_H

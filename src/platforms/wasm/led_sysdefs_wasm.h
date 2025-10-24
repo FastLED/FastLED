@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #ifndef FASTLED_STUB_IMPL

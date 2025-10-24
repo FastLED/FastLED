@@ -1,4 +1,6 @@
 /*
+
+// ok no namespace fl
   FastLED — Parallel Soft-SPI ISR (RISC-V / ESP32-C3/C2 AHB GPIO)
   ----------------------------------------------------------------
   Goals:

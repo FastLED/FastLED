@@ -1,3 +1,4 @@
+// ok no namespace fl
 #pragma once
 
 #include "fl/compiler_control.h"

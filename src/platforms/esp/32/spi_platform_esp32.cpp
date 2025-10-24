@@ -1,6 +1,7 @@
 // esp32c3_isr_platform.cpp — ESP32-C3 platform ISR and timer setup
 // Refactored to use cross-platform fl::isr API
 
+// ok no namespace fl
 #if defined(ESP32)
 
 #include "sdkconfig.h"
