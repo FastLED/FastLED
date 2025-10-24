@@ -121,7 +121,7 @@ public:
     /// @return true if transfer started successfully, false on error
     /// @note Waits for previous transaction to complete if still active
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -312,8 +312,8 @@ bool SPIDualRP2040::begin(const SpiHw2::Config& config) {
     dma_channel_configure(mDMAChannel,
                          &dma_config,
                          &mPIO->txf[mStateMachine],  // Write to PIO TX FIFO
-                         nullptr,  // Source set in transmitAsync
-                         0,        // Count set in transmitAsync
+                         nullptr,  // Source set in transmit
+                         0,        // Count set in transmit
                          false);   // Don't start yet
 
     mInitialized = true;
@@ -349,10 +349,13 @@ bool SPIDualRP2040::allocateDMABuffer(size_t required_size) {
     return true;
 }
 
-bool SPIDualRP2040::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIDualRP2040::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
+
+    // Mode is a hint - platform may block
+    (void)mode;
 
     // Wait for previous transaction if still active
     if (mTransactionActive) {

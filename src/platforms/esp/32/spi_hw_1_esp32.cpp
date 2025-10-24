@@ -5,7 +5,7 @@
 /// All class definition and implementation is contained in this single file.
 ///
 /// **IMPORTANT COMPATIBILITY NOTE:**
-/// This implementation uses BLOCKING transmission in transmitAsync() for backwards
+/// This implementation uses BLOCKING transmission in transmit() for backwards
 /// compatibility. While the interface appears async, the transmission completes
 /// synchronously before returning.
 ///
@@ -59,7 +59,7 @@ namespace fl {
 /// ESP32 hardware for Single-SPI transmission
 /// Implements SPISingle interface for ESP-IDF SPI peripheral
 ///
-/// **COMPATIBILITY WARNING**: transmitAsync() is currently BLOCKING
+/// **COMPATIBILITY WARNING**: transmit() is currently BLOCKING
 class SPISingleESP32 : public SpiHw1 {
 public:
     explicit SPISingleESP32(int bus_id = -1, const char* name = "Unknown");
@@ -67,7 +67,7 @@ public:
 
     bool begin(const SpiHw1::Config& config) override;
     void end() override;
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -152,7 +152,7 @@ bool SPISingleESP32::begin(const SpiHw1::Config& config) {
     dev_config.mode = 0;  // SPI mode 0 (CPOL=0, CPHA=0)
     dev_config.clock_speed_hz = config.clock_speed_hz;
     dev_config.spics_io_num = -1;  // No CS pin for LED strips
-    dev_config.queue_size = 7;  // Allow up to 7 queued transactions
+    dev_config.queue_size = 1;  // Single transaction slot (double-buffered with CRGB buffer)
     dev_config.flags = SPI_DEVICE_HALFDUPLEX;  // Transmit-only mode
 
     // Add device to bus
@@ -171,7 +171,7 @@ void SPISingleESP32::end() {
     cleanup();
 }
 
-bool SPISingleESP32::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPISingleESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
@@ -179,6 +179,9 @@ bool SPISingleESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     if (buffer.empty()) {
         return true;  // Nothing to transmit
     }
+
+    // Mode is currently ignored - always blocks (TODO: implement async DMA)
+    (void)mode;
 
     // TODO: Convert to true async DMA implementation
     // Currently BLOCKING for backwards compatibility
@@ -201,12 +204,12 @@ bool SPISingleESP32::transmitAsync(fl::span<const uint8_t> buffer) {
 
 bool SPISingleESP32::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused - transmission already complete
-    // Since transmitAsync() is blocking, always return immediately
+    // Since transmit() is blocking, always return immediately
     return true;
 }
 
 bool SPISingleESP32::isBusy() const {
-    // Since transmitAsync() is blocking, never busy
+    // Since transmit() is blocking, never busy
     return false;
 }
 

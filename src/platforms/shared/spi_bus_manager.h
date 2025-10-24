@@ -14,6 +14,13 @@
 
 namespace fl {
 
+/// SPI transmission mode hint
+/// Platforms may not support async transmission and will block regardless
+enum class TransmitMode : uint8_t {
+    SYNC,   ///< Block until transmission complete
+    ASYNC   ///< Return immediately (hint - platform may block anyway)
+};
+
 /// SPI bus configuration types
 enum class SPIBusType : uint8_t {
     SOFT_SPI,      ///< Software bit-banged SPI (always available)
@@ -367,7 +374,7 @@ public:
             }
 
             // Transmit via Dual-SPI hardware
-            bool transmit_ok = dual->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            bool transmit_ok = dual->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
             if (transmit_ok) {
                 dual->waitComplete();
             } else {
@@ -465,14 +472,14 @@ public:
         if (is_octal_mode) {
             // 8-lane (Octal-SPI)
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
-            transmit_ok = octal->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            transmit_ok = octal->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
             if (transmit_ok) {
                 octal->waitComplete();
             }
         } else {
             // 4-lane (Quad-SPI)
             SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
-            transmit_ok = quad->transmitAsync(fl::span<const uint8_t>(bus.interleaved_buffer));
+            transmit_ok = quad->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
             if (transmit_ok) {
                 quad->waitComplete();
             }

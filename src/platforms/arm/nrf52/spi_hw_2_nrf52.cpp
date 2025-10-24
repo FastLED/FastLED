@@ -168,10 +168,13 @@ bool SPIDualNRF52::allocateDMABuffers(size_t required_size) {
     return true;
 }
 
-bool SPIDualNRF52::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIDualNRF52::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
+
+    // Mode is a hint - platform may block
+    (void)mode;
 
     // Wait for previous transaction if still active
     if (mTransactionActive) {

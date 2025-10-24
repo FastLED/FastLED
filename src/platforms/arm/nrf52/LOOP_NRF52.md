@@ -148,7 +148,7 @@ class SpiHw2NRF52 : public SpiHw2 {
 public:
     bool begin(const Config& config) override;
     void end() override;
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -194,7 +194,7 @@ class SpiHw4NRF52 : public SpiHw4 {
 public:
     bool begin(const Config& config) override;
     void end() override;
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -533,7 +533,7 @@ Create unit tests for nRF52 parallel SPI:
 
 4. **Integration and Testing**
    - ✅ Called configuration functions from `begin()` method
-   - ✅ Updated `transmitAsync()` to use synchronized transmission
+   - ✅ Updated `transmit()` to use synchronized transmission
    - ✅ Updated documentation to reflect Iteration 3 status
 
 ### ⚠️ Known Limitations (TODO for Future Iterations):
@@ -723,7 +723,7 @@ Create unit tests for nRF52 parallel SPI:
 5. **Removed Byte-Level Interleaving from Hardware Drivers**
    - Note: The hardware drivers (spi_hw_2_nrf52.cpp, spi_hw_4_nrf52.cpp) still contain
      byte-level interleaving code, but this is now UNUSED
-   - SPIBusManager performs transposition BEFORE calling `transmitAsync()`
+   - SPIBusManager performs transposition BEFORE calling `transmit()`
    - Hardware drivers receive already-transposed data in the correct bit-interleaved format
    - The byte-level code in the drivers can be removed in a future cleanup pass
 
@@ -737,7 +737,7 @@ SPIBusManager::finalizeTransmission()
     ↓
 SPITransposer::transpose2() → interleaved_buffer (2× size, bit-level)
     ↓
-SpiHw2::transmitAsync(interleaved_buffer) → Hardware (SPIM0/1)
+SpiHw2::transmit(interleaved_buffer) → Hardware (SPIM0/1)
 ```
 
 **Key Insight**: Hardware drivers receive PRE-TRANSPOSED data, not raw lane data.
@@ -769,7 +769,7 @@ The transposition happens in SPIBusManager, not in the hardware driver.
 2. **Optional Code Cleanup**
    - Remove unused byte-level interleaving code from spi_hw_2_nrf52.cpp
    - Remove unused byte-level interleaving code from spi_hw_4_nrf52.cpp
-   - Simplify `transmitAsync()` to just set up DMA pointers
+   - Simplify `transmit()` to just set up DMA pointers
    - Document that transposition is handled by SPIBusManager
 
 3. **Performance Benchmarking** (after hardware testing)

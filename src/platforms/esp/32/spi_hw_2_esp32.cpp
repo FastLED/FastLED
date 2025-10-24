@@ -58,7 +58,7 @@ public:
 
     bool begin(const SpiHw2::Config& config) override;
     void end() override;
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -158,7 +158,7 @@ bool SPIDualESP32::begin(const SpiHw2::Config& config) {
     dev_config.mode = 0;  // SPI mode 0 (CPOL=0, CPHA=0)
     dev_config.clock_speed_hz = config.clock_speed_hz;
     dev_config.spics_io_num = -1;  // No CS pin for LED strips
-    dev_config.queue_size = 7;  // Allow up to 7 queued transactions
+    dev_config.queue_size = 1;  // Single transaction slot (double-buffered with CRGB buffer)
     dev_config.flags = SPI_DEVICE_HALFDUPLEX;  // Transmit-only mode
 
     FL_LOG_SPI("SPIDualESP32::begin - Configuring device:");
@@ -186,7 +186,7 @@ void SPIDualESP32::end() {
     cleanup();
 }
 
-bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIDualESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
@@ -195,6 +195,9 @@ bool SPIDualESP32::transmitAsync(fl::span<const uint8_t> buffer) {
     if (mTransactionActive) {
         waitComplete();
     }
+
+    // Mode is ignored - ESP32 always does async via DMA
+    (void)mode;
 
     if (buffer.empty()) {
         return true;  // Nothing to transmit

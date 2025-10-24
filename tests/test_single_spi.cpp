@@ -46,10 +46,10 @@ TEST_CASE("SpiHw1: Blocking transmission behavior") {
 
     fl::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
 
-    // transmitAsync should be BLOCKING - completes immediately
-    CHECK(single->transmitAsync(fl::span<const uint8_t>(data)));
+    // transmit should be BLOCKING - completes immediately
+    CHECK(single->transmit(fl::span<const uint8_t>(data)));
 
-    // Should NOT be busy after transmitAsync returns (because it's blocking)
+    // Should NOT be busy after transmit returns (because it's blocking)
     CHECK_FALSE(single->isBusy());
 
     // waitComplete should return immediately
@@ -68,7 +68,7 @@ TEST_CASE("SpiHw1: Empty buffer transmission") {
     CHECK(single->begin(config));
 
     fl::vector<uint8_t> empty_data;
-    CHECK(single->transmitAsync(fl::span<const uint8_t>(empty_data)));
+    CHECK(single->transmit(fl::span<const uint8_t>(empty_data)));
 
     single->end();
 }
@@ -83,12 +83,12 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
 
     // First transmission
     fl::vector<uint8_t> data1 = {0xAA, 0xBB};
-    CHECK(single->transmitAsync(fl::span<const uint8_t>(data1)));
+    CHECK(single->transmit(fl::span<const uint8_t>(data1)));
     CHECK_FALSE(single->isBusy());  // Blocking, so not busy
 
     // Second transmission (should work immediately since first is complete)
     fl::vector<uint8_t> data2 = {0xCC, 0xDD};
-    CHECK(single->transmitAsync(fl::span<const uint8_t>(data2)));
+    CHECK(single->transmit(fl::span<const uint8_t>(data2)));
     CHECK_FALSE(single->isBusy());
 
     single->end();
@@ -102,7 +102,7 @@ TEST_CASE("SpiHw1: Transmission without initialization fails") {
     stub->end();  // Ensure not initialized
 
     fl::vector<uint8_t> data = {0x12, 0x34};
-    CHECK_FALSE(stub->transmitAsync(fl::span<const uint8_t>(data)));
+    CHECK_FALSE(stub->transmit(fl::span<const uint8_t>(data)));
 }
 
 TEST_CASE("SpiHw1: Stub inspection") {
@@ -119,7 +119,7 @@ TEST_CASE("SpiHw1: Stub inspection") {
     CHECK_EQ(stub->getClockSpeed(), 20000000);
 
     fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
-    CHECK(stub->transmitAsync(fl::span<const uint8_t>(test_data)));
+    CHECK(stub->transmit(fl::span<const uint8_t>(test_data)));
 
     const auto& transmitted = stub->getLastTransmission();
     CHECK_EQ(transmitted.size(), 4);
@@ -145,13 +145,13 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
     CHECK_EQ(stub->getTransmissionCount(), 0);
 
     fl::vector<uint8_t> data = {0x11, 0x22};
-    stub->transmitAsync(fl::span<const uint8_t>(data));
+    stub->transmit(fl::span<const uint8_t>(data));
     CHECK_EQ(stub->getTransmissionCount(), 1);
 
-    stub->transmitAsync(fl::span<const uint8_t>(data));
+    stub->transmit(fl::span<const uint8_t>(data));
     CHECK_EQ(stub->getTransmissionCount(), 2);
 
-    stub->transmitAsync(fl::span<const uint8_t>(data));
+    stub->transmit(fl::span<const uint8_t>(data));
     CHECK_EQ(stub->getTransmissionCount(), 3);
 
     stub->reset();
@@ -210,7 +210,7 @@ TEST_CASE("SpiHw1: Large data transmission") {
         large_data.push_back(static_cast<uint8_t>(i & 0xFF));
     }
 
-    CHECK(stub->transmitAsync(fl::span<const uint8_t>(large_data)));
+    CHECK(stub->transmit(fl::span<const uint8_t>(large_data)));
 
     const auto& transmitted = stub->getLastTransmission();
     CHECK_EQ(transmitted.size(), 1000);
@@ -250,7 +250,7 @@ TEST_CASE("SpiHw1: Reset clears transmission history") {
     CHECK(stub->begin(config));
 
     fl::vector<uint8_t> data = {0xFF, 0xEE, 0xDD};
-    stub->transmitAsync(fl::span<const uint8_t>(data));
+    stub->transmit(fl::span<const uint8_t>(data));
 
     CHECK_EQ(stub->getTransmissionCount(), 1);
     CHECK_EQ(stub->getLastTransmission().size(), 3);

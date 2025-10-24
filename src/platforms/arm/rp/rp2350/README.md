@@ -108,7 +108,7 @@ if (!controllers.empty()) {
 
 - **Maximum clock speed**: ~25 MHz (PIO-limited)
 - **DMA overhead**: <1 µs transfer initiation
-- **Async operation**: Non-blocking transmitAsync() + waitComplete()
+- **Async operation**: Non-blocking transmit() + waitComplete()
 - **Memory overhead**: Minimal (no internal buffering required for DMA-safe buffers)
 - **Enhanced performance**: 3rd PIO instance allows more concurrent operations
 

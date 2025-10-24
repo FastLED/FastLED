@@ -7,7 +7,7 @@
 ///
 /// IMPLEMENTATION STATUS:
 /// ✅ Class structure complete (inherits from SpiHw8)
-/// ✅ All interface methods implemented (begin, end, transmitAsync, waitComplete, etc.)
+/// ✅ All interface methods implemented (begin, end, transmit, waitComplete, etc.)
 /// ✅ 8-lane bit interleaving algorithm implemented
 /// ✅ DMA buffer management complete
 /// ✅ Factory pattern with 2 controller instances
@@ -93,7 +93,7 @@ public:
     /// @note Waits for previous transaction to complete if still active
     /// @note Returns immediately - use waitComplete() to block until done
     /// @note Each byte is split into 1 bit per lane (8 source bytes → 8 bits per lane)
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -361,10 +361,13 @@ void SPIOctalSTM32::interleaveBits(fl::span<const uint8_t> buffer) {
     }
 }
 
-bool SPIOctalSTM32::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIOctalSTM32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
+
+    // Mode is a hint - platform may block
+    (void)mode;
 
     // Wait for previous transaction if still active
     if (mTransactionActive) {

@@ -44,7 +44,7 @@ void SpiHw8Stub::end() {
     mLastBuffer.clear();
 }
 
-bool SpiHw8Stub::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw8Stub::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }

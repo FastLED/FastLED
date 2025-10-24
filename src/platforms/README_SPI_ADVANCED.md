@@ -203,7 +203,7 @@ For each LED controller:
      → Bit-interleaves all lane data into single buffer
      ↓
   9. Bus Manager calls hardware:
-     quad->transmitAsync(output_buffer);
+     quad->transmit(output_buffer);
      quad->waitComplete();
      ↓
   10. Hardware SPI peripheral transmits via DMA (0% CPU)
@@ -895,7 +895,7 @@ void setup() {
     const char* error = nullptr;
     if (fl::SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3],
                                       fl::span<uint8_t>(output), &error)) {
-        quad->transmitAsync(fl::span<const uint8_t>(output));
+        quad->transmit(fl::span<const uint8_t>(output));
         quad->waitComplete();
     } else {
         Serial.printf("Transpose failed: %s\n", error);
@@ -948,7 +948,7 @@ if (!controllers.empty()) {
 
 **SpiHw2/SpiHw4 Implementations:**
 - Not thread-safe (single hardware peripheral)
-- Caller must serialize `transmitAsync()` calls
+- Caller must serialize `transmit()` calls
 - `waitComplete()` must be called before next transmission
 
 **SPIBusManager:**
@@ -980,10 +980,10 @@ if (!quad->begin(config)) {
     // - Bus already in use
 }
 
-if (!quad->transmitAsync(buffer)) {
+if (!quad->transmit(buffer)) {
     // DMA queue full or transmission error
     quad->waitComplete();  // Clear pending
-    quad->transmitAsync(buffer);  // Retry
+    quad->transmit(buffer);  // Retry
 }
 ```
 
@@ -1043,7 +1043,7 @@ auto controllers = fl::SpiHw4::getAll();
 fl::SpiHw4Stub* stub = fl::toStub(controllers[0]);
 
 // Perform transmission
-stub->transmitAsync(data);
+stub->transmit(data);
 
 // Inspect captured data
 const auto& transmitted = stub->getLastTransmission();

@@ -135,7 +135,7 @@ public:
 
     virtual bool begin(const Config& config) = 0;
     virtual void end() = 0;
-    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    virtual bool transmit(fl::span<const uint8_t> buffer) = 0;
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
     virtual bool isBusy() const = 0;
     virtual bool isInitialized() const = 0;
@@ -147,7 +147,7 @@ public:
 
 **Key Design Choices:**
 
-- **Async DMA:** `transmitAsync()` queues non-blocking transmission
+- **Async DMA:** `transmit()` queues non-blocking transmission
 - **Platform handles DMA buffers:** User provides data, platform manages DMA allocation
 - **Auto-detection:** `begin()` configures dual mode based on active pins
 - **Singleton instances:** `getAll()` returns static lifetime controllers
@@ -468,7 +468,7 @@ void setup() {
     const char* error = nullptr;
     if (fl::SPITransposer::transpose2(lane0, lane1,
                                       fl::span<uint8_t>(output), &error)) {
-        dual->transmitAsync(fl::span<const uint8_t>(output));
+        dual->transmit(fl::span<const uint8_t>(output));
         dual->waitComplete();
     } else {
         Serial.printf("Transpose failed: %s\n", error);
@@ -508,7 +508,7 @@ auto controllers = fl::SpiHw2::getAll();
 fl::SpiHw2Stub* stub = fl::toStub(controllers[0]);
 
 // Perform transmission
-stub->transmitAsync(data);
+stub->transmit(data);
 
 // Inspect captured data
 const auto& transmitted = stub->getLastTransmission();

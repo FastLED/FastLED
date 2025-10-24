@@ -44,7 +44,7 @@ public:
 
     bool begin(const SpiHw4::Config& config) override;
     void end() override;
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -183,7 +183,7 @@ void SpiHw4MXRT1062::end() {
     cleanup();
 }
 
-bool SpiHw4MXRT1062::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SpiHw4MXRT1062::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized || !mSPI) {
         return false;
     }

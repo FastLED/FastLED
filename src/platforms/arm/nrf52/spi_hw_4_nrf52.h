@@ -79,7 +79,7 @@ public:
     /// @return true if transfer started successfully, false on error
     /// @note Waits for previous transaction to complete if still active
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)

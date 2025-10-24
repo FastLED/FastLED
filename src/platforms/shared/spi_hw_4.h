@@ -61,12 +61,13 @@ public:
     /// @note Should wait for any pending transmissions to complete
     virtual void end() = 0;
 
-    /// Queue asynchronous DMA transmission (non-blocking)
+    /// Queue DMA transmission (mode is a hint - platform may block regardless)
     /// @param buffer Data buffer to transmit (platform handles DMA requirements internally)
-    /// @returns true if queued successfully, false on error
+    /// @param mode Transmission mode hint (SYNC or ASYNC)
+    /// @returns true if transmitted/queued successfully, false on error
     /// @note Platform implementations handle DMA buffer allocation/alignment internally
     /// @note Buffer must remain valid until waitComplete() returns
-    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    virtual bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds

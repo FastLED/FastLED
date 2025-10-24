@@ -57,7 +57,7 @@ public:
     /// @return true if transfer started successfully, false on error
     /// @note Waits for previous transaction to complete if still active
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -317,10 +317,13 @@ bool SPIDualSAMD21::allocateDMABuffer(size_t required_size) {
     return false;
 }
 
-bool SPIDualSAMD21::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIDualSAMD21::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
+
+    // Mode is a hint - platform may block
+    (void)mode;
 
     // Wait for previous transaction if still active
     if (mTransactionActive) {

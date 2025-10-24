@@ -98,7 +98,7 @@ public:
     /// @return true if transfer started successfully, false on error
     /// @note Waits for previous transaction to complete if still active
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmitAsync(fl::span<const uint8_t> buffer) override;
+    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -282,7 +282,7 @@ bool SPIQuadSAMD51::begin(const SpiHw4::Config& config) {
         // Wait for QSPI to enable
     }
 
-    // Note: DMA setup will be done in transmitAsync() on first transfer
+    // Note: DMA setup will be done in transmit() on first transfer
     // This allows for lazy initialization and avoids holding DMA channels when not in use
 
     mInitialized = true;
@@ -295,10 +295,13 @@ void SPIQuadSAMD51::end() {
     cleanup();
 }
 
-bool SPIQuadSAMD51::transmitAsync(fl::span<const uint8_t> buffer) {
+bool SPIQuadSAMD51::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     if (!mInitialized) {
         return false;
     }
+
+    // Mode is a hint - platform may block
+    (void)mode;
 
     // Wait for previous transaction if still active
     if (mTransactionActive) {
@@ -408,7 +411,7 @@ bool SPIQuadSAMD51::waitComplete(uint32_t timeout_ms) {
     }
 
     // Implementation Note:
-    // Current transmitAsync() implementation is synchronous (polling-based),
+    // Current transmit() implementation is synchronous (polling-based),
     // so by the time it returns, the transaction is already complete.
     // This method is here for API consistency.
     //

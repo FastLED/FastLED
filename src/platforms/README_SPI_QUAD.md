@@ -165,7 +165,7 @@ public:
 
     virtual bool begin(const Config& config) = 0;
     virtual void end() = 0;
-    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    virtual bool transmit(fl::span<const uint8_t> buffer) = 0;
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
     virtual bool isBusy() const = 0;
     virtual bool isInitialized() const = 0;
@@ -191,7 +191,7 @@ public:
     // Same methods as SpiHw4
     virtual bool begin(const Config& config) = 0;
     virtual void end() = 0;
-    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    virtual bool transmit(fl::span<const uint8_t> buffer) = 0;
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
     virtual bool isBusy() const = 0;
     virtual bool isInitialized() const = 0;
@@ -203,7 +203,7 @@ public:
 
 **Key Design Choices:**
 
-- **Async DMA:** `transmitAsync()` queues non-blocking transmission
+- **Async DMA:** `transmit()` queues non-blocking transmission
 - **Platform handles DMA buffers:** User provides data, platform manages DMA allocation
 - **Explicit interfaces:** Separate interfaces make capabilities clear at compile-time
 - **Auto-detection:** `begin()` detects active lane count (1/2/4 for SpiHw4, always 8 for SpiHw8)
@@ -764,7 +764,7 @@ void setup() {
     const char* error = nullptr;
     if (fl::SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3],
                                       fl::span<uint8_t>(output), &error)) {
-        quad->transmitAsync(fl::span<const uint8_t>(output));
+        quad->transmit(fl::span<const uint8_t>(output));
         quad->waitComplete();
     } else {
         Serial.printf("Transpose failed: %s\n", error);
@@ -817,7 +817,7 @@ if (!controllers.empty()) {
 
 **SpiHw4 Implementations:**
 - Not thread-safe (single hardware peripheral)
-- Caller must serialize `transmitAsync()` calls
+- Caller must serialize `transmit()` calls
 - `waitComplete()` must be called before next transmission
 
 ### Error Handling
@@ -845,10 +845,10 @@ if (!quad->begin(config)) {
     // - Bus already in use
 }
 
-if (!quad->transmitAsync(buffer)) {
+if (!quad->transmit(buffer)) {
     // DMA queue full or transmission error
     quad->waitComplete();  // Clear pending
-    quad->transmitAsync(buffer);  // Retry
+    quad->transmit(buffer);  // Retry
 }
 ```
 
@@ -906,7 +906,7 @@ auto controllers = fl::SpiHw4::getAll();
 fl::SpiHw4Stub* stub = fl::toStub(controllers[0]);
 
 // Perform transmission
-stub->transmitAsync(data);
+stub->transmit(data);
 
 // Inspect captured data
 const auto& transmitted = stub->getLastTransmission();

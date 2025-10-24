@@ -8,7 +8,7 @@
 /// interface to provide hardware SPI support.
 ///
 /// **IMPORTANT COMPATIBILITY NOTE:**
-/// This implementation currently uses BLOCKING transmitAsync() for backwards
+/// This implementation currently uses BLOCKING transmit() for backwards
 /// compatibility with existing code. While the interface appears async, the
 /// transmission completes synchronously before returning.
 ///
@@ -59,24 +59,24 @@ public:
     /// @note Should wait for any pending transmissions to complete
     virtual void end() = 0;
 
-    /// Queue transmission (currently BLOCKING for backwards compatibility)
+    /// Queue transmission (mode is a hint - platform may block regardless)
     /// @param buffer Data buffer to transmit
+    /// @param mode Transmission mode hint (SYNC or ASYNC)
     /// @returns true if transmitted successfully, false on error
-    /// @note **COMPATIBILITY WARNING**: Despite the "Async" name, this is currently
-    ///       BLOCKING and will not return until transmission completes.
-    /// @note TODO: Convert to true async DMA implementation in the future.
-    /// @note Buffer must remain valid until waitComplete() returns (currently immediate)
-    virtual bool transmitAsync(fl::span<const uint8_t> buffer) = 0;
+    /// @note **PLATFORM NOTE**: This implementation currently BLOCKS regardless of mode
+    ///       for backwards compatibility. True async DMA will be added in the future.
+    /// @note Buffer must remain valid until waitComplete() returns
+    virtual bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
-    /// @note Currently returns immediately as transmitAsync() is blocking
+    /// @note Currently returns immediately as transmit() is blocking
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
-    /// @note Currently always returns false as transmitAsync() is blocking
+    /// @note Currently always returns false as transmit() is blocking
     virtual bool isBusy() const = 0;
 
     /// Get initialization status
