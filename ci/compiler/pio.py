@@ -712,7 +712,7 @@ class GlobalPackageLock:
 
         start_time = time.time()
         warning_shown = False
-        stale_check_done = False
+        last_stale_check = 0.0
 
         while True:
             # Check for keyboard interrupt
@@ -722,10 +722,14 @@ class GlobalPackageLock:
                 )
                 raise KeyboardInterrupt()
 
-            # Check for stale lock once at the beginning
-            if not stale_check_done and time.time() - start_time < 0.5:
-                self._check_stale_lock()
-                stale_check_done = True
+            elapsed = time.time() - start_time
+
+            # Check for stale lock periodically (every ~1 second)
+            if elapsed - last_stale_check >= 1.0:
+                if self._check_stale_lock():
+                    # Stale lock was removed, try to acquire immediately
+                    print(f"Stale lock removed, retrying acquisition...")
+                last_stale_check = elapsed
 
             # Try to acquire with very short timeout (non-blocking)
             try:
@@ -741,7 +745,6 @@ class GlobalPackageLock:
                 pass  # Continue the loop to check elapsed time and try again
 
             # Check if we should show warning (after 1 second)
-            elapsed = time.time() - start_time
             if not warning_shown and elapsed >= 1.0:
                 yellow = "\033[33m"
                 reset = "\033[0m"
@@ -750,10 +753,10 @@ class GlobalPackageLock:
                 )
                 warning_shown = True
 
-            # Check for timeout (after 10 seconds - longer for package installation)
-            if elapsed >= 10.0:
+            # Check for timeout (after 5 seconds)
+            if elapsed >= 5.0:
                 raise TimeoutError(
-                    f"Failed to acquire global package lock for platform {self.platform_name} within 10 seconds. "
+                    f"Failed to acquire global package lock for platform {self.platform_name} within 5 seconds. "
                     f"Lock file: {self.lock_file}. "
                     f"This may indicate another process is installing packages or a deadlock occurred."
                 )
@@ -1548,14 +1551,131 @@ class PlatformLock:
         self.lock = fasteners.InterProcessLock(str(self.lock_file_path))
         self.is_locked = False
 
+    def _check_stale_lock(self) -> bool:
+        """Check if lock file is stale (no process holding it) and remove if stale.
+
+        Returns:
+            True if lock was stale and removed, False otherwise
+        """
+        from ci.util.lock_handler import (
+            find_processes_locking_path,
+            is_psutil_available,
+        )
+
+        if not self.lock_file_path.exists():
+            return False
+
+        if not is_psutil_available():
+            return False  # Can't check, assume not stale
+
+        try:
+            # Check if any process has the lock file open
+            locking_pids = find_processes_locking_path(self.lock_file_path)
+
+            if not locking_pids:
+                # No process holds the lock, it's stale
+                print(
+                    f"Detected stale platform lock file at {self.lock_file_path}. Removing..."
+                )
+                try:
+                    self.lock_file_path.unlink()
+                    print(f"Removed stale lock file: {self.lock_file_path}")
+                    return True
+                except Exception as e:
+                    print(f"Warning: Could not remove stale lock file: {e}")
+                    return False
+            return False
+        except Exception as e:
+            print(f"Warning: Could not check for stale lock: {e}")
+            return False
+
     def acquire(self) -> None:
-        self.is_locked = True
-        self.lock.acquire(blocking=True, timeout=5)
+        """Acquire the platform lock."""
+        if self.is_locked:
+            return  # Already acquired
+
+        start_time = time.time()
+        warning_shown = False
+        last_stale_check = 0.0
+
+        while True:
+            # Check for keyboard interrupt
+            if is_interrupted():
+                print(f"\nKeyboardInterrupt: Aborting platform lock acquisition")
+                raise KeyboardInterrupt()
+
+            elapsed = time.time() - start_time
+
+            # Check for stale lock periodically (every ~1 second)
+            if elapsed - last_stale_check >= 1.0:
+                if self._check_stale_lock():
+                    # Stale lock was removed, try to acquire immediately
+                    print(f"Stale platform lock removed, retrying acquisition...")
+                last_stale_check = elapsed
+
+            # Try to acquire with very short timeout (non-blocking)
+            try:
+                success = self.lock.acquire(blocking=True, timeout=0.1)
+                if success:
+                    self.is_locked = True
+                    print(f"Acquired platform lock: {self.lock_file_path}")
+                    return
+            except Exception:
+                # Handle timeout or other exceptions as failed acquisition (continue loop)
+                pass  # Continue the loop to check elapsed time and try again
+
+            # Check if we should show warning (after 1 second)
+            if not warning_shown and elapsed >= 1.0:
+                yellow = "\033[33m"
+                reset = "\033[0m"
+                print(
+                    f"{yellow}Waiting to acquire platform lock at {self.lock_file_path}{reset}"
+                )
+                warning_shown = True
+
+            # Check for timeout (after 5 seconds)
+            if elapsed >= 5.0:
+                raise TimeoutError(
+                    f"Failed to acquire platform lock within 5 seconds. "
+                    f"Lock file: {self.lock_file_path}. "
+                    f"This may indicate another process is holding the lock or a deadlock occurred."
+                )
+
+            # Small sleep to prevent excessive CPU usage while allowing interrupts
+            time.sleep(0.1)
 
     def release(self) -> None:
+        """Release the platform lock."""
         if self.is_locked:
-            self.lock.release()
-            self.is_locked = False
+            try:
+                self.lock.release()
+                self.is_locked = False
+                print(f"Released platform lock: {self.lock_file_path}")
+            except Exception as e:
+                print(f"Warning: Failed to release platform lock: {e}")
+
+    def __enter__(self) -> "PlatformLock":
+        """Context manager entry - acquire the lock."""
+        self.acquire()
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[object],
+    ) -> None:
+        """Context manager exit - release the lock."""
+        self.release()
+
+    def __del__(self) -> None:
+        """Ensure lock is released on deletion."""
+        if self.is_locked:
+            try:
+                self.lock.release()
+                self.is_locked = False
+            except Exception:
+                pass  # Ignore errors during cleanup
 
 
 class PioCompiler(Compiler):
