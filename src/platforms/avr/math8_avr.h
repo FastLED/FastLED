@@ -25,7 +25,7 @@ namespace fl {
 /// 8x8 bit multiplication, with 8-bit result (AVR assembly with MUL or shift-and-add)
 /// Uses the hardware MUL instruction when available (2 cycle latency)
 /// ~10 cycles total, or ~32 cycles for shift-and-add on ATtiny
-#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
+#if !defined(LIB8_ATTINY)
 LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
@@ -62,7 +62,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
 /// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (AVR assembly with MUL or shift-and-add)
 /// Uses hardware MUL with high-byte test for saturation detection
 /// ~15 cycles, or ~40 cycles for shift-and-add on ATtiny
-#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
+#if !defined(LIB8_ATTINY)
 LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
@@ -111,7 +111,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
 /// Computes: result = ((a * (255 - amountOfB)) + (b * amountOfB)) >> 8
 /// Uses two hardware MUL instructions or shift-and-add fallback
 #if (FASTLED_BLEND_FIXED == 1)
-#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
+#if !defined(LIB8_ATTINY)
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial = 0;
     uint8_t result;
@@ -193,7 +193,7 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 }
 #endif
 #else
-#if !defined(__AVR_ATtiny25__) && !defined(__AVR_ATtiny45__) && !defined(__AVR_ATtiny85__) && !defined(__AVR_ATtiny88__) && !defined(__AVR_ATtiny4313__) && !defined(__AVR_ATtiny861__) && !defined(__AVR_ATtiny261__)
+#if !defined(LIB8_ATTINY)
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial = 0;
     uint8_t result;

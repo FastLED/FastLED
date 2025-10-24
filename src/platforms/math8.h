@@ -7,12 +7,14 @@
 #include "fl/compiler_control.h"
 
 // Select appropriate implementation based on platform configuration
+#if defined(__AVR__)
 #if defined(LIB8_ATTINY)
-// ATtiny has very limited resources - use specialized assembly optimizations
-#include "platforms/attiny/math8.h"
-#elif defined(__AVR__)
-// AVR is slow - use assembly-optimized version for performance
+// ATtiny has no MUL instruction - use portable C version
+#include "platforms/shared/math8.h"
+#else
+// AVR with MUL instruction - use assembly-optimized version for performance
 #include "platforms/avr/math8.h"
+#endif
 #else
 // All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
 #include "platforms/shared/math8.h"

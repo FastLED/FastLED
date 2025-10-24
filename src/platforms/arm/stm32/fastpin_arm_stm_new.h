@@ -1,5 +1,6 @@
 #pragma once
 
+// ok no namespace fl
 // Main dispatcher for STM32 variant-specific pin definitions
 // This file includes the appropriate variant file based on board definitions
 
