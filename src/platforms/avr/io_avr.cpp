@@ -1,4 +1,8 @@
+#ifdef __AVR__
+
 #include "io_avr.h"
+
+
 
 #ifdef ARDUINO_H
 #include "Arduino.h"
@@ -118,3 +122,5 @@ int read_avr() {
 }
 
 } // namespace fl
+
+#endif // __AVR__
