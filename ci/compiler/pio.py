@@ -1747,7 +1747,14 @@ class PioCompiler(Compiler):
 
     def cancel_all(self) -> None:
         """Cancel all builds."""
+        # Provide immediate feedback that cancellation is starting
+        import sys
+
+        sys.stdout.write("      → Shutting down build executor...\n")
+        sys.stdout.flush()
         self.executor.shutdown(wait=False, cancel_futures=True)
+        sys.stdout.write("      → Executor shutdown complete\n")
+        sys.stdout.flush()
 
     def build(self, examples: List[str]) -> List[Future[SketchResult]]:
         """Build a list of examples with proper lock management."""

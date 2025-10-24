@@ -183,10 +183,11 @@ def compile_board_examples(
                     break
 
             except KeyboardInterrupt:
-                print("Keyboard interrupt detected, cancelling builds")
+                print("\n⏹️  Cancelling builds and cleaning up...")
                 compiler.cancel_all()
                 for f in futures:
                     f.cancel()
+                print("   ✓ Cleanup complete")
                 notify_main_thread()
             except Exception as e:
                 # Represent unexpected exception as a failed SketchResult for consistency
@@ -237,8 +238,9 @@ def compile_board_examples(
             skipped_examples=skipped_examples,
         )
     except KeyboardInterrupt:
-        print("Keyboard interrupt detected, cancelling builds")
+        print("\n⏹️  Cancelling builds and cleaning up...")
         notify_main_thread()
+        print("   ✓ Cleanup complete")
         # Don't re-raise - notify_main_thread() already signaled the main thread
         return BoardCompilationResult(
             ok=False,
