@@ -1,19 +1,28 @@
 {
     "build": {
-        "core": "maple",
+        "arduino": {
+            "variant_h": "variant_PILL_F103Cx.h"
+        },
+        "core": "stm32",
         "cpu": "cortex-m3",
-        "extra_flags": "-DSTM32F103CB -DSTM32F1 -DARDUINO_GENERIC_STM32F103CB -DARDUINO_ARCH_STM32",
+        "extra_flags": "-DSTM32F1 -DSTM32F103xB",
         "f_cpu": "72000000L",
         "hwids": [
             [
                 "0x1EAF",
                 "0x0003"
+            ],
+            [
+                "0x1EAF",
+                "0x0004"
             ]
         ],
-        "ldscript": "jtag_cb.ld",
-        "mcu": "stm32f103cb",
-        "product_line": "STM32F103xx",
-        "variant": "STM32F103CB"
+        "mcu": "stm32f103cbt6",
+        "product_line": "STM32F103xB",
+        "variant": "STM32F1xx/F103C8T_F103CB(T-U)",
+        "zephyr": {
+            "variant": "stm32_min_dev"
+        }
     },
     "connectivity": [
         "can"
