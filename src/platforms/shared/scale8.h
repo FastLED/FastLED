@@ -5,6 +5,7 @@
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -25,7 +26,7 @@ namespace fl {
 /// @{
 
 /// Scale one byte by a second one (C implementation)
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
     return (((uint16_t)i) * (1 + (uint16_t)(scale))) >> 8;
 #else
@@ -38,14 +39,14 @@ constexpr uint8_t scale8_constexpr(uint8_t i, fract8 scale) {
 }
 
 /// The "video" version of scale8() (C implementation)
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
     uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
     return j;
 }
 
 /// This version of scale8() does not clean up the R1 register (C implementation)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
                                                          fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
     return (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
@@ -56,7 +57,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8() that does not clean up the R1 (C implementation)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
                                                        fract8 scale) {
 #if (FASTLED_SCALE8_FIXED == 1)
     i = (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
@@ -67,7 +68,7 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
 
 /// This version of scale8_video() does not clean up the R1 register (C implementation)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
                                                                fract8 scale) {
     uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
     return j;
@@ -75,18 +76,18 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8_video() that does not clean up the R1 (C implementation)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
                                                              fract8 scale) {
     i = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls (C implementation)
-LIB8STATIC_ALWAYS_INLINE void cleanup_R1() {
+FL_ALWAYS_INLINE void cleanup_R1() {
     // No-op for non-AVR platforms
 }
 
 /// Scale a 16-bit unsigned value by an 8-bit value (C implementation)
-LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
     if (scale == 0) {
         return 0;
     }

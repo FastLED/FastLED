@@ -3,6 +3,7 @@
 #include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -26,7 +27,7 @@ namespace fl {
 /// Uses the hardware MUL instruction when available (2 cycle latency)
 /// ~10 cycles total, or ~32 cycles for shift-and-add on ATtiny
 #if !defined(LIB8_ATTINY)
-LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
         "mul %0, %1          \n\t"
@@ -41,7 +42,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
 }
 #else
 // Fallback for platforms without hardware MUL (e.g., ATtiny)
-LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
     uint8_t result = 0;
     uint8_t cnt = 0x80;
     asm volatile(
@@ -63,7 +64,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
 /// Uses hardware MUL with high-byte test for saturation detection
 /// ~15 cycles, or ~40 cycles for shift-and-add on ATtiny
 #if !defined(LIB8_ATTINY)
-LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     asm volatile(
         /* Multiply 8-bit i * 8-bit j, giving 16-bit r1,r0 */
         "  mul %0, %1          \n\t"
@@ -84,7 +85,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
 }
 #else
 // Fallback for platforms without hardware MUL (e.g., ATtiny)
-LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     uint8_t result = 0;
     uint8_t cnt = 0x80;
     asm volatile(

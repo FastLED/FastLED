@@ -5,6 +5,7 @@
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 // Select appropriate implementation based on platform configuration
 #if defined(__AVR__)
@@ -73,7 +74,7 @@ LIB8STATIC uint8_t sqrt16(uint16_t x) {
     return low - 1;
 }
 
-LIB8STATIC_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
+FL_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
     return sqrt16(map8_to_16(x));
 }
 

@@ -5,6 +5,7 @@
 #include "fastled_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -26,7 +27,7 @@ namespace fl {
 
 /// Scale one byte by a second one (AVR assembly)
 /// @note Takes 4 clocks on AVR with MUL, 2 clocks on ARM
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 #if defined(LIB8_ATTINY)
 #if (FASTLED_SCALE8_FIXED == 1)
     uint8_t work = i;
@@ -82,7 +83,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 }
 
 /// The "video" version of scale8() (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
 #if !defined(LIB8_ATTINY)
     uint8_t j = 0;
     asm volatile("  tst %[i]\n\t"
@@ -105,7 +106,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
 
 /// This version of scale8() does not clean up the R1 register on AVR (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
                                                          fract8 scale) {
 #if !defined(LIB8_ATTINY)
     asm volatile(
@@ -143,7 +144,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8() that does not clean up the R1 (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
                                                        fract8 scale) {
 #if !defined(LIB8_ATTINY)
     asm volatile(
@@ -180,7 +181,7 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
 
 /// This version of scale8_video() does not clean up the R1 register on AVR (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
+FL_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
                                                                fract8 scale) {
 #if !defined(LIB8_ATTINY)
     uint8_t j = 0;
@@ -203,7 +204,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
 
 /// In place modifying version of scale8_video() that does not clean up the R1 (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
-LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
+FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
                                                              fract8 scale) {
 #if !defined(LIB8_ATTINY)
     asm volatile("  tst %[i]\n\t"
@@ -222,13 +223,13 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE void cleanup_R1() {
+FL_ALWAYS_INLINE void cleanup_R1() {
     // Restore r1 to "0"; it's expected to always be that
     asm volatile("clr __zero_reg__  \n\t" : : : "r1");
 }
 
 /// Scale a 16-bit unsigned value by an 8-bit value (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
+FL_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
     if (scale == 0) {
         return 0; // Fixes non zero output when scale == 0 and
                   // FASTLED_SCALE8_FIXED==1

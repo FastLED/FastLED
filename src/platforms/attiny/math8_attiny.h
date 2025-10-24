@@ -3,6 +3,7 @@
 #include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -25,7 +26,7 @@ namespace fl {
 /// 8x8 bit multiplication, with 8-bit result (ATtiny shift-and-add assembly)
 /// Uses shift-and-add (Russian Peasant) algorithm
 /// ~32 cycles vs ~80+ for C compiler's __mulqi3
-LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
     uint8_t result = 0;
     uint8_t cnt = 0x80;
     asm volatile(
@@ -45,7 +46,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
 /// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (ATtiny shift-and-add assembly)
 /// Uses shift-and-add with overflow detection via carry flag
 /// ~40 cycles vs ~90+ for C with saturation
-LIB8STATIC_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     uint8_t result = 0;
     uint8_t cnt = 0x80;
     asm volatile(

@@ -5,6 +5,7 @@
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/compiler_control.h"
+#include "fl/force_inline.h"
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_UNUSED_PARAMETER
@@ -28,7 +29,7 @@ namespace fl {
 /// @{
 
 /// Add one byte to another, saturating at 0xFF (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
     asm volatile(
         /* First, add j to i, conditioning the C flag */
         "add %0, %1    \n\t"
@@ -46,7 +47,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
 }
 
 /// Add one byte to another, saturating at 0x7F and -0x80 (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
+FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
     asm volatile(
         /* First, add j to i, conditioning the V and C flags */
         "add %0, %1    \n\t"
@@ -68,7 +69,7 @@ LIB8STATIC_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
 }
 
 /// Subtract one byte from another, saturating at 0x00 (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
     asm volatile(
         /* First, subtract j from i, conditioning the C flag */
         "sub %0, %1    \n\t"
@@ -86,14 +87,14 @@ LIB8STATIC_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
 }
 
 /// Add one byte to another, with 8-bit result (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t add8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t add8(uint8_t i, uint8_t j) {
     // Add j to i, period.
     asm volatile("add %0, %1" : "+r"(i) : "r"(j));
     return i;
 }
 
 /// Add one byte to two bytes, with 16-bit result (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
+FL_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
     // Add i(one byte) to j(two bytes)
     asm volatile("add %A[j], %[i]              \n\t"
                  "adc %B[j], __zero_reg__      \n\t"
@@ -103,14 +104,14 @@ LIB8STATIC_ALWAYS_INLINE uint16_t add8to16(uint8_t i, uint16_t j) {
 }
 
 /// Subtract one byte from another, 8-bit result (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t sub8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t sub8(uint8_t i, uint8_t j) {
     // Subtract j from i, period.
     asm volatile("sub %0, %1" : "+r"(i) : "r"(j));
     return i;
 }
 
 /// Calculate an integer average of two unsigned 8-bit values (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
     asm volatile(
         /* First, add j to i, 9th bit overflows into C flag */
         "add %0, %1    \n\t"
@@ -122,7 +123,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8(uint8_t i, uint8_t j) {
 }
 
 /// Calculate an integer average of two unsigned 16-bit values (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
+FL_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
         "add %A[i], %A[j]    \n\t"
@@ -139,7 +140,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16(uint16_t i, uint16_t j) {
 }
 
 /// Calculate an integer average of two unsigned 8-bit values, rounded up (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
+FL_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
     asm volatile(
         /* First, add j to i, 9th bit overflows into C flag */
         "add %0, %1          \n\t"
@@ -153,7 +154,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t avg8r(uint8_t i, uint8_t j) {
 }
 
 /// Calculate an integer average of two unsigned 16-bit values, rounded up (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
+FL_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
     asm volatile(
         /* First, add jLo (heh) to iLo, 9th bit overflows into C flag */
         "add %A[i], %A[j]    \n\t"
@@ -174,7 +175,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t avg16r(uint16_t i, uint16_t j) {
 }
 
 /// Calculate an integer average of two signed 7-bit integers (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE int8_t avg7(int8_t i, int8_t j) {
+FL_ALWAYS_INLINE int8_t avg7(int8_t i, int8_t j) {
     asm volatile("asr %1        \n\t"
                  "asr %0        \n\t"
                  "adc %0, %1    \n\t"
@@ -184,7 +185,7 @@ LIB8STATIC_ALWAYS_INLINE int8_t avg7(int8_t i, int8_t j) {
 }
 
 /// Calculate an integer average of two signed 15-bit integers (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
+FL_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
     asm volatile(
         /* first divide j by 2, throwing away lowest bit */
         "asr %B[j]          \n\t"
@@ -202,7 +203,7 @@ LIB8STATIC_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
 
 
 /// Take the absolute value of a signed 8-bit int8_t (AVR assembly)
-LIB8STATIC_ALWAYS_INLINE int8_t abs8(int8_t i) {
+FL_ALWAYS_INLINE int8_t abs8(int8_t i) {
     asm volatile(
         /* First, check the high bit, and prepare to skip if it's clear */
         "sbrc %0, 7 \n"
@@ -227,7 +228,7 @@ LIB8STATIC_ALWAYS_INLINE int8_t abs8(int8_t i) {
 /// @param a dividend byte
 /// @param m divisor byte
 /// @returns remainder of a / m (i.e. a % m)
-LIB8STATIC_ALWAYS_INLINE uint8_t mod8(uint8_t a, uint8_t m) {
+FL_ALWAYS_INLINE uint8_t mod8(uint8_t a, uint8_t m) {
     asm volatile("L_%=:  sub %[a],%[m]    \n\t"
                  "       brcc L_%=        \n\t"
                  "       add %[a],%[m]    \n\t"
