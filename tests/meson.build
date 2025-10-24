@@ -175,6 +175,9 @@ foreach test_name : test_names
   # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
   # No need to add it explicitly to individual tests anymore
 
+  # Note: Linker map file generation not supported by Zig's LLD wrapper
+  # Use nm or objdump on the executable for symbol information if needed
+
   test_exe = executable(test_name,
     test_sources,
     include_directories: [src_dir, tests_dir, stub_dir],

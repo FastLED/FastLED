@@ -4,7 +4,7 @@ project('fastled', 'cpp',
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
     'werror=false',
-    'buildtype=debug',
+    'buildtype=plain',
     'unity=off'  # Disable Unity builds to prevent generating multiple compilation units
   ]
 )
@@ -112,8 +112,7 @@ unit_test_compile_args = [
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
-  '-O0',
-  '-g'
+  '-O0'
 ]
 
 # Platform-specific compiler flags
@@ -148,7 +147,7 @@ else
   # Unix/Linux/macOS: Standard pthread linking
   unit_test_link_args = [
     '-pthread',
-    '-rdynamic',  # Export symbols for backtrace_symbols() in crash handler
+    '-rdynamic',              # Export symbols for backtrace_symbols() in crash handler
   ]
   # Note: -fuse-ld=lld removed - zig uses its own bundled lld and ignores this flag
 endif
