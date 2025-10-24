@@ -49,6 +49,7 @@ void setup() {
     Serial.begin(115200);
     delay(1000);
 
+    Serial.println("SpecialDrivers/ESP/LCD_I80 setup starting");
     Serial.println("LCD_I80 Driver Demo");
     Serial.println("===================");
     Serial.println("Using LCD I80 parallel driver");

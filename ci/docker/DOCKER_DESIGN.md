@@ -10,13 +10,13 @@ This document describes the architecture and naming conventions for FastLED's pr
 
 ```
 niteris/fastled-compiler-base:latest
-    ├── niteris/fastled-compiler-avr-uno:latest
+    ├── niteris/fastled-compiler-avr:latest
     ├── niteris/fastled-compiler-esp:latest
-    ├── niteris/fastled-compiler-teensy-teensy41:latest
-    ├── niteris/fastled-compiler-stm32-bluepill:latest
+    ├── niteris/fastled-compiler-teensy:latest
+    ├── niteris/fastled-compiler-stm32:latest
     ├── niteris/fastled-compiler-rp:latest
-    ├── niteris/fastled-compiler-nrf52-nrf52840_dk:latest
-    └── niteris/fastled-compiler-sam-due:latest
+    ├── niteris/fastled-compiler-nrf52:latest
+    └── niteris/fastled-compiler-sam:latest
 ```
 
 ### Base Image
@@ -36,7 +36,7 @@ niteris/fastled-compiler-base:latest
 
 ### Platform Images
 
-**Pattern**: `niteris/fastled-compiler-<platform>-<representative-board>:latest`
+**Pattern**: `niteris/fastled-compiler-<platform>:latest`
 
 **Contents**:
 - Inherits from base image
@@ -44,10 +44,10 @@ niteris/fastled-compiler-base:latest
 - Pre-warmed compilation cache for multiple boards
 
 **Build Strategy**: Each platform image is built with **multiple board compilations** to pre-cache all toolchains and dependencies for that platform family. For example:
-- `avr-uno` image compiles: uno, attiny85, attiny88, nano_every, etc.
+- `avr` image compiles: uno, attiny85, attiny88, nano_every, etc.
 - `esp` image compiles: esp32dev, esp32s3, esp32c3, etc.
-- `teensy-teensy41` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
-- `sam-due` image compiles: due, digix
+- `teensy` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
+- `sam` image compiles: due, digix
 
 This ensures that any board in the platform family can compile instantly without downloading additional toolchains.
 
@@ -61,33 +61,33 @@ This ensures that any board in the platform family can compile instantly without
 
 Platform images are organized by **toolchain family**, not individual boards. Boards that share the same PlatformIO platform and have small toolchain overhead are grouped together.
 
-**Important**: Each platform image contains **pre-cached toolchains for ALL boards** in that family. The "representative board" in the image name is just the naming convention - the actual image supports all listed boards with zero additional downloads.
+**Important**: Each platform image contains **pre-cached toolchains for ALL boards** in that family. All images use platform-only naming without board suffixes since they support all boards in the family.
 
-| Platform Family | Representative Board | Docker Image | Included Boards |
-|----------------|---------------------|--------------|-----------------|
-| **avr** | uno | `fastled-compiler-avr-uno` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
-| **esp** | (varies by IDF) | `fastled-compiler-esp` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
-| **teensy** | teensy41 | `fastled-compiler-teensy-teensy41` | teensy30, teensy31, teensy40, teensy41, teensylc |
-| **stm32** | bluepill | `fastled-compiler-stm32-bluepill` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
-| **rp2040** | rp2040 | `fastled-compiler-rp` | rp2040, rp2350 |
-| **nrf52** | nrf52840_dk | `fastled-compiler-nrf52-nrf52840_dk` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
-| **sam** | due | `fastled-compiler-sam-due` | due, digix |
+| Platform Family | Docker Image | Included Boards |
+|----------------|--------------|-----------------|
+| **avr** | `fastled-compiler-avr` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
+| **esp** | `fastled-compiler-esp` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
+| **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc |
+| **stm32** | `fastled-compiler-stm32` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
+| **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 |
+| **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
+| **sam** | `fastled-compiler-sam` | due, digix |
 
-### Platform-Board Naming Convention
+### Platform Naming Convention
 
 ```
-niteris/fastled-compiler-<platform-family>-<board-name>:<tag>
+niteris/fastled-compiler-<platform-family>:<tag>
 ```
 
 **Examples**:
-- `niteris/fastled-compiler-avr-uno:latest`
+- `niteris/fastled-compiler-avr:latest`
 - `niteris/fastled-compiler-esp:latest`
-- `niteris/fastled-compiler-teensy-teensy41:latest`
+- `niteris/fastled-compiler-teensy:latest`
 
 **Rationale**:
 - `<platform-family>`: Groups boards by shared toolchain (e.g., `avr`, `esp`, `teensy`)
-- `<board-name>`: Representative board for the platform (usually the most common or well-known)
 - `<tag>`: Version identifier (currently `:latest`)
+- No board suffix needed since each image contains toolchains for ALL boards in the family
 
 ## Special Cases
 
@@ -116,16 +116,15 @@ niteris/fastled-compiler-esp:idf4.4     → Explicit IDF 4.4
 
 **Note**: Despite radical differences between Teensy 3.x (Cortex-M4, ~72MHz) and Teensy 4.x (Cortex-M7, 600MHz), the toolchains have small payload and can be aggregated into a single image.
 
-**Image**: `niteris/fastled-compiler-teensy-teensy41:latest`
+**Image**: `niteris/fastled-compiler-teensy:latest`
 - Pre-caches ALL Teensy boards: teensylc, teensy30, teensy31, teensy40, teensy41
 - Build process compiles example for each board to warm up all toolchains
-- Uses representative board `teensy41` in the name (most capable current board)
 
 ### AVR Platform
 
 **Note**: Combines classic AVR (`atmelavr`) and modern AVR (`atmelmegaavr`) platforms since they share similar toolchains.
 
-**Image**: `niteris/fastled-compiler-avr-uno:latest`
+**Image**: `niteris/fastled-compiler-avr:latest`
 
 **Pre-cached boards**:
 - Classic AVR (`atmelavr`): uno, yun, attiny85, attiny88, attiny4313
@@ -151,13 +150,13 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  (10 minute delay for registry propagation)
                  ↓
 2:10 AM UTC  →  Platform images build in parallel (each compiles multiple boards)
-                 ├── avr-uno (builds: uno, attiny85, attiny88, nano_every, etc.)
+                 ├── avr (builds: uno, attiny85, attiny88, nano_every, etc.)
                  ├── esp (builds: esp32dev, esp32s3, esp32c3, esp32c6, etc.)
-                 ├── teensy-teensy41 (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
-                 ├── stm32-bluepill (builds: bluepill, blackpill, maple_mini, etc.)
+                 ├── teensy (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
+                 ├── stm32 (builds: bluepill, blackpill, maple_mini, etc.)
                  ├── rp (builds: rp2040, rp2350)
-                 ├── nrf52-nrf52840_dk (builds: nrf52840_dk, adafruit boards, xiaoblesense)
-                 └── sam-due (builds: due, digix)
+                 ├── nrf52 (builds: nrf52840_dk, adafruit boards, xiaoblesense)
+                 └── sam (builds: due, digix)
 ```
 
 **Scheduling**:
@@ -281,7 +280,7 @@ To add a new platform image:
    registry_apollo3: ${{ steps.credentials.outputs.registry_apollo3 }}
 
    # In credentials steps, add:
-   echo "registry_apollo3=$(echo 'niteris/fastled-compiler-apollo3-apollo3_red' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+   echo "registry_apollo3=$(echo 'niteris/fastled-compiler-apollo3' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
    # Then add the three jobs: build-apollo3-amd64, build-apollo3-arm, merge-apollo3
    ```
@@ -293,7 +292,7 @@ To add a new platform image:
    cd ci/docker
    docker build -f Dockerfile.template \
      --build-arg PLATFORM_NAME=<board> \
-     -t niteris/fastled-compiler-<platform>-<board>:latest .
+     -t niteris/fastled-compiler-<platform>:latest .
    ```
 
 ## Local Testing
@@ -310,7 +309,7 @@ docker build -f Dockerfile.base \
 cd ci/docker
 docker build -f Dockerfile.template \
   --build-arg PLATFORM_NAME=uno \
-  -t niteris/fastled-compiler-avr-uno:latest .
+  -t niteris/fastled-compiler-avr:latest .
 ```
 
 **What happens**:
@@ -324,7 +323,7 @@ docker build -f Dockerfile.template \
 ```bash
 cd ../..  # Back to project root
 bash compile uno Blink --docker       # Uses pre-cached AVR toolchain
-bash compile attiny85 Blink --docker  # Also uses same avr-uno image (instant!)
+bash compile attiny85 Blink --docker  # Also uses same avr image (instant!)
 bash compile nano_every Blink --docker  # Also instant - toolchain already cached
 ```
 

@@ -138,37 +138,27 @@ def get_docker_image_name(platform: str, board: Optional[str] = None) -> str:
     """
     Get the Docker image name for a platform family.
 
-    Uses consistent naming: niteris/fastled-compiler-{platform}-{board}
-    For aggregated platforms (e.g., "rp"), returns just niteris/fastled-compiler-{platform}
+    All platform images use the naming convention: niteris/fastled-compiler-{platform}
+    without board suffixes, as each platform image contains pre-cached toolchains
+    for ALL boards in that platform family.
 
     Args:
         platform: Platform family name (e.g., "avr", "esp", "rp")
-        board: Representative board name (optional, inferred if not provided)
+        board: Reserved for future use (currently ignored)
 
     Returns:
         Full Docker image name without tag
 
     Example:
-        >>> get_docker_image_name("avr", "uno")
-        'niteris/fastled-compiler-avr-uno'
-        >>> get_docker_image_name("esp", "esp32dev")
-        'niteris/fastled-compiler-esp-esp32dev'
+        >>> get_docker_image_name("avr")
+        'niteris/fastled-compiler-avr'
+        >>> get_docker_image_name("esp")
+        'niteris/fastled-compiler-esp'
         >>> get_docker_image_name("rp")
         'niteris/fastled-compiler-rp'
     """
-    # Special case for aggregated platforms that don't have a board suffix
-    if platform == "rp":
-        return f"niteris/fastled-compiler-{platform}"
-
-    # Use provided board or first board in platform
-    if board is None:
-        boards = get_boards_for_platform(platform)
-        if not boards:
-            return f"niteris/fastled-compiler-{platform}"
-        board = boards[0]
-
-    # Consistent naming for all platforms: niteris/fastled-compiler-{platform}-{board}
-    return f"niteris/fastled-compiler-{platform}-{board}"
+    # All platform images use consistent naming without board suffix
+    return f"niteris/fastled-compiler-{platform}"
 
 
 # Validation: Ensure no duplicate boards across platforms
