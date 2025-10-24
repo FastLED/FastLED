@@ -123,15 +123,37 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
             break;  // Incomplete data
         }
 
-        // Extract nibbles from interleaved data
-        uint8_t byte0 = mLastBuffer[input_offset];
-        uint8_t byte1 = mLastBuffer[input_offset + 1];
+        // Extract bit pairs from interleaved data
+        uint8_t byte0 = mLastBuffer[input_offset];     // Bit positions 7,6,5,4
+        uint8_t byte1 = mLastBuffer[input_offset + 1];  // Bit positions 3,2,1,0
 
-        // Reconstruct lane bytes
-        // byte0 format: [b_hi a_hi] (4 bits each)
-        // byte1 format: [b_lo a_lo] (4 bits each)
-        lanes[0][byte_idx] = ((byte0 & 0x0F) << 4) | (byte1 & 0x0F);
-        lanes[1][byte_idx] = (byte0 & 0xF0) | ((byte1 >> 4) & 0x0F);
+        // Reconstruct lane bytes by extracting individual bits
+        // Each pair has: lane0 bit at position 0, lane1 bit at position 1
+        uint8_t lane0_byte = 0;
+        uint8_t lane1_byte = 0;
+
+        // Extract from byte0 (bits 7,6,5,4)
+        lane0_byte |= ((byte0 >> 0) & 0x01) << 7;  // bit 7
+        lane1_byte |= ((byte0 >> 1) & 0x01) << 7;
+        lane0_byte |= ((byte0 >> 2) & 0x01) << 6;  // bit 6
+        lane1_byte |= ((byte0 >> 3) & 0x01) << 6;
+        lane0_byte |= ((byte0 >> 4) & 0x01) << 5;  // bit 5
+        lane1_byte |= ((byte0 >> 5) & 0x01) << 5;
+        lane0_byte |= ((byte0 >> 6) & 0x01) << 4;  // bit 4
+        lane1_byte |= ((byte0 >> 7) & 0x01) << 4;
+
+        // Extract from byte1 (bits 3,2,1,0)
+        lane0_byte |= ((byte1 >> 2) & 0x01) << 3;  // bit 3
+        lane1_byte |= ((byte1 >> 3) & 0x01) << 3;
+        lane0_byte |= ((byte1 >> 0) & 0x01) << 2;  // bit 2
+        lane1_byte |= ((byte1 >> 1) & 0x01) << 2;
+        lane0_byte |= ((byte1 >> 4) & 0x01) << 1;  // bit 1
+        lane1_byte |= ((byte1 >> 5) & 0x01) << 1;
+        lane0_byte |= ((byte1 >> 6) & 0x01) << 0;  // bit 0
+        lane1_byte |= ((byte1 >> 7) & 0x01) << 0;
+
+        lanes[0][byte_idx] = lane0_byte;
+        lanes[1][byte_idx] = lane1_byte;
     }
 
     return lanes;

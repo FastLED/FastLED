@@ -25,11 +25,13 @@ TEST_CASE("SPITransposerDual: Basic bit interleaving - single byte") {
     CHECK(success);
     CHECK_EQ(output.size(), 2);
 
-    // Verify interleaving: each output byte has 4 bits from each lane
-    // Format: [lane1_nibble lane0_nibble]
-    // Lane0=0xAB (hi=0xA, lo=0xB), Lane1=0x12 (hi=0x1, lo=0x2)
-    CHECK_EQ(output[0], 0x1A);  // bits 7:4 -> lane1=0x1, lane0=0xA
-    CHECK_EQ(output[1], 0x2B);  // bits 3:0 -> lane1=0x2, lane0=0xB
+    // Verify interleaving: each output byte has 4 pairs of bits (one bit from each lane per pair)
+    // Hardware dual-SPI sends 2 bits per clock: IO0=lane0, IO1=lane1
+    // Lane0=0xAB (10101011), Lane1=0x12 (00010010)
+    // dest[0] = bits[7:4] = 10010001 = 0x91
+    // dest[1] = bits[3:0] = 01110001 = 0x71
+    CHECK_EQ(output[0], 0x91);  // bits 7:4 pairs
+    CHECK_EQ(output[1], 0x71);  // bits 3:0 pairs
 }
 
 TEST_CASE("SPITransposerDual: Equal length lanes - 2 lanes") {
@@ -132,10 +134,11 @@ TEST_CASE("SPITransposerDual: Alternating patterns - 0xFF and 0x00") {
     bool success = fl::SPITransposer::transpose2(lane0_opt, lane1_opt, output, nullptr);
 
     CHECK(success);
-    // Lane0=0xFF (hi=0xF, lo=0xF), Lane1=0x00 (hi=0x0, lo=0x0)
-    // Output should be: [0x0F, 0x0F]
-    CHECK_EQ(output[0], 0x0F);
-    CHECK_EQ(output[1], 0x0F);
+    // Lane0=0xFF (11111111), Lane1=0x00 (00000000)
+    // Each pair: lane0=1, lane1=0 → 0b01 repeated 4 times
+    // Output should be: [0x55, 0x55] (01010101)
+    CHECK_EQ(output[0], 0x55);
+    CHECK_EQ(output[1], 0x55);
 }
 
 TEST_CASE("SPITransposerDual: Identical lanes - 0xAA pattern") {
@@ -149,10 +152,11 @@ TEST_CASE("SPITransposerDual: Identical lanes - 0xAA pattern") {
     bool success = fl::SPITransposer::transpose2(lane0_opt, lane1_opt, output, nullptr);
 
     CHECK(success);
-    // Both lanes identical: Lane0=0xAA (hi=0xA, lo=0xA), Lane1=0xAA
-    // Output should be: [0xAA, 0xAA]
-    CHECK_EQ(output[0], 0xAA);
-    CHECK_EQ(output[1], 0xAA);
+    // Both lanes identical: Lane0=0xAA (10101010), Lane1=0xAA (10101010)
+    // Each pair alternates: 1,1 → 0b11 then 0,0 → 0b00
+    // Output should be: [0x33, 0x33] (00110011)
+    CHECK_EQ(output[0], 0x33);
+    CHECK_EQ(output[1], 0x33);
 }
 
 TEST_CASE("SPITransposerDual: Multi-byte lanes") {
@@ -190,11 +194,11 @@ TEST_CASE("SPITransposerDual: Verify bit-level interleaving") {
 
     CHECK(success);
 
-    // Lane0=0xCA (hi=0xC, lo=0xA), Lane1=0x53 (hi=0x5, lo=0x3)
-    // Output byte 0: [lane1_hi lane0_hi] = [0x5 0xC] = 0x5C
-    // Output byte 1: [lane1_lo lane0_lo] = [0x3 0xA] = 0x3A
-    CHECK_EQ(output[0], 0x5C);
-    CHECK_EQ(output[1], 0x3A);
+    // Lane0=0xCA (11001010), Lane1=0x53 (01010011)
+    // dest[0] = bits[7:4] pairs = 10001101 = 0x8D
+    // dest[1] = bits[3:0] pairs = 10110001 = 0xB1
+    CHECK_EQ(output[0], 0x8D);
+    CHECK_EQ(output[1], 0xB1);
 }
 
 TEST_CASE("SPITransposerDual: Zero padding for missing lanes") {
@@ -210,17 +214,17 @@ TEST_CASE("SPITransposerDual: Zero padding for missing lanes") {
 
     CHECK(success);
 
-    // Lane0=0xFF, Lane1=0x00 (default)
-    // Output[0]: [0x0 0xF] = 0x0F
-    // Output[1]: [0x0 0xF] = 0x0F
-    CHECK_EQ(output[0], 0x0F);
-    CHECK_EQ(output[1], 0x0F);
+    // Lane0=0xFF (11111111), Lane1=0x00 (default, 00000000)
+    // Each pair: 1,0 → 0b01 repeated
+    // Output[0]: 0x55, Output[1]: 0x55
+    CHECK_EQ(output[0], 0x55);
+    CHECK_EQ(output[1], 0x55);
 
-    // Lane0=0xAA, Lane1=0x00
-    // Output[2]: [0x0 0xA] = 0x0A
-    // Output[3]: [0x0 0xA] = 0x0A
-    CHECK_EQ(output[2], 0x0A);
-    CHECK_EQ(output[3], 0x0A);
+    // Lane0=0xAA (10101010), Lane1=0x00 (00000000)
+    // Pairs: 1,0→01, 0,0→00, 1,0→01, 0,0→00 = 00010001 = 0x11
+    // Output[2]: 0x11, Output[3]: 0x11
+    CHECK_EQ(output[2], 0x11);
+    CHECK_EQ(output[3], 0x11);
 }
 
 // ============================================================================
@@ -307,9 +311,9 @@ TEST_CASE("SpiHw2: Extract lanes from interleaved data") {
     CHECK(stub->begin(config));
 
     // Create interleaved data manually
-    // Lane0=0xAB, Lane1=0x12
-    // Interleaved: [0x1A, 0x2B]
-    fl::vector<uint8_t> interleaved = {0x1A, 0x2B};
+    // Lane0=0xAB (10101011), Lane1=0x12 (00010010)
+    // Interleaved (with new algorithm): [0x91, 0x74]
+    fl::vector<uint8_t> interleaved = {0x91, 0x74};
     stub->transmitAsync(fl::span<const uint8_t>(interleaved));
 
     auto lanes = stub->extractLanes(2, 1);

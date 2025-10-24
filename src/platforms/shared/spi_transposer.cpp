@@ -68,16 +68,23 @@ bool SPITransposer::transpose2(const fl::optional<LaneData>& lane0,
 }
 
 void SPITransposer::interleave_byte_2way(uint8_t* dest, uint8_t a, uint8_t b) {
-    // Each output byte contains 4 bits from each input lane
-    // Output format: [b3 a3 b2 a2 b1 a1 b0 a0]
+    // Each output byte contains 4 pairs of bits (one bit from each lane per pair)
+    // Hardware dual-SPI sends 2 bits per clock: IO0=bit0, IO1=bit1
+    // Output format: Each pair has lane0 bit in position 0, lane1 bit in position 1
     // where a=lane0, b=lane1
 
-    // Extract and combine 4-bit nibbles from each lane
-    // First output byte: bits 7:4 from each lane
-    dest[0] = ((a >> 4) & 0x0F) | (((b >> 4) & 0x0F) << 4);
+    // Extract and combine individual bits from each lane
+    // dest[0] contains bit pairs for positions 7,6,5,4 (MSB first)
+    dest[0] = ((a >> 7) & 0x01) << 0 | ((b >> 7) & 0x01) << 1 |  // bits [7]
+              ((a >> 6) & 0x01) << 2 | ((b >> 6) & 0x01) << 3 |  // bits [6]
+              ((a >> 5) & 0x01) << 4 | ((b >> 5) & 0x01) << 5 |  // bits [5]
+              ((a >> 4) & 0x01) << 6 | ((b >> 4) & 0x01) << 7;   // bits [4]
 
-    // Second output byte: bits 3:0 from each lane
-    dest[1] = (a & 0x0F) | ((b & 0x0F) << 4);
+    // dest[1] contains bit pairs for positions 3,2,1,0 (LSB)
+    dest[1] = ((a >> 3) & 0x01) << 0 | ((b >> 3) & 0x01) << 1 |  // bits [3]
+              ((a >> 2) & 0x01) << 2 | ((b >> 2) & 0x01) << 3 |  // bits [2]
+              ((a >> 1) & 0x01) << 4 | ((b >> 1) & 0x01) << 5 |  // bits [1]
+              ((a >> 0) & 0x01) << 6 | ((b >> 0) & 0x01) << 7;   // bits [0]
 }
 
 // ============================================================================
@@ -150,19 +157,27 @@ bool SPITransposer::transpose4(const fl::optional<LaneData>& lane0,
 void SPITransposer::interleave_byte_4way(uint8_t* dest,
                                           uint8_t a, uint8_t b,
                                           uint8_t c, uint8_t d) {
-    // Each output byte contains 2 bits from each input lane
-    // Output format: [d1 d0 c1 c0 b1 b0 a1 a0]
+    // Each output byte contains 2 groups of 4 bits (one bit from each lane per group)
+    // Hardware quad-SPI sends 4 bits per clock: IO0=bit0, IO1=bit1, IO2=bit2, IO3=bit3
+    // Output format: Each nibble has one bit from each lane in lane order
     // where a=lane0, b=lane1, c=lane2, d=lane3
 
-    // Extract and combine 2-bit pairs from each lane
-    dest[0] = ((a >> 6) & 0x03) | (((b >> 6) & 0x03) << 2) |
-              (((c >> 6) & 0x03) << 4) | (((d >> 6) & 0x03) << 6);
-    dest[1] = ((a >> 4) & 0x03) | (((b >> 4) & 0x03) << 2) |
-              (((c >> 4) & 0x03) << 4) | (((d >> 4) & 0x03) << 6);
-    dest[2] = ((a >> 2) & 0x03) | (((b >> 2) & 0x03) << 2) |
-              (((c >> 2) & 0x03) << 4) | (((d >> 2) & 0x03) << 6);
-    dest[3] = ( a       & 0x03) | (( b       & 0x03) << 2) |
-              (( c       & 0x03) << 4) | (( d       & 0x03) << 6);
+    // Extract and combine individual bits from each lane
+    // dest[0] contains 2 nibbles: bits [7] and bits [6] from all lanes
+    dest[0] = ((a >> 7) & 0x01) << 0 | ((b >> 7) & 0x01) << 1 | ((c >> 7) & 0x01) << 2 | ((d >> 7) & 0x01) << 3 |
+              ((a >> 6) & 0x01) << 4 | ((b >> 6) & 0x01) << 5 | ((c >> 6) & 0x01) << 6 | ((d >> 6) & 0x01) << 7;
+
+    // dest[1] contains 2 nibbles: bits [5] and bits [4] from all lanes
+    dest[1] = ((a >> 5) & 0x01) << 0 | ((b >> 5) & 0x01) << 1 | ((c >> 5) & 0x01) << 2 | ((d >> 5) & 0x01) << 3 |
+              ((a >> 4) & 0x01) << 4 | ((b >> 4) & 0x01) << 5 | ((c >> 4) & 0x01) << 6 | ((d >> 4) & 0x01) << 7;
+
+    // dest[2] contains 2 nibbles: bits [3] and bits [2] from all lanes
+    dest[2] = ((a >> 3) & 0x01) << 0 | ((b >> 3) & 0x01) << 1 | ((c >> 3) & 0x01) << 2 | ((d >> 3) & 0x01) << 3 |
+              ((a >> 2) & 0x01) << 4 | ((b >> 2) & 0x01) << 5 | ((c >> 2) & 0x01) << 6 | ((d >> 2) & 0x01) << 7;
+
+    // dest[3] contains 2 nibbles: bits [1] and bits [0] from all lanes
+    dest[3] = ((a >> 1) & 0x01) << 0 | ((b >> 1) & 0x01) << 1 | ((c >> 1) & 0x01) << 2 | ((d >> 1) & 0x01) << 3 |
+              ((a >> 0) & 0x01) << 4 | ((b >> 0) & 0x01) << 5 | ((c >> 0) & 0x01) << 6 | ((d >> 0) & 0x01) << 7;
 }
 
 // ============================================================================

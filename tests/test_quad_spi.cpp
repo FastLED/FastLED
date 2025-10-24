@@ -28,13 +28,17 @@ TEST_CASE("SPITransposer: Basic bit interleaving - single byte") {
     CHECK(success);
     CHECK_EQ(output.size(), 4);
 
-    // Verify interleaving: each output byte has 2 bits from each lane
-    // Format: [lane3[1:0] lane2[1:0] lane1[1:0] lane0[1:0]] for each 2-bit group
-    // Lane0=0x12, Lane1=0x34, Lane2=0x56, Lane3=0x78
-    CHECK_EQ(output[0], 0x50);  // bits 7:6 -> 01_01_00_00
-    CHECK_EQ(output[1], 221);  // bits 5:4 -> 11_01_11_01 (actual output)
-    CHECK_EQ(output[2], 148);  // bits 3:2 (actual output)
-    CHECK_EQ(output[3], 0x22);  // bits 1:0 -> 00_10_00_10
+    // Verify interleaving: each output byte has 2 nibbles (one bit from each lane per nibble)
+    // Hardware quad-SPI sends 4 bits per clock: IO0=bit0, IO1=bit1, IO2=bit2, IO3=bit3
+    // Lane0=0x12 (00010010), Lane1=0x34 (00110100), Lane2=0x56 (01010110), Lane3=0x78 (01111000)
+    // dest[0] = bits[7,6] = 11000000 = 0xC0
+    // dest[1] = bits[5,4] = 11111010 = 0xFA
+    // dest[2] = bits[3,2] = 01101000 = 0x68
+    // dest[3] = bits[1,0] = 00000101 = 0x05
+    CHECK_EQ(output[0], 0xC0);  // bits 7:6 nibbles
+    CHECK_EQ(output[1], 0xFA);  // bits 5:4 nibbles
+    CHECK_EQ(output[2], 0x68);  // bits 3:2 nibbles
+    CHECK_EQ(output[3], 0x05);  // bits 1:0 nibbles
 }
 
 TEST_CASE("SPITransposer: Equal length lanes - 4 lanes") {
@@ -156,11 +160,13 @@ TEST_CASE("SPITransposer: Alternating patterns - 0xFF and 0x00") {
     bool success = fl::SPITransposer::transpose4(lane0_opt, lane1_opt, lane2_opt, lane3_opt, output, nullptr);
 
     CHECK(success);
-    // Each output byte should have alternating bit pairs: 00_11_00_11
-    CHECK_EQ(output[0], 0x33);
-    CHECK_EQ(output[1], 0x33);
-    CHECK_EQ(output[2], 0x33);
-    CHECK_EQ(output[3], 0x33);
+    // Pattern: lane0=0xFF, lane1=0x00, lane2=0xFF, lane3=0x00
+    // Each nibble: bit from each lane → 1,0,1,0 = 0b0101 = 0x5
+    // Each byte has 2 nibbles: 0x55
+    CHECK_EQ(output[0], 0x55);
+    CHECK_EQ(output[1], 0x55);
+    CHECK_EQ(output[2], 0x55);
+    CHECK_EQ(output[3], 0x55);
 }
 
 TEST_CASE("SPITransposer: Identical lanes - 0xAA pattern") {
