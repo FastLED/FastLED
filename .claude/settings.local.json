@@ -60,7 +60,9 @@
       "WebFetch(domain:gcc.gnu.org)",
       "SlashCommand(/git-historian AVR delaycycles --paths src)",
       "SlashCommand(/git-historian compile-commands setup-js-linting-fast --paths ci)",
-      "Bash(c++filt:*)"
+      "Bash(c++filt:*)",
+      "Bash(docker run:*)",
+      "Bash(docker inspect:*)"
     ],
     "deny": []
   }

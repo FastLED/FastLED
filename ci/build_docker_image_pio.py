@@ -205,7 +205,7 @@ def build_base_image(no_cache: bool = False, force_rebuild: bool = False) -> Non
     Raises:
         subprocess.CalledProcessError: If docker build fails
     """
-    base_image_name = "fastled-compiler-base:latest"
+    base_image_name = "niteris/fastled-compiler-base:latest"
 
     # Check if base image exists
     if (
