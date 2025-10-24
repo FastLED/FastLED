@@ -83,6 +83,7 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 
 /// The "video" version of scale8() (AVR assembly)
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
+#if !defined(LIB8_ATTINY)
     uint8_t j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
@@ -96,12 +97,17 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
                  : [i] "r"(i), [scale] "r"(scale)
                  : "r0", "r1");
     return j;
+#else
+    uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
+    return j;
+#endif
 }
 
 /// This version of scale8() does not clean up the R1 register on AVR (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
                                                          fract8 scale) {
+#if !defined(LIB8_ATTINY)
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -126,12 +132,20 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
     );
     // Return the result
     return i;
+#else
+#if (FASTLED_SCALE8_FIXED == 1)
+    return (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
+#else
+    return ((int)i * (int)(scale)) >> 8;
+#endif
+#endif
 }
 
 /// In place modifying version of scale8() that does not clean up the R1 (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
                                                        fract8 scale) {
+#if !defined(LIB8_ATTINY)
     asm volatile(
 #if (FASTLED_SCALE8_FIXED == 1)
         // Multiply 8-bit i * 8-bit scale, giving 16-bit r1,r0
@@ -155,12 +169,20 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
         : "r"(scale) /* uses scale */
         : "r0", "r1" /* clobbers r0, r1 */
     );
+#else
+#if (FASTLED_SCALE8_FIXED == 1)
+    i = (((uint16_t)i) * ((uint16_t)(scale) + 1)) >> 8;
+#else
+    i = ((int)i * (int)(scale)) >> 8;
+#endif
+#endif
 }
 
 /// This version of scale8_video() does not clean up the R1 register on AVR (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
                                                                fract8 scale) {
+#if !defined(LIB8_ATTINY)
     uint8_t j = 0;
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
@@ -173,12 +195,17 @@ LIB8STATIC_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
                  : [i] "r"(i), [scale] "r"(scale)
                  : "r0", "r1");
     return j;
+#else
+    uint8_t j = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
+    return j;
+#endif
 }
 
 /// In place modifying version of scale8_video() that does not clean up the R1 (AVR assembly)
 /// @warning You **MUST** call cleanup_R1() after using this function!
 LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
                                                              fract8 scale) {
+#if !defined(LIB8_ATTINY)
     asm volatile("  tst %[i]\n\t"
                  "  breq L_%=\n\t"
                  "  mul %[i], %[scale]\n\t"
@@ -189,6 +216,9 @@ LIB8STATIC_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
                  : [i] "+d"(i) // r16-r31, restricted by subi
                  : [scale] "r"(scale)
                  : "r0", "r1");
+#else
+    i = (((int)i * (int)scale) >> 8) + ((i && scale) ? 1 : 0);
+#endif
 }
 
 /// Clean up the r1 register after a series of *LEAVING_R1_DIRTY calls (AVR assembly)
@@ -203,6 +233,7 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
         return 0; // Fixes non zero output when scale == 0 and
                   // FASTLED_SCALE8_FIXED==1
     }
+#if !defined(LIB8_ATTINY)
 #if FASTLED_SCALE8_FIXED == 1
     uint16_t result = 0;
     asm volatile(
@@ -247,10 +278,23 @@ LIB8STATIC_ALWAYS_INLINE uint16_t scale16by8(uint16_t i, fract8 scale) {
         : "r0", "r1");
     return result;
 #endif
+#else
+    // ATtiny C implementation
+#if FASTLED_SCALE8_FIXED == 1
+    uint16_t result;
+    result = (((uint32_t)(i) * (1 + ((uint32_t)scale))) >> 8);
+    return result;
+#else
+    uint16_t result;
+    result = (i * scale) / 256;
+    return result;
+#endif
+#endif
 }
 
 /// Scale a 16-bit unsigned value by an 16-bit value (AVR assembly)
 LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
+#if !defined(LIB8_ATTINY)
 #if FASTLED_SCALE8_FIXED == 1
     // implemented sort of like
     //   result = ((i * scale) + i ) / 65536
@@ -354,6 +398,18 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 
     result = result >> 16;
     return result;
+#endif
+#else
+    // ATtiny C implementation
+#if FASTLED_SCALE8_FIXED == 1
+    uint16_t result;
+    result = ((uint32_t)(i) * (1 + (uint32_t)(scale))) / 65536;
+    return result;
+#else
+    uint16_t result;
+    result = ((uint32_t)(i) * (uint32_t)(scale)) / 65536;
+    return result;
+#endif
 #endif
 }
 

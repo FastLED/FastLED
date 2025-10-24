@@ -7,12 +7,16 @@
 #include "fl/compiler_control.h"
 
 // Select appropriate implementation based on platform configuration
-#if defined(__AVR__) && !defined(LIB8_ATTINY)
-// Full AVR with MUL instruction support - use optimized assembly
-#include "platforms/avr/scale8.h"
+#if defined(__AVR__)
+#if defined(LIB8_ATTINY)
+// ATtiny has no MUL instruction - use ATtiny-specific shift-and-add and C implementations
+#include "platforms/avr/scale8_attiny.h"
 #else
-// Portable C implementation for all other platforms (ATtiny, ARM, etc.)
-// Note: ATtiny platforms define LIB8_ATTINY but need C implementations
+// Full AVR with MUL instruction support - use optimized MUL-based assembly
+#include "platforms/avr/scale8.h"
+#endif
+#else
+// Portable C implementation for all other platforms (ARM, ESP32, etc.)
 #include "platforms/shared/scale8.h"
 #endif
 
@@ -45,7 +49,7 @@ namespace fl {
 
 /// @ingroup ScalingDirty
 // Note: scale8_LEAVING_R1_DIRTY, nscale8_LEAVING_R1_DIRTY, etc.
-// are now defined in platforms/avr/scale8.h or platforms/shared/scale8.h
+// are now defined in platforms/avr/scale8.h, platforms/avr/scale8_attiny.h, or platforms/shared/scale8.h
 
 constexpr CRGB nscale8x3_constexpr(uint8_t r, uint8_t g, uint8_t b, fract8 scale) {
     return CRGB(((int)r * (int)(scale)) >> 8, ((int)g * (int)(scale)) >> 8,
@@ -168,7 +172,7 @@ LIB8STATIC void nscale8x2_video(uint8_t &i, uint8_t &j, fract8 scale) {
 #endif
 }
 
-// Note: scale16by8() and scale16() are now defined in platforms/avr/scale8.h or platforms/shared/scale8.h
+// Note: scale16by8() and scale16() are now defined in platforms/avr/scale8.h, platforms/avr/scale8_attiny.h, or platforms/shared/scale8.h
 /// @} Scaling
 
 /// @defgroup Dimming Dimming and Brightening Functions
