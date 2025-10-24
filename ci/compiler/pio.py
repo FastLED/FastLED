@@ -30,7 +30,7 @@ from running_process.process_output_reader import EndOfStream
 from ci.boards import ALL, Board, create_board
 from ci.compiler.compiler import CacheType, Compiler, InitResult, SketchResult
 from ci.util.create_build_dir import insert_tool_aliases
-from ci.util.global_interrupt_handler import notify_main_thread
+from ci.util.global_interrupt_handler import is_interrupted, notify_main_thread
 from ci.util.output_formatter import create_sketch_path_formatter
 
 
@@ -715,6 +715,13 @@ class GlobalPackageLock:
         stale_check_done = False
 
         while True:
+            # Check for keyboard interrupt
+            if is_interrupted():
+                print(
+                    f"\nKeyboardInterrupt: Aborting lock acquisition for platform {self.platform_name}"
+                )
+                raise KeyboardInterrupt()
+
             # Check for stale lock once at the beginning
             if not stale_check_done and time.time() - start_time < 0.5:
                 self._check_stale_lock()
