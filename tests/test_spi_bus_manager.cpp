@@ -12,7 +12,7 @@ TEST_CASE("SPIBusManager: Single device registration") {
     fl::SPIBusManager manager;
 
     MockController ctrl(1);
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, &ctrl);
 
     CHECK(handle.is_valid);
     CHECK(handle.bus_id == 0);
@@ -26,9 +26,9 @@ TEST_CASE("SPIBusManager: Multiple devices on same clock pin") {
     MockController ctrl1(1), ctrl2(2), ctrl3(3);
 
     // Register 3 devices on same clock pin
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
 
     CHECK(h1.is_valid);
     CHECK(h2.is_valid);
@@ -53,9 +53,9 @@ TEST_CASE("SPIBusManager: Multiple devices on different clock pins") {
     MockController ctrl1(1), ctrl2(2), ctrl3(3);
 
     // Register devices on different clock pins
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(18, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(22, 33, &ctrl3);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(18, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(22, 33, 0, &ctrl3);
 
     CHECK(h1.is_valid);
     CHECK(h2.is_valid);
@@ -77,7 +77,7 @@ TEST_CASE("SPIBusManager: Multiple devices on different clock pins") {
 TEST_CASE("SPIBusManager: nullptr controller registration") {
     fl::SPIBusManager manager;
 
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, nullptr);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, nullptr);
 
     CHECK_FALSE(handle.is_valid);
 }
@@ -89,14 +89,14 @@ TEST_CASE("SPIBusManager: Too many buses") {
 
     // Register 8 buses (max)
     for (uint8_t i = 0; i < 8; i++) {
-        fl::SPIBusHandle h = manager.registerDevice(10 + i, 20, &ctrls[i]);
+        fl::SPIBusHandle h = manager.registerDevice(10 + i, 20, 0, &ctrls[i]);
         CHECK(h.is_valid);
     }
 
     CHECK(manager.getNumBuses() == 8);
 
     // 9th bus should fail
-    fl::SPIBusHandle h9 = manager.registerDevice(99, 20, &ctrls[8]);
+    fl::SPIBusHandle h9 = manager.registerDevice(99, 20, 0, &ctrls[8]);
     CHECK_FALSE(h9.is_valid);
 }
 
@@ -107,12 +107,12 @@ TEST_CASE("SPIBusManager: Too many devices on one bus") {
 
     // Register 8 devices (max per bus)
     for (uint8_t i = 0; i < 8; i++) {
-        fl::SPIBusHandle h = manager.registerDevice(14, 20 + i, &ctrls[i]);
+        fl::SPIBusHandle h = manager.registerDevice(14, 20 + i, 0, &ctrls[i]);
         CHECK(h.is_valid);
     }
 
     // 9th device on same clock pin should fail
-    fl::SPIBusHandle h9 = manager.registerDevice(14, 99, &ctrls[8]);
+    fl::SPIBusHandle h9 = manager.registerDevice(14, 99, 0, &ctrls[8]);
     CHECK_FALSE(h9.is_valid);
 }
 
@@ -120,7 +120,7 @@ TEST_CASE("SPIBusManager: Single device initialization") {
     fl::SPIBusManager manager;
 
     MockController ctrl(1);
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, &ctrl);
 
     bool result = manager.initialize();
 
@@ -138,9 +138,9 @@ TEST_CASE("SPIBusManager: Quad-SPI promotion with 3 devices") {
 
     MockController ctrl1(1), ctrl2(2), ctrl3(3);
 
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
 
     bool result = manager.initialize();
 
@@ -160,10 +160,10 @@ TEST_CASE("SPIBusManager: Quad-SPI promotion with 4 devices") {
 
     MockController ctrl1(1), ctrl2(2), ctrl3(3), ctrl4(4);
 
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
-    fl::SPIBusHandle h4 = manager.registerDevice(14, 25, &ctrl4);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
+    fl::SPIBusHandle h4 = manager.registerDevice(14, 25, 0, &ctrl4);
 
     bool result = manager.initialize();
 
@@ -184,8 +184,8 @@ TEST_CASE("SPIBusManager: Dual-SPI promotion with 2 devices") {
 
     MockController ctrl1(1), ctrl2(2);
 
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
 
     bool result = manager.initialize();
 
@@ -203,7 +203,7 @@ TEST_CASE("SPIBusManager: Reset functionality") {
     fl::SPIBusManager manager;
 
     MockController ctrl(1);
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, &ctrl);
 
     CHECK(manager.getNumBuses() == 1);
     CHECK(handle.is_valid);
@@ -213,7 +213,7 @@ TEST_CASE("SPIBusManager: Reset functionality") {
     CHECK(manager.getNumBuses() == 0);
 
     // Register again after reset
-    fl::SPIBusHandle handle2 = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle2 = manager.registerDevice(14, 13, 0, &ctrl);
     CHECK(handle2.is_valid);
     CHECK(manager.getNumBuses() == 1);
 }
@@ -242,16 +242,16 @@ TEST_CASE("SPIBusManager: Multiple buses with mixed device counts") {
     MockController ctrls[10] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
 
     // Bus 1: Single device on pin 14
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrls[0]);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrls[0]);
 
     // Bus 2: Three devices on pin 18 (Quad-SPI candidate)
-    fl::SPIBusHandle h2_1 = manager.registerDevice(18, 19, &ctrls[1]);
-    fl::SPIBusHandle h2_2 = manager.registerDevice(18, 20, &ctrls[2]);
-    fl::SPIBusHandle h2_3 = manager.registerDevice(18, 21, &ctrls[3]);
+    fl::SPIBusHandle h2_1 = manager.registerDevice(18, 19, 0, &ctrls[1]);
+    fl::SPIBusHandle h2_2 = manager.registerDevice(18, 20, 0, &ctrls[2]);
+    fl::SPIBusHandle h2_3 = manager.registerDevice(18, 21, 0, &ctrls[3]);
 
     // Bus 3: Two devices on pin 22 (Dual-SPI candidate)
-    (void)manager.registerDevice(22, 23, &ctrls[4]);
-    (void)manager.registerDevice(22, 24, &ctrls[5]);
+    (void)manager.registerDevice(22, 23, 0, &ctrls[4]);
+    (void)manager.registerDevice(22, 24, 0, &ctrls[5]);
 
     CHECK(manager.getNumBuses() == 3);
 
@@ -283,8 +283,8 @@ TEST_CASE("SPIBusManager: Device info tracking") {
 
     MockController ctrl1(1), ctrl2(2);
 
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    (void)manager.registerDevice(14, 27, &ctrl2);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    (void)manager.registerDevice(14, 27, 0, &ctrl2);
 
     const fl::SPIBusInfo* bus = manager.getBusInfo(h1.bus_id);
     REQUIRE(bus != nullptr);
@@ -303,7 +303,7 @@ TEST_CASE("SPIBusManager: Device unregistration") {
     fl::SPIBusManager manager;
 
     MockController ctrl(1);
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, &ctrl);
 
     CHECK(handle.is_valid);
     CHECK(manager.isDeviceEnabled(handle));
@@ -330,9 +330,9 @@ TEST_CASE("SPIBusManager: Quad-SPI release when all devices unregistered") {
     MockController ctrl1(1), ctrl2(2), ctrl3(3);
 
     // Register 3 devices for Quad-SPI
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
 
     manager.initialize();
 
@@ -363,10 +363,10 @@ TEST_CASE("SPIBusManager: Partial unregistration - Quad-SPI remains active") {
     MockController ctrl1(1), ctrl2(2), ctrl3(3), ctrl4(4);
 
     // Register 4 devices for Quad-SPI
-    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
-    fl::SPIBusHandle h4 = manager.registerDevice(14, 25, &ctrl4);
+    fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+    fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+    fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
+    fl::SPIBusHandle h4 = manager.registerDevice(14, 25, 0, &ctrl4);
 
     manager.initialize();
 
@@ -396,7 +396,7 @@ TEST_CASE("SPIBusManager: Double unregistration is safe") {
     fl::SPIBusManager manager;
 
     MockController ctrl(1);
-    fl::SPIBusHandle handle = manager.registerDevice(14, 13, &ctrl);
+    fl::SPIBusHandle handle = manager.registerDevice(14, 13, 0, &ctrl);
 
     // First unregister should succeed
     bool result1 = manager.unregisterDevice(handle);
@@ -414,9 +414,9 @@ TEST_CASE("SPIBusManager: Quad-SPI controller reuse after release") {
     {
         MockController ctrl1(1), ctrl2(2), ctrl3(3);
 
-        fl::SPIBusHandle h1 = manager.registerDevice(14, 13, &ctrl1);
-        fl::SPIBusHandle h2 = manager.registerDevice(14, 27, &ctrl2);
-        fl::SPIBusHandle h3 = manager.registerDevice(14, 33, &ctrl3);
+        fl::SPIBusHandle h1 = manager.registerDevice(14, 13, 0, &ctrl1);
+        fl::SPIBusHandle h2 = manager.registerDevice(14, 27, 0, &ctrl2);
+        fl::SPIBusHandle h3 = manager.registerDevice(14, 33, 0, &ctrl3);
 
         manager.initialize();
 
@@ -444,10 +444,10 @@ TEST_CASE("SPIBusManager: Quad-SPI controller reuse after release") {
     {
         MockController ctrl4(4), ctrl5(5), ctrl6(6), ctrl7(7);
 
-        fl::SPIBusHandle h4 = manager.registerDevice(18, 19, &ctrl4);  // Different clock pin!
-        fl::SPIBusHandle h5 = manager.registerDevice(18, 20, &ctrl5);
-        fl::SPIBusHandle h6 = manager.registerDevice(18, 21, &ctrl6);
-        fl::SPIBusHandle h7 = manager.registerDevice(18, 22, &ctrl7);
+        fl::SPIBusHandle h4 = manager.registerDevice(18, 19, 0, &ctrl4);  // Different clock pin!
+        fl::SPIBusHandle h5 = manager.registerDevice(18, 20, 0, &ctrl5);
+        fl::SPIBusHandle h6 = manager.registerDevice(18, 21, 0, &ctrl6);
+        fl::SPIBusHandle h7 = manager.registerDevice(18, 22, 0, &ctrl7);
 
         // Need to initialize this new bus
         manager.initialize();
@@ -478,15 +478,15 @@ TEST_CASE("SPIBusManager: Multiple buses can share Quad-SPI controllers") {
     MockController ctrls[8] = {0, 1, 2, 3, 4, 5, 6, 7};
 
     // Bus 1: 3 devices on clock pin 14
-    fl::SPIBusHandle b1_h1 = manager.registerDevice(14, 13, &ctrls[0]);
-    fl::SPIBusHandle b1_h2 = manager.registerDevice(14, 27, &ctrls[1]);
-    fl::SPIBusHandle b1_h3 = manager.registerDevice(14, 33, &ctrls[2]);
+    fl::SPIBusHandle b1_h1 = manager.registerDevice(14, 13, 0, &ctrls[0]);
+    fl::SPIBusHandle b1_h2 = manager.registerDevice(14, 27, 0, &ctrls[1]);
+    fl::SPIBusHandle b1_h3 = manager.registerDevice(14, 33, 0, &ctrls[2]);
 
     // Bus 2: 4 devices on clock pin 18
-    fl::SPIBusHandle b2_h1 = manager.registerDevice(18, 19, &ctrls[3]);
-    fl::SPIBusHandle b2_h2 = manager.registerDevice(18, 20, &ctrls[4]);
-    fl::SPIBusHandle b2_h3 = manager.registerDevice(18, 21, &ctrls[5]);
-    fl::SPIBusHandle b2_h4 = manager.registerDevice(18, 22, &ctrls[6]);
+    fl::SPIBusHandle b2_h1 = manager.registerDevice(18, 19, 0, &ctrls[3]);
+    fl::SPIBusHandle b2_h2 = manager.registerDevice(18, 20, 0, &ctrls[4]);
+    fl::SPIBusHandle b2_h3 = manager.registerDevice(18, 21, 0, &ctrls[5]);
+    fl::SPIBusHandle b2_h4 = manager.registerDevice(18, 22, 0, &ctrls[6]);
 
     manager.initialize();
 

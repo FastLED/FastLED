@@ -3,6 +3,7 @@
 #include "fl/vector.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
+#include "fl/log.h"
 #include "fl/stdint.h"
 
 // Multi-lane SPI support - unconditional includes (platform detection via weak linkage)
@@ -37,12 +38,13 @@ struct SPIDeviceInfo {
     uint8_t data_pin;               ///< Data pin number
     void* controller;               ///< Pointer to LED controller
     uint8_t lane_id;                ///< Assigned lane (0-7)
+    uint32_t requested_speed_hz;    ///< User-requested SPI speed (from DATA_RATE_MHZ)
     bool is_enabled;                ///< Whether this device is active
     bool is_allocated;              ///< Whether this slot is currently in use
 
     SPIDeviceInfo()
         : clock_pin(0xFF), data_pin(0xFF), controller(nullptr),
-          lane_id(0xFF), is_enabled(false), is_allocated(false) {}
+          lane_id(0xFF), requested_speed_hz(0), is_enabled(false), is_allocated(false) {}
 };
 
 /// Information about a managed SPI bus
@@ -93,9 +95,10 @@ public:
     /// Called by LED controllers during construction
     /// @param clock_pin Clock pin number
     /// @param data_pin Data pin number
+    /// @param requested_speed_hz User-requested SPI speed in Hz (from DATA_RATE_MHZ)
     /// @param controller Pointer to controller instance
     /// @returns Handle to use for transmit operations
-    SPIBusHandle registerDevice(uint8_t clock_pin, uint8_t data_pin, void* controller) {
+    SPIBusHandle registerDevice(uint8_t clock_pin, uint8_t data_pin, uint32_t requested_speed_hz, void* controller) {
         if (!controller) {
             FL_WARN("SPIBusManager: nullptr controller pointer");
             return SPIBusHandle();
@@ -120,6 +123,7 @@ public:
         bus->devices[device_idx].data_pin = data_pin;
         bus->devices[device_idx].controller = controller;
         bus->devices[device_idx].lane_id = device_idx;  // Tentative assignment
+        bus->devices[device_idx].requested_speed_hz = requested_speed_hz;
         bus->devices[device_idx].is_enabled = true;  // Enabled by default
         bus->devices[device_idx].is_allocated = true;  // Mark as allocated
         bus->num_devices++;
@@ -616,7 +620,7 @@ private:
             // Configure Dual-SPI
             SpiHw2::Config config;
             config.bus_num = static_cast<uint8_t>(dual_ctrl->getBusId());
-            config.clock_speed_hz = 20000000;  // 20 MHz default (platform can override in begin())
+            config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
             config.clock_pin = bus.clock_pin;
             config.data0_pin = bus.devices[0].data_pin;
             config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
@@ -668,7 +672,7 @@ private:
             // Configure Quad-SPI
             SpiHw4::Config config;
             config.bus_num = static_cast<uint8_t>(quad_ctrl->getBusId());
-            config.clock_speed_hz = 20000000;  // 20 MHz default (conservative)
+            config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
             config.clock_pin = bus.clock_pin;
             config.data0_pin = bus.devices[0].data_pin;
             config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
@@ -724,7 +728,7 @@ private:
             // Configure Octal-SPI (8 data lines)
             SpiHw8::Config config;
             config.bus_num = static_cast<uint8_t>(octal_ctrl->getBusId());
-            config.clock_speed_hz = 20000000;  // 20 MHz default (conservative)
+            config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
             config.clock_pin = bus.clock_pin;
             config.data0_pin = bus.devices[0].data_pin;
             config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
@@ -786,6 +790,83 @@ private:
             bus.bus_type = SPIBusType::SINGLE_SPI;
             bus.is_initialized = true;
         }
+    }
+
+    /// Select appropriate SPI clock speed for a bus
+    /// Takes the minimum (slowest) requested speed to ensure all devices work
+    /// @param bus Bus to select speed for
+    /// @returns Clock speed in Hz
+    uint32_t selectBusSpeed(const SPIBusInfo& bus) {
+        // Find the minimum (slowest) requested speed from all devices on this bus
+        // This ensures all devices can handle the speed
+        uint32_t min_speed = UINT32_MAX;
+        uint32_t devices_with_speed = 0;
+
+        for (uint8_t i = 0; i < bus.num_devices; i++) {
+            if (bus.devices[i].is_allocated && bus.devices[i].requested_speed_hz > 0) {
+                min_speed = fl::fl_min(min_speed, bus.devices[i].requested_speed_hz);
+                devices_with_speed++;
+            }
+        }
+
+        // If no devices specified a speed (or all specified 0), use platform default
+        if (devices_with_speed == 0 || min_speed == UINT32_MAX) {
+            min_speed = getPlatformDefaultSpeed();
+        }
+
+        // Clamp to platform-specific maximum
+        uint32_t platform_max = getPlatformMaxSpeed();
+        if (min_speed > platform_max) {
+            FL_WARN("SPI: Requested speed " << min_speed << " Hz exceeds platform max "
+                    << platform_max << " Hz, clamping to " << platform_max);
+            min_speed = platform_max;
+        }
+
+        // Log selected speed in MHz with one decimal place
+        uint32_t mhz_whole = min_speed / 1000000;
+        uint32_t mhz_tenth = (min_speed / 100000) % 10;
+        FL_LOG_SPI("SPI: Selected bus speed " << mhz_whole << "." << mhz_tenth
+                   << " MHz for clock pin " << static_cast<int>(bus.clock_pin));
+
+        return min_speed;
+    }
+
+    /// Get platform-specific default SPI speed
+    /// @returns Default speed in Hz
+    uint32_t getPlatformDefaultSpeed() {
+        // Platform-specific defaults based on hardware capabilities
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+            return 40000000;  // ESP32: 40 MHz default (can do up to 80 MHz)
+        #elif defined(__SAMD51__)
+            return 40000000;  // SAMD51: 40 MHz (can do 60 MHz)
+        #elif defined(NRF52) || defined(NRF52832) || defined(NRF52840)
+            return 8000000;   // NRF52: 8 MHz maximum
+        #elif defined(__SAMD21G18A__) || defined(__SAMD21__)
+            return 12000000;  // SAMD21: 12 MHz safe default (max 24 MHz)
+        #elif defined(__IMXRT1062__) || defined(TEENSY40) || defined(TEENSY41)
+            return 30000000;  // Teensy 4.x: 30 MHz default
+        #else
+            return 12000000;  // Conservative default for unknown platforms
+        #endif
+    }
+
+    /// Get platform-specific maximum SPI speed
+    /// @returns Maximum safe speed in Hz
+    uint32_t getPlatformMaxSpeed() {
+        // Platform-specific maximums based on hardware datasheets
+        #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+            return 80000000;  // ESP32: 80 MHz maximum with IO_MUX pins
+        #elif defined(__SAMD51__)
+            return 60000000;  // SAMD51: 60 MHz maximum
+        #elif defined(NRF52) || defined(NRF52832) || defined(NRF52840)
+            return 8000000;   // NRF52: 8 MHz maximum (hardware limitation)
+        #elif defined(__SAMD21G18A__) || defined(__SAMD21__)
+            return 24000000;  // SAMD21: 24 MHz maximum (F_CPU/2)
+        #elif defined(__IMXRT1062__) || defined(TEENSY40) || defined(TEENSY41)
+            return 50000000;  // Teensy 4.x: 50 MHz safe maximum
+        #else
+            return 25000000;  // Conservative maximum for unknown platforms
+        #endif
     }
 
     /// Release hardware resources for a bus

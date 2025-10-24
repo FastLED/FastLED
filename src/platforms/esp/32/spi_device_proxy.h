@@ -85,7 +85,7 @@ public:
         // Register with bus manager
         // NOTE: Bus manager will determine if we use Single/Quad/Soft SPI
         // based on how many devices share our clock pin
-        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, this);
+        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this);
 
         if (!mHandle.is_valid) {
             FL_LOG_SPI("Failed to register with bus manager (pin "
