@@ -6,6 +6,9 @@
 // This file must not be in the fl namespace, it must be in the global
 // namespace.
 
+// Guard to prevent redefinition if <new> has already been included by other headers
+#if !defined(_NEW) && !defined(_GLIBCXX_NEW) && !defined(_NEW_) && !defined(__NEW__)
+
 #if (defined(__AVR__) || defined(__STM32F1__) || !defined(__has_include)) && (!defined(FASTLED_HAS_NEW))
 // Platforms that need manual placement new definition:
 // - AVR: doesn't have <new> header
@@ -24,3 +27,5 @@ inline void *operator new(fl::size, void *ptr) _NO_EXCEPT { return ptr; }
 #elif __has_include("new.h")
 #include "new.h"
 #endif
+
+#endif // Guard against <new> already being included
