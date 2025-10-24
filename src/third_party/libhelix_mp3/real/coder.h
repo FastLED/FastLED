@@ -269,7 +269,7 @@ typedef struct _ScaleFactorInfo {
  *   last 15 blocks to shift them down one, a hardware style FIFO)
  */ 
 typedef struct _SubbandInfo {
-	int vbuf[MAX_NCHAN * VBUF_LENGTH];		/* vbuf for fast DCT-based synthesis PQMF - double size for speed (no modulo indexing) */
+	int32_t vbuf[MAX_NCHAN * VBUF_LENGTH];		/* vbuf for fast DCT-based synthesis PQMF - double size for speed (no modulo indexing) */
 	int vindex;								/* internal index for tracking position in vbuf */
 } SubbandInfo;
 
@@ -307,8 +307,8 @@ extern const int quadTabMaxBits[2];
 #ifdef __cplusplus
 extern "C" {
 #endif
-void PolyphaseMono(short *pcm, int *vbuf, const int32_t *coefBase);
-void PolyphaseStereo(short *pcm, int *vbuf, const int32_t *coefBase);
+void PolyphaseMono(short *pcm, int32_t *vbuf, const int32_t *coefBase);
+void PolyphaseStereo(short *pcm, int32_t *vbuf, const int32_t *coefBase);
 #ifdef __cplusplus
 }
 #endif
