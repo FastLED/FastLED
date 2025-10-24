@@ -5,8 +5,8 @@
 
 #include "fl/stdint.h"
 #include "fl/string.h"
-#include "../rgbw.h"
-#include "../crgb.h"
+#include "rgbw.h"
+#include "crgb.h"
 
 namespace fl {
 

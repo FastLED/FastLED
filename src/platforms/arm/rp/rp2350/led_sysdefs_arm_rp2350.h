@@ -17,6 +17,6 @@
 #endif
 
 // Include common RP platform definitions
-#include "../rpcommon/led_sysdefs_rp_common.h"
+#include "platforms/arm/rp/rpcommon/led_sysdefs_rp_common.h"
 
 #endif // __INC_LED_SYSDEFS_ARM_RP2350_H

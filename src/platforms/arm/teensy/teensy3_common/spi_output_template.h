@@ -4,7 +4,7 @@
 /// @brief Teensy 3 SPIOutput template definition
 
 #include "fl/int.h"
-#include "../teensy31_32/fastspi_arm_k20.h"
+#include "platforms/arm/teensy/teensy31_32/fastspi_arm_k20.h"
 
 namespace fl {
 

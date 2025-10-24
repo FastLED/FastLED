@@ -5,8 +5,8 @@
 // RP2350-specific clockless wrapper
 // Includes common RP2xxx PIO implementation
 
-#include "../rpcommon/clockless_rp_pio.h"
-#include "../rpcommon/clockless_rp_pio_parallel.h"
+#include "platforms/arm/rp/rpcommon/clockless_rp_pio.h"
+#include "platforms/arm/rp/rpcommon/clockless_rp_pio_parallel.h"
 
 // Any RP2350-specific overrides or optimizations go here
 

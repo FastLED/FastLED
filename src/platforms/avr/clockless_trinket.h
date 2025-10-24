@@ -1,13 +1,13 @@
 #ifndef __INC_CLOCKLESS_TRINKET_H
 #define __INC_CLOCKLESS_TRINKET_H
 
-#include "../../controller.h"
-#include "../../lib8tion.h"
+#include "controller.h"
+#include "lib8tion.h"
 #include <avr/interrupt.h> // for cli/se definitions
-#include "../../fl/force_inline.h"
-#include "../../fl/chipsets/led_timing.h"
-#include "../../fl/chipsets/timing_traits.h"
-#include "../../fastled_delay.h"
+#include "fl/force_inline.h"
+#include "fl/chipsets/led_timing.h"
+#include "fl/chipsets/timing_traits.h"
+#include "fastled_delay.h"
 
 namespace fl {
 

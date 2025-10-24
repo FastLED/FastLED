@@ -17,7 +17,7 @@
 #include "fl/str.h"
 
 #include "lzw.h"
-#include "../include/nsgif.hpp"
+#include "third_party/libnsgif/include/nsgif.hpp"
 
 namespace fl {
 namespace third_party {

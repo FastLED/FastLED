@@ -14,7 +14,7 @@
 #pragma once
 
 #include "fl/compiler_control.h"
-#include "../led_sysdefs.h"
+#include "led_sysdefs.h"
 
 /// Constant for "not a pin"
 /// @todo Unused, remove?
@@ -29,4 +29,4 @@
 // - FastPin<> specializations - platform-specific optimization
 // - For stub/WASM: no-op implementations
 // - For other platforms: optimized register access or Arduino PINMAP fallback
-#include "../platforms/fastpin.h"
+#include "platforms/fastpin.h"

@@ -32,9 +32,9 @@
 // ============================================================================
 
 /// FastLED configuration and platform definitions
-#include "../fastled_config.h"
-#include "../led_sysdefs.h"
-#include "../cpp_compat.h"
+#include "fastled_config.h"
+#include "led_sysdefs.h"
+#include "cpp_compat.h"
 
 // ============================================================================
 // CORE UTILITY HEADERS
@@ -53,53 +53,53 @@
 // ============================================================================
 
 /// Basic color types (CRGB, HSV)
-#include "../color.h"
-#include "../crgb.h"
-#include "../chsv.h"
+#include "color.h"
+#include "crgb.h"
+#include "chsv.h"
 
 /// Pixel types and color ordering
-#include "../pixeltypes.h"
-#include "../eorder.h"
+#include "pixeltypes.h"
+#include "eorder.h"
 
 /// Pixel utilities
-#include "../dither_mode.h"
-#include "../pixel_controller.h"
-#include "../pixel_iterator.h"
+#include "dither_mode.h"
+#include "pixel_controller.h"
+#include "pixel_iterator.h"
 
 // ============================================================================
 // CORE CONTROLLER DEFINITIONS
 // ============================================================================
 
 /// Base LED controller classes
-#include "../cled_controller.h"
-#include "../cpixel_ledcontroller.h"
-#include "../controller.h"
+#include "cled_controller.h"
+#include "cpixel_ledcontroller.h"
+#include "controller.h"
 
 // ============================================================================
 // PLATFORM SUPPORT
 // ============================================================================
 
 /// Platform-specific definitions and initialization
-#include "../platforms.h"
+#include "platforms.h"
 
 // ============================================================================
 // MISCELLANEOUS CORE UTILITIES
 // ============================================================================
 
 /// Timing utilities
-#include "../fastled_delay.h"
+#include "fastled_delay.h"
 
 /// Math utilities from lib8tion
-#include "../lib8tion.h"
+#include "lib8tion.h"
 
 /// Bit manipulation
-#include "../bitswap.h"
+#include "bitswap.h"
 
 /// Memory utilities
-#include "../fastled_progmem.h"
+#include "fastled_progmem.h"
 
 /// Hardware pin definitions
-#include "../fastpin.h"
+#include "fastpin.h"
 
 // ============================================================================
 // INTERNAL UTILITY DECLARATIONS

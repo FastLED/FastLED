@@ -22,7 +22,7 @@
 
 #pragma once
 
-#include "../lib8tion/lib8static.h"
+#include "lib8tion/lib8static.h"
 #include "fl/stdint.h"
 #include "fl/sketch_macros.h"
 #include "fl/type_traits.h"

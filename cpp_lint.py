@@ -1,0 +1,140 @@
+#!/usr/bin/env python3
+"""
+cpp_lint.py - FastLED C++ Linter
+
+Checks for relative includes (those containing "..") in C++ source files.
+Relative includes are discouraged as they can cause build issues across platforms.
+"""
+
+import argparse
+import re
+import sys
+from pathlib import Path
+from typing import List, Tuple, Set
+
+
+def find_cpp_files(root_dir: Path, exclude_dirs: Set[str]) -> List[Path]:
+    """Find all C++ source and header files, excluding specified directories."""
+    cpp_extensions = {'.cpp', '.h', '.hpp', '.cc', '.cxx', '.ino'}
+    cpp_files: List[Path] = []
+
+    for ext in cpp_extensions:
+        for file_path in root_dir.rglob(f'*{ext}'):
+            # Check if any parent directory should be excluded
+            if any(excluded in file_path.parts for excluded in exclude_dirs):
+                continue
+            cpp_files.append(file_path)
+
+    return cpp_files
+
+
+def check_relative_includes(file_path: Path) -> List[Tuple[int, str]]:
+    """
+    Check a file for #include directives containing ".."
+
+    Returns:
+        List of (line_number, line_content) tuples for offending includes
+    """
+    violations: List[Tuple[int, str]] = []
+
+    # Regex to match #include directives with ".." in the path
+    # Matches both #include "path/with/../file.h" and #include <path/with/../file.h>
+    include_pattern = re.compile(r'^\s*#\s*include\s+[<"]([^>"]*\.\..*)[>"]')
+
+    try:
+        with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+            for line_num, line in enumerate(f, start=1):
+                match = include_pattern.match(line)
+                if match:
+                    violations.append((line_num, line.rstrip()))
+    except Exception as e:
+        print(f"Warning: Could not read {file_path}: {e}", file=sys.stderr)
+
+    return violations
+
+
+def main() -> int:
+    """Main entry point for the linter."""
+    parser = argparse.ArgumentParser(
+        description='Check C++ files for relative includes (paths containing "..")',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  uv run cpp_lint.py              # Check all C++ files in project
+  uv run cpp_lint.py src/         # Check only src/ directory
+  uv run cpp_lint.py --exclude .pio # Exclude additional directories
+        """
+    )
+    parser.add_argument(
+        'paths',
+        nargs='*',
+        default=['.'],
+        help='Paths to check (default: current directory)'
+    )
+    parser.add_argument(
+        '--exclude',
+        action='append',
+        default=[],
+        help='Additional directories to exclude (can be specified multiple times)'
+    )
+
+    args = parser.parse_args()
+
+    # Default exclusions
+    exclude_dirs: Set[str] = {
+        '.git',
+        '.pio',
+        'build',
+        'node_modules',
+        '__pycache__',
+        '.venv',
+        'venv',
+    }
+    exclude_dirs.update(args.exclude)
+
+    # Collect all files to check
+    all_files: List[Path] = []
+    for path_str in args.paths:
+        path = Path(path_str)
+        if not path.exists():
+            print(f"Error: Path does not exist: {path}", file=sys.stderr)
+            return 1
+
+        if path.is_file():
+            all_files.append(path)
+        else:
+            all_files.extend(find_cpp_files(path, exclude_dirs))
+
+    if not all_files:
+        print("No C++ files found to check.", file=sys.stderr)
+        return 0
+
+    # Check all files
+    total_violations = 0
+    files_with_violations = 0
+
+    for file_path in sorted(all_files):
+        violations = check_relative_includes(file_path)
+        if violations:
+            files_with_violations += 1
+            total_violations += len(violations)
+
+            print(f"\n{file_path}:")
+            for line_num, line in violations:
+                print(f"  {line_num}: {line}")
+                print(f"      ^ Error: Relative include path contains '..'")
+
+    # Summary
+    print(f"\nChecked {len(all_files)} files")
+    if total_violations > 0:
+        print(f"Found {total_violations} violation(s) in {files_with_violations} file(s)")
+        print("\nRelative includes (paths with '..') should be avoided.")
+        print("Use absolute includes from project root or proper include paths instead.")
+        return 1
+    else:
+        print("No relative includes found ✓")
+        return 0
+
+
+if __name__ == '__main__':
+    sys.exit(main())

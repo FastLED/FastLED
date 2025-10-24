@@ -2,7 +2,7 @@
 #define __INC_FASTSPI_ARM_SAM_H
 
 // Includes must come before all namespace declarations
-#include "../../../fastspi_types.h"
+#include "fastspi_types.h"
 
 #if defined(__SAM3X8E__)
 #endif

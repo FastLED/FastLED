@@ -6,7 +6,7 @@
 #include "fastled_delay.h"
 
 #if FASTLED_RP2040_CLOCKLESS_M0_FALLBACK || !FASTLED_RP2040_CLOCKLESS_PIO
-#include "../../common/m0clockless.h"
+#include "platforms/arm/common/m0clockless.h"
 #endif
 
 #if FASTLED_RP2040_CLOCKLESS_PIO

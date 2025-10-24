@@ -44,7 +44,7 @@
 #ifndef _CODER_H
 #define _CODER_H
 
-#include "../pub/mp3common.h"
+#include "third_party/libhelix_mp3/pub/mp3common.h"
 
 #if defined(ASSERT)
 #undef ASSERT

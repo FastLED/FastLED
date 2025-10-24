@@ -1,8 +1,8 @@
 #ifndef __INC_FASTSPI_ARM_KL26_H
 #define __INC_FASTSPI_ARM_KL26_H
 
-#include "../../../../fastspi_types.h"
-#include "../../../../fastled_delay.h"
+#include "fastspi_types.h"
+#include "fastled_delay.h"
 
 namespace fl {
 template <int VAL> void getScalars(uint8_t & sppr, uint8_t & spr) {

@@ -1,10 +1,10 @@
 #ifndef __INC_CLOCKLESS_ARM_KL26
 #define __INC_CLOCKLESS_ARM_KL26
 
-#include "../../common/m0clockless.h"
+#include "platforms/arm/common/m0clockless.h"
 #include "eorder.h"
 #include "fl/chipsets/timing_traits.h"
-#include "../../../../fastled_delay.h"
+#include "fastled_delay.h"
 namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 

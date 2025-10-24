@@ -5,8 +5,8 @@
 #include "fastpin_arm_mxrt1062.h"
 #include "fastspi_arm_mxrt1062.h"
 #include "octows2811_controller.h"
-#include "../teensy31_32/ws2812serial_controller.h"
-#include "../teensy31_32/smartmatrix_t3.h"
+#include "platforms/arm/teensy/teensy31_32/ws2812serial_controller.h"
+#include "platforms/arm/teensy/teensy31_32/smartmatrix_t3.h"
 #include "clockless_arm_mxrt1062.h"
 #include "block_clockless_arm_mxrt1062.h"
 

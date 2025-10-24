@@ -6,6 +6,6 @@
 #include "fastpin_arm_kl26.h"
 #include "fastspi_arm_kl26.h"
 #include "clockless_arm_kl26.h"
-#include "../teensy31_32/ws2812serial_controller.h"
+#include "platforms/arm/teensy/teensy31_32/ws2812serial_controller.h"
 
 #endif

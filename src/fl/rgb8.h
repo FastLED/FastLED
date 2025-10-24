@@ -13,7 +13,7 @@
 #include "fl/ease.h"
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared
-#include "../color.h"
+#include "color.h"
 
 // Forward declarations
 namespace fl {
