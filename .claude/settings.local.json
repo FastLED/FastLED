@@ -62,7 +62,8 @@
       "SlashCommand(/git-historian compile-commands setup-js-linting-fast --paths ci)",
       "Bash(c++filt:*)",
       "Bash(docker run:*)",
-      "Bash(docker inspect:*)"
+      "Bash(docker inspect:*)",
+      "SlashCommand(/git-historian LIB8 attiny85 math8 scale8 --paths src/lib8tion)"
     ],
     "deny": []
   }

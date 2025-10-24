@@ -8,13 +8,9 @@
 
 // Select appropriate implementation based on platform configuration
 #if defined(__AVR__)
-#if defined(LIB8_ATTINY)
-// ATtiny has no MUL instruction - use portable C version
-#include "platforms/shared/math8.h"
-#else
-// AVR with MUL instruction - use assembly-optimized version for performance
+// All AVR platforms (ATmega and ATtiny) use assembly-optimized versions
+// ATtiny-specific implementations are handled within platforms/avr/math8.h
 #include "platforms/avr/math8.h"
-#endif
 #else
 // All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
 #include "platforms/shared/math8.h"
