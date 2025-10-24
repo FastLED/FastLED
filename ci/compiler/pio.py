@@ -667,6 +667,44 @@ class GlobalPackageLock:
         self._file_lock = fasteners.InterProcessLock(str(self.lock_file))
         self._is_acquired = False
 
+    def _check_stale_lock(self) -> bool:
+        """Check if lock file is stale (no process holding it) and remove if stale.
+
+        Returns:
+            True if lock was stale and removed, False otherwise
+        """
+        from ci.util.lock_handler import (
+            find_processes_locking_path,
+            is_psutil_available,
+        )
+
+        if not self.lock_file.exists():
+            return False
+
+        if not is_psutil_available():
+            return False  # Can't check, assume not stale
+
+        try:
+            # Check if any process has the lock file open
+            locking_pids = find_processes_locking_path(self.lock_file)
+
+            if not locking_pids:
+                # No process holds the lock, it's stale
+                print(
+                    f"Detected stale lock file for {self.platform_name} at {self.lock_file}. Removing..."
+                )
+                try:
+                    self.lock_file.unlink()
+                    print(f"Removed stale lock file: {self.lock_file}")
+                    return True
+                except Exception as e:
+                    print(f"Warning: Could not remove stale lock file: {e}")
+                    return False
+            return False
+        except Exception as e:
+            print(f"Warning: Could not check for stale lock: {e}")
+            return False
+
     def acquire(self) -> None:
         """Acquire the global package installation lock for this board."""
         if self._is_acquired:
@@ -674,8 +712,14 @@ class GlobalPackageLock:
 
         start_time = time.time()
         warning_shown = False
+        stale_check_done = False
 
         while True:
+            # Check for stale lock once at the beginning
+            if not stale_check_done and time.time() - start_time < 0.5:
+                self._check_stale_lock()
+                stale_check_done = True
+
             # Try to acquire with very short timeout (non-blocking)
             try:
                 success = self._file_lock.acquire(blocking=True, timeout=0.1)
@@ -727,6 +771,22 @@ class GlobalPackageLock:
     def is_acquired(self) -> bool:
         """Check if the lock is currently acquired."""
         return self._is_acquired
+
+    def __enter__(self) -> "GlobalPackageLock":
+        """Context manager entry - acquire the lock."""
+        self.acquire()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
+        """Context manager exit - release the lock."""
+        self.release()
+
+    def __del__(self) -> None:
+        """Ensure lock is released when object is garbage collected."""
+        try:
+            self.release()
+        except Exception:
+            pass  # Ignore errors during cleanup
 
 
 # Remove duplicate dataclass definitions - use the ones from compiler.py
@@ -1576,7 +1636,7 @@ class PioCompiler(Compiler):
 
         futures: List[Future[SketchResult]] = []
 
-        # Submit all builds
+        # Submit all builds with proper lock management
         self._global_package_lock.acquire()
         cancelled = threading.Event()
         try:
@@ -1592,11 +1652,16 @@ class PioCompiler(Compiler):
             for future in futures:
                 future.cancel()
             notify_main_thread()
+            raise
         except Exception as e:
             print(f"Exception: {e}")
             for future in futures:
                 future.cancel()
             raise
+        finally:
+            # Always release the global package lock after submitting all builds
+            # The lock is held during initialization and package installation
+            self._global_package_lock.release()
 
         return futures
 
@@ -1840,10 +1905,8 @@ class PioCompiler(Compiler):
         """Clean all build artifacts (local and global packages) for this platform."""
         print(f"Cleaning all artifacts for platform {self.board.board_name}...")
 
-        # Acquire both platform and global package locks
-        self._global_package_lock.acquire()
-
-        try:
+        # Use context manager for automatic lock release
+        with self._global_package_lock:
             # Clean local build artifacts first
             if self.build_dir.exists():
                 print(f"Removing build directory: {self.build_dir}")
@@ -1869,10 +1932,6 @@ class PioCompiler(Compiler):
                 print(f"✅ Cleaned global core cache for {self.board.board_name}")
             else:
                 print(f"✅ No global core directory found for {self.board.board_name}")
-
-        finally:
-            # Always release locks
-            self._global_package_lock.release()
 
     def deploy(
         self, example: str, upload_port: Optional[str] = None, monitor: bool = False
