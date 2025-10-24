@@ -31,13 +31,13 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
         "add %0, %1    \n\t"
 
         /* Now test the C flag.
-        If C is clear, we branch around a load of 0xFF into i.
-        If C is set, we go ahead and load 0xFF into i.
+        If C is clear, we branch around a set of 0xFF into i.
+        If C is set, we go ahead and set 0xFF into i.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0xFF  \n\t"
+        "ser %0        \n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // Any register - ser works on all registers
         : "r"(j));
     return i;
 }
@@ -50,16 +50,17 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
 
         /* Now test the V flag.
         If V is clear, we branch to end.
-        If V is set, we go ahead and load 0x7F into i.
+        If V is set, we go ahead and set 0x7F into i.
         */
         "brvc L_%=     \n\t"
-        "ldi %0, 0x7F  \n\t"
+        "ser %0        \n\t"
+        "lsr %0        \n\t"
 
         /* When both numbers are negative, C is set.
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // Any register - ser and lsr work on all registers
         : "r"(j));
     return i;
 }
@@ -71,13 +72,13 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
         "sub %0, %1    \n\t"
 
         /* Now test the C flag.
-        If C is clear, we branch around a load of 0x00 into i.
-        If C is set, we go ahead and load 0x00 into i.
+        If C is clear, we branch around a clear of i.
+        If C is set, we go ahead and clear i to 0x00.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0x00  \n\t"
+        "clr %0        \n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // Any register - clr works on all registers
         : "r"(j));
     return i;
 }
