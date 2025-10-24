@@ -63,7 +63,8 @@
       "Bash(c++filt:*)",
       "Bash(docker run:*)",
       "Bash(docker inspect:*)",
-      "SlashCommand(/git-historian LIB8 attiny85 math8 scale8 --paths src/lib8tion)"
+      "SlashCommand(/git-historian LIB8 attiny85 math8 scale8 --paths src/lib8tion)",
+      "WebFetch(domain:www.espressif.com)"
     ],
     "deny": []
   }
