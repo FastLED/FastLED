@@ -81,10 +81,10 @@ platform_replacements: Dict[str, Dict[str, str]] = {
         '#include "../common/m0clockless.h"': '#include "platforms/arm/common/m0clockless.h"',
     },
     "src/platforms/arm/d51/fastled_arm_d51.h": {
-        '#include "../../fastspi_ardunio_core.h"': '#include "fastspi_ardunio_core.h"',
+        '#include "../../fastspi_arduino_core.h"': '#include "fastspi_arduino_core.h"',
     },
     "src/platforms/arm/giga/fastled_arm_giga.h": {
-        '#include "../../fastspi_ardunio_core.h"': '#include "fastspi_ardunio_core.h"',
+        '#include "../../fastspi_arduino_core.h"': '#include "fastspi_arduino_core.h"',
     },
     "src/platforms/arm/k20/octows2811_controller.h": {
         '#include "../../../bitswap.h"': '#include "bitswap.h"',
@@ -96,7 +96,7 @@ platform_replacements: Dict[str, Dict[str, str]] = {
         '#include "../common/m0clockless.h"': '#include "platforms/arm/common/m0clockless.h"',
     },
     "src/platforms/arm/renesas/fastled_arm_renesas.h": {
-        '#include "../../fastspi_ardunio_core.h"': '#include "fastspi_ardunio_core.h"',
+        '#include "../../fastspi_arduino_core.h"': '#include "fastspi_arduino_core.h"',
     },
     "src/platforms/arm/rp/rp2040/clockless_arm_rp2040.h": {
         '#include "../rpcommon/clockless_rp_pio.h"': '#include "platforms/arm/rp/rpcommon/clockless_rp_pio.h"',
