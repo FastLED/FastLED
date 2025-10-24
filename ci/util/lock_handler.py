@@ -25,11 +25,15 @@ def is_psutil_available() -> bool:
     return psutil is not None
 
 
-def find_processes_locking_path(path: Path) -> Set[int]:
+def find_processes_locking_path(
+    path: Path, max_processes: int = 200, timeout: float = 3.0
+) -> Set[int]:
     """Find all process IDs that have open handles to files under the given path.
 
     Args:
         path: Path to check for locks (file or directory)
+        max_processes: Maximum number of processes to check (default: 200)
+        timeout: Maximum time in seconds to spend checking (default: 3.0)
 
     Returns:
         Set of process IDs holding locks on the path
@@ -50,9 +54,43 @@ def find_processes_locking_path(path: Path) -> Set[int]:
 
     locking_pids: Set[int] = set()
     path_str = str(normalized_path).lower()
+    start_time = time.time()
+    processes_checked = 0
 
-    # Iterate through all processes
-    for proc in psutil.process_iter(["pid", "name"]):  # type: ignore[misc]
+    # Priority process names (check these first)
+    priority_names = {"python.exe", "python3.exe", "python", "uv.exe", "uv"}
+
+    # Get all processes and sort by priority
+    all_procs = list(psutil.process_iter(["pid", "name"]))  # type: ignore[misc]
+
+    # Sort processes: priority names first, then others
+    def sort_key(proc: Any) -> int:
+        try:
+            name = proc.info["name"].lower() if proc.info.get("name") else ""
+            return 0 if name in priority_names else 1
+        except Exception:
+            return 2
+
+    all_procs.sort(key=sort_key)
+
+    # Iterate through processes with limits
+    for proc in all_procs:
+        # Check timeout
+        if time.time() - start_time > timeout:
+            print(
+                f"  Warning: Lock detection timed out after {timeout}s (checked {processes_checked} processes)"
+            )
+            break
+
+        # Check process limit
+        if processes_checked >= max_processes:
+            print(
+                f"  Warning: Lock detection stopped after checking {max_processes} processes"
+            )
+            break
+
+        processes_checked += 1
+
         try:
             # Get open files for this process
             open_files = proc.open_files()
@@ -77,6 +115,12 @@ def find_processes_locking_path(path: Path) -> Set[int]:
                         print(
                             f"  Process {proc.info['pid']} ({proc.info['name']}) has open file: {file_info.path}"
                         )
+                        # Verify process still exists
+                        if not psutil.pid_exists(proc.info["pid"]):  # type: ignore[misc]
+                            print(
+                                f"  Warning: Process {proc.info['pid']} no longer exists (stale)"
+                            )
+                            locking_pids.discard(proc.info["pid"])
                         break
 
         except (
