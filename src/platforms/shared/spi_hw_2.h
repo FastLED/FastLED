@@ -11,6 +11,7 @@
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"
+#include "platforms/shared/spi_types.h"
 
 namespace fl {
 
@@ -54,17 +55,23 @@ public:
     /// @note Should wait for any pending transmissions to complete
     virtual void end() = 0;
 
-    /// Queue DMA transmission (mode is a hint - platform may block regardless)
-    /// @param buffer Data buffer to transmit (platform handles DMA requirements internally)
+    /// Acquire writable DMA buffer for zero-copy transmission
+    /// @param size Number of bytes needed
+    /// @returns DMABufferResult containing buffer span or error code
+    /// @note Automatically waits (calls waitComplete()) if previous transmission active
+    /// @note Buffer remains valid until waitComplete() is called
+    virtual DMABufferResult acquireDMABuffer(size_t size) = 0;
+
+    /// Transmit data from previously acquired DMA buffer
     /// @param mode Transmission mode hint (SYNC or ASYNC)
-    /// @returns true if transmitted/queued successfully, false on error
-    /// @note Platform implementations handle DMA buffer allocation/alignment internally
-    /// @note Buffer must remain valid until waitComplete() returns
-    virtual bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) = 0;
+    /// @returns true if transmitted successfully, false on error
+    /// @note Must call acquireDMABuffer() before this
+    virtual bool transmit(TransmitMode mode = TransmitMode::ASYNC) = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
+    /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
 
     /// Check if a transmission is currently in progress

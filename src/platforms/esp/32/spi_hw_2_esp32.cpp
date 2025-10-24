@@ -18,6 +18,7 @@
 // Include soc_caps.h if available (ESP-IDF 4.0+)
 // Older versions (like IDF 3.3) don't have this header
 #include "fl/has_include.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include "soc/soc_caps.h"
 #endif
@@ -58,7 +59,8 @@ public:
 
     bool begin(const SpiHw2::Config& config) override;
     void end() override;
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    DMABufferResult acquireDMABuffer(size_t size) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -76,6 +78,12 @@ private:
     bool mTransactionActive;
     bool mInitialized;
 
+    // DMA buffer management
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format)
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * 2)
+    bool mBufferAcquired;
+
     SPIDualESP32(const SPIDualESP32&) = delete;
     SPIDualESP32& operator=(const SPIDualESP32&) = delete;
 };
@@ -90,7 +98,11 @@ SPIDualESP32::SPIDualESP32(int bus_id, const char* name)
     , mSPIHandle(nullptr)
     , mHost(SPI2_HOST)
     , mTransactionActive(false)
-    , mInitialized(false) {
+    , mInitialized(false)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
     fl::memset(&mTransaction, 0, sizeof(mTransaction));
 }
 
@@ -186,28 +198,69 @@ void SPIDualESP32::end() {
     cleanup();
 }
 
-bool SPIDualESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
+DMABufferResult SPIDualESP32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return false;
+        return SPIError::NOT_INITIALIZED;
     }
 
-    // Wait for previous transaction if still active
+    // Auto-wait if previous transmission still active
     if (mTransactionActive) {
-        waitComplete();
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For dual SPI: total size = bytes_per_lane × 2 lanes (interleaved)
+    constexpr size_t num_lanes = 2;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against max_transfer_sz from bus config
+    // ESP32 SPI max is typically 64KB per transaction
+    if (total_size > 65536) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            heap_caps_free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory for max size
+        uint8_t* ptr = (uint8_t*)heap_caps_malloc(total_size, MALLOC_CAP_DMA);
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SPIDualESP32::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
+        return false;
     }
 
     // Mode is ignored - ESP32 always does async via DMA
     (void)mode;
 
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
-    // Configure transaction
+    // Configure transaction using internal DMA buffer
     fl::memset(&mTransaction, 0, sizeof(mTransaction));
     mTransaction.flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
-    mTransaction.length = buffer.size() * 8;   // Length in BITS (critical!)
-    mTransaction.tx_buffer = buffer.data();
+    mTransaction.length = mCurrentTotalSize * 8;   // Length in BITS (critical!)
+    mTransaction.tx_buffer = mDMABuffer.data();
 
     // Queue transaction (non-blocking)
     esp_err_t ret = spi_device_queue_trans(mSPIHandle, &mTransaction, portMAX_DELAY);
@@ -232,6 +285,11 @@ bool SPIDualESP32::waitComplete(uint32_t timeout_ms) {
     );
 
     mTransactionActive = false;
+
+    // Auto-release DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return (ret == ESP_OK);
 }
 
@@ -256,6 +314,15 @@ void SPIDualESP32::cleanup() {
         // Wait for any pending transmission
         if (mTransactionActive) {
             waitComplete();
+        }
+
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            heap_caps_free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
         }
 
         // Remove device and free bus

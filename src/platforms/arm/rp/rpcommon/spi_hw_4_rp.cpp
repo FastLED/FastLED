@@ -16,6 +16,7 @@
 #include "fl/warn.h"
 #include <cstring> // ok include
 #include "fl/cstring.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -120,12 +121,18 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (reorganized into quad-lane format internally)
+    /// @brief Acquire DMA buffer for zero-copy transmission
+    /// @param bytes_per_lane Number of bytes per lane to allocate
+    /// @return DMABufferResult containing span to write into, or error
+    /// @note Auto-waits if previous transmission still active
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission using acquired DMA buffer
+    /// @param mode Transmission mode (async/sync hint - may be ignored)
     /// @return true if transfer started successfully, false on error
-    /// @note Waits for previous transaction to complete if still active
+    /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -152,11 +159,6 @@ private:
     /// @brief Release all allocated resources (PIO, DMA, buffers)
     void cleanup();
 
-    /// @brief Allocate or resize internal DMA buffer
-    /// @param required_size Size needed in bytes
-    /// @return true if buffer allocated successfully
-    bool allocateDMABuffer(size_t required_size);
-
     int mBusId;  ///< Logical bus identifier
     const char* mName;  ///< Controller name
 
@@ -167,8 +169,12 @@ private:
 
     // DMA resources
     int mDMAChannel;
-    void* mDMABuffer;
-    size_t mDMABufferSize;
+
+    // DMA buffer management
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for quad-lane)
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * 4)
+    bool mBufferAcquired;
 
     // State
     bool mTransactionActive;
@@ -196,8 +202,10 @@ SPIQuadRP2040::SPIQuadRP2040(int bus_id, const char* name)
     , mStateMachine(-1)
     , mPIOOffset(-1)
     , mDMAChannel(-1)
-    , mDMABuffer(nullptr)
-    , mDMABufferSize(0)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false)
     , mTransactionActive(false)
     , mInitialized(false)
     , mClockPin(0)
@@ -357,74 +365,83 @@ void SPIQuadRP2040::end() {
     cleanup();
 }
 
-bool SPIQuadRP2040::allocateDMABuffer(size_t required_size) {
-    if (mDMABufferSize >= required_size) {
-        return true;  // Buffer is already large enough
+DMABufferResult SPIQuadRP2040::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
     }
 
-    // Free old buffer if exists
-    if (mDMABuffer != nullptr) {
-        free(mDMABuffer);
-        mDMABuffer = nullptr;
-        mDMABufferSize = 0;
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
     }
 
-    // Allocate new buffer (32-bit aligned for DMA)
-    mDMABuffer = malloc(required_size);
-    if (mDMABuffer == nullptr) {
-        FL_WARN("SPIQuadRP2040: Failed to allocate DMA buffer");
-        return false;
+    // For quad SPI: total size = bytes_per_lane × 4 lanes (interleaved)
+    constexpr size_t num_lanes = 4;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Calculate required buffer size in 32-bit words for PIO
+    // Each 4 bytes becomes 1 word where bits are interleaved
+    size_t word_count = (total_size + 3) / 4;
+    size_t buffer_size_bytes = word_count * 4;  // 4 bytes per 32-bit word
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (regular malloc for RP2040)
+        uint8_t* ptr = (uint8_t*)malloc(buffer_size_bytes);
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, buffer_size_bytes);
+        mMaxBytesPerLane = bytes_per_lane;
     }
 
-    mDMABufferSize = required_size;
-    return true;
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span representing the logical interleaved data (not the word buffer)
+    // User fills this as if it's bytes_per_lane * 4
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
 }
 
-bool SPIQuadRP2040::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized) {
+bool SPIQuadRP2040::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
-    // Calculate required buffer size in 32-bit words
-    // Each byte needs to be split across 4 lanes (4 bits per clock cycle)
-    // Each byte = 8 bits = 2 clock cycles, each word holds 8 clock cycles
-    // So 4 bytes per word when using quad-lane output
-    size_t byte_count = buffer.size();
+    // mDMABuffer now contains interleaved data written by caller
+    // We need to convert it to PIO word format for transmission
+    // Each 4 bytes becomes 1 word where bits are interleaved
 
-    // For quad-SPI: reorganize bytes so bits are split across 4 lanes
-    // Simple approach: every 4 bytes becomes 1 word where bits are interleaved
-    // Word format: byte0[0..3], byte1[0..3], byte2[0..3], byte3[0..3], ...
-    // Each clock cycle outputs 4 bits (one from each of 4 bytes)
-
-    // Calculate words needed: ceil(byte_count / 4)
+    size_t byte_count = mCurrentTotalSize;
     size_t word_count = (byte_count + 3) / 4;
-    size_t buffer_size_bytes = word_count * 4;  // 4 bytes per 32-bit word
 
-    if (!allocateDMABuffer(buffer_size_bytes)) {
-        return false;
-    }
+    // Access the buffer data - already allocated with enough space for words
+    uint8_t* byte_buffer = mDMABuffer.data();
+    uint32_t* word_buffer = (uint32_t*)mDMABuffer.data();
 
-    // Pack bytes into quad-lane format
-    uint32_t* word_buffer = (uint32_t*)mDMABuffer;
-    fl::memset(word_buffer, 0, buffer_size_bytes);  // Clear buffer
-
-    for (size_t i = 0; i < byte_count; i += 4) {
-        uint8_t byte0 = buffer[i];
-        uint8_t byte1 = (i + 1 < byte_count) ? buffer[i + 1] : 0;
-        uint8_t byte2 = (i + 2 < byte_count) ? buffer[i + 2] : 0;
-        uint8_t byte3 = (i + 3 < byte_count) ? buffer[i + 3] : 0;
+    // Convert interleaved byte data to PIO word format
+    // Work backwards to avoid overwriting data we haven't read yet
+    for (int i = (int)word_count - 1; i >= 0; i--) {
+        size_t byte_idx = i * 4;
+        uint8_t byte0 = byte_buffer[byte_idx];
+        uint8_t byte1 = (byte_idx + 1 < byte_count) ? byte_buffer[byte_idx + 1] : 0;
+        uint8_t byte2 = (byte_idx + 2 < byte_count) ? byte_buffer[byte_idx + 2] : 0;
+        uint8_t byte3 = (byte_idx + 3 < byte_count) ? byte_buffer[byte_idx + 3] : 0;
 
         // Interleave bits from byte0, byte1, byte2, byte3
         // Result: 32 bits where bits are grouped by nibbles from each byte
@@ -444,11 +461,11 @@ bool SPIQuadRP2040::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) 
             interleaved |= (nibble << (28 - bit * 4));
         }
 
-        word_buffer[i / 4] = interleaved;
+        word_buffer[i] = interleaved;
     }
 
     // Start DMA transfer
-    dma_channel_set_read_addr(mDMAChannel, mDMABuffer, false);
+    dma_channel_set_read_addr(mDMAChannel, word_buffer, false);
     dma_channel_set_trans_count(mDMAChannel, word_count, true);  // Start transfer
 
     mTransactionActive = true;
@@ -474,6 +491,11 @@ bool SPIQuadRP2040::waitComplete(uint32_t timeout_ms) {
     }
 
     mTransactionActive = false;
+
+    // Auto-release DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -503,6 +525,15 @@ void SPIQuadRP2040::cleanup() {
             waitComplete();
         }
 
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
         // Disable and unclaim PIO state machine
         if (mPIO != nullptr && mStateMachine != -1) {
             pio_sm_set_enabled(mPIO, mStateMachine, false);
@@ -513,13 +544,6 @@ void SPIQuadRP2040::cleanup() {
         if (mDMAChannel != -1) {
             dma_channel_unclaim(mDMAChannel);
             mDMAChannel = -1;
-        }
-
-        // Free DMA buffer
-        if (mDMABuffer != nullptr) {
-            free(mDMABuffer);
-            mDMABuffer = nullptr;
-            mDMABufferSize = 0;
         }
 
         mInitialized = false;

@@ -77,12 +77,18 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (reorganized into dual-lane format internally)
+    /// @brief Acquire a DMA buffer for zero-copy data preparation
+    /// @param bytes_per_lane Number of bytes per lane to allocate
+    /// @return DMABufferResult containing span to buffer or error code
+    /// @note Automatically waits if previous transmission still active
+    /// @note Reallocates only if requested size exceeds current capacity
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission using internal DMA buffer
     /// @return true if transfer started successfully, false on error
-    /// @note Waits for previous transaction to complete if still active
+    /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -137,7 +143,13 @@ private:
     // TIMER resource
     NRF_TIMER_Type* mTimer;  ///< TIMER0 for clock generation
 
-    // DMA buffers (must be in RAM for EasyDMA)
+    // DMA buffer management (must be in RAM for EasyDMA)
+    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for dual-lane)
+    size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * num_lanes)
+    bool mBufferAcquired;            ///< True if buffer has been acquired for transmission
+
+    // Legacy lane buffers (kept for internal de-interleaving)
     uint8_t* mLane0Buffer;  ///< Buffer for lane 0 data
     uint8_t* mLane1Buffer;  ///< Buffer for lane 1 data
     size_t mBufferSize;     ///< Size of each lane buffer in bytes

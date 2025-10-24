@@ -5,6 +5,7 @@
 /// It captures transmitted data for inspection without real hardware.
 
 #include "platforms/stub/spi_octal_stub.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 #ifdef FASTLED_TESTING
 
@@ -20,7 +21,10 @@ SpiHw8Stub::SpiHw8Stub(int bus_id, const char* name)
     , mInitialized(false)
     , mBusy(false)
     , mClockSpeed(20000000)
-    , mTransmitCount(0) {
+    , mTransmitCount(0)
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
 }
 
 bool SpiHw8Stub::begin(const SpiHw8::Config& config) {
@@ -42,22 +46,58 @@ void SpiHw8Stub::end() {
     mInitialized = false;
     mBusy = false;
     mLastBuffer.clear();
+
+    // Free DMA buffer
+    mDMABuffer.clear();
+    mMaxBytesPerLane = 0;
+    mCurrentTotalSize = 0;
+    mBufferAcquired = false;
 }
 
-bool SpiHw8Stub::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
+DMABufferResult SpiHw8Stub::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mBusy) {
+        waitComplete();
+    }
+
+    // For octal-lane SPI: num_lanes = 8
+    constexpr size_t num_lanes = 8;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        mDMABuffer.clear();
+        mDMABuffer.resize(total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SpiHw8Stub::transmit(TransmitMode mode) {
+    (void)mode;  // Unused in stub
+
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
     // Capture data for inspection
     mLastBuffer.clear();
-    mLastBuffer.reserve(buffer.size());
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        mLastBuffer.push_back(buffer[i]);
+    mLastBuffer.reserve(mCurrentTotalSize);
+    for (size_t i = 0; i < mCurrentTotalSize; ++i) {
+        mLastBuffer.push_back(mDMABuffer[i]);
     }
 
     mTransmitCount++;
@@ -69,6 +109,11 @@ bool SpiHw8Stub::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
 bool SpiHw8Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in mock
     mBusy = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;  // Always succeeds instantly
 }
 

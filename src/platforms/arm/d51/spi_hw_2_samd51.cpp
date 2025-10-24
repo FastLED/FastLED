@@ -42,6 +42,7 @@
 #include "fl/warn.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -77,12 +78,18 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (reorganized into dual-lane format internally)
-    /// @return true if transfer started successfully, false on error
+    /// @brief Acquire a DMA buffer for zero-copy transmission
+    /// @param bytes_per_lane Number of bytes per lane to allocate
+    /// @return DMABufferResult containing buffer span or error
     /// @note Waits for previous transaction to complete if still active
+    /// @note Buffer is automatically released after waitComplete()
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission using previously acquired DMA buffer
+    /// @return true if transfer started successfully, false on error
+    /// @note Requires acquireDMABuffer() to have been called first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -109,22 +116,15 @@ private:
     /// @brief Release all allocated resources (SERCOM, DMA, buffers)
     void cleanup();
 
-    /// @brief Allocate or resize internal DMA buffer
-    /// @param required_size Size needed in bytes
-    /// @return true if buffer allocated successfully
-    bool allocateDMABuffer(size_t required_size);
-
     int mBusId;  ///< Logical bus identifier (SERCOM number)
     const char* mName;
 
     // SERCOM resources
     Sercom* mSercom;
 
-    // DMA resources
+    // DMA resources (legacy, for future DMA implementation)
     int mDmaChannel;                       ///< Allocated DMA channel (-1 if not allocated)
     DmacDescriptor* mDmaDescriptor;        ///< Pointer to writeback descriptor
-    uint8_t* mDmaBuffer;                   ///< DMA buffer for data
-    size_t mDmaBufferSize;                 ///< Size of allocated DMA buffer
     volatile bool mDmaComplete;            ///< Flag set by DMA interrupt
     static DmacDescriptor sDescriptors[DMAC_CH_NUM] __attribute__((aligned(16)));    ///< DMA descriptors in SRAM
     static DmacDescriptor sWritebackDescriptors[DMAC_CH_NUM] __attribute__((aligned(16))); ///< DMA writeback descriptors
@@ -137,6 +137,12 @@ private:
     uint8_t mClockPin;
     uint8_t mData0Pin;
     uint8_t mData1Pin;
+
+    // DMA buffer management (new zero-copy API)
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for dual-lane)
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
+    bool mBufferAcquired;
 
     SPIDualSAMD51(const SPIDualSAMD51&) = delete;
     SPIDualSAMD51& operator=(const SPIDualSAMD51&) = delete;
@@ -152,14 +158,16 @@ SPIDualSAMD51::SPIDualSAMD51(int bus_id, const char* name)
     , mSercom(nullptr)
     , mDmaChannel(-1)
     , mDmaDescriptor(nullptr)
-    , mDmaBuffer(nullptr)
-    , mDmaBufferSize(0)
     , mDmaComplete(false)
     , mTransactionActive(false)
     , mInitialized(false)
     , mClockPin(0)
     , mData0Pin(0)
-    , mData1Pin(0) {
+    , mData1Pin(0)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
 }
 
 SPIDualSAMD51::~SPIDualSAMD51() {
@@ -359,25 +367,61 @@ void SPIDualSAMD51::end() {
     cleanup();
 }
 
-bool SPIDualSAMD51::allocateDMABuffer(size_t required_size) {
-    // TODO: Implement DMA buffer allocation
-    return false;
+DMABufferResult SPIDualSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For dual-lane SPI: total size = bytes_per_lane × 2 (interleaved)
+    constexpr size_t num_lanes = 2;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against platform max (256KB practical limit for embedded)
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (SAMD51 uses regular malloc)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
 }
 
-bool SPIDualSAMD51::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized) {
+bool SPIDualSAMD51::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
@@ -395,12 +439,12 @@ bool SPIDualSAMD51::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) 
     mTransactionActive = true;
 
     // Transmit each byte via SERCOM SPI DATA register
-    for (size_t i = 0; i < buffer.size(); ++i) {
+    for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for Data Register Empty flag
         while (!mSercom->SPI.INTFLAG.bit.DRE);
 
         // Write byte to DATA register
-        mSercom->SPI.DATA.reg = buffer[i];
+        mSercom->SPI.DATA.reg = mDMABuffer[i];
     }
 
     // Wait for Transmit Complete flag
@@ -417,8 +461,14 @@ bool SPIDualSAMD51::waitComplete(uint32_t timeout_ms) {
 
     // TODO: Implement completion waiting
     // Poll DMA status or use interrupts
+    (void)timeout_ms;  // Unused for now
 
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -448,19 +498,21 @@ void SPIDualSAMD51::cleanup() {
             waitComplete();
         }
 
-        // Release DMA resources
+        // Free DMA buffer (new zero-copy API)
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
+        // Release DMA resources (legacy, for future DMA implementation)
         if (mDmaChannel != -1) {
             // TODO: Disable DMA channel
             // TODO: Free DMA descriptor
             mDmaChannel = -1;
             mDmaDescriptor = nullptr;
-        }
-
-        // Free DMA buffer
-        if (mDmaBuffer != nullptr) {
-            delete[] mDmaBuffer;
-            mDmaBuffer = nullptr;
-            mDmaBufferSize = 0;
         }
 
         if (mSercom != nullptr) {

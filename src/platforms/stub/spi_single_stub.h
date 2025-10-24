@@ -21,7 +21,8 @@ public:
 
     bool begin(const SpiHw1::Config& config) override;
     void end() override;
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -41,6 +42,12 @@ private:
     uint32_t mClockSpeed;
     uint32_t mTransmitCount;
     fl::vector<uint8_t> mLastBuffer;
+
+    // DMA buffer management
+    fl::vector<uint8_t> mDMABuffer;  // Dynamically allocated DMA buffer
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
+    bool mBufferAcquired;
 };
 
 /// Cast SpiHw1* to SpiHw1Stub* for test inspection

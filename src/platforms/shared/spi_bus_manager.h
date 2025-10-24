@@ -6,6 +6,9 @@
 #include "fl/log.h"
 #include "fl/stdint.h"
 
+// Shared SPI type definitions
+#include "platforms/shared/spi_types.h"
+
 // Multi-lane SPI support - unconditional includes (platform detection via weak linkage)
 #include "platforms/shared/spi_hw_2.h"  // Dual-SPI
 #include "platforms/shared/spi_hw_4.h"  // Quad-SPI
@@ -13,13 +16,6 @@
 #include "platforms/shared/spi_transposer.h"
 
 namespace fl {
-
-/// SPI transmission mode hint
-/// Platforms may not support async transmission and will block regardless
-enum class TransmitMode : uint8_t {
-    SYNC,   ///< Block until transmission complete
-    ASYNC   ///< Return immediately (hint - platform may block anyway)
-};
 
 /// SPI bus configuration types
 enum class SPIBusType : uint8_t {
@@ -344,6 +340,18 @@ public:
                 return;  // No data to transmit
             }
 
+            // Acquire DMA buffer (zero-copy API)
+            DMABufferResult result = dual->acquireDMABuffer(max_size);
+            if (!result.ok()) {
+                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Dual-SPI: " << static_cast<int>(result.error()));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+            fl::span<uint8_t> dma_buf = result.buffer();
+
             // Prepare 2-lane data for transposer
             fl::optional<SPITransposer::LaneData> lane0, lane1;
             if (bus.num_devices > 0 && bus.devices[0].is_enabled && 0 < bus.lane_buffers.size()) {
@@ -359,12 +367,9 @@ public:
                 };
             }
 
-            // Allocate interleaved buffer (2× max lane size)
-            bus.interleaved_buffer.resize(max_size * 2);
-
-            // Transpose lanes into interleaved format
+            // Transpose lanes directly into DMA buffer (zero-copy!)
             const char* error = nullptr;
-            if (!SPITransposer::transpose2(lane0, lane1, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+            if (!SPITransposer::transpose2(lane0, lane1, dma_buf, &error)) {
                 FL_WARN("SPI Bus Manager: Dual transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
@@ -374,7 +379,7 @@ public:
             }
 
             // Transmit via Dual-SPI hardware
-            bool transmit_ok = dual->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
+            bool transmit_ok = dual->transmit(TransmitMode::ASYNC);
             if (transmit_ok) {
                 dual->waitComplete();
             } else {
@@ -411,6 +416,35 @@ public:
         // Determine if we're using 8-lane (octal) or 4-lane (quad) mode
         bool is_octal = (bus.num_devices > 4 && bus.num_devices <= 8);
 
+        // Acquire DMA buffer (zero-copy API)
+        DMABufferResult result;
+        fl::span<uint8_t> dma_buf;
+        if (is_octal) {
+            SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+            result = octal->acquireDMABuffer(max_size);
+            if (!result.ok()) {
+                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Octal-SPI: " << static_cast<int>(result.error()));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+            dma_buf = result.buffer();
+        } else {
+            SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+            result = quad->acquireDMABuffer(max_size);
+            if (!result.ok()) {
+                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Quad-SPI: " << static_cast<int>(result.error()));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+            dma_buf = result.buffer();
+        }
+
         const char* error = nullptr;
         if (is_octal) {
             // Prepare 8-lane data for transposer
@@ -426,11 +460,8 @@ public:
                 }
             }
 
-            // Allocate interleaved buffer (8× max lane size)
-            bus.interleaved_buffer.resize(max_size * 8);
-
-            // Transpose lanes into interleaved format
-            if (!SPITransposer::transpose8(lanes, fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+            // Transpose lanes directly into DMA buffer (zero-copy!)
+            if (!SPITransposer::transpose8(lanes, dma_buf, &error)) {
                 FL_WARN("SPI Bus Manager: Octal transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
@@ -452,12 +483,8 @@ public:
                 }
             }
 
-            // Allocate interleaved buffer (4× max lane size)
-            bus.interleaved_buffer.resize(max_size * 4);
-
-            // Transpose lanes into interleaved format
-            if (!SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3],
-                                           fl::span<uint8_t>(bus.interleaved_buffer), &error)) {
+            // Transpose lanes directly into DMA buffer (zero-copy!)
+            if (!SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3], dma_buf, &error)) {
                 FL_WARN("SPI Bus Manager: Quad transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
@@ -472,14 +499,14 @@ public:
         if (is_octal_mode) {
             // 8-lane (Octal-SPI)
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
-            transmit_ok = octal->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
+            transmit_ok = octal->transmit(TransmitMode::ASYNC);
             if (transmit_ok) {
                 octal->waitComplete();
             }
         } else {
             // 4-lane (Quad-SPI)
             SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
-            transmit_ok = quad->transmit(fl::span<const uint8_t>(bus.interleaved_buffer));
+            transmit_ok = quad->transmit(TransmitMode::ASYNC);
             if (transmit_ok) {
                 quad->waitComplete();
             }

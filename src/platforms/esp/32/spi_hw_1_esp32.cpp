@@ -24,6 +24,7 @@
 // Include soc_caps.h if available (ESP-IDF 4.0+)
 // Older versions (like IDF 3.3) don't have this header
 #include "fl/has_include.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include "soc/soc_caps.h"
 #endif
@@ -67,7 +68,8 @@ public:
 
     bool begin(const SpiHw1::Config& config) override;
     void end() override;
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -82,6 +84,13 @@ private:
     spi_device_handle_t mSPIHandle;
     spi_host_device_t mHost;
     bool mInitialized;
+    bool mTransactionActive;
+
+    // DMA buffer management
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (for single-lane: bytes_per_lane * 1)
+    bool mBufferAcquired;
 
     SPISingleESP32(const SPISingleESP32&) = delete;
     SPISingleESP32& operator=(const SPISingleESP32&) = delete;
@@ -96,7 +105,12 @@ SPISingleESP32::SPISingleESP32(int bus_id, const char* name)
     , mName(name)
     , mSPIHandle(nullptr)
     , mHost(SPI2_HOST)
-    , mInitialized(false) {
+    , mInitialized(false)
+    , mTransactionActive(false)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
 }
 
 SPISingleESP32::~SPISingleESP32() {
@@ -171,12 +185,58 @@ void SPISingleESP32::end() {
     cleanup();
 }
 
-bool SPISingleESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
+DMABufferResult SPISingleESP32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For single SPI: total size = bytes_per_lane × 1 lane
+    constexpr size_t num_lanes = 1;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against max_transfer_sz from bus config
+    // ESP32 SPI max is typically 64KB per transaction
+    if (total_size > 65536) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            heap_caps_free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory for max size
+        uint8_t* ptr = (uint8_t*)heap_caps_malloc(total_size, MALLOC_CAP_DMA);
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SPISingleESP32::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
@@ -187,10 +247,10 @@ bool SPISingleESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode)
     // Currently BLOCKING for backwards compatibility
     // This is a critical fallback path - do not break existing code!
 
-    // Configure transaction
+    // Configure transaction using internal DMA buffer
     spi_transaction_t transaction = {};
-    transaction.length = buffer.size() * 8;   // Length in BITS (critical!)
-    transaction.tx_buffer = buffer.data();
+    transaction.length = mCurrentTotalSize * 8;   // Length in BITS (critical!)
+    transaction.tx_buffer = mDMABuffer.data();
 
     // BLOCKING transmission - completes before returning
     esp_err_t ret = spi_device_transmit(mSPIHandle, &transaction);
@@ -198,13 +258,27 @@ bool SPISingleESP32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode)
         return false;
     }
 
+    // Mark transaction as active (even though it's already done for blocking mode)
+    mTransactionActive = true;
+
     // Transmission already complete at this point
     return true;
 }
 
 bool SPISingleESP32::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused - transmission already complete
-    // Since transmit() is blocking, always return immediately
+
+    if (!mTransactionActive) {
+        return true;  // Nothing to wait for
+    }
+
+    // Since transmit() is blocking, transmission is already complete
+    mTransactionActive = false;
+
+    // Auto-release DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -227,6 +301,20 @@ const char* SPISingleESP32::getName() const {
 
 void SPISingleESP32::cleanup() {
     if (mInitialized) {
+        // Wait for any pending transmission
+        if (mTransactionActive) {
+            waitComplete();
+        }
+
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            heap_caps_free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
         // Remove device and free bus
         if (mSPIHandle) {
             spi_bus_remove_device(mSPIHandle);

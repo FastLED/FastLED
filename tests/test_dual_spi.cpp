@@ -270,7 +270,13 @@ TEST_CASE("SpiHw2: Async transmission") {
     CHECK(dual->begin(config));
 
     fl::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
-    CHECK(dual->transmit(fl::span<const uint8_t>(data)));
+    fl::DMABufferResult result = dual->acquireDMABuffer(data.size() / 2);  // bytes_per_lane = total / 2
+    REQUIRE(result.ok());
+    auto buf = result.buffer();
+    for (size_t i = 0; i < data.size(); i++) {
+        buf[i] = data[i];
+    }
+    CHECK(dual->transmit());
     CHECK(dual->isBusy());
 
     CHECK(dual->waitComplete());
@@ -291,7 +297,13 @@ TEST_CASE("SpiHw2: Stub inspection") {
     CHECK(stub->begin(config));
 
     fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
-    CHECK(stub->transmit(fl::span<const uint8_t>(test_data)));
+    fl::DMABufferResult result = stub->acquireDMABuffer(test_data.size() / 2);  // bytes_per_lane = total / 2
+    REQUIRE(result.ok());
+    auto buf = result.buffer();
+    for (size_t i = 0; i < test_data.size(); i++) {
+        buf[i] = test_data[i];
+    }
+    CHECK(stub->transmit());
 
     const auto& transmitted = stub->getLastTransmission();
     CHECK_EQ(transmitted.size(), 4);
@@ -314,7 +326,13 @@ TEST_CASE("SpiHw2: Extract lanes from interleaved data") {
     // Lane0=0xAB (10101011), Lane1=0x12 (00010010)
     // Interleaved (with new algorithm): [0x91, 0x74]
     fl::vector<uint8_t> interleaved = {0x91, 0x74};
-    stub->transmit(fl::span<const uint8_t>(interleaved));
+    fl::DMABufferResult result = stub->acquireDMABuffer(interleaved.size() / 2);  // bytes_per_lane = total / 2
+    REQUIRE(result.ok());
+    auto buf = result.buffer();
+    for (size_t i = 0; i < interleaved.size(); i++) {
+        buf[i] = interleaved[i];
+    }
+    stub->transmit();
 
     auto lanes = stub->extractLanes(2, 1);
     CHECK_EQ(lanes.size(), 2);

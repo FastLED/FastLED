@@ -35,6 +35,7 @@
 #include "fl/warn.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -93,12 +94,18 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (sent directly via QSPI peripheral)
-    /// @return true if transfer started successfully, false on error
+    /// @brief Acquire a DMA buffer for zero-copy transmission
+    /// @param bytes_per_lane Number of bytes per lane to allocate
+    /// @return DMABufferResult containing buffer span or error
     /// @note Waits for previous transaction to complete if still active
+    /// @note Buffer is automatically released after waitComplete()
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission using previously acquired DMA buffer
+    /// @return true if transfer started successfully, false on error
+    /// @note Requires acquireDMABuffer() to have been called first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -148,6 +155,12 @@ private:
     uint8_t mData2Pin;
     uint8_t mData3Pin;
 
+    // DMA buffer management
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for quad-lane)
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
+    bool mBufferAcquired;
+
     SPIQuadSAMD51(const SPIQuadSAMD51&) = delete;
     SPIQuadSAMD51& operator=(const SPIQuadSAMD51&) = delete;
 };
@@ -166,7 +179,11 @@ SPIQuadSAMD51::SPIQuadSAMD51(int bus_id, const char* name)
     , mData0Pin(0)
     , mData1Pin(0)
     , mData2Pin(0)
-    , mData3Pin(0) {
+    , mData3Pin(0)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
 }
 
 SPIQuadSAMD51::~SPIQuadSAMD51() {
@@ -295,20 +312,61 @@ void SPIQuadSAMD51::end() {
     cleanup();
 }
 
-bool SPIQuadSAMD51::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
+DMABufferResult SPIQuadSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For quad-lane SPI: total size = bytes_per_lane × 4 (interleaved)
+    constexpr size_t num_lanes = 4;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against platform max (256KB practical limit for embedded)
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (SAMD51 uses regular malloc)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SPIQuadSAMD51::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
@@ -370,8 +428,8 @@ bool SPIQuadSAMD51::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) 
     //
     // Note: This is polling-based (blocking) for simplicity.
     // A DMA-based implementation would be more efficient.
-    const uint8_t* data_ptr = buffer.data();
-    size_t remaining = buffer.size();
+    const uint8_t* data_ptr = mDMABuffer.data();
+    size_t remaining = mCurrentTotalSize;
 
     while (remaining > 0) {
         // Wait for DRE (Data Register Empty) flag before writing next byte
@@ -419,9 +477,15 @@ bool SPIQuadSAMD51::waitComplete(uint32_t timeout_ms) {
     // - Start timeout timer
     // - Poll QSPI status or DMA completion
     // - Return false if timeout expires
+    (void)timeout_ms;  // Unused for now
 
     // For polling-based implementation, transaction is already complete
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -449,6 +513,15 @@ void SPIQuadSAMD51::cleanup() {
         // Wait for any pending transmission
         if (mTransactionActive) {
             waitComplete();
+        }
+
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
         }
 
         // Disable QSPI peripheral

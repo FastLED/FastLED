@@ -8,6 +8,7 @@
 
 #include "spi_hw_2_nrf52.h"
 #include "fl/cstring.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -21,6 +22,10 @@ SPIDualNRF52::SPIDualNRF52(int bus_id, const char* name)
     , mSPIM0(NRF_SPIM0)
     , mSPIM1(NRF_SPIM1)
     , mTimer(NRF_TIMER0)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false)
     , mLane0Buffer(nullptr)
     , mLane1Buffer(nullptr)
     , mBufferSize(0)
@@ -133,6 +138,52 @@ void SPIDualNRF52::end() {
     cleanup();
 }
 
+DMABufferResult SPIDualNRF52::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For dual-lane SPI: total size = bytes_per_lane × 2 (interleaved)
+    constexpr size_t num_lanes = 2;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against platform max (256KB for embedded systems)
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (regular malloc for NRF52)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
 bool SPIDualNRF52::allocateDMABuffers(size_t required_size) {
     if (mBufferSize >= required_size) {
         return true;  // Buffers are already large enough
@@ -168,44 +219,35 @@ bool SPIDualNRF52::allocateDMABuffers(size_t required_size) {
     return true;
 }
 
-bool SPIDualNRF52::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized) {
+bool SPIDualNRF52::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
-    // IMPORTANT: This method receives PRE-TRANSPOSED data from SPIBusManager
-    // SPITransposer has already performed bit-level interleaving:
-    // - Input buffer contains interleaved data for both lanes
-    // - First half is lane 0 data, second half is lane 1 data
-    // - Each lane's data is in the correct bit-interleaved format
-
-    size_t byte_count = buffer.size();
-    size_t bytes_per_lane = byte_count / 2;
+    // Calculate bytes per lane from total size
+    constexpr size_t num_lanes = 2;
+    size_t bytes_per_lane = mCurrentTotalSize / num_lanes;
 
     if (bytes_per_lane == 0) {
         return true;  // Empty buffer
     }
 
+    // Allocate lane buffers for hardware (SPIM requires separate buffers per peripheral)
     if (!allocateDMABuffers(bytes_per_lane)) {
         return false;
     }
 
-    // Copy pre-transposed data to DMA buffers
-    // First half -> lane 0, second half -> lane 1
-    fl::memcpy(mLane0Buffer, buffer.data(), bytes_per_lane);
-    fl::memcpy(mLane1Buffer, buffer.data() + bytes_per_lane, bytes_per_lane);
+    // De-interleave mDMABuffer into lane-specific buffers
+    // mDMABuffer contains interleaved data: first half -> lane 0, second half -> lane 1
+    fl::memcpy(mLane0Buffer, mDMABuffer.data(), bytes_per_lane);
+    fl::memcpy(mLane1Buffer, mDMABuffer.data() + bytes_per_lane, bytes_per_lane);
 
     // Configure SPIM0 transmission (lane 0)
     nrf_spim_tx_buffer_set(mSPIM0, mLane0Buffer, bytes_per_lane);
@@ -256,6 +298,11 @@ bool SPIDualNRF52::waitComplete(uint32_t timeout_ms) {
     nrf_spim_event_clear(mSPIM1, NRF_SPIM_EVENT_STARTED);
 
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -303,7 +350,16 @@ void SPIDualNRF52::cleanup() {
 
         // Release GPIOTE resources (currently none allocated)
 
-        // Free DMA buffers
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
+        // Free lane buffers
         if (mLane0Buffer != nullptr) {
             free(mLane0Buffer);
             mLane0Buffer = nullptr;

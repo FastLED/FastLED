@@ -40,6 +40,7 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/warn.h"
 #include <cstring> // ok include
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 // TODO: Include STM32 HAL headers when implementing hardware initialization
 // #ifdef HAL_TIM_MODULE_ENABLED
@@ -87,13 +88,18 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (interleaved across 8 lanes internally)
+    /// @brief Acquire DMA buffer for direct user writes (zero-copy)
+    /// @param bytes_per_lane Number of bytes per lane (total = bytes_per_lane * 8)
+    /// @return DMABufferResult containing buffer span or error
+    /// @note Auto-waits if previous transmission still active
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission of previously acquired DMA buffer
     /// @return true if transfer started successfully, false on error
-    /// @note Waits for previous transaction to complete if still active
+    /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
     /// @note Each byte is split into 1 bit per lane (8 source bytes → 8 bits per lane)
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -125,8 +131,7 @@ private:
     /// @return true if all buffers allocated successfully
     bool allocateDMABuffer(size_t required_size);
 
-    /// @brief Interleave source data across 8 DMA buffers (one per lane)
-    /// @param buffer Source data buffer
+    /// @brief Interleave source data from mDMABuffer across 8 DMA buffers (one per lane)
     ///
     /// Each source byte contributes 1 bit to each of 8 lanes:
     /// - Lane 0 receives bit 7 from each byte
@@ -145,7 +150,7 @@ private:
     /// → Lane 7: 0b00010100 (bits [0,0,0,0,0,0,0,0])
     ///
     /// Packing: 8 source bytes → 1 byte per lane
-    void interleaveBits(fl::span<const uint8_t> buffer);
+    void interleaveBits();
 
     int mBusId;  ///< Logical bus identifier
     const char* mName;  ///< Controller name
@@ -154,9 +159,15 @@ private:
     void* mTimerHandle;  ///< TIM_HandleTypeDef* (Timer for clock generation)
     void* mDMAHandles[8];  ///< DMA_HandleTypeDef* (8 DMA channels, one per lane)
 
-    // DMA buffers (one per data lane)
-    uint8_t* mDMABuffers[8];  ///< 8 separate DMA buffers
-    size_t mDMABufferSize;  ///< Size of each DMA buffer (all same size)
+    // DMA buffer management (zero-copy API)
+    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for octal-lane)
+    size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * 8)
+    bool mBufferAcquired;            ///< True if buffer acquired and ready for transmit
+
+    // Legacy DMA buffers (one per data lane, derived from mDMABuffer for lane splitting)
+    uint8_t* mDMABuffers[8];  ///< 8 separate DMA buffers (derived)
+    size_t mDMABufferSize;  ///< Size of each DMA buffer (all same size, derived)
 
     // State
     bool mTransactionActive;  ///< True if DMA transfer in progress
@@ -179,6 +190,10 @@ SPIOctalSTM32::SPIOctalSTM32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
     , mTimerHandle(nullptr)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false)
     , mDMABufferSize(0)
     , mTransactionActive(false)
     , mInitialized(false)
@@ -299,6 +314,53 @@ void SPIOctalSTM32::end() {
     cleanup();
 }
 
+DMABufferResult SPIOctalSTM32::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For octal-lane SPI: total size = bytes_per_lane × 8 (interleaved)
+    constexpr size_t num_lanes = 8;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // STM32 doesn't have a specific max size limit like ESP32, but validate reasonable size
+    // Use 256KB as a practical limit for embedded systems
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (regular malloc for STM32)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
 bool SPIOctalSTM32::allocateDMABuffer(size_t required_size) {
     if (mDMABufferSize >= required_size) {
         return true;  // Buffers are already large enough
@@ -331,8 +393,8 @@ bool SPIOctalSTM32::allocateDMABuffer(size_t required_size) {
     return true;
 }
 
-void SPIOctalSTM32::interleaveBits(fl::span<const uint8_t> buffer) {
-    size_t byte_count = buffer.size();
+void SPIOctalSTM32::interleaveBits() {
+    size_t byte_count = mCurrentTotalSize;
 
     // Each source byte contributes 1 bit to each of the 8 lanes
     // 8 source bytes pack into 1 byte per lane
@@ -343,9 +405,9 @@ void SPIOctalSTM32::interleaveBits(fl::span<const uint8_t> buffer) {
         fl::memset(mDMABuffers[lane], 0, mDMABufferSize);
     }
 
-    // Interleave bits across lanes
+    // Interleave bits from mDMABuffer across lanes
     for (size_t src_idx = 0; src_idx < byte_count; ++src_idx) {
-        uint8_t src_byte = buffer[src_idx];
+        uint8_t src_byte = mDMABuffer[src_idx];
 
         // Which output byte index in each lane buffer
         size_t lane_byte_idx = src_idx / 8;
@@ -361,35 +423,29 @@ void SPIOctalSTM32::interleaveBits(fl::span<const uint8_t> buffer) {
     }
 }
 
-bool SPIOctalSTM32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized) {
+bool SPIOctalSTM32::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
-    // Calculate buffer size needed per lane
+    // Calculate buffer size needed per lane from interleaved buffer
     // 8 source bytes → 1 byte per lane
-    size_t byte_count = buffer.size();
-    size_t bytes_per_lane = (byte_count + 7) / 8;  // Ceiling division
+    size_t bytes_per_lane = (mCurrentTotalSize + 7) / 8;  // Ceiling division
 
     // Allocate DMA buffers if needed
     if (!allocateDMABuffer(bytes_per_lane)) {
         return false;
     }
 
-    // Interleave source data across 8 lanes
-    interleaveBits(buffer);
+    // Interleave source data from mDMABuffer across 8 lanes
+    interleaveBits();
 
     // TODO: Start DMA transfers on all 8 channels
     // This is where STM32 HAL DMA start calls would be added.
@@ -446,6 +502,11 @@ bool SPIOctalSTM32::waitComplete(uint32_t timeout_ms) {
     // }
 
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -521,7 +582,16 @@ void SPIOctalSTM32::cleanup() {
         //     HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
         // }
 
-        // Free DMA buffers
+        // Free main DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
+        // Free legacy DMA buffers
         for (int i = 0; i < 8; ++i) {
             if (mDMABuffers[i] != nullptr) {
                 free(mDMABuffers[i]);

@@ -4,6 +4,7 @@
 #ifdef FASTLED_TESTING
 
 #include "spi_single_stub.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -12,7 +13,10 @@ SpiHw1Stub::SpiHw1Stub(int bus_id, const char* name)
     , mName(name)
     , mInitialized(false)
     , mClockSpeed(0)
-    , mTransmitCount(0) {
+    , mTransmitCount(0)
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false) {
 }
 
 bool SpiHw1Stub::begin(const SpiHw1::Config& config) {
@@ -33,22 +37,53 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) {
 void SpiHw1Stub::end() {
     mInitialized = false;
     mLastBuffer.clear();
+
+    // Free DMA buffer
+    mDMABuffer.clear();
+    mMaxBytesPerLane = 0;
+    mCurrentTotalSize = 0;
+    mBufferAcquired = false;
 }
 
-bool SpiHw1Stub::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
+DMABufferResult SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // For single-lane SPI: num_lanes = 1
+    constexpr size_t num_lanes = 1;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        mDMABuffer.clear();
+        mDMABuffer.resize(total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SpiHw1Stub::transmit(TransmitMode mode) {
+    (void)mode;  // Unused in stub
+
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
     // Capture data for inspection (simulates blocking transmission)
     mLastBuffer.clear();
-    mLastBuffer.reserve(buffer.size());
-    for (size_t i = 0; i < buffer.size(); ++i) {
-        mLastBuffer.push_back(buffer[i]);
+    mLastBuffer.reserve(mCurrentTotalSize);
+    for (size_t i = 0; i < mCurrentTotalSize; ++i) {
+        mLastBuffer.push_back(mDMABuffer[i]);
     }
 
     mTransmitCount++;
@@ -59,6 +94,11 @@ bool SpiHw1Stub::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
 
 bool SpiHw1Stub::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused in stub (transmission already complete)
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 

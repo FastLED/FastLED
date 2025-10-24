@@ -14,6 +14,7 @@
 #include <SPI.h>
 #include <imxrt.h>
 #include <cstring> // ok include
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -34,7 +35,8 @@ public:
 
     bool begin(const SpiHw2::Config& config) override;
     void end() override;
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
     bool isInitialized() const override;
@@ -57,6 +59,12 @@ private:
     int8_t mData0Pin;
     int8_t mData1Pin;
 
+    // DMA buffer management
+    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for dual-lane)
+    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
+    bool mBufferAcquired;
+
     SpiHw2MXRT1062(const SpiHw2MXRT1062&) = delete;
     SpiHw2MXRT1062& operator=(const SpiHw2MXRT1062&) = delete;
 };
@@ -75,6 +83,10 @@ SpiHw2MXRT1062::SpiHw2MXRT1062(int bus_id, const char* name)
     , mClockPin(-1)
     , mData0Pin(-1)
     , mData1Pin(-1)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false)
 {
 }
 
@@ -170,17 +182,61 @@ void SpiHw2MXRT1062::end() {
     cleanup();
 }
 
-bool SpiHw2MXRT1062::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized || !mSPI) {
+DMABufferResult SpiHw2MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For dual-lane SPI: total size = bytes_per_lane × 2 (interleaved)
+    constexpr size_t num_lanes = 2;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // Validate size against Teensy practical limit (256KB for embedded systems)
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (regular malloc for Teensy)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+}
+
+bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
+    if (!mInitialized || !mSPI || !mBufferAcquired) {
         return false;
     }
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
+    // Mode handling (Teensy uses synchronous/blocking via LPSPI)
+    (void)mode;
 
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
@@ -216,14 +272,14 @@ bool SpiHw2MXRT1062::transmit(fl::span<const uint8_t> buffer, TransmitMode mode)
     uint32_t new_tcr = (old_tcr & ~(0x3 << 16)) | (0x1 << 16);  // Set WIDTH to 0b01
     port->TCR = new_tcr;
 
-    // Transmit data
+    // Transmit data using internal DMA buffer
     // In dual mode, each byte in the buffer will be transmitted as nibbles
     // split across the two data lines
-    for (size_t i = 0; i < buffer.size(); ++i) {
+    for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for transmit FIFO to have space
         while (!(port->SR & LPSPI_SR_TDF)) ;
 
-        port->TDR = buffer[i];
+        port->TDR = mDMABuffer[i];
     }
 
     // Wait for transmission to complete
@@ -233,7 +289,11 @@ bool SpiHw2MXRT1062::transmit(fl::span<const uint8_t> buffer, TransmitMode mode)
     port->TCR = old_tcr;
 
     mSPI->endTransaction();
+
+    // Note: Transaction is complete synchronously, so we can auto-release immediately
     mTransactionActive = false;
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
 
     return true;
 }
@@ -245,6 +305,11 @@ bool SpiHw2MXRT1062::waitComplete(uint32_t timeout_ms) {
 
     // For synchronous implementation, transmission is already complete
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -269,6 +334,15 @@ void SpiHw2MXRT1062::cleanup() {
         // Wait for any pending transmission
         if (mTransactionActive) {
             waitComplete();
+        }
+
+        // Free DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
         }
 
         mSPI->end();

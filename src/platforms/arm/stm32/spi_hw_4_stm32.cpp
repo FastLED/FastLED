@@ -33,6 +33,7 @@
 #endif
 
 #include <cstring> // ok include
+#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
 
@@ -84,12 +85,17 @@ public:
     /// @brief Deinitialize the controller and release resources
     void end() override;
 
-    /// @brief Start non-blocking transmission of data buffer
-    /// @param buffer Data to transmit (reorganized into quad-lane format internally)
+    /// @brief Acquire DMA buffer for direct user writes (zero-copy)
+    /// @param bytes_per_lane Number of bytes per lane (total = bytes_per_lane * 4)
+    /// @return DMABufferResult containing buffer span or error
+    /// @note Auto-waits if previous transmission still active
+    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+
+    /// @brief Start non-blocking transmission of previously acquired DMA buffer
     /// @return true if transfer started successfully, false on error
-    /// @note Waits for previous transaction to complete if still active
+    /// @note Must call acquireDMABuffer() first
     /// @note Returns immediately - use waitComplete() to block until done
-    bool transmit(fl::span<const uint8_t> buffer, TransmitMode mode = TransmitMode::ASYNC) override;
+    bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
 
     /// @brief Wait for current transmission to complete
     /// @param timeout_ms Maximum time to wait in milliseconds (UINT32_MAX = infinite)
@@ -143,12 +149,18 @@ private:
     // DMA_HandleTypeDef* mDMAChannel2;  // DMA for D2
     // DMA_HandleTypeDef* mDMAChannel3;  // DMA for D3
 
-    // DMA buffers (one per lane)
-    void* mDMABuffer0;      ///< Buffer for lane 0
-    void* mDMABuffer1;      ///< Buffer for lane 1
-    void* mDMABuffer2;      ///< Buffer for lane 2
-    void* mDMABuffer3;      ///< Buffer for lane 3
-    size_t mDMABufferSize;  ///< Size of each DMA buffer
+    // DMA buffer management (zero-copy API)
+    fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for quad-lane)
+    size_t mMaxBytesPerLane;         ///< Max bytes per lane we've allocated for
+    size_t mCurrentTotalSize;        ///< Current transmission size (bytes_per_lane * 4)
+    bool mBufferAcquired;            ///< True if buffer acquired and ready for transmit
+
+    // Legacy buffers (will be derived from mDMABuffer for lane splitting)
+    void* mDMABuffer0;      ///< Buffer for lane 0 (derived from mDMABuffer)
+    void* mDMABuffer1;      ///< Buffer for lane 1 (derived from mDMABuffer)
+    void* mDMABuffer2;      ///< Buffer for lane 2 (derived from mDMABuffer)
+    void* mDMABuffer3;      ///< Buffer for lane 3 (derived from mDMABuffer)
+    size_t mDMABufferSize;  ///< Size of each DMA buffer (derived)
 
     // State
     bool mTransactionActive;
@@ -173,6 +185,10 @@ private:
 SPIQuadSTM32::SPIQuadSTM32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
+    , mDMABuffer()
+    , mMaxBytesPerLane(0)
+    , mCurrentTotalSize(0)
+    , mBufferAcquired(false)
     , mDMABuffer0(nullptr)
     , mDMABuffer1(nullptr)
     , mDMABuffer2(nullptr)
@@ -262,6 +278,53 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
 
 void SPIQuadSTM32::end() {
     cleanup();
+}
+
+DMABufferResult SPIQuadSTM32::acquireDMABuffer(size_t bytes_per_lane) {
+    if (!mInitialized) {
+        return SPIError::NOT_INITIALIZED;
+    }
+
+    // Auto-wait if previous transmission still active
+    if (mTransactionActive) {
+        if (!waitComplete()) {
+            return SPIError::BUSY;
+        }
+    }
+
+    // For quad-lane SPI: total size = bytes_per_lane × 4 (interleaved)
+    constexpr size_t num_lanes = 4;
+    const size_t total_size = bytes_per_lane * num_lanes;
+
+    // STM32 doesn't have a specific max size limit like ESP32, but validate reasonable size
+    // Use 256KB as a practical limit for embedded systems
+    constexpr size_t MAX_SIZE = 256 * 1024;
+    if (total_size > MAX_SIZE) {
+        return SPIError::BUFFER_TOO_LARGE;
+    }
+
+    // Reallocate buffer only if we need more capacity
+    if (bytes_per_lane > mMaxBytesPerLane) {
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+        }
+
+        // Allocate DMA-capable memory (regular malloc for STM32)
+        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
+        if (!ptr) {
+            return SPIError::ALLOCATION_FAILED;
+        }
+
+        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
+        mMaxBytesPerLane = bytes_per_lane;
+    }
+
+    mBufferAcquired = true;
+    mCurrentTotalSize = total_size;
+
+    // Return span of current size (not max allocated size)
+    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
 }
 
 bool SPIQuadSTM32::allocateDMABuffer(size_t required_size) {
@@ -390,29 +453,22 @@ void SPIQuadSTM32::interleaveBits(const uint8_t* src, size_t src_len,
     }
 }
 
-bool SPIQuadSTM32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
-    if (!mInitialized) {
+bool SPIQuadSTM32::transmit(TransmitMode mode) {
+    if (!mInitialized || !mBufferAcquired) {
         return false;
     }
 
     // Mode is a hint - platform may block
     (void)mode;
 
-    // Wait for previous transaction if still active
-    if (mTransactionActive) {
-        waitComplete();
-    }
-
-    if (buffer.empty()) {
+    if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
 
-    size_t byte_count = buffer.size();
-
-    // Calculate required buffer size for each lane
+    // Calculate required buffer size for each lane from interleaved buffer
     // Each byte splits into 2 bits per lane (8 bits / 4 lanes)
     // 4 source bytes = 8 bits per lane = 1 byte per lane
-    size_t buffer_size_per_lane = (byte_count + 3) / 4;  // Round up
+    size_t buffer_size_per_lane = (mCurrentTotalSize + 3) / 4;  // Round up
 
     if (!allocateDMABuffer(buffer_size_per_lane)) {
         return false;
@@ -424,8 +480,8 @@ bool SPIQuadSTM32::transmit(fl::span<const uint8_t> buffer, TransmitMode mode) {
     fl::memset(mDMABuffer2, 0, buffer_size_per_lane);
     fl::memset(mDMABuffer3, 0, buffer_size_per_lane);
 
-    // Interleave bits across four lanes
-    interleaveBits(buffer.data(), byte_count,
+    // Interleave bits from mDMABuffer across four lanes
+    interleaveBits(mDMABuffer.data(), mCurrentTotalSize,
                    (uint8_t*)mDMABuffer0, (uint8_t*)mDMABuffer1,
                    (uint8_t*)mDMABuffer2, (uint8_t*)mDMABuffer3,
                    buffer_size_per_lane);
@@ -461,6 +517,11 @@ bool SPIQuadSTM32::waitComplete(uint32_t timeout_ms) {
     (void)timeout_ms;  // Unused until implementation
 
     mTransactionActive = false;
+
+    // AUTO-RELEASE DMA buffer
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+
     return true;
 }
 
@@ -502,7 +563,16 @@ void SPIQuadSTM32::cleanup() {
         // 3. Reset GPIO pins to default state
         // 4. Disable peripheral clocks
 
-        // Free DMA buffers
+        // Free main DMA buffer
+        if (!mDMABuffer.empty()) {
+            free(mDMABuffer.data());
+            mDMABuffer = fl::span<uint8_t>();
+            mMaxBytesPerLane = 0;
+            mCurrentTotalSize = 0;
+            mBufferAcquired = false;
+        }
+
+        // Free legacy DMA buffers
         if (mDMABuffer0 != nullptr) {
             free(mDMABuffer0);
             mDMABuffer0 = nullptr;
