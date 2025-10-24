@@ -49,6 +49,7 @@ from ci.compiler.output_utils import (
 )
 from ci.util.docker_helper import should_use_docker_for_board
 from ci.util.global_interrupt_handler import (
+    install_signal_handler,
     signal_interrupt,
     wait_for_cleanup,
 )
@@ -156,6 +157,9 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
 
 def main() -> int:
     """Main function."""
+    # Install signal handler for Ctrl-C to work properly on all platforms
+    install_signal_handler()
+
     # Parse arguments using new CompilationArgumentParser
     from ci.compiler.argument_parser import CompilationArgumentParser, WorkflowType
 

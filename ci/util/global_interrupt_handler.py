@@ -2,6 +2,7 @@
 
 import _thread
 import os
+import signal
 import threading
 import time
 from typing import Optional
@@ -20,6 +21,7 @@ class GlobalInterruptHandler:
         self.interrupt_time: Optional[float] = None
         self._interrupt_count = 0
         self._in_cleanup = False
+        self._signal_handler_installed = False
 
     @classmethod
     def get_instance(cls) -> "GlobalInterruptHandler":
@@ -50,6 +52,20 @@ class GlobalInterruptHandler:
         if not self.is_interrupted():
             self.signal_interrupt(from_thread=threading.current_thread().name)
         _thread.interrupt_main()
+
+    def install_signal_handler(self) -> None:
+        """Install SIGINT handler to catch Ctrl-C and set interrupt flag."""
+        if self._signal_handler_installed:
+            return
+
+        def sigint_handler(signum: int, frame: object) -> None:
+            """Handle SIGINT (Ctrl-C) by setting the interrupt flag."""
+            self.signal_interrupt()
+            # Raise KeyboardInterrupt to allow exception handlers to run
+            raise KeyboardInterrupt()
+
+        signal.signal(signal.SIGINT, sigint_handler)
+        self._signal_handler_installed = True
 
     def wait_for_cleanup(self) -> None:
         if self._in_cleanup:
@@ -101,3 +117,8 @@ def notify_main_thread() -> None:
 
 def wait_for_cleanup() -> None:
     _handler.wait_for_cleanup()
+
+
+def install_signal_handler() -> None:
+    """Install SIGINT (Ctrl-C) signal handler."""
+    _handler.install_signal_handler()
