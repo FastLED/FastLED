@@ -71,9 +71,10 @@
  *                 gain from AntiAlias < 2.0)
  **************************************************************************************/
 // a little bit faster in RAM (< 1 ms per block)
-static void AntiAlias(int *x, int nBfly)
+static void AntiAlias(int32_t *x, int nBfly)
 {
-	int k, a0, b0, c0, c1;
+	int k;
+	int32_t a0, b0, c0, c1;
 	const int32_t *c;
 
 	/* csa = Q31 */
@@ -131,9 +132,10 @@ static void AntiAlias(int *x, int nBfly)
  *              all blocks gain at least 1 guard bit via window (long blocks get extra
  *                sign bit, short blocks can have one addition but max gain < 1.0)
  **************************************************************************************/
-static void WinPrevious(int *xPrev, int *xPrevWin, int btPrev)
+static void WinPrevious(int32_t *xPrev, int32_t *xPrevWin, int btPrev)
 {
-	int i, x, *xp, *xpwLo, *xpwHi, wLo, wHi;
+	int i;
+	int32_t x, *xp, *xpwLo, *xpwHi, wLo, wHi;
 	const int32_t *wpLo, *wpHi;
 
 	xp = xPrev;
@@ -184,10 +186,11 @@ static void WinPrevious(int *xPrev, int *xPrevWin, int btPrev)
  *
  * Return:      updated mOut (from new outputs y)
  **************************************************************************************/
-static int FreqInvertRescale(int *y, int *xPrev, int blockIdx, int es)
+static int FreqInvertRescale(int32_t *y, int32_t *xPrev, int blockIdx, int es)
 {
-	int i, d, mOut;
-	int y0, y1, y2, y3, y4, y5, y6, y7, y8;
+	int i;
+	int32_t d, mOut;
+	int32_t y0, y1, y2, y3, y4, y5, y6, y7, y8;
 
 	if (es == 0) {
 		/* fast case - frequency invert only (no rescaling) - can fuse into overlap-add for speed, if desired */
@@ -260,13 +263,13 @@ static const int32_t c18[9] = {
 };
 
 /* require at least 3 guard bits in x[] to ensure no overflow */
-static __inline void idct9(int *x)
+static __inline void idct9(int32_t *x)
 {
-	int a1, a2, a3, a4, a5, a6, a7, a8, a9;
-	int a10, a11, a12, a13, a14, a15, a16, a17, a18;
-	int a19, a20, a21, a22, a23, a24, a25, a26, a27;
-	int m1, m3, m5, m6, m7, m8, m9, m10, m11, m12;
-	int x0, x1, x2, x3, x4, x5, x6, x7, x8;
+	int32_t a1, a2, a3, a4, a5, a6, a7, a8, a9;
+	int32_t a10, a11, a12, a13, a14, a15, a16, a17, a18;
+	int32_t a19, a20, a21, a22, a23, a24, a25, a26, a27;
+	int32_t m1, m3, m5, m6, m7, m8, m9, m10, m11, m12;
+	int32_t x0, x1, x2, x3, x4, x5, x6, x7, x8;
 
 	x0 = x[0]; x1 = x[1]; x2 = x[2]; x3 = x[3]; x4 = x[4];
 	x5 = x[5]; x6 = x[6]; x7 = x[7]; x8 = x[8];
@@ -369,11 +372,12 @@ int32_t fastWin36[18] = {
  *                inline asm may or may not be helpful)
  **************************************************************************************/
 // barely faster in RAM
-static int IMDCT36(int *xCurr, int *xPrev, int *y, int btCurr, int btPrev, int blockIdx, int gb)
+static int IMDCT36(int32_t *xCurr, int32_t *xPrev, int32_t *y, int btCurr, int btPrev, int blockIdx, int gb)
 {
-	int i, es, xBuf[18], xPrevWin[18];
-	int acc1, acc2, s, d, t, mOut;
-	int xo, xe, c, *xp, yLo, yHi;
+	int i, es;
+	int32_t xBuf[18], xPrevWin[18];
+	int32_t acc1, acc2, s, d, t, mOut;
+	int32_t xo, xe, c, *xp, yLo, yHi;
 	const int32_t *cp, *wp;
 
 	acc1 = acc2 = 0;
@@ -472,10 +476,10 @@ static int32_t c6[3] = { (int32_t)0x7ba3751d, (int32_t)0x5a82799a, 0x2120fb83 };
 /* 12-point inverse DCT, used in IMDCT12x3() 
  * 4 input guard bits will ensure no overflow
  */
-static __inline void imdct12 (int *x, int *out)
+static __inline void imdct12 (int32_t *x, int32_t *out)
 {
-	int a0, a1, a2;
-	int x0, x1, x2, x3, x4, x5;
+	int32_t a0, a1, a2;
+	int32_t x0, x1, x2, x3, x4, x5;
 
 	x0 = *x;	x+=3;	x1 = *x;	x+=3;
 	x2 = *x;	x+=3;	x3 = *x;	x+=3;
@@ -538,9 +542,10 @@ static __inline void imdct12 (int *x, int *out)
  * TODO:        optimize for ARM
  **************************************************************************************/
  // barely faster in RAM
-static int IMDCT12x3(int *xCurr, int *xPrev, int *y, int btPrev, int blockIdx, int gb)
+static int IMDCT12x3(int32_t *xCurr, int32_t *xPrev, int32_t *y, int btPrev, int blockIdx, int gb)
 {
-	int i, es, mOut, yLo, xBuf[18], xPrevWin[18];	/* need temp buffer for reordering short blocks */
+	int i, es, mOut;
+	int32_t yLo, xBuf[18], xPrevWin[18];	/* need temp buffer for reordering short blocks */
 	const int32_t *wp;
 
 	es = 0;
@@ -620,11 +625,12 @@ static int IMDCT12x3(int *xCurr, int *xPrev, int *y, int btPrev, int blockIdx, i
  *
  * TODO:        examine mixedBlock/winSwitch logic carefully (test he_mode.bit)
  **************************************************************************************/
-static int HybridTransform(int *xCurr, int *xPrev, int y[BLOCK_SIZE][NBANDS], SideInfoSub *sis, BlockCount *bc)
+static int HybridTransform(int32_t *xCurr, int32_t *xPrev, int32_t y[BLOCK_SIZE][NBANDS], SideInfoSub *sis, BlockCount *bc)
 {
-	int xPrevWin[18], currWinIdx, prevWinIdx;
+	int32_t xPrevWin[18];
+	int currWinIdx, prevWinIdx;
 	int i, j, nBlocksOut, nonZero, mOut;
-	int xp;
+	int32_t xp;
 
 	ASSERT(bc->nBlocksLong  <= NBANDS);
 	ASSERT(bc->nBlocksTotal <= NBANDS);

@@ -130,7 +130,7 @@ int32_t pow2frac[8] = {
  *
  * Return:      bitwise-OR of the unsigned outputs (for guard bit calculations)
  **************************************************************************************/
-static int DequantBlock(int *inbuf, int *outbuf, int num, int scale)
+static int DequantBlock(int32_t *inbuf, int32_t *outbuf, int num, int scale)
 {
 	int tab4[4];
 	int32_t scalef, scalei, shift;
@@ -242,7 +242,7 @@ static int DequantBlock(int *inbuf, int *outbuf, int num, int scale)
  *
  * Notes:       dequantized samples in Q(DQ_FRACBITS_OUT) format 
  **************************************************************************************/
-int DequantChannel(int *sampleBuf, int *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 
+int DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 
 					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi)
 {
 	int i, j, w, cb;

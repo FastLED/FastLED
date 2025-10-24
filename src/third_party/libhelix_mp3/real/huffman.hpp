@@ -81,7 +81,7 @@
  *                necessarily all linBits outputs for x,y > 15)
  **************************************************************************************/
 // no improvement with section=data
-static int DecodeHuffmanPairs(int *xy, int nVals, int tabIdx, int bitsLeft, const unsigned char *buf, int bitOffset)
+static int DecodeHuffmanPairs(int32_t *xy, int nVals, int tabIdx, int bitsLeft, const unsigned char *buf, int bitOffset)
 {
 	int i, x, y;
 	int cachedBits, padBits, len, startBits, linBits, maxBits, minBits;
@@ -285,7 +285,7 @@ static int DecodeHuffmanPairs(int *xy, int nVals, int tabIdx, int bitsLeft, cons
  * Notes:        si_huff.bit tests every vwxy output in both quad tables
  **************************************************************************************/
 // no improvement with section=data
-static int DecodeHuffmanQuads(int *vwxy, int nVals, int tabIdx, int bitsLeft, const unsigned char *buf, int bitOffset)
+static int DecodeHuffmanQuads(int32_t *vwxy, int nVals, int tabIdx, int bitsLeft, const unsigned char *buf, int bitOffset)
 {
 	int i, v, w, x, y;
 	int len, maxBits, cachedBits, padBits;

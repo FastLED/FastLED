@@ -201,12 +201,12 @@ typedef struct {
 } CriticalBandInfo;
 
 typedef struct _DequantInfo {
-	int workBuf[MAX_REORDER_SAMPS];		/* workbuf for reordering short blocks */
+	int32_t workBuf[MAX_REORDER_SAMPS];		/* workbuf for reordering short blocks */
 	CriticalBandInfo cbi[MAX_NCHAN];	/* filled in dequantizer, used in joint stereo reconstruction */
 } DequantInfo;
 
 typedef struct _HuffmanInfo {
-	int huffDecBuf[MAX_NCHAN][MAX_NSAMP];		/* used both for decoded Huffman values and dequantized coefficients */
+	int32_t huffDecBuf[MAX_NCHAN][MAX_NSAMP];		/* used both for decoded Huffman values and dequantized coefficients */
 	int nonZeroBound[MAX_NCHAN];				/* number of coeffs in huffDecBuf[ch] which can be > 0 */
 	int gb[MAX_NCHAN];							/* minimum number of guard bits in huffDecBuf[ch] */
 } HuffmanInfo;
@@ -227,8 +227,8 @@ typedef struct _HuffTabLookup {
 } HuffTabLookup;
 
 typedef struct _IMDCTInfo {
-	int outBuf[MAX_NCHAN][BLOCK_SIZE][NBANDS];	/* output of IMDCT */	
-	int overBuf[MAX_NCHAN][MAX_NSAMP / 2];		/* overlap-add buffer (by symmetry, only need 1/2 size) */
+	int32_t outBuf[MAX_NCHAN][BLOCK_SIZE][NBANDS];	/* output of IMDCT */
+	int32_t overBuf[MAX_NCHAN][MAX_NSAMP / 2];		/* overlap-add buffer (by symmetry, only need 1/2 size) */
 	int numPrevIMDCT[MAX_NCHAN];				/* how many IMDCT's calculated in this channel on prev. granule */
 	int prevType[MAX_NCHAN];
 	int prevWinSwitch[MAX_NCHAN];
@@ -279,17 +279,17 @@ uint32_t GetBits(BitStreamInfo *bsi, int32_t nBits);
 int32_t CalcBitsUsed(BitStreamInfo *bsi, const unsigned char *startBuf, int32_t startOffset);
 
 /* dequant.c, dqchan.c, stproc.c */
-int DequantChannel(int *sampleBuf, int *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 
+int DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 
 					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi);
-void MidSideProc(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, int mOut[2]);
-void IntensityProcMPEG1(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, 
+void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, int mOut[2]);
+void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
 						CriticalBandInfo *cbi, int midSideFlag, int mixFlag, int mOut[2]);
-void IntensityProcMPEG2(int x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis, 
+void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
 						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int midSideFlag, int mixFlag, int mOut[2]);
 
 /* dct32.c */
 // about 1 ms faster in RAM, but very large
-void FDCT32(int *x, int *d, int offset, int oddBlock, int gb);// __attribute__ ((section (".data")));
+void FDCT32(int32_t *x, int32_t *d, int offset, int oddBlock, int gb);// __attribute__ ((section (".data")));
 
 /* hufftabs.c */
 extern const HuffTabLookup huffTabLookup[HUFF_PAIRTABS];
