@@ -84,8 +84,8 @@ namespace fl {
 	// #pragma message "Targeting ESP32P4, which has flexible SPI support. Configuring for flexible pin assignment."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
-#elif CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32C6
-	// #pragma message "Targeting ESP32-C3/C5/C6, using FSPI for hardware SPI support."
+#elif CONFIG_IDF_TARGET_ESP32C2 || CONFIG_IDF_TARGET_ESP32C3 || CONFIG_IDF_TARGET_ESP32C5 || CONFIG_IDF_TARGET_ESP32C6
+	// #pragma message "Targeting ESP32-C2/C3/C5/C6, using FSPI for hardware SPI support."
 	#undef FASTLED_ESP32_SPI_BUS
 	#define FASTLED_ESP32_SPI_BUS FSPI
 #else // Configuration for standard ESP32 variants
