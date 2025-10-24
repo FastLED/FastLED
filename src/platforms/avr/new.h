@@ -5,4 +5,4 @@
 // This file exists for organizational purposes but delegates to inplacenew.h
 // which handles placement new definition properly without including <new> in headers
 
-#include "avr/inplacenew.h"
+#include "platforms/avr/inplacenew.h"
