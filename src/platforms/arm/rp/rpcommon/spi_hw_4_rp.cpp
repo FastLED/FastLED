@@ -16,6 +16,7 @@
 #include "fl/warn.h"
 #include <cstring> // ok include
 #include "fl/cstring.h"
+#include "fl/time.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
 
 namespace fl {
@@ -477,16 +478,17 @@ bool SPIQuadRP2040::waitComplete(uint32_t timeout_ms) {
         return true;  // Nothing to wait for
     }
 
-    // Simple polling implementation (timeout support can be added later)
+    // Poll with timeout checking
     if (timeout_ms == UINT32_MAX) {
         // Infinite timeout - just wait
         dma_channel_wait_for_finish_blocking(mDMAChannel);
     } else {
-        // Timeout-based polling
-        // Note: This is a simple implementation, could be improved with timestamp checking
+        // Timeout-based polling with timestamp checking
+        fl::u32 start_time = fl::time();
         while (dma_channel_is_busy(mDMAChannel)) {
-            // TODO: Add actual timeout checking with timestamp
-            // For now, just poll (safe but not ideal)
+            if ((fl::time() - start_time) >= timeout_ms) {
+                return false;  // Timeout
+            }
         }
     }
 

@@ -7,14 +7,9 @@
 /// Platform-specific implementations (ESP32, RP2040, etc.) inherit from this
 /// interface to provide hardware SPI support.
 ///
-/// **IMPORTANT COMPATIBILITY NOTE:**
-/// This implementation currently uses BLOCKING transmit() for backwards
-/// compatibility with existing code. While the interface appears async, the
-/// transmission completes synchronously before returning.
-///
-/// TODO: Convert to true async DMA implementation in the future.
-/// This requires careful testing to ensure no regressions in existing code
-/// that relies on the blocking behavior.
+/// **Implementation Notes:**
+/// - ESP32: Uses true async DMA via spi_device_queue_trans()
+/// - Other platforms: May use synchronous polling or DMA depending on capabilities
 
 #include "fl/vector.h"
 #include "fl/span.h"
@@ -65,13 +60,12 @@ public:
     /// @returns DMABufferResult containing buffer span or error code
     /// @note Automatically waits (calls waitComplete()) if previous transmission active
     /// @note Buffer remains valid until waitComplete() is called
-    /// @note **PLATFORM NOTE**: This implementation currently BLOCKS during transmission
     virtual DMABufferResult acquireDMABuffer(size_t size) = 0;
 
     /// Transmit data from previously acquired DMA buffer
     /// @param mode Transmission mode hint (SYNC or ASYNC)
     /// @returns true if transmitted successfully, false on error
-    /// @note **PLATFORM NOTE**: Currently BLOCKS regardless of mode for backwards compatibility
+    /// @note ESP32: Queues async DMA transaction (non-blocking)
     /// @note Must call acquireDMABuffer() before this
     virtual bool transmit(TransmitMode mode = TransmitMode::ASYNC) = 0;
 
@@ -79,12 +73,10 @@ public:
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
     /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
-    /// @note Currently returns immediately as transmit() is blocking
     virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
-    /// @note Currently always returns false as transmit() is blocking
     virtual bool isBusy() const = 0;
 
     /// Get initialization status

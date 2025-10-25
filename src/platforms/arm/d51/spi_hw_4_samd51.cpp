@@ -33,6 +33,7 @@
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
+#include "fl/time.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
 #include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
@@ -470,16 +471,30 @@ bool SPIQuadSAMD51::waitComplete(uint32_t timeout_ms) {
 
     // Implementation Note:
     // Current transmit() implementation is synchronous (polling-based),
-    // so by the time it returns, the transaction is already complete.
-    // This method is here for API consistency.
+    // waiting for QSPI INSTREND flag before returning.
+    // Therefore, by the time waitComplete() is called, the transaction
+    // is already complete.
     //
-    // A future DMA-based implementation would need real timeout handling:
-    // - Start timeout timer
-    // - Poll QSPI status or DMA completion
-    // - Return false if timeout expires
-    (void)timeout_ms;  // Unused for now
+    // This timeout logic is provided for API consistency and future-proofing
+    // in case async DMA implementation is added later.
 
-    // For polling-based implementation, transaction is already complete
+    fl::u32 start_time = fl::time();
+
+    // Poll QSPI status to verify transmission actually completed
+    // Check INSTREND (Instruction End) flag in INTFLAG register
+    while (!QSPI->INTFLAG.bit.INSTREND) {
+        if ((fl::time() - start_time) >= timeout_ms) {
+            FL_WARN("SPIQuadSAMD51: waitComplete timeout");
+            return false;  // Timeout
+        }
+        // Check for error condition
+        if (QSPI->INTFLAG.bit.ERROR) {
+            FL_WARN("SPIQuadSAMD51: QSPI error during waitComplete");
+            QSPI->INTFLAG.reg = QSPI_INTFLAG_ERROR;  // Clear error
+            return false;
+        }
+    }
+
     mTransactionActive = false;
 
     // AUTO-RELEASE DMA buffer
@@ -530,7 +545,12 @@ void SPIQuadSAMD51::cleanup() {
             // Wait for QSPI to disable
         }
 
-        // TODO: Release DMA channels (when DMA is implemented)
+        // Release DMA resources (placeholder for future DMA implementation)
+        // Note: DMA is not currently implemented (polling-based transfers only)
+        // When async DMA is added, cleanup steps would include:
+        // 1. Disable DMA channel(s) via DMAC registers
+        // 2. Free DMA descriptor memory if dynamically allocated
+        // 3. Release channel ID(s) back to allocator
 
         // Disable peripheral clocks
         MCLK->APBCMASK.bit.QSPI_ = 0;

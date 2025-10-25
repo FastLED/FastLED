@@ -14,6 +14,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
+#include "fl/time.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
 #include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
@@ -409,9 +410,25 @@ bool SPIDualSAMD21::waitComplete(uint32_t timeout_ms) {
         return true;  // Nothing to wait for
     }
 
-    // TODO: Implement completion waiting
-    // Poll DMA status or use interrupts
-    (void)timeout_ms;  // Unused for now
+    // Implementation Note:
+    // Current transmit() implementation is synchronous (polling-based),
+    // waiting for SERCOM TXC (Transmit Complete) flag before returning.
+    // Therefore, by the time waitComplete() is called, the transaction
+    // is already complete.
+    //
+    // This timeout logic is provided for API consistency and future-proofing
+    // in case async DMA implementation is added later.
+
+    fl::u32 start_time = fl::time();
+
+    // Poll SERCOM status to verify transmission actually completed
+    // Check TXC (Transmit Complete) flag in INTFLAG register
+    while (mSercom && !mSercom->SPI.INTFLAG.bit.TXC) {
+        if ((fl::time() - start_time) >= timeout_ms) {
+            FL_WARN("SPIDualSAMD21: waitComplete timeout");
+            return false;  // Timeout
+        }
+    }
 
     mTransactionActive = false;
 

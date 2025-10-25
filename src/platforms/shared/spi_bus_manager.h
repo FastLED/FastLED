@@ -15,6 +15,12 @@
 #include "platforms/shared/spi_hw_8.h"  // Octal-SPI
 #include "platforms/shared/spi_transposer.h"
 
+// Software SPI support - Pin class forward declared here, defined by platform
+// Users must include FastLED.h before using SPIBusManager to ensure Pin class is available
+namespace fl {
+    class Pin;  // Forward declaration - actual class provided by platform's fastpin.h
+}
+
 namespace fl {
 
 /// SPI bus configuration types
@@ -253,8 +259,15 @@ public:
             }
 
             case SPIBusType::SOFT_SPI: {
-                // Software SPI fallback
-                // TODO: Implement software SPI fallback (future)
+                // Software SPI fallback implementation
+                // Note: This requires Pin class to be available, which depends on platform-specific
+                // headers being included before spi_bus_manager.h. In practice, when users include
+                // FastLED.h, all necessary platform types are defined, so software SPI will work.
+                // For testing/stub builds, this is a no-op (see softwareSPIWrite implementation).
+                if (handle.lane_id < bus.num_devices) {
+                    const SPIDeviceInfo& device = bus.devices[handle.lane_id];
+                    softwareSPIWrite(device.clock_pin, device.data_pin, data, length);
+                }
                 break;
             }
         }
@@ -451,11 +464,22 @@ public:
             fl::optional<SPITransposer::LaneData> lanes[8];
             for (uint8_t i = 0; i < bus.num_devices && i < 8; i++) {
                 if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
-                    // TODO: Add proper padding frame support (chipset-specific black LED patterns)
-                    // For now, use empty padding (will pad with zeros)
+                    // Padding frame support: Currently uses zero-padding for synchronized latching.
+                    // Zero-padding ensures all lanes finish transmitting simultaneously, which is
+                    // the primary requirement for visual synchronization across parallel strips.
+                    //
+                    // Chipset-specific black LED patterns (e.g., APA102's {0xE0,0x00,0x00,0x00})
+                    // would be preferable but require type information not available in this
+                    // type-erased context (void* controller pointer). Zero-padding works universally
+                    // across all chipsets, though it may cause brief LED flashes on mismatched lengths.
+                    //
+                    // Design Note: To support chipset-specific padding, would need either:
+                    // 1. Virtual getPaddingFrame() method on base controller class (API change)
+                    // 2. Padding frame passed during device registration (requires user management)
+                    // 3. Ensure all strips in parallel group have identical LED counts (current best practice)
                     lanes[i] = SPITransposer::LaneData{
                         fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                        fl::span<const uint8_t>()  // No padding frame yet
+                        fl::span<const uint8_t>()  // Zero-padding (universal fallback)
                     };
                 }
             }
@@ -474,11 +498,22 @@ public:
             fl::optional<SPITransposer::LaneData> lanes[4];
             for (uint8_t i = 0; i < bus.num_devices && i < 4; i++) {
                 if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
-                    // TODO: Add proper padding frame support (chipset-specific black LED patterns)
-                    // For now, use empty padding (will pad with zeros)
+                    // Padding frame support: Currently uses zero-padding for synchronized latching.
+                    // Zero-padding ensures all lanes finish transmitting simultaneously, which is
+                    // the primary requirement for visual synchronization across parallel strips.
+                    //
+                    // Chipset-specific black LED patterns (e.g., APA102's {0xE0,0x00,0x00,0x00})
+                    // would be preferable but require type information not available in this
+                    // type-erased context (void* controller pointer). Zero-padding works universally
+                    // across all chipsets, though it may cause brief LED flashes on mismatched lengths.
+                    //
+                    // Design Note: To support chipset-specific padding, would need either:
+                    // 1. Virtual getPaddingFrame() method on base controller class (API change)
+                    // 2. Padding frame passed during device registration (requires user management)
+                    // 3. Ensure all strips in parallel group have identical LED counts (current best practice)
                     lanes[i] = SPITransposer::LaneData{
                         fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
-                        fl::span<const uint8_t>()  // No padding frame yet
+                        fl::span<const uint8_t>()  // Zero-padding (universal fallback)
                     };
                 }
             }
@@ -598,11 +633,11 @@ private:
         // Multiple devices? Try to promote to multi-line SPI
         if (bus.num_devices >= 2 && bus.num_devices <= 8) {
             if (promoteToMultiSPI(bus)) {
-                const char* type_name = "Unknown";
+                const char* type_name;
                 switch (bus.bus_type) {
                     case SPIBusType::DUAL_SPI: type_name = "Dual-SPI"; break;
                     case SPIBusType::QUAD_SPI: type_name = "Quad-SPI"; break;
-                    default: break;
+                    default: type_name = "Unknown"; break;
                 }
                 FL_WARN("SPI Manager: Promoted clock pin " << bus.clock_pin << " to " << type_name << " (" << bus.num_devices << " devices)");
                 return true;
@@ -942,6 +977,17 @@ private:
         bus.bus_type = SPIBusType::SOFT_SPI;
     }
 
+    /// Software SPI bit-banging implementation using runtime pins
+    /// @param clock_pin Clock pin number
+    /// @param data_pin Data pin number
+    /// @param data Pointer to data buffer
+    /// @param length Number of bytes to transmit
+    ///
+    /// @note This function is only available when Pin class is fully defined.
+    ///       In normal usage (when FastLED.h is included), Pin will be available.
+    ///       In test/stub builds or when Pin is not available, this is a no-op.
+    void softwareSPIWrite(uint8_t clock_pin, uint8_t data_pin, const uint8_t* data, size_t length);  // Declaration only
+
     /// Get maximum supported SPI type for this platform
     /// Uses runtime detection via getAll() - platforms provide via weak linkage
     /// @returns Maximum SPI type supported
@@ -965,6 +1011,61 @@ private:
 inline SPIBusManager& getSPIBusManager() {
     static SPIBusManager instance;
     return instance;
+}
+
+// ============================================================================
+// Software SPI Implementation (out-of-line to avoid Pin class dependency issues)
+// ============================================================================
+
+/// Software SPI bit-banging implementation - defined out-of-line to handle Pin class dependencies
+/// This implementation is only active when Pin class is fully defined (i.e., when FastLED.h is included)
+inline void SPIBusManager::softwareSPIWrite(uint8_t clock_pin, uint8_t data_pin, const uint8_t* data, size_t length) {
+#if !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+    // Real hardware implementation using Pin class for bit-banging
+    // At this point in the header (after class definition), Pin should be available
+    // if the user included FastLED.h before using SPIBusManager.
+
+    // Create runtime Pin objects
+    Pin clock(clock_pin);
+    Pin dataOut(data_pin);
+
+    // Set pins to output
+    clock.setOutput();
+    dataOut.setOutput();
+
+    // Initial state: clock low
+    clock.lo();
+
+    // Bit-bang each byte
+    for (size_t i = 0; i < length; i++) {
+        uint8_t byte = data[i];
+
+        // Send 8 bits, MSB first
+        for (uint8_t bit = 0; bit < 8; bit++) {
+            // Set data line based on MSB
+            if (byte & 0x80) {
+                dataOut.hi();
+            } else {
+                dataOut.lo();
+            }
+
+            // Clock high (data is latched on rising edge)
+            clock.hi();
+
+            // Clock low (prepare for next bit)
+            clock.lo();
+
+            // Shift to next bit
+            byte <<= 1;
+        }
+    }
+#else
+    // Stub/WASM platforms: no-op (software SPI not available in test/simulation environment)
+    FL_UNUSED(clock_pin);
+    FL_UNUSED(data_pin);
+    FL_UNUSED(data);
+    FL_UNUSED(length);
+#endif
 }
 
 } // namespace fl

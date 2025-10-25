@@ -1,21 +1,16 @@
 /// @file spi_single_esp32.cpp
-/// @brief ESP32 implementation of Single-SPI (backwards compatibility layer)
+/// @brief ESP32 implementation of Single-SPI
 ///
 /// This file provides the SPISingleESP32 class and factory for ESP32 platforms.
 /// All class definition and implementation is contained in this single file.
 ///
-/// **IMPORTANT COMPATIBILITY NOTE:**
-/// This implementation uses BLOCKING transmission in transmit() for backwards
-/// compatibility. While the interface appears async, the transmission completes
-/// synchronously before returning.
-///
-/// This is to make it backwards compatbile with the original implementation.
-///
-/// TODO: Convert to true async DMA implementation in the future.
+/// This implementation uses true async DMA via ESP-IDF's spi_device_queue_trans()
+/// and spi_device_get_trans_result() functions for non-blocking transmission.
 
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 
 #include "platforms/shared/spi_hw_1.h"
+#include "fl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
@@ -60,7 +55,7 @@ namespace fl {
 /// ESP32 hardware for Single-SPI transmission
 /// Implements SPISingle interface for ESP-IDF SPI peripheral
 ///
-/// **COMPATIBILITY WARNING**: transmit() is currently BLOCKING
+/// This implementation uses async DMA via spi_device_queue_trans()
 class SPISingleESP32 : public SpiHw1 {
 public:
     explicit SPISingleESP32(int bus_id = -1, const char* name = "Unknown");
@@ -91,6 +86,9 @@ private:
     size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
     size_t mCurrentTotalSize;        // Current transmission size (for single-lane: bytes_per_lane * 1)
     bool mBufferAcquired;
+
+    // Transaction structure for async DMA
+    spi_transaction_t mTransaction;
 
     SPISingleESP32(const SPISingleESP32&) = delete;
     SPISingleESP32& operator=(const SPISingleESP32&) = delete;
@@ -240,51 +238,47 @@ bool SPISingleESP32::transmit(TransmitMode mode) {
         return true;  // Nothing to transmit
     }
 
-    // Mode is currently ignored - always blocks (TODO: implement async DMA)
+    // Mode is ignored - ESP32 always does async via DMA
     (void)mode;
 
-    // TODO: Convert to true async DMA implementation
-    // Currently BLOCKING for backwards compatibility
-    // This is a critical fallback path - do not break existing code!
-
     // Configure transaction using internal DMA buffer
-    spi_transaction_t transaction = {};
-    transaction.length = mCurrentTotalSize * 8;   // Length in BITS (critical!)
-    transaction.tx_buffer = mDMABuffer.data();
+    fl::memset(&mTransaction, 0, sizeof(mTransaction));
+    mTransaction.length = mCurrentTotalSize * 8;   // Length in BITS (critical!)
+    mTransaction.tx_buffer = mDMABuffer.data();
 
-    // BLOCKING transmission - completes before returning
-    esp_err_t ret = spi_device_transmit(mSPIHandle, &transaction);
+    // Queue transaction (non-blocking)
+    esp_err_t ret = spi_device_queue_trans(mSPIHandle, &mTransaction, portMAX_DELAY);
     if (ret != ESP_OK) {
         return false;
     }
 
-    // Mark transaction as active (even though it's already done for blocking mode)
     mTransactionActive = true;
-
-    // Transmission already complete at this point
     return true;
 }
 
 bool SPISingleESP32::waitComplete(uint32_t timeout_ms) {
-    (void)timeout_ms;  // Unused - transmission already complete
-
     if (!mTransactionActive) {
         return true;  // Nothing to wait for
     }
 
-    // Since transmit() is blocking, transmission is already complete
+    spi_transaction_t* result = nullptr;
+    esp_err_t ret = spi_device_get_trans_result(
+        mSPIHandle,
+        &result,
+        pdMS_TO_TICKS(timeout_ms)
+    );
+
     mTransactionActive = false;
 
     // Auto-release DMA buffer
     mBufferAcquired = false;
     mCurrentTotalSize = 0;
 
-    return true;
+    return (ret == ESP_OK);
 }
 
 bool SPISingleESP32::isBusy() const {
-    // Since transmit() is blocking, never busy
-    return false;
+    return mTransactionActive;
 }
 
 bool SPISingleESP32::isInitialized() const {
