@@ -79,9 +79,7 @@ private:
     bool mInitialized;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for multi-lane)
-    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
-    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * 8)
+    DMABuffer mDMABuffer;            // Current DMA buffer
     bool mBufferAcquired;
 
     SpiHw8ESP32(const SpiHw8ESP32&) = delete;
@@ -100,8 +98,6 @@ SpiHw8ESP32::SpiHw8ESP32(int bus_id, const char* name)
     , mTransactionActive(false)
     , mInitialized(false)
     , mDMABuffer()
-    , mMaxBytesPerLane(0)
-    , mCurrentTotalSize(0)
     , mBufferAcquired(false) {
     fl::memset(&mTransaction, 0, sizeof(mTransaction));
 }
@@ -193,13 +189,13 @@ void SpiHw8ESP32::end() {
 
 DMABuffer SpiHw8ESP32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -210,31 +206,19 @@ DMABuffer SpiHw8ESP32::acquireDMABuffer(size_t bytes_per_lane) {
     // Validate size against max_transfer_sz from bus config
     // ESP32 SPI max is typically 64KB per transaction
     if (total_size > 65536) {
-        return SPIError::BUFFER_TOO_LARGE;
+        return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
 
-    // Reallocate buffer only if we need more capacity
-    if (bytes_per_lane > mMaxBytesPerLane) {
-        if (!mDMABuffer.empty()) {
-            heap_caps_free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-        }
-
-        // Allocate DMA-capable memory for max size
-        uint8_t* ptr = (uint8_t*)heap_caps_malloc(total_size, MALLOC_CAP_DMA);
-        if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
-        }
-
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
-        mMaxBytesPerLane = bytes_per_lane;
+    // Allocate new DMABuffer - it will manage its own memory
+    mDMABuffer = DMABuffer(total_size);
+    if (!mDMABuffer.ok()) {
+        return DMABuffer(SPIError::ALLOCATION_FAILED);
     }
 
     mBufferAcquired = true;
-    mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return the DMABuffer
+    return mDMABuffer;
 }
 
 bool SpiHw8ESP32::transmit(TransmitMode mode) {
@@ -245,15 +229,18 @@ bool SpiHw8ESP32::transmit(TransmitMode mode) {
     // Mode is ignored - ESP32 always does async via DMA
     (void)mode;
 
-    if (mCurrentTotalSize == 0) {
+    if (!mDMABuffer.ok() || mDMABuffer.size() == 0) {
         return true;  // Nothing to transmit
     }
+
+    // Get the buffer span
+    fl::span<uint8_t> buffer_span = mDMABuffer.data();
 
     // Configure transaction for octal mode using internal DMA buffer
     fl::memset(&mTransaction, 0, sizeof(mTransaction));
     mTransaction.flags = SPI_TRANS_MODE_OCT;  // Octal I/O mode
-    mTransaction.length = mCurrentTotalSize * 8;   // Length in BITS (critical!)
-    mTransaction.tx_buffer = mDMABuffer.data();
+    mTransaction.length = buffer_span.size() * 8;   // Length in BITS (critical!)
+    mTransaction.tx_buffer = buffer_span.data();
 
     // Queue transaction (non-blocking)
     esp_err_t ret = spi_device_queue_trans(mSPIHandle, &mTransaction, portMAX_DELAY);
@@ -281,7 +268,7 @@ bool SpiHw8ESP32::waitComplete(uint32_t timeout_ms) {
 
     // Auto-release DMA buffer
     mBufferAcquired = false;
-    mCurrentTotalSize = 0;
+    mDMABuffer.reset();
 
     return (ret == ESP_OK);
 }
@@ -309,14 +296,9 @@ void SpiHw8ESP32::cleanup() {
             waitComplete();
         }
 
-        // Free DMA buffer
-        if (!mDMABuffer.empty()) {
-            heap_caps_free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-            mMaxBytesPerLane = 0;
-            mCurrentTotalSize = 0;
-            mBufferAcquired = false;
-        }
+        // Release DMA buffer
+        mDMABuffer.reset();
+        mBufferAcquired = false;
 
         // Remove device and free bus
         if (mSPIHandle) {

@@ -7,6 +7,9 @@
 
 namespace fl {
 
+// Forward declaration for streaming support
+class StrStream;
+
 // Forward declaration
 struct DMABufferInternalData;
 
@@ -22,8 +25,13 @@ enum class SPIError : uint8_t {
     NOT_INITIALIZED,    ///< SPI hardware not initialized
     BUFFER_TOO_LARGE,   ///< Requested buffer size exceeds platform maximum
     ALLOCATION_FAILED,  ///< Memory allocation failed
-    BUSY                ///< Previous transmission still in progress
+    BUSY,               ///< Previous transmission still in progress
+    NOT_SUPPORTED       ///< Operation not supported (e.g., RX on TX-only SPI)
 };
+
+/// @brief Stream operator for SPIError (enables use with FL_DBG/FL_WARN macros)
+/// @note Defined in spi_types.cpp
+StrStream& operator<<(StrStream& s, SPIError err);
 
 /// @brief Result type for DMA buffer acquisition
 /// @details Returns either a valid buffer span or an error code

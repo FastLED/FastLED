@@ -120,6 +120,7 @@ test_names = [
   'test_spi_block_8',
   'test_spi_block_16',
   'test_spi_block_32',
+  'test_spi_device',
   'test_sketch_runner',
   'test_slab_multi_alloc',
   'test_slice',

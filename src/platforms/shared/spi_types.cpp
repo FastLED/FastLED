@@ -2,6 +2,7 @@
 #include "fl/vector.h"
 #include "fl/allocator.h"
 #include "fl/string.h"
+#include "fl/strstream.h"
 
 namespace fl {
 
@@ -122,6 +123,11 @@ SPIError SPITransmitResult::error() const {
 
 const fl::string& SPITransmitResult::message() const {
     return error_message;
+}
+
+// Stream operator for SPIError
+StrStream& operator<<(StrStream& s, SPIError err) {
+    return s << static_cast<int>(err);
 }
 
 }  // namespace fl

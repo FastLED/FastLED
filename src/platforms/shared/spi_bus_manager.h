@@ -5,6 +5,7 @@
 #include "fl/dbg.h"
 #include "fl/log.h"
 #include "fl/stdint.h"
+#include "fl/fastpin.h"
 
 // Shared SPI type definitions
 #include "platforms/shared/spi_types.h"
@@ -29,12 +30,13 @@ enum class SPIBusType : uint8_t {
     SINGLE_SPI,    ///< Hardware SPI, 1 data line (standard SPI)
     DUAL_SPI,      ///< Hardware SPI, 2 data lines (ESP32-C series)
     QUAD_SPI,      ///< Hardware SPI, 4 data lines (ESP32/S/P series)
+    OCTO_SPI,      ///< Hardware SPI, 8 data lines (ESP32-P4)
 };
 
 /// Handle returned when registering with the SPI bus manager
 struct SPIBusHandle {
     uint8_t bus_id;        ///< Internal bus ID
-    uint8_t lane_id;       ///< Lane ID within bus (0 for single SPI, 0-3 for quad)
+    uint8_t lane_id;       ///< Lane ID within bus (0 for single SPI, 0-3 for quad, 0-7 for octo)
     bool is_valid;         ///< Whether this handle is valid
 
     SPIBusHandle() : bus_id(0xFF), lane_id(0xFF), is_valid(false) {}
@@ -243,7 +245,8 @@ public:
                 break;
             }
 
-            case SPIBusType::QUAD_SPI: {
+            case SPIBusType::QUAD_SPI:
+            case SPIBusType::OCTO_SPI: {
                 // Buffer data for this lane - will be interleaved in finalizeTransmission()
                 // Ensure lane_buffers is sized correctly
                 if (bus.lane_buffers.size() <= handle.lane_id) {
@@ -297,16 +300,17 @@ public:
             }
             case SPIBusType::QUAD_SPI: {
                 if (bus.hw_controller) {
-                    // Determine if this is 4-lane or 8-lane based on device count
-                    if (bus.num_devices > 4) {
-                        // 8-lane (Octal-SPI)
-                        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
-                        octal->waitComplete();
-                    } else {
-                        // 4-lane (Quad-SPI)
-                        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
-                        quad->waitComplete();
-                    }
+                    // 4-lane (Quad-SPI)
+                    SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+                    quad->waitComplete();
+                }
+                break;
+            }
+            case SPIBusType::OCTO_SPI: {
+                if (bus.hw_controller) {
+                    // 8-lane (Octal-SPI)
+                    SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+                    octal->waitComplete();
                 }
                 break;
             }
@@ -315,7 +319,7 @@ public:
         }
     }
 
-    /// Finalize transmission - flush buffered data for Dual-SPI and Quad-SPI
+    /// Finalize transmission - flush buffered data for Dual-SPI, Quad-SPI and Octo-SPI
     /// This performs the bit-interleaving and DMA transmission
     /// @param handle Device handle from registerDevice()
     void finalizeTransmission(SPIBusHandle handle) {
@@ -329,7 +333,9 @@ public:
         }
 
         // Only needed for multi-SPI modes (Dual-SPI, Quad-SPI, Octal-SPI)
-        if (bus.bus_type != SPIBusType::DUAL_SPI && bus.bus_type != SPIBusType::QUAD_SPI) {
+        if (bus.bus_type != SPIBusType::DUAL_SPI &&
+            bus.bus_type != SPIBusType::QUAD_SPI &&
+            bus.bus_type != SPIBusType::OCTO_SPI) {
             return;
         }
 
@@ -406,13 +412,13 @@ public:
             return;
         }
 
-        // Handle Quad-SPI and Octal-SPI (runtime detection)
+        // Handle Quad-SPI and Octal-SPI
         if (!bus.hw_controller) {
             return;
         }
 
-        // Determine if this is 4-lane or 8-lane based on device count
-        bool is_octal_mode = (bus.num_devices > 4);
+        // Determine if this is 4-lane or 8-lane based on bus type
+        bool is_octal_mode = (bus.bus_type == SPIBusType::OCTO_SPI);
 
         // Find maximum lane size
         size_t max_size = 0;
@@ -633,12 +639,14 @@ private:
         // Multiple devices? Try to promote to multi-line SPI
         if (bus.num_devices >= 2 && bus.num_devices <= 8) {
             if (promoteToMultiSPI(bus)) {
-                const char* type_name;
+                const char* type_name = "Unknown";
                 switch (bus.bus_type) {
                     case SPIBusType::DUAL_SPI: type_name = "Dual-SPI"; break;
                     case SPIBusType::QUAD_SPI: type_name = "Quad-SPI"; break;
-                    default: type_name = "Unknown"; break;
+                    case SPIBusType::OCTO_SPI: type_name = "Octo-SPI"; break;
+                    default: break;
                 }
+                (void)type_name;  // Suppress unused variable warning when FL_WARN is a no-op
                 FL_WARN("SPI Manager: Promoted clock pin " << bus.clock_pin << " to " << type_name << " (" << bus.num_devices << " devices)");
                 return true;
             } else {
@@ -769,9 +777,9 @@ private:
             return true;
 
         } else if (bus.num_devices >= 5 && bus.num_devices <= 8 &&
-                   static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::QUAD_SPI)) {
+                   static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::OCTO_SPI)) {
             // Octal-SPI: 8 lanes using SpiHw8 interface
-            bus.bus_type = SPIBusType::QUAD_SPI;  // Reuses enum value, but with 8-lane controller
+            bus.bus_type = SPIBusType::OCTO_SPI;
 
             // Get available Octal-SPI controllers (8-lane) - runtime detection
             const auto& controllers = SpiHw8::getAll();
@@ -953,18 +961,17 @@ private:
             bus.hw_controller = nullptr;
         }
 
-        // Release Quad-SPI or Octal-SPI controller (runtime detection)
+        // Release Quad-SPI controller
         if (bus.bus_type == SPIBusType::QUAD_SPI && bus.hw_controller) {
-            // Determine if this is 4-lane or 8-lane based on device count
-            if (bus.num_devices > 4) {
-                // 8-lane (Octal-SPI)
-                SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
-                octal->end();  // Shutdown SPI peripheral
-            } else {
-                // 4-lane (Quad-SPI)
-                SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
-                quad->end();  // Shutdown SPI peripheral
-            }
+            SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+            quad->end();  // Shutdown SPI peripheral
+            bus.hw_controller = nullptr;
+        }
+
+        // Release Octal-SPI controller
+        if (bus.bus_type == SPIBusType::OCTO_SPI && bus.hw_controller) {
+            SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+            octal->end();  // Shutdown SPI peripheral
             bus.hw_controller = nullptr;
         }
 
@@ -994,13 +1001,13 @@ private:
     SPIBusType getMaxSupportedSPIType() const {
         // Check at runtime using getAll() - platforms provide via weak linkage
         if (!SpiHw8::getAll().empty()) {
-            return SPIBusType::QUAD_SPI;  // Octal uses QUAD_SPI enum
+            return SPIBusType::OCTO_SPI;  // 8-lane SPI
         }
         if (!SpiHw4::getAll().empty()) {
-            return SPIBusType::QUAD_SPI;
+            return SPIBusType::QUAD_SPI;  // 4-lane SPI
         }
         if (!SpiHw2::getAll().empty()) {
-            return SPIBusType::DUAL_SPI;
+            return SPIBusType::DUAL_SPI;  // 2-lane SPI
         }
         return SPIBusType::SINGLE_SPI;
     }

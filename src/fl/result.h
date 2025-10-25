@@ -42,7 +42,7 @@ namespace fl {
 
 /// @brief Generic error codes for Result type
 /// @details Default error type when no specific error enum is needed
-enum class Error : uint8_t {
+enum class ResultError : uint8_t {
     OK,                     ///< No error (not typically used)
     UNKNOWN,                ///< Unknown or unspecified error
     INVALID_ARGUMENT,       ///< Invalid argument provided
@@ -57,7 +57,7 @@ enum class Error : uint8_t {
 };
 
 // Forward declaration for Result template
-template<typename T, typename E = Error> class Result;
+template<typename T, typename E = ResultError> class Result;
 
 /// @brief Result type for operations that can fail
 /// @details Explicit error handling without exceptions
