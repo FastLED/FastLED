@@ -363,7 +363,7 @@ public:
                 }
                 return;
             }
-            fl::span<uint8_t> dma_buf = result.buffer();
+            fl::span<uint8_t> dma_buf = result.data();
 
             // Prepare 2-lane data for transposer
             fl::optional<SPITransposer::LaneData> lane0, lane1;
@@ -443,7 +443,7 @@ public:
                 }
                 return;
             }
-            dma_buf = result.buffer();
+            dma_buf = result.data();
         } else {
             SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
             result = quad->acquireDMABuffer(max_size);
@@ -455,7 +455,7 @@ public:
                 }
                 return;
             }
-            dma_buf = result.buffer();
+            dma_buf = result.data();
         }
 
         const char* error = nullptr;

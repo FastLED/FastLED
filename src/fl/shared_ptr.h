@@ -76,6 +76,14 @@ struct no_op_deleter {
     }
 };
 
+// Array deleter implementation for delete[]
+template<typename T>
+struct array_delete {
+    void operator()(T* ptr) const {
+        delete[] ptr;
+    }
+};
+
 // Enhanced control block for external objects with no-tracking support
 template<typename T, typename Deleter = default_delete<T>>
 struct ControlBlock : public ControlBlockBase {
@@ -338,6 +346,9 @@ private:
     
     template<typename Y>
     friend shared_ptr<Y> make_shared_no_tracking(Y& obj);
+
+    template<typename Y>
+    friend shared_ptr<Y> make_shared_array(size_t n);
 };
 
 // Factory functions
@@ -378,6 +389,14 @@ template<typename T>
 shared_ptr<T> make_shared_no_tracking(T& obj) {
     auto* control = new detail::ControlBlock<T, detail::NoDeleter<T>>(&obj, detail::NoDeleter<T>{}, false);  // track = false (enables no-tracking mode)
     return shared_ptr<T>(&obj, control, detail::no_tracking_tag{});
+}
+
+// make_shared_array for array allocations
+template<typename T>
+shared_ptr<T> make_shared_array(size_t n) {
+    T* arr = new T[n]();  // Zero-initialize the array
+    auto* control = new detail::ControlBlock<T, detail::array_delete<T>>(arr, detail::array_delete<T>{});
+    return shared_ptr<T>(arr, control, detail::make_shared_tag{});
 }
 
 // allocate_shared (simplified version without full allocator support for now)

@@ -15,8 +15,7 @@ SpiHw2Stub::SpiHw2Stub(int bus_id, const char* name)
     , mBusy(false)
     , mClockSpeed(0)
     , mTransmitCount(0)
-    , mMaxBytesPerLane(0)
-    , mCurrentTotalSize(0)
+    , mCurrentBuffer()
     , mBufferAcquired(false) {
 }
 
@@ -40,16 +39,14 @@ void SpiHw2Stub::end() {
     mBusy = false;
     mLastBuffer.clear();
 
-    // Free DMA buffer
-    mDMABuffer.clear();
-    mMaxBytesPerLane = 0;
-    mCurrentTotalSize = 0;
+    // Release current buffer
+    mCurrentBuffer.reset();
     mBufferAcquired = false;
 }
 
 DMABuffer SpiHw2Stub::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
@@ -61,18 +58,17 @@ DMABuffer SpiHw2Stub::acquireDMABuffer(size_t bytes_per_lane) {
     constexpr size_t num_lanes = 2;
     const size_t total_size = bytes_per_lane * num_lanes;
 
-    // Reallocate buffer only if we need more capacity
-    if (bytes_per_lane > mMaxBytesPerLane) {
-        mDMABuffer.clear();
-        mDMABuffer.resize(total_size);
-        mMaxBytesPerLane = bytes_per_lane;
+    // Create a new DMABuffer with the specified size
+    mCurrentBuffer = DMABuffer(total_size);
+
+    if (!mCurrentBuffer.ok()) {
+        return mCurrentBuffer;  // Return error
     }
 
     mBufferAcquired = true;
-    mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return a copy of the buffer (shared_ptr will be shared)
+    return mCurrentBuffer;
 }
 
 bool SpiHw2Stub::transmit(TransmitMode mode) {
@@ -82,15 +78,16 @@ bool SpiHw2Stub::transmit(TransmitMode mode) {
         return false;
     }
 
-    if (mCurrentTotalSize == 0) {
+    if (!mCurrentBuffer.ok() || mCurrentBuffer.data().size() == 0) {
         return true;  // Nothing to transmit
     }
 
     // Capture data for inspection
     mLastBuffer.clear();
-    mLastBuffer.reserve(mCurrentTotalSize);
-    for (size_t i = 0; i < mCurrentTotalSize; ++i) {
-        mLastBuffer.push_back(mDMABuffer[i]);
+    fl::span<uint8_t> buffer_span = mCurrentBuffer.data();
+    mLastBuffer.reserve(buffer_span.size());
+    for (size_t i = 0; i < buffer_span.size(); ++i) {
+        mLastBuffer.push_back(buffer_span[i]);
     }
 
     mTransmitCount++;
@@ -105,7 +102,6 @@ bool SpiHw2Stub::waitComplete(uint32_t timeout_ms) {
 
     // AUTO-RELEASE DMA buffer
     mBufferAcquired = false;
-    mCurrentTotalSize = 0;
 
     return true;
 }

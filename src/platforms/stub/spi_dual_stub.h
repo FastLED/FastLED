@@ -49,9 +49,7 @@ private:
     fl::vector<uint8_t> mLastBuffer;
 
     // DMA buffer management
-    fl::vector<uint8_t> mDMABuffer;  // Dynamically allocated DMA buffer (interleaved format)
-    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
-    size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
+    DMABuffer mCurrentBuffer;            // Current active buffer
     bool mBufferAcquired;
 };
 
