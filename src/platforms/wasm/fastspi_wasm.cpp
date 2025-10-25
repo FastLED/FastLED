@@ -54,7 +54,7 @@ void WasmSpiOutput::onEndShowLeds() {
         mRgb.push_back(b);
         pixels.advanceData();
     }
-    ActiveStripData &active_strips = Singleton<ActiveStripData>::instance();
+    ActiveStripData &active_strips = ActiveStripData::Instance();
     active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
 }
 
