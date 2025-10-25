@@ -253,13 +253,13 @@ void SPIDualSTM32::end() {
 
 DMABuffer SPIDualSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -271,7 +271,7 @@ DMABuffer SPIDualSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     // Use 256KB as a practical limit for embedded systems
     constexpr size_t MAX_SIZE = 256 * 1024;
     if (total_size > MAX_SIZE) {
-        return SPIError::BUFFER_TOO_LARGE;
+        return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
 
     // Reallocate buffer only if we need more capacity
@@ -284,7 +284,7 @@ DMABuffer SPIDualSTM32::acquireDMABuffer(size_t bytes_per_lane) {
         // Allocate DMA-capable memory (regular malloc for STM32)
         uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
         if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
+            return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
         mDMABuffer = fl::span<uint8_t>(ptr, total_size);
@@ -294,8 +294,8 @@ DMABuffer SPIDualSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     mBufferAcquired = true;
     mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return DMABuffer constructed from size
+    return DMABuffer(total_size);
 }
 
 bool SPIDualSTM32::allocateDMABuffer(size_t required_size) {
