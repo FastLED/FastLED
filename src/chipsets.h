@@ -23,7 +23,30 @@
 #include "platforms/avr/led_timing_legacy_avr.h"
 #endif
 
-// Include UCS7604 controller
+// Platform-specific clockless controller
+// This must be included before using ClocklessControllerImpl and before UCS7604
+#if defined(__EMSCRIPTEN__)
+  #include "platforms/wasm/clockless.h"
+#elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+  #include "platforms/stub/clockless_stub_generic.h"
+#elif defined(ESP32)
+  #ifdef FASTLED_ESP32_I2S
+    #include "platforms/esp/32/clockless_i2s_esp32.h"
+  #else
+    #include "third_party/espressif/led_strip/src/enabled.h"
+    #if FASTLED_ESP32_HAS_RMT
+      #include "platforms/esp/32/clockless_rmt_esp32.h"
+    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
+      #include "platforms/esp/32/clockless_spi_esp32.h"
+    #endif
+  #endif
+#elif defined(FASTLED_TEENSY4)
+  #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
+#elif defined(__AVR__)
+  #include "platforms/avr/clockless_trinket.h"
+#endif
+
+// Include UCS7604 controller (requires ClocklessBlockController to be defined)
 #include "fl/chipsets/ucs7604.h"  // optional.
 
 // Include platform-independent SPI utilities
@@ -73,29 +96,6 @@
 #else
 // Fallback: Generic software SPI for unsupported platforms
 #include "platforms/shared/spi_bitbang/spi_output_template.h"
-#endif
-
-// Platform-specific clockless controller
-// This must be included before using ClocklessControllerImpl
-#if defined(__EMSCRIPTEN__)
-  #include "platforms/wasm/clockless.h"
-#elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
-  #include "platforms/stub/clockless_stub_generic.h"
-#elif defined(ESP32)
-  #ifdef FASTLED_ESP32_I2S
-    #include "platforms/esp/32/clockless_i2s_esp32.h"
-  #else
-    #include "third_party/espressif/led_strip/src/enabled.h"
-    #if FASTLED_ESP32_HAS_RMT
-      #include "platforms/esp/32/clockless_rmt_esp32.h"
-    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
-      #include "platforms/esp/32/clockless_spi_esp32.h"
-    #endif
-  #endif
-#elif defined(FASTLED_TEENSY4)
-  #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
-#elif defined(__AVR__)
-  #include "platforms/avr/clockless_trinket.h"
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS

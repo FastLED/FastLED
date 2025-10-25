@@ -22,7 +22,7 @@ class ActiveStripData : public fl::EngineEvents::Listener {
     typedef fl::SortedHeapMap<int, ScreenMap> ScreenMapMap;
 
     static ActiveStripData &Instance();
-    void update(int id, uint32_t now, const uint8_t *pixel_data, size_t size);
+    void update(int id, uint32_t now, fl::span<const uint8_t> pixel_data);
     void updateScreenMap(int id, const ScreenMap &screenmap);
 
     // JSON creation methods

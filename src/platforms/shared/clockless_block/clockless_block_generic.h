@@ -1,5 +1,4 @@
-#ifndef __INC_CLOCKLESS_BLOCK_GENERIC_H
-#define __INC_CLOCKLESS_BLOCK_GENERIC_H
+#pragma once
 
 /// @file clockless_block_generic.h
 /// Generic blocking clockless LED controller using nanosecond-precision delays
@@ -25,6 +24,9 @@
 #include "crgb.h"
 
 namespace fl {
+
+// Don't define ClocklessBlockController if stub version is already defined
+#ifndef FASTLED_CLOCKLESS_STUB_DEFINED
 /// Generic blocking clockless controller
 ///
 /// Template parameters:
@@ -49,7 +51,7 @@ namespace fl {
 ///   - Delay T3 nanoseconds
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
-template <fl::u8 DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
 {
 private:
@@ -149,6 +151,7 @@ private:
     /// Send a '1' bit with T1/T2 timing
     FASTLED_FORCE_INLINE static void sendBit1()
     {
+        // TODO: Needs verification of timing
         // Set line HIGH
         fl::FastPin<DATA_PIN>::hi();
         // Hold high for T1 nanoseconds
@@ -163,6 +166,7 @@ private:
     /// Send a '0' bit with modified timing
     FASTLED_FORCE_INLINE static void sendBit0()
     {
+        // TODO: Needs verification of timing
         // Set line HIGH
         fl::FastPin<DATA_PIN>::hi();
         // For a '0' bit: high time is (T1 + T2 - T3)
@@ -172,8 +176,10 @@ private:
         // Set line LOW
         fl::FastPin<DATA_PIN>::lo();
         // Hold low for T3 nanoseconds
-        fl::delayNanoseconds<T3>();
+        fl::delayNanoseconds<T3>(); 
     }
 };
+
+#endif  // FASTLED_CLOCKLESS_STUB_DEFINED
+
 }  // namespace fl
-#endif  // __INC_CLOCKLESS_BLOCK_GENERIC_H

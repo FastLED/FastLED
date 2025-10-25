@@ -7,7 +7,7 @@
 
 #include "FastLED.h"
 #include "cled_controller.h"
-#include "platforms/wasm/strip_id_map.h"
+#include "platforms/shared/strip_id_map/strip_id_map.h"
 #include "fl/unused.h"
 using namespace fl;
 struct FakeSpi {

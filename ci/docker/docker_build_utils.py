@@ -8,7 +8,6 @@ This module handles platformio.ini generation and platform-related operations.
 
 import logging
 import subprocess
-import sys
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
@@ -41,7 +40,6 @@ def generate_platformio_ini(
 
     try:
         # Import FastLED's board configuration
-        sys.path.insert(0, project_root)
         from ci.boards import create_board
 
         board = create_board(board_name)

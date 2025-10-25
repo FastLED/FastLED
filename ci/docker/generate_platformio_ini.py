@@ -22,8 +22,6 @@ def main():
     board_name = sys.argv[1]
     project_root = sys.argv[2] if len(sys.argv) > 2 else "/fastled"
 
-    sys.path.insert(0, project_root)
-
     try:
         from ci.boards import create_board
 

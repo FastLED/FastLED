@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/stdint.h"
-#include <stdio.h>
+#include "fl/dbg.h"
 
 #include "fl/map.h"
 #include "fl/singleton.h"
@@ -22,7 +22,7 @@ class StripIdMap {
             return id;
         }
         id = instance.mCounter++;
-        printf("Adding strip id: %d\n", id);
+        FL_DBG("Adding strip id: " << id);
         instance.mStripMap.update(owner, id);
         instance.mOwnerMap.update(id, owner);
         return id;

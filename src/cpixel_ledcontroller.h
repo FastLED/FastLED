@@ -64,5 +64,3 @@ public:
     /// @returns LANES from template
     int lanes() override { return LANES; }
 };
-
-

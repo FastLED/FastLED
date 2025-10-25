@@ -1,18 +1,17 @@
-#ifdef __EMSCRIPTEN__
-
+#ifdef FASTLED_STUB_IMPL
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 
-#include "platforms/wasm/fastspi_wasm.h"
-
-namespace fl {
+#include "platforms/stub/fastspi_stub_generic.h"
 
 extern uint8_t get_brightness();
 
-CLEDController *WasmSpiOutput::tryFindOwner() {
+namespace fl {
+
+CLEDController *StubSPIOutput::tryFindOwner() {
     if (mId == -1) {
-        mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uint32_t>(this));
+        mId = StripIdMap::getOrFindByAddress(reinterpret_cast<uintptr_t>(this));
     }
     if (mId == -1) {
         return nullptr;
@@ -20,11 +19,11 @@ CLEDController *WasmSpiOutput::tryFindOwner() {
     return StripIdMap::getOwner(mId);
 }
 
-WasmSpiOutput::WasmSpiOutput() { EngineEvents::addListener(this); }
-WasmSpiOutput::~WasmSpiOutput() { EngineEvents::removeListener(this); }
+StubSPIOutput::StubSPIOutput() { EngineEvents::addListener(this); }
+StubSPIOutput::~StubSPIOutput() { EngineEvents::removeListener(this); }
 
-void WasmSpiOutput::onEndShowLeds() {
-    // Get the led data and send it to the JavaScript side. This is tricky
+void StubSPIOutput::onEndShowLeds() {
+    // Get the led data and send it to the ActiveStripData system. This is tricky
     // because we have to find the owner of this pointer, which will be
     // inlined in a CLEDController subclass. Therefore we are going to do
     // address lookup to get the CLEDController for all CLEDController
@@ -55,27 +54,26 @@ void WasmSpiOutput::onEndShowLeds() {
         pixels.advanceData();
     }
     ActiveStripData &active_strips = ActiveStripData::Instance();
-    active_strips.update(mId, millis(), mRgb.data(), mRgb.size());
+    active_strips.update(mId, millis(), fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
 }
 
-void WasmSpiOutput::select() { mRgb.clear(); }
+void StubSPIOutput::select() { mRgb.clear(); }
 
-void WasmSpiOutput::init() { mRgb.clear(); }
+void StubSPIOutput::init() { mRgb.clear(); }
 
-void WasmSpiOutput::waitFully() {}
+void StubSPIOutput::waitFully() {}
 
-void WasmSpiOutput::release() {}
+void StubSPIOutput::release() {}
 
-void WasmSpiOutput::writeByte(uint8_t byte) {
-    // FASTLED_WARN("writeByte %d\n", byte);
+void StubSPIOutput::writeByte(uint8_t byte) {
     mRgb.push_back(byte);
 }
 
-void WasmSpiOutput::writeWord(uint16_t word) {
+void StubSPIOutput::writeWord(uint16_t word) {
     writeByte(word >> 8);
     writeByte(word & 0xFF);
 }
 
 } // namespace fl
 
-#endif // __EMSCRIPTEN__
+#endif // FASTLED_STUB_IMPL

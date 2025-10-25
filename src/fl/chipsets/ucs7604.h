@@ -210,8 +210,12 @@
 /// https://github.com/FastLED/FastLED/issues/2088
 
 // Generic platform implementations using blocking clockless driver
+// Skip on stub/wasm platforms - they provide their own implementations with LED capture
+#if !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 #define UCS7604_HAS_CONTROLLER 1
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
+#endif
+
 #include "fl/eorder.h"
 #include "fl/fastpin.h"
 #include "cled_controller.h"
@@ -220,6 +224,7 @@
 
 namespace fl {
 
+#if !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 /// @brief UCS7604 protocol configuration modes
 enum UCS7604Mode {
     UCS7604_MODE_8BIT_800KHZ = 0x03,   ///< 8-bit depth, 800 kHz, RGBW mode
@@ -257,7 +262,7 @@ enum UCS7604Mode {
 /// Data Phase:        Send pixel data via clockless driver
 /// Reset:             Line held low for 50µs (handled by clockless driver)
 /// ```
-template <fl::u8 DATA_PIN, typename TIMING, fl::EOrder RGB_ORDER = GRB,
+template <int DATA_PIN, typename TIMING, fl::EOrder RGB_ORDER = GRB,
           UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
 class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     enum : uint32_t {
@@ -392,8 +397,11 @@ protected:
     }
 };
 
+#endif  // !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
+
 }  // namespace fl
 
+#if !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 /// @defgroup UCS7604ControllerTypes UCS7604 Controller Type Aliases
 /// @brief Pre-configured controller types for common use cases
 ///
@@ -431,6 +439,7 @@ typedef fl::UCS7604Controller<
 > UCS7604_1600KHZ_Standard;
 
 /// @}
+#endif  // !defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
 
 /// @example Basic UCS7604 Usage (Standard Configuration)
 /// ```cpp

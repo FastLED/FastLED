@@ -37,7 +37,7 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
                 iterator.advanceData();
             }
             
-            data.update(mStripId, 1000, rgbBuffer.data(), rgbBuffer.size());
+            data.update(mStripId, 1000, fl::span<const uint8_t>(rgbBuffer.data(), rgbBuffer.size()));
         }
         
         uint16_t getMaxRefreshRate() const override { return 60; }

@@ -16,10 +16,9 @@ ActiveStripData &ActiveStripData::Instance() {
     return fl::Singleton<ActiveStripData>::instance();
 }
 
-void ActiveStripData::update(int id, uint32_t now, const uint8_t *pixel_data,
-                             size_t size) {
+void ActiveStripData::update(int id, uint32_t now, fl::span<const uint8_t> pixel_data) {
     FL_UNUSED(now);
-    mStripMap.update(id, SliceUint8(pixel_data, size));
+    mStripMap.update(id, pixel_data);
 }
 
 void ActiveStripData::updateScreenMap(int id, const ScreenMap &screenmap) {

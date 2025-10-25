@@ -129,6 +129,7 @@ test_names = [
   'test_splat',
   'test_str',
   'test_strip_id_map',
+  'test_stub_led_capture',
   'test_sstring',
   'test_strstream',
   'test_task',
