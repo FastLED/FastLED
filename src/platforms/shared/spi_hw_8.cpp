@@ -10,6 +10,13 @@
 
 namespace fl {
 
+/// Get all available 8-lane hardware SPI devices on this platform
+/// This is moved out of the header to avoid __cxa_guard conflicts on some platforms
+const fl::vector<SpiHw8*>& SpiHw8::getAll() {
+    static fl::vector<SpiHw8*> instances = createInstances();
+    return instances;
+}
+
 #ifndef FASTLED_TESTING  // Skip weak default when testing (stub provides strong definition)
 
 /// Weak default factory - returns empty vector (no 8-lane SPI support)

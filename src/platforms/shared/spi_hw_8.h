@@ -116,10 +116,8 @@ public:
     /// @note Thread-safe via C++11 static local initialization
     /// @note Returns empty vector if platform doesn't support 8-lane SPI
     /// @note Returns bare pointers - instances are alive forever (static lifetime)
-    static const fl::vector<SpiHw8*>& getAll() {
-        static fl::vector<SpiHw8*> instances = createInstances();
-        return instances;
-    }
+    /// @note Implementation is in spi_hw_8.cpp to avoid __cxa_guard conflicts on some platforms
+    static const fl::vector<SpiHw8*>& getAll();
 
 private:
     /// Platform-specific factory implementation (weak linkage)
