@@ -49,7 +49,7 @@ TEST_CASE("SpiHw1: Blocking transmission behavior") {
     // Acquire DMA buffer and fill it
     fl::DMABuffer result = single->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }
@@ -95,7 +95,7 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
     fl::vector<uint8_t> data1 = {0xAA, 0xBB};
     fl::DMABuffer result1 = single->acquireDMABuffer(data1.size());
     REQUIRE(result1.ok());
-    auto buf1 = result1.buffer();
+    auto buf1 = result1.data();
     for (size_t i = 0; i < data1.size(); i++) {
         buf1[i] = data1[i];
     }
@@ -106,7 +106,7 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
     fl::vector<uint8_t> data2 = {0xCC, 0xDD};
     fl::DMABuffer result2 = single->acquireDMABuffer(data2.size());
     REQUIRE(result2.ok());
-    auto buf2 = result2.buffer();
+    auto buf2 = result2.data();
     for (size_t i = 0; i < data2.size(); i++) {
         buf2[i] = data2[i];
     }
@@ -144,7 +144,7 @@ TEST_CASE("SpiHw1: Stub inspection") {
     fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
     fl::DMABuffer result = stub->acquireDMABuffer(test_data.size());
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < test_data.size(); i++) {
         buf[i] = test_data[i];
     }
@@ -176,7 +176,7 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
     fl::vector<uint8_t> data = {0x11, 0x22};
     fl::DMABuffer result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }
@@ -186,7 +186,7 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
 
     result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
-    buf = result.buffer();
+    buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }
@@ -195,7 +195,7 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
 
     result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
-    buf = result.buffer();
+    buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }
@@ -260,7 +260,7 @@ TEST_CASE("SpiHw1: Large data transmission") {
 
     fl::DMABuffer result = stub->acquireDMABuffer(large_data.size());
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < large_data.size(); i++) {
         buf[i] = large_data[i];
     }
@@ -306,7 +306,7 @@ TEST_CASE("SpiHw1: Reset clears transmission history") {
     fl::vector<uint8_t> data = {0xFF, 0xEE, 0xDD};
     fl::DMABuffer result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }

@@ -272,7 +272,7 @@ TEST_CASE("SpiHw2: Async transmission") {
     fl::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
     fl::DMABuffer result = dual->acquireDMABuffer(data.size() / 2);  // bytes_per_lane = total / 2
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < data.size(); i++) {
         buf[i] = data[i];
     }
@@ -299,7 +299,7 @@ TEST_CASE("SpiHw2: Stub inspection") {
     fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
     fl::DMABuffer result = stub->acquireDMABuffer(test_data.size() / 2);  // bytes_per_lane = total / 2
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < test_data.size(); i++) {
         buf[i] = test_data[i];
     }
@@ -328,7 +328,7 @@ TEST_CASE("SpiHw2: Extract lanes from interleaved data") {
     fl::vector<uint8_t> interleaved = {0x91, 0x74};
     fl::DMABuffer result = stub->acquireDMABuffer(interleaved.size() / 2);  // bytes_per_lane = total / 2
     REQUIRE(result.ok());
-    auto buf = result.buffer();
+    auto buf = result.data();
     for (size_t i = 0; i < interleaved.size(); i++) {
         buf[i] = interleaved[i];
     }
