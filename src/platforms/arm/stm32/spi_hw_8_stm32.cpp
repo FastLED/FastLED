@@ -40,7 +40,7 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/warn.h"
 #include <cstring> // ok include
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 // TODO: Include STM32 HAL headers when implementing hardware initialization
 // #ifdef HAL_TIM_MODULE_ENABLED
@@ -90,9 +90,9 @@ public:
 
     /// @brief Acquire DMA buffer for direct user writes (zero-copy)
     /// @param bytes_per_lane Number of bytes per lane (total = bytes_per_lane * 8)
-    /// @return DMABufferResult containing buffer span or error
+    /// @return DMABuffer containing buffer span or error
     /// @note Auto-waits if previous transmission still active
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
 
     /// @brief Start non-blocking transmission of previously acquired DMA buffer
     /// @return true if transfer started successfully, false on error
@@ -314,7 +314,7 @@ void SPIOctalSTM32::end() {
     cleanup();
 }
 
-DMABufferResult SPIOctalSTM32::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SPIOctalSTM32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

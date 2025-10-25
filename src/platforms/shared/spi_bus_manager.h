@@ -354,7 +354,7 @@ public:
             }
 
             // Acquire DMA buffer (zero-copy API)
-            DMABufferResult result = dual->acquireDMABuffer(max_size);
+            DMABuffer result = dual->acquireDMABuffer(max_size);
             if (!result.ok()) {
                 FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Dual-SPI: " << static_cast<int>(result.error()));
                 // Clear buffers and bail
@@ -430,7 +430,7 @@ public:
         bool is_octal = (bus.num_devices > 4 && bus.num_devices <= 8);
 
         // Acquire DMA buffer (zero-copy API)
-        DMABufferResult result;
+        DMABuffer result;
         fl::span<uint8_t> dma_buf;
         if (is_octal) {
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);

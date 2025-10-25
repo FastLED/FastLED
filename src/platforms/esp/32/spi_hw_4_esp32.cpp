@@ -20,7 +20,7 @@
 // Include soc_caps.h if available (ESP-IDF 4.0+)
 // Older versions (like IDF 3.3) don't have this header
 #include "fl/has_include.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include "soc/soc_caps.h"
 #endif
@@ -61,7 +61,7 @@ public:
 
     bool begin(const SpiHw4::Config& config) override;
     void end() override;
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
@@ -219,7 +219,7 @@ void SPIQuadESP32::end() {
     cleanup();
 }
 
-DMABufferResult SPIQuadESP32::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SPIQuadESP32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

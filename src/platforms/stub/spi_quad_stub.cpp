@@ -5,7 +5,7 @@
 /// It captures transmitted data for inspection without real hardware.
 
 #include "platforms/stub/spi_quad_stub.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 #ifdef FASTLED_TESTING
 
@@ -54,7 +54,7 @@ void SpiHw4Stub::end() {
     mBufferAcquired = false;
 }
 
-DMABufferResult SpiHw4Stub::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SpiHw4Stub::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

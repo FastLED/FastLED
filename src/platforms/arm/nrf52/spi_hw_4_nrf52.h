@@ -76,10 +76,10 @@ public:
 
     /// @brief Acquire a DMA buffer for zero-copy data preparation
     /// @param bytes_per_lane Number of bytes per lane to allocate
-    /// @return DMABufferResult containing span to buffer or error code
+    /// @return DMABuffer containing span to buffer or error code
     /// @note Automatically waits if previous transmission still active
     /// @note Reallocates only if requested size exceeds current capacity
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
 
     /// @brief Start non-blocking transmission using internal DMA buffer
     /// @return true if transfer started successfully, false on error

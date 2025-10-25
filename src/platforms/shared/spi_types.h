@@ -22,21 +22,21 @@ enum class SPIError : uint8_t {
 
 /// @brief Result type for DMA buffer acquisition
 /// @details Returns either a valid buffer span or an error code
-struct DMABufferResult {
+struct DMABuffer {
     fl::span<uint8_t> buffer_data;
     SPIError error_code;
     bool is_ok;
 
     /// @brief Default constructor (uninitialized error state)
-    DMABufferResult()
+    DMABuffer()
         : buffer_data(), error_code(SPIError::NOT_INITIALIZED), is_ok(false) {}
 
     /// @brief Construct successful result with buffer
-    DMABufferResult(fl::span<uint8_t> buf)
+    DMABuffer(fl::span<uint8_t> buf)
         : buffer_data(buf), error_code(SPIError::NOT_INITIALIZED), is_ok(true) {}
 
     /// @brief Construct error result
-    DMABufferResult(SPIError err)
+    DMABuffer(SPIError err)
         : buffer_data(), error_code(err), is_ok(false) {}
 
     /// @brief Check if buffer acquisition succeeded

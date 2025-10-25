@@ -28,7 +28,7 @@
 #include <SPI.h>
 #include <imxrt.h>
 #include <cstring> // ok include
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
 
@@ -45,7 +45,7 @@ public:
 
     bool begin(const SpiHw4::Config& config) override;
     void end() override;
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
@@ -195,7 +195,7 @@ void SpiHw4MXRT1062::end() {
     cleanup();
 }
 
-DMABufferResult SpiHw4MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SpiHw4MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

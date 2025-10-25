@@ -47,7 +47,7 @@ TEST_CASE("SpiHw1: Blocking transmission behavior") {
     fl::vector<uint8_t> data = {0x12, 0x34, 0x56, 0x78};
 
     // Acquire DMA buffer and fill it
-    fl::DMABufferResult result = single->acquireDMABuffer(data.size());
+    fl::DMABuffer result = single->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
     auto buf = result.buffer();
     for (size_t i = 0; i < data.size(); i++) {
@@ -76,7 +76,7 @@ TEST_CASE("SpiHw1: Empty buffer transmission") {
     CHECK(single->begin(config));
 
     fl::vector<uint8_t> empty_data;
-    fl::DMABufferResult result = single->acquireDMABuffer(0);
+    fl::DMABuffer result = single->acquireDMABuffer(0);
     REQUIRE(result.ok());
     CHECK(single->transmit());
 
@@ -93,7 +93,7 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
 
     // First transmission
     fl::vector<uint8_t> data1 = {0xAA, 0xBB};
-    fl::DMABufferResult result1 = single->acquireDMABuffer(data1.size());
+    fl::DMABuffer result1 = single->acquireDMABuffer(data1.size());
     REQUIRE(result1.ok());
     auto buf1 = result1.buffer();
     for (size_t i = 0; i < data1.size(); i++) {
@@ -104,7 +104,7 @@ TEST_CASE("SpiHw1: Multiple transmissions") {
 
     // Second transmission (should work immediately since first is complete)
     fl::vector<uint8_t> data2 = {0xCC, 0xDD};
-    fl::DMABufferResult result2 = single->acquireDMABuffer(data2.size());
+    fl::DMABuffer result2 = single->acquireDMABuffer(data2.size());
     REQUIRE(result2.ok());
     auto buf2 = result2.buffer();
     for (size_t i = 0; i < data2.size(); i++) {
@@ -124,7 +124,7 @@ TEST_CASE("SpiHw1: Transmission without initialization fails") {
     stub->end();  // Ensure not initialized
 
     fl::vector<uint8_t> data = {0x12, 0x34};
-    fl::DMABufferResult result = stub->acquireDMABuffer(data.size());
+    fl::DMABuffer result = stub->acquireDMABuffer(data.size());
     CHECK_FALSE(result.ok());  // Should fail - not initialized
 }
 
@@ -142,7 +142,7 @@ TEST_CASE("SpiHw1: Stub inspection") {
     CHECK_EQ(stub->getClockSpeed(), 20000000);
 
     fl::vector<uint8_t> test_data = {0xAA, 0xBB, 0xCC, 0xDD};
-    fl::DMABufferResult result = stub->acquireDMABuffer(test_data.size());
+    fl::DMABuffer result = stub->acquireDMABuffer(test_data.size());
     REQUIRE(result.ok());
     auto buf = result.buffer();
     for (size_t i = 0; i < test_data.size(); i++) {
@@ -174,7 +174,7 @@ TEST_CASE("SpiHw1: Transmission count tracking") {
     CHECK_EQ(stub->getTransmissionCount(), 0);
 
     fl::vector<uint8_t> data = {0x11, 0x22};
-    fl::DMABufferResult result = stub->acquireDMABuffer(data.size());
+    fl::DMABuffer result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
     auto buf = result.buffer();
     for (size_t i = 0; i < data.size(); i++) {
@@ -258,7 +258,7 @@ TEST_CASE("SpiHw1: Large data transmission") {
         large_data.push_back(static_cast<uint8_t>(i & 0xFF));
     }
 
-    fl::DMABufferResult result = stub->acquireDMABuffer(large_data.size());
+    fl::DMABuffer result = stub->acquireDMABuffer(large_data.size());
     REQUIRE(result.ok());
     auto buf = result.buffer();
     for (size_t i = 0; i < large_data.size(); i++) {
@@ -304,7 +304,7 @@ TEST_CASE("SpiHw1: Reset clears transmission history") {
     CHECK(stub->begin(config));
 
     fl::vector<uint8_t> data = {0xFF, 0xEE, 0xDD};
-    fl::DMABufferResult result = stub->acquireDMABuffer(data.size());
+    fl::DMABuffer result = stub->acquireDMABuffer(data.size());
     REQUIRE(result.ok());
     auto buf = result.buffer();
     for (size_t i = 0; i < data.size(); i++) {

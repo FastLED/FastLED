@@ -9,7 +9,7 @@
 
 #include "spi_hw_4_nrf52.h"
 #include "fl/cstring.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
 
@@ -157,7 +157,7 @@ void SPIQuadNRF52::end() {
     cleanup();
 }
 
-DMABufferResult SPIQuadNRF52::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SPIQuadNRF52::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

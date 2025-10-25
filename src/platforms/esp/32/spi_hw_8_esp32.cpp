@@ -18,7 +18,7 @@
 
 // Include soc_caps.h if available (ESP-IDF 4.0+)
 #include "fl/has_include.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include "soc/soc_caps.h"
 #endif
@@ -59,7 +59,7 @@ public:
 
     bool begin(const SpiHw8::Config& config) override;
     void end() override;
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;
@@ -191,7 +191,7 @@ void SpiHw8ESP32::end() {
     cleanup();
 }
 
-DMABufferResult SpiHw8ESP32::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SpiHw8ESP32::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

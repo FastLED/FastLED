@@ -21,7 +21,7 @@ public:
 
     bool begin(const SpiHw8::Config& config) override;
     void end() override;
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
     bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
     bool isBusy() const override;

@@ -43,7 +43,7 @@
 #include "fl/time.h"
 #include <Arduino.h>  // ok include
 #include <wiring_private.h>
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
 
@@ -81,10 +81,10 @@ public:
 
     /// @brief Acquire a DMA buffer for zero-copy transmission
     /// @param bytes_per_lane Number of bytes per lane to allocate
-    /// @return DMABufferResult containing buffer span or error
+    /// @return DMABuffer containing buffer span or error
     /// @note Waits for previous transaction to complete if still active
     /// @note Buffer is automatically released after waitComplete()
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
 
     /// @brief Start non-blocking transmission using previously acquired DMA buffer
     /// @return true if transfer started successfully, false on error
@@ -368,7 +368,7 @@ void SPIDualSAMD51::end() {
     cleanup();
 }
 
-DMABufferResult SPIDualSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SPIDualSAMD51::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

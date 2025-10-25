@@ -17,7 +17,7 @@
 #include <cstring> // ok include
 #include "fl/cstring.h"
 #include "fl/time.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
 
@@ -124,9 +124,9 @@ public:
 
     /// @brief Acquire DMA buffer for zero-copy transmission
     /// @param bytes_per_lane Number of bytes per lane to allocate
-    /// @return DMABufferResult containing span to write into, or error
+    /// @return DMABuffer containing span to write into, or error
     /// @note Auto-waits if previous transmission still active
-    DMABufferResult acquireDMABuffer(size_t bytes_per_lane) override;
+    DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
 
     /// @brief Start non-blocking transmission using acquired DMA buffer
     /// @param mode Transmission mode (async/sync hint - may be ignored)
@@ -366,7 +366,7 @@ void SPIQuadRP2040::end() {
     cleanup();
 }
 
-DMABufferResult SPIQuadRP2040::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SPIQuadRP2040::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

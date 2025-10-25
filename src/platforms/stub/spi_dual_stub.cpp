@@ -4,7 +4,7 @@
 #ifdef FASTLED_TESTING
 
 #include "spi_dual_stub.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABufferResult, TransmitMode, SPIError
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {
 
@@ -47,7 +47,7 @@ void SpiHw2Stub::end() {
     mBufferAcquired = false;
 }
 
-DMABufferResult SpiHw2Stub::acquireDMABuffer(size_t bytes_per_lane) {
+DMABuffer SpiHw2Stub::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
         return SPIError::NOT_INITIALIZED;
     }

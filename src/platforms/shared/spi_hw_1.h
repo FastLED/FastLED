@@ -57,10 +57,10 @@ public:
 
     /// Acquire writable DMA buffer for zero-copy transmission
     /// @param size Number of bytes needed
-    /// @returns DMABufferResult containing buffer span or error code
+    /// @returns DMABuffer containing buffer span or error code
     /// @note Automatically waits (calls waitComplete()) if previous transmission active
     /// @note Buffer remains valid until waitComplete() is called
-    virtual DMABufferResult acquireDMABuffer(size_t size) = 0;
+    virtual DMABuffer acquireDMABuffer(size_t size) = 0;
 
     /// Transmit data from previously acquired DMA buffer
     /// @param mode Transmission mode hint (SYNC or ASYNC)
