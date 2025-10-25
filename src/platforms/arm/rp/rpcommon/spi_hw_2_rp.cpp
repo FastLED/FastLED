@@ -337,13 +337,13 @@ void SPIDualRP2040::end() {
 
 DMABuffer SPIDualRP2040::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -368,7 +368,7 @@ DMABuffer SPIDualRP2040::acquireDMABuffer(size_t bytes_per_lane) {
         // Allocate DMA-capable memory (regular malloc for RP2040)
         uint8_t* ptr = (uint8_t*)malloc(buffer_size_bytes);
         if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
+            return DMABuffer(SPIError::ALLOCATION_FAILED);
         }
 
         mDMABuffer = fl::span<uint8_t>(ptr, buffer_size_bytes);
@@ -378,9 +378,8 @@ DMABuffer SPIDualRP2040::acquireDMABuffer(size_t bytes_per_lane) {
     mBufferAcquired = true;
     mCurrentTotalSize = total_size;
 
-    // Return span representing the logical interleaved data (not the word buffer)
-    // User fills this as if it's bytes_per_lane * 2
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return DMABuffer constructed from size
+    return DMABuffer(total_size);
 }
 
 bool SPIDualRP2040::transmit(TransmitMode mode) {
