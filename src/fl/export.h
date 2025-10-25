@@ -42,7 +42,7 @@
 #ifndef FL_KEEP_ALIVE
     #if defined(__EMSCRIPTEN__)
         #include <emscripten.h>
-        #define FL_KEEP_ALIVE EMSCRIPTEN_KEEP_ALIVE
+        #define FL_KEEP_ALIVE EMSCRIPTEN_KEEPALIVE
     #else
         #define FL_KEEP_ALIVE
     #endif
