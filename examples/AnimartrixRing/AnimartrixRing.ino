@@ -11,6 +11,7 @@
 #include "fl/math_macros.h"
 #include "fl/screenmap.h"
 #include "fl/ui.h"
+#include "fl/audio_reactive.h"
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx2d_to_1d.h"
 #include "fx/fx_engine.h"
@@ -77,6 +78,18 @@ fl::UISlider autoBrightnessMax("Auto Brightness Max", 84, 0, 255, 1);
 fl::UISlider autoBrightnessLowThreshold("Auto Brightness Low Threshold", 8, 0, 100, 1);
 fl::UISlider autoBrightnessHighThreshold("Auto Brightness High Threshold", 22, 0, 100, 1);
 
+// Audio UI controls
+fl::UIAudio audio("Audio Input");
+fl::UICheckbox enableAudioReactive("Enable Audio Reactive", false);
+fl::UICheckbox audioAffectsSpeed("Audio Affects Speed", true);
+fl::UICheckbox audioAffectsBrightness("Audio Affects Brightness", false);
+fl::UISlider audioSpeedMultiplier("Audio Speed Multiplier", 5.0, 0.0, 20.0, 0.5);
+fl::UISlider audioBrightnessMultiplier("Audio Brightness Multiplier", 1.5, 0.0, 3.0, 0.1);
+fl::UISlider audioSensitivity("Audio Sensitivity", 128, 0, 255, 1);
+
+// Audio reactive processor
+fl::AudioReactive audioReactive;
+
 // Calculate average brightness percentage from LED array
 float getAverageBrightness(CRGB* leds, int numLeds) {
     uint32_t total = 0;
@@ -114,7 +127,7 @@ void setup() {
     FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMapLocal);
-    FastLED.setBrightness(brightness);
+    FastLED.setBrightness(brightness.value());
 
     // Add the 2D-to-1D effect to FxEngine
     fxEngine.addFx(fx2dTo1d);
@@ -127,29 +140,71 @@ void setup() {
         Serial.println(index);
     });
 
+    // Initialize audio reactive processor
+    fl::AudioReactiveConfig audioConfig;
+    audioConfig.gain = 128;
+    audioConfig.sensitivity = audioSensitivity.as_int();
+    audioConfig.agcEnabled = true;
+    audioConfig.sampleRate = 22050;
+    audioReactive.begin(audioConfig);
+
     Serial.println("AnimartrixRing setup complete");
 }
 
 void loop() {
-    // Update animation
-    fxEngine.setSpeed(timeSpeed);
+    // Process audio if enabled
+    float audioSpeedFactor = 1.0f;
+    float audioBrightnessFactor = 1.0f;
+
+    if (enableAudioReactive.value()) {
+        // Process audio samples
+        fl::AudioSample sample = audio.next();
+        if (sample.isValid()) {
+            audioReactive.processSample(sample);
+
+            const fl::AudioData& audioData = audioReactive.getSmoothedData();
+
+            // Map volume to speed (0-1 range, scaled by multiplier)
+            if (audioAffectsSpeed.value()) {
+                float normalizedVolume = audioData.volume / 255.0f;
+                audioSpeedFactor = 1.0f + (normalizedVolume * audioSpeedMultiplier.value());
+            }
+
+            // Map volume to brightness
+            if (audioAffectsBrightness.value()) {
+                float normalizedVolume = audioData.volume / 255.0f;
+                audioBrightnessFactor = fl::fl_max(0.3f, normalizedVolume * audioBrightnessMultiplier.value());
+            }
+        }
+    }
+
+    // Update animation with audio-reactive speed
+    float effectiveSpeed = timeSpeed.value() * audioSpeedFactor;
+    fxEngine.setSpeed(effectiveSpeed);
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
 
-    // Calculate and apply auto brightness if enabled
-    if (autoBrightness) {
+    // Calculate final brightness
+    uint8_t finalBrightness;
+    if (autoBrightness.value()) {
         float avgBri = getAverageBrightness(leds, NUM_LEDS);
-        uint8_t newBri = applyBrightnessCompression(
+        finalBrightness = applyBrightnessCompression(
             avgBri,
-            static_cast<uint8_t>(autoBrightnessMax),
-            autoBrightnessLowThreshold,
-            autoBrightnessHighThreshold
+            static_cast<uint8_t>(autoBrightnessMax.value()),
+            autoBrightnessLowThreshold.value(),
+            autoBrightnessHighThreshold.value()
         );
-        FastLED.setBrightness(newBri);
     } else {
-        FastLED.setBrightness(static_cast<uint8_t>(brightness));
+        finalBrightness = static_cast<uint8_t>(brightness.value());
     }
+
+    // Apply audio brightness multiplier if enabled
+    if (enableAudioReactive.value() && audioAffectsBrightness.value()) {
+        finalBrightness = static_cast<uint8_t>(finalBrightness * audioBrightnessFactor);
+    }
+
+    FastLED.setBrightness(finalBrightness);
 
     // Show the LEDs
     FastLED.show();
