@@ -99,7 +99,7 @@ public:
 
 	/// Gets the state of the port with this pin `HIGH`
 	FL_DISABLE_WARNING_PUSH
-	FL_DISABLE_WARNING(ignored-qualifiers)
+	FL_DISABLE_WARNING_VOLATILE
 	volatile port_t hival() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort | mPinMask; }
 		else { return HIGH; }
@@ -107,7 +107,7 @@ public:
 	FL_DISABLE_WARNING_POP
 	/// Gets the state of the port with this pin `LOW`
 	FL_DISABLE_WARNING_PUSH
-	FL_DISABLE_WARNING(ignored-qualifiers)
+	FL_DISABLE_WARNING_VOLATILE
 	volatile port_t loval() __attribute__ ((always_inline)) {
 		if (mPort) { return *mPort & ~mPinMask; }
 		else { return LOW; }
@@ -117,7 +117,7 @@ public:
 	port_ptr_t  port() __attribute__ ((always_inline)) { return mPort; }
 	/// Get the pin mask
 	FL_DISABLE_WARNING_PUSH
-	FL_DISABLE_WARNING(ignored-qualifiers)
+	FL_DISABLE_WARNING_VOLATILE
 	volatile port_t mask() __attribute__ ((always_inline)) { return mPinMask; }
 	FL_DISABLE_WARNING_POP
 	FL_DISABLE_WARNING_POP
