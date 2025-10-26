@@ -332,21 +332,42 @@ def setup_meson_build(
                     f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
                 )
             else:
-                # When not using thin archives, filter out 'T' flag from ar arguments
+                # When not using thin archives, use Python wrapper to filter T flag (same as Unix)
+                # Windows batch regex is too limited, Python is more reliable
+                ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
+                ar_wrapper_py.write_text(
+                    "#!/usr/bin/env python3\n"
+                    '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
+                    "import sys\n"
+                    "import subprocess\n"
+                    "\n"
+                    'if __name__ == "__main__":\n'
+                    "    args = []\n"
+                    "    for arg in sys.argv[1:]:\n"
+                    "        # Skip --thin flag entirely\n"
+                    '        if arg == "--thin" or arg == "-T":\n'
+                    "            continue\n"
+                    "        # Remove T from operation flags like csrDT, crT, rcT, Tcr, etc.\n"
+                    "        # Operation flags are single args containing only ar flag letters\n"
+                    "        # Common ar flags: c r s q t p a d i b D T U V u\n"
+                    '        ar_flag_chars = set("crsqtpadibDTUVu")\n'
+                    '        if len(arg) <= 10 and arg and set(arg).issubset(ar_flag_chars) and "T" in arg:\n'
+                    "            # This looks like an operation flag containing T - remove T\n"
+                    '            arg = arg.replace("T", "")\n'
+                    "            # Skip if now empty\n"
+                    "            if not arg:\n"
+                    "                continue\n"
+                    "        args.append(arg)\n"
+                    "    \n"
+                    "    # Execute zig ar with filtered arguments\n"
+                    '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
+                    "    sys.exit(result.returncode)\n",
+                    encoding="utf-8",
+                )
+
+                # Main wrapper calls the Python filter
                 ar_wrapper.write_text(
-                    "@echo off\n"
-                    "setlocal enabledelayedexpansion\n"
-                    'set "filtered_args="\n'
-                    "for %%a in (%*) do (\n"
-                    '  set "arg=%%a"\n'
-                    '  echo !arg! | findstr /r "^cr.*T.*$ ^rc.*T.*$" >nul\n'
-                    "  if !errorlevel! equ 0 (\n"
-                    "    REM Remove T flag from ar operation flags\n"
-                    '    set "arg=!arg:T=!"\n'
-                    "  )\n"
-                    '  set "filtered_args=!filtered_args! !arg!"\n'
-                    ")\n"
-                    "python -m ziglang ar %filtered_args%\n",
+                    f'@echo off\npython "{ar_wrapper_py}" %*\n',
                     encoding="utf-8",
                 )
     else:
@@ -396,10 +417,12 @@ def setup_meson_build(
                     "        # Skip --thin flag entirely\n"
                     '        if arg == "--thin" or arg == "-T":\n'
                     "            continue\n"
-                    "        # Remove T from operation flags like crT, rcT, Tcr, etc.\n"
-                    '        # Operation flags are single args containing letters like "crs" "rc" "cr"\n'
-                    '        if len(arg) <= 5 and arg.replace("c", "").replace("r", "").replace("s", "").replace("u", "").replace("T", "").replace("D", "") == "":\n'
-                    "            # This looks like an operation flag - remove T\n"
+                    "        # Remove T from operation flags like csrDT, crT, rcT, Tcr, etc.\n"
+                    "        # Operation flags are single args containing only ar flag letters\n"
+                    "        # Common ar flags: c r s q t p a d i b D T U V u\n"
+                    '        ar_flag_chars = set("crsqtpadibDTUVu")\n'
+                    '        if len(arg) <= 10 and arg and set(arg).issubset(ar_flag_chars) and "T" in arg:\n'
+                    "            # This looks like an operation flag containing T - remove T\n"
                     '            arg = arg.replace("T", "")\n'
                     "            # Skip if now empty\n"
                     "            if not arg:\n"
