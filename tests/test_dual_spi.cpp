@@ -3,6 +3,7 @@
 #include "test.h"
 #include "FastLED.h"
 #include "platforms/shared/spi_transposer.h"
+#include "fl/algorithm.h"
 
 using namespace fl;
 

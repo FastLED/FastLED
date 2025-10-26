@@ -18,6 +18,7 @@ class DynamicsAnalyzer;
 class PitchDetector;
 class NoteDetector;
 class DownbeatDetector;
+class BackbeatDetector;
 class VocalDetector;
 class PercussionDetector;
 class ChordDetector;
@@ -96,6 +97,9 @@ public:
     void onMeterChange(function<void(u8 beatsPerMeasure)> callback);
     void onMeasurePhase(function<void(float phase)> callback);
 
+    // ----- Backbeat Detection Events -----
+    void onBackbeat(function<void(u8 beatNumber, float confidence, float strength)> callback);
+
     // ----- Vocal Detection Events -----
     void onVocal(function<void(bool active)> callback);
     void onVocalStart(function<void()> callback);
@@ -155,6 +159,7 @@ private:
     shared_ptr<PitchDetector> mPitchDetector;
     shared_ptr<NoteDetector> mNoteDetector;
     shared_ptr<DownbeatDetector> mDownbeatDetector;
+    shared_ptr<BackbeatDetector> mBackbeatDetector;
     shared_ptr<VocalDetector> mVocalDetector;
     shared_ptr<PercussionDetector> mPercussionDetector;
     shared_ptr<ChordDetector> mChordDetector;
@@ -174,6 +179,7 @@ private:
     shared_ptr<PitchDetector> getPitchDetector();
     shared_ptr<NoteDetector> getNoteDetector();
     shared_ptr<DownbeatDetector> getDownbeatDetector();
+    shared_ptr<BackbeatDetector> getBackbeatDetector();
     shared_ptr<VocalDetector> getVocalDetector();
     shared_ptr<PercussionDetector> getPercussionDetector();
     shared_ptr<ChordDetector> getChordDetector();

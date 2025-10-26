@@ -207,7 +207,7 @@ void KeyDetector::extractChroma(const FFTBins& fft, float* chroma) {
 
         // Convert frequency to MIDI note number
         // MIDI note = 69 + 12 * log2(freq / 440)
-        float midiNote = 69.0f + 12.0f * log2f(freq / 440.0f);
+        float midiNote = 69.0f + 12.0f * (fl::logf(freq / 440.0f) / fl::logf(2.0f));
 
         // Get pitch class (0-11)
         int pitchClass = static_cast<int>(midiNote + 0.5f) % 12;

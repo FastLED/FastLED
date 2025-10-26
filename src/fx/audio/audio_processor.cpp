@@ -9,6 +9,7 @@
 #include "fx/audio/detectors/pitch.h"
 #include "fx/audio/detectors/note.h"
 #include "fx/audio/detectors/downbeat.h"
+#include "fx/audio/detectors/backbeat.h"
 #include "fx/audio/detectors/vocal.h"
 #include "fx/audio/detectors/percussion.h"
 #include "fx/audio/detectors/chord.h"
@@ -57,6 +58,9 @@ void AudioProcessor::update(const AudioSample& sample) {
     }
     if (mDownbeatDetector) {
         mDownbeatDetector->update(mContext);
+    }
+    if (mBackbeatDetector) {
+        mBackbeatDetector->update(mContext);
     }
     if (mVocalDetector) {
         mVocalDetector->update(mContext);
@@ -266,6 +270,11 @@ void AudioProcessor::onMeasurePhase(function<void(float)> callback) {
     detector->onMeasurePhase = callback;
 }
 
+void AudioProcessor::onBackbeat(function<void(u8 beatNumber, float confidence, float strength)> callback) {
+    auto detector = getBackbeatDetector();
+    detector->onBackbeat = callback;
+}
+
 void AudioProcessor::onVocal(function<void(bool)> callback) {
     auto detector = getVocalDetector();
     detector->onVocalChange = callback;
@@ -438,6 +447,9 @@ void AudioProcessor::reset() {
     if (mDownbeatDetector) {
         mDownbeatDetector->reset();
     }
+    if (mBackbeatDetector) {
+        mBackbeatDetector->reset();
+    }
     if (mVocalDetector) {
         mVocalDetector->reset();
     }
@@ -533,6 +545,16 @@ shared_ptr<DownbeatDetector> AudioProcessor::getDownbeatDetector() {
         mDownbeatDetector = make_shared<DownbeatDetector>(beatDetector);
     }
     return mDownbeatDetector;
+}
+
+shared_ptr<BackbeatDetector> AudioProcessor::getBackbeatDetector() {
+    if (!mBackbeatDetector) {
+        // Share the BeatDetector and DownbeatDetector instances with BackbeatDetector
+        auto beatDetector = getBeatDetector();
+        auto downbeatDetector = getDownbeatDetector();
+        mBackbeatDetector = make_shared<BackbeatDetector>(beatDetector, downbeatDetector);
+    }
+    return mBackbeatDetector;
 }
 
 shared_ptr<VocalDetector> AudioProcessor::getVocalDetector() {

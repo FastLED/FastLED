@@ -50,6 +50,7 @@ test_names = [
   'test_async',
   'test_atomic',
   'test_await',
+  'test_backbeat_detector',
   'test_bitset',
   'test_bytestream',
   'test_circular_buffer',
