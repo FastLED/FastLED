@@ -260,4 +260,27 @@ float ChordDetector::chromaDistance(const float* a, const float* b) {
     return fl::sqrt(dist);
 }
 
+// Out-of-line definitions for Chord methods (needed for linking with unity builds)
+const char* Chord::getRootName() const {
+    static const char* noteNames[] = {
+        "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+    };
+    return (rootNote >= 0 && rootNote < 12) ? noteNames[rootNote] : "?";
+}
+
+const char* Chord::getTypeName() const {
+    switch (type) {
+        case ChordType::MAJOR: return "maj";
+        case ChordType::MINOR: return "min";
+        case ChordType::DIMINISHED: return "dim";
+        case ChordType::AUGMENTED: return "aug";
+        case ChordType::MAJOR7: return "maj7";
+        case ChordType::MINOR7: return "min7";
+        case ChordType::DOMINANT7: return "7";
+        case ChordType::SUSPENDED2: return "sus2";
+        case ChordType::SUSPENDED4: return "sus4";
+        default: return "?";
+    }
+}
+
 } // namespace fl

@@ -220,6 +220,187 @@ class Board:
         data_str = self.__repr__()
         return hash(data_str)
 
+    @property
+    def memory_class(self) -> str:
+        """Return memory classification: 'low' or 'high'.
+
+        Based on sketch_macros.h SKETCH_HAS_LOTS_OF_MEMORY definitions.
+        Low-memory boards include AVR, Teensy LC/3.0/3.1, STM32F1, ESP8266, Renesas UNO R4.
+        """
+        # Low-memory board list (matches sketch_macros.h)
+        low_memory_boards = {
+            "uno",
+            "nano",
+            "nano_every",
+            "yun",
+            "attiny85",
+            "attiny88",
+            "attiny1604",
+            "attiny4313",
+            "attiny1616",
+            "teensylc",
+            "teensy30",
+            "teensy31",
+            "bluepill",
+            "bluepill_f103cb",
+            "maple_mini",
+            "hy_tinystm103tb",
+            "esp8266",
+            "uno_r4_wifi",
+            "uno_r4_minima",
+        }
+
+        # Low-memory platform families
+        low_memory_platforms = {
+            "atmelavr",  # AVR classic
+            "atmelmegaavr",  # AVR modern (mega)
+            "renesas-ra",  # Renesas (UNO R4)
+        }
+
+        # Check board name first
+        if self.board_name in low_memory_boards:
+            return "low"
+
+        # Check platform
+        if self.platform and self.platform in low_memory_platforms:
+            return "low"
+
+        # Default to high memory
+        return "high"
+
+    @property
+    def platform_family(self) -> str:
+        """Return simplified platform family name for filtering.
+
+        Maps PlatformIO platform names to simplified family names like 'avr', 'esp32', 'teensy'.
+        """
+        if not self.platform:
+            return "unknown"
+
+        platform_lower = self.platform.lower()
+
+        # Extract platform family from various URL formats
+        if "atmelavr" in platform_lower or "atmelmegaavr" in platform_lower:
+            return "avr"
+        elif "espressif32" in platform_lower or "esp32" in platform_lower:
+            return "esp32"
+        elif "espressif8266" in platform_lower or "esp8266" in platform_lower:
+            return "esp8266"
+        elif "teensy" in platform_lower:
+            return "teensy"
+        elif "ststm32" in platform_lower or "stm32" in platform_lower:
+            return "stm32"
+        elif "atmelsam" in platform_lower or "sam" in platform_lower:
+            return "sam"
+        elif "raspberrypi" in platform_lower or "rp2040" in platform_lower:
+            return "rp"
+        elif "nordicnrf52" in platform_lower or "nrf52" in platform_lower:
+            return "nrf52"
+        elif "renesas" in platform_lower:
+            return "renesas"
+        elif "native" in platform_lower:
+            return "native"
+        elif "apollo" in platform_lower:
+            return "apollo3"
+        elif "siliconlabs" in platform_lower or "efm32" in platform_lower:
+            return "efm32"
+        else:
+            # Return platform as-is if no mapping found
+            return self.platform
+
+    def get_mcu_target(self) -> str | None:
+        """Return the MCU target identifier for filtering.
+
+        Returns board_build_mcu if set, otherwise derives from board name or platform.
+        """
+        # Use explicit board_build_mcu if set
+        if self.board_build_mcu:
+            return self.board_build_mcu.upper()
+
+        # Derive from board name for common patterns
+        board_lower = self.board_name.lower()
+
+        # AVR boards
+        if board_lower == "uno" or board_lower == "nano":
+            return "ATMEGA328P"
+        elif board_lower == "yun":
+            return "ATMEGA32U4"
+        elif board_lower.startswith("attiny"):
+            return self.board_name.upper()  # ATtiny85, ATtiny88, etc.
+        elif board_lower == "nano_every":
+            return "ATMEGA4809"
+
+        # ESP32 boards
+        elif board_lower.startswith("esp32"):
+            if "s3" in board_lower:
+                return "ESP32S3"
+            elif "s2" in board_lower:
+                return "ESP32S2"
+            elif "c3" in board_lower:
+                return "ESP32C3"
+            elif "c2" in board_lower:
+                return "ESP32C2"
+            elif "c5" in board_lower:
+                return "ESP32C5"
+            elif "c6" in board_lower:
+                return "ESP32C6"
+            elif "h2" in board_lower:
+                return "ESP32H2"
+            elif "p4" in board_lower:
+                return "ESP32P4"
+            else:
+                return "ESP32"
+
+        # ESP8266
+        elif "esp8266" in board_lower or "esp01" in board_lower:
+            return "ESP8266"
+
+        # Teensy boards
+        elif board_lower == "teensylc":
+            return "MKL26Z64"
+        elif board_lower == "teensy30":
+            return "MK20DX128"
+        elif board_lower == "teensy31":
+            return "MK20DX256"
+        elif board_lower == "teensy40":
+            return "IMXRT1062"
+        elif board_lower == "teensy41":
+            return "IMXRT1062"
+
+        # STM32 boards
+        elif "bluepill" in board_lower:
+            if "f103cb" in board_lower:
+                return "STM32F103CB"
+            else:
+                return "STM32F103C8"
+        elif "blackpill" in board_lower:
+            return "STM32F411CE"
+        elif "maple" in board_lower:
+            return "STM32F103CB"
+        elif "giga" in board_lower:
+            return "STM32H747"
+
+        # SAM boards
+        elif board_lower == "due" or board_lower == "digix":
+            return "SAM3X8E"
+
+        # RP2040/RP2350
+        elif "pico" in board_lower:
+            if "2" in board_lower:
+                return "RP2350"
+            return "RP2040"
+
+        # NRF52 boards
+        elif "nrf52" in board_lower:
+            return "NRF52840"
+
+        # UNO R4
+        elif "uno_r4" in board_lower:
+            return "RA4M1"
+
+        # Return None if we can't determine the target
+        return None
+
     def to_platformio_ini(
         self,
         additional_defines: list[str] | None = None,

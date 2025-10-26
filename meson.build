@@ -55,7 +55,7 @@ platforms_sources = run_command(uv_prog, 'run', 'python', '-c',
   check: false, capture: true)
 
 fl_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").glob("*.cpp")))',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").rglob("*.cpp")))',
   check: false, capture: true)
 
 shared_sources = run_command(uv_prog, 'run', 'python', '-c',

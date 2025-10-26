@@ -148,7 +148,7 @@ void setup() {
     // Initialize audio reactive processor
     fl::AudioReactiveConfig audioConfig;
     audioConfig.gain = 128;
-    audioConfig.sensitivity = audioSensitivity.as_int();
+    audioConfig.sensitivity = audioSensitivity.as_int(); 
     audioConfig.agcEnabled = true;
     audioConfig.sampleRate = 22050;
     audioReactive.begin(audioConfig);
@@ -162,6 +162,9 @@ void setup() {
 }
 
 void loop() {
+    EVERY_N_MILLISECONDS(1000) {
+        Serial.println("AnimartrixRing loop");
+    }
     // Process audio if enabled
     float audioSpeedFactor = 1.0f;
     float audioBrightnessFactor = 1.0f;
