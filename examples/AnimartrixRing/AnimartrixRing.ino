@@ -21,8 +21,8 @@
 #define TWO_PI 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
 #endif
 
-#define NUM_LEDS 144
-#define DATA_PIN 4
+#define NUM_LEDS 244
+#define DATA_PIN 21  // ESP32C6 has this random pin available on the break out.
 #define BRIGHTNESS 8
 
 // Grid dimensions for Animartrix sampling
@@ -163,13 +163,21 @@ void setup() {
 
 void loop() {
     EVERY_N_MILLISECONDS(1000) {
-        Serial.println("AnimartrixRing loop");
+        // Serial.println("AnimartrixRing loop");
+        FL_WARN("AnimartrixRing loop");
+        // fill black
+        fill_solid(leds, NUM_LEDS, CRGB::Black);
+        FastLED.show();
+        delay(240);
+        return;
     }
+
+    return;
     // Process audio if enabled
     float audioSpeedFactor = 1.0f;
     float audioBrightnessFactor = 1.0f;
 
-    if (enableAudioReactive.value()) {
+    if (enableAudioReactive.value() && false) {
         // Process audio samples
         fl::AudioSample sample = audio.next();
         if (sample.isValid()) {

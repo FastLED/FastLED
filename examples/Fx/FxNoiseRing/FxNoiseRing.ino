@@ -30,7 +30,7 @@
 #include "fl/noise.h"
 
 // Defines come after all includes
-#define LED_PIN 2
+#define LED_PIN 21
 #define COLOR_ORDER GRB  // Color order matters for a real device, web-compiler will ignore this.
 #define NUM_LEDS 250
 #define PIN_PIR 0
