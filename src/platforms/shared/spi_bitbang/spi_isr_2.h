@@ -4,10 +4,6 @@
 #include "fl/stdint.h"
 #include "spi_isr_engine.h"
 
-#ifndef SPI_ISR_SOFTWARE_BITBANG_FORCED_ON
-#warning "SpiIsr2 uses software ISR bit-banging, not hardware SPI. Define SPI_ISR_SOFTWARE_BITBANG_FORCED_ON to acknowledge."
-#endif
-
 namespace fl {
 
 /**
