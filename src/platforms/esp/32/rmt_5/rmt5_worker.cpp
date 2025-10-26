@@ -31,10 +31,10 @@ FL_EXTERN_C_END
 // Define rmt_item32_t union (compatible with RMT4)
 union rmt_item32_t {
     struct {
-        uint32_t duration0 : 15;
-        uint32_t level0 : 1;
-        uint32_t duration1 : 15;
-        uint32_t level1 : 1;
+        uint16_t duration0 : 15;
+        uint16_t level0 : 1;
+        uint16_t duration1 : 15;
+        uint16_t level1 : 1;
     };
     uint32_t val;
 };
@@ -178,6 +178,7 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
         mChannel = nullptr;
         return false;
     }
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)", mWorkerId);
 #else
     // Fallback: Use RMT5 high-level callback API
     rmt_tx_event_callbacks_t callbacks = {};
@@ -190,6 +191,7 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
         mChannel = nullptr;
         return false;
     }
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Callback registered successfully (RMT5 high-level API)", mWorkerId);
 #endif
 
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
@@ -260,6 +262,11 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
     mOne.duration0 = ns_to_ticks(t1 + t2);
     mOne.level1 = 0;
     mOne.duration1 = ns_to_ticks(t3);
+
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: mZero={dur0=%u, lvl0=%u, dur1=%u, lvl1=%u, val=0x%08lx}",
+             mWorkerId, mZero.duration0, mZero.level0, mZero.duration1, mZero.level1, mZero.val);
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: mOne={dur0=%u, lvl0=%u, dur1=%u, lvl1=%u, val=0x%08lx}",
+             mWorkerId, mOne.duration0, mOne.level0, mOne.duration1, mOne.level1, mOne.val);
 
     // Update GPIO pin assignment
     // Note: ESP-IDF v5 requires channel to be disabled before changing GPIO
