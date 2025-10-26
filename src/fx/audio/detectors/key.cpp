@@ -6,8 +6,6 @@
 #include "fl/dbg.h"
 #include "fl/namespace.h"
 #include "fl/stdio.h"
-#include <math.h>
-#include <string.h>
 
 FASTLED_USING_NAMESPACE
 

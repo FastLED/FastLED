@@ -61,13 +61,13 @@ private:
     int mMaxPeriod;
 
     // Autocorrelation buffer
-    std::vector<float> mAutocorrelation;
+    fl::vector<float> mAutocorrelation;
 
     // Internal helper methods
     void updatePeriodRange();
     float calculateAutocorrelation(const int16_t* pcm, size numSamples);
-    int findBestPeakLag(const std::vector<float>& autocorr) const;
-    float calculateConfidence(const std::vector<float>& autocorr, int peakLag) const;
+    int findBestPeakLag(const fl::vector<float>& autocorr) const;
+    float calculateConfidence(const fl::vector<float>& autocorr, int peakLag) const;
     float periodToFrequency(int period) const;
     int frequencyToPeriod(float frequency) const;
     void updatePitchSmoothing(float newPitch);
