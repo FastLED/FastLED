@@ -15,12 +15,13 @@
 #include "fx/2d/animartrix.hpp"
 #include "fx/fx2d_to_1d.h"
 #include "fx/fx_engine.h"
+#include "fx/audio/audio_processor.h"
 
 #ifndef TWO_PI
 #define TWO_PI 6.2831853071795864769252867665590057683943387987502116419498891846156328125724179972560696506842341359
 #endif
 
-#define NUM_LEDS 60
+#define NUM_LEDS 144
 #define DATA_PIN 3
 #define BRIGHTNESS 128
 
@@ -90,6 +91,10 @@ fl::UISlider audioSensitivity("Audio Sensitivity", 128, 0, 255, 1);
 // Audio reactive processor
 fl::AudioReactive audioReactive;
 
+// Audio processor for downbeat detection
+fl::AudioProcessor audioProcessor;
+bool flashWhiteThisFrame = false;
+
 // Calculate average brightness percentage from LED array
 float getAverageBrightness(CRGB* leds, int numLeds) {
     uint32_t total = 0;
@@ -148,6 +153,11 @@ void setup() {
     audioConfig.sampleRate = 22050;
     audioReactive.begin(audioConfig);
 
+    // Setup downbeat detector callback
+    audioProcessor.onDownbeat([](){
+        flashWhiteThisFrame = true;
+    });
+
     Serial.println("AnimartrixRing setup complete");
 }
 
@@ -175,6 +185,9 @@ void loop() {
                 float normalizedVolume = audioData.volume / 255.0f;
                 audioBrightnessFactor = fl::fl_max(0.3f, normalizedVolume * audioBrightnessMultiplier.value());
             }
+
+            // Process audio for downbeat detection
+            audioProcessor.update(sample);
         }
     }
 
@@ -184,6 +197,12 @@ void loop() {
 
     // Draw the effect
     fxEngine.draw(millis(), leds);
+
+    // Flash white on downbeat
+    if (flashWhiteThisFrame) {
+        fill_solid(leds, NUM_LEDS, CRGB::White);
+        flashWhiteThisFrame = false;
+    }
 
     // Calculate final brightness
     uint8_t finalBrightness;

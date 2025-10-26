@@ -4,10 +4,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 #include "fl/dbg.h"
-#include "fl/namespace.h"
 #include "fl/stdio.h"
-
-FASTLED_USING_NAMESPACE
 
 namespace fl {
 

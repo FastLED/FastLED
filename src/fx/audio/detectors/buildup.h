@@ -6,7 +6,6 @@
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
 #include "fl/function.h"
-#include "fl/namespace.h"
 
 namespace fl {
 

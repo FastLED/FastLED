@@ -2,7 +2,7 @@
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 DynamicsAnalyzer::DynamicsAnalyzer()
     : mHistorySize(86)  // ~2 seconds at 43fps
@@ -193,4 +193,4 @@ void DynamicsAnalyzer::setSmoothingFactor(float alpha) {
     mSmoothingFactor = fl::fl_max(0.0f, fl::fl_min(1.0f, alpha));
 }
 
-FASTLED_NAMESPACE_END
+}  // namespace fl

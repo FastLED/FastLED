@@ -4,9 +4,8 @@
 #include "fl/audio/audio_context.h"
 #include "fl/function.h"
 #include "fl/vector.h"
-#include "fl/namespace.h"
 
-FASTLED_NAMESPACE_BEGIN
+namespace fl {
 
 // DynamicsAnalyzer tracks loudness trends over time to detect crescendos,
 // diminuendos, and overall dynamic evolution.
@@ -68,4 +67,4 @@ private:
     void updateCompression();
 };
 
-FASTLED_NAMESPACE_END
+}  // namespace fl
