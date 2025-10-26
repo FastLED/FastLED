@@ -491,13 +491,14 @@ These images are:
 
 | Platform | Docker Image | Cached Boards |
 |----------|--------------|---------------|
-| AVR | `niteris/fastled-compiler-avr-uno:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
-| ESP | `niteris/fastled-compiler-esp:latest` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
-| Teensy | `niteris/fastled-compiler-teensy-teensy41:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
-| STM32 | `niteris/fastled-compiler-stm32-bluepill:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
+| AVR | `niteris/fastled-compiler-avr:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
+| ESP RISC-V | `niteris/fastled-compiler-esp-riscv:latest` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
+| ESP Xtensa | `niteris/fastled-compiler-esp-xtensa:latest` | esp32dev, esp32s2, esp32s3, esp8266 |
+| Teensy | `niteris/fastled-compiler-teensy:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
+| STM32 | `niteris/fastled-compiler-stm32:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
 | RP | `niteris/fastled-compiler-rp:latest` | rp2040, rp2350 |
-| NRF52 | `niteris/fastled-compiler-nrf52-nrf52840_dk:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
-| SAM | `niteris/fastled-compiler-sam-due:latest` | due, digix |
+| NRF52 | `niteris/fastled-compiler-nrf52:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
+| SAM | `niteris/fastled-compiler-sam:latest` | due, digix |
 
 ### Key Features
 

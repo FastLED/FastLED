@@ -28,20 +28,26 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "nano_every",
         "attiny1616",
     ],
-    # ESP Platform - All Espressif chips (ESP32 + ESP8266)
-    # Image: niteris/fastled-compiler-esp-esp32dev:latest
-    # Platform: espressif32, espressif8266
-    # IDF versions: Mixed (pioarduino provides latest)
-    "esp": [
-        "esp32dev",
-        "esp32s3",
-        "esp32c3",
+    # ESP RISC-V Platform - ESP32 chips with RISC-V architecture
+    # Image: niteris/fastled-compiler-esp-riscv:latest
+    # Platform: espressif32
+    # Chips: C2, C3, C5, C6, H2, P4 (all use RISC-V cores)
+    "esp-riscv": [
         "esp32c2",
+        "esp32c3",
         "esp32c5",
         "esp32c6",
         "esp32h2",
         "esp32p4",
+    ],
+    # ESP Xtensa Platform - ESP32 chips with Xtensa architecture
+    # Image: niteris/fastled-compiler-esp-xtensa:latest
+    # Platform: espressif32, espressif8266
+    # Chips: ESP32 (original), S2, S3 (all use Xtensa cores), ESP8266
+    "esp-xtensa": [
+        "esp32dev",
         "esp32s2",
+        "esp32s3",
         "esp8266",
     ],
     # Teensy Platform - All Teensy variants

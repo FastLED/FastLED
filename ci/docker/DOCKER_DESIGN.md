@@ -11,7 +11,8 @@ This document describes the architecture and naming conventions for FastLED's pr
 ```
 niteris/fastled-compiler-base:latest
     ├── niteris/fastled-compiler-avr:latest
-    ├── niteris/fastled-compiler-esp:latest
+    ├── niteris/fastled-compiler-esp-riscv:latest
+    ├── niteris/fastled-compiler-esp-xtensa:latest
     ├── niteris/fastled-compiler-teensy:latest
     ├── niteris/fastled-compiler-stm32:latest
     ├── niteris/fastled-compiler-rp:latest
@@ -66,7 +67,8 @@ Platform images are organized by **toolchain family**, not individual boards. Bo
 | Platform Family | Docker Image | Included Boards |
 |----------------|--------------|-----------------|
 | **avr** | `fastled-compiler-avr` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
-| **esp** | `fastled-compiler-esp` | esp32dev, esp32s3, esp32c3, esp32c2, esp32c5, esp32c6, esp32h2, esp32p4, esp32s2, esp8266 |
+| **esp-riscv** | `fastled-compiler-esp-riscv` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
+| **esp-xtensa** | `fastled-compiler-esp-xtensa` | esp32dev, esp32s2, esp32s3, esp8266 |
 | **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc |
 | **stm32** | `fastled-compiler-stm32` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
 | **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 |
@@ -81,29 +83,44 @@ niteris/fastled-compiler-<platform-family>:<tag>
 
 **Examples**:
 - `niteris/fastled-compiler-avr:latest`
-- `niteris/fastled-compiler-esp:latest`
+- `niteris/fastled-compiler-esp-riscv:latest`
+- `niteris/fastled-compiler-esp-xtensa:latest`
 - `niteris/fastled-compiler-teensy:latest`
 
 **Rationale**:
-- `<platform-family>`: Groups boards by shared toolchain (e.g., `avr`, `esp`, `teensy`)
+- `<platform-family>`: Groups boards by shared toolchain (e.g., `avr`, `esp-riscv`, `esp-xtensa`, `teensy`)
 - `<tag>`: Version identifier (currently `:latest`)
 - No board suffix needed since each image contains toolchains for ALL boards in the family
+- ESP32 is split by architecture (RISC-V vs Xtensa) to reduce image size
 
 ## Special Cases
 
 ### ESP32 Platform
 
-**Complexity**: ESP32 boards support multiple IDF (Espressif IoT Development Framework) versions with different capabilities.
+**Architecture Split**: ESP32 family is split by CPU architecture due to large toolchain size:
 
-**Current Strategy**: Single `:latest` tag using current stable IDF from pioarduino
+**RISC-V Image**: `niteris/fastled-compiler-esp-riscv:latest`
+- **Boards**: esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4
+- **Toolchain**: `toolchain-riscv32-esp` (RISC-V cross-compiler)
+- **Characteristics**: Modern ESP32 chips using open-source RISC-V architecture
 
-**Future Strategy** (when needed):
+**Xtensa Image**: `niteris/fastled-compiler-esp-xtensa:latest`
+- **Boards**: esp32dev (original ESP32), esp32s2, esp32s3, esp8266
+- **Toolchain**: `toolchain-xtensa-esp32` (Xtensa cross-compiler)
+- **Characteristics**: Classic ESP32 chips using Xtensa architecture
+
+**Rationale**:
+- ESP32 toolchains are significantly larger than other platforms (esp. RISC-V + Xtensa combined)
+- Splitting by architecture reduces image size from ~3GB to ~1.5GB per image
+- Most users only need one architecture, so they only download the toolchain they need
+- Both images share the same IDF version from pioarduino for consistency
+
+**IDF Version Strategy**: Both images currently use `:latest` tag with current stable IDF from pioarduino. Future strategy (when needed):
 ```
-niteris/fastled-compiler-esp:latest     → Current stable (e.g., idf5.5)
-niteris/fastled-compiler-esp:idf5.5     → Explicit IDF 5.5
-niteris/fastled-compiler-esp:idf5.4     → Explicit IDF 5.4
-niteris/fastled-compiler-esp:idf5.3     → Explicit IDF 5.3
-niteris/fastled-compiler-esp:idf4.4     → Explicit IDF 4.4
+niteris/fastled-compiler-esp-riscv:latest     → Current stable (e.g., idf5.5)
+niteris/fastled-compiler-esp-riscv:idf5.5     → Explicit IDF 5.5
+niteris/fastled-compiler-esp-xtensa:latest    → Current stable (e.g., idf5.5)
+niteris/fastled-compiler-esp-xtensa:idf5.5    → Explicit IDF 5.5
 ```
 
 **Platform Sources**:
@@ -151,7 +168,8 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  ↓
 2:10 AM UTC  →  Platform images build in parallel (each compiles multiple boards)
                  ├── avr (builds: uno, attiny85, attiny88, nano_every, etc.)
-                 ├── esp (builds: esp32dev, esp32s3, esp32c3, esp32c6, etc.)
+                 ├── esp-riscv (builds: esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4)
+                 ├── esp-xtensa (builds: esp32dev, esp32s2, esp32s3, esp8266)
                  ├── teensy (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
                  ├── stm32 (builds: bluepill, blackpill, maple_mini, etc.)
                  ├── rp (builds: rp2040, rp2350)
@@ -182,7 +200,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
 
 2. **`.github/workflows/docker_compiler_base_platforms.yml`**
    - Single unified workflow building ALL platform images in parallel
-   - Contains jobs for: avr, esp, teensy, stm32, rp2040, nrf52, sam
+   - Contains jobs for: avr, esp-riscv, esp-xtensa, teensy, stm32, rp2040, nrf52, sam
    - Triggered by base workflow (with 10 min delay)
    - Can also run via manual dispatch or fallback cron
 
@@ -210,8 +228,9 @@ The single source of truth for platform→boards relationships. This module defi
 DOCKER_PLATFORMS = {
     "avr": ["uno", "yun", "attiny85", "attiny88", "attiny4313",
             "nano_every", "attiny1604", "attiny1616"],
-    "esp": ["esp32dev", "esp32s3", "esp32c3", "esp32c2", "esp32c5",
-            "esp32c6", "esp32h2", "esp32p4", "esp32s2", "esp8266"],
+    "esp-riscv": ["esp32c2", "esp32c3", "esp32c5", "esp32c6",
+                  "esp32h2", "esp32p4"],
+    "esp-xtensa": ["esp32dev", "esp32s2", "esp32s3", "esp8266"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
     "stm32": ["bluepill", "blackpill", "maple_mini",
               "hy_tinystm103tb", "giga_r1"],
@@ -232,10 +251,10 @@ BOARD_TO_PLATFORM = {
 **How It Works**:
 
 During Docker build (`ci/docker/build.sh`), the "compile" stage:
-1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "uno")
-2. Looks up platform family: `BOARD_TO_PLATFORM["uno"]` → `"avr"`
-3. Gets all boards for platform: `DOCKER_PLATFORMS["avr"]` → `["uno", "attiny85", ...]`
-4. Loops through and compiles each board: `bash compile uno Blink`, `bash compile attiny85 Blink`, etc.
+1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "esp32c3")
+2. Looks up platform family: `BOARD_TO_PLATFORM["esp32c3"]` → `"esp-riscv"`
+3. Gets all boards for platform: `DOCKER_PLATFORMS["esp-riscv"]` → `["esp32c2", "esp32c3", "esp32c5", ...]`
+4. Loops through and compiles each board: `bash compile esp32c2 Blink`, `bash compile esp32c3 Blink`, etc.
 5. Result: All toolchains for the platform family are pre-cached in the image
 
 **Helper Functions**:
