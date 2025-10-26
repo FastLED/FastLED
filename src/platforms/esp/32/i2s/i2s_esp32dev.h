@@ -59,7 +59,7 @@ FL_EXTERN_C_END
 
 #define NUM_COLOR_CHANNELS 3
 namespace fl {
-struct DMABuffer {
+struct I2SDMABuffer {
     lldesc_t descriptor;
     uint8_t *buffer;
 };
@@ -68,7 +68,7 @@ extern int gCurBuffer;
 extern bool gDoneFilling;
 extern uint8_t gPixelRow[NUM_COLOR_CHANNELS][32];
 extern uint8_t gPixelBits[NUM_COLOR_CHANNELS][8][4];
-extern DMABuffer *dmaBuffers[NUM_DMA_BUFFERS];;
+extern I2SDMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
 
 // typedef for a void function pointer
 typedef void (*void_func_t)(void);

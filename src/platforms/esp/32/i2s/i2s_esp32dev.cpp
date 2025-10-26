@@ -75,7 +75,7 @@ void i2s_set_fill_buffer_callback(void_func_t callback) {
     gCallback = callback;
 }
 
-DMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
+I2SDMABuffer *dmaBuffers[NUM_DMA_BUFFERS];
 
 // -- Global semaphore for the whole show process
 //    Semaphore is not given until all data has been sent
@@ -88,9 +88,9 @@ static xSemaphoreHandle gTX_semaphore = nullptr;
 // -- One-time I2S initialization
 static bool gInitializedI2sInitialized = false;
 
-static DMABuffer *allocateDMABuffer(int bytes) {
-    DMABuffer *b =
-        (DMABuffer *)heap_caps_malloc(sizeof(DMABuffer), MALLOC_CAP_DMA);
+static I2SDMABuffer *allocateDMABuffer(int bytes) {
+    I2SDMABuffer *b =
+        (I2SDMABuffer *)heap_caps_malloc(sizeof(I2SDMABuffer), MALLOC_CAP_DMA);
 
     b->buffer = (uint8_t *)heap_caps_malloc(bytes, MALLOC_CAP_DMA);
     fl::memset(b->buffer, 0, bytes);
