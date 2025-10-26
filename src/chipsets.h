@@ -46,6 +46,10 @@
   #include "platforms/avr/clockless_trinket.h"
 #endif
 
+// Include generic ClocklessBlockController as fallback for platforms without specialized implementation
+// This provides single-pin clockless LED support using nanosecond-precision timing
+#include "platforms/shared/clockless_block/clockless_block_generic.h"
+
 // Include UCS7604 controller (requires ClocklessBlockController to be defined)
 #include "fl/chipsets/ucs7604.h"  // optional.
 
