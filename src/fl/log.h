@@ -51,6 +51,14 @@
     #define FL_LOG_PARLIO(X) FL_DBG_NO_OP(X)
 #endif
 
+/// @brief Audio processing logging
+/// Logs audio sample processing, FFT computation, beat detection, and detector updates
+#ifdef FASTLED_LOG_AUDIO_ENABLED
+    #define FL_LOG_AUDIO(X) FL_WARN(X)
+#else
+    #define FL_LOG_AUDIO(X) FL_DBG_NO_OP(X)
+#endif
+
 
 
 
