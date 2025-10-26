@@ -48,8 +48,12 @@ def find_docker_executable() -> Optional[str]:
 
     # Try standard PATH first
     try:
+        # On Windows, look for docker.exe to avoid shell script issues
+        search_cmd = (
+            ["where", "docker.exe"] if sys.platform == "win32" else ["which", "docker"]
+        )
         result = subprocess.run(
-            ["where", "docker"] if sys.platform == "win32" else ["which", "docker"],
+            search_cmd,
             capture_output=True,
             text=True,
             timeout=5,
