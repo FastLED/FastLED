@@ -37,7 +37,7 @@ auto animartrix = fl::make_shared<fl::Animartrix>(xymap, fl::RGB_BLOBS5);
 int currentAnimationIndex = 0;
 
 // ScreenMap for the ring - defines circular sampling positions using a lambda
-fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.5f, [](int index, fl::vec2f& pt_out) {
+fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.15f, [](int index, fl::vec2f& pt_out) {
     float centerX = GRID_WIDTH / 2.0f;
     float centerY = GRID_HEIGHT / 2.0f;
     float radius = min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
@@ -128,7 +128,7 @@ void setup() {
 
     // Setup LED strip
     fl::ScreenMap screenMapLocal(screenmap);
-    screenMapLocal.setDiameter(0.5);
+    screenMapLocal.setDiameter(0.15);  // 0.15 cm or 1.5mm - appropriate for dense 144 LED rope
     FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMapLocal);
