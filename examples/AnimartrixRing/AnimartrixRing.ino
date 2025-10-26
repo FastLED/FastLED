@@ -22,8 +22,8 @@
 #endif
 
 #define NUM_LEDS 144
-#define DATA_PIN 3
-#define BRIGHTNESS 128
+#define DATA_PIN 4
+#define BRIGHTNESS 8
 
 // Grid dimensions for Animartrix sampling
 #define GRID_WIDTH 32

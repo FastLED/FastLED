@@ -184,10 +184,10 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
         lane1_byte |= ((byte0 >> 7) & 0x01) << 4;
 
         // Extract from byte1 (bits 3,2,1,0)
-        lane0_byte |= ((byte1 >> 2) & 0x01) << 3;  // bit 3
-        lane1_byte |= ((byte1 >> 3) & 0x01) << 3;
-        lane0_byte |= ((byte1 >> 0) & 0x01) << 2;  // bit 2
-        lane1_byte |= ((byte1 >> 1) & 0x01) << 2;
+        lane0_byte |= ((byte1 >> 0) & 0x01) << 3;  // bit 3
+        lane1_byte |= ((byte1 >> 1) & 0x01) << 3;
+        lane0_byte |= ((byte1 >> 2) & 0x01) << 2;  // bit 2
+        lane1_byte |= ((byte1 >> 3) & 0x01) << 2;
         lane0_byte |= ((byte1 >> 4) & 0x01) << 1;  // bit 1
         lane1_byte |= ((byte1 >> 5) & 0x01) << 1;
         lane0_byte |= ((byte1 >> 6) & 0x01) << 0;  // bit 0

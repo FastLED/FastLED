@@ -86,6 +86,10 @@ inline double log(double value) { return log_impl_double(value); }
 inline float log10f(float value) { return log10_impl_float(value); }
 inline double log10(double value) { return log10_impl_double(value); }
 
+// Base-2 logarithm functions (implemented using natural log)
+inline float log2f(float value) { return log_impl_float(value) / log_impl_float(2.0f); }
+inline double log2(double value) { return log_impl_double(value) / log_impl_double(2.0); }
+
 // Power functions
 inline float powf(float base, float exponent) { return pow_impl_float(base, exponent); }
 inline double pow(double base, double exponent) { return pow_impl_double(base, exponent); }

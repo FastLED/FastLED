@@ -289,6 +289,7 @@ ARDUINOJSON_END_PRIVATE_NAMESPACE
 #include "fl/cstring.h"
 #include "fl/stdint.h"
 #include "fl/cstdlib.h"
+#include "fl/stddef.h"
 #include "fl/malloc.h"
 #include "fl/str.h"
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
