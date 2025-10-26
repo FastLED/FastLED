@@ -60,11 +60,9 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     // Set log level to verbose for maximum debugging
     esp_log_level_set(RMT5_POOL_TAG, ESP_LOG_VERBOSE);
 
-    ESP_LOGE(RMT5_POOL_TAG, "=== initializeWorkersIfNeeded() ENTRY ===");
-    ESP_LOGE(RMT5_POOL_TAG, "mInitialized=%d", mInitialized);
+
 
     if (mInitialized) {
-        ESP_LOGE(RMT5_POOL_TAG, "Already initialized - returning early");
         return;
     }
 
@@ -72,55 +70,40 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     mExpectedChannels = max_workers;
     mCreatedChannels = 0;
 
-    ESP_LOGE(RMT5_POOL_TAG, "");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "RMT WORKER POOL INITIALIZATION");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "Max workers: %d", max_workers);
-    ESP_LOGE(RMT5_POOL_TAG, "Hybrid mode threshold: %d LEDs", FASTLED_ONESHOT_THRESHOLD_LEDS);
-    ESP_LOGE(RMT5_POOL_TAG, "STRICT MODE: Will abort if all %d channels cannot be created", max_workers);
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "");
+
 
     // Create K double-buffer workers (current default)
     // Note: We only create one type because we only have K hardware channels
     // Future: could dynamically choose worker type based on usage patterns
-    ESP_LOGE(RMT5_POOL_TAG, "Starting worker creation loop...");
+    ESP_LOGD(RMT5_POOL_TAG, "Starting worker creation loop...");
     for (int i = 0; i < max_workers; i++) {
-        ESP_LOGE(RMT5_POOL_TAG, "");
-        ESP_LOGE(RMT5_POOL_TAG, "--- Creating worker %d/%d ---", i + 1, max_workers);
-        ESP_LOGE(RMT5_POOL_TAG, "Allocating RmtWorker object...");
+        ESP_LOGD(RMT5_POOL_TAG, "");
+        ESP_LOGD(RMT5_POOL_TAG, "--- Creating worker %d/%d ---", i + 1, max_workers);
+        ESP_LOGD(RMT5_POOL_TAG, "Allocating RmtWorker object...");
         RmtWorker* worker = new RmtWorker();
-        ESP_LOGE(RMT5_POOL_TAG, "Worker object allocated at %p", worker);
+        ESP_LOGD(RMT5_POOL_TAG, "Worker object allocated at %p", worker);
 
-        ESP_LOGE(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
+        ESP_LOGD(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
         if (!worker->initialize(static_cast<uint8_t>(i))) {
             ESP_LOGE(RMT5_POOL_TAG, "FAILED to initialize double-buffer worker %d - skipping", i);
             delete worker;
             continue;
         }
-        ESP_LOGE(RMT5_POOL_TAG, "Worker %d initialized successfully", i);
+        ESP_LOGD(RMT5_POOL_TAG, "Worker %d initialized successfully", i);
 
-        ESP_LOGE(RMT5_POOL_TAG, "Adding worker %d to pool vectors...", i);
+        ESP_LOGD(RMT5_POOL_TAG, "Adding worker %d to pool vectors...", i);
         mDoubleBufferWorkers.push_back(worker);
         mWorkers.push_back(worker);  // Legacy support
-        ESP_LOGE(RMT5_POOL_TAG, "Worker %d added to pool (total workers: %zu)", i, mDoubleBufferWorkers.size());
+        ESP_LOGD(RMT5_POOL_TAG, "Worker %d added to pool (total workers: %zu)", i, mDoubleBufferWorkers.size());
     }
 
-    ESP_LOGE(RMT5_POOL_TAG, "");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "Worker creation complete");
-    ESP_LOGE(RMT5_POOL_TAG, "Double-buffer workers: %zu", mDoubleBufferWorkers.size());
-    ESP_LOGE(RMT5_POOL_TAG, "One-shot workers: %zu", mOneShotWorkers.size());
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "");
 
     if (mDoubleBufferWorkers.size() == 0 && mOneShotWorkers.size() == 0) {
         ESP_LOGE(RMT5_POOL_TAG, "FATAL: No workers initialized successfully!");
     }
 
     mInitialized = true;
-    ESP_LOGE(RMT5_POOL_TAG, "=== initializeWorkersIfNeeded() EXIT - mInitialized=%d ===", mInitialized);
+    ESP_LOGD(RMT5_POOL_TAG, "=== initializeWorkersIfNeeded() EXIT - mInitialized=%d ===", mInitialized);
 }
 
 IRmtWorkerBase* RmtWorkerPool::acquireWorker(
@@ -134,75 +117,64 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     uint32_t t2 = TIMING.T2;
     uint32_t t3 = TIMING.T3;
 
-    ESP_LOGE(RMT5_POOL_TAG, "");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "=== acquireWorker() ENTRY ===");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "num_bytes=%d (%d LEDs)", num_bytes, num_bytes / 3);
-    ESP_LOGE(RMT5_POOL_TAG, "pin=%d", (int)pin);
-    ESP_LOGE(RMT5_POOL_TAG, "t1=%lu, t2=%lu, t3=%lu", t1, t2, t3);
-    ESP_LOGE(RMT5_POOL_TAG, "reset_ns=%lu", reset_ns);
-    ESP_LOGE(RMT5_POOL_TAG, "");
+
 
     // Initialize workers on first use
-    ESP_LOGE(RMT5_POOL_TAG, "Calling initializeWorkersIfNeeded()...");
+    ESP_LOGD(RMT5_POOL_TAG, "Calling initializeWorkersIfNeeded()...");
     initializeWorkersIfNeeded();
-    ESP_LOGE(RMT5_POOL_TAG, "initializeWorkersIfNeeded() returned");
+    ESP_LOGD(RMT5_POOL_TAG, "initializeWorkersIfNeeded() returned");
 
     // Determine which worker type to use based on strip size
     // For now, always use double-buffer (hybrid mode for future expansion)
     bool use_oneshot = (static_cast<size_t>(num_bytes) <= ONE_SHOT_THRESHOLD_BYTES);
 
-    ESP_LOGE(RMT5_POOL_TAG, "Worker selection:");
-    ESP_LOGE(RMT5_POOL_TAG, "  use_oneshot=%d", use_oneshot);
-    ESP_LOGE(RMT5_POOL_TAG, "  threshold_bytes=%zu", ONE_SHOT_THRESHOLD_BYTES);
-    ESP_LOGE(RMT5_POOL_TAG, "  num_bytes=%d", num_bytes);
+
 
     // Try to get an available worker immediately
-    ESP_LOGE(RMT5_POOL_TAG, "Entering critical section to search for available worker...");
+    ESP_LOGD(RMT5_POOL_TAG, "Entering critical section to search for available worker...");
     portENTER_CRITICAL(&mSpinlock);
     IRmtWorkerBase* worker = nullptr;
 
-    ESP_LOGE(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
-    ESP_LOGE(RMT5_POOL_TAG, "Available one-shot workers: %zu", mOneShotWorkers.size());
+    ESP_LOGD(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
+    ESP_LOGD(RMT5_POOL_TAG, "Available one-shot workers: %zu", mOneShotWorkers.size());
 
     if (use_oneshot && mOneShotWorkers.size() > 0) {
-        ESP_LOGE(RMT5_POOL_TAG, "Searching for available one-shot worker...");
+        ESP_LOGD(RMT5_POOL_TAG, "Searching for available one-shot worker...");
         worker = findAvailableOneShotWorker();
         if (worker) {
-            ESP_LOGE(RMT5_POOL_TAG, "Found ONE-SHOT worker for %d bytes (%d LEDs)",
+            ESP_LOGD(RMT5_POOL_TAG, "Found ONE-SHOT worker for %d bytes (%d LEDs)",
                      num_bytes, num_bytes / 3);
         } else {
-            ESP_LOGE(RMT5_POOL_TAG, "No one-shot worker available");
+            ESP_LOGD(RMT5_POOL_TAG, "No one-shot worker available");
         }
     }
 
     if (!worker) {
-        ESP_LOGE(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
+        ESP_LOGD(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
         worker = findAvailableDoubleBufferWorker();
         if (worker) {
             if (use_oneshot) {
-                ESP_LOGE(RMT5_POOL_TAG, "Using DOUBLE-BUFFER worker for %d bytes (no one-shot available)", num_bytes);
+                ESP_LOGD(RMT5_POOL_TAG, "Using DOUBLE-BUFFER worker for %d bytes (no one-shot available)", num_bytes);
             } else {
-                ESP_LOGE(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
+                ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
             }
         } else {
-            ESP_LOGE(RMT5_POOL_TAG, "No double-buffer worker available");
+            ESP_LOGD(RMT5_POOL_TAG, "No double-buffer worker available");
         }
     }
 
     portEXIT_CRITICAL(&mSpinlock);
-    ESP_LOGE(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
+    ESP_LOGD(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
 
     if (worker) {
-        ESP_LOGE(RMT5_POOL_TAG, "Worker found! Configuring worker...");
+        ESP_LOGD(RMT5_POOL_TAG, "Worker found! Configuring worker...");
 
         // Check if this worker already has a channel (to track actual channel creation)
         bool had_channel = worker->hasChannel();
-        ESP_LOGE(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
+        ESP_LOGD(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
 
         // Configure the worker before returning
-        ESP_LOGE(RMT5_POOL_TAG, "Calling worker->configure(pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu)...",
+        ESP_LOGD(RMT5_POOL_TAG, "Calling worker->configure(pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu)...",
                  (int)pin, t1, t2, t3, reset_ns);
         if (!worker->configure(pin, TIMING, reset_ns)) {
             ESP_LOGE(RMT5_POOL_TAG, "worker->configure() FAILED!");
@@ -222,25 +194,25 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
             // Stack trace from abort() will be printed by panic handler
             abort();
         } else {
-            ESP_LOGE(RMT5_POOL_TAG, "worker->configure() SUCCESS!");
+            ESP_LOGD(RMT5_POOL_TAG, "worker->configure() SUCCESS!");
 
             // Successfully configured - track channel creation only if this is a NEW channel
             if (!had_channel) {
                 mCreatedChannels++;
-                ESP_LOGE(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d",
+                ESP_LOGD(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d",
                          mCreatedChannels, mExpectedChannels, (int)pin);
             } else {
-                ESP_LOGE(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d", (int)pin);
+                ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d", (int)pin);
             }
 
-            ESP_LOGE(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS - returning worker %p ===", worker);
+            ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS - returning worker %p ===", worker);
             return worker;
         }
     }
 
     // No workers available (or configuration failed) - poll until one frees up
     // This implements the N > K blocking behavior
-    ESP_LOGE(RMT5_POOL_TAG, "No worker immediately available - entering polling loop...");
+    ESP_LOGD(RMT5_POOL_TAG, "No worker immediately available - entering polling loop...");
     uint32_t poll_count = 0;
     uint32_t config_fail_count = 0;  // Track consecutive configuration failures
     const uint32_t MAX_CONFIG_RETRIES = 10;  // Limit retries before aborting
@@ -252,7 +224,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         delayMicroseconds(100);
 
         if (poll_count % 50 == 0) {
-            ESP_LOGE(RMT5_POOL_TAG, "Polling iteration %u - searching for available worker...", poll_count);
+            ESP_LOGD(RMT5_POOL_TAG, "Polling iteration %u - searching for available worker...", poll_count);
         }
 
         portENTER_CRITICAL(&mSpinlock);
@@ -268,30 +240,30 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         portEXIT_CRITICAL(&mSpinlock);
 
         if (worker) {
-            ESP_LOGE(RMT5_POOL_TAG, "Worker found in polling loop (iteration %u)", poll_count);
+            ESP_LOGD(RMT5_POOL_TAG, "Worker found in polling loop (iteration %u)", poll_count);
 
             // Check if this worker already has a channel (to track actual channel creation)
             bool had_channel = worker->hasChannel();
-            ESP_LOGE(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
+            ESP_LOGD(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
 
-            ESP_LOGE(RMT5_POOL_TAG, "Configuring worker in retry path...");
+            ESP_LOGD(RMT5_POOL_TAG, "Configuring worker in retry path...");
             if (worker->configure(pin, TIMING, reset_ns)) {
-                ESP_LOGE(RMT5_POOL_TAG, "worker->configure() SUCCESS in retry path!");
+                ESP_LOGD(RMT5_POOL_TAG, "worker->configure() SUCCESS in retry path!");
 
                 // Success - track channel creation only if this is a NEW channel
                 if (!had_channel) {
                     mCreatedChannels++;
-                    ESP_LOGE(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d (retry path, iteration %u)",
+                    ESP_LOGD(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d (retry path, iteration %u)",
                              mCreatedChannels, mExpectedChannels, (int)pin, poll_count);
                 } else {
-                    ESP_LOGE(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d (retry path, iteration %u)",
+                    ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d (retry path, iteration %u)",
                              (int)pin, poll_count);
                 }
-                ESP_LOGE(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS (retry path) - returning worker %p ===", worker);
+                ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS (retry path) - returning worker %p ===", worker);
                 return worker;
             }
 
-            ESP_LOGE(RMT5_POOL_TAG, "worker->configure() FAILED in retry path!");
+            ESP_LOGD(RMT5_POOL_TAG, "worker->configure() FAILED in retry path!");
 
             // Configuration failed - likely RMT channel exhaustion
             config_fail_count++;
@@ -383,7 +355,7 @@ RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
         bool available = mDoubleBufferWorkers[i]->isAvailable();
         ESP_LOGD(RMT5_POOL_TAG, "  Worker[%d]: available=%d", i, available);
         if (available) {
-            ESP_LOGE(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - found worker[%d]", i);
+            ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - found worker[%d]", i);
             return mDoubleBufferWorkers[i];
         }
     }
