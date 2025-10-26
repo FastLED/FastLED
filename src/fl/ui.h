@@ -76,7 +76,7 @@ class UISlider : public UIElement {
         mImpl.setValue(static_cast<float>(value));
         return *this;
     }
-    
+
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIElement::setGroup(groupName); 
@@ -318,7 +318,7 @@ class UINumberField : public UIElement {
         setValue(static_cast<double>(value));
         return *this;
     }
-    
+
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
         UIElement::setGroup(groupName); 
