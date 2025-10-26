@@ -1,4 +1,4 @@
-/// <reference path="../types.d.ts" />
+/// <reference path="../../types.d.ts" />
 
 /* eslint-disable no-console */
 /* eslint-disable guard-for-in */

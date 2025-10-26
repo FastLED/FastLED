@@ -356,7 +356,7 @@ async function initializeGraphicsManager() {
 
   try {
     // Dynamically import GraphicsManager module for worker context
-    const { GraphicsManager } = await import('./graphics_manager.js');
+    const { GraphicsManager } = await import('../graphics/graphics_manager.js');
 
     // Create graphics manager with OffscreenCanvas
     workerState.graphicsManager = new GraphicsManager({

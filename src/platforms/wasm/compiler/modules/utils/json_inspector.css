@@ -95,7 +95,7 @@
     padding: 6px 12px;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 12px;
+    font-size: 14px;
     transition: all 0.2s ease;
 }
 
@@ -111,7 +111,7 @@
 
 .event-counter {
     color: #999;
-    font-size: 12px;
+    font-size: 14px;
     margin-left: auto;
 }
 
@@ -120,8 +120,8 @@
     overflow-y: auto;
     padding: 4px;
     font-family: 'Courier New', monospace;
-    font-size: 12px;
-    line-height: 1.3;
+    font-size: 14px;
+    line-height: 1.4;
 }
 
 .inspector-event {
@@ -140,7 +140,7 @@
 .direction-header {
     font-weight: bold;
     color: #E0E0E0;
-    font-size: 11px;
+    font-size: 13px;
     padding: 2px 8px;
     background: #2A2A2A;
     border-bottom: 1px solid #333;
@@ -175,8 +175,8 @@
     padding: 2px 8px;
     color: #E0E0E0;
     font-family: 'Courier New', monospace;
-    font-size: 11px;
-    line-height: 1.2;
+    font-size: 13px;
+    line-height: 1.4;
     white-space: pre;
 }
 
@@ -185,10 +185,10 @@
     align-items: center;
     padding: 2px 8px;
     font-family: 'Courier New', monospace;
-    font-size: 11px;
-    line-height: 1.2;
+    font-size: 13px;
+    line-height: 1.4;
     gap: 8px;
-    min-height: 20px;
+    min-height: 22px;
     margin-top: 4px;
 }
 

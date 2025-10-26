@@ -1,5 +1,5 @@
 /* Import JSON Inspector CSS */
-@import url('./modules/json_inspector.css');
+@import url('./modules/utils/json_inspector.css');
 
 body {
     background-color: #121212;

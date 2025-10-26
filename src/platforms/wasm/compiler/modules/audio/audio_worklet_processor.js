@@ -3,7 +3,7 @@
  * Processes audio input for LED visualization
  */
 
-/// <reference path="../types.d.ts" />
+/// <reference path="../../types.d.ts" />
 
 // AudioWorklet global environment declarations
 /* global AudioWorkletProcessor, registerProcessor */

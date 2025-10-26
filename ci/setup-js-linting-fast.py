@@ -242,7 +242,7 @@ echo "$JS_FILES" | sed 's/^/  /'
 # Run ESLint
 echo -e "${{BLUE}}Running ESLint...${{NC}}"
 cd .cache/js-tools
-if "./node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" --no-eslintrc --no-inline-config -c .eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/*.js; then
+if "./node_modules/.bin/eslint{".cmd" if platform.system() == "Windows" else ""}" --no-eslintrc --no-inline-config -c .eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/**/*.js; then
     echo -e "${{GREEN}}SUCCESS: JavaScript linting completed successfully${{NC}}"
 else
     echo -e "${{RED}}ERROR: JavaScript linting failed${{NC}}"

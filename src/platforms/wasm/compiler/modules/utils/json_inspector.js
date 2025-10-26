@@ -95,14 +95,18 @@ export class JsonInspector {
     this.isVisible = true;
     this.overlay.style.display = 'block';
     this.popup.style.display = 'block';
-    this.button.classList.add('active');
+    if (this.button) {
+      this.button.classList.add('active');
+    }
   }
 
   hide() {
     this.isVisible = false;
     this.overlay.style.display = 'none';
     this.popup.style.display = 'none';
-    this.button.classList.remove('active');
+    if (this.button) {
+      this.button.classList.remove('active');
+    }
   }
 
   togglePause() {

@@ -1,4 +1,4 @@
-/// <reference path="../types.d.ts" />
+/// <reference path="../../types.d.ts" />
 
 /**
  * FastLED Pure JavaScript Callbacks Interface

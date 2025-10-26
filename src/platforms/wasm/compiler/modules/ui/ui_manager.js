@@ -40,9 +40,9 @@
 /* eslint-disable max-len */
 /* eslint-disable guard-for-in */
 
-import { AudioManager } from './audio_manager.js';
+import { AudioManager } from '../audio/audio_manager.js';
 import { UILayoutPlacementManager } from './ui_layout_placement_manager.js';
-import { UIRecorder } from './ui_recorder.js';
+import { UIRecorder } from '../recording/ui_recorder.js';
 
 /** Global instance of AudioManager for audio processing */
 const audioManager = new AudioManager();

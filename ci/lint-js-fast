@@ -46,7 +46,7 @@ echo "$JS_FILES" | sed 's/^/  /'
 # Run ESLint using config from ci/ directory
 echo -e "${BLUE}Running ESLint...${NC}"
 cd .cache/js-tools
-if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c ../../ci/.eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/*.js; then
+if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c ../../ci/.eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/**/*.js; then
     echo -e "${GREEN}✅ ESLint completed successfully${NC}"
 else
     echo -e "${RED}ERROR: ESLint failed${NC}"

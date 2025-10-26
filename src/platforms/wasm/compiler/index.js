@@ -22,22 +22,29 @@
 /// <reference path="./types.d.ts" />
 
 
-import { JsonUiManager } from './modules/ui_manager.js';
-import { GraphicsManager } from './modules/graphics_manager.js';
-import { GraphicsManagerThreeJS } from './modules/graphics_manager_threejs.js';
-import { isDenseGrid } from './modules/graphics_utils.js';
-import { JsonInspector } from './modules/json_inspector.js';
-import { VideoRecorder } from './modules/video_recorder.js';
-// Import UI recording modules to make them available globally
-import './modules/ui_recorder.js';
-import './modules/ui_playback.js';
-import './modules/ui_recorder_test.js';
+// UI System imports
+import { JsonUiManager } from './modules/ui/ui_manager.js';
 
-// Import new pure JavaScript modules
-import { FastLEDAsyncController } from './modules/fastled_async_controller.js';
-import './modules/fastled_callbacks.js';
-import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/fastled_events.js';
-import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/fastled_debug_logger.js';
+// Graphics System imports
+import { GraphicsManager } from './modules/graphics/graphics_manager.js';
+import { GraphicsManagerThreeJS } from './modules/graphics/graphics_manager_threejs.js';
+import { isDenseGrid } from './modules/graphics/graphics_utils.js';
+
+// Utility imports
+import { JsonInspector } from './modules/utils/json_inspector.js';
+
+// Recording System imports
+import { VideoRecorder } from './modules/recording/video_recorder.js';
+// Import UI recording modules to make them available globally
+import './modules/recording/ui_recorder.js';
+import './modules/recording/ui_playback.js';
+import './modules/recording/ui_recorder_test.js';
+
+// Core FastLED Integration imports
+import { FastLEDAsyncController } from './modules/core/fastled_async_controller.js';
+import './modules/core/fastled_callbacks.js';
+import { fastLEDEvents, fastLEDPerformanceMonitor } from './modules/core/fastled_events.js';
+import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './modules/core/fastled_debug_logger.js';
 
 /**
  * @typedef {Object} FrameData
@@ -336,7 +343,7 @@ function updateCanvas(frameData) {
     return;
   }
   if (!graphicsManager) {
-    const isDenseMap = isDenseGrid(/** @type {import('./modules/graphics_utils.js').FrameData} */ (frameData));
+    const isDenseMap = isDenseGrid(/** @type {import('./modules/graphics/graphics_utils.js').FrameData} */ (frameData));
 
     // Ensure graphicsArgs has required properties
     const currentGraphicsArgs = {
