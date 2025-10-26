@@ -12,7 +12,8 @@ FL_EXTERN_C_BEGIN
 #include "esp32-hal.h"
 #include "esp_intr_alloc.h"
 #include "driver/gpio.h"
-#include "soc/soc.h"  // For ETS_RMT_INTR_SOURCE
+#include "soc/soc.h"
+#include "soc/interrupts.h"  // For ETS_RMT_INTR_SOURCE
 #include "soc/rmt_struct.h"
 #include "rom/gpio.h"  // For gpio_matrix_out
 #include "rom/ets_sys.h"  // For ets_printf (ISR-safe logging)
@@ -162,7 +163,8 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     RMT.int_ena.val |= (1 << thresh_int_bit);
 
     // Allocate custom ISR at Level 3 (compatible with Xtensa and RISC-V)
-#ifdef ETS_RMT_INTR_SOURCE
+    // NOTE: ETS_RMT_INTR_SOURCE is an enum, not a #define, so it exists on all ESP32 platforms
+    // We MUST use direct ISR since we're using manual register writes in tx_start()
     ret = esp_intr_alloc(
         ETS_RMT_INTR_SOURCE,
         ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
@@ -179,20 +181,6 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
         return false;
     }
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)", mWorkerId);
-#else
-    // Fallback: Use RMT5 high-level callback API
-    rmt_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
-    ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
-    if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to register callbacks: %s (0x%x)",
-                 mWorkerId, esp_err_to_name(ret), ret);
-        rmt_del_channel(mChannel);
-        mChannel = nullptr;
-        return false;
-    }
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Callback registered successfully (RMT5 high-level API)", mWorkerId);
-#endif
 
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
     return true;
