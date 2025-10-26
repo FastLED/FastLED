@@ -92,6 +92,24 @@ constexpr int type_rank<unsigned long long>::value;
 constexpr int type_rank<float>::value;
 constexpr int type_rank<double>::value;
 
+// type_rank - static constexpr members
+template <typename T> constexpr int type_rank<T>::value;
+constexpr int type_rank<bool>::value;
+constexpr int type_rank<signed char>::value;
+constexpr int type_rank<unsigned char>::value;
+constexpr int type_rank<char>::value;
+constexpr int type_rank<short>::value;
+constexpr int type_rank<unsigned short>::value;
+constexpr int type_rank<int>::value;
+constexpr int type_rank<unsigned int>::value;
+constexpr int type_rank<long>::value;
+constexpr int type_rank<unsigned long>::value;
+constexpr int type_rank<long long>::value;
+constexpr int type_rank<unsigned long long>::value;
+constexpr int type_rank<float>::value;
+constexpr int type_rank<double>::value;
+constexpr int type_rank<long double>::value;
+
 // SpiBlock8
 constexpr int SpiBlock8::NUM_DATA_PINS;
 constexpr uint16_t SpiBlock8::MAX_BUFFER_SIZE;

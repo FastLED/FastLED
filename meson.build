@@ -4,8 +4,8 @@ project('fastled', 'cpp',
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
     'werror=false',
-    'buildtype=plain',
-    'unity=off'  # Disable Unity builds to prevent generating multiple compilation units
+    'buildtype=debug',
+    'unity=on'       # Enable unity builds for faster compilation (default: 20 files per chunk)
   ]
 )
 
@@ -16,65 +16,111 @@ tests_dir = include_directories('tests')
 # Platform-specific stub include
 stub_dir = include_directories('src/platforms/stub')
 
+# FastLED library sources
+fastled_sources = files(
+  'src/FastLED.cpp',
+  'src/bitswap.cpp',
+  'src/cled_controller.cpp',
+  'src/colorpalettes.cpp',
+  'src/crgb.cpp',
+  'src/hsv2rgb.cpp',
+  'src/lib8tion.cpp',
+  'src/noise.cpp',
+  'src/platforms.cpp',
+  'src/power_mgt.cpp',
+  'src/simplex.cpp',
+  'src/transpose8x1_noinline.cpp',
+  'src/wiring.cpp',
+  'src/fastled_delay.cpp'
+)
+
 # Collect all .cpp files recursively from src directory
+# This mimics what the Python build system does
 fs = import('fs')
 
 # Find uv for running Python commands
 uv_prog = find_program('uv', required: true)
 
-# Recursively find all .cpp files in src directory
-fastled_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in list(pathlib.Path("src").rglob("*.cpp")) + list(pathlib.Path("fl").rglob("*.cpp"))))',
-  check: true, capture: true).stdout().strip().split('\n')
+# Find additional sources in subdirectories
+lib8tion_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/lib8tion").glob("*.cpp")))',
+  check: false, capture: true)
 
-# Track source code changes for external tools (linting, tests, etc.)
-# Meson automatically regenerates these when relevant files change
-# External tools check if these files are newer than their marker files to decide if they need to re-run
-python_prog = find_program('python', required: true)
+stub_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp") if p.name != "stub_main.cpp"))',
+  check: false, capture: true)
 
-# C++ lint tracker: tracks src/** and examples/**
-cpp_lint_tracker = custom_target('cpp_lint_tracker',
-  input: files(fastled_sources),
-  output: 'cpp_lint.timestamp',
-  command: [uv_prog, 'run', 'python', '-c', '''
-import json, time, pathlib
-# Get all example files
-example_files = list(pathlib.Path("examples").rglob("*.ino")) + list(pathlib.Path("examples").rglob("*.cpp")) + list(pathlib.Path("examples").rglob("*.h"))
-with open("@OUTPUT@", "w") as f:
-    json.dump({"timestamp": time.time(), "examples": len(example_files)}, f, indent=2)
-  '''],
-  build_by_default: true,
-)
+platforms_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms").glob("*.cpp")))',
+  check: false, capture: true)
 
-# Python lint tracker: tracks ci/** + test.py + pyproject.toml
-python_lint_tracker = custom_target('python_lint_tracker',
-  input: files('test.py', 'pyproject.toml'),
-  output: 'python_lint.timestamp',
-  command: [uv_prog, 'run', 'python', '-c', '''
-import json, time, pathlib
-# Get all ci/** files
-ci_files = list(pathlib.Path("ci").rglob("*.py"))
-with open("@OUTPUT@", "w") as f:
-    json.dump({"timestamp": time.time(), "ci_files": len(ci_files)}, f, indent=2)
-  '''],
-  build_by_default: true,
-)
+fl_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").glob("*.cpp")))',
+  check: false, capture: true)
 
-# JavaScript lint tracker: tracks src/platforms/wasm/compiler/** (compiles to JS)
-js_wasm_files = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; files = [str(p) for p in pathlib.Path("src/platforms/wasm/compiler").rglob("*") if p.is_file()]; print(len(files))',
-  check: false, capture: true).stdout().strip()
+shared_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; excluded = {"spi_isr_engine.cpp", "host_timer.cpp"}; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp") if p.name not in excluded))',
+  check: false, capture: true)
 
-if js_wasm_files != '0'
-  js_lint_tracker = custom_target('js_lint_tracker',
-    output: 'js_lint.timestamp',
-    command: [python_prog, '-c', '''
-import json, time
-with open("@OUTPUT@", "w") as f:
-    json.dump({"timestamp": time.time()}, f, indent=2)
-    '''],
-    build_by_default: true,
-  )
+esp_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/esp").rglob("*.cpp")))',
+  check: false, capture: true)
+
+third_party_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/third_party").rglob("*.cpp")))',
+  check: false, capture: true)
+
+codec_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl/codec").glob("*.cpp")))',
+  check: false, capture: true)
+
+fx_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fx").rglob("*.cpp")))',
+  check: false, capture: true)
+
+sensors_sources = run_command(uv_prog, 'run', 'python', '-c',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/sensors").glob("*.cpp")))',
+  check: false, capture: true)
+
+# Add found sources if any
+if lib8tion_sources.returncode() == 0 and lib8tion_sources.stdout().strip() != ''
+  fastled_sources += files(lib8tion_sources.stdout().strip().split('\n'))
+endif
+
+if stub_sources.returncode() == 0 and stub_sources.stdout().strip() != ''
+  fastled_sources += files(stub_sources.stdout().strip().split('\n'))
+endif
+
+if platforms_sources.returncode() == 0 and platforms_sources.stdout().strip() != ''
+  fastled_sources += files(platforms_sources.stdout().strip().split('\n'))
+endif
+
+if fl_sources.returncode() == 0 and fl_sources.stdout().strip() != ''
+  fastled_sources += files(fl_sources.stdout().strip().split('\n'))
+endif
+
+if shared_sources.returncode() == 0 and shared_sources.stdout().strip() != ''
+  fastled_sources += files(shared_sources.stdout().strip().split('\n'))
+endif
+
+if esp_sources.returncode() == 0 and esp_sources.stdout().strip() != ''
+  fastled_sources += files(esp_sources.stdout().strip().split('\n'))
+endif
+
+if third_party_sources.returncode() == 0 and third_party_sources.stdout().strip() != ''
+  fastled_sources += files(third_party_sources.stdout().strip().split('\n'))
+endif
+
+if codec_sources.returncode() == 0 and codec_sources.stdout().strip() != ''
+  fastled_sources += files(codec_sources.stdout().strip().split('\n'))
+endif
+
+if fx_sources.returncode() == 0 and fx_sources.stdout().strip() != ''
+  fastled_sources += files(fx_sources.stdout().strip().split('\n'))
+endif
+
+if sensors_sources.returncode() == 0 and sensors_sources.stdout().strip() != ''
+  fastled_sources += files(sensors_sources.stdout().strip().split('\n'))
 endif
 
 # Compile flags for unit tests (base flags)
@@ -112,7 +158,8 @@ unit_test_compile_args = [
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
-  '-O0'
+  '-O0',
+  '-g'
 ]
 
 # Platform-specific compiler flags
@@ -147,14 +194,14 @@ else
   # Unix/Linux/macOS: Standard pthread linking
   unit_test_link_args = [
     '-pthread',
-    '-rdynamic',              # Export symbols for backtrace_symbols() in crash handler
+    '-rdynamic',  # Export symbols for backtrace_symbols() in crash handler
   ]
   # Note: -fuse-ld=lld removed - zig uses its own bundled lld and ignores this flag
 endif
 
 # Build FastLED static library for tests
 fastled_lib = static_library('fastled',
-  files(fastled_sources),
+  fastled_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: unit_test_compile_args,
   install: false
