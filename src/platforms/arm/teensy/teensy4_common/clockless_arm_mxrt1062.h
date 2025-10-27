@@ -27,6 +27,7 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	uint32_t off[3];
 
 public:
+	using __TIMING = TIMING;
 	static constexpr int __DATA_PIN() { return DATA_PIN; }
 	static constexpr uint32_t __T1() { return T1; }
 	static constexpr uint32_t __T2() { return T2; }

@@ -4,7 +4,7 @@
 /// @brief Teensy 4 SPIOutput template definition
 
 #include "fl/int.h"
-#include "spi_device_proxy.h"
+#include "platforms/arm/mxrt1062/spi_device_proxy.h"
 
 namespace fl {
 
