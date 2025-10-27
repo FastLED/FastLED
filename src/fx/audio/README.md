@@ -328,263 +328,64 @@ void setup() {
 
 ---
 
-## Beat Detector (Simple)
+## Beat Detector
 
 **Files:** `detectors/beat.h`, `detectors/beat.cpp`
 
-Simple beat detector using the AudioContext pattern for shared FFT computation.
-
-**For advanced EDM beat detection**, see:
-- **`advanced/beat_detector_edm.h`** - SuperFlux-based onset detection with comb filter tempo tracking
-- Optimized for Electronic Dance Music with configurable parameters
-- 988 lines of advanced signal processing algorithms
+Real-time beat detection using the AudioContext pattern for shared FFT computation.
 
 ### What is it?
 
-The simple Beat Detector provides basic rhythmic pulse detection using shared FFT computation from AudioContext. For production use, consider the advanced EDM beat detector in `advanced/`.
+The Beat Detector provides rhythmic pulse detection and tempo tracking using spectral flux analysis of the shared FFT from AudioContext. It detects both individual onsets and maintains a tempo estimate with confidence scoring.
 
 ### Key Features
 
-- **SuperFlux onset detection** with vibrato suppression
-- **Multi-band spectral flux** (bass/mid/high weighting for kick drums and hi-hats)
-- **Adaptive whitening** for polyphonic music
-- **Comb filter tempo tracking** (100-150 BPM range optimized for EDM)
-- **Real-time peak picking** with adaptive thresholds
-- **~4ms processing budget** target for ESP32
-
-### How It Works
-
-The beat detection pipeline consists of three stages:
-
-#### 1. Onset Detection Function (ODF)
-
-Computes a "novelty curve" that spikes when new musical events occur. Several algorithms are available:
-
-- **Energy** - Simple time-domain energy (fastest, least accurate)
-- **Spectral Flux** - Positive magnitude difference in frequency domain (good baseline)
-- **SuperFlux** ⭐ - Spectral flux with maximum filter & delayed difference (best for EDM)
-  - Uses a maximum filter to suppress vibrato and tremolo
-  - Compares current spectrum to a delayed spectrum (μ frames ago)
-  - Highly effective for percussive onset detection
-- **HFC** - High-frequency content (good for cymbals/hi-hats)
-- **Complex Domain** - Phase-aware detection (robust to vibrato)
-- **Multi-band** - Multi-band spectral flux with custom frequency weighting
-
-**EDM Optimizations:**
-- 24 mel bands for spectral analysis
-- 3-band weighting: bass (1.5x for kick drums), mid (1.0x), high (1.2x for hi-hats)
-- Adaptive whitening suppresses side-chain pumping effects
-- Log compression de-emphasizes large harmonics
-
-#### 2. Peak Picking
-
-Detects peaks in the ODF that represent actual musical onsets:
-
-- **Local Maximum** - Simple local maximum within window
-- **Adaptive Threshold** - Threshold based on local mean + delta
-- **SuperFlux Peaks** ⭐ - Pre/post/avg windows with minimum distance (best for EDM)
-  - Uses both maximum and mean windows for robust peak detection
-  - Enforces minimum inter-onset interval (30-50ms) to prevent false triggers
-
-#### 3. Tempo Tracking
-
-Estimates the tempo (BPM) and predicts beat times:
-
-- **Autocorrelation** - Simple autocorrelation of ODF
-- **Comb Filter** ⭐ - Autocorrelation + comb filter with Rayleigh weighting (recommended for EDM)
-  - Emphasizes periodic structure in the ODF
-  - Rayleigh weighting favors typical tempos (120 BPM default)
-  - Beat phase tracking for predicted beat times
-- **Dynamic Programming** - Advanced beat tracking with tempo changes (higher latency)
-
-**Key Concepts:**
-- **Autocorrelation** finds repeating patterns in the ODF over time
-- **Comb filter** enhances harmonic relationships (e.g., 120 BPM, 60 BPM, 240 BPM)
-- **Rayleigh weighting** biases toward musically plausible tempos
+- **Spectral flux onset detection** with adaptive thresholds
+- **Tempo tracking** with BPM estimation
+- **Beat phase tracking** for predicted beat times
+- **Adaptive threshold** using flux history
+- **Temporal filtering** to prevent false triggers
+- **Shared FFT** - Optimal performance through AudioContext
 
 ### Quick Start
 
-```cpp
-#include "fx/audio/advanced/beat_detector_edm.h"
-
-// Create configuration (EDM defaults)
-BeatDetectorConfig cfg;
-cfg.sample_rate_hz = 48000;
-cfg.frame_size = 512;
-cfg.hop_size = 256;
-cfg.tempo_min_bpm = 100.0f;
-cfg.tempo_max_bpm = 150.0f;
-
-// Create detector
-BeatDetector detector(cfg);
-
-// Set callbacks
-detector.onBeat = [](float confidence, float bpm, float timestamp_ms) {
-    Serial.print("BEAT! BPM=");
-    Serial.print(bpm);
-    Serial.print(", confidence=");
-    Serial.println(confidence);
-};
-
-detector.onOnset = [](float confidence, float timestamp_ms) {
-    Serial.print("Onset at ");
-    Serial.print(timestamp_ms);
-    Serial.println("ms");
-};
-
-// In your audio processing loop:
-float audioBuffer[512];
-// ... fill audioBuffer with audio samples ...
-detector.processFrame(audioBuffer, 512);
-```
-
-### Configuration Reference
-
-#### Audio Parameters
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `sample_rate_hz` | 48000 | Input sample rate in Hz |
-| `frame_size` | 512 | Analysis window size in samples (256-1024) |
-| `hop_size` | 256 | Step size between frames (typically frame_size/2) |
-| `fft_size` | 512 | FFT size (must be power of 2, >= frame_size) |
-
-#### Onset Detection
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `odf_type` | SuperFlux | Onset detection function algorithm |
-| `num_bands` | 24 | Number of mel bands for spectral analysis |
-| `log_compression` | true | Apply log compression to magnitude spectrum |
-| `superflux_mu` | 3 | SuperFlux delay parameter (frames to compare) |
-| `max_filter_radius` | 2 | SuperFlux maximum filter radius (bins) |
-| `adaptive_whitening` | false | Enable adaptive spectral whitening |
-
-#### Peak Picking
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `peak_mode` | SuperFluxPeaks | Peak picking strategy |
-| `peak_threshold_delta` | 0.07 | Threshold above local mean (0.05-0.15) |
-| `peak_pre_max_ms` | 30 | Pre-window for local maximum (ms) |
-| `peak_post_max_ms` | 30 | Post-window for local maximum (ms) |
-| `peak_pre_avg_ms` | 100 | Pre-window for mean calculation (ms) |
-| `peak_post_avg_ms` | 70 | Post-window for mean calculation (ms) |
-| `min_inter_onset_ms` | 30 | Minimum time between onsets (ms) |
-
-#### Tempo Tracking
-
-| Parameter | Default | Description |
-|-----------|---------|-------------|
-| `tempo_tracker` | CombFilter | Tempo tracking algorithm |
-| `tempo_min_bpm` | 100.0 | Minimum tempo in BPM |
-| `tempo_max_bpm` | 150.0 | Maximum tempo in BPM |
-| `tempo_rayleigh_sigma` | 120.0 | Rayleigh prior center (typical tempo) |
-| `tempo_acf_window_sec` | 4 | Autocorrelation window size (seconds) |
-
-#### Multi-band Configuration
-
-The `bands` vector defines custom frequency bands with weights. Default EDM configuration:
+The easiest way to use beat detection is through the **AudioProcessor** facade:
 
 ```cpp
-cfg.bands.push_back({60.0f, 160.0f, 1.5f});   // Bass/kick emphasis
-cfg.bands.push_back({160.0f, 2000.0f, 1.0f}); // Mid range
-cfg.bands.push_back({2000.0f, 8000.0f, 1.2f});// High/hi-hats emphasis
+#include "fx/audio/audio_processor.h"
+
+fl::AudioProcessor audio;
+
+void setup() {
+    // Register callbacks for beat events
+    audio.onBeat([]() {
+        // Flash on beat
+        fill_solid(leds, NUM_LEDS, CRGB::White);
+    });
+
+    audio.onTempoChange([](float bpm, float confidence) {
+        Serial.print("Tempo: ");
+        Serial.print(bpm);
+        Serial.print(" BPM");
+    });
+
+    audio.onOnset([](float strength) {
+        Serial.print("Onset strength: ");
+        Serial.println(strength);
+    });
+}
+
+void loop() {
+    while (fl::AudioSample sample = audioInput.next()) {
+        audio.update(sample);  // Updates beat detector automatically
+    }
+    FastLED.show();
+}
 ```
-
-### Performance Characteristics
-
-Based on theoretical complexity and implementation analysis:
-
-| Component | Complexity | Estimated Time @ 512 samples |
-|-----------|------------|------------------------------|
-| Energy ODF | O(N) | ~0.5ms |
-| Spectral Flux | O(K) + FFT | ~2ms |
-| SuperFlux | O(K·μ) + FFT | ~3ms |
-| Autocorrelation | O(N·L) every 0.5s | ~0.5ms (amortized) |
-| **Total (SuperFlux + CombFilter)** | - | **~4ms** ✅ |
-
-**Memory footprint:** ~50KB for all buffers (suitable for ESP32 with 520KB SRAM)
-
-### Advanced Usage
-
-#### Custom ODF Types
-
-```cpp
-// High-frequency content (good for hi-hats/cymbals)
-cfg.odf_type = OnsetDetectionFunction::HFC;
-
-// Multi-band with custom weighting
-cfg.odf_type = OnsetDetectionFunction::MultiBand;
-cfg.bands.clear();
-cfg.bands.push_back({80.0f, 120.0f, 2.0f});   // Focus on kick drum
-cfg.bands.push_back({8000.0f, 12000.0f, 1.5f}); // Focus on hi-hats
-```
-
-#### Processing Pre-computed FFT
-
-```cpp
-// If you already have an FFT for other purposes
-float magnitude_spectrum[256];
-// ... compute FFT magnitude ...
-detector.processSpectrum(magnitude_spectrum, 256, timestamp_ms);
-```
-
-#### Accessing Statistics
-
-```cpp
-TempoEstimate tempo = detector.getTempo();
-Serial.print("BPM: ");
-Serial.print(tempo.bpm);
-Serial.print(", confidence: ");
-Serial.println(tempo.confidence);
-
-Serial.print("Total onsets detected: ");
-Serial.println(detector.getOnsetCount());
-
-Serial.print("Total beats detected: ");
-Serial.println(detector.getBeatCount());
-
-Serial.print("Current ODF value: ");
-Serial.println(detector.getCurrentODF());
-```
-
-### Algorithm Details
-
-#### SuperFlux Onset Detection
-
-SuperFlux improves upon basic spectral flux by suppressing vibrato and tremolo:
-
-1. **Delayed Difference**: Compares current spectrum to spectrum from μ frames ago (typically μ=3)
-2. **Maximum Filter**: Applies a maximum filter to the delayed spectrum to suppress rapid fluctuations
-3. **Positive Rectification**: Only positive differences are counted (increasing energy)
-
-This makes it highly effective for percussive onset detection in EDM tracks with side-chain compression.
-
-#### Comb Filter Tempo Tracking
-
-The comb filter enhances the autocorrelation function by emphasizing harmonic relationships:
-
-1. **Autocorrelation**: Compute correlation of ODF with itself at various lags
-2. **Comb Filtering**: For each lag, add contributions from harmonic multiples (2×, 3×, 4×)
-3. **Rayleigh Weighting**: Multiply by Rayleigh distribution centered on target tempo
-4. **Peak Finding**: Find peak within BPM range (constrained by min/max BPM)
-
-The Rayleigh distribution provides a prior that favors musically plausible tempos around 120 BPM.
-
-### Research Background
-
-Based on academic research in onset detection and beat tracking:
-
-- Böck & Widmer (2013) - Maximum Filter Vibrato Suppression for Onset Detection
-- Davies & Plumbley (2004) - Causal Tempo Tracker (ACF + Comb Filter)
-- Ellis (2007) - Dynamic Programming Beat Tracker
-- Masri (1996) - High-Frequency Content Method
-- Subramani et al. (2018) - Energy-Weighted Multi-Band Novelty Functions
 
 ### Example
 
-See `examples/BeatDetection/BeatDetection.ino` for a complete example with LED visualization.
+See `examples/BeatDetection/BeatDetection.ino` for a complete example with LED visualization and BPM-based color coding.
 
 ---
 
@@ -1236,11 +1037,9 @@ FastLED provides features not found in competing libraries:
 ## Examples
 
 - **`examples/BeatDetection/BeatDetection.ino`** - Real-time beat detection with LED visualization
-  - Demonstrates all ODF types and configuration options
+  - Demonstrates the AudioProcessor facade for beat detection
   - LED strip flashes on beat with BPM-based color coding
-  - Comprehensive UI controls for parameter tuning
-
-**Note:** Sound to MIDI examples coming soon demonstrating sliding window, K-of-M, and auto-tuning features.
+  - Shows tempo tracking and onset detection callbacks
 
 ---
 
@@ -1251,13 +1050,6 @@ MIT License (same as FastLED)
 ---
 
 ## References
-
-### Beat Detector
-1. Böck & Widmer (2013) - Maximum Filter Vibrato Suppression for Onset Detection
-2. Davies & Plumbley (2004) - Causal Tempo Tracker (ACF + Comb Filter)
-3. Ellis (2007) - Dynamic Programming Beat Tracker
-4. Masri (1996) - High-Frequency Content Method
-5. Subramani et al. (2018) - Energy-Weighted Multi-Band Novelty Functions
 
 ### Sound to MIDI - Core Algorithms
 1. De Cheveigné & Kawahara (2002) - YIN, a fundamental frequency estimator for speech and music
