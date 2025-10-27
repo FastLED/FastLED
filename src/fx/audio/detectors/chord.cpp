@@ -1,4 +1,4 @@
-#include "fx/audio/detectors/chord_detector.h"
+#include "fx/audio/detectors/chord.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 #include "fl/dbg.h"
