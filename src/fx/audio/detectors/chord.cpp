@@ -126,7 +126,7 @@ void ChordDetector::calculateChroma(const FFTBins& fft) {
 
     const float sampleRate = 44100.0f;
     const int fftSize = 1024;  // Assumed FFT size
-    const int numBins = fft.size();
+    const fl::size numBins = fft.size();
 
     for (fl::size binIdx = 0; binIdx < numBins; binIdx++) {
         float magnitude = fft.bins_raw[binIdx];

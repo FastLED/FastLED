@@ -29,11 +29,11 @@ void SilenceDetector::update(shared_ptr<AudioContext> context) {
     mLastUpdateTime = timestamp;
 
     // Build history
-    if (static_cast<int>(mRMSHistory.size()) < mHistorySize) {
+    if (mRMSHistory.size() < mHistorySize) {
         mRMSHistory.push_back(mCurrentRMS);
     } else {
         mRMSHistory[mHistoryIndex] = mCurrentRMS;
-        mHistoryIndex = (mHistoryIndex + 1) % mHistorySize;
+        mHistoryIndex = (mHistoryIndex + 1) % static_cast<int>(mHistorySize);
     }
 
     // Get smoothed RMS

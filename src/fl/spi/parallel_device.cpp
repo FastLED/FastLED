@@ -243,6 +243,7 @@ Result<Transaction> ParallelDevice::write(const uint8_t* data, size_t size) {
 }
 
 bool ParallelDevice::waitComplete(uint32_t timeout_ms) {
+    (void)timeout_ms;  // Unused parameter - reserved for future implementation
     if (!isReady()) {
         return false;
     }
