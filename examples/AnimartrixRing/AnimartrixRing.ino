@@ -22,7 +22,11 @@
 #endif
 
 #define NUM_LEDS 244
-#define DATA_PIN 21  // ESP32C6 has this random pin available on the break out.
+
+#ifndef DATA_PIN
+#define DATA_PIN 3  // ESP32C6 has this random pin available on the break out.
+#endif // DATA_PIN
+
 #define BRIGHTNESS 8
 
 // Grid dimensions for Animartrix sampling

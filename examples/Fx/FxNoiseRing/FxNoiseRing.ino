@@ -30,7 +30,10 @@
 #include "fl/noise.h"
 
 // Defines come after all includes
-#define LED_PIN 21
+#ifndef DATA_PIN
+#define DATA_PIN 3
+#endif // DATA_PIN
+
 #define COLOR_ORDER GRB  // Color order matters for a real device, web-compiler will ignore this.
 #define NUM_LEDS 250
 #define PIN_PIR 0
@@ -65,7 +68,7 @@ void setup() {
     // show on the web display. For deployements to real devices, this essentially
     // becomes a no-op.
     ScreenMap xyMap = ScreenMap::Circle(NUM_LEDS, 2.0, 2.0);
-    controller = &FastLED.addLeds<WS2811, LED_PIN, COLOR_ORDER>(leds, NUM_LEDS)
+    controller = &FastLED.addLeds<WS2811, DATA_PIN, COLOR_ORDER>(leds, NUM_LEDS)
                 .setCorrection(TypicalLEDStrip)
                 .setDither(DISABLE_DITHER)
                 .setScreenMap(xyMap);
