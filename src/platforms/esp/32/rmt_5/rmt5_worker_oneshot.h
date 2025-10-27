@@ -101,10 +101,10 @@ private:
     // Pre-calculated RMT symbols
     union rmt_item32_t {
         struct {
-            uint16_t duration0 : 15;
-            uint16_t level0 : 1;
-            uint16_t duration1 : 15;
-            uint16_t level1 : 1;
+            uint32_t duration0 : 15;
+            uint32_t level0 : 1;
+            uint32_t duration1 : 15;
+            uint32_t level1 : 1;
         };
         uint32_t val;
     };

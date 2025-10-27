@@ -13,7 +13,5 @@ void on_startup() {
 }
 
 #endif  // ESP32
-#include "../examples/AnimartrixRing/AnimartrixRing.ino"
 
-
-// #include "../examples/Fx/FxNoiseRing/FxNoiseRing.ino"
+#include "../examples/Blink/Blink.ino"

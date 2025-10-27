@@ -15,9 +15,9 @@
 namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 
-// Template for new-style API accepting ChipsetTiming reference
+// Template for type-based timing API (TIMING_WS2812_800KHZ, etc.)
 // This is the primary template with LED capture support
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 public:
 	virtual void init() { }

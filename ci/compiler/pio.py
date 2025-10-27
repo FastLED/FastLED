@@ -1406,8 +1406,8 @@ def _init_platformio_build(
         opt_report_path = (build_dir / "optimization_report.txt").resolve()
         # GCC writes reports relative to the current working directory; provide absolute path
 
-        # ESP32-C2 platform cannot work with -fopt-info-all, suppress it for this platform
-        if board.board_name != "esp32c2":
+        # ESP32-C2 and AVR platforms cannot work with -fopt-info-all, suppress it for these platforms
+        if board.board_name != "esp32c2" and board.platform != "atmelavr":
             board_with_sketch_include.build_flags.append(
                 f"-fopt-info-all={opt_report_path.as_posix()}"
             )

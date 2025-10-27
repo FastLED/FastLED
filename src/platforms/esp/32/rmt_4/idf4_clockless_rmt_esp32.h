@@ -41,6 +41,7 @@
 #include "platforms/esp/esp_version.h"
 #include "pixel_iterator.h"
 #include "idf4_rmt.h"
+#include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 
 
@@ -71,14 +72,19 @@ namespace fl {
 // Not used.
 //#define NUM_COLOR_CHANNELS 3
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessController : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Extract timing values from struct (for reference/debugging)
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
+    // Extract timing values from timing type's enum members
+    static constexpr uint32_t T1 = TIMING::T1;
+    static constexpr uint32_t T2 = TIMING::T2;
+    static constexpr uint32_t T3 = TIMING::T3;
+
+    // Convert to runtime ChipsetTiming for RMT controller
+    static constexpr ChipsetTiming runtime_timing() {
+        return {TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET, "timing"};
+    }
 
     // -- The actual controller object for ESP32
     RmtController mRMTController;
@@ -89,7 +95,7 @@ private:
 public:
     ClocklessController()
         : mRMTController(
-            DATA_PIN, TIMING,
+            DATA_PIN, runtime_timing(),
             FASTLED_RMT_MAX_CHANNELS,
             FASTLED_RMT_BUILTIN_DRIVER
         )

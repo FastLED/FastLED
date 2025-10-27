@@ -19,6 +19,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/compiler_control.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/log.h"
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
@@ -76,6 +77,16 @@ private:
 
 public:
     virtual void init() {
+        // Warn once that generic fallback controller is being used
+        // This may indicate missing platform-specific optimizations
+        static bool warned = false;
+        if (!warned) {
+            FL_WARN("Using GENERIC fallback clockless controller - platform-specific driver not available!");
+            FL_WARN("  This may result in reduced performance or timing issues.");
+            FL_WARN("  Expected platforms (ESP32/Teensy/etc) should use hardware drivers.");
+            warned = true;
+        }
+
         // Initialize pin as output
         fl::FastPin<DATA_PIN>::setOutput();
         // Ensure line starts low (idle state)
@@ -148,35 +159,34 @@ private:
         }
     }
 
-    /// Send a '1' bit with T1/T2 timing
+    /// Send a '1' bit with correct WS2812 timing
+    /// T1H (high time for 1-bit) = T1+T2, T1L (low time) = T3
     FASTLED_FORCE_INLINE static void sendBit1()
     {
-        // TODO: Needs verification of timing
         // Set line HIGH
         fl::FastPin<DATA_PIN>::hi();
-        // Hold high for T1 nanoseconds
+        // Hold high for T1+T2 nanoseconds (e.g., 875ns for WS2812)
+        fl::delayNanoseconds<T1 + T2>();
+
+        // Set line LOW
+        fl::FastPin<DATA_PIN>::lo();
+        // Hold low for T3 nanoseconds (e.g., 375ns for WS2812)
+        fl::delayNanoseconds<T3>();
+    }
+
+    /// Send a '0' bit with correct WS2812 timing
+    /// T0H (high time for 0-bit) = T1, T0L (low time) = T2+T3
+    FASTLED_FORCE_INLINE static void sendBit0()
+    {
+        // Set line HIGH
+        fl::FastPin<DATA_PIN>::hi();
+        // Hold high for T1 nanoseconds (e.g., 250ns for WS2812)
         fl::delayNanoseconds<T1>();
 
         // Set line LOW
         fl::FastPin<DATA_PIN>::lo();
-        // Hold low for T2 nanoseconds
-        fl::delayNanoseconds<T2>();
-    }
-
-    /// Send a '0' bit with modified timing
-    FASTLED_FORCE_INLINE static void sendBit0()
-    {
-        // TODO: Needs verification of timing
-        // Set line HIGH
-        fl::FastPin<DATA_PIN>::hi();
-        // For a '0' bit: high time is (T1 + T2 - T3)
-        // This ensures total cycle time is still (T1 + T2)
-        fl::delayNanoseconds<T1 + T2 - T3>();
-
-        // Set line LOW
-        fl::FastPin<DATA_PIN>::lo();
-        // Hold low for T3 nanoseconds
-        fl::delayNanoseconds<T3>(); 
+        // Hold low for T2+T3 nanoseconds (e.g., 1000ns for WS2812)
+        fl::delayNanoseconds<T2 + T3>();
     }
 };
 

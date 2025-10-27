@@ -32,10 +32,10 @@ FL_EXTERN_C_END
 // Define rmt_item32_t union (compatible with RMT4)
 union rmt_item32_t {
     struct {
-        uint16_t duration0 : 15;
-        uint16_t level0 : 1;
-        uint16_t duration1 : 15;
-        uint16_t level1 : 1;
+        uint32_t duration0 : 15;
+        uint32_t level0 : 1;
+        uint32_t duration1 : 15;
+        uint32_t level1 : 1;
     };
     uint32_t val;
 };
@@ -60,6 +60,7 @@ RmtWorker::RmtWorker()
     , mChannelId(0)
     , mWorkerId(0)
     , mIntrHandle(nullptr)
+    , mInterruptAllocated(false)
     , mCurrentPin(GPIO_NUM_NC)
     , mT1(0)
     , mT2(0)
@@ -158,6 +159,25 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
 #endif
 
+    // NOTE: Threshold interrupt setup moved to allocateInterrupt() for lazy initialization
+    // This prevents interrupt watchdog timeout on ESP32-C6 during early boot
+
+    // NOTE: Interrupt allocation deferred to first transmit() call
+    // This prevents interrupt watchdog timeout on ESP32-C6 (RISC-V) during early boot
+
+
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
+    return true;
+}
+
+bool RmtWorker::allocateInterrupt() {
+    // Interrupt already allocated - skip
+    if (mInterruptAllocated) {
+        return true;
+    }
+
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Allocating interrupt (first transmit)", mWorkerId);
+
     // Enable threshold interrupt using direct register access
     uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
     RMT.int_ena.val |= (1 << thresh_int_bit);
@@ -165,7 +185,7 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     // Allocate custom ISR at Level 3 (compatible with Xtensa and RISC-V)
     // NOTE: ETS_RMT_INTR_SOURCE is an enum, not a #define, so it exists on all ESP32 platforms
     // We MUST use direct ISR since we're using manual register writes in tx_start()
-    ret = esp_intr_alloc(
+    esp_err_t ret = esp_intr_alloc(
         ETS_RMT_INTR_SOURCE,
         ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
         &RmtWorker::globalISR,
@@ -176,13 +196,11 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %s (0x%x)",
                  mWorkerId, esp_err_to_name(ret), ret);
-        rmt_del_channel(mChannel);
-        mChannel = nullptr;
         return false;
     }
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)", mWorkerId);
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
+    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)", mWorkerId);
+    mInterruptAllocated = true;
     return true;
 }
 
@@ -195,12 +213,8 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%lu, t2=%lu, t3=%lu, reset_ns=%lu",
              mWorkerId, (int)pin, t1, t2, t3, reset_ns);
 
-    // Create channel on first configure
-    if (mChannel == nullptr) {
-        if (!createChannel(pin)) {
-            return false;
-        }
-    }
+    // Channel creation deferred to first transmit() call
+    // This prevents ESP32-C6 (RISC-V) boot hang during RMT hardware initialization
 
     // Check if reconfiguration needed
     if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
@@ -256,46 +270,7 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
     ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: mOne={dur0=%u, lvl0=%u, dur1=%u, lvl1=%u, val=0x%08lx}",
              mWorkerId, mOne.duration0, mOne.level0, mOne.duration1, mOne.level1, mOne.val);
 
-    // Update GPIO pin assignment
-    // Note: ESP-IDF v5 requires channel to be disabled before changing GPIO
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Updating GPIO assignment to pin %d (channel_id=%lu)",
-             mWorkerId, (int)pin, mChannelId);
-
-    // Disable channel if it's currently enabled (not on first configure)
-    if (old_pin != GPIO_NUM_NC) {
-        esp_err_t ret = rmt_disable(mChannel);
-        if (ret != ESP_OK) {
-            ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to disable channel for GPIO change: %s (0x%x)",
-                     mWorkerId, esp_err_to_name(ret), ret);
-            return false;
-        }
-    }
-
-    // Use low-level API to change GPIO
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Setting GPIO %d direction to OUTPUT", mWorkerId, (int)pin);
-    gpio_set_direction(pin, GPIO_MODE_OUTPUT);
-
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
-    int signal_idx = RMT_SIG_PAD_OUT0_IDX + mChannelId;
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Mapping GPIO %d to RMT signal %d (ESP32P4)",
-             mWorkerId, (int)pin, signal_idx);
-    gpio_matrix_out(pin, signal_idx, false, false);
-#else
-    int signal_idx = RMT_SIG_OUT0_IDX + mChannelId;
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Mapping GPIO %d to RMT signal %d",
-             mWorkerId, (int)pin, signal_idx);
-    gpio_matrix_out(pin, signal_idx, false, false);
-#endif
-
-    esp_err_t ret = rmt_enable(mChannel);
-    if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to enable channel: %s (0x%x)",
-                 mWorkerId, esp_err_to_name(ret), ret);
-        return false;
-    }
-
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: GPIO configuration complete - pin %d ready",
-             mWorkerId, (int)pin);
+    // GPIO configuration deferred to first transmit() when channel exists
 
     return true;
 }
@@ -303,6 +278,43 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
 void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_ASSERT(!mTransmitting, "RmtWorker::transmit called while already transmitting");
     FL_ASSERT(pixel_data != nullptr, "RmtWorker::transmit called with null pixel data");
+
+    // Create RMT channel on first transmit (lazy initialization)
+    // This prevents ESP32-C6 (RISC-V) boot hang during hardware initialization
+    if (mChannel == nullptr) {
+        if (!createChannel(mCurrentPin)) {
+            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to create channel - aborting transmit", mWorkerId);
+            return;
+        }
+        
+        // Configure GPIO and enable channel (only on first creation)
+        ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Configuring GPIO %d for RMT output", mWorkerId, (int)mCurrentPin);
+        gpio_set_direction(mCurrentPin, GPIO_MODE_OUTPUT);
+        
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
+        int signal_idx = RMT_SIG_PAD_OUT0_IDX + mChannelId;
+        gpio_matrix_out(mCurrentPin, signal_idx, false, false);
+#else
+        int signal_idx = RMT_SIG_OUT0_IDX + mChannelId;
+        gpio_matrix_out(mCurrentPin, signal_idx, false, false);
+#endif
+        
+        esp_err_t ret = rmt_enable(mChannel);
+        if (ret != ESP_OK) {
+            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to enable channel: %s", mWorkerId, esp_err_to_name(ret));
+            return;
+        }
+        ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Channel enabled and ready", mWorkerId);
+    }
+
+    // Allocate interrupt on first transmit (lazy initialization)
+    // This prevents interrupt watchdog timeout on ESP32-C6 during early boot
+    if (!mInterruptAllocated) {
+        if (!allocateInterrupt()) {
+            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to allocate interrupt - aborting transmit", mWorkerId);
+            return;
+        }
+    }
 
     // Store pixel data pointer (not owned by worker)
     mPixelData = pixel_data;
