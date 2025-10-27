@@ -1,6 +1,11 @@
 #ifndef __INC_CLOCKLESS_ARM_SAM_H
 #define __INC_CLOCKLESS_ARM_SAM_H
 
+// SAM/Due platform: Set this FIRST before any includes to prevent generic controller alias
+#if defined(__SAM3X8E__)
+#define FASTLED_HAS_CLOCKLESS 1
+#endif
+
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 namespace fl {
@@ -9,11 +14,8 @@ namespace fl {
 
 #if defined(__SAM3X8E__)
 
-
-#define FASTLED_HAS_CLOCKLESS 1
-
-template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+class ClocklessSAMHardware : public CPixelLEDController<RGB_ORDER> {
 	static constexpr uint32_t T1 = TIMING::T1;
 	static constexpr uint32_t T2 = TIMING::T2;
 	static constexpr uint32_t T3 = TIMING::T3;
@@ -118,6 +120,11 @@ protected:
 	}
 };
 
-#endif
+// Make ClocklessSAMHardware the default ClocklessController for SAM platforms
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+using ClocklessController = ClocklessSAMHardware<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+
+#endif  // defined(__SAM3X8E__)
+
 }  // namespace fl
-#endif
+#endif  // __INC_CLOCKLESS_ARM_SAM_H
