@@ -170,6 +170,13 @@ class BannedHeadersChecker(BaseChecker):
         # Allow <new> in inplacenew.h for placement new operator
         if banned_header == "new" and "inplacenew.h" in file_path_str:
             return True
+        # Allow <new> in platforms/*/new.h for platform-specific placement new handling
+        if (
+            banned_header == "new"
+            and "/platforms/" in file_path_normalized
+            and file_path_str.endswith("new.h")
+        ):
+            return True
 
         # Allow Arduino.h in led_sysdefs.h - core system definitions need platform headers
         if banned_header == "Arduino.h" and "led_sysdefs.h" in file_path_str:
