@@ -11,7 +11,7 @@
 #include "fl/allocator.h"
 #include "fl/scoped_ptr.h"
 #include "fl/type_traits.h"
-#include "inplacenew.h"
+#include "fl/new.h"
 #include "fl/align.h"
 
 namespace fl {

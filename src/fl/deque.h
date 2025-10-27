@@ -5,7 +5,7 @@
 
 #include "fl/allocator.h"
 #include "fl/initializer_list.h"
-#include "fl/inplacenew.h"
+#include "fl/new.h"
 #include "fl/move.h"
 #include "fl/type_traits.h"
 
