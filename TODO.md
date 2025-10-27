@@ -12,6 +12,12 @@
   [ ] Adafruit converter driver
   [ ] NeoPixel converter driver
 
+  * CH32V003 RISC-V MCU Support
+    * Ultra-low-cost 10-cent RISC-V microcontroller
+    * Currently has partial support
+    * Board configuration: ci/boards/package_ch32v_index.json (CH32V00x EVT Board)
+    * Development resources: https://github.com/cnlohr/ch32fun
+
   * I2S driver for ESP32 WS2812
     * https://github.com/hpwit/I2SClocklessLedDriver
       * Our copy is here: https://github.com/FastLED/FastLED/blob/master/src/platforms/esp/32/clockless_i2s_esp32.h
