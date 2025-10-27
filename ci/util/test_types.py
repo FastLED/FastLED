@@ -88,6 +88,7 @@ class TestArgs:
     qemu: Optional[List[str]] = None  # Run examples in QEMU emulation
     no_fingerprint: bool = False  # Disable fingerprint caching
     build: bool = False  # Build Docker images if missing (use with --qemu)
+    force: bool = False  # Force rerun of all tests, ignore fingerprint cache
 
 
 @typechecked

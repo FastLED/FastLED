@@ -1409,44 +1409,58 @@ def runner(
 
     # Always use Meson build system for unit tests (Python build system has been removed)
     # Only return early if unit tests are the ONLY thing running (unit_only mode)
+    # Skip if fingerprint cache indicates no changes
     if test_categories.unit_only:
-        from ci.util.meson_runner import run_meson_build_and_test
-        from ci.util.paths import PROJECT_ROOT
+        if cpp_test_change:
+            from ci.util.meson_runner import run_meson_build_and_test
+            from ci.util.paths import PROJECT_ROOT
 
-        build_dir = PROJECT_ROOT / ".build" / "meson"
-        test_name = args.test if args.test else None
+            build_dir = PROJECT_ROOT / ".build" / "meson"
+            test_name = args.test if args.test else None
 
-        success = run_meson_build_and_test(
-            source_dir=PROJECT_ROOT,
-            build_dir=build_dir,
-            test_name=test_name,
-            clean=args.clean,
-            verbose=args.verbose,
-        )
+            success = run_meson_build_and_test(
+                source_dir=PROJECT_ROOT,
+                build_dir=build_dir,
+                test_name=test_name,
+                clean=args.clean,
+                verbose=args.verbose,
+            )
 
-        if not success:
-            sys.exit(1)
+            if not success:
+                sys.exit(1)
+        else:
+            # Fingerprint cache hit - skip unit tests
+            print_cache_hit(
+                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in C++ test-related files)"
+            )
 
         return
 
     # For mixed test modes (unit + examples, etc.), run unit tests via Meson but continue to other tests
+    # Skip if fingerprint cache indicates no changes
     if test_categories.unit and not test_categories.unit_only:
-        from ci.util.meson_runner import run_meson_build_and_test
-        from ci.util.paths import PROJECT_ROOT
+        if cpp_test_change:
+            from ci.util.meson_runner import run_meson_build_and_test
+            from ci.util.paths import PROJECT_ROOT
 
-        build_dir = PROJECT_ROOT / ".build" / "meson"
-        test_name = args.test if args.test else None
+            build_dir = PROJECT_ROOT / ".build" / "meson"
+            test_name = args.test if args.test else None
 
-        success = run_meson_build_and_test(
-            source_dir=PROJECT_ROOT,
-            build_dir=build_dir,
-            test_name=test_name,
-            clean=args.clean,
-            verbose=args.verbose,
-        )
+            success = run_meson_build_and_test(
+                source_dir=PROJECT_ROOT,
+                build_dir=build_dir,
+                test_name=test_name,
+                clean=args.clean,
+                verbose=args.verbose,
+            )
 
-        if not success:
-            sys.exit(1)
+            if not success:
+                sys.exit(1)
+        else:
+            # Fingerprint cache hit - skip unit tests
+            print_cache_hit(
+                "Fingerprint cache valid - skipping C++ unit tests (no changes detected in C++ test-related files)"
+            )
 
         # Continue to run other tests (examples, Python, etc.) - don't return
 

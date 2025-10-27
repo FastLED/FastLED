@@ -156,6 +156,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Disable fingerprint caching for tests (force rebuild/rerun)",
     )
     parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Force rerun of all tests, ignore fingerprint cache (same as --no-fingerprint)",
+    )
+    parser.add_argument(
         "--build",
         action="store_true",
         help="Build Docker images if missing (use with --qemu)",
@@ -191,6 +196,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         debug=parsed_args.debug,
         qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
+        force=parsed_args.force,
         build=parsed_args.build,
     )
 

@@ -610,19 +610,28 @@ def main() -> None:
             else:
                 # Use normal test runner for other cases
                 # Force change flags=True when running a specific test to disable fingerprint cache
-                # Also force when --no-fingerprint is used
-                # DISABLED: Always force cpp_test and examples to run (fingerprinting disabled)
-                force_cpp_test_change = True  # Fingerprinting disabled for unit tests
-                force_examples_change = True  # Fingerprinting disabled for examples
-                force_python_test_change = (
-                    python_test_change or (args.test is not None) or args.no_fingerprint
+                # Also force when --no-fingerprint or --force is used
+                force_cpp_test_change = (
+                    cpp_test_change
+                    or (args.test is not None)
+                    or args.no_fingerprint
+                    or args.force
                 )
-                force_src_code_change = src_code_change or args.no_fingerprint
+                force_examples_change = (
+                    examples_change or args.no_fingerprint or args.force
+                )
+                force_python_test_change = (
+                    python_test_change
+                    or (args.test is not None)
+                    or args.no_fingerprint
+                    or args.force
+                )
+                force_src_code_change = (
+                    src_code_change or args.no_fingerprint or args.force
+                )
 
-                if args.no_fingerprint:
-                    print("Fingerprint caching disabled (--no-fingerprint)")
-                else:
-                    print("Fingerprint caching disabled for unit tests and examples")
+                if args.no_fingerprint or args.force:
+                    print("Fingerprint caching disabled (--no-fingerprint or --force)")
 
                 test_runner(
                     args,

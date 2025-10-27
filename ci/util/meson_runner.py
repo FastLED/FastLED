@@ -28,6 +28,45 @@ def check_meson_installed() -> bool:
         return False
 
 
+def write_if_different(path: Path, content: str, mode: Optional[int] = None) -> bool:
+    """
+    Write file only if content differs from existing file.
+
+    This prevents unnecessary file modifications that would trigger Meson
+    regeneration. If the file doesn't exist or content has changed, writes
+    the new content.
+
+    Args:
+        path: Path to file to write
+        content: Content to write
+        mode: Optional file permissions (Unix only)
+
+    Returns:
+        True if file was written (created or modified), False if unchanged
+    """
+    try:
+        if path.exists():
+            existing_content = path.read_text(encoding="utf-8")
+            if existing_content == content:
+                return False  # Content unchanged, skip write
+
+        # Content changed or file doesn't exist - write it
+        path.write_text(content, encoding="utf-8")
+
+        # Set permissions if specified (Unix only)
+        if mode is not None and not sys.platform.startswith("win"):
+            path.chmod(mode)
+
+        return True
+    except (OSError, IOError) as e:
+        # On error, try to write anyway - caller will handle failures
+        print(f"[MESON] Warning: Error checking file {path}: {e}")
+        path.write_text(content, encoding="utf-8")
+        if mode is not None and not sys.platform.startswith("win"):
+            path.chmod(mode)
+        return True
+
+
 def detect_system_llvm_tools() -> Tuple[bool, bool]:
     """
     Detect if system has LLD and LLVM-AR that support thin archives.
@@ -238,18 +277,17 @@ def setup_meson_build(
     native_file_path = build_dir / "meson_native.txt"
 
     # Create wrapper scripts for meson since it expects single executables
-    # IMPORTANT: Always recreate wrappers to ensure thin archive flags match current detection
-    # This happens before the skip check so wrappers are always up-to-date
+    # OPTIMIZATION: Only recreate wrappers if content changes to avoid triggering Meson regeneration
     wrapper_dir = build_dir / "compiler_wrappers"
     wrapper_dir.mkdir(parents=True, exist_ok=True)
 
+    # Track if any wrapper files were modified
+    wrappers_changed = False
+
     cmd: Optional[List[str]] = None
     if skip_meson_setup:
-        # Build already configured, wrappers will be recreated below
+        # Build already configured, check wrappers below
         print(f"[MESON] Build directory already configured: {build_dir}")
-        print(
-            f"[MESON] Recreating compiler wrappers with current thin archive settings"
-        )
     elif already_configured and (reconfigure or force_reconfigure):
         # Reconfigure existing build (explicitly requested or forced by thin archive change)
         reason = (
@@ -312,30 +350,32 @@ def setup_meson_build(
         cc_wrapper = wrapper_dir / "zig-cc.cmd"
         cxx_wrapper = wrapper_dir / "zig-cxx.cmd"
         ar_wrapper = wrapper_dir / "zig-ar.cmd"
-        cc_wrapper.write_text(
-            f"@echo off\npython -m ziglang cc{linker_flag} %*\n", encoding="utf-8"
+
+        wrappers_changed |= write_if_different(
+            cc_wrapper, f"@echo off\npython -m ziglang cc{linker_flag} %*\n"
         )
-        cxx_wrapper.write_text(
-            f"@echo off\npython -m ziglang c++{linker_flag} %*\n", encoding="utf-8"
+        wrappers_changed |= write_if_different(
+            cxx_wrapper, f"@echo off\npython -m ziglang c++{linker_flag} %*\n"
         )
+
         if use_system_ar:
             # Use system llvm-ar with thin archives support
-            ar_wrapper.write_text(
-                f"@echo off\nllvm-ar{thin_flag} %*\n", encoding="utf-8"
+            wrappers_changed |= write_if_different(
+                ar_wrapper, f"@echo off\nllvm-ar{thin_flag} %*\n"
             )
         else:
             # Use zig's ar
             # Filter out thin archive flag 'T' from arguments when not using thin archives
             # because Zig's linker doesn't support thin archives
             if use_thin_archives:
-                ar_wrapper.write_text(
-                    f"@echo off\npython -m ziglang ar{thin_flag} %*\n", encoding="utf-8"
+                wrappers_changed |= write_if_different(
+                    ar_wrapper, f"@echo off\npython -m ziglang ar{thin_flag} %*\n"
                 )
             else:
                 # When not using thin archives, use Python wrapper to filter T flag (same as Unix)
                 # Windows batch regex is too limited, Python is more reliable
                 ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
-                ar_wrapper_py.write_text(
+                ar_filter_content = (
                     "#!/usr/bin/env python3\n"
                     '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
                     "import sys\n"
@@ -361,33 +401,35 @@ def setup_meson_build(
                     "    \n"
                     "    # Execute zig ar with filtered arguments\n"
                     '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
-                    "    sys.exit(result.returncode)\n",
-                    encoding="utf-8",
+                    "    sys.exit(result.returncode)\n"
                 )
+                wrappers_changed |= write_if_different(ar_wrapper_py, ar_filter_content)
 
                 # Main wrapper calls the Python filter
-                ar_wrapper.write_text(
-                    f'@echo off\npython "{ar_wrapper_py}" %*\n',
-                    encoding="utf-8",
+                wrappers_changed |= write_if_different(
+                    ar_wrapper, f'@echo off\npython "{ar_wrapper_py}" %*\n'
                 )
     else:
         # Unix/Linux/macOS: Create shell script wrappers
         cc_wrapper = wrapper_dir / "zig-cc"
         cxx_wrapper = wrapper_dir / "zig-cxx"
         ar_wrapper = wrapper_dir / "zig-ar"
-        cc_wrapper.write_text(
+
+        wrappers_changed |= write_if_different(
+            cc_wrapper,
             f'#!/bin/sh\nexec python -m ziglang cc{linker_flag} "$@"\n',
-            encoding="utf-8",
+            mode=0o755,
         )
-        cxx_wrapper.write_text(
+        wrappers_changed |= write_if_different(
+            cxx_wrapper,
             f'#!/bin/sh\nexec python -m ziglang c++{linker_flag} "$@"\n',
-            encoding="utf-8",
+            mode=0o755,
         )
+
         if use_system_ar:
             # Use system llvm-ar with thin archives support
-            ar_wrapper.write_text(
-                f'#!/bin/sh\nexec llvm-ar{thin_flag} "$@"\n',
-                encoding="utf-8",
+            wrappers_changed |= write_if_different(
+                ar_wrapper, f'#!/bin/sh\nexec llvm-ar{thin_flag} "$@"\n', mode=0o755
             )
         else:
             # Use zig's ar with Python wrapper to robustly filter thin archive flags
@@ -395,9 +437,10 @@ def setup_meson_build(
             # Shell scripts have fragile pattern matching that fails with different flag orders
             if use_thin_archives:
                 # Thin archives enabled - pass through directly
-                ar_wrapper.write_text(
+                wrappers_changed |= write_if_different(
+                    ar_wrapper,
                     f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
-                    encoding="utf-8",
+                    mode=0o755,
                 )
             else:
                 # Thin archives disabled - use Python wrapper to filter ALL thin archive flags
@@ -405,7 +448,7 @@ def setup_meson_build(
                 #                --thin as separate argument
                 #                Any combination or order of flags
                 ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
-                ar_wrapper_py.write_text(
+                ar_filter_content = (
                     "#!/usr/bin/env python3\n"
                     '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
                     "import sys\n"
@@ -431,45 +474,24 @@ def setup_meson_build(
                     "    \n"
                     "    # Execute zig ar with filtered arguments\n"
                     '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
-                    "    sys.exit(result.returncode)\n",
-                    encoding="utf-8",
+                    "    sys.exit(result.returncode)\n"
                 )
-                ar_wrapper_py.chmod(0o755)
+                wrappers_changed |= write_if_different(
+                    ar_wrapper_py, ar_filter_content, mode=0o755
+                )
 
                 # Main wrapper calls the Python filter
-                ar_wrapper.write_text(
+                wrappers_changed |= write_if_different(
+                    ar_wrapper,
                     f'#!/bin/sh\nexec {sys.executable} "{ar_wrapper_py}" "$@"\n',
-                    encoding="utf-8",
+                    mode=0o755,
                 )
-        # Make executable on Unix-like systems
-        cc_wrapper.chmod(0o755)
-        cxx_wrapper.chmod(0o755)
-        ar_wrapper.chmod(0o755)
 
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
     # environment variables are lost. Native file ensures tools are configured.
+    # OPTIMIZATION: Only write native file if wrappers changed or if it doesn't exist
     try:
-        native_file_content = f"""# ============================================================================
-# Meson Native Build Configuration for FastLED (Auto-generated)
-# ============================================================================
-# This file is auto-generated by meson_runner.py to configure tool paths.
-# It persists across build regenerations when ninja detects meson.build changes.
-
-[binaries]
-c = ['{str(cc_wrapper)}']
-cpp = ['{str(cxx_wrapper)}']
-ar = ['{str(ar_wrapper)}']
-
-[host_machine]
-system = 'windows' if {is_windows} else 'linux'
-cpu_family = 'x86_64'
-cpu = 'x86_64'
-endian = 'little'
-
-[properties]
-# No additional properties needed - compiler flags are in meson.build
-"""
         # Fix the native file content - can't use Python conditionals
         if is_windows:
             native_file_content = f"""# ============================================================================
@@ -513,8 +535,11 @@ endian = 'little'
 [properties]
 # No additional properties needed - compiler flags are in meson.build
 """
-        native_file_path.write_text(native_file_content, encoding="utf-8")
-        print(f"[MESON] Generated native file: {native_file_path}")
+        native_file_changed = write_if_different(native_file_path, native_file_content)
+        wrappers_changed |= native_file_changed
+
+        if wrappers_changed:
+            print(f"[MESON] Regenerated native file: {native_file_path}")
     except (OSError, IOError) as e:
         print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
