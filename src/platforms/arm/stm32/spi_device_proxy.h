@@ -12,7 +12,7 @@
 /// The proxy provides a transparent interface that mirrors STM32SPIOutput,
 /// allowing chipset controllers to work without modification.
 
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || \
+#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
     defined(STM32F2XX) || defined(STM32F4) || defined(STM32L4) || \
     defined(STM32H7) || defined(STM32G4) || defined(STM32U5)
 

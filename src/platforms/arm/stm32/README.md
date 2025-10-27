@@ -6,9 +6,10 @@ STM32 family support (e.g., F1, F2, F4 series).
 
 FastLED supports multiple STM32 Arduino cores:
 
-1. **STM32duino** (Official ST core): Defines `STM32F1`, `STM32F4`
+1. **STM32duino** (Official STMicroelectronics core): Defines `STM32F1xx`, `STM32F4`, etc.
 2. **Roger Clark STM32** (STM32F103C and similar): Defines `__STM32F1__`
-3. **Particle** (STM32F10X_MD, STM32F2XX): For Particle boards
+3. **Older STM32duino/Arduino_STM32**: Defines `STM32F1`, `STM32F4`
+4. **Particle** (STM32F10X_MD, STM32F2XX): For Particle boards
 
 ## Files (quick pass)
 - `fastled_arm_stm32.h`: Aggregator; includes pin and clockless.

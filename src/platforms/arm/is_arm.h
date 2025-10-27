@@ -17,7 +17,7 @@
     /* ARM Cortex-M0/M0+ (SAM) */ \
     defined(__SAM3X8E__) || \
     /* ARM Cortex-M (STM32F/H7) */ \
-    defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || \
+    defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
     defined(STM32F2XX) || defined(STM32F4) || \
     /* NXP Kinetis (MK20, MK26, IMXRT) */ \
     defined(__MK20DX128__) || defined(__MK20DX256__) || \

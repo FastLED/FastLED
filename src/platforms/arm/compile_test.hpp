@@ -79,7 +79,7 @@ static void arm_compile_tests() {
 #endif
 
 // STM32F1 specific compile-time size validation
-#if defined(STM32F1) || defined(__STM32F1__)
+#if defined(STM32F1) || defined(__STM32F1__) || defined(STM32F1xx)
     // Static assert to ensure we're aware of memory constraints
     // STM32F103C8 has only 64KB flash and 20KB RAM
     static_assert(sizeof(void*) == 4, "STM32F1 should be 32-bit platform");

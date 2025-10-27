@@ -47,7 +47,7 @@
 #include "platforms/arm/nrf52/spi_device_proxy.h"
 #elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #include "platforms/arm/sam/spi_device_proxy.h"
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
 #include "platforms/arm/stm32/spi_device_proxy.h"
 #endif
 
@@ -88,7 +88,7 @@
       defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #include "platforms/arm/sam/spi_output_template.h"
 
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F2XX) || defined(STM32F4)
+#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
 #include "platforms/arm/stm32/spi_output_template.h"
 
 #elif defined(AVR_HARDWARE_SPI) || defined(ARDUNIO_CORE_SPI)
