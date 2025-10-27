@@ -70,6 +70,8 @@
 // Convenience includes for sketch inclusion
 #include "fl/async.h"
 #include "fl/sketch_macros.h"
+#include "fl/array.h"
+#include "fl/vector.h"
 
 
 #include "fl/force_inline.h"

@@ -33,34 +33,8 @@ template <typename T, fl::size N> class array {
     using iterator = pointer;
     using const_iterator = const_pointer;
 
-    // Default constructor - elements are default-initialized
-    array() = default;
-
-    // Fill constructor
-    explicit array(const T &value) {
-        // std::fill_n(begin(), N, value);
-        fill_n(data_, N, value);
-    }
-
-    // Initializer list constructor
-    array(fl::initializer_list<T> list) {
-        fl::size i = 0;
-        for (auto it = list.begin(); it != list.end() && i < N; ++it, ++i) {
-            data_[i] = *it;
-        }
-    }
-
-    // Copy constructor
-    array(const array &) = default;
-
-    // Move constructor
-    array(array &&) = default;
-
-    // Copy assignment
-    array &operator=(const array &) = default;
-
-    // Move assignment
-    array &operator=(array &&) = default;
+    // Data member - public to allow aggregate initialization
+    T data_[N];
 
     // Element access
     T &at(fl::size pos) {
@@ -129,7 +103,6 @@ template <typename T, fl::size N> class array {
         static T empty_value;
         return empty_value;
     }
-    T data_[N];
 };
 
 // Non-member functions

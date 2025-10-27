@@ -11,7 +11,8 @@
 
 #if defined(__AVR__)
 // Emulated initializer_list for AVR platforms
-namespace fl {
+// MUST be in std namespace for compiler's brace-initialization magic to work
+namespace std {
     template<typename T>
     class initializer_list {
     private:
@@ -55,6 +56,11 @@ namespace fl {
     constexpr const T* end(initializer_list<T> il) {
         return il.end();
     }
+}
+
+// Alias in fl namespace for consistency
+namespace fl {
+    using std::initializer_list;  // okay std namespace
 }
 #else
 namespace fl {
