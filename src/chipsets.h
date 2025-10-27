@@ -50,6 +50,10 @@
 // This provides single-pin clockless LED support using nanosecond-precision timing
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
 
+// Template alias to ClocklessController (platform-specific or generic blocking)
+// This must come AFTER all clockless drivers are included
+#include "fl/clockless_controller_impl.h"
+
 // Include UCS7604 controller (requires ClocklessBlockController to be defined)
 #include "fl/chipsets/ucs7604.h"  // optional.
 
@@ -143,10 +147,6 @@
 #if defined(ARDUINO) && (defined(SoftwareSerial_h) || defined(__SoftwareSerial_h))
 #include <SoftwareSerial.h>
 #endif
-
-// Template alias to platform-specific ClocklessController implementation
-// This provides type-safe access to the platform implementation without macros
-#include "fl/clockless_controller_impl.h"
 
 /// @file chipsets.h
 /// Contains the bulk of the definitions for the various LED chipsets supported.

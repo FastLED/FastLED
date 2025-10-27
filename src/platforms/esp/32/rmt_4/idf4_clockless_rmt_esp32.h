@@ -73,7 +73,7 @@ namespace fl {
 //#define NUM_COLOR_CHANNELS 3
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessController : public CPixelLEDController<RGB_ORDER>
+class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Extract timing values from timing type's enum members
@@ -93,7 +93,7 @@ private:
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessController()
+    ClocklessRMT()
         : mRMTController(
             DATA_PIN, runtime_timing(),
             FASTLED_RMT_MAX_CHANNELS,

@@ -151,7 +151,7 @@ static int gNumStarted = 0;
 
 template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
     // -- Store the GPIO pin
     gpio_num_t mPin;
 
@@ -226,8 +226,8 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
             //    This causes the bits to come out in the right position after
             //    we transpose them.
             int bit_index = 23 - i;
-            ClocklessController *pController =
-                static_cast<ClocklessController *>(gControllers[i]);
+            ClocklessI2S *pController =
+                static_cast<ClocklessI2S *>(gControllers[i]);
             if (pController->mPixels->has(1)) {
                 gPixelRow[0][bit_index] = pController->mPixels->loadAndScale0();
                 gPixelRow[1][bit_index] = pController->mPixels->loadAndScale1();
@@ -344,4 +344,10 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
         i2s_stop();
     }
 };
+
+// Backwards compatibility alias
+template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
+          int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+
 }  // namespace fl

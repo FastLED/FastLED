@@ -26,9 +26,13 @@
 
 namespace fl {
 
-// Don't define ClocklessBlockController if stub version is already defined
+// Don't define ClocklessBlocking if stub version is already defined
 #ifndef FASTLED_CLOCKLESS_STUB_DEFINED
 /// Generic blocking clockless controller
+///
+/// This is the software-based blocking implementation that works on all platforms.
+/// Platform-specific drivers (ClocklessRMT, ClocklessSPI, etc.) provide hardware-accelerated
+/// alternatives when available.
 ///
 /// Template parameters:
 /// - DATA_PIN: GPIO pin for data line (e.g., 5 for GPIO5)
@@ -53,7 +57,7 @@ namespace fl {
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class ClocklessBlockController : public CPixelLEDController<RGB_ORDER>
+class ClocklessBlocking : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Reference timing values from the TIMING type
@@ -141,7 +145,7 @@ private:
         // Send reset code: line low for at least 50µs
         // (WS2812/SK6812 datasheet requirement)
         fl::FastPin<DATA_PIN>::lo();
-        fl::delayNanoseconds<50000>();  // 50 microseconds
+        fl::delayNanoseconds<280000>();  // 280 microseconds
     }
 
     /// Send a single byte with bit-by-bit timing
@@ -190,6 +194,24 @@ private:
     }
 };
 
+#else  // FASTLED_CLOCKLESS_STUB_DEFINED
+
+// When stub is active, provide aliases to the stub implementations
+// (The stub defines ClocklessController and ClocklessBlockController already)
+
 #endif  // FASTLED_CLOCKLESS_STUB_DEFINED
+
+// Backwards compatibility alias - only define when ClocklessBlocking exists
+#ifndef FASTLED_CLOCKLESS_STUB_DEFINED
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+using ClocklessBlockController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+#endif
+
+// Default ClocklessController typedef (when no platform-specific driver is available)
+// Platform-specific drivers (ClocklessRMT, ClocklessSPI, etc.) may override this
+#if !defined(FASTLED_HAS_CLOCKLESS) && !defined(FASTLED_CLOCKLESS_STUB_DEFINED)
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+using ClocklessController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+#endif
 
 }  // namespace fl

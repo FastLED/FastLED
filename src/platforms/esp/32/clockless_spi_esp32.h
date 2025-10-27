@@ -72,4 +72,10 @@ protected:
     }
 };
 
+// Convenient alias for SPI-based clockless controller
+namespace fl {
+template <int DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+using ClocklessSPI = ::ClocklessSpiWs2812Controller<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+}
+
 #endif  // FASTLED_RMT5

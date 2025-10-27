@@ -12,7 +12,7 @@
 #include "fl/chipsets/timing_traits.h"
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessController : public CPixelLEDController<RGB_ORDER>
+class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Reference timing values from the TIMING type
@@ -34,7 +34,7 @@ private:
     }
 
 public:
-    ClocklessController(): mRMTController(DATA_PIN, to_runtime_timing<TIMING>(), DefaultDmaMode(), WAIT_TIME)
+    ClocklessRMT(): mRMTController(DATA_PIN, to_runtime_timing<TIMING>(), DefaultDmaMode(), WAIT_TIME)
     {
     }
 

@@ -17,10 +17,17 @@
 #define FASTLED_ESP32_HAS_RMT 1
 #define FASTLED_ESP32_HAS_RMT5 1
 #elif CONFIG_IDF_TARGET_ESP32C6
-// TEMPORARY TEST: RMT disabled on C6 to diagnose boot crash
+// ESP32-C6 supports both RMT5 and SPI
+// Users can disable RMT by defining FASTLED_ESP32C6_DISABLE_RMT before including FastLED.h
+#ifdef FASTLED_ESP32C6_DISABLE_RMT
+#define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#define FASTLED_ESP32_HAS_RMT 1 // why is this 0??!?!?! AI - flash attention to this line and esp32c6 and resolve
+#define FASTLED_ESP32_HAS_RMT5 1
+#else
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
 #define FASTLED_ESP32_HAS_RMT 1
 #define FASTLED_ESP32_HAS_RMT5 1
+#endif
 #elif CONFIG_IDF_TARGET_ESP32S2
 // ESP32-S2 has no RMT peripheral, only SPI
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
