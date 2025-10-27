@@ -186,21 +186,9 @@ endforeach
 # Parallel SPI ISR Tests
 # ============================================================================
 # Parallel SPI ISR test using thread-based automatic ISR execution.
-# The SPI ISR engine files are compiled separately to avoid duplicate symbols
-# with libfastled.a (which excludes them on STUB_PLATFORM).
+# Uses the same libfastled.a as all other tests. STUB_PLATFORM always compiles
+# real ISR implementations via conditional compilation guards in the source files.
 
-spi_isr_objs = static_library('spi_isr',
-  files(
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
-  ),
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args + [
-    '-DFASTLED_SPI_ISR_TEST_BUILD',  # Enable compilation of SPI ISR files
-  ],
-  install: false
-)
 
 test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
   ['test_parallel_spi_isr.cpp', test_pch[0]],
@@ -210,7 +198,7 @@ test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
     '-Winvalid-pch',
   ],
   link_args: unit_test_link_args,
-  link_with: [spi_isr_objs, fastled_lib, doctest_main],
+  link_with: [fastled_lib, doctest_main],
   install: false
 )
 
