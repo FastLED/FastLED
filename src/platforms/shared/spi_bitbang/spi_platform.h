@@ -19,7 +19,7 @@
 #include "fl/compiler_control.h"
 
 /* Auto-enable host simulation mode on stub platform */
-#if defined(STUB_PLATFORM) && !defined(FASTLED_SPI_HOST_SIMULATION)
+#if (defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)) && !defined(FASTLED_SPI_HOST_SIMULATION)
 #define FASTLED_SPI_HOST_SIMULATION 1
 #endif
 

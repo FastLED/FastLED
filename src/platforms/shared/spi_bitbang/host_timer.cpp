@@ -23,13 +23,13 @@
 #include <thread>   // ok include (no fl/thread.h wrapper available)
 #include <chrono>   // ok include (no fl/chrono.h available)
 #include <atomic>   // ok include (for std::atomic_thread_fence)
+#include <cstdio>   // ok include (for std::printf)
 #include "fl/atomic.h"
 #include "fl/mutex.h"
 #include "fl/vector.h"
 
 // Simple printf-style debugging for thread mode
-#include "fl/stdio.h"
-#define ISR_DBG(...) printf("[ISR_THREAD] " __VA_ARGS__)
+#define ISR_DBG(...) std::printf("[ISR_THREAD] " __VA_ARGS__)
 
 /* ISR context for thread-based execution */
 struct ISRContext {
