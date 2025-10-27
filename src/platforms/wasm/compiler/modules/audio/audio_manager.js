@@ -840,6 +840,57 @@ export class AudioManager {
       const audioId = audioElement.parentNode.querySelector('input').id;
       this.storeAudioSamples(sampleBuffer, audioId, audioElement);
       this.updateProcessingIndicator();
+
+      // Push audio samples to C++ via WASM
+      this.pushSamplesToWasm(sampleBuffer, timestamp);
+    }
+  }
+
+  /**
+   * Push audio samples to C++ WASM module
+   * @param {Int16Array} sampleBuffer - Audio samples (512 Int16 values)
+   * @param {number} timestamp - Sample timestamp in milliseconds
+   */
+  pushSamplesToWasm(sampleBuffer, timestamp) {
+    // Check if Module and ccall are available
+    if (typeof Module === 'undefined' || !Module.ccall) {
+      if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.sampleRate) {
+        console.warn('🎵 Module.ccall not available - cannot push audio to WASM');
+      }
+      return;
+    }
+
+    try {
+      // Allocate memory in WASM heap for the samples
+      const byteLength = sampleBuffer.length * 2; // 512 samples × 2 bytes per Int16
+      const ptr = Module._malloc(byteLength);
+
+      if (!ptr) {
+        console.error('🎵 Failed to allocate WASM memory for audio samples');
+        return;
+      }
+
+      // Create a view into the WASM heap and copy the samples
+      const heap16 = new Int16Array(Module.HEAP16.buffer, ptr, sampleBuffer.length);
+      heap16.set(sampleBuffer);
+
+      // Call C++ function to push samples into ring buffer
+      Module.ccall(
+        'pushAudioSamples',           // C function name
+        null,                          // Return type (void)
+        ['number', 'number', 'number'], // Argument types
+        [ptr, sampleBuffer.length, timestamp] // Arguments: pointer, count, timestamp
+      );
+
+      // Free the allocated memory
+      Module._free(ptr);
+
+      // Debug logging (very sparse to avoid console spam)
+      if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.sampleRate * 0.1) {
+        console.log(`🎵 Pushed ${sampleBuffer.length} samples to WASM @ ${timestamp}ms`);
+      }
+    } catch (error) {
+      console.error('🎵 Error pushing audio samples to WASM:', error);
     }
   }
 

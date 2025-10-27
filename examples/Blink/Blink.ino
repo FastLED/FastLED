@@ -6,23 +6,20 @@
 #include <FastLED.h>
 
 // How many leds in your strip?
-#define NUM_LEDS 250
+#define NUM_LEDS 1
 
 // For led chips like WS2812, which have a data line, ground, and power, you just
 // need to define DATA_PIN.  For led chipsets that are SPI based (four wires - data, clock,
 // ground, and power), like the LPD8806 define both DATA_PIN and CLOCK_PIN
 // Clock pin only needed for SPI based chipsets when not using hardware SPI
-#define DATA_PIN 21
+#define DATA_PIN 3
 #define CLOCK_PIN 13
 
 // Define the array of leds
 CRGB leds[NUM_LEDS];
 
 void setup() {
-    Serial.begin(9600);
-    Serial.println("BLINK setup starting");
-
-    delay(2000);
+    //Serial.begin(9600);
 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
@@ -71,13 +68,7 @@ void setup() {
     // FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);  // BGR ordering is typical
 }
 
-void loop() { 
-  //Serial.println("BLINK");
-
-  EVERY_N_BSECONDS(100) {
-    FL_WARN("BLINK");
-  }
-  
+void loop() {
   // Turn the LED on, then pause
   for (int i = 0; i < NUM_LEDS; ++i) {
     leds[i] = CRGB::Red;

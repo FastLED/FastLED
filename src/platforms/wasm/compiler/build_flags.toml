@@ -292,7 +292,7 @@ flags = [
     
     # JavaScript Interop - C Functions
     # Note: _extern_setup and _extern_loop are now compatibility functions; _main is the primary entry point
-    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData','_js_fetch_success_callback','_js_fetch_error_callback']",
+    "-sEXPORTED_FUNCTIONS=['_malloc','_free','_main','_extern_setup','_extern_loop','_fastled_declare_files','_getStripPixelData','_getFrameData','_getScreenMapData','_freeFrameData','_getFrameVersion','_hasNewFrameData','_js_fetch_success_callback','_js_fetch_error_callback','_pushAudioSamples']",
     
     # Runtime Behavior
     "-sEXIT_RUNTIME=0",                      # Keep runtime alive after main() exits
