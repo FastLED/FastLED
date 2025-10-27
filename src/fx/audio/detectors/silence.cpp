@@ -1,4 +1,4 @@
-#include "fx/audio/detectors/silence_detector.h"
+#include "fx/audio/detectors/silence.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 
@@ -29,11 +29,11 @@ void SilenceDetector::update(shared_ptr<AudioContext> context) {
     mLastUpdateTime = timestamp;
 
     // Build history
-    if (mRMSHistory.size() < mHistorySize) {
+    if (mRMSHistory.size() < static_cast<fl::size>(mHistorySize)) {
         mRMSHistory.push_back(mCurrentRMS);
     } else {
         mRMSHistory[mHistoryIndex] = mCurrentRMS;
-        mHistoryIndex = (mHistoryIndex + 1) % static_cast<int>(mHistorySize);
+        mHistoryIndex = (mHistoryIndex + 1) % mHistorySize;
     }
 
     // Get smoothed RMS
