@@ -162,22 +162,11 @@ void setup() {
 }
 
 void loop() {
-    EVERY_N_MILLISECONDS(1000) {
-        // Serial.println("AnimartrixRing loop");
-        FL_WARN("AnimartrixRing loop");
-        // fill black
-        fill_solid(leds, NUM_LEDS, CRGB::Black);
-        FastLED.show();
-        delay(240);
-        return;
-    }
-
-    return;
     // Process audio if enabled
     float audioSpeedFactor = 1.0f;
     float audioBrightnessFactor = 1.0f;
 
-    if (enableAudioReactive.value() && false) {
+    if (enableAudioReactive.value()) {
         // Process audio samples
         fl::AudioSample sample = audio.next();
         if (sample.isValid()) {
