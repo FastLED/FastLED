@@ -1,15 +1,25 @@
 // ok no namespace fl
 #pragma once
 
-// Router header for placement new operator - distributes to platform-specific implementations
-// This file is NOT in the fl/* namespace to avoid header bloat
-// The actual placement new operator is defined in global namespace by platform-specific headers
+// Platform-specific placement new operator definitions
+// This file dispatches to the appropriate platform-specific new.h file
 
-#if defined(__AVR__)
-#include "avr/new.h"
-#elif defined(__STM32F1__) || defined(__arm__) || defined(__ARM_ARCH)
-#include "arm/new.h"
+// ARM platform detection
+#include "platforms/arm/is_arm.h"
+
+#if defined(ESP8266)
+    #include "platforms/esp/new.h"
+#elif defined(ESP32)
+    #include "platforms/esp/new.h"
+#elif defined(__AVR__)
+    #include "platforms/avr/new.h"
+#elif defined(FASTLED_ARM)
+    // All ARM platforms (Due, STM32, Teensy, nRF52, Apollo3, etc.)
+    #include "platforms/arm/new.h"
+#elif defined(__EMSCRIPTEN__)
+    // WebAssembly / Emscripten
+    #include "platforms/wasm/new.h"
 #else
-// Default: use shared/generic implementation
-#include "shared/new.h"
+    // Default platform (desktop/generic)
+    #include "platforms/shared/new.h"
 #endif
