@@ -12,14 +12,14 @@ namespace fl {
 
 #define _FASTLED_NS_TO_DWT(_NS) (((F_CPU_ACTUAL>>16)*(_NS)) / (1000000000UL>>16))
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
+	static constexpr uint32_t T1 = TIMING::T1;
+	static constexpr uint32_t T2 = TIMING::T2;
+	static constexpr uint32_t T3 = TIMING::T3;
 
 	data_t mPinMask;
 	data_ptr_t mPort;

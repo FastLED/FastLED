@@ -153,6 +153,13 @@
 #define FL_LINK_WEAK __attribute__((weak))
 #endif
 
+// Mark functions/variables as maybe unused (for compile-time test functions)
+#if defined(__GNUC__) || defined(__clang__)
+  #define FL_MAYBE_UNUSED __attribute__((unused))
+#else
+  #define FL_MAYBE_UNUSED
+#endif
+
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus
   #define FL_EXTERN_C_BEGIN extern "C" {

@@ -101,6 +101,10 @@
 /// Hardware pin definitions
 #include "fastpin.h"
 
+/// Color utilities and palettes
+#include "colorutils.h"
+#include "colorpalettes.h"
+
 // ============================================================================
 // INTERNAL UTILITY DECLARATIONS
 // ============================================================================

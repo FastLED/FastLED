@@ -43,7 +43,7 @@ namespace fl {
 
 // Test that StrStream and FakeStrStream can accept all fundamental integer types
 // This ensures SFINAE collision prevention works across all platforms
-static void test_strstream_integer_operators() {
+FL_MAYBE_UNUSED static void test_strstream_integer_operators() {
     fl::StrStream ss;
     fl::FakeStrStream fss;
 
@@ -89,7 +89,7 @@ static void test_strstream_integer_operators() {
 // This file contains only compile-time tests.
 // The platform-specific test functions are called to trigger
 // any compile-time errors if the platform is not configured correctly.
-static void compile_tests() {
+FL_MAYBE_UNUSED static void compile_tests() {
 
     static_assert(fl::is_same<u32, uint32_t>::value, "u32 must be the same type as uint32_t");
     static_assert(fl::is_same<u16, uint16_t>::value, "u16 must be the same type as uint16_t");

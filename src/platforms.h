@@ -1,7 +1,5 @@
 #pragma once
 
-#include "FastLED.h"
-
 #include "fastled_config.h"
 
 

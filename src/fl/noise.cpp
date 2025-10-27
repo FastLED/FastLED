@@ -2,6 +2,9 @@
 /// Ring, sphere, and cylinder noise functions in the fl namespace
 
 #include "fl/fastled.h"
+#include "fl/hsv16.h"
+#include "fl/map_range.h"
+#include "fl/noise.h"
 
 // Forward declarations from src/noise.cpp
 uint16_t inoise16(uint32_t x, uint32_t y, uint32_t z, uint32_t t);

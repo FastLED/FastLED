@@ -3,8 +3,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include "fl/fastled.h"
-#include "power_mgt.h"
+#include "FastLED.h"
 // POWER MANAGEMENT
 
 /// @name Power Usage Values
