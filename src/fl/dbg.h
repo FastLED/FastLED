@@ -51,7 +51,7 @@ inline const char *fastled_file_offset(const char *file) {
 #define FL_DBG_NO_OP(X) do { if (false) { fl::FakeStrStream() << X; } } while(0)
 
 // Debug printing: Enable only when explicitly requested to avoid ~5KB memory bloat
-#if !defined(FASTLED_FORCE_DBG) || !SKETCH_HAS_LOTS_OF_MEMORY
+#if !defined(FASTLED_FORCE_DBG) && !SKETCH_HAS_LOTS_OF_MEMORY
 // By default, debug printing is disabled to prevent memory bloat in simple applications
 #define FASTLED_HAS_DBG 0
 #define _FASTLED_DGB(X) FL_DBG_NO_OP(X)
