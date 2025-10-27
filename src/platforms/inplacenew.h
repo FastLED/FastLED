@@ -7,6 +7,9 @@
 #if defined(__AVR__)
 // AVR doesn't have <new> header, needs manual definition
 #include "avr/inplacenew.h"
+#elif defined(__STM32F1__)
+// Roger Clark STM32 has broken/missing placement new
+#include "shared/inplacenew.h"
 #elif !defined(__has_include)
 // Platforms without __has_include support - assume no <new> header
 #include "shared/inplacenew.h"
