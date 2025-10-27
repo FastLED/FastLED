@@ -1,6 +1,6 @@
 // KeyDetector implementation
 
-#include "fx/audio/detectors/key_detector.h"
+#include "fx/audio/detectors/key.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 #include "fl/dbg.h"
@@ -344,7 +344,7 @@ float KeyDetector::correlateWithProfile(const float* chroma, const float* profil
     return correlation;
 }
 
-void KeyDetector::fireCallbacks(const Key& key, u32 timestamp) {
+void KeyDetector::fireCallbacks(const Key& key, u32 /*timestamp*/) {
     // Fire onKeyChange if key actually changed
     if (mPreviousKey != key || !mKeyActive) {
         if (onKeyChange) {
