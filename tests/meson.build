@@ -183,57 +183,26 @@ foreach test_name : test_names
 endforeach
 
 # ============================================================================
-# Parallel SPI ISR Tests (Consolidated)
+# Parallel SPI ISR Tests
 # ============================================================================
-# All parallel SPI ISR tests are consolidated into a single test_parallel_spi_isr.cpp
-# file with conditional compilation for different execution modes.
-# Two builds are created:
-# 1. Manual tick mode (FASTLED_SPI_MANUAL_TICK) - deterministic testing
-# 2. Thread mode (no FASTLED_SPI_MANUAL_TICK) - automatic ISR execution
+# Parallel SPI ISR test using thread-based automatic ISR execution.
+# The SPI ISR engine files are compiled separately to avoid duplicate symbols
+# with libfastled.a (which excludes them on STUB_PLATFORM).
 
-# Manual tick mode - all widths tested with explicit tick() calls
-# Compile SPI ISR engine with manual tick mode enabled
-spi_isr_manual_objs = static_library('spi_isr_manual',
+spi_isr_objs = static_library('spi_isr',
   files(
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
     meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
+    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_sim.cpp',
   ),
   include_directories: [src_dir, tests_dir, stub_dir],
   cpp_args: unit_test_compile_args + [
-    '-DFASTLED_SPI_MANUAL_TICK',
+    '-DFASTLED_SPI_ISR_TEST_BUILD',  # Enable compilation of SPI ISR files
   ],
   install: false
 )
 
-test_parallel_spi_isr_manual_exe = executable('test_parallel_spi_isr_manual',
-  ['test_parallel_spi_isr.cpp', test_pch[0]],
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args + [
-    '-DFASTLED_SPI_MANUAL_TICK',
-    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-    '-Winvalid-pch',
-  ],
-  link_args: unit_test_link_args,
-  # Link manual tick SPI ISR library BEFORE libfastled to override symbols
-  link_with: [spi_isr_manual_objs, fastled_lib, doctest_main],
-  install: false
-)
-
-test('test_parallel_spi_isr_manual', test_parallel_spi_isr_manual_exe, workdir: meson.project_source_root())
-
-# Thread mode - all widths tested with automatic ISR execution
-# Compile SPI ISR engine with thread mode (no manual tick)
-spi_isr_thread_objs = static_library('spi_isr_thread',
-  files(
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/spi_isr_engine.cpp',
-    meson.project_source_root() / 'src/platforms/shared/spi_bitbang/host_timer.cpp',
-  ),
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args,
-  install: false
-)
-
-test_parallel_spi_isr_thread_exe = executable('test_parallel_spi_isr_thread',
+test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
   ['test_parallel_spi_isr.cpp', test_pch[0]],
   include_directories: [src_dir, tests_dir, stub_dir],
   cpp_args: unit_test_compile_args + [
@@ -241,9 +210,8 @@ test_parallel_spi_isr_thread_exe = executable('test_parallel_spi_isr_thread',
     '-Winvalid-pch',
   ],
   link_args: unit_test_link_args,
-  # Link thread mode SPI ISR library BEFORE libfastled to override symbols
-  link_with: [spi_isr_thread_objs, fastled_lib, doctest_main],
+  link_with: [spi_isr_objs, fastled_lib, doctest_main],
   install: false
 )
 
-test('test_parallel_spi_isr_thread', test_parallel_spi_isr_thread_exe, workdir: meson.project_source_root())
+test('test_parallel_spi_isr', test_parallel_spi_isr_exe, workdir: meson.project_source_root())

@@ -12,7 +12,10 @@
 #include "spi_platform.h"
 #include "host_sim.h"
 
-#ifdef FASTLED_SPI_HOST_SIMULATION
+// Only compile for host simulation on embedded platforms OR when building as part of a test
+// Test builds define FASTLED_SPI_ISR_TEST_BUILD to include these files
+// This avoids duplicate symbols between libfastled.a and test libraries
+#if (defined(FASTLED_SPI_HOST_SIMULATION) && !defined(STUB_PLATFORM)) || defined(FASTLED_SPI_ISR_TEST_BUILD)
 #include "fl/stdint.h"
 #include "fl/cstring.h"
 

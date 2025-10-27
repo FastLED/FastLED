@@ -36,10 +36,10 @@
 // Include platform header first to enable auto-detection of FASTLED_SPI_HOST_SIMULATION
 #include "spi_platform.h"
 
-// Only compile for real embedded platforms OR when explicitly building for host simulation tests
-// On STUB_PLATFORM (meson unit test builds), this is compiled directly into test executables
-// with FASTLED_SPI_HOST_SIMULATION auto-enabled, not into the library.
-#if SKETCH_HAS_LOTS_OF_MEMORY && (!defined(STUB_PLATFORM) || defined(FASTLED_SPI_HOST_SIMULATION))
+// Only compile for real embedded platforms OR when building as part of a test
+// Test builds define FASTLED_SPI_ISR_TEST_BUILD to include these files
+// This avoids duplicate symbols between libfastled.a and test libraries
+#if (SKETCH_HAS_LOTS_OF_MEMORY && !defined(STUB_PLATFORM)) || defined(FASTLED_SPI_ISR_TEST_BUILD)
 
 #include "fl/stdint.h"
 #include "fl/compiler_control.h"
