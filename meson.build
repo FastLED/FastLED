@@ -47,7 +47,7 @@ lib8tion_sources = run_command(uv_prog, 'run', 'python', '-c',
   check: false, capture: true)
 
 stub_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp") if p.name != "stub_main.cpp"))',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp")))',
   check: false, capture: true)
 
 platforms_sources = run_command(uv_prog, 'run', 'python', '-c',
@@ -59,7 +59,7 @@ fl_sources = run_command(uv_prog, 'run', 'python', '-c',
   check: false, capture: true)
 
 shared_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; excluded = {"spi_isr_engine.cpp", "host_timer.cpp"}; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp") if p.name not in excluded))',
+  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp")))',
   check: false, capture: true)
 
 esp_sources = run_command(uv_prog, 'run', 'python', '-c',
