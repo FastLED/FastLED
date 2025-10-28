@@ -4,6 +4,7 @@
 
 #include <Arduino.h>
 #include <FastLED.h>
+#include "sketch_assert.h"
 
 // Test configuration
 #define NUM_LEDS 8
@@ -16,67 +17,6 @@ CRGB leds[NUM_LEDS];
 static uint8_t g_test_idx = 0;
 static uint8_t g_failed_tests = 0;
 static uint8_t g_passed_tests = 0;
-
-// Helper class for assertion messages - outputs in destructor if failed
-class AssertHelper {
-public:
-    AssertHelper(bool failed, uint8_t line, uint8_t actual, uint8_t expected)
-        : mFailed(failed), mLine(line), mActual(actual), mExpected(expected) {
-    }
-
-    ~AssertHelper() {
-        if (mFailed) {
-            Serial.print(F("FAIL L"));
-            Serial.print(mLine);
-            Serial.print(F(" exp="));
-            Serial.print(mExpected);
-            Serial.print(F(" got="));
-            Serial.print(mActual);
-
-            // Print optional message if any was streamed
-            if (mMsg.str().length() > 0) {
-                Serial.print(F(" - "));
-                Serial.print(mMsg.c_str());
-            }
-            Serial.println();
-            g_failed_tests++;
-        }
-    }
-
-    // Stream operator for optional message
-    template<typename T>
-    AssertHelper& operator<<(const T& value) {
-        if (mFailed) {
-            mMsg << value;
-        }
-        return *this;
-    }
-
-    // Check if assertion failed
-    bool failed() const { return mFailed; }
-
-private:
-    bool mFailed;
-    uint8_t mLine;
-    uint8_t mActual;
-    uint8_t mExpected;
-    fl::StrStream mMsg;
-};
-
-// ASSERT_EQ macro with optional message support via << operator
-// Uses nested for-loops for C++11 compatibility (no init-statement in if)
-#define ASSERT_EQ(actual, expected) \
-    for (bool _assert_guard = false; !_assert_guard; _assert_guard = true) \
-        for (AssertHelper _assert_helper = AssertHelper( \
-                (actual) != (expected), \
-                __LINE__ & 0xFF, \
-                (actual), \
-                (expected)); \
-             !_assert_guard; _assert_guard = true) \
-            if (_assert_helper.failed()) \
-                return false; \
-            else \
-                _assert_helper
 
 // Test functions return true on success, false on failure
 bool test_math8_qadd() {
@@ -200,11 +140,13 @@ bool test_array_blur() {
     // Middle should still have most light, neighbor should have some
     // Just verify neighbor got some light (blur worked)
     if (leds[3].r == 0) {
-        // Manual fail since we can't use ASSERT_EQ for comparison
-        Serial.print(F("FAIL L"));
-        Serial.print(__LINE__ & 0xFF);
-        Serial.println(F(" - Blur did not spread light to neighbor"));
-        g_failed_tests++;
+        // Manual fail - add error to collection
+        if (canAddError()) {
+            Error error(__FILE__, __LINE__, "FAIL - Blur did not spread light to neighbor");
+            g_errors.push_back(error);
+            Serial.println(error.message.c_str());
+            triggerErrorCallback();
+        }
         return false;
     }
 
@@ -240,14 +182,50 @@ void setup() {
     // Initialize FastLED
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(50);
+
+    // Set up assertion error callback
+    setAssertCallback([]() {
+        // Callback is invoked when an assertion fails
+        // Error details are already added to g_errors vector
+        g_failed_tests++;
+    });
 }
 
 void loop() {
     static bool tests_complete = false;
+    static uint32_t last_status_print = 0;
 
+    // If tests are complete, print status once per second
     if (tests_complete) {
-        FL_WARN("All tests complete");
-        delay(5000);
+        if (millis() - last_status_print >= 1000) {
+            last_status_print = millis();
+
+            if (g_errors.size() > 0) {
+                // Print all collected errors
+                Serial.print("ERRORS (");
+                Serial.print(g_errors.size());
+                Serial.println("):");
+                for (uint8_t i = 0; i < g_errors.size(); i++) {
+                    Serial.print("  [");
+                    Serial.print(i + 1);
+                    Serial.print("] ");
+                    Serial.print(g_errors[i].message.c_str());
+                    Serial.print(" (");
+                    Serial.print(g_errors[i].source_file.c_str());
+                    Serial.print(":");
+                    Serial.print(g_errors[i].line);
+                    Serial.println(")");
+                }
+            } else {
+                Serial.println("SUCCESS: All tests passed!");
+            }
+        }
+        return;
+    }
+
+    // If we've hit the error limit, mark tests as complete
+    if (g_errors.size() >= MAX_ERRORS) {
+        tests_complete = true;
         return;
     }
 
