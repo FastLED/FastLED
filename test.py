@@ -149,19 +149,10 @@ def run_qemu_tests(args: TestArgs) -> None:
             print()
             print(f"❌ Could not pull image from Docker Hub")
             print()
-            print("Options:")
-            print(f"  1. Build and test in one command:")
-            print(
-                f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
-            )
-            print()
-            print(f"  2. Build image separately (takes ~30 minutes):")
-            print(f"     bash compile --docker --build {platform} Blink")
-            print()
 
             # Check if we should auto-build
             if args.build:
-                # Auto-build mode
+                # Auto-build mode (explicit flag)
                 print("Auto-build enabled (--build flag)")
                 print()
                 build_result = docker_runner.build_board_image(platform, progress=True)
@@ -185,8 +176,36 @@ def run_qemu_tests(args: TestArgs) -> None:
                     print("Build cancelled. Please build the image manually.")
                     sys.exit(1)
             else:
-                # Non-interactive mode - just exit with error
-                sys.exit(1)
+                # Default mode - automatically build with warning and delay
+                print("⚠️  Docker image not available. Will build automatically.")
+                print("   This will take approximately 30 minutes.")
+                print("   Press Ctrl+C within 5 seconds to cancel...")
+                print()
+
+                import time
+
+                for i in range(5, 0, -1):
+                    print(f"   Starting build in {i}...", end="\r")
+                    time.sleep(1)
+                print()  # New line after countdown
+                print()
+
+                print("🔨 Building Docker image automatically...")
+                print()
+                build_result = docker_runner.build_board_image(platform, progress=True)
+                if build_result != 0:
+                    print(f"❌ Failed to build Docker image for {platform}")
+                    print()
+                    print("Options:")
+                    print(f"  1. Try again with verbose logging:")
+                    print(
+                        f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
+                    )
+                    print()
+                    print(f"  2. Build image separately:")
+                    print(f"     bash compile --docker --build {platform} Blink")
+                    print()
+                    sys.exit(1)
 
     success_count = 0
     failure_count = 0
