@@ -1,3 +1,5 @@
+// @filter: (mem is high)
+
 /// @file    WasmScreenCoords.ino
 /// @brief   Demonstrates screen coordinate mapping for web display
 /// @example WasmScreenCoords.ino
