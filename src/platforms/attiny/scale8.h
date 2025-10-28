@@ -7,11 +7,6 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-
 namespace fl {
 
 /// @file scale8.h
@@ -60,8 +55,8 @@ FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
         "mul %0, %1          \n\t"
         // Add i to r0, possibly setting the carry flag
         "add r0, %0         \n\t"
-        // load the immediate 0 into i (note, this does _not_ touch any flags)
-        "ldi %0, 0x00       \n\t"
+        // load 0 into i (using clr instead of ldi to avoid upper register requirement)
+        "clr %0             \n\t"
         // walk and chew gum at the same time
         "adc %0, r1          \n\t"
 #else
@@ -73,7 +68,7 @@ FL_ALWAYS_INLINE uint8_t scale8(uint8_t i, fract8 scale) {
 #endif
         "clr __zero_reg__    \n\t"
 
-        : "+d"(i)    /* writes to i; r16-r31, restricted by ldi */
+        : "+r"(i)    /* writes to i; any register */
         : "r"(scale) /* uses scale */
         : "r0", "r1" /* clobbers r0, r1 */
     );
@@ -91,9 +86,9 @@ FL_ALWAYS_INLINE uint8_t scale8_video(uint8_t i, fract8 scale) {
                  "  mov %[j], r1\n\t"
                  "  clr __zero_reg__\n\t"
                  "  cpse %[scale], r1\n\t"
-                 "  subi %[j], 0xFF\n\t"
+                 "  inc %[j]\n\t"
                  "L_%=: \n\t"
-                 : [j] "+d"(j) // r16-r31, restricted by subi
+                 : [j] "+r"(j) // any register (using inc instead of subi)
                  : [i] "r"(i), [scale] "r"(scale)
                  : "r0", "r1");
     return j;
@@ -109,8 +104,8 @@ FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
         "mul %0, %1          \n\t"
         // Add i to r0, possibly setting the carry flag
         "add r0, %0         \n\t"
-        // load the immediate 0 into i (note, this does _not_ touch any flags)
-        "ldi %0, 0x00       \n\t"
+        // load 0 into i (using clr instead of ldi to avoid upper register requirement)
+        "clr %0             \n\t"
         // walk and chew gum at the same time
         "adc %0, r1          \n\t"
 #else
@@ -121,7 +116,7 @@ FL_ALWAYS_INLINE uint8_t scale8_LEAVING_R1_DIRTY(uint8_t i,
 #endif
         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF  */
         /* "clr __zero_reg__    \n\t" */
-        : "+d"(i)    /* writes to i; r16-r31, restricted by ldi */
+        : "+r"(i)    /* writes to i; any register */
         : "r"(scale) /* uses scale */
         : "r0", "r1" /* clobbers r0, r1 */
     );
@@ -139,8 +134,8 @@ FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
         "mul %0, %1          \n\t"
         // Add i to r0, possibly setting the carry flag
         "add r0, %0         \n\t"
-        // load the immediate 0 into i (note, this does _not_ touch any flags)
-        "ldi %0, 0x00       \n\t"
+        // load 0 into i (using clr instead of ldi to avoid upper register requirement)
+        "clr %0             \n\t"
         // walk and chew gum at the same time
         "adc %0, r1          \n\t"
 #else
@@ -152,7 +147,7 @@ FL_ALWAYS_INLINE void nscale8_LEAVING_R1_DIRTY(uint8_t &i,
         /* R1 IS LEFT DIRTY HERE; YOU MUST ZERO IT OUT YOURSELF */
         /* "clr __zero_reg__    \n\t" */
 
-        : "+d"(i)    /* writes to i; r16-r31, restricted by ldi */
+        : "+r"(i)    /* writes to i; any register */
         : "r"(scale) /* uses scale */
         : "r0", "r1" /* clobbers r0, r1 */
     );
@@ -168,9 +163,9 @@ FL_ALWAYS_INLINE uint8_t scale8_video_LEAVING_R1_DIRTY(uint8_t i,
                  "  mul %[i], %[scale]\n\t"
                  "  mov %[j], r1\n\t"
                  "  breq L_%=\n\t"
-                 "  subi %[j], 0xFF\n\t"
+                 "  inc %[j]\n\t"
                  "L_%=: \n\t"
-                 : [j] "+d"(j) // r16-r31, restricted by subi
+                 : [j] "+r"(j) // any register (using inc instead of subi)
                  : [i] "r"(i), [scale] "r"(scale)
                  : "r0", "r1");
     return j;
@@ -185,9 +180,9 @@ FL_ALWAYS_INLINE void nscale8_video_LEAVING_R1_DIRTY(uint8_t &i,
                  "  mul %[i], %[scale]\n\t"
                  "  mov %[i], r1\n\t"
                  "  breq L_%=\n\t"
-                 "  subi %[i], 0xFF\n\t"
+                 "  inc %[i]\n\t"
                  "L_%=: \n\t"
-                 : [i] "+d"(i) // r16-r31, restricted by subi
+                 : [i] "+r"(i) // any register (using inc instead of subi)
                  : [scale] "r"(scale)
                  : "r0", "r1");
 }
@@ -365,4 +360,3 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 /// @} Scaling_AVR
 
 }  // namespace fl
-FL_DISABLE_WARNING_POP

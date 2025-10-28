@@ -7,10 +7,7 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
+
 
 // Include ATtiny-specific optimized implementations (shift-and-add, no MUL)
 #include "math8_attiny.h"
@@ -39,9 +36,9 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and load 0xFF into i.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0xFF  \n\t"
+        "ser %0        \n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // any register (using ser instead of ldi)
         : "r"(j));
     return i;
 }
@@ -57,13 +54,14 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
         If V is set, we go ahead and load 0x7F into i.
         */
         "brvc L_%=     \n\t"
-        "ldi %0, 0x7F  \n\t"
+        "ser %0        \n\t"
+        "lsr %0        \n\t"
 
         /* When both numbers are negative, C is set.
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // any register (using ser/lsr instead of ldi)
         : "r"(j));
     return i;
 }
@@ -79,9 +77,9 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and load 0x00 into i.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0x00  \n\t"
+        "clr %0        \n\t"
         "L_%=: "
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // any register (using clr instead of ldi)
         : "r"(j));
     return i;
 }
@@ -294,4 +292,3 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
 /// @} Math_AVR
 
 }  // namespace fl
-FL_DISABLE_WARNING_POP

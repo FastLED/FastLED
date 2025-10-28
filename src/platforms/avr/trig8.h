@@ -86,6 +86,7 @@ const uint8_t b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
 #define sin8 sin8_avr
 
 /// Fast 8-bit approximation of sin(x) (AVR implementation)
+#if !defined(LIB8_ATTINY)
 LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
     uint8_t offset = theta;
 
@@ -113,17 +114,21 @@ LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
 
     uint8_t mx;
     uint8_t xr1;
+    // Create mask registers outside asm to reduce register pressure
+    uint8_t mask_0F = 0x0F;
+    uint8_t mask_F0 = 0xF0;
     asm volatile("mul %[m16],%[secoffset]   \n\t"
                  "mov %[mx],r0              \n\t"
                  "mov %[xr1],r1             \n\t"
                  "eor  r1, r1               \n\t"
                  "swap %[mx]                \n\t"
-                 "andi %[mx],0x0F           \n\t"
+                 "and %[mx],%[mask_0F]      \n\t"
                  "swap %[xr1]               \n\t"
-                 "andi %[xr1], 0xF0         \n\t"
+                 "and %[xr1],%[mask_F0]     \n\t"
                  "or   %[mx], %[xr1]        \n\t"
-                 : [mx] "=d"(mx), [xr1] "=d"(xr1)
-                 : [m16] "d"(m16), [secoffset] "d"(secoffset));
+                 : [mx] "=r"(mx), [xr1] "=r"(xr1), [mask_0F] "+r"(mask_0F), [mask_F0] "+r"(mask_F0)
+                 : [m16] "r"(m16), [secoffset] "r"(secoffset)
+                 : "r0", "r1");
 
     int8_t y = mx + b;
     if (theta & 0x80)
@@ -133,6 +138,28 @@ LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
 
     return y;
 }
+#else
+// ATtiny fallback - C implementation (no mul instruction)
+LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
+    static const uint8_t b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
+    uint8_t offset = theta;
+    if (theta & 0x40) offset = ~offset;
+    offset &= 0x3F;
+    uint8_t secoffset = (offset & 0x0F);
+    if (theta & 0x40) ++secoffset;
+    uint8_t section = offset >> 4;
+    uint8_t s2 = section * 2;
+    const uint8_t *p = b_m16_interleave + s2;
+    uint8_t b = *p++;
+    uint8_t m16 = *p;
+    // C version of multiply without hardware mul
+    uint16_t mx_full = (uint16_t)m16 * secoffset;
+    uint8_t mx = mx_full >> 4;
+    int8_t y = mx + b;
+    if (theta & 0x80) y = -y;
+    return y + 128;
+}
+#endif // !defined(LIB8_ATTINY)
 
 /// Fast 16-bit approximation of cos(x) (calls sin16)
 LIB8STATIC int16_t cos16(uint16_t theta) { return sin16(theta + 16384); }

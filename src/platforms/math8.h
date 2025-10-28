@@ -7,6 +7,9 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 
+
+
+
 // Select appropriate implementation based on platform configuration
 #if defined(__AVR__)
 // All AVR platforms (ATmega and ATtiny) use assembly-optimized versions
@@ -16,13 +19,8 @@
 // All other processors (ARM, ESP32, etc.) are fast enough - use portable C version
 #include "platforms/shared/math8.h"
 #endif
-
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 namespace fl {
-/// @file math8.h
+    /// @file math8.h
 /// Fast, efficient 8-bit math functions specifically
 /// designed for high-performance LED programming.
 
@@ -81,4 +79,3 @@ FL_ALWAYS_INLINE uint8_t sqrt8(uint8_t x) {
 /// @} Math
 /// @} lib8tion
 }  // namespace fl
-FL_DISABLE_WARNING_POP

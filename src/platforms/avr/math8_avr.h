@@ -74,11 +74,11 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
         "  tst r1              \n\t"
         "  breq Lnospill_%=    \n\t"
         /* If high byte of result > 0, saturate to 0xFF */
-        "  ldi %0, 0xFF         \n\t"
+        "  ser %0              \n\t"
         "Lnospill_%=:          \n\t"
         /* Restore r1 to "0"; it's expected to always be that */
         "  clr __zero_reg__    \n\t"
-        : "+d"(i) // r16-r31, restricted by ldi
+        : "+r"(i) // any register (using ser instead of ldi)
         : "r"(j)
         : "r0", "r1");
     return i;
@@ -99,9 +99,9 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
         "  brcc LOOP_%=                 \n\t"  /* Loop if counter not zero */
         "  rjmp DONE_%=                 \n\t"
         "SATURATE_%=:                   \n\t"
-        "  ldi %[result], 0xFF          \n\t"  /* Set result to 0xFF */
+        "  ser %[result]                \n\t"  /* Set result to 0xFF */
         "DONE_%=:                       \n\t"
-        : [result] "+d"(result), [cnt] "+r"(cnt)  /* d = r16-r31 for ldi */
+        : [result] "+r"(result), [cnt] "+r"(cnt)  /* any register (using ser instead of ldi) */
         : [i] "r"(i), [j] "r"(j)
         :);
     return result;
@@ -148,11 +148,10 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 
     // Use shift-and-add assembly for two 8x8->16 bit multiplies
     asm volatile(
-        // Initialize partial to 0
+        // Initialize partial and temp_work to 0 (mult_cnt already initialized to 0x80 in C)
         "  mov %A[partial], __zero_reg__ \n\t"
         "  mov %B[partial], __zero_reg__ \n\t"
         "  mov %[temp_work], __zero_reg__ \n\t"
-        "  mov %[mult_cnt], 0x80         \n\t"
 
         // Compute: partial = a * amountOfA (first multiply)
         "MULT_A_%=:                      \n\t"
@@ -168,7 +167,10 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
         "brcc MULT_A_%=                  \n\t"  // loop if counter not zero
 
         // Now add: partial += b * amountOfB (second multiply)
-        "  mov %[mult_cnt], 0x80         \n\t"
+        // Reinitialize mult_cnt to 0x80 and temp_work to 0
+        "  ser %[mult_cnt]               \n\t"  // Set all bits: 0xFF
+        "  lsr %[mult_cnt]               \n\t"  // Shift right: 0x7F, C=1
+        "  adc %[mult_cnt], __zero_reg__ \n\t"  // Add carry: 0x7F + 1 = 0x80
         "  mov %[temp_work], __zero_reg__ \n\t"
 
         "MULT_B_%=:                      \n\t"
@@ -237,11 +239,10 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 
     // Use shift-and-add assembly for two 8x8->16 bit multiplies
     asm volatile(
-        // Initialize partial to 0
+        // Initialize partial and temp_work to 0 (mult_cnt already initialized to 0x80 in C)
         "  mov %A[partial], __zero_reg__ \n\t"
         "  mov %B[partial], __zero_reg__ \n\t"
         "  mov %[temp_work], __zero_reg__ \n\t"
-        "  mov %[mult_cnt], 0x80         \n\t"
 
         // Compute: partial = a * amountOfA (first multiply)
         "MULT_A_%=:                      \n\t"
@@ -257,7 +258,10 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
         "brcc MULT_A_%=                  \n\t"  // loop if counter not zero
 
         // Now add: partial += b * amountOfB (second multiply)
-        "  mov %[mult_cnt], 0x80         \n\t"
+        // Reinitialize mult_cnt to 0x80 and temp_work to 0
+        "  ser %[mult_cnt]               \n\t"  // Set all bits: 0xFF
+        "  lsr %[mult_cnt]               \n\t"  // Shift right: 0x7F, C=1
+        "  adc %[mult_cnt], __zero_reg__ \n\t"  // Add carry: 0x7F + 1 = 0x80
         "  mov %[temp_work], __zero_reg__ \n\t"
 
         "MULT_B_%=:                      \n\t"

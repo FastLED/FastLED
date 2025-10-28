@@ -63,12 +63,14 @@ template<int CYCLES> inline void _dc(FASTLED_REGISTER uint8_t & loopvar);
 template<int _LOOP, int PAD> FASTLED_FORCE_INLINE void _dc_AVR(FASTLED_REGISTER uint8_t & loopvar) {
 	_dc<PAD>(loopvar);
 	// The convolution in here is to ensure that the state of the carry flag coming into the delay loop is preserved
+	// Use a const variable to allow "any register" constraint
+	const uint8_t loop_count = _LOOP;
 	asm __volatile__ (  "BRCS L_PC%=\n\t"
-						"        LDI %[loopvar], %[_LOOP]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBREQ L_DONE%=\n\t"
-						"L_PC%=: LDI %[loopvar], %[_LOOP]\n\tLL_%=: DEC %[loopvar]\n\t BRNE LL_%=\n\tBSET 0\n\t"
+						"        MOV %[loopvar], %[loop_count]\n\tL_%=: DEC %[loopvar]\n\t BRNE L_%=\n\tBREQ L_DONE%=\n\t"
+						"L_PC%=: MOV %[loopvar], %[loop_count]\n\tLL_%=: DEC %[loopvar]\n\t BRNE LL_%=\n\tBSET 0\n\t"
 						"L_DONE%=:\n\t"
 						:
-							[loopvar] "+d" (loopvar) : [_LOOP] "M" (_LOOP) : );
+							[loopvar] "+r" (loopvar) : [loop_count] "r" (loop_count) : );
 }
 
 template<int CYCLES> FASTLED_FORCE_INLINE void _dc(FASTLED_REGISTER uint8_t & loopvar) {
@@ -279,7 +281,7 @@ protected:
 				[d1] "+r" (d1),							\
 				[d2] "+r" (d2),							\
 				[loopvar] "+a" (loopvar),				\
-				[scale_base] "+a" (scale_base)			\
+				[scale_base] "+r" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
 				[b0] "a" (b0),							\
@@ -306,7 +308,7 @@ protected:
 				[d1] "+r" (d1),							\
 				[d2] "+r" (d2),							\
 				[loopvar] "+a" (loopvar),				\
-				[scale_base] "+a" (scale_base)			\
+				[scale_base] "+r" (scale_base)			\
 				: /* use variables */					\
 				[ADV] "r" (advanceBy),					\
 				[b0] "a" (b0),							\
@@ -358,16 +360,16 @@ protected:
 
 #if (DITHER==1)
 // apply dithering value  before we do anything with scale_base
-#define PRESCALE4(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\t" ASM_VARS);
+#define PRESCALE4(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\tbrcc L_%=\n\tser %[scale_base]\n\tL_%=:\n\t" ASM_VARS);
 
 // Do the add for the prescale
 #define PRESCALEA2(D) asm __volatile__("cpse %[scale_base], __zero_reg__\n\t add %[scale_base],%[" #D "]\n\t" ASM_VARS);
 
 // Do the clamp for the prescale, clear carry when we're done - NOTE: Must ensure carry flag state is preserved!
-#define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
+#define PRESCALEB4(D) asm __volatile__("brcc L_%=\n\tser %[scale_base]\n\tL_%=:\n\tneg %[" #D "]\n\tCLC" ASM_VARS);
 
 // Clamp for prescale, increment data, since we won't ever wrap 65k, this also effectively clears carry for us
-#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tldi %[scale_base], 0xFF\n\tL_%=:\n\tadd %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t" ASM_VARS);
+#define PSBIDATA4(D) asm __volatile__("brcc L_%=\n\tser %[scale_base]\n\tL_%=:\n\tadd %A[data], %A[ADV]\n\tadc %B[data], %B[ADV]\n\t" ASM_VARS);
 
 #else
 #define PRESCALE4(D) _dc<4>(loopvar);
