@@ -48,11 +48,11 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
         "  tst r1              \n\t"
         "  breq Lnospill_%=    \n\t"
         /* If high byte of result > 0, saturate to 0xFF */
-        "  ser %0              \n\t"
+        "  ldi %0, 0xFF        \n\t"
         "Lnospill_%=:          \n\t"
         /* Restore r1 to "0"; it's expected to always be that */
         "  clr __zero_reg__    \n\t"
-        : "+r"(i) // any register (using ser instead of ldi)
+        : "+d"(i)
         : "r"(j)
         : "r0", "r1");
     return i;

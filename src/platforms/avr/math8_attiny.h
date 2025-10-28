@@ -30,9 +30,9 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and set 0xFF into i.
         */
         "brcc L_%=     \n\t"
-        "ser %0        \n\t"
+        "ldi %0, 0xFF  \n\t"
         "L_%=: "
-        : "+r"(i) // Any register - ser works on all registers
+        : "+d"(i)
         : "r"(j));
     return i;
 }
@@ -48,14 +48,13 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
         If V is set, we go ahead and set 0x7F into i.
         */
         "brvc L_%=     \n\t"
-        "ser %0        \n\t"
-        "lsr %0        \n\t"
+        "ldi %0, 0x7F  \n\t"
 
         /* When both numbers are negative, C is set.
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+r"(i) // Any register - ser and lsr work on all registers
+        : "+d"(i)
         : "r"(j));
     return i;
 }
@@ -71,9 +70,9 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and clear i to 0x00.
         */
         "brcc L_%=     \n\t"
-        "clr %0        \n\t"
+        "ldi %0, 0x00  \n\t"
         "L_%=: "
-        : "+r"(i) // Any register - clr works on all registers
+        : "+d"(i)
         : "r"(j));
     return i;
 }
