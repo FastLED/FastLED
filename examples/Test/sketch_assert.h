@@ -77,4 +77,4 @@ private:
             if (_assert_helper.failed()) { \
                 if (!canAddError()) return false; \
             } else \
-                _assert_helper
+                (void)_assert_helper
