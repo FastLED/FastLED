@@ -64,6 +64,36 @@ This project uses directory-specific agent guidelines. See:
 ### Python Code Standards
 - **Collection Types**: Always fully type annotate collections using `List[T]`, `Set[T]`, `Dict[K, V]` instead of bare `list`, `set`, `dict` to pass pyright type checking
 
+- **Exception Handling - KeyboardInterrupt**:
+  - **CRITICAL**: NEVER silently catch or suppress `KeyboardInterrupt` exceptions
+  - When catching broad `Exception`, ALWAYS explicitly re-raise `KeyboardInterrupt` first:
+    ```python
+    try:
+        operation()
+    except KeyboardInterrupt:
+        raise  # MANDATORY: Always re-raise KeyboardInterrupt
+    except Exception as e:
+        logger.error(f"Operation failed: {e}")
+    ```
+  - **Thread-aware KeyboardInterrupt handling**: When handling KeyboardInterrupt in worker threads, use the global interrupt handler:
+    ```python
+    from ci.util.global_interrupt_handler import notify_main_thread
+
+    try:
+        # Worker thread operation
+        operation()
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt: Cancelling operation")
+        notify_main_thread()  # Propagate interrupt to main thread
+        raise
+    ```
+  - `notify_main_thread()` calls `_thread.interrupt_main()` to ensure the main thread receives the interrupt signal
+  - This is essential for multi-threaded applications to properly coordinate shutdown across all threads
+  - KeyboardInterrupt (Ctrl+C) is a user signal to stop execution - suppressing it creates unresponsive processes
+  - This applies to ALL exception handlers, including hook handlers, cleanup code, and background tasks
+  - Ruff's **BLE001** (blind-except) rule can detect this but is NOT active by default
+  - Consider enabling BLE001 with `--select BLE001` for automatic detection
+
 ### JavaScript Code Standards
 - **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
 
