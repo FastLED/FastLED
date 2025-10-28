@@ -34,6 +34,13 @@ import httpx
 from running_process import RunningProcess
 
 from ci.compiler.platformio_ini import PlatformIOIni
+from ci.util.download_breadcrumb import (
+    create_download_breadcrumb,
+    get_breadcrumb_path,
+    is_download_complete,
+    read_breadcrumb,
+    write_breadcrumb,
+)
 from ci.util.url_utils import sanitize_url_for_path
 
 
@@ -128,37 +135,26 @@ _global_cancel_event = threading.Event()
 _download_lock = threading.Lock()
 
 
+# Legacy function wrappers for backward compatibility
+# These now use the consolidated breadcrumb system
 def _get_status_file(artifact_dir: Path, cache_key: str) -> Path:
-    """Get the JSON status file path for an artifact."""
-    # Use simple descriptive filename since artifacts are already in unique directories
+    """Get the JSON status file path for an artifact (legacy wrapper)."""
     return artifact_dir / "info.json"
 
 
 def _read_status(status_file: Path) -> Optional[Dict[str, Any]]:
-    """Read status from JSON file."""
-    if not status_file.exists():
-        return None
-
-    try:
-        with open(status_file, "r") as f:
-            return json.load(f)
-    except (json.JSONDecodeError, OSError):
-        return None
+    """Read status from JSON file (legacy wrapper)."""
+    return read_breadcrumb(status_file)
 
 
 def _write_status(status_file: Path, status: Dict[str, Any]) -> None:
-    """Write status to JSON file."""
-    try:
-        with open(status_file, "w") as f:
-            json.dump(status, f, indent=2)
-    except OSError as e:
-        logger.warning(f"Failed to write status file {status_file}: {e}")
+    """Write status to JSON file (legacy wrapper)."""
+    write_breadcrumb(status_file, status)
 
 
 def _is_processing_complete(status_file: Path) -> bool:
-    """Check if processing is complete based on status file."""
-    status = _read_status(status_file)
-    return status is not None and status.get("status") == "complete"
+    """Check if processing is complete based on status file (legacy wrapper)."""
+    return is_download_complete(status_file)
 
 
 def _download_with_progress(

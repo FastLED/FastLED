@@ -199,11 +199,22 @@ class PackageInfo:
             return self.requirements
 
         # If requirements is a version, resolve through registry
-        if self.requirements and not self.requirements.startswith(("~", "^", "=")):
-            # Try to resolve through PlatformIO Registry API
-            return _resolve_package_url_from_registry(
-                self.name, self.requirements, self.type, system
-            )
+        if self.requirements:
+            # Check if it has semantic versioning operators
+            has_semver_operator = self.requirements.startswith(("~", "^", "="))
+
+            # For semver operators, pass None to get latest compatible version
+            # Otherwise pass the exact version
+            if has_semver_operator:
+                # Use latest version (pass None to _resolve_package_url_from_registry)
+                return _resolve_package_url_from_registry(
+                    self.name, None, self.type, system
+                )
+            else:
+                # Exact version
+                return _resolve_package_url_from_registry(
+                    self.name, self.requirements.strip(), self.type, system
+                )
 
         # No resolvable URL found
         return None
@@ -783,7 +794,7 @@ def _parse_global_env_section(
 
 def _resolve_package_url_from_registry(
     package_name: str,
-    version: str,
+    version: Optional[str],
     package_type: str = "",
     system: Optional[str] = None,
 ) -> Optional[str]:
@@ -792,7 +803,7 @@ def _resolve_package_url_from_registry(
 
     Args:
         package_name: Package name (e.g., "toolchain-riscv32-esp")
-        version: Version string (e.g., "14.2.0+20241119")
+        version: Version string (e.g., "14.2.0+20241119") or None for latest
         package_type: Package type hint ("tool", "framework", etc.)
         system: Target system (e.g., "windows_amd64"). If None, auto-detects.
 
@@ -850,12 +861,18 @@ def _resolve_package_url_from_registry(
             with urllib.request.urlopen(req, timeout=10) as response:
                 data = json.loads(response.read().decode("utf-8"))
 
-                # Check if the version matches
-                if data.get("version", {}).get("name") != version:
+                # Get the actual version from the response
+                actual_version = data.get("version", {}).get("name")
+
+                # Check if the version matches (if version was specified)
+                if version is not None and actual_version != version:
                     logger.debug(
-                        f"Version mismatch: expected {version}, got {data.get('version', {}).get('name')}"
+                        f"Version mismatch: expected {version}, got {actual_version}"
                     )
                     continue
+
+                # If version is None, we accept the latest version
+                version_to_log = version if version else f"{actual_version} (latest)"
 
                 # Find the file for the target system
                 files = data.get("version", {}).get("files", [])
@@ -864,13 +881,13 @@ def _resolve_package_url_from_registry(
                         download_url = file_info.get("download_url")
                         if download_url:
                             logger.info(
-                                f"Resolved {owner}/{package_name}@{version} ({system}) -> {download_url}"
+                                f"Resolved {owner}/{package_name}@{version_to_log} ({system}) -> {download_url}"
                             )
                             return download_url
 
                 # If we got here, version matched but no file for this system
                 logger.warning(
-                    f"Package {owner}/{package_name}@{version} has no file for system: {system}"
+                    f"Package {owner}/{package_name}@{version_to_log} has no file for system: {system}"
                 )
 
         except urllib.error.HTTPError as e:
@@ -883,8 +900,9 @@ def _resolve_package_url_from_registry(
         except Exception as e:
             logger.warning(f"Error resolving package {owner}/{package_name}: {e}")
 
+    version_str = version if version else "latest"
     logger.warning(
-        f"Failed to resolve package URL: {package_name}@{version} for system {system}"
+        f"Failed to resolve package URL: {package_name}@{version_str} for system {system}"
     )
     return None
 
