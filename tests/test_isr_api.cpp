@@ -6,7 +6,7 @@
   License: MIT (FastLED)
 */
 
-#define FASTLED_INTERNAL 1
+#define FASTLED_INTERNAL
 #include "fl/isr.h"
 #include "test.h"
 

@@ -7,7 +7,7 @@
 // #include "util.h"
 
 #ifndef FASTLED_INTERNAL
-#define FASTLED_INTERNAL 1
+#define FASTLED_INTERNAL
 #endif
 
 #include "fl/fastled.h"

@@ -1,4 +1,4 @@
-#define FASTLED_INTERNAL 1
+#define FASTLED_INTERNAL
 #define __PROG_TYPES_COMPAT__
 
 /// @file colorutils.cpp
