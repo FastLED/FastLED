@@ -214,21 +214,26 @@ class DockerQEMURunner:
             platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
 
         Returns:
-            Docker Hub registry image name (e.g., 'niteris/fastled-compiler-esp')
+            Docker Hub registry image name (e.g., 'niteris/fastled-compiler-esp-xtensa')
         """
         from ci.docker.build_platforms import (
             get_docker_image_name,
             get_platform_for_board,
         )
 
-        # Get platform family (e.g., 'esp32dev' -> 'esp')
+        # Get platform family (e.g., 'esp32s3' -> 'esp-xtensa')
         platform_family = get_platform_for_board(platform)
         if not platform_family:
             # Fallback: try direct platform name
-            return f"niteris/fastled-compiler-{platform}"
+            fallback_image = f"niteris/fastled-compiler-{platform}"
+            print(
+                f"⚠️  Warning: Platform family not found for '{platform}', using fallback: {fallback_image}"
+            )
+            return fallback_image
 
-        # Get registry image name (e.g., 'niteris/fastled-compiler-esp')
-        return get_docker_image_name(platform_family, platform)
+        # Get registry image name (e.g., 'niteris/fastled-compiler-esp-xtensa')
+        registry_image = get_docker_image_name(platform_family, platform)
+        return registry_image
 
     def pull_and_tag_board_image(self, platform: str) -> bool:
         """Try to pull board image from Docker Hub registry and tag it locally.
@@ -239,10 +244,18 @@ class DockerQEMURunner:
         Returns:
             True if pull and tag succeeded, False otherwise
         """
+        from ci.docker.build_platforms import get_platform_for_board
+
+        # Show platform family resolution for debugging
+        platform_family = get_platform_for_board(platform)
+        if platform_family:
+            print(f"📦 Platform '{platform}' belongs to family '{platform_family}'")
+
         registry_image = self.get_registry_image_name(platform)
         local_image = self.get_board_image_name(platform)
 
         print(f"🔍 Attempting to pull from Docker Hub: {registry_image}")
+        print(f"   Will be tagged locally as: {local_image}")
         print(f"   This may take a few minutes on first run...")
         print()
 
