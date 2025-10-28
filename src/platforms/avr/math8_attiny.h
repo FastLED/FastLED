@@ -30,9 +30,9 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and set 0xFF into i.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0xFF  \n\t"
+        "ser %0        \n\t"
         "L_%=: "
-        : "+d"(i)
+        : "+r"(i)
         : "r"(j));
     return i;
 }
@@ -48,13 +48,14 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
         If V is set, we go ahead and set 0x7F into i.
         */
         "brvc L_%=     \n\t"
-        "ldi %0, 0x7F  \n\t"
+        "ser %0        \n\t"
+        "lsr %0        \n\t"
 
         /* When both numbers are negative, C is set.
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+d"(i)
+        : "+r"(i)
         : "r"(j));
     return i;
 }
@@ -70,9 +71,9 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
         If C is set, we go ahead and clear i to 0x00.
         */
         "brcc L_%=     \n\t"
-        "ldi %0, 0x00  \n\t"
+        "clr %0        \n\t"
         "L_%=: "
-        : "+d"(i)
+        : "+r"(i)
         : "r"(j));
     return i;
 }
@@ -279,6 +280,52 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
                  : [b] "r"(b), [m] "r"(m));
     return a;
 }
+
+/// 8x8 bit multiplication, with 8-bit result (C implementation for ATtiny)
+FL_ALWAYS_INLINE uint8_t mul8(uint8_t i, uint8_t j) {
+    return ((int)i * (int)(j)) & 0xFF;
+}
+
+/// 8x8 bit multiplication with 8-bit result, saturating at 0xFF (C implementation for ATtiny)
+FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
+    unsigned p = (unsigned)i * (unsigned)j;
+    if (p > 255)
+        p = 255;
+    return p;
+}
+
+/// Blend a variable proportion of one byte to another (C implementation for ATtiny)
+#if (FASTLED_BLEND_FIXED == 1)
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint16_t partial;
+    uint8_t result;
+
+    partial = (a << 8) | b; // A*256 + B
+
+    // on many platforms this compiles to a single multiply of (B-A) * amountOfB
+    partial += (b * amountOfB);
+    partial -= (a * amountOfB);
+
+    result = partial >> 8;
+
+    return result;
+}
+#else
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint16_t partial;
+    uint8_t result;
+    uint8_t amountOfA = 255 - amountOfB;
+
+    // on the other hand, this compiles to two multiplies, and gives the "wrong"
+    // answer :]
+    partial = (a * amountOfA);
+    partial += (b * amountOfB);
+
+    result = partial >> 8;
+
+    return result;
+}
+#endif
 
 /// @} Math_ATtiny
 

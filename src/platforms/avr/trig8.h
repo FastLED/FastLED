@@ -101,17 +101,20 @@ LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
 
     uint8_t mx;
     uint8_t xr1;
+    // Create mask registers outside asm to reduce register pressure
+    uint8_t mask_0F = 0x0F;
+    uint8_t mask_F0 = 0xF0;
     asm volatile("mul %[m16],%[secoffset]   \n\t"
                  "mov %[mx],r0              \n\t"
                  "mov %[xr1],r1             \n\t"
                  "eor  r1, r1               \n\t"
                  "swap %[mx]                \n\t"
-                 "andi %[mx],0x0F           \n\t"
+                 "and %[mx],%[mask_0F]      \n\t"
                  "swap %[xr1]               \n\t"
-                 "andi %[xr1], 0xF0         \n\t"
+                 "and %[xr1],%[mask_F0]     \n\t"
                  "or   %[mx], %[xr1]        \n\t"
-                 : [mx] "=d"(mx), [xr1] "=d"(xr1)
-                 : [m16] "d"(m16), [secoffset] "d"(secoffset)
+                 : [mx] "=r"(mx), [xr1] "=r"(xr1), [mask_0F] "+r"(mask_0F), [mask_F0] "+r"(mask_F0)
+                 : [m16] "r"(m16), [secoffset] "r"(secoffset)
                  : "r0", "r1");
 
     int8_t y = mx + b;
