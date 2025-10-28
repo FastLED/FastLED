@@ -246,6 +246,7 @@ void loop() {
     static bool tests_complete = false;
 
     if (tests_complete) {
+        FL_WARN("All tests complete");
         delay(5000);
         return;
     }
