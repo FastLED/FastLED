@@ -444,7 +444,7 @@ def main() -> None:
 
         # Calculate C++ test fingerprint (but don't save until tests pass)
         prev_cpp_test_fingerprint = read_cpp_test_fingerprint()
-        cpp_test_fingerprint_data = calculate_cpp_test_fingerprint()
+        cpp_test_fingerprint_data = calculate_cpp_test_fingerprint(args)
         cpp_test_change = (
             True
             if prev_cpp_test_fingerprint is None

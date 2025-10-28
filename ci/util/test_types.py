@@ -349,9 +349,14 @@ def calculate_fingerprint(root_dir: Optional[Path] = None) -> FingerprintResult:
     return result
 
 
-def calculate_cpp_test_fingerprint() -> FingerprintResult:
+def calculate_cpp_test_fingerprint(
+    args: Optional[TestArgs] = None,
+) -> FingerprintResult:
     """
     Calculate fingerprint for C++ unit tests, including both src/ and tests/ directories.
+
+    Args:
+        args: Test arguments (optional, used to include build configuration in fingerprint)
 
     Returns:
         The fingerprint result covering files that affect C++ unit tests
@@ -373,6 +378,13 @@ def calculate_cpp_test_fingerprint() -> FingerprintResult:
     if tests_dir.exists():
         tests_result = fingerprint_code_base(tests_dir, "**/*.h,**/*.cpp,**/*.hpp")
         hasher.update(f"tests:{tests_result.hash}".encode("utf-8"))
+
+    # Include build configuration flags that affect compilation
+    if args is not None:
+        # Include --unity flag since it fundamentally changes how code is compiled
+        hasher.update(f"unity:{args.unity}".encode("utf-8"))
+        # Include --debug flag as it affects build configuration
+        hasher.update(f"debug:{args.debug}".encode("utf-8"))
 
     elapsed_time = time.time() - start_time
 
