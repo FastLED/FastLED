@@ -254,7 +254,9 @@ void setup() {
   FastLED.setBrightness(BRIGHTNESS);
 
   // Seed random number generator from analog noise
+  #ifdef A0
   random16_add_entropy(analogRead(A0));
+  #endif
 
   // Initialize wave physics
   initEmitters();
