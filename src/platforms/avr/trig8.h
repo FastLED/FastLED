@@ -16,9 +16,6 @@ namespace fl {
 /// AVR-optimized sin and cos approximations
 /// @{
 
-/// Platform-independent alias of the fast sin implementation
-#define sin16 sin16_avr
-
 /// Fast 16-bit approximation of sin(x) (AVR implementation)
 LIB8STATIC int16_t sin16_avr(uint16_t theta) {
     static const uint8_t data[] = {
@@ -74,9 +71,6 @@ LIB8STATIC int16_t sin16_avr(uint16_t theta) {
 
 /// Pre-calculated lookup table used in sin8() and cos8() functions
 const uint8_t b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
-
-/// Platform-independent alias of the fast sin implementation
-#define sin8 sin8_avr
 
 /// Fast 8-bit approximation of sin(x) (AVR implementation)
 #if !defined(LIB8_ATTINY)
@@ -151,8 +145,14 @@ LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
 }
 #endif // !defined(LIB8_ATTINY)
 
+/// Platform-independent alias of the fast sin implementation
+LIB8STATIC int16_t sin16(uint16_t theta) { return sin16_avr(theta); }
+
 /// Fast 16-bit approximation of cos(x) (calls sin16)
 LIB8STATIC int16_t cos16(uint16_t theta) { return sin16(theta + 16384); }
+
+/// Platform-independent alias of the fast sin implementation
+LIB8STATIC uint8_t sin8(uint8_t theta) { return sin8_avr(theta); }
 
 /// Fast 8-bit approximation of cos(x) (calls sin8)
 LIB8STATIC uint8_t cos8(uint8_t theta) { return sin8(theta + 64); }

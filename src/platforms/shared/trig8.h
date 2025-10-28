@@ -16,9 +16,6 @@ namespace fl {
 /// Portable C implementations of sin and cos approximations
 /// @{
 
-/// Platform-independent alias of the fast sin implementation
-#define sin16 sin16_C
-
 /// Fast 16-bit approximation of sin(x) (C implementation)
 LIB8STATIC int16_t sin16_C(uint16_t theta) {
     static const uint16_t base[] = {0,     6393,  12539, 18204,
@@ -44,14 +41,14 @@ LIB8STATIC int16_t sin16_C(uint16_t theta) {
     return y;
 }
 
+/// Platform-independent alias of the fast sin implementation
+LIB8STATIC int16_t sin16(uint16_t theta) { return sin16_C(theta); }
+
 /// Fast 16-bit approximation of cos(x) (calls sin16)
 LIB8STATIC int16_t cos16(uint16_t theta) { return sin16(theta + 16384); }
 
 /// Pre-calculated lookup table used in sin8() and cos8() functions
 const uint8_t b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
-
-/// Platform-independent alias of the fast sin implementation
-#define sin8 sin8_C
 
 /// Fast 8-bit approximation of sin(x) (C implementation)
 LIB8STATIC uint8_t sin8_C(uint8_t theta) {
@@ -83,6 +80,9 @@ LIB8STATIC uint8_t sin8_C(uint8_t theta) {
 
     return y;
 }
+
+/// Platform-independent alias of the fast sin implementation
+LIB8STATIC uint8_t sin8(uint8_t theta) { return sin8_C(theta); }
 
 /// Fast 8-bit approximation of cos(x) (calls sin8)
 LIB8STATIC uint8_t cos8(uint8_t theta) { return sin8(theta + 64); }

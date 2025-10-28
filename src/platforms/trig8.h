@@ -39,8 +39,8 @@ namespace fl {
 
 #if defined(USE_SIN_32)
 
-#define sin16 fl::sin16lut
-#define cos16 fl::cos16lut
+inline int16_t sin16(uint16_t theta) { return fl::sin16lut(theta); }
+inline int16_t cos16(uint16_t theta) { return fl::cos16lut(theta); }
 
 #endif
 
