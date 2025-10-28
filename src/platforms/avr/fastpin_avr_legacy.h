@@ -171,7 +171,7 @@ _FL_DEFPIN(5, 5, B); // PB5 (PCINT5/RESET/ADC0/dW)
 
 #elif defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__)
 
-#define MAX_PIN 27
+#define MAX_PIN 25
 _FL_DEFPIN( 0, 0, D); _FL_DEFPIN( 1, 1, D); _FL_DEFPIN( 2, 2, D); _FL_DEFPIN( 3, 3, D);
 _FL_DEFPIN( 4, 4, D); _FL_DEFPIN( 5, 5, D); _FL_DEFPIN( 6, 6, D); _FL_DEFPIN( 7, 7, D);
 _FL_DEFPIN( 8, 0, B); _FL_DEFPIN( 9, 1, B); _FL_DEFPIN(10, 2, B); _FL_DEFPIN(11, 3, B);
