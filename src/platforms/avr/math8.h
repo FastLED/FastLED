@@ -1,7 +1,6 @@
 #pragma once
 
 #include "platforms/math8_config.h"
-#include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/compiler_control.h"
@@ -12,26 +11,21 @@ FL_DISABLE_WARNING_UNUSED_PARAMETER
 FL_DISABLE_WARNING_RETURN_TYPE
 FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
-#if defined(LIB8_ATTINY)
-// ATtiny-specific implementations (no MUL instruction, ATtiny-compatible opcodes)
-#include "math8_attiny.h"
-// ATtiny-specific MUL-dependent functions are in math8_avr.h with guards
-#include "math8_avr.h"
-#else
 // Include AVR-specific optimized implementations (with MUL instruction)
 #include "math8_avr.h"
 
 namespace fl {
 
 /// @file math8.h
-/// AVR assembly language implementations of 8-bit math functions.
-/// This file contains optimized AVR assembly versions of functions from math8.h
+/// AVR assembly language implementations of 8-bit math functions (ATmega with MUL).
+/// This file contains optimized AVR assembly versions using hardware MUL instruction.
+/// For ATtiny (no MUL), see platforms/attiny/math8.h
 
 /// @ingroup lib8tion
 /// @{
 
 /// @defgroup Math_AVR AVR Math Implementations
-/// Fast AVR assembly implementations of 8-bit math operations
+/// Fast AVR assembly implementations of 8-bit math operations (ATmega with MUL)
 /// @{
 
 /// Add one byte to another, saturating at 0xFF (AVR assembly)
@@ -301,5 +295,4 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
 /// @} Math_AVR
 
 }  // namespace fl
-#endif  // !defined(LIB8_ATTINY)
 FL_DISABLE_WARNING_POP

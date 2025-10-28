@@ -1,28 +1,30 @@
 #pragma once
 
 #include "platforms/math8_config.h"
-#include "lib8tion/scale8.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_UNUSED_PARAMETER
+FL_DISABLE_WARNING_RETURN_TYPE
+FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 
-
-// Include ATtiny-specific optimized implementations (shift-and-add, no MUL)
+// Include ATtiny-specific MUL-dependent functions (mul8, qmul8, blend8)
 #include "math8_attiny.h"
 
 namespace fl {
 
 /// @file math8.h
-/// ATtiny-specific assembly language implementations of 8-bit math functions.
-/// This file contains optimized assembly versions for ATtiny (no MUL instruction)
+/// ATtiny-specific assembly language implementations of 8-bit math functions (no MUL).
+/// This file contains optimized assembly versions for ATtiny using ATtiny-compatible opcodes.
 
 /// @ingroup lib8tion
 /// @{
 
 /// @defgroup Math_ATtiny ATtiny Math Implementations
-/// Fast assembly implementations of 8-bit math operations for ATtiny
+/// Fast assembly implementations of 8-bit math operations for ATtiny (no MUL instruction)
 /// @{
 
 /// Add one byte to another, saturating at 0xFF (AVR assembly)
@@ -32,13 +34,13 @@ FL_ALWAYS_INLINE uint8_t qadd8(uint8_t i, uint8_t j) {
         "add %0, %1    \n\t"
 
         /* Now test the C flag.
-        If C is clear, we branch around a load of 0xFF into i.
-        If C is set, we go ahead and load 0xFF into i.
+        If C is clear, we branch around a set of 0xFF into i.
+        If C is set, we go ahead and set 0xFF into i.
         */
         "brcc L_%=     \n\t"
         "ser %0        \n\t"
         "L_%=: "
-        : "+r"(i) // any register (using ser instead of ldi)
+        : "+r"(i) // Any register - ser works on all registers
         : "r"(j));
     return i;
 }
@@ -51,7 +53,7 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
 
         /* Now test the V flag.
         If V is clear, we branch to end.
-        If V is set, we go ahead and load 0x7F into i.
+        If V is set, we go ahead and set 0x7F into i.
         */
         "brvc L_%=     \n\t"
         "ser %0        \n\t"
@@ -61,7 +63,7 @@ FL_ALWAYS_INLINE int8_t qadd7(int8_t i, int8_t j) {
         Adding it to make result negative. */
         "adc %0, __zero_reg__\n\t"
         "L_%=: "
-        : "+r"(i) // any register (using ser/lsr instead of ldi)
+        : "+r"(i) // Any register - ser and lsr work on all registers
         : "r"(j));
     return i;
 }
@@ -73,13 +75,13 @@ FL_ALWAYS_INLINE uint8_t qsub8(uint8_t i, uint8_t j) {
         "sub %0, %1    \n\t"
 
         /* Now test the C flag.
-        If C is clear, we branch around a load of 0x00 into i.
-        If C is set, we go ahead and load 0x00 into i.
+        If C is clear, we branch around a clear of i.
+        If C is set, we go ahead and clear i to 0x00.
         */
         "brcc L_%=     \n\t"
         "clr %0        \n\t"
         "L_%=: "
-        : "+r"(i) // any register (using clr instead of ldi)
+        : "+r"(i) // Any register - clr works on all registers
         : "r"(j));
     return i;
 }
@@ -199,7 +201,6 @@ FL_ALWAYS_INLINE int16_t avg15(int16_t i, int16_t j) {
     return i;
 }
 
-
 /// Take the absolute value of a signed 8-bit int8_t (AVR assembly)
 FL_ALWAYS_INLINE int8_t abs8(int8_t i) {
     asm volatile(
@@ -213,7 +214,6 @@ FL_ALWAYS_INLINE int8_t abs8(int8_t i) {
         : "r"(i));
     return i;
 }
-
 
 /// Calculate the remainder of one unsigned 8-bit
 /// value divided by another, aka A % M. (AVR assembly)
@@ -289,6 +289,7 @@ LIB8STATIC uint8_t submod8(uint8_t a, uint8_t b, uint8_t m) {
     return a;
 }
 
-/// @} Math_AVR
+/// @} Math_ATtiny
 
 }  // namespace fl
+FL_DISABLE_WARNING_POP
