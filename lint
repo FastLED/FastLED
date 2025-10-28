@@ -139,6 +139,15 @@ else
             fi
         done
 
+        # Check for relative includes (paths with "..")
+        # Only enforce strict no-relative-includes rule for src/, not examples/
+        echo ""
+        echo "Running cpp_lint.py (relative includes check for src/ only)"
+        uv run python cpp_lint.py src/ || {
+            echo "❌ cpp_lint.py failed: Found relative includes in src/"
+            exit 1
+        }
+
         # Mark C++ linting as successful
         mkdir -p .cache
         touch "$CPP_LINT_MARKER"

@@ -209,11 +209,11 @@
 // Platform-specific implementations
 #if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__) || defined(__SAMD51__) || defined(__SAME51__)
 #define UCS7604_HAS_CONTROLLER 1
-#include "../../platforms/arm/common/m0clockless.h"
-#include "../eorder.h"
-#include "../../fastpin.h"
-#include "../../cled_controller.h"
-#include "../force_inline.h"
+#include "platforms/arm/common/m0clockless.h"
+#include "eorder.h"
+#include "fastpin.h"
+#include "cled_controller.h"
+#include "force_inline.h"
 
 namespace fl {
 

@@ -4,4 +4,4 @@
 // WebAssembly placement new operator - in global namespace
 // WASM/Emscripten has full C++ standard library support
 
-#include <new>
+#include <new>  // ok include

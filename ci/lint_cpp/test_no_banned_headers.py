@@ -153,6 +153,11 @@ class BannedHeadersChecker(FileContentChecker):
         if header == "new" and "inplacenew.h" in file_path:
             return True
 
+        # Allow <new> in platform new.h files - they are wrappers for placement new
+        if header == "new" and file_path.endswith("new.h"):
+            if "/platforms/" in file_path.replace("\\", "/"):
+                return True
+
         # Allow Arduino.h in led_sysdefs.h - core system definitions need platform headers
         if header == "Arduino.h" and "led_sysdefs.h" in file_path:
             return True

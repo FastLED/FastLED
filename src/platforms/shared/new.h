@@ -9,10 +9,10 @@
     #include "platforms/shared/inplacenew.h"
 #elif __has_include(<new>)
     // Modern platforms with standard library support
-    #include <new>
+    #include <new>  // ok include
 #elif __has_include(<new.h>)
     // Alternative standard header location
-    #include <new.h>
+    #include <new.h>  // ok include
 #else
     // Fallback to manual definition
     #include "platforms/shared/inplacenew.h"

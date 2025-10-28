@@ -9,7 +9,10 @@
     #include "platforms/arm/inplacenew.h"
 #elif __has_include(<new>)
     // Modern ARM platforms with standard library support (includes STM32F1 with modern toolchains)
-    #include <new>
+    #include <new>  // ok include
+#elif __has_include(<new.h>)
+    // Alternative standard header location
+    #include <new.h> // ok include
 #else
     // Fallback to manual definition for platforms without <new> header
     #include "platforms/arm/inplacenew.h"

@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 #include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
