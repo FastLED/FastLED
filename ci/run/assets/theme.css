@@ -9,5 +9,5 @@ Header { background: #111111; color: #00ffff; }
 /* Main menu layout - constrain width and center */
 MainMenu OptionList {
     width: 50;
-    margin: 0 auto;
+    margin: 0;
 }
