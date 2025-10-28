@@ -5,16 +5,17 @@
 #include "fl/vector.h"
 #include <algorithm>
 
-
+namespace {
 // Test struct for slab allocator testing
 struct TestObject {
     int data[4];  // 16 bytes to make it larger than pointer size
-    TestObject() { 
+    TestObject() {
         for (int i = 0; i < 4; ++i) {
             data[i] = 0;
         }
     }
 };
+} // anonymous namespace
 
 TEST_CASE("SlabAllocator - Basic functionality") {
     using TestAllocator = fl::SlabAllocator<TestObject, 8>;

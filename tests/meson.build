@@ -147,59 +147,109 @@ test_names = [
   'test_esp32_riscv_interrupts',
 ]
 
-# Build each test executable with shared PCH
-foreach test_name : test_names
-  # Map test names to file paths (handle subdirectories)
-  test_file_map = {
-    'test_noise_range': 'noise/test_noise_range.cpp',
-    'test_noise_ring': 'noise/test_noise_ring.cpp',
-    'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
-  }
+# Check if unity builds are enabled
+unity_enabled = get_option('unity') == 'on'
 
-  # Get the actual test file path
-  test_file = test_file_map.get(test_name, test_name + '.cpp')
+if unity_enabled
+  # UNITY MODE: Combine all tests into single all_tests executable
 
-  # Some tests need additional source files for ESP32 parallel SPI host simulation
-  test_sources = [test_file, test_pch[0]]
-  test_cpp_args = unit_test_compile_args + [
-    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-    '-Winvalid-pch',
-  ]
+  # Collect all test source files
+  all_test_sources = [test_pch[0]]  # Start with PCH
 
-  # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
-  # No need to add it explicitly to individual tests anymore
+  foreach test_name : test_names
+    # Map test names to file paths
+    test_file_map = {
+      'test_noise_range': 'noise/test_noise_range.cpp',
+      'test_noise_ring': 'noise/test_noise_ring.cpp',
+      'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
+    }
 
-  test_exe = executable(test_name,
-    test_sources,
+    test_file = test_file_map.get(test_name, test_name + '.cpp')
+    all_test_sources += files(test_file)
+  endforeach
+
+  # Add parallel SPI ISR test
+  all_test_sources += files('test_parallel_spi_isr.cpp')
+
+  # Build single unified test executable
+  # NOTE: Explicitly disable Meson's unity builds for this target to avoid
+  # double unity builds (we're already combining all test files manually)
+  all_tests_exe = executable('all_tests',
+    all_test_sources,
     include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: test_cpp_args,
+    cpp_args: unit_test_compile_args + [
+      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+      '-Winvalid-pch',
+    ],
+    link_args: unit_test_link_args,
+    link_with: [fastled_lib, doctest_main],
+    override_options: ['unity=off'],
+    install: false
+  )
+
+  # Register single test target
+  test('all_tests', all_tests_exe, workdir: meson.project_source_root())
+
+  message('Unity test build enabled: all tests combined into all_tests executable')
+
+else
+  # NORMAL MODE: Build individual test executables (current behavior)
+
+  # Build each test executable with shared PCH
+  foreach test_name : test_names
+    # Map test names to file paths (handle subdirectories)
+    test_file_map = {
+      'test_noise_range': 'noise/test_noise_range.cpp',
+      'test_noise_ring': 'noise/test_noise_ring.cpp',
+      'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
+    }
+
+    # Get the actual test file path
+    test_file = test_file_map.get(test_name, test_name + '.cpp')
+
+    # Some tests need additional source files for ESP32 parallel SPI host simulation
+    test_sources = [test_file, test_pch[0]]
+    test_cpp_args = unit_test_compile_args + [
+      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+      '-Winvalid-pch',
+    ]
+
+    # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined
+    # No need to add it explicitly to individual tests anymore
+
+    test_exe = executable(test_name,
+      test_sources,
+      include_directories: [src_dir, tests_dir, stub_dir],
+      cpp_args: test_cpp_args,
+      link_args: unit_test_link_args,
+      link_with: [fastled_lib, doctest_main],
+      install: false
+    )
+
+    # Register test with project root as working directory
+    test(test_name, test_exe, workdir: meson.project_source_root())
+  endforeach
+
+  # ============================================================================
+  # Parallel SPI ISR Tests
+  # ============================================================================
+  # Parallel SPI ISR test using thread-based automatic ISR execution.
+  # Uses the same libfastled.a as all other tests. STUB_PLATFORM always compiles
+  # real ISR implementations via conditional compilation guards in the source files.
+
+
+  test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
+    ['test_parallel_spi_isr.cpp', test_pch[0]],
+    include_directories: [src_dir, tests_dir, stub_dir],
+    cpp_args: unit_test_compile_args + [
+      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+      '-Winvalid-pch',
+    ],
     link_args: unit_test_link_args,
     link_with: [fastled_lib, doctest_main],
     install: false
   )
 
-  # Register test with project root as working directory
-  test(test_name, test_exe, workdir: meson.project_source_root())
-endforeach
+  test('test_parallel_spi_isr', test_parallel_spi_isr_exe, workdir: meson.project_source_root())
 
-# ============================================================================
-# Parallel SPI ISR Tests
-# ============================================================================
-# Parallel SPI ISR test using thread-based automatic ISR execution.
-# Uses the same libfastled.a as all other tests. STUB_PLATFORM always compiles
-# real ISR implementations via conditional compilation guards in the source files.
-
-
-test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
-  ['test_parallel_spi_isr.cpp', test_pch[0]],
-  include_directories: [src_dir, tests_dir, stub_dir],
-  cpp_args: unit_test_compile_args + [
-    '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-    '-Winvalid-pch',
-  ],
-  link_args: unit_test_link_args,
-  link_with: [fastled_lib, doctest_main],
-  install: false
-)
-
-test('test_parallel_spi_isr', test_parallel_spi_isr_exe, workdir: meson.project_source_root())
+endif  # unity_enabled

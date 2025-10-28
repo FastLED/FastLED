@@ -5,7 +5,7 @@ project('fastled', 'cpp',
     'warning_level=2',
     'werror=false',
     'buildtype=debug',
-    'unity=on'       # Enable unity builds for faster compilation (default: 20 files per chunk)
+    'unity=off'      # Unity builds disabled by default (use --unity flag to enable)
   ]
 )
 

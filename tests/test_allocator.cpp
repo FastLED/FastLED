@@ -4,16 +4,17 @@
 #include "fl/allocator.h"
 #include "fl/vector.h"
 
-
+namespace {
 // Test struct for general allocator testing
 struct TestObject {
     int data[4];  // 16 bytes to make it larger than pointer size
-    TestObject() { 
+    TestObject() {
         for (int i = 0; i < 4; ++i) {
             data[i] = 0;
         }
     }
 };
+} // anonymous namespace
 
 TEST_CASE("Allocator - Integration tests") {
     SUBCASE("Different allocator types comparison") {

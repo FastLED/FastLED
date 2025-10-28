@@ -7,12 +7,6 @@
 #include "fl/unused.h"
 
 
-// Forward declarations
-class TestClass;
-void takeLValue(TestClass &obj);
-void takeRValue(TestClass &&obj);
-template <typename T> void forwardValue(T &&obj);
-
 TEST_CASE("is_base_of") {
     class Base {};
     class Derived : public Base {};
@@ -100,19 +94,21 @@ TEST_CASE("Test fl::move") {
     }
 }
 
+namespace {
+
 // A simple class to test with
-class TestClass {
+class TypeTraitsTestClass {
   public:
     int value;
-    TestClass() : value(0) {}
-    TestClass(int v) : value(v) {}
+    TypeTraitsTestClass() : value(0) {}
+    TypeTraitsTestClass(int v) : value(v) {}
 };
 
 // Function that takes an lvalue reference
-void takeLValue(TestClass &obj) { obj.value = 42; }
+void takeLValue(TypeTraitsTestClass &obj) { obj.value = 42; }
 
 // Function that takes an rvalue reference
-void takeRValue(TestClass &&obj) { obj.value = 100; }
+void takeRValue(TypeTraitsTestClass &&obj) { obj.value = 100; }
 
 // Function template that forwards its argument to an lvalue reference function
 template <typename T> void forwardToLValue(T &&obj) {
@@ -124,10 +120,12 @@ template <typename T> void forwardValue(T &&obj) {
     takeRValue(fl::forward<T>(obj));
 }
 
+} // anonymous namespace
+
 TEST_CASE("fl::forward preserves value categories") {
 
     SUBCASE("Forwarding lvalues") {
-        TestClass obj(10);
+        TypeTraitsTestClass obj(10);
 
         // Should call takeLValue
         forwardToLValue(obj);
@@ -140,17 +138,17 @@ TEST_CASE("fl::forward preserves value categories") {
 
     SUBCASE("Forwarding rvalues") {
         // Should call takeRValue
-        forwardValue(TestClass(20));
+        forwardValue(TypeTraitsTestClass(20));
 
         // We can also test with a temporary
-        TestClass temp(30);
+        TypeTraitsTestClass temp(30);
         forwardValue(fl::move(temp));
         // temp.value should now be 100, but we can't check it here since it was
         // moved
     }
 
     SUBCASE("Move and forward") {
-        TestClass obj(50);
+        TypeTraitsTestClass obj(50);
 
         // Move creates an rvalue, forward preserves that
         forwardValue(fl::move(obj));

@@ -3,6 +3,8 @@
 #include "fl/memory.h"
 #include "fl/compiler_control.h"
 
+namespace {
+
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
 class TestClass {
 public:
@@ -467,3 +469,5 @@ TEST_CASE("fl::shared_ptr self-assignment safety - a = b scenario") {
     nodeB.reset();
     CHECK(nodeB_destroyed); // Now nodeB should be destroyed
 }
+
+} // anonymous namespace

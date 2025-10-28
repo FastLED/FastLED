@@ -11,7 +11,7 @@
 
 TEST_CASE("Test simple JSON parsing") {
     const char* jsonStr = "{\"map\":{\"strip1\":{\"x\":[0,1,2],\"y\":[0,0,0],\"diameter\":0.5}}}";
-    
+
     fl::Json parsedJson = fl::Json::parse(jsonStr);
     CHECK(parsedJson.is_object());
     CHECK(parsedJson.contains("map"));

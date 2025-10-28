@@ -2,11 +2,11 @@
 
 #include "test.h"
 
-
+namespace {
 // Test sketch implementation
-static int setup_call_count = 0;
-static int loop_call_count = 0;
-static bool test_mode = false;
+int setup_call_count = 0;
+int loop_call_count = 0;
+bool test_mode = false;
 
 // Mock Arduino functions for testing
 void setup() {
@@ -22,6 +22,7 @@ void loop() {
         printf("SKETCH: loop() called (count: %d)\n", loop_call_count);
     }
 }
+} // anonymous namespace
 
 // Direct declarations for testing (avoiding DLL export complexity in test context)
 extern "C" {

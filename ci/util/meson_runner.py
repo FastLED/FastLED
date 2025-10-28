@@ -117,7 +117,7 @@ def detect_system_llvm_tools() -> Tuple[bool, bool]:
 
 
 def setup_meson_build(
-    source_dir: Path, build_dir: Path, reconfigure: bool = False
+    source_dir: Path, build_dir: Path, reconfigure: bool = False, unity: bool = False
 ) -> bool:
     """
     Set up Meson build directory.
@@ -126,6 +126,7 @@ def setup_meson_build(
         source_dir: Project root directory containing meson.build
         build_dir: Build output directory
         reconfigure: Force reconfiguration of existing build
+        unity: Enable unity builds (default: False)
 
     Returns:
         True if setup successful, False otherwise
@@ -304,10 +305,20 @@ def setup_meson_build(
             str(native_file_path),
             str(build_dir),
         ]
+        if unity:
+            cmd.extend(["-Dunity=on"])
     else:
         # Initial setup
         print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", "--native-file", str(native_file_path), str(build_dir)]
+        if unity:
+            cmd.extend(["-Dunity=on"])
+
+    # Print unity build status
+    if unity:
+        print("[MESON] ✅ Unity builds ENABLED (--unity flag)")
+    else:
+        print("[MESON] Unity builds disabled (use --unity to enable)")
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
@@ -672,6 +683,84 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
         return False
 
 
+def _create_error_context_filter(context_lines: int = 20) -> callable:
+    """
+    Create a filter function that only shows output when errors are detected.
+
+    The filter accumulates output in a circular buffer. When an error pattern
+    is detected, it outputs the buffered context (lines before the error) plus
+    the error line, and then continues outputting for context_lines after.
+
+    Args:
+        context_lines: Number of lines to show before and after error detection
+
+    Returns:
+        Filter function that takes a line and returns None (consumes line)
+    """
+    from collections import deque
+
+    # Circular buffer for context before errors
+    pre_error_buffer: deque[str] = deque(maxlen=context_lines)
+
+    # Counter for lines after error (to show context after error)
+    post_error_lines = 0
+
+    # Track if we've seen any errors
+    error_detected = False
+
+    # Error patterns (case-insensitive)
+    error_patterns = [
+        "error:",
+        "failed",
+        "failure",
+        "FAILED",
+        "ERROR",
+        ": fatal",
+        "assertion",
+        "segmentation fault",
+        "core dumped",
+    ]
+
+    def filter_line(line: str) -> None:
+        """Process a line and print it if it's part of error context."""
+        nonlocal post_error_lines, error_detected
+
+        # Check if this line contains an error pattern
+        line_lower = line.lower()
+        is_error_line = any(pattern.lower() in line_lower for pattern in error_patterns)
+
+        if is_error_line:
+            # Error detected! Output all buffered pre-context
+            if not error_detected:
+                # First error - show header and pre-context
+                print("\n[MESON] ⚠️  Test failures detected - showing error context:")
+                print("-" * 80)
+                for buffered_line in pre_error_buffer:
+                    print(buffered_line)
+                error_detected = True
+
+            # Output this error line with red color highlighting
+            print(f"\033[91m{line}\033[0m")
+
+            # Start counting post-error lines
+            post_error_lines = context_lines
+
+            # Don't buffer this line (already printed)
+            return
+
+        if post_error_lines > 0:
+            # We're in the post-error context window
+            print(line)
+            post_error_lines -= 1
+            return
+
+        # No error detected yet - buffer this line for potential future context
+        # Don't print anything - just accumulate in buffer
+        pre_error_buffer.append(line)
+
+    return filter_line
+
+
 def run_meson_test(
     build_dir: Path, test_name: Optional[str] = None, verbose: bool = False
 ) -> bool:
@@ -708,7 +797,23 @@ def run_meson_test(
             env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        returncode = proc.wait(echo=True)
+        # In verbose mode, show all output
+        # In normal mode, only show errors with context
+        if verbose:
+            returncode = proc.wait(echo=True)
+        else:
+            # Wait silently, capturing all output
+            returncode = proc.wait(echo=False)
+
+            # If test failed, show error context from accumulated output
+            if returncode != 0:
+                # Create error-detecting filter
+                error_filter = _create_error_context_filter(context_lines=20)
+
+                # Process accumulated output to show error context
+                output_lines = proc.stdout.splitlines()
+                for line in output_lines:
+                    error_filter(line)
 
         if returncode != 0:
             print(
@@ -730,6 +835,7 @@ def run_meson_build_and_test(
     test_name: Optional[str] = None,
     clean: bool = False,
     verbose: bool = False,
+    unity: bool = False,
 ) -> bool:
     """
     Complete Meson build and test workflow.
@@ -740,6 +846,7 @@ def run_meson_build_and_test(
         test_name: Specific test to run (without test_ prefix, e.g., "json")
         clean: Clean build directory before setup
         verbose: Enable verbose output
+        unity: Enable unity builds (default: False)
 
     Returns:
         True if build and tests successful, False otherwise
@@ -758,7 +865,7 @@ def run_meson_build_and_test(
         shutil.rmtree(build_dir)
 
     # Setup build
-    if not setup_meson_build(source_dir, build_dir, reconfigure=False):
+    if not setup_meson_build(source_dir, build_dir, reconfigure=False, unity=unity):
         return False
 
     # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
@@ -774,17 +881,96 @@ def run_meson_build_and_test(
     # Compile with build lock to prevent conflicts with example builds
     try:
         with libfastled_build_lock(timeout=600):  # 10 minute timeout
-            if not compile_meson(
-                build_dir, target=meson_test_name if meson_test_name else None
-            ):
+            # In unity mode, always build all_tests target (no individual test targets exist)
+            compile_target = None
+            if unity:
+                compile_target = "all_tests"
+            elif meson_test_name:
+                compile_target = meson_test_name
+
+            if not compile_meson(build_dir, target=compile_target):
                 return False
     except TimeoutError as e:
         print(f"[MESON] {e}", file=sys.stderr)
         return False
 
     # Run tests
-    if not run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose):
-        return False
+    if unity:
+        # Unity mode: Run unified test executable directly
+        all_tests_exe = build_dir / "tests" / "all_tests.exe"
+
+        # Check if executable exists (Windows uses .exe, Unix doesn't)
+        if not all_tests_exe.exists():
+            all_tests_exe = build_dir / "tests" / "all_tests"
+
+        if not all_tests_exe.exists():
+            print(
+                f"[MESON] Error: Unity test executable not found at {all_tests_exe}",
+                file=sys.stderr,
+            )
+            return False
+
+        # Build command
+        test_cmd = [str(all_tests_exe)]
+
+        # If specific test name provided, use doctest filtering
+        if meson_test_name:
+            # Strip the test_ prefix for doctest filtering to match test case names
+            filter_name = meson_test_name.replace("test_", "")
+            test_cmd.extend(["--test-case", f"*{filter_name}*"])
+            print(f"[MESON] Running unified test executable with filter: {filter_name}")
+        else:
+            print(f"[MESON] Running unified test executable (all tests)")
+
+        # Execute test
+        try:
+            proc = RunningProcess(
+                test_cmd,
+                cwd=source_dir,
+                timeout=600,  # 10 minute timeout for tests
+                auto_run=True,
+                check=False,
+                env=os.environ.copy(),
+            )
+
+            # In verbose mode, show all output
+            # In normal mode, only show errors with context
+            if verbose:
+                returncode = proc.wait(echo=True)
+            else:
+                # Wait silently, capturing all output
+                returncode = proc.wait(echo=False)
+
+                # If test failed, show error context from accumulated output
+                if returncode != 0:
+                    # Create error-detecting filter
+                    error_filter = _create_error_context_filter(context_lines=20)
+
+                    # Process accumulated output to show error context
+                    output_lines = proc.stdout.splitlines()
+                    for line in output_lines:
+                        error_filter(line)
+
+            if returncode != 0:
+                print(
+                    f"[MESON] Unity tests failed with return code {returncode}",
+                    file=sys.stderr,
+                )
+                return False
+
+            print(f"[MESON] Unity tests passed")
+            return True
+
+        except Exception as e:
+            print(
+                f"[MESON] Unity test execution failed with exception: {e}",
+                file=sys.stderr,
+            )
+            return False
+    else:
+        # Normal mode: Use Meson's test runner
+        if not run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose):
+            return False
 
     return True
 

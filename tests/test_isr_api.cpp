@@ -201,9 +201,4 @@ TEST_CASE("test_isr_error_handling") {
 // =============================================================================
 // Test Main
 // =============================================================================
-
-void setup() {
-}
-
-void loop() {
-}
+// Note: setup() and loop() removed - not needed for this test

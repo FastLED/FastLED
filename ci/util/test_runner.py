@@ -1424,6 +1424,7 @@ def runner(
                 test_name=test_name,
                 clean=args.clean,
                 verbose=args.verbose,
+                unity=args.unity,
             )
 
             if not success:
@@ -1452,6 +1453,7 @@ def runner(
                 test_name=test_name,
                 clean=args.clean,
                 verbose=args.verbose,
+                unity=args.unity,
             )
 
             if not success:
