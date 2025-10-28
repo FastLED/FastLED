@@ -64,16 +64,19 @@ private:
 };
 
 // ASSERT_EQ macro with optional message support via << operator
+// Uses nested for-loops for C++11 compatibility (no init-statement in if)
 #define ASSERT_EQ(actual, expected) \
-    if (AssertHelper _assert_helper = AssertHelper( \
-            (actual) != (expected), \
-            __LINE__ & 0xFF, \
-            (actual), \
-            (expected)); \
-        _assert_helper.failed()) \
-        return _assert_helper.failed(); \
-    else \
-        _assert_helper
+    for (bool _assert_guard = false; !_assert_guard; _assert_guard = true) \
+        for (AssertHelper _assert_helper = AssertHelper( \
+                (actual) != (expected), \
+                __LINE__ & 0xFF, \
+                (actual), \
+                (expected)); \
+             !_assert_guard; _assert_guard = true) \
+            if (_assert_helper.failed()) \
+                return false; \
+            else \
+                _assert_helper
 
 // Test functions return true on success, false on failure
 bool test_math8_qadd() {
