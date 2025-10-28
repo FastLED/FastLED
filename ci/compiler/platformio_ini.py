@@ -170,6 +170,44 @@ class PackageInfo:
     version: Optional[str] = None
     description: Optional[str] = None
 
+    def get_download_url(self, system: Optional[str] = None) -> Optional[str]:
+        """
+        Get the download URL for this package.
+
+        If the package has a direct URL, returns it.
+        If the package has a version requirement (e.g., "14.2.0+20241119"),
+        resolves it through the PlatformIO Registry API.
+
+        Args:
+            system: Target system (e.g., "windows_amd64", "linux_x86_64").
+                   If None, auto-detects from current platform.
+
+        Returns:
+            Download URL or None if resolution fails.
+        """
+        # If we already have a direct URL, return it
+        if self.url and (
+            self.url.startswith("http://") or self.url.startswith("https://")
+        ):
+            return self.url
+
+        # If requirements is a URL, return it
+        if self.requirements and (
+            self.requirements.startswith("http://")
+            or self.requirements.startswith("https://")
+        ):
+            return self.requirements
+
+        # If requirements is a version, resolve through registry
+        if self.requirements and not self.requirements.startswith(("~", "^", "=")):
+            # Try to resolve through PlatformIO Registry API
+            return _resolve_package_url_from_registry(
+                self.name, self.requirements, self.type, system
+            )
+
+        # No resolvable URL found
+        return None
+
 
 @dataclass
 class PlatformUrlResolution:
@@ -741,6 +779,114 @@ def _parse_global_env_section(
         extra_scripts=extra_scripts,
         custom_options=custom_options,
     )
+
+
+def _resolve_package_url_from_registry(
+    package_name: str,
+    version: str,
+    package_type: str = "",
+    system: Optional[str] = None,
+) -> Optional[str]:
+    """
+    Resolve a package version to its download URL via PlatformIO Registry API.
+
+    Args:
+        package_name: Package name (e.g., "toolchain-riscv32-esp")
+        version: Version string (e.g., "14.2.0+20241119")
+        package_type: Package type hint ("tool", "framework", etc.)
+        system: Target system (e.g., "windows_amd64"). If None, auto-detects.
+
+    Returns:
+        Download URL or None if resolution fails.
+    """
+    import platform as platform_module
+    import urllib.request
+
+    # Auto-detect system if not provided
+    if system is None:
+        os_name = platform_module.system().lower()
+        machine = platform_module.machine().lower()
+
+        if os_name == "windows":
+            system = (
+                "windows_amd64" if machine in ("amd64", "x86_64") else "windows_x86"
+            )
+        elif os_name == "darwin":
+            system = "darwin_arm64" if machine == "arm64" else "darwin_x86_64"
+        elif os_name == "linux":
+            if machine in ("aarch64", "arm64"):
+                system = "linux_aarch64"
+            elif machine in ("armv7l", "armv8l"):
+                system = "linux_armv7l"
+            elif machine == "armv6l":
+                system = "linux_armv6l"
+            else:
+                system = "linux_x86_64"
+        else:
+            logger.warning(f"Unknown platform: {os_name}/{machine}")
+            return None
+
+    # Try both platformio/ and espressif/ owners (common for ESP32 packages)
+    owners = ["platformio", "espressif"]
+
+    # Normalize package type for PlatformIO Registry API
+    # The API uses "tool" for toolchains, frameworks, debuggers, uploaders, etc.
+    if package_type in ("toolchain", "framework", "debugger", "uploader", ""):
+        package_type = "tool"
+    # If still empty or unknown, default to "tool"
+    if not package_type:
+        package_type = "tool"
+
+    for owner in owners:
+        try:
+            # Query PlatformIO Registry API
+            api_url = f"https://api.registry.platformio.org/v3/packages/{owner}/{package_type}/{package_name}"
+
+            logger.debug(f"Querying PlatformIO Registry: {api_url}")
+
+            req = urllib.request.Request(api_url)
+            req.add_header("User-Agent", "FastLED-CI/1.0")
+
+            with urllib.request.urlopen(req, timeout=10) as response:
+                data = json.loads(response.read().decode("utf-8"))
+
+                # Check if the version matches
+                if data.get("version", {}).get("name") != version:
+                    logger.debug(
+                        f"Version mismatch: expected {version}, got {data.get('version', {}).get('name')}"
+                    )
+                    continue
+
+                # Find the file for the target system
+                files = data.get("version", {}).get("files", [])
+                for file_info in files:
+                    if system in file_info.get("system", []):
+                        download_url = file_info.get("download_url")
+                        if download_url:
+                            logger.info(
+                                f"Resolved {owner}/{package_name}@{version} ({system}) -> {download_url}"
+                            )
+                            return download_url
+
+                # If we got here, version matched but no file for this system
+                logger.warning(
+                    f"Package {owner}/{package_name}@{version} has no file for system: {system}"
+                )
+
+        except urllib.error.HTTPError as e:
+            if e.code == 404:
+                # Package not found with this owner, try next
+                continue
+            logger.warning(
+                f"HTTP error querying registry for {owner}/{package_name}: {e}"
+            )
+        except Exception as e:
+            logger.warning(f"Error resolving package {owner}/{package_name}: {e}")
+
+    logger.warning(
+        f"Failed to resolve package URL: {package_name}@{version} for system {system}"
+    )
+    return None
 
 
 class PlatformIOIni:
@@ -1529,20 +1675,24 @@ class PlatformIOIni:
         return repository_url
 
     def resolve_platform_url_enhanced(
-        self, platform_name: str
+        self, platform_name: str, force_resolve: bool = False
     ) -> Optional[PlatformUrlResolution]:
         """
         Resolve a platform shorthand name to comprehensive URL information.
 
         Args:
-            platform_name: Platform name like 'espressif32', 'atmelavr', etc.
+            platform_name: Platform name like 'espressif32', 'atmelavr', etc., or a full URL
+            force_resolve: If True, query PlatformIO even for URLs to get package information
 
         Returns:
             PlatformUrlResolution with git_url, zip_url, packages, etc. or None if resolution fails.
         """
         # Check if it's already a URL or local path
         url_type = self._classify_url_type(platform_name)
-        if url_type in ("git", "zip", "file"):
+        is_url = url_type in ("git", "zip", "file")
+
+        # If it's a URL and we're not forcing resolution, return basic info
+        if is_url and not force_resolve:
             resolution = PlatformUrlResolution(name=platform_name)
 
             if url_type == "git":
@@ -1554,12 +1704,11 @@ class PlatformIOIni:
 
             return resolution
 
-        # Check cache first
-        if self._is_platform_cached(platform_name):
-            cached = self._platform_cache[platform_name]
-            logger.debug(
-                f"Using cached enhanced platform resolution for {platform_name}"
-            )
+        # Check cache first (use normalized key for URLs)
+        cache_key = platform_name
+        if self._is_platform_cached(cache_key):
+            cached = self._platform_cache[cache_key]
+            logger.debug(f"Using cached enhanced platform resolution for {cache_key}")
             if cached.enhanced_resolution:
                 return cached.enhanced_resolution
             # Fall back to creating resolution from cached data
@@ -1572,6 +1721,7 @@ class PlatformIOIni:
             )
 
         # Resolve via PlatformIO CLI using typed response
+        # PlatformIO can resolve both shorthand names and URLs
         platform_show = self._get_platform_show_typed(platform_name)
         if not platform_show:
             logger.warning(f"Failed to resolve platform: {platform_name}")
