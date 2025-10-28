@@ -4,6 +4,7 @@
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
+#include "fl/stdint.h"
 
 namespace fl {
 
