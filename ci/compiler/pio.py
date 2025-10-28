@@ -378,10 +378,15 @@ def get_platform_required_packages(platform_path: Path) -> List[str]:
 
 def get_installed_packages_from_pio() -> Dict[str, str]:
     """Get installed packages using PlatformIO CLI."""
+    import os
     import re
     import subprocess
 
     try:
+        # Force UTF-8 encoding for PlatformIO subprocess to avoid Windows CP1252 encoding errors
+        env = os.environ.copy()
+        env["PYTHONIOENCODING"] = "utf-8"
+
         result = subprocess.run(
             ["pio", "pkg", "list", "--global"],
             capture_output=True,
@@ -390,6 +395,7 @@ def get_installed_packages_from_pio() -> Dict[str, str]:
             errors="replace",
             check=False,
             timeout=30,
+            env=env,
         )
 
         if result.returncode != 0:
