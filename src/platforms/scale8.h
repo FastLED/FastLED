@@ -20,10 +20,6 @@
 #include "platforms/shared/scale8.h"
 #endif
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
 namespace fl {
 /// @file scale8.h
 /// Fast, efficient 8-bit scaling functions specifically
@@ -237,4 +233,3 @@ LIB8STATIC uint8_t brighten8_lin(uint8_t x) {
 /// @} Dimming
 /// @} lib8tion
 }  // namespace fl
-FL_DISABLE_WARNING_POP

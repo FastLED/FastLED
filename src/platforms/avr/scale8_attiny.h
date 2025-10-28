@@ -7,11 +7,6 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-
 namespace fl {
 
 /// @file scale8_attiny.h
@@ -131,4 +126,3 @@ LIB8STATIC uint16_t scale16(uint16_t i, fract16 scale) {
 /// @} Scaling_ATtiny
 
 }  // namespace fl
-FL_DISABLE_WARNING_POP

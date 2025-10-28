@@ -16,13 +16,6 @@
 #ifndef __INC_LIB8TION_TRIG_H
 #define __INC_LIB8TION_TRIG_H
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-FL_DISABLE_WARNING_FLOAT_CONVERSION
-FL_DISABLE_WARNING_SIGN_CONVERSION
-
 /// @file trig8.h
 /// Fast, efficient 8-bit trigonometry functions specifically
 /// designed for high-performance LED programming.
@@ -57,5 +50,3 @@ namespace fl {
 /// @} lib8tion
 
 #endif
-
-FL_DISABLE_WARNING_POP

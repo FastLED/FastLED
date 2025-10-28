@@ -6,13 +6,6 @@
 
 namespace fl {
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-FL_DISABLE_WARNING_FLOAT_CONVERSION
-FL_DISABLE_WARNING_SIGN_CONVERSION
-
 // Note: This file opens its own namespace fl block
 
 /// @file trig8.h
@@ -95,7 +88,5 @@ LIB8STATIC uint8_t sin8_C(uint8_t theta) {
 LIB8STATIC uint8_t cos8(uint8_t theta) { return sin8(theta + 64); }
 
 /// @} Trig_C
-
-FL_DISABLE_WARNING_POP
 
 }  // namespace fl

@@ -8,14 +8,6 @@
 
 #include "fl/compiler_control.h"
 
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING_UNUSED_PARAMETER
-FL_DISABLE_WARNING_RETURN_TYPE
-FL_DISABLE_WARNING_IMPLICIT_INT_CONVERSION
-FL_DISABLE_WARNING_FLOAT_CONVERSION
-FL_DISABLE_WARNING_SIGN_CONVERSION
-
-
 #ifndef __INC_LED_SYSDEFS_H
 #error WTH?  led_sysdefs needs to be included first
 #endif
@@ -1276,5 +1268,3 @@ using fl::q62;
 using fl::q88;
 using fl::q124;
 using fl::dim8_raw;
-
-FL_DISABLE_WARNING_POP
