@@ -19,7 +19,7 @@
 CRGB leds[NUM_LEDS];
 
 void setup() {
-    //Serial.begin(9600);
+    Serial.begin(9600);
 
     // Uncomment/edit one of the following lines for your leds arrangement.
     // ## Clockless types ##
@@ -69,6 +69,10 @@ void setup() {
 }
 
 void loop() {
+  EVERY_N_SECONDS(400) {
+    FL_WARN("Blink!");
+
+  }
   // Turn the LED on, then pause
   for (int i = 0; i < NUM_LEDS; ++i) {
     leds[i] = CRGB::Red;
