@@ -4,6 +4,7 @@ import unittest
 from pathlib import Path
 from typing import List
 
+import pytest
 from unified_scanner import BaseChecker, CheckResult, UnifiedFileScanner
 from unified_scanner.checkers import (
     BannedDefineChecker,
@@ -22,6 +23,7 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 class TestUnifiedScanner(unittest.TestCase):
     """Single test that runs all file checkers."""
 
+    @pytest.mark.slow
     def test_all_file_checkers(self) -> None:
         """Run all file checkers in a single filesystem scan."""
 

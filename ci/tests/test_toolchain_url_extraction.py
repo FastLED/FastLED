@@ -11,6 +11,8 @@ import unittest
 from pathlib import Path
 from typing import Dict, List, Optional
 
+import pytest
+
 from ci.compiler.platformio_ini import (
     PackageInfo,
     PlatformIOIni,
@@ -21,6 +23,7 @@ from ci.compiler.platformio_ini import (
 class TestToolchainUrlExtraction(unittest.TestCase):
     """Test extraction of toolchain URLs from platformio.ini."""
 
+    @pytest.mark.slow
     def test_extract_toolchains_from_esp32c3(self) -> None:
         """
         Test that we can extract toolchain URLs for ESP32C3 (RISC-V platform).
@@ -111,6 +114,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         print(f"  Version: {riscv_toolchain.version or 'N/A'}")
         print(f"  Optional: {riscv_toolchain.optional}")
 
+    @pytest.mark.slow
     def test_extract_toolchains_from_esp32s3(self) -> None:
         """
         Test that we can extract toolchain URLs for ESP32S3 (Xtensa platform).
@@ -183,6 +187,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
             print(f"  Version Requirement: {toolchain_url}")
         print(f"  Resolved Version: {xtensa_toolchain.version or 'N/A'}")
 
+    @pytest.mark.slow
     def test_compare_toolchains_across_environments(self) -> None:
         """
         Test that different ESP32 variants use different toolchains.
@@ -254,6 +259,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         print(f"  ESP32S3 (Xtensa): {s3_name}")
         print(f"    URL/Version: {s3_url}")
 
+    @pytest.mark.slow
     def test_extract_all_packages_by_type(self) -> None:
         """
         Test that we can categorize all packages by type (toolchains, frameworks, debuggers, etc.).

@@ -18,6 +18,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 
 # Ensure UTF-8 output on Windows and other platforms (only when running directly)
 def _setup_utf8_output():
@@ -425,6 +427,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"✅ URL detection works correctly for all test cases - REAL IMPLEMENTATION TESTED")
 
+    @pytest.mark.slow
     def test_basic_platform_shorthand_resolution(self) -> None:
         """Test converting platform shorthand names to repository URLs using REAL PlatformIO CLI."""
         # debug_print(f"\n🏗️ Testing basic platform shorthand to URL conversion (REAL PlatformIO CLI)")
@@ -504,6 +507,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
     # CACHING TESTS - Resolution Caching and TTL Behavior
     # =============================================================================
 
+    @pytest.mark.slow
     def test_resolution_caching_works(self) -> None:
         """Test that platform resolution results are properly cached using REAL PlatformIO CLI."""
         # debug_print(f"\n🗄️ Testing resolution caching mechanism (REAL CLI CALLS)")
@@ -660,6 +664,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
 
         # debug_print(f"🎉 All failure cases handled correctly")
 
+    @pytest.mark.slow
     def test_platform_url_resolution(self) -> None:
         """Test resolving platform shorthand names to URLs."""
         # debug_print(f"\n🔍 Testing platform shorthand to URL resolution")
