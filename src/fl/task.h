@@ -4,7 +4,7 @@
 ## Usage Example
 
 ```cpp
-#include <FastLED.h>
+#include <fl/fastled.h>
 #include <fl/task.h>
 
 void setup() {

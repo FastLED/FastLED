@@ -8,7 +8,7 @@
 #define __INC_FASTSPI_ARM_SAM_H
 
 #if FASTLED_DOXYGEN // guard against the arduino ide idiotically including every header file
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/int.h"
 
 /// A skeletal implementation of hardware SPI support.  Fill in the necessary code for init, waiting, and writing.  The rest of

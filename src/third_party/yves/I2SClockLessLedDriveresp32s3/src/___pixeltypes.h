@@ -2,7 +2,7 @@
 #include "fl/string.h"
 
 #ifdef USE_FASTLED
-#include "FastLED.h"
+#include "fl/fastled.h"
 #endif
 // #include "Arduino.h"
 

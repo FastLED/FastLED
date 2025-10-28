@@ -9,7 +9,7 @@
 
 #if FASTLED_DOXYGEN // Guard against the arduino ide idiotically including every header file
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 #include "fl/int.h"
 
 

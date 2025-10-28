@@ -9,7 +9,7 @@
 #include "fl/fill.h"
 #include "fl/blur.h"
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 #define FUNCTION_FILL_RAINBOW(a,b,c,d) fl::fill_rainbow(a,b,c,d)
 #define FUNCTION_NAPPLY_GAMMA(a,b,c) fl::napplyGamma_video(a,b,c)

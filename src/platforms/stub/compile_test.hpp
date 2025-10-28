@@ -1,6 +1,6 @@
 #pragma once
 
-#include "FastLED.h"
+#include "fl/fastled.h"
 
 namespace fl {
 static void stub_compile_tests() {

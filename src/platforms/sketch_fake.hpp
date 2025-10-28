@@ -2,7 +2,7 @@
 // This file provides a common fallback for examples that won't compile on all platforms
 
 // ok no namespace fl
-#include <FastLED.h>
+#include <FastLED.h>  // ok include
 
 #define NUM_LEDS 60
 
