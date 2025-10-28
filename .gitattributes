@@ -1,0 +1,95 @@
+# Enforce LF line endings for all text files to prevent
+# build issues between Windows hosts and Linux Docker containers
+
+# Auto detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Source code
+*.cpp text eol=lf
+*.h text eol=lf
+*.hpp text eol=lf
+*.c text eol=lf
+*.cc text eol=lf
+*.cxx text eol=lf
+*.hxx text eol=lf
+*.inc text eol=lf
+
+# Arduino sketches
+*.ino text eol=lf
+*.pde text eol=lf
+
+# Python
+*.py text eol=lf
+*.pyx text eol=lf
+*.pyi text eol=lf
+
+# Shell scripts
+*.sh text eol=lf
+*.bash text eol=lf
+
+# Configuration files
+*.ini text eol=lf
+*.cfg text eol=lf
+*.conf text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.toml text eol=lf
+
+# Documentation
+*.md text eol=lf
+*.txt text eol=lf
+*.rst text eol=lf
+
+# Web files
+*.html text eol=lf
+*.css text eol=lf
+*.js text eol=lf
+*.xml text eol=lf
+
+# Git files
+.gitignore text eol=lf
+.gitattributes text eol=lf
+.gitmodules text eol=lf
+
+# CI/CD
+*.yml text eol=lf
+Dockerfile* text eol=lf
+
+# Build files
+Makefile text eol=lf
+*.mk text eol=lf
+CMakeLists.txt text eol=lf
+
+# Denote binary files (do not normalize)
+*.bin binary
+*.hex binary
+*.elf binary
+*.a binary
+*.o binary
+*.so binary
+*.dll binary
+*.exe binary
+*.jar binary
+*.zip binary
+*.tar binary
+*.gz binary
+*.7z binary
+*.rar binary
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.svg binary
+*.bmp binary
+*.tiff binary
+
+# Fonts
+*.ttf binary
+*.otf binary
+*.woff binary
+*.woff2 binary
+*.eot binary
