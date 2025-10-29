@@ -94,7 +94,7 @@ jobs:
             platforms: bluepill,blackpill,stm103tb
             registry: registry_stm32
           - name: rp
-            platforms: rp2040,rp2040_earle,rp2350,rp2350B
+            platforms: rp2040,rp2350,rp2350B
             registry: registry_rp
           - name: nrf52
             platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense

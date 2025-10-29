@@ -78,6 +78,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     "rp": [
         "rp2040",
         "rp2350",
+        "rp2350B",
     ],
     # NRF52 Platform - Nordic nRF52 boards
     # Image: niteris/fastled-compiler-nrf52:latest
