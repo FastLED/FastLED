@@ -75,5 +75,5 @@ tests/x64/
 tests/bin
 qemu_output.log
 gdb*.txt
-qemu-buildtest_output.txt
--e "\ntrusted/" 
+qemu-build
+test_output.txt
