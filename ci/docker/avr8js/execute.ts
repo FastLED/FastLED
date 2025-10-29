@@ -41,11 +41,13 @@ export class AVRRunner {
 
   async execute(callback: (cpu: CPU) => void) {
     this.stopped = false;
+    let nextCheckpoint = 16000000;
     for (;;) {
       avrInstruction(this.cpu);
       this.cpu.tick();
-      if (this.cpu.cycles % 500000 === 0) {
+      if (this.cpu.cycles >= nextCheckpoint) {
         callback(this.cpu);
+        nextCheckpoint += 16000000;
         await new Promise(resolve => {
           setTimeout(resolve, 0);
         });

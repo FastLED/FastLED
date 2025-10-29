@@ -22,7 +22,7 @@ Arguments:
   hex-file              Path to Intel HEX file to execute
 
 Options:
-  --timeout <seconds>   Maximum execution time (default: 10)
+  --timeout <seconds>   Maximum simulated time in seconds (default: 30)
   --verbose            Enable verbose output
   -h, --help           Show this help message
 
@@ -34,7 +34,7 @@ Example:
 
   const options: RunOptions = {
     hexFile: args[0],
-    timeout: 10,
+    timeout: 30,
     verbose: false
   };
 
@@ -89,31 +89,35 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
   // Execute with periodic checks
   console.log("[DEBUG] Starting CPU execution...");
   let callbackCount = 0;
+  let firstCheckpointTime = 0;
   try {
     await runner.execute(cpu => {
       callbackCount++;
-      if (callbackCount % 1000 === 0) {
-        const time = formatTime(cpu.cycles / runner.MHZ);
-        console.log(`[DEBUG][${time}] Execute callback #${callbackCount}, cycles=${cpu.cycles}`);
+      const time = formatTime(cpu.cycles / runner.MHZ);
+
+      // Performance checkpoint at 50k cycles
+      if (cpu.cycles >= 50000 && firstCheckpointTime === 0) {
+        firstCheckpointTime = Date.now();
+        const elapsed = (firstCheckpointTime - startTime) / 1000;
+        const cyclesPerSec = cpu.cycles / elapsed;
+        const targetCycles = runner.MHZ; // 16MHz
+        const perfPercent = (cyclesPerSec / targetCycles * 100).toFixed(1);
+        console.log(`[DEBUG][${time}] === 50k CYCLE CHECKPOINT ===`);
+        console.log(`[DEBUG] Wall time: ${elapsed.toFixed(3)}s`);
+        console.log(`[DEBUG] Cycles/sec: ${(cyclesPerSec / 1e6).toFixed(2)}M (${perfPercent}% of 16MHz target)`);
+        console.log(`[DEBUG] Target for 30s: 480M cycles (16MHz * 30s)`);
       }
 
-      const elapsed = Date.now() - startTime;
-      if (elapsed > timeoutMs) {
-        const time = formatTime(cpu.cycles / runner.MHZ);
-        console.error(`\n[DEBUG][${time}] Timeout reached after ${options.timeout}s`);
-        if (options.verbose) {
-          console.error(`[${time}] Timeout reached after ${options.timeout}s`);
-        }
-        runner.stop();
+      if (callbackCount <= 10 || callbackCount % 10 === 0) {
+        const interruptsEnabled = (cpu.data[95] & 0x80) !== 0; // SREG I bit
+        console.log(`[DEBUG][${time}] Callback #${callbackCount}, cycles=${cpu.cycles}, txEnable=${runner.usart.txEnable}, IE=${interruptsEnabled}`);
       }
 
-      // Also stop if no output for 2 seconds (assuming program finished)
-      const silentTime = Date.now() - lastOutputTime;
-      if (output.length > 0 && silentTime > 2000) {
-        const time = formatTime(cpu.cycles / runner.MHZ);
-        console.error(`\n[DEBUG][${time}] No output for 2s, assuming completion`);
+      const simTime = cpu.cycles / runner.MHZ;
+      if (simTime > (options.timeout || 30)) {
+        console.error(`\n[DEBUG][${time}] Timeout reached after ${options.timeout}s simulated time`);
         if (options.verbose) {
-          console.error(`[${time}] No output for 2s, assuming completion`);
+          console.error(`[${time}] Timeout reached after ${options.timeout}s simulated time`);
         }
         runner.stop();
       }
@@ -127,11 +131,16 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
 
   const executionTime = (Date.now() - startTime) / 1000;
   const simTime = runner.cpu.cycles / runner.MHZ;
+  const cyclesPerSec = runner.cpu.cycles / executionTime;
+  const perfPercent = (cyclesPerSec / runner.MHZ * 100).toFixed(1);
+  const simToWallRatio = (simTime / executionTime).toFixed(2);
 
   console.log(`\n[DEBUG] --- Execution Complete ---`);
   console.log(`[DEBUG] Wall time: ${executionTime.toFixed(3)}s`);
   console.log(`[DEBUG] Simulated time: ${formatTime(simTime)}`);
   console.log(`[DEBUG] CPU cycles: ${runner.cpu.cycles}`);
+  console.log(`[DEBUG] Performance: ${(cyclesPerSec / 1e6).toFixed(2)}M cycles/sec (${perfPercent}% of 16MHz target)`);
+  console.log(`[DEBUG] Sim/Wall ratio: ${simToWallRatio}x (${simToWallRatio > 1 ? 'faster than real-time' : 'slower than real-time'})`);
   console.log(`[DEBUG] Output length: ${output.length} bytes`);
   console.log(`[DEBUG] Output content: "${output}"`);
   console.log(`[DEBUG] Output (hex): ${Array.from(output).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ')}`);
@@ -141,6 +150,7 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
     console.log(`Wall time: ${executionTime.toFixed(3)}s`);
     console.log(`Simulated time: ${formatTime(simTime)}`);
     console.log(`CPU cycles: ${runner.cpu.cycles}`);
+    console.log(`Performance: ${(cyclesPerSec / 1e6).toFixed(2)}M cycles/sec (${perfPercent}% of 16MHz)`);
   }
 
   // Check for required test output
