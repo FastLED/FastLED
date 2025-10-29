@@ -8,8 +8,9 @@
     "start": "tsx main.ts"
   },
   "dependencies": {
-    "avr8js": "github:wokwi/avr8js",
-    "tsx": "^4.0.0"
+    "avr8js": "^0.14.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0"

@@ -15,20 +15,17 @@ WORKDIR /app
 # This layer is cached unless package.json changes
 COPY ci/docker/avr8js/package.json /app/package.json
 
-# Install avr8js and clean up to minimize size
-RUN npm install --production && \
+# Install dependencies including TypeScript and tsx
+RUN npm install && \
     npm cache clean --force && \
     rm -rf /root/.npm /tmp/*
 
-# Copy the runner script
-COPY ci/docker/avr8js/avr8js_runner.js /app/runner.js
+# Copy TypeScript source files
+COPY ci/docker/avr8js/*.ts /app/
 
-# Make runner executable
-RUN chmod +x /app/runner.js
-
-# Entrypoint: run the simulator
+# Entrypoint: run the simulator using tsx
 # Usage: docker run <image> <firmware.hex> [timeout]
-ENTRYPOINT ["node", "/app/runner.js"]
+ENTRYPOINT ["npx", "tsx", "/app/main.ts"]
 
 # Default: show help
 CMD ["--help"]

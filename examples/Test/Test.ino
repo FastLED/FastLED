@@ -16,6 +16,7 @@ void setup() {
 
     Serial.print("FastLED Runtime Test Suite - begin setup\n");
     Serial.print("===========================\n");
+    delay(100);
 
 
 

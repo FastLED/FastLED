@@ -51,11 +51,11 @@ _RUN_PLATFORM_BACKENDS = {
     "esp32dev": "qemu",
     "esp32c3": "qemu",
     "esp32s3": "qemu",
-    # AVR boards use simavr
-    "uno": "simavr",
-    "attiny85": "simavr",
-    "attiny88": "simavr",
-    "nano_every": "simavr",
+    # AVR boards use avr8js
+    "uno": "avr8js",
+    "attiny85": "avr8js",
+    "attiny88": "avr8js",
+    "nano_every": "avr8js",
 }
 
 if os.environ.get("_GITHUB"):
@@ -331,42 +331,43 @@ def run_qemu_tests(args: TestArgs) -> None:
         print("All QEMU tests passed!")
 
 
-def run_simavr_tests(args: TestArgs) -> None:
-    """Run AVR examples in simavr emulation using Docker."""
+def run_avr8js_tests(args: TestArgs) -> None:
+    """Run AVR examples in avr8js emulation using Docker."""
     from pathlib import Path
 
-    from ci.docker.avr_simavr_docker import DockerAVRSimRunner
     from running_process import RunningProcess
 
-    if not args.simavr or len(args.simavr) < 1:
-        print("Error: --simavr requires a board (e.g., uno)")
+    from ci.docker.avr8js_docker import DockerAVR8jsRunner
+
+    if not args.run or len(args.run) < 1:
+        print("Error: --run requires a board (e.g., uno)")
         sys.exit(1)
 
-    board = args.simavr[0].lower()
+    board = args.run[0].lower()
     supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]
     if board not in supported_boards:
         print(
-            f"Error: Unsupported simavr board: {board}. Supported boards: {', '.join(supported_boards)}"
+            f"Error: Unsupported avr8js board: {board}. Supported boards: {', '.join(supported_boards)}"
         )
         sys.exit(1)
 
-    print(f"Running {board.upper()} simavr tests using Docker...")
+    print(f"Running {board.upper()} avr8js tests using Docker...")
 
     # Determine which examples to test (skip the board argument)
-    examples_to_test = args.simavr[1:] if len(args.simavr) > 1 else ["Test"]
+    examples_to_test = args.run[1:] if len(args.run) > 1 else ["Test"]
     if not examples_to_test:  # Empty list means test Test example
         examples_to_test = ["Test"]
 
     print(f"Testing examples: {examples_to_test}")
 
     # Quick test mode - just validate the setup
-    if os.getenv("FASTLED_SIMAVR_QUICK_TEST") == "true":
-        print("Quick test mode - validating Docker simavr setup only")
-        print("simavr AVR Docker option is working correctly!")
+    if os.getenv("FASTLED_AVR8JS_QUICK_TEST") == "true":
+        print("Quick test mode - validating Docker avr8js setup only")
+        print("avr8js AVR Docker option is working correctly!")
         return
 
-    # Initialize Docker simavr runner
-    docker_runner = DockerAVRSimRunner()
+    # Initialize Docker avr8js runner
+    docker_runner = DockerAVR8jsRunner()
 
     # Check if Docker is available
     if not docker_runner.check_docker_available():
@@ -377,25 +378,25 @@ def run_simavr_tests(args: TestArgs) -> None:
         print()
         sys.exit(1)
 
-    # Check if simavr Docker image exists
-    simavr_image = docker_runner.docker_image
-    image_exists = docker_runner.check_image_exists(simavr_image)
+    # Check if avr8js Docker image exists
+    avr8js_image = docker_runner.docker_image
+    image_exists = docker_runner.check_image_exists(avr8js_image)
 
     if not image_exists:
-        print(f"❌ Docker simavr image not found locally: {simavr_image}")
+        print(f"❌ Docker avr8js image not found locally: {avr8js_image}")
         print()
-        print("Attempting to pull simavr image from Docker Hub...")
+        print("Attempting to pull avr8js image from Docker Hub...")
         try:
             docker_runner.pull_image()
-            print(f"✅ Successfully pulled {simavr_image}")
+            print(f"✅ Successfully pulled {avr8js_image}")
             print()
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            print(f"❌ Failed to pull simavr image: {e}")
+            print(f"❌ Failed to pull avr8js image: {e}")
             print()
             print("Please build the image manually:")
-            print(f"  docker build -f ci/docker/Dockerfile.simavr -t {simavr_image} .")
+            print(f"  docker build -f ci/docker/Dockerfile.avr8js -t {avr8js_image} .")
             print()
             sys.exit(1)
 
@@ -456,14 +457,14 @@ def run_simavr_tests(args: TestArgs) -> None:
             elf_path = elf_files[0]
             print(f"Found ELF file: {elf_path}")
 
-            # Run in simavr using Docker
-            print(f"Running {example} in Docker simavr...")
+            # Run in avr8js using Docker
+            print(f"Running {example} in Docker avr8js...")
 
             # Set up output file
-            output_file = "simavr_output.txt"
+            output_file = "avr8js_output.txt"
 
-            # Run simavr in Docker
-            simavr_returncode = docker_runner.run(
+            # Run avr8js in Docker
+            avr8js_returncode = docker_runner.run(
                 elf_path=elf_path,
                 mcu=config["mcu"],
                 frequency=config["frequency"],
@@ -482,17 +483,17 @@ def run_simavr_tests(args: TestArgs) -> None:
                     "Test Summary:" in output_content
                     and "All tests PASSED!" in output_content
                 ):
-                    print(f"SUCCESS: {example} tests passed in Docker simavr")
+                    print(f"SUCCESS: {example} tests passed in Docker avr8js")
                     success_count += 1
                 else:
-                    print(f"FAILED: {example} tests did not pass in Docker simavr")
+                    print(f"FAILED: {example} tests did not pass in Docker avr8js")
                     failure_count += 1
-            elif simavr_returncode == 0:
-                print(f"SUCCESS: {example} ran successfully in Docker simavr")
+            elif avr8js_returncode == 0:
+                print(f"SUCCESS: {example} ran successfully in Docker avr8js")
                 success_count += 1
             else:
                 print(
-                    f"FAILED: {example} failed in Docker simavr with exit code: {simavr_returncode}"
+                    f"FAILED: {example} failed in Docker avr8js with exit code: {avr8js_returncode}"
                 )
                 failure_count += 1
 
@@ -504,7 +505,7 @@ def run_simavr_tests(args: TestArgs) -> None:
             failure_count += 1
 
     # Summary
-    print(f"\n=== simavr {board.upper()} Test Summary ===")
+    print(f"\n=== avr8js {board.upper()} Test Summary ===")
     print(f"Examples tested: {len(examples_to_test)}")
     print(f"Successful: {success_count}")
     print(f"Failed: {failure_count}")
@@ -513,7 +514,7 @@ def run_simavr_tests(args: TestArgs) -> None:
         print("Some tests failed. See output above for details.")
         sys.exit(1)
     else:
-        print("All simavr tests passed!")
+        print("All avr8js tests passed!")
 
 
 def main() -> None:
@@ -742,14 +743,14 @@ def main() -> None:
                 qemu_platforms = [
                     p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "qemu"
                 ]
-                simavr_boards = [
-                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "simavr"
+                avr8js_boards = [
+                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "avr8js"
                 ]
 
                 if qemu_platforms:
                     print(f"  ESP32 (QEMU): {', '.join(sorted(qemu_platforms))}")
-                if simavr_boards:
-                    print(f"  AVR (simavr): {', '.join(sorted(simavr_boards))}")
+                if avr8js_boards:
+                    print(f"  AVR (avr8js): {', '.join(sorted(avr8js_boards))}")
 
                 sys.exit(1)
 
@@ -760,11 +761,10 @@ def main() -> None:
                 args.qemu = args.run
                 run_qemu_tests(args)
                 return
-            elif backend == "simavr":
-                print(f"=== simavr Testing ({platform}) ===")
-                # Convert --run to --simavr format for backward compatibility
-                args.simavr = args.run
-                run_simavr_tests(args)
+            elif backend == "avr8js":
+                print(f"=== avr8js Testing ({platform}) ===")
+                # Run avr8js tests
+                run_avr8js_tests(args)
                 return
             else:
                 print(f"Error: Unknown backend '{backend}' for platform '{platform}'")
@@ -775,13 +775,6 @@ def main() -> None:
             print("=== QEMU Testing ===")
             print("Note: --qemu is deprecated, use --run instead")
             run_qemu_tests(args)
-            return
-
-        # Handle simavr testing (deprecated - use --run)
-        if args.simavr is not None:
-            print("=== simavr Testing ===")
-            print("Note: --simavr is deprecated, use --run instead")
-            run_simavr_tests(args)
             return
 
         # Helper function to save all fingerprints with a given status
