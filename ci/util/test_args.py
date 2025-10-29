@@ -146,9 +146,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         help="Enable debug mode for C++ unit tests (e.g., full debug symbols)",
     )
     parser.add_argument(
+        "--run",
+        nargs="+",
+        help="Run examples in emulation. Usage: --run esp32s3|uno [example_names...]. Auto-detects QEMU for ESP32 or avr8js for AVR.",
+    )
+    parser.add_argument(
         "--qemu",
         nargs="+",
-        help="Run examples in QEMU emulation. Usage: --qemu esp32s3 [example_names...]",
+        help="(Deprecated - use --run) Run examples in QEMU emulation. Usage: --qemu esp32s3 [example_names...]",
     )
     parser.add_argument(
         "--no-fingerprint",
@@ -194,6 +199,7 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
         no_parallel=parsed_args.no_parallel,
         unity_chunks=parsed_args.unity_chunks,
         debug=parsed_args.debug,
+        run=parsed_args.run,
         qemu=parsed_args.qemu,
         no_fingerprint=parsed_args.no_fingerprint,
         force=parsed_args.force,

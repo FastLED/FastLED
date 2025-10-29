@@ -1,0 +1,20 @@
+{
+  "name": "fastled-avr8js-runner",
+  "version": "1.0.0",
+  "description": "AVR8JS-based test runner for FastLED Arduino examples",
+  "type": "module",
+  "main": "main.ts",
+  "scripts": {
+    "start": "tsx main.ts"
+  },
+  "dependencies": {
+    "avr8js": "github:wokwi/avr8js",
+    "tsx": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

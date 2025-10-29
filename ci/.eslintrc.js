@@ -2,7 +2,11 @@ module.exports = {
   env: {
     browser: true,
     es2022: true,
-    worker: true
+    worker: true,
+    node: true
+  },
+  globals: {
+    Module: "readonly"  // Emscripten WASM global
   },
   parserOptions: {
     ecmaVersion: 2022,
@@ -44,5 +48,37 @@ module.exports = {
     "no-unreachable": "error",        // Catch unreachable code
     "no-empty-function": "off",       // Allow empty functions (common for stubs)
     "consistent-return": "warn"       // Warn about inconsistent return statements
-  }
+  },
+  overrides: [
+    {
+      // TypeScript-specific configuration
+      files: ["*.ts", "*.tsx"],
+      parser: "@typescript-eslint/parser",
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: "module",
+        project: null  // Disable type-aware linting for speed
+      },
+      plugins: ["@typescript-eslint"],
+      rules: {
+        // Disable base ESLint rules that are handled by TypeScript
+        "no-unused-vars": "off",
+        "no-undef": "off",  // TypeScript handles this
+        "no-redeclare": "off",
+
+        // Enable TypeScript-specific rules
+        "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+        "@typescript-eslint/no-redeclare": "error",
+
+        // Keep other rules the same as JavaScript
+        "no-debugger": "error",
+        "no-eval": "error",
+        "eqeqeq": "error",
+        "no-var": "error",
+        "prefer-const": "error",
+        "no-console": "off",
+        "no-unreachable": "error"
+      }
+    }
+  ]
 };

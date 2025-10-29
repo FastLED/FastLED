@@ -150,12 +150,17 @@ def setup_eslint():
 
     print("Installing ESLint...")
 
-    # Create package.json
+    # Create package.json with TypeScript ESLint support
     package_json = {
         "name": "fastled-js-linting",
         "version": "1.0.0",
         "private": True,
-        "dependencies": {"eslint": "^8.56.0"},
+        "dependencies": {
+            "eslint": "^8.56.0",
+            "@typescript-eslint/parser": "^6.19.0",
+            "@typescript-eslint/eslint-plugin": "^6.19.0",
+            "typescript": "^5.3.3",
+        },
     }
 
     with open(TOOLS_DIR / "package.json", "w") as f:
@@ -195,8 +200,17 @@ def setup_eslint():
         print(f"npm install stdout: {e.stdout}")
         raise
 
-    # ESLint config is now in ci/.eslintrc.js (tracked in git)
-    # No need to create it here since it's already in version control
+    # Copy ESLint config to tools directory so it can resolve the TypeScript parser
+    import shutil
+
+    eslint_config_src = Path("ci/.eslintrc.js")
+    eslint_config_dst = TOOLS_DIR / ".eslintrc.js"
+
+    if eslint_config_src.exists():
+        shutil.copy(eslint_config_src, eslint_config_dst)
+        print(f"SUCCESS: ESLint config copied to {eslint_config_dst}")
+    else:
+        print(f"WARNING: ESLint config not found at {eslint_config_src}")
 
     print("SUCCESS: ESLint configured")
 

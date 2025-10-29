@@ -48,42 +48,57 @@ def _get_js_lint_cache() -> HashFingerprintCache:
 
 def check_js_files_changed() -> bool:
     """
-    Check if the wasm/compiler directory has changed since the last lint run.
+    Check if JavaScript/TypeScript directories have changed since the last lint run.
+
+    Monitors:
+    - src/platforms/wasm/compiler (JavaScript files)
+    - ci/docker/avr8js (TypeScript files)
 
     Uses the safe pre-computed fingerprint pattern to avoid race conditions.
 
     Returns:
-        True if directory changed and linting should run
+        True if directories changed and linting should run
         False if no changes detected and linting can be skipped
     """
-    # Monitor the wasm/compiler directory
-    compiler_dir = Path("src/platforms/wasm/compiler")
+    # Monitor both JavaScript and TypeScript directories
+    directories = [
+        Path("src/platforms/wasm/compiler"),
+        Path("ci/docker/avr8js"),
+    ]
 
-    if not compiler_dir.exists():
-        print("⚠️  Directory src/platforms/wasm/compiler not found")
-        return False
+    all_file_paths: List[Path] = []
+    missing_dirs: List[str] = []
 
-    # Get all files in the directory
-    file_paths = get_directory_files(compiler_dir)
+    for directory in directories:
+        if not directory.exists():
+            missing_dirs.append(str(directory))
+            continue
+        all_file_paths.extend(get_directory_files(directory))
 
-    if not file_paths:
-        print("📝 No files found in src/platforms/wasm/compiler/ - triggering lint")
+    if missing_dirs:
+        print(f"⚠️  Directories not found: {', '.join(missing_dirs)}")
+
+    if not all_file_paths:
+        print("📝 No files found in monitored directories - triggering lint")
         return True
 
     # Use the safe pattern: check_needs_update stores fingerprint for later use
     cache = _get_js_lint_cache()
-    needs_update = cache.check_needs_update(file_paths)
+    needs_update = cache.check_needs_update(all_file_paths)
 
     if needs_update:
-        # Count JS files for informational purposes
-        js_files = [f for f in file_paths if f.suffix == ".js"]
-        print_cache_miss(f"Changes detected in src/platforms/wasm/compiler/")
+        # Count JS and TS files for informational purposes
+        js_files = [f for f in all_file_paths if f.suffix == ".js"]
+        ts_files = [f for f in all_file_paths if f.suffix == ".ts"]
+        print_cache_miss(f"Changes detected in JavaScript/TypeScript directories")
         print(
-            f"   Found {len(js_files)} JavaScript files, {len(file_paths)} total files"
+            f"   Found {len(js_files)} JavaScript files, {len(ts_files)} TypeScript files, {len(all_file_paths)} total files"
         )
         return True
     else:
-        print_cache_hit("No changes in src/platforms/wasm/compiler/ - skipping lint")
+        print_cache_hit(
+            "No changes in JavaScript/TypeScript directories - skipping lint"
+        )
         return False
 
 

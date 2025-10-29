@@ -1,5 +1,5 @@
 #!/bin/bash
-# FastLED JavaScript Linting Script (Node.js + ESLint + JSDoc Type Checking - FAST!)
+# FastLED JavaScript/TypeScript Linting Script (Node.js + ESLint + JSDoc Type Checking - FAST!)
 
 # Colors for output
 RED='\033[0;31m'
@@ -14,7 +14,7 @@ PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 # Set up trap to invalidate cache on failure
 trap 'if [ $? -ne 0 ]; then cd "$PROJECT_ROOT" && uv run python ci/js_lint_cache.py failure; fi' EXIT
 
-echo -e "${BLUE}FAST FastLED JavaScript Linting (Node.js + ESLint + JSDoc Type Checking - FAST!)${NC}"
+echo -e "${BLUE}FAST FastLED JavaScript/TypeScript Linting (Node.js + ESLint + JSDoc Type Checking - FAST!)${NC}"
 
 # Check if ESLint is installed
 if [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
@@ -32,21 +32,44 @@ else
     exit 0
 fi
 
-# Find JavaScript files in WASM platform
+# Find JavaScript and TypeScript files (exclude node_modules)
 JS_FILES=$(find src/platforms/wasm -name "*.js" -type f 2>/dev/null)
+TS_FILES=$(find ci/docker/avr8js -name "*.ts" -type f -not -path "*/node_modules/*" 2>/dev/null)
 
-if [ -z "$JS_FILES" ]; then
-    echo -e "${YELLOW}WARNING: No JavaScript files found in src/platforms/wasm/${NC}"
+if [ -z "$JS_FILES" ] && [ -z "$TS_FILES" ]; then
+    echo -e "${YELLOW}WARNING: No JavaScript or TypeScript files found${NC}"
     exit 0
 fi
 
-echo -e "${BLUE}Found JavaScript files:${NC}"
-echo "$JS_FILES" | sed 's/^/  /'
+if [ -n "$JS_FILES" ]; then
+    echo -e "${BLUE}Found JavaScript files:${NC}"
+    echo "$JS_FILES" | sed 's/^/  /'
+fi
+
+if [ -n "$TS_FILES" ]; then
+    echo -e "${BLUE}Found TypeScript files:${NC}"
+    echo "$TS_FILES" | sed 's/^/  /'
+fi
 
 # Run ESLint using config from ci/ directory
 echo -e "${BLUE}Running ESLint...${NC}"
 cd .cache/js-tools
-if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c ../../ci/.eslintrc.js ../../src/platforms/wasm/compiler/*.js ../../src/platforms/wasm/compiler/modules/**/*.js; then
+
+# Build the list of files/patterns to lint
+LINT_TARGETS=()
+
+# Add JavaScript files if they exist
+if [ -n "$JS_FILES" ]; then
+    LINT_TARGETS+=("../../src/platforms/wasm/compiler/*.js")
+    LINT_TARGETS+=("../../src/platforms/wasm/compiler/modules/**/*.js")
+fi
+
+# Add TypeScript files if they exist
+if [ -n "$TS_FILES" ]; then
+    LINT_TARGETS+=("../../ci/docker/avr8js/*.ts")
+fi
+
+if "./node_modules/.bin/eslint.cmd" --no-eslintrc --no-inline-config -c .eslintrc.js "${LINT_TARGETS[@]}"; then
     echo -e "${GREEN}✅ ESLint completed successfully${NC}"
 else
     echo -e "${RED}ERROR: ESLint failed${NC}"
@@ -115,7 +138,7 @@ else
     echo -e "${BLUE}💡 To enable JSDoc checking: Run the ./install script or npm install -g typescript${NC}"
 fi
 
-echo -e "${GREEN}SUCCESS: JavaScript linting and type checking completed successfully${NC}"
+echo -e "${GREEN}SUCCESS: JavaScript/TypeScript linting and type checking completed successfully${NC}"
 
 # Mark linting as successful in cache (from project root)
 cd "$PROJECT_ROOT"

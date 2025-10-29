@@ -1,0 +1,38 @@
+# FastLED AVR8JS Docker Image
+# Minimal Alpine-based image for running Arduino Uno firmware in avr8js simulator
+# Target size: ~50-60MB
+
+FROM node:20-alpine
+
+LABEL maintainer="FastLED Project"
+LABEL description="AVR8JS Arduino simulator for FastLED testing"
+LABEL version="1.0"
+
+# Set working directory
+WORKDIR /app
+
+# Copy package.json for avr8js installation
+# This layer is cached unless package.json changes
+COPY ci/docker/avr8js/package.json /app/package.json
+
+# Install avr8js and clean up to minimize size
+RUN npm install --production && \
+    npm cache clean --force && \
+    rm -rf /root/.npm /tmp/*
+
+# Copy the runner script
+COPY ci/docker/avr8js/avr8js_runner.js /app/runner.js
+
+# Make runner executable
+RUN chmod +x /app/runner.js
+
+# Entrypoint: run the simulator
+# Usage: docker run <image> <firmware.hex> [timeout]
+ENTRYPOINT ["node", "/app/runner.js"]
+
+# Default: show help
+CMD ["--help"]
+
+# Health check (optional, for debugging)
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=1 \
+  CMD node --version || exit 1

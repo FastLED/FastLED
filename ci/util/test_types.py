@@ -85,9 +85,14 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
-    qemu: Optional[List[str]] = None  # Run examples in QEMU emulation
+    qemu: Optional[List[str]] = (
+        None  # Run examples in QEMU emulation (deprecated - use --run)
+    )
+    run: Optional[List[str]] = (
+        None  # Run examples in emulation (QEMU for ESP32, avr8js for AVR)
+    )
     no_fingerprint: bool = False  # Disable fingerprint caching
-    build: bool = False  # Build Docker images if missing (use with --qemu)
+    build: bool = False  # Build Docker images if missing (use with --run)
     force: bool = False  # Force rerun of all tests, ignore fingerprint cache
 
 

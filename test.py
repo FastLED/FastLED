@@ -45,6 +45,19 @@ _CANCEL_WATCHDOG = threading.Event()
 
 _TIMEOUT_EVERYTHING = 600
 
+# Platform to emulator backend mapping for --run command
+_RUN_PLATFORM_BACKENDS = {
+    # ESP32 platforms use QEMU
+    "esp32dev": "qemu",
+    "esp32c3": "qemu",
+    "esp32s3": "qemu",
+    # AVR boards use simavr
+    "uno": "simavr",
+    "attiny85": "simavr",
+    "attiny88": "simavr",
+    "nano_every": "simavr",
+}
+
 if os.environ.get("_GITHUB"):
     _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub Linux builds
     print(
@@ -318,6 +331,191 @@ def run_qemu_tests(args: TestArgs) -> None:
         print("All QEMU tests passed!")
 
 
+def run_simavr_tests(args: TestArgs) -> None:
+    """Run AVR examples in simavr emulation using Docker."""
+    from pathlib import Path
+
+    from ci.docker.avr_simavr_docker import DockerAVRSimRunner
+    from running_process import RunningProcess
+
+    if not args.simavr or len(args.simavr) < 1:
+        print("Error: --simavr requires a board (e.g., uno)")
+        sys.exit(1)
+
+    board = args.simavr[0].lower()
+    supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]
+    if board not in supported_boards:
+        print(
+            f"Error: Unsupported simavr board: {board}. Supported boards: {', '.join(supported_boards)}"
+        )
+        sys.exit(1)
+
+    print(f"Running {board.upper()} simavr tests using Docker...")
+
+    # Determine which examples to test (skip the board argument)
+    examples_to_test = args.simavr[1:] if len(args.simavr) > 1 else ["Test"]
+    if not examples_to_test:  # Empty list means test Test example
+        examples_to_test = ["Test"]
+
+    print(f"Testing examples: {examples_to_test}")
+
+    # Quick test mode - just validate the setup
+    if os.getenv("FASTLED_SIMAVR_QUICK_TEST") == "true":
+        print("Quick test mode - validating Docker simavr setup only")
+        print("simavr AVR Docker option is working correctly!")
+        return
+
+    # Initialize Docker simavr runner
+    docker_runner = DockerAVRSimRunner()
+
+    # Check if Docker is available
+    if not docker_runner.check_docker_available():
+        print("❌ ERROR: Docker is not available or not running")
+        print()
+        print("Please install Docker Desktop and ensure it's running:")
+        print("  https://www.docker.com/products/docker-desktop")
+        print()
+        sys.exit(1)
+
+    # Check if simavr Docker image exists
+    simavr_image = docker_runner.docker_image
+    image_exists = docker_runner.check_image_exists(simavr_image)
+
+    if not image_exists:
+        print(f"❌ Docker simavr image not found locally: {simavr_image}")
+        print()
+        print("Attempting to pull simavr image from Docker Hub...")
+        try:
+            docker_runner.pull_image()
+            print(f"✅ Successfully pulled {simavr_image}")
+            print()
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            print(f"❌ Failed to pull simavr image: {e}")
+            print()
+            print("Please build the image manually:")
+            print(f"  docker build -f ci/docker/Dockerfile.simavr -t {simavr_image} .")
+            print()
+            sys.exit(1)
+
+    # Get MCU type and frequency based on board
+    mcu_config = {
+        "uno": {"mcu": "atmega328p", "frequency": 16000000},
+        "attiny85": {"mcu": "attiny85", "frequency": 8000000},
+        "attiny88": {"mcu": "attiny88", "frequency": 8000000},
+        "nano_every": {"mcu": "atmega4809", "frequency": 16000000},
+    }
+    config = mcu_config.get(board, {"mcu": "atmega328p", "frequency": 16000000})
+
+    success_count = 0
+    failure_count = 0
+
+    # Test each example
+    for example in examples_to_test:
+        print(f"\n--- Testing {example} ---")
+
+        try:
+            # Build the example for the specified board
+            print(f"Building {example} for {board}...")
+            build_cmd = [
+                "uv",
+                "run",
+                "ci/ci-compile.py",
+                board,
+                "--examples",
+                example,
+            ]
+            build_proc = RunningProcess(
+                build_cmd,
+                timeout=300,
+                auto_run=True,
+            )
+
+            # Stream build output
+            with build_proc.line_iter(timeout=None) as it:
+                for line in it:
+                    print(line)
+
+            build_returncode = build_proc.wait()
+            if build_returncode != 0:
+                print(f"Build failed for {example} with exit code: {build_returncode}")
+                failure_count += 1
+                continue
+
+            print(f"Build successful for {example}")
+
+            # Find the compiled .elf file
+            build_dir = Path(".build")
+            elf_files = list(build_dir.rglob("*.elf"))
+            if not elf_files:
+                print(f"ELF file not found in {build_dir}")
+                failure_count += 1
+                continue
+
+            elf_path = elf_files[0]
+            print(f"Found ELF file: {elf_path}")
+
+            # Run in simavr using Docker
+            print(f"Running {example} in Docker simavr...")
+
+            # Set up output file
+            output_file = "simavr_output.txt"
+
+            # Run simavr in Docker
+            simavr_returncode = docker_runner.run(
+                elf_path=elf_path,
+                mcu=config["mcu"],
+                frequency=config["frequency"],
+                timeout=15,
+                output_file=output_file,
+            )
+
+            # Validate output for Test example
+            if example == "Test" and Path(output_file).exists():
+                output_content = Path(output_file).read_text(
+                    encoding="utf-8", errors="replace"
+                )
+
+                # Check for test completion
+                if (
+                    "Test Summary:" in output_content
+                    and "All tests PASSED!" in output_content
+                ):
+                    print(f"SUCCESS: {example} tests passed in Docker simavr")
+                    success_count += 1
+                else:
+                    print(f"FAILED: {example} tests did not pass in Docker simavr")
+                    failure_count += 1
+            elif simavr_returncode == 0:
+                print(f"SUCCESS: {example} ran successfully in Docker simavr")
+                success_count += 1
+            else:
+                print(
+                    f"FAILED: {example} failed in Docker simavr with exit code: {simavr_returncode}"
+                )
+                failure_count += 1
+
+        except KeyboardInterrupt:
+            _thread.interrupt_main()
+            raise
+        except Exception as e:
+            print(f"ERROR: {example} failed with exception: {e}")
+            failure_count += 1
+
+    # Summary
+    print(f"\n=== simavr {board.upper()} Test Summary ===")
+    print(f"Examples tested: {len(examples_to_test)}")
+    print(f"Successful: {success_count}")
+    print(f"Failed: {failure_count}")
+
+    if failure_count > 0:
+        print("Some tests failed. See output above for details.")
+        sys.exit(1)
+    else:
+        print("All simavr tests passed!")
+
+
 def main() -> None:
     try:
         # Record start time
@@ -523,10 +721,67 @@ def main() -> None:
             )
         )
 
-        # Handle QEMU testing
+        # Handle --run flag (unified emulation interface)
+        if args.run is not None:
+            if len(args.run) < 1:
+                print("Error: --run requires a platform/board (e.g., esp32s3, uno)")
+                sys.exit(1)
+
+            platform = args.run[0].lower()
+
+            # Look up backend from mapping table
+            backend = _RUN_PLATFORM_BACKENDS.get(platform)
+
+            if backend is None:
+                # Platform not found - show error with supported platforms
+                print(f"Error: Unknown platform '{platform}'")
+                print()
+                print("Supported platforms:")
+
+                # Group platforms by backend
+                qemu_platforms = [
+                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "qemu"
+                ]
+                simavr_boards = [
+                    p for p, b in _RUN_PLATFORM_BACKENDS.items() if b == "simavr"
+                ]
+
+                if qemu_platforms:
+                    print(f"  ESP32 (QEMU): {', '.join(sorted(qemu_platforms))}")
+                if simavr_boards:
+                    print(f"  AVR (simavr): {', '.join(sorted(simavr_boards))}")
+
+                sys.exit(1)
+
+            # Route to appropriate backend
+            if backend == "qemu":
+                print(f"=== QEMU Testing ({platform}) ===")
+                # Convert --run to --qemu format for backward compatibility
+                args.qemu = args.run
+                run_qemu_tests(args)
+                return
+            elif backend == "simavr":
+                print(f"=== simavr Testing ({platform}) ===")
+                # Convert --run to --simavr format for backward compatibility
+                args.simavr = args.run
+                run_simavr_tests(args)
+                return
+            else:
+                print(f"Error: Unknown backend '{backend}' for platform '{platform}'")
+                sys.exit(1)
+
+        # Handle QEMU testing (deprecated - use --run)
         if args.qemu is not None:
             print("=== QEMU Testing ===")
+            print("Note: --qemu is deprecated, use --run instead")
             run_qemu_tests(args)
+            return
+
+        # Handle simavr testing (deprecated - use --run)
+        if args.simavr is not None:
+            print("=== simavr Testing ===")
+            print("Note: --simavr is deprecated, use --run instead")
+            run_simavr_tests(args)
             return
 
         # Helper function to save all fingerprints with a given status
