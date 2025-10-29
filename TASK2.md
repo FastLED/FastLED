@@ -118,8 +118,7 @@ The FastLED project previously had **two separate Docker-related directories** (
 17. **.github/workflows/qemu_esp32dev_test.yml**
 18. **.github/workflows/qemu_esp32c3_test.yml**
 19. **.github/workflows/qemu_esp32s3_test.yml**
-20. **.github/workflows/qemu_esp32p4_test.yml**
-21. **.github/workflows/qemu_esp32dev_tobozo2_test.yml**
+20. **.github/workflows/qemu_esp32dev_tobozo2_test.yml**
 
 #### Documentation
 
