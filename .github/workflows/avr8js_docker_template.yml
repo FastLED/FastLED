@@ -195,6 +195,25 @@ jobs:
           echo "Mapped platform '$PLATFORM' to MCU '$MCU' @ ${FREQUENCY}Hz"
         shell: bash
 
+      - name: Build AVR8JS Docker image
+        working-directory: trusted
+        run: |
+          echo "=== Building AVR8JS Docker Image ==="
+          uv run python -c "
+          import sys
+          from ci.docker.avr8js_docker import DockerAVR8jsRunner
+
+          print('Checking Docker image availability...')
+          runner = DockerAVR8jsRunner()
+
+          if not runner.ensure_image_available():
+              print('❌ Failed to prepare Docker image')
+              sys.exit(1)
+
+          print('✅ Docker image ready')
+          "
+        shell: bash
+
       - name: Run ${{ inputs.platform_display }} in AVR8JS using Docker
         id: avr8js
         working-directory: trusted
