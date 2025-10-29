@@ -23,13 +23,18 @@ if [ ! -f ".cache/js-tools/node_modules/.bin/eslint.cmd" ]; then
 fi
 
 # Check if JS files need linting using fingerprint cache (from project root)
-echo -e "${BLUE}🔍 Checking if JavaScript files need linting...${NC}"
-cd "$PROJECT_ROOT"
-if uv run python ci/js_lint_cache.py check; then
-    echo -e "${BLUE}📋 JavaScript files changed - proceeding with linting${NC}"
+# Skip cache check if FASTLED_NO_FINGERPRINT is set
+if [ "${FASTLED_NO_FINGERPRINT:-0}" = "1" ]; then
+    echo -e "${BLUE}📋 Skipping cache check (--no-fingerprint flag set)${NC}"
 else
-    echo -e "${GREEN}⚡ No changes detected - skipping JavaScript linting${NC}"
-    exit 0
+    echo -e "${BLUE}🔍 Checking if JavaScript files need linting...${NC}"
+    cd "$PROJECT_ROOT"
+    if uv run python ci/js_lint_cache.py check; then
+        echo -e "${BLUE}📋 JavaScript files changed - proceeding with linting${NC}"
+    else
+        echo -e "${GREEN}⚡ No changes detected - skipping JavaScript linting${NC}"
+        exit 0
+    fi
 fi
 
 # Find JavaScript and TypeScript files (exclude node_modules)
@@ -141,5 +146,8 @@ fi
 echo -e "${GREEN}SUCCESS: JavaScript/TypeScript linting and type checking completed successfully${NC}"
 
 # Mark linting as successful in cache (from project root)
-cd "$PROJECT_ROOT"
-uv run python ci/js_lint_cache.py success
+# Skip if FASTLED_NO_FINGERPRINT is set (no cache check was performed)
+if [ "${FASTLED_NO_FINGERPRINT:-0}" != "1" ]; then
+    cd "$PROJECT_ROOT"
+    uv run python ci/js_lint_cache.py success
+fi

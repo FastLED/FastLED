@@ -95,7 +95,7 @@ This project uses directory-specific agent guidelines. See:
   - Consider enabling BLE001 with `--select BLE001` for automatic detection
 
 ### JavaScript Code Standards
-- **After modifying any JavaScript files**: Always run `bash lint --js` to ensure proper formatting
+- **After modifying any JavaScript files**: Always run `bash lint --js --no-fingerprint` to ensure proper formatting
 
 ### Code Review Rule
 **🚨 ALL AGENTS: After making code changes, run `/code_review` to validate changes. This ensures compliance with project standards.**

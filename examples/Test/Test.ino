@@ -13,13 +13,10 @@
 
 void setup() {
     Serial.begin(115200);  // Fast baud for avr8js
+    Serial.println("SETUP COMPLETE");
 
-    Serial.print("FastLED Runtime Test Suite - begin setup\n");
-    Serial.print("===========================\n");
+
     delay(100);
-
-
-
 }
 
 void loop() {

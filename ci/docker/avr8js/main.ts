@@ -56,30 +56,53 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
   const startTime = Date.now();
   const timeoutMs = (options.timeout || 10) * 1000;
 
+  console.log("[DEBUG] Setting up PORTB listener...");
   // Hook to PORTB register for LED output
   runner.portB.addListener(value => {
+    const time = formatTime(runner.cpu.cycles / runner.MHZ);
+    console.log(`[DEBUG][${time}] PORTB callback invoked: 0x${value.toString(16).padStart(2, '0')}`);
     if (options.verbose) {
-      const time = formatTime(runner.cpu.cycles / runner.MHZ);
       console.log(`[${time}] PORTB: 0x${value.toString(16).padStart(2, '0')}`);
     }
   });
 
+  console.log("[DEBUG] Setting up USART onByteTransmit callback...");
+  let usartCallbackCount = 0;
   // Serial port output support
   runner.usart.onByteTransmit = (value: number) => {
-    const char = String.fromCharCode(value);
-    output += char;
-    process.stdout.write(char);
-    lastOutputTime = Date.now();
+    try {
+      usartCallbackCount++;
+      const char = String.fromCharCode(value);
+      const time = formatTime(runner.cpu.cycles / runner.MHZ);
+      const wallTime = ((Date.now() - startTime) / 1000).toFixed(3);
+      console.log(`[DEBUG][#${usartCallbackCount}, sim=${time}, wall=${wallTime}s] USART byte: 0x${value.toString(16).padStart(2, '0')} '${char.replace(/\r/g, '\\r').replace(/\n/g, '\\n')}'`);
+      output += char;
+      // Temporarily comment out to test
+      // process.stdout.write(char);
+      lastOutputTime = Date.now();
+    } catch (err) {
+      console.error(`[DEBUG] USART callback error: ${err}`);
+      throw err;
+    }
   };
 
   // Execute with periodic checks
+  console.log("[DEBUG] Starting CPU execution...");
+  let callbackCount = 0;
   try {
     await runner.execute(cpu => {
+      callbackCount++;
+      if (callbackCount % 1000 === 0) {
+        const time = formatTime(cpu.cycles / runner.MHZ);
+        console.log(`[DEBUG][${time}] Execute callback #${callbackCount}, cycles=${cpu.cycles}`);
+      }
+
       const elapsed = Date.now() - startTime;
       if (elapsed > timeoutMs) {
+        const time = formatTime(cpu.cycles / runner.MHZ);
+        console.error(`\n[DEBUG][${time}] Timeout reached after ${options.timeout}s`);
         if (options.verbose) {
-          const time = formatTime(cpu.cycles / runner.MHZ);
-          console.error(`\n[${time}] Timeout reached after ${options.timeout}s`);
+          console.error(`[${time}] Timeout reached after ${options.timeout}s`);
         }
         runner.stop();
       }
@@ -87,14 +110,17 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
       // Also stop if no output for 2 seconds (assuming program finished)
       const silentTime = Date.now() - lastOutputTime;
       if (output.length > 0 && silentTime > 2000) {
+        const time = formatTime(cpu.cycles / runner.MHZ);
+        console.error(`\n[DEBUG][${time}] No output for 2s, assuming completion`);
         if (options.verbose) {
-          const time = formatTime(cpu.cycles / runner.MHZ);
-          console.error(`\n[${time}] No output for 2s, assuming completion`);
+          console.error(`[${time}] No output for 2s, assuming completion`);
         }
         runner.stop();
       }
     });
+    console.log(`[DEBUG] Execution completed. Total callbacks: ${callbackCount}`);
   } catch (err) {
+    console.error(`\n[DEBUG] Execution error: ${err}`);
     console.error(`\nExecution error: ${err}`);
     return 1;
   }
@@ -102,11 +128,28 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
   const executionTime = (Date.now() - startTime) / 1000;
   const simTime = runner.cpu.cycles / runner.MHZ;
 
+  console.log(`\n[DEBUG] --- Execution Complete ---`);
+  console.log(`[DEBUG] Wall time: ${executionTime.toFixed(3)}s`);
+  console.log(`[DEBUG] Simulated time: ${formatTime(simTime)}`);
+  console.log(`[DEBUG] CPU cycles: ${runner.cpu.cycles}`);
+  console.log(`[DEBUG] Output length: ${output.length} bytes`);
+  console.log(`[DEBUG] Output content: "${output}"`);
+  console.log(`[DEBUG] Output (hex): ${Array.from(output).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ')}`);
+
   if (options.verbose) {
     console.log(`\n--- Execution Complete ---`);
     console.log(`Wall time: ${executionTime.toFixed(3)}s`);
     console.log(`Simulated time: ${formatTime(simTime)}`);
     console.log(`CPU cycles: ${runner.cpu.cycles}`);
+  }
+
+  // Check for required test output
+  if (!output.includes("Test loop")) {
+    console.error('\n[DEBUG] ERROR: "Test loop" not found in output');
+    console.error('[DEBUG] Output was:', JSON.stringify(output));
+    console.error('\nERROR: "Test loop" not found in output');
+    console.error('This likely indicates the test did not execute properly');
+    return 1;
   }
 
   return 0;

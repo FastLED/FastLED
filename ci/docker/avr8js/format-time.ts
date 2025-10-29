@@ -1,7 +1,7 @@
 function zeroPad(value: number, length: number) {
     let sval = value.toString();
     while (sval.length < length) {
-      sval = '0' + sval;
+      sval = `0${sval}`;
     }
     return sval;
   }

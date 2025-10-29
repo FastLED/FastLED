@@ -4,14 +4,16 @@ set -e
 
 # Parse command line arguments
 JS_ONLY=false
+NO_FINGERPRINT=false
 while [[ $# -gt 0 ]]; do
     case $1 in
         --help|-h)
             echo "Usage: bash lint [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --help   Show this help message"
-            echo "  --js     Run JavaScript linting only"
+            echo "  --help            Show this help message"
+            echo "  --js              Run JavaScript linting only"
+            echo "  --no-fingerprint  Force re-run all linters (skip timestamp checks)"
             echo ""
             echo "This script runs comprehensive linting for Python, C++, and JavaScript."
             echo "JavaScript linting: FAST ONLY (skips if not available)."
@@ -19,6 +21,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --js)
             JS_ONLY=true
+            shift
+            ;;
+        --no-fingerprint)
+            NO_FINGERPRINT=true
             shift
             ;;
         *)
@@ -68,8 +74,13 @@ else
     # Run pyright if:
     # - No marker file exists (first time)
     # - Meson timestamp is newer than marker (Python code changed)
-    if [ ! -f "$PYTHON_LINT_MARKER" ] || [ "$PYTHON_LINT_TIMESTAMP" -nt "$PYTHON_LINT_MARKER" ] 2>/dev/null; then
-        echo "Running pyright (Python files changed)"
+    # - --no-fingerprint flag is set
+    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$PYTHON_LINT_MARKER" ] || [ "$PYTHON_LINT_TIMESTAMP" -nt "$PYTHON_LINT_MARKER" ] 2>/dev/null; then
+        if [ "$NO_FINGERPRINT" = true ]; then
+            echo "Running pyright (--no-fingerprint flag set)"
+        else
+            echo "Running pyright (Python files changed)"
+        fi
         if uv run pyright; then
             # Mark pyright as successful
             touch "$PYTHON_LINT_MARKER"
@@ -96,8 +107,12 @@ else
     CPP_LINT_TIMESTAMP=".build/meson/cpp_lint.timestamp"
     CPP_LINT_MARKER=".cache/cpp_lint.marker"
 
-    if [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null; then
-        echo "Source or example files changed - running C++ linting"
+    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null; then
+        if [ "$NO_FINGERPRINT" = true ]; then
+            echo "Running C++ linting (--no-fingerprint flag set)"
+        else
+            echo "Source or example files changed - running C++ linting"
+        fi
 
         folders=(
             #"src/lib8tion"
@@ -167,60 +182,51 @@ GREEN='\033[0;32m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Check if JavaScript linting needs to run using Meson's dependency tracking
-# Ensure Meson has generated the timestamp (tracks src/platforms/wasm/compiler/**)
-meson compile -C .build/meson js_lint_tracker > /dev/null 2>&1 || true
+# Note: JavaScript linting uses ci/lint-js-fast which handles its own cache checking
+# Monitors: src/platforms/wasm/compiler/** + ci/docker/avr8js/**
 
-JS_LINT_TIMESTAMP=".build/meson/js_lint.timestamp"
-JS_LINT_MARKER=".cache/js_lint.marker"
+# Export environment variable for lint-js-fast if --no-fingerprint is set
+if [ "$NO_FINGERPRINT" = true ]; then
+    export FASTLED_NO_FINGERPRINT=1
+fi
 
-if [ ! -f "$JS_LINT_MARKER" ] || [ "$JS_LINT_TIMESTAMP" -nt "$JS_LINT_MARKER" ] 2>/dev/null; then
-    echo "Running JavaScript linting (WASM compiler files changed)"
+# Check if fast linting is available
+ESLINT_EXE=""
+if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
+    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
+else
+    ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
+fi
 
-    # Check if fast linting is available
-    ESLINT_EXE=""
-    if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
-        ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint.cmd"
-    else
-        ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
+if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
+    echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
+    # Note: lint-js-fast handles its own cache checking and success/failure marking
+    if ! bash ci/lint-js-fast; then
+        echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
+        exit 1
     fi
-
-    if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
-        echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
-        if bash ci/lint-js-fast; then
-            mkdir -p .cache
-            touch "$JS_LINT_MARKER"
-        else
-            echo -e "${RED}❌ Fast JavaScript linting failed${NC}"
-            exit 1
-        fi
-    else
-        echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
-        # Auto-setup JavaScript linting
-        if uv run ci/setup-js-linting-fast.py; then
-            echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
-            # Now run the linting
-            if [ -f "ci/lint-js-fast" ]; then
-                echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
-                if bash ci/lint-js-fast; then
-                    mkdir -p .cache
-                    touch "$JS_LINT_MARKER"
-                else
-                    echo -e "${RED}❌ JavaScript linting failed${NC}"
-                    exit 1
-                fi
-            else
-                echo -e "${RED}❌ Failed to create lint script${NC}"
+else
+    echo -e "${BLUE}⚠️  Fast JavaScript linting not available. Setting up now...${NC}"
+    # Auto-setup JavaScript linting
+    if uv run ci/setup-js-linting-fast.py; then
+        echo -e "${GREEN}✅ JavaScript linting setup complete${NC}"
+        # Now run the linting
+        if [ -f "ci/lint-js-fast" ]; then
+            echo -e "${BLUE}🚀 Running JavaScript linting...${NC}"
+            # Note: lint-js-fast handles its own cache checking and success/failure marking
+            if ! bash ci/lint-js-fast; then
+                echo -e "${RED}❌ JavaScript linting failed${NC}"
                 exit 1
             fi
         else
-            echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
-            echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
-            # Don't exit with error, just skip JS linting
+            echo -e "${RED}❌ Failed to create lint script${NC}"
+            exit 1
         fi
+    else
+        echo -e "${RED}❌ Failed to setup JavaScript linting${NC}"
+        echo -e "${BLUE}💡 You can manually run: uv run ci/setup-js-linting-fast.py${NC}"
+        # Don't exit with error, just skip JS linting
     fi
-else
-    echo -e "${BLUE}✅ No changes detected - skipping JavaScript linting${NC}"
 fi
 
 echo ""
