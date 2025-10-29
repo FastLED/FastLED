@@ -132,12 +132,6 @@ jobs:
           ./test --clang --no-parallel --no-unity --examples Blink --no-pch --verbose
         shell: bash
 
-      - name: Run Unit Test Json
-        working-directory: trusted
-        run: |
-          ./test --clang --no-parallel --no-unity --unit --no-pch --verbose Json
-        shell: bash
-
       - name: Run All Unit Tests
         working-directory: trusted
         run: |
