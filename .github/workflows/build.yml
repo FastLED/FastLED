@@ -44,12 +44,12 @@ jobs:
   build_yun:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "yun"
+      args: "atmega32u4_leonardo"
 
   build_digix:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "digix"
+      args: "sam3x8e_due"
 
   build_teensy30:
     uses: ./.github/workflows/build_template.yml
