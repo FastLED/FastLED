@@ -49,7 +49,11 @@ class RectangularDrawBuffer {
   public:
 
 
-    RectangularDrawBuffer() {
+    RectangularDrawBuffer()
+        : mAllLedsBufferUint8Size(0)
+        , mDrawListChangedThisFrame(false)
+        , mQueueState(IDLE)
+    {
         mPinToLedSegment.setMaxSize(50);
     }
     ~RectangularDrawBuffer() = default;

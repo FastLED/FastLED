@@ -138,26 +138,4 @@ else
     test(test_name, test_exe, workdir: meson.project_source_root())
   endforeach
 
-  # ============================================================================
-  # Parallel SPI ISR Tests
-  # ============================================================================
-  # Parallel SPI ISR test using thread-based automatic ISR execution.
-  # Uses the same libfastled.a as all other tests. STUB_PLATFORM always compiles
-  # real ISR implementations via conditional compilation guards in the source files.
-
-
-  test_parallel_spi_isr_exe = executable('test_parallel_spi_isr',
-    ['test_parallel_spi_isr.cpp', test_pch[0]],
-    include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: unit_test_compile_args + [
-      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Winvalid-pch',
-    ],
-    link_args: unit_test_link_args,
-    link_with: [fastled_lib, doctest_main],
-    install: false
-  )
-
-  test('test_parallel_spi_isr', test_parallel_spi_isr_exe, workdir: meson.project_source_root())
-
 endif  # unity_enabled
