@@ -94,40 +94,91 @@ endforeach
 unity_enabled = get_option('unity') == 'on'
 
 if unity_enabled
-  # UNITY MODE: Combine all tests into single all_tests executable
+  # UNITY MODE: Combine tests into categorized test executables
 
-  # Collect all test source files
-  all_test_sources = [test_pch[0]]  # Start with PCH
+  # Categorize tests by functionality
+  fl_tests = []         # fl/ directory tests (stdlib-like utilities)
+  fx_tests = []         # fx/ directory tests (effects framework)
+  noise_tests = []      # noise/ directory tests
+  platform_tests = []   # Platform-specific tests (SPI, ISR, ESP32, etc.)
+  core_tests = []       # Core FastLED and general tests
+
+  # Platform test patterns
+  platform_patterns = [
+    'spi', 'isr', 'esp32', 'riscv', 'parallel', 'quad', 'single',
+    'clockless', 'dual', 'stub_led'
+  ]
 
   foreach test_name : test_names
-    # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
+    # Get test file path
     test_file = test_file_paths.get(test_name, test_name + '.cpp')
-    all_test_sources += files(test_file)
+
+    # Categorize based on prefix or file path
+    if test_name.startswith('fl_')
+      fl_tests += files(test_file)
+    elif test_name.startswith('fx_') or test_name.contains('fx')
+      fx_tests += files(test_file)
+    elif test_file.startswith('noise/')
+      noise_tests += files(test_file)
+    else
+      # Check if it's a platform test
+      is_platform = false
+      foreach pattern : platform_patterns
+        if test_name.contains(pattern)
+          is_platform = true
+          break
+        endif
+      endforeach
+
+      if is_platform
+        platform_tests += files(test_file)
+      else
+        core_tests += files(test_file)
+      endif
+    endif
   endforeach
 
-  # Add parallel SPI ISR test
-  all_test_sources += files('test_parallel_spi_isr.cpp')
+  # Add parallel SPI ISR test to platform tests
+  platform_tests += files('test_parallel_spi_isr.cpp')
 
-  # Build single unified test executable
-  # NOTE: Explicitly disable Meson's unity builds for this target to avoid
-  # double unity builds (we're already combining all test files manually)
-  all_tests_exe = executable('all_tests',
-    all_test_sources,
-    include_directories: [src_dir, tests_dir, stub_dir],
-    cpp_args: unit_test_compile_args + [
-      '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Winvalid-pch',
-    ],
-    link_args: unit_test_link_args,
-    link_with: [fastled_lib, doctest_main],
-    override_options: ['unity=off'],
-    install: false
-  )
+  # Build test executables for each category
+  test_categories = {
+    'fl_tests': fl_tests,
+    'fx_tests': fx_tests,
+    'noise_tests': noise_tests,
+    'platform_tests': platform_tests,
+    'core_tests': core_tests,
+  }
 
-  # Register single test target
-  test('all_tests', all_tests_exe, workdir: meson.project_source_root())
+  foreach category_name, test_sources : test_categories
+    if test_sources.length() > 0
+      # Add PCH to sources
+      category_sources = [test_pch[0]] + test_sources
 
-  message('Unity test build enabled: all tests combined into all_tests executable')
+      # Build test executable
+      # NOTE: Explicitly disable Meson's unity builds for this target to avoid
+      # double unity builds (we're already combining all test files manually)
+      test_exe = executable(category_name,
+        category_sources,
+        include_directories: [src_dir, tests_dir, stub_dir],
+        cpp_args: unit_test_compile_args + [
+          '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
+          '-Winvalid-pch',
+        ],
+        link_args: unit_test_link_args,
+        link_with: [fastled_lib, doctest_main],
+        override_options: ['unity=off'],
+        install: false
+      )
+
+      # Register test target
+      test(category_name, test_exe, workdir: meson.project_source_root())
+
+      message('Unity test category: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
+    endif
+  endforeach
+
+  message('Unity test build enabled: tests organized into categories')
 
 else
   # NORMAL MODE: Build individual test executables (current behavior)
