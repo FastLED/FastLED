@@ -137,7 +137,7 @@ enum ESPIChipsets {
 	APA102HD, ///< APA102 LED chipset with 5-bit gamma correction
 	HD107,  /// Same as APA102, but in turbo 40-mhz mode.
 	HD107HD,  /// Same as APA102HD, but in turbo 40-mhz mode.
-	HD108,  /// 16bit HD108 variant of HD107
+	HD108,  /// 16bit variant of HD107, always gamma corrected.
 
 };
 
