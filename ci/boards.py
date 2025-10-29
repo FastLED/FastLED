@@ -606,6 +606,7 @@ NATIVE = Board(
 
 SAM3X8E_DUE = Board(
     board_name="sam3x8e_due",
+    real_board_name="due",
     platform="atmelsam",
 )
 
