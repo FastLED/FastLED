@@ -105,6 +105,7 @@ inline long lround(double value) { return lround_impl_double(value); }
 // Floating-point modulo (remainder)
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }
 inline double fmod(double x, double y) { return fmod_impl_double(x, y); }
+inline float fmod(float x, float y) { return fmod_impl_float(x, y); }
 
 // Inverse tangent functions (atan2)
 inline float atan2f(float y, float x) { return atan2_impl_float(y, x); }
