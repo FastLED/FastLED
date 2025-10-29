@@ -1,0 +1,38 @@
+name: atmega32u4 AVR8JS Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/avr8js_atmega32u4_test.yml'
+      - '.github/workflows/avr8js_docker_template.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/avr8js_atmega32u4_test.yml'
+      - '.github/workflows/avr8js_docker_template.yml'
+
+jobs:
+  atmega32u4_avr8js_test:
+    uses: ./.github/workflows/avr8js_docker_template.yml
+    with:
+      platform: atmega32u4_leonardo
+      platform_display: ATmega32U4
+      sketch: Test

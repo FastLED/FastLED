@@ -1,0 +1,38 @@
+name: uno AVR8JS Test
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/avr8js_uno_test.yml'
+      - '.github/workflows/avr8js_docker_template.yml'
+  pull_request:
+    branches: [master]
+    paths:
+      - 'src/**/*.cpp'
+      - 'src/**/*.h'
+      - 'examples/**/*.ino'
+      - 'examples/**/*.cpp'
+      - 'examples/**/*.h'
+      - 'platformio.ini'
+      - 'CMakeLists.txt'
+      - 'library.json'
+      - '.github/workflows/avr8js_uno_test.yml'
+      - '.github/workflows/avr8js_docker_template.yml'
+
+jobs:
+  uno_avr8js_test:
+    uses: ./.github/workflows/avr8js_docker_template.yml
+    with:
+      platform: uno
+      platform_display: Arduino Uno
+      sketch: Test
