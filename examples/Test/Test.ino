@@ -85,10 +85,11 @@ bool test_math8_avg() {
 
 bool test_math8_blend() {
     // Test blend8 (linear interpolation)
-    ASSERT_EQ(blend8(0, 255, 128), 127);    // 50% blend
+    // Note: amountOfB=128 is 128/255 = 50.2%, not exactly 50%
+    ASSERT_EQ(blend8(0, 255, 128), 128);    // ~50% blend (128/255 = 50.2%)
     ASSERT_EQ(blend8(0, 255, 0), 0);        // 0% blend (all first value)
     ASSERT_EQ(blend8(0, 255, 255), 255);    // 100% blend (all second value)
-    ASSERT_EQ(blend8(100, 200, 128), 150);  // 50% blend
+    ASSERT_EQ(blend8(100, 200, 128), 150);  // ~50% blend
 
     g_passed_tests++;
     return true;
