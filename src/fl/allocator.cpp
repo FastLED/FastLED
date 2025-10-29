@@ -13,6 +13,20 @@
 
 namespace fl {
 
+// Explicit instantiations for commonly used allocator types
+// This ensures the constexpr static members are defined for these types
+template struct allocator_traits<allocator<int>>;
+template struct allocator_traits<allocator_realloc<int>>;
+template struct allocator_traits<allocator_psram<int>>;
+template struct allocator_traits<allocator_slab<int>>;
+
+// Define constexpr static members for allocator_traits (C++11 requires this for ODR-used variables)
+template <typename Allocator>
+constexpr bool allocator_traits<Allocator>::has_reallocate_v;
+
+template <typename Allocator>
+constexpr bool allocator_traits<Allocator>::has_allocate_at_least_v;
+
 namespace {
 
 #ifdef ESP32

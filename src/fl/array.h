@@ -78,6 +78,8 @@ template <typename T, fl::size N> class array {
 
     const_iterator end() const noexcept { return data_ + N; }
 
+    const_iterator cend() const noexcept { return data_ + N; }
+
     // Capacity
     bool empty() const noexcept { return N == 0; }
 
@@ -114,6 +116,7 @@ bool operator==(const array<T, N> &lhs, const array<T, N> &rhs) {
             return false;
         }
     }
+    return true;
 }
 
 template <typename T, fl::size N>

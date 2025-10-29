@@ -35,8 +35,8 @@ struct integral_limits_impl<T, true> {
     static constexpr T compute_max() {
         // Max is all bits set except the sign bit
         // This equals: (1 << (bits-1)) - 1
-        T val = static_cast<T>(1) << (sizeof(T) * 8 - 1);
-        return static_cast<T>(~val);
+        // C++11 constexpr requires single return statement
+        return static_cast<T>(~(static_cast<T>(1) << (sizeof(T) * 8 - 1)));
     }
 
     static constexpr T compute_min() {

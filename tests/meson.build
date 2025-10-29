@@ -37,115 +37,36 @@ doctest_main = static_library('doctest_main',
   install: false
 )
 
-# List of all test files (excluding test_example_compilation which has its own main)
-test_names = [
-  'test_json',
-  'test_json_roundtrip',
-  'test_active_strip_data_json',
-  'test_algorithm',
-  'test_allocator',
-  'test_allocator_inlined',
-  'test_allocator_inlined_slab',
-  'test_allocator_slab',
-  'test_async',
-  'test_atomic',
-  'test_await',
-  'test_backbeat_detector',
-  'test_bitset',
-  'test_bytestream',
-  'test_circular_buffer',
-  'test_codec',
-  'test_corkscrew',
-  'test_dbg',
-  'test_deque',
-  'test_downscale',
-  'test_dual_spi',
-  'test_easing',
-  'test_fastled',
-  'test_fft',
-  'test_filesystem',
-  'test_fixed_set',
-  'test_fl_string_comprehensive',
-  'test_frame',
-  'test_frame_tracker',
-  'test_function',
-  'test_fx',
-  'test_fx2d_blend',
-  'test_fx_engine',
-  'test_fx_time',
-  'test_gif',
-  'test_grid',
-  'test_hashmap',
-  'test_hashmap_lru',
-  'test_hsv16',
-  'test_intmap',
-  'test_invoke',
-  'test_isr_api',
-  'test_istream',
-  'test_jpeg',
-  'test_lcd50',
-  'test_limits',
-  'test_line_simplification',
-  'test_list',
-  'test_lut',
-  'test_malloc_hooks',
-  'test_map',
-  'test_map_range',
-  'test_mp3_decoder',
-  'test_mpeg1',
-  'test_mutex',
-  'test_noise_range',
-  'test_noise_ring',
-  'test_noise_cylinder',
-  'test_ostream',
-  'test_pixelview',
-  'test_point',
-  'test_priority_queue',
-  'test_printf',
-  'test_promise',
-  'test_quad_spi',
-  # Note: test_parallel_spi_isr_quad built separately below
-  'test_queue',
-  'test_raster',
-  'test_rbtree',
-  'test_rectangular_buffer',
-  'test_screenmap',
-  'test_screenmap_serialization',
-  'test_set_inlined',
-  'test_shared_ptr',
-  'test_single_spi',
-  'test_spi_block_8',
-  'test_sketch_runner',
-  'test_slab_multi_alloc',
-  'test_slice',
-  'test_span_conversions',
-  'test_spi_bus_manager',
-  'test_splat',
-  'test_str',
-  'test_strip_id_map',
-  'test_strstream',
-  'test_task',
-  'test_thread_local',
-  'test_tile2x2',
-  'test_time',
-  'test_transform',
-  'test_transition_ramp',
-  'test_traverse_grid',
-  'test_tuple',
-  'test_type_traits',
-  'test_ui',
-  'test_ui_help',
-  'test_ui_title_bug',
-  'test_unordered_set',
-  'test_variant',
-  'test_vector',
-  'test_video',
-  'test_videofx_wrapper',
-  'test_weak_ptr',
-  'test_xymap',
-  'test_xypath',
-  'test_esp32_riscv_interrupts',
-]
+# Automatically discover test files using rglob from tests/ directory
+# Find all test_*.cpp files recursively, excluding special files
+test_cpp_files = run_command('python', '-c', '''
+import sys
+from pathlib import Path
+tests_dir = Path(sys.argv[1])
+# Exclude special files that have their own build rules or aren't standard tests
+excluded = {"doctest_main.cpp", }
+for f in sorted(tests_dir.rglob("test_*.cpp")):
+    if f.name not in excluded:
+        print(f.relative_to(tests_dir).as_posix())
+''', meson.current_source_dir(), check: true).stdout().strip().split('\n')
+
+# Build test_names list and file path mapping for subdirectories
+test_names = []
+test_file_paths = {}
+
+foreach test_file : test_cpp_files
+  if test_file != ''
+    # Extract test name from file path
+    # For noise/test_noise_X.cpp -> test_noise_X (not noise_test_noise_X)
+    test_name = test_file.split('/')[-1].replace('.cpp', '')
+    test_names += test_name
+
+    # Store mapping for files in subdirectories
+    if test_file.contains('/')
+      test_file_paths += {test_name: test_file}
+    endif
+  endif
+endforeach
 
 # Check if unity builds are enabled
 unity_enabled = get_option('unity') == 'on'
@@ -157,14 +78,8 @@ if unity_enabled
   all_test_sources = [test_pch[0]]  # Start with PCH
 
   foreach test_name : test_names
-    # Map test names to file paths
-    test_file_map = {
-      'test_noise_range': 'noise/test_noise_range.cpp',
-      'test_noise_ring': 'noise/test_noise_ring.cpp',
-      'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
-    }
-
-    test_file = test_file_map.get(test_name, test_name + '.cpp')
+    # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
+    test_file = test_file_paths.get(test_name, test_name + '.cpp')
     all_test_sources += files(test_file)
   endforeach
 
@@ -197,15 +112,8 @@ else
 
   # Build each test executable with shared PCH
   foreach test_name : test_names
-    # Map test names to file paths (handle subdirectories)
-    test_file_map = {
-      'test_noise_range': 'noise/test_noise_range.cpp',
-      'test_noise_ring': 'noise/test_noise_ring.cpp',
-      'test_noise_cylinder': 'noise/test_noise_cylinder.cpp',
-    }
-
-    # Get the actual test file path
-    test_file = test_file_map.get(test_name, test_name + '.cpp')
+    # Get test file path from dynamic map (for subdirectories) or default to test_name.cpp
+    test_file = test_file_paths.get(test_name, test_name + '.cpp')
 
     # Some tests need additional source files for ESP32 parallel SPI host simulation
     test_sources = [test_file, test_pch[0]]
