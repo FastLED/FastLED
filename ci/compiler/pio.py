@@ -997,7 +997,10 @@ def _generate_main_cpp(ino_files: List[str]) -> str:
     include_lines = "\n".join(includes)
 
     int_main = """
+extern "C" void init(void) __attribute__((weak));
+
 __attribute__((weak)) int main() {{
+    init();  // Initialize Arduino timers and enable interrupts (calls sei())
     setup();
     while (true) {{
         loop();
