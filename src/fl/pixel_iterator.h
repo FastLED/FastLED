@@ -5,6 +5,7 @@
 
 #include "fl/stdint.h"
 #include "fl/string.h"
+#include "fl/deprecated.h"
 #include "rgbw.h"
 #include "crgb.h"
 
@@ -63,11 +64,16 @@ struct PixelControllerVtable {
     return pc->has(n);
   }
 
-  // function for getHdScale
+  // function for loadRGBScaleAndBrightness
   #if FASTLED_HD_COLOR_MIXING
-  static void getHdScale(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+  static void loadRGBScaleAndBrightness(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
     PixelControllerT* pc = static_cast<PixelControllerT*>(pixel_controller);
-    pc->getHdScale(c0, c1, c2, brightness);
+    pc->loadRGBScaleAndBrightness(c0, c1, c2, brightness);
+  }
+
+  // Deprecated: for backwards compatibility
+  static void getHdScale(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+    loadRGBScaleAndBrightness(pixel_controller, c0, c1, c2, brightness);
   }
   #endif
 };
@@ -83,6 +89,7 @@ typedef void (*advanceDataFunction)(void* pixel_controller);
 typedef int (*sizeFunction)(void* pixel_controller);
 typedef bool (*hasFunction)(void* pixel_controller, int n);
 typedef uint8_t (*globalBrightness)(void* pixel_controller);
+typedef void (*loadRGBScaleAndBrightnessFunction)(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness);
 typedef void (*getHdScaleFunction)(void* pixel_controller, uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness);
 
 
@@ -133,6 +140,7 @@ class PixelIterator {
       mSize = &Vtable::size;
       mHas = &Vtable::has;
       #if FASTLED_HD_COLOR_MIXING
+      mLoadRGBScaleAndBrightness = &Vtable::loadRGBScaleAndBrightness;
       mGetHdScale = &Vtable::getHdScale;
       #endif
     }
@@ -160,8 +168,13 @@ class PixelIterator {
     Rgbw get_rgbw() const { return mRgbw; }
 
     #if FASTLED_HD_COLOR_MIXING
+    void loadRGBScaleAndBrightness(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+      mLoadRGBScaleAndBrightness(mPixelController, c0, c1, c2, brightness);
+    }
+
+    FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead")
     void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
-      mGetHdScale(mPixelController, c0, c1, c2, brightness);
+      loadRGBScaleAndBrightness(c0, c1, c2, brightness);
     }
     #endif
 
@@ -180,6 +193,7 @@ class PixelIterator {
     sizeFunction mSize = nullptr;
     hasFunction mHas = nullptr;
     #if FASTLED_HD_COLOR_MIXING
+    loadRGBScaleAndBrightnessFunction mLoadRGBScaleAndBrightness = nullptr;
     getHdScaleFunction mGetHdScale = nullptr;
     #endif
 };

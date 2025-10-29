@@ -670,7 +670,7 @@ private:
 		    fl::u8* out_s0, fl::u8* out_s1, fl::u8* out_s2, fl::u8* out_brightness) {
 #if FASTLED_HD_COLOR_MIXING
 		fl::u8 brightness;
-		pixels.getHdScale(out_s0, out_s1, out_s2, &brightness);
+		pixels.loadRGBScaleAndBrightness(out_s0, out_s1, out_s2, &brightness);
 		struct Math {
 			static fl::u16 map(fl::u16 x, fl::u16 in_min, fl::u16 in_max, fl::u16 out_min, fl::u16 out_max) {
 				const fl::u16 run = in_max - in_min;

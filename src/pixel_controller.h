@@ -21,6 +21,7 @@
 #include "pixel_iterator.h"
 #include "crgb.h"
 #include "fl/compiler_control.h"
+#include "fl/deprecated.h"
 
 
 FL_DISABLE_WARNING_PUSH
@@ -477,13 +478,22 @@ struct PixelController {
 
     #if FASTLED_HD_COLOR_MIXING
     template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t getScaleFullBrightness(PixelController & pc) { return pc.mColorAdjustment.color.raw[RO(SLOT)]; }
-    // Gets the color corection and also the brightness as seperate values.
-    // This is needed for the higher precision chipsets like the APA102.
-    FASTLED_FORCE_INLINE void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+
+    /// Gets the color correction and also the brightness as separate values.
+    /// This is needed for the higher precision chipsets like the APA102.
+    /// The RGB values returned are color-corrected but NOT scaled by brightness.
+    /// Brightness is returned separately to preserve color fidelity for high-definition color mixing.
+    FASTLED_FORCE_INLINE void loadRGBScaleAndBrightness(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
         *c0 = getScaleFullBrightness<0>(*this);
         *c1 = getScaleFullBrightness<1>(*this);
         *c2 = getScaleFullBrightness<2>(*this);
         *brightness = mColorAdjustment.brightness;
+    }
+
+    /// @deprecated Use loadRGBScaleAndBrightness() instead - name better reflects that RGB scale and brightness are separate
+    FL_DEPRECATED("Use loadRGBScaleAndBrightness() instead")
+    FASTLED_FORCE_INLINE void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
+        loadRGBScaleAndBrightness(c0, c1, c2, brightness);
     }
     #endif
 
