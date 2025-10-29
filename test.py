@@ -612,7 +612,7 @@ def main() -> None:
         src_code_change = (
             True
             if prev_fingerprint is None
-            else fingerprint_data.hash != prev_fingerprint.hash
+            else not prev_fingerprint.should_skip(fingerprint_data)
         )
 
         # Set up C++ test-specific fingerprint caching
