@@ -58,6 +58,20 @@ uv run python ci/build_docker_image_pio.py --platform uno --no-cache
 
 ### 2. Run Compilation in Container
 
+**Recommended:** Use the `bash compile` command with `--docker` flag for automatic setup:
+
+```bash
+# Simple compilation with automatic Docker detection
+bash compile esp32dev Blink --docker
+
+# Compile with output directory (automatically mounted as volume)
+bash compile esp32dev Blink --docker -o ./build_output
+
+# Artifacts appear immediately in ./build_output on host
+```
+
+**Advanced:** Manual Docker commands for custom workflows:
+
 The Docker image contains a snapshot of FastLED from GitHub. To compile your local code, rsync your repo and run the same `compile` command:
 
 ```bash
@@ -90,14 +104,38 @@ docker run --rm -it \
 
 ## Volume Mounts
 
-### Recommended Pattern
+### Automatic Output Directory Mounting (with -o flag)
+
+**NEW:** When using the `-o` or `--out` flag with `bash compile`, the output directory is automatically mounted as a volume:
+
+```bash
+# Automatically mounts ./build_output as /fastled/output in container
+bash compile esp32dev Blink --docker -o ./build_output
+
+# Artifacts appear directly in ./build_output on host
+# - firmware.bin
+# - firmware.elf
+# - firmware.factory.bin (ESP32 merged binary)
+```
+
+**How it works:**
+1. Output directory is validated (must be within project root or current directory)
+2. Directory is created if it doesn't exist
+3. Mounted as `/fastled/output:rw` in container
+4. Build artifacts automatically copied after successful compilation
+5. No need for post-compilation `docker cp`
+
+**Security:** Output directory must be relative to current directory or a subdirectory. Absolute paths outside the project are rejected.
+
+### Manual Pattern (Advanced)
+
+For custom Docker usage, you can manually mount volumes:
 
 - `-v $(pwd):/host:ro` - Mount your FastLED repo as read-only
   - Use `rsync -a /host/ /fastled/` inside container to update code
   - Read-only mount keeps host filesystem safe
   - Rsync handles efficient updates (only changed files)
 
-### Optional (Read-Write)
 - `-v ./build_output:/fastled/output:rw` - Output directory for compiled binaries
 
 When `/fastled/output` is mounted, the entrypoint automatically copies build artifacts after successful compilation:
@@ -555,7 +593,8 @@ For complete details on the CI/CD Docker system:
 |---------|------------------|-----------------|
 | **Purpose** | Development/testing | Production/CI |
 | **Location** | Built locally | Docker Hub |
-| **Naming** | Hash-based (`fastled-platformio-uno-abc123`) | Semantic (`niteris/fastled-compiler-avr-uno:latest`) |
+| **Naming** | Hash-based (`fastled-platformio-uno-abc123`) | Platform-level (`niteris/fastled-compiler-avr:latest`) |
+| **Container** | Board-specific | Platform-level (`fastled-compiler-avr`) |
 | **Boards per image** | One board | Multiple boards (family) |
 | **Build trigger** | Manual | Daily (2 AM UTC) |
 | **FastLED source** | GitHub release | GitHub release |

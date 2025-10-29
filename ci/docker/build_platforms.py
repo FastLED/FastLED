@@ -2,8 +2,8 @@
 Docker Platform to Boards Mapping
 
 This module defines which boards belong to which Docker platform family.
-Each Docker platform image (e.g., fastled-compiler-avr-uno) pre-caches
-toolchains for ALL boards in its family, not just one representative board.
+Each Docker platform image (e.g., niteris/fastled-compiler-avr) pre-caches
+toolchains for ALL boards in its family.
 
 This is the single source of truth for platform→boards relationships used
 during Docker image builds.
@@ -17,7 +17,7 @@ from typing import Dict, List, Optional
 # Value = list of board names (from ci/boards.py) to pre-cache
 DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # AVR Platform - Classic and Modern AVR boards
-    # Image: niteris/fastled-compiler-avr-uno:latest
+    # Image: niteris/fastled-compiler-avr:latest
     # Platforms: atmelavr (classic) + atmelmegaavr (modern)
     "avr": [
         "uno",
@@ -51,7 +51,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "esp8266",
     ],
     # Teensy Platform - All Teensy variants
-    # Image: niteris/fastled-compiler-teensy-teensy41:latest
+    # Image: niteris/fastled-compiler-teensy:latest
     # Platform: teensy
     # Despite differences (3.x = M4, 4.x = M7), toolchains are small enough
     # to cache all variants in one image
@@ -63,7 +63,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "teensylc",
     ],
     # STM32 Platform - Various STM32 boards
-    # Image: niteris/fastled-compiler-stm32-bluepill:latest
+    # Image: niteris/fastled-compiler-stm32:latest
     # Platform: ststm32
     "stm32": [
         "bluepill",
@@ -80,7 +80,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "rp2350",
     ],
     # NRF52 Platform - Nordic nRF52 boards
-    # Image: niteris/fastled-compiler-nrf52-nrf52840_dk:latest
+    # Image: niteris/fastled-compiler-nrf52:latest
     # Platform: nordicnrf52
     "nrf52": [
         "nrf52840_dk",
@@ -88,7 +88,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "xiaoblesense",
     ],
     # SAM Platform - Atmel SAM (ARM Cortex-M3)
-    # Image: niteris/fastled-compiler-sam-due:latest
+    # Image: niteris/fastled-compiler-sam:latest
     # Platform: atmelsam
     "sam": [
         "due",

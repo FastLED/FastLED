@@ -140,7 +140,23 @@ def run_docker_command_no_fail(cmd: List[str]) -> int:
 
 
 class DockerQEMURunner:
-    """Runner for ESP32 QEMU emulation using Docker containers."""
+    """Runner for ESP32 QEMU emulation using Docker containers.
+
+    Container Naming Convention:
+        Simulator containers use platform-level naming with timestamps for uniqueness:
+        - Pattern: fastled-simulator-{platform}-{timestamp}
+        - Examples:
+            - fastled-simulator-esp-xtensa-1234567890 (ESP32, ESP32-S2, ESP32-S3, ESP8266)
+            - fastled-simulator-esp-riscv-1234567890 (ESP32-C3, ESP32-C6, etc.)
+            - fastled-simulator-avr-1234567890 (Uno, ATtiny, etc.)
+
+        Simulator containers are temporary (created/destroyed per test run) unlike
+        compiler containers which are persistent (paused/unpaused).
+
+    Image Naming Convention:
+        - Registry images: niteris/fastled-simulator-{platform}:latest
+        - Local images: fastled-platformio-{board}-{hash} (for compatibility)
+    """
 
     def __init__(self, docker_image: Optional[str] = None):
         """Initialize Docker QEMU runner.
@@ -214,25 +230,23 @@ class DockerQEMURunner:
             platform: Board platform name (e.g., 'esp32dev', 'esp32s3')
 
         Returns:
-            Docker Hub registry image name (e.g., 'niteris/fastled-compiler-esp-xtensa')
+            Docker Hub registry image name (e.g., 'niteris/fastled-simulator-esp-xtensa')
         """
-        from ci.docker.build_platforms import (
-            get_docker_image_name,
-            get_platform_for_board,
-        )
+        from ci.docker.build_platforms import get_platform_for_board
 
         # Get platform family (e.g., 'esp32s3' -> 'esp-xtensa')
         platform_family = get_platform_for_board(platform)
         if not platform_family:
             # Fallback: try direct platform name
-            fallback_image = f"niteris/fastled-compiler-{platform}"
+            fallback_image = f"niteris/fastled-simulator-{platform}"
             print(
                 f"⚠️  Warning: Platform family not found for '{platform}', using fallback: {fallback_image}"
             )
             return fallback_image
 
-        # Get registry image name (e.g., 'niteris/fastled-compiler-esp-xtensa')
-        registry_image = get_docker_image_name(platform_family, platform)
+        # Get simulator image name (e.g., 'niteris/fastled-simulator-esp-xtensa')
+        # Note: Simulator images follow same platform-level naming as compiler images
+        registry_image = f"niteris/fastled-simulator-{platform_family}"
         return registry_image
 
     def pull_and_tag_board_image(self, platform: str) -> bool:
@@ -568,8 +582,18 @@ class DockerQEMURunner:
         try:
             temp_firmware_dir = self.prepare_firmware(firmware_path)
 
-            # Generate unique container name
-            self.container_name = f"qemu_esp32_{int(time.time())}"
+            # Generate unique container name based on platform family
+            # Determine platform family from machine type
+            from ci.docker.build_platforms import get_platform_for_board
+
+            platform = get_platform_for_board(machine)
+            if platform:
+                # Use platform-level naming with timestamp for uniqueness
+                # Simulator containers are temporary (created/destroyed per test)
+                self.container_name = f"fastled-simulator-{platform}-{int(time.time())}"
+            else:
+                # Fallback for unmapped boards
+                self.container_name = f"fastled-simulator-{machine}-{int(time.time())}"
 
             # Convert Windows paths to Docker-compatible paths
             def windows_to_docker_path(path_str: Union[str, Path]) -> str:

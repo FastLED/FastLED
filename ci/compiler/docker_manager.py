@@ -34,23 +34,68 @@ class DockerConfig:
     container_name: str
     mount_target: str = "//host"  # Git-bash compatible path
     stop_timeout: int = 300
+    output_dir: Optional[Path] = None  # Optional host directory for build artifacts
+
+    @staticmethod
+    def _validate_output_dir(output_dir: Path, project_root: Path) -> Path:
+        """Validate and prepare output directory.
+
+        Args:
+            output_dir: Path to output directory (can be relative or absolute)
+            project_root: Project root path for validation
+
+        Returns:
+            Absolute path to validated output directory
+
+        Raises:
+            ValueError: If output directory is outside project root or parent directory
+        """
+        # Resolve to absolute path
+        if not output_dir.is_absolute():
+            output_dir = (project_root / output_dir).resolve()
+        else:
+            output_dir = output_dir.resolve()
+
+        # Security check: only allow directories within or relative to project root
+        try:
+            # Check if output_dir is relative to project_root or current working directory
+            cwd = Path.cwd().resolve()
+            try:
+                output_dir.relative_to(project_root)
+                # Output dir is under project root - OK
+            except ValueError:
+                # Not under project root, check if under current working directory
+                output_dir.relative_to(cwd)
+                # Output dir is under cwd - OK
+        except ValueError:
+            raise ValueError(
+                f"Output directory must be within project root ({project_root}) "
+                f"or current working directory ({cwd}), got: {output_dir}"
+            )
+
+        # Create directory if it doesn't exist
+        output_dir.mkdir(parents=True, exist_ok=True)
+
+        return output_dir
 
     @classmethod
-    def from_board(cls, board_name: str, project_root: Path) -> "DockerConfig":
+    def from_board(
+        cls, board_name: str, project_root: Path, output_dir: Optional[Path] = None
+    ) -> "DockerConfig":
         """Factory method to create config from board name.
 
-        Maps boards to their platform family Docker images.
+        Maps boards to their platform family Docker images and containers.
         Each platform family (AVR, ESP, Teensy, etc.) has ONE Docker image that
         contains pre-cached toolchains for ALL boards in that family.
 
         All platform images use the :latest tag since they contain all necessary
         toolchains for all boards in the platform family.
 
-        Examples:
-            uno -> fastled-compiler-avr-uno:latest
-            esp32s3 -> fastled-compiler-esp-esp32dev:latest
-            esp32c3 -> fastled-compiler-esp-esp32dev:latest
-            teensy41 -> fastled-compiler-teensy-teensy41:latest
+        Examples (board -> image, container):
+            uno -> niteris/fastled-compiler-avr:latest, container: fastled-compiler-avr
+            esp32s3 -> niteris/fastled-compiler-esp-xtensa:latest, container: fastled-compiler-esp-xtensa
+            esp32c3 -> niteris/fastled-compiler-esp-riscv:latest, container: fastled-compiler-esp-riscv
+            teensy41 -> niteris/fastled-compiler-teensy:latest, container: fastled-compiler-teensy
         """
         from ci.docker.build_platforms import (
             get_docker_image_name,
@@ -82,10 +127,22 @@ class DockerConfig:
             )
             image_name = f"niteris/fastled-compiler-{board_name}:latest"
 
-        container_name = f"fastled-{board_name}"
+        # Container name uses platform-level naming (one container per platform family)
+        # e.g., fastled-compiler-avr, fastled-compiler-esp-xtensa, etc.
+        # This matches the Docker image strategy and allows sharing containers across boards
+        if platform:
+            container_name = f"fastled-compiler-{platform}"
+        else:
+            # Fallback for unmapped boards
+            container_name = f"fastled-compiler-{board_name}"
 
         # Use git-bash compatible mount target on Windows
         mount_target = "//host" if sys.platform == "win32" else "/host"
+
+        # Validate and resolve output directory if provided
+        validated_output_dir = None
+        if output_dir is not None:
+            validated_output_dir = cls._validate_output_dir(output_dir, project_root)
 
         return cls(
             board_name=board_name,
@@ -93,6 +150,7 @@ class DockerConfig:
             project_root=project_root,
             container_name=container_name,
             mount_target=mount_target,
+            output_dir=validated_output_dir,
         )
 
 
@@ -168,13 +226,22 @@ class DockerContainerManager:
             self.config.container_name,
             "-v",
             f"{self.config.project_root}:{self.config.mount_target}:ro",
-            "--stop-timeout",
-            str(self.config.stop_timeout),
-            self._get_image_name(),
-            "tail",
-            "-f",
-            "/dev/null",
         ]
+
+        # Add optional output directory mount
+        if self.config.output_dir is not None:
+            cmd.extend(["-v", f"{self.config.output_dir}:/fastled/output:rw"])
+
+        cmd.extend(
+            [
+                "--stop-timeout",
+                str(self.config.stop_timeout),
+                self._get_image_name(),
+                "tail",
+                "-f",
+                "/dev/null",
+            ]
+        )
 
         result = subprocess.run(cmd, env=env)
         return result.returncode == 0

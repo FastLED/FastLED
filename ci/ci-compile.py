@@ -93,8 +93,20 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     # Get project root
     project_root = Path(__file__).parent.parent.absolute()
 
-    # Create Docker configuration
-    docker_config = DockerConfig.from_board(board_name, project_root)
+    # Determine output directory for volume mounting
+    output_dir = None
+    if config.output_path:
+        output_path_str = str(config.output_path)
+        # Determine the directory to mount
+        if output_path_str.endswith((".bin", ".hex", ".elf")):
+            # Output is a file, use its parent directory
+            output_dir = Path(output_path_str).parent
+        else:
+            # Output is already a directory
+            output_dir = Path(output_path_str)
+
+    # Create Docker configuration with optional output directory
+    docker_config = DockerConfig.from_board(board_name, project_root, output_dir)
 
     # Create container manager
     container_mgr = DockerContainerManager(docker_config)
@@ -123,7 +135,12 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     if config.merged_bin:
         compile_cmd += " --merged-bin"
     if config.output_path:
-        compile_cmd += f" -o {config.output_path}"
+        # If output directory is mounted, use the container path (/fastled/output)
+        # Otherwise, use the original path for docker cp to work
+        if docker_config.output_dir is not None:
+            compile_cmd += " -o output"
+        else:
+            compile_cmd += f" -o {config.output_path}"
     if config.max_failures is not None:
         compile_cmd += f" --max-failures {config.max_failures}"
 
@@ -131,20 +148,30 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
     result = orchestrator.run_compilation(compile_cmd, stream_output=True)
 
     # Copy output artifacts from container to host if compilation succeeded and -o flag was used
-    if result.returncode == 0 and config.output_path:
+    # Skip if output directory is already mounted as a volume (artifacts are already on host)
+    if (
+        result.returncode == 0
+        and config.output_path
+        and docker_config.output_dir is None
+    ):
         output_path = str(config.output_path)
         # Determine the directory to copy
         if output_path.endswith(".bin"):
             # Output is a file, copy its parent directory
-            output_dir = str(Path(output_path).parent)
+            output_dir_str = str(Path(output_path).parent)
         else:
             # Output is already a directory
-            output_dir = output_path
+            output_dir_str = output_path
 
-        # Copy artifacts from container to host
-        container_path = f"/fastled/{output_dir}"
-        host_path = project_root / output_dir
+        # Copy artifacts from container to host using docker cp
+        container_path = f"/fastled/{output_dir_str}"
+        host_path = project_root / output_dir_str
         orchestrator.copy_artifacts(container_path, host_path)
+    elif result.returncode == 0 and docker_config.output_dir is not None:
+        print()
+        print(
+            f"✅ Build artifacts available in mounted volume: {docker_config.output_dir}"
+        )
 
     # Pause container immediately after compilation
     # This keeps the container state but frees resources
