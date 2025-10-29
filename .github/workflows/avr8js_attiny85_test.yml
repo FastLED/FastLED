@@ -1,4 +1,4 @@
-name: atmega32u4 AVR8JS Test
+name: attiny85 AVR8JS Test
 
 on:
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
-      - '.github/workflows/avr8js_atmega32u4_test.yml'
+      - '.github/workflows/avr8js_attiny85_test.yml'
       - '.github/workflows/avr8js_docker_template.yml'
   pull_request:
     branches: [master]
@@ -26,13 +26,13 @@ on:
       - 'platformio.ini'
       - 'CMakeLists.txt'
       - 'library.json'
-      - '.github/workflows/avr8js_atmega32u4_test.yml'
+      - '.github/workflows/avr8js_attiny85_test.yml'
       - '.github/workflows/avr8js_docker_template.yml'
 
 jobs:
-  atmega32u4_avr8js_test:
+  attiny85_avr8js_test:
     uses: ./.github/workflows/avr8js_docker_template.yml
     with:
-      platform: atmega32u4_leonardo
-      platform_display: ATmega32U4
+      platform: attiny85
+      platform_display: ATtiny85
       sketch: Test
