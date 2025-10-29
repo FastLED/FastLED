@@ -113,11 +113,18 @@ class StripIdMap {
 #endif
 
   private:
+    friend class fl::Singleton<StripIdMap>;
+
+    StripIdMap() {
+        mStripMap.setMaxSize(MAX_STRIPS);
+        mOwnerMap.setMaxSize(MAX_STRIPS);
+    }
+
     static StripIdMap &Instance() {
         return fl::Singleton<StripIdMap>::instance();
     }
-    fl::FixedMap<CLEDController *, int, MAX_STRIPS> mStripMap;
-    fl::FixedMap<int, CLEDController *, MAX_STRIPS> mOwnerMap;
+    fl::SortedHeapMap<CLEDController *, int> mStripMap;
+    fl::SortedHeapMap<int, CLEDController *> mOwnerMap;
     int mCounter = 0;
 };
 

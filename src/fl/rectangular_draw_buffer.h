@@ -49,7 +49,9 @@ class RectangularDrawBuffer {
   public:
 
 
-    RectangularDrawBuffer() = default;
+    RectangularDrawBuffer() {
+        mPinToLedSegment.setMaxSize(50);
+    }
     ~RectangularDrawBuffer() = default;
 
     fl::span<u8> getLedsBufferBytesForPin(u8 pin,
@@ -77,7 +79,7 @@ class RectangularDrawBuffer {
     // go into psram on ESP32S3, which is managed by fl::PSRamAllocator.
     scoped_array<u8> mAllLedsBufferUint8;
     u32 mAllLedsBufferUint8Size = 0;
-    fl::FixedMap<u8, fl::span<u8>, 50> mPinToLedSegment;
+    fl::SortedHeapMap<u8, fl::span<u8>> mPinToLedSegment;
     DrawList mDrawList;
     DrawList mPrevDrawList;
     bool mDrawListChangedThisFrame = false;

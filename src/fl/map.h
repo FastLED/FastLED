@@ -481,7 +481,9 @@ class SortedHeapMap {
     void update(const Key &key, const Value &value) {
         if (!insert(key, value)) {
             iterator it = find(key);
-            it->second = value;
+            if (it != end()) {
+                it->second = value;
+            }
         }
     }
 
@@ -489,7 +491,9 @@ class SortedHeapMap {
     void update(const Key &key, Value &&value) {
         if (!insert(key, fl::move(value))) {
             iterator it = find(key);
-            it->second = fl::move(value);
+            if (it != end()) {
+                it->second = fl::move(value);
+            }
         }
     }
 
@@ -503,6 +507,38 @@ class SortedHeapMap {
         return false;
     }
 
+
+    bool next(const Key &key, Key *next_key,
+              bool allow_rollover = false) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            ++it;
+            if (it != end()) {
+                *next_key = it->first;
+                return true;
+            } else if (allow_rollover && !empty()) {
+                *next_key = begin()->first;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool prev(const Key &key, Key *prev_key,
+              bool allow_rollover = false) const {
+        const_iterator it = find(key);
+        if (it != end()) {
+            if (it != begin()) {
+                --it;
+                *prev_key = it->first;
+                return true;
+            } else if (allow_rollover && !empty()) {
+                *prev_key = data.back().first;
+                return true;
+            }
+        }
+        return false;
+    }
     // Comparison operators
     bool operator==(const SortedHeapMap &other) const {
         if (size() != other.size()) {

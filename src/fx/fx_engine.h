@@ -31,7 +31,7 @@ namespace fl {
  */
 class FxEngine {
   public:
-    typedef fl::FixedMap<int, FxPtr, FASTLED_FX_ENGINE_MAX_FX> IntFxMap;
+    typedef fl::SortedHeapMap<int, FxPtr> IntFxMap;
     /**
      * @brief Constructs an FxEngine with the specified number of LEDs.
      * @param numLeds The number of LEDs in the strip.

@@ -5,7 +5,9 @@ namespace fl {
 
 FxEngine::FxEngine(uint16_t numLeds, bool interpolate)
     : mTimeFunction(0), mCompositor(numLeds), mCurrId(0),
-      mInterpolate(interpolate) {}
+      mInterpolate(interpolate) {
+    mEffects.setMaxSize(FASTLED_FX_ENGINE_MAX_FX);
+}
 
 FxEngine::~FxEngine() {}
 
@@ -19,7 +21,7 @@ int FxEngine::addFx(FxPtr effect) {
         effect = vid_fx;
     }
     bool auto_set = mEffects.empty();
-    bool ok = mEffects.insert(mCounter, effect).first;
+    bool ok = mEffects.insert(mCounter, effect);
     if (!ok) {
         return -1;
     }
