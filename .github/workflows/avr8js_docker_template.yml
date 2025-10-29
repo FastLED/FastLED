@@ -94,12 +94,30 @@ jobs:
           mkdir -p avr8js-build
           echo "Created avr8js-build directory for ${{ inputs.platform }} binaries"
 
-      - name: Build ${{ inputs.platform }} firmware
+      - name: "[STEP 1/3] Compile Arduino Sketch → Firmware (examples/${{ inputs.sketch }}/Test.ino → firmware.hex)"
         working-directory: trusted
         run: |
-          echo "=== Building ${{ inputs.sketch }} for ${{ inputs.platform }} ==="
-          echo "Build command:"
-          echo "  uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }}"
+          echo "======================================================================"
+          echo "STEP 1/3: Compiling Arduino Sketch"
+          echo "======================================================================"
+          echo ""
+          echo "📄 Source Files:"
+          echo "  Input sketch: examples/${{ inputs.sketch }}/${{ inputs.sketch }}.ino"
+          if [ -f "examples/${{ inputs.sketch }}/${{ inputs.sketch }}.ino" ]; then
+            echo "  ✅ Sketch file exists"
+            echo "  Lines of code: $(wc -l < examples/${{ inputs.sketch }}/${{ inputs.sketch }}.ino)"
+          else
+            echo "  ❌ Sketch file not found!"
+            exit 1
+          fi
+          echo ""
+          echo "🎯 Target Platform:"
+          echo "  Board: ${{ inputs.platform }}"
+          echo "  Platform display: ${{ inputs.platform_display }}"
+          echo ""
+          echo "🔨 Compilation:"
+          echo "  Command: uv run ci/ci-compile.py ${{ inputs.platform }} --examples ${{ inputs.sketch }}"
+          echo ""
 
           set -x
           uv run ci/ci-compile.py ${{ inputs.platform }} \
@@ -107,64 +125,91 @@ jobs:
             --verbose
           set +x
 
-          echo "=== Build Complete ==="
+          echo ""
+          echo "======================================================================"
+          echo "STEP 1 COMPLETE: Compilation Successful"
+          echo "======================================================================"
+          echo ""
 
           # Copy firmware files for AVR8JS
-          echo "=== Copying firmware files ==="
+          echo "📦 Locating compiled firmware:"
           PIO_BUILD_DIR=".build/pio/${{ inputs.platform }}"
           PIO_ARTIFACTS_DIR="$PIO_BUILD_DIR/.pio/build/${{ inputs.platform }}"
+          echo "  Build directory: $PIO_ARTIFACTS_DIR"
+          echo ""
 
           if [ -f "$PIO_ARTIFACTS_DIR/firmware.elf" ]; then
             cp "$PIO_ARTIFACTS_DIR/firmware.elf" avr8js-build/
-            echo "✅ Copied firmware.elf"
+            echo "  ✅ firmware.elf: $PIO_ARTIFACTS_DIR/firmware.elf → avr8js-build/firmware.elf"
+            ls -lh "$PIO_ARTIFACTS_DIR/firmware.elf"
           else
-            echo "❌ firmware.elf not found"
+            echo "  ❌ firmware.elf not found in $PIO_ARTIFACTS_DIR"
             exit 1
           fi
 
           if [ -f "$PIO_ARTIFACTS_DIR/firmware.hex" ]; then
             cp "$PIO_ARTIFACTS_DIR/firmware.hex" avr8js-build/
-            echo "✅ Copied firmware.hex"
+            echo "  ✅ firmware.hex: $PIO_ARTIFACTS_DIR/firmware.hex → avr8js-build/firmware.hex"
+            ls -lh "$PIO_ARTIFACTS_DIR/firmware.hex"
           else
-            echo "❌ firmware.hex not found"
+            echo "  ❌ firmware.hex not found in $PIO_ARTIFACTS_DIR"
             exit 1
           fi
 
-          echo "=== Final avr8js-build contents ==="
-          ls -la avr8js-build/
+          echo ""
+          echo "📁 Firmware files ready in avr8js-build/:"
+          ls -lh avr8js-build/
+          echo ""
 
-      - name: Verify firmware files
+      - name: "[STEP 2/3] Validate Firmware Files (firmware.hex)"
         working-directory: trusted
         run: |
-          echo "=== Firmware Validation ==="
+          echo "======================================================================"
+          echo "STEP 2/3: Validating Firmware Files"
+          echo "======================================================================"
+          echo ""
+          echo "🔍 Checking firmware.hex for AVR8JS:"
+          echo "  Location: avr8js-build/firmware.hex"
+          echo ""
 
           if [ ! -f avr8js-build/firmware.hex ]; then
-            echo "❌ HEX file not found!"
+            echo "  ❌ HEX file not found!"
             exit 1
           fi
 
-          echo "✅ HEX file exists"
+          echo "  ✅ HEX file exists"
 
           # Check size
           SIZE=$(stat -c%s avr8js-build/firmware.hex)
-          echo "HEX file size: $SIZE bytes"
+          echo "  File size: $SIZE bytes"
 
           if [ $SIZE -lt 100 ]; then
-            echo "❌ HEX file too small: $SIZE bytes"
+            echo "  ❌ HEX file too small: $SIZE bytes (expected > 100 bytes)"
             exit 1
           fi
 
-          # Show first few lines of HEX file
-          echo "=== HEX file header (first 5 lines) ==="
-          head -5 avr8js-build/firmware.hex
+          echo "  ✅ Size validation passed"
+          echo ""
 
-          # MD5 checksum
-          echo "=== Firmware Checksum ==="
-          md5sum avr8js-build/firmware.hex
+          # Show first few lines of HEX file (Intel HEX format)
+          echo "📋 Intel HEX format preview (first 5 lines):"
+          head -5 avr8js-build/firmware.hex | sed 's/^/  /'
+          echo ""
 
-      - name: Map platform to MCU type
+          # MD5 checksum for verification
+          echo "🔐 Firmware checksum (MD5):"
+          md5sum avr8js-build/firmware.hex | sed 's/^/  /'
+          echo ""
+          echo "======================================================================"
+          echo "STEP 2 COMPLETE: Firmware Validated"
+          echo "======================================================================"
+          echo ""
+
+      - name: "Configure AVR8JS Emulator Settings"
         id: mcu_mapping
         run: |
+          echo "⚙️  AVR8JS Configuration:"
+          echo ""
           # Map PlatformIO platform names to AVR MCU types
           PLATFORM="${{ inputs.platform }}"
           case "$PLATFORM" in
@@ -185,44 +230,62 @@ jobs:
               FREQUENCY=8000000
               ;;
             *)
-              echo "Unknown platform: $PLATFORM, defaulting to atmega328p"
+              echo "  ⚠️  Unknown platform: $PLATFORM, defaulting to atmega328p"
               MCU="atmega328p"
               FREQUENCY=16000000
               ;;
           esac
           echo "mcu=$MCU" >> $GITHUB_OUTPUT
           echo "frequency=$FREQUENCY" >> $GITHUB_OUTPUT
-          echo "Mapped platform '$PLATFORM' to MCU '$MCU' @ ${FREQUENCY}Hz"
+          echo "  Platform: $PLATFORM → MCU: $MCU @ ${FREQUENCY}Hz"
+          echo ""
         shell: bash
 
-      - name: Build AVR8JS Docker image
+      - name: "Prepare AVR8JS Docker Image"
         working-directory: trusted
         run: |
-          echo "=== Building AVR8JS Docker Image ==="
+          echo "🐳 Preparing AVR8JS Docker environment:"
+          echo ""
           uv run python -c "
           import sys
           from ci.docker.avr8js_docker import DockerAVR8jsRunner
 
-          print('Checking Docker image availability...')
+          print('  Checking Docker image availability...')
           runner = DockerAVR8jsRunner()
+          print(f'  Docker image: {runner.docker_image}')
+          print('')
 
           if not runner.ensure_image_available():
-              print('❌ Failed to prepare Docker image')
+              print('  ❌ Failed to prepare Docker image')
               sys.exit(1)
 
-          print('✅ Docker image ready')
+          print('  ✅ Docker image ready for AVR8JS execution')
+          print('')
           "
         shell: bash
 
-      - name: Run ${{ inputs.platform_display }} in AVR8JS using Docker
+      - name: "[STEP 3/3] Run Firmware in AVR8JS Emulator (firmware.hex → avr8js → output)"
         id: avr8js
         working-directory: trusted
         run: |
-          echo "=== Running AVR8JS via Docker ==="
-          echo "Platform: ${{ inputs.platform }}"
-          echo "MCU: ${{ steps.mcu_mapping.outputs.mcu }}"
-          echo "Frequency: ${{ steps.mcu_mapping.outputs.frequency }}"
-          echo "Firmware: avr8js-build/firmware.elf"
+          echo "======================================================================"
+          echo "STEP 3/3: Running Firmware in AVR8JS Emulator"
+          echo "======================================================================"
+          echo ""
+          echo "🚀 Emulation Configuration:"
+          echo "  Platform: ${{ inputs.platform }} (${{ inputs.platform_display }})"
+          echo "  Target MCU: ${{ steps.mcu_mapping.outputs.mcu }} @ ${{ steps.mcu_mapping.outputs.frequency }}Hz"
+          echo "  Firmware: avr8js-build/firmware.hex"
+          echo "  Timeout: 30 seconds"
+          echo ""
+          echo "📊 Data Flow:"
+          echo "  examples/${{ inputs.sketch }}/${{ inputs.sketch }}.ino"
+          echo "    ↓ [PlatformIO compilation]"
+          echo "  avr8js-build/firmware.hex"
+          echo "    ↓ [Docker volume mount]"
+          echo "  AVR8JS Emulator (Docker)"
+          echo "    ↓ [Serial output capture]"
+          echo "  avr8js_output.log"
           echo ""
 
           # Run AVR8JS using the Docker runner
@@ -231,15 +294,16 @@ jobs:
           from pathlib import Path
           from ci.docker.avr8js_docker import DockerAVR8jsRunner
 
-          print('Initializing Docker AVR8JS runner...')
+          print('🔧 Initializing AVR8JS Docker runner...')
           runner = DockerAVR8jsRunner()
 
           firmware_path = Path('avr8js-build/firmware.elf').absolute()
-          print(f'Firmware path: {firmware_path}')
-          print(f'Firmware exists: {firmware_path.exists()}')
+          print(f'  Firmware input: {firmware_path}')
+          print(f'  Firmware exists: {firmware_path.exists()}')
           print('')
 
-          print('Starting AVR8JS execution...')
+          print('▶️  Starting AVR8JS emulation...')
+          print('')
           exit_code = runner.run(
               elf_path=firmware_path,
               mcu='${{ steps.mcu_mapping.outputs.mcu }}',
@@ -249,67 +313,102 @@ jobs:
           )
 
           print('')
-          print(f'AVR8JS execution completed with exit code: {exit_code}')
+          if exit_code == 0:
+              print('✅ AVR8JS execution completed successfully (exit code: 0)')
+          else:
+              print(f'❌ AVR8JS execution failed (exit code: {exit_code})')
           sys.exit(exit_code)
           "
 
           AVR8JS_EXIT_CODE=$?
           echo "avr8js_exit_code=$AVR8JS_EXIT_CODE" >> $GITHUB_OUTPUT
 
+          echo ""
+          echo "======================================================================"
           # Check if output file was created
           if [ -f "avr8js_output.log" ]; then
-            echo "✅ AVR8JS output file created ($(wc -l < avr8js_output.log) lines)"
+            echo "STEP 3 COMPLETE: Output Captured"
+            echo "======================================================================"
+            echo ""
+            echo "  ✅ Output file: avr8js_output.log ($(wc -l < avr8js_output.log) lines)"
           else
-            echo "❌ AVR8JS output file not found"
+            echo "STEP 3 FAILED: No Output"
+            echo "======================================================================"
+            echo ""
+            echo "  ❌ AVR8JS output file not found"
             exit 1
           fi
+          echo ""
 
           exit $AVR8JS_EXIT_CODE
         shell: bash
 
-      - name: Display AVR8JS output
+      - name: "📄 Display AVR8JS Emulator Output"
         if: always()
         working-directory: trusted
         run: |
-          echo "=== AVR8JS Results ==="
+          echo "======================================================================"
+          echo "AVR8JS Emulator Output"
+          echo "======================================================================"
+          echo ""
           echo "Exit code: ${{ steps.avr8js.outputs.avr8js_exit_code }}"
+          echo ""
 
           if [ -f avr8js_output.log ]; then
-            echo "=== AVR8JS Output (first 100 lines) ==="
+            echo "----------------------------------------------------------------------"
+            echo "Serial Output (first 100 lines):"
+            echo "----------------------------------------------------------------------"
             head -100 avr8js_output.log
-
-            echo "=== Output Summary ==="
-            echo "Total lines: $(wc -l < avr8js_output.log)"
+            echo "----------------------------------------------------------------------"
+            echo ""
+            echo "📊 Output Statistics:"
+            echo "  Total lines: $(wc -l < avr8js_output.log)"
+            echo "  File size: $(stat -c%s avr8js_output.log) bytes"
+            echo ""
           else
             echo "❌ No AVR8JS output file found"
           fi
 
-      - name: Validate ${{ inputs.sketch }} output
+      - name: "✅ Validate Test Results"
         working-directory: trusted
         run: |
-          echo "=== Validating ${{ inputs.sketch }} output ==="
+          echo "======================================================================"
+          echo "Test Validation: ${{ inputs.sketch }}"
+          echo "======================================================================"
+          echo ""
 
           if [ ! -f avr8js_output.log ]; then
             echo "❌ No AVR8JS output found"
             exit 1
           fi
 
+          echo "🔍 Checking for expected output patterns in avr8js_output.log:"
+          echo ""
+
           # Check for expected output patterns
           if grep -q "SETUP COMPLETE" avr8js_output.log; then
-            echo "✅ Setup complete message found"
+            echo "  ✅ Found: 'SETUP COMPLETE' message"
           else
-            echo "❌ Setup complete message not found"
+            echo "  ❌ Missing: 'SETUP COMPLETE' message"
+            echo ""
+            echo "Expected pattern not found. Test failed."
             exit 1
           fi
 
           if grep -q "Test loop" avr8js_output.log; then
-            echo "✅ Test loop message found"
+            echo "  ✅ Found: 'Test loop' message"
           else
-            echo "❌ Test loop message not found"
+            echo "  ❌ Missing: 'Test loop' message"
+            echo ""
+            echo "Expected pattern not found. Test failed."
             exit 1
           fi
 
-          echo "=== Validation complete ==="
+          echo ""
+          echo "======================================================================"
+          echo "All Validation Checks Passed!"
+          echo "======================================================================"
+          echo ""
 
       - name: Generate artifact name
         id: artifact_name
@@ -337,15 +436,29 @@ jobs:
           name: ${{ inputs.platform }}-avr8js-success-${{ steps.artifact_name.outputs.sketch }}-${{ github.sha }}
           path: trusted/avr8js_output.log
 
-      - name: Summary
+      - name: "📊 Test Summary"
         if: always()
         working-directory: trusted
         run: |
-          echo "=== ${{ inputs.platform_display }} AVR8JS Test Summary ==="
-          echo "Platform: ${{ inputs.platform }} (Docker-based)"
-          echo "Sketch: ${{ inputs.sketch }}"
-          echo "Status: ${{ job.status }}"
-
+          echo "======================================================================"
+          echo "${{ inputs.platform_display }} AVR8JS Test Summary"
+          echo "======================================================================"
+          echo ""
+          echo "📋 Test Configuration:"
+          echo "  Platform: ${{ inputs.platform }} (${{ inputs.platform_display }})"
+          echo "  Sketch: ${{ inputs.sketch }}"
+          echo "  Source: examples/${{ inputs.sketch }}/${{ inputs.sketch }}.ino"
+          echo ""
+          echo "🎯 Execution Path:"
+          echo "  1. Compiled to: firmware.hex"
+          echo "  2. Emulated in: AVR8JS (Docker)"
+          echo "  3. Output to: avr8js_output.log"
+          echo ""
+          echo "📈 Results:"
+          echo "  Job Status: ${{ job.status }}"
           if [ -f avr8js_output.log ]; then
-            echo "AVR8JS output lines: $(wc -l < avr8js_output.log)"
+            echo "  Output Lines: $(wc -l < avr8js_output.log)"
+            echo "  Output Size: $(stat -c%s avr8js_output.log) bytes"
           fi
+          echo ""
+          echo "======================================================================"

@@ -414,11 +414,22 @@ def run_avr8js_tests(args: TestArgs) -> None:
 
     # Test each example
     for example in examples_to_test:
-        print(f"\n--- Testing {example} ---")
+        print(f"\n{'=' * 70}")
+        print(f"Testing: {example}")
+        print(f"{'=' * 70}")
 
         try:
+            # Step 1: Show what we're compiling
+            example_ino_path = Path("examples") / example / f"{example}.ino"
+            print(f"\n[STEP 1/3] Compiling Arduino Sketch")
+            print(f"  Source file: {example_ino_path}")
+            print(
+                f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
+            )
+            print(f"  Compiler: PlatformIO via ci/ci-compile.py")
+            print()
+
             # Build the example for the specified board
-            print(f"Building {example} for {board}...")
             build_cmd = [
                 "uv",
                 "run",
@@ -440,25 +451,40 @@ def run_avr8js_tests(args: TestArgs) -> None:
 
             build_returncode = build_proc.wait()
             if build_returncode != 0:
-                print(f"Build failed for {example} with exit code: {build_returncode}")
+                print(
+                    f"\n❌ Build failed for {example} with exit code: {build_returncode}"
+                )
                 failure_count += 1
                 continue
 
-            print(f"Build successful for {example}")
+            print(f"\n✅ Build successful for {example}")
 
-            # Find the compiled .elf file
+            # Step 2: Locate compiled firmware
+            print(f"\n[STEP 2/3] Locating Compiled Firmware")
             build_dir = Path(".build")
             elf_files = list(build_dir.rglob("*.elf"))
             if not elf_files:
-                print(f"ELF file not found in {build_dir}")
+                print(f"  ❌ ELF file not found in {build_dir}")
                 failure_count += 1
                 continue
 
             elf_path = elf_files[0]
-            print(f"Found ELF file: {elf_path}")
+            hex_path = elf_path.with_suffix(".hex")
+            print(f"  ELF file: {elf_path}")
+            print(f"  HEX file: {hex_path}")
+            print(f"  (avr8js requires HEX format for execution)")
 
-            # Run in avr8js using Docker
-            print(f"Running {example} in Docker avr8js...")
+            if not hex_path.exists():
+                print(f"  ❌ HEX file not found: {hex_path}")
+                failure_count += 1
+                continue
+
+            # Step 3: Run in avr8js Docker
+            print(f"\n[STEP 3/3] Running in AVR8JS Docker Emulator")
+            print(f"  Docker image: {docker_runner.docker_image}")
+            print(f"  Firmware: {hex_path}")
+            print(f"  Timeout: 15 seconds")
+            print()
 
             # Set up output file
             output_file = "avr8js_output.txt"

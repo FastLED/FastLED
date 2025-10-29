@@ -101,12 +101,24 @@ class DockerAVR8jsRunner:
         if not hex_path.exists():
             raise FileNotFoundError(f"HEX file not found: {hex_path}")
 
+        print(f"Preparing Docker execution environment:")
+        print(f"  Firmware format conversion: ELF → HEX (required by avr8js)")
+        print(f"    ELF file: {elf_path}")
+        print(f"    HEX file: {hex_path}")
+        print()
+
         # Prepare Docker command with proper path handling
         firmware_dir = hex_path.parent
         firmware_name = hex_path.name
 
         # Convert to Docker-compatible path for volume mounting
         docker_firmware_dir = self._convert_to_docker_volume_path(firmware_dir)
+
+        print(f"  Docker volume mounting:")
+        print(f"    Host directory: {firmware_dir}")
+        print(f"    Docker path: {docker_firmware_dir}")
+        print(f"    Container mount: /firmware (read-only)")
+        print()
 
         docker_cmd: List[str] = [
             "docker",
@@ -119,14 +131,16 @@ class DockerAVR8jsRunner:
             str(timeout),
         ]
 
-        print(f"Running {firmware_name} in avr8js Docker container...")
-        print(f"Docker image: {self.docker_image}")
-        print(f"ELF path: {elf_path}")
-        print(f"HEX path: {hex_path}")
-        print(f"Docker volume: {docker_firmware_dir}:/firmware")
-        print(f"MCU: {mcu} @ {frequency}Hz")
-        print(f"Timeout: {timeout}s")
+        print(f"  Docker execution:")
+        print(f"    Image: {self.docker_image}")
+        print(f"    Target MCU: {mcu} @ {frequency}Hz")
+        print(f"    Firmware (in container): /firmware/{firmware_name}")
+        print(f"    Timeout: {timeout}s")
         print()
+        print(f"  Docker command: {' '.join(docker_cmd)}")
+        print()
+        print(f"Starting avr8js emulator...")
+        print(f"{'-' * 70}")
 
         try:
             # Run Docker container and capture output
@@ -144,13 +158,29 @@ class DockerAVR8jsRunner:
             if result.stderr:
                 output += "\n" + result.stderr
 
+            print(f"{'-' * 70}")
+            print(f"Emulator output:")
+            print(f"{'-' * 70}")
+
             # Print output to console
             if output:
                 print(output)
+            else:
+                print("(no output)")
+
+            print(f"{'-' * 70}")
 
             # Write to output file if specified
             if output_file and output:
-                Path(output_file).write_text(output, encoding="utf-8")
+                output_path = Path(output_file)
+                output_path.write_text(output, encoding="utf-8")
+                print(f"\nOutput saved to: {output_path.absolute()}")
+
+            # Print result summary
+            if result.returncode == 0:
+                print(f"✅ Emulation completed successfully (exit code: 0)")
+            else:
+                print(f"❌ Emulation failed (exit code: {result.returncode})")
 
             return result.returncode
 
