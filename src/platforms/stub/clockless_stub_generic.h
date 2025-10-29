@@ -9,7 +9,6 @@
 #include "fl/chipsets/timing_traits.h"
 #include "pixel_iterator.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
-#include "platforms/shared/strip_id_map/strip_id_map.h"
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 
 namespace fl {

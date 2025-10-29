@@ -5,7 +5,6 @@
 #include "FastLED.h"
 #include "cled_controller.h"
 #include "platforms/shared/active_strip_data/active_strip_data.h"
-#include "platforms/shared/strip_id_map/strip_id_map.h"
 #include "platforms/stub/fastspi_stub_generic.h"
 #include "platforms/stub/clockless_stub_generic.h"
 #include "fl/chipsets/timing_traits.h"
@@ -15,9 +14,6 @@ using namespace fl;
 
 
 TEST_CASE("ClocklessController - LED Data Capture") {
-    // Clean up from any previous tests
-    StripIdMap::test_clear();
-
     // Create LED array
     CRGB leds[3] = {CRGB::Red, CRGB::Green, CRGB::Blue};
 
