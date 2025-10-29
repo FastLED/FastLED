@@ -1009,6 +1009,9 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 		mSPI.writeByte(0);
 		mSPI.writeByte(0);
 		mSPI.writeByte(0);
+		// Note: waitFully() and release() may not be strictly necessary for SM16716
+		// since we're just streaming bytes. However, they're kept here for consistency
+		// with other SPI-based controllers and as defensive programming.
 		mSPI.waitFully();
 		mSPI.release();
 	}
