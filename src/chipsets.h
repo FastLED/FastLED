@@ -1032,6 +1032,79 @@ protected:
 
 };
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+// HD108 16-bit SPI chipset // should use SPI MODE3???
+//
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// HD108 Controller class
+/// @tparam DATA_PIN the data pin for these LEDs
+/// @tparam CLOCK_PIN the clock pin for these LEDs
+/// @tparam RGB_ORDER the RGB ordering for these LEDs
+/// @tparam SPI_SPEED the clock divider used for these LEDs
+template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = GRB, uint32_t SPI_SPEED = DATA_RATE_MHZ(40)>
+class HD108Controller : public CPixelLEDController<RGB_ORDER> {
+	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
+	SPI mSPI;
+
+public:
+	HD108Controller() {}
+
+	void init() override { mSPI.init(); }
+
+protected:
+void showPixels(PixelController<RGB_ORDER> &pixels) override {
+    // ---- Start frame: 64 bits of 0 ----
+    mSPI.select();
+    for (int i = 0; i < 8; i++) mSPI.writeByte(0x00);
+    mSPI.waitFully();
+    mSPI.release();
+
+    while (pixels.has(1)) {
+        fl::u8 r8, g8, b8;
+        pixels.loadAndScaleRGB(&r8, &g8, &b8);
+
+        // Derive full-gain header (no coarse brightness)
+        const fl::u8 bri5 = 0x1F;  // full current drive
+        const fl::u8 f0 = (fl::u8)(0x80 | ((bri5 & 0x1F) << 2));
+        const fl::u8 f1 = (fl::u8)((bri5 & 0x07) << 5 | (bri5 & 0x1F));
+
+        // 8->16 with gamma
+        fl::u16 r = _u8_to_u16_gamma(r8);
+        fl::u16 g = _u8_to_u16_gamma(g8);
+        fl::u16 b = _u8_to_u16_gamma(b8);
+
+        mSPI.select();
+        mSPI.writeByte(f0);
+        mSPI.writeByte(f1);
+        mSPI.writeByte((fl::u8)(r >> 8)); mSPI.writeByte((fl::u8)(r & 0xFF));
+        mSPI.writeByte((fl::u8)(g >> 8)); mSPI.writeByte((fl::u8)(g & 0xFF));
+        mSPI.writeByte((fl::u8)(b >> 8)); mSPI.writeByte((fl::u8)(b & 0xFF));
+        mSPI.waitFully();
+        mSPI.release();
+
+        pixels.stepDithering();
+        pixels.advanceData();
+    }
+
+    // ---- End frame ----
+    int latch = pixels.size() / 2 + 4;
+    mSPI.select();
+    for (int i = 0; i < latch; i++) mSPI.writeByte(0xFF);
+    mSPI.waitFully();
+    mSPI.release();
+}
+
+
+private:
+	// 8-bit -> 16-bit with fast gamma ≈ 2.0
+	static FASTLED_FORCE_INLINE fl::u16 _u8_to_u16_gamma(fl::u8 v) {
+		// v*v gives ~gamma 2.0; close to 65535 max (65025), visually better esp. for blue
+		return (fl::u16)v * (fl::u16)v;
+	}
+};
+
 /// @} ClockedChipsets
 
 
