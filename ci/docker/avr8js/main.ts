@@ -52,79 +52,36 @@ Example:
 async function executeProgram(hex: string, options: RunOptions): Promise<number> {
   const runner = new AVRRunner(hex);
   let output = "";
-  let lastOutputTime = Date.now();
   const startTime = Date.now();
-  const timeoutMs = (options.timeout || 10) * 1000;
 
-  console.log("[DEBUG] Setting up PORTB listener...");
   // Hook to PORTB register for LED output
   runner.portB.addListener(value => {
     const time = formatTime(runner.cpu.cycles / runner.MHZ);
-    console.log(`[DEBUG][${time}] PORTB callback invoked: 0x${value.toString(16).padStart(2, '0')}`);
     if (options.verbose) {
       console.log(`[${time}] PORTB: 0x${value.toString(16).padStart(2, '0')}`);
     }
   });
 
-  console.log("[DEBUG] Setting up USART onByteTransmit callback...");
-  let usartCallbackCount = 0;
   // Serial port output support
   runner.usart.onByteTransmit = (value: number) => {
-    try {
-      usartCallbackCount++;
-      const char = String.fromCharCode(value);
-      const time = formatTime(runner.cpu.cycles / runner.MHZ);
-      const wallTime = ((Date.now() - startTime) / 1000).toFixed(3);
-      console.log(`[DEBUG][#${usartCallbackCount}, sim=${time}, wall=${wallTime}s] USART byte: 0x${value.toString(16).padStart(2, '0')} '${char.replace(/\r/g, '\\r').replace(/\n/g, '\\n')}'`);
-      output += char;
-      // Temporarily comment out to test
-      // process.stdout.write(char);
-      lastOutputTime = Date.now();
-    } catch (err) {
-      console.error(`[DEBUG] USART callback error: ${err}`);
-      throw err;
-    }
+    const char = String.fromCharCode(value);
+    output += char;
+    process.stdout.write(char);
   };
 
   // Execute with periodic checks
-  console.log("[DEBUG] Starting CPU execution...");
-  let callbackCount = 0;
-  let firstCheckpointTime = 0;
   try {
     await runner.execute(cpu => {
-      callbackCount++;
-      const time = formatTime(cpu.cycles / runner.MHZ);
-
-      // Performance checkpoint at 50k cycles
-      if (cpu.cycles >= 50000 && firstCheckpointTime === 0) {
-        firstCheckpointTime = Date.now();
-        const elapsed = (firstCheckpointTime - startTime) / 1000;
-        const cyclesPerSec = cpu.cycles / elapsed;
-        const targetCycles = runner.MHZ; // 16MHz
-        const perfPercent = (cyclesPerSec / targetCycles * 100).toFixed(1);
-        console.log(`[DEBUG][${time}] === 50k CYCLE CHECKPOINT ===`);
-        console.log(`[DEBUG] Wall time: ${elapsed.toFixed(3)}s`);
-        console.log(`[DEBUG] Cycles/sec: ${(cyclesPerSec / 1e6).toFixed(2)}M (${perfPercent}% of 16MHz target)`);
-        console.log(`[DEBUG] Target for 30s: 480M cycles (16MHz * 30s)`);
-      }
-
-      if (callbackCount <= 10 || callbackCount % 10 === 0) {
-        const interruptsEnabled = (cpu.data[95] & 0x80) !== 0; // SREG I bit
-        console.log(`[DEBUG][${time}] Callback #${callbackCount}, cycles=${cpu.cycles}, txEnable=${runner.usart.txEnable}, IE=${interruptsEnabled}`);
-      }
-
       const simTime = cpu.cycles / runner.MHZ;
       if (simTime > (options.timeout || 30)) {
-        console.error(`\n[DEBUG][${time}] Timeout reached after ${options.timeout}s simulated time`);
         if (options.verbose) {
-          console.error(`[${time}] Timeout reached after ${options.timeout}s simulated time`);
+          const time = formatTime(cpu.cycles / runner.MHZ);
+          console.error(`\n[${time}] Timeout reached after ${options.timeout}s simulated time`);
         }
         runner.stop();
       }
     });
-    console.log(`[DEBUG] Execution completed. Total callbacks: ${callbackCount}`);
   } catch (err) {
-    console.error(`\n[DEBUG] Execution error: ${err}`);
     console.error(`\nExecution error: ${err}`);
     return 1;
   }
@@ -133,17 +90,6 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
   const simTime = runner.cpu.cycles / runner.MHZ;
   const cyclesPerSec = runner.cpu.cycles / executionTime;
   const perfPercent = (cyclesPerSec / runner.MHZ * 100).toFixed(1);
-  const simToWallRatio = (simTime / executionTime).toFixed(2);
-
-  console.log(`\n[DEBUG] --- Execution Complete ---`);
-  console.log(`[DEBUG] Wall time: ${executionTime.toFixed(3)}s`);
-  console.log(`[DEBUG] Simulated time: ${formatTime(simTime)}`);
-  console.log(`[DEBUG] CPU cycles: ${runner.cpu.cycles}`);
-  console.log(`[DEBUG] Performance: ${(cyclesPerSec / 1e6).toFixed(2)}M cycles/sec (${perfPercent}% of 16MHz target)`);
-  console.log(`[DEBUG] Sim/Wall ratio: ${simToWallRatio}x (${simToWallRatio > 1 ? 'faster than real-time' : 'slower than real-time'})`);
-  console.log(`[DEBUG] Output length: ${output.length} bytes`);
-  console.log(`[DEBUG] Output content: "${output}"`);
-  console.log(`[DEBUG] Output (hex): ${Array.from(output).map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join(' ')}`);
 
   if (options.verbose) {
     console.log(`\n--- Execution Complete ---`);
@@ -155,8 +101,6 @@ async function executeProgram(hex: string, options: RunOptions): Promise<number>
 
   // Check for required test output
   if (!output.includes("Test loop")) {
-    console.error('\n[DEBUG] ERROR: "Test loop" not found in output');
-    console.error('[DEBUG] Output was:', JSON.stringify(output));
     console.error('\nERROR: "Test loop" not found in output');
     console.error('This likely indicates the test did not execute properly');
     return 1;

@@ -36,18 +36,15 @@ export class AVRRunner {
     this.portC = new AVRIOPort(this.cpu, portCConfig);
     this.portD = new AVRIOPort(this.cpu, portDConfig);
     this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
-    console.log(`[DEBUG] USART initialized: baudRate=${this.usart.baudRate}, txEnable=${this.usart.txEnable}, rxEnable=${this.usart.rxEnable}`);
   }
 
   async execute(callback: (cpu: CPU) => void) {
     this.stopped = false;
-    let nextCheckpoint = 16000000;
     for (;;) {
       avrInstruction(this.cpu);
       this.cpu.tick();
-      if (this.cpu.cycles >= nextCheckpoint) {
+      if (this.cpu.cycles % 500000 === 0) {
         callback(this.cpu);
-        nextCheckpoint += 16000000;
         await new Promise(resolve => {
           setTimeout(resolve, 0);
         });
