@@ -242,6 +242,7 @@ def setup_meson_build(
     # If it doesn't match the current setting, we force a reconfigure.
     # ============================================================================
     thin_archive_marker = build_dir / ".thin_archive_config"
+    unity_marker = build_dir / ".unity_config"
     force_reconfigure = False
 
     if already_configured:
@@ -268,9 +269,29 @@ def setup_meson_build(
             # This can happen on first run after updating to this version
             print("[MESON] ℹ️  No thin archive marker found, will create after setup")
 
+        # Check if unity setting has changed since last configure
+        if unity_marker.exists():
+            try:
+                last_unity_setting = unity_marker.read_text().strip() == "True"
+                if last_unity_setting != unity:
+                    print(
+                        f"[MESON] ⚠️  Unity build setting changed: {last_unity_setting} → {unity}"
+                    )
+                    print("[MESON] 🔄 Forcing reconfigure to update build targets")
+                    force_reconfigure = True
+            except (OSError, IOError):
+                # If we can't read the marker, force reconfigure to be safe
+                print("[MESON] ⚠️  Could not read unity marker, forcing reconfigure")
+                force_reconfigure = True
+        else:
+            # No marker file exists from previous configure
+            # Force reconfigure to ensure Meson is configured with correct unity setting
+            print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
+            force_reconfigure = True
+
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
-    # AND thin archive settings haven't changed
+    # AND thin archive/unity settings haven't changed
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
 
     # Declare native file path early (needed for meson commands)
@@ -628,6 +649,14 @@ endian = 'little'
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
             print(f"[MESON] Warning: Could not write thin archive marker: {e}")
+
+        # Write marker file to track unity setting for future runs
+        try:
+            unity_marker.write_text(str(unity), encoding="utf-8")
+            print(f"[MESON] ✅ Saved unity configuration: {unity}")
+        except (OSError, IOError) as e:
+            # Not critical if marker file write fails
+            print(f"[MESON] Warning: Could not write unity marker: {e}")
 
         return True
 

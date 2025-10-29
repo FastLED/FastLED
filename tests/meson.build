@@ -34,6 +34,7 @@ doctest_main = static_library('doctest_main',
   'doctest_main.cpp',
   include_directories: [src_dir, tests_dir, stub_dir],
   cpp_args: unit_test_compile_args,
+  override_options: ['unity=off'],  # Don't apply unity builds to this single-file library
   install: false
 )
 

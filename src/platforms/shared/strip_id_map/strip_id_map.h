@@ -66,27 +66,30 @@ class StripIdMap {
         // objects. Note that the device should already have been added by the
         // time this function is called.
         StripIdMap &instance = Instance();
-        uint16_t controller_size = cled_contoller_size();
-        uint16_t smallest_diff = 0xFFFF;
+        uintptr_t smallest_diff = UINTPTR_MAX;
         CLEDController *closest_controller = nullptr;
 
         for (auto it = instance.mStripMap.begin();
              it != instance.mStripMap.end(); ++it) {
             CLEDController *controller = it->first;
-            uintptr_t address_subclass =
-                reinterpret_cast<uintptr_t>(controller) + controller_size;
-            // if below, then the spiDevice is NOT a member of the subclass of
-            // CLEDController
-            if (spi_address < address_subclass) {
+            uintptr_t controller_addr = reinterpret_cast<uintptr_t>(controller);
+
+            // Check if spi_address is after the start of the controller object
+            if (spi_address < controller_addr) {
                 continue;
             }
-            uintptr_t diff = spi_address - address_subclass;
+
+            uintptr_t diff = spi_address - controller_addr;
             if (diff < smallest_diff) {
                 smallest_diff = diff;
                 closest_controller = controller;
             }
         }
-        if (closest_controller && smallest_diff < controller_size) {
+
+        // Sanity check: ensure the address is within a reasonable object size
+        // Use a generous limit (e.g., 64KB) since we don't know the actual derived class size
+        const uintptr_t MAX_REASONABLE_OBJECT_SIZE = 65536;
+        if (closest_controller && smallest_diff < MAX_REASONABLE_OBJECT_SIZE) {
             return closest_controller;
         }
         return nullptr;
@@ -113,18 +116,11 @@ class StripIdMap {
 #endif
 
   private:
-    friend class fl::Singleton<StripIdMap>;
-
-    StripIdMap() {
-        mStripMap.setMaxSize(MAX_STRIPS);
-        mOwnerMap.setMaxSize(MAX_STRIPS);
-    }
-
     static StripIdMap &Instance() {
         return fl::Singleton<StripIdMap>::instance();
     }
-    fl::SortedHeapMap<CLEDController *, int> mStripMap;
-    fl::SortedHeapMap<int, CLEDController *> mOwnerMap;
+    fl::FixedMap<CLEDController *, int, MAX_STRIPS> mStripMap;
+    fl::FixedMap<int, CLEDController *, MAX_STRIPS> mOwnerMap;
     int mCounter = 0;
 };
 
