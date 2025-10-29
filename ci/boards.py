@@ -822,7 +822,7 @@ RPI_PICO2 = Board(
 
 STM32F103C8_BLUEPILL = Board(
     board_name="stm32f103c8_bluepill",
-    real_board_name="bluepill_f103c8",
+    real_board_name="stm32f103c8_bluepill",
     platform="ststm32",
 )
 
@@ -831,7 +831,7 @@ STM32F103C8_BLUEPILL = Board(
 # Supports Roger Clark STM32 core and STM32duino
 STM32F103CB_BLUEPILL = Board(
     board_name="stm32f103cb_bluepill",
-    real_board_name="bluepill_f103cb",
+    real_board_name="stm32f103cb_bluepill",
     platform="ststm32",
 )
 
