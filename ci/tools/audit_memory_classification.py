@@ -31,7 +31,7 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("uno", "low"),
     ("nano", "low"),
     ("nano_every", "low"),
-    ("yun", "low"),
+    ("atmega32u4_leonardo", "low"),
     ("attiny85", "low"),
     ("attiny88", "low"),
     ("attiny1604", "low"),
@@ -42,11 +42,11 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("teensy30", "low"),
     ("teensy31", "low"),  # __MK20DX256__ - important!
     # STM32F1 (all low-memory)
-    ("bluepill", "low"),
-    ("bluepill_f103cb", "low"),
-    ("maple_mini", "low"),
-    ("hy_tinystm103tb", "low"),
-    ("blackpill", "high"),  # STM32F4 - HIGH memory
+    ("stm32f103c8_bluepill", "low"),
+    ("stm32f103cb_bluepill", "low"),
+    ("stm32f103cb_maplemini", "low"),
+    ("stm32f103tb_tinystm", "low"),
+    ("stm32f411ce_blackpill", "high"),  # STM32F4 - HIGH memory
     # ESP variants
     ("esp8266", "low"),
     ("esp32dev", "high"),
@@ -62,16 +62,15 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("teensy40", "high"),
     ("teensy41", "high"),
     # ARM Cortex boards (typically high-memory)
-    ("due", "high"),
-    ("digix", "high"),
-    ("zero", "high"),
+    ("sam3x8e_due", "high"),
+    ("samd21g18a_zero", "high"),
     (
-        "adafruit_feather_m0",
+        "samd21g18a_feather",
         "high",
     ),  # SAMD21 with 32KB RAM - borderline but not in C++ low list
-    ("adafruit_feather_m4", "high"),  # SAMD51 - definitely high
-    ("adafruit_grand_central_m4", "high"),  # SAMD51 - definitely high
-    ("giga_r1", "high"),  # STM32H747 - definitely high
+    ("samd51j19a_feather_m4", "high"),  # SAMD51 - definitely high
+    ("samd51p20a_grandcentral", "high"),  # SAMD51 - definitely high
+    ("stm32h747xi_giga", "high"),  # STM32H747 - definitely high
     # RP2040
     ("rp2040", "high"),
     ("rp2350", "high"),
@@ -194,7 +193,7 @@ def verify_sketch_macros_compliance():
     print("  7. STM32F1")
     print("  8. ESP8266")
     print("  9. ARDUINO_ARCH_RENESAS_UNO")
-    print(" 10. ARDUINO_BLUEPILL_F103C8")
+    print(" 10. ARDUINO_STM32F103C8_BLUEPILL")
     print()
 
     print("Python boards.py low_memory_boards list:")
@@ -207,14 +206,14 @@ def verify_sketch_macros_compliance():
     print("  ✓ uno (AVR ATmega328P)")
     print("  ✓ nano (AVR ATmega328P)")
     print("  ✓ nano_every (AVR ATmega4809)")
-    print("  ✓ yun (AVR ATmega32U4)")
+    print("  ✓ atmega32u4_leonardo (AVR ATmega32U4)")
     print("  ✓ attiny85, attiny88 (AVR ATtiny)")
     print("  ✓ attiny1604, attiny4313, attiny1616 (AVR ATtiny)")
     print("  ✓ teensy_lc (ARDUINO_TEENSYLC)")
     print("  ✓ teensy30 (ARDUINO_TEENSY30)")
     print("  ✓ teensy31 (NEW: __MK20DX256__)")
-    print("  ✓ bluepill, bluepill_f103cb (STM32F1)")
-    print("  ✓ maple_mini, hy_tinystm103tb (STM32F1)")
+    print("  ✓ stm32f103c8_bluepill, stm32f103cb_bluepill (STM32F1)")
+    print("  ✓ stm32f103cb_maplemini, stm32f103tb_tinystm (STM32F1)")
     print("  ✓ esp8266 (ESP8266)")
     print("  ✓ uno_r4_wifi, uno_r4_minima (ARDUINO_ARCH_RENESAS_UNO)")
     print()

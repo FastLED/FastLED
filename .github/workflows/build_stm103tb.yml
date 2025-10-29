@@ -1,4 +1,4 @@
-name: stm103tb
+name: stm32f103tb_tinystm
 
 on:
   push:
@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: hy_tinystm103tb all
+      args: stm32f103tb_tinystm all

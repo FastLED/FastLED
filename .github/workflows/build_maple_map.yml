@@ -1,4 +1,4 @@
-name: maple_map
+name: stm32f103cb_maplemini
 
 on:
   push:
@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: maple_mini all
+      args: stm32f103cb_maplemini all

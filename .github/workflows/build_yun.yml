@@ -1,4 +1,4 @@
-name: yun-32u4
+name: atmega32u4_leonardo
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: yun all
+      args: atmega32u4_leonardo all

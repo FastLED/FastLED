@@ -1,4 +1,4 @@
-name: Arduino Giga-R1
+name: stm32h747xi_giga
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: giga_r1 all
+      args: stm32h747xi_giga all

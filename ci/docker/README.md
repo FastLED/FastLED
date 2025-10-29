@@ -298,7 +298,7 @@ PlatformIO automatically creates merged binaries at:
 The system supports all platforms defined in `ci/boards.py`:
 
 ### AVR
-- `uno`, `nano_every`, `yun`
+- `uno`, `nano_every`, `atmega32u4_leonardo`
 - `attiny85`, `attiny88`, `attiny4313`
 - `attiny1604`, `attiny1616` (megaAVR)
 
@@ -307,8 +307,8 @@ The system supports all platforms defined in `ci/boards.py`:
 - All ESP32 variants with custom SDK support
 
 ### ARM
-- `due`, `digix` (SAM)
-- `bluepill`, `blackpill`, `giga_r1` (STM32)
+- `sam3x8e_due` (SAM)
+- `stm32f103c8_bluepill`, `stm32f411ce_blackpill`, `stm32h747xi_giga` (STM32)
 - `teensy30`, `teensy40`, `teensy41` (Teensy)
 - `rp2040`, `rp2350` (RP2040)
 - `nrf52840_dk`, `xiaoblesense` (nRF52)
@@ -529,14 +529,14 @@ These images are:
 
 | Platform | Docker Image | Cached Boards |
 |----------|--------------|---------------|
-| AVR | `niteris/fastled-compiler-avr:latest` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
+| AVR | `niteris/fastled-compiler-avr:latest` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
 | ESP RISC-V | `niteris/fastled-compiler-esp-riscv:latest` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
 | ESP Xtensa | `niteris/fastled-compiler-esp-xtensa:latest` | esp32dev, esp32s2, esp32s3, esp8266 |
 | Teensy | `niteris/fastled-compiler-teensy:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
-| STM32 | `niteris/fastled-compiler-stm32:latest` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
+| STM32 | `niteris/fastled-compiler-stm32:latest` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga |
 | RP | `niteris/fastled-compiler-rp:latest` | rp2040, rp2350 |
 | NRF52 | `niteris/fastled-compiler-nrf52:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
-| SAM | `niteris/fastled-compiler-sam:latest` | due, digix |
+| SAM | `niteris/fastled-compiler-sam:latest` | sam3x8e_due |
 
 ### Key Features
 

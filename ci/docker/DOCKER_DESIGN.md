@@ -48,7 +48,7 @@ niteris/fastled-compiler-base:latest
 - `avr` image compiles: uno, attiny85, attiny88, nano_every, etc.
 - `esp` image compiles: esp32dev, esp32s3, esp32c3, etc.
 - `teensy` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
-- `sam` image compiles: due, digix
+- `sam` image compiles: sam3x8e_due
 
 This ensures that any board in the platform family can compile instantly without downloading additional toolchains.
 
@@ -66,14 +66,14 @@ Platform images are organized by **toolchain family**, not individual boards. Bo
 
 | Platform Family | Docker Image | Included Boards |
 |----------------|--------------|-----------------|
-| **avr** | `fastled-compiler-avr` | uno, yun, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
+| **avr** | `fastled-compiler-avr` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
 | **esp-riscv** | `fastled-compiler-esp-riscv` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
 | **esp-xtensa** | `fastled-compiler-esp-xtensa` | esp32dev, esp32s2, esp32s3, esp8266 |
 | **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc |
-| **stm32** | `fastled-compiler-stm32` | bluepill, blackpill, maple_mini, hy_tinystm103tb, giga_r1 |
+| **stm32** | `fastled-compiler-stm32` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga |
 | **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 |
 | **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
-| **sam** | `fastled-compiler-sam` | due, digix |
+| **sam** | `fastled-compiler-sam` | sam3x8e_due |
 
 ### Platform Naming Convention
 
@@ -144,7 +144,7 @@ niteris/fastled-compiler-esp-xtensa:idf5.5    → Explicit IDF 5.5
 **Image**: `niteris/fastled-compiler-avr:latest`
 
 **Pre-cached boards**:
-- Classic AVR (`atmelavr`): uno, yun, attiny85, attiny88, attiny4313
+- Classic AVR (`atmelavr`): uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313
 - Modern AVR (`atmelmegaavr`): nano_every, attiny1604, attiny1616
 
 **Build process**: Compiles example for each board listed above to ensure all AVR toolchains are cached in the image.
@@ -167,14 +167,14 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  (10 minute delay for registry propagation)
                  ↓
 2:10 AM UTC  →  Platform images build in parallel (each compiles multiple boards)
-                 ├── avr (builds: uno, attiny85, attiny88, nano_every, etc.)
+                 ├── avr (builds: uno, atmega32u4_leonardo, attiny85, attiny88, nano_every, etc.)
                  ├── esp-riscv (builds: esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4)
                  ├── esp-xtensa (builds: esp32dev, esp32s2, esp32s3, esp8266)
                  ├── teensy (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
-                 ├── stm32 (builds: bluepill, blackpill, maple_mini, etc.)
+                 ├── stm32 (builds: stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, etc.)
                  ├── rp (builds: rp2040, rp2350)
                  ├── nrf52 (builds: nrf52840_dk, adafruit boards, xiaoblesense)
-                 └── sam (builds: due, digix)
+                 └── sam (builds: sam3x8e_due)
 ```
 
 **Scheduling**:
@@ -226,18 +226,18 @@ The single source of truth for platform→boards relationships. This module defi
 **Structure**:
 ```python
 DOCKER_PLATFORMS = {
-    "avr": ["uno", "yun", "attiny85", "attiny88", "attiny4313",
+    "avr": ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "attiny4313",
             "nano_every", "attiny1604", "attiny1616"],
     "esp-riscv": ["esp32c2", "esp32c3", "esp32c5", "esp32c6",
                   "esp32h2", "esp32p4"],
     "esp-xtensa": ["esp32dev", "esp32s2", "esp32s3", "esp8266"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
-    "stm32": ["bluepill", "blackpill", "maple_mini",
-              "hy_tinystm103tb", "giga_r1"],
+    "stm32": ["stm32f103c8_bluepill", "stm32f411ce_blackpill", "stm32f103cb_maplemini",
+              "stm32f103tb_tinystm", "stm32h747xi_giga"],
     "rp": ["rp2040", "rp2350"],
     "nrf52": ["nrf52840_dk", "adafruit_feather_nrf52840_sense",
               "xiaoblesense"],
-    "sam": ["due", "digix"],
+    "sam": ["sam3x8e_due"],
 }
 
 # Reverse mapping automatically generated
@@ -334,7 +334,7 @@ docker build -f Dockerfile.template \
 **What happens**:
 - `build.sh` receives `PLATFORM_NAME=uno`
 - Looks up platform family in `build_platforms.py`: uno → "avr"
-- Gets all AVR boards: ["uno", "yun", "attiny85", "attiny88", "nano_every", "attiny1604", "attiny1616"]
+- Gets all AVR boards: ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "nano_every", "attiny1604", "attiny1616"]
 - Compiles each board to pre-cache all AVR toolchains
 - Image contains cached toolchains for ALL AVR boards
 

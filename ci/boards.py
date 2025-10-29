@@ -232,7 +232,7 @@ class Board:
             "uno",
             "nano",
             "nano_every",
-            "yun",
+            "atmega32u4_leonardo",
             "attiny85",
             "attiny88",
             "attiny1604",
@@ -241,10 +241,10 @@ class Board:
             "teensylc",
             "teensy30",
             "teensy31",
-            "bluepill",
-            "bluepill_f103cb",
-            "maple_mini",
-            "hy_tinystm103tb",
+            "stm32f103c8_bluepill",
+            "stm32f103cb_bluepill",
+            "stm32f103cb_maplemini",
+            "stm32f103tb_tinystm",
             "esp8266",
             "uno_r4_wifi",
             "uno_r4_minima",
@@ -323,7 +323,7 @@ class Board:
         # AVR boards
         if board_lower == "uno" or board_lower == "nano":
             return "ATMEGA328P"
-        elif board_lower == "yun":
+        elif board_lower == "atmega32u4_leonardo" or "leonardo" in board_lower:
             return "ATMEGA32U4"
         elif board_lower.startswith("attiny"):
             return self.board_name.upper()  # ATtiny85, ATtiny88, etc.
@@ -368,21 +368,29 @@ class Board:
             return "IMXRT1062"
 
         # STM32 boards
-        elif "bluepill" in board_lower:
-            if "f103cb" in board_lower:
-                return "STM32F103CB"
-            else:
-                return "STM32F103C8"
-        elif "blackpill" in board_lower:
-            return "STM32F411CE"
-        elif "maple" in board_lower:
+        elif "stm32f103c8_bluepill" in board_lower:
+            return "STM32F103C8"
+        elif (
+            "stm32f103cb_bluepill" in board_lower
+            or "stm32f103cb_maplemini" in board_lower
+        ):
             return "STM32F103CB"
-        elif "giga" in board_lower:
-            return "STM32H747"
+        elif "stm32f103tb_tinystm" in board_lower:
+            return "STM32F103TB"
+        elif "stm32f411ce_blackpill" in board_lower:
+            return "STM32F411CE"
+        elif "stm32h747xi_giga" in board_lower:
+            return "STM32H747XI"
 
         # SAM boards
-        elif board_lower == "due" or board_lower == "digix":
+        elif "sam3x8e_due" in board_lower:
             return "SAM3X8E"
+        elif "samd21g18a" in board_lower:
+            return "SAMD21G18A"
+        elif "samd51j19a" in board_lower:
+            return "SAMD51J19A"
+        elif "samd51p20a" in board_lower:
+            return "SAMD51P20A"
 
         # RP2040/RP2350
         elif "pico" in board_lower:
@@ -596,8 +604,8 @@ NATIVE = Board(
     ],
 )
 
-DUE = Board(
-    board_name="due",
+SAM3X8E_DUE = Board(
+    board_name="sam3x8e_due",
     platform="atmelsam",
 )
 
@@ -662,8 +670,8 @@ ESP32DEV_IDF4_4 = Board(
     platform=ESP32_IDF_4_4_LATEST,
 )
 
-GIGA_R1 = Board(
-    board_name="giga_r1",
+STM32H747XI_GIGA = Board(
+    board_name="stm32h747xi_giga",
     platform="ststm32",
     framework="arduino",
     real_board_name="giga_r1_m7",
@@ -811,8 +819,8 @@ RPI_PICO2 = Board(
     board_build_filesystem_size="0.5m",
 )
 
-BLUEPILL = Board(
-    board_name="bluepill",
+STM32F103C8_BLUEPILL = Board(
+    board_name="stm32f103c8_bluepill",
     real_board_name="bluepill_f103c8",
     platform="ststm32",
 )
@@ -820,21 +828,21 @@ BLUEPILL = Board(
 # STM32F103CB variant with 128KB flash (double the C8's 64KB)
 # Fully compatible with BluePill F103C8 but with more flash memory
 # Supports Roger Clark STM32 core and STM32duino
-BLUEPILL_F103CB = Board(
-    board_name="bluepill_f103cb",
+STM32F103CB_BLUEPILL = Board(
+    board_name="stm32f103cb_bluepill",
     real_board_name="bluepill_f103cb",
     platform="ststm32",
 )
 
 # maple_mini_b20
-MAPLE_MINI = Board(
-    board_name="maple_mini",
+STM32F103CB_MAPLEMINI = Board(
+    board_name="stm32f103cb_maplemini",
     real_board_name="maple_mini_b20",
     platform="ststm32",
 )
 
-HY_TINYSTM103TB = Board(
-    board_name="hy_tinystm103tb",
+STM32F103TB_TINYSTM = Board(
+    board_name="stm32f103tb_tinystm",
     platform="ststm32",
 )
 
@@ -925,16 +933,10 @@ UNO = Board(
     framework="arduino",
 )
 
-YUN = Board(
-    board_name="yun",
+ATMEGA32U4_LEONARDO = Board(
+    board_name="atmega32u4_leonardo",
+    real_board_name="leonardo",
     platform="atmelavr",
-    framework="arduino",
-)
-
-DIGIX = Board(
-    board_name="digix",
-    real_board_name="due",  # Digix is Arduino Due compatible
-    platform="atmelsam",
     framework="arduino",
 )
 
@@ -965,8 +967,8 @@ XIAO_ESP32S3 = Board(
 )
 
 # STM32F4 Black Pill board - addresses GitHub issue #726
-BLACKPILL = Board(
-    board_name="blackpill",
+STM32F411CE_BLACKPILL = Board(
+    board_name="stm32f411ce_blackpill",
     real_board_name="blackpill_f411ce",
     platform="ststm32",
 )
@@ -983,22 +985,24 @@ MGM240S = Board(
 )
 
 # SAMD21 boards (Cortex-M0+ @ 48 MHz)
-ADAFRUIT_FEATHER_M0 = Board(
-    board_name="adafruit_feather_m0",
+SAMD21G18A_FEATHER = Board(
+    board_name="samd21g18a_feather",
+    real_board_name="adafruit_feather_m0",
     platform="atmelsam",
     framework="arduino",
 )
 
-ARDUINO_ZERO = Board(
-    board_name="zero",
+SAMD21G18A_ZERO = Board(
+    board_name="samd21g18a_zero",
     real_board_name="zeroUSB",
     platform="atmelsam",
     framework="arduino",
 )
 
 # SAMD51 boards (Cortex-M4F @ 120 MHz)
-ADAFRUIT_FEATHER_M4 = Board(
-    board_name="adafruit_feather_m4",
+SAMD51J19A_FEATHER_M4 = Board(
+    board_name="samd51j19a_feather_m4",
+    real_board_name="adafruit_feather_m4",
     platform="atmelsam",
     framework="arduino",
     lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues
@@ -1007,8 +1011,9 @@ ADAFRUIT_FEATHER_M4 = Board(
     ],
 )
 
-ADAFRUIT_GRAND_CENTRAL_M4 = Board(
-    board_name="adafruit_grand_central_m4",
+SAMD51P20A_GRANDCENTRAL = Board(
+    board_name="samd51p20a_grandcentral",
+    real_board_name="adafruit_grand_central_m4",
     platform="atmelsam",
     framework="arduino",
     lib_ignore=["I2S"],  # I2S library has SAMD51 compatibility issues

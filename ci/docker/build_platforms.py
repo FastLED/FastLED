@@ -21,7 +21,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # Platforms: atmelavr (classic) + atmelmegaavr (modern)
     "avr": [
         "uno",
-        "yun",
+        "atmega32u4_leonardo",
         "attiny85",
         "attiny88",
         "attiny4313",
@@ -66,11 +66,11 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # Image: niteris/fastled-compiler-stm32:latest
     # Platform: ststm32
     "stm32": [
-        "bluepill",
-        "blackpill",
-        "maple_mini",
-        "hy_tinystm103tb",
-        "giga_r1",
+        "stm32f103c8_bluepill",
+        "stm32f411ce_blackpill",
+        "stm32f103cb_maplemini",
+        "stm32f103tb_tinystm",
+        "stm32h747xi_giga",
     ],
     # RP Platform - Raspberry Pi Pico family
     # Image: niteris/fastled-compiler-rp:latest
@@ -92,8 +92,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
     # Image: niteris/fastled-compiler-sam:latest
     # Platform: atmelsam
     "sam": [
-        "due",
-        "digix",
+        "sam3x8e_due",
     ],
 }
 
@@ -136,7 +135,7 @@ def get_boards_for_platform(platform: str) -> List[str]:
 
     Example:
         >>> get_boards_for_platform("avr")
-        ['uno', 'yun', 'attiny85', ...]
+        ['uno', 'atmega32u4_leonardo', 'attiny85', ...]
     """
     return DOCKER_PLATFORMS.get(platform, [])
 

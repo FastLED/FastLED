@@ -1,4 +1,4 @@
-name: Blackpill (STM32F411CE)
+name: stm32f411ce_blackpill
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: blackpill all
+      args: stm32f411ce_blackpill all

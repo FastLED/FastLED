@@ -1,4 +1,4 @@
-name: Bluepill F103CB (128KB)
+name: stm32f103cb_bluepill
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: bluepill_f103cb all
+      args: stm32f103cb_bluepill all

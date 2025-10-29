@@ -1,4 +1,4 @@
-name: digix
+name: sam3x8e_due (digix merged)
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: digix all
+      args: sam3x8e_due all

@@ -29,7 +29,7 @@ def get_default_boards() -> List[str]:
         "teensylc",
         "teensy31",
         "teensy41",
-        "digix",
+        "sam3x8e_due",
         "rpipico",
         "rpipico2",
     ]

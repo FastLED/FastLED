@@ -34,8 +34,8 @@ DEFAULT_BOARDS_NAMES = [
     "esp32c6",
     "esp32s3",
     "esp32p4",
-    "yun",
-    "digix",
+    "atmega32u4_leonardo",
+    "sam3x8e_due",
     "teensylc",
     "teensy30",
     "teensy31",
@@ -47,9 +47,9 @@ DEFAULT_BOARDS_NAMES = [
     "uno_r4_wifi",
     "esp32rmt_51",
     "esp32dev_idf44",
-    "bluepill",
+    "stm32f103c8_bluepill",
     "esp32rmt_51",
-    "giga_r1",
+    "stm32h747xi_giga",
     "sparkfun_xrp_controller",
 ]
 

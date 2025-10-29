@@ -1,4 +1,4 @@
-name: Bluepill (STM32F103C8)
+name: stm32f103c8_bluepill
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: bluepill all
+      args: stm32f103c8_bluepill all

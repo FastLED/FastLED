@@ -1,4 +1,4 @@
-name: check_bluepill_size
+name: check_stm32f103c8_bluepill_size
 
 on:
   push:
@@ -32,6 +32,6 @@ jobs:
   build:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
-      board: bluepill
+      board: stm32f103c8_bluepill
       max_size: 55000
       max_size_apa102: 45000
