@@ -38,7 +38,7 @@ doctest_main = static_library('doctest_main',
 )
 
 # Automatically discover test files using rglob from tests/ directory
-# Find all test_*.cpp files recursively, plus *.cpp files in fl/ subdirectory
+# Find all test_*.cpp files recursively, plus *.cpp files in fl/, fx/ subdirectories
 test_cpp_files = run_command('python', '-c', '''
 import sys
 from pathlib import Path
@@ -51,12 +51,13 @@ for f in sorted(tests_dir.rglob("test_*.cpp")):
     if f.name not in excluded:
         rel_path = f.resolve().relative_to(tests_dir)
         print(rel_path.as_posix())
-# Also find *.cpp files directly in fl/ subdirectory
-fl_dir = tests_dir / "fl"
-if fl_dir.exists():
-    for f in sorted(fl_dir.glob("*.cpp")):
-        rel_path = f.resolve().relative_to(tests_dir)
-        print(rel_path.as_posix())
+# Also find *.cpp files directly in fl/, fx/ subdirectories
+for subdir in ["fl", "fx"]:
+    subdir_path = tests_dir / subdir
+    if subdir_path.exists():
+        for f in sorted(subdir_path.glob("*.cpp")):
+            rel_path = f.resolve().relative_to(tests_dir)
+            print(rel_path.as_posix())
 ''', meson.current_source_dir(), check: true).stdout().strip().split('\n')
 
 # Build test_names list and file path mapping for subdirectories
@@ -68,10 +69,15 @@ foreach test_file : test_cpp_files
     # Extract test name from file path
     # For noise/test_noise_X.cpp -> test_noise_X (not noise_test_noise_X)
     # For fl/algorithm.cpp -> fl_algorithm (prefix with subdirectory name)
+    # For fx/engine.cpp -> fx_engine (prefix with subdirectory name)
     if test_file.startswith('fl/')
       # Files in fl/ subdirectory: add fl_ prefix to avoid conflicts
       base_name = test_file.split('/')[-1].replace('.cpp', '')
       test_name = 'fl_' + base_name
+    elif test_file.startswith('fx/')
+      # Files in fx/ subdirectory: add fx_ prefix to avoid conflicts
+      base_name = test_file.split('/')[-1].replace('.cpp', '')
+      test_name = 'fx_' + base_name
     else
       test_name = test_file.split('/')[-1].replace('.cpp', '')
     endif
