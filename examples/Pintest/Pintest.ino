@@ -1,4 +1,4 @@
-// @filter: ((platform is avr) or (platform is teensy))
+// @filter: ((platform is avr) and not (board is attiny*)) or (platform is teensy)
 
 /// @file    Pintest.ino
 /// @brief   Pintest example with platform detection
