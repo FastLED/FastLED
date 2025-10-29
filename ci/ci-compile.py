@@ -136,11 +136,14 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
         compile_cmd += " --merged-bin"
     if config.output_path:
         # If output directory is mounted, use the container path (/fastled/output)
-        # Otherwise, use the original path for docker cp to work
+        # Otherwise, use POSIX path format for Docker/Linux compatibility
         if docker_config.output_dir is not None:
             compile_cmd += " -o output"
         else:
-            compile_cmd += f" -o {config.output_path}"
+            # Use POSIX path format (forward slashes) for Docker/Linux compatibility
+            # On Windows, backslashes in paths get interpreted as escape characters in bash
+            output_path_posix = config.output_path.as_posix()
+            compile_cmd += f" -o {output_path_posix}"
     if config.max_failures is not None:
         compile_cmd += f" --max-failures {config.max_failures}"
 
