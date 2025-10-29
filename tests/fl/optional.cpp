@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/optional.h"
+#include "fl/compiler_control.h"
 
 using namespace fl;
 
@@ -133,6 +134,8 @@ TEST_CASE("fl::Optional - assignment operators") {
 
     SUBCASE("self-assignment") {
         Optional<int> opt(42);
+        FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
         opt = opt;
         CHECK(opt.has_value());
         CHECK(*opt == 42);

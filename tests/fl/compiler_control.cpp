@@ -2,7 +2,7 @@
 #include "fl/compiler_control.h"
 
 // Test helper: Function that would normally trigger a warning
-static int unused_parameter_function(int x, int y) {
+static int unused_parameter_function(int x, FL_MAYBE_UNUSED int y) {
     FL_DISABLE_WARNING_PUSH
     FL_DISABLE_WARNING_UNUSED_PARAMETER
     return x;  // y is unused
@@ -555,7 +555,7 @@ TEST_CASE("practical usage scenarios") {
     SUBCASE("suppress warning in template code") {
         FL_DISABLE_WARNING_PUSH
         FL_DISABLE_WARNING_UNUSED_PARAMETER
-        auto lambda = [](int x, int y) { return x; };
+        auto lambda = [](int x, FL_MAYBE_UNUSED int y) { return x; };
         FL_DISABLE_WARNING_POP
         CHECK(lambda(10, 20) == 10);
     }

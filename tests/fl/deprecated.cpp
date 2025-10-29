@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/deprecated.h"
+#include "fl/compiler_control.h"
 
 using namespace fl;
 
@@ -34,8 +35,11 @@ inline int deprecated_test_function() {
 
 TEST_CASE("fl::deprecated_function_usage") {
     // Function should still work even if deprecated
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     int result = deprecated_test_function();
     CHECK_EQ(result, 42);
+    FL_DISABLE_WARNING_POP
 }
 
 // Test that deprecated class macro can be applied
@@ -49,6 +53,8 @@ public:
 
 TEST_CASE("fl::deprecated_class_usage") {
     // Class should still work even if deprecated
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     DeprecatedTestClass obj;
     CHECK_EQ(obj.getValue(), 100);
 
@@ -71,10 +77,13 @@ public:
 
 TEST_CASE("fl::deprecated_method_usage") {
     TestClassWithDeprecatedMethod obj;
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
 
     // Old method should still work
     CHECK_EQ(obj.oldMethod(), 1);
 
+    FL_DISABLE_WARNING_POP
     // New method should work
     CHECK_EQ(obj.newMethod(), 2);
 }
@@ -92,6 +101,8 @@ inline int deprecated_fastled() {
 
 TEST_CASE("fl::deprecated_macro_equivalence") {
     // Both versions should work
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     CHECK_EQ(deprecated_fl(), 1);
     CHECK_EQ(deprecated_fastled(), 2);
 }
@@ -104,11 +115,14 @@ DeprecatedTestStruct {
 };
 
 TEST_CASE("fl::deprecated_struct_usage") {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     DeprecatedTestStruct s;
     s.x = 10;
     s.y = 20;
     CHECK_EQ(s.x, 10);
     CHECK_EQ(s.y, 20);
+    FL_DISABLE_WARNING_POP
 }
 
 // Test deprecated typedef
@@ -116,8 +130,11 @@ FL_DEPRECATED("Use int instead")
 typedef int deprecated_int_type;
 
 TEST_CASE("fl::deprecated_typedef_usage") {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     deprecated_int_type value = 42;
     CHECK_EQ(value, 42);
+    FL_DISABLE_WARNING_POP
 }
 
 // Test deprecated variable
@@ -127,7 +144,10 @@ static const int OLD_CONSTANT = 100;
 static const int NEW_CONSTANT = 200;
 
 TEST_CASE("fl::deprecated_variable_usage") {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     CHECK_EQ(OLD_CONSTANT, 100);
+    FL_DISABLE_WARNING_POP
     CHECK_EQ(NEW_CONSTANT, 200);
 }
 
@@ -144,8 +164,11 @@ T newTemplateFunction(T value) {
 }
 
 TEST_CASE("fl::deprecated_template_function") {
+    FL_DISABLE_WARNING_PUSH
+    FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
     CHECK_EQ(oldTemplateFunction(5), 10);
     CHECK_EQ(oldTemplateFunction(3.0), 6.0);
+    FL_DISABLE_WARNING_POP
 
     CHECK_EQ(newTemplateFunction(5), 15);
     CHECK_EQ(newTemplateFunction(3.0), 9.0);
