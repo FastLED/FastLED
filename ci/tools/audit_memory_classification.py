@@ -43,7 +43,6 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("teensy31", "low"),  # __MK20DX256__ - important!
     # STM32F1 (all low-memory)
     ("stm32f103c8_bluepill", "low"),
-    ("stm32f103cb_bluepill", "low"),
     ("stm32f103cb_maplemini", "low"),
     ("stm32f103tb_tinystm", "low"),
     ("stm32f411ce_blackpill", "high"),  # STM32F4 - HIGH memory
@@ -212,7 +211,7 @@ def verify_sketch_macros_compliance():
     print("  ✓ teensy_lc (ARDUINO_TEENSYLC)")
     print("  ✓ teensy30 (ARDUINO_TEENSY30)")
     print("  ✓ teensy31 (NEW: __MK20DX256__)")
-    print("  ✓ stm32f103c8_bluepill, stm32f103cb_bluepill (STM32F1)")
+    print("  ✓ stm32f103c8_bluepill (STM32F1)")
     print("  ✓ stm32f103cb_maplemini, stm32f103tb_tinystm (STM32F1)")
     print("  ✓ esp8266 (ESP8266)")
     print("  ✓ uno_r4_wifi, uno_r4_minima (ARDUINO_ARCH_RENESAS_UNO)")

@@ -242,7 +242,6 @@ class Board:
             "teensy30",
             "teensy31",
             "stm32f103c8_bluepill",
-            "stm32f103cb_bluepill",
             "stm32f103cb_maplemini",
             "stm32f103tb_tinystm",
             "esp8266",
@@ -370,10 +369,7 @@ class Board:
         # STM32 boards
         elif "stm32f103c8_bluepill" in board_lower:
             return "STM32F103C8"
-        elif (
-            "stm32f103cb_bluepill" in board_lower
-            or "stm32f103cb_maplemini" in board_lower
-        ):
+        elif "stm32f103cb_maplemini" in board_lower:
             return "STM32F103CB"
         elif "stm32f103tb_tinystm" in board_lower:
             return "STM32F103TB"
@@ -823,15 +819,6 @@ RPI_PICO2 = Board(
 STM32F103C8_BLUEPILL = Board(
     board_name="stm32f103c8_bluepill",
     real_board_name="bluepill_f103c8",
-    platform="ststm32",
-)
-
-# STM32F103CB variant with 128KB flash (double the C8's 64KB)
-# Fully compatible with BluePill F103C8 but with more flash memory
-# Supports Roger Clark STM32 core and STM32duino
-STM32F103CB_BLUEPILL = Board(
-    board_name="stm32f103cb_bluepill",
-    real_board_name="bluepill_f103cb",
     platform="ststm32",
 )
 
