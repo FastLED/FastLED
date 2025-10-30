@@ -20,7 +20,10 @@ SOURCE_DIRECTORIES: List[Tuple[str, bool]] = [
     ("src/fl", True),  # FastLED stdlib-like utilities (recursive)
     ("src/platforms/shared", True),  # Shared platform code (recursive)
     ("src/platforms/esp", True),  # ESP32/ESP8266 specific code (recursive)
-    ("src/platforms/arm", True),  # ARM-based platforms (RP2040, Teensy, etc.) (recursive)
+    (
+        "src/platforms/arm",
+        True,
+    ),  # ARM-based platforms (RP2040, Teensy, etc.) (recursive)
     ("src/third_party", True),  # Third-party libraries (recursive)
     ("src/fl/codec", False),  # Codec implementations
     ("src/fx", True),  # Effects framework (recursive)
