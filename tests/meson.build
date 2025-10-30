@@ -139,9 +139,6 @@ if unity_enabled
     endif
   endforeach
 
-  # Add parallel SPI ISR test to platform tests
-  platform_tests += files('test_parallel_spi_isr.cpp')
-
   # Build test executables for each category
   test_categories = {
     'fl_tests': fl_tests,

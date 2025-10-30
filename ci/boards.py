@@ -831,6 +831,7 @@ STM32F103CB_MAPLEMINI = Board(
 
 STM32F103TB_TINYSTM = Board(
     board_name="stm32f103tb_tinystm",
+    real_board_name="hy_tinystm103tb",
     platform="ststm32",
 )
 
