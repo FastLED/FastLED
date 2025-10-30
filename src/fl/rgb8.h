@@ -201,7 +201,10 @@ struct CRGB {
     /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    FASTLED_FORCE_INLINE CRGB& setHue (u8 hue);
+    FASTLED_FORCE_INLINE CRGB& setHue (u8 hue)
+    {
+        return setHSV( hue, 255, 255);
+    }
 
     /// Allow assignment from HSV color
     CRGB& operator= (const hsv8& rhs);
