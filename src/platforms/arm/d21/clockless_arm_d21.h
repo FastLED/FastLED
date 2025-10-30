@@ -4,6 +4,7 @@
 #include "platforms/arm/common/m0clockless.h"
 #include "fl/chipsets/timing_traits.h"
 #include "eorder.h"
+#include "fastled_delay.h"
 namespace fl {
 #define FASTLED_HAS_CLOCKLESS 1
 

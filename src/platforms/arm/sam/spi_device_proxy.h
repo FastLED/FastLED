@@ -87,7 +87,9 @@ public:
         // Register with bus manager
         // NOTE: Bus manager will determine if we use Single/Dual/Quad SPI
         // based on how many devices share our clock pin
-        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_SPEED, this);
+        // Calculate SPI speed from clock divider: speed_hz = F_CPU / divider
+        constexpr uint32_t spi_speed_hz = F_CPU / SPI_CLOCK_DIVIDER;
+        mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, spi_speed_hz, this);
 
         if (!mHandle.is_valid) {
             FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
