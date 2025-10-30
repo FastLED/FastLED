@@ -7,6 +7,8 @@
 #include "fl/int.h"
 
 #include "hsv.h"
+#include "crgb.h"
+#include "hsv2rgb.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
 #include "fl/type_traits.h"
