@@ -5,6 +5,8 @@
 
 #include "pixeltypes.h"
 #include "pixel_controller.h"
+#include "cpixel_ledcontroller.h"
+#include "fl/force_inline.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -214,10 +216,6 @@ enum UCS7604Mode {
 };
 
 }  // namespace fl
-
-// Include required headers for UCS7604Controller implementation
-#include "cpixel_ledcontroller.h"
-#include "fl/force_inline.h"
 
 namespace fl {
 
