@@ -37,7 +37,8 @@ void setup() {
     // FastLED.addLeds<UCS1903B, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<UCS1904, DATA_PIN, RGB>(leds, NUM_LEDS);
     // FastLED.addLeds<UCS2903, DATA_PIN, RGB>(leds, NUM_LEDS);
-    // FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);  // BETA: 16-bit RGBW chipset, ARM M0/M0+ only (SAMD21/SAMD51)
+    // FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);  // 8-bit RGBW chipset (all platforms)
+    // FastLED.addLeds<UCS7604HD, DATA_PIN, GRB>(leds, NUM_LEDS);  // 16-bit RGBW chipset (all platforms)
     // FastLED.addLeds<WS2812, DATA_PIN, RGB>(leds, NUM_LEDS);  // GRB ordering is typical
     // FastLED.addLeds<WS2852, DATA_PIN, RGB>(leds, NUM_LEDS);  // GRB ordering is typical
     // FastLED.addLeds<WS2812B, DATA_PIN, RGB>(leds, NUM_LEDS);  // GRB ordering is typical

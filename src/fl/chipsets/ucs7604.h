@@ -20,7 +20,7 @@
 /// - **Bit Depths**: 8/12/14/16-bit configurable via protocol
 /// - **Data Rates**: 800 kbps or 1.6 Mbps (configurable)
 /// - **PWM Frequency**: 16,000 KHz (~500fps camera compatible, flicker-free)
-/// - **Color Modes**: RGB or RGBW (digitally configurable via preamble)
+/// - **Color Modes**: RGB or RGBW (digitally-configurable via preamble)
 /// - **Voltage**: DC24V (5V regulator integrated)
 /// - **Current Control**: 4-bit per channel (0x00-0x0F, 0-60mA range, interacts with hardware ILIM resistor)
 /// - **Special Features**:
@@ -109,16 +109,13 @@
 ///
 /// ## Platform Support
 ///
-/// Currently implemented for **ARM Cortex-M0/M0+ platforms** (SAMD21/SAMD51):
-/// - Reuses existing `showLedData<>()` ARM assembly routine for efficiency
-/// - Same assembly code handles preambles (raw bytes) and pixel data (with color correction)
-/// - Conditional compilation via `__SAMD21__` / `__SAMD51__` defines
+/// The UCS7604 uses a universal carrier-based implementation that works on **ALL platforms**
+/// with clockless controller support:
+/// - Wraps any clockless controller (ClocklessBlocking, ClocklessRMT, ClocklessI2S, etc.)
+/// - Same code works on AVR, ESP32, ARM (SAMD, STM32, Teensy), RP2040, and more
+/// - No platform-specific assembly required
 ///
-/// **Future Platform Expansion:**
-/// - ESP32 (RMT/I2S): Requires buffering all three chunks into unified RMT symbol stream
-/// - STM32: Similar approach to ARM M0 using GPIO bit-banging
-/// - Teensy 4.x: FlexIO DMA approach similar to ObjectFLED
-/// - AVR: Likely unsupported (insufficient timing margin for 260µs delays with interrupts)
+/// Implementation details can be found in `ucs7604_universal.h`.
 ///
 /// # References & Documentation
 ///
@@ -165,11 +162,11 @@
 /// CRGB leds[NUM_LEDS];
 ///
 /// void setup() {
-///     // 16-bit mode @ 800kHz (default)
+///     // Standard 8-bit mode @ 800kHz (recommended for most use cases)
 ///     FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);
 ///
-///     // Or 8-bit mode for memory efficiency:
-///     // FastLED.addLeds<UCS7604Controller800Khz_8bit, DATA_PIN, GRB>(leds, NUM_LEDS);
+///     // Or 16-bit high-definition mode for maximum color depth:
+///     // FastLED.addLeds<UCS7604HD, DATA_PIN, GRB>(leds, NUM_LEDS);
 /// }
 ///
 /// void loop() {
@@ -194,7 +191,7 @@
 ///
 /// **⚠️ BETA DRIVER - Hardware validation ongoing**
 ///
-/// - **Platforms**: ARM M0/M0+ (SAMD21/SAMD51) only
+/// - **Platforms**: All platforms with clockless controller support
 /// - **Tested**: Code compiles and passes linting, architecture validated via prototype
 /// - **Not Tested**: Real UCS7604 hardware validation pending
 /// - **Limitations**:
@@ -206,18 +203,10 @@
 /// For the latest status, hardware compatibility, and ESP32/STM32 ports, see:
 /// https://github.com/FastLED/FastLED/issues/2088
 
-// Platform-specific implementations
-#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__) || defined(__SAMD51__) || defined(__SAME51__)
-#define UCS7604_HAS_CONTROLLER 1
-#include "platforms/arm/common/m0clockless.h"
-#include "eorder.h"
-#include "fastpin.h"
-#include "cled_controller.h"
-#include "force_inline.h"
-
 namespace fl {
 
 /// @brief UCS7604 protocol configuration modes
+/// Used by UCS7604Controller (see ucs7604_universal.h) to configure chipset operation
 enum UCS7604Mode {
     UCS7604_MODE_8BIT_800KHZ = 0x03,   ///< 8-bit depth, 800 kHz, RGBW mode
     UCS7604_MODE_16BIT_800KHZ = 0x8B,  ///< 16-bit depth, 800 kHz, RGBW mode (default)
@@ -226,36 +215,103 @@ enum UCS7604Mode {
 
 }  // namespace fl
 
-#endif // Platform check for UCS7604 support
-
-#if defined(__SAMD21G18A__) || defined(__SAMD21E18A__) || defined(__SAMD21__)
+// Include required headers for UCS7604Controller implementation
+#include "cpixel_ledcontroller.h"
+#include "fl/force_inline.h"
 
 namespace fl {
 
-/// @brief UCS7604 controller for ARM M0 platforms (SAMD21)
-/// @tparam DATA_PIN The GPIO pin for data output
-/// @tparam T1 Timing parameter for first interval (WS2812 timing: 2 FMUL)
-/// @tparam T2 Timing parameter for second interval (WS2812 timing: 5 FMUL)
-/// @tparam T3 Timing parameter for third interval (WS2812 timing: 3 FMUL)
-/// @tparam RGB_ORDER The RGB ordering for pixel data (typically GRB)
-/// @tparam MODE The UCS7604 mode configuration byte
+/// @brief UCS7604 controller using carrier pattern
+/// @tparam CARRIER_CONTROLLER Any clockless controller type (must use RGB ordering)
+/// @tparam RGB_ORDER Color ordering for pixel data (default GRB)
+/// @tparam MODE UCS7604 mode byte (8-bit/16-bit, 800kHz/1.6MHz)
 ///
-/// This controller sends UCS7604 preambles before pixel data using the
-/// ARM M0 showLedData<>() assembly routine for all transmissions.
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
-          UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
-class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
-    typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPinBB<DATA_PIN>::port_t data_t;
+/// This controller wraps any clockless controller and uses it to transmit:
+/// 1. Chunk 1 (framing header) - 8 bytes
+/// 2. 260µs delay
+/// 3. Chunk 2 (configuration) - 7 bytes
+/// 4. 260µs delay
+/// 5. Pixel data - N bytes (actual LED data)
+///
+/// All data is transmitted using WS2812-compatible timing via the carrier.
+///
+/// # Architecture
+///
+/// The UCS7604Controller uses the wrapper/carrier pattern:
+///
+/// ```
+/// UCS7604Controller<CARRIER, RGB_ORDER, MODE>
+///   └─ wraps ANY ClocklessController as carrier
+///   └─ carrier: ClocklessBlocking, ClocklessRMT, ClocklessI2S, etc.
+///   └─ Uses carrier's optimized bit-banging for everything
+/// ```
+///
+/// # Key Insight
+///
+/// All UCS7604 data uses WS2812-compatible timing:
+/// - Preamble chunks (8 bytes + 7 bytes) use 800kHz timing
+/// - Pixel data uses 800kHz or 1.6MHz timing
+/// - Therefore: **one clockless controller can send all of it**
+///
+/// # Implementation Strategy
+///
+/// 1. Convert preamble bytes to "fake" CRGB pixels
+/// 2. Send preambles via carrier.show() with raw data
+/// 3. Send actual pixel data via carrier.show()
+/// 4. All transmissions use carrier's optimized bit-banging
+///
+/// # Platform Support
+///
+/// Works on ALL FastLED platforms:
+/// - AVR (Uno, Nano) - via ClocklessBlocking
+/// - ESP32 - via ClocklessBlocking (or ClocklessRMT for performance)
+/// - ARM (STM32, SAMD, Teensy) - via platform-specific drivers
+/// - RP2040 - via platform-specific drivers
+/// - Any platform with a clockless controller
+template <
+    typename CARRIER_CONTROLLER,
+    EOrder RGB_ORDER = GRB,
+    fl::UCS7604Mode MODE = fl::UCS7604_MODE_8BIT_800KHZ
+>
+class UCS7604Controller
+    : public CPixelLEDController<RGB_ORDER,
+                                 CARRIER_CONTROLLER::LANES_VALUE,
+                                 CARRIER_CONTROLLER::MASK_VALUE>
+{
+private:
+    // ControllerT is a wrapper that exposes protected methods of the carrier
+    // Similar to RGBWEmulatedController pattern
+    typedef CARRIER_CONTROLLER ControllerBaseT;
 
-    data_t mPinMask;
-    data_ptr_t mPort;
-    CMinWait<WAIT_TIME> mWait;
+    class ControllerT : public CARRIER_CONTROLLER {
+        friend class UCS7604Controller;
 
-    // UCS7604 preamble configuration
-    static constexpr uint8_t CHUNK1_LEN = 8;
-    static constexpr uint8_t CHUNK2_LEN = 7;
-    static constexpr uint16_t PREAMBLE_DELAY_US = 260;
+        /// Call carrier's beginShowLeds() (protected method)
+        void* callBeginShowLeds(int size) {
+            return ControllerBaseT::beginShowLeds(size);
+        }
+
+        /// Call carrier's show() (protected method)
+        void callShow(const CRGB *data, int nLeds, fl::u8 brightness) {
+            ControllerBaseT::show(data, nLeds, brightness);
+        }
+
+        /// Call carrier's showPixels() (protected method)
+        template<EOrder RGB_ORDER_ARG, int LANES_ARG, fl::u32 MASK_ARG>
+        void callShowPixels(PixelController<RGB_ORDER_ARG, LANES_ARG, MASK_ARG> &pixels) {
+            ControllerBaseT::showPixels(pixels);
+        }
+
+        /// Call carrier's endShowLeds() (protected method)
+        void callEndShowLeds(void* data) {
+            ControllerBaseT::endShowLeds(data);
+        }
+    };
+
+    // Static constants for UCS7604 protocol
+    static constexpr uint8_t CHUNK1_LEN = 8;   ///< Framing header length
+    static constexpr uint8_t CHUNK2_LEN = 7;   ///< Configuration length
+    static constexpr uint16_t PREAMBLE_DELAY_US = 260;  ///< Delay between chunks
 
     // Chunk 1: Framing header (fixed pattern)
     const uint8_t mChunk1[CHUNK1_LEN] = {
@@ -265,32 +321,45 @@ class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
     // Chunk 2: Configuration (mode-dependent)
     uint8_t mChunk2[CHUNK2_LEN];
 
+    // The wrapped carrier controller
+    ControllerT mCarrier;
+
 public:
+    static const int LANES = CARRIER_CONTROLLER::LANES_VALUE;
+    static const fl::u32 MASK = CARRIER_CONTROLLER::MASK_VALUE;
+
+    // Carrier must use RGB ordering (no reordering allowed for preambles)
+    static_assert(RGB == CARRIER_CONTROLLER::RGB_ORDER_VALUE,
+                  "Carrier controller MUST use RGB ordering (no reordering)");
+
     /// @brief Constructor - initializes UCS7604 configuration
     /// @param r_current Red channel current (0x00-0x0F, default 0x0F = max)
     /// @param g_current Green channel current (0x00-0x0F, default 0x0F = max)
     /// @param b_current Blue channel current (0x00-0x0F, default 0x0F = max)
     /// @param w_current White channel current (0x00-0x0F, default 0x0F = max)
     UCS7604Controller(uint8_t r_current = 0x0F, uint8_t g_current = 0x0F,
-                      uint8_t b_current = 0x0F, uint8_t w_current = 0x0F) {
-        mChunk2[0] = static_cast<uint8_t>(MODE);
-        mChunk2[1] = r_current & 0x0F;
-        mChunk2[2] = g_current & 0x0F;
-        mChunk2[3] = b_current & 0x0F;
-        mChunk2[4] = w_current & 0x0F;
+                              uint8_t b_current = 0x0F, uint8_t w_current = 0x0F) {
+        // Initialize Chunk 2 based on MODE
+        mChunk2[0] = static_cast<uint8_t>(MODE);  // Configuration byte
+        mChunk2[1] = r_current & 0x0F;  // R current (max)
+        mChunk2[2] = g_current & 0x0F;  // G current (max)
+        mChunk2[3] = b_current & 0x0F;  // B current (max)
+        mChunk2[4] = w_current & 0x0F;  // W current (max)
         mChunk2[5] = 0x00;  // Reserved
         mChunk2[6] = 0x00;  // Reserved
     }
 
-    /// @brief Initialize the GPIO pin
-    virtual void init() {
-        FastPinBB<DATA_PIN>::setOutput();
-        mPinMask = FastPinBB<DATA_PIN>::mask();
-        mPort = FastPinBB<DATA_PIN>::port();
+    /// @brief Initialize the carrier controller
+    virtual void init() override {
+        mCarrier.init();
+        // Keep carrier disabled - we control when it shows
+        mCarrier.setEnabled(false);
     }
 
     /// @brief Get maximum refresh rate
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
+    virtual fl::u16 getMaxRefreshRate() const override {
+        return 400;  // Conservative estimate for UCS7604
+    }
 
     /// @brief Set current control for individual channels
     /// @param r_current Red channel current (0x00-0x0F)
@@ -308,216 +377,78 @@ public:
     /// @brief Show pixels with UCS7604 preambles
     /// @param pixels The pixel controller with RGB data
     ///
-    /// Sends: chunk1 → delay → chunk2 → delay → pixel data
-    /// Retries once if initial transmission fails.
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) {
+    /// Transmission sequence:
+    /// 1. Prepare carrier (disable color correction/dithering)
+    /// 2. Begin show cycle (carrier sync point)
+    /// 3. Send Chunk 1 (framing header) as fake CRGB pixels
+    /// 4. Delay 260µs
+    /// 5. Send Chunk 2 (configuration) as fake CRGB pixels
+    /// 6. Delay 260µs
+    /// 7. Send actual pixel data
+    /// 8. End show cycle (carrier signal transmission)
+    virtual void showPixels(PixelController<RGB_ORDER, LANES, MASK> &pixels) override {
         if (pixels.size() == 0) {
             return;
         }
 
-        mWait.wait();
-        cli();
+        // Prepare carrier for raw transmission
+        // Force pass-through mode: no color correction, no dithering
+        mCarrier.setCorrection(CRGB(255, 255, 255));
+        mCarrier.setTemperature(CRGB(255, 255, 255));
+        mCarrier.setDither(DISABLE_DITHER);
+        mCarrier.setEnabled(true);
 
-        if (!showRGBInternal(pixels)) {
-            // Retry once if failed
-            sei();
-            delayMicroseconds(WAIT_TIME);
-            cli();
-            showRGBInternal(pixels);
-        }
+        // Begin show cycle (carrier sync point)
+        void* sync_data = mCarrier.callBeginShowLeds(pixels.size());
 
-        sei();
-        mWait.mark();
+        // Send Chunk 1 (framing header) as fake CRGB pixels
+        sendPreambleChunk(mChunk1, CHUNK1_LEN);
+        delayMicroseconds(PREAMBLE_DELAY_US);
+
+        // Send Chunk 2 (configuration) as fake CRGB pixels
+        sendPreambleChunk(mChunk2, CHUNK2_LEN);
+        delayMicroseconds(PREAMBLE_DELAY_US);
+
+        // Send actual pixel data
+        sendPixelData(pixels);
+
+        // End show cycle (carrier signal transmission)
+        mCarrier.callEndShowLeds(sync_data);
+        mCarrier.setEnabled(false);
     }
 
 protected:
-    /// @brief Send a preamble chunk using ARM M0 timing
-    /// @param data Pointer to preamble bytes
+    /// @brief Send a preamble chunk as fake CRGB pixels
+    /// @param bytes Pointer to preamble bytes
     /// @param len Number of bytes in preamble
     ///
-    /// Sends raw bytes without color scaling/dithering using showLedData<>()
-    FASTLED_FORCE_INLINE void sendPreamble(const uint8_t* data, uint32_t len) {
-        struct M0ClocklessData preambleData;
-        // Zero out all scaling/adjustment for raw preamble transmission
-        preambleData.d[0] = 0;
-        preambleData.d[1] = 0;
-        preambleData.d[2] = 0;
-        preambleData.s[0] = 0;
-        preambleData.s[1] = 0;
-        preambleData.s[2] = 0;
-        preambleData.e[0] = 0;
-        preambleData.e[1] = 0;
-        preambleData.e[2] = 0;
-        preambleData.adj = 0;
+    /// Converts raw bytes to CRGB array (3 bytes per CRGB) and sends via carrier.
+    /// The carrier transmits these bytes with WS2812 timing, which UCS7604 accepts.
+    FASTLED_FORCE_INLINE void sendPreambleChunk(const uint8_t* bytes, uint8_t len) {
+        // Convert byte array to CRGB array (3 bytes per CRGB)
+        // Round up: (len + 2) / 3
+        int num_fake_pixels = (len + 2) / 3;
+        CRGB fake_pixels[3];  // Max 3 CRGB for 8 bytes
 
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), data, len, &preambleData);
+        // Zero out and copy bytes
+        memset(fake_pixels, 0, sizeof(fake_pixels));
+        memcpy(fake_pixels, bytes, len);
+
+        // Send via carrier with full brightness (raw data)
+        mCarrier.callShow(fake_pixels, num_fake_pixels, 255);
     }
 
-    /// @brief Internal method to show RGB pixel data with UCS7604 preambles
+    /// @brief Send actual pixel data
     /// @param pixels The pixel controller
-    /// @return Non-zero on success
     ///
-    /// Transmits: chunk1 → delay → chunk2 → delay → pixel data
-    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-        if (pixels.size() == 0) {
-            return 1;
-        }
-
-        // Send chunk 1 (framing header)
-        sendPreamble(mChunk1, CHUNK1_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        // Send chunk 2 (configuration)
-        sendPreamble(mChunk2, CHUNK2_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        // Setup pixel data transmission with color adjustment
-        struct M0ClocklessData data;
-        data.d[0] = pixels.d[0];
-        data.d[1] = pixels.d[1];
-        data.d[2] = pixels.d[2];
-        data.s[0] = pixels.mColorAdjustment.premixed[0];
-        data.s[1] = pixels.mColorAdjustment.premixed[1];
-        data.s[2] = pixels.mColorAdjustment.premixed[2];
-        data.e[0] = pixels.e[0];
-        data.e[1] = pixels.e[1];
-        data.e[2] = pixels.e[2];
-        data.adj = pixels.mAdvance;
-
-        // Send pixel data
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        return showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
+    /// Calls the carrier's showPixels() method directly.
+    /// This preserves all color correction, dithering, and scaling
+    /// that the PixelController has already applied.
+    void sendPixelData(PixelController<RGB_ORDER, LANES, MASK> &pixels) {
+        mCarrier.callShowPixels(pixels);
     }
 };
 
 }  // namespace fl
-
-#elif defined(__SAMD51__) || defined(__SAME51__)
-
-namespace fl {
-
-/// @brief UCS7604 controller for ARM M0+ platforms (SAMD51)
-/// Same implementation as SAMD21 version
-template <uint8_t DATA_PIN, int T1, int T2, int T3, EOrder RGB_ORDER = GRB,
-          UCS7604Mode MODE = UCS7604_MODE_16BIT_800KHZ, int WAIT_TIME = 280>
-class UCS7604Controller : public CPixelLEDController<RGB_ORDER> {
-    typedef typename FastPinBB<DATA_PIN>::port_ptr_t data_ptr_t;
-    typedef typename FastPinBB<DATA_PIN>::port_t data_t;
-
-    data_t mPinMask;
-    data_ptr_t mPort;
-    CMinWait<WAIT_TIME> mWait;
-
-    static constexpr uint8_t CHUNK1_LEN = 8;
-    static constexpr uint8_t CHUNK2_LEN = 7;
-    static constexpr uint16_t PREAMBLE_DELAY_US = 260;
-
-    const uint8_t mChunk1[CHUNK1_LEN] = {
-        0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x02
-    };
-
-    uint8_t mChunk2[CHUNK2_LEN];
-
-public:
-    UCS7604Controller(uint8_t r_current = 0x0F, uint8_t g_current = 0x0F,
-                      uint8_t b_current = 0x0F, uint8_t w_current = 0x0F) {
-        mChunk2[0] = static_cast<uint8_t>(MODE);
-        mChunk2[1] = r_current & 0x0F;
-        mChunk2[2] = g_current & 0x0F;
-        mChunk2[3] = b_current & 0x0F;
-        mChunk2[4] = w_current & 0x0F;
-        mChunk2[5] = 0x00;
-        mChunk2[6] = 0x00;
-    }
-
-    virtual void init() {
-        FastPinBB<DATA_PIN>::setOutput();
-        mPinMask = FastPinBB<DATA_PIN>::mask();
-        mPort = FastPinBB<DATA_PIN>::port();
-    }
-
-    virtual uint16_t getMaxRefreshRate() const { return 400; }
-
-    void setCurrentControl(uint8_t r_current, uint8_t g_current,
-                          uint8_t b_current, uint8_t w_current) {
-        mChunk2[1] = r_current & 0x0F;
-        mChunk2[2] = g_current & 0x0F;
-        mChunk2[3] = b_current & 0x0F;
-        mChunk2[4] = w_current & 0x0F;
-    }
-
-    virtual void showPixels(PixelController<RGB_ORDER>& pixels) {
-        if (pixels.size() == 0) {
-            return;
-        }
-
-        mWait.wait();
-        cli();
-
-        if (!showRGBInternal(pixels)) {
-            sei();
-            delayMicroseconds(WAIT_TIME);
-            cli();
-            showRGBInternal(pixels);
-        }
-
-        sei();
-        mWait.mark();
-    }
-
-protected:
-    FASTLED_FORCE_INLINE void sendPreamble(const uint8_t* data, uint32_t len) {
-        struct M0ClocklessData preambleData;
-        preambleData.d[0] = 0;
-        preambleData.d[1] = 0;
-        preambleData.d[2] = 0;
-        preambleData.s[0] = 0;
-        preambleData.s[1] = 0;
-        preambleData.s[2] = 0;
-        preambleData.e[0] = 0;
-        preambleData.e[1] = 0;
-        preambleData.e[2] = 0;
-        preambleData.adj = 0;
-
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), data, len, &preambleData);
-    }
-
-    uint32_t showRGBInternal(PixelController<RGB_ORDER> pixels) {
-        if (pixels.size() == 0) {
-            return 1;
-        }
-
-        sendPreamble(mChunk1, CHUNK1_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        sendPreamble(mChunk2, CHUNK2_LEN);
-        delayMicroseconds(PREAMBLE_DELAY_US);
-
-        struct M0ClocklessData data;
-        data.d[0] = pixels.d[0];
-        data.d[1] = pixels.d[1];
-        data.d[2] = pixels.d[2];
-        data.s[0] = pixels.mColorAdjustment.premixed[0];
-        data.s[1] = pixels.mColorAdjustment.premixed[1];
-        data.s[2] = pixels.mColorAdjustment.premixed[2];
-        data.e[0] = pixels.e[0];
-        data.e[1] = pixels.e[1];
-        data.e[2] = pixels.e[2];
-        data.adj = pixels.mAdvance;
-
-        typename FastPin<DATA_PIN>::port_ptr_t portBase = FastPin<DATA_PIN>::port();
-        return showLedData<8, 4, T1, T2, T3, RGB_ORDER, WAIT_TIME>(
-            portBase, FastPin<DATA_PIN>::mask(), pixels.mData, pixels.mLen, &data);
-    }
-};
-
-}  // namespace fl
-
-#endif // Platform checks
 
 #endif // __INC_UCS7604_H

@@ -5,18 +5,25 @@ FastLED 3.10.4
     * AudioContext pattern: FFT computed once and shared across all detectors with lazy evaluation
     * Callback-based API with lazy instantiation
     * See [src/fl/audio/](src/fl/audio/) and [README](src/fl/audio/README.md)
-  * **NEW: UCS7604 RGBW Chipset Support (BETA)**: 16-bit RGBW LED driver for ARM M0/M0+ platforms
+  * **NEW: UCS7604 RGBW Chipset Support (BETA)**: Universal 16-bit RGBW LED driver for all platforms
     * High-resolution 4-channel LED driver with configurable bit depth (8/12/14/16-bit) and dual data rates (800kHz/1.6MHz)
-    * Currently supported on ARM M0/M0+ platforms (SAMD21/SAMD51)
-    * Usage: `FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);`
+    * **Universal Platform Support**: Works on ALL platforms with clockless controller support (AVR, ESP32, ARM, STM32, Teensy, RP2040, etc.)
+    * **Simplified API**: Just use `UCS7604` or `UCS7604HD`
+    * Usage:
+      * Standard 8-bit: `FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);`
+      * High-definition 16-bit: `FastLED.addLeds<UCS7604HD, DATA_PIN, GRB>(leds, NUM_LEDS);`
     * Features:
       * 16-bit color resolution (65,536 levels per channel) for ultra-smooth gradients
       * Configurable per-channel current control (0x00-0x0F)
       * Unique preamble-based protocol: sends configuration before pixel data
-      * Reuses existing ARM M0 showLedData<>() assembly for efficiency
-    * Beta status: Hardware validation ongoing, ARM M0/M0+ only
-    * Example: [examples/UCS7604_Basic/UCS7604_Basic.ino](examples/UCS7604_Basic/UCS7604_Basic.ino)
-    * Files: [src/fl/chipsets/ucs7604.h](src/fl/chipsets/ucs7604.h)
+      * Universal carrier-based implementation wraps platform clockless drivers
+      * Automatic platform optimization - uses best available driver for each platform
+    * Implementation:
+      * Uses carrier/wrapper pattern for maximum compatibility
+      * Single unified codebase - no platform-specific assembly required
+      * Consolidated from 2 files into 1: [src/fl/chipsets/ucs7604.h](src/fl/chipsets/ucs7604.h)
+    * Beta status: Hardware validation ongoing, software architecture validated
+    * Example: [examples/Blink/Blink.ino](examples/Blink/Blink.ino) (see UCS7604 lines)
   * **NEW: ESP8266 UART Driver (Opt-in)**: UART-based WS2812 driver for ESP8266 with improved Wi-Fi stability
     * Alternative to bit-bang driver using UART1 peripheral (GPIO2) for hardware-timed LED output
     * Enable with `#define FASTLED_ESP8266_UART` before including FastLED.h

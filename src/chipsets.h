@@ -54,8 +54,8 @@
 // This must come AFTER all clockless drivers are included
 #include "fl/clockless_controller_impl.h"
 
-// Include UCS7604 controller (requires ClocklessBlockController to be defined)
-#include "fl/chipsets/ucs7604.h"  // optional.
+// Include UCS7604 controller (works on all platforms with clockless controller support)
+#include "fl/chipsets/ucs7604.h"
 
 // Include platform-independent SPI utilities
 #include "platforms/shared/spi_pixel_writer.h"
@@ -1230,30 +1230,73 @@ class SM16824EController : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMI
 
 
 
-// UCS7604 controller typedefs (available on supported platforms)
-// Uses WS2812-like timing (800kHz) for preambles and pixel data by default
-#ifdef UCS7604_HAS_CONTROLLER
-/// UCS7604 controller class @ 800 KHz, 16-bit mode
+
+
+/// @defgroup UCS7604Controllers UCS7604 LED Controllers
+/// @brief High-resolution 4-channel (RGBW) LED driver controllers
+///
+/// The UCS7604 is a 16-bit RGBW LED controller with configurable bit depth and data rate.
+/// FastLED provides two controller modes:
+///
+/// **Controllers**:
+/// - `UCS7604` - 8-bit mode, recommended for most use cases
+/// - `UCS7604HD` - 16-bit mode, maximum color depth
+/// - Available on: ALL platforms with clockless controller support
+///
+/// **Technical Details**:
+/// - Protocol: Preamble-based (unique to UCS7604)
+/// - Timing: WS2812-compatible (800kHz default)
+/// - Overhead: ~670µs fixed per frame (preambles + delays)
+/// - Resolution: 8-bit (256 levels) or 16-bit (65,536 levels) per channel
+/// - Channels: RGBW (4 channels)
+///
+/// @see fl::UCS7604Controller for implementation details
+/// @see ucs7604.h for full protocol documentation
+/// @{
+
+/// UCS7604 controller class (standard 8-bit mode)
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for UCS7604)
 ///
-/// The UCS7604 is a 4-channel (RGBW) LED driver with 16-bit color resolution.
+/// The UCS7604 is a 4-channel (RGBW) LED driver supporting 8-bit and 16-bit color modes.
 /// This controller sends protocol-required preambles before pixel data.
-/// Default mode: 16-bit depth @ 800 kHz with RGBW ordering.
+/// Standard mode: 8-bit depth @ 800 kHz with RGBW ordering.
+/// For 16-bit high-definition mode, use UCS7604HD.
+///
+/// Usage:
+/// @code
+/// FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);
+/// @endcode
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604Controller800Khz : public fl::UCS7604Controller<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ> {};
+class UCS7604 : public fl::UCS7604Controller<
+    fl::ClocklessBlocking<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB>,
+    RGB_ORDER,
+    fl::UCS7604_MODE_8BIT_800KHZ
+> {};
 
-/// UCS7604 controller class @ 800 KHz, 8-bit mode
-/// @copydetails UCS7604Controller800Khz
+/// UCS7604HD high-definition controller class (16-bit mode)
+/// @tparam DATA_PIN the data pin for these LEDs
+/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for UCS7604)
+///
+/// High-definition variant with 16-bit color resolution (65,536 levels per channel).
+/// Uses 2x the memory and bandwidth of standard UCS7604.
+/// Mode: 16-bit depth @ 800 kHz with RGBW ordering.
+///
+/// Usage:
+/// @code
+/// FastLED.addLeds<UCS7604HD, DATA_PIN, GRB>(leds, NUM_LEDS);
+/// @endcode
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604Controller800Khz_8bit : public fl::UCS7604Controller<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ> {};
+class UCS7604HD : public fl::UCS7604Controller<
+    fl::ClocklessBlocking<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB>,
+    RGB_ORDER,
+    fl::UCS7604_MODE_16BIT_800KHZ
+> {};
 
-/// UCS7604 default typedef (16-bit @ 800kHz)
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604 = UCS7604Controller800Khz<DATA_PIN, RGB_ORDER>;
-#endif
+/// @} // end of UCS7604Controllers group
 
 #else
+
 
 
 
