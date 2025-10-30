@@ -1,5 +1,18 @@
 # Troubleshooting Guide
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 10-15 minutes (reading and understanding troubleshooting resources available)
+**Prerequisites**:
+- [Getting Started: First Example](../getting-started/first-example.md) - Basic FastLED setup
+- [Getting Started: Hardware](../getting-started/hardware.md) - Hardware wiring basics
+
+**You'll Learn**:
+- How to navigate troubleshooting resources to quickly find solutions to common LED problems
+- Using the quick troubleshooting checklist to verify basic setup before detailed debugging
+- When to check common-issues.md for quick fixes vs debugging.md for systematic diagnosis
+- Identifying hardware problems (wiring, power, signal integrity) vs software issues (code, configuration)
+- Where to find help when problems persist beyond the troubleshooting guides
+
 This section provides comprehensive troubleshooting resources for FastLED projects, covering common issues, debugging techniques, and hardware problems.
 
 ## Contents

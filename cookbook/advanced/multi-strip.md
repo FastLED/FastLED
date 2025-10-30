@@ -1,5 +1,22 @@
 # Multiple Strip Coordination
 
+**Difficulty Level**: ⭐⭐⭐ Advanced
+**Time to Complete**: 40-50 minutes
+**Prerequisites**:
+- [Getting Started](../getting-started/) - Basic LED control and FastLED setup
+- [Core Concepts](../core-concepts/) - Especially arrays and timing
+- [Basic Patterns](../basic-patterns/) - Pattern programming and animations
+- [Intermediate Techniques](../intermediate/) - Math utilities and coordination patterns
+
+**You'll Learn**:
+1. How to control multiple LED strips from a single microcontroller
+2. Techniques for synchronizing effects across multiple strips
+3. How to create wave and chase effects that span multiple strips
+4. The virtual combined strip concept for treating multiple strips as one
+5. Performance considerations, memory usage, and troubleshooting for multi-strip setups
+
+---
+
 Control multiple LED strips independently or in coordination for larger installations and complex effects.
 
 ## Setting Up Multiple Controllers

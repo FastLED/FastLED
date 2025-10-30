@@ -1,5 +1,16 @@
 # FastLED Reference Guide
 
+**Difficulty Level**: ⭐ All Levels
+**Time to Find Information**: 2-5 minutes (depending on what you're looking up)
+**Prerequisites**: None (reference materials are self-contained and can be used at any point in your learning journey)
+
+**You'll Find**:
+- Complete API function reference with syntax and parameters for all FastLED functions
+- Platform-specific pin recommendations and limitations for Arduino, ESP32, Teensy, STM32, and more
+- Supported LED chipset list with configuration examples for WS2812B, APA102, SK6812, and others
+- Quick code snippets for common operations (setup, colors, array operations)
+- External resources and community links for additional FastLED help
+
 This section provides quick reference materials for FastLED development.
 
 ## Contents

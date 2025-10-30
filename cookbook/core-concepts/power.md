@@ -1,5 +1,18 @@
 # Power Considerations
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 30-40 minutes
+**Prerequisites**:
+- [Getting Started - Basic Concepts](../getting-started/concepts.md)
+- [Getting Started - Hardware Setup](../getting-started/hardware.md)
+
+**You'll Learn**:
+- How to calculate power requirements for your LED projects
+- How to choose the right power supply and avoid safety hazards
+- How to reduce power consumption using software controls
+- How to handle voltage drop and power injection for large installations
+- How to safely wire power supplies and avoid damaging your components
+
 Manage power consumption safely in your LED projects.
 
 ## Current Requirements

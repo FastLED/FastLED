@@ -1,5 +1,20 @@
 # Wave Patterns
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 35-45 minutes
+**Prerequisites**:
+- [Basic Patterns: Animations](../basic-patterns/animations.md) - Understanding timing and static variables
+- [Core Concepts: Color Theory](../core-concepts/color-theory.md) - RGB and HSV color spaces
+- [Intermediate: Math](../intermediate/math.md) - sin8(), beatsin8(), and trigonometric wave functions (core dependency)
+- [Intermediate: Blending](../intermediate/blending.md) - fadeToBlackBy() for trail effects
+
+**You'll Learn**:
+- How to create traveling wave animations using sin8() trigonometric function with phase and position parameters
+- Controlling wave characteristics: speed via phase increment, frequency via position multiplier, wavelength via spread
+- Layering multiple waves together to create complex organic patterns (multi-wave, plasma, ocean simulation)
+- Creating directional wave effects: ripples expanding from center point, dual waves with phase offsets, traveling peaks
+- Applying wave techniques to practical patterns: color waves moving along strip, smooth scanners with sine falloff, ocean waves (Pacifica), pride effect with multiple modulated parameters
+
 Various wave effects including sine waves, color waves, and ocean-inspired patterns.
 
 ## Sine Wave

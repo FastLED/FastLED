@@ -1,5 +1,18 @@
 # Understanding LED Data Structures
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 30-40 minutes
+**Prerequisites**:
+- [Basic Concepts](../getting-started/concepts.md) - Understanding of FastLED fundamentals
+- [First Example](../getting-started/first-example.md) - Basic LED programming experience
+
+**You'll Learn**:
+- How to work with CRGB arrays and access individual LEDs
+- Multiple ways to create and manipulate LED colors
+- How to perform color arithmetic and blending operations
+- Memory considerations for LED arrays on different platforms
+- Classical LED programming techniques like pixel drawing and scanning patterns
+
 How LED arrays work in FastLED.
 
 ## The CRGB Array

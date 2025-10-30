@@ -1,5 +1,17 @@
 # Intermediate Techniques
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 2-3 hours (to read and work through all four intermediate technique documents)
+**Prerequisites**: [Getting Started](../getting-started/), [Core Concepts](../core-concepts/), [Basic Patterns](../basic-patterns/)
+
+**You'll Learn**:
+- How to use color palettes for sophisticated color schemes and smooth transitions
+- How to create organic, natural-looking animations with noise functions
+- Techniques for blending colors and transitioning smoothly between patterns
+- Mathematical utilities for creating rhythmic, precise, and complex animations
+
+---
+
 This section covers intermediate FastLED techniques that go beyond basic patterns and animations. These techniques will help you create more sophisticated and professional-looking LED effects.
 
 ## Topics Covered

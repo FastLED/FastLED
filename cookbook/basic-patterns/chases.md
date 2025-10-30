@@ -1,5 +1,16 @@
 # Chases and Scanners
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 25-30 minutes
+**Prerequisites**: [Animations](animations.md), [Timing Concepts](../core-concepts/timing.md), [Solid Colors](solid-colors.md)
+
+**You'll Learn**:
+- How to create movement along your LED strip using position tracking
+- The difference between bouncing (bidirectional) and chase (unidirectional) effects
+- How to use `fadeToBlackBy()` to create trailing effects behind moving LEDs
+- How to implement boundary detection and direction reversal for bouncing patterns
+- How to create variations like multiple scanners, color changes, and variable width
+
 Chase and scanner effects create the illusion of movement along your LED strip. The classic "Cylon" or "Knight Rider" scanner is an iconic example that teaches essential animation techniques.
 
 ## Nightrider / Cylon Effect

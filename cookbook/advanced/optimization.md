@@ -1,5 +1,22 @@
 # Performance Optimization
 
+**Difficulty Level**: ⭐⭐⭐ Advanced
+**Time to Complete**: 50-60 minutes
+**Prerequisites**:
+- [Getting Started](../getting-started/) - Basic LED control and FastLED setup
+- [Core Concepts](../core-concepts/) - Especially timing and memory considerations
+- [Basic Patterns](../basic-patterns/) - Pattern programming fundamentals
+- [Intermediate Techniques](../intermediate/) - Advanced patterns that benefit from optimization
+
+**You'll Learn**:
+1. How to identify and eliminate performance bottlenecks in LED code
+2. Techniques for optimizing calculations (integer math, precalculation, bit shifts)
+3. Memory optimization strategies for constrained microcontrollers
+4. Frame rate management and power consumption control
+5. Platform-specific optimization tips and profiling techniques
+
+---
+
 Tips and techniques for creating smooth, efficient LED animations. Optimizing your code ensures high frame rates and responsive effects.
 
 ## Reduce Calculations in Loop

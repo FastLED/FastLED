@@ -1,5 +1,21 @@
 # Color Palettes
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 40-50 minutes
+**Prerequisites**:
+- [Basic Patterns](../basic-patterns/README.md) - Understanding fill functions and animations
+- [Color Theory](../core-concepts/color-theory.md) - RGB and HSV color models
+- [Animations](../basic-patterns/animations.md) - Static variables and timing
+
+**You'll Learn**:
+- How to use FastLED's built-in color palettes for instant professional color schemes
+- How to create custom palettes with gradient definitions and direct color specification
+- How to retrieve and blend colors from palettes using `ColorFromPalette()`
+- Palette animation techniques: moving, stretching, pulsing, and transitioning between palettes
+- Advanced techniques combining palettes with noise, multiple palettes, and smooth palette blending with `nblendPaletteTowardPalette()`
+
+---
+
 Color palettes allow you to define a set of colors and smoothly blend between them. This is one of the most powerful features in FastLED for creating sophisticated color effects.
 
 ## Why Use Palettes?

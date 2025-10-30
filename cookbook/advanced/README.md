@@ -1,5 +1,19 @@
 # Advanced Effects
 
+**Difficulty Level**: ⭐⭐⭐ Advanced
+**Time to Complete**: 3-4 hours
+**Prerequisites**:
+- [Getting Started](../getting-started/) - Basic LED control and FastLED setup
+- [Core Concepts](../core-concepts/) - Color theory, timing, and power management
+- [Basic Patterns](../basic-patterns/) - Solid colors, animations, chases, and rainbows
+- [Intermediate Techniques](../intermediate/) - Palettes, noise functions, blending, and math utilities
+
+**You'll Learn**:
+- How to work with LED matrices and 2D patterns using XY coordinate mapping
+- How to control and synchronize multiple LED strips or controllers simultaneously
+- How to optimize FastLED code for smooth performance with complex animations
+- When and how to apply advanced techniques for professional-quality installations
+
 This section covers advanced techniques and patterns for creating sophisticated LED effects with FastLED.
 
 ## Contents

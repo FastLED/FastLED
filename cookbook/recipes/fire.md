@@ -1,5 +1,20 @@
 # Fire Effect
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 30-40 minutes
+**Prerequisites**:
+- [Palettes](../intermediate/palettes.md) - Understanding ColorFromPalette() and built-in palettes
+- [Math Functions](../intermediate/math.md) - Using scale8(), qadd8(), qsub8() for calculations
+- [Arrays and LED Structures](../core-concepts/led-structures.md) - Working with parallel data arrays
+- [Animations](../basic-patterns/animations.md) - Basic animation concepts and timing
+
+**You'll Learn**:
+- How to simulate natural phenomena using heat arrays and diffusion algorithms
+- Mapping abstract data (heat values) to visual output (LED colors) with palettes
+- Tuning parameters (cooling, sparking) to create different fire behaviors
+- Using parallel arrays to store state data alongside LED color data
+- Creating organic, realistic animations through randomness and physics-inspired rules
+
 Realistic fire simulation using heat array and color palette.
 
 ## Basic Fire Effect

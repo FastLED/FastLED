@@ -1,5 +1,15 @@
 # Basic Patterns
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 1-2 hours (for entire section)
+**Prerequisites**: [Getting Started](../getting-started/README.md), [Core Concepts](../core-concepts/README.md)
+
+**You'll Learn**:
+- How to create solid colors and fill effects on LED strips
+- Timing control and smooth animations using brightness
+- Movement patterns including chases and scanner effects
+- Rainbow effects using HSV color space for easy color cycling
+
 This section covers fundamental LED patterns that form the building blocks of more complex effects. These patterns are perfect for beginners and demonstrate core FastLED concepts.
 
 ## Contents

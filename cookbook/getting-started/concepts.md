@@ -1,5 +1,16 @@
 # Basic Concepts
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 20 minutes
+**Prerequisites**: None (this is your starting point!)
+
+**You'll Learn**:
+- How to address and control individual LEDs in a strip
+- The difference between RGB and HSV color models and when to use each
+- The essential setup() and loop() pattern for FastLED programs
+- How to configure FastLED for your specific LED hardware
+- Key concepts like brightness control and static variables
+
 Core ideas behind LED programming with FastLED.
 
 ## LED Addressing

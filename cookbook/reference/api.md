@@ -1,5 +1,22 @@
 # API Quick Reference
 
+**Difficulty Level**: ⭐ All Levels
+**Time to Find Information**: 2-5 minutes
+**Prerequisites**: None (quick lookup reference)
+
+**You'll Find**:
+- Complete function syntax with parameters for all major FastLED APIs
+- Setup functions for adding LEDs, setting brightness, and power management
+- Display and timing functions for updating and controlling animations
+- Color creation and manipulation functions for both RGB and HSV
+- Array operations for filling, fading, and blurring LED strips
+- Mathematical functions for scaling, mapping, waves, and beats
+- Noise and random functions for organic patterns
+- Color palette APIs with built-in palette list
+- Quick copy-paste syntax for common operations
+
+---
+
 Comprehensive reference for FastLED functions and APIs.
 
 ## Setup Functions

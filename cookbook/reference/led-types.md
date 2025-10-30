@@ -2,6 +2,22 @@
 
 Comprehensive guide to LED chipsets supported by FastLED.
 
+**Difficulty Level**: ⭐ All Levels
+
+**Time to Find Information**: 3-5 minutes
+
+**Prerequisites**: None
+
+**You'll Find**:
+- Complete reference table of common LED chipsets (WS2812B, APA102, SK6812, WS2813, SK9822, WS2801, LPD8806, P9813) with voltage, speed, and key features
+- Code examples for each chipset with correct LED_TYPE and COLOR_ORDER configuration for immediate copy-paste use
+- Chipset selection guide comparing cost, speed, reliability, and use cases (when to use WS2812B vs APA102 vs SK6812 vs WS2813)
+- Color order reference and testing code (GRB, RGB, BGR) with diagnostic test pattern to identify correct COLOR_ORDER for your specific LEDs
+- Technical specifications including data rates, color depth, voltage requirements, current draw, and timing tolerance for major chipsets
+- Wiring diagrams for single-wire LEDs (WS2812B family) and clock+data LEDs (APA102 family) with resistor placement
+- Performance comparison table rating speed, reliability, cost, ease of use, and availability across popular LED types
+- Troubleshooting guide for color order issues, first LED problems, partial failures, and random flickering
+
 ## Common LED Types
 
 | LED Type | Clock Pin | Voltage | Speed | Notes |

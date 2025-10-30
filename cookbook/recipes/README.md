@@ -1,5 +1,22 @@
 # FastLED Recipes
 
+**Difficulty Level**: ⭐ to ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 1-2 hours (to explore all four recipe documents)
+**Prerequisites**:
+- [Getting Started](../getting-started/) - Basic LED control and FastLED setup
+- [Core Concepts](../core-concepts/) - Understanding color theory, arrays, and timing
+- [Basic Patterns](../basic-patterns/) - Foundation pattern programming
+- Recommended: [Intermediate Techniques](../intermediate/) - For deeper understanding of techniques used in recipes
+
+**You'll Learn**:
+- How to use ready-to-use, copy-paste LED effect recipes
+- Fire simulation techniques using heat arrays and color palettes
+- Twinkle/sparkle effects with random LED selection
+- Breathing/pulsing animations with smooth fading
+- Various wave patterns including sine waves and color waves
+
+---
+
 This directory contains practical, ready-to-use recipes for common LED effects. Each recipe is self-contained with complete code examples and explanations.
 
 ## Available Recipes

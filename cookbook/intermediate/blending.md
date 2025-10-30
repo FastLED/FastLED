@@ -1,5 +1,21 @@
 # Blending and Transitions
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 40-50 minutes
+**Prerequisites**:
+- [Basic Patterns - Animations](../basic-patterns/animations.md) - Understanding static variables and timing
+- [Color Theory](../core-concepts/color-theory.md) - RGB and HSV color models
+- [Timing and Animation Control](../core-concepts/timing.md) - Frame rate and timing concepts
+
+**You'll Learn**:
+- How to smoothly blend between colors using `blend()` and control interpolation with blend amounts
+- Creating fade effects with `fadeToBlackBy()` and fading to specific colors for trails and transitions
+- Using `blur1d()` to create smooth gradients and soften sharp edges
+- Cross-fading between complete patterns and layering multiple effects
+- Advanced blending techniques: additive/subtractive blending, brightness scaling, and easing functions for natural motion
+
+---
+
 Blending and transitions are essential techniques for creating smooth, professional-looking LED animations. FastLED provides powerful functions for fading, blending, and transitioning between colors and patterns.
 
 ## Why Blending Matters

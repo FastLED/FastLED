@@ -2,6 +2,20 @@
 
 Write and run your first LED program with FastLED.
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 30 minutes (including hardware setup)
+**Prerequisites**:
+- [FastLED Concepts](concepts.md) - Understanding of basic LED control concepts
+- Arduino IDE or PlatformIO installed
+- LED strip connected to your microcontroller
+
+**You'll Learn**:
+- How to write a complete FastLED program from scratch
+- The essential setup() and loop() pattern in action
+- How to use `fill_solid()` to set all LEDs to one color
+- Why `FastLED.show()` is required to update your LED strip
+- How to customize pin numbers, LED counts, and timing for your hardware
+
 ## Complete Example
 
 This program blinks all LEDs between red and off:

@@ -1,5 +1,21 @@
 # Hardware Problems
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 45-60 minutes
+**Prerequisites**:
+- [Getting Started - Hardware Requirements](../getting-started/hardware.md)
+- [Getting Started - First Example](../getting-started/first-example.md)
+- [Common Issues](common-issues.md)
+
+**You'll Learn**:
+- How to diagnose and fix voltage drop issues causing dim or discolored LEDs
+- How to solve signal integrity problems (wrong first LED, flickering, partial strip failures)
+- How to use a multimeter to verify power supply voltage, current, and wiring continuity
+- How to troubleshoot ESP32-specific issues with WiFi interference and pin selection
+- How to properly wire LED strips with power injection, ground connections, and signal resistors
+
+---
+
 In-depth troubleshooting guide for hardware-related LED issues including wiring, power, and platform-specific problems.
 
 ## Voltage Drop Issues

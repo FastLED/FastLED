@@ -2,6 +2,16 @@
 
 Learn the basics to get your LED strip up and running with FastLED.
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 5-10 minutes (reading and planning your learning path)
+**Prerequisites**: None - this is your starting point
+**You'll Learn**:
+- What topics are covered in the getting-started section
+- The recommended order for learning FastLED basics
+- Which documents to read based on your current needs (hardware, software, or concepts)
+- How to navigate from setup to your first working LED program
+- What to explore after completing the getting-started section
+
 ## Contents
 
 - [Installation and Setup](installation.md) - How to install FastLED for your platform

@@ -1,5 +1,16 @@
 # Solid Colors
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 15-20 minutes
+**Prerequisites**: [Core Concepts](../core-concepts/README.md), [First Example](../getting-started/first-example.md)
+
+**You'll Learn**:
+- How to fill your entire LED strip with a single solid color
+- The difference between RGB and HSV color spaces and when to use each
+- How to use FastLED's efficient fill functions instead of manual loops
+- How to fill specific sections of your LED strip with different colors
+- Named color constants for readable, maintainable code
+
 Solid colors are the foundation of LED control. This pattern demonstrates how to fill your LED strip with a single color using FastLED's efficient fill functions.
 
 ## Basic Usage

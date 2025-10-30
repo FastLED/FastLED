@@ -2,6 +2,17 @@
 
 Understanding RGB and HSV color models in FastLED.
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 25-30 minutes (reading and experimenting with examples)
+**Prerequisites**: [Getting Started](../getting-started/) - Basic FastLED setup and first example
+
+**You'll Learn**:
+- How to create colors using RGB (Red, Green, Blue) values
+- How to use HSV (Hue, Saturation, Value) for easier color animations
+- When to choose RGB vs HSV for different effects
+- How to blend colors and adjust brightness programmatically
+- How to convert between color models in FastLED
+
 ## RGB Color Model
 
 RGB (Red, Green, Blue) uses three channels, each ranging from 0-255.

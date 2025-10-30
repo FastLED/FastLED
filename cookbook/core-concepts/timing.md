@@ -1,5 +1,18 @@
 # Timing and Frame Rate
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 35-45 minutes (reading and experimenting with different timing approaches)
+**Prerequisites**:
+- [Getting Started: Basic Concepts](../getting-started/concepts.md) - Understanding FastLED fundamentals
+- [Getting Started: First Example](../getting-started/first-example.md) - Hands-on programming experience
+
+**You'll Learn**:
+- How to control animation speed using multiple timing methods (delay, EVERY_N, millis)
+- The difference between blocking and non-blocking timing approaches
+- How to calculate and measure frame rates for smooth animations
+- Advanced timing techniques including beat synchronization and time-based effects
+- Best practices for performance optimization and timing reliability
+
 Control animation speed and timing in FastLED.
 
 ## Simple Delay

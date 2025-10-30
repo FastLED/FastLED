@@ -2,6 +2,16 @@
 
 How to install FastLED for your development environment.
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 10-20 minutes (depending on internet speed and IDE download)
+**Prerequisites**: None - this is the software setup step
+**You'll Learn**:
+- How to install FastLED in PlatformIO (recommended method)
+- How to install FastLED in Arduino IDE
+- How to manually install from source (advanced users)
+- How to verify your installation is working correctly
+- What to do after installation succeeds
+
 ## PlatformIO (Recommended)
 
 PlatformIO provides the best development experience with dependency management, multiple board support, and easy configuration.

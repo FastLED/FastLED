@@ -1,5 +1,20 @@
 # Twinkle/Sparkle Effects
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 25-35 minutes
+**Prerequisites**:
+- [Animations](../basic-patterns/animations.md) - fadeToBlackBy() and timing concepts
+- [Color Theory](../core-concepts/color-theory.md) - HSV color space for random colors
+- [Math Functions](../intermediate/math.md) - random8() and random16() functions
+- [Blending](../intermediate/blending.md) - Brightness variation and fade techniques
+
+**You'll Learn**:
+- How to create probability-based animations using random8() threshold checks
+- Selecting random LED positions safely with random16(NUM_LEDS)
+- Tuning fade rates and probability thresholds to control twinkle density and persistence
+- Creating variations (starfield, party lights, fireflies) by adjusting parameters
+- Using brightness variation and timing to add depth and dimension to sparkle effects
+
 Random twinkling stars and sparkle effects.
 
 ## Simple Twinkle

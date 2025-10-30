@@ -1,5 +1,19 @@
 # Math and Mapping Functions
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 50-60 minutes
+**Prerequisites**:
+- [Animations](../basic-patterns/animations.md) - Understanding static variables and timing
+- [Color Theory](../core-concepts/color-theory.md) - RGB and HSV color models
+- [Timing Control](../core-concepts/timing.md) - Frame rates and animation control
+
+**You'll Learn**:
+- How to use FastLED's optimized integer math functions (scale8, qadd8, qsub8) for fast, safe calculations
+- How to create smooth wave patterns with sin8/cos8 and animated effects
+- How to generate rhythmic animations using beat8 and beatsin8 functions
+- How to map values between ranges for brightness, position, and color control
+- How to combine multiple mathematical functions for complex, layered effects
+
 FastLED provides a rich set of mathematical functions optimized for LED animations. These functions are essential for creating precise, rhythmic, and mathematically beautiful patterns.
 
 ## Why Use FastLED Math Functions?

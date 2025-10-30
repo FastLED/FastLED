@@ -1,5 +1,22 @@
 # 2D/Matrix Operations
 
+**Difficulty Level**: ⭐⭐⭐ Advanced
+**Time to Complete**: 45-60 minutes
+**Prerequisites**:
+- [Getting Started](../getting-started/) - Basic LED control and FastLED setup
+- [Core Concepts](../core-concepts/) - Especially arrays, color theory, and timing
+- [Basic Patterns](../basic-patterns/) - Pattern programming fundamentals
+- [Intermediate Techniques](../intermediate/) - Noise functions, palettes, and math utilities
+
+**You'll Learn**:
+- How to map 2D coordinates (X, Y) to 1D LED array indices
+- The difference between serpentine and progressive matrix layouts
+- How to create 2D patterns like plasma effects, bouncing shapes, and heat maps
+- Performance optimization techniques for matrix animations
+- How to troubleshoot common matrix wiring and positioning issues
+
+---
+
 When working with LED matrices or grids, you need to map 2D coordinates to a 1D array. This guide covers the essential techniques for creating patterns on LED matrices.
 
 ## XY Mapping Function

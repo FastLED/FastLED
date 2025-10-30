@@ -1,5 +1,21 @@
 # Noise and Perlin Noise
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 45-55 minutes
+**Prerequisites**:
+- [Color Palettes](palettes.md) - Noise is often combined with palettes for stunning effects
+- [Color Theory](../core-concepts/color-theory.md) - Understanding HSV and RGB color models
+- [Animations](../basic-patterns/animations.md) - Static variables and timing concepts
+
+**You'll Learn**:
+- What Perlin noise is and how it differs from random values for creating smooth, organic animations
+- Using FastLED's noise functions (`inoise8`, `inoise16`) in 1D, 2D, and 3D for different effect complexity
+- Controlling noise parameters: spatial coordinates (smoothness), time component (animation speed), and Z dimension (depth)
+- Combining noise with color palettes to create natural effects like lava lamps, clouds, ocean waves, and fire
+- Advanced techniques: layered noise for richer patterns, noise-controlled brightness, and noise-based movement
+
+---
+
 FastLED includes noise functions for creating organic, natural-looking animations. Unlike random values, noise produces smooth, continuous patterns that flow naturally over time and space.
 
 ## What is Perlin Noise?

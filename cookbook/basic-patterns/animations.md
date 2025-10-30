@@ -1,5 +1,16 @@
 # Simple Animations
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 20-25 minutes
+**Prerequisites**: [Solid Colors](solid-colors.md), [Timing Concepts](../core-concepts/timing.md)
+
+**You'll Learn**:
+- How to create smooth fade in/out animations using brightness control
+- The power of static variables for maintaining animation state
+- The difference between global and per-LED brightness control
+- How to control animation speed with timing and delay
+- How to create variations by parameterizing your animation functions
+
 Learn how to create smooth, dynamic effects by animating brightness and color over time. The fade in/out effect is one of the most fundamental animations in LED programming.
 
 ## Fade In/Out Effect

@@ -1,5 +1,19 @@
 # Rainbow Effects
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 30-35 minutes
+**Prerequisites**:
+- [Solid Colors](solid-colors.md) - Understanding fill functions and color basics
+- [Animations](animations.md) - Working with static variables for animation
+- [Color Theory](../core-concepts/color-theory.md) - RGB vs HSV color spaces
+
+**You'll Learn**:
+- How to use `fill_rainbow()` to create smooth rainbow gradients across your LED strip
+- Why HSV color space makes rainbow effects dramatically simpler than RGB
+- How to animate rainbows by cycling the starting hue value
+- How to control rainbow density, speed, and direction with parameters
+- Advanced rainbow techniques including mirroring, chunking, breathing effects, and dual-direction animations
+
 Rainbow effects showcase the power of HSV color space for creating smooth, natural color transitions. These patterns are visually striking and demonstrate essential color cycling techniques.
 
 ## Static Rainbow

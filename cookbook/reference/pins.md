@@ -1,5 +1,20 @@
 # Pin Configurations by Platform
 
+**Difficulty Level**: ⭐ All Levels
+**Time to Find Information**: 3-5 minutes
+**Prerequisites**: None (quick reference guide)
+
+**You'll Find**:
+- Recommended data pins for Arduino Uno, Mega, ESP32, ESP8266, Teensy, STM32, and RP2040
+- Pin limitations and restrictions per platform (boot pins, input-only pins, flash pins)
+- Best pins for hardware-accelerated output (ESP32 RMT, RP2040 PIO)
+- Memory capacity and maximum LED counts for each microcontroller
+- Multiple strip wiring examples with pin assignments
+- Level shifting guidance for 3.3V to 5V signal conversion
+- Troubleshooting solutions for first LED issues, signal degradation, and WiFi interference
+
+---
+
 Platform-specific pin recommendations and configurations for FastLED.
 
 ## Arduino Uno/Nano (ATmega328)

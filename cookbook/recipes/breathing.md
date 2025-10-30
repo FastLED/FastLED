@@ -1,5 +1,20 @@
 # Breathing Effect
 
+**Difficulty Level**: ⭐⭐ Intermediate
+**Time to Complete**: 30-40 minutes
+**Prerequisites**:
+- [Basic Patterns: Animations](../basic-patterns/animations.md) - Understanding timing and static variables
+- [Core Concepts: Color Theory](../core-concepts/color-theory.md) - RGB and HSV color spaces
+- [Intermediate: Math](../intermediate/math.md) - beatsin8() and wave functions
+- [Intermediate: Blending](../intermediate/blending.md) - fadeToBlackBy() for brightness control
+
+**You'll Learn**:
+- How to create smooth pulsing/breathing animations using beatsin8() sine wave function
+- Controlling breathing speed with BPM (breaths per minute) parameter and depth with min/max brightness range
+- Creating phased breathing effects where LEDs pulse in sequence using phase offset parameter
+- Combining multiple breathing patterns (dual colors, rainbow breathing, sectioned breathing with different phases)
+- Applying breathing to practical use cases: meditation lights, alert indicators, ocean waves, heartbeat patterns
+
 Smooth pulsing/breathing animations.
 
 ## Simple Breathing

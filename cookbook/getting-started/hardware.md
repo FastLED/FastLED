@@ -2,6 +2,16 @@
 
 Components needed for your FastLED project.
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 20 minutes (reading and shopping list preparation)
+**Prerequisites**: None - start here if you're buying hardware
+**You'll Learn**:
+- Which microcontrollers work with FastLED and which to choose
+- What LED strip types are compatible and their differences
+- How to calculate power supply requirements for your project
+- Essential safety components (capacitor, resistor) and why they matter
+- How to properly wire everything together safely
+
 ## Essential Components
 
 ### Microcontroller

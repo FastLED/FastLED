@@ -1,5 +1,19 @@
 # Debugging Tips
 
+**Difficulty Level**: ⭐⭐ Beginner to Intermediate
+**Time to Complete**: 40-50 minutes
+**Prerequisites**:
+- [Getting Started: First Example](../getting-started/first-example.md) - Basic FastLED setup and code structure
+- [Getting Started: Hardware](../getting-started/hardware.md) - Understanding of wiring and components
+- [Common Issues](common-issues.md) - Quick fixes that solve 80% of problems before systematic debugging needed
+
+**You'll Learn**:
+- How to use Serial monitoring to diagnose LED system status, track frame rates, and identify performance bottlenecks
+- Running comprehensive test patterns to verify hardware, check color channels, and identify failing LEDs
+- Monitoring memory usage to prevent out-of-memory crashes, especially on constrained AVR boards (Uno/Mega)
+- Debugging color issues with systematic color testing, checking COLOR_ORDER settings, and printing RGB values
+- Using systematic diagnostic strategies: isolation testing (test components separately), binary search for bad LEDs, minimal test sketches, and frame rate/timing analysis
+
 Techniques and code examples for diagnosing and debugging FastLED projects.
 
 ## Serial Monitoring

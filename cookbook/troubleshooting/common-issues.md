@@ -1,5 +1,20 @@
 # Common Issues and Solutions
 
+**Difficulty Level**: ⭐ Beginner
+**Time to Complete**: 5-10 minutes
+**Prerequisites**:
+- [Getting Started: First Example](../getting-started/first-example.md) - Basic FastLED setup
+- [Getting Started: Hardware](../getting-started/hardware.md) - Hardware wiring basics
+
+**You'll Learn**:
+- How to diagnose and fix the most common LED problems (no lights, wrong colors, flickering)
+- Quick solutions for power and wiring issues that affect 80% of LED problems
+- How to identify signal integrity issues (wrong first LED, data connection problems)
+- When to adjust software settings (brightness, color order, power limits) vs hardware fixes
+- Which advanced troubleshooting guide to consult when quick fixes don't resolve the problem
+
+---
+
 Quick reference guide for the most frequently encountered FastLED problems and their solutions.
 
 ## LEDs Don't Light Up
