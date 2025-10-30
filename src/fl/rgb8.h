@@ -196,12 +196,12 @@ struct CRGB {
     /// @note For array operations with many pixels, consider using fill_rainbow() or fill_gradient<>()
     /// in fl/fill.h instead, which are optimized for bulk HSV-to-RGB conversions and significantly
     /// faster on most platforms due to loop unrolling and SIMD opportunities.
-    FASTLED_FORCE_INLINE CRGB& setHSV (u8 hue, u8 sat, u8 val);
+    CRGB& setHSV (u8 hue, u8 sat, u8 val);
 
     /// Allow assignment from just a hue.
     /// Saturation and value (brightness) are set automatically to max.
     /// @param hue color hue
-    FASTLED_FORCE_INLINE CRGB& setHue (u8 hue);
+    CRGB& setHue (u8 hue);
 
     /// Allow assignment from HSV color
     CRGB& operator= (const hsv8& rhs);
