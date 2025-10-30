@@ -874,7 +874,7 @@ uv run test.py --qemu esp32c3  # RISC-V
 ### External Resources
 - **ESP-IDF RMT Docs**: https://docs.espressif.com/projects/esp-idf/en/stable/esp32/api-reference/peripherals/rmt.html
 - **Interrupt Infrastructure**: `src/platforms/esp/32/interrupts/`
-- **RMT Analysis**: `RMT.md`
+- **RMT Analysis**: `RMT_RESEARCH.md` (this directory)
 
 ---
 

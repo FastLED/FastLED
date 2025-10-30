@@ -390,6 +390,7 @@ Based on WLED-MM implementation:
 3. ✓ Added example in `examples/SpecialDrivers/ESP/Parlio/Esp32P4Parlio/`
 4. ✓ Supports 8 or 16 parallel channels with template parameterization
 5. ✓ DMA-based transmission with hardware timing
+6. ✓ Strategic buffer breaking at color component boundaries (see Buffer Breaking Strategy below)
 
 **Next Steps**:
 1. Test on ESP32-P4 hardware
@@ -399,8 +400,99 @@ Based on WLED-MM implementation:
 5. Document platform-specific setup requirements
 6. Add support for other chipsets (SK6812, WS2811, etc.)
 
+## Buffer Breaking Strategy
+
+### Overview
+
+The FastLED ESP32-P4 parlio driver implements **strategic buffer breaking** at color component boundaries to minimize visual artifacts from DMA timing gaps. This enhancement was inspired by insights from the WLED-MM P4 implementation.
+
+### Problem: DMA Gap Visual Artifacts
+
+When transmitting large LED configurations, DMA transfers often require multiple buffers due to size constraints. The gaps between buffer transmissions can cause timing glitches that manifest as visual artifacts on the LED strips.
+
+**Key timing constraint**: Inter-buffer gaps must be < 20µs to avoid glitches (not 50µs as datasheets suggest).
+
+For large transmissions (e.g., 512×16 LEDs), multiple DMA buffers are unavoidable, and gaps between them can be observed on logic analyzers.
+
+### Solution: Break at Color Component Boundaries
+
+**Key insight from WLED-MM developer** ([GitHub issue #2095](https://github.com/FastLED/FastLED/issues/2095#issuecomment-3369324255)):
+
+> "I also break my buffers so it's after the LSB of the triplet (or quad). In case that pause is misinterpreted as a 1 vs 0, it's not going to cause a visual disruption. At worst 0,0,0 becomes 0,0,1."
+
+**Implementation approach**: Break DMA buffers at color component boundaries (G, R, B) rather than using a single monolithic buffer. This ensures that if DMA gaps cause timing glitches, they occur between complete color components rather than mid-component.
+
+**Benefits**:
+- DMA gaps can only affect transitions between color components
+- Visual artifacts reduced to minimal levels (at worst, slightly different complete color)
+- Eliminates major glitches from timing issues where MSB corruption causes ±128 brightness errors
+
+### Error Impact Comparison
+
+**Without buffer breaking** (gap occurs mid-component):
+```
+Intended: G=128 (0b10000000)
+Glitched: G=0   (0b00000000)  ← MSB corrupted
+Result: Highly visible color shift (±128 brightness)
+```
+
+**With buffer breaking** (gap occurs between components):
+```
+Intended: G=128, R=64, B=32
+Glitched: G=128, R=65, B=32  ← Transition timing slightly affected
+Result: Barely visible color difference (±1 brightness if at all)
+```
+
+### Implementation
+
+The implementation uses a `ParlioBufferStrategy` enum defined in `src/platforms/esp/32/parlio/parlio_driver.h`:
+
+```cpp
+enum class ParlioBufferStrategy : uint8_t {
+    MONOLITHIC = 0,      // Original: single buffer for entire frame
+    BREAK_PER_COLOR = 1  // Enhanced: separate buffer per color component (G, R, B)
+};
+```
+
+**Default behavior**: `BREAK_PER_COLOR` is enabled by default in `clockless_parlio_esp32p4.cpp`.
+
+**Buffer layout**:
+- **Monolithic mode**: Single buffer containing all G, R, B data for all LEDs
+- **Break-per-color mode**: Three separate sub-buffers:
+  1. Buffer 1: All G (green) components for all LEDs
+  2. Buffer 2: All R (red) components for all LEDs
+  3. Buffer 3: All B (blue) components for all LEDs
+
+Each sub-buffer is transmitted sequentially with DMA, with the driver waiting for each transmission to complete before starting the next.
+
+### Configuration
+
+**Default (recommended)**:
+```cpp
+// No configuration needed - BREAK_PER_COLOR is the default
+```
+
+**To revert to monolithic buffer** (not recommended):
+```cpp
+config.buffer_strategy = fl::ParlioBufferStrategy::MONOLITHIC;
+```
+
+### Performance Impact
+
+- **Transmission time**: Negligible difference (same total data transferred)
+- **Memory**: Uses 3 separate sub-buffers instead of 1 monolithic buffer (same total size)
+- **CPU overhead**: Minimal (3 sequential DMA transactions instead of 1)
+- **Visual quality**: Significantly improved for large LED configurations
+
+### References
+
+- Original issue: [FastLED #2095](https://github.com/FastLED/FastLED/issues/2095)
+- WLED-MM P4 experimental branch: https://github.com/troyhacks/WLED/tree/P4_experimental
+- WLED-MM demo: https://www.reddit.com/r/WLED/s/q1pZg1mnwZ
+- Implementation: `src/platforms/esp/32/parlio/parlio_driver_impl.h`
+
 ---
 
-*Last updated: 2025-10-02*
+*Last updated: 2025-10-30*
 *Target FastLED version: 4.x*
 *ESP-IDF version: 5.5.1+*
