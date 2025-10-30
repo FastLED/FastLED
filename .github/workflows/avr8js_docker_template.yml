@@ -211,6 +211,10 @@ jobs:
           echo "⚙️  AVR8JS Configuration:"
           echo ""
           # Map PlatformIO platform names to AVR MCU types
+          # NOTE: Only platforms with hardware USART are supported
+          # ATtiny85 is NOT supported - lacks hardware UART and avr8js does not
+          # emulate Analog Comparator required for TinySoftwareSerial
+          # See ci/docker/avr8js/README.md for details
           PLATFORM="${{ inputs.platform }}"
           case "$PLATFORM" in
             uno)
@@ -226,8 +230,10 @@ jobs:
               FREQUENCY=16000000
               ;;
             attiny85)
-              MCU="attiny85"
-              FREQUENCY=8000000
+              echo "  ❌ ERROR: attiny85 is not supported by AVR8JS emulator"
+              echo "  Reason: No hardware UART, requires Analog Comparator for software serial"
+              echo "  See ci/docker/avr8js/README.md for technical details"
+              exit 1
               ;;
             *)
               echo "  ⚠️  Unknown platform: $PLATFORM, defaulting to atmega328p"
