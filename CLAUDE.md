@@ -97,6 +97,35 @@ This project uses directory-specific agent guidelines. See:
 ### JavaScript Code Standards
 - **After modifying any JavaScript files**: Always run `bash lint --js --no-fingerprint` to ensure proper formatting
 
+### Meson Build System Standards
+**Critical Information for Working with meson.build Files**:
+
+1. **NO Embedded Python Scripts** - Meson supports inline Python via `run_command('python', '-c', '...')`, but this creates unmaintainable code
+   - ❌ Bad: `run_command('python', '-c', 'import pathlib; print(...)')`
+   - ✅ Good: Extract to standalone `.py` file in `ci/` or `tests/`, then call via `run_command('python', 'script.py')`
+   - Rationale: External scripts can be tested, type-checked, and debugged independently
+
+2. **Avoid Dictionary Subscript Assignment in Loops** - Meson does NOT support `dict[key] += value` syntax
+   - ❌ Bad: `category_files[name] += files(...)`
+   - ✅ Good: `existing = category_files.get(name); updated = existing + files(...); category_files += {name: updated}`
+   - Limitation: Meson's assignment operators work on variables, not dictionary subscripts
+
+3. **Configuration as Data** - Hardcoded values should live in Python config files, not meson.build
+   - ❌ Bad: Lists of paths, patterns, or categories scattered throughout meson.build
+   - ✅ Good: Define in `*_config.py`, import in Python scripts, call from Meson
+   - Example: `tests/test_config.py` defines test categories and patterns
+
+4. **Extract Complex Logic to Python** - Meson is a declarative build system, not a programming language
+   - Meson is great for: Defining targets, dependencies, compiler flags
+   - Python is better for: String manipulation, file discovery, categorization, conditional logic
+   - Pattern: Use `run_command()` to call Python helpers that output Meson-parseable data
+   - Example: `tests/organize_tests.py` outputs `TEST:name:path:category` format
+
+**Current Architecture** (after refactoring):
+- `meson.build` (root): Source discovery + library compilation (⚠️ still has duplication - needs refactoring)
+- `tests/meson.build`: Uses `organize_tests.py` for test discovery (✅ refactored)
+- `examples/meson.build`: PlatformIO target registration (✅ clean)
+
 ### Code Review Rule
 **🚨 ALL AGENTS: After making code changes, run `/code_review` to validate changes. This ensures compliance with project standards.**
 

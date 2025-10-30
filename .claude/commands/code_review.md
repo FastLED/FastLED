@@ -58,6 +58,34 @@ You are a specialized code review agent for FastLED. Review staged and unstaged 
    - Required for pyright type checking
    - Missing annotation: Fix directly by adding proper type hints
 
+### **/meson.build changes - BUILD SYSTEM ARCHITECTURE
+
+**FastLED Meson Build Architecture** (3-tier structure):
+```
+meson.build (root)          → Source discovery, library compilation
+├── tests/meson.build       → Test discovery, categorization, executable creation
+└── examples/meson.build    → Example compilation target registration
+```
+
+**Critical Rules**:
+1. **NO embedded Python scripts** - Extract to standalone `.py` files in `ci/` or `tests/`
+2. **NO code duplication** - Use loops/functions instead of copy-paste patterns
+3. **Configuration as data** - Hardcoded values go in Python config files (e.g., `test_config.py`)
+4. **External scripts for complex logic** - Call Python scripts via `run_command()`, don't inline
+
+**Common Violations to Check**:
+- ❌ Multiple `run_command(..., '-c', 'import ...')` blocks → Extract to script
+- ❌ Repeated if-blocks with same pattern → Use loop
+- ❌ Hardcoded paths/lists in build logic → Move to config file
+- ❌ String manipulation in Meson → Move to Python helper
+
+**Architecture Summary**:
+- **Root meson.build**: Discovers C++ sources from `src/` subdirectories, builds `libfastled.a`
+- **tests/meson.build**: Uses `organize_tests.py` to discover/categorize tests, creates executables
+- **examples/meson.build**: Registers PlatformIO compilation targets for Arduino examples
+
+**If violations found**: Recommend refactoring similar to `tests/meson.build` (see git history)
+
 ## Output Format
 
 ```

@@ -35,92 +35,19 @@ fastled_sources = files(
 )
 
 # Collect all .cpp files recursively from src directory
-# This mimics what the Python build system does
-fs = import('fs')
-
-# Find uv for running Python commands
+# Uses external Python script to discover sources based on configuration in ci/source_config.py
 uv_prog = find_program('uv', required: true)
 
-# Find additional sources in subdirectories
-lib8tion_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/lib8tion").glob("*.cpp")))',
-  check: false, capture: true)
+# Discover additional sources from configured directories
+additional_sources = run_command(
+  uv_prog, 'run', 'python',
+  meson.project_source_root() / 'ci' / 'collect_sources.py',
+  check: false, capture: true
+)
 
-stub_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/stub").glob("*.cpp")))',
-  check: false, capture: true)
-
-platforms_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms").glob("*.cpp")))',
-  check: false, capture: true)
-
-fl_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl").rglob("*.cpp")))',
-  check: false, capture: true)
-
-shared_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/shared").rglob("*.cpp")))',
-  check: false, capture: true)
-
-esp_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/platforms/esp").rglob("*.cpp")))',
-  check: false, capture: true)
-
-third_party_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/third_party").rglob("*.cpp")))',
-  check: false, capture: true)
-
-codec_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fl/codec").glob("*.cpp")))',
-  check: false, capture: true)
-
-fx_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/fx").rglob("*.cpp")))',
-  check: false, capture: true)
-
-sensors_sources = run_command(uv_prog, 'run', 'python', '-c',
-  'import pathlib; print("\\n".join(str(p) for p in pathlib.Path("src/sensors").glob("*.cpp")))',
-  check: false, capture: true)
-
-# Add found sources if any
-if lib8tion_sources.returncode() == 0 and lib8tion_sources.stdout().strip() != ''
-  fastled_sources += files(lib8tion_sources.stdout().strip().split('\n'))
-endif
-
-if stub_sources.returncode() == 0 and stub_sources.stdout().strip() != ''
-  fastled_sources += files(stub_sources.stdout().strip().split('\n'))
-endif
-
-if platforms_sources.returncode() == 0 and platforms_sources.stdout().strip() != ''
-  fastled_sources += files(platforms_sources.stdout().strip().split('\n'))
-endif
-
-if fl_sources.returncode() == 0 and fl_sources.stdout().strip() != ''
-  fastled_sources += files(fl_sources.stdout().strip().split('\n'))
-endif
-
-if shared_sources.returncode() == 0 and shared_sources.stdout().strip() != ''
-  fastled_sources += files(shared_sources.stdout().strip().split('\n'))
-endif
-
-if esp_sources.returncode() == 0 and esp_sources.stdout().strip() != ''
-  fastled_sources += files(esp_sources.stdout().strip().split('\n'))
-endif
-
-if third_party_sources.returncode() == 0 and third_party_sources.stdout().strip() != ''
-  fastled_sources += files(third_party_sources.stdout().strip().split('\n'))
-endif
-
-if codec_sources.returncode() == 0 and codec_sources.stdout().strip() != ''
-  fastled_sources += files(codec_sources.stdout().strip().split('\n'))
-endif
-
-if fx_sources.returncode() == 0 and fx_sources.stdout().strip() != ''
-  fastled_sources += files(fx_sources.stdout().strip().split('\n'))
-endif
-
-if sensors_sources.returncode() == 0 and sensors_sources.stdout().strip() != ''
-  fastled_sources += files(sensors_sources.stdout().strip().split('\n'))
+# Add discovered sources if any
+if additional_sources.returncode() == 0 and additional_sources.stdout().strip() != ''
+  fastled_sources += files(additional_sources.stdout().strip().split('\n'))
 endif
 
 # Compile flags for unit tests (base flags)

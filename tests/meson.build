@@ -38,56 +38,30 @@ doctest_main = static_library('doctest_main',
   install: false
 )
 
-# Automatically discover test files using rglob from tests/ directory
-# Find all test_*.cpp files recursively, plus *.cpp files in fl/, fx/ subdirectories
-test_cpp_files = run_command('python', '-c', '''
-import sys
-from pathlib import Path
-tests_dir = Path(sys.argv[1]).resolve()
-# Exclude special files that have their own build rules or aren't standard tests
-# Also exclude broken tests with missing dependencies (TODO: fix these)
-excluded = {"doctest_main.cpp", "test_parallel_spi_isr.cpp", "test_audio_reactive_simple.cpp", "test_beat_detector.cpp"}
-# Find all test_*.cpp files recursively
-for f in sorted(tests_dir.rglob("test_*.cpp")):
-    if f.name not in excluded:
-        rel_path = f.resolve().relative_to(tests_dir)
-        print(rel_path.as_posix())
-# Also find *.cpp files directly in fl/, fx/ subdirectories
-for subdir in ["fl", "fx"]:
-    subdir_path = tests_dir / subdir
-    if subdir_path.exists():
-        for f in sorted(subdir_path.glob("*.cpp")):
-            rel_path = f.resolve().relative_to(tests_dir)
-            print(rel_path.as_posix())
-''', meson.current_source_dir(), check: true).stdout().strip().split('\n')
+# Discover and organize tests using external Python script
+# Output format: TEST:<name>:<file_path>:<category>
+test_metadata_output = run_command(
+  'python', meson.current_source_dir() / 'organize_tests.py',
+  meson.current_source_dir(),
+  check: true
+).stdout().strip()
 
-# Build test_names list and file path mapping for subdirectories
+# Parse test metadata
 test_names = []
 test_file_paths = {}
+test_categories = {}
 
-foreach test_file : test_cpp_files
-  if test_file != ''
-    # Extract test name from file path
-    # For noise/test_noise_X.cpp -> test_noise_X (not noise_test_noise_X)
-    # For fl/algorithm.cpp -> fl_algorithm (prefix with subdirectory name)
-    # For fx/engine.cpp -> fx_engine (prefix with subdirectory name)
-    if test_file.startswith('fl/')
-      # Files in fl/ subdirectory: add fl_ prefix to avoid conflicts
-      base_name = test_file.split('/')[-1].replace('.cpp', '')
-      test_name = 'fl_' + base_name
-    elif test_file.startswith('fx/')
-      # Files in fx/ subdirectory: add fx_ prefix to avoid conflicts
-      base_name = test_file.split('/')[-1].replace('.cpp', '')
-      test_name = 'fx_' + base_name
-    else
-      test_name = test_file.split('/')[-1].replace('.cpp', '')
-    endif
+foreach line : test_metadata_output.split('\n')
+  if line != ''
+    # Parse line format: TEST:<name>:<file_path>:<category>
+    parts = line.split(':')
+    test_name = parts[1]
+    test_file = parts[2]
+    test_category = parts[3]
+
     test_names += test_name
-
-    # Store mapping for files in subdirectories
-    if test_file.contains('/')
-      test_file_paths += {test_name: test_file}
-    endif
+    test_file_paths += {test_name: test_file}
+    test_categories += {test_name: test_category}
   endif
 endforeach
 
@@ -96,59 +70,29 @@ unity_enabled = get_option('unity') == 'on'
 
 if unity_enabled
   # UNITY MODE: Combine tests into categorized test executables
+  # Categories are pre-computed by organize_tests.py
 
-  # Categorize tests by functionality
-  fl_tests = []         # fl/ directory tests (stdlib-like utilities)
-  fx_tests = []         # fx/ directory tests (effects framework)
-  noise_tests = []      # noise/ directory tests
-  platform_tests = []   # Platform-specific tests (SPI, ISR, ESP32, etc.)
-  core_tests = []       # Core FastLED and general tests
-
-  # Platform test patterns
-  platform_patterns = [
-    'spi', 'isr', 'esp32', 'riscv', 'parallel', 'quad', 'single',
-    'clockless', 'dual', 'stub_led'
-  ]
+  # Dynamically organize test files by category
+  # Build dictionary on-the-fly based on discovered categories
+  category_files = {}
 
   foreach test_name : test_names
-    # Get test file path
     test_file = test_file_paths.get(test_name, test_name + '.cpp')
+    test_category = test_categories.get(test_name)
 
-    # Categorize based on prefix or file path
-    if test_name.startswith('fl_')
-      fl_tests += files(test_file)
-    elif test_name.startswith('fx_') or test_name.contains('fx')
-      fx_tests += files(test_file)
-    elif test_file.startswith('noise/')
-      noise_tests += files(test_file)
+    # Initialize category list if not exists, then append
+    if not category_files.has_key(test_category)
+      category_files += {test_category: files(test_file)}
     else
-      # Check if it's a platform test
-      is_platform = false
-      foreach pattern : platform_patterns
-        if test_name.contains(pattern)
-          is_platform = true
-          break
-        endif
-      endforeach
-
-      if is_platform
-        platform_tests += files(test_file)
-      else
-        core_tests += files(test_file)
-      endif
+      # Get existing list, append, and update
+      existing_files = category_files.get(test_category)
+      updated_files = existing_files + files(test_file)
+      category_files += {test_category: updated_files}
     endif
   endforeach
 
   # Build test executables for each category
-  test_categories = {
-    'fl_tests': fl_tests,
-    'fx_tests': fx_tests,
-    'noise_tests': noise_tests,
-    'platform_tests': platform_tests,
-    'core_tests': core_tests,
-  }
-
-  foreach category_name, test_sources : test_categories
+  foreach category_name, test_sources : category_files
     if test_sources.length() > 0
       # Add PCH to sources
       category_sources = [test_pch[0]] + test_sources
