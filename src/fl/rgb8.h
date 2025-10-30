@@ -7,8 +7,6 @@
 #include "fl/int.h"
 
 #include "hsv.h"
-#include "crgb.h"
-#include "hsv2rgb.h"
 #include "lib8tion/types.h"
 #include "fl/force_inline.h"
 #include "fl/type_traits.h"
@@ -16,6 +14,14 @@
 // Include color.h for LEDColorCorrection and ColorTemperature enums
 // These are needed for constexpr constructors and can't be forward-declared
 #include "color.h"
+
+#include "fl/stdint.h"
+
+#include "fl/fastled.h"
+#include "fl/math_macros.h"
+
+#include "crgb.h"
+#include "hsv2rgb.h"
 
 // Forward declarations
 namespace fl {
