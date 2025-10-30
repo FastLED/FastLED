@@ -39,6 +39,10 @@ FastLED 3.10.4
       * Not compatible with parallel output modes
     * Proven technique from NeoPixelBus, now available in FastLED
     * Files: [src/platforms/esp/8266/fastled_esp8266_uart.h](src/platforms/esp/8266/fastled_esp8266_uart.h), [src/platforms/esp/8266/fastled_esp8266_uart.cpp](src/platforms/esp/8266/fastled_esp8266_uart.cpp)
+  * **NEW: RP2040 Automatic Parallel I/O Driver**: Hardware-accelerated parallel LED output with automatic pin allocation
+    * Support for up to 8 parallel WS2812 strips on RP2040/RP2350
+    * Example: [examples/SpecialDrivers/RP/Parallel_IO.ino](examples/SpecialDrivers/RP/Parallel_IO.ino)
+    * Documentation: [src/platforms/arm/rp/rpcommon/PARALLEL_AUTO.md](src/platforms/arm/rp/rpcommon/PARALLEL_AUTO.md)
   * **NEW: ESP32-P4 PARLIO Driver (Alpha)**: Hardware-accelerated parallel LED driver using PARLIO TX peripheral
     * Drive 8 or 16 WS28xx LED strips simultaneously with DMA and hardware timing
     * Minimal CPU overhead with automatic timing for WS2812, WS2811, SK6812, etc.

@@ -88,6 +88,19 @@ class WS2812Parlio:
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 using WS2812Controller800Khz = WS2812Parlio<DATA_PIN, RGB_ORDER>;
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
+#elif (defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)) && defined(FASTLED_RP2040_CLOCKLESS_PIO_AUTO)
+#include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
+// Explicit name for RP2040/RP2350 PIO automatic parallel WS2812 controller
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
+class WS2812RP2040Auto:
+	public fl::ClocklessController_RP2040_PIO_WS2812<
+		DATA_PIN,
+		RGB_ORDER
+	> {};
+// Default WS2812 controller typedef (selects automatic parallel PIO on RP2040/RP2350)
+template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
+using WS2812Controller800Khz = WS2812RP2040Auto<DATA_PIN, RGB_ORDER>;
+#define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #elif defined(FASTLED_USE_ADAFRUIT_NEOPIXEL)
 #include "platforms/adafruit/clockless.h"
 // Explicit name for Adafruit NeoPixel-based WS2812 controller

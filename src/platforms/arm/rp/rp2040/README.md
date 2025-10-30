@@ -16,6 +16,65 @@ Notes:
 - Uses PIO program assembled at runtime; ensure T1/T2/T3 match LED timing.
  - `clockless_arm_rp2040.h` configures wrap targets and delays via `pio_gen.h`; changes to timing require regenerating the program.
 
+## Automatic Parallel Clockless Output (NEW!)
+
+**FastLED now supports automatic parallel output for clockless LEDs (WS2812, etc.) using the standard `FastLED.addLeds()` API!**
+
+### Quick Start
+
+```cpp
+#define FASTLED_RP2040_CLOCKLESS_PIO_AUTO 1
+#include <FastLED.h>
+
+CRGB leds1[100], leds2[100], leds3[100], leds4[100];
+
+void setup() {
+    // Just use standard addLeds() - automatic parallel grouping!
+    FastLED.addLeds<WS2812, 2, GRB>(leds1, 100);  // GPIO 2
+    FastLED.addLeds<WS2812, 3, GRB>(leds2, 100);  // GPIO 3 (auto-grouped with 2)
+    FastLED.addLeds<WS2812, 4, GRB>(leds3, 100);  // GPIO 4 (auto-grouped with 2-3)
+    FastLED.addLeds<WS2812, 5, GRB>(leds4, 100);  // GPIO 5 (auto-grouped with 2-4)
+}
+
+void loop() {
+    FastLED.show();  // All 4 strips output in parallel automatically!
+}
+```
+
+### Features
+
+- ✅ **Standard FastLED API** - no custom controller classes needed
+- ✅ **Automatic grouping** - detects consecutive GPIO pins and groups them for parallel output
+- ✅ **2/4/8-lane parallel** - supports groups of 2, 4, or 8 consecutive pins
+- ✅ **Graceful fallback** - non-consecutive pins use sequential output
+- ✅ **Same performance** - identical to manual parallel setup
+
+### How It Works
+
+The driver automatically:
+1. Detects consecutive GPIO pins from all `addLeds()` calls
+2. Groups them for parallel output (2, 4, or 8 pins per group)
+3. Allocates PIO state machines and DMA channels per group
+4. Transposes LED data to bit-parallel format
+5. Outputs all groups simultaneously
+
+**Example:** Pins 2-5 (consecutive) → Single 4-lane parallel group using 1 PIO SM + 1 DMA channel
+
+### Pin Requirements
+
+**CRITICAL:** Pins must be consecutive GPIO numbers for parallel output (RP2040 PIO hardware limitation).
+
+- ✅ Valid: GPIO 2-5 (4 consecutive pins) → 4-lane parallel
+- ❌ Invalid: GPIO 2,4,6,8 (non-consecutive) → Falls back to sequential
+
+See `src/platforms/arm/rp/rpcommon/PARALLEL_AUTO.md` for complete documentation.
+
+### Examples
+
+- `examples/SpecialDrivers/RP/Parallel_IO.ino` - Automatic parallel grouping demo
+
+---
+
 ## Hardware SPI Support
 
 The RP2040/RP2350 platforms support parallel SPI output for controlling multiple LED strips simultaneously using the Programmable I/O (PIO) subsystem combined with DMA transfers.
@@ -103,6 +162,7 @@ if (!controllers.empty()) {
 - **`FASTLED_ACCURATE_CLOCK`**: Enabled when interrupts are allowed to maintain timing math accuracy.
 - **`FASTLED_USE_PROGMEM`**: Default `0` (flat memory model).
 - **Clockless driver selection/tuning**
+  - **`FASTLED_RP2040_CLOCKLESS_PIO_AUTO`**: Enable automatic parallel grouping for clockless LEDs (WS2812, etc.). Uses standard `FastLED.addLeds()` API with automatic consecutive pin detection. Default `0` (disabled).
   - **`FASTLED_RP2040_CLOCKLESS_PIO`**: Use PIO engine for clockless. Default `1`.
   - **`FASTLED_RP2040_CLOCKLESS_IRQ_SHARED`**: Share IRQ usage between PIO and other subsystems. Default `1`.
   - **`FASTLED_RP2040_CLOCKLESS_M0_FALLBACK`**: Fallback to a Cortex‑M0 timing loop if PIO is disabled/unavailable. Default `0`.
