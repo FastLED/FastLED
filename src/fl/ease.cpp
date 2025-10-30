@@ -17,7 +17,7 @@ namespace fl {
 // Gamma 2.8 lookup table for 8-bit to 16-bit gamma correction
 // This table converts linear 8-bit values to gamma-corrected 16-bit values
 // using a gamma curve of 2.8 (commonly used for LED brightness correction)
-const u16 gamma_2_8[256] FL_PROGMEM = {
+const u16 _gamma_2_8[256] FL_PROGMEM = {
     0,     0,     0,     1,     1,     2,     4,     6,     8,     11,
     14,    18,    23,    29,    35,    41,    49,    57,    67,    77,
     88,    99,    112,   126,   141,   156,   173,   191,   210,   230,
@@ -44,6 +44,10 @@ const u16 gamma_2_8[256] FL_PROGMEM = {
     50114, 50683, 51255, 51832, 52412, 52996, 53585, 54177, 54773, 55374,
     55978, 56587, 57199, 57816, 58436, 59061, 59690, 60323, 60960, 61601,
     62246, 62896, 63549, 64207, 64869, 65535};
+
+u16 gamma_2_8(u8 value) {
+    return FL_PGM_READ_WORD_NEAR(&_gamma_2_8[value]);
+}
 
 // 8-bit easing functions
 u8 easeInQuad8(u8 i) {
@@ -132,7 +136,7 @@ u8 easeOutCubic8(u8 i) {
 
 u8 easeInSine8(u8 i) {
 
-    static const u8 easeInSineTable[256] = {
+    static const u8 easeInSineTable[256] FL_PROGMEM = {
         0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   1,   1,   1,
         1,   1,   1,   1,   2,   2,   2,   2,   2,   3,   3,   3,   3,   4,
         4,   4,   4,   5,   5,   5,   6,   6,   6,   7,   7,   7,   8,   8,
@@ -155,7 +159,7 @@ u8 easeInSine8(u8 i) {
 
     // ease-in sine: 1 - cos(t * π/2)
     // Handle boundary conditions explicitly
-    return easeInSineTable[i];
+    return FL_PGM_READ_BYTE_NEAR(&easeInSineTable[i]);
 }
 
 u8 easeOutSine8(u8 i) {

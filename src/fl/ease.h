@@ -14,9 +14,8 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 
 namespace fl {
 
-// Gamma 2.8 lookup table for 8-bit to 16-bit gamma correction 
-// Used for converting linear 8-bit values to gamma-corrected 16-bit values
-extern const u16 gamma_2_8[256] FL_PROGMEM;
+// LUT for 8-bit to 16-bit gamma correction at pow(x, 2.8)
+u16 gamma_2_8(u8 value);
 
 enum EaseType {
     EASE_NONE,
