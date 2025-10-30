@@ -2,6 +2,7 @@
 
 #ifndef __INC_HSV2RGB_H
 #define __INC_HSV2RGB_H
+#include "crgb.h"
 
 
 /// @file hsv2rgb.h
