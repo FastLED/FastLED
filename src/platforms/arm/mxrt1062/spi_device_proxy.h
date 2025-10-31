@@ -145,6 +145,12 @@ public:
         mInTransaction = false;
     }
 
+    /// End SPI transaction (alias for release)
+    /// Added to match the new endTransaction() API used by chipset controllers
+    void endTransaction() {
+        release();
+    }
+
     /// Write single byte
     /// Mirrors Teensy4HardwareSPIOutput::writeByte()
     void writeByte(uint8_t b) {
