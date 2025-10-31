@@ -173,6 +173,11 @@ namespace fl {
             restoreSpimConfig();
         }
 
+        void endTransaction() {
+            waitFully();
+            release();
+        }
+
         /// wait until all queued up data has been written
         static void waitFully() {
             if (!s_NeedToWait) return;

@@ -38,6 +38,11 @@ public:
 	// release the CS select
 	void inline release() { /* TODO */ }
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
 

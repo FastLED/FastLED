@@ -166,6 +166,11 @@ public:
 #endif
     }
 
+    void endTransaction() {
+        waitFully();
+        release();
+    }
+
     // Write out len bytes of the given value
     void writeBytesValue(uint8_t value, int len) {
         select();

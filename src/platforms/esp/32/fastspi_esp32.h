@@ -179,9 +179,14 @@ public:
 	} 
 
 	// release the SPI line
-	void release() { 
-		if(m_pSelect != nullptr) { m_pSelect->release(); } 
+	void release() {
+		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		m_ledSPI.endTransaction();
+	}
+
+	void endTransaction() {
+		waitFully();
+		release();
 	}
 
 	// Write out len bytes of the given value out over m_ledSPI.  Useful for quickly flushing, say, a line of 0's down the line.

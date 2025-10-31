@@ -111,6 +111,11 @@ public:
 		disable_pins();
 	}
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) {
 			writeByte(value);
@@ -260,6 +265,11 @@ public:
 			m_pSelect->release();
 		}
 		disable_pins();
+	}
+
+	void endTransaction() {
+		waitFully();
+		release();
 	}
 
 	static void writeBytesValueRaw(uint8_t value, int len) {
@@ -426,6 +436,11 @@ public:
 			m_pSelect->release();
 		}
 		disable_pins();
+	}
+
+	void endTransaction() {
+		waitFully();
+		release();
 	}
 
 	static void writeBytesValueRaw(uint8_t value, int len) {
@@ -615,6 +630,11 @@ public:
 		disable_pins();
 	}
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) { writeByte(value); }
 	}
@@ -796,6 +816,11 @@ public:
 	void release() {
 		if(m_pSelect != nullptr) { m_pSelect->release(); }
 		disable_pins();
+	}
+
+	void endTransaction() {
+		waitFully();
+		release();
 	}
 
 	static void writeBytesValueRaw(uint8_t value, int len) {

@@ -36,6 +36,11 @@ public:
 	/// release the CS select
 	void inline release() __attribute__((always_inline)) { if(m_pSelect != nullptr) { m_pSelect->release(); } }
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	/// wait until all queued up data has been written
 	static void waitFully() { /* TODO */ }
 

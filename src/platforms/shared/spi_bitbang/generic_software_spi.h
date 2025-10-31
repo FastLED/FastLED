@@ -248,6 +248,11 @@ public:
 	/// Release the SPI chip select line
 	void release() { if(m_pSelect != nullptr) { m_pSelect->release(); } } // fl::FastPin<SELECT_PIN>::lo(); }
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	/// Write multiple bytes of the given value over SPI.
 	/// Useful for quickly flushing, say, a line of 0's down the line.
 	/// @param value the value to write to the bus

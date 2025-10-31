@@ -173,6 +173,11 @@ public:
     if(m_pSelect != nullptr) { m_pSelect->release(); }
   }
 
+  void endTransaction() {
+    waitFully();
+    release();
+  }
+
   // Wait for the world to be clear
   static void wait() __attribute__((always_inline)) { while(!(SPIX.S & SPI_S_SPTEF));  }
 

@@ -62,6 +62,11 @@ public:
     // release the CS select
     void release() { shouldWait(); restoreSPIData(); }
 
+    void endTransaction() {
+        waitFully();
+        release();
+    }
+
     static bool shouldWait(bool wait = false) __attribute__((always_inline)) __attribute__((always_inline)) {
         // static bool sWait=false;
         // bool oldWait = sWait;

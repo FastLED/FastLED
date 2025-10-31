@@ -375,6 +375,11 @@ public:
 		restore_spi_state();
 	}
 
+	void endTransaction() {
+		waitFully();
+		release();
+	}
+
 	static void writeBytesValueRaw(uint8_t value, int len) {
 		while(len--) { Write<CM, WM, NOTLAST>::writeByte(value); }
 	}

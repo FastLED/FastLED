@@ -565,8 +565,7 @@ protected:
 			pixels.advanceData();
 		}
 		endBoundary(pixels.size());
-		mSPI.waitFully();
-		mSPI.release();
+		mSPI.endTransaction();
 	}
 
 };
@@ -722,8 +721,7 @@ private:
 		}
 		endBoundary(pixels.size());
 
-		mSPI.waitFully();
-		mSPI.release();
+		mSPI.endTransaction();
 
 		// Finalize transmission (no-op on non-ESP32, flushes Quad-SPI on ESP32)
 		mSPI.finalizeTransmission();
@@ -741,8 +739,7 @@ private:
 			pixels.advanceData();
 		}
 		endBoundary(pixels.size());
-		mSPI.waitFully();
-		mSPI.release();
+		mSPI.endTransaction();
 
 		// Finalize transmission (no-op on non-ESP32, flushes Quad-SPI on ESP32)
 		mSPI.finalizeTransmission();
@@ -938,9 +935,8 @@ protected:
 			pixels.stepDithering();
 		}
 		writeBoundary();
-		mSPI.waitFully();
 
-		mSPI.release();
+		mSPI.endTransaction();
 	}
 
 public:
@@ -1009,11 +1005,10 @@ class SM16716Controller : public CPixelLEDController<RGB_ORDER> {
 		mSPI.writeByte(0);
 		mSPI.writeByte(0);
 		mSPI.writeByte(0);
-		// Note: waitFully() and release() may not be strictly necessary for SM16716
-		// since we're just streaming bytes. However, they're kept here for consistency
+		// Note: endTransaction() may not be strictly necessary for SM16716
+		// since we're just streaming bytes. However, it's kept here for consistency
 		// with other SPI-based controllers and as defensive programming.
-		mSPI.waitFully();
-		mSPI.release();
+		mSPI.endTransaction();
 	}
 
 public:
