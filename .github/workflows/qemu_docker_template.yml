@@ -218,6 +218,52 @@ jobs:
           echo "Mapped platform '$PLATFORM' to chip '$CHIP'"
         shell: bash
 
+      - name: Pull or build Docker image for QEMU
+        working-directory: trusted
+        run: |
+          echo "=== Ensuring Docker image is available ==="
+          echo "This step pulls the image if available, otherwise builds it"
+          echo ""
+
+          # Try to pull or build the Docker image
+          uv run python -c "
+          import sys
+          from ci.docker.qemu_esp32_docker import DockerQEMURunner
+
+          print('Initializing Docker QEMU runner...')
+          runner = DockerQEMURunner()
+
+          print('Attempting to pull Docker image...')
+          try:
+              runner.pull_image()
+              print('')
+              print('✅ Docker image ready')
+              sys.exit(0)
+          except Exception as e:
+              print(f'⚠️  Pull failed: {e}')
+              print('')
+              print('🔨 Building Docker image as fallback...')
+              print('   This will take approximately 30 minutes')
+              print('')
+
+              # Build the image for the current platform
+              exit_code = runner.build_board_image(
+                  platform='${{ inputs.platform }}',
+                  progress=True
+              )
+
+              if exit_code == 0:
+                  print('✅ Docker image built successfully')
+                  sys.exit(0)
+              else:
+                  print('❌ Failed to build Docker image')
+                  sys.exit(1)
+          "
+
+          echo ""
+          echo "=== Docker image ready for QEMU ==="
+        shell: bash
+
       - name: Run ${{ inputs.platform_display }} in QEMU using Docker
         id: qemu
         working-directory: trusted
@@ -248,7 +294,8 @@ jobs:
               timeout=120,
               machine='${{ steps.chip_mapping.outputs.chip }}',
               interrupt_regex=r'Test finished.*completed.*iterations|Starting loop iteration 2',
-              output_file='qemu_output.log'
+              output_file='qemu_output.log',
+              skip_pull=True
           )
 
           print('')

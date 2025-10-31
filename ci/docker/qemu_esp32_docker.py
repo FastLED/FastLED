@@ -552,6 +552,7 @@ class DockerQEMURunner:
         interactive: bool = False,
         output_file: Optional[str] = None,
         machine: str = "esp32",
+        skip_pull: bool = False,
     ) -> int:
         """Run ESP32/ESP32C3/ESP32S3 firmware in QEMU using Docker.
 
@@ -563,6 +564,7 @@ class DockerQEMURunner:
             interactive: Run in interactive mode (attach to container)
             output_file: Optional file path to write QEMU output to
             machine: QEMU machine type (esp32, esp32c3, esp32s3, etc.)
+            skip_pull: Skip pulling Docker image (assumes image already exists)
 
         Returns:
             Exit code: actual QEMU/container exit code, except timeout returns 0
@@ -572,8 +574,11 @@ class DockerQEMURunner:
             print("Please install Docker and ensure it's running", file=sys.stderr)
             return 1
 
-        # Pull image if needed
-        self.pull_image()
+        # Pull image if needed (unless skip_pull is True)
+        if not skip_pull:
+            self.pull_image()
+        else:
+            print(f"Skipping image pull (using existing {self.docker_image})")
 
         # Prepare firmware files
         print(f"Preparing firmware from: {firmware_path}")
@@ -708,6 +713,11 @@ def main():
         default="esp32",
         help="QEMU machine type: esp32, esp32c3, esp32s3 (default: esp32)",
     )
+    parser.add_argument(
+        "--skip-pull",
+        action="store_true",
+        help="Skip pulling Docker image (assumes image already exists)",
+    )
 
     args = parser.parse_args()
 
@@ -727,6 +737,7 @@ def main():
         interactive=args.interactive,
         output_file=args.output_file,
         machine=args.machine,
+        skip_pull=args.skip_pull,
     )
 
 
