@@ -17,6 +17,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // Apollo3 uses cycle-based timing
+#endif
+
 #ifndef F_CPU
 #define F_CPU 48000000
 #endif

@@ -20,6 +20,10 @@
 #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // Stub platform uses nanosecond-based timing
+#endif
+
 #define FASTLED_USE_PROGMEM 0
 #define INTERRUPT_THRESHOLD 0
 

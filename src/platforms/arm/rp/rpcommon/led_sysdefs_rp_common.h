@@ -59,6 +59,10 @@ typedef volatile uint32_t RwReg;
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // RP2xxx uses cycle-based timing
+#endif
+
 // Default to no PROGMEM
 #ifndef FASTLED_USE_PROGMEM
 #define FASTLED_USE_PROGMEM 0

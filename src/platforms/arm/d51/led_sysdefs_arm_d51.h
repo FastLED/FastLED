@@ -20,6 +20,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM D51 uses cycle-based timing
+#endif
+
 // reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq();
 #define sei() __enable_irq();

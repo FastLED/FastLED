@@ -38,6 +38,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM MGM240 uses cycle-based timing
+#endif
+
 /// @brief FreeRTOS-compatible critical section macros
 /// Automatically detects FreeRTOS presence and uses task-safe critical sections.
 /// Falls back to bare metal interrupt disable/enable when FreeRTOS is not available.

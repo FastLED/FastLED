@@ -43,6 +43,10 @@ typedef uint8_t boolean;
 #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM NRF51 uses cycle-based timing
+#endif
+
 #define cli()  __disable_irq();
 #define sei() __enable_irq();
 

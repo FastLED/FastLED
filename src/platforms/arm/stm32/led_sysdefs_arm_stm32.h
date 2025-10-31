@@ -47,6 +47,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM STM32 uses cycle-based timing
+#endif
+
 // pgmspace definitions
 #define PROGMEM
 

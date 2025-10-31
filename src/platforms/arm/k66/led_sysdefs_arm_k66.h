@@ -20,6 +20,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM K66 uses cycle-based timing
+#endif
+
 #if (F_CPU == 192000000)
 #define CLK_DBL 1
 #endif

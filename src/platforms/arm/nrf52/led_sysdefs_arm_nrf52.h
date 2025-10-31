@@ -29,6 +29,10 @@
     #define FASTLED_ALLOW_INTERRUPTS 1
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM NRF52 uses cycle-based timing
+#endif
+
 // Use PWM instance 0
 // See clockless_arm_nrf52.h and (in root of library) platforms.cpp
 #define FASTLED_NRF52_ENABLE_PWM_INSTANCE0

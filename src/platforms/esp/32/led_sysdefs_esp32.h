@@ -45,6 +45,9 @@ typedef unsigned long prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
+// ESP32 timing is configured in platforms/esp/clockless.h
+// Do NOT define FASTLED_CLOCKLESS_USES_NANOSECONDS here
+
 #define NEED_CXX_BITS
 
 // These can be overridden

@@ -26,11 +26,12 @@
 #endif
 
 // Platform-specific clockless controller includes
-// Note: ESP32 drivers are included via platforms.h -> fastled_esp32.h
 #if defined(__EMSCRIPTEN__)
   #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
   #include "platforms/stub/clockless_stub_generic.h"
+#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
+  #include "platforms/esp/clockless.h"
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #elif defined(__AVR__)
@@ -40,36 +41,6 @@
 // Include generic ClocklessBlockController as fallback for platforms without specialized implementation
 // This provides single-pin clockless LED support using nanosecond-precision timing
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
-
-// Define platform-default ClocklessController alias
-// Each platform can have multiple driver types (ClocklessRMT, ClocklessSPI, etc.)
-// This alias selects the preferred default for backward compatibility
-#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
-  #include "third_party/espressif/led_strip/src/enabled.h"
-  namespace fl {
-    #ifdef FASTLED_ESP32_I2S
-      // I2S driver requested explicitly
-      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-      using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-    #elif FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
-      // RMT is preferred default for ESP32 (best performance, most features)
-      #pragma message "ESP32: Using ClocklessRMT as default ClocklessController"
-      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-      using ClocklessController = ClocklessRMT<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
-      // SPI fallback for platforms without RMT (e.g., ESP32-S2)
-      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-      using ClocklessController = ClocklessSPI<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-    #else
-      // No hardware driver available - use generic blocking implementation
-      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-      using ClocklessController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-    #endif
-  }  // namespace fl
-#endif
 
 // Template alias to ClocklessController (platform-specific or generic blocking)
 // This must come AFTER all clockless drivers are included
@@ -127,21 +98,15 @@
 #include "platforms/shared/spi_bitbang/spi_output_template.h"
 #endif
 
+// Platform-specific clockless timing configuration
+// Each platform MUST define this in their platform headers:
+// - ESP32/ESP8266: platforms/esp/clockless.h
+// - Teensy4: platforms/arm/teensy/teensy4_common/led_sysdefs_arm_mxrt1062.h
+// - 1 = Driver expects raw nanosecond values (ESP32 RMT5, Teensy4)
+// - 0 = Driver expects cycle counts (ESP32 non-RMT5, ESP8266, AVR, most others)
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
- #if defined(FASTLED_TEENSY4)
-   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
- #elif defined(ESP32)
-   #include "third_party/espressif/led_strip/src/enabled.h"
-   // RMT 5.1 driver converts from nanoseconds to RMT ticks.
-   #if FASTLED_RMT5
-	 #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
-   #else
-   	 #define FASTLED_CLOCKLESS_USES_NANOSECONDS 0
-   #endif
- #else
-   #define FASTLED_CLOCKLESS_USES_NANOSECONDS 0
- #endif  // FASTLED_TEENSY4
-#endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
+  #error "FASTLED_CLOCKLESS_USES_NANOSECONDS must be defined by the platform. Define it in your platform's header file (e.g., platforms/esp/clockless.h or led_sysdefs_*.h). Set to 1 for nanosecond-based timing or 0 for cycle-based timing."
+#endif
 
 
 // Allow overclocking of the clockless family of leds. 1.2 would be
