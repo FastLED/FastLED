@@ -25,26 +25,9 @@
 #include "platforms/avr/led_timing_legacy_avr.h"
 #endif
 
-// Platform-specific clockless controller includes
-#if defined(__EMSCRIPTEN__)
-  #include "platforms/wasm/clockless.h"
-#elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
-  #include "platforms/stub/clockless_stub_generic.h"
-#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
-  #include "platforms/esp/clockless.h"
-#elif defined(FASTLED_TEENSY4)
-  #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
-#elif defined(__AVR__)
-  #include "platforms/avr/clockless_trinket.h"
-#endif
-
-// Include generic ClocklessBlockController as fallback for platforms without specialized implementation
-// This provides single-pin clockless LED support using nanosecond-precision timing
-#include "platforms/shared/clockless_block/clockless_block_generic.h"
-
-// Template alias to ClocklessController (platform-specific or generic blocking)
-// This must come AFTER all clockless drivers are included
-#include "fl/clockless_controller_impl.h"
+// Platform-specific clockless controller dispatch
+// Includes the appropriate clockless controller implementation for the target platform
+#include "platforms/clockless.h"
 
 // Include UCS7604 controller (works on all platforms with clockless controller support)
 #include "fl/chipsets/ucs7604.h"
@@ -52,51 +35,10 @@
 // Include platform-independent SPI utilities
 #include "platforms/shared/spi_pixel_writer.h"
 
-// Include platform-specific SPIOutput template implementations
-// Each platform file defines the SPIOutput template for its platform
-// This must happen before any SPI chipset controllers (e.g., APA102, P9813)
-#if defined(__EMSCRIPTEN__) || defined(FASTLED_STUB_IMPL)
-#include "platforms/stub/spi_output_template.h"
-
-#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
-#include "platforms/esp/32/spi_output_template.h"
-
-#elif defined(ESP8266)
-#include "platforms/esp/8266/spi_output_template.h"
-
-#elif defined(NRF51)
-#include "platforms/arm/nrf51/spi_output_template.h"
-
-#elif defined(NRF52_SERIES)
-#include "platforms/arm/nrf52/spi_output_template.h"
-
-#elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
-#include "platforms/apollo3/spi_output_template.h"
-
-#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
-#include "platforms/arm/teensy/teensy3_common/spi_output_template.h"
-
-#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
-#include "platforms/arm/teensy/teensy4_common/spi_output_template.h"
-
-#elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
-#include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
-
-#elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \
-      defined(__SAMD21E18A__) || defined(__SAMD51G19A__) || defined(__SAMD51J19A__) || defined(__SAME51J19A__) || \
-      defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
-#include "platforms/arm/sam/spi_output_template.h"
-
-#elif defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || defined(STM32F2XX) || defined(STM32F4)
-#include "platforms/arm/stm32/spi_output_template.h"
-
-#elif defined(AVR_HARDWARE_SPI) || defined(ARDUNIO_CORE_SPI)
-#include "platforms/avr/spi_output_template.h"
-
-#else
-// Fallback: Generic software SPI for unsupported platforms
-#include "platforms/shared/spi_bitbang/spi_output_template.h"
-#endif
+// Platform-specific SPI output template dispatch
+// Includes the appropriate SPIOutput template implementation for the target platform
+// This must be included before any SPI chipset controllers (e.g., APA102, P9813)
+#include "platforms/spi_output_template.h"
 
 // Platform-specific clockless timing configuration
 // Each platform MUST define this in their platform headers:
