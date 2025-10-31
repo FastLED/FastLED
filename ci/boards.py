@@ -796,7 +796,8 @@ NRF52840 = Board(
 )
 
 RPI_PICO = Board(
-    board_name="rpipico",
+    board_name="rp2040",
+    real_board_name="rpipico",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",
@@ -806,8 +807,8 @@ RPI_PICO = Board(
 )
 
 RPI_PICO2 = Board(
-    board_name="rpipico2",
-    real_board_name="rpipico",  # Use the existing Pico board definition until PlatformIO adds native Pico 2 support
+    board_name="rp2350",
+    real_board_name="rpipico2",
     platform="https://github.com/maxgerhardt/platform-raspberrypi.git",
     platform_needs_install=True,  # Install platform package to get the boards
     platform_packages="framework-arduinopico@https://github.com/earlephilhower/arduino-pico.git",

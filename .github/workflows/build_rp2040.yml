@@ -1,4 +1,4 @@
-name: rpipico
+name: rp2040
 
 on:
   push:
@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: rpipico all
+      args: rp2040 all

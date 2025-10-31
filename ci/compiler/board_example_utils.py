@@ -30,8 +30,8 @@ def get_default_boards() -> List[str]:
         "teensy31",
         "teensy41",
         "sam3x8e_due",
-        "rpipico",
-        "rpipico2",
+        "rp2040",
+        "rp2350",
     ]
 
     # Get all available board names from the ALL list

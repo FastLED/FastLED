@@ -49,7 +49,7 @@
 #include <FastLED.h>
 
 #if !defined(ARDUINO_ARCH_RP2040) && !defined(ARDUINO_ARCH_RP2350)
-#error "This sketch requires RP2040 or RP2350 platform (Raspberry Pi Pico). Use bash compile rpipico SpecialDrivers/RP instead."
+#error "This sketch requires RP2040 or RP2350 platform (Raspberry Pi Pico). Use bash compile rp2040 SpecialDrivers/RP instead."
 #endif
 
 // ============================================================================
