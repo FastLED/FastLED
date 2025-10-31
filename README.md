@@ -731,6 +731,7 @@ FastLED supports virtually every LED chipset available:
 | **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812-V5B, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
 | **TM180x Series**: TM1809/4, TM1803 | **High-Speed SPI**: LPD8806, WS2801, SM16716 | **DMX Output** |
 | **Other 3-wire**: UCS1903, GW6205, SM16824E | **APA102HD**: Driver-level gamma correction | **P9813 Total Control** |
+| | **HD108/NS108**: 16-bit high-definition with gamma | |
 
 **RGBW Support**: WS2816 and other white-channel LED strips • **Overclocking**: WS2812 up to 70% speed boost
 
@@ -747,6 +748,36 @@ void setup() {
 ![APA102HD Comparison](https://github.com/user-attachments/assets/999e68ce-454f-4f15-9590-a8d2e8d47a22)
 
 Read more: [APA102 HD Documentation](APA102.md) • [Rust Implementation](https://docs.rs/apa102-spi/latest/apa102_spi/)
+
+### HD108 16-bit High Definition Mode
+```cpp
+#define LED_TYPE HD108  // 16-bit per channel with built-in gamma correction
+void setup() {
+  FastLED.addLeds<LED_TYPE, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);
+}
+```
+
+**HD108/NS108 Features:**
+- **16-bit per channel** (65,536 levels) vs APA102's 8-bit (256 levels)
+- **Built-in gamma correction** (gamma 2.8) for smooth perceptual brightness transitions
+- **Higher PWM frequency** (27 kHz) reduces visible flicker compared to APA102's ~20 kHz
+- **40 MHz max clock** (25 MHz default for stability on long strips)
+- **5-bit brightness control** (0-31) per LED for current limiting
+- **Manufacturer**: Newstar LED (NS108 = HD108, same chip)
+- **No SD (standard definition) option** - All HD108s use gamma correction built-in
+
+**Comparison with APA102:**
+
+| Feature | APA102 | HD108 |
+|---------|--------|-------|
+| Bytes per LED | 4 | 8 |
+| Color depth | 8-bit | 16-bit |
+| Start frame | 32 bits | 64 bits |
+| Header format | 1 byte | 2 bytes |
+| Max clock | 6-24 MHz | 25-40 MHz |
+| PWM frequency | ~20 kHz | 27 kHz |
+
+Read more: See detailed protocol documentation in [src/chipsets.h:1040-1183](src/chipsets.h)
 
 ## 🛠️ Development & Contributing
 

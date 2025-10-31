@@ -26,15 +26,19 @@ public:
     void init();
     void waitFully();
     void release();
+    void endTransaction() { release(); }  // For compatibility with chipsets that use endTransaction
     void writeByte(uint8_t byte);
     void writeWord(uint16_t word);
     static void finalizeTransmission() { }
+
+    // Access captured SPI transmission bytes for testing
+    const fl::vector<uint8_t>& getCapturedBytes() const { return mBytes; }
 
 private:
     void onEndShowLeds() override;
 
     ActiveStripTracker mTracker;
-    fl::vector<uint8_t> mRgb;
+    fl::vector<uint8_t> mBytes;  // Captures all raw SPI transmission bytes
 };
 
 

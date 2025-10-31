@@ -1,3 +1,24 @@
+FastLED 3.10.5
+==============
+  * **NEW: HD108/NS108 16-bit SPI Chipset Support**: High-definition LED chipset with built-in gamma correction
+    * 16-bit color depth (65,536 levels per channel) vs APA102's 8-bit (256 levels)
+    * Automatic gamma correction (gamma 2.8) provides smooth perceptual brightness transitions
+    * Higher PWM frequency (27 kHz) reduces visible flicker compared to APA102's ~20 kHz
+    * 5-bit brightness control (0-31) per LED for current limiting
+    * 40 MHz max clock speed (25 MHz default for stable operation on long strips)
+    * Dual-byte header encoding for brightness/current control
+    * Manufacturer: Newstar LED (NS108 = HD108, same chip)
+    * Protocol: APA102-like but extended to 16-bit with 8 bytes per LED
+      * Start frame: 64 bits (8 bytes)
+      * LED frame: 2 header bytes + 6 data bytes (16-bit RGB, big-endian)
+      * End frame: (num_leds / 2) + 4 bytes of 0xFF
+    * Usage: `FastLED.addLeds<HD108, DATA_PIN, CLOCK_PIN, RGB>(leds, NUM_LEDS);`
+    * Implementation: Enhanced showPixels() with brightness caching and optimized gamma correction
+    * **No SD (standard definition) option available** - all HD108s use gamma correction
+    * See detailed protocol documentation in [src/chipsets.h:1040-1183](src/chipsets.h)
+    * Unit tests: Comprehensive test suite in [tests/chipsets/test_hd108.cpp](tests/chipsets/test_hd108.cpp)
+    * Related: GitHub Issue #1045, Pull Request #2119 (thanks to @arfoll for initial implementation)
+
 FastLED 3.10.4
 ==============
   * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects

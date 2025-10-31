@@ -13,21 +13,21 @@ StubSPIOutput::StubSPIOutput() { EngineEvents::addListener(this); }
 StubSPIOutput::~StubSPIOutput() { EngineEvents::removeListener(this); }
 
 void StubSPIOutput::onEndShowLeds() {
-    // Simply push the captured RGB data through the tracker
-    // The mRgb buffer is populated by writeByte() calls during LED transmission
-    mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
+    // Simply push the captured SPI transmission bytes through the tracker
+    // The mBytes buffer is populated by writeByte() calls during LED transmission
+    mTracker.update(fl::span<const uint8_t>(mBytes.data(), mBytes.size()));
 }
 
-void StubSPIOutput::select() { mRgb.clear(); }
+void StubSPIOutput::select() { mBytes.clear(); }
 
-void StubSPIOutput::init() { mRgb.clear(); }
+void StubSPIOutput::init() { mBytes.clear(); }
 
 void StubSPIOutput::waitFully() {}
 
 void StubSPIOutput::release() {}
 
 void StubSPIOutput::writeByte(uint8_t byte) {
-    mRgb.push_back(byte);
+    mBytes.push_back(byte);
 }
 
 void StubSPIOutput::writeWord(uint16_t word) {

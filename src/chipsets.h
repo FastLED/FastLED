@@ -1037,7 +1037,47 @@ protected:
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //
-// HD108 16-bit SPI chipset // should use SPI MODE3???
+// HD108/NS108 16-bit SPI chipset
+//
+// Protocol Overview:
+// - Manufacturer: Newstar LED (NS108 = HD108, same chip)
+// - Color depth: 16-bit per channel (65,536 levels) vs APA102's 8-bit (256 levels)
+// - Brightness control: 5-bit per LED (0-31) affecting current limiting
+// - PWM frequency: 27 kHz (higher than APA102's ~20 kHz, reduces flicker)
+// - Max clock speed: 40 MHz (datasheet spec), 25 MHz default (conservative)
+// - Logic level: 3.0V compatible while operating at 5V (no level shifter needed)
+// - SPI mode: MODE3 recommended (CPOL=1, CPHA=1)
+//
+// Frame Structure (APA102-like but extended to 16-bit):
+// - Start frame: 64 bits of zeros (8 bytes) [Note: some sources mention 128 bits]
+// - LED frame: 64 bits per LED (8 bytes):
+//   * 2 header bytes: brightness/current control (complex encoding - see below)
+//   * 6 data bytes: 16-bit RGB values (big-endian, MSB first)
+// - End frame: 0xFF bytes, quantity = (num_leds / 2) + 4
+//
+// Header Byte Encoding (2 bytes per LED):
+// The HD108 uses a dual-header encoding where brightness bits appear in both bytes
+// with overlapping patterns. For a 5-bit brightness value (b4 b3 b2 b1 b0):
+// - Byte 0 (f0): 1 b4 b3 b2 b1 b0 0 0  (start bit + brightness << 2)
+// - Byte 1 (f1): b2 b1 b0 b4 b3 b2 b1 b0  (upper 3 bits + full 5 bits)
+// Example: brightness=31 (max) produces f0=0xFC, f1=0xFF
+// Note: The reason for this encoding is not fully documented. It may provide separate
+// PWM and current controls, or be for error checking/redundancy.
+//
+// Comparison with APA102:
+// | Feature          | APA102      | HD108       |
+// |------------------|-------------|-------------|
+// | Bytes per LED    | 4           | 8           |
+// | Color depth      | 8-bit       | 16-bit      |
+// | Start frame      | 32 bits     | 64 bits     |
+// | Header format    | 1 byte      | 2 bytes     |
+// | Max clock        | 6-24 MHz    | 25-40 MHz   |
+// | PWM frequency    | ~20 kHz     | 27 kHz      |
+//
+// References:
+// - GitHub Issue #1045: Community protocol discussion
+// - Pull Request #2119: Initial implementation by arfoll
+// - Manufacturer: www.hd108-led.com protocol documentation
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1045,11 +1085,12 @@ protected:
 /// @tparam DATA_PIN the data pin for these LEDs
 /// @tparam CLOCK_PIN the clock pin for these LEDs
 /// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @tparam SPI_SPEED the clock divider used for these LEDs
+/// @tparam SPI_SPEED the clock divider used for these LEDs (default 25 MHz, max 40 MHz)
 template <int DATA_PIN, fl::u8 CLOCK_PIN, EOrder RGB_ORDER = GRB, uint32_t SPI_SPEED = DATA_RATE_MHZ(25)>
 class HD108Controller : public CPixelLEDController<RGB_ORDER> {
 	typedef fl::SPIOutput<DATA_PIN, CLOCK_PIN, SPI_SPEED> SPI;
 	SPI mSPI;
+
 
 public:
 	HD108Controller() {}
@@ -1058,41 +1099,85 @@ public:
 
 protected:
 void showPixels(PixelController<RGB_ORDER> &pixels) override {
+
+	// Brightness conversion cache
+	// Initialize with invalid marker - use 0x100 conceptually (impossible 8-bit value)
+	// We'll detect this by checking if lastBrightness5 > 31
+	fl::u8 lastBrightness8 = 0;
+	fl::u8 lastBrightness5 = 0xFF;  // > 31, 0xff marks cache as invalid
+
+
     mSPI.select();
 
     // ---- Start frame: 64 bits of 0 ----
+    // HD108 requires 8 bytes (64 bits) of zeros to initialize the strip
+    // Note: Some sources mention 128 bits (16 bytes), but 64 bits works reliably
     for (int i = 0; i < 8; i++) mSPI.writeByte(0x00);
 
     while (pixels.has(1)) {
-        fl::u8 r8, g8, b8;
-        pixels.loadAndScaleRGB(&r8, &g8, &b8);
+        // Load raw pixel data directly in OUTPUT order (respects RGB_ORDER template parameter)
+        // loadByte<0> returns first channel in output order, <1> second, <2> third
+        fl::u8 c0_8 = PixelController<RGB_ORDER>::template loadByte<0>(pixels);
+        fl::u8 c1_8 = PixelController<RGB_ORDER>::template loadByte<1>(pixels);
+        fl::u8 c2_8 = PixelController<RGB_ORDER>::template loadByte<2>(pixels);
 
-        // gamma correction
-        fl::CRGB rgb(r8, g8, b8);
-        fl::u16 r16, g16, b16;
-        fl::gamma16(rgb, &r16, &g16, &b16);
+        // Extract brightness from ColorAdjustment
+        #if FASTLED_HD_COLOR_MIXING
+        fl::u8 brightness = pixels.getBrightness();
+        #else
+        fl::u8 brightness = 255;  // Use full brightness if HD color mixing is disabled
+        #endif
 
-        const fl::u8 bri5 = 0x1F;  // full current drive
-        const fl::u8 f0   = fl::u8(0x80 | ((bri5 & 0x1F) << 2));
-        const fl::u8 f1   = fl::u8(((bri5 & 0x07) << 5) | (bri5 & 0x1F));
+        // Apply gamma correction (2.8) to convert 8-bit to 16-bit for HD108
+        // This provides smooth perceptual brightness transitions across the full 65K range
+        fl::u16 c0_16 = fl::gamma_2_8(c0_8);
+        fl::u16 c1_16 = fl::gamma_2_8(c1_8);
+        fl::u16 c2_16 = fl::gamma_2_8(c2_8);
 
-        mSPI.select();
+        // Map 8-bit brightness (0-255) to 5-bit (0-31) for HD108 current control
+        // Formula: (brightness * 31 + 127) / 255 provides proper rounding
+        // Caching optimization: reuse conversion if brightness unchanged from previous LED
+        fl::u8 bri5;
+        if (brightness == lastBrightness8 && lastBrightness5 <= 31) {
+            // Use cached conversion (common when all LEDs have same brightness)
+            // Only use cache if lastBrightness5 is valid (<=31)
+            bri5 = lastBrightness5;
+        } else {
+            // Compute new conversion with rounding
+            fl::u16 bri = ((fl::u16)brightness * 31 + 127) / 255;
+            if (bri == 0 && brightness != 0) {
+                bri = 1;  // Clamp to minimum visible: prevent invisible LEDs at brightness=1-7
+            }
+            bri5 = static_cast<fl::u8>(bri);
+            // Update cache
+            lastBrightness8 = brightness;
+            lastBrightness5 = bri5;
+        }
+
+        // Header bytes: HD108 dual-byte encoding for brightness/current control
+        // f0 format: 1bbbbb00 (bit 7=start marker, bits 6-2=brightness, bits 1-0=padding)
+        // f1 format: bbbBBBBB (bits 7-5=lower 3 bits, bits 4-0=full 5 bits, overlapping)
+        // This encoding may provide separate PWM and current controls (not fully documented)
+        const fl::u8 f0 = fl::u8(0x80 | ((bri5 & 0x1F) << 2));
+        const fl::u8 f1 = fl::u8(((bri5 & 0x07) << 5) | (bri5 & 0x1F));
+
+        // Transmit LED frame: 2 header bytes + 6 color bytes (16-bit, big-endian, in RGB_ORDER)
         mSPI.writeByte(f0);
         mSPI.writeByte(f1);
-        mSPI.writeByte(fl::u8(r16 >> 8)); mSPI.writeByte(fl::u8(r16 & 0xFF));
-        mSPI.writeByte(fl::u8(g16 >> 8)); mSPI.writeByte(fl::u8(g16 & 0xFF));
-        mSPI.writeByte(fl::u8(b16 >> 8)); mSPI.writeByte(fl::u8(b16 & 0xFF));
+        mSPI.writeByte(fl::u8(c0_16 >> 8)); mSPI.writeByte(fl::u8(c0_16 & 0xFF));  // Channel 0 MSB, LSB
+        mSPI.writeByte(fl::u8(c1_16 >> 8)); mSPI.writeByte(fl::u8(c1_16 & 0xFF));  // Channel 1 MSB, LSB
+        mSPI.writeByte(fl::u8(c2_16 >> 8)); mSPI.writeByte(fl::u8(c2_16 & 0xFF));  // Channel 2 MSB, LSB
 
         pixels.stepDithering();
         pixels.advanceData();
     }
 
-    // ---- End frame ----
+    // ---- End frame: 0xFF bytes to latch data into LEDs ----
+    // Formula: (num_leds / 2) + 4 provides sufficient clock pulses for 40 MHz operation
+    // This is more conservative than APA102's (num_leds + 15) / 16 formula
     const int latch = pixels.size() / 2 + 4;
-    mSPI.select();
     for (int i = 0; i < latch; i++) mSPI.writeByte(0xFF);
-    mSPI.waitFully();
-    mSPI.release();
+	mSPI.endTransaction();
 }
 };
 

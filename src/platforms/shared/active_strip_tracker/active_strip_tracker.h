@@ -33,17 +33,14 @@ public:
     /// @brief Constructor - registers this tracker and gets a unique sequential ID
     /// Uses the tracker's own address to obtain a stable, unique identifier
     ActiveStripTracker() {
-        static fl::SortedHeapMap<uintptr_t, int> sTrackerMap;
-        static fl::atomic_int sNextId(0);
-
         uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
         int existing_id;
 
-        if (sTrackerMap.get(tracker_addr, &existing_id)) {
+        if (getTrackerMap().get(tracker_addr, &existing_id)) {
             mId = existing_id;
         } else {
-            mId = sNextId.fetch_add(1);
-            sTrackerMap.update(tracker_addr, mId);
+            mId = getNextId().fetch_add(1);
+            getTrackerMap().update(tracker_addr, mId);
         }
     }
 
@@ -66,7 +63,27 @@ public:
     /// @return The strip ID assigned to this controller
     int getId() const { return mId; }
 
+    /// @brief Reset all tracker state (for testing)
+    /// Clears the tracker map and resets the ID counter
+    /// WARNING: Only use this in test environments!
+    static void resetForTesting() {
+        getTrackerMap().clear();
+        getNextId().store(0);
+    }
+
 private:
+    /// @brief Get the static tracker map (accessor for resetForTesting)
+    static fl::SortedHeapMap<uintptr_t, int>& getTrackerMap() {
+        static fl::SortedHeapMap<uintptr_t, int> sTrackerMap;
+        return sTrackerMap;
+    }
+
+    /// @brief Get the static ID counter (accessor for resetForTesting)
+    static fl::atomic_int& getNextId() {
+        static fl::atomic_int sNextId(0);
+        return sNextId;
+    }
+
     int mId;
 };
 

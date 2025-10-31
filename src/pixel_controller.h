@@ -495,6 +495,12 @@ struct PixelController {
     FASTLED_FORCE_INLINE void getHdScale(uint8_t* c0, uint8_t* c1, uint8_t* c2, uint8_t* brightness) {
         loadRGBScaleAndBrightness(c0, c1, c2, brightness);
     }
+
+    /// Gets the brightness value from the ColorAdjustment
+    /// @returns the brightness value (0-255)
+    FASTLED_FORCE_INLINE uint8_t getBrightness() {
+        return mColorAdjustment.brightness;
+    }
     #endif
 
 
