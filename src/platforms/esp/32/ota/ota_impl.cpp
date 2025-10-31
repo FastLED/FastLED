@@ -4,6 +4,11 @@
 #if defined(ESP32)
 
 #include "platforms/ota.h"
+#include "platforms/esp/esp_version.h"
+
+// OTA requires IDF 4.0 or higher for HTTP server and OTA APIs
+// For IDF 3.3 and earlier, fall back to null implementation
+#if ESP_IDF_VERSION_4_OR_HIGHER
 
 // ESP-IDF headers
 #include <esp_http_server.h>
@@ -771,5 +776,7 @@ fl::shared_ptr<IOTA> platform_create_ota() {
 
 }  // namespace platforms
 }  // namespace fl
+
+#endif  // ESP_IDF_VERSION_4_OR_HIGHER
 
 #endif  // ESP32
