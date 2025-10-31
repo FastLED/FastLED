@@ -1,5 +1,5 @@
 
-#ifdef ESP32
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
 #include "enabled.h"
 
@@ -191,4 +191,4 @@ err:
 
 #endif  // FASTLED_RMT5
 
-#endif // ESP32
+#endif  // ESP32 || ARDUINO_ARCH_ESP32

@@ -1,6 +1,6 @@
 #pragma once
 
-#ifdef ESP32
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
@@ -78,4 +78,4 @@
 #endif
 #endif
 
-#endif  // ESP32
+#endif  // ESP32 || ARDUINO_ARCH_ESP32

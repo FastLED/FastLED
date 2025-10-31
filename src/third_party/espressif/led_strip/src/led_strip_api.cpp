@@ -1,5 +1,5 @@
 
-#ifdef ESP32
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
 #include "enabled.h"
 
@@ -115,4 +115,4 @@ esp_err_t led_strip_del(led_strip_handle_t strip)
 
 #endif  // FASTLED_RMT5 || FASTLED_ESP_HAS_CLOCKLESS_SPI
 
-#endif  // ESP32
+#endif  // ESP32 || ARDUINO_ARCH_ESP32
