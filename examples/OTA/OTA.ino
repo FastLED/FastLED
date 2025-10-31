@@ -166,23 +166,23 @@ void setup() {
 #endif
 
   // Optional callbacks for monitoring OTA progress:
-  ota.onProgress([](size_t w, size_t t){
-    //Serial.printf("OTA Progress: %u/%u (%d%%)\n", (unsigned)w, (unsigned)t, (int)((w * 100) / t));
-    fl::sstream s;
-    s << "OTA Progress: " << w << "/" << t << " (" << (int)((w * 100) / t) << "%)";
-    Serial.println(s.c_str());
+  ota.onProgress([](size_t written, size_t total){
+    //Serial.printf("OTA Progress: %u/%u (%d%%)\n", (unsigned)written, (unsigned)total, (int)((written * 100) / total));
+    fl::sstream msg;
+    msg << "OTA Progress: " << written << "/" << total << " (" << (int)((written * 100) / total) << "%)";
+    Serial.println(msg.c_str());
   });
-  ota.onError([](const char* m){
-    // Serial.printf("OTA error: %s\n", m);
-    fl::sstream s;
-    s << "OTA error: " << m;
-    Serial.println(s.c_str());
+  ota.onError([](const char* error_msg){
+    // Serial.printf("OTA error: %s\n", error_msg);
+    fl::sstream msg;
+    msg << "OTA error: " << error_msg;
+    Serial.println(msg.c_str());
   });
-  ota.onState([](uint8_t s){
-    //Serial.printf("OTA state: %u\n", s);
-    fl::sstream s;
-    s << "OTA state: " << s;
-    Serial.println(s.c_str());
+  ota.onState([](uint8_t state){
+    //Serial.printf("OTA state: %u\n", state);
+    fl::sstream msg;
+    msg << "OTA state: " << (int)state;
+    Serial.println(msg.c_str());
   });
 
   // Optional: Enable AP fallback when Wi-Fi STA fails (default OFF):
