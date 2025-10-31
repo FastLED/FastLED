@@ -3,6 +3,8 @@
 #ifndef __INC_CHIPSETS_H
 #define __INC_CHIPSETS_H
 
+// allow-include-after-namespace
+
 #include "pixeltypes.h"
 #include "fl/five_bit_hd_gamma.h"
 #include "fl/force_inline.h"
@@ -23,23 +25,12 @@
 #include "platforms/avr/led_timing_legacy_avr.h"
 #endif
 
-// Platform-specific clockless controller
-// This must be included before using ClocklessControllerImpl and before UCS7604
+// Platform-specific clockless controller includes
+// Note: ESP32 drivers are included via platforms.h -> fastled_esp32.h
 #if defined(__EMSCRIPTEN__)
   #include "platforms/wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)
   #include "platforms/stub/clockless_stub_generic.h"
-#elif defined(ESP32)
-  #ifdef FASTLED_ESP32_I2S
-    #include "platforms/esp/32/clockless_i2s_esp32.h"
-  #else
-    #include "third_party/espressif/led_strip/src/enabled.h"
-    #if FASTLED_ESP32_HAS_RMT
-      #include "platforms/esp/32/clockless_rmt_esp32.h"
-    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
-      #include "platforms/esp/32/clockless_spi_esp32.h"
-    #endif
-  #endif
 #elif defined(FASTLED_TEENSY4)
   #include "platforms/arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #elif defined(__AVR__)
@@ -49,6 +40,36 @@
 // Include generic ClocklessBlockController as fallback for platforms without specialized implementation
 // This provides single-pin clockless LED support using nanosecond-precision timing
 #include "platforms/shared/clockless_block/clockless_block_generic.h"
+
+// Define platform-default ClocklessController alias
+// Each platform can have multiple driver types (ClocklessRMT, ClocklessSPI, etc.)
+// This alias selects the preferred default for backward compatibility
+#if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
+  #include "third_party/espressif/led_strip/src/enabled.h"
+  namespace fl {
+    #ifdef FASTLED_ESP32_I2S
+      // I2S driver requested explicitly
+      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+      using ClocklessController = ClocklessI2S<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+    #elif FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
+      // RMT is preferred default for ESP32 (best performance, most features)
+      #pragma message "ESP32: Using ClocklessRMT as default ClocklessController"
+      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+      using ClocklessController = ClocklessRMT<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+    #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
+      // SPI fallback for platforms without RMT (e.g., ESP32-S2)
+      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+      using ClocklessController = ClocklessSPI<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+      #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+    #else
+      // No hardware driver available - use generic blocking implementation
+      template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+      using ClocklessController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+    #endif
+  }  // namespace fl
+#endif
 
 // Template alias to ClocklessController (platform-specific or generic blocking)
 // This must come AFTER all clockless drivers are included
@@ -66,7 +87,7 @@
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_STUB_IMPL)
 #include "platforms/stub/spi_output_template.h"
 
-#elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 #include "platforms/esp/32/spi_output_template.h"
 
 #elif defined(ESP8266)

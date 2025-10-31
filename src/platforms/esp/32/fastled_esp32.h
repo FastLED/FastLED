@@ -10,28 +10,22 @@
 #endif
 
 
-#ifdef FASTLED_ESP32_I2S
+// Include ALL available clockless drivers for ESP32
+// Each driver defines its own type (ClocklessRMT, ClocklessSPI, ClocklessI2S)
+// The platform-default ClocklessController alias is defined in chipsets.h
 
+#if FASTLED_ESP32_HAS_RMT
+#include "clockless_rmt_esp32.h"
+#endif
+
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+#include "clockless_spi_esp32.h"
+#endif
+
+#ifdef FASTLED_ESP32_I2S
 #ifndef FASTLED_INTERNAL
-// Be careful with including defs for internal code.
 #include "clockless_i2s_esp32.h"
 #endif
-
-#else
-
-#if FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
-#include "clockless_rmt_esp32.h"
-#elif FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#include "clockless_spi_esp32.h"
-// Note that this driver only works with the WS2811x family of LEDs.
-// Other types of WS281x or leds with significantly different timings
-// will not work with this driver but will fail silently to render pixels.
-#define ClocklessController ClocklessSpiWs2812Controller
-#define FASTLED_HAS_CLOCKLESS 1
-#else
-#warning "No clockless drivers defined for ESP32 chip. You won't be able to drive WS2812 and other clockless chipsets".
-#endif
-
 #endif
 
 

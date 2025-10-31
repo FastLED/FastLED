@@ -50,10 +50,4 @@
 #endif
 #endif
 
-// Backwards compatibility alias
-namespace fl {
-template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-using ClocklessController = ClocklessRMT<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-}
-
 #endif  // FASTLED_ESP32_HAS_RMT
