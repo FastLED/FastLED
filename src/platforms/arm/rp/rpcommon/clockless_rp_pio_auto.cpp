@@ -21,20 +21,20 @@
 #include "hardware/dma.h"
 #include "hardware/gpio.h"
 
-namespace {  // anonymous namespace
+namespace fl {
 
 /// @brief Represents a group of consecutive GPIO pins for parallel output
 struct PinGroup {
-    u8 base_pin;      ///< Starting GPIO pin
-    u8 num_pins;      ///< Number of consecutive pins (2, 4, or 8)
-    fl::HeapVector<u8> pins;  ///< List of all pins in this group (sorted)
+    fl::u8 base_pin;      ///< Starting GPIO pin
+    fl::u8 num_pins;      ///< Number of consecutive pins (2, 4, or 8)
+    fl::HeapVector<fl::u8> pins;  ///< List of all pins in this group (sorted)
 
     PIO pio;          ///< PIO instance (pio0 or pio1)
-    i32 sm;           ///< State machine index (-1 if not allocated)
-    i32 dma_chan;     ///< DMA channel (-1 if not allocated)
+    fl::i32 sm;           ///< State machine index (-1 if not allocated)
+    fl::i32 dma_chan;     ///< DMA channel (-1 if not allocated)
 
-    fl::scoped_array<u8> transpose_buffer;  ///< Bit-transposed output buffer
-    u32 buffer_size;  ///< Size of transpose buffer
+    fl::scoped_array<fl::u8> transpose_buffer;  ///< Bit-transposed output buffer
+    fl::u32 buffer_size;  ///< Size of transpose buffer
 
     PinGroup() : base_pin(0), num_pins(0), pio(nullptr), sm(-1), dma_chan(-1), buffer_size(0) {}
 
@@ -79,7 +79,7 @@ struct PinGroup {
         }
 
         // Initialize GPIO pins for output
-        for (u8 i = 0; i < num_pins; i++) {
+        for (fl::u8 i = 0; i < num_pins; i++) {
             gpio_init(base_pin + i);
             gpio_set_dir(base_pin + i, GPIO_OUT);
         }
@@ -105,7 +105,7 @@ class RP2040ParallelGroup {
     fl::HeapVector<fl::unique_ptr<PinGroup>> mPinGroups;
 
     // Map from pin number to group index
-    fl::HeapMap<u8, u32> mPinToGroupIndex;
+    fl::HeapMap<fl::u8, fl::u32> mPinToGroupIndex;
 
     static RP2040ParallelGroup& getInstance() {
         return fl::Singleton<RP2040ParallelGroup>::instance();
@@ -125,7 +125,7 @@ class RP2040ParallelGroup {
         mRectDrawBuffer.onQueuingDone();
     }
 
-    void addObject(u8 pin, u16 numLeds, bool is_rgbw) {
+    void addObject(fl::u8 pin, fl::u16 numLeds, bool is_rgbw) {
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
@@ -144,16 +144,16 @@ class RP2040ParallelGroup {
         }
 
         // Extract pins and sort them (simple insertion sort for small N)
-        fl::HeapVector<u8> sorted_pins;
+        fl::HeapVector<fl::u8> sorted_pins;
         for (auto it = mRectDrawBuffer.mDrawList.begin();
              it != mRectDrawBuffer.mDrawList.end(); ++it) {
             sorted_pins.push_back(it->mPin);
         }
 
         // Sort pins numerically using insertion sort (efficient for small N)
-        for (u32 i = 1; i < sorted_pins.size(); i++) {
-            u8 key = sorted_pins[i];
-            i32 j = i - 1;
+        for (fl::u32 i = 1; i < sorted_pins.size(); i++) {
+            fl::u8 key = sorted_pins[i];
+            fl::i32 j = i - 1;
             while (j >= 0 && sorted_pins[j] > key) {
                 sorted_pins[j + 1] = sorted_pins[j];
                 j--;
@@ -164,10 +164,10 @@ class RP2040ParallelGroup {
         FL_DBG("Detecting pin groups from " << sorted_pins.size() << " pins");
 
         // Detect consecutive runs
-        u32 i = 0;
+        fl::u32 i = 0;
         while (i < sorted_pins.size()) {
-            u8 start_pin = sorted_pins[i];
-            u32 run_length = 1;
+            fl::u8 start_pin = sorted_pins[i];
+            fl::u32 run_length = 1;
 
             // Find consecutive run
             while (i + run_length < sorted_pins.size() &&
@@ -176,7 +176,7 @@ class RP2040ParallelGroup {
             }
 
             // Determine group size (2, 4, 8, or 1 for fallback)
-            u8 group_size = 1;
+            fl::u8 group_size = 1;
             if (run_length >= 8) {
                 group_size = 8;
             } else if (run_length >= 4) {
@@ -191,7 +191,7 @@ class RP2040ParallelGroup {
             group->num_pins = group_size;
 
             // Add pins to group
-            for (u8 j = 0; j < group_size; j++) {
+            for (fl::u8 j = 0; j < group_size; j++) {
                 group->pins.push_back(start_pin + j);
                 mPinToGroupIndex[start_pin + j] = mPinGroups.size();
             }
@@ -263,10 +263,10 @@ class RP2040ParallelGroup {
   private:
     /// @brief Output a single pin (non-parallel fallback)
     void outputSinglePin(PinGroup* group) {
-        u8 pin = group->base_pin;
+        fl::u8 pin = group->base_pin;
 
         // Get LED data for this pin from RectangularDrawBuffer
-        fl::span<u8> led_data = mRectDrawBuffer.getLedsBufferBytesForPin(pin, false);
+        fl::span<fl::u8> led_data = mRectDrawBuffer.getLedsBufferBytesForPin(pin, false);
 
         // TODO: Implement sequential PIO output for single pins
         // For now, just log that we would output this data
@@ -285,22 +285,22 @@ class RP2040ParallelGroup {
         }
 
         // Get LED data for each pin in the group
-        u32 max_bytes = mRectDrawBuffer.getMaxBytesInStrip();
-        u32 max_leds = max_bytes / 3;  // Assume RGB (not RGBW for now)
+        fl::u32 max_bytes = mRectDrawBuffer.getMaxBytesInStrip();
+        fl::u32 max_leds = max_bytes / 3;  // Assume RGB (not RGBW for now)
 
         // Allocate transpose buffer if needed
-        u32 needed_buffer_size = max_leds * 24;  // 24 bytes per LED (8 bits * 3 colors)
+        fl::u32 needed_buffer_size = max_leds * 24;  // 24 bytes per LED (8 bits * 3 colors)
         if (group->buffer_size < needed_buffer_size) {
-            group->transpose_buffer.reset(new u8[needed_buffer_size]);
+            group->transpose_buffer.reset(new fl::u8[needed_buffer_size]);
             group->buffer_size = needed_buffer_size;
             fl::memset(group->transpose_buffer.get(), 0, needed_buffer_size);
         }
 
         // Build array of pointers to LED data for each pin in the group
-        const u8* strip_ptrs[8];  // Max 8 strips
-        for (u8 i = 0; i < group->num_pins; i++) {
-            u8 pin = group->base_pin + i;
-            fl::span<u8> led_data = mRectDrawBuffer.getLedsBufferBytesForPin(pin, false);
+        const fl::u8* strip_ptrs[8];  // Max 8 strips
+        for (fl::u8 i = 0; i < group->num_pins; i++) {
+            fl::u8 pin = group->base_pin + i;
+            fl::span<fl::u8> led_data = mRectDrawBuffer.getLedsBufferBytesForPin(pin, false);
             strip_ptrs[i] = led_data.data();
         }
 
@@ -335,9 +335,7 @@ class RP2040ParallelGroup {
     }
 };
 
-}  // anonymous namespace
 
-namespace fl {
 
 void RP2040_PIO_Parallel::beginShowLeds(int data_pin, int nleds) {
     RP2040ParallelGroup& group = RP2040ParallelGroup::getInstance();
@@ -352,7 +350,7 @@ void RP2040_PIO_Parallel::showPixels(u8 data_pin, PixelIterator& pixel_iterator)
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
     // Get buffer slice for this pin
-    fl::span<u8> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
+    span<u8> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
 
     if (rgbw.active()) {
         // RGBW mode
