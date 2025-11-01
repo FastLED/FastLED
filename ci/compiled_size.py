@@ -39,9 +39,31 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
             check=False,
         )
         output = (result.stdout or "") + "\n" + (result.stderr or "")
+
+        # Try AVR format first: "Program: XXXXX bytes"
         m = re.search(r"Program:\s*(\d+)\s*bytes", output)
         if m:
             return int(m.group(1))
+
+        # Try ARM toolchain format: "text    data    bss    dec    hex filename"
+        # Flash usage = text + data (initialized code and data in flash)
+        m = re.search(r"^\s*(\d+)\s+(\d+)\s+\d+\s+\d+\s+\w+\s+", output, re.MULTILINE)
+        if m:
+            text = int(m.group(1))
+            data = int(m.group(2))
+            return text + data
+
+        # Try teensy_size format (Teensy 4.x boards): "teensy_size:   FLASH: code:XXX, data:YYY, headers:ZZZ"
+        # Flash usage = code + data + headers
+        m = re.search(
+            r"teensy_size:\s+FLASH:\s+code:(\d+),\s+data:(\d+),\s+headers:(\d+)", output
+        )
+        if m:
+            code = int(m.group(1))
+            data = int(m.group(2))
+            headers = int(m.group(3))
+            return code + data + headers
+
         # If size target did not yield, try a full build then retry size
         subprocess.run(
             ["pio", "run", "-d", str(build_dir)], capture_output=False, check=False
@@ -53,9 +75,30 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
             check=False,
         )
         output = (result.stdout or "") + "\n" + (result.stderr or "")
+
+        # Try AVR format first: "Program: XXXXX bytes"
         m = re.search(r"Program:\s*(\d+)\s*bytes", output)
         if m:
             return int(m.group(1))
+
+        # Try ARM toolchain format: "text    data    bss    dec    hex filename"
+        # Flash usage = text + data (initialized code and data in flash)
+        m = re.search(r"^\s*(\d+)\s+(\d+)\s+\d+\s+\d+\s+\w+\s+", output, re.MULTILINE)
+        if m:
+            text = int(m.group(1))
+            data = int(m.group(2))
+            return text + data
+
+        # Try teensy_size format (Teensy 4.x boards): "teensy_size:   FLASH: code:XXX, data:YYY, headers:ZZZ"
+        # Flash usage = code + data + headers
+        m = re.search(
+            r"teensy_size:\s+FLASH:\s+code:(\d+),\s+data:(\d+),\s+headers:(\d+)", output
+        )
+        if m:
+            code = int(m.group(1))
+            data = int(m.group(2))
+            headers = int(m.group(3))
+            return code + data + headers
     except Exception:
         pass
     return None
@@ -65,30 +108,30 @@ def check_firmware_size(board: str) -> int:
     build_info_json = _find_build_info(board)
     board_info = _create_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
-    prog_path = Path(board_info["prog_path"])  # absolute or relative path
+
+    # PRIORITY 1: Use PlatformIO's size command for accurate flash usage
+    # This is essential for AVR boards where .hex files are ASCII format
+    # and their file size is much larger than actual flash usage
+    build_dir = build_info_json.parent
+    size = _run_pio_size(build_dir)
+    if size is not None:
+        return size
+
+    # PRIORITY 2: Only use .bin or .uf2 files (which have accurate file sizes)
+    # DO NOT use .hex files - they're ASCII Intel HEX format
+    prog_path = Path(board_info["prog_path"])
     base_path = prog_path.parent
-    suffixes = [".bin", ".hex", ".uf2"]
-    firmware: Optional[Path] = None
+    suffixes = [".bin", ".uf2"]
     for suffix in suffixes:
         candidate = base_path / f"firmware{suffix}"
         if candidate.exists():
-            firmware = candidate
-            break
-    if firmware is None:
-        # As a fallback, if firmware.* doesn't exist, use ELF size (filesize) if present
-        if prog_path.exists():
-            return prog_path.stat().st_size
-        # As a last resort, run PlatformIO size target in the build directory
-        build_dir = build_info_json.parent
-        size = _run_pio_size(build_dir)
-        if size is not None:
-            return size
-        msg = (
-            ", ".join([f"firmware{suffix}" for suffix in suffixes])
-            + f" not found in {base_path}"
-        )
-        raise FileNotFoundError(msg)
-    return firmware.stat().st_size
+            return candidate.stat().st_size
+
+    # Unable to determine size accurately
+    raise FileNotFoundError(
+        f"Unable to determine firmware size for {board}. "
+        f"PlatformIO size command failed and no .bin/.uf2 file found in {base_path}"
+    )
 
 
 def main(board: str):
