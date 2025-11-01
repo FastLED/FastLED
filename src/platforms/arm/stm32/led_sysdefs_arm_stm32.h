@@ -48,7 +48,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM STM32 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM STM32 driver converts nanoseconds to cycles internally
 #endif
 
 // pgmspace definitions

@@ -60,7 +60,7 @@ typedef volatile uint32_t RwReg;
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // RP2xxx uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // RP2xxx driver converts nanoseconds to cycles internally
 #endif
 
 // Default to no PROGMEM

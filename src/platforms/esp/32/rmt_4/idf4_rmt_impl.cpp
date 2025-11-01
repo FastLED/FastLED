@@ -172,6 +172,10 @@ FL_EXTERN_C_END
 #endif
 #endif //  F_CPU_RMT_CLOCK_MANUALLY_DEFINED
 
+// -- Convert nanoseconds to ESP32 CPU cycles
+//    Formula: (ns * MHz + 500) / 1000 with rounding
+#define NS_TO_ESP_CYCLES(ns) (((ns) * (F_CPU / 1000000UL) + 500) / 1000)
+
 // -- Convert ESP32 CPU cycles to RMT device cycles, taking into account the divider
 // RMT Clock is typically APB CLK, which is 80MHz on most devices, but 40MHz on ESP32-H2 and ESP32-C6
 #define RMT_CYCLES_PER_SEC (F_CPU_RMT / DIVIDER)
@@ -283,10 +287,15 @@ fl::ESP32RMTController::ESP32RMTController(int DATA_PIN, const fl::ChipsetTiming
       mCurPulse(0),
       mBuiltInDriver(built_in_driver)
 {
-    // -- Extract timing values from struct
+    // -- Extract timing values from struct (now in nanoseconds)
     uint32_t T1 = TIMING.T1;
     uint32_t T2 = TIMING.T2;
     uint32_t T3 = TIMING.T3;
+
+    // -- Convert nanoseconds to ESP32 CPU cycles first
+    uint32_t T1_cycles = NS_TO_ESP_CYCLES(T1);
+    uint32_t T2_cycles = NS_TO_ESP_CYCLES(T2);
+    uint32_t T3_cycles = NS_TO_ESP_CYCLES(T3);
 
     // -- Store the max channel and mem blocks parameters
     gMaxChannel = maxChannel;
@@ -296,23 +305,23 @@ fl::ESP32RMTController::ESP32RMTController(int DATA_PIN, const fl::ChipsetTiming
     //    according to the timing values given in the template instantiation
     // T1H
     mOne.level0 = 1;
-    mOne.duration0 = ESP_TO_RMT_CYCLES(T1 + T2); // TO_RMT_CYCLES(T1+T2);
+    mOne.duration0 = ESP_TO_RMT_CYCLES(T1_cycles + T2_cycles); // TO_RMT_CYCLES(T1+T2);
     // T1L
     mOne.level1 = 0;
-    mOne.duration1 = ESP_TO_RMT_CYCLES(T3); // TO_RMT_CYCLES(T3);
+    mOne.duration1 = ESP_TO_RMT_CYCLES(T3_cycles); // TO_RMT_CYCLES(T3);
 
     // T0H
     mZero.level0 = 1;
-    mZero.duration0 = ESP_TO_RMT_CYCLES(T1); // TO_RMT_CYCLES(T1);
+    mZero.duration0 = ESP_TO_RMT_CYCLES(T1_cycles); // TO_RMT_CYCLES(T1);
     // T0L
     mZero.level1 = 0;
-    mZero.duration1 = ESP_TO_RMT_CYCLES(T2 + T3); // TO_RMT_CYCLES(T2 + T3);
+    mZero.duration1 = ESP_TO_RMT_CYCLES(T2_cycles + T3_cycles); // TO_RMT_CYCLES(T2 + T3);
 
     gControllers[gNumControllers] = this;
     gNumControllers++;
 
     // -- Expected number of CPU cycles between buffer fills
-    mCyclesPerFill = (T1 + T2 + T3) * PULSES_PER_FILL;
+    mCyclesPerFill = (T1_cycles + T2_cycles + T3_cycles) * PULSES_PER_FILL;
 
     // -- If there is ever an interval greater than 1.5 times
     //    the expected time, then bail out.

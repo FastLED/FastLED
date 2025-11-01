@@ -46,11 +46,18 @@ class InlineBlockClocklessController : public CPixelLEDController<RGB_ORDER, LAN
     typedef typename FastPin<FIRST_PIN>::port_ptr_t data_ptr_t;
     typedef typename FastPin<FIRST_PIN>::port_t data_t;
 
+    // Convert nanoseconds to CPU cycles (compile-time)
+    // Formula: cycles = (ns * (F_CPU / 1MHz) + 500) / 1000
+    // +500 for rounding to nearest cycle
+    static constexpr uint32_t NS_TO_CYCLES(uint32_t ns) {
+        return (ns * (F_CPU / 1000000UL) + 500) / 1000;
+    }
+
     enum : uint32_t {
-        T1 = TIMING::T1,
-        T2 = TIMING::T2,
-        T3 = TIMING::T3,
-        WAIT_TIME = TIMING::RESET
+        T1 = NS_TO_CYCLES(TIMING::T1),  // Convert nanoseconds → CPU cycles
+        T2 = NS_TO_CYCLES(TIMING::T2),
+        T3 = NS_TO_CYCLES(TIMING::T3),
+        WAIT_TIME = TIMING::RESET  // Already in microseconds (no conversion)
     };
 
 	// Verify that the pin is valid

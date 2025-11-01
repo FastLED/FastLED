@@ -34,4 +34,8 @@ typedef volatile uint32_t RwReg;
 
 #define F_CPU 480000000
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM Giga driver converts nanoseconds to cycles internally
+#endif
+
 #endif

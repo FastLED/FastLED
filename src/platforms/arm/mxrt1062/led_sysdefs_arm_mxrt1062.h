@@ -21,7 +21,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM MXRT1062 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM MXRT1062 clockless driver uses nanosecond-based timing
 #endif
 
 #if (F_CPU == 96000000)

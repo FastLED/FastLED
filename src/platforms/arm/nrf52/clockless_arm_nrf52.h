@@ -24,9 +24,12 @@ extern uint32_t isrCount;
 
 template <uint8_t _DATA_PIN, typename TIMING, EOrder _RGB_ORDER = RGB, int _XTRA0 = 0, bool _FLIP = false, int _WAIT_TIME_MICROSECONDS = 10>
 class ClocklessController : public CPixelLEDController<_RGB_ORDER> {
-    static constexpr int _T1 = TIMING::T1;
-    static constexpr int _T2 = TIMING::T2;
-    static constexpr int _T3 = TIMING::T3;
+    // Convert nanoseconds to PWM cycles at 16MHz (CLOCKLESS_FREQUENCY)
+    // Formula: cycles = (nanoseconds * PWM_MHz + 500) / 1000
+    // The +500 provides rounding to nearest integer
+    static constexpr int _T1 = (TIMING::T1 * (CLOCKLESS_FREQUENCY / 1000000UL) + 500) / 1000;
+    static constexpr int _T2 = (TIMING::T2 * (CLOCKLESS_FREQUENCY / 1000000UL) + 500) / 1000;
+    static constexpr int _T3 = (TIMING::T3 * (CLOCKLESS_FREQUENCY / 1000000UL) + 500) / 1000;
 
     static_assert(FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING > 0, "Maximum string length must be positive value (FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING)");
     static_assert(_T1         >             0 , "negative values are not allowed");

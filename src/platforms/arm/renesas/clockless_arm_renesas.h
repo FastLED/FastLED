@@ -17,9 +17,13 @@ namespace fl {
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-	static constexpr uint32_t T1 = TIMING::T1;
-	static constexpr uint32_t T2 = TIMING::T2;
-	static constexpr uint32_t T3 = TIMING::T3;
+	// Extract timing values from ChipsetTiming struct and convert from nanoseconds to clock cycles
+	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
+	// The +500 provides rounding to nearest integer
+	// Renesas RA4M1 uses DWT cycle counter at F_CPU (48MHz)
+	static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 

@@ -2,6 +2,9 @@
 #ifndef __INC_LED_SYSDEFS_APOLLO3_H
 #define __INC_LED_SYSDEFS_APOLLO3_H
 
+
+#include "fl/stdint.h"
+
 #define FASTLED_APOLLO3
 
 #ifndef INTERRUPT_THRESHOLD
@@ -18,7 +21,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // Apollo3 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // Apollo3 driver converts nanoseconds to cycles internally
 #endif
 
 #ifndef F_CPU

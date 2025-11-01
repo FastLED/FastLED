@@ -40,7 +40,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM SAM uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM SAM driver converts nanoseconds to cycles internally
 #endif
 
 // reusing/abusing cli/sei defs for due

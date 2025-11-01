@@ -22,7 +22,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM D21 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM D21 driver converts nanoseconds to cycles internally
 #endif
 
 // reusing/abusing cli/sei defs for due

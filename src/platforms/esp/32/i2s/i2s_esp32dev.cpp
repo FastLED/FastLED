@@ -187,15 +187,10 @@ static void transpose32(uint8_t *pixels, uint8_t *bits) {
 }
 
 void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
-    // Extract timing values from struct
-    int T1 = TIMING.T1;
-    int T2 = TIMING.T2;
-    int T3 = TIMING.T3;
-
-    // -- First, convert back to ns from CPU clocks
-    uint32_t T1ns = ESPCLKS_TO_NS(T1);
-    uint32_t T2ns = ESPCLKS_TO_NS(T2);
-    uint32_t T3ns = ESPCLKS_TO_NS(T3);
+    // Extract timing values from struct (already in nanoseconds)
+    uint32_t T1ns = TIMING.T1;
+    uint32_t T2ns = TIMING.T2;
+    uint32_t T3ns = TIMING.T3;
 
     /*
      We calculate the best pcgd to the timing
@@ -204,33 +199,33 @@ void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
      WS2812 60 150 90 => 2 5 3 => nb pulses=10
      */
     int smallest = 0;
-    if (T1 > T2)
-        smallest = T2;
+    if (T1ns > T2ns)
+        smallest = T2ns;
     else
-        smallest = T1;
-    if (smallest > T3)
-        smallest = T3;
+        smallest = T1ns;
+    if (smallest > T3ns)
+        smallest = T3ns;
     double freq = (double)1 / (double)(T1ns + T2ns + T3ns);
     // Serial.printf("chipset frequency:%f Khz\n", 1000000L*freq);
     // Serial.printf("smallest %d\n",smallest);
     int pgc_ = 1;
     int precision = 0;
-    pgc_ = pgcd(smallest, precision, T1, T2, T3);
+    pgc_ = pgcd(smallest, precision, T1ns, T2ns, T3ns);
     // Serial.printf("%f\n",I2S_MAX_CLK/(1000000000L*freq));
     while (
         pgc_ == 1 ||
-        (T1 / pgc_ + T2 / pgc_ + T3 / pgc_) >
-            I2S_MAX_PULSE_PER_BIT) // while(pgc_==1 ||  (T1/pgc_ +T2/pgc_
-                                   // +T3/pgc_)>I2S_MAX_CLK/(1000000000L*freq))
+        (T1ns / pgc_ + T2ns / pgc_ + T3ns / pgc_) >
+            I2S_MAX_PULSE_PER_BIT) // while(pgc_==1 ||  (T1ns/pgc_ +T2ns/pgc_
+                                   // +T3ns/pgc_)>I2S_MAX_CLK/(1000000000L*freq))
     {
         ++precision;
-        pgc_ = pgcd(smallest, precision, T1, T2, T3);
+        pgc_ = pgcd(smallest, precision, T1ns, T2ns, T3ns);
         // Serial.printf("%d %d\n",pgc_,(a+b+c)/pgc_);
     }
-    pgc_ = pgcd(smallest, precision, T1, T2, T3);
+    pgc_ = pgcd(smallest, precision, T1ns, T2ns, T3ns);
     // Serial.printf("pgcd %d precision:%d\n",pgc_,precision);
-    // Serial.printf("nb pulse per bit:%d\n",T1/pgc_ +T2/pgc_ +T3/pgc_);
-    gPulsesPerBit = (int)T1 / pgc_ + (int)T2 / pgc_ + (int)T3 / pgc_;
+    // Serial.printf("nb pulse per bit:%d\n",T1ns/pgc_ +T2ns/pgc_ +T3ns/pgc_);
+    gPulsesPerBit = (int)T1ns / pgc_ + (int)T2ns / pgc_ + (int)T3ns / pgc_;
     /*
      we calculate the duration of one pulse nd htre base frequency of the led
      ie WS2812B F=1/(250+625+375)=800kHz or 1250ns
@@ -301,7 +296,7 @@ void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
     // Serial.print("Pulses per bit: "); Serial.println(gPulsesPerBit);
 
     // int ones_for_one  = ((T1ns + T2ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
-    ones_for_one = T1 / pgc_ + T2 / pgc_;
+    ones_for_one = T1ns / pgc_ + T2ns / pgc_;
     // Serial.print("One bit:  target ");
     // Serial.print(T1ns+T2ns); Serial.print("ns --- ");
     // Serial.print(ones_for_one); Serial.print(" 1 bits");
@@ -321,7 +316,7 @@ void i2s_define_bit_patterns(const ChipsetTiming& TIMING) {
     }
 
     // int ones_for_zero = ((T1ns - 1)/FASTLED_I2S_NS_PER_PULSE) + 1;
-    ones_for_zero = T1 / pgc_;
+    ones_for_zero = T1ns / pgc_;
     // Serial.print("Zero bit:  target ");
     // Serial.print(T1ns); Serial.print("ns --- ");
     // Serial.print(ones_for_zero); Serial.print(" 1 bits");

@@ -25,9 +25,16 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 
-	static constexpr uint32_t T1 = TIMING.T1;
-	static constexpr uint32_t T2 = TIMING.T2;
-	static constexpr uint32_t T3 = TIMING.T3;
+	// Convert nanoseconds to CPU cycles (compile-time)
+	// Formula: cycles = (ns * (F_CPU / 1MHz) + 500) / 1000
+	// +500 for rounding to nearest cycle
+	static constexpr uint32_t NS_TO_CYCLES(uint32_t ns) {
+		return (ns * (F_CPU / 1000000UL) + 500) / 1000;
+	}
+
+	static constexpr uint32_t T1 = NS_TO_CYCLES(TIMING.T1);  // Convert nanoseconds → CPU cycles
+	static constexpr uint32_t T2 = NS_TO_CYCLES(TIMING.T2);
+	static constexpr uint32_t T3 = NS_TO_CYCLES(TIMING.T3);
 
 	data_t mPinMask;
 	data_ptr_t mPort;

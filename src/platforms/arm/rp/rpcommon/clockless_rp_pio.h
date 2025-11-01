@@ -62,9 +62,12 @@ static bool clockless_isr_installed = false;
 
 template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
-    static constexpr int T1 = TIMING::T1;
-    static constexpr int T2 = TIMING::T2;
-    static constexpr int T3 = TIMING::T3;
+    // Extract timing values from struct and convert from nanoseconds to clock cycles
+    // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
+    // The +500 provides rounding to nearest integer
+    static constexpr int T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr int T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr int T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
     int dma_channel = -1;

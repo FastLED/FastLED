@@ -30,7 +30,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM NRF52 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM NRF52 driver converts nanoseconds to PWM cycles internally
 #endif
 
 // Use PWM instance 0

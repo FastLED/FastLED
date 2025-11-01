@@ -44,7 +44,7 @@ typedef uint8_t boolean;
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM NRF51 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM NRF51 driver converts nanoseconds to cycles internally (via m0clockless.h)
 #endif
 
 #define cli()  __disable_irq();

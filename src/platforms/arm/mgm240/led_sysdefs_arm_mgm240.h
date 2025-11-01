@@ -39,7 +39,7 @@
 #endif
 
 #ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 0  // ARM MGM240 uses cycle-based timing
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM MGM240 driver converts nanoseconds to cycles internally
 #endif
 
 /// @brief FreeRTOS-compatible critical section macros
