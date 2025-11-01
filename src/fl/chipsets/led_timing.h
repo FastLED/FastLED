@@ -49,13 +49,28 @@ struct TIMING_GE8822_800KHZ {
     };
 };
 
+// User-overridable WS2812 timing macros
+// These allow compile-time customization for WS2812 variants (e.g., V5B)
+#ifndef FASTLED_WS2812_T1
+#define FASTLED_WS2812_T1 250
+#endif
+
+#ifndef FASTLED_WS2812_T2
+#define FASTLED_WS2812_T2 625
+#endif
+
+#ifndef FASTLED_WS2812_T3
+#define FASTLED_WS2812_T3 375
+#endif
+
 /// WS2812 RGB controller @ 800 kHz (most common, overclockable)
 /// Timing: 250ns, 625ns, 375ns (total 1250ns, fast variant)
+/// @note Timings can be overridden at compile time using FASTLED_WS2812_T1, FASTLED_WS2812_T2, FASTLED_WS2812_T3
 struct TIMING_WS2812_800KHZ {
     enum : uint32_t {
-        T1 = 250,
-        T2 = 625,
-        T3 = 375,
+        T1 = FASTLED_WS2812_T1,
+        T2 = FASTLED_WS2812_T2,
+        T3 = FASTLED_WS2812_T3,
         RESET = 280
     };
 };

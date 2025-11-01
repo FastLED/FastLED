@@ -721,23 +721,9 @@ class WS2811Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2813Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2813, RGB_ORDER> {};
 
-#ifndef FASTLED_WS2812_T1
-#define FASTLED_WS2812_T1 250
-#endif
-
-#ifndef FASTLED_WS2812_T2
-#define FASTLED_WS2812_T2 625
-#endif
-
-#ifndef FASTLED_WS2812_T3
-#define FASTLED_WS2812_T3 375
-#endif
-
-
-
 /// WS2812 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812_800KHZ
 /// @note Timing: 250ns, 625ns, 375ns (overclockable via FASTLED_OVERCLOCK_WS2812)
-/// @see fl::TIMING_WS2812_800KHZ in chipsets::led_timing.h (250, 625, 375 ns)
+/// @see fl::TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
 /// @note Timings can be overridden at compile time using FASTLED_WS2812_T1, FASTLED_WS2812_T2, FASTLED_WS2812_T3
 #if !FASTLED_WS2812_HAS_SPECIAL_DRIVER
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
