@@ -62,24 +62,6 @@
 // - AVR platforms: led_sysdefs_avr.h + platforms/avr/clockless_*.h
 // - Other platforms: respective led_sysdefs_*.h files
 
-
-// Allow overclocking of the clockless family of leds. 1.2 would be
-// 20% overclocking. In tests WS2812 can be overclocked at 20%, but
-// various manufacturers may be different.  This is a global value
-// which is overridable by each supported chipset.
-#ifdef FASTLED_LED_OVERCLOCK
-#warning "FASTLED_LED_OVERCLOCK has been changed to FASTLED_OVERCLOCK. Please update your code."
-#define FASTLED_OVERCLOCK FASTLED_LED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK
-#define FASTLED_OVERCLOCK 1.0
-#else
-#ifndef FASTLED_OVERCLOCK_SUPPRESS_WARNING
-#warning "FASTLED_OVERCLOCK is now active, #define FASTLED_OVERCLOCK_SUPPRESS_WARNING to disable this warning"
-#endif
-#endif
-
 // So many platforms have specialized WS2812 controllers. Why? Because they
 // are the cheapest chipsets use. So we special case this.
 #include "platforms/chipsets_specialized_ws2812.h"
@@ -581,60 +563,9 @@ class UCS7604HD : public fl::UCS7604Controller<
 
 
 
-// WS2812 can be overclocked pretty aggressively, however, there are
-// some excellent articles that you should read about WS2812 overclocking
-// and corruption for a large number of LEDs.
-// https://wp.josh.com/2014/05/16/why-you-should-give-your-neopixel-bits-room-to-breathe/
-// https://wp.josh.com/2014/05/13/ws2812-neopixels-are-not-so-finicky-once-you-get-to-know-them/
-#ifndef FASTLED_OVERCLOCK_WS2812
-#define FASTLED_OVERCLOCK_WS2812 FASTLED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK_WS2811
-#define FASTLED_OVERCLOCK_WS2811 FASTLED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK_WS2813
-#define FASTLED_OVERCLOCK_WS2813 FASTLED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK_WS2815
-#define FASTLED_OVERCLOCK_WS2815 FASTLED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK_SK6822
-#define FASTLED_OVERCLOCK_SK6822 FASTLED_OVERCLOCK
-#endif
-
-#ifndef FASTLED_OVERCLOCK_SK6812
-#define FASTLED_OVERCLOCK_SK6812 FASTLED_OVERCLOCK
-#endif
-
 // Legacy macro for nanoseconds to clock cycles conversion
 // This is no longer used by the core API but kept for backward compatibility
 #define FL_NANOSECONDS_TO_CLOCK_CYCLES(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
-
-/// Timing value passthrough macro
-/// @brief Passes nanosecond timing values unchanged to platform clockless drivers
-/// @param _NS Timing value in nanoseconds (e.g., 250, 625, 375)
-/// @return The same nanosecond value unchanged
-///
-/// This macro is a simple passthrough since all platforms use nanosecond-based timing.
-/// Platform drivers that require cycle counts perform conversion internally
-/// using F_CPU or CLOCKLESS_FREQUENCY.
-#define C_NS(_NS) (_NS)
-
-// Allow overclocking various LED chipsets in the clockless family.
-// Clocked chips like the APA102 don't need this because they allow
-// you to control the clock speed directly.
-#define C_NS_WS2812(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_WS2812)))
-#define C_NS_WS2811(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_WS2811)))
-#define C_NS_WS2813(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_WS2813)))
-#define C_NS_WS2815(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_WS2815)))
-#define C_NS_SK6822(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_SK6822)))
-#define C_NS_SK6812(_NS) (C_NS(int(_NS / FASTLED_OVERCLOCK_SK6812)))
-
-
 
 // At T=0        : the line is raised hi to start a bit
 // At T=T1       : the line is dropped low to transmit a zero bit

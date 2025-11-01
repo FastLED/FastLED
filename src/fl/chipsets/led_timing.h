@@ -18,6 +18,55 @@
 #include "fl/stdint.h"
 #include "fl/compiler_control.h"
 
+// ============================================================================
+// Overclock Factor Configuration
+// ============================================================================
+
+// Allow overclocking of the clockless family of LEDs. 1.2 would be
+// 20% overclocking. In tests WS2812 can be overclocked at 20%, but
+// various manufacturers may be different. This is a global value
+// which is overridable by each supported chipset.
+
+#ifdef FASTLED_LED_OVERCLOCK
+#warning "FASTLED_LED_OVERCLOCK has been changed to FASTLED_OVERCLOCK. Please update your code."
+#define FASTLED_OVERCLOCK FASTLED_LED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK
+#define FASTLED_OVERCLOCK 1.0
+#else
+#ifndef FASTLED_OVERCLOCK_SUPPRESS_WARNING
+#warning "FASTLED_OVERCLOCK is now active, #define FASTLED_OVERCLOCK_SUPPRESS_WARNING to disable this warning"
+#endif
+#endif
+
+// Per-chipset overclock factors (default to global FASTLED_OVERCLOCK)
+// These allow fine-grained control of overclocking for specific chipsets
+
+#ifndef FASTLED_OVERCLOCK_WS2812
+#define FASTLED_OVERCLOCK_WS2812 FASTLED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK_WS2811
+#define FASTLED_OVERCLOCK_WS2811 FASTLED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK_WS2813
+#define FASTLED_OVERCLOCK_WS2813 FASTLED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK_WS2815
+#define FASTLED_OVERCLOCK_WS2815 FASTLED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK_SK6822
+#define FASTLED_OVERCLOCK_SK6822 FASTLED_OVERCLOCK
+#endif
+
+#ifndef FASTLED_OVERCLOCK_SK6812
+#define FASTLED_OVERCLOCK_SK6812 FASTLED_OVERCLOCK
+#endif
+
 namespace fl {
 
 // ============================================================================
