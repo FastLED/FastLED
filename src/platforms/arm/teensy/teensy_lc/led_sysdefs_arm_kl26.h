@@ -23,6 +23,10 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
+#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
+#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM KL26 driver converts nanoseconds to cycles internally
+#endif
+
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif
