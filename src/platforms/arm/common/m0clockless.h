@@ -45,14 +45,14 @@ struct M0ClocklessData {
 };
 
 
-template<int HI_OFFSET, int LO_OFFSET, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
+template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>int
 showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, uint32_t num_leds, struct M0ClocklessData *pData) {
   // Extract timing values from struct and convert from nanoseconds to clock cycles
   // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
   // The +500 provides rounding to nearest integer
-  static constexpr uint32_t T1 = (TIMING.T1 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr uint32_t T2 = (TIMING.T2 * (F_CPU / 1000000UL) + 500) / 1000;
-  static constexpr uint32_t T3 = (TIMING.T3 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+  static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
   // Lo register variables
   FASTLED_REGISTER uint32_t scratch=0;

@@ -20,7 +20,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
@@ -32,9 +32,9 @@ class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 		return (ns * (F_CPU / 1000000UL) + 500) / 1000;
 	}
 
-	static constexpr uint32_t T1 = NS_TO_CYCLES(TIMING.T1);  // Convert nanoseconds → CPU cycles
-	static constexpr uint32_t T2 = NS_TO_CYCLES(TIMING.T2);
-	static constexpr uint32_t T3 = NS_TO_CYCLES(TIMING.T3);
+	static constexpr uint32_t T1 = NS_TO_CYCLES(TIMING::T1);  // Convert nanoseconds → CPU cycles
+	static constexpr uint32_t T2 = NS_TO_CYCLES(TIMING::T2);
+	static constexpr uint32_t T3 = NS_TO_CYCLES(TIMING::T3);
 
 	data_t mPinMask;
 	data_ptr_t mPort;

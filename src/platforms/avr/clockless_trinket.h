@@ -144,14 +144,14 @@ static uint8_t gTimeErrorAccum256ths;
 
 #define FASTLED_HAS_CLOCKLESS 1
 
-template <uint8_t DATA_PIN, const fl::ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
+template <uint8_t DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 10>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {
 	// Extract timing values from struct and convert from nanoseconds to clock cycles
 	// Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000
 	// The +500 provides rounding to nearest integer
-	static constexpr uint32_t T1 = (TIMING.T1 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T2 = (TIMING.T2 * (F_CPU / 1000000UL) + 500) / 1000;
-	static constexpr uint32_t T3 = (TIMING.T3 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr uint32_t T1 = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr uint32_t T2 = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+	static constexpr uint32_t T3 = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
 
 	static_assert(T1 >= 2 && T2 >= 2 && T3 >= 3, "Not enough cycles - use a higher clock speed");
 
