@@ -6,7 +6,7 @@ Ambiq Apollo3 platform support.
 - `fastled_apollo3.h`: Aggregator; includes `fastpin_apollo3.h`, `fastspi_apollo3.h`, `clockless_apollo3.h`.
 - `fastpin_apollo3.h`: Pin helpers using Ambiq fastgpio; board‑specific `(pin,pad)` mappings (e.g., SFE Edge/Thing Plus/ATP, Artemis Nano, LoRa Thing Plus expLoRaBLE). Defines `HAS_HARDWARE_PIN_SUPPORT` when applicable.
 - `fastspi_apollo3.h`: Bit‑banged SPI via fastgpio (all pins usable). Provides `APOLLO3HardwareSPIOutput` with `writeBytes`, `writePixels`, and bit‑level toggling.
-- `clockless_apollo3.h`: Clockless WS281x controller using SysTick for timing on Apollo3 Blue; sets `FASTLED_HAS_CLOCKLESS`.
+- `clockless_apollo3.h`: Clockless WS281x controller using SysTick for timing on Apollo3 Blue; sets `FL_CLOCKLESS_CONTROLLER_DEFINED`.
 
 ## Supported boards and toolchains
 

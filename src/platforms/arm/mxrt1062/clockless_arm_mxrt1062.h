@@ -7,7 +7,7 @@ namespace fl {
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY4)
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #define _FASTLED_NS_TO_DWT(_NS) (((F_CPU_ACTUAL>>16)*(_NS)) / (1000000000UL>>16))
 

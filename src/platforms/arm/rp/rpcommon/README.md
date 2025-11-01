@@ -185,7 +185,7 @@ inline void noInterrupts() { /* disable interrupts */ }
 #endif
 
 // Common RP-specific macros
-#define FASTLED_HAS_CLOCKLESS 1  // PIO clockless support available
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1  // PIO clockless support available
 ```
 
 **Usage**: Included by platform-specific `led_sysdefs_arm_rpXXXX.h` files:

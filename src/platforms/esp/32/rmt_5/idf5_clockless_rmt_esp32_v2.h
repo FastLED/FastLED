@@ -1,7 +1,7 @@
 #pragma once
 
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #define FASTLED_RMT_USE_DMA
 

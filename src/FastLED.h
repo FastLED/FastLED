@@ -159,7 +159,7 @@ enum SWS2812 { WS2812SERIAL };
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER> class PIXIE : public PixieController<DATA_PIN, RGB_ORDER> {};
 #endif
 
-#ifdef FASTLED_HAS_CLOCKLESS
+#ifdef FL_CLOCKLESS_CONTROLLER_DEFINED
 /// @addtogroup Chipsets
 /// @{
 /// @addtogroup ClocklessChipsets
@@ -578,7 +578,7 @@ public:
 #endif
 	/// @} Adding SPI based controllers
 
-#ifdef FASTLED_HAS_CLOCKLESS
+#ifdef FL_CLOCKLESS_CONTROLLER_DEFINED
 	/// @brief Helper to unwrap controller pointer and call base addLeds
 	/// This explicit helper function aids AVR GCC with template-dependent type resolution
 	/// during two-phase name lookup, solving compilation issues on older compiler versions.

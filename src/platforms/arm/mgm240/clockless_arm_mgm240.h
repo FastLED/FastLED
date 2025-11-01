@@ -13,7 +13,7 @@ namespace fl {
 #define ARM_DWT_CYCCNT          (*(volatile uint32_t *)0xE0001004) // Cycle count register
 
 // Enable clockless LED support for MGM240
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 /// @brief ARM Cortex-M33 clockless LED controller for MGM240
 ///

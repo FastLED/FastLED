@@ -20,12 +20,13 @@ namespace fl {
   using ClocklessControllerImpl = ClocklessBlockController<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
 #else
   // Use platform-specific ClocklessController if available, otherwise ClocklessBlocking
-  #if !defined(FL_CLOCKLESS_CONTROLLER_DEFINED) && !defined(FASTLED_HAS_CLOCKLESS)
+  #if !defined(FL_CLOCKLESS_CONTROLLER_DEFINED)
     // Generic fallback for platforms without specialized drivers
+    #warning "No clockless controller was defined, falling back to generic ClocklessBlocking. Results will probably be very sub-optimal."
     template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
     using ClocklessControllerImpl = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
   #else
-    // Platform-specific ClocklessController (when either macro is defined)
+    // Platform-specific ClocklessController (FL_CLOCKLESS_CONTROLLER_DEFINED is set)
     template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
     using ClocklessControllerImpl = ClocklessController<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
   #endif

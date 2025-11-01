@@ -111,7 +111,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 namespace fl {
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define NUM_COLOR_CHANNELS 3
 
 // -- Choose which I2S device to use

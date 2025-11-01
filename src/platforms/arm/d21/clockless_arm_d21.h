@@ -6,7 +6,7 @@
 #include "eorder.h"
 #include "fastled_delay.h"
 namespace fl {
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 /// @brief ARM D21 (SAMD21) Clockless LED Controller
 /// @tparam DATA_PIN Pin number for data line output

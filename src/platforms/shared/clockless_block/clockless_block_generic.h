@@ -208,6 +208,6 @@ using ClocklessBlockController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, 
 #endif
 
 // Note: ClocklessController alias selection is now handled by fl/clockless_controller_impl.h
-// which checks both FL_CLOCKLESS_CONTROLLER_DEFINED and FASTLED_HAS_CLOCKLESS flags
+// which checks both FL_CLOCKLESS_CONTROLLER_DEFINED and FL_CLOCKLESS_CONTROLLER_DEFINED flags
 
 }  // namespace fl

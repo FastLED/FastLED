@@ -18,7 +18,7 @@ __attribute__ ((always_inline)) inline static uint32_t __clock_cycles() {
   return cyc;
 }
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 85>
 class ClocklessController : public CPixelLEDController<RGB_ORDER> {

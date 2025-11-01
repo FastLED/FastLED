@@ -10,7 +10,7 @@
 #include "eorder.h"
 namespace fl {
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #define FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING 144 // TODO: Figure out how to safely let this be calller-defined....
 
 // nRF52810 has a single PWM peripheral (PWM0)

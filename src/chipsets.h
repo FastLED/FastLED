@@ -331,7 +331,7 @@ class RGBWEmulatedController
 // Clockless template instantiations - see clockless.h for how the timing values are used
 //
 
-#ifdef FASTLED_HAS_CLOCKLESS
+#ifdef FL_CLOCKLESS_CONTROLLER_DEFINED
 /// @defgroup ClocklessChipsets Clockless Chipsets
 /// These chipsets have only a single data line.
 ///

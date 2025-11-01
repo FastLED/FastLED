@@ -43,7 +43,7 @@
  * to avoid this becoming an issue.
  */
 namespace fl {
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
 static CMinWait<0> *dma_chan_waits[NUM_DMA_CHANNELS] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

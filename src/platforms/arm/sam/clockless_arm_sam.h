@@ -3,7 +3,7 @@
 
 // SAM/Due platform: Set this FIRST before any includes to prevent generic controller alias
 #if defined(__SAM3X8E__)
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 #endif
 
 #include "fl/chipsets/timing_traits.h"

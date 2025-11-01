@@ -14,7 +14,7 @@ namespace fl {
 #define ARM_DWT_CYCCNT          (*(volatile uint32_t *)0xE0001004) // Cycle count register
 
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 /// @brief ARM D51 (SAMD51) Clockless LED Controller
 /// @tparam DATA_PIN Pin number for data line output

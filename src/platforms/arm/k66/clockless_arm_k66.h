@@ -7,7 +7,7 @@ namespace fl {
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY3)
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 /// @brief ARM K66 (Teensy 3.6) Clockless LED Controller
 /// @tparam DATA_PIN Pin number for data line output

@@ -8,7 +8,7 @@ namespace fl {
 // Definition for a single channel clockless controller for the stm32 family of chips, like that used in the spark core
 // See clockless.h for detailed info on how the template parameters are used.
 
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #if defined(STM32F2XX)
 // The photon runs faster than the others

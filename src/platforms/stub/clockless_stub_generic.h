@@ -12,7 +12,7 @@
 #include "platforms/shared/active_strip_tracker/active_strip_tracker.h"
 
 namespace fl {
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 // Template for type-based timing API (TIMING_WS2812_800KHZ, etc.)
 // This is the primary template with LED capture support

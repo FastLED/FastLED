@@ -68,7 +68,7 @@
 
 namespace fl {
 // Platform-specific headers are included conditionally below
-#define FASTLED_HAS_CLOCKLESS 1
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 // Not used.
 //#define NUM_COLOR_CHANNELS 3
 
