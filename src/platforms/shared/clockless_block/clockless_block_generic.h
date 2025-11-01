@@ -207,11 +207,7 @@ template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, 
 using ClocklessBlockController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
 #endif
 
-// Default ClocklessController typedef (when no platform-specific driver is available)
-// Platform-specific drivers (ClocklessRMT, ClocklessSPI, etc.) may override this
-#if !defined(FASTLED_HAS_CLOCKLESS) && !defined(FASTLED_CLOCKLESS_STUB_DEFINED)
-template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-using ClocklessController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-#endif
+// Note: ClocklessController alias selection is now handled by fl/clockless_controller_impl.h
+// which checks both FL_CLOCKLESS_CONTROLLER_DEFINED and FASTLED_HAS_CLOCKLESS flags
 
 }  // namespace fl
