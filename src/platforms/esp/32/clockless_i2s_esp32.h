@@ -149,15 +149,15 @@ static int gNumStarted = 0;
 //    For now, we require all strips to be the same chipset, so these
 //    are global variables.
 
-template <int DATA_PIN, const ChipsetTiming& TIMING, EOrder RGB_ORDER = RGB,
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB,
           int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
     // -- Store the GPIO pin
     gpio_num_t mPin;
 
-    static constexpr uint32_t T1 = TIMING.T1;
-    static constexpr uint32_t T2 = TIMING.T2;
-    static constexpr uint32_t T3 = TIMING.T3;
+    static constexpr uint32_t T1 = TIMING::T1;
+    static constexpr uint32_t T2 = TIMING::T2;
+    static constexpr uint32_t T3 = TIMING::T3;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
@@ -177,7 +177,8 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
 
         // -- Construct the bit patterns for ones and zeros
         if (!i2s_is_initialized()) {
-            i2s_define_bit_patterns(TIMING);
+            const ChipsetTiming timing = {TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET, nullptr};
+            i2s_define_bit_patterns(timing);
             i2s_init(I2S_DEVICE);
             i2s_set_fill_buffer_callback(fillBuffer);
         }
