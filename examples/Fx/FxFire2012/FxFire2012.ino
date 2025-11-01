@@ -1,3 +1,4 @@
+// @filter: (mem is high)
 /// @file    FxFire2012.ino
 /// @brief   Fire2012 effect with ScreenMap
 /// @example FxFire2012.ino
