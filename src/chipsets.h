@@ -49,25 +49,18 @@
 #include "fl/chipsets/sm16716.h"
 
 // Platform-specific clockless timing configuration
-// Each platform MUST define this in their platform headers:
+//
+// IMPORTANT: All platforms use nanosecond-based timing at the API level.
+// Chipset timing values (T1, T2, T3) are specified in nanoseconds (e.g., T1=250ns, T2=625ns, T3=375ns)
+//
+// Platforms that need cycle-based timing internally (e.g., AVR, ARM, ESP8266) perform
+// nanosecond-to-cycle conversion within their clockless driver implementation using F_CPU or equivalent.
+//
+// Platform-specific clockless drivers are defined in:
 // - ESP32/ESP8266: platforms/esp/clockless.h
-// - All ARM platforms: led_sysdefs_arm_*.h
-// - AVR platforms: led_sysdefs_avr.h
-// - Other platforms: respective led_sysdefs_*.h
-//
-// CRITICAL: All platforms MUST set FASTLED_CLOCKLESS_USES_NANOSECONDS to 1
-// The API now exclusively uses nanosecond-based timing values (e.g., T1=250ns, T2=625ns, T3=375ns)
-// Platforms that need cycle-based timing internally (e.g., AVR, ARM, ESP8266) MUST convert
-// nanoseconds to cycles within their clockless driver implementation using F_CPU or equivalent.
-//
-// See AVR_TIMING_MIGRATION.md for the reference conversion pattern.
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-  #error "FASTLED_CLOCKLESS_USES_NANOSECONDS must be defined by the platform. Define it in your platform's header file (e.g., platforms/esp/clockless.h or led_sysdefs_*.h). MUST be set to 1 (nanosecond-based timing)."
-#endif
-
-#if FASTLED_CLOCKLESS_USES_NANOSECONDS != 1
-  #error "FASTLED_CLOCKLESS_USES_NANOSECONDS must be 1. All platforms must use nanosecond-based timing at the API level. If your platform needs cycle counts, convert nanoseconds to cycles internally within the clockless driver (see AVR_TIMING_MIGRATION.md for reference pattern)."
-#endif
+// - All ARM platforms: led_sysdefs_arm_*.h + platform-specific clockless headers
+// - AVR platforms: led_sysdefs_avr.h + platforms/avr/clockless_*.h
+// - Other platforms: respective led_sysdefs_*.h files
 
 
 // Allow overclocking of the clockless family of leds. 1.2 would be
@@ -626,9 +619,9 @@ class UCS7604HD : public fl::UCS7604Controller<
 /// @param _NS Timing value in nanoseconds (e.g., 250, 625, 375)
 /// @return The same nanosecond value unchanged
 ///
-/// Since all platforms now use FASTLED_CLOCKLESS_USES_NANOSECONDS=1, this macro is a simple
-/// passthrough. Platform drivers that require cycle counts MUST perform conversion internally
-/// using F_CPU or CLOCKLESS_FREQUENCY (see AVR_TIMING_MIGRATION.md for reference pattern).
+/// This macro is a simple passthrough since all platforms use nanosecond-based timing.
+/// Platform drivers that require cycle counts perform conversion internally
+/// using F_CPU or CLOCKLESS_FREQUENCY.
 #define C_NS(_NS) (_NS)
 
 // Allow overclocking various LED chipsets in the clockless family.

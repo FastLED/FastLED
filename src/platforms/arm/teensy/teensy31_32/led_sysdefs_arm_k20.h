@@ -24,10 +24,6 @@
 #define CLK_DBL 1
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM K20 driver converts nanoseconds to cycles internally
-#endif
-
 // Get some system include files
 #include <avr/io.h>
 #include <avr/interrupt.h> // for cli/se definitions

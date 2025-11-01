@@ -38,10 +38,6 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM MGM240 driver converts nanoseconds to cycles internally
-#endif
-
 /// @brief FreeRTOS-compatible critical section macros
 /// Automatically detects FreeRTOS presence and uses task-safe critical sections.
 /// Falls back to bare metal interrupt disable/enable when FreeRTOS is not available.

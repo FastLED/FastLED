@@ -28,11 +28,6 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // AVR driver converts nanoseconds to cycles internally
-#endif
-
-
 // Default to using PROGMEM here
 #ifndef FASTLED_USE_PROGMEM
 #define FASTLED_USE_PROGMEM 1

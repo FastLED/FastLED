@@ -20,10 +20,6 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM MXRT1062 clockless driver uses nanosecond-based timing
-#endif
-
 #if (F_CPU == 96000000)
 #define CLK_DBL 1
 #endif

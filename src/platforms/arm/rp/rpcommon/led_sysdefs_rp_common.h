@@ -59,10 +59,6 @@ typedef volatile uint32_t RwReg;
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // RP2xxx driver converts nanoseconds to cycles internally
-#endif
-
 // Default to no PROGMEM
 #ifndef FASTLED_USE_PROGMEM
 #define FASTLED_USE_PROGMEM 0

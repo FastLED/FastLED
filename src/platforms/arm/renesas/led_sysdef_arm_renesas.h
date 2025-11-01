@@ -32,8 +32,4 @@
 typedef volatile uint32_t RoReg;
 typedef volatile uint32_t RwReg;
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM Renesas driver converts nanoseconds to cycles internally
-#endif
-
 #endif

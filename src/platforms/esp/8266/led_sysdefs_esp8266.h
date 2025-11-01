@@ -27,9 +27,6 @@ typedef uint32_t prog_uint32_t;
 # define INTERRUPT_THRESHOLD 0
 #endif
 
-// ESP8266 timing is configured in platforms/esp/clockless.h
-// Do NOT define FASTLED_CLOCKLESS_USES_NANOSECONDS here
-
 #define NEED_CXX_BITS
 
 // These can be overridden

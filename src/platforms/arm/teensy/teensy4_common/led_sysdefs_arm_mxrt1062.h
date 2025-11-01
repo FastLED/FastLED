@@ -42,11 +42,4 @@ typedef volatile       uint32_t RwReg; /**< Read-Write 8-bit register (volatile 
 #define FASTLED_USE_PROGMEM 1
 #endif
 
-// Teensy4 clockless driver uses nanosecond-based timing
-// The driver converts nanoseconds to DWT cycles internally
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
-#endif
-
-
 #endif

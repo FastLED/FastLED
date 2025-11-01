@@ -4,10 +4,10 @@
 /// @brief ESP32/ESP8266 platform-specific clockless controller dispatch
 ///
 /// This header centralizes ESP platform-specific conditional logic for selecting
-/// the appropriate clockless LED controller implementation. It handles:
-/// - ESP32 ClocklessController alias selection (I2S, RMT, SPI, or blocking fallback)
-/// - ESP32 FASTLED_CLOCKLESS_USES_NANOSECONDS configuration
-/// - ESP8266 FASTLED_CLOCKLESS_USES_NANOSECONDS configuration
+/// the appropriate clockless LED controller implementation.
+///
+/// ESP32: Selects ClocklessController alias (I2S, RMT, SPI, or blocking fallback)
+/// ESP8266: Includes clockless driver implementation
 ///
 /// This keeps platform-specific #ifdef logic out of the main chipsets.h file.
 
@@ -49,26 +49,6 @@ namespace fl {
 
 }  // namespace fl
 
-// Define whether ESP32 clockless drivers use nanosecond-based timing
-// All ESP32 drivers now support nanosecond-based timing:
-// - RMT5: Native nanosecond support
-// - RMT4: Converts nanoseconds → CPU cycles → RMT ticks
-// - I2S: Uses nanosecond values directly
-// - SPI: External driver handles timing
-// - LCD (I80/RGB): Uses ClocklessTiming module with nanoseconds
-// - ParLIO: Uses ClocklessTiming module with nanoseconds
-// - Blocking: Converts nanoseconds → CPU cycles
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-  #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
-#endif  // FASTLED_CLOCKLESS_USES_NANOSECONDS
-
 #elif defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
-
-// ESP8266 now uses nanosecond-based timing
-// The clockless driver (platforms/esp/8266/clockless_esp8266.h) converts
-// nanoseconds to CPU cycles at compile-time using the NS_TO_CYCLES formula.
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-  #define FASTLED_CLOCKLESS_USES_NANOSECONDS 1
-#endif
 
 #endif  // ESP32 || ARDUINO_ARCH_ESP32 || ESP8266 || ARDUINO_ARCH_ESP8266

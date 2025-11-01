@@ -24,10 +24,6 @@
 #define FASTLED_ALLOW_INTERRUPTS 1
 #define INTERRUPT_THRESHOLD 0
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // WASM uses nanosecond-based timing
-#endif
-
 #define digitalPinToBitMask(P) (0)
 #define digitalPinToPort(P) (0)
 #define portOutputRegister(P) (0)

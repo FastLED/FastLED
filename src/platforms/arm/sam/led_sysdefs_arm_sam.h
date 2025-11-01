@@ -39,10 +39,6 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // ARM SAM driver converts nanoseconds to cycles internally
-#endif
-
 // reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq(); __disable_fault_irq();
 #define sei() __enable_irq(); __enable_fault_irq();

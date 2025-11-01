@@ -20,10 +20,6 @@
 #define FASTLED_ACCURATE_CLOCK
 #endif
 
-#ifndef FASTLED_CLOCKLESS_USES_NANOSECONDS
-#define FASTLED_CLOCKLESS_USES_NANOSECONDS 1  // Apollo3 driver converts nanoseconds to cycles internally
-#endif
-
 #ifndef F_CPU
 #define F_CPU 48000000
 #endif
