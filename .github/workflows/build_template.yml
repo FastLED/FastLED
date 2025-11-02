@@ -181,14 +181,6 @@ jobs:
             echo "platformio.ini not found"
           fi
 
-      - name: Build Blink.ino for library info
-        continue-on-error: true
-        working-directory: trusted
-        run: |
-          BOARD=$(python -c "print('${{ inputs.args }}'.split()[0])")
-          uv run ci/ci-compile.py $BOARD --examples Blink
-        shell: bash
-
       - name: Print out build_info.json
         if: always()
         working-directory: trusted
@@ -234,21 +226,47 @@ jobs:
         continue-on-error: true
         working-directory: trusted
         run: |
-          uv run ci/inspect_binary.py --first
+          echo "============================================"
+          echo "Binary Artifacts"
+          echo "============================================"
 
-      - name: Inspect Elf
-        if: always()
-        continue-on-error: true
-        working-directory: trusted
-        run: |
-          uv run ci/inspect_elf.py --first
+          # Find build directory
+          if [ -d ".build/pio" ]; then
+            BUILD_DIR=".build/pio"
+          else
+            BUILD_DIR=".build"
+          fi
 
-      - name: Optimization Report
-        if: always()
-        continue-on-error: true
-        working-directory: trusted
-        run: |
-          uv run ci/optimization_report.py --first
+          # List all firmware files with paths and sizes
+          echo ""
+          find "$BUILD_DIR" \( -name "*.bin" -o -name "*.hex" -o -name "*.elf" -o -name "*.uf2" \) -type f 2>/dev/null | while read -r file; do
+            size=$(stat -f%z "$file" 2>/dev/null || stat -c%s "$file" 2>/dev/null || echo "unknown")
+            if [ "$size" != "unknown" ]; then
+              size_kb=$(echo "scale=2; $size / 1024" | bc)
+              echo "📦 $file"
+              echo "   Size: $size bytes (${size_kb} KB)"
+            else
+              echo "📦 $file"
+            fi
+          done
+
+          # List partition files if they exist
+          echo ""
+          find "$BUILD_DIR" -name "partitions.csv" -type f 2>/dev/null | while read -r file; do
+            echo "📋 $file"
+            echo "   $(head -1 "$file" 2>/dev/null || echo 'Partition table')"
+          done
+
+          echo ""
+          echo "============================================"
+
+      # Inspect Elf step removed - superseded by Symbol Analysis step
+      # - name: Inspect Elf
+      #   if: always()
+      #   continue-on-error: true
+      #   working-directory: trusted
+      #   run: |
+      #     uv run ci/inspect_elf.py --first
 
       - name: Symbol Analysis
         if: always()
@@ -258,6 +276,20 @@ jobs:
           # Parse the board name from args (first element)
           python -c "print('${{ inputs.args }}'.split()[0])" > board.txt
           cat board.txt | xargs -I {} uv run ci/symbol_analysis_runner.py --board {} --example Blink --skip-on-failure
+        shell: bash
+
+      - name: Optimization Report
+        if: always()
+        continue-on-error: true
+        working-directory: trusted
+        run: |
+          uv run ci/optimization_report.py --first
+
+      - name: Build Blink.ino for library info
+        continue-on-error: true
+        working-directory: trusted
+        run: |
+          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
         shell: bash
 
       - name: Generate timestamp and random hex
