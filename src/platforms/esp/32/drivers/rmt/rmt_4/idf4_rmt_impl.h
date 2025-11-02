@@ -13,7 +13,7 @@
 
 #include "FastLED.h"
 #include "idf4_rmt.h"
-#include "platforms/esp/32/clock_cycles.h"
+#include "platforms/esp/32/core/clock_cycles.h"
 #include "fl/chipsets/led_timing.h"
 
 FL_EXTERN_C_BEGIN
@@ -35,7 +35,7 @@ FL_EXTERN_C_BEGIN
 #include "freertos/semphr.h"
 #include "soc/rmt_struct.h"
 
-#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
+#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
 FL_EXTERN_C_END

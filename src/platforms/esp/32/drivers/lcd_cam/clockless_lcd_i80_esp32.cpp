@@ -24,7 +24,7 @@
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
 #include "clockless_lcd_i80_esp32.h"
-#include "lcd/lcd_driver_i80_impl.h"
+#include "lcd_driver_i80_impl.h"
 
 namespace { // anonymous namespace
 

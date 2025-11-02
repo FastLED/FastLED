@@ -30,7 +30,7 @@
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
 // Include the PARLIO driver
-#include "parlio/parlio_driver.h"
+#include "parlio_driver.h"
 
 namespace fl {
 

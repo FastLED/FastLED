@@ -17,9 +17,9 @@
 #include "fl/fastled.h"
 #include "fl/force_inline.h"
 #include "fl/assert.h"
-#include "platforms/esp/32/rmt_4/idf4_rmt.h"
-#include "platforms/esp/32/rmt_4/idf4_rmt_impl.h"
-#include "platforms/esp/32/clock_cycles.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/idf4_rmt.h"
+#include "platforms/esp/32/drivers/rmt/rmt_4/idf4_rmt_impl.h"
+#include "platforms/esp/32/core/clock_cycles.h"
 #include "fl/chipsets/led_timing.h"
 #include "freertos/semphr.h"
 
@@ -42,7 +42,7 @@ FL_EXTERN_C_BEGIN
 #include "freertos/semphr.h"
 #include "soc/rmt_struct.h"
 
-#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
+#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 
 FL_EXTERN_C_END

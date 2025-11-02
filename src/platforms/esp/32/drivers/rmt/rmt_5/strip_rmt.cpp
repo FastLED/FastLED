@@ -10,7 +10,7 @@
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "third_party/espressif/led_strip/src/led_strip.h"
-#include "platforms/esp/32/esp_log_control.h"  // Control ESP logging before including esp_log.h
+#include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 #include "esp_err.h"
 #include "esp_check.h"

@@ -22,7 +22,7 @@
 #include "pixel_iterator.h"
 
 // Include the RGB LCD driver
-#include "lcd/lcd_driver_rgb.h"
+#include "lcd_driver_rgb.h"
 
 namespace fl {
 

@@ -14,7 +14,7 @@
 #include "fl/compiler_control.h"
 // Get ESP-IDF version macros if on ESP32
 #if defined(ESP32)
-    #include "platforms/esp/32/led_sysdefs_esp32.h"
+    #include "platforms/esp/32/core/led_sysdefs_esp32.h"
 #endif
 
 namespace fl {

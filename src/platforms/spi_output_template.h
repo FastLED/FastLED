@@ -12,7 +12,7 @@
 #include "stub/spi_output_template.h"
 
 #elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
-#include "esp/32/spi_output_template.h"
+#include "esp/32/drivers/spi/spi_output_template.h"
 
 #elif defined(ESP8266)
 #include "esp/8266/spi_output_template.h"

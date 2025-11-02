@@ -11,8 +11,8 @@
 /// ESP32 (Xtensa) platform-specific cycle-accurate delay utilities
 
 /// ESP32 Xtensa: Use CCOUNT register (cycle counter)
-/// Already included via platforms/esp/32/clock_cycles.h
-#include "platforms/esp/32/clock_cycles.h"
+/// Already included via platforms/esp/32/core/clock_cycles.h
+#include "clock_cycles.h"
 
 FASTLED_FORCE_INLINE fl::u32 get_ccount() {
   return __clock_cycles();

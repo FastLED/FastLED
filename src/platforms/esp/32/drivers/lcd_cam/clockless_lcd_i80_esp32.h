@@ -26,7 +26,7 @@
 #include "pixel_iterator.h"
 
 // Include the I80 LCD driver
-#include "lcd/lcd_driver_i80.h"
+#include "lcd_driver_i80.h"
 
 namespace fl {
 

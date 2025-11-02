@@ -21,10 +21,10 @@
 #include "platforms/avr/delay_cycles.h"
 #elif defined(ESP32) && !defined(ESP32C3) && !defined(ESP32C6)
 #include "platforms/shared/delay_cycles_generic.h"
-#include "platforms/esp/32/delaycycles.h"
+#include "platforms/esp/32/core/delaycycles.h"
 #elif defined(ESP32C3) || defined(ESP32C6)
 #include "platforms/shared/delay_cycles_generic.h"
-#include "platforms/esp/32/delaycycles_riscv.h"
+#include "platforms/esp/32/core/delaycycles_riscv.h"
 #elif defined(ARDUINO_ARCH_RP2040)
 #include "platforms/shared/delay_cycles_generic.h"
 #include "platforms/arm/rp/rp2040/delaycycles.h"

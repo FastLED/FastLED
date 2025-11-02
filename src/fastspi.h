@@ -38,7 +38,7 @@
 // These provide the hardware SPI abstractions for each platform
 // This must happen before FastLED.h includes chipsets.h
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
-#include "platforms/esp/32/spi_device_proxy.h"
+#include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
 #elif defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
 #include "platforms/arm/mxrt1062/spi_device_proxy.h"
 #elif defined(NRF51)
@@ -60,7 +60,7 @@
 #include "platforms/stub/spi_output_template.h"
 
 #elif defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
-#include "platforms/esp/32/spi_output_template.h"
+#include "platforms/esp/32/drivers/spi/spi_output_template.h"
 
 #elif defined(ESP8266)
 #include "platforms/esp/8266/spi_output_template.h"

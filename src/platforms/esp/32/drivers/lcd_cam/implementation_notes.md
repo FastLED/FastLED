@@ -177,21 +177,21 @@ References
 ### ✅ Completed (Date: 2025-01-XX)
 
 #### Phase 1: ESP32 I80 LCD Driver Refactoring
-- ✅ Created unified `lcd/` subdirectory structure in `src/platforms/esp/32/lcd/`
+- ✅ Created unified `lcd_cam/` subdirectory structure in `src/platforms/esp/32/drivers/lcd_cam/`
 - ✅ Extracted I80 LCD driver to modular architecture:
-  - `lcd/lcd_driver_common.h` - Shared structures and pin validation utilities
-  - `lcd/lcd_driver_i80.h` - I80/LCD_CAM driver class definition
-  - `lcd/lcd_driver_i80_impl.h` - Template implementation for I80
+  - `lcd_driver_common.h` - Shared structures and pin validation utilities
+  - `lcd_driver_i80.h` - I80/LCD_CAM driver class definition
+  - `lcd_driver_i80_impl.h` - Template implementation for I80
 - ✅ Refactored existing wrapper files to use new structure:
-  - Updated `clockless_lcd_i80_esp32.h` to include from `lcd/` directory
+  - Updated `clockless_lcd_i80_esp32.h` to include from same directory
   - Updated `clockless_lcd_i80_esp32.cpp` to use `LcdI80Driver` class
 - ✅ Preserved backward compatibility - all existing LCD code still works
 - ✅ Verified with unit tests - all C++ tests pass
 
 #### Phase 2: ESP32 RGB LCD Driver Implementation
 - ✅ Implemented RGB LCD driver following TASK.md specification:
-  - `lcd/lcd_driver_rgb.h` - RGB LCD driver class definition
-  - `lcd/lcd_driver_rgb_impl.h` - Template implementation for RGB
+  - `lcd_driver_rgb.h` - RGB LCD driver class definition
+  - `lcd_driver_rgb_impl.h` - Template implementation for RGB
 - ✅ Key RGB implementation features:
   - 4-pixel encoding for WS2812 timing (vs I80's 3-word encoding)
   - Uses `esp_lcd_new_rgb_panel()` API (vs I80's I80 API)
@@ -206,18 +206,17 @@ References
 
 **File Structure:**
 ```
-src/platforms/esp/32/
-├── lcd/                          (LCD driver code - peripheral-based naming)
-│   ├── lcd_driver_common.h       - Shared config, pin validation
-│   ├── lcd_driver_i80.h          - I80/LCD_CAM driver (ESP32-S3, potentially others)
-│   ├── lcd_driver_i80_impl.h     - I80 implementation
-│   ├── lcd_driver_rgb.h          - RGB LCD driver (ESP32-P4, potentially others)
-│   └── lcd_driver_rgb_impl.h     - RGB implementation
-│
-├── clockless_lcd_i80_esp32.h     - I80 controller wrapper
-├── clockless_lcd_i80_esp32.cpp   - I80 RectangularDrawBuffer integration
-├── clockless_lcd_rgb_esp32.h     - RGB controller wrapper
-└── clockless_lcd_rgb_esp32.cpp   - RGB RectangularDrawBuffer integration
+src/platforms/esp/32/drivers/lcd_cam/  (LCD_CAM driver code - peripheral-based naming)
+├── lcd_driver_common.h                - Shared config, pin validation
+├── lcd_driver_i80.h                   - I80/LCD_CAM driver (ESP32-S3, potentially others)
+├── lcd_driver_i80_impl.h              - I80 implementation
+├── lcd_driver_rgb.h                   - RGB LCD driver (ESP32-P4, potentially others)
+├── lcd_driver_rgb_impl.h              - RGB implementation
+├── clockless_lcd_i80_esp32.h          - I80 controller wrapper
+├── clockless_lcd_i80_esp32.cpp        - I80 RectangularDrawBuffer integration
+├── clockless_lcd_rgb_esp32.h          - RGB controller wrapper
+├── clockless_lcd_rgb_esp32.cpp        - RGB RectangularDrawBuffer integration
+└── clockless_lcd_esp32s3_impl.hpp     - ESP32-S3 specific implementation
 ```
 
 **Key Differences: I80 vs RGB**

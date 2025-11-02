@@ -106,7 +106,7 @@
     "NOTE: ESP32 support using I2S parallel driver. All strips must use the same chipset"
 
 #include "eorder.h"
-#include "platforms/esp/32/i2s/i2s_esp32dev.h"
+#include "i2s_esp32dev.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"

@@ -273,11 +273,11 @@ void RmtController5LowLevel::waitForPreviousTransmission() {
 ```
 
 **Files Modified**:
-- ✅ `src/platforms/esp/32/clockless_rmt_esp32.h` - Conditional include logic
-- ✅ `src/platforms/esp/32/rmt_5/idf5_clockless_rmt_esp32_v2.h` - New V2 driver
+- ✅ `src/platforms/esp/32/drivers/rmt/clockless_rmt_esp32.h` - Conditional include logic
+- ✅ `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless_rmt_esp32_v2.h` - New V2 driver
 
 **Files Preserved** (unchanged):
-- ✅ `src/platforms/esp/32/rmt_5/idf5_clockless_rmt_esp32.h` - Old driver (legacy fallback)
+- ✅ `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless_rmt_esp32.h` - Old driver (legacy fallback)
 
 ### Architecture Comparison
 
@@ -858,8 +858,8 @@ uv run test.py --qemu esp32c3  # RISC-V
 ## References
 
 ### Implementation Files
-- **RMT4 Reference**: `src/platforms/esp/32/rmt_4/idf4_rmt_impl.cpp`
-- **RMT5 Old Driver**: `src/platforms/esp/32/rmt_5/idf5_rmt.cpp`
+- **RMT4 Reference**: `src/platforms/esp/32/drivers/rmt/rmt_4/idf4_rmt_impl.cpp`
+- **RMT5 Old Driver**: `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_rmt.cpp`
 - **Worker Implementation**: `rmt5_worker.h`, `rmt5_worker.cpp`
 - **Worker Pool**: `rmt5_worker_pool.h`, `rmt5_worker_pool.cpp`
 - **Controller**: `rmt5_controller_lowlevel.h`, `rmt5_controller_lowlevel.cpp`

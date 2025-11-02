@@ -15,16 +15,16 @@
 // The platform-default ClocklessController alias is defined in chipsets.h
 
 #if FASTLED_ESP32_HAS_RMT
-#include "clockless_rmt_esp32.h"
+#include "../drivers/rmt/clockless_rmt_esp32.h"
 #endif
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#include "clockless_spi_esp32.h"
+#include "../drivers/spi_ws2812/clockless_spi_esp32.h"
 #endif
 
 #ifdef FASTLED_ESP32_I2S
 #ifndef FASTLED_INTERNAL
-#include "clockless_i2s_esp32.h"
+#include "../drivers/i2s/clockless_i2s_esp32.h"
 #endif
 #endif
 

@@ -21,7 +21,7 @@
 #include "cpixel_ledcontroller.h"
 
 #include "clockless_parlio_esp32p4.h"
-#include "parlio/parlio_driver.h"
+#include "parlio_driver.h"
 
 namespace { // anonymous namespace
 

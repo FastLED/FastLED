@@ -26,9 +26,9 @@
 #if defined(ARDUINO_ARCH_AVR)
 #include "platforms/avr/delay.h"
 #elif defined(ESP32) && !defined(ESP32C3) && !defined(ESP32C6)
-#include "platforms/esp/32/delay.h"
+#include "platforms/esp/32/core/delay.h"
 #elif defined(ESP32C3) || defined(ESP32C6)
-#include "platforms/esp/32/delay_riscv.h"
+#include "platforms/esp/32/core/delay_riscv.h"
 #elif defined(ARDUINO_ARCH_RP2040)
 #include "platforms/arm/rp/rp2040/delay.h"
 #elif defined(NRF52_SERIES)

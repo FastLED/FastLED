@@ -445,7 +445,7 @@ Result: Barely visible color difference (±1 brightness if at all)
 
 ### Implementation
 
-The implementation uses a `ParlioBufferStrategy` enum defined in `src/platforms/esp/32/parlio/parlio_driver.h`:
+The implementation uses a `ParlioBufferStrategy` enum defined in `src/platforms/esp/32/drivers/parlio/parlio_driver.h`:
 
 ```cpp
 enum class ParlioBufferStrategy : uint8_t {
@@ -489,7 +489,7 @@ config.buffer_strategy = fl::ParlioBufferStrategy::MONOLITHIC;
 - Original issue: [FastLED #2095](https://github.com/FastLED/FastLED/issues/2095)
 - WLED-MM P4 experimental branch: https://github.com/troyhacks/WLED/tree/P4_experimental
 - WLED-MM demo: https://www.reddit.com/r/WLED/s/q1pZg1mnwZ
-- Implementation: `src/platforms/esp/32/parlio/parlio_driver_impl.h`
+- Implementation: `src/platforms/esp/32/drivers/parlio/parlio_driver_impl.h`
 
 ---
 

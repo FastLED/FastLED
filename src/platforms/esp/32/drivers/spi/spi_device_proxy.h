@@ -16,7 +16,7 @@
 
 #include "fl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
-#include "platforms/esp/32/fastspi_esp32.h"
+#include "platforms/esp/32/core/fastspi_esp32.h"
 #include "fl/stdint.h"
 #include "fl/stddef.h"
 #include "fl/log.h"

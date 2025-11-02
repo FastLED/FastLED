@@ -36,7 +36,7 @@
 
 
 
-#include "platforms/esp/32/fastpin_esp32.h"
+#include "platforms/esp/32/core/fastpin_esp32.h"
 
 #include "platforms/esp/esp_version.h"
 #include "pixel_iterator.h"

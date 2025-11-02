@@ -7,7 +7,7 @@
 #pragma once
 
 #if defined(ESP32)
-    #include "platforms/esp/32/fastpin_esp32.h"
+    #include "platforms/esp/32/core/fastpin_esp32.h"
 #elif defined(ESP8266)
     #include "platforms/esp/8266/fastpin_esp8266.h"
 #endif

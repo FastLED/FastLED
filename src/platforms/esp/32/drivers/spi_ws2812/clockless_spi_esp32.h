@@ -9,7 +9,7 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "spi_ws2812/strip_spi.h"
+#include "strip_spi.h"
 #include "fl/unique_ptr.h"
 #include "fl/assert.h"
 #include "fl/chipsets/timing_traits.h"

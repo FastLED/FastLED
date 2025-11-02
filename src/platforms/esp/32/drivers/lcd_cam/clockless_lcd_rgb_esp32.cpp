@@ -22,7 +22,7 @@
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
 #include "clockless_lcd_rgb_esp32.h"
-#include "lcd/lcd_driver_rgb_impl.h"
+#include "lcd_driver_rgb_impl.h"
 
 namespace { // anonymous namespace
 
