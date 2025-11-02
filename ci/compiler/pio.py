@@ -1004,6 +1004,7 @@ __attribute__((weak)) int main() {{
     setup();
     while (true) {{
         loop();
+        delay(0);  // Yield to scheduler/watchdog (critical for ESP32 QEMU)
     }}
 }}
 """
