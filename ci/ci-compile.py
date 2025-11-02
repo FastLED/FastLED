@@ -138,7 +138,13 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
         # If output directory is mounted, use the container path (/fastled/output)
         # Otherwise, use POSIX path format for Docker/Linux compatibility
         if docker_config.output_dir is not None:
-            compile_cmd += " -o output"
+            # Preserve filename for file outputs (e.g., merged.bin)
+            if config.output_path.suffix:  # Has extension (.bin, .hex, etc.)
+                filename = config.output_path.name
+                compile_cmd += f" -o output/{filename}"
+            else:
+                # Directory output - use as-is
+                compile_cmd += " -o output"
         else:
             # Use POSIX path format (forward slashes) for Docker/Linux compatibility
             # On Windows, backslashes in paths get interpreted as escape characters in bash
