@@ -249,17 +249,17 @@ static int32_t FreqInvertRescale(int32_t *y, int32_t *xPrev, int32_t blockIdx, i
  * float c4 = sin(2*u);
  */
 
-static const int32_t c9_0 = (int32_t)0x6ed9eba1;
-static const int32_t c9_1 = (int32_t)0x620dbe8b;
+static const int32_t c9_0 = static_cast<int32_t>(0x6ed9eba1U);
+static const int32_t c9_1 = static_cast<int32_t>(0x620dbe8bU);
 static const int32_t c9_2 = 0x163a1a7e;
-static const int32_t c9_3 = (int32_t)0x5246dd49;
-static const int32_t c9_4 = (int32_t)0x7e0e2e32;
+static const int32_t c9_3 = static_cast<int32_t>(0x5246dd49U);
+static const int32_t c9_4 = static_cast<int32_t>(0x7e0e2e32U);
 
 /* format = Q31
  * cos(((0:8) + 0.5) * (pi/18))
  */
 static const int32_t c18[9] = {
-	(int32_t)0x7f834ed0, (int32_t)0x7ba3751d, (int32_t)0x7401e4c1, (int32_t)0x68d9f964, (int32_t)0x5a82799a, (int32_t)0x496af3e2, (int32_t)0x36185aee, 0x2120fb83, 0x0b27eb5c,
+	static_cast<int32_t>(0x7f834ed0U), static_cast<int32_t>(0x7ba3751dU), static_cast<int32_t>(0x7401e4c1U), static_cast<int32_t>(0x68d9f964U), static_cast<int32_t>(0x5a82799aU), static_cast<int32_t>(0x496af3e2U), static_cast<int32_t>(0x36185aeeU), 0x2120fb83, 0x0b27eb5c,
 };
 
 /* require at least 3 guard bits in x[] to ensure no overflow */
@@ -288,16 +288,16 @@ static __inline void idct9(int32_t *x)
 	a11 = a4 - x8;		/* ie x[2] - x[4] - x[8] */
 
 	/* do the << 1 as constant shifts where mX is actually used (free, no stall or extra inst.) */
-	m1 =  (int32_t)MULSHIFT32(c9_0, x3);
-	m3 =  (int32_t)MULSHIFT32(c9_0, a10);
-	m5 =  (int32_t)MULSHIFT32(c9_1, a5);
-	m6 =  (int32_t)MULSHIFT32(c9_2, a6);
-	m7 =  (int32_t)MULSHIFT32(c9_1, a8);
-	m8 =  (int32_t)MULSHIFT32(c9_2, a5);
-	m9 =  (int32_t)MULSHIFT32(c9_3, a9);
-	m10 = (int32_t)MULSHIFT32(c9_4, a7);
-	m11 = (int32_t)MULSHIFT32(c9_3, a3);
-	m12 = (int32_t)MULSHIFT32(c9_4, a9);
+	m1 =  MULSHIFT32(c9_0, x3);
+	m3 =  MULSHIFT32(c9_0, a10);
+	m5 =  MULSHIFT32(c9_1, a5);
+	m6 =  MULSHIFT32(c9_2, a6);
+	m7 =  MULSHIFT32(c9_1, a8);
+	m8 =  MULSHIFT32(c9_2, a5);
+	m9 =  MULSHIFT32(c9_3, a9);
+	m10 = MULSHIFT32(c9_4, a7);
+	m11 = MULSHIFT32(c9_3, a3);
+	m12 = MULSHIFT32(c9_4, a9);
 
 	a12 = x[0] +  (x[6] >> 1);
 	a13 = a12  +  (  m1 * 2L);
@@ -334,9 +334,9 @@ static __inline void idct9(int32_t *x)
  * format = Q30
  */
 int32_t fastWin36[18] = {
-	(int32_t)0x42aace8b, (int32_t)0xc2e92724, (int32_t)0x47311c28, (int32_t)0xc95f619a, (int32_t)0x4a868feb, (int32_t)0xd0859d8c,
-	(int32_t)0x4c913b51, (int32_t)0xd8243ea0, (int32_t)0x4d413ccc, (int32_t)0xe0000000, (int32_t)0x4c913b51, (int32_t)0xe7dbc161,
-	(int32_t)0x4a868feb, (int32_t)0xef7a6275, (int32_t)0x47311c28, (int32_t)0xf6a09e67, (int32_t)0x42aace8b, (int32_t)0xfd16d8dd,
+	static_cast<int32_t>(0x42aace8bU), static_cast<int32_t>(0xc2e92724U), static_cast<int32_t>(0x47311c28U), static_cast<int32_t>(0xc95f619aU), static_cast<int32_t>(0x4a868febU), static_cast<int32_t>(0xd0859d8cU),
+	static_cast<int32_t>(0x4c913b51U), static_cast<int32_t>(0xd8243ea0U), static_cast<int32_t>(0x4d413cccU), static_cast<int32_t>(0xe0000000U), static_cast<int32_t>(0x4c913b51U), static_cast<int32_t>(0xe7dbc161U),
+	static_cast<int32_t>(0x4a868febU), static_cast<int32_t>(0xef7a6275U), static_cast<int32_t>(0x47311c28U), static_cast<int32_t>(0xf6a09e67U), static_cast<int32_t>(0x42aace8bU), static_cast<int32_t>(0xfd16d8ddU),
 };
 
 /**************************************************************************************
@@ -470,8 +470,8 @@ static int32_t IMDCT36(int32_t *xCurr, int32_t *xPrev, int32_t *y, int32_t btCur
 	return mOut;
 }
 
-static int32_t c3_0 = (int32_t)0x6ed9eba1;	/* format = Q31, cos(pi/6) */
-static int32_t c6[3] = { (int32_t)0x7ba3751d, (int32_t)0x5a82799a, 0x2120fb83 };	/* format = Q31, cos(((0:2) + 0.5) * (pi/6)) */
+static int32_t c3_0 = static_cast<int32_t>(0x6ed9eba1U);	/* format = Q31, cos(pi/6) */
+static int32_t c6[3] = { static_cast<int32_t>(0x7ba3751dU), static_cast<int32_t>(0x5a82799aU), 0x2120fb83 };	/* format = Q31, cos(((0:2) + 0.5) * (pi/6)) */
 
 /* 12-point inverse DCT, used in IMDCT12x3() 
  * 4 input guard bits will ensure no overflow

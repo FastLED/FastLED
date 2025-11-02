@@ -60,7 +60,7 @@
 
 #pragma warning( disable : 4035 )	/* complains about inline asm not returning a value */
 
-static __inline int MULSHIFT32(int x, int y)	
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	__asm {
 		mov		eax, x
@@ -188,7 +188,7 @@ static __inline Word64 SAR64(Word64 x, int n)
 
 /* use asm function for now (EVC++ 3.0 does horrible job compiling __int64 version) */
 #define MULSHIFT32	xmp3_MULSHIFT32
-int MULSHIFT32(int x, int y);
+int32_t MULSHIFT32(int32_t x, int32_t y);
 
 static __inline int FASTABS(int x) 
 {
@@ -219,7 +219,7 @@ static __inline int CLZ(int x)
 
 #elif defined ARM_ADS
 
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	/* important rules for smull RdLo, RdHi, Rm, Rs:
 	 *     RdHi and Rm can't be the same register
@@ -273,7 +273,7 @@ static __inline int CLZ(int x)
 	
 typedef long long Word64;
 
-static __inline int MULSHIFT32(int x, int y) {
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y) {
 	return x * y;
 }
 
@@ -300,7 +300,7 @@ static __inline Word64 MADD64(Word64 sum64, int x, int y)
 	
 #else
 
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	/* important rules for smull RdLo, RdHi, Rm, Rs:
 	 *     RdHi and Rm can't be the same register
@@ -356,7 +356,7 @@ static __inline int CLZ(int x)
 
 typedef long long Word64;
 
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	unsigned int result = 0;
 	asm volatile ("mulh %0, %1, %2" : "=r"(result): "r"(x), "r"(y));
@@ -427,7 +427,7 @@ static __inline Word64 MADD64(Word64 sum64, int x, int y)
 
 #if XCHAL_HAVE_MUL32_HIGH
 
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     /* important rules for smull RdLo, RdHi, Rm, Rs:
      *     RdHi and Rm can't be the same register
@@ -447,10 +447,10 @@ static __inline int MULSHIFT32(int x, int y)
 #else
 
 // Fallback for Xtensa without MUL32_HIGH (e.g., ESP8266)
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     Word64 result = ((Word64) x) * y;
-    return (int)(result >> 32);
+    return (int32_t)(result >> 32);
 }
 
 #endif
@@ -495,21 +495,21 @@ typedef long long Word64;
 /**
  * Multiply together two 32-bit numbers and return the top 32-bits of the result.
  */
-static __inline int MULSHIFT32(int x, int y)
+static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     Word64 result = ((Word64) x) * y;
 
-    return (int)(result >> 32);
+    return (int32_t)(result >> 32);
 }
 
 /**
  * Absolute value of x
  */
-static __inline int FASTABS(int x)
+static __inline int32_t FASTABS(int32_t x)
 {
-    int sign;
+    int32_t sign;
 
-    sign = x >> (sizeof(int) * 8 - 1);
+    sign = x >> (sizeof(int32_t) * 8 - 1);
     x ^= sign;
     x -= sign;
 
@@ -519,12 +519,12 @@ static __inline int FASTABS(int x)
 /**
  * Leading zeros
  */
-static __inline int CLZ(int x)
+static __inline int32_t CLZ(int32_t x)
 {
-    int numZeros;
+    int32_t numZeros;
 
     if (!x)
-        return (sizeof(int) * 8);
+        return (sizeof(int32_t) * 8);
 
     numZeros = 0;
     while (!(x & 0x80000000)) {
