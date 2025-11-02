@@ -144,7 +144,9 @@ def analyze_symbols(
     print("Analyzing symbols with enhanced coverage...")
 
     symbols: List[SymbolInfo] = []
-    symbols_dict: Dict[str, SymbolInfo] = {}  # To deduplicate by address+name
+    symbols_dict: Dict[
+        str, SymbolInfo
+    ] = {}  # To deduplicate by address+type (or demangled name for zero-address symbols)
 
     # Method 1: Use readelf to get ALL symbols (including those without size)
     if readelf_path:
@@ -180,23 +182,47 @@ def analyze_symbols(
                         if not name or name.startswith(".") or symbol_type == "SECTION":
                             continue
 
-                        # Create a unique key for deduplication (use name as primary key since addresses can vary)
-                        key = name.strip()
+                        # Demangle the symbol name
+                        demangled_name = demangle_symbol(name, cppfilt_path)
+
+                        # Normalize address to int for comparison (readelf uses hex)
+                        try:
+                            addr_int = int(addr, 16)
+                        except ValueError:
+                            addr_int = 0
+
+                        # Create key: Use address ONLY for non-zero addresses (symbol type can vary between tools)
+                        # For zero-address symbols, use demangled_name+type to catch duplicates
+                        sym_type_char = symbol_type[0].upper()
+                        if addr_int != 0:
+                            key = f"{addr_int}"
+                        else:
+                            key = f"0:{demangled_name}:{sym_type_char}"
 
                         if key not in symbols_dict:
-                            # Demangle the symbol name
-                            demangled_name = demangle_symbol(name, cppfilt_path)
-
                             symbol_info = SymbolInfo(
                                 address=addr,
                                 size=size,
-                                type=symbol_type[0].upper(),  # T, D, B, etc.
+                                type=sym_type_char,  # T, D, B, etc.
                                 name=name,
                                 demangled_name=demangled_name,
                                 source="readelf",
                             )
 
                             symbols_dict[key] = symbol_info
+                        else:
+                            # If duplicate found, prefer the one with more accurate data
+                            existing = symbols_dict[key]
+
+                            # Prefer non-truncated mangled names (longer is usually better)
+                            if len(name) > len(existing.name):
+                                symbols_dict[key].name = name
+                                symbols_dict[key].demangled_name = demangled_name
+
+                            # Prefer larger non-zero size (more accurate measurement)
+                            if size > existing.size:
+                                symbols_dict[key].size = size
+                                symbols_dict[key].source = "readelf-updated"
 
                     except (ValueError, IndexError):
                         continue  # Skip malformed lines
@@ -219,18 +245,40 @@ def analyze_symbols(
                     symbol_type = parts[2]
                     name = " ".join(parts[3:])
 
-                    # Create a unique key for deduplication (use name as primary key)
-                    key = name.strip()
+                    # Demangle the symbol name
+                    demangled_name = demangle_symbol(name, cppfilt_path)
+
+                    # Normalize address to int for comparison (nm --radix=d uses decimal)
+                    try:
+                        addr_int = int(addr)
+                    except ValueError:
+                        addr_int = 0
+
+                    # Create key: Use address ONLY for non-zero addresses
+                    if addr_int != 0:
+                        key = f"{addr_int}"
+                    else:
+                        key = f"0:{demangled_name}:{symbol_type}"
 
                     # If we already have this symbol from readelf, update with accurate size
                     if key in symbols_dict:
-                        symbols_dict[key].size = size
-                        symbols_dict[key].type = symbol_type
-                        symbols_dict[key].source = "nm+readelf"
+                        existing = symbols_dict[key]
+
+                        # Prefer non-truncated mangled names (longer is usually better)
+                        if len(name) > len(existing.name):
+                            symbols_dict[key].name = name
+                            symbols_dict[key].demangled_name = demangled_name
+
+                        # Prefer larger non-zero size (more accurate measurement)
+                        if size > existing.size:
+                            symbols_dict[key].size = size
+                            symbols_dict[key].type = symbol_type
+                            symbols_dict[key].source = "nm+readelf"
+                        # If same size, prefer nm over readelf (nm --print-size is more accurate)
+                        elif size == existing.size and "nm" not in existing.source:
+                            symbols_dict[key].source = "nm+readelf"
                     else:
                         # New symbol not found by readelf
-                        demangled_name = demangle_symbol(name, cppfilt_path)
-
                         symbol_info = SymbolInfo(
                             address=addr,
                             size=size,
@@ -266,13 +314,23 @@ def analyze_symbols(
                     if not name:
                         continue
 
-                    # Create a unique key for deduplication (use name as primary key)
-                    key = name.strip()
+                    # Demangle the symbol name
+                    demangled_name = demangle_symbol(name, cppfilt_path)
+
+                    # Normalize address to int for comparison (nm -a uses decimal with --radix=d)
+                    try:
+                        addr_int = int(addr)
+                    except ValueError:
+                        addr_int = 0
+
+                    # Create key: Use address ONLY for non-zero addresses
+                    if addr_int != 0:
+                        key = f"{addr_int}"
+                    else:
+                        key = f"0:{demangled_name}:{symbol_type}"
 
                     if key not in symbols_dict:
                         # New symbol not found by other methods
-                        demangled_name = demangle_symbol(name, cppfilt_path)
-
                         symbol_info = SymbolInfo(
                             address=addr,
                             size=0,  # nm -a doesn't provide size
@@ -283,6 +341,12 @@ def analyze_symbols(
                         )
 
                         symbols_dict[key] = symbol_info
+                    else:
+                        # If duplicate found, prefer non-truncated mangled names
+                        existing = symbols_dict[key]
+                        if len(name) > len(existing.name):
+                            symbols_dict[key].name = name
+                            symbols_dict[key].demangled_name = demangled_name
 
                 except (ValueError, IndexError):
                     continue  # Skip malformed lines
@@ -466,17 +530,17 @@ def generate_report(
 
     # Summary statistics
     total_symbols = len(symbols)
-    total_size = sum(s.size for s in symbols)
     symbols_with_size = [s for s in symbols if s.size > 0]
     symbols_without_size = [s for s in symbols if s.size == 0]
+
+    # Calculate total size from ONLY sized symbols
+    total_size = sum(s.size for s in symbols_with_size)
 
     print("\nSUMMARY:")
     print(f"  Total symbols: {total_symbols}")
     print(f"  Symbols with size info: {len(symbols_with_size)}")
-    print(f"  Symbols without size info: {len(symbols_without_size)}")
-    print(
-        f"  Total symbol size: {total_size} bytes ({total_size / 1024:.1f} KB) [sized symbols only]"
-    )
+    print(f"  Symbols without size (elided by linker): {len(symbols_without_size)}")
+    print(f"  Total symbol size: {total_size} bytes ({total_size / 1024:.1f} KB)")
 
     if enhanced_mode and call_graph and reverse_call_graph:
         print(f"  Functions with calls: {len(call_graph)}")
@@ -494,9 +558,18 @@ def generate_report(
     for source, count in sorted(source_stats.items()):
         print(f"  {source}: {count} symbols")
 
-    # Largest symbols overall
+    # Largest symbols overall (FILTER OUT ZERO-SIZE SYMBOLS)
     print("\nLARGEST SYMBOLS (all symbols, sorted by size):")
-    symbols_sorted = sorted(symbols, key=lambda x: x.size, reverse=True)
+
+    # Filter to only symbols with size > 0 (exclude elided/unused symbols)
+    sized_symbols = [s for s in symbols if s.size > 0]
+    symbols_sorted = sorted(sized_symbols, key=lambda x: x.size, reverse=True)
+
+    zero_size_count = len(symbols) - len(sized_symbols)
+    if zero_size_count > 0:
+        print(
+            f"  (Filtered out {zero_size_count} zero-size symbols that were elided by linker)"
+        )
 
     display_count = 30 if enhanced_mode else 50
     for i, sym in enumerate(symbols_sorted[:display_count]):
