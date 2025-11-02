@@ -11,10 +11,10 @@
 // Select appropriate AVR implementation based on MUL instruction availability
 #if defined(LIB8_ATTINY)
 // ATtiny platforms without MUL instruction
-#include "math8_attiny.h"
+#include "attiny/math/math8_attiny.h"
 #else
 // AVR platforms with MUL instruction (ATmega, etc.)
-#include "math8_avr.h"
+#include "atmega/common/math8_avr.h"
 #endif
 
 // All function implementations are now in math8_attiny.h or math8_avr.h

@@ -8,7 +8,7 @@
 #if defined(USE_SIN_32)
 #include "fl/sin32.h"
 #elif defined(__AVR__)
-#include "platforms/avr/trig8.h"
+#include "platforms/avr/atmega/common/trig8.h"
 #else
 #include "platforms/shared/trig8.h"
 #endif

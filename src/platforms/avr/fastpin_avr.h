@@ -10,10 +10,11 @@
 // Nano Every is also powered by ATmega4809
 #ifdef __AVR_ATmega4809__
     #ifdef ARDUINO_AVR_NANO_EVERY
-    #include "fastpin_avr_nano_every.h"
+    #include "atmega/m4809/fastpin_avr_nano_every.h"
     #else
-    #include "fastpin_avr_atmega4809.h"
+    #include "atmega/m4809/fastpin_avr_atmega4809.h"
     #endif  // ARDUINO_AVR_NANO_EVERY
 #else
-#include "fastpin_avr_legacy.h"
+    // Legacy DDR/PORT/PIN architecture
+    #include "atmega/common/fastpin_avr_legacy_dispatcher.h"
 #endif // __AVR_ATmega4809__

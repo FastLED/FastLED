@@ -10,10 +10,10 @@
 #if defined(__AVR__)
 #if defined(LIB8_ATTINY)
 // ATtiny has no MUL instruction - use ATtiny-specific shift-and-add and C implementations
-#include "platforms/avr/scale8_attiny.h"
+#include "platforms/avr/attiny/math/scale8_attiny.h"
 #else
 // Full AVR with MUL instruction support - use optimized MUL-based assembly
-#include "platforms/avr/scale8.h"
+#include "platforms/avr/atmega/common/scale8_avr.h"
 #endif
 #else
 // Portable C implementation for all other platforms (ARM, ESP32, etc.)
