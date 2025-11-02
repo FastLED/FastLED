@@ -26,8 +26,6 @@
 
 namespace fl {
 
-// Don't define ClocklessBlocking if stub version is already defined
-#ifndef FASTLED_CLOCKLESS_STUB_DEFINED
 /// Generic blocking clockless controller
 ///
 /// This is the software-based blocking implementation that works on all platforms.
@@ -57,7 +55,7 @@ namespace fl {
 ///
 /// Total bit time = T1 + T2 (for both 0 and 1)
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-class ClocklessBlocking : public CPixelLEDController<RGB_ORDER>
+class ClocklessBlockingGeneric : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Reference timing values from the TIMING type
@@ -194,18 +192,12 @@ private:
     }
 };
 
-#else  // FASTLED_CLOCKLESS_STUB_DEFINED
-
-// When stub is active, provide aliases to the stub implementations
-// (The stub defines ClocklessController and ClocklessBlockController already)
-
-#endif  // FASTLED_CLOCKLESS_STUB_DEFINED
-
-// Backwards compatibility alias - only define when ClocklessBlocking exists
-#ifndef FASTLED_CLOCKLESS_STUB_DEFINED
+// Backwards compatibility aliases
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
-using ClocklessBlockController = ClocklessBlocking<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
-#endif
+using ClocklessBlocking = ClocklessBlockingGeneric<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 0>
+using ClocklessBlockController = ClocklessBlockingGeneric<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
 
 // Note: ClocklessController alias selection is now handled by fl/clockless_controller_impl.h
 // which checks both FL_CLOCKLESS_CONTROLLER_DEFINED and FL_CLOCKLESS_CONTROLLER_DEFINED flags
