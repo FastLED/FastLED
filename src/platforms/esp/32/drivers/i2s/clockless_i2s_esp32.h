@@ -177,7 +177,7 @@ class ClocklessI2S : public CPixelLEDController<RGB_ORDER> {
 
         // -- Construct the bit patterns for ones and zeros
         if (!i2s_is_initialized()) {
-            const ChipsetTiming timing = {TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET, nullptr};
+            const ChipsetTiming timing = to_runtime_timing<TIMING>();
             i2s_define_bit_patterns(timing);
             i2s_init(I2S_DEVICE);
             i2s_set_fill_buffer_callback(fillBuffer);
