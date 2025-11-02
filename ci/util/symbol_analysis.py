@@ -694,8 +694,18 @@ def generate_report(
     return report_data
 
 
-def find_board_build_info(board_name: Optional[str] = None) -> Tuple[Path, str]:
-    """Find build info for a specific board or detect available boards"""
+def find_board_build_info(
+    board_name: Optional[str] = None, example: str = "Blink"
+) -> Tuple[Path, str]:
+    """Find build info for a specific board or detect available boards
+
+    Args:
+        board_name: Board name to search for (optional)
+        example: Example name for finding example-specific build_info_{example}.json (default: "Blink")
+
+    Returns:
+        Tuple of (build_info_path, board_name)
+    """
     # Detect build directory
     current = Path.cwd()
     build_dir: Optional[Path] = None
@@ -712,40 +722,82 @@ def find_board_build_info(board_name: Optional[str] = None) -> Tuple[Path, str]:
 
     # If specific board requested, look for it
     if board_name:
-        # 1) Direct board directory: .build/<board>/build_info.json
+        # Try example-specific build_info_{example}.json first
+        build_info_filename = f"build_info_{example}.json"
+
+        # 1) Direct board directory: .build/<board>/build_info_{example}.json
         board_dir = build_dir / board_name
+        if board_dir.exists() and (board_dir / build_info_filename).exists():
+            return board_dir / build_info_filename, board_name
+
+        # 2) PlatformIO nested directory: .build/pio/<board>/build_info_{example}.json
+        pio_board_dir = build_dir / "pio" / board_name
+        if pio_board_dir.exists() and (pio_board_dir / build_info_filename).exists():
+            return pio_board_dir / build_info_filename, board_name
+
+        # Fallback to legacy build_info.json (for backward compatibility)
         if board_dir.exists() and (board_dir / "build_info.json").exists():
+            print(
+                f"Warning: Using legacy build_info.json (consider migrating to {build_info_filename})"
+            )
             return board_dir / "build_info.json", board_name
 
-        # 2) PlatformIO nested directory: .build/pio/<board>/build_info.json
-        pio_board_dir = build_dir / "pio" / board_name
         if pio_board_dir.exists() and (pio_board_dir / "build_info.json").exists():
+            print(
+                f"Warning: Using legacy build_info.json (consider migrating to {build_info_filename})"
+            )
             return pio_board_dir / "build_info.json", board_name
 
-        print(f"Error: Board '{board_name}' not found or missing build_info.json")
+        print(
+            f"Error: Board '{board_name}' not found or missing {build_info_filename} (or build_info.json)"
+        )
         sys.exit(1)
 
-    # Otherwise, find any available board
+    # Otherwise, find any available board (prefer example-specific files)
     available_boards: List[Tuple[Path, str]] = []
+    build_info_filename = f"build_info_{example}.json"
 
-    # 1) Direct children of .build
+    # 1) Direct children of .build - try example-specific first
     for item in build_dir.iterdir():
         if item.is_dir():
-            build_info_file = item / "build_info.json"
+            build_info_file = item / build_info_filename
             if build_info_file.exists():
                 available_boards.append((build_info_file, item.name))
 
-    # 2) Nested PlatformIO structure .build/pio/*
+    # 2) Nested PlatformIO structure .build/pio/* - try example-specific first
     pio_dir = build_dir / "pio"
     if pio_dir.exists() and pio_dir.is_dir():
         for item in pio_dir.iterdir():
             if item.is_dir():
-                build_info_file = item / "build_info.json"
+                build_info_file = item / build_info_filename
                 if build_info_file.exists():
                     available_boards.append((build_info_file, item.name))
 
+    # Fallback to legacy build_info.json if no example-specific files found
     if not available_boards:
-        print(f"Error: No boards with build_info.json found in {build_dir}")
+        for item in build_dir.iterdir():
+            if item.is_dir():
+                build_info_file = item / "build_info.json"
+                if build_info_file.exists():
+                    print(
+                        f"Warning: Using legacy build_info.json (consider migrating to {build_info_filename})"
+                    )
+                    available_boards.append((build_info_file, item.name))
+
+        if pio_dir.exists() and pio_dir.is_dir():
+            for item in pio_dir.iterdir():
+                if item.is_dir():
+                    build_info_file = item / "build_info.json"
+                    if build_info_file.exists():
+                        print(
+                            f"Warning: Using legacy build_info.json (consider migrating to {build_info_filename})"
+                        )
+                        available_boards.append((build_info_file, item.name))
+
+    if not available_boards:
+        print(
+            f"Error: No boards with {build_info_filename} or build_info.json found in {build_dir}"
+        )
         sys.exit(1)
 
     # Return the first available board
@@ -760,6 +812,11 @@ def main():
     )
     parser.add_argument(
         "--board", help="Board name to analyze (e.g., uno, esp32dev, esp32s3)"
+    )
+    parser.add_argument(
+        "--example",
+        default="Blink",
+        help="Example name for finding example-specific build_info_{example}.json",
     )
     parser.add_argument(
         "--no-enhanced",
@@ -786,7 +843,7 @@ def main():
     comprehensive_symbols = not args.basic
 
     # Find build info
-    build_info_path, board_name = find_board_build_info(args.board)
+    build_info_path, board_name = find_board_build_info(args.board, args.example)
     print(f"Found build info for {board_name}: {build_info_path}")
 
     with open(build_info_path) as f:

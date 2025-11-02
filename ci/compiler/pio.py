@@ -55,13 +55,14 @@ def _ensure_platform_installed(board: Board) -> bool:
 
 
 def _generate_build_info_json_from_existing_build(
-    build_dir: Path, board: Board
+    build_dir: Path, board: Board, example: Optional[str] = None
 ) -> bool:
     """Generate build_info.json from an existing PlatformIO build.
 
     Args:
         build_dir: Build directory containing the PlatformIO project
         board: Board configuration
+        example: Optional example name for generating example-specific build_info_{example}.json
 
     Returns:
         True if build_info.json was successfully generated
@@ -92,12 +93,16 @@ def _generate_build_info_json_from_existing_build(
             # Add tool aliases for symbol analysis and debugging
             insert_tool_aliases(data)
 
-            # Save to build_info.json
-            build_info_path = build_dir / "build_info.json"
+            # Save to build_info.json (example-specific if example provided)
+            if example:
+                build_info_filename = f"build_info_{example}.json"
+            else:
+                build_info_filename = "build_info.json"
+            build_info_path = build_dir / build_info_filename
             with open(build_info_path, "w") as f:
                 json.dump(data, f, indent=4, sort_keys=True)
 
-            print(f"✅ Generated build_info.json at {build_info_path}")
+            print(f"✅ Generated {build_info_filename} at {build_info_path}")
             return True
 
         except json.JSONDecodeError as e:
@@ -1550,7 +1555,8 @@ def _init_platformio_build(
     # Board configuration includes all necessary settings
 
     # Generate build_info.json after successful initialization build
-    _generate_build_info_json_from_existing_build(build_dir, board)
+    # Pass example name to generate example-specific build_info_{example}.json
+    _generate_build_info_json_from_existing_build(build_dir, board, example)
 
     return InitResult(success=True, output="", build_dir=build_dir)
 
@@ -1920,7 +1926,7 @@ class PioCompiler(Compiler):
             # Generate build_info.json after successful build
             if success:
                 _generate_build_info_json_from_existing_build(
-                    self.build_dir, self.board
+                    self.build_dir, self.board, example
                 )
 
             return SketchResult(

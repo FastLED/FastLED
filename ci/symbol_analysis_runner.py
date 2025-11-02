@@ -26,16 +26,21 @@ def main():
 
     print(f"Symbol Analysis Runner - Board: {args.board}, Example: {args.example}")
 
-    # Check if build_info.json exists
-    build_info_path = Path(".build") / args.board / "build_info.json"
+    # Check if example-specific build_info_{example}.json exists
+    build_info_filename = f"build_info_{args.example}.json"
+    build_info_path = Path(".build") / args.board / build_info_filename
     if not build_info_path.exists():
         # Fall back to nested pio structure
-        build_info_path = Path(".build") / "pio" / args.board / "build_info.json"
+        build_info_path = Path(".build") / "pio" / args.board / build_info_filename
+
+    # Fallback to legacy build_info.json (for backward compatibility during migration)
+    if not build_info_path.exists():
+        build_info_path = Path(".build") / args.board / "build_info.json"
+        if not build_info_path.exists():
+            build_info_path = Path(".build") / "pio" / args.board / "build_info.json"
 
     if not build_info_path.exists():
-        message = (
-            f"Build info not found at {build_info_path}. Skipping symbol analysis."
-        )
+        message = f"Build info not found at {build_info_path} (or {build_info_filename}). Skipping symbol analysis."
         if args.skip_on_failure:
             print(f"Warning: {message}")
             return 0
@@ -47,9 +52,15 @@ def main():
         # Import and run the generic symbol analysis
         print("Running symbol analysis...")
 
-        # Override sys.argv to pass the board argument to the symbol analysis script
+        # Override sys.argv to pass the board and example arguments to the symbol analysis script
         original_argv = sys.argv
-        sys.argv = ["symbol_analysis.py", "--board", args.board]
+        sys.argv = [
+            "symbol_analysis.py",
+            "--board",
+            args.board,
+            "--example",
+            args.example,
+        ]
 
         try:
             symbol_analysis()
