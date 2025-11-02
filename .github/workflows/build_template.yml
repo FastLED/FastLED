@@ -185,7 +185,8 @@ jobs:
         continue-on-error: true
         working-directory: trusted
         run: |
-          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+          BOARD=$(python -c "print('${{ inputs.args }}'.split()[0])")
+          uv run ci/ci-compile.py $BOARD --examples Blink
         shell: bash
 
       - name: Print out build_info.json
