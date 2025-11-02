@@ -73,7 +73,8 @@
  **************************************************************************************/
 int Dequantize(MP3DecInfo *mp3DecInfo, int gr)
 {
-	int i, ch, nSamps, mOut[2];
+	int i, ch, nSamps;
+	int32_t mOut[2];
 	FrameHeader *fh;
 	SideInfo *si;
 	ScaleFactorInfo *sfi;

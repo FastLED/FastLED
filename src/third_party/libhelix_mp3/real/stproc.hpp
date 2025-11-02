@@ -62,9 +62,9 @@
  *
  * Notes:       assume at least 1 GB in input
  **************************************************************************************/
-void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, int mOut[2])  
+void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, int32_t mOut[2])
 {
-	int i, xr, xl, mOutL, mOutR;
+	int32_t i, xr, xl, mOutL, mOutR;
 	
 	/* L = (M+S)/sqrt(2), R = (M-S)/sqrt(2) 
 	 * NOTE: 1/sqrt(2) done in DequantChannel() - see comments there
@@ -104,15 +104,15 @@ void MidSideProc(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, int mOut[2])
  * TODO:        combine MPEG1/2 into one function (maybe)
  *              make sure all the mixed-block and IIP logic is right
  **************************************************************************************/
-void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, int midSideFlag, int mixFlag, int mOut[2])
+void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
+						CriticalBandInfo *cbi, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2])
 {
 	(void)mixFlag;  // Unused parameter - reserved for future use
-	int i=0, j=0, n=0, cb=0, w=0;
-	int sampsLeft, isf, mOutL, mOutR, xl, xr;
-	int fl, fr, fls[3], frs[3];
-	int cbStartL=0, cbStartS=0, cbEndL=0, cbEndS=0;
-	int *isfTab;
+	int32_t i=0, j=0, n=0, cb=0, w=0;
+	int32_t sampsLeft, isf, mOutL, mOutR, xl, xr;
+	int32_t fl, fr, fls[3], frs[3];
+	int32_t cbStartL=0, cbStartS=0, cbEndL=0, cbEndS=0;
+	int32_t *isfTab;
 	
 	/* NOTE - this works fine for mixed blocks, as long as the switch point starts in the
 	 *  short block section (i.e. on or after sample 36 = sfBand->l[8] = 3*sfBand->s[3]
@@ -135,7 +135,7 @@ void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader
 	}
 
 	sampsLeft = nSamps - i;		/* process to length of left */
-	isfTab = (int *)ISFMpeg1[midSideFlag];
+	isfTab = (int32_t *)ISFMpeg1[midSideFlag];
 	mOutL = mOutR = 0;
 
 	/* long blocks */
@@ -211,18 +211,18 @@ void IntensityProcMPEG1(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader
  *              make sure all the mixed-block and IIP logic is right
  *                probably redo IIP logic to be simpler
  **************************************************************************************/
-void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
-						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int midSideFlag, int mixFlag, int mOut[2])
+void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHeader *fh, ScaleFactorInfoSub *sfis,
+						CriticalBandInfo *cbi, ScaleFactorJS *sfjs, int32_t midSideFlag, int32_t mixFlag, int32_t mOut[2])
 {
 	(void)mixFlag;  // Unused parameter - reserved for future use
-	int i, j, k, n, r, cb, w;
-	int fl, fr, mOutL, mOutR, xl, xr;
-	int sampsLeft;
-	int isf, sfIdx, tmp, il[23];
-	int *isfTab;
-	int cbStartL, cbStartS, cbEndL, cbEndS;
+	int32_t i, j, k, n, r, cb, w;
+	int32_t fl, fr, mOutL, mOutR, xl, xr;
+	int32_t sampsLeft;
+	int32_t isf, sfIdx, tmp, il[23];
+	int32_t *isfTab;
+	int32_t cbStartL, cbStartS, cbEndL, cbEndS;
 	
-	isfTab = (int *)ISFMpeg2[sfjs->intensityScale][midSideFlag];
+	isfTab = (int32_t *)ISFMpeg2[sfjs->intensityScale][midSideFlag];
 	mOutL = mOutR = 0;
 
 	/* fill buffer with illegal intensity positions (depending on slen) */

@@ -662,7 +662,7 @@ const unsigned short huffTable[] = {
 #define HUFF_OFFSET_16	(580 + HUFF_OFFSET_15)
 #define HUFF_OFFSET_24	(651 + HUFF_OFFSET_16)
 
-const int huffTabOffset[HUFF_PAIRTABS] = {
+const int32_t huffTabOffset[HUFF_PAIRTABS] = {
 	0,          
 	HUFF_OFFSET_01,
 	HUFF_OFFSET_02,
@@ -752,5 +752,5 @@ const unsigned char quadTable[64+16] = {
 	0x47, 0x46, 0x45, 0x44, 0x43, 0x42, 0x41, 0x40, 
 };
 
-const int quadTabOffset[2] = {0, 64};
-const int quadTabMaxBits[2] = {6, 4};
+const int32_t quadTabOffset[2] = {0, 64};
+const int32_t quadTabMaxBits[2] = {6, 4};

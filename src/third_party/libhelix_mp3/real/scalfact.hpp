@@ -79,7 +79,7 @@ static const char SFLenTab[16][2] = {
  *                (make sure dequantizer follows same convention)
  *              Illegal Intensity Position = 7 (always) for MPEG1 scale factors
  **************************************************************************************/
-static void UnpackSFMPEG1(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int *scfsi, int gr, ScaleFactorInfoSub *sfisGr0)
+static void UnpackSFMPEG1(BitStreamInfo *bsi, SideInfoSub *sis, ScaleFactorInfoSub *sfis, int32_t *scfsi, int gr, ScaleFactorInfoSub *sfisGr0)
 {
 	int sfb;
 	int slen0, slen1;

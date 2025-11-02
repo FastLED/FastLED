@@ -242,14 +242,14 @@ static int DequantBlock(int32_t *inbuf, int32_t *outbuf, int num, int scale)
  *
  * Notes:       dequantized samples in Q(DQ_FRACBITS_OUT) format 
  **************************************************************************************/
-int DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int *nonZeroBound, FrameHeader *fh, SideInfoSub *sis, 
+int32_t DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int32_t *nonZeroBound, FrameHeader *fh, SideInfoSub *sis,
 					ScaleFactorInfoSub *sfis, CriticalBandInfo *cbi)
 {
-	int i, j, w, cb;
-	int cbEndL, cbStartS, cbEndS;
-	int nSamps, nonZero, sfactMultiplier, gbMask;
-	int globalGain, gainI;
-	int cbMax[3];
+	int32_t i, j, w, cb;
+	int32_t cbEndL, cbStartS, cbEndS;
+	int32_t nSamps, nonZero, sfactMultiplier, gbMask;
+	int32_t globalGain, gainI;
+	int32_t cbMax[3];
 	ARRAY3 *buf;    /* short block reorder */
 	
 	/* set default start/end points for short/long blocks - will update with non-zero cb info */
