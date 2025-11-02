@@ -340,18 +340,6 @@ class RGBWEmulatedController
 
 // We want to force all avr's to use the Trinket controller when running at 8Mhz, because even the 328's at 8Mhz
 // need the more tightly defined timeframes.
-#if defined(__LGT8F__) || (CLOCKLESS_FREQUENCY == 8000000 || CLOCKLESS_FREQUENCY == 16000000 || CLOCKLESS_FREQUENCY == 24000000) || defined(FASTLED_DOXYGEN) //  || CLOCKLESS_FREQUENCY == 48000000 || CLOCKLESS_FREQUENCY == 96000000) // 125ns/clock
-
-/// Frequency multiplier for each clockless data interval.
-/// @see Notes in @ref ClocklessChipsets
-#define FMUL (CLOCKLESS_FREQUENCY/8000000)
-
-/// @note AVR FMUL-based controllers (below) use platform-specific timing optimizations
-/// that have been validated on AVR processors at 8/16/24MHz. These values represent
-/// tested approximations for AVR platforms and should NOT be changed to match the
-/// nanosecond values in fl::chipsets::led_timing.h, as they may introduce timing
-/// regressions. For reference timing values, see fl::TIMING_* constants in led_timing.h.
-
 // Suppress -Wsubobject-linkage warning for controller template instantiations.
 // In C++11/14, constexpr variables have internal linkage, which causes the compiler
 // to warn when they are used in base classes of externally-linked templates. The macro
@@ -359,206 +347,6 @@ class RGBWEmulatedController
 // compatibility we suppress the warning here.
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(subobject-linkage)
-
-/// GE8822 controller class.
-/// @copydetails WS2812Controller800Khz
-/// @note Timing: 350ns, 660ns, 350ns (nanosecond-based timing)
-/// @see fl::TIMING_GE8822_800KHZ in fl::chipsets::led_timing.h
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class GE8822Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_GE8822_800KHZ, RGB_ORDER, 4> {};
-
-/// LPD1886 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_LPD1886_1250KHZ, RGB_ORDER, 4> {};
-
-/// LPD1886 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class LPD1886Controller1250Khz_8bit : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_LPD1886_1250KHZ, RGB_ORDER> {};
-
-#if !FASTLED_WS2812_HAS_SPECIAL_DRIVER
-/// WS2812 controller class @ 800 KHz.
-/// @tparam DATA_PIN the data pin for these LEDs
-/// @tparam RGB_ORDER the RGB ordering for these LEDs
-/// @note Timing: 250ns, 625ns, 375ns (nanosecond-based timing)
-/// @see fl::TIMING_WS2812_800KHZ in fl::chipsets::led_timing.h
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2812Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812_800KHZ, RGB_ORDER> {};
-#endif
-
-/// WS2815 controller class @ 400 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2815Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2815, RGB_ORDER> {};
-
-/// DP1903 controller class @ 800 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_DP1903_800KHZ, RGB_ORDER> {};
-
-/// DP1903 controller class @ 400 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class DP1903Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_DP1903_400KHZ, RGB_ORDER> {};
-
-/// WS2813 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>                                                             //not tested
-class WS2813Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2813, RGB_ORDER> {};
-
-/// WS2811 controller class @ 400 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_400KHZ, RGB_ORDER> {};
-
-/// WS2811 controller class @ 800 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class WS2811Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2811_800KHZ_LEGACY, RGB_ORDER> {};
-
-/// SK6822 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6822Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SK6822, RGB_ORDER> {};
-
-/// SM16703 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16703Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SM16703, RGB_ORDER> {};
-
-/// SK6812 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class SK6812Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SK6812, RGB_ORDER> {};
-
-/// UCS1903 controller class @ 400 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS1903_400KHZ, RGB_ORDER> {};
-
-/// UCS1903B controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1903BController800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS1903B_800KHZ, RGB_ORDER> {};
-
-/// UCS1904 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1904Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS1904_800KHZ, RGB_ORDER> {};
-
-/// UCS2903 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS2903Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS2903, RGB_ORDER> {};
-
-/// TM1809 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1809Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1809_800KHZ, RGB_ORDER> {};
-
-/// TM1803 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1803Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1803_400KHZ, RGB_ORDER> {};
-
-/// TM1829 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class TM1829Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_TM1829_800KHZ, RGB_ORDER, 0, true> {};
-
-/// GW6205 controller class @ 400 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_GW6205_400KHZ, RGB_ORDER, 4> {};
-
-/// UCS1904 controller class @ 800 KHz.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class GW6205Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_GW6205_800KHZ, RGB_ORDER, 4> {};
-
-/// PL9823 controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class PL9823Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_PL9823, RGB_ORDER> {};
-
-// UCS1912 - Note, never been tested, this is according to the datasheet
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class UCS1912Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS1912, RGB_ORDER> {};
-
-/// SM16824E controller class.
-/// @copydetails WS2812Controller800Khz
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class SM16824EController : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SM16824E, RGB_ORDER> {};
-
-
-
-
-
-/// @defgroup UCS7604Controllers UCS7604 LED Controllers
-/// @brief High-resolution 4-channel (RGBW) LED driver controllers
-///
-/// The UCS7604 is a 16-bit RGBW LED controller with configurable bit depth and data rate.
-/// FastLED provides two controller modes:
-///
-/// **Controllers**:
-/// - `UCS7604` - 8-bit mode, recommended for most use cases
-/// - `UCS7604HD` - 16-bit mode, maximum color depth
-/// - Available on: ALL platforms with clockless controller support
-///
-/// **Technical Details**:
-/// - Protocol: Preamble-based (unique to UCS7604)
-/// - Timing: WS2812-compatible (800kHz default)
-/// - Overhead: ~670µs fixed per frame (preambles + delays)
-/// - Resolution: 8-bit (256 levels) or 16-bit (65,536 levels) per channel
-/// - Channels: RGBW (4 channels)
-///
-/// @see fl::UCS7604Controller for implementation details
-/// @see ucs7604.h for full protocol documentation
-/// @{
-
-/// UCS7604 controller class (standard 8-bit mode)
-/// @tparam DATA_PIN the data pin for these LEDs
-/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for UCS7604)
-///
-/// The UCS7604 is a 4-channel (RGBW) LED driver supporting 8-bit and 16-bit color modes.
-/// This controller sends protocol-required preambles before pixel data.
-/// Standard mode: 8-bit depth @ 800 kHz with RGBW ordering.
-/// For 16-bit high-definition mode, use UCS7604HD.
-///
-/// Usage:
-/// @code
-/// FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);
-/// @endcode
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604 : public fl::UCS7604Controller<
-    fl::ClocklessBlocking<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB>,
-    RGB_ORDER,
-    fl::UCS7604_MODE_8BIT_800KHZ
-> {};
-
-/// UCS7604HD high-definition controller class (16-bit mode)
-/// @tparam DATA_PIN the data pin for these LEDs
-/// @tparam RGB_ORDER the RGB ordering for these LEDs (typically GRB for UCS7604)
-///
-/// High-definition variant with 16-bit color resolution (65,536 levels per channel).
-/// Uses 2x the memory and bandwidth of standard UCS7604.
-/// Mode: 16-bit depth @ 800 kHz with RGBW ordering.
-///
-/// Usage:
-/// @code
-/// FastLED.addLeds<UCS7604HD, DATA_PIN, GRB>(leds, NUM_LEDS);
-/// @endcode
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-class UCS7604HD : public fl::UCS7604Controller<
-    fl::ClocklessBlocking<DATA_PIN, fl::TIMING_UCS7604_800KHZ, RGB>,
-    RGB_ORDER,
-    fl::UCS7604_MODE_16BIT_800KHZ
-> {};
-
-/// @} // end of UCS7604Controllers group
-
-#else
 
 
 
@@ -664,6 +452,16 @@ class WS2811Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2815Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2815, RGB_ORDER> {};
 
+/// DP1903 controller @ 800 kHz - references centralized timing from fl::TIMING_DP1903_800KHZ
+/// @see fl::TIMING_DP1903_800KHZ in chipsets::led_timing.h
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class DP1903Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_DP1903_800KHZ, RGB_ORDER> {};
+
+/// DP1903 controller @ 400 kHz - references centralized timing from fl::TIMING_DP1903_400KHZ
+/// @see fl::TIMING_DP1903_400KHZ in chipsets::led_timing.h
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+class DP1903Controller400Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_DP1903_400KHZ, RGB_ORDER> {};
+
 /// TM1803 controller @ 400 kHz - references centralized timing from fl::TIMING_TM1803_400KHZ
 /// @see fl::TIMING_TM1803_400KHZ in chipsets::led_timing.h (700, 1100, 700 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
@@ -722,7 +520,7 @@ class UCS1912Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMIN
 /// @see fl::TIMING_SM16824E in chipsets::led_timing.h (300, 900, 100 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class SM16824EController : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_SM16824E, RGB_ORDER> {};
-#endif
+
 FL_DISABLE_WARNING_POP
 /// @} ClocklessChipsets
 
