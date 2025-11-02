@@ -193,11 +193,25 @@ jobs:
         if: always()
         working-directory: trusted
         run: |
+          echo "============================================"
+          echo "Current directory: $(pwd)"
+          echo "============================================"
+          echo "Searching for build_info.json..."
+          echo "Running: find . -name build_info.json"
+          echo "============================================"
           build_info=$(find . -name build_info.json)
+          echo "Find results: ${build_info:-<none found>}"
+          echo "============================================"
           if [ -f "$build_info" ]; then
+            echo "Found build_info.json at: $build_info"
+            echo "File contents:"
+            echo "============================================"
             cat $build_info
+            echo "============================================"
           else
-            echo "build_info.json not found"
+            echo "ERROR: build_info.json not found"
+            echo "Directory contents of .build:"
+            ls -laR .build 2>/dev/null || echo ".build directory does not exist"
           fi
 
       - name: CPP Check
