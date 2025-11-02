@@ -3,7 +3,7 @@
 
 #include "test.h"
 // Test that the header compiles and includes are correct
-#include "platforms/shared/clockless_block/clockless_block_generic.h"
+#include "platforms/shared/clockless_blocking.h"
 
 TEST_SUITE("ClocklessBlockGeneric") {
 

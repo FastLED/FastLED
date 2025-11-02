@@ -1,6 +1,6 @@
 #pragma once
 
-/// @file clockless_block_generic.h
+/// @file clockless_blocking.h
 /// Generic blocking clockless LED controller using nanosecond-precision delays
 ///
 /// This implementation provides a true blocking clockless controller that works

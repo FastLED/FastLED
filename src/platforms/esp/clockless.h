@@ -16,6 +16,9 @@
 // Include ESP32 driver availability checks
 #include "third_party/espressif/led_strip/src/enabled.h"
 
+// Include portable blocking clockless controller for fallback
+#include "platforms/shared/clockless_blocking.h"
+
 namespace fl {
 
 // Define platform-default ClocklessController alias for ESP32

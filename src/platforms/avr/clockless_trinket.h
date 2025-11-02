@@ -8,6 +8,7 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
+#include "platforms/shared/clockless_blocking.h"
 
 namespace fl {
 
