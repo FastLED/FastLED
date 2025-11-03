@@ -276,6 +276,13 @@ jobs:
       #   run: |
       #     uv run ci/inspect_elf.py --first
 
+      - name: Build Blink.ino for library info
+        continue-on-error: true
+        working-directory: trusted
+        run: |
+          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+        shell: bash
+
       - name: Symbol Analysis
         if: always()
         continue-on-error: true
@@ -292,13 +299,6 @@ jobs:
         working-directory: trusted
         run: |
           uv run ci/optimization_report.py --first
-
-      - name: Build Blink.ino for library info
-        continue-on-error: true
-        working-directory: trusted
-        run: |
-          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
-        shell: bash
 
       - name: Generate timestamp and random hex
         id: generate_id
