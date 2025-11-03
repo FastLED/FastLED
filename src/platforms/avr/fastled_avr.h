@@ -4,7 +4,16 @@
 
 #include "fastpin_avr.h"
 #include "fastspi_avr.h"
-#include "clockless_trinket.h"
+
+// Include appropriate clockless controller based on platform
+#include "lib8tion/attiny_detect.h"
+#if defined(LIB8_ATTINY)
+  // ATtiny platforms use optimized assembly implementation
+  #include "platforms/attiny/clockless_blocking.h"
+#else
+  // Other AVR platforms use standard clockless controller
+  #include "clockless_trinket.h"
+#endif
 
 // Default to using PROGMEM
 #ifndef FASTLED_USE_PROGMEM
