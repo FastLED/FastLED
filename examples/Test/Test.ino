@@ -23,4 +23,5 @@ void loop() {
     EVERY_N_MILLIS(1000) {
         Serial.println("Test loop!");
     }
+    delay(1);  // Prevent watchdog timeout on ESP32 qemu tests.
 }
