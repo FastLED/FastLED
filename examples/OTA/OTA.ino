@@ -20,12 +20,13 @@
 /// monitor_speed = 115200
 ///
 /// FEATURES:
-/// - One-line setup for Wi-Fi or Ethernet
+/// - One-line setup for Wi-Fi (async mode)
 /// - Arduino IDE OTA support (port 3232)
 /// - Web-based OTA at http://<hostname>.local/
 /// - mDNS hostname registration
 /// - Progress/error callbacks
 /// - Low overhead: ~73µs per poll() when idle
+/// - Non-blocking Wi-Fi connection with visual feedback
 ///
 /// USAGE:
 /// 1. Configure Wi-Fi credentials below
@@ -91,10 +92,8 @@
 ///
 /// 9. Network setup guidance
 ///    - ESP32 variants (ESP32, S3, S2, C3, C6): All support Wi-Fi
-///    - ESP32 classic only: Has internal Ethernet MAC (PHY required)
-///    - For W5500/ENC28J60 (SPI Ethernet): Call Ethernet.begin() first, then ota.begin()
-///    - Ethernet PHY examples: LAN8720, TLK110, RTL8201, DP83848
-///    - Check board schematic for Ethernet PHY pins and configuration
+///    - Ethernet users: Initialize ETH manually, then call ota.begin()
+///    - Example: ETH.begin(/* PHY config */); while(!ETH.linkUp()) delay(100); ota.begin(...);
 
 #include <Arduino.h>
 #include <FastLED.h>
@@ -103,7 +102,6 @@
 
 // ====== Configure your transport here ======
 #define USE_WIFI         1
-#define USE_ETHERNET     0
 
 // ====== Your identifiers ======
 static const char* HOSTNAME   = "my-device";
@@ -131,37 +129,61 @@ void setup() {
   FastLED.addLeds<WS2812, DATA_PIN, GRB>(leds, NUM_LEDS);
   FastLED.setBrightness(50);
 
+  // Optional: Enable AP fallback when Wi-Fi STA fails (must be called before beginWiFi)
+  // ota.enableApFallback("MyDevice-Setup", "setup-only");
+
 #if USE_WIFI
-  // Full bring-up via Wi-Fi:
-  Serial.println("Starting Wi-Fi...");
-  if (ota.beginWiFi(HOSTNAME, OTA_PASS, WIFI_SSID, WIFI_PASS)) {
-    Serial.println("Wi-Fi OTA started successfully");
-    Serial.print("Access web interface at: http://");
-    Serial.print(HOSTNAME);
-    Serial.println(".local/");
-  } else {
-    Serial.println("Wi-Fi OTA failed to start");
+  // Start Wi-Fi (async mode - returns immediately)
+  Serial.println("Starting Wi-Fi (async mode)...");
+  ota.beginWiFi(HOSTNAME, OTA_PASS, WIFI_SSID, WIFI_PASS);
+  Serial.println("Wi-Fi connecting in background...");
+  Serial.println("LEDs will show connection status:");
+  Serial.println("  - Pulsing blue: Connecting...");
+  Serial.println("  - Solid green: Connected!");
+
+  // Check for service initialization failures
+  uint8_t failed = ota.getFailedServices();
+  if (failed != 0) {
+    Serial.println("\nWARNING: Some OTA services failed to initialize:");
+    if (failed & (uint8_t)fl::OTAService::MDNS_FAILED) {
+      Serial.println("  - mDNS failed: Device won't be discoverable at hostname.local");
+      Serial.println("    Try accessing via IP address instead");
+    }
+    if (failed & (uint8_t)fl::OTAService::HTTP_FAILED) {
+      Serial.println("  - HTTP server failed: Web OTA unavailable");
+      Serial.println("    You can still use Arduino IDE OTA (port 3232)");
+    }
+    if (failed & (uint8_t)fl::OTAService::ARDUINO_OTA_FAILED) {
+      Serial.println("  - ArduinoOTA failed: IDE OTA unavailable");
+      Serial.println("    You can still use Web OTA interface");
+    }
   }
-#elif USE_ETHERNET
-  // Full bring-up via Ethernet (ESP32 internal EMAC via ETH.h):
-  Serial.println("Starting Ethernet...");
-  if (ota.beginEthernet(HOSTNAME, OTA_PASS)) {
-    Serial.println("Ethernet OTA started successfully");
-    Serial.print("Access web interface at: http://");
-    Serial.print(HOSTNAME);
-    Serial.println(".local/");
-  } else {
-    Serial.println("Ethernet OTA failed to start");
-  }
-  // NOTE: For W5500/ENC28J60, first call your Ethernet.begin(...), then:
-  // ota.begin(HOSTNAME, OTA_PASS);
 #else
   // If your networking is already up (Wi-Fi or ETH), just start OTA services:
+  // For Ethernet users: Call ETH.begin() first, then ota.begin()
   Serial.println("Starting OTA services (network assumed configured)...");
   if (ota.begin(HOSTNAME, OTA_PASS)) {
     Serial.println("OTA services started successfully");
   } else {
     Serial.println("OTA services failed to start");
+  }
+
+  // Check for service initialization failures
+  uint8_t failed = ota.getFailedServices();
+  if (failed != 0) {
+    Serial.println("\nWARNING: Some OTA services failed to initialize:");
+    if (failed & (uint8_t)fl::OTAService::MDNS_FAILED) {
+      Serial.println("  - mDNS failed: Device won't be discoverable at hostname.local");
+      Serial.println("    Try accessing via IP address instead");
+    }
+    if (failed & (uint8_t)fl::OTAService::HTTP_FAILED) {
+      Serial.println("  - HTTP server failed: Web OTA unavailable");
+      Serial.println("    You can still use Arduino IDE OTA (port 3232)");
+    }
+    if (failed & (uint8_t)fl::OTAService::ARDUINO_OTA_FAILED) {
+      Serial.println("  - ArduinoOTA failed: IDE OTA unavailable");
+      Serial.println("    You can still use Web OTA interface");
+    }
   }
 #endif
 
@@ -185,19 +207,65 @@ void setup() {
     Serial.println(msg.c_str());
   });
 
-  // Optional: Enable AP fallback when Wi-Fi STA fails (default OFF):
-  // ota.enableApFallback("MyDevice-Setup", "setup-only");
+  // Callback invoked before device reboots after successful OTA update
+  // Use this to save state, turn off LEDs, or perform cleanup
+  ota.onBeforeReboot([](){
+    Serial.println("OTA complete! Preparing to reboot...");
+    Serial.println("Saving state and turning off LEDs...");
+
+    // Turn off all LEDs before reboot
+    fill_solid(leds, NUM_LEDS, CRGB::Black);
+    FastLED.show();
+
+    // In a real application, you might:
+    // - Save LED configuration to EEPROM/preferences
+    // - Save animation state
+    // - Close file handles
+    // - Notify other systems of impending reboot
+  });
 
   Serial.println("Setup complete. Running LED animation...");
 }
 
 uint8_t hue = 0;
+bool wifi_connected_notified = false;
 
 void loop() {
   // Service OTA (low overhead: ~73µs when idle)
   ota.poll();
 
-  // Simple rainbow animation
+#if USE_WIFI
+  // Async WiFi mode: Show connection status via LEDs
+  if (!ota.isConnected()) {
+    // Connecting: Show pulsing blue animation
+    static uint8_t pulse = 0;
+    uint8_t brightness = beatsin8(60, 30, 255);  // Pulse at 60 BPM
+    fill_solid(leds, NUM_LEDS, CRGB::Blue);
+    FastLED.setBrightness(brightness);
+    FastLED.show();
+    pulse++;
+    delay(20);
+    return;  // Skip normal animation while connecting
+  } else if (!wifi_connected_notified) {
+    // Just connected: Show success and print info
+    wifi_connected_notified = true;
+    Serial.println("\nWi-Fi connected!");
+    Serial.print("Access web interface at: http://");
+    Serial.print(HOSTNAME);
+    Serial.println(".local/");
+
+    // Brief celebration: Green flash
+    fill_solid(leds, NUM_LEDS, CRGB::Green);
+    FastLED.setBrightness(255);
+    FastLED.show();
+    delay(500);
+
+    // Restore normal brightness for animation
+    FastLED.setBrightness(50);
+  }
+#endif
+
+  // Normal LED animation (rainbow)
   fill_rainbow(leds, NUM_LEDS, hue, 7);
   FastLED.show();
 

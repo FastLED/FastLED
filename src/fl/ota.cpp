@@ -26,13 +26,6 @@ bool OTA::beginWiFi(const char* hostname, const char* password,
     return impl_->beginWiFi(hostname, password, ssid, wifi_pass);
 }
 
-bool OTA::beginEthernet(const char* hostname, const char* password) {
-    if (!impl_) {
-        impl_ = platforms::IOTA::create();
-    }
-    return impl_->beginEthernet(hostname, password);
-}
-
 bool OTA::begin(const char* hostname, const char* password) {
     if (!impl_) {
         impl_ = platforms::IOTA::create();
@@ -40,11 +33,11 @@ bool OTA::begin(const char* hostname, const char* password) {
     return impl_->begin(hostname, password);
 }
 
-void OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) {
+bool OTA::enableApFallback(const char* ap_ssid, const char* ap_pass) {
     if (!impl_) {
         impl_ = platforms::IOTA::create();
     }
-    impl_->enableApFallback(ap_ssid, ap_pass);
+    return impl_->enableApFallback(ap_ssid, ap_pass);
 }
 
 void OTA::onProgress(ProgressCallback callback) {
@@ -68,11 +61,32 @@ void OTA::onState(StateCallback callback) {
     impl_->onState(callback);
 }
 
+void OTA::onBeforeReboot(void (*callback)()) {
+    if (!impl_) {
+        impl_ = platforms::IOTA::create();
+    }
+    impl_->onBeforeReboot(callback);
+}
+
 void OTA::poll() {
     if (!impl_) {
         impl_ = platforms::IOTA::create();
     }
     impl_->poll();
+}
+
+bool OTA::isConnected() const {
+    if (!impl_) {
+        return false;
+    }
+    return impl_->isConnected();
+}
+
+uint8_t OTA::getFailedServices() const {
+    if (!impl_) {
+        return 0;
+    }
+    return impl_->getFailedServices();
 }
 
 }  // namespace fl

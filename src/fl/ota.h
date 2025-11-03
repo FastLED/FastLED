@@ -2,11 +2,11 @@
 /// Minimal, batteries-included OTA (Over-The-Air) update system for ESP32
 ///
 /// This module provides a simple, one-liner API for enabling OTA updates on ESP32
-/// devices via Wi-Fi or Ethernet. It supports both Arduino IDE OTA (port 3232) and
+/// devices via Wi-Fi. It supports both Arduino IDE OTA (port 3232) and
 /// a web-based update interface at the root path "/".
 ///
 /// Key features:
-/// - One-liner setup: `beginWiFi()`, `beginEthernet()`, or `begin()`
+/// - One-liner setup: `beginWiFi()` or `begin()`
 /// - Arduino IDE OTA support with MD5 password authentication
 /// - Web-based OTA UI with Basic Auth (username: "admin")
 /// - Automatic mDNS hostname registration for discovery
@@ -22,13 +22,13 @@
 /// Architecture:
 /// - Built on ESP-IDF native APIs (minimal Arduino dependency)
 /// - Uses esp_http_server.h for async Web OTA (separate task)
-/// - Uses esp_wifi.h / esp_eth.h for network transport
+/// - Uses esp_wifi.h for network transport
 /// - Uses mdns.h for service discovery
 /// - Future-proof: designed for ESP-IDF component migration
 ///
 /// Platform support:
-/// - ESP32 (all variants): Full feature set
-/// - ESP8266: Reduced feature set (no Ethernet support)
+/// - ESP32 (all variants): Full feature set (Wi-Fi only)
+/// - ESP8266: Reduced feature set (Wi-Fi only)
 /// - Other platforms: Compile-time stubs (no-op)
 ///
 /// Security notes:
@@ -57,10 +57,7 @@
 ///   // Option 1: Full Wi-Fi setup + OTA
 ///   ota.beginWiFi("my-device", "password", "MySSID", "wifi-pass");
 ///
-///   // Option 2: Ethernet setup + OTA (ESP32 internal EMAC)
-///   // ota.beginEthernet("my-device", "password");
-///
-///   // Option 3: OTA only (network already configured)
+///   // Option 2: OTA only (network already configured)
 ///   // ota.begin("my-device", "password");
 ///
 ///   // Optional: Set callbacks
@@ -73,6 +70,15 @@
 ///   ota.poll();  // Low overhead: ~10-73µs when idle
 ///   // ... your LED animation code ...
 /// }
+/// @endcode
+///
+/// Ethernet usage:
+/// @code
+/// // For users who need Ethernet support:
+/// // Initialize ETH manually before calling begin()
+/// ETH.begin(/* your board's PHY config */);
+/// while (!ETH.linkUp()) delay(100);
+/// ota.begin("my-device", "password");  // OTA services work over Ethernet too
 /// @endcode
 ///
 /// References:
@@ -94,11 +100,20 @@ namespace platforms {
     class IOTA;
 }
 
+/// @brief OTA service initialization status flags
+/// @note Used with getFailedServices() to identify which services failed during initialization
+enum class OTAService : uint8_t {
+    NONE = 0,                    ///< No failures
+    MDNS_FAILED = 1 << 0,        ///< mDNS initialization failed (device not discoverable at hostname.local)
+    HTTP_FAILED = 1 << 1,        ///< HTTP server failed to start (Web OTA unavailable)
+    ARDUINO_OTA_FAILED = 1 << 2  ///< ArduinoOTA initialization failed (IDE OTA unavailable)
+};
+
 /// @brief OTA (Over-The-Air) update manager for ESP32 platforms
 ///
 /// Provides a unified interface for enabling OTA firmware updates via
 /// Arduino IDE (port 3232) and web browser (HTTP POST at "/").
-/// Handles network setup (Wi-Fi/Ethernet), mDNS registration, and
+/// Handles network setup (Wi-Fi), mDNS registration, and
 /// authentication automatically.
 class OTA {
 public:
@@ -116,30 +131,26 @@ public:
     /// @param ssid Wi-Fi network SSID
     /// @param wifi_pass Wi-Fi network password
     /// @return true if setup successful, false otherwise
+    /// @note This function returns immediately and Wi-Fi connects asynchronously. Use isConnected() to check status.
     bool beginWiFi(const char* hostname, const char* password,
                    const char* ssid, const char* wifi_pass);
-
-    /// @brief Start OTA with Ethernet setup (ESP32 internal EMAC)
-    /// @param hostname Device hostname (used for mDNS and DHCP)
-    /// @param password Password for OTA authentication
-    /// @return true if setup successful, false otherwise
-    /// @note For external Ethernet chips (W5500/ENC28J60), call your Ethernet.begin() first, then use begin()
-    bool beginEthernet(const char* hostname, const char* password);
 
     /// @brief Start OTA services only (network already configured)
     /// @param hostname Device hostname (used for mDNS)
     /// @param password Password for OTA authentication
     /// @return true if setup successful, false otherwise
     /// @note Use this when you've already configured Wi-Fi or Ethernet yourself
+    /// @note For Ethernet users: Call ETH.begin() first, then use this method
     bool begin(const char* hostname, const char* password);
 
     // ========== Optional Configuration ==========
 
     /// @brief Enable AP (Access Point) fallback mode if Wi-Fi STA connection fails
-    /// @param ap_ssid Access Point SSID
+    /// @param ap_ssid Access Point SSID (cannot be empty)
     /// @param ap_pass Access Point password (minimum 8 characters, use nullptr for open AP)
+    /// @return true if parameters are valid, false if validation fails
     /// @note Must be called before beginWiFi(). Only applies to Wi-Fi mode.
-    void enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr);
+    bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr);
 
     // ========== Callback Registration ==========
 
@@ -168,13 +179,25 @@ public:
     /// @param callback Callback function (supports lambdas, function pointers, functors)
     void onState(StateCallback callback);
 
+    /// @brief Set callback to be called before device reboots after OTA update
+    /// @param callback Callback function to call (e.g., to save state, turn off LEDs)
+    /// @note This callback is called after successful OTA update, before device reboots
+    void onBeforeReboot(void (*callback)());
+
     // ========== Runtime Methods ==========
 
     /// @brief Poll OTA handlers (must be called regularly in loop())
     /// @note Low overhead: ~10-73µs when idle. Web OTA runs in separate task (zero overhead).
     void poll();
 
+    /// @brief Check if WiFi is connected
+    /// @return true if WiFi connection is established
+    bool isConnected() const;
 
+    /// @brief Get bitmask of services that failed to initialize
+    /// @return Bitfield of OTAService flags indicating which services failed
+    /// @note Check specific services with: (getFailedServices() & (uint8_t)OTAService::MDNS_FAILED)
+    uint8_t getFailedServices() const;
 
 private:
     // Platform-specific implementation (lazy initialized via shared_ptr)

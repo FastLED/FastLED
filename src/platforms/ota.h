@@ -35,27 +35,24 @@ public:
     /// @param ssid Wi-Fi network SSID
     /// @param wifi_pass Wi-Fi network password
     /// @return true if setup successful, false otherwise
+    /// @note Returns immediately - Wi-Fi connects asynchronously
     virtual bool beginWiFi(const char* hostname, const char* password,
                           const char* ssid, const char* wifi_pass) = 0;
-
-    /// @brief Start OTA with Ethernet setup
-    /// @param hostname Device hostname (used for mDNS and DHCP)
-    /// @param password Password for OTA authentication
-    /// @return true if setup successful, false otherwise
-    virtual bool beginEthernet(const char* hostname, const char* password) = 0;
 
     /// @brief Start OTA services only (network already configured)
     /// @param hostname Device hostname (used for mDNS)
     /// @param password Password for OTA authentication
     /// @return true if setup successful, false otherwise
+    /// @note For Ethernet users: Call ETH.begin() first, then use this method
     virtual bool begin(const char* hostname, const char* password) = 0;
 
     // ========== Optional Configuration ==========
 
     /// @brief Enable AP (Access Point) fallback mode if Wi-Fi STA connection fails
     /// @param ap_ssid Access Point SSID
-    /// @param ap_pass Access Point password (nullptr for open AP)
-    virtual void enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr) = 0;
+    /// @param ap_pass Access Point password (minimum 8 characters, nullptr for open AP)
+    /// @return true if parameters are valid, false if validation fails
+    virtual bool enableApFallback(const char* ap_ssid, const char* ap_pass = nullptr) = 0;
 
     // ========== Callback Registration ==========
 
@@ -71,10 +68,22 @@ public:
     /// @param callback Callback function (state code)
     virtual void onState(fl::function<void(uint8_t)> callback) = 0;
 
+    /// @brief Set callback to be called before device reboots after OTA update
+    /// @param callback Callback function to call (e.g., to save state)
+    virtual void onBeforeReboot(void (*callback)()) = 0;
+
     // ========== Runtime Methods ==========
 
     /// @brief Poll OTA handlers (must be called regularly in loop())
     virtual void poll() = 0;
+
+    /// @brief Check if WiFi is connected
+    /// @return true if WiFi connection is established
+    virtual bool isConnected() const = 0;
+
+    /// @brief Get bitmask of services that failed to initialize
+    /// @return Bitfield of OTAService flags indicating which services failed
+    virtual uint8_t getFailedServices() const = 0;
 };
 
 // Platform-specific factory function - can be overridden via strong linkage

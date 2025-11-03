@@ -5,6 +5,7 @@
 
 #include "platforms/ota.h"
 #include "platforms/esp/esp_version.h"
+#include "fl/ota.h"  // For OTAService enum
 
 // OTA requires IDF 4.0 or higher for HTTP server and OTA APIs
 // For IDF 3.3 and earlier, fall back to null implementation
@@ -18,8 +19,12 @@
 
 // Arduino headers
 #include <WiFi.h>
-#include <ETH.h>
 #include <ArduinoOTA.h>
+
+// FastLED headers
+#include "fl/str.h"
+#include "fl/warn.h"
+#include "fl/dbg.h"
 
 namespace fl {
 namespace platforms {
@@ -33,6 +38,7 @@ struct OTAHttpContext {
     const char* password;
     fl::function<void(size_t, size_t)>* progress_cb;
     fl::function<void(const char*)>* error_cb;
+    void (**before_reboot_cb)();  // Pointer to function pointer
 };
 
 // ============================================================================
@@ -326,42 +332,39 @@ int decodeBase64(const char* input, char* output, size_t max_output_len) {
     return out_len;
 }
 
-/// @brief HTTP handler for GET requests to root path (serves upload page)
+/// @brief Check Basic Authentication for HTTP request
 /// @param req HTTP request handle
-/// @return ESP_OK on success
-esp_err_t otaHttpGetHandler(httpd_req_t *req) {
+/// @param password Expected password
+/// @return true if authentication successful, false otherwise
+bool checkBasicAuth(httpd_req_t *req, const char* password) {
     // Check Basic Auth
     size_t auth_len = httpd_req_get_hdr_value_len(req, "Authorization");
     if (auth_len == 0) {
         // No auth header, request authentication
         httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic realm=\"OTA Update\"");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Authentication required");
-        return ESP_OK;
+        return false;
     }
 
     // Get the auth header value
     char* auth_value = (char*)malloc(auth_len + 1);
     if (!auth_value) {
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Memory allocation failed");
-        return ESP_FAIL;
+        return false;
     }
 
     if (httpd_req_get_hdr_value_str(req, "Authorization", auth_value, auth_len + 1) != ESP_OK) {
         free(auth_value);
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Invalid authentication");
-        return ESP_OK;
+        return false;
     }
-
-    // Get HTTP context from user context
-    OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
-    const char* password = ctx->password;
 
     // Verify Basic Auth format: "Basic <base64>"
     if (strncmp(auth_value, "Basic ", 6) != 0) {
         free(auth_value);
         httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic realm=\"OTA Update\"");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Invalid authentication format");
-        return ESP_OK;
+        return false;
     }
 
     // Decode Base64 credentials
@@ -372,7 +375,7 @@ esp_err_t otaHttpGetHandler(httpd_req_t *req) {
     if (decoded_len < 0) {
         httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic realm=\"OTA Update\"");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Invalid Base64 encoding");
-        return ESP_OK;
+        return false;
     }
 
     // Expected format: "admin:password"
@@ -381,7 +384,7 @@ esp_err_t otaHttpGetHandler(httpd_req_t *req) {
     if (!colon) {
         httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic realm=\"OTA Update\"");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Invalid credentials format");
-        return ESP_OK;
+        return false;
     }
 
     // Split username and password
@@ -393,7 +396,52 @@ esp_err_t otaHttpGetHandler(httpd_req_t *req) {
     if (strcmp(username, "admin") != 0 || strcmp(user_password, password) != 0) {
         httpd_resp_set_hdr(req, "WWW-Authenticate", "Basic realm=\"OTA Update\"");
         httpd_resp_send_err(req, HTTPD_401_UNAUTHORIZED, "Invalid credentials");
-        return ESP_OK;
+        return false;
+    }
+
+    return true;
+}
+
+/// @brief Validate ESP32 firmware image header
+/// @param data Pointer to firmware data (at least 24 bytes)
+/// @param len Length of firmware data
+/// @return true if firmware header is valid, false otherwise
+bool validateESP32Firmware(const uint8_t* data, size_t len) {
+    // Need at least 24 bytes for ESP32 image header
+    if (len < 24) {
+        FL_WARN("Firmware validation: header too small (" << len << " bytes)");
+        return false;
+    }
+
+    // Check ESP32 magic byte (0xE9)
+    if (data[0] != 0xE9) {
+        FL_WARN("Firmware validation: invalid magic byte 0x"
+                << (int)data[0] << " (expected 0xE9)");
+        return false;
+    }
+
+    // Check segment count is reasonable (1-16)
+    uint8_t segments = data[1];
+    if (segments == 0 || segments > 16) {
+        FL_WARN("Firmware validation: invalid segment count " << (int)segments);
+        return false;
+    }
+
+    FL_DBG("Firmware validation passed: magic=0xE9, segments=" << (int)segments);
+    return true;
+}
+
+/// @brief HTTP handler for GET requests to root path (serves upload page)
+/// @param req HTTP request handle
+/// @return ESP_OK on success
+esp_err_t otaHttpGetHandler(httpd_req_t *req) {
+    // Get HTTP context from user context
+    OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
+    const char* password = ctx->password;
+
+    // Check authentication
+    if (!checkBasicAuth(req, password)) {
+        return ESP_OK;  // Response already sent by checkBasicAuth
     }
 
     // Authentication successful - serve the OTA upload page
@@ -406,13 +454,18 @@ esp_err_t otaHttpGetHandler(httpd_req_t *req) {
 /// @param req HTTP request handle
 /// @return ESP_OK on success
 esp_err_t otaHttpPostHandler(httpd_req_t *req) {
+    // Get HTTP context from user context
+    OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
+
+    // SECURITY: Require authentication for firmware upload
+    if (!checkBasicAuth(req, ctx->password)) {
+        return ESP_FAIL;  // Response already sent by checkBasicAuth
+    }
+
     esp_ota_handle_t ota_handle = 0;
     const esp_partition_t* update_partition = nullptr;
     bool ota_started = false;
     size_t total_received = 0;
-
-    // Get HTTP context from user context
-    OTAHttpContext* ctx = (OTAHttpContext*)req->user_ctx;
 
     // Get expected content length for progress tracking
     size_t content_length = req->content_len;
@@ -427,22 +480,36 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
         return ESP_FAIL;
     }
 
-    // Begin OTA
-    esp_err_t err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &ota_handle);
-    if (err != ESP_OK) {
-        if (ctx->error_cb && *ctx->error_cb) {
-            (*ctx->error_cb)("OTA begin failed");
-        }
-        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA begin failed");
-        return ESP_FAIL;
-    }
-    ota_started = true;
-
     // Receive data in chunks
     char buffer[1024];
     int received;
+    bool first_chunk = true;
+    esp_err_t err;
 
     while ((received = httpd_req_recv(req, buffer, sizeof(buffer))) > 0) {
+        // Validate firmware header on first chunk
+        if (first_chunk) {
+            if (!validateESP32Firmware((const uint8_t*)buffer, received)) {
+                if (ctx->error_cb && *ctx->error_cb) {
+                    (*ctx->error_cb)("Invalid ESP32 firmware image");
+                }
+                httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "Invalid ESP32 firmware image");
+                return ESP_FAIL;
+            }
+
+            // Begin OTA after validation passes
+            err = esp_ota_begin(update_partition, OTA_SIZE_UNKNOWN, &ota_handle);
+            if (err != ESP_OK) {
+                if (ctx->error_cb && *ctx->error_cb) {
+                    (*ctx->error_cb)("OTA begin failed");
+                }
+                httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "OTA begin failed");
+                return ESP_FAIL;
+            }
+            ota_started = true;
+            first_chunk = false;
+        }
+
         // Write to flash
         err = esp_ota_write(ota_handle, buffer, received);
         if (err != ESP_OK) {
@@ -466,7 +533,9 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
         if (ctx->error_cb && *ctx->error_cb) {
             (*ctx->error_cb)("Upload interrupted");
         }
-        esp_ota_abort(ota_handle);
+        if (ota_started) {
+            esp_ota_abort(ota_handle);
+        }
         httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Upload interrupted");
         return ESP_FAIL;
     }
@@ -493,6 +562,11 @@ esp_err_t otaHttpPostHandler(httpd_req_t *req) {
 
     // Success
     httpd_resp_send(req, "OK", HTTPD_RESP_USE_STRLEN);
+
+    // Call before-reboot callback if configured
+    if (ctx->before_reboot_cb && *ctx->before_reboot_cb) {
+        (*ctx->before_reboot_cb)();
+    }
 
     // Reboot after a short delay (allow response to be sent)
     // Note: In a real implementation, you'd use a FreeRTOS task/timer for this
@@ -547,16 +621,14 @@ httpd_handle_t startHttpServer(OTAHttpContext* ctx) {
 class ESP32OTA : public IOTA {
 public:
     ESP32OTA()
-        : hostname_(nullptr)
-        , password_(nullptr)
-        , ap_ssid_(nullptr)
-        , ap_pass_(nullptr)
-        , ap_fallback_enabled_(false)
+        : ap_fallback_enabled_(false)
         , http_server_(nullptr)
+        , failed_services_(0)
     {
         http_context_.password = nullptr;
         http_context_.progress_cb = &progress_cb_;
         http_context_.error_cb = &error_cb_;
+        http_context_.before_reboot_cb = &before_reboot_cb_;
     }
 
     ~ESP32OTA() override {
@@ -565,36 +637,29 @@ public:
 
     bool beginWiFi(const char* hostname, const char* password,
                    const char* ssid, const char* wifi_pass) override {
-        hostname_ = hostname;
-        password_ = password;
-        http_context_.password = password;
+        // Stop any existing HTTP server to prevent leaks
+        stopHttpServer();
 
-        // Connect to Wi-Fi using Arduino WiFi library
+        // Reset failure tracking
+        failed_services_ = 0;
+
+        // Store configuration strings safely
+        hostname_ = hostname ? hostname : "";
+        password_ = password ? password : "";
+        http_context_.password = password_.c_str();
+
+        // Connect to Wi-Fi using Arduino WiFi library (async mode)
         WiFi.mode(WIFI_STA);
-        WiFi.setHostname(hostname);
+        WiFi.setHostname(hostname_.c_str());
         WiFi.begin(ssid, wifi_pass);
 
-        // Wait for connection with timeout (30 seconds)
-        int timeout = 30;
-        while (WiFi.status() != WL_CONNECTED && timeout > 0) {
-            delay(1000);
-            timeout--;
-        }
-
-        if (WiFi.status() != WL_CONNECTED) {
-            // Connection failed
-            if (ap_fallback_enabled_) {
-                // Try AP fallback mode
-                WiFi.mode(WIFI_AP);
-                WiFi.softAP(ap_ssid_, ap_pass_);
-            } else {
-                return false;
-            }
-        }
+        // Async mode: Return immediately, user polls isConnected()
+        // Note: We initialize services even if not connected yet
 
         // Initialize mDNS
-        if (!initMDNS(hostname)) {
-            // mDNS failed, but continue anyway
+        if (!initMDNS(hostname_.c_str())) {
+            FL_WARN("mDNS init failed - device won't be discoverable at " << hostname_.c_str() << ".local");
+            failed_services_ |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup ArduinoOTA
@@ -603,65 +668,32 @@ public:
         // Start HTTP server for Web OTA
         http_server_ = startHttpServer(&http_context_);
         if (!http_server_) {
-            // HTTP server failed, but ArduinoOTA still works
-        }
-
-        return true;
-    }
-
-    bool beginEthernet(const char* hostname, const char* password) override {
-        hostname_ = hostname;
-        password_ = password;
-        http_context_.password = password;
-
-        // Start Ethernet using Arduino ETH library
-        // This uses ESP32 internal EMAC
-        if (!ETH.begin()) {
-            return false;
-        }
-
-        // Set hostname
-        ETH.setHostname(hostname);
-
-        // Wait for link with timeout (10 seconds)
-        int timeout = 10;
-        while (!ETH.linkUp() && timeout > 0) {
-            delay(1000);
-            timeout--;
-        }
-
-        if (!ETH.linkUp()) {
-            return false;
-        }
-
-        // Initialize mDNS
-        if (!initMDNS(hostname)) {
-            // mDNS failed, but continue anyway
-        }
-
-        // Setup ArduinoOTA
-        setupArduinoOTA();
-
-        // Start HTTP server for Web OTA
-        http_server_ = startHttpServer(&http_context_);
-        if (!http_server_) {
-            // HTTP server failed, but ArduinoOTA still works
+            FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
+            failed_services_ |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
     }
 
     bool begin(const char* hostname, const char* password) override {
-        hostname_ = hostname;
-        password_ = password;
-        http_context_.password = password;
+        // Stop any existing HTTP server to prevent leaks
+        stopHttpServer();
+
+        // Reset failure tracking
+        failed_services_ = 0;
+
+        // Store configuration strings safely
+        hostname_ = hostname ? hostname : "";
+        password_ = password ? password : "";
+        http_context_.password = password_.c_str();
 
         // Assume network is already configured
         // Just start OTA services
 
         // Initialize mDNS
-        if (!initMDNS(hostname)) {
-            // mDNS failed, but continue anyway
+        if (!initMDNS(hostname_.c_str())) {
+            FL_WARN("mDNS init failed - device won't be discoverable at " << hostname_.c_str() << ".local");
+            failed_services_ |= (uint8_t)fl::OTAService::MDNS_FAILED;
         }
 
         // Setup ArduinoOTA
@@ -670,16 +702,30 @@ public:
         // Start HTTP server for Web OTA
         http_server_ = startHttpServer(&http_context_);
         if (!http_server_) {
-            // HTTP server failed, but ArduinoOTA still works
+            FL_WARN("HTTP server failed - Web OTA unavailable (ArduinoOTA still works)");
+            failed_services_ |= (uint8_t)fl::OTAService::HTTP_FAILED;
         }
 
         return true;
     }
 
-    void enableApFallback(const char* ap_ssid, const char* ap_pass) override {
+    bool enableApFallback(const char* ap_ssid, const char* ap_pass) override {
+        // Validate SSID
+        if (!ap_ssid || strlen(ap_ssid) == 0) {
+            FL_WARN("AP SSID cannot be empty");
+            return false;
+        }
+
+        // Validate password (WPA2 requires minimum 8 characters)
+        if (ap_pass && strlen(ap_pass) > 0 && strlen(ap_pass) < 8) {
+            FL_WARN("AP password must be at least 8 characters or nullptr for open network");
+            return false;
+        }
+
         ap_fallback_enabled_ = true;
         ap_ssid_ = ap_ssid;
-        ap_pass_ = ap_pass;
+        ap_pass_ = ap_pass ? ap_pass : "";
+        return true;
     }
 
     void onProgress(fl::function<void(size_t, size_t)> callback) override {
@@ -694,16 +740,28 @@ public:
         state_cb_ = callback;
     }
 
+    void onBeforeReboot(void (*callback)()) override {
+        before_reboot_cb_ = callback;
+    }
+
     void poll() override {
         // Only need to handle ArduinoOTA
         // HTTP server runs in separate FreeRTOS task (zero polling overhead)
         ArduinoOTA.handle();
     }
 
+    bool isConnected() const override {
+        return WiFi.status() == WL_CONNECTED;
+    }
+
+    uint8_t getFailedServices() const override {
+        return failed_services_;
+    }
+
 private:
     void setupArduinoOTA() {
-        ArduinoOTA.setHostname(hostname_);
-        ArduinoOTA.setPassword(password_);
+        ArduinoOTA.setHostname(hostname_.c_str());
+        ArduinoOTA.setPassword(password_.c_str());
 
         ArduinoOTA.onStart([this]() {
             if (state_cb_) {
@@ -740,31 +798,39 @@ private:
         ArduinoOTA.begin();
     }
 
-    void cleanup() {
+    void stopHttpServer() {
         if (http_server_) {
             httpd_stop(http_server_);
             http_server_ = nullptr;
         }
+    }
+
+    void cleanup() {
+        stopHttpServer();
         ArduinoOTA.end();
     }
 
-    // Configuration
-    const char* hostname_;
-    const char* password_;
-    const char* ap_ssid_;
-    const char* ap_pass_;
+    // Configuration - using StrN for safe string storage
+    fl::StrN<64> hostname_;
+    fl::StrN<64> password_;
+    fl::StrN<32> ap_ssid_;
+    fl::StrN<64> ap_pass_;
     bool ap_fallback_enabled_;
 
     // Callbacks
     fl::function<void(size_t, size_t)> progress_cb_;
     fl::function<void(const char*)> error_cb_;
     fl::function<void(uint8_t)> state_cb_;
+    void (*before_reboot_cb_)() = nullptr;
 
     // HTTP server handle
     httpd_handle_t http_server_;
 
     // HTTP context (shared with handlers)
     OTAHttpContext http_context_;
+
+    // Service initialization status
+    uint8_t failed_services_;
 };
 
 // ============================================================================

@@ -21,19 +21,14 @@ public:
         return false;  // Not supported
     }
 
-    bool beginEthernet(const char*, const char*) override {
-        FL_WARN("OTA not supported on this platform");
-        return false;  // Not supported
-    }
-
     bool begin(const char*, const char*) override {
         FL_WARN("OTA not supported on this platform");
         return false;  // Not supported
     }
 
-    void enableApFallback(const char*, const char*) override {
+    bool enableApFallback(const char*, const char*) override {
         FL_WARN("OTA not supported on this platform");
-        // No-op
+        return false;  // Not supported
     }
 
     void onProgress(fl::function<void(size_t, size_t)>) override {
@@ -51,9 +46,24 @@ public:
         // No-op
     }
 
+    void onBeforeReboot(void (*callback)()) override {
+        FL_WARN("OTA not supported on this platform");
+        // No-op
+        (void)callback;  // Suppress unused parameter warning
+    }
+
     void poll() override {
         FL_WARN("OTA not supported on this platform");
         // No-op
+    }
+
+    bool isConnected() const override {
+        FL_WARN("OTA not supported on this platform");
+        return false;  // Not supported
+    }
+
+    uint8_t getFailedServices() const override {
+        return 0;  // No services on unsupported platforms
     }
 };
 
