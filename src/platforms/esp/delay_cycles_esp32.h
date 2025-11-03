@@ -3,7 +3,7 @@
 #ifndef __INC_FASTLED_PLATFORMS_ESP_DELAY_CYCLES_ESP32_H
 #define __INC_FASTLED_PLATFORMS_ESP_DELAY_CYCLES_ESP32_H
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
 /// @file platforms/esp/delay_cycles_esp32.h

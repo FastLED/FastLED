@@ -8,7 +8,7 @@
 /// This header handles all platform detection and includes the appropriate
 /// platform-specific delay and delay_cycles headers.
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
 // ============================================================================

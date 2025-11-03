@@ -6,7 +6,7 @@
 
 #include "fl/stdint.h"
 #include "fl/delay.h"
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/compiler_control.h"
 
 // ============================================================================

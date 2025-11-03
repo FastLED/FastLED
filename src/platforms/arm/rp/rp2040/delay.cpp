@@ -2,7 +2,7 @@
 /// RP2040 platform-specific delay implementation
 
 // ok no namespace fl
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 
 #ifdef ARDUINO_ARCH_RP2040
 #include "Arduino.h"  // Include Arduino.h here for busy_wait_at_least_cycles

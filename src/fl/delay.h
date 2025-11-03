@@ -7,7 +7,7 @@
 /// Delay utilities for FastLED
 /// Includes nanosecond-precision delays, cycle counting, and microsecond delays
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 #include "fl/compiler_control.h"
 

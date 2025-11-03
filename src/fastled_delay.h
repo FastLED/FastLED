@@ -3,7 +3,7 @@
 #ifndef __INC_FASTLED_DELAY_H
 #define __INC_FASTLED_DELAY_H
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 #include "fl/delay.h"
 

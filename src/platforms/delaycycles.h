@@ -9,7 +9,7 @@
 /// This header handles all platform detection and includes the appropriate
 /// platform-specific delaycycles headers with NOP macros and delaycycles<> specializations.
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
 // ============================================================================

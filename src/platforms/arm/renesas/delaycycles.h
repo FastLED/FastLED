@@ -4,7 +4,7 @@
 #ifndef __INC_FASTLED_PLATFORMS_RENESAS_DELAYCYCLES_H
 #define __INC_FASTLED_PLATFORMS_RENESAS_DELAYCYCLES_H
 
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/force_inline.h"
 
 /// @file platforms/arm/renesas/delaycycles.h

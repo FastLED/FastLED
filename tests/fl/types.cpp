@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fl/types.h"
+#include "platforms/cycle_type.h"
 #include "fl/int.h"
 
 using namespace fl;
