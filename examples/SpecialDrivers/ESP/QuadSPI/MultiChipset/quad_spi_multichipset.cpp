@@ -13,9 +13,14 @@
 // ESP32-only example - do not compile on other platforms
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
+#include "platforms/esp/esp_version.h"
+
 // Pin definitions - hardware QuadSPI pins per ESP32 variant
 // These use the IO_MUX pins for optimal performance (up to 80MHz)
-#if CONFIG_IDF_TARGET_ESP32
+// CONFIG_IDF_TARGET_ESP32 was introduced in ESP-IDF v4.0
+// For v3.x (where the macro doesn't exist), assume original ESP32
+// For v4.0+, only use these settings when CONFIG_IDF_TARGET_ESP32 is defined
+#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(CONFIG_IDF_TARGET_ESP32)
 // ESP32 (original) - Using HSPI (SPI2) QuadSPI pins
 #define CLOCK_PIN 14   // HSPI CLK
 #define DATA_PIN_0 13  // APA102 - HSPI MOSI (D0)

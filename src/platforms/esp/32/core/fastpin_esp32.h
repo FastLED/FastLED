@@ -86,7 +86,10 @@ public:
 
 #define _FL_BIT(B) (1ULL << B)
 
-#if CONFIG_IDF_TARGET_ESP32
+// CONFIG_IDF_TARGET_ESP32 was introduced in ESP-IDF v4.0
+// For v3.x (where the macro doesn't exist), assume original ESP32
+// For v4.0+, only use these settings when CONFIG_IDF_TARGET_ESP32 is defined
+#if !ESP_IDF_VERSION_4_OR_HIGHER || defined(CONFIG_IDF_TARGET_ESP32)
 // 40 GPIO pins. ESPIDF defined 24, 28-31 as invalid and 34-39 as readonly
 // GPIO 6-11 used by default for SPI flash.  GPIO 20 is invalid.
 // NOTE: GPIO 1 & 3 commonly used for UART and may cause flashes when uploading.
