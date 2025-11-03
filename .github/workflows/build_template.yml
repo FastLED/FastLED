@@ -181,29 +181,37 @@ jobs:
             echo "platformio.ini not found"
           fi
 
-      - name: Print out build_info.json
+      - name: Print out build_info files
         if: always()
         working-directory: trusted
         run: |
           echo "============================================"
           echo "Current directory: $(pwd)"
           echo "============================================"
-          echo "Searching for build_info.json..."
-          echo "Running: find . -name build_info.json"
+          echo "Searching for build_info*.json files..."
+          echo "Running: find . -name 'build_info*.json'"
           echo "============================================"
-          build_info=$(find . -name build_info.json)
-          echo "Find results: ${build_info:-<none found>}"
-          echo "============================================"
-          if [ -f "$build_info" ]; then
-            echo "Found build_info.json at: $build_info"
-            echo "File contents:"
-            echo "============================================"
-            cat $build_info
-            echo "============================================"
-          else
-            echo "ERROR: build_info.json not found"
+          build_info_files=$(find . -name 'build_info*.json')
+
+          if [ -z "$build_info_files" ]; then
+            echo "ERROR: No build_info*.json files found"
             echo "Directory contents of .build:"
             ls -laR .build 2>/dev/null || echo ".build directory does not exist"
+          else
+            echo "Found build_info files:"
+            echo "$build_info_files"
+            echo "============================================"
+
+            # Print each file's contents
+            while IFS= read -r file; do
+              if [ -f "$file" ]; then
+                echo ""
+                echo "File: $file"
+                echo "--------------------------------------------"
+                cat "$file"
+                echo "============================================"
+              fi
+            done <<< "$build_info_files"
           fi
 
       - name: CPP Check

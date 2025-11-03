@@ -85,14 +85,27 @@ jobs:
           ./compile --no-interactive --max-failures 3 ${{ inputs.args }} | tee build.log
         shell: bash
 
-      - name: Print out build_info.json
+      - name: Print out build_info files
         working-directory: trusted
         run: |
-          build_info=$(find . -name build_info.json)
-          if [ -f "$build_info" ]; then
-            cat $build_info
+          build_info_files=$(find . -name 'build_info*.json')
+          if [ -z "$build_info_files" ]; then
+            echo "No build_info*.json files found"
+            echo "Directory contents of .build:"
+            ls -laR .build 2>/dev/null || echo ".build directory does not exist"
           else
-            echo "build_info.json not found"
+            echo "Found build_info files:"
+            echo "$build_info_files"
+            echo ""
+            # Print each file's contents
+            while IFS= read -r file; do
+              if [ -f "$file" ]; then
+                echo "File: $file"
+                echo "--------------------------------------------"
+                cat "$file"
+                echo ""
+              fi
+            done <<< "$build_info_files"
           fi
         if: always()
 

@@ -26,21 +26,30 @@ def main():
 
     print(f"Symbol Analysis Runner - Board: {args.board}, Example: {args.example}")
 
-    # Check if example-specific build_info_{example}.json exists
+    # Build list of all paths to check (in priority order)
     build_info_filename = f"build_info_{args.example}.json"
-    build_info_path = Path(".build") / args.board / build_info_filename
-    if not build_info_path.exists():
-        # Fall back to nested pio structure
-        build_info_path = Path(".build") / "pio" / args.board / build_info_filename
+    paths_to_check = [
+        Path(".build") / args.board / build_info_filename,
+        Path(".build") / "pio" / args.board / build_info_filename,
+        Path(".build") / args.board / "build_info.json",
+        Path(".build") / "pio" / args.board / "build_info.json",
+    ]
 
-    # Fallback to legacy build_info.json (for backward compatibility during migration)
-    if not build_info_path.exists():
-        build_info_path = Path(".build") / args.board / "build_info.json"
-        if not build_info_path.exists():
-            build_info_path = Path(".build") / "pio" / args.board / "build_info.json"
+    # Find first existing path
+    build_info_path = None
+    for path in paths_to_check:
+        if path.exists():
+            build_info_path = path
+            break
 
-    if not build_info_path.exists():
-        message = f"Build info not found at {build_info_path} (or {build_info_filename}). Skipping symbol analysis."
+    if build_info_path is None:
+        # Show all paths that were checked
+        checked_paths = "\n  - ".join(str(p) for p in paths_to_check)
+        message = (
+            f"Build info not found. Checked the following paths:\n  - {checked_paths}\n"
+            f"This may indicate the compilation did not complete successfully. "
+            f"Check the compilation logs for warnings about build_info generation."
+        )
         if args.skip_on_failure:
             print(f"Warning: {message}")
             return 0
