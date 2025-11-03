@@ -61,9 +61,9 @@ If you are targeting a desktop/browser host for demos or tests:
 
 ### Platform header organization pattern
 
-FastLED follows a **coarse-to-fine delegation pattern** for platform detection headers located directly in `src/platforms/`. This keeps platform routing clean and maintainable.
+FastLED has evolved its platform directory to contain **dispatch headers** that follow a **coarse-to-fine delegation pattern**. These dispatch headers live at the root of `src/platforms/` (e.g., `int.h`, `io_arduino.h`, `quad_spi_platform.h`) and route the compiler to the appropriate platform-specific implementations. This keeps platform routing clean and maintainable.
 
-**Rule**: Headers at `platforms/header.h` perform **coarse platform detection** and delegate to platform-specific subdirectories for **fine-grained detection**.
+**Architecture**: Headers at `platforms/header.h` perform **coarse platform detection** (ESP32, AVR, ARM families) and delegate to platform-specific subdirectories for **fine-grained detection** (ESP32-S3, ATmega328P, SAMD51, etc.).
 
 #### Pattern structure
 

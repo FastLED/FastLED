@@ -53,6 +53,7 @@ This project uses directory-specific agent guidelines. See:
 ### C++ Code Standards
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
+- **Platform dispatch headers**: FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
 - **Use proper warning macros** from `fl/compiler_control.h`
 - **Debug and Warning Output**:
   - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
