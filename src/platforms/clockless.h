@@ -18,7 +18,7 @@
   #include "lib8tion/attiny_detect.h"
   #if defined(LIB8_ATTINY)
     // ATtiny platforms use optimized assembly implementation from FastLED 3.10.3
-    #include "attiny/clockless_blocking.h"
+    #include "avr/attiny/clockless_blocking.h"
   #else
     // Other AVR platforms (Uno, Mega, etc.) use the standard clockless controller
     #include "avr/clockless_trinket.h"

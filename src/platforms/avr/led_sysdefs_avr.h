@@ -62,11 +62,32 @@ extern volatile unsigned long timer0_millis;
 #if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)  || defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__) || defined(__AVR_ATtinyX41__) || defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__) || defined(__AVR_ATtiny4313__) || defined(__AVR_ATtiny13__)
 #define LIB8_ATTINY 1
 #define FASTLED_NEEDS_YIELD
+
+// Memory-saving defines for ATtiny platforms
+// These platforms have very limited flash memory (typically 4-16KB)
+// Disable expensive features to ensure sketches fit within memory constraints
+#ifndef NO_CORRECTION
+#define NO_CORRECTION 1  // Disable color correction (~196 bytes)
+#endif
+#ifndef NO_DITHERING
+#define NO_DITHERING 1  // Disable temporal dithering (~130 bytes)
+#endif
+#ifndef NO_CLOCK_CORRECTION
+#define NO_CLOCK_CORRECTION 1  // Disable clock correction (~50-100 bytes)
+                                // Safe for ATtiny: These platforms typically don't require
+                                // precise millis() timing during LED updates. Clock correction
+                                // compensates for time spent with interrupts disabled, but
+                                // ATtiny applications are usually simple (e.g., Blink) where
+                                // slight timing drift is acceptable.
+#endif
+#ifndef FASTLED_INTERNAL
+#define FASTLED_INTERNAL  // Suppress pragma messages
+#endif
 #endif
 
 #if defined(ARDUINO) && (ARDUINO > 150) && !defined(IS_BEAN) && !defined (ARDUINO_AVR_DIGISPARK) && !defined (LIB8_TINY) && !defined (ARDUINO_AVR_LARDU_328E)
-// don't need YIELD defined by the library 
-#else 
+// don't need YIELD defined by the library
+#else
 #define FASTLED_NEEDS_YIELD
 extern "C" void yield();
 #endif

@@ -9,7 +9,7 @@
 #include "lib8tion/attiny_detect.h"
 #if defined(LIB8_ATTINY)
   // ATtiny platforms use optimized assembly implementation
-  #include "platforms/attiny/clockless_blocking.h"
+  #include "platforms/avr/attiny/clockless_blocking.h"
 #else
   // Other AVR platforms use standard clockless controller
   #include "clockless_trinket.h"
