@@ -26,11 +26,36 @@ typedef long ptrdiff_t;
 
 // FastLED equivalent of std::max_align_t
 // Use union approach (like standard library implementations) for fast compilation
-typedef union {
-    long long ll;
-    long double ld;
-    void* p;
-} max_align_t;
+// Template-based selection to handle platforms where long double == double
+namespace detail {
+    // Union variant with long double (for platforms with distinct long double like x86/x64)
+    typedef union {
+        long long ll;
+        long double ld;
+        void* p;
+    } max_align_with_ld;
+
+    // Union variant without long double (for ARM/AVR where long double == double)
+    typedef union {
+        long long ll;
+        double d;
+        void* p;
+    } max_align_without_ld;
+}
+
+// Template selector - automatically chooses correct variant at compile time
+template <bool UseLD>
+struct max_align_selector {
+    typedef detail::max_align_with_ld type;
+};
+
+template <>
+struct max_align_selector<false> {
+    typedef detail::max_align_without_ld type;
+};
+
+// Select appropriate union based on whether long double is distinct from double
+typedef typename max_align_selector<(sizeof(long double) > sizeof(double))>::type max_align_t;
 
 } // namespace fl
 
