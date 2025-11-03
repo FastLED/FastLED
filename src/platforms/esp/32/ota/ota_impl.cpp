@@ -8,7 +8,8 @@
 
 // OTA requires IDF 4.0 or higher for HTTP server and OTA APIs
 // For IDF 3.3 and earlier, fall back to null implementation
-#if ESP_IDF_VERSION_4_OR_HIGHER
+// ESP32-H2 and ESP32-P4 don't have WiFi, so OTA is not supported
+#if ESP_IDF_VERSION_4_OR_HIGHER && !defined(CONFIG_IDF_TARGET_ESP32H2) && !defined(CONFIG_IDF_TARGET_ESP32P4)
 
 // ESP-IDF headers
 #include <esp_http_server.h>
