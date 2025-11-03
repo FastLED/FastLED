@@ -56,7 +56,19 @@ def main() -> int:
     board_dir = board_dirs[which]
     board = board_dir.name
 
-    build_info_json = board_dir / "build_info.json"
+    # Find build_info.json (try example-specific files first, then generic)
+    build_info_files = list(board_dir.glob("build_info_*.json"))
+    if build_info_files:
+        # Prefer example-specific files
+        build_info_json = build_info_files[0]
+    else:
+        # Fall back to generic build_info.json
+        build_info_json = board_dir / "build_info.json"
+
+    if not build_info_json.exists():
+        print(f"Error: No build_info*.json found in {board_dir}")
+        return 1
+
     build_info = json.loads(build_info_json.read_text())
     board_info = build_info.get(board) or build_info[next(iter(build_info))]
 

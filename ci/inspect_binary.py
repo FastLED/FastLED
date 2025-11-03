@@ -205,7 +205,19 @@ def main() -> int:
         else int(input("Enter the number of the board you want to inspect: "))
     )
     board_dir = board_dirs[which]
-    build_info_json = board_dir / "build_info.json"
+
+    # Find build_info.json (try example-specific files first, then generic)
+    build_info_files = list(board_dir.glob("build_info_*.json"))
+    if build_info_files:
+        # Prefer example-specific files
+        build_info_json = build_info_files[0]
+    else:
+        # Fall back to generic build_info.json
+        build_info_json = board_dir / "build_info.json"
+
+    if not build_info_json.exists():
+        print(f"Error: No build_info*.json found in {board_dir}")
+        return 1
 
     build_info = load_build_info(build_info_json)
     board = board_dir.name

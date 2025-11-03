@@ -15,18 +15,52 @@ def _create_board_info(path: Path) -> Dict[str, Any]:
     return build_info[next(iter(build_info))]
 
 
-def _find_build_info(board: str) -> Path:
-    # Prefer PIO layout
-    candidate = Path(".build") / "pio" / board / "build_info.json"
-    if candidate.exists():
-        return candidate
-    # Fallback legacy layout
-    candidate = Path(".build") / board / "build_info.json"
-    if candidate.exists():
-        return candidate
-    raise FileNotFoundError(
-        f"build_info.json not found for board '{board}' in .build/pio/{board} or .build/{board}"
+def _find_build_info(board: str, example: Optional[str] = None) -> Path:
+    """Find build_info.json for a board, with optional example-specific search.
+
+    Args:
+        board: Board name
+        example: Optional example name to search for build_info_{example}.json first
+
+    Returns:
+        Path to build_info.json file
+
+    Raises:
+        FileNotFoundError: If no build_info file found
+    """
+    candidates = []
+
+    # If example provided, try example-specific files first
+    if example:
+        candidates.extend(
+            [
+                Path(".build") / "pio" / board / f"build_info_{example}.json",
+                Path(".build") / board / f"build_info_{example}.json",
+            ]
+        )
+
+    # Always try generic build_info.json as fallback
+    candidates.extend(
+        [
+            Path(".build") / "pio" / board / "build_info.json",
+            Path(".build") / board / "build_info.json",
+        ]
     )
+
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate
+
+    # Generate helpful error message
+    if example:
+        raise FileNotFoundError(
+            f"build_info.json not found for board '{board}' "
+            f"(tried build_info_{example}.json and build_info.json in .build/pio/{board} and .build/{board})"
+        )
+    else:
+        raise FileNotFoundError(
+            f"build_info.json not found for board '{board}' in .build/pio/{board} or .build/{board}"
+        )
 
 
 def _run_pio_size(build_dir: Path) -> Optional[int]:
@@ -104,8 +138,8 @@ def _run_pio_size(build_dir: Path) -> Optional[int]:
     return None
 
 
-def check_firmware_size(board: str) -> int:
-    build_info_json = _find_build_info(board)
+def check_firmware_size(board: str, example: Optional[str] = None) -> int:
+    build_info_json = _find_build_info(board, example)
     board_info = _create_board_info(build_info_json)
     assert board_info, f"Board {board} not found in {build_info_json}"
 
@@ -134,9 +168,9 @@ def check_firmware_size(board: str) -> int:
     )
 
 
-def main(board: str):
+def main(board: str, example: Optional[str] = None):
     try:
-        size = check_firmware_size(board)
+        size = check_firmware_size(board, example)
         print(f"Firmware size for {board}: {size} bytes")
     except FileNotFoundError as e:
         print(f"Error: {e}")
@@ -153,6 +187,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--board", type=str, required=True, help="Board to check firmware size for"
     )
+    parser.add_argument(
+        "--example", type=str, help="Example name (looks for build_info_{example}.json)"
+    )
     args = parser.parse_args()
 
-    main(args.board)
+    main(args.board, args.example)
