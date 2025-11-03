@@ -179,6 +179,8 @@ class GitHubDebugger:
                 ["gh", "run", "view", self.run_id, "--log"],
                 capture_output=True,
                 text=True,
+                encoding="utf-8",
+                errors="replace",
                 check=True,
                 timeout=300,  # 5 minute timeout
             )
