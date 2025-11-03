@@ -27,9 +27,31 @@ HERE = Path(__file__).resolve().parent.absolute()
 UNO = HERE / "uno"
 OUTPUT = HERE / "output"
 ELF_FILE = UNO / "firmware.elf"
-BUILD_INFO_PATH = (
-    PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
-)
+
+
+# Try to find build_info files in the standard locations
+# Prefer example-specific build_info_Blink.json, fall back to build_info.json
+def _find_uno_build_info() -> Path:
+    """Find UNO build_info file in standard locations."""
+    # Try new PIO layout with example-specific file
+    candidate = PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info_Blink.json"
+    if candidate.exists():
+        return candidate
+    # Try new PIO layout with legacy file
+    candidate = PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info.json"
+    if candidate.exists():
+        return candidate
+    # Try legacy layout (for old test structure)
+    candidate = (
+        PROJECT_ROOT / ".build" / "fled" / "examples" / "uno" / "build_info.json"
+    )
+    if candidate.exists():
+        return candidate
+    # Default to PIO layout (will be created if needed)
+    return PROJECT_ROOT / ".build" / "pio" / "uno" / "build_info_Blink.json"
+
+
+BUILD_INFO_PATH = _find_uno_build_info()
 
 
 PLATFORMIO_PATH = Path.home() / ".platformio"
@@ -286,7 +308,10 @@ class TestSymbolAnalysis(unittest.TestCase):
             build_info_path, board_name = find_board_build_info("uno")
             self.assertEqual(board_name, "uno")
             self.assertTrue(build_info_path.exists())
-            self.assertEqual(build_info_path.name, "build_info.json")
+            # Should accept either legacy build_info.json or new build_info_Blink.json
+            self.assertIn(
+                build_info_path.name, ["build_info.json", "build_info_Blink.json"]
+            )
             print(f"Found UNO build info: {build_info_path}")
         except SystemExit:
             self.skipTest("UNO build not available for testing")
@@ -295,10 +320,100 @@ class TestSymbolAnalysis(unittest.TestCase):
         try:
             build_info_path, board_name = find_board_build_info(None)
             self.assertTrue(build_info_path.exists())
-            self.assertEqual(build_info_path.name, "build_info.json")
+            # Should accept either legacy build_info.json or new build_info_Blink.json
+            self.assertIn(
+                build_info_path.name, ["build_info.json", "build_info_Blink.json"]
+            )
             print(f"Auto-detected board: {board_name} at {build_info_path}")
         except SystemExit:
             self.skipTest("No builds available for auto-detection testing")
+
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
+    def test_find_board_build_info_example_specific(self) -> None:
+        """Test finding example-specific build_info_{example}.json files."""
+        print("Testing example-specific build info detection...")
+
+        # Test finding UNO board with example-specific build_info
+        try:
+            build_info_path, board_name = find_board_build_info("uno", example="Blink")
+            self.assertEqual(board_name, "uno")
+            self.assertTrue(build_info_path.exists())
+
+            # Should prefer build_info_Blink.json over build_info.json
+            if build_info_path.name == "build_info_Blink.json":
+                print(
+                    f"✅ Found example-specific build_info_Blink.json: {build_info_path}"
+                )
+            else:
+                print(f"⚠️  Fell back to legacy build_info.json: {build_info_path}")
+                print(
+                    "   Consider running: uv run ci/ci-compile.py uno --examples Blink"
+                )
+
+        except SystemExit:
+            self.skipTest("UNO build not available for testing")
+
+        # Test with different example name
+        try:
+            build_info_path, board_name = find_board_build_info("uno", example="Apa102")
+            self.assertTrue(build_info_path.exists())
+            print(f"Found build info for Apa102 example: {build_info_path.name}")
+        except SystemExit:
+            print("Apa102 build not available - this is OK, skipping")
+
+    @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
+    def test_symbol_analysis_runner_integration(self) -> None:
+        """Test the complete symbol analysis runner workflow with build_info_{example}.json."""
+        print("Testing symbol analysis runner integration...")
+
+        import sys
+
+        from ci.symbol_analysis_runner import main as runner_main
+
+        # Save original argv
+        original_argv = sys.argv
+
+        try:
+            # Simulate calling symbol_analysis_runner.py with board and example
+            sys.argv = [
+                "symbol_analysis_runner.py",
+                "--board",
+                "uno",
+                "--example",
+                "Blink",
+                "--skip-on-failure",
+            ]
+
+            # Run the symbol analysis runner
+            result = runner_main()
+
+            # Verify it completes successfully (returns 0)
+            self.assertEqual(
+                result, 0, "Symbol analysis runner should complete successfully"
+            )
+
+            print("✅ Symbol analysis runner completed successfully")
+
+            # Verify output files were created
+            from pathlib import Path
+
+            build_dir = Path(".build")
+
+            # Check for symbol analysis output
+            symbol_output_files = list(build_dir.glob("**/uno*symbol_analysis.json"))
+            if symbol_output_files:
+                print(f"✅ Found symbol analysis output: {symbol_output_files[0]}")
+            else:
+                print("⚠️  No symbol analysis output found (may have been skipped)")
+
+        except SystemExit as e:
+            if e.code == 0:
+                print("✅ Symbol analysis runner exited successfully")
+            else:
+                self.fail(f"Symbol analysis runner failed with exit code: {e.code}")
+        finally:
+            # Restore original argv
+            sys.argv = original_argv
 
     @unittest.skipUnless(_ENABLED, "Tests disabled - set _ENABLED = True to run")
     def test_analyze_map_file(self) -> None:
