@@ -15,6 +15,7 @@
 #include "fl/xymap.h"
 #include "lib8tion/memmove.h"
 #include "fl/compiler_control.h"
+#include "fl/warn.h"
 
 // #include "pixeltypes.h"  // pulls in FastLED.h, beware.
 
@@ -265,6 +266,11 @@ typedef union {
     fl::u32 dword;   ///< values as a packed 32-bit double word
     fl::u8 bytes[4]; ///< values as an array
 } TRGBGradientPaletteEntryUnion;
+
+/// Maximum number of gradient palette entries to read before safety cutoff.
+/// Prevents buffer overruns when gradient palette is missing the required
+/// index=255 terminator entry.
+#define FASTLED_MAX_GRADIENT_PALETTE_ENTRIES 256
 
 typedef fl::u8
     TDynamicRGBGradientPalette_byte; ///< Byte of an RGB gradient entry, stored
@@ -772,12 +778,23 @@ class CRGBPalette16 {
             fl::bit_cast<TRGBGradientPaletteEntryUnion *>(progpal);
         TRGBGradientPaletteEntryUnion u;
 
-        // Count entries
+        // Count entries with safety limit to prevent buffer overrun
         fl::u16 count = 0;
+        bool has_terminator = false;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
             ++count;
-        } while (u.index != 255);
+            if (u.index == 255) {
+                has_terminator = true;
+                break;
+            }
+            if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                break;
+            }
+        } while (true);
 
         fl::i8 lastSlotUsed = -1;
 
@@ -787,11 +804,30 @@ class CRGBPalette16 {
         int indexstart = 0;
         fl::u8 istart8 = 0;
         fl::u8 iend8 = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (!has_terminator && entries_processed + 1 >= count) {
+                // No more validated entries - extend current color to 255
+                istart8 = indexstart / 16;
+                iend8 = 255 / 16;
+                if (count < 16) {
+                    if ((istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
+                        istart8 = lastSlotUsed + 1;
+                        if (iend8 < istart8) {
+                            iend8 = istart8;
+                        }
+                    }
+                }
+                fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbstart);
+                break;
+            }
+
             ++progent;
             u.dword = FL_PGM_READ_DWORD_NEAR(progent);
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
             istart8 = indexstart / 16;
             iend8 = indexend / 16;
             if (count < 16) {
@@ -806,6 +842,7 @@ class CRGBPalette16 {
             fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
@@ -819,12 +856,23 @@ class CRGBPalette16 {
             fl::bit_cast<TRGBGradientPaletteEntryUnion *>(gpal);
         TRGBGradientPaletteEntryUnion u;
 
-        // Count entries
+        // Count entries with safety limit to prevent buffer overrun
         fl::u16 count = 0;
+        bool has_terminator = false;
         do {
             u = *(ent + count);
             ++count;
-        } while (u.index != 255);
+            if (u.index == 255) {
+                has_terminator = true;
+                break;
+            }
+            if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                break;
+            }
+        } while (true);
 
         fl::i8 lastSlotUsed = -1;
 
@@ -834,11 +882,30 @@ class CRGBPalette16 {
         int indexstart = 0;
         fl::u8 istart8 = 0;
         fl::u8 iend8 = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (!has_terminator && entries_processed + 1 >= count) {
+                // No more validated entries - extend current color to 255
+                istart8 = indexstart / 16;
+                iend8 = 255 / 16;
+                if (count < 16) {
+                    if ((istart8 <= lastSlotUsed) && (lastSlotUsed < 15)) {
+                        istart8 = lastSlotUsed + 1;
+                        if (iend8 < istart8) {
+                            iend8 = istart8;
+                        }
+                    }
+                }
+                fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbstart);
+                break;
+            }
+
             ++ent;
             u = *ent;
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
             istart8 = indexstart / 16;
             iend8 = indexend / 16;
             if (count < 16) {
@@ -853,6 +920,7 @@ class CRGBPalette16 {
             fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
@@ -1187,12 +1255,23 @@ class CRGBPalette32 {
             fl::bit_cast<TRGBGradientPaletteEntryUnion *>(progpal);
         TRGBGradientPaletteEntryUnion u;
 
-        // Count entries
+        // Count entries with safety limit to prevent buffer overrun
         fl::u16 count = 0;
+        bool has_terminator = false;
         do {
             u.dword = FL_PGM_READ_DWORD_NEAR(progent + count);
             ++count;
-        } while (u.index != 255);
+            if (u.index == 255) {
+                has_terminator = true;
+                break;
+            }
+            if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                break;
+            }
+        } while (true);
 
         fl::i8 lastSlotUsed = -1;
 
@@ -1202,11 +1281,31 @@ class CRGBPalette32 {
         int indexstart = 0;
         fl::u8 istart8 = 0;
         fl::u8 iend8 = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (!has_terminator && entries_processed + 1 >= count) {
+                // No more validated entries - extend current color to 255
+                istart8 = indexstart / 8;
+                iend8 = 255 / 8;
+                if (count < 16) {
+                    if ((istart8 <= lastSlotUsed) && (lastSlotUsed < 31)) {
+                        istart8 = lastSlotUsed + 1;
+                        if (iend8 < istart8) {
+                            iend8 = istart8;
+                        }
+                    }
+                }
+                fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbstart);
+                break;
+            }
+
             ++progent;
             u.dword = FL_PGM_READ_DWORD_NEAR(progent);
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
+
             istart8 = indexstart / 8;
             iend8 = indexend / 8;
             if (count < 16) {
@@ -1221,6 +1320,7 @@ class CRGBPalette32 {
             fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
@@ -1233,12 +1333,23 @@ class CRGBPalette32 {
             fl::bit_cast<TRGBGradientPaletteEntryUnion *>(gpal);
         TRGBGradientPaletteEntryUnion u;
 
-        // Count entries
+        // Count entries with safety limit to prevent buffer overrun
         fl::u16 count = 0;
+        bool has_terminator = false;
         do {
             u = *(ent + count);
             ++count;
-        } while (u.index != 255);
+            if (u.index == 255) {
+                has_terminator = true;
+                break;
+            }
+            if (count >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                break;
+            }
+        } while (true);
 
         fl::i8 lastSlotUsed = -1;
 
@@ -1248,11 +1359,31 @@ class CRGBPalette32 {
         int indexstart = 0;
         fl::u8 istart8 = 0;
         fl::u8 iend8 = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (!has_terminator && entries_processed + 1 >= count) {
+                // No more validated entries - extend current color to 255
+                istart8 = indexstart / 8;
+                iend8 = 255 / 8;
+                if (count < 16) {
+                    if ((istart8 <= lastSlotUsed) && (lastSlotUsed < 31)) {
+                        istart8 = lastSlotUsed + 1;
+                        if (iend8 < istart8) {
+                            iend8 = istart8;
+                        }
+                    }
+                }
+                fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbstart);
+                break;
+            }
+
             ++ent;
             u = *ent;
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
+
             istart8 = indexstart / 8;
             iend8 = indexend / 8;
             if (count < 16) {
@@ -1267,6 +1398,7 @@ class CRGBPalette32 {
             fill_gradient_RGB(&(entries[0]), istart8, rgbstart, iend8, rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
@@ -1451,15 +1583,28 @@ class CRGBPalette256 {
         CRGB rgbstart(u.r, u.g, u.b);
 
         int indexstart = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (entries_processed >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("DEFINE_GRADIENT_PALETTE missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                // Extend current color to 255
+                fill_gradient_RGB(&(entries[0]), indexstart, rgbstart, 255, rgbstart);
+                break;
+            }
+
             ++progent;
             u.dword = FL_PGM_READ_DWORD_NEAR(progent);
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
             fill_gradient_RGB(&(entries[0]), indexstart, rgbstart, indexend,
                               rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
@@ -1475,15 +1620,28 @@ class CRGBPalette256 {
         CRGB rgbstart(u.r, u.g, u.b);
 
         int indexstart = 0;
+        fl::u16 entries_processed = 0;
         while (indexstart < 255) {
+            // Safety: check BEFORE reading to prevent buffer overrun
+            if (entries_processed >= FASTLED_MAX_GRADIENT_PALETTE_ENTRIES) {
+                FL_WARN("Dynamic gradient palette missing index=255 terminator! "
+                        "This will cause buffer overruns and crashes. "
+                        "Auto-correcting but please fix your gradient definition.");
+                // Extend current color to 255
+                fill_gradient_RGB(&(entries[0]), indexstart, rgbstart, 255, rgbstart);
+                break;
+            }
+
             ++ent;
             u = *ent;
             int indexend = u.index;
             CRGB rgbend(u.r, u.g, u.b);
+
             fill_gradient_RGB(&(entries[0]), indexstart, rgbstart, indexend,
                               rgbend);
             indexstart = indexend;
             rgbstart = rgbend;
+            ++entries_processed;
         }
         return *this;
     }
