@@ -672,14 +672,11 @@ class DockerQEMURunner:
             if temp_firmware_dir and temp_firmware_dir.exists():
                 shutil.rmtree(temp_firmware_dir, ignore_errors=True)
 
-            # Ensure container is stopped and removed
-            if self.container_name:
-                try:
-                    # Stop and remove container
-                    run_docker_command_no_fail(["docker", "stop", self.container_name])
-                    run_docker_command_no_fail(["docker", "rm", self.container_name])
-                except:
-                    pass
+            # Note: Container cleanup is handled automatically by the --rm flag
+            # in run_container_streaming(). The container is automatically removed
+            # when it exits, so we don't need to manually stop/rm it here.
+            # Attempting cleanup here creates race conditions when DockerManager
+            # already stops the container on timeout.
 
 
 def main():
