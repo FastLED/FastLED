@@ -86,6 +86,60 @@ meson.build (root)          → Source discovery, library compilation
 
 **If violations found**: Recommend refactoring similar to `tests/meson.build` (see git history)
 
+### **/*.h and **/*.cpp changes - FILE/CLASS NAME NORMALIZATION
+
+**Core Principle**: Header and source file names MUST match the primary class/type they define.
+
+**Naming Convention Rules**:
+1. **One-to-One Mapping**: File name matches primary class name
+   - Class `BulkStrip` → File `bulk_strip.h` + `bulk_strip.cpp`
+   - Class `ColorAdjustment` → File `color_adjustment.h` + `color_adjustment.cpp`
+   - Class `ActiveStripTracker` → File `active_strip_tracker.h` + `active_strip_tracker.cpp`
+
+2. **Case Convention**:
+   - C++ files: `snake_case` (all lowercase with underscores)
+   - Classes: `PascalCase` (capitalize each word)
+   - Example: `BulkClockless` → `bulk_clockless.h`
+
+3. **Name by WHAT it IS, not by role**:
+   - ✅ Good: `bulk_strip.h` (describes the entity)
+   - ❌ Bad: `sub_controller.h` (describes internal implementation detail)
+   - ✅ Good: `peripheral_tags.h` (describes what it contains)
+   - ❌ Bad: `type_markers.h` (too generic/vague)
+
+4. **Multi-Class Files** (rare exceptions - must be justified):
+   - OK: `peripheral_tags.h` - Contains multiple related tag types and traits
+   - OK: `constants.h` - Contains multiple constant definitions
+   - OK: `color.h` - Contains color enums, but consider if primary type warrants name
+   - NOT OK: `utilities.h` containing `BulkStrip` class (rename to `bulk_strip.h`)
+
+**Check Process**:
+1. For each new/modified .h file, extract primary class name(s)
+2. Convert class name to snake_case
+3. Compare with actual filename
+4. If mismatch:
+   - **Minor mismatch** (e.g., `strip_controller.h` → `bulk_strip.h`): Suggest rename
+   - **Major mismatch** (e.g., `sub_controller.h` → `bulk_strip.h`): Flag as violation, ask for fix
+   - **Multi-class file**: Verify it's justified (related utilities/tags/constants)
+
+**Examples of Violations**:
+```cpp
+// ❌ VIOLATION: File "sub_controller.h" contains class BulkStrip
+// Fix: Rename to "bulk_strip.h" + "bulk_strip.cpp"
+
+// ❌ VIOLATION: File "helpers.h" contains single class BulkStripHelper
+// Fix: Rename to "bulk_strip_helper.h"
+
+// ✅ ACCEPTABLE: File "peripheral_tags.h" contains LCD_I80, RMT, I2S, SPI_BULK tags
+// Reason: Multiple related types, descriptive collective name
+```
+
+**Action on Violation**:
+- Report the mismatch with exact file and class names
+- Suggest correct file name following snake_case convention
+- For new files: Fix immediately by asking user to rename
+- For existing files: Create GitHub issue or ask user if they want to rename now
+
 ## Output Format
 
 ```
@@ -93,12 +147,17 @@ meson.build (root)          → Source discovery, library compilation
 
 ### File-by-file Analysis
 - **src/file.cpp**: [no issues / violations found]
+- **src/sub_controller.h**: [VIOLATION: Filename mismatch - contains BulkStrip class, should be bulk_strip.h]
 - **examples/file.ino**: [status and action taken]
 - **ci/script.py**: [violations / fixes applied]
 
 ### Summary
 - Files reviewed: N
 - Violations found: N
+  - Try-catch blocks: N
+  - Filename mismatches: N
+  - Type annotation issues: N
+  - Other: N
 - Violations fixed: N
 - User confirmations needed: N
 ```
