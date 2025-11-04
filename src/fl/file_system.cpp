@@ -2,6 +2,7 @@
 #include "fl/codec/idecoder.h"
 #include "fl/unused.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
 #include "fl/compiler_control.h"
 #include "fl/has_include.h"
 #include "fl/codec/jpeg.h"

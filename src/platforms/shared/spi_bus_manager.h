@@ -2,6 +2,7 @@
 
 #include "fl/vector.h"
 #include "fl/warn.h"
+#include "fl/strstream.h"  // Required for FL_WARN_FMT
 #include "fl/dbg.h"
 #include "fl/log.h"
 #include "fl/stdint.h"
@@ -118,13 +119,13 @@ public:
         // Find or create bus for this clock pin
         SPIBusInfo* bus = getOrCreateBus(clock_pin);
         if (!bus) {
-            FL_WARN("SPIBusManager: Too many different clock pins (max " << MAX_BUSES << ")");
+            FL_WARN_FMT("SPIBusManager: Too many different clock pins (max " << MAX_BUSES << ")");
             return SPIBusHandle();
         }
 
         // Check if we can add another device to this bus
         if (bus->num_devices >= 8) {
-            FL_WARN("SPIBusManager: Too many devices on clock pin " << clock_pin << " (max 8)");
+            FL_WARN_FMT("SPIBusManager: Too many devices on clock pin " << clock_pin << " (max 8)");
             return SPIBusHandle();
         }
 
@@ -362,7 +363,7 @@ public:
             // Acquire DMA buffer (zero-copy API)
             DMABuffer result = dual->acquireDMABuffer(max_size);
             if (!result.ok()) {
-                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Dual-SPI: " << static_cast<int>(result.error()));
+                FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Dual-SPI: " << static_cast<int>(result.error()));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -389,7 +390,7 @@ public:
             // Transpose lanes directly into DMA buffer (zero-copy!)
             const char* error = nullptr;
             if (!SPITransposer::transpose2(lane0, lane1, dma_buf, &error)) {
-                FL_WARN("SPI Bus Manager: Dual transpose failed - " << (error ? error : "unknown error"));
+                FL_WARN_FMT("SPI Bus Manager: Dual transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -442,7 +443,7 @@ public:
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
             result = octal->acquireDMABuffer(max_size);
             if (!result.ok()) {
-                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Octal-SPI: " << static_cast<int>(result.error()));
+                FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Octal-SPI: " << static_cast<int>(result.error()));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -454,7 +455,7 @@ public:
             SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
             result = quad->acquireDMABuffer(max_size);
             if (!result.ok()) {
-                FL_WARN("SPI Bus Manager: Failed to acquire DMA buffer for Quad-SPI: " << static_cast<int>(result.error()));
+                FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Quad-SPI: " << static_cast<int>(result.error()));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -492,7 +493,7 @@ public:
 
             // Transpose lanes directly into DMA buffer (zero-copy!)
             if (!SPITransposer::transpose8(lanes, dma_buf, &error)) {
-                FL_WARN("SPI Bus Manager: Octal transpose failed - " << (error ? error : "unknown error"));
+                FL_WARN_FMT("SPI Bus Manager: Octal transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -526,7 +527,7 @@ public:
 
             // Transpose lanes directly into DMA buffer (zero-copy!)
             if (!SPITransposer::transpose4(lanes[0], lanes[1], lanes[2], lanes[3], dma_buf, &error)) {
-                FL_WARN("SPI Bus Manager: Quad transpose failed - " << (error ? error : "unknown error"));
+                FL_WARN_FMT("SPI Bus Manager: Quad transpose failed - " << (error ? error : "unknown error"));
                 // Clear buffers and bail
                 for (auto& lane_buffer : bus.lane_buffers) {
                     lane_buffer.clear();
@@ -554,7 +555,7 @@ public:
         }
 
         if (!transmit_ok) {
-            FL_WARN("SPI Bus Manager: " << (is_octal_mode ? "Octal" : "Quad") << "-SPI transmit failed");
+            FL_WARN_FMT("SPI Bus Manager: " << (is_octal_mode ? "Octal" : "Quad") << "-SPI transmit failed");
         }
 
         // Clear lane buffers for next frame
@@ -647,18 +648,18 @@ private:
                     default: break;
                 }
                 (void)type_name;  // Suppress unused variable warning when FL_WARN is a no-op
-                FL_WARN("SPI Manager: Promoted clock pin " << bus.clock_pin << " to " << type_name << " (" << bus.num_devices << " devices)");
+                FL_WARN_FMT("SPI Manager: Promoted clock pin " << bus.clock_pin << " to " << type_name << " (" << bus.num_devices << " devices)");
                 return true;
             } else {
                 // Promotion failed - disable conflicting devices
-                FL_WARN("SPI Manager: Cannot promote clock pin " << bus.clock_pin << " (platform limitation)");
+                FL_WARN_FMT("SPI Manager: Cannot promote clock pin " << bus.clock_pin << " (platform limitation)");
                 disableConflictingDevices(bus);
                 return false;
             }
         }
 
         // Too many devices
-        FL_WARN("SPI Manager: Too many devices on clock pin " << bus.clock_pin << " (" << bus.num_devices << " devices)");
+        FL_WARN_FMT("SPI Manager: Too many devices on clock pin " << bus.clock_pin << " (" << bus.num_devices << " devices)");
         disableConflictingDevices(bus);
         return false;
     }
@@ -858,7 +859,7 @@ private:
         // Keep first device enabled, disable all others
         for (uint8_t i = 1; i < bus.num_devices; i++) {
             bus.devices[i].is_enabled = false;
-            FL_WARN("SPI Manager: Disabled device " << i << " on clock pin " << bus.clock_pin << " (conflict)");
+            FL_WARN_FMT("SPI Manager: Disabled device " << i << " on clock pin " << bus.clock_pin << " (conflict)");
         }
 
         // Initialize first device as single SPI
@@ -894,7 +895,7 @@ private:
         // Clamp to platform-specific maximum
         uint32_t platform_max = getPlatformMaxSpeed();
         if (min_speed > platform_max) {
-            FL_WARN("SPI: Requested speed " << min_speed << " Hz exceeds platform max "
+            FL_WARN_FMT("SPI: Requested speed " << min_speed << " Hz exceeds platform max "
                     << platform_max << " Hz, clamping to " << platform_max);
             min_speed = platform_max;
         }
