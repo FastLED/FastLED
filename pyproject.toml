@@ -42,7 +42,7 @@ dependencies = [
     "docker>=7.0.0",
     "pillow>=11.3.0",
     "ffmpeg-python>=0.2.0",
-    "fastled>=1.4.48",
+    "fastled>=1.4.50",
     "running-process>=1.0.6",
 ]
 
