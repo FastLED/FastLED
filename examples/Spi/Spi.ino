@@ -3,6 +3,7 @@
 // @filter (mem is high)
 
 #include "FastLED.h"
+#include "fl/dbg.h"
 
 #define CLOCK_PIN 3
 
