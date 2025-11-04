@@ -16,6 +16,7 @@
 #include "fl/cstring.h"
 #include "fl/allocator.h"
 #include "fl/map.h"
+#include "fl/dbg.h"
 
 // Hardware headers for RP2040/RP2350
 #include "hardware/pio.h"
