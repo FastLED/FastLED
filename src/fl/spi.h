@@ -88,7 +88,15 @@ public:
     /// @note Call wait() to block until transmission completes
     /// @note Internally unpacks to FixedVector for atomic processing (no heap allocation)
     /// @note Hardware modes (SPI_HW) support 1-8 lanes, software modes support up to 32 lanes
+    /// @note **IMPORTANT**: All lanes MUST have identical sizes. Operation fails if sizes differ.
+    /// @note Users must handle chipset-specific padding at application level before calling write()
     /// @code{.cpp}
+    /// // All lanes must have the same size!
+    /// fl::array<uint8_t, 100> lane0 = {...};
+    /// fl::array<uint8_t, 100> lane1 = {...};  // Same size!
+    /// fl::array<uint8_t, 100> lane2 = {...};  // Same size!
+    /// fl::array<uint8_t, 100> lane3 = {...};  // Same size!
+    ///
     /// // Async usage (fire and forget)
     /// auto result = spi.write(lane0, lane1, lane2, lane3);
     /// if (!result.ok) {

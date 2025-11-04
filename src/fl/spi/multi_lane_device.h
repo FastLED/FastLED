@@ -103,7 +103,8 @@ public:
     /// @returns Result containing Transaction handle or error
     /// @note Transposes all lane buffers and transmits via hardware DMA
     /// @note Clears all lane buffers after transmission starts
-    /// @note If lanes have different sizes, shorter lanes are zero-padded
+    /// @note All non-empty lanes MUST have identical sizes - operation fails with error if sizes differ
+    /// @note Zero-padding is NOT performed - size validation prevents unreliable chipset-specific padding issues
     Result<Transaction> flush();
 
     /// @brief Wait for pending transmission to complete
@@ -141,11 +142,13 @@ public:
     /// @returns WriteResult with ok=true on success, or ok=false with error message
     /// @note Automatically waits for previous transmission, then starts new one **asynchronously**
     /// @note Call wait() to block until transmission completes
+    /// @note **IMPORTANT**: All lanes MUST have identical sizes. Operation fails if sizes differ.
+    /// @note Users must handle chipset-specific padding at application level before calling write()
     /// @code{.cpp}
     /// fl::array<uint8_t, 16> lane0 = {...};
-    /// fl::array<uint8_t, 3>  lane1 = {...};
-    /// fl::array<uint8_t, 8>  lane2 = {...};
-    /// fl::array<uint8_t, 24> lane3 = {...};
+    /// fl::array<uint8_t, 16> lane1 = {...};  // Same size as lane0!
+    /// fl::array<uint8_t, 16> lane2 = {...};  // Same size as lane0!
+    /// fl::array<uint8_t, 16> lane3 = {...};  // Same size as lane0!
     ///
     /// // Async usage - transmission happens in background
     /// auto result = spi->write(lane0, lane1, lane2, lane3);

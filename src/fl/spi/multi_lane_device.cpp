@@ -313,19 +313,36 @@ Result<Transaction> MultiLaneDevice::flush() {
             "Device not initialized");
     }
 
-    // Find maximum lane size for transposition
-    size_t max_size = 0;
-    for (const auto& lane : pImpl->lanes) {
-        if (lane.bufferSize() > max_size) {
-            max_size = lane.bufferSize();
+    // Find lane sizes and validate all non-empty lanes have the same size
+    size_t expected_size = 0;
+    bool found_first = false;
+
+    for (size_t i = 0; i < pImpl->lanes.size(); i++) {
+        size_t lane_size = pImpl->lanes[i].bufferSize();
+
+        if (lane_size > 0) {
+            if (!found_first) {
+                // First non-empty lane sets the expected size
+                expected_size = lane_size;
+                found_first = true;
+            } else if (lane_size != expected_size) {
+                // Size mismatch detected
+                FL_WARN("MultiLaneDevice: Lane size mismatch - expected " << expected_size
+                        << " bytes (lane 0), but lane " << i << " has " << lane_size << " bytes");
+                return Result<Transaction>::failure(SPIError::INVALID_PARAMETER,
+                    "Lane size mismatch: all lanes must have identical sizes");
+            }
         }
     }
 
-    if (max_size == 0) {
+    if (expected_size == 0) {
         FL_WARN("MultiLaneDevice: No data to flush (all lanes empty)");
         return Result<Transaction>::failure(SPIError::ALLOCATION_FAILED,
             "No data to transmit");
     }
+
+    // Use expected_size for DMA buffer allocation (all lanes now guaranteed same size)
+    size_t max_size = expected_size;
 
     // Acquire DMA buffer from hardware backend
     DMABuffer dma_buffer;
@@ -362,18 +379,19 @@ Result<Transaction> MultiLaneDevice::flush() {
             fl::span<const uint8_t> lane_data = pImpl->lanes[0].data();
             fl::span<uint8_t> dma_data = dma_buffer.data();
 
-            // Copy lane data to DMA buffer
-            size_t copy_size = (lane_data.size() < dma_data.size()) ? lane_data.size() : dma_data.size();
-            for (size_t i = 0; i < copy_size; i++) {
-                dma_data[i] = lane_data[i];
+            // Verify sizes match (DMA buffer should be exactly the size we requested)
+            if (lane_data.size() != dma_data.size()) {
+                FL_WARN("MultiLaneDevice: DMA buffer size mismatch - expected " << lane_data.size()
+                        << " bytes, got " << dma_data.size() << " bytes");
+                error = "DMA buffer size mismatch";
+                transpose_ok = false;
+            } else {
+                // Copy lane data to DMA buffer
+                for (size_t i = 0; i < lane_data.size(); i++) {
+                    dma_data[i] = lane_data[i];
+                }
+                transpose_ok = true;
             }
-
-            // Zero-fill remaining bytes if lane is shorter
-            for (size_t i = copy_size; i < dma_data.size(); i++) {
-                dma_data[i] = 0;
-            }
-
-            transpose_ok = true;
         } else {
             error = "No lanes configured";
             transpose_ok = false;
@@ -522,6 +540,18 @@ WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const uint8_t>> l
         FL_WARN("MultiLaneDevice: Too many lanes provided (" << lane_data.size()
                 << " > " << pImpl->lanes.size() << ")");
         return WriteResult("Too many lanes provided");
+    }
+
+    // Validate that all lanes have the same size (required for reliable transposition)
+    if (lane_data.size() > 1) {
+        size_t first_size = lane_data[0].size();
+        for (size_t i = 1; i < lane_data.size(); i++) {
+            if (lane_data[i].size() != first_size) {
+                FL_WARN("MultiLaneDevice: Lane size mismatch - lane 0 has " << first_size
+                        << " bytes, lane " << i << " has " << lane_data[i].size() << " bytes");
+                return WriteResult("Lane size mismatch: all lanes must have identical sizes");
+            }
+        }
     }
 
     // Wait for previous transmission to complete

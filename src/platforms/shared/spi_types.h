@@ -26,7 +26,8 @@ enum class SPIError : uint8_t {
     BUFFER_TOO_LARGE,   ///< Requested buffer size exceeds platform maximum
     ALLOCATION_FAILED,  ///< Memory allocation failed
     BUSY,               ///< Previous transmission still in progress
-    NOT_SUPPORTED       ///< Operation not supported (e.g., RX on TX-only SPI)
+    NOT_SUPPORTED,      ///< Operation not supported (e.g., RX on TX-only SPI)
+    INVALID_PARAMETER   ///< Invalid parameter provided (e.g., lane size mismatch)
 };
 
 /// @brief Stream operator for SPIError (enables use with FL_DBG/FL_WARN macros)
