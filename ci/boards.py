@@ -930,6 +930,17 @@ ATMEGA32U4_LEONARDO = Board(
     framework="arduino",
 )
 
+ATMEGA8A = Board(
+    board_name="atmega8a",
+    real_board_name="ATmega8",  # PlatformIO board ID (supports ATmega8/A)
+    platform="atmelavr",
+    framework="arduino",
+    board_build_mcu="atmega8a",  # Override to specifically target ATmega8A
+    lib_ignore=[
+        "SoftwareSerial"
+    ],  # ATmega8A lacks PCMSK registers needed by SoftwareSerial
+)
+
 # ESP8266 boards
 ESP8266 = Board(
     board_name="esp8266",

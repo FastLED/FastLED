@@ -32,6 +32,7 @@ void loop() {
 
     // Example data for each lane (different sizes are OK - shorter lanes are zero-padded)
     // Using C arrays and manual initialization for AVR compatibility
+    // TODO: lanes now must be all the same size, else runtime warning and spi will fail to transfer.
     static const uint8_t lane0[] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
                                           0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00};
     static const uint8_t lane1[] = {0xAA, 0x55, 0xAA};
