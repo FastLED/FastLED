@@ -19,6 +19,7 @@
 #include "fl/chipsets/timing_traits.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/eorder.h"
+#include "fl/clockless/chipset.h"
 
 namespace fl {
 
@@ -121,6 +122,48 @@ struct ChipsetTraits {
         return {T1, T2, T3, RESET, "clockless"};
     }
 };
+
+/// @brief ChipsetTraits specializations for Chipset type tags
+/// Map chipset types to their corresponding timing structs
+///
+/// Fast-Speed Chipsets (800kHz - 1600kHz range)
+template <> struct ChipsetTraits<Chipset::GE8822> : ChipsetTraits<TIMING_GE8822_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::WS2812> : ChipsetTraits<TIMING_WS2812_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::WS2812_LEGACY> : ChipsetTraits<TIMING_WS2812_800KHZ_LEGACY> {};
+template <> struct ChipsetTraits<Chipset::WS2813> : ChipsetTraits<TIMING_WS2813> {};
+template <> struct ChipsetTraits<Chipset::SK6812> : ChipsetTraits<TIMING_SK6812> {};
+template <> struct ChipsetTraits<Chipset::SK6822> : ChipsetTraits<TIMING_SK6822> {};
+template <> struct ChipsetTraits<Chipset::UCS1903B> : ChipsetTraits<TIMING_UCS1903B_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::UCS1904> : ChipsetTraits<TIMING_UCS1904_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::UCS2903> : ChipsetTraits<TIMING_UCS2903> {};
+template <> struct ChipsetTraits<Chipset::TM1809> : ChipsetTraits<TIMING_TM1809_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::TM1829_800> : ChipsetTraits<TIMING_TM1829_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::TM1829_1600> : ChipsetTraits<TIMING_TM1829_1600KHZ> {};
+template <> struct ChipsetTraits<Chipset::LPD1886> : ChipsetTraits<TIMING_LPD1886_1250KHZ> {};
+template <> struct ChipsetTraits<Chipset::PL9823> : ChipsetTraits<TIMING_PL9823> {};
+template <> struct ChipsetTraits<Chipset::SM16703> : ChipsetTraits<TIMING_SM16703> {};
+template <> struct ChipsetTraits<Chipset::SM16824E> : ChipsetTraits<TIMING_SM16824E> {};
+
+/// Medium-Speed Chipsets (400kHz - 600kHz range)
+template <> struct ChipsetTraits<Chipset::WS2811_400> : ChipsetTraits<TIMING_WS2811_400KHZ> {};
+template <> struct ChipsetTraits<Chipset::WS2815> : ChipsetTraits<TIMING_WS2815> {};
+template <> struct ChipsetTraits<Chipset::UCS1903> : ChipsetTraits<TIMING_UCS1903_400KHZ> {};
+template <> struct ChipsetTraits<Chipset::DP1903_400> : ChipsetTraits<TIMING_DP1903_400KHZ> {};
+template <> struct ChipsetTraits<Chipset::TM1803> : ChipsetTraits<TIMING_TM1803_400KHZ> {};
+template <> struct ChipsetTraits<Chipset::GW6205_400> : ChipsetTraits<TIMING_GW6205_400KHZ> {};
+template <> struct ChipsetTraits<Chipset::UCS1912> : ChipsetTraits<TIMING_UCS1912> {};
+
+/// Legacy/Special Chipsets
+template <> struct ChipsetTraits<Chipset::WS2811_800_LEGACY> : ChipsetTraits<TIMING_WS2811_800KHZ_LEGACY> {};
+template <> struct ChipsetTraits<Chipset::GW6205_800> : ChipsetTraits<TIMING_GW6205_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::DP1903_800> : ChipsetTraits<TIMING_DP1903_800KHZ> {};
+
+/// RGBW Chipsets
+template <> struct ChipsetTraits<Chipset::TM1814> : ChipsetTraits<TIMING_TM1814> {};
+
+/// UCS7604 Special 16-Bit RGBW Controller
+template <> struct ChipsetTraits<Chipset::UCS7604_800> : ChipsetTraits<TIMING_UCS7604_800KHZ> {};
+template <> struct ChipsetTraits<Chipset::UCS7604_1600> : ChipsetTraits<TIMING_UCS7604_1600KHZ> {};
 
 /// Trait to get human-readable peripheral name for diagnostic messages
 ///

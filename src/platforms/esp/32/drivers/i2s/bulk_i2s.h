@@ -47,14 +47,14 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<WS2812_CHIPSET, I2S>* bulk =
-///     &FastLED.addBulkLeds<WS2812_CHIPSET, I2S>({
+/// BulkClockless<Chipset::WS2812, I2S>* bulk =
+///     &FastLED.addBulkLeds<Chipset::WS2812, I2S>({
 ///         {2, strip1, 100, screenmap1},
 ///         {4, strip2, 100, screenmap2}
 ///     });
 /// @endcode
 template <>
-class BulkClockless<WS2812_CHIPSET, I2S>
+class BulkClockless<Chipset::WS2812, I2S>
     : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
   public:
     /// Maximum number of strips supported by I2S peripheral
@@ -271,7 +271,7 @@ class BulkClockless<WS2812_CHIPSET, I2S>
         buildStripArrays();
 
         // Initialize I2S with timing
-        ChipsetTiming timing = ChipsetTraits<WS2812_CHIPSET>::runtime_timing();
+        ChipsetTiming timing = ChipsetTraits<Chipset::WS2812>::runtime_timing();
 
 #if defined(CONFIG_IDF_TARGET_ESP32S3)
         // ESP32-S3: Use InternalI2SDriver

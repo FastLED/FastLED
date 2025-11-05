@@ -14,7 +14,7 @@
 /// @par Example Usage (brace-init):
 /// @code
 /// CRGB strip1[100], strip2[100];
-/// auto& bulk = FastLED.addBulkLeds<WS2812_CHIPSET, RMT>({
+/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>({
 ///     {2, strip1, 100, ScreenMap()},
 ///     {4, strip2, 100, ScreenMap()}
 /// });
@@ -27,7 +27,7 @@
 /// vector<BulkStripConfig> configs;
 /// configs.push_back({2, strip1, 100, ScreenMap()});
 /// configs.push_back({4, strip2, 100, ScreenMap()});
-/// auto& bulk = FastLED.addBulkLeds<WS2812_CHIPSET, RMT>(
+/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>(
 ///     span<const BulkStripConfig>(configs.data(), configs.size()));
 /// @endcode
 ///
@@ -141,7 +141,7 @@ struct BulkClocklessHelper {
 /// @warning **CRITICAL**: Do NOT call add() or remove() during FastLED.show().
 /// Wait for show() to complete before modifying strip configuration.
 ///
-/// @tparam CHIPSET LED chipset type (e.g., WS2812_CHIPSET)
+/// @tparam CHIPSET LED chipset type (e.g., Chipset::WS2812)
 /// @tparam PERIPHERAL Hardware peripheral type (e.g., LCD_I80, RMT, I2S)
 template <typename CHIPSET, typename PERIPHERAL>
 class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {

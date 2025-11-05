@@ -23,7 +23,7 @@
 /// #include "fl/clockless.h"
 ///
 /// CRGB strip1[100], strip2[100];
-/// auto& bulk = FastLED.addBulkLeds<WS2812_CHIPSET, RMT>({
+/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>({
 ///     {2, strip1, 100, ScreenMap()},
 ///     {4, strip2, 100, ScreenMap()}
 /// });

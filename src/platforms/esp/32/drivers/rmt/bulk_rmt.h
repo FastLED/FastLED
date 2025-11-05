@@ -42,13 +42,13 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<WS2812, RMT>* bulk = &FastLED.addBulkLeds<WS2812, RMT>({
+/// BulkClockless<Chipset::WS2812, RMT>* bulk = &FastLED.addBulkLeds<Chipset::WS2812, RMT>({
 ///     {2, strip1, 100, screenmap1},
 ///     {4, strip2, 100, screenmap2}
 /// });
 /// @endcode
 template <>
-class BulkClockless<WS2812_CHIPSET, RMT>
+class BulkClockless<Chipset::WS2812, RMT>
     : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
   public:
     /// Constructor with initializer list
@@ -258,7 +258,7 @@ class BulkClockless<WS2812_CHIPSET, RMT>
     /// Called when a strip is added - create RMT controller for it
     void onStripAdded(int pin) {
         // Create RMT controller for this pin
-        auto timing = ChipsetTraits<WS2812_CHIPSET>::runtime_timing();
+        auto timing = ChipsetTraits<Chipset::WS2812>::runtime_timing();
         RmtController5LowLevel *rmt =
             new RmtController5LowLevel(pin, timing, 280);
         mRmtControllers[pin] = rmt;

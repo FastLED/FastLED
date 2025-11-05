@@ -41,14 +41,14 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<WS2812_CHIPSET, LCD_I80>* bulk =
-///     &FastLED.addBulkLeds<WS2812_CHIPSET, LCD_I80>({
+/// BulkClockless<Chipset::WS2812, LCD_I80>* bulk =
+///     &FastLED.addBulkLeds<Chipset::WS2812, LCD_I80>({
 ///         {8, strip1, 100, screenmap1},
 ///         {9, strip2, 100, screenmap2}
 ///     });
 /// @endcode
 template <>
-class BulkClockless<WS2812_CHIPSET, LCD_I80>
+class BulkClockless<Chipset::WS2812, LCD_I80>
     : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
   public:
     /// Maximum number of strips supported by LCD_I80 peripheral
