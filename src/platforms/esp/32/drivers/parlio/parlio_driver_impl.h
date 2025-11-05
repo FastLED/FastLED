@@ -39,6 +39,81 @@ namespace detail {
 inline const char* parlio_err_to_str(esp_err_t err) {
     return esp_err_to_name(err);
 }
+
+// WS2812 timing patterns (4 bits per LED bit at 3.2 MHz)
+// Each 4-bit group: 1000 = T0H+T0L (0.4μs+0.85μs), 1110 = T1H+T1L (0.8μs+0.45μs)
+static constexpr uint16_t WS2812_BITPATTERNS[16] = {
+    0b1000100010001000, 0b1000100010001110, 0b1000100011101000, 0b1000100011101110,
+    0b1000111010001000, 0b1000111010001110, 0b1000111011101000, 0b1000111011101110,
+    0b1110100010001000, 0b1110100010001110, 0b1110100011101000, 0b1110100011101110,
+    0b1110111010001000, 0b1110111010001110, 0b1110111011101000, 0b1110111011101110,
+};
+
+// Generate 32-bit waveform for 8-bit color value
+// Input: color byte (0-255)
+// Output: 32-bit pattern encoding 8 LED bits as timing waveforms
+inline uint32_t generate_waveform(uint8_t value) {
+    const uint16_t p1 = WS2812_BITPATTERNS[value >> 4];    // High nibble
+    const uint16_t p2 = WS2812_BITPATTERNS[value & 0x0F];  // Low nibble
+    return (uint32_t(p2) << 16) | p1;
+}
+
+// Pack 32 time-slices for 1-bit width (32 slices → 4 bytes)
+inline void process_1bit(uint8_t* buffer, const uint32_t* slices) {
+    uint32_t packed = 0;
+    for (int i = 0; i < 32; ++i) {
+        if (slices[i] & 0x01) packed |= (1 << i);
+    }
+    *reinterpret_cast<uint32_t*>(buffer) = packed;
+}
+
+// Pack 32 time-slices for 2-bit width (32 slices → 8 bytes)
+inline void process_2bit(uint8_t* buffer, const uint32_t* slices) {
+    uint32_t* out = reinterpret_cast<uint32_t*>(buffer);
+    uint32_t word0 = 0, word1 = 0;
+    for (int i = 0; i < 16; ++i) {
+        word0 |= ((slices[i] & 0x03) << (i * 2));
+        word1 |= ((slices[i+16] & 0x03) << (i * 2));
+    }
+    out[0] = word0;
+    out[1] = word1;
+}
+
+// Pack 32 time-slices for 4-bit width (32 slices → 16 bytes)
+inline void process_4bit(uint8_t* buffer, const uint32_t* slices) {
+    uint32_t* out = reinterpret_cast<uint32_t*>(buffer);
+    uint32_t word0 = 0, word1 = 0, word2 = 0, word3 = 0;
+    for (int i = 0; i < 8; ++i) {
+        word0 |= ((slices[i] & 0x0F) << (i * 4));
+        word1 |= ((slices[i+8] & 0x0F) << (i * 4));
+        word2 |= ((slices[i+16] & 0x0F) << (i * 4));
+        word3 |= ((slices[i+24] & 0x0F) << (i * 4));
+    }
+    out[0] = word0; out[1] = word1; out[2] = word2; out[3] = word3;
+}
+
+// Pack 32 time-slices for 8-bit width (32 slices → 32 bytes)
+inline void process_8bit(uint8_t* buffer, const uint32_t* slices) {
+    uint32_t* out = reinterpret_cast<uint32_t*>(buffer);
+    for (int i = 0; i < 8; ++i) {
+        const int base = i * 4;
+        out[i] = (slices[base] & 0xFF) |
+                 ((slices[base+1] & 0xFF) << 8) |
+                 ((slices[base+2] & 0xFF) << 16) |
+                 ((slices[base+3] & 0xFF) << 24);
+    }
+}
+
+// Pack 32 time-slices for 16-bit width (32 slices → 64 bytes)
+inline void process_16bit(uint8_t* buffer, const uint32_t* slices) {
+    uint32_t* out = reinterpret_cast<uint32_t*>(buffer);
+    for (int i = 0; i < 16; ++i) {
+        const int base = i * 2;
+        out[i] = (slices[base] & 0xFFFF) |
+                 ((slices[base+1] & 0xFFFF) << 16);
+    }
+}
+
 } // namespace detail
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
@@ -88,46 +163,22 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
         PARLIO_DLOG("Using configured clock frequency: " << config_.clock_freq_hz << " Hz");
     }
 
-    // Calculate buffer size: num_leds * 24 bytes (1 byte per bit-time)
-    // Each LED has 24 bits (GRB), we send 1 byte per bit-time regardless of DATA_WIDTH
-    buffer_size_ = num_leds * 24;
-    PARLIO_DLOG("Calculated buffer_size: " << buffer_size_ << " bytes");
+    // Calculate expanded buffer size for waveform encoding
+    // 3 color components × 32-bit waveform each = 96 bits per LED
+    // Then multiply by DATA_WIDTH for parallel strips
+    const uint32_t SYMBOLS_PER_LED = 96;  // 3 components × 32 bits each
+    const uint32_t BITS_PER_LED = SYMBOLS_PER_LED * DATA_WIDTH;
+    buffer_size_ = (num_leds * BITS_PER_LED + 7) / 8;  // Convert to bytes
+    PARLIO_DLOG("Calculated buffer_size: " << buffer_size_ << " bytes (SYMBOLS_PER_LED=" << SYMBOLS_PER_LED << ", BITS_PER_LED=" << BITS_PER_LED << ")");
 
-    // Allocate DMA buffers based on strategy
-    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-        PARLIO_DLOG("Using BREAK_PER_COLOR buffer strategy");
-        // Allocate 3 sub-buffers (one for each color component: G, R, B)
-        // Each sub-buffer holds 8 bytes per LED (1 byte per bit-time)
-        sub_buffer_size_ = num_leds * 8;
-        PARLIO_DLOG("Allocating 3 sub-buffers of " << sub_buffer_size_ << " bytes each");
-
-        for (int i = 0; i < 3; i++) {
-            dma_sub_buffers_[i] = (uint8_t*)heap_caps_malloc(sub_buffer_size_, MALLOC_CAP_DMA);
-            if (!dma_sub_buffers_[i]) {
-                FL_LOG_PARLIO("Failed to allocate DMA sub-buffer " << i << " (" << sub_buffer_size_ << " bytes)");
-                // Clean up previously allocated buffers
-                for (int j = 0; j < i; j++) {
-                    heap_caps_free(dma_sub_buffers_[j]);
-                    dma_sub_buffers_[j] = nullptr;
-                }
-                return false;
-            }
-            fl::memset(dma_sub_buffers_[i], 0, sub_buffer_size_);
-            PARLIO_DLOG("Sub-buffer " << i << " allocated successfully at " << (void*)dma_sub_buffers_[i]);
-        }
-    } else {
-        PARLIO_DLOG("Using MONOLITHIC buffer strategy");
-        // Monolithic buffer (original implementation)
-        // Set sub_buffer_size for consistent logging (8 bytes per LED for one color component)
-        sub_buffer_size_ = num_leds * 8;
-        dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
-        if (!dma_buffer_) {
-            FL_LOG_PARLIO("Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
-            return false;
-        }
-        fl::memset(dma_buffer_, 0, buffer_size_);
-        PARLIO_DLOG("Monolithic buffer allocated successfully at " << (void*)dma_buffer_);
+    // Allocate single DMA buffer for continuous waveform transmission
+    dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
+    if (!dma_buffer_) {
+        FL_LOG_PARLIO("Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
+        return false;
     }
+    fl::memset(dma_buffer_, 0, buffer_size_);
+    PARLIO_DLOG("DMA buffer allocated successfully at " << (void*)dma_buffer_);
 
     // Create semaphore for transfer completion
     xfer_done_sem_ = xSemaphoreCreateBinary();
@@ -150,17 +201,14 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     PARLIO_DLOG("Configuring PARLIO TX unit:");
     parlio_tx_unit_config_t parlio_config = {};
     parlio_config.clk_src = PARLIO_CLK_SRC_DEFAULT;
-    parlio_config.clk_in_gpio_num = (gpio_num_t)-1;  // Use internal clock
+    parlio_config.clk_in_gpio_num = (gpio_num_t)-1;  // Use internal clock source
     parlio_config.input_clk_src_freq_hz = 0;  // Not used when clk_in_gpio_num is -1
-    parlio_config.output_clk_freq_hz = config_.clock_freq_hz;
+    parlio_config.output_clk_freq_hz = config_.clock_freq_hz;  // 3.2 MHz for WS2812
     parlio_config.data_width = DATA_WIDTH;
-    parlio_config.clk_out_gpio_num = (gpio_num_t)config_.clk_gpio;
+    parlio_config.clk_out_gpio_num = (gpio_num_t)-1;  // No external clock output needed
     parlio_config.valid_gpio_num = (gpio_num_t)-1;  // No separate valid signal
     parlio_config.trans_queue_depth = 4;
-    // Use sub-buffer size if breaking per color, otherwise use full buffer size
-    parlio_config.max_transfer_size = (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR)
-                                       ? sub_buffer_size_
-                                       : buffer_size_;
+    parlio_config.max_transfer_size = buffer_size_;  // Maximum size for single continuous buffer
     parlio_config.dma_burst_size = 64;  // Standard DMA burst size
     parlio_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
     parlio_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
@@ -171,7 +219,7 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     PARLIO_DLOG("  data_width: " << int(DATA_WIDTH));
     PARLIO_DLOG("  output_clk_freq_hz: " << config_.clock_freq_hz);
     PARLIO_DLOG("  max_transfer_size: " << parlio_config.max_transfer_size);
-    PARLIO_DLOG("  clk_gpio: " << config_.clk_gpio);
+    PARLIO_DLOG("  clk_out_gpio: -1 (internal clock)");
 
     // Copy GPIO numbers
     for (int i = 0; i < DATA_WIDTH; i++) {
@@ -183,19 +231,12 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     esp_err_t err = parlio_new_tx_unit(&parlio_config, &tx_unit_);
     if (err != ESP_OK) {
         FL_LOG_PARLIO("parlio_new_tx_unit() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
-        FL_LOG_PARLIO("  Check GPIO pins - clk:" << config_.clk_gpio << ", data:["
-                << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << "]");
+        FL_LOG_PARLIO("  Check GPIO pins - data:["
+                << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << ",...]");
 
         vSemaphoreDelete(xfer_done_sem_);
-        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-            for (int i = 0; i < 3; i++) {
-                heap_caps_free(dma_sub_buffers_[i]);
-                dma_sub_buffers_[i] = nullptr;
-            }
-        } else {
-            heap_caps_free(dma_buffer_);
-            dma_buffer_ = nullptr;
-        }
+        heap_caps_free(dma_buffer_);
+        dma_buffer_ = nullptr;
         xfer_done_sem_ = nullptr;
         return false;
     }
@@ -215,15 +256,8 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
 
         parlio_del_tx_unit(tx_unit_);
         vSemaphoreDelete(xfer_done_sem_);
-        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-            for (int i = 0; i < 3; i++) {
-                heap_caps_free(dma_sub_buffers_[i]);
-                dma_sub_buffers_[i] = nullptr;
-            }
-        } else {
-            heap_caps_free(dma_buffer_);
-            dma_buffer_ = nullptr;
-        }
+        heap_caps_free(dma_buffer_);
+        dma_buffer_ = nullptr;
         tx_unit_ = nullptr;
         xfer_done_sem_ = nullptr;
         return false;
@@ -245,13 +279,6 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::end() {
     if (dma_buffer_) {
         heap_caps_free(dma_buffer_);
         dma_buffer_ = nullptr;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        if (dma_sub_buffers_[i]) {
-            heap_caps_free(dma_sub_buffers_[i]);
-            dma_sub_buffers_[i] = nullptr;
-        }
     }
 
     if (xfer_done_sem_) {
@@ -281,17 +308,10 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
         return;
     }
 
-    // Verify buffers are allocated
-    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-        if (!dma_sub_buffers_[0] || !dma_sub_buffers_[1] || !dma_sub_buffers_[2]) {
-            FL_LOG_PARLIO("show() called but DMA sub-buffers not allocated");
-            return;
-        }
-    } else {
-        if (!dma_buffer_) {
-            FL_LOG_PARLIO("show() called but DMA buffer not allocated");
-            return;
-        }
+    // Verify buffer is allocated
+    if (!dma_buffer_) {
+        FL_LOG_PARLIO("show() called but DMA buffer not allocated");
+        return;
     }
 
     // Wait for previous transfer to complete
@@ -308,42 +328,48 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     tx_config.idle_value = 0x00000000;  // Lines idle low between frames
     tx_config.flags.queue_nonblocking = 0;
 
-    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-        PARLIO_DLOG("Transmitting 3 sub-buffers sequentially...");
-        // Transmit 3 sub-buffers sequentially (G, R, B)
-        // This ensures DMA gaps only occur at color component boundaries
-        for (int color = 0; color < 3; color++) {
-            size_t total_bits = sub_buffer_size_ * 8;
-            PARLIO_DLOG("  Transmitting color " << color << " (" << sub_buffer_size_ << " bytes, " << total_bits << " bits)");
-            esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_sub_buffers_[color], total_bits, &tx_config);
+    // Calculate chunking parameters
+    constexpr uint32_t SYMBOLS_PER_LED = 96;  // 3 components × 32 bits each
+    constexpr uint32_t BITS_PER_LED = SYMBOLS_PER_LED * DATA_WIDTH;
+    constexpr uint32_t BYTES_PER_LED = (BITS_PER_LED + 7) / 8;
+    constexpr uint32_t MAX_BYTES_PER_CHUNK = 65535;  // PARLIO hardware limit
+    constexpr uint16_t MAX_LEDS_PER_CHUNK = MAX_BYTES_PER_CHUNK / BYTES_PER_LED;
 
-            if (err != ESP_OK) {
-                FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for color " << color << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
-                dma_busy_ = false;
-                xSemaphoreGive(xfer_done_sem_);
-                return;
-            }
+    // Continuous buffer transmission with chunking
+    const uint8_t num_chunks = (num_leds_ + MAX_LEDS_PER_CHUNK - 1) / MAX_LEDS_PER_CHUNK;
+    uint16_t leds_remaining = num_leds_;
+    const uint8_t* chunk_ptr = dma_buffer_;
 
-            // Wait for this buffer to complete before transmitting next
-            // This is necessary because we're reusing the completion callback
-            if (color < 2) {
-                xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
-            }
-        }
-        // Last callback will give semaphore when done
-    } else {
-        // Monolithic buffer (original implementation)
-        size_t total_bits = buffer_size_ * 8;
-        PARLIO_DLOG("Transmitting monolithic buffer (" << buffer_size_ << " bytes, " << total_bits << " bits)");
-        esp_err_t err = parlio_tx_unit_transmit(tx_unit_, dma_buffer_, total_bits, &tx_config);
+    PARLIO_DLOG("Transmitting continuous buffer in " << int(num_chunks) << " chunk(s)");
+
+    for (uint8_t chunk_idx = 0; chunk_idx < num_chunks; chunk_idx++) {
+        uint16_t leds_in_chunk = (leds_remaining < MAX_LEDS_PER_CHUNK)
+                                  ? leds_remaining : MAX_LEDS_PER_CHUNK;
+        size_t chunk_bits = leds_in_chunk * BITS_PER_LED;
+        size_t chunk_bytes = leds_in_chunk * BYTES_PER_LED;
+
+        PARLIO_DLOG("  Chunk " << int(chunk_idx) << ": " << leds_in_chunk << " LEDs, "
+                   << chunk_bytes << " bytes, " << chunk_bits << " bits");
+
+        esp_err_t err = parlio_tx_unit_transmit(tx_unit_, chunk_ptr, chunk_bits, &tx_config);
 
         if (err != ESP_OK) {
-            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for chunk " << int(chunk_idx)
+                          << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
             dma_busy_ = false;
             xSemaphoreGive(xfer_done_sem_);
+            return;
         }
-        // Callback will give semaphore when done
+
+        chunk_ptr += chunk_bytes;
+        leds_remaining -= leds_in_chunk;
+
+        // Wait for completion if not the last chunk
+        if (chunk_idx < num_chunks - 1) {
+            xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
+        }
     }
+    // Last callback will give semaphore when done
     PARLIO_DLOG("show() completed - transmission started");
 }
 
@@ -362,95 +388,67 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::is_initialized() const {
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
+    constexpr uint32_t BYTES_PER_COMPONENT = (DATA_WIDTH == 1) ? 4 :
+                                             (DATA_WIDTH == 2) ? 8 :
+                                             (DATA_WIDTH == 4) ? 16 :
+                                             (DATA_WIDTH == 8) ? 32 : 64;
+
     // Always show basic pack_data info (not just debug mode)
     FASTLED_DBG("PARLIO pack_data:");
     FASTLED_DBG("  DATA_WIDTH: " << int(DATA_WIDTH));
     FASTLED_DBG("  num_leds: " << num_leds_);
     FASTLED_DBG("  buffer_size: " << buffer_size_);
-    FASTLED_DBG("  sub_buffer_size: " << sub_buffer_size_);
+    FASTLED_DBG("  BYTES_PER_COMPONENT: " << BYTES_PER_COMPONENT);
 
-    PARLIO_DLOG("pack_data() - Packing " << num_leds_ << " LEDs across " << int(DATA_WIDTH) << " channels");
+    PARLIO_DLOG("pack_data() - Packing " << num_leds_ << " LEDs across " << int(DATA_WIDTH) << " channels with waveform generation");
+    uint8_t* out_ptr = dma_buffer_;
 
-    if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-        PARLIO_DLOG("Using BREAK_PER_COLOR packing strategy");
-        // Pack data into 3 separate sub-buffers (one per color component: R, G, B)
-        // This ensures DMA gaps only occur at color boundaries
-        // TODO: See top of file for WLED-MM-P4 style buffer breaking strategy
-        for (uint8_t color_idx = 0; color_idx < 3; color_idx++) {
-            // CRGB memory layout: r=0, g=1, b=2 (always RGB order)
-            size_t byte_idx = 0;
-            PARLIO_DLOG("  Color component " << int(color_idx) << " (CRGB offset " << int(color_idx) << ")");
+    // Process each LED
+    for (uint16_t led = 0; led < num_leds_; led++) {
+        // Process each color component (G, R, B in WS2812 order)
+        const uint8_t component_order[3] = {1, 0, 2};  // G=1, R=0, B=2 in CRGB
 
-            for (uint16_t led = 0; led < num_leds_; led++) {
-                // Process 8 bits of this color byte (MSB first)
-                for (int8_t bit = 7; bit >= 0; bit--) {
-                    uint8_t output_byte = 0;
+        for (uint8_t comp_idx = 0; comp_idx < 3; comp_idx++) {
+            const uint8_t component = component_order[comp_idx];
 
-                    // Pack same bit position from all DATA_WIDTH channels
-                    for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
-                        if (strips_[channel]) {
-                            const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                            uint8_t channel_byte = channel_data[color_idx];
-                            uint8_t bit_val = (channel_byte >> bit) & 0x01;
-                            // Position bit based on channel number
-                            // PARLIO hardware maps output_byte bits directly to GPIO pins:
-                            // - output_byte bit N → GPIO data_gpio_nums[N]
-                            // So we place each channel's data at bit position equal to channel number
-                            output_byte |= (bit_val << channel);
-                        }
+            // Initialize 32 time-slices (each holds bits for all strips)
+            uint32_t transposed_slices[32] = {0};
+
+            // Generate and transpose waveforms for all active strips
+            for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
+                if (!strips_[channel]) continue;
+
+                // Get color component value from strip buffer
+                const uint8_t* led_bytes = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
+                const uint8_t component_value = led_bytes[component];
+
+                // Generate 32-bit waveform for this component value
+                const uint32_t waveform = detail::generate_waveform(component_value);
+                const uint32_t pin_bit = (1u << channel);
+
+                // Transpose: Extract each of 32 bits from waveform
+                // and distribute to corresponding time-slices
+                for (int slice = 0; slice < 32; slice++) {
+                    if ((waveform >> slice) & 1) {
+                        transposed_slices[slice] |= pin_bit;
                     }
-
-                    dma_sub_buffers_[color_idx][byte_idx++] = output_byte;
-
-                    // Log first few bytes for debugging
-                    #ifdef FASTLED_ESP32_PARLIO_DLOGGING
-                    if (led == 0 && bit >= 5) {
-                        char buf[64];
-                        fl::snprintf(buf, sizeof(buf), "    LED[0] bit[%d]: byte=0x%02x", int(bit), int(output_byte));
-                        FASTLED_DBG(buf);
-                    }
-                    #endif
                 }
             }
-        }
-    } else {
-        PARLIO_DLOG("Using MONOLITHIC buffer packing strategy");
-        // Monolithic buffer (original implementation)
-        size_t byte_idx = 0;
 
-        for (uint16_t led = 0; led < num_leds_; led++) {
-            // Process each of 3 color bytes in RGB order (r=0, g=1, b=2)
-            for (uint8_t color_idx = 0; color_idx < 3; color_idx++) {
-                // Process 8 bits of this byte (MSB first)
-                for (int8_t bit = 7; bit >= 0; bit--) {
-                    uint8_t output_byte = 0;
-
-                    // Pack same bit position from all DATA_WIDTH channels
-                    for (uint8_t channel = 0; channel < DATA_WIDTH; channel++) {
-                        if (strips_[channel]) {
-                            const uint8_t* channel_data = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                            uint8_t channel_byte = channel_data[color_idx];
-                            uint8_t bit_val = (channel_byte >> bit) & 0x01;
-                            // Position bit based on channel number
-                            // PARLIO hardware maps output_byte bits directly to GPIO pins:
-                            // - output_byte bit N → GPIO data_gpio_nums[N]
-                            // So we place each channel's data at bit position equal to channel number
-                            output_byte |= (bit_val << channel);
-                        }
-                    }
-
-                    dma_buffer_[byte_idx++] = output_byte;
-
-                    // Log first few bytes for debugging
-                    #ifdef FASTLED_ESP32_PARLIO_DLOGGING
-                    if (led == 0 && color_idx == 0 && bit >= 5) {
-                        char buf[64];
-                        fl::snprintf(buf, sizeof(buf), "    LED[0] color[%d] bit[%d]: byte=0x%02x", int(color_idx), int(bit), int(output_byte));
-                        FASTLED_DBG(buf);
-                    }
-                    #endif
-                }
+            // Pack transposed slices based on DATA_WIDTH
+            if constexpr (DATA_WIDTH == 1) {
+                detail::process_1bit(out_ptr, transposed_slices);
+            } else if constexpr (DATA_WIDTH == 2) {
+                detail::process_2bit(out_ptr, transposed_slices);
+            } else if constexpr (DATA_WIDTH == 4) {
+                detail::process_4bit(out_ptr, transposed_slices);
+            } else if constexpr (DATA_WIDTH == 8) {
+                detail::process_8bit(out_ptr, transposed_slices);
+            } else if constexpr (DATA_WIDTH == 16) {
+                detail::process_16bit(out_ptr, transposed_slices);
             }
+
+            out_ptr += BYTES_PER_COMPONENT;
         }
     }
     PARLIO_DLOG("pack_data() completed");

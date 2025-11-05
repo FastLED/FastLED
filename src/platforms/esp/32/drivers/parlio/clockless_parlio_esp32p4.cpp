@@ -123,10 +123,9 @@ public:
 
             // Configure driver
             fl::ParlioDriverConfig config;
-            config.clk_gpio = mClkPin;
+            config.clk_gpio = -1;  // Internal clock used (field unused)
             config.num_lanes = optimal_width;  // Must match DATA_WIDTH template parameter
-            config.clock_freq_hz = 10000000;  // 10 MHz
-            config.buffer_strategy = fl::ParlioBufferStrategy::MONOLITHIC;  // Send all data contiguously
+            config.clock_freq_hz = 0;  // Use default 3.2 MHz for WS2812
 
             for (int i = 0; i < num_strips; i++) {
                 config.data_gpios[i] = pinList[i];
