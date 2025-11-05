@@ -23,13 +23,14 @@ void setup() {}
 void loop() {}
 #endif // FASTLED_STUB_MAIN_INCLUDE_INO
 
-#include <iostream>  // ok include
 
 int main() {
     // Super simple main function that just calls the setup and loop functions.
+    init();  // Arduino setup() function.
     setup();
     while (1) {
         loop();
+        delay(0);  // Needed for watchdog timers not to fail.
     }
 }
 #endif // FASTLED_STUB_MAIN_INCLUDE_INO
