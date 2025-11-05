@@ -5,6 +5,8 @@
 #include "fl/compiler_control.h"
 #include "fl/vector.h"
 
+namespace weak_ptr_test {
+
 // Test class that does NOT inherit from fl::Referent (non-intrusive)
 class TestClass {
 public:
@@ -569,3 +571,5 @@ TEST_CASE("fl::weak_ptr stress test - rapid creation and destruction") {
         CHECK(!weak.lock());
     }
 }
+
+} // namespace weak_ptr_test
