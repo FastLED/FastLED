@@ -35,7 +35,7 @@ void ObjectFLEDDmaManager::waitForCompletion() {
     }
 }
 
-bool ObjectFLEDDmaManager::isBusy() const {
+bool ObjectFLEDDmaManager::isBusy() {
     return !dma3.complete();
 }
 

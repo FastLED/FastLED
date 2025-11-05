@@ -26,7 +26,7 @@ class ObjectFLEDDmaManager {
     void acquire(void* owner);
     void release(void* owner);
     void waitForCompletion();
-    bool isBusy() const;
+    bool isBusy();
     void* getCurrentOwner() const { return mCurrentOwner; }
 
     // Shared DMA resources
