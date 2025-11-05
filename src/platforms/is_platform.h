@@ -11,6 +11,19 @@
 /// ARM Platforms:
 /// - FASTLED_ARM: ARM-based platforms (Cortex-M, RP2040, nRF52, etc.)
 ///
+/// Teensy Platforms (ARM-based):
+/// - FL_IS_TEENSY: General Teensy platform (any Teensy board)
+/// - FL_IS_TEENSY_LC: Teensy LC (Cortex-M0+, MKL26Z64)
+/// - FL_IS_TEENSY_3X: Teensy 3.x family (all 3.x boards)
+/// - FL_IS_TEENSY_30: Teensy 3.0 (Cortex-M4, MK20DX128)
+/// - FL_IS_TEENSY_31: Teensy 3.1 (Cortex-M4, MK20DX256)
+/// - FL_IS_TEENSY_32: Teensy 3.2 (Cortex-M4, MK20DX256)
+/// - FL_IS_TEENSY_35: Teensy 3.5 (Cortex-M4F, MK64FX512)
+/// - FL_IS_TEENSY_36: Teensy 3.6 (Cortex-M4F, MK66FX1M0)
+/// - FL_IS_TEENSY_4X: Teensy 4.x family (all 4.x boards)
+/// - FL_IS_TEENSY_40: Teensy 4.0 (Cortex-M7, IMXRT1062)
+/// - FL_IS_TEENSY_41: Teensy 4.1 (Cortex-M7, IMXRT1062)
+///
 /// AVR Platforms:
 /// - FL_IS_AVR: General AVR platform
 /// - FL_IS_AVR_ATMEGA: ATmega family (328P, 2560, 32U4, etc.)
@@ -68,6 +81,7 @@
 
 // Include all platform detection headers
 #include "arm/is_arm.h"
+#include "arm/teensy/is_teensy.h"
 #include "avr/is_avr.h"
 #include "esp/is_esp.h"
 #include "posix/is_posix.h"

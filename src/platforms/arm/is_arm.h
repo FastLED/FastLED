@@ -18,9 +18,10 @@
     /* ARM Cortex-M (STM32F/H7) */ \
     defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
     defined(STM32F2XX) || defined(STM32F4) || \
-    /* NXP Kinetis (MK20, MK26, IMXRT) */ \
+    /* NXP Kinetis (MK20, MK26, MK64, MK66, IMXRT) */ \
     defined(__MK20DX128__) || defined(__MK20DX256__) || \
-    defined(__MKL26Z64__) || defined(__IMXRT1062__) || \
+    defined(__MKL26Z64__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
+    defined(__IMXRT1062__) || \
     /* Arduino Renesas UNO R4 */ \
     defined(ARDUINO_ARCH_RENESAS) || \
     /* Arduino STM32H747 (GIGA) */ \
