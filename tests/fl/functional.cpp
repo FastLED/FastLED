@@ -5,6 +5,8 @@
 
 using namespace fl;
 
+namespace functional_test {
+
 // Test helper structures and functions
 
 // Simple free function
@@ -16,6 +18,10 @@ int add(int a, int b) {
 int get_42() {
     return 42;
 }
+
+} // namespace functional_test
+
+namespace {
 
 // Struct with member functions and member data
 struct Calculator {
@@ -51,20 +57,22 @@ struct Multiplier {
     }
 };
 
+} // anonymous namespace
+
 // Test invoke with regular functions
 TEST_CASE("fl::invoke with free functions") {
     SUBCASE("function with arguments") {
-        int result = invoke(add, 3, 4);
+        int result = invoke(functional_test::add, 3, 4);
         CHECK_EQ(result, 7);
     }
 
     SUBCASE("function with no arguments") {
-        int result = invoke(get_42);
+        int result = invoke(functional_test::get_42);
         CHECK_EQ(result, 42);
     }
 
     SUBCASE("function pointer") {
-        int (*fn_ptr)(int, int) = &add;
+        int (*fn_ptr)(int, int) = &functional_test::add;
         int result = invoke(fn_ptr, 10, 20);
         CHECK_EQ(result, 30);
     }
@@ -334,7 +342,7 @@ TEST_CASE("fl::invoke with fl::function objects") {
     };
 
     // 1. Test fl::function with free function
-    fl::function<int(int, int)> free_func = add;
+    fl::function<int(int, int)> free_func = functional_test::add;
     auto result1 = invoke(free_func, 10, 20);
     CHECK_EQ(30, result1);
 

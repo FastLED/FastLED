@@ -8,6 +8,7 @@
 #include "fl/vector.h"
 #include "FastLED.h"
 
+namespace {
 
 FASTLED_SMART_PTR(Fake2d);
 
@@ -32,6 +33,8 @@ class Fake2d : public fl::Fx2d {
     uint8_t mFrameCounter = 0;
     fl::FixedVector<CRGB, 5> mColors;
 };
+
+} // anonymous namespace
 
 
 

@@ -1,7 +1,7 @@
 // PercussionDetector - Drum-specific detection implementation
 // Part of FastLED Audio System v2.0 - Phase 3 (Differentiators)
 
-#include "fx/audio/detectors/percussion_detector.h"
+#include "fx/audio/detectors/percussion.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 

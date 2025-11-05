@@ -167,12 +167,13 @@ TEST_CASE("test_transition") {
     }
 }
 
+namespace {
 
 // Simple Fx2d object which writes a single red pixel to the first LED
 // with the red component being the intensity of the frame counter.
-class Fake2d : public Fx2d {
+class Fake2dEngine : public Fx2d {
   public:
-    Fake2d() : Fx2d(XYMap::constructRectangularGrid(1,1)) {}
+    Fake2dEngine() : Fx2d(XYMap::constructRectangularGrid(1,1)) {}
 
     void draw(fl::Fx::DrawContext context) override {
         CRGB c = mColors[mFrameCounter % mColors.size()];
@@ -190,8 +191,10 @@ class Fake2d : public Fx2d {
     FixedVector<CRGB, 5> mColors;
 };
 
+} // anonymous namespace
+
 TEST_CASE("test_fixed_fps") {
-    Fake2d fake;
+    Fake2dEngine fake;
     fake.mColors.push_back(CRGB(0, 0, 0));
     fake.mColors.push_back(CRGB(255, 0, 0));
 

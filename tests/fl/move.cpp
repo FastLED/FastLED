@@ -3,28 +3,30 @@
 
 using namespace fl;
 
+namespace {
+
 // Helper class to test move semantics
-struct MoveTestType {
+struct MoveTestTypeMove {
     int value;
     bool moved_from;
     bool moved_to;
 
-    MoveTestType() : value(0), moved_from(false), moved_to(false) {}
-    explicit MoveTestType(int v) : value(v), moved_from(false), moved_to(false) {}
+    MoveTestTypeMove() : value(0), moved_from(false), moved_to(false) {}
+    explicit MoveTestTypeMove(int v) : value(v), moved_from(false), moved_to(false) {}
 
     // Copy constructor
-    MoveTestType(const MoveTestType& other)
+    MoveTestTypeMove(const MoveTestTypeMove& other)
         : value(other.value), moved_from(false), moved_to(false) {}
 
     // Move constructor
-    MoveTestType(MoveTestType&& other)
+    MoveTestTypeMove(MoveTestTypeMove&& other)
         : value(other.value), moved_from(false), moved_to(true) {
         other.moved_from = true;
         other.value = 0;
     }
 
     // Copy assignment
-    MoveTestType& operator=(const MoveTestType& other) {
+    MoveTestTypeMove& operator=(const MoveTestTypeMove& other) {
         if (this != &other) {
             value = other.value;
             moved_from = false;
@@ -34,7 +36,7 @@ struct MoveTestType {
     }
 
     // Move assignment
-    MoveTestType& operator=(MoveTestType&& other) {
+    MoveTestTypeMove& operator=(MoveTestTypeMove&& other) {
         if (this != &other) {
             value = other.value;
             moved_from = false;
@@ -45,6 +47,8 @@ struct MoveTestType {
         return *this;
     }
 };
+
+} // anonymous namespace
 
 TEST_CASE("fl::remove_reference trait") {
     SUBCASE("Non-reference types remain unchanged") {
@@ -173,12 +177,12 @@ TEST_CASE("fl::move basic functionality") {
 
 TEST_CASE("fl::move with move-constructible types") {
     SUBCASE("move constructor is invoked") {
-        MoveTestType obj(100);
+        MoveTestTypeMove obj(100);
         CHECK_EQ(obj.value, 100);
         CHECK(!obj.moved_from);
         CHECK(!obj.moved_to);
 
-        MoveTestType moved_obj(fl::move(obj));
+        MoveTestTypeMove moved_obj(fl::move(obj));
         CHECK_EQ(moved_obj.value, 100);
         CHECK(moved_obj.moved_to);
         CHECK(!moved_obj.moved_from);
@@ -189,8 +193,8 @@ TEST_CASE("fl::move with move-constructible types") {
     }
 
     SUBCASE("move assignment is invoked") {
-        MoveTestType obj1(50);
-        MoveTestType obj2(75);
+        MoveTestTypeMove obj1(50);
+        MoveTestTypeMove obj2(75);
 
         obj2 = fl::move(obj1);
         CHECK_EQ(obj2.value, 50);
@@ -201,7 +205,7 @@ TEST_CASE("fl::move with move-constructible types") {
     }
 
     SUBCASE("move from temporary") {
-        MoveTestType obj(fl::move(MoveTestType(200)));
+        MoveTestTypeMove obj(fl::move(MoveTestTypeMove(200)));
         CHECK_EQ(obj.value, 200);
         CHECK(obj.moved_to);
     }
@@ -218,10 +222,10 @@ TEST_CASE("fl::move preserves const-ness") {
     }
 
     SUBCASE("move with const object") {
-        const MoveTestType obj(123);
+        const MoveTestTypeMove obj(123);
         // Moving from const object still preserves const
         // This will invoke copy constructor, not move constructor
-        MoveTestType copy_obj(fl::move(obj));
+        MoveTestTypeMove copy_obj(fl::move(obj));
         CHECK_EQ(copy_obj.value, 123);
         // Original const object unchanged
         CHECK_EQ(obj.value, 123);
@@ -283,7 +287,7 @@ TEST_CASE("fl::move is noexcept") {
     }
 
     SUBCASE("move is noexcept for user types") {
-        MoveTestType obj(10);
+        MoveTestTypeMove obj(10);
         static_assert(noexcept(fl::move(obj)), "fl::move should be noexcept");
         CHECK(true);  // Dummy runtime check
     }
@@ -309,49 +313,49 @@ TEST_CASE("fl::move with references") {
 
 TEST_CASE("fl::move in function return") {
     SUBCASE("move in return statement") {
-        auto make_object = []() -> MoveTestType {
-            MoveTestType obj(100);
+        auto make_object = []() -> MoveTestTypeMove {
+            MoveTestTypeMove obj(100);
             return fl::move(obj);
         };
 
-        MoveTestType result = make_object();
+        MoveTestTypeMove result = make_object();
         CHECK_EQ(result.value, 100);
         // Due to return value optimization (RVO), moved_to might not be set
         // but the value should be correct
     }
 
     SUBCASE("move prevents copy in return") {
-        auto get_value = [](MoveTestType&& obj) -> MoveTestType {
+        auto get_value = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
             return fl::move(obj);
         };
 
-        MoveTestType temp(50);
-        MoveTestType result = get_value(fl::move(temp));
+        MoveTestTypeMove temp(50);
+        MoveTestTypeMove result = get_value(fl::move(temp));
         CHECK_EQ(result.value, 50);
     }
 }
 
 TEST_CASE("fl::move with function parameters") {
     SUBCASE("move to rvalue reference parameter") {
-        auto take_rvalue = [](MoveTestType&& obj) -> MoveTestType {
+        auto take_rvalue = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
             // Actually move the object by constructing from it
-            return MoveTestType(fl::move(obj));
+            return MoveTestTypeMove(fl::move(obj));
         };
 
-        MoveTestType obj(75);
-        MoveTestType result = take_rvalue(fl::move(obj));
+        MoveTestTypeMove obj(75);
+        MoveTestTypeMove result = take_rvalue(fl::move(obj));
         CHECK_EQ(result.value, 75);
         // After move, obj is in valid but unspecified state
         CHECK(obj.moved_from);
     }
 
     SUBCASE("perfect forwarding scenario") {
-        auto forward_object = [](MoveTestType&& obj) -> MoveTestType {
-            return MoveTestType(fl::move(obj));
+        auto forward_object = [](MoveTestTypeMove&& obj) -> MoveTestTypeMove {
+            return MoveTestTypeMove(fl::move(obj));
         };
 
-        MoveTestType obj(150);
-        MoveTestType result = forward_object(fl::move(obj));
+        MoveTestTypeMove obj(150);
+        MoveTestTypeMove result = forward_object(fl::move(obj));
         CHECK_EQ(result.value, 150);
         CHECK(obj.moved_from);
     }
@@ -437,14 +441,14 @@ TEST_CASE("fl::move with volatile types") {
 
 TEST_CASE("fl::move multiple times") {
     SUBCASE("moving same object multiple times") {
-        MoveTestType obj(200);
+        MoveTestTypeMove obj(200);
 
-        MoveTestType obj2(fl::move(obj));
+        MoveTestTypeMove obj2(fl::move(obj));
         CHECK_EQ(obj2.value, 200);
         CHECK(obj.moved_from);
 
         // Moving from already-moved-from object
-        MoveTestType obj3(fl::move(obj));
+        MoveTestTypeMove obj3(fl::move(obj));
         // obj was already moved from, so value should be 0
         CHECK_EQ(obj3.value, 0);
     }
@@ -458,8 +462,8 @@ TEST_CASE("fl::move comparison with std semantics") {
         // Should produce rvalue reference
         CHECK_EQ(fl_moved, 42);
 
-        MoveTestType obj(100);
-        MoveTestType result(fl::move(obj));
+        MoveTestTypeMove obj(100);
+        MoveTestTypeMove result(fl::move(obj));
         CHECK_EQ(result.value, 100);
         CHECK(obj.moved_from);
     }

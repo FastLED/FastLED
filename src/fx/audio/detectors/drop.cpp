@@ -1,6 +1,6 @@
 // DropDetector.cpp - Implementation of EDM drop detection
 
-#include "fx/audio/detectors/drop_detector.h"
+#include "fx/audio/detectors/drop.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 #include "fl/dbg.h"

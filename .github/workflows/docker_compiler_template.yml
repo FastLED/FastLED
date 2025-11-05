@@ -141,19 +141,19 @@ jobs:
             registry: registry_teensy
           # STM32 platforms - individual images per board (flat structure)
           - name: stm32-f103c8
-            platforms: bluepill
+            platforms: stm32f103c8_bluepill
             registry: registry_stm32_f103c8
           - name: stm32-f411ce
-            platforms: blackpill
+            platforms: stm32f411ce_blackpill
             registry: registry_stm32_f411ce
           - name: stm32-f103cb
-            platforms: maplemini
+            platforms: stm32f103cb_maplemini
             registry: registry_stm32_f103cb
           - name: stm32-f103tb
-            platforms: stm103tb
+            platforms: stm32f103tb_tinystm
             registry: registry_stm32_f103tb
           - name: stm32-h747xi
-            platforms: giga_r1
+            platforms: stm32h747xi_giga
             registry: registry_stm32_h747xi
           - name: rp
             platforms: rp2040,rp2350,rp2350B
@@ -163,7 +163,7 @@ jobs:
             registry: registry_nrf52
           # SAM platforms - individual images per board (flat structure)
           - name: sam-3x8e
-            platforms: due
+            platforms: sam3x8e_due
             registry: registry_sam_3x8e
         arch:
           - runs_on: ubuntu-24.04

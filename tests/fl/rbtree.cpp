@@ -7,16 +7,19 @@
 #include <climits>
 #include "fl/rbtree.h"
 #include "fl/string.h"
+
+namespace {
+
 // Helper function to compare red-black tree with std::map
 template<typename StdMap, typename RBTree>
-bool maps_equal(const StdMap& std_map, const RBTree& rb_tree) {
+bool maps_equal_rbtree(const StdMap& std_map, const RBTree& rb_tree) {
     if (std_map.size() != rb_tree.size()) {
         return false;
     }
-    
+
     auto std_it = std_map.begin();
     auto rb_it = rb_tree.begin();
-    
+
     while (std_it != std_map.end() && rb_it != rb_tree.end()) {
         if (std_it->first != rb_it->first || std_it->second != rb_it->second) {
             return false;
@@ -24,7 +27,7 @@ bool maps_equal(const StdMap& std_map, const RBTree& rb_tree) {
         ++std_it;
         ++rb_it;
     }
-    
+
     return std_it == std_map.end() && rb_it == rb_tree.end();
 }
 
@@ -33,24 +36,24 @@ template<typename Key, typename Value, typename Compare>
 bool validate_red_black_properties(const fl::MapRedBlackTree<Key, Value, Compare>& tree) {
     // For now, we'll just check that the tree works as expected
     // A full red-black tree validation would require access to internal structure
-    
-    // Basic checks: 
+
+    // Basic checks:
     // 1. Size consistency
     size_t count = 0;
     for (auto it = tree.begin(); it != tree.end(); ++it) {
         count++;
     }
-    
+
     if (count != tree.size()) {
         return false;
     }
-    
+
     // 2. Ordering property using the tree's comparator
     if (!tree.empty()) {
         auto prev = tree.begin();
         auto current = prev;
         ++current;
-        
+
         while (current != tree.end()) {
             // If current comes before prev in the tree's ordering, it's invalid
             if (tree.key_comp()(current->first, prev->first)) {
@@ -60,9 +63,11 @@ bool validate_red_black_properties(const fl::MapRedBlackTree<Key, Value, Compare
             ++current;
         }
     }
-    
+
     return true;
 }
+
+} // anonymous namespace
 
 TEST_CASE("MapRedBlackTree - Basic Construction and Properties") {
     fl::MapRedBlackTree<int, int> rb_tree;
@@ -110,7 +115,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
         CHECK(std_result.second == rb_result.second);
         CHECK(std_result.first->first == rb_result.first->first);
         CHECK(std_result.first->second == rb_result.first->second);
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
     
@@ -123,7 +128,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
         
         CHECK(std_result.second == rb_result.second);
         CHECK(std_result.second == false); // Should not insert duplicate
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
     
@@ -137,7 +142,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
             rb_tree.insert(fl::pair<int, fl::string>(item.first, item.second));
         }
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(std_map.size() == 5);
         CHECK(rb_tree.size() == 5);
         CHECK(validate_red_black_properties(rb_tree));
@@ -153,7 +158,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
             rb_tree_int[i] = i * 10;
         }
         
-        CHECK(maps_equal(std_map_int, rb_tree_int));
+        CHECK(maps_equal_rbtree(std_map_int, rb_tree_int));
         CHECK(std_map_int.size() == 100);
         CHECK(rb_tree_int.size() == 100);
         CHECK(validate_red_black_properties(rb_tree_int));
@@ -169,7 +174,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Insert Operations") {
             rb_tree_int[i] = i * 10;
         }
         
-        CHECK(maps_equal(std_map_int, rb_tree_int));
+        CHECK(maps_equal_rbtree(std_map_int, rb_tree_int));
         CHECK(std_map_int.size() == 100);
         CHECK(rb_tree_int.size() == 100);
         CHECK(validate_red_black_properties(rb_tree_int));
@@ -199,7 +204,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Element Access") {
     SUBCASE("operator[] creates new key with default value") {
         CHECK(std_map[4] == rb_tree[4]); // Both should create empty string
         CHECK(std_map.size() == rb_tree.size());
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
     
@@ -354,7 +359,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Erase Operations") {
         
         CHECK(std_erased == rb_erased);
         CHECK(std_erased == 1);
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
     
@@ -364,7 +369,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Erase Operations") {
         
         CHECK(std_erased == rb_erased);
         CHECK(std_erased == 0);
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
     
@@ -375,7 +380,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Erase Operations") {
         std_map.erase(std_it);
         rb_tree.erase(rb_it);
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(std_map.find(3) == std_map.end());
         CHECK(rb_tree.find(3) == rb_tree.end());
         CHECK(validate_red_black_properties(rb_tree));
@@ -388,7 +393,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Erase Operations") {
             rb_tree.erase(i);
         }
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(std_map.size() == 6); // Should have 1, 3, 5, 7, 9, 10
         CHECK(rb_tree.size() == 6);
         CHECK(validate_red_black_properties(rb_tree));
@@ -400,7 +405,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Erase Operations") {
             rb_tree.erase(i);
         }
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(std_map.empty());
         CHECK(rb_tree.empty());
         CHECK(validate_red_black_properties(rb_tree));
@@ -428,7 +433,7 @@ TEST_CASE("MapRedBlackTree vs std::map - Clear and Empty") {
         CHECK(std_map.empty() == rb_tree.empty());
         CHECK(std_map.size() == rb_tree.size());
         CHECK(std_map.size() == 0);
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
 }
@@ -604,7 +609,7 @@ TEST_CASE("MapRedBlackTree - Stress Tests") {
             rb_tree[key] = key * 10;
         }
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         // Random deletions
@@ -615,7 +620,7 @@ TEST_CASE("MapRedBlackTree - Stress Tests") {
             rb_tree.erase(key);
         }
         
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         // Random lookups
@@ -630,19 +635,19 @@ TEST_CASE("MapRedBlackTree - Stress Tests") {
         // Perform a complex sequence of operations
         rb_tree[5] = 50;
         std_map[5] = 50;
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         rb_tree.erase(5);
         std_map.erase(5);
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         for (int i = 1; i <= 20; ++i) {
             rb_tree[i] = i * 10;
             std_map[i] = i * 10;
         }
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         // Erase every other element
@@ -650,12 +655,12 @@ TEST_CASE("MapRedBlackTree - Stress Tests") {
             rb_tree.erase(i);
             std_map.erase(i);
         }
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
         
         rb_tree.clear();
         std_map.clear();
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(rb_tree.empty());
         CHECK(std_map.empty());
         CHECK(validate_red_black_properties(rb_tree));
@@ -887,14 +892,14 @@ TEST_CASE("RBTree Stress Test - Large Scale Operations [rbtree][stress]") {
         std_map[i] = i * 3;
     }
     CHECK(rb_tree.size() == std_map.size());
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 
     // Reverse deletes
     for (int i = N; i >= 1; --i) {
         CHECK_EQ(rb_tree.erase(i), std_map.erase(i));
         if ((i % 257) == 0) {
-            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(maps_equal_rbtree(std_map, rb_tree));
             CHECK(validate_red_black_properties(rb_tree));
         }
     }
@@ -946,12 +951,12 @@ TEST_CASE("RBTree Stress Test - Randomized Operations [rbtree][stress]") {
         }
 
         if ((i % 401) == 0) {
-            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(maps_equal_rbtree(std_map, rb_tree));
             CHECK(validate_red_black_properties(rb_tree));
         }
     }
 
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 }
 
@@ -966,7 +971,7 @@ TEST_CASE("RBTree Stress Test - Edge Cases and Crash Scenarios [rbtree][stress]"
     }
     CHECK_EQ(rb_tree.size(), std_map.size());
     CHECK_EQ(rb_tree.size(), 1);
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 
     // Zig-zag insertion pattern (pathological for naive trees)
@@ -975,7 +980,7 @@ TEST_CASE("RBTree Stress Test - Edge Cases and Crash Scenarios [rbtree][stress]"
         rb_tree[k] = k * 2;
         std_map[k] = k * 2;
     }
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 
     // Erase root repeatedly: always erase current begin() (smallest key)
@@ -989,7 +994,7 @@ TEST_CASE("RBTree Stress Test - Edge Cases and Crash Scenarios [rbtree][stress]"
         CHECK(validate_red_black_properties(rb_tree));
     }
 
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
 }
 
 TEST_CASE("RBTree Stress Test - Pathological Patterns [rbtree][stress]") {
@@ -1011,12 +1016,12 @@ TEST_CASE("RBTree Stress Test - Pathological Patterns [rbtree][stress]") {
             CHECK_EQ(rb_tree.erase(k), std_map.erase(k));
         }
         if ((round % 127) == 0) {
-            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(maps_equal_rbtree(std_map, rb_tree));
             CHECK(validate_red_black_properties(rb_tree));
         }
     }
 
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 }
 
@@ -1069,12 +1074,12 @@ TEST_CASE("RBTree Stress Test - Comparison with std::map Comprehensive [rbtree][
             }
 
             if ((i % 503) == 0) {
-                CHECK(maps_equal(std_map, rb_tree));
+                CHECK(maps_equal_rbtree(std_map, rb_tree));
                 CHECK(validate_red_black_properties(rb_tree));
             }
         }
 
-        CHECK(maps_equal(std_map, rb_tree));
+        CHECK(maps_equal_rbtree(std_map, rb_tree));
         CHECK(validate_red_black_properties(rb_tree));
     }
 }
@@ -1089,7 +1094,7 @@ TEST_CASE("RBTree Stress Test - Heavy Memory and Performance [rbtree][stress][he
         rb_tree[i] = i ^ (i << 1);
         std_map[i] = i ^ (i << 1);
         if ((i % 2047) == 0) {
-            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(maps_equal_rbtree(std_map, rb_tree));
             CHECK(validate_red_black_properties(rb_tree));
         }
     }
@@ -1098,12 +1103,12 @@ TEST_CASE("RBTree Stress Test - Heavy Memory and Performance [rbtree][stress][he
     for (int i = 0; i < N; i += 2) {
         CHECK_EQ(rb_tree.erase(i), std_map.erase(i));
         if ((i % 4093) == 0) {
-            CHECK(maps_equal(std_map, rb_tree));
+            CHECK(maps_equal_rbtree(std_map, rb_tree));
             CHECK(validate_red_black_properties(rb_tree));
         }
     }
 
-    CHECK(maps_equal(std_map, rb_tree));
+    CHECK(maps_equal_rbtree(std_map, rb_tree));
     CHECK(validate_red_black_properties(rb_tree));
 }
 #endif // FASTLED_ENABLE_RBTREE_STRESS

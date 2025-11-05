@@ -3,33 +3,35 @@
 
 using namespace fl;
 
+namespace {
+
 // Helper class to test move semantics
-struct MoveTestType {
+struct MoveTestTypePair {
     int value;
     bool moved_from = false;
     bool moved_to = false;
 
-    MoveTestType() : value(0) {}
-    explicit MoveTestType(int v) : value(v) {}
+    MoveTestTypePair() : value(0) {}
+    explicit MoveTestTypePair(int v) : value(v) {}
 
     // Copy constructor
-    MoveTestType(const MoveTestType& other) : value(other.value) {}
+    MoveTestTypePair(const MoveTestTypePair& other) : value(other.value) {}
 
     // Move constructor
-    MoveTestType(MoveTestType&& other) noexcept
+    MoveTestTypePair(MoveTestTypePair&& other) noexcept
         : value(other.value), moved_to(true) {
         other.moved_from = true;
         other.value = 0;
     }
 
     // Copy assignment
-    MoveTestType& operator=(const MoveTestType& other) {
+    MoveTestTypePair& operator=(const MoveTestTypePair& other) {
         value = other.value;
         return *this;
     }
 
     // Move assignment
-    MoveTestType& operator=(MoveTestType&& other) noexcept {
+    MoveTestTypePair& operator=(MoveTestTypePair&& other) noexcept {
         value = other.value;
         moved_to = true;
         other.moved_from = true;
@@ -37,14 +39,16 @@ struct MoveTestType {
         return *this;
     }
 
-    bool operator==(const MoveTestType& other) const {
+    bool operator==(const MoveTestTypePair& other) const {
         return value == other.value;
     }
 
-    bool operator<(const MoveTestType& other) const {
+    bool operator<(const MoveTestTypePair& other) const {
         return value < other.value;
     }
 };
+
+} // anonymous namespace
 
 TEST_CASE("fl::pair default constructor") {
     SUBCASE("pair with default constructible types") {
@@ -54,7 +58,7 @@ TEST_CASE("fl::pair default constructor") {
     }
 
     SUBCASE("pair with custom types") {
-        pair<MoveTestType, MoveTestType> p;
+        pair<MoveTestTypePair, MoveTestTypePair> p;
         CHECK_EQ(p.first.value, 0);
         CHECK_EQ(p.second.value, 0);
     }
@@ -82,9 +86,9 @@ TEST_CASE("fl::pair value constructor") {
     }
 
     SUBCASE("pair of custom types") {
-        MoveTestType a(10);
-        MoveTestType b(20);
-        pair<MoveTestType, MoveTestType> p(a, b);
+        MoveTestTypePair a(10);
+        MoveTestTypePair b(20);
+        pair<MoveTestTypePair, MoveTestTypePair> p(a, b);
         CHECK_EQ(p.first.value, 10);
         CHECK_EQ(p.second.value, 20);
     }
@@ -113,8 +117,8 @@ TEST_CASE("fl::pair perfect forwarding constructor") {
     }
 
     SUBCASE("forwarding with move") {
-        MoveTestType a(100);
-        pair<MoveTestType, MoveTestType> p(fl::move(a), MoveTestType(200));
+        MoveTestTypePair a(100);
+        pair<MoveTestTypePair, MoveTestTypePair> p(fl::move(a), MoveTestTypePair(200));
         CHECK_EQ(p.first.value, 100);
         CHECK(p.first.moved_to);
         CHECK_EQ(p.second.value, 200);
@@ -140,8 +144,8 @@ TEST_CASE("fl::pair copy constructor from different pair types") {
 
 TEST_CASE("fl::pair move constructor from different pair types") {
     SUBCASE("move from same types") {
-        pair<MoveTestType, MoveTestType> p1(MoveTestType(10), MoveTestType(20));
-        pair<MoveTestType, MoveTestType> p2(fl::move(p1));
+        pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
+        pair<MoveTestTypePair, MoveTestTypePair> p2(fl::move(p1));
         CHECK_EQ(p2.first.value, 10);
         CHECK_EQ(p2.second.value, 20);
         CHECK(p2.first.moved_to);
@@ -149,8 +153,8 @@ TEST_CASE("fl::pair move constructor from different pair types") {
     }
 
     SUBCASE("move from convertible types") {
-        pair<MoveTestType, int> p1(MoveTestType(10), 20);
-        pair<MoveTestType, long> p2(fl::move(p1));
+        pair<MoveTestTypePair, int> p1(MoveTestTypePair(10), 20);
+        pair<MoveTestTypePair, long> p2(fl::move(p1));
         CHECK_EQ(p2.first.value, 10);
         CHECK(p2.first.moved_to);
         CHECK_EQ(p2.second, 20L);
@@ -189,8 +193,8 @@ TEST_CASE("fl::pair move constructor") {
     }
 
     SUBCASE("move constructor with moveable types") {
-        pair<MoveTestType, MoveTestType> p1(MoveTestType(10), MoveTestType(20));
-        pair<MoveTestType, MoveTestType> p2(fl::move(p1));
+        pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
+        pair<MoveTestTypePair, MoveTestTypePair> p2(fl::move(p1));
         CHECK_EQ(p2.first.value, 10);
         CHECK_EQ(p2.second.value, 20);
         CHECK(p2.first.moved_to);
@@ -208,8 +212,8 @@ TEST_CASE("fl::pair move assignment") {
     }
 
     SUBCASE("move assignment with moveable types") {
-        pair<MoveTestType, MoveTestType> p1(MoveTestType(10), MoveTestType(20));
-        pair<MoveTestType, MoveTestType> p2;
+        pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
+        pair<MoveTestTypePair, MoveTestTypePair> p2;
         p2 = fl::move(p1);
         CHECK_EQ(p2.first.value, 10);
         CHECK_EQ(p2.second.value, 20);
@@ -242,8 +246,8 @@ TEST_CASE("fl::pair::swap member function") {
     }
 
     SUBCASE("swap with custom types") {
-        pair<MoveTestType, MoveTestType> p1(MoveTestType(10), MoveTestType(20));
-        pair<MoveTestType, MoveTestType> p2(MoveTestType(30), MoveTestType(40));
+        pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
+        pair<MoveTestTypePair, MoveTestTypePair> p2(MoveTestTypePair(30), MoveTestTypePair(40));
         p1.swap(p2);
         CHECK_EQ(p1.first.value, 30);
         CHECK_EQ(p1.second.value, 40);
@@ -264,8 +268,8 @@ TEST_CASE("fl::swap non-member function") {
     }
 
     SUBCASE("non-member swap with custom types") {
-        pair<MoveTestType, MoveTestType> p1(MoveTestType(10), MoveTestType(20));
-        pair<MoveTestType, MoveTestType> p2(MoveTestType(30), MoveTestType(40));
+        pair<MoveTestTypePair, MoveTestTypePair> p1(MoveTestTypePair(10), MoveTestTypePair(20));
+        pair<MoveTestTypePair, MoveTestTypePair> p2(MoveTestTypePair(30), MoveTestTypePair(40));
         fl::swap(p1, p2);
         CHECK_EQ(p1.first.value, 30);
         CHECK_EQ(p1.second.value, 40);
@@ -417,7 +421,7 @@ TEST_CASE("fl::make_pair function") {
     }
 
     SUBCASE("make_pair with rvalue references") {
-        auto p = make_pair(MoveTestType(100), MoveTestType(200));
+        auto p = make_pair(MoveTestTypePair(100), MoveTestTypePair(200));
         CHECK_EQ(p.first.value, 100);
         CHECK_EQ(p.second.value, 200);
     }

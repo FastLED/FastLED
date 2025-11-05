@@ -5,16 +5,19 @@
 #include "fl/map.h"
 #include "fl/string.h"
 #include "fl/vector.h"
+
+namespace {
+
 // Helper function to compare map contents
 template<typename StdMap, typename FlMap>
-bool maps_equal(const StdMap& std_map, const FlMap& fl_map) {
+bool maps_equal_map(const StdMap& std_map, const FlMap& fl_map) {
     if (std_map.size() != fl_map.size()) {
         return false;
     }
-    
+
     auto std_it = std_map.begin();
     auto fl_it = fl_map.begin();
-    
+
     while (std_it != std_map.end() && fl_it != fl_map.end()) {
         if (std_it->first != fl_it->first || std_it->second != fl_it->second) {
             return false;
@@ -22,9 +25,11 @@ bool maps_equal(const StdMap& std_map, const FlMap& fl_map) {
         ++std_it;
         ++fl_it;
     }
-    
+
     return std_it == std_map.end() && fl_it == fl_map.end();
 }
+
+} // anonymous namespace
 
 TEST_CASE("std::map vs fl::fl_map - Basic Construction and Size") {
     std::map<int, int> std_map;
@@ -49,7 +54,7 @@ TEST_CASE("std::map vs fl::fl_map - Insert Operations") {
         CHECK(std_result.second == fl_result.second);
         CHECK(std_result.first->first == fl_result.first->first);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
     
     SUBCASE("Insert duplicate key") {
@@ -61,7 +66,7 @@ TEST_CASE("std::map vs fl::fl_map - Insert Operations") {
         
         CHECK(std_result.second == fl_result.second);
         CHECK(std_result.second == false); // Should not insert duplicate
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
     
     SUBCASE("Multiple inserts maintain order") {
@@ -74,7 +79,7 @@ TEST_CASE("std::map vs fl::fl_map - Insert Operations") {
             fl_map.insert(fl::pair<int, fl::string>(item.first, item.second));
         }
         
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 4);
         CHECK(fl_map.size() == 4);
     }
@@ -102,7 +107,7 @@ TEST_CASE("std::map vs fl::fl_map - Element Access") {
     SUBCASE("operator[] creates new key with default value") {
         CHECK(std_map[4] == fl_map[4]); // Both should create empty string
         CHECK(std_map.size() == fl_map.size());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
     
     SUBCASE("at() method for existing keys") {
@@ -229,7 +234,7 @@ TEST_CASE("std::map vs fl::fl_map - Erase Operations") {
         
         CHECK(std_erased == fl_erased);
         CHECK(std_erased == 1);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
     
     SUBCASE("Erase non-existent key") {
@@ -238,7 +243,7 @@ TEST_CASE("std::map vs fl::fl_map - Erase Operations") {
         
         CHECK(std_erased == fl_erased);
         CHECK(std_erased == 0);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
     
     SUBCASE("Erase by iterator") {
@@ -248,7 +253,7 @@ TEST_CASE("std::map vs fl::fl_map - Erase Operations") {
         std_map.erase(std_it);
         fl_map.erase(fl_it);
         
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.find(2) == std_map.end());
         CHECK(fl_map.find(2) == fl_map.end());
     }
@@ -274,7 +279,7 @@ TEST_CASE("std::map vs fl::fl_map - Clear and Empty") {
         CHECK(std_map.empty() == fl_map.empty());
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 0);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 
@@ -377,7 +382,7 @@ TEST_CASE("std::map vs fl::fl_map - Edge Cases") {
         
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 100);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         
         // Verify sorted order
         int prev_key = 0;
@@ -391,21 +396,21 @@ TEST_CASE("std::map vs fl::fl_map - Edge Cases") {
         // Perform a series of mixed operations
         std_map[5] = 50;
         fl_map[5] = 50;
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         
         std_map.erase(5);
         fl_map.erase(5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         
         std_map[1] = 10;
         std_map[3] = 30;
         fl_map[1] = 10;
         fl_map[3] = 30;
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         
         std_map.clear();
         fl_map.clear();
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.empty());
         CHECK(fl_map.empty());
     }
@@ -518,7 +523,7 @@ TEST_CASE("std::map vs fl::fl_map - Move Constructor and Move Assignment") {
         // Verify moved-to maps have the contents
         CHECK(std_moved.size() == 3);
         CHECK(fl_moved.size() == 3);
-        CHECK(maps_equal(std_moved, fl_moved));
+        CHECK(maps_equal_map(std_moved, fl_moved));
         CHECK(std_moved[1] == fl_moved[1]);
         CHECK(std_moved[2] == fl_moved[2]);
         CHECK(std_moved[3] == fl_moved[3]);
@@ -555,7 +560,7 @@ TEST_CASE("std::map vs fl::fl_map - Move Constructor and Move Assignment") {
         // Verify destination maps have the contents
         CHECK(std_dst.size() == 3);
         CHECK(fl_dst.size() == 3);
-        CHECK(maps_equal(std_dst, fl_dst));
+        CHECK(maps_equal_map(std_dst, fl_dst));
         CHECK(std_dst[1] == fl_dst[1]);
         CHECK(std_dst[2] == fl_dst[2]);
         CHECK(std_dst[3] == fl_dst[3]);
@@ -598,7 +603,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         CHECK(std_result.second == true);
         CHECK(std_result.first->first == fl_result.first->first);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Update existing key with lvalue") {
@@ -620,7 +625,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         CHECK(std_result.second == false);
         CHECK(std_result.first->second == "ONE");
         CHECK(fl_result.first->second == "ONE");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Insert new key with rvalue") {
@@ -635,7 +640,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         CHECK(std_result.second == true);
         CHECK(std_result.first->first == fl_result.first->first);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Update existing key with rvalue") {
@@ -654,7 +659,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         CHECK(std_result.second == false);
         CHECK(std_result.first->second == "ONE");
         CHECK(fl_result.first->second == "ONE");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Multiple insert_or_assign operations") {
@@ -688,7 +693,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
         // Verify final state
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map[1] == "ONE");
         CHECK(fl_map[1] == "ONE");
     }
@@ -703,7 +708,7 @@ TEST_CASE("std::map vs fl::fl_map - insert_or_assign()") {
 
         CHECK(std_result.second == fl_result.second);
         CHECK(std_result.second == true);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 #endif // __cplusplus >= 201703L
@@ -783,7 +788,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         CHECK(std_result.second == true);
         CHECK(std_result.first->first == fl_result.first->first);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Try to emplace existing key - should NOT modify value") {
@@ -802,7 +807,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         CHECK(std_result.second == false);
         CHECK(std_result.first->second == "one"); // Original value unchanged
         CHECK(fl_result.first->second == "one"); // Original value unchanged
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("try_emplace with rvalue key") {
@@ -817,7 +822,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         CHECK(std_result.second == true);
         CHECK(std_result.first->first == fl_result.first->first);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("try_emplace constructs value in-place") {
@@ -907,7 +912,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         // Verify final state
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map[1] == "one"); // Original value, not "ONE"
         CHECK(fl_map[1] == "one"); // Original value, not "ONE"
     }
@@ -924,7 +929,7 @@ TEST_CASE("std::map vs fl::fl_map - try_emplace()") {
         CHECK(std_result.second == fl_result.second);
         CHECK(std_result.second == true);
         CHECK(std_result.first->second == fl_result.first->second);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 #endif // __cplusplus >= 201703L
@@ -954,7 +959,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
         // Verify both maps have same contents
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Insert from empty range") {
@@ -970,7 +975,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
         // Both maps should still be empty
         CHECK(std_map.empty());
         CHECK(fl_map.empty());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Range insert with duplicate keys") {
@@ -997,7 +1002,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
         // Verify size and contents
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Original values should be preserved for duplicate keys
         CHECK(std_map[2] == "TWO");
@@ -1033,8 +1038,8 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
         // Verify contents match
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 3);
-        CHECK(maps_equal(std_map, fl_map));
-        CHECK(maps_equal(std_src, fl_src));
+        CHECK(maps_equal_map(std_map, fl_map));
+        CHECK(maps_equal_map(std_src, fl_src));
     }
 
     SUBCASE("Range insert maintains sorted order") {
@@ -1065,7 +1070,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
 
         CHECK(std_order == fl_order);
         CHECK(std_order == std::vector<int>{1, 2, 3, 4, 5});
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Range insert large dataset") {
@@ -1087,7 +1092,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Insert") {
         // Verify all elements inserted
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 50);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 
@@ -1110,7 +1115,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 1);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1130,7 +1135,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 20);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1153,7 +1158,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 10);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1175,7 +1180,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 20);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 4);
         CHECK(fl_map.size() == 4);
     }
@@ -1200,7 +1205,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == 10);
         CHECK(std_it->second == "ten"); // Original value unchanged
         CHECK(fl_it->second == "ten"); // Original value unchanged
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 2); // Size unchanged
         CHECK(fl_map.size() == 2);
     }
@@ -1217,7 +1222,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         fl_map.insert(fl_map.end(), {15, "fifteen"});
 
         // Verify all inserted correctly and order is maintained
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
 
@@ -1252,7 +1257,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->first == 10);
         CHECK(std_it->second == "ten");
         CHECK(fl_it->second == "ten");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Insert into empty map with hint") {
@@ -1266,7 +1271,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         CHECK(std_it->second == fl_it->second);
         CHECK(std_map.size() == 1);
         CHECK(fl_map.size() == 1);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Sequential inserts with end() hint (optimal pattern)") {
@@ -1285,7 +1290,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Insert") {
         // Verify all inserted correctly
         CHECK(std_map.size() == 5);
         CHECK(fl_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Verify order
         std::vector<int> fl_order;
@@ -1328,7 +1333,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 1);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1348,7 +1353,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 20);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1371,7 +1376,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 10);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
     }
@@ -1393,7 +1398,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == fl_it->first);
         CHECK(std_it->second == fl_it->second);
         CHECK(std_it->first == 20);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 4);
         CHECK(fl_map.size() == 4);
     }
@@ -1418,7 +1423,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == 10);
         CHECK(std_it->second == "ten"); // Original value unchanged
         CHECK(fl_it->second == "ten"); // Original value unchanged
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 2); // Size unchanged
         CHECK(fl_map.size() == 2);
     }
@@ -1435,7 +1440,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         fl_map.emplace_hint(fl_map.end(), 15, "fifteen");
 
         // Verify all emplaced correctly and order is maintained
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 3);
         CHECK(fl_map.size() == 3);
 
@@ -1466,7 +1471,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->second == fl_it->second);
         CHECK(std_map.size() == 1);
         CHECK(fl_map.size() == 1);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Sequential emplaces with end() hint (optimal pattern)") {
@@ -1485,7 +1490,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         // Verify all emplaced correctly
         CHECK(std_map.size() == 5);
         CHECK(fl_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Verify order
         std::vector<int> fl_order;
@@ -1504,7 +1509,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(fl_map.size() == 1);
         CHECK(std_map[1] == fl_map[1]);
         CHECK(fl_map[1] == "constructed in place");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Emplace with hint using pair construction") {
@@ -1520,7 +1525,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(std_it->first == 10);
         CHECK(std_it->second == "ten");
         CHECK(fl_it->second == "ten");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.size() == 2);
         CHECK(fl_map.size() == 2);
     }
@@ -1561,7 +1566,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
         CHECK(fl_it->second == "ten");
         CHECK(std_map[10] == "ten");
         CHECK(fl_map[10] == "ten");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Emplace with hint - random order insertions") {
@@ -1589,7 +1594,7 @@ TEST_CASE("std::map vs fl::fl_map - Hint-based Emplace") {
 
         CHECK(std_order == fl_order);
         CHECK(std_order == std::vector<int>{1, 2, 3, 4, 5});
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 
@@ -1629,7 +1634,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         CHECK(fl_map.find(3) == fl_map.end());
         CHECK(std_map.find(4) == std_map.end());
         CHECK(fl_map.find(4) == fl_map.end());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Verify returned iterators point to element after erased range
         CHECK(std_result->first == fl_result->first);
@@ -1656,7 +1661,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Verify both maps now contain only keys 4 and 5
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 2);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.find(4) != std_map.end());
         CHECK(fl_map.find(4) != fl_map.end());
         CHECK(std_map.find(5) != std_map.end());
@@ -1687,7 +1692,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Verify both maps now contain only keys 1 and 2
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 2);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
         CHECK(std_map.find(1) != std_map.end());
         CHECK(fl_map.find(1) != fl_map.end());
         CHECK(std_map.find(2) != std_map.end());
@@ -1715,7 +1720,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Both maps should be empty
         CHECK(std_map.empty());
         CHECK(fl_map.empty());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Returned iterators should be end()
         CHECK(std_result == std_map.end());
@@ -1742,7 +1747,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Nothing should be erased
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Returned iterator should be the same as input
         CHECK(std_result->first == fl_result->first);
@@ -1775,7 +1780,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         CHECK(std_map.size() == 4);
         CHECK(std_map.find(3) == std_map.end());
         CHECK(fl_map.find(3) == fl_map.end());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Returned iterator should point to element after erased
         CHECK(std_result->first == fl_result->first);
@@ -1790,7 +1795,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Should still be empty
         CHECK(std_map.empty());
         CHECK(fl_map.empty());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Returned iterators should be end()
         CHECK(std_result == std_map.end());
@@ -1817,7 +1822,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
 
         CHECK(std_map.size() == 7);
         CHECK(fl_map.size() == 7);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Second erase: remove keys 7, 8, 9
         auto std_first2 = std_map.find(7);
@@ -1829,7 +1834,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
 
         CHECK(std_map.size() == 4);
         CHECK(fl_map.size() == 4);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Verify remaining keys: 1, 5, 6, 10
         CHECK(std_map.find(1) != std_map.end());
@@ -1875,7 +1880,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
 
         CHECK(std_order == fl_order);
         CHECK(std_order == std::vector<int>{1, 2, 7, 8, 9, 10});
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Range erase with large dataset") {
@@ -1903,7 +1908,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Erase") {
         // Verify 50 elements remain
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 50);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Verify correct elements remain (1-25 and 76-100)
         for (int i = 1; i <= 25; ++i) {
@@ -1943,7 +1948,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         // Verify both maps have same contents
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 5);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct from empty range") {
@@ -1959,7 +1964,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         // Both maps should be empty
         CHECK(std_map.empty());
         CHECK(fl_map.empty());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct from range with duplicate keys") {
@@ -1980,7 +1985,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         // Verify size and contents
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 3); // Only 3 unique keys
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // First values should be kept for duplicate keys
         CHECK(std_map[1] == fl_map[1]);
@@ -2007,8 +2012,8 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         // Verify contents match
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 3);
-        CHECK(maps_equal(std_map, fl_map));
-        CHECK(maps_equal(std_src, fl_src));
+        CHECK(maps_equal_map(std_map, fl_map));
+        CHECK(maps_equal_map(std_src, fl_src));
     }
 
     SUBCASE("Construct maintains sorted order") {
@@ -2039,7 +2044,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
 
         CHECK(std_order == fl_order);
         CHECK(std_order == std::vector<int>{1, 2, 3, 4, 5});
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct with large dataset") {
@@ -2061,7 +2066,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         // Verify all elements constructed
         CHECK(std_map.size() == fl_map.size());
         CHECK(std_map.size() == 100);
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct with custom comparator") {
@@ -2093,7 +2098,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
 
         CHECK(std_order == fl_order);
         CHECK(std_order == std::vector<int>{3, 2, 1}); // Descending order
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct from single element range") {
@@ -2111,7 +2116,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         CHECK(std_map.size() == 1);
         CHECK(std_map[42] == fl_map[42]);
         CHECK(fl_map[42] == "answer");
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct verifies all elements accessible") {
@@ -2144,7 +2149,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         CHECK(std_map[30] == "thirty");
         CHECK(fl_map[30] == "thirty");
 
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 
     SUBCASE("Construct from range and then modify") {
@@ -2162,7 +2167,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         fl::fl_map<int, fl::string> fl_map(fl_test_data.begin(), fl_test_data.end());
 
         // Verify initial state
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
 
         // Modify maps after construction
         std_map[2] = "TWO";
@@ -2179,7 +2184,7 @@ TEST_CASE("std::map vs fl::fl_map - Range Constructor") {
         CHECK(fl_map[2] == "TWO");
         CHECK(std_map.find(1) == std_map.end());
         CHECK(fl_map.find(1) == fl_map.end());
-        CHECK(maps_equal(std_map, fl_map));
+        CHECK(maps_equal_map(std_map, fl_map));
     }
 }
 

@@ -1,4 +1,4 @@
-#include "fx/audio/detectors/note_detector.h"
+#include "fx/audio/detectors/note.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 

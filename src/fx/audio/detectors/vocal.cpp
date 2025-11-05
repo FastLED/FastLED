@@ -1,7 +1,7 @@
 // VocalDetector - Human voice detection implementation
 // Part of FastLED Audio System v2.0 - Phase 3 (Differentiators)
 
-#include "fx/audio/detectors/vocal_detector.h"
+#include "fx/audio/detectors/vocal.h"
 #include "fl/audio/audio_context.h"
 #include "fl/math.h"
 
