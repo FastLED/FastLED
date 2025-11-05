@@ -27,8 +27,14 @@ ARG PLATFORMS
 
 # Copy build scripts for dependency caching
 # Using script files makes Docker layer caching more deterministic
-COPY build.sh /tmp/build.sh
+COPY ci/docker/build.sh /tmp/build.sh
 RUN chmod +x /tmp/build.sh
+
+# Copy Python modules needed by build.sh
+# The build.sh script calls Python modules from ci.docker and ci.boards
+# We need to copy the entire ci directory structure to support these imports
+COPY ci/ /tmp/ci/
+ENV PYTHONPATH=/tmp:${PYTHONPATH}
 
 # Verify argument was passed
 RUN if [ -z "$PLATFORMS" ]; then \
