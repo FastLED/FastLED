@@ -43,8 +43,10 @@ namespace spi {
 ///
 /// spi.lane(0).write(data0, size0);
 /// spi.lane(1).write(data1, size1);
-/// auto tx = spi.flush();
-/// tx.wait();
+/// auto result = spi.flush();
+/// if (result.ok()) {
+///     spi.wait();  // Block until transmission completes
+/// }
 /// @endcode
 class MultiLaneDevice {
 public:
@@ -101,12 +103,13 @@ public:
     // ========== Transmission ==========
 
     /// @brief Flush all lanes (transpose and transmit)
-    /// @returns Result containing Transaction handle or error
+    /// @returns Result indicating success or error (Result<void>)
     /// @note Transposes all lane buffers and transmits via hardware DMA
     /// @note Clears all lane buffers after transmission starts
     /// @note All non-empty lanes MUST have identical sizes - operation fails with error if sizes differ
     /// @note Zero-padding is NOT performed - size validation prevents unreliable chipset-specific padding issues
-    Result<Transaction> flush();
+    /// @note Transaction API not yet implemented - call waitComplete() manually after flush()
+    Result<void> flush();
 
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)

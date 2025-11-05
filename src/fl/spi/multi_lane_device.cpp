@@ -307,9 +307,9 @@ size_t MultiLaneDevice::numLanes() const {
     return pImpl ? pImpl->lanes.size() : 0;
 }
 
-Result<Transaction> MultiLaneDevice::flush() {
+Result<void> MultiLaneDevice::flush() {
     if (!isReady()) {
-        return Result<Transaction>::failure(SPIError::NOT_INITIALIZED,
+        return Result<void>::failure(SPIError::NOT_INITIALIZED,
             "Device not initialized");
     }
 
@@ -329,7 +329,7 @@ Result<Transaction> MultiLaneDevice::flush() {
                 // Size mismatch detected
                 FL_WARN("MultiLaneDevice: Lane size mismatch - expected " << expected_size
                         << " bytes (lane 0), but lane " << i << " has " << lane_size << " bytes");
-                return Result<Transaction>::failure(SPIError::INVALID_PARAMETER,
+                return Result<void>::failure(SPIError::INVALID_PARAMETER,
                     "Lane size mismatch: all lanes must have identical sizes");
             }
         }
@@ -337,7 +337,7 @@ Result<Transaction> MultiLaneDevice::flush() {
 
     if (expected_size == 0) {
         FL_WARN("MultiLaneDevice: No data to flush (all lanes empty)");
-        return Result<Transaction>::failure(SPIError::ALLOCATION_FAILED,
+        return Result<void>::failure(SPIError::ALLOCATION_FAILED,
             "No data to transmit");
     }
 
@@ -359,13 +359,13 @@ Result<Transaction> MultiLaneDevice::flush() {
         SpiHw8* hw = static_cast<SpiHw8*>(pImpl->backend);
         dma_buffer = hw->acquireDMABuffer(max_size);
     } else {
-        return Result<Transaction>::failure(SPIError::NOT_INITIALIZED,
+        return Result<void>::failure(SPIError::NOT_INITIALIZED,
             "Invalid backend type");
     }
 
     if (!dma_buffer.ok()) {
         FL_WARN("MultiLaneDevice: Failed to acquire DMA buffer");
-        return Result<Transaction>::failure(dma_buffer.error(),
+        return Result<void>::failure(dma_buffer.error(),
             "Failed to acquire DMA buffer");
     }
 
@@ -443,7 +443,7 @@ Result<Transaction> MultiLaneDevice::flush() {
 
     if (!transpose_ok) {
         FL_WARN("MultiLaneDevice: Transposition failed - " << (error ? error : "unknown error"));
-        return Result<Transaction>::failure(SPIError::ALLOCATION_FAILED,
+        return Result<void>::failure(SPIError::ALLOCATION_FAILED,
             error ? error : "Transposition failed");
     }
 
@@ -465,7 +465,7 @@ Result<Transaction> MultiLaneDevice::flush() {
 
     if (!transmit_ok) {
         FL_WARN("MultiLaneDevice: Hardware transmit failed");
-        return Result<Transaction>::failure(SPIError::BUSY,
+        return Result<void>::failure(SPIError::BUSY,
             "Hardware transmit failed");
     }
 
@@ -477,11 +477,9 @@ Result<Transaction> MultiLaneDevice::flush() {
     FL_DBG("MultiLaneDevice: Flushed " << pImpl->lanes.size() << " lanes ("
            << max_size << " bytes per lane)");
 
-    // TODO: Create and return Transaction handle
-    // For now, transaction support is not yet implemented for MultiLaneDevice
-    // User must call waitComplete() manually after flush()
-    return Result<Transaction>::failure(SPIError::NOT_SUPPORTED,
-        "Transaction API not yet implemented for MultiLaneDevice - use waitComplete() instead");
+    // Success - transmission started asynchronously
+    // User must call waitComplete() manually to block until transmission completes
+    return Result<void>::success();
 }
 
 bool MultiLaneDevice::waitComplete(uint32_t timeout_ms) {
