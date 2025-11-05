@@ -280,7 +280,35 @@ jobs:
         continue-on-error: true
         working-directory: trusted
         run: |
-          uv run ci/ci-compile.py ${{ inputs.args }} --examples Blink
+          # Strip --examples and positional examples from args, then add --examples Blink
+          ARGS="${{ inputs.args }}"
+
+          # First remove any --examples flag and its value
+          ARGS=$(echo "$ARGS" | sed -E 's/--examples\s+[^[:space:]]+//g')
+
+          # Extract board name (first word)
+          BOARD=$(echo "$ARGS" | awk '{print $1}')
+
+          # Extract everything after board name
+          REST=$(echo "$ARGS" | sed -E 's/^[^[:space:]]+\s*//')
+
+          # Remove positional arguments (words not starting with --)
+          # Keep only flags and their values
+          CLEAN_ARGS=""
+          prev_was_flag=0
+          for word in $REST; do
+            if [[ $word == --* ]]; then
+              CLEAN_ARGS="$CLEAN_ARGS $word"
+              prev_was_flag=1
+            elif [[ $prev_was_flag == 1 ]]; then
+              # This is a flag value
+              CLEAN_ARGS="$CLEAN_ARGS $word"
+              prev_was_flag=0
+            fi
+            # Otherwise skip (it's a positional arg like "all")
+          done
+
+          uv run ci/ci-compile.py $BOARD$CLEAN_ARGS --examples Blink
         shell: bash
 
       - name: Symbol Analysis
