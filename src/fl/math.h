@@ -1,7 +1,26 @@
 #pragma once
 
 #include "fl/clamp.h"
+#include "fl/limits.h"
 #include "fl/math_macros.h"
+
+// Undefine Arduino/platform min/max/abs macros that conflict with our functions
+// Many platform headers (especially Arduino) define min/max/abs as function-like macros,
+// which prevents us from defining our own min/max/abs functions in the fl namespace.
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifdef abs
+#undef abs
+#endif
+
+#ifdef round
+#undef round
+#endif
+
 
 namespace fl {
 
@@ -118,9 +137,6 @@ template<typename T> inline long lround(T value) { return lround_impl_float(valu
 
 // Round to nearest floating-point value
 // Arduino defines round as a macro, so we need to undefine it first
-#ifdef round
-#undef round
-#endif
 inline float roundf(float value) { return round_impl_float(value); }
 inline double round(double value) { return round_impl_double(value); }
 template<typename T> inline T round(T value) { return round_impl_float(value); }
@@ -168,21 +184,23 @@ inline float tanf(float value) { return tan_impl_float(value); }
 inline double tan(double value) { return tan_impl_double(value); }
 template<typename T> inline T tan(T value) { return tan_impl_float(value); }
 
-// Arduino will define this in the global namespace as macros, so we can't
-// define them ourselves.
-// template <typename T>
-// inline T abs(T value) {
-//     return (value < 0) ? -value : value;
-// }
 
-// template <typename T>
-// inline T min(T a, T b) {
-//     return (a < b) ? a : b;
-// }
 
-// template <typename T>
-// inline T max(T a, T b) {
-//     return (a > b) ? a : b;
-// }
+// Min/max/abs functions that delegate to fl_min/fl_max/fl_abs
+// These are now safe to define since we've undefined the platform macros above
+template <typename T>
+inline T abs(T value) {
+    return fl_abs(value);
+}
+
+template <typename T, typename U>
+inline common_type_t<T, U> min(T a, U b) {
+    return fl_min(a, b);
+}
+
+template <typename T, typename U>
+inline common_type_t<T, U> max(T a, U b) {
+    return fl_max(a, b);
+}
 
 } // namespace fl

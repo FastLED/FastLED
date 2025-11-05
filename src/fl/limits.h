@@ -7,6 +7,8 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 */
 
 #include "fl/stdint.h"
+#include "fl/math.h"
+
 namespace fl {
 
 // Helper template to compute integer limits based on size and signedness
@@ -459,3 +461,19 @@ struct numeric_limits<double> {
 // long double specialization removed
 
 } // namespace fl
+
+// Include fl/math.h at the bottom to bring fl::min, fl::max, fl::abs functions into scope
+// This allows fl/math.h to include fl/limits.h at the top without circular dependency
+#include "fl/math.h"
+
+// Undefine macros at the end to prevent conflicts in code that includes this header
+// This ensures that fl::numeric_limits::min()/max() can be used without macro interference
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifdef abs
+#undef abs
+#endif
