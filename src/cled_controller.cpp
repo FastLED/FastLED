@@ -12,7 +12,7 @@
 CLEDController::~CLEDController() = default;
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() : m_Data(nullptr), m_ColorCorrection(UncorrectedColor), m_ColorTemperature(UncorrectedTemperature), m_DitherMode(BINARY_DITHER), m_nLeds(0) {
+CLEDController::CLEDController() : m_Data(nullptr), mSettings(), m_nLeds(0) {
     m_pNext = nullptr;
     if(m_pHead==nullptr) { m_pHead = this; }
     if(m_pTail != nullptr) { m_pTail->m_pNext = this; }

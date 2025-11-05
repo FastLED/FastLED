@@ -31,10 +31,12 @@ namespace fl {
 /// T1=350ns (bit 0 high), T2=700ns (bit 1 additional high), T3=600ns (low tail)
 /// Total bit period: 1650ns, Reset time: >280µs
 struct WS2812ChipsetTiming {
-    static constexpr uint32_t T1() { return 350; }  // ns
-    static constexpr uint32_t T2() { return 700; }  // ns
-    static constexpr uint32_t T3() { return 600; }  // ns
-    static constexpr uint32_t RESET() { return 280; }  // µs
+        enum : uint32_t {
+        T1 = 350,    // ns
+            T2 = 700,    // ns
+            T3 = 600,    // ns
+            RESET = 280  // µs
+    };
     static constexpr const char* name() { return "WS2812"; }
 };
 

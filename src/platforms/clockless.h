@@ -2,10 +2,27 @@
 
 /// @file clockless.h
 /// Platform-specific clockless controller dispatch header.
+///
 /// This header includes the appropriate clockless controller implementation
-/// based on the target platform.
+/// based on the target platform. The includes below MUST be in this file
+/// (rather than at the top of chipsets.h) because:
+///
+/// 1. **Template Specialization Architecture**: Base templates must be defined
+///    before platform-specific specializations can reference them
+/// 2. **Platform Detection**: Each platform's clockless implementation needs
+///    its specific platform macros and base types to be visible
+/// 3. **Conditional Compilation**: Different platforms get different controller
+///    implementations without requiring user code changes
+///
+/// This is intentional C++ template architecture for cross-platform support.
 
-// Platform-specific clockless controller includes
+// ============================================================================
+// PLATFORM-SPECIFIC CLOCKLESS DRIVER INCLUDES (Bottom Includes)
+// ============================================================================
+// These includes are at the "bottom" of the dependency chain because they
+// define concrete implementations that specialize the abstract base templates
+// defined earlier in the include hierarchy.
+// ============================================================================
 #if defined(__EMSCRIPTEN__)
   #include "wasm/clockless.h"
 #elif defined(FASTLED_STUB_IMPL) && !defined(__EMSCRIPTEN__)

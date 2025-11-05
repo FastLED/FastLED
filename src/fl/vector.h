@@ -413,8 +413,14 @@ class FL_ALIGN HeapVector {
         }
     }
 
+    // Iterator-based constructor
+    template <typename InputIterator>
+    HeapVector(InputIterator first, InputIterator last) {
+        assign(first, last);
+    }
+
     // Destructor
-    ~HeapVector() { 
+    ~HeapVector() {
         clear();
         if (mArray) {
             for (fl::size i = 0; i < mSize; ++i) {

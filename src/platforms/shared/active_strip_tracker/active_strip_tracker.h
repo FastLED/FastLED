@@ -44,6 +44,56 @@ public:
         }
     }
 
+    /// @brief Copy constructor - creates new tracker with fresh ID
+    /// Each copy gets its own unique ID in the registry
+    ActiveStripTracker(const ActiveStripTracker& other) {
+        (void)other; // Don't copy ID - get fresh one
+        uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
+        mId = getNextId().fetch_add(1);
+        getTrackerMap().update(tracker_addr, mId);
+    }
+
+    /// @brief Copy assignment - keeps same ID, updates address
+    ActiveStripTracker& operator=(const ActiveStripTracker& other) {
+        if (this != &other) {
+            uintptr_t addr = reinterpret_cast<uintptr_t>(this);
+            getTrackerMap().erase(addr);
+            mId = other.mId;
+            getTrackerMap().update(addr, mId);
+        }
+        return *this;
+    }
+
+    /// @brief Move constructor - transfers ID to new address
+    ActiveStripTracker(ActiveStripTracker&& other) noexcept {
+        mId = other.mId;
+        uintptr_t old_addr = reinterpret_cast<uintptr_t>(&other);
+        uintptr_t new_addr = reinterpret_cast<uintptr_t>(this);
+        getTrackerMap().erase(old_addr);
+        getTrackerMap().update(new_addr, mId);
+    }
+
+    /// @brief Move assignment - transfers ID to new address
+    ActiveStripTracker& operator=(ActiveStripTracker&& other) noexcept {
+        if (this != &other) {
+            uintptr_t old_this = reinterpret_cast<uintptr_t>(this);
+            uintptr_t old_other = reinterpret_cast<uintptr_t>(&other);
+            getTrackerMap().erase(old_this);
+            getTrackerMap().erase(old_other);
+            mId = other.mId;
+            uintptr_t new_this = reinterpret_cast<uintptr_t>(this);
+            getTrackerMap().update(new_this, mId);
+        }
+        return *this;
+    }
+
+    /// @brief Destructor - unregisters this tracker
+    /// Removes the tracker's address from the map to clean up orphaned IDs
+    ~ActiveStripTracker() {
+        uintptr_t tracker_addr = reinterpret_cast<uintptr_t>(this);
+        getTrackerMap().erase(tracker_addr);
+    }
+
     /// @brief Update strip data with RGB pixel data
     /// @param pixel_data Span of RGB pixel data (3 bytes per pixel: R, G, B)
     void update(fl::span<const uint8_t> pixel_data) {

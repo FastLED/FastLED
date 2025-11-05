@@ -28,5 +28,20 @@
 #endif
 #endif
 
+// Include bulk controller implementations
+// These provide multi-strip support using hardware peripherals
+
+#if FASTLED_RMT5
+#include "../drivers/rmt/bulk_rmt.h"
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#include "../drivers/lcd_cam/bulk_lcd_i80.h"
+#endif
+
+#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3)
+#include "../drivers/i2s/bulk_i2s.h"
+#endif
+
 
 #endif // _FASTLED_ESP32_H

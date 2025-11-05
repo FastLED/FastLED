@@ -62,8 +62,25 @@
 // - AVR platforms: led_sysdefs_avr.h + platforms/avr/clockless_*.h
 // - Other platforms: respective led_sysdefs_*.h files
 
-// So many platforms have specialized WS2812 controllers. Why? Because they
-// are the cheapest chipsets use. So we special case this.
+// ============================================================================
+// PLATFORM-SPECIFIC SPECIALIZED CONTROLLERS (Bottom Includes)
+// ============================================================================
+// The includes below MUST be at this point in the file because:
+//
+// 1. C++ templates require full definition in headers (no .cpp separation)
+// 2. Base templates and type definitions (above) must be defined BEFORE
+//    platform-specific specializations (below) can see and use them
+// 3. Platform specializations need to instantiate/specialize the base templates
+//
+// This is intentional C++ template architecture, not a code smell or circular
+// dependency. Template-heavy libraries like FastLED naturally have includes at
+// the bottom to support platform-specific specializations.
+//
+// Example: WS2812 is heavily optimized per-platform because it's the most
+// popular chipset. Each platform provides specialized implementations that
+// fully replace the default template instantiation.
+// ============================================================================
+
 #include "platforms/chipsets_specialized_ws2812.h"
 
 #if defined(ARDUINO) && (defined(SoftwareSerial_h) || defined(__SoftwareSerial_h))

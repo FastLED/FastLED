@@ -86,9 +86,9 @@ public:
         }
 
         return ClocklessTiming::calculate_optimal_pclk(
-            LED_CHIPSET::T1(),
-            LED_CHIPSET::T2(),
-            LED_CHIPSET::T3(),
+            LED_CHIPSET::T1,
+            LED_CHIPSET::T2,
+            LED_CHIPSET::T3,
             N_BIT,           // 3 words per bit
             1000000,         // 1 MHz min
             80000000,        // 80 MHz max

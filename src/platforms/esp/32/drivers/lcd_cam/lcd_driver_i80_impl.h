@@ -38,7 +38,7 @@ bool LcdI80Driver<LED_CHIPSET>::begin(const LcdDriverConfig& config, int leds_pe
 
     // Use chipset default reset time if not specified
     if (config_.latch_us == 0) {
-        config_.latch_us = LED_CHIPSET::RESET();
+        config_.latch_us = LED_CHIPSET::RESET;
     }
 
     // Validate configuration

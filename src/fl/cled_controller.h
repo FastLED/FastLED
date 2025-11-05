@@ -18,6 +18,7 @@
 #include "fl/virtual_if_not_avr.h"
 #include "fl/int.h"
 #include "fl/bit_cast.h"
+#include "fl/led_settings.h"
 
 
 
@@ -40,9 +41,7 @@ protected:
     friend class CFastLED;
     CRGB *m_Data;              ///< pointer to the LED data used by this controller
     CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
-    CRGB m_ColorCorrection;    ///< CRGB object representing the color correction to apply to the strip on show()  @see setCorrection
-    CRGB m_ColorTemperature;   ///< CRGB object representing the color temperature to apply to the strip on show() @see setTemperature
-    EDitherMode m_DitherMode;  ///< the current dither mode of the controller
+    LEDSettings mSettings;     ///< Common LED settings (correction, temperature, dither, rgbw)
     bool m_enabled = true;
     int m_nLeds;               ///< the number of LEDs in the LED data array
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
@@ -62,12 +61,10 @@ public:
     /// @param scale the rgb scaling to apply to each led before writing it out
     virtual void show(const CRGB *data, int nLeds, fl::u8 brightness) = 0;
 
-
-    Rgbw mRgbMode = RgbwInvalid::value();
     CLEDController& setRgbw(const Rgbw& arg = RgbwDefault::value()) {
         // Note that at this time (Sept 13th, 2024) this is only implemented in the ESP32 driver
         // directly. For an emulated version please see RGBWEmulatedController in chipsets.h
-        mRgbMode = arg;
+        mSettings.rgbw = arg;
         return *this;  // builder pattern.
     }
 
@@ -84,7 +81,7 @@ public:
     //   Without CLEDController destructor virtual: 10666 bytes to binary.
     VIRTUAL_IF_NOT_AVR ~CLEDController();
 
-    Rgbw getRgbw() const { return mRgbMode; }
+    Rgbw getRgbw() const { return mSettings.rgbw; }
 
     /// Initialize the LED controller
     virtual void init() = 0;
@@ -173,7 +170,7 @@ public:
 
     /// How many LEDs does this controller manage?
     /// @returns CLEDController::m_nLeds
-    virtual int size() { return m_nLeds; }
+    virtual int size() const { return m_nLeds; }
 
     /// How many Lanes does this controller manage?
     /// @returns 1 for a non-Parallel controller
@@ -191,7 +188,7 @@ public:
     /// Set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set
     /// @returns a reference to the controller
-    inline CLEDController & setDither(fl::u8 ditherMode = BINARY_DITHER) { m_DitherMode = ditherMode; return *this; }
+    inline CLEDController & setDither(fl::u8 ditherMode = BINARY_DITHER) { mSettings.ditherMode = ditherMode; return *this; }
 
     CLEDController& setScreenMap(const fl::XYMap& map, float diameter = -1.f) {
         // EngineEvents::onCanvasUiSet(this, map);
@@ -214,8 +211,8 @@ public:
     }
 
     /// Get the dithering option currently set for this controller
-    /// @return the currently set dithering option (CLEDController::m_DitherMode)
-    inline fl::u8 getDither() { return m_DitherMode; }
+    /// @return the currently set dithering option (CLEDController::mSettings.ditherMode)
+    inline fl::u8 getDither() { return mSettings.ditherMode; }
 
     virtual void* beginShowLeds(int size) {
         FASTLED_UNUSED(size);
@@ -247,32 +244,32 @@ public:
     /// The color corrction to use for this controller, expressed as a CRGB object
     /// @param correction the color correction to set
     /// @returns a reference to the controller
-    CLEDController & setCorrection(CRGB correction) { m_ColorCorrection = correction; return *this; }
+    CLEDController & setCorrection(CRGB correction) { mSettings.correction = correction; return *this; }
 
     /// @copydoc setCorrection()
-    CLEDController & setCorrection(LEDColorCorrection correction) { m_ColorCorrection = correction; return *this; }
+    CLEDController & setCorrection(LEDColorCorrection correction) { mSettings.correction = correction; return *this; }
 
     /// Get the correction value used by this controller
-    /// @returns the current color correction (CLEDController::m_ColorCorrection)
-    CRGB getCorrection() { return m_ColorCorrection; }
+    /// @returns the current color correction (CLEDController::mSettings.correction)
+    CRGB getCorrection() { return mSettings.correction; }
 
     /// Set the color temperature, aka white point, for this controller
     /// @param temperature the color temperature to set
     /// @returns a reference to the controller
-    CLEDController & setTemperature(CRGB temperature) { m_ColorTemperature = temperature; return *this; }
+    CLEDController & setTemperature(CRGB temperature) { mSettings.temperature = temperature; return *this; }
 
     /// @copydoc setTemperature()
-    CLEDController & setTemperature(ColorTemperature temperature) { m_ColorTemperature = temperature; return *this; }
+    CLEDController & setTemperature(ColorTemperature temperature) { mSettings.temperature = temperature; return *this; }
 
     /// Get the color temperature, aka white point, for this controller
-    /// @returns the current color temperature (CLEDController::m_ColorTemperature)
-    CRGB getTemperature() { return m_ColorTemperature; }
+    /// @returns the current color temperature (CLEDController::mSettings.temperature)
+    CRGB getTemperature() { return mSettings.temperature; }
 
     /// Get the combined brightness/color adjustment for this controller
     /// @param scale the brightness scale to get the correction for
     /// @returns a CRGB object representing the total adjustment, including color correction and color temperature
     CRGB getAdjustment(fl::u8 scale) {
-        return CRGB::computeAdjustment(scale, m_ColorCorrection, m_ColorTemperature);
+        return CRGB::computeAdjustment(scale, mSettings.correction, mSettings.temperature);
     }
 
     /// Gets the maximum possible refresh rate of the strip
