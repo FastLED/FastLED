@@ -24,6 +24,23 @@ Notes:
  - Many STM32 Arduino cores map `pinMode` to HAL; direct register variants in `fastpin_*` may differ across series.
 - Roger Clark's core requires special handling for ARM detection and placement new operator (handled automatically).
 
+## RGBW Support
+
+STM32 platforms now support RGBW (4-channel) LED strips like SK6812.
+
+### Features
+- **WS2812 RGBW (SK6812)**: Uses the same timing as WS2812 RGB, just 4 bytes per LED instead of 3
+- **Automatic detection**: RGBW mode is detected automatically based on strip configuration
+- **Mixed RGB/RGBW**: Different strips in the same application can use RGB or RGBW independently
+- **Color conversion**: Full RGBW color conversion and white channel management
+
+### Memory Usage
+- RGB mode: 3 bytes per LED
+- RGBW mode: 4 bytes per LED
+
+### Implementation
+The clockless driver (`clockless_arm_stm32.h`) automatically detects RGBW mode and processes 4 bytes per pixel when needed, using the same precise timing as RGB mode.
+
 ## Optional feature defines
 
 - **`FASTLED_ALLOW_INTERRUPTS`**: Default `0`. Clockless timing on STM32 typically runs with interrupts off for stability.
