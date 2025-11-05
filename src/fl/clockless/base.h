@@ -775,6 +775,11 @@ CLEDController &BulkClockless<CHIPSET, PERIPHERAL>::setRgbw(const Rgbw &arg) {
 template <typename CHIPSET, typename PERIPHERAL>
 void BulkClockless<CHIPSET, PERIPHERAL>::showColor(const CRGB &data, int nLeds, u8 brightness) {
     // Default implementation: show color to all strips
+    // Parameter unused: Each strip in BulkClockless has its own LED count tracked
+    // in BulkStrip. The nLeds parameter comes from CLEDController interface but
+    // doesn't apply to our multi-strip architecture.
+    (void)nLeds;
+
     for (auto &pair : mSubControllers) {
         BulkStrip &sub = pair.second;
         ColorAdjustment adj = BulkClocklessHelper::computeAdjustment(brightness, sub.settings);
@@ -787,6 +792,12 @@ void BulkClockless<CHIPSET, PERIPHERAL>::showColor(const CRGB &data, int nLeds, 
 // Show pixels
 template <typename CHIPSET, typename PERIPHERAL>
 void BulkClockless<CHIPSET, PERIPHERAL>::showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) {
+    // Parameter unused: BulkClockless manages multiple independent buffers, each
+    // requiring its own PixelController with per-strip settings. The global
+    // PixelController passed by base class doesn't apply to our multi-strip
+    // architecture - we create per-strip PixelControllers in showPixelsInternal().
+    (void)pixels;
+
     // This is called by base class show() method
     // For BulkClockless, we need to iterate all sub-controllers
     // Note: In practice, showLedsInternal() is the better override point

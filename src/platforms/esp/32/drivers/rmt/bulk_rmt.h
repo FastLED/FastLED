@@ -226,10 +226,16 @@ class BulkClockless<Chipset::WS2812, RMT>
 
     /// Show single color (not typically used for bulk controllers)
     void showColor(const CRGB &data, int nLeds, fl::u8 brightness) override {
-        // Not typically used for bulk controllers
-        (void)data;
-        (void)nLeds;
-        (void)brightness;
+        // Fill all strip buffers with solid color
+        for (auto &pair : mSubControllers) {
+            BulkStrip &sub = pair.second;
+            CRGB* buffer = sub.getBuffer();
+            for (int i = 0; i < sub.getCount(); i++) {
+                buffer[i] = data;
+            }
+        }
+        mBrightness = brightness;
+        // Transmission happens via showPixels() -> showPixelsInternal()
     }
 
     /// Override show() to capture brightness
@@ -244,7 +250,10 @@ class BulkClockless<Chipset::WS2812, RMT>
     void showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) override {
         // This is called by base class show() method
         // For BulkClockless, we iterate all sub-controllers
-        (void)pixels; // Not used - we use sub-controller buffers
+        // Parameter unused: BulkClockless manages multiple independent buffers, each
+        // requiring its own PixelController with per-strip settings. We create
+        // per-strip PixelControllers in showPixelsInternal().
+        (void)pixels;
         showPixelsInternal();
     }
 
