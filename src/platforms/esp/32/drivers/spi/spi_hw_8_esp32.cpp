@@ -321,27 +321,24 @@ void SpiHw8ESP32::cleanup() {
 
 /// ESP32 factory override - returns available 8-lane SPI bus instances
 /// Strong definition overrides weak default
+///
+/// IMPORTANT: ESP32's SPI peripheral Octal mode (SPI_TRANS_MODE_OCT) is designed
+/// for QSPI flash communication, NOT parallel LED strips. Octal mode sends a
+/// single byte stream to one device, splitting each byte across 8 data lines
+/// (8 bits per clock cycle). This is fundamentally different from parallel LED
+/// strips, which need 8 independent byte streams to 8 separate devices.
+///
+/// For parallel LED output on ESP32, use the I2S peripheral (SpiHw16) instead,
+/// which supports 1-16 independent data streams with true parallel DMA output.
+///
+/// This factory returns an empty vector to force SPIBusManager to use SpiHw16
+/// for 5-8 strip configurations instead of trying to use the broken SpiHw8.
 fl::vector<SpiHw8*> SpiHw8::createInstances() {
-    fl::vector<SpiHw8*> controllers;
+    FL_LOG_SPI("SpiHw8::createInstances - ESP32 uses I2S (SpiHw16) for parallel strips");
+    FL_LOG_SPI("Returning empty controller list - SPIBusManager will use SpiHw16 instead");
 
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    // Octal-SPI is only available on ESP-IDF 5.0+
-    // Note: Not all ESP32 variants support octal mode even with IDF 5.0+
-    // ESP32-P4 and some newer chips support it
-
-    // Bus 2 is available on all ESP32 platforms
-    static SpiHw8ESP32 controller2(2, "SPI2_OCTAL");  // Bus 2 - static lifetime
-    controllers.push_back(&controller2);
-
-#if SOC_SPI_PERIPH_NUM > 2
-    // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SpiHw8ESP32 controller3(3, "SPI3_OCTAL");  // Bus 3 - static lifetime
-    controllers.push_back(&controller3);
-#endif
-
-#endif  // ESP_IDF_VERSION >= 5.0.0
-
-    return controllers;
+    // Return empty - ESP32 parallel LED support is via I2S (SpiHw16), not SPI peripheral
+    return fl::vector<SpiHw8*>();
 }
 
 }  // namespace fl

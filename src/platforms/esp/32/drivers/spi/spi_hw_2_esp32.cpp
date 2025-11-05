@@ -326,26 +326,24 @@ void SPIDualESP32::cleanup() {
 
 /// ESP32 factory override - returns available SPI bus instances
 /// Strong definition overrides weak default
+///
+/// IMPORTANT: ESP32's SPI peripheral Dual mode (SPI_TRANS_MODE_DIO) is designed
+/// for QSPI flash communication, NOT parallel LED strips. Dual mode sends a
+/// single byte stream to one device, splitting each byte across 2 data lines
+/// (2 bits per clock cycle). This is fundamentally different from parallel LED
+/// strips, which need 2 independent byte streams to 2 separate devices.
+///
+/// For parallel LED output on ESP32, use the I2S peripheral (SpiHw16) instead,
+/// which supports 1-16 independent data streams with true parallel DMA output.
+///
+/// This factory returns an empty vector to force SPIBusManager to use SpiHw16
+/// for 2-strip configurations instead of trying to use the broken SpiHw2.
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    FL_LOG_SPI("SpiHw2::createInstances - Creating SPI Dual controllers");
-    FL_LOG_SPI("SPI Peripheral Count: " << SOC_SPI_PERIPH_NUM);
+    FL_LOG_SPI("SpiHw2::createInstances - ESP32 uses I2S (SpiHw16) for parallel strips");
+    FL_LOG_SPI("Returning empty controller list - SPIBusManager will use SpiHw16 instead");
 
-    fl::vector<SpiHw2*> controllers;
-
-    // Bus 2 is available on all ESP32 platforms
-    static SPIDualESP32 controller2(2, "SPI2");
-    FL_LOG_SPI("Adding SPI2 Controller");
-    controllers.push_back(&controller2);
-
-#if SOC_SPI_PERIPH_NUM > 2
-    // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SPIDualESP32 controller3(3, "SPI3");
-    FL_LOG_SPI("Adding SPI3 Controller");
-    controllers.push_back(&controller3);
-#endif
-
-    FL_LOG_SPI("Created " << controllers.size() << " SPI Dual controllers");
-    return controllers;
+    // Return empty - ESP32 parallel LED support is via I2S (SpiHw16), not SPI peripheral
+    return fl::vector<SpiHw2*>();
 }
 
 }  // namespace fl
