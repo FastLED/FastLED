@@ -75,6 +75,9 @@ class Board:
     lib_ignore: list[str] | None = (
         None  # Libraries to ignore during compilation (e.g., ['I2S'] for UNO R4 WiFi)
     )
+    extra_scripts: list[str] | None = (
+        None  # Custom build scripts to run (e.g., ['pre:script.py'] for pre-build hooks)
+    )
 
     def __post_init__(self) -> None:
         # Check if framework is set, warn and auto-set to arduino if missing (except for native/stub platforms)
@@ -451,8 +454,15 @@ class Board:
 
         # Section header
         lines.append(f"[env:{self.board_name}]")
+
+        # Merge board's extra_scripts with parameter extra_scripts
+        all_extra_scripts: list[str] = []
+        if self.extra_scripts:
+            all_extra_scripts.extend(self.extra_scripts)
         if extra_scripts:
-            lines.append(f"extra_scripts = {' '.join(extra_scripts)}")
+            all_extra_scripts.extend(extra_scripts)
+        if all_extra_scripts:
+            lines.append(f"extra_scripts = {' '.join(all_extra_scripts)}")
 
         # Board identifier (skip for platforms that don't need board specification)
         if not self.no_board_spec:
@@ -597,6 +607,14 @@ NATIVE = Board(
         "-std=c++17",
         "-I../../../src/platforms/stub",  # Include path for Arduino.h and other stub headers (relative to project dir)
         "-I../../../src",  # Include path for FastLED.h and other source headers (relative to project dir)
+    ],
+    build_unflags=[
+        "-mwindows",  # Remove GUI subsystem flag if present
+        "-Wl,-Map,firmware.map",  # Remove GCC/ld map file flag (incompatible with zig's lld linker)
+        "-fopt-info-all",  # Remove GCC-only optimization report flag (incompatible with Clang)
+    ],
+    extra_scripts=[
+        "pre:../../../ci/native/zig_toolchain_override.py",  # Override toolchain with zig's Clang (runs BEFORE library compilation - CRITICAL for ABI compatibility)
     ],
 )
 
