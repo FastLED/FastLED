@@ -81,8 +81,8 @@ struct PixelController {
     const uint8_t *mData;    ///< pointer to the underlying LED data
     int mLen;                ///< number of LEDs in the data for one lane
     int mLenRemaining;       ///< counter for the number of LEDs left to process
-    uint8_t d[3];            ///< values for the scaled dither signal @see init_binary_dithering()
-    uint8_t e[3];            ///< values for the unscaled dither signal @see init_binary_dithering()
+    uint8_t d[3];            ///< [DITHER] Current dither offset per R,G,B channel (toggles via stepDithering)
+    uint8_t e[3];            ///< [DITHER] Max dither range per R,G,B channel (inversely proportional to brightness)
     int8_t mAdvance;         ///< how many bytes to advance the pointer by each time. For CRGB this is 3.
     int mOffsets[LANES];     ///< the number of bytes to offset each lane from the starting pointer @see initOffsets()
     ColorAdjustment mColorAdjustment;
@@ -192,6 +192,50 @@ struct PixelController {
     #endif
 
 
+// ============================================================================
+// TEMPORAL DITHERING OVERVIEW
+// ============================================================================
+//
+// Temporal dithering recovers fractional brightness precision lost to integer
+// quantization by varying pixel values across frames. At refresh rates above
+// ~50Hz, human vision integrates these variations, perceiving the true
+// fractional brightness.
+//
+// THE PROBLEM:
+//   Integer scaling causes color shifts at low brightness. For example:
+//     CRGB(100, 60, 20) at 20% brightness → RGB(19, 11, 3)
+//   Each channel loses different fractional precision, distorting the color.
+//
+// THE SOLUTION:
+//   Add frame-varying noise BEFORE scaling, causing different rounding outcomes:
+//     Frame 1: scale8(100+0, 51) = 19
+//     Frame 2: scale8(100+3, 51) = 20  ← noise pushed over threshold
+//   Your eye averages these to perceive the correct fractional brightness.
+//
+// THE ALGORITHM:
+//   1. Frame counter R cycles 0-7, creating an 8-frame pattern
+//   2. Bit-reverse R to Q (0→0, 1→128, 2→64...) to distribute pattern temporally
+//   3. Center pattern: Q += 16
+//   4. Scale per channel: e[i] = 256/brightness, d[i] = scale8(Q, e[i])
+//      Lower brightness needs BIGGER dither to compensate for larger % error
+//   5. Toggle between pixels: d[i] = e[i] - d[i] (spatial distribution)
+//   6. Apply: pixel = scale8(qadd8(pixel, d[i]), brightness)
+//
+// VIRTUAL BITS:
+//   8-frame cycle at 400Hz = 50Hz complete cycle → +3 "virtual" bits
+//   Result: 8-bit hardware provides 11-bit perceived precision (0-2047 levels)
+//
+// DISABLE FOR:
+//   - Cameras/photography (captures individual frames, sees flicker)
+//   - Slow refresh <50Hz (visible flickering)
+//   - Video recording (frame rate mismatches create artifacts)
+//   Use: FastLED.setDither(DISABLE_DITHER)
+//
+// NOTE: This is NOT gamma correction. Dithering is pure temporal averaging
+// to recover quantization precision. See init_binary_dithering() below.
+//
+// ============================================================================
+
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
 
 /// Predicted max update rate, in Hertz
@@ -232,23 +276,22 @@ struct PixelController {
 
 
     /// Set up the values for binary dithering
+    /// @see "TEMPORAL DITHERING: THE COMPLETE GUIDE" section above (line 195)
     void init_binary_dithering() {
 #if !defined(NO_DITHERING) || (NO_DITHERING != 1)
-        // R is the digther signal 'counter'.
+        // STEP 1: Increment frame counter (creates temporal variation)
         static uint8_t R = 0;
         ++R;
 
-        // R is wrapped around at 2^ditherBits,
-        // so if ditherBits is 2, R will cycle through (0,1,2,3)
+        // STEP 2: Wrap counter at 2^ditherBits (creates 8-frame cycle: 0,1,2,3,4,5,6,7,0...)
         uint8_t ditherBits = VIRTUAL_BITS;
         R &= (0x01 << ditherBits) - 1;
 
-        // Q is the "unscaled dither signal" itself.
-        // It's initialized to the reversed bits of R.
-        // If 'ditherBits' is 2, Q here will cycle through (0,128,64,192)
+        // STEP 3: Bit-reverse R to create maximally-spaced pattern Q
+        // Why? Prevents visible ramping patterns. Turns 0,1,2,3,4,5,6,7 → 0,128,64,192,32,160,96,224
         uint8_t Q = 0;
 
-        // Reverse bits in a byte
+        // Bit reversal magic: mirrors bit positions (bit 0 ↔ bit 7, bit 1 ↔ bit 6, etc.)
         {
             if(R & 0x01) { Q |= 0x80; }
             if(R & 0x02) { Q |= 0x40; }
@@ -260,26 +303,31 @@ struct PixelController {
             if(R & 0x80) { Q |= 0x01; }
         }
 
-        // Now we adjust Q to fall in the center of each range,
-        // instead of at the start of the range.
-        // If ditherBits is 2, Q will be (0, 128, 64, 192) at first,
-        // and this adjustment makes it (31, 159, 95, 223).
+        // STEP 4: Center the pattern (shifts values to middle of quantization bins)
+        // Example: 0,128,64,192 becomes 16,144,80,208 (adds 16 when ditherBits=3)
         if( ditherBits < 8) {
             Q += 0x01 << (7 - ditherBits);
         }
 
-        // D and E form the "scaled dither signal"
-        // which is added to pixel values to affect the
-        // actual dithering.
-
-        // Setup the initial D and E values
+        // STEP 5: Scale per-channel based on brightness
+        // Key insight: Lower brightness needs BIGGER dithering offsets!
+        // e[i] = max dither range (inversely proportional to brightness)
+        // d[i] = current dither offset (Q scaled by e[i])
         for(int i = 0; i < 3; ++i) {
-                uint8_t s = mColorAdjustment.premixed.raw[i];
+                uint8_t s = mColorAdjustment.premixed.raw[i];  // Brightness scale factor
+
+                // Calculate max dither range: e = 256/brightness
+                // At 100% (255): e≈1 (tiny range), At 20% (51): e≈5 (large range)
                 e[i] = s ? (256/s) + 1 : 0;
+
+                // Scale Q by the dither range to get current offset
                 d[i] = scale8(Q, e[i]);
+
 #if (FASTLED_SCALE8_FIXED == 1)
+                // Adjust for scale8 implementation quirk
                 if(d[i]) (--d[i]);
 #endif
+                // Finalize e[i] value for later toggling
                 if(e[i]) --e[i];
         }
 #endif
@@ -292,15 +340,12 @@ struct PixelController {
         return mLenRemaining >= n;
     }
 
-    /// Toggle dithering enable
-    /// If dithering is set to enabled, this will re-init the dithering values
-    /// (init_binary_dithering()). Otherwise it will clear the stored dithering
-    /// data.
-    /// @param dither the dither setting
+    /// Toggle dithering enable/disable
+    /// @param dither BINARY_DITHER (on) or DISABLE_DITHER (off)
     void enable_dithering(EDitherMode dither) {
         switch(dither) {
-            case BINARY_DITHER: init_binary_dithering(); break;
-            default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;
+            case BINARY_DITHER: init_binary_dithering(); break;  // Initialize dithering algorithm
+            default: d[0]=d[1]=d[2]=e[0]=e[1]=e[2]=0; break;     // Clear dither values (disabled)
         }
     }
 
@@ -319,11 +364,11 @@ struct PixelController {
     /// Advance the data pointer forward, adjust position counter
     FASTLED_FORCE_INLINE void advanceData() { mData += mAdvance; --mLenRemaining;}
 
-    /// Step the dithering forward
+    /// Step the dithering forward - creates triangular wave that toggles between pixels
     /// @note If updating here, be sure to update the asm version in clockless_avr.h!
     FASTLED_FORCE_INLINE void stepDithering() {
-            // IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN
-            // clockless_avr.h!
+            // Toggles d between two values: if d=2 and e=5, becomes 3, then back to 2, etc.
+            // This spreads dithering spatially along the strip, preventing visible patterns
             d[0] = e[0] - d[0];
             d[1] = e[1] - d[1];
             d[2] = e[2] - d[2];
@@ -349,17 +394,18 @@ struct PixelController {
     /// @param lane the parallel output lane to read the byte for
     template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadByte(PixelController & pc, int lane) { return pc.mData[pc.mOffsets[lane] + RO(SLOT)]; }
 
-    /// Calculate a dither value using the per-channel dither data
-    /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
+    /// Add dither offset to pixel value (BEFORE scaling). Black pixels not dithered.
+    /// @tparam SLOT The data slot in the output stream
     /// @param pc reference to the pixel controller
     /// @param b the color byte to dither
-    /// @see PixelController::d
+    /// @returns b + dither offset, clamped to 255
     template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & pc, uint8_t b) { return b ? fl::qadd8(b, pc.d[RO(SLOT)]) : 0; }
-    
-    /// Calculate a dither value
-    /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
+
+    /// Add explicit dither offset to pixel value (BEFORE scaling). Black pixels not dithered.
+    /// @tparam SLOT The data slot in the output stream
     /// @param b the color byte to dither
-    /// @param d dither data
+    /// @param d dither offset to add
+    /// @returns b + d, clamped to 255
     template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t dither(PixelController & , uint8_t b, uint8_t d) { return b ? fl::qadd8(b,d) : 0; }
 
     /// Scale a value using the per-channel scale data
@@ -382,24 +428,21 @@ struct PixelController {
     /// @{
 
 
-    /// Loads, dithers, and scales a single byte for a given output slot, using class dither and scale values
-    /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
-    /// @param pc reference to the pixel controller
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc))); }
+    /// Complete pipeline: load → dither → scale (THE MAGIC HAPPENS HERE!)
+    /// Order is critical: pixel + dither FIRST, then scale by brightness
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc) {
+        return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc)));
+    }
 
-    /// Loads, dithers, and scales a single byte for a given output slot and lane, using class dither and scale values
-    /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
-    /// @param pc reference to the pixel controller
-    /// @param lane the parallel output lane to read the byte for
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc, int lane) { return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane))); }
+    /// Complete pipeline: load → dither → scale (parallel output version)
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc, int lane) {
+        return scale<SLOT>(pc, pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane)));
+    }
 
-    /// Loads, dithers, and scales a single byte for a given output slot and lane
-    /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
-    /// @param pc reference to the pixel controller
-    /// @param lane the parallel output lane to read the byte for
-    /// @param d the dither data for the byte
-    /// @param scale the scale data for the byte
-    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc, int lane, uint8_t d, uint8_t scale) { return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale); }
+    /// Complete pipeline: load → dither → scale (explicit dither/scale values)
+    template<int SLOT>  FASTLED_FORCE_INLINE static uint8_t loadAndScale(PixelController & pc, int lane, uint8_t d, uint8_t scale) {
+        return scale8(pc.dither<SLOT>(pc, pc.loadByte<SLOT>(pc, lane), d), scale);
+    }
 
     /// Loads and scales a single byte for a given output slot and lane
     /// @tparam SLOT The data slot in the output stream. This is used to select which byte of the output stream is being processed.
