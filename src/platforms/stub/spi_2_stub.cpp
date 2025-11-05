@@ -1,9 +1,9 @@
-/// @file spi_dual_stub.cpp
+/// @file spi_2_stub.cpp
 /// @brief Stub/Mock Dual-SPI implementation for testing
 
 #ifdef FASTLED_TESTING
 
-#include "spi_dual_stub.h"
+#include "spi_2_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {

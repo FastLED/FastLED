@@ -1042,7 +1042,7 @@ extern CFastLED FastLED;
 // Leds has a CRGB block and an XYMap
 #include "fl/leds.h"
 
-#include "fl/spi.h"  // SPI device and multi-lane SPI support
+#include "fl/spi.h"  // SPI device and multi-lane SPI support (1-16 lanes)
 
 #include "fl/ui.h"  // Provides UIButton, UISlider, UICheckbox, UINumberField and UITitle, UIDescription, UIHelp, UIGroup.
 using fl::UITitle;

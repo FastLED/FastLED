@@ -12,9 +12,11 @@
 #include "platforms/shared/spi_types.h"
 
 // Multi-lane SPI support - unconditional includes (platform detection via weak linkage)
+#include "platforms/shared/spi_hw_1.h"  // Single-SPI
 #include "platforms/shared/spi_hw_2.h"  // Dual-SPI
 #include "platforms/shared/spi_hw_4.h"  // Quad-SPI
 #include "platforms/shared/spi_hw_8.h"  // Octal-SPI
+#include "platforms/shared/spi_hw_16.h"  // Hexadeca-SPI
 #include "platforms/shared/spi_transposer.h"
 
 // Software SPI support - Pin class forward declared here, defined by platform
@@ -32,6 +34,7 @@ enum class SPIBusType : uint8_t {
     DUAL_SPI,      ///< Hardware SPI, 2 data lines (ESP32-C series)
     QUAD_SPI,      ///< Hardware SPI, 4 data lines (ESP32/S/P series)
     OCTO_SPI,      ///< Hardware SPI, 8 data lines (ESP32-P4)
+    HEXADECA_SPI,  ///< Hardware SPI, 16 data lines (ESP32 I2S parallel mode)
 };
 
 /// Handle returned when registering with the SPI bus manager
@@ -64,15 +67,15 @@ struct SPIBusInfo {
     uint8_t clock_pin;              ///< Clock pin number
     SPIBusType bus_type;            ///< How this bus is being used
     uint8_t num_devices;            ///< Number of devices on this bus
-    SPIDeviceInfo devices[8];       ///< Device list (max 8 for ESP32-P4)
+    SPIDeviceInfo devices[16];      ///< Device list (max 16 for I2S parallel mode)
     uint8_t spi_bus_num;            ///< Hardware SPI bus number (2 or 3)
-    void* hw_controller;            ///< Pointer to hardware controller (Single/Dual/Quad)
+    void* hw_controller;            ///< Pointer to hardware controller (Single/Dual/Quad/Octo/Hexadeca)
     bool is_initialized;            ///< Whether hardware is initialized
     const char* error_message;      ///< Error message if initialization failed
 
-    // Quad-SPI specific buffers
-    fl::vector<fl::vector<uint8_t>> lane_buffers;    ///< Per-lane write buffers for Quad-SPI
-    fl::vector<uint8_t> interleaved_buffer;          ///< Transposed output for Quad-SPI DMA
+    // Multi-lane SPI specific buffers
+    fl::vector<fl::vector<uint8_t>> lane_buffers;    ///< Per-lane write buffers for multi-lane SPI
+    fl::vector<uint8_t> interleaved_buffer;          ///< Transposed output for multi-lane DMA
 
     SPIBusInfo()
         : clock_pin(0xFF), bus_type(SPIBusType::SOFT_SPI), num_devices(0),
@@ -100,7 +103,13 @@ public:
 
     /// Destructor - clean up all hardware resources
     ~SPIBusManager() {
-        reset();  // Release all hardware controllers
+        // Note: Do NOT call reset() here!
+        // During static destruction, hardware resources (like SpiHw1Stub static instances)
+        // may have already been destroyed, causing crashes when we try to call end() on them.
+        // This is especially problematic in test environments where SPIBusManager, SpiHw1Stub,
+        // and other static objects are destroyed in undefined order.
+        //
+        // Device destructors already handle cleanup via unregisterDevice(), so this is safe.
     }
 
     /// Register a device (LED strip) with the manager
@@ -124,8 +133,8 @@ public:
         }
 
         // Check if we can add another device to this bus
-        if (bus->num_devices >= 8) {
-            FL_WARN_FMT("SPIBusManager: Too many devices on clock pin " << clock_pin << " (max 8)");
+        if (bus->num_devices >= 16) {
+            FL_WARN_FMT("SPIBusManager: Too many devices on clock pin " << clock_pin << " (max 16)");
             return SPIBusHandle();
         }
 
@@ -155,7 +164,7 @@ public:
         }
 
         SPIBusInfo& bus = mBuses[handle.bus_id];
-        if (handle.lane_id >= 8) {
+        if (handle.lane_id >= 16) {
             return false;
         }
 
@@ -247,7 +256,8 @@ public:
             }
 
             case SPIBusType::QUAD_SPI:
-            case SPIBusType::OCTO_SPI: {
+            case SPIBusType::OCTO_SPI:
+            case SPIBusType::HEXADECA_SPI: {
                 // Buffer data for this lane - will be interleaved in finalizeTransmission()
                 // Ensure lane_buffers is sized correctly
                 if (bus.lane_buffers.size() <= handle.lane_id) {
@@ -315,6 +325,14 @@ public:
                 }
                 break;
             }
+            case SPIBusType::HEXADECA_SPI: {
+                if (bus.hw_controller) {
+                    // 16-lane (Hexadeca-SPI)
+                    SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+                    hexadeca->waitComplete();
+                }
+                break;
+            }
             default:
                 break;
         }
@@ -333,10 +351,11 @@ public:
             return;  // Bus not initialized
         }
 
-        // Only needed for multi-SPI modes (Dual-SPI, Quad-SPI, Octal-SPI)
+        // Only needed for multi-SPI modes (Dual-SPI, Quad-SPI, Octal-SPI, Hexadeca-SPI)
         if (bus.bus_type != SPIBusType::DUAL_SPI &&
             bus.bus_type != SPIBusType::QUAD_SPI &&
-            bus.bus_type != SPIBusType::OCTO_SPI) {
+            bus.bus_type != SPIBusType::OCTO_SPI &&
+            bus.bus_type != SPIBusType::HEXADECA_SPI) {
             return;
         }
 
@@ -413,12 +432,13 @@ public:
             return;
         }
 
-        // Handle Quad-SPI and Octal-SPI
+        // Handle Quad-SPI, Octal-SPI, and Hexadeca-SPI
         if (!bus.hw_controller) {
             return;
         }
 
-        // Determine if this is 4-lane or 8-lane based on bus type
+        // Determine lane count based on bus type
+        bool is_hexadeca_mode = (bus.bus_type == SPIBusType::HEXADECA_SPI);
         bool is_octal_mode = (bus.bus_type == SPIBusType::OCTO_SPI);
 
         // Find maximum lane size
@@ -433,13 +453,26 @@ public:
             return;  // No data to transmit
         }
 
-        // Determine if we're using 8-lane (octal) or 4-lane (quad) mode
+        // Determine lane count for buffer acquisition
+        bool is_hexadeca = (bus.num_devices > 8 && bus.num_devices <= 16);
         bool is_octal = (bus.num_devices > 4 && bus.num_devices <= 8);
 
         // Acquire DMA buffer (zero-copy API)
         DMABuffer result;
         fl::span<uint8_t> dma_buf;
-        if (is_octal) {
+        if (is_hexadeca) {
+            SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+            result = hexadeca->acquireDMABuffer(max_size);
+            if (!result.ok()) {
+                FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Hexadeca-SPI: " << static_cast<int>(result.error()));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+            dma_buf = result.data();
+        } else if (is_octal) {
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
             result = octal->acquireDMABuffer(max_size);
             if (!result.ok()) {
@@ -466,7 +499,28 @@ public:
         }
 
         const char* error = nullptr;
-        if (is_octal) {
+        if (is_hexadeca) {
+            // Prepare 16-lane data for transposer
+            fl::optional<SPITransposer::LaneData> lanes[16];
+            for (uint8_t i = 0; i < bus.num_devices && i < 16; i++) {
+                if (bus.devices[i].is_enabled && i < bus.lane_buffers.size()) {
+                    lanes[i] = SPITransposer::LaneData{
+                        fl::span<const uint8_t>(bus.lane_buffers[i].data(), bus.lane_buffers[i].size()),
+                        fl::span<const uint8_t>()  // Zero-padding (universal fallback)
+                    };
+                }
+            }
+
+            // Transpose lanes directly into DMA buffer (zero-copy!)
+            if (!SPITransposer::transpose16(lanes, dma_buf, &error)) {
+                FL_WARN_FMT("SPI Bus Manager: Hexadeca transpose failed - " << (error ? error : "unknown error"));
+                // Clear buffers and bail
+                for (auto& lane_buffer : bus.lane_buffers) {
+                    lane_buffer.clear();
+                }
+                return;
+            }
+        } else if (is_octal) {
             // Prepare 8-lane data for transposer
             fl::optional<SPITransposer::LaneData> lanes[8];
             for (uint8_t i = 0; i < bus.num_devices && i < 8; i++) {
@@ -536,9 +590,16 @@ public:
             }
         }
 
-        // Transmit via Quad-SPI or Octal-SPI hardware
+        // Transmit via Quad-SPI, Octal-SPI, or Hexadeca-SPI hardware
         bool transmit_ok = false;
-        if (is_octal_mode) {
+        if (is_hexadeca_mode) {
+            // 16-lane (Hexadeca-SPI)
+            SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+            transmit_ok = hexadeca->transmit(TransmitMode::ASYNC);
+            if (transmit_ok) {
+                hexadeca->waitComplete();
+            }
+        } else if (is_octal_mode) {
             // 8-lane (Octal-SPI)
             SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
             transmit_ok = octal->transmit(TransmitMode::ASYNC);
@@ -555,7 +616,8 @@ public:
         }
 
         if (!transmit_ok) {
-            FL_WARN_FMT("SPI Bus Manager: " << (is_octal_mode ? "Octal" : "Quad") << "-SPI transmit failed");
+            const char* mode_name = is_hexadeca_mode ? "Hexadeca" : (is_octal_mode ? "Octal" : "Quad");
+            FL_WARN_FMT("SPI Bus Manager: " << mode_name << "-SPI transmit failed");
         }
 
         // Clear lane buffers for next frame
@@ -582,15 +644,44 @@ public:
 
     /// Clear all registrations (for testing)
     void reset() {
-        for (uint8_t i = 0; i < MAX_BUSES; i++) {
-            // Clean up hardware controllers if allocated
-            if (mBuses[i].is_initialized) {
-                releaseBusHardware(mBuses[i]);
-            }
-            mBuses[i] = SPIBusInfo{};
-        }
+        FL_DBG("SPIBusManager: reset() called");
+        // Save current mNumBuses before clearing
+        uint8_t num_buses_to_clear = mNumBuses;
+        // Set mNumBuses to 0 first to prevent re-entry issues
         mNumBuses = 0;
         mInitialized = false;
+
+        // Only iterate through buses that were actually used
+        for (uint8_t i = 0; i < num_buses_to_clear; i++) {
+            FL_DBG("SPIBusManager: reset() checking bus " << static_cast<int>(i));
+            // Clean up hardware controllers if allocated
+            if (mBuses[i].is_initialized) {
+                FL_DBG("SPIBusManager: reset() releasing bus " << static_cast<int>(i));
+                releaseBusHardware(mBuses[i]);
+                FL_DBG("SPIBusManager: reset() released bus " << static_cast<int>(i));
+            }
+            FL_DBG("SPIBusManager: reset() resetting bus info for bus " << static_cast<int>(i));
+            // Explicitly clear vectors to avoid crashes during destruction
+            FL_DBG("SPIBusManager: reset() clearing lane_buffers");
+            mBuses[i].lane_buffers.clear();
+            FL_DBG("SPIBusManager: reset() clearing interleaved_buffer");
+            mBuses[i].interleaved_buffer.clear();
+            FL_DBG("SPIBusManager: reset() resetting scalar fields");
+            // Reset scalar fields
+            mBuses[i].clock_pin = 0xFF;
+            mBuses[i].bus_type = SPIBusType::SOFT_SPI;
+            mBuses[i].num_devices = 0;
+            mBuses[i].spi_bus_num = 0xFF;
+            mBuses[i].hw_controller = nullptr;
+            mBuses[i].is_initialized = false;
+            mBuses[i].error_message = nullptr;
+            // Clear device slots
+            for (uint8_t j = 0; j < 16; j++) {
+                mBuses[i].devices[j] = SPIDeviceInfo();
+            }
+            FL_DBG("SPIBusManager: reset() done with bus " << static_cast<int>(i));
+        }
+        FL_DBG("SPIBusManager: reset() complete");
     }
 
     /// Get the number of buses currently registered
@@ -631,6 +722,11 @@ private:
     /// @param bus Bus to initialize
     /// @returns true if successful
     bool initializeBus(SPIBusInfo& bus) {
+        // No devices? Skip initialization (bus was released)
+        if (bus.num_devices == 0) {
+            return true;  // Not an error, just nothing to initialize
+        }
+
         // Single device? Use standard single-line SPI
         if (bus.num_devices == 1) {
             bus.bus_type = SPIBusType::SINGLE_SPI;
@@ -638,13 +734,14 @@ private:
         }
 
         // Multiple devices? Try to promote to multi-line SPI
-        if (bus.num_devices >= 2 && bus.num_devices <= 8) {
+        if (bus.num_devices >= 2 && bus.num_devices <= 16) {
             if (promoteToMultiSPI(bus)) {
                 const char* type_name = "Unknown";
                 switch (bus.bus_type) {
                     case SPIBusType::DUAL_SPI: type_name = "Dual-SPI"; break;
                     case SPIBusType::QUAD_SPI: type_name = "Quad-SPI"; break;
                     case SPIBusType::OCTO_SPI: type_name = "Octo-SPI"; break;
+                    case SPIBusType::HEXADECA_SPI: type_name = "Hexadeca-SPI"; break;
                     default: break;
                 }
                 (void)type_name;  // Suppress unused variable warning when FL_WARN is a no-op
@@ -658,8 +755,8 @@ private:
             }
         }
 
-        // Too many devices
-        FL_WARN_FMT("SPI Manager: Too many devices on clock pin " << bus.clock_pin << " (" << bus.num_devices << " devices)");
+        // Too many devices (>16)
+        FL_WARN_FMT("SPI Manager: Too many devices on clock pin " << bus.clock_pin << " (" << bus.num_devices << " devices, max 16)");
         disableConflictingDevices(bus);
         return false;
     }
@@ -836,6 +933,74 @@ private:
 
             bus.is_initialized = true;
             return true;
+
+        } else if (bus.num_devices >= 9 && bus.num_devices <= 16 &&
+                   static_cast<uint8_t>(max_type) >= static_cast<uint8_t>(SPIBusType::HEXADECA_SPI)) {
+            // Hexadeca-SPI: 16 lanes using SpiHw16 interface
+            bus.bus_type = SPIBusType::HEXADECA_SPI;
+
+            // Get available Hexadeca-SPI controllers (16-lane) - runtime detection
+            const auto& controllers = SpiHw16::getAll();
+            if (controllers.empty()) {
+                bus.error_message = "No Hexadeca-SPI (16-lane) controllers available on this platform";
+                return false;
+            }
+
+            // Try each controller until we find one that works
+            SpiHw16* hexadeca_ctrl = nullptr;
+            for (auto* ctrl : controllers) {
+                if (!ctrl->isInitialized()) {
+                    hexadeca_ctrl = ctrl;
+                    break;
+                }
+            }
+
+            if (!hexadeca_ctrl) {
+                bus.error_message = "All Hexadeca-SPI (16-lane) controllers already in use";
+                return false;
+            }
+
+            // Configure Hexadeca-SPI (16 data lines)
+            SpiHw16::Config config;
+            config.bus_num = static_cast<uint8_t>(hexadeca_ctrl->getBusId());
+            config.clock_speed_hz = selectBusSpeed(bus);  // Use slowest requested speed
+            config.clock_pin = bus.clock_pin;
+            config.data0_pin = bus.devices[0].data_pin;
+            config.data1_pin = (bus.num_devices > 1) ? bus.devices[1].data_pin : -1;
+            config.data2_pin = (bus.num_devices > 2) ? bus.devices[2].data_pin : -1;
+            config.data3_pin = (bus.num_devices > 3) ? bus.devices[3].data_pin : -1;
+            config.data4_pin = (bus.num_devices > 4) ? bus.devices[4].data_pin : -1;
+            config.data5_pin = (bus.num_devices > 5) ? bus.devices[5].data_pin : -1;
+            config.data6_pin = (bus.num_devices > 6) ? bus.devices[6].data_pin : -1;
+            config.data7_pin = (bus.num_devices > 7) ? bus.devices[7].data_pin : -1;
+            config.data8_pin = (bus.num_devices > 8) ? bus.devices[8].data_pin : -1;
+            config.data9_pin = (bus.num_devices > 9) ? bus.devices[9].data_pin : -1;
+            config.data10_pin = (bus.num_devices > 10) ? bus.devices[10].data_pin : -1;
+            config.data11_pin = (bus.num_devices > 11) ? bus.devices[11].data_pin : -1;
+            config.data12_pin = (bus.num_devices > 12) ? bus.devices[12].data_pin : -1;
+            config.data13_pin = (bus.num_devices > 13) ? bus.devices[13].data_pin : -1;
+            config.data14_pin = (bus.num_devices > 14) ? bus.devices[14].data_pin : -1;
+            config.data15_pin = (bus.num_devices > 15) ? bus.devices[15].data_pin : -1;
+            config.max_transfer_sz = 65536;  // 64KB default
+
+            // Initialize the controller
+            if (!hexadeca_ctrl->begin(config)) {
+                bus.error_message = "Failed to initialize Hexadeca-SPI (16-lane) controller";
+                return false;
+            }
+
+            FL_DBG("SPI: Initialized Hexadeca-SPI controller '" << hexadeca_ctrl->getName()
+                   << "' (bus " << config.bus_num << ") at " << config.clock_speed_hz << " Hz");
+
+            // Store controller pointer and SPI bus number
+            bus.hw_controller = hexadeca_ctrl;
+            bus.spi_bus_num = config.bus_num;
+
+            // Initialize lane buffers
+            bus.lane_buffers.resize(bus.num_devices);
+
+            bus.is_initialized = true;
+            return true;
         }
 
         bus.error_message = "Multi-SPI not supported on this platform";
@@ -951,8 +1116,21 @@ private:
     /// Called when all devices on a bus are unregistered
     /// @param bus Bus to clean up
     void releaseBusHardware(SPIBusInfo& bus) {
+        FL_DBG("SPIBusManager: releaseBusHardware() called, is_initialized=" << (bus.is_initialized ? "true" : "false"));
         if (!bus.is_initialized) {
+            FL_DBG("SPIBusManager: releaseBusHardware() bus not initialized, returning");
             return;  // Nothing to release
+        }
+
+        FL_DBG("SPIBusManager: releaseBusHardware() bus_type=" << static_cast<int>(bus.bus_type));
+        // Release Single-SPI controller (runtime detection)
+        if (bus.bus_type == SPIBusType::SINGLE_SPI && bus.hw_controller) {
+            FL_DBG("SPIBusManager: releaseBusHardware() releasing SINGLE_SPI controller");
+            SpiHw1* single = static_cast<SpiHw1*>(bus.hw_controller);
+            FL_DBG("SPIBusManager: releaseBusHardware() calling single->end()");
+            single->end();  // Shutdown SPI peripheral
+            FL_DBG("SPIBusManager: releaseBusHardware() nulling hw_controller");
+            bus.hw_controller = nullptr;
         }
 
         // Release Dual-SPI controller (runtime detection)
@@ -976,6 +1154,13 @@ private:
             bus.hw_controller = nullptr;
         }
 
+        // Release Hexadeca-SPI controller
+        if (bus.bus_type == SPIBusType::HEXADECA_SPI && bus.hw_controller) {
+            SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+            hexadeca->end();  // Shutdown SPI/I2S peripheral
+            bus.hw_controller = nullptr;
+        }
+
         // Clear lane buffers
         bus.lane_buffers.clear();
         bus.interleaved_buffer.clear();
@@ -983,6 +1168,7 @@ private:
         // Reset bus state
         bus.is_initialized = false;
         bus.bus_type = SPIBusType::SOFT_SPI;
+        bus.num_devices = 0;  // Reset device count to prevent stale state
     }
 
     /// Software SPI bit-banging implementation using runtime pins
@@ -1001,6 +1187,9 @@ private:
     /// @returns Maximum SPI type supported
     SPIBusType getMaxSupportedSPIType() const {
         // Check at runtime using getAll() - platforms provide via weak linkage
+        if (!SpiHw16::getAll().empty()) {
+            return SPIBusType::HEXADECA_SPI;  // 16-lane SPI
+        }
         if (!SpiHw8::getAll().empty()) {
             return SPIBusType::OCTO_SPI;  // 8-lane SPI
         }

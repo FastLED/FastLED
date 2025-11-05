@@ -1,6 +1,6 @@
 #include "fl/spi.h"
 #include "fl/spi/impl.h"
-#include "fl/dbg.h"
+#include "fl/log.h"
 #include "fl/warn.h"
 #include "fl/time.h"
 #include "platforms/shared/spi_bus_manager.h"
@@ -17,22 +17,27 @@ namespace spi {
 
 Device::Device(const Config& config)
     : pImpl(fl::make_unique<Impl>(config)) {
-    FL_DBG("SPI Device: Created with clock=" << config.clock_pin
+    FL_LOG_SPI("SPI Device: Created with clock=" << config.clock_pin
            << " data_pins.size()=" << config.data_pins.size());
 }
 
 Device::~Device() {
+    FL_LOG_SPI("SPI Device: Destructor called");
     if (pImpl && pImpl->initialized) {
+        FL_LOG_SPI("SPI Device: Calling end() from destructor");
         end();
     }
 
+    FL_LOG_SPI("SPI Device: Checking owned hardware backend");
     // Clean up owned hardware backend (for SINGLE_SPI mode)
     if (pImpl && pImpl->owns_backend && pImpl->hw_backend) {
+        FL_LOG_SPI("SPI Device: Cleaning up owned hardware backend");
         SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
         hw->end();
         delete hw;
         pImpl->hw_backend = nullptr;
     }
+    FL_LOG_SPI("SPI Device: Destructor complete");
 }
 
 fl::optional<fl::Error> Device::begin() {
@@ -105,7 +110,7 @@ fl::optional<fl::Error> Device::begin() {
 
         pImpl->hw_backend = hw;
         pImpl->owns_backend = false;  // We don't own it (it's from the static pool)
-        FL_DBG("SPI Device: Created SpiHw1 controller for SINGLE_SPI mode");
+        FL_LOG_SPI("SPI Device: Created SpiHw1 controller for SINGLE_SPI mode");
     } else {
         // Multi-lane or hardware controller already exists
         pImpl->hw_backend = bus_info ? bus_info->hw_controller : nullptr;
@@ -113,7 +118,7 @@ fl::optional<fl::Error> Device::begin() {
     }
 
     pImpl->initialized = true;
-    FL_DBG("SPI Device: Initialized successfully");
+    FL_LOG_SPI("SPI Device: Initialized successfully");
     return fl::nullopt;
 }
 
@@ -125,12 +130,10 @@ void Device::end() {
     // Wait for any pending operations
     waitComplete();
 
-    // Clean up SpiHw1 controller if we created it
-    if (pImpl->hw_backend && !pImpl->owns_backend) {
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
-        hw->end();
-        // Don't delete - it's from the static pool
-    }
+    // Note: Do NOT call hw->end() here!
+    // The SPIBusManager will call releaseBusHardware() (which calls hw->end())
+    // when the last device on this bus is unregistered below.
+    // Calling hw->end() here would result in calling end() twice on the same hardware.
     pImpl->hw_backend = nullptr;
 
     // Unregister from bus manager
@@ -141,7 +144,7 @@ void Device::end() {
     }
 
     pImpl->initialized = false;
-    FL_DBG("SPI Device: Shutdown complete");
+    FL_LOG_SPI("SPI Device: Shutdown complete");
 }
 
 bool Device::isReady() const {
@@ -227,7 +230,7 @@ Result<Transaction> Device::writeAsync(const uint8_t* data, size_t size) {
     txn.pImpl = fl::make_unique<Transaction::Impl>(this);
     txn.pImpl->completed = false;  // Will complete when hardware finishes
 
-    FL_DBG("SPI Device: Async write started (" << size << " bytes)");
+    FL_LOG_SPI("SPI Device: Async write started (" << size << " bytes)");
     return Result<Transaction>::success(fl::move(txn));
 }
 
@@ -273,7 +276,7 @@ DMABuffer Device::acquireBuffer(size_t size) {
     if (!buffer.ok()) {
         FL_WARN("SPI Device: Failed to acquire DMA buffer from hardware");
     } else {
-        FL_DBG("SPI Device: Acquired DMA buffer (" << size << " bytes)");
+        FL_LOG_SPI("SPI Device: Acquired DMA buffer (" << size << " bytes)");
     }
 
     return buffer;
@@ -314,7 +317,7 @@ fl::optional<fl::Error> Device::transmit(DMABuffer& buffer, bool async) {
         }
     }
 
-    FL_DBG("SPI Device: Transmission started (" << (async ? "async" : "blocking") << ")");
+    FL_LOG_SPI("SPI Device: Transmission started (" << (async ? "async" : "blocking") << ")");
     return fl::nullopt;
 }
 
@@ -364,10 +367,10 @@ fl::optional<fl::Error> Device::setClockSpeed(uint32_t speed_hz) {
     // To apply immediately, call end() followed by begin().
 
     if (pImpl->initialized) {
-        FL_DBG("SPI Device: Clock speed updated to " << speed_hz
+        FL_LOG_SPI("SPI Device: Clock speed updated to " << speed_hz
                << " Hz (will take effect on next begin())");
     } else {
-        FL_DBG("SPI Device: Clock speed set to " << speed_hz << " Hz");
+        FL_LOG_SPI("SPI Device: Clock speed set to " << speed_hz << " Hz");
     }
 
     return fl::nullopt;
@@ -444,7 +447,7 @@ bool Transaction::wait(uint32_t timeout_ms) {
         pImpl->result = fl::nullopt;
 
         uint32_t elapsed = fl::time() - start_time;
-        FL_DBG("Transaction: Completed successfully (waited " << elapsed << "ms)");
+        FL_LOG_SPI("Transaction: Completed successfully (waited " << elapsed << "ms)");
         return true;
     } else {
         // Timeout occurred
@@ -481,7 +484,7 @@ bool Transaction::cancel() {
         pImpl->device->pImpl->async_state.active = false;
     }
 
-    FL_DBG("Transaction: Cancelled");
+    FL_LOG_SPI("Transaction: Cancelled");
     return true;
 }
 

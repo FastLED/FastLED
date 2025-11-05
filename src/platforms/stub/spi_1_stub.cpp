@@ -1,10 +1,11 @@
-/// @file spi_single_stub.cpp
+/// @file spi_1_stub.cpp
 /// @brief Stub/Mock Single-SPI implementation for testing
 
 #ifdef FASTLED_TESTING
 
-#include "spi_single_stub.h"
+#include "spi_1_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "fl/log.h"
 
 namespace fl {
 
@@ -34,12 +35,23 @@ bool SpiHw1Stub::begin(const SpiHw1::Config& config) {
 }
 
 void SpiHw1Stub::end() {
+    FL_LOG_SPI("SpiHw1Stub::end() called, mInitialized=" << (mInitialized ? "true" : "false"));
+    if (!mInitialized) {
+        FL_LOG_SPI("SpiHw1Stub::end() already ended, returning");
+        return;  // Already ended - idempotent
+    }
+
+    FL_LOG_SPI("SpiHw1Stub::end() setting mInitialized=false");
     mInitialized = false;
+    FL_LOG_SPI("SpiHw1Stub::end() clearing mLastBuffer");
     mLastBuffer.clear();
 
+    FL_LOG_SPI("SpiHw1Stub::end() resetting mCurrentBuffer");
     // Release current buffer
     mCurrentBuffer.reset();
+    FL_LOG_SPI("SpiHw1Stub::end() setting mBufferAcquired=false");
     mBufferAcquired = false;
+    FL_LOG_SPI("SpiHw1Stub::end() complete");
 }
 
 DMABuffer SpiHw1Stub::acquireDMABuffer(size_t bytes_per_lane) {

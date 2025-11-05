@@ -1,4 +1,4 @@
-/// @file spi_quad_stub.h
+/// @file spi_4_stub.h
 /// @brief Stub/Mock Quad-SPI interface for testing
 ///
 /// This header exposes the SPIQuadStub class for tests to access

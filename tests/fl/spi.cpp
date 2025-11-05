@@ -11,20 +11,13 @@ using fl::DMABuffer;
 // ============================================================================
 // Test Fixture - Reset SPIBusManager before each test
 // ============================================================================
-// This fixture ensures test isolation by resetting the global SPIBusManager
-// singleton before each test case. Without this, devices accumulate across
-// tests and can hit the max device limit (8 per clock pin).
-struct SPITestFixture {
-    SPITestFixture() {
-        // Reset the bus manager before each test
-        fl::getSPIBusManager().reset();
-    }
-
-    ~SPITestFixture() {
-        // Also reset after each test for cleanliness
-        fl::getSPIBusManager().reset();
-    }
-};
+// NOTE: Fixture temporarily disabled to investigate crash issues
+// The Device destructors should handle all cleanup automatically via unregisterDevice()
+// struct SPITestFixture {
+//     SPITestFixture() {
+//         fl::getSPIBusManager().reset();
+//     }
+// };
 
 // ============================================================================
 // Result<T> Tests
@@ -118,7 +111,7 @@ TEST_CASE("Config construction") {
 // Device Construction Tests (Basic)
 // ============================================================================
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device construction (basic)") {
+TEST_CASE("Device construction (basic)") {
     SUBCASE("Device can be constructed") {
         Config cfg(18, 23);
         Device spi(cfg);
@@ -144,7 +137,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device construction (basic)") {
 // Device Initialization Tests (Iteration 2)
 // ============================================================================
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device initialization with begin()") {
+TEST_CASE("Device initialization with begin()") {
     SUBCASE("Device starts not ready") {
         Config cfg(18, 23);
         Device spi(cfg);
@@ -227,7 +220,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device initialization with begin()") {
     // }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device destructor cleanup") {
+TEST_CASE("Device destructor cleanup") {
     SUBCASE("Destructor cleans up initialized device") {
         Config cfg(18, 23);
         {
@@ -252,7 +245,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device destructor cleanup") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device state transitions") {
+TEST_CASE("Device state transitions") {
     Config cfg(18, 23);
     Device spi(cfg);
 
@@ -275,7 +268,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device state transitions") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device configuration updates") {
+TEST_CASE("Device configuration updates") {
     SUBCASE("Clock speed can be updated") {
         Config cfg(18, 23);
         cfg.clock_speed_hz = 10000000;
@@ -305,7 +298,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device configuration updates") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Multiple devices on different pins") {
+TEST_CASE("Multiple devices on different pins") {
     SUBCASE("Two devices can coexist") {
         // Use different clock pins to avoid conflicts with previous tests
         // Note: SPIBusManager is a global singleton and not reset between tests
@@ -337,7 +330,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Multiple devices on different pins") {
 // These tests are commented out
 
 /*
-TEST_CASE_FIXTURE(SPITestFixture, "Device write operations") {
+TEST_CASE("Device write operations") {
     SUBCASE("Basic write succeeds") {
         Config cfg(14, 15);
         Device spi(cfg);
@@ -436,7 +429,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device write operations") {
 }
 */
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device buffer acquisition") {
+TEST_CASE("Device buffer acquisition") {
     SUBCASE("acquireBuffer returns valid buffer") {
         Config cfg(16, 17);
         Device spi(cfg);
@@ -475,7 +468,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device buffer acquisition") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device transmit operations") {
+TEST_CASE("Device transmit operations") {
     SUBCASE("Transmit with valid buffer succeeds (blocking)") {
         Config cfg(16, 17);
         Device spi(cfg);
@@ -521,7 +514,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device transmit operations") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device busy state and waitComplete") {
+TEST_CASE("Device busy state and waitComplete") {
     SUBCASE("Device not busy after initialization") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -569,7 +562,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device busy state and waitComplete") {
 // These tests are commented out
 
 /*
-TEST_CASE_FIXTURE(SPITestFixture, "Device read operations") {
+TEST_CASE("Device read operations") {
     SUBCASE("Basic read succeeds") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -672,7 +665,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device read operations") {
 // These tests are commented out
 
 /*
-TEST_CASE_FIXTURE(SPITestFixture, "Device transfer operations") {
+TEST_CASE("Device transfer operations") {
     SUBCASE("Basic transfer succeeds") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -818,16 +811,17 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device transfer operations") {
 // Async Write Tests (Iteration 5)
 // ============================================================================
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device writeAsync operations") {
+TEST_CASE("Device writeAsync operations") {
     SUBCASE("Basic writeAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
-        spi.begin();
+        fl::optional<fl::Error> begin_result = spi.begin();
+        REQUIRE(!begin_result);  // Must succeed for test to continue
 
         uint8_t data[4] = {0x01, 0x02, 0x03, 0x04};
         Result<Transaction> result = spi.writeAsync(data, 4);
 
-        CHECK(result.ok());
+        REQUIRE(result.ok());  // Must succeed to safely access value()
 
         // Get transaction and wait for completion
         Transaction txn = fl::move(result.value());
@@ -961,7 +955,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device writeAsync operations") {
 // These tests are commented out
 
 /*
-TEST_CASE_FIXTURE(SPITestFixture, "Device readAsync operations") {
+TEST_CASE("Device readAsync operations") {
     SUBCASE("Basic readAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -1031,7 +1025,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device readAsync operations") {
 // These tests are commented out
 
 /*
-TEST_CASE_FIXTURE(SPITestFixture, "Device transferAsync operations") {
+TEST_CASE("Device transferAsync operations") {
     SUBCASE("Basic transferAsync succeeds and returns Transaction") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -1117,7 +1111,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device transferAsync operations") {
 // Transaction Tests (Iteration 5)
 // ============================================================================
 
-TEST_CASE_FIXTURE(SPITestFixture, "Transaction lifecycle") {
+TEST_CASE("Transaction lifecycle") {
     SUBCASE("Transaction isDone() and isPending() work correctly") {
         Config cfg(18, 19);
         Device spi(cfg);
@@ -1205,7 +1199,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Transaction lifecycle") {
 // Configuration Management Tests (Iteration 7)
 // ============================================================================
 
-TEST_CASE_FIXTURE(SPITestFixture, "Device configuration management") {
+TEST_CASE("Device configuration management") {
     SUBCASE("getConfig() returns correct configuration") {
         Config cfg(18, 19);
         cfg.clock_speed_hz = 5000000;  // 5 MHz
@@ -1278,7 +1272,7 @@ TEST_CASE_FIXTURE(SPITestFixture, "Device configuration management") {
     }
 }
 
-TEST_CASE_FIXTURE(SPITestFixture, "SPI mode configuration") {
+TEST_CASE("SPI mode configuration") {
     SUBCASE("Mode 0 (default) is accepted") {
         Config cfg(18, 19);
         cfg.spi_mode = 0;

@@ -174,6 +174,163 @@ Comprehensive unit tests validate all lane configurations:
 - Implementation is backward-compatible with existing platforms
 - On unsupported platforms, software bitbang fallback is used automatically
 
+## Multi-Lane SPI: I2S-Based 16-Lane Parallel SPI
+
+FastLED provides automatic multi-lane SPI support for driving **up to 16 parallel SPI LED strips** simultaneously using the same `fl::Spi` API. On ESP32 platforms, this is implemented via the I2S peripheral in parallel mode.
+
+### Implementation Details by Lane Count
+
+| Feature | Hardware SPI (1-8 lane) | I2S-based SPI (9-16 lane) |
+|---------|------------------------|---------------------------|
+| **Technology** | SPI peripheral with DMA | I2S peripheral in parallel mode |
+| **Max Lanes** | 8 (ESP32-P4 only) | 16 (ESP32/S2/S3) |
+| **Platforms** | All ESP32 variants | ESP32, ESP32-S2, ESP32-S3 |
+| **Pin Assignment** | Flexible (any GPIO) | Fixed range (GPIO 8-23) |
+| **Memory** | Internal RAM | PSRAM+DMA recommended |
+| **API** | `fl::Spi` class | `fl::Spi` class (same API!) |
+| **Best For** | 1-8 strips, flexible pins | 9-16 strips, maximum throughput |
+
+**Note**: The system automatically promotes to the appropriate hardware backend based on lane count. Users always use the same `fl::Spi` API.
+
+### Supported Platforms
+
+- **ESP32 (classic)**: 16 lanes via I2S0 parallel mode (GPIO 8-23)
+- **ESP32-S2**: 16 lanes via I2S0 (GPIO 8-23)
+- **ESP32-S3**: 16 lanes via I2S0 (GPIO 8-23) - **Recommended** with PSRAM
+- **ESP32-C3/C6**: Not supported (only 2 I2S lanes)
+
+### Supported LED Chipsets
+
+Multi-lane SPI works with clock-based SPI LED chipsets:
+- ✅ APA102 (tested)
+- ✅ SK9822 (APA102-compatible)
+- ✅ HD107S (newer, faster variant)
+- ❌ WS2812/WS2811 (use `BulkClockless` instead)
+
+### Quick Example
+
+```cpp
+#include <FastLED.h>
+
+const int CLOCK_PIN = 18;
+const int DATA_PINS[] = {23, 22, 21, 19};  // 4 strips (can be up to 16!)
+const int NUM_LEDS = 300;
+
+CRGB leds[4][NUM_LEDS];
+
+// Standard fl::Spi API - automatically uses I2S backend on ESP32
+fl::Spi spi(CLOCK_PIN, DATA_PINS, fl::SPI_HW);
+
+void setup() {
+    if (!spi.ok()) {
+        Serial.println("SPI init failed!");
+        while(1);
+    }
+}
+
+void loop() {
+    // Write all 4 strips in parallel using standard API
+    spi.write(
+        fl::span<const uint8_t>((uint8_t*)leds[0], NUM_LEDS * 3),
+        fl::span<const uint8_t>((uint8_t*)leds[1], NUM_LEDS * 3),
+        fl::span<const uint8_t>((uint8_t*)leds[2], NUM_LEDS * 3),
+        fl::span<const uint8_t>((uint8_t*)leds[3], NUM_LEDS * 3)
+    );
+    spi.wait();  // Optional: block until transmission complete
+}
+```
+
+### Performance
+
+**Throughput**: ~16× improvement over sequential SPI
+- 16 strips × 300 LEDs transmitted in ~10ms (vs ~160ms sequential)
+- Zero CPU usage during transmission (DMA handles everything)
+- Supports up to 8K+ LEDs per strip with PSRAM
+
+### Memory Requirements
+
+Multi-lane SPI requires DMA-capable memory for internal buffers:
+- **Small installations** (<500 LEDs/strip): Internal RAM sufficient
+- **Large installations** (>500 LEDs/strip): **PSRAM strongly recommended**
+- ESP32-S3 EDMA enables PSRAM to be DMA-capable (automatic)
+
+**Enable PSRAM in PlatformIO:**
+```ini
+[env:esp32s3]
+platform = espressif32
+board = esp32-s3-devkitc-1
+framework = arduino
+board_build.arduino.memory_type = qio_qspi
+build_flags =
+    -D BOARD_HAS_PSRAM
+```
+
+### Pin Configuration
+
+**Data Pins**: Must use GPIO 8-23 (I2S parallel mode range)
+- Use any subset (e.g., GPIO 23-20 for 4 strips)
+- Avoid GPIO 6-11 if used for SPI flash (platform-dependent)
+
+**Clock Pin**: Any free GPIO (recommend GPIO 18 or higher)
+- Shared across all strips
+- Keep wiring short for signal integrity
+
+### Implementation Files
+
+- Public API: `src/fl/spi.h` (unified 1-16 lane SPI API)
+- 16-lane interface: `src/platforms/shared/spi_hw_16.h`
+- ESP32 I2S backend: `src/platforms/esp/32/drivers/i2s/spi_hw_i2s_esp32.{h,cpp}`
+- Bus manager: `src/platforms/shared/spi_bus_manager.h` (automatic promotion to 16-lane mode)
+
+### Architecture
+
+FastLED uses a unified SPI API (`fl::Spi`) that automatically handles 1-16 lanes:
+- 1-2 lanes: Uses `SpiHw2` (dual SPI)
+- 3-4 lanes: Uses `SpiHw4` (quad SPI)
+- 5-8 lanes: Uses `SpiHw8` (octal SPI)
+- 9-16 lanes: Uses `SpiHw16` (hexadeca SPI via ESP32 I2S)
+
+The `SPIBusManager` automatically detects lane count and promotes to the appropriate hardware implementation.
+
+### Documentation
+
+For comprehensive documentation, see **`LOOP_SPI_I2S.md`** which includes:
+- Hardware requirements and wiring diagrams
+- Complete API reference
+- Integration with fl::Spi system
+- Memory optimization tips
+- Troubleshooting guide
+- Technical implementation details
+
+### Using Multi-Lane SPI
+
+The unified `fl::Spi` API works on all platforms and automatically uses hardware acceleration when available:
+
+```cpp
+#include <FastLED.h>
+
+// Define data pins (4 strips example)
+int data_pins[] = {8, 9, 10, 11};
+
+// Create SPI device with hardware mode
+fl::Spi spi(18, data_pins, fl::SPI_HW);  // Clock on GPIO 18
+
+if (!spi.ok()) {
+    Serial.println("SPI init failed");
+    return;
+}
+
+// Write data to all strips
+spi.write(strip0, strip1, strip2, strip3);
+spi.wait();  // Block until transmission complete
+```
+
+On ESP32, when using 9-16 lanes, the `SPIBusManager` automatically:
+1. Detects the lane count via `SpiHw16::getAll()`
+2. Finds the I2S hardware implementation (`SpiHwI2SESP32`)
+3. Promotes to hexadeca-SPI mode
+4. Uses hardware-accelerated parallel transmission
+
 ## RMT backends (IDF4 vs IDF5) and how to select
 
 Two RMT implementations exist and are selected by IDF version unless you override it:

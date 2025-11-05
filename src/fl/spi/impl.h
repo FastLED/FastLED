@@ -7,6 +7,7 @@
 #include "fl/spi.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/shared/spi_types.h"
+#include "fl/log.h"
 
 namespace fl {
 namespace spi {
@@ -42,6 +43,19 @@ struct Device::Impl {
         , async_state{false, nullptr, nullptr, 0, 0}
         , hw_backend(nullptr)
         , owns_backend(false) {}
+
+    /// @brief Destructor
+    ~Impl() {
+        FL_LOG_SPI("Device::Impl: Destructor called");
+        // Members will be destroyed in reverse order of declaration:
+        // 1. owns_backend (bool) - trivial
+        // 2. hw_backend (void*) - trivial (pointer not owned here)
+        // 3. async_state (struct) - trivial
+        // 4. initialized (bool) - trivial
+        // 5. bus_handle (struct) - trivial
+        // 6. config (Config) - contains fl::vector which might cause issues
+        FL_LOG_SPI("Device::Impl: Destructor complete");
+    }
 };
 
 /// @brief Private implementation data for Transaction class

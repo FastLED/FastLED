@@ -1,10 +1,10 @@
-/// @file spi_quad_stub.cpp
+/// @file spi_4_stub.cpp
 /// @brief Stub/Mock implementation of Quad-SPI for testing
 ///
 /// This provides a mock SPIQuad implementation for unit tests.
 /// It captures transmitted data for inspection without real hardware.
 
-#include "platforms/stub/spi_quad_stub.h"
+#include "platforms/stub/spi_4_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 #ifdef FASTLED_TESTING

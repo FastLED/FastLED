@@ -1,4 +1,4 @@
-/// @file spi_single_stub.h
+/// @file spi_1_stub.h
 /// @brief Stub/Mock Single-SPI interface for testing
 ///
 /// This header exposes the SPISingleStub class for tests to access

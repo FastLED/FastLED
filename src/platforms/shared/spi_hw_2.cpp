@@ -10,7 +10,6 @@
 
 namespace fl {
 
-#ifndef FASTLED_TESTING  // Skip weak default when testing (stub provides strong definition)
 
 /// Weak default factory - returns empty vector (no 2-lane SPI support)
 /// Platform-specific implementations override this function
@@ -21,6 +20,5 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
     return fl::vector<SpiHw2*>();
 }
 
-#endif  // FASTLED_TESTING
 
 }  // namespace fl

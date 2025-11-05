@@ -1031,8 +1031,8 @@ Linker picks strong definition when ESP32 code is linked.
 
 ### Mock Drivers
 
-**Quad-SPI Mock:** `src/platforms/stub/spi_quad_stub.h`
-**Dual-SPI Mock:** `src/platforms/stub/spi_dual_stub.h`
+**Quad-SPI Mock:** `src/platforms/stub/spi_4_stub.h`
+**Dual-SPI Mock:** `src/platforms/stub/spi_2_stub.h`
 
 Test-only implementation that captures transmissions:
 
@@ -1252,8 +1252,8 @@ FastLED's Advanced SPI system provides **intelligent, automatic parallel LED con
 - **Bus Manager Tests:** `tests/test_spi_bus_manager.cpp`
 - **Quad-SPI Tests:** `tests/test_quad_spi.cpp`
 - **Dual-SPI Tests:** `tests/test_dual_spi.cpp`
-- **Quad-SPI Mock:** `src/platforms/stub/spi_quad_stub.h`
-- **Dual-SPI Mock:** `src/platforms/stub/spi_dual_stub.h`
+- **Quad-SPI Mock:** `src/platforms/stub/spi_4_stub.h`
+- **Dual-SPI Mock:** `src/platforms/stub/spi_2_stub.h`
 
 ### Examples
 
