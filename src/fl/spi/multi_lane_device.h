@@ -11,6 +11,7 @@
 #include "fl/promise.h"  // for fl::Error
 #include "fl/spi/config.h"
 #include "fl/spi/lane.h"
+#include "fl/numeric_limits.h"
 #include "fl/spi/transaction.h"
 #include "fl/spi/write_result.h"
 #include "platforms/shared/spi_types.h"
@@ -110,7 +111,7 @@ public:
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX);
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max());
 
     /// @brief Convenience method - wait for transmission to complete
     /// @returns true if completed, false on timeout

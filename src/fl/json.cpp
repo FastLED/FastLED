@@ -8,8 +8,9 @@
 #include "fl/math.h" // For floor function
 #include "fl/compiler_control.h"
 #include "fl/thread_local.h"
+#include "fl/numeric_limits.h"
 
-// INT16_MIN, INT16_MAX, and UINT8_MAX should come from the platform's
+// fl::numeric_limits<i16>::min(), fl::numeric_limits<i16>::max(), and fl::numeric_limits<u8>::max() should come from the platform's
 // <stdint.h> or <cstdint> headers (via fl/stdint.h).
 // FastLED no longer defines these macros to avoid conflicts with system headers.
 
@@ -138,10 +139,10 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     void checkNumericValue(double val) {
                         // Check integer ranges in one pass
                         bool isInteger = val == floor(val);
-                        if (!isInteger || val < 0 || val > UINT8_MAX) {
+                        if (!isInteger || val < 0 || val > fl::numeric_limits<u8>::max()) {
                             isUint8 = false;
                         }
-                        if (!isInteger || val < INT16_MIN || val > INT16_MAX) {
+                        if (!isInteger || val < fl::numeric_limits<i16>::min() || val > fl::numeric_limits<i16>::max()) {
                             isInt16 = false;
                         }
                         if (!canBeRepresentedAsFloat(val)) {
@@ -151,10 +152,10 @@ fl::shared_ptr<JsonValue> JsonValue::parse(const fl::string& txt) {
                     
                     void checkIntegerValue(int64_t val) {
                         // Check all ranges in one pass
-                        if (val < 0 || val > UINT8_MAX) {
+                        if (val < 0 || val > fl::numeric_limits<u8>::max()) {
                             isUint8 = false;
                         }
-                        if (val < INT16_MIN || val > INT16_MAX) {
+                        if (val < fl::numeric_limits<i16>::min() || val > fl::numeric_limits<i16>::max()) {
                             isInt16 = false;
                         }
                         if (val < -16777216 || val > 16777216) {

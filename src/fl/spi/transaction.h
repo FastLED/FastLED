@@ -11,6 +11,7 @@
 #include "fl/result.h"
 #include "fl/optional.h"
 #include "fl/promise.h"  // for fl::Error
+#include "fl/numeric_limits.h"
 
 namespace fl {
 
@@ -38,7 +39,7 @@ public:
     /// @brief Wait for transaction to complete
     /// @param timeout_ms Maximum time to wait
     /// @returns true if completed, false on timeout
-    bool wait(uint32_t timeout_ms = UINT32_MAX);
+    bool wait(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max());
 
     /// @brief Check if transaction is complete
     /// @returns true if done, false if still in progress

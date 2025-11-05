@@ -8,6 +8,7 @@
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/shared/spi_types.h"
 #include "fl/log.h"
+#include "fl/numeric_limits.h"
 
 namespace fl {
 namespace spi {
@@ -77,7 +78,7 @@ struct Transaction::Impl {
         , completed(false)
         , cancelled(false)
         , result(fl::nullopt)  // nullopt = success
-        , timeout_ms(UINT32_MAX)
+        , timeout_ms(fl::numeric_limits<uint32_t>::max())
 #ifdef ESP32
         , notify_task(nullptr)
 #endif

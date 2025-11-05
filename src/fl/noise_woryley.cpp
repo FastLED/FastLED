@@ -1,4 +1,5 @@
 #include "noise_woryley.h"
+#include "fl/numeric_limits.h"
 
 namespace fl {
 namespace {
@@ -34,7 +35,7 @@ i32 worley_noise_2d_q15(i32 x, i32 y) {
     i32 cell_x = x >> 15;
     i32 cell_y = y >> 15;
 
-    i32 min_dist = INT32_MAX;
+    i32 min_dist = fl::numeric_limits<i32>::max();
 
     // Check surrounding 9 cells
     for (int dy = -1; dy <= 1; ++dy) {

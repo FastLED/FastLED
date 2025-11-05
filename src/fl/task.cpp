@@ -1,4 +1,5 @@
 #include "fl/task.h"
+#include "fl/numeric_limits.h"
 #include "fl/async.h"
 #include "fl/time.h"
 #include "fl/sstream.h"
@@ -25,7 +26,7 @@ TaskImpl::TaskImpl(TaskType type, int interval_ms)
       mTraceLabel(),
       mHasThen(false),
       mHasCatch(false),
-      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
+      mLastRunTime(fl::numeric_limits<uint32_t>::max()) {  // Use fl::numeric_limits<uint32_t>::max() to indicate "never run"
 }
 
 TaskImpl::TaskImpl(TaskType type, int interval_ms, const fl::TracePoint& trace)
@@ -35,7 +36,7 @@ TaskImpl::TaskImpl(TaskType type, int interval_ms, const fl::TracePoint& trace)
       mTraceLabel(fl::make_unique<string>(make_trace_label(trace))),  // Optional. Put it in the heap.
       mHasThen(false),
       mHasCatch(false),
-      mLastRunTime(UINT32_MAX) {  // Use UINT32_MAX to indicate "never run"
+      mLastRunTime(fl::numeric_limits<uint32_t>::max()) {  // Use fl::numeric_limits<uint32_t>::max() to indicate "never run"
 }
 
 // TaskImpl static builders
@@ -105,8 +106,8 @@ bool TaskImpl::ready_to_run(uint32_t current_time) const {
         return true;
     }
     
-    // Use UINT32_MAX to indicate "never run" instead of 0 to handle cases where time() returns 0
-    if (mLastRunTime == UINT32_MAX) {
+    // Use fl::numeric_limits<uint32_t>::max() to indicate "never run" instead of 0 to handle cases where time() returns 0
+    if (mLastRunTime == fl::numeric_limits<uint32_t>::max()) {
         return true;
     }
     
