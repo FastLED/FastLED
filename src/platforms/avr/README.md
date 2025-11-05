@@ -69,9 +69,9 @@ All existing code continues to work unchanged. Dispatcher headers route to corre
 - **avr_millis_timer_null_counter.hpp**: Defines a weak (or strong on some ATtiny) `volatile unsigned long timer_millis` symbol for boards missing a timer implementation.
 - **avr_millis_timer0_impl_source.hpp**: Minimal Timer0/TCA0 ISR-based `timer_millis` implementation for select ATtinyx/y parts; initialized via constructor.
 - **avr_millis_timer_source.cpp**: Chooses between weak symbol vs. implementation based on macros/board, includes the two headers above.
-- **clockless_trinket.h**: AVR clockless LED controller with tight-timing bit-banging (WS2811/WS2812). Docs on interrupt impact and timing macros.
+- **clockless_avr.h**: AVR clockless LED controller with tight-timing bit-banging (WS2811/WS2812). Docs on interrupt impact and timing macros.
 - **compile_test.hpp**: Compile-time checks for AVR config (e.g., `FASTLED_USE_PROGMEM==1`, `FASTLED_ALLOW_INTERRUPTS==0`, `F_CPU` sanity).
-- **fastled_avr.h**: Aggregator header enabling PROGMEM and including `fastpin_avr.h`, `fastspi_avr.h`, `clockless_trinket.h`.
+- **fastled_avr.h**: Aggregator header enabling PROGMEM and including `fastpin_avr.h`, `fastspi_avr.h`, `clockless_avr.h`.
 - **fastpin_avr.h**: Top-level dispatcher that routes to VPORT (ATmega4809/Nano Every) or legacy DDR/PORT/PIN pin mappings (all other AVRs).
 - **fastpin_avr_legacy.h**: Backward-compatibility shim that forwards to `atmega/common/fastpin_avr_legacy_dispatcher.h` (deprecated, will be removed in v4.0).
 - **math8.h**: Math dispatcher that routes to `attiny/math/math8_attiny.h` (software multiply) or `atmega/common/math8_avr.h` (hardware MUL) based on `LIB8_ATTINY`.

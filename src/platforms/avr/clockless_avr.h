@@ -1,5 +1,5 @@
-#ifndef __INC_CLOCKLESS_TRINKET_H
-#define __INC_CLOCKLESS_TRINKET_H
+#ifndef __INC_CLOCKLESS_AVR_H
+#define __INC_CLOCKLESS_AVR_H
 
 #include "controller.h"
 #include "lib8tion.h"
@@ -15,8 +15,8 @@ namespace fl {
 #if defined(FASTLED_AVR)
 
 // Scaling macro choice
-#ifndef TRINKET_SCALE
-#define TRINKET_SCALE 1
+#ifndef FASTLED_AVR_SCALE
+#define FASTLED_AVR_SCALE 1
 // whether or not to use dithering
 #define DITHER 1
 #endif

@@ -12,7 +12,7 @@
   #include "platforms/avr/attiny/clockless_blocking.h"
 #else
   // Other AVR platforms use standard clockless controller
-  #include "clockless_trinket.h"
+  #include "clockless_avr.h"
 #endif
 
 // Default to using PROGMEM

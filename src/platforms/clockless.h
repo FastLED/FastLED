@@ -38,7 +38,7 @@
     #include "avr/attiny/clockless_blocking.h"
   #else
     // Other AVR platforms (Uno, Mega, etc.) use the standard clockless controller
-    #include "avr/clockless_trinket.h"
+    #include "avr/clockless_avr.h"
   #endif
 #endif
 

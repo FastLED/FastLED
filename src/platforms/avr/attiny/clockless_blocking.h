@@ -2,7 +2,7 @@
 #define __INC_CLOCKLESS_BLOCKING_ATTINY_H
 
 // ATtiny Clockless Blocking Controller
-// Derived from clockless_trinket.h - cycle-perfect blocking implementation for ATtiny85 and similar AVR chipsets
+// Derived from clockless_avr.h - cycle-perfect blocking implementation for ATtiny85 and similar AVR chipsets
 // This implementation disables interrupts during LED updates for precise timing
 
 #include "controller.h"
@@ -21,8 +21,8 @@ namespace fl {
 #if defined(LIB8_ATTINY)
 
 // Scaling macro choice
-#ifndef TRINKET_SCALE
-#define TRINKET_SCALE 1
+#ifndef FASTLED_AVR_SCALE
+#define FASTLED_AVR_SCALE 1
 // whether or not to use dithering
 #define DITHER 1
 #endif

@@ -320,10 +320,10 @@ struct PixelController {
     FASTLED_FORCE_INLINE void advanceData() { mData += mAdvance; --mLenRemaining;}
 
     /// Step the dithering forward
-    /// @note If updating here, be sure to update the asm version in clockless_trinket.h!
+    /// @note If updating here, be sure to update the asm version in clockless_avr.h!
     FASTLED_FORCE_INLINE void stepDithering() {
             // IF UPDATING HERE, BE SURE TO UPDATE THE ASM VERSION IN
-            // clockless_trinket.h!
+            // clockless_avr.h!
             d[0] = e[0] - d[0];
             d[1] = e[1] - d[1];
             d[2] = e[2] - d[2];

@@ -4,7 +4,7 @@
 /// This file preserves the original AVR timing specifications based on
 /// CPU clock cycles (FMUL multiplier) rather than nanoseconds.
 ///
-/// These definitions are used by the AVR clockless driver (clockless_trinket.h)
+/// These definitions are used by the AVR clockless driver (clockless_avr.h)
 /// which requires cycle-accurate timing for bit manipulation.
 ///
 /// @note These timings are for 8/16/24 MHz frequencies and use FMUL multipliers.
