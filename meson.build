@@ -5,7 +5,8 @@ project('fastled', 'cpp',
     'warning_level=2',
     'werror=false',
     'buildtype=debug',
-    'unity=off'      # Unity builds disabled by default (use --unity flag to enable)
+    'unity=off',      # Unity builds disabled by default (use --unity flag to enable)
+    'unity_size=40'   # Combine 40 translation units per unity build (default is 4)
   ]
 )
 
