@@ -5,6 +5,7 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 #include "fl/stdint.h"
+#include "fl/sketch_macros.h"
 
 namespace fl {
 
@@ -321,26 +322,27 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     return i;
 }
 
-/// Blend a variable proportion of one byte to another (AVR assembly with MUL)
-/// Computes: result = ((a * (255 - amountOfB)) + (b * amountOfB)) >> 8
-/// Uses two hardware MUL instructions
-#if (FASTLED_BLEND_FIXED == 1)
-LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+/// Blend a variable proportion of one byte to another - 8-bit precision (AVR assembly with MUL)
+/// Uses Option 1: result = ((a << 8) + (b - a) * M + 0x80) >> 8
+/// Computes with proper rounding for accurate color interpolation
+LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial = 0;
     uint8_t result;
 
     // Use inline assembly to construct 16-bit value and perform blending
-    // This avoids generating illegal 32-bit 'or' instruction on ATtiny85
     asm volatile(
         "  mov %A[partial], %[b]           \n\t"  // Low byte = b
-        "  mov %B[partial], %[a]           \n\t"  // High byte = a
-        "  mul %[a], %[amountOfB]          \n\t"
-        "  sub %A[partial], r0             \n\t"
-        "  sbc %B[partial], r1             \n\t"
-        "  mul %[b], %[amountOfB]          \n\t"
-        "  add %A[partial], r0             \n\t"
-        "  adc %B[partial], r1             \n\t"
-        "  clr __zero_reg__                \n\t"
+        "  mov %B[partial], %[a]           \n\t"  // High byte = a (partial = a*256 + b)
+        "  mul %[a], %[amountOfB]          \n\t"  // r1:r0 = a * amountOfB
+        "  sub %A[partial], r0             \n\t"  // partial -= a * amountOfB (low byte)
+        "  sbc %B[partial], r1             \n\t"  // partial -= a * amountOfB (high byte)
+        "  mul %[b], %[amountOfB]          \n\t"  // r1:r0 = b * amountOfB
+        "  add %A[partial], r0             \n\t"  // partial += b * amountOfB (low byte)
+        "  adc %B[partial], r1             \n\t"  // partial += b * amountOfB (high byte)
+        "  ldi r0, 0x80                    \n\t"  // Load 128 for rounding
+        "  add %A[partial], r0             \n\t"  // partial += 0x80 (low byte)
+        "  adc %B[partial], __zero_reg__   \n\t"  // partial += carry (high byte)
+        "  clr __zero_reg__                \n\t"  // Restore zero register
         : [partial] "+r"(partial)
         : [amountOfB] "r"(amountOfB), [a] "r"(a), [b] "r"(b)
         : "r0", "r1");
@@ -349,37 +351,31 @@ LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
 
     return result;
 }
+
+/// Blend a variable proportion of one byte to another - 16-bit precision (AVR C implementation)
+/// Uses Option 2: result = ((a << 16) + (b - a) * M * 257 + 0x8000) >> 16
+/// Falls back to C implementation for AVR as 32-bit assembly would be complex
+LIB8STATIC uint8_t blend8_16bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint32_t partial;
+    int16_t delta = (int16_t)b - (int16_t)a;
+
+    // Calculate: (a * 65536 + (b - a) * amountOfB * 257 + 32768) / 65536
+    partial = ((uint32_t)a << 16);
+    partial += (uint32_t)delta * amountOfB * 257;
+    partial += 0x8000;
+
+    return partial >> 16;
+}
+
+/// Blend a variable proportion of one byte to another (AVR assembly with MUL)
+/// Automatically selects between 8-bit and 16-bit precision based on available memory
+#if (SKETCH_HAS_LOTS_OF_MEMORY)
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    return blend8_16bit(a, b, amountOfB);
+}
 #else
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint16_t partial = 0;
-    uint8_t result;
-
-    // non-SCALE8-fixed version
-    // Use inline assembly to avoid illegal 32-bit instructions on ATtiny85
-
-    asm volatile(
-        /* partial = b * amountOfB */
-        "  mul %[b], %[amountOfB]        \n\t"
-        "  movw %A[partial], r0          \n\t"
-
-        /* amountOfB (aka amountOfA) = 255 - amountOfB */
-        "  com %[amountOfB]              \n\t"
-
-        /* partial += a * amountOfB (aka amountOfA) */
-        "  mul %[a], %[amountOfB]        \n\t"
-
-        "  add %A[partial], r0           \n\t"
-        "  adc %B[partial], r1           \n\t"
-
-        "  clr __zero_reg__              \n\t"
-
-        : [partial] "+r"(partial), [amountOfB] "+r"(amountOfB)
-        : [a] "r"(a), [b] "r"(b)
-        : "r0", "r1");
-
-    result = partial >> 8;
-
-    return result;
+    return blend8_8bit(a, b, amountOfB);
 }
 #endif
 

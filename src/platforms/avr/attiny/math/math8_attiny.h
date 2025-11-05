@@ -5,6 +5,7 @@
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 #include "fl/stdint.h"
+#include "fl/sketch_macros.h"
 
 namespace fl {
 
@@ -295,36 +296,46 @@ FL_ALWAYS_INLINE uint8_t qmul8(uint8_t i, uint8_t j) {
     return p;
 }
 
-/// Blend a variable proportion of one byte to another (C implementation for ATtiny)
-#if (FASTLED_BLEND_FIXED == 1)
-LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+/// Blend a variable proportion of one byte to another - 8-bit precision (C implementation for ATtiny)
+/// Uses Option 1: result = ((a << 8) + (b - a) * M + 0x80) >> 8
+/// This provides proper rounding with minimal memory overhead
+LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint16_t partial;
-    uint8_t result;
 
-    partial = (a << 8) | b; // A*256 + B
+    // Calculate: (a * 256 + (b - a) * amountOfB + 128) / 256
+    // The +128 (0x80) provides proper rounding instead of truncation
+    partial = (a << 8);              // a * 256
+    partial += (b * amountOfB);       // + b * amountOfB
+    partial -= (a * amountOfB);       // - a * amountOfB = a*256 + (b-a)*amountOfB
+    partial += 0x80;                  // + 128 for rounding
 
-    // on many platforms this compiles to a single multiply of (B-A) * amountOfB
-    partial += (b * amountOfB);
-    partial -= (a * amountOfB);
+    return partial >> 8;
+}
 
-    result = partial >> 8;
+/// Blend a variable proportion of one byte to another - 16-bit precision (C implementation for ATtiny)
+/// Uses Option 2: result = ((a << 16) + (b - a) * M * 257 + 0x8000) >> 16
+/// This provides higher accuracy by using 16-bit intermediate values
+LIB8STATIC uint8_t blend8_16bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    uint32_t partial;
+    int16_t delta = (int16_t)b - (int16_t)a;
 
-    return result;
+    // Calculate: (a * 65536 + (b - a) * amountOfB * 257 + 32768) / 65536
+    partial = ((uint32_t)a << 16);
+    partial += (uint32_t)delta * amountOfB * 257;
+    partial += 0x8000;
+
+    return partial >> 16;
+}
+
+/// Blend a variable proportion of one byte to another (C implementation for ATtiny)
+/// Automatically selects between 8-bit and 16-bit precision based on available memory
+#if (SKETCH_HAS_LOTS_OF_MEMORY)
+LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
+    return blend8_16bit(a, b, amountOfB);
 }
 #else
 LIB8STATIC uint8_t blend8(uint8_t a, uint8_t b, uint8_t amountOfB) {
-    uint16_t partial;
-    uint8_t result;
-    uint8_t amountOfA = 255 - amountOfB;
-
-    // on the other hand, this compiles to two multiplies, and gives the "wrong"
-    // answer :]
-    partial = (a * amountOfA);
-    partial += (b * amountOfB);
-
-    result = partial >> 8;
-
-    return result;
+    return blend8_8bit(a, b, amountOfB);
 }
 #endif
 
