@@ -263,6 +263,11 @@ FL_OPTIMIZATION_LEVEL_O3_END
 
 FL_OPTIMIZATION_LEVEL_O3_BEGIN
 
+
+static constexpr uint32_t ns_to_cycles(uint32_t ns) {
+  return (uint32_t)(((uint64_t)ns * (uint64_t)F_CPU + 999'999'999ULL) / 1'000'000'000ULL);
+}
+
 template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WAIT_TIME>
 int showLedData(volatile uint32_t* port, uint32_t bitmask,
                 const uint8_t* leds, uint32_t num_leds,
@@ -270,9 +275,13 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
 
     // Convert timing values from nanoseconds to CPU cycles at compile-time
     // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000 (with rounding)
-    static constexpr uint32_t T1_CYCLES = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T2_CYCLES = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
-    static constexpr uint32_t T3_CYCLES = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+    // static constexpr uint32_t T1_CYCLES = (TIMING::T1 * (F_CPU / 1000000UL) + 500) / 1000;
+    // static constexpr uint32_t T2_CYCLES = (TIMING::T2 * (F_CPU / 1000000UL) + 500) / 1000;
+    // static constexpr uint32_t T3_CYCLES = (TIMING::T3 * (F_CPU / 1000000UL) + 500) / 1000;
+    static constexpr uint32_t T1_CYCLES = ns_to_cycles(TIMING::T1);
+    static constexpr uint32_t T2_CYCLES = ns_to_cycles(TIMING::T2);
+    static constexpr uint32_t T3_CYCLES = ns_to_cycles(TIMING::T3);
+
 
     // RGB channel ordering macro
     #define RO(X) (RGB_ORDER == RGB ? X : (RGB_ORDER == RBG && X == 1 ? 2 : (RGB_ORDER == RBG && X == 2 ? 1 : \
