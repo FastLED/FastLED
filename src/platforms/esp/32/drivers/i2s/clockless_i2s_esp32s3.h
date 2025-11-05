@@ -17,14 +17,22 @@
 
 #ifndef FASTLED_INTERNAL
 // We need to do a check for the esp-idf version because very specific versions of the
-// esp-idf arduino core are broken.
+// esp-idf arduino core are broken. NOTE: ESP-IDF 5.1.0 itself should work with the
+// legacy struct fields (psram_trans_align/sram_trans_align), but specific Arduino core
+// releases had issues. If you're using plain ESP-IDF 5.1.0, you may be able to compile
+// by defining FASTLED_INTERNAL to bypass this check.
 #include "platforms/esp/esp_version.h"
-// Broken in 3.0.2 (esp-idf 5.1.0)
-// Broken in 3.0.4 (esp-idf 5.1.0)
-// Broken in 3.0.7 (esp-idf 5.1.0)
-// Broken in 3.1.0 (esp-idf 5.3.2)
+// The struct fields changed in ESP-IDF 5.3.0 from psram_trans_align/sram_trans_align
+// to dma_burst_size. The driver implementation handles both correctly.
+// However, certain Arduino ESP32 core versions had other compatibility issues:
+// - Broken in Arduino core 3.0.2, 3.0.4, 3.0.7 (esp-idf 5.1.x): "whole display same color"
+// - Broken in Arduino core 3.1.0 (esp-idf 5.3.2): compatibility issues
+// - Working in Arduino core 3.2.0+ (esp-idf 5.4.0+)
+//
+// If you're using ESP-IDF 5.1.0 directly (not through a broken Arduino core version),
+// you can define FASTLED_INTERNAL to bypass this check at your own risk.
 #if ESP_IDF_VERSION > ESP_IDF_VERSION_VAL(5, 1, 0) && ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 2, 0)
-#error "I2S driver is known to not be compatible with ESP-IDF 5.1.0, upgrade to ESP-IDF 5.4.0 in Arduino core esp32 3.2.0+, see https://github.com/FastLED/FastLED/issues/1903"
+#warning "I2S driver is known to not be compatible with ESP-IDF 5.1.x in certain Arduino core versions (3.0.2, 3.0.4, 3.0.7). Consider upgrading to ESP-IDF 5.4.0+ in Arduino core esp32 3.2.0+. See https://github.com/FastLED/FastLED/issues/1903"
 #elif ESP_IDF_VERSION == ESP_IDF_VERSION_VAL(5, 3, 2)
 #error "I2S driver is known to not be compatible with ESP-IDF 5.3.2, upgrade to ESP-IDF 5.4.0 in Arduino core esp32 3.2.0+, see https://github.com/FastLED/FastLED/issues/1903"
 #endif
