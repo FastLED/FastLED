@@ -78,7 +78,7 @@ struct Transaction::Impl {
         , completed(false)
         , cancelled(false)
         , result(fl::nullopt)  // nullopt = success
-        , timeout_ms(fl::numeric_limits<uint32_t>::max())
+        , timeout_ms((fl::numeric_limits<uint32_t>::max)())
 #ifdef ESP32
         , notify_task(nullptr)
 #endif

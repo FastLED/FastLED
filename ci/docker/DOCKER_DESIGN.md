@@ -239,11 +239,13 @@ niteris/fastled-compiler-esp-32dev:idf5.3   → Explicit IDF 5.3
 
 All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx.
 
-**Build Process**:
+**Build Process** (Independent per Platform):
 1. Build amd64 image on `ubuntu-24.04` runner
 2. Build arm64 image on `ubuntu-24.04-arm` runner
-3. Merge digests into single multi-arch manifest
-4. Push manifest to Docker Hub
+3. Once both architectures complete for a platform, merge digests into single multi-arch manifest
+4. Push manifest to Docker Hub immediately (without waiting for other platforms)
+
+**Key Feature**: Each platform merges and uploads independently. If one platform build fails (e.g., ESP32-C6), other platforms (AVR, Teensy, etc.) still merge and upload successfully.
 
 ## Build Schedule
 
@@ -292,7 +294,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
 
 ### GitHub Workflows
 
-**Three workflow files:**
+**Four workflow files:**
 
 1. **`.github/workflows/docker_compiler_base.yml`**
    - Builds base image
@@ -300,23 +302,36 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
    - Triggers platform builds after completion
 
 2. **`.github/workflows/docker_compiler_template.yml`**
-   - Single unified workflow building ALL platform images in parallel
-   - Contains jobs for: avr, 10 ESP boards (flat), teensy, 5 STM32 boards (flat), rp2040, nrf52, 1 SAM board (flat)
+   - Main workflow orchestrating all platform builds
+   - Contains 20 independent build jobs (one per platform)
+   - Each build job produces amd64 + arm64 images
+   - Contains 20 independent merge jobs (one per platform)
+   - Each merge job depends only on its corresponding build job
    - Triggered by base workflow (with 10 min delay)
    - Can also run via manual dispatch or fallback cron
 
-3. **`.github/workflows/template_build_docker_compiler.yml`**
+3. **`.github/workflows/docker_build_compiler.yml`**
    - Reusable template for building single-architecture images
-   - Called by both base and platform workflows
+   - Called by platform build jobs (40 times total: 20 platforms × 2 architectures)
 
-### Template Workflow
+4. **`.github/workflows/docker_merge_platform.yml`**
+   - Reusable template for merging multi-arch manifests
+   - Called by platform merge jobs (20 times total: one per platform)
+   - Downloads digests, creates manifest, pushes to Docker Hub
 
-**File**: `.github/workflows/template_build_docker_compiler.yml`
+### Reusable Workflows
 
-Reusable workflow for building platform images:
-- Accepts platform name as input
-- Handles multi-arch builds
-- Manages digest uploads for manifest merging
+**Build Workflow** (`.github/workflows/docker_build_compiler.yml`):
+- Builds a single-architecture Docker image
+- Accepts platform name, dockerfile, architecture as inputs
+- Pushes image digest for later manifest merging
+- Uploads digest as artifact
+
+**Merge Workflow** (`.github/workflows/docker_merge_platform.yml`):
+- Merges amd64 and arm64 digests into multi-arch manifest
+- Accepts platform name and registry as inputs
+- Downloads digest artifacts from build jobs
+- Creates and pushes manifest to Docker Hub
 
 ### Python Board Mapping
 
@@ -413,22 +428,69 @@ The board will automatically be included in the next Docker build, and its toolc
 
 To add a new platform image:
 
-1. **Edit `.github/workflows/docker_compiler_base_platforms.yml`**:
-   - Add new platform to credentials job outputs
-   - Add new `build-<platform>-amd64` job
-   - Add new `build-<platform>-arm` job
-   - Add new `merge-<platform>` job
-   - Follow the existing pattern for AVR, ESP, etc.
+1. **Add platform to `ci/docker/build_platforms.py`**:
+   ```python
+   DOCKER_PLATFORMS = {
+       # ... existing platforms ...
+       "apollo3": ["apollo3_sparkfun"],  # Add new platform
+   }
+   ```
 
-2. **Example addition** (for Apollo3 platform):
+2. **Edit `.github/workflows/docker_compiler_template.yml`**:
+
+   a. Add registry output to `credentials` job:
    ```yaml
-   # In credentials job, add:
-   registry_apollo3: ${{ steps.credentials.outputs.registry_apollo3 }}
+   outputs:
+     registry_apollo3: ${{ steps.credentials.outputs.registry_apollo3 }}
+   ```
 
-   # In credentials steps, add:
-   echo "registry_apollo3=$(echo 'niteris/fastled-compiler-apollo3' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+   b. Add registry generation to credentials steps:
+   ```yaml
+   echo "registry_apollo3=$(echo -n 'niteris/fastled-compiler-apollo3' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+   ```
 
-   # Then add the three jobs: build-apollo3-amd64, build-apollo3-arm, merge-apollo3
+   c. Add build job:
+   ```yaml
+   build-apollo3:
+     name: 🔨 fastled-compiler-apollo3 [${{ matrix.arch.platform }}]
+     if: github.event.inputs.skip_platforms != 'true'
+     needs: [credentials, wait-for-base]
+     strategy:
+       fail-fast: false
+       matrix:
+         arch:
+           - runs_on: ubuntu-24.04
+             platform: linux/amd64
+           - runs_on: ubuntu-24.04-arm
+             platform: linux/arm64
+     uses: ./.github/workflows/docker_build_compiler.yml
+     with:
+       runs_on: ${{ matrix.arch.runs_on }}
+       platform: ${{ matrix.arch.platform }}
+       dockerfile: Dockerfile.template
+       group: apollo3
+       platforms: apollo3_sparkfun
+       tag: latest
+     secrets:
+       env_vars: |
+         docker_username=${{ needs.credentials.outputs.docker_username }}
+         docker_password=${{ needs.credentials.outputs.docker_password }}
+         docker_registry_image=${{ needs.credentials.outputs.registry_apollo3 }}
+   ```
+
+   d. Add merge job:
+   ```yaml
+   merge-apollo3:
+     name: 📦 merge fastled-compiler-apollo3
+     if: github.event.inputs.skip_platforms != 'true'
+     needs: build-apollo3
+     uses: ./.github/workflows/docker_merge_platform.yml
+     with:
+       group_name: apollo3
+       registry: niteris/fastled-compiler-apollo3
+       tag: latest
+     secrets:
+       docker_password: ${{ secrets.DOCKER_PASSWORD }}
    ```
 
 3. **Update this document** with new platform mapping
@@ -440,6 +502,8 @@ To add a new platform image:
      --build-arg PLATFORM_NAME=<board> \
      -t niteris/fastled-compiler-<platform>:latest .
    ```
+
+**Key Benefit**: The new platform will merge and upload independently, without being blocked by other platform builds.
 
 ## Local Testing
 

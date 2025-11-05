@@ -11,6 +11,7 @@
 #include "fl/cstddef.h"
 #include "fl/assert.h"
 #include "fl/int.h"
+#include "fl/limits.h"
 #include "fl/allocator.h"
 #include "fl/cstring.h"
 #include "fl/string.h"
@@ -158,7 +159,7 @@ struct nsgif {
 #define NSGIF_PROCESS_COLOURS 0xaa000000
 
 /** Internal flag that a frame is invalid/unprocessed */
-#define NSGIF_FRAME_INVALID UINT32_MAX
+#define NSGIF_FRAME_INVALID (fl::numeric_limits<fl::u32>::max)()
 
 /** Transparent colour */
 #define NSGIF_TRANSPARENT_COLOUR 0x00

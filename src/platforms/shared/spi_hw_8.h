@@ -14,6 +14,7 @@
 #include "fl/vector.h"
 #include "fl/span.h"
 #include "fl/stdint.h"
+#include "fl/limits.h"
 #include "platforms/shared/spi_types.h"
 
 namespace fl {
@@ -90,7 +91,7 @@ public:
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
     /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
-    virtual bool waitComplete(uint32_t timeout_ms = UINT32_MAX) = 0;
+    virtual bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle

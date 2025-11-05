@@ -7,7 +7,18 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 */
 
 #include "fl/stdint.h"
-#include "fl/math.h"
+
+// Undefine min/max/abs macros BEFORE any declarations
+// Arduino and platform headers often define these as macros which breaks member function declarations
+#ifdef min
+#undef min
+#endif
+#ifdef max
+#undef max
+#endif
+#ifdef abs
+#undef abs
+#endif
 
 namespace fl {
 
@@ -106,9 +117,9 @@ struct numeric_limits {
     enum : int { digits = 0 };
     enum : int { digits10 = 0 };
 
-    static constexpr T min() noexcept { return T(); }
-    static constexpr T max() noexcept { return T(); }
-    static constexpr T lowest() noexcept { return T(); }
+    static constexpr T (min)() noexcept { return T(); }
+    static constexpr T (max)() noexcept { return T(); }
+    static constexpr T (lowest)() noexcept { return T(); }
     static constexpr T epsilon() noexcept { return T(); }
     static constexpr T round_error() noexcept { return T(); }
     static constexpr T infinity() noexcept { return T(); }
@@ -130,9 +141,9 @@ struct numeric_limits<bool> {
     enum : int { digits = 1 };
     enum : int { digits10 = 0 };
 
-    static constexpr bool min() noexcept { return false; }
-    static constexpr bool max() noexcept { return true; }
-    static constexpr bool lowest() noexcept { return false; }
+    static constexpr bool (min)() noexcept { return false; }
+    static constexpr bool (max)() noexcept { return true; }
+    static constexpr bool (lowest)() noexcept { return false; }
     static constexpr bool epsilon() noexcept { return false; }
     static constexpr bool round_error() noexcept { return false; }
 };
@@ -150,9 +161,9 @@ struct numeric_limits<char> {
     static constexpr int digits = detail::integer_digits_helper<char>::value;
     static constexpr int digits10 = detail::integer_digits10_helper<char>::value;
 
-    static constexpr char min() noexcept { return detail::integer_min_helper<char>::value(); }
-    static constexpr char max() noexcept { return detail::integer_max_helper<char>::value(); }
-    static constexpr char lowest() noexcept { return min(); }
+    static constexpr char (min)() noexcept { return detail::integer_min_helper<char>::value(); }
+    static constexpr char (max)() noexcept { return detail::integer_max_helper<char>::value(); }
+    static constexpr char (lowest)() noexcept { return (min)(); }
     static constexpr char epsilon() noexcept { return 0; }
     static constexpr char round_error() noexcept { return 0; }
 };
@@ -170,9 +181,9 @@ struct numeric_limits<signed char> {
     static constexpr int digits = detail::integer_digits_helper<signed char>::value;
     static constexpr int digits10 = detail::integer_digits10_helper<signed char>::value;
 
-    static constexpr signed char min() noexcept { return detail::integer_min_helper<signed char>::value(); }
-    static constexpr signed char max() noexcept { return detail::integer_max_helper<signed char>::value(); }
-    static constexpr signed char lowest() noexcept { return min(); }
+    static constexpr signed char (min)() noexcept { return detail::integer_min_helper<signed char>::value(); }
+    static constexpr signed char (max)() noexcept { return detail::integer_max_helper<signed char>::value(); }
+    static constexpr signed char (lowest)() noexcept { return (min)(); }
     static constexpr signed char epsilon() noexcept { return 0; }
     static constexpr signed char round_error() noexcept { return 0; }
 };
@@ -190,9 +201,9 @@ struct numeric_limits<unsigned char> {
     static constexpr int digits = detail::integer_digits_helper<unsigned char>::value;
     static constexpr int digits10 = detail::integer_digits10_helper<unsigned char>::value;
 
-    static constexpr unsigned char min() noexcept { return detail::integer_min_helper<unsigned char>::value(); }
-    static constexpr unsigned char max() noexcept { return detail::integer_max_helper<unsigned char>::value(); }
-    static constexpr unsigned char lowest() noexcept { return 0; }
+    static constexpr unsigned char (min)() noexcept { return detail::integer_min_helper<unsigned char>::value(); }
+    static constexpr unsigned char (max)() noexcept { return detail::integer_max_helper<unsigned char>::value(); }
+    static constexpr unsigned char (lowest)() noexcept { return 0; }
     static constexpr unsigned char epsilon() noexcept { return 0; }
     static constexpr unsigned char round_error() noexcept { return 0; }
 };
@@ -466,8 +477,7 @@ struct numeric_limits<double> {
 // This allows fl/math.h to include fl/limits.h at the top without circular dependency
 #include "fl/math.h"
 
-// Undefine macros at the end to prevent conflicts in code that includes this header
-// This ensures that fl::numeric_limits::min()/max() can be used without macro interference
+// Undefine macros again at the end to prevent them from leaking to includers
 #ifdef min
 #undef min
 #endif

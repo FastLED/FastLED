@@ -1,7 +1,6 @@
 #pragma once
 
 #include "fl/clamp.h"
-#include "fl/limits.h"
 #include "fl/math_macros.h"
 
 // Undefine Arduino/platform min/max/abs macros that conflict with our functions
