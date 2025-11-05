@@ -8,7 +8,7 @@
 // ============================================================================
 // FL_IS_AVR - General AVR platform detection
 // ============================================================================
-#if defined(__AVR__) && !defined(FL_IS_AVR)
+#if defined(__AVR__)
 #define FL_IS_AVR
 #endif
 
@@ -16,7 +16,6 @@
 // FL_IS_AVR_ATMEGA - ATmega family detection
 // Includes all ATmega variants: ATmega328P, ATmega2560, ATmega32U4, etc.
 // ============================================================================
-#if !defined(FL_IS_AVR_ATMEGA)
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || \
     defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || \
     defined(__AVR_ATmega168__) || defined(__AVR_ATmega8__) || \
@@ -35,26 +34,22 @@
     defined(__AVR_ATmega128RFA1__) || defined(__AVR_ATmega256RFR2__)
 #define FL_IS_AVR_ATMEGA
 #endif
-#endif
 
 // ============================================================================
 // FL_IS_AVR_ATMEGA_328P - ATmega328P family detection (Arduino UNO/Nano)
 // Includes: ATmega328P, ATmega328PB, ATmega328, ATmega168P, ATmega168, ATmega8
 // ============================================================================
-#if !defined(FL_IS_AVR_ATMEGA_328P)
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || \
     defined(__AVR_ATmega328__) || defined(__AVR_ATmega168P__) || \
     defined(__AVR_ATmega168__) || defined(__AVR_ATmega8__) || \
     defined(__AVR_ATmega8A__)
 #define FL_IS_AVR_ATMEGA_328P
 #endif
-#endif
 
 // ============================================================================
 // FL_IS_AVR_ATTINY - ATtiny family detection
 // Includes both classic ATtiny (85, 84, etc.) and modern tinyAVR (412, 1614, etc.)
 // ============================================================================
-#if !defined(FL_IS_AVR_ATTINY)
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \
     defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
     defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || \
@@ -75,16 +70,13 @@
     defined(IS_BEAN)
 #define FL_IS_AVR_ATTINY
 #endif
-#endif
 
 // ============================================================================
 // FL_IS_AVR_ATTINY_NO_UART - ATtiny chips without UART hardware (only USI)
 // ============================================================================
-#if !defined(FL_IS_AVR_ATTINY_NO_UART)
 #if defined(__AVR_ATtiny13__) || defined(__AVR_ATtiny13A__) || \
     defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || \
     defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || \
     defined(__AVR_ATtiny88__)
 #define FL_IS_AVR_ATTINY_NO_UART
-#endif
 #endif

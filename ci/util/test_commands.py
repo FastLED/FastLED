@@ -72,6 +72,7 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
         "--examples",
         "Blink",
         "--no-interactive",
+        "--local",
     ]
     return RunningProcess(cmd, auto_run=True)
 

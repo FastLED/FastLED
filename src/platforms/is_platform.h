@@ -35,6 +35,20 @@
 /// - FL_IS_IDF_5_OR_HIGHER: ESP-IDF 5.x or higher
 /// - FL_IS_IDF_3_OR_LOWER: ESP-IDF 3.x or lower
 ///
+/// WebAssembly Platforms:
+/// - FL_IS_WASM: WebAssembly platform (Emscripten)
+///
+/// POSIX Platforms:
+/// - FL_IS_POSIX: General POSIX-compliant platform (Linux, macOS, BSD, etc.)
+/// - FL_IS_POSIX_LINUX: Linux systems
+/// - FL_IS_POSIX_MACOS: macOS/Darwin systems
+/// - FL_IS_POSIX_BSD: BSD variants (FreeBSD, OpenBSD, NetBSD)
+///
+/// Windows Platforms:
+/// - FL_IS_WIN: General Windows platform (any toolchain)
+/// - FL_IS_WIN_MSVC: Microsoft Visual C++ compiler
+/// - FL_IS_WIN_MINGW: MinGW/MinGW-w64 GCC toolchain (native Win32, not POSIX)
+///
 /// Usage:
 /// @code
 /// #include "platforms/is_platform.h"
@@ -56,3 +70,6 @@
 #include "arm/is_arm.h"
 #include "avr/is_avr.h"
 #include "esp/is_esp.h"
+#include "posix/is_posix.h"
+#include "wasm/is_wasm.h"
+#include "win/is_win.h"

@@ -535,10 +535,11 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
         "--examples",
         "Blink",
         "--no-interactive",
+        "--local",
     ]
 
-    # Let ci-compile.py handle Docker auto-detection internally
-    # It will use Docker if available + image exists, otherwise falls back to native mode
+    # Force local compilation to avoid Docker detection hangs in test environment
+    # Docker auto-detection can timeout if Docker is installed but not running
 
     # Use 15 minute timeout for platform compilation (as per CLAUDE.md guidelines)
     # Docker compilation may take longer during initial rsync sync without producing output

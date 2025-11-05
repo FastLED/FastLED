@@ -12,7 +12,6 @@
 
 /// ARM platform detection with optimized macro grouping
 /// This checks for various ARM-based microcontroller families
-#ifndef FASTLED_ARM
 #if \
     /* ARM Cortex-M0/M0+ (SAM) */ \
     defined(__SAM3X8E__) || \
@@ -44,4 +43,3 @@
     defined(__SAME51J19A__) || defined(__SAMD51P19A__) || defined(__SAMD51P20A__)
 #define FASTLED_ARM
 #endif  // ARM platform detection
-#endif  // FASTLED_ARM
