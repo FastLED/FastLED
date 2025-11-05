@@ -42,6 +42,8 @@
   // Clang doesn't have volatile warning, use no-op
   #define FL_DISABLE_WARNING_VOLATILE
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
+  // Clang doesn't have subobject-linkage warning, use no-op
+  #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
 #elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
@@ -75,6 +77,8 @@
     #define FL_DISABLE_WARNING_VOLATILE FL_DISABLE_WARNING(volatile)
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
   #endif
+  // GCC has subobject-linkage warning
+  #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
@@ -89,6 +93,8 @@
   #define FL_DISABLE_WARNING_VOLATILE
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS
   #define FL_DISABLE_WARNING_DEPRECATED_DECLARATIONS FL_DISABLE_WARNING(deprecated-declarations)
+  // Other compilers don't have subobject-linkage warning, use no-op
+  #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
 #endif
 
 // END WARNING SPECIFIC MACROS THAT MAY NOT BE UNIVERSAL.

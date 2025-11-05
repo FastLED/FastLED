@@ -363,7 +363,7 @@ class RGBWEmulatedController
 // FL_INLINE_CONSTEXPR adds explicit 'inline' in C++17+ to resolve this, but for C++11
 // compatibility we suppress the warning here.
 FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(subobject-linkage)
+FL_DISABLE_WARNING_SUBOBJECT_LINKAGE
 
 
 
