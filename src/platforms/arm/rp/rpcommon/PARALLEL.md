@@ -157,14 +157,19 @@ The driver transposes LED data from standard RGB format to bit-parallel format:
 
 ### Memory Usage
 
-**Buffer allocation:**
+**Buffer allocation (RGB mode):**
 - **RectangularDrawBuffer**: `(max_leds × 3 bytes) × num_strips`
   - Example: 100 LEDs × 4 strips = 1200 bytes
 - **Transpose buffer**: `max_leds × 24 bytes` per group
   - Example: 100 LEDs = 2400 bytes per group
+- **Total for 4 strips × 100 LEDs:** ~3600 bytes (1200 + 2400)
 
-**Total for 4 strips × 100 LEDs:**
-- ~3600 bytes (1200 + 2400)
+**Buffer allocation (RGBW mode):**
+- **RectangularDrawBuffer**: `(max_leds × 4 bytes) × num_strips`
+  - Example: 100 LEDs × 4 strips = 1600 bytes
+- **Transpose buffer**: `max_leds × 32 bytes` per group
+  - Example: 100 LEDs = 3200 bytes per group
+- **Total for 4 strips × 100 LEDs:** ~4800 bytes (1600 + 3200)
 
 **Memory location:**
 - RP2040: Main SRAM (264 KB)
@@ -259,9 +264,11 @@ void loop() {
    - If strips have different LED counts, all are padded to the longest
    - Example: [50, 100, 75] LEDs → all padded to 100 LEDs internally
 
-2. **RGBW mode** supported but not optimized
+2. **RGBW mode fully supported** ✅
    - RGBW uses 4 bytes per LED vs 3 for RGB
-   - Buffer sizes increase accordingly
+   - Buffer sizes increase accordingly (32 bytes vs 24 bytes per LED for transpose)
+   - Dedicated RGBW transpose functions for optimal performance
+   - Mixed RGB/RGBW strips in same parallel group supported (see RGBW section below)
 
 3. **Sequential fallback TODO** for single pins
    - Single non-consecutive pins currently use placeholder
@@ -334,6 +341,100 @@ void addMoreStrips() {
 
 **Note:** Pin grouping is re-evaluated when the strip configuration changes.
 
+### RGBW Support
+
+The RP2040/RP2350 automatic parallel driver fully supports RGBW (4-channel) LED strips like SK6812.
+
+#### Basic RGBW Usage
+
+```cpp
+#define FASTLED_RP2040_CLOCKLESS_PIO_AUTO 1
+#include <FastLED.h>
+
+#define NUM_LEDS 100
+CRGB leds[NUM_LEDS];
+
+void setup() {
+    // Add RGBW strip (SK6812 or similar)
+    FastLED.addLeds<WS2812, 2, GRB>(leds, NUM_LEDS).setRgbw(RgbwDefault());
+}
+
+void loop() {
+    // Set colors normally - white channel calculated automatically
+    fill_solid(leds, NUM_LEDS, CRGB::White);
+    FastLED.show();
+}
+```
+
+#### Parallel RGBW Strips
+
+Multiple RGBW strips work with automatic parallel grouping:
+
+```cpp
+CRGB leds1[100], leds2[100], leds3[100], leds4[100];
+
+void setup() {
+    // All 4 strips will output in parallel (GPIO 2-5)
+    FastLED.addLeds<WS2812, 2, GRB>(leds1, 100).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 3, GRB>(leds2, 100).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 4, GRB>(leds3, 100).setRgbw(RgbwDefault());
+    FastLED.addLeds<WS2812, 5, GRB>(leds4, 100).setRgbw(RgbwDefault());
+}
+```
+
+#### Mixed RGB and RGBW Strips
+
+You can mix RGB and RGBW strips in the same parallel group:
+
+```cpp
+CRGB rgb_leds[100];
+CRGB rgbw_leds[100];
+
+void setup() {
+    // GPIO 2: RGB strip (WS2812)
+    FastLED.addLeds<WS2812, 2, GRB>(rgb_leds, 100);
+
+    // GPIO 3: RGBW strip (SK6812)
+    FastLED.addLeds<WS2812, 3, GRB>(rgbw_leds, 100).setRgbw(RgbwDefault());
+
+    // These will be grouped for parallel output
+}
+```
+
+**Important:** When mixing RGB and RGBW strips in a parallel group:
+- The entire group operates in RGBW mode (4 bytes per LED)
+- RGB strips have their W channel set to 0 (no visible effect)
+- This simplifies hardware configuration (single PIO program per group)
+- Slight memory overhead for RGB strips, but negligible in practice
+
+#### RGBW Performance
+
+| Strip Type | Bytes per LED | Transpose Buffer (100 LEDs) |
+|------------|---------------|----------------------------|
+| RGB (3 channels) | 3 | 2,400 bytes (24 bytes/LED) |
+| RGBW (4 channels) | 4 | 3,200 bytes (32 bytes/LED) |
+
+**Frame time impact:**
+- RGBW: ~33% more data to transfer (4 bytes vs 3)
+- PIO timing: ~1.25 µs per byte (WS2812 protocol)
+- 100 RGBW LEDs: ~500 µs vs ~375 µs for RGB
+- Still well within real-time performance requirements
+
+#### RGBW Transpose Functions
+
+The transpose functions support both RGB and RGBW via a `bytes_per_led` parameter:
+- `transpose_8strips(input, output, num_leds, bytes_per_led)`: 8 parallel strips
+- `transpose_4strips(input, output, num_leds, bytes_per_led)`: 4 parallel strips
+- `transpose_2strips(input, output, num_leds, bytes_per_led)`: 2 parallel strips
+
+The `bytes_per_led` parameter defaults to 3 (RGB) but can be set to 4 for RGBW.
+
+The correct function is automatically selected based on:
+1. Number of consecutive pins in the group (2, 4, or 8)
+2. Whether any strip in the group has RGBW enabled (sets `bytes_per_led = 4`)
+
+**No performance regression:** RGB-only groups use `bytes_per_led = 3` (default).
+
 ### Debug Output
 
 Enable FastLED debug output to see grouping decisions:
@@ -373,6 +474,8 @@ Parallel output for 4 pins starting at GPIO 2 (2400 bytes)
 
 ### Bit Transposition Format
 
+#### RGB Mode (3 channels)
+
 **Input (Standard RGB):**
 ```
 Strip 0: [R0][G0][B0][R1][G1][B1]...
@@ -389,7 +492,38 @@ Byte 1:  [0][0][0][0][S3_R0_b6][S2_R0_b6][S1_R0_b6][S0_R0_b6]
 Byte 7:  [0][0][0][0][S3_R0_b0][S2_R0_b0][S1_R0_b0][S0_R0_b0]  // LSB of R0
 Byte 8:  [0][0][0][0][S3_G0_b7][S2_G0_b7][S1_G0_b7][S0_G0_b7]  // MSB of G0
 ...
+Byte 23: [0][0][0][0][S3_B0_b0][S2_B0_b0][S1_B0_b0][S0_B0_b0]  // LSB of B0
 ```
+
+**Total:** 24 bytes per LED (8 bytes per channel × 3 channels)
+
+#### RGBW Mode (4 channels)
+
+**Input (Standard RGBW):**
+```
+Strip 0: [R0][G0][B0][W0][R1][G1][B1][W1]...
+Strip 1: [R0][G0][B0][W0][R1][G1][B1][W1]...
+Strip 2: [R0][G0][B0][W0][R1][G1][B1][W1]...
+Strip 3: [R0][G0][B0][W0][R1][G1][B1][W1]...
+```
+
+**Output (Bit-Transposed for 4-pin PIO):**
+```
+Byte 0:  [0][0][0][0][S3_R0_b7][S2_R0_b7][S1_R0_b7][S0_R0_b7]  // MSB of R0
+...
+Byte 7:  [0][0][0][0][S3_R0_b0][S2_R0_b0][S1_R0_b0][S0_R0_b0]  // LSB of R0
+Byte 8:  [0][0][0][0][S3_G0_b7][S2_G0_b7][S1_G0_b7][S0_G0_b7]  // MSB of G0
+...
+Byte 15: [0][0][0][0][S3_G0_b0][S2_G0_b0][S1_G0_b0][S0_G0_b0]  // LSB of G0
+Byte 16: [0][0][0][0][S3_B0_b7][S2_B0_b7][S1_B0_b7][S0_B0_b7]  // MSB of B0
+...
+Byte 23: [0][0][0][0][S3_B0_b0][S2_B0_b0][S1_B0_b0][S0_B0_b0]  // LSB of B0
+Byte 24: [0][0][0][0][S3_W0_b7][S2_W0_b7][S1_W0_b7][S0_W0_b7]  // MSB of W0
+...
+Byte 31: [0][0][0][0][S3_W0_b0][S2_W0_b0][S1_W0_b0][S0_W0_b0]  // LSB of W0
+```
+
+**Total:** 32 bytes per LED (8 bytes per channel × 4 channels)
 
 **PIO `out pins, 4` instruction:** Outputs lower 4 bits to GPIO 2-5 simultaneously.
 

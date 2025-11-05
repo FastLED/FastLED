@@ -266,47 +266,76 @@ public:
 
 #if FASTLED_RP2040_CLOCKLESS_PIO
     void showRGBInternal(PixelController<RGB_ORDER> pixels) {
-        size_t req_buf_size = (pixels.mLen * 3 * (8+XTRA0) + 31) / 32;
-        
+        // Detect RGBW mode using pattern from ESP32 drivers
+        const Rgbw rgbw = this->getRgbw();
+        const bool is_rgbw = rgbw.active();
+        const int bytes_per_pixel = is_rgbw ? 4 : 3;
+
+        // Calculate buffer size based on pixel format (RGB = 3 bytes, RGBW = 4 bytes)
+        size_t req_buf_size = (pixels.mLen * bytes_per_pixel * (8+XTRA0) + 31) / 32;
+
         // (re)allocate DMA buffer if not large enough to hold req_buf_size 32-bit words
         // pico has enough memory to not really care about using a buffer for DMA
         // just give up on failure
         if (dma_buf_size < req_buf_size) {
             if (dma_buf != nullptr)
                 free(dma_buf);
-            
+
             dma_buf = malloc(req_buf_size * 4);
             if (dma_buf == nullptr) {
                 dma_buf_size = 0;
                 return;
             }
             dma_buf_size = req_buf_size;
-            
+
             // fill with zeroes to ensure XTRA0s are really zero without needing extra work
             fl::memset(dma_buf, 0, dma_buf_size * 4);
         }
-        
+
         unsigned int bitpos = 0;
-        
-        pixels.preStepFirstByteDithering();
-        uint8_t b = pixels.loadAndScale0();
-        
-        while(pixels.has(1)) {
-            pixels.stepDithering();
 
-            // Write first byte, read next byte
-            bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
-            b = pixels.loadAndScale1();
+        // Separate loops for RGB vs RGBW to match ESP32 pattern
+        if (is_rgbw) {
+            // RGBW mode: process 4 bytes per pixel
+            pixels.preStepFirstByteDithering();
 
-            // Write second byte, read 3rd byte
-            bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
-            b = pixels.loadAndScale2();
+            while(pixels.has(1)) {
+                pixels.stepDithering();
 
-            // Write third byte, read 1st byte of next pixel
-            bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
-            b = pixels.advanceAndLoadAndScale0();
-        };
-        
+                // Load all 4 channels (R, G, B, W) with proper color adjustment and RGBW conversion
+                uint8_t b0, b1, b2, b3;
+                pixels.loadAndScaleRGBW(rgbw, &b0, &b1, &b2, &b3);
+
+                // Write all 4 bytes to buffer
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b0);
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b1);
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b2);
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b3);
+
+                pixels.advanceData();
+            };
+        } else {
+            // RGB mode: process 3 bytes per pixel (original logic)
+            pixels.preStepFirstByteDithering();
+            uint8_t b = pixels.loadAndScale0();
+
+            while(pixels.has(1)) {
+                pixels.stepDithering();
+
+                // Write first byte, read next byte
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                b = pixels.loadAndScale1();
+
+                // Write second byte, read 3rd byte
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                b = pixels.loadAndScale2();
+
+                // Write third byte, read 1st byte of next pixel
+                bitpos += writeBitsToBuf<8+XTRA0>((int32_t*)(dma_buf), bitpos, b);
+                b = pixels.advanceAndLoadAndScale0();
+            };
+        }
+
         do_dma_transfer(dma_channel, dma_buf, req_buf_size);
     }
 #endif // FASTLED_RP2040_CLOCKLESS_PIO

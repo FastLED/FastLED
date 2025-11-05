@@ -73,17 +73,19 @@ namespace fl {
 /// to bit-parallel format suitable for 8-way PIO output. It uses the highly
 /// optimized transpose8x1_MSB() function from bitswap.h (Hacker's Delight algorithm).
 ///
-/// **Input:** 8 strips, each with `num_leds * 3` bytes (RGB)
-/// **Output:** `num_leds * 24` bytes (8 bytes per bit position × 24 bits per LED)
+/// **Input:** 8 strips, each with `num_leds * bytes_per_led` bytes
+/// **Output:** `num_leds * bytes_per_led * 8` bytes (8 bytes per bit position × 8 bits per byte)
 ///
-/// **Memory Layout (per LED):**
-/// - Bytes 0-7:   Red channel (MSB to LSB), 1 bit from each of 8 strips per byte
-/// - Bytes 8-15:  Green channel (MSB to LSB)
-/// - Bytes 16-23: Blue channel (MSB to LSB)
+/// **Memory Layout (per byte in LED):**
+/// - Bytes 0-7:   First byte (MSB to LSB), 1 bit from each of 8 strips per byte
+/// - Bytes 8-15:  Second byte (MSB to LSB)
+/// - Bytes 16-23: Third byte (MSB to LSB)
+/// - etc.
 ///
-/// @param input Array of 8 pointers to LED strip data (each strip is num_leds * 3 bytes)
-/// @param output Pointer to output buffer (must be at least num_leds * 24 bytes)
+/// @param input Array of 8 pointers to LED strip data (each strip is num_leds * bytes_per_led bytes)
+/// @param output Pointer to output buffer (must be at least num_leds * bytes_per_led * 8 bytes)
 /// @param num_leds Number of LEDs per strip (all strips padded to this length)
+/// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 ///
 /// @note All strips must be pre-padded to the same length (num_leds)
 /// @note Output buffer must be pre-allocated by caller
@@ -93,17 +95,18 @@ namespace fl {
 FASTLED_FORCE_INLINE void transpose_8strips(
     const u8* const input[8],
     u8* output,
-    u16 num_leds
+    u16 num_leds,
+    u8 bytes_per_led
 ) {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
         u8 temp_input[8];
 
-        // Process each color channel (R, G, B)
-        for (int color = 0; color < 3; color++) {
-            // Collect one byte from each strip for this color
+        // Process each byte in the LED
+        for (u8 byte_idx = 0; byte_idx < bytes_per_led; byte_idx++) {
+            // Collect one byte from each strip for this byte position
             for (int strip = 0; strip < 8; strip++) {
-                temp_input[strip] = input[strip][led * 3 + color];
+                temp_input[strip] = input[strip][led * bytes_per_led + byte_idx];
             }
 
             // Transpose 8 bytes → 8 bytes (1 bit from each strip per output byte)
@@ -122,8 +125,8 @@ FASTLED_FORCE_INLINE void transpose_8strips(
 /// to bit-parallel format suitable for 4-way PIO output. Each output byte contains
 /// 1 bit from each of the 4 strips in the lower 4 bits (upper 4 bits are zero).
 ///
-/// **Input:** 4 strips, each with `num_leds * 3` bytes (RGB)
-/// **Output:** `num_leds * 24` bytes (8 bytes per bit position × 24 bits per LED)
+/// **Input:** 4 strips, each with `num_leds * bytes_per_led` bytes
+/// **Output:** `num_leds * bytes_per_led * 8` bytes (8 bytes per bit position × 8 bits per byte)
 ///
 /// **Memory Layout (per bit position):**
 /// - Bit 0: Strip 0 bit value
@@ -132,9 +135,10 @@ FASTLED_FORCE_INLINE void transpose_8strips(
 /// - Bit 3: Strip 3 bit value
 /// - Bits 4-7: Zero (unused by PIO, but present for alignment)
 ///
-/// @param input Array of 4 pointers to LED strip data (each strip is num_leds * 3 bytes)
-/// @param output Pointer to output buffer (must be at least num_leds * 24 bytes)
+/// @param input Array of 4 pointers to LED strip data (each strip is num_leds * bytes_per_led bytes)
+/// @param output Pointer to output buffer (must be at least num_leds * bytes_per_led * 8 bytes)
 /// @param num_leds Number of LEDs per strip (all strips padded to this length)
+/// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 ///
 /// @note All strips must be pre-padded to the same length (num_leds)
 /// @note Output buffer must be pre-allocated by caller
@@ -142,16 +146,17 @@ FASTLED_FORCE_INLINE void transpose_8strips(
 FASTLED_FORCE_INLINE void transpose_4strips(
     const u8* const input[4],
     u8* output,
-    u16 num_leds
+    u16 num_leds,
+    u8 bytes_per_led
 ) {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
-        // Process each color channel (R, G, B)
-        for (int color = 0; color < 3; color++) {
-            // Collect one byte from each strip for this color
+        // Process each byte in the LED
+        for (u8 byte_idx = 0; byte_idx < bytes_per_led; byte_idx++) {
+            // Collect one byte from each strip for this byte position
             u8 strip_bytes[4];
             for (int strip = 0; strip < 4; strip++) {
-                strip_bytes[strip] = input[strip][led * 3 + color];
+                strip_bytes[strip] = input[strip][led * bytes_per_led + byte_idx];
             }
 
             // Transpose: extract each bit position from all 4 strips
@@ -174,17 +179,18 @@ FASTLED_FORCE_INLINE void transpose_4strips(
 /// to bit-parallel format suitable for 2-way PIO output. Each output byte contains
 /// 1 bit from each of the 2 strips in the lower 2 bits (upper 6 bits are zero).
 ///
-/// **Input:** 2 strips, each with `num_leds * 3` bytes (RGB)
-/// **Output:** `num_leds * 24` bytes (8 bytes per bit position × 24 bits per LED)
+/// **Input:** 2 strips, each with `num_leds * bytes_per_led` bytes
+/// **Output:** `num_leds * bytes_per_led * 8` bytes (8 bytes per bit position × 8 bits per byte)
 ///
 /// **Memory Layout (per bit position):**
 /// - Bit 0: Strip 0 bit value
 /// - Bit 1: Strip 1 bit value
 /// - Bits 2-7: Zero (unused by PIO, but present for alignment)
 ///
-/// @param input Array of 2 pointers to LED strip data (each strip is num_leds * 3 bytes)
-/// @param output Pointer to output buffer (must be at least num_leds * 24 bytes)
+/// @param input Array of 2 pointers to LED strip data (each strip is num_leds * bytes_per_led bytes)
+/// @param output Pointer to output buffer (must be at least num_leds * bytes_per_led * 8 bytes)
 /// @param num_leds Number of LEDs per strip (all strips padded to this length)
+/// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 ///
 /// @note All strips must be pre-padded to the same length (num_leds)
 /// @note Output buffer must be pre-allocated by caller
@@ -192,16 +198,17 @@ FASTLED_FORCE_INLINE void transpose_4strips(
 FASTLED_FORCE_INLINE void transpose_2strips(
     const u8* const input[2],
     u8* output,
-    u16 num_leds
+    u16 num_leds,
+    u8 bytes_per_led
 ) {
     // Process each LED
     for (u16 led = 0; led < num_leds; led++) {
-        // Process each color channel (R, G, B)
-        for (int color = 0; color < 3; color++) {
-            // Collect one byte from each strip for this color
+        // Process each byte in the LED
+        for (u8 byte_idx = 0; byte_idx < bytes_per_led; byte_idx++) {
+            // Collect one byte from each strip for this byte position
             u8 strip_bytes[2];
-            strip_bytes[0] = input[0][led * 3 + color];
-            strip_bytes[1] = input[1][led * 3 + color];
+            strip_bytes[0] = input[0][led * bytes_per_led + byte_idx];
+            strip_bytes[1] = input[1][led * bytes_per_led + byte_idx];
 
             // Transpose: extract each bit position from both strips
             // Output MSB-first (bit 7 first, then 6, 5, ..., 0)
@@ -217,18 +224,19 @@ FASTLED_FORCE_INLINE void transpose_2strips(
 
 /// @brief Calculate output buffer size needed for transposed data
 ///
-/// All strip counts (2, 4, 8) use the same output format: 24 bytes per LED.
-/// This is because each LED has 24 bits (8 bits × 3 colors), and each bit
-/// position requires 1 output byte.
+/// All strip counts (2, 4, 8) use the same output format: bytes_per_led * 8 bytes per LED.
+/// This is because each LED has bytes_per_led bytes (e.g., 3 for RGB, 4 for RGBW), each with
+/// 8 bits, and each bit position requires 1 output byte.
 ///
 /// @param num_leds Maximum number of LEDs across all strips
+/// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 /// @return Required output buffer size in bytes
 ///
 /// @note For 8 strips: all 8 bits of each byte are used
 /// @note For 4 strips: lower 4 bits used, upper 4 bits zero
 /// @note For 2 strips: lower 2 bits used, upper 6 bits zero
-FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds) {
-    return num_leds * 24;  // 24 bytes per LED (3 colors × 8 bits each)
+FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds, u8 bytes_per_led) {
+    return num_leds * bytes_per_led * 8;
 }
 
 /// @brief Helper to transpose N strips with automatic dispatch
@@ -240,22 +248,24 @@ FASTLED_FORCE_INLINE u32 calculate_transpose_buffer_size(u16 num_leds) {
 /// @param input Array of pointers to LED strip data
 /// @param output Pointer to output buffer
 /// @param num_leds Number of LEDs per strip
+/// @param bytes_per_led Number of bytes per LED (3 for RGB, 4 for RGBW, etc.)
 /// @return true if successful, false if invalid strip count
 inline bool transpose_strips(
     u8 num_strips,
     const u8* const* input,
     u8* output,
-    u16 num_leds
+    u16 num_leds,
+    u8 bytes_per_led
 ) {
     switch (num_strips) {
         case 8:
-            transpose_8strips(input, output, num_leds);
+            transpose_8strips(input, output, num_leds, bytes_per_led);
             return true;
         case 4:
-            transpose_4strips(input, output, num_leds);
+            transpose_4strips(input, output, num_leds, bytes_per_led);
             return true;
         case 2:
-            transpose_2strips(input, output, num_leds);
+            transpose_2strips(input, output, num_leds, bytes_per_led);
             return true;
         default:
             return false;  // Invalid strip count

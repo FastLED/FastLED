@@ -286,12 +286,33 @@ class RP2040ParallelGroup {
             return;
         }
 
+        // Check if any strip in this parallel group is RGBW
+        // If any strip is RGBW, we treat the entire group as RGBW (pad RGB strips with W=0)
+        bool any_rgbw = false;
+        for (fl::u8 i = 0; i < group->num_pins; i++) {
+            fl::u8 pin = group->base_pin + i;
+            // Search for this pin in the draw list
+            for (auto it = mRectDrawBuffer.mDrawList.begin();
+                 it != mRectDrawBuffer.mDrawList.end(); ++it) {
+                if (it->mPin == pin && it->mIsRgbw) {
+                    any_rgbw = true;
+                    break;
+                }
+            }
+            if (any_rgbw) break;
+        }
+
+        // Calculate bytes per pixel based on whether any strip is RGBW
+        const int bytes_per_pixel = any_rgbw ? 4 : 3;
+
         // Get LED data for each pin in the group
         fl::u32 max_bytes = mRectDrawBuffer.getMaxBytesInStrip();
-        fl::u32 max_leds = max_bytes / 3;  // Assume RGB (not RGBW for now)
+        fl::u32 max_leds = max_bytes / bytes_per_pixel;
 
         // Allocate transpose buffer if needed
-        fl::u32 needed_buffer_size = max_leds * 24;  // 24 bytes per LED (8 bits * 3 colors)
+        // RGB: 24 bytes per LED (8 bits * 3 colors)
+        // RGBW: 32 bytes per LED (8 bits * 4 channels)
+        fl::u32 needed_buffer_size = max_leds * (bytes_per_pixel * 8);
         if (group->buffer_size < needed_buffer_size) {
             group->transpose_buffer.reset(new fl::u8[needed_buffer_size]);
             group->buffer_size = needed_buffer_size;
@@ -306,16 +327,17 @@ class RP2040ParallelGroup {
             strip_ptrs[i] = led_data.data();
         }
 
-        // Transpose based on group size
+        // Transpose based on group size and pixel format (RGB vs RGBW)
+        fl::u8 bytes_per_led = any_rgbw ? 4 : 3;
         switch (group->num_pins) {
             case 8:
-                fl::transpose_8strips(strip_ptrs, group->transpose_buffer.get(), max_leds);
+                fl::transpose_8strips(strip_ptrs, group->transpose_buffer.get(), max_leds, bytes_per_led);
                 break;
             case 4:
-                fl::transpose_4strips(strip_ptrs, group->transpose_buffer.get(), max_leds);
+                fl::transpose_4strips(strip_ptrs, group->transpose_buffer.get(), max_leds, bytes_per_led);
                 break;
             case 2:
-                fl::transpose_2strips(strip_ptrs, group->transpose_buffer.get(), max_leds);
+                fl::transpose_2strips(strip_ptrs, group->transpose_buffer.get(), max_leds, bytes_per_led);
                 break;
             default:
                 FL_WARN("Invalid parallel group size: " << (int)group->num_pins);
@@ -339,10 +361,10 @@ class RP2040ParallelGroup {
 
 
 
-void RP2040_PIO_Parallel::beginShowLeds(int data_pin, int nleds) {
+void RP2040_PIO_Parallel::beginShowLeds(int data_pin, int nleds, bool is_rgbw) {
     RP2040ParallelGroup& group = RP2040ParallelGroup::getInstance();
     group.onQueuingStart();
-    group.addObject(data_pin, nleds, false);
+    group.addObject(data_pin, nleds, is_rgbw);
 }
 
 void RP2040_PIO_Parallel::showPixels(u8 data_pin, PixelIterator& pixel_iterator) {

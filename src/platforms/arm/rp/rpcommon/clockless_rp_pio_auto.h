@@ -78,7 +78,7 @@ namespace fl {
 /// its pin number and delegates to the global group for actual output.
 class RP2040_PIO_Parallel {
   public:
-    void beginShowLeds(int data_pin, int nleds);
+    void beginShowLeds(int data_pin, int nleds, bool is_rgbw);
     void showPixels(u8 data_pin, PixelIterator& pixel_iterator);
     void endShowLeds();
 };
@@ -108,7 +108,7 @@ class ClocklessController_RP2040_PIO_WS2812Base
     /// @brief Begin show cycle - queue this strip
     virtual void* beginShowLeds(int nleds) override {
         void* data = Base::beginShowLeds(nleds);
-        mRP2040_PIO.beginShowLeds(mPin, nleds);
+        mRP2040_PIO.beginShowLeds(mPin, nleds, this->getRgbw().active());
         return data;
     }
 
