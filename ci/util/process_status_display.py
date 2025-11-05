@@ -84,8 +84,15 @@ class ProcessStatusDisplay(ABC):
                     if running_count > 0:
                         # Show a brief status update
                         spinner_char = ["|", "/", "-", "\\\\"][spinner_index % 4]
+                        # Get names of running processes
+                        running_names = [
+                            p.name for p in group_status.processes if p.is_alive
+                        ]
+                        running_list = (
+                            ", ".join(running_names) if running_names else "none"
+                        )
                         print(
-                            f"{spinner_char} Progress: {completed_count}/{group_status.total_processes} completed, {running_count} running..."
+                            f"{spinner_char} Progress: {completed_count}/{group_status.total_processes} completed, {running_count} running: {running_list}"
                         )
                         last_status_time = current_time
 
