@@ -51,7 +51,7 @@
     #define __USE_M0_C_VERSION__ 0
 #elif defined(FASTLED_ARM_M0_PLUS) || defined(__ARM_ARCH_7M__) || defined(__ARM_ARCH_7EM__)
     // Cortex-M0+, M3, M4, M7: C++ version can leverage faster hardware
-    #define __USE_M0_C_VERSION__ 1
+    #define __USE_M0_C_VERSION__ 0  // not enabled yet though.
 #else
     // Unknown platform: default to C++ version (more portable)
     #define __USE_M0_C_VERSION__ 1
@@ -65,19 +65,9 @@
     // Using C++ implementation
     #include "m0clockless_c.h"
 
-    #pragma message("FastLED M0 Clockless: Using C++ implementation (m0clockless_c.h)")
-    #pragma message("  - Compiler-optimized with forced O3")
-    #pragma message("  - Portable across ARM Cortex platforms")
-    #pragma message("  - Best for M4/M7/M33 and faster CPUs")
-
 #else
     // Using assembly implementation
     #include "m0clockless_asm.h"
-
-    #pragma message("FastLED M0 Clockless: Using Assembly implementation (m0clockless_asm.h)")
-    #pragma message("  - Cycle-accurate hand-optimized code")
-    #pragma message("  - Optimized for M0/M0+ platforms")
-    #pragma message("  - Best for strict timing requirements")
 
 #endif
 
