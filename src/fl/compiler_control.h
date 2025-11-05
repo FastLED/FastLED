@@ -181,3 +181,13 @@
 // In C++11/14, we now use enum-based timing types instead of weak symbols
 // (see fl/chipsets/led_timing.h for enum-based TIMING_* definitions)
 #define FL_INLINE_CONSTEXPR inline constexpr
+
+// C++14 constexpr function support
+// C++11 constexpr functions cannot have local variables or multiple return statements.
+// These restrictions were relaxed in C++14. For C++11 compatibility, we use inline
+// functions instead of constexpr for complex functions.
+#if __cplusplus >= 201402L
+#define FL_CONSTEXPR14 constexpr
+#else
+#define FL_CONSTEXPR14 inline
+#endif

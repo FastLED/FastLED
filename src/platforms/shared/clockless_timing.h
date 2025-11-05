@@ -4,96 +4,15 @@
 /// This module provides compile-time and runtime calculation of optimal clock
 /// frequencies and bit patterns for WS28xx-style LED protocols. The algorithms
 /// are designed to minimize memory usage while maintaining timing accuracy.
-///
-/// Also includes chipset timing trait definitions for common LED chipsets.
 
 #pragma once
 
 #include "fl/stdint.h"
 #include "fl/math_macros.h"
-
-// C++11 constexpr functions cannot have local variables or multiple return statements.
-// These restrictions were relaxed in C++14. Since we target C++11 for AVR compatibility,
-// we disable constexpr for these complex functions.
-#if __cplusplus >= 201402L
-#define FL_CONSTEXPR14 constexpr
-#else
-#define FL_CONSTEXPR14 inline
-#endif
+#include "fl/clockless/timing_conversion.h"
+#include "fl/compiler_control.h"
 
 namespace fl {
-
-// ============================================================================
-// Chipset Timing Traits
-// ============================================================================
-
-/// @brief Timing trait for WS2812/WS2812B RGB LEDs
-/// T1=350ns (bit 0 high), T2=700ns (bit 1 additional high), T3=600ns (low tail)
-/// Total bit period: 1650ns, Reset time: >280µs
-struct WS2812ChipsetTiming {
-        enum : uint32_t {
-        T1 = 350,    // ns
-            T2 = 700,    // ns
-            T3 = 600,    // ns
-            RESET = 280  // µs
-    };
-    static constexpr const char* name() { return "WS2812"; }
-};
-
-/// @brief Timing trait for WS2816 high-density RGB LEDs
-/// T1=300ns, T2=700ns, T3=550ns
-/// Total bit period: 1550ns, Reset time: >280µs
-struct WS2816ChipsetTiming {
-    static constexpr uint32_t T1() { return 300; }  // ns
-    static constexpr uint32_t T2() { return 700; }  // ns
-    static constexpr uint32_t T3() { return 550; }  // ns
-    static constexpr uint32_t RESET() { return 280; }  // µs
-    static constexpr const char* name() { return "WS2816"; }
-};
-
-/// @brief Timing trait for WS2811 slow variant LEDs
-/// T1=500ns, T2=2000ns, T3=2000ns
-/// Total bit period: 4500ns (slower protocol), Reset time: >50µs
-struct WS2811ChipsetTiming {
-    static constexpr uint32_t T1() { return 500; }   // ns
-    static constexpr uint32_t T2() { return 2000; }  // ns
-    static constexpr uint32_t T3() { return 2000; }  // ns
-    static constexpr uint32_t RESET() { return 50; }  // µs
-    static constexpr const char* name() { return "WS2811"; }
-};
-
-/// @brief Timing trait for WS2813 LEDs (same as WS2812)
-/// T1=350ns, T2=700ns, T3=600ns
-/// Total bit period: 1650ns, Reset time: >300µs
-struct WS2813ChipsetTiming {
-    static constexpr uint32_t T1() { return 350; }  // ns
-    static constexpr uint32_t T2() { return 700; }  // ns
-    static constexpr uint32_t T3() { return 600; }  // ns
-    static constexpr uint32_t RESET() { return 300; }  // µs
-    static constexpr const char* name() { return "WS2813"; }
-};
-
-/// @brief Timing trait for SK6812 RGBW LEDs
-/// T1=300ns, T2=600ns, T3=300ns
-/// Total bit period: 1200ns (faster protocol), Reset time: >80µs
-struct SK6812ChipsetTiming {
-    static constexpr uint32_t T1() { return 300; }  // ns
-    static constexpr uint32_t T2() { return 600; }  // ns
-    static constexpr uint32_t T3() { return 300; }  // ns
-    static constexpr uint32_t RESET() { return 80; }  // µs
-    static constexpr const char* name() { return "SK6812"; }
-};
-
-/// @brief Timing trait for TM1814 RGBW LEDs
-/// T1=360ns, T2=600ns, T3=340ns
-/// Total bit period: 1300ns, Reset time: >300µs
-struct TM1814ChipsetTiming {
-    static constexpr uint32_t T1() { return 360; }  // ns
-    static constexpr uint32_t T2() { return 600; }  // ns
-    static constexpr uint32_t T3() { return 340; }  // ns
-    static constexpr uint32_t RESET() { return 300; }  // µs
-    static constexpr const char* name() { return "TM1814"; }
-};
 
 // ============================================================================
 // Timing Calculation

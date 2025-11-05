@@ -372,32 +372,23 @@ FL_DISABLE_WARNING(subobject-linkage)
 // This is no longer used by the core API but kept for backward compatibility
 #define FL_NANOSECONDS_TO_CLOCK_CYCLES(_NS) (((_NS * ((CLOCKLESS_FREQUENCY / 1000000L)) + 999)) / 1000)
 
-// At T=0        : the line is raised hi to start a bit
-// At T=T1       : the line is dropped low to transmit a zero bit
-// At T=T1+T2    : the line is dropped low to transmit a one bit
-// At T=T1+T2+T3 : the cycle is concluded (next bit can be sent)
+
 //
-// Python script to calculate the values for T1, T2, and T3 for FastLED:
-// Note: there is a discussion on whether this python script is correct or not:
-//  https://github.com/FastLED/FastLED/issues/1806
+// Given datasheet timing values T0H, T0L, T1H, T1L (in nanoseconds):
 //
-//  print("Enter the values of T0H, T0L, T1H, T1L, in nanoseconds: ")
-//  T0H = int(input("  T0H: "))
-//  T0L = int(input("  T0L: "))
-//  T1H = int(input("  T1H: "))
-//  T1L = int(input("  T1L: "))
-//  
-//  duration = max(T0H + T0L, T1H + T1L)
-//  
-//  print("The max duration of the signal is: ", duration)
-//  
-//  T1 = T0H
-//  T2 = T1H
-//  T3 = duration - T0H - T0L
-//  
-//  print("T1: ", T1)
-//  print("T2: ", T2)
-//  print("T3: ", T3)
+//  duration = max(T0H + T0L, T1H + T1L)  # Maximum cycle time
+//  T1 = T0H                               # High time for '0' bit
+//  T2 = T1H - T0H                         # Additional time for '1' bit
+//  T3 = duration - T1H                    # Tail time after '1' bit
+//
+// Example (WS2812B with T0H=400, T0L=850, T1H=850, T1L=400):
+//  duration = 1250, T1 = 400, T2 = 450, T3 = 400
+//
+// For interactive conversion or validation, use: uv run ci/tools/led_timing_conversions.py
+// For automated testing of all chipsets: uv run ci/test_led_timing_conversion.py
+// For C++ check out
+//   * converter: src/fl/clockless/timing_conversion.h
+//   * tests: tests/fl/clockless/timing_conversion.cpp
 
 
 /// GE8822 controller @ 800 kHz - references centralized timing from fl::TIMING_GE8822_800KHZ
