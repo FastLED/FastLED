@@ -37,12 +37,11 @@ PLATFORM_TEST_PATTERNS: List[str] = [
     "stub_led",
 ]
 
-# Category definitions for unity build mode
-# Tests are grouped into these categories to reduce compilation overhead
-UNITY_BUILD_CATEGORIES: List[str] = [
-    "fl_tests",       # fl/ directory tests (stdlib-like utilities)
-    "fx_tests",       # fx/ directory tests (effects framework)
-    "noise_tests",    # noise/ directory tests
-    "platform_tests", # Platform-specific tests (SPI, ISR, ESP32, etc.)
-    "core_tests",     # Core FastLED and general tests
-]
+# Maximum tests per category before subdividing
+# Large categories (like fl_tests with 100 tests) will be split into
+# multiple buckets to achieve ~50 tests per compilation unit
+MAX_TESTS_PER_CATEGORY: int = 50
+
+# Number of buckets for large categories
+# For example, fl_tests (100 tests) splits into fl_tests_1-2 (~50 each)
+LARGE_CATEGORY_BUCKET_COUNT: int = 2

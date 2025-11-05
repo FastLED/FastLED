@@ -8,7 +8,7 @@ This module provides utilities for:
 """
 
 from typing import Dict, List
-from test_config import PLATFORM_TEST_PATTERNS
+from test_config import PLATFORM_TEST_PATTERNS, LARGE_CATEGORY_BUCKET_COUNT
 
 
 def extract_test_name(test_file_path: str) -> str:
@@ -49,12 +49,14 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
     - platform_tests: Tests containing platform-specific keywords
     - core_tests: All other tests
 
+    Large categories (> 40 tests) will be subdivided by organize_tests.py.
+
     Args:
         test_name: Name of the test (from extract_test_name)
         test_file_path: Relative path to test file (POSIX format)
 
     Returns:
-        Category name for this test
+        Base category name for this test
     """
     # Check prefix and file path based categories first
     if test_name.startswith("fl_"):
@@ -71,6 +73,24 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
 
     # Default to core tests
     return "core_tests"
+
+
+def subdivide_category(test_name: str, base_category: str) -> str:
+    """
+    Subdivide a test into a numbered bucket within its category.
+
+    Used for large categories that need to be split into multiple
+    compilation units (e.g., fl_tests -> fl_tests_1, fl_tests_2, etc.).
+
+    Args:
+        test_name: Name of the test
+        base_category: Base category name (e.g., "fl_tests")
+
+    Returns:
+        Subdivided category name (e.g., "fl_tests_1")
+    """
+    bucket_index = hash(test_name) % LARGE_CATEGORY_BUCKET_COUNT
+    return f"{base_category}_{bucket_index + 1}"
 
 
 def organize_tests_by_category(test_file_paths: List[str]) -> Dict[str, List[str]]:
