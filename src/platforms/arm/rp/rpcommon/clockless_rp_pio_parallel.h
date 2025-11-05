@@ -251,19 +251,19 @@ private:
             case 8:
                 transpose_8strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_
+                    transpose_buffer_, max_leds_, 3
                 );
                 break;
             case 4:
                 transpose_4strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_
+                    transpose_buffer_, max_leds_, 3
                 );
                 break;
             case 2:
                 transpose_2strips(
                     reinterpret_cast<const u8* const*>(strip_ptrs),
-                    transpose_buffer_, max_leds_
+                    transpose_buffer_, max_leds_, 3
                 );
                 break;
         }
