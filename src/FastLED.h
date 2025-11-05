@@ -252,6 +252,16 @@ class WS2852 : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class WS2812B : public WS2812Controller800Khz<DATA_PIN, RGB_ORDER> {};
 
+/// @brief WS2812B-Mini-V3 controller class.
+/// @copydetails WS2812BMiniV3Controller
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class WS2812BMiniV3 : public WS2812BMiniV3Controller<DATA_PIN, RGB_ORDER> {};
+
+/// @brief WS2812B-V5 controller class (uses same timing as Mini-V3).
+/// @copydetails WS2812BV5Controller
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class WS2812BV5 : public WS2812BV5Controller<DATA_PIN, RGB_ORDER> {};
+
 /// @brief GS1903 controller class.
 /// @copydetails WS2812Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>

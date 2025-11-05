@@ -92,6 +92,8 @@ struct TimingHelper;
 
 // Forward declarations for chipset classes (actual definitions in chipsets.h)
 template <int, EOrder> class WS2812Controller800Khz;
+template <int, EOrder> class WS2812BMiniV3Controller;
+template <int, EOrder> class WS2812BV5Controller;
 template <int, EOrder> class SK6812Controller;
 template <int, EOrder> class WS2811Controller400Khz;
 template <int, EOrder> class WS2813Controller;
@@ -100,6 +102,8 @@ template <int, EOrder> class WS2815Controller;
 /// TimingHelper specializations - map chipset classes to timing structs. TimingHelper
 /// ignores RGB_ORDER.
 template <> struct TimingHelper<WS2812Controller800Khz> { using VALUE = TIMING_WS2812_800KHZ; };
+template <> struct TimingHelper<WS2812BMiniV3Controller> { using VALUE = TIMING_WS2812B_MINI_V3; };
+template <> struct TimingHelper<WS2812BV5Controller> { using VALUE = TIMING_WS2812B_V5; };
 template <> struct TimingHelper<SK6812Controller> { using VALUE = TIMING_SK6812; };
 template <> struct TimingHelper<WS2811Controller400Khz> { using VALUE = TIMING_WS2811_400KHZ; };
 template <> struct TimingHelper<WS2813Controller> { using VALUE = TIMING_WS2813; };
@@ -130,6 +134,8 @@ struct ChipsetTraits {
 template <> struct ChipsetTraits<Chipset::GE8822> : ChipsetTraits<TIMING_GE8822_800KHZ> {};
 template <> struct ChipsetTraits<Chipset::WS2812> : ChipsetTraits<TIMING_WS2812_800KHZ> {};
 template <> struct ChipsetTraits<Chipset::WS2812_LEGACY> : ChipsetTraits<TIMING_WS2812_800KHZ_LEGACY> {};
+template <> struct ChipsetTraits<Chipset::WS2812B_V5> : ChipsetTraits<TIMING_WS2812B_V5> {};
+template <> struct ChipsetTraits<Chipset::WS2812B_MINI_V3> : ChipsetTraits<TIMING_WS2812B_MINI_V3> {};
 template <> struct ChipsetTraits<Chipset::WS2813> : ChipsetTraits<TIMING_WS2813> {};
 template <> struct ChipsetTraits<Chipset::SK6812> : ChipsetTraits<TIMING_SK6812> {};
 template <> struct ChipsetTraits<Chipset::SK6822> : ChipsetTraits<TIMING_SK6822> {};

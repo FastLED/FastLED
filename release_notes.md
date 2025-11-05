@@ -3,6 +3,13 @@
 
 FastLED 3.10.5 (unreleased)
 ==============
+  * **NEW: WS2812B-V5 and WS2812B-Mini-V3 Chipset Support**: Added support for newer WS2812B variants with tighter timing specifications
+    * **WS2812B-V5**: Newer variant with 220/580ns timing (T0H: 220-380ns, T1H: 580-1000ns)
+    * **WS2812B-Mini-V3**: Compact 3535 package with identical timing to V5
+    * Both variants use tighter timing tolerances compared to original WS2812B (250/625ns)
+    * Usage: `FastLED.addLeds<WS2812BV5, DATA_PIN, GRB>(leds, NUM_LEDS);` or `FastLED.addLeds<WS2812BMiniV3, DATA_PIN, GRB>(leds, NUM_LEDS);`
+    * Supported across all platforms with clockless controller support
+    * See timing comparison table in [README.md](README.md#ws2812-variants-timing-specifications)
   * **NEW: Native RGBW Support Without Emulation**: The following platforms now support true RGBW LED strips (SK6812, etc.) with hardware-native 4-channel output:
     * **RP2040/RP2350 (Raspberry Pi Pico)**: Full RGBW support with parallel output driver
       * Supports mixed RGB/RGBW strips in same parallel group

@@ -450,6 +450,18 @@ template <int DATA_PIN, EOrder RGB_ORDER = GRB>
 class WS2812Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812_800KHZ, RGB_ORDER> {};
 #endif
 
+/// WS2812B-Mini-V3 controller @ 800 kHz - references centralized timing from fl::TIMING_WS2812B_MINI_V3
+/// @note Timing: 220ns, 360ns, 580ns (tighter timing specifications)
+/// @see fl::TIMING_WS2812B_MINI_V3 in fl::chipsets::led_timing.h (220, 360, 580 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2812BMiniV3Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812B_MINI_V3, RGB_ORDER> {};
+
+/// WS2812B-V5 controller @ 800 kHz - uses identical timing to Mini-V3
+/// @note Timing: 220ns, 360ns, 580ns (V5 and Mini-V3 share the same timing)
+/// @see fl::TIMING_WS2812B_V5 in fl::chipsets::led_timing.h (alias to TIMING_WS2812B_MINI_V3)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+class WS2812BV5Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_WS2812B_V5, RGB_ORDER> {};
+
 /// WS2811 controller @ 400 kHz - references centralized timing from fl::TIMING_WS2811_400KHZ
 /// @see fl::TIMING_WS2811_400KHZ in chipsets::led_timing.h (800, 800, 900 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>

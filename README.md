@@ -728,7 +728,7 @@ FastLED supports virtually every LED chipset available:
 
 | **Clockless (3-wire)** | **SPI-based (4-wire)** | **Specialty** |
 |------------------------|------------------------|---------------|
-| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812-V5B, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
+| **WS281x Family**: WS2811, WS2812 (NeoPixel), WS2812B-V5, WS2812B-Mini-V3, WS2813, WS2815 | **APA102 / DotStars**: Including HD107s (40MHz turbo) | **SmartMatrix Panels** |
 | **TM180x Series**: TM1809/4, TM1803 | **High-Speed SPI**: LPD8806, WS2801, SM16716 | **DMX Output** |
 | **Other 3-wire**: UCS1903, GW6205, SM16824E | **APA102HD**: Driver-level gamma correction | **P9813 Total Control** |
 | | **HD108/NS108**: 16-bit high-definition with gamma | |
@@ -736,6 +736,22 @@ FastLED supports virtually every LED chipset available:
 **RGBW Support**: WS2816 and other white-channel LED strips • **Overclocking**: WS2812 up to 70% speed boost
 
 More details: [Chipset Reference Wiki](https://github.com/FastLED/FastLED/wiki/Chipset-reference)
+
+#### WS2812 Variants Timing Specifications
+
+| **Variant** | **T0H (ns)** | **T1H (ns)** | **Total (ns)** | **FastLED Class** | **Notes** |
+|-------------|--------------|--------------|----------------|-------------------|-----------|
+| WS2812 (standard) | 250 | 875 | 1250 | `WS2812` | Original timing, most widely compatible |
+| WS2812B-V5 | 220 | 580 | 1160 | `WS2812BV5` | Newer variant with tighter timing tolerances |
+| WS2812B-Mini-V3 | 220 | 580 | 1160 | `WS2812BMiniV3` | Compact 3535 package, same timing as V5 |
+| WS2813 | 320 | 640 | 1280 | `WS2813` | Backup data line for improved reliability |
+
+Usage example:
+```cpp
+// For WS2812B-V5 or WS2812B-Mini-V3 strips
+FastLED.addLeds<WS2812BV5, DATA_PIN, GRB>(leds, NUM_LEDS);
+FastLED.addLeds<WS2812BMiniV3, DATA_PIN, GRB>(leds, NUM_LEDS);
+```
 
 ### APA102 High Definition Mode
 ```cpp

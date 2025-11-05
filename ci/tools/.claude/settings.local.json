@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//c/Users/niteris/dev/fastled9/src/**)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

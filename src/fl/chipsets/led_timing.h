@@ -128,6 +128,25 @@ struct TIMING_WS2812_800KHZ {
 /// Convenience alias for WS2812 timing (commonly used name)
 using WS2812ChipsetTiming = TIMING_WS2812_800KHZ;
 
+/// WS2812B-Mini-V3 / WS2812B-V5 RGB controller @ 800 kHz
+/// Timing: 220ns, 360ns, 580ns (total 1160ns, ~862 kHz)
+/// These newer variants share identical timing specifications with tighter tolerances
+/// @note WS2812B-V5 and WS2812B-Mini-V3 use the same protocol timing
+/// @note Based on official datasheets from World Semi
+/// @see https://www.peace-corp.co.jp/data/WS2812B-Mini-V3_V3.0_EN.pdf (Mini-V3)
+/// @see https://www.laskakit.cz/user/related_files/ws2812b.pdf (V5)
+struct TIMING_WS2812B_MINI_V3 {
+    enum : uint32_t {
+        T1 = 220,
+        T2 = 360,
+        T3 = 580,
+        RESET = 280
+    };
+};
+
+/// Convenience alias - WS2812B-V5 uses identical timing to Mini-V3
+using TIMING_WS2812B_V5 = TIMING_WS2812B_MINI_V3;
+
 /// WS2812 RGB controller @ 800 kHz legacy variant
 /// Timing: 320ns, 320ns, 640ns
 struct TIMING_WS2812_800KHZ_LEGACY {

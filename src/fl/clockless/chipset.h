@@ -34,6 +34,8 @@ namespace Chipset {
     struct GE8822 {};             ///< GE8822 @ 800kHz - RGB controller
     struct WS2812 {};             ///< WS2812/WS2812B @ 800kHz - most common addressable RGB LED
     struct WS2812_LEGACY {};      ///< WS2812 @ 800kHz - legacy timing variant
+    struct WS2812B_V5 {};         ///< WS2812B-V5 @ 800kHz - newer variant with tighter timing (220/580ns)
+    struct WS2812B_MINI_V3 {};    ///< WS2812B-Mini-V3 @ 800kHz - newer variant (same timing as V5)
     struct WS2813 {};             ///< WS2813 @ 800kHz - similar to WS2812 with backup data line
     struct SK6812 {};             ///< SK6812 @ 800kHz - supports RGBW
     struct SK6822 {};             ///< SK6822 @ 800kHz - RGB controller
