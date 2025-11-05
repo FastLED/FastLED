@@ -741,9 +741,11 @@ template <> struct max_size<> {
 };
 
 template <typename T, typename... Rest> struct max_size<T, Rest...> {
-    static constexpr fl::size value = (sizeof(T) > max_size<Rest...>::value)
-                                        ? sizeof(T)
-                                        : max_size<Rest...>::value;
+    enum : fl::size {
+        value = (sizeof(T) > max_size<Rest...>::value)
+                    ? sizeof(T)
+                    : max_size<Rest...>::value
+    };
 };
 
 // Helper to get maximum alignment of types
@@ -754,9 +756,11 @@ template <> struct max_align<> {
 };
 
 template <typename T, typename... Rest> struct max_align<T, Rest...> {
-    static constexpr fl::size value = (alignof(T) > max_align<Rest...>::value)
-                                        ? alignof(T)
-                                        : max_align<Rest...>::value;
+    enum : fl::size {
+        value = (alignof(T) > max_align<Rest...>::value)
+                    ? alignof(T)
+                    : max_align<Rest...>::value
+    };
 };
 
 // alignment_of trait
