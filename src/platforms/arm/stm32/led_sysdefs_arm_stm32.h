@@ -68,7 +68,9 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #define FASTLED_NO_PINMAP
 
 #if defined(STM32F2XX)
+#ifndef F_CPU
 #define F_CPU 120000000
+#endif
 #elif defined(STM32F1)
 // F_CPU is already defined on stm32duino, but it's not constant.
 #undef F_CPU
@@ -78,7 +80,9 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 #undef F_CPU
 #define F_CPU 100000000
 #else
+#ifndef F_CPU
 #define F_CPU 72000000
+#endif
 #endif
 
 #if defined(STM32F2XX)
