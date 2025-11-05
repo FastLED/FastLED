@@ -9,5 +9,6 @@
 #include "platforms/arm/teensy/teensy31_32/smartmatrix_t3.h"
 #include "clockless_arm_mxrt1062.h"
 #include "block_clockless_arm_mxrt1062.h"
+#include "clockless_objectfled.h"
 
 #endif

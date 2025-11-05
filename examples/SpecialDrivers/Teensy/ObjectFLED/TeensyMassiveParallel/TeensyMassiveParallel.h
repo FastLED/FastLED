@@ -1,90 +1,130 @@
-/// BasicTest example to demonstrate massive parallel output with FastLED using
-/// ObjectFLED for Teensy 4.0/4.1.
+/// Massive parallel output example using BulkClockless<OFLED> for Teensy 4.0/4.1.
 ///
-/// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
+/// This example demonstrates the new BulkClockless API with OFLED (ObjectFLED) peripheral,
+/// supporting up to 42 parallel strips on Teensy 4.1 or 16 strips on Teensy 4.0.
 ///
-/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
-/// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
-/// each at 60fps, is 23k pixels.
+/// Key Features:
+/// - DMA-driven multi-strip LED control (minimal CPU overhead)
+/// - Per-strip color correction and temperature
+/// - Automatic chipset timing (WS2812, SK6812, WS2811, etc.)
+/// - Up to 23,000 pixels at 60fps (42 strips × 550 LEDs each)
 ///
-/// @author Kurt Funderburg
+/// @author Kurt Funderburg (original ObjectFLED)
 /// @reddit: reddit.com/u/Tiny_Structure_7
-/// The FastLED code was written by Zach Vorhies
+/// FastLED integration by Zach Vorhies
 
 #if !defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
 #include "platforms/sketch_fake.hpp"
 #else
 
-// As if FastLED 3.9.12, this is no longer needed for Teensy 4.0/4.1.
-#define FASTLED_USES_OBJECTFLED
-
-// Optional define to override the latch delay (microseconds)
-// #define FASTLED_OBJECTFLED_LATCH_DELAY 75
 #include "FastLED.h"
 #include "fl/warn.h"
 
 using namespace fl;
 
-#define PIN_FIRST 3
-#define PIN_SECOND 1
-#define IS_RGBW false
+// Hardware configuration
+#define PIN_STRIP1 3
+#define PIN_STRIP2 1
+#define PIN_STRIP3 4
 
-#define NUM_LEDS1 (22 * 22)
-#define NUM_LEDS2 1
-CRGB leds1[NUM_LEDS1];
-CRGB leds2[NUM_LEDS2];
+// All strips must have the same length in a single BulkClockless instance
+#define NUM_LEDS 100
+CRGB strip1[NUM_LEDS];
+CRGB strip2[NUM_LEDS];
+CRGB strip3[NUM_LEDS];
 
 void wait_for_serial(uint32_t timeout = 3000) {
-    uint32_t end_timeout = millis();
-    while (!Serial && end_timeout > millis()) {}
+    uint32_t start = millis();
+    while (!Serial && (millis() - start) < timeout) {}
 }
 
 void print_startup_info() {
-    Serial.println("Start");
-    Serial.print("*********************************************\n");
-    Serial.print("* TeensyParallel.ino                        *\n");
-    Serial.print("*********************************************\n");
+    Serial.println("\n*********************************************");
+    Serial.println("* TeensyMassiveParallel - BulkClockless     *");
+    Serial.println("*********************************************");
     FL_DBG("CPU speed: " << (F_CPU_ACTUAL / 1000000) << " MHz   Temp: " << tempmonGetTemp()
-           << " C  " << (tempmonGetTemp() * 9.0 / 5.0 + 32) << " F   Serial baud: "
-           << (800000 * 1.6 / 1000000.0) << " MHz");
+           << " C  " << (tempmonGetTemp() * 9.0 / 5.0 + 32) << " F");
+    Serial.print("Number of strips: 3\n");
+    Serial.print("LEDs per strip: ");
+    Serial.println(NUM_LEDS);
+    Serial.print("Total LEDs: ");
+    Serial.println(NUM_LEDS * 3);
 }
 
 void setup() {
     Serial.begin(115200);
     wait_for_serial(3000);
-    CLEDController& c1 = FastLED.addLeds<WS2812, PIN_FIRST, GRB>(leds1, NUM_LEDS1);
-    CLEDController& c2 = FastLED.addLeds<WS2812, PIN_SECOND, GRB>(leds2, NUM_LEDS2);
-    if (IS_RGBW) {
-        c1.setRgbw();
-        c2.setRgbw();
-    }
+
+    // Add LED strips using the new BulkClockless API
+    // All strips in a single instance must have the same length
+    auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
+        {PIN_STRIP1, strip1, NUM_LEDS, ScreenMap()},
+        {PIN_STRIP2, strip2, NUM_LEDS, ScreenMap()},
+        {PIN_STRIP3, strip3, NUM_LEDS, ScreenMap()}
+    });
+
+    // Optional: Set per-strip color correction
+    bulk.get(PIN_STRIP1)->setCorrection(TypicalLEDStrip);
+    bulk.get(PIN_STRIP2)->setCorrection(TypicalSMD5050);
+    bulk.get(PIN_STRIP3)->setCorrection(UncorrectedColor);
+
     FastLED.setBrightness(8);
+    print_startup_info();
 }
 
-void fill(CRGB color) {
-    for (int i = 0; i < NUM_LEDS1; i++) {
-        leds1[i] = color;
-    }
-    for (int i = 0; i < NUM_LEDS2; i++) {
-        leds2[i] = color;
+void fill_all(CRGB color) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip1[i] = color;
+        strip2[i] = color;
+        strip3[i] = color;
     }
 }
 
-void blink(CRGB color, int times, int delay_ms = 250) {
+void fill_strip(CRGB* strip, CRGB color) {
+    for (int i = 0; i < NUM_LEDS; i++) {
+        strip[i] = color;
+    }
+}
+
+void blink_all(CRGB color, int times, int delay_ms = 250) {
     for (int i = 0; i < times; ++i) {
-        fill(color);
+        fill_all(color);
         FastLED.show();
         delay(delay_ms);
-        fill(CRGB::Black);
+        fill_all(CRGB::Black);
         FastLED.show();
         delay(delay_ms);
     }
+}
+
+void chase_pattern() {
+    // Chase different colors across the three strips
+    fill_strip(strip1, CRGB::Red);
+    fill_strip(strip2, CRGB::Black);
+    fill_strip(strip3, CRGB::Black);
+    FastLED.show();
+    delay(300);
+
+    fill_strip(strip1, CRGB::Black);
+    fill_strip(strip2, CRGB::Green);
+    fill_strip(strip3, CRGB::Black);
+    FastLED.show();
+    delay(300);
+
+    fill_strip(strip1, CRGB::Black);
+    fill_strip(strip2, CRGB::Black);
+    fill_strip(strip3, CRGB::Blue);
+    FastLED.show();
+    delay(300);
 }
 
 void loop() {
-    blink(CRGB::Red, 1);
-    blink(CRGB::Green, 2);
-    blink(CRGB::Blue, 3);
+    // Blink all strips simultaneously
+    blink_all(CRGB::White, 1, 200);
+
+    // Chase pattern across strips
+    chase_pattern();
+
     delay(500);
 }
 

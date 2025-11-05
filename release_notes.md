@@ -1,4 +1,7 @@
-FastLED 3.10.5
+
+
+
+FastLED 3.10.5 (unreleased)
 ==============
   * **NEW: HD108/NS108 16-bit SPI Chipset Support**: High-definition LED chipset with built-in gamma correction
     * 16-bit color depth (65,536 levels per channel) vs APA102's 8-bit (256 levels)
@@ -18,8 +21,42 @@ FastLED 3.10.5
     * See detailed protocol documentation in [src/chipsets.h:1040-1183](src/chipsets.h)
     * Unit tests: Comprehensive test suite in [tests/chipsets/test_hd108.cpp](tests/chipsets/test_hd108.cpp)
     * Related: GitHub Issue #1045, Pull Request #2119 (thanks to @arfoll for initial implementation)
+  * **MAJOR UPGRADE: ObjectFLED → BulkClockless OFLED API (Teensy 4.x)**: Unified multi-strip LED API with generic chipset support
+    * **New unified API**: `FastLED.addBulkLeds<WS2812B, OFLED>()` using same chipset names as traditional `addLeds()`
+    * **Generic chipset support**: Not limited to WS2812! Now supports SK6812, WS2811, WS2813, WS2815, and any clockless chipset
+    * **TimingHelper trait system**: Automatically extracts timing from existing chipset classes (WS2812B, SK6812, etc.)
+    * **✅ Mixed-length strips now supported!**: Different strip lengths work in a single instance
+      * Shorter strips automatically padded with black during DMA transposition
+      * **Memory optimization: Eliminates intermediate frame buffer** - saves ~50% memory!
+      * Old approach: RectangularDrawBuffer → ObjectFLED.frameBufferLocal (2 buffers)
+      * New approach: Write directly to ObjectFLED.frameBufferLocal with padding (1 buffer)
+      * Memory-efficient: Only max(strip lengths) × num_strips buffer needed
+      * **Backported to classic ObjectFLED driver** - both APIs benefit from this optimization!
+    * **Per-strip settings**: Independent color correction, temperature, dither, RGBW per strip
+    * **Up to 42 parallel strips** (Teensy 4.1) or 16 strips (Teensy 4.0)
+    * **RGBW support**: SK6812 RGBW with automatic white channel extraction
+    * **Dynamic add/remove**: Change strip configuration at runtime
+    * **Example usage**:
+      ```cpp
+      CRGB strip1[100];  // Short strip
+      CRGB strip2[300];  // Long strip
+      CRGB strip3[150];  // Medium strip
 
-FastLED 3.10.4
+      auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
+          {2, strip1, 100, ScreenMap()},
+          {5, strip2, 300, ScreenMap()},
+          {9, strip3, 150, ScreenMap()}
+      });
+
+      bulk.get(2)->setCorrection(TypicalLEDStrip);
+      bulk.get(5)->setCorrection(TypicalSMD5050);
+      ```
+    * **Migration from old API**: Replace `FASTLED_USES_OBJECTFLED` with `BulkClockless<CHIPSET, OFLED>` API
+    * Built on ObjectFLED by Kurt Funderburg, inspired by OctoWS2811 architecture
+    * See: [src/platforms/arm/teensy/teensy4_common/bulk_objectfled.h](src/platforms/arm/teensy/teensy4_common/bulk_objectfled.h)
+    * Example: [examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/](examples/SpecialDrivers/Teensy/ObjectFLED/TeensyMassiveParallel/)
+
+FastLED 3.10.4 (unreleased)
 ==============
   * **NEW: Audio System v2.0**: Real-time audio analysis for music-reactive LED effects
     * 20 components (3 core + 17 detectors): Beat, Tempo, Frequency Bands, Energy, Transient, Note, Downbeat, Dynamics, Pitch, Silence, Vocal, Percussion, Chord, Key, Mood, Buildup, Drop

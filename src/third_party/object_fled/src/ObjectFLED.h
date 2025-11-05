@@ -40,6 +40,9 @@
 #define ObjectFLED_h
 #include <WProgram.h>
 #include "DMAChannel.h"
+#include "ObjectFLEDDmaManager.h"
+
+#include "fl/stdint.h"
 
 //Experimentally found DSE=3, SPEED=0 gave best LED overclocking
 //boot defaults DSE=6, SPEED=2.
@@ -110,10 +113,10 @@ public:
 	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t config, uint8_t numPins, const uint8_t* pinList, \
 				uint8_t serpentine = 0);
 
-	~ObjectFLED() { 
+	~ObjectFLED() {
 		// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
-		while (micros() - update_begin_micros < numbytes * 8 * TH_TL / OC_FACTOR / 1000 + 5);
-		delete frameBuffer; 
+		while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / OC_FACTOR / 1000 + 5);
+		delete frameBufferLocal;
 	}
 
 	//begin() - Use defalut LED timing: 1.0 OC Factor, 1250 nS CLK (=800 KHz), 300 nS T0H, 750 nS T1H, 300 uS LED Latch Delay.
@@ -131,9 +134,7 @@ public:
 
 	void show(void);
 	void waitForDmaToFinish() {
-		while (!dma3.complete()) {  // wait for dma to complete before reset/re-use
-			delayMicroseconds(10);
-		}
+		ObjectFLEDDmaManager::getInstance().waitForCompletion();
 	}
 	
 	int busy(void);
@@ -152,16 +153,6 @@ private:
 	static void isr(void);
 
 	void genFrameBuffer(uint32_t);
-
-	static uint8_t* frameBuffer;					//isr()
-	static uint32_t numbytes;						//isr()
-	static uint8_t numpins;							//isr()
-	static uint8_t pin_bitnum[NUM_DIGITAL_PINS];	//isr()
-	static uint8_t pin_offset[NUM_DIGITAL_PINS];	//isr()
-	DMAMEM static uint32_t bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));	//isr()
-	DMAMEM static uint32_t bitmask[4] __attribute__((used, aligned(32)));
-	static DMAChannel dma1, dma2, dma3;
-	static DMASetting dma2next;
 
 	uint32_t update_begin_micros = 0;
 	uint8_t brightness = 255;

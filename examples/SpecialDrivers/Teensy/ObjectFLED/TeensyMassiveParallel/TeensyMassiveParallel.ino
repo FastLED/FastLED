@@ -1,15 +1,17 @@
-/// BasicTest example to demonstrate massive parallel output with FastLED using
-/// ObjectFLED for Teensy 4.0/4.1.
+/// Massive parallel output example using BulkClockless<OFLED> for Teensy 4.0/4.1.
 ///
-/// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
+/// This example demonstrates the new BulkClockless API with OFLED (ObjectFLED) peripheral,
+/// supporting up to 42 parallel strips on Teensy 4.1 or 16 strips on Teensy 4.0.
 ///
-/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
-/// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
-/// each at 60fps, is 23k pixels.
+/// Key Features:
+/// - DMA-driven multi-strip LED control (minimal CPU overhead)
+/// - Per-strip color correction and temperature
+/// - Automatic chipset timing (WS2812, SK6812, WS2811, etc.)
+/// - Up to 23,000 pixels at 60fps (42 strips × 550 LEDs each)
 ///
-/// @author Kurt Funderburg
+/// @author Kurt Funderburg (original ObjectFLED)
 /// @reddit: reddit.com/u/Tiny_Structure_7
-/// The FastLED code was written by Zach Vorhies
+/// FastLED integration by Zach Vorhies
 
 // @filter: (platform is teensy) and (target is Teensy40 or Teensy41)
 

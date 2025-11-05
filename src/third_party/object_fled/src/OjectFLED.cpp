@@ -61,6 +61,7 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 // Do nothing for other platforms.
 #else
 #include "ObjectFLED.h"
+#include "ObjectFLEDDmaManager.h"
 
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -72,19 +73,6 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 
 namespace fl {
 
-volatile uint32_t framebuffer_index = 0;		//isr()
-uint8_t* ObjectFLED::frameBuffer;				//isr()
-uint32_t ObjectFLED::numbytes;					//isr()
-uint8_t ObjectFLED::numpins;					//isr()
-uint8_t ObjectFLED::pin_bitnum[NUM_DIGITAL_PINS];	//isr()
-uint8_t ObjectFLED::pin_offset[NUM_DIGITAL_PINS];	//isr()
-uint32_t ObjectFLED::bitdata[BYTES_PER_DMA * 64] __attribute__((used, aligned(32)));	//isr()
-uint32_t ObjectFLED::bitmask[4] __attribute__((used, aligned(32)));
-
-DMASetting ObjectFLED::dma2next;
-DMAChannel ObjectFLED::dma1;
-DMAChannel ObjectFLED::dma2;
-DMAChannel ObjectFLED::dma3;
 volatile bool dma_first;
 
 
@@ -94,21 +82,17 @@ ObjectFLED::ObjectFLED(uint16_t numLEDs, void *drawBuf, uint8_t config, uint8_t 
 	drawBuffer = drawBuf;
 	params = config;
 	if (numPins > NUM_DIGITAL_PINS) numPins = NUM_DIGITAL_PINS;
-	numpins = numPins;			//static/isr
-	stripLen = numLEDs / numpins;
-	memcpy(pinlist, pinList, numpins);
+	numpinsLocal = numPins;
+	stripLen = numLEDs / numpinsLocal;
+	memcpy(pinlist, pinList, numpinsLocal);
 	if ((params & 0x3F) < 6) {
-		frameBuffer = new uint8_t[numLEDs * 3];		//static/isr
-		numbytes = stripLen * 3; // RGB formats	//static/isr
+		frameBufferLocal = new uint8_t[numLEDs * 3];
+		numbytesLocal = stripLen * 3; // RGB formats
 	}
 	else {
-		frameBuffer = new uint8_t[numLEDs * 4];		//static/isr
-		numbytes = stripLen * 4; // RGBW formats	//static/isr
+		frameBufferLocal = new uint8_t[numLEDs * 4];
+		numbytesLocal = stripLen * 4; // RGBW formats
 	}
-
-	numpinsLocal = numPins;
-	frameBufferLocal = frameBuffer;
-	numbytesLocal = numbytes;
 }	// ObjectFLED constructor
 
 
@@ -144,34 +128,33 @@ void ObjectFLED::begin(uint16_t period, uint16_t t0h, uint16_t t1h, uint16_t lat
 // GPIOR bits set for pins[i] -> bitmask, pin_bitnum[i], pin_offset[i]
 // init timers, xbar to DMA, DMA bitdata -> GPIOR; clears frameBuffer (total LEDs * 3 bytes)
 void ObjectFLED::begin(void) {
-	numpins = numpinsLocal;		//needed to compute pin mask/offset & bitmask since static for isr
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+
 	// Set each pin's bitmask bit, store offset & bit# for pin
-	memset(bitmask, 0, sizeof(bitmask));
-	for (uint32_t i=0; i < numpins; i++) {
+	uint32_t tempBitmask[4] = {0};
+	for (uint32_t i=0; i < numpinsLocal; i++) {
 		uint8_t pin = pinlist[i];
 		if (pin >= NUM_DIGITAL_PINS) continue;	// ignore illegal pins
 		uint8_t bit = digitalPinToBit(pin);		// pin's bit index in word port DR
 		// which GPIO R controls this pin: 0-3 map to GPIO6-9 then map to DMA compat GPIO1-4
 		uint8_t offset = ((uint32_t)portOutputRegister(pin) - (uint32_t)&GPIO6_DR) >> 14;
 		if (offset > 3) continue;	//ignore unknown pins
-		pin_bitnum[i] = bit;		//static/isr
-		pin_offset[i] = offset;		//static/isr
+		pin_bitnumLocal[i] = bit;		//local copy for context switch
+		pin_offsetLocal[i] = offset;	//local copy for context switch
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
-		bitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
+		tempBitmask[offset] |= mask;	//bitmask32[0..3] = collective pin bit masks for each GPIO DR
 		//bit7:6 SPEED; bit 5:3 DSE; bit0 SRE  (default SPEED = 0b10; def. DSE = 0b110)
 		*portControlRegister(pin) &= ~0xF9;		//clear SPEED, DSE, SRE
 		*portControlRegister(pin) |= ((OUTPUT_PAD_SPEED & 0x3) << 6) | \
 			((OUTPUT_PAD_DSE & 0x7) << 3);	//DSE = 0b011 for LED overclock
-		//clear pin bit in IOMUX_GPR26 to map GPIO6-9 to GPIO1-4 for DMA 
-		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;		
+		//clear pin bit in IOMUX_GPR26 to map GPIO6-9 to GPIO1-4 for DMA
+		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;
 		*standard_gpio_addr(portModeRegister(pin)) |= mask;		//GDIR? bit flag set output mode
 	}
 	//stash context for multi-show
-	memcpy(bitmaskLocal, bitmask, 16);
-	memcpy(pin_bitnumLocal, pin_bitnum, numpins);
-	memcpy(pin_offsetLocal, pin_offset, numpins);
+	memcpy(bitmaskLocal, tempBitmask, 16);
 
-	arm_dcache_flush_delete(bitmask, sizeof(bitmask));			//can't DMA from cached memory
+	arm_dcache_flush_delete(bitmaskLocal, sizeof(bitmaskLocal));			//can't DMA from cached memory
 
 	// Set up 3 timers to create waveform timing events
 	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)TH_TL / OC_FACTOR );
@@ -208,58 +191,58 @@ void ObjectFLED::begin(void) {
 	XBARA1_CTRL1 = XBARA_CTRL_STS0 | XBARA_CTRL_EDGE0(3) | XBARA_CTRL_DEN0;
 
 	// configure DMA channels
-	dma1.begin();
-	dma1.TCD->SADDR = bitmask;							// source 4*32b GPIO pin mask
-	dma1.TCD->SOFF = 8;									// bytes offset added to SADDR after each transfer
+	dma.dma1.begin();
+	dma.dma1.TCD->SADDR = dma.bitmask;					// source 4*32b GPIO pin mask
+	dma.dma1.TCD->SOFF = 8;								// bytes offset added to SADDR after each transfer
 	// SMOD(4) low bits of SADDR to update with adds of SOFF
 	// SSIZE(3) code for 64 bit transfer size  DSIZE(2) code for 32 bit transfer size
-	dma1.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_SMOD(4) | DMA_TCD_ATTR_DSIZE(2);
-	dma1.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |	// Dest minor loop offsetting enable
+	dma.dma1.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_SMOD(4) | DMA_TCD_ATTR_DSIZE(2);
+	dma.dma1.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |	// Dest minor loop offsetting enable
 		DMA_TCD_NBYTES_MLOFFYES_MLOFF(-65536) |
 		DMA_TCD_NBYTES_MLOFFYES_NBYTES(16);				// #bytes to tansfer, offsetting enabled
-	dma1.TCD->SLAST = 0;								// add to SADDR after xfer
-	dma1.TCD->DADDR = &GPIO1_DR_SET;
-	dma1.TCD->DOFF = 16384;								//&GPIO1_DR_SET + DOFF = next &GPIO2_DR_SET
-	dma1.TCD->CITER_ELINKNO = numbytes * 8;				// CITER outer loop count (linking disabled) = # LED bits to write
-	dma1.TCD->DLASTSGA = -65536;						// add to DADDR after xfer
-	dma1.TCD->BITER_ELINKNO = numbytes * 8;				// Beginning CITER (not decremented by transfer)
-	dma1.TCD->CSR = DMA_TCD_CSR_DREQ;					// channel ERQ field cleared when minor loop completed
-	dma1.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_0);	// only 4 XBAR1 triggers (DMA MUX mapping)
+	dma.dma1.TCD->SLAST = 0;							// add to SADDR after xfer
+	dma.dma1.TCD->DADDR = &GPIO1_DR_SET;
+	dma.dma1.TCD->DOFF = 16384;							//&GPIO1_DR_SET + DOFF = next &GPIO2_DR_SET
+	dma.dma1.TCD->CITER_ELINKNO = numbytesLocal * 8;	// CITER outer loop count (linking disabled) = # LED bits to write
+	dma.dma1.TCD->DLASTSGA = -65536;					// add to DADDR after xfer
+	dma.dma1.TCD->BITER_ELINKNO = numbytesLocal * 8;	// Beginning CITER (not decremented by transfer)
+	dma.dma1.TCD->CSR = DMA_TCD_CSR_DREQ;				// channel ERQ field cleared when minor loop completed
+	dma.dma1.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_0);	// only 4 XBAR1 triggers (DMA MUX mapping)
 
-	dma2next.TCD->SADDR = bitdata;						//uint32_t bitdata[BYTES_PER_DMA*64]
-	dma2next.TCD->SOFF = 8;
-	dma2next.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_DSIZE(2);
-	dma2next.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |
+	dma.dma2next.TCD->SADDR = dma.bitdata;				//uint32_t bitdata[BYTES_PER_DMA*64]
+	dma.dma2next.TCD->SOFF = 8;
+	dma.dma2next.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_DSIZE(2);
+	dma.dma2next.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |
 		DMA_TCD_NBYTES_MLOFFYES_MLOFF(-65536) |
 		DMA_TCD_NBYTES_MLOFFYES_NBYTES(16);
-	dma2next.TCD->SLAST = 0;
-	dma2next.TCD->DADDR = &GPIO1_DR_CLEAR;
-	dma2next.TCD->DOFF = 16384;
-	dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
-	dma2next.TCD->DLASTSGA = (int32_t)(dma2next.TCD);
-	dma2next.TCD->BITER_ELINKNO = BYTES_PER_DMA * 8;
-	dma2next.TCD->CSR = 0;
+	dma.dma2next.TCD->SLAST = 0;
+	dma.dma2next.TCD->DADDR = &GPIO1_DR_CLEAR;
+	dma.dma2next.TCD->DOFF = 16384;
+	dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
+	dma.dma2next.TCD->DLASTSGA = (int32_t)(dma.dma2next.TCD);
+	dma.dma2next.TCD->BITER_ELINKNO = BYTES_PER_DMA * 8;
+	dma.dma2next.TCD->CSR = 0;
 
-	dma2.begin();
-	dma2 = dma2next; // copies TCD
-	dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
-	dma2.attachInterrupt(isr);
+	dma.dma2.begin();
+	dma.dma2 = dma.dma2next; // copies TCD
+	dma.dma2.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_1);
+	dma.dma2.attachInterrupt(isr);
 
-	dma3.begin();
-	dma3.TCD->SADDR = bitmask;
-	dma3.TCD->SOFF = 8;
-	dma3.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_SMOD(4) | DMA_TCD_ATTR_DSIZE(2);
-	dma3.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |
+	dma.dma3.begin();
+	dma.dma3.TCD->SADDR = dma.bitmask;
+	dma.dma3.TCD->SOFF = 8;
+	dma.dma3.TCD->ATTR = DMA_TCD_ATTR_SSIZE(3) | DMA_TCD_ATTR_SMOD(4) | DMA_TCD_ATTR_DSIZE(2);
+	dma.dma3.TCD->NBYTES_MLOFFYES = DMA_TCD_NBYTES_DMLOE |
 		DMA_TCD_NBYTES_MLOFFYES_MLOFF(-65536) |
 		DMA_TCD_NBYTES_MLOFFYES_NBYTES(16);
-	dma3.TCD->SLAST = 0;
-	dma3.TCD->DADDR = &GPIO1_DR_CLEAR;
-	dma3.TCD->DOFF = 16384;
-	dma3.TCD->CITER_ELINKNO = numbytes * 8;
-	dma3.TCD->DLASTSGA = -65536;
-	dma3.TCD->BITER_ELINKNO = numbytes * 8;
-	dma3.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
-	dma3.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_2);
+	dma.dma3.TCD->SLAST = 0;
+	dma.dma3.TCD->DADDR = &GPIO1_DR_CLEAR;
+	dma.dma3.TCD->DOFF = 16384;
+	dma.dma3.TCD->CITER_ELINKNO = numbytesLocal * 8;
+	dma.dma3.TCD->DLASTSGA = -65536;
+	dma.dma3.TCD->BITER_ELINKNO = numbytesLocal * 8;
+	dma.dma3.TCD->CSR = DMA_TCD_CSR_DREQ | DMA_TCD_CSR_DONE;
+	dma.dma3.triggerAtHardwareEvent(DMAMUX_SOURCE_XBAR1_2);
 }	// begin()
 
 
@@ -296,62 +279,62 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 	if (serp == 0) {	// use faster loops if no serp
 		switch (params & 0x3F) {
 		case CORDER_RGBW:		// R,G,B = R,G,B - MIN(R,G,B); W = MIN(R,G,B)
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 4) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 4) {
 				uint8_t minRGB = MIN(*((uint8_t*)drawBuffer + j) * rLevel / 65025, \
 					*((uint8_t*)drawBuffer + j + 1) * rLevel / 65025);
 				minRGB = MIN(minRGB, *((uint8_t*)drawBuffer + j + 2) * rLevel / 65025);
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025 - minRGB;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025 - minRGB;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025 - minRGB;
-				*(frameBuffer + i + 3) = minRGB;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 3) = minRGB;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_GBR:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_BGR:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_BRG:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_GRB:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_RGB:
 		default:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 		}	// switch()
 	} else {	//serpentine
 		switch (params & 0x3F) {
 		case CORDER_RGBW:		// R,G,B = R,G,B - MIN(R,G,B); W = MIN(R,G,B)
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 4) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 4) {
 				uint8_t minRGB = MIN(*((uint8_t*)drawBuffer + j) * rLevel / 65025, \
 					* ((uint8_t*)drawBuffer + j + 1) * rLevel / 65025);
 				minRGB = MIN(minRGB, *((uint8_t*)drawBuffer + j + 2) * rLevel / 65025);
@@ -359,71 +342,71 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 					if (jChange < 0) { j = i / 4 * 3; jChange = 3; }
 					else { j = (i / 4 + serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025 - minRGB;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025 - minRGB;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025 - minRGB;
-				*(frameBuffer + i + 3) = minRGB;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025 - minRGB;
+				*(frameBufferLocal + i + 3) = minRGB;
 				j += jChange;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_GBR:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
 				if (i % (serp * 3) == 0) {
 					if (jChange < 0) { j = i; jChange = 3; }
 					else { j = i + (serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_BGR:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
 				if (i % (serp * 3) == 0) {
 					if (jChange < 0) { j = i; jChange = 3; }
 					else { j = i + (serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += 3;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_BRG:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
 				if (i % (serp * 3) == 0) {
 					if (jChange < 0) { j = i; jChange = 3; }
 					else { j = i + (serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += jChange;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_GRB:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
 				if (i % (serp * 3) == 0) {
 					if (jChange < 0) { j = i; jChange = 3; }
 					else { j = i + (serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += jChange;
 			}	//for(leds in drawbuffer)
 			break;
 		case CORDER_RGB:
 		default:
-			for (uint16_t i = 0; i < (numbytes * numpins); i += 3) {
+			for (uint16_t i = 0; i < (numbytesLocal * numpinsLocal); i += 3) {
 				if (i % (serp * 3) == 0) {
 					if (jChange < 0) { j = i; jChange = 3; }
 					else { j = i + (serp - 1) * 3; jChange = -3; }
 				}
-				*(frameBuffer + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
-				*(frameBuffer + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
-				*(frameBuffer + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
+				*(frameBufferLocal + i) = *((uint8_t*)drawBuffer + j) * rLevel / 65025;
+				*(frameBufferLocal + i + 1) = *((uint8_t*)drawBuffer + j + 1) * gLevel / 65025;
+				*(frameBufferLocal + i + 2) = *((uint8_t*)drawBuffer + j + 2) * bLevel / 65025;
 				j += jChange;
 			}	//for(leds in drawbuffer)
 		}	// switch()
@@ -437,17 +420,20 @@ void ObjectFLED::genFrameBuffer(uint32_t serp) {
 // 4 word32s for each bit in (led data)/pin = 16 * 8 = 96 bitdata bytes for each LED byte: 288 bytes / LED
 // launches DMA with IRQ activation to reload bitdata from frameBuffer
 void ObjectFLED::show(void) {
-	waitForDmaToFinish();	//wait for prior DMA to finish
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+
+	// Acquire DMA (blocks if another instance transmitting)
+	dma.acquire(this);
 
 	//Restore context if needed
-	if (frameBuffer != frameBufferLocal) {		
-		numpins = numpinsLocal;
-		frameBuffer = frameBufferLocal;
-		numbytes = numbytesLocal;
-		memcpy(bitmask, bitmaskLocal, 16);
-		memcpy(pin_bitnum, pin_bitnumLocal, numpins);
-		memcpy(pin_offset, pin_offsetLocal, numpins);
-		arm_dcache_flush_delete(bitmask, sizeof(bitmask));			//can't DMA from cached memory
+	if (dma.frameBuffer != frameBufferLocal) {
+		dma.numpins = numpinsLocal;
+		dma.frameBuffer = frameBufferLocal;
+		dma.numbytes = numbytesLocal;
+		memcpy(dma.bitmask, bitmaskLocal, 16);
+		memcpy(dma.pin_bitnum, pin_bitnumLocal, numpinsLocal);
+		memcpy(dma.pin_offset, pin_offsetLocal, numpinsLocal);
+		arm_dcache_flush_delete(dma.bitmask, sizeof(dma.bitmask));	//can't DMA from cached memory
 		// Restore 3 timers to create waveform timing events
 		TMR4_COMP10 = comp1load[0];
 		TMR4_CMPLD10 = comp1load[0];
@@ -456,10 +442,10 @@ void ObjectFLED::show(void) {
 		TMR4_COMP12 = comp1load[2]; // T1H
 		TMR4_CMPLD12 = comp1load[2];
 		//restore DMA loop control
-		dma1.TCD->CITER_ELINKNO = numbytes * 8;		// CITER outer loop count (linking disabled) = # LED bits to write
-		dma1.TCD->BITER_ELINKNO = numbytes * 8;		// Beginning CITER (not decremented by transfer)
-		dma3.TCD->CITER_ELINKNO = numbytes * 8;
-		dma3.TCD->BITER_ELINKNO = numbytes * 8;
+		dma.dma1.TCD->CITER_ELINKNO = dma.numbytes * 8;		// CITER outer loop count (linking disabled) = # LED bits to write
+		dma.dma1.TCD->BITER_ELINKNO = dma.numbytes * 8;		// Beginning CITER (not decremented by transfer)
+		dma.dma3.TCD->CITER_ELINKNO = dma.numbytes * 8;
+		dma.dma3.TCD->BITER_ELINKNO = dma.numbytes * 8;
 	} //done restoring context
 
 	genFrameBuffer(serpNumber);
@@ -478,43 +464,43 @@ void ObjectFLED::show(void) {
 	XBARA1_CTRL1 |= XBARA_CTRL_STS0;
 
 	// fill the DMA transmit buffer
-	memset(bitdata, 0, sizeof(bitdata));			//BYTES_PER_DMA * 64 words32
-	uint32_t count = numbytes;						//bytes per strip
+	memset(dma.bitdata, 0, sizeof(dma.bitdata));	//BYTES_PER_DMA * 64 words32
+	uint32_t count = dma.numbytes;					//bytes per strip
 	if (count > BYTES_PER_DMA*2) count = BYTES_PER_DMA*2;
-	framebuffer_index = count;						//ptr to framebuffer last byte output
+	dma.framebuffer_index = count;					//ptr to framebuffer last byte output
 
 	//Sets each pin mask in bitdata32[BYTES_PER_DMA*64] for every 0 bit of pin's frameBuffer block bytes
-	for (uint32_t i=0; i < numpins; i++) {			//for each pin
-		fillbits(bitdata + pin_offset[i], (uint8_t *)frameBuffer + i*numbytes,
-			count, 1<<pin_bitnum[i]);
+	for (uint32_t i=0; i < dma.numpins; i++) {		//for each pin
+		fillbits(dma.bitdata + dma.pin_offset[i], (uint8_t *)dma.frameBuffer + i*dma.numbytes,
+			count, 1<<dma.pin_bitnum[i]);
 	}
-	arm_dcache_flush_delete(bitdata, count * 128);	// don't need bitdata in cache for DMA
+	arm_dcache_flush_delete(dma.bitdata, count * 128);	// don't need bitdata in cache for DMA
 
     // set up DMA transfers
-    if (numbytes <= BYTES_PER_DMA*2) {
-		dma2.TCD->SADDR = bitdata;
-		dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
-		dma2.TCD->CITER_ELINKNO = count * 8;
-		dma2.TCD->CSR = DMA_TCD_CSR_DREQ;
+    if (dma.numbytes <= BYTES_PER_DMA*2) {
+		dma.dma2.TCD->SADDR = dma.bitdata;
+		dma.dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
+		dma.dma2.TCD->CITER_ELINKNO = count * 8;
+		dma.dma2.TCD->CSR = DMA_TCD_CSR_DREQ;
     } else {
-		dma2.TCD->SADDR = bitdata;
-		dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
-		dma2.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
-		dma2.TCD->CSR = 0;
-		dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
-		dma2next.TCD->SADDR = bitdata + BYTES_PER_DMA*32;
-		dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
-		if (numbytes <= BYTES_PER_DMA*3) {
-			dma2next.TCD->CSR = DMA_TCD_CSR_ESG;
+		dma.dma2.TCD->SADDR = dma.bitdata;
+		dma.dma2.TCD->DADDR = &GPIO1_DR_CLEAR;
+		dma.dma2.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
+		dma.dma2.TCD->CSR = 0;
+		dma.dma2.TCD->CSR = DMA_TCD_CSR_INTMAJOR | DMA_TCD_CSR_ESG;
+		dma.dma2next.TCD->SADDR = dma.bitdata + BYTES_PER_DMA*32;
+		dma.dma2next.TCD->CITER_ELINKNO = BYTES_PER_DMA * 8;
+		if (dma.numbytes <= BYTES_PER_DMA*3) {
+			dma.dma2next.TCD->CSR = DMA_TCD_CSR_ESG;
 		} else {
-			dma2next.TCD->CSR = DMA_TCD_CSR_ESG | DMA_TCD_CSR_INTMAJOR;
+			dma.dma2next.TCD->CSR = DMA_TCD_CSR_ESG | DMA_TCD_CSR_INTMAJOR;
 		}
 		dma_first = true;
     }
-	dma3.clearComplete();
-	dma1.enable(); 
-	dma2.enable();
-	dma3.enable();
+	dma.dma3.clearComplete();
+	dma.dma1.enable();
+	dma.dma2.enable();
+	dma.dma3.enable();
 
 	// initialize timers
 	TMR4_CNTR0 = 0;
@@ -522,11 +508,14 @@ void ObjectFLED::show(void) {
 	TMR4_CNTR2 = comp1load[0] + 1;
 
 	// wait for last LED reset to finish
-	while (micros() - update_begin_micros < numbytes * 8 * TH_TL / OC_FACTOR / 1000 + LATCH_DELAY);
+	while (micros() - update_begin_micros < dma.numbytes * 8 * TH_TL / OC_FACTOR / 1000 + LATCH_DELAY);
 
 	// start everything running!
 	TMR4_ENBL = enable | 7;
 	update_begin_micros = micros();
+
+	// Release DMA (transmission continues asynchronously)
+	dma.release(this);
 }	// show()
 
 
@@ -535,48 +524,51 @@ void ObjectFLED::show(void) {
 //Checks for last block to transfer, next to last, or not to update dma2next major loop
 void ObjectFLED::isr(void)
 {
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+
 	// first ack the interrupt
-	dma2.clearInterrupt();
+	dma.dma2.clearInterrupt();
 
 	// fill (up to) half the transmit buffer with new fillbits(frameBuffer data)
 	//digitalWriteFast(12, HIGH);
 	uint32_t *dest;
 	if (dma_first) {
 		dma_first = false;
-		dest = bitdata;
+		dest = dma.bitdata;
 	} else {
 		dma_first = true;
-		dest = bitdata + BYTES_PER_DMA*32;
+		dest = dma.bitdata + BYTES_PER_DMA*32;
 	}
-	memset(dest, 0, sizeof(bitdata)/2);
-	uint32_t index = framebuffer_index;
-	uint32_t count = numbytes - framebuffer_index;
+	memset(dest, 0, sizeof(dma.bitdata)/2);
+	uint32_t index = dma.framebuffer_index;
+	uint32_t count = dma.numbytes - dma.framebuffer_index;
 	if (count > BYTES_PER_DMA) count = BYTES_PER_DMA;
-	framebuffer_index = index + count;
-	for (int i=0; i < numpins; i++) {
-		fillbits(dest + pin_offset[i], (uint8_t *)frameBuffer + index + i*numbytes,
-			count, 1<<pin_bitnum[i]);
+	dma.framebuffer_index = index + count;
+	for (int i=0; i < dma.numpins; i++) {
+		fillbits(dest + dma.pin_offset[i], (uint8_t *)dma.frameBuffer + index + i*dma.numbytes,
+			count, 1<<dma.pin_bitnum[i]);
 	}
 	arm_dcache_flush_delete(dest, count * 128);
 	//digitalWriteFast(12, LOW);
 
 	// queue it for the next DMA transfer
-	dma2next.TCD->SADDR = dest;
-	dma2next.TCD->CITER_ELINKNO = count * 8;
-	uint32_t remain = numbytes - (index + count);
+	dma.dma2next.TCD->SADDR = dest;
+	dma.dma2next.TCD->CITER_ELINKNO = count * 8;
+	uint32_t remain = dma.numbytes - (index + count);
 	if (remain == 0) {
-		dma2next.TCD->CSR = DMA_TCD_CSR_DREQ;
+		dma.dma2next.TCD->CSR = DMA_TCD_CSR_DREQ;
 	} else if (remain <= BYTES_PER_DMA) {
-		dma2next.TCD->CSR = DMA_TCD_CSR_ESG;
+		dma.dma2next.TCD->CSR = DMA_TCD_CSR_ESG;
 	} else {
-		dma2next.TCD->CSR = DMA_TCD_CSR_ESG | DMA_TCD_CSR_INTMAJOR;
+		dma.dma2next.TCD->CSR = DMA_TCD_CSR_ESG | DMA_TCD_CSR_INTMAJOR;
 	}
 }	// isr()
 
 
 int ObjectFLED::busy(void)
 {
-	if (micros() - update_begin_micros < numbytes * TH_TL / OC_FACTOR / 1000 * 8 + LATCH_DELAY) {
+	auto& dma = ObjectFLEDDmaManager::getInstance();
+	if (micros() - update_begin_micros < dma.numbytes * TH_TL / OC_FACTOR / 1000 * 8 + LATCH_DELAY) {
 		return 1;
 	}
 	return 0;
