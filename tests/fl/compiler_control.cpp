@@ -144,6 +144,7 @@ TEST_CASE("specific warning suppression macros") {
 
     SUBCASE("FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED") {
         FL_DISABLE_WARNING_PUSH
+        FL_DISABLE_WARNING_SELF_ASSIGN
         FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
         int x = 5;
         x = x;  // Self-assignment

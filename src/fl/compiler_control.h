@@ -27,6 +27,8 @@
 #if defined(__clang__)
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS \
     FL_DISABLE_WARNING(global-constructors)
+  #define FL_DISABLE_WARNING_SELF_ASSIGN \
+    FL_DISABLE_WARNING(self-assign)
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED \
     FL_DISABLE_WARNING(self-assign-overloaded)
   // Clang doesn't have format-truncation warning, use no-op
@@ -47,6 +49,8 @@
 #elif defined(__GNUC__) && (__GNUC__*100 + __GNUC_MINOR__) >= 406
   // GCC doesn't have global-constructors warning, use no-op
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+  // GCC doesn't have self-assign warning, use no-op
+  #define FL_DISABLE_WARNING_SELF_ASSIGN
   // GCC doesn't have self-assign-overloaded warning, use no-op
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
   // GCC has format-truncation warning
@@ -81,6 +85,7 @@
   #define FL_DISABLE_WARNING_SUBOBJECT_LINKAGE FL_DISABLE_WARNING(subobject-linkage)
 #else
   #define FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+  #define FL_DISABLE_WARNING_SELF_ASSIGN
   #define FL_DISABLE_WARNING_SELF_ASSIGN_OVERLOADED
   #define FL_DISABLE_FORMAT_TRUNCATION
   #define FL_DISABLE_WARNING_NULL_DEREFERENCE
