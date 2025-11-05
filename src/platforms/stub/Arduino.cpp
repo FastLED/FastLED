@@ -2,10 +2,10 @@
 #if defined(FASTLED_USE_STUB_ARDUINO) || defined(__EMSCRIPTEN__)
 // STUB platform implementation - excluded for WASM builds which provide their own Arduino.cpp
 
-#include "./Arduino.h"  // ok include
-
-// Stdlib headers - kept out of Arduino.h for faster compilation
+// Stdlib headers included first
 #include <random>
+
+#include "./Arduino.h"  // ok include
 
 #include "fl/stdio.h"
 

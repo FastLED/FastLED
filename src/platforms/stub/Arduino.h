@@ -16,6 +16,12 @@
 #include "time_stub.h"
 #include "fl/math_macros.h"
 #include "fl/math.h"
+
+// Math functions from fl:: namespace
+// On stub platform, standard library <cmath> provides math functions in global namespace
+// through included headers like <mutex>. No need to re-export fl:: math functions here.
+// Arduino sketches can use either the stdlib versions or explicitly use fl:: prefix.
+
 // Custom min/max to avoid <algorithm> include
 template <typename T>
 T min(T a, T b) {
