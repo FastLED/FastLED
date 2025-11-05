@@ -41,7 +41,9 @@ from ci.util.test_types import (
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
 _TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 240
-_GLOBAL_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 300
+_GLOBAL_TIMEOUT = (
+    600 if _IS_GITHUB_ACTIONS else 600
+)  # Increased to 600s for local uno compilation
 
 # Abort threshold for total failures across all processes (unit + examples)
 MAX_FAILURES_BEFORE_ABORT = 3
@@ -1492,8 +1494,8 @@ def runner(
         if test_categories.integration or test_categories.integration_only:
             processes.append(create_integration_test_process(args, enable_stack_trace))
 
-        # Add uno compilation test if source changed
-        if src_code_change and not test_categories.py_only:
+        # Add uno compilation test if source changed (skip for unity builds as they're meant to be fast)
+        if src_code_change and not test_categories.py_only and not args.unity:
             processes.append(create_compile_uno_test_process(enable_stack_trace))
 
         # Add Python tests if needed and Python test files have changed

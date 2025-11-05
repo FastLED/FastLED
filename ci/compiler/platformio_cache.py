@@ -11,6 +11,7 @@ providing functionality to:
 """
 
 import _thread
+import atexit
 import configparser
 import json
 import logging
@@ -280,6 +281,87 @@ logger = logging.getLogger(__name__)
 logging.getLogger("httpx").setLevel(logging.WARNING)
 
 
+def cleanup_stale_platformio_locks(max_age_minutes: float = 30) -> int:
+    """
+    ⚠️ CRITICAL: Clean up stale PlatformIO lock files that block builds.
+
+    PlatformIO creates .download.lock files but doesn't always clean them up
+    when processes crash or are killed. This causes future builds to hang
+    indefinitely waiting for locks that will never be released.
+
+    This function removes lock files older than max_age_minutes from:
+    1. PlatformIO's global cache directory (~/.platformio/global_cache)
+    2. FastLED's global cache directory (~/.fastled/global_cache)
+
+    Args:
+        max_age_minutes: Maximum age of locks to keep (default: 30 minutes)
+
+    Returns:
+        Number of stale locks removed
+    """
+    cache_dirs = [
+        Path.home() / ".platformio" / "global_cache",
+        Path.home() / ".fastled" / "global_cache",
+    ]
+
+    cleaned_count = 0
+    max_age_seconds = max_age_minutes * 60
+    current_time = time.time()
+
+    for cache_dir in cache_dirs:
+        if not cache_dir.exists():
+            continue
+
+        try:
+            # Find all .lock files recursively
+            for lock_file in cache_dir.rglob("*.lock"):
+                try:
+                    # Check file age
+                    age_seconds = current_time - lock_file.stat().st_mtime
+
+                    if age_seconds > max_age_seconds:
+                        lock_file.unlink()
+                        age_minutes = age_seconds / 60
+                        logger.info(
+                            f"Cleaned stale lock: {lock_file.name} "
+                            f"from {cache_dir.name} (age: {age_minutes:.1f} minutes)"
+                        )
+                        cleaned_count += 1
+
+                        # Also clean up associated .pid metadata files
+                        pid_file = lock_file.with_suffix(lock_file.suffix + ".pid")
+                        if pid_file.exists():
+                            pid_file.unlink()
+
+                except (OSError, PermissionError) as e:
+                    logger.debug(f"Could not remove lock {lock_file}: {e}")
+
+        except Exception as e:
+            logger.warning(f"Error during lock cleanup in {cache_dir}: {e}")
+
+    if cleaned_count > 0:
+        logger.info(f"🧹 Cleaned {cleaned_count} stale lock file(s)")
+
+    return cleaned_count
+
+
+# Register atexit handler to clean up stale locks on process exit
+# This ensures we clean up even if the process crashes or is interrupted
+_cleanup_registered = False
+
+
+def _register_cleanup_handler():
+    """Register atexit handler for lock cleanup (once per process)."""
+    global _cleanup_registered
+    if not _cleanup_registered:
+        atexit.register(lambda: cleanup_stale_platformio_locks(max_age_minutes=30))
+        _cleanup_registered = True
+
+
+# Register cleanup handler when module is imported
+_register_cleanup_handler()
+
+
 class PlatformIOCache:
     """Enhanced cache manager for PlatformIO artifacts."""
 
@@ -291,6 +373,10 @@ class PlatformIOCache:
 
         # Create directory structure
         self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Proactively clean up stale PlatformIO locks before starting builds
+        # This prevents hangs from previous crashed builds
+        cleanup_stale_platformio_locks(max_age_minutes=30)
 
     def _get_cache_key(self, url: str) -> str:
         """Generate cache key from URL - sanitized for filesystem use."""

@@ -18,6 +18,7 @@ import logging
 import os
 import platform
 import signal
+import time
 from datetime import datetime
 from pathlib import Path
 from typing import ContextManager, Optional
@@ -141,9 +142,28 @@ def is_lock_stale(lock_file_path: Path) -> bool:
 
     metadata = _read_lock_metadata(lock_file_path)
     if metadata is None:
-        # No metadata = can't determine, assume active (conservative)
-        logger.warning(f"Lock {lock_file_path} has no metadata, assuming active")
-        return False
+        # ⚠️ WARNING: Lock has no metadata (foreign lock or corrupted)
+        # Use age-based heuristic: locks older than 30 minutes are considered stale
+        # This prevents immortal locks from PlatformIO or other systems
+        try:
+            age_seconds = time.time() - lock_file_path.stat().st_mtime
+            age_minutes = age_seconds / 60
+
+            if age_seconds > 1800:  # 30 minutes
+                logger.warning(
+                    f"Lock {lock_file_path} has no metadata and is {age_minutes:.1f} minutes old, treating as STALE"
+                )
+                return True
+            else:
+                logger.warning(
+                    f"Lock {lock_file_path} has no metadata but is recent ({age_minutes:.1f} minutes old), assuming active"
+                )
+                return False
+        except OSError as e:
+            logger.warning(
+                f"Failed to stat lock file {lock_file_path}: {e}, assuming active"
+            )
+            return False
 
     pid = metadata.get("pid")
     if pid is None:

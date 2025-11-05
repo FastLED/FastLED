@@ -107,20 +107,20 @@ TEST_CASE("fl::strcpy") {
 
     SUBCASE("copy empty string") {
         fl::strcpy(buffer, "");
-        CHECK_EQ(strlen(buffer), 0);
+        CHECK_EQ(fl::strlen(buffer), 0);
     }
 
     SUBCASE("copy short string") {
         fl::strcpy(buffer, "hello");
         CHECK_EQ(fl::strcmp(buffer, "hello"), 0);
-        CHECK_EQ(strlen(buffer), 5);
+        CHECK_EQ(fl::strlen(buffer), 5);
     }
 
     SUBCASE("copy replaces previous content") {
         fl::strcpy(buffer, "first");
         fl::strcpy(buffer, "new");
         CHECK_EQ(fl::strcmp(buffer, "new"), 0);
-        CHECK_EQ(strlen(buffer), 3);
+        CHECK_EQ(fl::strlen(buffer), 3);
     }
 
     SUBCASE("return value is destination") {
@@ -176,7 +176,7 @@ TEST_CASE("fl::strcat") {
         fl::strcpy(buffer, "hello");
         fl::strcat(buffer, " world");
         CHECK_EQ(fl::strcmp(buffer, "hello world"), 0);
-        CHECK_EQ(strlen(buffer), 11);
+        CHECK_EQ(fl::strlen(buffer), 11);
     }
 
     SUBCASE("concatenate multiple times") {
@@ -705,7 +705,7 @@ TEST_CASE("fl::cstring integration tests") {
         fl::strcat(buffer, " ");
         fl::strcat(buffer, "World");
         CHECK_EQ(fl::strcmp(buffer, "Hello World"), 0);
-        CHECK_EQ(strlen(buffer), 11);
+        CHECK_EQ(fl::strlen(buffer), 11);
     }
 
     SUBCASE("manipulate string in place") {
@@ -740,7 +740,7 @@ TEST_CASE("fl::cstring integration tests") {
 TEST_CASE("fl::cstring type safety") {
     SUBCASE("functions work with fl::size_t") {
         const char* str = "hello";
-        size_t len = strlen(str);
+        size_t len = fl::strlen(str);
         CHECK_EQ(len, 5);
 
         char buffer[10];

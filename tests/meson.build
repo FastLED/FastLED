@@ -91,6 +91,9 @@ if unity_enabled
     endif
   endforeach
 
+  # Track all test executables for alias
+  all_test_executables = []
+
   # Build test executables for each category
   foreach category_name, test_sources : category_files
     if test_sources.length() > 0
@@ -98,8 +101,8 @@ if unity_enabled
       category_sources = [test_pch[0]] + test_sources
 
       # Build test executable
-      # NOTE: Explicitly disable Meson's unity builds for this target to avoid
-      # double unity builds (we're already combining all test files manually)
+      # Unity builds enabled: Meson will combine multiple .cpp files into unity
+      # compilation units, significantly speeding up compilation
       test_exe = executable(category_name,
         category_sources,
         include_directories: [src_dir, tests_dir, stub_dir],
@@ -109,16 +112,21 @@ if unity_enabled
         ],
         link_args: unit_test_link_args,
         link_with: [fastled_lib, doctest_main],
-        override_options: ['unity=off'],
         install: false
       )
 
       # Register test target
       test(category_name, test_exe, workdir: meson.project_source_root())
 
+      # Track for all_tests alias
+      all_test_executables += test_exe
+
       message('Unity test category: ' + category_name + ' (' + test_sources.length().to_string() + ' tests)')
     endif
   endforeach
+
+  # Create alias target that builds all test executables
+  alias_target('all_tests', all_test_executables)
 
   message('Unity test build enabled: tests organized into categories')
 
