@@ -12,7 +12,7 @@
  * KEY FEATURES:
  * - Uses hardware cycle counters (DWT on M3/M4/M7, SysTick on M0/M0+)
  * - Compile-time conversion of nanosecond timings to CPU cycles
- * - Forced O3 optimization for maximum performance
+ * - Timing-specific optimizations for cycle-accurate LED protocol
  * - Cycle-accurate delays using get_cycle_count() and delay_cycles()
  * - Easier to understand, maintain, and port than assembly
  *
@@ -73,14 +73,50 @@ struct M0ClocklessData {
 #endif
 
 /******************************************************************************
- * HELPER FUNCTIONS - C++ equivalents of assembly macros
+ * MEMORY BARRIER MACROS
  *
- * OPTIMIZATION: Force O3 optimization level for all helper functions
- * regardless of global compiler settings. This is critical for performance
- * on time-sensitive bit-banging operations.
+ * These ensure correct ordering of memory operations for MMIO (GPIO) access.
+ * Critical for deterministic timing on ARM Cortex-M processors.
  ******************************************************************************/
 
-FL_OPTIMIZATION_LEVEL_O3_BEGIN
+// Compiler barrier: prevent compiler from reordering memory operations
+#ifndef FL_COMPILER_BARRIER
+  #define FL_COMPILER_BARRIER() __asm__ volatile("" ::: "memory")
+#endif
+
+// Data Sync Barrier: ensure all memory writes complete before continuing
+// This is critical for GPIO operations to ensure writes hit the bus before timing
+#ifndef FL_DSB
+  #if defined(__ARMCC_VERSION)
+    #define FL_DSB() __dsb(0xF)
+  #elif defined(__GNUC__) || defined(__clang__)
+    #define FL_DSB() __builtin_arm_dsb(0xF)
+  #else
+    #define FL_DSB() do {} while(0)
+  #endif
+#endif
+
+/******************************************************************************
+ * CYCLE COUNTER CONFIGURATION
+ *
+ * On M0/M0+, we use SysTick as a cycle counter (M3/M4/M7 have DWT).
+ * This can be disabled if SysTick is needed for other purposes.
+ ******************************************************************************/
+
+// Allow disabling SysTick-based cycle counting if needed
+#ifndef FL_USE_SYSTICK_FOR_CYCLECOUNT
+  #define FL_USE_SYSTICK_FOR_CYCLECOUNT 1
+#endif
+
+/******************************************************************************
+ * HELPER FUNCTIONS - C++ equivalents of assembly macros
+ *
+ * OPTIMIZATION: Use timing-specific optimization settings that disable
+ * instruction scheduling and other transformations that affect cycle accuracy.
+ * Critical for deterministic timing in bit-banging operations.
+ ******************************************************************************/
+
+FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 /**
  * get_cycle_count - Read current CPU cycle count
@@ -95,7 +131,15 @@ FL_FORCE_INLINE uint32_t get_cycle_count() {
     return DWT_CYCCNT;
 #elif defined(__ARM_ARCH_6M__)
     // M0/M0+: No DWT, use SysTick (down-counter, invert for up-count)
-    return 0xFFFFFF - SysTick->VAL;
+    #if FL_USE_SYSTICK_FOR_CYCLECOUNT
+        // Check if SysTick is enabled (CTRL bit 0)
+        if ((SysTick->CTRL & 0x1) == 0) {
+            return 0;  // SysTick not enabled - cannot use as counter
+        }
+        return 0xFFFFFF - SysTick->VAL;
+    #else
+        return 0;  // SysTick use disabled - no counter available
+    #endif
 #else
     // Fallback
     return 0;
@@ -133,18 +177,26 @@ FL_FORCE_INLINE void delay_cycles(uint32_t cycles) {
 /**
  * gpio_set_high - Set GPIO pin HIGH
  * Equivalent to: qset2 with HI_OFFSET
+ *
+ * NOTE: Macro with FL_DSB() to ensure write completes before timing delays.
+ * Critical for accurate WS2812 protocol timing.
  */
-FL_FORCE_INLINE void gpio_set_high(volatile uint32_t* port, uint32_t bitmask, int hi_offset) {
-    port[hi_offset / 4] = bitmask;  // Divide by 4 because port is uint32_t*
-}
+#define gpio_set_high(port, bitmask, hi_offset) do { \
+    (port)[(hi_offset) / 4] = (bitmask); \
+    FL_DSB(); \
+} while(0)
 
 /**
  * gpio_set_low - Set GPIO pin LOW
  * Equivalent to: qset2 with LO_OFFSET
+ *
+ * NOTE: Macro with FL_DSB() to ensure write completes before timing delays.
+ * Critical for accurate WS2812 protocol timing.
  */
-FL_FORCE_INLINE void gpio_set_low(volatile uint32_t* port, uint32_t bitmask, int lo_offset) {
-    port[lo_offset / 4] = bitmask;  // Divide by 4 because port is uint32_t*
-}
+#define gpio_set_low(port, bitmask, lo_offset) do { \
+    (port)[(lo_offset) / 4] = (bitmask); \
+    FL_DSB(); \
+} while(0)
 
 /**
  * gpio_conditional_low - Check bit and conditionally set pin LOW
@@ -162,9 +214,12 @@ FL_FORCE_INLINE uint8_t gpio_conditional_low(uint8_t byte, volatile uint32_t* po
     uint8_t shifted_byte = (uint8_t)temp;  // Get shifted value
 
     // If bit 7 was 0 (bit 8 of temp is 0), set pin LOW
+    FL_COMPILER_BARRIER();
     if ((temp & 0x100) == 0) {
-        gpio_set_low(port, bitmask, lo_offset);
+        port[lo_offset / 4] = bitmask;  // Write directly to avoid double barrier
+        FL_DSB();
     }
+    FL_COMPILER_BARRIER();
     // Otherwise (bit 7 was 1), do nothing - pin stays HIGH
 
     return shifted_byte;  // Return shifted byte for next iteration
@@ -250,18 +305,17 @@ FL_FORCE_INLINE uint8_t prepare_byte_for_output(uint8_t byte) {
     return byte;
 }
 
-FL_OPTIMIZATION_LEVEL_O3_END
+FL_END_OPTIMIZE_FOR_EXACT_TIMING
 
 /******************************************************************************
  * MAIN LED OUTPUT FUNCTION - C++ VERSION
  *
- * OPTIMIZATION: Force O3 optimization for maximum performance regardless of
- * global compiler settings. On faster platforms (M4, M7, etc.) this can
- * achieve comparable or better performance than the original assembly code
- * written for M0/M0+ platforms.
+ * OPTIMIZATION: Use timing-specific optimization settings for cycle-accurate
+ * LED protocol timing. Disables instruction scheduling and aggressive
+ * optimizations that could interfere with precise timing requirements.
  ******************************************************************************/
 
-FL_OPTIMIZATION_LEVEL_O3_BEGIN
+FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING
 
 
 static constexpr uint32_t ns_to_cycles(uint32_t ns) {
@@ -272,6 +326,12 @@ template<int HI_OFFSET, int LO_OFFSET, typename TIMING, EOrder RGB_ORDER, int WA
 int showLedData(volatile uint32_t* port, uint32_t bitmask,
                 const uint8_t* leds, uint32_t num_leds,
                 M0ClocklessData* pData) {
+
+    // Compile-time validation of GPIO offsets
+    static_assert((HI_OFFSET & 3) == 0 && (LO_OFFSET & 3) == 0,
+                  "HI_OFFSET and LO_OFFSET must be 4-byte aligned");
+    static_assert(HI_OFFSET != LO_OFFSET,
+                  "HI_OFFSET and LO_OFFSET must be different");
 
     // Convert timing values from nanoseconds to CPU cycles at compile-time
     // Formula: cycles = (nanoseconds * CPU_MHz + 500) / 1000 (with rounding)
@@ -323,14 +383,21 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     // - gpio_set_low: ~2 cycles (store instruction)
     /////////////////////////////////////////////////////////////////////////////
     #define OUTPUT_BIT(byte, work_cycles, work_code) do { \
+        FL_COMPILER_BARRIER(); \
         gpio_set_high(port, bitmask, HI_OFFSET); \
+        FL_COMPILER_BARRIER(); \
         if (T1_CYCLES > 2) { delay_cycles(T1_CYCLES - 2); } \
+        FL_COMPILER_BARRIER(); \
         byte = gpio_conditional_low(byte, port, bitmask, LO_OFFSET); \
+        FL_COMPILER_BARRIER(); \
         work_code; \
         constexpr uint32_t t2_overhead = 4 + work_cycles; \
         if (T2_CYCLES > t2_overhead) { delay_cycles(T2_CYCLES - t2_overhead); } \
+        FL_COMPILER_BARRIER(); \
         gpio_set_low(port, bitmask, LO_OFFSET); \
+        FL_COMPILER_BARRIER(); \
         if (T3_CYCLES > 2) { delay_cycles(T3_CYCLES - 2); } \
+        FL_COMPILER_BARRIER(); \
     } while(0)
 
     /////////////////////////////////////////////////////////////////////////////
@@ -406,9 +473,10 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
 
         // Check interrupt timing using SysTick
         uint32_t ticksBeforeInterrupts = SysTick->VAL;
-        sei();
+        uint32_t prim = __get_PRIMASK();
+        __enable_irq();
         --counter;
-        cli();
+        if (prim == 0) __disable_irq();
 
         // Calculate elapsed time and check if it exceeds 45μs
         const uint32_t kTicksPerMs = VARIANT_MCK / 1000;
@@ -467,7 +535,7 @@ int showLedData(volatile uint32_t* port, uint32_t bitmask,
     return num_leds;
 }
 
-FL_OPTIMIZATION_LEVEL_O3_END
+FL_END_OPTIMIZE_FOR_EXACT_TIMING
 
 /******************************************************************************
  * END OF M0 CLOCKLESS LED DRIVER - C++ VERSION
@@ -481,7 +549,9 @@ FL_OPTIMIZATION_LEVEL_O3_END
  * - Handles 32-bit wraparound correctly
  *
  * OPTIMIZATION:
- * - ALL code forced to O3 via FL_OPTIMIZATION_LEVEL_O3_BEGIN/END
+ * - Timing-specific optimizations via FL_BEGIN/END_OPTIMIZE_FOR_EXACT_TIMING
+ * - Uses O2 by default (configurable via FL_TIMING_OPT_LEVEL)
+ * - Disables instruction scheduling, loop unrolling, vectorization
  * - Works regardless of global compiler settings (-O0, -O1, -O2, etc.)
  * - Functions marked FL_FORCE_INLINE for minimal overhead
  *

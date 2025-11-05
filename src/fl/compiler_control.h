@@ -160,6 +160,36 @@
   #define FL_OPTIMIZATION_LEVEL_O0_END   /* nothing */
 #endif
 
+// Optimization for exact timing (cycle-accurate code)
+// Disables optimizations that can affect instruction timing predictability.
+// Default level is O2 for balance between performance and timing predictability.
+// Override with: #define FL_TIMING_OPT_LEVEL 3 before including this header.
+#ifndef FL_TIMING_OPT_LEVEL
+#define FL_TIMING_OPT_LEVEL 2
+#endif
+
+#if defined(__GNUC__)
+  #define _FL_STR1(x) #x
+  #define _FL_STR(x)  _FL_STR1(x)
+
+  #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING        \
+      _Pragma("GCC push_options")                   \
+      _Pragma("GCC optimize(\"O" _FL_STR(FL_TIMING_OPT_LEVEL) "\")") \
+      _Pragma("GCC optimize(\"-fno-lto\")")         \
+      _Pragma("GCC optimize(\"-fno-schedule-insns\")")  \
+      _Pragma("GCC optimize(\"-fno-schedule-insns2\")") \
+      _Pragma("GCC optimize(\"-fno-reorder-blocks\")")  \
+      _Pragma("GCC optimize(\"-fno-tree-vectorize\")")  \
+      _Pragma("GCC optimize(\"-fno-tree-reassoc\")")    \
+      _Pragma("GCC optimize(\"-fno-unroll-loops\")")
+
+  #define FL_END_OPTIMIZE_FOR_EXACT_TIMING \
+      _Pragma("GCC pop_options")
+#else
+  #define FL_BEGIN_OPTIMIZE_FOR_EXACT_TIMING /* nothing */
+  #define FL_END_OPTIMIZE_FOR_EXACT_TIMING   /* nothing */
+#endif
+
 #ifndef FL_LINK_WEAK
 #define FL_LINK_WEAK __attribute__((weak))
 #endif
