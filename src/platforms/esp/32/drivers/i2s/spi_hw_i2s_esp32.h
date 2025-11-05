@@ -1,9 +1,10 @@
 #pragma once
 #include "platforms/esp/is_esp.h"
 
-// The I2S parallel mode driver only works on ESP32, ESP32-S2, and ESP32-S3
-// ESP32-C3, C2, C5, C6, H2 have a completely different I2S peripheral architecture
-#if defined(ESP32) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
+// The I2S parallel mode driver only works on ESP32 and ESP32-S2
+// ESP32-S3: Use LCD_CAM peripheral instead (see lcd_driver_i80.h in FastLED)
+// ESP32-C3, C2, C5, C6, H2: Have completely different I2S peripheral architecture (no parallel mode)
+#if defined(ESP32) && !defined(FL_IS_ESP_32S3) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
 
 /// @file spi_hw_i2s_esp32.h
 /// @brief ESP32 I2S-based 16-lane SPI hardware implementation
@@ -19,7 +20,8 @@
 /// - Clock speeds from 1-40 MHz (configurable, chipset-dependent)
 ///
 /// **Hardware Requirements:**
-/// - ESP32, ESP32-S2, or ESP32-S3 (classic ESP32 and S-series only)
+/// - ESP32 (original) or ESP32-S2 only
+/// - ESP32-S3: NOT supported - use LCD_CAM peripheral instead (see lcd_driver_i80.h)
 /// - I2S0 peripheral (uses parallel output mode, not audio mode)
 /// - GPIO pins: Clock + Data (see pin mapping below)
 /// - PSRAM highly recommended for >1000 LEDs per strip
@@ -27,7 +29,7 @@
 /// **Pin Mapping:**
 /// - Data pins: I2S0O_DATA_OUT8-23 (GPIO offset +8)
 ///   - ESP32: GPIOs 8-23 for data output (via GPIO matrix)
-///   - ESP32-S2/S3: Any GPIOs can be mapped (more flexible)
+///   - ESP32-S2: Any GPIOs can be mapped (more flexible)
 /// - Clock pin: I2S0_BCLK (any GPIO via GPIO matrix)
 ///
 /// **Integration with Yves Driver:**
@@ -209,4 +211,4 @@ private:
 
 } // namespace fl
 
-#endif // ESP32 (excluding C3/C2/C5/C6/H2)
+#endif // ESP32 (excluding S3/C3/C2/C5/C6/H2)

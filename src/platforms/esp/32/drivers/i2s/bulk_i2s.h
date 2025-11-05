@@ -5,8 +5,9 @@
 
 #include "fl/compiler_control.h"
 
-// Platform guard - I2S parallel mode on ESP32 and ESP32-S3
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3)
+// Platform guard - I2S parallel mode on ESP32 (original) only
+// ESP32-S3: Use BulkClockless<LCD_I80> instead (see bulk_lcd_i80.h)
+#if defined(CONFIG_IDF_TARGET_ESP32)
 
 #include "fl/clockless/base.h"
 #include "fl/clockless/constants.h"
@@ -17,11 +18,8 @@
 #include "fl/unique_ptr.h"
 #include "rgbw.h"
 
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-#include "clockless_i2s_esp32s3.h"
-#else
+// ESP32 (original) uses i2s_esp32dev.h driver
 #include "i2s_esp32dev.h"
-#endif
 
 namespace fl {
 
@@ -34,14 +32,15 @@ namespace fl {
 /// transmission. All strips update simultaneously via parallel data bus.
 ///
 /// Features:
-/// - Up to 24 strips on ESP32 (GPIO 0-23) or 16 on ESP32-S3
+/// - Up to 24 strips on ESP32 (GPIO 0-23)
+/// - ESP32-S3: NOT supported - use BulkClockless<LCD_I80> instead (see bulk_lcd_i80.h)
 /// - Parallel transmission (all strips update at the same time)
 /// - Pin order matters (GPIO number determines bit position in parallel data)
 /// - Efficient memory usage with shared DMA buffer
 ///
 /// Constraints:
-/// - Maximum 24 strips on ESP32, 16 on ESP32-S3 (I2S peripheral limit)
-/// - Pins must be valid GPIO (avoid USB-JTAG pins 19/20 on ESP32-S3)
+/// - Maximum 24 strips on ESP32 (I2S peripheral limit)
+/// - Pins must be valid GPIO
 /// - All strips must have the same length (hardware limitation)
 /// - Pin numbers matter: lower GPIO numbers map to lower bit positions
 ///
@@ -57,12 +56,8 @@ template <>
 class BulkClockless<Chipset::WS2812, I2S>
     : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
   public:
-    /// Maximum number of strips supported by I2S peripheral
-#if defined(CONFIG_IDF_TARGET_ESP32S3)
-    static constexpr int MAX_STRIPS = 16;  // ESP32-S3 I2S LCD mode
-#else
-    static constexpr int MAX_STRIPS = 24;  // ESP32 original I2S
-#endif
+    /// Maximum number of strips supported by I2S peripheral on ESP32
+    static constexpr int MAX_STRIPS = 24;  // ESP32 (original) I2S parallel mode
 
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations

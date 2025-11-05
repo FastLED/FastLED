@@ -87,9 +87,9 @@ public:
                 LED_CHIPSET::T1(), LED_CHIPSET::T2(), LED_CHIPSET::T3(),
                 N_PIXELS, 1000000, 40000000, true
             );
-            // Use override frequency (ternary guards against div-by-zero warning)
+            // Use override frequency (constexpr guarantees > 0 in this branch)
             result.pclk_hz = LCD_PCLK_HZ_OVERRIDE;
-            result.slot_ns = (LCD_PCLK_HZ_OVERRIDE > 0) ? (1000000000UL / LCD_PCLK_HZ_OVERRIDE) : 0;
+            result.slot_ns = 1000000000UL / LCD_PCLK_HZ_OVERRIDE;
             return result;
         }
 

@@ -214,8 +214,8 @@ void LCD_I80_Esp32::endShowLeds() {
 }
 
 // Explicit template instantiation for WS2812 chipset (forces compilation)
+// Note: WS2812ChipsetTiming is a type alias for TIMING_WS2812_800KHZ
 template class LcdI80Driver<WS2812ChipsetTiming>;
-template class LcdI80Driver<TIMING_WS2812_800KHZ>;
 
 } // namespace fl
 
