@@ -203,14 +203,27 @@ if platform.system() == "Windows":
                 # -fopt-info-all is GCC-only (Clang doesn't support it)
                 # Need to check multiple flag locations
                 gcc_only_flags = ["-Map", "-Wl,-Map", "-fopt-info-all"]
-                for flag_key in ["LINKFLAGS", "CXXFLAGS", "CCFLAGS"]:
+                for flag_key in [
+                    "LINKFLAGS",
+                    "CXXFLAGS",
+                    "CCFLAGS",
+                    "CFLAGS",
+                    "BUILD_FLAGS",
+                ]:
                     flags = env.get(flag_key, [])
-                    if isinstance(flags, list):
-                        original_len = len(flags)
+                    # Handle both list and CLVar (SCons command line variable) types
+                    if flags:
+                        # Convert to list for processing
+                        flags_list = (
+                            list(flags)
+                            if hasattr(flags, "__iter__") and not isinstance(flags, str)
+                            else [flags]
+                        )
+                        original_len = len(flags_list)
                         # Filter out GCC-only flags
                         filtered = [
                             f
-                            for f in flags
+                            for f in flags_list
                             if not any(
                                 gcc_flag in str(f) for gcc_flag in gcc_only_flags
                             )
