@@ -191,3 +191,30 @@
 #else
 #define FL_CONSTEXPR14 inline
 #endif
+
+// Mark functions whose return value must be used (generates compiler warning if ignored)
+// Preferred over [[nodiscard]] for C++11/14 compatibility
+//
+// Usage: FL_NODISCARD bool try_lock();
+//
+// By default, this generates a WARNING when the return value is ignored.
+// To promote to a compile ERROR, use compiler flags:
+//   GCC/Clang: -Werror=unused-result
+//   MSVC:      /we6031
+//
+// Note: These flags ONLY affect functions explicitly marked with FL_NODISCARD.
+// Regular functions without this attribute can still have their return values
+// ignored without warnings/errors.
+#if __cplusplus >= 201703L
+  // C++17+: Use standard [[nodiscard]] attribute
+  #define FL_NODISCARD [[nodiscard]]
+#elif defined(__GNUC__) || defined(__clang__)
+  // GCC/Clang: Use warn_unused_result attribute
+  #define FL_NODISCARD __attribute__((warn_unused_result))
+#elif defined(_MSC_VER)
+  // MSVC: Use SAL annotation
+  #define FL_NODISCARD _Check_return_
+#else
+  // Unsupported compiler: no-op
+  #define FL_NODISCARD
+#endif

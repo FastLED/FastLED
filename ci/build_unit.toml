@@ -33,6 +33,7 @@ compiler_flags = [
     "-fno-exceptions",
     "-fno-rtti",
     "-Werror=unused-variable",  # Treat unused variables as errors
+    "-Werror=unused-result",  # Treat ignored FL_NODISCARD return values as errors
 ]
 
 defines = [

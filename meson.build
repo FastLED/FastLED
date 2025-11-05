@@ -85,6 +85,7 @@ unit_test_compile_args = [
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
+  '-Werror=unused-result',  # Treat ignored FL_NODISCARD return values as errors
   '-O0',
   '-g'
 ]

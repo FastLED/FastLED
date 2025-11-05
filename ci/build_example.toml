@@ -33,6 +33,7 @@ compiler_flags = [
     "-Wno-backslash-newline-escape",  # Suppress backslash newline escape warnings
     "-fno-exceptions",
     "-fno-rtti",
+    "-Werror=unused-result",  # Treat ignored FL_NODISCARD return values as errors
 ]
 
 defines = [
