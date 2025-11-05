@@ -8,6 +8,7 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 
 #include "fl/stdint.h"
 #include "fl/undef.h"
+#include "fl/math.h"
 
 namespace fl {
 

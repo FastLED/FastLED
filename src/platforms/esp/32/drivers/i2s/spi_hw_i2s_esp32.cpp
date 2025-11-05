@@ -6,8 +6,11 @@
 
 #include "spi_hw_i2s_esp32.h"
 #include "fl/dbg.h"
+#include "platforms/esp/is_esp.h"
 
-#ifdef ESP32
+// The I2S parallel mode driver only works on ESP32, ESP32-S2, and ESP32-S3
+// ESP32-C3, C2, C5, C6, H2 have a completely different I2S peripheral architecture
+#if defined(ESP32) && !defined(FL_IS_ESP_32C2) && !defined(FL_IS_ESP_32C3) && !defined(FL_IS_ESP_32C5) && !defined(FL_IS_ESP_32C6) && !defined(FL_IS_ESP_32H2)
 
 // Compatibility for ESP-IDF 3.3: heap_caps_aligned_alloc was added in IDF 4.1
 #if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR <= 3
@@ -398,4 +401,4 @@ fl::vector<SpiHw16*> SpiHw16::createInstances() {
 
 } // namespace fl
 
-#endif // ESP32
+#endif // defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3) etc.
