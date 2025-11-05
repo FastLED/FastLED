@@ -553,22 +553,30 @@ def _main_impl() -> int:
         with open(dockerfile_path, "w") as f:
             f.write(dockerfile_content)
 
-        # Copy entrypoint.sh and build.sh to temp directory
+        # Copy ci/ directory structure to temp directory
+        # The Dockerfile expects ci/docker/build.sh and ci/ for Python imports
         import shutil
 
-        entrypoint_src = Path(__file__).parent / "docker" / "entrypoint.sh"
-        if entrypoint_src.exists():
-            shutil.copy(entrypoint_src, temp_path / "entrypoint.sh")
-        else:
-            print(
-                f"Warning: entrypoint.sh not found at {entrypoint_src}", file=sys.stderr
-            )
+        # Create ci/ directory structure in temp directory
+        ci_temp_dir = temp_path / "ci"
+        ci_temp_dir.mkdir(exist_ok=True)
 
-        build_script_src = Path(__file__).parent / "docker" / "build.sh"
-        if build_script_src.exists():
-            shutil.copy(build_script_src, temp_path / "build.sh")
-        else:
-            print(f"Warning: build.sh not found at {build_script_src}", file=sys.stderr)
+        # Copy entire ci directory to maintain structure
+        ci_src_dir = Path(__file__).parent
+
+        # Copy all necessary files from ci/ to temp/ci/
+        # Include Python files, JSON config files, shell scripts, and other build files
+        file_patterns = ["**/*.py", "**/*.json", "**/*.sh", "**/*.toml", "**/*.ini"]
+        for pattern in file_patterns:
+            for item in ci_src_dir.glob(pattern):
+                # Skip __pycache__ directories and .pyc files
+                if "__pycache__" in str(item) or item.suffix == ".pyc":
+                    continue
+
+                relative_path = item.relative_to(ci_src_dir)
+                dest_path = ci_temp_dir / relative_path
+                dest_path.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy(item, dest_path)
 
         print("Using Dockerfile template:")
         print("=" * 70)
