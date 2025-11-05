@@ -7,7 +7,7 @@ namespace fl {
 
 // Fun fact, we can't define any function by the name of min,max,abs because
 // on some platforms these are macros. Therefore we can only use fl_min, fl_max, fl_abs.
-template <typename T> inline T fl_abs(T value) {
+template <typename T> constexpr inline T fl_abs(T value) {
     return value < 0 ? -value : value;
 }
 
@@ -21,11 +21,11 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 // Template functions for FL_MIN and FL_MAX to avoid statement repetition
 // Returns the most promotable type between the two arguments
-template <typename T, typename U> inline common_type_t<T, U> fl_min(T a, U b) {
+template <typename T, typename U> constexpr inline common_type_t<T, U> fl_min(T a, U b) {
     return (a < b) ? a : b;
 }
 
-template <typename T, typename U> inline common_type_t<T, U> fl_max(T a, U b) {
+template <typename T, typename U> constexpr inline common_type_t<T, U> fl_max(T a, U b) {
     return (a > b) ? a : b;
 }
 
