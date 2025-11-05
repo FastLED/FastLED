@@ -9,6 +9,14 @@
 
 #ifdef ESP32
 
+// Compatibility for ESP-IDF 3.3: heap_caps_aligned_alloc was added in IDF 4.1
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR <= 3
+static inline void* heap_caps_aligned_alloc(size_t alignment, size_t size, uint32_t caps) {
+    (void)alignment;  // IDF 3.3 heap_caps_malloc doesn't support alignment
+    return heap_caps_malloc(size, caps);
+}
+#endif
+
 namespace fl {
 
 // ============================================================================
