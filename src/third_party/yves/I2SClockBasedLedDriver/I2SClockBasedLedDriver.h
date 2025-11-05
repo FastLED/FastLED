@@ -1,10 +1,14 @@
 
 
 /*
- 
+
  */
 
 #pragma once
+
+// This I2S parallel mode driver only works on ESP32, ESP32-S2, and ESP32-S3
+// ESP32-C3, C2, C5, C6, H2 have a completely different I2S peripheral architecture
+#if !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 
 #include "esp_heap_caps.h"
 #include "soc/soc.h"
@@ -1339,3 +1343,5 @@ static void IRAM_ATTR loadAndTranspose(uint8_t *ledt, int led_per_strip, int num
         transpose16x1_noinline2(secondPixel[19].bytes, (uint8_t *)(buffer+16*19));
 #endif
 }
+
+#endif // !defined(CONFIG_IDF_TARGET_ESP32C3) && ...

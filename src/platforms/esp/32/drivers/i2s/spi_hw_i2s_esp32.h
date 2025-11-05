@@ -1,6 +1,8 @@
 #pragma once
 
-#ifdef ESP32
+// The I2S parallel mode driver only works on ESP32, ESP32-S2, and ESP32-S3
+// ESP32-C3, C2, C5, C6, H2 have a completely different I2S peripheral architecture
+#if defined(ESP32) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 
 /// @file spi_hw_i2s_esp32.h
 /// @brief ESP32 I2S-based 16-lane SPI hardware implementation
@@ -206,4 +208,4 @@ private:
 
 } // namespace fl
 
-#endif // ESP32
+#endif // ESP32 (excluding C3/C2/C5/C6/H2)
