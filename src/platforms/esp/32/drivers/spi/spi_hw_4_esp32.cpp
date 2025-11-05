@@ -6,7 +6,9 @@
 ///
 /// For 8-lane (Octal) SPI support, see spi_hw_8_esp32.cpp
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/dbg.h"
@@ -378,4 +380,4 @@ fl::vector<SpiHw4*> SpiHw4::createInstances() {
 
 }  // namespace fl
 
-#endif  // ESP32 variants
+#endif  // FL_IS_ESP32

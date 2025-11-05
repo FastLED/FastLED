@@ -4,7 +4,9 @@
 /// This file provides the SPIDualESP32 class and factory for ESP32 platforms.
 /// All class definition and implementation is contained in this single file.
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/dbg.h"
@@ -348,4 +350,4 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
 
 }  // namespace fl
 
-#endif  // ESP32 variants
+#endif  // FL_IS_ESP32

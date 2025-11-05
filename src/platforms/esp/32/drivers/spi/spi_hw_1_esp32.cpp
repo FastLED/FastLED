@@ -7,7 +7,9 @@
 /// This implementation uses true async DMA via ESP-IDF's spi_device_queue_trans()
 /// and spi_device_get_trans_result() functions for non-blocking transmission.
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_1.h"
 #include "fl/cstring.h"
@@ -326,4 +328,4 @@ fl::vector<SpiHw1*> SpiHw1::createInstances() {
 
 }  // namespace fl
 
-#endif  // ESP32 variants
+#endif  // FL_IS_ESP32

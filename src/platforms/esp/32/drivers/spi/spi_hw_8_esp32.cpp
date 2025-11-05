@@ -7,7 +7,9 @@
 /// Octal-SPI (8-lane) support requires ESP-IDF 5.0+ and ESP32-P4 or similar
 /// hardware with sufficient data lines.
 
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
+#include "platforms/esp/is_esp.h"
+
+#if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_8.h"
 #include <driver/spi_master.h>
@@ -344,4 +346,4 @@ fl::vector<SpiHw8*> SpiHw8::createInstances() {
 
 }  // namespace fl
 
-#endif  // ESP32 variants
+#endif  // FL_IS_ESP32
