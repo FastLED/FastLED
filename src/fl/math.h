@@ -2,24 +2,7 @@
 
 #include "fl/clamp.h"
 #include "fl/math_macros.h"
-
-// Undefine Arduino/platform min/max/abs macros that conflict with our functions
-// Many platform headers (especially Arduino) define min/max/abs as function-like macros,
-// which prevents us from defining our own min/max/abs functions in the fl namespace.
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#ifdef abs
-#undef abs
-#endif
-
-#ifdef round
-#undef round
-#endif
-
+#include "fl/undef.h"
 
 namespace fl {
 

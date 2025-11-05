@@ -7,18 +7,7 @@ Follows the same pattern as fl/type_traits.h to provide essential type informati
 */
 
 #include "fl/stdint.h"
-
-// Undefine min/max/abs macros BEFORE any declarations
-// Arduino and platform headers often define these as macros which breaks member function declarations
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#ifdef abs
-#undef abs
-#endif
+#include "fl/undef.h"
 
 namespace fl {
 
@@ -478,12 +467,4 @@ struct numeric_limits<double> {
 #include "fl/math.h"
 
 // Undefine macros again at the end to prevent them from leaking to includers
-#ifdef min
-#undef min
-#endif
-#ifdef max
-#undef max
-#endif
-#ifdef abs
-#undef abs
-#endif
+#include "fl/undef.h"
