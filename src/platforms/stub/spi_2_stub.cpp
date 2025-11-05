@@ -1,7 +1,7 @@
 /// @file spi_2_stub.cpp
 /// @brief Stub/Mock Dual-SPI implementation for testing
 
-#ifdef FASTLED_TESTING
+#if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
 #include "spi_2_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
@@ -219,4 +219,4 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
 
 }  // namespace fl
 
-#endif  // FASTLED_TESTING
+#endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

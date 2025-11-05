@@ -8,7 +8,7 @@
 
 #include "platforms/shared/spi_hw_2.h"
 
-#ifdef FASTLED_TESTING
+#if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
 namespace fl {
 
@@ -62,4 +62,4 @@ inline SpiHw2Stub* toStub(SpiHw2* driver) {
 
 }  // namespace fl
 
-#endif  // FASTLED_TESTING
+#endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)

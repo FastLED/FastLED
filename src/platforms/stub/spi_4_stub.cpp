@@ -7,7 +7,7 @@
 #include "platforms/stub/spi_4_stub.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
-#ifdef FASTLED_TESTING
+#if defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
 
 namespace fl {
 
@@ -205,4 +205,4 @@ fl::vector<SpiHw4*> SpiHw4::createInstances() {
 
 }  // namespace fl
 
-#endif  // FASTLED_TESTING
+#endif  // defined(FASTLED_TESTING) || defined(FASTLED_STUB_IMPL)
