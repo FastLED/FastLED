@@ -143,6 +143,15 @@ long lround_impl_double(double value) {
     return ::lround(value);
 }
 
+// Round to nearest floating-point value implementations using standard library
+float round_impl_float(float value) {
+    return ::roundf(value);
+}
+
+double round_impl_double(double value) {
+    return ::round(value);
+}
+
 // Floating-point modulo implementations using standard library
 float fmod_impl_float(float x, float y) {
     return ::fmodf(x, y);

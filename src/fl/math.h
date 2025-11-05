@@ -28,6 +28,8 @@ float fabs_impl_float(float value);
 double fabs_impl_double(double value);
 long lround_impl_float(float value);
 long lround_impl_double(double value);
+float round_impl_float(float value);
+double round_impl_double(double value);
 float fmod_impl_float(float x, float y);
 double fmod_impl_double(double x, double y);
 float atan2_impl_float(float y, float x);
@@ -113,6 +115,15 @@ template<typename T> inline T fabs(T value) { return fabs_impl_float(value); }
 inline long lroundf(float value) { return lround_impl_float(value); }
 inline long lround(double value) { return lround_impl_double(value); }
 template<typename T> inline long lround(T value) { return lround_impl_float(value); }
+
+// Round to nearest floating-point value
+// Arduino defines round as a macro, so we need to undefine it first
+#ifdef round
+#undef round
+#endif
+inline float roundf(float value) { return round_impl_float(value); }
+inline double round(double value) { return round_impl_double(value); }
+template<typename T> inline T round(T value) { return round_impl_float(value); }
 
 // Floating-point modulo (remainder)
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }

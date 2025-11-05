@@ -194,7 +194,8 @@ public:
     virtual void showPixels(PixelController<_RGB_ORDER> & pixels) {
         // wait for the only sequence buffer to become available
         spinAcquireSequenceBuffer();
-        prepareSequenceBuffers(pixels);
+        Rgbw rgbw = this->getRgbw();
+        prepareSequenceBuffers(pixels, rgbw);
         // ensure any prior data had time to latch
         mWait.wait();
         startPwmPlayback(s_SequenceBufferValidElements);
@@ -221,13 +222,12 @@ public:
             }
         }
     }
-    FASTLED_NRF52_INLINE_ATTRIBUTE static void prepareSequenceBuffers(PixelController<_RGB_ORDER> & pixels) {
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void prepareSequenceBuffers(PixelController<_RGB_ORDER> & pixels, Rgbw rgbw) {
         s_SequenceBufferValidElements = 0;
         int32_t    remainingSequenceElements = _PWM_BUFFER_COUNT;
         uint16_t * e = s_SequenceBuffer;
 
         // Detect RGBW mode using pattern from STM32/RP2040 drivers
-        Rgbw rgbw = pixels.getRgbw();
         const bool is_rgbw = rgbw.active();
         const uint8_t bits_per_pixel = is_rgbw ? _BITS_PER_PIXEL_RGBW : _BITS_PER_PIXEL_RGB;
 
