@@ -2,6 +2,28 @@
 
 set -e
 
+# Arrays to track linting stages and their durations
+declare -a LINT_STAGES=()
+declare -a LINT_DURATIONS=()
+declare -a LINT_SKIPPED=()
+
+# Function to record a linting stage's duration
+record_stage() {
+    local stage_name="$1"
+    local duration="$2"
+    local skipped="${3:-false}"
+    LINT_STAGES+=("$stage_name")
+    LINT_DURATIONS+=("$duration")
+    LINT_SKIPPED+=("$skipped")
+}
+
+# Function to get elapsed seconds since a start time
+get_elapsed_seconds() {
+    local start_time=$1
+    local end_time=$(date +%s)
+    echo $((end_time - start_time))
+}
+
 # Parse command line arguments
 JS_ONLY=false
 NO_FINGERPRINT=false
@@ -55,12 +77,14 @@ else
     echo ""
     echo "📝 PYTHON LINTING"
     echo "------------------"
+    PYTHON_LINT_START=$(date +%s)
     echo "Running ruff check (linting)"
     uv run ruff check --fix test.py
     uv run ruff check --fix ci --exclude ci/tmp/ --exclude ci/wasm/
     echo "Running ruff format (formatting + import sorting)"
     uv run ruff format test.py
     uv run ruff format ci --exclude ci/tmp/ --exclude ci/wasm/
+    PYTHON_LINT_DURATION=$(get_elapsed_seconds $PYTHON_LINT_START)
 
     # Check if pyright needs to run using Meson's dependency tracking
     echo "Checking if pyright needs to run..."
@@ -75,6 +99,8 @@ else
     # - No marker file exists (first time)
     # - Meson timestamp is newer than marker (Python code changed)
     # - --no-fingerprint flag is set
+    PYRIGHT_START=$(date +%s)
+    PYRIGHT_SKIPPED=false
     if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$PYTHON_LINT_MARKER" ] || [ "$PYTHON_LINT_TIMESTAMP" -nt "$PYTHON_LINT_MARKER" ] 2>/dev/null; then
         if [ "$NO_FINGERPRINT" = true ]; then
             echo "Running pyright (--no-fingerprint flag set)"
@@ -91,7 +117,13 @@ else
         fi
     else
         echo "✅ No Python changes detected - skipping pyright"
+        PYRIGHT_SKIPPED=true
     fi
+    PYRIGHT_DURATION=$(get_elapsed_seconds $PYRIGHT_START)
+
+    # Record Python linting stages
+    record_stage "ruff" "$PYTHON_LINT_DURATION" false
+    record_stage "pyright" "$PYRIGHT_DURATION" "$PYRIGHT_SKIPPED"
 
     export CLANG_FORMAT_STYLE="{SortIncludes: false}"
 
@@ -107,6 +139,8 @@ else
     CPP_LINT_TIMESTAMP=".build/meson/cpp_lint.timestamp"
     CPP_LINT_MARKER=".cache/cpp_lint.marker"
 
+    CPP_LINT_START=$(date +%s)
+    CPP_LINT_SKIPPED=false
     if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null; then
         if [ "$NO_FINGERPRINT" = true ]; then
             echo "Running C++ linting (--no-fingerprint flag set)"
@@ -168,7 +202,12 @@ else
         touch "$CPP_LINT_MARKER"
     else
         echo "✅ No C++ changes detected - skipping C++ linting"
+        CPP_LINT_SKIPPED=true
     fi
+    CPP_LINT_DURATION=$(get_elapsed_seconds $CPP_LINT_START)
+
+    # Record C++ linting stage
+    record_stage "cpp_linting" "$CPP_LINT_DURATION" "$CPP_LINT_SKIPPED"
 fi
 
 # JavaScript linting and enhanced checking (now included by default)
@@ -198,6 +237,7 @@ else
     ESLINT_EXE=".cache/js-tools/node_modules/.bin/eslint"
 fi
 
+JS_LINT_START=$(date +%s)
 if [ -f "ci/lint-js-fast" ] && [ -f "$ESLINT_EXE" ]; then
     echo -e "${BLUE}🚀 Using fast JavaScript linting (Node.js + ESLint)${NC}"
     # Note: lint-js-fast handles its own cache checking and success/failure marking
@@ -228,6 +268,10 @@ else
         # Don't exit with error, just skip JS linting
     fi
 fi
+JS_LINT_DURATION=$(get_elapsed_seconds $JS_LINT_START)
+
+# Record JavaScript linting stage
+record_stage "javascript_linting" "$JS_LINT_DURATION" false
 
 echo ""
 if [ "$JS_ONLY" = true ]; then
@@ -235,7 +279,53 @@ if [ "$JS_ONLY" = true ]; then
 else
     echo "🎉 All linting completed!"
 fi
-echo "========================="
+
+# Generate summary table
+echo ""
+echo "Linting Execution Summary:"
+
+# Calculate column widths
+max_name_width=0
+for stage_name in "${LINT_STAGES[@]}"; do
+    name_length=${#stage_name}
+    if [ $name_length -gt $max_name_width ]; then
+        max_name_width=$name_length
+    fi
+done
+
+# Ensure minimum width for header
+header_width=9  # Length of "Test Name"
+if [ $max_name_width -lt $header_width ]; then
+    max_name_width=$header_width
+fi
+
+# Print separator line
+separator=""
+for ((i=0; i<max_name_width; i++)); do separator="${separator}-"; done
+separator="${separator}-+-"
+for ((i=0; i<24; i++)); do separator="${separator}-"; done
+echo "$separator"
+
+# Print header
+printf "%-${max_name_width}s | %24s\n" "Linter Name" "Duration"
+echo "$separator"
+
+# Print each stage
+for i in "${!LINT_STAGES[@]}"; do
+    stage_name="${LINT_STAGES[$i]}"
+    duration="${LINT_DURATIONS[$i]}"
+    skipped="${LINT_SKIPPED[$i]}"
+
+    if [ "$skipped" = "true" ]; then
+        printf "%-${max_name_width}s | %24s\n" "$stage_name" "Skipped (no changes)"
+    else
+        printf "%-${max_name_width}s | %23ss\n" "$stage_name" "$duration"
+    fi
+done
+
+# Print final separator
+echo "$separator"
+
 echo ""
 echo "💡 FOR AI AGENTS:"
 echo "  - Use 'bash lint' for comprehensive linting (Python, C++, and JavaScript)"

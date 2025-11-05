@@ -389,24 +389,6 @@ class ReconfigurableIO(Protocol):
     def reconfigure(self, *, encoding: str, errors: str) -> None: ...
 
 
-def create_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
-    """Create a namespace check process without starting it"""
-    return RunningProcess(
-        "uv run python ci/lint_cpp/no_using_namespace_fl_in_headers.py",
-        shell=True,
-        auto_run=False,  # Don't auto-start - will be started in parallel later
-    )
-
-
-def create_std_namespace_check_process(enable_stack_trace: bool) -> RunningProcess:
-    """Create a std:: namespace check process without starting it"""
-    return RunningProcess(
-        "uv run python ci/lint_cpp/test_no_std_namespace.py",
-        shell=True,
-        auto_run=False,  # Don't auto-start - will be started in parallel later
-    )
-
-
 def create_unit_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
@@ -554,10 +536,6 @@ def get_cpp_test_processes(
     """Return all processes needed for C++ tests"""
     processes: list[RunningProcess] = []
 
-    # Always include namespace checks
-    processes.append(create_namespace_check_process(enable_stack_trace))
-    processes.append(create_std_namespace_check_process(enable_stack_trace))
-
     if test_categories.unit:
         processes.append(create_unit_test_process(args, enable_stack_trace))
 
@@ -591,10 +569,6 @@ def get_all_test_processes(
 ) -> list[RunningProcess]:
     """Return all processes needed for all tests"""
     processes: list[RunningProcess] = []
-
-    # Always include namespace checks
-    processes.append(create_namespace_check_process(enable_stack_trace))
-    processes.append(create_std_namespace_check_process(enable_stack_trace))
 
     # Add test processes based on categories
     if test_categories.unit:
@@ -1501,10 +1475,6 @@ def runner(
         # Build up unified list of all processes to run
         processes: list[RunningProcess] = []
         skipped_timings: list[ProcessTiming] = []
-
-        # Always start with namespace checks
-        processes.append(create_namespace_check_process(enable_stack_trace))
-        processes.append(create_std_namespace_check_process(enable_stack_trace))
 
         # Note: Unit tests are now exclusively handled by Meson (see lines 1412-1450)
         # This avoids the call to the removed ci.compiler.cpp_test_run module
