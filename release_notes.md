@@ -13,6 +13,18 @@ FastLED 3.10.5 (unreleased)
       * Hardware-timed 4-channel output for SK6812 and similar RGBW chipsets
       * No software emulation overhead
       * See commit 2293b52 and [src/platforms/arm/stm32/README.md](src/platforms/arm/stm32/README.md)
+    * **Teensy 3.x Series**: Native RGBW support added for Teensy 3.0/3.1/3.2/3.5/3.6
+      * Teensy 3.0/3.1/3.2 (ARM K20): Full 4-channel RGBW output
+      * Teensy 3.5/3.6 (ARM K66): Full 4-channel RGBW output
+      * Follows STM32 implementation pattern with unified loop and fixed-size buffer
+      * Automatic RGBW detection with no performance impact on RGB mode
+      * Files: [src/platforms/arm/teensy/teensy31_32/clockless_arm_k20.h](src/platforms/arm/teensy/teensy31_32/clockless_arm_k20.h), [src/platforms/arm/teensy/teensy36/clockless_arm_k66.h](src/platforms/arm/teensy/teensy36/clockless_arm_k66.h)
+    * **nRF52 (Nordic nRF52, Bluefruit boards)**: Native RGBW support via PWM peripheral
+      * 4-channel RGBW output using hardware PWM peripheral
+      * PWM buffer sized for maximum (RGBW), runtime selects RGB or RGBW mode
+      * Separate code paths for RGB (3 bytes) and RGBW (4 bytes) for optimal performance
+      * Supports up to 144 LEDs per string in RGBW mode
+      * File: [src/platforms/arm/nrf52/clockless_arm_nrf52.h](src/platforms/arm/nrf52/clockless_arm_nrf52.h)
     * **Note**: Previous RGBW support via software emulation (ESP32, Teensy ObjectFLED) remains available
   * **NEW: HD108/NS108 16-bit SPI Chipset Support**: High-definition LED chipset with built-in gamma correction
     * 16-bit color depth (65,536 levels per channel) vs APA102's 8-bit (256 levels)

@@ -47,8 +47,11 @@ private:
     static const bool     _INITIALIZE_PIN_HIGH = (_FLIP ? 1 : 0);
     static const uint16_t _POLARITY_BIT        = (_FLIP ? 0 : 0x8000);
 
-    static const uint8_t  _BITS_PER_PIXEL   = (8 + _XTRA0) * 3; // NOTE: 3 means RGB only...
-    static const uint16_t _PWM_BUFFER_COUNT = (_BITS_PER_PIXEL * FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING);
+    // Buffer sized for maximum (RGBW = 4 bytes), runtime determines actual bytes used
+    static const uint8_t  _BITS_PER_PIXEL_RGB  = (8 + _XTRA0) * 3;
+    static const uint8_t  _BITS_PER_PIXEL_RGBW = (8 + _XTRA0) * 4;
+    static const uint8_t  _BITS_PER_PIXEL_MAX  = (8 + _XTRA0) * 4; // Size for RGBW (maximum)
+    static const uint16_t _PWM_BUFFER_COUNT = (_BITS_PER_PIXEL_MAX * FASTLED_NRF52_MAXIMUM_PIXELS_PER_STRING);
     static const uint16_t _T0H = ((uint16_t)(_T1        ));
     static const uint16_t _T1H = ((uint16_t)(_T1+_T2    ));
     static const uint16_t _TOP = ((uint16_t)(_T1+_T2+_T3));
@@ -202,66 +205,64 @@ public:
     FASTLED_NRF52_INLINE_ATTRIBUTE static void WriteBitToSequence(uint8_t byte, uint16_t * e) {
         *e = _POLARITY_BIT | (((byte & (1u << _BIT)) == 0) ? _T0H : _T1H);
     }
+
+    FASTLED_NRF52_INLINE_ATTRIBUTE static void WriteByteToSequence(uint8_t byte, uint16_t * & e) {
+        WriteBitToSequence<7>(byte, e); ++e;
+        WriteBitToSequence<6>(byte, e); ++e;
+        WriteBitToSequence<5>(byte, e); ++e;
+        WriteBitToSequence<4>(byte, e); ++e;
+        WriteBitToSequence<3>(byte, e); ++e;
+        WriteBitToSequence<2>(byte, e); ++e;
+        WriteBitToSequence<1>(byte, e); ++e;
+        WriteBitToSequence<0>(byte, e); ++e;
+        if (_XTRA0 > 0) {
+            for (int i = 0; i < _XTRA0; ++i) {
+                WriteBitToSequence<0>(0, e); ++e;
+            }
+        }
+    }
     FASTLED_NRF52_INLINE_ATTRIBUTE static void prepareSequenceBuffers(PixelController<_RGB_ORDER> & pixels) {
         s_SequenceBufferValidElements = 0;
         int32_t    remainingSequenceElements = _PWM_BUFFER_COUNT;
         uint16_t * e = s_SequenceBuffer;
+
+        // Detect RGBW mode using pattern from STM32/RP2040 drivers
+        Rgbw rgbw = pixels.getRgbw();
+        const bool is_rgbw = rgbw.active();
+        const uint8_t bits_per_pixel = is_rgbw ? _BITS_PER_PIXEL_RGBW : _BITS_PER_PIXEL_RGB;
+
         uint32_t size_needed = pixels.size(); // count of pixels
-        size_needed *= (8 + _XTRA0);          // bits per pixel
-        size_needed *= 2;                     // each bit takes two bytes
+        size_needed *= (8 + _XTRA0);          // bits per byte
+        size_needed *= (is_rgbw ? 4 : 3);     // bytes per pixel (3 for RGB, 4 for RGBW)
 
         if (size_needed > _PWM_BUFFER_COUNT) {
             // TODO: assert()?
             return;
         }
 
-        while (pixels.has(1) && (remainingSequenceElements >= _BITS_PER_PIXEL)) {
-            uint8_t b0 = pixels.loadAndScale0();
-            WriteBitToSequence<7>(b0, e); ++e;
-            WriteBitToSequence<6>(b0, e); ++e;
-            WriteBitToSequence<5>(b0, e); ++e;
-            WriteBitToSequence<4>(b0, e); ++e;
-            WriteBitToSequence<3>(b0, e); ++e;
-            WriteBitToSequence<2>(b0, e); ++e;
-            WriteBitToSequence<1>(b0, e); ++e;
-            WriteBitToSequence<0>(b0, e); ++e;
-            if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; ++i) {
-                    WriteBitToSequence<0>(0,e); ++e;
-                }
-            }
-            uint8_t b1 = pixels.loadAndScale1();
-            WriteBitToSequence<7>(b1, e); ++e;
-            WriteBitToSequence<6>(b1, e); ++e;
-            WriteBitToSequence<5>(b1, e); ++e;
-            WriteBitToSequence<4>(b1, e); ++e;
-            WriteBitToSequence<3>(b1, e); ++e;
-            WriteBitToSequence<2>(b1, e); ++e;
-            WriteBitToSequence<1>(b1, e); ++e;
-            WriteBitToSequence<0>(b1, e); ++e;
-            if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; ++i) {
-                    WriteBitToSequence<0>(0,e); ++e;
-                }
-            }
-            uint8_t b2 = pixels.loadAndScale2();
-            WriteBitToSequence<7>(b2, e); ++e;
-            WriteBitToSequence<6>(b2, e); ++e;
-            WriteBitToSequence<5>(b2, e); ++e;
-            WriteBitToSequence<4>(b2, e); ++e;
-            WriteBitToSequence<3>(b2, e); ++e;
-            WriteBitToSequence<2>(b2, e); ++e;
-            WriteBitToSequence<1>(b2, e); ++e;
-            WriteBitToSequence<0>(b2, e); ++e;
-            if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; ++i) {
-                    WriteBitToSequence<0>(0,e); ++e;
-                }
+        while (pixels.has(1) && (remainingSequenceElements >= bits_per_pixel)) {
+            if (is_rgbw) {
+                // RGBW mode: load and write 4 bytes
+                uint8_t b0, b1, b2, b3;
+                pixels.loadAndScaleRGBW(rgbw, &b0, &b1, &b2, &b3);
+
+                WriteByteToSequence(b0, e);
+                WriteByteToSequence(b1, e);
+                WriteByteToSequence(b2, e);
+                WriteByteToSequence(b3, e);
+            } else {
+                // RGB mode: load and write 3 bytes
+                uint8_t b0 = pixels.loadAndScale0();
+                WriteByteToSequence(b0, e);
+                uint8_t b1 = pixels.loadAndScale1();
+                WriteByteToSequence(b1, e);
+                uint8_t b2 = pixels.loadAndScale2();
+                WriteByteToSequence(b2, e);
             }
 
             // advance pixel and sequence pointers
-            s_SequenceBufferValidElements += _BITS_PER_PIXEL;
-            remainingSequenceElements     -= _BITS_PER_PIXEL;
+            s_SequenceBufferValidElements += bits_per_pixel;
+            remainingSequenceElements     -= bits_per_pixel;
             pixels.advanceData();
             pixels.stepDithering();
         }
@@ -300,26 +301,16 @@ public:
         int32_t    remainingSequenceElements = _PWM_BUFFER_COUNT;
         uint16_t * e           = s_SequenceBuffer;
         uint8_t  * nextByte    = arrayOfBytes;
+        const uint8_t bits_per_byte = 8 + _XTRA0;
         for (uint16_t bytesRemain = bytesToSend;
-            (remainingSequenceElements >= 8) && (bytesRemain > 0);
+            (remainingSequenceElements >= bits_per_byte) && (bytesRemain > 0);
             --bytesRemain,
-            remainingSequenceElements     -= 8,
-            s_SequenceBufferValidElements += 8
+            remainingSequenceElements     -= bits_per_byte,
+            s_SequenceBufferValidElements += bits_per_byte
             ) {
             uint8_t b = *nextByte;
-            WriteBitToSequence<7,false>(b, e); ++e;
-            WriteBitToSequence<6,false>(b, e); ++e;
-            WriteBitToSequence<5,false>(b, e); ++e;
-            WriteBitToSequence<4,false>(b, e); ++e;
-            WriteBitToSequence<3,false>(b, e); ++e;
-            WriteBitToSequence<2,false>(b, e); ++e;
-            WriteBitToSequence<1,false>(b, e); ++e;
-            WriteBitToSequence<0,false>(b, e); ++e;
-            if (_XTRA0 > 0) {
-                for (int i = 0; i < _XTRA0; ++i) {
-                    WriteBitToSequence<0,_FLIP>(0,e); ++e;
-                }
-            }
+            WriteByteToSequence(b, e);
+            ++nextByte;
         }
         mWait.wait(); // ensure min time between updates
 
