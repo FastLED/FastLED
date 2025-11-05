@@ -384,6 +384,21 @@ def calculate_cpp_test_fingerprint(
         tests_result = fingerprint_code_base(tests_dir, "**/*.h,**/*.cpp,**/*.hpp")
         hasher.update(f"tests:{tests_result.hash}".encode("utf-8"))
 
+    # Include meson.build files that affect build configuration
+    meson_build_files = [
+        cwd / "meson.build",  # Root build configuration
+        cwd / "tests" / "meson.build",  # Test discovery and configuration
+    ]
+    for meson_file in meson_build_files:
+        if meson_file.exists():
+            with open(meson_file, "rb") as f:
+                meson_content = f.read()
+                hasher.update(
+                    f"meson:{meson_file.name}:{hashlib.sha256(meson_content).hexdigest()}".encode(
+                        "utf-8"
+                    )
+                )
+
     # Include build configuration flags that affect compilation
     if args is not None:
         # Include --unity flag since it fundamentally changes how code is compiled
@@ -424,6 +439,21 @@ def calculate_examples_fingerprint() -> FingerprintResult:
             examples_dir, "**/*.ino,**/*.h,**/*.cpp,**/*.hpp"
         )
         hasher.update(f"examples:{examples_result.hash}".encode("utf-8"))
+
+    # Include meson.build files that affect build configuration
+    meson_build_files = [
+        cwd / "meson.build",  # Root build configuration
+        cwd / "examples" / "meson.build",  # Example registration and configuration
+    ]
+    for meson_file in meson_build_files:
+        if meson_file.exists():
+            with open(meson_file, "rb") as f:
+                meson_content = f.read()
+                hasher.update(
+                    f"meson:{meson_file.name}:{hashlib.sha256(meson_content).hexdigest()}".encode(
+                        "utf-8"
+                    )
+                )
 
     # Include test_example_compilation.py and related scripts
     example_test_files = [
