@@ -149,10 +149,19 @@ class I2SClockBasedLedDriver
         uint8_t *buffer;
     };
 
+    // ESP32-S2 and ESP32-C3 only have I2S0, not I2S1
+    #if defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32C2) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
+    const int deviceBaseIndex[1] = {I2S0O_DATA_OUT0_IDX};
+    const int deviceClockIndex[1] = {I2S0O_BCK_OUT_IDX};
+    const int deviceWordSelectIndex[1] = {I2S0O_WS_OUT_IDX};
+    const periph_module_t deviceModule[1] = {PERIPH_I2S0_MODULE};
+    #else
+    // ESP32 and ESP32-S3 have both I2S0 and I2S1
     const int deviceBaseIndex[2] = {I2S0O_DATA_OUT0_IDX, I2S1O_DATA_OUT0_IDX};
     const int deviceClockIndex[2] = {I2S0O_BCK_OUT_IDX, I2S1O_BCK_OUT_IDX};
     const int deviceWordSelectIndex[2] = {I2S0O_WS_OUT_IDX, I2S1O_WS_OUT_IDX};
     const periph_module_t deviceModule[2] = {PERIPH_I2S0_MODULE, PERIPH_I2S1_MODULE};
+    #endif
 
 public:
     i2s_dev_t *i2s;
@@ -269,6 +278,8 @@ public:
             interruptSource = ETS_I2S0_INTR_SOURCE;
             i2s_base_pin_index = I2S0O_DATA_OUT0_IDX;
         }
+        #if !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+        // Only ESP32 and ESP32-S3 have I2S1
         else
         {
             i2s = &I2S1;
@@ -276,6 +287,7 @@ public:
             interruptSource = ETS_I2S1_INTR_SOURCE;
             i2s_base_pin_index = I2S1O_DATA_OUT0_IDX;
         }
+        #endif
 
         i2sReset();
         i2sReset_DMA();
@@ -293,7 +305,10 @@ public:
         i2s->sample_rate_conf.tx_bits_mod = 16; // Number of parallel bits/pins
         i2s->clkm_conf.val = 0;
 
+        // ESP32-S2 and newer chips have a different register structure without clka_en
+        #if !defined(CONFIG_IDF_TARGET_ESP32S2) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
         i2s->clkm_conf.clka_en = 0;
+        #endif
 
         i2s->clkm_conf.clkm_div_a = cA;    // CLOCK_DIVIDER_A;
         i2s->clkm_conf.clkm_div_b = cB;    //CLOCK_DIVIDER_B;
