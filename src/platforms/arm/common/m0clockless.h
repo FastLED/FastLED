@@ -680,14 +680,28 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
     //   - Platform-specific timing checks (SEI_CHK, CLI_CHK)
     //   - Fastest of the interrupt-enabled modes
     /////////////////////////////////////////////////////////////////////////////
+    // Pre-load byte 0 (outside main loop)
+    // This prepares the first byte for output while still in C++ context
     asm __volatile__ (
-      // pre-load byte 0
       LOADLEDS3(0) LOADDITHER7(0) DITHER5 SCALE4(0) ADJDITHER7(0) SWAPBBN1
       M0_ASM_ARGS);
 
     do {
       asm __volatile__ (
-      // Write out byte 0, prepping byte 1
+      /////////////////////////////////////////////////////////////////////////
+      // Write out byte 0 (8 bits), while preparing byte 1
+      //
+      // Each line outputs one bit using: HI2 _D1 QLO4 <work> _D2 LO2 _D3
+      // During the T2 period of each bit, we perform work for next byte:
+      //   Bit 7: Nothing (0 cycles)
+      //   Bit 6: Load byte 1 from memory (3 cycles)
+      //   Bit 5: Load dither value (7 cycles)
+      //   Bit 4: Apply dithering (5 cycles)
+      //   Bit 3: Apply color scaling (4 cycles)
+      //   Bit 2: Adjust dither for next time (7 cycles)
+      //   Bit 1: Nothing (0 cycles)
+      //   Bit 0: Position byte 1 for output (1 cycle)
+      /////////////////////////////////////////////////////////////////////////
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
       HI2 _D1 QLO4 LOADLEDS3(1)    _D2(3) LO2 _D3(0)
       HI2 _D1 QLO4 LOADDITHER7(1)  _D2(7) LO2 _D3(0)
@@ -697,7 +711,9 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
       HI2 _D1 QLO4 SWAPBBN1        _D2(1) LO2 _D3(0)
 
-      // Write out byte 1, prepping byte 2
+      /////////////////////////////////////////////////////////////////////////
+      // Write out byte 1 (8 bits), while preparing byte 2
+      /////////////////////////////////////////////////////////////////////////
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
       HI2 _D1 QLO4 LOADLEDS3(2)    _D2(3) LO2 _D3(0)
       HI2 _D1 QLO4 LOADDITHER7(2)  _D2(7) LO2 _D3(0)
@@ -707,7 +723,10 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
       HI2 _D1 QLO4 SWAPBBN1        _D2(1) LO2 _D3(0)
 
-      // Write out byte 2, prepping byte 0
+      /////////////////////////////////////////////////////////////////////////
+      // Write out byte 2 (8 bits), while preparing byte 0 of NEXT pixel
+      // After byte 2, we increment the LED pointer and prep the next pixel
+      /////////////////////////////////////////////////////////////////////////
       HI2 _D1 QLO4 INCLEDS3        _D2(3) LO2 _D3(0)
       HI2 _D1 QLO4 LOADLEDS3(0)    _D2(3) LO2 _D3(0)
       HI2 _D1 QLO4 LOADDITHER7(0)  _D2(7) LO2 _D3(0)
@@ -719,9 +738,24 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
 
       M0_ASM_ARGS
       );
+      // Re-enable interrupts between pixels (platform-specific macros)
       SEI_CHK; INNER_SEI; --counter; CLI_CHK;
     } while(counter);
+
 #elif (FASTLED_ALLOW_INTERRUPTS == 1)
+    /////////////////////////////////////////////////////////////////////////////
+    // MODE 2: INTERRUPTS WITH SOFTWARE TIMING CHECK
+    //
+    // Similar to Mode 3, but uses SysTick timer to measure interrupt duration.
+    // If an interrupt takes too long (>45μs), abort the frame to prevent
+    // corrupting LED data with timing violations.
+    //
+    // Characteristics:
+    //   - Interrupts enabled between pixels using sei()/cli()
+    //   - SysTick timer tracks interrupt duration
+    //   - Returns 0 (failure) if timing violation detected
+    //   - Small gaps between pixels allowed
+    /////////////////////////////////////////////////////////////////////////////
     // We're allowing interrupts - track the loop outside the asm code, and
     // re-enable interrupts in between each iteration.
     asm __volatile__ (
@@ -764,16 +798,28 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       M0_ASM_ARGS
       );
 
+      /////////////////////////////////////////////////////////////////////////
+      // Interrupt timing check using SysTick timer
+      //
+      // SysTick is a down-counter that decrements on each CPU cycle.
+      // We measure time elapsed during the interrupt by comparing SysTick->VAL
+      // before and after enabling interrupts.
+      //
+      // IMPORTANT: SysTick counts DOWN, so elapsed = before - after
+      // (or handle wraparound if timer restarted)
+      //
+      // Timing constraint:
+      //   WS2812 LEDs require data within ~50μs or they latch/reset.
+      //   We allow 45μs maximum interrupt duration to stay safe.
+      /////////////////////////////////////////////////////////////////////////
       uint32_t ticksBeforeInterrupts = SysTick->VAL;
-      sei();
+      sei();          // Enable interrupts
       --counter;
-      cli();
+      cli();          // Disable interrupts
 
-      // If more than 45 uSecs have elapsed, give up on this frame and start over.
-      // Note: this isn't completely correct. It's possible that more than one
-      // millisecond will elapse, and so SysTick->VAL will lap
-      // ticksBeforeInterrupts.
-      // Note: ticksBeforeInterrupts DECREASES
+      // Calculate elapsed time and check if it exceeds 45μs
+      // Note: This check isn't perfect - if >1ms elapses, SysTick wraps around
+      // and we may not detect it correctly. But 1ms is way too long anyway.
       const uint32_t kTicksPerMs = VARIANT_MCK / 1000;
       const uint32_t kTicksPerUs = kTicksPerMs / 1000;
       const uint32_t kTicksIn45us = kTicksPerUs * 45;
@@ -781,25 +827,53 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       const uint32_t currentTicks = SysTick->VAL;
 
       if (ticksBeforeInterrupts < currentTicks) {
-        // Timer started over
+        // Timer wrapped around (started over during interrupt)
         if ((ticksBeforeInterrupts + (kTicksPerMs - currentTicks)) > kTicksIn45us) {
-          return 0;
+          return 0;  // Interrupt took too long - abort
         }
       } else {
+        // Normal case: timer decremented (no wraparound)
         if ((ticksBeforeInterrupts - currentTicks) > kTicksIn45us) {
-          return 0;
+          return 0;  // Interrupt took too long - abort
         }
       }
     } while(counter);
+
 #else
-    // We're not allowing interrupts - run the entire loop in asm to keep things
-    // as tight as possible.  In an ideal world, we should be pushing out ws281x
-    // leds (or other 3-wire leds) with zero gaps between pixels.
+    /////////////////////////////////////////////////////////////////////////////
+    // MODE 1: NO INTERRUPTS - TIGHTEST TIMING
+    //
+    // Output entire LED string in one uninterrupted assembly block.
+    // This provides the best timing precision and zero inter-pixel gaps,
+    // but keeps interrupts disabled for the entire duration.
+    //
+    // Duration: ~30μs per pixel × num_leds
+    //   Example: 100 LEDs = ~3ms with interrupts disabled
+    //
+    // Characteristics:
+    //   - Zero gaps between pixels
+    //   - Perfect timing (no interrupt jitter)
+    //   - Interrupts disabled for entire string (may affect responsiveness)
+    //   - Best visual quality
+    /////////////////////////////////////////////////////////////////////////////
+    // Pre-load byte 0, then loop over ALL pixels in one assembly block
     asm __volatile__ (
-      // pre-load byte 0
+      /////////////////////////////////////////////////////////////////////////
+      // Pre-load byte 0 (prepare first byte before entering main loop)
+      /////////////////////////////////////////////////////////////////////////
     LOADLEDS3(0) LOADDITHER7(0) DITHER5 SCALE4(0) ADJDITHER7(0) SWAPBBN1
 
-    // loop over writing out the data
+    /////////////////////////////////////////////////////////////////////////////
+    // Main loop: Write all pixels with zero interruptions
+    //
+    // For each pixel (3 bytes):
+    //   - Write byte 0 (8 bits) while preparing byte 1
+    //   - Write byte 1 (8 bits) while preparing byte 2
+    //   - Write byte 2 (8 bits) while preparing byte 0 of next pixel
+    //   - Loop via CMPLOOP5 until all pixels done
+    //
+    // This creates a continuous stream of precisely-timed bits with no gaps.
+    /////////////////////////////////////////////////////////////////////////////
     LOOP
       // Write out byte 0, prepping byte 1
       HI2 _D1 QLO4 NOTHING         _D2(0) LO2 _D3(0)
@@ -834,7 +908,34 @@ showLedData(volatile uint32_t *_port, uint32_t _bitmask, const uint8_t *_leds, u
       M0_ASM_ARGS
     );
 #endif
-    return num_leds;
+
+  /////////////////////////////////////////////////////////////////////////////
+  // SUCCESS - All pixels output successfully
+  // Return the number of LEDs written (or 0 if Mode 2 detected timing violation)
+  /////////////////////////////////////////////////////////////////////////////
+  return num_leds;
 }
+
+/******************************************************************************
+ * END OF M0 CLOCKLESS LED DRIVER
+ *
+ * SUMMARY:
+ * This highly optimized assembly code achieves:
+ *
+ * 1. Precise timing: Cycle-accurate bit timing for WS2812 protocol
+ * 2. Zero overhead: Computation overlapped with I/O during T2 periods
+ * 3. Flexible: Three modes for different interrupt requirements
+ * 4. Portable: Works on both M0 and M0+ with timing adjustments
+ * 5. Full-featured: Includes dithering, color scaling, and gamma correction
+ *
+ * The macro-based approach allows the same core logic to work for:
+ * - Different RGB orderings (via RO() macro)
+ * - Different CPU speeds (via T1/T2/T3 calculations)
+ * - Different interrupt policies (via conditional compilation)
+ *
+ * LIMITATION: Hardcoded for 3 bytes per pixel (RGB only).
+ * Adding RGBW support requires significant restructuring to output 4 bytes
+ * per pixel and adjust all timing calculations.
+ ******************************************************************************/
 
 #endif
