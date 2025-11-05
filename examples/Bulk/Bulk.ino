@@ -24,6 +24,8 @@
 // On platforms without hardware peripheral support, the code runs with a warning
 // but LED output will not work (CPU fallback is not yet fully implemented).
 
+// @filter: (memory is high)
+
 #include <FastLED.h>
 #include "fl/screenmap.h"
 
