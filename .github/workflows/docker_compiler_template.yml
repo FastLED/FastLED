@@ -40,10 +40,14 @@ jobs:
       registry_esp_32h2: ${{ steps.credentials.outputs.registry_esp_32h2 }}
       registry_esp_32p4: ${{ steps.credentials.outputs.registry_esp_32p4 }}
       registry_teensy: ${{ steps.credentials.outputs.registry_teensy }}
-      registry_stm32: ${{ steps.credentials.outputs.registry_stm32 }}
+      registry_stm32_f103c8: ${{ steps.credentials.outputs.registry_stm32_f103c8 }}
+      registry_stm32_f411ce: ${{ steps.credentials.outputs.registry_stm32_f411ce }}
+      registry_stm32_f103cb: ${{ steps.credentials.outputs.registry_stm32_f103cb }}
+      registry_stm32_f103tb: ${{ steps.credentials.outputs.registry_stm32_f103tb }}
+      registry_stm32_h747xi: ${{ steps.credentials.outputs.registry_stm32_h747xi }}
       registry_rp: ${{ steps.credentials.outputs.registry_rp }}
       registry_nrf52: ${{ steps.credentials.outputs.registry_nrf52 }}
-      registry_sam: ${{ steps.credentials.outputs.registry_sam }}
+      registry_sam_3x8e: ${{ steps.credentials.outputs.registry_sam_3x8e }}
     steps:
       - name: Output encoded credentials
         id: credentials
@@ -65,10 +69,14 @@ jobs:
           echo "registry_esp_32h2=$(echo -n 'niteris/fastled-compiler-esp-32h2' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_esp_32p4=$(echo -n 'niteris/fastled-compiler-esp-32p4' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32_f103c8=$(echo -n 'niteris/fastled-compiler-stm32-f103c8' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32_f411ce=$(echo -n 'niteris/fastled-compiler-stm32-f411ce' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32_f103cb=$(echo -n 'niteris/fastled-compiler-stm32-f103cb' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32_f103tb=$(echo -n 'niteris/fastled-compiler-stm32-f103tb' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_stm32_h747xi=$(echo -n 'niteris/fastled-compiler-stm32-h747xi' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_rp=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_nrf52=$(echo -n 'niteris/fastled-compiler-nrf52' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_sam=$(echo -n 'niteris/fastled-compiler-sam' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_sam_3x8e=$(echo -n 'niteris/fastled-compiler-sam-3x8e' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
   # ============================================================================
   # PLATFORM IMAGES BUILD
@@ -131,18 +139,32 @@ jobs:
           - name: teensy
             platforms: teensy30,teensy31,teensy40,teensy41,teensyLC
             registry: registry_teensy
-          - name: stm32
-            platforms: bluepill,blackpill,stm103tb
-            registry: registry_stm32
+          # STM32 platforms - individual images per board (flat structure)
+          - name: stm32-f103c8
+            platforms: bluepill
+            registry: registry_stm32_f103c8
+          - name: stm32-f411ce
+            platforms: blackpill
+            registry: registry_stm32_f411ce
+          - name: stm32-f103cb
+            platforms: maplemini
+            registry: registry_stm32_f103cb
+          - name: stm32-f103tb
+            platforms: stm103tb
+            registry: registry_stm32_f103tb
+          - name: stm32-h747xi
+            platforms: giga_r1
+            registry: registry_stm32_h747xi
           - name: rp
             platforms: rp2040,rp2350,rp2350B
             registry: registry_rp
           - name: nrf52
             platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense
             registry: registry_nrf52
-          - name: sam
-            platforms: due,digix,giga_r1
-            registry: registry_sam
+          # SAM platforms - individual images per board (flat structure)
+          - name: sam-3x8e
+            platforms: due
+            registry: registry_sam_3x8e
         arch:
           - runs_on: ubuntu-24.04
             platform: linux/amd64
@@ -194,14 +216,24 @@ jobs:
             registry: niteris/fastled-compiler-esp-32p4
           - name: teensy
             registry: niteris/fastled-compiler-teensy
-          - name: stm32
-            registry: niteris/fastled-compiler-stm32
+          # STM32 platforms - individual images per board (flat structure)
+          - name: stm32-f103c8
+            registry: niteris/fastled-compiler-stm32-f103c8
+          - name: stm32-f411ce
+            registry: niteris/fastled-compiler-stm32-f411ce
+          - name: stm32-f103cb
+            registry: niteris/fastled-compiler-stm32-f103cb
+          - name: stm32-f103tb
+            registry: niteris/fastled-compiler-stm32-f103tb
+          - name: stm32-h747xi
+            registry: niteris/fastled-compiler-stm32-h747xi
           - name: rp
             registry: niteris/fastled-compiler-rp
           - name: nrf52
             registry: niteris/fastled-compiler-nrf52
-          - name: sam
-            registry: niteris/fastled-compiler-sam
+          # SAM platforms - individual images per board (flat structure)
+          - name: sam-3x8e
+            registry: niteris/fastled-compiler-sam-3x8e
     steps:
       - name: Download digests
         uses: actions/download-artifact@v4

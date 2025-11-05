@@ -23,10 +23,16 @@ niteris/fastled-compiler-base:latest
     │   ├── niteris/fastled-compiler-esp-32h2:latest
     │   └── niteris/fastled-compiler-esp-32p4:latest
     ├── niteris/fastled-compiler-teensy:latest
-    ├── niteris/fastled-compiler-stm32:latest
+    ├── STM32 Platforms (flat structure - one image per board):
+    │   ├── niteris/fastled-compiler-stm32-f103c8:latest
+    │   ├── niteris/fastled-compiler-stm32-f411ce:latest
+    │   ├── niteris/fastled-compiler-stm32-f103cb:latest
+    │   ├── niteris/fastled-compiler-stm32-f103tb:latest
+    │   └── niteris/fastled-compiler-stm32-h747xi:latest
     ├── niteris/fastled-compiler-rp:latest
     ├── niteris/fastled-compiler-nrf52:latest
-    └── niteris/fastled-compiler-sam:latest
+    └── SAM Platforms (flat structure - one image per board):
+        └── niteris/fastled-compiler-sam-3x8e:latest
 ```
 
 ### Base Image
@@ -55,19 +61,20 @@ niteris/fastled-compiler-base:latest
 
 **Build Strategy**: Varies by platform architecture:
 
-**Grouped Platforms** (AVR, Teensy, STM32, RP, NRF52, SAM):
+**Grouped Platforms** (AVR, Teensy, RP, NRF52):
 - Each image compiles **multiple boards** to pre-cache all toolchains and dependencies
 - Examples:
   - `avr` image compiles: uno, attiny85, attiny88, nano_every, etc.
   - `teensy` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
-  - `sam` image compiles: sam3x8e_due
+  - `nrf52` image compiles: nrf52840_dk, adafruit boards, xiaoblesense
 
-**Flat Platforms** (ESP):
+**Flat Platforms** (ESP, STM32, SAM):
 - Each image compiles **a single board** to prevent build artifact accumulation
 - Examples:
   - `esp-32s3` image compiles: esp32s3 only
   - `esp-8266` image compiles: esp8266 only
-  - `esp-32c3` image compiles: esp32c3 only
+  - `stm32-f103c8` image compiles: stm32f103c8_bluepill only
+  - `sam-3x8e` image compiles: sam3x8e_due only
 
 This ensures instant compilation without downloading additional toolchains, while preventing Docker image bloat for platforms prone to build artifact accumulation.
 
@@ -83,7 +90,7 @@ Platform images use two strategies:
 
 **Grouped Platforms**: Boards that share the same PlatformIO platform and have small toolchain overhead are grouped together.
 
-**Flat Platforms**: ESP boards use individual images (one per board) to prevent build artifact accumulation issues.
+**Flat Platforms**: ESP, STM32, and SAM boards use individual images (one per board) to prevent build artifact accumulation issues.
 
 | Platform Family | Docker Image | Included Boards | Strategy |
 |----------------|--------------|-----------------|----------|
@@ -99,10 +106,14 @@ Platform images use two strategies:
 | **esp-32h2** | `fastled-compiler-esp-32h2` | esp32h2 | Flat |
 | **esp-32p4** | `fastled-compiler-esp-32p4` | esp32p4 | Flat |
 | **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc | Grouped |
-| **stm32** | `fastled-compiler-stm32` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga | Grouped |
+| **stm32-f103c8** | `fastled-compiler-stm32-f103c8` | stm32f103c8_bluepill | Flat |
+| **stm32-f411ce** | `fastled-compiler-stm32-f411ce` | stm32f411ce_blackpill | Flat |
+| **stm32-f103cb** | `fastled-compiler-stm32-f103cb` | stm32f103cb_maplemini | Flat |
+| **stm32-f103tb** | `fastled-compiler-stm32-f103tb` | stm32f103tb_tinystm | Flat |
+| **stm32-h747xi** | `fastled-compiler-stm32-h747xi` | stm32h747xi_giga | Flat |
 | **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 | Grouped |
 | **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense | Grouped |
-| **sam** | `fastled-compiler-sam` | sam3x8e_due | Grouped |
+| **sam-3x8e** | `fastled-compiler-sam-3x8e` | sam3x8e_due | Flat |
 
 ### Platform Naming Convention
 
@@ -114,23 +125,25 @@ niteris/fastled-compiler-<platform-family>:<tag>
 **Examples**:
 - `niteris/fastled-compiler-avr:latest`
 - `niteris/fastled-compiler-teensy:latest`
-- `niteris/fastled-compiler-stm32:latest`
+- `niteris/fastled-compiler-nrf52:latest`
 
-**Flat Platforms (ESP)**:
+**Flat Platforms (ESP, STM32, SAM)**:
 ```
-niteris/fastled-compiler-esp-<chip-model>:<tag>
+niteris/fastled-compiler-<platform>-<board>:<tag>
 ```
 
 **Examples**:
 - `niteris/fastled-compiler-esp-32s3:latest`
 - `niteris/fastled-compiler-esp-8266:latest`
-- `niteris/fastled-compiler-esp-32c3:latest`
+- `niteris/fastled-compiler-stm32-f103c8:latest`
+- `niteris/fastled-compiler-stm32-h747xi:latest`
+- `niteris/fastled-compiler-sam-3x8e:latest`
 
 **Rationale**:
 - Grouped platforms: `<platform-family>` groups boards by shared toolchain (e.g., `avr`, `teensy`)
-- Flat platforms: `esp-<chip-model>` provides one image per ESP board to prevent build artifact accumulation
+- Flat platforms: `<platform>-<board>` provides one image per board to prevent build artifact accumulation
 - `<tag>`: Version identifier (currently `:latest`)
-- ESP boards use flat structure due to large toolchain sizes and build artifact issues
+- ESP, STM32, and SAM boards use flat structure due to large toolchain sizes and build artifact issues
 
 ## Special Cases
 
@@ -193,6 +206,35 @@ niteris/fastled-compiler-esp-32dev:idf5.3   → Explicit IDF 5.3
 
 **Build process**: Compiles example for each board listed above to ensure all AVR toolchains are cached in the image.
 
+### STM32 Platform
+
+**Flat Structure**: STM32 family uses individual images (one per board) to prevent build artifact accumulation:
+
+**STM32 Board Images** (5 images):
+- `niteris/fastled-compiler-stm32-f103c8:latest` - STM32F103C8 Blue Pill
+- `niteris/fastled-compiler-stm32-f411ce:latest` - STM32F411CE Black Pill
+- `niteris/fastled-compiler-stm32-f103cb:latest` - STM32F103CB Maple Mini
+- `niteris/fastled-compiler-stm32-f103tb:latest` - STM32F103TB Tiny STM
+- `niteris/fastled-compiler-stm32-h747xi:latest` - STM32H747XI Arduino Giga R1
+
+**Rationale**:
+- STM32 toolchains and build artifacts can accumulate in grouped images
+- Flat structure (one image per board) prevents artifact accumulation
+- Users only download the specific toolchain they need
+- Each board may use different STM32 HAL versions and configurations
+
+### SAM Platform
+
+**Flat Structure**: SAM family uses individual images (one per board) to prevent build artifact accumulation:
+
+**SAM Board Images** (1 image):
+- `niteris/fastled-compiler-sam-3x8e:latest` - Atmel SAM3X8E Due
+
+**Rationale**:
+- SAM toolchains and build artifacts can accumulate in grouped images
+- Flat structure maintains consistency with other flat platforms (ESP, STM32)
+- Provides flexibility for future SAM board additions without affecting existing images
+
 ## Multi-Architecture Support
 
 All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx.
@@ -224,10 +266,16 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  │   ├── esp-32h2 (builds: esp32h2 only)
                  │   └── esp-32p4 (builds: esp32p4 only)
                  ├── teensy (grouped: teensy30, teensy31, teensy40, teensy41, teensylc)
-                 ├── stm32 (grouped: stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, etc.)
+                 ├── STM32 boards (flat - 5 individual images):
+                 │   ├── stm32-f103c8 (builds: stm32f103c8_bluepill only)
+                 │   ├── stm32-f411ce (builds: stm32f411ce_blackpill only)
+                 │   ├── stm32-f103cb (builds: stm32f103cb_maplemini only)
+                 │   ├── stm32-f103tb (builds: stm32f103tb_tinystm only)
+                 │   └── stm32-h747xi (builds: stm32h747xi_giga only)
                  ├── rp (grouped: rp2040, rp2350)
                  ├── nrf52 (grouped: nrf52840_dk, adafruit boards, xiaoblesense)
-                 └── sam (grouped: sam3x8e_due)
+                 └── SAM boards (flat - 1 individual image):
+                     └── sam-3x8e (builds: sam3x8e_due only)
 ```
 
 **Scheduling**:
@@ -253,7 +301,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
 
 2. **`.github/workflows/docker_compiler_template.yml`**
    - Single unified workflow building ALL platform images in parallel
-   - Contains jobs for: avr, 10 ESP boards (flat), teensy, stm32, rp2040, nrf52, sam
+   - Contains jobs for: avr, 10 ESP boards (flat), teensy, 5 STM32 boards (flat), rp2040, nrf52, 1 SAM board (flat)
    - Triggered by base workflow (with 10 min delay)
    - Can also run via manual dispatch or fallback cron
 
@@ -283,12 +331,9 @@ DOCKER_PLATFORMS = {
     "avr": ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "attiny4313",
             "nano_every", "attiny1604", "attiny1616"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
-    "stm32": ["stm32f103c8_bluepill", "stm32f411ce_blackpill", "stm32f103cb_maplemini",
-              "stm32f103tb_tinystm", "stm32h747xi_giga"],
     "rp": ["rp2040", "rp2350"],
     "nrf52": ["nrf52840_dk", "adafruit_feather_nrf52840_sense",
               "xiaoblesense"],
-    "sam": ["sam3x8e_due"],
 
     # Flat platforms (single-board images) - ESP boards
     "esp-32dev": ["esp32dev"],
@@ -301,6 +346,16 @@ DOCKER_PLATFORMS = {
     "esp-32c6": ["esp32c6"],
     "esp-32h2": ["esp32h2"],
     "esp-32p4": ["esp32p4"],
+
+    # Flat platforms (single-board images) - STM32 boards
+    "stm32-f103c8": ["stm32f103c8_bluepill"],
+    "stm32-f411ce": ["stm32f411ce_blackpill"],
+    "stm32-f103cb": ["stm32f103cb_maplemini"],
+    "stm32-f103tb": ["stm32f103tb_tinystm"],
+    "stm32-h747xi": ["stm32h747xi_giga"],
+
+    # Flat platforms (single-board images) - SAM boards
+    "sam-3x8e": ["sam3x8e_due"],
 }
 
 # Reverse mapping automatically generated

@@ -73,16 +73,24 @@ DOCKER_PLATFORMS: dict[str, list[str]] = {
         "teensy30",
         "teensylc",
     ],
-    # STM32 Platform - Various STM32 boards
-    # Image: niteris/fastled-compiler-stm32:latest
-    # Platform: ststm32
-    "stm32": [
-        "stm32f103c8_bluepill",
-        "stm32f411ce_blackpill",
-        "stm32f103cb_maplemini",
-        "stm32f103tb_tinystm",
-        "stm32h747xi_giga",
-    ],
+    # STM32 Platforms - Individual images per board (flat structure)
+    # These replace the previous grouped stm32 image
+    # to prevent build artifact accumulation issues
+    # STM32F103C8 Blue Pill
+    # Image: niteris/fastled-compiler-stm32-f103c8:latest
+    "stm32-f103c8": ["stm32f103c8_bluepill"],
+    # STM32F411CE Black Pill
+    # Image: niteris/fastled-compiler-stm32-f411ce:latest
+    "stm32-f411ce": ["stm32f411ce_blackpill"],
+    # STM32F103CB Maple Mini
+    # Image: niteris/fastled-compiler-stm32-f103cb:latest
+    "stm32-f103cb": ["stm32f103cb_maplemini"],
+    # STM32F103TB Tiny STM
+    # Image: niteris/fastled-compiler-stm32-f103tb:latest
+    "stm32-f103tb": ["stm32f103tb_tinystm"],
+    # STM32H747XI Arduino Giga R1
+    # Image: niteris/fastled-compiler-stm32-h747xi:latest
+    "stm32-h747xi": ["stm32h747xi_giga"],
     # RP Platform - Raspberry Pi Pico family
     # Image: niteris/fastled-compiler-rp:latest
     # Platforms: raspberrypi (maxgerhardt fork)
@@ -99,12 +107,12 @@ DOCKER_PLATFORMS: dict[str, list[str]] = {
         "adafruit_feather_nrf52840_sense",
         "xiaoblesense",
     ],
-    # SAM Platform - Atmel SAM (ARM Cortex-M3)
-    # Image: niteris/fastled-compiler-sam:latest
-    # Platform: atmelsam
-    "sam": [
-        "sam3x8e_due",
-    ],
+    # SAM Platforms - Individual images per board (flat structure)
+    # These replace the previous grouped sam image
+    # to prevent build artifact accumulation issues
+    # Atmel SAM3X8E Due
+    # Image: niteris/fastled-compiler-sam-3x8e:latest
+    "sam-3x8e": ["sam3x8e_due"],
 }
 
 # Reverse mapping: board_name → platform_family
