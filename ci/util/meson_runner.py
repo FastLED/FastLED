@@ -3,14 +3,28 @@
 
 import hashlib
 import os
+import re
 import subprocess
 import sys
+import time
+from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple
 
 from running_process import RunningProcess
 
 from ci.util.build_lock import libfastled_build_lock
+
+
+@dataclass
+class MesonTestResult:
+    """Result from running Meson build and tests"""
+
+    success: bool
+    duration: float  # Total duration in seconds
+    num_tests_run: int = 0  # Number of tests executed
+    num_tests_passed: int = 0  # Number of tests that passed
+    num_tests_failed: int = 0  # Number of tests that failed
 
 
 def check_meson_installed() -> bool:
@@ -896,7 +910,7 @@ def _create_error_context_filter(context_lines: int = 20) -> callable:
 
 def run_meson_test(
     build_dir: Path, test_name: Optional[str] = None, verbose: bool = False
-) -> bool:
+) -> MesonTestResult:
     """
     Run tests using Meson.
 
@@ -906,7 +920,7 @@ def run_meson_test(
         verbose: Enable verbose test output
 
     Returns:
-        True if all tests passed, False otherwise
+        MesonTestResult with success status, duration, and test counts
     """
     cmd = ["meson", "test", "-C", str(build_dir), "--print-errorlogs"]
 
@@ -919,6 +933,11 @@ def run_meson_test(
     else:
         print(f"[MESON] Running all tests...")
 
+    start_time = time.time()
+    num_passed = 0
+    num_failed = 0
+    num_run = 0
+
     try:
         # Use RunningProcess for streaming output
         # Inherit environment to ensure compiler wrappers are available
@@ -930,16 +949,52 @@ def run_meson_test(
             env=os.environ.copy(),  # Pass current environment with wrapper paths
         )
 
-        # In verbose mode, show all output
-        # In normal mode, only show errors with context
+        # Parse output in real-time to show test progress
+        # Pattern matches: "1/143 test_name       OK     0.12s"
+        test_pattern = re.compile(
+            r"^\s*(\d+)/(\d+)\s+(\S+)\s+(OK|FAIL|SKIP|TIMEOUT)\s+([\d.]+)s"
+        )
+
         if verbose:
             returncode = proc.wait(echo=True)
         else:
-            # Wait silently, capturing all output
-            returncode = proc.wait(echo=False)
+            # Stream output line by line to show test progress
+            with proc.line_iter(timeout=None) as it:
+                for line in it:
+                    # Try to parse test result line
+                    match = test_pattern.match(line)
+                    if match:
+                        current = int(match.group(1))
+                        total = int(match.group(2))
+                        test_name_match = match.group(3)
+                        status = match.group(4)
+                        duration_str = match.group(5)
 
-            # If test failed, show error context from accumulated output
-            if returncode != 0:
+                        num_run = current
+                        if status == "OK":
+                            num_passed += 1
+                            # Show brief progress for passed tests
+                            print(
+                                f"  [{current}/{total}] ✓ {test_name_match} ({duration_str}s)"
+                            )
+                        elif status == "FAIL":
+                            num_failed += 1
+                            print(
+                                f"  [{current}/{total}] ✗ {test_name_match} FAILED ({duration_str}s)"
+                            )
+                        elif status == "TIMEOUT":
+                            num_failed += 1
+                            print(
+                                f"  [{current}/{total}] ⏱ {test_name_match} TIMEOUT ({duration_str}s)"
+                            )
+                    elif verbose or "FAILED" in line or "ERROR" in line:
+                        # Show error/important lines
+                        print(f"  {line}")
+
+            returncode = proc.wait()
+
+            # If test failed and we didn't see individual test results, show error context
+            if returncode != 0 and num_run == 0:
                 # Create error-detecting filter
                 error_filter = _create_error_context_filter(context_lines=20)
 
@@ -948,18 +1003,41 @@ def run_meson_test(
                 for line in output_lines:
                     error_filter(line)
 
+        duration = time.time() - start_time
+
         if returncode != 0:
             print(
                 f"[MESON] Tests failed with return code {returncode}", file=sys.stderr
             )
-            return False
+            return MesonTestResult(
+                success=False,
+                duration=duration,
+                num_tests_run=num_run,
+                num_tests_passed=num_passed,
+                num_tests_failed=num_failed,
+            )
 
-        print(f"[MESON] All tests passed")
-        return True
+        print(
+            f"[MESON] All tests passed ({num_passed}/{num_run} tests in {duration:.2f}s)"
+        )
+        return MesonTestResult(
+            success=True,
+            duration=duration,
+            num_tests_run=num_run,
+            num_tests_passed=num_passed,
+            num_tests_failed=num_failed,
+        )
 
     except Exception as e:
+        duration = time.time() - start_time
         print(f"[MESON] Test execution failed with exception: {e}", file=sys.stderr)
-        return False
+        return MesonTestResult(
+            success=False,
+            duration=duration,
+            num_tests_run=num_run,
+            num_tests_passed=num_passed,
+            num_tests_failed=num_failed,
+        )
 
 
 def run_meson_build_and_test(
@@ -969,7 +1047,7 @@ def run_meson_build_and_test(
     clean: bool = False,
     verbose: bool = False,
     unity: bool = False,
-) -> bool:
+) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
 
@@ -982,13 +1060,15 @@ def run_meson_build_and_test(
         unity: Enable unity builds (default: False)
 
     Returns:
-        True if build and tests successful, False otherwise
+        MesonTestResult with success status, duration, and test counts
     """
+    start_time = time.time()
+
     # Check if Meson is installed
     if not check_meson_installed():
         print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
         print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
-        return False
+        return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Clean if requested
     if clean and build_dir.exists():
@@ -999,7 +1079,7 @@ def run_meson_build_and_test(
 
     # Setup build
     if not setup_meson_build(source_dir, build_dir, reconfigure=False, unity=unity):
-        return False
+        return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
     meson_test_name = None
@@ -1022,10 +1102,10 @@ def run_meson_build_and_test(
                 compile_target = meson_test_name
 
             if not compile_meson(build_dir, target=compile_target):
-                return False
+                return MesonTestResult(success=False, duration=time.time() - start_time)
     except TimeoutError as e:
         print(f"[MESON] {e}", file=sys.stderr)
-        return False
+        return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Run tests
     if unity:
@@ -1055,7 +1135,7 @@ def run_meson_build_and_test(
                 f"[MESON] Error: No unity test executables found in {build_dir / 'tests'}",
                 file=sys.stderr,
             )
-            return False
+            return MesonTestResult(success=False, duration=time.time() - start_time)
 
         # If specific test requested, filter categories or prepare doctest filter
         filter_name = None
@@ -1067,7 +1147,12 @@ def run_meson_build_and_test(
 
         # Run each category executable
         overall_success = True
+        num_unity_tests_run = 0
+        num_unity_tests_passed = 0
+        num_unity_tests_failed = 0
+
         for category_name, exe_path in category_executables:
+            num_unity_tests_run += 1
             # Build command
             test_cmd = [str(exe_path)]
 
@@ -1116,10 +1201,12 @@ def run_meson_build_and_test(
                         file=sys.stderr,
                     )
                     overall_success = False
+                    num_unity_tests_failed += 1
                     # Continue running other categories to get full test results
                 else:
                     # Always show success status (even in non-verbose mode)
                     print(f"[MESON] ✓ {category_name} passed")
+                    num_unity_tests_passed += 1
 
             except KeyboardInterrupt:
                 raise
@@ -1129,19 +1216,31 @@ def run_meson_build_and_test(
                     file=sys.stderr,
                 )
                 overall_success = False
+                num_unity_tests_failed += 1
+
+        duration = time.time() - start_time
 
         if not overall_success:
             print("[MESON] Some unity test categories failed", file=sys.stderr)
-            return False
+            return MesonTestResult(
+                success=False,
+                duration=duration,
+                num_tests_run=num_unity_tests_run,
+                num_tests_passed=num_unity_tests_passed,
+                num_tests_failed=num_unity_tests_failed,
+            )
 
         print(f"[MESON] All unity test categories passed")
-        return True
+        return MesonTestResult(
+            success=True,
+            duration=duration,
+            num_tests_run=num_unity_tests_run,
+            num_tests_passed=num_unity_tests_passed,
+            num_tests_failed=num_unity_tests_failed,
+        )
     else:
         # Normal mode: Use Meson's test runner
-        if not run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose):
-            return False
-
-    return True
+        return run_meson_test(build_dir, test_name=meson_test_name, verbose=verbose)
 
 
 if __name__ == "__main__":

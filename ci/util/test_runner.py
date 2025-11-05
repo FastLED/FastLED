@@ -1421,7 +1421,7 @@ def runner(
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
 
-            success = run_meson_build_and_test(
+            result = run_meson_build_and_test(
                 source_dir=PROJECT_ROOT,
                 build_dir=build_dir,
                 test_name=test_name,
@@ -1430,7 +1430,14 @@ def runner(
                 unity=args.unity,
             )
 
-            if not success:
+            # Print summary with timing
+            if result.success:
+                print(f"\n{'=' * 70}")
+                print(f"✓ C++ Unit Tests PASSED")
+                print(f"  Tests run: {result.num_tests_passed}/{result.num_tests_run}")
+                print(f"  Duration: {result.duration:.2f}s")
+                print(f"{'=' * 70}\n")
+            else:
                 sys.exit(1)
         else:
             # Fingerprint cache hit - skip unit tests
@@ -1442,6 +1449,9 @@ def runner(
 
     # For mixed test modes (unit + examples, etc.), run unit tests via Meson but continue to other tests
     # Skip if fingerprint cache indicates no changes
+    # Track Meson test timing for summary
+    meson_test_timing: Optional[ProcessTiming] = None
+
     if test_categories.unit and not test_categories.unit_only:
         if cpp_test_change:
             from ci.util.meson_runner import run_meson_build_and_test
@@ -1450,7 +1460,7 @@ def runner(
             build_dir = PROJECT_ROOT / ".build" / "meson"
             test_name = args.test if args.test else None
 
-            success = run_meson_build_and_test(
+            result = run_meson_build_and_test(
                 source_dir=PROJECT_ROOT,
                 build_dir=build_dir,
                 test_name=test_name,
@@ -1459,13 +1469,22 @@ def runner(
                 unity=args.unity,
             )
 
-            if not success:
+            # Create timing entry for summary
+            meson_test_timing = ProcessTiming(
+                name=f"cpp_unit_tests ({result.num_tests_passed}/{result.num_tests_run} passed)",
+                duration=result.duration,
+                command="meson test",
+                skipped=False,
+            )
+
+            if not result.success:
                 sys.exit(1)
         else:
             # Fingerprint cache hit - skip unit tests
             print_cache_hit(
                 "Fingerprint cache valid - skipping C++ unit tests (no changes detected in C++ test-related files)"
             )
+            meson_test_timing = _create_skipped_timing("cpp_unit_tests")
 
         # Continue to run other tests (examples, Python, etc.) - don't return
 
@@ -1542,6 +1561,9 @@ def runner(
 
         # Display timing summary
         all_timings = timings + skipped_timings
+        # Add Meson test timing if it was run
+        if meson_test_timing:
+            all_timings.insert(0, meson_test_timing)  # Put unit tests first
         if all_timings:
             summary = _format_timing_summary(all_timings)
             print(summary)
