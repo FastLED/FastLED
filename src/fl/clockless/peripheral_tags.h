@@ -29,7 +29,14 @@ namespace fl {
 
 struct LCD_I80 {};     ///< LCD I80 parallel interface peripheral (ESP32-S3, ESP32-P4). Falls back to CPU on unsupported platforms.
 struct RMT {};         ///< Remote Control Transceiver peripheral (ESP32, ESP32-S3, ESP32-C3/C6/H2). Falls back to CPU on unsupported platforms.
+#ifdef I2S
+#pragma push_macro("I2S")
+#undef I2S
+#endif
 struct I2S {};         ///< I2S audio interface repurposed for LED output (ESP32, ESP32-S3). Falls back to CPU on unsupported platforms.
+#ifdef I2S
+#pragma pop_macro("I2S")
+#endif
 struct SPI_BULK {};    ///< SPI peripheral for bulk LED output. Falls back to CPU on unsupported platforms.
 struct OFLED {};  ///< OFLED DMA-based parallel output (Teensy 4.x). Falls back to CPU on unsupported platforms.
 
