@@ -83,7 +83,9 @@ def compile_board_examples(
         filtered_examples, skipped_examples = get_filtered_examples(board, examples)
 
     if skipped_examples:
-        print(f"\nSKIPPED {len(skipped_examples)} example(s) due to @filter constraints:")
+        print(
+            f"\nSKIPPED {len(skipped_examples)} example(s) due to @filter constraints:"
+        )
         for example, reason in skipped_examples:
             print(f"  - {example}: {reason}")
         print("  Use --no-filter to override and attempt compilation anyway")

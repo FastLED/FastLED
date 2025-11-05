@@ -606,11 +606,14 @@ class TestPintestFilter:
         that uses extensive template instantiation. While it matches the platform filter
         (avr and not attiny*), it should be excluded based on memory constraints.
         """
-        from ci.boards import ATMEGA8A
         from pathlib import Path
 
+        from ci.boards import ATMEGA8A
+
         # Parse actual Pintest filter
-        pintest_path = Path(__file__).parent.parent.parent / "examples" / "Pintest" / "Pintest.ino"
+        pintest_path = (
+            Path(__file__).parent.parent.parent / "examples" / "Pintest" / "Pintest.ino"
+        )
         sketch_filter = parse_filter_from_sketch(pintest_path)
 
         assert sketch_filter is not None, "Pintest should have a @filter directive"
@@ -625,7 +628,9 @@ class TestPintestFilter:
 
         # After fix: atmega8a should be skipped due to memory constraints
         # The filter now excludes atmega8* boards because atmega8a only has 8KB flash
-        assert should_skip is True, f"atmega8a should be skipped for Pintest (reason: {reason})"
+        assert should_skip is True, (
+            f"atmega8a should be skipped for Pintest (reason: {reason})"
+        )
         assert "atmega8" in reason.lower() or "board" in reason.lower()
 
 
