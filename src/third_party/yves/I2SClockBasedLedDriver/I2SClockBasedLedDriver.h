@@ -926,7 +926,7 @@ static void IRAM_ATTR _I2SClockBasedLedDriverinterruptHandler(void *arg)
 #else
     I2SClockBasedLedDriver *cont = (I2SClockBasedLedDriver *)arg;
 
-    if (GET_PERI_REG_BITS(I2S_INT_ST_REG(I2S_DEVICE), I2S_OUT_EOF_INT_ST_V, I2S_OUT_EOF_INT_ST_S))
+    if ((READ_PERI_REG(I2S_INT_ST_REG(I2S_DEVICE)) >> I2S_OUT_EOF_INT_ST_S) & I2S_OUT_EOF_INT_ST_V)
     {
         cont->framesync = !cont->framesync;
 
@@ -955,7 +955,7 @@ static void IRAM_ATTR _I2SClockBasedLedDriverinterruptHandler(void *arg)
         }
     }
 
-    if (GET_PERI_REG_BITS(I2S_INT_ST_REG(I2S_DEVICE), I2S_OUT_TOTAL_EOF_INT_ST_V, I2S_OUT_TOTAL_EOF_INT_ST_S))
+    if ((READ_PERI_REG(I2S_INT_ST_REG(I2S_DEVICE)) >> I2S_OUT_TOTAL_EOF_INT_ST_S) & I2S_OUT_TOTAL_EOF_INT_ST_V)
     {
 
         //        portBASE_TYPE HPTaskAwoken = 0;
