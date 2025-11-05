@@ -3,7 +3,7 @@
 #include "../../is_avr.h"
 
 // ATmega328P family pin mappings
-// Includes: ATmega328P, ATmega328PB, ATmega328, ATmega168P, ATmega168, ATmega8
+// Includes: ATmega328P, ATmega328PB, ATmega328, ATmega168P, ATmega168, ATmega8, ATmega8A
 // Used in: Arduino UNO, Arduino Nano, Arduino Pro Mini
 
 #include "../common/avr_pin.h"
@@ -52,7 +52,7 @@ _FL_DEFPIN(16, 2, C); _FL_DEFPIN(17, 3, C); _FL_DEFPIN(18, 4, C); _FL_DEFPIN(19,
 #define AVR_HARDWARE_SPI 1
 #define HAS_HARDWARE_PIN_SUPPORT 1
 
-#ifndef __AVR_ATmega8__
+#if !defined(__AVR_ATmega8__) && !defined(__AVR_ATmega8A__)
 #define SPI_UART0_DATA 1
 #define SPI_UART0_CLOCK 4
 #endif

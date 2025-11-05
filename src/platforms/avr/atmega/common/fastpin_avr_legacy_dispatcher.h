@@ -17,7 +17,7 @@
 // Note: Family-specific files have their own namespace fl {} wrappers
 
 #ifdef FL_IS_AVR_ATMEGA_328P
-    // ATmega328P family: Arduino UNO, Nano, Pro Mini
+    // ATmega328P family: Arduino UNO, Nano, Pro Mini, ATmega8/8A
     #include "../m328p/fastpin_m328p.h"
 
 #elif defined(__AVR_ATmega2560__) || defined(__AVR_ATmega1280__)
