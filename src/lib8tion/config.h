@@ -1,7 +1,9 @@
 #pragma once
 
-// Auto-detect ATtiny platforms - must be included first
-#include "lib8tion/attiny_detect.h"
+// Include centralized AVR platform detection
+#if defined(__AVR__)
+#include "platforms/avr/is_avr.h"
+#endif
 
 #if defined(__arm__)
 
@@ -94,7 +96,7 @@
 
 // Note: these require hardware MUL instruction
 //       -- sorry, ATtiny!
-#if !defined(LIB8_ATTINY)
+#ifndef FL_IS_AVR_ATTINY
 #define SCALE8_C 0
 #define SCALE16BY8_C 0
 #define SCALE16_C 0
@@ -126,7 +128,7 @@
 #define QMUL8_AVRASM 0
 #define EASE8_AVRASM 0
 #define BLEND8_AVRASM 0
-#endif // end of !defined(LIB8_ATTINY)
+#endif // end of !defined(FL_IS_AVR_ATTINY)
 
 // end of #elif defined(__AVR__)
 

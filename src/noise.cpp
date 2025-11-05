@@ -1,6 +1,10 @@
 /// @file noise.cpp
 /// Functions to generate and fill arrays with noise.
 
+#if defined(__AVR__)
+#include "platforms/avr/is_avr.h"
+#endif
+
 #include <string.h>  // ok include
 #include "fl/array.h"
 
@@ -56,7 +60,7 @@ FL_PROGMEM static uint8_t const p[] = {
 #define AVG15(U,V) (((U)+(V)) >> 1)
 #else
 // See if we should use the inlined avg15 for AVR with MUL instruction
-#if defined(__AVR__) && (LIB8_ATTINY == 0)
+#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
 #define AVG15(U,V) (noise_detail::avg15_inline_avr_mul((U),(V)))
 // inlined copy of avg15 for AVR with MUL instruction; cloned from math8.h
 // Forcing this inline in the 3-D 16bit noise produces a 12% speedup overall,

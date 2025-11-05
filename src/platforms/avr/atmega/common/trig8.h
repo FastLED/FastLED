@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../../is_avr.h"
 #include "fl/stdint.h"
 #include "lib8tion/lib8static.h"
 #include "fl/compiler_control.h"
@@ -73,7 +74,7 @@ LIB8STATIC int16_t sin16_avr(uint16_t theta) {
 const uint8_t b_m16_interleave[] = {0, 49, 49, 41, 90, 27, 117, 10};
 
 /// Fast 8-bit approximation of sin(x) (AVR implementation)
-#if !defined(LIB8_ATTINY)
+#ifndef FL_IS_AVR_ATTINY
 LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
     uint8_t offset = theta;
 
@@ -146,7 +147,7 @@ LIB8STATIC uint8_t sin8_avr(uint8_t theta) {
     if (theta & 0x80) y = -y;
     return y + 128;
 }
-#endif // !defined(LIB8_ATTINY)
+#endif // !defined(FL_IS_AVR_ATTINY)
 
 /// Platform-independent alias of the fast sin implementation
 LIB8STATIC int16_t sin16(uint16_t theta) { return sin16_avr(theta); }

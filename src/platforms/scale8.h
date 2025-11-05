@@ -8,7 +8,8 @@
 
 // Select appropriate implementation based on platform configuration
 #if defined(__AVR__)
-#if defined(LIB8_ATTINY)
+#include "platforms/avr/is_avr.h"
+#ifdef FL_IS_AVR_ATTINY
 // ATtiny has no MUL instruction - use ATtiny-specific shift-and-add and C implementations
 #include "platforms/avr/attiny/math/scale8_attiny.h"
 #else

@@ -2,6 +2,8 @@
 #ifndef __INC_LED_SYSDEFS_AVR_H
 #define __INC_LED_SYSDEFS_AVR_H
 
+#include "is_avr.h"
+
 #define FASTLED_AVR
 
 #ifndef INTERRUPT_THRESHOLD
@@ -59,7 +61,7 @@ extern volatile unsigned long timer0_millis;
 };
 
 // special defs for the tiny environments
-#if defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__) || defined(__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__) || defined(__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__) || defined(__AVR_ATtiny167__) || defined(__AVR_ATtiny87__)  || defined(__AVR_ATtiny48__) || defined(__AVR_ATtiny88__) || defined(__AVR_ATtinyX41__) || defined(__AVR_ATtiny841__) || defined(__AVR_ATtiny441__) || defined(__AVR_ATtiny4313__) || defined(__AVR_ATtiny13__)
+#if defined(FL_IS_AVR_ATTINY) || defined(__AVR_ATmega32U2__) || defined(__AVR_ATmega16U2__) || defined(__AVR_ATmega8U2__) || defined(__AVR_AT90USB162__)
 #define LIB8_ATTINY 1
 #define FASTLED_NEEDS_YIELD
 

@@ -299,8 +299,8 @@ class Args:
     """Parsed and resolved command-line arguments."""
 
     interactive: bool
-    datasheet: Optional[Tuple[int, int, int, int]]
-    fastled: Optional[Tuple[int, int, int]]
+    datasheet: Optional[tuple[int, int, int, int]]
+    fastled: Optional[tuple[int, int, int]]
     verbose: bool
 
 
@@ -368,7 +368,7 @@ Examples:
     return parser
 
 
-def parse_arguments(argv: Optional[List[str]] = None) -> Args:
+def parse_arguments(argv: Optional[list[str]] = None) -> Args:
     """Parse command-line arguments and return typed Args dataclass.
 
     Args:

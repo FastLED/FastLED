@@ -23,7 +23,7 @@ from tools.led_timing_conversions import (
 # ============================================================================
 
 # All chipsets from led_timing.h with their T1, T2, T3 values
-FASTLED_CHIPSETS: Dict[str, Tuple[int, int, int]] = {
+FASTLED_CHIPSETS: dict[str, tuple[int, int, int]] = {
     # Fast-Speed Chipsets (800kHz - 1600kHz)
     "GE8822_800KHZ": (350, 660, 350),
     "WS2812_800KHZ": (250, 625, 375),
@@ -113,7 +113,7 @@ class TestChipsetDatabase(unittest.TestCase):
 
     def test_all_chipsets_round_trip(self) -> None:
         """Test that all chipsets survive round-trip conversion."""
-        failures: List[str] = []
+        failures: list[str] = []
 
         for name, (T1, T2, T3) in FASTLED_CHIPSETS.items():
             with self.subTest(chipset=name):

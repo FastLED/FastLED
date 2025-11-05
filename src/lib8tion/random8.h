@@ -3,6 +3,10 @@
 #ifndef __INC_LIB8TION_RANDOM_H
 #define __INC_LIB8TION_RANDOM_H
 
+#if defined(__AVR__)
+#include "platforms/avr/is_avr.h"
+#endif
+
 #include "fl/stdint.h"
 
 #include "lib8tion/lib8static.h"
@@ -30,7 +34,7 @@
 /// Increment value for pseudo-random number generation
 #define FASTLED_RAND16_13849 ((uint16_t)(13849))
 
-#if defined(LIB8_ATTINY)
+#ifdef FL_IS_AVR_ATTINY
 /// Multiplies a value by the pseudo-random multiplier
 #define APPLY_FASTLED_RAND16_2053(x) (x << 11) + (x << 2) + x
 #else

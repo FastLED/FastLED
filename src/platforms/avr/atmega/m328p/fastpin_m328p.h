@@ -1,5 +1,7 @@
 #pragma once
 
+#include "../../is_avr.h"
+
 // ATmega328P family pin mappings
 // Includes: ATmega328P, ATmega328PB, ATmega328, ATmega168P, ATmega168, ATmega8
 // Used in: Arduino UNO, Arduino Nano, Arduino Pro Mini
@@ -9,7 +11,7 @@
 
 namespace fl {
 
-#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328PB__) || defined(__AVR_ATmega328__) || defined(__AVR_ATmega168__) || defined(__AVR_ATmega168P__) || defined(__AVR_ATmega8__)
+#ifdef FL_IS_AVR_ATMEGA_328P
 
 #ifndef FASTLED_FORCE_SOFTWARE_PINS
 

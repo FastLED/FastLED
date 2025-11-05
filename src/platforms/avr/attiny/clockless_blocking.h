@@ -11,14 +11,14 @@
 #include "fl/force_inline.h"
 #include "fl/register.h"
 #include "fl/fastpin.h"
-#include "lib8tion/attiny_detect.h"
+#include "platforms/avr/is_avr.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/chipsets/timing_traits.h"
 #include "fastled_delay.h"
 
 namespace fl {
 
-#if defined(LIB8_ATTINY)
+#ifdef FL_IS_AVR_ATTINY
 
 // Scaling macro choice
 #ifndef FASTLED_AVR_SCALE

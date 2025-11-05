@@ -32,8 +32,8 @@
 #elif defined(FASTLED_TEENSY4)
   #include "arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
 #elif defined(__AVR__)
-  #include "lib8tion/attiny_detect.h"
-  #if defined(LIB8_ATTINY)
+  #include "avr/is_avr.h"
+  #ifdef FL_IS_AVR_ATTINY
     // ATtiny platforms use optimized assembly implementation from FastLED 3.10.3
     #include "avr/attiny/clockless_blocking.h"
   #else

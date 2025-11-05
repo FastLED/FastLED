@@ -1,6 +1,10 @@
 /// @file hsv2rgb.cpp
 /// Functions to convert from the HSV colorspace to the RGB colorspace
 
+#if defined(__AVR__)
+#include "platforms/avr/is_avr.h"
+#endif
+
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
 #include "fl/stdint.h"
@@ -16,7 +20,7 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb);
 /// HSV to RGB implementation in raw C, for the AVR platform only
 void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb);
 
-#if defined(__AVR__) && !defined( LIB8_ATTINY )
+#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw(const CHSV & hsv, CRGB & rgb)
 {
     hsv2rgb_raw_avr( hsv, rgb);
@@ -135,7 +139,7 @@ void hsv2rgb_raw_C (const CHSV & hsv, CRGB & rgb)
 
 
 
-#if defined(__AVR__) && !defined( LIB8_ATTINY )
+#if defined(__AVR__) && !defined(FL_IS_AVR_ATTINY)
 void hsv2rgb_raw_avr(const CHSV & hsv, CRGB & rgb)
 {
     uint8_t hue, saturation, value;

@@ -2,6 +2,7 @@
 
 // ok no namespace fl
 
+#include "is_avr.h"
 #include "platforms/math8_config.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/intmap.h"
@@ -9,7 +10,7 @@
 #include "fl/force_inline.h"
 
 // Select appropriate AVR implementation based on MUL instruction availability
-#if defined(LIB8_ATTINY)
+#ifdef FL_IS_AVR_ATTINY
 // ATtiny platforms without MUL instruction
 #include "attiny/math/math8_attiny.h"
 #else
