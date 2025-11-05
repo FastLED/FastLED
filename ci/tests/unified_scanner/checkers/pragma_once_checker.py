@@ -29,8 +29,8 @@ class PragmaOnceChecker(BaseChecker):
 
         return True
 
-    def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
-        results: List[CheckResult] = []
+    def check_file(self, file_path: Path, content: str) -> list[CheckResult]:
+        results: list[CheckResult] = []
 
         # Check for third-party or excluded directories
         excluded_dirs = ["third_party", "platforms"]

@@ -63,7 +63,11 @@ This project uses directory-specific agent guidelines. See:
 - **Follow existing code patterns** and naming conventions
 
 ### Python Code Standards
-- **Collection Types**: Always fully type annotate collections using `List[T]`, `Set[T]`, `Dict[K, V]` instead of bare `list`, `set`, `dict` to pass pyright type checking
+- **Type Annotations**: Use modern PEP 585 and PEP 604 type hints (Python 3.11+ native syntax):
+  - Use `list[T]`, `dict[K, V]`, `set[T]` instead of `List[T]`, `Dict[K, V]`, `Set[T]`
+  - Use `X | Y` for unions instead of `Union[X, Y]`
+  - Use `T | None` instead of `Optional[T]`
+  - No need for `from __future__ import annotations` (works natively in Python 3.11+)
 
 - **Exception Handling - KeyboardInterrupt**:
   - **CRITICAL**: NEVER silently catch or suppress `KeyboardInterrupt` exceptions

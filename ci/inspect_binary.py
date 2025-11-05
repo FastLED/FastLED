@@ -88,7 +88,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_build_info(build_info_path: Path) -> Dict[str, Any]:
+def load_build_info(build_info_path: Path) -> dict[str, Any]:
     """
     Load build information from a JSON file.
 
@@ -104,7 +104,7 @@ def load_build_info(build_info_path: Path) -> Dict[str, Any]:
 
 
 def display_function_sizes(
-    symbols: List[SymbolInfo], board_name: str, top_n: int = 50
+    symbols: list[SymbolInfo], board_name: str, top_n: int = 50
 ) -> None:
     """
     Display per-function code sizes from the final binary (after tree-shaking).
@@ -123,8 +123,8 @@ def display_function_sizes(
     total_symbols = len(sized_symbols)
 
     # Type breakdown
-    type_counts: Dict[str, int] = {}
-    type_sizes: Dict[str, int] = {}
+    type_counts: dict[str, int] = {}
+    type_sizes: dict[str, int] = {}
     for sym in sized_symbols:
         sym_type = sym.type
         type_counts[sym_type] = type_counts.get(sym_type, 0) + 1

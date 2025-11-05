@@ -17,7 +17,7 @@ IS_GITHUB = "GITHUB_ACTIONS" in os.environ
 
 
 def run_command(
-    cmd_list: List[str],
+    cmd_list: list[str],
     capture_output: bool = True,
     shell: bool = False,
     check: Optional[bool] = None,

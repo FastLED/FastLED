@@ -73,8 +73,8 @@ class GitHubDebugger:
         self.max_errors = max_errors
         self.context_lines = context_lines
         self.repo = self._get_repo()
-        self.critical_errors: List[Dict[str, str]] = []
-        self.warnings: List[Dict[str, str]] = []
+        self.critical_errors: list[dict[str, str]] = []
+        self.warnings: list[dict[str, str]] = []
         self.log_file: Optional[Path] = None
 
     def _extract_run_id(self, run_input: str) -> str:
@@ -102,7 +102,7 @@ class GitHubDebugger:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"  # Default fallback
 
-    def get_run_info(self) -> Dict[str, str]:
+    def get_run_info(self) -> dict[str, str]:
         """Get basic run information."""
         try:
             result = subprocess.run(
@@ -124,7 +124,7 @@ class GitHubDebugger:
             print(f"Error getting run info: {e}", file=sys.stderr)
             return {}
 
-    def get_failed_jobs(self) -> List[Dict[str, str]]:
+    def get_failed_jobs(self) -> list[dict[str, str]]:
         """Get list of failed jobs."""
         try:
             result = subprocess.run(
@@ -212,8 +212,8 @@ class GitHubDebugger:
                 lines = f.readlines()
 
             # Process logs line by line
-            error_buffer: List[str] = []
-            context_buffer: List[str] = []
+            error_buffer: list[str] = []
+            context_buffer: list[str] = []
             in_error_context = False
             lines_after_error = 0
             current_job = "Unknown"
@@ -299,7 +299,7 @@ class GitHubDebugger:
             print(f"\nError analyzing logs: {e}", file=sys.stderr)
 
     def _save_error_block(
-        self, job_name: str, lines: List[str], is_critical: bool = True
+        self, job_name: str, lines: list[str], is_critical: bool = True
     ) -> None:
         """Save an error block to the collection.
 

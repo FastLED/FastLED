@@ -14,7 +14,7 @@ from ci.compiler.board_example_utils import should_skip_example_for_board
 console = Console()
 
 
-def parse_args() -> Tuple[argparse.Namespace, List[str]]:
+def parse_args() -> tuple[argparse.Namespace, list[str]]:
     parser = argparse.ArgumentParser(description="Compile wasm")
     parser.add_argument(
         "sketch_dir",
@@ -39,7 +39,7 @@ def parse_args() -> Tuple[argparse.Namespace, List[str]]:
     return known_args, unknown_args
 
 
-def run_command(cmd_list: List[str]) -> int:
+def run_command(cmd_list: list[str]) -> int:
     """Run a command and return its exit code."""
     cmd_str = subprocess.list2cmdline(cmd_list)
     console.print(f"[dim]→ {cmd_str}[/dim]")

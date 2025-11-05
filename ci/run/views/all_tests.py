@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from typing import Any, List
 
@@ -20,7 +18,7 @@ class AllTestsView(Screen[Any]):
 
     def __init__(self) -> None:
         super().__init__()
-        self._tasks: List[TaskState] = []
+        self._tasks: list[TaskState] = []
         self._runner_task: Any = None
 
     def compose(self) -> ComposeResult:
@@ -29,8 +27,8 @@ class AllTestsView(Screen[Any]):
         yield self.container
         self.call_after_refresh(self._start)
 
-    async def _run_block(self, items: List[TaskState], title_prefix: str) -> None:
-        blocks: List[tuple[TaskState, TaskBlock]] = []
+    async def _run_block(self, items: list[TaskState], title_prefix: str) -> None:
+        blocks: list[tuple[TaskState, TaskBlock]] = []
         for ts in items:
             tb = TaskBlock(f"{title_prefix}:{ts.name}")
             self.container.mount(tb)

@@ -56,8 +56,8 @@ from ci.boards import Board
 class SketchFilter:
     """Represents parsed @filter block from a sketch."""
 
-    require: Dict[str, List[str]] = field(default_factory=lambda: {})
-    exclude: Dict[str, List[str]] = field(default_factory=lambda: {})
+    require: dict[str, list[str]] = field(default_factory=lambda: {})
+    exclude: dict[str, list[str]] = field(default_factory=lambda: {})
 
     def is_empty(self) -> bool:
         """Check if filter has any constraints."""
@@ -112,8 +112,8 @@ def parse_oneline_filter(filter_line: str) -> Optional[SketchFilter]:
     if not filter_line:
         return None
 
-    require: Dict[str, List[str]] = {}
-    exclude: Dict[str, List[str]] = {}
+    require: dict[str, list[str]] = {}
+    exclude: dict[str, list[str]] = {}
 
     # Pattern to match conditions in three formats:
     # 1. (key is value) or (key is not value) or (key matches value)
@@ -208,8 +208,8 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
         return None
 
     filter_block = match.group(1)
-    require: Dict[str, List[str]] = {}
-    exclude: Dict[str, List[str]] = {}
+    require: dict[str, list[str]] = {}
+    exclude: dict[str, list[str]] = {}
     current_section: Optional[str] = None
 
     for line in filter_block.split("\n"):
@@ -255,7 +255,7 @@ def parse_filter_from_sketch(ino_path: Path) -> Optional[SketchFilter]:
 
 def should_skip_sketch(
     board: Board, sketch_filter: Optional[SketchFilter]
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """Determine if sketch should be skipped for this board based on filter.
 
     Args:
@@ -307,7 +307,7 @@ def _get_board_property(board: Board, key: str) -> Optional[str]:
         return None
 
 
-def _value_matches(board_value: str, filter_values: List[str]) -> bool:
+def _value_matches(board_value: str, filter_values: list[str]) -> bool:
     """Check if board value matches any of the filter values.
 
     Supports:

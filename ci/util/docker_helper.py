@@ -131,7 +131,7 @@ def is_docker_available() -> bool:
         return False
 
 
-def attempt_start_docker() -> Tuple[bool, str]:
+def attempt_start_docker() -> tuple[bool, str]:
     """Attempt to start Docker if it's not running.
 
     Returns:
@@ -159,7 +159,7 @@ def attempt_start_docker() -> Tuple[bool, str]:
         return _start_docker_linux()
 
 
-def _start_docker_windows() -> Tuple[bool, str]:
+def _start_docker_windows() -> tuple[bool, str]:
     """Attempt to start Docker Desktop on Windows.
 
     Returns:
@@ -208,7 +208,7 @@ def _start_docker_windows() -> Tuple[bool, str]:
         return False, "Failed to start Docker: Unknown error"
 
 
-def _start_docker_macos() -> Tuple[bool, str]:
+def _start_docker_macos() -> tuple[bool, str]:
     """Attempt to start Docker Desktop on macOS.
 
     Returns:
@@ -240,7 +240,7 @@ def _start_docker_macos() -> Tuple[bool, str]:
         )
 
 
-def _start_docker_linux() -> Tuple[bool, str]:
+def _start_docker_linux() -> tuple[bool, str]:
     """Attempt to start Docker on Linux using systemctl or service.
 
     Returns:

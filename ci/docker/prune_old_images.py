@@ -79,7 +79,7 @@ Examples:
     return parser.parse_args()
 
 
-def get_fastled_images() -> List[Dict[str, Any]]:
+def get_fastled_images() -> list[dict[str, Any]]:
     """
     Get list of FastLED PlatformIO Docker images.
 
@@ -100,7 +100,7 @@ def get_fastled_images() -> List[Dict[str, Any]]:
             check=True,
         )
 
-        images: List[Dict[str, Any]] = []
+        images: list[dict[str, Any]] = []
         for line in result.stdout.strip().split("\n"):
             if not line:
                 continue
@@ -132,7 +132,7 @@ def get_fastled_images() -> List[Dict[str, Any]]:
         return []
 
 
-def parse_image_name(image_name: str) -> Dict[str, str]:
+def parse_image_name(image_name: str) -> dict[str, str]:
     """
     Parse FastLED PlatformIO image name to extract components.
 
@@ -164,8 +164,8 @@ def parse_image_name(image_name: str) -> Dict[str, str]:
 
 
 def group_images_by_platform(
-    images: List[Dict[str, Any]],
-) -> Dict[str, List[Dict[str, Any]]]:
+    images: list[dict[str, Any]],
+) -> dict[str, list[dict[str, Any]]]:
     """
     Group images by platform/architecture combination.
 
@@ -175,7 +175,7 @@ def group_images_by_platform(
     Returns:
         Dictionary mapping platform key to list of images
     """
-    grouped: Dict[str, List[Dict[str, Any]]] = {}
+    grouped: dict[str, list[dict[str, Any]]] = {}
 
     for image in images:
         parsed = parse_image_name(image["name"])
@@ -186,7 +186,7 @@ def group_images_by_platform(
 
         grouped[platform_key].append(
             cast(
-                Dict[str, Any],
+                dict[str, Any],
                 {
                     **image,
                     "parsed": parsed,
@@ -224,8 +224,8 @@ def parse_docker_timestamp(timestamp: str) -> datetime:
 
 
 def filter_images_by_age(
-    images: List[Dict[str, Any]], days: int
-) -> List[Dict[str, Any]]:
+    images: list[dict[str, Any]], days: int
+) -> list[dict[str, Any]]:
     """
     Filter images older than specified days.
 
@@ -237,7 +237,7 @@ def filter_images_by_age(
         List of old images
     """
     cutoff_date = datetime.now() - timedelta(days=days)
-    old_images: List[Dict[str, Any]] = []
+    old_images: list[dict[str, Any]] = []
 
     for image in images:
         created_date = parse_docker_timestamp(image["created"])
@@ -304,7 +304,7 @@ def main() -> int:
         print(f"Filtered to {len(images)} images for platform: {args.platform}\n")
 
     # Determine what to delete
-    images_to_delete: List[Dict[str, Any]] = []
+    images_to_delete: list[dict[str, Any]] = []
 
     if args.all:
         # Delete ALL images (dangerous!)

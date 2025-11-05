@@ -23,7 +23,7 @@ class FileContent:
 
     path: str
     content: str
-    lines: List[str]
+    lines: list[str]
 
     def __post_init__(self):
         if not self.lines:
@@ -46,7 +46,7 @@ class FileContentChecker(ABC):
         pass
 
     @abstractmethod
-    def check_file_content(self, file_content: FileContent) -> List[str]:
+    def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check the file content and return any issues found.
 
         Args:
@@ -65,8 +65,8 @@ class MultiCheckerFileProcessor:
         pass
 
     def process_files_with_checkers(
-        self, file_paths: List[str], checkers: List[FileContentChecker]
-    ) -> Dict[str, List[str]]:
+        self, file_paths: list[str], checkers: list[FileContentChecker]
+    ) -> dict[str, list[str]]:
         """Process files with multiple checkers.
 
         Args:
@@ -77,7 +77,7 @@ class MultiCheckerFileProcessor:
             Dictionary mapping checker class name to list of issues found
         """
         # Initialize results dictionary for each checker
-        results: Dict[str, List[str]] = {}
+        results: dict[str, list[str]] = {}
         for checker in checkers:
             checker_name = checker.__class__.__name__
             results[checker_name] = []
@@ -122,7 +122,7 @@ class MultiCheckerFileProcessor:
 class FileProcessorCallback(FileContentChecker):
     """Legacy compatibility wrapper - delegates to FileContentChecker methods."""
 
-    def check_file_content_legacy(self, file_path: str, content: str) -> List[str]:
+    def check_file_content_legacy(self, file_path: str, content: str) -> list[str]:
         """Legacy method signature for backward compatibility."""
         file_content = FileContent(path=file_path, content=content, lines=[])
         return self.check_file_content(file_content)
@@ -136,7 +136,7 @@ class GenericFileSearcher:
 
     def search_directory(
         self, start_dir: str, callback: FileProcessorCallback
-    ) -> List[str]:
+    ) -> list[str]:
         """Search a directory and process files using the provided callback.
 
         Args:
@@ -146,7 +146,7 @@ class GenericFileSearcher:
         Returns:
             List of all issues found across all files
         """
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
 
         # Collect all files that should be processed
         for root, _, files in os.walk(start_dir):
@@ -156,7 +156,7 @@ class GenericFileSearcher:
                     files_to_check.append(file_path)
 
         # Process files in parallel
-        all_issues: List[str] = []
+        all_issues: list[str] = []
         with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             futures = [
                 executor.submit(self._process_single_file, file_path, callback)
@@ -169,7 +169,7 @@ class GenericFileSearcher:
 
     def _process_single_file(
         self, file_path: str, callback: FileProcessorCallback
-    ) -> List[str]:
+    ) -> list[str]:
         """Process a single file using the callback.
 
         Args:
@@ -189,13 +189,13 @@ class GenericFileSearcher:
 
 
 def collect_files_to_check(
-    test_directories: List[str], extensions: Optional[List[str]] = None
-) -> List[str]:
+    test_directories: list[str], extensions: Optional[list[str]] = None
+) -> list[str]:
     """Collect all files to check from the given directories."""
     if extensions is None:
         extensions = [".cpp", ".h", ".hpp"]
 
-    files_to_check: List[str] = []
+    files_to_check: list[str] = []
 
     # Search each directory
     for directory in test_directories:

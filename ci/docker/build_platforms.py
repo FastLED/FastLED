@@ -15,7 +15,7 @@ from typing import Dict, List, Optional
 # Platform families and their included boards
 # Key = platform family name (used in Docker image names)
 # Value = list of board names (from ci/boards.py) to pre-cache
-DOCKER_PLATFORMS: Dict[str, List[str]] = {
+DOCKER_PLATFORMS: dict[str, list[str]] = {
     # AVR Platform - Classic and Modern AVR boards
     # Image: niteris/fastled-compiler-avr:latest
     # Platforms: atmelavr (classic) + atmelmegaavr (modern)
@@ -110,7 +110,7 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
 # Reverse mapping: board_name → platform_family
 # Automatically generated from DOCKER_PLATFORMS
 # Used to determine which platform family a board belongs to
-BOARD_TO_PLATFORM: Dict[str, str] = {
+BOARD_TO_PLATFORM: dict[str, str] = {
     board: platform for platform, boards in DOCKER_PLATFORMS.items() for board in boards
 }
 
@@ -134,7 +134,7 @@ def get_platform_for_board(board_name: str) -> Optional[str]:
     return BOARD_TO_PLATFORM.get(board_name)
 
 
-def get_boards_for_platform(platform: str) -> List[str]:
+def get_boards_for_platform(platform: str) -> list[str]:
     """
     Get all board names for a given platform family.
 

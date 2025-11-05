@@ -203,7 +203,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
         pio_ini = PlatformIOIni.parseFile(pio_ini_path)
 
         # Extract toolchains for both environments
-        env_toolchains: Dict[str, List[PackageInfo]] = {}
+        env_toolchains: dict[str, list[PackageInfo]] = {}
 
         for env_name in ["esp32c3", "esp32s3"]:
             env = pio_ini.get_environment(env_name)
@@ -284,7 +284,7 @@ class TestToolchainUrlExtraction(unittest.TestCase):
             self.skipTest("Failed to resolve esp32c3 platform")
 
         # Categorize packages by type
-        packages_by_type: Dict[str, List[PackageInfo]] = {}
+        packages_by_type: dict[str, list[PackageInfo]] = {}
         for pkg in platform_resolution.packages:
             pkg_type = pkg.type or "unknown"
             if pkg_type not in packages_by_type:

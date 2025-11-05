@@ -41,9 +41,9 @@ def _install_global_package(package: str) -> None:
     locked_print(f"*** Finished installing {package} ***")
 
 
-def insert_tool_aliases(meta_json: Dict[str, Dict[str, Any]]) -> None:
+def insert_tool_aliases(meta_json: dict[str, dict[str, Any]]) -> None:
     for board in meta_json.keys():
-        aliases: Dict[str, Optional[str]] = {}
+        aliases: dict[str, Optional[str]] = {}
         cc_path_value = meta_json[board].get("cc_path")
         resolved_cc_path: Optional[Path] = None
         if cc_path_value:
@@ -243,13 +243,13 @@ def safe_file_removal(file_path: Path, max_retries: int) -> bool:
 
 def create_build_dir(
     board: Board,
-    defines: List[str],
+    defines: list[str],
     customsdk: Optional[str],
     no_install_deps: bool,
-    extra_packages: List[str],
+    extra_packages: list[str],
     build_dir: Optional[str],
     board_dir: Optional[str],
-    build_flags: Optional[List[str]],
+    build_flags: Optional[list[str]],
     extra_scripts: Optional[str],
 ) -> tuple[bool, str]:
     """Create the build directory for the given board."""

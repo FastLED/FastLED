@@ -36,7 +36,7 @@ def get_breadcrumb_path(cache_dir: Path, url: str, filename: str = "info.json") 
     return artifact_dir / filename
 
 
-def read_breadcrumb(breadcrumb_path: Path) -> Optional[Dict[str, Any]]:
+def read_breadcrumb(breadcrumb_path: Path) -> Optional[dict[str, Any]]:
     """
     Read breadcrumb data from a JSON file.
 
@@ -57,7 +57,7 @@ def read_breadcrumb(breadcrumb_path: Path) -> Optional[Dict[str, Any]]:
         return None
 
 
-def write_breadcrumb(breadcrumb_path: Path, data: Dict[str, Any]) -> bool:
+def write_breadcrumb(breadcrumb_path: Path, data: dict[str, Any]) -> bool:
     """
     Write breadcrumb data to a JSON file with file locking.
 
@@ -158,7 +158,7 @@ def update_breadcrumb_status(
     """
     data = read_breadcrumb(breadcrumb_path)
     if data is None:
-        data: Dict[str, Any] = {}
+        data: dict[str, Any] = {}
 
     data["status"] = status
     data["updated_at"] = datetime.now().isoformat()

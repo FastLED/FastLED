@@ -22,9 +22,9 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 class NoNamespaceFlDeclarationTester(unittest.TestCase):
-    def check_file(self, file_path: str) -> List[str]:
+    def check_file(self, file_path: str) -> list[str]:
         """Check if a file has namespace fl { declarations."""
-        failings: List[str] = []
+        failings: list[str] = []
         try:
             with open(file_path, "r", encoding="utf-8") as f:
                 for line_number, line in enumerate(f, 1):
@@ -45,7 +45,7 @@ class NoNamespaceFlDeclarationTester(unittest.TestCase):
         This only checks files directly in src/, not in subdirectories like
         src/chipsets/, src/protocols/, etc.
         """
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
 
         # Only check files directly in src/ directory, not subdirectories
         try:
@@ -57,7 +57,7 @@ class NoNamespaceFlDeclarationTester(unittest.TestCase):
         except (OSError, IOError):
             pass
 
-        all_failings: List[str] = []
+        all_failings: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

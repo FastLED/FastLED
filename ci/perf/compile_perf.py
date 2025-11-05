@@ -61,14 +61,14 @@ class CompilePerfAnalyzer:
 
     def _build_event_index(self) -> None:
         """Build indices for different event types."""
-        self.source_events: List[Dict[str, Any]] = []
-        self.parse_events: List[Dict[str, Any]] = []
-        self.instantiate_events: List[Dict[str, Any]] = []
-        self.phase_events: Dict[str, Dict[str, Any]] = {}
+        self.source_events: list[dict[str, Any]] = []
+        self.parse_events: list[dict[str, Any]] = []
+        self.instantiate_events: list[dict[str, Any]] = []
+        self.phase_events: dict[str, dict[str, Any]] = {}
 
         # First pass: collect all events
         # Second pass: match begin/end pairs for async events
-        begin_events: Dict[int, Dict[str, Any]] = {}
+        begin_events: dict[int, dict[str, Any]] = {}
 
         for event in self.events:
             name = event.get("name", "")
@@ -111,9 +111,9 @@ class CompilePerfAnalyzer:
             return exec_event.get("dur", 0) / 1000.0
         return 0.0
 
-    def get_phase_times(self) -> Dict[str, float]:
+    def get_phase_times(self) -> dict[str, float]:
         """Get time spent in each compilation phase."""
-        result: Dict[str, float] = {}
+        result: dict[str, float] = {}
 
         # Main phases
         for phase in ["Frontend", "Backend"]:
@@ -162,7 +162,7 @@ class CompilePerfAnalyzer:
         # Otherwise just return the filename
         return Path(path).name
 
-    def get_header_times(self, max_depth: int = 2) -> Dict[str, Any]:
+    def get_header_times(self, max_depth: int = 2) -> dict[str, Any]:
         """
         Get header parse times with nesting information.
 
@@ -180,13 +180,13 @@ class CompilePerfAnalyzer:
                 'children': List[str] # child headers
             }
         """
-        headers: Dict[str, Dict[str, Any]] = {}
+        headers: dict[str, dict[str, Any]] = {}
 
         # Sort events by timestamp
         sorted_sources = sorted(self.source_events, key=lambda e: e.get("ts", 0))
 
         # Build parent-child relationships
-        stack: List[Tuple[str, int, int]] = []  # (path, start_ts, end_ts)
+        stack: list[tuple[str, int, int]] = []  # (path, start_ts, end_ts)
 
         for event in sorted_sources:
             path = event.get("args", {}).get("detail", "")
@@ -236,7 +236,7 @@ class CompilePerfAnalyzer:
 
         return headers
 
-    def get_fastled_headers(self) -> List[Tuple[str, float]]:
+    def get_fastled_headers(self) -> list[tuple[str, float]]:
         """
         Get all FastLED-specific headers with their CUMULATIVE compile times.
 
@@ -245,7 +245,7 @@ class CompilePerfAnalyzer:
         to users when they #include that header.
         """
         headers = self.get_header_times()
-        fastled_headers: List[Tuple[str, float]] = []
+        fastled_headers: list[tuple[str, float]] = []
 
         for name, info in headers.items():
             path = self._normalize_path(info["path"])
@@ -255,7 +255,7 @@ class CompilePerfAnalyzer:
 
         return sorted(fastled_headers, key=lambda x: x[1], reverse=True)
 
-    def get_top_operations(self, n: int = 20) -> List[Tuple[str, str, float]]:
+    def get_top_operations(self, n: int = 20) -> list[tuple[str, str, float]]:
         """
         Get top N slowest operations.
 
@@ -263,7 +263,7 @@ class CompilePerfAnalyzer:
             List of (operation_type, detail, time_ms)
             e.g., ('ParseClass', 'fl::string', 129.4)
         """
-        operations: List[Tuple[str, str, float]] = []
+        operations: list[tuple[str, str, float]] = []
 
         for event in self.events:
             name = event.get("name", "")
@@ -287,17 +287,17 @@ class CompilePerfAnalyzer:
         operations.sort(key=lambda x: x[2], reverse=True)
         return operations[:n]
 
-    def build_header_tree(self, max_depth: int = 3) -> Dict[str, Any]:
+    def build_header_tree(self, max_depth: int = 3) -> dict[str, Any]:
         """Build nested tree of header includes up to max_depth levels deep."""
         headers = self.get_header_times(max_depth=max_depth + 1)
 
-        def build_subtree(header_name: str, current_depth: int) -> Dict[str, Any]:
+        def build_subtree(header_name: str, current_depth: int) -> dict[str, Any]:
             """Recursively build tree for a header and its children."""
             if header_name not in headers:
                 return {"time": 0, "children": {}}
 
             info = headers[header_name]
-            node: Dict[str, Any] = {"time": info["time"], "children": {}}
+            node: dict[str, Any] = {"time": info["time"], "children": {}}
 
             # Only recurse if we haven't hit max depth
             if current_depth < max_depth:
@@ -309,7 +309,7 @@ class CompilePerfAnalyzer:
             return node
 
         # Find root headers (depth 0 or 1)
-        tree: Dict[str, Any] = {}
+        tree: dict[str, Any] = {}
         for name, info in headers.items():
             if info["depth"] <= 1:
                 tree[name] = build_subtree(name, 0)
@@ -324,7 +324,7 @@ class CompilePerfAnalyzer:
             return json.dumps(self.generate_json(), indent=2)
 
         # Text report
-        lines: List[str] = []
+        lines: list[str] = []
 
         total_time = self.get_total_time()
         phases = self.get_phase_times()
@@ -380,14 +380,14 @@ class CompilePerfAnalyzer:
         tree = self.build_header_tree(max_depth=10)
 
         def format_tree(
-            node_dict: Dict[str, Any],
+            node_dict: dict[str, Any],
             prefix: str = "",
             is_last: bool = True,
             depth: int = 0,
             max_children: int = 5,
-        ) -> List[str]:
+        ) -> list[str]:
             """Recursively format tree structure."""
-            result: List[str] = []
+            result: list[str] = []
 
             # Sort children by time
             children = sorted(
@@ -494,14 +494,14 @@ class CompilePerfAnalyzer:
 
         return "\n".join(lines)
 
-    def generate_json(self) -> Dict[str, Any]:
+    def generate_json(self) -> dict[str, Any]:
         """Generate JSON output for GitHub Actions artifacts."""
         total_time = self.get_total_time()
         phases = self.get_phase_times()
         fastled_headers = self.get_fastled_headers()
         top_ops = self.get_top_operations(20)
 
-        warnings: List[str] = []
+        warnings: list[str] = []
 
         # Check for slow headers
         for name, time_ms in fastled_headers:
@@ -632,7 +632,7 @@ def check_thresholds(analyzer: CompilePerfAnalyzer, thresholds_file: Path) -> bo
 
     total_time = analyzer.get_total_time()
 
-    errors: List[str] = []
+    errors: list[str] = []
 
     # Check total compile time (this is the only check that matters)
     max_total = thresholds.get("total_compile_time_ms", 2000)

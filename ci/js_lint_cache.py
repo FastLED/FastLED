@@ -19,7 +19,7 @@ from ci.util.color_output import print_cache_hit, print_cache_miss
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
-def get_directory_files(directory: Path) -> List[Path]:
+def get_directory_files(directory: Path) -> list[Path]:
     """
     Get all files in a directory for fingerprint hashing.
 
@@ -32,7 +32,7 @@ def get_directory_files(directory: Path) -> List[Path]:
         return []
 
     # Get all files (not directories) recursively
-    all_files: List[Path] = []
+    all_files: list[Path] = []
     for file_path in directory.glob("**/*"):
         if file_path.is_file():
             all_files.append(file_path)
@@ -66,8 +66,8 @@ def check_js_files_changed() -> bool:
         Path("ci/docker/avr8js"),
     ]
 
-    all_file_paths: List[Path] = []
-    missing_dirs: List[str] = []
+    all_file_paths: list[Path] = []
+    missing_dirs: list[str] = []
 
     for directory in directories:
         if not directory.exists():

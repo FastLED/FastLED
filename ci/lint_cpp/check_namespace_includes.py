@@ -61,7 +61,7 @@ def is_bracket_balanced(file_path: Path) -> bool:
 
 def find_includes_after_namespace(
     file_path: Path,
-) -> List[Tuple[int, str, Optional[Tuple[int, str]]]]:
+) -> list[tuple[int, str, Optional[tuple[int, str]]]]:
     """
     Check if a C++ file has #include directives after namespace declarations.
 
@@ -75,8 +75,8 @@ def find_includes_after_namespace(
         with open(file_path, "r", encoding="utf-8") as f:
             content = f.readlines()
 
-        violations: List[Tuple[int, str, Optional[Tuple[int, str]]]] = []
-        current_namespace: Optional[Tuple[int, str]] = None
+        violations: list[tuple[int, str, Optional[tuple[int, str]]]] = []
+        current_namespace: Optional[tuple[int, str]] = None
 
         # Compiled regex patterns for validation (only used after fast string search)
         using_namespace_pattern = re.compile(r"^\s*using\s+namespace\s+\w+\s*;")
@@ -133,7 +133,7 @@ def find_includes_after_namespace(
         return []
 
 
-def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
+def scan_cpp_files(directory: str = ".") -> dict[str, Any]:
     """
     Scan all C++ files in a directory for includes after namespace declarations.
 
@@ -145,7 +145,7 @@ def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
     """
     # Only check .h and .hpp files
     cpp_extensions = [".h", ".hpp"]
-    violations: Dict[str, Any] = {}
+    violations: dict[str, Any] = {}
 
     for root, dirs, files in os.walk(directory):
         # Skip build directories, third-party code, and tests
@@ -178,7 +178,7 @@ def scan_cpp_files(directory: str = ".") -> Dict[str, Any]:
 def main() -> None:
     # Only scan src/ directory for .h files
     src_dir = os.path.join(PROJECT_ROOT, "src")
-    violations: Dict[str, Any] = scan_cpp_files(str(src_dir))
+    violations: dict[str, Any] = scan_cpp_files(str(src_dir))
 
     if violations:
         # Count total violations
@@ -200,7 +200,7 @@ def main() -> None:
             print(f"{rel_path}:")
 
             # Group violations by namespace
-            namespace_groups: Dict[Optional[str], List[Tuple[int, str]]] = {}
+            namespace_groups: dict[Optional[str], list[tuple[int, str]]] = {}
 
             for include_line, include_snippet, namespace_info in violation_data:
                 namespace_key = None

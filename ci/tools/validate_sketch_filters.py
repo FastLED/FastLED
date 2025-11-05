@@ -15,19 +15,19 @@ from typing import Dict, List, Tuple
 from ci.compiler.sketch_filter import parse_filter_from_sketch
 
 
-def find_all_sketches(examples_dir: Path) -> List[Path]:
+def find_all_sketches(examples_dir: Path) -> list[Path]:
     """Find all .ino sketch files in examples directory."""
     return sorted(examples_dir.rglob("*.ino"))
 
 
-def has_platform_guards(content: str) -> Tuple[bool, List[str]]:
+def has_platform_guards(content: str) -> tuple[bool, list[str]]:
     """Check if sketch has C++ platform guards.
 
     Returns:
         Tuple of (has_guards: bool, guard_types: List[str])
         guard_types examples: ['SKETCH_HAS_LOTS_OF_MEMORY', 'ESP32', 'esp32s3']
     """
-    guard_patterns: List[str] = [
+    guard_patterns: list[str] = [
         r"#if\s+!?SKETCH_HAS_LOTS_OF_MEMORY",
         r"#ifdef?\s+(ESP32|ESP8266|__AVR__|TEENSY|RP2040|STM32)",
         r"#if\s+defined\((ESP32|ESP8266|__AVR__|TEENSY|RP2040|STM32)",
@@ -36,7 +36,7 @@ def has_platform_guards(content: str) -> Tuple[bool, List[str]]:
         r"#ifndef\s+(ESP32|ESP8266)",
     ]
 
-    matches: List[str] = []
+    matches: list[str] = []
     for pattern in guard_patterns:
         if re.search(pattern, content, re.MULTILINE | re.IGNORECASE):
             matches.append(pattern)
@@ -44,13 +44,13 @@ def has_platform_guards(content: str) -> Tuple[bool, List[str]]:
     return len(matches) > 0, matches
 
 
-def validate_sketch(ino_path: Path, examples_dir: Path) -> Tuple[bool, List[str]]:
+def validate_sketch(ino_path: Path, examples_dir: Path) -> tuple[bool, list[str]]:
     """Validate a single sketch file.
 
     Returns:
         Tuple of (valid: bool, warnings: List[str])
     """
-    warnings: List[str] = []
+    warnings: list[str] = []
     relative_path = ino_path.relative_to(examples_dir)
 
     try:
@@ -112,11 +112,11 @@ def main() -> int:
     print(f"Validating sketches in: {examples_dir}")
     print()
 
-    sketches: List[Path] = find_all_sketches(examples_dir)
+    sketches: list[Path] = find_all_sketches(examples_dir)
     print(f"Found {len(sketches)} sketch files\n")
 
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
     valid_count = 0
 
     for ino_path in sketches:

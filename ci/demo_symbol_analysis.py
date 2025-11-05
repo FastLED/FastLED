@@ -76,7 +76,7 @@ def main():
     print("=" * 80)
 
     # List of boards to analyze (you can add more)
-    boards_to_analyze: List[str] = []
+    boards_to_analyze: list[str] = []
 
     # Check which boards have build info available
     build_dir = Path(".build")
@@ -97,7 +97,7 @@ def main():
     )
 
     # Run symbol analysis for each board
-    successful_boards: List[str] = []
+    successful_boards: list[str] = []
     for board in boards_to_analyze:
         if run_symbol_analysis(board):
             successful_boards.append(board)

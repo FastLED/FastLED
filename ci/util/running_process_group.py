@@ -70,7 +70,7 @@ class GroupStatus:
     """Status information for all processes in a group."""
 
     group_name: str
-    processes: List[ProcessStatus]
+    processes: list[ProcessStatus]
     total_processes: int
     completed_processes: int
     failed_processes: int
@@ -104,7 +104,7 @@ class RunningProcessGroup:
 
     def __init__(
         self,
-        processes: Optional[List[RunningProcess]] = None,
+        processes: Optional[list[RunningProcess]] = None,
         config: Optional[ProcessExecutionConfig] = None,
         name: str = "ProcessGroup",
     ):
@@ -118,11 +118,11 @@ class RunningProcessGroup:
         self.processes = processes or []
         self.config = config or ProcessExecutionConfig()
         self.name = name
-        self._dependencies: Dict[RunningProcess, List[RunningProcess]] = {}
+        self._dependencies: dict[RunningProcess, list[RunningProcess]] = {}
 
         # Status tracking
-        self._process_start_times: Dict[RunningProcess, datetime] = {}
-        self._process_last_output: Dict[RunningProcess, str] = {}
+        self._process_start_times: dict[RunningProcess, datetime] = {}
+        self._process_last_output: dict[RunningProcess, str] = {}
         self._status_monitoring_active: bool = False
 
     def add_process(self, process: RunningProcess) -> None:
@@ -152,7 +152,7 @@ class RunningProcessGroup:
             self._dependencies[process] = []
         self._dependencies[process].append(depends_on)
 
-    def add_sequential_chain(self, processes: List[RunningProcess]) -> None:
+    def add_sequential_chain(self, processes: list[RunningProcess]) -> None:
         """Add processes that must run in sequence.
 
         Args:
@@ -165,7 +165,7 @@ class RunningProcessGroup:
         for i in range(1, len(processes)):
             self.add_dependency(processes[i], processes[i - 1])
 
-    def run(self) -> List[ProcessTiming]:
+    def run(self) -> list[ProcessTiming]:
         """Execute all processes according to the configuration.
 
         Returns:
@@ -185,7 +185,7 @@ class RunningProcessGroup:
         else:
             raise ValueError(f"Unknown execution mode: {self.config.execution_mode}")
 
-    def _run_parallel(self) -> List[ProcessTiming]:
+    def _run_parallel(self) -> list[ProcessTiming]:
         """Execute processes in parallel (based on test_runner._run_processes_parallel)."""
         if not self.processes:
             return []
@@ -218,7 +218,7 @@ class RunningProcessGroup:
         active_processes = self.processes.copy()
         start_time = time.time()
 
-        runner_timeouts: List[int] = [
+        runner_timeouts: list[int] = [
             p.timeout for p in self.processes if p.timeout is not None
         ]
         global_timeout: Optional[int] = self.config.timeout_seconds
@@ -230,13 +230,13 @@ class RunningProcessGroup:
         stuck_process_timeout = self.config.stuck_timeout_seconds
 
         # Track failed processes for proper error reporting
-        failed_processes: List[str] = []  # Processes killed due to timeout/stuck
-        exit_failed_processes: List[
+        failed_processes: list[str] = []  # Processes killed due to timeout/stuck
+        exit_failed_processes: list[
             tuple[RunningProcess, int]
         ] = []  # Processes that failed with non-zero exit code
 
         # Track completed processes for timing summary
-        completed_timings: List[ProcessTiming] = []
+        completed_timings: list[ProcessTiming] = []
 
         # Create thread-based stuck process monitor if enabled
         stuck_monitor = None
@@ -263,7 +263,7 @@ class RunningProcessGroup:
                     )
                     print("\033[91m###### ERROR ######\033[0m", flush=True)
                     print("Tests failed due to global timeout", flush=True)
-                    failures: List[TestFailureInfo] = []
+                    failures: list[TestFailureInfo] = []
                     for p in active_processes:
                         failed_processes.append(
                             subprocess.list2cmdline(p.command)
@@ -339,7 +339,7 @@ class RunningProcessGroup:
             )
             for proc, exit_code in exit_failed_processes:
                 print(f"  - {proc.command} (exit code {exit_code})", flush=True)
-            failures: List[TestFailureInfo] = []
+            failures: list[TestFailureInfo] = []
             for proc, exit_code in exit_failed_processes:
                 # Extract error snippet from process output
                 error_snippet = extract_error_snippet(proc.accumulated_output)
@@ -365,7 +365,7 @@ class RunningProcessGroup:
             for cmd in failed_processes:
                 print(f"  - {cmd}", flush=True)
             print("Processes were killed due to timeout/stuck detection", flush=True)
-            failures: List[TestFailureInfo] = []
+            failures: list[TestFailureInfo] = []
             for cmd in failed_processes:
                 failures.append(
                     TestFailureInfo(
@@ -458,9 +458,9 @@ class RunningProcessGroup:
 
     def _handle_stuck_processes(
         self,
-        stuck_signals: List[StuckProcessSignal],
-        active_processes: List[RunningProcess],
-        failed_processes: List[str],
+        stuck_signals: list[StuckProcessSignal],
+        active_processes: list[RunningProcess],
+        failed_processes: list[str],
         stuck_monitor: ProcessStuckMonitor,
     ) -> None:
         """Handle processes that are detected as stuck."""
@@ -470,11 +470,11 @@ class RunningProcessGroup:
 
     def _build_failure_list(
         self,
-        exit_failed_processes: List[tuple[RunningProcess, int]],
-        failed_processes: List[str],
-    ) -> List[TestFailureInfo]:
+        exit_failed_processes: list[tuple[RunningProcess, int]],
+        failed_processes: list[str],
+    ) -> list[TestFailureInfo]:
         """Build a list of TestFailureInfo objects from failed processes."""
-        failures: List[TestFailureInfo] = []
+        failures: list[TestFailureInfo] = []
 
         for proc, exit_code in exit_failed_processes:
             error_snippet = extract_error_snippet(proc.accumulated_output)
@@ -507,10 +507,10 @@ class RunningProcessGroup:
 
     def _process_active_tests(
         self,
-        active_processes: List[RunningProcess],
-        exit_failed_processes: List[tuple[RunningProcess, int]],
-        failed_processes: List[str],
-        completed_timings: List[ProcessTiming],
+        active_processes: list[RunningProcess],
+        exit_failed_processes: list[tuple[RunningProcess, int]],
+        failed_processes: list[str],
+        completed_timings: list[ProcessTiming],
         stuck_monitor: Optional[ProcessStuckMonitor],
     ) -> bool:
         """Process active tests, return True if any activity occurred."""
@@ -575,9 +575,9 @@ class RunningProcessGroup:
 
         return any_activity
 
-    def _run_sequential(self) -> List[ProcessTiming]:
+    def _run_sequential(self) -> list[ProcessTiming]:
         """Execute processes in sequence."""
-        completed_timings: List[ProcessTiming] = []
+        completed_timings: list[ProcessTiming] = []
 
         # Enable status monitoring
         self._status_monitoring_active = True
@@ -628,9 +628,9 @@ class RunningProcessGroup:
 
         return completed_timings
 
-    def _run_with_dependencies(self) -> List[ProcessTiming]:
+    def _run_with_dependencies(self) -> list[ProcessTiming]:
         """Execute processes respecting dependency order."""
-        completed_timings: List[ProcessTiming] = []
+        completed_timings: list[ProcessTiming] = []
         completed_processes: set[RunningProcess] = set()
         remaining_processes = self.processes.copy()
 

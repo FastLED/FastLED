@@ -125,7 +125,7 @@ class BannedHeadersChecker(FileContentChecker):
         "new": "Use stack allocation or custom allocators (placement new allowed in inplacenew.h)",
     }
 
-    def __init__(self, banned_headers_list: List[str], strict_mode: bool = False):
+    def __init__(self, banned_headers_list: list[str], strict_mode: bool = False):
         """Initialize with the list of banned headers to check for.
 
         Args:
@@ -264,9 +264,9 @@ class BannedHeadersChecker(FileContentChecker):
         """
         return file_path.endswith(".cpp") or file_path.endswith(".cc")
 
-    def check_file_content(self, file_content: FileContent) -> List[str]:
+    def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for banned headers."""
-        failings: List[str] = []
+        failings: list[str] = []
 
         if len(self.banned_headers_list) == 0:
             return failings
@@ -314,8 +314,8 @@ class BannedHeadersChecker(FileContentChecker):
 
 
 def _test_no_banned_headers(
-    test_directories: List[str],
-    banned_headers_list: List[str],
+    test_directories: list[str],
+    banned_headers_list: list[str],
     on_fail: Callable[[str], None],
     strict_mode: bool = False,
 ) -> None:

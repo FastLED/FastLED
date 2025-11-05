@@ -115,7 +115,7 @@ def run_iwyu_on_platformio_project(project_dir: Path, args: argparse.Namespace) 
     os.chdir(str(project_dir))
 
     # Build mapping file arguments
-    mapping_args: List[str] = []
+    mapping_args: list[str] = []
 
     # Add FastLED mapping files if they exist
     project_root = project_dir
@@ -183,7 +183,7 @@ def apply_iwyu_fixes(source_dir: Path) -> int:
         return 1
 
     # Find all .h and .cpp files
-    cpp_files: List[Path] = []
+    cpp_files: list[Path] = []
     for pattern in ["**/*.cpp", "**/*.h", "**/*.hpp"]:
         cpp_files.extend(source_dir.glob(pattern))
 

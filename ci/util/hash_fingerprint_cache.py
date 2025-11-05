@@ -48,7 +48,7 @@ class HashFingerprintCache:
         self.cache_file = self.fingerprint_dir / f"{subpath}.json"
         self.lock_file = str(self.fingerprint_dir / f"{subpath}.lock")
 
-    def _get_file_hash_data(self, file_paths: List[Path]) -> str:
+    def _get_file_hash_data(self, file_paths: list[Path]) -> str:
         """
         Generate hash data from file paths and modification times.
 
@@ -97,7 +97,7 @@ class HashFingerprintCache:
             # If we can't store pending data, that's okay - we'll fall back to force update
             pass
 
-    def _load_pending_fingerprint(self) -> Optional[Dict[str, Any]]:
+    def _load_pending_fingerprint(self) -> Optional[dict[str, Any]]:
         """Load pending fingerprint data from temporary cache file."""
         pending_file = self.cache_file.with_suffix(".pending")
         if not pending_file.exists():
@@ -167,7 +167,7 @@ class HashFingerprintCache:
         except (json.JSONDecodeError, OSError):
             return None
 
-    def get_current_hash(self, file_paths: List[Path]) -> str:
+    def get_current_hash(self, file_paths: list[Path]) -> str:
         """
         Get current hash for the given file paths.
 
@@ -179,7 +179,7 @@ class HashFingerprintCache:
         """
         return self._get_file_hash_data(file_paths)
 
-    def _read_cache_data(self) -> Optional[Dict[str, Any]]:
+    def _read_cache_data(self) -> Optional[dict[str, Any]]:
         """
         Read cache data from JSON file (should be called within lock context).
 
@@ -195,7 +195,7 @@ class HashFingerprintCache:
         except (json.JSONDecodeError, OSError):
             return None
 
-    def _write_cache_data(self, data: Dict[str, Any]) -> None:
+    def _write_cache_data(self, data: dict[str, Any]) -> None:
         """
         Write cache data to JSON file (should be called within lock context).
 
@@ -208,7 +208,7 @@ class HashFingerprintCache:
         except OSError as e:
             raise RuntimeError(f"Failed to write cache file {self.cache_file}: {e}")
 
-    def is_valid(self, file_paths: List[Path]) -> bool:
+    def is_valid(self, file_paths: list[Path]) -> bool:
         """
         Check if the current file state matches the cached hash.
 
@@ -233,7 +233,7 @@ class HashFingerprintCache:
             cached_hash = cache_data.get("hash")
             return cached_hash == current_hash
 
-    def check_needs_update(self, file_paths: List[Path]) -> bool:
+    def check_needs_update(self, file_paths: list[Path]) -> bool:
         """
         Check if files need to be processed and store fingerprint for later use.
 
@@ -285,7 +285,7 @@ class HashFingerprintCache:
 
         # Fall back to in-memory pending fingerprint (single-process case)
         if fingerprint_data is None and hasattr(self, "_pending_fingerprint"):
-            pending_fp: Dict[str, Any] = getattr(self, "_pending_fingerprint")
+            pending_fp: dict[str, Any] = getattr(self, "_pending_fingerprint")
             fingerprint_data = pending_fp.copy()
             fingerprint_data["subpath"] = self.subpath
 
@@ -328,7 +328,7 @@ class HashFingerprintCache:
                         f"Failed to invalidate cache file {self.cache_file}: {e}"
                     )
 
-    def get_cache_info(self) -> Optional[Dict[str, Any]]:
+    def get_cache_info(self) -> Optional[dict[str, Any]]:
         """
         Get information about the current cache state.
 

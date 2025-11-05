@@ -634,7 +634,7 @@ class DockerCompilationOrchestrator:
             print("❌ Docker is not available. Please ensure Docker is running.")
             raise RuntimeError("Docker not available") from None
 
-    def _stream_execution(self, cmd: List[str]) -> "subprocess.CompletedProcess[str]":
+    def _stream_execution(self, cmd: list[str]) -> "subprocess.CompletedProcess[str]":
         """Execute command with real-time output streaming."""
         sys.stdout.flush()
         sys.stderr.flush()

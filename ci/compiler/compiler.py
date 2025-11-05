@@ -54,7 +54,7 @@ class Compiler(ABC):
         pass
 
     @abstractmethod
-    def build(self, examples: List[str]) -> List[Future[SketchResult]]:
+    def build(self, examples: list[str]) -> list[Future[SketchResult]]:
         """Build a list of examples with proper resource management.
 
         Args:

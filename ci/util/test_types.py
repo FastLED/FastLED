@@ -28,7 +28,7 @@ class TestResult:
     type: TestResultType
     message: str
     test_name: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    details: Optional[dict[str, Any]] = None
     timestamp: float = 0.0
 
     def __post_init__(self):
@@ -42,7 +42,7 @@ class TestSuiteResult:
     """Results for a test suite"""
 
     name: str
-    results: List[TestResult]
+    results: list[TestResult]
     start_time: float
     end_time: Optional[float] = None
     passed: bool = True
@@ -76,7 +76,7 @@ class TestArgs:
     no_stack_trace: bool = False
     stack_trace: bool = False
     check: bool = False
-    examples: Optional[List[str]] = None
+    examples: Optional[list[str]] = None
     no_pch: bool = False
     unity: bool = False
     no_unity: bool = False  # Disable unity builds for cpp tests and examples
@@ -85,10 +85,10 @@ class TestArgs:
     no_parallel: bool = False  # Force sequential test execution
     unity_chunks: int = 1  # Number of unity chunks for libfastled build
     debug: bool = False  # Enable debug mode for unit tests
-    qemu: Optional[List[str]] = (
+    qemu: Optional[list[str]] = (
         None  # Run examples in QEMU emulation (deprecated - use --run)
     )
-    run: Optional[List[str]] = (
+    run: Optional[list[str]] = (
         None  # Run examples in emulation (QEMU for ESP32, avr8js for AVR)
     )
     no_fingerprint: bool = False  # Disable fingerprint caching
@@ -207,7 +207,7 @@ def process_test_flags(args: TestArgs) -> TestArgs:
             pass  # args.full is already False
 
         # Log what's running
-        enabled_tests: List[str] = []
+        enabled_tests: list[str] = []
         if args.unit:
             enabled_tests.append("unit tests")
         if args.examples is not None:
@@ -301,7 +301,7 @@ def fingerprint_code_base(
         patterns = glob.split(",")
 
         # Get all matching files
-        all_files: List[Path] = []
+        all_files: list[Path] = []
         for pattern in patterns:
             pattern = pattern.strip()
             all_files.extend(sorted(start_directory.glob(pattern)))

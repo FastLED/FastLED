@@ -24,7 +24,7 @@ PLATFORMS_DIR = SRC_ROOT / "platforms"
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
-def check_file_has_namespace_or_exception(file_path: str) -> Tuple[bool, str]:
+def check_file_has_namespace_or_exception(file_path: str) -> tuple[bool, str]:
     """
     Check if a file has 'namespace fl {' or an exception comment.
 
@@ -57,7 +57,7 @@ def check_file_has_namespace_or_exception(file_path: str) -> Tuple[bool, str]:
 class PlatformsFlNamespaceTester(unittest.TestCase):
     def test_platforms_have_namespace_or_exception(self) -> None:
         """Check that files in src/platforms/ have 'namespace fl' or exception comment."""
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
 
         # Find all .h, .cpp, and .hpp files in src/platforms/
         try:
@@ -77,7 +77,7 @@ class PlatformsFlNamespaceTester(unittest.TestCase):
             return
 
         # Check files in parallel
-        violations: List[str] = []
+        violations: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = {
                 executor.submit(

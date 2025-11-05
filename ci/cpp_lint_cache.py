@@ -17,7 +17,7 @@ from ci.util.dependency_loader import DependencyManifest
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
-def get_cpp_files() -> List[Path]:
+def get_cpp_files() -> list[Path]:
     """
     Get all C++ files that should be monitored for changes.
 
@@ -26,7 +26,7 @@ def get_cpp_files() -> List[Path]:
     Returns:
         List of C++ file paths to monitor
     """
-    files: List[Path] = []
+    files: list[Path] = []
 
     try:
         manifest = DependencyManifest()

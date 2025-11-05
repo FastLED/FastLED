@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from typing import Any, List
 
@@ -14,7 +12,7 @@ from ci.run.core.task import TaskState
 from ci.run.core.updater import TaskBlock
 
 
-PLATFORMS: List[str] = ["uno", "esp32dev", "esp32s3", "esp32p4", "teensy41"]
+PLATFORMS: list[str] = ["uno", "esp32dev", "esp32s3", "esp32p4", "teensy41"]
 
 
 class BuildView(Screen[Any]):
@@ -22,7 +20,7 @@ class BuildView(Screen[Any]):
 
     def __init__(self) -> None:
         super().__init__()
-        self._tasks: List[TaskState] = []
+        self._tasks: list[TaskState] = []
 
     def compose(self) -> ComposeResult:
         yield Static("[b]Compile Platform[/b]")

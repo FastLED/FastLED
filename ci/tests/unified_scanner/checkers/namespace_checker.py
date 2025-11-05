@@ -62,8 +62,8 @@ class NamespaceIncludeChecker(BaseChecker):
 
         return file_path.suffix in {".cpp", ".h", ".hpp", ".cc", ".ino"}
 
-    def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
-        results: List[CheckResult] = []
+    def check_file(self, file_path: Path, content: str) -> list[CheckResult]:
+        results: list[CheckResult] = []
         lines = content.split("\n")
 
         namespace_started = False

@@ -47,7 +47,7 @@ class ToolchainDownloadResult:
 
 def extract_toolchains_from_platformio_ini(
     platformio_ini_path: Path,
-) -> List[PackageInfo]:
+) -> list[PackageInfo]:
     """
     Extract all toolchain packages from a platformio.ini file.
 
@@ -63,7 +63,7 @@ def extract_toolchains_from_platformio_ini(
         logger.error(f"Failed to parse {platformio_ini_path}: {e}")
         return []
 
-    all_packages: List[PackageInfo] = []
+    all_packages: list[PackageInfo] = []
 
     # Get all platform URLs from the ini file
     for section_name, option_name, platform_value in pio_ini.get_platform_urls():
@@ -191,7 +191,7 @@ def predownload_toolchains(
     platformio_ini_path: Path,
     cache_dir: Optional[Path] = None,
     max_workers: int = 4,
-) -> Dict[str, ToolchainDownloadResult]:
+) -> dict[str, ToolchainDownloadResult]:
     """
     Pre-download all toolchains from a platformio.ini file.
 
@@ -221,7 +221,7 @@ def predownload_toolchains(
     logger.info(f"Found {len(packages)} total packages")
 
     # Deduplicate by name and version
-    unique_packages: Dict[str, PackageInfo] = {}
+    unique_packages: dict[str, PackageInfo] = {}
     for package in packages:
         key = f"{package.name}:{package.version or 'latest'}"
         if key not in unique_packages:
@@ -230,7 +230,7 @@ def predownload_toolchains(
     logger.info(f"Processing {len(unique_packages)} unique packages")
 
     # Download toolchains concurrently
-    results: Dict[str, ToolchainDownloadResult] = {}
+    results: dict[str, ToolchainDownloadResult] = {}
     downloader = ResumableDownloader(chunk_size=8192, max_retries=5)
 
     with ThreadPoolExecutor(max_workers=max_workers) as executor:

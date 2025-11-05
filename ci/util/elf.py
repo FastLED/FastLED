@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 
-def run_command(command: List[str], show_output: bool = False) -> str:
+def run_command(command: list[str], show_output: bool = False) -> str:
     """
     Run a command using subprocess and capture the output.
 
@@ -153,7 +153,7 @@ def list_symbols_and_sizes(objdump_path: Path, cppfilt_path: Path, elf_file: Pat
     print(f"Listing symbols and sizes in ELF file: {elf_file}")
     output = run_command(command, show_output=False)
 
-    symbols: List[Dict[str, Any]] = []
+    symbols: list[dict[str, Any]] = []
     for line in output.splitlines():
         parts = line.split()
         # Expected parts length can vary, check if size and section index (parts[2] & parts[4]) are valid

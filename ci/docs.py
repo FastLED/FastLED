@@ -58,7 +58,7 @@ def run(
     return stdout.strip()
 
 
-def get_git_info() -> Tuple[str, str]:
+def get_git_info() -> tuple[str, str]:
     release_tag = os.environ.get("RELEASE_TAG", "")
 
     try:

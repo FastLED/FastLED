@@ -67,7 +67,7 @@ def write_if_different(path: Path, content: str, mode: Optional[int] = None) -> 
         return True
 
 
-def detect_system_llvm_tools() -> Tuple[bool, bool]:
+def detect_system_llvm_tools() -> tuple[bool, bool]:
     """
     Detect if system has LLD and LLVM-AR that support thin archives.
 
@@ -306,7 +306,7 @@ def setup_meson_build(
     # Track if any wrapper files were modified
     wrappers_changed = False
 
-    cmd: Optional[List[str]] = None
+    cmd: Optional[list[str]] = None
     if skip_meson_setup:
         # Build already configured, check wrappers below
         print(f"[MESON] Build directory already configured: {build_dir}")
@@ -362,7 +362,7 @@ def setup_meson_build(
         else:
             # System doesn't have LLVM tools anyway
             print("    Note: System LLVM tools not detected (additional reason)")
-            missing_tools: List[str] = []
+            missing_tools: list[str] = []
             if not has_lld:
                 missing_tools.append("lld/ld.lld")
             if not has_llvm_ar:

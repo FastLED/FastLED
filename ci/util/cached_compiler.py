@@ -21,7 +21,7 @@ from typing import Dict, List, Optional
 
 
 def find_toolchain_compiler(
-    compiler_name: str, platform_packages_paths: List[str]
+    compiler_name: str, platform_packages_paths: list[str]
 ) -> Optional[str]:
     """
     Find the real compiler binary in PlatformIO platform packages.
@@ -181,12 +181,12 @@ if __name__ == "__main__":
 
 
 def create_cached_toolchain(
-    toolchain_info: Dict[str, str],
-    cache_config: Dict[str, str],
-    platform_packages_paths: List[str],
+    toolchain_info: dict[str, str],
+    cache_config: dict[str, str],
+    platform_packages_paths: list[str],
     output_dir: Path,
     debug: bool = False,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     """
     Create a complete set of cached compiler scripts for a toolchain.
 
@@ -203,7 +203,7 @@ def create_cached_toolchain(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     cache_executable = cache_config.get("CACHE_EXECUTABLE", "sccache")
-    cached_tools: Dict[str, str] = {}
+    cached_tools: dict[str, str] = {}
 
     # Standard compiler tools that should be wrapped with cache
     cacheable_tools = {"CC", "CXX", "gcc", "g++", "clang", "clang++"}
@@ -247,14 +247,14 @@ def create_cached_toolchain(
     return cached_tools
 
 
-def get_platform_packages_paths() -> List[str]:
+def get_platform_packages_paths() -> list[str]:
     """
     Get list of platform package paths from PlatformIO.
 
     Returns:
         List of paths where platform packages are installed
     """
-    paths: List[str] = []
+    paths: list[str] = []
 
     # Try to get PlatformIO home directory
     try:

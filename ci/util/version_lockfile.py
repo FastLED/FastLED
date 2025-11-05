@@ -37,9 +37,9 @@ class VersionLockfile:
             lockfile_path: Path to the lockfile (e.g., platformio.lock)
         """
         self.lockfile_path = lockfile_path
-        self._data: Optional[Dict[str, Any]] = None
+        self._data: Optional[dict[str, Any]] = None
 
-    def _load(self) -> Dict[str, Any]:
+    def _load(self) -> dict[str, Any]:
         """Load lockfile data from disk."""
         if self._data is not None:
             return self._data
@@ -123,7 +123,7 @@ class VersionLockfile:
         requirement: str,
         resolved_version: str,
         package_type: str = "tool",
-        metadata: Optional[Dict[str, Any]] = None,
+        metadata: Optional[dict[str, Any]] = None,
     ) -> bool:
         """
         Pin a resolved version for a package requirement.
@@ -189,7 +189,7 @@ class VersionLockfile:
 
         return True
 
-    def list_pins(self) -> Dict[str, Dict[str, Any]]:
+    def list_pins(self) -> dict[str, dict[str, Any]]:
         """
         List all pinned packages.
 

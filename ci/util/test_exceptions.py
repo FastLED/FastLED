@@ -20,7 +20,7 @@ class TestFailureInfo:
 class FastLEDTestException(Exception):
     """Base exception for FastLED test failures"""
 
-    def __init__(self, message: str, failures: Optional[List[TestFailureInfo]] = None):
+    def __init__(self, message: str, failures: Optional[list[TestFailureInfo]] = None):
         super().__init__(message)
         self.failures = failures or []
         self.message = message
@@ -82,7 +82,7 @@ class CompilationFailedException(FastLEDTestException):
     def __init__(
         self,
         message: str = "Compilation failed",
-        failures: Optional[List[TestFailureInfo]] = None,
+        failures: Optional[list[TestFailureInfo]] = None,
     ):
         super().__init__(message, failures)
 
@@ -93,7 +93,7 @@ class TestExecutionFailedException(FastLEDTestException):
     def __init__(
         self,
         message: str = "Test execution failed",
-        failures: Optional[List[TestFailureInfo]] = None,
+        failures: Optional[list[TestFailureInfo]] = None,
     ):
         super().__init__(message, failures)
 
@@ -104,6 +104,6 @@ class TestTimeoutException(FastLEDTestException):
     def __init__(
         self,
         message: str = "Test execution timed out",
-        failures: Optional[List[TestFailureInfo]] = None,
+        failures: Optional[list[TestFailureInfo]] = None,
     ):
         super().__init__(message, failures)

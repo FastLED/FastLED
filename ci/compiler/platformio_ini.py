@@ -41,8 +41,8 @@ class PlatformIOSection:
     # Generic Options
     name: Optional[str] = None
     description: Optional[str] = None
-    default_envs: Optional[List[str]] = None
-    extra_configs: Optional[List[str]] = None
+    default_envs: Optional[list[str]] = None
+    extra_configs: Optional[list[str]] = None
 
     # Directory Options
     core_dir: Optional[str] = None
@@ -84,14 +84,14 @@ class EnvironmentSection:
 
     # Build Options
     build_type: Optional[str] = None
-    build_flags: List[str] = field(default_factory=lambda: [])
-    build_src_filter: List[str] = field(default_factory=lambda: [])
-    targets: List[str] = field(default_factory=lambda: [])
+    build_flags: list[str] = field(default_factory=lambda: [])
+    build_src_filter: list[str] = field(default_factory=lambda: [])
+    targets: list[str] = field(default_factory=lambda: [])
 
     # Library Options
-    lib_deps: List[str] = field(default_factory=lambda: [])
-    lib_ignore: List[str] = field(default_factory=lambda: [])
-    lib_extra_dirs: List[str] = field(default_factory=lambda: [])
+    lib_deps: list[str] = field(default_factory=lambda: [])
+    lib_ignore: list[str] = field(default_factory=lambda: [])
+    lib_extra_dirs: list[str] = field(default_factory=lambda: [])
     lib_ldf_mode: Optional[str] = None
 
     # Upload Options
@@ -102,7 +102,7 @@ class EnvironmentSection:
     # Monitor Options
     monitor_port: Optional[str] = None
     monitor_speed: Optional[str] = None
-    monitor_filters: List[str] = field(default_factory=lambda: [])
+    monitor_filters: list[str] = field(default_factory=lambda: [])
 
     # Board-specific Options
     board_build_mcu: Optional[str] = None
@@ -110,11 +110,11 @@ class EnvironmentSection:
     board_build_partitions: Optional[str] = None
 
     # Extra Scripts and Tools
-    extra_scripts: List[str] = field(default_factory=lambda: [])
+    extra_scripts: list[str] = field(default_factory=lambda: [])
     check_tool: Optional[str] = None
 
     # Custom Options (for non-standard options)
-    custom_options: Dict[str, str] = field(default_factory=lambda: {})
+    custom_options: dict[str, str] = field(default_factory=lambda: {})
 
 
 @dataclass
@@ -125,24 +125,24 @@ class GlobalEnvSection:
     """
 
     # Build Options
-    build_flags: List[str] = field(default_factory=lambda: [])
-    build_src_filter: List[str] = field(default_factory=lambda: [])
+    build_flags: list[str] = field(default_factory=lambda: [])
+    build_src_filter: list[str] = field(default_factory=lambda: [])
 
     # Library Options
-    lib_deps: List[str] = field(default_factory=lambda: [])
-    lib_ignore: List[str] = field(default_factory=lambda: [])
-    lib_extra_dirs: List[str] = field(default_factory=lambda: [])
+    lib_deps: list[str] = field(default_factory=lambda: [])
+    lib_ignore: list[str] = field(default_factory=lambda: [])
+    lib_extra_dirs: list[str] = field(default_factory=lambda: [])
     lib_ldf_mode: Optional[str] = None
 
     # Monitor Options
     monitor_speed: Optional[str] = None
-    monitor_filters: List[str] = field(default_factory=lambda: [])
+    monitor_filters: list[str] = field(default_factory=lambda: [])
 
     # Extra Scripts
-    extra_scripts: List[str] = field(default_factory=lambda: [])
+    extra_scripts: list[str] = field(default_factory=lambda: [])
 
     # Custom Options (for non-standard options)
-    custom_options: Dict[str, str] = field(default_factory=lambda: {})
+    custom_options: dict[str, str] = field(default_factory=lambda: {})
 
 
 @dataclass
@@ -153,7 +153,7 @@ class ParsedPlatformIOConfig:
 
     platformio_section: Optional[PlatformIOSection] = None
     global_env_section: Optional[GlobalEnvSection] = None
-    environments: Dict[str, EnvironmentSection] = field(default_factory=lambda: {})
+    environments: dict[str, EnvironmentSection] = field(default_factory=lambda: {})
 
 
 @dataclass
@@ -231,8 +231,8 @@ class PlatformUrlResolution:
     zip_url: Optional[str] = None
     local_path: Optional[str] = None
     version: Optional[str] = None
-    frameworks: List[str] = field(default_factory=lambda: [])
-    packages: List[PackageInfo] = field(default_factory=lambda: [])
+    frameworks: list[str] = field(default_factory=lambda: [])
+    packages: list[PackageInfo] = field(default_factory=lambda: [])
     homepage: Optional[str] = None
 
     @property
@@ -257,7 +257,7 @@ class FrameworkUrlResolution:
     zip_url: Optional[str] = None
     local_path: Optional[str] = None
     homepage: Optional[str] = None
-    platforms: List[str] = field(default_factory=lambda: [])
+    platforms: list[str] = field(default_factory=lambda: [])
     version: Optional[str] = None
     title: Optional[str] = None
     description: Optional[str] = None
@@ -279,15 +279,15 @@ class PlatformShowResponse:
     title: Optional[str] = None
     version: Optional[str] = None
     repository: Optional[str] = None
-    frameworks: List[str] = field(default_factory=list)  # type: ignore
-    packages: List[Dict[str, Any]] = field(  # type: ignore[reportUnknownVariableType]
+    frameworks: list[str] = field(default_factory=list)  # type: ignore
+    packages: list[dict[str, Any]] = field(  # type: ignore[reportUnknownVariableType]
         default_factory=list
     )  # Raw package data from CLI
     homepage: Optional[str] = None
     description: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "PlatformShowResponse":
+    def from_dict(cls, data: dict[str, Any]) -> "PlatformShowResponse":
         """Create PlatformShowResponse from raw CLI JSON response."""
         return cls(
             name=data.get("name", ""),
@@ -312,11 +312,11 @@ class FrameworkInfo:
     description: Optional[str] = None
     url: Optional[str] = None
     homepage: Optional[str] = None
-    platforms: List[str] = field(default_factory=list)  # type: ignore
+    platforms: list[str] = field(default_factory=list)  # type: ignore
     version: Optional[str] = None
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "FrameworkInfo":
+    def from_dict(cls, data: dict[str, Any]) -> "FrameworkInfo":
         """Create FrameworkInfo from raw CLI JSON response."""
         return cls(
             name=data.get("name", ""),
@@ -337,7 +337,7 @@ class PlatformCacheEntry:
 
     repository_url: Optional[str]
     version: Optional[str]
-    frameworks: List[str]
+    frameworks: list[str]
     resolved_at: Optional[str]
     expires_at: Optional[str]
 
@@ -350,7 +350,7 @@ class FrameworkCacheEntry:
 
     url: Optional[str]
     homepage: Optional[str]
-    platforms: List[str]
+    platforms: list[str]
     resolved_at: Optional[str]
     expires_at: Optional[str]
 
@@ -361,8 +361,8 @@ class ResolvedUrlsCache:
     Strongly typed representation of the complete resolved URLs cache.
     """
 
-    platforms: Dict[str, PlatformCacheEntry] = field(default_factory=dict)  # type: ignore
-    frameworks: Dict[str, FrameworkCacheEntry] = field(default_factory=dict)  # type: ignore
+    platforms: dict[str, PlatformCacheEntry] = field(default_factory=dict)  # type: ignore
+    frameworks: dict[str, FrameworkCacheEntry] = field(default_factory=dict)  # type: ignore
 
 
 @dataclass
@@ -375,7 +375,7 @@ class PlatformResolution:
     repository_url: Optional[str] = None  # Kept for backward compatibility
     packages_url: Optional[str] = None  # Kept for backward compatibility
     version: Optional[str] = None
-    frameworks: List[str] = field(default_factory=lambda: [])
+    frameworks: list[str] = field(default_factory=lambda: [])
     resolved_at: Optional[datetime] = None
     ttl_hours: int = 24
 
@@ -414,7 +414,7 @@ class FrameworkResolution:
     name: str
     url: Optional[str] = None  # Kept for backward compatibility
     homepage: Optional[str] = None
-    platforms: List[str] = field(default_factory=lambda: [])
+    platforms: list[str] = field(default_factory=lambda: [])
     resolved_at: Optional[datetime] = None
     ttl_hours: int = 24
 
@@ -481,12 +481,12 @@ def _resolve_variable_substitution(
 
 
 def _resolve_list_variables(
-    values: List[str], config: configparser.ConfigParser
-) -> List[str]:
+    values: list[str], config: configparser.ConfigParser
+) -> list[str]:
     """
     Resolve variable substitution in a list of values.
     """
-    resolved: List[str] = []
+    resolved: list[str] = []
     for value in values:
         resolved_value = _resolve_variable_substitution(value, config)
         # If the resolved value contains newlines or commas, parse it as a list
@@ -499,7 +499,7 @@ def _resolve_list_variables(
     return resolved
 
 
-def _parse_list_value(value: str) -> List[str]:
+def _parse_list_value(value: str) -> list[str]:
     """
     Parse a configuration value that can be either comma-separated or multi-line.
 
@@ -704,7 +704,7 @@ def _parse_env_section(
         "custom_sdkconfig",  # Add known custom options
     }
 
-    custom_options: Dict[str, str] = {}
+    custom_options: dict[str, str] = {}
     for key, value in section.items():
         if key not in standard_options:
             custom_options[key] = value
@@ -773,7 +773,7 @@ def _parse_global_env_section(
         "extra_scripts",
     }
 
-    custom_options: Dict[str, str] = {}
+    custom_options: dict[str, str] = {}
     for key, value in section.items():
         if key not in standard_options:
             custom_options[key] = value
@@ -1017,7 +1017,7 @@ class PlatformIOIni:
             logger.error(f"Failed to write platformio.ini: {e}")
             raise
 
-    def get_sections(self) -> List[str]:
+    def get_sections(self) -> list[str]:
         """
         Get all section names in the configuration.
 
@@ -1026,7 +1026,7 @@ class PlatformIOIni:
         """
         return self.config.sections()
 
-    def get_env_sections(self) -> List[str]:
+    def get_env_sections(self) -> list[str]:
         """
         Get all environment section names (sections starting with 'env:').
 
@@ -1110,28 +1110,28 @@ class PlatformIOIni:
             self.invalidate_cache()  # Invalidate cache when config changes
         return result
 
-    def get_platform_urls(self) -> List[Tuple[str, str, str]]:
+    def get_platform_urls(self) -> list[tuple[str, str, str]]:
         """
         Get all platform URLs from environment sections.
 
         Returns:
             List of tuples: (section_name, option_name, url)
         """
-        urls: List[Tuple[str, str, str]] = []
+        urls: list[tuple[str, str, str]] = []
         for section in self.get_env_sections():
             platform_value = self.get_option(section, "platform")
             if platform_value:
                 urls.append((section, "platform", platform_value))
         return urls
 
-    def get_framework_urls(self) -> List[Tuple[str, str, str]]:
+    def get_framework_urls(self) -> list[tuple[str, str, str]]:
         """
         Get all framework URLs from environment sections.
 
         Returns:
             List of tuples: (section_name, option_name, url)
         """
-        urls: List[Tuple[str, str, str]] = []
+        urls: list[tuple[str, str, str]] = []
         for section in self.get_env_sections():
             framework_value = self.get_option(section, "framework")
             if framework_value:
@@ -1160,14 +1160,14 @@ class PlatformIOIni:
             replacement_made = True
         return replacement_made
 
-    def validate_structure(self) -> List[str]:
+    def validate_structure(self) -> list[str]:
         """
         Validate the platformio.ini structure and return any issues.
 
         Returns:
             List of validation issues (empty if valid)
         """
-        issues: List[str] = []
+        issues: list[str] = []
 
         # Check for at least one environment section
         env_sections = self.get_env_sections()
@@ -1188,19 +1188,19 @@ class PlatformIOIni:
 
         return issues
 
-    def to_dict(self) -> Dict[str, Dict[str, str]]:
+    def to_dict(self) -> dict[str, dict[str, str]]:
         """
         Convert the configuration to a dictionary.
 
         Returns:
             Dictionary representation of the configuration
         """
-        result: Dict[str, Dict[str, str]] = {}
+        result: dict[str, dict[str, str]] = {}
         for section_name in self.config.sections():
             result[section_name] = dict(self.config[section_name])
         return result
 
-    def from_dict(self, data: Dict[str, Dict[str, str]]) -> None:
+    def from_dict(self, data: dict[str, dict[str, str]]) -> None:
         """
         Load configuration from a dictionary.
 
@@ -1240,13 +1240,13 @@ class PlatformIOIni:
         global_env_section = _parse_global_env_section(self.config)
 
         # Parse all [env:*] sections
-        environments: Dict[str, EnvironmentSection] = {}
+        environments: dict[str, EnvironmentSection] = {}
         for section_name in self.get_env_sections():
             env_name = section_name[4:]  # Remove "env:" prefix
             environments[env_name] = _parse_env_section(self.config, section_name)
 
         # Resolve inheritance (extends)
-        resolved_environments: Dict[str, EnvironmentSection] = {}
+        resolved_environments: dict[str, EnvironmentSection] = {}
         for env_name, env_section in environments.items():
             resolved_env = self._resolve_inheritance(
                 env_section, environments, global_env_section
@@ -1262,7 +1262,7 @@ class PlatformIOIni:
     def _resolve_inheritance(
         self,
         env_section: EnvironmentSection,
-        all_environments: Dict[str, EnvironmentSection],
+        all_environments: dict[str, EnvironmentSection],
         global_env: Optional[GlobalEnvSection],
     ) -> EnvironmentSection:
         """
@@ -1369,7 +1369,7 @@ class PlatformIOIni:
         """
         return self.parsed.environments.get(env_name)
 
-    def get_all_environments(self) -> Dict[str, EnvironmentSection]:
+    def get_all_environments(self) -> dict[str, EnvironmentSection]:
         """
         Get all typed environment sections.
 
@@ -1378,7 +1378,7 @@ class PlatformIOIni:
         """
         return self.parsed.environments.copy()
 
-    def dump_all_attributes(self) -> Dict[str, Any]:
+    def dump_all_attributes(self) -> dict[str, Any]:
         """
         Dump all parsed attributes as a dictionary for inspection.
 
@@ -1388,7 +1388,7 @@ class PlatformIOIni:
         from dataclasses import asdict
 
         parsed = self.parsed
-        result: Dict[str, Any] = {}
+        result: dict[str, Any] = {}
 
         if parsed.platformio_section:
             result["platformio"] = asdict(parsed.platformio_section)
@@ -1470,10 +1470,10 @@ class PlatformIOIni:
             return "unknown"
 
     def _extract_packages_from_platform_data(
-        self, platform_data: Dict[str, Any]
-    ) -> List[PackageInfo]:
+        self, platform_data: dict[str, Any]
+    ) -> list[PackageInfo]:
         """Extract package information from PlatformIO platform data (legacy method)."""
-        packages: List[PackageInfo] = []
+        packages: list[PackageInfo] = []
         packages_data = platform_data.get("packages", [])
 
         for pkg_data in packages_data:
@@ -1495,9 +1495,9 @@ class PlatformIOIni:
 
     def _extract_packages_from_platform_response(
         self, platform_show: PlatformShowResponse
-    ) -> List[PackageInfo]:
+    ) -> list[PackageInfo]:
         """Extract package information from typed PlatformShowResponse."""
-        packages: List[PackageInfo] = []
+        packages: list[PackageInfo] = []
 
         for pkg_data in platform_show.packages:
             if not isinstance(pkg_data, dict):
@@ -1519,7 +1519,7 @@ class PlatformIOIni:
     def _is_platform_cached(self, platform_name: str) -> bool:
         """Check if platform resolution is cached and still valid."""
         if not hasattr(self, "_platform_cache"):
-            self._platform_cache: Dict[str, PlatformResolution] = {}
+            self._platform_cache: dict[str, PlatformResolution] = {}
 
         if platform_name not in self._platform_cache:
             return False
@@ -1534,7 +1534,7 @@ class PlatformIOIni:
     def _is_framework_cached(self, framework_name: str) -> bool:
         """Check if framework resolution is cached and still valid."""
         if not hasattr(self, "_framework_cache"):
-            self._framework_cache: Dict[str, FrameworkResolution] = {}
+            self._framework_cache: dict[str, FrameworkResolution] = {}
 
         if framework_name not in self._framework_cache:
             return False
@@ -1547,8 +1547,8 @@ class PlatformIOIni:
         return age < timedelta(hours=resolution.ttl_hours)
 
     def _run_pio_command(
-        self, args: List[str]
-    ) -> Optional[Union[Dict[str, Any], List[Dict[str, Any]]]]:
+        self, args: list[str]
+    ) -> Optional[dict[str, Any] | list[dict[str, Any]]]:
         """Run a PlatformIO CLI command and return JSON output."""
         try:
             cmd = ["pio"] + args
@@ -1612,13 +1612,13 @@ class PlatformIOIni:
                 return None
         return None
 
-    def _get_frameworks_list_typed(self) -> List[FrameworkInfo]:
+    def _get_frameworks_list_typed(self) -> list[FrameworkInfo]:
         """Get typed list of available frameworks from PlatformIO CLI."""
         raw_data = self._run_pio_command(["platform", "frameworks", "--json-output"])
         if not raw_data:
             return []
 
-        frameworks_list: List[FrameworkInfo] = []
+        frameworks_list: list[FrameworkInfo] = []
         try:
             # Handle both dict and list responses
             if isinstance(raw_data, dict):
@@ -1679,7 +1679,7 @@ class PlatformIOIni:
 
         # Cache the resolution
         if not hasattr(self, "_platform_cache"):
-            self._platform_cache: Dict[str, PlatformResolution] = {}
+            self._platform_cache: dict[str, PlatformResolution] = {}
 
         self._platform_cache[platform_name] = PlatformResolution(
             name=platform_name,
@@ -1778,7 +1778,7 @@ class PlatformIOIni:
 
         # Cache the enhanced resolution
         if not hasattr(self, "_platform_cache"):
-            self._platform_cache: Dict[str, PlatformResolution] = {}
+            self._platform_cache: dict[str, PlatformResolution] = {}
 
         cached_resolution = PlatformResolution(
             name=platform_name,
@@ -1843,7 +1843,7 @@ class PlatformIOIni:
 
         # Cache the resolution
         if not hasattr(self, "_framework_cache"):
-            self._framework_cache: Dict[str, FrameworkResolution] = {}
+            self._framework_cache: dict[str, FrameworkResolution] = {}
 
         self._framework_cache[framework_name] = FrameworkResolution(
             name=framework_name,
@@ -1948,7 +1948,7 @@ class PlatformIOIni:
 
         # Cache the enhanced resolution
         if not hasattr(self, "_framework_cache"):
-            self._framework_cache: Dict[str, FrameworkResolution] = {}
+            self._framework_cache: dict[str, FrameworkResolution] = {}
 
         cached_resolution = FrameworkResolution(
             name=framework_name,
@@ -1965,14 +1965,14 @@ class PlatformIOIni:
         )
         return resolution
 
-    def resolve_platform_urls(self) -> Dict[str, Optional[str]]:
+    def resolve_platform_urls(self) -> dict[str, Optional[str]]:
         """
         Resolve all platform shorthand names in the configuration to URLs.
 
         Returns:
             Dictionary mapping platform names to their resolved URLs.
         """
-        resolutions: Dict[str, Optional[str]] = {}
+        resolutions: dict[str, Optional[str]] = {}
 
         for section_name, option_name, platform_value in self.get_platform_urls():
             if platform_value and not self._is_url(platform_value):
@@ -1983,14 +1983,14 @@ class PlatformIOIni:
 
         return resolutions
 
-    def resolve_framework_urls(self) -> Dict[str, Optional[str]]:
+    def resolve_framework_urls(self) -> dict[str, Optional[str]]:
         """
         Resolve all framework shorthand names in the configuration to URLs.
 
         Returns:
             Dictionary mapping framework names to their resolved URLs.
         """
-        resolutions: Dict[str, Optional[str]] = {}
+        resolutions: dict[str, Optional[str]] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
             if (
@@ -2140,7 +2140,7 @@ class PlatformIOIni:
             )
 
         # Step 3: Find all platform and framework URLs that need optimization (*.zip caching always happens)
-        zip_artifacts: List[Tuple[str, bool, str]] = []
+        zip_artifacts: list[tuple[str, bool, str]] = []
 
         # Scan platform URLs
         for section_name, option_name, url in self.get_platform_urls():
@@ -2157,8 +2157,8 @@ class PlatformIOIni:
             return
 
         # Step 4: Deduplicate artifacts by URL to avoid redundant processing
-        unique_artifacts: Dict[
-            str, Tuple[bool, str]
+        unique_artifacts: dict[
+            str, tuple[bool, str]
         ] = {}  # url -> (is_framework, env_section)
         for artifact_url, is_framework, env_section in zip_artifacts:
             if artifact_url not in unique_artifacts:
@@ -2169,7 +2169,7 @@ class PlatformIOIni:
         )
 
         # Step 5: Process each unique artifact and collect URL replacements
-        replacements: Dict[str, str] = {}
+        replacements: dict[str, str] = {}
         for artifact_url, (is_framework, env_section) in unique_artifacts.items():
             resolved_path = handle_zip_artifact(
                 artifact_url, cache_manager, env_section
@@ -2211,7 +2211,7 @@ class PlatformIOIni:
         # Step 1: Resolve shorthand platform names using enhanced resolution
         logger.debug("Resolving platform shorthand names using enhanced resolution...")
         platform_replacements_made = 0
-        platform_resolutions: Dict[str, PlatformUrlResolution] = {}
+        platform_resolutions: dict[str, PlatformUrlResolution] = {}
 
         for section_name, option_name, platform_value in self.get_platform_urls():
             if platform_value and not self._is_url(platform_value):
@@ -2242,7 +2242,7 @@ class PlatformIOIni:
         # Step 2: Resolve shorthand framework names using enhanced resolution
         logger.debug("Resolving framework shorthand names using enhanced resolution...")
         framework_replacements_made = 0
-        framework_resolutions: Dict[str, FrameworkUrlResolution] = {}
+        framework_resolutions: dict[str, FrameworkUrlResolution] = {}
 
         for section_name, option_name, framework_value in self.get_framework_urls():
             if (
@@ -2275,7 +2275,7 @@ class PlatformIOIni:
             )
 
         # Step 3: Cache downloadable URLs and update local paths
-        zip_artifacts: List[Tuple[str, bool, str]] = []
+        zip_artifacts: list[tuple[str, bool, str]] = []
 
         # Scan for zip URLs that can be cached
         for section_name, option_name, url in self.get_platform_urls():
@@ -2291,7 +2291,7 @@ class PlatformIOIni:
             return
 
         # Process caching as before
-        unique_artifacts: Dict[str, Tuple[bool, str]] = {}
+        unique_artifacts: dict[str, tuple[bool, str]] = {}
         for artifact_url, is_framework, env_section in zip_artifacts:
             if artifact_url not in unique_artifacts:
                 unique_artifacts[artifact_url] = (is_framework, env_section)
@@ -2301,7 +2301,7 @@ class PlatformIOIni:
         )
 
         # Cache artifacts and collect replacements
-        replacements: Dict[str, str] = {}
+        replacements: dict[str, str] = {}
         for artifact_url, (is_framework, env_section) in unique_artifacts.items():
             resolved_path = handle_zip_artifact(
                 artifact_url, cache_manager, env_section

@@ -77,7 +77,7 @@ class Board(BaseModel):
     """Board information with complete properties"""
 
     name: str = Field(min_length=1, max_length=200, description="Board display name")
-    properties: Dict[str, Any] = Field(
+    properties: dict[str, Any] = Field(
         default_factory=dict, description="Board configuration properties"
     )
 
@@ -149,10 +149,10 @@ class Platform(BaseModel):
         pattern=r"^SHA-256:[a-fA-F0-9]{64}$", description="SHA-256 checksum"
     )
     size_mb: float = Field(gt=0, alias="size", description="Archive size in megabytes")
-    boards: List[Board] = Field(
+    boards: list[Board] = Field(
         default_factory=lambda: [], description="Supported boards"
     )
-    tool_dependencies: List[ToolDependency] = Field(
+    tool_dependencies: list[ToolDependency] = Field(
         default_factory=lambda: [],
         alias="toolsDependencies",
         description="Required tool dependencies",
@@ -169,7 +169,7 @@ class Platform(BaseModel):
 
     @field_validator("size_mb", mode="before")
     @classmethod
-    def convert_size_from_bytes(cls, v: Union[str, int, float]) -> float:
+    def convert_size_from_bytes(cls, v: str | int | float) -> float:
         """Convert size from bytes to megabytes if needed"""
         if isinstance(v, str):
             try:
@@ -228,7 +228,7 @@ class SystemDownload(BaseModel):
 
     @field_validator("size_mb", mode="before")
     @classmethod
-    def convert_size_from_bytes(cls, v: Union[str, int, float]) -> float:
+    def convert_size_from_bytes(cls, v: str | int | float) -> float:
         """Convert size from bytes to megabytes if needed"""
         if isinstance(v, str):
             try:
@@ -270,13 +270,13 @@ class Tool(BaseModel):
 
     name: str = Field(pattern=r"^[a-zA-Z0-9_.-]+$", description="Tool name")
     version: str = Field(min_length=1, description="Tool version")
-    systems: List[SystemDownload] = Field(
+    systems: list[SystemDownload] = Field(
         min_length=1, description="System-specific downloads"
     )
 
     @field_validator("systems")
     @classmethod
-    def validate_unique_systems(cls, v: List[SystemDownload]) -> List[SystemDownload]:
+    def validate_unique_systems(cls, v: list[SystemDownload]) -> list[SystemDownload]:
         """Ensure no duplicate host systems"""
         hosts = [system.host for system in v]
         if len(hosts) != len(set(hosts)):
@@ -290,7 +290,7 @@ class Tool(BaseModel):
                 return system
         return None
 
-    def get_compatible_systems(self) -> List[str]:
+    def get_compatible_systems(self) -> list[str]:
         """Get list of compatible host systems"""
         return [system.host for system in self.systems]
 
@@ -323,16 +323,16 @@ class Package(BaseModel):
     website_url: HttpUrl = Field(alias="websiteURL", description="Package website URL")
     email: EmailStr = Field(description="Maintainer contact email")
     help: Help = Field(description="Help and documentation links")
-    platforms: List[Platform] = Field(
+    platforms: list[Platform] = Field(
         default_factory=lambda: [], description="Available platforms"
     )
-    tools: List[Tool] = Field(default_factory=lambda: [], description="Available tools")
+    tools: list[Tool] = Field(default_factory=lambda: [], description="Available tools")
 
     @field_validator("platforms")
     @classmethod
-    def validate_unique_platforms(cls, v: List[Platform]) -> List[Platform]:
+    def validate_unique_platforms(cls, v: list[Platform]) -> list[Platform]:
         """Ensure no duplicate platform architecture/version combinations"""
-        seen: Set[tuple[str, str]] = set()
+        seen: set[tuple[str, str]] = set()
         for platform in v:
             key = (platform.architecture, platform.version)
             if key in seen:
@@ -344,9 +344,9 @@ class Package(BaseModel):
 
     @field_validator("tools")
     @classmethod
-    def validate_unique_tools(cls, v: List[Tool]) -> List[Tool]:
+    def validate_unique_tools(cls, v: list[Tool]) -> list[Tool]:
         """Ensure no duplicate tool name/version combinations"""
-        seen: Set[tuple[str, str]] = set()
+        seen: set[tuple[str, str]] = set()
         for tool in v:
             key = (tool.name, tool.version)
             if key in seen:
@@ -399,11 +399,11 @@ class Package(BaseModel):
 class PackageIndex(BaseModel):
     """Root package index containing multiple packages"""
 
-    packages: List[Package] = Field(min_length=1, description="Available packages")
+    packages: list[Package] = Field(min_length=1, description="Available packages")
 
     @field_validator("packages")
     @classmethod
-    def validate_unique_packages(cls, v: List[Package]) -> List[Package]:
+    def validate_unique_packages(cls, v: list[Package]) -> list[Package]:
         """Ensure no duplicate package names"""
         names = [pkg.name for pkg in v]
         if len(names) != len(set(names)):
@@ -417,16 +417,16 @@ class PackageIndex(BaseModel):
                 return package
         return None
 
-    def get_all_platforms(self) -> List[Platform]:
+    def get_all_platforms(self) -> list[Platform]:
         """Get all platforms from all packages"""
-        platforms: List[Platform] = []
+        platforms: list[Platform] = []
         for package in self.packages:
             platforms.extend(package.platforms)
         return platforms
 
-    def get_all_tools(self) -> List[Tool]:
+    def get_all_tools(self) -> list[Tool]:
         """Get all tools from all packages"""
-        tools: List[Tool] = []
+        tools: list[Tool] = []
         for package in self.packages:
             tools.extend(package.tools)
         return tools
@@ -487,7 +487,7 @@ class PackageManagerConfig(BaseModel):
     """Configuration for package manager with validation"""
 
     cache_dir: Path = Field(default_factory=lambda: Path.home() / ".arduino_packages")
-    sources: List[HttpUrl] = Field(
+    sources: list[HttpUrl] = Field(
         default_factory=lambda: [], description="Package index URLs"
     )
     timeout: int = Field(
@@ -640,7 +640,7 @@ def display_validation_summary(package_index: PackageIndex) -> None:
     print(f"   💾 Total boards: {total_boards}")
 
     # Show architectures
-    architectures: Set[str] = set()
+    architectures: set[str] = set()
     for pkg in package_index.packages:
         for platform in pkg.platforms:
             architectures.add(platform.architecture)
@@ -681,7 +681,7 @@ def demo_model_validation() -> None:
     print("\n🧪 TESTING PYDANTIC MODEL VALIDATION")
 
     # Define valid platform data
-    valid_platform_data: Dict[str, Any] = {
+    valid_platform_data: dict[str, Any] = {
         "name": "ESP32 Arduino",
         "architecture": "esp32",
         "version": "2.0.5",

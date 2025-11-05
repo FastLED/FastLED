@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from typing import Any, List
 
@@ -30,7 +28,7 @@ class UnitTestsView(Screen[Any]):
 
     def __init__(self) -> None:
         super().__init__()
-        self._tasks: List[TaskState] = []
+        self._tasks: list[TaskState] = []
         self._runner_task: Any = None
 
     def compose(self) -> ComposeResult:
@@ -40,7 +38,7 @@ class UnitTestsView(Screen[Any]):
         self.call_after_refresh(self._start)
 
     async def _start(self) -> None:
-        blocks: List[tuple[TaskState, TaskBlock]] = []
+        blocks: list[tuple[TaskState, TaskBlock]] = []
         for test_name in EXAMPLE_TESTS:
             tb = TaskBlock(f"test_{test_name}")
             self._container.mount(tb)

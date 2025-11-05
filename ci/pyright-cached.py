@@ -23,12 +23,12 @@ def get_file_hash(file_path: Path) -> str:
         return ""
 
 
-def get_directory_hash(directory: Path, extensions: Optional[List[str]] = None) -> str:
+def get_directory_hash(directory: Path, extensions: Optional[list[str]] = None) -> str:
     """Get combined hash of all files in a directory."""
     if extensions is None:
         extensions = [".py"]
 
-    hashes: List[str] = []
+    hashes: list[str] = []
     if directory.exists():
         for ext in extensions:
             for file_path in directory.rglob(f"*{ext}"):
@@ -48,7 +48,7 @@ def get_cache_file() -> Path:
     return cache_dir / "file_hashes.json"
 
 
-def load_cache() -> Dict[str, str]:
+def load_cache() -> dict[str, str]:
     """Load the cache file."""
     cache_file = get_cache_file()
     if cache_file.exists():
@@ -60,7 +60,7 @@ def load_cache() -> Dict[str, str]:
     return {}
 
 
-def save_cache(cache: Dict[str, str]) -> None:
+def save_cache(cache: dict[str, str]) -> None:
     """Save the cache file."""
     cache_file = get_cache_file()
     try:
@@ -110,7 +110,7 @@ def has_files_changed() -> bool:
     return changed
 
 
-def run_pyright(args: List[str]) -> int:
+def run_pyright(args: list[str]) -> int:
     """Run pyright with the given arguments."""
     env = os.environ.copy()
     # env["PYRIGHT_PYTHON_FORCE_VERSION"] = "latest"

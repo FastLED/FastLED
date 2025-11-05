@@ -33,9 +33,9 @@ class SerialPrintfChecker(FileContentChecker):
 
         return True
 
-    def check_file_content(self, file_content: FileContent) -> List[str]:
+    def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for Serial.printf usage."""
-        failings: List[str] = []
+        failings: list[str] = []
         in_multiline_comment = False
 
         # Check each line for Serial.printf usage
@@ -70,7 +70,7 @@ class SerialPrintfChecker(FileContentChecker):
 
 
 def _test_no_serial_printf(
-    test_directories: List[str],
+    test_directories: list[str],
     on_fail: Callable[[str], None],
 ) -> None:
     """Searches through the example files to check for Serial.printf usage."""

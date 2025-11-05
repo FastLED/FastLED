@@ -68,9 +68,9 @@ def find_sccache() -> Optional[str]:
     return None
 
 
-def detect_response_files(args: List[str]) -> List[str]:
+def detect_response_files(args: list[str]) -> list[str]:
     """Detect response file arguments (@file.tmp) in command line."""
-    response_files: List[str] = []
+    response_files: list[str] = []
     for arg in args:
         if arg.startswith("@") and len(arg) > 1:
             response_file = arg[1:]
@@ -140,7 +140,7 @@ exec "{config.sccache_path}" "{config.compiler_path}" "$@"
         raise
 
 
-def execute_direct(config: XCacheConfig, args: List[str]) -> int:
+def execute_direct(config: XCacheConfig, args: list[str]) -> int:
     """Execute sccache directly without response file handling."""
     command = [config.sccache_path, config.compiler_path] + args
 
@@ -178,7 +178,7 @@ def execute_direct(config: XCacheConfig, args: List[str]) -> int:
         return 1
 
 
-def execute_with_wrapper(config: XCacheConfig, args: List[str]) -> int:
+def execute_with_wrapper(config: XCacheConfig, args: list[str]) -> int:
     """Execute using wrapper script for response file handling."""
     response_files = detect_response_files(args)
 

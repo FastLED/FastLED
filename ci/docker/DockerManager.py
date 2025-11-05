@@ -15,7 +15,7 @@ class DockerManager:
 
     def _run_docker_command(
         self,
-        command: List[str],
+        command: list[str],
         check: bool = True,
         stream_output: bool = False,
         timeout: Optional[int] = None,
@@ -182,9 +182,9 @@ class DockerManager:
     def run_container(
         self,
         image_name: str,
-        command: List[str],
-        volumes: Optional[Dict[str, Dict[str, str]]] = None,
-        environment: Optional[Dict[str, str]] = None,
+        command: list[str],
+        volumes: Optional[dict[str, dict[str, str]]] = None,
+        environment: Optional[dict[str, str]] = None,
         detach: bool = False,
         name: Optional[str] = None,
     ) -> str:  # Return container ID as string
@@ -221,9 +221,9 @@ class DockerManager:
     def run_container_streaming(
         self,
         image_name: str,
-        command: List[str],
-        volumes: Optional[Dict[str, Dict[str, str]]] = None,
-        environment: Optional[Dict[str, str]] = None,
+        command: list[str],
+        volumes: Optional[dict[str, dict[str, str]]] = None,
+        environment: Optional[dict[str, str]] = None,
         name: Optional[str] = None,
         timeout: Optional[int] = None,
         interrupt_pattern: Optional[str] = None,
@@ -306,7 +306,7 @@ class DockerManager:
         print(f"Container {container_id_or_name} removed.")
 
     def execute_command_in_container(
-        self, container_id_or_name: str, command: List[str]
+        self, container_id_or_name: str, command: list[str]
     ) -> tuple[int, str, str]:
         """Executes a command inside a running container and returns exit code, stdout, and stderr."""
         print(

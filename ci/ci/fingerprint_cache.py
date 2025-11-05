@@ -53,7 +53,7 @@ class FingerprintCache:
         self._modtime_only: bool = modtime_only
         self.cache = self._load_cache()
 
-    def _load_cache(self) -> Dict[str, CacheEntry]:
+    def _load_cache(self) -> dict[str, CacheEntry]:
         """
         Load cache from JSON file, return empty dict if file doesn't exist.
 
@@ -68,7 +68,7 @@ class FingerprintCache:
                 data = json.load(f)
 
             # Convert JSON dict to CacheEntry objects
-            cache: Dict[str, CacheEntry] = {}
+            cache: dict[str, CacheEntry] = {}
             for file_path, entry_data in data.items():
                 cache[file_path] = CacheEntry(
                     modification_time=entry_data["modification_time"],

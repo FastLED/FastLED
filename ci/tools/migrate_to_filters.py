@@ -37,7 +37,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
         return "require:\n   - memory: high"
 
     # Pattern 2: Platform-specific guards
-    filters: Dict[str, List[str]] = {"require": [], "exclude": []}  # type: Dict[str, List[str]]
+    filters: dict[str, list[str]] = {"require": [], "exclude": []}  # type: Dict[str, List[str]]
 
     # Check for ESP32-S3 specific
     if match := re.search(
@@ -75,7 +75,7 @@ def extract_guard_filters(content: str) -> Optional[str]:
             filters["require"].append("platform: esp32")
 
     # Build filter string
-    filter_parts: List[str] = []
+    filter_parts: list[str] = []
     if filters["require"]:
         filter_parts.append("require:")
         for req in filters["require"]:
@@ -97,7 +97,7 @@ def generate_filter_block(filters_str: str) -> str:
     return f"// @filter\n// {replaced}\n// @end-filter"
 
 
-def migrate_sketch(ino_path: Path, dry_run: bool = False) -> Tuple[bool, str]:
+def migrate_sketch(ino_path: Path, dry_run: bool = False) -> tuple[bool, str]:
     """Migrate a single sketch file.
 
     Returns:

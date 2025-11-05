@@ -142,12 +142,12 @@ def _get_status_file(artifact_dir: Path, cache_key: str) -> Path:
     return artifact_dir / "info.json"
 
 
-def _read_status(status_file: Path) -> Optional[Dict[str, Any]]:
+def _read_status(status_file: Path) -> Optional[dict[str, Any]]:
     """Read status from JSON file (legacy wrapper)."""
     return read_breadcrumb(status_file)
 
 
-def _write_status(status_file: Path, status: Dict[str, Any]) -> None:
+def _write_status(status_file: Path, status: dict[str, Any]) -> None:
     """Write status to JSON file (legacy wrapper)."""
     write_breadcrumb(status_file, status)
 
@@ -767,11 +767,11 @@ def _process_artifact(
         )
 
 
-def _collect_all_zip_urls(pio_ini: PlatformIOIni) -> List[ZipUrlInfo]:
+def _collect_all_zip_urls(pio_ini: PlatformIOIni) -> list[ZipUrlInfo]:
     """
     Collect all zip URLs from platformio.ini in a single pass.
     """
-    all_urls: List[ZipUrlInfo] = []
+    all_urls: list[ZipUrlInfo] = []
 
     # Collect platform URLs
     for section_name, option_name, url in pio_ini.get_platform_urls():
@@ -789,13 +789,13 @@ def _collect_all_zip_urls(pio_ini: PlatformIOIni) -> List[ZipUrlInfo]:
 
 
 def _dedupe_urls(
-    all_urls: List[ZipUrlInfo],
-) -> Dict[str, str]:
+    all_urls: list[ZipUrlInfo],
+) -> dict[str, str]:
     """
     Deduplicate URLs, keeping the first occurrence of each unique URL.
     Returns dict mapping url -> env_section.
     """
-    unique_urls: Dict[str, str] = {}
+    unique_urls: dict[str, str] = {}
     for url_info in all_urls:
         if url_info.url not in unique_urls:
             unique_urls[url_info.url] = url_info.section_name
@@ -803,8 +803,8 @@ def _dedupe_urls(
 
 
 def _download_and_process_urls(
-    unique_urls: Dict[str, str], cache_manager: PlatformIOCache
-) -> Dict[str, str]:
+    unique_urls: dict[str, str], cache_manager: PlatformIOCache
+) -> dict[str, str]:
     """
     Download and process all URLs concurrently.
     Returns dict mapping original_url -> resolved_local_path.
@@ -818,12 +818,12 @@ def _download_and_process_urls(
         max_workers=max_workers, thread_name_prefix="download"
     ) as executor:
         # Submit all download tasks
-        futures: List[Future[ArtifactProcessingResult]] = []
+        futures: list[Future[ArtifactProcessingResult]] = []
         for url, env_section in unique_urls.items():
             future = executor.submit(_process_artifact, url, env_section, cache_manager)
             futures.append(future)
 
-        replacements: Dict[str, str] = {}
+        replacements: dict[str, str] = {}
 
         try:
             for future in as_completed(futures):
@@ -855,8 +855,8 @@ def _download_and_process_urls(
 
 def _replace_all_urls(
     pio_ini: PlatformIOIni,
-    all_urls: List[ZipUrlInfo],
-    replacements: Dict[str, str],
+    all_urls: list[ZipUrlInfo],
+    replacements: dict[str, str],
 ) -> None:
     """
     Replace all URLs in platformio.ini with their resolved local paths.

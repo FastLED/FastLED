@@ -20,7 +20,7 @@ class BaseChecker(ABC):
         pass
 
     @abstractmethod
-    def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
+    def check_file(self, file_path: Path, content: str) -> list[CheckResult]:
         """
         Check file content and return any violations.
 

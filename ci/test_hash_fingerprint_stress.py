@@ -21,7 +21,7 @@ from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 # Type alias for Queue results
-QueueResult = Tuple[str, Any]
+QueueResult = tuple[str, Any]
 
 
 class StressTestResults:
@@ -30,7 +30,7 @@ class StressTestResults:
     def __init__(self):
         self.passed = 0
         self.failed = 0
-        self.errors: List[str] = []
+        self.errors: list[str] = []
 
     def pass_test(self, name: str):
         self.passed += 1
@@ -52,10 +52,10 @@ class StressTestResults:
         return self.failed == 0
 
 
-def create_test_files(test_dir: Path, count: int = 10) -> List[Path]:
+def create_test_files(test_dir: Path, count: int = 10) -> list[Path]:
     """Create test files in a temporary directory."""
     test_dir.mkdir(parents=True, exist_ok=True)
-    files: List[Path] = []
+    files: list[Path] = []
     for i in range(count):
         file_path = test_dir / f"test_file_{i}.txt"
         file_path.write_text(f"Content {i}\n")
@@ -152,8 +152,8 @@ def test_file_modification_during_processing(results: StressTestResults) -> None
 
 def _concurrent_check_worker(
     cache_dir: Path,
-    files: List[Path],
-    result_queue: multiprocessing.Queue[Tuple[str, Any]],
+    files: list[Path],
+    result_queue: multiprocessing.Queue[tuple[str, Any]],
 ) -> None:
     """Worker function run in separate process. Must be top-level for pickling."""
     try:
@@ -177,8 +177,8 @@ def test_concurrent_checks(results: StressTestResults) -> None:
         files = create_test_files(test_dir, 10)
 
         # Run 5 concurrent checks
-        result_queue: multiprocessing.Queue[Tuple[str, Any]] = multiprocessing.Queue()
-        processes: List[multiprocessing.Process] = []
+        result_queue: multiprocessing.Queue[tuple[str, Any]] = multiprocessing.Queue()
+        processes: list[multiprocessing.Process] = []
 
         for i in range(5):
             p = multiprocessing.Process(
@@ -192,7 +192,7 @@ def test_concurrent_checks(results: StressTestResults) -> None:
             p.join(timeout=10)
 
         # Check results
-        results_collected: List[Tuple[str, Any]] = []
+        results_collected: list[tuple[str, Any]] = []
         while not result_queue.empty():
             item = result_queue.get()
             if isinstance(item, tuple) and len(item) == 2:

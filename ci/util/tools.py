@@ -24,9 +24,9 @@ class Tools:
 
 
 def load_tools(build_info_path: Path) -> Tools:
-    build_info: Dict[str, Any] = json.loads(build_info_path.read_text())
-    board_info: Dict[str, Any] = build_info[next(iter(build_info))]
-    aliases: Dict[str, str] = board_info["aliases"]
+    build_info: dict[str, Any] = json.loads(build_info_path.read_text())
+    board_info: dict[str, Any] = build_info[next(iter(build_info))]
+    aliases: dict[str, str] = board_info["aliases"]
     as_path = Path(aliases["as"])
     ld_path = Path(aliases["ld"])
     objcopy_path = Path(aliases["objcopy"])

@@ -25,8 +25,8 @@ class CompilerInfo:
 
     cc_path: str = ""
     cxx_path: str = ""
-    cc_flags: List[str] = field(default_factory=lambda: list())
-    cxx_flags: List[str] = field(default_factory=lambda: list())
+    cc_flags: list[str] = field(default_factory=lambda: list())
+    cxx_flags: list[str] = field(default_factory=lambda: list())
     compiler_type: str = ""
     build_type: str = ""
 
@@ -36,9 +36,9 @@ class BuildInfo:
     """Complete build information for a platform"""
 
     board_name: str
-    defines: Dict[str, str] = field(default_factory=lambda: dict())
+    defines: dict[str, str] = field(default_factory=lambda: dict())
     compiler_info: CompilerInfo = field(default_factory=CompilerInfo)
-    aliases: Dict[str, Optional[str]] = field(default_factory=lambda: dict())
+    aliases: dict[str, Optional[str]] = field(default_factory=lambda: dict())
 
 
 class BuildInfoAnalyzer:
@@ -53,14 +53,14 @@ class BuildInfoAnalyzer:
         """
         self.build_dir = Path(build_dir)
 
-    def list_available_boards(self) -> List[str]:
+    def list_available_boards(self) -> list[str]:
         """
         List all boards that have build_info.json files.
 
         Returns:
             List of board names that have been built
         """
-        boards: List[str] = []
+        boards: list[str] = []
         if not self.build_dir.exists():
             return boards
 
@@ -85,7 +85,7 @@ class BuildInfoAnalyzer:
             return build_info_path
         return None
 
-    def load_build_info(self, board_name: str) -> Optional[Dict[str, Any]]:
+    def load_build_info(self, board_name: str) -> Optional[dict[str, Any]]:
         """
         Load and parse build_info.json for a board.
 
@@ -107,7 +107,7 @@ class BuildInfoAnalyzer:
             return None
 
     def create_board_key_from_build_info(
-        self, data: Dict[str, Any], board_name: str
+        self, data: dict[str, Any], board_name: str
     ) -> Optional[str]:
         """
         Get the actual board key used in build_info.json.
@@ -137,7 +137,7 @@ class BuildInfoAnalyzer:
 
         return None
 
-    def get_platform_defines(self, board_name: str) -> Tuple[bool, List[str], str]:
+    def get_platform_defines(self, board_name: str) -> tuple[bool, list[str], str]:
         """
         Get platform-specific preprocessor defines for a board.
 
@@ -161,7 +161,7 @@ class BuildInfoAnalyzer:
 
         return True, defines, ""
 
-    def get_compiler_info(self, board_name: str) -> Tuple[bool, CompilerInfo, str]:
+    def get_compiler_info(self, board_name: str) -> tuple[bool, CompilerInfo, str]:
         """
         Get compiler information for a board.
 
@@ -194,7 +194,7 @@ class BuildInfoAnalyzer:
 
     def get_toolchain_aliases(
         self, board_name: str
-    ) -> Tuple[bool, Dict[str, str], str]:
+    ) -> tuple[bool, dict[str, str], str]:
         """
         Get toolchain tool aliases for a board.
 
@@ -217,7 +217,7 @@ class BuildInfoAnalyzer:
 
         return True, aliases, ""
 
-    def get_all_info(self, board_name: str) -> Tuple[bool, Dict[str, Any], str]:
+    def get_all_info(self, board_name: str) -> tuple[bool, dict[str, Any], str]:
         """
         Get all available information for a board.
 
@@ -239,7 +239,7 @@ class BuildInfoAnalyzer:
 
     def compare_defines(
         self, board1: str, board2: str
-    ) -> Tuple[bool, Dict[str, Any], str]:
+    ) -> tuple[bool, dict[str, Any], str]:
         """
         Compare platform defines between two boards.
 
@@ -275,7 +275,7 @@ class BuildInfoAnalyzer:
         return True, comparison, ""
 
 
-def print_defines(defines: List[str], board_name: str):
+def print_defines(defines: list[str], board_name: str):
     """Print platform defines in a formatted way."""
     print(f"\n📋 Platform Defines for {board_name.upper()}:")
     print("=" * 50)
@@ -304,7 +304,7 @@ def print_compiler_info(compiler_info: CompilerInfo, board_name: str):
             print(f"  {flag}")
 
 
-def print_toolchain_aliases(aliases: Dict[str, str], board_name: str):
+def print_toolchain_aliases(aliases: dict[str, str], board_name: str):
     """Print toolchain aliases in a formatted way."""
     print(f"\n⚙️  Toolchain Aliases for {board_name.upper()}:")
     print("=" * 50)
@@ -317,7 +317,7 @@ def print_toolchain_aliases(aliases: Dict[str, str], board_name: str):
             print(f"  {tool:10}: Not available")
 
 
-def print_comparison(comparison: Dict[str, Any]):
+def print_comparison(comparison: dict[str, Any]):
     """Print a comparison between two boards."""
     board1 = comparison["board1"]
     board2 = comparison["board2"]

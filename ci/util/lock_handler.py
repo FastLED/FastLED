@@ -27,7 +27,7 @@ def is_psutil_available() -> bool:
 
 def find_processes_locking_path(
     path: Path, max_processes: int = 200, timeout: float = 3.0
-) -> Set[int]:
+) -> set[int]:
     """Find all process IDs that have open handles to files under the given path.
 
     Args:
@@ -52,7 +52,7 @@ def find_processes_locking_path(
         # Path might be in a bad state
         normalized_path = path.absolute()
 
-    locking_pids: Set[int] = set()
+    locking_pids: set[int] = set()
     path_str = str(normalized_path).lower()
     start_time = time.time()
     processes_checked = 0
@@ -138,7 +138,7 @@ def find_processes_locking_path(
     return locking_pids
 
 
-def kill_processes(pids: Set[int], force: bool = True) -> bool:
+def kill_processes(pids: set[int], force: bool = True) -> bool:
     """Kill processes by PID.
 
     Args:
@@ -275,7 +275,7 @@ def force_remove_path(path: Path, max_retries: int = 3) -> bool:
     return False
 
 
-def get_process_info(pids: Set[int]) -> List[Dict[str, Any]]:
+def get_process_info(pids: set[int]) -> list[dict[str, Any]]:
     """Get detailed information about processes.
 
     Args:
@@ -287,7 +287,7 @@ def get_process_info(pids: Set[int]) -> List[Dict[str, Any]]:
     if not is_psutil_available():
         return []
 
-    process_info: List[Dict[str, Any]] = []
+    process_info: list[dict[str, Any]] = []
 
     for pid in pids:
         try:

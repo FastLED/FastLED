@@ -31,7 +31,7 @@ PATTERN_CLOSE_WITH_COMMENT = re.compile(
 )
 
 
-def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> Tuple[bool, int]:
+def replace_extern_c_in_file(filepath: Path, dry_run: bool = False) -> tuple[bool, int]:
     """
     Replace extern "C" patterns in a file with FL_EXTERN_C macros.
 
@@ -155,7 +155,7 @@ def main():
     else:
         # Find all .h, .hpp, .cpp files in src/
         patterns = ["**/*.h", "**/*.hpp", "**/*.cpp"]
-        files_to_process: List[Path] = []
+        files_to_process: list[Path] = []
         for pattern in patterns:
             files_to_process.extend((root / "src").rglob(pattern))
 

@@ -120,7 +120,7 @@ class DockerAVR8jsRunner:
         print(f"    Container mount: /firmware (read-only)")
         print()
 
-        docker_cmd: List[str] = [
+        docker_cmd: list[str] = [
             "docker",
             "run",
             "--rm",  # Remove container after run

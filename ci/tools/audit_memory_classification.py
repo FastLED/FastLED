@@ -93,13 +93,13 @@ def audit_memory_classification():
     print("=" * 70)
     print()
 
-    errors: List[str] = []
-    warnings: List[str] = []
+    errors: list[str] = []
+    warnings: list[str] = []
     passed = 0
     total = 0
 
     # Check boards we have explicit expectations for
-    checked_boards: Set[str] = set()
+    checked_boards: set[str] = set()
 
     for board in sorted(ALL, key=lambda b: b.board_name):
         total += 1
@@ -162,9 +162,9 @@ def audit_memory_classification():
 
     # Check for boards in expectations that weren't found
     print("COVERAGE CHECK:")
-    found_boards: Set[str] = {board.board_name for board in ALL}
-    expected_boards: Set[str] = {name for name, _ in EXPECTED_MEMORY_BY_PATTERN}
-    missing_in_reality: Set[str] = expected_boards - found_boards
+    found_boards: set[str] = {board.board_name for board in ALL}
+    expected_boards: set[str] = {name for name, _ in EXPECTED_MEMORY_BY_PATTERN}
+    missing_in_reality: set[str] = expected_boards - found_boards
 
     if missing_in_reality:
         print(f"  ⚠️  Expected boards NOT found in ALL: {missing_in_reality}")

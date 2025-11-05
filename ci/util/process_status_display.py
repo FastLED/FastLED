@@ -119,7 +119,7 @@ class ASCIIStatusDisplay(ProcessStatusDisplay):
         self, group_status: "GroupStatus", spinner_index: int
     ) -> str:
         """Format status display using ASCII characters."""
-        lines: List[str] = []
+        lines: list[str] = []
 
         # Header
         lines.append(
@@ -284,7 +284,7 @@ class RichStatusDisplay(ProcessStatusDisplay):
         self, group_status: "GroupStatus", spinner_index: int
     ) -> str:
         """Fallback ASCII formatting when Rich fails."""
-        lines: List[str] = []
+        lines: list[str] = []
 
         # Header
         lines.append(

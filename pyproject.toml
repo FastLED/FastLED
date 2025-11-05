@@ -62,7 +62,12 @@ exclude = ["ci/tmp", "ci/wasm", "scripts", "native"]
 
 [tool.ruff.lint]
 # Enable import sorting (replaces isort)
-select = ["I"]
+# Enable PEP 585 annotations and PEP 604 unions (modern type hints)
+select = [
+    "I",      # isort - import sorting
+    "UP006",  # Use PEP 585 annotation (list[T] instead of List[T])
+    "UP007",  # Use PEP 604 union syntax (X | Y instead of Union[X, Y], T | None instead of Optional[T])
+]
 
 [tool.ruff.lint.isort]
 # Configure import sorting to match isort's black profile

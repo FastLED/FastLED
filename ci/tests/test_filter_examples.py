@@ -15,7 +15,7 @@ from ci.compiler.sketch_filter import parse_filter_from_sketch
 def test_example_sketches() -> None:
     """Test various @filter syntax styles with example sketches."""
 
-    examples: List[Dict[str, Any]] = [
+    examples: list[dict[str, Any]] = [
         # Style 1: Original - with colon and 'is' operator
         {
             "name": "Original with colon (backward compat)",
@@ -120,7 +120,7 @@ void loop() {}
         },
     ]
 
-    failed_examples: List[str] = []
+    failed_examples: list[str] = []
 
     for example in examples:
         with tempfile.NamedTemporaryFile(mode="w", suffix=".ino", delete=False) as f:
@@ -133,15 +133,15 @@ void loop() {}
             result = parse_filter_from_sketch(Path(temp_path))
 
             if result is None:
-                require: Dict[str, List[str]] = {}
-                exclude: Dict[str, List[str]] = {}
+                require: dict[str, list[str]] = {}
+                exclude: dict[str, list[str]] = {}
             else:
                 require = result.require
                 exclude = result.exclude
 
-            expected: Dict[str, Any] = example["expected"]
-            expected_require: Dict[str, List[str]] = expected["require"]
-            expected_exclude: Dict[str, List[str]] = expected["exclude"]
+            expected: dict[str, Any] = example["expected"]
+            expected_require: dict[str, list[str]] = expected["require"]
+            expected_exclude: dict[str, list[str]] = expected["exclude"]
 
             if require != expected_require or exclude != expected_exclude:
                 failed_examples.append(

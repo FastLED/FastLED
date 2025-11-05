@@ -6,8 +6,6 @@ context for AI assistants. Designed to complete searches in under 4 seconds by r
 parallel searches and keeping results compact.
 """
 
-from __future__ import annotations
-
 import re
 import shlex
 import subprocess
@@ -55,7 +53,7 @@ def _have(cmd: str) -> bool:
         return False
 
 
-def _compile_alt_regex(keywords: List[str]) -> str:
+def _compile_alt_regex(keywords: list[str]) -> str:
     """
     Build a smart, case-insensitive alternation regex.
 
@@ -63,7 +61,7 @@ def _compile_alt_regex(keywords: List[str]) -> str:
     If a term looks like a regex (has meta), we keep it; else escape it.
     """
     metas = set(".^$*+?{}[]|()\\")
-    parts: List[str] = []
+    parts: list[str] = []
     for kw in keywords:
         if any(c in metas for c in kw):
             parts.append(kw)
@@ -73,7 +71,7 @@ def _compile_alt_regex(keywords: List[str]) -> str:
     return "(?i)(" + "|".join(parts) + ")"
 
 
-def _paths_or_repo_root(paths: List[Path]) -> List[Path]:
+def _paths_or_repo_root(paths: list[Path]) -> list[Path]:
     """Return provided paths or default to repo root."""
     if paths:
         return paths
@@ -86,15 +84,15 @@ def _paths_or_repo_root(paths: List[Path]) -> List[Path]:
 
 
 def _search_working_tree(
-    pattern: str, roots: List[Path], max_files: int = 20, max_lines_per_file: int = 3
-) -> List[str]:
+    pattern: str, roots: list[Path], max_files: int = 20, max_lines_per_file: int = 3
+) -> list[str]:
     """
     Return file-context chunks from the working tree.
 
     Format: 'FILE <path>\\nL<line>: <snippet>\\n...'
     Prefer ripgrep; fall back to 'git grep'.
     """
-    chunks: List[str] = []
+    chunks: list[str] = []
     roots_quoted = " ".join(shlex.quote(str(p)) for p in roots)
 
     if _have("rg"):
@@ -120,7 +118,7 @@ def _search_working_tree(
         return chunks
 
     # Aggregate by file, capped at max_files
-    hits_by_file: Dict[str, List[Tuple[int, str]]] = {}
+    hits_by_file: dict[str, list[tuple[int, str]]] = {}
     for line in out.splitlines():
         # Expect "path:line:match"
         parts = line.split(":", 2)
@@ -137,7 +135,7 @@ def _search_working_tree(
     ranked = sorted(hits_by_file.items(), key=lambda kv: (-len(kv[1]), kv[0]))
     for fpath, hits in ranked[:max_files]:
         # compact snippet block
-        lines: List[str] = [f"FILE {fpath}"]
+        lines: list[str] = [f"FILE {fpath}"]
         for ln, snip in hits[:max_lines_per_file]:
             # trim long lines to keep context small
             if len(snip) > 220:
@@ -150,7 +148,7 @@ def _search_working_tree(
 
 def _search_last10_history(
     pattern: str, max_commits: int = 10, max_hunks_per_commit: int = 3
-) -> List[str]:
+) -> list[str]:
     """
     Search the diffs of the last N commits for the pattern (regex).
 
@@ -167,11 +165,11 @@ def _search_last10_history(
     if not out:
         return []
 
-    chunks: List[str] = []
+    chunks: list[str] = []
     cur_header = None
     cur_file = None
     hunks_this_commit = 0
-    lines_buf: List[str] = []
+    lines_buf: list[str] = []
 
     def _flush_commit() -> None:
         nonlocal lines_buf, hunks_this_commit, cur_header
@@ -226,7 +224,7 @@ def _search_last10_history(
 # --- main API ----------------------------------------------------------------
 
 
-def query(keywords: List[str], paths: List[Path]) -> List[str]:
+def query(keywords: list[str], paths: list[Path]) -> list[str]:
     """
     Return compact 'contexts' for an AI.
 
@@ -243,7 +241,7 @@ def query(keywords: List[str], paths: List[Path]) -> List[str]:
     pattern = _compile_alt_regex(keywords)
     roots = _paths_or_repo_root(paths)
 
-    results: List[str] = []
+    results: list[str] = []
     with ThreadPoolExecutor(max_workers=2) as pool:
         fut_tree = pool.submit(_search_working_tree, pattern, roots)
         fut_hist = pool.submit(_search_last10_history, pattern)

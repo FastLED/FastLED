@@ -5,8 +5,6 @@ This test executes a trivial Python command via `uv run python -c` and verifies:
 - The streamed output contains the expected line
 """
 
-from __future__ import annotations
-
 import time
 import unittest
 from pathlib import Path
@@ -44,10 +42,10 @@ class TestRunningProcess(unittest.TestCase):
             output_formatter=None,
         )
 
-        captured_lines: List[str] = []
+        captured_lines: list[str] = []
 
         while True:
-            out: Union[str, EndOfStream, None] = rp.get_next_line_non_blocking()
+            out: str | EndOfStream | None = rp.get_next_line_non_blocking()
             if isinstance(out, EndOfStream):
                 break
             if isinstance(out, str):
@@ -82,7 +80,7 @@ class TestRunningProcess(unittest.TestCase):
             output_formatter=None,
         )
 
-        iter_lines: List[str] = []
+        iter_lines: list[str] = []
         with rp.line_iter(timeout=60) as it:
             for ln in it:
                 # Should always be a string, never None
@@ -146,7 +144,7 @@ class TestRunningProcessAdditional(unittest.TestCase):
         end_seen: bool = False
         deadline: float = time.time() + 2.0
         while time.time() < deadline:
-            nxt: Union[str, EndOfStream, None] = rp.get_next_line_non_blocking()
+            nxt: str | EndOfStream | None = rp.get_next_line_non_blocking()
             if isinstance(nxt, EndOfStream):
                 end_seen = True
                 break
@@ -178,7 +176,7 @@ class TestRunningProcessAdditional(unittest.TestCase):
 
         # Drain output (optional; accumulated_output records lines regardless)
         while True:
-            line: Union[str, EndOfStream, None] = rp.get_next_line_non_blocking()
+            line: str | EndOfStream | None = rp.get_next_line_non_blocking()
             if isinstance(line, EndOfStream):
                 break
             if line is None:

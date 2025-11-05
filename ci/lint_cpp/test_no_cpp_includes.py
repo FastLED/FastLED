@@ -33,9 +33,9 @@ class CppIncludeChecker(FileContentChecker):
 
         return True
 
-    def check_file_content(self, file_content: FileContent) -> List[str]:
+    def check_file_content(self, file_content: FileContent) -> list[str]:
         """Check file content for .cpp file includes."""
-        failings: List[str] = []
+        failings: list[str] = []
         in_multiline_comment = False
 
         # Regex pattern to match #include "..." or #include <...> with .cpp extension
@@ -76,7 +76,7 @@ class CppIncludeChecker(FileContentChecker):
 
 
 def _test_no_cpp_includes(
-    test_directories: List[str],
+    test_directories: list[str],
     on_fail: Callable[[str], None],
 ) -> None:
     """Searches through the program files to check for .cpp file includes."""

@@ -51,7 +51,7 @@ ALLOW_DIRECTIVE_PATTERN = re.compile(r"//\s*allow-include-after-namespace")
 NOLINT_PATTERN = re.compile(r"//\s*nolint")
 
 
-def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
+def find_includes_after_namespace(file_path: str) -> list[tuple[int, str]]:
     """
     Check if a C++ file has #include directives after namespace declarations.
 
@@ -76,7 +76,7 @@ def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
             return []  # Return empty list if directive is found
 
     namespace_started = False
-    violations: List[Tuple[int, str]] = []
+    violations: list[tuple[int, str]] = []
 
     for i, line in enumerate(lines, 1):
         # Check if we're entering a namespace
@@ -94,7 +94,7 @@ def find_includes_after_namespace(file_path: str) -> List[Tuple[int, str]]:
     return violations
 
 
-def scan_cpp_files(directory: str = ".") -> Dict[str, List[Tuple[int, str]]]:
+def scan_cpp_files(directory: str = ".") -> dict[str, list[tuple[int, str]]]:
     """
     Scan all C++ files in a directory for includes after namespace declarations.
 
@@ -105,7 +105,7 @@ def scan_cpp_files(directory: str = ".") -> Dict[str, List[Tuple[int, str]]]:
         Dict[str, List[Tuple[int, str]]]: Dictionary mapping file paths to list of tuples
                                          (line numbers, line content) of violations
     """
-    violations: Dict[str, List[Tuple[int, str]]] = {}
+    violations: dict[str, list[tuple[int, str]]] = {}
 
     # Find all C++ files
     cpp_extensions = [".cpp", ".h", ".hpp", ".cc", ".ino"]

@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 
-def _create_board_info(path: Path) -> Dict[str, Any]:
+def _create_board_info(path: Path) -> dict[str, Any]:
     build_info = json.loads(path.read_text())
     assert build_info.keys(), f"No boards found in {build_info}"
     assert len(build_info.keys()) == 1, (

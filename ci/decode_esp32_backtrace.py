@@ -37,7 +37,7 @@ def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
     """
     try:
         with open(build_info_path, "r") as f:
-            build_info: Dict[str, Any] = json.load(f)
+            build_info: dict[str, Any] = json.load(f)
 
         # Build info has structure: { "board_name": { "aliases": { "addr2line": "path" } } }
         # Get the first (and usually only) board entry
@@ -46,7 +46,7 @@ def find_addr2line_from_build_info(build_info_path: Path) -> Optional[Path]:
                 continue
             if "aliases" not in board_data:
                 continue
-            aliases = cast(Dict[str, Any], board_data["aliases"])
+            aliases = cast(dict[str, Any], board_data["aliases"])
             if not isinstance(aliases, dict):
                 continue
             addr2line_path = cast(Optional[str], aliases.get("addr2line"))
@@ -112,7 +112,7 @@ def find_addr2line() -> Optional[Path]:
 
 
 def decode_addresses(
-    elf_file: Path, addresses: List[str], build_info_path: Optional[Path] = None
+    elf_file: Path, addresses: list[str], build_info_path: Optional[Path] = None
 ) -> None:
     """Decode addresses using addr2line.
 
@@ -164,9 +164,9 @@ def decode_addresses(
         print(f"Error running addr2line: {e}", file=sys.stderr)
 
 
-def extract_addresses_from_crash_log(log: str) -> List[str]:
+def extract_addresses_from_crash_log(log: str) -> list[str]:
     """Extract addresses from ESP32 crash log."""
-    addresses: List[str] = []
+    addresses: list[str] = []
 
     # Extract MEPC (RISC-V program counter)
     mepc_match = re.search(r"MEPC\s*:\s*(0x[0-9a-fA-F]+)", log)
@@ -181,12 +181,12 @@ def extract_addresses_from_crash_log(log: str) -> List[str]:
     # Extract backtrace addresses from ESP32 memory regions:
     # 0x3C - Flash DROM, 0x3F - DRAM, 0x40 - IRAM, 0x42 - Flash IROM, 0x50 - RTC
     backtrace_pattern = r"0x(?:3[CF]|4[02]|50)[0-9a-fA-F]{6}"
-    backtrace_addrs: List[str] = re.findall(backtrace_pattern, log)
+    backtrace_addrs: list[str] = re.findall(backtrace_pattern, log)
     addresses.extend(backtrace_addrs[:10])  # Limit to first 10 addresses
 
     # Remove duplicates while preserving order
     seen: set[str] = set()
-    unique_addresses: List[str] = []
+    unique_addresses: list[str] = []
     for addr in addresses:
         if addr not in seen:
             seen.add(addr)

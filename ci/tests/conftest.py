@@ -26,7 +26,7 @@ def pytest_configure(config: Config) -> None:
     )
 
 
-def pytest_collection_modifyitems(config: Config, items: List[Item]) -> None:
+def pytest_collection_modifyitems(config: Config, items: list[Item]) -> None:
     """Skip slow tests by default unless --runslow is given.
 
     Also marks serial tests to prevent parallel execution.

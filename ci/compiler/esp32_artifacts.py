@@ -69,9 +69,9 @@ class ArtifactSet:
             ]
         )
 
-    def missing_files(self) -> List[str]:
+    def missing_files(self) -> list[str]:
         """Get list of missing required files."""
-        missing: List[str] = []
+        missing: list[str] = []
         if not self.firmware:
             missing.append("firmware.bin")
         if not self.bootloader:
@@ -210,7 +210,7 @@ class ESP32ArtifactCopier:
         """Copy all artifacts needed for QEMU testing."""
         output_dir.mkdir(parents=True, exist_ok=True)
 
-        copied: List[str] = []
+        copied: list[str] = []
 
         # Copy required files
         if not self._copy_required_files(output_dir, copied):
@@ -229,7 +229,7 @@ class ESP32ArtifactCopier:
         self._print_summary(output_dir, copied)
         return True
 
-    def _copy_required_files(self, output_dir: Path, copied: List[str]) -> bool:
+    def _copy_required_files(self, output_dir: Path, copied: list[str]) -> bool:
         """Copy required files for QEMU."""
         success = True
         required = [
@@ -253,13 +253,13 @@ class ESP32ArtifactCopier:
 
         return success
 
-    def _copy_optional_files(self, output_dir: Path, copied: List[str]) -> None:
+    def _copy_optional_files(self, output_dir: Path, copied: list[str]) -> None:
         """Copy optional files if present."""
         if self.artifacts.spiffs:
             shutil.copy2(self.artifacts.spiffs, output_dir / FILE_NAMES.SPIFFS)
             copied.append(FILE_NAMES.SPIFFS)
 
-    def _ensure_partitions_csv(self, output_dir: Path, copied: List[str]) -> None:
+    def _ensure_partitions_csv(self, output_dir: Path, copied: list[str]) -> None:
         """Ensure partitions.csv exists (create default if missing)."""
         if self.artifacts.partitions_csv:
             shutil.copy2(
@@ -276,7 +276,7 @@ class ESP32ArtifactCopier:
         (output_dir / FILE_NAMES.BOOT_APP0).write_bytes(boot_app0_data)
 
     def _create_flash_image(
-        self, output_dir: Path, board_name: str, copied: List[str]
+        self, output_dir: Path, board_name: str, copied: list[str]
     ) -> None:
         """Create merged flash image for QEMU."""
         try:
@@ -287,7 +287,7 @@ class ESP32ArtifactCopier:
         except Exception as e:
             print(f"⚠️  Warning: Could not create flash.bin: {e}")
 
-    def _print_summary(self, output_dir: Path, copied: List[str]) -> None:
+    def _print_summary(self, output_dir: Path, copied: list[str]) -> None:
         """Print summary of copied files."""
         print(f"\n📋 ESP32 QEMU artifacts summary:")
         print(f"   Output directory: {output_dir}")

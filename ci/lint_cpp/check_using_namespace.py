@@ -16,14 +16,14 @@ from typing import List, Tuple
 from ci.util.paths import PROJECT_ROOT
 
 
-def find_using_namespace_violations(file_path: Path) -> List[Tuple[int, str]]:
+def find_using_namespace_violations(file_path: Path) -> list[tuple[int, str]]:
     """
     Find 'using namespace' declarations in a file.
 
     Returns:
         List of (line_number, line_content) tuples for violations
     """
-    violations: List[Tuple[int, str]] = []
+    violations: list[tuple[int, str]] = []
 
     try:
         with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
@@ -64,7 +64,7 @@ def find_using_namespace_violations(file_path: Path) -> List[Tuple[int, str]]:
     return violations
 
 
-def check_header_files(root_dir: Path, extensions: List[str]) -> bool:
+def check_header_files(root_dir: Path, extensions: list[str]) -> bool:
     """
     Check all header files in the given directory for using namespace violations.
 

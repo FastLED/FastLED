@@ -19,8 +19,8 @@ WRONG_DEFINES: dict[str, str] = {
 
 
 class TestWrongDefines(unittest.TestCase):
-    def check_file(self, file_path: str) -> List[str]:
-        failings: List[str] = []
+    def check_file(self, file_path: str) -> list[str]:
+        failings: list[str] = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, 1):
                 line = line.strip()
@@ -33,7 +33,7 @@ class TestWrongDefines(unittest.TestCase):
 
     def test_no_bad_defines(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
         for root, _, files in os.walk(SRC_ROOT):
             for file in files:
                 if file.endswith(
@@ -42,7 +42,7 @@ class TestWrongDefines(unittest.TestCase):
                     file_path = os.path.join(root, file)
                     files_to_check.append(file_path)
 
-        all_failings: List[str] = []
+        all_failings: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

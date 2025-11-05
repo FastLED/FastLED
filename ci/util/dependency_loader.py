@@ -46,7 +46,7 @@ class DependencyManifest:
         with open(manifest_path, "r") as f:
             self.data = json.load(f)
 
-    def get_globs(self, operation: str) -> List[str]:
+    def get_globs(self, operation: str) -> list[str]:
         """
         Get file patterns (globs) for a given operation.
 
@@ -67,7 +67,7 @@ class DependencyManifest:
 
         return self.data["operations"][operation].get("globs", [])
 
-    def get_excludes(self, operation: str) -> List[str]:
+    def get_excludes(self, operation: str) -> list[str]:
         """
         Get exclusion patterns for a given operation.
 
@@ -82,7 +82,7 @@ class DependencyManifest:
 
         return self.data["operations"][operation].get("excludes", [])
 
-    def get_operation(self, operation: str) -> Dict[str, Any]:
+    def get_operation(self, operation: str) -> dict[str, Any]:
         """
         Get full operation definition.
 
@@ -104,11 +104,11 @@ class DependencyManifest:
         """Get cache key for an operation."""
         return self.get_operation(operation).get("cache_key", operation)
 
-    def get_tools(self, operation: str) -> List[str]:
+    def get_tools(self, operation: str) -> list[str]:
         """Get list of tools used by an operation."""
         return self.get_operation(operation).get("tools", [])
 
-    def list_operations(self) -> List[str]:
+    def list_operations(self) -> list[str]:
         """Get list of all defined operations."""
         return list(self.data["operations"].keys())
 
@@ -134,7 +134,7 @@ class DependencyManifest:
                 print(f"     ... and {len(globs) - 3} more")
 
 
-def load_globs_for_operation(operation: str) -> List[str]:
+def load_globs_for_operation(operation: str) -> list[str]:
     """
     Convenience function: Load globs for an operation.
 
@@ -148,7 +148,7 @@ def load_globs_for_operation(operation: str) -> List[str]:
     return manifest.get_globs(operation)
 
 
-def load_operation_config(operation: str) -> Dict[str, Any]:
+def load_operation_config(operation: str) -> dict[str, Any]:
     """
     Convenience function: Load full operation config.
 

@@ -40,7 +40,7 @@ def compile_for_board_and_example(
     example: Path,
     build_dir: Optional[str],
     verbose_on_failure: bool,
-    libs: Optional[List[str]],
+    libs: Optional[list[str]],
 ) -> tuple[bool, str]:
     """Compile the given example for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement
@@ -134,7 +134,7 @@ def compile_for_board_and_example(
             )
 
             # Capture output lines in real-time with timing
-            stdout_lines: List[str] = []
+            stdout_lines: list[str] = []
             if result.stdout:
                 for line in iter(result.stdout.readline, ""):
                     if line:
@@ -196,7 +196,7 @@ def compile_for_board_and_example(
                 )
 
                 # Capture output lines in real-time with timing for verbose run
-                stdout_lines_verbose: List[str] = []
+                stdout_lines_verbose: list[str] = []
                 if result.stdout:
                     for line in iter(result.stdout.readline, ""):
                         if line:
@@ -228,10 +228,10 @@ def compile_for_board_and_example(
 # Function to process task queues for each board
 def compile_examples(
     board: Board,
-    examples: List[Path],
+    examples: list[Path],
     build_dir: Optional[str],
     verbose_on_failure: bool,
-    libs: Optional[List[str]],
+    libs: Optional[list[str]],
 ) -> tuple[bool, str]:
     """Process the task queue for the given board."""
     global ERROR_HAPPENED  # pylint: disable=global-statement

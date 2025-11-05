@@ -11,7 +11,7 @@ from ci.boards import ALL, Board
 from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch
 
 
-def get_default_boards() -> List[str]:
+def get_default_boards() -> list[str]:
     """Get all board names from the ALL boards list, with preferred boards first.
 
     Returns:
@@ -38,7 +38,7 @@ def get_default_boards() -> List[str]:
     available_board_names = {board.board_name for board in ALL}
 
     # Start with preferred boards that exist, warn about missing ones
-    default_boards: List[str] = []
+    default_boards: list[str] = []
     for board_name in preferred_board_names:
         if board_name in available_board_names:
             default_boards.append(board_name)
@@ -54,7 +54,7 @@ def get_default_boards() -> List[str]:
     return default_boards
 
 
-def get_all_examples() -> List[str]:
+def get_all_examples() -> list[str]:
     """Get all available example names from the examples directory.
 
     Returns:
@@ -70,7 +70,7 @@ def get_all_examples() -> List[str]:
     # Find all .ino files recursively
     ino_files = list(examples_dir.rglob("*.ino"))
 
-    examples: List[str] = []
+    examples: list[str] = []
     for ino_file in ino_files:
         # Get the parent directory relative to examples/
         # For examples/Blink/Blink.ino -> "Blink"
@@ -178,7 +178,7 @@ def get_example_ino_path(example: str) -> Path:
     raise FileNotFoundError(f"Example .ino file not found: {ino_file}")
 
 
-def should_skip_example_for_board(board: Board, example: str) -> Tuple[bool, str]:
+def should_skip_example_for_board(board: Board, example: str) -> tuple[bool, str]:
     """Check if an example should be skipped for a specific board.
 
     Parses the @filter/@end-filter block from the .ino file and determines
@@ -204,8 +204,8 @@ def should_skip_example_for_board(board: Board, example: str) -> Tuple[bool, str
 
 
 def get_filtered_examples(
-    board: Board, examples: List[str]
-) -> Tuple[List[str], List[Tuple[str, str]]]:
+    board: Board, examples: list[str]
+) -> tuple[list[str], list[tuple[str, str]]]:
     """Filter examples based on board capabilities.
 
     Args:
@@ -217,8 +217,8 @@ def get_filtered_examples(
         - included_examples: List of examples that should be compiled
         - skipped_with_reasons: List of (example_name, skip_reason) tuples
     """
-    included: List[str] = []
-    skipped: List[Tuple[str, str]] = []
+    included: list[str] = []
+    skipped: list[tuple[str, str]] = []
 
     for example in examples:
         should_skip, reason = should_skip_example_for_board(board, example)

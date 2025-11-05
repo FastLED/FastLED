@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from asyncio.subprocess import PIPE
 from typing import AsyncIterator, Dict, Iterable, List, Optional
@@ -16,7 +14,7 @@ async def _read_lines(stream: asyncio.StreamReader) -> AsyncIterator[str]:
 
 
 async def run_task(
-    task: TaskState, *, env: Optional[Dict[str, str]] = None
+    task: TaskState, *, env: Optional[dict[str, str]] = None
 ) -> TaskState:
     task.mark_running()
     proc = await asyncio.create_subprocess_exec(
@@ -40,6 +38,6 @@ async def run_task(
     return task
 
 
-async def run_many(tasks: Iterable[TaskState]) -> List[TaskState]:
+async def run_many(tasks: Iterable[TaskState]) -> list[TaskState]:
     coros = [run_task(t) for t in tasks]
     return await asyncio.gather(*coros)

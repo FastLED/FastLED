@@ -38,7 +38,7 @@ FLASH_OFFSETS = ESP32FlashOffsets()
 FILE_NAMES = ESP32FileNames()
 
 # Valid flash sizes in MB
-VALID_FLASH_SIZES: Set[int] = {2, 4, 8, 16}
+VALID_FLASH_SIZES: set[int] = {2, 4, 8, 16}
 
 # Default boot_app0.bin size
 BOOT_APP0_SIZE: int = 8192
@@ -84,7 +84,7 @@ def is_esp32_board(board_name: str) -> bool:
     return board_name.startswith("esp32") or board_name.startswith("esp8266")
 
 
-def get_all_esp32_file_names() -> List[str]:
+def get_all_esp32_file_names() -> list[str]:
     """Get a list of all ESP32 artifact file names.
 
     Returns:

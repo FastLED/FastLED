@@ -286,7 +286,7 @@ class NativeCompilationCache:
         if self.build_cache_file.exists():
             self.build_cache_file.unlink()
 
-    def get_cache_stats(self) -> Dict[str, Any]:
+    def get_cache_stats(self) -> dict[str, Any]:
         """Get cache statistics"""
         import json
 

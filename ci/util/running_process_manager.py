@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import threading
 from typing import List, Optional
 
@@ -12,7 +10,7 @@ class RunningProcessManager:
 
     def __init__(self) -> None:
         self._lock = threading.RLock()
-        self._processes: List[RunningProcess] = []
+        self._processes: list[RunningProcess] = []
 
     def register(self, proc: RunningProcess) -> None:
         with self._lock:
@@ -26,12 +24,12 @@ class RunningProcessManager:
             except ValueError:
                 pass
 
-    def list_active(self) -> List[RunningProcess]:
+    def list_active(self) -> list[RunningProcess]:
         with self._lock:
             return [p for p in self._processes if not p.finished]
 
     def dump_active(self) -> None:
-        active: List[RunningProcess] = self.list_active()
+        active: list[RunningProcess] = self.list_active()
         if not active:
             print("\nNO ACTIVE SUBPROCESSES DETECTED - MAIN PROCESS LIKELY HUNG")
             return

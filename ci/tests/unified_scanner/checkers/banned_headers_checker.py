@@ -10,7 +10,7 @@ class BannedHeadersChecker(BaseChecker):
     """Checks for banned header includes."""
 
     # Common banned headers - use FastLED alternatives instead
-    BANNED_HEADERS_COMMON: Set[str] = {
+    BANNED_HEADERS_COMMON: set[str] = {
         "pthread.h",
         "assert.h",
         "iostream",
@@ -57,7 +57,7 @@ class BannedHeadersChecker(BaseChecker):
     }
 
     # Recommendations: map banned headers to their fl:: alternatives
-    HEADER_RECOMMENDATIONS: Dict[str, str] = {
+    HEADER_RECOMMENDATIONS: dict[str, str] = {
         "pthread.h": "fl/thread.h or fl/mutex.h (depending on what you need)",
         "assert.h": "FL_CHECK or FL_ASSERT macros (check fl/compiler_control.h)",
         "iostream": "fl/str.h or fl/strstream.h",
@@ -104,16 +104,16 @@ class BannedHeadersChecker(BaseChecker):
     }
 
     # ESP-specific banned headers (only if paranoid mode enabled)
-    BANNED_HEADERS_ESP: Set[str] = (
+    BANNED_HEADERS_ESP: set[str] = (
         set()
     )  # Empty for now, could add "esp32-hal.h" if needed
 
     # Platform-specific: Arduino.h should only be in platforms/, not core
-    BANNED_HEADERS_CORE: Set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
+    BANNED_HEADERS_CORE: set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
 
     # For platforms/ directory: ban all stdlib headers (same as CORE)
     # Platform headers must use fl/ alternatives like core FastLED code
-    BANNED_HEADERS_PLATFORMS: Set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
+    BANNED_HEADERS_PLATFORMS: set[str] = BANNED_HEADERS_COMMON | {"Arduino.h"}
 
     def name(self) -> str:
         return "banned-headers"
@@ -125,7 +125,7 @@ class BannedHeadersChecker(BaseChecker):
         # Check all files including third_party (they should also use fl/ alternatives)
         return True
 
-    def _get_banned_headers_for_path(self, file_path: Path) -> Set[str]:
+    def _get_banned_headers_for_path(self, file_path: Path) -> set[str]:
         """Return the appropriate banned headers list based on file path."""
         path_str = str(file_path).replace("\\", "/")
         path_parts = path_str.split("/")
@@ -326,8 +326,8 @@ class BannedHeadersChecker(BaseChecker):
             return False  # Strict mode directories never allow bypass
         return file_path_str.endswith(".cpp") or file_path_str.endswith(".cc")
 
-    def check_file(self, file_path: Path, content: str) -> List[CheckResult]:
-        results: List[CheckResult] = []
+    def check_file(self, file_path: Path, content: str) -> list[CheckResult]:
+        results: list[CheckResult] = []
         lines = content.split("\n")
 
         # Get appropriate banned list for this file's location

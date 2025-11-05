@@ -28,7 +28,7 @@ class TestUnifiedScanner(unittest.TestCase):
         """Run all file checkers in a single filesystem scan."""
 
         # Register all checkers
-        checkers: List[BaseChecker] = [
+        checkers: list[BaseChecker] = [
             PragmaOnceChecker(),
             NamespaceIncludeChecker(),
             BannedDefineChecker(),
@@ -59,7 +59,7 @@ class TestUnifiedScanner(unittest.TestCase):
             print("=" * 80)
 
             # Group by checker
-            by_checker: dict[str, List[CheckResult]] = {}
+            by_checker: dict[str, list[CheckResult]] = {}
             for result in results:
                 if result.checker_name not in by_checker:
                     by_checker[result.checker_name] = []

@@ -13,7 +13,7 @@ from ci.compiler.esp32_artifacts import ESP32ArtifactManager
 
 def validate_output_path(
     output_path: str, sketch_name: str, board: Board
-) -> Tuple[bool, str, str]:
+) -> tuple[bool, str, str]:
     """Validate output path and return (is_valid, resolved_path, error_message).
 
     Args:

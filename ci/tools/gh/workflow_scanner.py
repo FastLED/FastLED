@@ -48,7 +48,7 @@ class ErrorBlock:
 
     job_name: str
     job_id: str
-    lines: List[str]
+    lines: list[str]
     error_line_index: int  # Index of the line that triggered the error
 
 
@@ -100,7 +100,7 @@ class WorkflowScanner:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"  # Default fallback
 
-    def get_workflow_runs(self, max_runs: int = 1) -> List[Dict[str, Any]]:
+    def get_workflow_runs(self, max_runs: int = 1) -> list[dict[str, Any]]:
         """Get recent workflow runs.
 
         Args:
@@ -135,7 +135,7 @@ class WorkflowScanner:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
             return []
 
-    def get_run_jobs(self, run_id: str) -> List[JobInfo]:
+    def get_run_jobs(self, run_id: str) -> list[JobInfo]:
         """Get all jobs for a specific run.
 
         Args:
@@ -155,7 +155,7 @@ class WorkflowScanner:
             data = json.loads(result.stdout)
             jobs = data.get("jobs", [])
 
-            job_infos: List[JobInfo] = []
+            job_infos: list[JobInfo] = []
             for job in jobs:
                 job_info = JobInfo(
                     job_id=str(job.get("databaseId", "")),
@@ -171,7 +171,7 @@ class WorkflowScanner:
             print(f"Error getting jobs for run {run_id}: {e}", file=sys.stderr)
             return []
 
-    def get_failed_jobs(self, run_id: str) -> List[JobInfo]:
+    def get_failed_jobs(self, run_id: str) -> list[JobInfo]:
         """Get only failed jobs for a run.
 
         Args:
@@ -188,7 +188,7 @@ class WorkflowScanner:
         ]
         return failed_jobs
 
-    def fetch_and_filter_job_logs(self, job: JobInfo) -> List[ErrorBlock]:
+    def fetch_and_filter_job_logs(self, job: JobInfo) -> list[ErrorBlock]:
         """Fetch logs for a job and filter for errors.
 
         This runs in a worker thread. Results are put in the output queue.
@@ -199,7 +199,7 @@ class WorkflowScanner:
         Returns:
             List of ErrorBlock objects containing filtered errors
         """
-        error_blocks: List[ErrorBlock] = []
+        error_blocks: list[ErrorBlock] = []
 
         try:
             # Use gh api to get logs
@@ -223,14 +223,14 @@ class WorkflowScanner:
             process.wait(timeout=60)
 
             # Find all lines matching error keywords
-            error_indices: Set[int] = set()
+            error_indices: set[int] = set()
             for i, line in enumerate(all_lines):
                 line_lower = line.lower()
                 if any(keyword in line_lower for keyword in self.ERROR_KEYWORDS):
                     error_indices.add(i)
 
             # For each error, extract context
-            processed_indices: Set[int] = set()
+            processed_indices: set[int] = set()
 
             for error_idx in sorted(error_indices):
                 # Skip if we've already processed this as part of another error's context
@@ -383,7 +383,7 @@ class WorkflowScanner:
         print("=" * 80)
 
         # Start worker threads to process jobs
-        threads: List[threading.Thread] = []
+        threads: list[threading.Thread] = []
         for job in failed_jobs:
             thread = threading.Thread(target=self.process_job_worker, args=(job,))
             thread.start()

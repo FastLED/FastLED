@@ -21,7 +21,7 @@ def generate_platformio_ini(
     board_name: str,
     project_root: str = "/fastled",
     include_platformio_section: bool = True,
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Generate platformio.ini from board configuration.
 
@@ -119,7 +119,7 @@ def get_platform_packages_from_ini(ini_path: str = "platformio.ini") -> Optional
     return None
 
 
-def run_command(cmd: List[str], description: str = "") -> bool:
+def run_command(cmd: list[str], description: str = "") -> bool:
     """
     Run a shell command and log output.
 
@@ -148,7 +148,7 @@ def run_command(cmd: List[str], description: str = "") -> bool:
         return False
 
 
-def install_platform(platform: str, skip_dependencies: bool = True) -> Tuple[bool, str]:
+def install_platform(platform: str, skip_dependencies: bool = True) -> tuple[bool, str]:
     """
     Install PlatformIO platform definition.
 
@@ -182,8 +182,8 @@ def install_platform(platform: str, skip_dependencies: bool = True) -> Tuple[boo
 
 
 def install_platform_packages(
-    platform: str, custom_packages: Optional[List[str]] = None
-) -> Tuple[bool, str]:
+    platform: str, custom_packages: Optional[list[str]] = None
+) -> tuple[bool, str]:
     """
     Install platform-specific packages (toolchains, compilers, etc.).
 
@@ -232,7 +232,7 @@ def compile_board_example(
     example: str = "Blink",
     parallel: bool = False,
     project_root: str = "/fastled",
-) -> Tuple[bool, str]:
+) -> tuple[bool, str]:
     """
     Compile a board with a specific example using bash compile script.
 
@@ -249,7 +249,7 @@ def compile_board_example(
 
     try:
         # Build compile command
-        cmd: List[str] = []
+        cmd: list[str] = []
 
         # Add NO_PARALLEL env var if not parallel
         if not parallel:
@@ -271,7 +271,7 @@ def compile_board_example(
         return False, error_msg
 
 
-def parse_board_list(boards_str: str) -> List[str]:
+def parse_board_list(boards_str: str) -> list[str]:
     """
     Parse comma-delimited board list into individual boards.
 
@@ -284,7 +284,7 @@ def parse_board_list(boards_str: str) -> List[str]:
     return [board.strip() for board in boards_str.split(",") if board.strip()]
 
 
-def log_compilation_summary(failed_boards: List[str], total_boards: int) -> None:
+def log_compilation_summary(failed_boards: list[str], total_boards: int) -> None:
     """
     Log a summary of compilation results.
 

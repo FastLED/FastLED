@@ -15,7 +15,7 @@ class UnifiedFileScanner:
     Thread-safe and efficient.
     """
 
-    def __init__(self, checkers: List[BaseChecker], max_workers: int = 4):
+    def __init__(self, checkers: list[BaseChecker], max_workers: int = 4):
         self.checkers = checkers
         self.max_workers = max_workers
         self.result_queue: Queue[CheckResult] = Queue()
@@ -23,9 +23,9 @@ class UnifiedFileScanner:
 
     def scan_directories(
         self,
-        directories: List[Path],
-        extensions: Set[str] = {".cpp", ".h", ".hpp", ".cc", ".ino"},
-    ) -> List[CheckResult]:
+        directories: list[Path],
+        extensions: set[str] = {".cpp", ".h", ".hpp", ".cc", ".ino"},
+    ) -> list[CheckResult]:
         """
         Scan directories and run all checkers.
 
@@ -37,7 +37,7 @@ class UnifiedFileScanner:
             List of all CheckResult violations found
         """
         # Collect all files to check (SINGLE filesystem scan)
-        files_to_check: List[Path] = []
+        files_to_check: list[Path] = []
         for directory in directories:
             if not directory.exists():
                 continue
@@ -60,7 +60,7 @@ class UnifiedFileScanner:
                 future.result()
 
         # Collect all results from queue
-        results: List[CheckResult] = []
+        results: list[CheckResult] = []
         while not self.result_queue.empty():
             results.append(self.result_queue.get())
 

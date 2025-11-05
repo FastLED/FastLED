@@ -10,7 +10,7 @@ from typing import Optional, Tuple
 from urllib.parse import urlparse
 
 
-def convert_github_url_to_zip(url: str) -> Tuple[Optional[str], bool]:
+def convert_github_url_to_zip(url: str) -> tuple[Optional[str], bool]:
     """
     Convert a GitHub URL to a downloadable zip URL if possible.
 

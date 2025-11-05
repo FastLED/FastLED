@@ -13,7 +13,7 @@ from typing import List
 
 def discover_sources(
     base_dir: str, pattern: str = "*.cpp", recursive: bool = False
-) -> List[str]:
+) -> list[str]:
     """
     Discover source files in a directory.
 

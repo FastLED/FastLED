@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 from typing import Any, List, Tuple
 
@@ -13,7 +11,7 @@ from ci.run.core.task import TaskState
 from ci.run.core.updater import TaskBlock
 
 
-QA_COMMANDS: List[Tuple[str, List[str]]] = [
+QA_COMMANDS: list[tuple[str, list[str]]] = [
     (
         "pytest",
         ["uv", "run", "pytest", "ci/", "-q", "-n", "4"],
@@ -32,7 +30,7 @@ class PythonQAView(Screen[Any]):
 
     def __init__(self) -> None:
         super().__init__()
-        self._tasks: List[TaskState] = []
+        self._tasks: list[TaskState] = []
         self._runner_task: Any = None
 
     def compose(self) -> ComposeResult:
@@ -42,7 +40,7 @@ class PythonQAView(Screen[Any]):
         self.call_after_refresh(self._start)
 
     async def _start(self) -> None:
-        blocks: List[tuple[TaskState, TaskBlock]] = []
+        blocks: list[tuple[TaskState, TaskBlock]] = []
         for name, cmd in QA_COMMANDS:
             tb = TaskBlock(name)
             self.container.mount(tb)

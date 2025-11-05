@@ -47,7 +47,7 @@ _GLOBAL_TIMEOUT = 600 if _IS_GITHUB_ACTIONS else 300
 MAX_FAILURES_BEFORE_ABORT = 3
 
 
-def extract_error_snippet(accumulated_output: List[str], context_lines: int = 5) -> str:
+def extract_error_snippet(accumulated_output: list[str], context_lines: int = 5) -> str:
     """
     Extract relevant error snippets from process output.
 
@@ -64,11 +64,11 @@ def extract_error_snippet(accumulated_output: List[str], context_lines: int = 5)
     if not accumulated_output:
         return "No output captured"
 
-    error_snippets: List[str] = []
+    error_snippets: list[str] = []
     error_pattern = re.compile(r"error", re.IGNORECASE)
 
     # Find all lines that contain "error" (case insensitive)
-    error_line_indices: List[int] = []
+    error_line_indices: list[int] = []
     for i, line in enumerate(accumulated_output):
         if error_pattern.search(line):
             error_line_indices.append(i)
@@ -90,7 +90,7 @@ def extract_error_snippet(accumulated_output: List[str], context_lines: int = 5)
         start_idx = max(0, error_idx - context_lines)
         end_idx = min(len(accumulated_output), error_idx + context_lines + 1)
 
-        snippet_lines: List[str] = []
+        snippet_lines: list[str] = []
 
         for j in range(start_idx, end_idx):
             line_marker = "➤ " if j == error_idx else "  "  # Mark the actual error line
@@ -101,7 +101,7 @@ def extract_error_snippet(accumulated_output: List[str], context_lines: int = 5)
     # Add summary if there are more errors - but show the actual error lines
     if len(error_line_indices) > max_errors_to_show:
         remaining_errors = error_line_indices[max_errors_to_show:]
-        additional_error_lines: List[str] = []
+        additional_error_lines: list[str] = []
         for error_idx in remaining_errors[:3]:  # Show up to 3 more error lines
             additional_error_lines.append(f"➤ {accumulated_output[error_idx]}")
 
@@ -218,7 +218,7 @@ class TestOutputFormatter:
 class TestProcessConfig:
     """Configuration for a test process"""
 
-    command: str | List[str]
+    command: str | list[str]
     echo: bool = True
     auto_run: bool = False
     timeout: Optional[int] = None
@@ -410,7 +410,7 @@ def create_unit_test_process(
 ) -> RunningProcess:
     """Create a unit test process without starting it"""
     # First compile the tests
-    compile_cmd: List[str] = [
+    compile_cmd: list[str] = [
         "uv",
         "run",
         "python",
@@ -453,7 +453,7 @@ def create_unit_test_process(
     if enable_stack_trace:
         test_cmd.append("--stack-trace")
 
-    both_cmds: List[str] = []
+    both_cmds: list[str] = []
     both_cmds.extend(compile_cmd)
     both_cmds.extend(["&&"])
     both_cmds.extend(test_cmd)
@@ -547,9 +547,9 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
 
 def get_cpp_test_processes(
     args: TestArgs, test_categories: TestCategories, enable_stack_trace: bool
-) -> List[RunningProcess]:
+) -> list[RunningProcess]:
     """Return all processes needed for C++ tests"""
-    processes: List[RunningProcess] = []
+    processes: list[RunningProcess] = []
 
     # Always include namespace checks
     processes.append(create_namespace_check_process(enable_stack_trace))
@@ -566,7 +566,7 @@ def get_cpp_test_processes(
 
 def get_python_test_processes(
     enable_stack_trace: bool, run_slow: bool = False
-) -> List[RunningProcess]:
+) -> list[RunningProcess]:
     """Return all processes needed for Python tests"""
     return [
         create_python_test_process(False, run_slow)
@@ -575,7 +575,7 @@ def get_python_test_processes(
 
 def get_integration_test_processes(
     args: TestArgs, enable_stack_trace: bool
-) -> List[RunningProcess]:
+) -> list[RunningProcess]:
     """Return all processes needed for integration tests"""
     return [create_integration_test_process(args, enable_stack_trace)]
 
@@ -585,9 +585,9 @@ def get_all_test_processes(
     test_categories: TestCategories,
     enable_stack_trace: bool,
     src_code_change: bool,
-) -> List[RunningProcess]:
+) -> list[RunningProcess]:
     """Return all processes needed for all tests"""
-    processes: List[RunningProcess] = []
+    processes: list[RunningProcess] = []
 
     # Always include namespace checks
     processes.append(create_namespace_check_process(enable_stack_trace))
@@ -612,7 +612,7 @@ def get_all_test_processes(
     return processes
 
 
-def _extract_test_name(command: str | List[str]) -> str:
+def _extract_test_name(command: str | list[str]) -> str:
     """Extract a human-readable test name from a command"""
     if isinstance(command, list):
         command = " ".join(command)
@@ -655,7 +655,7 @@ def _create_skipped_timing(test_name: str, command: str = "") -> ProcessTiming:
     return ProcessTiming(name=test_name, duration=0.0, command=command, skipped=True)
 
 
-def _get_friendly_test_name(command: str | List[str]) -> str:
+def _get_friendly_test_name(command: str | list[str]) -> str:
     """Extract a user-friendly test name for display in summary table"""
     if isinstance(command, list):
         command = " ".join(command)
@@ -674,7 +674,7 @@ def _get_friendly_test_name(command: str | List[str]) -> str:
                 normalized = tok.strip('"')
                 if normalized.endswith("test_example_compilation.py"):
                     script_name = os.path.basename(normalized)
-                    example_parts: List[str] = []
+                    example_parts: list[str] = []
                     for t in tokens[i + 1 :]:
                         if t.startswith("-"):
                             break
@@ -697,7 +697,7 @@ def _get_friendly_test_name(command: str | List[str]) -> str:
         return _extract_test_name(command)
 
 
-def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
+def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     """Format a summary table of process execution times"""
     if not process_timings:
         return ""
@@ -714,7 +714,7 @@ def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
     separator = f"{'-' * max_name_width}-+-{'-' * 23}"
 
     # Create rows
-    rows: List[str] = []
+    rows: list[str] = []
     for timing in sorted_timings:
         if timing.skipped:
             duration_str = "Skipped because no changes"
@@ -740,9 +740,9 @@ def _format_timing_summary(process_timings: List[ProcessTiming]) -> str:
 
 def _handle_process_completion(
     proc_state: ProcessState,
-    active_processes: List[RunningProcess],
-    completed_timings: List[ProcessTiming],
-    last_activity_time: Dict[RunningProcess, float],
+    active_processes: list[RunningProcess],
+    completed_timings: list[ProcessTiming],
+    last_activity_time: dict[RunningProcess, float],
 ) -> None:
     """
     Handle completion of a single test process
@@ -831,7 +831,7 @@ def _handle_process_completion(
         except Exception as output_error:
             print(f"Could not capture process output: {output_error}")
 
-        failures: List[TestFailureInfo] = []
+        failures: list[TestFailureInfo] = []
         for p in active_processes:
             p.kill()
             # Try to capture output from this process too
@@ -866,7 +866,7 @@ class ProcessStuckMonitor:
     def __init__(self, stuck_process_timeout: float):
         self.stuck_process_timeout = stuck_process_timeout
         self.stuck_signals: Queue[StuckProcessSignal] = Queue()
-        self.monitoring_threads: Dict[RunningProcess, threading.Thread] = {}
+        self.monitoring_threads: dict[RunningProcess, threading.Thread] = {}
         self.shutdown_event = threading.Event()
 
     def start_monitoring(self, process: RunningProcess) -> None:
@@ -893,9 +893,9 @@ class ProcessStuckMonitor:
         self.shutdown_event.set()
         self.monitoring_threads.clear()
 
-    def check_for_stuck_processes(self) -> List[StuckProcessSignal]:
+    def check_for_stuck_processes(self) -> list[StuckProcessSignal]:
         """Check for any stuck process signals from monitoring threads"""
-        stuck_processes: List[StuckProcessSignal] = []
+        stuck_processes: list[StuckProcessSignal] = []
         try:
             while True:
                 signal = self.stuck_signals.get_nowait()
@@ -949,9 +949,9 @@ class ProcessStuckMonitor:
 
 
 def _handle_stuck_processes(
-    stuck_signals: List[StuckProcessSignal],
-    active_processes: List[RunningProcess],
-    failed_processes: List[str],
+    stuck_signals: list[StuckProcessSignal],
+    active_processes: list[RunningProcess],
+    failed_processes: list[str],
     monitor: ProcessStuckMonitor,
 ) -> None:
     """
@@ -981,8 +981,8 @@ def _handle_stuck_processes(
 
 
 def _run_processes_parallel(
-    processes: List[RunningProcess], verbose: bool = False
-) -> List[ProcessTiming]:
+    processes: list[RunningProcess], verbose: bool = False
+) -> list[ProcessTiming]:
     """
     DEPRECATED: Use RunningProcessGroup instead.
 
@@ -1027,7 +1027,7 @@ def _run_processes_parallel(
     active_processes = processes.copy()
     start_time = time.time()
 
-    runner_timeouts: List[int] = [p.timeout for p in processes if p.timeout is not None]
+    runner_timeouts: list[int] = [p.timeout for p in processes if p.timeout is not None]
     global_timeout: Optional[int] = None
     if runner_timeouts:
         global_timeout = max(runner_timeouts) + 60  # Add 1 minute buffer
@@ -1037,13 +1037,13 @@ def _run_processes_parallel(
     stuck_process_timeout = _GLOBAL_TIMEOUT
 
     # Track failed processes for proper error reporting
-    failed_processes: List[str] = []  # Processes killed due to timeout/stuck
-    exit_failed_processes: List[
+    failed_processes: list[str] = []  # Processes killed due to timeout/stuck
+    exit_failed_processes: list[
         tuple[RunningProcess, int]
     ] = []  # Processes that failed with non-zero exit code
 
     # Track completed processes for timing summary
-    completed_timings: List[ProcessTiming] = []
+    completed_timings: list[ProcessTiming] = []
 
     # Create thread-based stuck process monitor
     stuck_monitor = ProcessStuckMonitor(stuck_process_timeout)
@@ -1066,7 +1066,7 @@ def _run_processes_parallel(
                 print(f"\nGlobal timeout reached after {global_timeout} seconds")
                 print("\033[91m###### ERROR ######\033[0m")
                 print("Tests failed due to global timeout")
-                failures: List[TestFailureInfo] = []
+                failures: list[TestFailureInfo] = []
                 for p in active_processes:
                     failed_processes.append(
                         subprocess.list2cmdline(p.command)
@@ -1101,7 +1101,7 @@ def _run_processes_parallel(
                     for p in active_processes:
                         p.kill()
                     # Build detailed failures
-                    failures: List[TestFailureInfo] = []
+                    failures: list[TestFailureInfo] = []
                     for proc, exit_code in exit_failed_processes:
                         error_snippet = extract_error_snippet(proc.accumulated_output)
                         failures.append(
@@ -1167,7 +1167,7 @@ def _run_processes_parallel(
                                 if p is not proc:
                                     p.kill()
                             # Prepare failures with snippets
-                            failures: List[TestFailureInfo] = []
+                            failures: list[TestFailureInfo] = []
                             for p, code in exit_failed_processes:
                                 error_snippet = extract_error_snippet(
                                     p.accumulated_output
@@ -1237,7 +1237,7 @@ def _run_processes_parallel(
             )
             for proc, exit_code in exit_failed_processes:
                 print(f"  - {proc.command} (exit code {exit_code})")
-            failures: List[TestFailureInfo] = []
+            failures: list[TestFailureInfo] = []
             for proc, exit_code in exit_failed_processes:
                 # Extract error snippet from process output
                 error_snippet = extract_error_snippet(proc.accumulated_output)
@@ -1260,7 +1260,7 @@ def _run_processes_parallel(
             for cmd in failed_processes:
                 print(f"  - {cmd}")
             print("Processes were killed due to timeout/stuck detection")
-            failures: List[TestFailureInfo] = []
+            failures: list[TestFailureInfo] = []
             for cmd in failed_processes:
                 failures.append(
                     TestFailureInfo(
@@ -1282,8 +1282,8 @@ def _run_processes_parallel(
 
 
 def run_test_processes(
-    processes: List[RunningProcess], parallel: bool = True, verbose: bool = False
-) -> List[ProcessTiming]:
+    processes: list[RunningProcess], parallel: bool = True, verbose: bool = False
+) -> list[ProcessTiming]:
     """
     Run multiple test processes using RunningProcessGroup
 
@@ -1477,8 +1477,8 @@ def runner(
             enable_stack_trace = True  # Default: enabled
 
         # Build up unified list of all processes to run
-        processes: List[RunningProcess] = []
-        skipped_timings: List[ProcessTiming] = []
+        processes: list[RunningProcess] = []
+        skipped_timings: list[ProcessTiming] = []
 
         # Always start with namespace checks
         processes.append(create_namespace_check_process(enable_stack_trace))

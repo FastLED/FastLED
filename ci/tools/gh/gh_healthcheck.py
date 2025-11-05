@@ -45,7 +45,7 @@ class JobFailure:
     job_id: str
     job_name: str
     conclusion: str
-    errors: List[str]
+    errors: list[str]
 
 
 class HealthChecker:
@@ -119,7 +119,7 @@ class HealthChecker:
             print(f"Error getting repo info: {e}", file=sys.stderr)
             return "FastLED/FastLED"
 
-    def get_latest_run(self) -> Optional[Dict[str, Any]]:
+    def get_latest_run(self) -> Optional[dict[str, Any]]:
         """Get the latest workflow run."""
         try:
             cmd = [
@@ -143,7 +143,7 @@ class HealthChecker:
             print(f"Error getting workflow runs: {e}", file=sys.stderr)
             return None
 
-    def get_run_info(self, run_id: str) -> Optional[Dict[str, Any]]:
+    def get_run_info(self, run_id: str) -> Optional[dict[str, Any]]:
         """Get detailed run information."""
         try:
             result = subprocess.run(
@@ -165,7 +165,7 @@ class HealthChecker:
             print(f"Error getting run info: {e}", file=sys.stderr)
             return None
 
-    def get_job_logs(self, job_id: str, max_lines: int = 1000) -> List[str]:
+    def get_job_logs(self, job_id: str, max_lines: int = 1000) -> list[str]:
         """Fetch logs for a specific job (only last N lines for efficiency).
 
         Args:
@@ -200,7 +200,7 @@ class HealthChecker:
             print(f"⚠️  Error fetching job logs: {e}", file=sys.stderr)
             return []
 
-    def analyze_logs(self, logs: List[str]) -> List[Tuple[str, str, str]]:
+    def analyze_logs(self, logs: list[str]) -> list[tuple[str, str, str]]:
         """Analyze logs and extract categorized errors.
 
         Args:
@@ -209,7 +209,7 @@ class HealthChecker:
         Returns:
             List of (category, error_line, context) tuples
         """
-        errors: List[Tuple[str, str, str]] = []
+        errors: list[tuple[str, str, str]] = []
 
         # Search for errors with context
         for i, line in enumerate(logs):
@@ -234,8 +234,8 @@ class HealthChecker:
         return errors
 
     def group_errors_by_category(
-        self, errors: List[Tuple[str, str, str]]
-    ) -> Dict[str, List[Tuple[str, str]]]:
+        self, errors: list[tuple[str, str, str]]
+    ) -> dict[str, list[tuple[str, str]]]:
         """Group errors by category.
 
         Args:
@@ -244,7 +244,7 @@ class HealthChecker:
         Returns:
             Dictionary mapping category to list of (error_line, context) tuples
         """
-        grouped: Dict[str, List[Tuple[str, str]]] = defaultdict(list)
+        grouped: dict[str, list[tuple[str, str]]] = defaultdict(list)
 
         for category, error_line, context in errors:
             grouped[category].append((error_line, context))
@@ -252,8 +252,8 @@ class HealthChecker:
         return dict(grouped)
 
     def extract_root_causes(
-        self, grouped_errors: Dict[str, List[Tuple[str, str]]]
-    ) -> List[Dict[str, Any]]:
+        self, grouped_errors: dict[str, list[tuple[str, str]]]
+    ) -> list[dict[str, Any]]:
         """Extract root causes from grouped errors.
 
         Args:
@@ -262,7 +262,7 @@ class HealthChecker:
         Returns:
             List of root cause dictionaries
         """
-        root_causes: List[Dict[str, Any]] = []
+        root_causes: list[dict[str, Any]] = []
 
         for category, errors in grouped_errors.items():
             # Find the pattern info
@@ -271,7 +271,7 @@ class HealthChecker:
             )
 
             # Extract specific details (e.g., missing file names)
-            details: Set[str] = set()
+            details: set[str] = set()
             for error_line, _ in errors:
                 # Extract missing file for header errors
                 if category == "Missing Header":
@@ -300,7 +300,7 @@ class HealthChecker:
         return root_causes
 
     def print_health_report(
-        self, run_info: Dict[str, Any], job_failures: List[JobFailure]
+        self, run_info: dict[str, Any], job_failures: list[JobFailure]
     ) -> None:
         """Print comprehensive health report.
 
@@ -345,7 +345,7 @@ class HealthChecker:
         print("\n🔍 Root Cause Analysis:")
 
         # Aggregate all errors
-        all_errors: List[Tuple[str, str, str]] = []
+        all_errors: list[tuple[str, str, str]] = []
         for job in job_failures:
             # Parse job errors (stored as strings)
             for error_str in job.errors:
@@ -439,7 +439,7 @@ class HealthChecker:
 
         # Analyze jobs
         jobs = run_info.get("jobs", [])
-        job_failures: List[JobFailure] = []
+        job_failures: list[JobFailure] = []
 
         for i, job in enumerate(jobs):
             if job.get("conclusion") in ["failure", "cancelled", "timed_out"]:

@@ -13,7 +13,7 @@ from typing import List, Tuple
 # Format: (directory_path, recursive)
 # - directory_path: Path relative to project root
 # - recursive: True to use rglob (search subdirectories), False to use glob (direct children only)
-SOURCE_DIRECTORIES: List[Tuple[str, bool]] = [
+SOURCE_DIRECTORIES: list[tuple[str, bool]] = [
     ("src/lib8tion", False),  # lib8tion utilities
     ("src/platforms/stub", False),  # Stub platform implementations
     ("src/platforms", False),  # Platform-specific code (top-level only)

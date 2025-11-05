@@ -216,7 +216,7 @@ def main() -> int:
     # Handle default boards if none specified
     if not config.boards:
         board_names = get_default_boards()
-        boards: List[Board] = []
+        boards: list[Board] = []
         for board_name in board_names:
             try:
                 board = create_board(board_name, no_project_options=False)
@@ -362,8 +362,8 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(examples)} examples"
     )
 
-    compilation_errors: List[str] = []
-    failed_example_names: List[str] = []
+    compilation_errors: list[str] = []
+    failed_example_names: list[str] = []
     failure_logs_dir: Optional[Path] = config.log_failures
     stopped_early: bool = False
 

@@ -22,9 +22,9 @@ class ConsoleErrorCollector:
     """Collects and categorizes console errors for analysis"""
 
     def __init__(self):
-        self.errors: List[Dict[str, Any]] = []
-        self.warnings: List[Dict[str, Any]] = []
-        self.all_messages: List[Dict[str, Any]] = []
+        self.errors: list[dict[str, Any]] = []
+        self.warnings: list[dict[str, Any]] = []
+        self.all_messages: list[dict[str, Any]] = []
 
     def add_message(self, msg: ConsoleMessage):
         """Add a console message to the appropriate collection"""

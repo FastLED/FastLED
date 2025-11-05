@@ -46,7 +46,7 @@ def build_cpp_test_command(args: TestArgs) -> str:
     return subprocess.list2cmdline(cmd_list)
 
 
-def make_pio_check_cmd() -> List[str]:
+def make_pio_check_cmd() -> list[str]:
     """Create the PlatformIO check command"""
     return [
         "pio",
@@ -76,7 +76,7 @@ def make_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningPro
     return RunningProcess(cmd, auto_run=True)
 
 
-def run_command(cmd: List[str], **kwargs: Any) -> None:
+def run_command(cmd: list[str], **kwargs: Any) -> None:
     """Run a command and handle errors"""
     try:
         subprocess.run(cmd, check=True, **kwargs)

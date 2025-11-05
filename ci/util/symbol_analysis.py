@@ -47,8 +47,8 @@ class CallStats:
 
     functions_with_calls: int
     functions_called_by_others: int
-    most_called: List[Tuple[str, int]] = field(default_factory=lambda: [])
-    most_calling: List[Tuple[str, int]] = field(default_factory=lambda: [])
+    most_called: list[tuple[str, int]] = field(default_factory=lambda: [])
+    most_calling: list[tuple[str, int]] = field(default_factory=lambda: [])
 
 
 @dataclass
@@ -58,11 +58,11 @@ class AnalysisReport:
     board: str
     total_symbols: int
     total_size: int
-    largest_symbols: List[SymbolInfo] = field(default_factory=lambda: [])
-    type_breakdown: List[TypeBreakdown] = field(default_factory=lambda: [])
-    dependencies: Dict[str, List[str]] = field(default_factory=lambda: {})
-    call_graph: Optional[Dict[str, List[str]]] = None
-    reverse_call_graph: Optional[Dict[str, List[str]]] = None
+    largest_symbols: list[SymbolInfo] = field(default_factory=lambda: [])
+    type_breakdown: list[TypeBreakdown] = field(default_factory=lambda: [])
+    dependencies: dict[str, list[str]] = field(default_factory=lambda: {})
+    call_graph: Optional[dict[str, list[str]]] = None
+    reverse_call_graph: Optional[dict[str, list[str]]] = None
     call_stats: Optional[CallStats] = None
 
 
@@ -71,17 +71,17 @@ class DetailedAnalysisData:
     """Complete detailed analysis data structure for JSON output"""
 
     summary: AnalysisReport
-    all_symbols_sorted_by_size: List[SymbolInfo]
-    dependencies: Dict[str, List[str]]
-    call_graph: Optional[Dict[str, List[str]]] = None
-    reverse_call_graph: Optional[Dict[str, List[str]]] = None
+    all_symbols_sorted_by_size: list[SymbolInfo]
+    dependencies: dict[str, list[str]]
+    call_graph: Optional[dict[str, list[str]]] = None
+    reverse_call_graph: Optional[dict[str, list[str]]] = None
 
 
 @dataclass
 class TypeStats:
     """Statistics for symbol types with dictionary-like functionality"""
 
-    stats: Dict[str, TypeBreakdown] = field(default_factory=lambda: {})
+    stats: dict[str, TypeBreakdown] = field(default_factory=lambda: {})
 
     def add_symbol(self, symbol: SymbolInfo) -> None:
         """Add a symbol to the type statistics"""
@@ -91,11 +91,11 @@ class TypeStats:
         self.stats[sym_type].count += 1
         self.stats[sym_type].total_size += symbol.size
 
-    def items(self) -> List[Tuple[str, TypeBreakdown]]:
+    def items(self) -> list[tuple[str, TypeBreakdown]]:
         """Return items for iteration, sorted by total_size descending"""
         return sorted(self.stats.items(), key=lambda x: x[1].total_size, reverse=True)
 
-    def values(self) -> List[TypeBreakdown]:
+    def values(self) -> list[TypeBreakdown]:
         """Return values for iteration"""
         return list(self.stats.values())
 
@@ -139,12 +139,12 @@ def demangle_symbol(mangled_name: str, cppfilt_path: str) -> str:
 
 def analyze_symbols(
     elf_file: str, nm_path: str, cppfilt_path: str, readelf_path: Optional[str] = None
-) -> List[SymbolInfo]:
+) -> list[SymbolInfo]:
     """Analyze ALL symbols in ELF file using both nm and readelf for comprehensive coverage"""
     print("Analyzing symbols with enhanced coverage...")
 
-    symbols: List[SymbolInfo] = []
-    symbols_dict: Dict[
+    symbols: list[SymbolInfo] = []
+    symbols_dict: dict[
         str, SymbolInfo
     ] = {}  # To deduplicate by address+type (or demangled name for zero-address symbols)
 
@@ -352,7 +352,7 @@ def analyze_symbols(
                     continue  # Skip malformed lines
 
     # Convert dict to list
-    symbols: List[SymbolInfo] = list(symbols_dict.values())
+    symbols: list[SymbolInfo] = list(symbols_dict.values())
 
     print(f"Found {len(symbols)} total symbols using enhanced analysis")
     print(f"  - Symbols with size info: {len([s for s in symbols if s.size > 0])}")
@@ -363,7 +363,7 @@ def analyze_symbols(
 
 def analyze_function_calls(
     elf_file: str, objdump_path: str, cppfilt_path: str
-) -> Dict[str, List[str]]:
+) -> dict[str, list[str]]:
     """Analyze function calls using objdump to build call graph"""
     print("Analyzing function calls using objdump...")
 
@@ -373,7 +373,7 @@ def analyze_function_calls(
     symbol_output = run_command(cmd)
 
     # Build symbol address map for function symbols
-    symbol_map: Dict[str, str] = {}  # address -> symbol_name
+    symbol_map: dict[str, str] = {}  # address -> symbol_name
     function_symbols: set[str] = set()  # set of function names
 
     for line in symbol_output.strip().split("\n"):
@@ -459,9 +459,9 @@ def analyze_function_calls(
     return {caller: list(callees) for caller, callees in call_graph.items()}
 
 
-def build_reverse_call_graph(call_graph: Dict[str, List[str]]) -> Dict[str, List[str]]:
+def build_reverse_call_graph(call_graph: dict[str, list[str]]) -> dict[str, list[str]]:
     """Build reverse call graph: function -> list of functions that call it"""
-    reverse_graph: defaultdict[str, List[str]] = defaultdict(list)
+    reverse_graph: defaultdict[str, list[str]] = defaultdict(list)
 
     for caller, callees in call_graph.items():
         for callee in callees:
@@ -470,11 +470,11 @@ def build_reverse_call_graph(call_graph: Dict[str, List[str]]) -> Dict[str, List
     return dict(reverse_graph)
 
 
-def analyze_map_file(map_file: Path) -> Dict[str, List[str]]:
+def analyze_map_file(map_file: Path) -> dict[str, list[str]]:
     """Analyze the map file to understand module dependencies"""
     print(f"Analyzing map file: {map_file}")
 
-    dependencies: Dict[str, List[str]] = {}
+    dependencies: dict[str, list[str]] = {}
     current_archive: Optional[str] = None
 
     if not map_file.exists():
@@ -514,10 +514,10 @@ def analyze_map_file(map_file: Path) -> Dict[str, List[str]]:
 
 def generate_report(
     board_name: str,
-    symbols: List[SymbolInfo],
-    dependencies: Dict[str, List[str]],
-    call_graph: Optional[Dict[str, List[str]]] = None,
-    reverse_call_graph: Optional[Dict[str, List[str]]] = None,
+    symbols: list[SymbolInfo],
+    dependencies: dict[str, list[str]],
+    call_graph: Optional[dict[str, list[str]]] = None,
+    reverse_call_graph: Optional[dict[str, list[str]]] = None,
     enhanced_mode: bool = False,
 ) -> AnalysisReport:
     """Generate a comprehensive report with optional call graph analysis"""
@@ -547,7 +547,7 @@ def generate_report(
         print(f"  Functions called by others: {len(reverse_call_graph)}")
 
     # Show source breakdown
-    source_stats: Dict[str, int] = {}
+    source_stats: dict[str, int] = {}
     for sym in symbols:
         source = sym.source
         if source not in source_stats:
@@ -696,7 +696,7 @@ def generate_report(
 
 def find_board_build_info(
     board_name: Optional[str] = None, example: str = "Blink"
-) -> Tuple[Path, str]:
+) -> tuple[Path, str]:
     """Find build info for a specific board or detect available boards
 
     Args:
@@ -754,7 +754,7 @@ def find_board_build_info(
         sys.exit(1)
 
     # Otherwise, find any available board (prefer example-specific files)
-    available_boards: List[Tuple[Path, str]] = []
+    available_boards: list[tuple[Path, str]] = []
     build_info_filename = f"build_info_{example}.json"
 
     # 1) Direct children of .build - try example-specific first
@@ -931,7 +931,7 @@ def main():
         exact_callers = reverse_call_graph.get(target_function, [])
 
         # Also search for partial matches
-        partial_matches: Dict[str, List[str]] = {}
+        partial_matches: dict[str, list[str]] = {}
         for func_name, callers in reverse_call_graph.items():
             if (
                 target_function.lower() in func_name.lower()

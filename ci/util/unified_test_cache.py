@@ -30,7 +30,7 @@ class UnifiedTestCache:
         )
         self.cache_name = cache_name
 
-    def check_needs_update(self, files_to_monitor: List[Path]) -> bool:
+    def check_needs_update(self, files_to_monitor: list[Path]) -> bool:
         """
         Check if files have changed and need processing.
 
@@ -73,9 +73,9 @@ def create_python_test_cache() -> UnifiedTestCache:
     return UnifiedTestCache("python_test")
 
 
-def get_src_code_files() -> List[Path]:
+def get_src_code_files() -> list[Path]:
     """Get all source code files to monitor."""
-    files: List[Path] = []
+    files: list[Path] = []
 
     # Add all source files
     src_dir = Path("src")
@@ -86,9 +86,9 @@ def get_src_code_files() -> List[Path]:
     return sorted(files, key=str)
 
 
-def get_cpp_test_files() -> List[Path]:
+def get_cpp_test_files() -> list[Path]:
     """Get all C++ test files to monitor."""
-    files: List[Path] = []
+    files: list[Path] = []
 
     # Add test files
     tests_dir = Path("tests")
@@ -102,9 +102,9 @@ def get_cpp_test_files() -> List[Path]:
     return sorted(files, key=str)
 
 
-def get_examples_files() -> List[Path]:
+def get_examples_files() -> list[Path]:
     """Get all example files to monitor."""
-    files: List[Path] = []
+    files: list[Path] = []
 
     # Add example files
     examples_dir = Path("examples")
@@ -118,9 +118,9 @@ def get_examples_files() -> List[Path]:
     return sorted(files, key=str)
 
 
-def get_python_test_files() -> List[Path]:
+def get_python_test_files() -> list[Path]:
     """Get all Python test files to monitor."""
-    files: List[Path] = []
+    files: list[Path] = []
 
     # Add Python test files
     for pattern in ("test*.py", "ci/**/*.py", "**/test_*.py"):

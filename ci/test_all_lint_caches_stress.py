@@ -25,7 +25,7 @@ from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
 # Type alias for Queue results
-QueueResult = Tuple[str, Any]
+QueueResult = tuple[str, Any]
 
 
 class CacheLintStressTest:
@@ -34,7 +34,7 @@ class CacheLintStressTest:
     def __init__(self):
         self.passed = 0
         self.failed = 0
-        self.errors: List[str] = []
+        self.errors: list[str] = []
         self.manifest = DependencyManifest()
 
     def pass_test(self, name: str):
@@ -46,7 +46,7 @@ class CacheLintStressTest:
         self.errors.append(f"{name}: {error}")
         print(f"  ❌ {name}: {error}")
 
-    def run_cache_check(self, cache_type: str) -> Tuple[bool, str]:
+    def run_cache_check(self, cache_type: str) -> tuple[bool, str]:
         """Run a cache check script and return (needs_run, output)."""
         scripts = {
             "python": "ci/python_lint_cache.py",
@@ -74,7 +74,7 @@ class CacheLintStressTest:
         except Exception as e:
             return False, str(e)
 
-    def run_cache_mark(self, cache_type: str) -> Tuple[bool, str]:
+    def run_cache_mark(self, cache_type: str) -> tuple[bool, str]:
         """Mark cache as successful."""
         scripts = {
             "python": "ci/python_lint_cache.py",
@@ -287,12 +287,12 @@ def test_manifest_completeness(test: CacheLintStressTest) -> None:
     try:
         # Check all required operations exist
         required_ops = ["python_lint", "javascript_lint", "cpp_lint"]
-        found_ops: List[str] = []
+        found_ops: list[str] = []
 
         for op in required_ops:
             try:
                 config = test.manifest.get_operation(op)
-                globs: List[Any] = test.manifest.get_globs(op)
+                globs: list[Any] = test.manifest.get_globs(op)
                 if globs:
                     found_ops.append(op)
                     test.pass_test(
@@ -346,7 +346,7 @@ def test_cache_performance_all_caches(test: CacheLintStressTest) -> None:
 
 
 def _concurrent_cache_check(
-    cache_type: str, result_queue: multiprocessing.Queue[Tuple[str, Any]]
+    cache_type: str, result_queue: multiprocessing.Queue[tuple[str, Any]]
 ) -> None:
     """Worker function for concurrent cache check (must be module-level for Windows pickling)."""
     try:
@@ -369,8 +369,8 @@ def test_concurrent_cache_access(test: CacheLintStressTest) -> None:
     print("-" * 70)
 
     # Run 3 concurrent cache checks
-    result_queue: multiprocessing.Queue[Tuple[str, Any]] = multiprocessing.Queue()
-    processes: List[multiprocessing.Process] = []
+    result_queue: multiprocessing.Queue[tuple[str, Any]] = multiprocessing.Queue()
+    processes: list[multiprocessing.Process] = []
 
     for i in range(3):
         p = multiprocessing.Process(
@@ -384,7 +384,7 @@ def test_concurrent_cache_access(test: CacheLintStressTest) -> None:
         p.join(timeout=15)
 
     # Check results
-    results: List[Tuple[str, Any]] = []
+    results: list[tuple[str, Any]] = []
     while not result_queue.empty():
         results.append(result_queue.get())
 

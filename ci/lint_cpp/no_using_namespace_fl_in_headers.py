@@ -15,10 +15,10 @@ NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 
 class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
-    def check_file(self, file_path: str) -> List[str]:
+    def check_file(self, file_path: str) -> list[str]:
         if "FastLED.h" in file_path:
             return []
-        failings: List[str] = []
+        failings: list[str] = []
         with open(file_path, "r", encoding="utf-8") as f:
             for line_number, line in enumerate(f, 1):
                 if line.startswith("//"):
@@ -29,7 +29,7 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
 
     def test_no_using_namespace(self) -> None:
         """Searches through the program files to check for banned headers, excluding src/platforms."""
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
         for root, _, files in os.walk(SRC_ROOT):
             for file in files:
                 if file.endswith(
@@ -38,7 +38,7 @@ class NoUsingNamespaceFlInHeaderTester(unittest.TestCase):
                     file_path = os.path.join(root, file)
                     files_to_check.append(file_path)
 
-        all_failings: List[str] = []
+        all_failings: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

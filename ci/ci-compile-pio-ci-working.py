@@ -106,7 +106,7 @@ DEFAULT_EXAMPLES = [
     "WS2816",
 ]
 
-EXTRA_EXAMPLES: Dict[Board, List[str]] = {
+EXTRA_EXAMPLES: dict[Board, list[str]] = {
     # ESP32DEV: ["EspI2SDemo"],
     # ESP32_S3_DEVKITC_1: ["EspS3I2SDemo"],
 }
@@ -225,9 +225,9 @@ def parse_args():
     return args
 
 
-def remove_duplicates(items: List[str]) -> List[str]:
-    seen: Set[str] = set()
-    out: List[str] = []
+def remove_duplicates(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)
@@ -235,13 +235,13 @@ def remove_duplicates(items: List[str]) -> List[str]:
     return out
 
 
-def choose_board_interactively(boards: List[str]) -> List[str]:
+def choose_board_interactively(boards: list[str]) -> list[str]:
     print("Available boards:")
     boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
     print("[all]: All boards")
-    out: List[str] = []
+    out: list[str] = []
     while True:
         try:
             input_str = input(
@@ -277,9 +277,9 @@ def resolve_example_path(example: str) -> Path:
 
 def compile_with_pio_ci(
     board: Board,
-    example_paths: List[Path],
+    example_paths: list[Path],
     build_dir: Optional[str],
-    defines: List[str],
+    defines: list[str],
     verbose: bool,
 ) -> tuple[bool, str]:
     """Compile examples for a board using pio ci command."""
@@ -302,7 +302,7 @@ def compile_with_pio_ci(
 
     locked_print(f"*** Compiling examples for board {board_name} using pio ci ***")
 
-    errors: List[str] = []
+    errors: list[str] = []
 
     for example_path in example_paths:
         locked_print(
@@ -424,7 +424,7 @@ def compile_with_pio_ci(
     return True, f"Successfully compiled all examples for {board_name}"
 
 
-def run_symbol_analysis(boards: List[Board]) -> None:
+def run_symbol_analysis(boards: list[Board]) -> None:
     """Run symbol analysis on compiled outputs if requested."""
     locked_print("\nRunning symbol analysis on compiled outputs...")
 
@@ -479,7 +479,7 @@ def main() -> int:
         boards_names = args.boards.split(",") if args.boards else DEFAULT_BOARDS_NAMES
 
     # Get board objects
-    boards: List[Board] = []
+    boards: list[Board] = []
     for board_name in boards_names:
         try:
             board = create_board(board_name, no_project_options=False)
@@ -508,7 +508,7 @@ def main() -> int:
         examples = [ex for ex in examples if ex not in exclude_examples]
 
     # Resolve example paths
-    example_paths: List[Path] = []
+    example_paths: list[Path] = []
     for example in examples:
         try:
             example_path = resolve_example_path(example)
@@ -518,7 +518,7 @@ def main() -> int:
             return 1
 
     # Add extra examples for specific boards
-    extra_examples: Dict[Board, List[Path]] = {}
+    extra_examples: dict[Board, list[Path]] = {}
     for board in boards:
         if board in EXTRA_EXAMPLES:
             board_examples = []
@@ -531,7 +531,7 @@ def main() -> int:
                 extra_examples[board] = board_examples
 
     # Set up defines
-    defines: List[str] = []
+    defines: list[str] = []
     if args.defines:
         defines.extend(args.defines.split(","))
 
@@ -547,7 +547,7 @@ def main() -> int:
         f"Starting compilation for {len(boards)} boards with {len(example_paths)} examples"
     )
 
-    compilation_errors: List[str] = []
+    compilation_errors: list[str] = []
 
     # Compile for each board
     for board in boards:

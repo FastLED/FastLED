@@ -10,7 +10,7 @@ from ci.util.paths import BUILD
 from ci.util.tools import load_tools
 
 
-def _list_builds() -> List[Path]:
+def _list_builds() -> list[Path]:
     str_paths = os.listdir(BUILD)
     paths = [BUILD / p for p in str_paths]
     dirs = [p for p in paths if p.is_dir()]
@@ -52,7 +52,7 @@ def _prompt_build() -> Path:
 def _prompt_object_file(build: Path) -> Path:
     # Look for object files in .pio/build directory
     build_dir = build / ".pio" / "build"
-    object_files: List[Path] = list(build_dir.rglob("*.o"))
+    object_files: list[Path] = list(build_dir.rglob("*.o"))
 
     if not object_files:
         print("Error: No object files found", file=sys.stderr)

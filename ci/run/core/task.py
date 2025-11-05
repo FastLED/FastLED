@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import asyncio
 import time
 from dataclasses import dataclass, field
@@ -16,7 +14,7 @@ Status = Literal["queued", "running", "done", "failed", "canceled"]
 class TaskState:
     id: str
     name: str
-    cmd: List[str]  # NOTE: Use List[str] not list[str] per project standards
+    cmd: list[str]  # NOTE: Use List[str] not list[str] per project standards
     cwd: Optional[str] = None
     status: Status = "queued"
     start_ts: float = field(default_factory=time.time)

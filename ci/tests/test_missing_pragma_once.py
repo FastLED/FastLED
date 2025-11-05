@@ -12,7 +12,7 @@ SRC_ROOT = PROJECT_ROOT / "src"
 NUM_WORKERS = 1 if os.environ.get("NO_PARALLEL") else (os.cpu_count() or 1) * 4
 
 # Files that are allowed to not have #pragma once
-EXCLUDED_FILES: List[str] = [
+EXCLUDED_FILES: list[str] = [
     # Add any exceptions here
 ]
 
@@ -47,7 +47,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
         1. Check for missing #pragma once in header files
         2. Check for incorrect #pragma once in cpp files
         """
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
         current_dir = None
 
         # Collect files to check
@@ -90,7 +90,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
         print(f"Found {len(files_to_check)} files to check")
 
         # Process files in parallel
-        all_failings: List[str] = []
+        all_failings: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

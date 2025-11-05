@@ -274,9 +274,9 @@ def parse_args():
     return args
 
 
-def remove_duplicates(items: List[str]) -> List[str]:
-    seen: Set[str] = set()
-    out: List[str] = []
+def remove_duplicates(items: list[str]) -> list[str]:
+    seen: set[str] = set()
+    out: list[str] = []
     for item in items:
         if item not in seen:
             seen.add(item)
@@ -284,13 +284,13 @@ def remove_duplicates(items: List[str]) -> List[str]:
     return out
 
 
-def choose_board_interactively(boards: List[str]) -> List[str]:
+def choose_board_interactively(boards: list[str]) -> list[str]:
     print("Available boards:")
     boards = remove_duplicates(sorted(boards))
     for i, board in enumerate(boards):
         print(f"[{i}]: {board}")
     print("[all]: All boards")
-    out: List[str] = []
+    out: list[str] = []
     while True:
         try:
             # choice = int(input("Enter the number of the board(s) you want to compile to: "))

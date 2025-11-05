@@ -39,7 +39,7 @@ class TestResult:
     success: bool
     duration: float
     output: str
-    captured_lines: List[str] = field(default_factory=list)  # type: ignore
+    captured_lines: list[str] = field(default_factory=list)  # type: ignore
     return_code: Optional[int] = None
 
 
@@ -60,7 +60,7 @@ def _is_test_executable(f: Path) -> bool:
     )
 
 
-def _get_test_patterns() -> List[str]:
+def _get_test_patterns() -> list[str]:
     """Get test patterns based on platform"""
     # On Windows, check both .exe and no extension (Clang generates without .exe)
     return ["test_*.exe"] if sys.platform == "win32" else ["test_*"]
@@ -175,7 +175,7 @@ def _dump_post_mortem_stack_trace(
         return f"Failed to run post-mortem stack trace analysis: {e}"
 
 
-def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List[Path]:
+def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> list[Path]:
     """Find test executables in the build directory"""
     # Check test directory
     possible_test_dirs = [
@@ -200,7 +200,7 @@ def discover_tests(build_dir: Path, specific_test: Optional[str] = None) -> List
         print(f"Error: No test directory found. Checked: {possible_test_dirs}")
         sys.exit(1)
 
-    test_files: List[Path] = []
+    test_files: list[Path] = []
     for pattern in _get_test_patterns():
         for test_file in test_dir.glob(pattern):
             if not _is_test_executable(test_file):
@@ -265,7 +265,7 @@ def run_test(
     cmd = [str(test_executable)]
     if not verbose:
         cmd.append("--minimal")  # Only show output for failures
-    captured_lines: List[str] = []
+    captured_lines: list[str] = []
     try:
         # Set timeout when stack traces are enabled to ensure stack trace functionality works
         timeout = (
@@ -387,8 +387,8 @@ def main() -> None:
 
         # Run tests in parallel
         start_time = time.time()
-        results: List[TestResult] = []
-        failed_tests: List[TestResult] = []
+        results: list[TestResult] = []
+        failed_tests: list[TestResult] = []
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             future_to_test = {

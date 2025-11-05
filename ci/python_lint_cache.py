@@ -18,14 +18,14 @@ from ci.util.color_output import print_cache_hit, print_cache_miss
 from ci.util.hash_fingerprint_cache import HashFingerprintCache
 
 
-def get_python_files() -> List[Path]:
+def get_python_files() -> list[Path]:
     """
     Get all Python files that should be monitored for changes.
 
     Returns:
         List of Python file paths to monitor
     """
-    files: List[Path] = []
+    files: list[Path] = []
 
     # Add test.py
     test_py = Path("test.py")

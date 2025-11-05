@@ -522,8 +522,8 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         original_handler = pio_ini._run_pio_command
 
         def counting_wrapper(
-            args: List[str],
-        ) -> Dict[str, Any] | List[Dict[str, Any]] | None:
+            args: list[str],
+        ) -> dict[str, Any] | list[dict[str, Any]] | None:
             nonlocal cli_call_count
             cli_call_count += 1
             # debug_print(f"📞 REAL CLI Call #{cli_call_count}: pio {' '.join(args)}")
@@ -637,7 +637,7 @@ class TestPlatformIOUrlResolution(unittest.TestCase):
         pio_ini, _ = self._create_simple_test_environment()
 
         # Mock CLI to always return None (simulating failures)
-        def failing_mock(args: List[str]) -> None:
+        def failing_mock(args: list[str]) -> None:
             # debug_print(f"📞 Mock CLI (will fail): {' '.join(args)}")
             return None
 
@@ -1169,8 +1169,8 @@ framework = arduino
 
         # MOCK - Configure CLI to return comprehensive platform data
         def enhanced_mock_cli_handler(
-            args: List[str],
-        ) -> Dict[str, Any] | List[Dict[str, Any]] | None:
+            args: list[str],
+        ) -> dict[str, Any] | list[dict[str, Any]] | None:
             # debug_print(f"📞 Mock CLI called with: {' '.join(args)}")
             if args == ["platform", "show", "espressif32", "--json-output"]:
                 response = MOCK_ESP32_PLATFORM_FULL_RESPONSE

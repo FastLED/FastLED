@@ -48,7 +48,7 @@ class QEMUTestIntegration:
 
     def run_qemu_test(
         self,
-        firmware_path: Union[str, Path],
+        firmware_path: str | Path,
         timeout: int = 30,
         interrupt_regex: Optional[str] = None,
         flash_size: int = 4,

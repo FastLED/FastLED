@@ -26,23 +26,23 @@ class BoardCompilationResult:
     """Aggregated result for compiling a set of examples on a single board."""
 
     ok: bool
-    sketch_results: List[SketchResult]
+    sketch_results: list[SketchResult]
     stopped_early: bool = False
-    skipped_examples: List[Tuple[str, str]] = field(
+    skipped_examples: list[tuple[str, str]] = field(
         default_factory=lambda: []
     )  # List of (example, reason) tuples
 
 
 def compile_board_examples(
     board: Board,
-    examples: List[str],
-    defines: List[str],
+    examples: list[str],
+    defines: list[str],
     verbose: bool,
     enable_cache: bool,
     global_cache_dir: Optional[Path] = None,
     merged_bin: bool = False,
     merged_bin_output: Optional[Path] = None,
-    extra_packages: Optional[List[str]] = None,
+    extra_packages: Optional[list[str]] = None,
     max_failures: Optional[int] = None,
     skip_filters: bool = False,
 ) -> BoardCompilationResult:
@@ -77,7 +77,7 @@ def compile_board_examples(
     if skip_filters:
         # User explicitly requested these examples, so don't filter them
         filtered_examples = examples
-        skipped_examples: List[Tuple[str, str]] = []
+        skipped_examples: list[tuple[str, str]] = []
     else:
         # Apply filters to auto-discovered examples
         filtered_examples, skipped_examples = get_filtered_examples(board, examples)
@@ -139,7 +139,7 @@ def compile_board_examples(
             result = compiler.build_with_merged_bin(
                 examples[0], output_path=merged_bin_output
             )
-            futures: List[Future[SketchResult]] = []
+            futures: list[Future[SketchResult]] = []
 
             # Wrap the result in a completed future for consistency
             from concurrent.futures import Future as ConcurrentFuture
@@ -152,7 +152,7 @@ def compile_board_examples(
             futures = compiler.build(examples)
 
         # Wait for completion and collect results
-        results: List[SketchResult] = []
+        results: list[SketchResult] = []
         failure_count = 0
         stopped_early = False
 

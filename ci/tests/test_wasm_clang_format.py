@@ -31,7 +31,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
         return failings
 
     def test_esm_asm_and_clang_format(self) -> None:
-        files_to_check: List[str] = []
+        files_to_check: list[str] = []
         current_dir = None
 
         # Collect files to check
@@ -50,7 +50,7 @@ class TestMissingPragmaOnce(unittest.TestCase):
         print(f"Found {len(files_to_check)} files to check")
 
         # Process files in parallel
-        all_failings: List[str] = []
+        all_failings: list[str] = []
         with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
             futures = [
                 executor.submit(self.check_file, file_path)

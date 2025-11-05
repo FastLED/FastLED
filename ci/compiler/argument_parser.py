@@ -24,13 +24,13 @@ class CompilationConfig:
     """Immutable compilation configuration with validation."""
 
     # Core configuration
-    boards: List[Board]
-    examples: List[str]
+    boards: list[Board]
+    examples: list[str]
     workflow: WorkflowType
 
     # Build options
-    defines: List[str] = field(default_factory=lambda: [])
-    extra_packages: List[str] = field(default_factory=lambda: [])
+    defines: list[str] = field(default_factory=lambda: [])
+    extra_packages: list[str] = field(default_factory=lambda: [])
     verbose: bool = False
     enable_cache: bool = False
 
@@ -53,9 +53,9 @@ class CompilationConfig:
         False  # True to skip @filter directives (override platform/memory constraints)
     )
 
-    def validate(self) -> List[str]:
+    def validate(self) -> list[str]:
         """Validate configuration and return list of error messages."""
-        errors: List[str] = []
+        errors: list[str] = []
 
         # Validate merged-bin requirements
         if self.merged_bin:
@@ -108,20 +108,20 @@ class CompilationArgumentParser:
         self.project_root = project_root
         self.examples_dir = project_root / "examples"
 
-    def parse(self, args: Optional[List[str]] = None) -> CompilationConfig:
+    def parse(self, args: Optional[list[str]] = None) -> CompilationConfig:
         """Parse arguments and return validated config."""
         parser = self._create_parser()
 
         # Parse arguments with intelligent unknown handling
         try:
             parsed = parser.parse_intermixed_args(args)
-            unknown: List[str] = []
+            unknown: list[str] = []
         except SystemExit:
             parsed, unknown = parser.parse_known_args(args)
 
         # Add unknown non-flag arguments as examples
         if unknown:
-            extra_examples: List[str] = [
+            extra_examples: list[str] = [
                 arg for arg in unknown if not arg.startswith("-")
             ]
             if extra_examples:
@@ -286,8 +286,8 @@ class CompilationArgumentParser:
         examples, skip_filters = self._resolve_examples(args, args.no_filter)
 
         # Parse other options
-        defines: List[str] = args.defines.split(",") if args.defines else []
-        extra_packages: List[str] = (
+        defines: list[str] = args.defines.split(",") if args.defines else []
+        extra_packages: list[str] = (
             [pkg.strip() for pkg in args.extra_packages.split(",")]
             if args.extra_packages
             else []
@@ -312,7 +312,7 @@ class CompilationArgumentParser:
             skip_filters=skip_filters,
         )
 
-    def _resolve_boards(self, board_spec: Optional[str]) -> List[Board]:
+    def _resolve_boards(self, board_spec: Optional[str]) -> list[Board]:
         """Resolve board specification to Board objects.
 
         Returns empty list if no board specification provided - caller should
@@ -324,7 +324,7 @@ class CompilationArgumentParser:
 
         board_names = board_spec.split(",")
 
-        boards: List[Board] = []
+        boards: list[Board] = []
         for name in board_names:
             try:
                 board = create_board(name, no_project_options=False)
@@ -336,7 +336,7 @@ class CompilationArgumentParser:
 
     def _resolve_examples(
         self, args: argparse.Namespace, no_filter: bool = False
-    ) -> Tuple[List[str], bool]:
+    ) -> tuple[list[str], bool]:
         """Resolve examples from arguments.
 
         Special keyword 'all' compiles all examples.
@@ -404,12 +404,12 @@ class CompilationArgumentParser:
         # If no match found, return original (will fail validation later with clear error)
         return example
 
-    def _discover_all_examples(self) -> List[str]:
+    def _discover_all_examples(self) -> list[str]:
         """Discover all examples in examples directory."""
         if not self.examples_dir.exists():
             return []
 
-        examples: List[str] = []
+        examples: list[str] = []
         for ino_file in self.examples_dir.rglob("*.ino"):
             rel_path = ino_file.parent.relative_to(self.examples_dir)
             examples.append(str(rel_path).replace("\\", "/"))
@@ -417,7 +417,7 @@ class CompilationArgumentParser:
         return sorted(examples)
 
     def _determine_workflow(
-        self, boards: List[Board], docker_flag: bool, local_flag: bool
+        self, boards: list[Board], docker_flag: bool, local_flag: bool
     ) -> WorkflowType:
         """Determine workflow type from boards and flags."""
         if docker_flag and not local_flag:

@@ -84,7 +84,7 @@ exit 0
 """
 
 
-def get_docker_env() -> Dict[str, str]:
+def get_docker_env() -> dict[str, str]:
     """Get environment for Docker commands, handling Git Bash/MSYS2 path conversion."""
     env = os.environ.copy()
     # Set UTF-8 encoding environment variables for Windows
@@ -101,7 +101,7 @@ def get_docker_env() -> Dict[str, str]:
 
 
 def run_subprocess_safe(
-    cmd: List[str], **kwargs: Any
+    cmd: list[str], **kwargs: Any
 ) -> subprocess.CompletedProcess[Any]:
     """Run subprocess with safe UTF-8 handling and error replacement."""
     kwargs.setdefault("encoding", "utf-8")
@@ -110,7 +110,7 @@ def run_subprocess_safe(
     return subprocess.run(cmd, **kwargs)  # type: ignore[misc]
 
 
-def run_docker_command_streaming(cmd: List[str]) -> int:
+def run_docker_command_streaming(cmd: list[str]) -> int:
     """Run docker command with streaming output using RunningProcess."""
     print(f"Executing: {' '.join(cmd)}")
     proc = RunningProcess(cmd, env=get_docker_env(), auto_run=True)
@@ -126,7 +126,7 @@ def run_docker_command_streaming(cmd: List[str]) -> int:
     return returncode
 
 
-def run_docker_command_no_fail(cmd: List[str]) -> int:
+def run_docker_command_no_fail(cmd: list[str]) -> int:
     """Run docker command with streaming output, but don't raise exceptions on failure."""
     print(f"Executing: {' '.join(cmd)}")
     proc = RunningProcess(cmd, env=get_docker_env(), auto_run=True)
@@ -196,7 +196,7 @@ class DockerQEMURunner:
                 env=get_docker_env(),
                 auto_run=True,
             )
-            stdout_lines: List[str] = []
+            stdout_lines: list[str] = []
             with proc.line_iter(timeout=None) as it:
                 for line in it:
                     stdout_lines.append(line)
@@ -373,7 +373,7 @@ class DockerQEMURunner:
                 env=get_docker_env(),
                 auto_run=True,
             )
-            stdout_lines: List[str] = []
+            stdout_lines: list[str] = []
             with proc.line_iter(timeout=None) as it:
                 for line in it:
                     stdout_lines.append(line)
@@ -502,7 +502,7 @@ class DockerQEMURunner:
         firmware_name: str = "firmware.bin",
         flash_size: int = 4,
         machine: str = "esp32",
-    ) -> List[str]:
+    ) -> list[str]:
         """Build QEMU command to run inside Docker container.
 
         Args:
@@ -601,7 +601,7 @@ class DockerQEMURunner:
                 self.container_name = f"fastled-simulator-{machine}-{int(time.time())}"
 
             # Convert Windows paths to Docker-compatible paths
-            def windows_to_docker_path(path_str: Union[str, Path]) -> str:
+            def windows_to_docker_path(path_str: str | Path) -> str:
                 """Convert Windows path to Docker volume mount format."""
                 import os
 
