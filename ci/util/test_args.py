@@ -236,6 +236,11 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     #     test_args.verbose = True
     #     print("Auto-enabled --verbose mode for unit tests")
 
+    # Auto-enable --unity unless --no-unity is specified
+    if not test_args.no_unity and not test_args.unity:
+        test_args.unity = True
+        print("Auto-enabled --unity mode (use --no-unity to disable)")
+
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:
         if not test_args.cpp:
