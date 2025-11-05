@@ -123,17 +123,12 @@ ParlioLedDriver<DATA_WIDTH, CHIPSET>::ParlioLedDriver()
     , strips_{}
     , tx_unit_(nullptr)
     , dma_buffer_(nullptr)
-    , dma_sub_buffers_{}
     , buffer_size_(0)
-    , sub_buffer_size_(0)
     , xfer_done_sem_(nullptr)
     , dma_busy_(false)
 {
     for (int i = 0; i < 16; i++) {
         strips_[i] = nullptr;
-    }
-    for (int i = 0; i < 3; i++) {
-        dma_sub_buffers_[i] = nullptr;
     }
 }
 
@@ -184,15 +179,8 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     xfer_done_sem_ = xSemaphoreCreateBinary();
     if (!xfer_done_sem_) {
         FL_LOG_PARLIO("Failed to create semaphore");
-        if (config_.buffer_strategy == ParlioBufferStrategy::BREAK_PER_COLOR) {
-            for (int i = 0; i < 3; i++) {
-                heap_caps_free(dma_sub_buffers_[i]);
-                dma_sub_buffers_[i] = nullptr;
-            }
-        } else {
-            heap_caps_free(dma_buffer_);
-            dma_buffer_ = nullptr;
-        }
+        heap_caps_free(dma_buffer_);
+        dma_buffer_ = nullptr;
         return false;
     }
     xSemaphoreGive(xfer_done_sem_);

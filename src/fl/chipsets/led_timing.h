@@ -122,7 +122,11 @@ struct TIMING_WS2812_800KHZ {
         T3 = FASTLED_WS2812_T3,
         RESET = 280
     };
+    static constexpr const char* name() { return "WS2812_800KHZ"; }
 };
+
+/// Convenience alias for WS2812 timing (commonly used name)
+using WS2812ChipsetTiming = TIMING_WS2812_800KHZ;
 
 /// WS2812 RGB controller @ 800 kHz legacy variant
 /// Timing: 320ns, 320ns, 640ns
