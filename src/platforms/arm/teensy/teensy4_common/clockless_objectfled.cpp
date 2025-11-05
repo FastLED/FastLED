@@ -1,6 +1,5 @@
 #if defined(__IMXRT1062__) // Teensy 4.0/4.1 only.
 
-
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"
 
@@ -14,6 +13,7 @@
 #include "fl/warn.h"
 #include "fl/math_macros.h"
 #include "fl/cstring.h"  // for fl::memset()
+#include "fl/chipsets/led_timing.h"  // For TIMING structs
 #include "pixel_iterator.h"
 #include "cpixel_ledcontroller.h"
 
@@ -22,12 +22,6 @@
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<uint8_t, 50> PinList50;
-
-
-static float gOverclock = 1.0f;
-static float gPrevOverclock = 1.0f;
-static int gLatchDelayUs = -1;
-
 
 // Lightweight strip tracking (replaces RectangularDrawBuffer to save memory)
 struct StripInfo {
@@ -39,31 +33,140 @@ struct StripInfo {
     bool isRgbw;
 };
 
-// Maps multiple pins and CRGB strips to a single ObjectFLED object.
-class ObjectFLEDGroup {
-  public:
+} // anonymous namespace
 
-    fl::unique_ptr<fl::ObjectFLED> mObjectFLED;
-    fl::vector<StripInfo> mStrips;
-    fl::vector<StripInfo> mPrevStrips;
-    uint16_t mMaxBytesPerStrip;
-    bool mDrawn = false;
-    bool mStripsChanged = false;
+namespace fl {
 
+// ============================================================================
+// ObjectFLED Registry (tracks all active chipset groups)
+// ============================================================================
 
-    static ObjectFLEDGroup &getInstance() {
-        return fl::Singleton<ObjectFLEDGroup>::instance();
+/// Track all active chipset groups across all chipset types
+class ObjectFLEDRegistry {
+public:
+    static ObjectFLEDRegistry& getInstance() {
+        return fl::Singleton<ObjectFLEDRegistry>::instance();
     }
 
-    ObjectFLEDGroup() : mMaxBytesPerStrip(0) {}
-    ~ObjectFLEDGroup() { mObjectFLED.reset(); }
+    // Register a group for tracking
+    void registerGroup(void* groupPtr, void (*flushFunc)(void*)) {
+        GroupEntry entry{groupPtr, flushFunc};
+        if (!contains(entry)) {
+            mGroups.push_back(entry);
+        }
+    }
 
+    // Flush all pending groups
+    void flushAll() {
+        for (auto& entry : mGroups) {
+            entry.flushFunc(entry.groupPtr);
+        }
+        mGroups.clear();
+    }
+
+    // Flush all groups except the specified one
+    void flushAllExcept(void* exceptPtr) {
+        for (auto& entry : mGroups) {
+            if (entry.groupPtr != exceptPtr) {
+                entry.flushFunc(entry.groupPtr);
+            }
+        }
+        // Remove flushed entries, keep the exception
+        auto newEnd = fl::remove_if(mGroups.begin(), mGroups.end(),
+            [exceptPtr](const GroupEntry& e) { return e.groupPtr != exceptPtr; });
+        mGroups.erase(newEnd, mGroups.end());
+    }
+
+private:
+    struct GroupEntry {
+        void* groupPtr;
+        void (*flushFunc)(void*);
+
+        bool operator==(const GroupEntry& other) const {
+            return groupPtr == other.groupPtr;
+        }
+    };
+
+    fl::vector<GroupEntry> mGroups;
+
+    bool contains(const GroupEntry& entry) {
+        for (const auto& e : mGroups) {
+            if (e == entry) return true;
+        }
+        return false;
+    }
+};
+
+// ============================================================================
+// Templated ObjectFLED Group (one instance per chipset type)
+// ============================================================================
+
+/// Templated singleton - one instance per chipset type
+/// Automatically instantiated on first access via fl::Singleton<T>
+template <typename TIMING>
+class ObjectFLEDGroup {
+public:
+    static ObjectFLEDGroup& getInstance() {
+        return fl::Singleton<ObjectFLEDGroup<TIMING>>::instance();
+    }
+
+    ObjectFLEDGroup() : mMaxBytesPerStrip(0) {
+        // Auto-register with global registry on construction
+        ObjectFLEDRegistry::getInstance().registerGroup(
+            this,
+            [](void* ptr) {
+                static_cast<ObjectFLEDGroup*>(ptr)->flush();
+            }
+        );
+    }
+
+    ~ObjectFLEDGroup() {
+        mObjectFLED.reset();
+    }
+
+    // Called by proxy in beginShowLeds()
     void onQueuingStart() {
         mStrips.swap(mPrevStrips);
         mStrips.clear();
         mDrawn = false;
     }
 
+    // Called by proxy in showPixels()
+    void addStrip(uint8_t pin, PixelIterator& pixel_iterator) {
+        // Add strip metadata
+        StripInfo info;
+        info.pin = pin;
+        info.numLeds = pixel_iterator.size();
+        info.isRgbw = pixel_iterator.get_rgbw().active();
+        info.numBytes = info.numLeds * (info.isRgbw ? 4 : 3);
+        info.offsetBytes = 0;
+        info.bytesWritten = 0;
+        mStrips.push_back(info);
+
+        // Finalize strip list
+        onQueuingDone();
+
+        // Write pixels directly to ObjectFLED's frameBufferLocal
+        writePixels(info, pixel_iterator);
+    }
+
+    // Called by registry when chipset changes or frame ends
+    void flush() {
+        if (mDrawn || mStrips.size() == 0) {
+            return;  // Already drawn or no data
+        }
+
+        mDrawn = true;
+
+        if (mStripsChanged || !mObjectFLED.get()) {
+            rebuildObjectFLED();
+        }
+
+        // TRANSMIT to hardware!
+        mObjectFLED->show();
+    }
+
+private:
     void onQueuingDone() {
         // Calculate max bytes per strip
         mMaxBytesPerStrip = 0;
@@ -95,163 +198,172 @@ class ObjectFLEDGroup {
         }
     }
 
-    void addObject(uint8_t pin, uint16_t numLeds, bool is_rgbw) {
-        StripInfo info;
-        info.pin = pin;
-        info.numLeds = numLeds;
-        info.numBytes = numLeds * (is_rgbw ? 4 : 3);
-        info.isRgbw = is_rgbw;
-        info.offsetBytes = 0;  // Will be set in onQueuingDone()
-        info.bytesWritten = 0;
-        mStrips.push_back(info);
+    void rebuildObjectFLED() {
+        mObjectFLED.reset();
+
+        // Build pin list
+        PinList50 pinList;
+        for (const auto& strip : mStrips) {
+            pinList.push_back(strip.pin);
+        }
+
+        // Check if any strip uses RGBW
+        bool hasRgbw = false;
+        for (const auto& strip : mStrips) {
+            if (strip.isRgbw) {
+                hasRgbw = true;
+                break;
+            }
+        }
+
+        // Total LEDs = max_bytes_per_strip * num_strips / bytes_per_led
+        int bytesPerLed = hasRgbw ? 4 : 3;
+        int totalLeds = (mMaxBytesPerStrip / bytesPerLed) * mStrips.size();
+
+        #ifdef FASTLED_DEBUG_OBJECTFLED
+        FL_WARN("ObjectFLEDGroup<TIMING>: totalLeds=" << totalLeds << " maxBytes=" << mMaxBytesPerStrip);
+        #endif
+
+        // Pass nullptr so ObjectFLED allocates frameBufferLocal internally
+        mObjectFLED.reset(new fl::ObjectFLED(
+            totalLeds,
+            nullptr,  // No intermediate buffer - write directly to frameBufferLocal!
+            hasRgbw ? CORDER_RGBW : CORDER_RGB,
+            pinList.size(),
+            pinList.data(),
+            0  // No serpentine
+        ));
+
+        // Use template-based begin<TIMING>() - extracts timing at compile-time
+        // Uses TIMING::RESET as the default latch delay
+        mObjectFLED->begin<TIMING>();
+
+        // Clear frameBufferLocal to zeros (for padding)
+        int totalBytes = mMaxBytesPerStrip * mStrips.size();
+        fl::memset(mObjectFLED->frameBufferLocal, 0, totalBytes);
     }
 
-    void showPixelsOnceThisFrame() {
-        if (mDrawn) {
-            return;
-        }
-        mDrawn = true;
-        if (mStrips.size() == 0) {
+    void writePixels(StripInfo& stripInfo, PixelIterator& pixel_iterator) {
+        if (!mObjectFLED) {
+            FL_WARN("ObjectFLEDGroup::writePixels: mObjectFLED not initialized");
             return;
         }
 
-        bool needs_rebuild = mStripsChanged || !mObjectFLED.get() || gOverclock != gPrevOverclock;
-        if (needs_rebuild) {
-            gPrevOverclock = gOverclock;
-            mObjectFLED.reset();
+        // Write directly to ObjectFLED's frameBufferLocal (saves a frame buffer!)
+        uint8_t* dest = mObjectFLED->frameBufferLocal + stripInfo.offsetBytes;
+        uint16_t bytesWritten = 0;
 
-            // Build pin list
-            PinList50 pinList;
-            for (const auto& strip : mStrips) {
-                pinList.push_back(strip.pin);
+        const Rgbw rgbw = pixel_iterator.get_rgbw();
+
+        if (rgbw.active()) {
+            uint8_t r, g, b, w;
+            while (pixel_iterator.has(1)) {
+                pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
+                *dest++ = r;
+                *dest++ = g;
+                *dest++ = b;
+                *dest++ = w;
+                bytesWritten += 4;
+                pixel_iterator.advanceData();
+                pixel_iterator.stepDithering();
             }
-
-            // Check if any strip uses RGBW
-            bool hasRgbw = false;
-            for (const auto& strip : mStrips) {
-                if (strip.isRgbw) {
-                    hasRgbw = true;
-                    break;
-                }
+        } else {
+            uint8_t r, g, b;
+            while (pixel_iterator.has(1)) {
+                pixel_iterator.loadAndScaleRGB(&r, &g, &b);
+                *dest++ = r;
+                *dest++ = g;
+                *dest++ = b;
+                bytesWritten += 3;
+                pixel_iterator.advanceData();
+                pixel_iterator.stepDithering();
             }
-
-            // Total LEDs = max_bytes_per_strip * num_strips / bytes_per_led
-            int bytesPerLed = hasRgbw ? 4 : 3;
-            int totalLeds = (mMaxBytesPerStrip / bytesPerLed) * mStrips.size();
-
-            #ifdef FASTLED_DEBUG_OBJECTFLED
-            FL_WARN("ObjectFLEDGroup: totalLeds=" << totalLeds << " maxBytes=" << mMaxBytesPerStrip);
-            #endif
-
-            // Pass nullptr so ObjectFLED allocates frameBufferLocal internally
-            // We'll write directly to it, saving a frame buffer!
-            mObjectFLED.reset(new fl::ObjectFLED(
-                totalLeds,
-                nullptr,  // No intermediate buffer - write directly to frameBufferLocal!
-                hasRgbw ? CORDER_RGBW : CORDER_RGB,
-                pinList.size(),
-                pinList.data(),
-                0  // No serpentine
-            ));
-
-            if (gLatchDelayUs >= 0) {
-                mObjectFLED->begin(gOverclock, gLatchDelayUs);
-            } else {
-                mObjectFLED->begin(gOverclock);
-            }
-
-            // Clear frameBufferLocal to zeros (for padding)
-            int totalBytes = mMaxBytesPerStrip * mStrips.size();
-            fl::memset(mObjectFLED->frameBufferLocal, 0, totalBytes);
         }
 
-        mObjectFLED->show();
+        stripInfo.bytesWritten = bytesWritten;
     }
+
+    fl::unique_ptr<fl::ObjectFLED> mObjectFLED;
+    fl::vector<StripInfo> mStrips;
+    fl::vector<StripInfo> mPrevStrips;
+    uint16_t mMaxBytesPerStrip;
+    bool mDrawn = false;
+    bool mStripsChanged = false;
 };
 
-} // anonymous namespace
+// ============================================================================
+// Proxy Controller Implementation
+// ============================================================================
 
-
-namespace fl {
-
-void ObjectFled::SetOverclock(float overclock) {
-    gOverclock = overclock;
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::ClocklessController_ObjectFLED_Proxy()
+    : Base() {
+    // Latch delay is automatically determined from TIMING::RESET
 }
 
-void ObjectFled::SetLatchDelay(uint16_t latch_delay_us) {
-    gLatchDelayUs = latch_delay_us;
-}
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginShowLeds(int nleds) {
+    void *data = Base::beginShowLeds(nleds);
 
-void ObjectFled::beginShowLeds(int datapin, int nleds) {
-    ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
+    // Auto-grab the singleton for THIS chipset type
+    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
+
+    // Flush any pending groups of DIFFERENT chipset types
+    ObjectFLEDRegistry::getInstance().flushAllExcept(&group);
+
+    // Start queuing for this group
     group.onQueuingStart();
-    group.addObject(datapin, nleds, false);
+
+    return data;
 }
 
-void ObjectFled::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    ObjectFLEDGroup &group = ObjectFLEDGroup::getInstance();
-    group.onQueuingDone();
-    const Rgbw rgbw = pixel_iterator.get_rgbw();
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::showPixels(
+    PixelController<RGB_ORDER> &pixels) {
+    // Auto-grab the singleton for THIS chipset type
+    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
 
-    // Find this strip's info
-    StripInfo* stripInfo = nullptr;
-    for (auto& strip : group.mStrips) {
-        if (strip.pin == data_pin) {
-            stripInfo = &strip;
-            break;
-        }
-    }
-
-    if (!stripInfo || !group.mObjectFLED) {
-        FL_WARN("ObjectFled::showPixels: strip not found for pin " << data_pin);
-        return;
-    }
-
-    // Write directly to ObjectFLED's frameBufferLocal (saves a frame buffer!)
-    uint8_t* dest = group.mObjectFLED->frameBufferLocal + stripInfo->offsetBytes;
-    uint16_t bytesWritten = 0;
-
-    if (rgbw.active()) {
-        uint8_t r, g, b, w;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            *dest++ = r;
-            *dest++ = g;
-            *dest++ = b;
-            *dest++ = w;
-            bytesWritten += 4;
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    } else {
-        uint8_t r, g, b;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            *dest++ = r;
-            *dest++ = g;
-            *dest++ = b;
-            bytesWritten += 3;
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    }
-
-    // Pad remaining bytes with zeros if strip is shorter than max
-    // (frameBufferLocal was already cleared to zeros in showPixelsOnceThisFrame)
-    uint16_t bytesToPad = group.mMaxBytesPerStrip - bytesWritten;
-    if (bytesToPad > 0) {
-        // Already zeros from memset, but we could explicitly clear if needed
-        // fl::memset(dest, 0, bytesToPad);
-    }
-
-    stripInfo->bytesWritten = bytesWritten;
+    // Add this strip to the group
+    auto pixel_iterator = pixels.as_iterator(this->getRgbw());
+    group.addStrip(DATA_PIN, pixel_iterator);
 }
 
-void ObjectFled::endShowLeds() {
-    // First one to call this draws everything, every other call this frame
-    // is ignored.
-    ObjectFLEDGroup::getInstance().showPixelsOnceThisFrame();
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::endShowLeds(void *data) {
+    Base::endShowLeds(data);
+
+    // DON'T flush here - let chipset change detection or frame end handle it
+    // This is handled by the next controller's beginShowLeds() or FastLED.show() end
 }
+
+// ============================================================================
+// Explicit Template Instantiations (for common chipsets)
+// ============================================================================
+
+// Instantiate for WS2812
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 0, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 1, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 2, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 3, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 4, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 5, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 6, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 7, GRB>;
+
+// Instantiate for SK6812
+template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 0, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 1, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 2, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 3, GRB>;
+
+// Instantiate for WS2811
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 0, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 1, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 2, GRB>;
+
+// Instantiate for WS2813
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2813, 0, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2813, 1, GRB>;
 
 } // namespace fl
 

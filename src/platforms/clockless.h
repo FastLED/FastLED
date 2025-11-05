@@ -30,7 +30,7 @@
 #elif defined(ESP32) || defined(ARDUINO_ARCH_ESP32) || defined(ESP8266) || defined(ARDUINO_ARCH_ESP8266)
   #include "esp/clockless.h"
 #elif defined(FASTLED_TEENSY4)
-  #include "arm/teensy/teensy4_common/clockless_arm_mxrt1062.h"
+  #include "arm/teensy/teensy4_common/clockless.h"
 #elif defined(__AVR__)
   #include "avr/is_avr.h"
   #ifdef FL_IS_AVR_ATTINY

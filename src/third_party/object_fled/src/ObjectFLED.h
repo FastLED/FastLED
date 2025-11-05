@@ -113,30 +113,44 @@ public:
 	ObjectFLED(uint16_t numLEDs, void* drawBuf, uint8_t config, uint8_t numPins, const uint8_t* pinList, \
 				uint8_t serpentine = 0);
 
-	~ObjectFLED() {
-		// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
-		while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / OC_FACTOR / 1000 + 5);
-		delete frameBufferLocal;
+	~ObjectFLED();
+
+	/// Template-based begin method - extracts timing from TIMING struct at compile-time
+	/// This is the preferred method for FastLED integration
+	/// @tparam TIMING The timing struct (e.g., TIMING_WS2812_800KHZ, TIMING_SK6812)
+	/// @param latch_delay_us Optional LED latch delay in microseconds (uses TIMING::RESET if not specified)
+	template <typename TIMING>
+	void begin(uint16_t latch_delay_us = TIMING::RESET) {
+		// Extract T1, T2, T3 directly from TIMING struct
+		// T1 = high time for '0' bit
+		// T2 = additional high time for '1' bit
+		// T3 = low tail duration
+		begin(TIMING::T1, TIMING::T2, TIMING::T3, latch_delay_us);
 	}
 
+	/// Three-phase timing begin method (T1, T2, T3 format)
+	/// This method converts 3-phase timing to ObjectFLED's internal format
+	/// @param t1 High time for '0' bit (nanoseconds)
+	/// @param t2 Additional high time for '1' bit (nanoseconds)
+	/// @param t3 Low tail duration (nanoseconds)
+	/// @param latch_delay_us LED latch delay in microseconds
+	void begin(uint16_t t1, uint16_t t2, uint16_t t3, uint16_t latch_delay_us = 300);
+
+private:
 	//begin() - Use defalut LED timing: 1.0 OC Factor, 1250 nS CLK (=800 KHz), 300 nS T0H, 750 nS T1H, 300 uS LED Latch Delay.
 	void begin(void);
 
 	//begin(LED_Latch_Delay_uS) - sets the LED Latch Delay.
 	void begin(uint16_t);
 
-	//begin(LED_Overclock_Factor, LED_Latch_Delay_uS) - divides default 1250 nS LED CLK (=800 KHz), 
-	// 300 nS T0H, 750 nS T1H; and optionally sets the LED Latch Delay.
-	void begin(double, uint16_t = 300);
+	//beginInternal(LED_CLK_nS, LED_T0H_nS, LED_T1H_nS, LED_Latch_Delay_uS) - specifies full LED waveform timing.
+	void beginInternal(uint16_t, uint16_t, uint16_t, uint16_t = 300);
 
-	//begin(LED_CLK_nS, LED_T0H_nS, LED_T1H_nS, LED_Latch_Delay_uS) - specifies full LED waveform timing.
-	void begin(uint16_t, uint16_t, uint16_t, uint16_t = 300);
+public:
 
 	void show(void);
-	void waitForDmaToFinish() {
-		ObjectFLEDDmaManager::getInstance().waitForCompletion();
-	}
-	
+	void waitForDmaToFinish();
+
 	int busy(void);
 
 	//Brightness values 0-255
@@ -145,9 +159,12 @@ public:
 	//Color Balance is 3-byte number in RGB order.  Each byte is a brightness value for that color.
 	void setBalance(uint32_t);
 
-	uint8_t getBrightness() { return brightness; }
+	uint8_t getBrightness();
 
-	uint32_t getBalance() { return colorBalance; }
+	uint32_t getBalance();
+
+	// Frame buffer for direct pixel access (used by FastLED integration)
+	uint8_t* frameBufferLocal;
 
 private:
 	static void isr(void);
@@ -166,7 +183,6 @@ private:
 	uint8_t pinlist[NUM_DIGITAL_PINS];
 	uint16_t comp1load[3];
 	uint8_t serpNumber;
-	float OC_FACTOR = 1.0;			//used to reduce period of LED output
 	uint16_t TH_TL = 1250;			//nS- period of LED output
 	uint16_t T0H = 300;				//nS- duration of T0H
 	uint16_t T1H = 750;				//nS- duration of T1H
@@ -175,7 +191,6 @@ private:
 	//for show context switch
 	uint32_t bitmaskLocal[4];
 	uint8_t numpinsLocal;
-	uint8_t* frameBufferLocal;
 	uint32_t numbytesLocal;
 	uint8_t pin_bitnumLocal[NUM_DIGITAL_PINS];
 	uint8_t pin_offsetLocal[NUM_DIGITAL_PINS];

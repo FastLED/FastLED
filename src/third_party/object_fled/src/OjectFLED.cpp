@@ -108,14 +108,19 @@ void ObjectFLED::begin(uint16_t latchDelay) {
 }
 
 
-void ObjectFLED::begin(double OCF, uint16_t latchDelay) {
-	OC_FACTOR = (float)OCF;
-	LATCH_DELAY = latchDelay;
-	begin();
+void ObjectFLED::begin(uint16_t t1, uint16_t t2, uint16_t t3, uint16_t latchDelay) {
+	// Convert 3-phase timing (T1, T2, T3) to ObjectFLED's internal format
+	// See fl/clockless/timing_conversion.h for details
+	// T1 = T0H (high time for '0' bit)
+	// T1 + T2 = T1H (high time for '1' bit)
+	// T1 + T2 + T3 = total period
+	uint16_t clk_ns = t1 + t2 + t3;
+	uint16_t t0h_ns = t1;
+	uint16_t t1h_ns = t1 + t2;
+	beginInternal(clk_ns, t0h_ns, t1h_ns, latchDelay);
 }
 
-
-void ObjectFLED::begin(uint16_t period, uint16_t t0h, uint16_t t1h, uint16_t latchDelay) {
+void ObjectFLED::beginInternal(uint16_t period, uint16_t t0h, uint16_t t1h, uint16_t latchDelay) {
 	TH_TL = period;
 	T0H = t0h;
 	T1H = t1h;
@@ -157,9 +162,9 @@ void ObjectFLED::begin(void) {
 	arm_dcache_flush_delete(bitmaskLocal, sizeof(bitmaskLocal));			//can't DMA from cached memory
 
 	// Set up 3 timers to create waveform timing events
-	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)TH_TL / OC_FACTOR );
-	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T0H / OC_FACTOR );
-	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T1H / (1.0 + ((OC_FACTOR - 1.0)/3)) );
+	comp1load[0] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)TH_TL);
+	comp1load[1] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T0H);
+	comp1load[2] = (uint16_t)((float)F_BUS_ACTUAL / 1000000000.0 * (float)T1H);
 	TMR4_ENBL &= ~7;
 	TMR4_SCTRL0 = TMR_SCTRL_OEN | TMR_SCTRL_FORCE | TMR_SCTRL_MSTR;
 	TMR4_CSCTRL0 = TMR_CSCTRL_CL1(1) | TMR_CSCTRL_TCF1EN;
@@ -508,7 +513,7 @@ void ObjectFLED::show(void) {
 	TMR4_CNTR2 = comp1load[0] + 1;
 
 	// wait for last LED reset to finish
-	while (micros() - update_begin_micros < dma.numbytes * 8 * TH_TL / OC_FACTOR / 1000 + LATCH_DELAY);
+	while (micros() - update_begin_micros < dma.numbytes * 8 * TH_TL / 1000 + LATCH_DELAY);
 
 	// start everything running!
 	TMR4_ENBL = enable | 7;
@@ -568,7 +573,7 @@ void ObjectFLED::isr(void)
 int ObjectFLED::busy(void)
 {
 	auto& dma = ObjectFLEDDmaManager::getInstance();
-	if (micros() - update_begin_micros < dma.numbytes * TH_TL / OC_FACTOR / 1000 * 8 + LATCH_DELAY) {
+	if (micros() - update_begin_micros < dma.numbytes * TH_TL / 1000 * 8 + LATCH_DELAY) {
 		return 1;
 	}
 	return 0;
@@ -641,6 +646,29 @@ void drawSquare(void* leds, uint16_t planeY, uint16_t planeX, int yCorner, int x
 		}	//if valid y
 	}	//for y
 } // drawSquare()
+
+
+// ============================================================================
+// ObjectFLED Member Functions (moved from header)
+// ============================================================================
+
+ObjectFLED::~ObjectFLED() {
+	// Wait for prior xmission to end, don't need to wait for latch time before deleting buffer
+	while (micros() - update_begin_micros < numbytesLocal * 8 * TH_TL / 1000 + 5);
+	delete frameBufferLocal;
+}
+
+void ObjectFLED::waitForDmaToFinish() {
+	ObjectFLEDDmaManager::getInstance().waitForCompletion();
+}
+
+uint8_t ObjectFLED::getBrightness() {
+	return brightness;
+}
+
+uint32_t ObjectFLED::getBalance() {
+	return colorBalance;
+}
 
 } // namespace fl
 

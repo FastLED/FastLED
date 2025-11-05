@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Meson build system integration for FastLED unit tests."""
 
+import hashlib
 import os
 import subprocess
 import sys
@@ -26,6 +27,53 @@ def check_meson_installed() -> bool:
         return result.returncode == 0
     except (subprocess.SubprocessError, FileNotFoundError):
         return False
+
+
+def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
+    """
+    Get hash of source files discovered by collect_sources.py.
+
+    This detects when source files are added or removed, which requires
+    Meson reconfiguration to update the build graph.
+
+    Args:
+        source_dir: Project root directory
+
+    Returns:
+        Tuple of (hash_string, sorted_file_list)
+    """
+    try:
+        # Call collect_sources.py to get current source file list
+        result = subprocess.run(
+            ["uv", "run", "python", str(source_dir / "ci" / "collect_sources.py")],
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            timeout=10,
+            cwd=source_dir,
+        )
+
+        if result.returncode != 0:
+            print(f"[MESON] Warning: collect_sources.py failed: {result.stderr}")
+            return ("", [])
+
+        # Get sorted list of source files
+        source_files = sorted(
+            line.strip() for line in result.stdout.strip().split("\n") if line.strip()
+        )
+
+        # Hash the list of file paths (not contents - just detect add/remove)
+        hasher = hashlib.sha256()
+        for file_path in source_files:
+            hasher.update(file_path.encode("utf-8"))
+            hasher.update(b"\n")  # Separator
+
+        return (hasher.hexdigest(), source_files)
+
+    except Exception as e:
+        print(f"[MESON] Warning: Failed to get source file hash: {e}")
+        return ("", [])
 
 
 def write_if_different(path: Path, content: str, mode: Optional[int] = None) -> bool:
@@ -243,7 +291,11 @@ def setup_meson_build(
     # ============================================================================
     thin_archive_marker = build_dir / ".thin_archive_config"
     unity_marker = build_dir / ".unity_config"
+    source_files_marker = build_dir / ".source_files_hash"
     force_reconfigure = False
+
+    # Get current source file hash (used for change detection and saving after setup)
+    current_source_hash, current_source_files = get_source_files_hash(source_dir)
 
     if already_configured:
         # Check if thin archive setting has changed since last configure
@@ -289,9 +341,33 @@ def setup_meson_build(
             print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
             force_reconfigure = True
 
+        # Check if source files have changed since last configure
+        # This detects when files are added or removed, which requires reconfigure
+        if current_source_hash:  # Only check if we successfully got the hash
+            if source_files_marker.exists():
+                try:
+                    last_hash = source_files_marker.read_text().strip()
+                    if last_hash != current_source_hash:
+                        print(
+                            "[MESON] ⚠️  Source file list changed (files added/removed)"
+                        )
+                        print("[MESON] 🔄 Forcing reconfigure to update build graph")
+                        force_reconfigure = True
+                except (OSError, IOError):
+                    # If we can't read the marker, force reconfigure to be safe
+                    print(
+                        "[MESON] ⚠️  Could not read source files marker, forcing reconfigure"
+                    )
+                    force_reconfigure = True
+            else:
+                # No marker file exists from previous configure
+                # Force reconfigure to ensure build graph matches current source files
+                print("[MESON] ℹ️  No source files marker found, forcing reconfigure")
+                force_reconfigure = True
+
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
-    # AND thin archive/unity settings haven't changed
+    # AND thin archive/unity/source file settings haven't changed
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
 
     # Declare native file path early (needed for meson commands)
@@ -658,6 +734,17 @@ endian = 'little'
             # Not critical if marker file write fails
             print(f"[MESON] Warning: Could not write unity marker: {e}")
 
+        # Write marker file to track source file list for future runs
+        if current_source_hash:
+            try:
+                source_files_marker.write_text(current_source_hash, encoding="utf-8")
+                print(
+                    f"[MESON] ✅ Saved source files hash ({len(current_source_files)} files)"
+                )
+            except (OSError, IOError) as e:
+                # Not critical if marker file write fails
+                print(f"[MESON] Warning: Could not write source files marker: {e}")
+
         return True
 
     except Exception as e:
@@ -702,6 +789,23 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
                 f"[MESON] Compilation failed with return code {returncode}",
                 file=sys.stderr,
             )
+
+            # Check for stale build cache error (missing files)
+            output = proc.stdout  # RunningProcess combines stdout and stderr
+            if "missing and no known rule to make it" in output.lower():
+                print(
+                    "[MESON] ⚠️  ERROR: Build cache references missing source files",
+                    file=sys.stderr,
+                )
+                print(
+                    "[MESON] 💡 TIP: Source files may have been deleted. Run with --clean to rebuild.",
+                    file=sys.stderr,
+                )
+                print(
+                    "[MESON] 💡 NOTE: Future builds should auto-detect this and reconfigure.",
+                    file=sys.stderr,
+                )
+
             return False
 
         print(f"[MESON] Compilation successful")

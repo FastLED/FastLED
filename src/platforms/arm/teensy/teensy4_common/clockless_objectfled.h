@@ -1,12 +1,14 @@
 /// FastLED mapping of the ObjectFLED driver for Teensy 4.0/4.1.
 ///
-/// This driver will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
-/// BasicTest example to demonstrate massive parallel output with FastLED using
-/// ObjectFLED for Teensy 4.0/4.1.
+/// This driver supports up to 42 parallel strips of ANY clockless LED chipsets!
+/// ~7x that of OctoWS2811!
 ///
-/// This mode will support upto 42 parallel strips of WS2812 LEDS! ~7x that of OctoWS2811!
+/// NEW: Generic proxy architecture supporting ALL clockless chipsets:
+/// - WS2812, WS2811, WS2813, WS2815
+/// - SK6812, SK6822
+/// - And any other clockless chipset with timing definitions
 ///
-/// The theoritical limit of Teensy 4.0, if frames per second is not a concern, is
+/// The theoretical limit of Teensy 4.0, if frames per second is not a concern, is
 /// more than 200k pixels. However, realistically, to run 42 strips at 550 pixels
 /// each at 60fps, is 23k pixels.
 ///
@@ -31,55 +33,43 @@
 
 namespace fl {
 
-class ObjectFled {
-  public:
-    static void SetOverclock(float overclock);
-    static void SetLatchDelay(uint16_t latchDelayUs);
-    void beginShowLeds(int data_pin, int nleds);
-    void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
-    void endShowLeds();
-};
+// Forward declarations for the templated architecture
+template <typename TIMING> class ObjectFLEDGroup;
+class ObjectFLEDRegistry;
 
-// TODO: RGBW support, should be pretty easy except the fact that ObjectFLED
-// either supports RGBW on all pixels strips, or none.
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class ClocklessController_ObjectFLED_WS2812
+/// Generic proxy controller for ObjectFLED on Teensy 4.x
+/// Works with ANY clockless chipset timing (WS2812, SK6812, WS2811, etc.)
+///
+/// Automatically routes to the correct ObjectFLEDGroup<TIMING> singleton
+/// based on the TIMING template parameter.
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER = RGB>
+class ClocklessController_ObjectFLED_Proxy
     : public CPixelLEDController<RGB_ORDER> {
   private:
     typedef CPixelLEDController<RGB_ORDER> Base;
-    ObjectFled mObjectFled;
 
   public:
-    ClocklessController_ObjectFLED_WS2812(float overclock = 1.0f, int latchDelayUs = FASTLED_OBJECTFLED_LATCH_DELAY): Base() {
-        // Warning - overwrites previous overclock value.
-        // Warning latchDelayUs is GLOBAL!
-        ObjectFled::SetOverclock(overclock);
-        if (latchDelayUs >= 0) {
-            ObjectFled::SetLatchDelay(latchDelayUs);
-        }
-    }
+    ClocklessController_ObjectFLED_Proxy();
     void init() override {}
-    virtual uint16_t getMaxRefreshRate() const { return 800; }
+
+    virtual uint16_t getMaxRefreshRate() const override {
+        // Calculate based on timing: if total period > 2000ns, it's 400kHz, else 800kHz
+        uint32_t total_ns = TIMING::T1 + TIMING::T2 + TIMING::T3;
+        return (total_ns > 2000) ? 400 : 800;
+    }
 
   protected:
-    // Wait until the last draw is complete, if necessary.
-    virtual void *beginShowLeds(int nleds) override {
-        void *data = Base::beginShowLeds(nleds);
-        mObjectFled.beginShowLeds(DATA_PIN, nleds);
-        return data;
-    }
-
-    // Prepares data for the draw.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
-        auto pixel_iterator = pixels.as_iterator(this->getRgbw());
-        mObjectFled.showPixels(DATA_PIN, pixel_iterator);
-    }
-
-    // Send the data to the strip
-    virtual void endShowLeds(void *data) override {
-        Base::endShowLeds(data);
-        mObjectFled.endShowLeds();
-    }
+    virtual void *beginShowLeds(int nleds) override;
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override;
+    virtual void endShowLeds(void *data) override;
 };
+
+// Legacy WS2812-specific controller (for backward compatibility)
+// Now just a typedef to the proxy with WS2812 timing
+template <int DATA_PIN, EOrder RGB_ORDER = RGB>
+using ClocklessController_ObjectFLED_WS2812 = ClocklessController_ObjectFLED_Proxy<
+    struct TIMING_WS2812_800KHZ,
+    DATA_PIN,
+    RGB_ORDER>;
 
 } // namespace fl

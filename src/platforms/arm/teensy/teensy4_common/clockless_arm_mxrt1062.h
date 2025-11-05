@@ -5,15 +5,18 @@
 #include "fastled_delay.h"
 namespace fl {
 // Definition for a single channel clockless controller for the teensy4
+// This is a fallback bit-banging implementation. The default ClocklessController
+// for Teensy 4.x now uses ObjectFLED (see clockless.h dispatch header).
 // See clockless.h for detailed info on how the template parameters are used.
 #if defined(FASTLED_TEENSY4)
 
-#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
+// Note: FL_CLOCKLESS_CONTROLLER_DEFINED is now set in the clockless.h dispatch header
 
 #define _FASTLED_NS_TO_DWT(_NS) (((F_CPU_ACTUAL>>16)*(_NS)) / (1000000000UL>>16))
 
+// Renamed to avoid conflict with ClocklessController alias in clockless.h
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessController : public CPixelLEDController<RGB_ORDER> {
+class ClocklessController_BitBang : public CPixelLEDController<RGB_ORDER> {
 	typedef typename FastPin<DATA_PIN>::port_ptr_t data_ptr_t;
 	typedef typename FastPin<DATA_PIN>::port_t data_t;
 

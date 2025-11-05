@@ -1,6 +1,7 @@
 #if defined(__IMXRT1062__)  // Teensy 4.0/4.1 only
 
 #include "ObjectFLEDDmaManager.h"
+#include "fl/delay.h"
 
 namespace fl {
 

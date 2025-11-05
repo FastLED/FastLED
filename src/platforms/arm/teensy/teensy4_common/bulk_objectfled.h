@@ -17,7 +17,6 @@
 #include "fl/warn.h"
 #include "fl/map.h"
 #include "fl/unique_ptr.h"
-#include "fl/namespace.h"
 #include "third_party/object_fled/src/ObjectFLED.h"
 #include "third_party/object_fled/src/ObjectFLEDDmaManager.h"
 
@@ -165,55 +164,13 @@ class BulkClockless<CHIPSET, OFLED>
 
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
-    BulkClockless(fl::initializer_list<BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
-        , mMaxLedCount(0)
-        , mNeedsInit(true)
-        , mHasCustomTiming(false) {
-
-        // Validate clockless chipset at compile time
-        static_assert(ChipsetTraits<Timing>::isClockless(),
-            "BulkClockless<OFLED> only supports clockless chipsets. "
-            "Detected SPI chipset (APA102, SK9822, etc.). "
-            "Use a clockless chipset like WS2812B, SK6812, or WS2811.");
-
-        // Initialize default settings from base class
-        mDefaultSettings.correction = this->mSettings.correction;
-        mDefaultSettings.temperature = this->mSettings.temperature;
-        mDefaultSettings.ditherMode = this->mSettings.ditherMode;
-        mDefaultSettings.rgbw = this->mSettings.rgbw;
-
-        // Add all strips from initializer list
-        for (const auto& config : strips) {
-            add(config.pin, config.buffer, config.count, config.screenmap);
-        }
-    }
+    BulkClockless(fl::initializer_list<BulkStripConfig> strips);
 
     /// Default constructor (creates empty bulk controller)
-    BulkClockless()
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
-        , mMaxLedCount(0)
-        , mNeedsInit(true)
-        , mHasCustomTiming(false) {
-
-        // Validate clockless chipset at compile time
-        static_assert(ChipsetTraits<Timing>::isClockless(),
-            "BulkClockless<OFLED> only supports clockless chipsets. "
-            "Detected SPI chipset (APA102, SK9822, etc.). "
-            "Use a clockless chipset like WS2812B, SK6812, or WS2811.");
-
-        // Initialize default settings from base class
-        mDefaultSettings.correction = this->mSettings.correction;
-        mDefaultSettings.temperature = this->mSettings.temperature;
-        mDefaultSettings.ditherMode = this->mSettings.ditherMode;
-        mDefaultSettings.rgbw = this->mSettings.rgbw;
-    }
+    BulkClockless();
 
     /// Destructor - cleanup resources
-    ~BulkClockless() {
-        mSubControllers.clear();
-        mObjectFLED.reset();
-    }
+    ~BulkClockless();
 
     /// Add a new LED strip to the bulk controller
     /// @param pin GPIO pin number for the strip
@@ -223,104 +180,24 @@ class BulkClockless<CHIPSET, OFLED>
     /// @return Pointer to sub-controller on success, nullptr on failure
     /// @note Strips can have different lengths - shorter strips are padded with black during DMA transposition
     BulkStrip* add(int pin, CRGB* buffer, int count,
-                   ScreenMap screenmap = ScreenMap()) {
-        // Validate max strips
-        if (mSubControllers.size() >= MAX_STRIPS) {
-            FL_WARN("BulkClockless<OFLED>: Maximum " << MAX_STRIPS
-                    << " strips exceeded");
-            return nullptr;
-        }
-
-        // Check duplicate pin
-        if (mSubControllers.count(pin) > 0) {
-            FL_WARN("BulkClockless<OFLED>: Pin " << pin << " already in use");
-            return nullptr;
-        }
-
-        // Validate pin number (Teensy 4.x has 0-41 or 0-53 depending on model)
-        if (pin < 0 || pin >= NUM_DIGITAL_PINS) {
-            FL_WARN("BulkClockless<OFLED>: Invalid pin " << pin);
-            return nullptr;
-        }
-
-        // Track maximum LED count across all strips (for DMA buffer allocation)
-        if (count > mMaxLedCount) {
-            mMaxLedCount = count;
-        }
-
-        // Create sub-controller with inherited settings
-        BulkStrip sub(pin, buffer, count, screenmap);
-        sub.settings = mDefaultSettings;
-
-        // Insert into map
-        mSubControllers[pin] = sub;
-
-        // Notify engine (for WASM visualization)
-        fl::EngineEvents::onStripAdded(this, count);
-        fl::EngineEvents::onCanvasUiSet(this, screenmap);
-
-        // Mark as needing re-initialization
-        mNeedsInit = true;
-
-        return &mSubControllers[pin];
-    }
+                   ScreenMap screenmap = ScreenMap());
 
     /// Remove a strip by pin number
     /// @param pin GPIO pin number to remove
     /// @return true if strip was removed, false if not found
-    bool remove(int pin) {
-        auto it = mSubControllers.find(pin);
-        if (it == mSubControllers.end()) {
-            return false;
-        }
-
-        // Remove from map
-        mSubControllers.erase(it);
-
-        // Recalculate max LED count across remaining strips
-        mMaxLedCount = 0;
-        for (const auto& pair : mSubControllers) {
-            if (pair.second.getCount() > mMaxLedCount) {
-                mMaxLedCount = pair.second.getCount();
-            }
-        }
-
-        // Mark as needing re-initialization
-        mNeedsInit = true;
-
-        return true;
-    }
+    bool remove(int pin);
 
     /// Remove all strips
     /// @return Number of strips removed
-    int removeAll() {
-        int count = static_cast<int>(mSubControllers.size());
-        mSubControllers.clear();
-        mMaxLedCount = 0;
-        mObjectFLED.reset();
-        mNeedsInit = true;
-        return count;
-    }
+    int removeAll();
 
     /// Get strip by pin number
     /// @param pin GPIO pin number
     /// @return Pointer to strip or nullptr if not found
-    BulkStrip* get(int pin) {
-        auto it = mSubControllers.find(pin);
-        if (it != mSubControllers.end()) {
-            return &it->second;
-        }
-        return nullptr;
-    }
+    BulkStrip* get(int pin);
 
     /// Get strip by pin number (const version)
-    const BulkStrip* get(int pin) const {
-        auto it = mSubControllers.find(pin);
-        if (it != mSubControllers.end()) {
-            return &it->second;
-        }
-        return nullptr;
-    }
+    const BulkStrip* get(int pin) const;
 
     /// Get number of strips
     size_t size() const { return mSubControllers.size(); }
@@ -332,14 +209,7 @@ class BulkClockless<CHIPSET, OFLED>
     bool has(int pin) const { return mSubControllers.count(pin) > 0; }
 
     /// Get all pin numbers
-    fl::vector<int> getAllPins() const {
-        fl::vector<int> pins;
-        pins.reserve(mSubControllers.size());
-        for (const auto& pair : mSubControllers) {
-            pins.push_back(pair.first);
-        }
-        return pins;
-    }
+    fl::vector<int> getAllPins() const;
 
     /// Set global color correction (applies to all new sub-controllers)
     /// @param correction Color correction to apply
@@ -377,209 +247,26 @@ class BulkClockless<CHIPSET, OFLED>
         return *this;
     }
 
-    /// Override chipset timing with custom values (advanced users)
-    /// @param period_ns Total bit period in nanoseconds (T1 + T2 + T3)
-    /// @param t0h_ns High time for '0' bit in nanoseconds
-    /// @param t1h_ns High time for '1' bit in nanoseconds
-    /// @param reset_us Reset/latch time in microseconds
-    /// @return Reference to this controller for chaining
-    /// @note This overrides the automatic timing from chipset traits
-    BulkClockless& setCustomTiming(uint16_t period_ns, uint16_t t0h_ns,
-                                    uint16_t t1h_ns, uint16_t reset_us = 300) {
-        mCustomTiming.period_ns = period_ns;
-        mCustomTiming.t0h_ns = t0h_ns;
-        mCustomTiming.t1h_ns = t1h_ns;
-        mCustomTiming.reset_us = reset_us;
-        mHasCustomTiming = true;
-        mNeedsInit = true;  // Force re-init with new timing
-        return *this;
-    }
-
   protected:
     /// Initialize peripheral (called before first show or after config change)
-    void init() override {
-        if (!mNeedsInit) return;
-        rebuildObjectFLED();
-    }
+    void init() override;
 
     /// Show LEDs (called by FastLED.show())
-    void showPixels(PixelController<RGB, 1, ALL_LANES_MASK>& pixels) override {
-        // Re-initialize if configuration changed
-        if (mNeedsInit) {
-            init();
-        }
-
-        if (!mObjectFLED || mSubControllers.size() == 0) {
-            FL_WARN("BulkClockless<OFLED>: Not initialized");
-            return;
-        }
-
-        // Render all strips to ObjectFLED's internal frameBuffer
-        renderAllStrips();
-
-        // Transmit via ObjectFLED (will acquire/release DMA)
-        mObjectFLED->show();
-    }
+    void showPixels(PixelController<RGB, 1, ALL_LANES_MASK>& pixels) override;
 
   private:
     /// Rebuild ObjectFLED instance with updated pin list
-    void rebuildObjectFLED() {
-        if (mSubControllers.size() == 0) {
-            mObjectFLED.reset();
-            mNeedsInit = false;
-            return;
-        }
-
-        // Build pin list from current sub-controllers
-        fl::vector<uint8_t> pinList;
-        pinList.reserve(mSubControllers.size());
-        for (const auto& pair : mSubControllers) {
-            pinList.push_back(static_cast<uint8_t>(pair.first));
-        }
-
-        // Allocate based on max LED count (shorter strips will be padded during rendering)
-        int totalLeds = mMaxLedCount * static_cast<int>(mSubControllers.size());
-
-        // Determine if any strip uses RGBW
-        bool hasRgbw = false;
-        for (const auto& pair : mSubControllers) {
-            if (pair.second.settings.rgbw.active()) {
-                hasRgbw = true;
-                break;
-            }
-        }
-
-        // Create new ObjectFLED instance
-        mObjectFLED.reset(new ObjectFLED(
-            totalLeds,
-            nullptr,  // ObjectFLED allocates frameBuffer internally
-            hasRgbw ? CORDER_RGBW : CORDER_RGB,
-            static_cast<uint8_t>(pinList.size()),
-            pinList.data(),
-            0  // No serpentine
-        ));
-
-        // Get timing (custom or from chipset traits)
-        uint16_t period_ns, t0h_ns, t1h_ns, reset_us;
-
-        if (mHasCustomTiming) {
-            // Use custom timing
-            period_ns = mCustomTiming.period_ns;
-            t0h_ns = mCustomTiming.t0h_ns;
-            t1h_ns = mCustomTiming.t1h_ns;
-            reset_us = mCustomTiming.reset_us;
-        } else {
-            // Get timing from chipset traits
-            ChipsetTiming timing = ChipsetTraits<Timing>::runtime_timing();
-
-            // Convert FastLED timing (T1, T2, T3) to ObjectFLED format (period, t0h, t1h)
-            // FastLED: T1=high for '1', T2=high for '0', T3=total period
-            // ObjectFLED: period=total, t0h=high for '0', t1h=high for '1'
-            period_ns = static_cast<uint16_t>(timing.T1 + timing.T2 + timing.T3);
-            t0h_ns = static_cast<uint16_t>(timing.T2);  // High time for '0'
-            t1h_ns = static_cast<uint16_t>(timing.T1);  // High time for '1'
-            reset_us = static_cast<uint16_t>(timing.RESET);
-        }
-
-        // Validate timing
-        if (period_ns < 800 || period_ns > 5000) {
-            FL_WARN("BulkClockless<OFLED>: Unusual period: " << period_ns << "ns");
-        }
-
-        // Initialize with timing
-        mObjectFLED->begin(period_ns, t0h_ns, t1h_ns, reset_us);
-
-        mNeedsInit = false;
-    }
+    void rebuildObjectFLED();
 
     /// Render all strips to ObjectFLED's frameBuffer
-    void renderAllStrips() {
-        if (!mObjectFLED) return;
-
-        // Get ObjectFLED's internal frameBuffer
-        uint8_t* frameBuffer = mObjectFLED->frameBufferLocal;
-        if (!frameBuffer) return;
-
-        // Determine bytes per LED (3 for RGB, 4 for RGBW)
-        bool hasRgbw = false;
-        for (const auto& pair : mSubControllers) {
-            if (pair.second.settings.rgbw.active()) {
-                hasRgbw = true;
-                break;
-            }
-        }
-        int bytesPerLed = hasRgbw ? 4 : 3;
-
-        // Render each strip to its section of frameBuffer
-        // Each strip gets mMaxLedCount bytes, shorter strips are padded with black
-        int pinIndex = 0;
-        for (auto& pair : mSubControllers) {
-            BulkStrip& strip = pair.second;
-            uint8_t* dest = frameBuffer + (pinIndex * mMaxLedCount * bytesPerLed);
-            renderStrip(pinIndex, strip, dest, bytesPerLed);
-            pinIndex++;
-        }
-    }
+    void renderAllStrips();
 
     /// Render a single strip using PixelIterator, padding shorter strips with black
     /// @param pinIndex Index of this strip (for offset calculation)
     /// @param strip BulkStrip to render
     /// @param dest Destination buffer (section of frameBuffer)
     /// @param bytesPerLed Bytes per LED (3 for RGB, 4 for RGBW)
-    void renderStrip(int pinIndex, BulkStrip& strip, uint8_t* dest, int bytesPerLed) {
-        // Compute color adjustment for this strip (brightness + correction + temperature)
-        ColorAdjustment adj = BulkClocklessHelper::computeAdjustment(
-            this->getBrightness(), strip.settings);
-
-        // Create pixel controller with per-strip settings
-        PixelController<RGB, 1, ALL_LANES_MASK> pixels(
-            strip.getBuffer(),
-            strip.getCount(),
-            adj,
-            strip.settings.ditherMode,
-            strip.settings.rgbw
-        );
-
-        // Check if RGBW mode is active
-        bool isRgbw = strip.settings.rgbw.active();
-
-        int pixelsRendered = 0;
-
-        // Render actual pixels from the strip buffer
-        if (isRgbw) {
-            // RGBW mode - output 4 bytes per pixel
-            while (pixels.has(1)) {
-                uint8_t r, g, b, w;
-                pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-                *dest++ = r;
-                *dest++ = g;
-                *dest++ = b;
-                *dest++ = w;
-                pixels.advanceData();
-                pixels.stepDithering();
-                pixelsRendered++;
-            }
-        } else {
-            // RGB mode - output 3 bytes per pixel
-            while (pixels.has(1)) {
-                *dest++ = pixels.loadAndScale0();  // R
-                *dest++ = pixels.loadAndScale1();  // G
-                *dest++ = pixels.loadAndScale2();  // B
-                pixels.advanceData();
-                pixels.stepDithering();
-                pixelsRendered++;
-            }
-        }
-
-        // Pad remaining space with black (for strips shorter than mMaxLedCount)
-        // This avoids needing a full RectangularDrawBuffer and saves memory
-        int pixelsToPad = mMaxLedCount - pixelsRendered;
-        for (int i = 0; i < pixelsToPad; i++) {
-            for (int j = 0; j < bytesPerLed; j++) {
-                *dest++ = 0;  // Black padding
-            }
-        }
-    }
+    void renderStrip(int pinIndex, BulkStrip& strip, uint8_t* dest, int bytesPerLed);
 
     // Member variables
     fl_map<int, BulkStrip> mSubControllers;  ///< Map of pin → BulkStrip
@@ -588,15 +275,6 @@ class BulkClockless<CHIPSET, OFLED>
     bool mNeedsInit;                         ///< Needs initialization flag
     PixelControllerSettings mDefaultSettings; ///< Default settings for new strips
 
-    /// Custom timing parameters (used when mHasCustomTiming is true)
-    struct CustomTimingParams {
-        uint16_t period_ns;   ///< Total bit period in nanoseconds
-        uint16_t t0h_ns;      ///< High time for '0' bit
-        uint16_t t1h_ns;      ///< High time for '1' bit
-        uint16_t reset_us;    ///< Reset/latch time in microseconds
-    };
-    CustomTimingParams mCustomTiming;  ///< Custom timing parameters
-    bool mHasCustomTiming;             ///< Whether custom timing is set
 };
 
 } // namespace fl
