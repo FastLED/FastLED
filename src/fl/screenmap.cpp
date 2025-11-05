@@ -469,7 +469,7 @@ void ScreenMap::addOffset(const vec2f &p) {
     }
 }
 
-void ScreenMap::addOffsetX(float x) { addOffset({x, 0}); }
-void ScreenMap::addOffsetY(float y) { addOffset({0, y}); }
+ScreenMap& ScreenMap::addOffsetX(float x) { addOffset({x, 0}); return *this; }
+ScreenMap& ScreenMap::addOffsetY(float y) { addOffset({0, y}); return *this; }
 
 } // namespace fl

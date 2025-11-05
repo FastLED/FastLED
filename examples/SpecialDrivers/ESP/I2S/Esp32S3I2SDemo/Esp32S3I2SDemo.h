@@ -1,28 +1,36 @@
 
 #ifdef ESP32
 
-/// The Yves ESP32_S3 I2S driver is a driver that uses the I2S peripheral on the ESP32-S3 to drive leds.
-/// Originally from: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
+/// ESP32-S3 I2S Bulk LED Controller Demo
 ///
+/// This example demonstrates the BulkClockless API for managing multiple LED strips
+/// using the I2S peripheral on ESP32/ESP32-S3 for parallel output.
 ///
-/// This is an advanced driver. It has certain ramifications.
-///   - Once flashed, the ESP32-S3 might NOT want to be reprogrammed again. To get around
-///     this hold the reset button and release when the flash tool is looking for an
-///     an upload port.
-///   - Put a delay in the setup function. This is to make it easier to flash the device during developement.
-///   - Serial output will mess up the DMA controller. I'm not sure why this is happening
-///     but just be aware of it. If your device suddenly stops working, remove the printfs and see if that fixes the problem.
+/// Originally based on Yves' I2S driver: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
 ///
-/// Is RGBW supported? Yes.
+/// Key Features:
+/// - Uses the new BulkClockless API with I2S peripheral
+/// - Manages 16 LED strips sharing a single I2S controller
+/// - Each strip can have individual color correction, temperature, dither, and RGBW settings
+/// - ScreenMap integration for spatial positioning
 ///
-/// Is Overclocking supported? Yes. Use this to bend the timeings to support other WS281X variants. Fun fact, just overclock the
-/// chipset until the LED starts working.
+/// What's Changed (New API):
+/// - Instead of 16 separate FastLED.addLeds() calls, uses single FastLED.addBulkLeds<WS2812_CHIPSET, I2S>()
+/// - Individual strip buffers instead of one large contiguous buffer
+/// - Per-strip settings via get(pin)->setCorrection(), etc.
+/// - Spatial positioning via ScreenMap for each strip
 ///
-/// What about the new WS2812-5VB leds? Yes, they have 250us timing.
+/// Hardware Notes:
+/// - This is an advanced driver with certain ramifications:
+///   - Once flashed, the ESP32-S3 might NOT want to be reprogrammed. Hold reset button during flash.
+///   - Put a delay in setup() to make flashing easier during development.
+///   - Serial output can interfere with DMA controller. Remove printfs if device stops working.
 ///
-/// Why use this?
-/// Raw YVes driver needs a perfect parallel rectacngle buffer for operation. In this code we've provided FastLED
-/// type bindings.
+/// Supported Features:
+/// - RGBW: Yes (via setRgbw())
+/// - Overclocking: Yes (to support WS281X variants and new WS2812-5VB with 250us timing)
+/// - Per-strip color correction and temperature
+/// - Dynamic add/remove of strips (NOT during show())
 ///
 // ArduinoIDE
 //  Should already be enabled.
@@ -42,7 +50,9 @@
 
 #include "FastLED.h"
 #include "fl/assert.h"
+#include "fl/screenmap.h"
 
+using namespace fl;
 
 #define NUMSTRIPS 16
 #define NUM_LEDS_PER_STRIP 256
@@ -90,59 +100,130 @@ int PINS[] = {
     EXAMPLE_PIN_NUM_DATA15
 };
 
-CRGB leds[NUM_LEDS];
+// Individual LED buffers for each strip
+CRGB strip0[NUM_LEDS_PER_STRIP];
+CRGB strip1[NUM_LEDS_PER_STRIP];
+CRGB strip2[NUM_LEDS_PER_STRIP];
+CRGB strip3[NUM_LEDS_PER_STRIP];
+CRGB strip4[NUM_LEDS_PER_STRIP];
+CRGB strip5[NUM_LEDS_PER_STRIP];
+CRGB strip6[NUM_LEDS_PER_STRIP];
+CRGB strip7[NUM_LEDS_PER_STRIP];
+CRGB strip8[NUM_LEDS_PER_STRIP];
+CRGB strip9[NUM_LEDS_PER_STRIP];
+CRGB strip10[NUM_LEDS_PER_STRIP];
+CRGB strip11[NUM_LEDS_PER_STRIP];
+CRGB strip12[NUM_LEDS_PER_STRIP];
+CRGB strip13[NUM_LEDS_PER_STRIP];
+CRGB strip14[NUM_LEDS_PER_STRIP];
+CRGB strip15[NUM_LEDS_PER_STRIP];
+
+// Bulk controller reference
+BulkClockless<WS2812_CHIPSET, I2S>* i2s_bulk = nullptr;
 
 void setup_i2s() {
-    // Note, in this case we are using contingious memory for the leds. But this is not required.
-    // Each strip can be a different size and the FastLED api will upscale the smaller strips to the largest strip.
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA0, GRB>(
-        leds + (0 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA1, GRB>(
-        leds + (1 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA2, GRB>(
-        leds + (2 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA3, GRB>(
-        leds + (3 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA4, GRB>(
-        leds + (4 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA5, GRB>(
-        leds + (5 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA6, GRB>(
-        leds + (6 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA7, GRB>(
-        leds + (7 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA8, GRB>(
-        leds + (8 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA9, GRB>(
-        leds + (9 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA10, GRB>(
-        leds + (10 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA11, GRB>(
-        leds + (11 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA12, GRB>(
-        leds + (12 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA13, GRB>(
-        leds + (13 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA14, GRB>(
-        leds + (14 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
-    FastLED.addLeds<WS2812, EXAMPLE_PIN_NUM_DATA15, GRB>(
-        leds + (15 * NUM_LEDS_PER_STRIP), NUM_LEDS_PER_STRIP
-    );
+    // I2S bulk controller: All strips share the I2S peripheral
+    // On ESP32/S3: Uses I2S peripheral for parallel output
+    // On other platforms: Uses CPU fallback (warning will be printed)
+
+    // Create screen maps for each strip's spatial position
+    // Arranging strips in a 4x4 grid layout
+    ScreenMap map0 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map0.addOffsetX(0.0f).addOffsetY(0.0f);
+
+    ScreenMap map1 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map1.addOffsetX(100.0f).addOffsetY(0.0f);
+
+    ScreenMap map2 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map2.addOffsetX(200.0f).addOffsetY(0.0f);
+
+    ScreenMap map3 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map3.addOffsetX(300.0f).addOffsetY(0.0f);
+
+    ScreenMap map4 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map4.addOffsetX(0.0f).addOffsetY(50.0f);
+
+    ScreenMap map5 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map5.addOffsetX(100.0f).addOffsetY(50.0f);
+
+    ScreenMap map6 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map6.addOffsetX(200.0f).addOffsetY(50.0f);
+
+    ScreenMap map7 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map7.addOffsetX(300.0f).addOffsetY(50.0f);
+
+    ScreenMap map8 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map8.addOffsetX(0.0f).addOffsetY(100.0f);
+
+    ScreenMap map9 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map9.addOffsetX(100.0f).addOffsetY(100.0f);
+
+    ScreenMap map10 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map10.addOffsetX(200.0f).addOffsetY(100.0f);
+
+    ScreenMap map11 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map11.addOffsetX(300.0f).addOffsetY(100.0f);
+
+    ScreenMap map12 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map12.addOffsetX(0.0f).addOffsetY(150.0f);
+
+    ScreenMap map13 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map13.addOffsetX(100.0f).addOffsetY(150.0f);
+
+    ScreenMap map14 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map14.addOffsetX(200.0f).addOffsetY(150.0f);
+
+    ScreenMap map15 = ScreenMap::DefaultStrip(NUM_LEDS_PER_STRIP, 1.0f, 0.4f);
+    map15.addOffsetX(300.0f).addOffsetY(150.0f);
+
+    // Create bulk controller with all 16 strips
+    // Initializer format: {pin, buffer_ptr, num_leds, screenMap}
+    auto& i2s_ref = FastLED.addBulkLeds<WS2812_CHIPSET, I2S>({
+        {EXAMPLE_PIN_NUM_DATA0, strip0, NUM_LEDS_PER_STRIP, map0},
+        {EXAMPLE_PIN_NUM_DATA1, strip1, NUM_LEDS_PER_STRIP, map1},
+        {EXAMPLE_PIN_NUM_DATA2, strip2, NUM_LEDS_PER_STRIP, map2},
+        {EXAMPLE_PIN_NUM_DATA3, strip3, NUM_LEDS_PER_STRIP, map3},
+        {EXAMPLE_PIN_NUM_DATA4, strip4, NUM_LEDS_PER_STRIP, map4},
+        {EXAMPLE_PIN_NUM_DATA5, strip5, NUM_LEDS_PER_STRIP, map5},
+        {EXAMPLE_PIN_NUM_DATA6, strip6, NUM_LEDS_PER_STRIP, map6},
+        {EXAMPLE_PIN_NUM_DATA7, strip7, NUM_LEDS_PER_STRIP, map7},
+        {EXAMPLE_PIN_NUM_DATA8, strip8, NUM_LEDS_PER_STRIP, map8},
+        {EXAMPLE_PIN_NUM_DATA9, strip9, NUM_LEDS_PER_STRIP, map9},
+        {EXAMPLE_PIN_NUM_DATA10, strip10, NUM_LEDS_PER_STRIP, map10},
+        {EXAMPLE_PIN_NUM_DATA11, strip11, NUM_LEDS_PER_STRIP, map11},
+        {EXAMPLE_PIN_NUM_DATA12, strip12, NUM_LEDS_PER_STRIP, map12},
+        {EXAMPLE_PIN_NUM_DATA13, strip13, NUM_LEDS_PER_STRIP, map13},
+        {EXAMPLE_PIN_NUM_DATA14, strip14, NUM_LEDS_PER_STRIP, map14},
+        {EXAMPLE_PIN_NUM_DATA15, strip15, NUM_LEDS_PER_STRIP, map15}
+    });
+
+    // Set global settings for all strips
+    i2s_ref.setCorrection(UncorrectedColor)
+           .setTemperature(UncorrectedTemperature)
+           .setDither(BINARY_DITHER);
+
+    i2s_bulk = &i2s_ref;
+
+    // Example: Configure individual strips with different settings
+    // Uncomment to see per-strip settings in action:
+    /*
+    auto* strip_0 = i2s_bulk->get(EXAMPLE_PIN_NUM_DATA0);
+    if (strip_0) {
+        strip_0->setCorrection(TypicalLEDStrip)
+               .setTemperature(Tungsten100W)
+               .setDither(BINARY_DITHER);
+    }
+
+    auto* strip_1 = i2s_bulk->get(EXAMPLE_PIN_NUM_DATA1);
+    if (strip_1) {
+        strip_1->setCorrection(TypicalSMD5050)
+               .setTemperature(Candle)
+               .setDither(DISABLE_DITHER)
+               .setRgbw(Rgbw(6000, kRGBWExactColors, W3));  // RGBW mode
+    }
+    */
+
+    FL_WARN("I2S bulk controller initialized with " << i2s_bulk->stripCount() << " strips");
 }
 
 
@@ -165,21 +246,28 @@ void setup() {
    
 }
 
-void fill_rainbow(CRGB* all_leds) {
+void fill_rainbow_strips() {
     static int s_offset = 0;
+
+    // Array of pointers to all strip buffers
+    CRGB* strips[] = {
+        strip0, strip1, strip2, strip3, strip4, strip5, strip6, strip7,
+        strip8, strip9, strip10, strip11, strip12, strip13, strip14, strip15
+    };
+
+    // Fill each strip with rainbow pattern
     for (int j = 0; j < NUMSTRIPS; j++) {
         for (int i = 0; i < NUM_LEDS_PER_STRIP; i++) {
-            int idx = (i + s_offset) % NUM_LEDS_PER_STRIP + NUM_LEDS_PER_STRIP * j;
-            all_leds[idx] = CHSV(i, 255, 255);
+            int idx = (i + s_offset) % NUM_LEDS_PER_STRIP;
+            strips[j][i] = CHSV(idx, 255, 255);
         }
     }
     s_offset++;
 }
 
 void loop() {
-    fill_rainbow(leds);
+    fill_rainbow_strips();
     FastLED.show();
-    
 }
 
 #else  // ESP32

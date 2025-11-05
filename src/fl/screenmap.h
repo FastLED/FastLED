@@ -67,8 +67,8 @@ class ScreenMap {
     void set(u16 index, const vec2f &p);
 
     void addOffset(const vec2f &p);
-    void addOffsetX(float x);
-    void addOffsetY(float y);
+    ScreenMap& addOffsetX(float x);
+    ScreenMap& addOffsetY(float y);
 
     vec2f &operator[](u32 x);
 
