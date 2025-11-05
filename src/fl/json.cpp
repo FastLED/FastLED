@@ -9,18 +9,9 @@
 #include "fl/compiler_control.h"
 #include "fl/thread_local.h"
 
-// Define INT16_MIN, INT16_MAX, and UINT8_MAX if not already defined
-#ifndef INT16_MIN
-#define INT16_MIN (-32768)
-#endif
-
-#ifndef INT16_MAX
-#define INT16_MAX 32767
-#endif
-
-#ifndef UINT8_MAX
-#define UINT8_MAX 255
-#endif
+// INT16_MIN, INT16_MAX, and UINT8_MAX should come from the platform's
+// <stdint.h> or <cstdint> headers (via fl/stdint.h).
+// FastLED no longer defines these macros to avoid conflicts with system headers.
 
 
 #if FASTLED_ENABLE_JSON

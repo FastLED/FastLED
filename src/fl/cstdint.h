@@ -56,42 +56,7 @@ typedef uptr uintptr_t;
 typedef iptr intptr_t;
 
 // stdint.h limit macros
-// Guard against redefinition if system headers already defined them
-#ifndef INT8_MIN
-#define INT8_MIN   (-128)
-#endif
-#ifndef INT16_MIN
-#define INT16_MIN  (-32767-1)
-#endif
-#ifndef INT32_MIN
-#define INT32_MIN  (-2147483647-1)
-#endif
-#ifndef INT64_MIN
-#define INT64_MIN  (-9223372036854775807LL-1)
-#endif
-
-#ifndef INT8_MAX
-#define INT8_MAX   127
-#endif
-#ifndef INT16_MAX
-#define INT16_MAX  32767
-#endif
-#ifndef INT32_MAX
-#define INT32_MAX  2147483647
-#endif
-#ifndef INT64_MAX
-#define INT64_MAX  9223372036854775807LL
-#endif
-
-#ifndef UINT8_MAX
-#define UINT8_MAX  0xFF
-#endif
-#ifndef UINT16_MAX
-#define UINT16_MAX 0xFFFF
-#endif
-#ifndef UINT32_MAX
-#define UINT32_MAX 0xFFFFFFFFU
-#endif
-#ifndef UINT64_MAX
-#define UINT64_MAX 0xFFFFFFFFFFFFFFFFULL
-#endif
+// Include the platform's <stdint.h> to get standard limit macros like INT32_MAX, UINT64_MAX, etc.
+// We include this at the END of the file after defining our types to avoid typedef conflicts.
+// The macros don't conflict and we need them for bounds checking in various parts of the codebase.
+#include <stdint.h>  // For INT8_MAX, UINT64_MAX, etc.
