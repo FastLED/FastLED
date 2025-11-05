@@ -16,13 +16,13 @@
 //   - GPIO 2 for RMT
 //
 // Platform Support:
-// - LCD_I80: ESP32-S3, ESP32-P4 (CPU fallback on other platforms)
-// - RMT: ESP32, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2 (CPU fallback on other platforms)
-// - I2S: ESP32, ESP32-S3 (CPU fallback on other platforms)
+// - LCD_I80: ESP32-S3, ESP32-P4
+// - RMT: ESP32, ESP32-S3, ESP32-C3, ESP32-C6, ESP32-H2
+// - I2S: ESP32, ESP32-S3
 //
-// NOTE: With CPU fallback, this example compiles on ALL platforms.
-// On platforms without hardware peripheral support, the code runs with a warning
-// but LED output will not work (CPU fallback is not yet fully implemented).
+// @filter: (mem is high)
+
+
 
 // @filter: (memory is high)
 
