@@ -3,6 +3,17 @@
 
 FastLED 3.10.5 (unreleased)
 ==============
+  * **NEW: Native RGBW Support Without Emulation**: The following platforms now support true RGBW LED strips (SK6812, etc.) with hardware-native 4-channel output:
+    * **RP2040/RP2350 (Raspberry Pi Pico)**: Full RGBW support with parallel output driver
+      * Supports mixed RGB/RGBW strips in same parallel group
+      * Automatic white channel handling via `setRgbw(RgbwDefault())`
+      * Works with automatic parallel grouping (2/4/8-lane output)
+      * See commit e2fc7f6 and [src/platforms/arm/rp/rpcommon/PARALLEL.md](src/platforms/arm/rp/rpcommon/PARALLEL.md)
+    * **STM32**: Native RGBW output on STM32 ARM platform
+      * Hardware-timed 4-channel output for SK6812 and similar RGBW chipsets
+      * No software emulation overhead
+      * See commit 2293b52 and [src/platforms/arm/stm32/README.md](src/platforms/arm/stm32/README.md)
+    * **Note**: Previous RGBW support via software emulation (ESP32, Teensy ObjectFLED) remains available
   * **NEW: HD108/NS108 16-bit SPI Chipset Support**: High-definition LED chipset with built-in gamma correction
     * 16-bit color depth (65,536 levels per channel) vs APA102's 8-bit (256 levels)
     * Automatic gamma correction (gamma 2.8) provides smooth perceptual brightness transitions
