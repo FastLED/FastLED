@@ -79,7 +79,7 @@ jobs:
           echo "registry_sam_3x8e=$(echo -n 'niteris/fastled-compiler-sam-3x8e' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
 
   # ============================================================================
-  # PLATFORM IMAGES BUILD
+  # WAIT FOR BASE IMAGE
   # ============================================================================
   wait-for-base:
     if: github.event.inputs.skip_platforms != 'true'
@@ -94,77 +94,18 @@ jobs:
           echo "Waiting ${delay_minutes} minutes for base image to settle in registry..."
           sleep $((${delay_minutes} * 60))
 
-  build-platforms:
-    name: 🔨 fastled-compiler-${{ matrix.group.name }}
+  # ============================================================================
+  # BUILD JOBS - Each platform builds independently (amd64 + arm64)
+  # ============================================================================
+
+  # AVR Platform
+  build-avr:
+    name: 🔨 fastled-compiler-avr [${{ matrix.arch.platform }}]
     if: github.event.inputs.skip_platforms != 'true'
     needs: [credentials, wait-for-base]
     strategy:
       fail-fast: false
       matrix:
-        group:
-          - name: avr
-            platforms: uno,attiny85,attiny88,attiny1616,attiny4313,yun-32u4
-            registry: registry_avr
-          # ESP32 platforms - individual images per board (flat structure)
-          - name: esp-32dev
-            platforms: esp32dev
-            registry: registry_esp_32dev
-          - name: esp-32s2
-            platforms: esp32s2
-            registry: registry_esp_32s2
-          - name: esp-32s3
-            platforms: esp32s3
-            registry: registry_esp_32s3
-          - name: esp-8266
-            platforms: esp8266
-            registry: registry_esp_8266
-          - name: esp-32c2
-            platforms: esp32c2
-            registry: registry_esp_32c2
-          - name: esp-32c3
-            platforms: esp32c3
-            registry: registry_esp_32c3
-          - name: esp-32c5
-            platforms: esp32c5
-            registry: registry_esp_32c5
-          - name: esp-32c6
-            platforms: esp32c6
-            registry: registry_esp_32c6
-          - name: esp-32h2
-            platforms: esp32h2
-            registry: registry_esp_32h2
-          - name: esp-32p4
-            platforms: esp32p4
-            registry: registry_esp_32p4
-          - name: teensy
-            platforms: teensy30,teensy31,teensy40,teensy41,teensyLC
-            registry: registry_teensy
-          # STM32 platforms - individual images per board (flat structure)
-          - name: stm32-f103c8
-            platforms: stm32f103c8_bluepill
-            registry: registry_stm32_f103c8
-          - name: stm32-f411ce
-            platforms: stm32f411ce_blackpill
-            registry: registry_stm32_f411ce
-          - name: stm32-f103cb
-            platforms: stm32f103cb_maplemini
-            registry: registry_stm32_f103cb
-          - name: stm32-f103tb
-            platforms: stm32f103tb_tinystm
-            registry: registry_stm32_f103tb
-          - name: stm32-h747xi
-            platforms: stm32h747xi_giga
-            registry: registry_stm32_h747xi
-          - name: rp
-            platforms: rp2040,rp2350,rp2350B
-            registry: registry_rp
-          - name: nrf52
-            platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense
-            registry: registry_nrf52
-          # SAM platforms - individual images per board (flat structure)
-          - name: sam-3x8e
-            platforms: sam3x8e_due
-            registry: registry_sam_3x8e
         arch:
           - runs_on: ubuntu-24.04
             platform: linux/amd64
@@ -175,104 +116,755 @@ jobs:
       runs_on: ${{ matrix.arch.runs_on }}
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
-      group: ${{ matrix.group.name }}
-      platforms: ${{ matrix.group.platforms }}
+      group: avr
+      platforms: uno,attiny85,attiny88,attiny1616,attiny4313,yun-32u4
       tag: latest
     secrets:
       env_vars: |
         docker_username=${{ needs.credentials.outputs.docker_username }}
         docker_password=${{ needs.credentials.outputs.docker_password }}
-        docker_registry_image=${{ needs.credentials.outputs[matrix.group.registry] }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_avr }}
 
-  merge-platforms:
+  # ESP32 Platforms - Individual images per board (flat structure)
+  build-esp-32dev:
+    name: 🔨 fastled-compiler-esp-32dev [${{ matrix.arch.platform }}]
     if: github.event.inputs.skip_platforms != 'true'
-    runs-on: ubuntu-24.04
-    needs: build-platforms
+    needs: [credentials, wait-for-base]
     strategy:
+      fail-fast: false
       matrix:
-        group:
-          - name: avr
-            registry: niteris/fastled-compiler-avr
-          # ESP32 platforms - individual images per board (flat structure)
-          - name: esp-32dev
-            registry: niteris/fastled-compiler-esp-32dev
-          - name: esp-32s2
-            registry: niteris/fastled-compiler-esp-32s2
-          - name: esp-32s3
-            registry: niteris/fastled-compiler-esp-32s3
-          - name: esp-8266
-            registry: niteris/fastled-compiler-esp-8266
-          - name: esp-32c2
-            registry: niteris/fastled-compiler-esp-32c2
-          - name: esp-32c3
-            registry: niteris/fastled-compiler-esp-32c3
-          - name: esp-32c5
-            registry: niteris/fastled-compiler-esp-32c5
-          - name: esp-32c6
-            registry: niteris/fastled-compiler-esp-32c6
-          - name: esp-32h2
-            registry: niteris/fastled-compiler-esp-32h2
-          - name: esp-32p4
-            registry: niteris/fastled-compiler-esp-32p4
-          - name: teensy
-            registry: niteris/fastled-compiler-teensy
-          # STM32 platforms - individual images per board (flat structure)
-          - name: stm32-f103c8
-            registry: niteris/fastled-compiler-stm32-f103c8
-          - name: stm32-f411ce
-            registry: niteris/fastled-compiler-stm32-f411ce
-          - name: stm32-f103cb
-            registry: niteris/fastled-compiler-stm32-f103cb
-          - name: stm32-f103tb
-            registry: niteris/fastled-compiler-stm32-f103tb
-          - name: stm32-h747xi
-            registry: niteris/fastled-compiler-stm32-h747xi
-          - name: rp
-            registry: niteris/fastled-compiler-rp
-          - name: nrf52
-            registry: niteris/fastled-compiler-nrf52
-          # SAM platforms - individual images per board (flat structure)
-          - name: sam-3x8e
-            registry: niteris/fastled-compiler-sam-3x8e
-    steps:
-      - name: Download digests
-        uses: actions/download-artifact@v4
-        with:
-          path: /tmp/digests
-          pattern: digests-${{ matrix.group.name }}-*
-          merge-multiple: true
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32dev
+      platforms: esp32dev
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32dev }}
 
-      - name: Verify digests were downloaded
-        run: |
-          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
-            echo "ERROR: No digests found! Build jobs likely failed."
-            exit 1
-          fi
-          echo "Found digests:"
-          ls -la /tmp/digests/
+  build-esp-32s2:
+    name: 🔨 fastled-compiler-esp-32s2 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32s2
+      platforms: esp32s2
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32s2 }}
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+  build-esp-32s3:
+    name: 🔨 fastled-compiler-esp-32s3 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32s3
+      platforms: esp32s3
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32s3 }}
 
-      - name: Docker meta
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ matrix.group.registry }}
-          tags: type=raw,value=latest
+  build-esp-8266:
+    name: 🔨 fastled-compiler-esp-8266 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-8266
+      platforms: esp8266
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_8266 }}
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: niteris
-          password: ${{ secrets.DOCKER_PASSWORD }}
+  build-esp-32c2:
+    name: 🔨 fastled-compiler-esp-32c2 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32c2
+      platforms: esp32c2
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32c2 }}
 
-      - name: Create manifest list and push
-        working-directory: /tmp/digests
-        run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ matrix.group.registry }}@sha256:%s ' *)
+  build-esp-32c3:
+    name: 🔨 fastled-compiler-esp-32c3 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32c3
+      platforms: esp32c3
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32c3 }}
 
-      - name: Inspect image
-        run: |
-          docker buildx imagetools inspect ${{ matrix.group.registry }}:latest
+  build-esp-32c5:
+    name: 🔨 fastled-compiler-esp-32c5 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32c5
+      platforms: esp32c5
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32c5 }}
+
+  build-esp-32c6:
+    name: 🔨 fastled-compiler-esp-32c6 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32c6
+      platforms: esp32c6
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32c6 }}
+
+  build-esp-32h2:
+    name: 🔨 fastled-compiler-esp-32h2 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32h2
+      platforms: esp32h2
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32h2 }}
+
+  build-esp-32p4:
+    name: 🔨 fastled-compiler-esp-32p4 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: esp-32p4
+      platforms: esp32p4
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_esp_32p4 }}
+
+  # Teensy Platform
+  build-teensy:
+    name: 🔨 fastled-compiler-teensy [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: teensy
+      platforms: teensy30,teensy31,teensy40,teensy41,teensyLC
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_teensy }}
+
+  # STM32 Platforms - Individual images per board (flat structure)
+  build-stm32-f103c8:
+    name: 🔨 fastled-compiler-stm32-f103c8 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: stm32-f103c8
+      platforms: stm32f103c8_bluepill
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32_f103c8 }}
+
+  build-stm32-f411ce:
+    name: 🔨 fastled-compiler-stm32-f411ce [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: stm32-f411ce
+      platforms: stm32f411ce_blackpill
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32_f411ce }}
+
+  build-stm32-f103cb:
+    name: 🔨 fastled-compiler-stm32-f103cb [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: stm32-f103cb
+      platforms: stm32f103cb_maplemini
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32_f103cb }}
+
+  build-stm32-f103tb:
+    name: 🔨 fastled-compiler-stm32-f103tb [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: stm32-f103tb
+      platforms: stm32f103tb_tinystm
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32_f103tb }}
+
+  build-stm32-h747xi:
+    name: 🔨 fastled-compiler-stm32-h747xi [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: stm32-h747xi
+      platforms: stm32h747xi_giga
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_stm32_h747xi }}
+
+  # RP Platform
+  build-rp:
+    name: 🔨 fastled-compiler-rp [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: rp
+      platforms: rp2040,rp2350,rp2350B
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_rp }}
+
+  # NRF52 Platform
+  build-nrf52:
+    name: 🔨 fastled-compiler-nrf52 [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: nrf52
+      platforms: nrf52840_dk,nrf52_xiaoblesense,adafruit_feather_nrf52840_sense,adafruit_xiaoblesense
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_nrf52 }}
+
+  # SAM Platform
+  build-sam-3x8e:
+    name: 🔨 fastled-compiler-sam-3x8e [${{ matrix.arch.platform }}]
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: [credentials, wait-for-base]
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.template
+      group: sam-3x8e
+      platforms: sam3x8e_due
+      tag: latest
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_sam_3x8e }}
+
+  # ============================================================================
+  # MERGE JOBS - Each platform merges independently as soon as its builds complete
+  # ============================================================================
+
+  merge-avr:
+    name: 📦 merge fastled-compiler-avr
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-avr
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: avr
+      registry: niteris/fastled-compiler-avr
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32dev:
+    name: 📦 merge fastled-compiler-esp-32dev
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32dev
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32dev
+      registry: niteris/fastled-compiler-esp-32dev
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32s2:
+    name: 📦 merge fastled-compiler-esp-32s2
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32s2
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32s2
+      registry: niteris/fastled-compiler-esp-32s2
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32s3:
+    name: 📦 merge fastled-compiler-esp-32s3
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32s3
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32s3
+      registry: niteris/fastled-compiler-esp-32s3
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-8266:
+    name: 📦 merge fastled-compiler-esp-8266
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-8266
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-8266
+      registry: niteris/fastled-compiler-esp-8266
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32c2:
+    name: 📦 merge fastled-compiler-esp-32c2
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32c2
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32c2
+      registry: niteris/fastled-compiler-esp-32c2
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32c3:
+    name: 📦 merge fastled-compiler-esp-32c3
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32c3
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32c3
+      registry: niteris/fastled-compiler-esp-32c3
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32c5:
+    name: 📦 merge fastled-compiler-esp-32c5
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32c5
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32c5
+      registry: niteris/fastled-compiler-esp-32c5
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32c6:
+    name: 📦 merge fastled-compiler-esp-32c6
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32c6
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32c6
+      registry: niteris/fastled-compiler-esp-32c6
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32h2:
+    name: 📦 merge fastled-compiler-esp-32h2
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32h2
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32h2
+      registry: niteris/fastled-compiler-esp-32h2
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-esp-32p4:
+    name: 📦 merge fastled-compiler-esp-32p4
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-esp-32p4
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: esp-32p4
+      registry: niteris/fastled-compiler-esp-32p4
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-teensy:
+    name: 📦 merge fastled-compiler-teensy
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-teensy
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: teensy
+      registry: niteris/fastled-compiler-teensy
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-stm32-f103c8:
+    name: 📦 merge fastled-compiler-stm32-f103c8
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-stm32-f103c8
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: stm32-f103c8
+      registry: niteris/fastled-compiler-stm32-f103c8
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-stm32-f411ce:
+    name: 📦 merge fastled-compiler-stm32-f411ce
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-stm32-f411ce
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: stm32-f411ce
+      registry: niteris/fastled-compiler-stm32-f411ce
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-stm32-f103cb:
+    name: 📦 merge fastled-compiler-stm32-f103cb
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-stm32-f103cb
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: stm32-f103cb
+      registry: niteris/fastled-compiler-stm32-f103cb
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-stm32-f103tb:
+    name: 📦 merge fastled-compiler-stm32-f103tb
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-stm32-f103tb
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: stm32-f103tb
+      registry: niteris/fastled-compiler-stm32-f103tb
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-stm32-h747xi:
+    name: 📦 merge fastled-compiler-stm32-h747xi
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-stm32-h747xi
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: stm32-h747xi
+      registry: niteris/fastled-compiler-stm32-h747xi
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-rp:
+    name: 📦 merge fastled-compiler-rp
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-rp
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: rp
+      registry: niteris/fastled-compiler-rp
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-nrf52:
+    name: 📦 merge fastled-compiler-nrf52
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-nrf52
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: nrf52
+      registry: niteris/fastled-compiler-nrf52
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
+
+  merge-sam-3x8e:
+    name: 📦 merge fastled-compiler-sam-3x8e
+    if: github.event.inputs.skip_platforms != 'true'
+    needs: build-sam-3x8e
+    uses: ./.github/workflows/docker_merge_platform.yml
+    with:
+      group_name: sam-3x8e
+      registry: niteris/fastled-compiler-sam-3x8e
+      tag: latest
+    secrets:
+      docker_password: ${{ secrets.DOCKER_PASSWORD }}
