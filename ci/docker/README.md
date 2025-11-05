@@ -521,7 +521,8 @@ bash compile teensy41 Blink --docker
 ```
 
 These images are:
-- **Multi-board**: Each image caches toolchains for ALL boards in its platform family
+- **Multi-board** (AVR, Teensy, etc.): Each image caches toolchains for ALL boards in its platform family
+- **Single-board** (ESP): Each ESP board has its own image to prevent build artifact accumulation
 - **Multi-arch**: Built for both linux/amd64 and linux/arm64
 - **Auto-updated**: Rebuilt daily at 2:00 AM UTC
 
@@ -530,8 +531,16 @@ These images are:
 | Platform | Docker Image | Cached Boards |
 |----------|--------------|---------------|
 | AVR | `niteris/fastled-compiler-avr:latest` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
-| ESP RISC-V | `niteris/fastled-compiler-esp-riscv:latest` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
-| ESP Xtensa | `niteris/fastled-compiler-esp-xtensa:latest` | esp32dev, esp32s2, esp32s3, esp8266 |
+| ESP32 (Original) | `niteris/fastled-compiler-esp-32dev:latest` | esp32dev |
+| ESP32-S2 | `niteris/fastled-compiler-esp-32s2:latest` | esp32s2 |
+| ESP32-S3 | `niteris/fastled-compiler-esp-32s3:latest` | esp32s3 |
+| ESP8266 | `niteris/fastled-compiler-esp-8266:latest` | esp8266 |
+| ESP32-C2 | `niteris/fastled-compiler-esp-32c2:latest` | esp32c2 |
+| ESP32-C3 | `niteris/fastled-compiler-esp-32c3:latest` | esp32c3 |
+| ESP32-C5 | `niteris/fastled-compiler-esp-32c5:latest` | esp32c5 |
+| ESP32-C6 | `niteris/fastled-compiler-esp-32c6:latest` | esp32c6 |
+| ESP32-H2 | `niteris/fastled-compiler-esp-32h2:latest` | esp32h2 |
+| ESP32-P4 | `niteris/fastled-compiler-esp-32p4:latest` | esp32p4 |
 | Teensy | `niteris/fastled-compiler-teensy:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
 | STM32 | `niteris/fastled-compiler-stm32:latest` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga |
 | RP | `niteris/fastled-compiler-rp:latest` | rp2040, rp2350 |
@@ -540,9 +549,11 @@ These images are:
 
 ### Key Features
 
-- **Multi-board caching**: Each platform image contains pre-cached toolchains for ALL boards in its family
-- **Instant compilation**: Any board in the family compiles immediately (zero downloads)
-- **Multi-architecture**: Supports both x86 and ARM hosts
+- **Flexible caching strategy**:
+  - Grouped platforms (AVR, Teensy, etc.): Multi-board images with shared toolchains
+  - Flat platforms (ESP): Single-board images to prevent build artifact accumulation
+- **Instant compilation**: Cached toolchains mean zero download time during compilation
+- **Multi-architecture**: Supports both x86 and ARM hosts (linux/amd64, linux/arm64)
 - **Daily updates**: Images rebuild nightly with latest FastLED release
 
 ### Example Usage

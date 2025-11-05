@@ -84,17 +84,19 @@ class DockerConfig:
     ) -> "DockerConfig":
         """Factory method to create config from board name.
 
-        Maps boards to their platform family Docker images and containers.
-        Each platform family (AVR, ESP, Teensy, etc.) has ONE Docker image that
-        contains pre-cached toolchains for ALL boards in that family.
+        Maps boards to their platform Docker images and containers.
+        Platform strategy varies:
+        - Grouped platforms (AVR, Teensy, etc.): ONE image contains ALL boards in that family
+        - Flat platforms (ESP): ONE image per board to prevent build artifact accumulation
 
         All platform images use the :latest tag since they contain all necessary
-        toolchains for all boards in the platform family.
+        toolchains for their boards.
 
         Examples (board -> image, container):
             uno -> niteris/fastled-compiler-avr:latest, container: fastled-compiler-avr
-            esp32s3 -> niteris/fastled-compiler-esp-xtensa:latest, container: fastled-compiler-esp-xtensa
-            esp32c3 -> niteris/fastled-compiler-esp-riscv:latest, container: fastled-compiler-esp-riscv
+            esp32s3 -> niteris/fastled-compiler-esp-32s3:latest, container: fastled-compiler-esp-32s3
+            esp32c3 -> niteris/fastled-compiler-esp-32c3:latest, container: fastled-compiler-esp-32c3
+            esp8266 -> niteris/fastled-compiler-esp-8266:latest, container: fastled-compiler-esp-8266
             teensy41 -> niteris/fastled-compiler-teensy:latest, container: fastled-compiler-teensy
         """
         from ci.docker.build_platforms import (
@@ -107,8 +109,9 @@ class DockerConfig:
             platform = get_platform_for_board(board_name)
 
             if platform:
-                # Get the platform family image name (e.g., niteris/fastled-compiler-esp-esp32dev)
-                # This returns the full image name with registry prefix and representative board
+                # Get the platform image name (e.g., niteris/fastled-compiler-avr, niteris/fastled-compiler-esp-32s3)
+                # For grouped platforms (avr, teensy): one image for multiple boards
+                # For flat platforms (esp-32s3, esp-8266): one image per board
                 platform_image = get_docker_image_name(platform)
                 # Keep the full registry prefix (niteris/) for Docker Hub compatibility
                 # Docker will automatically pull from the registry if image is not found locally
@@ -127,9 +130,9 @@ class DockerConfig:
             )
             image_name = f"niteris/fastled-compiler-{board_name}:latest"
 
-        # Container name uses platform-level naming (one container per platform family)
-        # e.g., fastled-compiler-avr, fastled-compiler-esp-xtensa, etc.
-        # This matches the Docker image strategy and allows sharing containers across boards
+        # Container name matches the platform naming
+        # Grouped platforms: one container for multiple boards (e.g., fastled-compiler-avr)
+        # Flat platforms: one container per board (e.g., fastled-compiler-esp-32s3)
         if platform:
             container_name = f"fastled-compiler-{platform}"
         else:

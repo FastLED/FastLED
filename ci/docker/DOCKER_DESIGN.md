@@ -11,8 +11,17 @@ This document describes the architecture and naming conventions for FastLED's pr
 ```
 niteris/fastled-compiler-base:latest
     ├── niteris/fastled-compiler-avr:latest
-    ├── niteris/fastled-compiler-esp-riscv:latest
-    ├── niteris/fastled-compiler-esp-xtensa:latest
+    ├── ESP32 Platforms (flat structure - one image per board):
+    │   ├── niteris/fastled-compiler-esp-32dev:latest
+    │   ├── niteris/fastled-compiler-esp-32s2:latest
+    │   ├── niteris/fastled-compiler-esp-32s3:latest
+    │   ├── niteris/fastled-compiler-esp-8266:latest
+    │   ├── niteris/fastled-compiler-esp-32c2:latest
+    │   ├── niteris/fastled-compiler-esp-32c3:latest
+    │   ├── niteris/fastled-compiler-esp-32c5:latest
+    │   ├── niteris/fastled-compiler-esp-32c6:latest
+    │   ├── niteris/fastled-compiler-esp-32h2:latest
+    │   └── niteris/fastled-compiler-esp-32p4:latest
     ├── niteris/fastled-compiler-teensy:latest
     ├── niteris/fastled-compiler-stm32:latest
     ├── niteris/fastled-compiler-rp:latest
@@ -44,13 +53,23 @@ niteris/fastled-compiler-base:latest
 - Pre-cached platform-specific toolchains for **ALL boards** in the platform family
 - Pre-warmed compilation cache for multiple boards
 
-**Build Strategy**: Each platform image is built with **multiple board compilations** to pre-cache all toolchains and dependencies for that platform family. For example:
-- `avr` image compiles: uno, attiny85, attiny88, nano_every, etc.
-- `esp` image compiles: esp32dev, esp32s3, esp32c3, etc.
-- `teensy` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
-- `sam` image compiles: sam3x8e_due
+**Build Strategy**: Varies by platform architecture:
 
-This ensures that any board in the platform family can compile instantly without downloading additional toolchains.
+**Grouped Platforms** (AVR, Teensy, STM32, RP, NRF52, SAM):
+- Each image compiles **multiple boards** to pre-cache all toolchains and dependencies
+- Examples:
+  - `avr` image compiles: uno, attiny85, attiny88, nano_every, etc.
+  - `teensy` image compiles: teensy30, teensy31, teensy40, teensy41, teensylc
+  - `sam` image compiles: sam3x8e_due
+
+**Flat Platforms** (ESP):
+- Each image compiles **a single board** to prevent build artifact accumulation
+- Examples:
+  - `esp-32s3` image compiles: esp32s3 only
+  - `esp-8266` image compiles: esp8266 only
+  - `esp-32c3` image compiles: esp32c3 only
+
+This ensures instant compilation without downloading additional toolchains, while preventing Docker image bloat for platforms prone to build artifact accumulation.
 
 **Build Schedule**: Daily at 3:00 AM UTC (1 hour after base)
 
@@ -60,67 +79,92 @@ This ensures that any board in the platform family can compile instantly without
 
 ### Platform Families
 
-Platform images are organized by **toolchain family**, not individual boards. Boards that share the same PlatformIO platform and have small toolchain overhead are grouped together.
+Platform images use two strategies:
 
-**Important**: Each platform image contains **pre-cached toolchains for ALL boards** in that family. All images use platform-only naming without board suffixes since they support all boards in the family.
+**Grouped Platforms**: Boards that share the same PlatformIO platform and have small toolchain overhead are grouped together.
 
-| Platform Family | Docker Image | Included Boards |
-|----------------|--------------|-----------------|
-| **avr** | `fastled-compiler-avr` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
-| **esp-riscv** | `fastled-compiler-esp-riscv` | esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4 |
-| **esp-xtensa** | `fastled-compiler-esp-xtensa` | esp32dev, esp32s2, esp32s3, esp8266 |
-| **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc |
-| **stm32** | `fastled-compiler-stm32` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga |
-| **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 |
-| **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
-| **sam** | `fastled-compiler-sam` | sam3x8e_due |
+**Flat Platforms**: ESP boards use individual images (one per board) to prevent build artifact accumulation issues.
+
+| Platform Family | Docker Image | Included Boards | Strategy |
+|----------------|--------------|-----------------|----------|
+| **avr** | `fastled-compiler-avr` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 | Grouped |
+| **esp-32dev** | `fastled-compiler-esp-32dev` | esp32dev | Flat |
+| **esp-32s2** | `fastled-compiler-esp-32s2` | esp32s2 | Flat |
+| **esp-32s3** | `fastled-compiler-esp-32s3` | esp32s3 | Flat |
+| **esp-8266** | `fastled-compiler-esp-8266` | esp8266 | Flat |
+| **esp-32c2** | `fastled-compiler-esp-32c2` | esp32c2 | Flat |
+| **esp-32c3** | `fastled-compiler-esp-32c3` | esp32c3 | Flat |
+| **esp-32c5** | `fastled-compiler-esp-32c5` | esp32c5 | Flat |
+| **esp-32c6** | `fastled-compiler-esp-32c6` | esp32c6 | Flat |
+| **esp-32h2** | `fastled-compiler-esp-32h2` | esp32h2 | Flat |
+| **esp-32p4** | `fastled-compiler-esp-32p4` | esp32p4 | Flat |
+| **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc | Grouped |
+| **stm32** | `fastled-compiler-stm32` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga | Grouped |
+| **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 | Grouped |
+| **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense | Grouped |
+| **sam** | `fastled-compiler-sam` | sam3x8e_due | Grouped |
 
 ### Platform Naming Convention
 
+**Grouped Platforms**:
 ```
 niteris/fastled-compiler-<platform-family>:<tag>
 ```
 
 **Examples**:
 - `niteris/fastled-compiler-avr:latest`
-- `niteris/fastled-compiler-esp-riscv:latest`
-- `niteris/fastled-compiler-esp-xtensa:latest`
 - `niteris/fastled-compiler-teensy:latest`
+- `niteris/fastled-compiler-stm32:latest`
+
+**Flat Platforms (ESP)**:
+```
+niteris/fastled-compiler-esp-<chip-model>:<tag>
+```
+
+**Examples**:
+- `niteris/fastled-compiler-esp-32s3:latest`
+- `niteris/fastled-compiler-esp-8266:latest`
+- `niteris/fastled-compiler-esp-32c3:latest`
 
 **Rationale**:
-- `<platform-family>`: Groups boards by shared toolchain (e.g., `avr`, `esp-riscv`, `esp-xtensa`, `teensy`)
+- Grouped platforms: `<platform-family>` groups boards by shared toolchain (e.g., `avr`, `teensy`)
+- Flat platforms: `esp-<chip-model>` provides one image per ESP board to prevent build artifact accumulation
 - `<tag>`: Version identifier (currently `:latest`)
-- No board suffix needed since each image contains toolchains for ALL boards in the family
-- ESP32 is split by architecture (RISC-V vs Xtensa) to reduce image size
+- ESP boards use flat structure due to large toolchain sizes and build artifact issues
 
 ## Special Cases
 
 ### ESP32 Platform
 
-**Architecture Split**: ESP32 family is split by CPU architecture due to large toolchain size:
+**Flat Structure**: ESP32 family uses individual images (one per board) to prevent build artifact accumulation:
 
-**RISC-V Image**: `niteris/fastled-compiler-esp-riscv:latest`
-- **Boards**: esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4
-- **Toolchain**: `toolchain-riscv32-esp` (RISC-V cross-compiler)
-- **Characteristics**: Modern ESP32 chips using open-source RISC-V architecture
+**Xtensa Architecture Boards** (4 images):
+- `niteris/fastled-compiler-esp-32dev:latest` - ESP32 (original)
+- `niteris/fastled-compiler-esp-32s2:latest` - ESP32-S2
+- `niteris/fastled-compiler-esp-32s3:latest` - ESP32-S3
+- `niteris/fastled-compiler-esp-8266:latest` - ESP8266
 
-**Xtensa Image**: `niteris/fastled-compiler-esp-xtensa:latest`
-- **Boards**: esp32dev (original ESP32), esp32s2, esp32s3, esp8266
-- **Toolchain**: `toolchain-xtensa-esp32` (Xtensa cross-compiler)
-- **Characteristics**: Classic ESP32 chips using Xtensa architecture
+**RISC-V Architecture Boards** (6 images):
+- `niteris/fastled-compiler-esp-32c2:latest` - ESP32-C2
+- `niteris/fastled-compiler-esp-32c3:latest` - ESP32-C3
+- `niteris/fastled-compiler-esp-32c5:latest` - ESP32-C5
+- `niteris/fastled-compiler-esp-32c6:latest` - ESP32-C6
+- `niteris/fastled-compiler-esp-32h2:latest` - ESP32-H2
+- `niteris/fastled-compiler-esp-32p4:latest` - ESP32-P4
 
 **Rationale**:
-- ESP32 toolchains are significantly larger than other platforms (esp. RISC-V + Xtensa combined)
-- Splitting by architecture reduces image size from ~3GB to ~1.5GB per image
-- Most users only need one architecture, so they only download the toolchain they need
-- Both images share the same IDF version from pioarduino for consistency
+- ESP32 toolchains are significantly larger than other platforms
+- Build artifacts accumulate rapidly in grouped images, causing build failures
+- Flat structure (one image per board) prevents artifact accumulation
+- Users only download the specific toolchain they need
+- Each board may use different IDF versions optimized for that chip
 
-**IDF Version Strategy**: Both images currently use `:latest` tag with current stable IDF from pioarduino. Future strategy (when needed):
+**IDF Version Strategy**: Each image uses `:latest` tag with the optimal IDF version for that board (typically from pioarduino). Future strategy (when needed):
 ```
-niteris/fastled-compiler-esp-riscv:latest     → Current stable (e.g., idf5.5)
-niteris/fastled-compiler-esp-riscv:idf5.5     → Explicit IDF 5.5
-niteris/fastled-compiler-esp-xtensa:latest    → Current stable (e.g., idf5.5)
-niteris/fastled-compiler-esp-xtensa:idf5.5    → Explicit IDF 5.5
+niteris/fastled-compiler-esp-32s3:latest    → Current stable (e.g., idf5.4)
+niteris/fastled-compiler-esp-32s3:idf5.4    → Explicit IDF 5.4
+niteris/fastled-compiler-esp-32dev:latest   → Current stable (e.g., idf5.3)
+niteris/fastled-compiler-esp-32dev:idf5.3   → Explicit IDF 5.3
 ```
 
 **Platform Sources**:
@@ -166,15 +210,24 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  ↓
                  (10 minute delay for registry propagation)
                  ↓
-2:10 AM UTC  →  Platform images build in parallel (each compiles multiple boards)
-                 ├── avr (builds: uno, atmega32u4_leonardo, attiny85, attiny88, nano_every, etc.)
-                 ├── esp-riscv (builds: esp32c2, esp32c3, esp32c5, esp32c6, esp32h2, esp32p4)
-                 ├── esp-xtensa (builds: esp32dev, esp32s2, esp32s3, esp8266)
-                 ├── teensy (builds: teensy30, teensy31, teensy40, teensy41, teensylc)
-                 ├── stm32 (builds: stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, etc.)
-                 ├── rp (builds: rp2040, rp2350)
-                 ├── nrf52 (builds: nrf52840_dk, adafruit boards, xiaoblesense)
-                 └── sam (builds: sam3x8e_due)
+2:10 AM UTC  →  Platform images build in parallel
+                 ├── avr (grouped: uno, atmega32u4_leonardo, attiny85, attiny88, nano_every, etc.)
+                 ├── ESP32 boards (flat - 10 individual images):
+                 │   ├── esp-32dev (builds: esp32dev only)
+                 │   ├── esp-32s2 (builds: esp32s2 only)
+                 │   ├── esp-32s3 (builds: esp32s3 only)
+                 │   ├── esp-8266 (builds: esp8266 only)
+                 │   ├── esp-32c2 (builds: esp32c2 only)
+                 │   ├── esp-32c3 (builds: esp32c3 only)
+                 │   ├── esp-32c5 (builds: esp32c5 only)
+                 │   ├── esp-32c6 (builds: esp32c6 only)
+                 │   ├── esp-32h2 (builds: esp32h2 only)
+                 │   └── esp-32p4 (builds: esp32p4 only)
+                 ├── teensy (grouped: teensy30, teensy31, teensy40, teensy41, teensylc)
+                 ├── stm32 (grouped: stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, etc.)
+                 ├── rp (grouped: rp2040, rp2350)
+                 ├── nrf52 (grouped: nrf52840_dk, adafruit boards, xiaoblesense)
+                 └── sam (grouped: sam3x8e_due)
 ```
 
 **Scheduling**:
@@ -198,9 +251,9 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
    - Runs daily at 2:00 AM UTC
    - Triggers platform builds after completion
 
-2. **`.github/workflows/docker_compiler_base_platforms.yml`**
+2. **`.github/workflows/docker_compiler_template.yml`**
    - Single unified workflow building ALL platform images in parallel
-   - Contains jobs for: avr, esp-riscv, esp-xtensa, teensy, stm32, rp2040, nrf52, sam
+   - Contains jobs for: avr, 10 ESP boards (flat), teensy, stm32, rp2040, nrf52, sam
    - Triggered by base workflow (with 10 min delay)
    - Can also run via manual dispatch or fallback cron
 
@@ -226,11 +279,9 @@ The single source of truth for platform→boards relationships. This module defi
 **Structure**:
 ```python
 DOCKER_PLATFORMS = {
+    # Grouped platforms (multi-board images)
     "avr": ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "attiny4313",
             "nano_every", "attiny1604", "attiny1616"],
-    "esp-riscv": ["esp32c2", "esp32c3", "esp32c5", "esp32c6",
-                  "esp32h2", "esp32p4"],
-    "esp-xtensa": ["esp32dev", "esp32s2", "esp32s3", "esp8266"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
     "stm32": ["stm32f103c8_bluepill", "stm32f411ce_blackpill", "stm32f103cb_maplemini",
               "stm32f103tb_tinystm", "stm32h747xi_giga"],
@@ -238,6 +289,18 @@ DOCKER_PLATFORMS = {
     "nrf52": ["nrf52840_dk", "adafruit_feather_nrf52840_sense",
               "xiaoblesense"],
     "sam": ["sam3x8e_due"],
+
+    # Flat platforms (single-board images) - ESP boards
+    "esp-32dev": ["esp32dev"],
+    "esp-32s2": ["esp32s2"],
+    "esp-32s3": ["esp32s3"],
+    "esp-8266": ["esp8266"],
+    "esp-32c2": ["esp32c2"],
+    "esp-32c3": ["esp32c3"],
+    "esp-32c5": ["esp32c5"],
+    "esp-32c6": ["esp32c6"],
+    "esp-32h2": ["esp32h2"],
+    "esp-32p4": ["esp32p4"],
 }
 
 # Reverse mapping automatically generated
@@ -251,11 +314,20 @@ BOARD_TO_PLATFORM = {
 **How It Works**:
 
 During Docker build (`ci/docker/build.sh`), the "compile" stage:
-1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "esp32c3")
-2. Looks up platform family: `BOARD_TO_PLATFORM["esp32c3"]` → `"esp-riscv"`
-3. Gets all boards for platform: `DOCKER_PLATFORMS["esp-riscv"]` → `["esp32c2", "esp32c3", "esp32c5", ...]`
-4. Loops through and compiles each board: `bash compile esp32c2 Blink`, `bash compile esp32c3 Blink`, etc.
+
+**Grouped Platforms** (e.g., AVR, Teensy):
+1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "uno")
+2. Looks up platform family: `BOARD_TO_PLATFORM["uno"]` → `"avr"`
+3. Gets all boards for platform: `DOCKER_PLATFORMS["avr"]` → `["uno", "atmega32u4_leonardo", ...]`
+4. Loops through and compiles each board: `bash compile uno Blink`, `bash compile attiny85 Blink`, etc.
 5. Result: All toolchains for the platform family are pre-cached in the image
+
+**Flat Platforms** (e.g., ESP):
+1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "esp32s3")
+2. Looks up platform: `BOARD_TO_PLATFORM["esp32s3"]` → `"esp-32s3"`
+3. Gets boards for platform: `DOCKER_PLATFORMS["esp-32s3"]` → `["esp32s3"]` (single board)
+4. Compiles the single board: `bash compile esp32s3 Blink`
+5. Result: Only the specific board's toolchain is cached, preventing artifact accumulation
 
 **Helper Functions**:
 - `get_platform_for_board(board_name)` - Returns platform family for a board

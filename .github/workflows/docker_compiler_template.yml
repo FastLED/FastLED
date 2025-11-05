@@ -29,8 +29,16 @@ jobs:
       docker_username: ${{ steps.credentials.outputs.docker_username }}
       docker_password: ${{ steps.credentials.outputs.docker_password }}
       registry_avr: ${{ steps.credentials.outputs.registry_avr }}
-      registry_esp_riscv: ${{ steps.credentials.outputs.registry_esp_riscv }}
-      registry_esp_xtensa: ${{ steps.credentials.outputs.registry_esp_xtensa }}
+      registry_esp_32dev: ${{ steps.credentials.outputs.registry_esp_32dev }}
+      registry_esp_32s2: ${{ steps.credentials.outputs.registry_esp_32s2 }}
+      registry_esp_32s3: ${{ steps.credentials.outputs.registry_esp_32s3 }}
+      registry_esp_8266: ${{ steps.credentials.outputs.registry_esp_8266 }}
+      registry_esp_32c2: ${{ steps.credentials.outputs.registry_esp_32c2 }}
+      registry_esp_32c3: ${{ steps.credentials.outputs.registry_esp_32c3 }}
+      registry_esp_32c5: ${{ steps.credentials.outputs.registry_esp_32c5 }}
+      registry_esp_32c6: ${{ steps.credentials.outputs.registry_esp_32c6 }}
+      registry_esp_32h2: ${{ steps.credentials.outputs.registry_esp_32h2 }}
+      registry_esp_32p4: ${{ steps.credentials.outputs.registry_esp_32p4 }}
       registry_teensy: ${{ steps.credentials.outputs.registry_teensy }}
       registry_stm32: ${{ steps.credentials.outputs.registry_stm32 }}
       registry_rp: ${{ steps.credentials.outputs.registry_rp }}
@@ -46,8 +54,16 @@ jobs:
           echo "docker_username=$(echo -n "niteris" | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_avr=$(echo -n 'niteris/fastled-compiler-avr' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp_riscv=$(echo -n 'niteris/fastled-compiler-esp-riscv' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
-          echo "registry_esp_xtensa=$(echo -n 'niteris/fastled-compiler-esp-xtensa' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32dev=$(echo -n 'niteris/fastled-compiler-esp-32dev' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32s2=$(echo -n 'niteris/fastled-compiler-esp-32s2' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32s3=$(echo -n 'niteris/fastled-compiler-esp-32s3' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_8266=$(echo -n 'niteris/fastled-compiler-esp-8266' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32c2=$(echo -n 'niteris/fastled-compiler-esp-32c2' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32c3=$(echo -n 'niteris/fastled-compiler-esp-32c3' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32c5=$(echo -n 'niteris/fastled-compiler-esp-32c5' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32c6=$(echo -n 'niteris/fastled-compiler-esp-32c6' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32h2=$(echo -n 'niteris/fastled-compiler-esp-32h2' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_esp_32p4=$(echo -n 'niteris/fastled-compiler-esp-32p4' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_teensy=$(echo -n 'niteris/fastled-compiler-teensy' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_stm32=$(echo -n 'niteris/fastled-compiler-stm32' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
           echo "registry_rp=$(echo -n 'niteris/fastled-compiler-rp' | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
@@ -81,12 +97,37 @@ jobs:
           - name: avr
             platforms: uno,attiny85,attiny88,attiny1616,attiny4313,yun-32u4
             registry: registry_avr
-          - name: esp-riscv
-            platforms: esp32c2,esp32c3,esp32c5,esp32c6,esp32h2,esp32p4
-            registry: registry_esp_riscv
-          - name: esp-xtensa
-            platforms: esp32dev,esp32s2,esp32s3,esp8266
-            registry: registry_esp_xtensa
+          # ESP32 platforms - individual images per board (flat structure)
+          - name: esp-32dev
+            platforms: esp32dev
+            registry: registry_esp_32dev
+          - name: esp-32s2
+            platforms: esp32s2
+            registry: registry_esp_32s2
+          - name: esp-32s3
+            platforms: esp32s3
+            registry: registry_esp_32s3
+          - name: esp-8266
+            platforms: esp8266
+            registry: registry_esp_8266
+          - name: esp-32c2
+            platforms: esp32c2
+            registry: registry_esp_32c2
+          - name: esp-32c3
+            platforms: esp32c3
+            registry: registry_esp_32c3
+          - name: esp-32c5
+            platforms: esp32c5
+            registry: registry_esp_32c5
+          - name: esp-32c6
+            platforms: esp32c6
+            registry: registry_esp_32c6
+          - name: esp-32h2
+            platforms: esp32h2
+            registry: registry_esp_32h2
+          - name: esp-32p4
+            platforms: esp32p4
+            registry: registry_esp_32p4
           - name: teensy
             platforms: teensy30,teensy31,teensy40,teensy41,teensyLC
             registry: registry_teensy
@@ -130,10 +171,27 @@ jobs:
         group:
           - name: avr
             registry: niteris/fastled-compiler-avr
-          - name: esp-riscv
-            registry: niteris/fastled-compiler-esp-riscv
-          - name: esp-xtensa
-            registry: niteris/fastled-compiler-esp-xtensa
+          # ESP32 platforms - individual images per board (flat structure)
+          - name: esp-32dev
+            registry: niteris/fastled-compiler-esp-32dev
+          - name: esp-32s2
+            registry: niteris/fastled-compiler-esp-32s2
+          - name: esp-32s3
+            registry: niteris/fastled-compiler-esp-32s3
+          - name: esp-8266
+            registry: niteris/fastled-compiler-esp-8266
+          - name: esp-32c2
+            registry: niteris/fastled-compiler-esp-32c2
+          - name: esp-32c3
+            registry: niteris/fastled-compiler-esp-32c3
+          - name: esp-32c5
+            registry: niteris/fastled-compiler-esp-32c5
+          - name: esp-32c6
+            registry: niteris/fastled-compiler-esp-32c6
+          - name: esp-32h2
+            registry: niteris/fastled-compiler-esp-32h2
+          - name: esp-32p4
+            registry: niteris/fastled-compiler-esp-32p4
           - name: teensy
             registry: niteris/fastled-compiler-teensy
           - name: stm32

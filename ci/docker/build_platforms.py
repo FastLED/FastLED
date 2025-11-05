@@ -28,28 +28,39 @@ DOCKER_PLATFORMS: Dict[str, List[str]] = {
         "nano_every",
         "attiny1616",
     ],
-    # ESP RISC-V Platform - ESP32 chips with RISC-V architecture
-    # Image: niteris/fastled-compiler-esp-riscv:latest
-    # Platform: espressif32
-    # Chips: C2, C3, C5, C6, H2, P4 (all use RISC-V cores)
-    "esp-riscv": [
-        "esp32c2",
-        "esp32c3",
-        "esp32c5",
-        "esp32c6",
-        "esp32h2",
-        "esp32p4",
-    ],
-    # ESP Xtensa Platform - ESP32 chips with Xtensa architecture
-    # Image: niteris/fastled-compiler-esp-xtensa:latest
-    # Platform: espressif32, espressif8266
-    # Chips: ESP32 (original), S2, S3 (all use Xtensa cores), ESP8266
-    "esp-xtensa": [
-        "esp32dev",
-        "esp32s2",
-        "esp32s3",
-        "esp8266",
-    ],
+    # ESP32 Platforms - Individual images per board (flat structure)
+    # These replace the previous grouped esp-riscv and esp-xtensa images
+    # to prevent build artifact accumulation issues
+    # ESP32 Original (Xtensa)
+    # Image: niteris/fastled-compiler-esp-32dev:latest
+    "esp-32dev": ["esp32dev"],
+    # ESP32-S2 (Xtensa)
+    # Image: niteris/fastled-compiler-esp-32s2:latest
+    "esp-32s2": ["esp32s2"],
+    # ESP32-S3 (Xtensa)
+    # Image: niteris/fastled-compiler-esp-32s3:latest
+    "esp-32s3": ["esp32s3"],
+    # ESP8266 (Xtensa)
+    # Image: niteris/fastled-compiler-esp-8266:latest
+    "esp-8266": ["esp8266"],
+    # ESP32-C2 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32c2:latest
+    "esp-32c2": ["esp32c2"],
+    # ESP32-C3 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32c3:latest
+    "esp-32c3": ["esp32c3"],
+    # ESP32-C5 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32c5:latest
+    "esp-32c5": ["esp32c5"],
+    # ESP32-C6 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32c6:latest
+    "esp-32c6": ["esp32c6"],
+    # ESP32-H2 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32h2:latest
+    "esp-32h2": ["esp32h2"],
+    # ESP32-P4 (RISC-V)
+    # Image: niteris/fastled-compiler-esp-32p4:latest
+    "esp-32p4": ["esp32p4"],
     # Teensy Platform - All Teensy variants
     # Image: niteris/fastled-compiler-teensy:latest
     # Platform: teensy

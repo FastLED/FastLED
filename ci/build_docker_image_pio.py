@@ -483,19 +483,32 @@ def _main_impl() -> int:
         # User provided custom name - use as-is
         image_name = args.image_name
     else:
-        # Use new naming convention: fastled-compiler-{arch}-{board}:{tag}
-        from ci.docker.build_image import extract_architecture, generate_docker_tag
+        # Try to use platform mapping first (preferred for grouped/flat platforms)
+        from ci.docker.build_image import generate_docker_tag
+        from ci.docker.build_platforms import (
+            get_docker_image_name,
+            get_platform_for_board,
+        )
 
         try:
-            arch = extract_architecture(platform_name)
-            # Use provided tag or auto-generate
-            if args.tag:
-                tag = args.tag
+            # Check if board is in platform mapping
+            platform = get_platform_for_board(platform_name)
+
+            if platform:
+                # Use platform-based naming (e.g., niteris/fastled-compiler-esp-32s3)
+                # This handles both grouped platforms (avr, teensy) and flat platforms (esp-32s3)
+                tag = args.tag if args.tag else generate_docker_tag(platform_name)
+                image_name = f"{get_docker_image_name(platform)}:{tag}"
             else:
-                tag = generate_docker_tag(platform_name)
-            image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
+                # Fallback to architecture-based naming for unmapped boards
+                from ci.docker.build_image import extract_architecture
+
+                arch = extract_architecture(platform_name)
+                tag = args.tag if args.tag else generate_docker_tag(platform_name)
+                image_name = f"fastled-compiler-{arch}-{platform_name}:{tag}"
+
         except Exception as e:
-            # Fallback to simple naming if extraction fails
+            # Final fallback if all lookups fail
             print(f"Warning: Could not generate semantic name: {e}", file=sys.stderr)
             tag = args.tag if args.tag else "latest"
             image_name = f"fastled-compiler-{platform_name}:{tag}"
