@@ -44,6 +44,17 @@ from ci.util.download_breadcrumb import (
 from ci.util.url_utils import sanitize_url_for_path
 
 
+def _get_utf8_env() -> dict[str, str]:
+    """Get environment with UTF-8 encoding to prevent Windows CP1252 encoding errors.
+
+    PlatformIO outputs Unicode characters (checkmarks, etc.) that fail on Windows
+    when using the default CP1252 console encoding. This ensures UTF-8 is used.
+    """
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
 @dataclass
 class DownloadResult:
     """Result of a download operation."""
@@ -579,6 +590,7 @@ def install_with_platformio(
             command,
             check=False,  # We'll handle errors ourselves
             timeout=300,  # 5 minute timeout
+            env=_get_utf8_env(),
         )
 
         # Stream output in real-time

@@ -43,6 +43,17 @@ assert (_PROJECT_ROOT / "library.json").exists(), (
 )
 
 
+def _get_utf8_env() -> dict[str, str]:
+    """Get environment with UTF-8 encoding to prevent Windows CP1252 encoding errors.
+
+    PlatformIO outputs Unicode characters (checkmarks, etc.) that fail on Windows
+    when using the default CP1252 console encoding. This ensures UTF-8 is used.
+    """
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+    return env
+
+
 def _ensure_platform_installed(board: Board) -> bool:
     """Ensure the required platform is installed for the board."""
     if not board.platform_needs_install:
@@ -1533,7 +1544,11 @@ def _init_platformio_build(
     formatter = create_sketch_path_formatter(example)
 
     running_process = RunningProcess(
-        run_cmd, cwd=build_dir, auto_run=True, output_formatter=formatter
+        run_cmd,
+        cwd=build_dir,
+        auto_run=True,
+        output_formatter=formatter,
+        env=_get_utf8_env(),
     )
     # Output is transformed by the formatter, but we need to print it
     while line := running_process.get_next_line():
@@ -1864,7 +1879,11 @@ class PioCompiler(Compiler):
             formatter = create_sketch_path_formatter(example)
 
             running_process = RunningProcess(
-                run_cmd, cwd=self.build_dir, auto_run=True, output_formatter=formatter
+                run_cmd,
+                cwd=self.build_dir,
+                auto_run=True,
+                output_formatter=formatter,
+                env=_get_utf8_env(),
             )
             try:
                 # Output is transformed by the formatter, but we need to print it
@@ -2143,6 +2162,7 @@ class PioCompiler(Compiler):
                 cwd=self.build_dir,
                 auto_run=True,
                 output_formatter=formatter,
+                env=_get_utf8_env(),
             )
             try:
                 # Output is transformed by the formatter, but we need to print it
@@ -2199,7 +2219,7 @@ class PioCompiler(Compiler):
 
                 # Start monitor process (no lock needed for monitoring)
                 monitor_process = RunningProcess(
-                    monitor_cmd, cwd=self.build_dir, auto_run=True
+                    monitor_cmd, cwd=self.build_dir, auto_run=True, env=_get_utf8_env()
                 )
                 try:
                     while line := monitor_process.get_next_line(
@@ -2507,7 +2527,11 @@ class PioCompiler(Compiler):
 
         try:
             merge_proc = subprocess.run(
-                merge_cmd, capture_output=True, text=True, timeout=300
+                merge_cmd,
+                capture_output=True,
+                text=True,
+                timeout=300,
+                env=_get_utf8_env(),
             )
         except subprocess.TimeoutExpired:
             return SketchResult(
