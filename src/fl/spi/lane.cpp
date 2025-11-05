@@ -6,7 +6,8 @@ namespace fl {
 namespace spi {
 
 Lane::Lane(size_t lane_id, MultiLaneDevice* parent)
-    : mLaneId(lane_id), mParent(parent) {
+    : mLaneId(lane_id) {
+    (void)parent;  // Unused parameter (reserved for future use)
 }
 
 void Lane::write(const uint8_t* data, size_t size) {

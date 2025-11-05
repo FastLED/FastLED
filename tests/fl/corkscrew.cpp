@@ -7,10 +7,11 @@
 #include "fl/sstream.h"
 
 #include "fl/corkscrew.h"
-#include "fl/grid.h" 
+#include "fl/grid.h"
 #include "fl/screenmap.h"
 #include "fl/tile2x2.h" // Ensure this header is included for Tile2x2_u8
 
+#undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 288
 
 

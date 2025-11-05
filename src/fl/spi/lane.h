@@ -59,7 +59,6 @@ private:
     fl::span<const uint8_t> data() const;
 
     size_t mLaneId;
-    MultiLaneDevice* mParent;
     fl::vector<uint8_t> mBuffer;  // Buffered data for this lane
 };
 

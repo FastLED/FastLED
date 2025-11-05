@@ -6,6 +6,7 @@
 #include "test.h"
 #include "FastLED.h"
 
+#undef NUM_LEDS  // Avoid redefinition in unity builds
 #define NUM_LEDS 1000
 #define DATA_PIN 2
 #define CLOCK_PIN 3
