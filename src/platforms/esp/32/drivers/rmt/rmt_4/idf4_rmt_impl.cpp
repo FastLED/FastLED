@@ -586,109 +586,109 @@ void fl::ESP32RMTController::tx_start()
     // Inline the code for rmt_tx_start, so it can be placed in IRAM
 #if CONFIG_IDF_TARGET_ESP32C3
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.tx_conf[mRMT_channel].mem_rd_rst = 1;
-    RMT.tx_conf[mRMT_channel].mem_rd_rst = 0;
-    RMT.tx_conf[mRMT_channel].mem_rst = 1;
-    RMT.tx_conf[mRMT_channel].mem_rst = 0;
+    ::RMT.tx_conf[mRMT_channel].mem_rd_rst = 1;
+    ::RMT.tx_conf[mRMT_channel].mem_rd_rst = 0;
+    ::RMT.tx_conf[mRMT_channel].mem_rst = 1;
+    ::RMT.tx_conf[mRMT_channel].mem_rst = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.tx_conf[mRMT_channel].conf_update = 1;
-    RMT.tx_conf[mRMT_channel].tx_start = 1;
+    ::RMT.tx_conf[mRMT_channel].conf_update = 1;
+    ::RMT.tx_conf[mRMT_channel].tx_start = 1;
 #elif CONFIG_IDF_TARGET_ESP32H2
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
-    RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #elif CONFIG_IDF_TARGET_ESP32S3
 // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
-    RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #else
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 1;
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 0;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 1;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 0;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 1;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_n = 0;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 1;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_n = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].conf_update_n = 1;
-    RMT.chnconf0[mRMT_channel].tx_start_n = 1;
+    ::RMT.chnconf0[mRMT_channel].conf_update_n = 1;
+    ::RMT.chnconf0[mRMT_channel].tx_start_n = 1;
 #endif
 #elif CONFIG_IDF_TARGET_ESP32C6
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
-    RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #elif CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     FASTLED_DEBUG(false, "tx_start Not yet implemented for ESP32-S2 in idf 5.x");
 #else
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+    ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
+    ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel * 3));
+    ::RMT.int_clr.val = (1 << (mRMT_channel * 3));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
-    RMT.int_ena.val |= (1 << (mRMT_channel * 3));
+    ::RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
+    ::RMT.int_ena.val |= (1 << (mRMT_channel * 3));
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+    ::RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
 #endif
 #elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+    ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
+    ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel * 3));
+    ::RMT.int_clr.val = (1 << (mRMT_channel * 3));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
-    RMT.int_ena.val |= (1 << (mRMT_channel * 3));
+    ::RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
+    ::RMT.int_ena.val |= (1 << (mRMT_channel * 3));
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
+    ::RMT.conf_ch[mRMT_channel].conf1.tx_start = 1;
 #elif CONFIG_IDF_TARGET_ESP32C6
     // rmt_ll_tx_reset_pointer(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].apb_mem_rst_chn = 0;
     // rmt_ll_clear_tx_end_interrupt(&RMT, mRMT_channel)
-    RMT.int_clr.val = (1 << (mRMT_channel));
+    ::RMT.int_clr.val = (1 << (mRMT_channel));
     // rmt_ll_enable_tx_end_interrupt(&RMT, mRMT_channel, true)
-    RMT.int_ena.val |= (1 << mRMT_channel);
+    ::RMT.int_ena.val |= (1 << mRMT_channel);
     // rmt_ll_tx_start(&RMT, mRMT_channel)
-    RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
-    RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].conf_update_chn = 1;
+    ::RMT.chnconf0[mRMT_channel].tx_start_chn = 1;
 #else
 #error Not yet implemented for unknown ESP32 target
 #endif
@@ -706,77 +706,77 @@ void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
     // Inline the code for rmt_set_tx_intr_en(channel, false) and rmt_tx_stop, so it can be placed in IRAM
 #if CONFIG_IDF_TARGET_ESP32C3
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << channel);
+    ::RMT.int_ena.val &= ~(1 << channel);
     // rmt_ll_tx_stop(&RMT, channel)
-    RMT.tx_conf[channel].tx_stop = 1;
-    RMT.tx_conf[channel].conf_update = 1;
+    ::RMT.tx_conf[channel].tx_stop = 1;
+    ::RMT.tx_conf[channel].conf_update = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.tx_conf[channel].mem_rd_rst = 1;
-    RMT.tx_conf[channel].mem_rd_rst = 0;
-    RMT.tx_conf[channel].mem_rst = 1;
-    RMT.tx_conf[channel].mem_rst = 0;
+    ::RMT.tx_conf[channel].mem_rd_rst = 1;
+    ::RMT.tx_conf[channel].mem_rd_rst = 0;
+    ::RMT.tx_conf[channel].mem_rst = 1;
+    ::RMT.tx_conf[channel].mem_rst = 0;
 #elif CONFIG_IDF_TARGET_ESP32H2
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << channel);
+    ::RMT.int_ena.val &= ~(1 << channel);
     // rmt_ll_tx_stop(&RMT, channel)
-    RMT.chnconf0[channel].tx_stop_chn = 1;
-    RMT.chnconf0[channel].conf_update_chn = 1;
+    ::RMT.chnconf0[channel].tx_stop_chn = 1;
+    ::RMT.chnconf0[channel].conf_update_chn = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #elif CONFIG_IDF_TARGET_ESP32S3
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << channel);
+    ::RMT.int_ena.val &= ~(1 << channel);
 // rmt_ll_tx_stop(&RMT, channel)
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
-    RMT.chnconf0[channel].tx_stop_chn = 1;
-    RMT.chnconf0[channel].conf_update_chn = 1;
+    ::RMT.chnconf0[channel].tx_stop_chn = 1;
+    ::RMT.chnconf0[channel].conf_update_chn = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #else
-    RMT.chnconf0[channel].tx_stop_n = 1;
-    RMT.chnconf0[channel].conf_update_n = 1;
+    ::RMT.chnconf0[channel].tx_stop_n = 1;
+    ::RMT.chnconf0[channel].conf_update_n = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.chnconf0[channel].mem_rd_rst_n = 1;
-    RMT.chnconf0[channel].mem_rd_rst_n = 0;
-    RMT.chnconf0[channel].apb_mem_rst_n = 1;
-    RMT.chnconf0[channel].apb_mem_rst_n = 0;
+    ::RMT.chnconf0[channel].mem_rd_rst_n = 1;
+    ::RMT.chnconf0[channel].mem_rd_rst_n = 0;
+    ::RMT.chnconf0[channel].apb_mem_rst_n = 1;
+    ::RMT.chnconf0[channel].apb_mem_rst_n = 0;
 #endif
 #elif CONFIG_IDF_TARGET_ESP32C6
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << channel);
+    ::RMT.int_ena.val &= ~(1 << channel);
     // rmt_ll_tx_stop(&RMT, channel)
-    RMT.chnconf0[channel].tx_stop_chn = 1;
-    RMT.chnconf0[channel].conf_update_chn = 1;
+    ::RMT.chnconf0[channel].tx_stop_chn = 1;
+    ::RMT.chnconf0[channel].conf_update_chn = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.chnconf0[channel].mem_rd_rst_chn = 1;
-    RMT.chnconf0[channel].mem_rd_rst_chn = 0;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 1;
-    RMT.chnconf0[channel].apb_mem_rst_chn = 0;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 1;
+    ::RMT.chnconf0[channel].mem_rd_rst_chn = 0;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 1;
+    ::RMT.chnconf0[channel].apb_mem_rst_chn = 0;
 #elif CONFIG_IDF_TARGET_ESP32S2
 #if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0)
     FASTLED_ASSERT(false, "doneOnChannel not yet implemented for ESP32-S2 in idf 5.x");
 #else
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << (channel * 3));
+    ::RMT.int_ena.val &= ~(1 << (channel * 3));
     // rmt_ll_tx_stop(&RMT, channel)
-    RMT.conf_ch[channel].conf1.tx_stop = 1;
+    ::RMT.conf_ch[channel].conf1.tx_stop = 1;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
-    RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+    ::RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
+    ::RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
 #endif
 #elif CONFIG_IDF_TARGET_ESP32
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
-    RMT.int_ena.val &= ~(1 << (channel * 3));
+    ::RMT.int_ena.val &= ~(1 << (channel * 3));
     // rmt_ll_tx_stop(&RMT, channel)
-    RMT.conf_ch[channel].conf1.tx_start = 0;
-    RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
+    ::RMT.conf_ch[channel].conf1.tx_start = 0;
+    ::RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
+    ::RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
     // rmt_ll_tx_reset_pointer(&RMT, channel)
     // RMT.conf_ch[channel].conf1.mem_rd_rst = 1;
     // RMT.conf_ch[channel].conf1.mem_rd_rst = 0;
@@ -830,7 +830,7 @@ void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c
     portENTER_CRITICAL_ISR(&rmt_spinlock);
-    uint32_t intr_st = RMT.int_st.val;
+    uint32_t intr_st = ::RMT.int_st.val;
     portEXIT_CRITICAL_ISR(&rmt_spinlock);
     uint8_t channel;
 
@@ -863,7 +863,7 @@ void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
                 // -- More to send on this channel
                 portENTER_CRITICAL_ISR(&rmt_spinlock);
                 pController->fillNext(true);
-                RMT.int_clr.val |= BIT(tx_next_bit);
+                ::RMT.int_clr.val |= BIT(tx_next_bit);
                 portEXIT_CRITICAL_ISR(&rmt_spinlock);
             }
             else
@@ -872,7 +872,7 @@ void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
                 if (intr_st & BIT(tx_done_bit))
                 {
                     portENTER_CRITICAL_ISR(&rmt_spinlock);
-                    RMT.int_clr.val |= BIT(tx_done_bit);
+                    ::RMT.int_clr.val |= BIT(tx_done_bit);
                     doneOnChannel(rmt_channel_t(channel), 0);
                     portEXIT_CRITICAL_ISR(&rmt_spinlock);
                 }
@@ -903,10 +903,10 @@ void fl::ESP32RMTController::fillNext(bool check_time)
                 /** -- Go back to the original strategy of just setting mCur = mSize
                        and letting the regular 'stop' process happen
                 * mRMT_mem_start = 0;
-                RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
-                RMT.conf_ch[mRMT_channel].conf1.tx_start = 0;
-                RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
-                RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
+                ::RMT.int_ena.val &= ~(1 << (mRMT_channel * 3));
+                ::RMT.conf_ch[mRMT_channel].conf1.tx_start = 0;
+                ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 1;
+                ::RMT.conf_ch[mRMT_channel].conf1.mem_rd_rst = 0;
                 */
                 mCur = mSize;
             }
