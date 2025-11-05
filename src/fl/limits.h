@@ -461,10 +461,3 @@ struct numeric_limits<double> {
 // long double specialization removed
 
 } // namespace fl
-
-// Include fl/math.h at the bottom to bring fl::min, fl::max, fl::abs functions into scope
-// This allows fl/math.h to include fl/limits.h at the top without circular dependency
-#include "fl/math.h"
-
-// Undefine macros again at the end to prevent them from leaking to includers
-#include "fl/undef.h"
