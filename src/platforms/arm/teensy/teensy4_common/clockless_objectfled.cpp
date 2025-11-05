@@ -356,10 +356,20 @@ template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 1, GRB>;
 template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 2, GRB>;
 template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 3, GRB>;
 
-// Instantiate for WS2811
+// Instantiate for WS2811 (400kHz variant)
 template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 0, GRB>;
 template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 1, GRB>;
 template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 2, GRB>;
+
+// Instantiate for WS2811 (800kHz LEGACY variant - used by default WS2811 class)
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 0, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 1, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 2, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 3, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 4, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 5, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 6, GRB>;
+template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 7, GRB>;
 
 // Instantiate for WS2813
 template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2813, 0, GRB>;
