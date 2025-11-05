@@ -177,7 +177,7 @@ class CompilationArgumentParser:
             "--no-filter",
             action="store_true",
             help="Disable @filter directives (compile even if incompatible with board). "
-            "By default, 'all' respects filters and individual sketches bypass them.",
+            "By default, filters always apply to prevent compilation failures.",
         )
         parser.add_argument(
             "--defines", type=str, help="Comma-separated list of compiler definitions"
@@ -375,10 +375,10 @@ class CompilationArgumentParser:
                 raise ValueError(f"Example not found: {example}")
 
         # Determine filter behavior:
-        # - Use "all" keyword: apply filters (protect against incompatible examples)
-        # - Specific examples: skip filters (allow forcing specific sketches)
-        # - --no-filter flag: skip filters regardless (override all filter logic)
-        skip_filters = (not used_all_keyword) or no_filter
+        # - Filters always apply UNLESS --no-filter is explicitly used
+        # - This prevents compilation failures for incompatible platform/memory combinations
+        # - Use --no-filter to override and attempt compilation anyway
+        skip_filters = no_filter
 
         return examples, skip_filters
 

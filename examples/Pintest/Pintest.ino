@@ -1,4 +1,4 @@
-// @filter: ((platform is avr) and not (board is attiny*)) or (platform is teensy)
+// @filter: ((platform is avr) and not (board is attiny*) and not (board is atmega8*)) or (platform is teensy)
 
 /// @file    Pintest.ino
 /// @brief   Pintest example with platform detection

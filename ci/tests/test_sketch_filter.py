@@ -581,5 +581,53 @@ some code
             )
 
 
+class TestPintestFilter:
+    """Test Pintest example filter behavior."""
+
+    def test_pintest_filter_parsing(self) -> None:
+        """Test that Pintest filter parses correctly."""
+        # Pintest filter: ((platform is avr) and not (board is attiny*) and not (board is atmega8*)) or (platform is teensy)
+        filter_str = "((platform is avr) and not (board is attiny*) and not (board is atmega8*)) or (platform is teensy)"
+        result = parse_oneline_filter(filter_str)
+
+        assert result is not None
+        # Should require avr OR teensy platforms
+        assert "platform" in result.require
+        assert set(result.require["platform"]) == {"avr", "teensy"}
+        # Should exclude attiny* and atmega8* boards
+        assert "board" in result.exclude
+        assert "attiny*" in result.exclude["board"]
+        assert "atmega8*" in result.exclude["board"]
+
+    def test_pintest_atmega8a_should_skip(self) -> None:
+        """Test that atmega8a should be skipped for Pintest due to code size constraints.
+
+        The atmega8a has only 8KB flash, which is insufficient for the Pintest example
+        that uses extensive template instantiation. While it matches the platform filter
+        (avr and not attiny*), it should be excluded based on memory constraints.
+        """
+        from ci.boards import ATMEGA8A
+        from pathlib import Path
+
+        # Parse actual Pintest filter
+        pintest_path = Path(__file__).parent.parent.parent / "examples" / "Pintest" / "Pintest.ino"
+        sketch_filter = parse_filter_from_sketch(pintest_path)
+
+        assert sketch_filter is not None, "Pintest should have a @filter directive"
+
+        # Check atmega8a board properties
+        assert ATMEGA8A.platform_family == "avr"
+        assert ATMEGA8A.board_name == "atmega8a"
+        assert not ATMEGA8A.board_name.startswith("attiny")
+
+        # Test skip logic
+        should_skip, reason = should_skip_sketch(ATMEGA8A, sketch_filter)
+
+        # After fix: atmega8a should be skipped due to memory constraints
+        # The filter now excludes atmega8* boards because atmega8a only has 8KB flash
+        assert should_skip is True, f"atmega8a should be skipped for Pintest (reason: {reason})"
+        assert "atmega8" in reason.lower() or "board" in reason.lower()
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

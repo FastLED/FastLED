@@ -73,19 +73,20 @@ def compile_board_examples(
     print(f"CORE DIR: {paths.core_dir}")
     print(f"PACKAGES DIR: {paths.packages_dir}")
 
-    # Filter examples based on @filter directives (unless skip_filters is True)
+    # Apply filters based on @filter directives (unless skip_filters is True)
     if skip_filters:
-        # User explicitly requested these examples, so don't filter them
+        # User explicitly requested to skip filters (--no-filter flag)
         filtered_examples = examples
         skipped_examples: list[tuple[str, str]] = []
     else:
-        # Apply filters to auto-discovered examples
+        # Apply filters to prevent compilation failures
         filtered_examples, skipped_examples = get_filtered_examples(board, examples)
 
     if skipped_examples:
-        print(f"\nFILTERED OUT {len(skipped_examples)} example(s):")
+        print(f"\nSKIPPED {len(skipped_examples)} example(s) due to @filter constraints:")
         for example, reason in skipped_examples:
             print(f"  - {example}: {reason}")
+        print("  Use --no-filter to override and attempt compilation anyway")
 
     if filtered_examples:
         print(f"COMPILING {len(filtered_examples)} example(s)...")
