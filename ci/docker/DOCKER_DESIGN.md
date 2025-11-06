@@ -73,7 +73,7 @@ niteris/fastled-compiler-base:latest
 - Examples:
   - `esp-32s3` image compiles: esp32s3 only
   - `esp-8266` image compiles: esp8266 only
-  - `stm32-f103c8` image compiles: stm32f103c8_bluepill only
+  - `stm32-f103c8` image compiles: stm32f103c8 only
   - `sam-3x8e` image compiles: sam3x8e_due only
 
 This ensures instant compilation without downloading additional toolchains, while preventing Docker image bloat for platforms prone to build artifact accumulation.
@@ -106,11 +106,11 @@ Platform images use two strategies:
 | **esp-32h2** | `fastled-compiler-esp-32h2` | esp32h2 | Flat |
 | **esp-32p4** | `fastled-compiler-esp-32p4` | esp32p4 | Flat |
 | **teensy** | `fastled-compiler-teensy` | teensy30, teensy31, teensy40, teensy41, teensylc | Grouped |
-| **stm32-f103c8** | `fastled-compiler-stm32-f103c8` | stm32f103c8_bluepill | Flat |
-| **stm32-f411ce** | `fastled-compiler-stm32-f411ce` | stm32f411ce_blackpill | Flat |
-| **stm32-f103cb** | `fastled-compiler-stm32-f103cb` | stm32f103cb_maplemini | Flat |
-| **stm32-f103tb** | `fastled-compiler-stm32-f103tb` | stm32f103tb_tinystm | Flat |
-| **stm32-h747xi** | `fastled-compiler-stm32-h747xi` | stm32h747xi_giga | Flat |
+| **stm32-f103c8** | `fastled-compiler-stm32-f103c8` | stm32f103c8 | Flat |
+| **stm32-f411ce** | `fastled-compiler-stm32-f411ce` | stm32f411ce | Flat |
+| **stm32-f103cb** | `fastled-compiler-stm32-f103cb` | stm32f103cb | Flat |
+| **stm32-f103tb** | `fastled-compiler-stm32-f103tb` | stm32f103tb | Flat |
+| **stm32-h747xi** | `fastled-compiler-stm32-h747xi` | stm32h747xi | Flat |
 | **rp2040** | `fastled-compiler-rp` | rp2040, rp2350 | Grouped |
 | **nrf52** | `fastled-compiler-nrf52` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense | Grouped |
 | **sam-3x8e** | `fastled-compiler-sam-3x8e` | sam3x8e_due | Flat |
@@ -269,11 +269,11 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  │   └── esp-32p4 (builds: esp32p4 only)
                  ├── teensy (grouped: teensy30, teensy31, teensy40, teensy41, teensylc)
                  ├── STM32 boards (flat - 5 individual images):
-                 │   ├── stm32-f103c8 (builds: stm32f103c8_bluepill only)
-                 │   ├── stm32-f411ce (builds: stm32f411ce_blackpill only)
-                 │   ├── stm32-f103cb (builds: stm32f103cb_maplemini only)
-                 │   ├── stm32-f103tb (builds: stm32f103tb_tinystm only)
-                 │   └── stm32-h747xi (builds: stm32h747xi_giga only)
+                 │   ├── stm32-f103c8 (builds: stm32f103c8 only)
+                 │   ├── stm32-f411ce (builds: stm32f411ce only)
+                 │   ├── stm32-f103cb (builds: stm32f103cb only)
+                 │   ├── stm32-f103tb (builds: stm32f103tb only)
+                 │   └── stm32-h747xi (builds: stm32h747xi only)
                  ├── rp (grouped: rp2040, rp2350)
                  ├── nrf52 (grouped: nrf52840_dk, adafruit boards, xiaoblesense)
                  └── SAM boards (flat - 1 individual image):
@@ -363,11 +363,11 @@ DOCKER_PLATFORMS = {
     "esp-32p4": ["esp32p4"],
 
     # Flat platforms (single-board images) - STM32 boards
-    "stm32-f103c8": ["stm32f103c8_bluepill"],
-    "stm32-f411ce": ["stm32f411ce_blackpill"],
-    "stm32-f103cb": ["stm32f103cb_maplemini"],
-    "stm32-f103tb": ["stm32f103tb_tinystm"],
-    "stm32-h747xi": ["stm32h747xi_giga"],
+    "stm32-f103c8": ["stm32f103c8"],
+    "stm32-f411ce": ["stm32f411ce"],
+    "stm32-f103cb": ["stm32f103cb"],
+    "stm32-f103tb": ["stm32f103tb"],
+    "stm32-h747xi": ["stm32h747xi"],
 
     # Flat platforms (single-board images) - SAM boards
     "sam-3x8e": ["sam3x8e_due"],

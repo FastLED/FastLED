@@ -32,6 +32,6 @@ jobs:
   build:
     uses: ./.github/workflows/build_template_binary_size.yml
     with:
-      board: stm32f103c8_bluepill
+      board: stm32f103c8
       max_size: 55000
       max_size_apa102: 45000

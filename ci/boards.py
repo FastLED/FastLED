@@ -244,9 +244,9 @@ class Board:
             "teensylc",
             "teensy30",
             "teensy31",
-            "stm32f103c8_bluepill",
-            "stm32f103cb_maplemini",
-            "stm32f103tb_tinystm",
+            "stm32f103c8",
+            "stm32f103cb",
+            "stm32f103tb",
             "esp8266",
             "uno_r4_wifi",
             "uno_r4_minima",
@@ -370,15 +370,15 @@ class Board:
             return "IMXRT1062"
 
         # STM32 boards
-        elif "stm32f103c8_bluepill" in board_lower:
+        elif "stm32f103c8" in board_lower:
             return "STM32F103C8"
-        elif "stm32f103cb_maplemini" in board_lower:
+        elif "stm32f103cb" in board_lower:
             return "STM32F103CB"
-        elif "stm32f103tb_tinystm" in board_lower:
+        elif "stm32f103tb" in board_lower:
             return "STM32F103TB"
-        elif "stm32f411ce_blackpill" in board_lower:
+        elif "stm32f411ce" in board_lower:
             return "STM32F411CE"
-        elif "stm32h747xi_giga" in board_lower:
+        elif "stm32h747xi" in board_lower:
             return "STM32H747XI"
 
         # SAM boards

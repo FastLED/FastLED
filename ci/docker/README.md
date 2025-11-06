@@ -308,7 +308,7 @@ The system supports all platforms defined in `ci/boards.py`:
 
 ### ARM
 - `sam3x8e_due` (SAM)
-- `stm32f103c8_bluepill`, `stm32f411ce_blackpill`, `stm32h747xi_giga` (STM32)
+- `stm32f103c8`, `stm32f103cb`, `stm32f103tb`, `stm32f411ce`, `stm32h747xi` (STM32)
 - `teensy30`, `teensy40`, `teensy41` (Teensy)
 - `rp2040`, `rp2350` (RP2040)
 - `nrf52840_dk`, `xiaoblesense` (nRF52)
@@ -542,7 +542,7 @@ These images are:
 | ESP32-H2 | `niteris/fastled-compiler-esp-32h2:latest` | esp32h2 |
 | ESP32-P4 | `niteris/fastled-compiler-esp-32p4:latest` | esp32p4 |
 | Teensy | `niteris/fastled-compiler-teensy:latest` | teensylc, teensy30, teensy31, teensy40, teensy41 |
-| STM32 | `niteris/fastled-compiler-stm32:latest` | stm32f103c8_bluepill, stm32f411ce_blackpill, stm32f103cb_maplemini, stm32f103tb_tinystm, stm32h747xi_giga |
+| STM32 | `niteris/fastled-compiler-stm32:latest` | stm32f103c8, stm32f103cb, stm32f103tb, stm32f411ce, stm32h747xi |
 | RP | `niteris/fastled-compiler-rp:latest` | rp2040, rp2350 |
 | NRF52 | `niteris/fastled-compiler-nrf52:latest` | nrf52840_dk, adafruit_feather_nrf52840_sense, xiaoblesense |
 | SAM | `niteris/fastled-compiler-sam:latest` | sam3x8e_due |

@@ -33,4 +33,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: stm32f103tb_tinystm all
+      args: stm32f103tb all

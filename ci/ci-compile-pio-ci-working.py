@@ -47,9 +47,9 @@ DEFAULT_BOARDS_NAMES = [
     "uno_r4_wifi",
     "esp32rmt_51",
     "esp32dev_idf44",
-    "stm32f103c8_bluepill",
+    "stm32f103c8",
     "esp32rmt_51",
-    "stm32h747xi_giga",
+    "stm32h747xi",
     "sparkfun_xrp_controller",
 ]
 

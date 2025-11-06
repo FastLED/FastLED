@@ -433,7 +433,7 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
       group: stm32-f103c8
-      platforms: stm32f103c8_bluepill
+      platforms: stm32f103c8
       tag: latest
     secrets:
       env_vars: |
@@ -459,7 +459,7 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
       group: stm32-f411ce
-      platforms: stm32f411ce_blackpill
+      platforms: stm32f411ce
       tag: latest
     secrets:
       env_vars: |
@@ -485,7 +485,7 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
       group: stm32-f103cb
-      platforms: stm32f103cb_maplemini
+      platforms: stm32f103cb
       tag: latest
     secrets:
       env_vars: |
@@ -511,7 +511,7 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
       group: stm32-f103tb
-      platforms: stm32f103tb_tinystm
+      platforms: stm32f103tb
       tag: latest
     secrets:
       env_vars: |
@@ -537,7 +537,7 @@ jobs:
       platform: ${{ matrix.arch.platform }}
       dockerfile: Dockerfile.template
       group: stm32-h747xi
-      platforms: stm32h747xi_giga
+      platforms: stm32h747xi
       tag: latest
     secrets:
       env_vars: |

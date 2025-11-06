@@ -78,19 +78,19 @@ DOCKER_PLATFORMS: dict[str, list[str]] = {
     # to prevent build artifact accumulation issues
     # STM32F103C8 Blue Pill
     # Image: niteris/fastled-compiler-stm32-f103c8:latest
-    "stm32-f103c8": ["stm32f103c8_bluepill"],
+    "stm32-f103c8": ["stm32f103c8"],
     # STM32F411CE Black Pill
     # Image: niteris/fastled-compiler-stm32-f411ce:latest
-    "stm32-f411ce": ["stm32f411ce_blackpill"],
+    "stm32-f411ce": ["stm32f411ce"],
     # STM32F103CB Maple Mini
     # Image: niteris/fastled-compiler-stm32-f103cb:latest
-    "stm32-f103cb": ["stm32f103cb_maplemini"],
+    "stm32-f103cb": ["stm32f103cb"],
     # STM32F103TB Tiny STM
     # Image: niteris/fastled-compiler-stm32-f103tb:latest
-    "stm32-f103tb": ["stm32f103tb_tinystm"],
+    "stm32-f103tb": ["stm32f103tb"],
     # STM32H747XI Arduino Giga R1
     # Image: niteris/fastled-compiler-stm32-h747xi:latest
-    "stm32-h747xi": ["stm32h747xi_giga"],
+    "stm32-h747xi": ["stm32h747xi"],
     # RP Platform - Raspberry Pi Pico family
     # Image: niteris/fastled-compiler-rp:latest
     # Platforms: raspberrypi (maxgerhardt fork)

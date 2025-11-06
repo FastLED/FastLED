@@ -32,4 +32,4 @@ jobs:
   build:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: stm32f103c8_bluepill all
+      args: stm32f103c8 all
