@@ -619,8 +619,7 @@ NATIVE = Board(
 )
 
 SAM3X8E_DUE = Board(
-    board_name="sam3x8e_due",
-    real_board_name="due",
+    board_name="due",
     platform="atmelsam",
 )
 
@@ -686,7 +685,7 @@ ESP32DEV_IDF4_4 = Board(
 )
 
 STM32H747XI_GIGA = Board(
-    board_name="stm32h747xi_giga",
+    board_name="stm32h747xi",
     platform="ststm32",
     framework="arduino",
     real_board_name="giga_r1_m7",
@@ -836,20 +835,20 @@ RPI_PICO2 = Board(
 )
 
 STM32F103C8_BLUEPILL = Board(
-    board_name="stm32f103c8_bluepill",
+    board_name="stm32f103c8",
     real_board_name="bluepill_f103c8",
     platform="ststm32",
 )
 
 # maple_mini_b20
 STM32F103CB_MAPLEMINI = Board(
-    board_name="stm32f103cb_maplemini",
+    board_name="stm32f103cb",
     real_board_name="maple_mini_b20",
     platform="ststm32",
 )
 
 STM32F103TB_TINYSTM = Board(
-    board_name="stm32f103tb_tinystm",
+    board_name="stm32f103tb",
     real_board_name="hy_tinystm103tb",
     platform="ststm32",
 )
@@ -942,7 +941,7 @@ UNO = Board(
 )
 
 ATMEGA32U4_LEONARDO = Board(
-    board_name="atmega32u4_leonardo",
+    board_name="leonardo",
     real_board_name="leonardo",
     platform="atmelavr",
     framework="arduino",
@@ -987,7 +986,7 @@ XIAO_ESP32S3 = Board(
 
 # STM32F4 Black Pill board - addresses GitHub issue #726
 STM32F411CE_BLACKPILL = Board(
-    board_name="stm32f411ce_blackpill",
+    board_name="stm32f411ce",
     real_board_name="blackpill_f411ce",
     platform="ststm32",
 )
@@ -1005,14 +1004,14 @@ MGM240S = Board(
 
 # SAMD21 boards (Cortex-M0+ @ 48 MHz)
 SAMD21G18A_FEATHER = Board(
-    board_name="samd21g18a_feather",
+    board_name="samd21",
     real_board_name="adafruit_feather_m0",
     platform="atmelsam",
     framework="arduino",
 )
 
 SAMD21G18A_ZERO = Board(
-    board_name="samd21g18a_zero",
+    board_name="samd21_zero",
     real_board_name="zeroUSB",
     platform="atmelsam",
     framework="arduino",
@@ -1020,7 +1019,7 @@ SAMD21G18A_ZERO = Board(
 
 # SAMD51 boards (Cortex-M4F @ 120 MHz)
 SAMD51J19A_FEATHER_M4 = Board(
-    board_name="samd51j19a_feather_m4",
+    board_name="samd51j",
     real_board_name="adafruit_feather_m4",
     platform="atmelsam",
     framework="arduino",
@@ -1031,7 +1030,7 @@ SAMD51J19A_FEATHER_M4 = Board(
 )
 
 SAMD51P20A_GRANDCENTRAL = Board(
-    board_name="samd51p20a_grandcentral",
+    board_name="samd51p",
     real_board_name="adafruit_grand_central_m4",
     platform="atmelsam",
     framework="arduino",
