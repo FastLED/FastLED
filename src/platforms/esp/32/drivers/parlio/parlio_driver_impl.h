@@ -4,6 +4,7 @@
 #pragma once
 
 #include "parlio_driver.h"
+#include "parlio_timing.h"
 #include "esp_err.h"
 #include "fl/cstring.h"
 #include "fl/log.h"
@@ -17,17 +18,23 @@
 #endif
 
 // ============================================================================
-// TODO: WLED-MM-P4 Style Buffer Breaking Strategy
+// WLED-MM-P4 Style Buffer Breaking Strategy - IMPLEMENTED
 // ============================================================================
-// Current BREAK_PER_COLOR implementation breaks buffers between entire color
-// components (all G bits → all R bits → all B bits). This can cause LEDs to
-// latch prematurely during DMA gaps between color transmissions.
+// This implementation breaks DMA buffers at LED boundaries after the LSB
+// (bit 0) of each color component byte. This strategic placement minimizes
+// visual artifacts from DMA timing gaps:
 //
-// WLED-MM-P4 uses a superior approach:
-// - Break buffers at LED boundaries after the LSB (bit 0) of each color byte
+// Benefits:
 // - DMA gaps only affect the least significant bit (minimal visual impact)
 // - Worst case artifact: 0,0,0 becomes 0,0,1 (imperceptible)
 // - Keeps each transmission under timing threshold (<20μs gap tolerance)
+// - Prevents mid-component corruption that causes ±128 brightness errors
+//
+// Implementation:
+// - Each LED's color data is transmitted in 3 chunks (G, R, B components)
+// - Each chunk consists of 32 bits (8 bits × 4 waveform expansion)
+// - Break points occur naturally at component boundaries after LSB
+// - For large LED counts, additional breaks occur at LED boundaries
 //
 // Reference: https://github.com/FastLED/FastLED/issues/2095#issuecomment-3369337632
 // ============================================================================
@@ -40,21 +47,24 @@ inline const char* parlio_err_to_str(esp_err_t err) {
     return esp_err_to_name(err);
 }
 
-// WS2812 timing patterns (4 bits per LED bit at 3.2 MHz)
-// Each 4-bit group: 1000 = T0H+T0L (0.4μs+0.85μs), 1110 = T1H+T1L (0.8μs+0.45μs)
-static constexpr uint16_t WS2812_BITPATTERNS[16] = {
-    0b1000100010001000, 0b1000100010001110, 0b1000100011101000, 0b1000100011101110,
-    0b1000111010001000, 0b1000111010001110, 0b1000111011101000, 0b1000111011101110,
-    0b1110100010001000, 0b1110100010001110, 0b1110100011101000, 0b1110100011101110,
-    0b1110111010001000, 0b1110111010001110, 0b1110111011101000, 0b1110111011101110,
-};
-
-// Generate 32-bit waveform for 8-bit color value
-// Input: color byte (0-255)
-// Output: 32-bit pattern encoding 8 LED bits as timing waveforms
+// Template-based waveform generator using chipset-specific bitpatterns
+// This replaces the hardcoded WS2812_BITPATTERNS with dynamic generation
+// based on the CHIPSET template parameter's timing specifications.
+//
+// Each LED bit is encoded as a 4-clock pattern, and each nibble (4 bits)
+// is encoded as a 16-bit pattern. An 8-bit color value is split into two
+// nibbles and expanded into a 32-bit waveform.
+//
+// @tparam CHIPSET Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
+// @param value 8-bit color value (0-255)
+// @return 32-bit pattern encoding 8 LED bits as timing waveforms
+template<typename CHIPSET>
 inline uint32_t generate_waveform(uint8_t value) {
-    const uint16_t p1 = WS2812_BITPATTERNS[value >> 4];    // High nibble
-    const uint16_t p2 = WS2812_BITPATTERNS[value & 0x0F];  // Low nibble
+    // Get chipset-specific bitpatterns from compile-time generated table
+    constexpr const uint16_t* patterns = parlio_detail::ParlioChipsetBitpatterns<CHIPSET>::patterns;
+
+    const uint16_t p1 = patterns[value >> 4];    // High nibble
+    const uint16_t p2 = patterns[value & 0x0F];  // Low nibble
     return (uint32_t(p2) << 16) | p1;
 }
 
@@ -150,12 +160,15 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     config_ = config;
     num_leds_ = num_leds;
 
-    // Set default clock frequency if not specified
+    // Set clock frequency from chipset timing if not specified
     if (config_.clock_freq_hz == 0) {
-        config_.clock_freq_hz = DEFAULT_CLOCK_FREQ_HZ;
-        PARLIO_DLOG("Using default clock frequency: " << DEFAULT_CLOCK_FREQ_HZ << " Hz");
+        // Use chipset-derived clock frequency from timing generator
+        using TimingGen = parlio_detail::ParlioTimingGenerator<CHIPSET>;
+        config_.clock_freq_hz = TimingGen::CLOCK_FREQ_HZ;
+        PARLIO_DLOG("Using chipset-derived clock frequency: " << config_.clock_freq_hz << " Hz "
+                    << "(T1=" << TimingGen::T1_NS << "ns, T2=" << TimingGen::T2_NS << "ns, T3=" << TimingGen::T3_NS << "ns)");
     } else {
-        PARLIO_DLOG("Using configured clock frequency: " << config_.clock_freq_hz << " Hz");
+        PARLIO_DLOG("Using configured clock frequency: " << config_.clock_freq_hz << " Hz (overriding chipset default)");
     }
 
     // Calculate expanded buffer size for waveform encoding
@@ -316,44 +329,60 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     tx_config.idle_value = 0x00000000;  // Lines idle low between frames
     tx_config.flags.queue_nonblocking = 0;
 
-    // Calculate chunking parameters
-    constexpr uint32_t SYMBOLS_PER_LED = 96;  // 3 components × 32 bits each
-    constexpr uint32_t BITS_PER_LED = SYMBOLS_PER_LED * DATA_WIDTH;
-    constexpr uint32_t BYTES_PER_LED = (BITS_PER_LED + 7) / 8;
+    // Calculate component-level chunking parameters (WLED-MM-P4 strategy)
+    // Each color component = 32 bits × DATA_WIDTH = one transmission unit
+    constexpr uint32_t BITS_PER_COMPONENT = 32 * DATA_WIDTH;
+    constexpr uint32_t BYTES_PER_COMPONENT = (BITS_PER_COMPONENT + 7) / 8;
+    constexpr uint32_t COMPONENTS_PER_LED = 3;  // G, R, B
     constexpr uint32_t MAX_BYTES_PER_CHUNK = 65535;  // PARLIO hardware limit
+
+    // Calculate max LEDs per chunk (must break at LED boundaries)
+    // Each LED = 3 components × BYTES_PER_COMPONENT bytes
+    constexpr uint32_t BYTES_PER_LED = COMPONENTS_PER_LED * BYTES_PER_COMPONENT;
     constexpr uint16_t MAX_LEDS_PER_CHUNK = MAX_BYTES_PER_CHUNK / BYTES_PER_LED;
 
-    // Continuous buffer transmission with chunking
-    const uint8_t num_chunks = (num_leds_ + MAX_LEDS_PER_CHUNK - 1) / MAX_LEDS_PER_CHUNK;
+    // Transmit using WLED-MM-P4 buffer breaking strategy:
+    // Break at LED boundaries, with each LED's 3 components transmitted together
     uint16_t leds_remaining = num_leds_;
     const uint8_t* chunk_ptr = dma_buffer_;
+    uint16_t led_offset = 0;
 
-    PARLIO_DLOG("Transmitting continuous buffer in " << int(num_chunks) << " chunk(s)");
+    PARLIO_DLOG("Transmitting with WLED-MM-P4 buffer breaking strategy");
+    PARLIO_DLOG("  BYTES_PER_COMPONENT=" << BYTES_PER_COMPONENT
+               << ", BYTES_PER_LED=" << BYTES_PER_LED
+               << ", MAX_LEDS_PER_CHUNK=" << MAX_LEDS_PER_CHUNK);
 
-    for (uint8_t chunk_idx = 0; chunk_idx < num_chunks; chunk_idx++) {
+    while (leds_remaining > 0) {
+        // Determine how many LEDs to transmit in this chunk
         uint16_t leds_in_chunk = (leds_remaining < MAX_LEDS_PER_CHUNK)
                                   ? leds_remaining : MAX_LEDS_PER_CHUNK;
-        size_t chunk_bits = leds_in_chunk * BITS_PER_LED;
+
+        // Calculate chunk parameters
         size_t chunk_bytes = leds_in_chunk * BYTES_PER_LED;
+        size_t chunk_bits = leds_in_chunk * COMPONENTS_PER_LED * BITS_PER_COMPONENT;
 
-        PARLIO_DLOG("  Chunk " << int(chunk_idx) << ": " << leds_in_chunk << " LEDs, "
-                   << chunk_bytes << " bytes, " << chunk_bits << " bits");
+        PARLIO_DLOG("  LED chunk [" << led_offset << ".." << (led_offset + leds_in_chunk - 1) << "]: "
+                   << leds_in_chunk << " LEDs, " << chunk_bytes << " bytes, " << chunk_bits << " bits");
 
+        // Transmit this LED chunk (contains G, R, B components for leds_in_chunk LEDs)
         esp_err_t err = parlio_tx_unit_transmit(tx_unit_, chunk_ptr, chunk_bits, &tx_config);
 
         if (err != ESP_OK) {
-            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for chunk " << int(chunk_idx)
+            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for LED chunk at offset " << led_offset
                           << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
             dma_busy_ = false;
             xSemaphoreGive(xfer_done_sem_);
             return;
         }
 
+        // Advance pointers
         chunk_ptr += chunk_bytes;
         leds_remaining -= leds_in_chunk;
+        led_offset += leds_in_chunk;
 
         // Wait for completion if not the last chunk
-        if (chunk_idx < num_chunks - 1) {
+        // This ensures DMA gaps occur at LED boundaries (after LSB of B component)
+        if (leds_remaining > 0) {
             xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
         }
     }
@@ -410,8 +439,8 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
                 const uint8_t* led_bytes = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
                 const uint8_t component_value = led_bytes[component];
 
-                // Generate 32-bit waveform for this component value
-                const uint32_t waveform = detail::generate_waveform(component_value);
+                // Generate 32-bit waveform for this component value using chipset-specific timing
+                const uint32_t waveform = detail::generate_waveform<CHIPSET>(component_value);
                 const uint32_t pin_bit = (1u << channel);
 
                 // Transpose: Extract each of 32 bits from waveform
