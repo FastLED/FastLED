@@ -48,28 +48,24 @@ if ! uv run python -m pytest --version &>/dev/null; then
 fi
 
 # Setup Meson build and generate compile_commands.json
+# Note: We use test.py to handle Meson setup because it properly:
+# 1. Generates meson_native.txt with correct compiler wrapper paths
+# 2. Handles platform-specific configuration automatically
+# 3. Sets up sccache integration correctly
 echo "Configuring Meson and building FastLED..."
-cd .build/meson 2>/dev/null || {
-    # First time setup: create build directory and run meson setup
-    mkdir -p .build/meson
-    cd .build/meson
-}
-meson setup . ../.. --wipe 2>/dev/null || meson compile -C .
-cd ../..
+mkdir -p .build/meson
+
+# Use test.py to configure Meson and generate compile_commands.json
+uv run test.py --cpp --quick 2>/dev/null || true
 
 # Copy compile_commands.json to project root for clangd
 if [ -f ".build/meson/compile_commands.json" ]; then
-    echo "✅ Generating auto complete for VSCode (compile_commands.json)"
     cp .build/meson/compile_commands.json .
+    echo "✅ Generated compile_commands.json for VSCode IntelliSense"
 else
-    echo "⚠️  Warning: compile_commands.json not found. Trying alternate setup..."
-    # Fallback: let test.py generate it
-    uv run test.py --cpp --quick 2>/dev/null || true
-    if [ -f ".build/meson/compile_commands.json" ]; then
-        cp .build/meson/compile_commands.json .
-        echo "✅ Generated compile_commands.json via test.py"
-    fi
-fi 
+    echo "⚠️  Warning: compile_commands.json not found. Meson setup may have failed."
+    echo "      You can retry with: uv run test.py --cpp --quick"
+fi
 
 echo "Setting up JavaScript development environment..."
 
