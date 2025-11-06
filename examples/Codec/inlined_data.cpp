@@ -1,5 +1,3 @@
-#include "fastled_progmem.h"
-
 #include "inlined_data.h"
 
 namespace CodecData {
