@@ -89,6 +89,9 @@ public:
     // Mark worker as available (called by pool under spinlock)
     void markAsAvailable() override;
 
+    // Mark worker as unavailable (called by pool under spinlock)
+    void markAsUnavailable() override;
+
 private:
     // Allow pool to access mAvailable for synchronized state changes
     friend class RmtWorkerPool;
@@ -129,6 +132,7 @@ private:
     fl::atomic_bool mTransmitting;    // Transmission in progress (ISR flag)
     const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
     int mNumBytes;                    // Total bytes to transmit
+    uint32_t mThresholdIsrCount;      // Threshold interrupt count (per-worker, ISR access)
 
     // Completion synchronization (replaces spin-wait)
     SemaphoreHandle_t mCompletionSemaphore;

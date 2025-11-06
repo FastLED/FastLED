@@ -20,6 +20,7 @@ FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"
+#include "fl/log.h"
 #include "fl/chipsets/led_timing.h"
 
 #define RMT5_POOL_TAG "rmt5_worker_pool"
@@ -41,6 +42,10 @@ RmtWorkerPool::RmtWorkerPool()
 }
 
 RmtWorkerPool::~RmtWorkerPool() {
+    // Clear alias vector first (before deleting) to avoid dangling pointers
+    // mWorkers is an alias for mDoubleBufferWorkers and contains the same pointers
+    mWorkers.clear();
+
     // Clean up double-buffer workers
     for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
         delete mDoubleBufferWorkers[i];
@@ -52,15 +57,17 @@ RmtWorkerPool::~RmtWorkerPool() {
         delete mOneShotWorkers[i];
     }
     mOneShotWorkers.clear();
-
-    mWorkers.clear();
 }
 
 void RmtWorkerPool::initializeWorkersIfNeeded() {
-    // Set log level to verbose for maximum debugging
+    // Set log level based on build type
+#ifdef NDEBUG
+    // Release build - use INFO level
+    esp_log_level_set(RMT5_POOL_TAG, ESP_LOG_INFO);
+#else
+    // Debug build - use VERBOSE level for detailed tracing
     esp_log_level_set(RMT5_POOL_TAG, ESP_LOG_VERBOSE);
-
-
+#endif
 
     if (mInitialized) {
         return;
@@ -73,8 +80,17 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 
 
     // Create K double-buffer workers (current default)
-    // Note: We only create one type because we only have K hardware channels
-    // Future: could dynamically choose worker type based on usage patterns
+    // HYBRID MODE: Currently only creating double-buffer workers
+    //
+    // Rationale: Each worker needs its own RMT hardware channel, and we only have K channels.
+    // We can't create both double-buffer AND one-shot workers without exceeding K channels.
+    //
+    // Future hybrid approach could:
+    // 1. Create some double-buffer + some one-shot workers (split K channels)
+    // 2. Dynamically reallocate channels based on strip sizes
+    // 3. Use DMA mode for large strips (ESP32-S3/C6 only)
+    //
+    // For now: All workers are double-buffer type, pool selects based on size at acquire time
     ESP_LOGD(RMT5_POOL_TAG, "Starting worker creation loop...");
     for (int i = 0; i < max_workers; i++) {
         ESP_LOGD(RMT5_POOL_TAG, "");
@@ -86,11 +102,11 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 
         ESP_LOGD(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
         if (!worker->initialize(static_cast<uint8_t>(i))) {
-            ESP_LOGE(RMT5_POOL_TAG, "FAILED to initialize double-buffer worker %d - skipping", i);
+            FL_WARN("FAILED to initialize double-buffer worker " << i << " - skipping");
             delete worker;
             continue;
         }
-        ESP_LOGD(RMT5_POOL_TAG, "Worker %d initialized successfully", i);
+        FL_LOG_RMT("Worker " << i << " initialized successfully");
 
         ESP_LOGD(RMT5_POOL_TAG, "Adding worker %d to pool vectors...", i);
         mDoubleBufferWorkers.push_back(worker);
@@ -100,11 +116,11 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
 
 
     if (mDoubleBufferWorkers.size() == 0 && mOneShotWorkers.size() == 0) {
-        ESP_LOGE(RMT5_POOL_TAG, "FATAL: No workers initialized successfully!");
+        FL_WARN("FATAL: No workers initialized successfully!");
     }
 
     mInitialized = true;
-    ESP_LOGD(RMT5_POOL_TAG, "=== initializeWorkersIfNeeded() EXIT - mInitialized=%d ===", mInitialized);
+    FL_LOG_RMT("Pool initialized with " << mDoubleBufferWorkers.size() << " workers");
 }
 
 IRmtWorkerBase* RmtWorkerPool::acquireWorker(
@@ -125,11 +141,13 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     initializeWorkersIfNeeded();
     ESP_LOGD(RMT5_POOL_TAG, "initializeWorkersIfNeeded() returned");
 
-    // Determine which worker type to use based on strip size
-    // For now, always use double-buffer (hybrid mode for future expansion)
+    // HYBRID MODE: Determine preferred worker type based on strip size
+    // Small strips (<=200 LEDs / 600 bytes) would benefit from one-shot (zero flicker)
+    // Large strips (>200 LEDs) use double-buffer (memory efficient)
+    //
+    // NOTE: Currently all workers are double-buffer type since we don't create one-shot workers
+    // This logic is preserved for future hybrid mode implementation
     bool use_oneshot = (static_cast<size_t>(num_bytes) <= ONE_SHOT_THRESHOLD_BYTES);
-
-
 
     // Try to get an available worker immediately
     ESP_LOGD(RMT5_POOL_TAG, "Entering critical section to search for available worker...");
@@ -139,6 +157,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     ESP_LOGD(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
     ESP_LOGD(RMT5_POOL_TAG, "Available one-shot workers: %zu", mOneShotWorkers.size());
 
+    // Try one-shot first if preferred and available
     if (use_oneshot && mOneShotWorkers.size() > 0) {
         ESP_LOGD(RMT5_POOL_TAG, "Searching for available one-shot worker...");
         worker = findAvailableOneShotWorker();
@@ -150,11 +169,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
     }
 
+    // Fall back to double-buffer worker
     if (!worker) {
         ESP_LOGD(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
         worker = findAvailableDoubleBufferWorker();
         if (worker) {
-            if (use_oneshot) {
+            if (use_oneshot && mOneShotWorkers.size() > 0) {
                 ESP_LOGD(RMT5_POOL_TAG, "Using DOUBLE-BUFFER worker for %d bytes (no one-shot available)", num_bytes);
             } else {
                 ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
@@ -167,7 +187,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     // CRITICAL: Mark worker unavailable BEFORE releasing spinlock
     // This prevents race where another thread/core acquires same worker
     if (worker) {
-        worker->mAvailable = false;  // Under spinlock - atomic visibility
+        worker->markAsUnavailable();  // Under spinlock - atomic visibility
     }
 
     portEXIT_CRITICAL(&mSpinlock);
@@ -184,19 +204,22 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         ESP_LOGD(RMT5_POOL_TAG, "Calling worker->configure(pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu)...",
                  (int)pin, t1, t2, t3, reset_ns);
         if (!worker->configure(pin, TIMING, reset_ns)) {
-            ESP_LOGE(RMT5_POOL_TAG, "worker->configure() FAILED!");
+            FL_WARN("worker->configure() FAILED!");
 
             // Configuration failed (likely channel creation failed due to exhaustion)
+            // Note: Worker state leak doesn't matter since abort() terminates program
+            // If this were changed to error handling, must release worker first
+
             // STRICT MODE: Abort immediately with stack trace
-            ESP_LOGE(RMT5_POOL_TAG, "");
-            ESP_LOGE(RMT5_POOL_TAG, "========================================");
-            ESP_LOGE(RMT5_POOL_TAG, "FATAL: RMT CHANNEL EXHAUSTION");
-            ESP_LOGE(RMT5_POOL_TAG, "========================================");
-            ESP_LOGE(RMT5_POOL_TAG, "Expected:  %d RMT channels", mExpectedChannels);
-            ESP_LOGE(RMT5_POOL_TAG, "Created:   %d channels", mCreatedChannels);
-            ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d (first acquisition)", (int)pin);
-            ESP_LOGE(RMT5_POOL_TAG, "========================================");
-            ESP_LOGE(RMT5_POOL_TAG, "");
+            FL_WARN("");
+            FL_WARN("========================================");
+            FL_WARN("FATAL: RMT CHANNEL EXHAUSTION");
+            FL_WARN("========================================");
+            FL_WARN("Expected:  " << mExpectedChannels << " RMT channels");
+            FL_WARN("Created:   " << mCreatedChannels << " channels");
+            FL_WARN("Failed on: GPIO " << (int)pin << " (first acquisition)");
+            FL_WARN("========================================");
+            FL_WARN("");
 
             // Stack trace from abort() will be printed by panic handler
             abort();
@@ -246,7 +269,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
         // CRITICAL: Mark unavailable BEFORE releasing spinlock
         if (worker) {
-            worker->mAvailable = false;
+            worker->markAsUnavailable();
         }
 
         portEXIT_CRITICAL(&mSpinlock);
@@ -282,22 +305,21 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
             if (config_fail_count >= MAX_CONFIG_RETRIES) {
                 // STRICT MODE: Abort with stack trace after exhausting retries
-                ESP_LOGE(RMT5_POOL_TAG, "");
-                ESP_LOGE(RMT5_POOL_TAG, "========================================");
-                ESP_LOGE(RMT5_POOL_TAG, "FATAL: RMT CHANNEL EXHAUSTION");
-                ESP_LOGE(RMT5_POOL_TAG, "========================================");
-                ESP_LOGE(RMT5_POOL_TAG, "Expected:  %d RMT channels", mExpectedChannels);
-                ESP_LOGE(RMT5_POOL_TAG, "Created:   %d channels", mCreatedChannels);
-                ESP_LOGE(RMT5_POOL_TAG, "Failed on: GPIO %d (after %u retries)", (int)pin, config_fail_count);
-                ESP_LOGE(RMT5_POOL_TAG, "========================================");
-                ESP_LOGE(RMT5_POOL_TAG, "");
+                FL_WARN("");
+                FL_WARN("========================================");
+                FL_WARN("FATAL: RMT CHANNEL EXHAUSTION");
+                FL_WARN("========================================");
+                FL_WARN("Expected:  " << mExpectedChannels << " RMT channels");
+                FL_WARN("Created:   " << mCreatedChannels << " channels");
+                FL_WARN("Failed on: GPIO " << (int)pin << " (after " << config_fail_count << " retries)");
+                FL_WARN("========================================");
+                FL_WARN("");
 
                 // Stack trace from abort() will be printed by panic handler
                 abort();
             }
 
-            ESP_LOGW(RMT5_POOL_TAG, "Worker configuration failed (attempt %u/%u) - will retry",
-                     config_fail_count, MAX_CONFIG_RETRIES);
+            FL_WARN("Worker configuration failed (attempt " << config_fail_count << "/" << MAX_CONFIG_RETRIES << ") - will retry");
             worker = nullptr;
         }
 
@@ -308,23 +330,20 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
         // Safety: Warn if waiting too long (more than 100ms = very unusual)
         if (poll_count % 1000 == 0) {  // Every 100ms
-            ESP_LOGW(RMT5_POOL_TAG, "Still waiting for available worker after %u ms",
-                static_cast<unsigned int>(poll_count / 10));
+            FL_WARN("Still waiting for available worker after " << (poll_count / 10) << " ms");
         }
     }
 
     // Timeout reached - no worker became available
-    ESP_LOGE(RMT5_POOL_TAG, "");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "WORKER ACQUISITION TIMEOUT");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "Failed to acquire worker for GPIO %d after %u ms",
-             (int)pin, static_cast<unsigned int>(poll_count / 10));
-    ESP_LOGE(RMT5_POOL_TAG, "Available workers: 0 (all %d workers are busy)",
-             static_cast<int>(mDoubleBufferWorkers.size() + mOneShotWorkers.size()));
-    ESP_LOGE(RMT5_POOL_TAG, "This usually indicates too many LED strips for available RMT channels");
-    ESP_LOGE(RMT5_POOL_TAG, "========================================");
-    ESP_LOGE(RMT5_POOL_TAG, "");
+    FL_WARN("");
+    FL_WARN("========================================");
+    FL_WARN("WORKER ACQUISITION TIMEOUT");
+    FL_WARN("========================================");
+    FL_WARN("Failed to acquire worker for GPIO " << (int)pin << " after " << (poll_count / 10) << " ms");
+    FL_WARN("Available workers: 0 (all " << (mDoubleBufferWorkers.size() + mOneShotWorkers.size()) << " workers are busy)");
+    FL_WARN("This usually indicates too many LED strips for available RMT channels");
+    FL_WARN("========================================");
+    FL_WARN("");
 
     return nullptr;
 }

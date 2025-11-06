@@ -20,6 +20,7 @@ FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"
+#include "fl/log.h"
 #include "fl/chipsets/led_timing.h"
 
 #define RMT5_CONTROLLER_TAG "rmt5_controller_lowlevel"
@@ -128,7 +129,7 @@ void RmtController5LowLevel::onEndShow() {
     );
 
     if (!worker) {
-        ESP_LOGW(RMT5_CONTROLLER_TAG, "Failed to acquire worker for pin %d", mPin);
+        FL_WARN("Failed to acquire worker for pin " << (int)mPin);
         return;
     }
 
@@ -160,8 +161,7 @@ void RmtController5LowLevel::ensurePixelBufferCapacity(int required_bytes) {
 
     uint8_t* new_buffer = static_cast<uint8_t*>(malloc(new_capacity));
     if (!new_buffer) {
-        ESP_LOGE(RMT5_CONTROLLER_TAG, "Failed to allocate pixel buffer (%u bytes)",
-            static_cast<unsigned int>(new_capacity));
+        FL_WARN("Failed to allocate pixel buffer (" << new_capacity << " bytes)");
         return;
     }
 

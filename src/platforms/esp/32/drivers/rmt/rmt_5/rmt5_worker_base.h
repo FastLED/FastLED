@@ -46,6 +46,10 @@ public:
     // This separates "transmission done" (ISR) from "worker available" (pool)
     virtual void markAsAvailable() = 0;
 
+    // Called by pool to mark worker as unavailable when acquired
+    // Must be called under pool's spinlock for atomic visibility
+    virtual void markAsUnavailable() = 0;
+
     // Worker info
     virtual uint8_t getWorkerId() const = 0;
 

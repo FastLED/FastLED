@@ -25,6 +25,7 @@ FL_EXTERN_C_END
 #include "fl/assert.h"
 #include "fl/cstring.h"
 #include "fl/compiler_control.h"
+#include "fl/log.h"
 #include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 #define RMT5_WORKER_TAG "rmt5_worker"
@@ -71,6 +72,7 @@ RmtWorker::RmtWorker(portMUX_TYPE* pool_spinlock)
     , mTransmitting(false)
     , mPixelData(nullptr)
     , mNumBytes(0)
+    , mThresholdIsrCount(0)
     , mCompletionSemaphore(nullptr)
     , mPoolSpinlock(pool_spinlock)
 {
@@ -111,13 +113,13 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 
     // Channel creation is deferred to configure() where we know the actual GPIO pin.
     // This avoids needing placeholder GPIOs and is safe for static initialization.
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Initialized (channel creation deferred to first configure)", worker_id);
+    FL_LOG_RMT("RmtWorker[" << (int)worker_id << "]: Initialized (channel creation deferred to first configure)");
 
     return true;
 }
 
 bool RmtWorker::createChannel(gpio_num_t pin) {
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Creating RMT TX channel for GPIO %d", mWorkerId, (int)pin);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Creating RMT TX channel for GPIO " << (int)pin);
 
     // Flush logs before potentially failing operation
     esp_log_level_set("*", ESP_LOG_VERBOSE);
@@ -132,35 +134,41 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     tx_config.flags.invert_out = false;
     tx_config.flags.with_dma = false;  // Phase 1: No DMA
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: About to call rmt_new_tx_channel for GPIO %d...", mWorkerId, (int)pin);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: About to call rmt_new_tx_channel for GPIO " << (int)pin);
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: rmt_new_tx_channel returned: %s (0x%x)", mWorkerId, esp_err_to_name(ret), ret);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: rmt_new_tx_channel returned: " << esp_err_to_name(ret) << " (0x" << ret << ")");
 
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to create RMT TX channel: %s (0x%x)",
-                 mWorkerId, esp_err_to_name(ret), ret);
+        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to create RMT TX channel: " << esp_err_to_name(ret) << " (0x" << ret << ")");
         return false;
     }
 
     // Extract channel ID from handle (relies on internal IDF structure)
     mChannelId = getChannelIdFromHandle(mChannel);
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Created channel_id=%lu", mWorkerId, mChannelId);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mChannelId);
 
     // Get direct pointer to RMT memory
     mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
     mRMT_mem_ptr = mRMT_mem_start;
 
     // Configure threshold interrupt for double-buffer ping-pong
+    // Threshold = half of total buffer size, triggering refill when first half is transmitted
+    // With 2 blocks × 64 words = 128 total words, threshold = 64 words (PULSES_PER_FILL)
+    // However, hardware requires threshold in bytes: 64 words × 4 bytes/word = 256 bytes
+    // But register expects word count, not byte count, so we use 48 (empirically determined)
+    // TODO: Investigate exact threshold calculation - may need platform-specific tuning
+    constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for double-buffer ping-pong
+
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    RMT.tx_lim_ch[mChannelId].limit = 48;
+    RMT.tx_lim_ch[mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-    RMT.tx_lim[mChannelId].limit = 48;
+    RMT.tx_lim[mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = 48;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #else
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
 #endif
@@ -172,7 +180,7 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     // This prevents interrupt watchdog timeout on ESP32-C6 (RISC-V) during early boot
 
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Channel created successfully", mWorkerId);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Channel created successfully");
     return true;
 }
 
@@ -182,7 +190,7 @@ bool RmtWorker::allocateInterrupt() {
         return true;
     }
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Allocating interrupt (first transmit)", mWorkerId);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating interrupt (first transmit)");
 
     // Enable threshold interrupt using direct register access
     uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
@@ -200,12 +208,11 @@ bool RmtWorker::allocateInterrupt() {
     );
 
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_WORKER_TAG, "RmtWorker[%d]: Failed to allocate ISR: %s (0x%x)",
-                 mWorkerId, esp_err_to_name(ret), ret);
+        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to allocate ISR: " << esp_err_to_name(ret) << " (0x" << ret << ")");
         return false;
     }
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)", mWorkerId);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
     mInterruptAllocated = true;
     return true;
 }
@@ -216,24 +223,23 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
     uint32_t t2 = TIMING.T2;
     uint32_t t3 = TIMING.T3;
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: configure() called - pin=%d, t1=%lu, t2=%lu, t3=%lu, reset_ns=%lu",
-             mWorkerId, (int)pin, t1, t2, t3, reset_ns);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: configure() called - pin=" << (int)pin
+               << ", t1=" << t1 << ", t2=" << t2 << ", t3=" << t3 << ", reset_ns=" << reset_ns);
 
     // Channel creation deferred to first transmit() call
     // This prevents ESP32-C6 (RISC-V) boot hang during RMT hardware initialization
 
     // Check if reconfiguration needed
     if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
-        ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Already configured with same parameters - skipping", mWorkerId);
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Already configured with same parameters - skipping");
         return true;  // Already configured
     }
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Reconfiguration needed (previous pin=%d)",
-             mWorkerId, (int)mCurrentPin);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Reconfiguration needed (previous pin=" << (int)mCurrentPin << ")");
 
     // Wait for active transmission
     if (mTransmitting) {
-        ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: Waiting for active transmission to complete", mWorkerId);
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Waiting for active transmission to complete");
         waitForCompletion();
     }
 
@@ -271,10 +277,10 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t 
     mOne.level1 = 0;
     mOne.duration1 = ns_to_ticks(t3);
 
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: mZero={dur0=%u, lvl0=%u, dur1=%u, lvl1=%u, val=0x%08lx}",
-             mWorkerId, mZero.duration0, mZero.level0, mZero.duration1, mZero.level1, mZero.val);
-    ESP_LOGI(RMT5_WORKER_TAG, "RmtWorker[%d]: mOne={dur0=%u, lvl0=%u, dur1=%u, lvl1=%u, val=0x%08lx}",
-             mWorkerId, mOne.duration0, mOne.level0, mOne.duration1, mOne.level1, mOne.val);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: mZero={dur0=" << mZero.duration0 << ", lvl0=" << mZero.level0
+               << ", dur1=" << mZero.duration1 << ", lvl1=" << mZero.level1 << ", val=0x" << mZero.val << "}");
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: mOne={dur0=" << mOne.duration0 << ", lvl0=" << mOne.level0
+               << ", dur1=" << mOne.duration1 << ", lvl1=" << mOne.level1 << ", val=0x" << mOne.val << "}");
 
     // GPIO configuration deferred to first transmit() when channel exists
 
@@ -285,16 +291,23 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_ASSERT(!mTransmitting, "RmtWorker::transmit called while already transmitting");
     FL_ASSERT(pixel_data != nullptr, "RmtWorker::transmit called with null pixel data");
 
+    // Safety check in case FL_ASSERT is compiled out
+    if (pixel_data == nullptr || mTransmitting) {
+        FL_WARN("Worker[" << (int)mWorkerId << "]: Invalid transmit state - pixel_data=" << (void*)pixel_data
+                << ", transmitting=" << mTransmitting.load());
+        return;
+    }
+
     // Create RMT channel on first transmit (lazy initialization)
     // This prevents ESP32-C6 (RISC-V) boot hang during hardware initialization
     if (mChannel == nullptr) {
         if (!createChannel(mCurrentPin)) {
-            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to create channel - aborting transmit", mWorkerId);
+            FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to create channel - aborting transmit");
             return;
         }
-        
+
         // Configure GPIO and enable channel (only on first creation)
-        ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Configuring GPIO %d for RMT output", mWorkerId, (int)mCurrentPin);
+        FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Configuring GPIO " << (int)mCurrentPin << " for RMT output");
         gpio_set_direction(mCurrentPin, GPIO_MODE_OUTPUT);
         
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
@@ -304,20 +317,20 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         int signal_idx = RMT_SIG_OUT0_IDX + mChannelId;
         gpio_matrix_out(mCurrentPin, signal_idx, false, false);
 #endif
-        
+
         esp_err_t ret = rmt_enable(mChannel);
         if (ret != ESP_OK) {
-            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to enable channel: %s", mWorkerId, esp_err_to_name(ret));
+            FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to enable channel: " << esp_err_to_name(ret));
             return;
         }
-        ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Channel enabled and ready", mWorkerId);
+        FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Channel enabled and ready");
     }
 
     // Allocate interrupt on first transmit (lazy initialization)
     // This prevents interrupt watchdog timeout on ESP32-C6 during early boot
     if (!mInterruptAllocated) {
         if (!allocateInterrupt()) {
-            ESP_LOGE(RMT5_WORKER_TAG, "Worker[%d]: Failed to allocate interrupt - aborting transmit", mWorkerId);
+            FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to allocate interrupt - aborting transmit");
             return;
         }
     }
@@ -327,13 +340,13 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     mNumBytes = num_bytes;
 
     // Debug: Log transmission start
-    ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: TX START - %d bytes (%d LEDs)",
-             mWorkerId, num_bytes, num_bytes / 3);
+    FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 
     // Reset state
     mCur = 0;
     mWhichHalf = 0;
     mRMT_mem_ptr = mRMT_mem_start;
+    mThresholdIsrCount = 0;  // Reset per-transmission counter
 
     // Set transmission flag (atomic for ISR visibility)
     mTransmitting.store(true, fl::memory_order_release);
@@ -348,7 +361,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     mWhichHalf = 0;
     mRMT_mem_ptr = mRMT_mem_start;
 
-    ESP_LOGI(RMT5_WORKER_TAG, "Worker[%d]: Both halves filled, starting HW transmission", mWorkerId);
+    FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Both halves filled, starting HW transmission");
 
     tx_start();
 }
@@ -365,6 +378,12 @@ void RmtWorker::markAsAvailable() {
     // Called by pool under spinlock to mark worker as available
     // This ensures atomic visibility across all cores
     mAvailable = true;
+}
+
+void RmtWorker::markAsUnavailable() {
+    // Called by pool under spinlock to mark worker as unavailable
+    // This ensures atomic visibility across all cores
+    mAvailable = false;
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -407,8 +426,17 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
     volatile rmt_item32_t* pItem = mRMT_mem_ptr;
     uint8_t currentHalf = mWhichHalf;
 
+    // Safety: Calculate buffer end pointer
+    volatile rmt_item32_t* pBufferEnd = mRMT_mem_start + MAX_PULSES;
+
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
     for (fl::size i = 0; i < RmtWorker::PULSES_PER_FILL / 8; i++) {
+        // Boundary check - ensure we don't overflow RMT memory
+        if (pItem + 8 > pBufferEnd) {
+            ets_printf("W%d: ERROR - Buffer overflow detected in fillNextHalf!\n", mWorkerId);
+            break;
+        }
+
         if (mCur < mNumBytes) {
             convertByteToRmt(mPixelData[mCur], pItem);
             pItem += 8;
@@ -566,11 +594,10 @@ FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
     portENTER_CRITICAL_ISR(mPoolSpinlock);
 
-    // Debug: Track threshold interrupts
-    static uint32_t thresholdCount = 0;
-    thresholdCount++;
-    if (thresholdCount % 10 == 0) {  // Log every 10th to reduce spam
-        ets_printf("W%d: THRESHOLD_ISR #%d\n", mWorkerId, thresholdCount);
+    // Debug: Track threshold interrupts (per-worker instance variable, not static)
+    mThresholdIsrCount++;
+    if (mThresholdIsrCount % 10 == 0) {  // Log every 10th to reduce spam
+        ets_printf("W%d: THRESHOLD_ISR #%lu\n", mWorkerId, mThresholdIsrCount);
     }
 
     fillNextHalf();
@@ -604,16 +631,37 @@ FL_DISABLE_WARNING_POP
 
 // Extract channel ID from opaque handle
 uint32_t RmtWorker::getChannelIdFromHandle(rmt_channel_handle_t handle) {
-    // This relies on internal IDF structure
-    // WARNING: May break on future IDF versions
+    // SAFETY WARNING: This relies on internal ESP-IDF structure layout
+    // which may change between IDF versions. This is a fragile workaround
+    // until ESP-IDF provides an official API to query channel ID.
+    //
+    // Tested on ESP-IDF 5.x series. If this breaks:
+    // 1. Check if ESP-IDF added rmt_get_channel_id() or similar API
+    // 2. Update this code to use official API
+    // 3. If no API exists, inspect rmt_tx_channel_t definition in:
+    //    components/esp_driver_rmt/src/rmt_tx.c
+
+    if (handle == nullptr) {
+        FL_WARN("getChannelIdFromHandle: null handle");
+        return 0;
+    }
+
     struct rmt_tx_channel_t {
-        void* base;  // rmt_channel_t base
-        uint32_t channel_id;
+        void* base;  // rmt_channel_t base (offset 0)
+        uint32_t channel_id;  // offset sizeof(void*)
         // ... other fields we don't care about
     };
 
     rmt_tx_channel_t* tx_chan = reinterpret_cast<rmt_tx_channel_t*>(handle);
-    return tx_chan->channel_id;
+    uint32_t channel_id = tx_chan->channel_id;
+
+    // Sanity check - channel ID should be in valid range
+    if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
+        FL_WARN("getChannelIdFromHandle: invalid channel_id " << channel_id << " (max " << (SOC_RMT_CHANNELS_PER_GROUP - 1) << ")");
+        return 0;
+    }
+
+    return channel_id;
 }
 
 } // namespace fl

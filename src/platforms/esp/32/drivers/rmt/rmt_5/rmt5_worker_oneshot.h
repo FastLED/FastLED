@@ -91,6 +91,9 @@ public:
     // Mark worker as available (called by pool under spinlock)
     void markAsAvailable() override;
 
+    // Mark worker as unavailable (called by pool under spinlock)
+    void markAsUnavailable() override;
+
 private:
     // Allow pool to access mAvailable for synchronized state changes
     friend class RmtWorkerPool;

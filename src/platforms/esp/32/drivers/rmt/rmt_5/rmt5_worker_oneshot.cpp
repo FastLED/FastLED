@@ -15,12 +15,14 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc.h"
 #include "soc/rmt_struct.h"
 #include "rom/gpio.h"
+#include "rom/ets_sys.h"  // For ets_printf (ISR-safe logging)
 #include "esp_log.h"
 
 FL_EXTERN_C_END
 
 #include "fl/force_inline.h"
 #include "fl/assert.h"
+#include "fl/log.h"
 
 #define RMT5_ONESHOT_TAG "rmt5_oneshot"
 
@@ -98,13 +100,13 @@ bool RmtWorkerOneShot::initialize(uint8_t worker_id) {
 
     // Channel creation is deferred to configure() where we know the actual GPIO pin.
     // This avoids needing placeholder GPIOs and is safe for static initialization.
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Initialized (channel creation deferred to first configure)", worker_id);
+    FL_LOG_RMT("OneShot[" << (int)worker_id << "]: Initialized (channel creation deferred to first configure)");
 
     return true;
 }
 
 bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Creating RMT TX channel for GPIO %d", mWorkerId, (int)pin);
+    FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: Creating RMT TX channel for GPIO " << (int)pin);
 
     // Create RMT TX channel (no double-buffer needed for one-shot)
     rmt_tx_channel_config_t tx_config = {};
@@ -118,7 +120,7 @@ bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
 
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create RMT TX channel: %d", mWorkerId, ret);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to create RMT TX channel: " << ret);
         return false;
     }
 
@@ -140,7 +142,7 @@ bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
 
     ret = rmt_new_bytes_encoder(&encoder_config, &mEncoder);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to create bytes encoder: %d", mWorkerId, ret);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to create bytes encoder: " << ret);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
         return false;
@@ -151,7 +153,7 @@ bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
     callbacks.on_trans_done = &RmtWorkerOneShot::onTransDoneCallback;
     ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to register callbacks: %d", mWorkerId, ret);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to register callbacks: " << ret);
         rmt_del_encoder(mEncoder);
         rmt_del_channel(mChannel);
         mEncoder = nullptr;
@@ -159,7 +161,7 @@ bool RmtWorkerOneShot::createChannel(gpio_num_t pin) {
         return false;
     }
 
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Channel created successfully", mWorkerId);
+    FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: Channel created successfully");
     return true;
 }
 
@@ -223,7 +225,7 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, const ChipsetTiming& TIMING, ui
     if (old_pin != GPIO_NUM_NC) {
         esp_err_t ret = rmt_disable(mChannel);
         if (ret != ESP_OK) {
-            ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to disable channel for GPIO change: %d", mWorkerId, ret);
+            FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to disable channel for GPIO change: " << ret);
             return false;
         }
     }
@@ -240,7 +242,7 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, const ChipsetTiming& TIMING, ui
 
     esp_err_t ret = rmt_enable(mChannel);
     if (ret != ESP_OK) {
-        ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to enable channel: %d", mWorkerId, ret);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to enable channel: " << ret);
         return false;
     }
 
@@ -248,13 +250,21 @@ bool RmtWorkerOneShot::configure(gpio_num_t pin, const ChipsetTiming& TIMING, ui
 }
 
 void RmtWorkerOneShot::preEncode(const uint8_t* pixel_data, int num_bytes) {
+    // Safety: Check for integer overflow before multiplication
+    const size_t max_bytes = (SIZE_MAX - 1) / 8;  // Maximum bytes before overflow
+    if (static_cast<size_t>(num_bytes) > max_bytes) {
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: num_bytes (" << num_bytes << ") too large, would overflow");
+        mEncodedSize = 0;
+        return;
+    }
+
     // Calculate required symbols (8 per byte + 1 reset)
     const size_t num_symbols = static_cast<size_t>(num_bytes) * 8 + 1;
 
     // Allocate exact size needed (LED strips don't grow, size is fixed at init)
     if (mEncodedCapacity < num_symbols) {
-        ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Resizing buffer %zu -> %zu symbols (%.1fKB)",
-                 mWorkerId, mEncodedCapacity, num_symbols, (num_symbols * sizeof(rmt_item32_t)) / 1024.0f);
+        FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: Resizing buffer " << mEncodedCapacity << " -> " << num_symbols
+                   << " symbols (" << ((num_symbols * sizeof(rmt_item32_t)) / 1024.0f) << "KB)");
 
         // Try realloc first (more efficient if possible)
         rmt_item32_t* new_buffer = static_cast<rmt_item32_t*>(
@@ -263,13 +273,13 @@ void RmtWorkerOneShot::preEncode(const uint8_t* pixel_data, int num_bytes) {
 
         if (!new_buffer) {
             // Realloc failed - free old buffer and try malloc
-            ESP_LOGW(RMT5_ONESHOT_TAG, "OneShot[%d]: realloc failed, trying malloc", mWorkerId);
+            FL_WARN("OneShot[" << (int)mWorkerId << "]: realloc failed, trying malloc");
             free(mEncodedSymbols);
             mEncodedSymbols = static_cast<rmt_item32_t*>(malloc(num_symbols * sizeof(rmt_item32_t)));
 
             if (!mEncodedSymbols) {
-                ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Failed to allocate %zu symbols (%.1fKB)",
-                         mWorkerId, num_symbols, (num_symbols * sizeof(rmt_item32_t)) / 1024.0f);
+                FL_WARN("OneShot[" << (int)mWorkerId << "]: Failed to allocate " << num_symbols << " symbols ("
+                        << ((num_symbols * sizeof(rmt_item32_t)) / 1024.0f) << "KB)");
                 mEncodedCapacity = 0;
                 mEncodedSize = 0;
                 return;
@@ -293,22 +303,28 @@ void RmtWorkerOneShot::preEncode(const uint8_t* pixel_data, int num_bytes) {
 
     mEncodedSize = num_symbols;
 
-    ESP_LOGD(RMT5_ONESHOT_TAG, "OneShot[%d]: Pre-encoded %d bytes -> %zu symbols (%.1fKB)",
-             mWorkerId, num_bytes, num_symbols, (num_symbols * sizeof(rmt_item32_t)) / 1024.0f);
+    FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: Pre-encoded " << num_bytes << " bytes -> " << num_symbols
+               << " symbols (" << ((num_symbols * sizeof(rmt_item32_t)) / 1024.0f) << "KB)");
 }
 
 void RmtWorkerOneShot::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_ASSERT(!mTransmitting, "RmtWorkerOneShot::transmit called while already transmitting");
     FL_ASSERT(pixel_data != nullptr, "RmtWorkerOneShot::transmit called with null pixel data");
 
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: TX START - %d bytes (%d LEDs)",
-             mWorkerId, num_bytes, num_bytes / 3);
+    // Safety check in case FL_ASSERT is compiled out
+    if (pixel_data == nullptr || mTransmitting) {
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Invalid transmit state - pixel_data=" << (void*)pixel_data
+                << ", transmitting=" << mTransmitting.load());
+        return;
+    }
+
+    FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 
     // Pre-encode entire strip to RMT symbols
     preEncode(pixel_data, num_bytes);
 
     if (!mEncodedSymbols || mEncodedSize == 0) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: Pre-encoding failed, aborting transmission", mWorkerId);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: Pre-encoding failed, aborting transmission");
         return;
     }
 
@@ -332,14 +348,13 @@ void RmtWorkerOneShot::transmit(const uint8_t* pixel_data, int num_bytes) {
     );
 
     if (ret != ESP_OK) {
-        ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: rmt_transmit failed: %d", mWorkerId, ret);
+        FL_WARN("OneShot[" << (int)mWorkerId << "]: rmt_transmit failed: " << ret);
         mTransmitting.store(false, fl::memory_order_release);
         // Don't modify mAvailable here - pool owns that state
         return;
     }
 
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: Transmission started (%zu symbols)",
-             mWorkerId, mEncodedSize);
+    FL_LOG_RMT("OneShot[" << (int)mWorkerId << "]: Transmission started (" << mEncodedSize << " symbols)");
 }
 
 void RmtWorkerOneShot::waitForCompletion() {
@@ -352,6 +367,11 @@ void RmtWorkerOneShot::waitForCompletion() {
 void RmtWorkerOneShot::markAsAvailable() {
     // Called by pool under spinlock to mark worker as available
     mAvailable = true;
+}
+
+void RmtWorkerOneShot::markAsUnavailable() {
+    // Called by pool under spinlock to mark worker as unavailable
+    mAvailable = false;
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -392,7 +412,8 @@ bool IRAM_ATTR RmtWorkerOneShot::onTransDoneCallback(
 ) {
     RmtWorkerOneShot* worker = static_cast<RmtWorkerOneShot*>(user_data);
 
-    ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: TX DONE", worker->mWorkerId);
+    // Use ISR-safe logging (ESP_LOGI uses mutexes, not safe in ISR)
+    ets_printf("OneShot[%d]: TX DONE\n", worker->mWorkerId);
 
     // Clear transmission flag (atomic for cross-core visibility)
     worker->mTransmitting.store(false, fl::memory_order_release);
@@ -409,13 +430,29 @@ bool IRAM_ATTR RmtWorkerOneShot::onTransDoneCallback(
 
 // Extract channel ID from opaque handle (same as double-buffer worker)
 uint32_t RmtWorkerOneShot::getChannelIdFromHandle(rmt_channel_handle_t handle) {
+    // SAFETY WARNING: This relies on internal ESP-IDF structure layout
+    // See detailed comments in RmtWorker::getChannelIdFromHandle()
+
+    if (handle == nullptr) {
+        FL_WARN("getChannelIdFromHandle: null handle");
+        return 0;
+    }
+
     struct rmt_tx_channel_t {
-        void* base;
-        uint32_t channel_id;
+        void* base;  // rmt_channel_t base (offset 0)
+        uint32_t channel_id;  // offset sizeof(void*)
     };
 
     rmt_tx_channel_t* tx_chan = reinterpret_cast<rmt_tx_channel_t*>(handle);
-    return tx_chan->channel_id;
+    uint32_t channel_id = tx_chan->channel_id;
+
+    // Sanity check - channel ID should be in valid range
+    if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
+        FL_WARN("getChannelIdFromHandle: invalid channel_id " << channel_id << " (max " << (SOC_RMT_CHANNELS_PER_GROUP - 1) << ")");
+        return 0;
+    }
+
+    return channel_id;
 }
 
 } // namespace fl
