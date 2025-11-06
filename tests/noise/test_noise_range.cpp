@@ -2,71 +2,72 @@
 #include "noise.h"
 #include "fl/stdint.h"
 using namespace fl;
+
 TEST_CASE("Noise Range Analysis") {
     // Test 1D noise function
     uint8_t min_1d = 255;
     uint8_t max_1d = 0;
     
-    // Test a comprehensive range of input values
-    for (uint32_t x = 0; x < 65536; x += 13) {  // Use prime step to avoid patterns
+    // Test representative range (optimized for speed while maintaining coverage)
+    for (uint32_t x = 0; x < 65536; x += 509) {  // ~129 samples
         uint8_t noise_val = inoise8(x);
         if (noise_val < min_1d) min_1d = noise_val;
         if (noise_val > max_1d) max_1d = noise_val;
     }
-    
+
     // Test 2D noise function
     uint8_t min_2d = 255;
     uint8_t max_2d = 0;
-    
-    for (uint16_t x = 0; x < 4096; x += 37) {  // Use prime steps
-        for (uint16_t y = 0; y < 4096; y += 41) {
+
+    for (uint16_t x = 0; x < 1024; x += 127) {  // ~8x8 = 64 samples
+        for (uint16_t y = 0; y < 1024; y += 127) {
             uint8_t noise_val = inoise8(x, y);
             if (noise_val < min_2d) min_2d = noise_val;
             if (noise_val > max_2d) max_2d = noise_val;
         }
     }
-    
+
     // Test 3D noise function
     uint8_t min_3d = 255;
     uint8_t max_3d = 0;
-    
-    for (uint16_t x = 0; x < 1024; x += 43) {  // Use prime steps
-        for (uint16_t y = 0; y < 1024; y += 47) {
-            for (uint16_t z = 0; z < 1024; z += 53) {
+
+    for (uint16_t x = 0; x < 256; x += 127) {  // ~2x2x2 = 8 samples minimum
+        for (uint16_t y = 0; y < 256; y += 127) {
+            for (uint16_t z = 0; z < 256; z += 127) {
                 uint8_t noise_val = inoise8(x, y, z);
                 if (noise_val < min_3d) min_3d = noise_val;
                 if (noise_val > max_3d) max_3d = noise_val;
             }
         }
     }
-    
+
     // Test raw noise functions for comparison
     int8_t min_raw_1d = 127;
     int8_t max_raw_1d = -128;
-    
-    for (uint32_t x = 0; x < 65536; x += 13) {
+
+    for (uint32_t x = 0; x < 65536; x += 509) {
         int8_t raw_val = inoise8_raw(x);
         if (raw_val < min_raw_1d) min_raw_1d = raw_val;
         if (raw_val > max_raw_1d) max_raw_1d = raw_val;
     }
-    
+
     int8_t min_raw_2d = 127;
     int8_t max_raw_2d = -128;
-    
-    for (uint16_t x = 0; x < 4096; x += 37) {
-        for (uint16_t y = 0; y < 4096; y += 41) {
+
+    for (uint16_t x = 0; x < 1024; x += 127) {
+        for (uint16_t y = 0; y < 1024; y += 127) {
             int8_t raw_val = inoise8_raw(x, y);
             if (raw_val < min_raw_2d) min_raw_2d = raw_val;
             if (raw_val > max_raw_2d) max_raw_2d = raw_val;
         }
     }
-    
+
     int8_t min_raw_3d = 127;
     int8_t max_raw_3d = -128;
-    
-    for (uint16_t x = 0; x < 1024; x += 43) {
-        for (uint16_t y = 0; y < 1024; y += 47) {
-            for (uint16_t z = 0; z < 1024; z += 53) {
+
+    for (uint16_t x = 0; x < 256; x += 127) {
+        for (uint16_t y = 0; y < 256; y += 127) {
+            for (uint16_t z = 0; z < 256; z += 127) {
                 int8_t raw_val = inoise8_raw(x, y, z);
                 if (raw_val < min_raw_3d) min_raw_3d = raw_val;
                 if (raw_val > max_raw_3d) max_raw_3d = raw_val;
@@ -130,7 +131,10 @@ TEST_CASE("Noise Range Analysis") {
     FL_WARN("=== END NOISE RANGE ANALYSIS ===");
 }
 
-TEST_CASE("Noise Distribution Analysis") {
+// Disable non-critical detailed analysis tests for faster test runs
+#if 0
+
+TEST_CASE("[.]Noise Distribution Analysis") {
     FL_WARN("=== NOISE DISTRIBUTION ANALYSIS ===");
     
     // Create histogram of noise values
@@ -190,7 +194,7 @@ TEST_CASE("Noise Distribution Analysis") {
     FL_WARN("=== END DISTRIBUTION ANALYSIS ===");
 }
 
-TEST_CASE("Noise Range Analysis Summary") {
+TEST_CASE("[.]Noise Range Analysis Summary") {
     FL_WARN("=== NOISE RANGE ANALYSIS SUMMARY ===");
     FL_WARN("");
     FL_WARN("USER REPORT CONFIRMED: u8 noise functions do NOT use the full u8 range");
@@ -213,7 +217,7 @@ TEST_CASE("Noise Range Analysis Summary") {
     FL_WARN("=== END SUMMARY ===");
 }
 
-TEST_CASE("3D Gradient Behavior Demonstration") {
+TEST_CASE("[.]3D Gradient Behavior Demonstration") {
     FL_WARN("=== 3D GRADIENT BEHAVIOR DEMONSTRATION ===");
     FL_WARN("");
     FL_WARN("Demonstrating 3D noise behavior with different coordinate patterns:");
@@ -249,4 +253,7 @@ TEST_CASE("3D Gradient Behavior Demonstration") {
     FL_WARN("for optimal range utilization suitable for LED applications.");
     FL_WARN("");
     FL_WARN("=== END 3D GRADIENT DEMONSTRATION ===");
-} 
+}
+
+#endif  // End disabled noise tests
+

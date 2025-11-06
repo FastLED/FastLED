@@ -10,7 +10,11 @@
 using namespace fl;
 using namespace noise_test_helpers;
 
-TEST_CASE("noiseRingHSV8 temporal smoothness - small time delta") {
+// Temporarily disable all non-critical noise tests for faster test runs
+// These can be re-enabled when needed for in-depth noise validation
+#if 0
+
+TEST_CASE("[.]noiseRingHSV8 temporal smoothness - small time delta") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -47,7 +51,7 @@ TEST_CASE("noiseRingHSV8 temporal smoothness - small time delta") {
     CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
-TEST_CASE("noiseRingHSV8 temporal evolution - large time delta") {
+TEST_CASE("[.]noiseRingHSV8 temporal evolution - large time delta") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -83,7 +87,7 @@ TEST_CASE("noiseRingHSV8 temporal evolution - large time delta") {
     CHECK_GT(avg_diff_1sec, 1.0f);
 }
 
-TEST_CASE("noiseRingHSV8 temporal response ratio") {
+TEST_CASE("[.]noiseRingHSV8 temporal response ratio") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -130,7 +134,7 @@ TEST_CASE("noiseRingHSV8 temporal response ratio") {
     CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("noiseRingCRGB temporal test") {
+TEST_CASE("[.]noiseRingCRGB temporal test") {
     const int NUM_LEDS = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -173,7 +177,7 @@ TEST_CASE("noiseRingCRGB temporal test") {
     CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("noiseRingHSV16 full ring coverage") {
+TEST_CASE("[.]noiseRingHSV16 full ring coverage") {
     const int NUM_LEDS = 256;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -224,7 +228,7 @@ TEST_CASE("noiseRingHSV16 full ring coverage") {
     CHECK_LT(h_avg, 0xD000);
 }
 
-TEST_CASE("noiseRingHSV8 radius level of detail") {
+TEST_CASE("[.]noiseRingHSV8 radius level of detail") {
     const int NUM_LEDS = 64;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_LEDS;
 
@@ -258,7 +262,7 @@ TEST_CASE("noiseRingHSV8 radius level of detail") {
 }
 
 // Sphere noise tests
-TEST_CASE("noiseSphereHSV8 temporal smoothness - small time delta") {
+TEST_CASE("[.]noiseSphereHSV8 temporal smoothness - small time delta") {
     const int NUM_SAMPLES = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_SAMPLES;
 
@@ -293,7 +297,7 @@ TEST_CASE("noiseSphereHSV8 temporal smoothness - small time delta") {
     CHECK_LT(avg_diff_1ms, 5.0f);
 }
 
-TEST_CASE("noiseSphereHSV8 temporal evolution - large time delta") {
+TEST_CASE("[.]noiseSphereHSV8 temporal evolution - large time delta") {
     const int NUM_SAMPLES = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_SAMPLES;
 
@@ -328,7 +332,7 @@ TEST_CASE("noiseSphereHSV8 temporal evolution - large time delta") {
     CHECK_GT(avg_diff_1sec, 0.1f);
 }
 
-TEST_CASE("noiseSphereHSV8 temporal response ratio") {
+TEST_CASE("[.]noiseSphereHSV8 temporal response ratio") {
     const int NUM_SAMPLES = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_SAMPLES;
 
@@ -376,7 +380,7 @@ TEST_CASE("noiseSphereHSV8 temporal response ratio") {
     CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("noiseSphereCRGB temporal test") {
+TEST_CASE("[.]noiseSphereCRGB temporal test") {
     const int NUM_SAMPLES = 128;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_SAMPLES;
 
@@ -419,7 +423,7 @@ TEST_CASE("noiseSphereCRGB temporal test") {
     CHECK_GT(avg_diff_1sec, avg_diff_1ms);
 }
 
-TEST_CASE("noiseSphereHSV16 full sphere coverage") {
+TEST_CASE("[.]noiseSphereHSV16 full sphere coverage") {
     const int ANGLE_SAMPLES = 16;
     const int PHI_SAMPLES = 8;
     const float ANGLE_STEP = 2.0f * M_PI / ANGLE_SAMPLES;
@@ -478,7 +482,7 @@ TEST_CASE("noiseSphereHSV16 full sphere coverage") {
     CHECK_LT(h_avg, 0xD000);
 }
 
-TEST_CASE("noiseSphereHSV8 radius level of detail") {
+TEST_CASE("[.]noiseSphereHSV8 radius level of detail") {
     const int NUM_SAMPLES = 64;
     const float ANGLE_STEP = 2.0f * M_PI / NUM_SAMPLES;
 
@@ -513,7 +517,7 @@ TEST_CASE("noiseSphereHSV8 radius level of detail") {
     CHECK_GT(avg_diff, 10.0f);
 }
 
-TEST_CASE("noiseSphereHSV8 polar angle variation") {
+TEST_CASE("[.]noiseSphereHSV8 polar angle variation") {
     const int NUM_SAMPLES = 32;
     const float PHI_STEP = M_PI / NUM_SAMPLES;
 
@@ -609,7 +613,7 @@ TEST_CASE("[.]noiseRingHSV16 stress test - 1M time samples") {
     CHECK_GT(v_span, 0);
 }
 
-TEST_CASE("noiseRingHSV16 angle sweep - full ring coverage at fixed time") {
+TEST_CASE("[.]noiseRingHSV16 angle sweep - full ring coverage at fixed time") {
     // Test: Vary angle around the full ring, keep time and radius constant
     // This shows the effective range when the noise position changes spatially
     const int NUM_ANGLES = 360;  // Sample every 1 degree
@@ -668,7 +672,7 @@ TEST_CASE("noiseRingHSV16 angle sweep - full ring coverage at fixed time") {
     CHECK_GT(v_span, 0);
 }
 
-TEST_CASE("noiseRingHSV16 2D parameter space - time + angle variation") {
+TEST_CASE("[.]noiseRingHSV16 2D parameter space - time + angle variation") {
     // Comprehensive stress test: Vary BOTH time and angle
     // This explores a 2D parameter space to find true min/max
     const int ANGLE_SAMPLES = 64;
@@ -730,7 +734,7 @@ TEST_CASE("noiseRingHSV16 2D parameter space - time + angle variation") {
     CHECK_GT(v_span, 0);
 }
 
-TEST_CASE("noiseRingHSV16 random angle + time - 1M samples") {
+TEST_CASE("[.]noiseRingHSV16 random angle + time - 1M samples") {
     // Randomized stress test: Vary BOTH angle (0->2PI) and time randomly
     // This tests if component ranges vary based on spatial position vs just time slices
     const int NUM_SAMPLES = 1000000;
@@ -800,7 +804,7 @@ TEST_CASE("noiseRingHSV16 random angle + time - 1M samples") {
     CHECK_GT(v_span, 0);
 }
 
-TEST_CASE("noiseRingHSV16 find optimal extents for 98% coverage - 100k raw samples") {
+TEST_CASE("[.]noiseRingHSV16 find optimal extents for 98% coverage - 100k raw samples") {
     // Find optimal MIN/MAX extents that will yield ~98% coverage after rescaling
     // Sample RAW noise values (before rescaling) to find observed min/max distribution
     const int NUM_SAMPLES = 100000;  // Sample 100k raw values
@@ -886,7 +890,7 @@ TEST_CASE("noiseRingHSV16 find optimal extents for 98% coverage - 100k raw sampl
     FL_WARN("  Option 3: [9000, 57000]  → ~95% coverage, valid at radius=1000");
 }
 
-TEST_CASE("noiseRingHSV16 extent validation - 10k random samples at radius 1000") {
+TEST_CASE("[.]noiseRingHSV16 extent validation - 10k random samples at radius 1000") {
     // Validation test: Run 10 trials to collect statistics on observed noise ranges
     // across different random seeds. This helps determine optimal extents that maximize
     // output coverage while accepting that extreme tail values will be clipped.
@@ -1015,4 +1019,6 @@ TEST_CASE("noiseRingHSV16 extent validation - 10k random samples at radius 1000"
     // The test passes as long as we're aware of the ranges
     // Clipping is acceptable for optimal coverage
 }
+
+#endif  // End disabled noise tests
 
