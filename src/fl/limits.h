@@ -198,6 +198,12 @@ struct numeric_limits<unsigned char> {
     static constexpr unsigned char round_error() noexcept { return 0; }
 };
 
+// Protect against min/max macros from Arduino and other platforms
+#pragma push_macro("min")
+#pragma push_macro("max")
+#undef min
+#undef max
+
 // Specialization for short (i16)
 template <>
 struct numeric_limits<short> {
@@ -460,5 +466,9 @@ struct numeric_limits<double> {
 };
 
 // long double specialization removed
+
+// Restore min/max macros if they were defined
+#pragma pop_macro("max")
+#pragma pop_macro("min")
 
 } // namespace fl
