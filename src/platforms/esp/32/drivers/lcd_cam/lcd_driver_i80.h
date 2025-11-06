@@ -70,6 +70,11 @@ public:
     /// @brief Bytes per bit (3 words × 2 bytes)
     static constexpr uint32_t BYTES_PER_BIT = N_BIT * 2;
 
+    /// @brief Helper to calculate slot_ns from pclk_hz (avoids division-by-zero warning)
+    static constexpr uint32_t calculate_slot_ns(uint32_t pclk_hz) {
+        return pclk_hz > 0 ? 1000000000UL / pclk_hz : 0;
+    }
+
     /// @brief Calculate timing using shared ClocklessTiming module
     static constexpr ClocklessTimingResult calculate_timing() {
         if constexpr (LCD_PCLK_HZ_OVERRIDE > 0) {
@@ -81,7 +86,7 @@ public:
             );
             // Use override frequency (constexpr guarantees > 0 in this branch)
             result.pclk_hz = LCD_PCLK_HZ_OVERRIDE;
-            result.slot_ns = 1000000000UL / LCD_PCLK_HZ_OVERRIDE;
+            result.slot_ns = calculate_slot_ns(LCD_PCLK_HZ_OVERRIDE);
             return result;
         }
 
