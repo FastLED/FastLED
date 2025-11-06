@@ -56,7 +56,8 @@ echo "Configuring Meson and building FastLED..."
 mkdir -p .build/meson
 
 # Use test.py to configure Meson and generate compile_commands.json
-uv run test.py --cpp --quick 2>/dev/null || true
+# Use --no-fingerprint to force a build (ensure compile_commands.json is generated)
+uv run test.py --cpp --quick --no-fingerprint 2>/dev/null || true
 
 # Copy compile_commands.json to project root for clangd
 if [ -f ".build/meson/compile_commands.json" ]; then
