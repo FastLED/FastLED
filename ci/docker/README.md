@@ -298,7 +298,7 @@ PlatformIO automatically creates merged binaries at:
 The system supports all platforms defined in `ci/boards.py`:
 
 ### AVR
-- `uno`, `nano_every`, `atmega32u4_leonardo`
+- `uno`, `nano_every`, `leonardo`
 - `attiny85`, `attiny88`, `attiny4313`
 - `attiny1604`, `attiny1616` (megaAVR)
 

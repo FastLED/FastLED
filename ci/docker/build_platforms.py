@@ -21,7 +21,7 @@ DOCKER_PLATFORMS: dict[str, list[str]] = {
     # Platforms: atmelavr (classic) + atmelmegaavr (modern)
     "avr": [
         "uno",
-        "atmega32u4_leonardo",
+        "leonardo",
         "attiny85",
         "attiny88",
         "attiny4313",

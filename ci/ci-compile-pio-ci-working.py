@@ -34,7 +34,7 @@ DEFAULT_BOARDS_NAMES = [
     "esp32c6",
     "esp32s3",
     "esp32p4",
-    "atmega32u4_leonardo",
+    "leonardo",
     "sam3x8e_due",
     "teensylc",
     "teensy30",

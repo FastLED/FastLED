@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       platform:
-        description: 'AVR platform to test (uno, atmega32u4_leonardo, etc.)'
+        description: 'AVR platform to test (uno, leonardo, etc.)'
         required: true
         type: string
       platform_display:
@@ -221,7 +221,7 @@ jobs:
               MCU="atmega328p"
               FREQUENCY=16000000
               ;;
-            atmega32u4_leonardo)
+            leonardo)
               MCU="atmega32u4"
               FREQUENCY=16000000
               ;;

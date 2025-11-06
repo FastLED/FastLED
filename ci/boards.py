@@ -235,7 +235,7 @@ class Board:
             "uno",
             "nano",
             "nano_every",
-            "atmega32u4_leonardo",
+            "leonardo",
             "attiny85",
             "attiny88",
             "attiny1604",
@@ -325,7 +325,7 @@ class Board:
         # AVR boards
         if board_lower == "uno" or board_lower == "nano":
             return "ATMEGA328P"
-        elif board_lower == "atmega32u4_leonardo" or "leonardo" in board_lower:
+        elif board_lower == "leonardo" or "leonardo" in board_lower:
             return "ATMEGA32U4"
         elif board_lower.startswith("attiny"):
             return self.board_name.upper()  # ATtiny85, ATtiny88, etc.

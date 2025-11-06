@@ -63,7 +63,7 @@ jobs:
           platform = '${{ matrix.platform }}'
           boards = get_boards_for_platform(platform)
           image = get_docker_image_name(platform)
-          print(f'boards={','.join(boards)}')
+          print(f'boards={\",\".join(boards)}')
           print(f'image={image}')
           ")
           echo "$boards" >> $GITHUB_OUTPUT

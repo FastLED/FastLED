@@ -44,7 +44,7 @@ jobs:
   build_yun:
     uses: ./.github/workflows/build_template.yml
     with:
-      args: "atmega32u4_leonardo"
+      args: "leonardo"
 
   build_digix:
     uses: ./.github/workflows/build_template.yml

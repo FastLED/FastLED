@@ -1,4 +1,4 @@
-name: atmega32u4_leonardo
+name: leonardo
 
 on:
   push:
