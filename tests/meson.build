@@ -28,6 +28,11 @@ test_pch = custom_target('test_pch',
     '-I' + meson.project_source_root() / 'src',
     '-I' + meson.project_source_root() / 'tests',
     '-I' + meson.project_source_root() / 'src/platforms/stub',
+    # STRICT PCH VALIDATION FLAGS (to catch invalidation issues):
+    '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
+    '-verify-pch',                              # Load and verify PCH is not stale
+    '-fpch-validate-input-files-content',       # Validate based on content, not just mtime
+    '-fpch-instantiate-templates',              # Instantiate templates during PCH build
   ],
   install: false
 )
@@ -111,7 +116,8 @@ if unity_enabled
         include_directories: [src_dir, tests_dir, stub_dir],
         cpp_args: unit_test_compile_args + [
           '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-          '-Winvalid-pch',
+          '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
+          '-fpch-validate-input-files-content',       # Validate based on content, not mtime
         ],
         link_args: unit_test_link_args,
         link_with: [fastled_lib, doctest_main],
@@ -145,7 +151,8 @@ else
     test_sources = [test_file, test_pch]
     test_cpp_args = unit_test_compile_args + [
       '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
-      '-Winvalid-pch',
+      '-Werror=invalid-pch',                      # Treat invalid PCH as hard error
+      '-fpch-validate-input-files-content',       # Validate based on content, not mtime
     ]
 
     # host_sim.cpp is now compiled as part of libfastled.a when STUB_PLATFORM is defined

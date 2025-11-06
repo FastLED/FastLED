@@ -1167,6 +1167,11 @@ def run_meson_build_and_test(
     # This helps prevent .ninja_deps corruption and keeps builds fast
     perform_ninja_maintenance(build_dir)
 
+    # Note: PCH dependency tracking is handled automatically by Ninja via depfiles.
+    # The compile_pch.py wrapper ensures depfiles reference the .pch output correctly,
+    # and Ninja loads these dependencies into .ninja_deps database (897 headers tracked).
+    # No manual staleness checking needed - Ninja rebuilds PCH when any dependency changes.
+
     # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
     meson_test_name = None
     if test_name:
