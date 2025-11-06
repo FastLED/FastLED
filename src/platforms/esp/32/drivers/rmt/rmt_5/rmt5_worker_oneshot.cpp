@@ -26,7 +26,7 @@ FL_EXTERN_C_END
 
 namespace fl {
 
-RmtWorkerOneShot::RmtWorkerOneShot()
+RmtWorkerOneShot::RmtWorkerOneShot(portMUX_TYPE* pool_spinlock)
     : mChannel(nullptr)
     , mEncoder(nullptr)
     , mChannelId(0)
@@ -41,7 +41,12 @@ RmtWorkerOneShot::RmtWorkerOneShot()
     , mEncodedSize(0)
     , mAvailable(true)
     , mTransmitting(false)
+    , mCompletionSemaphore(nullptr)
+    , mPoolSpinlock(pool_spinlock)
 {
+    // Create binary semaphore for completion signaling
+    mCompletionSemaphore = xSemaphoreCreateBinary();
+    FL_ASSERT(mCompletionSemaphore != nullptr, "Failed to create completion semaphore");
     // Initialize symbols to safe defaults
     mZero.duration0 = 0;
     mZero.level0 = 0;
@@ -60,6 +65,12 @@ RmtWorkerOneShot::RmtWorkerOneShot()
 }
 
 RmtWorkerOneShot::~RmtWorkerOneShot() {
+    // Delete semaphore
+    if (mCompletionSemaphore) {
+        vSemaphoreDelete(mCompletionSemaphore);
+        mCompletionSemaphore = nullptr;
+    }
+
     // Free pre-encoded symbol buffer
     if (mEncodedSymbols) {
         free(mEncodedSymbols);
@@ -301,8 +312,10 @@ void RmtWorkerOneShot::transmit(const uint8_t* pixel_data, int num_bytes) {
         return;
     }
 
-    mTransmitting = true;
-    mAvailable = false;
+    // Set transmission flag (atomic for ISR visibility)
+    mTransmitting.store(true, fl::memory_order_release);
+
+    // mAvailable is set false by pool under spinlock, not here
 
     // One-shot transmission configuration
     rmt_transmit_config_t tx_config = {};
@@ -320,8 +333,8 @@ void RmtWorkerOneShot::transmit(const uint8_t* pixel_data, int num_bytes) {
 
     if (ret != ESP_OK) {
         ESP_LOGE(RMT5_ONESHOT_TAG, "OneShot[%d]: rmt_transmit failed: %d", mWorkerId, ret);
-        mTransmitting = false;
-        mAvailable = true;
+        mTransmitting.store(false, fl::memory_order_release);
+        // Don't modify mAvailable here - pool owns that state
         return;
     }
 
@@ -330,10 +343,15 @@ void RmtWorkerOneShot::transmit(const uint8_t* pixel_data, int num_bytes) {
 }
 
 void RmtWorkerOneShot::waitForCompletion() {
-    // Spin-wait for transmission to complete
-    while (mTransmitting) {
-        taskYIELD();  // Yield to FreeRTOS scheduler
+    // Block on semaphore until ISR signals completion
+    if (mTransmitting.load(fl::memory_order_acquire)) {
+        xSemaphoreTake(mCompletionSemaphore, portMAX_DELAY);
     }
+}
+
+void RmtWorkerOneShot::markAsAvailable() {
+    // Called by pool under spinlock to mark worker as available
+    mAvailable = true;
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -376,10 +394,17 @@ bool IRAM_ATTR RmtWorkerOneShot::onTransDoneCallback(
 
     ESP_LOGI(RMT5_ONESHOT_TAG, "OneShot[%d]: TX DONE", worker->mWorkerId);
 
-    worker->mTransmitting = false;
-    worker->mAvailable = true;
+    // Clear transmission flag (atomic for cross-core visibility)
+    worker->mTransmitting.store(false, fl::memory_order_release);
 
-    return false;  // Don't yield from ISR
+    // Signal completion to waiting thread
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(worker->mCompletionSemaphore, &xHigherPriorityTaskWoken);
+
+    // DO NOT set mAvailable = true here!
+    // Pool will do this under spinlock when releaseWorker() is called
+
+    return (xHigherPriorityTaskWoken == pdTRUE);  // Yield if needed
 }
 
 // Extract channel ID from opaque handle (same as double-buffer worker)

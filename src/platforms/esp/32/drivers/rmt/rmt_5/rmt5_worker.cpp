@@ -52,10 +52,7 @@ extern rmt_block_mem_t RMTMEM;
 
 namespace fl {
 
-// Static spinlock for ISR synchronization
-portMUX_TYPE RmtWorker::sRmtSpinlock = portMUX_INITIALIZER_UNLOCKED;
-
-RmtWorker::RmtWorker()
+RmtWorker::RmtWorker(portMUX_TYPE* pool_spinlock)
     : mChannel(nullptr)
     , mChannelId(0)
     , mWorkerId(0)
@@ -74,7 +71,12 @@ RmtWorker::RmtWorker()
     , mTransmitting(false)
     , mPixelData(nullptr)
     , mNumBytes(0)
+    , mCompletionSemaphore(nullptr)
+    , mPoolSpinlock(pool_spinlock)
 {
+    // Create binary semaphore for completion signaling
+    mCompletionSemaphore = xSemaphoreCreateBinary();
+    FL_ASSERT(mCompletionSemaphore != nullptr, "Failed to create completion semaphore");
     // Initialize zero and one symbols to safe defaults
     mZero.duration0 = 0;
     mZero.level0 = 0;
@@ -88,6 +90,10 @@ RmtWorker::RmtWorker()
 }
 
 RmtWorker::~RmtWorker() {
+    if (mCompletionSemaphore) {
+        vSemaphoreDelete(mCompletionSemaphore);
+        mCompletionSemaphore = nullptr;
+    }
     if (mIntrHandle) {
         esp_intr_free(mIntrHandle);
         mIntrHandle = nullptr;
@@ -328,8 +334,11 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     mCur = 0;
     mWhichHalf = 0;
     mRMT_mem_ptr = mRMT_mem_start;
-    mTransmitting = true;
-    mAvailable = false;
+
+    // Set transmission flag (atomic for ISR visibility)
+    mTransmitting.store(true, fl::memory_order_release);
+
+    // mAvailable is set false by pool under spinlock, not here
 
     // Fill both halves initially (like RMT4)
     fillNextHalf();  // Fill half 0
@@ -345,11 +354,17 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
 }
 
 void RmtWorker::waitForCompletion() {
-    // Spin-wait for transmission to complete
-    while (mTransmitting) {
-        // Yield to FreeRTOS scheduler to prevent watchdog
-        taskYIELD();
+    // Block on semaphore until ISR signals completion
+    // This replaces the unsafe spin-wait with proper synchronization
+    if (mTransmitting.load(fl::memory_order_acquire)) {
+        xSemaphoreTake(mCompletionSemaphore, portMAX_DELAY);
     }
+}
+
+void RmtWorker::markAsAvailable() {
+    // Called by pool under spinlock to mark worker as available
+    // This ensures atomic visibility across all cores
+    mAvailable = true;
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -549,7 +564,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
-    portENTER_CRITICAL_ISR(&sRmtSpinlock);
+    portENTER_CRITICAL_ISR(mPoolSpinlock);
 
     // Debug: Track threshold interrupts
     static uint32_t thresholdCount = 0;
@@ -559,7 +574,7 @@ void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
     }
 
     fillNextHalf();
-    portEXIT_CRITICAL_ISR(&sRmtSpinlock);
+    portEXIT_CRITICAL_ISR(mPoolSpinlock);
 }
 FL_DISABLE_WARNING_POP
 
@@ -567,14 +582,23 @@ FL_DISABLE_WARNING_POP
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
-    portENTER_CRITICAL_ISR(&sRmtSpinlock);
-
     // Debug: Track transmission completion
     ets_printf("W%d: TX DONE - sent %d/%d bytes\n", mWorkerId, mCur, mNumBytes);
 
-    mTransmitting = false;
-    mAvailable = true;
-    portEXIT_CRITICAL_ISR(&sRmtSpinlock);
+    // Clear transmission flag (atomic for cross-core visibility)
+    mTransmitting.store(false, fl::memory_order_release);
+
+    // Signal completion to waiting thread
+    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+    xSemaphoreGiveFromISR(mCompletionSemaphore, &xHigherPriorityTaskWoken);
+
+    // DO NOT set mAvailable = true here!
+    // Pool will do this under spinlock when releaseWorker() is called
+    // This separates "transmission done" from "worker available for reuse"
+
+    if (xHigherPriorityTaskWoken == pdTRUE) {
+        portYIELD_FROM_ISR();
+    }
 }
 FL_DISABLE_WARNING_POP
 

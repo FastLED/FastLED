@@ -80,7 +80,8 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
         ESP_LOGD(RMT5_POOL_TAG, "");
         ESP_LOGD(RMT5_POOL_TAG, "--- Creating worker %d/%d ---", i + 1, max_workers);
         ESP_LOGD(RMT5_POOL_TAG, "Allocating RmtWorker object...");
-        RmtWorker* worker = new RmtWorker();
+        // Pass spinlock reference to worker for unified synchronization
+        RmtWorker* worker = new RmtWorker(&mSpinlock);
         ESP_LOGD(RMT5_POOL_TAG, "Worker object allocated at %p", worker);
 
         ESP_LOGD(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
@@ -163,6 +164,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
     }
 
+    // CRITICAL: Mark worker unavailable BEFORE releasing spinlock
+    // This prevents race where another thread/core acquires same worker
+    if (worker) {
+        worker->mAvailable = false;  // Under spinlock - atomic visibility
+    }
+
     portEXIT_CRITICAL(&mSpinlock);
     ESP_LOGD(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
 
@@ -235,6 +242,11 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
         if (!worker) {
             worker = findAvailableDoubleBufferWorker();
+        }
+
+        // CRITICAL: Mark unavailable BEFORE releasing spinlock
+        if (worker) {
+            worker->mAvailable = false;
         }
 
         portEXIT_CRITICAL(&mSpinlock);
@@ -320,8 +332,13 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "RmtWorkerPool::releaseWorker called with null worker");
 
-    // Worker marks itself as available after transmission completes
-    // Nothing to do here - worker is automatically recycled
+    // CRITICAL: Mark worker available under spinlock for atomic visibility
+    // This fixes the race condition where ISR completes but worker isn't yet available
+    portENTER_CRITICAL(&mSpinlock);
+    worker->markAsAvailable();  // Sets mAvailable = true under lock
+    portEXIT_CRITICAL(&mSpinlock);
+
+    ESP_LOGD(RMT5_POOL_TAG, "Worker released and marked available");
 }
 
 int RmtWorkerPool::getAvailableCount() const {

@@ -41,6 +41,11 @@ public:
     virtual void transmit(const uint8_t* pixel_data, int num_bytes) = 0;
     virtual void waitForCompletion() = 0;
 
+    // Worker lifecycle management
+    // Called by pool to mark worker as available after transmission completes
+    // This separates "transmission done" (ISR) from "worker available" (pool)
+    virtual void markAsAvailable() = 0;
+
     // Worker info
     virtual uint8_t getWorkerId() const = 0;
 

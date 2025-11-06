@@ -8,6 +8,7 @@
 #if FASTLED_RMT5
 
 #include "fl/stdint.h"
+#include "fl/atomic.h"
 #include "rmt5_worker_base.h"
 
 FL_EXTERN_C_BEGIN
@@ -19,6 +20,7 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
+#include "freertos/semphr.h"
 
 FL_EXTERN_C_END
 
@@ -61,7 +63,7 @@ public:
     friend class RmtWorkerPool;
 
     // Worker lifecycle
-    RmtWorkerOneShot();
+    RmtWorkerOneShot(portMUX_TYPE* pool_spinlock);
     ~RmtWorkerOneShot() override;
 
     // Initialize hardware channel (called once per worker)
@@ -86,7 +88,12 @@ public:
     // Check if channel has been created
     bool hasChannel() const override { return mChannel != nullptr; }
 
+    // Mark worker as available (called by pool under spinlock)
+    void markAsAvailable() override;
+
 private:
+    // Allow pool to access mAvailable for synchronized state changes
+    friend class RmtWorkerPool;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
     rmt_encoder_handle_t mEncoder;  // ESP-IDF bytes encoder
@@ -119,8 +126,14 @@ private:
     size_t mEncodedSize;        // Actual encoded size for current transmission
 
     // Transmission state
-    volatile bool mAvailable;     // Worker available for assignment
-    volatile bool mTransmitting;  // Transmission in progress
+    bool mAvailable;                  // Worker available (protected by pool's spinlock)
+    fl::atomic_bool mTransmitting;    // Transmission in progress (ISR flag)
+
+    // Completion synchronization
+    SemaphoreHandle_t mCompletionSemaphore;
+
+    // Reference to pool's spinlock (unified synchronization)
+    portMUX_TYPE* mPoolSpinlock;
 
     // Pre-encode pixel data to RMT symbols
     void preEncode(const uint8_t* pixel_data, int num_bytes);

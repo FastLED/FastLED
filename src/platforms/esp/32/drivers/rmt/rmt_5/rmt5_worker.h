@@ -8,6 +8,7 @@
 #if FASTLED_RMT5
 
 #include "fl/stdint.h"
+#include "fl/atomic.h"
 #include "rmt5_worker_base.h"
 
 FL_EXTERN_C_BEGIN
@@ -19,6 +20,7 @@ FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/portmacro.h"
+#include "freertos/semphr.h"
 #include "esp_intr_alloc.h"
 
 FL_EXTERN_C_END
@@ -59,7 +61,7 @@ public:
     static constexpr int PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
 
     // Worker lifecycle
-    RmtWorker();
+    RmtWorker(portMUX_TYPE* pool_spinlock);
     ~RmtWorker() override;
 
     // Initialize hardware channel (called once per worker)
@@ -84,7 +86,12 @@ public:
     // Check if channel has been created
     bool hasChannel() const override { return mChannel != nullptr; }
 
+    // Mark worker as available (called by pool under spinlock)
+    void markAsAvailable() override;
+
 private:
+    // Allow pool to access mAvailable for synchronized state changes
+    friend class RmtWorkerPool;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
     uint8_t mChannelId;
@@ -118,13 +125,16 @@ private:
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
 
     // Transmission state
-    volatile bool mAvailable;        // Worker available for assignment
-    volatile bool mTransmitting;     // Transmission in progress
-    const uint8_t* mPixelData;       // POINTER ONLY - not owned by worker
-    int mNumBytes;                   // Total bytes to transmit
+    bool mAvailable;                  // Worker available (protected by pool's spinlock)
+    fl::atomic_bool mTransmitting;    // Transmission in progress (ISR flag)
+    const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
+    int mNumBytes;                    // Total bytes to transmit
 
-    // Spinlock for ISR synchronization
-    static portMUX_TYPE sRmtSpinlock;
+    // Completion synchronization (replaces spin-wait)
+    SemaphoreHandle_t mCompletionSemaphore;
+
+    // Reference to pool's spinlock (unified synchronization)
+    portMUX_TYPE* mPoolSpinlock;
 
     // Double buffer refill (interrupt context)
     void IRAM_ATTR fillNextHalf();

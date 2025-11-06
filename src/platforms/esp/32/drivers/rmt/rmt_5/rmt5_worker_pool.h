@@ -107,6 +107,9 @@ private:
     bool mInitialized;
 
     // Spinlock for thread-safe access
+    // CRITICAL: This is the AUTHORITATIVE lock for all worker state
+    // Workers hold a reference to this spinlock for unified synchronization
+    // All modifications to worker mAvailable flag MUST hold this lock
     portMUX_TYPE mSpinlock;
 
     // Channel accounting (for strict verification)
