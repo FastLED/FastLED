@@ -19,6 +19,7 @@ from ci.util.global_interrupt_handler import (
     signal_interrupt,
     wait_for_cleanup,
 )
+from ci.util.output_formatter import TimestampFormatter
 from ci.util.running_process_manager import RunningProcessManagerSingleton
 from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_args import parse_args
@@ -40,6 +41,7 @@ from ci.util.test_types import (
     calculate_python_test_fingerprint,
     process_test_flags,
 )
+from ci.util.timestamp_print import ts_print
 
 
 _CANCEL_WATCHDOG = threading.Event()
@@ -61,7 +63,7 @@ _RUN_PLATFORM_BACKENDS = {
 
 if os.environ.get("_GITHUB"):
     _TIMEOUT_EVERYTHING = 1200  # Extended timeout for GitHub Linux builds
-    print(
+    ts_print(
         f"GitHub Windows environment detected - using extended timeout: {_TIMEOUT_EVERYTHING} seconds"
     )
 
@@ -77,13 +79,13 @@ def make_watch_dog_thread(
         warnings.warn(f"Watchdog timer expired after {seconds} seconds.")
 
         dump_thread_stacks()
-        print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
+        ts_print(f"Watchdog timer expired after {seconds} seconds - forcing exit")
 
         # Dump outstanding running processes (if any)
         try:
             RunningProcessManagerSingleton.dump_active()
         except Exception as e:
-            print(f"Failed to dump active processes: {e}")
+            ts_print(f"Failed to dump active processes: {e}")
 
         traceback.print_stack()
         time.sleep(0.5)
@@ -104,30 +106,30 @@ def run_qemu_tests(args: TestArgs) -> None:
     from ci.docker.qemu_esp32_docker import DockerQEMURunner
 
     if not args.qemu or len(args.qemu) < 1:
-        print("Error: --qemu requires a platform (e.g., esp32s3)")
+        ts_print("Error: --qemu requires a platform (e.g., esp32s3)")
         sys.exit(1)
 
     platform = args.qemu[0].lower()
     supported_platforms = ["esp32dev", "esp32c3", "esp32s3"]
     if platform not in supported_platforms:
-        print(
+        ts_print(
             f"Error: Unsupported QEMU platform: {platform}. Supported platforms: {', '.join(supported_platforms)}"
         )
         sys.exit(1)
 
-    print(f"Running {platform.upper()} QEMU tests using Docker...")
+    ts_print(f"Running {platform.upper()} QEMU tests using Docker...")
 
     # Determine which examples to test (skip the platform argument)
     examples_to_test = args.qemu[1:] if len(args.qemu) > 1 else ["BlinkParallel"]
     if not examples_to_test:  # Empty list means test all available examples
         examples_to_test = ["BlinkParallel", "RMT5WorkerPool"]
 
-    print(f"Testing examples: {examples_to_test}")
+    ts_print(f"Testing examples: {examples_to_test}")
 
     # Quick test mode - just validate the setup
     if os.getenv("FASTLED_QEMU_QUICK_TEST") == "true":
-        print("Quick test mode - validating Docker QEMU setup only")
-        print("QEMU ESP32 Docker option is working correctly!")
+        ts_print("Quick test mode - validating Docker QEMU setup only")
+        ts_print("QEMU ESP32 Docker option is working correctly!")
         return
 
     # Initialize Docker QEMU runner
@@ -135,11 +137,11 @@ def run_qemu_tests(args: TestArgs) -> None:
 
     # Check if Docker is available
     if not docker_runner.check_docker_available():
-        print("❌ ERROR: Docker is not available or not running")
-        print()
-        print("Please install Docker Desktop and ensure it's running:")
-        print("  https://www.docker.com/products/docker-desktop")
-        print()
+        ts_print("❌ ERROR: Docker is not available or not running")
+        ts_print()
+        ts_print("Please install Docker Desktop and ensure it's running:")
+        ts_print("  https://www.docker.com/products/docker-desktop")
+        ts_print()
         sys.exit(1)
 
     # Check if board Docker image exists (needed for compilation)
@@ -147,31 +149,31 @@ def run_qemu_tests(args: TestArgs) -> None:
     image_exists = docker_runner.check_image_exists(board_image)
 
     if not image_exists:
-        print(f"❌ Docker image for {platform} not found locally")
-        print()
+        ts_print(f"❌ Docker image for {platform} not found locally")
+        ts_print()
 
         # Try pulling from Docker Hub registry first
-        print(f"Attempting to pull prebuilt image from Docker Hub...")
+        ts_print(f"Attempting to pull prebuilt image from Docker Hub...")
         pull_success = docker_runner.pull_and_tag_board_image(platform)
 
         if pull_success:
-            print(f"✅ Successfully pulled and configured Docker image")
-            print()
+            ts_print(f"✅ Successfully pulled and configured Docker image")
+            ts_print()
             image_exists = True
         else:
             # Pull failed - show build options
-            print()
-            print(f"❌ Could not pull image from Docker Hub")
-            print()
+            ts_print()
+            ts_print(f"❌ Could not pull image from Docker Hub")
+            ts_print()
 
             # Check if we should auto-build
             if args.build:
                 # Auto-build mode (explicit flag)
-                print("Auto-build enabled (--build flag)")
-                print()
+                ts_print("Auto-build enabled (--build flag)")
+                ts_print()
                 build_result = docker_runner.build_board_image(platform, progress=True)
                 if build_result != 0:
-                    print(f"❌ Failed to build Docker image for {platform}")
+                    ts_print(f"❌ Failed to build Docker image for {platform}")
                     sys.exit(1)
             elif args.interactive:
                 # Interactive prompt mode
@@ -179,46 +181,46 @@ def run_qemu_tests(args: TestArgs) -> None:
                     input(f"Docker image missing. Build now? [y/N]: ").strip().lower()
                 )
                 if response in ["y", "yes"]:
-                    print()
+                    ts_print()
                     build_result = docker_runner.build_board_image(
                         platform, progress=True
                     )
                     if build_result != 0:
-                        print(f"❌ Failed to build Docker image for {platform}")
+                        ts_print(f"❌ Failed to build Docker image for {platform}")
                         sys.exit(1)
                 else:
-                    print("Build cancelled. Please build the image manually.")
+                    ts_print("Build cancelled. Please build the image manually.")
                     sys.exit(1)
             else:
                 # Default mode - automatically build with warning and delay
-                print("⚠️  Docker image not available. Will build automatically.")
-                print("   This will take approximately 30 minutes.")
-                print("   Press Ctrl+C within 5 seconds to cancel...")
-                print()
+                ts_print("⚠️  Docker image not available. Will build automatically.")
+                ts_print("   This will take approximately 30 minutes.")
+                ts_print("   Press Ctrl+C within 5 seconds to cancel...")
+                ts_print()
 
                 import time
 
                 for i in range(5, 0, -1):
-                    print(f"   Starting build in {i}...", end="\r")
+                    ts_print(f"   Starting build in {i}...", end="\r")
                     time.sleep(1)
-                print()  # New line after countdown
-                print()
+                ts_print()  # New line after countdown
+                ts_print()
 
-                print("🔨 Building Docker image automatically...")
-                print()
+                ts_print("🔨 Building Docker image automatically...")
+                ts_print()
                 build_result = docker_runner.build_board_image(platform, progress=True)
                 if build_result != 0:
-                    print(f"❌ Failed to build Docker image for {platform}")
-                    print()
-                    print("Options:")
-                    print(f"  1. Try again with verbose logging:")
-                    print(
+                    ts_print(f"❌ Failed to build Docker image for {platform}")
+                    ts_print()
+                    ts_print("Options:")
+                    ts_print(f"  1. Try again with verbose logging:")
+                    ts_print(
                         f"     bash test --qemu {platform} {' '.join(examples_to_test)} --build"
                     )
-                    print()
-                    print(f"  2. Build image separately:")
-                    print(f"     bash compile --docker --build {platform} Blink")
-                    print()
+                    ts_print()
+                    ts_print(f"  2. Build image separately:")
+                    ts_print(f"     bash compile --docker --build {platform} Blink")
+                    ts_print()
                     sys.exit(1)
 
     success_count = 0
@@ -226,11 +228,11 @@ def run_qemu_tests(args: TestArgs) -> None:
 
     # Test each example
     for example in examples_to_test:
-        print(f"\n--- Testing {example} ---")
+        ts_print(f"\n--- Testing {example} ---")
 
         try:
             # Build the example for the specified platform with merged binary for QEMU
-            print(f"Building {example} for {platform} with merged binary...")
+            ts_print(f"Building {example} for {platform} with merged binary...")
             # Use Docker compilation on Windows to avoid toolchain issues
             build_cmd = [
                 "uv",
@@ -251,32 +253,35 @@ def run_qemu_tests(args: TestArgs) -> None:
                 build_cmd,
                 timeout=600,
                 auto_run=True,
+                output_formatter=TimestampFormatter(),
             )
 
             # Stream build output
             with build_proc.line_iter(timeout=None) as it:
                 for line in it:
-                    print(line)
+                    ts_print(line)
 
             build_returncode = build_proc.wait()
             if build_returncode != 0:
-                print(f"Build failed for {example} with exit code: {build_returncode}")
+                ts_print(
+                    f"Build failed for {example} with exit code: {build_returncode}"
+                )
                 failure_count += 1
                 continue
 
-            print(f"Build successful for {example}")
+            ts_print(f"Build successful for {example}")
 
             # Check if merged binary exists
             merged_bin_path = Path("qemu-build/merged.bin")
             if not merged_bin_path.exists():
-                print(f"Merged binary not found: {merged_bin_path}")
+                ts_print(f"Merged binary not found: {merged_bin_path}")
                 failure_count += 1
                 continue
 
-            print(f"Merged binary found: {merged_bin_path}")
+            ts_print(f"Merged binary found: {merged_bin_path}")
 
             # Run in QEMU using Docker
-            print(f"Running {example} in Docker QEMU...")
+            ts_print(f"Running {example} in Docker QEMU...")
 
             # Set up interrupt regex pattern
             interrupt_regex = "(FL_WARN.*test finished)|(Setup complete - starting blink animation)|(guru meditation)|(abort\\(\\))|(LoadProhibited)"
@@ -304,10 +309,10 @@ def run_qemu_tests(args: TestArgs) -> None:
             )
 
             if qemu_returncode == 0:
-                print(f"SUCCESS: {example} ran successfully in Docker QEMU")
+                ts_print(f"SUCCESS: {example} ran successfully in Docker QEMU")
                 success_count += 1
             else:
-                print(
+                ts_print(
                     f"FAILED: {example} failed in Docker QEMU with exit code: {qemu_returncode}"
                 )
                 failure_count += 1
@@ -316,23 +321,23 @@ def run_qemu_tests(args: TestArgs) -> None:
             _thread.interrupt_main()
             raise
         except Exception as e:
-            print(f"ERROR: {example} failed with exception: {e}")
+            ts_print(f"ERROR: {example} failed with exception: {e}")
             failure_count += 1
 
     # Summary
-    print(f"\n=== QEMU {platform.upper()} Test Summary ===")
-    print(f"Examples tested: {len(examples_to_test)}")
-    print(f"Successful: {success_count}")
-    print(f"Failed: {failure_count}")
+    ts_print(f"\n=== QEMU {platform.upper()} Test Summary ===")
+    ts_print(f"Examples tested: {len(examples_to_test)}")
+    ts_print(f"Successful: {success_count}")
+    ts_print(f"Failed: {failure_count}")
 
     # Show sccache statistics
     show_sccache_stats()
 
     if failure_count > 0:
-        print("Some tests failed. See output above for details.")
+        ts_print("Some tests failed. See output above for details.")
         sys.exit(1)
     else:
-        print("All QEMU tests passed!")
+        ts_print("All QEMU tests passed!")
 
 
 def run_avr8js_tests(args: TestArgs) -> None:
@@ -344,30 +349,30 @@ def run_avr8js_tests(args: TestArgs) -> None:
     from ci.docker.avr8js_docker import DockerAVR8jsRunner
 
     if not args.run or len(args.run) < 1:
-        print("Error: --run requires a board (e.g., uno)")
+        ts_print("Error: --run requires a board (e.g., uno)")
         sys.exit(1)
 
     board = args.run[0].lower()
     supported_boards = ["uno", "attiny85", "attiny88", "nano_every"]
     if board not in supported_boards:
-        print(
+        ts_print(
             f"Error: Unsupported avr8js board: {board}. Supported boards: {', '.join(supported_boards)}"
         )
         sys.exit(1)
 
-    print(f"Running {board.upper()} avr8js tests using Docker...")
+    ts_print(f"Running {board.upper()} avr8js tests using Docker...")
 
     # Determine which examples to test (skip the board argument)
     examples_to_test = args.run[1:] if len(args.run) > 1 else ["Test"]
     if not examples_to_test:  # Empty list means test Test example
         examples_to_test = ["Test"]
 
-    print(f"Testing examples: {examples_to_test}")
+    ts_print(f"Testing examples: {examples_to_test}")
 
     # Quick test mode - just validate the setup
     if os.getenv("FASTLED_AVR8JS_QUICK_TEST") == "true":
-        print("Quick test mode - validating Docker avr8js setup only")
-        print("avr8js AVR Docker option is working correctly!")
+        ts_print("Quick test mode - validating Docker avr8js setup only")
+        ts_print("avr8js AVR Docker option is working correctly!")
         return
 
     # Initialize Docker avr8js runner
@@ -375,11 +380,11 @@ def run_avr8js_tests(args: TestArgs) -> None:
 
     # Check if Docker is available
     if not docker_runner.check_docker_available():
-        print("❌ ERROR: Docker is not available or not running")
-        print()
-        print("Please install Docker Desktop and ensure it's running:")
-        print("  https://www.docker.com/products/docker-desktop")
-        print()
+        ts_print("❌ ERROR: Docker is not available or not running")
+        ts_print()
+        ts_print("Please install Docker Desktop and ensure it's running:")
+        ts_print("  https://www.docker.com/products/docker-desktop")
+        ts_print()
         sys.exit(1)
 
     # Check if avr8js Docker image exists
@@ -387,21 +392,23 @@ def run_avr8js_tests(args: TestArgs) -> None:
     image_exists = docker_runner.check_image_exists(avr8js_image)
 
     if not image_exists:
-        print(f"❌ Docker avr8js image not found locally: {avr8js_image}")
-        print()
-        print("Attempting to pull avr8js image from Docker Hub...")
+        ts_print(f"❌ Docker avr8js image not found locally: {avr8js_image}")
+        ts_print()
+        ts_print("Attempting to pull avr8js image from Docker Hub...")
         try:
             docker_runner.pull_image()
-            print(f"✅ Successfully pulled {avr8js_image}")
-            print()
+            ts_print(f"✅ Successfully pulled {avr8js_image}")
+            ts_print()
         except KeyboardInterrupt:
             raise
         except Exception as e:
-            print(f"❌ Failed to pull avr8js image: {e}")
-            print()
-            print("Please build the image manually:")
-            print(f"  docker build -f ci/docker/Dockerfile.avr8js -t {avr8js_image} .")
-            print()
+            ts_print(f"❌ Failed to pull avr8js image: {e}")
+            ts_print()
+            ts_print("Please build the image manually:")
+            ts_print(
+                f"  docker build -f ci/docker/Dockerfile.avr8js -t {avr8js_image} ."
+            )
+            ts_print()
             sys.exit(1)
 
     # Get MCU type and frequency based on board
@@ -418,20 +425,20 @@ def run_avr8js_tests(args: TestArgs) -> None:
 
     # Test each example
     for example in examples_to_test:
-        print(f"\n{'=' * 70}")
-        print(f"Testing: {example}")
-        print(f"{'=' * 70}")
+        ts_print(f"\n{'=' * 70}")
+        ts_print(f"Testing: {example}")
+        ts_print(f"{'=' * 70}")
 
         try:
             # Step 1: Show what we're compiling
             example_ino_path = Path("examples") / example / f"{example}.ino"
-            print(f"\n[STEP 1/3] Compiling Arduino Sketch")
-            print(f"  Source file: {example_ino_path}")
-            print(
+            ts_print(f"\n[STEP 1/3] Compiling Arduino Sketch")
+            ts_print(f"  Source file: {example_ino_path}")
+            ts_print(
                 f"  Target board: {board} ({config['mcu']} @ {config['frequency']}Hz)"
             )
-            print(f"  Compiler: PlatformIO via ci/ci-compile.py")
-            print()
+            ts_print(f"  Compiler: PlatformIO via ci/ci-compile.py")
+            ts_print()
 
             # Build the example for the specified board
             build_cmd = [
@@ -446,49 +453,50 @@ def run_avr8js_tests(args: TestArgs) -> None:
                 build_cmd,
                 timeout=300,
                 auto_run=True,
+                output_formatter=TimestampFormatter(),
             )
 
             # Stream build output
             with build_proc.line_iter(timeout=None) as it:
                 for line in it:
-                    print(line)
+                    ts_print(line)
 
             build_returncode = build_proc.wait()
             if build_returncode != 0:
-                print(
+                ts_print(
                     f"\n❌ Build failed for {example} with exit code: {build_returncode}"
                 )
                 failure_count += 1
                 continue
 
-            print(f"\n✅ Build successful for {example}")
+            ts_print(f"\n✅ Build successful for {example}")
 
             # Step 2: Locate compiled firmware
-            print(f"\n[STEP 2/3] Locating Compiled Firmware")
+            ts_print(f"\n[STEP 2/3] Locating Compiled Firmware")
             build_dir = Path(".build")
             elf_files = list(build_dir.rglob("*.elf"))
             if not elf_files:
-                print(f"  ❌ ELF file not found in {build_dir}")
+                ts_print(f"  ❌ ELF file not found in {build_dir}")
                 failure_count += 1
                 continue
 
             elf_path = elf_files[0]
             hex_path = elf_path.with_suffix(".hex")
-            print(f"  ELF file: {elf_path}")
-            print(f"  HEX file: {hex_path}")
-            print(f"  (avr8js requires HEX format for execution)")
+            ts_print(f"  ELF file: {elf_path}")
+            ts_print(f"  HEX file: {hex_path}")
+            ts_print(f"  (avr8js requires HEX format for execution)")
 
             if not hex_path.exists():
-                print(f"  ❌ HEX file not found: {hex_path}")
+                ts_print(f"  ❌ HEX file not found: {hex_path}")
                 failure_count += 1
                 continue
 
             # Step 3: Run in avr8js Docker
-            print(f"\n[STEP 3/3] Running in AVR8JS Docker Emulator")
-            print(f"  Docker image: {docker_runner.docker_image}")
-            print(f"  Firmware: {hex_path}")
-            print(f"  Timeout: 15 seconds")
-            print()
+            ts_print(f"\n[STEP 3/3] Running in AVR8JS Docker Emulator")
+            ts_print(f"  Docker image: {docker_runner.docker_image}")
+            ts_print(f"  Firmware: {hex_path}")
+            ts_print(f"  Timeout: 15 seconds")
+            ts_print()
 
             # Set up output file
             output_file = "avr8js_output.txt"
@@ -513,16 +521,16 @@ def run_avr8js_tests(args: TestArgs) -> None:
                     "Test Summary:" in output_content
                     and "All tests PASSED!" in output_content
                 ):
-                    print(f"SUCCESS: {example} tests passed in Docker avr8js")
+                    ts_print(f"SUCCESS: {example} tests passed in Docker avr8js")
                     success_count += 1
                 else:
-                    print(f"FAILED: {example} tests did not pass in Docker avr8js")
+                    ts_print(f"FAILED: {example} tests did not pass in Docker avr8js")
                     failure_count += 1
             elif avr8js_returncode == 0:
-                print(f"SUCCESS: {example} ran successfully in Docker avr8js")
+                ts_print(f"SUCCESS: {example} ran successfully in Docker avr8js")
                 success_count += 1
             else:
-                print(
+                ts_print(
                     f"FAILED: {example} failed in Docker avr8js with exit code: {avr8js_returncode}"
                 )
                 failure_count += 1
@@ -531,23 +539,23 @@ def run_avr8js_tests(args: TestArgs) -> None:
             _thread.interrupt_main()
             raise
         except Exception as e:
-            print(f"ERROR: {example} failed with exception: {e}")
+            ts_print(f"ERROR: {example} failed with exception: {e}")
             failure_count += 1
 
     # Summary
-    print(f"\n=== avr8js {board.upper()} Test Summary ===")
-    print(f"Examples tested: {len(examples_to_test)}")
-    print(f"Successful: {success_count}")
-    print(f"Failed: {failure_count}")
+    ts_print(f"\n=== avr8js {board.upper()} Test Summary ===")
+    ts_print(f"Examples tested: {len(examples_to_test)}")
+    ts_print(f"Successful: {success_count}")
+    ts_print(f"Failed: {failure_count}")
 
     # Show sccache statistics
     show_sccache_stats()
 
     if failure_count > 0:
-        print("Some tests failed. See output above for details.")
+        ts_print("Some tests failed. See output above for details.")
         sys.exit(1)
     else:
-        print("All avr8js tests passed!")
+        ts_print("All avr8js tests passed!")
 
 
 def main() -> None:
@@ -574,7 +582,7 @@ def main() -> None:
         if args.examples is not None and args.no_parallel:
             # 35 minutes for sequential examples compilation
             timeout = 2100
-            print(
+            ts_print(
                 f"Adjusted watchdog timeout for sequential examples compilation: {timeout} seconds"
             )
 
@@ -599,13 +607,13 @@ def main() -> None:
         # Handle stack trace control
         enable_stack_trace = not args.no_stack_trace
         if enable_stack_trace:
-            print("Stack trace dumping enabled for test timeouts")
+            ts_print("Stack trace dumping enabled for test timeouts")
         else:
-            print("Stack trace dumping disabled for test timeouts")
+            ts_print("Stack trace dumping disabled for test timeouts")
 
         # Validate conflicting arguments
         if args.no_interactive and args.interactive:
-            print(
+            ts_print(
                 "Error: --interactive and --no-interactive cannot be used together",
                 file=sys.stderr,
             )
@@ -636,7 +644,7 @@ def main() -> None:
                             status=data.get("status"),
                         )
                     except json.JSONDecodeError:
-                        print("Invalid fingerprint file. Recalculating...")
+                        ts_print("Invalid fingerprint file. Recalculating...")
             return None
 
         # Calculate fingerprint (but don't save until tests pass)
@@ -671,7 +679,7 @@ def main() -> None:
                             status=data.get("status"),
                         )
                     except json.JSONDecodeError:
-                        print("Invalid C++ test fingerprint file. Recalculating...")
+                        ts_print("Invalid C++ test fingerprint file. Recalculating...")
             return None
 
         # Calculate C++ test fingerprint (but don't save until tests pass)
@@ -758,7 +766,7 @@ def main() -> None:
         # Handle --run flag (unified emulation interface)
         if args.run is not None:
             if len(args.run) < 1:
-                print("Error: --run requires a platform/board (e.g., esp32s3, uno)")
+                ts_print("Error: --run requires a platform/board (e.g., esp32s3, uno)")
                 sys.exit(1)
 
             platform = args.run[0].lower()
@@ -768,9 +776,9 @@ def main() -> None:
 
             if backend is None:
                 # Platform not found - show error with supported platforms
-                print(f"Error: Unknown platform '{platform}'")
-                print()
-                print("Supported platforms:")
+                ts_print(f"Error: Unknown platform '{platform}'")
+                ts_print()
+                ts_print("Supported platforms:")
 
                 # Group platforms by backend
                 qemu_platforms = [
@@ -781,32 +789,34 @@ def main() -> None:
                 ]
 
                 if qemu_platforms:
-                    print(f"  ESP32 (QEMU): {', '.join(sorted(qemu_platforms))}")
+                    ts_print(f"  ESP32 (QEMU): {', '.join(sorted(qemu_platforms))}")
                 if avr8js_boards:
-                    print(f"  AVR (avr8js): {', '.join(sorted(avr8js_boards))}")
+                    ts_print(f"  AVR (avr8js): {', '.join(sorted(avr8js_boards))}")
 
                 sys.exit(1)
 
             # Route to appropriate backend
             if backend == "qemu":
-                print(f"=== QEMU Testing ({platform}) ===")
+                ts_print(f"=== QEMU Testing ({platform}) ===")
                 # Convert --run to --qemu format for backward compatibility
                 args.qemu = args.run
                 run_qemu_tests(args)
                 return
             elif backend == "avr8js":
-                print(f"=== avr8js Testing ({platform}) ===")
+                ts_print(f"=== avr8js Testing ({platform}) ===")
                 # Run avr8js tests
                 run_avr8js_tests(args)
                 return
             else:
-                print(f"Error: Unknown backend '{backend}' for platform '{platform}'")
+                ts_print(
+                    f"Error: Unknown backend '{backend}' for platform '{platform}'"
+                )
                 sys.exit(1)
 
         # Handle QEMU testing (deprecated - use --run)
         if args.qemu is not None:
-            print("=== QEMU Testing ===")
-            print("Note: --qemu is deprecated, use --run instead")
+            ts_print("=== QEMU Testing ===")
+            ts_print("Note: --qemu is deprecated, use --run instead")
             run_qemu_tests(args)
             return
 
@@ -894,18 +904,18 @@ def main() -> None:
                     if display_thread:
                         time.sleep(0.5)
 
-                    print("Sequential test execution completed successfully")
+                    ts_print("Sequential test execution completed successfully")
 
                     # Print timing summary
                     if timings:
-                        print(f"\nExecution Summary:")
+                        ts_print(f"\nExecution Summary:")
                         for timing in timings:
-                            print(f"  {timing.name}: {timing.duration:.2f}s")
+                            ts_print(f"  {timing.name}: {timing.duration:.2f}s")
                 except KeyboardInterrupt:
                     _thread.interrupt_main()
                     raise
                 except Exception as e:
-                    print(f"Sequential test execution failed: {e}")
+                    ts_print(f"Sequential test execution failed: {e}")
                     sys.exit(1)
             else:
                 # Use normal test runner for other cases
@@ -931,7 +941,9 @@ def main() -> None:
                 )
 
                 if args.no_fingerprint or args.force:
-                    print("Fingerprint caching disabled (--no-fingerprint or --force)")
+                    ts_print(
+                        "Fingerprint caching disabled (--no-fingerprint or --force)"
+                    )
 
                 test_runner(
                     args,
@@ -960,7 +972,7 @@ def main() -> None:
 
         # Print total execution time
         elapsed_time = time.time() - start_time
-        print(f"\nTotal execution time: {elapsed_time:.2f} seconds")
+        ts_print(f"\nTotal execution time: {elapsed_time:.2f} seconds")
 
         sys.exit(0)
 

@@ -8,6 +8,7 @@ from typing import Optional
 from typeguard import typechecked
 
 from ci.util.test_types import TestArgs
+from ci.util.timestamp_print import ts_print
 
 
 def _python_test_exists(test_name: str) -> bool:
@@ -213,14 +214,14 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
             # This is a Python test - enable Python mode
             if not test_args.py and not test_args.cpp:
                 test_args.py = True
-                print(
+                ts_print(
                     f"Auto-enabled --py mode for specific Python test: {test_args.test}"
                 )
         else:
             # This is not a Python test - assume it's a C++ test
             if not test_args.cpp and not test_args.py:
                 test_args.cpp = True
-                print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
+                ts_print(f"Auto-enabled --cpp mode for specific test: {test_args.test}")
             # Also enable --unit when a specific C++ test is provided without any other flags
             if (
                 not test_args.unit
@@ -229,35 +230,37 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
                 and not test_args.full
             ):
                 test_args.unit = True
-                print(f"Auto-enabled --unit mode for specific test: {test_args.test}")
+                ts_print(
+                    f"Auto-enabled --unit mode for specific test: {test_args.test}"
+                )
 
     # Auto-enable --verbose when running unit tests (disabled)
     # if test_args.unit and not test_args.verbose:
     #     test_args.verbose = True
-    #     print("Auto-enabled --verbose mode for unit tests")
+    #     ts_print("Auto-enabled --verbose mode for unit tests")
 
     # Auto-enable --unity unless --no-unity is specified
     if not test_args.no_unity and not test_args.unity:
         test_args.unity = True
-        print("Auto-enabled --unity mode (use --no-unity to disable)")
+        ts_print("Auto-enabled --unity mode (use --no-unity to disable)")
 
     # Auto-enable --cpp and --clang when --check is provided
     if test_args.check:
         if not test_args.cpp:
             test_args.cpp = True
-            print("Auto-enabled --cpp mode for static analysis (--check)")
+            ts_print("Auto-enabled --cpp mode for static analysis (--check)")
         if not test_args.clang and not test_args.gcc:
             test_args.clang = True
-            print("Auto-enabled --clang compiler for static analysis (--check)")
+            ts_print("Auto-enabled --clang compiler for static analysis (--check)")
 
     # Auto-enable --cpp and --quick when --examples is provided
     if test_args.examples is not None:
         if not test_args.cpp:
             test_args.cpp = True
-            print("Auto-enabled --cpp mode for example compilation (--examples)")
+            ts_print("Auto-enabled --cpp mode for example compilation (--examples)")
         if not test_args.quick:
             test_args.quick = True
-            print(
+            ts_print(
                 "Auto-enabled --quick mode for faster example compilation (--examples)"
             )
 
@@ -265,26 +268,30 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     if test_args.full:
         if test_args.examples is not None:
             # --examples --full: Run examples with full compilation+linking+execution
-            print("Full examples mode: compilation + linking + program execution")
+            ts_print("Full examples mode: compilation + linking + program execution")
         else:
             # --full alone: Run integration tests
             if not test_args.cpp:
                 test_args.cpp = True
-                print("Auto-enabled --cpp mode for full integration tests (--full)")
-            print("Full integration tests: compilation + linking + program execution")
+                ts_print("Auto-enabled --cpp mode for full integration tests (--full)")
+            ts_print(
+                "Full integration tests: compilation + linking + program execution"
+            )
 
     # Default to Clang on Windows unless --gcc is explicitly passed
     if sys.platform == "win32" and not test_args.gcc and not test_args.clang:
         test_args.clang = True
-        print("Windows detected: defaulting to Clang compiler (use --gcc to override)")
+        ts_print(
+            "Windows detected: defaulting to Clang compiler (use --gcc to override)"
+        )
     elif test_args.gcc:
-        print("Using GCC compiler")
+        ts_print("Using GCC compiler")
     elif test_args.clang:
-        print("Using Clang compiler")
+        ts_print("Using Clang compiler")
 
     # Validate conflicting arguments
     if test_args.no_interactive and test_args.interactive:
-        print(
+        ts_print(
             "Error: --interactive and --no-interactive cannot be used together",
             file=sys.stderr,
         )
@@ -293,6 +300,6 @@ def parse_args(args: Optional[list[str]] = None) -> TestArgs:
     # Set NO_PARALLEL environment variable if --no-parallel is used
     if test_args.no_parallel:
         os.environ["NO_PARALLEL"] = "1"
-        print("Forcing sequential execution (NO_PARALLEL=1)")
+        ts_print("Forcing sequential execution (NO_PARALLEL=1)")
 
     return test_args

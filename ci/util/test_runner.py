@@ -24,6 +24,7 @@ from running_process.process_output_reader import EndOfStream
 from typeguard import typechecked
 
 from ci.util.color_output import print_cache_hit
+from ci.util.output_formatter import TimestampFormatter
 from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
@@ -38,6 +39,7 @@ from ci.util.test_types import (
     TestSuiteResult,
     determine_test_categories,
 )
+from ci.util.timestamp_print import ts_print
 
 
 _IS_GITHUB_ACTIONS = os.getenv("GITHUB_ACTIONS") == "true"
@@ -190,7 +192,7 @@ class TestOutputFormatter:
         msg += f"{color}{result.message}\033[0m"
 
         # Print with indentation
-        print(f"  {msg}")
+        ts_print(f"  {msg}")
 
     def _should_display(self, result: TestResult) -> bool:
         """Determine if a result should be displayed"""
@@ -448,6 +450,7 @@ def create_unit_test_process(
         cmd_str,
         timeout=_TIMEOUT,  # 2 minutes timeout
         auto_run=True,
+        output_formatter=TimestampFormatter(),
     )
 
 
@@ -492,6 +495,7 @@ def create_python_test_process(
         cmd_str,
         auto_run=False,  # Don't auto-start - will be started in parallel later
         timeout=_TIMEOUT,  # 2 minute timeout for Python tests
+        output_formatter=TimestampFormatter(),
     )
 
 
@@ -505,7 +509,7 @@ def create_integration_test_process(
         cmd.extend(["-k", "TestFullProgramLinking"])
     if args.verbose:
         cmd.append("-v")
-    return RunningProcess(cmd, auto_run=False)
+    return RunningProcess(cmd, auto_run=False, output_formatter=TimestampFormatter())
 
 
 def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningProcess:
@@ -528,7 +532,9 @@ def create_compile_uno_test_process(enable_stack_trace: bool = True) -> RunningP
 
     # Use 15 minute timeout for platform compilation (as per CLAUDE.md guidelines)
     # Docker compilation may take longer during initial rsync sync without producing output
-    return RunningProcess(cmd, auto_run=False, timeout=900)
+    return RunningProcess(
+        cmd, auto_run=False, timeout=900, output_formatter=TimestampFormatter()
+    )
 
 
 def get_cpp_test_processes(
@@ -743,17 +749,17 @@ def _handle_process_completion(
         returncode = proc.wait()
         if returncode != 0:
             test_name = _extract_test_name(cmd)
-            print(f"\nCommand failed: {cmd} with return code {returncode}")
-            print(f"\033[91m###### ERROR ######\033[0m")
-            print(f"Test failed: {test_name}")
+            ts_print(f"\nCommand failed: {cmd} with return code {returncode}")
+            ts_print(f"\033[91m###### ERROR ######\033[0m")
+            ts_print(f"Test failed: {test_name}")
 
             # Capture the actual output from the failed process
             try:
                 actual_output = proc.stdout
                 if actual_output.strip():
-                    print(f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
-                    print(actual_output)
-                    print(f"=== END OF OUTPUT ===")
+                    ts_print(f"\n=== ACTUAL OUTPUT FROM FAILED PROCESS ===")
+                    ts_print(actual_output)
+                    ts_print(f"=== END OF OUTPUT ===")
                 else:
                     actual_output = "No output captured from failed process"
             except Exception as e:
@@ -777,7 +783,7 @@ def _handle_process_completion(
         active_processes.remove(proc)
         if proc in last_activity_time:
             del last_activity_time[proc]  # Clean up tracking
-        print(f"Process completed: {cmd}")
+        ts_print(f"Process completed: {cmd}")
 
         # Collect timing data for summary
         if proc.duration is not None:
@@ -794,20 +800,20 @@ def _handle_process_completion(
 
     except Exception as e:
         test_name = _extract_test_name(cmd)
-        print(f"\nError waiting for process: {cmd}")
-        print(f"Error: {e}")
-        print(f"\033[91m###### ERROR ######\033[0m")
-        print(f"Test error: {test_name}")
+        ts_print(f"\nError waiting for process: {cmd}")
+        ts_print(f"Error: {e}")
+        ts_print(f"\033[91m###### ERROR ######\033[0m")
+        ts_print(f"Test error: {test_name}")
 
         # Try to capture any available output
         try:
             actual_output = proc.stdout
             if actual_output.strip():
-                print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
-                print(actual_output)
-                print(f"=== END OF OUTPUT ===")
+                ts_print(f"\n=== PROCESS OUTPUT BEFORE ERROR ===")
+                ts_print(actual_output)
+                ts_print(f"=== END OF OUTPUT ===")
         except Exception as output_error:
-            print(f"Could not capture process output: {output_error}")
+            ts_print(f"Could not capture process output: {output_error}")
 
         failures: list[TestFailureInfo] = []
         for p in active_processes:
@@ -914,13 +920,13 @@ class ProcessStuckMonitor:
                 time.sleep(1.0)  # Check every second
 
         except KeyboardInterrupt:
-            print(f"🛑 Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
-            print(f"📍 Stack trace for thread {thread_id}:")
+            ts_print(f"🛑 Thread {thread_id} ({thread_name}) caught KeyboardInterrupt")
+            ts_print(f"📍 Stack trace for thread {thread_id}:")
             traceback.print_exc()
             _thread.interrupt_main()
             raise
         except Exception as e:
-            print(f"❌ Thread {thread_id} ({thread_name}) unexpected error: {e}")
+            ts_print(f"❌ Thread {thread_id} ({thread_name}) unexpected error: {e}")
             traceback.print_exc()
             _thread.interrupt_main()
             raise
@@ -944,10 +950,10 @@ def _handle_stuck_processes(
     for signal in stuck_signals:
         proc = signal.process
         if proc in active_processes:
-            print(
+            ts_print(
                 f"\nProcess appears stuck (no output for {signal.timeout_duration}s): {proc.command}"
             )
-            print("Killing stuck process and its children...")
+            ts_print("Killing stuck process and its children...")
             proc.kill()  # This now kills the entire process tree
 
             # Track this as a failure
@@ -955,7 +961,7 @@ def _handle_stuck_processes(
 
             active_processes.remove(proc)
             monitor.stop_monitoring(proc)
-            print(f"Killed stuck process: {proc.command}")
+            ts_print(f"Killed stuck process: {proc.command}")
 
 
 def _run_processes_parallel(
@@ -997,9 +1003,9 @@ def _run_processes_parallel(
         cmd_str = proc.get_command_str()
         if proc.proc is None:  # Only start if not already running
             proc.start()
-            print(f"Started: {cmd_str}")
+            ts_print(f"Started: {cmd_str}")
         else:
-            print(f"Process already running: {cmd_str}")
+            ts_print(f"Process already running: {cmd_str}")
 
     # Monitor all processes for output and completion
     active_processes = processes.copy()
@@ -1041,9 +1047,9 @@ def _run_processes_parallel(
             # Check global timeout
             if time_expired():
                 assert global_timeout is not None
-                print(f"\nGlobal timeout reached after {global_timeout} seconds")
-                print("\033[91m###### ERROR ######\033[0m")
-                print("Tests failed due to global timeout")
+                ts_print(f"\nGlobal timeout reached after {global_timeout} seconds")
+                ts_print("\033[91m###### ERROR ######\033[0m")
+                ts_print("Tests failed due to global timeout")
                 failures: list[TestFailureInfo] = []
                 for p in active_processes:
                     failed_processes.append(
@@ -1072,7 +1078,7 @@ def _run_processes_parallel(
                 if (
                     len(exit_failed_processes) + len(failed_processes)
                 ) >= MAX_FAILURES_BEFORE_ABORT:
-                    print(
+                    ts_print(
                         f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
                     )
                     # Kill any remaining active processes
@@ -1115,7 +1121,7 @@ def _run_processes_parallel(
                 if verbose:
                     with proc.line_iter(timeout=60) as line_iter:
                         for line in line_iter:
-                            print(line)
+                            ts_print(line)
 
                 # Check if process has finished
                 if proc.finished:
@@ -1129,7 +1135,7 @@ def _run_processes_parallel(
 
                     # Check for non-zero exit code (failure)
                     if exit_code != 0:
-                        print(
+                        ts_print(
                             f"Process failed with exit code {exit_code}: {proc.command}"
                         )
                         exit_failed_processes.append((proc, exit_code))
@@ -1137,7 +1143,7 @@ def _run_processes_parallel(
                         if (
                             len(exit_failed_processes) + len(failed_processes)
                         ) >= MAX_FAILURES_BEFORE_ABORT:
-                            print(
+                            ts_print(
                                 f"\nExceeded failure threshold ({MAX_FAILURES_BEFORE_ABORT}). Aborting remaining tests."
                             )
                             # Kill remaining active processes
@@ -1192,7 +1198,7 @@ def _run_processes_parallel(
                         duration=duration,
                     )
                     completed_timings.append(timing)
-                    print(f"Process completed: {proc.get_command_str()}")
+                    ts_print(f"Process completed: {proc.get_command_str()}")
                     any_activity = True
                     continue
 
@@ -1209,12 +1215,12 @@ def _run_processes_parallel(
 
         # Check for processes that failed with non-zero exit codes
         if exit_failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m")
-            print(
+            ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+            ts_print(
                 f"Tests failed due to {len(exit_failed_processes)} process(es) with non-zero exit codes:"
             )
             for proc, exit_code in exit_failed_processes:
-                print(f"  - {proc.command} (exit code {exit_code})")
+                ts_print(f"  - {proc.command} (exit code {exit_code})")
             failures: list[TestFailureInfo] = []
             for proc, exit_code in exit_failed_processes:
                 # Extract error snippet from process output
@@ -1233,11 +1239,11 @@ def _run_processes_parallel(
 
         # Check for failed processes - CRITICAL FIX
         if failed_processes:
-            print(f"\n\033[91m###### ERROR ######\033[0m")
-            print(f"Tests failed due to {len(failed_processes)} killed process(es):")
+            ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+            ts_print(f"Tests failed due to {len(failed_processes)} killed process(es):")
             for cmd in failed_processes:
-                print(f"  - {cmd}")
-            print("Processes were killed due to timeout/stuck detection")
+                ts_print(f"  - {cmd}")
+            ts_print("Processes were killed due to timeout/stuck detection")
             failures: list[TestFailureInfo] = []
             for cmd in failed_processes:
                 failures.append(
@@ -1251,7 +1257,7 @@ def _run_processes_parallel(
                 )
             raise TestExecutionFailedException("Processes were killed", failures)
 
-        print("\nAll parallel tests completed successfully")
+        ts_print("\nAll parallel tests completed successfully")
         return completed_timings
 
     finally:
@@ -1286,8 +1292,8 @@ def run_test_processes(
         parallel = False
 
     if not processes:
-        print("\033[92m###### SUCCESS ######\033[0m")
-        print("No tests to run")
+        ts_print("\033[92m###### SUCCESS ######\033[0m")
+        ts_print("No tests to run")
         return []
 
     try:
@@ -1338,23 +1344,23 @@ def run_test_processes(
         # Success message for sequential execution
         if not parallel:
             elapsed = time.time() - start_time
-            print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
+            ts_print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
 
         return timings
 
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Tests failed - print detailed info and re-raise for proper handling
-        print("\n" + "=" * 60)
-        print("FASTLED TEST RUNNER FAILURE DETAILS")
-        print("=" * 60)
-        print(e.get_detailed_failure_info())
-        print("=" * 60)
+        ts_print("\n" + "=" * 60)
+        ts_print("FASTLED TEST RUNNER FAILURE DETAILS")
+        ts_print("=" * 60)
+        ts_print(e.get_detailed_failure_info())
+        ts_print("=" * 60)
         raise
     except SystemExit as e:
         # Tests failed - extract command name from the error
         if e.code != 0:
-            print("\033[91m###### ERROR ######\033[0m")
-            print(f"Tests failed with exit code {e.code}")
+            ts_print("\033[91m###### ERROR ######\033[0m")
+            ts_print(f"Tests failed with exit code {e.code}")
         raise
 
 
@@ -1375,12 +1381,12 @@ def runner(
         examples_change: Whether example-related files have changed
         python_test_change: Whether Python test-related files have changed
     """
-    print(f"[TEST_RUNNER] Starting runner function")
-    print(f"[TEST_RUNNER] Args: {args}")
-    print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
-    print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
-    print(f"[TEST_RUNNER] Example files changed: {examples_change}")
-    print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
+    ts_print(f"[TEST_RUNNER] Starting runner function")
+    ts_print(f"[TEST_RUNNER] Args: {args}")
+    ts_print(f"[TEST_RUNNER] Source code changed: {src_code_change}")
+    ts_print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
+    ts_print(f"[TEST_RUNNER] Example files changed: {examples_change}")
+    ts_print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
 
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
@@ -1407,11 +1413,13 @@ def runner(
 
             # Print summary with timing
             if result.success:
-                print(f"\n{'=' * 70}")
-                print(f"✓ C++ Unit Tests PASSED")
-                print(f"  Tests run: {result.num_tests_passed}/{result.num_tests_run}")
-                print(f"  Duration: {result.duration:.2f}s")
-                print(f"{'=' * 70}\n")
+                ts_print(f"\n{'=' * 70}")
+                ts_print(f"✓ C++ Unit Tests PASSED")
+                ts_print(
+                    f"  Tests run: {result.num_tests_passed}/{result.num_tests_run}"
+                )
+                ts_print(f"  Duration: {result.duration:.2f}s")
+                ts_print(f"{'=' * 70}\n")
             else:
                 sys.exit(1)
         else:
@@ -1539,11 +1547,11 @@ def runner(
             # Show sccache statistics before test summary
             show_sccache_stats()
             summary = _format_timing_summary(all_timings)
-            print(summary)
+            ts_print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:
         # Print summary and exit with proper code
-        print(f"\n\033[91m###### ERROR ######\033[0m")
-        print(f"Tests failed with {len(e.failures)} failure(s)")
+        ts_print(f"\n\033[91m###### ERROR ######\033[0m")
+        ts_print(f"Tests failed with {len(e.failures)} failure(s)")
 
         # Exit with appropriate code
         if e.failures:

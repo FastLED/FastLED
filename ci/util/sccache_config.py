@@ -13,6 +13,8 @@ import subprocess
 from pathlib import Path
 from typing import Any, Protocol
 
+from ci.util.timestamp_print import ts_print
+
 
 class PlatformIOEnv(Protocol):
     """Type hint for PlatformIO environment object."""
@@ -74,29 +76,29 @@ def show_sccache_stats() -> None:
             timeout=10,
         )
         if result.returncode == 0:
-            print("\n" + "=" * 70)
-            print("SCCACHE Statistics:")
-            print("=" * 70)
-            print(result.stdout)
-            print("=" * 70)
+            ts_print("\n" + "=" * 70)
+            ts_print("SCCACHE Statistics:")
+            ts_print("=" * 70)
+            ts_print(result.stdout)
+            ts_print("=" * 70)
     except subprocess.TimeoutExpired:
-        print("Warning: sccache --show-stats timed out")
+        ts_print("Warning: sccache --show-stats timed out")
     except Exception as e:
-        print(f"Warning: Failed to retrieve sccache stats: {e}")
+        ts_print(f"Warning: Failed to retrieve sccache stats: {e}")
 
 
 def configure_sccache(env: PlatformIOEnv) -> None:
     """Configure SCCACHE for the build environment."""
     if not is_sccache_available():
-        print("SCCACHE is not available. Skipping SCCACHE configuration.")
+        ts_print("SCCACHE is not available. Skipping SCCACHE configuration.")
         return
 
     sccache_path = get_sccache_path()
     if not sccache_path:
-        print("Could not find SCCACHE executable. Skipping SCCACHE configuration.")
+        ts_print("Could not find SCCACHE executable. Skipping SCCACHE configuration.")
         return
 
-    print(f"Found SCCACHE at: {sccache_path}")
+    ts_print(f"Found SCCACHE at: {sccache_path}")
 
     # Set up SCCACHE environment variables
     project_dir = env.get("PROJECT_DIR")
@@ -112,7 +114,7 @@ def configure_sccache(env: PlatformIOEnv) -> None:
 
     # Create sccache directory
     Path(sccache_dir).mkdir(parents=True, exist_ok=True)
-    print(f"Using board-specific SCCACHE directory: {sccache_dir}")
+    ts_print(f"Using board-specific SCCACHE directory: {sccache_dir}")
 
     # Configure SCCACHE environment variables
     os.environ["SCCACHE_DIR"] = sccache_dir
@@ -136,9 +138,9 @@ def configure_sccache(env: PlatformIOEnv) -> None:
     # Instead, we'll use build_flags to wrap the compiler commands
     # This is handled in the Board configuration via extra_scripts
 
-    print(f"SCCACHE configuration completed")
-    print(f"Cache directory: {sccache_dir}")
-    print(f"Cache size limit: 2G")
+    ts_print(f"SCCACHE configuration completed")
+    ts_print(f"Cache directory: {sccache_dir}")
+    ts_print(f"Cache size limit: 2G")
 
     # Show SCCACHE stats if available
     try:
@@ -146,8 +148,8 @@ def configure_sccache(env: PlatformIOEnv) -> None:
             [sccache_path, "--show-stats"], capture_output=True, text=True, check=False
         )
         if result.returncode == 0:
-            print("SCCACHE Statistics:")
-            print(result.stdout)
+            ts_print("SCCACHE Statistics:")
+            ts_print(result.stdout)
     except Exception:
         pass  # Don't fail build if stats aren't available
 
@@ -163,6 +165,7 @@ Import("env")
 import os
 import shutil
 from pathlib import Path
+from ci.util.timestamp_print import ts_print
 
 def setup_sccache_wrapper():
     """Setup sccache wrapper for compiler commands."""
@@ -170,10 +173,10 @@ def setup_sccache_wrapper():
     # Check if sccache is available
     sccache_path = shutil.which("sccache")
     if not sccache_path:
-        print("SCCACHE not found, compilation will proceed without caching")
+        ts_print("SCCACHE not found, compilation will proceed without caching")
         return
     
-    print(f"Setting up SCCACHE wrapper: {sccache_path}")
+    ts_print(f"Setting up SCCACHE wrapper: {sccache_path}")
     
     # Get current build environment
     project_dir = env.get("PROJECT_DIR", os.getcwd())
@@ -197,8 +200,8 @@ def setup_sccache_wrapper():
             CC=f'"{sccache_path}" {current_cc}',
             CXX=f'"{sccache_path}" {current_cxx}',
         )
-        print(f"Wrapped CC with SCCACHE: {env.get('CC')}")
-        print(f"Wrapped CXX with SCCACHE: {env.get('CXX')}")
+        ts_print(f"Wrapped CC with SCCACHE: {env.get('CC')}")
+        ts_print(f"Wrapped CXX with SCCACHE: {env.get('CXX')}")
 
 # Setup sccache wrapper
 setup_sccache_wrapper()

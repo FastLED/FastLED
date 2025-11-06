@@ -15,6 +15,8 @@ from typing import List, Optional, Tuple
 from running_process import RunningProcess
 
 from ci.util.build_lock import libfastled_build_lock
+from ci.util.output_formatter import TimestampFormatter
+from ci.util.timestamp_print import ts_print as _ts_print
 
 
 @dataclass
@@ -70,7 +72,7 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         )
 
         if result.returncode != 0:
-            print(f"[MESON] Warning: collect_sources.py failed: {result.stderr}")
+            _ts_print(f"[MESON] Warning: collect_sources.py failed: {result.stderr}")
             return ("", [])
 
         # Get sorted list of source files
@@ -87,7 +89,7 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         return (hasher.hexdigest(), source_files)
 
     except Exception as e:
-        print(f"[MESON] Warning: Failed to get source file hash: {e}")
+        _ts_print(f"[MESON] Warning: Failed to get source file hash: {e}")
         return ("", [])
 
 
@@ -123,7 +125,7 @@ def write_if_different(path: Path, content: str, mode: Optional[int] = None) -> 
         return True
     except (OSError, IOError) as e:
         # On error, try to write anyway - caller will handle failures
-        print(f"[MESON] Warning: Error checking file {path}: {e}")
+        _ts_print(f"[MESON] Warning: Error checking file {path}: {e}")
         path.write_text(content, encoding="utf-8")
         if mode is not None and not sys.platform.startswith("win"):
             path.chmod(mode)
@@ -318,42 +320,44 @@ def setup_meson_build(
             try:
                 last_thin_setting = thin_archive_marker.read_text().strip() == "True"
                 if last_thin_setting != use_thin_archives:
-                    print(
+                    _ts_print(
                         f"[MESON] ⚠️  Thin archive setting changed: {last_thin_setting} → {use_thin_archives}"
                     )
-                    print(
+                    _ts_print(
                         "[MESON] 🔄 Forcing reconfigure to update AR tool configuration"
                     )
                     force_reconfigure = True
             except (OSError, IOError):
                 # If we can't read the marker, force reconfigure to be safe
-                print(
+                _ts_print(
                     "[MESON] ⚠️  Could not read thin archive marker, forcing reconfigure"
                 )
                 force_reconfigure = True
         else:
             # No marker file exists from previous configure - create one after setup
             # This can happen on first run after updating to this version
-            print("[MESON] ℹ️  No thin archive marker found, will create after setup")
+            _ts_print(
+                "[MESON] ℹ️  No thin archive marker found, will create after setup"
+            )
 
         # Check if unity setting has changed since last configure
         if unity_marker.exists():
             try:
                 last_unity_setting = unity_marker.read_text().strip() == "True"
                 if last_unity_setting != unity:
-                    print(
+                    _ts_print(
                         f"[MESON] ⚠️  Unity build setting changed: {last_unity_setting} → {unity}"
                     )
-                    print("[MESON] 🔄 Forcing reconfigure to update build targets")
+                    _ts_print("[MESON] 🔄 Forcing reconfigure to update build targets")
                     force_reconfigure = True
             except (OSError, IOError):
                 # If we can't read the marker, force reconfigure to be safe
-                print("[MESON] ⚠️  Could not read unity marker, forcing reconfigure")
+                _ts_print("[MESON] ⚠️  Could not read unity marker, forcing reconfigure")
                 force_reconfigure = True
         else:
             # No marker file exists from previous configure
             # Force reconfigure to ensure Meson is configured with correct unity setting
-            print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
+            _ts_print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
             force_reconfigure = True
 
         # Check if source files have changed since last configure
@@ -363,21 +367,25 @@ def setup_meson_build(
                 try:
                     last_hash = source_files_marker.read_text().strip()
                     if last_hash != current_source_hash:
-                        print(
+                        _ts_print(
                             "[MESON] ⚠️  Source file list changed (files added/removed)"
                         )
-                        print("[MESON] 🔄 Forcing reconfigure to update build graph")
+                        _ts_print(
+                            "[MESON] 🔄 Forcing reconfigure to update build graph"
+                        )
                         force_reconfigure = True
                 except (OSError, IOError):
                     # If we can't read the marker, force reconfigure to be safe
-                    print(
+                    _ts_print(
                         "[MESON] ⚠️  Could not read source files marker, forcing reconfigure"
                     )
                     force_reconfigure = True
             else:
                 # No marker file exists from previous configure
                 # Force reconfigure to ensure build graph matches current source files
-                print("[MESON] ℹ️  No source files marker found, forcing reconfigure")
+                _ts_print(
+                    "[MESON] ℹ️  No source files marker found, forcing reconfigure"
+                )
                 force_reconfigure = True
 
     # Determine if we need to run meson setup/reconfigure
@@ -408,7 +416,7 @@ def setup_meson_build(
                 timeout=60,
             )
         except subprocess.SubprocessError as e:
-            print(f"[MESON] Warning: Failed to build wrapper trampolines: {e}")
+            _ts_print(f"[MESON] Warning: Failed to build wrapper trampolines: {e}")
             # Continue anyway - wrappers might already exist
 
     # Track if any wrapper files were modified
@@ -417,7 +425,7 @@ def setup_meson_build(
     cmd: Optional[list[str]] = None
     if skip_meson_setup:
         # Build already configured, check wrappers below
-        print(f"[MESON] Build directory already configured: {build_dir}")
+        _ts_print(f"[MESON] Build directory already configured: {build_dir}")
     elif already_configured and (reconfigure or force_reconfigure):
         # Reconfigure existing build (explicitly requested or forced by thin archive change)
         reason = (
@@ -425,7 +433,7 @@ def setup_meson_build(
             if force_reconfigure
             else "explicitly requested"
         )
-        print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
+        _ts_print(f"[MESON] Reconfiguring build directory ({reason}): {build_dir}")
         cmd = [
             "meson",
             "setup",
@@ -438,16 +446,16 @@ def setup_meson_build(
             cmd.extend(["-Dunity=on"])
     else:
         # Initial setup
-        print(f"[MESON] Setting up build directory: {build_dir}")
+        _ts_print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", "--native-file", str(native_file_path), str(build_dir)]
         if unity:
             cmd.extend(["-Dunity=on"])
 
     # Print unity build status
     if unity:
-        print("[MESON] ✅ Unity builds ENABLED (--unity flag)")
+        _ts_print("[MESON] ✅ Unity builds ENABLED (--unity flag)")
     else:
-        print("[MESON] Unity builds disabled (use --unity to enable)")
+        _ts_print("[MESON] Unity builds disabled (use --unity to enable)")
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
@@ -455,28 +463,34 @@ def setup_meson_build(
     thin_flag = " --thin" if use_thin_archives else ""
 
     if use_thin_archives:
-        print("[MESON] ✅ Thin archives enabled (using system LLVM tools)")
+        _ts_print("[MESON] ✅ Thin archives enabled (using system LLVM tools)")
     else:
         # Always show prominent warning when thin archives are disabled
-        print("=" * 80)
-        print("⚠️  WARNING: Thin archives DISABLED for Zig compatibility")
-        print("    Reason: Zig's bundled linker does not support thin archive format")
-        print("    Impact: +200ms archive creation, +45MB disk usage per build")
+        _ts_print("=" * 80)
+        _ts_print("⚠️  WARNING: Thin archives DISABLED for Zig compatibility")
+        _ts_print(
+            "    Reason: Zig's bundled linker does not support thin archive format"
+        )
+        _ts_print("    Impact: +200ms archive creation, +45MB disk usage per build")
 
         if has_lld and has_llvm_ar:
             # System HAS the tools, but we're disabling for Zig compatibility
-            print("    Note: System has LLVM tools (lld, llvm-ar) but cannot use them")
-            print("          Zig compiler does not reliably honor -fuse-ld=lld flag")
+            _ts_print(
+                "    Note: System has LLVM tools (lld, llvm-ar) but cannot use them"
+            )
+            _ts_print(
+                "          Zig compiler does not reliably honor -fuse-ld=lld flag"
+            )
         else:
             # System doesn't have LLVM tools anyway
-            print("    Note: System LLVM tools not detected (additional reason)")
+            _ts_print("    Note: System LLVM tools not detected (additional reason)")
             missing_tools: list[str] = []
             if not has_lld:
                 missing_tools.append("lld/ld.lld")
             if not has_llvm_ar:
                 missing_tools.append("llvm-ar")
-            print(f"          Missing: {', '.join(missing_tools)}")
-        print("=" * 80)
+            _ts_print(f"          Missing: {', '.join(missing_tools)}")
+        _ts_print("=" * 80)
 
     # Use system tools when available for thin archives, otherwise use zig
     use_system_ar = use_thin_archives and has_llvm_ar
@@ -497,11 +511,11 @@ def setup_meson_build(
 
         # Verify wrappers exist
         if not cc_wrapper.exists():
-            print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
+            _ts_print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
         if not cxx_wrapper.exists():
-            print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
+            _ts_print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
         if not ar_wrapper.exists():
-            print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
+            _ts_print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
     else:
         # Unix/Linux/macOS: Use wrapper trampolines from .meson directory for compilers
         wrapper_ext = ""
@@ -512,11 +526,11 @@ def setup_meson_build(
 
         # Verify wrappers exist
         if not cc_wrapper.exists():
-            print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
+            _ts_print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
         if not cxx_wrapper.exists():
-            print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
+            _ts_print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
         if not ar_wrapper.exists():
-            print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
+            _ts_print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
 
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
@@ -589,9 +603,9 @@ endian = 'little'
         wrappers_changed |= native_file_changed
 
         if wrappers_changed:
-            print(f"[MESON] Regenerated native file: {native_file_path}")
+            _ts_print(f"[MESON] Regenerated native file: {native_file_path}")
     except (OSError, IOError) as e:
-        print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
+        _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
     env = os.environ.copy()
     env["CC"] = str(cc_wrapper)
@@ -601,14 +615,14 @@ endian = 'little'
     ar_tool = "llvm-ar" if use_system_ar else "zig ar"
     linker_tool = "system lld" if (use_thin_archives and has_lld) else "zig lld"
 
-    print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
-    print(f"[MESON] Using linker: {linker_tool}")
+    _ts_print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
+    _ts_print(f"[MESON] Using linker: {linker_tool}")
     if sccache_available:
-        print(
+        _ts_print(
             f"[MESON] ✅ sccache is available and will be used for compilation caching"
         )
     else:
-        print(
+        _ts_print(
             f"[MESON] Note: Using Zig's built-in compilation caching (sccache not found)"
         )
 
@@ -628,22 +642,22 @@ endian = 'little'
                 if is_thin_archive and not use_thin_archives:
                     # Thin archive exists but we've disabled thin archives
                     # Delete it to force rebuild with regular archive
-                    print("[MESON] ⚠️  Detected thin archive from previous build")
-                    print(
+                    _ts_print("[MESON] ⚠️  Detected thin archive from previous build")
+                    _ts_print(
                         "[MESON] 🗑️  Deleting libfastled.a to force rebuild with regular archive"
                     )
                     libfastled_a.unlink()
                 elif not is_thin_archive and use_thin_archives:
                     # Regular archive exists but we've enabled thin archives
                     # Delete it to force rebuild with thin archive
-                    print("[MESON] ℹ️  Detected regular archive from previous build")
-                    print(
+                    _ts_print("[MESON] ℹ️  Detected regular archive from previous build")
+                    _ts_print(
                         "[MESON] 🗑️  Deleting libfastled.a to force rebuild with thin archive"
                     )
                     libfastled_a.unlink()
             except (OSError, IOError) as e:
                 # If we can't read/delete, that's okay - build will handle it
-                print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
+                _ts_print(f"[MESON] Warning: Could not check/delete libfastled.a: {e}")
                 pass
         return True
 
@@ -663,49 +677,52 @@ endian = 'little'
             auto_run=True,
             check=False,  # We'll check returncode manually
             env=setup_env,
+            output_formatter=TimestampFormatter(),
         )
 
         returncode = proc.wait(echo=True)
 
         if returncode != 0:
-            print(
+            _ts_print(
                 f"[MESON] Setup failed with return code {returncode}", file=sys.stderr
             )
             return False
 
-        print(f"[MESON] Setup successful")
+        _ts_print(f"[MESON] Setup successful")
 
         # Write marker file to track thin archive setting for future runs
         try:
             thin_archive_marker.write_text(str(use_thin_archives), encoding="utf-8")
-            print(f"[MESON] ✅ Saved thin archive configuration: {use_thin_archives}")
+            _ts_print(
+                f"[MESON] ✅ Saved thin archive configuration: {use_thin_archives}"
+            )
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
-            print(f"[MESON] Warning: Could not write thin archive marker: {e}")
+            _ts_print(f"[MESON] Warning: Could not write thin archive marker: {e}")
 
         # Write marker file to track unity setting for future runs
         try:
             unity_marker.write_text(str(unity), encoding="utf-8")
-            print(f"[MESON] ✅ Saved unity configuration: {unity}")
+            _ts_print(f"[MESON] ✅ Saved unity configuration: {unity}")
         except (OSError, IOError) as e:
             # Not critical if marker file write fails
-            print(f"[MESON] Warning: Could not write unity marker: {e}")
+            _ts_print(f"[MESON] Warning: Could not write unity marker: {e}")
 
         # Write marker file to track source file list for future runs
         if current_source_hash:
             try:
                 source_files_marker.write_text(current_source_hash, encoding="utf-8")
-                print(
+                _ts_print(
                     f"[MESON] ✅ Saved source files hash ({len(current_source_files)} files)"
                 )
             except (OSError, IOError) as e:
                 # Not critical if marker file write fails
-                print(f"[MESON] Warning: Could not write source files marker: {e}")
+                _ts_print(f"[MESON] Warning: Could not write source files marker: {e}")
 
         return True
 
     except Exception as e:
-        print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
+        _ts_print(f"[MESON] Setup failed with exception: {e}", file=sys.stderr)
         return False
 
 
@@ -724,9 +741,9 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
 
     if target:
         cmd.append(target)
-        print(f"[MESON] Compiling target: {target}")
+        _ts_print(f"[MESON] Compiling target: {target}")
     else:
-        print(f"[MESON] Compiling all targets...")
+        _ts_print(f"[MESON] Compiling all targets...")
 
     try:
         # Use RunningProcess for streaming output
@@ -737,6 +754,7 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
             auto_run=True,
             check=False,  # We'll check returncode manually
             env=os.environ.copy(),  # Pass current environment with wrapper paths
+            output_formatter=TimestampFormatter(),
         )
 
         returncode = proc.wait(echo=True)
@@ -746,11 +764,11 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
         # When detected, automatically repair the .ninja_deps file
         output = proc.stdout  # RunningProcess combines stdout and stderr
         if "premature end of file" in output.lower():
-            print(
+            _ts_print(
                 "[MESON] ⚠️  Detected corrupted Ninja dependency database (.ninja_deps)",
                 file=sys.stderr,
             )
-            print(
+            _ts_print(
                 "[MESON] 🔧 Auto-repairing: Running ninja -t recompact...",
                 file=sys.stderr,
             )
@@ -763,57 +781,58 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
                     auto_run=True,
                     check=False,
                     env=os.environ.copy(),
+                    output_formatter=TimestampFormatter(),
                 )
                 repair_returncode = repair_proc.wait(echo=False)
 
                 if repair_returncode == 0:
-                    print(
+                    _ts_print(
                         "[MESON] ✓ Dependency database repaired successfully",
                         file=sys.stderr,
                     )
-                    print(
+                    _ts_print(
                         "[MESON] 💡 Next build should be fast (incremental)",
                         file=sys.stderr,
                     )
                 else:
-                    print(
+                    _ts_print(
                         "[MESON] ⚠️  Repair failed, but continuing anyway",
                         file=sys.stderr,
                     )
             except Exception as repair_error:
-                print(
+                _ts_print(
                     f"[MESON] ⚠️  Repair failed with exception: {repair_error}",
                     file=sys.stderr,
                 )
 
         if returncode != 0:
-            print(
+            _ts_print(
                 f"[MESON] Compilation failed with return code {returncode}",
                 file=sys.stderr,
             )
 
             # Check for stale build cache error (missing files)
             if "missing and no known rule to make it" in output.lower():
-                print(
+                _ts_print(
                     "[MESON] ⚠️  ERROR: Build cache references missing source files",
                     file=sys.stderr,
                 )
-                print(
+                _ts_print(
                     "[MESON] 💡 TIP: Source files may have been deleted. Run with --clean to rebuild.",
                     file=sys.stderr,
                 )
-                print(
+                _ts_print(
                     "[MESON] 💡 NOTE: Future builds should auto-detect this and reconfigure.",
                     file=sys.stderr,
                 )
 
             return False
 
-        print(f"[MESON] Compilation successful")
+        _ts_print(f"[MESON] Compilation successful")
         return True
 
     except Exception as e:
-        print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
+        _ts_print(f"[MESON] Compilation failed with exception: {e}", file=sys.stderr)
         return False
 
 
@@ -867,14 +886,16 @@ def _create_error_context_filter(context_lines: int = 20) -> callable:
             # Error detected! Output all buffered pre-context
             if not error_detected:
                 # First error - show header and pre-context
-                print("\n[MESON] ⚠️  Test failures detected - showing error context:")
-                print("-" * 80)
+                _ts_print(
+                    "\n[MESON] ⚠️  Test failures detected - showing error context:"
+                )
+                _ts_print("-" * 80)
                 for buffered_line in pre_error_buffer:
-                    print(buffered_line)
+                    _ts_print(buffered_line)
                 error_detected = True
 
             # Output this error line with red color highlighting
-            print(f"\033[91m{line}\033[0m")
+            _ts_print(f"\033[91m{line}\033[0m")
 
             # Start counting post-error lines
             post_error_lines = context_lines
@@ -884,7 +905,7 @@ def _create_error_context_filter(context_lines: int = 20) -> callable:
 
         if post_error_lines > 0:
             # We're in the post-error context window
-            print(line)
+            _ts_print(line)
             post_error_lines -= 1
             return
 
@@ -916,9 +937,9 @@ def run_meson_test(
 
     if test_name:
         cmd.append(test_name)
-        print(f"[MESON] Running test: {test_name}")
+        _ts_print(f"[MESON] Running test: {test_name}")
     else:
-        print(f"[MESON] Running all tests...")
+        _ts_print(f"[MESON] Running all tests...")
 
     start_time = time.time()
     num_passed = 0
@@ -934,6 +955,7 @@ def run_meson_test(
             auto_run=True,
             check=False,  # We'll check returncode manually
             env=os.environ.copy(),  # Pass current environment with wrapper paths
+            output_formatter=TimestampFormatter(),
         )
 
         # Parse output in real-time to show test progress
@@ -961,22 +983,22 @@ def run_meson_test(
                         if status == "OK":
                             num_passed += 1
                             # Show brief progress for passed tests
-                            print(
+                            _ts_print(
                                 f"  [{current}/{total}] ✓ {test_name_match} ({duration_str}s)"
                             )
                         elif status == "FAIL":
                             num_failed += 1
-                            print(
+                            _ts_print(
                                 f"  [{current}/{total}] ✗ {test_name_match} FAILED ({duration_str}s)"
                             )
                         elif status == "TIMEOUT":
                             num_failed += 1
-                            print(
+                            _ts_print(
                                 f"  [{current}/{total}] ⏱ {test_name_match} TIMEOUT ({duration_str}s)"
                             )
                     elif verbose or "FAILED" in line or "ERROR" in line:
                         # Show error/important lines
-                        print(f"  {line}")
+                        _ts_print(f"  {line}")
 
             returncode = proc.wait()
 
@@ -993,7 +1015,7 @@ def run_meson_test(
         duration = time.time() - start_time
 
         if returncode != 0:
-            print(
+            _ts_print(
                 f"[MESON] Tests failed with return code {returncode}", file=sys.stderr
             )
             return MesonTestResult(
@@ -1004,7 +1026,7 @@ def run_meson_test(
                 num_tests_failed=num_failed,
             )
 
-        print(
+        _ts_print(
             f"[MESON] All tests passed ({num_passed}/{num_run} tests in {duration:.2f}s)"
         )
         return MesonTestResult(
@@ -1017,7 +1039,7 @@ def run_meson_test(
 
     except Exception as e:
         duration = time.time() - start_time
-        print(f"[MESON] Test execution failed with exception: {e}", file=sys.stderr)
+        _ts_print(f"[MESON] Test execution failed with exception: {e}", file=sys.stderr)
         return MesonTestResult(
             success=False,
             duration=duration,
@@ -1058,7 +1080,7 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             # If we can't read the marker, proceed with maintenance
             pass
 
-    print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
+    _ts_print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
 
     try:
         # Run ninja -t recompact to optimize dependency database
@@ -1068,11 +1090,14 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
             auto_run=True,
             check=False,
             env=os.environ.copy(),
+            output_formatter=TimestampFormatter(),
         )
         returncode = repair_proc.wait(echo=False)
 
         if returncode == 0:
-            print("[MESON] ✓ Dependency database maintenance completed successfully")
+            _ts_print(
+                "[MESON] ✓ Dependency database maintenance completed successfully"
+            )
 
             # Update marker file timestamp
             try:
@@ -1083,14 +1108,14 @@ def perform_ninja_maintenance(build_dir: Path) -> bool:
 
             return True
         else:
-            print(
+            _ts_print(
                 "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
                 file=sys.stderr,
             )
             return True  # Non-fatal, continue anyway
 
     except Exception as e:
-        print(
+        _ts_print(
             f"[MESON] ⚠️  Maintenance failed with exception: {e} (non-fatal)",
             file=sys.stderr,
         )
@@ -1123,13 +1148,13 @@ def run_meson_build_and_test(
 
     # Check if Meson is installed
     if not check_meson_installed():
-        print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
-        print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
+        _ts_print("[MESON] Error: Meson build system is not installed", file=sys.stderr)
+        _ts_print("[MESON] Install with: pip install meson ninja", file=sys.stderr)
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Clean if requested
     if clean and build_dir.exists():
-        print(f"[MESON] Cleaning build directory: {build_dir}")
+        _ts_print(f"[MESON] Cleaning build directory: {build_dir}")
         import shutil
 
         shutil.rmtree(build_dir)
@@ -1165,7 +1190,7 @@ def run_meson_build_and_test(
             if not compile_meson(build_dir, target=compile_target):
                 return MesonTestResult(success=False, duration=time.time() - start_time)
     except TimeoutError as e:
-        print(f"[MESON] {e}", file=sys.stderr)
+        _ts_print(f"[MESON] {e}", file=sys.stderr)
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Run tests
@@ -1192,7 +1217,7 @@ def run_meson_build_and_test(
                 category_executables.append((category, exe_path))
 
         if not category_executables:
-            print(
+            _ts_print(
                 f"[MESON] Error: No unity test executables found in {build_dir / 'tests'}",
                 file=sys.stderr,
             )
@@ -1202,9 +1227,13 @@ def run_meson_build_and_test(
         filter_name = None
         if meson_test_name:
             filter_name = meson_test_name.replace("test_", "")
-            print(f"[MESON] Running unity test categories with filter: {filter_name}")
+            _ts_print(
+                f"[MESON] Running unity test categories with filter: {filter_name}"
+            )
         else:
-            print(f"[MESON] Running {len(category_executables)} unity test categories")
+            _ts_print(
+                f"[MESON] Running {len(category_executables)} unity test categories"
+            )
 
         # Run each category executable
         overall_success = True
@@ -1222,7 +1251,7 @@ def run_meson_build_and_test(
                 test_cmd.extend(["--test-case", f"*{filter_name}*"])
 
             # Always show which category is being tested (even in non-verbose mode)
-            print(f"[MESON] Running {category_name}...")
+            _ts_print(f"[MESON] Running {category_name}...")
 
             # Execute test
             try:
@@ -1233,6 +1262,7 @@ def run_meson_build_and_test(
                     auto_run=True,
                     check=False,
                     env=os.environ.copy(),
+                    output_formatter=TimestampFormatter(),
                 )
 
                 # In verbose mode, show all output
@@ -1245,7 +1275,7 @@ def run_meson_build_and_test(
 
                     # If test failed, show error context from accumulated output
                     if returncode != 0:
-                        print(
+                        _ts_print(
                             f"[MESON] Category {category_name} failed:", file=sys.stderr
                         )
                         # Create error-detecting filter
@@ -1257,7 +1287,7 @@ def run_meson_build_and_test(
                             error_filter(line)
 
                 if returncode != 0:
-                    print(
+                    _ts_print(
                         f"[MESON] Unity test category '{category_name}' failed with return code {returncode}",
                         file=sys.stderr,
                     )
@@ -1266,13 +1296,13 @@ def run_meson_build_and_test(
                     # Continue running other categories to get full test results
                 else:
                     # Always show success status (even in non-verbose mode)
-                    print(f"[MESON] ✓ {category_name} passed")
+                    _ts_print(f"[MESON] ✓ {category_name} passed")
                     num_unity_tests_passed += 1
 
             except KeyboardInterrupt:
                 raise
             except Exception as e:
-                print(
+                _ts_print(
                     f"[MESON] Unity test category '{category_name}' execution failed with exception: {e}",
                     file=sys.stderr,
                 )
@@ -1282,7 +1312,7 @@ def run_meson_build_and_test(
         duration = time.time() - start_time
 
         if not overall_success:
-            print("[MESON] Some unity test categories failed", file=sys.stderr)
+            _ts_print("[MESON] Some unity test categories failed", file=sys.stderr)
             return MesonTestResult(
                 success=False,
                 duration=duration,
@@ -1291,7 +1321,7 @@ def run_meson_build_and_test(
                 num_tests_failed=num_unity_tests_failed,
             )
 
-        print(f"[MESON] All unity test categories passed")
+        _ts_print(f"[MESON] All unity test categories passed")
         return MesonTestResult(
             success=True,
             duration=duration,

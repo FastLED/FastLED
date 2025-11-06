@@ -104,19 +104,21 @@ def libfastled_build_lock(timeout: float = 300.0) -> Generator[BuildLock, None, 
     Raises:
         TimeoutError: If lock cannot be acquired within timeout
     """
+    from ci.util.timestamp_print import ts_print
+
     lock = BuildLock("libfastled_build")
 
-    print("[BUILD_LOCK] Acquiring libfastled build lock...")
+    ts_print("[BUILD_LOCK] Acquiring libfastled build lock...")
     if not lock.acquire(timeout=timeout):
         raise TimeoutError(
             f"Failed to acquire libfastled build lock after {timeout} seconds"
         )
 
     try:
-        print("[BUILD_LOCK] Lock acquired, proceeding with build")
+        ts_print("[BUILD_LOCK] Lock acquired, proceeding with build")
         yield lock
     finally:
-        print("[BUILD_LOCK] Releasing libfastled build lock")
+        ts_print("[BUILD_LOCK] Releasing libfastled build lock")
         lock.release()
 
 

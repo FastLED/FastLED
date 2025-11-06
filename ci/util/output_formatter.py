@@ -1,8 +1,28 @@
 from __future__ import annotations
 
 import re
+import time
 
 from running_process import OutputFormatter
+
+
+class TimestampFormatter:
+    """Simple formatter that adds timestamps relative to program start."""
+
+    def __init__(self) -> None:
+        self._start_time: float = 0.0
+
+    def begin(self) -> None:
+        self._start_time = time.time()
+
+    def transform(self, line: str) -> str:
+        if not line:
+            return line
+        elapsed: float = time.time() - self._start_time
+        return f"{elapsed:.2f} {line}"
+
+    def end(self) -> None:
+        return None
 
 
 class _MultiPathSubstitutionFormatter:
@@ -17,13 +37,9 @@ class _MultiPathSubstitutionFormatter:
         self._start_time: float = 0.0
 
     def begin(self) -> None:
-        import time
-
         self._start_time = time.time()
 
     def transform(self, line: str) -> str:
-        import time
-
         if not line:
             return line
         formatted: str = self._format_paths(line)
