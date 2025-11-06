@@ -114,7 +114,7 @@ public:
     /// @brief Wait for pending transmission to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max());
+    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
 
     /// @brief Convenience method - wait for transmission to complete
     /// @returns true if completed, false on timeout

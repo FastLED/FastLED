@@ -107,7 +107,7 @@ public:
     /// @brief Wait for pending async operation to complete
     /// @param timeout_ms Maximum time to wait (default: forever)
     /// @returns true if completed, false on timeout
-    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max());
+    bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)());
 
     /// @brief Check if async operation is in progress
     /// @returns true if busy, false if idle
