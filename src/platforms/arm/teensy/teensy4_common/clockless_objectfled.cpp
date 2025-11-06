@@ -292,88 +292,9 @@ private:
 };
 
 // ============================================================================
-// Proxy Controller Implementation
+// Note: Template implementations are in clockless_objectfled.h for visibility
+// No explicit instantiations needed - templates instantiated on-demand
 // ============================================================================
-
-template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::ClocklessController_ObjectFLED_Proxy()
-    : Base() {
-    // Latch delay is automatically determined from TIMING::RESET
-}
-
-template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginShowLeds(int nleds) {
-    void *data = Base::beginShowLeds(nleds);
-
-    // Auto-grab the singleton for THIS chipset type
-    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
-
-    // Flush any pending groups of DIFFERENT chipset types
-    ObjectFLEDRegistry::getInstance().flushAllExcept(&group);
-
-    // Start queuing for this group
-    group.onQueuingStart();
-
-    return data;
-}
-
-template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::showPixels(
-    PixelController<RGB_ORDER> &pixels) {
-    // Auto-grab the singleton for THIS chipset type
-    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
-
-    // Add this strip to the group
-    auto pixel_iterator = pixels.as_iterator(this->getRgbw());
-    group.addStrip(DATA_PIN, pixel_iterator);
-}
-
-template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
-void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::endShowLeds(void *data) {
-    Base::endShowLeds(data);
-
-    // DON'T flush here - let chipset change detection or frame end handle it
-    // This is handled by the next controller's beginShowLeds() or FastLED.show() end
-}
-
-// ============================================================================
-// Explicit Template Instantiations (for common chipsets)
-// ============================================================================
-
-// Instantiate for WS2812
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 0, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 1, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 2, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 3, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 4, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 5, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 6, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2812_800KHZ, 7, GRB>;
-
-// Instantiate for SK6812
-template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 0, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 1, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 2, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_SK6812, 3, GRB>;
-
-// Instantiate for WS2811 (400kHz variant)
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 0, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 1, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_400KHZ, 2, GRB>;
-
-// Instantiate for WS2811 (800kHz LEGACY variant - used by default WS2811 class)
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 0, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 1, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 2, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 3, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 4, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 5, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 6, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2811_800KHZ_LEGACY, 7, GRB>;
-
-// Instantiate for WS2813
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2813, 0, GRB>;
-template class ClocklessController_ObjectFLED_Proxy<TIMING_WS2813, 1, GRB>;
 
 } // namespace fl
 

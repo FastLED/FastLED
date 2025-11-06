@@ -31,9 +31,9 @@
 #define FASTLED_OBJECTFLED_LATCH_DELAY 300  // WS2812-5VB
 #endif
 
+// Forward declare so templates can reference them
+// Full definitions are in the .cpp file
 namespace fl {
-
-// Forward declarations for the templated architecture
 template <typename TIMING> class ObjectFLEDGroup;
 class ObjectFLEDRegistry;
 
@@ -50,6 +50,7 @@ class ClocklessController_ObjectFLED_Proxy
 
   public:
     ClocklessController_ObjectFLED_Proxy();
+
     void init() override {}
 
     virtual uint16_t getMaxRefreshRate() const override {
@@ -63,6 +64,51 @@ class ClocklessController_ObjectFLED_Proxy
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override;
     virtual void endShowLeds(void *data) override;
 };
+
+// ============================================================================
+// Template Member Function Implementations (must be in header for visibility)
+// ============================================================================
+
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::ClocklessController_ObjectFLED_Proxy()
+    : Base() {
+    // Latch delay is automatically determined from TIMING::RESET
+}
+
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void *ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::beginShowLeds(int nleds) {
+    void *data = Base::beginShowLeds(nleds);
+
+    // Auto-grab the singleton for THIS chipset type
+    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
+
+    // Flush any pending groups of DIFFERENT chipset types
+    ObjectFLEDRegistry::getInstance().flushAllExcept(&group);
+
+    // Start queuing for this group
+    group.onQueuingStart();
+
+    return data;
+}
+
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::showPixels(
+    PixelController<RGB_ORDER> &pixels) {
+    // Auto-grab the singleton for THIS chipset type
+    ObjectFLEDGroup<TIMING>& group = ObjectFLEDGroup<TIMING>::getInstance();
+
+    // Add this strip to the group
+    auto pixel_iterator = pixels.as_iterator(this->getRgbw());
+    group.addStrip(DATA_PIN, pixel_iterator);
+}
+
+template <typename TIMING, int DATA_PIN, EOrder RGB_ORDER>
+void ClocklessController_ObjectFLED_Proxy<TIMING, DATA_PIN, RGB_ORDER>::endShowLeds(void *data) {
+    Base::endShowLeds(data);
+
+    // DON'T flush here - let chipset change detection or frame end handle it
+    // This is handled by the next controller's beginShowLeds() or FastLED.show() end
+}
 
 // Legacy WS2812-specific controller (for backward compatibility)
 // Now just a typedef to the proxy with WS2812 timing
