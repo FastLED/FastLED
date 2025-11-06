@@ -60,6 +60,12 @@ This project uses directory-specific agent guidelines. See:
   - **Use `FL_WARN("message" << var)`** for warnings (persist into release builds)
   - **Avoid `fl::printf`, `fl::print`, `fl::println`** - prefer FL_DBG/FL_WARN macros instead
   - Note: FL_DBG and FL_WARN use stream-style `<<` operator, NOT printf-style formatting
+- **No function-local statics in headers** (Teensy 3.0 compatibility):
+  - **DO NOT** use function-local static variables in header files (causes `__cxa_guard` linkage errors on Teensy 3.0/3.1/3.2)
+  - **Instead**: Move static initialization to corresponding `.cpp` file
+  - **Example**: See `src/platforms/shared/spi_hw_1.{h,cpp}` for the correct pattern
+  - **Linter**: Enforced by `ci/lint_cpp/test_no_static_in_headers.py` for `src/platforms/shared/`
+  - **Suppression**: Add `// okay static in header` comment if absolutely necessary (use sparingly)
 - **Follow existing code patterns** and naming conventions
 
 ### Python Code Standards

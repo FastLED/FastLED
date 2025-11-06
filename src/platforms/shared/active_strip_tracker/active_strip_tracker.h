@@ -130,7 +130,7 @@ private:
 
     /// @brief Get the static ID counter (accessor for resetForTesting)
     static fl::atomic_int& getNextId() {
-        static fl::atomic_int sNextId(0);
+        static fl::atomic_int sNextId(0);  // okay static in header
         return sNextId;
     }
 

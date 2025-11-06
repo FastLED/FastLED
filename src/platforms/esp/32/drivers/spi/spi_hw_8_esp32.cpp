@@ -12,6 +12,8 @@
 #if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_8.h"
+#include "fl/dbg.h"
+#include "fl/log.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
