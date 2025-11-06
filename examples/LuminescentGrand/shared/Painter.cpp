@@ -386,7 +386,7 @@ void Painter::VegasVisualizer(const KeyboardState& keyboard,
     }
     
     int length = taper_idx_2 - taper_idx_1;
-    for (int i = 0; i < fl::min(200, length); ++i) {
+    for (int i = 0; i < fl_min(200, length); ++i) {
       led_rope->RawDrawPixel(c);
       painted_lights++;
     }

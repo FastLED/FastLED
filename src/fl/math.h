@@ -166,23 +166,4 @@ inline float tanf(float value) { return tan_impl_float(value); }
 inline double tan(double value) { return tan_impl_double(value); }
 template<typename T> inline T tan(T value) { return tan_impl_float(value); }
 
-
-
-// Min/max/abs functions that delegate to fl_min/fl_max/fl_abs
-// These are now safe to define since we've undefined the platform macros above
-template <typename T>
-inline T abs(T value) {
-    return fl_abs(value);
-}
-
-template <typename T, typename U>
-inline common_type_t<T, U> min(T a, U b) {
-    return fl_min(a, b);
-}
-
-template <typename T, typename U>
-inline common_type_t<T, U> max(T a, U b) {
-    return fl_max(a, b);
-}
-
 } // namespace fl
