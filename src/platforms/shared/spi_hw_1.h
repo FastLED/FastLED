@@ -97,13 +97,9 @@ public:
     /// Get all available 1-lane hardware SPI devices on this platform
     /// @returns Reference to static vector of available devices
     /// @note Cached - only allocates once on first call
-    /// @note Thread-safe via C++11 static local initialization
     /// @note Returns empty vector if platform doesn't support hardware SPI
     /// @note Returns bare pointers - instances are alive forever (static lifetime)
-    static const fl::vector<SpiHw1*>& getAll() {
-        static fl::vector<SpiHw1*> instances = createInstances();
-        return instances;
-    }
+    static const fl::vector<SpiHw1*>& getAll();
 
 private:
     /// Platform-specific factory implementation (weak linkage)

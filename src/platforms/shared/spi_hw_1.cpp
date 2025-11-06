@@ -21,4 +21,11 @@ fl::vector<SpiHw1*> SpiHw1::createInstances() {
 }
 
 
+/// Get all available 1-lane hardware SPI devices on this platform
+/// Implementation moved to cpp to avoid Teensy 3.x __cxa_guard linkage issues
+const fl::vector<SpiHw1*>& SpiHw1::getAll() {
+    static fl::vector<SpiHw1*> instances = createInstances();
+    return instances;
+}
+
 }  // namespace fl

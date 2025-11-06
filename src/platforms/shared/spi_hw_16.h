@@ -139,7 +139,6 @@ public:
     /// Get all available 16-lane hardware SPI devices on this platform
     /// @returns Reference to static vector of available devices
     /// @note Cached - only allocates once on first call
-    /// @note Thread-safe via C++11 static local initialization
     /// @note Returns empty vector if platform doesn't support 16-lane SPI
     /// @note Returns bare pointers - instances are alive forever (static lifetime)
     /// @note Implementation is in spi_hw_16.cpp to avoid __cxa_guard conflicts on some platforms
