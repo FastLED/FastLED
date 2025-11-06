@@ -157,19 +157,25 @@ def test_no_static_in_headers(
 class TestNoStaticInHeaders(unittest.TestCase):
     """Unit tests for static-in-header linter."""
 
-    def test_no_static_locals_in_platforms_shared(self) -> None:
-        """Check src/platforms/shared for function-local statics in headers.
+    def test_no_static_locals_in_critical_dirs(self) -> None:
+        """Check critical directories for function-local statics in headers.
 
-        This directory contains platform-agnostic SPI hardware interfaces that must
-        compile on all platforms, including Teensy 3.0 which has __cxa_guard issues.
+        Critical directories that must compile on all platforms including Teensy 3.0:
+        - src/platforms/shared: Platform-agnostic hardware interfaces
+        - src/fl: FastLED core library namespace
+        - src/fx: Effects library
         """
-        test_directories = [str(SRC_ROOT / "platforms" / "shared")]
+        test_directories = [
+            str(SRC_ROOT / "platforms" / "shared"),
+            str(SRC_ROOT / "fl"),
+            str(SRC_ROOT / "fx"),
+        ]
 
         failings = test_no_static_in_headers(test_directories)
 
         if failings:
             msg = (
-                f"Found {len(failings)} function-local static variable(s) in platforms/shared headers:\n\n"
+                f"Found {len(failings)} function-local static variable(s) in critical headers:\n\n"
                 + "\n".join(failings)
                 + "\n\n"
                 "REASON: Function-local static variables in headers cause compilation errors "
