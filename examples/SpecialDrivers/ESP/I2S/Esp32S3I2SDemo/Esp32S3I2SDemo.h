@@ -51,6 +51,7 @@
 #include "FastLED.h"
 #include "fl/assert.h"
 #include "fl/screenmap.h"
+#include "fl/clockless/chipset.h"
 
 using namespace fl;
 
@@ -119,7 +120,7 @@ CRGB strip14[NUM_LEDS_PER_STRIP];
 CRGB strip15[NUM_LEDS_PER_STRIP];
 
 // Bulk controller reference
-BulkClockless<WS2812, I2S>* i2s_bulk = nullptr;
+BulkClockless<Chipset::WS2812, I2S>* i2s_bulk = nullptr;
 
 void setup_i2s() {
     // I2S bulk controller: All strips share the I2S peripheral
@@ -178,7 +179,7 @@ void setup_i2s() {
 
     // Create bulk controller with all 16 strips
     // Initializer format: {pin, buffer_ptr, num_leds, screenMap}
-    auto& i2s_ref = FastLED.addBulkLeds<WS2812, I2S>({
+    auto& i2s_ref = FastLED.addBulkLeds<Chipset::WS2812, I2S>({
         {EXAMPLE_PIN_NUM_DATA0, strip0, NUM_LEDS_PER_STRIP, map0},
         {EXAMPLE_PIN_NUM_DATA1, strip1, NUM_LEDS_PER_STRIP, map1},
         {EXAMPLE_PIN_NUM_DATA2, strip2, NUM_LEDS_PER_STRIP, map2},

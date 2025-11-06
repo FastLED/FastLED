@@ -28,6 +28,7 @@
 
 #include <FastLED.h>
 #include "fl/screenmap.h"
+#include "fl/clockless/chipset.h"
 
 using namespace fl;
 

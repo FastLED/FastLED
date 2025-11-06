@@ -116,6 +116,7 @@ template <> struct TimingHelper<WS2815Controller> { using VALUE = TIMING_WS2815;
 /// Works with centralized TIMING_* structs from fl/chipsets/led_timing.h.
 template <typename TIMING>
 struct ChipsetTraits {
+    using VALUE = TIMING;  ///< The timing type itself (for template parameters)
     static constexpr uint32_t T1 = TIMING::T1;
     static constexpr uint32_t T2 = TIMING::T2;
     static constexpr uint32_t T3 = TIMING::T3;
