@@ -330,6 +330,7 @@ LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
     uint8_t result;
 
     // Use inline assembly to construct 16-bit value and perform blending
+    uint8_t temp_reg;  // Temporary register for loading 0x80
     asm volatile(
         "  mov %A[partial], %[b]           \n\t"  // Low byte = b
         "  mov %B[partial], %[a]           \n\t"  // High byte = a (partial = a*256 + b)
@@ -339,11 +340,11 @@ LIB8STATIC uint8_t blend8_8bit(uint8_t a, uint8_t b, uint8_t amountOfB) {
         "  mul %[b], %[amountOfB]          \n\t"  // r1:r0 = b * amountOfB
         "  add %A[partial], r0             \n\t"  // partial += b * amountOfB (low byte)
         "  adc %B[partial], r1             \n\t"  // partial += b * amountOfB (high byte)
-        "  ldi r0, 0x80                    \n\t"  // Load 128 for rounding
-        "  add %A[partial], r0             \n\t"  // partial += 0x80 (low byte)
+        "  ldi %[temp], 0x80               \n\t"  // Load 128 for rounding (into upper register)
+        "  add %A[partial], %[temp]        \n\t"  // partial += 0x80 (low byte)
         "  adc %B[partial], __zero_reg__   \n\t"  // partial += carry (high byte)
         "  clr __zero_reg__                \n\t"  // Restore zero register
-        : [partial] "+r"(partial)
+        : [partial] "+r"(partial), [temp] "=d"(temp_reg)
         : [amountOfB] "r"(amountOfB), [a] "r"(a), [b] "r"(b)
         : "r0", "r1");
 
