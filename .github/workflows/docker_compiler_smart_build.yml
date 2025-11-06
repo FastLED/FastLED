@@ -1,0 +1,463 @@
+name: Docker Compiler Smart Build
+
+on:
+  schedule:
+    # Run every 24 hours at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+    inputs:
+      limit:
+        description: 'Number of platforms to build (default: 5)'
+        type: number
+        default: 5
+      skip_base:
+        description: 'Skip base image build'
+        type: boolean
+        default: false
+      force_platforms:
+        description: 'Force specific platforms (comma-separated, e.g., "esp-32s3,avr")'
+        type: string
+        default: ''
+
+env:
+  BASE_IMAGE: niteris/fastled-compiler-base
+
+jobs:
+  # ============================================================================
+  # CREDENTIALS
+  # ============================================================================
+  credentials:
+    runs-on: ubuntu-latest
+    outputs:
+      docker_username: ${{ steps.credentials.outputs.docker_username }}
+      docker_password: ${{ steps.credentials.outputs.docker_password }}
+      registry_base: ${{ steps.credentials.outputs.registry_base }}
+    steps:
+      - name: Output encoded credentials
+        id: credentials
+        env:
+          docker_username: niteris
+          docker_password: ${{ secrets.DOCKER_PASSWORD }}
+          registry_base: ${{ env.BASE_IMAGE }}
+        run: |
+          echo "docker_username=$(echo -n "niteris" | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "docker_password=$(echo $docker_password | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+          echo "registry_base=$(echo $registry_base | base64 -w0 | base64 -w0)" >> $GITHUB_OUTPUT
+
+  # ============================================================================
+  # BASE IMAGE BUILD (optional, runs first if needed)
+  # ============================================================================
+  build-base:
+    if: github.event.inputs.skip_base != 'true'
+    needs: credentials
+    strategy:
+      fail-fast: false
+      matrix:
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    uses: ./.github/workflows/docker_build_compiler.yml
+    with:
+      runs_on: ${{ matrix.arch.runs_on }}
+      platform: ${{ matrix.arch.platform }}
+      dockerfile: Dockerfile.base
+      tag: latest
+      group: base
+      platforms: linux/amd64,linux/arm64
+    secrets:
+      env_vars: |
+        docker_username=${{ needs.credentials.outputs.docker_username }}
+        docker_password=${{ needs.credentials.outputs.docker_password }}
+        docker_registry_image=${{ needs.credentials.outputs.registry_base }}
+
+  merge-base:
+    if: github.event.inputs.skip_base != 'true'
+    runs-on: ubuntu-24.04
+    needs: build-base
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-base-*
+          merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests:"
+          ls -la /tmp/digests/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.BASE_IMAGE }}
+          tags: type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: niteris
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ env.BASE_IMAGE }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ env.BASE_IMAGE }}:latest
+
+  # ============================================================================
+  # PRIORITY DETECTION
+  # ============================================================================
+  detect-priority:
+    runs-on: ubuntu-24.04
+    needs: [credentials, merge-base]
+    if: always() && (needs.merge-base.result == 'success' || needs.merge-base.result == 'skipped')
+    outputs:
+      platforms: ${{ steps.prioritize.outputs.platforms }}
+      platform_count: ${{ steps.prioritize.outputs.platform_count }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Detect priority platforms
+        id: prioritize
+        run: |
+          # Check if force_platforms is specified
+          if [ -n "${{ github.event.inputs.force_platforms }}" ]; then
+            echo "Using force_platforms: ${{ github.event.inputs.force_platforms }}"
+
+            # Convert comma-separated string to JSON array
+            platforms_json=$(echo '${{ github.event.inputs.force_platforms }}' | \
+              python3 -c "import sys, json; print(json.dumps(sys.stdin.read().strip().split(',')))")
+
+            echo "platforms=$platforms_json" >> $GITHUB_OUTPUT
+            echo "platform_count=$(echo $platforms_json | jq '. | length')" >> $GITHUB_OUTPUT
+          else
+            # Use smart prioritization
+            limit=${{ github.event.inputs.limit || 5 }}
+            echo "Using smart prioritization with limit: $limit"
+
+            # Get prioritized platforms as JSON
+            platforms_json=$(uv run python ci/docker/image_priority_tracker.py --check --limit $limit --json | \
+              jq -c 'map(.platform)')
+
+            echo "Prioritized platforms: $platforms_json"
+            echo "platforms=$platforms_json" >> $GITHUB_OUTPUT
+            echo "platform_count=$(echo $platforms_json | jq '. | length')" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display selected platforms
+        run: |
+          echo "Selected ${{ steps.prioritize.outputs.platform_count }} platform(s) to build:"
+          echo '${{ steps.prioritize.outputs.platforms }}' | jq -r '.[]'
+
+  # ============================================================================
+  # DYNAMIC PLATFORM BUILDS
+  # ============================================================================
+  build-platforms:
+    name: 🔨 Build ${{ matrix.platform }} [${{ matrix.arch.platform }}]
+    needs: [credentials, detect-priority]
+    if: needs.detect-priority.outputs.platform_count > 0
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJson(needs.detect-priority.outputs.platforms) }}
+        arch:
+          - runs_on: ubuntu-24.04
+            platform: linux/amd64
+          - runs_on: ubuntu-24.04-arm
+            platform: linux/arm64
+    runs-on: ${{ matrix.arch.runs_on }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Get platform configuration
+        id: config
+        run: |
+          # Get boards for this platform
+          boards=$(uv run python3 -c "
+          from ci.docker.build_platforms import get_boards_for_platform, get_docker_image_name
+          platform = '${{ matrix.platform }}'
+          boards = get_boards_for_platform(platform)
+          image = get_docker_image_name(platform)
+          print(f'boards={','.join(boards)}')
+          print(f'image={image}')
+          ")
+
+          echo "$boards" >> $GITHUB_OUTPUT
+
+      - name: Decode credentials
+        id: decode
+        run: |
+          username=$(echo "${{ needs.credentials.outputs.docker_username }}" | base64 -d | base64 -d)
+          password=$(echo "${{ needs.credentials.outputs.docker_password }}" | base64 -d | base64 -d)
+          echo "::add-mask::$username"
+          echo "::add-mask::$password"
+          echo "username=$username" >> $GITHUB_OUTPUT
+          echo "password=$password" >> $GITHUB_OUTPUT
+
+      - name: Prepare
+        run: |
+          platform=${{ matrix.arch.platform }}
+          echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
+
+      - name: Display target Docker image
+        run: |
+          echo "================================"
+          echo "Building Docker image for platform: ${{ matrix.platform }}"
+          echo "Boards: ${{ steps.config.outputs.boards }}"
+          echo "Image: ${{ steps.config.outputs.image }}"
+          echo "Architecture: ${{ matrix.arch.platform }}"
+          echo "================================"
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ steps.decode.outputs.username }}
+          password: ${{ steps.decode.outputs.password }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.config.outputs.image }}
+          tags: type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push by digest
+        id: build
+        uses: docker/build-push-action@v6
+        with:
+          platforms: ${{ matrix.arch.platform }}
+          context: .
+          file: ./ci/docker/Dockerfile.template
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=${{ steps.config.outputs.image }},push-by-digest=true,name-canonical=true,push=true
+          build-args: |
+            PLATFORMS=${{ steps.config.outputs.boards }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max,compression=zstd
+
+      - name: Export digest
+        run: |
+          mkdir -p /tmp/digests
+          digest="${{ steps.build.outputs.digest }}"
+          touch "/tmp/digests/${digest#sha256:}"
+
+      - name: Upload digest
+        uses: actions/upload-artifact@v4
+        with:
+          name: digests-${{ matrix.platform }}-${{ env.PLATFORM_PAIR }}
+          path: /tmp/digests/*
+          if-no-files-found: error
+          retention-days: 1
+
+  # ============================================================================
+  # MERGE JOBS - Dynamically merge each platform
+  # ============================================================================
+  merge-platforms:
+    name: 📦 Merge ${{ matrix.platform }}
+    needs: [detect-priority, build-platforms]
+    if: needs.detect-priority.outputs.platform_count > 0
+    strategy:
+      fail-fast: false
+      matrix:
+        platform: ${{ fromJson(needs.detect-priority.outputs.platforms) }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Get platform image name
+        id: config
+        run: |
+          image=$(uv run python3 -c "
+          from ci.docker.build_platforms import get_docker_image_name
+          print(get_docker_image_name('${{ matrix.platform }}'))
+          ")
+          echo "image=$image" >> $GITHUB_OUTPUT
+
+      - name: Download digests for ${{ matrix.platform }}
+        uses: actions/download-artifact@v4
+        with:
+          path: /tmp/digests
+          pattern: digests-${{ matrix.platform }}-*
+          merge-multiple: true
+
+      - name: Verify digests were downloaded
+        run: |
+          if [ ! -d /tmp/digests ] || [ -z "$(ls -A /tmp/digests)" ]; then
+            echo "ERROR: No digests found for ${{ matrix.platform }}! Build jobs likely failed."
+            exit 1
+          fi
+          echo "Found digests for ${{ matrix.platform }}:"
+          ls -la /tmp/digests/
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.config.outputs.image }}
+          tags: type=raw,value=latest
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: niteris
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Create manifest list and push
+        working-directory: /tmp/digests
+        run: |
+          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
+            $(printf '${{ steps.config.outputs.image }}@sha256:%s ' *)
+
+      - name: Inspect image
+        run: |
+          docker buildx imagetools inspect ${{ steps.config.outputs.image }}:latest
+
+      - name: Report success
+        run: |
+          echo "✅ Successfully merged and pushed multi-arch image for ${{ matrix.platform }}"
+          echo "   Image: ${{ steps.config.outputs.image }}:latest"
+
+  # ============================================================================
+  # RECORD BUILD TIMESTAMPS
+  # ============================================================================
+  record-builds:
+    name: 📝 Record build timestamps
+    needs: [detect-priority, merge-platforms]
+    if: needs.detect-priority.outputs.platform_count > 0
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Download existing timestamp cache
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: build-timestamps
+          path: ci/docker/
+
+      - name: Record successful builds
+        run: |
+          echo "Recording build timestamps for completed platforms..."
+          echo '${{ needs.detect-priority.outputs.platforms }}' | jq -r '.[]' | while read platform; do
+            echo "Recording: $platform"
+            uv run python ci/docker/image_priority_tracker.py --record "$platform"
+          done
+
+      - name: Upload timestamp cache
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-timestamps
+          path: ci/docker/.build_timestamps.json
+          retention-days: 365
+
+  # ============================================================================
+  # SUMMARY REPORT
+  # ============================================================================
+  summary:
+    name: 📊 Build Summary
+    needs: [detect-priority, record-builds]
+    if: always() && needs.detect-priority.outputs.platform_count > 0
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Download timestamp cache
+        continue-on-error: true
+        uses: actions/download-artifact@v4
+        with:
+          name: build-timestamps
+          path: ci/docker/
+
+      - name: Generate summary report
+        run: |
+          echo "## Docker Build Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Built ${{ needs.detect-priority.outputs.platform_count }} platform(s) in this cycle:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Platform | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          echo '${{ needs.detect-priority.outputs.platforms }}' | jq -r '.[]' | while read platform; do
+            echo "| $platform | ✅ Built |" >> $GITHUB_STEP_SUMMARY
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### All Platforms Status" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          uv run python ci/docker/image_priority_tracker.py --list-all --no-dockerhub >> $GITHUB_STEP_SUMMARY

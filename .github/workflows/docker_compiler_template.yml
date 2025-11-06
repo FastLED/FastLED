@@ -16,7 +16,8 @@ on:
         type: number
         default: 0
   schedule:
-    # Platforms: monthly at 3:00 AM UTC (1 hour after base)
+    # Full build: monthly at 3:00 AM UTC on the 1st of each month
+    # (For daily smart builds, see docker_compiler_smart_build.yml)
     - cron: '0 3 1 * *'
 
 env:

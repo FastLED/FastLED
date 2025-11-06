@@ -86,3 +86,6 @@ ci/docker/avr8js/*.js
 
 .meson/zig-*
 !.meson/zig-*.c
+
+# Docker build timestamp cache (persisted via GitHub Actions artifacts)
+ci/docker/.build_timestamps.json

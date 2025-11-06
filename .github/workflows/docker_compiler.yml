@@ -12,8 +12,8 @@ on:
         type: boolean
         default: true
   schedule:
-    # Base image: 4x daily at 00:00, 06:00, 12:00, 18:00 UTC
-    - cron: '0 0,6,12,18 * * *'
+    # Base image: once daily at 23:00 UTC (1 hour before smart build at 00:00)
+    - cron: '0 23 * * *'
 
 env:
   BASE_IMAGE: niteris/fastled-compiler-base
@@ -112,7 +112,7 @@ jobs:
         run: |
           docker buildx imagetools inspect ${{ env.BASE_IMAGE }}:latest
 
-  trigger-template:
+  trigger-smart-build:
     if: github.event.inputs.trigger_template != 'false'
     runs-on: ubuntu-latest
     needs: merge-base
@@ -120,9 +120,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Trigger template workflow
+      - name: Trigger smart build workflow
         run: |
-          gh workflow run docker_compiler_template.yml \
-            -f delay_minutes=${{ github.event.inputs.delay_minutes || 10 }}
+          # Trigger the daily smart build workflow after base image is ready
+          gh workflow run docker_compiler_smart_build.yml
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
