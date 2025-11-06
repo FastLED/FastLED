@@ -6,9 +6,6 @@ be compiled into libfastled.a. Separating configuration from build logic
 makes it easier to add/remove source directories.
 """
 
-from typing import List, Tuple
-
-
 # Source directories to scan for C++ files
 # Format: (directory_path, recursive)
 # - directory_path: Path relative to project root
