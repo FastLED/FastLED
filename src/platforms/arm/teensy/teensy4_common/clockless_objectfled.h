@@ -26,16 +26,124 @@
 #include "cpixel_ledcontroller.h"
 #include "pixel_iterator.h"
 #include "fl/vector.h"
+#include "fl/singleton.h"
+#include "fl/map.h"
 
 #ifndef FASTLED_OBJECTFLED_LATCH_DELAY
 #define FASTLED_OBJECTFLED_LATCH_DELAY 300  // WS2812-5VB
 #endif
 
-// Forward declare so templates can reference them
-// Full definitions are in the .cpp file
 namespace fl {
+
+// Forward declarations
 template <typename TIMING> class ObjectFLEDGroup;
-class ObjectFLEDRegistry;
+
+// ============================================================================
+// ObjectFLED Registry (tracks all active chipset groups)
+// ============================================================================
+
+/// Track all active chipset groups across all chipset types
+class ObjectFLEDRegistry {
+public:
+    static ObjectFLEDRegistry& getInstance() {
+        return fl::Singleton<ObjectFLEDRegistry>::instance();
+    }
+
+    // Register a group for tracking
+    void registerGroup(void* groupPtr, void (*flushFunc)(void*));
+
+    // Flush all pending groups
+    void flushAll();
+
+    // Flush all groups except the specified one
+    void flushAllExcept(void* exceptPtr);
+
+private:
+    struct GroupEntry {
+        void* groupPtr;
+        void (*flushFunc)(void*);
+
+        bool operator==(const GroupEntry& other) const {
+            return groupPtr == other.groupPtr;
+        }
+    };
+
+    fl::vector<GroupEntry> mGroups;
+
+    bool contains(const GroupEntry& entry);
+};
+
+// ============================================================================
+// Concrete ObjectFLED Group (runtime timing configuration)
+// ============================================================================
+
+// Timing configuration passed at runtime instead of compile-time
+struct ObjectFLEDTimingConfig {
+    uint32_t T1;     // High time (ns)
+    uint32_t T2;     // Low time (ns)
+    uint32_t T3;     // Total bit period (ns)
+    uint32_t RESET;  // Reset/latch time (ns)
+};
+
+/// Concrete (non-template) group that manages ObjectFLED for a specific timing
+/// This does all the real work - templates just delegate to this
+class ObjectFLEDGroupBase {
+public:
+    ObjectFLEDGroupBase(const ObjectFLEDTimingConfig& timing);
+    ~ObjectFLEDGroupBase();
+
+    // Called by proxy in beginShowLeds()
+    void onQueuingStart();
+
+    // Called by proxy in showPixels()
+    void addStrip(uint8_t pin, PixelIterator& pixel_iterator);
+
+    // Called by registry when chipset changes or frame ends
+    void flush();
+
+private:
+    void onQueuingDone();
+    void rebuildObjectFLED();
+    void writePixels(uint8_t pin, PixelIterator& pixel_iterator);
+
+    ObjectFLEDTimingConfig mTiming;
+    void* mObjectFLED;  // Opaque pointer to ObjectFLED
+    void* mStripsData;  // Opaque pointer to strips vector
+    void* mPrevStripsData;  // Opaque pointer to previous strips vector
+    uint16_t mMaxBytesPerStrip;
+    bool mDrawn;
+    bool mStripsChanged;
+};
+
+/// Templated singleton wrapper - one instance per chipset type
+/// This is just a thin wrapper that converts compile-time TIMING to runtime config
+template <typename TIMING>
+class ObjectFLEDGroup {
+public:
+    static ObjectFLEDGroup& getInstance() {
+        return fl::Singleton<ObjectFLEDGroup<TIMING>>::instance();
+    }
+
+    ObjectFLEDGroup()
+        : mBase(ObjectFLEDTimingConfig{TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET}) {
+        // Auto-register with global registry on construction
+        ObjectFLEDRegistry::getInstance().registerGroup(
+            this,
+            [](void* ptr) {
+                static_cast<ObjectFLEDGroup*>(ptr)->flush();
+            }
+        );
+    }
+
+    void onQueuingStart() { mBase.onQueuingStart(); }
+    void addStrip(uint8_t pin, PixelIterator& pixel_iterator) {
+        mBase.addStrip(pin, pixel_iterator);
+    }
+    void flush() { mBase.flush(); }
+
+private:
+    ObjectFLEDGroupBase mBase;  // Delegate all work to concrete base
+};
 
 /// Generic proxy controller for ObjectFLED on Teensy 4.x
 /// Works with ANY clockless chipset timing (WS2812, SK6812, WS2811, etc.)
