@@ -51,6 +51,95 @@ typedef struct {
 // RMTMEM address is declared in <target>.peripherals.ld
 extern rmt_block_mem_t RMTMEM;
 
+//=============================================================================
+// NMI (Level 7) HANDLER SUPPORT
+//=============================================================================
+
+/*
+ * Global DRAM pointer for NMI-safe buffer refill
+ *
+ * CRITICAL: This must be in DRAM (not flash) for NMI access safety.
+ * When using Level 7 NMI for RMT interrupts, the handler cannot call
+ * FreeRTOS APIs (including portENTER_CRITICAL_ISR). This global pointer
+ * allows the NMI handler to directly access the RmtWorker instance.
+ *
+ * THREAD SAFETY: This is written once during interrupt allocation and
+ * never changed during NMI operation. The NMI handler will only call
+ * fillNextHalf() which is already designed for ISR context.
+ *
+ * NOTE: Currently unused - Level 3 interrupts are still the default.
+ * This infrastructure is prepared for future Level 7 NMI migration.
+ */
+fl::RmtWorker* DRAM_ATTR g_rmt5_nmi_worker = nullptr;
+
+/**
+ * NMI-Safe Buffer Refill Wrapper
+ *
+ * This function provides a Level 7 NMI-safe entry point for RMT buffer
+ * refill operations. It MUST NOT use any FreeRTOS APIs.
+ *
+ * REQUIREMENTS:
+ * - Marked IRAM_ATTR (code in IRAM, not flash)
+ * - Marked extern "C" (for ASM_2_C_SHIM.h linkage)
+ * - No FreeRTOS API calls (no portENTER_CRITICAL_ISR, no xSemaphore*, etc.)
+ * - Fast execution (<500ns target for WS2812 timing)
+ *
+ * USAGE:
+ *   // Set global pointer before enabling NMI
+ *   g_rmt5_nmi_worker = worker_instance;
+ *
+ *   // Generate NMI handler (in header or at module scope)
+ *   #include "platforms/esp/32/interrupts/ASM_2_C_SHIM.h"
+ *   FASTLED_NMI_ASM_SHIM_STATIC(xt_nmi, rmt5_nmi_buffer_refill)
+ *
+ *   // Install Level 7 NMI
+ *   esp_intr_alloc(ETS_RMT_INTR_SOURCE,
+ *                  ESP_INTR_FLAG_LEVEL7 | ESP_INTR_FLAG_IRAM,
+ *                  nullptr, nullptr, &handle);
+ *
+ * SAFETY ANALYSIS:
+ * ✅ fillNextHalf() is IRAM_ATTR
+ * ✅ fillNextHalf() has no FreeRTOS calls
+ * ✅ fillNextHalf() accesses only volatile member variables
+ * ✅ convertByteToRmt() is IRAM_ATTR and NMI-safe
+ * ✅ ets_printf() is ISR-safe (ROM function)
+ *
+ * RACE CONDITIONS:
+ * ⚠️ No spinlock protection (removed for NMI compatibility)
+ * ⚠️ Potential races if main thread modifies worker state during NMI
+ * ✅ Member variables are volatile, ensuring visibility
+ * ✅ Double-buffer design minimizes race window
+ *
+ * TIMING:
+ * - Assembly shim overhead: ~65ns (register save/restore)
+ * - fillNextHalf() execution: ~500ns (120 instructions at 240 MHz)
+ * - Total NMI latency: ~565ns (acceptable for WS2812)
+ */
+extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void) {
+    // Get worker instance from global DRAM pointer
+    fl::RmtWorker* worker = g_rmt5_nmi_worker;
+
+    if (worker == nullptr) {
+        // Safety: Should never happen if properly initialized
+        // Cannot log here (ets_printf may be unsafe without worker context)
+        return;
+    }
+
+    // Call NMI-safe buffer refill directly (no FreeRTOS spinlock!)
+    // This is safe because:
+    // 1. fillNextHalf() is IRAM_ATTR
+    // 2. It accesses only volatile member variables
+    // 3. It uses ets_printf() for logging (ISR-safe)
+    // 4. Double-buffer design prevents data corruption
+    worker->fillNextHalf();
+
+    // Note: handleThresholdInterrupt() increments mThresholdIsrCount and logs,
+    // but we skip that here to minimize NMI latency. If needed, add:
+    // worker->mThresholdIsrCount++; // (this is volatile, so safe)
+}
+
+//=============================================================================
+
 namespace fl {
 
 RmtWorker::RmtWorker(portMUX_TYPE* pool_spinlock)
