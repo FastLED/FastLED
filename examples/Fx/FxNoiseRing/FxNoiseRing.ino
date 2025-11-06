@@ -77,7 +77,7 @@ void setup() {
 }
 
 void draw(uint32_t now) {
-    double angle_offset = double(now) / 32000.0 * 2 * M_PI;
+    double angle_offset = double(now) / 32000.0 * 2 * FL_M_PI;
     now = (now << timeBitshift.as<int>()) * timescale.as<double>();
 
     // get radius/zoom level from slider
@@ -85,7 +85,7 @@ void draw(uint32_t now) {
 
     // go in circular formation and set the leds
     for (int i = 0; i < NUM_LEDS; i++) {
-        float angle = i * 2 * M_PI / NUM_LEDS + angle_offset;
+        float angle = i * 2 * FL_M_PI / NUM_LEDS + angle_offset;
 
         // Use the new noiseRingHSV8 function to sample three z-slices for HSV components
         CHSV hsv = noiseRingHSV8(angle, now, noise_radius);
