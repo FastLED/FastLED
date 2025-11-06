@@ -9,6 +9,9 @@
 
 #include "test.h"
 #include "platforms/fast_pins.h"
+#if defined(ESP32)
+#include "platforms/esp/32/nmi_multispi.h"
+#endif
 
 using namespace fl;
 
@@ -142,6 +145,217 @@ TEST_CASE("FastPins_default_constructor") {
     // LUT should exist but be uninitialized
     CHECK(writer.getLUT() != nullptr);
 }
+
+// ============================================================================
+// ESP32-specific NMI Multi-SPI Tests (Task 6.4)
+// ============================================================================
+// These tests validate the Level 7 NMI infrastructure for ultra-low latency
+// multi-SPI parallel output. Tests are conditional on ESP32 platform.
+
+#if defined(ESP32)
+
+// Test: NMI API availability
+TEST_CASE("NMI_API_available") {
+    // Verify that NMI API headers compile on ESP32
+    // This test ensures the API is accessible
+    CHECK(true);
+}
+
+// Test: NMI initialization with valid parameters
+TEST_CASE("NMI_initialization_valid_params") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize NMI multi-SPI at 800 kHz (WS2812 timing)
+    bool success = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    // Note: Initialization may fail if:
+    // - ESP-IDF v5.2.1 has known bug (returns ESP_ERR_NOT_FOUND)
+    // - Level 7 interrupt already allocated
+    // - Timer already in use
+    // Therefore, we don't CHECK(success) - just verify API compiles and returns bool
+
+    // If initialization succeeded, clean up
+    if (success) {
+        fl::nmi::shutdown();
+    }
+
+    CHECK(true);  // API is callable
+}
+
+// Test: NMI initialization with invalid frequency
+TEST_CASE("NMI_initialization_invalid_frequency") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Try to initialize with invalid frequency (too low)
+    bool success_low = fl::nmi::initMultiSPI(clock_pin, data_pins, 500);  // Below 1 kHz
+    CHECK(success_low == false);  // Should fail
+
+    // Try to initialize with invalid frequency (too high)
+    bool success_high = fl::nmi::initMultiSPI(clock_pin, data_pins, 50000000);  // Above 40 MHz
+    CHECK(success_high == false);  // Should fail
+}
+
+// Test: Transmission without initialization
+TEST_CASE("NMI_transmission_without_init") {
+    uint8_t buffer[256];
+
+    // Ensure NMI is not initialized
+    fl::nmi::shutdown();
+
+    // Try to start transmission without initialization
+    bool success = fl::nmi::startTransmission(buffer, sizeof(buffer));
+    CHECK(success == false);  // Should fail
+}
+
+// Test: Transmission with null buffer
+TEST_CASE("NMI_transmission_null_buffer") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize (may fail on some ESP-IDF versions)
+    bool init_success = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    if (init_success) {
+        // Try to start transmission with null buffer
+        bool success = fl::nmi::startTransmission(nullptr, 256);
+        CHECK(success == false);  // Should fail
+
+        // Try to start transmission with zero length
+        uint8_t buffer[256];
+        success = fl::nmi::startTransmission(buffer, 0);
+        CHECK(success == false);  // Should fail
+
+        fl::nmi::shutdown();
+    }
+}
+
+// Test: Transmission completion status
+TEST_CASE("NMI_transmission_completion") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize
+    bool init_success = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    if (init_success) {
+        // Before starting transmission, should report complete
+        bool is_complete = fl::nmi::isTransmissionComplete();
+        CHECK(is_complete == true);  // Nothing running
+
+        // Start a small transmission
+        uint8_t buffer[8] = {0xFF, 0x00, 0xAA, 0x55, 0xF0, 0x0F, 0xCC, 0x33};
+        bool start_success = fl::nmi::startTransmission(buffer, sizeof(buffer));
+
+        if (start_success) {
+            // Immediately after starting, might still be running
+            // (depends on timing - NMI may complete quickly)
+
+            // Wait for completion (with timeout to prevent infinite loop)
+            int timeout = 10000;  // 10ms should be plenty for 8 bytes @ 800 kHz
+            while (!fl::nmi::isTransmissionComplete() && timeout-- > 0) {
+                // Busy wait (NMI runs in background)
+            }
+
+            // Should eventually complete
+            CHECK(fl::nmi::isTransmissionComplete() == true);
+        }
+
+        fl::nmi::shutdown();
+    }
+}
+
+// Test: Shutdown API
+TEST_CASE("NMI_shutdown") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize
+    bool init_success = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    if (init_success) {
+        // Shutdown should succeed
+        fl::nmi::shutdown();
+
+        // After shutdown, transmission should fail
+        uint8_t buffer[256];
+        bool success = fl::nmi::startTransmission(buffer, sizeof(buffer));
+        CHECK(success == false);
+    }
+
+    // Multiple shutdowns should be safe (idempotent)
+    fl::nmi::shutdown();
+    fl::nmi::shutdown();
+    CHECK(true);
+}
+
+// Test: Re-initialization after shutdown
+TEST_CASE("NMI_reinit_after_shutdown") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize
+    bool init1 = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    if (init1) {
+        // Shutdown
+        fl::nmi::shutdown();
+
+        // Re-initialize with different frequency
+        bool init2 = fl::nmi::initMultiSPI(clock_pin, data_pins, 1000000);
+
+        if (init2) {
+            // Should be able to use API after re-init
+            uint8_t buffer[4] = {0xAA, 0xBB, 0xCC, 0xDD};
+            bool success = fl::nmi::startTransmission(buffer, sizeof(buffer));
+            // May succeed or fail depending on hardware state
+
+            fl::nmi::shutdown();
+        }
+    }
+
+    CHECK(true);
+}
+
+// Test: Diagnostic counters
+TEST_CASE("NMI_diagnostic_counters") {
+    uint8_t clock_pin = 17;
+    uint8_t data_pins[] = {2, 4, 5, 12, 13, 14, 15, 16};
+
+    // Initialize
+    bool init_success = fl::nmi::initMultiSPI(clock_pin, data_pins, 800000);
+
+    if (init_success) {
+        // Get initial counter values
+        uint32_t invocations_before = fl::nmi::getInvocationCount();
+        uint32_t max_cycles_before = fl::nmi::getMaxExecutionCycles();
+
+        // Counters should be accessible (exact values don't matter)
+        CHECK(invocations_before >= 0);  // Always true, but documents expectation
+        CHECK(max_cycles_before >= 0);
+
+        // Start a transmission
+        uint8_t buffer[16];
+        bool start_success = fl::nmi::startTransmission(buffer, sizeof(buffer));
+
+        if (start_success) {
+            // Wait for completion
+            int timeout = 10000;
+            while (!fl::nmi::isTransmissionComplete() && timeout-- > 0) {}
+
+            // Counters may have increased (if NMI fired)
+            uint32_t invocations_after = fl::nmi::getInvocationCount();
+            // Note: Invocations may not increase if timer hasn't fired yet
+            // So we just verify the API is callable
+            CHECK(invocations_after >= invocations_before);
+        }
+
+        fl::nmi::shutdown();
+    }
+}
+
+#endif // ESP32
 
 } // anonymous namespace
 

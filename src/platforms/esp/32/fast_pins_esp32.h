@@ -17,6 +17,9 @@
 #include "platforms/esp/32/core/fastpin_esp32.h"
 #include "fl/stdint.h"
 
+// Need FL_WARN for validation warnings
+#include "fl/warn.h"
+
 namespace fl {
 
 namespace detail {
@@ -50,10 +53,32 @@ inline uint8_t getPinBank(uint8_t pin) {
 
 } // namespace detail
 
-/// ESP32 implementation of FastPins::writeImpl()
-/// Uses direct MMIO writes to W1TS/W1TC registers
+// ============================================================================
+// FastPinsSamePort<> implementations for ESP32
+// ============================================================================
+
+/// ESP32 same-port validation for FastPinsSamePort
+/// Validates that all pins are in the same GPIO bank (0-31 or 32-63)
 template<uint8_t MAX_PINS>
-void FastPins<MAX_PINS>::writeImpl(uint32_t set_mask, uint32_t clear_mask) {
+bool FastPinsSamePort<MAX_PINS>::validateSamePort(const uint8_t* pins, uint8_t count) {
+    if (count == 0) return true;
+
+    // ESP32: All pins must be in same bank (0-31 or 32-63)
+    uint8_t first_bank = detail::getPinBank(pins[0]);
+    for (uint8_t i = 1; i < count; i++) {
+        uint8_t bank = detail::getPinBank(pins[i]);
+        if (bank != first_bank) {
+            FL_WARN("FastPinsSamePort: Pins span multiple GPIO banks - not all on same port!");
+            return false;  // Cross-bank not allowed in same-port mode
+        }
+    }
+    return true;
+}
+
+/// ESP32 same-port implementation for FastPinsSamePort::writeImpl()
+/// Uses single-bank W1TS/W1TC for atomic writes
+template<uint8_t MAX_PINS>
+void FastPinsSamePort<MAX_PINS>::writeImpl(uint32_t set_mask, uint32_t clear_mask) {
 #ifndef GPIO_OUT1_REG
     // Single GPIO bank (ESP32-C2/C3/C6/H2)
     volatile uint32_t* w1ts = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
@@ -63,32 +88,33 @@ void FastPins<MAX_PINS>::writeImpl(uint32_t set_mask, uint32_t clear_mask) {
     *w1tc = clear_mask;
 #else
     // Dual GPIO banks (ESP32/S2/S3/P4)
-    // Note: For simplicity, we write to both banks even if only one is used
-    // The hardware ignores writes to unused pins
-    volatile uint32_t* w1ts0 = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
-    volatile uint32_t* w1tc0 = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
-    volatile uint32_t* w1ts1 = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TS_REG;
-    volatile uint32_t* w1tc1 = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TC_REG;
-
-    // Bank 0 (pins 0-31)
-    *w1ts0 = set_mask;
-    *w1tc0 = clear_mask;
-
-    // Bank 1 (pins 32-63) - masks should already be shifted if needed
-    // For now, we assume all pins are in bank 0 (most common case)
-    // Full cross-bank support would require enhanced LUT with per-bank masks
-    *w1ts1 = 0;  // TODO: handle pins 32-63
-    *w1tc1 = 0;
+    // Use bank stored during buildLUT
+    if (mBank == 0) {
+        volatile uint32_t* w1ts = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
+        volatile uint32_t* w1tc = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
+        *w1ts = set_mask;
+        *w1tc = clear_mask;
+    } else {
+        volatile uint32_t* w1ts = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TS_REG;
+        volatile uint32_t* w1tc = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TC_REG;
+        *w1ts = set_mask;
+        *w1tc = clear_mask;
+    }
 #endif
 }
 
-/// ESP32 implementation of FastPins::buildLUT()
-/// Constructs 256-entry (or smaller) lookup table mapping bit patterns to GPIO masks
+/// ESP32 implementation for FastPinsSamePort::buildLUT()
+/// Builds 256-entry LUT with single-bank masks
 template<uint8_t MAX_PINS>
-void FastPins<MAX_PINS>::buildLUT(const uint8_t* pins, uint8_t count) {
+void FastPinsSamePort<MAX_PINS>::buildLUT(const uint8_t* pins, uint8_t count) {
     if (count > MAX_PINS) count = MAX_PINS;
 
-    // Extract pin masks for each configured pin
+    // Determine bank (validation ensures all same bank)
+#ifdef GPIO_OUT1_REG
+    mBank = detail::getPinBank(pins[0]);
+#endif
+
+    // Extract pin masks (adjusted for bank)
     uint32_t pin_masks[MAX_PINS];
     for (uint8_t i = 0; i < count; i++) {
         pin_masks[i] = detail::getPinMaskESP32(pins[i]);
@@ -117,6 +143,237 @@ void FastPins<MAX_PINS>::buildLUT(const uint8_t* pins, uint8_t count) {
     for (uint16_t pattern = num_patterns; pattern < LUT_SIZE; pattern++) {
         mLUT[pattern].set_mask = 0;
         mLUT[pattern].clear_mask = 0;
+    }
+}
+
+// ============================================================================
+// FastPinsWithClock<> implementations for ESP32
+// ============================================================================
+
+/// ESP32 validation for FastPinsWithClock
+/// Validates that all 9 pins (8 data + 1 clock) are in the same GPIO bank
+template<uint8_t DATA_PINS>
+bool FastPinsWithClock<DATA_PINS>::validateAllSamePort(uint8_t clockPin, const uint8_t* dataPins, uint8_t count) {
+    // Check that clock pin is in same bank as data pins
+    uint8_t clock_bank = detail::getPinBank(clockPin);
+
+    for (uint8_t i = 0; i < count; i++) {
+        uint8_t data_bank = detail::getPinBank(dataPins[i]);
+        if (data_bank != clock_bank) {
+            FL_WARN("FastPinsWithClock: Clock and data pins must be on same GPIO bank!");
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/// ESP32 implementation for FastPinsWithClock::buildClockMask()
+/// Stores clock pin's register addresses and mask
+template<uint8_t DATA_PINS>
+void FastPinsWithClock<DATA_PINS>::buildClockMask(uint8_t clockPin) {
+    // Extract clock pin mask
+    mClockMask = detail::getPinMaskESP32(clockPin);
+
+    // Determine which bank the clock pin is in
+    uint8_t clock_bank = detail::getPinBank(clockPin);
+
+#ifndef GPIO_OUT1_REG
+    // Single GPIO bank (ESP32-C2/C3/C6/H2)
+    mClockSet = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
+    mClockClear = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
+#else
+    // Dual GPIO banks (ESP32/S2/S3/P4)
+    if (clock_bank == 0) {
+        mClockSet = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
+        mClockClear = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
+    } else {
+        mClockSet = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TS_REG;
+        mClockClear = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TC_REG;
+    }
+#endif
+}
+
+/// ESP32 implementation for FastPinsWithClock::clockHighImpl()
+/// Sets clock pin HIGH using W1TS register (~5ns)
+template<uint8_t DATA_PINS>
+void FastPinsWithClock<DATA_PINS>::clockHighImpl() {
+    *mClockSet = mClockMask;
+}
+
+/// ESP32 implementation for FastPinsWithClock::clockLowImpl()
+/// Sets clock pin LOW using W1TC register (~5ns)
+template<uint8_t DATA_PINS>
+void FastPinsWithClock<DATA_PINS>::clockLowImpl() {
+    *mClockClear = mClockMask;
+}
+
+// ============================================================================
+// FastPins<> multi-port implementations for ESP32
+// ============================================================================
+
+/// ESP32: Check if all pins are on same GPIO bank
+template<uint8_t MAX_PINS>
+bool FastPins<MAX_PINS>::allSamePort(const uint8_t* pins, uint8_t count) {
+    if (count == 0) return true;
+
+    uint8_t first_bank = detail::getPinBank(pins[0]);
+    for (uint8_t i = 1; i < count; i++) {
+        if (detail::getPinBank(pins[i]) != first_bank) {
+            return false;  // Cross-bank detected
+        }
+    }
+    return true;
+}
+
+/// ESP32: Build same-port LUT (reuse FastPinsSamePort logic)
+template<uint8_t MAX_PINS>
+void FastPins<MAX_PINS>::buildSamePortLUT(const uint8_t* pins, uint8_t count) {
+    if (count > MAX_PINS) count = MAX_PINS;
+
+    // Extract pin masks
+    uint32_t pin_masks[MAX_PINS];
+    for (uint8_t i = 0; i < count; i++) {
+        pin_masks[i] = detail::getPinMaskESP32(pins[i]);
+    }
+
+    // Build LUT
+    uint16_t num_patterns = 1 << count;
+    for (uint16_t pattern = 0; pattern < num_patterns; pattern++) {
+        uint32_t set_mask = 0;
+        uint32_t clear_mask = 0;
+
+        for (uint8_t bit = 0; bit < count; bit++) {
+            if (pattern & (1 << bit)) {
+                set_mask |= pin_masks[bit];
+            } else {
+                clear_mask |= pin_masks[bit];
+            }
+        }
+
+        mSamePortLUT[pattern].set_mask = set_mask;
+        mSamePortLUT[pattern].clear_mask = clear_mask;
+    }
+
+    // Fill remaining entries with zeros
+    for (uint16_t pattern = num_patterns; pattern < LUT_SIZE; pattern++) {
+        mSamePortLUT[pattern].set_mask = 0;
+        mSamePortLUT[pattern].clear_mask = 0;
+    }
+}
+
+/// ESP32: Build multi-port LUT for cross-bank operation
+template<uint8_t MAX_PINS>
+void FastPins<MAX_PINS>::buildMultiPortLUT(const uint8_t* pins, uint8_t count) {
+    if (count > MAX_PINS) count = MAX_PINS;
+
+#ifdef GPIO_OUT1_REG
+    // Dual-bank ESP32 - build per-bank LUT
+
+    // Categorize pins by bank
+    struct PinInfo {
+        uint8_t bank;
+        uint32_t mask;
+    };
+    PinInfo pin_info[MAX_PINS];
+
+    for (uint8_t i = 0; i < count; i++) {
+        pin_info[i].bank = detail::getPinBank(pins[i]);
+        pin_info[i].mask = detail::getPinMaskESP32(pins[i]);
+    }
+
+    // Get register addresses for both banks
+    volatile uint32_t* w1ts_bank0 = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
+    volatile uint32_t* w1tc_bank0 = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
+    volatile uint32_t* w1ts_bank1 = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TS_REG;
+    volatile uint32_t* w1tc_bank1 = (volatile uint32_t*)(uintptr_t)GPIO_OUT1_W1TC_REG;
+
+    // Build LUT with per-bank masks
+    uint16_t num_patterns = 1 << count;
+    for (uint16_t pattern = 0; pattern < num_patterns; pattern++) {
+        // Calculate masks for each bank
+        uint32_t bank0_set = 0, bank0_clear = 0;
+        uint32_t bank1_set = 0, bank1_clear = 0;
+
+        for (uint8_t bit = 0; bit < count; bit++) {
+            if (pattern & (1 << bit)) {
+                // Bit is HIGH
+                if (pin_info[bit].bank == 0) {
+                    bank0_set |= pin_info[bit].mask;
+                } else {
+                    bank1_set |= pin_info[bit].mask;
+                }
+            } else {
+                // Bit is LOW
+                if (pin_info[bit].bank == 0) {
+                    bank0_clear |= pin_info[bit].mask;
+                } else {
+                    bank1_clear |= pin_info[bit].mask;
+                }
+            }
+        }
+
+        // Store in LUT (using first 2 port entries)
+        auto& entry = mMultiPortLUT[pattern];
+        entry.port_count = 2;  // Always use both banks for simplicity
+
+        // Bank 0
+        entry.ports[0].port_set = (void*)w1ts_bank0;
+        entry.ports[0].port_clear = (void*)w1tc_bank0;
+        entry.ports[0].set_mask = bank0_set;
+        entry.ports[0].clear_mask = bank0_clear;
+
+        // Bank 1
+        entry.ports[1].port_set = (void*)w1ts_bank1;
+        entry.ports[1].port_clear = (void*)w1tc_bank1;
+        entry.ports[1].set_mask = bank1_set;
+        entry.ports[1].clear_mask = bank1_clear;
+
+        // Unused ports
+        entry.ports[2].port_set = nullptr;
+        entry.ports[3].port_set = nullptr;
+    }
+
+    // Fill remaining entries with zeros
+    for (uint16_t pattern = num_patterns; pattern < LUT_SIZE; pattern++) {
+        auto& entry = mMultiPortLUT[pattern];
+        entry.port_count = 0;
+        for (int i = 0; i < 4; i++) {
+            entry.ports[i].port_set = nullptr;
+            entry.ports[i].port_clear = nullptr;
+            entry.ports[i].set_mask = 0;
+            entry.ports[i].clear_mask = 0;
+        }
+    }
+#else
+    // Single-bank ESP32 - shouldn't reach here, but handle gracefully
+    buildSamePortLUT(pins, count);
+#endif
+}
+
+/// ESP32: Same-port write implementation
+template<uint8_t MAX_PINS>
+void FastPins<MAX_PINS>::writeSamePortImpl(uint32_t set_mask, uint32_t clear_mask) {
+    // Reuse FastPinsSamePort logic - write to bank 0 by default
+    volatile uint32_t* w1ts = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TS_REG;
+    volatile uint32_t* w1tc = (volatile uint32_t*)(uintptr_t)GPIO_OUT_W1TC_REG;
+
+    *w1ts = set_mask;
+    *w1tc = clear_mask;
+}
+
+/// ESP32: Multi-port write implementation
+template<uint8_t MAX_PINS>
+void FastPins<MAX_PINS>::writeMultiPortImpl(const FastPinsMaskEntryMulti& entry) {
+    // Write to each port in sequence
+    for (uint8_t i = 0; i < entry.port_count && i < 4; i++) {
+        if (entry.ports[i].port_set != nullptr) {
+            volatile uint32_t* w1ts = (volatile uint32_t*)entry.ports[i].port_set;
+            volatile uint32_t* w1tc = (volatile uint32_t*)entry.ports[i].port_clear;
+
+            *w1ts = entry.ports[i].set_mask;
+            *w1tc = entry.ports[i].clear_mask;
+        }
     }
 }
 

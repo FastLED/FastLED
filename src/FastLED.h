@@ -111,6 +111,7 @@ using fl::abs;
 
 #include "controller.h"
 #include "fastpin.h"
+#include "platforms/fast_pins.h"
 #include "fastspi_types.h"
 #include "dmx.h"
 
