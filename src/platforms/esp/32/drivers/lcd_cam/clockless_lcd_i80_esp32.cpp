@@ -25,30 +25,41 @@
 #include "cpixel_ledcontroller.h"
 #include "platforms/assert_defs.h"
 #include "clockless_lcd_i80_esp32.h"
+#include "lcd_i80_registry.h"
 #include "esp_log.h"
 
 #define LCD_TAG "FastLED_LCD"
+
+namespace fl {
+
+// Forward declare for use in anonymous namespace
+class LCDI80Esp32GroupBase;
+
+} // namespace fl
 
 namespace { // anonymous namespace
 
 typedef fl::FixedVector<int, 16> PinList16;
 typedef uint8_t LCDPin;
 
-// Maps multiple pins and CRGB strips to a single I80 LCD driver object.
-// Uses WS2812 chipset timing (most common for parallel LCD driver)
-class LCDI80Esp32_Group {
+} // anonymous namespace
+
+namespace fl {
+
+// Concrete (non-template) base class for LCD I80 groups
+// Accepts runtime timing configuration instead of compile-time templates
+class LCDI80Esp32GroupBase {
   public:
 
-    fl::unique_ptr<fl::LcdI80Driver<fl::WS2812ChipsetTiming>> mDriver;
+    fl::unique_ptr<fl::LcdI80DriverBase> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
     bool mDrawn = false;
+    fl::LcdI80TimingConfig mTiming;
 
-    static LCDI80Esp32_Group &getInstance() {
-        return fl::Singleton<LCDI80Esp32_Group>::instance();
-    }
+    LCDI80Esp32GroupBase(const fl::LcdI80TimingConfig& timing)
+        : mTiming(timing) {}
 
-    LCDI80Esp32_Group() = default;
-    ~LCDI80Esp32_Group() { mDriver.reset(); }
+    ~LCDI80Esp32GroupBase() { mDriver.reset(); }
 
     void onQueuingStart() {
         mRectDrawBuffer.onQueuingStart();
@@ -59,7 +70,7 @@ class LCDI80Esp32_Group {
         mRectDrawBuffer.onQueuingDone();
     }
 
-    void addObject(LCDPin pin, uint16_t numLeds, bool is_rgbw) {
+    void addObject(uint8_t pin, uint16_t numLeds, bool is_rgbw) {
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
@@ -76,7 +87,7 @@ class LCDI80Esp32_Group {
         bool needs_validation = !mDriver.get() || drawlist_changed;
         if (needs_validation) {
             mDriver.reset();
-            mDriver.reset(new fl::LcdI80Driver<fl::WS2812ChipsetTiming>());
+            mDriver.reset(new fl::LcdI80DriverBase(mTiming));
 
             // Build pin list and config
             fl::LcdDriverConfig config;
@@ -162,23 +173,74 @@ class LCDI80Esp32_Group {
     }
 };
 
-} // anonymous namespace
-
+} // namespace fl
 
 namespace fl {
 
+/// Templated singleton wrapper - one instance per chipset type
+/// Thin wrapper that converts compile-time TIMING to runtime config and delegates to base
+/// This is now in fl namespace so it can be used from the header
+template <typename TIMING>
+class LCDI80Esp32Group {
+public:
+    static LCDI80Esp32Group& getInstance() {
+        return fl::Singleton<LCDI80Esp32Group<TIMING>>::instance();
+    }
+
+    LCDI80Esp32Group()
+        : mBase(fl::LcdI80TimingConfig{
+            TIMING::T1,        // T1
+            TIMING::T2,        // T2
+            TIMING::T3,        // T3
+            TIMING::RESET,     // reset_us
+            0,                 // pclk_hz (calculated by driver)
+            0,                 // slot_ns (calculated by driver)
+            0,                 // actual_T1 (calculated by driver)
+            0,                 // actual_T2 (calculated by driver)
+            0,                 // actual_T3 (calculated by driver)
+            0.0f,              // error_T1 (calculated by driver)
+            0.0f,              // error_T2 (calculated by driver)
+            0.0f,              // error_T3 (calculated by driver)
+            TIMING::name()     // chipset_name
+        })
+    {
+        // Auto-register with global registry on construction
+        fl::LCDI80Esp32Registry::getInstance().registerGroup(
+            this,
+            [](void* ptr) {
+                static_cast<LCDI80Esp32Group*>(ptr)->flush();
+            }
+        );
+    }
+
+    void onQueuingStart() { mBase.onQueuingStart(); }
+    void onQueuingDone() { mBase.onQueuingDone(); }
+    void addObject(uint8_t pin, uint16_t numLeds, bool is_rgbw) {
+        mBase.addObject(pin, numLeds, is_rgbw);
+    }
+    void showPixelsOnceThisFrame() { mBase.showPixelsOnceThisFrame(); }
+    void flush() { mBase.showPixelsOnceThisFrame(); }  // Alias for registry
+
+    LCDI80Esp32GroupBase mBase;  // Make public for proxy access
+
+private:
+};
+
 void LCD_I80_Esp32::beginShowLeds(int datapin, int nleds) {
-    LCDI80Esp32_Group &group = LCDI80Esp32_Group::getInstance();
+    // Temporary: Use WS2812 timing for backward compatibility
+    // This will be replaced by template-based routing in Phase 3
+    LCDI80Esp32Group<TIMING_WS2812_800KHZ> &group = LCDI80Esp32Group<TIMING_WS2812_800KHZ>::getInstance();
     group.onQueuingStart();
     group.addObject(datapin, nleds, false);
 }
 
 void LCD_I80_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    LCDI80Esp32_Group &group = LCDI80Esp32_Group::getInstance();
+    // Temporary: Use WS2812 timing for backward compatibility
+    LCDI80Esp32Group<TIMING_WS2812_800KHZ> &group = LCDI80Esp32Group<TIMING_WS2812_800KHZ>::getInstance();
     group.onQueuingDone();
     const Rgbw rgbw = pixel_iterator.get_rgbw();
 
-    fl::span<uint8_t> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
+    fl::span<uint8_t> strip_bytes = group.mBase.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
     if (rgbw.active()) {
         uint8_t r, g, b, w;
         while (pixel_iterator.has(1)) {
@@ -213,7 +275,8 @@ void LCD_I80_Esp32::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) 
 void LCD_I80_Esp32::endShowLeds() {
     // First one to call this draws everything, every other call this frame
     // is ignored.
-    LCDI80Esp32_Group::getInstance().showPixelsOnceThisFrame();
+    // Temporary: Use WS2812 timing for backward compatibility
+    LCDI80Esp32Group<TIMING_WS2812_800KHZ>::getInstance().showPixelsOnceThisFrame();
 }
 
 // ============================================================================

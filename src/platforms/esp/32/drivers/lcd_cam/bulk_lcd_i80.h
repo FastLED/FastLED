@@ -47,8 +47,8 @@ namespace fl {
 ///         {9, strip2, 100, screenmap2}
 ///     });
 /// @endcode
-template <>
-class BulkClockless<Chipset::WS2812, LCD_I80>
+template <typename CHIPSET>
+class BulkClockless<CHIPSET, LCD_I80>
     : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
   public:
     /// Maximum number of strips supported by LCD_I80 peripheral
@@ -285,7 +285,8 @@ class BulkClockless<Chipset::WS2812, LCD_I80>
         }
 
         config.use_psram = true; // Use PSRAM for DMA buffers
-        config.latch_us = 280;   // WS2812 reset time (280us)
+        using ChipsetTiming = typename ChipsetTraits<CHIPSET>::VALUE;
+        config.latch_us = ChipsetTiming::RESET;
 
         // Initialize driver with uniform LED count
         bool success = mDriver.begin(config, mLedCount);
@@ -352,8 +353,8 @@ class BulkClockless<Chipset::WS2812, LCD_I80>
     /// Map of pin number to sub-controller
     fl::fl_map<int, BulkStrip> mSubControllers;
 
-    /// LCD I80 driver instance (template parameter = WS2812 timing)
-    LcdI80Driver<TIMING_WS2812_800KHZ> mDriver;
+    /// LCD I80 driver instance (template parameter = chipset timing)
+    LcdI80Driver<typename ChipsetTraits<CHIPSET>::VALUE> mDriver;
 
     /// Array of strip pointers for driver (matches driver's lane order)
     CRGB *mStripPointers[MAX_STRIPS];
