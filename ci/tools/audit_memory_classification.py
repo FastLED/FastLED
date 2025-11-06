@@ -31,7 +31,7 @@ EXPECTED_MEMORY_BY_PATTERN = {
     ("uno", "low"),
     ("nano", "low"),
     ("nano_every", "low"),
-    ("atmega32u4_leonardo", "low"),
+    ("leonardo", "low"),
     ("attiny85", "low"),
     ("attiny88", "low"),
     ("attiny1604", "low"),
@@ -205,7 +205,7 @@ def verify_sketch_macros_compliance():
     print("  ✓ uno (AVR ATmega328P)")
     print("  ✓ nano (AVR ATmega328P)")
     print("  ✓ nano_every (AVR ATmega4809)")
-    print("  ✓ atmega32u4_leonardo (AVR ATmega32U4)")
+    print("  ✓ leonardo (AVR ATmega32U4)")
     print("  ✓ attiny85, attiny88 (AVR ATtiny)")
     print("  ✓ attiny1604, attiny4313, attiny1616 (AVR ATtiny)")
     print("  ✓ teensy_lc (ARDUINO_TEENSYLC)")

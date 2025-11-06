@@ -255,7 +255,7 @@ All images are built for **linux/amd64** and **linux/arm64** using Docker Buildx
                  (10 minute delay for registry propagation)
                  ↓
 2:10 AM UTC  →  Platform images build in parallel
-                 ├── avr (grouped: uno, atmega32u4_leonardo, attiny85, attiny88, nano_every, etc.)
+                 ├── avr (grouped: uno, leonardo, attiny85, attiny88, nano_every, etc.)
                  ├── ESP32 boards (flat - 10 individual images):
                  │   ├── esp-32dev (builds: esp32dev only)
                  │   ├── esp-32s2 (builds: esp32s2 only)
@@ -343,7 +343,7 @@ The single source of truth for platform→boards relationships. This module defi
 ```python
 DOCKER_PLATFORMS = {
     # Grouped platforms (multi-board images)
-    "avr": ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "attiny4313",
+    "avr": ["uno", "leonardo", "attiny85", "attiny88", "attiny4313",
             "nano_every", "attiny1604", "attiny1616"],
     "teensy": ["teensylc", "teensy30", "teensy31", "teensy40", "teensy41"],
     "rp": ["rp2040", "rp2350"],
@@ -388,7 +388,7 @@ During Docker build (`ci/docker/build.sh`), the "compile" stage:
 **Grouped Platforms** (e.g., AVR, Teensy):
 1. Receives `PLATFORM_NAME` from Dockerfile (e.g., "uno")
 2. Looks up platform family: `BOARD_TO_PLATFORM["uno"]` → `"avr"`
-3. Gets all boards for platform: `DOCKER_PLATFORMS["avr"]` → `["uno", "atmega32u4_leonardo", ...]`
+3. Gets all boards for platform: `DOCKER_PLATFORMS["avr"]` → `["uno", "leonardo", ...]`
 4. Loops through and compiles each board: `bash compile uno Blink`, `bash compile attiny85 Blink`, etc.
 5. Result: All toolchains for the platform family are pre-cached in the image
 
@@ -525,7 +525,7 @@ docker build -f Dockerfile.template \
 **What happens**:
 - `build.sh` receives `PLATFORM_NAME=uno`
 - Looks up platform family in `build_platforms.py`: uno → "avr"
-- Gets all AVR boards: ["uno", "atmega32u4_leonardo", "attiny85", "attiny88", "nano_every", "attiny1604", "attiny1616"]
+- Gets all AVR boards: ["uno", "leonardo", "attiny85", "attiny88", "nano_every", "attiny1604", "attiny1616"]
 - Compiles each board to pre-cache all AVR toolchains
 - Image contains cached toolchains for ALL AVR boards
 
