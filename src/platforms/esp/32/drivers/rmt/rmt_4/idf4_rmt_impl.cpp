@@ -866,16 +866,13 @@ void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
                 ::RMT.int_clr.val |= BIT(tx_next_bit);
                 portEXIT_CRITICAL_ISR(&rmt_spinlock);
             }
-            else
+            // -- Transmission is complete on this channel
+            if (intr_st & BIT(tx_done_bit))
             {
-                // -- Transmission is complete on this channel
-                if (intr_st & BIT(tx_done_bit))
-                {
-                    portENTER_CRITICAL_ISR(&rmt_spinlock);
-                    ::RMT.int_clr.val |= BIT(tx_done_bit);
-                    doneOnChannel(rmt_channel_t(channel), 0);
-                    portEXIT_CRITICAL_ISR(&rmt_spinlock);
-                }
+                portENTER_CRITICAL_ISR(&rmt_spinlock);
+                doneOnChannel(rmt_channel_t(channel), 0);
+                ::RMT.int_clr.val |= BIT(tx_done_bit);
+                portEXIT_CRITICAL_ISR(&rmt_spinlock);
             }
         }
     }
