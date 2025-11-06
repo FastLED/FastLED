@@ -187,6 +187,8 @@ foreach example_name : example_paths.keys()
             '-DFASTLED_STUB_MAIN',
             '-DFASTLED_STUB_MAIN_INCLUDE_INO=' + ino_file,
             '-DFASTLED_STUB_IMPL',
+            '-fno-rtti',  # Must match fastled_lib compilation flags
+            '-fno-exceptions',  # Must match fastled_lib compilation flags
         ],
         link_args: example_link_args,
         build_by_default: false,  # Only build when explicitly requested
