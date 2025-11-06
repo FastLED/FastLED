@@ -29,7 +29,7 @@ esp_err_t fastled_riscv_install_interrupt(
     int priority,
     void (*handler)(void *),
     void *arg,
-    esp_intr_handle_t *handle
+    intr_handle_t *handle
 ) {
     if (priority < 1 || priority > FASTLED_RISCV_MAX_PRIORITY) {
         FL_LOG_INTERRUPT("Invalid priority level: " << priority <<
@@ -82,7 +82,7 @@ esp_err_t fastled_riscv_install_official_interrupt(
     int source,
     void (*handler)(void *),
     void *arg,
-    esp_intr_handle_t *handle
+    intr_handle_t *handle
 ) {
     FL_LOG_INTERRUPT("Installing official FastLED interrupt (priority " <<
            FASTLED_RISCV_PRIORITY_RECOMMENDED << ")");
@@ -100,7 +100,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
     int priority,
     void (*handler)(void *),
     void *arg,
-    esp_intr_handle_t *handle
+    intr_handle_t *handle
 ) {
     if (priority < 4 || priority > 7) {
         FL_LOG_RMT("Experimental priority must be 4-7, got " << priority);
