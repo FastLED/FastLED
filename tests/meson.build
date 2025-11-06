@@ -11,16 +11,19 @@ uv = find_program('uv')
 
 # Build precompiled header from test_pch.h (contains FastLED.h, doctest + common headers)
 # Uses Zig's bundled Clang to match the compile flags (Meson detected GCC but we need Clang)
+# Wrapper script fixes the depfile to reference PCH output instead of temp .obj file
 test_pch = custom_target('test_pch',
   input: 'test_pch.h',
-  output: ['test_pch.h.pch', 'test_pch.h.d'],
+  output: 'test_pch.h.pch',      # Only PCH is an output; .d file is depfile only
   depfile: 'test_pch.h.d',
   command: [
-    uv, 'run', 'python', '-m', 'ziglang', 'c++',
+    uv, 'run', 'python',
+    meson.project_source_root() / 'ci/compile_pch.py',
+    'uv', 'run', 'python', '-m', 'ziglang', 'c++',
     '-x', 'c++-header',           # Treat input as C++ header
     '@INPUT@',                     # test_pch.h
-    '-o', '@OUTPUT0@',             # test_pch.h.pch
-    '-MD', '-MF', '@OUTPUT1@',     # Generate dependency file
+    '-o', '@OUTPUT@',              # test_pch.h.pch
+    '-MD', '-MF', '@DEPFILE@',     # Generate dependency file (will be fixed by wrapper)
     unit_test_compile_args,        # Same flags as all tests
     '-I' + meson.project_source_root() / 'src',
     '-I' + meson.project_source_root() / 'tests',
@@ -98,7 +101,7 @@ if unity_enabled
   foreach category_name, test_sources : category_files
     if test_sources.length() > 0
       # Add PCH to sources
-      category_sources = [test_pch[0]] + test_sources
+      category_sources = [test_pch] + test_sources
 
       # Build test executable
       # Unity builds enabled: Meson will combine multiple .cpp files into unity
@@ -139,7 +142,7 @@ else
     test_file = test_file_paths.get(test_name, test_name + '.cpp')
 
     # Some tests need additional source files for ESP32 parallel SPI host simulation
-    test_sources = [test_file, test_pch[0]]
+    test_sources = [test_file, test_pch]
     test_cpp_args = unit_test_compile_args + [
       '-include-pch', meson.current_build_dir() / 'test_pch.h.pch',
       '-Winvalid-pch',
