@@ -1,5 +1,6 @@
 #include <FastLED.h>
 
+
 // ===== matrix + LED config =====
 #define WIDTH 32
 #define HEIGHT 32

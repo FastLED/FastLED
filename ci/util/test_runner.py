@@ -457,16 +457,36 @@ def create_unit_test_process(
 def create_examples_test_process(
     args: TestArgs, enable_stack_trace: bool
 ) -> RunningProcess:
-    """
-    Create an examples test process without starting it
+    """Create an examples test process using Meson build system"""
+    # Use Meson-based example compilation instead of Python compiler
+    cmd = ["uv", "run", "python", "-u", "ci/util/meson_example_runner.py"]
 
-    NOTE: Examples are now compiled using ci-compile.py (via create_compile_uno_test_process).
-    This function is deprecated but kept for backwards compatibility during transition.
-    It now delegates to the uno compilation test which covers example compilation.
-    """
-    # Examples are now tested via uno compilation (ci-compile.py)
-    # Return the uno compilation process instead
-    return create_compile_uno_test_process(enable_stack_trace)
+    # Add example names if specified
+    if args.examples is not None:
+        cmd.extend(args.examples)
+
+    # Map command-line arguments to meson_example_runner.py
+    if args.clean:
+        cmd.append("--clean")
+    if args.no_pch:
+        cmd.append("--no-pch")  # Ignored by Meson (PCH always enabled)
+    if args.no_parallel:
+        cmd.append("--no-parallel")
+    if args.verbose:
+        cmd.append("--verbose")
+
+    # Auto-enable full mode for examples to include execution
+    if args.full or args.examples is not None:
+        cmd.append("--full")
+
+    # Use longer timeout for no-parallel mode since sequential compilation takes much longer
+    timeout = (
+        1800 if args.no_parallel else 600
+    )  # 30 minutes for sequential, 10 minutes for parallel
+
+    cmd_str = subprocess.list2cmdline(cmd)
+
+    return RunningProcess(cmd_str, auto_run=False, timeout=timeout)
 
 
 def create_python_test_process(
@@ -689,28 +709,28 @@ def _format_timing_summary(process_timings: list[ProcessTiming]) -> str:
     # Sort by skipped status first (non-skipped first), then by duration (longest first)
     sorted_timings = sorted(process_timings, key=lambda x: (x.skipped, -x.duration))
 
-    # Calculate column widths
+    # Calculate column widths dynamically
     max_name_width = max(len(timing.name) for timing in sorted_timings)
-    max_name_width = max(max_name_width, len("Test Name"))  # Ensure header fits
+    max_name_width = max(max_name_width, len("Test"))  # Use shorter header
 
-    # Create header
-    header = f"{'Test Name':<{max_name_width}} | {'Duration':>23}"
-    separator = f"{'-' * max_name_width}-+-{'-' * 23}"
+    # Create header with compact formatting
+    header = f"{'Test':<{max_name_width}} | Duration"
+    separator = f"{'-' * max_name_width}-+-{'-' * 8}"
 
-    # Create rows
+    # Create rows with compact formatting
     rows: list[str] = []
     for timing in sorted_timings:
         if timing.skipped:
-            duration_str = "Skipped because no changes"
+            duration_str = "skipped"
         else:
             duration_str = f"{timing.duration:.2f}s"
-        row = f"{timing.name:<{max_name_width}} | {duration_str:>23}"
+        row = f"{timing.name:<{max_name_width}} | {duration_str}"
         rows.append(row)
 
     # Combine all parts
     table_lines = (
         [
-            "\nTest Execution Summary:",
+            "\nTests:",
             separator,
             header,
             separator,
@@ -1292,8 +1312,7 @@ def run_test_processes(
         parallel = False
 
     if not processes:
-        ts_print("\033[92m###### SUCCESS ######\033[0m")
-        ts_print("No tests to run")
+        ts_print("\n✓ No tests to run")
         return []
 
     try:
@@ -1344,7 +1363,7 @@ def run_test_processes(
         # Success message for sequential execution
         if not parallel:
             elapsed = time.time() - start_time
-            ts_print(f"\033[92m### SUCCESS ({elapsed:.2f}s) ###\033[0m")
+            ts_print(f"\n✓ Tests completed ({elapsed:.2f}s)")
 
         return timings
 
@@ -1387,6 +1406,11 @@ def runner(
     ts_print(f"[TEST_RUNNER] C++ test files changed: {cpp_test_change}")
     ts_print(f"[TEST_RUNNER] Example files changed: {examples_change}")
     ts_print(f"[TEST_RUNNER] Python test files changed: {python_test_change}")
+
+    # Clear sccache stats at start to show only metrics from this build
+    from ci.util.sccache_config import clear_sccache_stats
+
+    clear_sccache_stats()
 
     # Determine test categories first to check if we should use meson
     test_categories = determine_test_categories(args)
@@ -1492,9 +1516,16 @@ def runner(
         if test_categories.integration or test_categories.integration_only:
             processes.append(create_integration_test_process(args, enable_stack_trace))
 
-        # Add uno compilation test if source changed (skip for unity builds as they're meant to be fast)
-        if src_code_change and not test_categories.py_only and not args.unity:
-            processes.append(create_compile_uno_test_process(enable_stack_trace))
+        # Add example compilation test if source changed OR examples explicitly requested
+        # This uses the restored host-based Clang compiler for fast compilation
+        examples_explicitly_requested = (
+            test_categories.examples or test_categories.examples_only
+        )
+        should_compile_examples = (
+            src_code_change or examples_explicitly_requested
+        ) and not test_categories.py_only
+        if should_compile_examples:
+            processes.append(create_examples_test_process(args, enable_stack_trace))
 
         # Add Python tests if needed and Python test files have changed
         if (test_categories.py or test_categories.py_only) and python_test_change:

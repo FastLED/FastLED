@@ -121,7 +121,7 @@ class UISlider : public UIElement {
   private:
     FunctionList<UISlider &> mCallbacks;
     float mLastFrameValue = 0;
-    bool mLastFramevalueValid = false;
+    bool mLastFrameValueValid = false;
     Listener mListener;
 };
 

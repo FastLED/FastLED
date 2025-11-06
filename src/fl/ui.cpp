@@ -13,7 +13,7 @@ void UISlider::setValue(float value) {
         mImpl.setValue(value);
         // Update the last frame value to keep state consistent
         mLastFrameValue = value;
-        mLastFramevalueValid = true;
+        mLastFrameValueValid = true;
         // Invoke callbacks to notify listeners (including JavaScript components)
         mCallbacks.invoke(*this);
     }
@@ -21,9 +21,9 @@ void UISlider::setValue(float value) {
 
 void UISlider::Listener::onBeginFrame() {
     UISlider &owner = *mOwner;
-    if (!owner.mLastFramevalueValid) {
+    if (!owner.mLastFrameValueValid) {
         owner.mLastFrameValue = owner.value();
-        owner.mLastFramevalueValid = true;
+        owner.mLastFrameValueValid = true;
         return;
     }
     float value = owner.value();

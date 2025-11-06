@@ -26,6 +26,26 @@ This project uses directory-specific agent guidelines. See:
 - `uv run ci/wasm_compile.py examples/Blink --just-compile` - Compile Arduino sketches to WASM
 - `uv run mcp_server.py` - Start MCP server for advanced tools
 
+### Example Compilation (Host-Based)
+FastLED supports fast host-based compilation of `.ino` examples using Meson build system:
+
+- `uv run test.py --examples` - Compile and run all examples for host (fast, 96 examples in ~0.2s)
+- `uv run test.py --examples Blink DemoReel100` - Compile and run specific examples
+- `uv run test.py --examples --no-parallel` - Sequential compilation (easier debugging)
+- `uv run test.py --examples --verbose` - Show detailed compilation output
+- `uv run test.py --examples --clean` - Clean build cache and recompile
+- `uv run test.py --examples --no-pch` - Disable precompiled headers (ignored - PCH always enabled)
+
+**Performance Notes:**
+- Host compilation is 60x+ faster than PlatformIO (2.2s vs 137s for single example)
+- All 96 examples compile in ~0.24s (394 examples/second) with PCH caching
+- PCH (precompiled headers) dramatically speeds up compilation by caching 986 dependencies
+- Examples execute with limited loop iterations (5 loops) for fast testing
+
+**Direct Invocation:**
+- `uv run python ci/util/meson_example_runner.py` - Compile all examples directly
+- `uv run python ci/util/meson_example_runner.py Blink --full` - Compile and execute specific example
+
 ### Git Historian (Code Search)
 - `/git-historian keyword1 keyword2` - Search codebase and recent git history for keywords
 - `/git-historian "error handling" config` - Search for multi-word phrases (use quotes)

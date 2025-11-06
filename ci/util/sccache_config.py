@@ -37,6 +37,28 @@ def is_sccache_available() -> bool:
         return False
 
 
+def clear_sccache_stats() -> None:
+    """Clear sccache statistics to get clean metrics for current build."""
+    if not is_sccache_available():
+        return
+
+    sccache_path = get_sccache_path()
+    if not sccache_path:
+        return
+
+    try:
+        subprocess.run(
+            [sccache_path, "--zero-stats"],
+            capture_output=True,
+            check=False,
+            timeout=5,
+        )
+    except subprocess.TimeoutExpired:
+        pass  # Don't fail build if stats clearing times out
+    except Exception:
+        pass  # Don't fail build if stats clearing fails
+
+
 def get_sccache_path() -> str | None:
     """Get the full path to sccache executable."""
     # Use shutil.which for cross-platform executable finding
@@ -76,11 +98,47 @@ def show_sccache_stats() -> None:
             timeout=10,
         )
         if result.returncode == 0:
-            ts_print("\n" + "=" * 70)
-            ts_print("SCCACHE Statistics:")
-            ts_print("=" * 70)
-            ts_print(result.stdout)
-            ts_print("=" * 70)
+            # Parse and display key metrics only
+            lines = result.stdout.strip().split("\n")
+            key_metrics: dict[str, str] = {}
+
+            # Extract only the most important metrics
+            for line in lines:
+                line_stripped = line.strip()
+                if not line_stripped:
+                    continue
+
+                # Split on whitespace with max 1 split to get key and value
+                if "Compile requests" in line and "executed" not in line.lower():
+                    # Get last token which is the number
+                    key_metrics["requests"] = line_stripped.split()[-1]
+                elif "Cache hits (C/C++)" in line:
+                    key_metrics["hits"] = line_stripped.split()[-1]
+                elif "Cache misses (C/C++)" in line:
+                    key_metrics["misses"] = line_stripped.split()[-1]
+                elif "Cache hits rate (C/C++)" in line:
+                    # Get the percentage (last 2 tokens: "32.88 %")
+                    tokens = line_stripped.split()
+                    key_metrics["hit_rate"] = f"{tokens[-2]} {tokens[-1]}"
+                elif "Average compiler" in line:
+                    # Get the time value (last 2 tokens: "5.438 s")
+                    tokens = line_stripped.split()
+                    key_metrics["avg_compile"] = f"{tokens[-2]} {tokens[-1]}"
+
+            # Display compact summary
+            ts_print("\nSCCACHE (this build):")
+            if key_metrics:
+                ts_print(
+                    f"  Requests: {key_metrics.get('requests', 'N/A')} | "
+                    f"Hits: {key_metrics.get('hits', 'N/A')} | "
+                    f"Misses: {key_metrics.get('misses', 'N/A')} | "
+                    f"Hit Rate: {key_metrics.get('hit_rate', 'N/A')}"
+                )
+                if "avg_compile" in key_metrics:
+                    ts_print(f"  Avg: {key_metrics['avg_compile']}")
+            else:
+                # Fallback: show raw output if parsing fails
+                ts_print(result.stdout)
     except subprocess.TimeoutExpired:
         ts_print("Warning: sccache --show-stats timed out")
     except Exception as e:

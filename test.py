@@ -928,7 +928,10 @@ def main() -> None:
                     or args.force
                 )
                 force_examples_change = (
-                    examples_change or args.no_fingerprint or args.force
+                    examples_change
+                    or (args.examples is not None)
+                    or args.no_fingerprint
+                    or args.force
                 )
                 force_python_test_change = (
                     python_test_change
