@@ -10,6 +10,13 @@ This project uses directory-specific agent guidelines. See:
 
 ## Key Commands
 
+### Build Setup
+- `uv run python build_setup.py` - Build sccache wrapper trampolines (auto-generated C binaries)
+  - **Run this once** after cloning repository or when `.meson/build_wrappers.py` changes
+  - Creates `zig-cc-wrapper.exe` and `zig-cxx-wrapper.exe` for compiler caching
+  - Automatically invoked by test/build scripts but can be run manually
+
+### Testing & Building
 - `uv run test.py` - Run all tests
 - `uv run test.py --cpp` - Run C++ tests only
 - `uv run test.py TestName` - Run specific C++ test (e.g., `uv run test.py xypath`)

@@ -798,6 +798,51 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
 
         returncode = proc.wait(echo=True)
 
+        # Check for Ninja dependency database corruption
+        # This appears as "ninja: warning: premature end of file; recovering"
+        # When detected, automatically repair the .ninja_deps file
+        output = proc.stdout  # RunningProcess combines stdout and stderr
+        if "premature end of file" in output.lower():
+            print(
+                "[MESON] ⚠️  Detected corrupted Ninja dependency database (.ninja_deps)",
+                file=sys.stderr,
+            )
+            print(
+                "[MESON] 🔧 Auto-repairing: Running ninja -t recompact...",
+                file=sys.stderr,
+            )
+
+            # Run ninja -t recompact to repair the dependency database
+            try:
+                repair_proc = RunningProcess(
+                    ["ninja", "-C", str(build_dir), "-t", "recompact"],
+                    timeout=60,
+                    auto_run=True,
+                    check=False,
+                    env=os.environ.copy(),
+                )
+                repair_returncode = repair_proc.wait(echo=False)
+
+                if repair_returncode == 0:
+                    print(
+                        "[MESON] ✓ Dependency database repaired successfully",
+                        file=sys.stderr,
+                    )
+                    print(
+                        "[MESON] 💡 Next build should be fast (incremental)",
+                        file=sys.stderr,
+                    )
+                else:
+                    print(
+                        "[MESON] ⚠️  Repair failed, but continuing anyway",
+                        file=sys.stderr,
+                    )
+            except Exception as repair_error:
+                print(
+                    f"[MESON] ⚠️  Repair failed with exception: {repair_error}",
+                    file=sys.stderr,
+                )
+
         if returncode != 0:
             print(
                 f"[MESON] Compilation failed with return code {returncode}",
@@ -805,7 +850,6 @@ def compile_meson(build_dir: Path, target: Optional[str] = None) -> bool:
             )
 
             # Check for stale build cache error (missing files)
-            output = proc.stdout  # RunningProcess combines stdout and stderr
             if "missing and no known rule to make it" in output.lower():
                 print(
                     "[MESON] ⚠️  ERROR: Build cache references missing source files",
@@ -1040,6 +1084,76 @@ def run_meson_test(
         )
 
 
+def perform_ninja_maintenance(build_dir: Path) -> bool:
+    """
+    Perform periodic maintenance on Ninja dependency database.
+
+    This function runs 'ninja -t recompact' to optimize and repair the
+    .ninja_deps file. It only runs once per day (tracked via marker file)
+    to avoid unnecessary overhead.
+
+    Args:
+        build_dir: Meson build directory containing .ninja_deps
+
+    Returns:
+        True if maintenance was performed or skipped successfully, False on error
+    """
+    # Create marker file to track last maintenance time
+    marker_file = build_dir / ".ninja_deps_maintenance"
+
+    # Check if maintenance was recently performed (within last 24 hours)
+    if marker_file.exists():
+        try:
+            last_maintenance = marker_file.stat().st_mtime
+            time_since_maintenance = time.time() - last_maintenance
+            hours_since_maintenance = time_since_maintenance / 3600
+
+            # Skip if maintenance was done within last 24 hours
+            if hours_since_maintenance < 24:
+                return True
+        except (OSError, IOError):
+            # If we can't read the marker, proceed with maintenance
+            pass
+
+    print("[MESON] 🔧 Performing periodic Ninja dependency database maintenance...")
+
+    try:
+        # Run ninja -t recompact to optimize dependency database
+        repair_proc = RunningProcess(
+            ["ninja", "-C", str(build_dir), "-t", "recompact"],
+            timeout=60,
+            auto_run=True,
+            check=False,
+            env=os.environ.copy(),
+        )
+        returncode = repair_proc.wait(echo=False)
+
+        if returncode == 0:
+            print("[MESON] ✓ Dependency database maintenance completed successfully")
+
+            # Update marker file timestamp
+            try:
+                marker_file.touch()
+            except (OSError, IOError):
+                # Not critical if marker update fails
+                pass
+
+            return True
+        else:
+            print(
+                "[MESON] ⚠️  Maintenance completed with warnings (non-fatal)",
+                file=sys.stderr,
+            )
+            return True  # Non-fatal, continue anyway
+
+    except Exception as e:
+        print(
+            f"[MESON] ⚠️  Maintenance failed with exception: {e} (non-fatal)",
+            file=sys.stderr,
+        )
+        return True  # Non-fatal, continue anyway
+
+
 def run_meson_build_and_test(
     source_dir: Path,
     build_dir: Path,
@@ -1080,6 +1194,10 @@ def run_meson_build_and_test(
     # Setup build
     if not setup_meson_build(source_dir, build_dir, reconfigure=False, unity=unity):
         return MesonTestResult(success=False, duration=time.time() - start_time)
+
+    # Perform periodic maintenance on Ninja dependency database (once per day)
+    # This helps prevent .ninja_deps corruption and keeps builds fast
+    perform_ninja_maintenance(build_dir)
 
     # Convert test name to executable name (add test_ prefix if needed, convert to lowercase)
     meson_test_name = None

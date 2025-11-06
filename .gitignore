@@ -83,3 +83,6 @@ test_output.txt
 ci/**/node_modules
 # TypeScript compiled output (we run .ts directly with tsx)
 ci/docker/avr8js/*.js
+
+.meson/zig-*
+!.meson/zig-*.c
