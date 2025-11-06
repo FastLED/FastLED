@@ -77,10 +77,27 @@ inline PinValidationResult validate_esp32s3_lcd_pin(int pin, bool allow_strappin
 /// @param pin GPIO pin number to validate
 /// @return Validation result with error message if invalid
 inline PinValidationResult validate_esp32p4_lcd_pin(int pin) {
-    // ESP32-P4 has different reserved pins than S3
-    // TODO: Add P4-specific pin validation based on datasheet
-    // For now, accept all pins - this should be updated with actual P4 constraints
-    (void)pin;
+    // Reject invalid pin numbers
+    if (pin < 0 || pin > 54) {
+        return {false, "GPIO pin must be in range 0-54 for ESP32-P4"};
+    }
+
+    // Reject strapping pins (hard error)
+    // GPIO34-38 are used for boot configuration and MUST NOT be used for LED output
+    if (pin >= 34 && pin <= 38) {
+        return {false, "GPIO34-38 are strapping pins and CANNOT be used for LED output. "
+                       "Using these pins WILL PREVENT BOOT. Please choose a different pin."};
+    }
+
+    // Reject USB-JTAG pins (hard error)
+    // GPIO24-25 are used for USB-JTAG debugging
+    if (pin == 24 || pin == 25) {
+        return {false, "GPIO24-25 are reserved for USB-JTAG on ESP32-P4. "
+                       "Using these pins WILL DISABLE USB-JTAG. Please choose a different pin."};
+    }
+
+    // Note: Flash/PSRAM pins are sdkconfig-dependent and harder to detect at compile time
+    // Users should consult their board documentation for Flash/PSRAM pin assignments
     return {true, nullptr};
 }
 

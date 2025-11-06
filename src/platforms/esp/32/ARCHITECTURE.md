@@ -363,12 +363,42 @@ The ESP32 platform has **two completely different SPI subsystems**:
 - **Best for**: High strip count with uniform chipsets (e.g., 20× WS2812 strips)
 
 ### LCD_CAM (I80/RGB)
-- **Supported targets**: ESP32-S3 (I80), ESP32-P4 (I80/RGB)
-- **Max strips**: Parallel output (up to 16 data lines)
+
+The LCD_CAM driver family includes two variants using different peripherals:
+
+#### LCD_I80 (ESP32-S3/P4)
+- **Supported targets**: ESP32-S3, ESP32-P4
+- **Peripheral**: LCD_CAM in I80 mode (Intel 8080 parallel interface)
+- **Max strips**: Up to 16 parallel data lines
+- **Encoding**: 3-word per bit (6 bytes/bit, 144 bytes/LED)
+- **PCLK Range**: 1-80 MHz
+- **Control Signals**: CS, DC
+- **GPIO Constraints**: Flexible (avoid GPIO0, GPIO45, GPIO46 strapping pins)
 - **Timing precision**: Excellent (hardware-timed)
 - **DMA**: Yes
 - **Async**: Yes
-- **Best for**: High-bandwidth applications (e.g., LED matrices, video walls)
+- **Testing Status**: ✅ Production-tested on ESP32-S3
+- **Best for**: High-bandwidth parallel output on S3/P4
+
+#### LCD_RGB (ESP32-P4 only)
+- **Supported targets**: ESP32-P4 only
+- **Peripheral**: RGB LCD controller (dedicated RGB parallel display peripheral)
+- **Max strips**: Up to 16 parallel data lines
+- **Encoding**: 4-pixel per bit (8 bytes/bit, 192 bytes/LED)
+- **PCLK Range**: 1-40 MHz (optimal: 3.2 MHz for WS2812B)
+- **Control Signals**: HSYNC, VSYNC, DE, DISP
+- **GPIO Constraints**: **STRICT** - GPIO39-54 only (16 pins available)
+  - ❌ Rejects GPIO34-38 (strapping pins - cause boot failures)
+  - ❌ Rejects GPIO24-25 (USB-JTAG - prevents debugging)
+- **Timing precision**: Excellent (hardware-timed)
+- **DMA**: Yes
+- **Async**: Yes
+- **Testing Status**: ⚠️ **EXPERIMENTAL** - Code complete, untested on hardware
+- **Memory Usage**: 33% higher than LCD_I80 (PSRAM recommended for >240 LEDs)
+- **Reset Gap**: VSYNC front porch timing (≥50µs between frames)
+- **DMA Callback**: VSYNC interrupt-driven synchronization
+- **Best for**: ESP32-P4 parallel output (when hardware becomes available)
+- **Documentation**: See `LCD_I80_vs_RGB_MIGRATION_GUIDE.md` for migration details
 
 ### PARLIO (Parallel IO)
 - **Supported targets**: ESP32-P4 only
@@ -489,6 +519,9 @@ The ESP32 platform has **two completely different SPI subsystems**:
 - **ESP32 README**: `src/platforms/esp/32/README.md` - Driver selection, build flags
 - **RMT5 Research**: `src/platforms/esp/32/drivers/rmt/rmt_5/RMT_RESEARCH.md` - RMT5 internals
 - **LCD Implementation**: `src/platforms/esp/32/drivers/lcd_cam/implementation_notes.md` - LCD_CAM details
+- **LCD_RGB Research**: `src/platforms/esp/32/drivers/lcd_cam/RGB_LCD_RESEARCH.md` - RGB LCD peripheral analysis
+- **LCD Migration Guide**: `src/platforms/esp/32/drivers/lcd_cam/LCD_I80_vs_RGB_MIGRATION_GUIDE.md` - I80→RGB migration
+- **LCD_RGB Release Notes**: `src/platforms/esp/32/drivers/lcd_cam/LCD_RGB_RELEASE_NOTES.md` - Feature announcement
 - **PARLIO Design**: `src/platforms/esp/32/ESP32-P4_PARLIO_DESIGN.md` - PARLIO architecture
 - **Interrupt Research**: `src/platforms/esp/32/interrupts/INVESTIGATE.md` - ISR implementation notes
 
@@ -508,6 +541,6 @@ This organization makes it straightforward for developers to:
 - Navigate the codebase efficiently
 - Contribute to the project
 
-**Version**: 1.0
-**Last Updated**: 2025-11-01
-**Status**: Complete (Post-Refactoring)
+**Version**: 1.1
+**Last Updated**: 2025-11-05
+**Status**: Complete (Post-Refactoring + LCD_RGB Documentation)

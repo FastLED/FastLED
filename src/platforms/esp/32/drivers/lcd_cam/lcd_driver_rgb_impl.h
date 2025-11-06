@@ -85,7 +85,8 @@ bool LcdRgbDriver<LED_CHIPSET>::begin(const LcdRgbDriverConfig& config, int leds
     // Data: num_leds * 24 bits * N_PIXELS * 2 bytes per pixel
     // Latch: latch_us converted to pixels, then to bytes
     size_t data_size = num_leds_ * 24 * N_PIXELS * 2;
-    size_t latch_pixels = (config_.latch_us * 1000) / PIXEL_NS;
+    // Use ceiling division to ensure reset time meets or exceeds target
+    size_t latch_pixels = ((config_.latch_us * 1000) + PIXEL_NS - 1) / PIXEL_NS;
     size_t latch_size = latch_pixels * 2;
     buffer_size_ = data_size + latch_size;
 
@@ -214,6 +215,16 @@ bool LcdRgbDriver<LED_CHIPSET>::begin(const LcdRgbDriverConfig& config, int leds
         return false;
     }
 
+    // Register DMA callback for proper synchronization
+    esp_lcd_rgb_panel_event_callbacks_t cbs = {};
+    cbs.on_vsync = drawCallback;
+    err = esp_lcd_rgb_panel_register_event_callbacks(panel_handle_, &cbs, this);
+    if (err != ESP_OK) {
+        ESP_LOGE(LCD_P4_TAG, "Failed to register event callbacks: %d (%s)", err, esp_err_to_name(err));
+        end();
+        return false;
+    }
+
     ESP_LOGI(LCD_P4_TAG, "RGB LCD driver initialized successfully");
     return true;
 }
@@ -334,12 +345,7 @@ bool LcdRgbDriver<LED_CHIPSET>::show() {
     front_buffer_ = back_buffer;
     frame_counter_++;
 
-    // For refresh-on-demand mode, we need to manually give the semaphore
-    // after the transfer completes (no callback in simple mode)
-    // TODO: Implement proper callback if needed
-    dma_busy_ = false;
-    xSemaphoreGive(xfer_done_sem_);
-
+    // DMA callback (drawCallback) will mark transfer as complete and release semaphore
     return true;
 }
 

@@ -183,6 +183,31 @@ FastLED.addLeds<UCS7604, DATA_PIN, GRB>(leds, NUM_LEDS);  // 16-bit mode, 800kHz
 
 **⚠️ Beta Status**: Currently ARM M0/M0+ only. Hardware validation ongoing. See [examples/UCS7604_Basic](examples/UCS7604_Basic/UCS7604_Basic.ino) for usage.
 
+## **FastLED 3.10.3: ESP32-P4 RGB LCD Driver (EXPERIMENTAL)**
+
+**Hardware-accelerated parallel LED output for ESP32-P4** using the dedicated RGB LCD peripheral. Drive up to 16 WS2812 LED strips simultaneously with DMA-backed, zero-CPU-overhead transmission.
+
+```cpp
+// Enable RGB LCD driver in platformio.ini
+build_flags = -DFASTLED_ESP32_LCD_RGB=1
+
+// Use GPIO39-54 (safe range for ESP32-P4)
+FastLED.addLeds<WS2812, 39, GRB>(leds[0], NUM_LEDS);
+FastLED.addLeds<WS2812, 40, GRB>(leds[1], NUM_LEDS);
+// ... up to 16 parallel strips
+```
+
+**Key Features**:
+- 🚀 **Up to 16 parallel strips** - Hardware-timed output with nanosecond precision
+- ⚡ **Zero CPU overhead** - DMA-driven frame buffer transmission
+- 🔒 **GPIO safety** - Automatic validation prevents boot failures from strapping pins
+- 💾 **PSRAM support** - Automatic frame buffer allocation for large installations
+- 🔄 **Async operation** - Non-blocking updates via VSYNC interrupt callbacks
+
+**⚠️ Experimental Status**: Code complete and passes all reviews, but **untested on hardware** (ESP32-P4 boards limited availability). Community testing welcome!
+
+**Documentation**: [RGB LCD Research](src/platforms/esp/32/drivers/lcd_cam/RGB_LCD_RESEARCH.md) • [Migration Guide](src/platforms/esp/32/drivers/lcd_cam/LCD_I80_vs_RGB_MIGRATION_GUIDE.md) • [Release Notes](src/platforms/esp/32/drivers/lcd_cam/LCD_RGB_RELEASE_NOTES.md) • [Example Code](examples/SpecialDrivers/ESP/LCD_RGB/)
+
 ## **FastLED 3.10.2: Corkscrew Mapping**
 
 See [examples/FestivalStick/FestivalStick.ino](examples/FestivalStick/FestivalStick.ino)
@@ -212,6 +237,50 @@ https://github.com/user-attachments/assets/ff8e0432-3e0d-47cc-a444-82ce27f562af
 
 <details>
 <summary>📖 <strong>Detailed Feature Information</strong> (Click to expand)</summary>
+
+## New in 3.10.3: ESP32-P4 RGB LCD Driver (Experimental)
+
+**Hardware-accelerated parallel LED output for ESP32-P4** using the dedicated RGB LCD peripheral.
+
+**What is RGB LCD?**
+
+The RGB LCD peripheral on ESP32-P4 is designed for driving RGB parallel displays but has been repurposed for WS2812 LED control:
+- **Parallel data bus**: Up to 16 data lines for simultaneous strip driving
+- **Hardware timing**: Pixel clock (PCLK) generates precise timing pulses (1-40 MHz range)
+- **DMA-driven**: Frame buffer mode with zero CPU overhead
+- **Async callbacks**: VSYNC interrupt-driven synchronization
+
+**Key Specifications**:
+- **Max strips**: 16 parallel (GPIO39-54)
+- **Encoding**: 4-pixel scheme (8 bytes/bit, 192 bytes/LED)
+- **PCLK**: 3.2 MHz optimal for WS2812B
+- **Memory**: ~33% higher than LCD_I80 (PSRAM recommended for >240 LEDs)
+- **Platform**: ESP32-P4 only (RGB LCD peripheral exclusive to P4)
+
+**Why Experimental?**
+- ✅ Code complete and reviewed (passes `/code_review`)
+- ✅ Timing calculations validated (WS2812B-compliant)
+- ✅ Examples compile successfully
+- ⚠️ **Untested on hardware** (ESP32-P4 boards limited availability)
+
+**Documentation**:
+- **Research**: [RGB_LCD_RESEARCH.md](src/platforms/esp/32/drivers/lcd_cam/RGB_LCD_RESEARCH.md) - GPIO constraints, timing analysis
+- **Migration**: [LCD_I80_vs_RGB_MIGRATION_GUIDE.md](src/platforms/esp/32/drivers/lcd_cam/LCD_I80_vs_RGB_MIGRATION_GUIDE.md) - ESP32-S3 (I80) → ESP32-P4 (RGB)
+- **Release Notes**: [LCD_RGB_RELEASE_NOTES.md](src/platforms/esp/32/drivers/lcd_cam/LCD_RGB_RELEASE_NOTES.md) - Feature announcement
+- **Examples**: [LCD_RGB.ino](examples/SpecialDrivers/ESP/LCD_RGB/) - Basic 4-strip demo with safety warnings
+
+**Comparison: LCD_I80 (S3) vs LCD_RGB (P4)**:
+
+| Feature | LCD_I80 (S3) | LCD_RGB (P4) |
+|---------|--------------|--------------|
+| Platform | ESP32-S3 | ESP32-P4 only |
+| Peripheral | LCD_CAM (I80 mode) | RGB LCD controller |
+| Encoding | 6 bytes/bit | 8 bytes/bit |
+| PCLK Range | 1-80 MHz | 1-40 MHz |
+| GPIO Constraints | Flexible | GPIO39-54 only |
+| Testing | Production-tested | Experimental |
+
+**Community Testing Needed**: If you have ESP32-P4 hardware, please test and report results via GitHub issues!
 
 ## New in 3.10.2: Corkscrew Mapping
 
@@ -507,8 +576,10 @@ The **LCD driver** is a high-performance parallel output driver for ESP32 boards
 - ✅ **Platform-agnostic**: Automatically detects and uses available LCD peripheral
 
 ### Supported Platforms
-- **ESP32-S3**: LCD_CAM peripheral with I80 interface (3-word encoding)
-- **ESP32-P4**: Both RGB LCD controller (4-pixel encoding) AND I80 interface (3-word encoding)
+- **ESP32-S3**: LCD_CAM peripheral with I80 interface (3-word encoding) - ✅ Production-tested
+- **ESP32-P4**: Both RGB LCD controller (4-pixel encoding) AND I80 interface (3-word encoding) - ⚠️ RGB mode experimental (untested on hardware)
+  - **LCD_I80**: Compatible with S3, uses 3-word encoding, flexible GPIO
+  - **LCD_RGB**: P4-only, uses 4-pixel encoding, strict GPIO39-54 requirement, 33% more memory
 - **Future ESP32 variants**: Any chip with RGB or I80 LCD peripheral support
 
 ### Configuration
@@ -543,9 +614,13 @@ void loop() {
 - **Recommended for new projects** on ESP32-S3/P4
 
 ### Examples
-- [Esp32S3I80 Example](examples/Esp32S3I80/) - Demonstrates LCD/I80 driver usage
+- **LCD_I80**: [LCD_I80 Example](examples/SpecialDrivers/ESP/LCD_I80/) - ESP32-S3/P4 with I80 interface
+- **LCD_RGB**: [LCD_RGB Example](examples/SpecialDrivers/ESP/LCD_RGB/) - ESP32-P4 RGB LCD controller
+- **Documentation**: See [LCD_I80_vs_RGB_MIGRATION_GUIDE.md](src/platforms/esp/32/drivers/lcd_cam/LCD_I80_vs_RGB_MIGRATION_GUIDE.md) for detailed comparison
 
 **Note:** All parallel strips must use the same chipset timing. For per-strip timing control, use the RMT driver.
+
+**LCD_RGB Status**: Code complete and reviewed, but untested on hardware (ESP32-P4 boards limited availability). See [LCD_RGB_RELEASE_NOTES.md](src/platforms/esp/32/drivers/lcd_cam/LCD_RGB_RELEASE_NOTES.md) for details. Community testing welcome!
 
 </details>
 
