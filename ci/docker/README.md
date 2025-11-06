@@ -530,7 +530,7 @@ These images are:
 
 | Platform | Docker Image | Cached Boards |
 |----------|--------------|---------------|
-| AVR | `niteris/fastled-compiler-avr:latest` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
+| AVR | `niteris/fastled-compiler-avr:latest` | uno, leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 |
 | ESP32 (Original) | `niteris/fastled-compiler-esp-32dev:latest` | esp32dev |
 | ESP32-S2 | `niteris/fastled-compiler-esp-32s2:latest` | esp32s2 |
 | ESP32-S3 | `niteris/fastled-compiler-esp-32s3:latest` | esp32s3 |

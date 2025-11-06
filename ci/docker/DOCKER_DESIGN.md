@@ -94,7 +94,7 @@ Platform images use two strategies:
 
 | Platform Family | Docker Image | Included Boards | Strategy |
 |----------------|--------------|-----------------|----------|
-| **avr** | `fastled-compiler-avr` | uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 | Grouped |
+| **avr** | `fastled-compiler-avr` | uno, leonardo, attiny85, attiny88, attiny4313, nano_every, attiny1604, attiny1616 | Grouped |
 | **esp-32dev** | `fastled-compiler-esp-32dev` | esp32dev | Flat |
 | **esp-32s2** | `fastled-compiler-esp-32s2` | esp32s2 | Flat |
 | **esp-32s3** | `fastled-compiler-esp-32s3` | esp32s3 | Flat |
@@ -201,7 +201,7 @@ niteris/fastled-compiler-esp-32dev:idf5.3   → Explicit IDF 5.3
 **Image**: `niteris/fastled-compiler-avr:latest`
 
 **Pre-cached boards**:
-- Classic AVR (`atmelavr`): uno, atmega32u4_leonardo, attiny85, attiny88, attiny4313
+- Classic AVR (`atmelavr`): uno, leonardo, attiny85, attiny88, attiny4313
 - Modern AVR (`atmelmegaavr`): nano_every, attiny1604, attiny1616
 
 **Build process**: Compiles example for each board listed above to ensure all AVR toolchains are cached in the image.
