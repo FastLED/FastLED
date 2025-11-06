@@ -39,6 +39,10 @@
 #include "../drivers/lcd_cam/bulk_lcd_i80.h"
 #endif
 
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
+#include "../drivers/parlio/bulk_parlio.h"
+#endif
+
 #if defined(CONFIG_IDF_TARGET_ESP32)
 // ESP32 (original): I2S-based bulk controller
 #include "../drivers/i2s/bulk_i2s.h"

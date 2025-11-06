@@ -83,7 +83,7 @@ struct BulkClocklessHelper {
 /// @brief Base template class for bulk LED controllers.
 ///
 /// Manages multiple LED strips using shared hardware peripherals (LCD_I80, RMT,
-/// SPI, I2S). Each peripheral has different capabilities:
+/// SPI, I2S, PARLIO). Each peripheral has different capabilities:
 ///
 /// @par Peripheral Capabilities:
 /// - **RMT** (ESP32): Flexible, per-channel configuration, up to 8 strips
@@ -91,6 +91,8 @@ struct BulkClocklessHelper {
 /// strips
 /// - **I2S** (ESP32/S3): Parallel output, uniform settings, up to 24 strips
 /// (ESP32) or 16 (S3)
+/// - **PARLIO** (ESP32-P4): Parallel output, per-strip settings, up to 16
+/// strips
 /// - **SPI** (various): Similar to LCD_I80 (implementation pending)
 ///
 /// @par Key Features:

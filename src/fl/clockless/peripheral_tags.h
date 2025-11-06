@@ -40,6 +40,7 @@ struct I2S {};         ///< I2S audio interface repurposed for LED output (ESP32
 #endif
 struct SPI_BULK {};    ///< SPI peripheral for bulk LED output. Falls back to CPU on unsupported platforms.
 struct OFLED {};  ///< OFLED DMA-based parallel output (Teensy 4.x). Falls back to CPU on unsupported platforms.
+struct PARLIO {};      ///< PARLIO parallel I/O peripheral (ESP32-P4). Falls back to CPU on unsupported platforms.
 
 /// @brief Extract timing struct from chipset template class
 /// @tparam CHIPSET Chipset template class (e.g., WS2812B, SK6812)
@@ -198,6 +199,10 @@ template <> struct PeripheralName<SPI_BULK> {
 
 template <> struct PeripheralName<OFLED> {
     static const char* name() { return "OFLED"; }
+};
+
+template <> struct PeripheralName<PARLIO> {
+    static const char* name() { return "PARLIO"; }
 };
 
 } // namespace fl

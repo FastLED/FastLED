@@ -17,6 +17,7 @@
 /// - `platforms/esp/32/drivers/rmt/bulk_rmt.h` - RMT peripheral (ESP32)
 /// - `platforms/esp/32/drivers/i2s/bulk_i2s.h` - I2S peripheral (ESP32/S3)
 /// - `platforms/esp/32/drivers/lcd_cam/bulk_lcd_i80.h` - LCD_I80 peripheral (ESP32-S3/P4)
+/// - `platforms/esp/32/drivers/parlio/bulk_parlio.h` - PARLIO peripheral (ESP32-P4)
 ///
 /// @par Example Usage:
 /// @code
