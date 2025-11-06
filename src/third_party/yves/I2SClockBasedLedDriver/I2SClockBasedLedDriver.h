@@ -7,14 +7,14 @@
 #pragma once
 
 // This I2S parallel mode driver only works on ESP32 and ESP32-S2
-// ESP32-S3: Use LCD_CAM peripheral instead (see lcd_driver_i80.h and bulk_lcd_i80.h)
+// ESP32-S3, ESP32-P4: Use LCD_CAM peripheral instead (see lcd_driver_i80.h and bulk_lcd_i80.h)
 // ESP32-C3, C2, C5, C6, H2: Have completely different I2S peripheral architecture (no parallel mode)
 //
-// Technical note: ESP32-S3 removed parallel LCD mode from I2S peripheral and moved it to
+// Technical note: ESP32-S3 and ESP32-P4 removed parallel LCD mode from I2S peripheral and moved it to
 // dedicated LCD_CAM peripheral with different register structure and API. The register-level
 // i2s_dev_t struct fields (conf, conf2, sample_rate_conf, clkm_conf, etc.) are incompatible
-// with ESP32-S3. FastLED provides LCD_CAM-based drivers for ESP32-S3 that are more efficient.
-#if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
+// with ESP32-S3/P4. FastLED provides LCD_CAM-based drivers for these chips that are more efficient.
+#if !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32P4) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2)
 
 #include "esp_heap_caps.h"
 #include "soc/soc.h"
