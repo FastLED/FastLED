@@ -21,6 +21,17 @@ Correct approach:
         static vector<Foo*> instances = create();  // ✅ PASS: static local in cpp
         return instances;
     }
+
+Exception for template functions:
+    // In header.h
+    template<typename T>
+    const T& getSingleton() {
+        static T instance;  // ✅ PASS: static in template function is okay
+        return instance;
+    }
+
+    Template functions are instantiated per template parameter, so each instantiation
+    gets its own static variable without __cxa_guard conflicts.
 """
 
 # pyright: reportUnknownMemberType=false
@@ -61,10 +72,14 @@ class StaticInHeaderChecker(FileContentChecker):
         in_multiline_comment = False
         brace_depth = 0  # Track brace nesting level
         in_function = False  # Are we inside a function implementation?
+        in_template_function = False  # Are we inside a template function?
 
         # Pattern to detect inline function implementations with bodies
         # We specifically look for getAll() pattern which is the problem case
         inline_func_pattern = re.compile(r"\w+\s*\([^)]*\)\s*\{")
+
+        # Pattern to detect template declarations (template<...>)
+        template_pattern = re.compile(r"^\s*template\s*<")
 
         for line_number, line in enumerate(file_content.lines, 1):
             stripped = line.strip()
@@ -91,6 +106,10 @@ class StaticInHeaderChecker(FileContentChecker):
             open_braces = code_part.count("{")
             close_braces = code_part.count("}")
 
+            # Detect template declaration - next function will be a template function
+            if template_pattern.search(code_part):
+                in_template_function = True
+
             # Detect entering a function body (inline implementation)
             if inline_func_pattern.search(code_part) and "{" in code_part:
                 in_function = True
@@ -101,13 +120,15 @@ class StaticInHeaderChecker(FileContentChecker):
             # Exit function when braces balance
             if in_function and brace_depth <= 0:
                 in_function = False
+                in_template_function = False  # Reset template state when function ends
                 brace_depth = 0
 
             # Look for "static" keyword followed by variable declaration inside functions
             # Specifically targeting patterns like: static vector<Type> var = ...
             # or: static Type var = ...
             # But NOT: static Type func() { ... } (static member functions)
-            if in_function and brace_depth > 0:
+            # EXCEPTION: Allow statics inside template functions (they are instantiated per template instance)
+            if in_function and brace_depth > 0 and not in_template_function:
                 # Match: static <type> <identifier> = or ( or {
                 # But exclude lines that are just function calls to static methods
                 static_var_match = re.search(
@@ -134,7 +155,7 @@ class StaticInHeaderChecker(FileContentChecker):
         return failings
 
 
-def test_no_static_in_headers(
+def _check_static_in_headers(
     test_directories: list[str],
 ) -> list[str]:
     """Check for function-local static variables in header files."""
@@ -171,7 +192,7 @@ class TestNoStaticInHeaders(unittest.TestCase):
             str(SRC_ROOT / "fx"),
         ]
 
-        failings = test_no_static_in_headers(test_directories)
+        failings = _check_static_in_headers(test_directories)
 
         if failings:
             msg = (
@@ -185,6 +206,8 @@ class TestNoStaticInHeaders(unittest.TestCase):
                 "  1. In header: Change inline function to declaration only\n"
                 "  2. In cpp file: Add the function implementation with the static variable\n\n"
                 "EXAMPLE: See spi_hw_1.h / spi_hw_1.cpp for the correct pattern.\n\n"
+                "EXCEPTION: Statics inside template functions are allowed (each template "
+                "instantiation gets its own static, avoiding __cxa_guard conflicts).\n\n"
                 "SUPPRESSION: Add '// okay static in header' comment to silence this check "
                 "for specific cases (use sparingly!)."
             )
