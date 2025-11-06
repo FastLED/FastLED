@@ -62,6 +62,8 @@ GOIO9List = { 2, 3, 4, 5, 29, 33, 48, 49, 50, 51, 52, 53, 54 }  //6 top, 7 botto
 #else
 #include "ObjectFLED.h"
 #include "ObjectFLEDDmaManager.h"
+#include "ObjectFLEDPinValidation.h"
+#include "fl/warn.h"
 
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
@@ -137,13 +139,40 @@ void ObjectFLED::begin(void) {
 
 	// Set each pin's bitmask bit, store offset & bit# for pin
 	uint32_t tempBitmask[4] = {0};
+	uint8_t validPinCount = 0;
 	for (uint32_t i=0; i < numpinsLocal; i++) {
 		uint8_t pin = pinlist[i];
-		if (pin >= NUM_DIGITAL_PINS) continue;	// ignore illegal pins
+
+		// Validate pin using validation helper
+		auto validation = objectfled::validate_teensy4_pin(pin);
+		if (!validation.valid) {
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is INVALID and has been disabled");
+			FL_WARN(validation.error_message);
+			FL_WARN("================================================================================");
+			continue;
+		}
+
+		// Check for warnings (pin is valid but may have issues)
+		if (validation.error_message != nullptr) {
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED WARNING: Pin " << (int)pin << " may have issues");
+			FL_WARN(validation.error_message);
+			FL_WARN("================================================================================");
+		}
+
 		uint8_t bit = digitalPinToBit(pin);		// pin's bit index in word port DR
 		// which GPIO R controls this pin: 0-3 map to GPIO6-9 then map to DMA compat GPIO1-4
 		uint8_t offset = ((uint32_t)portOutputRegister(pin) - (uint32_t)&GPIO6_DR) >> 14;
-		if (offset > 3) continue;	//ignore unknown pins
+		if (offset > 3) {
+			FL_WARN("================================================================================");
+			FL_WARN("FASTLED ERROR: Pin " << (int)pin << " does not map to GPIO6-9 (offset=" << (int)offset << ")");
+			FL_WARN("This pin may be a ground/power/read-only pin - strip disabled");
+			FL_WARN("================================================================================");
+			continue;
+		}
+
+		validPinCount++;
 		pin_bitnumLocal[i] = bit;		//local copy for context switch
 		pin_offsetLocal[i] = offset;	//local copy for context switch
 		uint32_t mask = 1 << bit;	//mask32 = bit set @position in GPIO DR
@@ -156,6 +185,24 @@ void ObjectFLED::begin(void) {
 		*(&IOMUXC_GPR_GPR26 + offset) &= ~mask;
 		*standard_gpio_addr(portModeRegister(pin)) |= mask;		//GDIR? bit flag set output mode
 	}
+
+	// Check if any valid pins were configured
+	if (validPinCount == 0) {
+		FL_WARN("================================================================================");
+		FL_WARN("FASTLED CRITICAL ERROR: No valid pins configured!");
+		FL_WARN("All " << (int)numpinsLocal << " pins failed validation.");
+		FL_WARN("ObjectFLED driver is disabled - no LEDs will be updated.");
+		FL_WARN("================================================================================");
+		return;
+	}
+
+	if (validPinCount < numpinsLocal) {
+		FL_WARN("================================================================================");
+		FL_WARN("FASTLED WARNING: Only " << (int)validPinCount << " of " << (int)numpinsLocal << " pins are valid");
+		FL_WARN("Strips on invalid pins will not function.");
+		FL_WARN("================================================================================");
+	}
+
 	//stash context for multi-show
 	memcpy(bitmaskLocal, tempBitmask, 16);
 

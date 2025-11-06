@@ -5,6 +5,7 @@
 
 #include "clockless_objectfled.h"
 #include "third_party/object_fled/src/ObjectFLED.h"
+#include "third_party/object_fled/src/ObjectFLEDPinValidation.h"
 #include "fl/warn.h"
 #include "fl/cstring.h"  // for fl::memset()
 
@@ -93,6 +94,34 @@ void ObjectFLEDGroupBase::onQueuingStart() {
 
 void ObjectFLEDGroupBase::addStrip(uint8_t pin, PixelIterator& pixel_iterator) {
     auto& strips = *static_cast<fl::vector<StripInfo>*>(mStripsData);
+
+    // Validate pin before adding
+    auto validation = objectfled::validate_teensy4_pin(pin);
+    if (!validation.valid) {
+        FL_WARN("================================================================================");
+        FL_WARN("FASTLED ERROR: Strip on pin " << (int)pin << " is INVALID and has been disabled");
+        FL_WARN(validation.error_message);
+        FL_WARN("================================================================================");
+        return;
+    }
+
+    // Check for warnings (pin is valid but may have issues)
+    if (validation.error_message != nullptr) {
+        FL_WARN("================================================================================");
+        FL_WARN("FASTLED WARNING: Strip on pin " << (int)pin << " may have issues");
+        FL_WARN(validation.error_message);
+        FL_WARN("================================================================================");
+    }
+
+    // Check for duplicate pin
+    for (const auto& strip : strips) {
+        if (strip.pin == pin) {
+            FL_WARN("================================================================================");
+            FL_WARN("FASTLED ERROR: Pin " << (int)pin << " is already in use - strip disabled");
+            FL_WARN("================================================================================");
+            return;
+        }
+    }
 
     // Add strip metadata
     StripInfo info;
