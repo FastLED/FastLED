@@ -46,6 +46,12 @@ int analogRead(int) {
     return random(0, 1023);
 }
 
+// Arduino hardware initialization (stub: does nothing)
+void init() {
+    // On real Arduino platforms, init() sets up timers, interrupts, and other hardware.
+    // On stub platform, there's no hardware to initialize, so this is a no-op.
+}
+
 // Digital I/O functions
 void digitalWrite(int, int) {}
 void analogWrite(int, int) {}

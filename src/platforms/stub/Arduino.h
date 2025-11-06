@@ -51,6 +51,7 @@ using fl::map;
 long random(long min, long max);
 long random(long max);
 int analogRead(int);
+void init();  // Arduino hardware initialization (stub: does nothing)
 
 
 
