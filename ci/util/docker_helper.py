@@ -11,7 +11,8 @@ import sys
 import time
 from typing import Optional, Tuple
 
-from ci.docker.build_platforms import get_docker_image_name as get_platform_image_name, get_platform_for_board
+from ci.docker.build_platforms import get_docker_image_name as get_platform_image_name
+from ci.docker.build_platforms import get_platform_for_board
 
 
 # Cache for docker executable path
