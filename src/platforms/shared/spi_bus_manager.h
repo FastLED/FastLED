@@ -6,6 +6,7 @@
 #include "fl/dbg.h"
 #include "fl/log.h"
 #include "fl/stdint.h"
+#include "fl/limits.h"
 #include "fl/fastpin.h"
 
 // Shared SPI type definitions
@@ -1042,7 +1043,7 @@ private:
     uint32_t selectBusSpeed(const SPIBusInfo& bus) {
         // Find the minimum (slowest) requested speed from all devices on this bus
         // This ensures all devices can handle the speed
-        uint32_t min_speed = UINT32_MAX;
+        uint32_t min_speed = fl::numeric_limits<uint32_t>::max();
         uint32_t devices_with_speed = 0;
 
         for (uint8_t i = 0; i < bus.num_devices; i++) {
@@ -1053,7 +1054,7 @@ private:
         }
 
         // If no devices specified a speed (or all specified 0), use platform default
-        if (devices_with_speed == 0 || min_speed == UINT32_MAX) {
+        if (devices_with_speed == 0 || min_speed == fl::numeric_limits<uint32_t>::max()) {
             min_speed = getPlatformDefaultSpeed();
         }
 
