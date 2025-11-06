@@ -128,7 +128,7 @@ async def run_simulator_direct(
 
     try:
         # Check if simulation is supported for this platform
-        supported_platforms = ["uno"]
+        supported_platforms = ["uno", "esp32", "esp32s3", "esp32c3"]
         if platform not in supported_platforms:
             print(f"Skipping simulation for {platform} (not yet supported)")
             return 0  # Treat as success
@@ -285,20 +285,24 @@ async def ensure_docker_image(platform: str) -> tuple[bool, float]:
 
     start_time = time.time()
 
+    # Platforms that use local QEMU (not Docker images)
+    local_qemu_platforms = ["esp32", "esp32s3", "esp32c3"]
+
     # Map platform to docker requirements
     # NOTE: ESP32 QEMU Docker image does not exist on Docker Hub.
     # ESP32 QEMU should be installed locally via `uv run ci/install-qemu.py` instead.
-    # Leaving ESP32 entries commented for future reference.
     platform_docker_map = {
         "uno": {
             "type": "avr8js",
             "image": "niteris/fastled-avr8js:latest",
             "needs_build": True,
         },
-        # "esp32s3": {"type": "qemu", "image": "espressif/qemu:esp-develop-20240606", "needs_build": False},
-        # "esp32": {"type": "qemu", "image": "espressif/qemu:esp-develop-20240606", "needs_build": False},
-        # "esp32c3": {"type": "qemu", "image": "espressif/qemu:esp-develop-20240606", "needs_build": False},
     }
+
+    # ESP32 platforms use local QEMU, no Docker image needed
+    if platform in local_qemu_platforms:
+        elapsed = time.time() - start_time
+        return (True, elapsed)  # Success - these platforms use local QEMU
 
     if platform not in platform_docker_map:
         print(
@@ -417,7 +421,7 @@ async def run_simulator(
     timeout = example_timeouts.get(example, platform_timeouts.get(platform, 30))
 
     # Check if simulation is supported for this platform
-    supported_platforms = ["uno"]  # Only AVR/uno is currently supported
+    supported_platforms = ["uno", "esp32", "esp32s3", "esp32c3"]
     if platform not in supported_platforms:
         print(f"Skipping simulation for {platform} (not yet supported)")
         elapsed = time.time() - start_time
@@ -646,12 +650,12 @@ async def run_avr8js_docker(firmware_path: Path, timeout: int) -> bool:
 
 
 async def run_qemu(platform: str, firmware_path: Path, timeout: int) -> bool:
-    """Run QEMU emulation for ESP32 firmware.
+    """Run QEMU emulation for ESP32 firmware using DockerQEMURunner.
 
     Returns:
         True for success, False for failure
     """
-    import os
+    from ci.docker.qemu_esp32_docker import DockerQEMURunner
 
     # Map platform to QEMU machine
     machine_map = {
@@ -662,78 +666,41 @@ async def run_qemu(platform: str, firmware_path: Path, timeout: int) -> bool:
 
     machine = machine_map.get(platform, "esp32")
 
-    # Convert Windows path for Docker volume mount
-    if os.name == "nt":
-        # firmware_path is .build/pio/{platform}/.pio/build/{platform}/firmware.bin
-        # We need .build/pio/{platform}, which is 4 parents up
-        build_dir = firmware_path.parent.parent.parent.parent
-        docker_path = str(build_dir.absolute()).replace("\\", "/")
-        if len(docker_path) > 2 and docker_path[1:3] == ":/":
-            docker_path = "/" + docker_path[0].lower() + docker_path[2:]
-    else:
-        build_dir = firmware_path.parent.parent.parent.parent
-        docker_path = str(build_dir.absolute())
-
-    cmd = [
-        "docker",
-        "run",
-        "--rm",
-        "-v",
-        f"{docker_path}:/build",
-        "espressif/qemu:esp-develop-20240606",
-        "qemu-system-xtensa" if platform != "esp32c3" else "qemu-system-riscv32",
-        "-nographic",
-        "-machine",
-        machine,
-        "-drive",
-        f"file=/build/.pio/build/{platform}/firmware.bin,if=mtd,format=raw",
-        "-serial",
-        "mon:stdio",
-    ]
-
-    print(f"Executing: {' '.join(cmd)}")
-    print()
-
     try:
-        proc = await asyncio.create_subprocess_exec(
-            *cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.STDOUT
-        )
+        # Get event loop to run blocking DockerQEMURunner in executor
+        loop = asyncio.get_event_loop()
 
-        # Stream output line by line with timeout
-        try:
+        def run_docker_qemu():
+            """Run DockerQEMURunner in executor (blocking operation)."""
+            runner = DockerQEMURunner()
 
-            async def read_output():
-                """Read and print output line by line."""
-                if proc.stdout:
-                    while True:
-                        line = await proc.stdout.readline()
-                        if not line:
-                            break
-                        print(line.decode("utf-8", errors="replace"), end="")
+            print(f"Running {platform} simulation...")
+            print(f"Firmware: {firmware_path}")
+            print(f"Timeout: {timeout}s")
+            print()
 
-            # Run output reading with timeout
-            await asyncio.wait_for(read_output(), timeout=timeout)
+            returncode = runner.run(
+                firmware_path=firmware_path,
+                timeout=timeout,
+                flash_size=4,
+                machine=machine,
+                skip_pull=False,  # Always ensure image is available
+            )
 
-            # Wait for process to complete
-            await proc.wait()
+            # Exit code 0 or timeout (also 0) means success
+            return returncode == 0
 
-            # Check return code
-            if proc.returncode == 0:
-                return True
-            else:
-                print(f"QEMU exited with code {proc.returncode}")
-                return False
-
-        except asyncio.TimeoutError:
-            print(f"\nEmulation reached timeout ({timeout}s) - treating as success")
-            proc.kill()
-            await proc.wait()
-            return True
+        # Run in executor to avoid blocking async loop
+        success = await loop.run_in_executor(None, run_docker_qemu)
+        return success
 
     except KeyboardInterrupt:
         raise
     except Exception as e:
         print(f"QEMU execution failed: {e}")
+        import traceback
+
+        traceback.print_exc()
         return False
 
 
