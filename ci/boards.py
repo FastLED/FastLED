@@ -619,7 +619,8 @@ NATIVE = Board(
 )
 
 SAM3X8E_DUE = Board(
-    board_name="due",
+    board_name="sam3x8e_due",
+    real_board_name="due",
     platform="atmelsam",
 )
 
@@ -1059,9 +1060,20 @@ def create_board(board_name: str, no_project_options: bool = False) -> Board:
     board: Board
     if no_project_options:
         board = Board(board_name=board_name, add_board_to_all=False)
-    if board_name not in _BOARD_MAP:
-        # empty board without any special overrides, assume platformio will know what to do with it.
-        board = Board(board_name=board_name, add_board_to_all=False)
-    else:
+    elif board_name in _BOARD_MAP:
+        # Direct match on board_name (primary lookup)
         board = _BOARD_MAP[board_name]
+    else:
+        # Try reverse lookup by real_board_name (alias support)
+        board = None  # type: ignore[assignment]
+        for candidate in ALL:
+            if candidate.real_board_name == board_name:
+                board = candidate
+                break
+
+        if board is None:
+            # No match found - create generic board without special overrides
+            # Assume platformio will know what to do with it
+            board = Board(board_name=board_name, add_board_to_all=False)
+
     return board.clone()
