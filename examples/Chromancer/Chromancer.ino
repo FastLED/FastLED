@@ -44,8 +44,6 @@
 #include "./ripple.h"
 #include "./detail.h"
 
-using namespace fl;
-
 enum {
     BlackStrip = 0,
     GreenStrip = 1,
@@ -83,7 +81,7 @@ byte ledColors[40][14][3]; // LED buffer - each ripple writes to this, then we
 //float decay = 0.97; // Multiply all LED's by this amount each tick to create
                     // fancy fading tails
 
-UISlider sliderDecay("decay", .97f, .8, 1.0, .01);
+fl::UISlider sliderDecay("decay", .97f, .8, 1.0, .01);
 
 // These ripples are endlessly reused so we don't need to do any memory
 // management
@@ -126,8 +124,8 @@ float gyroX, gyroY, gyroZ;
 // We'll fire automatic pulses
 #define randomPulsesEnabled true // Fire random rainbow pulses from random nodes
 #define cubePulsesEnabled true   // Draw cubes at random nodes
-UICheckbox starburstPulsesEnabled("Starburst Pulses", true);
-UICheckbox simulatedBiometricsEnabled("Simulated Biometrics", true);
+fl::UICheckbox starburstPulsesEnabled("Starburst Pulses", true);
+fl::UICheckbox simulatedBiometricsEnabled("Simulated Biometrics", true);
 
 #define autoPulseTimeout                                                       \
     5000 // If no heartbeat is received in this many ms, begin firing
@@ -161,25 +159,25 @@ bool isNodeOnBorder(byte node) {
     return false;
 }
 
-UITitle title("Chromancer");
-UIDescription description("Take 6 seconds to boot up. Chromancer is a wall-mounted hexagonal LED display that originally reacted to biometric data from an EmotiBit sensor. It visualizes your heartbeat, skin temperature, and movement in real-time. Chromancer also has a few built-in effects that can be triggered with the push of a button. Enjoy!");
-UICheckbox allWhite("All White", false);
+fl::UITitle title("Chromancer");
+fl::UIDescription description("Take 6 seconds to boot up. Chromancer is a wall-mounted hexagonal LED display that originally reacted to biometric data from an EmotiBit sensor. It visualizes your heartbeat, skin temperature, and movement in real-time. Chromancer also has a few built-in effects that can be triggered with the push of a button. Enjoy!");
+fl::UICheckbox allWhite("All White", false);
 
-UIButton simulatedHeartbeat("Simulated Heartbeat");
-UIButton triggerStarburst("Trigger Starburst");
-UIButton triggerRainbowCube("Rainbow Cube");
-UIButton triggerBorderWave("Border Wave");
-UIButton triggerSpiral("Spiral Wave");
+fl::UIButton simulatedHeartbeat("Simulated Heartbeat");
+fl::UIButton triggerStarburst("Trigger Starburst");
+fl::UIButton triggerRainbowCube("Rainbow Cube");
+fl::UIButton triggerBorderWave("Border Wave");
+fl::UIButton triggerSpiral("Spiral Wave");
 bool wasHeartbeatClicked = false;
 bool wasStarburstClicked = false;
 bool wasRainbowCubeClicked = false;
 bool wasBorderWaveClicked = false;
 bool wasSpiralClicked = false;
 
-// Group related UI elements using UIGroup template multi-argument constructor
-UIGroup effectTriggers("Effect Triggers", simulatedHeartbeat, triggerStarburst, triggerRainbowCube, triggerBorderWave, triggerSpiral);
-UIGroup automationControls("Automation", starburstPulsesEnabled, simulatedBiometricsEnabled);
-UIGroup displayControls("Display", sliderDecay, allWhite);
+// Group related UI elements using fl::UIGroup template multi-argument constructor
+fl::UIGroup effectTriggers("Effect Triggers", simulatedHeartbeat, triggerStarburst, triggerRainbowCube, triggerBorderWave, triggerSpiral);
+fl::UIGroup automationControls("Automation", starburstPulsesEnabled, simulatedBiometricsEnabled);
+fl::UIGroup displayControls("Display", sliderDecay, allWhite);
 
 void setup() {
     Serial.begin(115200);
@@ -189,8 +187,8 @@ void setup() {
     Serial.println("JSON SCREENMAP");
     Serial.println(JSON_SCREEN_MAP);
 
-    fl::fl_map<fl::string, ScreenMap> segmentMaps;
-    ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
+    fl::fl_map<fl::string, fl::ScreenMap> segmentMaps;
+    fl::ScreenMap::ParseJson(JSON_SCREEN_MAP, &segmentMaps);
 
     fl::printf("Parsed %d segment maps\n", int(segmentMaps.size()));
     for (auto kv : segmentMaps) {
@@ -200,8 +198,8 @@ void setup() {
     }
 
 
-    // ScreenMap screenmaps[4];
-    ScreenMap red, black, green, blue;
+    // fl::ScreenMap screenmaps[4];
+    fl::ScreenMap red, black, green, blue;
     bool ok = true;
 
     auto red_it = segmentMaps.find("red_segment");
