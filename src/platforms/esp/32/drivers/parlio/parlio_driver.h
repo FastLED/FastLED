@@ -38,6 +38,8 @@ struct ParlioDriverConfig {
     int data_gpios[16];          ///< GPIO numbers for data lanes (up to 16)
     int num_lanes;               ///< Active lane count (1, 2, 4, 8, or 16)
     uint32_t clock_freq_hz;      ///< PARLIO clock frequency (0 = use default 3.2 MHz for WS2812)
+    bool is_rgbw;                ///< True for RGBW (4-component) LEDs like SK6812 (default: false)
+    bool auto_clock_adjustment;  ///< Enable dynamic clock freq based on LED count (default: false)
 };
 
 /// @brief Abstract base for PARLIO driver (enables runtime polymorphism)
@@ -107,29 +109,41 @@ public:
     /// @brief Check if driver is initialized
     bool is_initialized() const override;
 
+    /// @brief Print current driver status and configuration (for debugging)
+    void print_status() const;
+
 private:
-    /// @brief Pack LED data into PARLIO format
+    /// @brief Pack LED data into PARLIO format with explicit buffer
     ///
-    /// For each LED position and each of 24 color bits (RGB order, MSB-first):
+    /// For each LED position and each color bit (RGB/RGBW order, MSB-first):
     /// - Collect the same bit position from all DATA_WIDTH strips
-    /// - Pack into single output byte
+    /// - Pack into output buffer
     ///
     /// Assumes CRGB data is already in correct RGB order (r=offset 0, g=offset 1, b=offset 2)
-    void pack_data();
+    /// @param output_buffer Target buffer for packed data (allows double buffering)
+    void pack_data(uint8_t* output_buffer);
 
     /// @brief PARLIO TX completion callback
     static bool IRAM_ATTR parlio_tx_done_callback(parlio_tx_unit_handle_t tx_unit,
                                                    const parlio_tx_done_event_data_t* edata,
                                                    void* user_ctx);
 
+    /// @brief Check if configuration requires reinitialization
+    bool needs_reconfiguration(const ParlioDriverConfig& new_config, uint16_t new_num_leds) const;
+
     ParlioDriverConfig config_;     ///< Driver configuration
     uint16_t num_leds_;             ///< Number of LEDs per strip
     CRGB* strips_[16];              ///< Pointers to LED data for each strip
     parlio_tx_unit_handle_t tx_unit_; ///< PARLIO TX unit handle
-    uint8_t* dma_buffer_;           ///< DMA buffer for waveform-encoded data
-    size_t buffer_size_;            ///< Size of DMA buffer in bytes
+    uint8_t* dma_buffer_[2];        ///< Ping-pong DMA buffers for double buffering
+    uint8_t current_buffer_idx_;    ///< Active buffer index (0 or 1)
+    size_t buffer_size_;            ///< Size of each DMA buffer in bytes
     SemaphoreHandle_t xfer_done_sem_; ///< Semaphore for transfer completion
     volatile bool dma_busy_;        ///< Flag indicating DMA transfer in progress
+
+    // State tracking for runtime reconfiguration
+    ParlioDriverConfig last_config_;  ///< Previous configuration for change detection
+    uint16_t last_num_leds_;          ///< Previous LED count
 };
 
 }  // namespace fl

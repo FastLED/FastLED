@@ -124,6 +124,92 @@ inline void process_16bit(uint8_t* buffer, const uint32_t* slices) {
     }
 }
 
+/// Calculate optimal clock frequency based on LED count
+///
+/// Strategy (from WLED Moon Modules):
+/// - ≤256 LEDs: 150% base frequency (DMA overhead dominates, can go faster)
+/// - ≤512 LEDs: 137.5% base frequency (balanced performance)
+/// - >512 LEDs: 100% base frequency (DMA bandwidth constrained)
+///
+/// @param num_leds Total LED count
+/// @param base_freq Chipset base frequency (from timing trait)
+/// @return Adjusted clock frequency in Hz
+inline uint32_t calculate_optimal_clock_freq(uint16_t num_leds, uint32_t base_freq) {
+    if (num_leds <= 256) {
+        // Small counts: 150% speed (e.g., 3.2 MHz → 4.8 MHz)
+        return (base_freq * 3) / 2;
+    } else if (num_leds <= 512) {
+        // Medium counts: 137.5% speed (e.g., 3.2 MHz → 4.4 MHz)
+        return (base_freq * 11) / 8;
+    } else {
+        // Large counts: 100% speed (e.g., 3.2 MHz → 3.2 MHz)
+        return base_freq;
+    }
+}
+
+/// Validate adjusted frequency is within PARLIO and chipset limits
+inline bool validate_adjusted_freq(uint32_t adjusted_freq, uint32_t base_freq) {
+    // PARLIO hardware limits: 1-40 MHz
+    if (adjusted_freq < 1000000 || adjusted_freq > 40000000) {
+        return false;
+    }
+
+    // Don't adjust more than 2× base frequency (safety margin)
+    if (adjusted_freq > base_freq * 2) {
+        return false;
+    }
+
+    return true;
+}
+
+/// Format GPIO status indicator
+inline const char* gpio_status_string(gpio_num_t gpio, bool is_active, bool is_valid) {
+    if (!is_active) {
+        return "[unused]";
+    }
+    if (!is_valid || gpio < 0) {
+        return "[INVALID]";
+    }
+    return "[active]";
+}
+
+/// Log detailed GPIO configuration
+template<uint8_t DATA_WIDTH>
+void log_gpio_configuration(const ParlioDriverConfig& config, uint32_t clock_freq) {
+    FL_LOG_PARLIO("╔═══════════════════════════════════════════════╗");
+    FL_LOG_PARLIO("║   PARLIO Configuration Summary                ║");
+    FL_LOG_PARLIO("╠═══════════════════════════════════════════════╣");
+    FL_LOG_PARLIO("  Data width:        " << int(DATA_WIDTH) << " bits");
+    FL_LOG_PARLIO("  Active lanes:      " << int(config.num_lanes));
+    FL_LOG_PARLIO("  LED mode:          " << (config.is_rgbw ? "RGBW (4-component)" : "RGB (3-component)"));
+    FL_LOG_PARLIO("  Clock frequency:   " << clock_freq << " Hz (" << (clock_freq / 1000) << " kHz)");
+    FL_LOG_PARLIO("  Clock source:      Internal (PARLIO_CLK_SRC_DEFAULT)");
+    FL_LOG_PARLIO("  Auto-clocking:     " << (config.auto_clock_adjustment ? "Enabled" : "Disabled"));
+    FL_LOG_PARLIO("╠═══════════════════════════════════════════════╣");
+    FL_LOG_PARLIO("║   GPIO Pin Mapping                            ║");
+    FL_LOG_PARLIO("╠═══════════════════════════════════════════════╣");
+
+    for (int i = 0; i < 16; i++) {
+        bool is_active = (i < config.num_lanes);
+        bool is_valid = (config.data_gpios[i] >= 0);
+        const char* status = gpio_status_string(
+            (gpio_num_t)config.data_gpios[i],
+            is_active,
+            is_valid
+        );
+
+        // Only show lanes up to DATA_WIDTH + inactive lanes if configured
+        if (is_active || (i < DATA_WIDTH && config.data_gpios[i] != 0)) {
+            char buf[64];
+            fl::snprintf(buf, sizeof(buf), "  Lane %2d:          GPIO %2d  %s",
+                        i, config.data_gpios[i], status);
+            FL_LOG_PARLIO(buf);
+        }
+    }
+
+    FL_LOG_PARLIO("╚═══════════════════════════════════════════════╝");
+}
+
 } // namespace detail
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
@@ -132,10 +218,13 @@ ParlioLedDriver<DATA_WIDTH, CHIPSET>::ParlioLedDriver()
     , num_leds_(0)
     , strips_{}
     , tx_unit_(nullptr)
-    , dma_buffer_(nullptr)
+    , dma_buffer_{nullptr, nullptr}
+    , current_buffer_idx_(0)
     , buffer_size_(0)
     , xfer_done_sem_(nullptr)
     , dma_busy_(false)
+    , last_config_{}
+    , last_num_leds_(0)
 {
     for (int i = 0; i < 16; i++) {
         strips_[i] = nullptr;
@@ -151,6 +240,16 @@ template <uint8_t DATA_WIDTH, typename CHIPSET>
 bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& config, uint16_t num_leds) {
     PARLIO_DLOG("begin() called - DATA_WIDTH=" << int(DATA_WIDTH) << ", num_leds=" << num_leds);
 
+    // Check if reconfiguration needed
+    if (is_initialized()) {
+        if (!needs_reconfiguration(config, num_leds)) {
+            PARLIO_DLOG("Configuration unchanged, skipping reinitialization");
+            return true;  // Already configured correctly
+        }
+        FL_LOG_PARLIO("Reconfiguring PARLIO driver...");
+        end();  // Clean teardown before reconfiguration
+    }
+
     if (config.num_lanes != DATA_WIDTH) {
         FL_LOG_PARLIO("Configuration error - num_lanes (" << int(config.num_lanes)
                 << ") does not match DATA_WIDTH (" << int(DATA_WIDTH) << ")");
@@ -164,36 +263,66 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
     if (config_.clock_freq_hz == 0) {
         // Use chipset-derived clock frequency from timing generator
         using TimingGen = parlio_detail::ParlioTimingGenerator<CHIPSET>;
-        config_.clock_freq_hz = TimingGen::CLOCK_FREQ_HZ;
-        PARLIO_DLOG("Using chipset-derived clock frequency: " << config_.clock_freq_hz << " Hz "
-                    << "(T1=" << TimingGen::T1_NS << "ns, T2=" << TimingGen::T2_NS << "ns, T3=" << TimingGen::T3_NS << "ns)");
+        uint32_t base_freq = TimingGen::CLOCK_FREQ_HZ;
+
+        // Apply auto-clock adjustment if enabled
+        if (config_.auto_clock_adjustment) {
+            uint32_t adjusted_freq = detail::calculate_optimal_clock_freq(num_leds, base_freq);
+            if (detail::validate_adjusted_freq(adjusted_freq, base_freq)) {
+                config_.clock_freq_hz = adjusted_freq;
+                PARLIO_DLOG("Auto-adjusted clock frequency: " << adjusted_freq << " Hz "
+                           << "(base: " << base_freq << " Hz, " << num_leds << " LEDs, "
+                           << "scaling: " << (adjusted_freq * 100 / base_freq) << "%)");
+            } else {
+                config_.clock_freq_hz = base_freq;
+                FL_LOG_PARLIO("Clock adjustment out of range, using base frequency: " << base_freq << " Hz");
+            }
+        } else {
+            config_.clock_freq_hz = base_freq;
+            PARLIO_DLOG("Using base clock frequency: " << base_freq << " Hz");
+        }
+        PARLIO_DLOG("Chipset timing: T1=" << TimingGen::T1_NS << "ns, T2=" << TimingGen::T2_NS << "ns, T3=" << TimingGen::T3_NS << "ns");
     } else {
-        PARLIO_DLOG("Using configured clock frequency: " << config_.clock_freq_hz << " Hz (overriding chipset default)");
+        PARLIO_DLOG("Using configured clock frequency: " << config_.clock_freq_hz << " Hz (manual override)");
     }
 
     // Calculate expanded buffer size for waveform encoding
-    // 3 color components × 32-bit waveform each = 96 bits per LED
-    // Then multiply by DATA_WIDTH for parallel strips
-    const uint32_t SYMBOLS_PER_LED = 96;  // 3 components × 32 bits each
+    // RGB: 3 components × 32 bits = 96 bits per LED
+    // RGBW: 4 components × 32 bits = 128 bits per LED
+    const uint32_t COMPONENTS_PER_LED = config_.is_rgbw ? 4 : 3;
+    const uint32_t SYMBOLS_PER_LED = COMPONENTS_PER_LED * 32;  // Each component = 32-bit waveform
     const uint32_t BITS_PER_LED = SYMBOLS_PER_LED * DATA_WIDTH;
     buffer_size_ = (num_leds * BITS_PER_LED + 7) / 8;  // Convert to bytes
-    PARLIO_DLOG("Calculated buffer_size: " << buffer_size_ << " bytes (SYMBOLS_PER_LED=" << SYMBOLS_PER_LED << ", BITS_PER_LED=" << BITS_PER_LED << ")");
+    PARLIO_DLOG("Calculated buffer_size: " << buffer_size_ << " bytes "
+               << "(mode: " << (config_.is_rgbw ? "RGBW" : "RGB") << ", "
+               << "components: " << COMPONENTS_PER_LED << ", "
+               << "SYMBOLS_PER_LED=" << SYMBOLS_PER_LED << ", BITS_PER_LED=" << BITS_PER_LED << ")");
 
-    // Allocate single DMA buffer for continuous waveform transmission
-    dma_buffer_ = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
-    if (!dma_buffer_) {
-        FL_LOG_PARLIO("Failed to allocate DMA buffer (" << buffer_size_ << " bytes)");
-        return false;
+    // Allocate TWO DMA buffers for ping-pong operation (double buffering)
+    for (int i = 0; i < 2; i++) {
+        dma_buffer_[i] = (uint8_t*)heap_caps_malloc(buffer_size_, MALLOC_CAP_DMA);
+        if (!dma_buffer_[i]) {
+            FL_LOG_PARLIO("Failed to allocate DMA buffer " << i << " (" << buffer_size_ << " bytes)");
+            // Clean up previously allocated buffers
+            for (int j = 0; j < i; j++) {
+                heap_caps_free(dma_buffer_[j]);
+                dma_buffer_[j] = nullptr;
+            }
+            return false;
+        }
+        fl::memset(dma_buffer_[i], 0, buffer_size_);
+        PARLIO_DLOG("DMA buffer " << i << " allocated at " << (void*)dma_buffer_[i]);
     }
-    fl::memset(dma_buffer_, 0, buffer_size_);
-    PARLIO_DLOG("DMA buffer allocated successfully at " << (void*)dma_buffer_);
+    current_buffer_idx_ = 0;  // Start with buffer 0
 
     // Create semaphore for transfer completion
     xfer_done_sem_ = xSemaphoreCreateBinary();
     if (!xfer_done_sem_) {
         FL_LOG_PARLIO("Failed to create semaphore");
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+        for (int i = 0; i < 2; i++) {
+            heap_caps_free(dma_buffer_[i]);
+            dma_buffer_[i] = nullptr;
+        }
         return false;
     }
     xSemaphoreGive(xfer_done_sem_);
@@ -236,8 +365,10 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
                 << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << ",...]");
 
         vSemaphoreDelete(xfer_done_sem_);
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+        for (int i = 0; i < 2; i++) {
+            heap_caps_free(dma_buffer_[i]);
+            dma_buffer_[i] = nullptr;
+        }
         xfer_done_sem_ = nullptr;
         return false;
     }
@@ -257,29 +388,53 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::begin(const ParlioDriverConfig& confi
 
         parlio_del_tx_unit(tx_unit_);
         vSemaphoreDelete(xfer_done_sem_);
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+        for (int i = 0; i < 2; i++) {
+            heap_caps_free(dma_buffer_[i]);
+            dma_buffer_[i] = nullptr;
+        }
         tx_unit_ = nullptr;
         xfer_done_sem_ = nullptr;
         return false;
     }
 
+    // Store configuration for reconfiguration detection
+    last_config_ = config_;
+    last_num_leds_ = num_leds;
+
+    // Log GPIO configuration summary
+    detail::log_gpio_configuration<DATA_WIDTH>(config_, config_.clock_freq_hz);
+
     PARLIO_DLOG("PARLIO driver initialization successful!");
+    PARLIO_DLOG("  DMA buffer:            " << buffer_size_ << " bytes × 2 (double buffered)");
+    PARLIO_DLOG("  Buffer 0 address:      " << (void*)dma_buffer_[0]);
+    PARLIO_DLOG("  Buffer 1 address:      " << (void*)dma_buffer_[1]);
+    PARLIO_DLOG("  Transfer queue depth:  " << int(parlio_config.trans_queue_depth));
+    PARLIO_DLOG("  DMA burst size:        " << int(parlio_config.dma_burst_size));
+    PARLIO_DLOG("  Max transfer size:     " << parlio_config.max_transfer_size);
+
     return true;
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
 void ParlioLedDriver<DATA_WIDTH, CHIPSET>::end() {
+    if (!is_initialized()) {
+        return;  // Already ended, idempotent
+    }
+
     PARLIO_DLOG("end() called - cleaning up resources");
+
     if (tx_unit_) {
         parlio_tx_unit_disable(tx_unit_);
         parlio_del_tx_unit(tx_unit_);
         tx_unit_ = nullptr;
     }
 
-    if (dma_buffer_) {
-        heap_caps_free(dma_buffer_);
-        dma_buffer_ = nullptr;
+    // Free both DMA buffers
+    for (int i = 0; i < 2; i++) {
+        if (dma_buffer_[i]) {
+            heap_caps_free(dma_buffer_[i]);
+            dma_buffer_[i] = nullptr;
+        }
     }
 
     if (xfer_done_sem_) {
@@ -287,6 +442,9 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::end() {
         xfer_done_sem_ = nullptr;
     }
 
+    // Clear state tracking
+    fl::memset(&last_config_, 0, sizeof(last_config_));
+    last_num_leds_ = 0;
     num_leds_ = 0;
 }
 
@@ -309,20 +467,30 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
         return;
     }
 
-    // Verify buffer is allocated
-    if (!dma_buffer_) {
-        FL_LOG_PARLIO("show() called but DMA buffer not allocated");
+    // Verify buffers are allocated
+    if (!dma_buffer_[0] || !dma_buffer_[1]) {
+        FL_LOG_PARLIO("show() called but DMA buffers not allocated");
         return;
     }
 
     // Wait for previous transfer to complete
     PARLIO_DLOG("Waiting for previous transfer to complete...");
     xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
+
+    // Swap to next buffer for packing (double buffering)
+    uint8_t pack_buffer_idx = 1 - current_buffer_idx_;
+    uint8_t* pack_buffer = dma_buffer_[pack_buffer_idx];
+
+    // Pack LED data into the next buffer
+    PARLIO_DLOG("Packing LED data into buffer " << int(pack_buffer_idx) << "...");
+    pack_data(pack_buffer);
+
+    // Swap to this buffer for transmission
+    current_buffer_idx_ = pack_buffer_idx;
     dma_busy_ = true;
 
-    // Pack LED data into DMA buffer(s)
-    PARLIO_DLOG("Packing LED data...");
-    pack_data();
+    // Get buffer to transmit
+    const uint8_t* tx_buffer = dma_buffer_[current_buffer_idx_];
 
     // Configure transmission
     parlio_transmit_config_t tx_config = {};
@@ -333,22 +501,24 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
     // Each color component = 32 bits × DATA_WIDTH = one transmission unit
     constexpr uint32_t BITS_PER_COMPONENT = 32 * DATA_WIDTH;
     constexpr uint32_t BYTES_PER_COMPONENT = (BITS_PER_COMPONENT + 7) / 8;
-    constexpr uint32_t COMPONENTS_PER_LED = 3;  // G, R, B
+    const uint32_t COMPONENTS_PER_LED = config_.is_rgbw ? 4 : 3;  // G, R, B, W (if RGBW)
     constexpr uint32_t MAX_BYTES_PER_CHUNK = 65535;  // PARLIO hardware limit
 
     // Calculate max LEDs per chunk (must break at LED boundaries)
-    // Each LED = 3 components × BYTES_PER_COMPONENT bytes
-    constexpr uint32_t BYTES_PER_LED = COMPONENTS_PER_LED * BYTES_PER_COMPONENT;
-    constexpr uint16_t MAX_LEDS_PER_CHUNK = MAX_BYTES_PER_CHUNK / BYTES_PER_LED;
+    // Each LED = COMPONENTS_PER_LED components × BYTES_PER_COMPONENT bytes
+    const uint32_t BYTES_PER_LED = COMPONENTS_PER_LED * BYTES_PER_COMPONENT;
+    const uint16_t MAX_LEDS_PER_CHUNK = MAX_BYTES_PER_CHUNK / BYTES_PER_LED;
 
     // Transmit using WLED-MM-P4 buffer breaking strategy:
-    // Break at LED boundaries, with each LED's 3 components transmitted together
+    // Break at LED boundaries, with each LED's components transmitted together
     uint16_t leds_remaining = num_leds_;
-    const uint8_t* chunk_ptr = dma_buffer_;
+    const uint8_t* chunk_ptr = tx_buffer;
     uint16_t led_offset = 0;
 
     PARLIO_DLOG("Transmitting with WLED-MM-P4 buffer breaking strategy");
+    PARLIO_DLOG("  Mode: " << (config_.is_rgbw ? "RGBW" : "RGB"));
     PARLIO_DLOG("  BYTES_PER_COMPONENT=" << BYTES_PER_COMPONENT
+               << ", COMPONENTS_PER_LED=" << COMPONENTS_PER_LED
                << ", BYTES_PER_LED=" << BYTES_PER_LED
                << ", MAX_LEDS_PER_CHUNK=" << MAX_LEDS_PER_CHUNK);
 
@@ -364,7 +534,7 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
         PARLIO_DLOG("  LED chunk [" << led_offset << ".." << (led_offset + leds_in_chunk - 1) << "]: "
                    << leds_in_chunk << " LEDs, " << chunk_bytes << " bytes, " << chunk_bits << " bits");
 
-        // Transmit this LED chunk (contains G, R, B components for leds_in_chunk LEDs)
+        // Transmit this LED chunk (contains all components for leds_in_chunk LEDs)
         esp_err_t err = parlio_tx_unit_transmit(tx_unit_, chunk_ptr, chunk_bits, &tx_config);
 
         if (err != ESP_OK) {
@@ -381,13 +551,13 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::show() {
         led_offset += leds_in_chunk;
 
         // Wait for completion if not the last chunk
-        // This ensures DMA gaps occur at LED boundaries (after LSB of B component)
+        // This ensures DMA gaps occur at LED boundaries (after LSB of last component)
         if (leds_remaining > 0) {
             xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
         }
     }
     // Last callback will give semaphore when done
-    PARLIO_DLOG("show() completed - transmission started");
+    PARLIO_DLOG("show() completed - transmission started from buffer " << int(current_buffer_idx_));
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
@@ -404,11 +574,100 @@ bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::is_initialized() const {
 }
 
 template <uint8_t DATA_WIDTH, typename CHIPSET>
-void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
+bool ParlioLedDriver<DATA_WIDTH, CHIPSET>::needs_reconfiguration(const ParlioDriverConfig& new_config, uint16_t new_num_leds) const {
+    if (!is_initialized()) return true;  // Not initialized yet
+
+    bool changed = false;
+
+    // Check LED count
+    if (last_num_leds_ != new_num_leds) {
+        FL_LOG_PARLIO("LED count changed: " << last_num_leds_ << " → " << new_num_leds);
+        changed = true;
+    }
+
+    // Check RGBW flag
+    if (last_config_.is_rgbw != new_config.is_rgbw) {
+        FL_LOG_PARLIO("LED mode changed: "
+                     << (last_config_.is_rgbw ? "RGBW" : "RGB") << " → "
+                     << (new_config.is_rgbw ? "RGBW" : "RGB"));
+        changed = true;
+    }
+
+    // Check lane count
+    if (last_config_.num_lanes != new_config.num_lanes) {
+        FL_LOG_PARLIO("Lane count changed: " << int(last_config_.num_lanes)
+                     << " → " << int(new_config.num_lanes));
+        changed = true;
+    }
+
+    // Check GPIO pins (only active lanes)
+    for (int i = 0; i < new_config.num_lanes; i++) {
+        if (last_config_.data_gpios[i] != new_config.data_gpios[i]) {
+            FL_LOG_PARLIO("Lane " << i << " GPIO changed: "
+                         << last_config_.data_gpios[i] << " → "
+                         << new_config.data_gpios[i]);
+            changed = true;
+        }
+    }
+
+    // Check clock frequency
+    if (last_config_.clock_freq_hz != new_config.clock_freq_hz) {
+        FL_LOG_PARLIO("Clock frequency changed: "
+                     << last_config_.clock_freq_hz << " Hz → "
+                     << new_config.clock_freq_hz << " Hz");
+        changed = true;
+    }
+
+    // Check auto-clock adjustment flag
+    if (last_config_.auto_clock_adjustment != new_config.auto_clock_adjustment) {
+        FL_LOG_PARLIO("Auto-clock adjustment changed: "
+                     << (last_config_.auto_clock_adjustment ? "Enabled" : "Disabled") << " → "
+                     << (new_config.auto_clock_adjustment ? "Enabled" : "Disabled"));
+        changed = true;
+    }
+
+    return changed;
+}
+
+template <uint8_t DATA_WIDTH, typename CHIPSET>
+void ParlioLedDriver<DATA_WIDTH, CHIPSET>::print_status() const {
+    if (!is_initialized()) {
+        FL_LOG_PARLIO("PARLIO driver is NOT initialized");
+        return;
+    }
+
+    detail::log_gpio_configuration<DATA_WIDTH>(config_, config_.clock_freq_hz);
+
+    FL_LOG_PARLIO("╔═══════════════════════════════════════════════╗");
+    FL_LOG_PARLIO("║   Runtime Status                              ║");
+    FL_LOG_PARLIO("╠═══════════════════════════════════════════════╣");
+    FL_LOG_PARLIO("  Initialized:       Yes");
+    FL_LOG_PARLIO("  LED count:         " << num_leds_);
+    FL_LOG_PARLIO("  DMA busy:          " << (dma_busy_ ? "Yes" : "No"));
+    FL_LOG_PARLIO("  Current buffer:    " << int(current_buffer_idx_));
+    FL_LOG_PARLIO("  Buffer size:       " << buffer_size_ << " bytes (each)");
+
+    // Show active strips
+    FL_LOG_PARLIO("  Active strips:");
+    for (uint8_t i = 0; i < DATA_WIDTH; i++) {
+        if (strips_[i]) {
+            FL_LOG_PARLIO("    Lane " << int(i) << ":        " << (void*)strips_[i] << " [SET]");
+        } else {
+            FL_LOG_PARLIO("    Lane " << int(i) << ":        nullptr [NOT SET]");
+        }
+    }
+
+    FL_LOG_PARLIO("╚═══════════════════════════════════════════════╝");
+}
+
+template <uint8_t DATA_WIDTH, typename CHIPSET>
+void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data(uint8_t* output_buffer) {
     constexpr uint32_t BYTES_PER_COMPONENT = (DATA_WIDTH == 1) ? 4 :
                                              (DATA_WIDTH == 2) ? 8 :
                                              (DATA_WIDTH == 4) ? 16 :
                                              (DATA_WIDTH == 8) ? 32 : 64;
+
+    const uint8_t num_components = config_.is_rgbw ? 4 : 3;
 
     // Always show basic pack_data info (not just debug mode)
     FASTLED_DBG("PARLIO pack_data:");
@@ -416,16 +675,19 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
     FASTLED_DBG("  num_leds: " << num_leds_);
     FASTLED_DBG("  buffer_size: " << buffer_size_);
     FASTLED_DBG("  BYTES_PER_COMPONENT: " << BYTES_PER_COMPONENT);
+    FASTLED_DBG("  mode: " << (config_.is_rgbw ? "RGBW" : "RGB"));
 
-    PARLIO_DLOG("pack_data() - Packing " << num_leds_ << " LEDs across " << int(DATA_WIDTH) << " channels with waveform generation");
-    uint8_t* out_ptr = dma_buffer_;
+    PARLIO_DLOG("pack_data() - Packing " << num_leds_ << " LEDs across " << int(DATA_WIDTH)
+               << " channels (" << (config_.is_rgbw ? "RGBW" : "RGB") << " mode)");
+    uint8_t* out_ptr = output_buffer;
 
     // Process each LED
     for (uint16_t led = 0; led < num_leds_; led++) {
-        // Process each color component (G, R, B in WS2812 order)
-        const uint8_t component_order[3] = {1, 0, 2};  // G=1, R=0, B=2 in CRGB
+        // Process each color component (G, R, B, W in order)
+        // G=1, R=0, B=2, W=3 in CRGB (W is always last for RGBW)
+        const uint8_t component_order[4] = {1, 0, 2, 3};
 
-        for (uint8_t comp_idx = 0; comp_idx < 3; comp_idx++) {
+        for (uint8_t comp_idx = 0; comp_idx < num_components; comp_idx++) {
             const uint8_t component = component_order[comp_idx];
 
             // Initialize 32 time-slices (each holds bits for all strips)
@@ -437,7 +699,11 @@ void ParlioLedDriver<DATA_WIDTH, CHIPSET>::pack_data() {
 
                 // Get color component value from strip buffer
                 const uint8_t* led_bytes = reinterpret_cast<const uint8_t*>(&strips_[channel][led]);
-                const uint8_t component_value = led_bytes[component];
+
+                // For RGBW, white component (index 3) needs special handling
+                // CRGB only has r, g, b, so white would be at offset 3 if we had CRGBW
+                // For now, white defaults to 0 (users need to provide CRGBW data)
+                const uint8_t component_value = (component < 3) ? led_bytes[component] : 0;
 
                 // Generate 32-bit waveform for this component value using chipset-specific timing
                 const uint32_t waveform = detail::generate_waveform<CHIPSET>(component_value);
