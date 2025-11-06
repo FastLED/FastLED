@@ -1,11 +1,8 @@
 import asyncio
 import time
+from asyncio.subprocess import Process
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Literal, Optional
-
-
-if TYPE_CHECKING:
-    from asyncio.subprocess import Process
+from typing import Literal
 
 Status = Literal["queued", "running", "done", "failed", "canceled"]
 
@@ -14,14 +11,14 @@ Status = Literal["queued", "running", "done", "failed", "canceled"]
 class TaskState:
     id: str
     name: str
-    cmd: list[str]  # NOTE: Use List[str] not list[str] per project standards
-    cwd: Optional[str] = None
+    cmd: list[str]
+    cwd: str | None = None
     status: Status = "queued"
     start_ts: float = field(default_factory=time.time)
-    end_ts: Optional[float] = None
+    end_ts: float | None = None
     last_line: str = ""
-    returncode: Optional[int] = None
-    process: Optional[Process] = None
+    returncode: int | None = None
+    process: Process | None = None
 
     @property
     def elapsed(self) -> float:
