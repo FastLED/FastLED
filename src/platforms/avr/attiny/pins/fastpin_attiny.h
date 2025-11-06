@@ -21,8 +21,9 @@ typedef volatile uint8_t & reg8_t;
 #define _RD8(T) struct __gen_struct_ ## T { static inline reg8_t r() { return T; }};
 
 // Modern ATtinyxy series uses VPORT-style registers
-#if defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__)
-// ATtiny series 0/1 with VPORT registers
+#if defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy6__) || defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy2__) || \
+    defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny1616__)
+// ATtiny series 0/1 with VPORT registers (ATtiny 0/1/2-series)
 #define _FL_IO(L,C) _RD8(PORT ## L ## _DIR); _RD8(PORT ## L ## _OUT); _RD8(PORT ## L ## _IN); _FL_DEFINE_PORT3(L, C, _R(PORT ## L ## _OUT));
 #define _FL_DEFPIN(_PIN, BIT, L) template<> class FastPin<_PIN> : public _AVRPIN<_PIN, 1<<BIT, _R(PORT ## L ## _OUT), _R(PORT ## L ## _DIR), _R(PORT ## L ## _IN)> {};
 #else

@@ -64,6 +64,7 @@
     defined(__AVR_ATtiny406__) || defined(__AVR_ATtiny407__) || \
     defined(__AVR_ATtiny412__) || defined(__AVR_ATtiny414__) || \
     defined(__AVR_ATtiny416__) || defined(__AVR_ATtiny417__) || \
+    defined(__AVR_ATtiny1604__) || defined(__AVR_ATtiny1616__) || \
     defined(__AVR_ATtinyxy4__) || defined(__AVR_ATtinyxy6__) || \
     defined(__AVR_ATtinyxy7__) || defined(__AVR_ATtinyxy2__) || \
     defined(ARDUINO_AVR_DIGISPARK) || defined(ARDUINO_AVR_DIGISPARKPRO) || \
