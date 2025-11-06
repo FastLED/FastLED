@@ -4,11 +4,26 @@ This module provides utility functions for managing boards and examples
 in the FastLED compilation system.
 """
 
+import os
 from pathlib import Path
 from typing import List, Tuple
 
 from ci.boards import ALL, Board
 from ci.compiler.sketch_filter import parse_filter_from_sketch, should_skip_sketch
+
+
+def _get_project_root() -> Path:
+    """Get the FastLED project root, handling both native and Docker environments.
+
+    Returns:
+        Path to the FastLED project root directory
+    """
+    # Detect if running inside Docker container
+    if os.environ.get("FASTLED_DOCKER") == "1":
+        return Path("/fastled")
+    else:
+        # Assume we're in ci/compiler/, go up two levels to project root
+        return Path(__file__).parent.parent.parent.resolve()
 
 
 def get_default_boards() -> list[str]:
@@ -60,8 +75,7 @@ def get_all_examples() -> list[str]:
     Returns:
         Sorted list of example names relative to examples directory
     """
-    # Assume we're in ci/compiler/, go up two levels to project root
-    project_root = Path(__file__).parent.parent.parent.resolve()
+    project_root = _get_project_root()
     examples_dir = project_root / "examples"
 
     if not examples_dir.exists():
@@ -96,8 +110,7 @@ def resolve_example_path(example: str) -> str:
     Raises:
         FileNotFoundError: If example directory does not exist
     """
-    # Assume we're in ci/compiler/, go up two levels to project root
-    project_root = Path(__file__).parent.parent.parent.resolve()
+    project_root = _get_project_root()
     examples_dir = project_root / "examples"
 
     # Handle both "Blink" and "examples/Blink" formats
@@ -144,7 +157,7 @@ def get_example_ino_path(example: str) -> Path:
     Raises:
         FileNotFoundError: If .ino file not found or multiple .ino files found
     """
-    project_root = Path(__file__).parent.parent.parent.resolve()
+    project_root = _get_project_root()
     examples_dir = project_root / "examples"
 
     # Handle both "Blink" and "examples/Blink" formats

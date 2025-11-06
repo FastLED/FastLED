@@ -199,7 +199,11 @@ def main() -> int:
     # Parse arguments using new CompilationArgumentParser
     from ci.compiler.argument_parser import CompilationArgumentParser, WorkflowType
 
-    project_root = Path(__file__).parent.parent.absolute()
+    # Detect if running inside Docker container
+    if os.environ.get("FASTLED_DOCKER") == "1":
+        project_root = Path("/fastled")
+    else:
+        project_root = Path(__file__).parent.parent.absolute()
     parser = CompilationArgumentParser(project_root)
 
     # First check if --supported-boards was requested before full parsing
