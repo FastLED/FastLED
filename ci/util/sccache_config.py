@@ -56,6 +56,35 @@ def get_sccache_path() -> str | None:
     return None
 
 
+def show_sccache_stats() -> None:
+    """Display sccache statistics if sccache is available."""
+    if not is_sccache_available():
+        return
+
+    sccache_path = get_sccache_path()
+    if not sccache_path:
+        return
+
+    try:
+        result = subprocess.run(
+            [sccache_path, "--show-stats"],
+            capture_output=True,
+            text=True,
+            check=False,
+            timeout=10,
+        )
+        if result.returncode == 0:
+            print("\n" + "=" * 70)
+            print("SCCACHE Statistics:")
+            print("=" * 70)
+            print(result.stdout)
+            print("=" * 70)
+    except subprocess.TimeoutExpired:
+        print("Warning: sccache --show-stats timed out")
+    except Exception as e:
+        print(f"Warning: Failed to retrieve sccache stats: {e}")
+
+
 def configure_sccache(env: PlatformIOEnv) -> None:
     """Configure SCCACHE for the build environment."""
     if not is_sccache_available():

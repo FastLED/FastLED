@@ -24,6 +24,7 @@ from running_process.process_output_reader import EndOfStream
 from typeguard import typechecked
 
 from ci.util.color_output import print_cache_hit
+from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_exceptions import (
     TestExecutionFailedException,
     TestFailureInfo,
@@ -1535,6 +1536,8 @@ def runner(
         if meson_test_timing:
             all_timings.insert(0, meson_test_timing)  # Put unit tests first
         if all_timings:
+            # Show sccache statistics before test summary
+            show_sccache_stats()
             summary = _format_timing_summary(all_timings)
             print(summary)
     except (TestExecutionFailedException, TestTimeoutException) as e:

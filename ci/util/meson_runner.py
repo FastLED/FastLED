@@ -4,6 +4,7 @@
 import hashlib
 import os
 import re
+import shutil
 import subprocess
 import sys
 import time
@@ -388,10 +389,27 @@ def setup_meson_build(
     # The native file will be generated later after wrapper creation
     native_file_path = build_dir / "meson_native.txt"
 
-    # Create wrapper scripts for meson since it expects single executables
-    # OPTIMIZATION: Only recreate wrappers if content changes to avoid triggering Meson regeneration
-    wrapper_dir = build_dir / "compiler_wrappers"
-    wrapper_dir.mkdir(parents=True, exist_ok=True)
+    # Use existing sccache wrapper trampolines from .meson directory
+    # These are C binary trampolines that call Python wrappers with sccache support
+    # Build them if they don't exist
+    meson_wrapper_dir = source_dir / ".meson"
+    wrapper_build_script = meson_wrapper_dir / "build_wrappers.py"
+
+    # Ensure wrapper trampolines are built
+    if wrapper_build_script.exists():
+        try:
+            import sys as py_sys
+
+            subprocess.run(
+                [py_sys.executable, str(wrapper_build_script)],
+                capture_output=True,
+                text=True,
+                check=True,
+                timeout=60,
+            )
+        except subprocess.SubprocessError as e:
+            print(f"[MESON] Warning: Failed to build wrapper trampolines: {e}")
+            # Continue anyway - wrappers might already exist
 
     # Track if any wrapper files were modified
     wrappers_changed = False
@@ -467,154 +485,64 @@ def setup_meson_build(
     # Add -fuse-ld=lld flag to force use of system lld instead of zig's bundled lld
     linker_flag = " -fuse-ld=lld" if use_thin_archives and has_lld else ""
 
+    # Use wrapper trampolines from .meson directory instead of creating new wrappers
+    # These are C binary trampolines that call Python wrappers with sccache support
     if is_windows:
-        # Windows: Create .cmd wrappers
-        cc_wrapper = wrapper_dir / "zig-cc.cmd"
-        cxx_wrapper = wrapper_dir / "zig-cxx.cmd"
-        ar_wrapper = wrapper_dir / "zig-ar.cmd"
+        # Windows: Use .exe trampolines from .meson directory for compilers
+        wrapper_ext = ".exe"
+        cc_wrapper = meson_wrapper_dir / f"zig-cc-wrapper{wrapper_ext}"
+        cxx_wrapper = meson_wrapper_dir / f"zig-cxx-wrapper{wrapper_ext}"
+        # For ar, use the Python script directly (no trampoline needed)
+        ar_wrapper = meson_wrapper_dir / "zig-ar.py"
 
-        wrappers_changed |= write_if_different(
-            cc_wrapper, f"@echo off\npython -m ziglang cc{linker_flag} %*\n"
-        )
-        wrappers_changed |= write_if_different(
-            cxx_wrapper, f"@echo off\npython -m ziglang c++{linker_flag} %*\n"
-        )
-
-        if use_system_ar:
-            # Use system llvm-ar with thin archives support
-            wrappers_changed |= write_if_different(
-                ar_wrapper, f"@echo off\nllvm-ar{thin_flag} %*\n"
-            )
-        else:
-            # Use zig's ar
-            # Filter out thin archive flag 'T' from arguments when not using thin archives
-            # because Zig's linker doesn't support thin archives
-            if use_thin_archives:
-                wrappers_changed |= write_if_different(
-                    ar_wrapper, f"@echo off\npython -m ziglang ar{thin_flag} %*\n"
-                )
-            else:
-                # When not using thin archives, use Python wrapper to filter T flag (same as Unix)
-                # Windows batch regex is too limited, Python is more reliable
-                ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
-                ar_filter_content = (
-                    "#!/usr/bin/env python3\n"
-                    '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
-                    "import sys\n"
-                    "import subprocess\n"
-                    "\n"
-                    'if __name__ == "__main__":\n'
-                    "    args = []\n"
-                    "    for arg in sys.argv[1:]:\n"
-                    "        # Skip --thin flag entirely\n"
-                    '        if arg == "--thin" or arg == "-T":\n'
-                    "            continue\n"
-                    "        # Remove T from operation flags like csrDT, crT, rcT, Tcr, etc.\n"
-                    "        # Operation flags are single args containing only ar flag letters\n"
-                    "        # Common ar flags: c r s q t p a d i b D T U V u\n"
-                    '        ar_flag_chars = set("crsqtpadibDTUVu")\n'
-                    '        if len(arg) <= 10 and arg and set(arg).issubset(ar_flag_chars) and "T" in arg:\n'
-                    "            # This looks like an operation flag containing T - remove T\n"
-                    '            arg = arg.replace("T", "")\n'
-                    "            # Skip if now empty\n"
-                    "            if not arg:\n"
-                    "                continue\n"
-                    "        args.append(arg)\n"
-                    "    \n"
-                    "    # Execute zig ar with filtered arguments\n"
-                    '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
-                    "    sys.exit(result.returncode)\n"
-                )
-                wrappers_changed |= write_if_different(ar_wrapper_py, ar_filter_content)
-
-                # Main wrapper calls the Python filter
-                wrappers_changed |= write_if_different(
-                    ar_wrapper, f'@echo off\npython "{ar_wrapper_py}" %*\n'
-                )
+        # Verify wrappers exist
+        if not cc_wrapper.exists():
+            print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
+        if not cxx_wrapper.exists():
+            print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
+        if not ar_wrapper.exists():
+            print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
     else:
-        # Unix/Linux/macOS: Create shell script wrappers
-        cc_wrapper = wrapper_dir / "zig-cc"
-        cxx_wrapper = wrapper_dir / "zig-cxx"
-        ar_wrapper = wrapper_dir / "zig-ar"
+        # Unix/Linux/macOS: Use wrapper trampolines from .meson directory for compilers
+        wrapper_ext = ""
+        cc_wrapper = meson_wrapper_dir / f"zig-cc-wrapper{wrapper_ext}"
+        cxx_wrapper = meson_wrapper_dir / f"zig-cxx-wrapper{wrapper_ext}"
+        # For ar, use the Python script directly (no trampoline needed)
+        ar_wrapper = meson_wrapper_dir / "zig-ar.py"
 
-        wrappers_changed |= write_if_different(
-            cc_wrapper,
-            f'#!/bin/sh\nexec python -m ziglang cc{linker_flag} "$@"\n',
-            mode=0o755,
-        )
-        wrappers_changed |= write_if_different(
-            cxx_wrapper,
-            f'#!/bin/sh\nexec python -m ziglang c++{linker_flag} "$@"\n',
-            mode=0o755,
-        )
-
-        if use_system_ar:
-            # Use system llvm-ar with thin archives support
-            wrappers_changed |= write_if_different(
-                ar_wrapper, f'#!/bin/sh\nexec llvm-ar{thin_flag} "$@"\n', mode=0o755
-            )
-        else:
-            # Use zig's ar with Python wrapper to robustly filter thin archive flags
-            # CRITICAL: Use Python wrapper instead of shell script for reliable filtering
-            # Shell scripts have fragile pattern matching that fails with different flag orders
-            if use_thin_archives:
-                # Thin archives enabled - pass through directly
-                wrappers_changed |= write_if_different(
-                    ar_wrapper,
-                    f'#!/bin/sh\nexec python -m ziglang ar{thin_flag} "$@"\n',
-                    mode=0o755,
-                )
-            else:
-                # Thin archives disabled - use Python wrapper to filter ALL thin archive flags
-                # This handles:  'T' in operation string (crT, rcT, Tcr, etc.)
-                #                --thin as separate argument
-                #                Any combination or order of flags
-                ar_wrapper_py = wrapper_dir / "zig-ar-filter.py"
-                ar_filter_content = (
-                    "#!/usr/bin/env python3\n"
-                    '"""Filter thin archive flags from ar arguments for Zig compatibility"""\n'
-                    "import sys\n"
-                    "import subprocess\n"
-                    "\n"
-                    'if __name__ == "__main__":\n'
-                    "    args = []\n"
-                    "    for arg in sys.argv[1:]:\n"
-                    "        # Skip --thin flag entirely\n"
-                    '        if arg == "--thin" or arg == "-T":\n'
-                    "            continue\n"
-                    "        # Remove T from operation flags like csrDT, crT, rcT, Tcr, etc.\n"
-                    "        # Operation flags are single args containing only ar flag letters\n"
-                    "        # Common ar flags: c r s q t p a d i b D T U V u\n"
-                    '        ar_flag_chars = set("crsqtpadibDTUVu")\n'
-                    '        if len(arg) <= 10 and arg and set(arg).issubset(ar_flag_chars) and "T" in arg:\n'
-                    "            # This looks like an operation flag containing T - remove T\n"
-                    '            arg = arg.replace("T", "")\n'
-                    "            # Skip if now empty\n"
-                    "            if not arg:\n"
-                    "                continue\n"
-                    "        args.append(arg)\n"
-                    "    \n"
-                    "    # Execute zig ar with filtered arguments\n"
-                    '    result = subprocess.run([sys.executable, "-m", "ziglang", "ar"] + args)\n'
-                    "    sys.exit(result.returncode)\n"
-                )
-                wrappers_changed |= write_if_different(
-                    ar_wrapper_py, ar_filter_content, mode=0o755
-                )
-
-                # Main wrapper calls the Python filter
-                wrappers_changed |= write_if_different(
-                    ar_wrapper,
-                    f'#!/bin/sh\nexec {sys.executable} "{ar_wrapper_py}" "$@"\n',
-                    mode=0o755,
-                )
+        # Verify wrappers exist
+        if not cc_wrapper.exists():
+            print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
+        if not cxx_wrapper.exists():
+            print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
+        if not ar_wrapper.exists():
+            print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
 
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
     # environment variables are lost. Native file ensures tools are configured.
     # OPTIMIZATION: Only write native file if wrappers changed or if it doesn't exist
     try:
+        # Get python executable for ar wrapper (Python script)
+        import sys as py_sys
+
+        python_exe = py_sys.executable
+
+        # Check if sccache is available (before we use it below)
+        import shutil
+
+        sccache_available = shutil.which("sccache") is not None
+
         # Fix the native file content - can't use Python conditionals
+        # Configure compiler wrappers with optional sccache
+        if sccache_available:
+            sccache_exe = shutil.which("sccache")
+            c_compiler = f"['{sccache_exe}', '{str(cc_wrapper)}']"
+            cpp_compiler = f"['{sccache_exe}', '{str(cxx_wrapper)}']"
+        else:
+            c_compiler = f"['{str(cc_wrapper)}']"
+            cpp_compiler = f"['{str(cxx_wrapper)}']"
+
         if is_windows:
             native_file_content = f"""# ============================================================================
 # Meson Native Build Configuration for FastLED (Auto-generated)
@@ -623,9 +551,9 @@ def setup_meson_build(
 # It persists across build regenerations when ninja detects meson.build changes.
 
 [binaries]
-c = ['{str(cc_wrapper)}']
-cpp = ['{str(cxx_wrapper)}']
-ar = ['{str(ar_wrapper)}']
+c = {c_compiler}
+cpp = {cpp_compiler}
+ar = ['{python_exe}', '{str(ar_wrapper)}']
 
 [host_machine]
 system = 'windows'
@@ -644,9 +572,9 @@ endian = 'little'
 # It persists across build regenerations when ninja detects meson.build changes.
 
 [binaries]
-c = ['{str(cc_wrapper)}']
-cpp = ['{str(cxx_wrapper)}']
-ar = ['{str(ar_wrapper)}']
+c = {c_compiler}
+cpp = {cpp_compiler}
+ar = ['{python_exe}', '{str(ar_wrapper)}']
 
 [host_machine]
 system = 'linux'
@@ -672,8 +600,17 @@ endian = 'little'
 
     ar_tool = "llvm-ar" if use_system_ar else "zig ar"
     linker_tool = "system lld" if (use_thin_archives and has_lld) else "zig lld"
+
     print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
     print(f"[MESON] Using linker: {linker_tool}")
+    if sccache_available:
+        print(
+            f"[MESON] ✅ sccache is available and will be used for compilation caching"
+        )
+    else:
+        print(
+            f"[MESON] Note: Using Zig's built-in compilation caching (sccache not found)"
+        )
 
     # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:
@@ -713,13 +650,19 @@ endian = 'little'
     # Run meson setup using RunningProcess for proper streaming output
     assert cmd is not None, "cmd should be set when not skipping meson setup"
     try:
+        # Disable sccache during Meson setup phase to avoid probe command conflicts
+        # sccache tries to detect compilers with -E flag which confuses Zig's command structure
+        # This will be unset for the actual ninja build phase
+        setup_env = env.copy()
+        setup_env["FASTLED_DISABLE_SCCACHE"] = "1"
+
         proc = RunningProcess(
             cmd,
             cwd=source_dir,
             timeout=600,
             auto_run=True,
             check=False,  # We'll check returncode manually
-            env=env,
+            env=setup_env,
         )
 
         returncode = proc.wait(echo=True)

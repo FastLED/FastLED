@@ -20,6 +20,7 @@ from ci.util.global_interrupt_handler import (
     wait_for_cleanup,
 )
 from ci.util.running_process_manager import RunningProcessManagerSingleton
+from ci.util.sccache_config import show_sccache_stats
 from ci.util.test_args import parse_args
 from ci.util.test_commands import run_command
 from ci.util.test_env import (
@@ -324,6 +325,9 @@ def run_qemu_tests(args: TestArgs) -> None:
     print(f"Successful: {success_count}")
     print(f"Failed: {failure_count}")
 
+    # Show sccache statistics
+    show_sccache_stats()
+
     if failure_count > 0:
         print("Some tests failed. See output above for details.")
         sys.exit(1)
@@ -535,6 +539,9 @@ def run_avr8js_tests(args: TestArgs) -> None:
     print(f"Examples tested: {len(examples_to_test)}")
     print(f"Successful: {success_count}")
     print(f"Failed: {failure_count}")
+
+    # Show sccache statistics
+    show_sccache_stats()
 
     if failure_count > 0:
         print("Some tests failed. See output above for details.")
