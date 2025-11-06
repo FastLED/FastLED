@@ -7,6 +7,18 @@
 /// Supported platforms:
 /// - ESP32-S3: LCD_CAM peripheral with I80 interface
 /// - ESP32-P4: I80 interface (if available)
+///
+/// **Supported Chipsets:**
+/// The underlying LcdI80Driver template is fully generic and supports multiple LED chipsets
+/// via compile-time T1/T2/T3 timing calculation. See clockless_lcd_i80_esp32.cpp for the
+/// list of instantiated chipsets (WS2812, SK6812, WS2813, TM1829, etc.).
+///
+/// **Current Limitation:**
+/// The wrapper controller (ClocklessController_LCD_I80_WS2812) currently uses a singleton
+/// pattern that only supports WS2812 timing at runtime. To use other chipsets, the wrapper
+/// would need to be refactored to support multiple driver instances or template-based chipset
+/// selection. The low-level driver already supports this - it's just the high-level wrapper
+/// that needs updating.
 
 #pragma once
 
