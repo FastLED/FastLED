@@ -11,7 +11,7 @@ import sys
 import time
 from typing import Optional, Tuple
 
-from ci.docker.build_image import generate_config_hash
+from ci.docker.build_platforms import get_docker_image_name as get_platform_image_name, get_platform_for_board
 
 
 # Cache for docker executable path
@@ -502,22 +502,29 @@ def _start_docker_linux() -> tuple[bool, str]:
 def get_docker_image_name(board_name: str) -> str:
     """Get the Docker image name for a specific board.
 
+    Uses the new platform-based naming scheme: niteris/fastled-compiler-{platform}:latest
+
     Args:
-        board_name: Name of the board (e.g., 'uno', 'esp32dev')
+        board_name: Name of the board (e.g., 'uno', 'esp32dev', 'esp32s3')
 
     Returns:
-        Docker image name (e.g., 'fastled-platformio-uno-abc12345')
+        Docker image name with tag (e.g., 'niteris/fastled-compiler-avr:latest',
+        'niteris/fastled-compiler-esp-32s3:latest')
 
     Raises:
-        ValueError: If board configuration cannot be determined
+        ValueError: If board is not mapped to a platform
     """
-    try:
-        config_hash = generate_config_hash(board_name)
-        return f"fastled-platformio-{board_name}-{config_hash}"
-    except Exception as e:
+    # Get platform for this board using the new mapping
+    platform = get_platform_for_board(board_name)
+    if not platform:
         raise ValueError(
-            f"Failed to determine Docker image name for board '{board_name}': {e}"
-        ) from e
+            f"Board '{board_name}' is not mapped to a Docker platform family. "
+            f"Please check ci/docker/build_platforms.py"
+        )
+
+    # Generate full image name with tag
+    image_base = get_platform_image_name(platform)
+    return f"{image_base}:latest"
 
 
 def is_docker_image_available(board_name: str) -> bool:
