@@ -534,8 +534,8 @@ class UIDropdown : public UIElement {
     FunctionList<UIDropdown &> mCallbacks;
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
+    fl::shared_ptr<Button> mNextButton;  // Must be before mListener to ensure proper initialization order
     Listener mListener;
-    fl::shared_ptr<Button> mNextButton;
 };
 
 class UIGroup {

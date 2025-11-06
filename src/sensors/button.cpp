@@ -60,7 +60,7 @@ bool ButtonLowLevel::isPressed() {
 }
 
 Button::Button(int pin, ButtonStrategy strategy)
-    : mButton(pin, strategy), mListener(this) {}
+    : mButton(pin, strategy), mListener(this), mPressedLastFrame(false), mClickedThisFrame(false) {}
 
 void Button::Listener::onEndFrame() {
     const bool pressed_curr_frame = mOwner->mButton.isPressed();
