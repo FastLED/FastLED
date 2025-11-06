@@ -99,6 +99,16 @@
 
 #include "lib8tion.h"
 
+// ============================================================================
+// MATH FUNCTION USING DECLARATIONS
+// ============================================================================
+
+/// Math functions are available in fl:: namespace via fl/math.h
+/// Bring commonly used math functions into global namespace for convenience
+using fl::min;
+using fl::max;
+using fl::abs;
+
 #include "controller.h"
 #include "fastpin.h"
 #include "fastspi_types.h"
