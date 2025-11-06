@@ -8,6 +8,8 @@
 #include "fl/stdint.h"
 #include "fl/limits.h"
 #include "fl/fastpin.h"
+#include "fl/undef.h"
+#include "fl/math.h"  // to get back abs, sin, cos and other math fjnctions.
 
 // Shared SPI type definitions
 #include "platforms/shared/spi_types.h"
