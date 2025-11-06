@@ -405,6 +405,15 @@ if command -v rsync &> /dev/null; then
     echo "Cleaning Python cache..."
     find /fastled/ci -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
     find /fastled/ci -type f -name "*.pyc" -delete 2>/dev/null || true
+
+    # TODO: Remove this from the docker image.
+    # Remove stale /tmp/ci directory to prevent import conflicts
+    # The Dockerfile copies ci/ to /tmp/ci for build-time use, but at runtime
+    # we want to use the synced version at /fastled/ci instead
+    if [ -d "/tmp/ci" ]; then
+        rm -rf /tmp/ci
+    fi
+
     echo "✓ Python cache cleaned"
 else
     echo "Warning: rsync not available, skipping directory sync"

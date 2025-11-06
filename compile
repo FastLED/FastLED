@@ -43,6 +43,50 @@ if [ -n "$show_boards_stmt" ]; then
     uv run ci/ci-compile.py $show_boards_stmt | tr ',' '\n' | sed 's/^/  /'
     echo -e "\nUsage: bash compile <board> [--examples example1,example2]\n"
 else
-    echo -e "\nRunning uv run ci/ci-compile.py $@\n"
-    uv run ci/ci-compile.py "$@"
+    # Auto-detect Docker if not already specified and not running inside Docker
+    # Only check if we have a board argument (first positional arg)
+    use_docker_flag=""
+    if [ -z "$FASTLED_DOCKER" ]; then
+        # Check if --docker or --local is already specified
+        has_docker_flag=false
+        has_local_flag=false
+        for arg in "$@"; do
+            if [ "$arg" = "--docker" ]; then
+                has_docker_flag=true
+            elif [ "$arg" = "--local" ]; then
+                has_local_flag=true
+            fi
+        done
+
+        # If neither flag is specified and we have arguments, check Docker availability
+        if [ "$has_docker_flag" = false ] && [ "$has_local_flag" = false ] && [ $# -gt 0 ]; then
+            # Extract board name (first non-flag argument)
+            board_name=""
+            for arg in "$@"; do
+                # Skip flags (arguments starting with --)
+                if [[ ! "$arg" =~ ^-- ]]; then
+                    board_name="$arg"
+                    break
+                fi
+            done
+
+            # Check if Docker should be used for this board
+            if [ -n "$board_name" ]; then
+                docker_check_output=$(uv run python -c "
+from ci.util.docker_helper import should_use_docker_for_board
+use_docker, reason = should_use_docker_for_board('$board_name', verbose=False)
+print('1' if use_docker else '0')
+" 2>/dev/null)
+
+                if [ "$docker_check_output" = "1" ]; then
+                    use_docker_flag="--docker"
+                    echo -e "🐳 Docker detected and will be used for faster compilation"
+                    echo -e "   Use --local to force native compilation instead\n"
+                fi
+            fi
+        fi
+    fi
+
+    echo -e "\nRunning uv run ci/ci-compile.py $use_docker_flag $@\n"
+    uv run ci/ci-compile.py $use_docker_flag "$@"
 fi
