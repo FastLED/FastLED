@@ -5,27 +5,14 @@
 /// Uses Timer for clock generation, GPIO for data outputs, and DMA for parallel transmission.
 /// All class definition and implementation is contained in this single file.
 ///
-/// IMPLEMENTATION STATUS:
-/// ✅ Class structure complete (inherits from SpiHw8)
-/// ✅ All interface methods implemented (begin, end, transmit, waitComplete, etc.)
-/// ✅ 8-lane bit interleaving algorithm implemented
-/// ✅ DMA buffer management complete
-/// ✅ Factory pattern with 2 controller instances
-/// ⏳ Hardware initialization pending (Timer/DMA/GPIO HAL calls)
-///
 /// ARCHITECTURE PATTERN: GPIO + Timer + DMA
 /// - Timer (TIM2/TIM3/TIM4): Generates SPI clock signal
 /// - GPIO (8 pins): Data lanes D0-D7, driven by DMA
 /// - DMA (8 channels): Each channel controls one data pin in parallel
 ///
 /// PLATFORM SUPPORT:
-/// - STM32F1 (Blue Pill, etc.) - 50 MHz GPIO, 2 DMA controllers
-/// - STM32F4 (F401, F411, F429) - 100 MHz GPIO, 2 DMA controllers
-/// - STM32L4 (L432, L476) - 80 MHz GPIO, 2 DMA controllers
-/// - STM32H7 (H743, H750) - 100 MHz GPIO, 2 MDMA controllers
-/// - STM32G4 (G431, G474) - 170 MHz GPIO, 2 DMA controllers
-/// - STM32U5 (U575, U585) - 160 MHz GPIO, 4 GPDMA controllers
-#include "fl/cstring.h"
+/// - STM32F2/F4/F7/H7/L4: Stream-based DMA (hardware accelerated)
+/// - STM32F1/G4/U5: Falls back to software bitbang (channel-based DMA not yet implemented)
 ///
 /// DMA CHANNEL REQUIREMENTS:
 /// Each octal-SPI controller requires 8 DMA channels (one per data lane).
@@ -33,31 +20,42 @@
 /// so theoretically 2 octal-SPI buses can coexist if no other DMA users exist.
 /// In practice, 1 octal-SPI bus + 1 dual/quad-SPI bus is more realistic.
 
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-    defined(STM32F2XX) || defined(STM32F4) || defined(STM32L4) || \
-    defined(STM32H7) || defined(STM32G4) || defined(STM32U5)
+#include "platforms/is_platform.h"
+
+#ifdef FL_IS_STM32
+
+// Platform detection and capability macros
+#include "platforms/arm/stm32/stm32_capabilities.h"
+
+#ifdef FL_STM32_HAS_SPI_HW_8
+
+// ============================================================================
+// Hardware SPI Support Guard
+// ============================================================================
+// Only compile this hardware implementation if FL_STM32_HAS_SPI_HW_8 is defined.
+// If undefined (e.g., on STM32F1 with channel-based DMA), the weak binding
+// will cause FastLED to fall back to software bitbang implementation.
+//
+// FL_STM32_HAS_SPI_HW_8 is defined in stm32_capabilities.h for platforms with:
+// - Stream-based DMA (F2/F4/F7/H7/L4)
+//
+// Not defined for:
+// - F1 (channel-based DMA - not yet implemented)
+// - G4 (channel-based DMA with DMAMUX - not yet implemented)
+// - U5 (GPDMA architecture - not yet implemented)
+
+#include <cstdint>  // For UINT32_MAX
+#include <Arduino.h>  // Ensure STM32 HAL is initialized
 
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
+#include "fl/cstring.h"
 #include <cstring> // ok include
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
-
-// TODO: Include STM32 HAL headers when implementing hardware initialization
-// #ifdef HAL_TIM_MODULE_ENABLED
-// #include "stm32XXxx_hal_tim.h"
-// #include "stm32XXxx_hal_dma.h"
-// #include "stm32XXxx_hal_gpio.h"
-// #endif
+#include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers
 
 namespace fl {
-
-// ============================================================================
-// SPIOctalSTM32 Class Definition
-// ============================================================================
-
-/// STM32 hardware driver for Octal-SPI DMA transmission using GPIO + Timer + DMA
-///
-/// Implements SpiHw8 interface for STM32 platforms using:
 /// - Timer (PWM mode) for synchronized clock generation
 /// - 8 GPIO outputs for data lanes (D0-D7)
 /// - 8 DMA channels for parallel, non-blocking data transmission
@@ -242,72 +240,57 @@ bool SPIOctalSTM32::begin(const SpiHw8::Config& config) {
     mDataPins[7] = config.data7_pin;
     mClockSpeedHz = config.clock_speed_hz;
 
-    // TODO: Hardware initialization
-    // This is where STM32 HAL calls would be added for actual hardware setup.
-    // The implementation would follow this pattern:
-    //
-    // 1. Enable peripheral clocks:
-    //    __HAL_RCC_TIM2_CLK_ENABLE();  // or TIM3/TIM4
-    //    __HAL_RCC_DMA1_CLK_ENABLE();  // and DMA2 if needed
-    //    __HAL_RCC_GPIOA_CLK_ENABLE(); // for all GPIO ports used
-    //
-    // 2. Configure Timer for clock generation:
-    //    TIM_HandleTypeDef* htim = new TIM_HandleTypeDef();
-    //    htim->Instance = TIM2;  // or TIM3/TIM4
-    //    htim->Init.Period = (Timer_Clock / clock_speed_hz) - 1;
-    //    htim->Init.Prescaler = 0;
-    //    htim->Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    //    htim->Init.CounterMode = TIM_COUNTERMODE_UP;
-    //    HAL_TIM_PWM_Init(htim);
-    //    // Configure PWM channel for clock pin
-    //    TIM_OC_InitTypeDef sConfigOC = {};
-    //    sConfigOC.OCMode = TIM_OCMODE_PWM1;
-    //    sConfigOC.Pulse = htim->Init.Period / 2;  // 50% duty cycle
-    //    HAL_TIM_PWM_ConfigChannel(htim, &sConfigOC, TIM_CHANNEL_1);
-    //    mTimerHandle = htim;
-    //
-    // 3. Configure GPIO pins:
-    //    GPIO_InitTypeDef GPIO_InitStruct = {};
-    //    // Clock pin as Timer PWM output (Alternate Function)
-    //    GPIO_InitStruct.Pin = GPIO_PIN_x;
-    //    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    //    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    //    GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-    //    HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
-    //    // Data pins as GPIO outputs (controlled by DMA)
-    //    for (int i = 0; i < 8; ++i) {
-    //        GPIO_InitStruct.Pin = mDataPins[i];
-    //        GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    //        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-    //        HAL_GPIO_Init(GPIOx, &GPIO_InitStruct);
-    //    }
-    //
-    // 4. Configure 8 DMA channels (one per data lane):
-    //    for (int i = 0; i < 8; ++i) {
-    //        DMA_HandleTypeDef* hdma = new DMA_HandleTypeDef();
-    //        hdma->Instance = DMA1_Channel1 + i;  // or appropriate channel
-    //        hdma->Init.Direction = DMA_MEMORY_TO_PERIPH;
-    //        hdma->Init.PeriphInc = DMA_PINC_DISABLE;
-    //        hdma->Init.MemInc = DMA_MINC_ENABLE;
-    //        hdma->Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
-    //        hdma->Init.MemDataAlignment = DMA_MDATAALIGN_BYTE;
-    //        hdma->Init.Mode = DMA_NORMAL;
-    //        hdma->Init.Priority = DMA_PRIORITY_HIGH;
-    //        HAL_DMA_Init(hdma);
-    //        // Link DMA to Timer Update event
-    //        __HAL_LINKDMA(mTimerHandle, hdma2, hdma);
-    //        mDMAHandles[i] = hdma;
-    //    }
-    //
-    // 5. Start Timer (clock generation):
-    //    HAL_TIM_PWM_Start(mTimerHandle, TIM_CHANNEL_1);
+    // Validate all pins using GPIO helper functions
+    if (!isValidPin(mClockPin)) {
+        FL_WARN("SPIOctalSTM32: Invalid clock pin " << static_cast<int>(mClockPin));
+        return false;
+    }
+    for (int i = 0; i < 8; ++i) {
+        if (!isValidPin(mDataPins[i])) {
+            FL_WARN("SPIOctalSTM32: Invalid data pin " << i << ": " << static_cast<int>(mDataPins[i]));
+            return false;
+        }
+    }
 
-    FL_WARN("SPIOctalSTM32: Hardware initialization not yet implemented");
-    FL_WARN("SPIOctalSTM32: Skeleton complete, awaiting STM32 HAL integration");
+    // Configure GPIO pins
+#ifdef HAL_GPIO_MODULE_ENABLED
+    // Configure all 8 data pins as outputs
+    for (int i = 0; i < 8; ++i) {
+        if (!configurePinAsOutput(mDataPins[i], GPIO_SPEED_FREQ_HIGH)) {
+            FL_WARN("SPIOctalSTM32: Failed to configure data pin " << i);
+            return false;
+        }
+    }
 
-    // For now, mark as not initialized until HAL code is added
+    FL_DBG("SPIOctalSTM32: GPIO pins configured successfully");
+    FL_DBG("  Clock pin: " << static_cast<int>(mClockPin));
+    FL_DBG("  Data pins: " << static_cast<int>(mDataPins[0]) << ", " << static_cast<int>(mDataPins[1]) << ", "
+                           << static_cast<int>(mDataPins[2]) << ", " << static_cast<int>(mDataPins[3]) << ", "
+                           << static_cast<int>(mDataPins[4]) << ", " << static_cast<int>(mDataPins[5]) << ", "
+                           << static_cast<int>(mDataPins[6]) << ", " << static_cast<int>(mDataPins[7]));
+#endif
+
+    // TODO: Implement remaining hardware initialization
+    // 1. Configure Timer for clock generation on mClockPin
+    //    - Enable Timer clock (e.g., __HAL_RCC_TIM2_CLK_ENABLE())
+    //    - Set prescaler and ARR based on mClockSpeedHz
+    //    - Configure Output Compare/PWM mode
+    //    - Configure mClockPin as Timer alternate function
+    // 2. Configure 8 DMA channels
+    //    - Enable DMA clock (e.g., __HAL_RCC_DMA1_CLK_ENABLE())
+    //    - DMA channels 0-7: Memory -> GPIO ODR for mDataPins[0-7]
+    //    - Link all DMA channels to Timer Update event
+    // 3. Start Timer
+
+    FL_WARN("SPIOctalSTM32: Timer/DMA initialization not yet implemented");
+    FL_WARN("SPIOctalSTM32: GPIO configuration complete - hardware integration not complete");
+
+    // Uncomment when Timer/DMA implementation is ready:
     // mInitialized = true;
-    return false;
+    // mTransactionActive = false;
+    // return true;
+
+    return false;  // Timer/DMA not yet implemented
 }
 
 void SPIOctalSTM32::end() {
@@ -631,4 +614,6 @@ fl::vector<SpiHw8*> SpiHw8::createInstances() {
 
 }  // namespace fl
 
-#endif  // STM32 platform check
+#endif  // FL_STM32_HAS_SPI_HW_8
+
+#endif  // FL_IS_STM32

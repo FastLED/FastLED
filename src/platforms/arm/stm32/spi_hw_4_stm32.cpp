@@ -10,53 +10,47 @@
 /// - Four DMA channels push data to four separate GPIO pins (D0, D1, D2, D3)
 /// - Timer triggers DMA transfers at configured SPI clock rate
 ///
-/// Implementation Status (Iteration 6):
-/// - ✅ Class structure and interface implementation complete
-/// - ✅ Bit interleaving algorithm implemented and ready for testing
-/// - ✅ Buffer management working
-/// - ⏳ Hardware initialization framework documented (see begin() method)
-/// - 🔜 Full Timer/DMA/GPIO HAL integration pending (requires hardware testing)
 ///
-/// Compatible with: STM32F1, STM32F4, STM32L4, STM32H7, STM32G4, STM32U5
+/// Compatible with: STM32F1, STM32F2, STM32F4, STM32F7, STM32L4, STM32H7, STM32G4, STM32U5
 
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-    defined(STM32F2XX) || defined(STM32F4) || defined(STM32L4) || \
-    defined(STM32H7) || defined(STM32G4) || defined(STM32U5)
+#include "platforms/is_platform.h"
+
+#ifdef FL_IS_STM32
+
+// Platform detection and capability macros
+#include "platforms/arm/stm32/stm32_capabilities.h"
+
+#ifdef FL_STM32_HAS_SPI_HW_4
+
+// ============================================================================
+// Hardware SPI Support Guard
+// ============================================================================
+// Only compile this hardware implementation if FL_STM32_HAS_SPI_HW_4 is defined.
+// If undefined (e.g., on STM32F1 with channel-based DMA), the weak binding
+// will cause FastLED to fall back to software bitbang implementation.
+//
+// FL_STM32_HAS_SPI_HW_4 is defined in stm32_capabilities.h for platforms with:
+// - Stream-based DMA (F2/F4/F7/H7/L4)
+//
+// Not defined for:
+// - F1 (channel-based DMA - not yet implemented)
+// - G4 (channel-based DMA with DMAMUX - not yet implemented)
+// - U5 (GPDMA architecture - not yet implemented)
+
+#include <cstdint>  // For UINT32_MAX
+#include <Arduino.h>  // Ensure STM32 HAL is initialized
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
 #include "fl/cstring.h"
-
-// Include STM32 HAL headers if available
-#ifdef HAL_TIM_MODULE_ENABLED
-#include <stm32_def.h>
-#endif
 
 #include <cstring> // ok include
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers
 
 namespace fl {
 
-// ============================================================================
-// STM32 Hardware Abstraction Layer Compatibility
-// ============================================================================
-
-// This skeleton implementation provides:
-// 1. Validates the architecture pattern
-// 2. Provides proper interface implementation
-// 3. Returns errors until full HAL integration is added
-//
-// Future implementation will add:
-// - Timer configuration (TIM2/TIM3/TIM4 for clock generation)
-// - DMA configuration (4 separate channels for D0, D1, D2, D3)
-// - GPIO configuration (output pins for clock and 4 data lanes)
-// - 4-lane bit interleaving for quad-lane transmission
-
-// ============================================================================
-// SPIQuadSTM32 Class Definition
-// ============================================================================
-
-/// STM32 hardware driver for Quad-SPI DMA transmission using GPIO+Timer+DMA
 ///
 /// Implements SpiHw4 interface for STM32 platforms using:
 /// - Timer peripheral (TIM2/TIM3/etc) for clock generation
@@ -141,6 +135,9 @@ private:
 
     int mBusId;  ///< Logical bus identifier
     const char* mName;
+    
+    // Hardware resources
+    TIM_TypeDef* mTimer;  ///< Timer peripheral for clock generation
 
     // Hardware resources (future implementation)
     // TIM_HandleTypeDef* mTimerHandle;  // Timer for clock generation
@@ -234,46 +231,78 @@ bool SPIQuadSTM32::begin(const SpiHw4::Config& config) {
     mData3Pin = config.data3_pin;
     mClockSpeedHz = config.clock_speed_hz;
 
-    // TODO: Implement hardware initialization
-    // 1. Enable RCC clocks for Timer, DMA, and GPIO
-    //    - __HAL_RCC_TIMx_CLK_ENABLE() for selected timer
-    //    - __HAL_RCC_DMAx_CLK_ENABLE() for DMA controller(s)
-    //    - __HAL_RCC_GPIOx_CLK_ENABLE() for all GPIO ports used
-    //
-    // 2. Configure Timer for clock generation on mClockPin
-    //    - Calculate prescaler and ARR based on mClockSpeedHz
-    //    - Configure Output Compare mode (toggle on match)
-    //    - Example: ARR = (Timer_Clock / mClockSpeedHz / 2) - 1
-    //
-    // 3. Configure GPIO pins as outputs
-    //    - Clock pin: Alternate function (Timer PWM output)
-    //    - Data pins: GPIO outputs controlled by DMA
-    //    - GPIO speed: "Very High" for clock, "High" for data
-    //    - HAL_GPIO_Init() for each pin
-    //
-    // 4. Allocate and configure 4 DMA channels
-    //    - Each channel: Memory -> GPIO ODR (single bit toggle)
-    //    - DMA channel 0: mDMABuffer0 -> GPIO ODR for mData0Pin
-    //    - DMA channel 1: mDMABuffer1 -> GPIO ODR for mData1Pin
-    //    - DMA channel 2: mDMABuffer2 -> GPIO ODR for mData2Pin
-    //    - DMA channel 3: mDMABuffer3 -> GPIO ODR for mData3Pin
+    // Validate all pins using GPIO helper functions
+    if (!isValidPin(mClockPin)) {
+        FL_WARN("SPIQuadSTM32: Invalid clock pin " << static_cast<int>(mClockPin));
+        return false;
+    }
+    if (!isValidPin(mData0Pin)) {
+        FL_WARN("SPIQuadSTM32: Invalid data0 pin " << static_cast<int>(mData0Pin));
+        return false;
+    }
+    if (!isValidPin(mData1Pin)) {
+        FL_WARN("SPIQuadSTM32: Invalid data1 pin " << static_cast<int>(mData1Pin));
+        return false;
+    }
+    if (!isValidPin(mData2Pin)) {
+        FL_WARN("SPIQuadSTM32: Invalid data2 pin " << static_cast<int>(mData2Pin));
+        return false;
+    }
+    if (!isValidPin(mData3Pin)) {
+        FL_WARN("SPIQuadSTM32: Invalid data3 pin " << static_cast<int>(mData3Pin));
+        return false;
+    }
+
+    // Configure GPIO pins
+#ifdef HAL_GPIO_MODULE_ENABLED
+    // Configure all 4 data pins as outputs
+    if (!configurePinAsOutput(mData0Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIQuadSTM32: Failed to configure data0 pin");
+        return false;
+    }
+    if (!configurePinAsOutput(mData1Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIQuadSTM32: Failed to configure data1 pin");
+        return false;
+    }
+    if (!configurePinAsOutput(mData2Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIQuadSTM32: Failed to configure data2 pin");
+        return false;
+    }
+    if (!configurePinAsOutput(mData3Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIQuadSTM32: Failed to configure data3 pin");
+        return false;
+    }
+
+    FL_DBG("SPIQuadSTM32: GPIO pins configured successfully");
+    FL_DBG("  Clock pin: " << static_cast<int>(mClockPin));
+    FL_DBG("  Data pins: " << static_cast<int>(mData0Pin) << ", "
+                           << static_cast<int>(mData1Pin) << ", "
+                           << static_cast<int>(mData2Pin) << ", "
+                           << static_cast<int>(mData3Pin));
+#endif
+
+    // TODO: Implement remaining hardware initialization
+    // 1. Configure Timer for clock generation on mClockPin
+    //    - Enable Timer clock (e.g., __HAL_RCC_TIM2_CLK_ENABLE())
+    //    - Set prescaler and ARR based on mClockSpeedHz
+    //    - Configure Output Compare/PWM mode
+    //    - Configure mClockPin as Timer alternate function
+    // 2. Configure 4 DMA channels
+    //    - Enable DMA clock (e.g., __HAL_RCC_DMA1_CLK_ENABLE())
+    //    - DMA channels 0-3: Memory -> GPIO ODR for mData0-3 pins
     //    - Link all DMA channels to Timer Update event
-    //    - HAL_DMA_Init() for each channel
-    //
-    // 5. Verify hardware resource availability
-    //    - Check that 4 DMA channels are available
-    //    - Validate timer and GPIO selections
+    // 3. Start Timer
 
-    // For now, return error until full implementation is added
-    FL_WARN("SPIQuadSTM32: Hardware initialization not yet implemented");
-    FL_WARN("SPIQuadSTM32: This is a skeleton implementation for architecture validation");
+    // For now, return error until Timer/DMA implementation is added
+    FL_WARN("SPIQuadSTM32: Timer/DMA initialization not yet implemented");
+    FL_WARN("SPIQuadSTM32: GPIO configuration complete - hardware integration not complete");
 
-    // Uncomment when implementation is ready:
+    // Uncomment when Timer/DMA implementation is ready:
     // mInitialized = true;
     // mTransactionActive = false;
     // return true;
 
-    return false;  // Not yet implemented
+    return false;  // Timer/DMA not yet implemented
 }
 
 void SPIQuadSTM32::end() {
@@ -628,4 +657,6 @@ fl::vector<SpiHw4*> SpiHw4::createInstances() {
 
 }  // namespace fl
 
-#endif  // STM32 variants
+#endif  // FL_STM32_HAS_SPI_HW_4
+
+#endif  // FL_IS_STM32

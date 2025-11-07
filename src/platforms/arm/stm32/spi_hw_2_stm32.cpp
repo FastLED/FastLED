@@ -10,27 +10,40 @@
 /// - Two DMA channels push data to two separate GPIO pins (D0, D1)
 /// - Timer triggers DMA transfers at configured SPI clock rate
 ///
-/// Implementation Status (Iteration 5):
-/// - ✅ Class structure and interface implementation complete
-/// - ✅ Bit interleaving algorithm implemented and ready for testing
-/// - ✅ Buffer management working
-/// - ⏳ Hardware initialization framework documented (see begin() method)
-/// - ⏳ Software GPIO fallback mode for testing (see FASTLED_STM32_DUALSPI_SOFTWARE_MODE)
-/// - 🔜 Full Timer/DMA/GPIO HAL integration pending (requires hardware testing)
 ///
-/// Compatible with: STM32F1, STM32F4, STM32L4, STM32H7, STM32G4, STM32U5
+/// Compatible with: STM32F1, STM32F2, STM32F4, STM32F7, STM32L4, STM32H7, STM32G4, STM32U5
 
-#if defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-    defined(STM32F2XX) || defined(STM32F4) || defined(STM32L4) || \
-    defined(STM32H7) || defined(STM32G4) || defined(STM32U5)
+#include "platforms/is_platform.h"
+
+#ifdef FL_IS_STM32
+
+// Platform detection and capability macros
+#include "platforms/arm/stm32/stm32_capabilities.h"
+
+#ifdef FL_STM32_HAS_SPI_HW_2
+
+// ============================================================================
+// Hardware SPI Support Guard
+// ============================================================================
+// Only compile this hardware implementation if FL_STM32_HAS_SPI_HW_2 is defined.
+// If undefined (e.g., on STM32F1 with channel-based DMA), the weak binding
+// will cause FastLED to fall back to software bitbang implementation.
+//
+// FL_STM32_HAS_SPI_HW_2 is defined in stm32_capabilities.h for platforms with:
+// - Stream-based DMA (F2/F4/F7/H7/L4)
+//
+// Not defined for:
+// - F1 (channel-based DMA - not yet implemented)
+// - G4 (channel-based DMA with DMAMUX - not yet implemented)
+// - U5 (GPDMA architecture - not yet implemented)
+
+#include <cstdint>  // For UINT32_MAX
+#include <Arduino.h>  // Ensure STM32 HAL is initialized
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
 #include "fl/cstring.h"
-// Include STM32 HAL headers if available
-#ifdef HAL_TIM_MODULE_ENABLED
-#include <stm32_def.h>
-#endif
 
 // Allow software-mode testing without hardware Timer/DMA
 // Define this to enable software GPIO bitbanging mode for testing
@@ -38,26 +51,17 @@
 
 #include <cstring> // ok include
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers
 
 namespace fl {
 
-// ============================================================================
-// STM32 Hardware Abstraction Layer Compatibility
-// ============================================================================
-
-// For now, we provide a skeleton implementation that:
-// 1. Validates the architecture pattern
-// 2. Provides proper interface implementation
-// 3. Returns errors until full HAL integration is added
-//
-// Future implementation will add:
-// - Timer configuration (TIM2/TIM3/TIM4 for clock generation)
-// - DMA configuration (separate channels for D0, D1)
-// - GPIO configuration (output pins for clock and data)
-// - Bit interleaving for dual-lane transmission
+// Use centralized STM32 helper functions
+using namespace fl::stm32;
 
 // ============================================================================
-// SPIDualSTM32 Class Definition
+// SPIDualSTM32 Class Implementation
+// ============================================================================
+
 // ============================================================================
 
 /// STM32 hardware driver for Dual-SPI DMA transmission using GPIO+Timer+DMA
@@ -142,10 +146,19 @@ private:
     int mBusId;  ///< Logical bus identifier
     const char* mName;
 
-    // Hardware resources (future implementation)
-    // TIM_HandleTypeDef* mTimerHandle;  // Timer for clock generation
-    // DMA_HandleTypeDef* mDMAChannel0;  // DMA for D0
-    // DMA_HandleTypeDef* mDMAChannel1;  // DMA for D1
+    // Hardware resources
+    TIM_TypeDef* mTimer;  ///< Timer peripheral for clock generation
+#ifdef HAL_TIM_MODULE_ENABLED
+    TIM_HandleTypeDef mTimerHandle;  ///< HAL handle for timer (persistent storage)
+#endif
+#ifdef FASTLED_STM32_HAS_DMA_STREAMS
+    DMA_Stream_TypeDef* mDMAStream0;  ///< DMA stream for lane 0
+    DMA_Stream_TypeDef* mDMAStream1;  ///< DMA stream for lane 1
+#ifdef HAL_DMA_MODULE_ENABLED
+    DMA_HandleTypeDef mDMAHandle0;  ///< HAL handle for DMA stream 0 (persistent storage)
+    DMA_HandleTypeDef mDMAHandle1;  ///< HAL handle for DMA stream 1 (persistent storage)
+#endif
+#endif
 
     // DMA buffer management (zero-copy API)
     fl::span<uint8_t> mDMABuffer;    ///< Allocated DMA buffer (interleaved format for dual-lane)
@@ -179,6 +192,11 @@ private:
 SPIDualSTM32::SPIDualSTM32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)
+    , mTimer(nullptr)
+#ifdef FASTLED_STM32_HAS_DMA_STREAMS
+    , mDMAStream0(nullptr)
+    , mDMAStream1(nullptr)
+#endif
     , mDMABuffer()
     , mMaxBytesPerLane(0)
     , mCurrentTotalSize(0)
@@ -221,30 +239,118 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     mData1Pin = config.data1_pin;
     mClockSpeedHz = config.clock_speed_hz;
 
-    // TODO: Implement hardware initialization
-    // 1. Enable RCC clocks for Timer, DMA, and GPIO
-    // 2. Configure Timer for clock generation on mClockPin
-    //    - Set prescaler and ARR based on mClockSpeedHz
-    //    - Configure Output Compare mode
-    // 3. Configure GPIO pins as outputs (mClockPin, mData0Pin, mData1Pin)
-    //    - Set GPIO speed to "Very High" for clock
-    //    - Set GPIO speed to "High" or "Very High" for data
-    // 4. Allocate and configure DMA channels
-    //    - DMA channel 0: Memory -> GPIO ODR for mData0Pin
-    //    - DMA channel 1: Memory -> GPIO ODR for mData1Pin
-    //    - Link both DMA channels to Timer Update event
-    // 5. Validate that requested pins and peripherals are available
+    // Validate pins using GPIO helper functions
+    if (!isValidPin(mClockPin)) {
+        FL_WARN("SPIDualSTM32: Invalid clock pin " << static_cast<int>(mClockPin));
+        return false;
+    }
+    if (!isValidPin(mData0Pin)) {
+        FL_WARN("SPIDualSTM32: Invalid data0 pin " << static_cast<int>(mData0Pin));
+        return false;
+    }
+    if (!isValidPin(mData1Pin)) {
+        FL_WARN("SPIDualSTM32: Invalid data1 pin " << static_cast<int>(mData1Pin));
+        return false;
+    }
 
-    // For now, return error until full implementation is added
-    FL_WARN("SPIDualSTM32: Hardware initialization not yet implemented");
-    FL_WARN("SPIDualSTM32: This is a skeleton implementation for architecture validation");
+    // Configure GPIO pins
+#ifdef HAL_GPIO_MODULE_ENABLED
+    // Configure data pins as outputs
+    if (!configurePinAsOutput(mData0Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIDualSTM32: Failed to configure data0 pin");
+        return false;
+    }
+    if (!configurePinAsOutput(mData1Pin, GPIO_SPEED_FREQ_HIGH)) {
+        FL_WARN("SPIDualSTM32: Failed to configure data1 pin");
+        return false;
+    }
 
-    // Uncomment when implementation is ready:
-    // mInitialized = true;
-    // mTransactionActive = false;
-    // return true;
+    FL_DBG("SPIDualSTM32: GPIO pins configured successfully");
+    FL_DBG("  Clock pin: " << static_cast<int>(mClockPin));
+    FL_DBG("  Data0 pin: " << static_cast<int>(mData0Pin));
+    FL_DBG("  Data1 pin: " << static_cast<int>(mData1Pin));
+#endif
 
-    return false;  // Not yet implemented
+    // Configure Timer for clock generation
+#ifdef HAL_TIM_MODULE_ENABLED
+    // Select timer based on bus_id
+    mTimer = selectTimer(mBusId);
+    if (mTimer == nullptr) {
+        FL_WARN("SPIDualSTM32: Failed to select timer for bus " << mBusId);
+        return false;
+    }
+
+    // Initialize timer for PWM clock generation
+    if (!initTimerPWM(mTimer, mClockSpeedHz)) {
+        FL_WARN("SPIDualSTM32: Failed to initialize timer PWM");
+        mTimer = nullptr;
+        return false;
+    }
+
+    // Configure clock pin as timer alternate function
+    if (!configurePinAsTimerAF(mClockPin, mTimer, FASTLED_GPIO_SPEED_MAX)) {
+        FL_WARN("SPIDualSTM32: Failed to configure clock pin as timer AF");
+        mTimer = nullptr;
+        return false;
+    }
+
+    FL_DBG("SPIDualSTM32: Timer configured successfully");
+    FL_DBG("  Timer: TIM" << ((mTimer == TIM2) ? "2" : (mTimer == TIM3) ? "3" : (mTimer == TIM4) ? "4"
+#ifdef FASTLED_STM32_HAS_TIM5
+         : (mTimer == TIM5) ? "5"
+#endif
+         : "?"));
+    FL_DBG("  Clock speed: " << mClockSpeedHz << " Hz");
+#endif
+
+    // Configure DMA streams for data lanes
+#if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
+    // Select DMA streams for both lanes
+    mDMAStream0 = getDMAStream(mTimer, mBusId, 0);
+    mDMAStream1 = getDMAStream(mTimer, mBusId, 1);
+
+    if (mDMAStream0 == nullptr || mDMAStream1 == nullptr) {
+        FL_WARN("SPIDualSTM32: Failed to select DMA streams for bus " << mBusId);
+        mTimer = nullptr;
+        mDMAStream0 = nullptr;
+        mDMAStream1 = nullptr;
+        return false;
+    }
+
+    // Get DMA channel number for timer update event
+    uint32_t dma_channel = getDMAChannel(mTimer);
+    if (dma_channel == 0xFF) {
+        FL_WARN("SPIDualSTM32: Failed to get DMA channel for timer");
+        mTimer = nullptr;
+        mDMAStream0 = nullptr;
+        mDMAStream1 = nullptr;
+        return false;
+    }
+
+    // Enable DMA clocks
+    enableDMAClock(getDMAController(mDMAStream0));
+    enableDMAClock(getDMAController(mDMAStream1));
+
+    FL_DBG("SPIDualSTM32: DMA streams selected successfully");
+    FL_DBG("  Stream 0: " << (void*)mDMAStream0);
+    FL_DBG("  Stream 1: " << (void*)mDMAStream1);
+    FL_DBG("  DMA channel: " << dma_channel);
+
+    // Note: DMA stream configuration (addresses, sizes) happens in transmit()
+    // because we need to know the buffer addresses and sizes at that time.
+    // Here we just allocate the streams and verify they're available.
+#else
+    FL_WARN("SPIDualSTM32: DMA not supported on this platform");
+    mTimer = nullptr;
+    return false;
+#endif
+
+    // Hardware initialization complete
+    mInitialized = true;
+    mTransactionActive = false;
+
+    FL_DBG("SPIDualSTM32: Hardware initialization complete");
+    return true;
 }
 
 void SPIDualSTM32::end() {
@@ -407,19 +513,67 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
                    (uint8_t*)mDMABuffer0, (uint8_t*)mDMABuffer1,
                    buffer_size_per_lane);
 
-    // TODO: Start DMA transfers
-    // 1. Configure DMA channel 0 to transfer mDMABuffer0 to GPIO ODR (mData0Pin)
-    // 2. Configure DMA channel 1 to transfer mDMABuffer1 to GPIO ODR (mData1Pin)
-    // 3. Start Timer to trigger DMA at clock rate
-    // 4. Set mTransactionActive = true
+    // Start DMA transfers and timer
+#if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
+    // Get GPIO ODR register addresses for DMA destination
+    GPIO_TypeDef* port0 = getGPIOPort(mData0Pin);
+    GPIO_TypeDef* port1 = getGPIOPort(mData1Pin);
 
-    FL_WARN("SPIDualSTM32: DMA transfer not yet implemented");
+    if (port0 == nullptr || port1 == nullptr) {
+        FL_WARN("SPIDualSTM32: Failed to get GPIO ports for data pins");
+        return false;
+    }
 
-    // Uncomment when implementation is ready:
-    // mTransactionActive = true;
-    // return true;
+    // Get DMA channel number for timer update event
+    uint32_t dma_channel = getDMAChannel(mTimer);
+    if (dma_channel == 0xFF) {
+        FL_WARN("SPIDualSTM32: Failed to get DMA channel for timer");
+        return false;
+    }
 
-    return false;  // Not yet implemented
+    // Clear any pending DMA flags before starting
+    clearDMAFlags(mDMAStream0);
+    clearDMAFlags(mDMAStream1);
+
+    // Configure and start DMA stream 0 (lane 0)
+    volatile void* odr0 = (volatile void*)&port0->ODR;
+    if (!initDMA(mDMAStream0, mDMABuffer0, odr0, buffer_size_per_lane, dma_channel)) {
+        FL_WARN("SPIDualSTM32: Failed to initialize DMA stream 0");
+        return false;
+    }
+
+    // Configure and start DMA stream 1 (lane 1)
+    volatile void* odr1 = (volatile void*)&port1->ODR;
+    if (!initDMA(mDMAStream1, mDMABuffer1, odr1, buffer_size_per_lane, dma_channel)) {
+        FL_WARN("SPIDualSTM32: Failed to initialize DMA stream 1");
+        stopDMA(mDMAStream0);  // Stop stream 0 since we're aborting
+        return false;
+    }
+
+    // Enable DMA requests from timer update event
+    TIM_HandleTypeDef htim = {};
+    htim.Instance = mTimer;
+    __HAL_TIM_ENABLE_DMA(&htim, TIM_DMA_UPDATE);
+
+    // Start timer PWM to trigger DMA transfers
+    if (!startTimer(mTimer)) {
+        FL_WARN("SPIDualSTM32: Failed to start timer");
+        stopDMA(mDMAStream0);
+        stopDMA(mDMAStream1);
+        __HAL_TIM_DISABLE_DMA(&htim, TIM_DMA_UPDATE);
+        return false;
+    }
+
+    FL_DBG("SPIDualSTM32: DMA transmission started");
+    FL_DBG("  Buffer size per lane: " << buffer_size_per_lane << " bytes");
+    FL_DBG("  Total bytes: " << mCurrentTotalSize);
+
+    mTransactionActive = true;
+    return true;
+#else
+    FL_WARN("SPIDualSTM32: DMA not supported on this platform");
+    return false;
+#endif
 }
 
 bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
@@ -427,13 +581,64 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
         return true;  // Nothing to wait for
     }
 
-    // TODO: Wait for DMA completion
-    // 1. Poll DMA channel status flags
-    // 2. Implement timeout checking
-    // 3. Stop Timer when both DMA channels complete
-    // 4. Clear interrupt flags
+    // Wait for DMA completion with timeout
+#if defined(HAL_DMA_MODULE_ENABLED) && defined(FASTLED_STM32_HAS_DMA_STREAMS)
+    // Record start time for timeout checking
+    uint32_t start_ms = millis();
+    bool timeout_enabled = (timeout_ms != UINT32_MAX);
 
-    (void)timeout_ms;  // Unused until implementation
+    // Poll DMA completion flags for both streams
+    while (true) {
+        bool stream0_complete = isDMAComplete(mDMAStream0);
+        bool stream1_complete = isDMAComplete(mDMAStream1);
+
+        // Check if both streams completed
+        if (stream0_complete && stream1_complete) {
+            FL_DBG("SPIDualSTM32: DMA transfer complete");
+            break;
+        }
+
+        // Check timeout
+        if (timeout_enabled) {
+            uint32_t elapsed_ms = millis() - start_ms;
+            if (elapsed_ms >= timeout_ms) {
+                FL_WARN("SPIDualSTM32: DMA transfer timeout after " << elapsed_ms << " ms");
+
+                // Emergency stop: disable DMA and timer
+                stopDMA(mDMAStream0);
+                stopDMA(mDMAStream1);
+                stopTimer(mTimer);
+
+                // Disable timer DMA requests
+                TIM_HandleTypeDef htim = {};
+                htim.Instance = mTimer;
+                __HAL_TIM_DISABLE_DMA(&htim, TIM_DMA_UPDATE);
+
+                mTransactionActive = false;
+                mBufferAcquired = false;
+                mCurrentTotalSize = 0;
+                return false;
+            }
+        }
+
+        // Small delay to avoid busy-waiting too aggressively
+        // This allows other tasks to run if RTOS is present
+        delayMicroseconds(10);
+    }
+
+    // Stop timer (DMA transfers are complete)
+    stopTimer(mTimer);
+
+    // Disable timer DMA requests
+    TIM_HandleTypeDef htim = {};
+    htim.Instance = mTimer;
+    __HAL_TIM_DISABLE_DMA(&htim, TIM_DMA_UPDATE);
+
+    // Clear DMA flags
+    clearDMAFlags(mDMAStream0);
+    clearDMAFlags(mDMAStream1);
+
+    FL_DBG("SPIDualSTM32: Timer and DMA stopped successfully");
 
     mTransactionActive = false;
 
@@ -442,6 +647,13 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
     mCurrentTotalSize = 0;
 
     return true;
+#else
+    (void)timeout_ms;
+    mTransactionActive = false;
+    mBufferAcquired = false;
+    mCurrentTotalSize = 0;
+    return true;
+#endif
 }
 
 bool SPIDualSTM32::isBusy() const {
@@ -474,11 +686,28 @@ void SPIDualSTM32::cleanup() {
             waitComplete();
         }
 
-        // TODO: Disable and release hardware resources
-        // 1. Stop Timer
-        // 2. Disable DMA channels
-        // 3. Reset GPIO pins to default state
-        // 4. Disable peripheral clocks
+        //  Stop hardware resources in reverse order of initialization
+        // 1. Stop DMA streams
+        // 2. Stop Timer
+        // 3. Reset GPIO pins (optional - not critical)
+
+        // Stop DMA streams if initialized
+#ifdef FASTLED_STM32_HAS_DMA_STREAMS
+        if (mDMAStream0 != nullptr) {
+            stopDMA(mDMAStream0);
+            mDMAStream0 = nullptr;
+        }
+        if (mDMAStream1 != nullptr) {
+            stopDMA(mDMAStream1);
+            mDMAStream1 = nullptr;
+        }
+#endif
+
+        // Stop timer if initialized
+        if (mTimer != nullptr) {
+            stopTimer(mTimer);
+            mTimer = nullptr;
+        }
 
         // Free main DMA buffer
         if (!mDMABuffer.empty()) {
@@ -535,4 +764,6 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
 
 }  // namespace fl
 
-#endif  // STM32 variants
+#endif  // FL_STM32_HAS_SPI_HW_2
+
+#endif  // FL_IS_STM32

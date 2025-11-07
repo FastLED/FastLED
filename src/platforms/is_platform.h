@@ -11,6 +11,17 @@
 /// ARM Platforms:
 /// - FASTLED_ARM: ARM-based platforms (Cortex-M, RP2040, nRF52, etc.)
 ///
+/// STM32 Platforms (ARM-based):
+/// - FL_IS_STM32: General STM32 platform (any STM32 family)
+/// - FL_IS_STM32_F1: STM32F1 family (Blue Pill, etc.)
+/// - FL_IS_STM32_F2: STM32F2 family (Particle Photon)
+/// - FL_IS_STM32_F4: STM32F4 family (Black Pill, etc.)
+/// - FL_IS_STM32_F7: STM32F7 family
+/// - FL_IS_STM32_L4: STM32L4 family (low-power)
+/// - FL_IS_STM32_H7: STM32H7 family (Giga R1, high-performance)
+/// - FL_IS_STM32_G4: STM32G4 family (motor control)
+/// - FL_IS_STM32_U5: STM32U5 family (ultra-low-power)
+///
 /// Teensy Platforms (ARM-based):
 /// - FL_IS_TEENSY: General Teensy platform (any Teensy board)
 /// - FL_IS_TEENSY_LC: Teensy LC (Cortex-M0+, MKL26Z64)
@@ -65,6 +76,10 @@
 /// Usage:
 /// @code
 /// #include "platforms/is_platform.h"
+
+/// #ifdef FL_IS_STM32
+///     // STM32 platform code (any family)
+/// #endif
 ///
 /// #ifdef FL_IS_ESP_32S3
 ///     // ESP32-S3 specific code

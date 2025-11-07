@@ -4,6 +4,7 @@
 /// @brief STM32 SPIOutput template definition
 
 #include "fl/int.h"
+#include "platforms/arm/stm32/fastspi_arm_stm32.h"
 
 namespace fl {
 

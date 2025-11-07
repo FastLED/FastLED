@@ -3,21 +3,23 @@
 
 /// @file is_arm.h
 /// ARM platform detection header
-/// 
+///
 /// This header detects ARM-based platforms by checking compiler-defined macros
 /// and defines FASTLED_ARM when an ARM platform is detected.
-/// 
+///
 /// Used by platforms/int.h for platform dispatching and by ARM platform headers
 /// for validation that ARM detection has occurred.
+
+// Include STM32 platform detection
+#include "stm32/is_stm32.h"
 
 /// ARM platform detection with optimized macro grouping
 /// This checks for various ARM-based microcontroller families
 #if \
     /* ARM Cortex-M0/M0+ (SAM) */ \
     defined(__SAM3X8E__) || \
-    /* ARM Cortex-M (STM32F/H7) */ \
-    defined(STM32F10X_MD) || defined(__STM32F1__) || defined(STM32F1) || defined(STM32F1xx) || \
-    defined(STM32F2XX) || defined(STM32F4) || \
+    /* STM32 Family (all variants) - defined by is_stm32.h */ \
+    defined(FL_IS_STM32) || \
     /* NXP Kinetis (MK20, MK26, MK64, MK66, IMXRT) */ \
     defined(__MK20DX128__) || defined(__MK20DX256__) || \
     defined(__MKL26Z64__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || \
