@@ -50,7 +50,7 @@ stub_incompatible_examples = [
     'Codec',                   # Platform-specific
     'ColorBoost',              # Crashes on host (uninitialized bool)
     'Corkscrew',               # Crashes on host (excessive memory)
-    'Downscale',               # Crashes on host (excessive memory)
+    # 'Downscale',               # DEBUGGING: Temporarily enabled to investigate crash
     'EaseInOut',               # Crashes on host (excessive memory)
     'Esp32P4Parlio',          # ESP32-specific
     'Esp8266Uart',            # ESP8266-specific
@@ -177,6 +177,13 @@ foreach example_name : example_paths.keys()
         example_link_args = ['-Wl,--stack,16777216']
     endif
 
+    # DEBUG FLAGS: Add debug symbols and disable optimization for Downscale
+    debug_cpp_args = []
+    debug_link_args = example_link_args
+    if example_name == 'Downscale'
+        debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
+    endif
+
     exe = executable(
         'example-' + example_name,
         stub_main_src,
@@ -187,10 +194,11 @@ foreach example_name : example_paths.keys()
             '-DFASTLED_STUB_MAIN',
             '-DFASTLED_STUB_MAIN_INCLUDE_INO=' + ino_file,
             '-DFASTLED_STUB_IMPL',
+            '-DFASTLED_TESTING',  # CRITICAL: Must match libfastled.a compilation to ensure ABI compatibility (HashMap size)
             '-fno-rtti',  # Must match fastled_lib compilation flags
             '-fno-exceptions',  # Must match fastled_lib compilation flags
-        ],
-        link_args: example_link_args,
+        ] + debug_cpp_args,
+        link_args: debug_link_args,
         build_by_default: false,  # Only build when explicitly requested
         install: false
     )

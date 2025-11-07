@@ -388,6 +388,40 @@ def setup_meson_build(
                 )
                 force_reconfigure = True
 
+    # Check if any meson.build files are newer than build.ninja (requires reconfigure)
+    build_ninja_path = build_dir / "build.ninja"
+    meson_build_modified = False
+    if already_configured and build_ninja_path.exists():
+        try:
+            build_ninja_mtime = build_ninja_path.stat().st_mtime
+            # Check all meson.build files (root + subdirs)
+            meson_build_files = [
+                source_dir / "meson.build",
+                source_dir / "tests" / "meson.build",
+                source_dir / "examples" / "meson.build",
+            ]
+            for meson_file in meson_build_files:
+                if meson_file.exists():
+                    meson_file_mtime = meson_file.stat().st_mtime
+                    if meson_file_mtime > build_ninja_mtime:
+                        _ts_print(
+                            f"[MESON] ⚠️  Detected modified meson.build: {meson_file.relative_to(source_dir)}"
+                        )
+                        _ts_print(
+                            f"[MESON]     File mtime: {meson_file_mtime:.6f} > build.ninja mtime: {build_ninja_mtime:.6f}"
+                        )
+                        meson_build_modified = True
+                        break
+        except (OSError, IOError) as e:
+            _ts_print(f"[MESON] Warning: Could not check meson.build timestamps: {e}")
+            # If we can't check, assume modification to be safe
+            meson_build_modified = True
+
+    # Force reconfigure if meson.build files were modified
+    if meson_build_modified:
+        _ts_print("[MESON] 🔄 Forcing reconfigure due to meson.build modifications")
+        force_reconfigure = True
+
     # Determine if we need to run meson setup/reconfigure
     # We skip meson setup only if already configured, not explicitly reconfiguring,
     # AND thin archive/unity/source file settings haven't changed
