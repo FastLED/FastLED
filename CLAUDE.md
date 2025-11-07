@@ -81,6 +81,34 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Platform dispatch headers**: FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
+- **Macro definition patterns - Two distinct types**:
+
+  **Type 1: Platform/Feature Detection Macros (defined/undefined pattern)**
+
+  **Platform Identification Naming Convention:**
+  - MUST follow pattern: `FL_IS_<PLATFORM><_OPTIONAL_VARIANT>`
+  - ✅ Correct: `FL_IS_STM32`, `FL_IS_STM32_F1`, `FL_IS_STM32_H7`, `FL_IS_ESP_32S3`
+  - ❌ Wrong: `FASTLED_STM32_F1`, `FASTLED_STM32` (missing `FL_IS_` prefix)
+  - ❌ Wrong: `FL_STM32_F1`, `IS_STM32_F1` (incorrect prefix pattern)
+
+  **Detection and Usage:**
+  - Platform defines like `FL_IS_ARM`, `FL_IS_STM32`, `FL_IS_ESP32` and their variants
+  - Feature detection like `FASTLED_STM32_HAS_TIM5`, `FASTLED_STM32_DMA_CHANNEL_BASED` (not platform IDs)
+  - These are either **defined** (set) or **undefined** (unset) - NO values
+  - ✅ Correct: `#ifdef FL_IS_STM32` or `#ifndef FL_IS_STM32`
+  - ✅ Correct: `#if defined(FL_IS_STM32)` or `#if !defined(FL_IS_STM32)`
+  - ✅ Define as: `#define FL_IS_STM32` (no value)
+  - ❌ Wrong: `#if FL_IS_STM32` or `#if FL_IS_STM32 == 1`
+  - ❌ Wrong: `#define FL_IS_STM32 1` (do not assign values)
+
+  **Type 2: Configuration Macros with Defaults (0/1 or numeric values)**
+  - Settings that have a default when undefined (e.g., `FASTLED_USE_PROGMEM`, `FASTLED_ALLOW_INTERRUPTS`)
+  - Numeric constants (e.g., `FASTLED_STM32_GPIO_MAX_FREQ_MHZ 100`, `FASTLED_STM32_DMA_TOTAL_CHANNELS 14`)
+  - These MUST have explicit values: 0, 1, or numeric constants
+  - ✅ Correct: `#define FASTLED_USE_PROGMEM 1` or `#define FASTLED_USE_PROGMEM 0`
+  - ✅ Correct: `#define FASTLED_STM32_GPIO_MAX_FREQ_MHZ 100`
+  - ✅ Check as: `#if FASTLED_USE_PROGMEM` or `#if FASTLED_USE_PROGMEM == 1`
+  - ❌ Wrong: `#define FASTLED_USE_PROGMEM` (missing value - ambiguous default behavior)
 - **Use proper warning macros** from `fl/compiler_control.h`
 - **Debug and Warning Output**:
   - **Use `FL_DBG("message" << var)`** for debug prints (easily stripped in release builds)
