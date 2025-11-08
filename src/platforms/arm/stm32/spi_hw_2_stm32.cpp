@@ -281,7 +281,7 @@ bool SPIDualSTM32::begin(const SpiHw2::Config& config) {
     }
 
     // Initialize timer for PWM clock generation
-    if (!initTimerPWM(mTimer, mClockSpeedHz)) {
+    if (!initTimerPWM(&mTimerHandle, mTimer, mClockSpeedHz)) {
         FL_WARN("SPIDualSTM32: Failed to initialize timer PWM");
         mTimer = nullptr;
         return false;
@@ -556,7 +556,7 @@ bool SPIDualSTM32::transmit(TransmitMode mode) {
     __HAL_TIM_ENABLE_DMA(&htim, TIM_DMA_UPDATE);
 
     // Start timer PWM to trigger DMA transfers
-    if (!startTimer(mTimer)) {
+    if (!startTimer(&mTimerHandle)) {
         FL_WARN("SPIDualSTM32: Failed to start timer");
         stopDMA(mDMAStream0);
         stopDMA(mDMAStream1);
@@ -607,7 +607,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
                 // Emergency stop: disable DMA and timer
                 stopDMA(mDMAStream0);
                 stopDMA(mDMAStream1);
-                stopTimer(mTimer);
+                stopTimer(&mTimerHandle);
 
                 // Disable timer DMA requests
                 TIM_HandleTypeDef htim = {};
@@ -627,7 +627,7 @@ bool SPIDualSTM32::waitComplete(uint32_t timeout_ms) {
     }
 
     // Stop timer (DMA transfers are complete)
-    stopTimer(mTimer);
+    stopTimer(&mTimerHandle);
 
     // Disable timer DMA requests
     TIM_HandleTypeDef htim = {};
@@ -705,7 +705,7 @@ void SPIDualSTM32::cleanup() {
 
         // Stop timer if initialized
         if (mTimer != nullptr) {
-            stopTimer(mTimer);
+            stopTimer(&mTimerHandle);
             mTimer = nullptr;
         }
 

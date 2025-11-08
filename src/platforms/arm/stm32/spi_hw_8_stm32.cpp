@@ -184,6 +184,8 @@ private:
 // SPIOctalSTM32 Implementation
 // ============================================================================
 
+using namespace fl::stm32;  // For GPIO/Timer/DMA helper functions
+
 SPIOctalSTM32::SPIOctalSTM32(int bus_id, const char* name)
     : mBusId(bus_id)
     , mName(name)

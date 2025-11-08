@@ -13,12 +13,14 @@ namespace fl {
 
 /// Weak default factory - returns empty vector (no 2-lane SPI support)
 /// Platform-specific implementations override this function
+#if !defined(FASTLED_TESTING) && !defined(FASTLED_STUB_IMPL)
 FL_LINK_WEAK
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
     // Default: no 2-lane hardware SPI available
     // Platform implementations will override this with their own strong definition
     return fl::vector<SpiHw2*>();
 }
+#endif
 
 
 

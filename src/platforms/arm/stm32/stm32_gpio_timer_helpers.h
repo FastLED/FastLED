@@ -17,12 +17,9 @@
 
 #include "fl/stdint.h"
 
-// Forward declarations for STM32 HAL types
-struct GPIO_TypeDef;
-struct TIM_TypeDef;
-struct TIM_HandleTypeDef;
-struct DMA_TypeDef;
-struct DMA_Stream_TypeDef;
+// STM32 HAL types cannot be forward-declared because they are typedef'd.
+// Include Arduino.h which pulls in the full STM32 HAL headers.
+#include <Arduino.h>
 
 namespace fl {
 namespace stm32 {
