@@ -31,7 +31,22 @@ discovered_sources = run_command(
   check: true,
   capture: true
 )
-fastled_sources = files(discovered_sources.stdout().strip().split('\n'))
+all_sources = discovered_sources.stdout().strip().split('\n')
+
+# Separate platforms/shared sources (need separate unity group for weak/strong linking)
+platforms_shared_sources = []
+fastled_sources_list = []
+
+foreach src : all_sources
+  if src.contains('platforms/shared/')
+    platforms_shared_sources += src
+  else
+    fastled_sources_list += src
+  endif
+endforeach
+
+fastled_sources = files(fastled_sources_list)
+platforms_shared_files = files(platforms_shared_sources)
 
 # ============================================================================
 # CENTRALIZED COMPILATION AND LINK CONFIGURATION
@@ -194,18 +209,30 @@ unit_test_link_args = test_link_args
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
+# Build platforms/shared object files separately (need own unity group for weak/strong linking)
+# These files contain weak default implementations that platform-specific files override
+# Must compile to separate *.o file to avoid weak/strong symbol conflicts in same translation unit
+platforms_shared_lib = static_library('platforms_shared',
+  platforms_shared_files,
+  include_directories: [src_dir, stub_dir],
+  cpp_args: base_compile_args,
+  override_options: ['unity=on'],  # Force unity build to create single *.o file
+  install: false
+)
+
+# Extract object files from platforms_shared library
+platforms_shared_objects = platforms_shared_lib.extract_all_objects()
+
 # Build main FastLED static library (includes ALL sources)
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
-# Unity builds DISABLED for this library due to weak/strong symbol conflicts:
-# - stub files (spi_*_stub.cpp) override weak defaults in platforms/shared/spi_hw_*.cpp
-# - Unity builds combine these into single translation units, causing redefinition errors
+# platforms/shared objects are included separately to ensure separate unity group
 fastled_lib = static_library('fastled',
   fastled_sources,
+  objects: platforms_shared_objects,
   include_directories: [src_dir, stub_dir],
   cpp_args: base_compile_args,
-  override_options: ['unity=off'],
   install: false
 )
 

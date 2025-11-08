@@ -20,14 +20,12 @@ const fl::vector<SpiHw4*>& SpiHw4::getAll() {
 
 /// Weak default factory - returns empty vector (no 4-lane SPI support)
 /// Platform-specific implementations override this function
-#if !defined(FASTLED_TESTING) && !defined(FASTLED_STUB_IMPL)
 FL_LINK_WEAK
 fl::vector<SpiHw4*> SpiHw4::createInstances() {
     // Default: no 4-lane hardware SPI available
     // Platform implementations will override this with their own strong definition
     return fl::vector<SpiHw4*>();
 }
-#endif
 
 
 }  // namespace fl
