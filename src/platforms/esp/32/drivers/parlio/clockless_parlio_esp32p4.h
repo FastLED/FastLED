@@ -1,17 +1,19 @@
 /// @file clockless_parlio_esp32p4.h
-/// @brief ESP32-P4 Parallel IO (PARLIO) LED driver for simultaneous multi-strip output
+/// @brief ESP32-P4 PARLIO channel adapter - individual LED strip interface
 ///
-/// This driver uses the ESP32-P4 PARLIO TX peripheral to drive up to 16
-/// identical WS28xx-style LED strips in parallel with DMA-based hardware timing.
+/// This file provides the ParlioChannel adapter that bridges individual LED strips
+/// to the PARLIO parallel I/O system. Each strip becomes a channel in the architecture.
 ///
-/// Supported platforms:
-/// - ESP32-P4: PARLIO TX peripheral (requires driver/parlio_tx.h)
+/// Architecture:
+/// - ParlioChannel: Individual strip adapter (N instances)
+/// - ParlioTransmitter: Broadcasts to K channels with same timing
+/// - ParlioHub: Coordinates all transmitters
+/// - ParlioEngine: DMA hardware controller
 ///
 /// Key features:
-/// - Simultaneous output to multiple LED strips
-/// - DMA-based transmission (minimal CPU overhead)
-/// - Hardware timing control (no CPU bit-banging)
-/// - High performance (+ FPS for 256-pixel strips)
+/// - Seamless integration with FastLED API
+/// - Hardware-accelerated parallel output
+/// - No distinction between clockless/clocked - everything is a channel
 
 #pragma once
 
@@ -22,7 +24,6 @@
 #include "sdkconfig.h"
 
 #include "fl/stdint.h"
-#include "platforms/esp/esp_version.h"
 
 #include "crgb.h"
 #include "cpixel_ledcontroller.h"
@@ -30,67 +31,82 @@
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
 // Include the PARLIO driver
-#include "parlio_driver.h"
+#include "parlio_channel.h"
+#include "fl/chipsets/chipset_timing_config.h"
 
 namespace fl {
 
-// ===== Proxy Controller System (matches I2S pattern) =====
+// ===== Concrete Driver Layer (NO TEMPLATES) =====
 
-/// @brief Helper object for PARLIO proxy controllers
-class Parlio_Esp32P4 {
+/// @brief PARLIO channel driver - handles runtime configuration for a single LED strip
+///
+/// This class is completely non-templated and uses runtime ChipsetTimingConfig.
+/// All template parameters from entry points are converted to runtime values
+/// before reaching this class. Each instance represents one channel in the system.
+class ParlioChannelDriver {
 public:
-    void beginShowLeds(int data_pin, int nleds);
-    void showPixels(uint8_t data_pin, PixelIterator& pixel_iterator);
+    /// @brief Constructor with runtime pin and timing
+    /// @param pin GPIO pin number (runtime value)
+    /// @param timing Chipset timing configuration (runtime value)
+    explicit ParlioChannelDriver(int pin, const ChipsetTimingConfig& timing);
+
+    void init();
+    void beginShowLeds(int nleds);
+    void showPixels(PixelIterator& pixel_iterator);
     void endShowLeds();
+
+private:
+    int mPin;
+    ChipsetTimingConfig mTiming;
 };
 
-/// @brief Base proxy controller with dynamic pin
-template <EOrder RGB_ORDER = RGB>
-class ClocklessController_Parlio_Esp32P4_WS2812Base
+// ===== Templated Entry Points (convert compile-time types to runtime) =====
+
+/// @brief PARLIO channel adapter - FastLED's interface to a single LED strip
+///
+/// This is the main entry point that FastLED users interact with via addLeds<>().
+/// Each instance represents one channel in the parallel I/O architecture.
+///
+/// Template parameters (compile-time):
+/// - DATA_PIN: GPIO pin number
+/// - CHIPSET: Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
+/// - RGB_ORDER: Color channel ordering (RGB, GRB, etc.)
+///
+/// These are converted to runtime values and passed to the ParlioTransmitter,
+/// which broadcasts to all channels with matching timing.
+///
+/// @tparam DATA_PIN GPIO pin number (compile-time)
+/// @tparam CHIPSET Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
+/// @tparam RGB_ORDER Color channel ordering (RGB, GRB, etc.)
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER = RGB>
+class ParlioChannel
     : public CPixelLEDController<RGB_ORDER> {
 private:
     typedef CPixelLEDController<RGB_ORDER> Base;
-    Parlio_Esp32P4 mParlio_Esp32P4;
-    int mPin;
+    ParlioChannelDriver mDriver;  // Concrete driver instance
 
 public:
-    ClocklessController_Parlio_Esp32P4_WS2812Base(int pin) : mPin(pin) {}
+    /// @brief Constructor - converts all template parameters to runtime values
+    ParlioChannel();
 
-    void init() override {}
+    void init() override;
 
-    uint16_t getMaxRefreshRate() const override { return 800; }
+    uint16_t getMaxRefreshRate() const override;
 
 protected:
-    void *beginShowLeds(int nleds) override {
-        void *data = Base::beginShowLeds(nleds);
-        mParlio_Esp32P4.beginShowLeds(mPin, nleds);
-        return data;
-    }
-
-    void showPixels(PixelController<RGB_ORDER> &pixels) override {
-        auto pixel_iterator = pixels.as_iterator(this->getRgbw());
-        mParlio_Esp32P4.showPixels(mPin, pixel_iterator);
-    }
-
-    void endShowLeds(void *data) override {
-        Base::endShowLeds(data);
-        mParlio_Esp32P4.endShowLeds();
-    }
+    void *beginShowLeds(int nleds) override;
+    void showPixels(PixelController<RGB_ORDER> &pixels) override;
+    void endShowLeds(void *data) override;
 };
 
-/// @brief Template version with compile-time pin
+// ===== Backward Compatibility Aliases =====
+
+/// @brief Backward compatibility alias
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER = RGB>
+using ClocklessController_Parlio_Esp32P4 = ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>;
+
+/// @brief WS2812-specific channel (backward compatibility)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-class ClocklessController_Parlio_Esp32P4_WS2812
-    : public ClocklessController_Parlio_Esp32P4_WS2812Base<RGB_ORDER> {
-private:
-    typedef ClocklessController_Parlio_Esp32P4_WS2812Base<RGB_ORDER> Base;
-
-public:
-    ClocklessController_Parlio_Esp32P4_WS2812() : Base(DATA_PIN) {}
-
-    void init() override {}
-
-    uint16_t getMaxRefreshRate() const override { return 800; }
-};
+using ClocklessController_Parlio_Esp32P4_WS2812 = ParlioChannel<DATA_PIN, TIMING_WS2812_800KHZ, RGB_ORDER>;
 
 }  // namespace fl

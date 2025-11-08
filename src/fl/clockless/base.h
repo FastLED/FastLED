@@ -78,6 +78,14 @@ struct BulkClocklessHelper {
     /// @returns ColorAdjustment structure
     static ColorAdjustment computeAdjustment(u8 brightness,
                                       const BulkStrip::Settings &settings);
+
+    /// Apply color adjustment to a buffer of pixels
+    /// Handles both legacy and HD color mixing modes automatically
+    /// @param buffer pointer to LED data buffer
+    /// @param count number of LEDs in the buffer
+    /// @param adj color adjustment (brightness + correction + temperature)
+    static void applyAdjustmentToBuffer(CRGB* buffer, int count,
+                                        const ColorAdjustment& adj);
 };
 
 /// @brief Base template class for bulk LED controllers.

@@ -8,39 +8,59 @@
 
 #include "crgb.h"
 #include "eorder.h"
-#include "fl/map.h"
 #include "fl/singleton.h"
 #include "fl/vector.h"
 #include "fl/warn.h"
-#include "fl/math_macros.h"
 #include "pixel_iterator.h"
-#include "fl/allocator.h"
 #include "fl/unique_ptr.h"
-#include "fl/assert.h"
 #include "fl/rectangular_draw_buffer.h"
 #include "cpixel_ledcontroller.h"
 
 #include "clockless_parlio_esp32p4.h"
-#include "parlio_driver.h"
+#include "parlio_channel.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "parlio_transmitter.h"
+#include "parlio_hub.h"
+
+// Runtime driver creation with chipset timing config
+namespace fl {
+    fl::unique_ptr<fl::IParlioChannel> createParlioChannelRuntime(uint8_t width, const ChipsetTimingConfig& timing) {
+        return fl::IParlioChannel::create(timing, width);
+    }
+}
 
 namespace { // anonymous namespace
 
 typedef uint8_t ParlioPin;
 
-/// @brief Manages all PARLIO strips and bulk driver
-class ParlioEsp32P4_Group {
+/// @brief Base transmitter that manages parallel output to multiple LED channels
+///
+/// This class broadcasts to LED strips sharing identical chipset timing.
+/// One transmitter instance per chipset type (WS2812, WS2816, etc.)
+class ParlioTransmitterBase {
 public:
-    fl::unique_ptr<fl::ParlioLedDriverBase> mDriver;
+    fl::unique_ptr<fl::IParlioChannel> mDriver;
     fl::RectangularDrawBuffer mRectDrawBuffer;
-    bool mDrawn = false;
-    uint8_t mClkPin = 9;  // Default clock pin (GPIO 9)
+    fl::ChipsetTimingConfig mTimingConfig;  // Chipset timing configuration
 
-    static ParlioEsp32P4_Group& getInstance() {
-        return fl::Singleton<ParlioEsp32P4_Group>::instance();
-    }
+    // Frame lifecycle state tracking
+    enum QueueState { IDLE, QUEUING, FLUSHED };
+    QueueState mQueueState = IDLE;
 
-    ParlioEsp32P4_Group() = default;
-    ~ParlioEsp32P4_Group() { mDriver.reset(); }
+    /// @brief Driver factory function type
+    /// Creates a driver of the correct width and chipset type
+    using DriverFactory = fl::unique_ptr<fl::IParlioChannel> (*)(uint8_t width, const fl::ChipsetTimingConfig& timing);
+
+    DriverFactory mDriverFactory;  // Factory function for creating drivers
+
+    /// @brief Constructor with chipset timing configuration
+    /// @param timing Chipset timing configuration for this transmitter
+    /// @param factory Driver factory function for the chipset
+    explicit ParlioTransmitterBase(const fl::ChipsetTimingConfig& timing, DriverFactory factory)
+        : mTimingConfig(timing)
+        , mDriverFactory(factory) {}
+
+    ~ParlioTransmitterBase() { mDriver.reset(); }
 
     /// @brief Validate GPIO pin for ESP32-P4 PARLIO peripheral
     ///
@@ -80,8 +100,19 @@ public:
     }
 
     void onQueuingStart() {
+        // Only initialize queuing state once per frame
+        if (mQueueState == QUEUING) {
+            FL_DBG("PARLIO: Already queuing, skipping onQueuingStart()");
+            return;
+        }
+
+        FL_DBG("PARLIO: Starting new frame queuing");
+        mQueueState = QUEUING;
         mRectDrawBuffer.onQueuingStart();
-        mDrawn = false;
+    }
+
+    bool isQueuing() const {
+        return mQueueState == QUEUING;
     }
 
     void onQueuingDone() {
@@ -132,12 +163,59 @@ public:
         mRectDrawBuffer.queue(fl::DrawItem(pin, numLeds, is_rgbw));
     }
 
+    /// @brief Write pixel data for a specific strip
+    ///
+    /// Writes RGB or RGBW pixel data from a PixelIterator into the internal
+    /// DMA buffer for the specified pin.
+    ///
+    /// @param data_pin GPIO pin number of the strip
+    /// @param pixel_iterator Iterator providing pixel data with scaling/dithering
+    void writePixels(uint8_t data_pin, fl::PixelIterator& pixel_iterator) {
+        // Get the buffer span for this pin's strip
+        fl::span<uint8_t> strip_bytes = mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
+
+        // Determine if RGBW based on pixel iterator
+        const fl::Rgbw rgbw = pixel_iterator.get_rgbw();
+
+        if (rgbw.active()) {
+            // RGBW mode: 4 bytes per pixel
+            uint8_t r, g, b, w;
+            while (pixel_iterator.has(1)) {
+                pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
+                strip_bytes[0] = r;
+                strip_bytes[1] = g;
+                strip_bytes[2] = b;
+                strip_bytes[3] = w;
+                strip_bytes.pop_front();
+                strip_bytes.pop_front();
+                strip_bytes.pop_front();
+                strip_bytes.pop_front();
+                pixel_iterator.advanceData();
+                pixel_iterator.stepDithering();
+            }
+        } else {
+            // RGB mode: 3 bytes per pixel
+            uint8_t r, g, b;
+            while (pixel_iterator.has(1)) {
+                pixel_iterator.loadAndScaleRGB(&r, &g, &b);
+                strip_bytes[0] = r;
+                strip_bytes[1] = g;
+                strip_bytes[2] = b;
+                strip_bytes.pop_front();
+                strip_bytes.pop_front();
+                strip_bytes.pop_front();
+                pixel_iterator.advanceData();
+                pixel_iterator.stepDithering();
+            }
+        }
+    }
+
     void showPixelsOnceThisFrame() {
-        if (mDrawn) {
-            FL_DBG("PARLIO: Already drawn this frame, skipping");
+        if (mQueueState == FLUSHED) {
+            FL_DBG("PARLIO: Already flushed this frame, skipping");
             return;
         }
-        mDrawn = true;
+        mQueueState = FLUSHED;  // Mark frame as flushed
 
         if (!mRectDrawBuffer.mAllLedsBufferUint8Size) {
             FL_DBG("PARLIO: No LED data to transmit (buffer size is 0)");
@@ -205,45 +283,21 @@ public:
             uint8_t optimal_width = selectOptimalWidth(num_strips);
             FL_DBG("  optimal_width selected: " << int(optimal_width));
 
-            // Instantiate driver based on width (optimal memory usage)
-            switch (optimal_width) {
-                case 1:
-                    mDriver.reset(new fl::ParlioLedDriver<1, fl::WS2812ChipsetTiming>());
-                    FL_DBG("  Created 1-lane driver");
-                    break;
-                case 2:
-                    mDriver.reset(new fl::ParlioLedDriver<2, fl::WS2812ChipsetTiming>());
-                    FL_DBG("  Created 2-lane driver");
-                    break;
-                case 4:
-                    mDriver.reset(new fl::ParlioLedDriver<4, fl::WS2812ChipsetTiming>());
-                    FL_DBG("  Created 4-lane driver");
-                    break;
-                case 8:
-                    mDriver.reset(new fl::ParlioLedDriver<8, fl::WS2812ChipsetTiming>());
-                    FL_DBG("  Created 8-lane driver");
-                    break;
-                case 16:
-                    mDriver.reset(new fl::ParlioLedDriver<16, fl::WS2812ChipsetTiming>());
-                    FL_DBG("  Created 16-lane driver");
-                    break;
-                default:
-                    FL_WARN("PARLIO: Invalid optimal width " << int(optimal_width)
-                            << ". This is a bug in selectOptimalWidth().");
-                    FL_ASSERT(false, "Invalid PARLIO width: " << int(optimal_width));
-                    return;
-            }
+            // Instantiate driver using factory function (chipset-agnostic)
+            FL_DBG("  Creating " << int(optimal_width) << "-lane driver for chipset: " << mTimingConfig.name);
+            mDriver = mDriverFactory(optimal_width, mTimingConfig);
 
             if (!mDriver.get()) {
-                FL_WARN("PARLIO: Failed to allocate driver (out of memory?)");
+                FL_WARN("PARLIO: Failed to allocate driver (out of memory or invalid width?)");
                 return;
             }
+            FL_DBG("  Successfully created " << int(optimal_width) << "-lane driver");
 
             // Configure driver
-            fl::ParlioDriverConfig config = {};
+            fl::ParlioChannelConfig config = {};
             config.clk_gpio = -1;  // Internal clock used (field unused)
             config.num_lanes = optimal_width;  // Must match DATA_WIDTH template parameter
-            config.clock_freq_hz = 0;  // Use default 3.2 MHz for WS2812
+            config.clock_freq_hz = 0;  // Use driver's default clock frequency (chipset-specific)
             config.is_rgbw = is_rgbw;  // Set RGBW mode
             config.auto_clock_adjustment = false;  // Manual clock control
 
@@ -305,6 +359,9 @@ public:
         mDriver->show();
         mDriver->wait();
         FL_DBG("PARLIO: Transmission complete");
+
+        // Reset state for next frame
+        mQueueState = IDLE;
     }
 
 private:
@@ -321,58 +378,137 @@ private:
 
 namespace fl {
 
-void Parlio_Esp32P4::beginShowLeds(int data_pin, int nleds) {
-    FASTLED_DBG("PARLIO Parlio_Esp32P4::beginShowLeds called with data_pin=" << data_pin << ", nleds=" << nleds);
-    ParlioEsp32P4_Group& group = ParlioEsp32P4_Group::getInstance();
-    group.onQueuingStart();
-    group.addObject(data_pin, nleds, false);
-    FASTLED_DBG("  After addObject, drawList.size()=" << (int)group.mRectDrawBuffer.mDrawList.size());
+// ===== ParlioChannelDriver method implementations =====
+// Concrete driver helper - uses ParlioGroup for per-chipset management
+
+ParlioChannelDriver::ParlioChannelDriver(int pin, const ChipsetTimingConfig& timing)
+    : mPin(pin)
+    , mTiming(timing)
+{
 }
 
-void Parlio_Esp32P4::showPixels(uint8_t data_pin, PixelIterator& pixel_iterator) {
-    ParlioEsp32P4_Group& group = ParlioEsp32P4_Group::getInstance();
+void ParlioChannelDriver::init() {
+    // Initialization happens in beginShowLeds()
+}
+
+void ParlioChannelDriver::beginShowLeds(int nleds) {
+    FASTLED_DBG("PARLIO ParlioChannelDriver::beginShowLeds called with data_pin=" << mPin << ", nleds=" << nleds);
+
+    // Get the chipset-specific group singleton using runtime timing config
+    // Each unique ChipsetTimingConfig hash has its own group
+    auto& group = IParlioTransmitter::getOrCreate(mTiming);
+
+    // Cross-chipset coordination: Flush any pending groups of DIFFERENT chipset types
+    // This ensures that if the user mixes chipsets (e.g., WS2812 + SK6812), the previous
+    // chipset's data transmits before we start queuing data for this chipset.
+    // Same-chipset strips can batch together for efficiency.
+    ParlioHub::getInstance().flushAllExcept(&group);
+
+    // Start queuing mode for this frame (if not already active)
+    // Multiple strips of the same chipset will all queue into this group
+    if (!group.isQueuing()) {
+        group.onQueuingStart();
+    }
+
+    // Register this strip with the chipset-specific group
+    // All strips in a group must have same LED count (PARLIO hardware limitation)
+    group.addStrip(mPin, nleds, false);
+    FASTLED_DBG("  Strip registered with " << mTiming.name << " group");
+}
+
+void ParlioChannelDriver::showPixels(PixelIterator& pixel_iterator) {
+    auto& group = IParlioTransmitter::getOrCreate(mTiming);
+
+    // Mark queuing phase as complete for this group
     group.onQueuingDone();
 
-    const Rgbw rgbw = pixel_iterator.get_rgbw();
-    int numLeds = pixel_iterator.size();
-    span<uint8_t> strip_bytes = group.mRectDrawBuffer.getLedsBufferBytesForPin(data_pin, true);
-
-    if (rgbw.active()) {
-        uint8_t r, g, b, w;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-            strip_bytes[0] = r;
-            strip_bytes[1] = g;
-            strip_bytes[2] = b;
-            strip_bytes[3] = w;
-            strip_bytes.pop_front();
-            strip_bytes.pop_front();
-            strip_bytes.pop_front();
-            strip_bytes.pop_front();
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    } else {
-        uint8_t r, g, b;
-        while (pixel_iterator.has(1)) {
-            pixel_iterator.loadAndScaleRGB(&r, &g, &b);
-            strip_bytes[0] = r;
-            strip_bytes[1] = g;
-            strip_bytes[2] = b;
-            strip_bytes.pop_front();
-            strip_bytes.pop_front();
-            strip_bytes.pop_front();
-            pixel_iterator.advanceData();
-            pixel_iterator.stepDithering();
-        }
-    }
+    // Write pixel data to the DMA buffer for this strip
+    // Data is queued but NOT transmitted yet - transmission happens later during flush
+    group.writePixels(mPin, pixel_iterator);
 }
 
-void Parlio_Esp32P4::endShowLeds() {
-    ParlioEsp32P4_Group::getInstance().showPixelsOnceThisFrame();
+void ParlioChannelDriver::endShowLeds() {
+    // FastLED calls this on EACH controller after pixel data is written
+    //
+    // For PARLIO, we call showPixelsOnceThisFrame() which has internal logic
+    // to only flush once per frame (via mQueueState == FLUSHED check).
+    //
+    // This means:
+    // - First PARLIO strip's endShowLeds(): Flushes and transmits
+    // - Subsequent PARLIO strips' endShowLeds(): Skipped (already flushed)
+    // - Same pattern works for all chipset types (WS2812, SK6812, etc.)
+    //
+    // Each chipset has its own group, so WS2812 and SK6812 each flush once.
+    auto& group = IParlioTransmitter::getOrCreate(mTiming);
+    group.showPixelsOnceThisFrame();
 }
+
+// ===== ParlioTransmitterBase factory function =====
+// Creates ParlioTransmitterBase instances for IParlioTransmitter
+
+ParlioTransmitterBase* createParlioTransmitterBase(const ChipsetTimingConfig& timing) {
+    // Create a stateless lambda (no capture) that can be converted to function pointer
+    auto factory = [](uint8_t width, const ChipsetTimingConfig& timing) -> unique_ptr<IParlioChannel> {
+        return createParlioChannelRuntime(width, timing);
+    };
+    return new ParlioTransmitterBase(timing, factory);
+}
+
+// ===== ParlioChannel (channel adapter) method implementations =====
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::ParlioChannel()
+    : mDriver(DATA_PIN, makeTimingConfig<CHIPSET>())
+{
+    // Template parameters converted to runtime values:
+    // - DATA_PIN (compile-time int) → constructor argument (runtime int)
+    // - CHIPSET (compile-time type) → makeTimingConfig<CHIPSET>() (runtime ChipsetTimingConfig)
+    // - RGB_ORDER handled by CPixelLEDController<RGB_ORDER> base class
+}
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+void ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::init() {
+    mDriver.init();
+}
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+uint16_t ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::getMaxRefreshRate() const {
+    return 800;
+}
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+void* ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::beginShowLeds(int nleds) {
+    void *data = Base::beginShowLeds(nleds);
+    mDriver.beginShowLeds(nleds);
+    return data;
+}
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+void ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::showPixels(PixelController<RGB_ORDER> &pixels) {
+    auto pixel_iterator = pixels.as_iterator(this->getRgbw());
+    mDriver.showPixels(pixel_iterator);
+}
+
+template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER>
+void ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>::endShowLeds(void *data) {
+    Base::endShowLeds(data);
+    mDriver.endShowLeds();
+}
+
+// Note: No explicit template instantiations needed for ParlioChannel
+// It's a shallow wrapper that converts template parameters to runtime values in the constructor.
+// The compiler will instantiate on-demand when used.
 
 } // namespace fl
+
+// ===== C-linkage function for FastLED.cpp integration =====
+// See BULK_CLOCKLESS_DESIGN.md §8 - FastLED.cpp must call flushAll() at frame end
+
+namespace fl {
+void parlio_flush_all_groups() {
+    ParlioHub::getInstance().flushAll();
+}
+}  // namespace fl
 
 #endif // CONFIG_IDF_TARGET_ESP32P4
 #endif // ESP32
