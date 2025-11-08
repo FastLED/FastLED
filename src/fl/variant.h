@@ -2,13 +2,14 @@
 
 #include "fl/type_traits.h" // for fl::enable_if, fl::is_same, etc.
 #include "fl/bit_cast.h"    // for safe type-punning
-#include "fl/new.h"   // for placement new operator (must be before namespace fl)
+#include "fl/new.h"          // for placement new operator (must be before namespace fl)
+#include "fl/align.h"        // for FL_ALIGN_AS_T macro (GCC 4.8.3 workaround)
 
 namespace fl {
 
 // A variant that can hold any of N different types
-template <typename... Types> 
-class alignas(max_align<Types...>::value) Variant {
+template <typename... Types>
+class FL_ALIGN_AS_T(max_align<Types...>::value) Variant {
   public:
     using Tag = u8;
     static constexpr Tag Empty = 0;
@@ -290,8 +291,7 @@ class alignas(max_align<Types...>::value) Variant {
         _tag = type_to_tag<T>();
     }
 
-    alignas(
-        max_align<Types...>::value) char _storage[max_size<Types...>::value];
+    FL_ALIGN_AS_T(max_align<Types...>::value) char _storage[max_size<Types...>::value];
 
     Tag _tag;
 };
