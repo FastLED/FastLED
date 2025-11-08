@@ -15,12 +15,33 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def resolve_board_name(board_input: str) -> str:
+    """Resolve board name using the same logic as ci-compile.py.
+
+    This handles cases where a board has both a board_name (canonical name used for
+    build directories) and a real_board_name (PlatformIO board identifier).
+
+    For example: 'blackpill_f411ce' (real_board_name) resolves to 'stm32f411ce' (board_name).
+
+    Args:
+        board_input: The board name or alias provided by the user
+
+    Returns:
+        The canonical board_name used for build directories
+    """
+    from ci.boards import create_board
+
+    board = create_board(board_input)
+    return board.board_name
+
+
 def find_platformio_project_dir(build_root: Path, board_name: str) -> Path | None:
     """Find a directory containing platformio.ini file for the specified board.
 
-    Handles both old and new build directory structures:
+    Handles multiple build directory structures:
+    Modern: .build/pio/uno/Blink/platformio.ini
+    Legacy: .build/fled/examples/uno/Blink/platformio.ini
     Old: .build/uno/Blink/platformio.ini
-    New: .build/fled/examples/uno/Blink/platformio.ini
 
     Returns the directory containing platformio.ini, or None if not found.
     """
@@ -29,11 +50,12 @@ def find_platformio_project_dir(build_root: Path, board_name: str) -> Path | Non
 
     # Search patterns for different build structures
     search_patterns = [
-        # New structure: .build/fled/examples/{board}/**/*.ini
+        # Modern PlatformIO structure: .build/pio/{board}/**/*.ini
+        build_root / "pio" / board_name,
+        # Legacy structure: .build/fled/examples/{board}/**/*.ini
         build_root / "fled" / "examples" / board_name,
         # Old structure: .build/{board}/**/*.ini
         build_root / board_name,
-        # Fallback: search all subdirectories for board name
     ]
 
     # Try each search pattern
@@ -88,10 +110,19 @@ def main() -> int:
         return 1
 
     if args.board:
-        # Search for the specified board
-        project_dir = find_platformio_project_dir(build, args.board)
+        # Resolve board name to canonical board_name (handles aliases like blackpill_f411ce → stm32f411ce)
+        canonical_board_name = resolve_board_name(args.board)
+        if canonical_board_name != args.board:
+            print(
+                f"Resolved board '{args.board}' to canonical name '{canonical_board_name}'"
+            )
+
+        # Search for the specified board using the canonical name
+        project_dir = find_platformio_project_dir(build, canonical_board_name)
         if not project_dir:
-            print(f"No platformio.ini found for board '{args.board}'")
+            print(
+                f"No platformio.ini found for board '{args.board}' (canonical name: '{canonical_board_name}')"
+            )
             print("This usually means the board hasn't been compiled yet.")
             print(f"Try running: uv run ci/ci-compile.py {args.board} --examples Blink")
             return 1
