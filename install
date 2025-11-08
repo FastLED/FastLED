@@ -68,65 +68,72 @@ else
     echo "      You can retry with: uv run test.py --cpp --quick"
 fi
 
-echo "Setting up JavaScript development environment..."
+if [ -z "$FASTLED_DOCKER" ]; then
+    echo "Setting up JavaScript development environment..."
 
-# Install fast JavaScript linter (Node.js + ESLint)
-echo "Installing fast JavaScript linter (Node.js + ESLint)..."
-if uv run ci/setup-js-linting-fast.py; then
-    echo "✅ Fast JavaScript linting enabled - 53x faster than Deno!"
+    # Install fast JavaScript linter (Node.js + ESLint)
+    echo "Installing fast JavaScript linter (Node.js + ESLint)..."
+    if uv run ci/setup-js-linting-fast.py; then
+        echo "✅ Fast JavaScript linting enabled - 53x faster than Deno!"
+    else
+        echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
+    fi
 else
-    echo "⚠️  Warning: JavaScript linter setup failed. You can retry with: uv run ci/setup-js-linting-fast.py"
+    echo "ℹ️  Skipping JavaScript development environment setup (running in Docker)"
 fi
 
-# Install TypeScript for JSDoc type checking
-echo "Installing TypeScript for JSDoc type checking..."
-if [ -d ".cache/js-tools" ]; then
-    echo "Installing TypeScript in local js-tools environment..."
-    cd .cache/js-tools
-    # Use the local Node.js installation to run npm
-    if [ -f "node/npm.cmd" ]; then
-        if ./node/npm.cmd install typescript; then
-            echo "✅ TypeScript installed successfully for JSDoc checking!"
-        else
-            echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
-        fi
-    elif [ -f "node/bin/npm" ]; then
-        if ./node/bin/npm install typescript; then
-            echo "✅ TypeScript installed successfully for JSDoc checking!"
-        else
-            echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
-        fi
-    else
-        echo "⚠️  Warning: Local npm not found in js-tools. Trying global installation..."
-        cd ../..
-        if command -v npm >/dev/null 2>&1; then
-            echo "Using global npm to install TypeScript..."
-            if npm install -g typescript; then
-                echo "✅ TypeScript installed globally for JSDoc checking!"
+if [ -z "$FASTLED_DOCKER" ]; then
+    # Install TypeScript for JSDoc type checking
+    echo "Installing TypeScript for JSDoc type checking..."
+    if [ -d ".cache/js-tools" ]; then
+        echo "Installing TypeScript in local js-tools environment..."
+        cd .cache/js-tools
+        # Use the local Node.js installation to run npm
+        if [ -f "node/npm.cmd" ]; then
+            if ./node/npm.cmd install typescript; then
+                echo "✅ TypeScript installed successfully for JSDoc checking!"
             else
-                echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+                echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
+            fi
+        elif [ -f "node/bin/npm" ]; then
+            if ./node/bin/npm install typescript; then
+                echo "✅ TypeScript installed successfully for JSDoc checking!"
+            else
+                echo "⚠️  Warning: TypeScript installation failed. JSDoc checking will be skipped."
             fi
         else
-            echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
+            echo "⚠️  Warning: Local npm not found in js-tools. Trying global installation..."
+            cd ../..
+            if command -v npm >/dev/null 2>&1; then
+                echo "Using global npm to install TypeScript..."
+                if npm install -g typescript; then
+                    echo "✅ TypeScript installed globally for JSDoc checking!"
+                else
+                    echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+                fi
+            else
+                echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
+            fi
         fi
-    fi
-    cd ../.. 2>/dev/null || true
-elif command -v npm >/dev/null 2>&1; then
-    echo "Using global npm to install TypeScript..."
-    if npm install -g typescript; then
-        echo "✅ TypeScript installed globally for JSDoc checking!"
+        cd ../.. 2>/dev/null || true
+    elif command -v npm >/dev/null 2>&1; then
+        echo "Using global npm to install TypeScript..."
+        if npm install -g typescript; then
+            echo "✅ TypeScript installed globally for JSDoc checking!"
+        else
+            echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+        fi
     else
-        echo "⚠️  Warning: Global TypeScript installation failed. JSDoc checking will be skipped."
+        echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
     fi
-else
-    echo "⚠️  Warning: npm not found. TypeScript cannot be installed. JSDoc checking will be skipped."
 fi
 
-echo "Setting up VSCode extensions..."
+if [ -z "$FASTLED_DOCKER" ]; then
+    echo "Setting up VSCode extensions..."
 
-# Install Auto Debug extension from local .vsix file
-echo "Installing Auto Debug extension for VSCode..."
-if [ -f .vscode/DarrenLevine.auto-debug-1.0.2.vsix ]; then
+    # Install Auto Debug extension from local .vsix file
+    echo "Installing Auto Debug extension for VSCode..."
+    if [ -f .vscode/DarrenLevine.auto-debug-1.0.2.vsix ]; then
     # Get absolute path to extension
     ext_path="$(cd .vscode && pwd)/DarrenLevine.auto-debug-1.0.2.vsix"
     installed_count=0
@@ -183,9 +190,12 @@ if [ -f .vscode/DarrenLevine.auto-debug-1.0.2.vsix ]; then
     else
         echo "✅ Auto Debug extension installed on $installed_count editors!"
     fi
+    else
+        echo "⚠️  Warning: Auto Debug extension file not found at .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
+        echo "      Please ensure the extension file is in the correct location."
+    fi
 else
-    echo "⚠️  Warning: Auto Debug extension file not found at .vscode/DarrenLevine.auto-debug-1.0.2.vsix"
-    echo "      Please ensure the extension file is in the correct location."
+    echo "ℹ️  Skipping VSCode extensions setup (running in Docker)"
 fi
 
 # Initialize and update git submodules (including wiki)
