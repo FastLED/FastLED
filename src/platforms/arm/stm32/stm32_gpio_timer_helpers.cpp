@@ -3,12 +3,28 @@
 ///
 /// This file centralizes common GPIO and Timer utility functions used across
 /// all STM32 SPI implementations (dual, quad, and octal) to eliminate code duplication.
+///
+/// IMPORTANT: This file requires STM32 HAL types (GPIO_TypeDef, TIM_TypeDef, etc.)
+/// which are only available on platforms with hardware SPI support enabled.
+/// It is only compiled when FL_STM32_HAS_SPI_HW_* flags are defined.
 
 #include "platforms/is_platform.h"
 
 #ifdef FL_IS_STM32
 
+#include "platforms/arm/stm32/stm32_capabilities.h"
+
+// Only compile this file if hardware SPI is enabled (requires HAL types)
+#if defined(FL_STM32_HAS_SPI_HW_2) || defined(FL_STM32_HAS_SPI_HW_4) || defined(FL_STM32_HAS_SPI_HW_8)
+
 #include <Arduino.h>
+
+// Ensure STM32 HAL types are available (needed for function signatures)
+// Arduino.h on STM32 platforms should include these, but we make it explicit
+#if __has_include("stm32_def.h")
+#include "stm32_def.h"  // STM32duino core - provides HAL includes
+#endif
+
 #include "platforms/arm/stm32/stm32_capabilities.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
@@ -824,4 +840,5 @@ void stopDMA(DMA_Stream_TypeDef* stream) {
 }  // namespace stm32
 }  // namespace fl
 
+#endif  // FL_STM32_HAS_SPI_HW_*
 #endif  // FL_IS_STM32
