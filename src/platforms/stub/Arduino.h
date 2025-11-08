@@ -132,6 +132,10 @@ struct SerialEmulation {
     void flush();
     void end();
     uint8_t peek();
+
+    // Support for Serial boolean checks (always returns true for stub platform)
+    explicit operator bool() const { return true; }
+    bool operator!() const { return false; }
 };
 
 #define LED_BUILTIN 13
