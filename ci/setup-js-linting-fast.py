@@ -123,7 +123,7 @@ def download_and_extract_node():
                 tar_ref.extractall(NODE_DIR)
             # Move contents from nested folder to NODE_DIR
             nested_dir = (
-                NODE_DIR / f"node-v{NODE_VERSION}-{platform.system().lower()}-x64"
+                NODE_DIR / f"node-v{NODE_VERSION}-{platform.system().lower()}-{arch}"
             )
             if nested_dir.exists():
                 for item in nested_dir.iterdir():
@@ -168,12 +168,26 @@ def setup_eslint():
 
     # Install ESLint
     try:
-        # Use absolute path for npm executable
+        # Get absolute paths for node and npm
+        node_exe_abs = (
+            (TOOLS_DIR / "node" / "node.exe").resolve()
+            if platform.system() == "Windows"
+            else (TOOLS_DIR / "node" / "bin" / "node").resolve()
+        )
         npm_exe_abs = (
             (TOOLS_DIR / "node" / "npm.cmd").resolve()
             if platform.system() == "Windows"
             else (TOOLS_DIR / "node" / "bin" / "npm").resolve()
         )
+
+        # Add node directory to PATH for npm to find node executable
+        env = os.environ.copy()
+        node_bin_dir = (
+            str((TOOLS_DIR / "node").resolve())
+            if platform.system() == "Windows"
+            else str((TOOLS_DIR / "node" / "bin").resolve())
+        )
+        env["PATH"] = f"{node_bin_dir}{os.pathsep}{env.get('PATH', '')}"
 
         # On Windows, use shell=True to properly execute .cmd files
         if platform.system() == "Windows":
@@ -184,6 +198,7 @@ def setup_eslint():
                 capture_output=True,
                 text=True,
                 shell=True,
+                env=env,
             )
         else:
             result = subprocess.run(
@@ -192,6 +207,7 @@ def setup_eslint():
                 check=True,
                 capture_output=True,
                 text=True,
+                env=env,
             )
         # npm install succeeded
     except subprocess.CalledProcessError as e:

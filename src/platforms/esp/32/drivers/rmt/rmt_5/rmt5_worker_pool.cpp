@@ -35,7 +35,7 @@ RmtWorkerPool& RmtWorkerPool::getInstance() {
 
 RmtWorkerPool::RmtWorkerPool()
     : mInitialized(false)
-    , mSpinlock(portMUX_INITIALIZER_UNLOCKED)
+    
     , mExpectedChannels(0)
     , mCreatedChannels(0)
 {
@@ -52,11 +52,6 @@ RmtWorkerPool::~RmtWorkerPool() {
     }
     mDoubleBufferWorkers.clear();
 
-    // Clean up one-shot workers
-    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
-        delete mOneShotWorkers[i];
-    }
-    mOneShotWorkers.clear();
 }
 
 void RmtWorkerPool::initializeWorkersIfNeeded() {
@@ -83,10 +78,8 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     // HYBRID MODE: Currently only creating double-buffer workers
     //
     // Rationale: Each worker needs its own RMT hardware channel, and we only have K channels.
-    // We can't create both double-buffer AND one-shot workers without exceeding K channels.
     //
     // Future hybrid approach could:
-    // 1. Create some double-buffer + some one-shot workers (split K channels)
     // 2. Dynamically reallocate channels based on strip sizes
     // 3. Use DMA mode for large strips (ESP32-S3/C6 only)
     //
@@ -96,8 +89,7 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
         ESP_LOGD(RMT5_POOL_TAG, "");
         ESP_LOGD(RMT5_POOL_TAG, "--- Creating worker %d/%d ---", i + 1, max_workers);
         ESP_LOGD(RMT5_POOL_TAG, "Allocating RmtWorker object...");
-        // Pass spinlock reference to worker for unified synchronization
-        RmtWorker* worker = new RmtWorker(&mSpinlock);
+        RmtWorker* worker = new RmtWorker();
         ESP_LOGD(RMT5_POOL_TAG, "Worker object allocated at %p", worker);
 
         ESP_LOGD(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
@@ -115,7 +107,7 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     }
 
 
-    if (mDoubleBufferWorkers.size() == 0 && mOneShotWorkers.size() == 0) {
+    if (mDoubleBufferWorkers.size() == 0 ) {
         FL_WARN("FATAL: No workers initialized successfully!");
     }
 
@@ -141,31 +133,13 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     initializeWorkersIfNeeded();
     ESP_LOGD(RMT5_POOL_TAG, "initializeWorkersIfNeeded() returned");
 
-    // HYBRID MODE: Determine preferred worker type based on strip size
-    // Small strips (<=200 LEDs / 600 bytes) would benefit from one-shot (zero flicker)
-    // Large strips (>200 LEDs) use double-buffer (memory efficient)
-    //
-    // NOTE: Currently all workers are double-buffer type since we don't create one-shot workers
-    // This logic is preserved for future hybrid mode implementation
-    bool use_oneshot = (static_cast<size_t>(num_bytes) <= ONE_SHOT_THRESHOLD_BYTES);
 
     // Try to get an available worker immediately
     ESP_LOGD(RMT5_POOL_TAG, "Entering critical section to search for available worker...");
-    portENTER_CRITICAL(&mSpinlock);
     IRmtWorkerBase* worker = nullptr;
 
     ESP_LOGD(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
-    ESP_LOGD(RMT5_POOL_TAG, "Available one-shot workers: %zu", mOneShotWorkers.size());
 
-    // Try one-shot first if preferred and available
-    if (use_oneshot && mOneShotWorkers.size() > 0) {
-        ESP_LOGD(RMT5_POOL_TAG, "Searching for available one-shot worker...");
-        worker = findAvailableOneShotWorker();
-        if (worker) {
-            ESP_LOGD(RMT5_POOL_TAG, "Found ONE-SHOT worker for %d bytes (%d LEDs)",
-                     num_bytes, num_bytes / 3);
-        } else {
-            ESP_LOGD(RMT5_POOL_TAG, "No one-shot worker available");
         }
     }
 
@@ -174,9 +148,6 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         ESP_LOGD(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
         worker = findAvailableDoubleBufferWorker();
         if (worker) {
-            if (use_oneshot && mOneShotWorkers.size() > 0) {
-                ESP_LOGD(RMT5_POOL_TAG, "Using DOUBLE-BUFFER worker for %d bytes (no one-shot available)", num_bytes);
-            } else {
                 ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
             }
         } else {
@@ -184,13 +155,11 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
     }
 
-    // CRITICAL: Mark worker unavailable BEFORE releasing spinlock
     // This prevents race where another thread/core acquires same worker
     if (worker) {
-        worker->markAsUnavailable();  // Under spinlock - atomic visibility
+        worker->markAsUnavailable();  // Volatile write
     }
 
-    portEXIT_CRITICAL(&mSpinlock);
     ESP_LOGD(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
 
     if (worker) {
@@ -257,22 +226,16 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
             ESP_LOGD(RMT5_POOL_TAG, "Polling iteration %u - searching for available worker...", poll_count);
         }
 
-        portENTER_CRITICAL(&mSpinlock);
 
-        if (use_oneshot && mOneShotWorkers.size() > 0) {
-            worker = findAvailableOneShotWorker();
-        }
 
         if (!worker) {
             worker = findAvailableDoubleBufferWorker();
         }
 
-        // CRITICAL: Mark unavailable BEFORE releasing spinlock
         if (worker) {
             worker->markAsUnavailable();
         }
 
-        portEXIT_CRITICAL(&mSpinlock);
 
         if (worker) {
             ESP_LOGD(RMT5_POOL_TAG, "Worker found in polling loop (iteration %u)", poll_count);
@@ -340,7 +303,6 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
     FL_WARN("WORKER ACQUISITION TIMEOUT");
     FL_WARN("========================================");
     FL_WARN("Failed to acquire worker for GPIO " << (int)pin << " after " << (poll_count / 10) << " ms");
-    FL_WARN("Available workers: 0 (all " << (mDoubleBufferWorkers.size() + mOneShotWorkers.size()) << " workers are busy)");
     FL_WARN("This usually indicates too many LED strips for available RMT channels");
     FL_WARN("========================================");
     FL_WARN("");
@@ -351,17 +313,13 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "RmtWorkerPool::releaseWorker called with null worker");
 
-    // CRITICAL: Mark worker available under spinlock for atomic visibility
     // This fixes the race condition where ISR completes but worker isn't yet available
-    portENTER_CRITICAL(&mSpinlock);
     worker->markAsAvailable();  // Sets mAvailable = true under lock
-    portEXIT_CRITICAL(&mSpinlock);
 
     ESP_LOGD(RMT5_POOL_TAG, "Worker released and marked available");
 }
 
 int RmtWorkerPool::getAvailableCount() const {
-    portENTER_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
     int count = 0;
 
     // Count double-buffer workers
@@ -371,19 +329,12 @@ int RmtWorkerPool::getAvailableCount() const {
         }
     }
 
-    // Count one-shot workers
-    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
-        if (mOneShotWorkers[i]->isAvailable()) {
-            count++;
-        }
     }
 
-    portEXIT_CRITICAL(const_cast<portMUX_TYPE*>(&mSpinlock));
     return count;
 }
 
 RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
-    // Caller must hold mSpinlock
     ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - searching %zu workers",
              mDoubleBufferWorkers.size());
 
@@ -399,15 +350,6 @@ RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
     return nullptr;
 }
 
-RmtWorkerOneShot* RmtWorkerPool::findAvailableOneShotWorker() {
-    // Caller must hold mSpinlock
-    for (int i = 0; i < static_cast<int>(mOneShotWorkers.size()); i++) {
-        if (mOneShotWorkers[i]->isAvailable()) {
-            return mOneShotWorkers[i];
-        }
-    }
-    return nullptr;
-}
 
 int RmtWorkerPool::getMaxWorkers() {
     // Platform-specific maximum worker count

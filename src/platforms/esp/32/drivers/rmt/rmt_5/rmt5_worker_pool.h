@@ -12,7 +12,6 @@
 #include "fl/chipsets/led_timing.h"
 #include "rmt5_worker_base.h"
 #include "rmt5_worker.h"
-#include "rmt5_worker_oneshot.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -24,25 +23,14 @@ FL_EXTERN_C_END
 
 namespace fl {
 
-// Hybrid mode configuration
-#ifndef FASTLED_ONESHOT_THRESHOLD_LEDS
-#define FASTLED_ONESHOT_THRESHOLD_LEDS 200
-#endif
-
 /**
  * RmtWorkerPool - Singleton pool manager for RMT workers
  *
  * Architecture:
  * - Manages K workers (where K = hardware channel count)
- * - Supports both double-buffer and one-shot workers
- * - Hybrid mode: automatic selection based on strip size
+ * - Double-buffer workers for efficient memory usage
  * - Supports N > K controllers through worker recycling
- * - Thread-safe worker acquisition/release
  * - Platform-specific worker count (ESP32=8, ESP32-S3=4, ESP32-C3/C6=2)
- *
- * Hybrid Mode (default):
- * - Strip <= 200 LEDs → One-shot worker (zero flicker, higher memory)
- * - Strip > 200 LEDs → Double-buffer worker (low flicker, efficient)
  *
  * Usage:
  *   RmtWorkerPool& pool = RmtWorkerPool::getInstance();
@@ -57,7 +45,7 @@ public:
     // Get singleton instance
     static RmtWorkerPool& getInstance();
 
-    // Acquire a worker with hybrid mode selection (blocks if all workers busy and N > K)
+    // Acquire a double-buffer worker (blocks if all workers busy and N > K)
     IRmtWorkerBase* acquireWorker(
         int num_bytes,
         gpio_num_t pin,
@@ -86,31 +74,21 @@ private:
     // Initialize workers on first use
     void initializeWorkersIfNeeded();
 
-    // Find an available worker of specific type (caller must hold spinlock)
+    // Find an available worker
     RmtWorker* findAvailableDoubleBufferWorker();
-    RmtWorkerOneShot* findAvailableOneShotWorker();
 
     // Get platform-specific max worker count
     static int getMaxWorkers();
 
-    // Threshold for hybrid mode (in bytes)
-    static constexpr size_t ONE_SHOT_THRESHOLD_BYTES = FASTLED_ONESHOT_THRESHOLD_LEDS * 3;
 
-    // Worker storage (separate pools for each type)
+    // Worker storage
     fl::vector<RmtWorker*> mDoubleBufferWorkers;
-    fl::vector<RmtWorkerOneShot*> mOneShotWorkers;
 
     // Legacy interface support
     fl::vector<RmtWorker*> mWorkers;  // Alias for double-buffer workers
 
     // Initialization flag
     bool mInitialized;
-
-    // Spinlock for thread-safe access
-    // CRITICAL: This is the AUTHORITATIVE lock for all worker state
-    // Workers hold a reference to this spinlock for unified synchronization
-    // All modifications to worker mAvailable flag MUST hold this lock
-    portMUX_TYPE mSpinlock;
 
     // Channel accounting (for strict verification)
     int mExpectedChannels;  // Number of channels we expect to create
