@@ -20,24 +20,40 @@ stub_dir = include_directories('src/platforms/stub')
 
 # Recursively discover all .cpp source files in src/ directory
 # Note: Meson doesn't have native rglob, so we use Python's pathlib
+# All files should always be included, no exceptions.
+# If there is a build issue then the cpp file does not have
+# the right #if-def guard in it to prevent compilation
 uv_prog = find_program('uv', required: true)
 
 python_rglob_script = '''
 import pathlib
 import sys
+import os
 directory = sys.argv[1]
 pattern = sys.argv[2]
+exclude_path = sys.argv[3] if len(sys.argv) > 3 else None
 matches = pathlib.Path(directory).rglob(pattern)
 for p in matches:
-    print(str(p))
+    # Normalize path for comparison (use forward slashes)
+    path_str = str(p).replace(os.sep, "/")
+    if exclude_path is None or exclude_path not in path_str:
+        print(str(p))
 '''
 
-discovered_sources = run_command(
-  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src', '*.cpp',
+# Discover platforms/shared sources separately for unity build isolation
+shared_sources_result = run_command(
+  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src/platforms/shared', '*.cpp',
   check: true,
   capture: true
 )
+shared_sources = files(shared_sources_result.stdout().strip().split('\n'))
 
+# Discover all other sources (excluding platforms/shared to avoid duplicates)
+discovered_sources = run_command(
+  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src', '*.cpp', 'platforms/shared',
+  check: true,
+  capture: true
+)
 fastled_sources = files(discovered_sources.stdout().strip().split('\n'))
 
 # Compile flags for unit tests (base flags)
@@ -134,12 +150,24 @@ if get_option('debug_mode')
   ]
 endif
 
-# Build FastLED static library for tests
+# Build platforms/shared sources with unity disabled (each file gets its own .o)
+# This prevents weak defaults from being combined with stub overrides in unity builds
+shared_objects = static_library('fastled_shared',
+  shared_sources,
+  include_directories: [src_dir, stub_dir],
+  cpp_args: unit_test_compile_args,
+  install: false,
+  override_options: ['unity=off']  # Each shared file compiles to its own .o
+)
+
+# Build main FastLED static library for tests
+# Includes objects from both unity builds (fastled_sources) and non-unity (shared_objects)
 fastled_lib = static_library('fastled',
   fastled_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: unit_test_compile_args,
-  install: false
+  install: false,
+  objects: shared_objects.extract_all_objects()  # Include shared .o files in libfastled.a
 )
 
 # Build tests subdirectory
