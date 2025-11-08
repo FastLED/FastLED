@@ -23,7 +23,7 @@ public:
     void end() override;
     DMABuffer acquireDMABuffer(size_t bytes_per_lane) override;
     bool transmit(TransmitMode mode = TransmitMode::ASYNC) override;
-    bool waitComplete(uint32_t timeout_ms = UINT32_MAX) override;
+    bool waitComplete(uint32_t timeout_ms = fl::numeric_limits<uint32_t>::max()) override;
     bool isBusy() const override;
     bool isInitialized() const override;
     int getBusId() const override;
