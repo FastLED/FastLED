@@ -30,20 +30,6 @@
 volatile fl::u32 fuckit;
 #endif
 
-// Disable to fix build breakage.
-// #ifndef FASTLED_DEFINE_WEAK_YEILD_FUNCTION
-// #if defined(__AVR_ATtiny13__)
-// // Arduino.h also defines this as a weak function on this platform.
-// #define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 0
-// #else
-// #define FASTLED_DEFINE_WEAK_YEILD_FUNCTION 1
-// #endif
-// #endif
-
-/// Has to be declared outside of any namespaces.
-/// Called at program exit when run in a desktop environment. 
-/// Extra C definition that some environments may need. 
-/// @returns 0 to indicate success
 
 #ifndef FASTLED_NO_ATEXIT
 #define FASTLED_NO_ATEXIT 0
@@ -419,5 +405,3 @@ namespace __cxxabiv1
 	}
 }
 #endif
-
-

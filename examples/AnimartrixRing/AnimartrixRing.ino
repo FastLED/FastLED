@@ -47,8 +47,8 @@ fl::ScreenMap screenmap = fl::ScreenMap(NUM_LEDS, 0.15f, [](int index, fl::vec2f
     float centerY = GRID_HEIGHT / 2.0f;
     float radius = fl::min(GRID_WIDTH, GRID_HEIGHT) / 2.0f - 1;
     float angle = (TWO_PI * index) / NUM_LEDS;
-    pt_out.x = centerX + cos(angle) * radius;
-    pt_out.y = centerY + sin(angle) * radius;
+    pt_out.x = centerX + fl::cos(angle) * radius;
+    pt_out.y = centerY + fl::sin(angle) * radius;
 });
 
 // Create the 2D-to-1D sampling effect

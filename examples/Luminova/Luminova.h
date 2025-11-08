@@ -86,8 +86,8 @@ void plotSoftDot(float fx, float fy, float s) {
     // map s (decays from 5) to a pixel radius 1..3
     float r = constrain(s * 0.5f, 1.0f, 3.0f);
     int R = (int)fl::ceilf(r);
-    int cx = (int)roundf(fx);
-    int cy = (int)roundf(fy);
+    int cx = (int)fl::roundf(fx);
+    int cy = (int)fl::roundf(fy);
     float r2 = r * r;
     for (int dy = -R; dy <= R; ++dy) {
         for (int dx = -R; dx <= R; ++dx) {
