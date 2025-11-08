@@ -202,28 +202,18 @@ unit_test_link_args = test_link_args
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
-# Build platforms/shared sources as object files in ONE unity chunk
-# Override unity_size to ensure all shared files go into a single .o file
-# This keeps shared files separate from stub overrides
-shared_objects = static_library('fastled_shared',
-  shared_sources,
-  include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,
-  install: false,
-  override_options: ['unity_size=1000']  # Force all shared files into one unity chunk
-)
-
-# Build main FastLED static library (excludes platforms/shared)
+# Build main FastLED static library (includes ALL sources)
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
-# Includes object files from shared_objects (compiled as single unity .o file)
+# Combines all sources (fastled_sources + shared_sources) for optimal unity builds
 fastled_lib = static_library('fastled',
-  fastled_sources,
+  # Combine ALL sources into a single library for unity build optimization
+  # This includes both fastled_sources and shared_sources
+  fastled_sources + shared_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: base_compile_args,
-  install: false,
-  objects: shared_objects.extract_all_objects(recursive: false)
+  install: false
 )
 
 # Build tests subdirectory
