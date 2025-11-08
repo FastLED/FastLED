@@ -2,6 +2,7 @@
 #include "fl/json.h"
 #include "platforms/shared/ui/json/button.h"
 #include "platforms/shared/ui/json/ui.h"
+#include "fl/assert.h"
 
 namespace fl {
 
@@ -62,6 +63,10 @@ void JsonButtonImpl::toJson(fl::Json &json) const {
 }
 
 bool JsonButtonImpl::isPressed() const {
+    if (!mInternal) {
+        FL_ASSERT(false, "JsonButtonImpl::isPressed() called before initialization");
+        return false;  // Return default value if not initialized
+    }
     return mInternal->isPressed();
 }
 

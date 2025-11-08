@@ -226,6 +226,12 @@ bool VideoImpl::updateBufferFromStream(fl::u32 now) {
                     return false;
                 }
             } else {
+                // For streaming mode, buffer might not have data yet - this is OK
+                // Producer (effect renderer) will fill buffer on next call
+                // Just return success and we'll try again next frame
+                if (mStream->getType() == PixelStream::kStreaming) {
+                    return true;  // Gracefully handle empty streaming buffer
+                }
                 FASTLED_WARN("We failed for some other reason");
                 return false;
             }
