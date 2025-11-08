@@ -380,15 +380,45 @@ class FL_ALIGN HeapVector {
         reserve(other.size());
         assign(other.begin(), other.end());
     }
-    HeapVector(HeapVector<T> &&other) {
-        this->swap(other);
-        other.clear();
+    // Move constructor - directly transfer ownership to maintain invariants
+    HeapVector(HeapVector<T> &&other)
+        : mArray(other.mArray)
+        , mCapacity(other.mCapacity)
+        , mSize(other.mSize)
+        , mAlloc(fl::move(other.mAlloc)) {
+        // Leave other in valid empty state (maintains invariant)
+        other.mArray = nullptr;
+        other.mSize = 0;
+        other.mCapacity = 0;
     }
     HeapVector &operator=(
         const HeapVector<T> &other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             mAlloc = other.mAlloc;
             assign(other.begin(), other.end());
+        }
+        return *this;
+    }
+
+    // Move assignment operator - explicitly defined to maintain invariants
+    HeapVector &operator=(HeapVector<T> &&other) {
+        if (this != &other) {
+            // Clean up our own resources first
+            clear();
+            if (mArray) {
+                mAlloc.deallocate(mArray, mCapacity);
+            }
+
+            // Transfer ownership from other
+            mArray = other.mArray;
+            mSize = other.mSize;
+            mCapacity = other.mCapacity;
+            mAlloc = fl::move(other.mAlloc);
+
+            // Leave other in valid empty state (maintains invariant)
+            other.mArray = nullptr;
+            other.mSize = 0;
+            other.mCapacity = 0;
         }
         return *this;
     }
@@ -421,11 +451,10 @@ class FL_ALIGN HeapVector {
 
     // Destructor
     ~HeapVector() {
-        clear();
+        clear();  // Destroys all elements and sets mSize = 0
+        // Invariant checks
         if (mArray) {
-            for (fl::size i = 0; i < mSize; ++i) {
-                mAlloc.destroy(&mArray[i]);
-            }
+            // No need to destroy elements again - clear() already did that
             mAlloc.deallocate(mArray, mCapacity);
             mArray = nullptr;
         }
@@ -636,8 +665,10 @@ public:
     }
 
     void clear() {
-        for (fl::size i = 0; i < mSize; ++i) {
-            mAlloc.destroy(&mArray[i]);
+        if (mArray) {  // Add null check before accessing array
+            for (fl::size i = 0; i < mSize; ++i) {
+                mAlloc.destroy(&mArray[i]);
+            }
         }
         mSize = 0;
     }
