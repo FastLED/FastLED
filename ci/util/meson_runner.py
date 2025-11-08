@@ -48,7 +48,7 @@ def check_meson_installed() -> bool:
 
 def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
     """
-    Get hash of source files discovered by collect_sources.py.
+    Get hash of all .cpp source files in src/ directory.
 
     This detects when source files are added or removed, which requires
     Meson reconfiguration to update the build graph.
@@ -60,24 +60,10 @@ def get_source_files_hash(source_dir: Path) -> tuple[str, list[str]]:
         Tuple of (hash_string, sorted_file_list)
     """
     try:
-        # Call collect_sources.py to get current source file list
-        result = subprocess.run(
-            ["uv", "run", "python", str(source_dir / "ci" / "collect_sources.py")],
-            capture_output=True,
-            text=True,
-            encoding="utf-8",
-            errors="replace",
-            timeout=10,
-            cwd=source_dir,
-        )
-
-        if result.returncode != 0:
-            _ts_print(f"[MESON] Warning: collect_sources.py failed: {result.stderr}")
-            return ("", [])
-
-        # Get sorted list of source files
+        # Recursively discover all .cpp files in src/ directory
+        src_path = source_dir / "src"
         source_files = sorted(
-            line.strip() for line in result.stdout.strip().split("\n") if line.strip()
+            str(p.relative_to(source_dir)) for p in src_path.rglob("*.cpp")
         )
 
         # Hash the list of file paths (not contents - just detect add/remove)

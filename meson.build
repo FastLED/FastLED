@@ -17,39 +17,27 @@ tests_dir = include_directories('tests')
 # Platform-specific stub include
 stub_dir = include_directories('src/platforms/stub')
 
-# FastLED library sources
-fastled_sources = files(
-  'src/FastLED.cpp',
-  'src/bitswap.cpp',
-  'src/cled_controller.cpp',
-  'src/colorpalettes.cpp',
-  'src/crgb.cpp',
-  'src/hsv2rgb.cpp',
-  'src/lib8tion.cpp',
-  'src/noise.cpp',
-  'src/platforms.cpp',
-  'src/power_mgt.cpp',
-  'src/simplex.cpp',
-  'src/transpose8x1_noinline.cpp',
-  'src/wiring.cpp',
-  'src/fastled_delay.cpp'
-)
-
-# Collect all .cpp files recursively from src directory
-# Uses external Python script to discover sources based on configuration in ci/source_config.py
+# Recursively discover all .cpp source files in src/ directory
+# Note: Meson doesn't have native rglob, so we use Python's pathlib
 uv_prog = find_program('uv', required: true)
 
-# Discover additional sources from configured directories
-additional_sources = run_command(
-  uv_prog, 'run', 'python',
-  meson.project_source_root() / 'ci' / 'collect_sources.py',
-  check: false, capture: true
+python_rglob_script = '''
+import pathlib
+import sys
+directory = sys.argv[1]
+pattern = sys.argv[2]
+matches = pathlib.Path(directory).rglob(pattern)
+for p in matches:
+    print(str(p))
+'''
+
+discovered_sources = run_command(
+  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src', '*.cpp',
+  check: true,
+  capture: true
 )
 
-# Add discovered sources if any
-if additional_sources.returncode() == 0 and additional_sources.stdout().strip() != ''
-  fastled_sources += files(additional_sources.stdout().strip().split('\n'))
-endif
+fastled_sources = files(discovered_sources.stdout().strip().split('\n'))
 
 # Compile flags for unit tests (base flags)
 unit_test_compile_args = [
