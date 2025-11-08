@@ -140,16 +140,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 
     ESP_LOGD(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
 
-        }
-    }
-
     // Fall back to double-buffer worker
     if (!worker) {
         ESP_LOGD(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
         worker = findAvailableDoubleBufferWorker();
         if (worker) {
-                ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
-            }
+            ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
         } else {
             ESP_LOGD(RMT5_POOL_TAG, "No double-buffer worker available");
         }
@@ -327,8 +323,6 @@ int RmtWorkerPool::getAvailableCount() const {
         if (mDoubleBufferWorkers[i]->isAvailable()) {
             count++;
         }
-    }
-
     }
 
     return count;

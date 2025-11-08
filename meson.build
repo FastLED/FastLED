@@ -25,17 +25,9 @@ stub_dir = include_directories('src/platforms/stub')
 # the right #if-def guard in it to prevent compilation
 uv_prog = find_program('uv', required: true)
 
-# Discover platforms/shared sources separately for unity build isolation
-shared_sources_result = run_command(
-  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src/platforms/shared', '*.cpp',
-  check: true,
-  capture: true
-)
-shared_sources = files(shared_sources_result.stdout().strip().split('\n'))
-
-# Discover all other sources (excluding platforms/shared to avoid duplicates)
+# Discover ALL sources in one call
 discovered_sources = run_command(
-  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src', '*.cpp', 'platforms/shared',
+  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src', '*.cpp',
   check: true,
   capture: true
 )
@@ -206,13 +198,14 @@ example_link_args = base_link_args
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
-# Combines all sources (fastled_sources + shared_sources) for optimal unity builds
+# Unity builds DISABLED for this library due to weak/strong symbol conflicts:
+# - stub files (spi_*_stub.cpp) override weak defaults in platforms/shared/spi_hw_*.cpp
+# - Unity builds combine these into single translation units, causing redefinition errors
 fastled_lib = static_library('fastled',
-  # Combine ALL sources into a single library for unity build optimization
-  # This includes both fastled_sources and shared_sources
-  fastled_sources + shared_sources,
+  fastled_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: base_compile_args,
+  override_options: ['unity=off'],
   install: false
 )
 
