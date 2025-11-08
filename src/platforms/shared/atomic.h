@@ -79,6 +79,19 @@ public:
         return __atomic_fetch_sub(&mValue, value, __ATOMIC_ACQ_REL);
     }
 
+    // Compare-and-swap operations
+    bool compare_exchange_weak(T& expected, T desired, int order = memory_order_acq_rel) {
+        return __atomic_compare_exchange_n(&mValue, &expected, desired,
+                                          true, // weak
+                                          order, order);
+    }
+
+    bool compare_exchange_strong(T& expected, T desired, int order = memory_order_acq_rel) {
+        return __atomic_compare_exchange_n(&mValue, &expected, desired,
+                                          false, // strong
+                                          order, order);
+    }
+
 private:
     mutable T mValue;  // mutable to allow load() on const objects
 };

@@ -64,7 +64,7 @@ template <typename T> class AtomicFake {
         return old;
     }
     
-    bool compare_exchange_weak(T& expected, T desired) {
+    bool compare_exchange_weak(T& expected, T desired, memory_order = memory_order_seq_cst) {
         if (mValue == expected) {
             mValue = desired;
             return true;
@@ -73,8 +73,8 @@ template <typename T> class AtomicFake {
             return false;
         }
     }
-    
-    bool compare_exchange_strong(T& expected, T desired) {
+
+    bool compare_exchange_strong(T& expected, T desired, memory_order = memory_order_seq_cst) {
         return compare_exchange_weak(expected, desired);
     }
     
