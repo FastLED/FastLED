@@ -120,7 +120,7 @@ if unity_enabled
           '-fpch-validate-input-files-content',       # Validate based on content, not mtime
         ],
         link_args: unit_test_link_args,
-        link_with: [fastled_lib, shared_lib, doctest_main],
+        link_with: [fastled_lib, doctest_main],
         install: false
       )
 
@@ -163,7 +163,7 @@ else
       include_directories: [src_dir, tests_dir, stub_dir],
       cpp_args: test_cpp_args,
       link_args: unit_test_link_args,
-      link_with: [fastled_lib, shared_lib, doctest_main],
+      link_with: [fastled_lib, doctest_main],
       install: false
     )
 

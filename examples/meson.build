@@ -191,7 +191,7 @@ foreach example_name : example_paths.keys()
         'example-' + example_name,
         all_sources,  # Wrapper + additional .cpp files
         include_directories: all_includes,
-        link_with: [fastled_lib, shared_lib],
+        link_with: fastled_lib,
         cpp_args: example_compile_args + debug_cpp_args,
         link_args: example_link_args,
         build_by_default: false,  # Only build when explicitly requested
