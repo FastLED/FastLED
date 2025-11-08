@@ -47,7 +47,6 @@ stub_incompatible_examples = [
 
 
     # Other platform-specific
-    'Codec',                   # Platform-specific
     'OctoWS2811',             # Teensy OctoWS2811 library
     'OctoWS2811Demo',         # Teensy OctoWS2811 library
     'Parallel_IO',            # RP2040-specific PIO
