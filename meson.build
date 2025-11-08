@@ -202,31 +202,25 @@ unit_test_link_args = test_link_args
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
-# Build platforms/shared sources as ONE unity .o file
+# Build platforms/shared sources as a separate static library
 # This keeps shared files in their own unity chunk, separate from stub overrides
 # CRITICAL: Uses base_compile_args (NOT unit_test_compile_args) for ABI compatibility with examples
-shared_objects = static_library('fastled_shared',
+shared_lib = static_library('fastled_shared',
   shared_sources,
   include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,  # Changed from unit_test_compile_args for ABI compatibility
+  cpp_args: base_compile_args,
   install: false
-  # Unity builds enabled (inherits from project) - all shared files → one unity .o
 )
 
-# Build main FastLED static library
+# Build main FastLED static library (excludes platforms/shared)
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
-# Includes objects from two separate unity builds:
-#   - fastled_sources → fastled-unity0.o, fastled-unity1.o, ... (stub + other sources)
-#   - shared_objects  → fastled_shared-unity0.o (all platforms/shared files)
-# All .o files merged into libfastled.a
 fastled_lib = static_library('fastled',
   fastled_sources,
   include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,  # Changed from unit_test_compile_args for ABI compatibility
-  install: false,
-  objects: shared_objects.extract_all_objects()  # Include shared unity .o in libfastled.a
+  cpp_args: base_compile_args,
+  install: false
 )
 
 # Build tests subdirectory

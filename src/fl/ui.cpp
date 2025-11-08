@@ -33,7 +33,7 @@ UICheckbox::~UICheckbox() {}
 
 // UINumberField constructor
 UINumberField::UINumberField(const char *name, double value, double min, double max)
-    : mImpl(name, value, min, max), mLastFrameValue(0), mLastFrameValueValid(false), mListener(this) {
+    : mImpl(name, value, min, max), mListener(this), mLastFrameValue(0), mLastFrameValueValid(false) {
     mListener.addToEngineEventsOnce();
 }
 
