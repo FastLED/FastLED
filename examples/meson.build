@@ -123,7 +123,7 @@ foreach line : result_includes.stdout().strip().split('\n')
 endforeach
 
 # Get stub_main.cpp source file (provides main() that calls setup/loop)
-stub_main_src = project_root / 'src' / 'fl' / 'stub_main.cpp'
+stub_main_src = project_root / 'src' / 'platforms' / 'stub_main.cpp'
 
 # List to store all example executables for the alias target
 example_executables = []

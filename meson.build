@@ -131,6 +131,10 @@ test_specific_args = [
 # Currently empty - examples use only base_compile_args
 example_specific_args = []
 
+# Construct final compile args for tests and examples
+unit_test_compile_args = base_compile_args + test_specific_args
+example_compile_args = base_compile_args + example_specific_args
+
 # Platform-specific base link arguments (shared by both tests and examples)
 base_link_args = []
 if build_machine.system() == 'windows'
@@ -164,7 +168,27 @@ if build_machine.system() == 'windows'
   ]
 endif
 
-# Build FastLED static library for tests
+# Legacy alias for backward compatibility with tests/meson.build
+unit_test_link_args = test_link_args
+
+# Example-specific link arguments (currently same as base)
+example_link_args = base_link_args
+
+# Build platforms/shared sources as ONE unity .o file
+# This keeps shared files in their own unity chunk, separate from stub overrides
+shared_objects = static_library('fastled_shared',
+  shared_sources,
+  include_directories: [src_dir, stub_dir],
+  cpp_args: unit_test_compile_args,
+  install: false
+  # Unity builds enabled (inherits from project) - all shared files → one unity .o
+)
+
+# Build main FastLED static library for tests
+# Includes objects from two separate unity builds:
+#   - fastled_sources → fastled-unity0.o, fastled-unity1.o, ... (stub + other sources)
+#   - shared_objects  → fastled_shared-unity0.o (all platforms/shared files)
+# All .o files merged into libfastled.a
 fastled_lib = static_library('fastled',
   fastled_sources,
   include_directories: [src_dir, stub_dir],

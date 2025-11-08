@@ -89,12 +89,12 @@ TEST_CASE("FL_ALIGN_AS") {
         AlignedToInt ati;
         (void)ati; // Suppress unused variable warning
 
-#ifdef __EMSCRIPTEN__
+#ifdef __AVR__
+        // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
+        CHECK(alignof(AlignedToInt) >= 1);
+#else
         // Should be aligned to int (4 bytes on most platforms)
         CHECK_EQ(alignof(AlignedToInt), alignof(int));
-#else
-        // On other platforms, FL_ALIGN_AS is a no-op
-        CHECK(alignof(AlignedToInt) >= 1);
 #endif
     }
 
@@ -107,12 +107,12 @@ TEST_CASE("FL_ALIGN_AS") {
         AlignedToDouble atd;
         (void)atd; // Suppress unused variable warning
 
-#ifdef __EMSCRIPTEN__
+#ifdef __AVR__
+        // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
+        CHECK(alignof(AlignedToDouble) >= 1);
+#else
         // Should be aligned to double (8 bytes on most platforms)
         CHECK_EQ(alignof(AlignedToDouble), alignof(double));
-#else
-        // On other platforms, FL_ALIGN_AS is a no-op
-        CHECK(alignof(AlignedToDouble) >= 1);
 #endif
     }
 
@@ -128,13 +128,13 @@ TEST_CASE("FL_ALIGN_AS") {
         AlignedToCustom atc;
         (void)atc; // Suppress unused variable warning
 
-#ifdef __EMSCRIPTEN__
+#ifdef __AVR__
+        // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
+        CHECK(alignof(AlignedToCustom) >= 1);
+#else
         // Should be aligned to CustomAligned (16 bytes)
         CHECK_EQ(alignof(AlignedToCustom), alignof(CustomAligned));
         CHECK_EQ(alignof(AlignedToCustom), 16);
-#else
-        // On other platforms, FL_ALIGN_AS is a no-op
-        CHECK(alignof(AlignedToCustom) >= 1);
 #endif
     }
 
@@ -146,12 +146,12 @@ TEST_CASE("FL_ALIGN_AS") {
         AlignedToPointer atp;
         (void)atp; // Suppress unused variable warning
 
-#ifdef __EMSCRIPTEN__
+#ifdef __AVR__
+        // On AVR (8-bit), FL_ALIGN_AS is a no-op to save RAM
+        CHECK(alignof(AlignedToPointer) >= 1);
+#else
         // Should be aligned to pointer size
         CHECK_EQ(alignof(AlignedToPointer), alignof(void*));
-#else
-        // On other platforms, FL_ALIGN_AS is a no-op
-        CHECK(alignof(AlignedToPointer) >= 1);
 #endif
     }
 }
@@ -278,12 +278,12 @@ TEST_CASE("FL_ALIGN macro combinations") {
         BothAligned ba;
         (void)ba; // Suppress unused variable warning
 
-#ifdef __EMSCRIPTEN__
+#ifdef __AVR__
+        // On AVR (8-bit), both macros are no-ops to save RAM
+        CHECK(alignof(BothAligned) >= 1);
+#else
         // Both macros should apply - FL_ALIGN_AS(double) takes precedence
         CHECK_EQ(alignof(BothAligned), alignof(double));
-#else
-        // Both are no-ops
-        CHECK(alignof(BothAligned) >= 1);
 #endif
     }
 

@@ -9,6 +9,7 @@
 #include "fl/new.h"
 #include "fl/bitset.h"
 #include "fl/malloc.h"
+#include "fl/align.h"
 
 #ifndef FASTLED_DEFAULT_SLAB_SIZE
 #define FASTLED_DEFAULT_SLAB_SIZE 8
@@ -727,7 +728,7 @@ private:
 
     // Inlined storage block
     struct InlinedStorage {
-        alignas(T) u8 data[N * sizeof(T)];
+        FL_ALIGN_AS(T) u8 data[N * sizeof(T)];
         
         InlinedStorage() {
             fl::memset(data, 0, sizeof(data));

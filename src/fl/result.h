@@ -37,6 +37,7 @@
 
 #include "fl/stdint.h"
 #include "fl/utility.h"
+#include "fl/align.h"
 
 namespace fl {
 
@@ -139,7 +140,7 @@ private:
     bool is_ok;
     E error_code;
     const char* error_msg;
-    alignas(T) char storage[sizeof(T)];
+    FL_ALIGN_AS(T) char storage[sizeof(T)];
 
     // Non-copyable
     Result(const Result&) = delete;

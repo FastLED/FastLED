@@ -24,6 +24,6 @@ void loop() {}
 #endif // FASTLED_STUB_MAIN_INCLUDE_INO
 
 // Include the header which provides main() and other infrastructure
-#include "fl/stub_main.hpp"
+#include "platforms/stub_main.hpp"
 
 #endif // FASTLED_STUB_MAIN or FASTLED_STUB_MAIN_INCLUDE_INO

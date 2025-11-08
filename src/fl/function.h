@@ -76,7 +76,7 @@ private:
     struct InlinedLambda {
         // Storage for the lambda/functor object
         // Use aligned storage to ensure proper alignment for any type
-        alignas(max_align_t) char bytes[kInlineLambdaSize];
+        FL_ALIGN_MAX char bytes[kInlineLambdaSize];
         
         // Type-erased invoker and destructor function pointers
         R (*invoker)(const InlinedLambda& storage, Args... args);
@@ -125,7 +125,7 @@ private:
         template <typename FUNCTOR>
         static R invoke_lambda(const InlinedLambda& storage, Args... args) {
             // Use placement new to safely access the stored lambda
-            alignas(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
+            FL_ALIGN_AS(FUNCTOR) char temp_storage[sizeof(FUNCTOR)];
             // Copy the lambda from storage
             fl::memcpy(temp_storage, storage.bytes, sizeof(FUNCTOR));
             // Get a properly typed pointer to the copied lambda (non-const for mutable lambdas)

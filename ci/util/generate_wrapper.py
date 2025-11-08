@@ -23,7 +23,7 @@ def main():
 // This file includes the Arduino sketch and provides main()
 
 #include "{ino_file}"
-#include "fl/stub_main.hpp"
+#include "platforms/stub_main.hpp"
 """
 
     with open(output_file, "w") as f:
