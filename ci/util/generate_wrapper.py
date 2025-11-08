@@ -6,9 +6,13 @@ This script creates a simple wrapper that includes the .ino file and provides ma
 
 import sys
 
+
 def main():
     if len(sys.argv) != 4:
-        print("Usage: generate_wrapper.py <output_file> <example_name> <ino_file>", file=sys.stderr)
+        print(
+            "Usage: generate_wrapper.py <output_file> <example_name> <ino_file>",
+            file=sys.stderr,
+        )
         sys.exit(1)
 
     output_file = sys.argv[1]
@@ -22,10 +26,11 @@ def main():
 #include "fl/stub_main.hpp"
 """
 
-    with open(output_file, 'w') as f:
+    with open(output_file, "w") as f:
         f.write(content)
 
     print(f"Generated wrapper: {output_file}")
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
