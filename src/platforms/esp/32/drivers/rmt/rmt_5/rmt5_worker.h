@@ -65,7 +65,7 @@ public:
     static constexpr int PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
 
     // Worker lifecycle
-    RmtWorker(portMUX_TYPE* pool_spinlock);
+    RmtWorker();
     ~RmtWorker() override;
 
     // Initialize hardware channel (called once per worker)
@@ -135,7 +135,7 @@ private:
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
 
     // Transmission state
-    bool mAvailable;                  // Worker available (protected by pool's spinlock)
+    bool mAvailable;                  // Worker available (volatile for lock-free access)
     fl::atomic_bool mTransmitting;    // Transmission in progress (ISR flag)
     const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
     int mNumBytes;                    // Total bytes to transmit
@@ -143,9 +143,6 @@ private:
 
     // Completion synchronization (replaces spin-wait)
     SemaphoreHandle_t mCompletionSemaphore;
-
-    // Reference to pool's spinlock (unified synchronization)
-    portMUX_TYPE* mPoolSpinlock;
 
     // ISR handlers
     static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (currently unused)
