@@ -150,24 +150,27 @@ if get_option('debug_mode')
   ]
 endif
 
-# Build platforms/shared sources with unity disabled (each file gets its own .o)
-# This prevents weak defaults from being combined with stub overrides in unity builds
+# Build platforms/shared sources as ONE unity .o file
+# This keeps shared files in their own unity chunk, separate from stub overrides
 shared_objects = static_library('fastled_shared',
   shared_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: unit_test_compile_args,
-  install: false,
-  override_options: ['unity=off']  # Each shared file compiles to its own .o
+  install: false
+  # Unity builds enabled (inherits from project) - all shared files → one unity .o
 )
 
 # Build main FastLED static library for tests
-# Includes objects from both unity builds (fastled_sources) and non-unity (shared_objects)
+# Includes objects from two separate unity builds:
+#   - fastled_sources → fastled-unity0.o, fastled-unity1.o, ... (stub + other sources)
+#   - shared_objects  → fastled_shared-unity0.o (all platforms/shared files)
+# All .o files merged into libfastled.a
 fastled_lib = static_library('fastled',
   fastled_sources,
   include_directories: [src_dir, stub_dir],
   cpp_args: unit_test_compile_args,
   install: false,
-  objects: shared_objects.extract_all_objects()  # Include shared .o files in libfastled.a
+  objects: shared_objects.extract_all_objects()  # Include shared unity .o in libfastled.a
 )
 
 # Build tests subdirectory
