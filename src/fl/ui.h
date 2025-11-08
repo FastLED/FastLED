@@ -26,7 +26,7 @@ namespace fl {
 // Base class for UI elements that provides string-based group functionality
 class UIElement {
   public:
-    UIElement() {}
+    UIElement();
     VIRTUAL_IF_NOT_AVR ~UIElement() {}
     virtual void setGroup(const fl::string& groupName) { mGroupName = groupName; }
 
@@ -44,8 +44,7 @@ class UISlider : public UIElement {
     FL_NO_COPY(UISlider)
     // If step is -1, it will be calculated as (max - min) / 100
     UISlider(const char *name, float value = 128.0f, float min = 1,
-             float max = 255, float step = -1.f)
-        : mImpl(name, value, min, max, step), mListener(this) {}
+             float max = 255, float step = -1.f);
     float value() const { return mImpl.value(); }
     float value_normalized() const {
         float min = mImpl.getMin();
@@ -97,7 +96,7 @@ class UISlider : public UIElement {
 
     struct Listener : public EngineEvents::Listener {
         Listener(UISlider *owner) : mOwner(owner) {
-            EngineEvents::addListener(this);
+            
         }
         ~Listener() {
             if (added) {
@@ -130,8 +129,8 @@ class UISlider : public UIElement {
 class UIButton : public UIElement {
   public:
     FL_NO_COPY(UIButton)
-    UIButton(const char *name) : mImpl(name), mListener(this) {}
-    ~UIButton() {}
+    UIButton(const char *name);
+    ~UIButton();
     bool isPressed() const {
         if (mImpl.isPressed()) {
             return true;
@@ -206,7 +205,6 @@ class UIButton : public UIElement {
 
     struct Listener : public EngineEvents::Listener {
         Listener(UIButton *owner) : mOwner(owner) {
-            EngineEvents::addListener(this);
         }
         ~Listener() {
             if (added) {
@@ -240,9 +238,8 @@ class UIButton : public UIElement {
 class UICheckbox : public UIElement {
   public:
     FL_NO_COPY(UICheckbox);
-    UICheckbox(const char *name, bool value = false)
-        : mImpl(name, value), mLastFrameValue(false), mLastFrameValueValid(false), mListener(this) {}
-    ~UICheckbox() {}
+    UICheckbox(const char *name, bool value = false);
+    ~UICheckbox();
 
     operator bool() const { return value(); }
     explicit operator int() const { return static_cast<int>(value()); }
@@ -271,7 +268,7 @@ class UICheckbox : public UIElement {
 
     struct Listener : public EngineEvents::Listener {
         Listener(UICheckbox *owner) : mOwner(owner) {
-            EngineEvents::addListener(this);
+            // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
         ~Listener() {
             if (added) {
@@ -303,9 +300,8 @@ class UINumberField : public UIElement {
   public:
     FL_NO_COPY(UINumberField);
     UINumberField(const char *name, double value, double min = 0,
-                  double max = 100)
-        : mImpl(name, value, min, max), mLastFrameValue(0), mLastFrameValueValid(false), mListener(this) {}
-    ~UINumberField() {}
+                  double max = 100);
+    ~UINumberField();
     double value() const { return mImpl.value(); }
     void setValue(double value) { mImpl.setValue(value); }
     operator double() const { return mImpl.value(); }
@@ -339,7 +335,7 @@ class UINumberField : public UIElement {
   private:
     struct Listener : public EngineEvents::Listener {
         Listener(UINumberField *owner) : mOwner(owner) {
-            EngineEvents::addListener(this);
+            // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
         ~Listener() {
             if (added) {
@@ -369,12 +365,8 @@ class UINumberField : public UIElement {
 class UITitle : public UIElement {
   public:
     FL_NO_COPY(UITitle);
-#if FASTLED_USE_JSON_UI
-    UITitle(const char *name) : mImpl(fl::string(name), fl::string(name)) {}
-#else
-    UITitle(const char *name) : mImpl(name) {}
-#endif
-    ~UITitle() {}
+    UITitle(const char *name);
+    ~UITitle();
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -390,8 +382,8 @@ class UITitle : public UIElement {
 class UIDescription : public UIElement {
   public:
     FL_NO_COPY(UIDescription);
-    UIDescription(const char *name) : mImpl(name) {}
-    ~UIDescription() {}
+    UIDescription(const char *name);
+    ~UIDescription();
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -407,8 +399,8 @@ class UIDescription : public UIElement {
 class UIHelp : public UIElement {
   public:
     FL_NO_COPY(UIHelp);
-    UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
-    ~UIHelp() {}
+    UIHelp(const char *markdownContent);
+    ~UIHelp();
     
     // Override setGroup to also update the implementation
     void setGroup(const fl::string& groupName) override { 
@@ -427,8 +419,8 @@ class UIHelp : public UIElement {
 class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)
-    UIAudio(const char *name) : mImpl(name) {}
-    ~UIAudio() {}
+    UIAudio(const char *name);
+    ~UIAudio();
     AudioSample next() { return mImpl.next(); }
     bool hasNext() { return mImpl.hasNext(); }
     
@@ -450,14 +442,12 @@ class UIDropdown : public UIElement {
     
 
     // Constructor with fl::span<fl::string> for arrays and containers.
-    UIDropdown(const char *name, fl::span<fl::string> options)
-        : mImpl(fl::string(name), options), mListener(this) {}
+    UIDropdown(const char *name, fl::span<fl::string> options);
 
     // Constructor with initializer_list
-    UIDropdown(const char *name, fl::initializer_list<fl::string> options)
-        : mImpl(name, options), mListener(this) {}
+    UIDropdown(const char *name, fl::initializer_list<fl::string> options);
 
-    ~UIDropdown() {}
+    ~UIDropdown();
     
     fl::string value() const { return mImpl.value(); }
     int as_int() const { return mImpl.value_int(); }
@@ -509,7 +499,7 @@ class UIDropdown : public UIElement {
 
     struct Listener : public EngineEvents::Listener {
         Listener(UIDropdown *owner) : mOwner(owner) {
-            EngineEvents::addListener(this);
+            // Don't register in constructor - prevents callbacks before owner is fully initialized
         }
         ~Listener() {
             if (added) {
@@ -541,19 +531,19 @@ class UIDropdown : public UIElement {
 class UIGroup {
   public:
     FL_NO_COPY(UIGroup);
-    
+
     // Constructor takes fl::string as the only parameter for grouping name
-    UIGroup(const fl::string& groupName) : mImpl(groupName.c_str()) {}
-    
+    UIGroup(const fl::string& groupName);
+
     // Variadic template constructor: first argument is group name, remaining are UI elements
     template<typename... UIElements>
-    UIGroup(const fl::string& groupName, UIElements&... elements) 
+    UIGroup(const fl::string& groupName, UIElements&... elements)
         : mImpl(groupName.c_str()) {
         // Add all UI elements to this group
         add(elements...);
     }
-    
-    ~UIGroup() {}
+
+    ~UIGroup();
     
     // Get the group name
     fl::string name() const { return mImpl.name(); }

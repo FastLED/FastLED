@@ -7,6 +7,76 @@ FL_DISABLE_WARNING(float-equal)
 
 namespace fl {
 
+// UIElement constructor
+UIElement::UIElement() {}
+
+// UISlider constructor
+UISlider::UISlider(const char *name, float value, float min, float max, float step)
+    : mImpl(name, value, min, max, step), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+// UIButton constructor
+UIButton::UIButton(const char *name) : mImpl(name), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+UIButton::~UIButton() {}
+
+// UICheckbox constructor
+UICheckbox::UICheckbox(const char *name, bool value)
+    : mImpl(name, value), mLastFrameValue(false), mLastFrameValueValid(false), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+UICheckbox::~UICheckbox() {}
+
+// UINumberField constructor
+UINumberField::UINumberField(const char *name, double value, double min, double max)
+    : mImpl(name, value, min, max), mLastFrameValue(0), mLastFrameValueValid(false), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+UINumberField::~UINumberField() {}
+
+// UITitle constructors
+#if FASTLED_USE_JSON_UI
+UITitle::UITitle(const char *name) : mImpl(fl::string(name), fl::string(name)) {}
+#else
+UITitle::UITitle(const char *name) : mImpl(name) {}
+#endif
+
+UITitle::~UITitle() {}
+
+// UIDescription constructor
+UIDescription::UIDescription(const char *name) : mImpl(name) {}
+UIDescription::~UIDescription() {}
+
+// UIHelp constructor
+UIHelp::UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
+UIHelp::~UIHelp() {}
+
+// UIAudio constructor
+UIAudio::UIAudio(const char *name) : mImpl(name) {}
+UIAudio::~UIAudio() {}
+
+// UIDropdown constructors
+UIDropdown::UIDropdown(const char *name, fl::span<fl::string> options)
+    : mImpl(fl::string(name), options), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+UIDropdown::UIDropdown(const char *name, fl::initializer_list<fl::string> options)
+    : mImpl(name, options), mListener(this) {
+    mListener.addToEngineEventsOnce();
+}
+
+UIDropdown::~UIDropdown() {}
+
+// UIGroup constructors
+UIGroup::UIGroup(const fl::string& groupName) : mImpl(groupName.c_str()) {}
+UIGroup::~UIGroup() {}
+
 void UISlider::setValue(float value) {
     float oldValue = mImpl.value();
     if (value != oldValue) {
