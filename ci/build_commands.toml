@@ -6,7 +6,6 @@ defines = [
 ]
 compiler_flags = [
   "-std=gnu++17",
-  "-fpermissive",
   "-Wall",
   "-Wextra"
 ]

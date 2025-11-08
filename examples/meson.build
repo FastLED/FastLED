@@ -25,9 +25,10 @@
 project_root = meson.project_source_root()
 fs = import('fs')
 
-# Define include directories for FastLED (relative to this meson.build file)
-fastled_src_dir = include_directories('../src')
-fastled_stub_dir = include_directories('../src/platforms/stub')
+# Include directories are provided by parent meson.build:
+#   src_dir  = include_directories('src')
+#   stub_dir = include_directories('src/platforms/stub')
+# No need to redefine them here
 
 # ============================================================================
 # HOST-BASED EXAMPLE COMPILATION (Fast, using STUB platform)
@@ -36,60 +37,56 @@ fastled_stub_dir = include_directories('../src/platforms/stub')
 # Discovers all .ino files and uses their parent directory as the sketch directory.
 
 # Blacklist of examples that won't compile with STUB platform
-# These require platform-specific hardware, Serial, or other unavailable features
+# After build config refactoring (proper 16MB stack + pthread support), many "memory crash" examples now work!
+# Keep only truly platform-specific examples here.
 stub_incompatible_examples = [
-    'AdafruitBridge',          # Platform-specific driver
-    'Animartrix',              # Excessive memory usage (crashes on host)
-    'AnimartrixRing',          # Uses cos/sin (missing math)
+    # Hardware dependencies (Serial/Audio/Network/SD)
     'Audio',                   # Audio hardware
     'AudioInput',              # Audio hardware
     'BeatDetection',           # Uses Serial
-    'Bulk',                    # Platform-specific
-    'BulkRmtSimple',          # Platform-specific (ESP32 RMT)
-    'Chromancer',              # Excessive memory usage (crashes on host)
-    'Codec',                   # Platform-specific
-    'ColorBoost',              # Crashes on host (uninitialized bool)
-    'Corkscrew',               # Crashes on host (excessive memory)
-    # 'Downscale',               # DEBUGGING: Temporarily enabled to investigate crash
-    'EaseInOut',               # Crashes on host (excessive memory)
-    'Esp32P4Parlio',          # ESP32-specific
-    'Esp8266Uart',            # ESP8266-specific
     'FestivalStick',          # Uses Serial
-    'FireCylinder',            # Crashes on host (null pointer)
-    'FireMatrix',              # Excessive memory usage (100x100 LED array = 300KB)
-    'FxEngine',                # Video/buffer issues on host
-    'FxNoisePlusPalette',      # Crashes on host (excessive memory)
-    'FxNoiseRing',             # Crashes on host (excessive memory)
     'FxSdCard',               # SD card hardware
-    'FxWave2d',                # Crashes on host (excessive memory)
-    'HSVTest',                 # Crashes on host (excessive memory)
-    'Json',                    # Crashes on host (initialization issues)
-    'LCD_I80',                # ESP-specific LCD
-    'Luminova',               # Uses roundf (missing math)
     'LuminescentGrand',       # Uses Serial
     'NetTest',                # Network hardware
-    'NoisePlayground',         # Crashes on host (excessive memory)
-    'OctoWS2811',             # Teensy OctoWS2811 library
-    'OctoWS2811Demo',         # Teensy OctoWS2811 library
     'OTA',                    # Network/OTA specific
-    'Overclock',              # Platform-specific
-    'Parallel_IO',            # RP2040-specific
-    'ParallelSPI',            # Platform-specific
-    'Particles1d',             # Crashes on host (excessive memory)
-    'PhasorField',            # Uses cos/sin
     'Pintest',                # Uses Serial
-    'PJRCSpectrumAnalyzer',   # Teensy OctoWS2811 library
-    'QuadSPI_Basic',          # ESP-specific QSPI
-    'QuadSPI_MultiChipset',   # ESP-specific QSPI
-    'SAMD_SingleSPI',         # SAMD-specific
     'Sound2Midi',             # Audio hardware
-    'Spi',                    # Platform-specific SPI
     'Test',                   # Uses Serial
     'UITest',                 # Uses Serial
-    'wasm',                    # Crashes on host (excessive memory)
+
+    # ESP-specific (RMT, QSPI, LCD, etc.)
+    'BulkRmtSimple',          # ESP32 RMT peripheral
+    'Esp32P4Parlio',          # ESP32-P4 Parallel IO
+    'Esp8266Uart',            # ESP8266 UART
+    'LCD_I80',                # ESP-specific LCD interface
+    'Overclock',              # ESP overclocking
+    'QuadSPI_Basic',          # ESP-specific QSPI
+    'QuadSPI_MultiChipset',   # ESP-specific QSPI
+
+    # Other platform-specific
+    'AdafruitBridge',          # Platform-specific driver
+    'Bulk',                    # Platform-specific
+    'Codec',                   # Platform-specific
+    'OctoWS2811',             # Teensy OctoWS2811 library
+    'OctoWS2811Demo',         # Teensy OctoWS2811 library
+    'Parallel_IO',            # RP2040-specific PIO
+    'ParallelSPI',            # Platform-specific SPI
+    'PJRCSpectrumAnalyzer',   # Teensy OctoWS2811 library
+    'SAMD_SingleSPI',         # SAMD-specific
+    'Spi',                    # Platform-specific SPI
     'WasmScreenCoords',       # WASM-specific
-    'Wave',                    # Crashes on host (excessive memory)
-    'Wave2d',                  # Crashes on host (excessive memory)
+
+    # Compilation errors (missing stdlib functions in STUB platform)
+    'AnimartrixRing',          # Missing fl::min() function
+    'Chromancer',              # Missing fl_max() function
+    'Luminova',               # Missing roundf() math function
+    'PhasorField',            # Missing cos/sin trig functions
+
+    # Large memory examples (may exceed reasonable limits)
+    'FireMatrix',              # 100x100 LED array (30KB) exceeds reasonable limits
+
+    # Runtime crashes still being investigated:
+    # (Testing to see which ones actually fail with new build config)
 ]
 
 # Discover all .ino files using Python helper script
@@ -160,45 +157,41 @@ foreach example_name : example_paths.keys()
         include_objs += include_directories(inc_dir_fixed)
     endforeach
 
-    # Compile example as executable using stub_main.cpp
-    # The stub_main.cpp will include the .ino file via FASTLED_STUB_MAIN_INCLUDE_INO macro
     # Construct proper path: <example_root>/<example_name>.ino
     ino_file = project_root / example_root / (example_name + '.ino')
 
+    # Generate a wrapper .cpp file that includes the .ino and provides main()
+    # This approach is cleaner than using preprocessor macros
+    wrapper_cpp = custom_target(
+        'wrapper-' + example_name,
+        output: 'example-' + example_name + '-wrapper.cpp',
+        command: [
+            find_program('python'),
+            project_root / 'ci' / 'util' / 'generate_wrapper.py',
+            '@OUTPUT@',
+            example_name,
+            ino_file,
+        ],
+        build_by_default: false
+    )
+
     # Add FastLED includes (src and stub platform) to the example includes
-    all_includes = [fastled_src_dir, fastled_stub_dir] + include_objs
+    all_includes = [src_dir, stub_dir] + include_objs
 
-    # Some examples may fail to compile due to platform-specific code
-    # Use should_fail: true to mark them as expected failures
-    # Set a large stack size to accommodate examples with large arrays (e.g., FireMatrix, Chromancer)
-    example_link_args = []
-    if build_machine.system() == 'windows'
-        # Windows: Set stack size to 16MB (default is usually 1MB)
-        example_link_args = ['-Wl,--stack,16777216']
-    endif
-
-    # DEBUG FLAGS: Add debug symbols and disable optimization for Downscale
+    # DEBUG FLAGS: Special case for Downscale example - add debug symbols for investigation
+    # TODO: Consider generalizing this mechanism for per-example compile flags if needed
     debug_cpp_args = []
-    debug_link_args = example_link_args
     if example_name == 'Downscale'
         debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
     endif
 
     exe = executable(
         'example-' + example_name,
-        stub_main_src,
+        wrapper_cpp,  # Use generated wrapper instead of stub_main_src
         include_directories: all_includes,
         link_with: fastled_lib,
-        cpp_args: [
-            '-DARDUINO=1',  # Define ARDUINO to enable Arduino.h inclusion
-            '-DFASTLED_STUB_MAIN',
-            '-DFASTLED_STUB_MAIN_INCLUDE_INO=' + ino_file,
-            '-DFASTLED_STUB_IMPL',
-            '-DFASTLED_TESTING',  # CRITICAL: Must match libfastled.a compilation to ensure ABI compatibility (HashMap size)
-            '-fno-rtti',  # Must match fastled_lib compilation flags
-            '-fno-exceptions',  # Must match fastled_lib compilation flags
-        ] + debug_cpp_args,
-        link_args: debug_link_args,
+        cpp_args: example_compile_args + debug_cpp_args,
+        link_args: example_link_args,
         build_by_default: false,  # Only build when explicitly requested
         install: false
     )
