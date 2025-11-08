@@ -90,9 +90,7 @@ if(portRef == (void*)&GPIO3_DR) { return "GPIO3_DR"; }
 #ifdef GPIO4_DR
 if(portRef == (void*)&GPIO4_DR) { return "GPIO4_DR"; }
 #endif
-  String unknown_str = "Unknown: " + String((size_t)portRef, HEX);
-	strncpy(fullstrBuffer, unknown_str.c_str(), unknown_str.length());
-	fullstrBuffer[sizeof(fullstrBuffer)-1] = '\0';
+  snprintf(fullstrBuffer, sizeof(fullstrBuffer), "Unknown: %zx", (size_t)portRef);
 	return fullstrBuffer;
 }
 

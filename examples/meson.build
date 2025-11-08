@@ -40,32 +40,13 @@ fs = import('fs')
 # After build config refactoring (proper 16MB stack + pthread support), many "memory crash" examples now work!
 # Keep only truly platform-specific examples here.
 stub_incompatible_examples = [
-    # Hardware dependencies (Serial/Audio/Network/SD)
-    'Audio',                   # Audio hardware
-    'AudioInput',              # Audio hardware
-    'BeatDetection',           # Uses Serial
-    'FestivalStick',          # Uses Serial
-    'FxSdCard',               # SD card hardware
-    'LuminescentGrand',       # Uses Serial
-    'NetTest',                # Network hardware
-    'OTA',                    # Network/OTA specific
-    'Pintest',                # Uses Serial
-    'Sound2Midi',             # Audio hardware
-    'Test',                   # Uses Serial
-    'UITest',                 # Uses Serial
-
     # ESP-specific (RMT, QSPI, LCD, etc.)
     'BulkRmtSimple',          # ESP32 RMT peripheral
     'Esp32P4Parlio',          # ESP32-P4 Parallel IO
     'Esp8266Uart',            # ESP8266 UART
-    'LCD_I80',                # ESP-specific LCD interface
-    'Overclock',              # ESP overclocking
-    'QuadSPI_Basic',          # ESP-specific QSPI
-    'QuadSPI_MultiChipset',   # ESP-specific QSPI
+
 
     # Other platform-specific
-    'AdafruitBridge',          # Platform-specific driver
-    'Bulk',                    # Platform-specific
     'Codec',                   # Platform-specific
     'OctoWS2811',             # Teensy OctoWS2811 library
     'OctoWS2811Demo',         # Teensy OctoWS2811 library
@@ -73,20 +54,6 @@ stub_incompatible_examples = [
     'ParallelSPI',            # Platform-specific SPI
     'PJRCSpectrumAnalyzer',   # Teensy OctoWS2811 library
     'SAMD_SingleSPI',         # SAMD-specific
-    'Spi',                    # Platform-specific SPI
-    'WasmScreenCoords',       # WASM-specific
-
-    # Compilation errors (missing stdlib functions in STUB platform)
-    'AnimartrixRing',          # Missing fl::min() function
-    'Chromancer',              # Missing fl_max() function
-    'Luminova',               # Missing roundf() math function
-    'PhasorField',            # Missing cos/sin trig functions
-
-    # Large memory examples (may exceed reasonable limits)
-    'FireMatrix',              # 100x100 LED array (30KB) exceeds reasonable limits
-
-    # Runtime crashes still being investigated:
-    # (Testing to see which ones actually fail with new build config)
 ]
 
 # Discover all .ino files using Python helper scripts
