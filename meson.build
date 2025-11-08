@@ -25,24 +25,9 @@ stub_dir = include_directories('src/platforms/stub')
 # the right #if-def guard in it to prevent compilation
 uv_prog = find_program('uv', required: true)
 
-python_rglob_script = '''
-import pathlib
-import sys
-import os
-directory = sys.argv[1]
-pattern = sys.argv[2]
-exclude_path = sys.argv[3] if len(sys.argv) > 3 else None
-matches = pathlib.Path(directory).rglob(pattern)
-for p in matches:
-    # Normalize path for comparison (use forward slashes)
-    path_str = str(p).replace(os.sep, "/")
-    if exclude_path is None or exclude_path not in path_str:
-        print(str(p))
-'''
-
 # Discover platforms/shared sources separately for unity build isolation
 shared_sources_result = run_command(
-  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src/platforms/shared', '*.cpp',
+  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src/platforms/shared', '*.cpp',
   check: true,
   capture: true
 )
@@ -50,7 +35,7 @@ shared_sources = files(shared_sources_result.stdout().strip().split('\n'))
 
 # Discover all other sources (excluding platforms/shared to avoid duplicates)
 discovered_sources = run_command(
-  uv_prog, 'run', 'python', '-c', python_rglob_script, 'src', '*.cpp', 'platforms/shared',
+  uv_prog, 'run', 'python', 'ci/meson/rglob.py', 'src', '*.cpp', 'platforms/shared',
   check: true,
   capture: true
 )
@@ -75,10 +60,13 @@ fastled_sources = files(discovered_sources.stdout().strip().split('\n'))
 #   example_link_args        → base + example-specific additions
 # ============================================================================
 
-# Base compilation flags shared between unit tests and examples
+# ============================================================================
+# Base compilation flags - organized into three groups for clarity
+# ============================================================================
 # CRITICAL: These flags ensure ABI compatibility between libfastled.a and executables
-base_compile_args = [
-  '-std=gnu++11',                # GNU C++11 standard (must be first to override Meson's default)
+
+# Group 1: Preprocessor defines (platform and feature configuration)
+base_defines = [
   '-DFASTLED_USE_PROGMEM=0',
   '-DSTUB_PLATFORM',
   '-DARDUINO=10808',
@@ -93,32 +81,61 @@ base_compile_args = [
   '-DFASTLED_DEBUG_LEVEL=1',
   '-DFASTLED_NO_ATEXIT=1',
   '-DENABLE_CRASH_HANDLER',
+]
+
+# Group 2: Warning and error flags (code quality enforcement)
+base_warnings = [
   '-Wall',
   '-Wextra',
   '-Wno-deprecated-register',
   '-Wno-backslash-newline-escape',
   '-Wno-narrowing',
-  '-fno-exceptions',
-  '-fno-rtti',
-  '-fno-omit-frame-pointer',
-  '-fno-strict-aliasing',
   '-Werror=unused-variable',
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
   '-Werror=unused-result',     # Treat ignored FL_NODISCARD return values as errors
-  '-O0',
-  '-g1'  # Minimal debug info for stack traces (function names + line numbers)
 ]
 
-# Debug mode: Add full debug symbols and sanitizers when debug_mode option is enabled
-if get_option('debug_mode')
-  unit_test_compile_args += [
-    '-g3',                        # Full debug symbols (override -g1)
-    '-fsanitize=address',         # Address sanitizer (detect memory errors)
-    '-fsanitize=undefined',       # Undefined behavior sanitizer
+# Group 3: Optimization and code generation flags (mode-dependent)
+# Common flags present in all modes (ABI-critical)
+base_common = [
+  '-std=gnu++11',              # GNU C++11 standard
+  '-fno-exceptions',           # Disable C++ exceptions (ABI compatibility)
+  '-fno-rtti',                 # Disable runtime type information
+  '-fno-omit-frame-pointer',   # Keep frame pointers for stack traces
+  '-fno-strict-aliasing',      # Prevent strict aliasing optimizations
+]
+
+# Mode-specific optimization flags
+build_mode = get_option('build_mode')
+if build_mode == 'debug'
+  # Debug mode: No optimization, full debug symbols, sanitizers
+  base_optimization = base_common + [
+    '-O0',                      # No optimization (fastest compilation)
+    '-g3',                      # Full debug symbols (variables, macros, everything)
+    '-fsanitize=address',       # Address sanitizer (detect memory errors)
+    '-fsanitize=undefined',     # Undefined behavior sanitizer
   ]
+elif build_mode == 'quick'
+  # Quick mode: Default mode for fast development iteration
+  # Minimal optimization, minimal debug info, no sanitizers
+  base_optimization = base_common + [
+    '-O0',                      # No optimization (fast compilation)
+    '-g1',                      # Minimal debug info (function names + line numbers)
+  ]
+elif build_mode == 'release'
+  # Release mode: Maximum optimization, no debug info
+  base_optimization = base_common + [
+    '-O3',                      # Maximum optimization
+    '-DNDEBUG',                 # Disable assertions
+  ]
+else
+  error('Invalid build_mode: @0@. Must be one of: debug, quick, release'.format(build_mode))
 endif
+
+# Assemble base_compile_args from organized groups
+base_compile_args = base_optimization + base_defines + base_warnings
 
 # Unit test-specific compilation flags (only used for test executables)
 test_specific_args = [
@@ -135,56 +152,71 @@ example_specific_args = []
 unit_test_compile_args = base_compile_args + test_specific_args
 example_compile_args = base_compile_args + example_specific_args
 
-# Platform-specific base link arguments (shared by both tests and examples)
-base_link_args = []
-if build_machine.system() == 'windows'
-  # Windows: Clang targeting x86_64-windows-gnu with custom stdlib
+# ============================================================================
+# Platform-specific link arguments
+# ============================================================================
+# Windows vs Unix/Linux/macOS have different linking requirements
+
+# Detect platform
+is_windows = build_machine.system() == 'windows'
+
+# Base link arguments (shared foundation for all link types)
+if is_windows
+  # Windows-specific base flags
   base_link_args = [
-    '-mconsole',              # Console application
-    '-nodefaultlibs',         # Don't automatically include default libraries
-    '-unwindlib=libunwind',   # Use Clang's libunwind (avoid MinGW unwind)
-    '-nostdlib++',            # Don't auto-link standard C++ library
-    '-lc++',                  # Manually link libc++ (Clang's C++ standard library)
-    '-lkernel32',             # Windows kernel functions
-    '-luser32',               # Windows user interface
-    '-lgdi32',                # Graphics device interface
-    '-ladvapi32',             # Advanced Windows API
-    '-Wl,--stack,16777216',   # 16MB stack (for large arrays in examples/tests)
+    '-mconsole',                # Console application
+    '-nodefaultlibs',           # Don't automatically include default libraries
+    '-unwindlib=libunwind',     # Use Clang's libunwind (avoid MinGW unwind)
+    '-nostdlib++',              # Don't auto-link standard C++ library
+    '-lc++',                    # Manually link libc++ (Clang's C++ standard library)
+    '-lkernel32',               # Windows kernel functions
+    '-luser32',                 # Windows user interface
+    '-lgdi32',                  # Graphics device interface
+    '-ladvapi32',               # Advanced Windows API
+    '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
+    '-Wl,--no-allow-shlib-undefined',  # CRITICAL: Catch undefined symbols at link time
   ]
 else
-  # Unix/Linux/macOS: Standard pthread linking
+  # Unix/Linux/macOS base flags
   base_link_args = [
-    '-pthread',               # Enable POSIX threads
-    '-rdynamic',              # Export symbols for backtrace_symbols() in crash handler
+    '-pthread',                 # Enable POSIX threads
+    '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
+    '-Wl,--no-allow-shlib-undefined',  # CRITICAL: Catch undefined symbols at link time
   ]
 endif
 
-# Test-specific link arguments (adds debug libraries for crash handling)
-test_link_args = base_link_args
-if build_machine.system() == 'windows'
-  test_link_args += [
-    '-ldbghelp',              # Debug helper library (for stack traces in crash handler)
-    '-lpsapi',                # Process status API (for memory info in crash handler)
+# Test-specific link arguments (includes debug libraries on Windows)
+if is_windows
+  test_link_args = base_link_args + [
+    '-ldbghelp',                # Debug helper library (for stack traces in crash handler)
+    '-lpsapi',                  # Process status API (for memory info in crash handler)
   ]
+else
+  # Unix uses same flags for all link types
+  test_link_args = base_link_args
 endif
 
 # Legacy alias for backward compatibility with tests/meson.build
 unit_test_link_args = test_link_args
 
-# Example-specific link arguments (currently same as base)
+# Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
 # Build platforms/shared sources as ONE unity .o file
 # This keeps shared files in their own unity chunk, separate from stub overrides
+# CRITICAL: Uses base_compile_args (NOT unit_test_compile_args) for ABI compatibility with examples
 shared_objects = static_library('fastled_shared',
   shared_sources,
   include_directories: [src_dir, stub_dir],
-  cpp_args: unit_test_compile_args,
+  cpp_args: base_compile_args,  # Changed from unit_test_compile_args for ABI compatibility
   install: false
   # Unity builds enabled (inherits from project) - all shared files → one unity .o
 )
 
-# Build main FastLED static library for tests
+# Build main FastLED static library
+# CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
+# to ensure binary compatibility with both unit tests and examples.
+# Unit tests add their specific flags when compiling test sources.
 # Includes objects from two separate unity builds:
 #   - fastled_sources → fastled-unity0.o, fastled-unity1.o, ... (stub + other sources)
 #   - shared_objects  → fastled_shared-unity0.o (all platforms/shared files)
@@ -192,7 +224,7 @@ shared_objects = static_library('fastled_shared',
 fastled_lib = static_library('fastled',
   fastled_sources,
   include_directories: [src_dir, stub_dir],
-  cpp_args: unit_test_compile_args,
+  cpp_args: base_compile_args,  # Changed from unit_test_compile_args for ABI compatibility
   install: false,
   objects: shared_objects.extract_all_objects()  # Include shared unity .o in libfastled.a
 )

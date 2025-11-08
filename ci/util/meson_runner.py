@@ -470,7 +470,7 @@ def setup_meson_build(
         if unity:
             cmd.extend(["-Dunity=on"])
         if debug:
-            cmd.extend(["-Ddebug_mode=true"])
+            cmd.extend(["-Dbuild_mode=debug"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
@@ -478,7 +478,7 @@ def setup_meson_build(
         if unity:
             cmd.extend(["-Dunity=on"])
         if debug:
-            cmd.extend(["-Ddebug_mode=true"])
+            cmd.extend(["-Dbuild_mode=debug"])
 
     # Print unity build status
     if unity:

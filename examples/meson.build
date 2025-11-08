@@ -89,14 +89,22 @@ stub_incompatible_examples = [
     # (Testing to see which ones actually fail with new build config)
 ]
 
-# Discover all .ino files using Python helper script
-discover_script = project_root / 'ci' / 'discover_examples.py'
-discover_includes_script = project_root / 'ci' / 'discover_example_includes.py'
+# Discover all .ino files using Python helper scripts
+discover_script = project_root / 'ci' / 'meson' / 'discover_examples.py'
+discover_includes_script = project_root / 'ci' / 'meson' / 'discover_example_includes.py'
+discover_sources_script = project_root / 'ci' / 'meson' / 'discover_example_sources.py'
 examples_dir = project_root / 'examples'
 
 # Get include directories for each example - this also gives us the example paths
 result_includes = run_command(
     'python', discover_includes_script, examples_dir,
+    check: true,
+    capture: true
+)
+
+# Get additional source files for each example (.cpp files in subdirectories)
+result_sources = run_command(
+    'python', discover_sources_script, examples_dir,
     check: true,
     capture: true
 )
@@ -119,6 +127,23 @@ foreach line : result_includes.stdout().strip().split('\n')
             include_dirs += [parts[i]]
         endforeach
         example_includes += {example_name: include_dirs}
+    endif
+endforeach
+
+# Parse source file information: SOURCES:<name>:<source1>:<source2>:...
+example_sources = {}
+foreach line : result_sources.stdout().strip().split('\n')
+    parts = line.split(':')
+    if parts.length() >= 2
+        example_name = parts[1]
+        # Collect additional .cpp source files (beyond the .ino)
+        source_files = []
+        foreach i : range(2, parts.length())
+            if parts[i] != ''
+                source_files += [parts[i]]
+            endif
+        endforeach
+        example_sources += {example_name: source_files}
     endif
 endforeach
 
@@ -178,6 +203,14 @@ foreach example_name : example_paths.keys()
     # Add FastLED includes (src and stub platform) to the example includes
     all_includes = [src_dir, stub_dir] + include_objs
 
+    # Get additional source files for this example (e.g., src/*.cpp)
+    additional_sources = []
+    if example_sources.has_key(example_name) and example_sources[example_name].length() > 0
+        foreach src_file : example_sources[example_name]
+            additional_sources += files(project_root / src_file)
+        endforeach
+    endif
+
     # DEBUG FLAGS: Special case for Downscale example - add debug symbols for investigation
     # TODO: Consider generalizing this mechanism for per-example compile flags if needed
     debug_cpp_args = []
@@ -185,9 +218,12 @@ foreach example_name : example_paths.keys()
         debug_cpp_args = ['-g3', '-O0', '-DFASTLED_MULTITHREADING=0']
     endif
 
+    # Collect all source files: wrapper + any additional .cpp files from subdirectories
+    all_sources = [wrapper_cpp] + additional_sources
+
     exe = executable(
         'example-' + example_name,
-        wrapper_cpp,  # Use generated wrapper instead of stub_main_src
+        all_sources,  # Wrapper + additional .cpp files
         include_directories: all_includes,
         link_with: fastled_lib,
         cpp_args: example_compile_args + debug_cpp_args,

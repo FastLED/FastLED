@@ -1,6 +1,9 @@
 # Meson build options for FastLED
 
-# Debug mode: Enable full debug symbols (-g3) and sanitizers (asan/ubsan)
-# Default: false (uses -g1 for minimal debug info with stack traces)
-# Enable with: meson setup -Ddebug_mode=enabled build
-option('debug_mode', type: 'boolean', value: false, description: 'Enable full debug symbols and sanitizers')
+# Build mode: Controls optimization level and debug information
+# - quick:   Fast compilation, minimal debug info (-O0 -g1) [DEFAULT]
+# - debug:   Full debug symbols and sanitizers (-O0 -g3 -fsanitize=address,undefined)
+# - release: Maximum optimization, no debug info (-O3 -DNDEBUG)
+# Usage: meson setup -Dbuild_mode=debug build
+option('build_mode', type: 'combo', choices: ['quick', 'debug', 'release'], value: 'quick',
+       description: 'Build mode: quick (default), debug (full symbols+sanitizers), or release (optimized)')
