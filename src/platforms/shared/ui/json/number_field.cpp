@@ -90,7 +90,13 @@ void JsonNumberFieldImpl::toJson(fl::Json &json) const {
     mInternal->toJson(json);
 }
 
-float JsonNumberFieldImpl::value() const { return mInternal->value(); }
+float JsonNumberFieldImpl::value() const {
+    if (!mInternal) {
+        FASTLED_ASSERT(false, "JsonNumberFieldImpl::value() called before initialization");
+        return 0.0f;  // Return default value if not initialized
+    }
+    return mInternal->value();
+}
 
 void JsonNumberFieldImpl::setValue(float value) {
     float oldValue = mInternal->value();

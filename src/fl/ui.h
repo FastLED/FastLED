@@ -241,7 +241,7 @@ class UICheckbox : public UIElement {
   public:
     FL_NO_COPY(UICheckbox);
     UICheckbox(const char *name, bool value = false)
-        : mImpl(name, value), mListener(this) {}
+        : mImpl(name, value), mLastFrameValue(false), mLastFrameValueValid(false), mListener(this) {}
     ~UICheckbox() {}
 
     operator bool() const { return value(); }
@@ -304,7 +304,7 @@ class UINumberField : public UIElement {
     FL_NO_COPY(UINumberField);
     UINumberField(const char *name, double value, double min = 0,
                   double max = 100)
-        : mImpl(name, value, min, max), mListener(this) {}
+        : mImpl(name, value, min, max), mLastFrameValue(0), mLastFrameValueValid(false), mListener(this) {}
     ~UINumberField() {}
     double value() const { return mImpl.value(); }
     void setValue(double value) { mImpl.setValue(value); }

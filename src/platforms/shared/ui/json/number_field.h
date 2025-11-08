@@ -39,7 +39,7 @@ class JsonNumberFieldImpl {
 
   private:
     // Change to use the specific internal implementation
-    fl::shared_ptr<JsonUiNumberFieldInternal> mInternal;
+    fl::shared_ptr<JsonUiNumberFieldInternal> mInternal = nullptr;
 };
 
 } // namespace fl
