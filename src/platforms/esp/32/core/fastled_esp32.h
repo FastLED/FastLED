@@ -40,7 +40,7 @@
 #endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
-#include "../drivers/parlio/bulk_parlio.h"
+#include "../drivers/parlio/bulk_clockless_parlio.h"
 #endif
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
