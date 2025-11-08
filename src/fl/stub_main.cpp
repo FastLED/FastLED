@@ -1,9 +1,8 @@
 /*
- * This is a stub implementation of main that can be used to include an *.ino
- * file which is so close to C++ that many of them can be compiled as C++. The
- * notable difference between a *.ino file and a *.cpp file is that the *.ino
- * file does not need to include function prototypes, and are instead
- * auto-generated.
+ * Stub implementation of main() for Arduino sketches (.ino files).
+ *
+ * This file supports the old macro-based approach with FASTLED_STUB_MAIN_INCLUDE_INO.
+ * New code should use stub_main.hpp with generated wrapper files instead.
  */
 
 // This can't be in the namespace fl. It needs to be in the global namespace.
@@ -15,58 +14,16 @@
 #define _FASTLED_STRINGIFY(x) _FASTLED_STRINGIFY_HELPER(x)
 #endif
 
-// Include function.h and time_stub.h at file scope (not inside function)
-#include "fl/function.h"
-#include "platforms/stub/time_stub.h"
-
 #ifdef FASTLED_STUB_MAIN_INCLUDE_INO
-// Correctly include the file by expanding and stringifying the macro value
+// Old approach: Include .ino via preprocessor macro (deprecated)
 #include _FASTLED_STRINGIFY(FASTLED_STUB_MAIN_INCLUDE_INO)
 #else
+// No .ino file specified - provide empty setup/loop
 void setup() {}
 void loop() {}
 #endif // FASTLED_STUB_MAIN_INCLUDE_INO
 
+// Include the header which provides main() and other infrastructure
+#include "fl/stub_main.hpp"
 
-
-// Fast test mode: run setup() once and loop() for limited iterations
-static int main_stub() {
-    // Override delay function to return immediately for fast testing
-    setDelayFunction([](uint32_t ms) {
-        // Fast delay override - do nothing for speed
-        (void)ms; // Suppress unused parameter warning
-    });
-
-    init();   // Arduino init() function
-    setup();  // User-defined setup()
-
-    // For testing, run loop() limited times instead of infinitely
-    // This allows examples to complete successfully in test environments
-    const int max_iterations = 5;
-    for (int i = 0; i < max_iterations; i++) {
-        loop();
-    }
-    return 0;
-}
-
-// Production mode: run setup() once and loop() infinitely
-static int main_example() {
-    init();   // Arduino init() function
-    setup();  // User-defined setup()
-
-    // Run loop() infinitely (normal Arduino behavior)
-    while (1) {
-        loop();
-        delay(0);  // Needed for watchdog timers not to fail
-    }
-}
-
-
-int main() {
-#ifdef FASTLED_STUB_IMPL
-    return main_stub();
-#else
-    return main_example();
-#endif
-}
-#endif // FASTLED_STUB_MAIN_INCLUDE_INO
+#endif // FASTLED_STUB_MAIN or FASTLED_STUB_MAIN_INCLUDE_INO
