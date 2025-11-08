@@ -69,7 +69,7 @@ struct PARLIO {};      ///< PARLIO parallel I/O peripheral (ESP32-P4). Falls bac
 /// **User API:**
 /// @code
 /// // User writes the same chipset names as traditional addLeds:
-/// auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
+/// auto& bulk = FastLED.addClocklessLeds<WS2812B, fl::GRB, OFLED>({
 ///     {2, strip1, 100, ScreenMap()},
 ///     {5, strip2, 100, ScreenMap()}
 /// });

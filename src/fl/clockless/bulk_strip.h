@@ -8,6 +8,7 @@
 
 #include "color.h"
 #include "dither_mode.h"
+#include "fl/eorder.h"
 #include "fl/led_settings.h"
 #include "fl/screenmap.h"
 #include "led_sysdefs.h"
@@ -18,7 +19,7 @@
 namespace fl {
 
 /// Forward declaration
-template <typename CHIPSET, typename PERIPHERAL> class BulkClockless;
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL> class BulkClockless;
 
 /// Strip descriptor for individual LED strips within a BulkClockless controller.
 ///
@@ -108,7 +109,7 @@ class BulkStrip {
     ActiveStripTracker mTracker; ///< Tracker for LED data capture (WASM visualization & CPU fallback)
 
     // Allow BulkClockless to access private members
-    template <typename CHIPSET, typename PERIPHERAL> friend class BulkClockless;
+    template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL> friend class BulkClockless;
 };
 
 } // namespace fl

@@ -33,9 +33,9 @@ namespace fl {
 /// All business logic lives in the concrete implementation class.
 ///
 /// @tparam CHIPSET LED chipset timing (e.g., Chipset::WS2812, TIMING_WS2812_800KHZ)
-template <typename CHIPSET>
-class BulkClockless<CHIPSET, PARLIO>
-    : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
+template <typename CHIPSET, EOrder RGB_ORDER>
+class BulkClockless<CHIPSET, RGB_ORDER, PARLIO>
+    : public CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK> {
 public:
     /// Maximum number of strips supported by PARLIO peripheral
     static constexpr int MAX_STRIPS = BulkControllerImpl::MAX_STRIPS;
@@ -43,7 +43,7 @@ public:
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
     BulkClockless(fl::initializer_list<BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>()
         , mImpl(IParlioTransmitter::getOrCreate<CHIPSET>(), initDefaultSettings()) {
         // Add all strips from initializer list
         for (const auto &config : strips) {
@@ -54,7 +54,7 @@ public:
     /// Constructor with span (for runtime arrays/vectors)
     /// @param strips span of strip configurations
     BulkClockless(span<const BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>()
         , mImpl(IParlioTransmitter::getOrCreate<CHIPSET>(), initDefaultSettings()) {
         // Add all strips from span
         for (const auto &config : strips) {

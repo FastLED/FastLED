@@ -46,15 +46,15 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<Chipset::WS2812, I2S>* bulk =
-///     &FastLED.addBulkLeds<Chipset::WS2812, I2S>({
+/// BulkClockless<Chipset::WS2812, GRB, I2S>* bulk =
+///     &FastLED.addClocklessLeds<Chipset::WS2812, GRB, I2S>({
 ///         {2, strip1, 100, screenmap1},
 ///         {4, strip2, 100, screenmap2}
 ///     });
 /// @endcode
-template <>
-class BulkClockless<Chipset::WS2812, I2S>
-    : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
+template <EOrder RGB_ORDER>
+class BulkClockless<Chipset::WS2812, RGB_ORDER, I2S>
+    : public CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK> {
   public:
     /// Maximum number of strips supported by I2S peripheral on ESP32
     static constexpr int MAX_STRIPS = 24;  // ESP32 (original) I2S parallel mode
@@ -62,7 +62,7 @@ class BulkClockless<Chipset::WS2812, I2S>
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
     BulkClockless(fl::initializer_list<BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>()
         , mLedCount(0)
         , mInitialized(false) {
         // Initialize default settings from base class
@@ -79,7 +79,7 @@ class BulkClockless<Chipset::WS2812, I2S>
 
     /// Default constructor (creates empty bulk controller)
     BulkClockless()
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>()
         , mLedCount(0)
         , mInitialized(false) {
         // Initialize default settings from base class
@@ -308,7 +308,7 @@ class BulkClockless<Chipset::WS2812, I2S>
     }
 
     /// Show LEDs (called by FastLED.show())
-    void showPixelsInternal(PixelController<RGB> &pixels) {
+    void showPixelsInternal(PixelController<RGB_ORDER> &pixels) {
         // Re-initialize if configuration changed
         if (!mInitialized) {
             initPeripheral();
@@ -344,7 +344,7 @@ class BulkClockless<Chipset::WS2812, I2S>
     }
 
     /// Show LEDs - internal override
-    void showPixels(PixelController<RGB> &pixels) override {
+    void showPixels(PixelController<RGB_ORDER> &pixels) override {
         showPixelsInternal(pixels);
     }
 

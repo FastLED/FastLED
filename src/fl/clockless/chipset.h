@@ -21,7 +21,7 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>({
+/// auto& bulk = FastLED.addClocklessLeds<Chipset::WS2812, fl::GRB, RMT>({
 ///     {2, strip1, 100, screenmap1},
 ///     {4, strip2, 100, screenmap2}
 /// });

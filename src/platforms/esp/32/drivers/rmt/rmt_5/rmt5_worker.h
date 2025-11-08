@@ -44,9 +44,13 @@ class RmtWorkerPool;
  * - Manual buffer refill via fillNextHalf() in interrupt context
  * - Direct RMT memory access like RMT4
  */
+// Forward declare extern "C" function for friend declaration
+extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void);
+
 class RmtWorker : public IRmtWorkerBase {
 public:
     friend class RmtWorkerPool;
+    friend void rmt5_nmi_buffer_refill(void);
 
     // Memory configuration (matching RMT4)
     #ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
@@ -91,6 +95,9 @@ public:
 
     // Mark worker as unavailable (called by pool under spinlock)
     void markAsUnavailable() override;
+
+    // Double buffer refill (interrupt context) - public for NMI access
+    void IRAM_ATTR fillNextHalf();
 
 private:
     // Allow pool to access mAvailable for synchronized state changes
@@ -139,9 +146,6 @@ private:
 
     // Reference to pool's spinlock (unified synchronization)
     portMUX_TYPE* mPoolSpinlock;
-
-    // Double buffer refill (interrupt context)
-    void IRAM_ATTR fillNextHalf();
 
     // ISR handlers
     static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (currently unused)

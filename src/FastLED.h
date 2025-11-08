@@ -847,20 +847,21 @@ public:
 	/// @note The controller is dynamically allocated and lives for the program's lifetime.
 	///       Do not delete the returned reference. This matches embedded system patterns.
 	///
-	/// @tparam CHIPSET the LED chipset type (e.g., WS2812)
+	/// @tparam CHIPSET the LED chipset type (e.g., Chipset::WS2812)
+	/// @tparam RGB_ORDER the RGB color channel ordering (e.g., RGB, GRB, BRG)
 	/// @tparam PERIPHERAL the hardware peripheral type (e.g., LCD_I80, RMT)
 	/// @param strips initializer list of strip configurations {pin, buffer, count, screenmap}
 	/// @returns reference to the bulk controller
 	/// @{
 
-	template<typename CHIPSET, typename PERIPHERAL>
-	static ::fl::BulkClockless<CHIPSET, PERIPHERAL>& addBulkLeds(
+	template<typename CHIPSET, fl::EOrder RGB_ORDER, typename PERIPHERAL>
+	static ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>& addClocklessLeds(
 		fl::initializer_list<fl::BulkStripConfig> strips
 	) {
 		// Use dynamic allocation to support multiple instances of the same type
 		// Unlike regular addLeds(), BulkClockless controllers are identified by
-		// CHIPSET+PERIPHERAL only, so static storage would limit to one instance
-		auto* controller = new ::fl::BulkClockless<CHIPSET, PERIPHERAL>(strips);
+		// CHIPSET+RGB_ORDER+PERIPHERAL, so static storage would limit to one instance
+		auto* controller = new ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>(strips);
 
 		// Register with FastLED controller list
 		::CLEDController* pLed = static_cast<::CLEDController*>(controller);
@@ -882,15 +883,16 @@ public:
 	}
 
 	/// Add bulk LED controller with span (for runtime arrays/vectors)
-	/// @tparam CHIPSET the LED chipset type (e.g., WS2812)
+	/// @tparam CHIPSET the LED chipset type (e.g., Chipset::WS2812)
+	/// @tparam RGB_ORDER the RGB color channel ordering (e.g., RGB, GRB, BRG)
 	/// @tparam PERIPHERAL the hardware peripheral type (e.g., LCD_I80, RMT)
 	/// @param strips span of strip configurations
 	/// @returns reference to the bulk controller
-	template<typename CHIPSET, typename PERIPHERAL>
-	static ::fl::BulkClockless<CHIPSET, PERIPHERAL>& addBulkLeds(
+	template<typename CHIPSET, fl::EOrder RGB_ORDER, typename PERIPHERAL>
+	static ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>& addClocklessLeds(
 		fl::span<const fl::BulkStripConfig> strips
 	) {
-		auto* controller = new ::fl::BulkClockless<CHIPSET, PERIPHERAL>(strips);
+		auto* controller = new ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>(strips);
 
 		::CLEDController* pLed = static_cast<::CLEDController*>(controller);
 		pLed->init();

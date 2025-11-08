@@ -38,8 +38,8 @@ CRGB lcd_strip1[100];
 CRGB lcd_strip2[100];
 
 // Controllers
-BulkClockless<Chipset::WS2812, RMT>* rmt_bulk = nullptr;
-BulkClockless<Chipset::WS2812, LCD_I80>* lcd_bulk = nullptr;
+BulkClockless<Chipset::WS2812, fl::GRB, RMT>* rmt_bulk = nullptr;
+BulkClockless<Chipset::WS2812, fl::GRB, LCD_I80>* lcd_bulk = nullptr;
 
 void setup() {
     Serial.begin(115200);
@@ -58,7 +58,7 @@ void setup() {
     // Initializer format: {pin, buffer_ptr, num_leds, screenMap}
     // On ESP32-S3/P4: Uses LCD_I80 peripheral
     // On other platforms: Uses CPU fallback (warning will be printed)
-    auto& lcd_ref = FastLED.addBulkLeds<Chipset::WS2812, LCD_I80>({
+    auto& lcd_ref = FastLED.addClocklessLeds<Chipset::WS2812, fl::GRB, LCD_I80>({
         {8, lcd_strip1, 100, map_position_left},      // Pin 8: lcd_strip1, appears at left
         {9, lcd_strip2, 100, map_position_center}     // Pin 9: lcd_strip2, appears at center
     });
@@ -96,7 +96,7 @@ void setup() {
     ScreenMap map_position_right = ScreenMap::DefaultStrip(100, 1.5f, 0.4f);
     map_position_right.addOffsetX(300.0f);  // Right position
 
-    auto& rmt_ref = FastLED.addBulkLeds<Chipset::WS2812, RMT>({
+    auto& rmt_ref = FastLED.addClocklessLeds<Chipset::WS2812, fl::GRB, RMT>({
         {2, rmt_strip, 100, map_position_right}       // Pin 2: rmt_strip, appears at right
     });
     // Global settings - simple and clean for single-strip or uniform multi-strip

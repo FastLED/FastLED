@@ -36,7 +36,7 @@ CRGB strip2[NUM_LEDS];
 CRGB strip3[NUM_LEDS];
 
 void setup() {
-    auto& bulk = FastLED.addBulkLeds<WS2812_CHIPSET, ObjectFLED>({
+    auto& bulk = FastLED.addClocklessLeds<WS2812_CHIPSET, fl::GRB, ObjectFLED>({
         {2, strip1, NUM_LEDS, ScreenMap()},
         {5, strip2, NUM_LEDS, ScreenMap()},
         {9, strip3, NUM_LEDS, ScreenMap()}

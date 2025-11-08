@@ -56,7 +56,7 @@ namespace fl {
 /// CRGB strip2[300];  // Long strip
 /// CRGB strip3[150];  // Medium strip
 ///
-/// auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
+/// auto& bulk = FastLED.addClocklessLeds<WS2812B, fl::GRB, OFLED>({
 ///     {2, strip1, 100, ScreenMap()},  // 100 LEDs
 ///     {5, strip2, 300, ScreenMap()},  // 300 LEDs (longest)
 ///     {9, strip3, 150, ScreenMap()}   // 150 LEDs
@@ -96,7 +96,7 @@ namespace fl {
 ///
 /// void setup() {
 ///     // Create bulk controller with WS2812 timing (automatic)
-///     auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>({
+///     auto& bulk = FastLED.addClocklessLeds<WS2812B, fl::GRB, OFLED>({
 ///         {2, strip1, NUM_LEDS, ScreenMap()},
 ///         {5, strip2, NUM_LEDS, ScreenMap()},
 ///         {9, strip3, NUM_LEDS, ScreenMap()}
@@ -116,14 +116,14 @@ namespace fl {
 /// **ADVANCED USAGE - MULTIPLE CHIPSETS:**
 /// @code
 /// // WS2812 group (pins 2,5,9 - 100 LEDs each)
-/// auto& bulk1 = FastLED.addBulkLeds<WS2812B, OFLED>({
+/// auto& bulk1 = FastLED.addClocklessLeds<WS2812B, fl::GRB, OFLED>({
 ///     {2, strip1, 100, map1},
 ///     {5, strip2, 100, map2},
 ///     {9, strip3, 100, map3}
 /// });
 ///
 /// // SK6812 RGBW group (pins 10,11,12 - 200 LEDs each)
-/// auto& bulk2 = FastLED.addBulkLeds<SK6812, OFLED>({
+/// auto& bulk2 = FastLED.addClocklessLeds<SK6812, fl::GRB, OFLED>({
 ///     {10, strip4, 200, map4},
 ///     {11, strip5, 200, map5},
 ///     {12, strip6, 200, map6}
@@ -135,7 +135,7 @@ namespace fl {
 ///
 /// **DYNAMIC ADD/REMOVE:**
 /// @code
-/// auto& bulk = FastLED.addBulkLeds<WS2812B, OFLED>();  // Start empty
+/// auto& bulk = FastLED.addClocklessLeds<WS2812B, fl::GRB, OFLED>();  // Start empty
 ///
 /// // Add strips dynamically
 /// bulk.add(2, strip1, 100, ScreenMap());

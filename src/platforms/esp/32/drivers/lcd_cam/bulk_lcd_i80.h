@@ -41,15 +41,15 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<Chipset::WS2812, LCD_I80>* bulk =
-///     &FastLED.addBulkLeds<Chipset::WS2812, LCD_I80>({
+/// BulkClockless<Chipset::WS2812, GRB, LCD_I80>* bulk =
+///     &FastLED.addClocklessLeds<Chipset::WS2812, GRB, LCD_I80>({
 ///         {8, strip1, 100, screenmap1},
 ///         {9, strip2, 100, screenmap2}
 ///     });
 /// @endcode
-template <typename CHIPSET>
-class BulkClockless<CHIPSET, LCD_I80>
-    : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
+template <typename CHIPSET, EOrder RGB_ORDER>
+class BulkClockless<CHIPSET, RGB_ORDER, LCD_I80>
+    : public CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK> {
   public:
     /// Maximum number of strips supported by LCD_I80 peripheral
     static constexpr int MAX_STRIPS = 16;
@@ -57,7 +57,7 @@ class BulkClockless<CHIPSET, LCD_I80>
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
     BulkClockless(fl::initializer_list<BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>()
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>()
         , mDriver()
         , mLedCount(0)
         , mInitialized(false) {
@@ -252,11 +252,11 @@ class BulkClockless<CHIPSET, LCD_I80>
         // Store brightness for use in showPixelsInternal()
         mBrightness = brightness;
         // Call base class which will eventually call showPixels()
-        CPixelLEDController<RGB, 1, ALL_LANES_MASK>::show(data, nLeds, brightness);
+        CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>::show(data, nLeds, brightness);
     }
 
     /// Show LED data (override from CPixelLEDController)
-    void showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) override {
+    void showPixels(PixelController<RGB_ORDER, 1, ALL_LANES_MASK> &pixels) override {
         // This is called by base class show() method
         // For BulkClockless, we iterate all sub-controllers
         (void)pixels; // Not used - we use sub-controller buffers

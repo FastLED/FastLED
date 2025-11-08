@@ -42,19 +42,19 @@ namespace fl {
 ///
 /// Usage:
 /// @code
-/// BulkClockless<Chipset::WS2812, RMT>* bulk = &FastLED.addBulkLeds<Chipset::WS2812, RMT>({
+/// BulkClockless<Chipset::WS2812, GRB, RMT>* bulk = &FastLED.addClocklessLeds<Chipset::WS2812, GRB, RMT>({
 ///     {2, strip1, 100, screenmap1},
 ///     {4, strip2, 100, screenmap2}
 /// });
 /// @endcode
-template <>
-class BulkClockless<Chipset::WS2812, RMT>
-    : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
+template <EOrder RGB_ORDER>
+class BulkClockless<Chipset::WS2812, RGB_ORDER, RMT>
+    : public CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK> {
   public:
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
     BulkClockless(fl::initializer_list<BulkStripConfig> strips)
-        : CPixelLEDController<RGB, 1, ALL_LANES_MASK>() {
+        : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>() {
         // Initialize default settings from base class
         mDefaultSettings.correction = this->mSettings.correction;
         mDefaultSettings.temperature = this->mSettings.temperature;
@@ -243,11 +243,11 @@ class BulkClockless<Chipset::WS2812, RMT>
         // Store brightness for use in showPixelsInternal()
         mBrightness = brightness;
         // Call base class which will eventually call showPixels()
-        CPixelLEDController<RGB, 1, ALL_LANES_MASK>::show(data, nLeds, brightness);
+        CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>::show(data, nLeds, brightness);
     }
 
     /// Show LED data (override from CPixelLEDController)
-    void showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) override {
+    void showPixels(PixelController<RGB_ORDER, 1, ALL_LANES_MASK> &pixels) override {
         // This is called by base class show() method
         // For BulkClockless, we iterate all sub-controllers
         // Parameter unused: BulkClockless manages multiple independent buffers, each
@@ -331,7 +331,7 @@ class BulkClockless<Chipset::WS2812, RMT>
             // Create pixel iterator with per-strip settings
             ColorAdjustment adj =
                 BulkClocklessHelper::computeAdjustment(mBrightness, sub.settings);
-            PixelController<RGB, 1, ALL_LANES_MASK> pixels(
+            PixelController<RGB_ORDER, 1, ALL_LANES_MASK> pixels(
                 sub.getBuffer(), sub.getCount(), adj, sub.settings.ditherMode);
 
             // Convert to PixelIterator and load into RMT controller

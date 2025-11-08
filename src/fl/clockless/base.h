@@ -14,7 +14,7 @@
 /// @par Example Usage (brace-init):
 /// @code
 /// CRGB strip1[100], strip2[100];
-/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>({
+/// auto& bulk = FastLED.addClocklessLeds<Chipset::WS2812, fl::GRB, RMT>({
 ///     {2, strip1, 100, ScreenMap()},
 ///     {4, strip2, 100, ScreenMap()}
 /// });
@@ -27,7 +27,7 @@
 /// vector<BulkStripConfig> configs;
 /// configs.push_back({2, strip1, 100, ScreenMap()});
 /// configs.push_back({4, strip2, 100, ScreenMap()});
-/// auto& bulk = FastLED.addBulkLeds<Chipset::WS2812, RMT>(
+/// auto& bulk = FastLED.addClocklessLeds<Chipset::WS2812, fl::GRB, RMT>(
 ///     span<const BulkStripConfig>(configs.data(), configs.size()));
 /// @endcode
 ///
@@ -115,7 +115,7 @@ struct BulkClocklessHelper {
 /// documentation for specific limits.
 ///
 /// @par Usage Pattern:
-/// 1. Create controller with initializer list via FastLED.addBulkLeds()
+/// 1. Create controller with initializer list via FastLED.addClocklessLeds()
 /// 2. Optionally set global settings via setCorrection(), setTemperature(),
 /// etc.
 /// 3. Optionally override per-strip settings via get(pin)->setCorrection(),
@@ -131,7 +131,7 @@ struct BulkClocklessHelper {
 /// per-strip settings.
 ///
 /// @code
-/// auto& bulk = FastLED.addBulkLeds<WS2812, RMT>({
+/// auto& bulk = FastLED.addClocklessLeds<WS2812, fl::GRB, RMT>({
 ///     {2, strip1, 100, map},  // Gets default settings
 ///     {4, strip2, 100, map}   // Gets default settings
 /// });
@@ -152,9 +152,10 @@ struct BulkClocklessHelper {
 /// Wait for show() to complete before modifying strip configuration.
 ///
 /// @tparam CHIPSET LED chipset type (e.g., Chipset::WS2812)
+/// @tparam RGB_ORDER RGB color channel ordering (e.g., RGB, GRB, BRG)
 /// @tparam PERIPHERAL Hardware peripheral type (e.g., LCD_I80, RMT, I2S)
-template <typename CHIPSET, typename PERIPHERAL>
-class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+class BulkClockless : public CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK> {
   public:
     /// Constructor with initializer list
     /// @param strips initializer list of strip configurations
@@ -421,7 +422,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     ///
     /// @par Example - Regular setters (future strips only):
     /// @code
-    /// auto& bulk = FastLED.addBulkLeds<WS2812, RMT>({
+    /// auto& bulk = FastLED.addClocklessLeds<WS2812, fl::GRB, RMT>({
     ///     {2, strip1, 100, map},  // Uses default correction
     ///     {4, strip2, 100, map}   // Uses default correction
     /// });
@@ -431,7 +432,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     ///
     /// @par Example - updateAllSettings (all strips):
     /// @code
-    /// auto& bulk = FastLED.addBulkLeds<WS2812, RMT>({
+    /// auto& bulk = FastLED.addClocklessLeds<WS2812, fl::GRB, RMT>({
     ///     {2, strip1, 100, map},
     ///     {4, strip2, 100, map}
     /// });
@@ -451,7 +452,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     ///
     /// @param correction color correction to apply (e.g., TypicalLEDStrip)
     /// @returns reference to this controller for method chaining
-    CLEDController &setCorrection(CRGB correction);
+    BulkClockless &setCorrection(CRGB correction);
 
     /// @brief Set global color temperature default for new strips
     ///
@@ -462,7 +463,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     /// @param temperature color temperature to apply (e.g., Tungsten100W,
     /// Candle)
     /// @returns reference to this controller for method chaining
-    CLEDController &setTemperature(CRGB temperature);
+    BulkClockless &setTemperature(CRGB temperature);
 
     /// @brief Set global dither mode default for new strips
     ///
@@ -473,7 +474,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     /// @param ditherMode dither mode to apply (e.g., BINARY_DITHER,
     /// DISABLE_DITHER)
     /// @returns reference to this controller for method chaining
-    CLEDController &setDither(u8 ditherMode);
+    BulkClockless &setDither(u8 ditherMode);
 
     /// @brief Set global RGBW configuration default for new strips
     ///
@@ -483,7 +484,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     ///
     /// @param arg RGBW configuration to apply (e.g., RgbwDefault::value())
     /// @returns reference to this controller for method chaining
-    CLEDController &setRgbw(const Rgbw &arg);
+    BulkClockless &setRgbw(const Rgbw &arg);
 
     /// Initialize the controller
     void init() override { initPeripheral(); }
@@ -492,7 +493,7 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
     void showColor(const CRGB &data, int nLeds, u8 brightness) override;
 
     /// Show LED data (override from CPixelLEDController)
-    void showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) override;
+    void showPixels(PixelController<RGB_ORDER, 1, ALL_LANES_MASK> &pixels) override;
 
   protected:
     /// Peripheral-specific initialization
@@ -558,8 +559,8 @@ class BulkClockless : public CPixelLEDController<RGB, 1, ALL_LANES_MASK> {
 // ============================================================================
 
 // Common initialization helper
-template <typename CHIPSET, typename PERIPHERAL>
-void BulkClockless<CHIPSET, PERIPHERAL>::initFromSpan(span<const BulkStripConfig> strips) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+void BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::initFromSpan(span<const BulkStripConfig> strips) {
     // Calculate total LED count across all strips
     int totalLeds = 0;
     for (const auto &config : strips) {
@@ -581,25 +582,25 @@ void BulkClockless<CHIPSET, PERIPHERAL>::initFromSpan(span<const BulkStripConfig
 }
 
 // Constructor with initializer list
-template <typename CHIPSET, typename PERIPHERAL>
-BulkClockless<CHIPSET, PERIPHERAL>::BulkClockless(initializer_list<BulkStripConfig> strips)
-    : CPixelLEDController<RGB, 1, ALL_LANES_MASK>() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::BulkClockless(initializer_list<BulkStripConfig> strips)
+    : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>() {
     // Delegate to span constructor via temporary vector
     vector<BulkStripConfig> configs(strips.begin(), strips.end());
     initFromSpan(span<const BulkStripConfig>(configs.data(), configs.size()));
 }
 
 // Constructor with span
-template <typename CHIPSET, typename PERIPHERAL>
-BulkClockless<CHIPSET, PERIPHERAL>::BulkClockless(span<const BulkStripConfig> strips)
-    : CPixelLEDController<RGB, 1, ALL_LANES_MASK>() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::BulkClockless(span<const BulkStripConfig> strips)
+    : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>() {
     initFromSpan(strips);
 }
 
 // Move constructor
-template <typename CHIPSET, typename PERIPHERAL>
-BulkClockless<CHIPSET, PERIPHERAL>::BulkClockless(BulkClockless &&other) noexcept
-    : CPixelLEDController<RGB, 1, ALL_LANES_MASK>(fl::move(other)),
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::BulkClockless(BulkClockless &&other) noexcept
+    : CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>(fl::move(other)),
       mSubControllers(fl::move(other.mSubControllers)),
       mDefaultSettings(fl::move(other.mDefaultSettings)) {
     // Base class move handled by base constructor
@@ -608,15 +609,15 @@ BulkClockless<CHIPSET, PERIPHERAL>::BulkClockless(BulkClockless &&other) noexcep
 }
 
 // Move assignment operator
-template <typename CHIPSET, typename PERIPHERAL>
-BulkClockless<CHIPSET, PERIPHERAL> &
-BulkClockless<CHIPSET, PERIPHERAL>::operator=(BulkClockless &&other) noexcept {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL> &
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::operator=(BulkClockless &&other) noexcept {
     if (this != &other) {
         // Clean up existing resources
         removeAll();
 
         // Move base class state
-        CPixelLEDController<RGB, 1, ALL_LANES_MASK>::operator=(
+        CPixelLEDController<RGB_ORDER, 1, ALL_LANES_MASK>::operator=(
             fl::move(other));
 
         // Move members
@@ -629,8 +630,8 @@ BulkClockless<CHIPSET, PERIPHERAL>::operator=(BulkClockless &&other) noexcept {
 }
 
 // Add method
-template <typename CHIPSET, typename PERIPHERAL>
-BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::add(int pin, CRGB *buffer, int count,
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkStrip *BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::add(int pin, CRGB *buffer, int count,
                                                      const ScreenMap &screenmap) {
     // 1. Validate pin for platform
     if (!validatePin(pin)) {
@@ -669,8 +670,8 @@ BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::add(int pin, CRGB *buffer, int co
 }
 
 // Remove method
-template <typename CHIPSET, typename PERIPHERAL>
-bool BulkClockless<CHIPSET, PERIPHERAL>::remove(int pin) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+bool BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::remove(int pin) {
     auto it = mSubControllers.find(pin);
     if (it == mSubControllers.end()) {
         return false;
@@ -685,8 +686,8 @@ bool BulkClockless<CHIPSET, PERIPHERAL>::remove(int pin) {
 }
 
 // Get (const version)
-template <typename CHIPSET, typename PERIPHERAL>
-const BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::get(int pin) const {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+const BulkStrip *BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::get(int pin) const {
     auto it = mSubControllers.find(pin);
     if (it == mSubControllers.end()) {
         return nullptr;
@@ -695,8 +696,8 @@ const BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::get(int pin) const {
 }
 
 // Get (non-const version)
-template <typename CHIPSET, typename PERIPHERAL>
-BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::get(int pin) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkStrip *BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::get(int pin) {
     auto it = mSubControllers.find(pin);
     if (it == mSubControllers.end()) {
         return nullptr;
@@ -705,8 +706,8 @@ BulkStrip *BulkClockless<CHIPSET, PERIPHERAL>::get(int pin) {
 }
 
 // Size
-template <typename CHIPSET, typename PERIPHERAL>
-int BulkClockless<CHIPSET, PERIPHERAL>::size() const noexcept {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+int BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::size() const noexcept {
     int total = 0;
     for (const auto &pair : mSubControllers) {
         total += pair.second.getCount();
@@ -715,20 +716,20 @@ int BulkClockless<CHIPSET, PERIPHERAL>::size() const noexcept {
 }
 
 // Strip count
-template <typename CHIPSET, typename PERIPHERAL>
-int BulkClockless<CHIPSET, PERIPHERAL>::stripCount() const noexcept {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+int BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::stripCount() const noexcept {
     return static_cast<int>(mSubControllers.size());
 }
 
 // Has
-template <typename CHIPSET, typename PERIPHERAL>
-bool BulkClockless<CHIPSET, PERIPHERAL>::has(int pin) const noexcept {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+bool BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::has(int pin) const noexcept {
     return mSubControllers.find(pin) != mSubControllers.end();
 }
 
 // Get all pins
-template <typename CHIPSET, typename PERIPHERAL>
-vector<int> BulkClockless<CHIPSET, PERIPHERAL>::getAllPins() const {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+vector<int> BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::getAllPins() const {
     vector<int> pins;
     pins.reserve(mSubControllers.size());
     for (const auto &pair : mSubControllers) {
@@ -738,8 +739,8 @@ vector<int> BulkClockless<CHIPSET, PERIPHERAL>::getAllPins() const {
 }
 
 // Remove all
-template <typename CHIPSET, typename PERIPHERAL>
-int BulkClockless<CHIPSET, PERIPHERAL>::removeAll() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+int BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::removeAll() {
     int count = static_cast<int>(mSubControllers.size());
     // Call peripheral cleanup for each strip before clearing
     for (const auto &pair : mSubControllers) {
@@ -750,40 +751,40 @@ int BulkClockless<CHIPSET, PERIPHERAL>::removeAll() {
 }
 
 // Set correction
-template <typename CHIPSET, typename PERIPHERAL>
-CLEDController &BulkClockless<CHIPSET, PERIPHERAL>::setCorrection(CRGB correction) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL> &BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::setCorrection(CRGB correction) {
     CLEDController::setCorrection(correction);
     mDefaultSettings.correction = correction;
     return *this;
 }
 
 // Set temperature
-template <typename CHIPSET, typename PERIPHERAL>
-CLEDController &BulkClockless<CHIPSET, PERIPHERAL>::setTemperature(CRGB temperature) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL> &BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::setTemperature(CRGB temperature) {
     CLEDController::setTemperature(temperature);
     mDefaultSettings.temperature = temperature;
     return *this;
 }
 
 // Set dither
-template <typename CHIPSET, typename PERIPHERAL>
-CLEDController &BulkClockless<CHIPSET, PERIPHERAL>::setDither(u8 ditherMode) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL> &BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::setDither(u8 ditherMode) {
     CLEDController::setDither(ditherMode);
     mDefaultSettings.ditherMode = ditherMode;
     return *this;
 }
 
 // Set RGBW
-template <typename CHIPSET, typename PERIPHERAL>
-CLEDController &BulkClockless<CHIPSET, PERIPHERAL>::setRgbw(const Rgbw &arg) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL> &BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::setRgbw(const Rgbw &arg) {
     CLEDController::setRgbw(arg);
     mDefaultSettings.rgbw = arg;
     return *this;
 }
 
 // Show color
-template <typename CHIPSET, typename PERIPHERAL>
-void BulkClockless<CHIPSET, PERIPHERAL>::showColor(const CRGB &data, int nLeds, u8 brightness) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+void BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::showColor(const CRGB &data, int nLeds, u8 brightness) {
     // Default implementation: show color to all strips
     // Parameter unused: Each strip in BulkClockless has its own LED count tracked
     // in BulkStrip. The nLeds parameter comes from CLEDController interface but
@@ -793,15 +794,15 @@ void BulkClockless<CHIPSET, PERIPHERAL>::showColor(const CRGB &data, int nLeds, 
     for (auto &pair : mSubControllers) {
         BulkStrip &sub = pair.second;
         ColorAdjustment adj = BulkClocklessHelper::computeAdjustment(brightness, sub.settings);
-        PixelController<RGB, 1, ALL_LANES_MASK> pixels(
+        PixelController<RGB_ORDER, 1, ALL_LANES_MASK> pixels(
             data, sub.getCount(), adj, sub.settings.ditherMode);
         showPixels(pixels);
     }
 }
 
 // Show pixels
-template <typename CHIPSET, typename PERIPHERAL>
-void BulkClockless<CHIPSET, PERIPHERAL>::showPixels(PixelController<RGB, 1, ALL_LANES_MASK> &pixels) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+void BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::showPixels(PixelController<RGB_ORDER, 1, ALL_LANES_MASK> &pixels) {
     // Parameter unused: BulkClockless manages multiple independent buffers, each
     // requiring its own PixelController with per-strip settings. The global
     // PixelController passed by base class doesn't apply to our multi-strip
@@ -815,8 +816,8 @@ void BulkClockless<CHIPSET, PERIPHERAL>::showPixels(PixelController<RGB, 1, ALL_
 }
 
 // Init peripheral
-template <typename CHIPSET, typename PERIPHERAL>
-void BulkClockless<CHIPSET, PERIPHERAL>::initPeripheral() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+void BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::initPeripheral() {
     // CPU fallback: Warn user that peripheral is not available
     // Include specific peripheral name in warning message
     FL_WARN("BulkClockless: " << PeripheralName<PERIPHERAL>::name()
@@ -827,23 +828,23 @@ void BulkClockless<CHIPSET, PERIPHERAL>::initPeripheral() {
 }
 
 // Validate pin
-template <typename CHIPSET, typename PERIPHERAL>
-bool BulkClockless<CHIPSET, PERIPHERAL>::validatePin(int pin) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+bool BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::validatePin(int pin) {
     // CPU fallback: Accept any reasonable pin number
     // Platform-specific specializations will have stricter validation
     return pin >= 0 && pin < MAX_GPIO_PIN;
 }
 
 // Get max strips
-template <typename CHIPSET, typename PERIPHERAL>
-int BulkClockless<CHIPSET, PERIPHERAL>::getMaxStrips() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+int BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::getMaxStrips() {
     // CPU fallback: Use MAX_CLED_CONTROLLERS as limit
     return 64;
 }
 
 // Show pixels internal
-template <typename CHIPSET, typename PERIPHERAL>
-void BulkClockless<CHIPSET, PERIPHERAL>::showPixelsInternal() {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+void BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::showPixelsInternal() {
     // CPU fallback: Iterate all strips and update their trackers
     // This enables WASM visualization and provides basic CPU fallback
     for (auto &pair : mSubControllers) {
@@ -856,9 +857,9 @@ void BulkClockless<CHIPSET, PERIPHERAL>::showPixelsInternal() {
 }
 
 // AllStripsProxy::setCorrection
-template <typename CHIPSET, typename PERIPHERAL>
-typename BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy &
-BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setCorrection(CRGB correction) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+typename BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy &
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy::setCorrection(CRGB correction) {
     for (auto &pair : bulk.mSubControllers) {
         pair.second.settings.correction = correction;
     }
@@ -868,9 +869,9 @@ BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setCorrection(CRGB correctio
 }
 
 // AllStripsProxy::setTemperature
-template <typename CHIPSET, typename PERIPHERAL>
-typename BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy &
-BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setTemperature(CRGB temperature) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+typename BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy &
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy::setTemperature(CRGB temperature) {
     for (auto &pair : bulk.mSubControllers) {
         pair.second.settings.temperature = temperature;
     }
@@ -880,9 +881,9 @@ BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setTemperature(CRGB temperat
 }
 
 // AllStripsProxy::setDither
-template <typename CHIPSET, typename PERIPHERAL>
-typename BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy &
-BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setDither(u8 ditherMode) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+typename BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy &
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy::setDither(u8 ditherMode) {
     for (auto &pair : bulk.mSubControllers) {
         pair.second.settings.ditherMode = ditherMode;
     }
@@ -892,9 +893,9 @@ BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setDither(u8 ditherMode) {
 }
 
 // AllStripsProxy::setRgbw
-template <typename CHIPSET, typename PERIPHERAL>
-typename BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy &
-BulkClockless<CHIPSET, PERIPHERAL>::AllStripsProxy::setRgbw(const Rgbw &rgbw) {
+template <typename CHIPSET, EOrder RGB_ORDER, typename PERIPHERAL>
+typename BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy &
+BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>::AllStripsProxy::setRgbw(const Rgbw &rgbw) {
     for (auto &pair : bulk.mSubControllers) {
         pair.second.settings.rgbw = rgbw;
     }
