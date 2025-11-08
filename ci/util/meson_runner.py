@@ -168,7 +168,11 @@ def detect_system_llvm_tools() -> tuple[bool, bool]:
 
 
 def setup_meson_build(
-    source_dir: Path, build_dir: Path, reconfigure: bool = False, unity: bool = False
+    source_dir: Path,
+    build_dir: Path,
+    reconfigure: bool = False,
+    unity: bool = False,
+    debug: bool = False,
 ) -> bool:
     """
     Set up Meson build directory.
@@ -178,6 +182,7 @@ def setup_meson_build(
         build_dir: Build output directory
         reconfigure: Force reconfiguration of existing build
         unity: Enable unity builds (default: False)
+        debug: Enable debug mode with full symbols and sanitizers (default: False)
 
     Returns:
         True if setup successful, False otherwise
@@ -464,18 +469,28 @@ def setup_meson_build(
         ]
         if unity:
             cmd.extend(["-Dunity=on"])
+        if debug:
+            cmd.extend(["-Ddebug_mode=true"])
     else:
         # Initial setup
         _ts_print(f"[MESON] Setting up build directory: {build_dir}")
         cmd = ["meson", "setup", "--native-file", str(native_file_path), str(build_dir)]
         if unity:
             cmd.extend(["-Dunity=on"])
+        if debug:
+            cmd.extend(["-Ddebug_mode=true"])
 
     # Print unity build status
     if unity:
         _ts_print("[MESON] ✅ Unity builds ENABLED (--unity flag)")
     else:
         _ts_print("[MESON] Unity builds disabled (use --unity to enable)")
+
+    # Print debug mode status
+    if debug:
+        _ts_print("[MESON] ✅ Debug mode ENABLED (-g3 + sanitizers)")
+    else:
+        _ts_print("[MESON] Debug mode disabled (using -g1 for stack traces)")
 
     is_windows = sys.platform.startswith("win") or os.name == "nt"
 
@@ -1149,6 +1164,7 @@ def run_meson_build_and_test(
     clean: bool = False,
     verbose: bool = False,
     unity: bool = False,
+    debug: bool = False,
 ) -> MesonTestResult:
     """
     Complete Meson build and test workflow.
@@ -1160,6 +1176,7 @@ def run_meson_build_and_test(
         clean: Clean build directory before setup
         verbose: Enable verbose output
         unity: Enable unity builds (default: False)
+        debug: Enable debug mode with full symbols and sanitizers (default: False)
 
     Returns:
         MesonTestResult with success status, duration, and test counts
@@ -1180,7 +1197,9 @@ def run_meson_build_and_test(
         shutil.rmtree(build_dir)
 
     # Setup build
-    if not setup_meson_build(source_dir, build_dir, reconfigure=False, unity=unity):
+    if not setup_meson_build(
+        source_dir, build_dir, reconfigure=False, unity=unity, debug=debug
+    ):
         return MesonTestResult(success=False, duration=time.time() - start_time)
 
     # Perform periodic maintenance on Ninja dependency database (once per day)

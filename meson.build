@@ -1,5 +1,6 @@
 project('fastled', 'cpp',
   version: '6.0.0',
+  meson_version: '>=1.1.0',
   default_options: [
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
@@ -76,8 +77,17 @@ unit_test_compile_args = [
   '-Werror=c++17-extensions',  # Enforce C++11 compatibility
   '-Werror=unused-result',  # Treat ignored FL_NODISCARD return values as errors
   '-O0',
-  '-g'
+  '-g1'  # Minimal debug info for stack traces (function names + line numbers)
 ]
+
+# Debug mode: Add full debug symbols and sanitizers when debug_mode option is enabled
+if get_option('debug_mode')
+  unit_test_compile_args += [
+    '-g3',                        # Full debug symbols (override -g1)
+    '-fsanitize=address',         # Address sanitizer (detect memory errors)
+    '-fsanitize=undefined',       # Undefined behavior sanitizer
+  ]
+endif
 
 # Platform-specific compiler flags
 if build_machine.system() == 'windows'
@@ -114,6 +124,14 @@ else
     '-rdynamic',  # Export symbols for backtrace_symbols() in crash handler
   ]
   # Note: -fuse-ld=lld removed - zig uses its own bundled lld and ignores this flag
+endif
+
+# Debug mode: Add sanitizer flags to linker when debug_mode option is enabled
+if get_option('debug_mode')
+  unit_test_link_args += [
+    '-fsanitize=address',         # Address sanitizer runtime
+    '-fsanitize=undefined',       # Undefined behavior sanitizer runtime
+  ]
 endif
 
 # Build FastLED static library for tests
