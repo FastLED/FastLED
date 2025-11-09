@@ -6,7 +6,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(NoiseWave);
+FASTLED_SHARED_PTR(NoiseWave);
 
 class NoiseWave : public Fx1d {
   public:

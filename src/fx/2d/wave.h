@@ -10,7 +10,7 @@
 
 #include "fl/colorutils.h"
 #include "fl/gradient.h"
-#include "fl/ptr.h"  // For FASTLED_SMART_PTR macros and shared_ptr
+#include "fl/ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"
@@ -18,10 +18,10 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(WaveFx);
-FASTLED_SMART_PTR(WaveCrgbMap);
-FASTLED_SMART_PTR(WaveCrgbMapDefault);
-FASTLED_SMART_PTR(WaveCrgbGradientMap);
+FASTLED_SHARED_PTR(WaveFx);
+FASTLED_SHARED_PTR(WaveCrgbMap);
+FASTLED_SHARED_PTR(WaveCrgbMapDefault);
+FASTLED_SHARED_PTR(WaveCrgbGradientMap);
 
 /// @brief Abstract base class for mapping wave simulation values to LED colors
 ///

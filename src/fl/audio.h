@@ -2,7 +2,7 @@
 
 #include "fl/fft.h"
 #include "fl/math.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/int.h"
@@ -12,7 +12,7 @@ namespace fl {
 
 class AudioSampleImpl;
 
-FASTLED_SMART_PTR(AudioSampleImpl);
+FASTLED_SHARED_PTR(AudioSampleImpl);
 
 // AudioSample is a wrapper around AudioSampleImpl, hiding the reference
 // counting so that the api object can be simple and have standard object

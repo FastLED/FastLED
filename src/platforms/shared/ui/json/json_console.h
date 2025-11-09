@@ -9,7 +9,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(JsonConsole);
+FASTLED_SHARED_PTR(JsonConsole);
 
 /**
  * JsonConsole provides a console interface to interact with JsonUI components.

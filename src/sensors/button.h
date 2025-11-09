@@ -3,7 +3,7 @@
 #include "fl/stdint.h"
 
 #include "fl/function_list.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/ui.h"
 #include "sensors/digital_pin.h"
 

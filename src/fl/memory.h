@@ -2,7 +2,7 @@
 
 // Convenience header that includes all smart pointer types
 // For better compile times, prefer including only what you need:
-//   - fl/shared_ptr.h for shared_ptr (includes FASTLED_SMART_PTR macros)
+//   - fl/shared_ptr.h for shared_ptr (includes FASTLED_SHARED_PTR macros)
 //   - fl/weak_ptr.h for weak_ptr
 //   - fl/unique_ptr.h for unique_ptr and make_unique
 

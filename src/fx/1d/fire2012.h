@@ -43,7 +43,7 @@ namespace fl {
 // Higher chance = more roaring fire.  Lower chance = more flickery fire.
 // Default 120, suggested range 50-200.
 
-FASTLED_SMART_PTR(Fire2012);
+FASTLED_SHARED_PTR(Fire2012);
 
 class Fire2012 : public Fx1d {
   public:

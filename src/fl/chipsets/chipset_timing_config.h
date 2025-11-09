@@ -13,6 +13,8 @@ namespace fl {
 /// This struct captures the essential timing information from compile-time
 /// chipset definitions and makes it available at runtime for driver configuration.
 struct ChipsetTimingConfig {
+    ChipsetTimingConfig(uint32_t t1, uint32_t t2, uint32_t t3, uint32_t reset, const char* name = "UNNAMED CHIPSET")
+        : t1_ns(t1), t2_ns(t2), t3_ns(t3), reset_us(reset), name(name) {}
     uint32_t t1_ns;      ///< T0H: High time for bit 0 (nanoseconds)
     uint32_t t2_ns;      ///< T1H-T0H: Additional high time for bit 1 (nanoseconds)
     uint32_t t3_ns;      ///< T0L: Low tail duration (nanoseconds)

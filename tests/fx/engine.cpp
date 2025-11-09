@@ -13,7 +13,7 @@
 
 using namespace fl;
 
-FASTLED_SMART_PTR(MockFx);
+FASTLED_SHARED_PTR(MockFx);
 
 class MockFx : public fl::Fx {
 public:

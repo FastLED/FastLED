@@ -167,7 +167,7 @@ private:
     fl::third_party::Mp3StreamDecoderImpl* mImpl;
 };
 
-FASTLED_SMART_PTR(Mp3Decoder);
+FASTLED_SHARED_PTR(Mp3Decoder);
 
 // MP3 factory for creating decoders and parsing metadata
 class Mp3 {

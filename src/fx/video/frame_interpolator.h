@@ -7,7 +7,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(FrameInterpolator);
+FASTLED_SHARED_PTR(FrameInterpolator);
 
 // Holds onto frames and allow interpolation. This allows
 // effects to have high effective frame rate and also

@@ -2,13 +2,13 @@
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
 #include "fx/fx.h"
 
 namespace fl {
 
-FASTLED_SMART_PTR(Fx2d);
+FASTLED_SHARED_PTR(Fx2d);
 
 // Abstract base class for 2D effects that use a grid, which is defined
 // by an XYMap.

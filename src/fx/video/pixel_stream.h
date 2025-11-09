@@ -3,18 +3,18 @@
 #include "crgb.h"
 #include "fl/bytestream.h"
 #include "fl/file_system.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
 #include "fx/frame.h"
 #include "fl/int.h"
 namespace fl {
-FASTLED_SMART_PTR(FileHandle);
-FASTLED_SMART_PTR(ByteStream);
+FASTLED_SHARED_PTR(FileHandle);
+FASTLED_SHARED_PTR(ByteStream);
 } // namespace fl
 
 namespace fl {
 
-FASTLED_SMART_PTR(PixelStream);
+FASTLED_SHARED_PTR(PixelStream);
 
 // PixelStream takes either a file handle or a byte stream
 // and reads frames from it in order to serve data to the

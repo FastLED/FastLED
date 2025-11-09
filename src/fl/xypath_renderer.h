@@ -9,13 +9,13 @@
 // #include "fl/raster.h"
 // #include "fl/xypath.h"
 #include "fl/function.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 
 namespace fl {
 
-FASTLED_SMART_PTR(XYPathGenerator);
+FASTLED_SHARED_PTR(XYPathGenerator);
 
 class XYPathRenderer {
   public:

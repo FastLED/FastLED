@@ -10,13 +10,13 @@ expensive trig functions are needed. Same with scale and offset.
 
 #include "fl/lut.h"
 #include "fl/math_macros.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
 #include "lib8tion/types.h"
 
 namespace fl {
 
-FASTLED_SMART_PTR(TransformFloatImpl);
+FASTLED_SHARED_PTR(TransformFloatImpl);
 
 using alpha16 =
     u16; // fixed point representation of 0->1 in the range [0, 65535]

@@ -12,7 +12,7 @@
 #include "fl/stdint.h"
 
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
 #include "fl/xymap.h"       // Needed for constructor parameter
 #include "fx/fx2d.h"
@@ -58,7 +58,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(ScaleUp);
+FASTLED_SHARED_PTR(ScaleUp);
 
 /// @brief Effect wrapper that upscales delegate effects using bilinear interpolation
 ///

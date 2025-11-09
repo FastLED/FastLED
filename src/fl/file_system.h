@@ -5,7 +5,7 @@
 #include "fl/stdint.h"
 #include "fl/int.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str_fwd.h"     // Lightweight forward declarations for string
 #include "fx/video.h"
 #include "fl/screenmap.h"
@@ -16,7 +16,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(FsImpl);
+FASTLED_SHARED_PTR(FsImpl);
 // PLATFORM INTERFACE
 // You need to define this for your platform.
 // Otherwise a null filesystem will be used that will do nothing but spew
@@ -35,8 +35,8 @@ const char* getTestFileSystemRoot();
 namespace fl {
 
 class ScreenMap;
-FASTLED_SMART_PTR(FileSystem);
-FASTLED_SMART_PTR(FileHandle);
+FASTLED_SHARED_PTR(FileSystem);
+FASTLED_SHARED_PTR(FileHandle);
 class Video;
 template <typename Key, typename Value, fl::size N> class FixedMap;
 

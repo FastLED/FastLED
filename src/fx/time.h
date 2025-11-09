@@ -3,12 +3,12 @@
 #include "fl/stdint.h"
 
 #include "fl/deprecated.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 
 namespace fl {
 
-FASTLED_SMART_PTR(TimeFunction);
-FASTLED_SMART_PTR(TimeWarp);
+FASTLED_SHARED_PTR(TimeFunction);
+FASTLED_SHARED_PTR(TimeWarp);
 
 // Interface for time generation and time manipulation.
 class TimeFunction {

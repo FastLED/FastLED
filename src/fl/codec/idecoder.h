@@ -74,7 +74,7 @@ public:
 };
 
 // Smart pointer typedef - must come after class definition
-FASTLED_SMART_PTR(IDecoder);
+FASTLED_SHARED_PTR(IDecoder);
 
 
 } // namespace fl
