@@ -7,14 +7,12 @@
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 
 #include "parlio_channel.h"
-#include "parlio_timing.h"
 #include "parlio_engine.h"
 #include "crgb.h"
 #include "esp_err.h"
 #include "fl/cstring.h"
 #include "fl/log.h"
 #include "fl/unique_ptr.h"
-#include "driver/parlio_tx.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
 #include "esp_heap_caps.h"
@@ -37,11 +35,11 @@
 // Benefits:
 // - DMA gaps only affect the least significant bit (minimal visual impact)
 // - Worst case artifact: 0,0,0 becomes 0,0,1 (imperceptible)
-// - Keeps each transmission under timing threshold (<20μs gap tolerance)
+// - Keeps each write operation under timing threshold (<20μs gap tolerance)
 // - Prevents mid-component corruption that causes ±128 brightness errors
 //
 // Implementation:
-// - Each LED's color data is transmitted in 3 chunks (G, R, B components)
+// - Each LED's color data is written in 3 chunks (G, R, B components)
 // - Each chunk consists of 32 bits (8 bits × 4 waveform expansion)
 // - Break points occur naturally at component boundaries after LSB
 // - For large LED counts, additional breaks occur at LED boundaries
@@ -53,10 +51,6 @@ namespace fl {
 
 // Helper functions
 namespace detail {
-
-inline const char* parlio_err_to_str(esp_err_t err) {
-    return esp_err_to_name(err);
-}
 
 // Runtime waveform generator using chipset timing configuration
 // Each LED bit is encoded as a 4-clock pattern, and each nibble (4 bits)
@@ -239,8 +233,8 @@ private:
     void pack_data(uint8_t* output_buffer);
 
     static bool IRAM_ATTR parlio_tx_done_callback(
-        parlio_tx_unit_handle_t tx_unit,
-        const parlio_tx_done_event_data_t* edata,
+        void* tx_unit,
+        const void* edata,
         void* user_ctx);
 
     // All data members inline (no pimpl indirection)
@@ -250,7 +244,6 @@ private:
     ParlioChannelConfig config_;
     uint16_t num_leds_;
     CRGB* strips_[16];
-    parlio_tx_unit_handle_t tx_unit_;
     uint8_t* dma_buffer_[2];
     uint8_t current_buffer_idx_;
     size_t buffer_size_;
@@ -271,7 +264,6 @@ ParlioChannel::ParlioChannel(const ChipsetTimingConfig& timing, uint8_t data_wid
     , config_{}
     , num_leds_(0)
     , strips_{}
-    , tx_unit_(nullptr)
     , dma_buffer_{nullptr, nullptr}
     , current_buffer_idx_(0)
     , buffer_size_(0)
@@ -433,40 +425,29 @@ bool ParlioChannel::begin(const ParlioChannelConfig& config, uint16_t num_leds) 
     }
     xSemaphoreGive(xfer_done_sem_);
 
-    // Configure PARLIO TX unit
-    PARLIO_DLOG("Configuring PARLIO TX unit:");
-    parlio_tx_unit_config_t parlio_config = {};
-    parlio_config.clk_src = PARLIO_CLK_SRC_DEFAULT;
-    parlio_config.clk_in_gpio_num = (gpio_num_t)-1;  // Use internal clock source
-    parlio_config.input_clk_src_freq_hz = 0;  // Not used when clk_in_gpio_num is -1
-    parlio_config.output_clk_freq_hz = config_.clock_freq_hz;  // 3.2 MHz for WS2812
-    parlio_config.data_width = data_width_;
-    parlio_config.clk_out_gpio_num = (gpio_num_t)-1;  // No external clock output needed
-    parlio_config.valid_gpio_num = (gpio_num_t)-1;  // No separate valid signal
-    parlio_config.trans_queue_depth = 4;
-    parlio_config.max_transfer_size = buffer_size_;  // Maximum size for single continuous buffer
-    parlio_config.dma_burst_size = 64;  // Standard DMA burst size
-    parlio_config.sample_edge = PARLIO_SAMPLE_EDGE_POS;
-    parlio_config.bit_pack_order = PARLIO_BIT_PACK_ORDER_MSB;
-    parlio_config.flags.clk_gate_en = 0;
-    parlio_config.flags.io_loop_back = 0;
-    parlio_config.flags.allow_pd = 0;
+    // Configure PARLIO hardware via hub (gatekeeper)
+    PARLIO_DLOG("Configuring PARLIO hardware via hub");
+    auto& hub = ParlioHub::getInstance();
+
+    // Prepare hardware configuration
+    ParlioHardwareConfig hw_config = {};
+    for (int i = 0; i < data_width_; i++) {
+        hw_config.data_gpios[i] = config_.data_gpios[i];
+        PARLIO_DLOG("  data_gpio[" << i << "]: " << config_.data_gpios[i]);
+    }
+    hw_config.num_lanes = data_width_;
+    hw_config.clock_freq_hz = config_.clock_freq_hz;
+    hw_config.max_transfer_size = buffer_size_;
+    hw_config.on_write_done = parlio_tx_done_callback;
+    hw_config.callback_arg = this;
 
     PARLIO_DLOG("  data_width: " << int(data_width_));
     PARLIO_DLOG("  output_clk_freq_hz: " << config_.clock_freq_hz);
-    PARLIO_DLOG("  max_transfer_size: " << parlio_config.max_transfer_size);
-    PARLIO_DLOG("  clk_out_gpio: -1 (internal clock)");
+    PARLIO_DLOG("  max_transfer_size: " << buffer_size_);
 
-    // Copy GPIO numbers
-    for (int i = 0; i < data_width_; i++) {
-        parlio_config.data_gpio_nums[i] = (gpio_num_t)config_.data_gpios[i];
-        PARLIO_DLOG("  data_gpio[" << i << "]: " << config_.data_gpios[i]);
-    }
-
-    // Create PARLIO TX unit
-    esp_err_t err = parlio_new_tx_unit(&parlio_config, &tx_unit_);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("parlio_new_tx_unit() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+    // Configure engine via hub
+    if (!hub.engineConfigure(hw_config)) {
+        FL_LOG_PARLIO("Engine configuration failed");
         FL_LOG_PARLIO("  Check GPIO pins - data:["
                 << config_.data_gpios[0] << "," << config_.data_gpios[1] << "," << config_.data_gpios[2] << ",...]");
 
@@ -475,30 +456,6 @@ bool ParlioChannel::begin(const ParlioChannelConfig& config, uint16_t num_leds) 
             heap_caps_free(dma_buffer_[i]);
             dma_buffer_[i] = nullptr;
         }
-        xfer_done_sem_ = nullptr;
-        return false;
-    }
-
-    // Register event callbacks
-    PARLIO_DLOG("Registering PARLIO event callbacks");
-    parlio_tx_event_callbacks_t cbs = {
-        .on_trans_done = parlio_tx_done_callback,
-    };
-    parlio_tx_unit_register_event_callbacks(tx_unit_, &cbs, this);
-
-    // Enable PARLIO TX unit
-    PARLIO_DLOG("Enabling PARLIO TX unit");
-    err = parlio_tx_unit_enable(tx_unit_);
-    if (err != ESP_OK) {
-        FL_LOG_PARLIO("parlio_tx_unit_enable() failed with error: " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
-
-        parlio_del_tx_unit(tx_unit_);
-        vSemaphoreDelete(xfer_done_sem_);
-        for (int i = 0; i < 2; i++) {
-            heap_caps_free(dma_buffer_[i]);
-            dma_buffer_[i] = nullptr;
-        }
-        tx_unit_ = nullptr;
         xfer_done_sem_ = nullptr;
         return false;
     }
@@ -528,11 +485,9 @@ void ParlioChannel::end() {
 
     PARLIO_DLOG("end() called - cleaning up resources");
 
-    if (tx_unit_) {
-        parlio_tx_unit_disable(tx_unit_);
-        parlio_del_tx_unit(tx_unit_);
-        tx_unit_ = nullptr;
-    }
+    // Shutdown engine hardware via hub
+    auto& hub = ParlioHub::getInstance();
+    hub.engineShutdown();
 
     // Free both DMA buffers
     for (int i = 0; i < 2; i++) {
@@ -563,28 +518,28 @@ void ParlioChannel::set_strip(uint8_t channel, CRGB* leds) {
 }
 
 void ParlioChannel::show() {
-    // Acquire hardware resource (blocks if another driver is using PARLIO)
-    auto& resource_mgr = IParlioEngine::getInstance();
-    resource_mgr.acquire(this);
+    // Acquire hardware resource via hub (blocks if another driver is using PARLIO)
+    auto& hub = ParlioHub::getInstance();
+    hub.engineAcquire(this);
     PARLIO_DLOG("Acquired PARLIO hardware resource");
 
     PARLIO_DLOG("show() called");
 
-    if (!tx_unit_) {
-        FL_LOG_PARLIO("show() called but tx_unit_ not initialized");
-        resource_mgr.release(this);
+    if (!hub.engineIsConfigured()) {
+        FL_LOG_PARLIO("show() called but engine not configured");
+        hub.engineRelease(this);
         return;
     }
 
     // Verify buffers are allocated
     if (!dma_buffer_[0] || !dma_buffer_[1]) {
         FL_LOG_PARLIO("show() called but DMA buffers not allocated");
-        resource_mgr.release(this);
+        hub.engineRelease(this);
         return;
     }
 
-    // Wait for previous transfer to complete
-    PARLIO_DLOG("Waiting for previous transfer to complete...");
+    // Wait for previous write to complete
+    PARLIO_DLOG("Waiting for previous write to complete...");
     xSemaphoreTake(xfer_done_sem_, portMAX_DELAY);
 
     // Swap to next buffer for packing (double buffering)
@@ -595,20 +550,20 @@ void ParlioChannel::show() {
     PARLIO_DLOG("Packing LED data into buffer " << int(pack_buffer_idx) << "...");
     pack_data(pack_buffer);
 
-    // Swap to this buffer for transmission
+    // Swap to this buffer for write operation
     current_buffer_idx_ = pack_buffer_idx;
     dma_busy_ = true;
 
-    // Get buffer to transmit
+    // Get buffer to write
     const uint8_t* tx_buffer = dma_buffer_[current_buffer_idx_];
 
-    // Configure transmission
+    // Configure write operation
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x00000000;  // Lines idle low between frames
     tx_config.flags.queue_nonblocking = 0;
 
     // Calculate component-level chunking parameters (WLED-MM-P4 strategy)
-    // Each color component = 32 bits × data_width = one transmission unit
+    // Each color component = 32 bits × data_width = one write unit
     const uint32_t BITS_PER_COMPONENT = 32 * data_width_;
     const uint32_t BYTES_PER_COMPONENT = (BITS_PER_COMPONENT + 7) / 8;
     const uint32_t COMPONENTS_PER_LED = config_.is_rgbw ? 4 : 3;  // G, R, B, W (if RGBW)
@@ -619,13 +574,13 @@ void ParlioChannel::show() {
     const uint32_t BYTES_PER_LED = COMPONENTS_PER_LED * BYTES_PER_COMPONENT;
     const uint16_t MAX_LEDS_PER_CHUNK = MAX_BYTES_PER_CHUNK / BYTES_PER_LED;
 
-    // Transmit using WLED-MM-P4 buffer breaking strategy:
-    // Break at LED boundaries, with each LED's components transmitted together
+    // Write using WLED-MM-P4 buffer breaking strategy:
+    // Break at LED boundaries, with each LED's components written together
     uint16_t leds_remaining = num_leds_;
     const uint8_t* chunk_ptr = tx_buffer;
     uint16_t led_offset = 0;
 
-    PARLIO_DLOG("Transmitting with WLED-MM-P4 buffer breaking strategy");
+    PARLIO_DLOG("Writing with WLED-MM-P4 buffer breaking strategy");
     PARLIO_DLOG("  Mode: " << (config_.is_rgbw ? "RGBW" : "RGB"));
     PARLIO_DLOG("  BYTES_PER_COMPONENT=" << BYTES_PER_COMPONENT
                << ", COMPONENTS_PER_LED=" << COMPONENTS_PER_LED
@@ -633,7 +588,7 @@ void ParlioChannel::show() {
                << ", MAX_LEDS_PER_CHUNK=" << MAX_LEDS_PER_CHUNK);
 
     while (leds_remaining > 0) {
-        // Determine how many LEDs to transmit in this chunk
+        // Determine how many LEDs to write in this chunk
         uint16_t leds_in_chunk = (leds_remaining < MAX_LEDS_PER_CHUNK)
                                   ? leds_remaining : MAX_LEDS_PER_CHUNK;
 
@@ -644,15 +599,12 @@ void ParlioChannel::show() {
         PARLIO_DLOG("  LED chunk [" << led_offset << ".." << (led_offset + leds_in_chunk - 1) << "]: "
                    << leds_in_chunk << " LEDs, " << chunk_bytes << " bytes, " << chunk_bits << " bits");
 
-        // Transmit this LED chunk (contains all components for leds_in_chunk LEDs)
-        esp_err_t err = parlio_tx_unit_transmit(tx_unit_, chunk_ptr, chunk_bits, &tx_config);
-
-        if (err != ESP_OK) {
-            FL_LOG_PARLIO("parlio_tx_unit_transmit() failed for LED chunk at offset " << led_offset
-                          << ": " << detail::parlio_err_to_str(err) << " (" << int(err) << ")");
+        // Write this LED chunk (contains all components for leds_in_chunk LEDs)
+        if (!hub.engineWrite(chunk_ptr, chunk_bits, this)) {
+            FL_LOG_PARLIO("Engine write() failed for LED chunk at offset " << led_offset);
             dma_busy_ = false;
             xSemaphoreGive(xfer_done_sem_);
-            resource_mgr.release(this);
+            hub.engineRelease(this);
             return;
         }
 
@@ -669,9 +621,9 @@ void ParlioChannel::show() {
     }
 
     // Release hardware resource for next driver (async DMA continues)
-    resource_mgr.release(this);
+    hub.engineRelease(this);
     // Last callback will give semaphore when done
-    PARLIO_DLOG("show() completed - transmission started from buffer " << int(current_buffer_idx_));
+    PARLIO_DLOG("show() completed - write operation started from buffer " << int(current_buffer_idx_));
 }
 
 void ParlioChannel::wait() {
@@ -682,7 +634,8 @@ void ParlioChannel::wait() {
 }
 
 bool ParlioChannel::is_initialized() const {
-    return tx_unit_ != nullptr;
+    auto& hub = ParlioHub::getInstance();
+    return hub.engineIsConfigured();
 }
 
 bool ParlioChannel::needs_reconfiguration(const ParlioChannelConfig& new_config, uint16_t new_num_leds) const {
@@ -861,8 +814,8 @@ void ParlioChannel::pack_data(uint8_t* output_buffer) {
 }
 
 bool IRAM_ATTR ParlioChannel::parlio_tx_done_callback(
-    parlio_tx_unit_handle_t tx_unit,
-    const parlio_tx_done_event_data_t* edata,
+    void* tx_unit,
+    const void* edata,
     void* user_ctx)
 {
     ParlioChannel* driver = static_cast<ParlioChannel*>(user_ctx);

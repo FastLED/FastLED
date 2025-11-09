@@ -41,6 +41,7 @@ fs = import('fs')
 # Keep only truly platform-specific examples here.
 stub_incompatible_examples = [
     # ESP-specific (RMT, QSPI, LCD, etc.)
+    'BulkArchitectureTest',   # ESP32-P4 Parallel IO (bulk architecture test)
     'BulkRmtSimple',          # ESP32 RMT peripheral
     'Esp32P4Parlio',          # ESP32-P4 Parallel IO
     'Esp8266Uart',            # ESP8266 UART

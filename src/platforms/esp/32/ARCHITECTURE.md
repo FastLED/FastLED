@@ -109,7 +109,7 @@ platforms/esp/32/core/fastled_esp32.h (Master Aggregator)
     │       ↓
     │       └─→ lcd_driver_rgb.h / lcd_driver_rgb_impl.h
     │
-    ├─→ drivers/parlio/clockless_parlio_esp32p4.h (P4 only)
+    ├─→ drivers/parlio/legacy/clockless_parlio_esp32p4.h (P4 only)
     │       ↓
     │       └─→ parlio_driver.h / parlio_driver_impl.h
     │
@@ -208,7 +208,7 @@ Drivers are selected via preprocessor macros, evaluated in `core/fastled_esp32.h
     #include "../drivers/lcd_cam/clockless_lcd_rgb_esp32.h"  // LCD RGB (P4)
 
 #elif defined(FASTLED_ESP32_PARLIO) && FASTLED_ESP32_PARLIO
-    #include "../drivers/parlio/clockless_parlio_esp32p4.h"  // PARLIO (P4)
+    #include "../drivers/parlio/legacy/clockless_parlio_esp32p4.h"  // PARLIO (P4)
 
 #elif defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI)
     #include "../drivers/spi_ws2812/clockless_spi_esp32.h"  // Clockless SPI

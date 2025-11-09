@@ -6,7 +6,7 @@
 ///
 /// Key features:
 /// - Simultaneous output to multiple LED strips
-/// - DMA-based transmission (minimal CPU overhead)
+/// - DMA-based write operation (minimal CPU overhead)
 /// - Hardware timing control (no CPU bit-banging)
 /// - Runtime-configured for different channel counts and chipset timings
 
@@ -30,7 +30,7 @@ struct ParlioChannelConfig {
     int clk_gpio;                ///< [UNUSED] GPIO number for clock output - internal clock is used instead
     int data_gpios[16];          ///< GPIO numbers for data lanes (up to 16)
     int num_lanes;               ///< Active lane count (1, 2, 4, 8, or 16)
-    uint32_t clock_freq_hz;      ///< PARLIO clock frequency (0 = use default 3.2 MHz for WS2812)
+    uint32_t clock_freq_hz;      ///< PARLIO clock frequency (calculated from chipset timing)
     bool is_rgbw;                ///< True for RGBW (4-component) LEDs like SK6812 (default: false)
     bool auto_clock_adjustment;  ///< Enable dynamic clock freq based on LED count (default: false)
 };
@@ -43,10 +43,6 @@ struct ParlioChannelConfig {
 /// Implementation is hidden in .cpp file for complete platform isolation.
 class IParlioChannel {
 public:
-    /// @brief Default clock frequency for WS2812 timing
-    /// 3.2 MHz = 800kHz WS2812 data rate × 4 clocks per LED bit
-    static constexpr uint32_t DEFAULT_CLOCK_FREQ_HZ = 3200000;  // 3.2 MHz
-
     /// @brief Factory function to create a PARLIO driver instance
     /// @param timing Chipset timing configuration (T1, T2, T3, etc.)
     /// @param data_width Number of parallel data lanes (1, 2, 4, 8, or 16)
@@ -72,11 +68,11 @@ public:
     /// @param leds Pointer to LED data array
     virtual void set_strip(uint8_t channel, CRGB* leds) = 0;
 
-    /// @brief Show LED data - transmit to all strips
+    /// @brief Show LED data - write to all strips
     /// Assumes data in CRGB buffer is already in correct RGB order
     virtual void show() = 0;
 
-    /// @brief Wait for current transmission to complete
+    /// @brief Wait for current write operation to complete
     virtual void wait() = 0;
 
     /// @brief Check if driver is initialized

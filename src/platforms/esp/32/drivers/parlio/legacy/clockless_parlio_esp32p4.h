@@ -6,8 +6,8 @@
 ///
 /// Architecture:
 /// - ParlioChannel: Individual strip adapter (N instances)
-/// - ParlioTransmitter: Broadcasts to K channels with same timing
-/// - ParlioHub: Coordinates all transmitters
+/// - IParlioGroup: Broadcasts to K channels with same timing
+/// - ParlioHub: Coordinates all groups
 /// - ParlioEngine: DMA hardware controller
 ///
 /// Key features:
@@ -31,7 +31,7 @@
 #include "pixel_iterator.h"
 #include "platforms/shared/clockless_timing.h"
 // Include the PARLIO driver
-#include "parlio_channel.h"
+#include "../bulk/parlio_channel.h"
 #include "fl/chipsets/chipset_timing_config.h"
 
 namespace fl {
@@ -72,14 +72,14 @@ private:
 /// - CHIPSET: Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
 /// - RGB_ORDER: Color channel ordering (RGB, GRB, etc.)
 ///
-/// These are converted to runtime values and passed to the ParlioTransmitter,
+/// These are converted to runtime values and passed to the ParlioGroup,
 /// which broadcasts to all channels with matching timing.
 ///
 /// @tparam DATA_PIN GPIO pin number (compile-time)
 /// @tparam CHIPSET Chipset timing trait (e.g., TIMING_WS2812_800KHZ)
 /// @tparam RGB_ORDER Color channel ordering (RGB, GRB, etc.)
 template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER = RGB>
-class ParlioChannel
+class ClocklessController_Parlio_Esp32P4
     : public CPixelLEDController<RGB_ORDER> {
 private:
     typedef CPixelLEDController<RGB_ORDER> Base;
@@ -87,26 +87,37 @@ private:
 
 public:
     /// @brief Constructor - converts all template parameters to runtime values
-    ParlioChannel();
+    ClocklessController_Parlio_Esp32P4()
+        : mDriver(DATA_PIN, makeTimingConfig<CHIPSET>())
+    {
+        // Template parameters converted to runtime values:
+        // - DATA_PIN (compile-time int) → constructor argument (runtime int)
+        // - CHIPSET (compile-time type) → makeTimingConfig<CHIPSET>() (runtime ChipsetTimingConfig)
+        // - RGB_ORDER handled by CPixelLEDController<RGB_ORDER> base class
+    }
 
-    void init() override;
+    void init() override {
+        mDriver.init();
+    }
 
-    uint16_t getMaxRefreshRate() const override;
+    uint16_t getMaxRefreshRate() const override { return 800; }
 
 protected:
-    void *beginShowLeds(int nleds) override;
-    void showPixels(PixelController<RGB_ORDER> &pixels) override;
-    void endShowLeds(void *data) override;
+    void *beginShowLeds(int nleds) override {
+        void *data = Base::beginShowLeds(nleds);
+        mDriver.beginShowLeds(nleds);
+        return data;
+    }
+
+    void showPixels(PixelController<RGB_ORDER> &pixels) override {
+        auto pixel_iterator = pixels.as_iterator(this->getRgbw());
+        mDriver.showPixels(pixel_iterator);
+    }
+
+    void endShowLeds(void *data) override {
+        Base::endShowLeds(data);
+        mDriver.endShowLeds();
+    }
 };
-
-// ===== Backward Compatibility Aliases =====
-
-/// @brief Backward compatibility alias
-template <int DATA_PIN, typename CHIPSET, EOrder RGB_ORDER = RGB>
-using ClocklessController_Parlio_Esp32P4 = ParlioChannel<DATA_PIN, CHIPSET, RGB_ORDER>;
-
-/// @brief WS2812-specific channel (backward compatibility)
-template <int DATA_PIN, EOrder RGB_ORDER = RGB>
-using ClocklessController_Parlio_Esp32P4_WS2812 = ParlioChannel<DATA_PIN, TIMING_WS2812_800KHZ, RGB_ORDER>;
 
 }  // namespace fl
