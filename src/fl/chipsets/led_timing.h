@@ -128,18 +128,34 @@ struct TIMING_WS2812_800KHZ {
 /// Convenience alias for WS2812 timing (commonly used name)
 using WS2812ChipsetTiming = TIMING_WS2812_800KHZ;
 
+// User-overridable WS2812B-V5 timing macros
+// These allow compile-time customization for WS2812B-V5 variants
+#ifndef FASTLED_WS2812B_V5_T1
+#define FASTLED_WS2812B_V5_T1 220
+#endif
+
+#ifndef FASTLED_WS2812B_V5_T2
+#define FASTLED_WS2812B_V5_T2 360
+#endif
+
+#ifndef FASTLED_WS2812B_V5_T3
+#define FASTLED_WS2812B_V5_T3 680  // Increased from 580ns to ensure T1L meets spec (580ns-1μs)
+#endif
+
 /// WS2812B-Mini-V3 / WS2812B-V5 RGB controller @ 800 kHz
-/// Timing: 220ns, 360ns, 580ns (total 1160ns, ~862 kHz)
+/// Timing: 220ns, 360ns, 680ns (total 1260ns, ~794 kHz)
 /// These newer variants share identical timing specifications with tighter tolerances
 /// @note WS2812B-V5 and WS2812B-Mini-V3 use the same protocol timing
 /// @note Based on official datasheets from World Semi
+/// @note T3 increased to 680ns (from datasheet 580ns) to ensure reliable T1L timing in practice
+/// @note Timings can be overridden at compile time using FASTLED_WS2812B_V5_T1, FASTLED_WS2812B_V5_T2, FASTLED_WS2812B_V5_T3
 /// @see https://www.peace-corp.co.jp/data/WS2812B-Mini-V3_V3.0_EN.pdf (Mini-V3)
 /// @see https://www.laskakit.cz/user/related_files/ws2812b.pdf (V5)
 struct TIMING_WS2812B_MINI_V3 {
     enum : uint32_t {
-        T1 = 220,
-        T2 = 360,
-        T3 = 580,
+        T1 = FASTLED_WS2812B_V5_T1,
+        T2 = FASTLED_WS2812B_V5_T2,
+        T3 = FASTLED_WS2812B_V5_T3,
         RESET = 280
     };
 };
