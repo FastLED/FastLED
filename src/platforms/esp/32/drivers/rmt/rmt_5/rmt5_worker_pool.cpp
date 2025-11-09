@@ -151,7 +151,7 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
     }
 
-    // This prevents race where another thread/core acquires same worker
+    // Mark worker as unavailable if we found one
     if (worker) {
         worker->markAsUnavailable();  // Volatile write
     }
@@ -309,8 +309,11 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
 void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "RmtWorkerPool::releaseWorker called with null worker");
 
-    // This fixes the race condition where ISR completes but worker isn't yet available
-    worker->markAsAvailable();  // Sets mAvailable = true under lock
+    // Defensive: Ensure worker is marked available
+    // Note: ISR already sets mAvailable=true at end of handleDoneInterrupt(),
+    // but this redundant write serves as defensive programming to ensure
+    // the worker is always available after waitForCompletion() returns.
+    worker->markAsAvailable();
 
     ESP_LOGD(RMT5_POOL_TAG, "Worker released and marked available");
 }
@@ -334,7 +337,6 @@ RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
 
     for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
         bool available = mDoubleBufferWorkers[i]->isAvailable();
-        ESP_LOGD(RMT5_POOL_TAG, "  Worker[%d]: available=%d", i, available);
         if (available) {
             ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - found worker[%d]", i);
             return mDoubleBufferWorkers[i];

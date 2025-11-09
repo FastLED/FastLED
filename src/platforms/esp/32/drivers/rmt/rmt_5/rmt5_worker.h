@@ -135,8 +135,7 @@ private:
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
 
     // Transmission state
-    bool mAvailable;                  // Worker available (volatile for lock-free access)
-    fl::atomic_bool mTransmitting;    // Transmission in progress (ISR flag)
+    volatile bool mAvailable;         // Worker available (false = transmitting)
     const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
     int mNumBytes;                    // Total bytes to transmit
     uint32_t mThresholdIsrCount;      // Threshold interrupt count (per-worker, ISR access)
