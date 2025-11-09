@@ -56,7 +56,7 @@ struct ChannelConfig {
 
 };
 
-FASTLED_SHARED_PTR(ChannelConfig);
+FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
 
 /// @brief Multi-channel LED configuration with builder pattern support
 ///
