@@ -163,7 +163,7 @@ template <typename T> class AtomicFake {
     }
     
   private:
-    T mValue;
+    T volatile mValue;
 };
 
 } // namespace fl

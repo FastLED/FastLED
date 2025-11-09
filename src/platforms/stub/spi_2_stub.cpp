@@ -204,6 +204,7 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
 // Factory Implementation (Weak Linkage for Testing)
 // ============================================================================
 
+FL_LINK_WEAK
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
     fl::vector<SpiHw2*> controllers;
 

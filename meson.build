@@ -38,7 +38,8 @@ platforms_shared_sources = []
 fastled_sources_list = []
 
 foreach src : all_sources
-  if src.contains('platforms/shared/')
+  # Check for both forward and backslash paths (Windows uses backslash)
+  if src.contains('platforms/shared/') or src.contains('platforms\\shared\\')
     platforms_shared_sources += src
   else
     fastled_sources_list += src
@@ -209,25 +210,26 @@ unit_test_link_args = test_link_args
 # Example-specific link arguments (currently same as base on all platforms)
 example_link_args = base_link_args
 
-# Build platforms/shared object files separately (need own unity group for weak/strong linking)
-# These files contain weak default implementations that platform-specific files override
-# Must compile to separate *.o file to avoid weak/strong symbol conflicts in same translation unit
-platforms_shared_lib = static_library('platforms_shared',
-  platforms_shared_files,
-  include_directories: [src_dir, stub_dir],
-  cpp_args: base_compile_args,
-  override_options: ['unity=on'],  # Force unity build to create single *.o file
-  install: false
-)
-
-# Extract object files from platforms_shared library
-platforms_shared_objects = platforms_shared_lib.extract_all_objects()
-
-# Build main FastLED static library (includes ALL sources)
+# Build main FastLED static library (includes ALL sources EXCEPT platforms/shared)
+# platforms/shared files are intentionally excluded to avoid weak/strong symbol conflicts
+# in unity builds where both weak defaults and strong overrides end up in same translation unit
 # CRITICAL ABI REQUIREMENT: Must use base_compile_args (NOT unit_test_compile_args)
 # to ensure binary compatibility with both unit tests and examples.
 # Unit tests add their specific flags when compiling test sources.
-# platforms/shared objects are included separately to ensure separate unity group
+
+# Compile platforms/shared files separately without unity build
+platforms_shared_objects = []
+foreach src : platforms_shared_files
+  obj = static_library(
+    'platforms_shared_' + src.full_path().replace('/', '_').replace('\\', '_').replace('.cpp', '').replace(':', '_').replace(meson.current_source_dir() + '/', ''),
+    src,
+    include_directories: [src_dir, stub_dir],
+    cpp_args: base_compile_args,
+    install: false
+  )
+  platforms_shared_objects += obj.extract_all_objects()
+endforeach
+
 fastled_lib = static_library('fastled',
   fastled_sources,
   objects: platforms_shared_objects,

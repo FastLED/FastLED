@@ -148,6 +148,7 @@ void SpiHw1Stub::reset() {
 // Factory Implementation (Weak Linkage for Testing)
 // ============================================================================
 
+FL_LINK_WEAK
 fl::vector<SpiHw1*> SpiHw1::createInstances() {
     fl::vector<SpiHw1*> controllers;
 

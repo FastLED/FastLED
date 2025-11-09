@@ -190,6 +190,7 @@ fl::vector<fl::vector<uint8_t>> SpiHw4Stub::extractLanes(uint8_t num_lanes, size
 
 /// Stub factory override - returns mock instances for testing
 /// Strong definition overrides weak default
+FL_LINK_WEAK
 fl::vector<SpiHw4*> SpiHw4::createInstances() {
     fl::vector<SpiHw4*> controllers;
 
