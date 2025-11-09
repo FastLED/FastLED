@@ -496,15 +496,15 @@ shared_ptr<T> reinterpret_pointer_cast(const shared_ptr<Y>& other) noexcept {
     using type##Ptr = fl::shared_ptr<type>;
 
 // Same as FASTLED_SHARED_PTR but for structs
-#define FASTLED_SHARED_PTR_STRUCT(type)                                         \
+#define FASTLED_SHARED_PTR_STRUCT(type)                                        \
     struct type;                                                               \
     using type##Ptr = fl::shared_ptr<type>;
 
 // Creates typedef without forward declaration (for template instantiations)
 // Example: using FooInt = Foo<int>; FASTLED_SHARED_PTR_NO_FWD(FooInt)
-#define FASTLED_SHARED_PTR_NO_FWD(type) using type##Ptr = fl::shared_ptr<type>; 
+#define FASTLED_SHARED_PTR_NO_FWD(type) using type##Ptr = fl::shared_ptr<type>;
 
-// Aliase for backwards compatibility
-#define FASTLED_SMART_PTR FASTLED_SHARED_PTR
-#define FASTLED_SMART_PTR_CONSTRUCTORS FASTLED_SHARED_PTR_CONSTRUCTORS
-#define FASTLED_SMART_PTR_NO_FWD FASTLED_SHARED_PTR_NO_FWD
+// Backward compatibility aliases (deprecated - prefer FASTLED_SHARED_PTR variants)
+#define FASTLED_SMART_PTR(type) FASTLED_SHARED_PTR(type)
+#define FASTLED_SMART_PTR_STRUCT(type) FASTLED_SHARED_PTR_STRUCT(type)
+#define FASTLED_SMART_PTR_NO_FWD(type) FASTLED_SHARED_PTR_NO_FWD(type)
