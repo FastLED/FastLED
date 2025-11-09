@@ -18,9 +18,9 @@ using fl::FileHandlePtr;
 
 namespace fl {
 
-FASTLED_SMART_PTR(PixelStream);
-FASTLED_SMART_PTR(FrameInterpolator);
-FASTLED_SMART_PTR(Frame);
+FASTLED_SHARED_PTR(PixelStream);
+FASTLED_SHARED_PTR(FrameInterpolator);
+FASTLED_SHARED_PTR(Frame);
 
 Video::Video() : Fx1d(0) {}
 

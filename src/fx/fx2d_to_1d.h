@@ -8,7 +8,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(Fx2dTo1d);
+FASTLED_SHARED_PTR(Fx2dTo1d);
 
 /// @brief Fx2dTo1d samples a 2D effect into a 1D LED strip using a ScreenMap.
 ///

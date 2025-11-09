@@ -104,7 +104,7 @@ namespace fl {
 // incandescent bulbs change color as they get dim down.
 #define COOL_LIKE_INCANDESCENT 1
 
-FASTLED_SMART_PTR(TwinkleFox);
+FASTLED_SHARED_PTR(TwinkleFox);
 
 class TwinkleFox : public Fx1d {
   public:

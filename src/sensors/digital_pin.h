@@ -2,12 +2,12 @@
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 
 
 namespace fl {
 
-FASTLED_SMART_PTR(DigitalPinImpl);
+FASTLED_SHARED_PTR(DigitalPinImpl);
 
 
 // A simple digital pin. If we are compiling in an Arduino environment, then

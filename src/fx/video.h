@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
 #include "fx/fx1d.h"
 #include "fx/time.h"
@@ -14,12 +14,12 @@ struct CRGB;
 using CRGB = fl::CRGB;  // CRGB is now a typedef
 
 // Forward declare classes
-FASTLED_SMART_PTR(FileHandle);
-FASTLED_SMART_PTR(ByteStream);
-FASTLED_SMART_PTR(Frame);
-FASTLED_SMART_PTR(VideoImpl);
-FASTLED_SMART_PTR(VideoFxWrapper);
-FASTLED_SMART_PTR(ByteStreamMemory);
+FASTLED_SHARED_PTR(FileHandle);
+FASTLED_SHARED_PTR(ByteStream);
+FASTLED_SHARED_PTR(Frame);
+FASTLED_SHARED_PTR(VideoImpl);
+FASTLED_SHARED_PTR(VideoFxWrapper);
+FASTLED_SHARED_PTR(ByteStreamMemory);
 
 // Video represents a video file that can be played back on a LED strip.
 // The video file is expected to be a sequence of frames. You can either use

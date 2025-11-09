@@ -19,7 +19,7 @@
 #define VIDEO_HEIGHT 10
 #define LEDS_PER_FRAME VIDEO_WIDTH *VIDEO_HEIGHT
 
-FASTLED_SMART_PTR(FakeFileHandle);
+FASTLED_SHARED_PTR(FakeFileHandle);
 
 
 class FakeFileHandle : public fl::FileHandle {

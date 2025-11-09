@@ -9,7 +9,7 @@ namespace fl {
 /// @brief   An animation that simulates gentle, blue-green ocean waves
 /// @example Pacifica.ino
 
-FASTLED_SMART_PTR(Pacifica);
+FASTLED_SHARED_PTR(Pacifica);
 
 class Pacifica : public Fx1d {
   public:

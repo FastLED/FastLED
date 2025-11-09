@@ -6,7 +6,7 @@ LUT - Look up table implementation for various types.
 
 #include "fl/allocator.h"
 #include "fl/force_inline.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/unique_ptr.h"  // For fl::unique_ptr<T>
 #include "fl/stdint.h"
 
@@ -25,10 +25,10 @@ typedef LUT<vec2<u16>> LUTXY16;
 typedef LUT<vec2f> LUTXYFLOAT;
 typedef LUT<vec3f> LUTXYZFLOAT;
 
-FASTLED_SMART_PTR_NO_FWD(LUT16);
-FASTLED_SMART_PTR_NO_FWD(LUTXY16);
-FASTLED_SMART_PTR_NO_FWD(LUTXYFLOAT);
-FASTLED_SMART_PTR_NO_FWD(LUTXYZFLOAT);
+FASTLED_SHARED_PTR_NO_FWD(LUT16);
+FASTLED_SHARED_PTR_NO_FWD(LUTXY16);
+FASTLED_SHARED_PTR_NO_FWD(LUTXYFLOAT);
+FASTLED_SHARED_PTR_NO_FWD(LUTXYZFLOAT);
 
 // Templated lookup table.
 template <typename T> class LUT {

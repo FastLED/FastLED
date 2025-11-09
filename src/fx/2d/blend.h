@@ -8,7 +8,7 @@ are blended by the the max luminance of the components.
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
 #include "fx/fx2d.h"
 
@@ -24,7 +24,7 @@ struct Blend2dParams {
     uint8_t blur_passes = 1;
 };
 
-FASTLED_SMART_PTR(Blend2d);
+FASTLED_SHARED_PTR(Blend2d);
 
 class Blend2d : public Fx2d {
   public:

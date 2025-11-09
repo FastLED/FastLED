@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/shared_ptr.h"  // For shared_ptr
 
 // Forward declarations to avoid including heavy headers
@@ -10,7 +10,7 @@ namespace fl {
 class Frame;
 class Fx;
 
-FASTLED_SMART_PTR(FxLayer);
+FASTLED_SHARED_PTR(FxLayer);
 class FxLayer {
   public:
     void setFx(fl::shared_ptr<Fx> newFx);

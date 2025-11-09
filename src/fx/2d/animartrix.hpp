@@ -24,7 +24,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(Animartrix);
+FASTLED_SHARED_PTR(Animartrix);
 
 enum AnimartrixAnim {
     RGB_BLOBS5 = 0,

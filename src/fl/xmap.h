@@ -4,7 +4,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/lut.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 
 namespace fl {
 

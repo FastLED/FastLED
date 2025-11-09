@@ -2,7 +2,7 @@
 
 #include "fl/cstring.h"
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
 #include "fl/vector.h"
 #include "fl/stdint.h"
@@ -13,7 +13,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(Frame);
+FASTLED_SHARED_PTR(Frame);
 
 // Frames are used to hold led data. This includes an optional alpha channel.
 // This object is used by the fx and video engines. Most of the memory used for

@@ -6,7 +6,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(Particles1d);
+FASTLED_SHARED_PTR(Particles1d);
 
 /// @brief Power-based particle system for 1D LED strips creating organic light effects
 ///

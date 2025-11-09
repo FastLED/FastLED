@@ -13,7 +13,7 @@
 #include "fl/function.h"
 #include "fl/leds.h"
 #include "fl/pair.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 #include "fl/xypath_impls.h"
@@ -26,10 +26,10 @@ class XYRasterU8Sparse;
 template <typename T> class function;
 
 // Smart pointers for the XYPath family.
-FASTLED_SMART_PTR(XYPath);
-FASTLED_SMART_PTR(XYPathRenderer);
-FASTLED_SMART_PTR(XYPathGenerator);
-FASTLED_SMART_PTR(XYPathFunction);
+FASTLED_SHARED_PTR(XYPath);
+FASTLED_SHARED_PTR(XYPathRenderer);
+FASTLED_SHARED_PTR(XYPathGenerator);
+FASTLED_SHARED_PTR(XYPathFunction);
 
 namespace xypath_detail {
 fl::string unique_missing_name(const char *prefix = "XYCustomPath: ");

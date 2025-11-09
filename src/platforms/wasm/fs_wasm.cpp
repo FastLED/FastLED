@@ -54,12 +54,12 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(FsImplWasm);
-FASTLED_SMART_PTR(WasmFileHandle);
+FASTLED_SHARED_PTR(FsImplWasm);
+FASTLED_SHARED_PTR(WasmFileHandle);
 
 // Map is great because it doesn't invalidate it's data members unless erase is
 // called.
-FASTLED_SMART_PTR(FileData);
+FASTLED_SHARED_PTR(FileData);
 
 class FileData {
   public:

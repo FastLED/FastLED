@@ -10,7 +10,7 @@
 
 namespace {
 
-FASTLED_SMART_PTR(Fake2d);
+FASTLED_SHARED_PTR(Fake2d);
 
 // Simple Fx2d object which writes a single red pixel to the first LED
 // with the red component being the intensity of the frame counter.

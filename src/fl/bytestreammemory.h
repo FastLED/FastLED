@@ -2,7 +2,7 @@
 
 #include "fl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 
 #include "fl/bytestream.h"
 #include "fl/circular_buffer.h"
@@ -10,7 +10,7 @@
 
 namespace fl {
 
-FASTLED_SMART_PTR(ByteStreamMemory);
+FASTLED_SHARED_PTR(ByteStreamMemory);
 
 class ByteStreamMemory : public ByteStream {
   public:

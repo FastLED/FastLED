@@ -21,7 +21,7 @@ namespace fl {
 
 // Forward declare the smart pointer type for FsArduino
 class FsArduino;
-FASTLED_SMART_PTR(FsArduino);
+FASTLED_SHARED_PTR(FsArduino);
 
 #ifdef USE_SDFAT
 class SdFatFileHandle : public FileHandle {

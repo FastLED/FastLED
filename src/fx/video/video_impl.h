@@ -13,16 +13,16 @@ class FrameInterpolator;
 class PixelStream;
 class TimeWarp;
 
-FASTLED_SMART_PTR(FileHandle);
-FASTLED_SMART_PTR(ByteStream);
+FASTLED_SHARED_PTR(FileHandle);
+FASTLED_SHARED_PTR(ByteStream);
 } // namespace fl
 
 namespace fl {
 
-FASTLED_SMART_PTR(VideoImpl);
-FASTLED_SMART_PTR(FrameInterpolator);
-FASTLED_SMART_PTR(PixelStream)
-FASTLED_SMART_PTR(TimeWarp);
+FASTLED_SHARED_PTR(VideoImpl);
+FASTLED_SHARED_PTR(FrameInterpolator);
+FASTLED_SHARED_PTR(PixelStream)
+FASTLED_SHARED_PTR(TimeWarp);
 
 class VideoImpl {
   public:

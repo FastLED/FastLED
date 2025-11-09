@@ -14,7 +14,7 @@ namespace fl {
 //
 // -Mark Kriegsman, December 2014
 
-FASTLED_SMART_PTR(DemoReel100);
+FASTLED_SHARED_PTR(DemoReel100);
 
 class DemoReel100 : public Fx1d {
   public:

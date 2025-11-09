@@ -5,13 +5,13 @@
 #include "crgb.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macros
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
 #include "fl/unused.h"
 
 namespace fl {
 
-FASTLED_SMART_PTR(Fx);
+FASTLED_SHARED_PTR(Fx);
 
 // Abstract base class for effects on a strip/grid of LEDs.
 class Fx {

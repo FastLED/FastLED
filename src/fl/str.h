@@ -19,7 +19,7 @@ extern "C" {
 
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
-#include "fl/ptr.h"         // For FASTLED_SMART_PTR macro
+#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macro
 #include "fl/optional.h"
 #include "fl/type_traits.h"
 #include "fl/vector.h"
@@ -91,7 +91,7 @@ namespace fl {
 ///////////////////////////////////////////////////////
 // Implementation details.
 
-FASTLED_SMART_PTR(StringHolder);
+FASTLED_SHARED_PTR(StringHolder);
 
 class StringFormatter {
   public:
