@@ -92,14 +92,14 @@ meson.build (root)          → Source discovery, library compilation
 
 **Naming Convention Rules**:
 1. **One-to-One Mapping**: File name matches primary class name
-   - Class `BulkStrip` → File `bulk_strip.h` + `bulk_strip.cpp`
+   - Class `Channel` → File `channel.h` + `channel.cpp`
    - Class `ColorAdjustment` → File `color_adjustment.h` + `color_adjustment.cpp`
    - Class `ActiveStripTracker` → File `active_strip_tracker.h` + `active_strip_tracker.cpp`
 
 2. **Case Convention**:
    - C++ files: `snake_case` (all lowercase with underscores)
    - Classes: `PascalCase` (capitalize each word)
-   - Example: `BulkClockless` → `bulk_clockless.h`
+   - Example: `ChannelEngine` → `channel_engine.h`
 
 3. **Name by WHAT it IS, not by role**:
    - ✅ Good: `bulk_strip.h` (describes the entity)
@@ -111,7 +111,7 @@ meson.build (root)          → Source discovery, library compilation
    - OK: `peripheral_tags.h` - Contains multiple related tag types and traits
    - OK: `constants.h` - Contains multiple constant definitions
    - OK: `color.h` - Contains color enums, but consider if primary type warrants name
-   - NOT OK: `utilities.h` containing `BulkStrip` class (rename to `bulk_strip.h`)
+   - NOT OK: `utilities.h` containing `Channel` class (rename to `channel.h`)
 
 **Check Process**:
 1. For each new/modified .h file, extract primary class name(s)
@@ -124,11 +124,11 @@ meson.build (root)          → Source discovery, library compilation
 
 **Examples of Violations**:
 ```cpp
-// ❌ VIOLATION: File "sub_controller.h" contains class BulkStrip
-// Fix: Rename to "bulk_strip.h" + "bulk_strip.cpp"
+// ❌ VIOLATION: File "sub_controller.h" contains class Channel
+// Fix: Rename to "channel.h" + "channel.cpp"
 
-// ❌ VIOLATION: File "helpers.h" contains single class BulkStripHelper
-// Fix: Rename to "bulk_strip_helper.h"
+// ❌ VIOLATION: File "helpers.h" contains single class ChannelHelper
+// Fix: Rename to "channel_helper.h"
 
 // ✅ ACCEPTABLE: File "peripheral_tags.h" contains LCD_I80, RMT, I2S, SPI_BULK tags
 // Reason: Multiple related types, descriptive collective name
@@ -147,7 +147,7 @@ meson.build (root)          → Source discovery, library compilation
 
 ### File-by-file Analysis
 - **src/file.cpp**: [no issues / violations found]
-- **src/sub_controller.h**: [VIOLATION: Filename mismatch - contains BulkStrip class, should be bulk_strip.h]
+- **src/sub_controller.h**: [VIOLATION: Filename mismatch - contains Channel class, should be channel.h]
 - **examples/file.ino**: [status and action taken]
 - **ci/script.py**: [violations / fixes applied]
 

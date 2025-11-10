@@ -5,26 +5,18 @@
 
 namespace fl {
 
-
 // Constructors
-ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                              EOrder rgbOrder, Rgbw rgbw)
-    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw) {}
-
-ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                              EOrder rgbOrder, Rgbw rgbw, CRGB correction, CRGB temperature,
-                              fl::u8 ditherMode)
-    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw), correction(correction),
-      temperature(temperature), ditherMode(ditherMode) {}
+ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+                              EOrder rgbOrder, const LEDSettings& settings)
+    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), settings(settings) {}
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other)
-    : pin(other.pin), timing(other.timing), mLeds(other.mLeds), rgb_order(other.rgb_order), rgbw(other.rgbw),
-      correction(other.correction), temperature(other.temperature), ditherMode(other.ditherMode) {}
+    : pin(other.pin), timing(other.timing), mLeds(other.mLeds), rgb_order(other.rgb_order),
+      settings(other.settings) {}
 
 ChannelConfig::ChannelConfig(ChannelConfig&& other)
     : pin(other.pin), timing(fl::move(other.timing)), mLeds(other.mLeds), rgb_order(other.rgb_order),
-      rgbw(fl::move(other.rgbw)), correction(other.correction), temperature(other.temperature),
-      ditherMode(other.ditherMode) {}
+      settings(fl::move(other.settings)) {}
 
 // MultiChannelConfig constructors
 
@@ -44,50 +36,6 @@ MultiChannelConfig::MultiChannelConfig(fl::initializer_list<ChannelConfig> chann
 
 MultiChannelConfig& MultiChannelConfig::add(ChannelConfigPtr channel) {
     mChannels.push_back(channel);
-    return *this;
-}
-
-MultiChannelConfig& MultiChannelConfig::setCorrection(CRGB correction) {
-    for (auto& channel : mChannels) {
-        if (channel) {
-            channel->correction = correction;
-        }
-    }
-    return *this;
-}
-
-MultiChannelConfig& MultiChannelConfig::setCorrection(LEDColorCorrection correction) {
-    return setCorrection(CRGB(correction));
-}
-
-MultiChannelConfig& MultiChannelConfig::setTemperature(CRGB temperature) {
-    for (auto& channel : mChannels) {
-        if (channel) {
-            channel->temperature = temperature;
-        }
-    }
-    return *this;
-}
-
-MultiChannelConfig& MultiChannelConfig::setTemperature(ColorTemperature temperature) {
-    return setTemperature(CRGB(temperature));
-}
-
-MultiChannelConfig& MultiChannelConfig::setDither(fl::u8 ditherMode) {
-    for (auto& channel : mChannels) {
-        if (channel) {
-            channel->ditherMode = ditherMode;
-        }
-    }
-    return *this;
-}
-
-MultiChannelConfig& MultiChannelConfig::setRgbw(const Rgbw& rgbw) {
-    for (auto& channel : mChannels) {
-        if (channel) {
-            channel->rgbw = rgbw;
-        }
-    }
     return *this;
 }
 

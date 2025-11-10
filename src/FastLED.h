@@ -83,6 +83,8 @@
 // Include the internal FastLED header (provides core types without cycles)
 #include "fl/fastled.h"
 
+#include "fl/channels/channel.h"
+
 // ============================================================================
 // C STRING FUNCTION USING DECLARATIONS
 // ============================================================================
@@ -126,11 +128,7 @@
 
 #include "fl/leds.h"
 
-// Bulk controller support - single anchor includes all components
-#include "fl/clockless.h"
-
-// Platform-specific bulk controller implementations are included
-// via the platform headers (e.g., platforms/esp/32/core/fastled_esp32.h)
+// clockless.h removed - BulkClockless API has been superseded by Channel API
 
 /// LED chipsets with SPI interface
 enum ESPIChipsets {
@@ -393,6 +391,7 @@ enum EBlockChipsets {
 #endif
 };
 
+
 /// Typedef for a power consumption calculation function. Used within
 /// CFastLED for rescaling brightness before sending the LED data to
 /// the strip with CFastLED::show().
@@ -450,6 +449,29 @@ public:
 	/// @param nLedsIfOffset number of leds (4 argument version)
 	/// @returns a reference to the added controller
 	static ::CLEDController &addLeds(::CLEDController *pLed, CRGB *data, int nLedsOrOffset, int nLedsIfOffset = 0);
+
+	/// @brief Add a Channel-based LED controller to the world
+	///
+	/// This method registers a Channel instance (created via Channel::create<ENGINE>(config))
+	/// with the FastLED controller list. Channels provide hardware-accelerated parallel LED output
+	/// using platform-specific engines (e.g., ESP32 PARLIO, Teensy FlexIO).
+	///
+	/// Example usage:
+	/// @code
+	/// // Create channel configuration
+	/// ChannelConfig config(pin, timing, leds, RGB);
+	///
+	/// // Create and register channel with engine
+	/// ChannelPtr channel = FastLED.addLedChannel(Channel::create<ParlioEngine>(config));
+	/// @endcode
+	///
+	/// @param channel Shared pointer to a Channel instance
+	/// @returns The same ChannelPtr for chaining or storage
+	static fl::ChannelPtr addLedChannel(fl::ChannelPtr channel) {
+		// Channel inherits from CLEDController, so it's already in the linked list
+		// No additional registration needed beyond what Channel::create() does
+		return channel;
+	}
 
 	/// @name Adding SPI-based controllers
 	/// Add an SPI based CLEDController instance to the world.
@@ -835,80 +857,6 @@ public:
 	}
 	/// @} Adding parallel output controllers
 #endif
-
-	/// @name Adding Bulk Controllers
-	/// Add a bulk LED controller that manages multiple strips dynamically.
-	/// Bulk controllers share a single hardware peripheral (LCD_I80, RMT, SPI, I2S)
-	/// across multiple LED strips, each with independent settings.
-	///
-	/// Multiple calls with the same CHIPSET and PERIPHERAL will create separate instances,
-	/// allowing multiple bulk controllers of the same type.
-	///
-	/// @note The controller is dynamically allocated and lives for the program's lifetime.
-	///       Do not delete the returned reference. This matches embedded system patterns.
-	///
-	/// @tparam CHIPSET the LED chipset type (e.g., Chipset::WS2812)
-	/// @tparam RGB_ORDER the RGB color channel ordering (e.g., RGB, GRB, BRG)
-	/// @tparam PERIPHERAL the hardware peripheral type (e.g., LCD_I80, RMT)
-	/// @param strips initializer list of strip configurations {pin, buffer, count, screenmap}
-	/// @returns reference to the bulk controller
-	/// @{
-
-	template<typename CHIPSET, fl::EOrder RGB_ORDER, typename PERIPHERAL>
-	static ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>& addClocklessLeds(
-		fl::initializer_list<fl::BulkStripConfig> strips
-	) {
-		// Use dynamic allocation to support multiple instances of the same type
-		// Unlike regular addLeds(), BulkClockless controllers are identified by
-		// CHIPSET+RGB_ORDER+PERIPHERAL, so static storage would limit to one instance
-		auto* controller = new ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>(strips);
-
-		// Register with FastLED controller list
-		::CLEDController* pLed = static_cast<::CLEDController*>(controller);
-		pLed->init();
-
-		// Calculate total LED count for refresh rate
-		int totalLeds = 0;
-		for (const auto& strip : strips) {
-			totalLeds += strip.count;
-		}
-
-		// addLeds() adds the controller to FastLED's linked list for show() calls
-		// Note: The dynamically allocated controller lives for the program's lifetime.
-		// This matches embedded system patterns where controllers are never destroyed.
-		// Users should not call delete on the returned reference.
-		addLeds(pLed, nullptr, 0, totalLeds);
-
-		return *controller;
-	}
-
-	/// Add bulk LED controller with span (for runtime arrays/vectors)
-	/// @tparam CHIPSET the LED chipset type (e.g., Chipset::WS2812)
-	/// @tparam RGB_ORDER the RGB color channel ordering (e.g., RGB, GRB, BRG)
-	/// @tparam PERIPHERAL the hardware peripheral type (e.g., LCD_I80, RMT)
-	/// @param strips span of strip configurations
-	/// @returns reference to the bulk controller
-	template<typename CHIPSET, fl::EOrder RGB_ORDER, typename PERIPHERAL>
-	static ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>& addClocklessLeds(
-		fl::span<const fl::BulkStripConfig> strips
-	) {
-		auto* controller = new ::fl::BulkClockless<CHIPSET, RGB_ORDER, PERIPHERAL>(strips);
-
-		::CLEDController* pLed = static_cast<::CLEDController*>(controller);
-		pLed->init();
-
-		// Calculate total LED count for refresh rate
-		int totalLeds = 0;
-		for (const auto& strip : strips) {
-			totalLeds += strip.count;
-		}
-
-		addLeds(pLed, nullptr, 0, totalLeds);
-
-		return *controller;
-	}
-
-	/// @} Adding Bulk Controllers
 
 	/// Set the global brightness scaling
 	/// @param scale a 0-255 value for how much to scale all leds before writing them out

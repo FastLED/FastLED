@@ -1,9 +1,16 @@
-/// Massive parallel output example using BulkClockless<OFLED> for Teensy 4.0/4.1.
+/// ⚠️ DEPRECATED EXAMPLE - BulkClockless API has been removed
 ///
-/// This example demonstrates the new BulkClockless API with OFLED (ObjectFLED) peripheral,
-/// supporting up to 42 parallel strips on Teensy 4.1 or 16 strips on Teensy 4.0.
+/// This example demonstrates the obsolete BulkClockless API which has been
+/// superseded by the Channel/ChannelEngine API.
 ///
-/// Key Features:
+/// ⚠️ WARNING: This example will NOT compile in current FastLED versions.
+///
+/// Migration Path:
+/// - The BulkClockless API has been replaced by the Channel API
+/// - See fl/channels/channel.h for the new API documentation
+/// - New examples using the Channel API will be added in future releases
+///
+/// Original Features (now deprecated):
 /// - DMA-driven multi-strip LED control (minimal CPU overhead)
 /// - Per-strip color correction and temperature
 /// - Automatic chipset timing (WS2812, SK6812, WS2811, etc.)

@@ -6,22 +6,24 @@ The Channels API provides a modern, platform-independent interface for driving m
 
 ## Architecture
 
-The Channels API consists of three main components:
+The Channels API consists of two main components:
 
-1. **Channel** - Individual LED strip controller
-2. **IChannelEngine** - Platform-specific DMA/hardware engine (e.g., ESP32-P4 PARLIO)
-3. **ChannelManager** - Central factory and coordinator for all channels
+1. **Channel** - Individual LED strip controller with factory methods
+2. **ChannelEngine** - Platform-specific DMA/hardware engine (e.g., ESP32-P4 PARLIO)
 
 ## Key Concepts
 
 ### Channel Configuration
 
 Each channel is configured with:
+- **Pin number** - GPIO pin for the LED strip
 - **Chipset timing** - T1/T2/T3 timings for WS2812, SK6812, etc.
-- **LED data buffer** - Array of CRGB pixel data
-- **RGBW settings** - Optional RGBW conversion
-- **Color correction** - Color temperature and LED strip corrections
-- **Dithering** - Temporal dithering for smooth color transitions
+- **LED data buffer** - Array of CRGB pixel data (as fl::span<CRGB>)
+- **RGB order** - Color channel ordering (RGB, GRB, BRG, etc.)
+- **LED settings** - Grouped settings including:
+  - **Color correction** - Color temperature and LED strip corrections
+  - **Dithering** - Temporal dithering for smooth color transitions
+  - **RGBW settings** - Optional RGBW conversion
 
 ### Multi-Channel Configuration
 
@@ -42,6 +44,10 @@ config.add(channel1_config)
 #include "FastLED.h"
 
 #define NUM_LEDS 60
+#define PIN1 16
+#define PIN2 17
+#define PIN3 18
+#define PIN4 19
 
 // LED data arrays for each strip
 CRGB strip1[NUM_LEDS];
@@ -49,37 +55,34 @@ CRGB strip2[NUM_LEDS];
 CRGB strip3[NUM_LEDS];
 CRGB strip4[NUM_LEDS];
 
-fl::vector<ChannelPtr> channels;
-
-// ParlioEngine is a platform-specific ChannelEngine for ESP32-P4.
-
-
 void setup() {
     // Create timing configuration for WS2812
     auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
 
+    // Optional: Configure LED settings (defaults shown)
+    fl::LEDSettings settings;
+    settings.correction = UncorrectedColor;
+    settings.temperature = UncorrectedTemperature;
+    settings.ditherMode = BINARY_DITHER;
+    settings.rgbw = RgbwInvalid::value();
+
     // Create individual channel configurations
-    fl::ChannelConfig config1(timing, fl::span<const CRGB>(strip1, NUM_LEDS));
-    fl::ChannelConfig config2(timing, fl::span<const CRGB>(strip2, NUM_LEDS));
-    fl::ChannelConfig config3(timing, fl::span<const CRGB>(strip3, NUM_LEDS));
-    fl::ChannelConfig config4(timing, fl::span<const CRGB>(strip4, NUM_LEDS));
+    fl::ChannelConfig config1(PIN1, timing, fl::span<CRGB>(strip1, NUM_LEDS), RGB, settings);
+    fl::ChannelConfig config2(PIN2, timing, fl::span<CRGB>(strip2, NUM_LEDS), RGB, settings);
+    fl::ChannelConfig config3(PIN3, timing, fl::span<CRGB>(strip3, NUM_LEDS), RGB, settings);
+    fl::ChannelConfig config4(PIN4, timing, fl::span<CRGB>(strip4, NUM_LEDS), RGB, settings);
 
-    // Optional: Apply settings to all channels
-    fl::MultiChannelConfig multiConfig({
-        fl::make_shared<fl::ChannelConfig>(config1),
-        fl::make_shared<fl::ChannelConfig>(config2),
-        fl::make_shared<fl::ChannelConfig>(config3),
-        fl::make_shared<fl::ChannelConfig>(config4)
-    });
+    // Create channels using platform-specific engine (e.g., ParlioEngine for ESP32-P4)
+    auto channel1 = fl::Channel::create<ParlioEngine>(config1);
+    auto channel2 = fl::Channel::create<ParlioEngine>(config2);
+    auto channel3 = fl::Channel::create<ParlioEngine>(config3);
+    auto channel4 = fl::Channel::create<ParlioEngine>(config4);
 
-    multiConfig.setCorrection(TypicalLEDStrip)
-               .setTemperature(Tungsten100W);
-
-    // When FastLED.addLeds() is called:
-    //   * The channel engine singleton will be created
-    //   * All channels will be registered with the ChannelManager
-    //   * The channel manager will group channels by timing (internally)
-    FastLED.addLeds<ParlioEngine>(multiConfig, &channels /*optional*/);
+    // Add channels to FastLED (they're automatically in the controller list)
+    FastLED.addLedChannel(channel1);
+    FastLED.addLedChannel(channel2);
+    FastLED.addLedChannel(channel3);
+    FastLED.addLedChannel(channel4);
 }
 
 void loop() {
@@ -172,7 +175,7 @@ while ((state = engine->poll()) != IChannelEngine::EngineState::READY) {
 
 ### "Chipset timing mismatch"
 
-All strips managed by a single engine must use compatible chipset timing. If you need to mix chipsets (e.g., WS2812 + SK6812), the channel manager will handle grouping internally.
+All strips managed by a single engine must use compatible chipset timing. If you need to mix chipsets (e.g., WS2812 + SK6812), you'll need to use separate engines for each timing configuration.
 
 ## API Status
 
@@ -182,8 +185,7 @@ The Channels API is actively being developed. Interface stability is not guarant
 
 ## See Also
 
-- `channel.h` - Channel class definition
-- `channel_manager.h` - ChannelManager factory
+- `channel.h` - Channel class definition with factory methods
 - `channel_config.h` - Configuration structures
 - `channel_engine.h` - Platform engine interface with non-blocking poll() API
 - `chipset_timing_config.h` - Chipset timing definitions

@@ -57,7 +57,9 @@ public:
     /// @brief Enqueue channel data for later transmission
     /// @param channelData Channel data to transmit when show() is called
     /// @note Non-blocking. Data is batched until show() is called.
-    void enqueue(ChannelDataPtr channelData);
+    /// @note Very clever engines may begin transmission immediately after
+    ///       certain batch sizes to save memory.
+    virtual void enqueue(ChannelDataPtr channelData);
 
     /// @brief Transmit all enqueued channel data
     /// @note Calls beginTransmission() with all batched channel data, then clears the queue
@@ -114,8 +116,5 @@ private:
     fl::vector_inlined<ChannelDataPtr, 16> mPendingChannels;
 };
 
-/// @brief Backward compatibility aliases
-using AbstractChannelEngine = ChannelEngine;
-using IChannelEngine = ChannelEngine;
 
 }  // namespace fl

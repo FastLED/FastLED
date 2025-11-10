@@ -12,7 +12,7 @@
 CLEDController::~CLEDController() = default;
 
 /// Create an led controller object, add it to the chain of controllers
-CLEDController::CLEDController() : m_Data(nullptr), mSettings(), m_nLeds(0) {
+CLEDController::CLEDController() : m_Leds(), mSettings() {
     m_pNext = nullptr;
     if(m_pHead==nullptr) { m_pHead = this; }
     if(m_pTail != nullptr) { m_pTail->m_pNext = this; }
@@ -22,10 +22,10 @@ CLEDController::CLEDController() : m_Data(nullptr), mSettings(), m_nLeds(0) {
 
 
 void CLEDController::clearLedDataInternal(int nLeds) {
-    if(m_Data) {
-        nLeds = (nLeds < 0) ? m_nLeds : nLeds;
-        nLeds = (nLeds > m_nLeds) ? m_nLeds : nLeds;
-        fl::memset((void*)m_Data, 0, sizeof(CRGB) * nLeds);
+    // On common code that runs on avr, every byte counts.
+    uint16_t n = nLeds >= 0 ? static_cast<uint16_t>(nLeds) : static_cast<uint16_t>(m_Leds.size());
+    if (m_Leds.data()) {
+        fl::memset((void*)m_Leds.data(), 0, sizeof(CRGB) * n);
     }
 
 }
@@ -80,6 +80,3 @@ ColorAdjustment CLEDController::getAdjustmentData(uint8_t brightness) {
     #endif
     return out;
 }
-
-
-

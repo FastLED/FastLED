@@ -205,7 +205,7 @@ Multi-lane SPI works with clock-based SPI LED chipsets:
 - ✅ APA102 (tested)
 - ✅ SK9822 (APA102-compatible)
 - ✅ HD107S (newer, faster variant)
-- ❌ WS2812/WS2811 (use `BulkClockless` instead)
+- ❌ WS2812/WS2811 (use the Channel API for clockless LEDs)
 
 ### Quick Example
 

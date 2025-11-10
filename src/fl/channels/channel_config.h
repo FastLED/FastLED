@@ -7,6 +7,7 @@
 #include "fl/ptr.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/eorder.h"
+#include "fl/led_settings.h"
 #include "color.h"
 #include "dither_mode.h"
 
@@ -22,75 +23,55 @@ namespace fl {
 /// - RGBW conversion settings
 struct ChannelConfig {
 
+    // Template constructor with TIMING type
     template<typename TIMING>
-    ChannelConfig(int pin, fl::span<const CRGB> leds, EOrder rgbOrder = RGB,
-                  Rgbw rgbw = RgbwInvalid::value(),
-                  CRGB correction = UncorrectedColor,
-                  CRGB temperature = UncorrectedTemperature,
-                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(pin, makeTimingConfig<TIMING>(), leds, rgbOrder, rgbw, correction, temperature, ditherMode) {}
+    ChannelConfig(int pin, fl::span<CRGB> leds, EOrder rgbOrder = RGB,
+                  const LEDSettings& settings = LEDSettings())
+        : ChannelConfig(pin, makeTimingConfig<TIMING>(), leds, rgbOrder, settings) {}
 
-    // Basic constructor with timing, leds, and rgbw
-    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                  EOrder rgbOrder = RGB, Rgbw rgbw = RgbwInvalid::value());
+    // Basic constructor with timing, leds, rgb_order, and LEDSettings
+    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+                  EOrder rgbOrder = RGB, const LEDSettings& settings = LEDSettings());
 
-    // Full constructor with all settings
-    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                  EOrder rgbOrder, Rgbw rgbw, CRGB correction = UncorrectedColor,
-                  CRGB temperature = UncorrectedTemperature,
-                  fl::u8 ditherMode = BINARY_DITHER);
-
-    // Copy constructor (needed because of const member)
+    // Copy constructor (needed because of const members)
     ChannelConfig(const ChannelConfig& other);
 
-    // Move constructor (needed because of const member)
+    // Move constructor (needed because of const members)
     ChannelConfig(ChannelConfig&& other);
 
-    // Note: Assignment operators deleted because const member mLeds cannot be reassigned
+    // Note: Assignment operators deleted because const members cannot be reassigned
     ChannelConfig& operator=(const ChannelConfig&) = delete;
     ChannelConfig& operator=(ChannelConfig&&) = delete;
 
     // GPIO pin
-    const int pin; // Can't change the pin, destroy the Channel instead.
+    const int pin;
 
     // Chipset timing
     const ChipsetTimingConfig timing;
 
     // LED data
-    const fl::span<const CRGB> mLeds;
+    fl::span<CRGB> mLeds;
 
     // RGB channel ordering
-    EOrder rgb_order = RGB;                  ///< RGB channel ordering (default: RGB)
+    EOrder rgb_order = RGB;
 
-    // RGBW conversion
-    Rgbw rgbw = RgbwInvalid::value();        ///< RGBW conversion settings (default: RGB mode)
-
-    // Color adjustments (common FastLED.addLeds<>().set...() options)
-    CRGB correction = UncorrectedColor;      ///< Color correction (e.g., TypicalLEDStrip, TypicalSMD5050)
-    CRGB temperature = UncorrectedTemperature; ///< Color temperature/white point
-    fl::u8 ditherMode = BINARY_DITHER;       ///< Dithering mode for smoother color transitions
-
+    // LED settings (correction, temperature, dither, rgbw)
+    LEDSettings settings;
 };
 
 FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
 
-/// @brief Multi-channel LED configuration with builder pattern support
+/// @brief Multi-channel LED configuration
 ///
-/// Stores shared pointers to ChannelConfig objects, allowing external modifications
-/// to affect the actual LED strips. All setter methods apply to all channels and
-/// return a reference for chaining.
+/// Stores shared pointers to ChannelConfig objects for managing multiple channels.
 ///
 /// @example
 /// ```cpp
 /// MultiChannelConfig config;
-/// auto channel1 = fl::make_shared<ChannelConfig>();
-/// auto channel2 = fl::make_shared<ChannelConfig>();
+/// auto channel1 = fl::make_shared<ChannelConfig>(pin1, timing);
+/// auto channel2 = fl::make_shared<ChannelConfig>(pin2, timing);
 /// config.add(channel1);
 /// config.add(channel2);
-/// config.setCorrection(TypicalLEDStrip)
-///       .setTemperature(Tungsten100W)
-///       .setDither(BINARY_DITHER);
-/// // External modifications also work:
-/// channel1->correction = CRGB(255, 200, 200);
 /// ```
 struct MultiChannelConfig {
     MultiChannelConfig() = default;
@@ -116,32 +97,6 @@ struct MultiChannelConfig {
     /// @param channel shared pointer to the channel configuration to add
     /// @returns reference to this object for method chaining
     MultiChannelConfig& add(ChannelConfigPtr channel);
-
-    /// Set color correction for all channels
-    /// @param correction the color correction to apply (e.g., TypicalLEDStrip, TypicalSMD5050)
-    /// @returns reference to this object for method chaining
-    MultiChannelConfig& setCorrection(CRGB correction);
-
-    /// @copydoc setCorrection(CRGB)
-    MultiChannelConfig& setCorrection(LEDColorCorrection correction);
-
-    /// Set color temperature for all channels
-    /// @param temperature the color temperature/white point to apply
-    /// @returns reference to this object for method chaining
-    MultiChannelConfig& setTemperature(CRGB temperature);
-
-    /// @copydoc setTemperature(CRGB)
-    MultiChannelConfig& setTemperature(ColorTemperature temperature);
-
-    /// Set dithering mode for all channels
-    /// @param ditherMode the dithering mode to apply (default: BINARY_DITHER)
-    /// @returns reference to this object for method chaining
-    MultiChannelConfig& setDither(fl::u8 ditherMode = BINARY_DITHER);
-
-    /// Set RGBW conversion settings for all channels
-    /// @param rgbw the RGBW conversion settings to apply
-    /// @returns reference to this object for method chaining
-    MultiChannelConfig& setRgbw(const Rgbw& rgbw = RgbwDefault::value());
 
     /// Vector of shared pointers to channel configurations
     fl::vector<ChannelConfigPtr> mChannels;

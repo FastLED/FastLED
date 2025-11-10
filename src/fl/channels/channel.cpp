@@ -6,6 +6,7 @@
 #include "channel_data.h"
 #include "channel_engine.h"
 #include "fl/atomic.h"
+#include "fl/led_settings.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
 
@@ -17,72 +18,47 @@ int32_t Channel::nextId() {
     return gNextChannelId.fetch_add(1);
 }
 
-ChannelPtr Channel::create(const ChannelConfig &config,
-                           ChannelEngine *engine) {
-    return fl::make_shared<Channel>(config, engine);
+ChannelPtr Channel::create(const ChannelConfig &config, ChannelEngine *engine) {
+    return fl::make_shared<Channel>(config.pin, config.timing, config.mLeds,
+                                     config.rgb_order, engine, config.settings);
 }
 
-Channel::Channel(const ChannelConfig &config, ChannelEngine *engine)
-    : mConfig(config), mEngine(engine), mId(nextId()) {
+Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
+                 EOrder rgbOrder, ChannelEngine* engine, const LEDSettings& settings)
+    : CPixelLEDController<RGB>()
+    , mPin(pin)
+    , mTiming(timing)
+    , mRgbOrder(rgbOrder)
+    , mEngine(engine)
+    , mId(nextId()) {
+    // Set the LED data array
+    setLeds(leds);
+
+    // Set color correction/temperature/dither/rgbw from LEDSettings
+    setCorrection(settings.correction);
+    setTemperature(settings.temperature);
+    setDither(settings.ditherMode);
+    setRgbw(settings.rgbw);
+
     // Create ChannelData during construction
-    mChannelData = ChannelData::create(mConfig.pin, mConfig.timing);
+    mChannelData = ChannelData::create(mPin, mTiming);
 }
 
 Channel::~Channel() {}
 
-Channel &Channel::setCorrection(CRGB correction) {
-    CLEDController::setCorrection(correction);
-    return *this;
-}
 
-Channel &Channel::setTemperature(CRGB temperature) {
-    CLEDController::setTemperature(temperature);
-    return *this;
-}
-
-Channel &Channel::setDither(fl::u8 ditherMode) {
-    CLEDController::setDither(ditherMode);
-    return *this;
-}
-
-Channel &Channel::setRgbw(const Rgbw &rgbw) {
-    CLEDController::setRgbw(rgbw);
-    return *this;
-}
-
-void Channel::dispose() {
-    // Remove this channel from the CLEDController linked list
-    CLEDController::removeFromList(this);
-}
-
-
-/* the problem here is that the CLED controller sub class represents two things
-
-  * read only link to the frame buffer
-  * Encoder: RGB8 -> uint8_t[]
-  * sw/hw bit banging
-
-Now we are running into the real trifecta of the challenges fastled always had to face
-the problem of naming things.
-
-It's hard to name things in classic FastLED speak because what something did was fuzzy.
-
-It's easier to name things now because we are  seperating them into their functional components.
-  * Channel
-  * Encoder
-  * Controller
-
-  */
 
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // BIG TODO: CHANNEL NEEDS AN ENCODER:
     // Convert pixels to channel data using the configured color order and RGBW settings
 
     // Encode pixels into the channel data
-    PixelIteratorAny any(pixels, mConfig.rgb_order, mConfig.rgbw);
+    PixelIteratorAny any(pixels, mRgbOrder, mSettings.rgbw);
     PixelIterator& pixelIterator = any;
     // FUTURE WORK: This is where we put the encoder
-    pixelIterator.writeWS2812(&mChannelData->getData());
+    auto& data = mChannelData->getData();
+    data.clear();
+    pixelIterator.writeWS2812(&data);
 
     // Enqueue for transmission (will be sent when engine->show() is called)
     mEngine->enqueue(mChannelData);

@@ -19,6 +19,7 @@
 #include "fl/int.h"
 #include "fl/bit_cast.h"
 #include "fl/led_settings.h"
+#include "fl/span.h"
 
 
 
@@ -39,11 +40,10 @@ namespace fl {
 class CLEDController {
 protected:
     friend class CFastLED;
-    CRGB *m_Data;              ///< pointer to the LED data used by this controller
+    fl::span<CRGB> m_Leds;     ///< span of LED data used by this controller
     CLEDController *m_pNext;   ///< pointer to the next LED controller in the linked list
     LEDSettings mSettings;     ///< Common LED settings (correction, temperature, dither, rgbw)
     bool m_enabled = true;
-    int m_nLeds;               ///< the number of LEDs in the LED data array
     static CLEDController *m_pHead;  ///< pointer to the first LED controller in the linked list
     static CLEDController *m_pTail;  ///< pointer to the last LED controller in the linked list
 
@@ -95,7 +95,7 @@ public:
 
     // Compatibility with the 3.8.x codebase.
     VIRTUAL_IF_NOT_AVR void showLeds(fl::u8 brightness) {
-        void* data = beginShowLeds(m_nLeds);
+        void* data = beginShowLeds(m_Leds.size());
         showLedsInternal(brightness);
         endShowLeds(data);
     }
@@ -133,7 +133,7 @@ public:
     /// @see show(const CRGB*, int, fl::u8)
     void showLedsInternal(fl::u8 brightness) {
         if (m_enabled) {
-            show(m_Data, m_nLeds, brightness);
+            show(m_Leds.data(), m_Leds.size(), brightness);
         }
     }
 
@@ -144,7 +144,7 @@ public:
     /// @see showColor(const CRGB&, int, CRGB)
     void showColorInternal(const CRGB & data, fl::u8 brightness) {
         if (m_enabled) {
-            showColor(data, m_nLeds, brightness);
+            showColor(data, m_Leds.size(), brightness);
         }
     }
 
@@ -160,35 +160,51 @@ public:
     /// @param data pointer to the LED data
     /// @param nLeds the number of LEDs in the LED data
     CLEDController & setLeds(CRGB *data, int nLeds) {
-        m_Data = data;
-        m_nLeds = nLeds;
+        m_Leds = fl::span<CRGB>(data, nLeds);
+        return *this;
+    }
+
+    /// Set the default array of LEDs to be used by this controller (span version)
+    /// @param leds span of LED data
+    CLEDController & setLeds(fl::span<CRGB> leds) {
+        m_Leds = leds;
         return *this;
     }
 
     /// Zero out the LED data managed by this controller
     void clearLedDataInternal(int nLeds = -1);
 
+    /// Remove this controller from the draw list
+    /// @note Safe to call at any time - controllers currently drawing are protected by ownership
+    void removeFromDrawList() {
+        removeFromList(this);
+    }
+
     /// Remove a controller from the linked list
     /// @param controller The controller to remove from the list
-    /// @note Protected static method - subclasses can call this in their dispose/cleanup methods
+    /// @note Protected static method - subclasses can call this in their cleanup methods
     static void removeFromList(CLEDController* controller);
 
     /// How many LEDs does this controller manage?
-    /// @returns CLEDController::m_nLeds
-    virtual int size() const { return m_nLeds; }
+    /// @returns CLEDController::m_Leds.size()
+    virtual int size() const { return m_Leds.size(); }
 
     /// How many Lanes does this controller manage?
     /// @returns 1 for a non-Parallel controller
     virtual int lanes() { return 1; }
 
     /// Pointer to the CRGB array for this controller
-    /// @returns CLEDController::m_Data
-    CRGB* leds() { return m_Data; }
+    /// @returns CLEDController::m_Leds.data()
+    CRGB* leds() { return m_Leds.data(); }
+
+    /// Span of LEDs managed by this controller
+    /// @returns CLEDController::m_Leds
+    fl::span<CRGB> ledsSpan() { return m_Leds; }
 
     /// Reference to the n'th LED managed by the controller
     /// @param x the LED number to retrieve
-    /// @returns reference to CLEDController::m_Data[x]
-    CRGB &operator[](int x) { return m_Data[x]; }
+    /// @returns reference to CLEDController::m_Leds[x]
+    CRGB &operator[](int x) { return m_Leds[x]; }
 
     /// Set the dithering mode for this controller to use
     /// @param ditherMode the dithering mode to set

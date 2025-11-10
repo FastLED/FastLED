@@ -1,24 +1,25 @@
 
 #ifdef ESP32
 
-/// ESP32-S3 I2S Bulk LED Controller Demo
+/// ⚠️ DEPRECATED EXAMPLE - BulkClockless API has been removed
 ///
-/// This example demonstrates the BulkClockless API for managing multiple LED strips
-/// using the I2S peripheral on ESP32/ESP32-S3 for parallel output.
+/// This example demonstrates the obsolete BulkClockless API which has been
+/// superseded by the Channel/ChannelEngine API.
+///
+/// ⚠️ WARNING: This example will NOT compile in current FastLED versions.
+///
+/// Migration Path:
+/// - The BulkClockless API has been replaced by the Channel API
+/// - See fl/channels/channel.h for the new API documentation
+/// - New examples using the Channel API will be added in future releases
 ///
 /// Originally based on Yves' I2S driver: https://github.com/hpwit/I2SClockLessLedDriveresp32s3
 ///
-/// Key Features:
-/// - Uses the new BulkClockless API with I2S peripheral
-/// - Manages 16 LED strips sharing a single I2S controller
-/// - Each strip can have individual color correction, temperature, dither, and RGBW settings
+/// Original Features (now deprecated):
+/// - BulkClockless API with I2S peripheral
+/// - Managed 16 LED strips sharing a single I2S controller
+/// - Per-strip color correction, temperature, dither, and RGBW settings
 /// - ScreenMap integration for spatial positioning
-///
-/// What's Changed (New API):
-/// - Instead of 16 separate FastLED.addLeds() calls, uses single FastLED.addBulkLeds<WS2812, I2S>()
-/// - Individual strip buffers instead of one large contiguous buffer
-/// - Per-strip settings via get(pin)->setCorrection(), etc.
-/// - Spatial positioning via ScreenMap for each strip
 ///
 /// Hardware Notes:
 /// - This is an advanced driver with certain ramifications:
