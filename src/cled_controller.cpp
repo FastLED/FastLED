@@ -9,7 +9,15 @@
 #include "fl/cstring.h"
 
 
-CLEDController::~CLEDController() = default;
+CLEDController::~CLEDController() {
+#if SKETCH_HAS_LOTS_OF_MEMORY
+    // Remove from draw list on destruction to prevent dangling pointers
+    // Note: Not enabled on memory-constrained platforms (AVR, ESP8266, etc.)
+    // because the virtual destructor adds ~600 bytes on AVR and pulling in
+    // removeFromDrawList() adds additional overhead
+    removeFromDrawList();
+#endif
+}
 
 /// Create an led controller object, add it to the chain of controllers
 CLEDController::CLEDController() : m_Leds(), mSettings() {
