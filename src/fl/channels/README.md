@@ -50,6 +50,10 @@ CRGB strip2[NUM_LEDS];
 CRGB strip3[NUM_LEDS];
 CRGB strip4[NUM_LEDS];
 
+fl::vector<IChannelPtr> channels;
+
+// ParlioEngine is a platform-specific ChannelEngine for ESP32-P4.
+
 
 void setup() {
     // Create timing configuration for WS2812
@@ -72,7 +76,7 @@ void setup() {
     multiConfig.setCorrection(TypicalLEDStrip)
                .setTemperature(Tungsten100W);
 
-    fl::IChannelManager::create<fl::ParlioEngine>(multiConfig);
+    FastLED.addLeds<ParlioEngine>(multiConfig, &channels /*optional*/);
 }
 
 void loop() {
@@ -96,7 +100,7 @@ void loop() {
     }
     hue++;
 
-    FastLED.show();
+    FastLED.show();  // Show updates all channels
     delay(20);
 }
 ```
