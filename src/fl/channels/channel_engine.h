@@ -9,6 +9,7 @@
 #include "fl/span.h"
 #include "fl/stdint.h"
 #include "fl/shared_ptr.h"
+#include "fl/string.h"
 
 namespace fl {
 
@@ -17,30 +18,42 @@ class IChannel;
 
 FASTLED_SHARED_PTR(IChannel);
 
-/// @brief Abstract interfac for drawing parallel I/O hardware
+/// @brief Abstract interface for drawing parallel I/O hardware
 ///
 /// The engine manages exclusive access to the peripheral hardware,
 /// ensuring only one group can use the DMA controller at a time
 /// using semaphore-based locking for thread-safe access.
 ///
+/// State Machine Behavior:
+/// Typical flow: READY → BUSY → DRAINING → READY
+///
+/// Some implementations may skip BUSY state if they use internal mechanisms
+/// (like ISRs) to asynchronously queue pending channels to the hardware.
+///
 /// Implementation is hidden in .cpp file for complete platform isolation.
 class IChannelEngine {
 public:
     enum class EngineState {
-        IDLE,       ///< No channels active or queued; ready to start a new frame
-        BUSY,       ///< Mixed: some channels transmitting, others queued (scheduler still enqueuing)
-        DRAINING,   ///< All chennels submitted; CPU-side updates stopped; DMA still transmitting
-        COMPLETE,   ///< All transmissions finished; hardware stable and up-to-date
+        READY,      ///< Hardware idle; ready to accept beginTransmission() non-blocking
+        BUSY,       ///< Active: channels transmitting or queued (scheduler still enqueuing)
+        DRAINING,   ///< All channels submitted; still transmitting; beginTransmission() will block
+        ERROR,      ///< Engine encountered an error; check getLastError() for details
     };
 
-    /// @brief Execute show operation for all channel groups
-    /// @param channels Span of channel groups to process
+    /// @brief Begin LED data transmission for all channels
+    /// @param channels Span of channels to transmit
     /// @warning This will block if poll() returns BUSY or DRAINING.
-    virtual void onBeginShow(fl::span<IChannelPtr> channels) = 0;
+    virtual void beginTransmission(fl::span<IChannelPtr> channels) = 0;
 
-    /// The caller needs to call poll() until the engine returns DRAINING or COMPLETE.
-    /// @note None blocking.
+    /// @brief Query engine state (may advance state machine)
+    /// The caller needs to call poll() until the engine returns READY.
+    /// @note Non-blocking. Implementations should override for optimized state queries.
     virtual EngineState poll() = 0;
+
+    /// @brief Get the last error message
+    /// @return Error description string, or empty string if no error occurred
+    /// @note Only valid when poll() returns EngineState::ERROR
+    virtual fl::string getLastError() const { return fl::string(); }
 
 protected:
     /// @brief Protected constructor (interface pattern)

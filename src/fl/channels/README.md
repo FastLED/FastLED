@@ -6,12 +6,11 @@ The Channels API provides a modern, platform-independent interface for driving m
 
 ## Architecture
 
-The Channels API consists of four main components:
+The Channels API consists of three main components:
 
 1. **IChannel** - Individual LED strip controller interface
-2. **IChannelGroup** - Coordinator for multiple channels sharing the same chipset timing
-3. **IChannelEngine** - Platform-specific DMA/hardware engine (e.g., ESP32-P4 PARLIO)
-4. **IChannelManager** - Central factory and coordinator for all channels
+2. **IChannelEngine** - Platform-specific DMA/hardware engine (e.g., ESP32-P4 PARLIO)
+3. **IChannelManager** - Central factory and coordinator for all channels
 
 ## Key Concepts
 
@@ -76,11 +75,10 @@ void setup() {
     multiConfig.setCorrection(TypicalLEDStrip)
                .setTemperature(Tungsten100W);
 
-    // When this happens then
-    //   * The channel engine singleton will be created.
-    //   * all the channels will be register with the ChannelManager.
-    // The channel manager will
-    //   * Group the channels by timing into a ChannelGroup (internally)
+    // When FastLED.addLeds() is called:
+    //   * The channel engine singleton will be created
+    //   * All channels will be registered with the ChannelManager
+    //   * The channel manager will group channels by timing (internally)
     FastLED.addLeds<ParlioEngine>(multiConfig, &channels /*optional*/);
 }
 
@@ -105,30 +103,76 @@ void loop() {
     }
     hue++;
 
-    // When this happens then
-    //   * onBeginShowLeds() will be called on all channels (CLEDController)
-    //     * no op for now.
-    //   * onShowLeds() will be called on all channels (CLEDController)
-    //     * Any channels still drawing will be waited for.
-    //     * All data will be queued up for draw and begin transmission
-    //       * If not all groups can be drawn immediatly then it will block until all groups have
-    //         * begun transmission
-    //   * onEndShowLeds() will be called on all channels (CLEDController)
-    //     * no op for now.
+    // When FastLED.show() is called:
+    //   1. Engine's beginTransmission() is called with all channels
+    //      - May block if poll() returns BUSY or DRAINING (previous frame still transmitting)
+    //      - Queues all channel data for transmission
+    //      - Starts DMA transmission
     //
-    // Clarification:
-    //   * By "waiting for channels to draw" we don't mean there will be a Channel.wait() call,
-    //     but rather that the engine itself will wait for the channels to finish drawing by its internal
-    //     representation of the channel.
+    // When FastLED.show() returns, the engine will be in DRAINING, READY, or ERROR state:
+    //   - DRAINING: Transmission queued/started and still in progress
+    //   - READY: Transmission already complete
+    //   - ERROR: An error occurred during transmission (check getLastError())
+    //
+    // The engine manages state transitions internally via poll() state machine.
+    // Advanced users can call poll() directly for non-blocking state queries.
     FastLED.show();  // Show updates all channels
     delay(20);
 }
 ```
 
 
+## Channel Engine States
+
+The `IChannelEngine` uses a 4-state machine to manage non-blocking LED transmission:
+
+- **READY** - Hardware idle; ready to accept `beginTransmission()` non-blocking
+- **BUSY** - Active: channels transmitting or queued (scheduler still enqueuing)
+- **DRAINING** - All channels submitted; DMA still transmitting; `beginTransmission()` will block
+- **ERROR** - Engine encountered an error; check `getLastError()` for details
+
+**Typical state flow**: **READY** → `beginTransmission()` → **BUSY** → (all queued) → **DRAINING** → (transmission done) → **READY**
+
+**Note**: Some implementations may skip the **BUSY** state entirely if they use internal mechanisms (like ISRs) to asynchronously queue pending channels as the hardware becomes ready.
+
+If an error occurs at any point, the engine transitions to **ERROR** state.
+
+### Non-Blocking Show API
+
+The channel engine provides a non-blocking `poll()` API for advanced use cases:
+
+```cpp
+// Start transmission (may block if previous frame still transmitting)
+engine->beginTransmission(channels);
+
+// Poll until ready (non-blocking)
+IChannelEngine::EngineState state;
+while ((state = engine->poll()) != IChannelEngine::EngineState::READY) {
+    if (state == IChannelEngine::EngineState::ERROR) {
+        // Handle error
+        Serial.println(engine->getLastError().c_str());
+        break;
+    }
+    // Do other work while DMA transmits...
+    // Examples: process input, compute next frame, handle network, etc.
+}
+```
+
+**How it works:**
+- `beginTransmission()` - Queues channels and starts DMA transmission (may block if poll() returns BUSY or DRAINING)
+- `poll()` - Non-blocking state check; returns current engine state and may advance state machine
+- `getLastError()` - Returns error description string when poll() returns ERROR state
+- User code can interleave computation while DMA hardware handles LED updates asynchronously
+
+**Blocking Behavior:**
+- `FastLED.show()` may or may not block, depending on engine state
+- When `FastLED.show()` returns, all engines are guaranteed to be in **DRAINING**, **READY**, or **ERROR** state
+- This means transmission has been queued/started and may still be transmitting (DRAINING), already complete (READY), or encountered an error (ERROR)
+- Most users don't need to interact with the engine directly - the poll() API is for advanced scenarios requiring fine-grained control over CPU/DMA parallelism
+
 ### "Chipset timing mismatch"
 
-All strips in a channel group must use the same chipset timing. If you need to mix chipsets (e.g., WS2812 + SK6812), create separate channel groups with different timing configurations.
+All strips managed by a single engine must use compatible chipset timing. If you need to mix chipsets (e.g., WS2812 + SK6812), the channel manager will handle grouping internally.
 
 ## API Status
 
@@ -141,6 +185,6 @@ The Channels API is actively being developed. Interface stability is not guarant
 - `channel.h` - IChannel interface definition
 - `channel_manager.h` - IChannelManager factory interface
 - `channel_config.h` - Configuration structures
-- `channel_engine.h` - Platform engine interface
+- `channel_engine.h` - Platform engine interface with non-blocking poll() API
 - `chipset_timing_config.h` - Chipset timing definitions
 - `examples/BlinkParallel.ino` - Traditional parallel LED example
