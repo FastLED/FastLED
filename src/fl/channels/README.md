@@ -8,9 +8,9 @@ The Channels API provides a modern, platform-independent interface for driving m
 
 The Channels API consists of three main components:
 
-1. **IChannel** - Individual LED strip controller interface
+1. **Channel** - Individual LED strip controller
 2. **IChannelEngine** - Platform-specific DMA/hardware engine (e.g., ESP32-P4 PARLIO)
-3. **IChannelManager** - Central factory and coordinator for all channels
+3. **ChannelManager** - Central factory and coordinator for all channels
 
 ## Key Concepts
 
@@ -49,7 +49,7 @@ CRGB strip2[NUM_LEDS];
 CRGB strip3[NUM_LEDS];
 CRGB strip4[NUM_LEDS];
 
-fl::vector<IChannelPtr> channels;
+fl::vector<ChannelPtr> channels;
 
 // ParlioEngine is a platform-specific ChannelEngine for ESP32-P4.
 
@@ -182,8 +182,8 @@ The Channels API is actively being developed. Interface stability is not guarant
 
 ## See Also
 
-- `channel.h` - IChannel interface definition
-- `channel_manager.h` - IChannelManager factory interface
+- `channel.h` - Channel class definition
+- `channel_manager.h` - ChannelManager factory
 - `channel_config.h` - Configuration structures
 - `channel_engine.h` - Platform engine interface with non-blocking poll() API
 - `chipset_timing_config.h` - Chipset timing definitions
