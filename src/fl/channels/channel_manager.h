@@ -26,10 +26,9 @@ class IChannelGroup;
 
 /// @brief Abstract interface for PARLIO manager coordinating all active groups
 ///
-/// Enables multi-chipset support by coordinating flush timing across different
-/// groups to prevent hardware conflicts and ensure proper sequencing.
-/// Acts as the SOLE gatekeeper for engine access - no other component should
-/// directly access IParlioEngine.
+/// The ChannelManager acts as the central nervous system for the parallel I/O architecture,
+/// coordinating all groups to prevent conflicts and ensure proper sequencing.
+/// It also serves as the SOLE gatekeeper for engine access.
 ///
 /// Implementation is hidden in .cpp file for complete platform isolation.
 class IChannelManager {

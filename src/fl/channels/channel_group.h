@@ -29,14 +29,9 @@ class PixelIterator;
 /// @brief Abstract interface for PARLIO write coordinator
 ///
 /// This is a pure service (DESIGN.md "Group" terminology) that handles DMA write operations.
-/// Multiple LED strips with identical chipset timing share one instance (singleton per timing).
+/// Multiple LED strips with identical chipset timing share one instance per engine.
 ///
 /// Responsibilities:
-/// - Frame lifecycle management (IDLE → QUEUING → FLUSHED)
-/// - Strip registration (registerStrip/unregisterStrip)
-/// - Pixel data buffering (writePixels)
-/// - DMA packing and write operations (via IChannelManager)
-/// - Singleton factory pattern for managing instances by chipset timing
 ///
 /// Implementation is hidden in .cpp file for complete platform isolation.
 class IChannelGroup {
