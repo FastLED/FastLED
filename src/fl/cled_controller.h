@@ -168,6 +168,11 @@ public:
     /// Zero out the LED data managed by this controller
     void clearLedDataInternal(int nLeds = -1);
 
+    /// Remove a controller from the linked list
+    /// @param controller The controller to remove from the list
+    /// @note Protected static method - subclasses can call this in their dispose/cleanup methods
+    static void removeFromList(CLEDController* controller);
+
     /// How many LEDs does this controller manage?
     /// @returns CLEDController::m_nLeds
     virtual int size() const { return m_nLeds; }

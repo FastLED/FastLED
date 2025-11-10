@@ -74,7 +74,7 @@ private:
 
     /// @brief Mapping from channel engines to their associated channels
     /// @note Uses inlined vector with capacity 16 to avoid heap allocation for typical use cases
-    fl::fl_map<IChannelEngine*, fl::vector_inlined<ChannelPtr, 16>> mEngineChannels;
+    fl::fl_map<IChannelEngine*, fl::vector_inlined<ChannelPtr, 16>> mPendingChannels;
 };
 
 } // namespace fl

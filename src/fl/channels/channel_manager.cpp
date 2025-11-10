@@ -32,12 +32,12 @@ ChannelPtr ChannelManager::createInternal(const ChannelConfig& config, IChannelE
 void ChannelManager::onBeginShow(ChannelPtr channel) {
     IChannelEngine* engine = channel->getChannelEngine();
     FASTLED_ASSERT(engine, "Channel has no engine");
-    mEngineChannels[engine].push_back(channel);
+    mPendingChannels[engine].push_back(channel);
 }
 
 void ChannelManager::show() {
     // Iterate through each engine and its associated channels
-    for (auto& pair : mEngineChannels) {
+    for (auto& pair : mPendingChannels) {
         IChannelEngine* engine = pair.first;
         auto& channels = pair.second;
 
@@ -51,7 +51,7 @@ void ChannelManager::show() {
         engine->beginTransmission(channelSpan);
     }
 
-    mEngineChannels.clear();
+    mPendingChannels.clear();
 }
 
 }  // namespace fl

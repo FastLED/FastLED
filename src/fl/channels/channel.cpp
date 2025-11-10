@@ -8,11 +8,8 @@
 
 namespace fl {
 
-namespace {
-fl::atomic<int32_t> gNextChannelId(0);
-}
-
 int32_t Channel::nextId() {
+    static fl::atomic<int32_t> gNextChannelId(0);
     return gNextChannelId.fetch_add(1);
 }
 
@@ -31,31 +28,28 @@ Channel::~Channel() {
 }
 
 Channel& Channel::setCorrection(CRGB correction) {
-    // TODO: Implement color correction
-    (void)correction;
+    CLEDController::setCorrection(correction);
     return *this;
 }
 
 Channel& Channel::setTemperature(CRGB temperature) {
-    // TODO: Implement color temperature
-    (void)temperature;
+    CLEDController::setTemperature(temperature);
     return *this;
 }
 
 Channel& Channel::setDither(fl::u8 ditherMode) {
-    // TODO: Implement dithering
-    (void)ditherMode;
+    CLEDController::setDither(ditherMode);
     return *this;
 }
 
 Channel& Channel::setRgbw(const Rgbw& rgbw) {
-    // TODO: Implement RGBW conversion
-    (void)rgbw;
+    CLEDController::setRgbw(rgbw);
     return *this;
 }
 
 void Channel::dispose() {
-    // TODO: Implement disposal - remove from CLEDController linked list
+    // Remove this channel from the CLEDController linked list
+    CLEDController::removeFromList(this);
 }
 
 void Channel::showColor(const CRGB& data, int nLeds, fl::u8 brightness) {

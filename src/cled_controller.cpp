@@ -30,6 +30,44 @@ void CLEDController::clearLedDataInternal(int nLeds) {
 
 }
 
+void CLEDController::removeFromList(CLEDController* controller) {
+    if (controller == nullptr) {
+        return;
+    }
+
+    // Remove the specified controller from the linked list
+    CLEDController* prev = nullptr;
+    CLEDController* curr = m_pHead;
+
+    // Find the controller in the linked list
+    while (curr != nullptr) {
+        if (curr == controller) {
+            // Found it - remove from list
+            if (prev == nullptr) {
+                // Removing head
+                m_pHead = controller->m_pNext;
+                if (m_pHead == nullptr) {
+                    // List is now empty
+                    m_pTail = nullptr;
+                }
+            } else {
+                // Removing from middle or end
+                prev->m_pNext = controller->m_pNext;
+                if (controller->m_pNext == nullptr) {
+                    // Removing tail
+                    m_pTail = prev;
+                }
+            }
+
+            // Clear the controller's next pointer
+            controller->m_pNext = nullptr;
+            break;
+        }
+        prev = curr;
+        curr = curr->m_pNext;
+    }
+}
+
 ColorAdjustment CLEDController::getAdjustmentData(uint8_t brightness) {
     // *premixed = getAdjustment(brightness);
     // if (color_correction) {

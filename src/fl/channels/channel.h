@@ -30,7 +30,7 @@ FASTLED_SHARED_PTR(Channel);
 /// @brief LED channel for parallel output
 ///
 /// Provides access to LED channel functionality for driving LED strips.
-class Channel: public CLEDController {
+class Channel: protected CLEDController {
 public:
     /// @brief Create a new channel
     /// @param config Channel configuration
@@ -74,12 +74,12 @@ public:
     /// @param manager Pointer to the ChannelManager
     void setChannelManager(ChannelManager* manager) { mManager = manager; }
 
+private:
     // CLEDController interface implementation
     virtual void showColor(const CRGB& data, int nLeds, fl::u8 brightness) override;
     virtual void show(const CRGB* data, int nLeds, fl::u8 brightness) override;
     virtual void init() override;
 
-private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
