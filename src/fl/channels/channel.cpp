@@ -3,9 +3,10 @@
 
 #include "channel.h"
 #include "channel_config.h"
+#include "channel_data.h"
 #include "channel_manager.h"
 #include "fl/atomic.h"
-#include "fl/variant.h"
+#include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
 
 namespace fl {
@@ -52,84 +53,6 @@ void Channel::dispose() {
 }
 
 
-// Adapter class for showPixels().
-class PixelIteratorForAnyColorOrder {
-  public:
-    PixelIteratorForAnyColorOrder(PixelController<RGB> &controller, EOrder newOrder, Rgbw rgbw): mRgbw(rgbw) {
-        init(controller, newOrder);
-    }
-
-    PixelIterator& get() { return *mPixelIterator; }
-
-    void init(PixelController<RGB> &controller, EOrder newOrder) {
-        // Step 1: Create the appropriate PixelController variant based on color order
-        switch (newOrder) {
-        case RGB:
-            mAnyController = controller;
-            break;
-        case RBG:
-            mAnyController = PixelController<RBG>(controller);
-            break;
-        case GRB:
-            mAnyController = PixelController<GRB>(controller);
-            break;
-        case GBR:
-            mAnyController = PixelController<GBR>(controller);
-            break;
-        case BRG:
-            mAnyController = PixelController<BRG>(controller);
-            break;
-        case BGR:
-            mAnyController = PixelController<BGR>(controller);
-            break;
-        }
-
-        // Step 2: Use visitor pattern to construct PixelIterator with correct pointer type
-        // Note: fl::Optional::emplace takes a constructed object, not constructor args
-        struct PixelIteratorInitVisitor {
-            PixelIteratorInitVisitor(Rgbw rgbw) : rgbw(rgbw) {}
-            fl::Optional<PixelIterator>* pixelIteratorPtr;
-            Rgbw rgbw;
-
-            // Need concrete overloads for each type in the Variant
-            void accept(PixelController<RGB>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-            void accept(PixelController<RBG>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-            void accept(PixelController<GRB>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-            void accept(PixelController<GBR>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-            void accept(PixelController<BRG>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-            void accept(PixelController<BGR>& controller) {
-                pixelIteratorPtr->emplace(PixelIterator(&controller, rgbw));
-            }
-        };
-
-        PixelIteratorInitVisitor visitor(mRgbw);
-        visitor.pixelIteratorPtr = &mPixelIterator;
-        visitor.rgbw = RgbwDefault::value();
-        mAnyController.visit(visitor);
-    }
-
-    fl::Variant<PixelController<RGB>, PixelController<RBG>,
-                PixelController<GRB>, PixelController<GBR>,
-                PixelController<BRG>, PixelController<BGR>>
-        mAnyController;
-
-    // fl::optional used just as a way to defer constructions.
-    fl::Optional<PixelIterator> mPixelIterator;
-
-    Rgbw mRgbw;
-};
-
-
 /* the problem here is that the CLED controller sub class represents two things
 
   * read only link to the frame buffer
@@ -151,11 +74,20 @@ It's easier to name things now because we are  seperating them into their functi
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // BIG TODO: CHANNEL NEEDS AN ENCODER:
     // Convert pixels to channel data using the configured color order and RGBW settings
-    PixelIteratorForAnyColorOrder tmp(pixels, mConfig.rgb_order, mConfig.rgbw);
-    PixelIterator& pixelIterator = tmp.get();
+
+    // Create ChannelData if not already exists
+    if (!mChannelData) {
+        mChannelData = ChannelData::create(mConfig.pin, mConfig.timing);
+    }
+
+    // Encode pixels into the channel data
+    PixelIteratorAny any(pixels, mConfig.rgb_order, mConfig.rgbw);
+    PixelIterator& pixelIterator = any;
     // FUTURE WORK: This is where we put the encoder
-    pixelIterator.writeWS2812(mConfig.rgbw, &mChannelData);
-    
+    pixelIterator.writeWS2812(&mChannelData->getData());
+
+    // Enqueue for transmission
+    mManager->enqueueForDraw(mEngine, mChannelData);
 }
 
 void Channel::init() {

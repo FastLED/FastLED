@@ -1312,4 +1312,6 @@ using vector_fixed = FixedVector<T, INLINED_SIZE>;
 template <typename T, fl::size INLINED_SIZE = 64>
 using vector_inlined = InlinedVector<T, INLINED_SIZE>;
 
+template <typename T> using vector_psram = HeapVector<T, fl::allocator_psram<T>>;
+
 } // namespace fl

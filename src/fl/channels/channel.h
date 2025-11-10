@@ -24,9 +24,11 @@ namespace fl {
 // Forward declarations
 class IChannelEngine;
 class ChannelManager;
+class ChannelData;
 
 class Channel;
 FASTLED_SHARED_PTR(Channel);
+FASTLED_SHARED_PTR(ChannelData);
 
 /// @brief LED channel for parallel output
 ///
@@ -100,7 +102,7 @@ private:
     IChannelEngine* mEngine;
     ChannelManager* mManager;
     const int32_t mId;
-    fl::vector<uint8_t> mChannelData;
+    ChannelDataPtr mChannelData;
 };
 
 }  // namespace fl

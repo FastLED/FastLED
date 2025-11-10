@@ -3,6 +3,7 @@
 
 #include "channel_manager.h"
 #include "channel.h"
+#include "channel_data.h"
 #include "channel_config.h"
 #include "channel_engine.h"
 #include "fl/map.h"
@@ -29,26 +30,26 @@ ChannelPtr ChannelManager::createInternal(const ChannelConfig& config, IChannelE
     return channel;
 }
 
-void ChannelManager::onBeginShow(ChannelPtr channel) {
-    IChannelEngine* engine = channel->getChannelEngine();
-    FASTLED_ASSERT(engine, "Channel has no engine");
-    mPendingChannels[engine].push_back(channel);
+void ChannelManager::enqueueForDraw(IChannelEngine* engine, ChannelDataPtr channelData) {
+    FASTLED_ASSERT(engine, "Engine cannot be null");
+    FASTLED_ASSERT(channelData, "ChannelData cannot be null");
+    mPendingChannels[engine].push_back(channelData);
 }
 
 void ChannelManager::show() {
-    // Iterate through each engine and its associated channels
+    // Iterate through each engine and its associated channel data
     for (auto& pair : mPendingChannels) {
         IChannelEngine* engine = pair.first;
-        auto& channels = pair.second;
+        auto& channelDataList = pair.second;
 
-        // Skip if no channels for this engine
-        if (channels.empty()) {
+        // Skip if no channel data for this engine
+        if (channelDataList.empty()) {
             continue;
         }
 
-        // Create a span from the channels vector and call beginTransmission
-        fl::span<ChannelPtr> channelSpan(channels.data(), channels.size());
-        engine->beginTransmission(channelSpan);
+        // Create a span from the channel data vector and call beginTransmission
+        fl::span<ChannelDataPtr> channelDataSpan(channelDataList.data(), channelDataList.size());
+        engine->beginTransmission(channelDataSpan);
     }
 
     mPendingChannels.clear();

@@ -179,8 +179,8 @@ class PixelIterator {
     #endif
 
     template <typename CONTAINER_UIN8_T>
-    void writeWS2812(Rgbw rgbw_mode, CONTAINER_UIN8_T* out) {
-      if (rgbw_mode.active()) {
+    void writeWS2812(CONTAINER_UIN8_T* out) {
+      if (mRgbw.active()) {
           // RGBW mode: 4 bytes per pixel (R, G, B, W)
           while (has(1)) {
               u8 b0, b1, b2, w;

@@ -15,8 +15,10 @@ namespace fl {
 
 // Forward declarations
 class Channel;
+class ChannelData;
 
 FASTLED_SHARED_PTR(Channel);
+FASTLED_SHARED_PTR(ChannelData);
 
 /// @brief Abstract interface for drawing parallel I/O hardware
 ///
@@ -41,9 +43,9 @@ public:
     };
 
     /// @brief Begin LED data transmission for all channels
-    /// @param channels Span of channels to transmit
+    /// @param channelData Span of channel data to transmit
     /// @warning This will block if poll() returns BUSY or DRAINING.
-    virtual void beginTransmission(fl::span<ChannelPtr> channels) = 0;
+    virtual void beginTransmission(fl::span<ChannelDataPtr> channelData) = 0;
 
     /// @brief Query engine state (may advance state machine)
     /// The caller needs to call poll() until the engine returns READY.

@@ -6,23 +6,23 @@
 namespace fl {
 
 
-// Legacy constructors (for backward compatibility)
-ChannelConfig::ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
+// Constructors
+ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                               EOrder rgbOrder, Rgbw rgbw)
-    : timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw) {}
+    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw) {}
 
-ChannelConfig::ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
+ChannelConfig::ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                               EOrder rgbOrder, Rgbw rgbw, CRGB correction, CRGB temperature,
                               fl::u8 ditherMode)
-    : timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw), correction(correction),
+    : pin(pin), timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw), correction(correction),
       temperature(temperature), ditherMode(ditherMode) {}
 
 ChannelConfig::ChannelConfig(const ChannelConfig& other)
-    : timing(other.timing), mLeds(other.mLeds), rgb_order(other.rgb_order), rgbw(other.rgbw),
+    : pin(other.pin), timing(other.timing), mLeds(other.mLeds), rgb_order(other.rgb_order), rgbw(other.rgbw),
       correction(other.correction), temperature(other.temperature), ditherMode(other.ditherMode) {}
 
 ChannelConfig::ChannelConfig(ChannelConfig&& other)
-    : timing(fl::move(other.timing)), mLeds(other.mLeds), rgb_order(other.rgb_order),
+    : pin(other.pin), timing(fl::move(other.timing)), mLeds(other.mLeds), rgb_order(other.rgb_order),
       rgbw(fl::move(other.rgbw)), correction(other.correction), temperature(other.temperature),
       ditherMode(other.ditherMode) {}
 

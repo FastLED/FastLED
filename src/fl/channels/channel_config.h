@@ -23,18 +23,18 @@ namespace fl {
 struct ChannelConfig {
 
     template<typename TIMING>
-    ChannelConfig(fl::span<const CRGB> leds, EOrder rgbOrder = RGB,
+    ChannelConfig(int pin, fl::span<const CRGB> leds, EOrder rgbOrder = RGB,
                   Rgbw rgbw = RgbwInvalid::value(),
                   CRGB correction = UncorrectedColor,
                   CRGB temperature = UncorrectedTemperature,
-                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(makeTimingConfig<TIMING>(), leds, rgbOrder, rgbw, correction, temperature, ditherMode) {}
+                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(pin, makeTimingConfig<TIMING>(), leds, rgbOrder, rgbw, correction, temperature, ditherMode) {}
 
     // Basic constructor with timing, leds, and rgbw
-    ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
+    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                   EOrder rgbOrder = RGB, Rgbw rgbw = RgbwInvalid::value());
 
     // Full constructor with all settings
-    ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
+    ChannelConfig(int pin, const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                   EOrder rgbOrder, Rgbw rgbw, CRGB correction = UncorrectedColor,
                   CRGB temperature = UncorrectedTemperature,
                   fl::u8 ditherMode = BINARY_DITHER);
@@ -48,6 +48,9 @@ struct ChannelConfig {
     // Note: Assignment operators deleted because const member mLeds cannot be reassigned
     ChannelConfig& operator=(const ChannelConfig&) = delete;
     ChannelConfig& operator=(ChannelConfig&&) = delete;
+
+    // GPIO pin
+    const int pin; // Can't change the pin, destroy the Channel instead.
 
     // Chipset timing
     const ChipsetTimingConfig timing;

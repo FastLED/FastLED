@@ -8,6 +8,7 @@
 #pragma once
 
 #include "channel.h"
+#include "channel_data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/ptr.h"
@@ -52,8 +53,10 @@ public:
         return createInternal(config, engine);
     }
 
-    /// @brief Enqueues a channel for transmission
-    void onBeginShow(ChannelPtr channel);
+    /// @brief Enqueues channel data for transmission
+    /// @param engine The engine that will transmit this channel data
+    /// @param channelData The channel data to transmit
+    void enqueueForDraw(IChannelEngine* engine, ChannelDataPtr channelData);
 
     /// @brief Organizes all the channels by engine and calls
     /// beginTransmission on each engine
@@ -72,9 +75,9 @@ private:
     ChannelManager(ChannelManager&&) = delete;
     ChannelManager& operator=(ChannelManager&&) = delete;
 
-    /// @brief Mapping from channel engines to their associated channels
+    /// @brief Mapping from channel engines to their associated channel data
     /// @note Uses inlined vector with capacity 16 to avoid heap allocation for typical use cases
-    fl::fl_map<IChannelEngine*, fl::vector_inlined<ChannelPtr, 16>> mPendingChannels;
+    fl::fl_map<IChannelEngine*, fl::vector_inlined<ChannelDataPtr, 16>> mPendingChannels;
 };
 
 } // namespace fl
