@@ -29,7 +29,6 @@
 #include "cpixel_ledcontroller.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "platforms/shared/clockless_timing.h"
 // Include the PARLIO driver
 #include "parlio_channel.h"
 #include "fl/chipsets/chipset_timing_config.h"
