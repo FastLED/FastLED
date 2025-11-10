@@ -5,8 +5,8 @@
 
 namespace fl {
 
-// ChannelConfig constructors
 
+// Legacy constructors (for backward compatibility)
 ChannelConfig::ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                               EOrder rgbOrder, Rgbw rgbw)
     : timing(timing), mLeds(leds), rgb_order(rgbOrder), rgbw(rgbw) {}
