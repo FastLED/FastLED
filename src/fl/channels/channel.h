@@ -74,7 +74,16 @@ public:
     /// @param manager Pointer to the ChannelManager
     void setChannelManager(ChannelManager* manager) { mManager = manager; }
 
+    // CLEDController interface implementation
+    virtual void showColor(const CRGB& data, int nLeds, fl::u8 brightness) override;
+    virtual void show(const CRGB* data, int nLeds, fl::u8 brightness) override;
+    virtual void init() override;
+
 private:
+    /// @brief Friend declaration for make_shared to access private constructor
+    template<typename T, typename... Args>
+    friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
+
     /// @brief Private constructor (use create() factory method)
     Channel(const ChannelConfig& config, IChannelEngine* engine);
 

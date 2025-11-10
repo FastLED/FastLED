@@ -19,7 +19,7 @@
 #include "channel_engine.h"
 #include "fl/singleton.h"
 #include "fl/map.h"
-#include "fl/vector_inlined.h"
+#include "fl/vector.h"
 
 namespace fl {
 

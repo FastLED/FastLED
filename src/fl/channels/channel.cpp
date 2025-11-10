@@ -17,7 +17,7 @@ int32_t Channel::nextId() {
 }
 
 ChannelPtr Channel::create(const ChannelConfig& config, IChannelEngine* engine) {
-    return ChannelPtr(new Channel(config, engine));
+    return fl::make_shared<Channel>(config, engine);
 }
 
 Channel::Channel(const ChannelConfig& config, IChannelEngine* engine)
@@ -56,6 +56,24 @@ Channel& Channel::setRgbw(const Rgbw& rgbw) {
 
 void Channel::dispose() {
     // TODO: Implement disposal - remove from CLEDController linked list
+}
+
+void Channel::showColor(const CRGB& data, int nLeds, fl::u8 brightness) {
+    // TODO: Implement showColor
+    (void)data;
+    (void)nLeds;
+    (void)brightness;
+}
+
+void Channel::show(const CRGB* data, int nLeds, fl::u8 brightness) {
+    // TODO: Implement show
+    (void)data;
+    (void)nLeds;
+    (void)brightness;
+}
+
+void Channel::init() {
+    // TODO: Implement initialization
 }
 
 }  // namespace fl
