@@ -22,8 +22,7 @@
 namespace fl {
 
 // Forward declarations
-class IChannelEngine;
-class ChannelManager;
+class ChannelEngine;
 class ChannelData;
 
 class Channel;
@@ -40,7 +39,7 @@ public:
     /// @param config Channel configuration
     /// @param engine Channel engine this channel belongs to
     /// @return Shared pointer to the channel
-    static ChannelPtr create(const ChannelConfig& config, IChannelEngine* engine);
+    static ChannelPtr create(const ChannelConfig& config, ChannelEngine* engine);
 
     /// @brief Destructor
     ~Channel();
@@ -63,20 +62,12 @@ public:
     void dispose();
 
     /// @brief Get the channel engine this channel belongs to
-    /// @return Pointer to the IChannelEngine, or nullptr if not set
-    IChannelEngine* getChannelEngine() const { return mEngine; }
+    /// @return Pointer to the ChannelEngine, or nullptr if not set
+    ChannelEngine* getChannelEngine() const { return mEngine; }
 
     /// @brief Set the channel engine this channel belongs to
-    /// @param engine Pointer to the IChannelEngine (set by ChannelManager)
-    void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
-
-    /// @brief Get the channel manager
-    /// @return Pointer to the ChannelManager, or nullptr if not set
-    ChannelManager* getChannelManager() const { return mManager; }
-
-    /// @brief Set the channel manager
-    /// @param manager Pointer to the ChannelManager
-    void setChannelManager(ChannelManager* manager) { mManager = manager; }
+    /// @param engine Pointer to the ChannelEngine
+    void setChannelEngine(ChannelEngine* engine) { mEngine = engine; }
 
 private:
     // CPixelLEDController interface implementation
@@ -88,7 +79,7 @@ private:
     friend fl::shared_ptr<T> fl::make_shared(Args&&... args);
 
     /// @brief Private constructor (use create() factory method)
-    Channel(const ChannelConfig& config, IChannelEngine* engine);
+    Channel(const ChannelConfig& config, ChannelEngine* engine);
 
     // Non-copyable, non-movable
     Channel(const Channel&) = delete;
@@ -99,8 +90,7 @@ private:
     static int32_t nextId();
 
     const ChannelConfig mConfig;
-    IChannelEngine* mEngine;
-    ChannelManager* mManager;
+    ChannelEngine* mEngine;
     const int32_t mId;
     ChannelDataPtr mChannelData;
 };

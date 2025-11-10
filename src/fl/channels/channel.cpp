@@ -4,7 +4,7 @@
 #include "channel.h"
 #include "channel_config.h"
 #include "channel_data.h"
-#include "channel_manager.h"
+#include "channel_engine.h"
 #include "fl/atomic.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
@@ -18,12 +18,15 @@ int32_t Channel::nextId() {
 }
 
 ChannelPtr Channel::create(const ChannelConfig &config,
-                           IChannelEngine *engine) {
+                           ChannelEngine *engine) {
     return fl::make_shared<Channel>(config, engine);
 }
 
-Channel::Channel(const ChannelConfig &config, IChannelEngine *engine)
-    : mConfig(config), mEngine(engine), mManager(NULL), mId(nextId()) {}
+Channel::Channel(const ChannelConfig &config, ChannelEngine *engine)
+    : mConfig(config), mEngine(engine), mId(nextId()) {
+    // Create ChannelData during construction
+    mChannelData = ChannelData::create(mConfig.pin, mConfig.timing);
+}
 
 Channel::~Channel() {}
 
@@ -75,19 +78,14 @@ void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // BIG TODO: CHANNEL NEEDS AN ENCODER:
     // Convert pixels to channel data using the configured color order and RGBW settings
 
-    // Create ChannelData if not already exists
-    if (!mChannelData) {
-        mChannelData = ChannelData::create(mConfig.pin, mConfig.timing);
-    }
-
     // Encode pixels into the channel data
     PixelIteratorAny any(pixels, mConfig.rgb_order, mConfig.rgbw);
     PixelIterator& pixelIterator = any;
     // FUTURE WORK: This is where we put the encoder
     pixelIterator.writeWS2812(&mChannelData->getData());
 
-    // Enqueue for transmission
-    mManager->enqueueForDraw(mEngine, mChannelData);
+    // Enqueue for transmission (will be sent when engine->show() is called)
+    mEngine->enqueue(mChannelData);
 }
 
 void Channel::init() {

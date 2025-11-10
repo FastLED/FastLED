@@ -26,32 +26,24 @@ ChannelManager::~ChannelManager() {
 ChannelPtr ChannelManager::createInternal(const ChannelConfig& config, IChannelEngine* engine) {
     ChannelPtr channel = Channel::create(config, engine);
     channel->setChannelEngine(engine);
-    channel->setChannelManager(this);
     return channel;
 }
 
 void ChannelManager::enqueueForDraw(IChannelEngine* engine, ChannelDataPtr channelData) {
     FASTLED_ASSERT(engine, "Engine cannot be null");
     FASTLED_ASSERT(channelData, "ChannelData cannot be null");
-    mPendingChannels[engine].push_back(channelData);
+    // Delegate to the engine's enqueue method
+    engine->enqueue(channelData);
 }
 
 void ChannelManager::show() {
-    // Iterate through each engine and its associated channel data
+    // Iterate through each engine and call its show() method
     for (auto& pair : mPendingChannels) {
         IChannelEngine* engine = pair.first;
-        auto& channelDataList = pair.second;
-
-        // Skip if no channel data for this engine
-        if (channelDataList.empty()) {
-            continue;
-        }
-
-        // Create a span from the channel data vector and call beginTransmission
-        fl::span<ChannelDataPtr> channelDataSpan(channelDataList.data(), channelDataList.size());
-        engine->beginTransmission(channelDataSpan);
+        // Call the engine's show() method which will handle beginTransmission internally
+        engine->show();
     }
-
+    // Note: No need to clear mPendingChannels since engines clear their own queues
     mPendingChannels.clear();
 }
 
