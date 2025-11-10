@@ -365,7 +365,9 @@ def handle_interactive() -> None:
 
         if choice == "1":
             # Datasheet → 3-phase conversion
-            print("Do you want to optimize for datasheet specifications? [y/N]: ", end="")
+            print(
+                "Do you want to optimize for datasheet specifications? [y/N]: ", end=""
+            )
             optimize = input().strip().lower() in ["y", "yes"]
             print()
 
@@ -427,9 +429,7 @@ def handle_interactive() -> None:
                     print(f"⚠ NOTE: Asymmetric cycle times in initial values:")
                     print(f"  Cycle 0: {ds_measured.cycle_0}ns (T0H + T0L)")
                     print(f"  Cycle 1: {ds_measured.cycle_1}ns (T1H + T1L)")
-                    print(
-                        f"  Asymmetry will be corrected (symmetric cycles required)"
-                    )
+                    print(f"  Asymmetry will be corrected (symmetric cycles required)")
                     print()
 
                 # Optimize timing
@@ -446,7 +446,7 @@ def handle_interactive() -> None:
                 print(f"T1L: {ds_optimized.T1L}ns (spec: {T1L_min}-{T1L_max}ns) ✓")
                 print(
                     f"Cycles: {ds_optimized.cycle_0}ns (symmetric) "
-                    f"~{1000/ds_optimized.duration:.1f}kHz"
+                    f"~{1000 / ds_optimized.duration:.1f}kHz"
                 )
                 print()
 
@@ -496,9 +496,7 @@ def handle_interactive() -> None:
                     print(f"  Cycle 0: {ds.cycle_0}ns (T0H + T0L)")
                     print(f"  Cycle 1: {ds.cycle_1}ns (T1H + T1L)")
                     print()
-                    print(
-                        "  The 3-phase format cannot represent asymmetric cycles."
-                    )
+                    print("  The 3-phase format cannot represent asymmetric cycles.")
                     print(
                         "  Conversion will use max cycle duration. "
                         "Round-trip conversion will NOT match original!"
