@@ -39,7 +39,7 @@ public:
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
-    virtual int id() const = 0;
+    virtual int32_t id() const = 0;
 
     /// @brief Get the channel configuration
     /// @return ChannelConfig object containing all channel settings
@@ -60,6 +60,8 @@ protected:
     IChannel& operator=(const IChannel&) = delete;
     IChannel(IChannel&&) = delete;
     IChannel& operator=(IChannel&&) = delete;
+
+    static int32_t nextId();  // uses fl::atomic<int32_t>.
 };
 
 }  // namespace fl

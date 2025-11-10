@@ -13,39 +13,45 @@
 namespace fl {
 
 // Forward declarations
-class IChannelGroup;
+class IChannel;
 
-FASTLED_SHARED_PTR(IChannelGroup);
+FASTLED_SHARED_PTR(IChannel);
 
-/// @brief Abstract interface for the PARLIO DMA engine
+/// @brief Abstract interfac for drawing parallel I/O hardware
 ///
-/// The engine manages exclusive access to the PARLIO peripheral hardware,
+/// The engine manages exclusive access to the peripheral hardware,
 /// ensuring only one group can use the DMA controller at a time
 /// using semaphore-based locking for thread-safe access.
 ///
 /// Implementation is hidden in .cpp file for complete platform isolation.
 class IChannelEngine {
 public:
-
-    /// @brief Virtual destructor
-    virtual ~IChannelEngine() = default;
+    enum class EngineState {
+        IDLE,       ///< No channels active or queued; ready to start a new frame
+        BUSY,       ///< Mixed: some channels transmitting, others queued (scheduler still enqueuing)
+        DRAINING,   ///< All chennels submitted; CPU-side updates stopped; DMA still transmitting
+        COMPLETE,   ///< All transmissions finished; hardware stable and up-to-date
+    };
 
     /// @brief Execute show operation for all channel groups
-    /// @param groups Span of channel groups to process
-    virtual void onShow(fl::span<IChannelGroupPtr> groups) = 0;
+    /// @param channels Span of channel groups to process
+    /// @warning This will block if poll() returns BUSY or DRAINING.
+    virtual void onBeginShow(fl::span<IChannelPtr> channels) = 0;
+
+    /// The caller needs to call poll() until the engine returns DRAINING or COMPLETE.
+    /// @note None blocking.
+    virtual EngineState poll() = 0;
 
 protected:
     /// @brief Protected constructor (interface pattern)
     IChannelEngine() = default;
+    virtual ~IChannelEngine() = default;  // FastLED will never delete a channel engine.
 
     // Non-copyable, non-movable
     IChannelEngine(const IChannelEngine&) = delete;
     IChannelEngine& operator=(const IChannelEngine&) = delete;
     IChannelEngine(IChannelEngine&&) = delete;
     IChannelEngine& operator=(IChannelEngine&&) = delete;
-
-    // operator delete is forbidden
-    void operator delete(void*) = delete;
 };
 
 }  // namespace fl

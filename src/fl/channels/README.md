@@ -76,6 +76,11 @@ void setup() {
     multiConfig.setCorrection(TypicalLEDStrip)
                .setTemperature(Tungsten100W);
 
+    // When this happens then
+    //   * The channel engine singleton will be created.
+    //   * all the channels will be register with the ChannelManager.
+    // The channel manager will
+    //   * Group the channels by timing into a ChannelGroup (internally)
     FastLED.addLeds<ParlioEngine>(multiConfig, &channels /*optional*/);
 }
 
@@ -100,6 +105,21 @@ void loop() {
     }
     hue++;
 
+    // When this happens then
+    //   * onBeginShowLeds() will be called on all channels (CLEDController)
+    //     * no op for now.
+    //   * onShowLeds() will be called on all channels (CLEDController)
+    //     * Any channels still drawing will be waited for.
+    //     * All data will be queued up for draw and begin transmission
+    //       * If not all groups can be drawn immediatly then it will block until all groups have
+    //         * begun transmission
+    //   * onEndShowLeds() will be called on all channels (CLEDController)
+    //     * no op for now.
+    //
+    // Clarification:
+    //   * By "waiting for channels to draw" we don't mean there will be a Channel.wait() call,
+    //     but rather that the engine itself will wait for the channels to finish drawing by its internal
+    //     representation of the channel.
     FastLED.show();  // Show updates all channels
     delay(20);
 }
