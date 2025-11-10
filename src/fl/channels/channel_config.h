@@ -20,6 +20,13 @@ namespace fl {
 /// - Dithering mode
 /// - RGBW conversion settings
 struct ChannelConfig {
+
+    template<typename TIMING>
+    ChannelConfig(fl::span<const CRGB> leds, Rgbw rgbw = RgbwInvalid::value(),
+                  CRGB correction = UncorrectedColor,
+                  CRGB temperature = UncorrectedTemperature,
+                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(makeTimingConfig<TIMING>(), leds, rgbw,correction, temperature, ditherMode) {}
+
     // Basic constructor with timing, leds, and rgbw
     ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
                   Rgbw rgbw = RgbwInvalid::value());
