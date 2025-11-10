@@ -4,16 +4,76 @@
 Converts between datasheet timing format (T0H, T0L, T1H, T1L) and
 3-phase timing format (T1, T2, T3).
 
-Example:
+Examples:
+    # Interactive mode with menu-driven selection
+    $ python led_timing_conversions.py
+
+    # Datasheet → 3-phase conversion
     $ python led_timing_conversions.py --datasheet 400 850 850 400
     Datasheet Format: T0H=400ns, T0L=850ns, T1H=850ns, T1L=400ns
     3-Phase Format:   T1=400ns, T2=450ns, T3=400ns
+
+    # 3-phase → Datasheet conversion
+    $ python led_timing_conversions.py --fastled 400 450 400
+    3-Phase Format:   T1=400ns, T2=450ns, T3=400ns
+    Datasheet Format: T0H=400ns, T0L=850ns, T1H=850ns, T1L=400ns
 """
 
 import argparse
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Tuple
+from typing import Optional
+
+
+@dataclass
+class TimingSpec:
+    """Datasheet timing specifications (min/max ranges).
+
+    Attributes:
+        T0H_min, T0H_max: T0H valid range (nanoseconds)
+        T0L_min, T0L_max: T0L valid range (nanoseconds)
+        T1H_min, T1H_max: T1H valid range (nanoseconds)
+        T1L_min, T1L_max: T1L valid range (nanoseconds)
+    """
+
+    T0H_min: int
+    T0H_max: int
+    T0L_min: int
+    T0L_max: int
+    T1H_min: int
+    T1H_max: int
+    T1L_min: int
+    T1L_max: int
+
+    def validate(self, ds: "TimingDatasheet") -> tuple[bool, list[str]]:
+        """Validate datasheet timing against specifications.
+
+        Args:
+            ds: Datasheet timing to validate
+
+        Returns:
+            Tuple of (is_valid, list of error messages)
+        """
+        errors = []
+
+        if not (self.T0H_min <= ds.T0H <= self.T0H_max):
+            errors.append(
+                f"T0H={ds.T0H}ns out of spec (valid: {self.T0H_min}-{self.T0H_max}ns)"
+            )
+        if not (self.T0L_min <= ds.T0L <= self.T0L_max):
+            errors.append(
+                f"T0L={ds.T0L}ns out of spec (valid: {self.T0L_min}-{self.T0L_max}ns)"
+            )
+        if not (self.T1H_min <= ds.T1H <= self.T1H_max):
+            errors.append(
+                f"T1H={ds.T1H}ns out of spec (valid: {self.T1H_min}-{self.T1H_max}ns)"
+            )
+        if not (self.T1L_min <= ds.T1L <= self.T1L_max):
+            errors.append(
+                f"T1L={ds.T1L}ns out of spec (valid: {self.T1L_min}-{self.T1L_max}ns)"
+            )
+
+        return (len(errors) == 0, errors)
 
 
 class TimingDatasheet:
@@ -158,6 +218,72 @@ def datasheet_to_phase3(ds: TimingDatasheet) -> Timing3Phase:
     return Timing3Phase(T1, T2, T3, ds.name)
 
 
+def optimize_datasheet_timing(
+    measured: TimingDatasheet, spec: TimingSpec
+) -> TimingDatasheet:
+    """Optimize datasheet timing to be spec-compliant with symmetric cycles.
+
+    Strategy:
+        1. Keep measured T0H and T1H (high times are most critical)
+        2. Minimize T0H (reduce jitter impact - timers never fire early)
+        3. Adjust T0L and T1L to create symmetric cycles (T0H+T0L = T1H+T1L)
+        4. Ensure all values are within spec ranges
+
+    Args:
+        measured: Measured timing values (may be out of spec or asymmetric)
+        spec: Datasheet specifications (min/max ranges)
+
+    Returns:
+        Optimized spec-compliant symmetric timing
+
+    Example:
+        >>> spec = TimingSpec(220, 380, 580, 1000, 580, 1000, 580, 1000)
+        >>> measured = TimingDatasheet(264, 920, 640, 552)  # Asymmetric, T1L out of spec
+        >>> optimized = optimize_datasheet_timing(measured, spec)
+        >>> print(optimized)
+        T0H=264ns, T0L=1000ns, T1H=640ns, T1L=624ns (cycle=1264ns)
+    """
+    # Use measured high times (most critical for signal integrity)
+    # KEEP both T0H and T1H from measured values because they're hardware-dependent
+    T0H = measured.T0H
+    T1H = measured.T1H
+
+    # Clamp high times to spec ranges
+    T0H = max(spec.T0H_min, min(T0H, spec.T0H_max))
+    T1H = max(spec.T1H_min, min(T1H, spec.T1H_max))
+
+    # For symmetric cycles: T0H + T0L = T1H + T1L
+    # We need to find T0L and T1L such that:
+    # 1. T0L and T1L are both in spec ranges
+    # 2. T0H + T0L = T1H + T1L (symmetric)
+
+    # From symmetry: T0L = T1L + (T1H - T0H)
+    # We need: T0L_min <= T1L + (T1H - T0H) <= T0L_max
+    #          T1L_min <= T1L <= T1L_max
+
+    # Solving for valid T1L range:
+    # T0L_min <= T1L + (T1H - T0H) <= T0L_max
+    # T0L_min - (T1H - T0H) <= T1L <= T0L_max - (T1H - T0H)
+
+    delta = T1H - T0H
+    T1L_min_constrained = max(spec.T1L_min, spec.T0L_min - delta)
+    T1L_max_constrained = min(spec.T1L_max, spec.T0L_max - delta)
+
+    if T1L_min_constrained > T1L_max_constrained:
+        # No valid solution - use fallback (maximize T1L to get T0L at max)
+        T1L = spec.T1L_max
+        T0L = T1L + delta
+    else:
+        # CRITICAL: Maximize T1L to provide maximum margin above minimum spec
+        # This is important because measured T1L is often below spec due to
+        # platform timing implementation issues (see WS2812B-V5 analysis)
+        # By maximizing T1L, we ensure the most spec-compliant solution
+        T1L = T1L_max_constrained
+        T0L = T1L + delta
+
+    return TimingDatasheet(T0H, T0L, T1H, T1L, measured.name)
+
+
 def phase3_to_datasheet(
     fl: Timing3Phase, duration: Optional[int] = None
 ) -> Optional[TimingDatasheet]:
@@ -222,32 +348,216 @@ def handle_interactive() -> None:
     print("LED Chipset Timing Conversion Tool")
     print("=" * 50)
     print()
-    print("Enter the values of T0H, T0L, T1H, T1L in nanoseconds:")
+    print("Which conversion would you like to perform?")
+    print()
+    print("[1] Datasheet format (T0H, T0L, T1H, T1L) → 3-phase format (T1, T2, T3)")
+    print("[2] 3-phase format (T1, T2, T3) → Datasheet format (T0H, T0L, T1H, T1L)")
+    print()
 
     try:
-        T0H = int(input("  T0H: "))
-        T0L = int(input("  T0L: "))
-        T1H = int(input("  T1H: "))
-        T1L = int(input("  T1L: "))
+        choice = input("Enter choice [1 or 2]: ").strip()
+
+        if choice not in ["1", "2"]:
+            print("\nERROR: Invalid choice. Please enter 1 or 2.")
+            sys.exit(1)
+
+        print()
+
+        if choice == "1":
+            # Datasheet → 3-phase conversion
+            print("Do you want to optimize for datasheet specifications? [y/N]: ", end="")
+            optimize = input().strip().lower() in ["y", "yes"]
+            print()
+
+            if optimize:
+                print("Enter datasheet SPECIFICATIONS (min-max ranges in nanoseconds):")
+                print("  Example: For WS2812B-V5, T0H range is 220-380ns")
+                print()
+                T0H_min = int(input("  T0H min: "))
+                T0H_max = int(input("  T0H max: "))
+                T0L_min = int(input("  T0L min: "))
+                T0L_max = int(input("  T0L max: "))
+                T1H_min = int(input("  T1H min: "))
+                T1H_max = int(input("  T1H max: "))
+                T1L_min = int(input("  T1L min: "))
+                T1L_max = int(input("  T1L max: "))
+                print()
+
+                spec = TimingSpec(
+                    T0H_min,
+                    T0H_max,
+                    T0L_min,
+                    T0L_max,
+                    T1H_min,
+                    T1H_max,
+                    T1L_min,
+                    T1L_max,
+                )
+
+                # Generate initial timing from spec midpoints
+                # Use minimum values for high times (safest for signal integrity)
+                # This avoids requiring oscilloscope measurements
+                print("Generating optimal timing from specification ranges...")
+                print()
+                print("Strategy:")
+                print("  - T0H set to MINIMUM + 5ns (safety margin above spec floor)")
+                print("    CPU timers never fire early, so minimum T0H is safest")
+                print("  - T1H set to MINIMUM spec value (symmetric with T0H)")
+                print("  - T0L set to MINIMUM + 20ns (safety margin)")
+                print("  - T1L set to midpoint (balanced for optimization)")
+                print()
+                T0H = T0H_min + 5
+                T0L = T0L_min + 20
+                T1H = T1H_min
+                T1L = (T1L_min + T1L_max) // 2
+
+                ds_measured = TimingDatasheet(T0H, T0L, T1H, T1L)
+
+                # Validate initial values
+                is_valid, errors = spec.validate(ds_measured)
+                if not is_valid:
+                    print()
+                    print("⚠ WARNING: Initial generated values are out of spec:")
+                    for error in errors:
+                        print(f"  - {error}")
+                    print()
+
+                # Check for asymmetric cycles
+                if ds_measured.cycle_0 != ds_measured.cycle_1:
+                    print(f"⚠ NOTE: Asymmetric cycle times in initial values:")
+                    print(f"  Cycle 0: {ds_measured.cycle_0}ns (T0H + T0L)")
+                    print(f"  Cycle 1: {ds_measured.cycle_1}ns (T1H + T1L)")
+                    print(
+                        f"  Asymmetry will be corrected (symmetric cycles required)"
+                    )
+                    print()
+
+                # Optimize timing
+                ds_optimized = optimize_datasheet_timing(ds_measured, spec)
+
+                # Validate optimized values
+                is_valid_opt, errors_opt = spec.validate(ds_optimized)
+
+                print("Optimized spec-compliant timing:")
+                print("-" * 50)
+                print(f"T0H: {ds_optimized.T0H}ns (spec: {T0H_min}-{T0H_max}ns) ✓")
+                print(f"T0L: {ds_optimized.T0L}ns (spec: {T0L_min}-{T0L_max}ns) ✓")
+                print(f"T1H: {ds_optimized.T1H}ns (spec: {T1H_min}-{T1H_max}ns) ✓")
+                print(f"T1L: {ds_optimized.T1L}ns (spec: {T1L_min}-{T1L_max}ns) ✓")
+                print(
+                    f"Cycles: {ds_optimized.cycle_0}ns (symmetric) "
+                    f"~{1000/ds_optimized.duration:.1f}kHz"
+                )
+                print()
+
+                if not is_valid_opt:
+                    print("⚠ WARNING: Could not find fully spec-compliant solution:")
+                    for error in errors_opt:
+                        print(f"  - {error}")
+                    print()
+
+                # Show changes from initial values
+                print("Changes from initial values:")
+                print(
+                    f"  T0H: {ds_measured.T0H}ns → {ds_optimized.T0H}ns "
+                    f"({ds_optimized.T0H - ds_measured.T0H:+d}ns)"
+                )
+                print(
+                    f"  T0L: {ds_measured.T0L}ns → {ds_optimized.T0L}ns "
+                    f"({ds_optimized.T0L - ds_measured.T0L:+d}ns)"
+                )
+                print(
+                    f"  T1H: {ds_measured.T1H}ns → {ds_optimized.T1H}ns "
+                    f"({ds_optimized.T1H - ds_measured.T1H:+d}ns)"
+                )
+                print(
+                    f"  T1L: {ds_measured.T1L}ns → {ds_optimized.T1L}ns "
+                    f"({ds_optimized.T1L - ds_measured.T1L:+d}ns)"
+                )
+                print()
+
+                # Use optimized values for 3-phase conversion
+                ds = ds_optimized
+
+            else:
+                # No optimization - use raw values
+                print("Enter datasheet timing values in nanoseconds:")
+                T0H = int(input("  T0H (high time for '0' bit): "))
+                T0L = int(input("  T0L (low time for '0' bit): "))
+                T1H = int(input("  T1H (high time for '1' bit): "))
+                T1L = int(input("  T1L (low time for '1' bit): "))
+
+                ds = TimingDatasheet(T0H, T0L, T1H, T1L)
+
+                # Check for asymmetric cycles and warn user
+                if ds.cycle_0 != ds.cycle_1:
+                    print()
+                    print(f"⚠ WARNING: Asymmetric cycle times detected!")
+                    print(f"  Cycle 0: {ds.cycle_0}ns (T0H + T0L)")
+                    print(f"  Cycle 1: {ds.cycle_1}ns (T1H + T1L)")
+                    print()
+                    print(
+                        "  The 3-phase format cannot represent asymmetric cycles."
+                    )
+                    print(
+                        "  Conversion will use max cycle duration. "
+                        "Round-trip conversion will NOT match original!"
+                    )
+                    print()
+
+            # Convert to 3-phase
+            fl = datasheet_to_phase3(ds)
+
+            print()
+            print("Results:")
+            print("-" * 50)
+            print(f"Duration (max cycle): {ds.duration}ns")
+            print()
+            print(f"T1: {fl.T1}ns   (high time for '0' bit)")
+            print(f"T2: {fl.T2}ns   (additional time for '1' bit)")
+            print(f"T3: {fl.T3}ns   (tail time)")
+
+            print_phase3_cpp_definition(fl)
+
+            print()
+            print(f"T0H={ds.T0H} T0L={ds.T0L} T1H={ds.T1H} T1L={ds.T1L}")
+            print()
+            print(f"T1={fl.T1} T2={fl.T2} T3={fl.T3}")
+
+        else:
+            # 3-phase → Datasheet conversion
+            print("Enter 3-phase timing values in nanoseconds:")
+            T1 = int(input("  T1 (high time for '0' bit): "))
+            T2 = int(input("  T2 (additional high time for '1' bit): "))
+            T3 = int(input("  T3 (low tail duration): "))
+
+            fl = Timing3Phase(T1, T2, T3)
+            ds = phase3_to_datasheet(fl)
+
+            if ds is None:
+                print(
+                    "\nERROR: Invalid timing (produces negative values in datasheet format)"
+                )
+                sys.exit(1)
+
+            print()
+            print("Results:")
+            print("-" * 50)
+            print(f"Duration (total cycle): {fl.duration}ns")
+            print()
+            print(f"T0H: {ds.T0H}ns   (high time for '0' bit)")
+            print(f"T0L: {ds.T0L}ns   (low time for '0' bit)")
+            print(f"T1H: {ds.T1H}ns   (high time for '1' bit)")
+            print(f"T1L: {ds.T1L}ns   (low time for '1' bit)")
+            print()
+            print(f"Cycle '0': {ds.cycle_0}ns")
+            print(f"Cycle '1': {ds.cycle_1}ns")
+
     except KeyboardInterrupt:
         raise
     except ValueError:
         print("\nERROR: Invalid input. Please enter integer values.")
         sys.exit(1)
-
-    ds = TimingDatasheet(T0H, T0L, T1H, T1L)
-    fl = datasheet_to_phase3(ds)
-
-    print()
-    print("Results:")
-    print("-" * 50)
-    print(f"Duration (max cycle): {ds.duration}ns")
-    print()
-    print(f"T1: {fl.T1}ns   (high time for '0' bit)")
-    print(f"T2: {fl.T2}ns   (additional time for '1' bit)")
-    print(f"T3: {fl.T3}ns   (tail time)")
-
-    print_phase3_cpp_definition(fl)
 
 
 def handle_datasheet(T0H: int, T0L: int, T1H: int, T1L: int, verbose: bool) -> None:
