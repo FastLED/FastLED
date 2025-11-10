@@ -6,6 +6,7 @@
 #include "fl/vector.h"
 #include "fl/ptr.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "fl/eorder.h"
 #include "color.h"
 #include "dither_mode.h"
 
@@ -22,18 +23,19 @@ namespace fl {
 struct ChannelConfig {
 
     template<typename TIMING>
-    ChannelConfig(fl::span<const CRGB> leds, Rgbw rgbw = RgbwInvalid::value(),
+    ChannelConfig(fl::span<const CRGB> leds, EOrder rgbOrder = RGB,
+                  Rgbw rgbw = RgbwInvalid::value(),
                   CRGB correction = UncorrectedColor,
                   CRGB temperature = UncorrectedTemperature,
-                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(makeTimingConfig<TIMING>(), leds, rgbw,correction, temperature, ditherMode) {}
+                  fl::u8 ditherMode = BINARY_DITHER) : ChannelConfig(makeTimingConfig<TIMING>(), leds, rgbOrder, rgbw, correction, temperature, ditherMode) {}
 
     // Basic constructor with timing, leds, and rgbw
     ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                  Rgbw rgbw = RgbwInvalid::value());
+                  EOrder rgbOrder = RGB, Rgbw rgbw = RgbwInvalid::value());
 
     // Full constructor with all settings
     ChannelConfig(const ChipsetTimingConfig& timing, fl::span<const CRGB> leds,
-                  Rgbw rgbw, CRGB correction = UncorrectedColor,
+                  EOrder rgbOrder, Rgbw rgbw, CRGB correction = UncorrectedColor,
                   CRGB temperature = UncorrectedTemperature,
                   fl::u8 ditherMode = BINARY_DITHER);
 
@@ -52,6 +54,9 @@ struct ChannelConfig {
 
     // LED data
     const fl::span<const CRGB> mLeds;
+
+    // RGB channel ordering
+    EOrder rgb_order = RGB;                  ///< RGB channel ordering (default: RGB)
 
     // RGBW conversion
     Rgbw rgbw = RgbwInvalid::value();        ///< RGBW conversion settings (default: RGB mode)

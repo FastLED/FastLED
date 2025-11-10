@@ -12,7 +12,8 @@
 
 #pragma once
 
-#include "fl/cled_controller.h"
+#include "cpixel_ledcontroller.h"
+#include "pixel_controller.h"
 #include "fl/ptr.h"
 #include "fl/stdint.h"
 #include "pixeltypes.h"
@@ -30,7 +31,8 @@ FASTLED_SHARED_PTR(Channel);
 /// @brief LED channel for parallel output
 ///
 /// Provides access to LED channel functionality for driving LED strips.
-class Channel: protected CLEDController {
+/// RGB_ORDER is set to RGB - reordering is handled internally by the Channel
+class Channel: protected CPixelLEDController<RGB> {
 public:
     /// @brief Create a new channel
     /// @param config Channel configuration
@@ -75,9 +77,8 @@ public:
     void setChannelManager(ChannelManager* manager) { mManager = manager; }
 
 private:
-    // CLEDController interface implementation
-    virtual void showColor(const CRGB& data, int nLeds, fl::u8 brightness) override;
-    virtual void show(const CRGB* data, int nLeds, fl::u8 brightness) override;
+    // CPixelLEDController interface implementation
+    virtual void showPixels(PixelController<RGB, 1, 0xFFFFFFFF>& pixels) override;
     virtual void init() override;
 
     /// @brief Friend declaration for make_shared to access private constructor
@@ -99,6 +100,7 @@ private:
     IChannelEngine* mEngine;
     ChannelManager* mManager;
     const int32_t mId;
+    fl::vector<uint8_t> mChannelData;
 };
 
 }  // namespace fl

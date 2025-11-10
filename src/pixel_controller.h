@@ -22,7 +22,7 @@
 #include "crgb.h"
 #include "fl/compiler_control.h"
 #include "fl/deprecated.h"
-
+#include "fl/variant.h"  // for PixelControllerAny.
 
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING_SIGN_CONVERSION
@@ -664,6 +664,18 @@ struct PixelController {
 #endif
     }
 };
+
+/*
+using fl::RGB;
+using fl::RBG;
+using fl::GRB;
+using fl::GBR;
+using fl::BRG;
+using fl::BGR;
+*/
+
+
+
 
 
 
