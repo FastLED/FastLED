@@ -90,75 +90,94 @@ template <typename T> class AtomicFake {
     }
     
     // Arithmetic operators (for integral and floating point types)
+    // Avoid deprecated volatile increment/decrement (C++20)
     T operator++() {
-        return ++mValue;
+        T temp = mValue + 1;
+        mValue = temp;
+        return temp;
     }
     
     T operator++(int) {
-        return mValue++;
+        T temp = mValue;
+        mValue = temp + 1;
+        return temp;
     }
     
     T operator--() {
-        return --mValue;
+        T temp = mValue - 1;
+        mValue = temp;
+        return temp;
     }
     
     T operator--(int) {
-        return mValue--;
+        T temp = mValue;
+        mValue = temp - 1;
+        return temp;
     }
     
     T operator+=(T value) {
-        mValue += value;
-        return mValue;
+        T temp = mValue + value;
+        mValue = temp;
+        return temp;
     }
     
     T operator-=(T value) {
-        mValue -= value;
-        return mValue;
+        T temp = mValue - value;
+        mValue = temp;
+        return temp;
     }
     
     T operator&=(T value) {
-        mValue &= value;
-        return mValue;
+        T temp = mValue & value;
+        mValue = temp;
+        return temp;
     }
     
     T operator|=(T value) {
-        mValue |= value;
-        return mValue;
+        T temp = mValue | value;
+        mValue = temp;
+        return temp;
     }
     
     T operator^=(T value) {
-        mValue ^= value;
-        return mValue;
+        T temp = mValue ^ value;
+        mValue = temp;
+        return temp;
     }
     
     // Fetch operations
     T fetch_add(T value) {
         T old = mValue;
-        mValue += value;
+        T temp = old + value;
+        mValue = temp;
         return old;
     }
     
     T fetch_sub(T value) {
         T old = mValue;
-        mValue -= value;
+        T temp = old - value;
+        mValue = temp;
         return old;
     }
     
     T fetch_and(T value) {
         T old = mValue;
-        mValue &= value;
+        T temp = old & value;
+        mValue = temp;
         return old;
     }
     
     T fetch_or(T value) {
         T old = mValue;
-        mValue |= value;
+        T temp = old | value;
+        mValue = temp;
         return old;
     }
     
     T fetch_xor(T value) {
         T old = mValue;
-        mValue ^= value;
+        T temp = old ^ value;
+        mValue = temp;
         return old;
     }
     
