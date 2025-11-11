@@ -257,7 +257,7 @@ void loop() {
     for (int segment = 0; segment < 40; segment++) {
         for (int fromBottom = 0; fromBottom < 14; fromBottom++) {
             int strip = ledAssignments[segment][0];
-            int led = round(fmap(fromBottom, 0, 13, ledAssignments[segment][2],
+            int led = fl::round(fmap(fromBottom, 0, 13, ledAssignments[segment][2],
                                  ledAssignments[segment][1]));
             leds[strip][led] = CRGB(ledColors[segment][fromBottom][0],
                                     ledColors[segment][fromBottom][1],

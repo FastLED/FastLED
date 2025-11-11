@@ -1019,6 +1019,7 @@ using fl::UISlider;
 using fl::UIDropdown;
 using fl::UIGroup;
 using fl::XYMap;
+// Note: fl::round is not imported to avoid conflicts with math.h ::round
 
 // Common fl:: type aliases for global namespace convenience
 template<typename T> using fl_vector = fl::vector<T>;
