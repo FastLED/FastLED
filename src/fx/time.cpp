@@ -36,16 +36,6 @@ void TimeWarp::resume(fl::u32 now) {
 }
 
 fl::u32 TimeWarp::update(fl::u32 timeNow) {
-
-    // DBG("TimeWarp::update: timeNow: " << timeNow << " mLastRealTime: " <<
-    // mLastRealTime
-    //<< " mRelativeTime: " << mRelativeTime << " mTimeScale: " << mTimeScale);
-
-    if (mLastRealTime > timeNow) {
-        DBG("TimeWarp::applyExact: mLastRealTime > timeNow: "
-            << mLastRealTime << " > " << timeNow);
-    }
-
     applyExact(timeNow);
     return time();
 }
@@ -59,9 +49,28 @@ void TimeWarp::reset(fl::u32 realTimeNow) {
 }
 
 void TimeWarp::applyExact(fl::u32 timeNow) {
+    // Handle time going backwards - reset if this happens
+    if (timeNow < mLastRealTime) {
+        FASTLED_WARN("TimeWarp::applyExact: time went backwards, resetting");
+        reset(timeNow);
+        return;
+    }
+
     fl::u32 elapsedRealTime = timeNow - mLastRealTime;
     mLastRealTime = timeNow;
-    int32_t diff = static_cast<int32_t>(elapsedRealTime * mTimeScale);
+
+    // Calculate scaled time difference with bounds checking
+    float scaledTime = elapsedRealTime * mTimeScale;
+
+    // Check for overflow/underflow before casting to int32_t
+    // int32_t range is [-2147483648, 2147483647]
+    if (scaledTime > 2147483647.0f) {
+        scaledTime = 2147483647.0f;
+    } else if (scaledTime < -2147483648.0f) {
+        scaledTime = -2147483648.0f;
+    }
+
+    int32_t diff = static_cast<int32_t>(scaledTime);
     if (diff == 0) {
         return;
     }
