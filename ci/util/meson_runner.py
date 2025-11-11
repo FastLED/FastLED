@@ -453,6 +453,37 @@ def setup_meson_build(
         _ts_print("    Impact: +200ms archive creation, +45MB disk usage per build")
         _ts_print("=" * 80)
 
+    # Check for obsolete zig wrapper artifacts before proceeding
+    # These wrappers were used in the old zig-based compiler system and must be removed
+    meson_dir = source_dir / ".meson"
+    if meson_dir.exists():
+        obsolete_wrappers = list(meson_dir.glob("zig-*-wrapper.exe"))
+        if obsolete_wrappers:
+            _ts_print("=" * 80)
+            _ts_print("[MESON] ❌ ERROR: Obsolete zig wrapper artifacts detected!")
+            _ts_print("[MESON]")
+            _ts_print(
+                "[MESON] Found old zig-based wrapper executables in .meson/ directory:"
+            )
+            for wrapper in obsolete_wrappers:
+                _ts_print(f"[MESON]   - {wrapper.name}")
+            _ts_print("[MESON]")
+            _ts_print(
+                "[MESON] These wrappers are from the old zig-based compiler system"
+            )
+            _ts_print("[MESON] and are no longer compatible with clang-tool-chain.")
+            _ts_print("[MESON]")
+            _ts_print("[MESON] To fix this issue, delete the .meson directory:")
+            _ts_print("[MESON]   rm -rf .meson")
+            _ts_print("[MESON]")
+            _ts_print("[MESON] Then run your build command again. The system will use")
+            _ts_print("[MESON] clang-tool-chain wrappers instead.")
+            _ts_print("=" * 80)
+            raise RuntimeError(
+                "Obsolete zig wrapper artifacts detected in .meson/ directory. "
+                "Delete .meson/ directory and try again."
+            )
+
     # Get clang-tool-chain wrapper commands
     # Use the wrapper commands (clang-tool-chain-c/cpp) instead of raw clang binaries
     # The wrappers automatically handle GNU ABI setup on Windows
