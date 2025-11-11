@@ -40,18 +40,19 @@ enum UCS7604Mode {
 
 
 
-/// @brief UCS7604 controller extending ClocklessBlockingGeneric
+/// @brief UCS7604 controller extending CPixelLEDController
 template <
     int DATA_PIN,
-    EOrder RGB_ORDER,  // used to convert, delegate get's RGB ordering.
-    fl::UCS7604Mode MODE, // = fl::UCS7604_MODE_8BIT_800KHZ,
-    typename CHIPSET_TIMING, // = fl::WS2812ChipsetTiming
+    EOrder RGB_ORDER,  // Color order for input pixels (converted to RGB internally)
+    fl::UCS7604Mode MODE,
+    typename CHIPSET_TIMING,
     template<int, typename, EOrder> class CLOCKLESS_CONTROLLER
 >
-class UCS7604ControllerT : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>
+class UCS7604ControllerT : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    using BaseController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
+    using DelegateController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
+    DelegateController mDelegate;  // Clockless controller for wire transmission (always RGB)
 
     static constexpr uint8_t PREAMBLE_LEN = 15;
     static constexpr uint8_t PREAMBLE_PIXELS = 5;  // 15 ÷ 3 = 5 exactly!
@@ -74,12 +75,25 @@ public:
         , mWCurrent(w_current & 0x0F)
     {}
 
+    virtual void init() override {
+        mDelegate.init();
+    }
+
     void setCurrentControl(uint8_t r_current, uint8_t g_current,
                           uint8_t b_current, uint8_t w_current) {
         mRCurrent = r_current & 0x0F;
         mGCurrent = g_current & 0x0F;
         mBCurrent = b_current & 0x0F;
         mWCurrent = w_current & 0x0F;
+    }
+
+    // Access delegate controller (for testing)
+    const DelegateController& getDelegate() const {
+        return mDelegate;
+    }
+
+    DelegateController& getDelegate() {
+        return mDelegate;
     }
 
 protected:
@@ -95,7 +109,7 @@ protected:
 
         // Step 1: Convert to PixelIterator with RGBW support
         //fl::Rgbw rgbw(fl::kRGBWDefaultColorTemp, fl::kRGBWExactColors, WDefault);
-        fl::Rgbw rgbw = BaseController::getRgbw();
+        fl::Rgbw rgbw = mDelegate.getRgbw();
         fl::PixelIterator pixel_iter = pixels.as_iterator(rgbw);
 
         // Calculate bytes per LED based on mode and RGB/RGBW
@@ -178,9 +192,9 @@ protected:
         size_t num_pixels = mByteBuffer.size() / 3;
         CRGB* fake_pixels = reinterpret_cast<CRGB*>(mByteBuffer.data());
         
-        // Step 5: Construct PixelController and send to base controller
+        // Step 5: Construct PixelController and send to delegate controller
         PixelController<RGB> pixel_data(fake_pixels, num_pixels, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
-        BaseController::showPixels(pixel_data);
+        mDelegate.showPixels(pixel_data);
     }
 
     

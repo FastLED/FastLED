@@ -56,7 +56,7 @@ public:
         return fl::span<const uint8_t>(capturedBytes.data(), capturedBytes.size());
     }
 
-protected:
+    // Made public for testing with UCS7604Controller which uses composition
     virtual void showPixels(PixelController<RGB_ORDER>& pixels) override {
         // Capture raw RGB bytes
         capturedBytes.clear();
@@ -75,36 +75,38 @@ protected:
     }
 };
 
-/// Test wrapper that exposes protected showPixels method for 8-bit mode
+/// Test wrapper that exposes protected showPixels method and provides access to captured bytes
 template<int DATA_PIN, EOrder RGB_ORDER>
 class UCS7604TestController8bit : public UCS7604Controller8bitT<DATA_PIN, RGB_ORDER, MockClocklessController> {
 private:
     using BaseType = UCS7604Controller8bitT<DATA_PIN, RGB_ORDER, MockClocklessController>;
-    using MockType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
+    using DelegateType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
 
 public:
     using BaseType::showPixels;
 
-    // Access captured bytes via IData interface from base MockClocklessController
+    // Access captured bytes from the delegate controller
     fl::span<const uint8_t> getCapturedBytes() const {
-        const IData* idata = static_cast<const MockType*>(this);
+        const DelegateType& delegate = this->getDelegate();
+        const IData* idata = static_cast<const IData*>(&delegate);
         return idata->data();
     }
 };
 
-/// Test wrapper that exposes protected showPixels method for 16-bit mode
+/// Test wrapper that exposes protected showPixels method and provides access to captured bytes
 template<int DATA_PIN, EOrder RGB_ORDER>
 class UCS7604TestController16bit : public UCS7604Controller16bitT<DATA_PIN, RGB_ORDER, MockClocklessController> {
 private:
     using BaseType = UCS7604Controller16bitT<DATA_PIN, RGB_ORDER, MockClocklessController>;
-    using MockType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
+    using DelegateType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
 
 public:
     using BaseType::showPixels;
 
-    // Access captured bytes via IData interface from base MockClocklessController
+    // Access captured bytes from the delegate controller
     fl::span<const uint8_t> getCapturedBytes() const {
-        const IData* idata = static_cast<const MockType*>(this);
+        const DelegateType& delegate = this->getDelegate();
+        const IData* idata = static_cast<const IData*>(&delegate);
         return idata->data();
     }
 };
@@ -112,10 +114,10 @@ public:
 
 /// Helper to verify preamble structure
 /// @param bytes Captured byte stream
-/// @param expected_preamble Expected preamble bytes (15-byte array)
-void verifyPreamble(fl::span<const uint8_t> bytes, const uint8_t* expected_preamble) {
-    constexpr size_t PREAMBLE_SIZE = 15;
-    for (size_t i = 0; i < PREAMBLE_SIZE; i++) {
+/// @param expected_preamble Expected preamble bytes
+void verifyPreamble(fl::span<const uint8_t> bytes, fl::span<const uint8_t> expected_preamble) {
+    REQUIRE_EQ(expected_preamble.size(), 15);
+    for (size_t i = 0; i < expected_preamble.size(); i++) {
         CHECK_EQ(bytes[i], expected_preamble[i]);
     }
 }
@@ -176,32 +178,26 @@ fl::span<const uint8_t> testUCS7604Controller(fl::span<const CRGB> leds) {
     fl::span<const uint8_t> captured;
 
     if (MODE == fl::UCS7604_MODE_8BIT_800KHZ) {
-        // Test 8-bit mode - controller always uses RGB wire order
-        static UCS7604TestController8bit<TEST_PIN, RGB> controller;
+        // Test 8-bit mode - controller accepts RGB_ORDER and converts to RGB wire order internally
+        static UCS7604TestController8bit<TEST_PIN, RGB_ORDER> controller;
 
         // Create pixels with specified color order
         PixelController<RGB_ORDER> pixels(leds.data(), leds.size(), ColorAdjustment::noAdjustment(), DISABLE_DITHER);
 
-        // Convert to RGB for the controller
-        PixelController<RGB> pixels_rgb = pixels;
-
         controller.init();
-        controller.showPixels(pixels_rgb);
+        controller.showPixels(pixels);
 
         // Get captured bytes via IData interface
         captured = controller.getCapturedBytes();
     } else {
-        // Test 16-bit mode - controller always uses RGB wire order
-        static UCS7604TestController16bit<TEST_PIN, RGB> controller;
+        // Test 16-bit mode - controller accepts RGB_ORDER and converts to RGB wire order internally
+        static UCS7604TestController16bit<TEST_PIN, RGB_ORDER> controller;
 
         // Create pixels with specified color order
         PixelController<RGB_ORDER> pixels(leds.data(), leds.size(), ColorAdjustment::noAdjustment(), DISABLE_DITHER);
 
-        // Convert to RGB for the controller
-        PixelController<RGB> pixels_rgb = pixels;
-
         controller.init();
-        controller.showPixels(pixels_rgb);
+        controller.showPixels(pixels);
 
         // Get captured bytes via IData interface
         captured = controller.getCapturedBytes();
@@ -217,11 +213,11 @@ TEST_CASE("UCS7604 8-bit - RGB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // Expected output: RGB order maps to RGB wire order (no conversion)
+    // RGB -> RGB (no conversion)
     CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red -> RGB
-        CRGB(0x00, 0xFF, 0x00),  // Green -> RGB
-        CRGB(0x00, 0x00, 0xFF)   // Blue -> RGB
+        CRGB(0xFF, 0x00, 0x00),
+        CRGB(0x00, 0xFF, 0x00),
+        CRGB(0x00, 0x00, 0xFF)
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
@@ -243,11 +239,11 @@ TEST_CASE("UCS7604 8-bit - GRB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // Expected output: GRB order converts to RGB wire order
+    // GRB -> RGB conversion
     CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red (GRB input) -> RGB
-        CRGB(0x00, 0xFF, 0x00),  // Green (GRB input) -> RGB
-        CRGB(0x00, 0x00, 0xFF)   // Blue (GRB input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Red as GRB -> Green
+        CRGB(0xFF, 0x00, 0x00),  // Green as GRB -> Red
+        CRGB(0x00, 0x00, 0xFF)   // Blue as GRB -> Blue
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
@@ -269,11 +265,11 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // Expected output: BRG order converts to RGB wire order
+    // BRG -> RGB conversion
     CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red (BRG input) -> RGB
-        CRGB(0x00, 0xFF, 0x00),  // Green (BRG input) -> RGB
-        CRGB(0x00, 0x00, 0xFF)   // Blue (BRG input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Red as BRG -> Green
+        CRGB(0x00, 0x00, 0xFF),  // Green as BRG -> Blue
+        CRGB(0xFF, 0x00, 0x00)   // Blue as BRG -> Red
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<BRG, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
@@ -295,11 +291,11 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // Expected output: RGB order maps to RGB wire order (no conversion)
+    // RGB -> RGB (no conversion)
     CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red -> RGB
-        CRGB(0x00, 0xFF, 0x00),  // Green -> RGB
-        CRGB(0x00, 0x00, 0xFF)   // Blue -> RGB
+        CRGB(0xFF, 0x00, 0x00),
+        CRGB(0x00, 0xFF, 0x00),
+        CRGB(0x00, 0x00, 0xFF)
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
@@ -321,11 +317,11 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // Expected output: GRB order converts to RGB wire order
+    // GRB -> RGB conversion
     CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red (GRB input) -> RGB
-        CRGB(0x00, 0xFF, 0x00),  // Green (GRB input) -> RGB
-        CRGB(0x00, 0x00, 0xFF)   // Blue (GRB input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Red as GRB -> Green
+        CRGB(0xFF, 0x00, 0x00),  // Green as GRB -> Red
+        CRGB(0x00, 0x00, 0xFF)   // Blue as GRB -> Blue
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
