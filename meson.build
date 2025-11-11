@@ -1,6 +1,6 @@
 project('fastled', 'cpp',
   version: '6.0.0',
-  meson_version: '>=1.1.0',
+  meson_version: '>=1.4.0',
   default_options: [
     'cpp_std=c++11',  # Use c++11 to match AVR builds
     'warning_level=2',
@@ -223,7 +223,7 @@ foreach src : platforms_shared_files
     cpp_args: base_compile_args,
     install: false
   )
-  platforms_shared_objects += obj.extract_all_objects()
+  platforms_shared_objects += obj.extract_all_objects(recursive: false)
 endforeach
 
 fastled_lib = static_library('fastled',
