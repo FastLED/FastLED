@@ -460,26 +460,25 @@ struct TIMING_TM1814 {
 // ============================================================================
 
 /// UCS7604 RGBW controller @ 800 kHz (16-bit color depth)
-/// Four-phase: TH0=250ns, TH1=875ns, TL0=1000ns, TL1=375ns
-/// @note WS2812-compatible timing
+/// Four-phase: TH0=420ns, TH1=840ns, TL0=580ns, TL1=160ns
 /// @note Special protocol with preamble support
 struct TIMING_UCS7604_800KHZ {
     enum : uint32_t {
-        T1 = 250,
-        T2 = 625,
-        T3 = 375,
+        T1 = 420,
+        T2 = 420,
+        T3 = 160,
         RESET = 280
     };
 };
 
 /// UCS7604 RGBW controller @ 1600 kHz (16-bit color depth, high-speed)
-/// Four-phase: TH0=125ns, TH1=437ns, TL0=500ns, TL1=188ns
-/// @note Half the 800kHz timings (approximately)
+/// Four-phase: TH0=210ns, TH1=420ns, TL0=380ns, TL1=170ns
+/// @note Exactly half the 800kHz timings
 struct TIMING_UCS7604_1600KHZ {
     enum : uint32_t {
-        T1 = 125,
-        T2 = 312,
-        T3 = 188,
+        T1 = 210,
+        T2 = 210,
+        T3 = 170,
         RESET = 280
     };
 };

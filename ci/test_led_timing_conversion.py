@@ -57,8 +57,8 @@ FASTLED_CHIPSETS: dict[str, tuple[int, int, int]] = {
     "DP1903_800KHZ": (400, 1000, 400),
     # RGBW Chipsets
     "TM1814": (360, 600, 340),
-    "UCS7604_800KHZ": (250, 625, 375),
-    "UCS7604_1600KHZ": (125, 312, 188),
+    "UCS7604_800KHZ": (420, 420, 160),
+    "UCS7604_1600KHZ": (210, 210, 170),
 }
 
 
