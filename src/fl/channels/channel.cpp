@@ -6,6 +6,7 @@
 #include "channel_data.h"
 #include "channel_engine.h"
 #include "fl/atomic.h"
+#include "fl/dbg.h"
 #include "fl/led_settings.h"
 #include "fl/pixel_iterator_any.h"
 #include "pixel_controller.h"
@@ -51,6 +52,12 @@ Channel::~Channel() {}
 void Channel::showPixels(PixelController<RGB, 1, 0xFFFFFFFF> &pixels) {
     // BIG TODO: CHANNEL NEEDS AN ENCODER:
     // Convert pixels to channel data using the configured color order and RGBW settings
+
+    // Safety check: don't modify buffer if engine is currently transmitting it
+    if (mChannelData->isInUse()) {
+        FL_ASSERT(false, "Channel " << mId << ": Skipping update - buffer in use by engine");
+        return;
+    }
 
     // Encode pixels into the channel data
     PixelIteratorAny any(pixels, mRgbOrder, mSettings.rgbw);

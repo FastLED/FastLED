@@ -65,26 +65,36 @@ public:
     /// @note Calls beginTransmission() with all batched channel data, then clears the queue
     void show();
 
-    //==========================================================================
-    // IMPLEMENTERS: YOU MUST OVERRIDE THIS METHOD
-    //==========================================================================
-    /// @brief Query engine state (may advance state machine)
+    /// @brief Query engine state and manage channel buffer flags
     ///
-    /// **OVERRIDE THIS METHOD IN YOUR DERIVED CLASS**
-    ///
-    /// This method should check the hardware state and return the current status.
-    /// The caller needs to call poll() until the engine returns READY.
+    /// This method calls pollDerived() to check hardware status. When transmission
+    /// completes (READY, ERROR states), it automatically clears the "in use" flags
+    /// on all transmitted channels and clears the transmission queue.
     ///
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
-    /// @note Non-blocking. Should return immediately with current hardware status.
-    virtual EngineState poll() = 0;
+    /// @note Non-blocking. Returns immediately with current hardware status.
+    EngineState poll();
 
     /// @brief Get the last error message
     /// @return Error description string, or empty string if no error occurred
     /// @note Only valid when poll() returns EngineState::ERROR
-    virtual fl::string getLastError() = 0;
+    fl::string getLastError() { return mLastError; }
 
 protected:
+    //==========================================================================
+    // IMPLEMENTERS: YOU MUST OVERRIDE THIS METHOD
+    //==========================================================================
+    /// @brief Query engine state (hardware polling implementation)
+    ///
+    /// **OVERRIDE THIS METHOD IN YOUR DERIVED CLASS**
+    ///
+    /// This method should check the hardware state and return the current status.
+    /// The base poll() method will call this and handle channel cleanup automatically.
+    ///
+    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
+    /// @note Non-blocking. Should return immediately with current hardware status.
+    virtual EngineState pollDerived() = 0;
+
     //==========================================================================
     // IMPLEMENTERS: YOU MUST OVERRIDE THIS METHOD
     //==========================================================================
@@ -114,6 +124,12 @@ private:
     /// @brief Pending channel data waiting for show() to be called
     /// @note Uses inlined vector with capacity 16 to avoid heap allocation for typical use cases
     fl::vector_inlined<ChannelDataPtr, 16> mPendingChannels;
+
+    /// @brief Channels currently being transmitted (async operation in progress)
+    /// @note These channels will have their "in use" flags cleared when poll() returns READY or ERROR
+    fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
+
+    fl::string mLastError;
 };
 
 

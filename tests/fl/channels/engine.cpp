@@ -23,6 +23,11 @@ protected:
         transmitCount++;
         lastChannelCount = channels.size();
     }
+
+    EngineState pollDerived() override {
+        // Mock implementation: always return READY after transmission
+        return EngineState::READY;
+    }
 };
 
 TEST_CASE("Channel basic operations") {

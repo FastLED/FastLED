@@ -46,6 +46,14 @@ public:
     /// @brief Get the data size in bytes
     size_t getSize() const { return mEncodedData.size(); }
 
+    /// @brief Check if channel data is currently in use by the engine
+    /// @return true if engine is transmitting this data, false otherwise
+    bool isInUse() const { return mInUse; }
+
+    /// @brief Mark channel data as in use by the engine
+    /// @param inUse true to mark as in use, false to mark as available
+    void setInUse(bool inUse) { mInUse = inUse; }
+
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
@@ -65,6 +73,7 @@ private:
     const int mPin;                         ///< GPIO pin number
     const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset)
     fl::vector_psram<uint8_t> mEncodedData; ///< Encoded transmission bytes (PSRAM)
+    volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
 };
 
 }  // namespace fl
