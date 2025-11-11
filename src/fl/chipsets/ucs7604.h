@@ -12,6 +12,7 @@
 #include "fl/pixel_iterator.h"
 #include "fl/vector.h"
 #include "lib8tion/intmap.h"
+#include "fl/type_traits.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -33,19 +34,23 @@ namespace fl {
 enum UCS7604Mode {
     UCS7604_MODE_8BIT_800KHZ = 0x03,
     UCS7604_MODE_16BIT_800KHZ = 0x8B,
-    UCS7604_MODE_16BIT_1600KHZ = 0x9B
+    UCS7604_MODE_16BIT_1600KHZ = 0x9B // not implemented because of timing difference.
 };
+
+
+
 
 /// @brief UCS7604 controller extending ClocklessBlockingGeneric
 template <
     int DATA_PIN,
-    EOrder RGB_ORDER = GRB,
-    fl::UCS7604Mode MODE = fl::UCS7604_MODE_8BIT_800KHZ
+    EOrder RGB_ORDER,
+    fl::UCS7604Mode MODE, // = fl::UCS7604_MODE_8BIT_800KHZ,
+    typename CHIPSET_TIMING // = fl::WS2812ChipsetTiming
 >
-class UCS7604Controller : public fl::ClocklessBlockingGeneric<DATA_PIN, fl::WS2812ChipsetTiming, RGB>
+class UCS7604Controller : public fl::ClocklessBlockingGeneric<DATA_PIN, CHIPSET_TIMING, RGB>
 {
 private:
-    using BaseController = fl::ClocklessBlockingGeneric<DATA_PIN, fl::WS2812ChipsetTiming, RGB>;
+    using BaseController = fl::ClocklessBlockingGeneric<DATA_PIN, CHIPSET_TIMING, RGB>;
 
     static constexpr uint8_t PREAMBLE_LEN = 15;
     static constexpr uint8_t PREAMBLE_PIXELS = 5;  // 15 ÷ 3 = 5 exactly!
@@ -201,6 +206,17 @@ private:
         buffer->push_back(0x00);
     }
 };
+
+// now typedef the controllers
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller8bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ>;
+
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller16bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ>;
+
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller16bit1600 = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ>;
+
 
 }  // namespace fl
 
