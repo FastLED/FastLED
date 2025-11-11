@@ -151,11 +151,6 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
     }
 
-    // Mark worker as unavailable if we found one
-    if (worker) {
-        worker->markAsUnavailable();  // Volatile write
-    }
-
     ESP_LOGD(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
 
     if (worker) {
@@ -200,6 +195,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
                 ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d", (int)pin);
             }
 
+            // Mark worker as unavailable now that configuration succeeded
+            // CRITICAL: Must be done AFTER configure() to avoid deadlock in configure()'s
+            // waitForCompletion() check (which blocks if mAvailable == false)
+            worker->markAsUnavailable();
+            ESP_LOGD(RMT5_POOL_TAG, "Worker marked as unavailable");
+
             ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS - returning worker %p ===", worker);
             return worker;
         }
@@ -229,11 +230,6 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
         }
 
         if (worker) {
-            worker->markAsUnavailable();
-        }
-
-
-        if (worker) {
             ESP_LOGD(RMT5_POOL_TAG, "Worker found in polling loop (iteration %u)", poll_count);
 
             // Check if this worker already has a channel (to track actual channel creation)
@@ -253,6 +249,12 @@ IRmtWorkerBase* RmtWorkerPool::acquireWorker(
                     ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d (retry path, iteration %u)",
                              (int)pin, poll_count);
                 }
+
+                // Mark worker as unavailable now that configuration succeeded
+                // CRITICAL: Must be done AFTER configure() to avoid deadlock
+                worker->markAsUnavailable();
+                ESP_LOGD(RMT5_POOL_TAG, "Worker marked as unavailable (retry path)");
+
                 ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS (retry path) - returning worker %p ===", worker);
                 return worker;
             }
