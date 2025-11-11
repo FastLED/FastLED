@@ -12,6 +12,11 @@ from enum import Enum
 from pathlib import Path
 from typing import List, Optional
 
+from ci.docker.container_db import (
+    ContainerDatabase,
+    cleanup_container,
+    prepare_container,
+)
 from ci.util.docker_helper import get_docker_command
 
 
@@ -163,6 +168,8 @@ class DockerContainerManager:
     def __init__(self, config: DockerConfig):
         self.config = config
         self._image_name_override: Optional[str] = None
+        self._db = ContainerDatabase()
+        self._container_id: Optional[str] = None
 
     def set_image_name(self, image_name: str) -> None:
         """Override the image name to use (for cases where local image differs from config)."""
@@ -217,8 +224,15 @@ class DockerContainerManager:
             # If Docker is not available, we can't check state
             return ContainerState.NOT_EXISTS
 
-    def create_container(self) -> bool:
-        """Create a new container."""
+    def _create_container_internal(self) -> str:
+        """Internal method to create a Docker container.
+
+        Returns:
+            Container ID
+
+        Raises:
+            RuntimeError: If container creation fails
+        """
         env = os.environ.copy()
         env["MSYS_NO_PATHCONV"] = "1"
 
@@ -247,46 +261,76 @@ class DockerContainerManager:
             ]
         )
 
-        result = subprocess.run(cmd, env=env)
-        return result.returncode == 0
+        result = subprocess.run(cmd, env=env, capture_output=True, text=True)
+        if result.returncode != 0:
+            raise RuntimeError(f"Failed to create container: {result.stderr}")
+
+        # Get the container ID from docker create output
+        container_id = result.stdout.strip()
+
+        # Start the container
+        start_result = subprocess.run(
+            [get_docker_command(), "start", container_id],
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        if start_result.returncode != 0:
+            raise RuntimeError(f"Failed to start container: {start_result.stderr}")
+
+        return container_id
 
     def transition_to_running(self) -> bool:
-        """Ensure container is in running state."""
+        """Ensure container is in running state using database tracking.
+
+        This method uses the prepare_container function to:
+        1. Check for existing container registrations
+        2. Verify owner PID is not alive (prevent concurrent usage)
+        3. Clean up orphaned containers from dead processes
+        4. Create fresh container with database tracking
+        5. Register container ownership by current PID
+
+        Returns:
+            True if container is running, False on failure
+        """
         try:
-            state = self.get_container_state()
+            # Use prepare_container to handle all the lifecycle management
+            container_id, was_cleaned = prepare_container(
+                container_name=self.config.container_name,
+                image_name=self._get_image_name(),
+                create_container_fn=self._create_container_internal,
+                db=self._db,
+            )
 
-            if state == ContainerState.NOT_EXISTS:
-                print(f"Creating new container: {self.config.container_name}")
-                if not self.create_container():
-                    return False
-                state = ContainerState.STOPPED
+            self._container_id = container_id
 
-            if state == ContainerState.STOPPED:
-                print(f"Starting container: {self.config.container_name}")
-                result = subprocess.run(
-                    [get_docker_command(), "start", self.config.container_name],
-                    timeout=30,
+            if was_cleaned:
+                print(
+                    f"✓ Container cleaned and recreated: {self.config.container_name}"
                 )
-                if result.returncode != 0:
-                    return False
-            elif state == ContainerState.PAUSED:
-                print(f"Unpausing container: {self.config.container_name}")
-                result = subprocess.run(
-                    [get_docker_command(), "unpause", self.config.container_name],
-                    timeout=30,
-                )
-                if result.returncode != 0:
-                    return False
             else:
-                print(f"✓ Using existing container: {self.config.container_name}")
+                print(f"✓ Fresh container created: {self.config.container_name}")
 
             return True
+        except RuntimeError as e:
+            print(f"❌ {e}")
+            return False
         except FileNotFoundError:
             print("❌ Docker is not available. Please ensure Docker is running.")
             return False
         except subprocess.TimeoutExpired:
             print("❌ Docker command timed out. Docker may not be responding.")
             return False
+
+    def cleanup(self) -> None:
+        """Clean up container registration but keep container alive for debugging.
+
+        This method removes the container from the database tracking but leaves
+        it running so users can inspect it for debugging purposes.
+        """
+        if self._container_id:
+            cleanup_container(self._container_id, self._db)
+            self._container_id = None
 
     def pause(self) -> bool:
         """Pause the container to free resources."""

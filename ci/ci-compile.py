@@ -183,9 +183,13 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
             f"✅ Build artifacts available in mounted volume: {docker_config.output_dir}"
         )
 
+    # Clean up container registration (keeps container alive for debugging)
+    print()
+    print(f"Cleaning up container registration: {docker_config.container_name}")
+    container_mgr.cleanup()
+
     # Stop container after compilation to trigger auto-removal (--rm flag)
     # This ensures fresh bind mounts on next run and prevents stale source issues
-    print()
     print(f"Stopping container: {docker_config.container_name}")
     try:
         subprocess.run(
