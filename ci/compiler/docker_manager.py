@@ -225,6 +225,7 @@ class DockerContainerManager:
         cmd = [
             get_docker_command(),
             "create",
+            "--rm",  # Auto-remove container when stopped to ensure fresh bind mounts
             "--name",
             self.config.container_name,
             "-v",

@@ -19,6 +19,7 @@ Uses esptool.py when available, falls back to manual binary merge if not install
 """
 
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -47,7 +48,7 @@ from ci.compiler.output_utils import (
     copy_build_artifact,
     validate_output_path,
 )
-from ci.util.docker_helper import should_use_docker_for_board
+from ci.util.docker_helper import get_docker_command, should_use_docker_for_board
 from ci.util.global_interrupt_handler import (
     install_signal_handler,
     signal_interrupt,
@@ -182,11 +183,20 @@ def handle_docker_compilation(config: CompilationConfig) -> int:
             f"✅ Build artifacts available in mounted volume: {docker_config.output_dir}"
         )
 
-    # Pause container immediately after compilation
-    # This keeps the container state but frees resources
+    # Stop container after compilation to trigger auto-removal (--rm flag)
+    # This ensures fresh bind mounts on next run and prevents stale source issues
     print()
-    print(f"Pausing container: {docker_config.container_name}")
-    container_mgr.pause()
+    print(f"Stopping container: {docker_config.container_name}")
+    try:
+        subprocess.run(
+            [get_docker_command(), "stop", docker_config.container_name],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+            timeout=30,
+        )
+    except (FileNotFoundError, subprocess.TimeoutExpired):
+        # Silently fail if Docker is not available
+        pass
 
     return result.returncode
 
