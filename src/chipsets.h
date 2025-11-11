@@ -426,6 +426,21 @@ class UCS1904Controller800Khz : public fl::ClocklessControllerImpl<DATA_PIN, fl:
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>
 class UCS2903Controller : public fl::ClocklessControllerImpl<DATA_PIN, fl::TIMING_UCS2903, RGB_ORDER> {};
 
+/// UCS7604 8-bit @ 800 kHz controller - references centralized timing from fl::TIMING_UCS7604_800KHZ
+/// @see fl::TIMING_UCS7604_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller8bit = fl::UCS7604Controller8bitT<DATA_PIN, RGB_ORDER, fl::ClocklessControllerImpl>;
+
+/// UCS7604 16-bit @ 800 kHz controller - references centralized timing from fl::TIMING_UCS7604_800KHZ
+/// @see fl::TIMING_UCS7604_800KHZ in fl::chipsets::led_timing.h (250, 625, 375 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller16bit = fl::UCS7604Controller16bitT<DATA_PIN, RGB_ORDER, fl::ClocklessControllerImpl>;
+
+/// UCS7604 16-bit @ 1600 kHz controller - references centralized timing from fl::TIMING_UCS7604_1600KHZ
+/// @see fl::TIMING_UCS7604_1600KHZ in fl::chipsets::led_timing.h (100, 350, 175 ns)
+template <int DATA_PIN, EOrder RGB_ORDER = GRB>
+using UCS7604Controller16bit1600 = fl::UCS7604Controller16bit1600T<DATA_PIN, RGB_ORDER, fl::ClocklessControllerImpl>;
+
 /// TM1809 controller @ 800 kHz - references centralized timing from fl::TIMING_TM1809_800KHZ
 /// @see fl::TIMING_TM1809_800KHZ in fl::chipsets::led_timing.h (350, 350, 450 ns)
 template <int DATA_PIN, EOrder RGB_ORDER = RGB>

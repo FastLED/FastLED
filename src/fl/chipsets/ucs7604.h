@@ -43,12 +43,12 @@ enum UCS7604Mode {
 /// @brief UCS7604 controller extending ClocklessBlockingGeneric
 template <
     int DATA_PIN,
-    EOrder RGB_ORDER,
+    EOrder RGB_ORDER,  // used to convert, delegate get's RGB ordering.
     fl::UCS7604Mode MODE, // = fl::UCS7604_MODE_8BIT_800KHZ,
     typename CHIPSET_TIMING, // = fl::WS2812ChipsetTiming
     template<int, typename, EOrder> class CLOCKLESS_CONTROLLER
 >
-class UCS7604Controller : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>
+class UCS7604ControllerT : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>
 {
 private:
     using BaseController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>;
@@ -66,8 +66,8 @@ private:
     fl::vector_psram<uint8_t> mByteBuffer;
 
 public:
-    UCS7604Controller(uint8_t r_current = 0x0F, uint8_t g_current = 0x0F,
-                      uint8_t b_current = 0x0F, uint8_t w_current = 0x0F)
+    UCS7604ControllerT(uint8_t r_current = 0x0F, uint8_t g_current = 0x0F,
+                       uint8_t b_current = 0x0F, uint8_t w_current = 0x0F)
         : mRCurrent(r_current & 0x0F)
         , mGCurrent(g_current & 0x0F)
         , mBCurrent(b_current & 0x0F)
@@ -209,14 +209,14 @@ private:
 };
 
 // now typedef the controllers
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller8bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, fl::ClocklessBlockingGeneric>;
+template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+using UCS7604Controller8bitT = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, CLOCKLESS_CONTROLLER>;
 
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller16bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, fl::ClocklessBlockingGeneric>;
+template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+using UCS7604Controller16bitT = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, CLOCKLESS_CONTROLLER>;
 
-template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller16bit1600 = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ, fl::ClocklessBlockingGeneric>;
+template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+using UCS7604Controller16bit1600T = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ, CLOCKLESS_CONTROLLER>;
 
 
 }  // namespace fl
