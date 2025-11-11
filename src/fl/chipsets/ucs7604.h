@@ -48,10 +48,10 @@ template <
     typename CHIPSET_TIMING, // = fl::WS2812ChipsetTiming
     template<int, typename, EOrder> class CLOCKLESS_CONTROLLER
 >
-class UCS7604ControllerT : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>
+class UCS7604ControllerT : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>
 {
 private:
-    using BaseController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>;
+    using BaseController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
 
     static constexpr uint8_t PREAMBLE_LEN = 15;
     static constexpr uint8_t PREAMBLE_PIXELS = 5;  // 15 ÷ 3 = 5 exactly!
@@ -83,6 +83,11 @@ public:
     }
 
 protected:
+
+    fl::span<const uint8_t> bytes() const {
+        return mByteBuffer;
+    }
+
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override {
         if (pixels.size() == 0) {
             return;
@@ -174,18 +179,13 @@ protected:
         CRGB* fake_pixels = reinterpret_cast<CRGB*>(mByteBuffer.data());
         
         // Step 5: Construct PixelController and send to base controller
-        ColorAdjustment no_adjust = {
-            CRGB(255, 255, 255)  // premixed: No color correction
-#if FASTLED_HD_COLOR_MIXING
-            , CRGB(255, 255, 255)  // color: full scale
-            , 255  // brightness: max
-#endif
-        };
-        PixelController<RGB> pixel_data(fake_pixels, num_pixels, no_adjust, DISABLE_DITHER);
+        PixelController<RGB> pixel_data(fake_pixels, num_pixels, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
         BaseController::showPixels(pixel_data);
     }
 
-private:
+    
+
+
     static FASTLED_FORCE_INLINE void buildPreamble(fl::vector_psram<uint8_t>* buffer,
                                                      uint8_t r_current, uint8_t g_current,
                                                      uint8_t b_current, uint8_t w_current) {

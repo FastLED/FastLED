@@ -1,0 +1,285 @@
+/// @file test_ucs7604.cpp
+/// @brief Unit test for UCS7604 LED chipset protocol
+///
+/// UCS7604 Protocol Format:
+/// - Preamble: 15 bytes (device config + current control)
+/// - LED data: 3 bytes (RGB 8-bit) per LED
+/// - Padding: 0-2 zero bytes to ensure total size divisible by 3
+
+#include "test.h"
+#include "FastLED.h"
+#include "fl/chipsets/ucs7604.h"
+#include "crgb.h"
+#include "fl/vector.h"
+
+using namespace fl;
+
+namespace {
+
+// Test pin numbers (arbitrary values for testing, not used for actual hardware)
+constexpr int FAKE_PIN_1 = 1;
+constexpr int FAKE_PIN_2 = 2;
+
+/// Interface for accessing captured byte data
+class IData {
+public:
+    virtual ~IData() = default;
+    virtual fl::span<const uint8_t> data() const = 0;
+};
+
+/// Mock clockless controller that captures byte output
+template<int DATA_PIN, typename TIMING, EOrder RGB_ORDER>
+class MockClocklessController : public CPixelLEDController<RGB_ORDER>, public IData {
+public:
+    fl::vector<uint8_t> capturedBytes;
+
+    virtual void init() override {}
+
+    fl::span<const uint8_t> data() const override {
+        return fl::span<const uint8_t>(capturedBytes.data(), capturedBytes.size());
+    }
+
+protected:
+    virtual void showPixels(PixelController<RGB_ORDER>& pixels) override {
+        // Capture raw RGB bytes
+        capturedBytes.clear();
+        PixelController<RGB> pixels_rgb = pixels;
+        pixels_rgb.disableColorAdjustment();
+        auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
+
+        while (iterator.has(1)) {
+            uint8_t r, g, b;
+            iterator.loadAndScaleRGB(&r, &g, &b);
+            capturedBytes.push_back(r);
+            capturedBytes.push_back(g);
+            capturedBytes.push_back(b);
+            iterator.advanceData();
+        }
+    }
+};
+
+/// Test wrapper that exposes protected showPixels method for 8-bit mode
+template<int DATA_PIN, EOrder RGB_ORDER>
+class UCS7604TestController8bit : public UCS7604Controller8bitT<DATA_PIN, RGB_ORDER, MockClocklessController> {
+private:
+    using BaseType = UCS7604Controller8bitT<DATA_PIN, RGB_ORDER, MockClocklessController>;
+    using MockType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
+
+public:
+    using BaseType::showPixels;
+
+    // Access captured bytes via IData interface from base MockClocklessController
+    fl::span<const uint8_t> getCapturedBytes() const {
+        const IData* idata = static_cast<const MockType*>(this);
+        return idata->data();
+    }
+};
+
+/// Test wrapper that exposes protected showPixels method for 16-bit mode
+template<int DATA_PIN, EOrder RGB_ORDER>
+class UCS7604TestController16bit : public UCS7604Controller16bitT<DATA_PIN, RGB_ORDER, MockClocklessController> {
+private:
+    using BaseType = UCS7604Controller16bitT<DATA_PIN, RGB_ORDER, MockClocklessController>;
+    using MockType = MockClocklessController<DATA_PIN, TIMING_UCS7604_800KHZ, RGB>;
+
+public:
+    using BaseType::showPixels;
+
+    // Access captured bytes via IData interface from base MockClocklessController
+    fl::span<const uint8_t> getCapturedBytes() const {
+        const IData* idata = static_cast<const MockType*>(this);
+        return idata->data();
+    }
+};
+
+/// Helper to verify preamble structure
+/// @param bytes Captured byte stream
+/// @param expected_mode Expected mode byte (0x03 for 8-bit@800kHz, 0x8B for 16-bit@800kHz)
+void verifyPreamble(fl::span<const uint8_t> bytes, uint8_t expected_mode = 0x03) {
+    // Verify preamble (first 15 bytes)
+    // Preamble bytes: 0xFF×6, 0x00, 0x02, MODE, 0x0F×4, 0x00×2
+    CHECK_EQ(bytes[0], 0xFF);  // Sync pattern
+    CHECK_EQ(bytes[1], 0xFF);
+    CHECK_EQ(bytes[2], 0xFF);
+    CHECK_EQ(bytes[3], 0xFF);
+    CHECK_EQ(bytes[4], 0xFF);
+    CHECK_EQ(bytes[5], 0xFF);
+    CHECK_EQ(bytes[6], 0x00);  // Header
+    CHECK_EQ(bytes[7], 0x02);
+    CHECK_EQ(bytes[8], expected_mode);  // MODE byte
+    CHECK_EQ(bytes[9], 0x0F);  // R current
+    CHECK_EQ(bytes[10], 0x0F); // G current
+    CHECK_EQ(bytes[11], 0x0F); // B current
+    CHECK_EQ(bytes[12], 0x0F); // W current
+    CHECK_EQ(bytes[13], 0x00); // Reserved
+    CHECK_EQ(bytes[14], 0x00); // Reserved
+}
+
+/// Helper to verify pixel data (RGB 8-bit mode)
+/// Verifies that the byte stream contains the expected RGB pixel data
+/// starting at offset 15 (after the preamble)
+void verifyPixels8bit(fl::span<const uint8_t> bytes, fl::span<const CRGB> pixels) {
+    const size_t PREAMBLE_SIZE = 15;
+    const size_t BYTES_PER_PIXEL = 3;  // RGB 8-bit
+
+    for (size_t i = 0; i < pixels.size(); i++) {
+        size_t byte_offset = PREAMBLE_SIZE + (i * BYTES_PER_PIXEL);
+        CHECK_EQ(bytes[byte_offset + 0], pixels[i].r);  // R
+        CHECK_EQ(bytes[byte_offset + 1], pixels[i].g);  // G
+        CHECK_EQ(bytes[byte_offset + 2], pixels[i].b);  // B
+    }
+}
+
+/// Helper to verify pixel data (RGB 16-bit mode)
+/// Verifies that the byte stream contains the expected RGB pixel data
+/// starting at offset 15 (after the preamble), scaled to 16-bit
+void verifyPixels16bit(fl::span<const uint8_t> bytes, fl::span<const CRGB> pixels) {
+    const size_t PREAMBLE_SIZE = 15;
+    const size_t BYTES_PER_PIXEL = 6;  // RGB 16-bit
+
+    for (size_t i = 0; i < pixels.size(); i++) {
+        size_t byte_offset = PREAMBLE_SIZE + (i * BYTES_PER_PIXEL);
+
+        // 8-bit to 16-bit: value * 257 = (value << 8) | value
+        uint16_t r16 = (uint16_t(pixels[i].r) << 8) | pixels[i].r;
+        uint16_t g16 = (uint16_t(pixels[i].g) << 8) | pixels[i].g;
+        uint16_t b16 = (uint16_t(pixels[i].b) << 8) | pixels[i].b;
+
+        // Verify big-endian 16-bit values
+        CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
+        CHECK_EQ(bytes[byte_offset + 1], r16 & 0xFF);  // R low
+        CHECK_EQ(bytes[byte_offset + 2], g16 >> 8);    // G high
+        CHECK_EQ(bytes[byte_offset + 3], g16 & 0xFF);  // G low
+        CHECK_EQ(bytes[byte_offset + 4], b16 >> 8);    // B high
+        CHECK_EQ(bytes[byte_offset + 5], b16 & 0xFF);  // B low
+    }
+}
+
+/// Generic test function for UCS7604 controllers
+/// Tests preamble, color order conversion, and pixel data
+/// @tparam RGB_ORDER Color order for the INPUT pixels (RGB, GRB, etc.)
+/// @tparam MODE UCS7604Mode enum value (8-bit, 16-bit, etc.)
+/// @param leds Input LED array
+/// @return Captured byte stream from the controller
+///
+/// Note: UCS7604Controller always uses RGB for the wire protocol, but accepts
+/// different color orders for input pixels which are converted internally
+template<EOrder RGB_ORDER, fl::UCS7604Mode MODE>
+fl::span<const uint8_t> testUCS7604Controller(fl::span<const CRGB> leds) {
+    static constexpr int TEST_PIN = 10;
+
+    fl::span<const uint8_t> captured;
+
+    if (MODE == fl::UCS7604_MODE_8BIT_800KHZ) {
+        // Test 8-bit mode - controller always uses RGB wire order
+        static UCS7604TestController8bit<TEST_PIN, RGB> controller;
+
+        // Create pixels with specified color order
+        PixelController<RGB_ORDER> pixels(leds.data(), leds.size(), ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+
+        // Convert to RGB for the controller
+        PixelController<RGB> pixels_rgb = pixels;
+
+        controller.init();
+        controller.showPixels(pixels_rgb);
+
+        // Get captured bytes via IData interface
+        captured = controller.getCapturedBytes();
+    } else {
+        // Test 16-bit mode - controller always uses RGB wire order
+        static UCS7604TestController16bit<TEST_PIN, RGB> controller;
+
+        // Create pixels with specified color order
+        PixelController<RGB_ORDER> pixels(leds.data(), leds.size(), ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+
+        // Convert to RGB for the controller
+        PixelController<RGB> pixels_rgb = pixels;
+
+        controller.init();
+        controller.showPixels(pixels_rgb);
+
+        // Get captured bytes via IData interface
+        captured = controller.getCapturedBytes();
+    }
+
+    // Verify preamble with correct mode byte
+    uint8_t expected_mode = static_cast<uint8_t>(MODE);
+    verifyPreamble(captured, expected_mode);
+
+    // Verify pixel data based on mode
+    // Pixels are already in RGB order after conversion
+    if (MODE == fl::UCS7604_MODE_8BIT_800KHZ) {
+        verifyPixels8bit(captured, leds);
+    } else {
+        verifyPixels16bit(captured, leds);
+    }
+
+    return captured;
+}
+
+TEST_CASE("UCS7604 8-bit - RGB color order") {
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red
+        CRGB(0x00, 0xFF, 0x00),  // Green
+        CRGB(0x00, 0x00, 0xFF)   // Blue
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+
+    // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
+    REQUIRE_EQ(output.size(), 24);
+}
+
+TEST_CASE("UCS7604 8-bit - GRB color order") {
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red
+        CRGB(0x00, 0xFF, 0x00),  // Green
+        CRGB(0x00, 0x00, 0xFF)   // Blue
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+
+    // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
+    REQUIRE_EQ(output.size(), 24);
+}
+
+TEST_CASE("UCS7604 8-bit - BRG color order") {
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red
+        CRGB(0x00, 0xFF, 0x00),  // Green
+        CRGB(0x00, 0x00, 0xFF)   // Blue
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<BRG, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+
+    // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
+    REQUIRE_EQ(output.size(), 24);
+}
+
+TEST_CASE("UCS7604 16-bit - RGB color order") {
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red
+        CRGB(0x00, 0xFF, 0x00),  // Green
+        CRGB(0x00, 0x00, 0xFF)   // Blue
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+
+    // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
+    REQUIRE_EQ(output.size(), 33);
+}
+
+TEST_CASE("UCS7604 16-bit - GRB color order") {
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red
+        CRGB(0x00, 0xFF, 0x00),  // Green
+        CRGB(0x00, 0x00, 0xFF)   // Blue
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+
+    // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
+    REQUIRE_EQ(output.size(), 33);
+}
+
+} // anonymous namespace

@@ -61,12 +61,30 @@ FL_DISABLE_WARNING_FLOAT_CONVERSION
 
 // operator byte *(struct CRGB[] arr) { return (byte*)arr; }
 
+/// Color adjustment structure for pixel output
+///
+/// IMPORTANT: This must remain POD (Plain Old Data) compatible.
+/// Micro-memory devices (e.g., AVR, ESP8266) require POD types for efficient
+/// memory layout and register optimization. Only static member functions are
+/// allowed - no non-static member functions, virtual functions, or constructors.
 struct ColorAdjustment {
     CRGB premixed;       /// the per-channel scale values premixed with brightness.
     #if FASTLED_HD_COLOR_MIXING
     CRGB color;          /// the per-channel scale values assuming full brightness.
     uint8_t brightness;  /// the global brightness value
     #endif
+
+    /// Create a ColorAdjustment with no scaling or brightness adjustment
+    /// Static functions are allowed without breaking POD compatibility
+    static ColorAdjustment noAdjustment() {
+        ColorAdjustment adj;
+        adj.premixed = CRGB(255, 255, 255);
+        #if FASTLED_HD_COLOR_MIXING
+        adj.color = CRGB(255, 255, 255);
+        adj.brightness = 255;
+        #endif
+        return adj;
+    }
 };
 
 
