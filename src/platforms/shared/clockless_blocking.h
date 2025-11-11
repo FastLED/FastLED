@@ -23,6 +23,7 @@
 #include "controller.h"
 #include "pixel_iterator.h"
 #include "crgb.h"
+#include "fastled_delay.h"
 
 namespace fl {
 

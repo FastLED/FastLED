@@ -364,4 +364,330 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
     verifyPixels16bit(output, expected);
 }
 
+TEST_CASE("UCS7604 runtime brightness control") {
+    // Test the global brightness control functions
+
+    // Save original brightness
+    fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
+
+    // Test set_brightness and brightness functions with single value
+    fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x08));
+    fl::ucs7604::CurrentControl current = fl::ucs7604::brightness();
+    CHECK_EQ(current.r, 0x08);
+    CHECK_EQ(current.g, 0x08);
+    CHECK_EQ(current.b, 0x08);
+    CHECK_EQ(current.w, 0x08);
+
+    // Test clamping to 4-bit range
+    fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0xFF));
+    current = fl::ucs7604::brightness();
+    CHECK_EQ(current.r, 0x0F);  // Should clamp to 0x0F
+    CHECK_EQ(current.g, 0x0F);
+    CHECK_EQ(current.b, 0x0F);
+    CHECK_EQ(current.w, 0x0F);
+
+    // Test individual channel control via struct
+    fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x03, 0x05, 0x07, 0x09));
+    current = fl::ucs7604::brightness();
+    CHECK_EQ(current.r, 0x03);
+    CHECK_EQ(current.g, 0x05);
+    CHECK_EQ(current.b, 0x07);
+    CHECK_EQ(current.w, 0x09);
+
+    // Test individual channel control via inline function
+    fl::ucs7604::set_brightness(0x02, 0x04, 0x06, 0x08);
+    current = fl::ucs7604::brightness();
+    CHECK_EQ(current.r, 0x02);
+    CHECK_EQ(current.g, 0x04);
+    CHECK_EQ(current.b, 0x06);
+    CHECK_EQ(current.w, 0x08);
+
+    // Test that controller uses global brightness
+    fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x05));
+
+    UCS7604TestController8bit<10, RGB> controller;
+
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00)  // Red
+    };
+
+    PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.init();
+    controller.showPixels(pixels);
+
+    fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+    // Verify preamble has the brightness value (0x05) in current control bytes
+    // Preamble bytes 9-12 are RGBW current control
+    CHECK_EQ(output[9], 0x05);   // R current
+    CHECK_EQ(output[10], 0x05);  // G current
+    CHECK_EQ(output[11], 0x05);  // B current
+    CHECK_EQ(output[12], 0x05);  // W current
+
+    // Restore original brightness
+    fl::ucs7604::set_brightness(original);
+}
+
+TEST_CASE("UCS7604 brightness with color order - GRB") {
+    // Save original brightness
+    fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
+
+    // Set different current for each channel
+    // r=0x3 controls RED LEDs, g=0x5 controls GREEN LEDs, b=0x7 controls BLUE LEDs
+    fl::ucs7604::set_brightness(0x3, 0x5, 0x7, 0x9);
+
+    // For GRB color order:
+    // - User's R channel -> wire position 1 (G) -> should get r_current (0x3)
+    // - User's G channel -> wire position 0 (R) -> should get g_current (0x5)
+    // - User's B channel -> wire position 2 (B) -> should get b_current (0x7)
+    // - W channel -> wire position 3 -> should get w_current (0x9)
+
+    UCS7604TestController8bit<10, GRB> controller;
+
+    CRGB leds[] = {
+        CRGB(0xFF, 0x00, 0x00)  // Red LED
+    };
+
+    PixelController<GRB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.init();
+    controller.showPixels(pixels);
+
+    fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+    // Preamble bytes 9-12 are RGBW current control in wire order (RGB)
+    // For GRB input order, the wire should have:
+    // - Position 0 (wire R): g_current = 0x5 (because user's G goes to wire R in GRB)
+    // - Position 1 (wire G): r_current = 0x3 (because user's R goes to wire G in GRB)
+    // - Position 2 (wire B): b_current = 0x7 (because user's B stays at wire B)
+    // - Position 3 (wire W): w_current = 0x9
+    CHECK_EQ(output[9],  0x5);  // Wire R gets user G current
+    CHECK_EQ(output[10], 0x3);  // Wire G gets user R current
+    CHECK_EQ(output[11], 0x7);  // Wire B gets user B current
+    CHECK_EQ(output[12], 0x9);  // Wire W gets user W current
+
+    // Restore original brightness
+    fl::ucs7604::set_brightness(original);
+}
+
+TEST_CASE("UCS7604 preamble updates with current control changes") {
+    // Save original brightness
+    fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
+
+    UCS7604TestController8bit<10, RGB> controller;
+    CRGB leds[] = { CRGB(0xFF, 0x00, 0x00) };
+
+    // Test 1: Set all channels to same value
+    fl::ucs7604::set_brightness(fl::ucs7604::CurrentControl(0x08));
+    PixelController<RGB> pixels1(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.init();
+    controller.showPixels(pixels1);
+    fl::span<const uint8_t> output1 = controller.getCapturedBytes();
+
+    CHECK_EQ(output1[9],  0x08);  // R current
+    CHECK_EQ(output1[10], 0x08);  // G current
+    CHECK_EQ(output1[11], 0x08);  // B current
+    CHECK_EQ(output1[12], 0x08);  // W current
+
+    // Test 2: Set individual channel values
+    fl::ucs7604::set_brightness(0x03, 0x05, 0x07, 0x09);
+    PixelController<RGB> pixels2(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels2);
+    fl::span<const uint8_t> output2 = controller.getCapturedBytes();
+
+    CHECK_EQ(output2[9],  0x03);  // R current
+    CHECK_EQ(output2[10], 0x05);  // G current
+    CHECK_EQ(output2[11], 0x07);  // B current
+    CHECK_EQ(output2[12], 0x09);  // W current
+
+    // Test 3: Test clamping - values > 0x0F should be clamped to 0x0F
+    fl::ucs7604::set_brightness(0xFF, 0x1A, 0x23, 0x45);
+    PixelController<RGB> pixels3(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels3);
+    fl::span<const uint8_t> output3 = controller.getCapturedBytes();
+
+    CHECK_EQ(output3[9],  0x0F);  // R current (0xFF clamped to 0x0F)
+    CHECK_EQ(output3[10], 0x0A);  // G current (0x1A clamped to 0x0A)
+    CHECK_EQ(output3[11], 0x03);  // B current (0x23 clamped to 0x03)
+    CHECK_EQ(output3[12], 0x05);  // W current (0x45 clamped to 0x05)
+
+    // Test 4: Test minimum values
+    fl::ucs7604::set_brightness(0x00, 0x00, 0x00, 0x00);
+    PixelController<RGB> pixels4(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels4);
+    fl::span<const uint8_t> output4 = controller.getCapturedBytes();
+
+    CHECK_EQ(output4[9],  0x00);  // R current
+    CHECK_EQ(output4[10], 0x00);  // G current
+    CHECK_EQ(output4[11], 0x00);  // B current
+    CHECK_EQ(output4[12], 0x00);  // W current
+
+    // Test 5: Test maximum valid values (0x0F)
+    fl::ucs7604::set_brightness(0x0F, 0x0F, 0x0F, 0x0F);
+    PixelController<RGB> pixels5(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels5);
+    fl::span<const uint8_t> output5 = controller.getCapturedBytes();
+
+    CHECK_EQ(output5[9],  0x0F);  // R current
+    CHECK_EQ(output5[10], 0x0F);  // G current
+    CHECK_EQ(output5[11], 0x0F);  // B current
+    CHECK_EQ(output5[12], 0x0F);  // W current
+
+    // Test 6: Test mixed valid values in range
+    fl::ucs7604::set_brightness(0x01, 0x04, 0x08, 0x0C);
+    PixelController<RGB> pixels6(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels6);
+    fl::span<const uint8_t> output6 = controller.getCapturedBytes();
+
+    CHECK_EQ(output6[9],  0x01);  // R current
+    CHECK_EQ(output6[10], 0x04);  // G current
+    CHECK_EQ(output6[11], 0x08);  // B current
+    CHECK_EQ(output6[12], 0x0C);  // W current
+
+    // Restore original brightness
+    fl::ucs7604::set_brightness(original);
+}
+
+TEST_CASE("UCS7604 preamble updates with current control changes - GRB order") {
+    // Save original brightness
+    fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
+
+    UCS7604TestController8bit<10, GRB> controller;
+    CRGB leds[] = { CRGB(0xFF, 0x00, 0x00) };
+
+    // Test with different current values for each channel
+    // User sets: R=0x3, G=0x5, B=0x7, W=0x9
+    // For GRB order, wire should receive: wire_R=0x5, wire_G=0x3, wire_B=0x7, wire_W=0x9
+    fl::ucs7604::set_brightness(0x3, 0x5, 0x7, 0x9);
+    PixelController<GRB> pixels1(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.init();
+    controller.showPixels(pixels1);
+    fl::span<const uint8_t> output1 = controller.getCapturedBytes();
+
+    CHECK_EQ(output1[9],  0x5);  // Wire R gets user G current (0x5)
+    CHECK_EQ(output1[10], 0x3);  // Wire G gets user R current (0x3)
+    CHECK_EQ(output1[11], 0x7);  // Wire B gets user B current (0x7)
+    CHECK_EQ(output1[12], 0x9);  // Wire W gets user W current (0x9)
+
+    // Test clamping with GRB order
+    // User sets: R=0xFF, G=0x1A, B=0x23, W=0x45
+    // After clamping: R=0xF, G=0xA, B=0x3, W=0x5
+    // For GRB order, wire should receive: wire_R=0xA, wire_G=0xF, wire_B=0x3, wire_W=0x5
+    fl::ucs7604::set_brightness(0xFF, 0x1A, 0x23, 0x45);
+    PixelController<GRB> pixels2(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+    controller.showPixels(pixels2);
+    fl::span<const uint8_t> output2 = controller.getCapturedBytes();
+
+    CHECK_EQ(output2[9],  0x0A);  // Wire R gets user G current (0x1A -> 0x0A)
+    CHECK_EQ(output2[10], 0x0F);  // Wire G gets user R current (0xFF -> 0x0F)
+    CHECK_EQ(output2[11], 0x03);  // Wire B gets user B current (0x23 -> 0x03)
+    CHECK_EQ(output2[12], 0x05);  // Wire W gets user W current (0x45 -> 0x05)
+
+    // Restore original brightness
+    fl::ucs7604::set_brightness(original);
+}
+
+TEST_CASE("UCS7604 current control follows color order transformations") {
+    // Save original brightness
+    fl::ucs7604::CurrentControl original = fl::ucs7604::brightness();
+
+    CRGB leds[] = { CRGB(0xFF, 0x00, 0x00) };
+
+    // Set distinct current values for each channel so we can track them
+    // R=0x1, G=0x2, B=0x3, W=0x4
+    fl::ucs7604::set_brightness(0x1, 0x2, 0x3, 0x4);
+
+    // Test RGB order - no transformation
+    {
+        UCS7604TestController8bit<10, RGB> controller;
+        PixelController<RGB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // RGB order: preamble should have R=0x1, G=0x2, B=0x3, W=0x4 (no swap)
+        CHECK_EQ(output[9],  0x1);  // Wire R = user R
+        CHECK_EQ(output[10], 0x2);  // Wire G = user G
+        CHECK_EQ(output[11], 0x3);  // Wire B = user B
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W
+    }
+
+    // Test GRB order - R and G swapped
+    {
+        UCS7604TestController8bit<10, GRB> controller;
+        PixelController<GRB> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // GRB order: preamble should have R=0x2, G=0x1, B=0x3, W=0x4 (R↔G swap)
+        CHECK_EQ(output[9],  0x2);  // Wire R = user G (swapped)
+        CHECK_EQ(output[10], 0x1);  // Wire G = user R (swapped)
+        CHECK_EQ(output[11], 0x3);  // Wire B = user B (unchanged)
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+    }
+
+    // Test BRG order - rotate left (B→R→G→B)
+    {
+        UCS7604TestController8bit<10, BRG> controller;
+        PixelController<BRG> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // BRG order: preamble should have R=0x3, G=0x1, B=0x2, W=0x4 (rotate left)
+        CHECK_EQ(output[9],  0x3);  // Wire R = user B
+        CHECK_EQ(output[10], 0x1);  // Wire G = user R
+        CHECK_EQ(output[11], 0x2);  // Wire B = user G
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+    }
+
+    // Test RBG order - G and B swapped
+    {
+        UCS7604TestController8bit<10, RBG> controller;
+        PixelController<RBG> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // RBG order: preamble should have R=0x1, G=0x3, B=0x2, W=0x4 (G↔B swap)
+        CHECK_EQ(output[9],  0x1);  // Wire R = user R (unchanged)
+        CHECK_EQ(output[10], 0x3);  // Wire G = user B (swapped)
+        CHECK_EQ(output[11], 0x2);  // Wire B = user G (swapped)
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+    }
+
+    // Test GBR order - rotate right (G→B→R→G)
+    {
+        UCS7604TestController8bit<10, GBR> controller;
+        PixelController<GBR> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // GBR order: preamble should have R=0x3, G=0x2, B=0x1, W=0x4 (rotate right)
+        CHECK_EQ(output[9],  0x3);  // Wire R = user B
+        CHECK_EQ(output[10], 0x2);  // Wire G = user G
+        CHECK_EQ(output[11], 0x1);  // Wire B = user R
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+    }
+
+    // Test BGR order - reverse RGB
+    {
+        UCS7604TestController8bit<10, BGR> controller;
+        PixelController<BGR> pixels(leds, 1, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
+        controller.init();
+        controller.showPixels(pixels);
+        fl::span<const uint8_t> output = controller.getCapturedBytes();
+
+        // BGR order: preamble should have R=0x3, G=0x2, B=0x1, W=0x4 (reverse)
+        CHECK_EQ(output[9],  0x3);  // Wire R = user B
+        CHECK_EQ(output[10], 0x2);  // Wire G = user G (unchanged)
+        CHECK_EQ(output[11], 0x1);  // Wire B = user R
+        CHECK_EQ(output[12], 0x4);  // Wire W = user W (unchanged)
+    }
+
+    // Restore original brightness
+    fl::ucs7604::set_brightness(original);
+}
+
 } // anonymous namespace
