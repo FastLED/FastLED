@@ -55,7 +55,7 @@ public:
     static ChannelPtr create(const ChannelConfig& config, ChannelEngine* engine);
 
     /// @brief Destructor
-    ~Channel();
+    virtual ~Channel();
 
     /// @brief Get the channel ID
     /// @return Channel ID (always increments, starts at 0)
