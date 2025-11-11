@@ -28,26 +28,9 @@
 #endif
 #endif
 
-// Include bulk controller implementations
-// These provide multi-strip support using hardware peripherals
+// Bulk controller implementations have been replaced by the Channel API
+// See src/fl/channels/README.md for multi-strip support
 
-#if FASTLED_RMT5
-#include "../drivers/rmt/bulk_rmt.h"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
-#include "../drivers/lcd_cam/bulk_lcd_i80.h"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
-#include "../drivers/parlio/bulk_clockless_parlio.h"
-#endif
-
-#if defined(CONFIG_IDF_TARGET_ESP32)
-// ESP32 (original): I2S-based bulk controller
-#include "../drivers/i2s/bulk_i2s.h"
-#endif
-// ESP32-S3: Use LCD_CAM-based bulk controller (included above at line 38-40)
 
 
 #endif // _FASTLED_ESP32_H
