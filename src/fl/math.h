@@ -120,8 +120,20 @@ template<typename T> inline long lround(T value) { return lround_impl_float(valu
 // Round to nearest floating-point value
 // Arduino defines round as a macro, so we need to undefine it first
 inline float roundf(float value) { return round_impl_float(value); }
-inline double round(double value) { return round_impl_double(value); }
-template<typename T> inline T round(T value) { return round_impl_float(value); }
+// Template overload for exact type matching - avoids ambiguity with ::round
+// when using "using fl::round;" and calling round with float/double arguments
+// Template has higher priority than implicit float->double conversion
+template<typename T>
+inline T round(T value) {
+    // Delegate to float implementation for all types
+    // This will only be instantiated for types other than double (double uses specialized template below)
+    return static_cast<T>(round_impl_float(static_cast<float>(value)));
+}
+// Explicit specialization for double to use double implementation
+template<>
+inline double round<double>(double value) {
+    return round_impl_double(value);
+}
 
 // Floating-point modulo (remainder)
 inline float fmodf(float x, float y) { return fmod_impl_float(x, y); }
