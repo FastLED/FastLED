@@ -1,5 +1,6 @@
 #include "test.h"
 #include "fl/utility.h"
+#include "fl/limits.h"
 
 using namespace fl;
 
@@ -159,10 +160,10 @@ TEST_CASE("fl::less - edge cases") {
 
     SUBCASE("boundary values") {
         less<int> cmp;
-        CHECK(cmp(INT_MIN, 0));
-        CHECK(cmp(0, INT_MAX));
-        CHECK(cmp(INT_MIN, INT_MAX));
-        CHECK(!cmp(INT_MAX, INT_MIN));
+        CHECK(cmp(fl::numeric_limits<int>::min(), 0));
+        CHECK(cmp(0, fl::numeric_limits<int>::max()));
+        CHECK(cmp(fl::numeric_limits<int>::min(), fl::numeric_limits<int>::max()));
+        CHECK(!cmp(fl::numeric_limits<int>::max(), fl::numeric_limits<int>::min()));
     }
 
     SUBCASE("floating point special values") {
