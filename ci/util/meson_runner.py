@@ -419,33 +419,8 @@ def setup_meson_build(
     skip_meson_setup = already_configured and not reconfigure and not force_reconfigure
 
     # Declare native file path early (needed for meson commands)
-    # The native file will be generated later after wrapper creation
+    # The native file will be generated later after tool detection
     native_file_path = build_dir / "meson_native.txt"
-
-    # Use existing sccache wrapper trampolines from .meson directory
-    # These are C binary trampolines that call Python wrappers with sccache support
-    # Build them if they don't exist
-    meson_wrapper_dir = source_dir / ".meson"
-    wrapper_build_script = meson_wrapper_dir / "build_wrappers.py"
-
-    # Ensure wrapper trampolines are built
-    if wrapper_build_script.exists():
-        try:
-            import sys as py_sys
-
-            subprocess.run(
-                [py_sys.executable, str(wrapper_build_script)],
-                capture_output=True,
-                text=True,
-                check=True,
-                timeout=60,
-            )
-        except subprocess.SubprocessError as e:
-            _ts_print(f"[MESON] Warning: Failed to build wrapper trampolines: {e}")
-            # Continue anyway - wrappers might already exist
-
-    # Track if any wrapper files were modified
-    wrappers_changed = False
 
     cmd: Optional[list[str]] = None
     if skip_meson_setup:
@@ -527,70 +502,71 @@ def setup_meson_build(
             _ts_print(f"          Missing: {', '.join(missing_tools)}")
         _ts_print("=" * 80)
 
-    # Use system tools when available for thin archives, otherwise use zig
+    # Use system tools when available for thin archives
     use_system_ar = use_thin_archives and has_llvm_ar
 
     # When using thin archives, we must use system lld for linking
-    # Add -fuse-ld=lld flag to force use of system lld instead of zig's bundled lld
+    # Add -fuse-ld=lld flag to force use of system lld
     linker_flag = " -fuse-ld=lld" if use_thin_archives and has_lld else ""
 
-    # Use wrapper trampolines from .meson directory instead of creating new wrappers
-    # These are C binary trampolines that call Python wrappers with sccache support
-    if is_windows:
-        # Windows: Use .exe trampolines from .meson directory for compilers
-        wrapper_ext = ".exe"
-        cc_wrapper = meson_wrapper_dir / f"zig-cc-wrapper{wrapper_ext}"
-        cxx_wrapper = meson_wrapper_dir / f"zig-cxx-wrapper{wrapper_ext}"
-        # For ar, use the Python script directly (no trampoline needed)
-        ar_wrapper = meson_wrapper_dir / "zig-ar.py"
+    # Get clang-tool-chain wrapper commands
+    # Use the wrapper commands (clang-tool-chain-c/cpp) instead of raw clang binaries
+    # The wrappers automatically handle GNU ABI setup on Windows
+    # For sccache integration, use clang-tool-chain's built-in sccache wrappers
+    import shutil
 
-        # Verify wrappers exist
-        if not cc_wrapper.exists():
-            _ts_print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
-        if not cxx_wrapper.exists():
-            _ts_print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
-        if not ar_wrapper.exists():
-            _ts_print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
+    # TODO: sccache integration with clang-tool-chain needs fixing
+    # For now, use plain wrappers without sccache
+    # The issue is that clang-tool-chain-sccache-* bypasses the GNU ABI setup
+    sccache_available = False  # Temporarily disable sccache
+    use_sccache = False
+
+    # Use plain clang-tool-chain wrappers
+    clang_wrapper = shutil.which("clang-tool-chain-c")
+    clangxx_wrapper = shutil.which("clang-tool-chain-cpp")
+
+    llvm_ar_wrapper = shutil.which("clang-tool-chain-ar")
+
+    if not clang_wrapper or not clangxx_wrapper or not llvm_ar_wrapper:
+        _ts_print("[MESON] ERROR: clang-tool-chain wrapper commands not found in PATH")
+        _ts_print(
+            "[MESON] Install clang-tool-chain with: uv pip install clang-tool-chain"
+        )
+        _ts_print("[MESON] Missing commands:")
+        if not clang_wrapper:
+            if sccache_available:
+                _ts_print("[MESON]   - clang-tool-chain-sccache-c")
+            else:
+                _ts_print("[MESON]   - clang-tool-chain-c")
+        if not clangxx_wrapper:
+            if sccache_available:
+                _ts_print("[MESON]   - clang-tool-chain-sccache-cpp")
+            else:
+                _ts_print("[MESON]   - clang-tool-chain-cpp")
+        if not llvm_ar_wrapper:
+            _ts_print("[MESON]   - clang-tool-chain-ar")
+        raise RuntimeError("clang-tool-chain wrapper commands not available")
+
+    _ts_print("[MESON] ✓ Using clang-tool-chain wrapper commands")
+    if use_sccache:
+        _ts_print(f"[MESON]   C compiler: {clang_wrapper} (with sccache)")
+        _ts_print(f"[MESON]   C++ compiler: {clangxx_wrapper} (with sccache)")
     else:
-        # Unix/Linux/macOS: Use wrapper trampolines from .meson directory for compilers
-        wrapper_ext = ""
-        cc_wrapper = meson_wrapper_dir / f"zig-cc-wrapper{wrapper_ext}"
-        cxx_wrapper = meson_wrapper_dir / f"zig-cxx-wrapper{wrapper_ext}"
-        # For ar, use the Python script directly (no trampoline needed)
-        ar_wrapper = meson_wrapper_dir / "zig-ar.py"
-
-        # Verify wrappers exist
-        if not cc_wrapper.exists():
-            _ts_print(f"[MESON] Warning: CC wrapper not found at {cc_wrapper}")
-        if not cxx_wrapper.exists():
-            _ts_print(f"[MESON] Warning: CXX wrapper not found at {cxx_wrapper}")
-        if not ar_wrapper.exists():
-            _ts_print(f"[MESON] Warning: AR wrapper not found at {ar_wrapper}")
+        _ts_print(f"[MESON]   C compiler: {clang_wrapper}")
+        _ts_print(f"[MESON]   C++ compiler: {clangxx_wrapper}")
+    _ts_print(f"[MESON]   Archiver: {llvm_ar_wrapper}")
 
     # Generate native file for Meson that persists tool configuration across regenerations
     # When Meson regenerates (e.g., when ninja detects meson.build changes),
     # environment variables are lost. Native file ensures tools are configured.
-    # OPTIMIZATION: Only write native file if wrappers changed or if it doesn't exist
     try:
-        # Get python executable for ar wrapper (Python script)
-        import sys as py_sys
+        # Use clang-tool-chain wrapper commands directly (they already include sccache if requested)
+        # Do NOT wrap with external sccache - clang-tool-chain handles that internally
+        c_compiler = f"['{clang_wrapper}']"
+        cpp_compiler = f"['{clangxx_wrapper}']"
 
-        python_exe = py_sys.executable
-
-        # Check if sccache is available (before we use it below)
-        import shutil
-
-        sccache_available = shutil.which("sccache") is not None
-
-        # Fix the native file content - can't use Python conditionals
-        # Configure compiler wrappers with optional sccache
-        if sccache_available:
-            sccache_exe = shutil.which("sccache")
-            c_compiler = f"['{sccache_exe}', '{str(cc_wrapper)}']"
-            cpp_compiler = f"['{sccache_exe}', '{str(cxx_wrapper)}']"
-        else:
-            c_compiler = f"['{str(cc_wrapper)}']"
-            cpp_compiler = f"['{str(cxx_wrapper)}']"
+        # Use llvm-ar wrapper from clang-tool-chain
+        ar_tool = f"['{llvm_ar_wrapper}']"
 
         if is_windows:
             native_file_content = f"""# ============================================================================
@@ -602,7 +578,7 @@ def setup_meson_build(
 [binaries]
 c = {c_compiler}
 cpp = {cpp_compiler}
-ar = ['{python_exe}', '{str(ar_wrapper)}']
+ar = {ar_tool}
 
 [host_machine]
 system = 'windows'
@@ -623,7 +599,7 @@ endian = 'little'
 [binaries]
 c = {c_compiler}
 cpp = {cpp_compiler}
-ar = ['{python_exe}', '{str(ar_wrapper)}']
+ar = {ar_tool}
 
 [host_machine]
 system = 'linux'
@@ -635,31 +611,21 @@ endian = 'little'
 # No additional properties needed - compiler flags are in meson.build
 """
         native_file_changed = write_if_different(native_file_path, native_file_content)
-        wrappers_changed |= native_file_changed
 
-        if wrappers_changed:
+        if native_file_changed:
             _ts_print(f"[MESON] Regenerated native file: {native_file_path}")
     except (OSError, IOError) as e:
         _ts_print(f"[MESON] Warning: Could not write native file: {e}", file=sys.stderr)
 
     env = os.environ.copy()
-    env["CC"] = str(cc_wrapper)
-    env["CXX"] = str(cxx_wrapper)
-    env["AR"] = str(ar_wrapper)
+    env["CC"] = clang_wrapper
+    env["CXX"] = clangxx_wrapper
+    env["AR"] = llvm_ar_wrapper
 
-    ar_tool = "llvm-ar" if use_system_ar else "zig ar"
-    linker_tool = "system lld" if (use_thin_archives and has_lld) else "zig lld"
-
-    _ts_print(f"[MESON] Using compilers: CC=zig cc, CXX=zig c++, AR={ar_tool}")
-    _ts_print(f"[MESON] Using linker: {linker_tool}")
-    if sccache_available:
-        _ts_print(
-            f"[MESON] ✅ sccache is available and will be used for compilation caching"
-        )
+    if use_sccache:
+        _ts_print("[MESON] ✅ sccache integration active (via clang-tool-chain)")
     else:
-        _ts_print(
-            f"[MESON] Note: Using Zig's built-in compilation caching (sccache not found)"
-        )
+        _ts_print("[MESON] Note: sccache not found - using direct compilation")
 
     # If we're skipping meson setup (already configured), check for thin archive conflicts
     if skip_meson_setup:

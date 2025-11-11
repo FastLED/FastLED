@@ -171,25 +171,20 @@ is_windows = build_machine.system() == 'windows'
 # Base link arguments (shared foundation for all link types)
 if is_windows
   # Windows-specific base flags
+  # Let clang-tool-chain handle library linking automatically (stdlib, runtime, unwind, etc.)
+  # Only specify application-specific requirements
   base_link_args = [
-    '-mconsole',                # Console application
-    '-nodefaultlibs',           # Don't automatically include default libraries
-    '-unwindlib=libunwind',     # Use Clang's libunwind (avoid MinGW unwind)
-    '-nostdlib++',              # Don't auto-link standard C++ library
-    '-lc++',                    # Manually link libc++ (Clang's C++ standard library)
-    '-lkernel32',               # Windows kernel functions
-    '-luser32',                 # Windows user interface
-    '-lgdi32',                  # Graphics device interface
-    '-ladvapi32',               # Advanced Windows API
+    '-mconsole',                # Console application subsystem
+    '-lpthread',                # POSIX threads (winpthreads) - required for thread_local.h
     '-Wl,--stack,16777216',     # 16MB stack (for large arrays in examples/tests)
-    '-Wl,--no-allow-shlib-undefined',  # CRITICAL: Catch undefined symbols at link time
+    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 else
   # Unix/Linux/macOS base flags
   base_link_args = [
     '-pthread',                 # Enable POSIX threads
     '-rdynamic',                # Export symbols for backtrace_symbols() in crash handler
-    '-Wl,--no-allow-shlib-undefined',  # CRITICAL: Catch undefined symbols at link time
+    '-Wl,--no-undefined',       # CRITICAL: Catch undefined symbols at link time (lld-compatible)
   ]
 endif
 

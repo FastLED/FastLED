@@ -10,8 +10,9 @@
 uv = find_program('uv')
 
 # Build precompiled header from test_pch.h (contains FastLED.h, doctest + common headers)
-# Uses Zig's bundled Clang to match the compile flags (Meson detected GCC but we need Clang)
+# Uses the same C++ compiler configured in meson_native.txt to ensure PCH compatibility
 # Wrapper script fixes the depfile to reference PCH output instead of temp .obj file
+cpp_compiler = meson.get_compiler('cpp')
 test_pch = custom_target('test_pch',
   input: 'test_pch.h',
   output: 'test_pch.h.pch',      # Only PCH is an output; .d file is depfile only
@@ -19,7 +20,7 @@ test_pch = custom_target('test_pch',
   command: [
     uv, 'run', 'python',
     meson.project_source_root() / 'ci/compile_pch.py',
-    'uv', 'run', 'python', '-m', 'ziglang', 'c++',
+    cpp_compiler.cmd_array(),
     '-x', 'c++-header',           # Treat input as C++ header
     '@INPUT@',                     # test_pch.h
     '-o', '@OUTPUT@',              # test_pch.h.pch
