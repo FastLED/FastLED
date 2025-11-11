@@ -89,7 +89,11 @@ def subdivide_category(test_name: str, base_category: str) -> str:
     Returns:
         Subdivided category name (e.g., "fl_tests_1")
     """
-    bucket_index = hash(test_name) % LARGE_CATEGORY_BUCKET_COUNT
+    # Use a deterministic hash that doesn't change between Python runs
+    # Python's hash() is randomized for security, but we need consistency
+    import hashlib
+    hash_value = int(hashlib.md5(test_name.encode()).hexdigest(), 16)
+    bucket_index = hash_value % LARGE_CATEGORY_BUCKET_COUNT
     return f"{base_category}_{bucket_index + 1}"
 
 
