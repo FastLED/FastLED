@@ -110,8 +110,9 @@ class DockerManager:
                     print(f"Stopping Docker container: {container_name}")
                     try:
                         # Stop the container - this will cause the docker run command to exit
+                        # Use --time=1 for faster shutdown (1 second grace period before SIGKILL)
                         stop_proc = subprocess.run(
-                            ["docker", "stop", container_name],
+                            ["docker", "stop", "--time=1", container_name],
                             capture_output=True,
                             timeout=10,
                             env=env,
@@ -294,9 +295,9 @@ class DockerManager:
             return ""
 
     def stop_container(self, container_id_or_name: str):
-        """Stops a running container."""
+        """Stops a running container with fast shutdown (1 second grace period)."""
         print(f"Stopping container: {container_id_or_name}")
-        self._run_docker_command(["stop", container_id_or_name])
+        self._run_docker_command(["stop", "--time=1", container_id_or_name])
         print(f"Container {container_id_or_name} stopped.")
 
     def remove_container(self, container_id_or_name: str):
