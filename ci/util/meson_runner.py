@@ -194,17 +194,14 @@ def setup_meson_build(
     meson_info = build_dir / "meson-info"
     already_configured = meson_info.exists()
 
-    # Detect system LLVM tools
-    has_lld, has_llvm_ar = detect_system_llvm_tools()
-
     # ============================================================================
-    # THIN ARCHIVES: DISABLED FOR ZIG COMPILER
+    # THIN ARCHIVES: ENABLED FOR CLANG-TOOL-CHAIN
     # ============================================================================
     #
     # Background:
     # -----------
-    # Thin archives (created with `ar crT`) store only file paths instead of
-    # embedding object files directly. This provides significant benefits:
+    # Thin archives (created with `ar crT` or `ar --thin`) store only file paths
+    # instead of embedding object files directly. This provides significant benefits:
     # - Faster archive creation (no file copying)
     # - Smaller disk usage (object files not duplicated in archive)
     # - Faster incremental builds (archive update is just path table change)
@@ -218,73 +215,44 @@ def setup_meson_build(
     # store file paths and let the linker read objects from their original
     # locations. This is safe because build systems control object lifetime.
     #
-    # The Problem:
-    # ------------
-    # Zig's bundled linker (lld) does NOT support thin archives and fails with:
-    #   error: unexpected token in LD script: literal: '!<thin>' (0:0)
-    #   note: while parsing libfastled.a
+    # Current Implementation:
+    # -----------------------
+    # As of commit 6bbe2725e7, FastLED now uses clang-tool-chain instead of Zig.
+    # The clang-tool-chain package provides LLVM-based tools (clang, lld, llvm-ar)
+    # that fully support thin archives.
     #
-    # The '!<thin>' marker is the thin archive magic header (like '!<arch>' for
-    # regular archives). When Zig's linker encounters this, it cannot parse the
-    # thin archive format and aborts with the error above.
-    #
-    # How The Bug Occurs:
+    # Historical Context:
     # -------------------
-    # 1. System has llvm-ar (supports thin archives)
-    # 2. Meson invokes: llvm-ar crT libfastled.a *.o
-    # 3. llvm-ar creates thin archive with !<thin> header
-    # 4. Meson invokes: zig c++ main.o -o test libfastled.a
-    # 5. Zig's bundled lld tries to read libfastled.a
-    # 6. ❌ ERROR: Zig lld doesn't understand !<thin> marker
+    # Previously, thin archives were disabled because Zig's bundled linker (lld)
+    # did not support the thin archive format (!<thin> header). This caused link
+    # failures when llvm-ar created thin archives but Zig's lld tried to read them.
     #
-    # Why -fuse-ld=lld Workaround Doesn't Work:
-    # ------------------------------------------
-    # We attempted to force system lld (which supports thin archives) via the
-    # `-fuse-ld=lld` compiler flag. However:
-    # - Zig's compiler wrapper doesn't reliably honor -fuse-ld=lld
-    # - Zig may not find system lld in PATH or LD_LIBRARY_PATH
-    # - Zig prioritizes its bundled toolchain over system tools
-    # - Even when system lld is found, Zig may use bundled lld for some links
+    # With the migration to clang-tool-chain, all toolchain components (compiler,
+    # linker, archiver) are now from the same LLVM toolchain and fully support
+    # thin archives. There is no longer any compatibility issue.
     #
-    # Solution:
-    # ---------
-    # Force disable thin archives for ALL Zig-based builds by setting
-    # use_thin_archives = False. This ensures llvm-ar (or zig ar) creates
-    # regular archives that embed object files, which are universally
-    # compatible with all linkers including Zig's bundled lld.
+    # Benefits of Re-enabling:
+    # ------------------------
+    # ✓ Faster archive creation (~100-500ms saved for libfastled.a)
+    # ✓ Smaller disk usage (~50MB → ~50KB for libfastled.a, 99% reduction)
+    # ✓ Faster incremental builds (archive update is just path table change)
+    # ✓ No compatibility issues with clang-tool-chain's LLVM toolchain
     #
-    # Trade-offs:
-    # -----------
-    # ✗ Slower archive creation (~100-500ms overhead for libfastled.a)
-    # ✗ Larger disk usage (~50MB vs ~50KB for libfastled.a)
-    # ✗ Slower incremental builds (archive must be rebuilt on object change)
-    # ✓ Guaranteed compatibility with Zig's bundled linker
-    # ✓ Simpler build configuration (no fragile -fuse-ld workarounds)
-    # ✓ Works reliably across all platforms (Linux/macOS/Windows)
-    #
-    # Impact Assessment:
-    # ------------------
-    # For FastLED's ~170 object file build:
-    # - Archive creation: +200ms (acceptable for CI builds)
-    # - Disk usage: +45MB (negligible on modern systems)
-    # - Overall build time: <5% increase
-    #
-    # Future Consideration:
-    # ---------------------
-    # If we switch away from Zig compiler to pure Clang/GCC, restore the
-    # original thin archive logic below to re-enable build optimizations.
+    # Configuration:
+    # --------------
+    # Thin archives are automatically enabled with clang-tool-chain.
+    # They can be manually disabled by setting FASTLED_DISABLE_THIN_ARCHIVES=1
+    # environment variable if needed for debugging or compatibility testing.
     # ============================================================================
 
     disable_thin_archives = os.environ.get("FASTLED_DISABLE_THIN_ARCHIVES", "0") == "1"
 
-    # Force disable thin archives when using Zig - see detailed explanation above
-    use_thin_archives = False  # Always disabled for Zig builds
+    # Enable thin archives for clang-tool-chain (LLVM-based toolchain)
+    # clang-tool-chain provides llvm-ar and lld that fully support thin archives
+    use_thin_archives = not disable_thin_archives
 
-    # Original logic (restore if switching away from Zig compiler):
-    # use_thin_archives = (has_lld and has_llvm_ar) and not disable_thin_archives
-
-    # Set compiler environment variables to use zig
-    # This matches the compiler used by the regular build system (ci/compiler/clang_compiler.py:89)
+    # Legacy detection for standalone LLVM tools (kept for diagnostic messages)
+    has_lld, has_llvm_ar = detect_system_llvm_tools()
 
     # ============================================================================
     # CRITICAL: Check if thin archive configuration has changed
@@ -473,41 +441,17 @@ def setup_meson_build(
     thin_flag = " --thin" if use_thin_archives else ""
 
     if use_thin_archives:
-        _ts_print("[MESON] ✅ Thin archives enabled (using system LLVM tools)")
-    else:
-        # Always show prominent warning when thin archives are disabled
-        _ts_print("=" * 80)
-        _ts_print("⚠️  WARNING: Thin archives DISABLED for Zig compatibility")
         _ts_print(
-            "    Reason: Zig's bundled linker does not support thin archive format"
+            "[MESON] ✅ Thin archives ENABLED (using clang-tool-chain LLVM tools)"
         )
-        _ts_print("    Impact: +200ms archive creation, +45MB disk usage per build")
-
-        if has_lld and has_llvm_ar:
-            # System HAS the tools, but we're disabling for Zig compatibility
-            _ts_print(
-                "    Note: System has LLVM tools (lld, llvm-ar) but cannot use them"
-            )
-            _ts_print(
-                "          Zig compiler does not reliably honor -fuse-ld=lld flag"
-            )
-        else:
-            # System doesn't have LLVM tools anyway
-            _ts_print("    Note: System LLVM tools not detected (additional reason)")
-            missing_tools: list[str] = []
-            if not has_lld:
-                missing_tools.append("lld/ld.lld")
-            if not has_llvm_ar:
-                missing_tools.append("llvm-ar")
-            _ts_print(f"          Missing: {', '.join(missing_tools)}")
+        _ts_print("[MESON]     Benefits: Faster builds, ~99% smaller archive files")
+    else:
+        # Show warning when thin archives are manually disabled
         _ts_print("=" * 80)
-
-    # Use system tools when available for thin archives
-    use_system_ar = use_thin_archives and has_llvm_ar
-
-    # When using thin archives, we must use system lld for linking
-    # Add -fuse-ld=lld flag to force use of system lld
-    linker_flag = " -fuse-ld=lld" if use_thin_archives and has_lld else ""
+        _ts_print("⚠️  WARNING: Thin archives DISABLED")
+        _ts_print("    Reason: FASTLED_DISABLE_THIN_ARCHIVES environment variable set")
+        _ts_print("    Impact: +200ms archive creation, +45MB disk usage per build")
+        _ts_print("=" * 80)
 
     # Get clang-tool-chain wrapper commands
     # Use the wrapper commands (clang-tool-chain-c/cpp) instead of raw clang binaries
