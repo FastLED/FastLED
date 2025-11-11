@@ -3,6 +3,7 @@
 #ifndef __INC_UCS7604_H
 #define __INC_UCS7604_H
 
+#include "led_sysdefs.h"
 #include "pixeltypes.h"
 #include "pixel_controller.h"
 #include "cpixel_ledcontroller.h"

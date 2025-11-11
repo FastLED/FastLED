@@ -98,6 +98,7 @@ base_warnings = [
   '-Wno-deprecated-register',
   '-Wno-backslash-newline-escape',
   '-Wno-narrowing',
+  '-Wno-macro-redefined',      # Suppress redefinition warnings (libc++ hardening mode conflict)
   '-Werror=unused-variable',
   '-Werror=unused-function',
   '-Werror=c++14-extensions',  # Enforce C++11 compatibility
