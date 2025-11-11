@@ -16,6 +16,23 @@ using namespace fl;
 
 namespace {
 
+// Preamble constants for different modes
+constexpr uint8_t PREAMBLE_8BIT_800KHZ[15] = {
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Sync pattern (6 bytes)
+    0x00, 0x02,                          // Header (2 bytes)
+    0x03,                                // MODE: 8-bit @ 800kHz
+    0x0F, 0x0F, 0x0F, 0x0F,             // RGBW current control (4 bytes)
+    0x00, 0x00                           // Reserved (2 bytes)
+};
+
+constexpr uint8_t PREAMBLE_16BIT_800KHZ[15] = {
+    0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Sync pattern (6 bytes)
+    0x00, 0x02,                          // Header (2 bytes)
+    0x8B,                                // MODE: 16-bit @ 800kHz
+    0x0F, 0x0F, 0x0F, 0x0F,             // RGBW current control (4 bytes)
+    0x00, 0x00                           // Reserved (2 bytes)
+};
+
 // Test pin numbers (arbitrary values for testing, not used for actual hardware)
 constexpr int FAKE_PIN_1 = 1;
 constexpr int FAKE_PIN_2 = 2;
@@ -92,27 +109,15 @@ public:
     }
 };
 
+
 /// Helper to verify preamble structure
 /// @param bytes Captured byte stream
-/// @param expected_mode Expected mode byte (0x03 for 8-bit@800kHz, 0x8B for 16-bit@800kHz)
-void verifyPreamble(fl::span<const uint8_t> bytes, uint8_t expected_mode = 0x03) {
-    // Verify preamble (first 15 bytes)
-    // Preamble bytes: 0xFF×6, 0x00, 0x02, MODE, 0x0F×4, 0x00×2
-    CHECK_EQ(bytes[0], 0xFF);  // Sync pattern
-    CHECK_EQ(bytes[1], 0xFF);
-    CHECK_EQ(bytes[2], 0xFF);
-    CHECK_EQ(bytes[3], 0xFF);
-    CHECK_EQ(bytes[4], 0xFF);
-    CHECK_EQ(bytes[5], 0xFF);
-    CHECK_EQ(bytes[6], 0x00);  // Header
-    CHECK_EQ(bytes[7], 0x02);
-    CHECK_EQ(bytes[8], expected_mode);  // MODE byte
-    CHECK_EQ(bytes[9], 0x0F);  // R current
-    CHECK_EQ(bytes[10], 0x0F); // G current
-    CHECK_EQ(bytes[11], 0x0F); // B current
-    CHECK_EQ(bytes[12], 0x0F); // W current
-    CHECK_EQ(bytes[13], 0x00); // Reserved
-    CHECK_EQ(bytes[14], 0x00); // Reserved
+/// @param expected_preamble Expected preamble bytes (15-byte array)
+void verifyPreamble(fl::span<const uint8_t> bytes, const uint8_t* expected_preamble) {
+    constexpr size_t PREAMBLE_SIZE = 15;
+    for (size_t i = 0; i < PREAMBLE_SIZE; i++) {
+        CHECK_EQ(bytes[i], expected_preamble[i]);
+    }
 }
 
 /// Helper to verify pixel data (RGB 8-bit mode)
@@ -212,16 +217,23 @@ TEST_CASE("UCS7604 8-bit - RGB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+    // Expected output: RGB order maps to RGB wire order (no conversion)
+    CRGB expected[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Green -> RGB
+        CRGB(0x00, 0x00, 0xFF)   // Blue -> RGB
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
-    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+    verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
 
     // Verify pixel data
-    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
+    verifyPixels8bit(output, expected);
 }
 
 TEST_CASE("UCS7604 8-bit - GRB color order") {
@@ -231,16 +243,23 @@ TEST_CASE("UCS7604 8-bit - GRB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+    // Expected output: GRB order converts to RGB wire order
+    CRGB expected[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red (GRB input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Green (GRB input) -> RGB
+        CRGB(0x00, 0x00, 0xFF)   // Blue (GRB input) -> RGB
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
-    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+    verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
 
     // Verify pixel data
-    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
+    verifyPixels8bit(output, expected);
 }
 
 TEST_CASE("UCS7604 8-bit - BRG color order") {
@@ -250,16 +269,23 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    fl::span<const uint8_t> output = testUCS7604Controller<BRG, fl::UCS7604_MODE_8BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+    // Expected output: BRG order converts to RGB wire order
+    CRGB expected[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red (BRG input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Green (BRG input) -> RGB
+        CRGB(0x00, 0x00, 0xFF)   // Blue (BRG input) -> RGB
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<BRG, fl::UCS7604_MODE_8BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
 
     // Verify preamble with 8-bit mode byte
-    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+    verifyPreamble(output, PREAMBLE_8BIT_800KHZ);
 
     // Verify pixel data
-    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
+    verifyPixels8bit(output, expected);
 }
 
 TEST_CASE("UCS7604 16-bit - RGB color order") {
@@ -269,16 +295,23 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+    // Expected output: RGB order maps to RGB wire order (no conversion)
+    CRGB expected[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Green -> RGB
+        CRGB(0x00, 0x00, 0xFF)   // Blue -> RGB
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
     REQUIRE_EQ(output.size(), 33);
 
     // Verify preamble with 16-bit mode byte
-    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_16BIT_800KHZ));
+    verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
 
     // Verify pixel data
-    verifyPixels16bit(output, fl::span<const CRGB>(leds, 3));
+    verifyPixels16bit(output, expected);
 }
 
 TEST_CASE("UCS7604 16-bit - GRB color order") {
@@ -288,16 +321,23 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(fl::span<const CRGB>(leds, 3));
+    // Expected output: GRB order converts to RGB wire order
+    CRGB expected[] = {
+        CRGB(0xFF, 0x00, 0x00),  // Red (GRB input) -> RGB
+        CRGB(0x00, 0xFF, 0x00),  // Green (GRB input) -> RGB
+        CRGB(0x00, 0x00, 0xFF)   // Blue (GRB input) -> RGB
+    };
+
+    fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
     REQUIRE_EQ(output.size(), 33);
 
     // Verify preamble with 16-bit mode byte
-    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_16BIT_800KHZ));
+    verifyPreamble(output, PREAMBLE_16BIT_800KHZ);
 
     // Verify pixel data
-    verifyPixels16bit(output, fl::span<const CRGB>(leds, 3));
+    verifyPixels16bit(output, expected);
 }
 
 } // anonymous namespace

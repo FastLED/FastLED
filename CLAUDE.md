@@ -81,6 +81,14 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - **Use `fl::` namespace** instead of `std::`
 - **If you want to use a stdlib header like <type_traits>, look check for equivalent in `fl/type_traits.h`
 - **Platform dispatch headers**: FastLED uses dispatch headers in `src/platforms/` (e.g., `int.h`, `io_arduino.h`) that route to platform-specific implementations via coarse-to-fine detection. See `src/platforms/README.md` for details.
+- **Automatic span conversion**: `fl::span<T>` has implicit conversion constructors - you don't need explicit `fl::span<T>(...)` wrapping in function calls. Example:
+  - ✅ Correct: `verifyPixels8bit(output, leds)` (implicit conversion)
+  - ❌ Verbose: `verifyPixels8bit(output, fl::span<const CRGB>(leds, 3))` (unnecessary explicit wrapping)
+- **Prefer passing and returning by span**: Use `fl::span<T>` or `fl::span<const T>` for function parameters and return types unless a copy of the source data is required:
+  - ✅ Preferred: `fl::span<const uint8_t> getData()` (zero-copy view)
+  - ✅ Preferred: `void process(fl::span<const CRGB> pixels)` (accepts arrays, vectors, etc.)
+  - ❌ Avoid: `std::vector<uint8_t> getData()` (unnecessary copy)
+  - Use `fl::span<const T>` for read-only views to prevent accidental modification
 - **Macro definition patterns - Two distinct types**:
 
   **Type 1: Platform/Feature Detection Macros (defined/undefined pattern)**

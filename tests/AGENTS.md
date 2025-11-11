@@ -164,7 +164,7 @@ using namespace fl;
 
 TEST_CASE("New test - fill in") {
 
-} 
+}
 ```
 
 **❌ WRONG patterns to avoid:**
@@ -173,6 +173,46 @@ TEST_CASE("New test - fill in") {
 - Missing `using namespace fl;` declaration
 - Empty or non-descriptive test case names
 - Inconsistent formatting and spacing
+
+## Test Namespace Convention
+
+**🚨 CRITICAL: Anonymous namespaces in test files should match the test name:**
+
+For test files in `tests/**/*`, use an **anonymous namespace** named after the test:
+
+```cpp
+// File: tests/fl/chipsets/test_ucs7604.cpp
+
+#include "test.h"
+#include "FastLED.h"
+
+using namespace fl;
+
+namespace {  // Anonymous namespace for test_ucs7604
+
+// Helper functions and test fixtures specific to this test
+class MockController { /*...*/ };
+void helperFunction() { /*...*/ }
+
+TEST_CASE("UCS7604 - feature test") {
+    // Test implementation
+}
+
+}  // anonymous namespace
+```
+
+**Why:**
+- **Prevents symbol conflicts** between tests
+- **Scopes test helpers** to avoid polluting global namespace
+- **Improves readability** - clear organization of test-specific code
+- **Follows C++ best practices** for internal linkage
+
+**Rules:**
+- ✅ Use anonymous namespace `namespace { ... }` for all test helpers and fixtures
+- ✅ Close namespace with descriptive comment: `} // anonymous namespace`
+- ✅ Place `using namespace fl;` **before** the anonymous namespace
+- ❌ Don't create named namespaces in test files (e.g., `namespace test_ucs7604 { ... }`)
+- ❌ Don't leave test helpers in global scope
 
 ## Debugging and Stack Traces
 
