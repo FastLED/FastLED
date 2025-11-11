@@ -5,6 +5,7 @@
 #include "fl/span.h"
 #include "fl/vector.h"
 #include "fl/ptr.h"
+#include "fl/screenmap.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/eorder.h"
 #include "fl/led_settings.h"
@@ -57,6 +58,9 @@ struct ChannelConfig {
 
     // LED settings (correction, temperature, dither, rgbw)
     LEDSettings settings;
+
+    // Screen mapping
+    fl::ScreenMap mScreenMap;
 };
 
 FASTLED_SHARED_PTR_STRUCT(ChannelConfig);
