@@ -202,18 +202,6 @@ fl::span<const uint8_t> testUCS7604Controller(fl::span<const CRGB> leds) {
         captured = controller.getCapturedBytes();
     }
 
-    // Verify preamble with correct mode byte
-    uint8_t expected_mode = static_cast<uint8_t>(MODE);
-    verifyPreamble(captured, expected_mode);
-
-    // Verify pixel data based on mode
-    // Pixels are already in RGB order after conversion
-    if (MODE == fl::UCS7604_MODE_8BIT_800KHZ) {
-        verifyPixels8bit(captured, leds);
-    } else {
-        verifyPixels16bit(captured, leds);
-    }
-
     return captured;
 }
 
@@ -228,6 +216,12 @@ TEST_CASE("UCS7604 8-bit - RGB color order") {
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
+
+    // Verify preamble with 8-bit mode byte
+    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+
+    // Verify pixel data
+    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
 }
 
 TEST_CASE("UCS7604 8-bit - GRB color order") {
@@ -241,6 +235,12 @@ TEST_CASE("UCS7604 8-bit - GRB color order") {
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
+
+    // Verify preamble with 8-bit mode byte
+    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+
+    // Verify pixel data
+    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
 }
 
 TEST_CASE("UCS7604 8-bit - BRG color order") {
@@ -254,6 +254,12 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
 
     // Verify total size: 15 (preamble) + 9 (3 LEDs * 3 bytes) = 24
     REQUIRE_EQ(output.size(), 24);
+
+    // Verify preamble with 8-bit mode byte
+    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_8BIT_800KHZ));
+
+    // Verify pixel data
+    verifyPixels8bit(output, fl::span<const CRGB>(leds, 3));
 }
 
 TEST_CASE("UCS7604 16-bit - RGB color order") {
@@ -267,6 +273,12 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
     REQUIRE_EQ(output.size(), 33);
+
+    // Verify preamble with 16-bit mode byte
+    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_16BIT_800KHZ));
+
+    // Verify pixel data
+    verifyPixels16bit(output, fl::span<const CRGB>(leds, 3));
 }
 
 TEST_CASE("UCS7604 16-bit - GRB color order") {
@@ -280,6 +292,12 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
 
     // Verify total size: 15 (preamble) + 18 (3 LEDs * 6 bytes) = 33
     REQUIRE_EQ(output.size(), 33);
+
+    // Verify preamble with 16-bit mode byte
+    verifyPreamble(output, static_cast<uint8_t>(fl::UCS7604_MODE_16BIT_800KHZ));
+
+    // Verify pixel data
+    verifyPixels16bit(output, fl::span<const CRGB>(leds, 3));
 }
 
 } // anonymous namespace
