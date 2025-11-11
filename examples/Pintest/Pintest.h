@@ -95,6 +95,7 @@ if(portRef == (void*)&GPIO4_DR) { return "GPIO4_DR"; }
 	return fullstrBuffer;
 }
 
+
 template<uint8_t PIN> void CheckPin()
 {
 	CheckPin<PIN - 1>();
