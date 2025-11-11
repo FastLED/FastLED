@@ -16,6 +16,29 @@ using namespace fl;
 
 namespace {
 
+/// RGB16 color structure for 16-bit color values (test-only)
+/// Similar to CRGB but uses uint16_t for each channel
+struct RGB16 {
+    union {
+        struct {
+            uint16_t r;  ///< Red channel (16-bit)
+            uint16_t g;  ///< Green channel (16-bit)
+            uint16_t b;  ///< Blue channel (16-bit)
+        };
+        uint16_t raw[3];  ///< Access as array
+    };
+
+    /// Default constructor
+    RGB16() : r(0), g(0), b(0) {}
+
+    /// Construct from individual 16-bit values
+    RGB16(uint16_t ir, uint16_t ig, uint16_t ib) : r(ir), g(ig), b(ib) {}
+
+    /// Array access operator
+    uint16_t& operator[](size_t x) { return raw[x]; }
+    const uint16_t& operator[](size_t x) const { return raw[x]; }
+};
+
 // Preamble constants for different modes
 constexpr uint8_t PREAMBLE_8BIT_800KHZ[15] = {
     0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,  // Sync pattern (6 bytes)
@@ -140,17 +163,16 @@ void verifyPixels8bit(fl::span<const uint8_t> bytes, fl::span<const CRGB> pixels
 /// Helper to verify pixel data (RGB 16-bit mode)
 /// Verifies that the byte stream contains the expected RGB pixel data
 /// starting at offset 15 (after the preamble), scaled to 16-bit
-void verifyPixels16bit(fl::span<const uint8_t> bytes, fl::span<const CRGB> pixels) {
+void verifyPixels16bit(fl::span<const uint8_t> bytes, fl::span<const RGB16> pixels) {
     const size_t PREAMBLE_SIZE = 15;
     const size_t BYTES_PER_PIXEL = 6;  // RGB 16-bit
 
     for (size_t i = 0; i < pixels.size(); i++) {
         size_t byte_offset = PREAMBLE_SIZE + (i * BYTES_PER_PIXEL);
 
-        // 8-bit to 16-bit: value * 257 = (value << 8) | value
-        uint16_t r16 = (uint16_t(pixels[i].r) << 8) | pixels[i].r;
-        uint16_t g16 = (uint16_t(pixels[i].g) << 8) | pixels[i].g;
-        uint16_t b16 = (uint16_t(pixels[i].b) << 8) | pixels[i].b;
+        uint16_t r16 = pixels[i].r;
+        uint16_t g16 = pixels[i].g;
+        uint16_t b16 = pixels[i].b;
 
         // Verify big-endian 16-bit values
         CHECK_EQ(bytes[byte_offset + 0], r16 >> 8);    // R high
@@ -291,11 +313,11 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // RGB -> RGB (no conversion)
-    CRGB expected[] = {
-        CRGB(0xFF, 0x00, 0x00),
-        CRGB(0x00, 0xFF, 0x00),
-        CRGB(0x00, 0x00, 0xFF)
+    // RGB -> RGB (no conversion) - 8-bit to 16-bit: value * 257 = (value << 8) | value
+    RGB16 expected[] = {
+        RGB16(0xFFFF, 0x0000, 0x0000),  // Red
+        RGB16(0x0000, 0xFFFF, 0x0000),  // Green
+        RGB16(0x0000, 0x0000, 0xFFFF)   // Blue
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
@@ -317,11 +339,11 @@ TEST_CASE("UCS7604 16-bit - GRB color order") {
         CRGB(0x00, 0x00, 0xFF)   // Blue
     };
 
-    // GRB -> RGB conversion
-    CRGB expected[] = {
-        CRGB(0x00, 0xFF, 0x00),  // Red as GRB -> Green
-        CRGB(0xFF, 0x00, 0x00),  // Green as GRB -> Red
-        CRGB(0x00, 0x00, 0xFF)   // Blue as GRB -> Blue
+    // GRB -> RGB conversion - 8-bit to 16-bit: value * 257 = (value << 8) | value
+    RGB16 expected[] = {
+        RGB16(0x0000, 0xFFFF, 0x0000),  // Red as GRB -> Green
+        RGB16(0xFFFF, 0x0000, 0x0000),  // Green as GRB -> Red
+        RGB16(0x0000, 0x0000, 0xFFFF)   // Blue as GRB -> Blue
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
