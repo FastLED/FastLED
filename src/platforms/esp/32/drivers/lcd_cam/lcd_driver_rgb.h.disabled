@@ -99,9 +99,9 @@ public:
         }
 
         return ClocklessTiming::calculate_optimal_pclk(
-            LED_CHIPSET::T1(),
-            LED_CHIPSET::T2(),
-            LED_CHIPSET::T3(),
+            LED_CHIPSET::T1,
+            LED_CHIPSET::T2,
+            LED_CHIPSET::T3,
             N_PIXELS,        // 4 pixels per bit
             1000000,         // 1 MHz min
             40000000,        // 40 MHz max (conservative for WS2812)

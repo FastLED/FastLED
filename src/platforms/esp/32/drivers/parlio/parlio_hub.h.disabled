@@ -58,7 +58,7 @@ private:
     ~ParlioHub() = default;
 
     // Singleton needs access to private constructor
-    friend class fl::Singleton<ParlioHub>;
+    friend class fl::Singleton<ParlioHub, 0>;
 
     /// Transmitter entry in hub
     struct TransmitterEntry {
