@@ -45,12 +45,13 @@ template <
     int DATA_PIN,
     EOrder RGB_ORDER,
     fl::UCS7604Mode MODE, // = fl::UCS7604_MODE_8BIT_800KHZ,
-    typename CHIPSET_TIMING // = fl::WS2812ChipsetTiming
+    typename CHIPSET_TIMING, // = fl::WS2812ChipsetTiming
+    template<int, typename, EOrder> class CLOCKLESS_CONTROLLER
 >
-class UCS7604Controller : public fl::ClocklessBlockingGeneric<DATA_PIN, CHIPSET_TIMING, RGB>
+class UCS7604Controller : public CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>
 {
 private:
-    using BaseController = fl::ClocklessBlockingGeneric<DATA_PIN, CHIPSET_TIMING, RGB>;
+    using BaseController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB_ORDER>;
 
     static constexpr uint8_t PREAMBLE_LEN = 15;
     static constexpr uint8_t PREAMBLE_PIXELS = 5;  // 15 ÷ 3 = 5 exactly!
@@ -209,13 +210,13 @@ private:
 
 // now typedef the controllers
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller8bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ>;
+using UCS7604Controller8bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, fl::ClocklessBlockingGeneric>;
 
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller16bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ>;
+using UCS7604Controller16bit = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, fl::ClocklessBlockingGeneric>;
 
 template <int DATA_PIN, EOrder RGB_ORDER = GRB>
-using UCS7604Controller16bit1600 = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ>;
+using UCS7604Controller16bit1600 = UCS7604Controller<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ, fl::ClocklessBlockingGeneric>;
 
 
 }  // namespace fl
