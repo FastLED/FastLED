@@ -11,6 +11,7 @@
 #include "fl/chipsets/ucs7604.h"
 #include "crgb.h"
 #include "fl/vector.h"
+#include "fl/ease.h"
 
 using namespace fl;
 
@@ -308,16 +309,18 @@ TEST_CASE("UCS7604 8-bit - BRG color order") {
 
 TEST_CASE("UCS7604 16-bit - RGB color order") {
     CRGB leds[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red
-        CRGB(0x00, 0xFF, 0x00),  // Green
-        CRGB(0x00, 0x00, 0xFF)   // Blue
+        CRGB(127, 0, 0),  // Red (mid-range to show gamma curve)
+        CRGB(0, 127, 0),  // Green (mid-range to show gamma curve)
+        CRGB(0, 0, 127)   // Blue (mid-range to show gamma curve)
     };
 
-    // RGB -> RGB (no conversion) - 8-bit to 16-bit: value * 257 = (value << 8) | value
+    // RGB -> RGB (no conversion) - 8-bit to 16-bit with gamma 2.8 correction
+    const uint16_t g0 = fl::gamma_2_8(0);
+    const uint16_t g127 = fl::gamma_2_8(127);
     RGB16 expected[] = {
-        RGB16(0xFFFF, 0x0000, 0x0000),  // Red
-        RGB16(0x0000, 0xFFFF, 0x0000),  // Green
-        RGB16(0x0000, 0x0000, 0xFFFF)   // Blue
+        RGB16(g127, g0, g0),  // Red
+        RGB16(g0, g127, g0),  // Green
+        RGB16(g0, g0, g127)   // Blue
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<RGB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);
@@ -334,16 +337,19 @@ TEST_CASE("UCS7604 16-bit - RGB color order") {
 
 TEST_CASE("UCS7604 16-bit - GRB color order") {
     CRGB leds[] = {
-        CRGB(0xFF, 0x00, 0x00),  // Red
-        CRGB(0x00, 0xFF, 0x00),  // Green
-        CRGB(0x00, 0x00, 0xFF)   // Blue
+        CRGB(127, 0, 0),  // Red (mid-range to show gamma curve)
+        CRGB(0, 127, 0),  // Green (mid-range to show gamma curve)
+        CRGB(0, 0, 127)   // Blue (mid-range to show gamma curve)
     };
 
-    // GRB -> RGB conversion - 8-bit to 16-bit: value * 257 = (value << 8) | value
+    // GRB -> RGB conversion with gamma 2.8 correction
+    // When input is GRB order, it gets reordered to RGB for wire protocol
+    const uint16_t g0 = fl::gamma_2_8(0);
+    const uint16_t g127 = fl::gamma_2_8(127);
     RGB16 expected[] = {
-        RGB16(0x0000, 0xFFFF, 0x0000),  // Red as GRB -> Green
-        RGB16(0xFFFF, 0x0000, 0x0000),  // Green as GRB -> Red
-        RGB16(0x0000, 0x0000, 0xFFFF)   // Blue as GRB -> Blue
+        RGB16(g0, g127, g0),  // Red as GRB -> Green at wire
+        RGB16(g127, g0, g0),  // Green as GRB -> Red at wire
+        RGB16(g0, g0, g127)   // Blue as GRB -> Blue at wire
     };
 
     fl::span<const uint8_t> output = testUCS7604Controller<GRB, fl::UCS7604_MODE_16BIT_800KHZ>(leds);

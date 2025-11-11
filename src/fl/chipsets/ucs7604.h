@@ -13,6 +13,7 @@
 #include "fl/vector.h"
 #include "lib8tion/intmap.h"
 #include "fl/type_traits.h"
+#include "fl/ease.h"
 
 /// @file ucs7604.h
 /// @brief UCS7604 LED chipset controller implementation for FastLED
@@ -145,18 +146,19 @@ protected:
             // 8-bit mode: Use writeWS2812() which outputs RGB or RGBW
             pixel_iter.writeWS2812(&mByteBuffer);
         } else {
-            // 16-bit mode: Expand 8-bit to 16-bit using fl::int_scale
+            // 16-bit mode: Apply gamma correction (power 2.8) to expand 8-bit to 16-bit
             if (pixel_iter.get_rgbw().active()) {
                 // RGBW mode: 8 bytes per pixel (R16, G16, B16, W16)
+                // Apply gamma correction (power 2.8) for 16-bit output
                 while (pixel_iter.has(1)) {
                     uint8_t r, g, b, w;
                     pixel_iter.loadAndScaleRGBW(&r, &g, &b, &w);
                     pixel_iter.advanceData();
 
-                    uint16_t r16 = fl::int_scale<uint8_t, uint16_t>(r);
-                    uint16_t g16 = fl::int_scale<uint8_t, uint16_t>(g);
-                    uint16_t b16 = fl::int_scale<uint8_t, uint16_t>(b);
-                    uint16_t w16 = fl::int_scale<uint8_t, uint16_t>(w);
+                    uint16_t r16 = fl::gamma_2_8(r);
+                    uint16_t g16 = fl::gamma_2_8(g);
+                    uint16_t b16 = fl::gamma_2_8(b);
+                    uint16_t w16 = fl::gamma_2_8(w);
 
                     mByteBuffer.push_back(r16 >> 8);
                     mByteBuffer.push_back(r16 & 0xFF);
@@ -169,14 +171,15 @@ protected:
                 }
             } else {
                 // RGB mode: 6 bytes per pixel (R16, G16, B16)
+                // Apply gamma correction (power 2.8) for 16-bit output
                 while (pixel_iter.has(1)) {
                     uint8_t r, g, b;
                     pixel_iter.loadAndScaleRGB(&r, &g, &b);
                     pixel_iter.advanceData();
 
-                    uint16_t r16 = fl::int_scale<uint8_t, uint16_t>(r);
-                    uint16_t g16 = fl::int_scale<uint8_t, uint16_t>(g);
-                    uint16_t b16 = fl::int_scale<uint8_t, uint16_t>(b);
+                    uint16_t r16 = fl::gamma_2_8(r);
+                    uint16_t g16 = fl::gamma_2_8(g);
+                    uint16_t b16 = fl::gamma_2_8(b);
 
                     mByteBuffer.push_back(r16 >> 8);
                     mByteBuffer.push_back(r16 & 0xFF);
