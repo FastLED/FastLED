@@ -104,10 +104,6 @@ constexpr uint8_t PREAMBLE_16BIT_800KHZ[15] = {
     0x00, 0x00                           // Reserved (2 bytes)
 };
 
-// Test pin numbers (arbitrary values for testing, not used for actual hardware)
-constexpr int FAKE_PIN_1 = 1;
-constexpr int FAKE_PIN_2 = 2;
-
 /// Interface for accessing captured byte data
 class IData {
 public:

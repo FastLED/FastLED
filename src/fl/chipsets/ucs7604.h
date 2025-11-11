@@ -8,7 +8,6 @@
 #include "pixel_controller.h"
 #include "cpixel_ledcontroller.h"
 #include "fl/force_inline.h"
-#include "platforms/shared/clockless_blocking.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/pixel_iterator.h"
 #include "fl/vector.h"
@@ -299,13 +298,13 @@ protected:
 };
 
 // now typedef the controllers
-template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+template <int DATA_PIN, EOrder RGB_ORDER, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER>
 using UCS7604Controller8bitT = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_8BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, CLOCKLESS_CONTROLLER>;
 
-template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+template <int DATA_PIN, EOrder RGB_ORDER, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER>
 using UCS7604Controller16bitT = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_800KHZ, fl::TIMING_UCS7604_800KHZ, CLOCKLESS_CONTROLLER>;
 
-template <int DATA_PIN, EOrder RGB_ORDER = GRB, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER = fl::ClocklessBlockingGeneric>
+template <int DATA_PIN, EOrder RGB_ORDER, template<int, typename, EOrder> class CLOCKLESS_CONTROLLER>
 using UCS7604Controller16bit1600T = UCS7604ControllerT<DATA_PIN, RGB_ORDER, fl::UCS7604_MODE_16BIT_1600KHZ, fl::TIMING_UCS7604_1600KHZ, CLOCKLESS_CONTROLLER>;
 
 
