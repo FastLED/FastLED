@@ -14,90 +14,12 @@ from typing import Optional, Tuple
 from ci.docker.build_platforms import get_docker_image_name as get_platform_image_name
 from ci.docker.build_platforms import get_platform_for_board
 
-
-# Cache for docker executable path
-_docker_executable_cache: Optional[str] = None
-
-
-def get_docker_command() -> str:
-    """Get the docker command to use (as a string).
-
-    Returns:
-        The path to the docker executable, or "docker" if not found (will fail later with clear error)
-    """
-    docker_exe = find_docker_executable()
-    if sys.platform == "win32":
-        return "docker"
-    return docker_exe if docker_exe else "docker"
-
-
-def find_docker_executable() -> Optional[str]:
-    """Find the docker executable with fallback paths.
-
-    Attempts to find docker in this order:
-    1. Standard PATH using `where` (Windows) or `which` (Unix)
-    2. Common Docker Desktop installation paths
-    3. Common Linux/macOS installation paths
-
-    Returns:
-        Path to docker executable if found, None otherwise
-    """
-    global _docker_executable_cache
-
-    if _docker_executable_cache is not None:
-        return _docker_executable_cache
-
-    # Try standard PATH first
-    try:
-        # On Windows, look for docker.exe to avoid shell script issues
-        search_cmd = (
-            ["where", "docker.exe"] if sys.platform == "win32" else ["which", "docker"]
-        )
-        result = subprocess.run(
-            search_cmd,
-            capture_output=True,
-            text=True,
-            timeout=5,
-        )
-        if result.returncode == 0:
-            docker_path = result.stdout.strip().split("\n")[
-                0
-            ]  # First result on Windows (where returns multiple)
-            if docker_path:
-                _docker_executable_cache = docker_path
-                return docker_path
-    except Exception:
-        pass
-
-    # Try common Docker Desktop paths on Windows
-    if sys.platform == "win32":
-        common_paths = [
-            r"C:\Program Files\Docker\Docker\resources\bin\docker.exe",
-            r"C:\Program Files (x86)\Docker\Docker\resources\bin\docker.exe",
-            os.path.expanduser(
-                r"~\AppData\Local\Docker\Docker\resources\bin\docker.exe"
-            ),
-            r"C:\Program Files\Docker\Docker\docker.exe",
-        ]
-        for path in common_paths:
-            if os.path.exists(path):
-                _docker_executable_cache = path
-                return path
-
-    # Try common paths on macOS/Linux
-    if sys.platform in ("darwin", "linux"):
-        common_paths = [
-            "/usr/local/bin/docker",
-            "/usr/bin/docker",
-            "/opt/docker/bin/docker",
-            os.path.expanduser("~/.docker/bin/docker"),
-        ]
-        for path in common_paths:
-            if os.path.exists(path):
-                _docker_executable_cache = path
-                return path
-
-    return None
+# Import Docker command utilities from separate module to avoid circular imports
+from ci.util.docker_command import (
+    find_docker_executable,
+    get_docker_command,
+    is_docker_available,
+)
 
 
 def is_docker_installed() -> bool:
@@ -107,29 +29,6 @@ def is_docker_installed() -> bool:
         True if Docker executable is found, False otherwise
     """
     return find_docker_executable() is not None
-
-
-def is_docker_available() -> bool:
-    """Check if Docker is installed and running.
-
-    Returns:
-        True if Docker is available, False otherwise
-    """
-    try:
-        docker_exe = find_docker_executable()
-        if not docker_exe:
-            return False
-
-        result = subprocess.run(
-            [docker_exe, "version"],
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=5,
-        )
-        return result.returncode == 0
-    except (subprocess.TimeoutExpired, FileNotFoundError, Exception):
-        return False
 
 
 def attempt_start_docker() -> tuple[bool, str]:

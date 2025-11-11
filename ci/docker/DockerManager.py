@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from running_process.process_output_reader import EndOfStream
 
-from ci.util.docker_helper import get_docker_command
+from ci.util.docker_command import get_docker_command
 
 
 class DockerManager:

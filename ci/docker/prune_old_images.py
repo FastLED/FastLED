@@ -27,7 +27,7 @@ import sys
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Set, cast
 
-from ci.util.docker_helper import get_docker_command
+from ci.util.docker_command import get_docker_command
 
 
 def parse_arguments() -> argparse.Namespace:

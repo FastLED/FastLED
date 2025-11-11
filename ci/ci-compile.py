@@ -48,7 +48,8 @@ from ci.compiler.output_utils import (
     copy_build_artifact,
     validate_output_path,
 )
-from ci.util.docker_helper import get_docker_command, should_use_docker_for_board
+from ci.util.docker_command import get_docker_command
+from ci.util.docker_helper import should_use_docker_for_board
 from ci.util.global_interrupt_handler import (
     install_signal_handler,
     signal_interrupt,

@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Optional, Union
 
 from ci.docker.qemu_esp32_docker import DockerQEMURunner
-from ci.util.docker_helper import get_docker_command
+from ci.util.docker_command import get_docker_command
 
 
 class QEMUTestIntegration:

@@ -4,6 +4,7 @@
 #include "fl/assert.h"
 
 #if FASTLED_MULTITHREADED
+#include <algorithm>  // ok include - Required for <string_view> dependency in <mutex>
 #include <mutex>  // ok include
 #endif
 

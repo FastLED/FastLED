@@ -19,7 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
-from ci.util.docker_helper import get_docker_command
+from ci.util.docker_command import get_docker_command
 
 
 @dataclass
