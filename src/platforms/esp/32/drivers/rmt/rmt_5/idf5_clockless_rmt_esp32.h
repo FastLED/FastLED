@@ -30,7 +30,7 @@ private:
 
 public:
     ClocklessRMT()
-        : mEngine(fl::Singleton<ChannelEngineRMT>::instance())
+        : mEngine(fl::Singleton<ChannelEngineRMT>::instanceRef())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();

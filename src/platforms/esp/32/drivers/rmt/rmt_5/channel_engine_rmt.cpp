@@ -288,6 +288,7 @@ bool ChannelEngineRMT::tryStartPendingChannel(const PendingChannel& pending) {
 
     // Track this worker with its pin and reset time
     mActiveWorkers.push_back(WorkerInfo{worker, pending.pin, pending.reset_us});
+    // This doesn't work.
     mPinResetTimers[pending.pin] = Timeout(::micros(), pending.reset_us);
 
     ESP_LOGD(RMT_ENGINE_TAG, "Started transmission for pin %d", pending.pin);
