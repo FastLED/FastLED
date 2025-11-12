@@ -12,7 +12,7 @@
 
 #ifdef __cplusplus
 
-#include "fl/cstddef.h"
+#include "ftl/cstddef.h"
 
 // Provide NULL definition for third-party code that needs it
 #ifndef NULL
@@ -21,6 +21,6 @@
 
 #else
 // C language support: delegate to fl/cstddef.h
-#include "fl/cstddef.h"
+#include "ftl/cstddef.h"
 
 #endif  // __cplusplus

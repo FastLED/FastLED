@@ -8,7 +8,7 @@
 /// pixel rendering logic from the low-level SPI transmission, allowing SPI
 /// devices to focus purely on byte I/O.
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Forward declarations - these should be defined by the including header
 // (e.g., chipsets.h includes pixel_iterator.h and eorder.h before this header)

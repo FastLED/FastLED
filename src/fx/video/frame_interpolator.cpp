@@ -6,7 +6,7 @@
 #include "fl/dbg.h"
 
 #include "fl/math_macros.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 
 #define DBG FASTLED_DBG
 

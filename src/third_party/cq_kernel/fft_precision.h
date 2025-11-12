@@ -18,7 +18,7 @@
 #ifndef FFT_PRECISION_H
 #define FFT_PRECISION_H
 
-#include "fl/math.h"
+#include "ftl/math.h"
 
 // Define precision mode constants
 #define FASTLED_FFT_FLOAT   1

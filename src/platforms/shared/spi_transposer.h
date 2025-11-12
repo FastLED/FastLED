@@ -97,8 +97,8 @@
 /// - **Transmission time**: Hardware DMA, zero CPU usage during transfer
 /// - **Optimization**: Direct bit extraction provides optimal performance
 
-#include "fl/span.h"
-#include "fl/optional.h"
+#include "ftl/span.h"
+#include "ftl/optional.h"
 
 namespace fl {
 

@@ -4,7 +4,7 @@
 /// @brief Shared implementation helpers for SPI device classes
 /// @note This reduces code duplication between MultiLaneDevice and ParallelDevice
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 namespace fl {
 namespace spi {

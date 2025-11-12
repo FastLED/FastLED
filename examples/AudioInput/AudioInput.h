@@ -9,8 +9,8 @@
 #include <Arduino.h>
 #include <FastLED.h>
 
-#include "fl/sstream.h"
-#include "fl/type_traits.h"
+#include "ftl/sstream.h"
+#include "ftl/type_traits.h"
 
 #include "fl/audio_input.h"
 

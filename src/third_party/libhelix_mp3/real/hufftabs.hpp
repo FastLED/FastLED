@@ -42,7 +42,7 @@
  **************************************************************************************/
 
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /* NOTE - regenerated tables to use shorts instead of ints 
  *        (all needed data can fit in 16 bits - see below)

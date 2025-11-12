@@ -1,5 +1,5 @@
 #include "fl/ease.h"
-#include "fl/array.h"
+#include "ftl/array.h"
 #include "fl/pair.h"
 #include "lib8tion/intmap.h"
 #include "test.h"

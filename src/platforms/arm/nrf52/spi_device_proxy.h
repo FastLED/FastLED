@@ -27,10 +27,10 @@
 
 #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/nrf52/fastspi_arm_nrf52.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/stddef.h"
 
 namespace fl {

@@ -2,11 +2,11 @@
 #include "scale_up.h"
 
 #include "crgb.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/upscale.h"
-#include "fl/memory.h"
+#include "ftl/memory.h"
 #include "fl/xymap.h"
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "fl/allocator.h"
 #include "fx/fx2d.h"
 

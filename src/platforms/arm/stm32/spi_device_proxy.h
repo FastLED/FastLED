@@ -16,10 +16,10 @@
 
 #ifdef FL_IS_STM32
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/stm32/fastspi_arm_stm32.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/stddef.h"
 
 namespace fl {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/int.h"

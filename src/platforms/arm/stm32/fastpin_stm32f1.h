@@ -3,7 +3,7 @@
 // STM32F1 pin definitions for BluePill, Maple Mini, and similar STM32F1 based boards
 // Provides access to all common STM32 GPIO pins using hardware names (PA0-PA15, PB0-PB15, etc.)
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

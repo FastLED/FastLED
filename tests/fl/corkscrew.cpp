@@ -4,7 +4,7 @@
 #include "test.h"
 #include "fl/algorithm.h"
 
-#include "fl/sstream.h"
+#include "ftl/sstream.h"
 
 #include "fl/corkscrew.h"
 #include "fl/grid.h"

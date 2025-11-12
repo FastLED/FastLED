@@ -16,9 +16,9 @@
 /// This interface was created to support I2S-based clocked LED drivers
 /// (APA102, SK9822, etc.) that can drive up to 16 parallel strips simultaneously.
 
-#include "fl/vector.h"
-#include "fl/span.h"
-#include "fl/stdint.h"
+#include "ftl/vector.h"
+#include "ftl/span.h"
+#include "ftl/stdint.h"
 #include "fl/limits.h"
 #include "platforms/shared/spi_types.h"
 

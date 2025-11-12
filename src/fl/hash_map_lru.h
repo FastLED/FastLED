@@ -6,8 +6,8 @@ This hashmap has a maximum size and will automatically evict the least
 recently used items when it reaches capacity.
 */
 
-#include "fl/hash_map.h"
-#include "fl/type_traits.h"
+#include "ftl/hash_map.h"
+#include "ftl/type_traits.h"
 #include "fl/numeric_limits.h"
 
 namespace fl {

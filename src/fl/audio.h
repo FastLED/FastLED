@@ -1,12 +1,12 @@
 #pragma once
 
 #include "fl/fft.h"
-#include "fl/math.h"
+#include "../ftl/math.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/span.h"
-#include "fl/vector.h"
+#include "ftl/span.h"
+#include "ftl/vector.h"
 #include "fl/int.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 namespace fl {
 

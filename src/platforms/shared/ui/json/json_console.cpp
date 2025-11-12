@@ -8,7 +8,7 @@
 #include "fl/json.h"
 #include "fl/json.h"
 #include "fl/algorithm.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"
 #include <stdlib.h>
 

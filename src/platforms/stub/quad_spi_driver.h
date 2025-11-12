@@ -3,7 +3,7 @@
 // Mock Quad-SPI driver for testing without real ESP32 hardware
 // This simulates DMA transmission and provides inspection methods for validation
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 
 namespace fl {
 

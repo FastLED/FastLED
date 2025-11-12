@@ -1,13 +1,13 @@
 #pragma once
 
 #include "fl/fft.h"
-#include "fl/math.h"
-#include "fl/vector.h"
-#include "fl/stdint.h"
+#include "../ftl/math.h"
+#include "ftl/vector.h"
+#include "ftl/stdint.h"
 #include "fl/int.h"
 #include "fl/audio.h"
-#include "fl/array.h"
-#include "fl/unique_ptr.h"
+#include "ftl/array.h"
+#include "ftl/unique_ptr.h"
 #include "fl/sketch_macros.h"
 #include "crgb.h"
 #include "fl/colorutils.h"

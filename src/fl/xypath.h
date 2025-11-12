@@ -10,7 +10,7 @@
 // We provide common paths discovered throughout human history, for use in
 // your animations.
 
-#include "fl/function.h"
+#include "ftl/function.h"
 #include "fl/leds.h"
 #include "fl/pair.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros

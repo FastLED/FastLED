@@ -6,10 +6,10 @@ are blended by the the max luminance of the components.
 
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/shared_ptr.h"  // For shared_ptr
+#include "ftl/shared_ptr.h"  // For shared_ptr
 #include "fx/fx2d.h"
 
 // Forward declarations to reduce header overhead

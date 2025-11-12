@@ -1,7 +1,7 @@
 
 #include "fl/tile2x2.h"
 #include "fl/splat.h"
-#include "fl/math.h"
+#include "../ftl/math.h"
 
 namespace fl {
 

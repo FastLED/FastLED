@@ -143,8 +143,18 @@ else
   error('Invalid build_mode: @0@. Must be one of: debug, quick, release'.format(build_mode))
 endif
 
+# Windows-specific workaround for Clang 19 AVX-512 intrinsics bugs
+# Prevent immintrin.h from including buggy AVX-512 headers that use unavailable builtins
+windows_avx_workaround = []
+if build_machine.system() == 'windows'
+  windows_avx_workaround = [
+    '-D__AVX512BITALG__',
+    '-D__AVX512VPOPCNTDQ__',
+  ]
+endif
+
 # Assemble base_compile_args from organized groups
-base_compile_args = base_optimization + base_defines + base_warnings
+base_compile_args = base_optimization + base_defines + base_warnings + windows_avx_workaround
 
 # Unit test-specific compilation flags (only used for test executables)
 test_specific_args = [

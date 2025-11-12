@@ -16,7 +16,7 @@
 
 #ifdef __EMSCRIPTEN__
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 
 
 #include "fl/json.h"

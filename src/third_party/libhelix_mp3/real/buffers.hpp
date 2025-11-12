@@ -47,9 +47,9 @@
 
 //#include "hlxclib/stdlib.h"		/* for malloc, free */
 #include <stdlib.h>
-#include "fl/string.h"
+#include "ftl/string.h"
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /**************************************************************************************
  * Function:    ClearBuffer

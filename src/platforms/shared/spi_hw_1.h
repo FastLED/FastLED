@@ -11,9 +11,9 @@
 /// - ESP32: Uses true async DMA via spi_device_queue_trans()
 /// - Other platforms: May use synchronous polling or DMA depending on capabilities
 
-#include "fl/vector.h"
-#include "fl/span.h"
-#include "fl/stdint.h"
+#include "ftl/vector.h"
+#include "ftl/span.h"
+#include "ftl/stdint.h"
 #include "fl/limits.h"
 #include "platforms/shared/spi_types.h"
 

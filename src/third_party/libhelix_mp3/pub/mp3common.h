@@ -113,7 +113,7 @@ int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bi
 int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf);
 
 /* mp3tabs.c - global ROM tables */
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 extern const int32_t samplerateTab[3][3];
 extern const short bitrateTab[3][3][15];
 extern const short samplesPerFrameTab[3][3];

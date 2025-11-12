@@ -53,12 +53,12 @@ auto ledData = corkscrew.data();  // Or corkscrew.rawData() for pointer
 ```
 */
 
-#include "fl/assert.h"
+#include "ftl/assert.h"
 #include "fl/corkscrew.h"
 #include "fl/grid.h"
 #include "fl/leds.h"
 #include "fl/screenmap.h"
-#include "fl/sstream.h"
+#include "ftl/sstream.h"
 #include "fl/warn.h"
 #include "noise.h"
 #include <FastLED.h>

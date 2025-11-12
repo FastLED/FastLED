@@ -18,7 +18,7 @@
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "eorder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Forward declarations for ESP8266 Arduino core functions
 // These are provided by the ESP8266 Arduino framework

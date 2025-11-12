@@ -98,7 +98,7 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include "fl/ota.h"
-#include "fl/sstream.h"
+#include "ftl/sstream.h"
 
 // ====== Configure your transport here ======
 #define USE_WIFI         1

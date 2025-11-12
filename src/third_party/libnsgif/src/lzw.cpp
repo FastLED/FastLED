@@ -7,8 +7,8 @@
  * Copyright 2021 Michael Drake <tlsa@netsurf-browser.org>
  */
 
-#include "fl/cstddef.h"
-#include "fl/assert.h"
+#include "ftl/cstddef.h"
+#include "ftl/assert.h"
 #include "fl/int.h"
 #include "fl/allocator.h"
 

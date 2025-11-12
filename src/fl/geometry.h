@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/int.h"
-#include "fl/math.h"
+#include "../ftl/math.h"
 #include "fl/compiler_control.h"
 #include "fl/move.h"
 

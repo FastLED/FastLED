@@ -1,7 +1,7 @@
-#include "fl/stdio.h"
-#include "fl/atomic.h"
+#include "ftl/stdio.h"
+#include "ftl/atomic.h"
 #include "fl/compiler_control.h"
-#include "fl/mutex.h"
+#include "ftl/mutex.h"
 #include "fl/warn.h"
 #include "ui_internal.h"
 

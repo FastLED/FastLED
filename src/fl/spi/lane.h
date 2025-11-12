@@ -3,9 +3,9 @@
 /// @file spi/lane.h
 /// @brief Lane class for multi-lane SPI devices
 
-#include "fl/stdint.h"
-#include "fl/span.h"
-#include "fl/vector.h"
+#include "ftl/stdint.h"
+#include "ftl/span.h"
+#include "ftl/vector.h"
 
 namespace fl {
 namespace spi {

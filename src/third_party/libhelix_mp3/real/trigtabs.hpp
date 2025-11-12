@@ -44,7 +44,7 @@
 // constants in RAM are not significantly faster
 
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /* post-IMDCT window, win[blockType][i]
  * format = Q31

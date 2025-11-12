@@ -42,7 +42,7 @@
  **************************************************************************************/
 
 #include "pub/mp3common.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /* indexing = [version][samplerate index]
  * sample rate of frame (Hz)

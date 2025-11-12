@@ -31,7 +31,7 @@
 //
 // ⚠️⚠️⚠️ REMEMBER: Timing errors break ALL animations and effects! ⚠️⚠️⚠️
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/warn.h"
 #include "js.h"
 #include <thread>

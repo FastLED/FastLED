@@ -2,7 +2,7 @@
 #ifndef __INC_FASTSPI_LED2_H
 #define __INC_FASTSPI_LED2_H
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/dll.h"  // Will optionally compile in.
 
 /// @file FastLED.h
@@ -77,8 +77,8 @@
 // Convenience includes for sketch inclusion
 #include "fl/async.h"
 #include "fl/sketch_macros.h"
-#include "fl/array.h"
-#include "fl/vector.h"
+#include "ftl/array.h"
+#include "ftl/vector.h"
 
 
 #include "fl/force_inline.h"
@@ -993,17 +993,17 @@ extern CFastLED FastLED;
 #include "fl/map_range.h"  // fl::map_range(value, in_min, in_max, out_min, out_max)
 
 #include "fl/warn.h"  // FASTLED_WARN("time now: " << millis()), FASTLED_WARN_IF(condition, "time now: " << millis());"
-#include "fl/assert.h"  // FASTLED_ASSERT(condition, "message");
+#include "ftl/assert.h"  // FASTLED_ASSERT(condition, "message");
 #include "fl/unused.h"  // FASTLED_UNUSED(variable), for strict compiler settings.
 
 // provides:
 //   fl::vector<T> - Standard heap vector
 //   fl::vector_inlined<T,N> - Allocate on stack N elements, then overflow to heap vector.
 //   fl::vector_fixed<T,N> - Stack allocated fixed size vector, elements will fail to add when full.
-#include "fl/vector.h"
+#include "ftl/vector.h"
 
 // Flexible callbacks in the style of std::function.
-#include "fl/function.h"
+#include "ftl/function.h"
 
 // Clears the led data and other objects.
 // CRGB leds[NUM_LEDS];

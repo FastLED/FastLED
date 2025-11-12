@@ -7,9 +7,9 @@
 /// See examples/Spi/Spi.ino for usage example
 
 
-#include "fl/stdint.h"
-#include "fl/unique_ptr.h"
-#include "fl/span.h"
+#include "ftl/stdint.h"
+#include "ftl/unique_ptr.h"
+#include "ftl/span.h"
 
 // SPI components
 #include "fl/spi/config.h"

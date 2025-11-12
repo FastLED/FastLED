@@ -1,7 +1,7 @@
 #pragma once
 
 #include "crgb.h"
-#include "fl/map.h"
+#include "ftl/map.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/ui.h"
 #include "fl/xymap.h"
@@ -10,7 +10,7 @@
 #include "fx/fx.h"
 #include "fx/time.h"
 #include "fx/video.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // TimeFunction is defined in fx/time.h (fl::TimeFunction)
 

@@ -20,7 +20,7 @@
 // ============================================================================
 
 /// Platform-agnostic integer types
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/int.h"
 
 /// Version and configuration
@@ -45,7 +45,7 @@
 #include "fl/math_macros.h"
 
 /// Memory and type utilities
-#include "fl/bit_cast.h"
+#include "ftl/bit_cast.h"
 #include "fl/cstring.h"
 
 // ============================================================================

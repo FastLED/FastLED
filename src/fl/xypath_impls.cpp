@@ -3,8 +3,8 @@
 
 #include <math.h>
 
-#include "fl/assert.h"
-#include "fl/function.h"
+#include "ftl/assert.h"
+#include "ftl/function.h"
 #include "fl/lut.h"
 #include "fl/map_range.h"
 #include "fl/math_macros.h"

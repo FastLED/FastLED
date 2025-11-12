@@ -17,16 +17,16 @@
 
 #include "spi_isr_engine.h"
 #include "host_sim.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Thread-based mode: Use real-time ISR emulation
 #include <thread>   // ok include (no fl/thread.h wrapper available)
 #include <chrono>   // ok include (no fl/chrono.h available)
 #include <atomic>   // ok include (for std::atomic_thread_fence)
 #include <cstdio>   // ok include (for std::printf)
-#include "fl/atomic.h"
-#include "fl/mutex.h"
-#include "fl/vector.h"
+#include "ftl/atomic.h"
+#include "ftl/mutex.h"
+#include "ftl/vector.h"
 
 // Simple printf-style debugging for thread mode
 #define ISR_DBG(...) std::printf("[ISR_THREAD] " __VA_ARGS__)

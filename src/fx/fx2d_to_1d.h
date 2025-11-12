@@ -1,6 +1,6 @@
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/screenmap.h"
 #include "fx/fx1d.h"

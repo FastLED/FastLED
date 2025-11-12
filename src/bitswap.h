@@ -5,7 +5,7 @@
 
 #include "fl/force_inline.h"
 #include "fl/int.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /// @file bitswap.h
 /// Functions for doing a rotation of bits/bytes used by parallel output

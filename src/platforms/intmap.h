@@ -23,9 +23,9 @@
 #pragma once
 
 #include "lib8tion/lib8static.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/sketch_macros.h"
-#include "fl/type_traits.h"
+#include "ftl/type_traits.h"
 #include "fl/compiler_control.h"
 #include "fl/force_inline.h"
 

@@ -8,7 +8,7 @@
 #if FASTLED_RMT5
 
 #include "pixel_iterator.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/channels/channel_data.h"
 #include "fl/channels/channel_engine.h"

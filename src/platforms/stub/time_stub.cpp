@@ -3,7 +3,7 @@
 #ifdef FASTLED_STUB_IMPL  // Only use this if explicitly defined.
 
 #include "time_stub.h"
-#include "fl/function.h"
+#include "ftl/function.h"
 #include <chrono>
 #include <thread>
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "crgb.h"
 #include "chsv.h"
 #include "fl/hsv16.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "lib8tion/qfx.h"
 #include "lib8tion/intmap.h"
 

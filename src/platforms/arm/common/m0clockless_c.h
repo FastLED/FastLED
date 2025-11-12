@@ -25,7 +25,7 @@
  ******************************************************************************/
 
 #include "fl/compiler_control.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/chipsets/timing_traits.h"
 
 FL_EXTERN_C_BEGIN

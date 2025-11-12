@@ -27,7 +27,7 @@
 
 #include "fl/sketch_macros.h"
 #include "fl/warn.h"
-#include "fl/stdio.h"
+#include "ftl/stdio.h"
 
 #include <FastLED.h>
 
@@ -35,7 +35,7 @@
 #include "fl/math_macros.h"
 #include "fl/json.h"
 #include "fl/ui.h"
-#include "fl/map.h"
+#include "ftl/map.h"
 
 #include "fl/str.h"
 

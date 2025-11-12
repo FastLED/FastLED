@@ -7,7 +7,7 @@
 #include "fl/has_include.h"
 #include "fl/codec/jpeg.h"
 #include "fl/codec/mp3.h"
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "fl/math_macros.h"
 
 #ifdef FASTLED_TESTING

@@ -4,8 +4,8 @@
 #include "crgb.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
-#include "fl/vector.h"
-#include "fl/stdint.h"
+#include "ftl/vector.h"
+#include "ftl/stdint.h"
 
 #include "fl/allocator.h"
 #include "fl/draw_mode.h"

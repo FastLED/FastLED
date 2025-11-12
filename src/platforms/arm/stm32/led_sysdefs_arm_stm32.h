@@ -11,7 +11,7 @@
 #if defined(STM32F10X_MD) || defined(STM32F2XX)
 
 #include <application.h>
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // reusing/abusing cli/sei defs for due
 #define cli()  __disable_irq(); __disable_fault_irq();

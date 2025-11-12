@@ -4,7 +4,7 @@
 /// @brief Result type for SPI write operations
 
 #include "fl/str.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 namespace fl {
 

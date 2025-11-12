@@ -13,7 +13,7 @@
 /// - Silicon Labs EFM32/EFR32 GPIO architecture
 /// - FreeRTOS compatibility with automatic detection
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Include Silicon Labs EMLIB GPIO for direct register access
 

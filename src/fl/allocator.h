@@ -1,14 +1,14 @@
 #pragma once
 
-#include "fl/cstddef.h"
+#include "ftl/cstddef.h"
 #include "fl/cstring.h"
-#include "fl/type_traits.h"
+#include "ftl/type_traits.h"
 #include "fl/unused.h"
-#include "fl/bit_cast.h"
-#include "fl/stdint.h"
-#include "fl/new.h"
-#include "fl/bitset.h"
-#include "fl/malloc.h"
+#include "ftl/bit_cast.h"
+#include "ftl/stdint.h"
+#include "../ftl/new.h"
+#include "ftl/bitset.h"
+#include "ftl/malloc.h"
 #include "fl/align.h"
 
 #ifndef FASTLED_DEFAULT_SLAB_SIZE

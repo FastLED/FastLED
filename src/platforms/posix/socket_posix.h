@@ -4,8 +4,8 @@
 #if !defined(_WIN32)
 
 #include "fl/networking.h"  // For SocketError enum
-#include "fl/string.h"
-#include "fl/stdint.h"
+#include "ftl/string.h"
+#include "ftl/stdint.h"
 
 // Minimal POSIX includes for function declarations
 #include <sys/types.h>    // For ssize_t, socklen_t

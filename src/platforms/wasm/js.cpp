@@ -13,14 +13,14 @@
 #include <emscripten/html5.h>
 
 #include <memory> // ok include
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include <stdio.h> // ok include
 #include <string>
 
 #include "active_strip_data.h"
 #include "engine_listener.h"
 #include "fl/dbg.h"
-#include "fl/map.h"
+#include "ftl/map.h"
 #include "fl/screenmap.h"
 #include "fl/str.h"
 #include "js.h"

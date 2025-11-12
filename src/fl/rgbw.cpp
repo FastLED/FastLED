@@ -1,7 +1,7 @@
 /// @file rgbw.cpp
 /// Functions for red, green, blue, white (RGBW) output
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #define FASTLED_INTERNAL
 #include "fl/fastled.h"

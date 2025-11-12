@@ -7,7 +7,7 @@
 #include "./dprint.h"
 #include "./Keyboard.h"
 #include "fl/math_macros.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "fl/warn.h"
 #include "fl/cstring.h"
 

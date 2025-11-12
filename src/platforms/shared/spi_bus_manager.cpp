@@ -1,14 +1,14 @@
 #include "spi_bus_manager.h"
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "fl/warn.h"
-#include "fl/strstream.h"  // Required for FL_WARN_FMT
+#include "ftl/strstream.h"  // Required for FL_WARN_FMT
 #include "fl/dbg.h"
 #include "fl/log.h"
 
 #include "fl/limits.h"
 #include "fl/fastpin.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 
 // Arduino defines max/min as macros, which conflicts with fl::numeric_limits<T>::max()
 // Undefine them here since we use the FastLED fl:: equivalents (fl_min/fl_max)

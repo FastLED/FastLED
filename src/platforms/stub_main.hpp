@@ -14,7 +14,7 @@
 
 // Include function.h and time_stub.h at file scope
 #include "fl/compiler_control.h"  // For FL_MAYBE_UNUSED
-#include "fl/function.h"
+#include "ftl/function.h"
 #include "platforms/stub/time_stub.h"
 
 extern void init();

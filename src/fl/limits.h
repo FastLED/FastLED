@@ -6,9 +6,9 @@ This avoids including <limits> which can slow down compilation.
 Follows the same pattern as fl/type_traits.h to provide essential type information.
 */
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/undef.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 
 namespace fl {
 

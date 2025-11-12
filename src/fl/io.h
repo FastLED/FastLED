@@ -3,7 +3,7 @@
 #define FL_IO_H_INCLUDED
 
 #ifdef FASTLED_TESTING
-#include "fl/function.h"
+#include "ftl/function.h"
 #endif
 
 namespace fl {

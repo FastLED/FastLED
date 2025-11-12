@@ -5,7 +5,7 @@
 #include "channel_config.h"
 #include "channel_data.h"
 #include "channel_engine.h"
-#include "fl/atomic.h"
+#include "ftl/atomic.h"
 #include "fl/dbg.h"
 #include "fl/led_settings.h"
 #include "fl/pixel_iterator_any.h"

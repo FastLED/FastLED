@@ -42,7 +42,7 @@
  **************************************************************************************/
 
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /* helper macros - see comments in hufftabs.c about the format of the huffman tables */
 #define GetMaxbits(x)   ((int)( (((unsigned short)(x)) >>  0) & 0x000f))

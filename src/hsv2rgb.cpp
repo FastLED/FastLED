@@ -7,7 +7,7 @@
 
 /// Disables pragma messages and warnings
 #define FASTLED_INTERNAL
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/fastled.h"
 #include "fl/math_macros.h"

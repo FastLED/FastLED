@@ -8,7 +8,7 @@ Modern platforms are so fast that the extra performance is not needed, but accur
 
 */
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/int.h"
 #include "fastled_progmem.h"
 

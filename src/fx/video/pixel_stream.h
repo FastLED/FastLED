@@ -4,7 +4,7 @@
 #include "fl/bytestream.h"
 #include "fl/file_system.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
-#include "fl/shared_ptr.h"  // For shared_ptr
+#include "ftl/shared_ptr.h"  // For shared_ptr
 #include "fx/frame.h"
 #include "fl/int.h"
 namespace fl {

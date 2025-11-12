@@ -4,7 +4,7 @@
 #include "fx/audio/detectors/beat.h"
 #include "fx/audio/detectors/downbeat.h"
 #include "fl/audio/audio_context.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 
 using namespace fl;
 

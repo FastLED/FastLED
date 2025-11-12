@@ -70,7 +70,7 @@ Example: using containers, views, and ownership
 ```cpp
 #include "fl/vector.h"
 #include "fl/span.h"
-#include "fl/memory.h"   // for fl::make_unique
+#include "../ftl/memory.h"   // for fl::make_unique
 
 void process(fl::span<const int> values) {
     // Non-owning view over contiguous data
@@ -345,7 +345,7 @@ fl::string greet(const fl::string& name) {
 Why: RAII ownership with explicit semantics. Prefer `fl::make_shared<T>()`/`fl::make_unique<T>()` patterns where available, or direct constructors provided by these headers.
 
 ```cpp
-#include "fl/shared_ptr.h"
+#include "../ftl/shared_ptr.h"
 
 struct Widget { int value; };
 

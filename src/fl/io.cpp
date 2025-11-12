@@ -1,6 +1,6 @@
 #include "io.h"
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Platform-specific I/O implementations
 #ifdef __EMSCRIPTEN__

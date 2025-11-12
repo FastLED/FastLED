@@ -15,7 +15,7 @@
 #include "cpixel_ledcontroller.h"
 #include "pixel_controller.h"
 #include "fl/ptr.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/singleton.h"
 #include "pixeltypes.h"
 #include "channel_config.h"

@@ -1,6 +1,6 @@
 #include "software_decoder.h"
 #include "fl/scoped_array.h"
-#include "fl/string.h"
+#include "ftl/string.h"
 #include "fl/str.h"
 #include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 

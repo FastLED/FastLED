@@ -20,10 +20,10 @@ extern "C" {
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macro
-#include "fl/optional.h"
-#include "fl/type_traits.h"
-#include "fl/vector.h"
-#include "fl/span.h"
+#include "ftl/optional.h"
+#include "ftl/type_traits.h"
+#include "ftl/vector.h"
+#include "ftl/span.h"
 #include "fl/force_inline.h"
 #include "fl/deprecated.h"
 

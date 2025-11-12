@@ -16,13 +16,13 @@
 /// Fast, efficient 8-bit math functions specifically
 /// designed for high-performance LED programming. 
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "lib8tion/lib8static.h"
 #include "lib8tion/qfx.h"
 #include "lib8tion/memmove.h"
 #include "platforms/math8_config.h"
 #include "fl/ease.h"
-#include "fl/time.h"
+#include "ftl/time.h"
 
 
 #if !defined(__AVR__)

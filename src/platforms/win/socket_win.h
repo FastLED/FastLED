@@ -3,8 +3,8 @@
 #ifdef FASTLED_HAS_NETWORKING && 0
 #ifdef _WIN32
 
-#include "fl/string.h"
-#include "fl/stdint.h"
+#include "ftl/string.h"
+#include "ftl/stdint.h"
 
 // Essential Windows header isolation
 #ifndef WIN32_LEAN_AND_MEAN

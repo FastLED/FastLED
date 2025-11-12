@@ -21,7 +21,7 @@
 #define F_CPU 16000000
 #endif
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include <nrf51.h>
 #include <core_cm0.h>
 

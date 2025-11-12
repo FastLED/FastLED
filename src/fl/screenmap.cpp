@@ -10,13 +10,13 @@
 #include "fl/lut.h"       // Full LUT definitions needed for implementation
 #include "fl/json.h"      // 61.1ms - only needed for ParseJson/toJson implementations
 #include "fl/str.h"       // 129.4ms - only needed for string parameters in implementations
-#include "fl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
-#include "fl/function.h"  // ~5ms - only needed for function<> constructor implementation
+#include "../ftl/map.h"       // 12.4ms - only needed for fl_map parameters in implementations
+#include "ftl/function.h"  // ~5ms - only needed for function<> constructor implementation
 
 // Other implementation dependencies
-#include "fl/math.h"
+#include "../ftl/math.h"
 #include "fl/math_macros.h"
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "fl/warn.h"
 
 

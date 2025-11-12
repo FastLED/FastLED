@@ -40,10 +40,10 @@
 // STUB_PLATFORM now always gets real ISR implementations instead of stubs
 #if SKETCH_HAS_LOTS_OF_MEMORY || defined(STUB_PLATFORM)
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/compiler_control.h"
 #include "spi_isr_engine.h"
-#include "fl/atomic.h"
+#include "ftl/atomic.h"
 
 
 // All implementation uses C linkage for clean assembly generation

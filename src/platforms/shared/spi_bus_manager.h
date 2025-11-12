@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fl/stdint.h"
-#include "fl/vector.h"
+#include "ftl/stdint.h"
+#include "ftl/vector.h"
 
 // Shared SPI type definitions
 #include "platforms/shared/spi_types.h"

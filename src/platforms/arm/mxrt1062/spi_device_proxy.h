@@ -18,10 +18,10 @@
 
 #if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
 
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/stddef.h"
 #include <SPI.h>
 

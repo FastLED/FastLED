@@ -3,7 +3,7 @@
 // Spark Core/Photon pin definitions
 // Reference: https://docs.particle.io/reference/hardware/wifi/spark-core/
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

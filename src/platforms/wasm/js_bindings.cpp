@@ -36,10 +36,10 @@
 #include "platforms/shared/active_strip_data/active_strip_data.h"
 #include "platforms/wasm/js.h"
 #include "fl/dbg.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "fl/screenmap.h"
 #include "fl/json.h"
-#include "fl/stdio.h"
+#include "ftl/stdio.h"
 
 // Forward declarations for functions used in this file
 namespace fl {

@@ -8,9 +8,9 @@
 #include "fl/fastled.h"
 #include "fl/blur.h"
 #include "fl/clamp.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "fl/xymap.h"
-#include "fl/vector.h"
+#include "ftl/vector.h"
 #include "crgb.h"
 #include "noise.h"
 

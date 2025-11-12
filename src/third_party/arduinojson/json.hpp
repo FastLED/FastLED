@@ -285,12 +285,12 @@ ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 template <typename T1, typename T2>
 class InvalidConversion;  // Error here? See https://arduinojson.org/v7/invalid-conversion/
 ARDUINOJSON_END_PRIVATE_NAMESPACE
-#include "fl/cstddef.h"
+#include "ftl/cstddef.h"
 #include "fl/cstring.h"
-#include "fl/stdint.h"
-#include "fl/cstdlib.h"
+#include "ftl/stdint.h"
+#include "ftl/cstdlib.h"
 #include "fl/stddef.h"
-#include "fl/malloc.h"
+#include "ftl/malloc.h"
 #include "fl/str.h"
 ARDUINOJSON_BEGIN_PUBLIC_NAMESPACE
 class Allocator {
@@ -663,7 +663,7 @@ void swap_(T& a, T& b) {
   b = move(tmp);
 }
 ARDUINOJSON_END_PRIVATE_NAMESPACE
-#include "fl/string.h"
+#include "ftl/string.h"
 ARDUINOJSON_BEGIN_PRIVATE_NAMESPACE
 using PoolCount = SlotId;
 template <typename T>

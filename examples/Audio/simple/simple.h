@@ -28,7 +28,7 @@ all the UI elements you see below.
 #include "fl/downscale.h"
 #include "fl/draw_visitor.h"
 #include "fl/fft.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "fl/math_macros.h"
 #include "fl/raster.h"
 #include "fl/time_alpha.h"
@@ -36,7 +36,7 @@ all the UI elements you see below.
 #include "fl/xypath.h"
 #include "fl/unused.h"
 #include "fx/time.h"
-#include "fl/function.h"
+#include "ftl/function.h"
 
 // Sketch.
 #include "fx_audio.h"

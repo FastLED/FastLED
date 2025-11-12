@@ -15,7 +15,7 @@
 // Compile for host simulation OR stub platform (includes tests)
 // STUB_PLATFORM now always gets real ISR implementations instead of stubs
 #if defined(FASTLED_SPI_HOST_SIMULATION) || defined(STUB_PLATFORM)
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/cstring.h"
 
 /* Ring buffer for capturing GPIO events */

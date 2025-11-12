@@ -1,3 +1,12 @@
+// Workaround for Clang 19 AVX-512 intrinsics bug on Windows
+// The clang-tool-chain version 19 has buggy AVX-512 intrinsics that use __builtin_elementwise_popcount
+// which is not available in this build. We prevent those headers from being included.
+#ifdef _WIN32
+// Prevent immintrin.h from including the buggy AVX-512 headers
+#define __AVX512BITALG__
+#define __AVX512VPOPCNTDQ__
+#endif
+
 // Fix INPUT macro conflict between Arduino and Windows headers
 #ifdef INPUT
 #define ARDUINO_INPUT_BACKUP INPUT

@@ -1,9 +1,9 @@
 #pragma once
 
 #include "fl/str.h"
-#include "fl/type_traits.h"
+#include "ftl/type_traits.h"
 #include "fl/int.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/cstring.h"
 #include "fl/compiler_control.h"

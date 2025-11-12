@@ -9,12 +9,12 @@
 #ifndef KISS_FFT_H
 #define KISS_FFT_H
 
-#include "fl/cstdlib.h"
-#include "fl/stdio.h"
-#include "fl/stdint.h"
-#include "fl/math.h"
-#include "fl/string.h"
-#include "fl/malloc.h"
+#include "ftl/cstdlib.h"
+#include "ftl/stdio.h"
+#include "ftl/stdint.h"
+#include "ftl/math.h"
+#include "ftl/string.h"
+#include "ftl/malloc.h"
 #include "fft_precision.h"
 
 // Configure FIXED_POINT based on precision mode

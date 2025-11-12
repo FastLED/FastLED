@@ -8,11 +8,11 @@ Based on works and code by Shawn Silverman.
 
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/math_macros.h" // if needed for MAX/FL_MIN macros
-#include "fl/unique_ptr.h"
-#include "fl/vector.h"
+#include "ftl/unique_ptr.h"
+#include "ftl/vector.h"
 #include "fl/warn.h"
 
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros

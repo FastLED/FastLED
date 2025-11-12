@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // STM32 HAL types cannot be forward-declared because they are typedef'd.
 // Include Arduino.h which pulls in the full STM32 HAL headers.

@@ -1,5 +1,5 @@
 #include "fl/hsv16.h"
-#include "fl/math.h"
+#include "../ftl/math.h"
 
 #include "lib8tion/intmap.h"
 #include "fl/ease.h"

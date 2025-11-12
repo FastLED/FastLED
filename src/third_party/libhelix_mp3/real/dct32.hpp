@@ -43,7 +43,7 @@
  **************************************************************************************/
 
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "assembly.h"
 
 #define COS0_0  0x4013c251	/* Q31 */

@@ -16,7 +16,7 @@
 
 #include "fl/fastled.h"
 #include "fl/force_inline.h"
-#include "fl/assert.h"
+#include "ftl/assert.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/idf4_rmt.h"
 #include "platforms/esp/32/drivers/rmt/rmt_4/idf4_rmt_impl.h"
 #include "platforms/esp/32/core/clock_cycles.h"

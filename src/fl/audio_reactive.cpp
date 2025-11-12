@@ -1,8 +1,8 @@
 #include "fl/audio_reactive.h"
-#include "fl/math.h"
-#include "fl/span.h"
+#include "../ftl/math.h"
+#include "ftl/span.h"
 #include "fl/int.h"
-#include "fl/unique_ptr.h"  // For unique_ptr
+#include "ftl/unique_ptr.h"  // For unique_ptr
 #include <math.h>
 
 namespace fl {

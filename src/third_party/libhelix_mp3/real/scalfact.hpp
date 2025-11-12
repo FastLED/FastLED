@@ -42,7 +42,7 @@
  **************************************************************************************/
 
 #include "coder.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 /* scale factor lengths (num bits) */
 static const char SFLenTab[16][2] = {

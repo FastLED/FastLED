@@ -1,7 +1,7 @@
 #pragma once
 
-#include "fl/string.h"
-#include "fl/function.h"
+#include "ftl/string.h"
+#include "ftl/function.h"
 
 // Forward declaration - fl::response is defined in fl/fetch.h
 namespace fl {

@@ -6,8 +6,8 @@
  *  See COPYING file for more information.
  */
 
-#include "fl/cstddef.h"
-#include "fl/stdio.h"
+#include "ftl/cstddef.h"
+#include "ftl/stdio.h"
 #include "kiss_fftr.h"
 #include "_kiss_fft_guts.h"
 #include "fl/str.h"
@@ -19,7 +19,7 @@
 #endif
 
 #include "fl/warn.h"
-#include "fl/malloc.h"
+#include "ftl/malloc.h"
 #include "fl/exit.h"
 
 struct kiss_fftr_state{

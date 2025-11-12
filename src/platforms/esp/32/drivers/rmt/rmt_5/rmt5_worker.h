@@ -7,8 +7,8 @@
 
 #if FASTLED_RMT5
 
-#include "fl/stdint.h"
-#include "fl/atomic.h"
+#include "ftl/stdint.h"
+#include "ftl/atomic.h"
 #include "rmt5_worker_base.h"
 
 FL_EXTERN_C_BEGIN

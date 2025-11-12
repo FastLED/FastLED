@@ -7,14 +7,14 @@ not allocate memory for the entire grid. This is useful for large grids where
 only a small number of pixels are set.
 */
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "fl/int.h"
 #include "fl/geometry.h"
 #include "fl/grid.h"
-#include "fl/hash_map.h"
-#include "fl/map.h"
-#include "fl/span.h"
+#include "ftl/hash_map.h"
+#include "../ftl/map.h"
+#include "ftl/span.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"
 

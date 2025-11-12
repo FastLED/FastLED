@@ -30,7 +30,7 @@
 #if FASTLED_USE_NEOPIXEL_BUS
 
 #include "NeoPixelBus.h"
-#include "fl/memory.h"
+#include "ftl/memory.h"
 #include "controller.h"
 #include "pixel_controller.h"
 #include "color.h"

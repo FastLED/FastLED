@@ -1,7 +1,7 @@
 // spi_block_32.h — 32-way blocking soft-SPI driver (inline bit-banging, platform-agnostic)
 #pragma once
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "spi_isr_engine.h"
 #include "spi_platform.h"
 

@@ -2,7 +2,7 @@
 /// @brief   Demonstrates how to mix noise generation with color palettes on a
 /// 2D LED matrix
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #include "crgb.h"
 #include "fl/upscale.h"

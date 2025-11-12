@@ -1,6 +1,6 @@
 #include "test.h"
 
-#include "fl/mutex.h"
+#include "ftl/mutex.h"
 
 
 TEST_CASE("Mutex reentrant") {

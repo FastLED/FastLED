@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 // Test that fl/stdint.h provides standard integer types without including <stdint.h>
 // This header is critical for FastLED's fast compilation strategy

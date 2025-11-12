@@ -62,9 +62,9 @@
 /// spi.wait();  // Block until DMA completes
 /// @endcode
 
-#include "fl/stdint.h"
-#include "fl/span.h"
-#include "fl/vector.h"
+#include "ftl/stdint.h"
+#include "ftl/span.h"
+#include "ftl/vector.h"
 #include "platforms/shared/spi_hw_16.h"
 #include "platforms/shared/spi_types.h"
 

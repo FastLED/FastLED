@@ -2,7 +2,7 @@
 
 // Note, fs.h breaks ESPAsyncWebServer so we use file_system.h instead.
 
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 #include "fl/int.h"
 
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros

@@ -8,7 +8,7 @@
 #include "FastLED.h"
 
 #include <FastLED.h>
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "fl/math_macros.h"
 #include "fl/screenmap.h"
 #include "fl/ui.h"

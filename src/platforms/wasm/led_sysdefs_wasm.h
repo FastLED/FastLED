@@ -6,7 +6,7 @@
 #endif
 
 #include "platforms/wasm/compiler/Arduino.h"
-#include "fl/stdint.h"
+#include "ftl/stdint.h"
 
 #ifndef F_CPU
 #define F_CPU 1000000000

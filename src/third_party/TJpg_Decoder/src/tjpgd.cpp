@@ -25,10 +25,10 @@
 /----------------------------------------------------------------------------*/
 
 // Include standard library headers outside namespace to avoid conflicts
-#include "fl/cstdlib.h"
+#include "ftl/cstdlib.h"
 #include "fl/str.h"
 #include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
-#include "fl/string.h"
+#include "ftl/string.h"
 
 #include "tjpgd.h"
 

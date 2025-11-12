@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#include "fl/cstddef.h"
-#include "fl/math.h"
-#include "fl/string.h"
-#include "fl/malloc.h"
+#include "ftl/cstddef.h"
+#include "ftl/math.h"
+#include "ftl/string.h"
+#include "ftl/malloc.h"
 #include "fl/str.h"
 #include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "cq_kernel.h"
