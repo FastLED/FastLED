@@ -122,10 +122,9 @@ RmtWorker* ChannelEngineRMT::findAvailableWorker() {
 void ChannelEngineRMT::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "ChannelEngineRMT::releaseWorker called with null worker");
 
-    // Mark worker as available
-    // Note: ISR already sets mAvailable=true at end of handleDoneInterrupt(),
-    // but this redundant write serves as defensive programming to ensure
-    // the worker is always available after waitForCompletion() returns.
+    // Mark worker as available for reuse
+    // Note: ISR sets mAvailable=true when transmission completes,
+    // but we call markAsAvailable() here for clarity and consistency
     worker->markAsAvailable();
 
     ESP_LOGD(RMT_ENGINE_TAG, "Worker released and marked available");

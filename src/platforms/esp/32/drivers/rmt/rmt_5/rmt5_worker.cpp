@@ -38,6 +38,14 @@ FL_EXTERN_C_END
 #define FASTLED_RMT5_USE_DIRECT_ISR 1
 #endif
 
+#define FASTLED_RMT5_HZ 10000000
+
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
+#define RMT_SIG_PAD_IDX RMT_SIG_PAD_OUT0_IDX
+#else
+#define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
+#endif
+
 // Define rmt_item32_t union (compatible with RMT4)
 union rmt_item32_t {
     struct {
@@ -92,51 +100,19 @@ fl::RmtWorker* DRAM_ATTR g_rmt5_nmi_worker = nullptr;
  * - No FreeRTOS API calls (no portENTER_CRITICAL_ISR, no xSemaphore*, etc.)
  * - Fast execution (<500ns target for WS2812 timing)
  *
- * USAGE:
- *   // Set global pointer before enabling NMI
- *   g_rmt5_nmi_worker = worker_instance;
- *
- *   // Generate NMI handler (in header or at module scope)
- *   #include "platforms/esp/32/interrupts/ASM_2_C_SHIM.h"
- *   FASTLED_NMI_ASM_SHIM_STATIC(xt_nmi, rmt5_nmi_buffer_refill)
  *
  *   // Install Level 7 NMI
  *   esp_intr_alloc(ETS_RMT_INTR_SOURCE,
  *                  ESP_INTR_FLAG_LEVEL7 | ESP_INTR_FLAG_IRAM,
  *                  nullptr, nullptr, &handle);
  *
- * SAFETY ANALYSIS:
- * ✅ fillNextHalf() is IRAM_ATTR
- * ✅ fillNextHalf() has no FreeRTOS calls
- * ✅ fillNextHalf() accesses only volatile member variables
- * ✅ convertByteToRmt() is IRAM_ATTR and NMI-safe
- * ✅ ets_printf() is ISR-safe (ROM function)
- * ✅ Member variables are volatile, ensuring visibility
- * ✅ Ping-pong buffer design is race-free
  *
  * TIMING:
  * - Assembly shim overhead: ~65ns (register save/restore)
  * - fillNextHalf() execution: ~500ns (120 instructions at 240 MHz)
- * - Total NMI latency: ~565ns (acceptable for WS2812)
+ 
  */
-extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void) {
-    // Get worker instance from global DRAM pointer
-    fl::RmtWorker* worker = g_rmt5_nmi_worker;
 
-    if (worker == nullptr) {
-        // Safety: Should never happen if properly initialized
-        // Cannot log here (ets_printf may be unsafe without worker context)
-        return;
-    }
-
-    // Call NMI-safe buffer refill directly (no FreeRTOS spinlock!)
-    // This is safe because:
-    // 1. fillNextHalf() is IRAM_ATTR
-    // 2. It accesses only volatile member variables
-    // 3. It uses ets_printf() for logging (ISR-safe)
-    // 4. Ping-pong buffer design prevents data corruption
-    worker->fillNextHalf();
-}
 
 //=============================================================================
 
@@ -161,13 +137,10 @@ RmtWorker::RmtWorker()
     , mNumBytes(0)
 {
     // Initialize ISR data
-    // Create binary semaphore and set to 1 (available state)
-    mIsrData.mCompletionSemaphore = xSemaphoreCreateBinary();
-    FL_ASSERT(mIsrData.mCompletionSemaphore != nullptr, "Failed to create completion semaphore");
+    // FIXED: Simplified to use only volatile bool - no semaphore needed
+    // Workers start in available state (true)
+    mIsrData.mAvailable = true;
 
-    // CRITICAL: Binary semaphores start at 0 (unavailable), but workers must start available
-    // Give the semaphore once to set it to 1 (available)
-    xSemaphoreGive(mIsrData.mCompletionSemaphore);
     // Initialize zero and one symbols to safe defaults
     mZero.duration0 = 0;
     mZero.level0 = 0;
@@ -181,10 +154,6 @@ RmtWorker::RmtWorker()
 }
 
 RmtWorker::~RmtWorker() {
-    if (mIsrData.mCompletionSemaphore) {
-        vSemaphoreDelete(mIsrData.mCompletionSemaphore);
-        mIsrData.mCompletionSemaphore = nullptr;
-    }
     if (mIntrHandle) {
         esp_intr_free(mIntrHandle);
         mIntrHandle = nullptr;
@@ -198,7 +167,7 @@ RmtWorker::~RmtWorker() {
 
 bool RmtWorker::initialize(uint8_t worker_id) {
     mWorkerId = worker_id;
-    // Availability tracked by semaphore count (already initialized to 1 in constructor)
+    // FIXED: Availability tracked by volatile boolean (already initialized to true in constructor)
 
     // Channel creation is deferred to configure() where we know the actual GPIO pin.
     // This avoids needing placeholder GPIOs and is safe for static initialization.
@@ -206,6 +175,8 @@ bool RmtWorker::initialize(uint8_t worker_id) {
 
     return true;
 }
+
+
 
 bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Creating RMT TX channel for GPIO " << (int)pin);
@@ -344,6 +315,10 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
 
     // Clean up old GPIO pin: set to input with pulldown
     if (old_pin != GPIO_NUM_NC) {
+        // Disconnect GPIO from RMT controller BEFORE reconfiguration
+        // This prevents the RMT from driving the old pin during pin changes
+        gpio_matrix_out(old_pin, SIG_GPIO_OUT_IDX, 0, 0);
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Disconnected GPIO " << (int)old_pin << " from RMT");
         gpio_set_direction(old_pin, GPIO_MODE_INPUT);
         gpio_pulldown_en(old_pin);
         gpio_pullup_dis(old_pin);
@@ -372,7 +347,7 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Reconfiguration needed (previous pin=" << (int)mCurrentPin << ")");
 
-    // Wait for active transmission (check semaphore availability)
+    // Wait for active transmission
     if (!isAvailable()) {
         FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Waiting for active transmission to complete");
         waitForCompletion();
@@ -408,6 +383,7 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
 
     // Convert from ns to ticks (divide by 100 since 1 tick = 100ns at 10MHz)
     auto ns_to_ticks = [](uint32_t ns) -> uint16_t {
+        static_assert(FASTLED_RMT5_HZ == 10000000, "FASTLED_RMT5_HZ is not 10MHz");
         return static_cast<uint16_t>((ns + 50) / 100);  // Round to nearest tick
     };
 
@@ -454,13 +430,9 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Configuring GPIO " << (int)mCurrentPin << " for RMT output");
         gpio_set_direction(mCurrentPin, GPIO_MODE_OUTPUT);
         
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
-        int signal_idx = RMT_SIG_PAD_OUT0_IDX + mChannelId;
+
+        int signal_idx = RMT_SIG_PAD_IDX + mChannelId;
         gpio_matrix_out(mCurrentPin, signal_idx, false, false);
-#else
-        int signal_idx = RMT_SIG_OUT0_IDX + mChannelId;
-        gpio_matrix_out(mCurrentPin, signal_idx, false, false);
-#endif
 
         esp_err_t ret = rmt_enable(mChannel);
         if (ret != ESP_OK) {
@@ -507,36 +479,22 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
 }
 
 void RmtWorker::waitForCompletion() {
-    // Block on semaphore until ISR signals completion
-    // Semaphore state: 0 = busy (will block), 1 = done (returns immediately)
-    //
-    // WARNING: This CONSUMES the semaphore (takes it from 1→0)
-    // Calling this twice without markAsAvailable() in between will DEADLOCK!
-    //
-    // Correct usage pattern (enforced by ChannelEngineRMT):
-    //   1. markAsUnavailable() - take semaphore (1→0)
-    //   2. transmit()
-    //   3. ISR gives semaphore (0→1)
-    //   4. waitForCompletion() - takes semaphore (1→0)
-    //   5. markAsAvailable() - gives semaphore (0→1)
-    //
-    // After step 5, calling waitForCompletion() again will deadlock because
-    // there's no ISR to give the semaphore. The engine MUST call markAsAvailable()
-    // between waitForCompletion() calls.
-    xSemaphoreTake(mIsrData.mCompletionSemaphore, portMAX_DELAY);
+    // FIXED: No semaphore needed - engine polls isAvailable() instead
+    // Spin-wait until ISR sets mAvailable = true
+    while (!isAvailable()) {
+        // Yield to other tasks while waiting
+        taskYIELD();
+    }
 }
 
 void RmtWorker::markAsAvailable() {
-    // Called by pool to mark worker as available
-    // Give semaphore to set count to 1 (available)
-    xSemaphoreGive(mIsrData.mCompletionSemaphore);
+    // Set volatile availability flag to true
+    mIsrData.mAvailable = true;
 }
 
 void RmtWorker::markAsUnavailable() {
-    // Called by pool to mark worker as unavailable
-    // Take semaphore to set count to 0 (busy)
-    // Use non-blocking take - if already taken (count=0), this is a no-op
-    xSemaphoreTake(mIsrData.mCompletionSemaphore, 0);
+    // Set volatile availability flag to false
+    mIsrData.mAvailable = false;
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -701,7 +659,7 @@ FL_DISABLE_WARNING_POP
 //       Registered via rmt_tx_register_event_callbacks() in allocateInterrupt()
 bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data) {
     RmtWorker* worker = static_cast<RmtWorker*>(user_data);
-    worker->handleDoneInterrupt();
+    worker->mIsrData.mAvailable = true;
     return false;  // Don't yield from ISR
 }
 
@@ -729,18 +687,8 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 
     // Check done interrupt (transmission complete)
     if (intr_st & (1 << tx_done_bit)) {
-        // OPTIMIZATION: Inline handleDoneInterrupt() to eliminate function call overhead
-        // Access IsrData directly with minimal pointer chasing
-        IsrData* isr_data = &worker->mIsrData;
-
-        // Signal completion to waiting thread
-        // Semaphore give sets count to 1 (available state)
-        portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-        xSemaphoreGiveFromISR(isr_data->mCompletionSemaphore, &xHigherPriorityTaskWoken);
-
-        if (xHigherPriorityTaskWoken == pdTRUE) {
-            portYIELD_FROM_ISR();
-        }
+        // Signal completion by setting availability flag
+        worker->mIsrData.mAvailable = true;
 
         RMT.int_clr.val = (1 << tx_done_bit);
     }
@@ -755,21 +703,7 @@ void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
 }
 FL_DISABLE_WARNING_POP
 
-// Handle done interrupt (transmission complete)
-// NOTE: Only used by callback API path (FASTLED_RMT5_USE_DIRECT_ISR=0)
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
-    // Signal completion to waiting thread
-    // Semaphore give sets count to 1 (available state)
-    portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    xSemaphoreGiveFromISR(mIsrData.mCompletionSemaphore, &xHigherPriorityTaskWoken);
 
-    if (xHigherPriorityTaskWoken == pdTRUE) {
-        portYIELD_FROM_ISR();
-    }
-}
-FL_DISABLE_WARNING_POP
 
 // Extract channel ID from opaque handle
 uint32_t RmtWorker::getChannelIdFromHandle(rmt_channel_handle_t handle) {

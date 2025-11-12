@@ -47,8 +47,7 @@ class ChannelEngineRMT;
  *   1. Direct ISR (default): Low-level ISR with direct register access (faster)
  *   2. Callback API: High-level RMT5 driver callbacks (simpler, higher overhead)
  */
-// Forward declare extern "C" function for friend declaration
-extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void);
+
 
 class RmtWorker : public IRmtWorkerBase {
 public:
@@ -75,9 +74,9 @@ public:
     bool initialize(uint8_t worker_id) override;
 
     // Check if worker is available for assignment
-    // Availability is determined by semaphore count (1 = available, 0 = busy)
+    // Availability is now tracked separately from completion signaling
     bool isAvailable() const override {
-        return uxSemaphoreGetCount(mIsrData.mCompletionSemaphore) > 0;
+        return mIsrData.mAvailable;
     }
 
     // Configuration (called before each transmission)
@@ -106,10 +105,10 @@ public:
     void IRAM_ATTR fillNextHalf();
 
     // ISR-optimized data structure (minimal pointer chasing for interrupt handlers)
-    // This struct groups the minimal data needed by ISR for completion signaling
-    // NOTE: Worker availability is tracked by semaphore count (1 = available, 0 = busy)
+    // FIXED: Simplified to use only volatile bool - no semaphore needed
+    // The engine polls isAvailable() to check completion instead of blocking
     struct IsrData {
-        SemaphoreHandle_t mCompletionSemaphore;  // Completion synchronization + availability flag
+        volatile bool mAvailable;  // Availability flag (true = available, false = busy)
     };
 
 private:
