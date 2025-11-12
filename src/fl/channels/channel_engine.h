@@ -111,6 +111,7 @@ protected:
     virtual void beginTransmission(fl::span<const ChannelDataPtr> channelData) = 0;
 
     void setLastError(const fl::string& error) { mLastError = error; }
+    void clearError() { mLastError.clear(); }
 
     /// @brief Protected constructor (base class pattern)
     ChannelEngine() = default;
