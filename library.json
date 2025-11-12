@@ -69,6 +69,7 @@
             "+<third_party/libhelix_mp3/real/arm/*.S>",
             "+<fx/**/*.cpp>",
             "+<fl/**/*.cpp>",
+            "+<ftl/**/*.cpp>",
             "+<sensors/**/*.cpp>"
         ],
         "libArchive": true
