@@ -146,21 +146,9 @@ ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
     // Process pending channels if workers have become available
     processPendingChannels();
 
-    // If no active workers and no pending channels, check if all pin resets are complete
+    // If no active workers and no pending channels, we're ready
     if (mActiveWorkers.empty() && mPendingChannels.empty()) {
-        // Check if any pins are still in reset period
-        uint32_t now = ::micros();
-        bool anyPinInReset = false;
-        for (auto it = mPinResetTimers.begin(); it != mPinResetTimers.end(); ++it) {
-            if (!(*it).second.done(now)) {
-                anyPinInReset = true;
-                break;
-            }
-        }
-        if (!anyPinInReset) {
-            mPinResetTimers.clear();
-        }
-        return anyPinInReset ? EngineState::BUSY : EngineState::READY;
+        return EngineState::READY;
     }
 
     // Separate workers into still-active vs completed
@@ -182,14 +170,9 @@ ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
             ++i;
         }
     }
-    // Release completed workers and start their reset timers
-    uint32_t now = ::micros();
+    // Release completed workers
     for (const WorkerInfo& info : justRetired) {
         releaseWorker(info.worker);
-        // Mark the reset timer for this pin
-        if (info.reset_us > 0) {
-            mPinResetTimers[info.pin] = Timeout(now, info.reset_us);
-        }
     }
     return EngineState::BUSY;
 }
@@ -202,26 +185,6 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
         setLastError(errMsg);
         return;
     }
-
-    // wait for all reset periods to complete
-    while (true) {
-        uint32_t now = ::micros();
-        bool allDone = true;
-        for (auto it = mPinResetTimers.begin(); it != mPinResetTimers.end(); ++it) {
-            if (!(*it).second.done(now)) {
-                allDone = false;
-                break;
-            }
-        }
-        // All reset periods are done
-        if (allDone) {
-            break;
-        }
-        // Spin-wait for reset period to complete
-        fl::delayMicroseconds(10);
-    }
-
-    mPinResetTimers.clear();
 
     // Re-order so that strips with the smallest payloads go first, this helps
     // async transmissions since we have to wait until all channels are at least
@@ -288,8 +251,6 @@ bool ChannelEngineRMT::tryStartPendingChannel(const PendingChannel& pending) {
 
     // Track this worker with its pin and reset time
     mActiveWorkers.push_back(WorkerInfo{worker, pending.pin, pending.reset_us});
-    // This doesn't work.
-    mPinResetTimers[pending.pin] = Timeout(::micros(), pending.reset_us);
 
     ESP_LOGD(RMT_ENGINE_TAG, "Started transmission for pin %d", pending.pin);
     return true;

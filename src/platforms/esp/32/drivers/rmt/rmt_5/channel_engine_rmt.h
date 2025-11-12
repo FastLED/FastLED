@@ -87,9 +87,6 @@ private:
     /// @brief Track workers that can be released back to the pool
     fl::vector_inlined<WorkerInfo, 16> mAvailableWorkers;
 
-    /// @brief Track reset timers for each pin (microsecond-based)
-    fl::unordered_map<int, Timeout> mPinResetTimers;
-
     /// @brief Pending channels waiting for available workers
     fl::vector_inlined<PendingChannel, 16> mPendingChannels;
 
