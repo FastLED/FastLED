@@ -8,34 +8,33 @@
 #include "crgb.h"
 #include "eorder.h"
 #include "pixel_iterator.h"
-#include "idf5_rmt.h"
+#include "fl/channels/channel_data.h"
+#include "fl/channels/channel_engine.h"
+#include "channel_engine_rmt.h"
 #include "fl/chipsets/timing_traits.h"
+#include "fl/singleton.h"
+
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
 class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Reference timing values from the TIMING type
-    enum : uint32_t {
-        T1 = TIMING::T1,
-        T2 = TIMING::T2,
-        T3 = TIMING::T3
-    };
+    // Channel data for transmission
+    ChannelDataPtr mChannelData;
 
-    // -- The actual controller object for ESP32
-    fl::RmtController5 mRMTController;
+    // Channel engine reference (singleton)
+    ChannelEngine* mEngine;
 
-        // -- Verify that the pin is valid
+    // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
-    static fl::RmtController5::DmaMode DefaultDmaMode()
-    {
-        return fl::RmtController5::DMA_AUTO;
-    }
-
 public:
-    ClocklessRMT(): mRMTController(DATA_PIN, to_runtime_timing<TIMING>(), DefaultDmaMode(), WAIT_TIME)
+    ClocklessRMT()
+        : mEngine(fl::Singleton<ChannelEngineRMT>::instance())
     {
+        // Create channel data with pin and timing configuration
+        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+        mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 
     void init() override { }
@@ -43,18 +42,23 @@ public:
 
 protected:
 
-
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        mRMTController.loadPixelData(iterator);
-    }
+        // Safety check: don't modify buffer if engine is currently transmitting it
+        if (mChannelData->isInUse()) {
+            FL_ASSERT(false, "ClocklessRMT: Skipping update - buffer in use by engine");
+            return;
+        }
 
-    virtual void endShowLeds(void *data) override
-    {
-        CPixelLEDController<RGB_ORDER>::endShowLeds(data);
-        mRMTController.showPixels();
+        // Convert pixels to encoded byte data
+        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
+        auto& data = mChannelData->getData();
+        data.clear();
+        iterator.writeWS2812(&data);
+
+        // Enqueue for transmission (will be sent when engine->show() is called)
+        mEngine->enqueue(mChannelData);
     }
 };
 }  // namespace fl
