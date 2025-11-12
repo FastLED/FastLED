@@ -10,6 +10,8 @@ on:
       - 'ci/**'
       - '.github/workflows/build_unit_test.yml'
       - 'CMakeLists.txt'
+      - 'meson.build'
+      - 'pyproject.toml'
       - 'test'
       - 'test.py'
   pull_request_target:
@@ -21,6 +23,8 @@ on:
       - 'ci/**'
       - '.github/workflows/build_unit_test.yml'
       - 'CMakeLists.txt'
+      - 'meson.build'
+      - 'pyproject.toml'
       - 'test'
       - 'test.py'
 
