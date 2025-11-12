@@ -455,7 +455,7 @@ def setup_meson_build(
 
     # Check for obsolete zig wrapper artifacts before proceeding
     # These wrappers were used in the old zig-based compiler system and must be removed
-    meson_dir = source_dir / ".meson"
+    meson_dir = source_dir / ".build" / "meson"
     if meson_dir.exists():
         obsolete_wrappers = list(meson_dir.glob("zig-*-wrapper.exe"))
         if obsolete_wrappers:
@@ -463,7 +463,7 @@ def setup_meson_build(
             _ts_print("[MESON] ❌ ERROR: Obsolete zig wrapper artifacts detected!")
             _ts_print("[MESON]")
             _ts_print(
-                "[MESON] Found old zig-based wrapper executables in .meson/ directory:"
+                "[MESON] Found old zig-based wrapper executables in .build/meson/ directory:"
             )
             for wrapper in obsolete_wrappers:
                 _ts_print(f"[MESON]   - {wrapper.name}")
@@ -473,15 +473,15 @@ def setup_meson_build(
             )
             _ts_print("[MESON] and are no longer compatible with clang-tool-chain.")
             _ts_print("[MESON]")
-            _ts_print("[MESON] To fix this issue, delete the .meson directory:")
-            _ts_print("[MESON]   rm -rf .meson")
+            _ts_print("[MESON] To fix this issue, delete the .build/meson directory:")
+            _ts_print("[MESON]   rm -rf .build/meson")
             _ts_print("[MESON]")
             _ts_print("[MESON] Then run your build command again. The system will use")
             _ts_print("[MESON] clang-tool-chain wrappers instead.")
             _ts_print("=" * 80)
             raise RuntimeError(
-                "Obsolete zig wrapper artifacts detected in .meson/ directory. "
-                "Delete .meson/ directory and try again."
+                "Obsolete zig wrapper artifacts detected in .build/meson/ directory. "
+                "Delete .build/meson/ directory and try again."
             )
 
     # Get clang-tool-chain wrapper commands
