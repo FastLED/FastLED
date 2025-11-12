@@ -22,7 +22,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include "fl/force_inline.h"
-#include "ftl/assert.h"
+#include "fl/assert.h"
 #include "fl/cstring.h"
 #include "fl/compiler_control.h"
 #include "fl/log.h"
@@ -553,7 +553,7 @@ FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     FASTLED_REGISTER uint32_t pixel_u32 = byte_val;
     pixel_u32 <<= 24;  // Shift to MSB position
 
-    // Use temporary buffer to avoid volatile writes in loop (RMT4 pattern)
+    #pragma unroll
     for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
         out[j].val = (pixel_u32 & 0x80000000UL) ? one_val : zero_val;
         pixel_u32 <<= 1;
