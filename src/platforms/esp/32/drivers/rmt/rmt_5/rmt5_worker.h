@@ -40,9 +40,12 @@ class ChannelEngineRMT;
  * - Implements RMT4-style interrupt-driven buffer refill
  *
  * Implementation:
- * - Ping-pong buffer transmission with Level 3 ISR
+ * - Ping-pong buffer transmission with interrupt-driven refill
  * - Manual buffer refill via fillNextHalf() in interrupt context
  * - Direct RMT memory access like RMT4
+ * - Two interrupt handling modes (selectable via FASTLED_RMT5_USE_DIRECT_ISR):
+ *   1. Direct ISR (default): Low-level ISR with direct register access (faster)
+ *   2. Callback API: High-level RMT5 driver callbacks (simpler, higher overhead)
  */
 // Forward declare extern "C" function for friend declaration
 extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void);
@@ -143,9 +146,9 @@ private:
     // Completion synchronization (replaces spin-wait)
     SemaphoreHandle_t mCompletionSemaphore;
 
-    // ISR handlers
-    static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (currently unused)
-    static bool IRAM_ATTR onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data);  // RMT5 callback
+    // ISR handlers (selected via FASTLED_RMT5_USE_DIRECT_ISR)
+    static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (used when FASTLED_RMT5_USE_DIRECT_ISR=1)
+    static bool IRAM_ATTR onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data);  // RMT5 callback (used when FASTLED_RMT5_USE_DIRECT_ISR=0)
     void IRAM_ATTR handleThresholdInterrupt();
     void IRAM_ATTR handleDoneInterrupt();
 

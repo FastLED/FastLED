@@ -30,6 +30,13 @@ FL_EXTERN_C_END
 
 #define RMT5_WORKER_TAG "rmt5_worker"
 
+// RMT interrupt handling mode selection
+// When 1: Use low-level ISR with direct register access (current default, faster)
+// When 0: Use high-level RMT5 callback API (simpler, but may have higher overhead)
+#ifndef FASTLED_RMT5_USE_DIRECT_ISR
+#define FASTLED_RMT5_USE_DIRECT_ISR 1
+#endif
+
 // Define rmt_item32_t union (compatible with RMT4)
 union rmt_item32_t {
     struct {
@@ -275,6 +282,9 @@ bool RmtWorker::allocateInterrupt() {
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating interrupt (first transmit)");
 
+#if FASTLED_RMT5_USE_DIRECT_ISR
+    // Low-level ISR approach: Direct register access with manual interrupt handling
+
     // Enable threshold interrupt using direct register access
     uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
     RMT.int_ena.val |= (1 << thresh_int_bit);
@@ -295,7 +305,23 @@ bool RmtWorker::allocateInterrupt() {
         return false;
     }
 
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Direct ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
+#else
+    // High-level callback API approach: Use RMT5 driver callbacks
+
+    rmt_tx_event_callbacks_t callbacks = {};
+    callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
+
+    esp_err_t ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
+
+    if (ret != ESP_OK) {
+        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to register callbacks: " << esp_err_to_name(ret) << " (0x" << ret << ")");
+        return false;
+    }
+
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: High-level callbacks registered successfully");
+#endif
+
     mInterruptAllocated = true;
     return true;
 }
@@ -538,7 +564,6 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
     volatile rmt_item32_t* pItem = mRMT_mem_ptr;
-    uint8_t currentHalf = mWhichHalf;
 
     // Safety: Calculate buffer end pointer
     volatile rmt_item32_t* pBufferEnd = mRMT_mem_start + MAX_PULSES;
@@ -571,13 +596,6 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
     mWhichHalf = nextHalf;
 
     mRMT_mem_ptr = pItem;
-
-    // Debug logging - track buffer refills
-    // Note: Use ets_printf for ISR-safe logging (ESP_LOG* may not be ISR-safe)
-    // Only log if significantly more data remaining (avoid spam at end)
-    if (mCur < mNumBytes - 16) {
-        ets_printf("W%d: fillHalf=%d, byte=%d/%d\n", mWorkerId, currentHalf, mCur, mNumBytes);
-    }
 }
 FL_DISABLE_WARNING_POP
 
@@ -668,6 +686,8 @@ void IRAM_ATTR RmtWorker::tx_start() {
 FL_DISABLE_WARNING_POP
 
 // RMT5 TX done callback (called from ISR context)
+// NOTE: Used when FASTLED_RMT5_USE_DIRECT_ISR=0 (high-level callback API)
+//       Registered via rmt_tx_register_event_callbacks() in allocateInterrupt()
 bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data) {
     RmtWorker* worker = static_cast<RmtWorker*>(user_data);
     worker->handleDoneInterrupt();
@@ -675,7 +695,8 @@ bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, cons
 }
 
 // Global ISR handler (dispatches to instance handlers)
-// NOTE: This is currently unused - using RMT5 high-level callbacks instead
+// NOTE: Used when FASTLED_RMT5_USE_DIRECT_ISR=1 (default)
+//       Registered via esp_intr_alloc() in allocateInterrupt()
 void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     RmtWorker* worker = static_cast<RmtWorker*>(arg);
     uint32_t intr_st = RMT.int_st.val;
@@ -706,11 +727,8 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
-    // Debug: Track threshold interrupts (per-worker instance variable, not static)
+    // Track threshold interrupts for debugging (no logging in ISR)
     mThresholdIsrCount++;
-    if (mThresholdIsrCount % 10 == 0) {  // Log every 10th to reduce spam
-        ets_printf("W%d: THRESHOLD_ISR #%lu\n", mWorkerId, mThresholdIsrCount);
-    }
 
     fillNextHalf();
 }
@@ -720,9 +738,6 @@ FL_DISABLE_WARNING_POP
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
-    // Debug: Track transmission completion
-    ets_printf("W%d: TX DONE - sent %d/%d bytes\n", mWorkerId, mCur, mNumBytes);
-
     // Mark worker available FIRST (volatile write ensures visibility)
     // Order matters: set mAvailable = true BEFORE signaling semaphore
     mAvailable = true;
