@@ -685,7 +685,7 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
     // Check threshold interrupt (buffer half empty) - if enabled
     // Note: Currently disabled - using one-shot mode
     if (intr_st & (1 << tx_next_bit)) {
-        worker->handleThresholdInterrupt();
+        worker->fillNextHalf();
         RMT.int_clr.val = (1 << tx_next_bit);
     }
 
@@ -697,16 +697,6 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
         RMT.int_clr.val = (1 << tx_done_bit);
     }
 }
-
-// Handle threshold interrupt (refill next buffer half)
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
-    // OPTIMIZATION: Removed mThresholdIsrCount++ - ISR should be as fast as possible
-    fillNextHalf();
-}
-FL_DISABLE_WARNING_POP
-
 
 
 // Extract channel ID from opaque handle

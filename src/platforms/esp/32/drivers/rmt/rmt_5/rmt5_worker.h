@@ -163,8 +163,6 @@ private:
     // ISR handlers (selected via FASTLED_RMT5_USE_DIRECT_ISR)
     static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (used when FASTLED_RMT5_USE_DIRECT_ISR=1)
     static bool IRAM_ATTR onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data);  // RMT5 callback (used when FASTLED_RMT5_USE_DIRECT_ISR=0)
-    void IRAM_ATTR handleThresholdInterrupt();
-    void IRAM_ATTR handleDoneInterrupt();
 
     // Helper: allocate interrupt (lazy, called from first transmit())
     bool allocateInterrupt();
