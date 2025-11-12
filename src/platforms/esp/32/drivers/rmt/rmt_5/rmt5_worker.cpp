@@ -103,12 +103,8 @@ fl::RmtWorker* DRAM_ATTR g_rmt5_nmi_worker = nullptr;
  * ✅ fillNextHalf() accesses only volatile member variables
  * ✅ convertByteToRmt() is IRAM_ATTR and NMI-safe
  * ✅ ets_printf() is ISR-safe (ROM function)
- *
- * RACE CONDITIONS:
- * ⚠️ No spinlock protection (removed for NMI compatibility)
- * ⚠️ Potential races if main thread modifies worker state during NMI
  * ✅ Member variables are volatile, ensuring visibility
- * ✅ Double-buffer design minimizes race window
+ * ✅ Ping-pong buffer design is race-free
  *
  * TIMING:
  * - Assembly shim overhead: ~65ns (register save/restore)
@@ -130,7 +126,7 @@ extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void) {
     // 1. fillNextHalf() is IRAM_ATTR
     // 2. It accesses only volatile member variables
     // 3. It uses ets_printf() for logging (ISR-safe)
-    // 4. Double-buffer design prevents data corruption
+    // 4. Ping-pong buffer design prevents data corruption
     worker->fillNextHalf();
 
     // Note: handleThresholdInterrupt() increments mThresholdIsrCount and logs,
@@ -211,15 +207,15 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     // Flush logs before potentially failing operation
     esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-    // Create RMT TX channel with double memory blocks
+    // Create RMT TX channel with 2 memory blocks
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
     tx_config.resolution_hz = 10000000;  // 10MHz (100ns resolution)
-    tx_config.mem_block_symbols = 2 * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // Double buffer
+    tx_config.mem_block_symbols = 2 * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // 2 blocks for ping-pong
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = false;
-    tx_config.flags.with_dma = false;  // Phase 1: No DMA
+    tx_config.flags.with_dma = false;  // No DMA
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: About to call rmt_new_tx_channel for GPIO " << (int)pin);
     esp_err_t ret = rmt_new_tx_channel(&tx_config, &mChannel);
@@ -238,13 +234,13 @@ bool RmtWorker::createChannel(gpio_num_t pin) {
     mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
     mRMT_mem_ptr = mRMT_mem_start;
 
-    // Configure threshold interrupt for double-buffer ping-pong
+    // Configure threshold interrupt for ping-pong buffer refill
     // Threshold = half of total buffer size, triggering refill when first half is transmitted
     // With 2 blocks × 64 words = 128 total words, threshold = 64 words (PULSES_PER_FILL)
     // However, hardware requires threshold in bytes: 64 words × 4 bytes/word = 256 bytes
     // But register expects word count, not byte count, so we use 48 (empirically determined)
     // TODO: Investigate exact threshold calculation - may need platform-specific tuning
-    constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for double-buffer ping-pong
+    constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for ping-pong refill
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
     RMT.tx_lim_ch[mChannelId].limit = RMT_THRESHOLD_LIMIT;

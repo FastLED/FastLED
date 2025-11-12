@@ -31,16 +31,16 @@ namespace fl {
 class RmtWorkerPool;
 
 /**
- * RmtWorker - Low-level RMT channel worker with double-buffered ping-pong
+ * RmtWorker - Low-level RMT channel worker with ping-pong buffers
  *
  * Architecture:
- * - Owns persistent RMT hardware channel and double-buffer state
+ * - Owns persistent RMT hardware channel and buffer state
  * - Does NOT own pixel data - uses pointers to controller-owned buffers
  * - Supports reconfiguration for different pins/timings (worker pooling)
  * - Implements RMT4-style interrupt-driven buffer refill
  *
- * Phase 1 Implementation:
- * - Double-buffered transmission with Level 3 ISR
+ * Implementation:
+ * - Ping-pong buffer transmission with Level 3 ISR
  * - Manual buffer refill via fillNextHalf() in interrupt context
  * - Direct RMT memory access like RMT4
  */
@@ -84,8 +84,8 @@ public:
     // Get worker ID
     uint8_t getWorkerId() const override { return mWorkerId; }
 
-    // Get worker type (double-buffer)
-    WorkerType getWorkerType() const override { return WorkerType::DOUBLE_BUFFER; }
+    // Get worker type
+    WorkerType getWorkerType() const override { return WorkerType::STANDARD; }
 
     // Check if channel has been created
     bool hasChannel() const override { return mChannel != nullptr; }
@@ -96,7 +96,7 @@ public:
     // Mark worker as unavailable (called by pool under spinlock)
     void markAsUnavailable() override;
 
-    // Double buffer refill (interrupt context) - public for NMI access
+    // Buffer refill (interrupt context) - public for NMI access
     void IRAM_ATTR fillNextHalf();
 
 private:
@@ -128,7 +128,7 @@ private:
     rmt_item32_t mZero;
     rmt_item32_t mOne;
 
-    // Double buffer state (like RMT4)
+    // Ping-pong buffer state (like RMT4)
     volatile int mCur;               // Current byte position in pixel data
     volatile uint8_t mWhichHalf;     // Which half of buffer (0 or 1)
     volatile rmt_item32_t* mRMT_mem_start;  // Start of RMT channel memory

@@ -159,17 +159,19 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
             timingConfig.name
         };
 
-        // Acquire worker from pool
+        // Acquire worker from pool (thin pool - just returns an available worker)
         auto& pool = RmtWorkerPool::getInstance();
-        IRmtWorkerBase* worker = pool.tryAcquireWorker(
-            data->getSize(),
-            static_cast<gpio_num_t>(pin),
-            timing,
-            timingConfig.reset_us * 1000  // Convert microseconds to nanoseconds
-        );
+        IRmtWorkerBase* worker = pool.tryAcquireWorker();
 
         if (!worker) {
             FL_WARN("Failed to acquire RMT worker for pin " << pin);
+            continue;
+        }
+
+        // Configure the worker with pin and timing
+        if (!worker->configure(static_cast<gpio_num_t>(pin), timing, timingConfig.reset_us * 1000)) {
+            FL_WARN("Failed to configure RMT worker for pin " << pin);
+            pool.releaseWorker(worker);
             continue;
         }
 

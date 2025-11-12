@@ -8,20 +8,15 @@
 
 #include "rmt5_worker_pool.h"
 
-#include <Arduino.h>  // ok include - needed for delayMicroseconds()
-
 FL_EXTERN_C_BEGIN
 
 #include "esp_log.h"
-#include "freertos/task.h"
-#include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 FL_EXTERN_C_END
 
 #include "fl/assert.h"
 #include "fl/warn.h"
 #include "fl/log.h"
-#include "fl/chipsets/led_timing.h"
 
 #define RMT5_POOL_TAG "rmt5_worker_pool"
 
@@ -35,23 +30,15 @@ RmtWorkerPool& RmtWorkerPool::getInstance() {
 
 RmtWorkerPool::RmtWorkerPool()
     : mInitialized(false)
-    
-    , mExpectedChannels(0)
-    , mCreatedChannels(0)
 {
 }
 
 RmtWorkerPool::~RmtWorkerPool() {
-    // Clear alias vector first (before deleting) to avoid dangling pointers
-    // mWorkers is an alias for mDoubleBufferWorkers and contains the same pointers
-    mWorkers.clear();
-
-    // Clean up double-buffer workers
-    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
-        delete mDoubleBufferWorkers[i];
+    // Clean up workers
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
+        delete mWorkers[i];
     }
-    mDoubleBufferWorkers.clear();
-
+    mWorkers.clear();
 }
 
 void RmtWorkerPool::initializeWorkersIfNeeded() {
@@ -69,249 +56,68 @@ void RmtWorkerPool::initializeWorkersIfNeeded() {
     }
 
     int max_workers = getMaxWorkers();
-    mExpectedChannels = max_workers;
-    mCreatedChannels = 0;
 
-
-
-    // Create K double-buffer workers (current default)
-    // HYBRID MODE: Currently only creating double-buffer workers
-    //
-    // Rationale: Each worker needs its own RMT hardware channel, and we only have K channels.
-    //
-    // Future hybrid approach could:
-    // 2. Dynamically reallocate channels based on strip sizes
-    // 3. Use DMA mode for large strips (ESP32-S3/C6 only)
-    //
-    // For now: All workers are double-buffer type, pool selects based on size at acquire time
-    ESP_LOGD(RMT5_POOL_TAG, "Starting worker creation loop...");
+    // Create K workers
+    ESP_LOGD(RMT5_POOL_TAG, "Creating %d workers...", max_workers);
     for (int i = 0; i < max_workers; i++) {
-        ESP_LOGD(RMT5_POOL_TAG, "");
-        ESP_LOGD(RMT5_POOL_TAG, "--- Creating worker %d/%d ---", i + 1, max_workers);
-        ESP_LOGD(RMT5_POOL_TAG, "Allocating RmtWorker object...");
+        ESP_LOGD(RMT5_POOL_TAG, "Creating worker %d/%d", i + 1, max_workers);
         RmtWorker* worker = new RmtWorker();
-        ESP_LOGD(RMT5_POOL_TAG, "Worker object allocated at %p", worker);
 
-        ESP_LOGD(RMT5_POOL_TAG, "Calling worker->initialize(%d)...", i);
+        ESP_LOGD(RMT5_POOL_TAG, "Initializing worker %d", i);
         if (!worker->initialize(static_cast<uint8_t>(i))) {
-            FL_WARN("FAILED to initialize double-buffer worker " << i << " - skipping");
+            FL_WARN("Failed to initialize worker " << i << " - skipping");
             delete worker;
             continue;
         }
         FL_LOG_RMT("Worker " << i << " initialized successfully");
 
-        ESP_LOGD(RMT5_POOL_TAG, "Adding worker %d to pool vectors...", i);
-        mDoubleBufferWorkers.push_back(worker);
-        mWorkers.push_back(worker);  // Legacy support
-        ESP_LOGD(RMT5_POOL_TAG, "Worker %d added to pool (total workers: %zu)", i, mDoubleBufferWorkers.size());
+        mWorkers.push_back(worker);
     }
 
-
-    if (mDoubleBufferWorkers.size() == 0 ) {
+    if (mWorkers.size() == 0) {
         FL_WARN("FATAL: No workers initialized successfully!");
     }
 
     mInitialized = true;
-    FL_LOG_RMT("Pool initialized with " << mDoubleBufferWorkers.size() << " workers");
+    FL_LOG_RMT("Pool initialized with " << mWorkers.size() << " workers");
 }
 
-IRmtWorkerBase* RmtWorkerPool::acquireWorker(
-    int num_bytes,
-    gpio_num_t pin,
-    const ChipsetTiming& TIMING,
-    uint32_t reset_ns
-) {
-    // Extract timing values from struct
-    uint32_t t1 = TIMING.T1;
-    uint32_t t2 = TIMING.T2;
-    uint32_t t3 = TIMING.T3;
-
-
-
+IRmtWorkerBase* RmtWorkerPool::acquireWorker() {
     // Initialize workers on first use
-    ESP_LOGD(RMT5_POOL_TAG, "Calling initializeWorkersIfNeeded()...");
+    ESP_LOGD(RMT5_POOL_TAG, "acquireWorker() called");
     initializeWorkersIfNeeded();
-    ESP_LOGD(RMT5_POOL_TAG, "initializeWorkersIfNeeded() returned");
 
-
-    // Try to get an available worker immediately
-    ESP_LOGD(RMT5_POOL_TAG, "Entering critical section to search for available worker...");
-    IRmtWorkerBase* worker = nullptr;
-
-    ESP_LOGD(RMT5_POOL_TAG, "Available double-buffer workers: %zu", mDoubleBufferWorkers.size());
-
-    // Fall back to double-buffer worker
-    if (!worker) {
-        ESP_LOGD(RMT5_POOL_TAG, "Searching for available double-buffer worker...");
-        worker = findAvailableDoubleBufferWorker();
-        if (worker) {
-            ESP_LOGD(RMT5_POOL_TAG, "Found DOUBLE-BUFFER worker for %d bytes", num_bytes);
-        } else {
-            ESP_LOGD(RMT5_POOL_TAG, "No double-buffer worker available");
-        }
-    }
-
-    ESP_LOGD(RMT5_POOL_TAG, "Exited critical section - worker=%p", worker);
+    // Find an available worker
+    IRmtWorkerBase* worker = findAvailableWorker();
 
     if (worker) {
-        ESP_LOGD(RMT5_POOL_TAG, "Worker found! Configuring worker...");
-
-        // Check if this worker already has a channel (to track actual channel creation)
-        bool had_channel = worker->hasChannel();
-        ESP_LOGD(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
-
-        // Configure the worker before returning
-        ESP_LOGD(RMT5_POOL_TAG, "Calling worker->configure(pin=%d, t1=%d, t2=%d, t3=%d, reset_ns=%lu)...",
-                 (int)pin, t1, t2, t3, reset_ns);
-        if (!worker->configure(pin, TIMING, reset_ns)) {
-            FL_WARN("worker->configure() FAILED!");
-
-            // Configuration failed (likely channel creation failed due to exhaustion)
-            // Note: Worker state leak doesn't matter since abort() terminates program
-            // If this were changed to error handling, must release worker first
-
-            // STRICT MODE: Abort immediately with stack trace
-            FL_WARN("");
-            FL_WARN("========================================");
-            FL_WARN("FATAL: RMT CHANNEL EXHAUSTION");
-            FL_WARN("========================================");
-            FL_WARN("Expected:  " << mExpectedChannels << " RMT channels");
-            FL_WARN("Created:   " << mCreatedChannels << " channels");
-            FL_WARN("Failed on: GPIO " << (int)pin << " (first acquisition)");
-            FL_WARN("========================================");
-            FL_WARN("");
-
-            // Stack trace from abort() will be printed by panic handler
-            abort();
-        } else {
-            ESP_LOGD(RMT5_POOL_TAG, "worker->configure() SUCCESS!");
-
-            // Successfully configured - track channel creation only if this is a NEW channel
-            if (!had_channel) {
-                mCreatedChannels++;
-                ESP_LOGD(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d",
-                         mCreatedChannels, mExpectedChannels, (int)pin);
-            } else {
-                ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d", (int)pin);
-            }
-
-            // Mark worker as unavailable now that configuration succeeded
-            // CRITICAL: Must be done AFTER configure() to avoid deadlock in configure()'s
-            // waitForCompletion() check (which blocks if mAvailable == false)
-            worker->markAsUnavailable();
-            ESP_LOGD(RMT5_POOL_TAG, "Worker marked as unavailable");
-
-            ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS - returning worker %p ===", worker);
-            return worker;
-        }
+        ESP_LOGD(RMT5_POOL_TAG, "Found available worker %p", worker);
+        // Mark worker as unavailable (acquired by caller)
+        worker->markAsUnavailable();
+        ESP_LOGD(RMT5_POOL_TAG, "Worker marked as unavailable");
+        return worker;
     }
 
-    // No workers available (or configuration failed) - poll until one frees up
-    // This implements the N > K blocking behavior
-    ESP_LOGD(RMT5_POOL_TAG, "No worker immediately available - entering polling loop...");
-    uint32_t poll_count = 0;
-    uint32_t config_fail_count = 0;  // Track consecutive configuration failures
-    const uint32_t MAX_CONFIG_RETRIES = 10;  // Limit retries before aborting
-    const uint32_t MAX_POLL_ITERATIONS = 50000;  // 5 seconds at 100µs per iteration
-
-    while (poll_count < MAX_POLL_ITERATIONS) {
-        poll_count++;
-        // Short delay before retry
-        delayMicroseconds(100);
-
-        if (poll_count % 50 == 0) {
-            ESP_LOGD(RMT5_POOL_TAG, "Polling iteration %u - searching for available worker...", poll_count);
-        }
-
-
-
-        if (!worker) {
-            worker = findAvailableDoubleBufferWorker();
-        }
-
-        if (worker) {
-            ESP_LOGD(RMT5_POOL_TAG, "Worker found in polling loop (iteration %u)", poll_count);
-
-            // Check if this worker already has a channel (to track actual channel creation)
-            bool had_channel = worker->hasChannel();
-            ESP_LOGD(RMT5_POOL_TAG, "Worker already has channel: %d", had_channel);
-
-            ESP_LOGD(RMT5_POOL_TAG, "Configuring worker in retry path...");
-            if (worker->configure(pin, TIMING, reset_ns)) {
-                ESP_LOGD(RMT5_POOL_TAG, "worker->configure() SUCCESS in retry path!");
-
-                // Success - track channel creation only if this is a NEW channel
-                if (!had_channel) {
-                    mCreatedChannels++;
-                    ESP_LOGD(RMT5_POOL_TAG, "NEW channel created: %d/%d for GPIO %d (retry path, iteration %u)",
-                             mCreatedChannels, mExpectedChannels, (int)pin, poll_count);
-                } else {
-                    ESP_LOGD(RMT5_POOL_TAG, "Existing channel reconfigured for GPIO %d (retry path, iteration %u)",
-                             (int)pin, poll_count);
-                }
-
-                // Mark worker as unavailable now that configuration succeeded
-                // CRITICAL: Must be done AFTER configure() to avoid deadlock
-                worker->markAsUnavailable();
-                ESP_LOGD(RMT5_POOL_TAG, "Worker marked as unavailable (retry path)");
-
-                ESP_LOGD(RMT5_POOL_TAG, "=== acquireWorker() SUCCESS (retry path) - returning worker %p ===", worker);
-                return worker;
-            }
-
-            ESP_LOGD(RMT5_POOL_TAG, "worker->configure() FAILED in retry path!");
-
-            // Configuration failed - likely RMT channel exhaustion
-            config_fail_count++;
-
-            if (config_fail_count >= MAX_CONFIG_RETRIES) {
-                // STRICT MODE: Abort with stack trace after exhausting retries
-                FL_WARN("");
-                FL_WARN("========================================");
-                FL_WARN("FATAL: RMT CHANNEL EXHAUSTION");
-                FL_WARN("========================================");
-                FL_WARN("Expected:  " << mExpectedChannels << " RMT channels");
-                FL_WARN("Created:   " << mCreatedChannels << " channels");
-                FL_WARN("Failed on: GPIO " << (int)pin << " (after " << config_fail_count << " retries)");
-                FL_WARN("========================================");
-                FL_WARN("");
-
-                // Stack trace from abort() will be printed by panic handler
-                abort();
-            }
-
-            FL_WARN("Worker configuration failed (attempt " << config_fail_count << "/" << MAX_CONFIG_RETRIES << ") - will retry");
-            worker = nullptr;
-        }
-
-        // Yield to FreeRTOS periodically to prevent watchdog
-        if (poll_count % 50 == 0) {  // Every 5ms
-            taskYIELD();
-        }
-
-        // Safety: Warn if waiting too long (more than 100ms = very unusual)
-        if (poll_count % 1000 == 0) {  // Every 100ms
-            FL_WARN("Still waiting for available worker after " << (poll_count / 10) << " ms");
-        }
-    }
-
-    // Timeout reached - no worker became available
-    FL_WARN("");
-    FL_WARN("========================================");
-    FL_WARN("WORKER ACQUISITION TIMEOUT");
-    FL_WARN("========================================");
-    FL_WARN("Failed to acquire worker for GPIO " << (int)pin << " after " << (poll_count / 10) << " ms");
-    FL_WARN("This usually indicates too many LED strips for available RMT channels");
-    FL_WARN("========================================");
-    FL_WARN("");
-
+    ESP_LOGD(RMT5_POOL_TAG, "No worker available");
     return nullptr;
+}
+
+IRmtWorkerBase* RmtWorkerPool::tryAcquireWorker() {
+    // Initialize workers on first use
+    initializeWorkersIfNeeded();
+
+    // Try to get an available worker (non-blocking, same as acquireWorker for now)
+    IRmtWorkerBase* worker = findAvailableWorker();
+    if (worker) {
+        worker->markAsUnavailable();
+    }
+    return worker;
 }
 
 void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
     FL_ASSERT(worker != nullptr, "RmtWorkerPool::releaseWorker called with null worker");
 
-    // Defensive: Ensure worker is marked available
+    // Mark worker as available
     // Note: ISR already sets mAvailable=true at end of handleDoneInterrupt(),
     // but this redundant write serves as defensive programming to ensure
     // the worker is always available after waitForCompletion() returns.
@@ -323,9 +129,9 @@ void RmtWorkerPool::releaseWorker(IRmtWorkerBase* worker) {
 int RmtWorkerPool::getAvailableCount() const {
     int count = 0;
 
-    // Count double-buffer workers
-    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
-        if (mDoubleBufferWorkers[i]->isAvailable()) {
+    // Count available workers
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
+        if (mWorkers[i]->isAvailable()) {
             count++;
         }
     }
@@ -333,39 +139,37 @@ int RmtWorkerPool::getAvailableCount() const {
     return count;
 }
 
-RmtWorker* RmtWorkerPool::findAvailableDoubleBufferWorker() {
-    ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - searching %zu workers",
-             mDoubleBufferWorkers.size());
+RmtWorker* RmtWorkerPool::findAvailableWorker() {
+    ESP_LOGD(RMT5_POOL_TAG, "Searching %zu workers for available worker",
+             mWorkers.size());
 
-    for (int i = 0; i < static_cast<int>(mDoubleBufferWorkers.size()); i++) {
-        bool available = mDoubleBufferWorkers[i]->isAvailable();
-        if (available) {
-            ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - found worker[%d]", i);
-            return mDoubleBufferWorkers[i];
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
+        if (mWorkers[i]->isAvailable()) {
+            ESP_LOGD(RMT5_POOL_TAG, "Found available worker[%d]", i);
+            return mWorkers[i];
         }
     }
-    ESP_LOGD(RMT5_POOL_TAG, "findAvailableDoubleBufferWorker() - no available workers found");
+    ESP_LOGD(RMT5_POOL_TAG, "No available workers found");
     return nullptr;
 }
 
-
 int RmtWorkerPool::getMaxWorkers() {
     // Platform-specific maximum worker count
-    // Double-buffering uses 2 memory blocks per worker, so actual worker count
+    // Workers use 2 memory blocks each, so actual worker count
     // is half the number of RMT TX channels
 
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2)
-    // ESP32-C3/C6/H2: 2 RMT TX channels ÷ 2 (double-buffer) = 1 worker
+    // ESP32-C3/C6/H2: 2 RMT TX channels ÷ 2 = 1 worker
     return 1;
 #elif defined(SOC_RMT_TX_CANDIDATES_PER_GROUP)
     // Modern ESP-IDF defines this (ESP32-S3, etc.)
-    // Divide by 2 for double-buffering
+    // Divide by 2 (2 memory blocks per worker)
     return SOC_RMT_TX_CANDIDATES_PER_GROUP / 2;
 #elif defined(CONFIG_IDF_TARGET_ESP32)
-    // ESP32: 8 RMT TX channels ÷ 2 (double-buffer) = 4 workers
+    // ESP32: 8 RMT TX channels ÷ 2 = 4 workers
     return 4;
 #elif defined(CONFIG_IDF_TARGET_ESP32S2) || defined(CONFIG_IDF_TARGET_ESP32S3)
-    // ESP32-S2/S3: 4 RMT TX channels ÷ 2 (double-buffer) = 2 workers
+    // ESP32-S2/S3: 4 RMT TX channels ÷ 2 = 2 workers
     return 2;
 #else
     // Conservative default

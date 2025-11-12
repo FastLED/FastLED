@@ -22,9 +22,8 @@ namespace fl {
  * IRmtWorkerBase - Abstract interface for RMT workers
  *
  * Purpose:
- * - Allows worker pool to manage both double-buffer and one-shot workers
- * - Enables hybrid mode (automatic selection based on strip size)
  * - Common interface for all worker types
+ * - Enables worker pool management
  */
 class IRmtWorkerBase {
 public:
@@ -55,8 +54,7 @@ public:
 
     // Worker type identification (for debugging/telemetry)
     enum class WorkerType {
-        DOUBLE_BUFFER,  // RmtWorker - interrupt-driven double-buffer
-        ONE_SHOT        // RmtWorkerOneShot - pre-encoded fire-and-forget
+        STANDARD    // RmtWorker - interrupt-driven with ping-pong buffers
     };
 
     virtual WorkerType getWorkerType() const = 0;
