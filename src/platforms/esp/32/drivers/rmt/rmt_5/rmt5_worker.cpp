@@ -26,6 +26,7 @@ FL_EXTERN_C_END
 #include "fl/cstring.h"
 #include "fl/compiler_control.h"
 #include "fl/log.h"
+#include "fl/register.h"
 #include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 #define RMT5_WORKER_TAG "rmt5_worker"
@@ -135,10 +136,6 @@ extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void) {
     // 3. It uses ets_printf() for logging (ISR-safe)
     // 4. Ping-pong buffer design prevents data corruption
     worker->fillNextHalf();
-
-    // Note: handleThresholdInterrupt() increments mThresholdIsrCount and logs,
-    // but we skip that here to minimize NMI latency. If needed, add:
-    // worker->mThresholdIsrCount++; // (this is volatile, so safe)
 }
 
 //=============================================================================
@@ -160,15 +157,17 @@ RmtWorker::RmtWorker()
     , mWhichHalf(0)
     , mRMT_mem_start(nullptr)
     , mRMT_mem_ptr(nullptr)
-    , mAvailable(true)
     , mPixelData(nullptr)
     , mNumBytes(0)
-    , mThresholdIsrCount(0)
-    , mCompletionSemaphore(nullptr)
 {
-    // Create binary semaphore for completion signaling
-    mCompletionSemaphore = xSemaphoreCreateBinary();
-    FL_ASSERT(mCompletionSemaphore != nullptr, "Failed to create completion semaphore");
+    // Initialize ISR data
+    // Create binary semaphore and set to 1 (available state)
+    mIsrData.mCompletionSemaphore = xSemaphoreCreateBinary();
+    FL_ASSERT(mIsrData.mCompletionSemaphore != nullptr, "Failed to create completion semaphore");
+
+    // CRITICAL: Binary semaphores start at 0 (unavailable), but workers must start available
+    // Give the semaphore once to set it to 1 (available)
+    xSemaphoreGive(mIsrData.mCompletionSemaphore);
     // Initialize zero and one symbols to safe defaults
     mZero.duration0 = 0;
     mZero.level0 = 0;
@@ -182,9 +181,9 @@ RmtWorker::RmtWorker()
 }
 
 RmtWorker::~RmtWorker() {
-    if (mCompletionSemaphore) {
-        vSemaphoreDelete(mCompletionSemaphore);
-        mCompletionSemaphore = nullptr;
+    if (mIsrData.mCompletionSemaphore) {
+        vSemaphoreDelete(mIsrData.mCompletionSemaphore);
+        mIsrData.mCompletionSemaphore = nullptr;
     }
     if (mIntrHandle) {
         esp_intr_free(mIntrHandle);
@@ -199,7 +198,7 @@ RmtWorker::~RmtWorker() {
 
 bool RmtWorker::initialize(uint8_t worker_id) {
     mWorkerId = worker_id;
-    mAvailable = true;
+    // Availability tracked by semaphore count (already initialized to 1 in constructor)
 
     // Channel creation is deferred to configure() where we know the actual GPIO pin.
     // This avoids needing placeholder GPIOs and is safe for static initialization.
@@ -373,8 +372,8 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Reconfiguration needed (previous pin=" << (int)mCurrentPin << ")");
 
-    // Wait for active transmission
-    if (!mAvailable) {
+    // Wait for active transmission (check semaphore availability)
+    if (!isAvailable()) {
         FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Waiting for active transmission to complete");
         waitForCompletion();
     }
@@ -433,13 +432,13 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
 }
 
 void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
-    FL_ASSERT(mAvailable, "RmtWorker::transmit called while already transmitting");
+    FL_ASSERT(isAvailable(), "RmtWorker::transmit called while already transmitting");
     FL_ASSERT(pixel_data != nullptr, "RmtWorker::transmit called with null pixel data");
 
     // Safety check in case FL_ASSERT is compiled out
-    if (pixel_data == nullptr || !mAvailable) {
+    if (pixel_data == nullptr || !isAvailable()) {
         FL_WARN("Worker[" << (int)mWorkerId << "]: Invalid transmit state - pixel_data=" << (void*)pixel_data
-                << ", available=" << mAvailable);
+                << ", available=" << isAvailable());
         return;
     }
 
@@ -491,9 +490,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     mCur = 0;
     mWhichHalf = 0;
     mRMT_mem_ptr = mRMT_mem_start;
-    mThresholdIsrCount = 0;  // Reset per-transmission counter
 
-    // mAvailable is set false by pool, not here
+    // Availability is controlled by semaphore (taken by pool before transmit)
 
     // Fill both halves initially (like RMT4)
     fillNextHalf();  // Fill half 0
@@ -510,20 +508,35 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
 
 void RmtWorker::waitForCompletion() {
     // Block on semaphore until ISR signals completion
-    // This replaces the unsafe spin-wait with proper synchronization
-    if (!mAvailable) {
-        xSemaphoreTake(mCompletionSemaphore, portMAX_DELAY);
-    }
+    // Semaphore state: 0 = busy (will block), 1 = done (returns immediately)
+    //
+    // WARNING: This CONSUMES the semaphore (takes it from 1→0)
+    // Calling this twice without markAsAvailable() in between will DEADLOCK!
+    //
+    // Correct usage pattern (enforced by ChannelEngineRMT):
+    //   1. markAsUnavailable() - take semaphore (1→0)
+    //   2. transmit()
+    //   3. ISR gives semaphore (0→1)
+    //   4. waitForCompletion() - takes semaphore (1→0)
+    //   5. markAsAvailable() - gives semaphore (0→1)
+    //
+    // After step 5, calling waitForCompletion() again will deadlock because
+    // there's no ISR to give the semaphore. The engine MUST call markAsAvailable()
+    // between waitForCompletion() calls.
+    xSemaphoreTake(mIsrData.mCompletionSemaphore, portMAX_DELAY);
 }
 
 void RmtWorker::markAsAvailable() {
-    // Called by pool to mark worker as available (volatile write)
-    mAvailable = true;
+    // Called by pool to mark worker as available
+    // Give semaphore to set count to 1 (available)
+    xSemaphoreGive(mIsrData.mCompletionSemaphore);
 }
 
 void RmtWorker::markAsUnavailable() {
-    // Called by pool to mark worker as unavailable (volatile write)
-    mAvailable = false;
+    // Called by pool to mark worker as unavailable
+    // Take semaphore to set count to 0 (busy)
+    // Use non-blocking take - if already taken (count=0), this is a no-op
+    xSemaphoreTake(mIsrData.mCompletionSemaphore, 0);
 }
 
 // Convert byte to 8 RMT items (one per bit)
@@ -560,22 +573,17 @@ FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
 FL_DISABLE_WARNING_POP
 
 // Fill next half of RMT buffer (interrupt context)
+// OPTIMIZATION: Matches RMT4 approach - no defensive checks, trust the buffer sizing math
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
-    volatile rmt_item32_t* pItem = mRMT_mem_ptr;
-
-    // Safety: Calculate buffer end pointer
-    volatile rmt_item32_t* pBufferEnd = mRMT_mem_start + MAX_PULSES;
+    // Use local register for speed (pattern from RMT4)
+    volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
 
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
-    for (fl::size i = 0; i < RmtWorker::PULSES_PER_FILL / 8; i++) {
-        // Boundary check - ensure we don't overflow RMT memory
-        if (pItem + 8 > pBufferEnd) {
-            ets_printf("W%d: ERROR - Buffer overflow detected in fillNextHalf!\n", mWorkerId);
-            break;
-        }
-
+    // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
+    // Buffer size: MAX_PULSES = PULSES_PER_FILL * 2 (ping-pong halves)
+    for (FASTLED_REGISTER fl::size i = 0; i < RmtWorker::PULSES_PER_FILL / 8; i++) {
         if (mCur < mNumBytes) {
             convertByteToRmt(mPixelData[mCur], pItem);
             pItem += 8;
@@ -587,7 +595,7 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
         }
     }
 
-    // Flip to other half
+    // Flip to other half (use local variable to minimize volatile writes)
     uint8_t nextHalf = mWhichHalf + 1;
     if (nextHalf == 2) {
         pItem = mRMT_mem_start;
@@ -718,7 +726,19 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 
     // Check done interrupt (transmission complete)
     if (intr_st & (1 << tx_done_bit)) {
-        worker->handleDoneInterrupt();
+        // OPTIMIZATION: Inline handleDoneInterrupt() to eliminate function call overhead
+        // Access IsrData directly with minimal pointer chasing
+        IsrData* isr_data = &worker->mIsrData;
+
+        // Signal completion to waiting thread
+        // Semaphore give sets count to 1 (available state)
+        portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
+        xSemaphoreGiveFromISR(isr_data->mCompletionSemaphore, &xHigherPriorityTaskWoken);
+
+        if (xHigherPriorityTaskWoken == pdTRUE) {
+            portYIELD_FROM_ISR();
+        }
+
         RMT.int_clr.val = (1 << tx_done_bit);
     }
 }
@@ -727,24 +747,20 @@ void IRAM_ATTR RmtWorker::globalISR(void* arg) {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleThresholdInterrupt() {
-    // Track threshold interrupts for debugging (no logging in ISR)
-    mThresholdIsrCount++;
-
+    // OPTIMIZATION: Removed mThresholdIsrCount++ - ISR should be as fast as possible
     fillNextHalf();
 }
 FL_DISABLE_WARNING_POP
 
 // Handle done interrupt (transmission complete)
+// NOTE: Only used by callback API path (FASTLED_RMT5_USE_DIRECT_ISR=0)
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::handleDoneInterrupt() {
-    // Mark worker available FIRST (volatile write ensures visibility)
-    // Order matters: set mAvailable = true BEFORE signaling semaphore
-    mAvailable = true;
-
     // Signal completion to waiting thread
+    // Semaphore give sets count to 1 (available state)
     portBASE_TYPE xHigherPriorityTaskWoken = pdFALSE;
-    xSemaphoreGiveFromISR(mCompletionSemaphore, &xHigherPriorityTaskWoken);
+    xSemaphoreGiveFromISR(mIsrData.mCompletionSemaphore, &xHigherPriorityTaskWoken);
 
     if (xHigherPriorityTaskWoken == pdTRUE) {
         portYIELD_FROM_ISR();

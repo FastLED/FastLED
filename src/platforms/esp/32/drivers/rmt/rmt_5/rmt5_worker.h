@@ -75,7 +75,10 @@ public:
     bool initialize(uint8_t worker_id) override;
 
     // Check if worker is available for assignment
-    bool isAvailable() const override { return mAvailable; }
+    // Availability is determined by semaphore count (1 = available, 0 = busy)
+    bool isAvailable() const override {
+        return uxSemaphoreGetCount(mIsrData.mCompletionSemaphore) > 0;
+    }
 
     // Configuration (called before each transmission)
     bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
@@ -101,6 +104,13 @@ public:
 
     // Buffer refill (interrupt context) - public for NMI access
     void IRAM_ATTR fillNextHalf();
+
+    // ISR-optimized data structure (minimal pointer chasing for interrupt handlers)
+    // This struct groups the minimal data needed by ISR for completion signaling
+    // NOTE: Worker availability is tracked by semaphore count (1 = available, 0 = busy)
+    struct IsrData {
+        SemaphoreHandle_t mCompletionSemaphore;  // Completion synchronization + availability flag
+    };
 
 private:
     // Allow engine to access mAvailable for synchronized state changes
@@ -137,14 +147,12 @@ private:
     volatile rmt_item32_t* mRMT_mem_start;  // Start of RMT channel memory
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
 
+    // ISR-optimized data (grouped for minimal pointer chasing in interrupt handlers)
+    IsrData mIsrData;
+
     // Transmission state
-    volatile bool mAvailable;         // Worker available (false = transmitting)
     const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
     int mNumBytes;                    // Total bytes to transmit
-    uint32_t mThresholdIsrCount;      // Threshold interrupt count (per-worker, ISR access)
-
-    // Completion synchronization (replaces spin-wait)
-    SemaphoreHandle_t mCompletionSemaphore;
 
     // ISR handlers (selected via FASTLED_RMT5_USE_DIRECT_ISR)
     static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (used when FASTLED_RMT5_USE_DIRECT_ISR=1)
