@@ -126,6 +126,7 @@ private:
     int mT1, mT2, mT3;
     uint32_t mResetNs;
 
+public:
     // Pre-calculated RMT symbols
     union rmt_item32_t {
         struct {
@@ -137,6 +138,7 @@ private:
         uint32_t val;
     };
 
+private:
     rmt_item32_t mZero;
     rmt_item32_t mOne;
 
@@ -168,8 +170,8 @@ private:
     // Helper: tear down RMT channel and cleanup GPIO (called when switching pins)
     void tearDownRMTChannel(gpio_num_t old_pin);
 
-    // Helper: convert byte to RMT pulses using nibble lookup table
-    void IRAM_ATTR convertByteToRmt(uint8_t byte, const uint32_t lut_nibble[16][4], volatile rmt_item32_t* pItem);
+    // Helper: convert byte to RMT pulses using zero/one values
+    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, uint32_t zero_val, uint32_t one_val, volatile rmt_item32_t* out);
 
     // Helper: start RMT transmission
     void IRAM_ATTR tx_start();
