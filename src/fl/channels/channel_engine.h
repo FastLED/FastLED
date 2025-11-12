@@ -110,6 +110,8 @@ protected:
     /// @note Called automatically by show() - you don't call this directly from user code
     virtual void beginTransmission(fl::span<const ChannelDataPtr> channelData) = 0;
 
+    void setLastError(const fl::string& error) { mLastError = error; }
+
     /// @brief Protected constructor (base class pattern)
     ChannelEngine() = default;
     virtual ~ChannelEngine() = default;  // FastLED will never delete a channel engine.
