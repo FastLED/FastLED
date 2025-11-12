@@ -383,6 +383,19 @@ if command -v rsync &> /dev/null; then
         ) &
     fi
 
+    # Sync project-root library.json if present
+    if [ -f "/host/library.json" ]; then
+        echo "  → syncing library.json"
+        (
+            START=$(date +%s.%N)
+            # Copy single file to /fastled root. No --delete needed for single-file.
+            # --checksum ensures content-based update even with skewed timestamps.
+            rsync -a --checksum /host/library.json /fastled/
+            END=$(date +%s.%N)
+            echo "$END - $START" | bc > "$TMPDIR/library.time"
+        ) &
+    fi
+
     # Run all syncs in parallel, each writing its timing to a temp file
     if [ -d "/host/src" ]; then
         echo "  → syncing src/..."
@@ -425,6 +438,10 @@ if command -v rsync &> /dev/null; then
 
     if [ -f "$TMPDIR/pyproject.time" ]; then
         printf "  ✓ pyproject.toml synced in %.3fs\\n" $(cat "$TMPDIR/pyproject.time")
+    fi
+
+    if [ -f "$TMPDIR/library.time" ]; then
+        printf "  ✓ library.json synced in %.3fs\\n" $(cat "$TMPDIR/library.time")
     fi
 
     if [ -f "$TMPDIR/src.time" ]; then
@@ -581,7 +598,9 @@ class DockerCompilationOrchestrator:
                 )
 
                 if pull_result.returncode == 0:
-                    print(f"✓ Successfully pulled Docker image: {self.config.image_name}")
+                    print(
+                        f"✓ Successfully pulled Docker image: {self.config.image_name}"
+                    )
                     return True
 
             # Pull failed or was skipped - check if we should build
