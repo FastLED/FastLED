@@ -53,6 +53,18 @@ public:
         uint32_t reset_ns
     );
 
+    IRmtWorkerBase* tryAcquireWorker(
+        int num_bytes,
+        gpio_num_t pin,
+        const ChipsetTiming& TIMING,
+        uint32_t reset_ns
+    ) {
+        if (getAvailableCount() > 0) {
+            return acquireWorker(num_bytes, pin, TIMING, reset_ns);
+        }
+        return nullptr;
+    }
+
     // Release a worker back to the pool
     void releaseWorker(IRmtWorkerBase* worker);
 

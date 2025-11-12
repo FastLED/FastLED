@@ -8,13 +8,13 @@
 #if FASTLED_RMT5
 
 #include "rmt5_controller_lowlevel.h"
-#include "rmt5_worker_pool.h"
+#include "channel_engine_rmt.h"
+#include "fl/chipsets/chipset_timing_config.h"
+#include "fl/singleton.h"
 
 FL_EXTERN_C_BEGIN
 
 #include "esp_log.h"
-#include <stdlib.h>
-#include <string.h> // ok include
 
 FL_EXTERN_C_END
 
@@ -28,156 +28,51 @@ FL_EXTERN_C_END
 namespace fl {
 
 RmtController5LowLevel::RmtController5LowLevel(
-    int DATA_PIN,
-    const ChipsetTiming& TIMING,
-    int RESET_US
+    int pin,
+    const ChipsetTiming& timing
 )
-    : mPin(static_cast<gpio_num_t>(DATA_PIN))
-    , mT1(TIMING.T1)
-    , mT2(TIMING.T2)
-    , mT3(TIMING.T3)
-    , mResetNs(RESET_US * 1000)  // Convert microseconds to nanoseconds
-    , mPixelData(nullptr)
-    , mPixelDataSize(0)
-    , mPixelDataCapacity(0)
-    , mCurrentWorker(nullptr)
 {
+    // Get the singleton ChannelEngineRMT instance
+    mEngine = &fl::Singleton<ChannelEngineRMT>::instance();
+
+    // Create ChipsetTimingConfig from ChipsetTiming
+    ChipsetTimingConfig timingConfig(
+        timing.T1,
+        timing.T2,
+        timing.T3,
+        timing.RESET,
+        timing.name
+    );
+
+    // Create ChannelData for this controller
+    mChannelData = ChannelData::create(pin, timingConfig);
 }
 
 RmtController5LowLevel::~RmtController5LowLevel() {
-    // Wait for any pending transmission
-    waitForPreviousTransmission();
-
-    // Free pixel buffer
-    if (mPixelData) {
-        free(mPixelData);
-        mPixelData = nullptr;
-    }
+    // ChannelData is held by shared_ptr and will be cleaned up automatically
+    // Engine holds reference until transmission completes
 }
 
 void RmtController5LowLevel::loadPixelData(PixelIterator& pixels) {
-    // Wait for previous transmission to complete before overwriting buffer
-    waitForPreviousTransmission();
-
-    // Determine if RGBW or RGB
-    const bool is_rgbw = pixels.get_rgbw().active();
-    const fl::size bytes_per_pixel = is_rgbw ? 4 : 3;
-    const fl::size num_pixels = pixels.size();
-    const fl::size required_bytes = num_pixels * bytes_per_pixel;
-
-    // Ensure buffer capacity
-    ensurePixelBufferCapacity(required_bytes);
-
-    // Copy pixel data to buffer
-    if (is_rgbw) {
-        uint8_t r, g, b, w;
-        int offset = 0;
-        for (int i = 0; pixels.has(1); i++) {
-            pixels.loadAndScaleRGBW(&r, &g, &b, &w);
-            mPixelData[offset++] = r;
-            mPixelData[offset++] = g;
-            mPixelData[offset++] = b;
-            mPixelData[offset++] = w;
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-        mPixelDataSize = offset;
-    } else {
-        uint8_t r, g, b;
-        int offset = 0;
-        for (int i = 0; pixels.has(1); i++) {
-            pixels.loadAndScaleRGB(&r, &g, &b);
-            mPixelData[offset++] = r;
-            mPixelData[offset++] = g;
-            mPixelData[offset++] = b;
-            pixels.advanceData();
-            pixels.stepDithering();
-        }
-        mPixelDataSize = offset;
+    // Safety check: don't modify buffer if engine is transmitting it
+    if (mChannelData->isInUse()) {
+        FL_WARN("RMT5 Controller: Skipping update - buffer in use by engine");
+        return;
     }
+
+    // Get the data buffer
+    auto& data = mChannelData->getData();
+    data.clear();
+
+    // Write pixel data to buffer
+    pixels.writeWS2812(&data);
 }
 
 void RmtController5LowLevel::showPixels() {
-    // This method starts the transmission
-    // It's called by FastLED after loadPixelData()
-    onEndShow();
-}
+    // Enqueue channel data to engine
+    mEngine->enqueue(mChannelData);
 
-void RmtController5LowLevel::onBeforeShow() {
-    // Wait for previous transmission to complete
-    // This is called by FastLED.show() before loading new pixel data
-    waitForPreviousTransmission();
-}
 
-void RmtController5LowLevel::onEndShow() {
-    // Acquire worker with hybrid mode selection (may block if N > K and all workers busy)
-    // Worker is pre-configured based on strip size and timing parameters
-    // Create a ChipsetTiming struct from stored timing values
-    const ChipsetTiming timing = {
-        static_cast<uint32_t>(mT1),
-        static_cast<uint32_t>(mT2),
-        static_cast<uint32_t>(mT3),
-        static_cast<uint32_t>(mResetNs / 1000),  // Convert nanoseconds to microseconds
-        "custom"
-    };
-
-    IRmtWorkerBase* worker = RmtWorkerPool::getInstance().acquireWorker(
-        mPixelDataSize,
-        mPin,
-        timing,
-        mResetNs
-    );
-
-    if (!worker) {
-        FL_WARN("Failed to acquire worker for pin " << (int)mPin);
-        return;
-    }
-
-    // Start transmission (async - returns immediately after transmission STARTS)
-    worker->transmit(mPixelData, mPixelDataSize);
-
-    // Store worker reference for completion waiting
-    mCurrentWorker = worker;
-}
-
-void RmtController5LowLevel::waitForPreviousTransmission() {
-    if (mCurrentWorker) {
-        // Wait for transmission to complete
-        mCurrentWorker->waitForCompletion();
-
-        // Release worker back to pool
-        RmtWorkerPool::getInstance().releaseWorker(mCurrentWorker);
-        mCurrentWorker = nullptr;
-    }
-}
-
-void RmtController5LowLevel::ensurePixelBufferCapacity(int required_bytes) {
-    if (required_bytes <= mPixelDataCapacity) {
-        return;  // Sufficient capacity
-    }
-
-    // Allocate new buffer with extra headroom to reduce reallocations
-    int new_capacity = required_bytes + (required_bytes / 4);  // 25% headroom
-
-    uint8_t* new_buffer = static_cast<uint8_t*>(malloc(new_capacity));
-    if (!new_buffer) {
-        FL_WARN("Failed to allocate pixel buffer (" << new_capacity << " bytes)");
-        return;
-    }
-
-    // Copy existing data if any
-    if (mPixelData && mPixelDataSize > 0) {
-        fl::memcpy(new_buffer, mPixelData, mPixelDataSize);
-    }
-
-    // Free old buffer
-    if (mPixelData) {
-        free(mPixelData);
-    }
-
-    // Update buffer
-    mPixelData = new_buffer;
-    mPixelDataCapacity = new_capacity;
 }
 
 } // namespace fl

@@ -33,7 +33,7 @@ private:
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessRMT(): mRMTController(DATA_PIN, runtime_timing(), WAIT_TIME)
+    ClocklessRMT(): mRMTController(DATA_PIN, runtime_timing())
     {
     }
 
