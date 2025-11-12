@@ -32,12 +32,10 @@ FL_EXTERN_C_END
 
 #define RMT5_WORKER_TAG "rmt5_worker"
 
-// RMT interrupt handling mode selection
-// When 1: Use low-level ISR with direct register access (current default, faster)
-// When 0: Use high-level RMT5 callback API (simpler, but may have higher overhead)
-#ifndef FASTLED_RMT5_USE_DIRECT_ISR
-#define FASTLED_RMT5_USE_DIRECT_ISR 1
-#endif
+// RMT interrupt handling - Always use direct ISR
+// The ESP-IDF v5.x RMT driver does NOT provide a threshold callback in rmt_tx_event_callbacks_t,
+// only on_trans_done. Since we need threshold interrupts for ping-pong buffer refill,
+// we must use direct ISR with manual register access (no alternative exists).
 
 #define FASTLED_RMT5_HZ 10000000
 
@@ -69,25 +67,30 @@ typedef struct {
 extern rmt_block_mem_t RMTMEM;
 
 //=============================================================================
-// NMI (Level 7) HANDLER SUPPORT
+// SHARED GLOBAL ISR INFRASTRUCTURE (like RMT4)
 //=============================================================================
 
 /*
- * Global DRAM pointer for NMI-safe buffer refill
+ * Global shared interrupt handler architecture
  *
- * CRITICAL: This must be in DRAM (not flash) for NMI access safety.
- * When using Level 7 NMI for RMT interrupts, the handler cannot call
- * FreeRTOS APIs (including portENTER_CRITICAL_ISR). This global pointer
- * allows the NMI handler to directly access the RmtWorker instance.
+ * DESIGN: Like RMT4, we use a SINGLE shared ISR for ALL RMT channels.
+ * This prevents race conditions and missed interrupts when multiple channels
+ * fire simultaneously. The shared ISR reads RMT.int_st.val once and processes
+ * all pending channel interrupts in a single pass.
  *
- * THREAD SAFETY: This is written once during interrupt allocation and
- * never changed during NMI operation. The NMI handler will only call
- * fillNextHalf() which is already designed for ISR context.
- *
- * NOTE: Currently unused - Level 3 interrupts are still the default.
- * This infrastructure is prepared for future Level 7 NMI migration.
+ * THREAD SAFETY: The gOnChannel[] array is written during worker allocation
+ * (before transmission starts) and read in the ISR. Workers are assigned to
+ * channels before interrupts are enabled, so no race conditions exist.
  */
-fl::RmtWorker* DRAM_ATTR g_rmt5_nmi_worker = nullptr;
+
+// Global worker registry - maps channel ID to active worker
+static fl::RmtWorker* DRAM_ATTR gOnChannel[SOC_RMT_CHANNELS_PER_GROUP] = {nullptr};
+
+// Global interrupt handle (shared by all channels)
+static intr_handle_t DRAM_ATTR gRMT5_intr_handle = nullptr;
+
+// Maximum channel number (initialized at runtime)
+static uint8_t gMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
 
 /**
  * NMI-Safe Buffer Refill Wrapper
@@ -123,7 +126,6 @@ RmtWorker::RmtWorker()
     : mChannel(nullptr)
     , mChannelId(0)
     , mWorkerId(0)
-    , mIntrHandle(nullptr)
     , mInterruptAllocated(false)
     , mCurrentPin(GPIO_NUM_NC)
     , mT1(0)
@@ -155,15 +157,22 @@ RmtWorker::RmtWorker()
 }
 
 RmtWorker::~RmtWorker() {
-    if (mIntrHandle) {
-        esp_intr_free(mIntrHandle);
-        mIntrHandle = nullptr;
+    // wait tilll done
+    waitForCompletion();
+    // Unregister from global channel map
+    if (mInterruptAllocated && mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
+        gOnChannel[mChannelId] = nullptr;
     }
+
+    // Clean up channel
     if (mChannel) {
         rmt_disable(mChannel);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
     }
+
+    // Note: We do NOT free gRMT5_intr_handle because it's shared by all workers
+    // The shared ISR will remain active as long as any worker exists
 }
 
 bool RmtWorker::initialize(uint8_t worker_id) {
@@ -253,45 +262,33 @@ bool RmtWorker::allocateInterrupt() {
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating interrupt (first transmit)");
 
-#if FASTLED_RMT5_USE_DIRECT_ISR
-    // Low-level ISR approach: Direct register access with manual interrupt handling
+    // Register this worker in the global channel map
+    gOnChannel[mChannelId] = this;
 
-    // Enable threshold interrupt using direct register access
+    // Enable threshold interrupt for this channel using direct register access
     uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
     RMT.int_ena.val |= (1 << thresh_int_bit);
 
-    // Allocate custom ISR at Level 3 (compatible with Xtensa and RISC-V)
-    // NOTE: ETS_RMT_INTR_SOURCE is an enum, not a #define, so it exists on all ESP32 platforms
-    // We MUST use direct ISR since we're using manual register writes in tx_start()
-    esp_err_t ret = esp_intr_alloc(
-        ETS_RMT_INTR_SOURCE,
-        ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
-        &RmtWorker::globalISR,
-        this,
-        &mIntrHandle
-    );
+    // Allocate shared global ISR (only once for all channels, like RMT4)
+    if (gRMT5_intr_handle == nullptr) {
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating shared global ISR for all RMT channels");
 
-    if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to allocate ISR: " << esp_err_to_name(ret) << " (0x" << ret << ")");
-        return false;
+        esp_err_t ret = esp_intr_alloc(
+            ETS_RMT_INTR_SOURCE,
+            ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
+            &RmtWorker::sharedGlobalISR,
+            nullptr,  // No user data - ISR reads gOnChannel[] directly
+            &gRMT5_intr_handle
+        );
+
+        if (ret != ESP_OK) {
+            FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to allocate shared ISR: " << esp_err_to_name(ret) << " (0x" << ret << ")");
+            gOnChannel[mChannelId] = nullptr;  // Clean up registration
+            return false;
+        }
+
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Shared global ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
     }
-
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Direct ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
-#else
-    // High-level callback API approach: Use RMT5 driver callbacks
-
-    rmt_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done = &RmtWorker::onTransDoneCallback;
-
-    esp_err_t ret = rmt_tx_register_event_callbacks(mChannel, &callbacks, this);
-
-    if (ret != ESP_OK) {
-        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to register callbacks: " << esp_err_to_name(ret) << " (0x" << ret << ")");
-        return false;
-    }
-
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: High-level callbacks registered successfully");
-#endif
 
     mInterruptAllocated = true;
     return true;
@@ -307,12 +304,14 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
         mChannel = nullptr;
     }
 
-    // Free interrupt handler
-    if (mIntrHandle) {
-        esp_intr_free(mIntrHandle);
-        mIntrHandle = nullptr;
+    // Unregister from global channel map
+    if (mInterruptAllocated && mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
+        gOnChannel[mChannelId] = nullptr;
         mInterruptAllocated = false;
     }
+
+    // Note: We do NOT free gRMT5_intr_handle here because it's shared by all workers
+    // It will be cleaned up when the last worker is destroyed (see destructor)
 
     // Clean up old GPIO pin: set to input with pulldown
     if (old_pin != GPIO_NUM_NC) {
@@ -658,43 +657,47 @@ void IRAM_ATTR RmtWorker::tx_start() {
 }
 FL_DISABLE_WARNING_POP
 
-// RMT5 TX done callback (called from ISR context)
-// NOTE: Used when FASTLED_RMT5_USE_DIRECT_ISR=0 (high-level callback API)
-//       Registered via rmt_tx_register_event_callbacks() in allocateInterrupt()
-bool IRAM_ATTR RmtWorker::onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data) {
-    RmtWorker* worker = static_cast<RmtWorker*>(user_data);
-    worker->mIsrData.mAvailable = true;
-    return false;  // Don't yield from ISR
-}
-
-// Global ISR handler (dispatches to instance handlers)
-// NOTE: Used when FASTLED_RMT5_USE_DIRECT_ISR=1 (default)
-//       Registered via esp_intr_alloc() in allocateInterrupt()
-void IRAM_ATTR RmtWorker::globalISR(void* arg) {
-    RmtWorker* worker = static_cast<RmtWorker*>(arg);
+// Shared Global ISR - Handles ALL RMT channels in one pass (like RMT4)
+//
+// DESIGN: This ISR reads RMT.int_st.val once and processes all pending channel
+// interrupts atomically. This prevents race conditions and missed interrupts
+// when multiple channels fire simultaneously.
+//
+// PERFORMANCE: Single ISR invocation with O(n) channel scan is faster than
+// multiple per-channel ISR invocations due to reduced context switch overhead.
+void IRAM_ATTR RmtWorker::sharedGlobalISR(void* arg) {
+    // Read interrupt status once - captures all pending channel interrupts atomically
     uint32_t intr_st = RMT.int_st.val;
 
-    // Platform-specific bit positions (from RMT4)
+    // Process all channels in a single pass
+    for (uint8_t channel = 0; channel < gMaxChannel; channel++) {
+        RmtWorker* worker = gOnChannel[channel];
+
+        // Skip inactive channels
+        if (worker == nullptr) {
+            continue;
+        }
+
+        // Platform-specific bit positions (from RMT4)
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
-    int tx_done_bit = worker->mChannelId;
-    int tx_next_bit = worker->mChannelId + 8;  // Threshold interrupt
+        int tx_done_bit = channel;
+        int tx_next_bit = channel + 8;  // Threshold interrupt
 #else
 #error "RMT5 worker ISR not yet implemented for this ESP32 variant"
 #endif
 
-    // Check threshold interrupt (buffer half empty) - if enabled
-    // Note: Currently disabled - using one-shot mode
-    if (intr_st & (1 << tx_next_bit)) {
-        worker->fillNextHalf();
-        RMT.int_clr.val = (1 << tx_next_bit);
-    }
+        // Check threshold interrupt (buffer half empty) - refill needed
+        if (intr_st & (1 << tx_next_bit)) {
+            worker->fillNextHalf();
+            RMT.int_clr.val = (1 << tx_next_bit);
+        }
 
-    // Check done interrupt (transmission complete)
-    if (intr_st & (1 << tx_done_bit)) {
-        // Signal completion by setting availability flag
-        worker->mIsrData.mAvailable = true;
-
-        RMT.int_clr.val = (1 << tx_done_bit);
+        // Check done interrupt (transmission complete)
+        if (intr_st & (1 << tx_done_bit)) {
+            // Signal completion by setting availability flag
+            worker->mIsrData.mAvailable = true;
+            RMT.int_clr.val = (1 << tx_done_bit);
+        }
     }
 }
 

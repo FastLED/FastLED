@@ -123,8 +123,7 @@ private:
     rmt_channel_handle_t mChannel;
     uint8_t mChannelId;
     uint8_t mWorkerId;
-    intr_handle_t mIntrHandle;
-    bool mInterruptAllocated;  // Track if interrupt has been allocated (lazy initialization)
+    bool mInterruptAllocated;  // Track if this worker is registered in the global ISR (lazy initialization)
 
     // Current configuration
     gpio_num_t mCurrentPin;
@@ -160,9 +159,8 @@ private:
     const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
     int mNumBytes;                    // Total bytes to transmit
 
-    // ISR handlers (selected via FASTLED_RMT5_USE_DIRECT_ISR)
-    static void IRAM_ATTR globalISR(void* arg);  // Direct ISR (used when FASTLED_RMT5_USE_DIRECT_ISR=1)
-    static bool IRAM_ATTR onTransDoneCallback(rmt_channel_handle_t channel, const rmt_tx_done_event_data_t *edata, void *user_data);  // RMT5 callback (used when FASTLED_RMT5_USE_DIRECT_ISR=0)
+    // Shared global ISR - processes all channels in one pass (like RMT4)
+    static void IRAM_ATTR sharedGlobalISR(void* arg);
 
     // Helper: allocate interrupt (lazy, called from first transmit())
     bool allocateInterrupt();
