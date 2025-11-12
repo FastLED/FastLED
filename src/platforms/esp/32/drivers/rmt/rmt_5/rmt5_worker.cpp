@@ -22,7 +22,7 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 #include "fl/force_inline.h"
-#include "fl/assert.h"
+#include "ftl/assert.h"
 #include "fl/cstring.h"
 #include "fl/compiler_control.h"
 #include "fl/log.h"
