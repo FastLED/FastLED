@@ -43,6 +43,7 @@ stub_incompatible_examples = [
     # ESP-specific (RMT, QSPI, LCD, etc.)
     'BulkRmtSimple',          # ESP32 RMT peripheral
     'Esp32P4Parlio',          # ESP32-P4 Parallel IO
+    'Esp32S3I2SDemo',         # ESP32-S3 I2S parallel output (requires esp_psram.h)
     'Esp8266Uart',            # ESP8266 UART
 
 
