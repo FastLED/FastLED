@@ -27,6 +27,13 @@
 #    endif
 #  endif
 #endif
+// ESP32 I2S Driver compatibility warning
+#if defined(FASTLED_ESP32_I2S) && !defined(FASTLED_INTERNAL)
+#include "platforms/esp/esp_version.h"
+#if defined(ESP_IDF_VERSION_MAJOR) && ESP_IDF_VERSION_MAJOR >= 5
+#warning "ESP32 I2S Driver: ESP-IDF 5.x detected. This driver may not work reliably with ESP-IDF 5.x+. Consider using RMT driver instead or staying on ESP-IDF 4.x. See ESP32_I2S_ISSUES.md for details. Report issues at: https://github.com/FastLED/FastLED/issues"
+#endif
+#endif
 
 
 #if !defined(FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS)
