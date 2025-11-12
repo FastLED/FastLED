@@ -5,8 +5,14 @@
 This project uses directory-specific agent guidelines. See:
 
 - **CI/Build Tasks**: `ci/AGENTS.md` - Python build system, compilation, MCP server tools
-- **Testing**: `tests/AGENTS.md` - Unit tests, test execution, validation requirements  
+- **Testing**: `tests/AGENTS.md` - Unit tests, test execution, validation requirements, **test simplicity principles**
 - **Examples**: `examples/AGENTS.md` - Arduino sketch compilation, .ino file rules
+
+**⚠️ IMPORTANT: When writing/updating tests, follow the Test Simplicity Principle in `tests/AGENTS.md`:**
+- Keep tests as simple as possible
+- Avoid mocks and helper classes unless absolutely necessary
+- One focused test is better than many complex ones
+- See `tests/fl/timeout.cpp` for an example of simple, effective testing
 
 ## Key Commands
 

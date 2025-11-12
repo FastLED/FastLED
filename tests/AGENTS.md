@@ -149,6 +149,72 @@ CHECK("expected" == actual_string);     // Wrong comparison type
 - **Cleaner repository** - less file clutter
 - **Improved discoverability** - easier to find existing test coverage
 
+## Test Simplicity Principle
+
+**🚨 CRITICAL: KEEP TESTS AS SIMPLE AS POSSIBLE**
+
+When writing or updating tests in `tests/*`, prioritize **absolute simplicity** over comprehensive coverage:
+
+### SIMPLICITY RULES
+- ✅ **MINIMAL:** Test only the critical functionality - one focused test is better than many complex ones
+- ✅ **DIRECT:** Avoid mocks, helpers, and abstraction layers unless absolutely necessary
+- ✅ **READABLE:** Code should be immediately understandable without documentation
+- ✅ **CONCISE:** Shorter tests with clear intent are better than exhaustive test suites
+
+### AVOID OVER-ENGINEERING
+- ❌ **Mock frameworks** - Use real objects/values whenever possible
+- ❌ **Helper classes** - Write inline test code instead of creating test infrastructure
+- ❌ **Excessive test cases** - One well-designed test > ten redundant variations
+- ❌ **Complex setup/teardown** - Keep test state simple and explicit
+
+### EXAMPLE: Good vs Bad Test Design
+
+**❌ BAD - Over-engineered with mocks and helpers:**
+```cpp
+class MockTime {
+    static uint32_t value;
+    static void set(uint32_t v) { value = v; }
+    static void advance(uint32_t d) { value += d; }
+    static uint32_t get() { return value; }
+};
+
+TEST_CASE("Timeout - comprehensive") {
+    SUBCASE("basic") { /* ... */ }
+    SUBCASE("rollover case 1") { /* ... */ }
+    SUBCASE("rollover case 2") { /* ... */ }
+    SUBCASE("edge case 1") { /* ... */ }
+    // ... 20 more subcases
+}
+```
+
+**✅ GOOD - Simple, direct, focused:**
+```cpp
+TEST_CASE("Timeout - rollover test") {
+    // Test critical rollover: starts before 0xFFFFFFFF, ends after 0x00000000
+    uint32_t start = 0xFFFFFF00;
+    Timeout timeout(start, 512);
+
+    CHECK_FALSE(timeout.done(start));
+    CHECK(timeout.done(start + 512));  // Works across rollover
+}
+```
+
+**Why the good example is better:**
+- No mock infrastructure needed
+- Tests the critical behavior (rollover) directly
+- Obvious what's being tested from reading the code
+- Easy to modify and maintain
+- Compiles faster
+
+### REFACTORING EXISTING TESTS
+When updating existing tests that violate these principles:
+1. **Identify the critical behavior** being tested
+2. **Remove mock/helper infrastructure** if it can be replaced with direct values
+3. **Consolidate** multiple test cases into one focused test
+4. **Simplify** assertions and test logic
+
+**Remember:** A simple test that catches real bugs is infinitely more valuable than a complex test suite that's hard to maintain.
+
 ## Blank Test Template
 
 **✅ CORRECT blank test file structure:**
