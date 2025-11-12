@@ -19,13 +19,14 @@
 #include "fl/time.h"
 #include "fl/timeout.h"
 #include "rmt5_worker_base.h"
+#include "rmt5_worker.h"
 
 namespace fl {
 
 /// @brief RMT5-based ChannelEngine implementation
 ///
-/// Simple implementation that wraps the RmtWorkerPool to provide
-/// ChannelEngine interface for RMT5 hardware on ESP32.
+/// Manages RMT workers directly, allocating them dynamically until
+/// the hardware runs out of channels.
 ///
 /// Listens to onEndFrame events and polls workers until transmission completes.
 class ChannelEngineRMT : public ChannelEngine, public EngineEvents::Listener {
@@ -53,6 +54,33 @@ private:
         uint32_t reset_us;
     };
 
+    /// @brief Pending channel data to be transmitted when workers become available
+    struct PendingChannel {
+        ChannelDataPtr data;
+        int pin;
+        ChipsetTiming timing;
+        uint32_t reset_us;
+    };
+
+    /// @brief Initialize workers on first use (allocates until hardware failure)
+    void initializeWorkersIfNeeded();
+
+    /// @brief Find an available worker
+    RmtWorker* findAvailableWorker();
+
+    /// @brief Release a worker back to available pool
+    void releaseWorker(IRmtWorkerBase* worker);
+
+    /// @brief Try to start transmission for a pending channel
+    /// @return true if transmission started, false if no worker available
+    bool tryStartPendingChannel(const PendingChannel& pending);
+
+    /// @brief Process pending channels that couldn't be started earlier
+    void processPendingChannels();
+
+    /// @brief All workers (owned by this engine)
+    fl::vector<RmtWorker*> mWorkers;
+
     /// @brief Track workers currently transmitting (not yet available)
     fl::vector_inlined<WorkerInfo, 16> mActiveWorkers;
 
@@ -61,6 +89,12 @@ private:
 
     /// @brief Track reset timers for each pin (microsecond-based)
     fl::unordered_map<int, Timeout> mPinResetTimers;
+
+    /// @brief Pending channels waiting for available workers
+    fl::vector_inlined<PendingChannel, 16> mPendingChannels;
+
+    /// @brief Initialization flag
+    bool mInitialized;
 };
 
 } // namespace fl

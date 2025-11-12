@@ -300,14 +300,15 @@ bool RmtWorker::allocateInterrupt() {
     return true;
 }
 
-bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) {
+bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
     // Extract timing values from struct
-    uint32_t t1 = TIMING.T1;
-    uint32_t t2 = TIMING.T2;
-    uint32_t t3 = TIMING.T3;
+    uint32_t t1 = timing.T1;
+    uint32_t t2 = timing.T2;
+    uint32_t t3 = timing.T3;
+    uint32_t reset_ns = timing.RESET * 1000;
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: configure() called - pin=" << (int)pin
-               << ", t1=" << t1 << ", t2=" << t2 << ", t3=" << t3 << ", reset_ns=" << reset_ns);
+               << ", t1=" << t1 << ", t2=" << t2 << ", t3=" << t3 << ", reset_us=" << timing.RESET);
 
     // Channel creation deferred to first transmit() call
     // This prevents ESP32-C6 (RISC-V) boot hang during RMT hardware initialization

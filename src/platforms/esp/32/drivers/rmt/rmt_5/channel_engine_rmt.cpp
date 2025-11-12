@@ -9,7 +9,6 @@
 #if FASTLED_RMT5
 
 #include "channel_engine_rmt.h"
-#include "rmt5_worker_pool.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/chipsets/led_timing.h"
@@ -17,14 +16,20 @@
 #include "fl/time.h"
 #include "fl/assert.h"
 #include "fl/delay.h"
+#include "fl/log.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/gpio.h"
+#include "esp_log.h"
 FL_EXTERN_C_END
+
+#define RMT_ENGINE_TAG "channel_engine_rmt"
 
 namespace fl {
 
-ChannelEngineRMT::ChannelEngineRMT() {
+ChannelEngineRMT::ChannelEngineRMT()
+    : mInitialized(false)
+{
     // Register as listener for end frame events
     EngineEvents::addListener(this);
 }
@@ -42,6 +47,88 @@ ChannelEngineRMT::~ChannelEngineRMT() {
         // Spin until ready
         fl::delayMicroseconds(100);
     }
+
+    // Clean up workers
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
+        delete mWorkers[i];
+    }
+    mWorkers.clear();
+}
+
+void ChannelEngineRMT::initializeWorkersIfNeeded() {
+    // Set log level based on build type
+#ifdef NDEBUG
+    // Release build - use INFO level
+    esp_log_level_set(RMT_ENGINE_TAG, ESP_LOG_INFO);
+#else
+    // Debug build - use VERBOSE level for detailed tracing
+    esp_log_level_set(RMT_ENGINE_TAG, ESP_LOG_VERBOSE);
+#endif
+
+    if (mInitialized) {
+        return;
+    }
+
+    // Allocate workers until the RMT system gives us an error
+    // This dynamically discovers how many channels are available
+    ESP_LOGD(RMT_ENGINE_TAG, "Creating workers until hardware limit...");
+
+    int worker_id = 0;
+    while (true) {
+        ESP_LOGD(RMT_ENGINE_TAG, "Attempting to create worker %d", worker_id);
+        RmtWorker* worker = new RmtWorker();
+
+        ESP_LOGD(RMT_ENGINE_TAG, "Initializing worker %d", worker_id);
+        if (!worker->initialize(static_cast<uint8_t>(worker_id))) {
+            // Failed to initialize - we've hit the hardware limit
+            ESP_LOGD(RMT_ENGINE_TAG, "Worker %d initialization failed - hardware limit reached", worker_id);
+            delete worker;
+            break;
+        }
+
+        FL_LOG_RMT("Worker " << worker_id << " initialized successfully");
+        mWorkers.push_back(worker);
+        worker_id++;
+
+        // Safety limit to prevent infinite loop
+        if (worker_id >= 16) {
+            ESP_LOGW(RMT_ENGINE_TAG, "Reached safety limit of 16 workers");
+            break;
+        }
+    }
+
+    if (mWorkers.size() == 0) {
+        FL_WARN("FATAL: No workers initialized successfully!");
+    }
+
+    mInitialized = true;
+    FL_LOG_RMT("Engine initialized with " << mWorkers.size() << " workers");
+}
+
+RmtWorker* ChannelEngineRMT::findAvailableWorker() {
+    ESP_LOGD(RMT_ENGINE_TAG, "Searching %zu workers for available worker",
+             mWorkers.size());
+
+    for (int i = 0; i < static_cast<int>(mWorkers.size()); i++) {
+        if (mWorkers[i]->isAvailable()) {
+            ESP_LOGD(RMT_ENGINE_TAG, "Found available worker[%d]", i);
+            return mWorkers[i];
+        }
+    }
+    ESP_LOGD(RMT_ENGINE_TAG, "No available workers found");
+    return nullptr;
+}
+
+void ChannelEngineRMT::releaseWorker(IRmtWorkerBase* worker) {
+    FL_ASSERT(worker != nullptr, "ChannelEngineRMT::releaseWorker called with null worker");
+
+    // Mark worker as available
+    // Note: ISR already sets mAvailable=true at end of handleDoneInterrupt(),
+    // but this redundant write serves as defensive programming to ensure
+    // the worker is always available after waitForCompletion() returns.
+    worker->markAsAvailable();
+
+    ESP_LOGD(RMT_ENGINE_TAG, "Worker released and marked available");
 }
 
 void ChannelEngineRMT::onEndFrame() {
@@ -56,8 +143,11 @@ void ChannelEngineRMT::onEndFrame() {
 }
 
 ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
-    // If no active workers, check if all pin resets are complete
-    if (mActiveWorkers.empty()) {
+    // Process pending channels if workers have become available
+    processPendingChannels();
+
+    // If no active workers and no pending channels, check if all pin resets are complete
+    if (mActiveWorkers.empty() && mPendingChannels.empty()) {
         // Check if any pins are still in reset period
         uint32_t now = ::micros();
         bool anyPinInReset = false;
@@ -95,7 +185,7 @@ ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
     // Release completed workers and start their reset timers
     uint32_t now = ::micros();
     for (const WorkerInfo& info : justRetired) {
-        RmtWorkerPool::getInstance().releaseWorker(info.worker);
+        releaseWorker(info.worker);
         // Mark the reset timer for this pin
         if (info.reset_us > 0) {
             mPinResetTimers[info.pin] = Timeout(now, info.reset_us);
@@ -159,28 +249,70 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
             timingConfig.name
         };
 
-        // Acquire worker from pool (thin pool - just returns an available worker)
-        auto& pool = RmtWorkerPool::getInstance();
-        IRmtWorkerBase* worker = pool.tryAcquireWorker();
+        // Initialize workers on first use
+        initializeWorkersIfNeeded();
 
-        if (!worker) {
-            FL_WARN("Failed to acquire RMT worker for pin " << pin);
-            continue;
+        // Try to start transmission for this channel
+        PendingChannel pending{data, pin, timing, timingConfig.reset_us};
+        if (!tryStartPendingChannel(pending)) {
+            // No worker available - queue it for later
+            ESP_LOGD(RMT_ENGINE_TAG, "No worker available for pin %d - queuing", pin);
+            mPendingChannels.push_back(pending);
         }
+    }
+}
 
-        // Configure the worker with pin and timing
-        if (!worker->configure(static_cast<gpio_num_t>(pin), timing, timingConfig.reset_us * 1000)) {
-            FL_WARN("Failed to configure RMT worker for pin " << pin);
-            pool.releaseWorker(worker);
-            continue;
+bool ChannelEngineRMT::tryStartPendingChannel(const PendingChannel& pending) {
+    // Initialize workers on first use
+    initializeWorkersIfNeeded();
+
+    // Acquire worker from engine's worker pool
+    IRmtWorkerBase* worker = findAvailableWorker();
+
+    if (!worker) {
+        return false;  // No worker available
+    }
+
+    // Mark worker as unavailable (acquired)
+    worker->markAsUnavailable();
+
+    // Configure the worker with pin and timing
+    if (!worker->configure(static_cast<gpio_num_t>(pending.pin), pending.timing)) {
+        FL_WARN("Failed to configure RMT worker for pin " << pending.pin);
+        releaseWorker(worker);
+        return false;
+    }
+
+    // Start transmission
+    worker->transmit(pending.data->getData().data(), pending.data->getSize());
+
+    // Track this worker with its pin and reset time
+    mActiveWorkers.push_back(WorkerInfo{worker, pending.pin, pending.reset_us});
+    mPinResetTimers[pending.pin] = Timeout(::micros(), pending.reset_us);
+
+    ESP_LOGD(RMT_ENGINE_TAG, "Started transmission for pin %d", pending.pin);
+    return true;
+}
+
+void ChannelEngineRMT::processPendingChannels() {
+    if (mPendingChannels.empty()) {
+        return;
+    }
+
+    // Try to start pending channels
+    for (size_t i = 0; i < mPendingChannels.size(); ) {
+        const PendingChannel& pending = mPendingChannels[i];
+        if (tryStartPendingChannel(pending)) {
+            // Started successfully - remove from pending list
+            if (i < mPendingChannels.size() - 1) {
+                mPendingChannels[i] = mPendingChannels[mPendingChannels.size() - 1];
+            }
+            mPendingChannels.pop_back();
+            // Don't increment i since we just moved a new element to this position
+        } else {
+            // Still no worker available - keep in pending list and try next iteration
+            ++i;
         }
-
-        // Start transmission
-        worker->transmit(data->getData().data(), data->getSize());
-
-        // Track this worker with its pin and reset time
-        mActiveWorkers.push_back(WorkerInfo{worker, pin, timingConfig.reset_us});
-        mPinResetTimers[pin] = Timeout(::micros(), timingConfig.reset_us);
     }
 }
 

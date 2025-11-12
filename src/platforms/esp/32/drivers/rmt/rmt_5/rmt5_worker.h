@@ -28,7 +28,7 @@ FL_EXTERN_C_END
 namespace fl {
 
 // Forward declarations
-class RmtWorkerPool;
+class ChannelEngineRMT;
 
 /**
  * RmtWorker - Low-level RMT channel worker with ping-pong buffers
@@ -49,7 +49,7 @@ extern "C" void IRAM_ATTR rmt5_nmi_buffer_refill(void);
 
 class RmtWorker : public IRmtWorkerBase {
 public:
-    friend class RmtWorkerPool;
+    friend class ChannelEngineRMT;
     friend void rmt5_nmi_buffer_refill(void);
 
     // Memory configuration (matching RMT4)
@@ -75,7 +75,7 @@ public:
     bool isAvailable() const override { return mAvailable; }
 
     // Configuration (called before each transmission)
-    bool configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) override;
+    bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
 
     // Transmission control
     void transmit(const uint8_t* pixel_data, int num_bytes) override;
@@ -100,8 +100,8 @@ public:
     void IRAM_ATTR fillNextHalf();
 
 private:
-    // Allow pool to access mAvailable for synchronized state changes
-    friend class RmtWorkerPool;
+    // Allow engine to access mAvailable for synchronized state changes
+    friend class ChannelEngineRMT;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
     uint8_t mChannelId;

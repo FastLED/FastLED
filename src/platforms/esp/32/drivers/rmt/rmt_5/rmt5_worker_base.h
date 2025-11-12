@@ -34,7 +34,7 @@ public:
     virtual bool isAvailable() const = 0;
 
     // Configuration
-    virtual bool configure(gpio_num_t pin, const ChipsetTiming& TIMING, uint32_t reset_ns) = 0;
+    virtual bool configure(gpio_num_t pin, const ChipsetTiming& timing) = 0;
 
     // Transmission
     virtual void transmit(const uint8_t* pixel_data, int num_bytes) = 0;
