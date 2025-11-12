@@ -6,6 +6,7 @@
 #if FASTLED_RMT5
 
 #include "rmt5_worker.h"
+#include "rmt5_worker_lut.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -402,6 +403,10 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: mOne={dur0=" << mOne.duration0 << ", lvl0=" << mOne.level0
                << ", dur1=" << mOne.duration1 << ", lvl1=" << mOne.level1 << ", val=0x" << mOne.val << "}");
 
+    // Build nibble lookup table for fast byte-to-RMT conversion
+    buildNibbleLut(mIsrData.mNibbleLut, mZero.val, mOne.val);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Nibble LUT initialized");
+
     // GPIO configuration deferred to first transmit() when channel exists
 
     return true;
@@ -497,25 +502,27 @@ void RmtWorker::markAsUnavailable() {
     mIsrData.mAvailable = false;
 }
 
-// Convert byte to 8 RMT items (one per bit)
+// Convert byte to RMT symbol (8 RMT items) using nibble lookup table
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     uint8_t byte_val,
-    uint32_t zero_val,
-    uint32_t one_val,
+    const rmt_nibble_lut_t& lut,
     volatile rmt_item32_t* out
 ) {
-    // OPTIMIZATION: Pass zero/one as parameters (loaded once per fillNextHalf() call)
-    // instead of reading from member variables each time (RMT4 pattern)
-    FASTLED_REGISTER uint32_t pixel_u32 = byte_val;
-    pixel_u32 <<= 24;  // Shift to MSB position
+    // Copy 4 RMT items from LUT for high nibble (bits 7-4)
+    const rmt_item32_t* high_lut = lut[byte_val >> 4];
+    out[0].val = high_lut[0].val;
+    out[1].val = high_lut[1].val;
+    out[2].val = high_lut[2].val;
+    out[3].val = high_lut[3].val;
 
-    #pragma unroll
-    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
-        out[j].val = (pixel_u32 & 0x80000000UL) ? one_val : zero_val;
-        pixel_u32 <<= 1;
-    }
+    // Copy 4 RMT items from LUT for low nibble (bits 3-0)
+    const rmt_item32_t* low_lut = lut[byte_val & 0x0F];
+    out[4].val = low_lut[0].val;
+    out[5].val = low_lut[1].val;
+    out[6].val = low_lut[2].val;
+    out[7].val = low_lut[3].val;
 }
 FL_DISABLE_WARNING_POP
 
@@ -524,16 +531,13 @@ FL_DISABLE_WARNING_POP
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
-    // OPTIMIZATION: Cache zero/one values in local registers before loop (RMT4 pattern)
-    // This avoids repeated member variable access inside convertByteToRmt()
-    FASTLED_REGISTER uint32_t zero_val = mZero.val;
-    FASTLED_REGISTER uint32_t one_val = mOne.val;
-
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
     // Since we're in ISR context and own the buffer state, we can safely cache and update once
     FASTLED_REGISTER int cur = mCur;
     FASTLED_REGISTER int num_bytes = mNumBytes;
     const uint8_t* pixel_data = mPixelData;
+    // Cache LUT reference for ISR performance (avoid repeated member access)
+    const rmt_nibble_lut_t& lut = mIsrData.mNibbleLut;
     // Remember that volatile writes are super fast, volatile reads
     // are super slow.
     volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
@@ -545,7 +549,7 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
 
     for (FASTLED_REGISTER int i = 0; i < i_end; i++) {
         if (cur < num_bytes) {
-            convertByteToRmt(pixel_data[cur], zero_val, one_val, pItem);
+            convertByteToRmt(pixel_data[cur], lut, pItem);
             pItem += 8;
             cur++;
         } else {

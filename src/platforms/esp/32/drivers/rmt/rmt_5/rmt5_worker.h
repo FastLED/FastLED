@@ -109,6 +109,11 @@ public:
     // The engine polls isAvailable() to check completion instead of blocking
     struct IsrData {
         volatile bool mAvailable;  // Availability flag (true = available, false = busy)
+
+        // Nibble lookup table for fast bit-to-RMT conversion
+        // Maps each nibble value (0x0-0xF) to 4 RMT items (MSB first: bit3, bit2, bit1, bit0)
+        // Used for both high nibble (bits 7-4) and low nibble (bits 3-0)
+        rmt_nibble_lut_t mNibbleLut;
     };
 
 private:
@@ -170,8 +175,8 @@ private:
     // Helper: tear down RMT channel and cleanup GPIO (called when switching pins)
     void tearDownRMTChannel(gpio_num_t old_pin);
 
-    // Helper: convert byte to RMT pulses using zero/one values
-    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, uint32_t zero_val, uint32_t one_val, volatile rmt_item32_t* out);
+    // Helper: convert byte to RMT pulses using nibble LUT
+    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, const rmt_nibble_lut_t& lut, volatile rmt_item32_t* out);
 
     // Helper: start RMT transmission
     void IRAM_ATTR tx_start();
