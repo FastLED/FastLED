@@ -561,23 +561,30 @@ class DockerCompilationOrchestrator:
                     self._actual_image_name = image_without_registry
                     return True
 
-            # Image not found locally - try to pull from registry
+            # Image not found locally
             print(f"Docker image {self.config.image_name} not found locally.")
-            print(f"Attempting to pull from registry...")
-            print()
 
-            pull_result = subprocess.run(
-                [get_docker_command(), "pull", self.config.image_name],
-                capture_output=True,
-                text=True,
-                timeout=600,  # 10 minute timeout for pull
-            )
+            # If build_if_missing is True, skip pull and go straight to build
+            if build_if_missing:
+                print("Skipping pull (--build specified), building locally...")
+                print()
+            else:
+                # Try to pull from registry with streaming output
+                print(f"Attempting to pull from registry...")
+                print()
 
-            if pull_result.returncode == 0:
-                print(f"✓ Successfully pulled Docker image: {self.config.image_name}")
-                return True
+                sys.stdout.flush()
+                sys.stderr.flush()
+                pull_result = subprocess.run(
+                    [get_docker_command(), "pull", self.config.image_name],
+                    timeout=600,  # 10 minute timeout for pull
+                )
 
-            # Pull failed - show options
+                if pull_result.returncode == 0:
+                    print(f"✓ Successfully pulled Docker image: {self.config.image_name}")
+                    return True
+
+            # Pull failed or was skipped - check if we should build
             if not build_if_missing:
                 print(f"❌ Could not pull Docker image from registry.")
                 print(f"   Image: {self.config.image_name}")
