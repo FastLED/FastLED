@@ -201,7 +201,7 @@ bool RmtWorker::initialize(uint8_t worker_id) {
     return true;
 }
 
-bool RmtWorker::createChannel(gpio_num_t pin) {
+bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Creating RMT TX channel for GPIO " << (int)pin);
 
     // Flush logs before potentially failing operation
@@ -300,6 +300,32 @@ bool RmtWorker::allocateInterrupt() {
     return true;
 }
 
+void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Tearing down RMT channel (old pin=" << (int)old_pin << ")");
+
+    // Disable and delete the RMT channel
+    if (mChannel) {
+        rmt_disable(mChannel);
+        rmt_del_channel(mChannel);
+        mChannel = nullptr;
+    }
+
+    // Free interrupt handler
+    if (mIntrHandle) {
+        esp_intr_free(mIntrHandle);
+        mIntrHandle = nullptr;
+        mInterruptAllocated = false;
+    }
+
+    // Clean up old GPIO pin: set to input with pulldown
+    if (old_pin != GPIO_NUM_NC) {
+        gpio_set_direction(old_pin, GPIO_MODE_INPUT);
+        gpio_pulldown_en(old_pin);
+        gpio_pullup_dis(old_pin);
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Old pin " << (int)old_pin << " set to input pulldown");
+    }
+}
+
 bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
     // Extract timing values from struct
     uint32_t t1 = timing.T1;
@@ -327,8 +353,17 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
         waitForCompletion();
     }
 
-    // Save old pin before updating (needed to check if channel needs disable)
+    // Save old pin before updating (needed for cleanup and channel recreation check)
     gpio_num_t old_pin = mCurrentPin;
+
+    // Detect pin change - requires channel teardown and recreation
+    bool pin_changed = (old_pin != GPIO_NUM_NC && old_pin != pin);
+
+    if (pin_changed && mChannel != nullptr) {
+        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Pin changed from " << (int)old_pin
+                   << " to " << (int)pin << " - calling tearDownRMTChannel()");
+        tearDownRMTChannel(old_pin);
+    }
 
     // Update configuration
     mCurrentPin = pin;
@@ -385,7 +420,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Create RMT channel on first transmit (lazy initialization)
     // This prevents ESP32-C6 (RISC-V) boot hang during hardware initialization
     if (mChannel == nullptr) {
-        if (!createChannel(mCurrentPin)) {
+        if (!createRMTChannel(mCurrentPin)) {
             FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to create channel - aborting transmit");
             return;
         }

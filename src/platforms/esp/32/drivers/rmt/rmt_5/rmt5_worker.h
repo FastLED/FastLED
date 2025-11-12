@@ -149,10 +149,14 @@ private:
     void IRAM_ATTR handleThresholdInterrupt();
     void IRAM_ATTR handleDoneInterrupt();
 
-    // Helper: create RMT channel (called from configure on first use)
     // Helper: allocate interrupt (lazy, called from first transmit())
     bool allocateInterrupt();
-    bool createChannel(gpio_num_t pin);
+
+    // Helper: create RMT channel (called from configure on first use)
+    bool createRMTChannel(gpio_num_t pin);
+
+    // Helper: tear down RMT channel and cleanup GPIO (called when switching pins)
+    void tearDownRMTChannel(gpio_num_t old_pin);
 
     // Helper: convert byte to RMT pulses
     void IRAM_ATTR convertByteToRmt(uint8_t byte, volatile rmt_item32_t* pItem);
