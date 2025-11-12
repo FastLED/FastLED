@@ -544,31 +544,20 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     uint8_t byte_val,
+    uint32_t zero_val,
+    uint32_t one_val,
     volatile rmt_item32_t* out
 ) {
-    // Use local registers for speed (pattern from RMT4)
-    uint32_t zero_val = *reinterpret_cast<uint32_t*>(&mZero);
-    uint32_t one_val = *reinterpret_cast<uint32_t*>(&mOne);
-
-    uint32_t pixel_u32 = byte_val;
+    // OPTIMIZATION: Pass zero/one as parameters (loaded once per fillNextHalf() call)
+    // instead of reading from member variables each time (RMT4 pattern)
+    FASTLED_REGISTER uint32_t pixel_u32 = byte_val;
     pixel_u32 <<= 24;  // Shift to MSB position
 
-    // Use temporary buffer to avoid volatile writes in loop
-    uint32_t tmp[8];
-    for (uint32_t j = 0; j < 8; j++) {
-        tmp[j] = (pixel_u32 & 0x80000000UL) ? one_val : zero_val;
+    // Use temporary buffer to avoid volatile writes in loop (RMT4 pattern)
+    for (FASTLED_REGISTER uint32_t j = 0; j < 8; j++) {
+        out[j].val = (pixel_u32 & 0x80000000UL) ? one_val : zero_val;
         pixel_u32 <<= 1;
     }
-
-    // Write to volatile RMT memory
-    out[0].val = tmp[0];
-    out[1].val = tmp[1];
-    out[2].val = tmp[2];
-    out[3].val = tmp[3];
-    out[4].val = tmp[4];
-    out[5].val = tmp[5];
-    out[6].val = tmp[6];
-    out[7].val = tmp[7];
 }
 FL_DISABLE_WARNING_POP
 
@@ -577,17 +566,30 @@ FL_DISABLE_WARNING_POP
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
-    // Use local register for speed (pattern from RMT4)
+    // OPTIMIZATION: Cache zero/one values in local registers before loop (RMT4 pattern)
+    // This avoids repeated member variable access inside convertByteToRmt()
+    FASTLED_REGISTER uint32_t zero_val = mZero.val;
+    FASTLED_REGISTER uint32_t one_val = mOne.val;
+
+    // OPTIMIZATION: Cache volatile member variables to avoid repeated access
+    // Since we're in ISR context and own the buffer state, we can safely cache and update once
+    FASTLED_REGISTER int cur = mCur;
+    FASTLED_REGISTER int num_bytes = mNumBytes;
+    const uint8_t* pixel_data = mPixelData;
+    // Remember that volatile writes are super fast, volatile reads
+    // are super slow.
     volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
 
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
     // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
     // Buffer size: MAX_PULSES = PULSES_PER_FILL * 2 (ping-pong halves)
-    for (FASTLED_REGISTER fl::size i = 0; i < RmtWorker::PULSES_PER_FILL / 8; i++) {
-        if (mCur < mNumBytes) {
-            convertByteToRmt(mPixelData[mCur], pItem);
+    constexpr int i_end = PULSES_PER_FILL / 8;
+
+    for (FASTLED_REGISTER int i = 0; i < i_end; i++) {
+        if (cur < num_bytes) {
+            convertByteToRmt(pixel_data[cur], zero_val, one_val, pItem);
             pItem += 8;
-            mCur = mCur + 1;  // Avoid deprecated ++ on volatile
+            cur++;
         } else {
             // End marker - zero duration signals end of transmission
             pItem->val = 0;
@@ -595,14 +597,15 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
         }
     }
 
-    // Flip to other half (use local variable to minimize volatile writes)
-    uint8_t nextHalf = mWhichHalf + 1;
-    if (nextHalf == 2) {
-        pItem = mRMT_mem_start;
-        nextHalf = 0;
-    }
-    mWhichHalf = nextHalf;
+    // Write back updated position (single volatile write instead of many)
+    mCur = cur;
 
+    // Flip to other half (matches RMT4 pattern)
+    mWhichHalf++;
+    if (mWhichHalf == 2) {
+        pItem = mRMT_mem_start;
+        mWhichHalf = 0;
+    }
     mRMT_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP

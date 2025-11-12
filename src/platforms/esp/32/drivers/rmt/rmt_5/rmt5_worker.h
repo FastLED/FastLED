@@ -142,8 +142,8 @@ private:
     rmt_item32_t mOne;
 
     // Ping-pong buffer state (like RMT4)
-    volatile int mCur;               // Current byte position in pixel data
-    volatile uint8_t mWhichHalf;     // Which half of buffer (0 or 1)
+    int mCur;               // Current byte position in pixel data
+    uint8_t mWhichHalf;     // Which half of buffer (0 or 1)
     volatile rmt_item32_t* mRMT_mem_start;  // Start of RMT channel memory
     volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
 
@@ -169,8 +169,8 @@ private:
     // Helper: tear down RMT channel and cleanup GPIO (called when switching pins)
     void tearDownRMTChannel(gpio_num_t old_pin);
 
-    // Helper: convert byte to RMT pulses
-    void IRAM_ATTR convertByteToRmt(uint8_t byte, volatile rmt_item32_t* pItem);
+    // Helper: convert byte to RMT pulses using nibble lookup table
+    void IRAM_ATTR convertByteToRmt(uint8_t byte, const uint32_t lut_nibble[16][4], volatile rmt_item32_t* pItem);
 
     // Helper: start RMT transmission
     void IRAM_ATTR tx_start();
