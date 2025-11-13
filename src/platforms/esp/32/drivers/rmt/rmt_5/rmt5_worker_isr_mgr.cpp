@@ -359,7 +359,7 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
                 pItem->level0 = 0;
                 pItem->duration0 = chunk_duration;
                 pItem->level1 = 0;
-                pItem->duration1 = more ? 0 : 1;  // 0 is signal for termination.
+                pItem->duration1 = more ? 1 : 0;  // 0 is signal for termination.
 
                 isr_data->mResetTicksRemaining -= chunk_duration;
                 pItem++;
