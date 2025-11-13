@@ -30,10 +30,13 @@ namespace fl {
  * Internal implementation class that manages ISR data and interrupt allocation.
  * Kept in cpp file to hide implementation details.
  */
-class RmtWorkerIsrMgrImpl : public RmtWorkerIsrMgr {
+class RmtWorkerIsrMgrImpl {
 public:
+
+    static RmtWorkerIsrMgrImpl& getInstance();
+
     RmtWorkerIsrMgrImpl();
-    ~RmtWorkerIsrMgrImpl() override = default;
+    ~RmtWorkerIsrMgrImpl() = default;
 
     // Implement pure virtual interface methods
     Result<RmtIsrHandle, RmtRegisterError> startTransmission(
@@ -42,9 +45,9 @@ public:
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing
-    ) override;
+    );
 
-    void stopTransmission(const RmtIsrHandle& handle) override;
+    void stopTransmission(const RmtIsrHandle& handle);
 
 
     // Internal helper methods
@@ -102,6 +105,7 @@ private:
     friend class RmtWorkerIsrMgr;
 };
 
+
 // Static member definitions with DRAM_ATTR for ISR access
 DRAM_ATTR RmtWorkerIsrData RmtWorkerIsrMgrImpl::sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP] = {};
 DRAM_ATTR uint8_t RmtWorkerIsrMgrImpl::sMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
@@ -119,7 +123,7 @@ RmtWorkerIsrMgrImpl::RmtWorkerIsrMgrImpl() {
 // All data is in static members for direct ISR access
 static RmtWorkerIsrMgrImpl g_RmtWorkerIsrMgr;
 
-RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
+RmtWorkerIsrMgrImpl& RmtWorkerIsrMgrImpl::getInstance() {
     return g_RmtWorkerIsrMgr;
 }
 
@@ -547,6 +551,22 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
         // Clear threshold interrupt in hardware
         RMT5_CLEAR_INTERRUPTS(channel, false, true);
     }
+}
+
+
+// Bind to api.
+Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgr::startTransmission(
+    uint8_t channel_id,
+    volatile bool* completed,
+    fl::span<volatile rmt_item32_t> rmt_mem,
+    fl::span<const uint8_t> pixel_data,
+    const ChipsetTiming& timing
+) {
+    return RmtWorkerIsrMgrImpl::getInstance().startTransmission(channel_id, completed, rmt_mem, pixel_data, timing);
+}
+
+void RmtWorkerIsrMgr::stopTransmission(const RmtIsrHandle& handle) {
+    RmtWorkerIsrMgrImpl::getInstance().stopTransmission(handle);
 }
 
 } // namespace fl

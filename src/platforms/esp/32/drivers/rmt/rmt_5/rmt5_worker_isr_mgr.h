@@ -58,11 +58,6 @@ enum class RmtRegisterError : uint8_t {
  */
 class RmtWorkerIsrMgr {
 public:
-    // Get the singleton instance
-    static RmtWorkerIsrMgr& getInstance();
-
-    // Virtual destructor for interface
-    virtual ~RmtWorkerIsrMgr() = default;
 
     /**
      * Starts transmission of the isr worker on the specified channel.
@@ -75,13 +70,13 @@ public:
      * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
      * @return Result containing handle on success, or error code on failure
      */
-    virtual Result<RmtIsrHandle, RmtRegisterError> startTransmission(
+    static Result<RmtIsrHandle, RmtRegisterError> startTransmission(
         uint8_t channel_id,
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing
-    ) = 0;
+    );
 
     /**
      * Stops the transmission of the isr worker.
@@ -89,7 +84,7 @@ public:
      *
      * @param handle Handle returned from startTransmission
      */
-    virtual void stopTransmission(const RmtIsrHandle& handle) = 0;
+    static void stopTransmission(const RmtIsrHandle& handle);
 
 protected:
     // Protected constructor for singleton pattern

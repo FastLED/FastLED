@@ -118,7 +118,7 @@ RmtWorker::RmtWorker()
 RmtWorker::~RmtWorker() {
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
+        RmtWorkerIsrMgr::stopTransmission(mHandleResult.value());
     }
 
     // Clean up channel
@@ -200,7 +200,7 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
 
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
+        RmtWorkerIsrMgr::stopTransmission(mHandleResult.value());
     }
 
     // Disable and delete the RMT channel
@@ -323,7 +323,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Register with ISR manager and start transmission
     // The manager will build the LUT, configure ISR data, fill buffers, and start hardware
     // Pass pointer to our availability flag so ISR can signal completion
-    mHandleResult = RmtWorkerIsrMgr::getInstance().startTransmission(
+    mHandleResult = RmtWorkerIsrMgr::startTransmission(
         channel_id,
         &mAvailable,
         rmt_mem,
@@ -352,7 +352,7 @@ void RmtWorker::waitForCompletion() {
 void RmtWorker::markAsAvailable() {
     // Unregister from ISR manager if we have a valid handle
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
+        RmtWorkerIsrMgr::stopTransmission(mHandleResult.value());
         // Reset to failure state
         mHandleResult = Result<RmtIsrHandle, RmtRegisterError>::failure(
             RmtRegisterError::INVALID_CHANNEL,

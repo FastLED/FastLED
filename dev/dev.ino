@@ -14,4 +14,6 @@ void on_startup() {
 
 #endif  // ESP32
 
-#include "../examples/Blink/Blink.ino"
+//#define PIN_DATA 21
+
+#include "../examples/AnimartrixRing/AnimartrixRing.ino"

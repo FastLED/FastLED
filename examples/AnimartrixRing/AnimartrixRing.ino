@@ -24,15 +24,15 @@
 
 #define NUM_LEDS 244
 
-#ifndef DATA_PIN
-#define DATA_PIN 3  // ESP32C6 has this random pin available on the break out.
-#endif // DATA_PIN
+#ifndef PIN_DATA
+#define PIN_DATA 21  // ESP32C6 has this random pin available on the break out.
+#endif // PIN_DATA
 
 #define BRIGHTNESS 8
 
 // Grid dimensions for Animartrix sampling
-#define GRID_WIDTH 32
-#define GRID_HEIGHT 32
+#define GRID_WIDTH 16
+#define GRID_HEIGHT 16
 
 CRGB leds[NUM_LEDS];
 
@@ -134,7 +134,7 @@ void setup() {
     // Setup LED strip
     fl::ScreenMap screenMapLocal(screenmap);
     screenMapLocal.setDiameter(0.15);  // 0.15 cm or 1.5mm - appropriate for dense 144 LED rope
-    FastLED.addLeds<WS2811, DATA_PIN, GRB>(leds, NUM_LEDS)
+    FastLED.addLeds<WS2811, PIN_DATA, GRB>(leds, NUM_LEDS)
         .setCorrection(TypicalLEDStrip)
         .setScreenMap(screenMapLocal);
     FastLED.setBrightness(brightness.value());
@@ -230,6 +230,29 @@ void loop() {
 
     FastLED.setBrightness(finalBrightness);
 
-    // Show the LEDs
-    FastLED.show();
+    //delay(1000);
+    //return;
+
+    EVERY_N_SECONDS(10) {
+        //Serial.println("FastLED.show()");
+        #ifdef FASTLED_RMT5
+        FL_WARN("FastLED.show() on pin " << PIN_DATA << " with RMT5 " << FASTLED_RMT5);
+        #else
+        FL_WARN("FastLED.show() on pin " << PIN_DATA);
+        #endif
+        // Show the LEDs
+
+        delay(10);
+
+
+        Serial.println("FastLED.show() - end");
+
+    }
+
+    EVERY_N_MILLIS(0) {
+        FastLED.show();
+    }
+
+
+
 }
