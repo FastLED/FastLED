@@ -769,6 +769,50 @@ struct alignment_of {
     enum : fl::size { value = alignof(T) };
 };
 
+//-------------------------------------------------------------------------------
+// is_enum trait - detects enum and enum class types
+//-------------------------------------------------------------------------------
+#if defined(__GNUC__) || defined(__clang__)
+// GCC and Clang support __is_enum intrinsic
+template <typename T> struct is_enum {
+    enum : bool { value = __is_enum(T) };
+};
+#elif defined(_MSC_VER)
+// MSVC also supports __is_enum
+template <typename T> struct is_enum {
+    enum : bool { value = __is_enum(T) };
+};
+#else
+// Fallback for other compilers - conservative approach
+// Assumes non-enum by default (safe but may need manual overloads)
+template <typename T> struct is_enum {
+    enum : bool { value = false };
+};
+#endif
+
+//-------------------------------------------------------------------------------
+// underlying_type trait - gets underlying type of enum
+//-------------------------------------------------------------------------------
+#if defined(__GNUC__) || defined(__clang__)
+// GCC and Clang support __underlying_type intrinsic
+template <typename T> struct underlying_type {
+    using type = __underlying_type(T);
+};
+#elif defined(_MSC_VER) && _MSC_VER >= 1900
+// MSVC 2015+ supports __underlying_type
+template <typename T> struct underlying_type {
+    using type = __underlying_type(T);
+};
+#else
+// Fallback - assume int for non-class enums (C++03 behavior)
+template <typename T> struct underlying_type {
+    using type = int;
+};
+#endif
+
+template <typename T>
+using underlying_type_t = typename underlying_type<T>::type;
+
 
 
 // C++11 requires out-of-class definitions for static constexpr members that are ODR-used

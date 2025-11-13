@@ -229,6 +229,16 @@ class StrStream {
     }
 
     //-------------------------------------------------------------------------
+    // Enum support - converts enum class and regular enums to their underlying integer type
+    //-------------------------------------------------------------------------
+    template<typename T>
+    typename fl::enable_if<fl::is_enum<T>::value, StrStream&>::type
+    operator<<(T e) {
+        using underlying_t = typename fl::underlying_type<T>::type;
+        return (*this) << static_cast<underlying_t>(e);
+    }
+
+    //-------------------------------------------------------------------------
     // Fundamental integer type overloads with SFINAE collision prevention
     //-------------------------------------------------------------------------
     // Each type checks it's distinct from 'char' and all previously-defined types
@@ -360,6 +370,11 @@ class FakeStrStream {
 
     // bool support to match StrStream interface
     FakeStrStream &operator<<(bool) { return *this; }
+
+    // Enum support to match StrStream interface
+    template<typename T>
+    typename fl::enable_if<fl::is_enum<T>::value, FakeStrStream&>::type
+    operator<<(T) { return *this; }
 
     FakeStrStream &operator<<(float) { return *this; }
     FakeStrStream &operator<<(double) { return *this; }
