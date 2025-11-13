@@ -10,17 +10,21 @@ from pathlib import Path
 from typing import List, Set
 
 
-def discover_test_files(tests_dir: Path, excluded: Set[str]) -> List[str]:
+def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[str] | None = None) -> List[str]:
     """
     Discover all test files in the tests directory.
 
     Args:
         tests_dir: Root directory containing test files
         excluded: Set of filenames to exclude from discovery
+        test_subdirs: List of subdirectories to search for tests (defaults to ["fl", "fx", "ftl"])
 
     Returns:
         List of relative paths (POSIX format) to test files, sorted
     """
+    if test_subdirs is None:
+        test_subdirs = ["fl", "fx", "ftl"]
+
     test_files: List[str] = []
 
     # Find all test_*.cpp files recursively
@@ -29,8 +33,8 @@ def discover_test_files(tests_dir: Path, excluded: Set[str]) -> List[str]:
             rel_path = f.resolve().relative_to(tests_dir)
             test_files.append(rel_path.as_posix())
 
-    # Also find *.cpp files directly in fl/, fx/ subdirectories
-    for subdir in ["fl", "fx"]:
+    # Also find *.cpp files directly in specified subdirectories
+    for subdir in test_subdirs:
         subdir_path = tests_dir / subdir
         if subdir_path.exists():
             for f in sorted(subdir_path.glob("*.cpp")):

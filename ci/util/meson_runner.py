@@ -1181,10 +1181,11 @@ def run_meson_build_and_test(
     # Run tests
     if unity:
         # Unity mode: Run category test executables
-        # Categories: core_tests, fl_tests, fx_tests, noise_tests, codec_tests
+        # Categories: core_tests, fl_tests, ftl_tests, fx_tests, noise_tests, codec_tests
         test_categories = [
             "core_tests",
             "fl_tests",
+            "ftl_tests",
             "fx_tests",
             "noise_tests",
             "codec_tests",

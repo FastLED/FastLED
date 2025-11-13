@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 from typing import Dict, List
 from discover_tests import discover_test_files
-from test_config import EXCLUDED_TEST_FILES, MAX_TESTS_PER_CATEGORY
+from test_config import EXCLUDED_TEST_FILES, MAX_TESTS_PER_CATEGORY, TEST_SUBDIRS
 from test_helpers import extract_test_name, categorize_test, subdivide_category
 
 
@@ -32,7 +32,7 @@ def main() -> None:
         sys.exit(1)
 
     # Discover all test files
-    test_files = discover_test_files(tests_dir, EXCLUDED_TEST_FILES)
+    test_files = discover_test_files(tests_dir, EXCLUDED_TEST_FILES, TEST_SUBDIRS)
 
     # First pass: categorize all tests and count per category
     test_metadata: List[tuple[str, str, str]] = []  # (test_name, test_file_path, base_category)
