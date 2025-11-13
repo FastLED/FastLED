@@ -63,15 +63,15 @@ struct alignas(32) RmtWorkerIsrData {
     // Accessed by: ISR (read - EVERY ITERATION), main thread (write on transmit)
     int mNumBytes;
 
-#if FASTLED_RMT5_USE_TIMER_ISR
+
     // Partial byte state for nibble-level filling (allows 4-item refills instead of 8)
     // Only used in timer ISR mode for sub-byte granularity
     // mCurrentByte: The byte currently being processed
     // mNibbleState: 0=need new byte, 1=high nibble done (need low nibble)
     // Accessed by: ISR (read/write - EVERY NIBBLE), main thread (write on init)
-    uint8_t mCurrentByte;
-    uint8_t mNibbleState;
-#endif
+    uint8_t mCurrentByte;  // Used by FASTLED_RMT5_USE_TIMER_ISR
+    uint8_t mNibbleState;  // Need new byte, used by FASTLED_RMT5_USE_TIMER_ISR
+
 
     // === Warm Data (Accessed periodically) ===
 
@@ -161,10 +161,10 @@ struct alignas(32) RmtWorkerIsrData {
         mChannelId = channel_id;
         mWhichHalf = 0;
         mCur = 0;
-#if FASTLED_RMT5_USE_TIMER_ISR
-        mCurrentByte = 0;
-        mNibbleState = 0;  // Need new byte
-#endif
+
+        mCurrentByte = 0;  // Used by FASTLED_RMT5_USE_TIMER_ISR
+        mNibbleState = 0;  // Need new byte, used by FASTLED_RMT5_USE_TIMER_ISR
+
         mRMT_mem_start = rmt_mem_start;
         mRMT_mem_ptr = rmt_mem_start;
         mPixelData = pixel_data;

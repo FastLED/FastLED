@@ -12,7 +12,7 @@
 #include "fl/slice.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/result.h"
-#include "rmt5_worker_isr.h"
+#include "rmt5_worker_isr_data.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"

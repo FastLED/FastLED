@@ -10,7 +10,7 @@
 #include "ftl/stdint.h"
 #include "ftl/atomic.h"
 #include "rmt5_worker_base.h"
-#include "rmt5_worker_isr.h"
+#include "rmt5_worker_isr_data.h"
 #include "rmt5_worker_isr_mgr.h"
 
 FL_EXTERN_C_BEGIN
