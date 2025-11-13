@@ -16,8 +16,8 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 
-// #define FASTLED_RMT5_PRESET_LEGACY
-#define FASTLED_RMT5_PRESET_BALANCED
+#define FASTLED_RMT5_PRESET_LEGACY
+// #define FASTLED_RMT5_PRESET_BALANCED
 // #define FASTLED_RMT5_PRESET_AGGRESSIVE
 // #define FASTLED_RMT5_PRESET_MAX_CHANNELS
 // #define FASTLED_RMT5_PRESET_AGGRESSIVE_MAX_CHANNELS
@@ -138,11 +138,11 @@ FL_EXTERN_C_END
 
 // Note that WIFI interrupt = level 4.
 #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5)
-// Riscv chipsets play nice with higher level interrupts + c isr handlers.
-#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL6  // More resitant to jitter.
+// Rumor is this can go higher without asm handler.
+#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3
 #else
-// Xtensa sometimes need asm isr handlers, level 3 is safe.
-#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3  // Test if this can go higher without asm handler.
+// Xtensa might need an asm isr handlers, level 3 is safe.
+#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3
 #endif
 
 

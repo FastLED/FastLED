@@ -20,6 +20,7 @@ FL_EXTERN_C_BEGIN
 #include "rom/gpio.h"  // For gpio_matrix_out
 #include "rom/ets_sys.h"  // For ets_printf (ISR-safe logging)
 #include "esp_log.h"
+#include "esp_private/rmt.h"  // For rmt_get_channel_id()
 
 FL_EXTERN_C_END
 
@@ -167,8 +168,17 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
         return false;
     }
 
-    // Extract channel ID from handle (relies on internal IDF structure)
-    mChannelId = getChannelIdFromHandle(mChannel);
+    // Get channel ID using official ESP-IDF API (available since ESP-IDF v5.1)
+    // This replaces the fragile static counter approach and correctly handles channel reuse
+    int channel_id = -1;
+    ret = rmt_get_channel_id(mChannel, &channel_id);
+    if (ret != ESP_OK || channel_id < 0) {
+        FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to get channel ID: " << esp_err_to_name(ret));
+        rmt_del_channel(mChannel);
+        mChannel = nullptr;
+        return false;
+    }
+    mChannelId = static_cast<uint8_t>(channel_id);
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mChannelId);
 
     // Note: RMT memory pointers will be initialized during first transmit() when ISR data is registered
@@ -316,10 +326,9 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Configure ISR data right before transmission
     // Note: Interrupt allocation happens automatically in startTransmission()
 
-    // Get RMT memory pointer for this channel
-    uint8_t channel_id = getChannelIdFromHandle(mChannel);
+    // Get RMT memory pointer for this channel (use stored channel ID)
     volatile rmt_item32_t* rmt_mem_start =
-        reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[channel_id].data32[0]);
+        reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
 
     // Create spans for RMT memory buffer and pixel data
     fl::span<volatile rmt_item32_t> rmt_mem(rmt_mem_start, MAX_PULSES);
@@ -329,7 +338,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // The manager will build the LUT, configure ISR data, fill buffers, and start hardware
     // Pass pointer to our availability flag so ISR can signal completion
     mHandleResult = RmtWorkerIsrMgr::startTransmission(
-        channel_id,
+        mChannelId,
         &mAvailable,
         rmt_mem,
         pixel_data_span,
@@ -369,39 +378,29 @@ void RmtWorker::markAsAvailable() {
     mAvailable = true;
 }
 
-// Extract channel ID from opaque handle
+// Extract channel ID from opaque handle using official ESP-IDF API
+// Uses rmt_get_channel_id() from esp_private/rmt.h (available since ESP-IDF v5.1)
 uint32_t RmtWorker::getChannelIdFromHandle(rmt_channel_handle_t handle) {
-    // SAFETY WARNING: This relies on internal ESP-IDF structure layout
-    // which may change between IDF versions. This is a fragile workaround
-    // until ESP-IDF provides an official API to query channel ID.
-    //
-    // Tested on ESP-IDF 5.x series. If this breaks:
-    // 1. Check if ESP-IDF added rmt_get_channel_id() or similar API
-    // 2. Update this code to use official API
-    // 3. If no API exists, inspect rmt_tx_channel_t definition in:
-    //    components/esp_driver_rmt/src/rmt_tx.c
-
     if (handle == nullptr) {
-        FL_WARN("getChannelIdFromHandle: null handle");
+        FL_WARN("getChannelIdFromHandle: null handle provided");
         return 0;
     }
 
-    struct rmt_tx_channel_t {
-        void* base;  // rmt_channel_t base (offset 0)
-        uint32_t channel_id;  // offset sizeof(void*)
-        // ... other fields we don't care about
-    };
+    int channel_id = -1;
+    esp_err_t ret = rmt_get_channel_id(handle, &channel_id);
 
-    rmt_tx_channel_t* tx_chan = reinterpret_cast<rmt_tx_channel_t*>(handle);
-    uint32_t channel_id = tx_chan->channel_id;
-
-    // Sanity check - channel ID should be in valid range
-    if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
-        FL_WARN("getChannelIdFromHandle: invalid channel_id " << channel_id << " (max " << (SOC_RMT_CHANNELS_PER_GROUP - 1) << ")");
+    if (ret != ESP_OK) {
+        FL_WARN("getChannelIdFromHandle: rmt_get_channel_id failed: " << esp_err_to_name(ret));
         return 0;
     }
 
-    return channel_id;
+    if (channel_id < 0 || channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
+        FL_WARN("getChannelIdFromHandle: invalid channel_id " << channel_id
+                << " (max " << (SOC_RMT_CHANNELS_PER_GROUP - 1) << ")");
+        return 0;
+    }
+
+    return static_cast<uint32_t>(channel_id);
 }
 
 } // namespace fl

@@ -131,8 +131,9 @@ void ChannelEngineRMT::releaseWorker(IRmtWorkerBase* worker) {
 }
 
 void ChannelEngineRMT::onEndFrame() {
+    show();
     while (true) {
-        auto state = pollDerived();
+        auto state = poll();  // Use poll() instead of pollDerived() to properly clear mInUse flags
         if (state != EngineState::BUSY) {
             break;
         }

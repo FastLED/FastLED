@@ -556,7 +556,7 @@ void RmtWorkerIsrMgrTimerImpl::tx_start(uint8_t channel_id) {
 }
 
 // Timer alarm callback - calls sharedGlobalISR_FillAll
-static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
+bool IRAM_ATTR RmtWorkerIsrMgrTimerImpl::timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
     // Call the fill-all ISR directly
     RmtWorkerIsrMgrTimerImpl::sharedGlobalISR_FillAll(nullptr);
     return false;  // No high-priority task woken
