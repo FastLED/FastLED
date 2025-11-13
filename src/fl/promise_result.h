@@ -88,7 +88,7 @@ public:
     T& value() {
         if (!ok()) {
             // Return static empty object instead of crashing
-            static T empty{};
+            static T empty{};  // okay static in header
             return empty;
         }
         return mResult.template get<T>();

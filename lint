@@ -139,11 +139,26 @@ else
     CPP_LINT_TIMESTAMP=".build/meson/cpp_lint.timestamp"
     CPP_LINT_MARKER=".cache/cpp_lint.marker"
 
+    # Check if any linter scripts in ci/lint_cpp/ have changed
+    LINTER_CHANGED=false
+    if [ -f "$CPP_LINT_MARKER" ]; then
+        for linter_script in ci/lint_cpp/*.py; do
+            if [ -f "$linter_script" ] && [ "$linter_script" -nt "$CPP_LINT_MARKER" ]; then
+                LINTER_CHANGED=true
+                break
+            fi
+        done
+    else
+        LINTER_CHANGED=true
+    fi
+
     CPP_LINT_START=$(date +%s)
     CPP_LINT_SKIPPED=false
-    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null; then
+    if [ "$NO_FINGERPRINT" = true ] || [ ! -f "$CPP_LINT_MARKER" ] || [ "$CPP_LINT_TIMESTAMP" -nt "$CPP_LINT_MARKER" ] 2>/dev/null || [ "$LINTER_CHANGED" = true ]; then
         if [ "$NO_FINGERPRINT" = true ]; then
             echo "Running C++ linting (--no-fingerprint flag set)"
+        elif [ "$LINTER_CHANGED" = true ]; then
+            echo "Linter scripts in ci/lint_cpp/ changed - running C++ linting"
         else
             echo "Source or example files changed - running C++ linting"
         fi

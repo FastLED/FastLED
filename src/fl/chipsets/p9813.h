@@ -62,8 +62,8 @@ public:
 	/// Get a black LED frame for synchronized latching
 	/// Used for quad-SPI lane padding to ensure all strips latch simultaneously
 	/// @returns Black LED frame (invisible LED: flag byte + BGR all zero)
-	static fl::span<const fl::u8> getPaddingLEDFrame() {
-		static const fl::u8 frame[] = {
+	static fl::span<const fl::u8> getPaddingLEDFrame() {  // okay static in header
+		static const fl::u8 frame[] = {  // okay static in header
 			0xFF,  // Flag byte for RGB=0,0,0
 			0x00,  // Blue = 0
 			0x00,  // Green = 0

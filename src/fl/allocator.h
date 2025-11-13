@@ -6,7 +6,7 @@
 #include "fl/unused.h"
 #include "ftl/bit_cast.h"
 #include "ftl/stdint.h"
-#include "../ftl/new.h"
+#include "ftl/new.h"
 #include "ftl/bitset.h"
 #include "ftl/malloc.h"
 #include "fl/align.h"

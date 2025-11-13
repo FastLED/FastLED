@@ -3,10 +3,10 @@
 #include "ftl/stdint.h"
 
 #include "ftl/vector.h"
-#include "../ftl/map.h"
+#include "ftl/map.h"
 #include "fl/rbtree.h"
 #include "fl/allocator.h"
-#include "fl/pair.h"
+#include "ftl/pair.h"
 
 
 namespace fl {

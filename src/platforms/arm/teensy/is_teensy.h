@@ -1,3 +1,5 @@
+// ok no namespace fl
+
 /// @file is_teensy.h
 /// @brief Teensy platform detection macros for FastLED
 ///

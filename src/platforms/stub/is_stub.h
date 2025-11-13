@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_stub.h
 /// Stub platform detection header
 ///

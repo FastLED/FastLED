@@ -1,8 +1,8 @@
 #pragma once
 
 #include "ftl/type_traits.h"
-#include "fl/move.h"
-#include "../ftl/random.h"
+#include "ftl/move.h"
+#include "ftl/random.h"
 
 namespace fl {
 

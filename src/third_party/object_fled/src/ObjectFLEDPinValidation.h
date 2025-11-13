@@ -1,7 +1,7 @@
 #ifndef OBJECTFLED_PIN_VALIDATION_H
 #define OBJECTFLED_PIN_VALIDATION_H
 
-#include <stdint.h>
+#include "fl/stdint.h"
 
 namespace objectfled {
 

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ftl/type_traits.h"
-#include "fl/utility.h"       // for fl::move, fl::forward, fl::swap
+#include "ftl/utility.h"       // for fl::move, fl::forward, fl::swap
 #include "ftl/stdint.h"        // for fl::size_t
 #include "ftl/cstddef.h"       // for fl::nullptr_t
-#include "fl/initializer_list.h"  // for consistency (though not used in unique_ptr itself)
+#include "ftl/initializer_list.h"  // for consistency (though not used in unique_ptr itself)
 
 namespace fl {
 

@@ -4,7 +4,7 @@
 // Includes: ATmega32U4
 // Used in: Arduino Leonardo, Arduino Pro Micro, Teensy 2.0
 
-#include "../common/avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

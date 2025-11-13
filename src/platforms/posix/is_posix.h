@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_posix.h
 /// POSIX platform detection header
 ///

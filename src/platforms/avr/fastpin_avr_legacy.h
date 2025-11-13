@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 // Backward compatibility shim for fastpin_avr_legacy.h
 //
 // This file has been decomposed into family-specific headers for better maintainability.

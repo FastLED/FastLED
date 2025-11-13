@@ -14,9 +14,9 @@ threshold. The first version is much faster and should be used in most cases.
 */
 
 #include "ftl/bitset.h"
-#include "../ftl/math.h"
+#include "ftl/math.h"
 #include "fl/math_macros.h"
-#include "fl/pair.h"
+#include "ftl/pair.h"
 #include "fl/point.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"

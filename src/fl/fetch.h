@@ -54,7 +54,7 @@
 #include "fl/promise.h"
 #include "ftl/string.h"
 #include "ftl/vector.h"
-#include "../ftl/map.h"
+#include "ftl/map.h"
 #include "ftl/hash_map.h"
 #include "ftl/optional.h"
 #include "ftl/function.h"
@@ -163,7 +163,7 @@ private:
         return parsed;
     }
     
-    static fl::string get_default_status_text(int status) {
+    static fl::string get_default_status_text(int status) {  // okay static in header
         switch (status) {
             case 200: return "OK";
             case 400: return "Bad Request";

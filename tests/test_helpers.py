@@ -17,6 +17,7 @@ def extract_test_name(test_file_path: str) -> str:
 
     Naming rules:
     - fl/*.cpp files: prefix with "fl_" (e.g., fl/algorithm.cpp -> fl_algorithm)
+    - ftl/*.cpp files: prefix with "ftl_" (e.g., ftl/algorithm.cpp -> ftl_algorithm)
     - fx/*.cpp files: prefix with "fx_" (e.g., fx/engine.cpp -> fx_engine)
     - Other files: use basename without .cpp (e.g., noise/test_noise.cpp -> test_noise)
 
@@ -32,6 +33,8 @@ def extract_test_name(test_file_path: str) -> str:
     # Add prefix for subdirectory files to avoid naming conflicts
     if test_file_path.startswith("fl/"):
         return f"fl_{base_name}"
+    elif test_file_path.startswith("ftl/"):
+        return f"ftl_{base_name}"
     elif test_file_path.startswith("fx/"):
         return f"fx_{base_name}"
     else:
@@ -43,7 +46,8 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
     Categorize a test for unity build grouping.
 
     Categories:
-    - fl_tests: Tests from fl/ directory (stdlib-like utilities)
+    - fl_tests: Tests from fl/ directory (legacy stdlib-like utilities)
+    - ftl_tests: Tests from ftl/ directory (FastLED Template Library utilities)
     - fx_tests: Tests from fx/ directory or containing "fx" (effects framework)
     - noise_tests: Tests from noise/ directory
     - platform_tests: Tests containing platform-specific keywords
@@ -61,6 +65,8 @@ def categorize_test(test_name: str, test_file_path: str) -> str:
     # Check prefix and file path based categories first
     if test_name.startswith("fl_"):
         return "fl_tests"
+    elif test_name.startswith("ftl_"):
+        return "ftl_tests"
     elif test_name.startswith("fx_") or "fx" in test_name:
         return "fx_tests"
     elif test_file_path.startswith("noise/"):
@@ -109,6 +115,7 @@ def organize_tests_by_category(test_file_paths: List[str]) -> Dict[str, List[str
     """
     categories: Dict[str, List[str]] = {
         "fl_tests": [],
+        "ftl_tests": [],
         "fx_tests": [],
         "noise_tests": [],
         "platform_tests": [],

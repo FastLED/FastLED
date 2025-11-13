@@ -44,7 +44,7 @@
       "description": "C++ linting: clang-format + custom linters (namespace checks, include order, etc.)",
       "cache_key": "cpp_lint",
       "cache_file": ".cache/fingerprint/cpp_lint.json",
-      "pattern": "C++ Source + Examples",
+      "pattern": "C++ Source + Examples + Linter Scripts",
       "globs": [
         "src/**/*.cpp",
         "src/**/*.h",
@@ -53,7 +53,8 @@
         "examples/**/*.ino",
         "examples/**/*.cpp",
         "examples/**/*.h",
-        "examples/**/*.hpp"
+        "examples/**/*.hpp",
+        "ci/lint_cpp/*.py"
       ],
       "tools": [
         "clang-format",
@@ -65,10 +66,11 @@
         "test_no_cpp_includes.py",
         "test_no_include_after_namespace.py",
         "test_no_serial_printf.py",
-        "test_no_std_namespace.py"
+        "test_no_std_namespace.py",
+        "test_test_headers_exist.py"
       ],
       "script": "ci/cpp_lint_cache.py (TO CREATE)",
-      "lint_command": "bash lint (when cpp_lint_cache.py is created)"
+      "lint_command": "bash lint (currently uses timestamp-based checking with ci/lint_cpp/*.py tracking)"
     },
     "cpp_tests": {
       "description": "C++ unit tests compilation and execution",

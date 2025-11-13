@@ -1,7 +1,7 @@
 
 #pragma once
 #ifdef USE_FASTLED
-    #include "FastLED.h" //to have the type CRGB
+    #include "fl/fastled.h" //to have the type CRGB
 #endif
 
 /*Definition des pixels*/

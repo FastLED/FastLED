@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_win.h
 /// Windows platform detection header
 ///

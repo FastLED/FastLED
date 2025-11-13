@@ -1,3 +1,5 @@
+// ok no namespace fl
+
 /// @file stm32_capabilities.h
 /// @brief STM32 capability and feature detection macros
 ///

@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_avr.h
 /// Centralized AVR platform detection macros
 /// Defines FL_IS_AVR, FL_IS_AVR_ATMEGA, and FL_IS_AVR_ATTINY for use throughout the codebase

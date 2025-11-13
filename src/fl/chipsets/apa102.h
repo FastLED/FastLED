@@ -111,7 +111,7 @@ private:
 		fl::u8 brightness;
 		pixels.loadRGBScaleAndBrightness(out_s0, out_s1, out_s2, &brightness);
 		struct Math {
-			static fl::u16 map(fl::u16 x, fl::u16 in_min, fl::u16 in_max, fl::u16 out_min, fl::u16 out_max) {
+			static fl::u16 map(fl::u16 x, fl::u16 in_min, fl::u16 in_max, fl::u16 out_min, fl::u16 out_max) {  // okay static in header
 				const fl::u16 run = in_max - in_min;
 				const fl::u16 rise = out_max - out_min;
 				const fl::u16 delta = x - in_min;
@@ -196,10 +196,10 @@ public:
 	/// Returns a black LED frame to prepend to shorter strips, ensuring
 	/// all strips finish transmitting simultaneously for synchronized updates
 	/// @returns Black LED frame (4 bytes: brightness=0, RGB=0,0,0)
-	static fl::span<const fl::u8> getPaddingLEDFrame() {
+	static fl::span<const fl::u8> getPaddingLEDFrame() {  // okay static in header
 		// APA102 LED frame format: [111BBBBB][B][G][R]
 		// Black LED: 0xE0 (brightness=0), RGB=0,0,0
-		static const fl::u8 frame[] = {
+		static const fl::u8 frame[] = {  // okay static in header
 			0xE0,  // Brightness byte (111 00000 = brightness 0)
 			0x00,  // Blue = 0
 			0x00,  // Green = 0

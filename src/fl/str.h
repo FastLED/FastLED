@@ -512,7 +512,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     char &operator[](fl::size index) {
         if (index >= mLength) {
-            static char dummy = '\0';
+            static char dummy = '\0';  // okay static in header
             return dummy;
         }
         return c_str_mutable()[index];
@@ -520,7 +520,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
 
     char operator[](fl::size index) const {
         if (index >= mLength) {
-            static char dummy = '\0';
+            static char dummy = '\0';  // okay static in header
             return dummy;
         }
         return c_str()[index];
@@ -534,7 +534,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // In std::string, this would throw std::out_of_range
             // For fl::string (embedded-friendly), we return a dummy reference
             // Could also use FL_WARN here for debug builds
-            static char dummy = '\0';
+            static char dummy = '\0';  // okay static in header
             return dummy;
         }
         return c_str_mutable()[pos];
@@ -545,7 +545,7 @@ template <fl::size SIZE = FASTLED_STR_INLINED_SIZE> class StrN {
             // Out of bounds access
             // In std::string, this would throw std::out_of_range
             // For fl::string (embedded-friendly), we return a dummy reference
-            static char dummy = '\0';
+            static char dummy = '\0';  // okay static in header
             return dummy;
         }
         return c_str()[pos];

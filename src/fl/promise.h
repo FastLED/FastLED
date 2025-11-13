@@ -43,8 +43,8 @@
 
 #include "ftl/function.h"
 #include "ftl/string.h"
-#include "../ftl/shared_ptr.h"
-#include "fl/move.h"
+#include "ftl/shared_ptr.h"
+#include "ftl/move.h"
 
 namespace fl {
 
@@ -77,28 +77,28 @@ public:
     }
     
     /// Create a resolved promise with value
-    static promise<T> resolve(const T& value) {
+    static promise<T> resolve(const T& value) {  // okay static in header
         auto p = create();
         p.complete_with_value(value);
         return p;
     }
     
     /// Create a resolved promise with value (move version)
-    static promise<T> resolve(T&& value) {
+    static promise<T> resolve(T&& value) {  // okay static in header
         auto p = create();
         p.complete_with_value(fl::move(value));
         return p;
     }
     
     /// Create a rejected promise with error
-    static promise<T> reject(const Error& error) {
+    static promise<T> reject(const Error& error) {  // okay static in header
         auto p = create();
         p.complete_with_error(error);
         return p;
     }
     
     /// Create a rejected promise with error message
-    static promise<T> reject(const fl::string& error_message) {
+    static promise<T> reject(const fl::string& error_message) {  // okay static in header
         return reject(Error(error_message));
     }
     

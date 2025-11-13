@@ -1,7 +1,7 @@
 #include "fx/audio/detectors/transient.h"
 #include "fl/audio/audio_context.h"
 #include "ftl/math.h"
-#include "fl/algorithm.h"
+#include "ftl/algorithm.h"
 
 namespace fl {
 

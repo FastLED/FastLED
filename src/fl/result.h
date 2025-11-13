@@ -36,7 +36,7 @@
 /// @endcode
 
 #include "ftl/stdint.h"
-#include "fl/utility.h"
+#include "ftl/utility.h"
 #include "fl/align.h"
 
 namespace fl {

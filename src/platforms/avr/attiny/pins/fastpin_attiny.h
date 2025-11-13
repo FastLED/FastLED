@@ -6,7 +6,7 @@
 //           Modern tinyAVR series (xy2, xy4, xy6, xy7)
 //           Special boards: Digispark, Digispark Pro, LightBlue Bean
 
-#include "../../atmega/common/avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

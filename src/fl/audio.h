@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/fft.h"
-#include "../ftl/math.h"
+#include "ftl/math.h"
 #include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/span.h"
 #include "ftl/vector.h"

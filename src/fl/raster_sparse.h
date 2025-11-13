@@ -13,7 +13,7 @@ only a small number of pixels are set.
 #include "fl/geometry.h"
 #include "fl/grid.h"
 #include "ftl/hash_map.h"
-#include "../ftl/map.h"
+#include "ftl/map.h"
 #include "ftl/span.h"
 #include "fl/tile2x2.h"
 #include "fl/xymap.h"

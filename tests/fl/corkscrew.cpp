@@ -2,7 +2,7 @@
 
 #include "fl/math_macros.h"
 #include "test.h"
-#include "fl/algorithm.h"
+#include "ftl/algorithm.h"
 
 #include "ftl/sstream.h"
 

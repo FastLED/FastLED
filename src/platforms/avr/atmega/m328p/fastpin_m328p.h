@@ -1,12 +1,12 @@
 #pragma once
 
-#include "../../is_avr.h"
+#include "platforms/avr/is_avr.h"
 
 // ATmega328P family pin mappings
 // Includes: ATmega328P, ATmega328PB, ATmega328, ATmega168P, ATmega168, ATmega8, ATmega8A
 // Used in: Arduino UNO, Arduino Nano, Arduino Pro Mini
 
-#include "../common/avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

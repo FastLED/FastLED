@@ -26,7 +26,7 @@ class bitset_dynamic {
     fl::u32 _size = 0;
 
     // Helper to calculate block count from bit count
-    static fl::u32 calc_block_count(fl::u32 bit_count) {
+    static fl::u32 calc_block_count(fl::u32 bit_count) {  // okay static in header
         return (bit_count + bits_per_block - 1) / bits_per_block;
     }
 

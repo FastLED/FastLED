@@ -5,7 +5,7 @@
 #pragma once
 
 #include <avr/io.h>
-#include "../common/avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 
 #warning "Untested platform. Please report any issues to the https://github.com/fastled/fastled/issues"
 #include "fl/fastpin_base.h"

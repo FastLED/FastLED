@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_wasm.h
 /// WebAssembly platform detection header
 ///

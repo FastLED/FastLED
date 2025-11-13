@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file spi_output_template.h
 /// Platform-specific SPI output template dispatch header.
 /// This header includes the appropriate SPIOutput template implementation

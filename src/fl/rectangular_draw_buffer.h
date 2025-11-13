@@ -18,7 +18,7 @@
 #include "ftl/stdint.h"
 
 #include "fl/int.h"
-#include "../ftl/map.h"
+#include "ftl/map.h"
 #include "fl/scoped_array.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"

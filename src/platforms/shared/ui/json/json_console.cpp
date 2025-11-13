@@ -7,7 +7,7 @@
 #include "fl/warn.h"
 #include "fl/json.h"
 #include "fl/json.h"
-#include "fl/algorithm.h"
+#include "ftl/algorithm.h"
 #include "ftl/stdint.h"
 #include "platforms/shared/ui/json/ui.h"
 #include <stdlib.h>

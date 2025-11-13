@@ -1,5 +1,7 @@
 #pragma once
 
+// ok no namespace fl
+
 /// @file is_apollo3.h
 /// Apollo3 platform detection header
 ///

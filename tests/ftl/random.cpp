@@ -1,6 +1,6 @@
 #include "test.h"
 #include "ftl/random.h"
-#include "fl/algorithm.h"
+#include "ftl/algorithm.h"
 #include "ftl/vector.h"
 
 using namespace fl;

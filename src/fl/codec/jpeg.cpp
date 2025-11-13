@@ -1,7 +1,7 @@
 #include "fl/codec/jpeg.h"
 #include "ftl/unique_ptr.h"  // For make_unique
 #include "third_party/TJpg_Decoder/driver.h"
-#include "fl/utility.h"
+#include "ftl/utility.h"
 #include "ftl/vector.h"
 #include "fx/frame.h"
 #include "ftl/stdio.h"

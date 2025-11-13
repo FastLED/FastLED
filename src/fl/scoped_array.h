@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/allocator.h"
-#include "../ftl/new.h"
+#include "ftl/new.h"
 #include "fl/deprecated.h"
 #include "ftl/cstddef.h"
 

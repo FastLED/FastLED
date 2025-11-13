@@ -1,5 +1,5 @@
 #include "fl/audio_reactive.h"
-#include "../ftl/math.h"
+#include "ftl/math.h"
 #include "ftl/span.h"
 #include "fl/int.h"
 #include "ftl/unique_ptr.h"  // For unique_ptr

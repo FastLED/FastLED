@@ -148,8 +148,8 @@
 #include "ftl/variant.h"
 #include "ftl/optional.h"
 #include "ftl/unique_ptr.h"
-#include "../ftl/shared_ptr.h"
-#include "fl/functional.h"
+#include "ftl/shared_ptr.h"
+#include "ftl/functional.h"
 #include "fl/str.h" // For StringFormatter
 #include "fl/promise.h" // For Error type
 

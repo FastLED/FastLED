@@ -4,7 +4,7 @@
 // Includes: ATmega2560, ATmega1280
 // Used in: Arduino MEGA 2560
 
-#include "../common/avr_pin.h"
+#include "platforms/avr/atmega/common/avr_pin.h"
 #include "fl/fastpin_base.h"
 
 namespace fl {

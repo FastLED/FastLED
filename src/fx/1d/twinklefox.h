@@ -297,7 +297,7 @@ const TProgmemRGBPalette16 *ActivePaletteList[] = {
 void TwinkleFox::chooseNextColorPalette(CRGBPalette16 &pal) {
     const uint8_t numberOfPalettes =
         sizeof(ActivePaletteList) / sizeof(ActivePaletteList[0]);
-    static uint8_t whichPalette = -1;
+    static uint8_t whichPalette = -1;  // okay static in header
     whichPalette = addmod8(whichPalette, 1, numberOfPalettes);
     pal = *(ActivePaletteList[whichPalette]);
 }

@@ -12,7 +12,7 @@
 #include "fl/warn.h"
 #include "fl/dbg.h"
 #include "fl/chipsets/led_timing.h"
-#include "fl/algorithm.h"
+#include "ftl/algorithm.h"
 #include "ftl/time.h"
 #include "ftl/assert.h"
 #include "fl/delay.h"

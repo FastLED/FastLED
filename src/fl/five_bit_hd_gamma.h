@@ -5,7 +5,7 @@
 
 #include "fl/gamma.h"
 #include "fl/int.h"
-#include "../ftl/math.h"
+#include "ftl/math.h"
 
 #include "crgb.h"
 #include "lib8tion/scale8.h"

@@ -5,7 +5,7 @@
 #include "ftl/deque.h"
 #include "ftl/function.h"
 #include "fl/sketch_macros.h"
-#include "../ftl/math.h" // For floor function
+#include "ftl/math.h" // For floor function
 #include "fl/compiler_control.h"
 #include "fl/thread_local.h"
 #include "fl/numeric_limits.h"
