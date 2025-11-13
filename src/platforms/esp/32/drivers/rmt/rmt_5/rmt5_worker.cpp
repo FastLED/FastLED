@@ -83,14 +83,7 @@ extern rmt_block_mem_t RMTMEM;
  * channels before interrupts are enabled, so no race conditions exist.
  */
 
-// Global worker registry - maps channel ID to active worker
-static fl::RmtWorker* DRAM_ATTR gOnChannel[SOC_RMT_CHANNELS_PER_GROUP] = {nullptr};
-
-// Global interrupt handle (shared by all channels)
-static intr_handle_t DRAM_ATTR gRMT5_intr_handle = nullptr;
-
-// Maximum channel number (initialized at runtime)
-static uint8_t gMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
+// Note: Global worker registry, interrupt handle, and ISR moved to RmtWorkerIsrMgr
 
 /**
  * NMI-Safe Buffer Refill Wrapper
@@ -125,6 +118,7 @@ namespace fl {
 RmtWorker::RmtWorker()
     : mChannel(nullptr)
     , mWorkerId(0)
+    , mChannelId(0xFF)
     , mInterruptAllocated(false)
     , mCurrentPin(GPIO_NUM_NC)
     , mT1(0)
@@ -132,17 +126,24 @@ RmtWorker::RmtWorker()
     , mT3(0)
     , mResetNs(0)
     , mAvailable(true)
+    , mIsrData(nullptr)
 {
-    // Initialize ISR data (handled by RmtWorkerIsrData constructor)
+    // ISR data will be acquired from manager during transmission
     // Workers start in available state
 }
 
 RmtWorker::~RmtWorker() {
     // wait tilll done
     waitForCompletion();
-    // Unregister from global channel map
-    if (mInterruptAllocated && mIsrData.mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
-        gOnChannel[mIsrData.mChannelId] = nullptr;
+    // Unregister from ISR manager if currently registered
+    if (mIsrData != nullptr) {
+        RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
+        mIsrData = nullptr;
+    }
+
+    // Deallocate interrupt if allocated
+    if (mInterruptAllocated) {
+        RmtWorkerIsrMgr::getInstance().deallocateInterrupt(mChannelId);
     }
 
     // Clean up channel
@@ -151,9 +152,6 @@ RmtWorker::~RmtWorker() {
         rmt_del_channel(mChannel);
         mChannel = nullptr;
     }
-
-    // Note: We do NOT free gRMT5_intr_handle because it's shared by all workers
-    // The shared ISR will remain active as long as any worker exists
 }
 
 bool RmtWorker::initialize(uint8_t worker_id) {
@@ -195,12 +193,10 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     }
 
     // Extract channel ID from handle (relies on internal IDF structure)
-    mIsrData.mChannelId = getChannelIdFromHandle(mChannel);
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mIsrData.mChannelId);
+    mChannelId = getChannelIdFromHandle(mChannel);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mChannelId);
 
-    // Get direct pointer to RMT memory
-    mIsrData.mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mIsrData.mChannelId].data32[0]);
-    mIsrData.mRMT_mem_ptr = mIsrData.mRMT_mem_start;
+    // Note: RMT memory pointers will be initialized during first transmit() when ISR data is registered
 
     // Configure threshold interrupt for ping-pong buffer refill
     // Threshold = half of total buffer size, triggering refill when first half is transmitted
@@ -211,15 +207,15 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for ping-pong refill
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    RMT.tx_lim_ch[mIsrData.mChannelId].limit = RMT_THRESHOLD_LIMIT;
+    RMT.tx_lim_ch[mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-    RMT.tx_lim[mIsrData.mChannelId].limit = RMT_THRESHOLD_LIMIT;
+    RMT.tx_lim[mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
-    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #else
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
 #endif
@@ -241,34 +237,9 @@ bool RmtWorker::allocateInterrupt() {
         return true;
     }
 
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating interrupt (first transmit)");
-
-    // Register this worker in the global channel map
-    gOnChannel[mIsrData.mChannelId] = this;
-
-    // Enable threshold interrupt for this channel using direct register access
-    uint32_t thresh_int_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for channels 0-3
-    RMT.int_ena.val |= (1 << thresh_int_bit);
-
-    // Allocate shared global ISR (only once for all channels, like RMT4)
-    if (gRMT5_intr_handle == nullptr) {
-        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating shared global ISR for all RMT channels");
-
-        esp_err_t ret = esp_intr_alloc(
-            ETS_RMT_INTR_SOURCE,
-            ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
-            &RmtWorker::sharedGlobalISR,
-            nullptr,  // No user data - ISR reads gOnChannel[] directly
-            &gRMT5_intr_handle
-        );
-
-        if (ret != ESP_OK) {
-            FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to allocate shared ISR: " << esp_err_to_name(ret) << " (0x" << ret << ")");
-            gOnChannel[mIsrData.mChannelId] = nullptr;  // Clean up registration
-            return false;
-        }
-
-        FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Shared global ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
+    // Delegate to ISR manager
+    if (!RmtWorkerIsrMgr::getInstance().allocateInterrupt(mChannelId, this)) {
+        return false;
     }
 
     mInterruptAllocated = true;
@@ -278,21 +249,24 @@ bool RmtWorker::allocateInterrupt() {
 void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Tearing down RMT channel (old pin=" << (int)old_pin << ")");
 
+    // Unregister from ISR manager
+    if (mIsrData != nullptr) {
+        RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
+        mIsrData = nullptr;
+    }
+
+    // Deallocate interrupt if allocated
+    if (mInterruptAllocated) {
+        RmtWorkerIsrMgr::getInstance().deallocateInterrupt(mChannelId);
+        mInterruptAllocated = false;
+    }
+
     // Disable and delete the RMT channel
     if (mChannel) {
         rmt_disable(mChannel);
         rmt_del_channel(mChannel);
         mChannel = nullptr;
     }
-
-    // Unregister from global channel map
-    if (mInterruptAllocated && mIsrData.mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
-        gOnChannel[mIsrData.mChannelId] = nullptr;
-        mInterruptAllocated = false;
-    }
-
-    // Note: We do NOT free gRMT5_intr_handle here because it's shared by all workers
-    // It will be cleaned up when the last worker is destroyed (see destructor)
 
     // Clean up old GPIO pin: set to input with pulldown
     if (old_pin != GPIO_NUM_NC) {
@@ -398,9 +372,9 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         // Configure GPIO and enable channel (only on first creation)
         FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Configuring GPIO " << (int)mCurrentPin << " for RMT output");
         gpio_set_direction(mCurrentPin, GPIO_MODE_OUTPUT);
-        
 
-        int signal_idx = RMT_SIG_PAD_IDX + mIsrData.mChannelId;
+
+        int signal_idx = RMT_SIG_PAD_IDX + mChannelId;
         gpio_matrix_out(mCurrentPin, signal_idx, false, false);
 
         esp_err_t ret = rmt_enable(mChannel);
@@ -448,15 +422,25 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     rmt_nibble_lut_t nibble_lut;
     buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
 
-    // Configure ISR data with all transmission parameters
-    mIsrData.config(
+    // Get RMT memory pointer for this channel
+    uint8_t channel_id = getChannelIdFromHandle(mChannel);
+    volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start =
+        reinterpret_cast<volatile RmtWorkerIsrData::rmt_item32_t*>(&RMTMEM.chan[channel_id].data32[0]);
+
+    // Register with ISR manager to acquire ISR data slot
+    // The manager will configure all ISR data fields including LUT, memory pointers, and pixel data
+    mIsrData = RmtWorkerIsrMgr::getInstance().registerChannel(
+        channel_id,
         this,
-        mIsrData.mChannelId,
-        mIsrData.mRMT_mem_start,
+        rmt_mem_start,
         pixel_data,
         num_bytes,
         nibble_lut
     );
+    if (mIsrData == nullptr) {
+        FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to register with ISR manager - aborting transmit");
+        return;
+    }
 
     // Debug: Log transmission start
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
@@ -464,16 +448,15 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Availability is controlled by semaphore (taken by pool before transmit)
 
     // Fill both halves initially (like RMT4)
-    fillNextHalf();  // Fill half 0
-    fillNextHalf();  // Fill half 1
+    RmtWorkerIsrMgr::fillNextHalf(channel_id);  // Fill half 0
+    RmtWorkerIsrMgr::fillNextHalf(channel_id);  // Fill half 1
 
-    // Reset memory pointer and start transmission
-    mIsrData.mWhichHalf = 0;
-    mIsrData.mRMT_mem_ptr = mIsrData.mRMT_mem_start;
+    // Reset buffer state before starting transmission
+    RmtWorkerIsrMgr::resetBufferState(channel_id);
 
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Both halves filled, starting HW transmission");
 
-    tx_start();
+    RmtWorkerIsrMgr::tx_start(channel_id);
 }
 
 void RmtWorker::waitForCompletion() {
@@ -488,219 +471,20 @@ void RmtWorker::waitForCompletion() {
 void RmtWorker::markAsAvailable() {
     // Set availability flag to true
     mAvailable = true;
-    // Also clear worker pointer
-    mIsrData.mWorker = nullptr;
+    // Also clear worker pointer if ISR data is registered
+    if (mIsrData != nullptr) {
+        mIsrData->mWorker = nullptr;
+    }
 }
 
 void RmtWorker::markAsUnavailable() {
     // Set availability flag to false
     mAvailable = false;
-    // Also set worker pointer for ISR access
-    mIsrData.mWorker = this;
-}
-
-// Convert byte to RMT symbol (8 RMT items) using nibble lookup table
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
-    uint8_t byte_val,
-    const rmt_nibble_lut_t& lut,
-    volatile RmtWorkerIsrData::rmt_item32_t* out
-) {
-    // Copy 4 RMT items from LUT for high nibble (bits 7-4)
-    const RmtWorkerIsrData::rmt_item32_t* high_lut = lut[byte_val >> 4];
-    out[0].val = high_lut[0].val;
-    out[1].val = high_lut[1].val;
-    out[2].val = high_lut[2].val;
-    out[3].val = high_lut[3].val;
-
-    // Copy 4 RMT items from LUT for low nibble (bits 3-0)
-    const RmtWorkerIsrData::rmt_item32_t* low_lut = lut[byte_val & 0x0F];
-    out[4].val = low_lut[0].val;
-    out[5].val = low_lut[1].val;
-    out[6].val = low_lut[2].val;
-    out[7].val = low_lut[3].val;
-}
-FL_DISABLE_WARNING_POP
-
-// Fill next half of RMT buffer (interrupt context)
-// OPTIMIZATION: Matches RMT4 approach - no defensive checks, trust the buffer sizing math
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorker::fillNextHalf() {
-    // OPTIMIZATION: Cache volatile member variables to avoid repeated access
-    // Since we're in ISR context and own the buffer state, we can safely cache and update once
-    FASTLED_REGISTER int cur = mIsrData.mCur;
-    FASTLED_REGISTER int num_bytes = mIsrData.mNumBytes;
-    const uint8_t* pixel_data = mIsrData.mPixelData;
-    // Cache LUT reference for ISR performance (avoid repeated member access)
-    const rmt_nibble_lut_t& lut = mIsrData.mNibbleLut;
-    // Remember that volatile writes are super fast, volatile reads
-    // are super slow.
-    volatile FASTLED_REGISTER RmtWorkerIsrData::rmt_item32_t* pItem = mIsrData.mRMT_mem_ptr;
-
-    // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
-    // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
-    // Buffer size: MAX_PULSES = PULSES_PER_FILL * 2 (ping-pong halves)
-    constexpr int i_end = PULSES_PER_FILL / 8;
-
-    for (FASTLED_REGISTER int i = 0; i < i_end; i++) {
-        if (cur < num_bytes) {
-            convertByteToRmt(pixel_data[cur], lut, pItem);
-            pItem += 8;
-            cur++;
-        } else {
-            // End marker - zero duration signals end of transmission
-            pItem->val = 0;
-            pItem++;
-        }
-    }
-
-    // Write back updated position (single volatile write instead of many)
-    mIsrData.mCur = cur;
-
-    // Flip to other half (matches RMT4 pattern)
-    mIsrData.mWhichHalf++;
-    if (mIsrData.mWhichHalf == 2) {
-        pItem = mIsrData.mRMT_mem_start;
-        mIsrData.mWhichHalf = 0;
-    }
-    mIsrData.mRMT_mem_ptr = pItem;
-}
-FL_DISABLE_WARNING_POP
-
-// Start RMT transmission
-FL_DISABLE_WARNING_PUSH
-FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorker::tx_start() {
-    // Use direct register access like RMT4
-    // This is platform-specific and based on RMT4's approach
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    // Reset RMT memory read pointer
-    RMT.conf_ch[mIsrData.mChannelId].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[mIsrData.mChannelId].conf1.mem_rd_rst = 0;
-    RMT.conf_ch[mIsrData.mChannelId].conf1.apb_mem_rst = 1;
-    RMT.conf_ch[mIsrData.mChannelId].conf1.apb_mem_rst = 0;
-
-    // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-
-    // Start transmission
-    RMT.conf_ch[mIsrData.mChannelId].conf1.tx_start = 1;
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    // Reset RMT memory read pointer
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
-
-    // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-
-    // Start transmission
-    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
-    // Reset RMT memory read pointer
-    RMT.tx_conf[mIsrData.mChannelId].mem_rd_rst = 1;
-    RMT.tx_conf[mIsrData.mChannelId].mem_rd_rst = 0;
-    RMT.tx_conf[mIsrData.mChannelId].mem_rst = 1;
-    RMT.tx_conf[mIsrData.mChannelId].mem_rst = 0;
-
-    // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-
-    // Start transmission
-    RMT.tx_conf[mIsrData.mChannelId].conf_update = 1;
-    RMT.tx_conf[mIsrData.mChannelId].tx_start = 1;
-#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
-    // Reset RMT memory read pointer
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
-
-    // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-
-    // Start transmission
-    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
-#elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    // Reset RMT memory read pointer
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
-
-    // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
-
-    // Start transmission
-    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
-#else
-#error "RMT5 worker not yet implemented for this ESP32 variant"
-#endif
-}
-FL_DISABLE_WARNING_POP
-
-// Shared Global ISR - Handles ALL RMT channels in one pass (like RMT4)
-//
-// DESIGN: This ISR reads RMT.int_st.val once and processes all pending channel
-// interrupts atomically. This prevents race conditions and missed interrupts
-// when multiple channels fire simultaneously.
-//
-// PERFORMANCE: Single ISR invocation with O(n) channel scan is faster than
-// multiple per-channel ISR invocations due to reduced context switch overhead.
-void IRAM_ATTR RmtWorker::sharedGlobalISR(void* arg) {
-    // Read interrupt status once - captures all pending channel interrupts atomically
-    uint32_t intr_st = RMT.int_st.val;
-
-    // Process all channels in a single pass
-    for (uint8_t channel = 0; channel < gMaxChannel; channel++) {
-        RmtWorker* worker = gOnChannel[channel];
-
-        // Skip inactive channels
-        if (worker == nullptr) {
-            continue;
-        }
-
-        // Platform-specific bit positions (from RMT4)
-#if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
-        int tx_done_bit = channel;
-        int tx_next_bit = channel + 8;  // Threshold interrupt
-#else
-#error "RMT5 worker ISR not yet implemented for this ESP32 variant"
-#endif
-
-        // Check threshold interrupt (buffer half empty) - refill needed
-        if (intr_st & (1 << tx_next_bit)) {
-            worker->fillNextHalf();
-            RMT.int_clr.val = (1 << tx_next_bit);
-        }
-
-        // Check done interrupt (transmission complete)
-        if (intr_st & (1 << tx_done_bit)) {
-            // Signal completion by setting availability flag
-            worker->mAvailable = true;
-            // Also clear worker pointer
-            worker->mIsrData.mWorker = nullptr;
-            RMT.int_clr.val = (1 << tx_done_bit);
-        }
+    // Also set worker pointer for ISR access if ISR data is registered
+    if (mIsrData != nullptr) {
+        mIsrData->mWorker = this;
     }
 }
-
 
 // Extract channel ID from opaque handle
 uint32_t RmtWorker::getChannelIdFromHandle(rmt_channel_handle_t handle) {

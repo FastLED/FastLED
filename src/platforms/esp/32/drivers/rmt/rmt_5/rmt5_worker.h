@@ -11,6 +11,7 @@
 #include "ftl/atomic.h"
 #include "rmt5_worker_base.h"
 #include "rmt5_worker_isr.h"
+#include "rmt5_worker_isr_mgr.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -42,7 +43,7 @@ class ChannelEngineRMT;
  *
  * Implementation:
  * - Ping-pong buffer transmission with interrupt-driven refill
- * - Manual buffer refill via fillNextHalf() in interrupt context
+ * - Buffer refill handled by ISR manager in interrupt context
  * - Direct RMT memory access like RMT4
  * - Two interrupt handling modes (selectable via FASTLED_RMT5_USE_DIRECT_ISR):
  *   1. Direct ISR (default): Low-level ISR with direct register access (faster)
@@ -80,8 +81,9 @@ public:
         return mAvailable;
     }
 
-    // Get ISR data (for global ISR access)
-    RmtWorkerIsrData& getIsrData() { return mIsrData; }
+    // Get ISR data pointer (for global ISR access)
+    // Returns nullptr if worker is not currently registered
+    RmtWorkerIsrData* getIsrData() { return mIsrData; }
 
     // Configuration (called before each transmission)
     bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
@@ -105,15 +107,13 @@ public:
     // Mark worker as unavailable (called by pool under spinlock)
     void markAsUnavailable() override;
 
-    // Buffer refill (interrupt context) - public for NMI access
-    void IRAM_ATTR fillNextHalf();
-
 private:
     // Allow engine to access ISR data for synchronized state changes
     friend class ChannelEngineRMT;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
     uint8_t mWorkerId;
+    uint8_t mChannelId;  // Hardware channel ID (stored separately from ISR data)
     bool mInterruptAllocated;  // Track if this worker is registered in the global ISR (lazy initialization)
 
     // Current configuration
@@ -127,21 +127,11 @@ private:
     // Set to false by main thread when worker is assigned
     volatile bool mAvailable;
 
-    // ISR-optimized data (grouped for minimal pointer chasing in interrupt handlers)
-    // Contains ALL ISR-accessed state:
-    //   - mWorker: Worker pointer (nullptr = available, non-null = busy)
-    //   - mChannelId: Hardware channel ID
-    //   - mWhichHalf: Ping-pong buffer half (0 or 1)
-    //   - mCur: Current byte position in pixel data
-    //   - mRMT_mem_start: Start of RMT channel memory
-    //   - mRMT_mem_ptr: Current write pointer in RMT memory
-    //   - mPixelData: Pointer to pixel data
-    //   - mNumBytes: Total bytes to transmit
-    //   - mNibbleLut: Nibble lookup table for bit-to-RMT conversion
-    RmtWorkerIsrData mIsrData;
-
-    // Shared global ISR - processes all channels in one pass (like RMT4)
-    static void IRAM_ATTR sharedGlobalISR(void* arg);
+    // Pointer to ISR data (acquired from ISR manager during transmission)
+    // - nullptr when worker is not transmitting
+    // - Points to manager-owned ISR data during transmission
+    // - Managed by registerChannel() / unregisterChannel()
+    RmtWorkerIsrData* mIsrData;
 
     // Helper: allocate interrupt (lazy, called from first transmit())
     bool allocateInterrupt();
@@ -151,12 +141,6 @@ private:
 
     // Helper: tear down RMT channel and cleanup GPIO (called when switching pins)
     void tearDownRMTChannel(gpio_num_t old_pin);
-
-    // Helper: convert byte to RMT pulses using nibble LUT
-    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, const rmt_nibble_lut_t& lut, volatile RmtWorkerIsrData::rmt_item32_t* out);
-
-    // Helper: start RMT transmission
-    void IRAM_ATTR tx_start();
 
     // Helper: extract channel ID from handle
     static uint32_t getChannelIdFromHandle(rmt_channel_handle_t handle);
