@@ -39,7 +39,33 @@ FL_EXTERN_C_END
 
 // Buffer size calculations
 #define FASTLED_RMT5_MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
-#define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / 2)  // Half buffer
+#define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / FASTLED_RMT_MEM_BLOCKS)  // Half buffer
+
+// Interrupt mode selection
+// 0 = RMT threshold interrupts (original, less aggressive, lower CPU overhead)
+// 1 = Timer-driven interrupts (new, sub-microsecond filling, nibble-level granularity, higher CPU)
+#ifndef FASTLED_RMT5_USE_TIMER_ISR
+#define FASTLED_RMT5_USE_TIMER_ISR 0  // Default to threshold mode
+#endif
+
+// Timer interrupt configuration for aggressive buffer filling
+// Timer drives fills at sub-microsecond intervals instead of using RMT threshold interrupts
+// Note: Always defined to support both threshold and timer variants being compiled
+#ifndef FASTLED_RMT5_TIMER_GROUP
+#define FASTLED_RMT5_TIMER_GROUP 1  // Timer Group 0 (0 or 1)
+#endif
+
+#ifndef FASTLED_RMT5_TIMER_INDEX
+#define FASTLED_RMT5_TIMER_INDEX 1  // Timer 1 (0 or 1) - TG0_T0 often used by FreeRTOS
+#endif
+
+#ifndef FASTLED_RMT5_TIMER_RESOLUTION_HZ
+#define FASTLED_RMT5_TIMER_RESOLUTION_HZ 10000000  // 10MHz = 0.1µs tick resolution
+#endif
+
+#ifndef FASTLED_RMT5_TIMER_INTERVAL_TICKS
+#define FASTLED_RMT5_TIMER_INTERVAL_TICKS 5  // Fire every 5 ticks = 0.5µs at 10MHz
+#endif
 
 // === Platform-Specific Signal Routing ===
 

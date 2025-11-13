@@ -173,6 +173,11 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
 
     // Note: RMT memory pointers will be initialized during first transmit() when ISR data is registered
 
+#if FASTLED_RMT5_USE_TIMER_ISR
+    // NOTE: Timer interrupt setup is done globally in allocateInterrupt() for all channels
+    // Timer drives buffer fills at sub-microsecond intervals instead of using RMT threshold interrupts
+    // This prevents interrupt watchdog timeout on ESP32-C6 (RISC-V) during early boot
+#else
     // Configure threshold interrupt for ping-pong buffer refill
     // Threshold = half of total buffer size (PULSES_PER_FILL), triggering refill when first half is transmitted
     // PULSES_PER_FILL = SOC_RMT_MEM_WORDS_PER_CHANNEL (platform-dependent):
@@ -189,7 +194,7 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
 
     // NOTE: Interrupt allocation deferred to first transmit() call
     // This prevents interrupt watchdog timeout on ESP32-C6 (RISC-V) during early boot
-
+#endif
 
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Channel created successfully");
     return true;
