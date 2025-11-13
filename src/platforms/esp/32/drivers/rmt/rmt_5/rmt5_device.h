@@ -49,7 +49,8 @@ FL_EXTERN_C_END
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 1; \
     RMT.chnconf0[channel_id].mem_rd_rst_chn = 0; \
     RMT.chnconf0[channel_id].apb_mem_rst_chn = 1; \
-    RMT.chnconf0[channel_id].apb_mem_rst_chn = 0
+    RMT.chnconf0[channel_id].apb_mem_rst_chn = 0; \
+    RMT.chnconf0[channel_id].conf_update_chn = 1
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 #define RMT5_RESET_MEMORY_READ_POINTER(channel_id) \
     RMT.tx_conf[channel_id].mem_rd_rst = 1; \
@@ -208,8 +209,8 @@ FL_EXTERN_C_END
     RMT.conf_ch[channel_id].conf1.tx_start = 1
 #elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
 #define RMT5_START_TRANSMISSION(channel_id) \
-    RMT.chnconf0[channel_id].conf_update_chn = 1; \
-    RMT.chnconf0[channel_id].tx_start_chn = 1
+    RMT.chnconf0[channel_id].tx_start_chn = 1; \
+    RMT.chnconf0[channel_id].conf_update_chn = 1
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
 #define RMT5_START_TRANSMISSION(channel_id) \
     RMT.tx_conf[channel_id].conf_update = 1; \
@@ -609,6 +610,26 @@ FL_EXTERN_C_END
     ((RMT.int_st.val & (1 << RMT5_TX_THRESHOLD_BIT(channel_id))) != 0)
 
 // === Advanced Control ===
+
+/**
+ * Get continuous transmission mode status
+ * Returns true if continuous mode is enabled
+ *
+ * @param channel_id Hardware RMT channel
+ * @return true if continuous mode enabled, false otherwise
+ */
+#if defined(CONFIG_IDF_TARGET_ESP32)
+#define RMT5_GET_CONTINUOUS_MODE(channel_id) \
+    (RMT.conf_ch[channel_id].conf1.tx_conti_mode != 0)
+#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
+#define RMT5_GET_CONTINUOUS_MODE(channel_id) \
+    (RMT.chnconf0[channel_id].tx_conti_mode_chn != 0)
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+#define RMT5_GET_CONTINUOUS_MODE(channel_id) \
+    (RMT.tx_conf[channel_id].tx_conti_mode != 0)
+#else
+#define RMT5_GET_CONTINUOUS_MODE(channel_id) 0
+#endif
 
 /**
  * Set continuous transmission mode
