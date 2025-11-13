@@ -65,8 +65,8 @@ public:
     virtual ~RmtWorkerIsrMgr() = default;
 
     /**
-     * Register worker for transmission on specific channel
-     * Configures all ISR data fields for transmission, builds LUT from timing config
+     * Register worker for transmission on specific channel and start transmission
+     * Configures all ISR data fields, builds LUT from timing config, fills buffers, and starts hardware transmission
      *
      * @param channel_id Hardware RMT channel ID (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
      * @param completed Pointer to worker's completion flag (ISR signals completion)
@@ -90,14 +90,6 @@ public:
      * @param handle Handle returned from registerChannel
      */
     virtual void unregisterChannel(const RmtIsrHandle& handle) = 0;
-
-    /**
-     * Start RMT transmission for channel
-     * Fills buffers and starts hardware transmission
-     *
-     * @param handle Handle returned from registerChannel
-     */
-    virtual void startTransmission(const RmtIsrHandle& handle) = 0;
 
 protected:
     // Protected constructor for singleton pattern

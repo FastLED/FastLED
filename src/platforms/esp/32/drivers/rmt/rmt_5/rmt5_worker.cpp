@@ -328,8 +328,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     fl::span<volatile rmt_item32_t> rmt_mem(rmt_mem_start, MAX_PULSES);
     fl::span<const uint8_t> pixel_data_span(pixel_data, num_bytes);
 
-    // Register with ISR manager to acquire ISR handle
-    // The manager will build the LUT and configure all ISR data fields
+    // Register with ISR manager and start transmission
+    // The manager will build the LUT, configure ISR data, fill buffers, and start hardware
     // Pass pointer to our availability flag so ISR can signal completion
     mHandleResult = RmtWorkerIsrMgr::getInstance().registerChannel(
         channel_id,
@@ -344,11 +344,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         return;
     }
 
-    // Debug: Log transmission start
+    // Debug: Log transmission start (transmission now starts automatically in registerChannel)
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
-
-    // Start transmission (fills buffers and starts hardware)
-    RmtWorkerIsrMgr::getInstance().startTransmission(mHandleResult.value());
 }
 
 void RmtWorker::waitForCompletion() {

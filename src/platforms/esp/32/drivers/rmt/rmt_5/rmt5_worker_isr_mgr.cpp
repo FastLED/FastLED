@@ -45,7 +45,6 @@ public:
 
     void unregisterChannel(const RmtIsrHandle& handle) override;
 
-    void startTransmission(const RmtIsrHandle& handle) override;
 
     // Internal helper methods
     bool allocateInterrupt(uint8_t channel_id);
@@ -209,6 +208,9 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
+    // Start transmission immediately after registration
+    tx_start(channel_id);
+
     // Return success with handle
     return Result<RmtIsrHandle, RmtRegisterError>::success(RmtIsrHandle(channel_id));
 }
@@ -247,10 +249,6 @@ void RmtWorkerIsrMgrImpl::unregisterChannel(const RmtIsrHandle& handle) {
     deallocateInterrupt(channel_id);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Unregistered channel " << (int)channel_id);
-}
-
-void RmtWorkerIsrMgrImpl::startTransmission(const RmtIsrHandle& handle) {
-    tx_start(handle.channel_id);
 }
 
 bool RmtWorkerIsrMgrImpl::isChannelOccupied(uint8_t channel_id) const {
