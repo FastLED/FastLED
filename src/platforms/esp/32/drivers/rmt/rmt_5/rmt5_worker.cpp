@@ -124,7 +124,6 @@ namespace fl {
 
 RmtWorker::RmtWorker()
     : mChannel(nullptr)
-    , mChannelId(0)
     , mWorkerId(0)
     , mInterruptAllocated(false)
     , mCurrentPin(GPIO_NUM_NC)
@@ -132,36 +131,18 @@ RmtWorker::RmtWorker()
     , mT2(0)
     , mT3(0)
     , mResetNs(0)
-    , mCur(0)
-    , mWhichHalf(0)
-    , mRMT_mem_start(nullptr)
-    , mRMT_mem_ptr(nullptr)
-    , mPixelData(nullptr)
-    , mNumBytes(0)
+    , mAvailable(true)
 {
-    // Initialize ISR data
-    // FIXED: Simplified to use only volatile bool - no semaphore needed
-    // Workers start in available state (true)
-    mIsrData.mAvailable = true;
-
-    // Initialize zero and one symbols to safe defaults
-    mZero.duration0 = 0;
-    mZero.level0 = 0;
-    mZero.duration1 = 0;
-    mZero.level1 = 0;
-
-    mOne.duration0 = 0;
-    mOne.level0 = 0;
-    mOne.duration1 = 0;
-    mOne.level1 = 0;
+    // Initialize ISR data (handled by RmtWorkerIsrData constructor)
+    // Workers start in available state
 }
 
 RmtWorker::~RmtWorker() {
     // wait tilll done
     waitForCompletion();
     // Unregister from global channel map
-    if (mInterruptAllocated && mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
-        gOnChannel[mChannelId] = nullptr;
+    if (mInterruptAllocated && mIsrData.mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
+        gOnChannel[mIsrData.mChannelId] = nullptr;
     }
 
     // Clean up channel
@@ -214,12 +195,12 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     }
 
     // Extract channel ID from handle (relies on internal IDF structure)
-    mChannelId = getChannelIdFromHandle(mChannel);
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mChannelId);
+    mIsrData.mChannelId = getChannelIdFromHandle(mChannel);
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Created channel_id=" << (unsigned)mIsrData.mChannelId);
 
     // Get direct pointer to RMT memory
-    mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mChannelId].data32[0]);
-    mRMT_mem_ptr = mRMT_mem_start;
+    mIsrData.mRMT_mem_start = reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[mIsrData.mChannelId].data32[0]);
+    mIsrData.mRMT_mem_ptr = mIsrData.mRMT_mem_start;
 
     // Configure threshold interrupt for ping-pong buffer refill
     // Threshold = half of total buffer size, triggering refill when first half is transmitted
@@ -230,15 +211,15 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for ping-pong refill
 
 #if defined(CONFIG_IDF_TARGET_ESP32)
-    RMT.tx_lim_ch[mChannelId].limit = RMT_THRESHOLD_LIMIT;
+    RMT.tx_lim_ch[mIsrData.mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-    RMT.tx_lim[mChannelId].limit = RMT_THRESHOLD_LIMIT;
+    RMT.tx_lim[mIsrData.mChannelId].limit = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
+    RMT.chn_tx_lim[mIsrData.mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
 #else
 #error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
 #endif
@@ -263,10 +244,10 @@ bool RmtWorker::allocateInterrupt() {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Allocating interrupt (first transmit)");
 
     // Register this worker in the global channel map
-    gOnChannel[mChannelId] = this;
+    gOnChannel[mIsrData.mChannelId] = this;
 
     // Enable threshold interrupt for this channel using direct register access
-    uint32_t thresh_int_bit = 8 + mChannelId;  // Bits 8-11 for channels 0-3
+    uint32_t thresh_int_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for channels 0-3
     RMT.int_ena.val |= (1 << thresh_int_bit);
 
     // Allocate shared global ISR (only once for all channels, like RMT4)
@@ -283,7 +264,7 @@ bool RmtWorker::allocateInterrupt() {
 
         if (ret != ESP_OK) {
             FL_WARN("RmtWorker[" << (int)mWorkerId << "]: Failed to allocate shared ISR: " << esp_err_to_name(ret) << " (0x" << ret << ")");
-            gOnChannel[mChannelId] = nullptr;  // Clean up registration
+            gOnChannel[mIsrData.mChannelId] = nullptr;  // Clean up registration
             return false;
         }
 
@@ -305,8 +286,8 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
     }
 
     // Unregister from global channel map
-    if (mInterruptAllocated && mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
-        gOnChannel[mChannelId] = nullptr;
+    if (mInterruptAllocated && mIsrData.mChannelId < SOC_RMT_CHANNELS_PER_GROUP) {
+        gOnChannel[mIsrData.mChannelId] = nullptr;
         mInterruptAllocated = false;
     }
 
@@ -387,24 +368,8 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
         return static_cast<uint16_t>((ns + 50) / 100);  // Round to nearest tick
     };
 
-    mZero.level0 = 1;
-    mZero.duration0 = ns_to_ticks(t1);
-    mZero.level1 = 0;
-    mZero.duration1 = ns_to_ticks(t2 + t3);
-
-    mOne.level0 = 1;
-    mOne.duration0 = ns_to_ticks(t1 + t2);
-    mOne.level1 = 0;
-    mOne.duration1 = ns_to_ticks(t3);
-
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: mZero={dur0=" << mZero.duration0 << ", lvl0=" << mZero.level0
-               << ", dur1=" << mZero.duration1 << ", lvl1=" << mZero.level1 << ", val=0x" << mZero.val << "}");
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: mOne={dur0=" << mOne.duration0 << ", lvl0=" << mOne.level0
-               << ", dur1=" << mOne.duration1 << ", lvl1=" << mOne.level1 << ", val=0x" << mOne.val << "}");
-
-    // Build nibble lookup table for fast byte-to-RMT conversion
-    buildNibbleLut(mIsrData.mNibbleLut, mZero.val, mOne.val);
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Nibble LUT initialized");
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Timing configured: T1=" << t1
+               << "ns, T2=" << t2 << "ns, T3=" << t3 << "ns");
 
     // GPIO configuration deferred to first transmit() when channel exists
 
@@ -435,7 +400,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         gpio_set_direction(mCurrentPin, GPIO_MODE_OUTPUT);
         
 
-        int signal_idx = RMT_SIG_PAD_IDX + mChannelId;
+        int signal_idx = RMT_SIG_PAD_IDX + mIsrData.mChannelId;
         gpio_matrix_out(mCurrentPin, signal_idx, false, false);
 
         esp_err_t ret = rmt_enable(mChannel);
@@ -455,17 +420,46 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         }
     }
 
-    // Store pixel data pointer (not owned by worker)
-    mPixelData = pixel_data;
-    mNumBytes = num_bytes;
+    // Configure ISR data right before transmission
+    // Build RMT items and LUT on the stack from stored timing parameters
+    auto ns_to_ticks = [](uint32_t ns) -> uint16_t {
+        static_assert(FASTLED_RMT5_HZ == 10000000, "FASTLED_RMT5_HZ is not 10MHz");
+        return static_cast<uint16_t>((ns + 50) / 100);  // Round to nearest tick
+    };
+
+    uint16_t t1_ticks = ns_to_ticks(mT1);
+    uint16_t t2_ticks = ns_to_ticks(mT2);
+    uint16_t t3_ticks = ns_to_ticks(mT3);
+
+    // Build RMT items for 0 and 1 bits on the stack
+    RmtWorkerIsrData::rmt_item32_t zero_item;
+    zero_item.level0 = 1;
+    zero_item.duration0 = t1_ticks;
+    zero_item.level1 = 0;
+    zero_item.duration1 = t2_ticks + t3_ticks;
+
+    RmtWorkerIsrData::rmt_item32_t one_item;
+    one_item.level0 = 1;
+    one_item.duration0 = t1_ticks + t2_ticks;
+    one_item.level1 = 0;
+    one_item.duration1 = t3_ticks;
+
+    // Build nibble LUT on the stack using helper function
+    rmt_nibble_lut_t nibble_lut;
+    buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
+
+    // Configure ISR data with all transmission parameters
+    mIsrData.config(
+        this,
+        mIsrData.mChannelId,
+        mIsrData.mRMT_mem_start,
+        pixel_data,
+        num_bytes,
+        nibble_lut
+    );
 
     // Debug: Log transmission start
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
-
-    // Reset state
-    mCur = 0;
-    mWhichHalf = 0;
-    mRMT_mem_ptr = mRMT_mem_start;
 
     // Availability is controlled by semaphore (taken by pool before transmit)
 
@@ -474,8 +468,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     fillNextHalf();  // Fill half 1
 
     // Reset memory pointer and start transmission
-    mWhichHalf = 0;
-    mRMT_mem_ptr = mRMT_mem_start;
+    mIsrData.mWhichHalf = 0;
+    mIsrData.mRMT_mem_ptr = mIsrData.mRMT_mem_start;
 
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Both halves filled, starting HW transmission");
 
@@ -492,13 +486,17 @@ void RmtWorker::waitForCompletion() {
 }
 
 void RmtWorker::markAsAvailable() {
-    // Set volatile availability flag to true
-    mIsrData.mAvailable = true;
+    // Set availability flag to true
+    mAvailable = true;
+    // Also clear worker pointer
+    mIsrData.mWorker = nullptr;
 }
 
 void RmtWorker::markAsUnavailable() {
-    // Set volatile availability flag to false
-    mIsrData.mAvailable = false;
+    // Set availability flag to false
+    mAvailable = false;
+    // Also set worker pointer for ISR access
+    mIsrData.mWorker = this;
 }
 
 // Convert byte to RMT symbol (8 RMT items) using nibble lookup table
@@ -507,17 +505,17 @@ FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorker::convertByteToRmt(
     uint8_t byte_val,
     const rmt_nibble_lut_t& lut,
-    volatile rmt_item32_t* out
+    volatile RmtWorkerIsrData::rmt_item32_t* out
 ) {
     // Copy 4 RMT items from LUT for high nibble (bits 7-4)
-    const rmt_item32_t* high_lut = lut[byte_val >> 4];
+    const RmtWorkerIsrData::rmt_item32_t* high_lut = lut[byte_val >> 4];
     out[0].val = high_lut[0].val;
     out[1].val = high_lut[1].val;
     out[2].val = high_lut[2].val;
     out[3].val = high_lut[3].val;
 
     // Copy 4 RMT items from LUT for low nibble (bits 3-0)
-    const rmt_item32_t* low_lut = lut[byte_val & 0x0F];
+    const RmtWorkerIsrData::rmt_item32_t* low_lut = lut[byte_val & 0x0F];
     out[4].val = low_lut[0].val;
     out[5].val = low_lut[1].val;
     out[6].val = low_lut[2].val;
@@ -532,14 +530,14 @@ FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorker::fillNextHalf() {
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
     // Since we're in ISR context and own the buffer state, we can safely cache and update once
-    FASTLED_REGISTER int cur = mCur;
-    FASTLED_REGISTER int num_bytes = mNumBytes;
-    const uint8_t* pixel_data = mPixelData;
+    FASTLED_REGISTER int cur = mIsrData.mCur;
+    FASTLED_REGISTER int num_bytes = mIsrData.mNumBytes;
+    const uint8_t* pixel_data = mIsrData.mPixelData;
     // Cache LUT reference for ISR performance (avoid repeated member access)
     const rmt_nibble_lut_t& lut = mIsrData.mNibbleLut;
     // Remember that volatile writes are super fast, volatile reads
     // are super slow.
-    volatile FASTLED_REGISTER rmt_item32_t* pItem = mRMT_mem_ptr;
+    volatile FASTLED_REGISTER RmtWorkerIsrData::rmt_item32_t* pItem = mIsrData.mRMT_mem_ptr;
 
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
     // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
@@ -559,15 +557,15 @@ void IRAM_ATTR RmtWorker::fillNextHalf() {
     }
 
     // Write back updated position (single volatile write instead of many)
-    mCur = cur;
+    mIsrData.mCur = cur;
 
     // Flip to other half (matches RMT4 pattern)
-    mWhichHalf++;
-    if (mWhichHalf == 2) {
-        pItem = mRMT_mem_start;
-        mWhichHalf = 0;
+    mIsrData.mWhichHalf++;
+    if (mIsrData.mWhichHalf == 2) {
+        pItem = mIsrData.mRMT_mem_start;
+        mIsrData.mWhichHalf = 0;
     }
-    mRMT_mem_ptr = pItem;
+    mIsrData.mRMT_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP
 
@@ -579,78 +577,78 @@ void IRAM_ATTR RmtWorker::tx_start() {
     // This is platform-specific and based on RMT4's approach
 #if defined(CONFIG_IDF_TARGET_ESP32)
     // Reset RMT memory read pointer
-    RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 1;
-    RMT.conf_ch[mChannelId].conf1.mem_rd_rst = 0;
-    RMT.conf_ch[mChannelId].conf1.apb_mem_rst = 1;
-    RMT.conf_ch[mChannelId].conf1.apb_mem_rst = 0;
+    RMT.conf_ch[mIsrData.mChannelId].conf1.mem_rd_rst = 1;
+    RMT.conf_ch[mIsrData.mChannelId].conf1.mem_rd_rst = 0;
+    RMT.conf_ch[mIsrData.mChannelId].conf1.apb_mem_rst = 1;
+    RMT.conf_ch[mIsrData.mChannelId].conf1.apb_mem_rst = 0;
 
     // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    RMT.conf_ch[mChannelId].conf1.tx_start = 1;
+    RMT.conf_ch[mIsrData.mChannelId].conf1.tx_start = 1;
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
     // Reset RMT memory read pointer
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
 
     // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    RMT.chnconf0[mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mChannelId].tx_start_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
     // Reset RMT memory read pointer
-    RMT.tx_conf[mChannelId].mem_rd_rst = 1;
-    RMT.tx_conf[mChannelId].mem_rd_rst = 0;
-    RMT.tx_conf[mChannelId].mem_rst = 1;
-    RMT.tx_conf[mChannelId].mem_rst = 0;
+    RMT.tx_conf[mIsrData.mChannelId].mem_rd_rst = 1;
+    RMT.tx_conf[mIsrData.mChannelId].mem_rd_rst = 0;
+    RMT.tx_conf[mIsrData.mChannelId].mem_rst = 1;
+    RMT.tx_conf[mIsrData.mChannelId].mem_rst = 0;
 
     // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    RMT.tx_conf[mChannelId].conf_update = 1;
-    RMT.tx_conf[mChannelId].tx_start = 1;
+    RMT.tx_conf[mIsrData.mChannelId].conf_update = 1;
+    RMT.tx_conf[mIsrData.mChannelId].tx_start = 1;
 #elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
     // Reset RMT memory read pointer
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
 
     // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    RMT.chnconf0[mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mChannelId].tx_start_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
 #elif defined(CONFIG_IDF_TARGET_ESP32P4)
     // Reset RMT memory read pointer
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 1;
-    RMT.chnconf0[mChannelId].mem_rd_rst_chn = 0;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 1;
-    RMT.chnconf0[mChannelId].apb_mem_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].mem_rd_rst_chn = 0;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].apb_mem_rst_chn = 0;
 
     // Clear and enable both TX end and threshold interrupts
-    uint32_t thresh_bit = 8 + mChannelId;  // Bits 8-11 for threshold
-    RMT.int_clr.val = (1 << mChannelId) | (1 << thresh_bit);
-    RMT.int_ena.val |= (1 << mChannelId) | (1 << thresh_bit);
+    uint32_t thresh_bit = 8 + mIsrData.mChannelId;  // Bits 8-11 for threshold
+    RMT.int_clr.val = (1 << mIsrData.mChannelId) | (1 << thresh_bit);
+    RMT.int_ena.val |= (1 << mIsrData.mChannelId) | (1 << thresh_bit);
 
     // Start transmission
-    RMT.chnconf0[mChannelId].conf_update_chn = 1;
-    RMT.chnconf0[mChannelId].tx_start_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].conf_update_chn = 1;
+    RMT.chnconf0[mIsrData.mChannelId].tx_start_chn = 1;
 #else
 #error "RMT5 worker not yet implemented for this ESP32 variant"
 #endif
@@ -695,7 +693,9 @@ void IRAM_ATTR RmtWorker::sharedGlobalISR(void* arg) {
         // Check done interrupt (transmission complete)
         if (intr_st & (1 << tx_done_bit)) {
             // Signal completion by setting availability flag
-            worker->mIsrData.mAvailable = true;
+            worker->mAvailable = true;
+            // Also clear worker pointer
+            worker->mIsrData.mWorker = nullptr;
             RMT.int_clr.val = (1 << tx_done_bit);
         }
     }

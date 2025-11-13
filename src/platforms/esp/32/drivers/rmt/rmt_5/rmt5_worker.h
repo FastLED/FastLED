@@ -10,6 +10,7 @@
 #include "ftl/stdint.h"
 #include "ftl/atomic.h"
 #include "rmt5_worker_base.h"
+#include "rmt5_worker_isr.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -74,10 +75,13 @@ public:
     bool initialize(uint8_t worker_id) override;
 
     // Check if worker is available for assignment
-    // Availability is now tracked separately from completion signaling
+    // Availability is tracked via volatile bool (set by ISR on completion)
     bool isAvailable() const override {
-        return mIsrData.mAvailable;
+        return mAvailable;
     }
+
+    // Get ISR data (for global ISR access)
+    RmtWorkerIsrData& getIsrData() { return mIsrData; }
 
     // Configuration (called before each transmission)
     bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
@@ -104,24 +108,11 @@ public:
     // Buffer refill (interrupt context) - public for NMI access
     void IRAM_ATTR fillNextHalf();
 
-    // ISR-optimized data structure (minimal pointer chasing for interrupt handlers)
-    // FIXED: Simplified to use only volatile bool - no semaphore needed
-    // The engine polls isAvailable() to check completion instead of blocking
-    struct IsrData {
-        volatile bool mAvailable;  // Availability flag (true = available, false = busy)
-
-        // Nibble lookup table for fast bit-to-RMT conversion
-        // Maps each nibble value (0x0-0xF) to 4 RMT items (MSB first: bit3, bit2, bit1, bit0)
-        // Used for both high nibble (bits 7-4) and low nibble (bits 3-0)
-        rmt_nibble_lut_t mNibbleLut;
-    };
-
 private:
-    // Allow engine to access mAvailable for synchronized state changes
+    // Allow engine to access ISR data for synchronized state changes
     friend class ChannelEngineRMT;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
-    uint8_t mChannelId;
     uint8_t mWorkerId;
     bool mInterruptAllocated;  // Track if this worker is registered in the global ISR (lazy initialization)
 
@@ -130,34 +121,24 @@ private:
     int mT1, mT2, mT3;
     uint32_t mResetNs;
 
-public:
-    // Pre-calculated RMT symbols
-    union rmt_item32_t {
-        struct {
-            uint32_t duration0 : 15;
-            uint32_t level0 : 1;
-            uint32_t duration1 : 15;
-            uint32_t level1 : 1;
-        };
-        uint32_t val;
-    };
-
 private:
-    rmt_item32_t mZero;
-    rmt_item32_t mOne;
-
-    // Ping-pong buffer state (like RMT4)
-    int mCur;               // Current byte position in pixel data
-    uint8_t mWhichHalf;     // Which half of buffer (0 or 1)
-    volatile rmt_item32_t* mRMT_mem_start;  // Start of RMT channel memory
-    volatile rmt_item32_t* mRMT_mem_ptr;    // Current write pointer in RMT memory
+    // Availability flag (volatile for ISR/main thread communication)
+    // Set to true by ISR when transmission completes
+    // Set to false by main thread when worker is assigned
+    volatile bool mAvailable;
 
     // ISR-optimized data (grouped for minimal pointer chasing in interrupt handlers)
-    IsrData mIsrData;
-
-    // Transmission state
-    const uint8_t* mPixelData;        // POINTER ONLY - not owned by worker
-    int mNumBytes;                    // Total bytes to transmit
+    // Contains ALL ISR-accessed state:
+    //   - mWorker: Worker pointer (nullptr = available, non-null = busy)
+    //   - mChannelId: Hardware channel ID
+    //   - mWhichHalf: Ping-pong buffer half (0 or 1)
+    //   - mCur: Current byte position in pixel data
+    //   - mRMT_mem_start: Start of RMT channel memory
+    //   - mRMT_mem_ptr: Current write pointer in RMT memory
+    //   - mPixelData: Pointer to pixel data
+    //   - mNumBytes: Total bytes to transmit
+    //   - mNibbleLut: Nibble lookup table for bit-to-RMT conversion
+    RmtWorkerIsrData mIsrData;
 
     // Shared global ISR - processes all channels in one pass (like RMT4)
     static void IRAM_ATTR sharedGlobalISR(void* arg);
@@ -172,7 +153,7 @@ private:
     void tearDownRMTChannel(gpio_num_t old_pin);
 
     // Helper: convert byte to RMT pulses using nibble LUT
-    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, const rmt_nibble_lut_t& lut, volatile rmt_item32_t* out);
+    void IRAM_ATTR convertByteToRmt(uint8_t byte_val, const rmt_nibble_lut_t& lut, volatile RmtWorkerIsrData::rmt_item32_t* out);
 
     // Helper: start RMT transmission
     void IRAM_ATTR tx_start();
