@@ -46,18 +46,8 @@ FL_EXTERN_C_END
 #define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
 #endif
 
-// Define rmt_item32_t union (compatible with RMT4)
-union rmt_item32_t {
-    struct {
-        uint32_t duration0 : 15;
-        uint32_t level0 : 1;
-        uint32_t duration1 : 15;
-        uint32_t level1 : 1;
-    };
-    uint32_t val;
-};
-
 // Define rmt_block_mem_t for IDF5 (removed from public headers)
+// Note: rmt_item32_t is defined in rmt5_worker_lut.h
 typedef struct {
     struct {
         rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
