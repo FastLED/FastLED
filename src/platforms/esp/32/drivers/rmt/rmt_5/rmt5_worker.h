@@ -114,8 +114,7 @@ private:
 
     // Current configuration
     gpio_num_t mCurrentPin;
-    int mT1, mT2, mT3;
-    uint32_t mResetNs;
+    ChipsetTiming mTiming;
 
 private:
     // Availability flag (volatile for ISR/main thread communication)

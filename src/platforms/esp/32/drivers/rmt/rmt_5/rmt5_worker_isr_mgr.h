@@ -10,6 +10,7 @@
 #include "ftl/stdint.h"
 #include "fl/force_inline.h"
 #include "fl/slice.h"
+#include "fl/chipsets/led_timing.h"
 #include "rmt5_worker_isr.h"
 
 FL_EXTERN_C_BEGIN
@@ -45,13 +46,13 @@ public:
 
     /**
      * Register worker for transmission on specific channel
-     * Configures all ISR data fields for transmission
+     * Configures all ISR data fields for transmission, builds LUT from timing config
      *
      * @param channel_id Hardware RMT channel ID (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
      * @param worker Pointer to worker requesting registration
      * @param rmt_mem RMT channel memory buffer (span of volatile rmt_item32_t)
      * @param pixel_data Pixel data to transmit (span of const uint8_t)
-     * @param nibble_lut Pre-built nibble lookup table (will be copied)
+     * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
      * @return Const pointer to assigned ISR data, or nullptr if channel occupied
      */
     virtual const RmtWorkerIsrData* registerChannel(
@@ -59,7 +60,7 @@ public:
         RmtWorker* worker,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const rmt_nibble_lut_t& nibble_lut
+        const ChipsetTiming& timing
     ) = 0;
 
     /**

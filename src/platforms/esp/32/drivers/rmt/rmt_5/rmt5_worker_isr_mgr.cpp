@@ -39,7 +39,7 @@ public:
         RmtWorker* worker,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const rmt_nibble_lut_t& nibble_lut
+        const ChipsetTiming& timing
     ) override;
 
     void unregisterChannel(uint8_t channel_id) override;
@@ -64,6 +64,16 @@ public:
     );
 
 private:
+    // RMT clock frequency (10 MHz for all RMT5 implementations)
+    static constexpr uint32_t RMT_CLOCK_HZ = 10000000;
+
+    // Helper: Convert nanoseconds to RMT ticks
+    static inline uint16_t ns_to_ticks(uint32_t ns) {
+        // Formula: ticks = (ns * RMT_CLOCK_HZ) / 1,000,000,000
+        // Simplified: ticks = ns / 100 (since 10MHz = 100ns per tick)
+        return static_cast<uint16_t>((ns + 50) / 100);  // +50 for rounding
+    }
+
     // ISR data pool - one per hardware channel
     // DRAM attribute for ISR access
     RmtWorkerIsrData mIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
@@ -111,7 +121,7 @@ const RmtWorkerIsrData* RmtWorkerIsrMgrImpl::registerChannel(
     RmtWorker* worker,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
-    const rmt_nibble_lut_t& nibble_lut
+    const ChipsetTiming& timing
 ) {
     // Validate channel ID
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
@@ -140,6 +150,28 @@ const RmtWorkerIsrData* RmtWorkerIsrMgrImpl::registerChannel(
         FL_WARN("RmtWorkerIsrMgr: Failed to allocate interrupt for channel " << (int)channel_id);
         return nullptr;
     }
+
+    // Convert timing from nanoseconds to RMT ticks
+    uint16_t t1_ticks = ns_to_ticks(timing.T1);
+    uint16_t t2_ticks = ns_to_ticks(timing.T2);
+    uint16_t t3_ticks = ns_to_ticks(timing.T3);
+
+    // Build RMT items for 0 and 1 bits
+    rmt_item32_t zero_item;
+    zero_item.level0 = 1;
+    zero_item.duration0 = t1_ticks;
+    zero_item.level1 = 0;
+    zero_item.duration1 = t2_ticks + t3_ticks;
+
+    rmt_item32_t one_item;
+    one_item.level0 = 1;
+    one_item.duration0 = t1_ticks + t2_ticks;
+    one_item.level1 = 0;
+    one_item.duration1 = t3_ticks;
+
+    // Build nibble LUT using helper function
+    rmt_nibble_lut_t nibble_lut;
+    buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
 
     // Extract pointer and length from spans
     volatile rmt_item32_t* rmt_mem_start = rmt_mem.data();

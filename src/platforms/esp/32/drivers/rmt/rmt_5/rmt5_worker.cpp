@@ -38,8 +38,6 @@ FL_EXTERN_C_END
 // only on_trans_done. Since we need threshold interrupts for ping-pong buffer refill,
 // we must use direct ISR with manual register access (no alternative exists).
 
-#define FASTLED_RMT5_HZ 10000000
-
 #if defined(CONFIG_IDF_TARGET_ESP32P4)
 #define RMT_SIG_PAD_IDX RMT_SIG_PAD_OUT0_IDX
 #else
@@ -111,10 +109,7 @@ RmtWorker::RmtWorker()
     , mWorkerId(0)
     , mChannelId(0xFF)
     , mCurrentPin(GPIO_NUM_NC)
-    , mT1(0)
-    , mT2(0)
-    , mT3(0)
-    , mResetNs(0)
+    , mTiming{0, 0, 0, 0, nullptr}  // ChipsetTiming initialization
     , mAvailable(true)
     , mIsrData(nullptr)
 {
@@ -246,20 +241,18 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
 }
 
 bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
-    // Extract timing values from struct
-    uint32_t t1 = timing.T1;
-    uint32_t t2 = timing.T2;
-    uint32_t t3 = timing.T3;
-    uint32_t reset_ns = timing.RESET * 1000;
-
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: configure() called - pin=" << (int)pin
-               << ", t1=" << t1 << ", t2=" << t2 << ", t3=" << t3 << ", reset_us=" << timing.RESET);
+               << ", t1=" << timing.T1 << ", t2=" << timing.T2 << ", t3=" << timing.T3 << ", reset_us=" << timing.RESET);
 
     // Channel creation deferred to first transmit() call
     // This prevents ESP32-C6 (RISC-V) boot hang during RMT hardware initialization
 
-    // Check if reconfiguration needed
-    if (mCurrentPin == pin && mT1 == t1 && mT2 == t2 && mT3 == t3 && mResetNs == reset_ns) {
+    // Check if reconfiguration needed (compare entire timing struct and pin)
+    if (mCurrentPin == pin &&
+        mTiming.T1 == timing.T1 &&
+        mTiming.T2 == timing.T2 &&
+        mTiming.T3 == timing.T3 &&
+        mTiming.RESET == timing.RESET) {
         FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Already configured with same parameters - skipping");
         return true;  // Already configured
     }
@@ -284,31 +277,14 @@ bool RmtWorker::configure(gpio_num_t pin, const ChipsetTiming& timing) {
         tearDownRMTChannel(old_pin);
     }
 
-    // Update configuration
+    // Update configuration (direct struct copy)
     mCurrentPin = pin;
-    mT1 = t1;
-    mT2 = t2;
-    mT3 = t3;
-    mResetNs = reset_ns;
+    mTiming = timing;
 
-    // Recalculate RMT symbols
-    // 10MHz = 100ns per tick
-    const uint32_t TICKS_PER_NS = 10;  // 10MHz / 1GHz = 10 ticks per ns (actually 0.01, so we need to scale)
-    // Actually: 10MHz means 1 tick = 100ns, so ticks = ns / 100
+    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Timing configured: T1=" << timing.T1
+               << "ns, T2=" << timing.T2 << "ns, T3=" << timing.T3 << "ns");
 
-    // For WS2812B:
-    // T0H: 400ns = 4 ticks, T0L: 850ns = 8.5 ticks
-    // T1H: 800ns = 8 ticks, T1L: 450ns = 4.5 ticks
-
-    // Convert from ns to ticks (divide by 100 since 1 tick = 100ns at 10MHz)
-    auto ns_to_ticks = [](uint32_t ns) -> uint16_t {
-        static_assert(FASTLED_RMT5_HZ == 10000000, "FASTLED_RMT5_HZ is not 10MHz");
-        return static_cast<uint16_t>((ns + 50) / 100);  // Round to nearest tick
-    };
-
-    FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Timing configured: T1=" << t1
-               << "ns, T2=" << t2 << "ns, T3=" << t3 << "ns");
-
+    // Note: Timing conversion (ns to ticks) and LUT building happens in ISR manager
     // GPIO configuration deferred to first transmit() when channel exists
 
     return true;
@@ -351,32 +327,6 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
 
     // Configure ISR data right before transmission
     // Note: Interrupt allocation happens automatically in registerChannel()
-    // Build RMT items and LUT on the stack from stored timing parameters
-    auto ns_to_ticks = [](uint32_t ns) -> uint16_t {
-        static_assert(FASTLED_RMT5_HZ == 10000000, "FASTLED_RMT5_HZ is not 10MHz");
-        return static_cast<uint16_t>((ns + 50) / 100);  // Round to nearest tick
-    };
-
-    uint16_t t1_ticks = ns_to_ticks(mT1);
-    uint16_t t2_ticks = ns_to_ticks(mT2);
-    uint16_t t3_ticks = ns_to_ticks(mT3);
-
-    // Build RMT items for 0 and 1 bits on the stack
-    rmt_item32_t zero_item;
-    zero_item.level0 = 1;
-    zero_item.duration0 = t1_ticks;
-    zero_item.level1 = 0;
-    zero_item.duration1 = t2_ticks + t3_ticks;
-
-    rmt_item32_t one_item;
-    one_item.level0 = 1;
-    one_item.duration0 = t1_ticks + t2_ticks;
-    one_item.level1 = 0;
-    one_item.duration1 = t3_ticks;
-
-    // Build nibble LUT on the stack using helper function
-    rmt_nibble_lut_t nibble_lut;
-    buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
 
     // Get RMT memory pointer for this channel
     uint8_t channel_id = getChannelIdFromHandle(mChannel);
@@ -388,13 +338,13 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     fl::span<const uint8_t> pixel_data_span(pixel_data, num_bytes);
 
     // Register with ISR manager to acquire ISR data slot
-    // The manager will configure all ISR data fields including LUT, memory pointers, and pixel data
+    // The manager will build the LUT and configure all ISR data fields
     mIsrData = RmtWorkerIsrMgr::getInstance().registerChannel(
         channel_id,
         this,
         rmt_mem,
         pixel_data_span,
-        nibble_lut
+        mTiming
     );
     if (mIsrData == nullptr) {
         FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to register with ISR manager - aborting transmit");
