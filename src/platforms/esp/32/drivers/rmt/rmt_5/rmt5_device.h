@@ -122,6 +122,18 @@ FL_EXTERN_C_END
         RMT.int_ena.val |= (1 << thresh_int_bit); \
     }
 
+/**
+ * Disable threshold interrupt for channel using direct register access
+ * Used during interrupt deallocation
+ *
+ * @param channel_id Hardware RMT channel
+ */
+#define RMT5_DISABLE_THRESHOLD_INTERRUPT(channel_id) \
+    { \
+        uint32_t thresh_int_bit = 8 + (channel_id); \
+        RMT.int_ena.val &= ~(1 << thresh_int_bit); \
+    }
+
 // === Transmission Control ===
 
 /**

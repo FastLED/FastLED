@@ -90,9 +90,6 @@ private:
     // DRAM attribute for ISR access
     static RmtWorkerIsrData sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
 
-    // Interrupt allocation tracking per channel
-    static bool sInterruptAllocated[SOC_RMT_CHANNELS_PER_GROUP];
-
     // Global interrupt handle (shared by all channels)
     static intr_handle_t sGlobalInterruptHandle;
 
@@ -108,7 +105,6 @@ DRAM_ATTR RmtWorkerIsrData RmtWorkerIsrMgrImpl::sIsrDataArray[SOC_RMT_CHANNELS_P
 DRAM_ATTR uint8_t RmtWorkerIsrMgrImpl::sMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
 
 // Non-ISR static members (no DRAM_ATTR needed)
-bool RmtWorkerIsrMgrImpl::sInterruptAllocated[SOC_RMT_CHANNELS_PER_GROUP] = {};
 intr_handle_t RmtWorkerIsrMgrImpl::sGlobalInterruptHandle = nullptr;
 
 RmtWorkerIsrMgrImpl::RmtWorkerIsrMgrImpl() {
@@ -417,15 +413,10 @@ bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id) {
         return false;
     }
 
-    // Check if already allocated
-    if (sInterruptAllocated[channel_id]) {
-        FL_LOG_RMT("RmtWorkerIsrMgr: Interrupt already allocated for channel " << (int)channel_id);
-        return true;
-    }
-
     FL_LOG_RMT("RmtWorkerIsrMgr: Allocating interrupt for channel " << (int)channel_id);
 
     // Enable threshold interrupt for this channel using RMT device macro
+    // This is idempotent - safe to call multiple times
     RMT5_ENABLE_THRESHOLD_INTERRUPT(channel_id);
 
     // Allocate shared global ISR (only once for all channels, like RMT4)
@@ -448,17 +439,20 @@ bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id) {
         FL_LOG_RMT("RmtWorkerIsrMgr: Shared global ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
     }
 
-    // Mark as allocated
-    sInterruptAllocated[channel_id] = true;
     return true;
 }
 
 // Deallocate interrupt for channel
 void RmtWorkerIsrMgrImpl::deallocateInterrupt(uint8_t channel_id) {
-    if (channel_id < SOC_RMT_CHANNELS_PER_GROUP && sInterruptAllocated[channel_id]) {
-        sInterruptAllocated[channel_id] = false;
-        FL_LOG_RMT("RmtWorkerIsrMgr: Deallocated interrupt for channel " << (int)channel_id);
+    if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
+        return;
     }
+
+    // Disable threshold interrupt for this channel
+    // This is idempotent - safe to call multiple times
+    RMT5_DISABLE_THRESHOLD_INTERRUPT(channel_id);
+
+    FL_LOG_RMT("RmtWorkerIsrMgr: Deallocated interrupt for channel " << (int)channel_id);
 }
 
 // Shared global ISR - processes all channels in one pass (like RMT4)
