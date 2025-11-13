@@ -79,6 +79,27 @@ private:
         return static_cast<uint16_t>((ns + ns_per_tick_half) / ns_per_tick);
     }
 
+    // Helper: Convert microseconds to RMT ticks
+    // Used for reset pulses which are specified in microseconds and can be large (280µs+)
+    static inline uint16_t us_to_ticks(uint32_t us) {
+        // Formula: ticks = (us * CLOCK_HZ) / 1,000,000
+        // For 10MHz clock: ticks = us * 10
+        // We use division approach for generality and to add proper rounding
+        constexpr uint32_t ONE_MHZ = 1000000UL;
+
+        // For CLOCK_HZ >= 1MHz: this calculates ticks_per_us (e.g., 10 for 10MHz)
+        // For CLOCK_HZ < 1MHz: this would be 0, so we use the multiplication form
+        if constexpr (FASTLED_RMT5_CLOCK_HZ >= ONE_MHZ) {
+            constexpr uint32_t ticks_per_us = FASTLED_RMT5_CLOCK_HZ / ONE_MHZ;
+            return static_cast<uint16_t>(us * ticks_per_us);
+        } else {
+            // For slower clocks, use division with rounding
+            constexpr uint32_t us_per_tick = ONE_MHZ / FASTLED_RMT5_CLOCK_HZ;
+            constexpr uint32_t us_per_tick_half = us_per_tick / 2;
+            return static_cast<uint16_t>((us + us_per_tick_half) / us_per_tick);
+        }
+    }
+
     // Static data members - shared across all instances
     // ISR data pool - one per hardware channel
     // DRAM attribute for ISR access
@@ -166,11 +187,12 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
         );
     }
 
-    // Convert timing from nanoseconds to RMT ticks
+    // Convert timing to RMT ticks
+    // T1, T2, T3 are in nanoseconds; RESET is in microseconds
     uint16_t t1_ticks = ns_to_ticks(timing.T1);
     uint16_t t2_ticks = ns_to_ticks(timing.T2);
     uint16_t t3_ticks = ns_to_ticks(timing.T3);
-    uint16_t reset_ticks = ns_to_ticks(timing.RESET);
+    uint16_t reset_ticks = us_to_ticks(timing.RESET);  // Convert µs to ticks
 
     // Build RMT items for 0 and 1 bits
     rmt_item32_t zero_item;
