@@ -249,7 +249,7 @@ void loop() {
 
     }
 
-    EVERY_N_MILLIS(0) {
+    EVERY_N_MILLIS(200) {
         FastLED.show();
     }
 
