@@ -2,12 +2,11 @@
 
 // ok no namespace fl
 
+#include "third_party/espressif/led_strip/src/enabled.h"
 
-#ifdef ESP32
+#if FASTLED_RMT5
 
 #include "fl/compiler_control.h"
-
-
 #include "ftl/stdint.h"
 #include "sdkconfig.h"
 
@@ -15,8 +14,6 @@ FL_EXTERN_C_BEGIN
 #include "soc/rmt_struct.h"
 #include "esp_attr.h"
 FL_EXTERN_C_END
-
-
 
 
 #define FASTLED_RMT5_PRESET_LEGACY 0
@@ -99,7 +96,7 @@ FL_EXTERN_C_END
 #endif
 
 #ifndef FASTLED_RMT_MEM_BLOCKS
-#define FASTLED_RMT_MEM_BLOCKS 2  // Ping-pong buffer by default
+#define FASTLED_RMT_MEM_BLOCKS 2  // 2x as much memory for increased stability vs wifi jitter.
 #endif
 
 // Buffer size calculations
