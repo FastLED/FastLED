@@ -8,11 +8,13 @@
 #if FASTLED_RMT5
 
 #include "ftl/stdint.h"
+#include "fl/force_inline.h"
 #include "rmt5_worker_isr.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
 #include "esp_intr_alloc.h"
+#include "esp_attr.h"
 FL_EXTERN_C_END
 
 namespace fl {
@@ -53,7 +55,7 @@ public:
     const RmtWorkerIsrData* registerChannel(
         uint8_t channel_id,
         RmtWorker* worker,
-        volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start,
+        volatile rmt_item32_t* rmt_mem_start,
         const uint8_t* pixel_data,
         int num_bytes,
         const rmt_nibble_lut_t& nibble_lut
@@ -117,7 +119,7 @@ public:
     static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
         uint8_t byte_val,
         const rmt_nibble_lut_t& lut,
-        volatile RmtWorkerIsrData::rmt_item32_t* out
+        volatile rmt_item32_t* out
     );
 
     /**
@@ -163,13 +165,13 @@ private:
 
     // Global worker registry - maps channel ID to active worker
     // Used by ISR to access worker for completion signaling
-    RmtWorker* DRAM_ATTR mWorkerRegistry[SOC_RMT_CHANNELS_PER_GROUP];
+    RmtWorker* mWorkerRegistry[SOC_RMT_CHANNELS_PER_GROUP];
 
     // Interrupt allocation tracking per channel
     bool mInterruptAllocated[SOC_RMT_CHANNELS_PER_GROUP];
 
     // Global interrupt handle (shared by all channels)
-    intr_handle_t DRAM_ATTR mGlobalInterruptHandle;
+    intr_handle_t mGlobalInterruptHandle;
 
     // Maximum channel number
     uint8_t mMaxChannel;

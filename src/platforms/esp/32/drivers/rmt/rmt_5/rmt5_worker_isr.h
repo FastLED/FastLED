@@ -9,6 +9,7 @@
 
 #include "ftl/stdint.h"
 #include "rmt5_worker_base.h"
+#include "rmt5_worker_lut.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_tx.h"
@@ -32,17 +33,6 @@ class RmtWorker;
  * - Lookup tables for fast bit-to-RMT conversion
  */
 struct RmtWorkerIsrData {
-    // Define rmt_item32_t union (compatible with RMT4)
-    union rmt_item32_t {
-        struct {
-            uint32_t duration0 : 15;
-            uint32_t level0 : 1;
-            uint32_t duration1 : 15;
-            uint32_t level1 : 1;
-        };
-        uint32_t val;
-    };
-
     // === Worker Pointer ===
     // Pointer to the owning RmtWorker (nullptr = available, non-null = busy)
     // Accessed by: ISR (read), main thread (write)

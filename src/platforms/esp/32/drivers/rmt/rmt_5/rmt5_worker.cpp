@@ -371,13 +371,13 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     uint16_t t3_ticks = ns_to_ticks(mT3);
 
     // Build RMT items for 0 and 1 bits on the stack
-    RmtWorkerIsrData::rmt_item32_t zero_item;
+    rmt_item32_t zero_item;
     zero_item.level0 = 1;
     zero_item.duration0 = t1_ticks;
     zero_item.level1 = 0;
     zero_item.duration1 = t2_ticks + t3_ticks;
 
-    RmtWorkerIsrData::rmt_item32_t one_item;
+    rmt_item32_t one_item;
     one_item.level0 = 1;
     one_item.duration0 = t1_ticks + t2_ticks;
     one_item.level1 = 0;
@@ -389,8 +389,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
 
     // Get RMT memory pointer for this channel
     uint8_t channel_id = getChannelIdFromHandle(mChannel);
-    volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start =
-        reinterpret_cast<volatile RmtWorkerIsrData::rmt_item32_t*>(&RMTMEM.chan[channel_id].data32[0]);
+    volatile rmt_item32_t* rmt_mem_start =
+        reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[channel_id].data32[0]);
 
     // Register with ISR manager to acquire ISR data slot
     // The manager will configure all ISR data fields including LUT, memory pointers, and pixel data

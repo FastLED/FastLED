@@ -8,6 +8,7 @@
 #include "rmt5_worker_isr_mgr.h"
 #include "rmt5_worker.h"
 #include "fl/log.h"
+#include "fl/register.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
@@ -44,7 +45,7 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
 const RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
     uint8_t channel_id,
     RmtWorker* worker,
-    volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start,
+    volatile rmt_item32_t* rmt_mem_start,
     const uint8_t* pixel_data,
     int num_bytes,
     const rmt_nibble_lut_t& nibble_lut
@@ -129,17 +130,17 @@ FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorkerIsrMgr::convertByteToRmt(
     uint8_t byte_val,
     const rmt_nibble_lut_t& lut,
-    volatile RmtWorkerIsrData::rmt_item32_t* out
+    volatile rmt_item32_t* out
 ) {
     // Copy 4 RMT items from LUT for high nibble (bits 7-4)
-    const RmtWorkerIsrData::rmt_item32_t* high_lut = lut[byte_val >> 4];
+    const rmt_item32_t* high_lut = lut[byte_val >> 4];
     out[0].val = high_lut[0].val;
     out[1].val = high_lut[1].val;
     out[2].val = high_lut[2].val;
     out[3].val = high_lut[3].val;
 
     // Copy 4 RMT items from LUT for low nibble (bits 3-0)
-    const RmtWorkerIsrData::rmt_item32_t* low_lut = lut[byte_val & 0x0F];
+    const rmt_item32_t* low_lut = lut[byte_val & 0x0F];
     out[4].val = low_lut[0].val;
     out[5].val = low_lut[1].val;
     out[6].val = low_lut[2].val;
@@ -163,7 +164,7 @@ void IRAM_ATTR RmtWorkerIsrMgr::fillNextHalf(uint8_t channel_id) {
     // Cache LUT reference for ISR performance (avoid repeated member access)
     const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
     // Remember that volatile writes are super fast, volatile reads are super slow.
-    volatile FASTLED_REGISTER RmtWorkerIsrData::rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
+    volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
 
     // Calculate buffer constants (matching RmtWorker values)
     #ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
@@ -407,8 +408,8 @@ void IRAM_ATTR RmtWorkerIsrMgr::sharedGlobalISR(void* arg) {
             if (isr_data->mWorker != nullptr) {
                 isr_data->mWorker = nullptr;
             }
-            // Signal completion by setting availability flag
-            worker->mAvailable = true;
+            // Signal completion by marking worker as available
+            worker->markAsAvailable();
             RMT.int_clr.val = (1 << tx_done_bit);
         }
     }
