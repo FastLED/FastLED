@@ -154,12 +154,12 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     // Flush logs before potentially failing operation
     esp_log_level_set("*", ESP_LOG_VERBOSE);
 
-    // Create RMT TX channel with 2 memory blocks
+    // Create RMT TX channel with FASTLED_RMT_MEM_BLOCKS memory blocks (default 2 for ping-pong)
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
     tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
-    tx_config.mem_block_symbols = 2 * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // 2 blocks for ping-pong
+    tx_config.mem_block_symbols = FASTLED_RMT_MEM_BLOCKS * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // Configurable via FASTLED_RMT_MEM_BLOCKS
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = false;
     tx_config.flags.with_dma = false;  // No DMA
