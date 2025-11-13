@@ -235,9 +235,6 @@ bool ChannelEngineRMT::tryStartPendingChannel(const PendingChannel& pending) {
         return false;  // No worker available
     }
 
-    // Mark worker as unavailable (acquired)
-    worker->markAsUnavailable();
-
     // Configure the worker with pin and timing
     if (!worker->configure(static_cast<gpio_num_t>(pending.pin), pending.timing)) {
         FL_WARN("Failed to configure RMT worker for pin " << pending.pin);

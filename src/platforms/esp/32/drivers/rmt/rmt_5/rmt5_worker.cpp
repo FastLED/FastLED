@@ -119,7 +119,6 @@ RmtWorker::RmtWorker()
     : mChannel(nullptr)
     , mWorkerId(0)
     , mChannelId(0xFF)
-    , mInterruptAllocated(false)
     , mCurrentPin(GPIO_NUM_NC)
     , mT1(0)
     , mT2(0)
@@ -135,15 +134,10 @@ RmtWorker::RmtWorker()
 RmtWorker::~RmtWorker() {
     // wait tilll done
     waitForCompletion();
-    // Unregister from ISR manager if currently registered
+    // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mIsrData != nullptr) {
         RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
         mIsrData = nullptr;
-    }
-
-    // Deallocate interrupt if allocated
-    if (mInterruptAllocated) {
-        RmtWorkerIsrMgr::getInstance().deallocateInterrupt(mChannelId);
     }
 
     // Clean up channel
@@ -231,34 +225,13 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     return true;
 }
 
-bool RmtWorker::allocateInterrupt() {
-    // Interrupt already allocated - skip
-    if (mInterruptAllocated) {
-        return true;
-    }
-
-    // Delegate to ISR manager
-    if (!RmtWorkerIsrMgr::getInstance().allocateInterrupt(mChannelId, this)) {
-        return false;
-    }
-
-    mInterruptAllocated = true;
-    return true;
-}
-
 void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Tearing down RMT channel (old pin=" << (int)old_pin << ")");
 
-    // Unregister from ISR manager
+    // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mIsrData != nullptr) {
         RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
         mIsrData = nullptr;
-    }
-
-    // Deallocate interrupt if allocated
-    if (mInterruptAllocated) {
-        RmtWorkerIsrMgr::getInstance().deallocateInterrupt(mChannelId);
-        mInterruptAllocated = false;
     }
 
     // Disable and delete the RMT channel
@@ -385,16 +358,8 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Channel enabled and ready");
     }
 
-    // Allocate interrupt on first transmit (lazy initialization)
-    // This prevents interrupt watchdog timeout on ESP32-C6 during early boot
-    if (!mInterruptAllocated) {
-        if (!allocateInterrupt()) {
-            FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to allocate interrupt - aborting transmit");
-            return;
-        }
-    }
-
     // Configure ISR data right before transmission
+    // Note: Interrupt allocation happens automatically in registerChannel()
     // Build RMT items and LUT on the stack from stored timing parameters
     auto ns_to_ticks = [](uint32_t ns) -> uint16_t {
         static_assert(FASTLED_RMT5_HZ == 10000000, "FASTLED_RMT5_HZ is not 10MHz");
@@ -445,17 +410,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Debug: Log transmission start
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 
-    // Availability is controlled by semaphore (taken by pool before transmit)
-
-    // Fill both halves initially (like RMT4)
-    RmtWorkerIsrMgr::fillNextHalf(channel_id);  // Fill half 0
-    RmtWorkerIsrMgr::fillNextHalf(channel_id);  // Fill half 1
-
-    // Reset buffer state before starting transmission
-    RmtWorkerIsrMgr::resetBufferState(channel_id);
-
-    FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Both halves filled, starting HW transmission");
-
+    // Start transmission (fills buffers and starts hardware)
     RmtWorkerIsrMgr::tx_start(channel_id);
 }
 
@@ -471,19 +426,7 @@ void RmtWorker::waitForCompletion() {
 void RmtWorker::markAsAvailable() {
     // Set availability flag to true
     mAvailable = true;
-    // Also clear worker pointer if ISR data is registered
-    if (mIsrData != nullptr) {
-        mIsrData->mWorker = nullptr;
-    }
-}
-
-void RmtWorker::markAsUnavailable() {
-    // Set availability flag to false
-    mAvailable = false;
-    // Also set worker pointer for ISR access if ISR data is registered
-    if (mIsrData != nullptr) {
-        mIsrData->mWorker = this;
-    }
+    // Note: mWorker pointer in ISR data is cleared by ISR before signaling completion
 }
 
 // Extract channel ID from opaque handle

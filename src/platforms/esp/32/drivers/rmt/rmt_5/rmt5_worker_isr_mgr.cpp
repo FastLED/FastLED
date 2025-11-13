@@ -27,9 +27,10 @@ RmtWorkerIsrMgr::RmtWorkerIsrMgr()
     // ISR data array is default-constructed
     // All mWorker pointers are nullptr (available state)
 
-    // Initialize worker registry to nullptr
+    // Initialize worker registry and interrupt tracking
     for (int i = 0; i < SOC_RMT_CHANNELS_PER_GROUP; i++) {
         mWorkerRegistry[i] = nullptr;
+        mInterruptAllocated[i] = false;
     }
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Initialized with " << SOC_RMT_CHANNELS_PER_GROUP << " ISR data slots");
@@ -40,7 +41,7 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
     return instance;
 }
 
-RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
+const RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
     uint8_t channel_id,
     RmtWorker* worker,
     volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start,
@@ -70,6 +71,12 @@ RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
         return nullptr;
     }
 
+    // Allocate interrupt on first registration (lazy initialization)
+    if (!allocateInterrupt(channel_id, worker)) {
+        FL_WARN("RmtWorkerIsrMgr: Failed to allocate interrupt for channel " << (int)channel_id);
+        return nullptr;
+    }
+
     // Configure ISR data using the provided config() method
     isr_data->config(worker, channel_id, rmt_mem_start, pixel_data, num_bytes, nibble_lut);
 
@@ -95,6 +102,9 @@ void RmtWorkerIsrMgr::unregisterChannel(uint8_t channel_id) {
     isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
     isr_data->mPixelData = nullptr;
     isr_data->mNumBytes = 0;
+
+    // Also deallocate interrupt (unregister from worker registry)
+    deallocateInterrupt(channel_id);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Unregistered channel " << (int)channel_id);
 }
@@ -206,6 +216,13 @@ void RmtWorkerIsrMgr::resetBufferState(uint8_t channel_id) {
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorkerIsrMgr::tx_start(uint8_t channel_id) {
+    // Fill both halves of ping-pong buffer initially (like RMT4)
+    fillNextHalf(channel_id);  // Fill half 0
+    fillNextHalf(channel_id);  // Fill half 1
+
+    // Reset buffer state before starting transmission
+    resetBufferState(channel_id);
+
     // Use direct register access like RMT4
     // This is platform-specific and based on RMT4's approach
 #if defined(CONFIG_IDF_TARGET_ESP32)
@@ -302,6 +319,12 @@ bool RmtWorkerIsrMgr::allocateInterrupt(uint8_t channel_id, RmtWorker* worker) {
         return false;
     }
 
+    // Check if already allocated
+    if (mInterruptAllocated[channel_id]) {
+        FL_LOG_RMT("RmtWorkerIsrMgr: Interrupt already allocated for channel " << (int)channel_id);
+        return true;
+    }
+
     FL_LOG_RMT("RmtWorkerIsrMgr: Allocating interrupt for channel " << (int)channel_id);
 
     // Register this worker in the global channel map
@@ -332,13 +355,16 @@ bool RmtWorkerIsrMgr::allocateInterrupt(uint8_t channel_id, RmtWorker* worker) {
         FL_LOG_RMT("RmtWorkerIsrMgr: Shared global ISR allocated successfully (Level 3, ETS_RMT_INTR_SOURCE)");
     }
 
+    // Mark as allocated
+    mInterruptAllocated[channel_id] = true;
     return true;
 }
 
 // Deallocate interrupt for channel
 void RmtWorkerIsrMgr::deallocateInterrupt(uint8_t channel_id) {
-    if (channel_id < SOC_RMT_CHANNELS_PER_GROUP) {
+    if (channel_id < SOC_RMT_CHANNELS_PER_GROUP && mInterruptAllocated[channel_id]) {
         mWorkerRegistry[channel_id] = nullptr;
+        mInterruptAllocated[channel_id] = false;
         FL_LOG_RMT("RmtWorkerIsrMgr: Deallocated interrupt for channel " << (int)channel_id);
     }
 }
@@ -376,13 +402,13 @@ void IRAM_ATTR RmtWorkerIsrMgr::sharedGlobalISR(void* arg) {
 
         // Check done interrupt (transmission complete)
         if (intr_st & (1 << tx_done_bit)) {
-            // Signal completion by setting availability flag
-            worker->mAvailable = true;
-            // Also clear worker pointer in ISR data if registered
+            // Clear worker pointer in ISR data BEFORE signaling completion
             RmtWorkerIsrData* isr_data = &mgr.mIsrDataArray[channel];
             if (isr_data->mWorker != nullptr) {
                 isr_data->mWorker = nullptr;
             }
+            // Signal completion by setting availability flag
+            worker->mAvailable = true;
             RMT.int_clr.val = (1 << tx_done_bit);
         }
     }

@@ -83,7 +83,7 @@ public:
 
     // Get ISR data pointer (for global ISR access)
     // Returns nullptr if worker is not currently registered
-    RmtWorkerIsrData* getIsrData() { return mIsrData; }
+    const RmtWorkerIsrData* getIsrData() const { return mIsrData; }
 
     // Configuration (called before each transmission)
     bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
@@ -104,9 +104,6 @@ public:
     // Mark worker as available (called by pool under spinlock)
     void markAsAvailable() override;
 
-    // Mark worker as unavailable (called by pool under spinlock)
-    void markAsUnavailable() override;
-
 private:
     // Allow engine to access ISR data for synchronized state changes
     friend class ChannelEngineRMT;
@@ -114,7 +111,6 @@ private:
     rmt_channel_handle_t mChannel;
     uint8_t mWorkerId;
     uint8_t mChannelId;  // Hardware channel ID (stored separately from ISR data)
-    bool mInterruptAllocated;  // Track if this worker is registered in the global ISR (lazy initialization)
 
     // Current configuration
     gpio_num_t mCurrentPin;
@@ -129,12 +125,9 @@ private:
 
     // Pointer to ISR data (acquired from ISR manager during transmission)
     // - nullptr when worker is not transmitting
-    // - Points to manager-owned ISR data during transmission
+    // - Points to manager-owned ISR data during transmission (read-only for worker)
     // - Managed by registerChannel() / unregisterChannel()
-    RmtWorkerIsrData* mIsrData;
-
-    // Helper: allocate interrupt (lazy, called from first transmit())
-    bool allocateInterrupt();
+    const RmtWorkerIsrData* mIsrData;
 
     // Helper: create RMT channel (called from configure on first use)
     bool createRMTChannel(gpio_num_t pin);

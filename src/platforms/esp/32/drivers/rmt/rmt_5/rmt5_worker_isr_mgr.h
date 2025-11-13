@@ -48,9 +48,9 @@ public:
      * @param pixel_data Pointer to pixel data to transmit
      * @param num_bytes Number of bytes to transmit
      * @param nibble_lut Pre-built nibble lookup table (will be copied)
-     * @return Pointer to assigned ISR data, or nullptr if channel occupied
+     * @return Const pointer to assigned ISR data, or nullptr if channel occupied
      */
-    RmtWorkerIsrData* registerChannel(
+    const RmtWorkerIsrData* registerChannel(
         uint8_t channel_id,
         RmtWorker* worker,
         volatile RmtWorkerIsrData::rmt_item32_t* rmt_mem_start,
@@ -164,6 +164,9 @@ private:
     // Global worker registry - maps channel ID to active worker
     // Used by ISR to access worker for completion signaling
     RmtWorker* DRAM_ATTR mWorkerRegistry[SOC_RMT_CHANNELS_PER_GROUP];
+
+    // Interrupt allocation tracking per channel
+    bool mInterruptAllocated[SOC_RMT_CHANNELS_PER_GROUP];
 
     // Global interrupt handle (shared by all channels)
     intr_handle_t DRAM_ATTR mGlobalInterruptHandle;
