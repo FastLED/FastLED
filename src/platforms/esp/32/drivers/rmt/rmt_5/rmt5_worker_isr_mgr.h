@@ -69,7 +69,7 @@ public:
      * Configures all ISR data fields for transmission, builds LUT from timing config
      *
      * @param channel_id Hardware RMT channel ID (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
-     * @param available_flag Pointer to worker's availability flag (ISR signals completion)
+     * @param completed Pointer to worker's completion flag (ISR signals completion)
      * @param rmt_mem RMT channel memory buffer (span of volatile rmt_item32_t)
      * @param pixel_data Pixel data to transmit (span of const uint8_t)
      * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
@@ -77,7 +77,7 @@ public:
      */
     virtual Result<RmtIsrHandle, RmtRegisterError> registerChannel(
         uint8_t channel_id,
-        volatile bool* available_flag,
+        volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing

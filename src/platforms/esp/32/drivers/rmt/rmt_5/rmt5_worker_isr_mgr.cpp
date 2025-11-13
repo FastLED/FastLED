@@ -37,7 +37,7 @@ public:
     // Implement pure virtual interface methods
     Result<RmtIsrHandle, RmtRegisterError> registerChannel(
         uint8_t channel_id,
-        volatile bool* available_flag,
+        volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing
@@ -114,7 +114,7 @@ intr_handle_t RmtWorkerIsrMgrImpl::sGlobalInterruptHandle = nullptr;
 
 RmtWorkerIsrMgrImpl::RmtWorkerIsrMgrImpl() {
     // Static members are initialized above with default values
-    // ISR data array is default-constructed (all mAvailableFlag pointers are nullptr)
+    // ISR data array is default-constructed (all mCompleted pointers are nullptr)
     FL_LOG_RMT("RmtWorkerIsrMgr: Initialized with " << SOC_RMT_CHANNELS_PER_GROUP << " ISR data slots");
 }
 
@@ -128,7 +128,7 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
 
 Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     uint8_t channel_id,
-    volatile bool* available_flag,
+    volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
     const ChipsetTiming& timing
@@ -143,19 +143,19 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
         );
     }
 
-    // Validate availability flag pointer
-    if (available_flag == nullptr) {
-        FL_WARN("RmtWorkerIsrMgr: Null availability flag pointer for channel " << (int)channel_id);
+    // Validate completion flag pointer
+    if (completed == nullptr) {
+        FL_WARN("RmtWorkerIsrMgr: Null completion flag pointer for channel " << (int)channel_id);
         return Result<RmtIsrHandle, RmtRegisterError>::failure(
             RmtRegisterError::INVALID_CHANNEL,
-            "Null availability flag pointer"
+            "Null completion flag pointer"
         );
     }
 
     RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
 
     // Check if channel is already occupied
-    if (isr_data->mAvailableFlag != nullptr) {
+    if (isr_data->mCompleted != nullptr) {
         FL_WARN("RmtWorkerIsrMgr: Channel " << (int)channel_id
                 << " already occupied by another worker");
         return Result<RmtIsrHandle, RmtRegisterError>::failure(
@@ -205,7 +205,7 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     int num_bytes = static_cast<int>(pixel_data.size());
 
     // Configure ISR data using the provided config() method
-    isr_data->config(available_flag, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut, reset_ticks);
+    isr_data->config(completed, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut, reset_ticks);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
@@ -224,8 +224,17 @@ void RmtWorkerIsrMgrImpl::unregisterChannel(const RmtIsrHandle& handle) {
 
     RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
 
-    // Clear availability flag pointer to mark as available
-    isr_data->mAvailableFlag = nullptr;
+    if (isr_data->mCompleted != nullptr) {
+        // wait till done
+        while (*(isr_data->mCompleted) == false) {
+            // Yield to other tasks while waiting
+            taskYIELD();
+        }
+    }
+
+    // Clear completion flag pointer to mark as available
+    isr_data->mCompleted = nullptr;
+    isr_data->mEnabled = false;
 
     // Reset state (optional - ISR data will be reconfigured on next use)
     isr_data->mWhichHalf = 0;
@@ -248,7 +257,7 @@ bool RmtWorkerIsrMgrImpl::isChannelOccupied(uint8_t channel_id) const {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return false;
     }
-    return sIsrDataArray[channel_id].mAvailableFlag != nullptr;
+    return sIsrDataArray[channel_id].mCompleted != nullptr;
 }
 
 RmtWorkerIsrData* RmtWorkerIsrMgrImpl::getIsrData(uint8_t channel_id) {
@@ -325,7 +334,7 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
             // This ensures proper LED latch timing for chipsets like WS2812
             // For high-frequency clocks (40MHz+), reset time may exceed uint16_t max (65,535 ticks)
             // In this case, chain multiple RMT items across multiple fillNextHalf() calls
-            // mResetTicksRemaining is initialized in tx_start() before calling fillNextHalf()
+            // mResetTicksRemaining is initialized in config() during registerChannel()
 
             constexpr uint16_t MAX_DURATION = 65535;
 
@@ -371,6 +380,11 @@ FL_DISABLE_WARNING_POP
 
 // Start RMT transmission (called from main thread, not ISR)
 void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
+    // NOTE: mResetTicksRemaining does NOT need restoration here
+    // It's set in config() during registerChannel() and consumed during transmission.
+    // The workflow guarantees registerChannel() is called before each transmission,
+    // which properly initializes mResetTicksRemaining for that transmission cycle.
+
     // Fill both halves of ping-pong buffer initially (like RMT4)
     fillNextHalf(channel_id);  // Fill half 0
     fillNextHalf(channel_id);  // Fill half 1
@@ -379,6 +393,7 @@ void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
     RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
     isr_data->mWhichHalf = 0;
     isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
+    isr_data->mEnabled = true;
 
     // Reset RMT memory read pointer
     RMT5_RESET_MEMORY_READ_POINTER(channel_id);
@@ -454,7 +469,7 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
         RmtWorkerIsrData* isr_data = &sIsrDataArray[channel];
 
         // Skip inactive channels
-        if (isr_data->mAvailableFlag == nullptr) {
+        if (!isr_data->mEnabled) {
             continue;
         }
 
@@ -474,11 +489,10 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
 
         // Check done interrupt (transmission complete)
         if (intr_st & (1 << tx_done_bit)) {
-            // Signal completion by setting worker's availability flag to true
+            // Signal completion by setting worker's completion flag to true
             // This allows the worker to detect completion and unregister
-            if (isr_data->mAvailableFlag != nullptr) {
-                *(isr_data->mAvailableFlag) = true;
-            }
+            *(isr_data->mCompleted) = true;
+            isr_data->mEnabled = false;  // Disable this channel
             RMT5_CLEAR_INTERRUPTS(channel, true, false);
         }
     }

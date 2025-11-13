@@ -33,11 +33,19 @@ class RmtWorker;
  * - Lookup tables for fast bit-to-RMT conversion
  */
 struct RmtWorkerIsrData {
-    // === Availability Flag Pointer ===
-    // Pointer to the worker's availability flag (nullptr = slot free, non-null = busy)
-    // ISR sets *mAvailableFlag = true when transmission completes
+    // === Enabled Flag ===
+    // Indicates whether this worker is actively processing data
+    // Set to true when transmission starts, false when complete
+    // Used by ISR to determine which channels to process (not the availability flag!)
+    // Accessed by: ISR (read), main thread (write)
+    bool mEnabled;
+
+    // === Completion Flag Pointer ===
+    // Pointer to the worker's completion flag (nullptr = slot free, non-null = busy)
+    // ISR sets *mCompleted = true when transmission completes (completion signal only)
+    // NOT used to determine if worker should process - that's what mEnabled is for
     // Accessed by: ISR (write), main thread (read/write)
-    volatile bool* mAvailableFlag;
+    volatile bool* mCompleted;
 
     // === Hardware Channel ID ===
     // Physical RMT channel ID (0-7 on ESP32, 0-3 on ESP32-S2/S3/C3/C6)
@@ -85,13 +93,16 @@ struct RmtWorkerIsrData {
     // uint32_t to support high-frequency clocks (40MHz+) where reset time may exceed uint16_t max
     // For chained reset pulses, this value is split across multiple RMT items in fillNextHalf()
     // Stores the template value (set in config), and is used as working counter during transmission
-    // Decremented in ISR as reset chunks are written, restored in tx_start() before each transmission
+    // Decremented in ISR as reset chunks are written
+    // NOTE: Does NOT need restoration in tx_start() - registerChannel() is called before each
+    // transmission and properly initializes this value via config()
     // Accessed by: ISR (read/write), main thread (read/write)
     uint32_t mResetTicksRemaining;
 
     // Constructor
     RmtWorkerIsrData()
-        : mAvailableFlag(nullptr)
+        : mEnabled(false)
+        , mCompleted(nullptr)
         , mChannelId(0xFF)  // Invalid channel ID
         , mWhichHalf(0)
         , mCur(0)
@@ -106,7 +117,7 @@ struct RmtWorkerIsrData {
     /**
      * Configure ISR data for transmission
      *
-     * @param available_flag Pointer to worker's availability flag (ISR signals completion by setting to true)
+     * @param completed Pointer to worker's completion flag (ISR signals completion by setting to true)
      * @param channel_id Hardware RMT channel ID
      * @param rmt_mem_start Pointer to start of RMT channel memory
      * @param pixel_data Pointer to pixel data to transmit
@@ -115,7 +126,7 @@ struct RmtWorkerIsrData {
      * @param reset_ticks Reset pulse duration in RMT ticks (uint32_t for 40MHz+ clock support)
      */
     void config(
-        volatile bool* available_flag,
+        volatile bool* completed,
         uint8_t channel_id,
         volatile rmt_item32_t* rmt_mem_start,
         const uint8_t* pixel_data,
@@ -123,7 +134,8 @@ struct RmtWorkerIsrData {
         const rmt_nibble_lut_t& nibble_lut,
         uint32_t reset_ticks
     ) {
-        mAvailableFlag = available_flag;
+        mEnabled = false;  // Will be set to true when transmission starts
+        mCompleted = completed;
         mChannelId = channel_id;
         mWhichHalf = 0;
         mCur = 0;
