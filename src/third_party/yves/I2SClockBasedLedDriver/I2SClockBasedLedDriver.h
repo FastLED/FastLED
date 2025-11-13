@@ -26,11 +26,12 @@
 #include "driver/periph_ctrl.h"
 #include "rom/lldesc.h"
 #include "fl/str.h"
-#include "fl/math.h"
+#include "ftl/math.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "freertos/semphr.h"
 #include "fl/str.h"
+#include "fl/cstring.h"
 #include <rom/ets_sys.h>
 #include "esp32-hal-log.h"
 #include "ledtypes.h"
@@ -247,13 +248,13 @@ public:
         float tmp;
         for (int i = 0; i < 256; i++)
         {
-            tmp = powf((float)i / 255, 1 / _gammag);
+            tmp = fl::powf((float)i / 255, 1 / _gammag);
             __green_map[i] = (uint8_t)(tmp * brightness);
-            tmp = powf((float)i / 255, 1 / _gammag);
+            tmp = fl::powf((float)i / 255, 1 / _gammag);
             __blue_map[i] = (uint8_t)(tmp * brightness);
-            tmp = powf((float)i / 255, 1 / _gammag);
+            tmp = fl::powf((float)i / 255, 1 / _gammag);
             __red_map[i] = (uint8_t)(tmp * brightness);
-            tmp = powf((float)i / 255, 1 / _gammag);
+            tmp = fl::powf((float)i / 255, 1 / _gammag);
             __white_map[i] = (uint8_t)(tmp * brightness);
         }
     }
@@ -369,8 +370,8 @@ public:
         DMABuffersTampon[1] = allocateDMABuffer(NUMBER_OF_BLOCK * 8 * 2 );
         DMABuffersTampon[2] = allocateDMABuffer(START_FRAME_SIZE * 8 * 2 );
         DMABuffersTampon[3] = allocateDMABuffer((NUM_LEDS_PER_STRIP * 2 ));
-        memset(DMABuffersTampon[3]->buffer,END_FRAME * 255,(NUM_LEDS_PER_STRIP * 2 ));
-         memset(DMABuffersTampon[2]->buffer,0,(START_FRAME_SIZE * 8 * 2));
+        fl::memset(DMABuffersTampon[3]->buffer,END_FRAME * 255,(NUM_LEDS_PER_STRIP * 2 ));
+         fl::memset(DMABuffersTampon[2]->buffer,0,(START_FRAME_SIZE * 8 * 2));
 
         //putdefaultones((uint16_t *)DMABuffersTampon[0]->buffer);
         //putdefaultones((uint16_t *)DMABuffersTampon[1]->buffer);
@@ -389,7 +390,7 @@ public:
             else
             {
                 DMABuffersTransposed[i] = allocateDMABuffer(NUM_LEDS_PER_STRIP * 2 );
-                memset(DMABuffersTransposed[i]->buffer,255,NUM_LEDS_PER_STRIP*2);
+                fl::memset(DMABuffersTransposed[i]->buffer,255,NUM_LEDS_PER_STRIP*2);
              }
             if (i==0)
                 DMABuffersTransposed[i] = allocateDMABuffer(START_FRAME_SIZE * 8 * 2 * 16 );
@@ -695,7 +696,7 @@ Show pixels classiques
     {
 
         #if HARDWARESPRITES == 1
-        memset(target, 0, num_led_per_strip * num_strips  * 2);
+        fl::memset(target, 0, num_led_per_strip * num_strips  * 2);
         for (int i = 0; i < 8; i++)
         {
             sprites[i].reorder(_offsetDisplay.panel_width, _offsetDisplay.panel_height);
@@ -798,7 +799,7 @@ Show pixels classiques
             ESP_LOGE(TAG, "No more memory\n");
             return NULL;
         }
-        memset(b->buffer, 0, bytes);
+        fl::memset(b->buffer, 0, bytes);
 
         b->descriptor.length = bytes;
         b->descriptor.size = bytes;

@@ -4,6 +4,14 @@
     #include "fl/fastled.h" //to have the type CRGB
 #endif
 
+#include "ftl/math.h"
+#include "fl/math_macros.h"
+
+// NAN is not available in all platforms, define it if not present
+#ifndef FL_NAN
+    #define FL_NAN (0.0f / 0.0f)
+#endif
+
 /*Definition des pixels*/
 #define APA102 0
 #define HD107 0
@@ -47,7 +55,7 @@ inline rgb16 HSVtoRGB(hsv color){
     float v = color.v;
    // float H=color.h;
     float C = s*v;
-    float X = C*(1-abs(fmod(H/60.0, 2)-1));
+    float X = C*(1-FL_ABS(fl::fmod(H/60.0f, 2.0f)-1.0f));
     float m = v-C;
     float r,g,b;
     if(H >= 0 && H < 60){
@@ -101,7 +109,7 @@ inline hsv rgb2hsv(rgb in)
         // if max is 0, then r = g = b = 0              
         // s = 0, h is undefined
         out.s = 0.0;
-        out.h = NAN;                            // its now undefined
+        out.h = FL_NAN;                            // its now undefined
         return out;
     }
     if( in.r >= max )                           // > is bogus, just keeps compilor happy
