@@ -28,66 +28,47 @@ class RmtWorker;
  * this data together, we minimize pointer chasing in the ISR.
  *
  * Memory Layout Strategy:
- * - All ISR-accessed data in one cache-line-friendly structure
- * - Volatile members for ISR/main thread communication
- * - Lookup tables for fast bit-to-RMT conversion
+ * - Cache line aligned (32 bytes) for optimal ESP32 cache performance
+ * - Hot data (accessed every byte/iteration) placed first for best cache locality
+ * - Frequently accessed lookup table at the beginning (256 bytes, 8 cache lines)
+ * - Member ordering optimized for ISR access patterns:
+ *   1. mNibbleLut: Accessed every byte conversion (HOT)
+ *   2. Hot pointers/counters: Accessed every loop iteration
+ *   3. Cold data: Accessed rarely (initialization, completion)
  */
-struct RmtWorkerIsrData {
-    // === Enabled Flag ===
-    // Indicates whether this worker is actively processing data
-    // Set to true when transmission starts, false when complete
-    // Used by ISR to determine which channels to process (not the availability flag!)
-    // Accessed by: ISR (read), main thread (write)
-    bool mEnabled;
-
-    // === Completion Flag Pointer ===
-    // Pointer to the worker's completion flag (nullptr = slot free, non-null = busy)
-    // ISR sets *mCompleted = true when transmission completes (completion signal only)
-    // NOT used to determine if worker should process - that's what mEnabled is for
-    // Accessed by: ISR (write), main thread (read/write)
-    volatile bool* mCompleted;
-
-    // === Hardware Channel ID ===
-    // Physical RMT channel ID (0-7 on ESP32, 0-3 on ESP32-S2/S3/C3/C6)
-    // Used by global ISR to determine which worker handles which channel
-    // Accessed by: Main thread (write), ISR (read)
-    uint8_t mChannelId;
-
-    // === Buffer Management ===
-    // Which half of the ping-pong buffer (0 or 1)
-    // Accessed by: ISR (read/write), main thread (write on init)
-    uint8_t mWhichHalf;
-
-    // Current byte position in pixel data (updated during buffer refill)
-    // Accessed by: ISR (read/write), main thread (write on init)
-    int mCur;
-
-    // === RMT Memory Pointers ===
-    // Start of RMT channel memory (base address for this channel)
-    // Accessed by: ISR (read), main thread (write on configure)
-    volatile rmt_item32_t* mRMT_mem_start;
-
-    // Current write pointer in RMT memory (updated during buffer refill)
-    // Accessed by: ISR (read/write), main thread (write on init)
-    volatile rmt_item32_t* mRMT_mem_ptr;
-
-    // === Transmission Data ===
-    // Pointer to pixel data (NOT owned by worker, just a reference)
-    // Accessed by: ISR (read), main thread (write on transmit)
-    const uint8_t* mPixelData;
-
-    // Total number of bytes to transmit
-    // Accessed by: ISR (read), main thread (write on transmit)
-    int mNumBytes;
-
-    // === Lookup Table ===
-    // Nibble lookup table for fast bit-to-RMT conversion
+struct alignas(32) RmtWorkerIsrData {
+    // === Lookup Table (HOT - First in structure for optimal cache access) ===
+    // Nibble lookup table for fast bit-to-RMT conversion (256 bytes = 8 cache lines)
     // Maps each nibble value (0x0-0xF) to 4 RMT items (MSB first: bit3, bit2, bit1, bit0)
     // Used for both high nibble (bits 7-4) and low nibble (bits 3-0)
-    // Accessed by: ISR (read), main thread (write on configure)
-    rmt_nibble_lut_t mNibbleLut;
+    // Accessed by: ISR (read - EVERY BYTE), main thread (write on configure)
+    // Placed first for guaranteed alignment at structure start
+    alignas(32) rmt_nibble_lut_t mNibbleLut;
 
-    // === Reset Pulse Timing ===
+    // === Hot Data (Accessed every loop iteration) ===
+
+    // Pointer to pixel data (NOT owned by worker, just a reference)
+    // Accessed by: ISR (read - EVERY BYTE), main thread (write on transmit)
+    const uint8_t* mPixelData;
+
+    // Current write pointer in RMT memory (updated during buffer refill)
+    // Accessed by: ISR (read/write - EVERY BYTE), main thread (write on init)
+    volatile rmt_item32_t* mRMT_mem_ptr;
+
+    // Current byte position in pixel data (updated during buffer refill)
+    // Accessed by: ISR (read/write - EVERY ITERATION), main thread (write on init)
+    int mCur;
+
+    // Total number of bytes to transmit
+    // Accessed by: ISR (read - EVERY ITERATION), main thread (write on transmit)
+    int mNumBytes;
+
+    // === Warm Data (Accessed periodically) ===
+
+    // Start of RMT channel memory (base address for this channel)
+    // Accessed by: ISR (read - on buffer wrap), main thread (write on configure)
+    volatile rmt_item32_t* mRMT_mem_start;
+
     // Reset pulse duration in RMT ticks (LOW level after data transmission)
     // Required for chipsets like WS2812 to latch data and reset internal state
     // uint32_t to support high-frequency clocks (40MHz+) where reset time may exceed uint16_t max
@@ -96,22 +77,49 @@ struct RmtWorkerIsrData {
     // Decremented in ISR as reset chunks are written
     // NOTE: Does NOT need restoration in tx_start() - startTransmission() is called before each
     // transmission and properly initializes this value via config()
-    // Accessed by: ISR (read/write), main thread (read/write)
+    // Accessed by: ISR (read/write - at end of transmission), main thread (read/write)
     uint32_t mResetTicksRemaining;
+
+    // Which half of the ping-pong buffer (0 or 1)
+    // Accessed by: ISR (read/write - on buffer wrap), main thread (write on init)
+    uint8_t mWhichHalf;
+
+    // === Cold Data (Accessed rarely) ===
+
+    // Indicates whether this worker is actively processing data
+    // Set to true when transmission starts, false when complete
+    // Used by ISR to determine which channels to process (not the availability flag!)
+    // Accessed by: ISR (read - at start), main thread (write)
+    bool mEnabled;
+
+    // Hardware Channel ID (0-7 on ESP32, 0-3 on ESP32-S2/S3/C3/C6)
+    // Used by global ISR to determine which worker handles which channel
+    // Accessed by: Main thread (write), ISR (rarely)
+    uint8_t mChannelId;
+
+    // Padding byte for alignment (unused)
+    uint8_t _padding;
+
+    // Pointer to the worker's completion flag (nullptr = slot free, non-null = busy)
+    // ISR sets *mCompleted = true when transmission completes (completion signal only)
+    // NOT used to determine if worker should process - that's what mEnabled is for
+    // Accessed by: ISR (write - at completion), main thread (read/write)
+    volatile bool* mCompleted;
 
     // Constructor
     RmtWorkerIsrData()
-        : mEnabled(false)
-        , mCompleted(nullptr)
-        , mChannelId(0xFF)  // Invalid channel ID
-        , mWhichHalf(0)
-        , mCur(0)
-        , mRMT_mem_start(nullptr)
-        , mRMT_mem_ptr(nullptr)
+        : mNibbleLut{}
         , mPixelData(nullptr)
+        , mRMT_mem_ptr(nullptr)
+        , mCur(0)
         , mNumBytes(0)
-        , mNibbleLut{}
+        , mRMT_mem_start(nullptr)
         , mResetTicksRemaining(0)
+        , mWhichHalf(0)
+        , mEnabled(false)
+        , mChannelId(0xFF)  // Invalid channel ID
+        , _padding(0)
+        , mCompleted(nullptr)
     {}
 
     /**

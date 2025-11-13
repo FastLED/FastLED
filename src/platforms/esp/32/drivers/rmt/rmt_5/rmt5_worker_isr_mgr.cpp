@@ -54,14 +54,15 @@ public:
     RmtWorkerIsrData* getIsrData(uint8_t channel_id);
 
     // Static ISR methods (internal implementation details)
-    static void IRAM_ATTR fillNextHalf(uint8_t channel_id);
+    // Marked with __attribute__((hot)) for aggressive optimization
+    static void IRAM_ATTR fillNextHalf(uint8_t channel_id) __attribute__((hot));
     static void tx_start(uint8_t channel_id);
-    static void IRAM_ATTR sharedGlobalISR(void* arg);
+    static void IRAM_ATTR sharedGlobalISR(void* arg) __attribute__((hot));
     static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
         uint8_t byte_val,
         const rmt_nibble_lut_t& lut,
         volatile rmt_item32_t* out
-    );
+    ) __attribute__((hot));
 
 private:
     // Helper: Convert nanoseconds to RMT ticks
@@ -268,6 +269,7 @@ RmtWorkerIsrData* RmtWorkerIsrMgrImpl::getIsrData(uint8_t channel_id) {
 }
 
 // Convert byte to RMT symbols using nibble lookup table (inline helper)
+// OPTIMIZATION: Use 64-bit writes instead of 8x 32-bit writes for better memory bandwidth
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorkerIsrMgrImpl::convertByteToRmt(
@@ -275,19 +277,27 @@ FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorkerIsrMgrImpl::convertByteToRmt(
     const rmt_nibble_lut_t& lut,
     volatile rmt_item32_t* out
 ) {
-    // Copy 4 RMT items from LUT for high nibble (bits 7-4)
-    const rmt_item32_t* high_lut = lut[byte_val >> 4];
-    out[0].val = high_lut[0].val;
-    out[1].val = high_lut[1].val;
-    out[2].val = high_lut[2].val;
-    out[3].val = high_lut[3].val;
+    // ESP32 supports efficient unaligned 64-bit access
+    // Use 64-bit writes (2 RMT items per write) for 4 total writes instead of 8
+    // This reduces memory bus traffic and improves cache efficiency
 
-    // Copy 4 RMT items from LUT for low nibble (bits 3-0)
-    const rmt_item32_t* low_lut = lut[byte_val & 0x0F];
-    out[4].val = low_lut[0].val;
-    out[5].val = low_lut[1].val;
-    out[6].val = low_lut[2].val;
-    out[7].val = low_lut[3].val;
+    // Get pointers to LUT entries
+    const rmt_item32_t* __restrict__ high_lut = lut[byte_val >> 4];
+    const rmt_item32_t* __restrict__ low_lut = lut[byte_val & 0x0F];
+
+    // Cast to 64-bit pointers for wider writes
+    // Each write transfers 2 RMT items (2 x 32-bit = 64-bit)
+    volatile uint64_t* __restrict__ out64 = reinterpret_cast<volatile uint64_t*>(out);
+    const uint64_t* __restrict__ high_lut64 = reinterpret_cast<const uint64_t*>(high_lut);
+    const uint64_t* __restrict__ low_lut64 = reinterpret_cast<const uint64_t*>(low_lut);
+
+    // Copy high nibble (4 items = 2 x 64-bit writes)
+    out64[0] = high_lut64[0];  // Items 0-1
+    out64[1] = high_lut64[1];  // Items 2-3
+
+    // Copy low nibble (4 items = 2 x 64-bit writes)
+    out64[2] = low_lut64[0];  // Items 4-5
+    out64[3] = low_lut64[1];  // Items 6-7
 }
 FL_DISABLE_WARNING_POP
 
@@ -297,44 +307,49 @@ FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
 void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
     // Direct static member access (no instance needed, no function call overhead)
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    RmtWorkerIsrData* __restrict__ isr_data = &sIsrDataArray[channel_id];
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
     // Since we're in ISR context and own the buffer state, we can safely cache and update once
     FASTLED_REGISTER int cur = isr_data->mCur;
-    FASTLED_REGISTER int num_bytes = isr_data->mNumBytes;
-    const uint8_t* pixel_data = isr_data->mPixelData;
+    FASTLED_REGISTER const int num_bytes = isr_data->mNumBytes;
+    const uint8_t* __restrict__ pixel_data = isr_data->mPixelData;
     // Cache LUT reference for ISR performance (avoid repeated member access)
     const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
     // Remember that volatile writes are super fast, volatile reads are super slow.
     volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
 
     // Calculate buffer constants (matching RmtWorker values from common.h)
-    constexpr int MAX_PULSES = FASTLED_RMT5_MAX_PULSES;
     constexpr int PULSES_PER_FILL = FASTLED_RMT5_PULSES_PER_FILL;
+    constexpr int BYTES_PER_FILL = PULSES_PER_FILL / 8;
 
-    // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
-    // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
-    // Buffer size: MAX_PULSES = PULSES_PER_FILL * 2 (ping-pong halves)
-    constexpr int i_end = PULSES_PER_FILL / 8;
+    // OPTIMIZATION: Split into two phases for better branch prediction
+    // Phase 1: Fill pixel data (hot path - highly predictable)
+    const int bytes_remaining = num_bytes - cur;
+    const int bytes_to_convert = (bytes_remaining < BYTES_PER_FILL) ? bytes_remaining : BYTES_PER_FILL;
 
-    for (FASTLED_REGISTER int i = 0; i < i_end; i++) {
-        if (cur < num_bytes) {
-            convertByteToRmt(pixel_data[cur], lut, pItem);
-            pItem += 8;
-            cur++;
-        } else {
-            // Reset pulse - LOW level for reset duration, then terminator
-            // This ensures proper LED latch timing for chipsets like WS2812
-            // For high-frequency clocks (40MHz+), reset time may exceed uint16_t max (65,535 ticks)
-            // In this case, chain multiple RMT items across multiple fillNextHalf() calls
-            // mResetTicksRemaining is initialized in config() during startTransmission()
+    // Main pixel conversion loop (no branches inside, perfect for branch prediction)
+    for (FASTLED_REGISTER int i = 0; __builtin_expect(i < bytes_to_convert, 1); i++) {
+        convertByteToRmt(pixel_data[cur], lut, pItem);
+        pItem += 8;
+        cur++;
+    }
 
-            constexpr uint16_t MAX_DURATION = 65535;
+    // Phase 2: Fill reset pulse if needed (cold path - only happens at end)
+    if (__builtin_expect(cur >= num_bytes, 0)) {
+        // Reset pulse - LOW level for reset duration, then terminator
+        // This ensures proper LED latch timing for chipsets like WS2812
+        // For high-frequency clocks (40MHz+), reset time may exceed uint16_t max (65,535 ticks)
+        // In this case, chain multiple RMT items across multiple fillNextHalf() calls
+        // mResetTicksRemaining is initialized in config() during startTransmission()
 
-            // Write one chunk of reset pulse per iteration
-            // Continue filling buffer with reset chunks until complete
-            if (isr_data->mResetTicksRemaining > 0) {
+        constexpr uint16_t MAX_DURATION = 65535;
+        const int items_filled = bytes_to_convert * 8;
+        const int items_remaining = PULSES_PER_FILL - items_filled;
+
+        // Fill remaining buffer space with reset pulse chunks
+        for (FASTLED_REGISTER int i = 0; i < items_remaining; i++) {
+            if (__builtin_expect(isr_data->mResetTicksRemaining > 0, 1)) {
                 uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
                     ? MAX_DURATION
                     : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
@@ -348,10 +363,8 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
 
                 isr_data->mResetTicksRemaining -= chunk_duration;
                 pItem++;
-            }
-            // Exit loop only when reset is fully written
-            // This allows buffer to be filled with multiple reset chunks
-            if (isr_data->mResetTicksRemaining == 0) {
+            } else {
+                // Reset complete - exit early
                 break;
             }
         }
@@ -360,11 +373,14 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
     // Write back updated position (single volatile write instead of many)
     isr_data->mCur = cur;
 
-    // Flip to other half (matches RMT4 pattern)
-    isr_data->mWhichHalf++;
-    if (isr_data->mWhichHalf == 2) {
+    // OPTIMIZATION: Use XOR toggle for mWhichHalf (branchless, faster than increment+check)
+    const uint8_t which_half = isr_data->mWhichHalf;
+    isr_data->mWhichHalf = which_half ^ 1;  // Toggle between 0 and 1
+
+    // Update pointer based on half (conditional move is faster than branch)
+    // If which_half was 1, we wrap to start; if 0, we keep current pItem
+    if (__builtin_expect(which_half == 1, 0)) {
         pItem = isr_data->mRMT_mem_start;
-        isr_data->mWhichHalf = 0;
     }
     isr_data->mRMT_mem_ptr = pItem;
 }
@@ -456,36 +472,62 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
     // Read interrupt status once - captures all pending channel interrupts atomically
     uint32_t intr_st = RMT5_READ_INTERRUPT_STATUS();
 
+    // Early exit if no interrupts pending (optimization for common case)
+    if (__builtin_expect(intr_st == 0, 0)) {
+        return;
+    }
+
     // Process all channels in a single pass
     for (uint8_t channel = 0; channel < sMaxChannel; channel++) {
-        RmtWorkerIsrData* isr_data = &sIsrDataArray[channel];
-
-        // Skip inactive channels
-        if (!isr_data->mEnabled) {
-            continue;
-        }
-
         // Platform-specific bit positions (from RMT4)
 #if defined(CONFIG_IDF_TARGET_ESP32) || defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5) || defined(CONFIG_IDF_TARGET_ESP32P4)
-        int tx_done_bit = channel;
-        int tx_next_bit = channel + 8;  // Threshold interrupt
+        const uint32_t tx_done_bit = channel;
+        const uint32_t tx_next_bit = channel + 8;  // Threshold interrupt
+        const uint32_t channel_mask = (1U << tx_done_bit) | (1U << tx_next_bit);
 #else
 #error "RMT5 worker ISR not yet implemented for this ESP32 variant"
 #endif
 
+        // Skip channels with no interrupts pending (optimization)
+        if (__builtin_expect((intr_st & channel_mask) == 0, 0)) {
+            continue;
+        }
+
+        RmtWorkerIsrData* __restrict__ isr_data = &sIsrDataArray[channel];
+
+        // Skip inactive channels
+        if (__builtin_expect(!isr_data->mEnabled, 0)) {
+            continue;
+        }
+
+        // Batch interrupt clearing - determine which interrupts to clear
+        bool clear_done = false;
+        bool clear_threshold = false;
+
         // Check threshold interrupt (buffer half empty) - refill needed
-        if (intr_st & (1 << tx_next_bit)) {
+        if (intr_st & (1U << tx_next_bit)) {
             fillNextHalf(channel);
-            RMT5_CLEAR_INTERRUPTS(channel, false, true);
+            clear_threshold = true;
         }
 
         // Check done interrupt (transmission complete)
-        if (intr_st & (1 << tx_done_bit)) {
+        if (intr_st & (1U << tx_done_bit)) {
             // Signal completion by setting worker's completion flag to true
             // This allows the worker to detect completion and unregister
             *(isr_data->mCompleted) = true;
             isr_data->mEnabled = false;  // Disable this channel
-            RMT5_CLEAR_INTERRUPTS(channel, true, false);
+            clear_done = true;
+        }
+
+        // Clear both interrupts in a single operation (optimization)
+        if (clear_done || clear_threshold) {
+            RMT5_CLEAR_INTERRUPTS(channel, clear_done, clear_threshold);
+        }
+
+        // Early exit if no more interrupts remain (optimization)
+        intr_st &= ~channel_mask;
+        if (__builtin_expect(intr_st == 0, 0)) {
+            return;
         }
     }
 }
