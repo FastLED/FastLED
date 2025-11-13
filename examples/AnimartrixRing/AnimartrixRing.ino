@@ -25,7 +25,7 @@
 #define NUM_LEDS 244
 
 #ifndef PIN_DATA
-#define PIN_DATA 21  // ESP32C6 has this random pin available on the break out.
+#define PIN_DATA 3  // ESP32C6 has this random pin available on the break out.
 #endif // PIN_DATA
 
 #define BRIGHTNESS 8
