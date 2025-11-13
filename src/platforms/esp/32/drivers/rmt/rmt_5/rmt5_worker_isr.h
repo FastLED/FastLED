@@ -79,6 +79,12 @@ struct RmtWorkerIsrData {
     // Accessed by: ISR (read), main thread (write on configure)
     rmt_nibble_lut_t mNibbleLut;
 
+    // === Reset Timing ===
+    // Reset pulse duration in RMT ticks (LOW level after data transmission)
+    // Required for chipsets like WS2812 to latch data and reset internal state
+    // Accessed by: ISR (read), main thread (write on configure)
+    uint16_t mResetTicks;
+
     // Constructor
     RmtWorkerIsrData()
         : mAvailableFlag(nullptr)
@@ -90,6 +96,7 @@ struct RmtWorkerIsrData {
         , mPixelData(nullptr)
         , mNumBytes(0)
         , mNibbleLut{}
+        , mResetTicks(0)
     {}
 
     /**
@@ -101,6 +108,7 @@ struct RmtWorkerIsrData {
      * @param pixel_data Pointer to pixel data to transmit
      * @param num_bytes Number of bytes to transmit
      * @param nibble_lut Pre-built nibble lookup table
+     * @param reset_ticks Reset pulse duration in RMT ticks
      */
     void config(
         volatile bool* available_flag,
@@ -108,7 +116,8 @@ struct RmtWorkerIsrData {
         volatile rmt_item32_t* rmt_mem_start,
         const uint8_t* pixel_data,
         int num_bytes,
-        const rmt_nibble_lut_t& nibble_lut
+        const rmt_nibble_lut_t& nibble_lut,
+        uint16_t reset_ticks
     ) {
         mAvailableFlag = available_flag;
         mChannelId = channel_id;
@@ -118,6 +127,7 @@ struct RmtWorkerIsrData {
         mRMT_mem_ptr = rmt_mem_start;
         mPixelData = pixel_data;
         mNumBytes = num_bytes;
+        mResetTicks = reset_ticks;
 
         // Copy nibble lookup table
         for (int i = 0; i < 16; i++) {

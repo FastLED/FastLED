@@ -46,10 +46,10 @@ FL_EXTERN_C_END
 #endif
 
 // Define rmt_block_mem_t for IDF5 (removed from public headers)
-// Note: rmt_item32_t is defined in rmt5_worker_lut.h
+// Note: rmt_item32_t is defined in rmt5_worker_lut.h within fl:: namespace
 typedef struct {
     struct {
-        rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
+        fl::rmt_item32_t data32[SOC_RMT_MEM_WORDS_PER_CHANNEL];
     } chan[SOC_RMT_CHANNELS_PER_GROUP];
 } rmt_block_mem_t;
 
@@ -125,9 +125,8 @@ RmtWorker::~RmtWorker() {
     // wait tilll done
     waitForCompletion();
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
-    if (mIsrData != nullptr) {
-        RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
-        mIsrData = nullptr;
+    if (mHandleResult.ok()) {
+        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
     }
 
     // Clean up channel
@@ -208,9 +207,8 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
     FL_LOG_RMT("RmtWorker[" << (int)mWorkerId << "]: Tearing down RMT channel (old pin=" << (int)old_pin << ")");
 
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
-    if (mIsrData != nullptr) {
-        RmtWorkerIsrMgr::getInstance().unregisterChannel(mIsrData->mChannelId);
-        mIsrData = nullptr;
+    if (mHandleResult.ok()) {
+        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
     }
 
     // Disable and delete the RMT channel

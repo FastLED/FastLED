@@ -71,7 +71,7 @@ private:
         // Formula: ticks = (ns * CLOCK_HZ) / 1,000,000,000
         // To avoid overflow for large ns values, we rearrange:
         // ticks = ns / (1,000,000,000 / CLOCK_HZ)
-        constexpr uint32_t ONE_GHZ = 1_000_000_000UL;
+        constexpr uint32_t ONE_GHZ = 1000000000UL;
         constexpr uint32_t ns_per_tick = ONE_GHZ / FASTLED_RMT5_CLOCK_HZ;
         constexpr uint32_t ns_per_tick_half = ns_per_tick / 2;
 
@@ -170,6 +170,7 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     uint16_t t1_ticks = ns_to_ticks(timing.T1);
     uint16_t t2_ticks = ns_to_ticks(timing.T2);
     uint16_t t3_ticks = ns_to_ticks(timing.T3);
+    uint16_t reset_ticks = ns_to_ticks(timing.RESET);
 
     // Build RMT items for 0 and 1 bits
     rmt_item32_t zero_item;
@@ -194,7 +195,7 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     int num_bytes = static_cast<int>(pixel_data.size());
 
     // Configure ISR data using the provided config() method
-    isr_data->config(available_flag, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut);
+    isr_data->config(available_flag, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut, reset_ticks);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
@@ -310,8 +311,12 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
             pItem += 8;
             cur++;
         } else {
-            // End marker - zero duration signals end of transmission
-            pItem->val = 0;
+            // Reset pulse - LOW level for reset duration, then terminator
+            // This ensures proper LED latch timing for chipsets like WS2812
+            pItem->level0 = 0;
+            pItem->duration0 = isr_data->mResetTicks;
+            pItem->level1 = 0;
+            pItem->duration1 = 0;  // Zero duration terminates transmission
             pItem++;
         }
     }
