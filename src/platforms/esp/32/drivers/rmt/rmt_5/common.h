@@ -16,6 +16,67 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 
+// #define FASTLED_RMT5_PRESET_LEGACY
+#define FASTLED_RMT5_PRESET_BALANCED
+// #define FASTLED_RMT5_PRESET_AGGRESSIVE
+// #define FASTLED_RMT5_PRESET_MAX_CHANNELS
+// #define FASTLED_RMT5_PRESET_AGGRESSIVE_MAX_CHANNELS
+
+
+#if defined(FASTLED_RMT5_PRESET_LEGACY)
+// LEGACY preset:
+// - Uses RMT threshold interrupts (no timer ISR)
+#define FASTLED_RMT5_USE_TIMER_ISR 0
+#define FASTLED_RMT5_USE_THRESHOLD_ISR 1
+#define FASTLED_RMT_MEM_BLOCKS 2
+
+#elif defined(FASTLED_RMT5_PRESET_BALANCED)
+// BALANCED preset:
+// - Uses gentle RMT timer ISR with lots of memory.
+// - 1 memory block per channel to maximize channel usage
+// - Higher CPU load but better precision for tight timing loops
+#define FASTLED_RMT5_USE_TIMER_ISR 1
+#define FASTLED_RMT5_USE_THRESHOLD_ISR 0
+#define FASTLED_RMT_MEM_BLOCKS 2
+#define FASTLED_RMT5_TIMER_RESOLUTION_HZ 10000000  // 10 MHz = 0.1 µs per tick
+#define FASTLED_RMT5_TIMER_INTERVAL_TICKS 80        // 80 ticks @10 MHz = 8.0 µs interval
+#define FASTLED_RMT5_USING_PRESET
+
+#elif defined(FASTLED_RMT5_PRESET_AGGRESSIVE)
+// AGGRESSIVE preset:
+// - Uses both RMT threshold interrupts and a high-rate timer ISR
+// - Higher CPU load but better precision for tight timing loops
+#define FASTLED_RMT5_USE_TIMER_ISR 1
+#define FASTLED_RMT5_USE_THRESHOLD_ISR 1
+#define FASTLED_RMT_MEM_BLOCKS 2
+#define FASTLED_RMT5_TIMER_RESOLUTION_HZ 10000000  // 10 MHz = 0.1 µs per tick
+#define FASTLED_RMT5_TIMER_INTERVAL_TICKS 20        // 20 ticks @10 MHz = 2.0 µs interval (aggressive; Wi-Fi may suffer)
+
+#elif defined(FASTLED_RMT5_PRESET_MAX_CHANNELS)
+// MAX CHANNELS preset:
+// - Prioritizes channel count over precision
+// - Uses RMT threshold interrupts + timer ISR
+// - 1 memory block per channel to maximize channel usage
+#define FASTLED_RMT5_USE_TIMER_ISR 1
+#define FASTLED_RMT5_USE_THRESHOLD_ISR 0
+#define FASTLED_RMT_MEM_BLOCKS 1
+#define FASTLED_RMT5_TIMER_RESOLUTION_HZ 10000000  // 10 MHz = 0.1 µs per tick
+#define FASTLED_RMT5_TIMER_INTERVAL_TICKS 80        // 80 ticks @10 MHz = 8.0 µs interval
+
+#elif defined(FASTLED_RMT5_PRESET_AGGRESSIVE_MAX_CHANNELS)
+// AGGRESSIVE MAX CHANNELS preset:
+// - Prioritizes maximum channel count and minimal latency
+// - Very high timer ISR rate (~0.5 µs interval) — can disrupt Wi-Fi
+#define FASTLED_RMT5_USE_TIMER_ISR 1
+#define FASTLED_RMT5_USE_THRESHOLD_ISR 0
+#define FASTLED_RMT_MEM_BLOCKS 1
+#define FASTLED_RMT5_TIMER_RESOLUTION_HZ 10000000   // 40 MHz = 0.025 µs per tick
+#define FASTLED_RMT5_TIMER_INTERVAL_TICKS 20        // 20 ticks @10 MHz = 2.0 µs interval (aggressive; Wi-Fi may suffer)
+#endif
+
+#if FASTLED_RMT5_USE_TIMER_ISR == FASTLED_RMT5_USE_THRESHOLD_ISR
+#error "FASTLED_RMT5_USE_TIMER_ISR and FASTLED_RMT5_USE_THRESHOLD_ISR cannot both be enabled"
+#endif
 
 //=============================================================================
 // RMT5 Common Definitions and Hardware Abstraction Macros
