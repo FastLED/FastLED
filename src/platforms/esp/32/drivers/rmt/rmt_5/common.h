@@ -50,6 +50,11 @@ FL_EXTERN_C_END
 #define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
 #endif
 
+#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C5)
+#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL6  // More resitant to jitter.
+#else
+#define FL_RMT5_INTERRUPT_LEVEL ESP_INTR_FLAG_LEVEL3  // Test if this can go higher.
+#endif
 
 
 #endif // ESP32

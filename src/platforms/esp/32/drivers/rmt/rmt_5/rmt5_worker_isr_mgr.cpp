@@ -436,7 +436,7 @@ bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id) {
 
         esp_err_t ret = esp_intr_alloc(
             ETS_RMT_INTR_SOURCE,
-            ESP_INTR_FLAG_IRAM | ESP_INTR_FLAG_LEVEL3,
+            ESP_INTR_FLAG_IRAM | FL_RMT5_INTERRUPT_LEVEL,
             &RmtWorkerIsrMgrImpl::sharedGlobalISR,
             nullptr,  // No user data - ISR uses static member arrays
             &sGlobalInterruptHandle
