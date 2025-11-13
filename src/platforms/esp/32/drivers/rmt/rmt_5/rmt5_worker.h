@@ -81,10 +81,6 @@ public:
         return mAvailable;
     }
 
-    // Get ISR data pointer (for global ISR access)
-    // Returns nullptr if worker is not currently registered
-    const RmtWorkerIsrData* getIsrData() const { return mIsrData; }
-
     // Configuration (called before each transmission)
     bool configure(gpio_num_t pin, const ChipsetTiming& timing) override;
 
@@ -122,11 +118,11 @@ private:
     // Set to false by main thread when worker is assigned
     volatile bool mAvailable;
 
-    // Pointer to ISR data (acquired from ISR manager during transmission)
-    // - nullptr when worker is not transmitting
-    // - Points to manager-owned ISR data during transmission (read-only for worker)
+    // ISR handle result (acquired from ISR manager during transmission)
+    // - Contains opaque handle to channel registration on success
+    // - Checked via .ok() method - type system forces error handling
     // - Managed by registerChannel() / unregisterChannel()
-    const RmtWorkerIsrData* mIsrData;
+    Result<RmtIsrHandle, RmtRegisterError> mHandleResult;
 
     // Helper: create RMT channel (called from configure on first use)
     bool createRMTChannel(gpio_num_t pin);

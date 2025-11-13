@@ -18,12 +18,6 @@ FL_EXTERN_C_BEGIN
 #include "esp_intr_alloc.h"
 FL_EXTERN_C_END
 
-// RMT clock frequency in Hz (10 MHz for all RMT5 implementations)
-// This can be changed if needed for different hardware configurations
-#ifndef FASTLED_RMT5_CLOCK_HZ
-#define FASTLED_RMT5_CLOCK_HZ 10_000_000
-#endif
-
 #define RMT_ISR_MGR_TAG "rmt5_isr_mgr"
 
 namespace fl {
@@ -40,20 +34,20 @@ public:
     ~RmtWorkerIsrMgrImpl() override = default;
 
     // Implement pure virtual interface methods
-    const RmtWorkerIsrData* registerChannel(
+    Result<RmtIsrHandle, RmtRegisterError> registerChannel(
         uint8_t channel_id,
-        RmtWorker* worker,
+        volatile bool* available_flag,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing
     ) override;
 
-    void unregisterChannel(uint8_t channel_id) override;
+    void unregisterChannel(const RmtIsrHandle& handle) override;
 
-    void startTransmission(uint8_t channel_id) override;
+    void startTransmission(const RmtIsrHandle& handle) override;
 
     // Internal helper methods
-    bool allocateInterrupt(uint8_t channel_id, RmtWorker* worker);
+    bool allocateInterrupt(uint8_t channel_id);
     void deallocateInterrupt(uint8_t channel_id);
     bool isChannelOccupied(uint8_t channel_id) const;
     RmtWorkerIsrData* getIsrData(uint8_t channel_id);
@@ -88,10 +82,6 @@ private:
     // DRAM attribute for ISR access
     RmtWorkerIsrData mIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
 
-    // Global worker registry - maps channel ID to active worker
-    // Used by ISR to access worker for completion signaling
-    RmtWorker* mWorkerRegistry[SOC_RMT_CHANNELS_PER_GROUP];
-
     // Interrupt allocation tracking per channel
     bool mInterruptAllocated[SOC_RMT_CHANNELS_PER_GROUP];
 
@@ -110,11 +100,10 @@ RmtWorkerIsrMgrImpl::RmtWorkerIsrMgrImpl()
     , mMaxChannel(SOC_RMT_CHANNELS_PER_GROUP)
 {
     // ISR data array is default-constructed
-    // All mWorker pointers are nullptr (available state)
+    // All mAvailableFlag pointers are nullptr (available state)
 
-    // Initialize worker registry and interrupt tracking
+    // Initialize interrupt tracking
     for (int i = 0; i < SOC_RMT_CHANNELS_PER_GROUP; i++) {
-        mWorkerRegistry[i] = nullptr;
         mInterruptAllocated[i] = false;
     }
 
@@ -126,9 +115,9 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
     return instance;
 }
 
-const RmtWorkerIsrData* RmtWorkerIsrMgrImpl::registerChannel(
+Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     uint8_t channel_id,
-    RmtWorker* worker,
+    volatile bool* available_flag,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
     const ChipsetTiming& timing
@@ -137,28 +126,40 @@ const RmtWorkerIsrData* RmtWorkerIsrMgrImpl::registerChannel(
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         FL_WARN("RmtWorkerIsrMgr: Invalid channel_id=" << (int)channel_id
                 << " (max=" << (SOC_RMT_CHANNELS_PER_GROUP - 1) << ")");
-        return nullptr;
+        return Result<RmtIsrHandle, RmtRegisterError>::failure(
+            RmtRegisterError::INVALID_CHANNEL,
+            "Channel ID out of valid range"
+        );
     }
 
-    // Validate worker pointer
-    if (worker == nullptr) {
-        FL_WARN("RmtWorkerIsrMgr: Null worker pointer for channel " << (int)channel_id);
-        return nullptr;
+    // Validate availability flag pointer
+    if (available_flag == nullptr) {
+        FL_WARN("RmtWorkerIsrMgr: Null availability flag pointer for channel " << (int)channel_id);
+        return Result<RmtIsrHandle, RmtRegisterError>::failure(
+            RmtRegisterError::INVALID_CHANNEL,
+            "Null availability flag pointer"
+        );
     }
 
     RmtWorkerIsrData* isr_data = &mIsrDataArray[channel_id];
 
     // Check if channel is already occupied
-    if (isr_data->mWorker != nullptr) {
+    if (isr_data->mAvailableFlag != nullptr) {
         FL_WARN("RmtWorkerIsrMgr: Channel " << (int)channel_id
                 << " already occupied by another worker");
-        return nullptr;
+        return Result<RmtIsrHandle, RmtRegisterError>::failure(
+            RmtRegisterError::CHANNEL_OCCUPIED,
+            "Channel already in use"
+        );
     }
 
     // Allocate interrupt on first registration (lazy initialization)
-    if (!allocateInterrupt(channel_id, worker)) {
+    if (!allocateInterrupt(channel_id)) {
         FL_WARN("RmtWorkerIsrMgr: Failed to allocate interrupt for channel " << (int)channel_id);
-        return nullptr;
+        return Result<RmtIsrHandle, RmtRegisterError>::failure(
+            RmtRegisterError::INTERRUPT_ALLOC_FAILED,
+            "Failed to allocate interrupt"
+        );
     }
 
     // Convert timing from nanoseconds to RMT ticks
@@ -189,13 +190,17 @@ const RmtWorkerIsrData* RmtWorkerIsrMgrImpl::registerChannel(
     int num_bytes = static_cast<int>(pixel_data.size());
 
     // Configure ISR data using the provided config() method
-    isr_data->config(worker, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut);
+    isr_data->config(available_flag, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
-    return isr_data;
+
+    // Return success with handle
+    return Result<RmtIsrHandle, RmtRegisterError>::success(RmtIsrHandle(channel_id));
 }
 
-void RmtWorkerIsrMgrImpl::unregisterChannel(uint8_t channel_id) {
+void RmtWorkerIsrMgrImpl::unregisterChannel(const RmtIsrHandle& handle) {
+    uint8_t channel_id = handle.channel_id;
+
     // Validate channel ID
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         FL_WARN("RmtWorkerIsrMgr: Invalid channel_id=" << (int)channel_id << " during unregister");
@@ -204,8 +209,8 @@ void RmtWorkerIsrMgrImpl::unregisterChannel(uint8_t channel_id) {
 
     RmtWorkerIsrData* isr_data = &mIsrDataArray[channel_id];
 
-    // Clear worker pointer to mark as available
-    isr_data->mWorker = nullptr;
+    // Clear availability flag pointer to mark as available
+    isr_data->mAvailableFlag = nullptr;
 
     // Reset state (optional - ISR data will be reconfigured on next use)
     isr_data->mWhichHalf = 0;
@@ -220,15 +225,15 @@ void RmtWorkerIsrMgrImpl::unregisterChannel(uint8_t channel_id) {
     FL_LOG_RMT("RmtWorkerIsrMgr: Unregistered channel " << (int)channel_id);
 }
 
-void RmtWorkerIsrMgrImpl::startTransmission(uint8_t channel_id) {
-    tx_start(channel_id);
+void RmtWorkerIsrMgrImpl::startTransmission(const RmtIsrHandle& handle) {
+    tx_start(handle.channel_id);
 }
 
 bool RmtWorkerIsrMgrImpl::isChannelOccupied(uint8_t channel_id) const {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return false;
     }
-    return mIsrDataArray[channel_id].mWorker != nullptr;
+    return mIsrDataArray[channel_id].mAvailableFlag != nullptr;
 }
 
 RmtWorkerIsrData* RmtWorkerIsrMgrImpl::getIsrData(uint8_t channel_id) {
@@ -420,16 +425,10 @@ void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
 }
 
 // Allocate interrupt for channel
-bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id, RmtWorker* worker) {
+bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id) {
     // Validate channel ID
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         FL_WARN("RmtWorkerIsrMgr: Invalid channel ID during interrupt allocation: " << (int)channel_id);
-        return false;
-    }
-
-    // Validate worker pointer
-    if (worker == nullptr) {
-        FL_WARN("RmtWorkerIsrMgr: Null worker pointer during interrupt allocation");
         return false;
     }
 
@@ -440,9 +439,6 @@ bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id, RmtWorker* worke
     }
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Allocating interrupt for channel " << (int)channel_id);
-
-    // Register this worker in the global channel map
-    mWorkerRegistry[channel_id] = worker;
 
     // Enable threshold interrupt for this channel using direct register access
     uint32_t thresh_int_bit = 8 + channel_id;  // Bits 8-11 for channels 0-3
@@ -477,7 +473,6 @@ bool RmtWorkerIsrMgrImpl::allocateInterrupt(uint8_t channel_id, RmtWorker* worke
 // Deallocate interrupt for channel
 void RmtWorkerIsrMgrImpl::deallocateInterrupt(uint8_t channel_id) {
     if (channel_id < SOC_RMT_CHANNELS_PER_GROUP && mInterruptAllocated[channel_id]) {
-        mWorkerRegistry[channel_id] = nullptr;
         mInterruptAllocated[channel_id] = false;
         FL_LOG_RMT("RmtWorkerIsrMgr: Deallocated interrupt for channel " << (int)channel_id);
     }
@@ -493,10 +488,10 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
 
     // Process all channels in a single pass
     for (uint8_t channel = 0; channel < impl.mMaxChannel; channel++) {
-        RmtWorker* worker = impl.mWorkerRegistry[channel];
+        RmtWorkerIsrData* isr_data = &impl.mIsrDataArray[channel];
 
         // Skip inactive channels
-        if (worker == nullptr) {
+        if (isr_data->mAvailableFlag == nullptr) {
             continue;
         }
 
@@ -516,13 +511,11 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::sharedGlobalISR(void* arg) {
 
         // Check done interrupt (transmission complete)
         if (intr_st & (1 << tx_done_bit)) {
-            // Clear worker pointer in ISR data BEFORE signaling completion
-            RmtWorkerIsrData* isr_data = &impl.mIsrDataArray[channel];
-            if (isr_data->mWorker != nullptr) {
-                isr_data->mWorker = nullptr;
+            // Signal completion by setting worker's availability flag to true
+            // This allows the worker to detect completion and unregister
+            if (isr_data->mAvailableFlag != nullptr) {
+                *(isr_data->mAvailableFlag) = true;
             }
-            // Signal completion by marking worker as available
-            worker->markAsAvailable();
             RMT.int_clr.val = (1 << tx_done_bit);
         }
     }

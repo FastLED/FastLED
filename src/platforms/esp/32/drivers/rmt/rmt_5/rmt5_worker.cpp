@@ -111,9 +111,12 @@ RmtWorker::RmtWorker()
     , mCurrentPin(GPIO_NUM_NC)
     , mTiming{0, 0, 0, 0, nullptr}  // ChipsetTiming initialization
     , mAvailable(true)
-    , mIsrData(nullptr)
+    , mHandleResult(Result<RmtIsrHandle, RmtRegisterError>::failure(
+        RmtRegisterError::INVALID_CHANNEL,
+        "Not yet registered"
+    ))
 {
-    // ISR data will be acquired from manager during transmission
+    // ISR handle will be acquired from manager during transmission
     // Workers start in available state
 }
 
@@ -157,7 +160,7 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
-    tx_config.resolution_hz = 10000000;  // 10MHz (100ns resolution)
+    tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
     tx_config.mem_block_symbols = 2 * FASTLED_RMT_MEM_WORDS_PER_CHANNEL;  // 2 blocks for ping-pong
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = false;
@@ -337,17 +340,19 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     fl::span<volatile rmt_item32_t> rmt_mem(rmt_mem_start, MAX_PULSES);
     fl::span<const uint8_t> pixel_data_span(pixel_data, num_bytes);
 
-    // Register with ISR manager to acquire ISR data slot
+    // Register with ISR manager to acquire ISR handle
     // The manager will build the LUT and configure all ISR data fields
-    mIsrData = RmtWorkerIsrMgr::getInstance().registerChannel(
+    // Pass pointer to our availability flag so ISR can signal completion
+    mHandleResult = RmtWorkerIsrMgr::getInstance().registerChannel(
         channel_id,
-        this,
+        &mAvailable,
         rmt_mem,
         pixel_data_span,
         mTiming
     );
-    if (mIsrData == nullptr) {
-        FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to register with ISR manager - aborting transmit");
+    if (!mHandleResult.ok()) {
+        FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to register with ISR manager: "
+                << (int)mHandleResult.error() << " - aborting transmit");
         return;
     }
 
@@ -355,7 +360,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 
     // Start transmission (fills buffers and starts hardware)
-    RmtWorkerIsrMgr::getInstance().startTransmission(channel_id);
+    RmtWorkerIsrMgr::getInstance().startTransmission(mHandleResult.value());
 }
 
 void RmtWorker::waitForCompletion() {
@@ -368,9 +373,18 @@ void RmtWorker::waitForCompletion() {
 }
 
 void RmtWorker::markAsAvailable() {
+    // Unregister from ISR manager if we have a valid handle
+    if (mHandleResult.ok()) {
+        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
+        // Reset to failure state
+        mHandleResult = Result<RmtIsrHandle, RmtRegisterError>::failure(
+            RmtRegisterError::INVALID_CHANNEL,
+            "Channel unregistered"
+        );
+    }
+
     // Set availability flag to true
     mAvailable = true;
-    // Note: mWorker pointer in ISR data is cleared by ISR before signaling completion
 }
 
 // Extract channel ID from opaque handle

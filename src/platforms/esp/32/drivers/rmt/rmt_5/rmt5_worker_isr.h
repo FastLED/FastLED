@@ -33,11 +33,11 @@ class RmtWorker;
  * - Lookup tables for fast bit-to-RMT conversion
  */
 struct RmtWorkerIsrData {
-    // === Worker Pointer ===
-    // Pointer to the owning RmtWorker (nullptr = available, non-null = busy)
-    // Accessed by: ISR (read), main thread (write)
-    // The ISR can use this to access the worker's methods and state
-    RmtWorker* volatile mWorker;
+    // === Availability Flag Pointer ===
+    // Pointer to the worker's availability flag (nullptr = slot free, non-null = busy)
+    // ISR sets *mAvailableFlag = true when transmission completes
+    // Accessed by: ISR (write), main thread (read/write)
+    volatile bool* mAvailableFlag;
 
     // === Hardware Channel ID ===
     // Physical RMT channel ID (0-7 on ESP32, 0-3 on ESP32-S2/S3/C3/C6)
@@ -81,7 +81,7 @@ struct RmtWorkerIsrData {
 
     // Constructor
     RmtWorkerIsrData()
-        : mWorker(nullptr)
+        : mAvailableFlag(nullptr)
         , mChannelId(0xFF)  // Invalid channel ID
         , mWhichHalf(0)
         , mCur(0)
@@ -95,7 +95,7 @@ struct RmtWorkerIsrData {
     /**
      * Configure ISR data for transmission
      *
-     * @param worker Pointer to the owning worker (for ISR access)
+     * @param available_flag Pointer to worker's availability flag (ISR signals completion by setting to true)
      * @param channel_id Hardware RMT channel ID
      * @param rmt_mem_start Pointer to start of RMT channel memory
      * @param pixel_data Pointer to pixel data to transmit
@@ -103,14 +103,14 @@ struct RmtWorkerIsrData {
      * @param nibble_lut Pre-built nibble lookup table
      */
     void config(
-        RmtWorker* worker,
+        volatile bool* available_flag,
         uint8_t channel_id,
         volatile rmt_item32_t* rmt_mem_start,
         const uint8_t* pixel_data,
         int num_bytes,
         const rmt_nibble_lut_t& nibble_lut
     ) {
-        mWorker = worker;
+        mAvailableFlag = available_flag;
         mChannelId = channel_id;
         mWhichHalf = 0;
         mCur = 0;

@@ -11,6 +11,7 @@
 #include "fl/force_inline.h"
 #include "fl/slice.h"
 #include "fl/chipsets/led_timing.h"
+#include "fl/result.h"
 #include "rmt5_worker_isr.h"
 
 FL_EXTERN_C_BEGIN
@@ -22,6 +23,25 @@ namespace fl {
 
 // Forward declaration
 class RmtWorker;
+
+/**
+ * Opaque handle for registered RMT ISR channel
+ * Wraps channel_id but prevents direct access to ISR data
+ */
+struct RmtIsrHandle {
+    uint8_t channel_id;
+
+    explicit RmtIsrHandle(uint8_t id) : channel_id(id) {}
+};
+
+/**
+ * Error codes for RMT channel registration
+ */
+enum class RmtRegisterError : uint8_t {
+    INVALID_CHANNEL,        ///< Channel ID out of valid range
+    CHANNEL_OCCUPIED,       ///< Channel already in use by another worker
+    INTERRUPT_ALLOC_FAILED  ///< Failed to allocate interrupt
+};
 
 /**
  * RmtWorkerIsrMgr - Global ISR data manager interface for RMT workers
@@ -49,15 +69,15 @@ public:
      * Configures all ISR data fields for transmission, builds LUT from timing config
      *
      * @param channel_id Hardware RMT channel ID (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
-     * @param worker Pointer to worker requesting registration
+     * @param available_flag Pointer to worker's availability flag (ISR signals completion)
      * @param rmt_mem RMT channel memory buffer (span of volatile rmt_item32_t)
      * @param pixel_data Pixel data to transmit (span of const uint8_t)
      * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
-     * @return Const pointer to assigned ISR data, or nullptr if channel occupied
+     * @return Result containing handle on success, or error code on failure
      */
-    virtual const RmtWorkerIsrData* registerChannel(
+    virtual Result<RmtIsrHandle, RmtRegisterError> registerChannel(
         uint8_t channel_id,
-        RmtWorker* worker,
+        volatile bool* available_flag,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
         const ChipsetTiming& timing
@@ -67,17 +87,17 @@ public:
      * Unregister worker from channel
      * Clears worker pointer and resets ISR data state
      *
-     * @param channel_id Hardware RMT channel ID
+     * @param handle Handle returned from registerChannel
      */
-    virtual void unregisterChannel(uint8_t channel_id) = 0;
+    virtual void unregisterChannel(const RmtIsrHandle& handle) = 0;
 
     /**
      * Start RMT transmission for channel
      * Fills buffers and starts hardware transmission
      *
-     * @param channel_id Hardware RMT channel ID
+     * @param handle Handle returned from registerChannel
      */
-    virtual void startTransmission(uint8_t channel_id) = 0;
+    virtual void startTransmission(const RmtIsrHandle& handle) = 0;
 
 protected:
     // Protected constructor for singleton pattern
