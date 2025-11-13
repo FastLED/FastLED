@@ -94,7 +94,7 @@ struct RmtWorkerIsrData {
     // For chained reset pulses, this value is split across multiple RMT items in fillNextHalf()
     // Stores the template value (set in config), and is used as working counter during transmission
     // Decremented in ISR as reset chunks are written
-    // NOTE: Does NOT need restoration in tx_start() - registerChannel() is called before each
+    // NOTE: Does NOT need restoration in tx_start() - startTransmission() is called before each
     // transmission and properly initializes this value via config()
     // Accessed by: ISR (read/write), main thread (read/write)
     uint32_t mResetTicksRemaining;

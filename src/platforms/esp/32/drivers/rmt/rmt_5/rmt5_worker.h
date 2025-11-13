@@ -121,7 +121,7 @@ private:
     // ISR handle result (acquired from ISR manager during transmission)
     // - Contains opaque handle to channel registration on success
     // - Checked via .ok() method - type system forces error handling
-    // - Managed by registerChannel() / unregisterChannel()
+    // - Managed by startTransmission() / stopTransmission()
     Result<RmtIsrHandle, RmtRegisterError> mHandleResult;
 
     // Helper: create RMT channel (called from configure on first use)

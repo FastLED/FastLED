@@ -35,7 +35,7 @@ public:
     ~RmtWorkerIsrMgrImpl() override = default;
 
     // Implement pure virtual interface methods
-    Result<RmtIsrHandle, RmtRegisterError> registerChannel(
+    Result<RmtIsrHandle, RmtRegisterError> startTransmission(
         uint8_t channel_id,
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
@@ -43,7 +43,7 @@ public:
         const ChipsetTiming& timing
     ) override;
 
-    void unregisterChannel(const RmtIsrHandle& handle) override;
+    void stopTransmission(const RmtIsrHandle& handle) override;
 
 
     // Internal helper methods
@@ -125,7 +125,7 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
     return g_RmtWorkerIsrMgr;
 }
 
-Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
+Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::startTransmission(
     uint8_t channel_id,
     volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
@@ -208,6 +208,11 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
+    // Memory barrier: Ensure all ISR data writes are visible before starting transmission
+    // This prevents race conditions where the ISR (potentially on another CPU core) might
+    // see partially initialized data when interrupts are enabled by tx_start()
+    __sync_synchronize();
+
     // Start transmission immediately after registration
     tx_start(channel_id);
 
@@ -215,7 +220,7 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
     return Result<RmtIsrHandle, RmtRegisterError>::success(RmtIsrHandle(channel_id));
 }
 
-void RmtWorkerIsrMgrImpl::unregisterChannel(const RmtIsrHandle& handle) {
+void RmtWorkerIsrMgrImpl::stopTransmission(const RmtIsrHandle& handle) {
     uint8_t channel_id = handle.channel_id;
 
     // Validate channel ID
@@ -332,7 +337,7 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
             // This ensures proper LED latch timing for chipsets like WS2812
             // For high-frequency clocks (40MHz+), reset time may exceed uint16_t max (65,535 ticks)
             // In this case, chain multiple RMT items across multiple fillNextHalf() calls
-            // mResetTicksRemaining is initialized in config() during registerChannel()
+            // mResetTicksRemaining is initialized in config() during startTransmission()
 
             constexpr uint16_t MAX_DURATION = 65535;
 
@@ -379,8 +384,8 @@ FL_DISABLE_WARNING_POP
 // Start RMT transmission (called from main thread, not ISR)
 void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
     // NOTE: mResetTicksRemaining does NOT need restoration here
-    // It's set in config() during registerChannel() and consumed during transmission.
-    // The workflow guarantees registerChannel() is called before each transmission,
+    // It's set in config() during startTransmission() and consumed during transmission.
+    // The workflow guarantees startTransmission() is called before each transmission,
     // which properly initializes mResetTicksRemaining for that transmission cycle.
 
     // Fill both halves of ping-pong buffer initially (like RMT4)

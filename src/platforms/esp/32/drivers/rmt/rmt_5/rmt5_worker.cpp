@@ -122,11 +122,9 @@ RmtWorker::RmtWorker()
 }
 
 RmtWorker::~RmtWorker() {
-    // wait tilll done
-    waitForCompletion();
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
+        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
     }
 
     // Clean up channel
@@ -208,7 +206,7 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
 
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
+        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
     }
 
     // Disable and delete the RMT channel
@@ -317,7 +315,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     }
 
     // Configure ISR data right before transmission
-    // Note: Interrupt allocation happens automatically in registerChannel()
+    // Note: Interrupt allocation happens automatically in startTransmission()
 
     // Get RMT memory pointer for this channel
     uint8_t channel_id = getChannelIdFromHandle(mChannel);
@@ -331,7 +329,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     // Register with ISR manager and start transmission
     // The manager will build the LUT, configure ISR data, fill buffers, and start hardware
     // Pass pointer to our availability flag so ISR can signal completion
-    mHandleResult = RmtWorkerIsrMgr::getInstance().registerChannel(
+    mHandleResult = RmtWorkerIsrMgr::getInstance().startTransmission(
         channel_id,
         &mAvailable,
         rmt_mem,
@@ -344,7 +342,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         return;
     }
 
-    // Debug: Log transmission start (transmission now starts automatically in registerChannel)
+    // Debug: Log transmission start (transmission now starts automatically in startTransmission)
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 }
 
@@ -360,7 +358,7 @@ void RmtWorker::waitForCompletion() {
 void RmtWorker::markAsAvailable() {
     // Unregister from ISR manager if we have a valid handle
     if (mHandleResult.ok()) {
-        RmtWorkerIsrMgr::getInstance().unregisterChannel(mHandleResult.value());
+        RmtWorkerIsrMgr::getInstance().stopTransmission(mHandleResult.value());
         // Reset to failure state
         mHandleResult = Result<RmtIsrHandle, RmtRegisterError>::failure(
             RmtRegisterError::INVALID_CHANNEL,

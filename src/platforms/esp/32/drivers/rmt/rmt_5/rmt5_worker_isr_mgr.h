@@ -52,7 +52,7 @@ enum class RmtRegisterError : uint8_t {
  *
  * Architecture:
  * - Static array of ISR data (one per hardware channel)
- * - Workers acquire ISR data pointer during transmission via registerChannel()
+ * - Workers acquire ISR data pointer during transmission via startTransmission()
  * - ISR accesses data through internal implementation
  * - Registration includes copying pre-built nibble LUT
  */
@@ -65,7 +65,7 @@ public:
     virtual ~RmtWorkerIsrMgr() = default;
 
     /**
-     * Register worker for transmission on specific channel and start transmission
+     * Starts transmission of the isr worker on the specified channel.
      * Configures all ISR data fields, builds LUT from timing config, fills buffers, and starts hardware transmission
      *
      * @param channel_id Hardware RMT channel ID (0 to SOC_RMT_CHANNELS_PER_GROUP-1)
@@ -75,7 +75,7 @@ public:
      * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
      * @return Result containing handle on success, or error code on failure
      */
-    virtual Result<RmtIsrHandle, RmtRegisterError> registerChannel(
+    virtual Result<RmtIsrHandle, RmtRegisterError> startTransmission(
         uint8_t channel_id,
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
@@ -84,12 +84,12 @@ public:
     ) = 0;
 
     /**
-     * Unregister worker from channel
+     * Stops the transmission of the isr worker.
      * Clears worker pointer and resets ISR data state
      *
-     * @param handle Handle returned from registerChannel
+     * @param handle Handle returned from startTransmission
      */
-    virtual void unregisterChannel(const RmtIsrHandle& handle) = 0;
+    virtual void stopTransmission(const RmtIsrHandle& handle) = 0;
 
 protected:
     // Protected constructor for singleton pattern
