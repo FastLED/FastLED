@@ -18,6 +18,12 @@ FL_EXTERN_C_BEGIN
 #include "esp_intr_alloc.h"
 FL_EXTERN_C_END
 
+// RMT clock frequency in Hz (10 MHz for all RMT5 implementations)
+// This can be changed if needed for different hardware configurations
+#ifndef FASTLED_RMT5_CLOCK_HZ
+#define FASTLED_RMT5_CLOCK_HZ 10_000_000
+#endif
+
 #define RMT_ISR_MGR_TAG "rmt5_isr_mgr"
 
 namespace fl {
@@ -64,14 +70,18 @@ public:
     );
 
 private:
-    // RMT clock frequency (10 MHz for all RMT5 implementations)
-    static constexpr uint32_t RMT_CLOCK_HZ = 10000000;
-
     // Helper: Convert nanoseconds to RMT ticks
+    // Works for any clock frequency defined by FASTLED_RMT5_CLOCK_HZ
     static inline uint16_t ns_to_ticks(uint32_t ns) {
-        // Formula: ticks = (ns * RMT_CLOCK_HZ) / 1,000,000,000
-        // Simplified: ticks = ns / 100 (since 10MHz = 100ns per tick)
-        return static_cast<uint16_t>((ns + 50) / 100);  // +50 for rounding
+        // Formula: ticks = (ns * CLOCK_HZ) / 1,000,000,000
+        // To avoid overflow for large ns values, we rearrange:
+        // ticks = ns / (1,000,000,000 / CLOCK_HZ)
+        constexpr uint32_t ONE_GHZ = 1_000_000_000UL;
+        constexpr uint32_t ns_per_tick = ONE_GHZ / FASTLED_RMT5_CLOCK_HZ;
+        constexpr uint32_t ns_per_tick_half = ns_per_tick / 2;
+
+        // Add half a tick for rounding
+        return static_cast<uint16_t>((ns + ns_per_tick_half) / ns_per_tick);
     }
 
     // ISR data pool - one per hardware channel
