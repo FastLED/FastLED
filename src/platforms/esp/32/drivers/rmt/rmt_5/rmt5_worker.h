@@ -57,16 +57,9 @@ public:
     friend void rmt5_nmi_buffer_refill(void);
 
     // Memory configuration (matching RMT4)
-    #ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
-    #define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
-    #endif
-
-    #ifndef FASTLED_RMT_MEM_BLOCKS
-    #define FASTLED_RMT_MEM_BLOCKS 2
-    #endif
-
-    static constexpr int MAX_PULSES = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS;
-    static constexpr int PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
+    // Memory configuration now in common.h
+    static constexpr int MAX_PULSES = FASTLED_RMT5_MAX_PULSES;
+    static constexpr int PULSES_PER_FILL = FASTLED_RMT5_PULSES_PER_FILL;
 
     // Worker lifecycle
     RmtWorker();

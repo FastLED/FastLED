@@ -8,12 +8,7 @@
 #if FASTLED_RMT5
 
 #include "ftl/stdint.h"
-
-// RMT clock frequency configuration
-// This can be overridden before including this header if different frequency is needed
-#ifndef FASTLED_RMT5_CLOCK_HZ
-#define FASTLED_RMT5_CLOCK_HZ 10000000  // 10MHz (100ns resolution)
-#endif
+#include "common.h"
 
 namespace fl {
 

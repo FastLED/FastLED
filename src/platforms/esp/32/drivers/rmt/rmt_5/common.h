@@ -1,0 +1,55 @@
+#pragma once
+
+// ok no namespace fl
+
+
+#ifdef ESP32
+
+#include "fl/compiler_control.h"
+
+
+#include "ftl/stdint.h"
+#include "sdkconfig.h"
+
+FL_EXTERN_C_BEGIN
+#include "soc/rmt_struct.h"
+#include "esp_attr.h"
+FL_EXTERN_C_END
+
+//=============================================================================
+// RMT5 Common Definitions and Hardware Abstraction Macros
+//=============================================================================
+
+// === Configuration Constants ===
+
+// RMT clock frequency configuration
+// This can be overridden before including FastLED.h if different frequency is needed
+#ifndef FASTLED_RMT5_CLOCK_HZ
+#define FASTLED_RMT5_CLOCK_HZ 10000000  // 10MHz (100ns resolution)
+#endif
+
+// RMT memory configuration (matching RMT4)
+#ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
+#define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
+#endif
+
+#ifndef FASTLED_RMT_MEM_BLOCKS
+#define FASTLED_RMT_MEM_BLOCKS 2  // Ping-pong buffer by default
+#endif
+
+// Buffer size calculations
+#define FASTLED_RMT5_MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
+#define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / 2)  // Half buffer
+
+// === Platform-Specific Signal Routing ===
+
+// RMT signal routing for GPIO matrix
+#if defined(CONFIG_IDF_TARGET_ESP32P4)
+#define RMT_SIG_PAD_IDX RMT_SIG_PAD_OUT0_IDX
+#else
+#define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
+#endif
+
+
+
+#endif // ESP32

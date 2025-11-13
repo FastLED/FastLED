@@ -39,12 +39,6 @@ FL_EXTERN_C_END
 // only on_trans_done. Since we need threshold interrupts for ping-pong buffer refill,
 // we must use direct ISR with manual register access (no alternative exists).
 
-#if defined(CONFIG_IDF_TARGET_ESP32P4)
-#define RMT_SIG_PAD_IDX RMT_SIG_PAD_OUT0_IDX
-#else
-#define RMT_SIG_PAD_IDX RMT_SIG_OUT0_IDX
-#endif
-
 // Define rmt_block_mem_t for IDF5 (removed from public headers)
 // Note: rmt_item32_t is defined in rmt5_worker_lut.h within fl:: namespace
 typedef struct {

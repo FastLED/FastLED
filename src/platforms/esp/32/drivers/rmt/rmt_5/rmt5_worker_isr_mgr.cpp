@@ -8,6 +8,7 @@
 #include "rmt5_worker_isr_mgr.h"
 #include "rmt5_worker.h"
 #include "rmt5_device.h"
+#include "common.h"
 #include "fl/log.h"
 #include "fl/register.h"
 
@@ -308,15 +309,9 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
     // Remember that volatile writes are super fast, volatile reads are super slow.
     volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
 
-    // Calculate buffer constants (matching RmtWorker values)
-    #ifndef FASTLED_RMT_MEM_WORDS_PER_CHANNEL
-    #define FASTLED_RMT_MEM_WORDS_PER_CHANNEL SOC_RMT_MEM_WORDS_PER_CHANNEL
-    #endif
-    #ifndef FASTLED_RMT_MEM_BLOCKS
-    #define FASTLED_RMT_MEM_BLOCKS 2
-    #endif
-    constexpr int MAX_PULSES = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS;
-    constexpr int PULSES_PER_FILL = MAX_PULSES / 2;  // Half buffer
+    // Calculate buffer constants (matching RmtWorker values from common.h)
+    constexpr int MAX_PULSES = FASTLED_RMT5_MAX_PULSES;
+    constexpr int PULSES_PER_FILL = FASTLED_RMT5_PULSES_PER_FILL;
 
     // Fill PULSES_PER_FILL / 8 bytes (since each byte = 8 pulses)
     // Note: Boundary checking removed - if buffer sizing is correct, overflow is impossible
