@@ -174,12 +174,12 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     // Note: RMT memory pointers will be initialized during first transmit() when ISR data is registered
 
     // Configure threshold interrupt for ping-pong buffer refill
-    // Threshold = half of total buffer size, triggering refill when first half is transmitted
-    // With 2 blocks × 64 words = 128 total words, threshold = 64 words (PULSES_PER_FILL)
-    // However, hardware requires threshold in bytes: 64 words × 4 bytes/word = 256 bytes
-    // But register expects word count, not byte count, so we use 48 (empirically determined)
-    // TODO: Investigate exact threshold calculation - may need platform-specific tuning
-    constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for ping-pong refill
+    // Threshold = half of total buffer size (PULSES_PER_FILL), triggering refill when first half is transmitted
+    // PULSES_PER_FILL = SOC_RMT_MEM_WORDS_PER_CHANNEL (platform-dependent):
+    //   - ESP32/ESP32-S3: 64 words (2 blocks × 64 = 128 total, threshold = 64)
+    //   - ESP32-C3/C6/H2/C5: 48 words (2 blocks × 48 = 96 total, threshold = 48)
+    // TODO: May need empirical tuning due to interrupt latency (threshold fires slightly late on some platforms)
+    constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // Half of total buffer
 
     // Set threshold limit using RMT device macro
     RMT5_SET_THRESHOLD_LIMIT(mChannelId, RMT_THRESHOLD_LIMIT);
