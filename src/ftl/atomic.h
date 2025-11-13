@@ -3,13 +3,19 @@
 #include "ftl/thread.h"
 #include "fl/int.h"
 
-#if FASTLED_MULTITHREADED
+// Determine if we need real atomics:
+// 1. Multi-threaded mode (pthread support)
+// 2. ESP platforms (ISRs require atomic operations, and ESP has fast hardware atomics)
+#if FASTLED_MULTITHREADED || defined(ESP32) || defined(ESP8266)
+#define FASTLED_USE_REAL_ATOMICS 1
 #include "platforms/atomic.h"
+#else
+#define FASTLED_USE_REAL_ATOMICS 0
 #endif
 
 namespace fl {
 
-#if FASTLED_MULTITHREADED
+#if FASTLED_USE_REAL_ATOMICS
 template <typename T>
 using atomic = AtomicReal<T>;
 #else
@@ -27,7 +33,7 @@ using atomic_i32 = atomic<fl::i32>;
 ///////////////////// IMPLEMENTATION //////////////////////////////////////
 
 // Forward declare memory_order enum (defined in platforms/shared/atomic.h for real atomics)
-#if !FASTLED_MULTITHREADED
+#if !FASTLED_USE_REAL_ATOMICS
 enum memory_order {
     memory_order_relaxed,
     memory_order_acquire,
