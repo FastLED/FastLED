@@ -170,6 +170,48 @@ FL_EXTERN_C_END
 #error "RMT5 device not yet implemented for this ESP32 variant"
 #endif
 
+// === Status Reading ===
+
+/**
+ * Get current RMT memory read address for channel
+ * Returns the memory address offset currently being read by the transmitter
+ * This indicates the current position in the RMT memory buffer during transmission
+ *
+ * Futre optimization for isr buffer refill.
+ *
+ * @param channel_id Hardware RMT channel
+ * @return Current read address offset (number of RMT items from buffer start)
+
+ *| Platform | Register Access | Bit Width | Range |
+ *|----------|----------------|-----------|-------|
+ *| ESP32 (classic) | `RMT.status_ch[channel_id]` bits [21:12] | 10 bits | 0-1023 |
+ *| ESP32-S3 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 10 bits | 0-1023 |
+ *| ESP32-C3 | `RMT.tx_status[channel_id].mem_raddr_ex` | 9 bits | 0-511 |
+ *| ESP32-C6 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 9 bits | 0-511 |
+ *| ESP32-H2 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 9 bits | 0-511 |
+ *| ESP32-C5 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 9 bits | 0-511 |
+ *| ESP32-P4 | `RMT.chnstatus[channel_id].mem_raddr_ex_chn` | 10 bits | 0-1023 |
+ */
+#if defined(CONFIG_IDF_TARGET_ESP32)
+// ESP32 classic: status_ch is plain uint32_t, extract bits [21:12]
+#define RMT5_GET_READ_ADDRESS(channel_id) \
+    ((RMT.status_ch[channel_id] >> 12) & 0x3FF)
+#elif defined(CONFIG_IDF_TARGET_ESP32S3) || defined(CONFIG_IDF_TARGET_ESP32P4)
+// ESP32-S3, ESP32-P4: chnstatus has mem_raddr_ex_chn field (10 bits)
+#define RMT5_GET_READ_ADDRESS(channel_id) \
+    (RMT.chnstatus[channel_id].mem_raddr_ex_chn)
+#elif defined(CONFIG_IDF_TARGET_ESP32C3)
+// ESP32-C3: tx_status has mem_raddr_ex field (9 bits)
+#define RMT5_GET_READ_ADDRESS(channel_id) \
+    (RMT.tx_status[channel_id].mem_raddr_ex)
+#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
+// ESP32-C6, ESP32-H2, ESP32-C5: chnstatus has mem_raddr_ex_chn field (9 bits)
+#define RMT5_GET_READ_ADDRESS(channel_id) \
+    (RMT.chnstatus[channel_id].mem_raddr_ex_chn)
+#else
+#error "RMT5 device not yet implemented for this ESP32 variant"
+#endif
+
 #endif // FASTLED_RMT5
 
 #endif // ESP32
