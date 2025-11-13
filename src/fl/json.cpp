@@ -11,7 +11,7 @@
 #include "fl/numeric_limits.h"
 
 // fl::numeric_limits<i16>::min(), fl::numeric_limits<i16>::max(), and fl::numeric_limits<u8>::max() should come from the platform's
-// <stdint.h> or <cstdint> headers (via fl/stdint.h).
+// <stdint.h> or <cstdint> headers (via ftl/stdint.h).
 // FastLED no longer defines these macros to avoid conflicts with system headers.
 
 

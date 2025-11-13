@@ -99,7 +99,7 @@ void __compile_test() {
     static_assert(fl::is_integral<fl::uint>::value,
                   "uint should be integral");
 
-    // fixed width int types from fl/stdint.h
+    // fixed width int types from ftl/stdint.h
     static_assert(fl::is_integral<int8_t>::value, "int8_t should be integral");
     static_assert(fl::is_integral<uint8_t>::value,
                   "uint8_t should be integral");
