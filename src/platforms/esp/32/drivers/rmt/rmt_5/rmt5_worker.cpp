@@ -28,6 +28,7 @@ FL_EXTERN_C_END
 #include "fl/compiler_control.h"
 #include "fl/log.h"
 #include "fl/register.h"
+#include "fl/slice.h"
 #include "esp_debug_helpers.h"  // For esp_backtrace_print()
 
 #define RMT5_WORKER_TAG "rmt5_worker"
@@ -392,14 +393,17 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     volatile rmt_item32_t* rmt_mem_start =
         reinterpret_cast<volatile rmt_item32_t*>(&RMTMEM.chan[channel_id].data32[0]);
 
+    // Create spans for RMT memory buffer and pixel data
+    fl::span<volatile rmt_item32_t> rmt_mem(rmt_mem_start, MAX_PULSES);
+    fl::span<const uint8_t> pixel_data_span(pixel_data, num_bytes);
+
     // Register with ISR manager to acquire ISR data slot
     // The manager will configure all ISR data fields including LUT, memory pointers, and pixel data
     mIsrData = RmtWorkerIsrMgr::getInstance().registerChannel(
         channel_id,
         this,
-        rmt_mem_start,
-        pixel_data,
-        num_bytes,
+        rmt_mem,
+        pixel_data_span,
         nibble_lut
     );
     if (mIsrData == nullptr) {

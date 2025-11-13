@@ -45,9 +45,8 @@ RmtWorkerIsrMgr& RmtWorkerIsrMgr::getInstance() {
 const RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
     uint8_t channel_id,
     RmtWorker* worker,
-    volatile rmt_item32_t* rmt_mem_start,
-    const uint8_t* pixel_data,
-    int num_bytes,
+    fl::span<volatile rmt_item32_t> rmt_mem,
+    fl::span<const uint8_t> pixel_data,
     const rmt_nibble_lut_t& nibble_lut
 ) {
     // Validate channel ID
@@ -78,8 +77,13 @@ const RmtWorkerIsrData* RmtWorkerIsrMgr::registerChannel(
         return nullptr;
     }
 
+    // Extract pointer and length from spans
+    volatile rmt_item32_t* rmt_mem_start = rmt_mem.data();
+    const uint8_t* pixel_data_ptr = pixel_data.data();
+    int num_bytes = static_cast<int>(pixel_data.size());
+
     // Configure ISR data using the provided config() method
-    isr_data->config(worker, channel_id, rmt_mem_start, pixel_data, num_bytes, nibble_lut);
+    isr_data->config(worker, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut);
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
     return isr_data;
