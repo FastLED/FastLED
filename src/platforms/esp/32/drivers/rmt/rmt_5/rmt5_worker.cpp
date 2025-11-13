@@ -7,6 +7,7 @@
 
 #include "rmt5_worker.h"
 #include "rmt5_worker_lut.h"
+#include "rmt5_device.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -189,19 +190,8 @@ bool RmtWorker::createRMTChannel(gpio_num_t pin) {
     // TODO: Investigate exact threshold calculation - may need platform-specific tuning
     constexpr uint32_t RMT_THRESHOLD_LIMIT = PULSES_PER_FILL;  // 48 words for ping-pong refill
 
-#if defined(CONFIG_IDF_TARGET_ESP32)
-    RMT.tx_lim_ch[mChannelId].limit = RMT_THRESHOLD_LIMIT;
-#elif defined(CONFIG_IDF_TARGET_ESP32S3)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
-#elif defined(CONFIG_IDF_TARGET_ESP32C3)
-    RMT.tx_lim[mChannelId].limit = RMT_THRESHOLD_LIMIT;
-#elif defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32H2) || defined(CONFIG_IDF_TARGET_ESP32C5)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
-#elif defined(CONFIG_IDF_TARGET_ESP32P4)
-    RMT.chn_tx_lim[mChannelId].tx_lim_chn = RMT_THRESHOLD_LIMIT;
-#else
-#error "RMT5 worker threshold setup not yet implemented for this ESP32 variant"
-#endif
+    // Set threshold limit using RMT device macro
+    RMT5_SET_THRESHOLD_LIMIT(mChannelId, RMT_THRESHOLD_LIMIT);
 
     // NOTE: Threshold interrupt setup moved to allocateInterrupt() for lazy initialization
     // This prevents interrupt watchdog timeout on ESP32-C6 during early boot
