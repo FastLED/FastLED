@@ -415,7 +415,7 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
     FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: TX START - " << num_bytes << " bytes (" << (num_bytes / 3) << " LEDs)");
 
     // Start transmission (fills buffers and starts hardware)
-    RmtWorkerIsrMgr::tx_start(channel_id);
+    RmtWorkerIsrMgr::getInstance().startTransmission(channel_id);
 }
 
 void RmtWorker::waitForCompletion() {
