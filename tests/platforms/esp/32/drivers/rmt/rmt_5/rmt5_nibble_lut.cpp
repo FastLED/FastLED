@@ -8,9 +8,6 @@
 #define ESP32
 #endif
 
-#ifndef FASTLED_RMT5
-#define FASTLED_RMT5 1
-#endif
 
 #include "platforms/esp/32/drivers/rmt/rmt_5/rmt5_worker_lut.h"
 

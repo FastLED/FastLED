@@ -1,9 +1,15 @@
 #pragma once
 
+#include "third_party/espressif/led_strip/src/enabled.h"
+
+#if FASTLED_RMT5
+
+
+
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-#define FASTLED_RMT_USE_DMA
+//#define FASTLED_RMT_USE_DMA
 
 #include "crgb.h"
 #include "eorder.h"
@@ -62,3 +68,5 @@ protected:
     }
 };
 }  // namespace fl
+
+#endif // FASTLED_RMT5
