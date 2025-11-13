@@ -11,8 +11,6 @@
 
 // RMT clock frequency configuration
 // This can be overridden before including this header if different frequency is needed
-// NOTE: Reset for WS2812 is 280us, and if this barely fits in the 10MHz clock, if this
-// define get's bigger, then the reset pulse overflows and the LEDs will not latch!!!
 #ifndef FASTLED_RMT5_CLOCK_HZ
 #define FASTLED_RMT5_CLOCK_HZ 10000000  // 10MHz (100ns resolution)
 #endif

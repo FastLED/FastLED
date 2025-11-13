@@ -79,11 +79,15 @@ struct RmtWorkerIsrData {
     // Accessed by: ISR (read), main thread (write on configure)
     rmt_nibble_lut_t mNibbleLut;
 
-    // === Reset Timing ===
+    // === Reset Pulse Timing ===
     // Reset pulse duration in RMT ticks (LOW level after data transmission)
     // Required for chipsets like WS2812 to latch data and reset internal state
-    // Accessed by: ISR (read), main thread (write on configure)
-    uint16_t mResetTicks;
+    // uint32_t to support high-frequency clocks (40MHz+) where reset time may exceed uint16_t max
+    // For chained reset pulses, this value is split across multiple RMT items in fillNextHalf()
+    // Stores the template value (set in config), and is used as working counter during transmission
+    // Decremented in ISR as reset chunks are written, restored in tx_start() before each transmission
+    // Accessed by: ISR (read/write), main thread (read/write)
+    uint32_t mResetTicksRemaining;
 
     // Constructor
     RmtWorkerIsrData()
@@ -96,7 +100,7 @@ struct RmtWorkerIsrData {
         , mPixelData(nullptr)
         , mNumBytes(0)
         , mNibbleLut{}
-        , mResetTicks(0)
+        , mResetTicksRemaining(0)
     {}
 
     /**
@@ -108,7 +112,7 @@ struct RmtWorkerIsrData {
      * @param pixel_data Pointer to pixel data to transmit
      * @param num_bytes Number of bytes to transmit
      * @param nibble_lut Pre-built nibble lookup table
-     * @param reset_ticks Reset pulse duration in RMT ticks
+     * @param reset_ticks Reset pulse duration in RMT ticks (uint32_t for 40MHz+ clock support)
      */
     void config(
         volatile bool* available_flag,
@@ -117,7 +121,7 @@ struct RmtWorkerIsrData {
         const uint8_t* pixel_data,
         int num_bytes,
         const rmt_nibble_lut_t& nibble_lut,
-        uint16_t reset_ticks
+        uint32_t reset_ticks
     ) {
         mAvailableFlag = available_flag;
         mChannelId = channel_id;
@@ -127,7 +131,7 @@ struct RmtWorkerIsrData {
         mRMT_mem_ptr = rmt_mem_start;
         mPixelData = pixel_data;
         mNumBytes = num_bytes;
-        mResetTicks = reset_ticks;
+        mResetTicksRemaining = reset_ticks;  // Store value
 
         // Copy nibble lookup table
         for (int i = 0; i < 16; i++) {
@@ -135,16 +139,6 @@ struct RmtWorkerIsrData {
                 mNibbleLut[i][j].val = nibble_lut[i][j].val;
             }
         }
-    }
-
-    /**
-     * Reset buffer state for new transmission
-     * Called before starting transmission
-     */
-    void resetBufferState() {
-        mWhichHalf = 0;
-        mCur = 0;
-        mRMT_mem_ptr = mRMT_mem_start;
     }
 };
 

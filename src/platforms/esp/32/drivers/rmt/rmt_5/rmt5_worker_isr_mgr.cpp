@@ -55,7 +55,6 @@ public:
 
     // Static ISR methods (internal implementation details)
     static void IRAM_ATTR fillNextHalf(uint8_t channel_id);
-    static void resetBufferState(uint8_t channel_id);
     static void tx_start(uint8_t channel_id);
     static void IRAM_ATTR sharedGlobalISR(void* arg);
     static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
@@ -67,7 +66,8 @@ public:
 private:
     // Helper: Convert nanoseconds to RMT ticks
     // Works for any clock frequency defined by FASTLED_RMT5_CLOCK_HZ
-    static inline uint16_t ns_to_ticks(uint32_t ns) {
+    // Returns uint32_t to support high-frequency clocks (40MHz+) with long pulse times
+    static inline uint32_t ns_to_ticks(uint32_t ns) {
         // Formula: ticks = (ns * CLOCK_HZ) / 1,000,000,000
         // To avoid overflow for large ns values, we rearrange:
         // ticks = ns / (1,000,000,000 / CLOCK_HZ)
@@ -76,28 +76,14 @@ private:
         constexpr uint32_t ns_per_tick_half = ns_per_tick / 2;
 
         // Add half a tick for rounding
-        return static_cast<uint16_t>((ns + ns_per_tick_half) / ns_per_tick);
+        return (ns + ns_per_tick_half) / ns_per_tick;
     }
 
     // Helper: Convert microseconds to RMT ticks
     // Used for reset pulses which are specified in microseconds and can be large (280µs+)
-    static inline uint16_t us_to_ticks(uint32_t us) {
-        // Formula: ticks = (us * CLOCK_HZ) / 1,000,000
-        // For 10MHz clock: ticks = us * 10
-        // We use division approach for generality and to add proper rounding
-        constexpr uint32_t ONE_MHZ = 1000000UL;
-
-        // For CLOCK_HZ >= 1MHz: this calculates ticks_per_us (e.g., 10 for 10MHz)
-        // For CLOCK_HZ < 1MHz: this would be 0, so we use the multiplication form
-        if constexpr (FASTLED_RMT5_CLOCK_HZ >= ONE_MHZ) {
-            constexpr uint32_t ticks_per_us = FASTLED_RMT5_CLOCK_HZ / ONE_MHZ;
-            return static_cast<uint16_t>(us * ticks_per_us);
-        } else {
-            // For slower clocks, use division with rounding
-            constexpr uint32_t us_per_tick = ONE_MHZ / FASTLED_RMT5_CLOCK_HZ;
-            constexpr uint32_t us_per_tick_half = us_per_tick / 2;
-            return static_cast<uint16_t>((us + us_per_tick_half) / us_per_tick);
-        }
+    // Returns uint32_t to support high-frequency clocks (40MHz+) with long reset times
+    static inline uint32_t us_to_ticks(uint32_t us) {
+        return ns_to_ticks(us * 1000);
     }
 
     // Static data members - shared across all instances
@@ -189,10 +175,12 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrImpl::registerChannel(
 
     // Convert timing to RMT ticks
     // T1, T2, T3 are in nanoseconds; RESET is in microseconds
-    uint16_t t1_ticks = ns_to_ticks(timing.T1);
-    uint16_t t2_ticks = ns_to_ticks(timing.T2);
-    uint16_t t3_ticks = ns_to_ticks(timing.T3);
-    uint16_t reset_ticks = us_to_ticks(timing.RESET);  // Convert µs to ticks
+    // T1-T3 fit in uint16_t even at 40MHz (max ~1.6µs per pulse)
+    // Reset time uses uint32_t to support long latches at high frequencies
+    uint16_t t1_ticks = static_cast<uint16_t>(ns_to_ticks(timing.T1));
+    uint16_t t2_ticks = static_cast<uint16_t>(ns_to_ticks(timing.T2));
+    uint16_t t3_ticks = static_cast<uint16_t>(ns_to_ticks(timing.T3));
+    uint32_t reset_ticks = us_to_ticks(timing.RESET);
 
     // Build RMT items for 0 and 1 bits
     rmt_item32_t zero_item;
@@ -335,11 +323,34 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
         } else {
             // Reset pulse - LOW level for reset duration, then terminator
             // This ensures proper LED latch timing for chipsets like WS2812
-            pItem->level0 = 0;
-            pItem->duration0 = isr_data->mResetTicks;
-            pItem->level1 = 0;
-            pItem->duration1 = 0;  // Zero duration terminates transmission
-            pItem++;
+            // For high-frequency clocks (40MHz+), reset time may exceed uint16_t max (65,535 ticks)
+            // In this case, chain multiple RMT items across multiple fillNextHalf() calls
+            // mResetTicksRemaining is initialized in tx_start() before calling fillNextHalf()
+
+            constexpr uint16_t MAX_DURATION = 65535;
+
+            // Write one chunk of reset pulse per iteration
+            // Continue filling buffer with reset chunks until complete
+            if (isr_data->mResetTicksRemaining > 0) {
+                uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
+                    ? MAX_DURATION
+                    : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
+
+                const bool more = (chunk_duration == MAX_DURATION);
+
+                pItem->level0 = 0;
+                pItem->duration0 = chunk_duration;
+                pItem->level1 = 0;
+                pItem->duration1 = more ? 0 : 1;  // 0 is signal for termination.
+
+                isr_data->mResetTicksRemaining -= chunk_duration;
+                pItem++;
+            }
+            // Exit loop only when reset is fully written
+            // This allows buffer to be filled with multiple reset chunks
+            if (isr_data->mResetTicksRemaining == 0) {
+                break;
+            }
         }
     }
 
@@ -356,13 +367,7 @@ void IRAM_ATTR RmtWorkerIsrMgrImpl::fillNextHalf(uint8_t channel_id) {
 }
 FL_DISABLE_WARNING_POP
 
-// Reset buffer state after filling both halves
-void RmtWorkerIsrMgrImpl::resetBufferState(uint8_t channel_id) {
-    // Direct static member access (no instance needed, no function call overhead)
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
-    isr_data->mWhichHalf = 0;
-    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
-}
+
 
 // Start RMT transmission (called from main thread, not ISR)
 void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
@@ -370,8 +375,10 @@ void RmtWorkerIsrMgrImpl::tx_start(uint8_t channel_id) {
     fillNextHalf(channel_id);  // Fill half 0
     fillNextHalf(channel_id);  // Fill half 1
 
-    // Reset buffer state before starting transmission
-    resetBufferState(channel_id);
+    // Reset buffer state before starting transmission (fill both halves).
+    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    isr_data->mWhichHalf = 0;
+    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
 
     // Reset RMT memory read pointer
     RMT5_RESET_MEMORY_READ_POINTER(channel_id);
