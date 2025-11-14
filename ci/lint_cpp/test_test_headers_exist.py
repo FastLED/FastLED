@@ -42,6 +42,7 @@ EXCLUDED_TEST_FILES = {
 # Test directories that don't follow the 1:1 mapping (legacy code)
 EXCLUDED_TEST_DIRS = {
     "core",  # Legacy tests with different structure
+    ".build-examples-all",  # Generated build artifacts for example compilation
 }
 
 # Pattern to match #include statements with project headers (not system headers)
@@ -60,6 +61,17 @@ def find_test_files() -> list[Path]:
         # Skip excluded directories
         relative_path = test_file.relative_to(TESTS_ROOT)
         if any(part in EXCLUDED_TEST_DIRS for part in relative_path.parts):
+            continue
+
+        # Skip build-related directories (with pattern matching)
+        # Matches: build, .build-examples-*, example_compile_direct, CMakeFiles
+        if any(
+            part == "build"
+            or part.startswith(".build-")
+            or part == "example_compile_direct"
+            or part == "CMakeFiles"
+            for part in relative_path.parts
+        ):
             continue
 
         test_files.append(test_file)
