@@ -10,7 +10,6 @@
 #include "ftl/stdint.h"
 #include "ftl/atomic.h"
 #include "rmt5_worker_base.h"
-#include "rmt5_worker_isr_data.h"
 #include "rmt5_worker_isr_mgr.h"
 
 FL_EXTERN_C_BEGIN
@@ -98,6 +97,7 @@ private:
     friend class ChannelEngineRMT;
     // Hardware resources (persistent)
     rmt_channel_handle_t mChannel;
+    rmt_encoder_handle_t mCopyEncoder;  // Copy encoder for hybrid API + timer ISR approach
     uint8_t mWorkerId;
     uint8_t mChannelId;  // Hardware channel ID (stored separately from ISR data)
 

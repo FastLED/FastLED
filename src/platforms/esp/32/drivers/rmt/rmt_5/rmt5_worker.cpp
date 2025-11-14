@@ -102,6 +102,7 @@ namespace fl {
 
 RmtWorker::RmtWorker()
     : mChannel(nullptr)
+    , mCopyEncoder(nullptr)
     , mWorkerId(0)
     , mChannelId(0xFF)
     , mCurrentPin(GPIO_NUM_NC)
@@ -120,6 +121,12 @@ RmtWorker::~RmtWorker() {
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
         RmtWorkerIsrMgr::stopTransmission(mHandleResult.value());
+    }
+
+    // Clean up encoder
+    if (mCopyEncoder) {
+        rmt_del_encoder(mCopyEncoder);
+        mCopyEncoder = nullptr;
     }
 
     // Clean up channel
@@ -216,6 +223,12 @@ void RmtWorker::tearDownRMTChannel(gpio_num_t old_pin) {
     // Unregister from ISR manager (handles both ISR data and interrupt deallocation)
     if (mHandleResult.ok()) {
         RmtWorkerIsrMgr::stopTransmission(mHandleResult.value());
+    }
+
+    // Clean up encoder
+    if (mCopyEncoder) {
+        rmt_del_encoder(mCopyEncoder);
+        mCopyEncoder = nullptr;
     }
 
     // Disable and delete the RMT channel
@@ -321,6 +334,20 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
             return;
         }
         FL_LOG_RMT("Worker[" << (int)mWorkerId << "]: Channel enabled and ready");
+
+        // Create copy encoder for hybrid API + timer ISR approach
+        // This encoder allows us to use rmt_transmit() to kick off transmission
+        // while timer ISR continues to refill the buffer directly
+        FL_WARN("Worker[" << (int)mWorkerId << "]: Creating copy encoder for hybrid approach");
+        rmt_copy_encoder_config_t copy_config = {};
+        ret = rmt_new_copy_encoder(&copy_config, &mCopyEncoder);
+        if (ret != ESP_OK || !mCopyEncoder) {
+            FL_WARN("Worker[" << (int)mWorkerId << "]: Copy encoder creation FAILED - ret="
+                   << esp_err_to_name(ret) << " encoder=" << (void*)mCopyEncoder);
+            return;
+        }
+        FL_WARN("Worker[" << (int)mWorkerId << "]: Copy encoder created successfully - encoder="
+               << (void*)mCopyEncoder);
     }
 
     // Configure ISR data right before transmission
@@ -342,7 +369,9 @@ void RmtWorker::transmit(const uint8_t* pixel_data, int num_bytes) {
         &mAvailable,
         rmt_mem,
         pixel_data_span,
-        mTiming
+        mTiming,
+        mChannel,
+        mCopyEncoder
     );
     if (!mHandleResult.ok()) {
         FL_WARN("Worker[" << (int)mWorkerId << "]: Failed to register with ISR manager: "

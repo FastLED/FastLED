@@ -28,6 +28,100 @@ FL_EXTERN_C_END
 namespace fl {
 namespace rmt5_timer {
 
+/**
+ * TimerIsrData - Timer Manager Private ISR Data
+ *
+ * Optimized for high-frequency timer ISR with nibble-level encoding.
+ * ISR fires every ~0.5-5µs unconditionally, fills 4 items (1 nibble) at a time.
+ *
+ * Performance Target: < 500ns ISR execution time
+ * Memory: 2 cache lines (128 bytes)
+ */
+struct alignas(64) TimerIsrData {
+    // === CACHE LINE 1: ULTRA-HOT ISR STATE (64 bytes) ===
+
+    // Nibble lookup table pointer (256 bytes, separate allocation)
+    const rmt_nibble_lut_t* nibble_lut  __attribute__((aligned(8)));
+
+    // Current pixel data pointer
+    const uint8_t* pixel_data           __attribute__((aligned(8)));
+
+    // RMT memory pointers
+    volatile rmt_item32_t* rmt_mem_ptr  __attribute__((aligned(8)));
+    volatile rmt_item32_t* rmt_mem_start __attribute__((aligned(8)));
+
+    // Encoding state (nibble-level for timer ISR)
+    int cur_byte;                        // Current byte offset
+    int num_bytes;                       // Total bytes to transmit
+    uint8_t current_byte;                // Current byte being processed
+    uint8_t nibble_state;                // 0=need new byte, 1=high nibble done
+    uint8_t which_half;                  // Ping-pong buffer half (0 or 1)
+
+    // Reset pulse tracking
+    uint32_t reset_ticks_remaining;      // Reset pulse countdown
+
+    // Channel info
+    uint8_t channel_id;                  // Hardware RMT channel (0-7)
+    bool enabled;                        // Transmission active flag
+
+    // Completion callback (ONLY SHARED ELEMENT)
+    volatile bool* completed             __attribute__((aligned(8)));
+
+    // Padding to 64 bytes
+    uint8_t _pad1[64 - 56];
+
+    // === CACHE LINE 2: TIMER CONFIG/COLD DATA (64 bytes) ===
+
+    // Timer handle
+    gptimer_handle_t timer_handle;
+
+    // Encoder fields (for copy encoder approach)
+    rmt_channel_handle_t mChannel;       // RMT channel handle
+    rmt_encoder_handle_t mCopyEncoder;   // Copy encoder handle
+    rmt_symbol_word_t* mSymbolBuffer;    // Pre-converted symbol buffer
+    size_t mSymbolBufferSize;            // Symbol buffer size
+
+    // Reset pulse total
+    uint32_t reset_ticks_total;
+
+    // Timer config (rarely accessed in ISR)
+    uint64_t timer_interval_us;
+
+    // Padding to 128 bytes total
+    uint8_t _pad2[64 - 52];
+
+    // Constructor
+    TimerIsrData()
+        : nibble_lut(nullptr)
+        , pixel_data(nullptr)
+        , rmt_mem_ptr(nullptr)
+        , rmt_mem_start(nullptr)
+        , cur_byte(0)
+        , num_bytes(0)
+        , current_byte(0)
+        , nibble_state(0)
+        , which_half(0)
+        , reset_ticks_remaining(0)
+        , channel_id(0xFF)
+        , enabled(false)
+        , completed(nullptr)
+        , timer_handle(nullptr)
+        , mChannel(nullptr)
+        , mCopyEncoder(nullptr)
+        , mSymbolBuffer(nullptr)
+        , mSymbolBufferSize(0)
+        , reset_ticks_total(0)
+        , timer_interval_us(0)
+    {
+        static_assert(sizeof(TimerIsrData) == 128, "TimerIsrData must be 128 bytes");
+        static_assert(alignof(TimerIsrData) == 64, "TimerIsrData must be 64-byte aligned");
+    }
+};
+
+// Nibble LUT storage (separate from ISR data for better cache control)
+// Shared across all channels to save memory
+static DRAM_ATTR rmt_nibble_lut_t g_TimerNibbleLut alignas(32) = {};
+
 // Internal implementation class with all private members
 class RmtWorkerIsrMgrTimerImpl {
 public:
@@ -38,7 +132,9 @@ public:
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const ChipsetTiming& timing
+        const ChipsetTiming& timing,
+        rmt_channel_handle_t channel,
+        rmt_encoder_handle_t copy_encoder
     );
 
     void stopTransmission(const RmtIsrHandle& handle);
@@ -48,10 +144,10 @@ public:
     bool allocateInterrupt(uint8_t channel_id);
     void deallocateInterrupt(uint8_t channel_id);
     bool isChannelOccupied(uint8_t channel_id) const;
-    RmtWorkerIsrData* getIsrData(uint8_t channel_id);
+    TimerIsrData* getIsrData(uint8_t channel_id);
 
-    static void IRAM_ATTR fillNextHalf(RmtWorkerIsrData* isr_data) __attribute__((hot));
-    static void IRAM_ATTR fillAll(RmtWorkerIsrData* isr_data) __attribute__((hot));
+    static void IRAM_ATTR fillNextHalf(TimerIsrData* isr_data) __attribute__((hot));
+    static void IRAM_ATTR fillAll(TimerIsrData* isr_data) __attribute__((hot));
     static void tx_start(uint8_t channel_id);
     static void IRAM_ATTR sharedGlobalISR_FillAll(void* arg) __attribute__((hot));
     static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx);
@@ -73,14 +169,14 @@ public:
     }
 
     // Static data members (DRAM_ATTR applied in definitions below)
-    static RmtWorkerIsrData sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
+    static TimerIsrData sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
     static uint8_t sMaxChannel;
     static gptimer_handle_t sTimerHandle;
     static bool sTimerInitialized;
 };
 
 // Static member definitions - DRAM_ATTR applied here for ISR access
-DRAM_ATTR RmtWorkerIsrData RmtWorkerIsrMgrTimerImpl::sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP] = {};
+DRAM_ATTR TimerIsrData RmtWorkerIsrMgrTimerImpl::sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP] alignas(64) = {};
 DRAM_ATTR uint8_t RmtWorkerIsrMgrTimerImpl::sMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
 gptimer_handle_t RmtWorkerIsrMgrTimerImpl::sTimerHandle = nullptr;
 bool RmtWorkerIsrMgrTimerImpl::sTimerInitialized = false;
@@ -106,10 +202,12 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrTimer::startTransmission(
     volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
-    const ChipsetTiming& timing
+    const ChipsetTiming& timing,
+    rmt_channel_handle_t channel,
+    rmt_encoder_handle_t copy_encoder
 ) {
     return RmtWorkerIsrMgrTimerImpl::getInstance().startTransmission(
-        channel_id, completed, rmt_mem, pixel_data, timing
+        channel_id, completed, rmt_mem, pixel_data, timing, channel, copy_encoder
     );
 }
 
@@ -122,7 +220,9 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrTimerImpl::startTransmissi
     volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
-    const ChipsetTiming& timing
+    const ChipsetTiming& timing,
+    rmt_channel_handle_t channel,
+    rmt_encoder_handle_t copy_encoder
 ) {
     // Validate channel ID
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
@@ -143,10 +243,10 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrTimerImpl::startTransmissi
         );
     }
 
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    TimerIsrData* isr_data = &sIsrDataArray[channel_id];
 
     // Check if channel is already occupied
-    if (isr_data->mCompleted != nullptr) {
+    if (isr_data->completed != nullptr) {
         FL_WARN("RmtWorkerIsrMgr: Channel " << (int)channel_id
                 << " already occupied by another worker");
         return Result<RmtIsrHandle, RmtRegisterError>::failure(
@@ -186,17 +286,31 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrTimerImpl::startTransmissi
     one_item.level1 = 0;
     one_item.duration1 = t3_ticks;
 
-    // Build nibble LUT using helper function
-    rmt_nibble_lut_t nibble_lut;
-    buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
+    // Build nibble LUT (shared across all channels)
+    buildNibbleLut(g_TimerNibbleLut, zero_item.val, one_item.val);
 
     // Extract pointer and length from spans
     volatile rmt_item32_t* rmt_mem_start = rmt_mem.data();
     const uint8_t* pixel_data_ptr = pixel_data.data();
     int num_bytes = static_cast<int>(pixel_data.size());
 
-    // Configure ISR data using the provided config() method
-    isr_data->config(completed, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut, reset_ticks);
+    // Configure ISR data (direct field assignment for performance)
+    isr_data->enabled = false;  // Will be set true when transmission starts
+    isr_data->completed = completed;
+    isr_data->channel_id = channel_id;
+    isr_data->nibble_lut = &g_TimerNibbleLut;
+    isr_data->pixel_data = pixel_data_ptr;
+    isr_data->num_bytes = num_bytes;
+    isr_data->cur_byte = 0;
+    isr_data->current_byte = 0;
+    isr_data->nibble_state = 0;
+    isr_data->which_half = 0;
+    isr_data->rmt_mem_start = rmt_mem_start;
+    isr_data->rmt_mem_ptr = rmt_mem_start;
+    isr_data->reset_ticks_remaining = reset_ticks;
+    isr_data->reset_ticks_total = reset_ticks;
+    isr_data->timer_handle = sTimerHandle;
+    isr_data->timer_interval_us = 0;  // Set by timer init if needed
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
@@ -205,8 +319,12 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrTimerImpl::startTransmissi
     // see partially initialized data when interrupts are enabled by tx_start()
     __sync_synchronize();
 
+    FL_WARN("RMT5 ch" << (int)channel_id << " BEFORE tx_start call - isr_data configured");
+
     // Start transmission immediately after registration
     tx_start(channel_id);
+
+    FL_WARN("RMT5 ch" << (int)channel_id << " AFTER tx_start call - returned");
 
     // Return success with handle
     return Result<RmtIsrHandle, RmtRegisterError>::success(RmtIsrHandle(channel_id));
@@ -221,28 +339,28 @@ void RmtWorkerIsrMgrTimerImpl::stopTransmission(const RmtIsrHandle& handle) {
         return;
     }
 
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    TimerIsrData* isr_data = &sIsrDataArray[channel_id];
 
-    if (isr_data->mCompleted != nullptr) {
+    if (isr_data->completed != nullptr) {
         // wait till done
-        while (*(isr_data->mCompleted) == false) {
+        while (*(isr_data->completed) == false) {
             // Yield to other tasks while waiting
             taskYIELD();
         }
     }
 
     // Clear completion flag pointer to mark as available
-    isr_data->mCompleted = nullptr;
-    isr_data->mEnabled = false;
+    isr_data->completed = nullptr;
+    isr_data->enabled = false;
 
     // Reset state (optional - ISR data will be reconfigured on next use)
-    isr_data->mWhichHalf = 0;
-    isr_data->mCur = 0;
-    isr_data->mCurrentByte = 0;
-    isr_data->mNibbleState = 0;
-    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
-    isr_data->mPixelData = nullptr;
-    isr_data->mNumBytes = 0;
+    isr_data->which_half = 0;
+    isr_data->cur_byte = 0;
+    isr_data->current_byte = 0;
+    isr_data->nibble_state = 0;
+    isr_data->rmt_mem_ptr = isr_data->rmt_mem_start;
+    isr_data->pixel_data = nullptr;
+    isr_data->num_bytes = 0;
 
     // Also deallocate interrupt (unregister from worker registry)
     deallocateInterrupt(channel_id);
@@ -254,10 +372,10 @@ bool RmtWorkerIsrMgrTimerImpl::isChannelOccupied(uint8_t channel_id) const {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return false;
     }
-    return sIsrDataArray[channel_id].mCompleted != nullptr;
+    return sIsrDataArray[channel_id].completed != nullptr;
 }
 
-RmtWorkerIsrData* RmtWorkerIsrMgrTimerImpl::getIsrData(uint8_t channel_id) {
+TimerIsrData* RmtWorkerIsrMgrTimerImpl::getIsrData(uint8_t channel_id) {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return nullptr;
     }
@@ -301,18 +419,18 @@ FL_DISABLE_WARNING_POP
 // OPTIMIZATION: Matches RMT4 approach - no defensive checks, trust the buffer sizing math
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(RmtWorkerIsrData* __restrict__ isr_data) {
+void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(TimerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
     // Since we're in ISR context and own the buffer state, we can safely cache and update once
-    FASTLED_REGISTER int cur = isr_data->mCur;
-    FASTLED_REGISTER const int num_bytes = isr_data->mNumBytes;
-    const uint8_t* __restrict__ pixel_data = isr_data->mPixelData;
+    FASTLED_REGISTER int cur = isr_data->cur_byte;
+    FASTLED_REGISTER const int num_bytes = isr_data->num_bytes;
+    const uint8_t* __restrict__ pixel_data = isr_data->pixel_data;
     // Cache LUT reference for ISR performance (avoid repeated member access)
-    const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
+    const rmt_nibble_lut_t& lut = isr_data->(*nibble_lut);
     // Remember that volatile writes are super fast, volatile reads are super slow.
-    volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
+    volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->rmt_mem_ptr;
 
     // Calculate buffer constants (matching RmtWorker values from common.h)
     constexpr int PULSES_PER_FILL = FASTLED_RMT5_PULSES_PER_FILL;
@@ -344,10 +462,10 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(RmtWorkerIsrData* __restri
 
         // Fill remaining buffer space with reset pulse chunks
         for (FASTLED_REGISTER int i = 0; i < items_remaining; i++) {
-            if (__builtin_expect(isr_data->mResetTicksRemaining > 0, 1)) {
-                uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
+            if (__builtin_expect(isr_data->reset_ticks_remaining > 0, 1)) {
+                uint16_t chunk_duration = (isr_data->reset_ticks_remaining > MAX_DURATION)
                     ? MAX_DURATION
-                    : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
+                    : static_cast<uint16_t>(isr_data->reset_ticks_remaining);
 
                 const bool more = (chunk_duration == MAX_DURATION);
 
@@ -356,7 +474,7 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(RmtWorkerIsrData* __restri
                 pItem->level1 = 0;
                 pItem->duration1 = more ? 1 : 0;  // 0 is signal for termination.
 
-                isr_data->mResetTicksRemaining -= chunk_duration;
+                isr_data->reset_ticks_remaining -= chunk_duration;
                 pItem++;
             } else {
                 // Reset complete - exit early
@@ -366,18 +484,18 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(RmtWorkerIsrData* __restri
     }
 
     // Write back updated position (single volatile write instead of many)
-    isr_data->mCur = cur;
+    isr_data->cur_byte = cur;
 
     // OPTIMIZATION: Use XOR toggle for mWhichHalf (branchless, faster than increment+check)
-    const uint8_t which_half = isr_data->mWhichHalf;
-    isr_data->mWhichHalf = which_half ^ 1;  // Toggle between 0 and 1
+    const uint8_t which_half = isr_data->which_half;
+    isr_data->which_half = which_half ^ 1;  // Toggle between 0 and 1
 
     // Update pointer based on half (conditional move is faster than branch)
     // If which_half was 1, we wrap to start; if 0, we keep current pItem
     if (__builtin_expect(which_half == 1, 0)) {
-        pItem = isr_data->mRMT_mem_start;
+        pItem = isr_data->rmt_mem_start;
     }
-    isr_data->mRMT_mem_ptr = pItem;
+    isr_data->rmt_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP
 
@@ -387,15 +505,15 @@ FL_DISABLE_WARNING_POP
 // maximizing buffer utilization beyond the ping-pong half-buffer strategy.
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(RmtWorkerIsrData* __restrict__ isr_data) {
+void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(TimerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // Get hardware read pointer (where the RMT engine is currently reading from)
-    uint32_t read_addr = RMT5_GET_READ_ADDRESS(isr_data->mChannelId);
+    uint32_t read_addr = RMT5_GET_READ_ADDRESS(isr_data->channel_id);
 
     // Calculate current write address (offset from buffer start)
-    volatile rmt_item32_t* __restrict__ write_ptr = isr_data->mRMT_mem_ptr;
-    volatile rmt_item32_t* __restrict__ buffer_start = isr_data->mRMT_mem_start;
+    volatile rmt_item32_t* __restrict__ write_ptr = isr_data->rmt_mem_ptr;
+    volatile rmt_item32_t* __restrict__ buffer_start = isr_data->rmt_mem_start;
     uint32_t write_addr = write_ptr - buffer_start;
 
     // Calculate available items to fill (with circular wraparound handling)
@@ -418,17 +536,31 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(RmtWorkerIsrData* __restrict__ 
 
     // Early exit if no space available (need at least 4 items for one nibble)
     if (__builtin_expect(available_items < 4, 0)) {
+        static DRAM_ATTR uint32_t early_exit_count[SOC_RMT_CHANNELS_PER_GROUP] = {0};
+        if (++early_exit_count[isr_data->channel_id] % 50 == 1) {
+            FL_WARN("RMT5 fillAll EARLY EXIT ch" << (int)isr_data->channel_id
+                   << " read=" << read_addr << " write=" << write_addr
+                   << " avail=" << available_items << " (need 4+)");
+        }
         return;
     }
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
-    FASTLED_REGISTER int cur = isr_data->mCur;
-    FASTLED_REGISTER const int num_bytes = isr_data->mNumBytes;
-    const uint8_t* __restrict__ pixel_data = isr_data->mPixelData;
-    const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
+    FASTLED_REGISTER int cur = isr_data->cur_byte;
+    FASTLED_REGISTER const int num_bytes = isr_data->num_bytes;
+
+    // Debug: Log available items calculation
+    static DRAM_ATTR uint32_t fill_debug_count[SOC_RMT_CHANNELS_PER_GROUP] = {0};
+    if (++fill_debug_count[isr_data->channel_id] % 20 == 1) {
+        FL_WARN("RMT5 fillAll ch" << (int)isr_data->channel_id
+               << " read=" << read_addr << " write=" << write_addr
+               << " avail=" << available_items << " cur=" << cur << "/" << num_bytes);
+    }
+    const uint8_t* __restrict__ pixel_data = isr_data->pixel_data;
+    const rmt_nibble_lut_t& lut = isr_data->(*nibble_lut);
     volatile FASTLED_REGISTER rmt_item32_t* pItem = write_ptr;
-    FASTLED_REGISTER uint8_t current_byte = isr_data->mCurrentByte;
-    FASTLED_REGISTER uint8_t nibble_state = isr_data->mNibbleState;
+    FASTLED_REGISTER uint8_t current_byte = isr_data->current_byte;
+    FASTLED_REGISTER uint8_t nibble_state = isr_data->nibble_state;
 
     // Phase 1: Fill pixel data - Timer mode: nibble-level granularity for maximum fill rate
     while (available_items >= 4 && cur < num_bytes) {
@@ -493,11 +625,15 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(RmtWorkerIsrData* __restrict__ 
     if (__builtin_expect(cur >= num_bytes && nibble_state == 0, 0)) {
         constexpr uint16_t MAX_DURATION = 65535;
 
+        // Debug: Track reset pulse progress
+        uint32_t reset_before = isr_data->reset_ticks_remaining;
+        int reset_items_written = 0;
+
         // Fill reset pulse items up to available space
-        while (__builtin_expect(available_items > 0 && isr_data->mResetTicksRemaining > 0, 1)) {
-            uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
+        while (__builtin_expect(available_items > 0 && isr_data->reset_ticks_remaining > 0, 1)) {
+            uint16_t chunk_duration = (isr_data->reset_ticks_remaining > MAX_DURATION)
                 ? MAX_DURATION
-                : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
+                : static_cast<uint16_t>(isr_data->reset_ticks_remaining);
 
             const bool more = (chunk_duration == MAX_DURATION);
 
@@ -506,53 +642,172 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(RmtWorkerIsrData* __restrict__ 
             pItem->level1 = 0;
             pItem->duration1 = more ? 1 : 0;  // 0 signals termination
 
-            isr_data->mResetTicksRemaining -= chunk_duration;
+            isr_data->reset_ticks_remaining -= chunk_duration;
             pItem++;
             available_items--;
+            reset_items_written++;
 
             // Handle circular buffer wraparound
             if (__builtin_expect(pItem >= buffer_start + BUFFER_SIZE, 0)) {
                 pItem = buffer_start;
             }
         }
+
+        // Debug: Log reset pulse progress (only when we write reset items)
+        if (reset_items_written > 0) {
+            FL_WARN("RMT5 ch" << (int)isr_data->channel_id << " reset: wrote " << reset_items_written
+                   << " items, ticks " << reset_before << " -> " << isr_data->reset_ticks_remaining);
+        }
     }
 
     // Write back updated position (single volatile write instead of many)
-    isr_data->mCur = cur;
-    isr_data->mCurrentByte = current_byte;
-    isr_data->mNibbleState = nibble_state;
-    isr_data->mRMT_mem_ptr = pItem;
+    isr_data->cur_byte = cur;
+    isr_data->current_byte = current_byte;
+    isr_data->nibble_state = nibble_state;
+    isr_data->rmt_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP
 
 
+// Convert all pixel data to RMT symbols in user-space buffer
+// Returns true if successful, false if allocation failed
+static bool convertPixelsToSymbols(TimerIsrData* isr_data) {
+    constexpr uint16_t MAX_DURATION = 65535;  // Max RMT symbol duration
+    const size_t num_bytes = isr_data->num_bytes;
+    const size_t num_symbols = num_bytes * 8;  // 8 RMT items per byte
+    const size_t num_reset_symbols = (isr_data->reset_ticks_remaining + MAX_DURATION - 1) / MAX_DURATION;
+    const size_t total_symbols = num_symbols + num_reset_symbols;
+
+    // Allocate buffer if needed
+    if (!isr_data->mSymbolBuffer || isr_data->mSymbolBufferSize < total_symbols) {
+        if (isr_data->mSymbolBuffer) {
+            fl::free(isr_data->mSymbolBuffer);
+        }
+        isr_data->mSymbolBuffer = (rmt_symbol_word_t*)malloc(total_symbols * sizeof(rmt_symbol_word_t));
+        if (!isr_data->mSymbolBuffer) {
+            FL_WARN("RMT5 ch" << (int)isr_data->channel_id << " failed to allocate " << total_symbols << " symbols");
+            return false;
+        }
+        isr_data->mSymbolBufferSize = total_symbols;
+    }
+
+    // Convert pixel data using nibble LUT
+    const uint8_t* pixel_data = isr_data->pixel_data;
+    const rmt_nibble_lut_t& lut = isr_data->(*nibble_lut);
+    rmt_symbol_word_t* out_ptr = isr_data->mSymbolBuffer;
+
+    for (size_t i = 0; i < num_bytes; i++) {
+        uint8_t byte = pixel_data[i];
+
+        // High nibble (bits 7-4) - 4 symbols
+        const rmt_item32_t* high_lut = lut[(byte >> 4) & 0x0F];
+        out_ptr[0].val = high_lut[0].val;
+        out_ptr[1].val = high_lut[1].val;
+        out_ptr[2].val = high_lut[2].val;
+        out_ptr[3].val = high_lut[3].val;
+        out_ptr += 4;
+
+        // Low nibble (bits 3-0) - 4 symbols
+        const rmt_item32_t* low_lut = lut[byte & 0x0F];
+        out_ptr[0].val = low_lut[0].val;
+        out_ptr[1].val = low_lut[1].val;
+        out_ptr[2].val = low_lut[2].val;
+        out_ptr[3].val = low_lut[3].val;
+        out_ptr += 4;
+    }
+
+    // Add reset pulse at the end
+    if (num_reset_symbols > 0) {
+        // Reset pulse: LOW level for mResetTicksRemaining duration
+        // Split into multiple symbols if duration exceeds max tick count
+        uint32_t ticks_remaining = isr_data->reset_ticks_remaining;
+        for (size_t i = 0; i < num_reset_symbols; i++) {
+            uint32_t ticks_this_symbol = (ticks_remaining > MAX_DURATION)
+                                        ? MAX_DURATION
+                                        : ticks_remaining;
+            out_ptr->duration0 = ticks_this_symbol;
+            out_ptr->level0 = 0;
+            out_ptr->duration1 = 0;
+            out_ptr->level1 = 0;
+            out_ptr++;
+            ticks_remaining -= ticks_this_symbol;
+        }
+    }
+
+    FL_WARN("RMT5 ch" << (int)isr_data->channel_id << " converted " << num_bytes
+           << " bytes to " << num_symbols << " symbols + " << num_reset_symbols << " reset symbols");
+
+    return true;
+}
+
 
 // Start RMT transmission (called from main thread, not ISR)
 void RmtWorkerIsrMgrTimerImpl::tx_start(uint8_t channel_id) {
+    FL_WARN("RMT5 ch" << (int)channel_id << " tx_start ENTRY - function called");
+
     // NOTE: mResetTicksRemaining does NOT need restoration here
     // It's set in config() during startTransmission() and consumed during transmission.
     // The workflow guarantees startTransmission() is called before each transmission,
     // which properly initializes mResetTicksRemaining for that transmission cycle.
 
     // Reset buffer state before initial fill
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
-    isr_data->mWhichHalf = 0;
-    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
-    isr_data->mEnabled = true;
+    TimerIsrData* isr_data = &sIsrDataArray[channel_id];
 
-    // Reset RMT memory read pointer
-    RMT5_RESET_MEMORY_READ_POINTER(channel_id);
+    FL_WARN("RMT5 ch" << (int)channel_id << " tx_start: isr_data=" << (void*)isr_data
+           << " mChannel=" << (void*)isr_data->mChannel
+           << " mCopyEncoder=" << (void*)isr_data->mCopyEncoder);
+    isr_data->which_half = 0;
+    isr_data->rmt_mem_ptr = isr_data->rmt_mem_start;
+    // NOTE: Do NOT set mEnabled=true here! We need to call rmt_transmit() first
+    // to initialize the ESP-IDF driver FSM. ISR will be enabled after that.
 
-    // Fill entire buffer aggressively using fillAll()
-    // This replaces the two fillNextHalf() calls with a single call
-    // that fills as much as possible up to the read pointer
-    fillAll(isr_data);
+    FL_DBG("RMT5 ch" << (int)channel_id << " tx_start: bytes=" << isr_data->num_bytes
+           << " reset_ticks=" << isr_data->reset_ticks_remaining);
 
-    // No RMT interrupt setup needed - timer drives all fills
-    // Timer is already running and will continue to call sharedGlobalISR_FillAll
+    // Convert pixel data to RMT symbols in user-space buffer
+    // This prepares ALL symbols (including reset pulse) for rmt_transmit()
+    if (!convertPixelsToSymbols(isr_data)) {
+        FL_WARN("RMT5 ch" << (int)channel_id << " convertPixelsToSymbols FAILED - aborting");
+        return;
+    }
 
-    // Start transmission
-    RMT5_START_TRANSMISSION(channel_id);
+    // Use rmt_transmit() API with copy encoder to send pre-converted symbols
+    // The copy encoder will handle ping-pong refilling automatically
+    if (isr_data->mChannel && isr_data->mCopyEncoder) {
+        FL_WARN("RMT5 ch" << (int)channel_id << " calling rmt_transmit with "
+               << isr_data->mSymbolBufferSize << " symbols");
+
+        rmt_transmit_config_t tx_config = {
+            .loop_count = 0,  // No looping, one-shot
+            .flags = {
+                .eot_level = 0,  // LOW level after transmission (reset state)
+            }
+        };
+
+        // Pass pre-converted symbols to rmt_transmit()
+        // The copy encoder will copy them to hardware memory with automatic refilling
+        size_t buffer_bytes = isr_data->mSymbolBufferSize * sizeof(rmt_symbol_word_t);
+        esp_err_t ret = rmt_transmit(isr_data->mChannel, isr_data->mCopyEncoder,
+                                      isr_data->mSymbolBuffer, buffer_bytes, &tx_config);
+        if (ret != ESP_OK) {
+            FL_WARN("RMT5 ch" << (int)channel_id << " rmt_transmit failed: " << esp_err_to_name(ret));
+        } else {
+            FL_WARN("RMT5 ch" << (int)channel_id << " rmt_transmit succeeded - transmission started");
+        }
+    } else {
+        FL_WARN("RMT5 ch" << (int)channel_id << " SKIPPING rmt_transmit - mChannel="
+               << (void*)isr_data->mChannel << " mCopyEncoder=" << (void*)isr_data->mCopyEncoder);
+    }
+
+    // Note: Timer ISR is NOT needed with this approach - rmt_transmit() handles everything
+    // We can disable the timer ISR eventually, but keeping it disabled for now
+    // isr_data->enabled remains false
+
+    // Debug: Check if transmission actually started
+    uint32_t state_after = RMT5_GET_STATE(channel_id);
+    uint32_t read_after = RMT5_GET_READ_ADDRESS(channel_id);
+    FL_WARN("RMT5 ch" << (int)channel_id << " after START: state=" << state_after
+           << " read_addr=" << read_after << " (0=idle, 1=sending, 2=reading)");
 }
 
 // Timer alarm callback - calls sharedGlobalISR_FillAll
@@ -669,28 +924,71 @@ void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::sharedGlobalISR_FillAll(void* arg) {
 #error "RMT5 worker ISR not yet implemented for this ESP32 variant"
 #endif
 
+    // Debug: Track ISR call count per channel
+    static DRAM_ATTR uint32_t isr_call_count[SOC_RMT_CHANNELS_PER_GROUP] = {0};
+
     // Unconditionally fill all enabled channels and check for completion
     // Timer-driven approach: no interrupt status checking needed
     for (uint8_t channel = 0; channel < sMaxChannel; channel++) {
-        RmtWorkerIsrData* __restrict__ isr_data = &sIsrDataArray[channel];
+        TimerIsrData* __restrict__ isr_data = &sIsrDataArray[channel];
 
         // Only process if channel is actively transmitting
-        if (!isr_data->mEnabled) {
+        if (!isr_data->enabled) {
             continue;
+        }
+
+        // Track ISR calls for this channel
+        uint32_t call_count = ++isr_call_count[channel];
+        if (call_count % 10 == 1) {  // Log every 10th call (1st, 11th, 21st, etc.)
+            FL_WARN("RMT5 ISR ch" << (int)channel << " call#" << call_count
+                   << " cur=" << isr_data->cur_byte << "/" << isr_data->num_bytes);
         }
 
         // Fill buffer aggressively
         fillAll(isr_data);
 
-        // Detect completion by checking buffer pointer position
-        // Transmission is complete when all pixel data is sent AND reset pulse is finished
-        // In timer mode, also check that no partial byte remains (nibble-level filling)
-        bool pixel_complete = isr_data->mCur >= isr_data->mNumBytes;
-        pixel_complete = pixel_complete && (isr_data->mNibbleState == 0);
-        if (pixel_complete && isr_data->mResetTicksRemaining == 0) {
+        // Enhanced completion detection: Software tracking + hardware confirmation
+        // OPTIMIZATION: Combines software buffer position tracking with hardware status
+        // This provides more reliable completion detection than software-only approach
+
+        // Software state: Check if we've processed all data
+        bool software_complete = isr_data->cur_byte >= isr_data->num_bytes;
+        software_complete = software_complete && (isr_data->nibble_state == 0);  // No partial nibble
+        software_complete = software_complete && (isr_data->reset_ticks_remaining == 0);  // Reset pulse sent
+
+        // Hardware state: Check if RMT hardware has consumed all data
+        // Use multiple hardware indicators for robust detection:
+        // 1. RMT5_IS_MEM_EMPTY - Hardware buffer empty (mem_empty_chn bit)
+        // 2. RMT5_GET_RAW_TX_DONE_INT - Raw TX done interrupt (set even when interrupts disabled)
+        bool hardware_buffer_empty = RMT5_IS_MEM_EMPTY(channel);
+        bool hardware_tx_done = RMT5_GET_RAW_TX_DONE_INT(channel);
+
+        // Debug: Log completion state periodically (every 100 ISR calls to avoid spam)
+        static DRAM_ATTR uint32_t debug_counter[SOC_RMT_CHANNELS_PER_GROUP] = {0};
+        if (software_complete && ++debug_counter[channel] % 100 == 0) {
+            FL_WARN("RMT5 ch" << (int)channel << " completion check: sw=" << software_complete
+                   << " hw_empty=" << hardware_buffer_empty << " hw_done=" << hardware_tx_done
+                   << " reset_remaining=" << isr_data->reset_ticks_remaining);
+        }
+
+        // Only signal completion when software tracking AND hardware status both confirm completion
+        // Require either buffer empty OR TX done interrupt - provides redundancy
+        // This prevents race conditions where software thinks it's done but hardware is still active
+        if (software_complete && (hardware_buffer_empty || hardware_tx_done)) {
+            FL_WARN("RMT5 ch" << (int)channel << " COMPLETE: hw_empty=" << hardware_buffer_empty
+                   << " hw_done=" << hardware_tx_done);
+
+            // Clear the raw TX done interrupt flag to prevent false positives on next transmission
+            if (hardware_tx_done) {
+                RMT5_CLEAR_INTERRUPTS(channel, true, false);
+            }
+
             // Signal completion by setting worker's completion flag to true
-            *(isr_data->mCompleted) = true;
-            isr_data->mEnabled = false;  // Disable this channel
+            *(isr_data->completed) = true;
+            isr_data->enabled = false;  // Disable this channel
+
+            // Reset debug counter
+            debug_counter[channel] = 0;
         }
     }
 }

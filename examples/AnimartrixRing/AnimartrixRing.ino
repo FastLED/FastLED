@@ -131,6 +131,7 @@ uint8_t applyBrightnessCompression(float inputBrightnessPercent, uint8_t maxBrig
 void setup() {
     Serial.begin(115200);
 
+
     // Setup LED strip
     fl::ScreenMap screenMapLocal(screenmap);
     screenMapLocal.setDiameter(0.15);  // 0.15 cm or 1.5mm - appropriate for dense 144 LED rope
@@ -167,6 +168,7 @@ void setup() {
 }
 
 void loop() {
+
     // Process audio if enabled
     float audioSpeedFactor = 1.0f;
     float audioBrightnessFactor = 1.0f;

@@ -31,7 +31,9 @@ public:
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const ChipsetTiming& timing
+        const ChipsetTiming& timing,
+        rmt_channel_handle_t channel,
+        rmt_encoder_handle_t copy_encoder
     );
 
     void stopTransmission(const RmtIsrHandle& handle);

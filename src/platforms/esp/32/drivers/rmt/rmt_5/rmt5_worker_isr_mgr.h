@@ -12,7 +12,6 @@
 #include "fl/slice.h"
 #include "fl/chipsets/led_timing.h"
 #include "fl/result.h"
-#include "rmt5_worker_isr_data.h"
 
 FL_EXTERN_C_BEGIN
 #include "soc/soc_caps.h"
@@ -68,6 +67,8 @@ public:
      * @param rmt_mem RMT channel memory buffer (span of volatile rmt_item32_t)
      * @param pixel_data Pixel data to transmit (span of const uint8_t)
      * @param timing Chipset timing configuration (T1, T2, T3, RESET in nanoseconds)
+     * @param channel RMT channel handle (for hybrid API + timer ISR approach)
+     * @param copy_encoder Copy encoder handle (for hybrid API + timer ISR approach)
      * @return Result containing handle on success, or error code on failure
      */
     static Result<RmtIsrHandle, RmtRegisterError> startTransmission(
@@ -75,7 +76,9 @@ public:
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const ChipsetTiming& timing
+        const ChipsetTiming& timing,
+        rmt_channel_handle_t channel,
+        rmt_encoder_handle_t copy_encoder
     );
 
     /**

@@ -27,6 +27,81 @@ FL_EXTERN_C_END
 namespace fl {
 namespace rmt5_threshold {
 
+/**
+ * ThresholdIsrData - Threshold Manager Private ISR Data
+ *
+ * Optimized for threshold interrupt-driven refilling.
+ * ISR fires when buffer half-empty, refills with on-the-fly pixel encoding.
+ *
+ * Performance Target: < 1µs ISR execution time
+ * Memory: 2 cache lines (128 bytes)
+ */
+struct alignas(64) ThresholdIsrData {
+    // === CACHE LINE 1: HOT ISR STATE (64 bytes) ===
+
+    // Nibble lookup table (256 bytes, separate allocation for cache efficiency)
+    // Pointer placed here for fast access
+    const rmt_nibble_lut_t* nibble_lut  __attribute__((aligned(8)));
+
+    // Current pixel data pointer (updated during transmission)
+    const uint8_t* pixel_data           __attribute__((aligned(8)));
+
+    // RMT memory pointers
+    volatile rmt_item32_t* rmt_mem_ptr  __attribute__((aligned(8)));
+    volatile rmt_item32_t* rmt_mem_start __attribute__((aligned(8)));
+
+    // Encoding state
+    int cur_byte;                        // Current byte offset in pixel data
+    int num_bytes;                       // Total bytes to transmit
+    uint32_t reset_ticks_remaining;      // Reset pulse countdown
+    uint8_t which_half;                  // Ping-pong buffer half (0 or 1)
+
+    // Channel info
+    uint8_t channel_id;                  // Hardware RMT channel (0-7)
+    bool enabled;                        // Transmission active flag
+
+    // Completion callback (ONLY SHARED ELEMENT)
+    volatile bool* completed             __attribute__((aligned(8)));
+
+    // Padding to 64 bytes
+    uint8_t _pad1[64 - 56];
+
+    // === CACHE LINE 2: CONFIG/COLD DATA (64 bytes) ===
+
+    // Reset pulse total (template value, rarely accessed)
+    uint32_t reset_ticks_total;
+
+    // Threshold config (set once per transmission)
+    uint32_t threshold_limit;
+
+    // Padding to 128 bytes total
+    uint8_t _pad2[64 - 8];
+
+    // Constructor
+    ThresholdIsrData()
+        : nibble_lut(nullptr)
+        , pixel_data(nullptr)
+        , rmt_mem_ptr(nullptr)
+        , rmt_mem_start(nullptr)
+        , cur_byte(0)
+        , num_bytes(0)
+        , reset_ticks_remaining(0)
+        , which_half(0)
+        , channel_id(0xFF)
+        , enabled(false)
+        , completed(nullptr)
+        , reset_ticks_total(0)
+        , threshold_limit(0)
+    {
+        static_assert(sizeof(ThresholdIsrData) == 128, "ThresholdIsrData must be 128 bytes");
+        static_assert(alignof(ThresholdIsrData) == 64, "ThresholdIsrData must be 64-byte aligned");
+    }
+};
+
+// Nibble LUT storage (separate from ISR data for better cache control)
+// Shared across all channels to save memory
+static DRAM_ATTR rmt_nibble_lut_t g_ThresholdNibbleLut alignas(32) = {};
+
 // Internal implementation class with all private members
 class RmtWorkerIsrMgrThresholdImpl {
 public:
@@ -37,7 +112,9 @@ public:
         volatile bool* completed,
         fl::span<volatile rmt_item32_t> rmt_mem,
         fl::span<const uint8_t> pixel_data,
-        const ChipsetTiming& timing
+        const ChipsetTiming& timing,
+        rmt_channel_handle_t channel,
+        rmt_encoder_handle_t copy_encoder
     );
 
     void stopTransmission(const RmtIsrHandle& handle);
@@ -47,10 +124,10 @@ public:
     bool allocateInterrupt(uint8_t channel_id);
     void deallocateInterrupt(uint8_t channel_id);
     bool isChannelOccupied(uint8_t channel_id) const;
-    RmtWorkerIsrData* getIsrData(uint8_t channel_id);
+    ThresholdIsrData* getIsrData(uint8_t channel_id);
 
-    static void IRAM_ATTR fillNextHalf(RmtWorkerIsrData* isr_data) __attribute__((hot));
-    static void IRAM_ATTR fillAll(RmtWorkerIsrData* isr_data) __attribute__((hot));
+    static void IRAM_ATTR fillNextHalf(ThresholdIsrData* isr_data) __attribute__((hot));
+    static void IRAM_ATTR fillAll(ThresholdIsrData* isr_data) __attribute__((hot));
     static void tx_start(uint8_t channel_id);
     static void IRAM_ATTR sharedGlobalISR(void* arg) __attribute__((hot));
     static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
@@ -71,13 +148,13 @@ public:
     }
 
     // Static data members (DRAM_ATTR applied in definitions below)
-    static RmtWorkerIsrData sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
+    static ThresholdIsrData sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP];
     static uint8_t sMaxChannel;
     static intr_handle_t sGlobalInterruptHandle;
 };
 
 // Static member definitions - DRAM_ATTR applied here for ISR access
-DRAM_ATTR RmtWorkerIsrData RmtWorkerIsrMgrThresholdImpl::sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP] = {};
+DRAM_ATTR ThresholdIsrData RmtWorkerIsrMgrThresholdImpl::sIsrDataArray[SOC_RMT_CHANNELS_PER_GROUP] alignas(64) = {};
 DRAM_ATTR uint8_t RmtWorkerIsrMgrThresholdImpl::sMaxChannel = SOC_RMT_CHANNELS_PER_GROUP;
 intr_handle_t RmtWorkerIsrMgrThresholdImpl::sGlobalInterruptHandle = nullptr;
 
@@ -102,10 +179,12 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrThreshold::startTransmissi
     volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
-    const ChipsetTiming& timing
+    const ChipsetTiming& timing,
+    rmt_channel_handle_t channel,
+    rmt_encoder_handle_t copy_encoder
 ) {
     return RmtWorkerIsrMgrThresholdImpl::getInstance().startTransmission(
-        channel_id, completed, rmt_mem, pixel_data, timing
+        channel_id, completed, rmt_mem, pixel_data, timing, channel, copy_encoder
     );
 }
 
@@ -118,7 +197,9 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrThresholdImpl::startTransm
     volatile bool* completed,
     fl::span<volatile rmt_item32_t> rmt_mem,
     fl::span<const uint8_t> pixel_data,
-    const ChipsetTiming& timing
+    const ChipsetTiming& timing,
+    rmt_channel_handle_t channel,
+    rmt_encoder_handle_t copy_encoder
 ) {
     // Validate channel ID
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
@@ -139,10 +220,10 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrThresholdImpl::startTransm
         );
     }
 
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    ThresholdIsrData* isr_data = &sIsrDataArray[channel_id];
 
     // Check if channel is already occupied
-    if (isr_data->mCompleted != nullptr) {
+    if (isr_data->completed != nullptr) {
         FL_WARN("RmtWorkerIsrMgr: Channel " << (int)channel_id
                 << " already occupied by another worker");
         return Result<RmtIsrHandle, RmtRegisterError>::failure(
@@ -182,17 +263,28 @@ Result<RmtIsrHandle, RmtRegisterError> RmtWorkerIsrMgrThresholdImpl::startTransm
     one_item.level1 = 0;
     one_item.duration1 = t3_ticks;
 
-    // Build nibble LUT using helper function
-    rmt_nibble_lut_t nibble_lut;
-    buildNibbleLut(nibble_lut, zero_item.val, one_item.val);
+    // Build nibble LUT (shared across all channels)
+    buildNibbleLut(g_ThresholdNibbleLut, zero_item.val, one_item.val);
 
     // Extract pointer and length from spans
     volatile rmt_item32_t* rmt_mem_start = rmt_mem.data();
     const uint8_t* pixel_data_ptr = pixel_data.data();
     int num_bytes = static_cast<int>(pixel_data.size());
 
-    // Configure ISR data using the provided config() method
-    isr_data->config(completed, channel_id, rmt_mem_start, pixel_data_ptr, num_bytes, nibble_lut, reset_ticks);
+    // Configure ISR data (direct field assignment for performance)
+    isr_data->enabled = false;  // Will be set true when transmission starts
+    isr_data->completed = completed;
+    isr_data->channel_id = channel_id;
+    isr_data->nibble_lut = &g_ThresholdNibbleLut;
+    isr_data->pixel_data = pixel_data_ptr;
+    isr_data->num_bytes = num_bytes;
+    isr_data->cur_byte = 0;
+    isr_data->which_half = 0;
+    isr_data->rmt_mem_start = rmt_mem_start;
+    isr_data->rmt_mem_ptr = rmt_mem_start;
+    isr_data->reset_ticks_remaining = reset_ticks;
+    isr_data->reset_ticks_total = reset_ticks;
+    isr_data->threshold_limit = 0;  // Set by manager if needed
 
     FL_LOG_RMT("RmtWorkerIsrMgr: Registered and configured worker on channel " << (int)channel_id);
 
@@ -217,26 +309,26 @@ void RmtWorkerIsrMgrThresholdImpl::stopTransmission(const RmtIsrHandle& handle) 
         return;
     }
 
-    RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
+    ThresholdIsrData* isr_data = &sIsrDataArray[channel_id];
 
-    if (isr_data->mCompleted != nullptr) {
+    if (isr_data->completed != nullptr) {
         // wait till done
-        while (*(isr_data->mCompleted) == false) {
+        while (*(isr_data->completed) == false) {
             // Yield to other tasks while waiting
             taskYIELD();
         }
     }
 
     // Clear completion flag pointer to mark as available
-    isr_data->mCompleted = nullptr;
-    isr_data->mEnabled = false;
+    isr_data->completed = nullptr;
+    isr_data->enabled = false;
 
     // Reset state (optional - ISR data will be reconfigured on next use)
-    isr_data->mWhichHalf = 0;
-    isr_data->mCur = 0;
-    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
-    isr_data->mPixelData = nullptr;
-    isr_data->mNumBytes = 0;
+    isr_data->which_half = 0;
+    isr_data->cur_byte = 0;
+    isr_data->rmt_mem_ptr = isr_data->rmt_mem_start;
+    isr_data->pixel_data = nullptr;
+    isr_data->num_bytes = 0;
 
     // Also deallocate interrupt (unregister from worker registry)
     deallocateInterrupt(channel_id);
@@ -248,10 +340,10 @@ bool RmtWorkerIsrMgrThresholdImpl::isChannelOccupied(uint8_t channel_id) const {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return false;
     }
-    return sIsrDataArray[channel_id].mCompleted != nullptr;
+    return sIsrDataArray[channel_id].completed != nullptr;
 }
 
-RmtWorkerIsrData* RmtWorkerIsrMgrThresholdImpl::getIsrData(uint8_t channel_id) {
+ThresholdIsrData* RmtWorkerIsrMgrThresholdImpl::getIsrData(uint8_t channel_id) {
     if (channel_id >= SOC_RMT_CHANNELS_PER_GROUP) {
         return nullptr;
     }
@@ -300,13 +392,13 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __re
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
     // Since we're in ISR context and own the buffer state, we can safely cache and update once
-    FASTLED_REGISTER int cur = isr_data->mCur;
-    FASTLED_REGISTER const int num_bytes = isr_data->mNumBytes;
-    const uint8_t* __restrict__ pixel_data = isr_data->mPixelData;
+    FASTLED_REGISTER int cur = isr_data->cur_byte;
+    FASTLED_REGISTER const int num_bytes = isr_data->num_bytes;
+    const uint8_t* __restrict__ pixel_data = isr_data->pixel_data;
     // Cache LUT reference for ISR performance (avoid repeated member access)
-    const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
+    const rmt_nibble_lut_t& lut = isr_data->(*nibble_lut);
     // Remember that volatile writes are super fast, volatile reads are super slow.
-    volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->mRMT_mem_ptr;
+    volatile FASTLED_REGISTER rmt_item32_t* pItem = isr_data->rmt_mem_ptr;
 
     // Calculate buffer constants (matching RmtWorker values from common.h)
     constexpr int PULSES_PER_FILL = FASTLED_RMT5_PULSES_PER_FILL;
@@ -338,10 +430,10 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __re
 
         // Fill remaining buffer space with reset pulse chunks
         for (FASTLED_REGISTER int i = 0; i < items_remaining; i++) {
-            if (__builtin_expect(isr_data->mResetTicksRemaining > 0, 1)) {
-                uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
+            if (__builtin_expect(isr_data->reset_ticks_remaining > 0, 1)) {
+                uint16_t chunk_duration = (isr_data->reset_ticks_remaining > MAX_DURATION)
                     ? MAX_DURATION
-                    : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
+                    : static_cast<uint16_t>(isr_data->reset_ticks_remaining);
 
                 const bool more = (chunk_duration == MAX_DURATION);
 
@@ -350,7 +442,7 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __re
                 pItem->level1 = 0;
                 pItem->duration1 = more ? 1 : 0;  // 0 is signal for termination.
 
-                isr_data->mResetTicksRemaining -= chunk_duration;
+                isr_data->reset_ticks_remaining -= chunk_duration;
                 pItem++;
             } else {
                 // Reset complete - exit early
@@ -360,18 +452,18 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __re
     }
 
     // Write back updated position (single volatile write instead of many)
-    isr_data->mCur = cur;
+    isr_data->cur_byte = cur;
 
     // OPTIMIZATION: Use XOR toggle for mWhichHalf (branchless, faster than increment+check)
-    const uint8_t which_half = isr_data->mWhichHalf;
-    isr_data->mWhichHalf = which_half ^ 1;  // Toggle between 0 and 1
+    const uint8_t which_half = isr_data->which_half;
+    isr_data->which_half = which_half ^ 1;  // Toggle between 0 and 1
 
     // Update pointer based on half (conditional move is faster than branch)
     // If which_half was 1, we wrap to start; if 0, we keep current pItem
     if (__builtin_expect(which_half == 1, 0)) {
-        pItem = isr_data->mRMT_mem_start;
+        pItem = isr_data->rmt_mem_start;
     }
-    isr_data->mRMT_mem_ptr = pItem;
+    isr_data->rmt_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP
 
@@ -388,8 +480,8 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restric
     uint32_t read_addr = RMT5_GET_READ_ADDRESS(isr_data->mChannelId);
 
     // Calculate current write address (offset from buffer start)
-    volatile rmt_item32_t* __restrict__ write_ptr = isr_data->mRMT_mem_ptr;
-    volatile rmt_item32_t* __restrict__ buffer_start = isr_data->mRMT_mem_start;
+    volatile rmt_item32_t* __restrict__ write_ptr = isr_data->rmt_mem_ptr;
+    volatile rmt_item32_t* __restrict__ buffer_start = isr_data->rmt_mem_start;
     uint32_t write_addr = write_ptr - buffer_start;
 
     // Calculate available items to fill (with circular wraparound handling)
@@ -416,10 +508,10 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restric
     }
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
-    FASTLED_REGISTER int cur = isr_data->mCur;
-    FASTLED_REGISTER const int num_bytes = isr_data->mNumBytes;
-    const uint8_t* __restrict__ pixel_data = isr_data->mPixelData;
-    const rmt_nibble_lut_t& lut = isr_data->mNibbleLut;
+    FASTLED_REGISTER int cur = isr_data->cur_byte;
+    FASTLED_REGISTER const int num_bytes = isr_data->num_bytes;
+    const uint8_t* __restrict__ pixel_data = isr_data->pixel_data;
+    const rmt_nibble_lut_t& lut = isr_data->(*nibble_lut);
     volatile FASTLED_REGISTER rmt_item32_t* pItem = write_ptr;
 
     // Phase 1: Fill pixel data - Threshold mode: byte-level granularity (8 items at a time)
@@ -445,10 +537,10 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restric
         constexpr uint16_t MAX_DURATION = 65535;
 
         // Fill reset pulse items up to available space
-        while (__builtin_expect(available_items > 0 && isr_data->mResetTicksRemaining > 0, 1)) {
-            uint16_t chunk_duration = (isr_data->mResetTicksRemaining > MAX_DURATION)
+        while (__builtin_expect(available_items > 0 && isr_data->reset_ticks_remaining > 0, 1)) {
+            uint16_t chunk_duration = (isr_data->reset_ticks_remaining > MAX_DURATION)
                 ? MAX_DURATION
-                : static_cast<uint16_t>(isr_data->mResetTicksRemaining);
+                : static_cast<uint16_t>(isr_data->reset_ticks_remaining);
 
             const bool more = (chunk_duration == MAX_DURATION);
 
@@ -457,7 +549,7 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restric
             pItem->level1 = 0;
             pItem->duration1 = more ? 1 : 0;  // 0 signals termination
 
-            isr_data->mResetTicksRemaining -= chunk_duration;
+            isr_data->reset_ticks_remaining -= chunk_duration;
             pItem++;
             available_items--;
 
@@ -469,8 +561,8 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restric
     }
 
     // Write back updated position (single volatile write instead of many)
-    isr_data->mCur = cur;
-    isr_data->mRMT_mem_ptr = pItem;
+    isr_data->cur_byte = cur;
+    isr_data->rmt_mem_ptr = pItem;
 }
 FL_DISABLE_WARNING_POP
 
@@ -485,9 +577,9 @@ void RmtWorkerIsrMgrThresholdImpl::tx_start(uint8_t channel_id) {
 
     // Reset buffer state before initial fill
     RmtWorkerIsrData* isr_data = &sIsrDataArray[channel_id];
-    isr_data->mWhichHalf = 0;
-    isr_data->mRMT_mem_ptr = isr_data->mRMT_mem_start;
-    isr_data->mEnabled = true;
+    isr_data->which_half = 0;
+    isr_data->rmt_mem_ptr = isr_data->rmt_mem_start;
+    isr_data->enabled = true;
 
     // Reset RMT memory read pointer
     RMT5_RESET_MEMORY_READ_POINTER(channel_id);
@@ -594,14 +686,14 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::sharedGlobalISR(void* arg) {
         RmtWorkerIsrData* __restrict__ isr_data = &sIsrDataArray[channel];
 
         // Skip inactive channels (worker not currently transmitting)
-        if (__builtin_expect(!isr_data->mEnabled, 0)) {
+        if (__builtin_expect(!isr_data->enabled, 0)) {
             continue;
         }
 
         // Signal completion by setting worker's completion flag to true
         // This allows the worker to detect completion and unregister
-        *(isr_data->mCompleted) = true;
-        isr_data->mEnabled = false;  // Disable this channel
+        *(isr_data->completed) = true;
+        isr_data->enabled = false;  // Disable this channel
 
         // Clear TX done interrupt in hardware
         RMT5_CLEAR_INTERRUPTS(channel, true, false);
@@ -625,7 +717,7 @@ void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::sharedGlobalISR(void* arg) {
         RmtWorkerIsrData* __restrict__ isr_data = &sIsrDataArray[channel];
 
         // Skip inactive channels (worker not currently transmitting)
-        if (__builtin_expect(!isr_data->mEnabled, 0)) {
+        if (__builtin_expect(!isr_data->enabled, 0)) {
             continue;
         }
 
