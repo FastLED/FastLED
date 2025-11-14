@@ -10,6 +10,8 @@
 /// Each platform file defines the SPIOutput template for its platform.
 /// This must be included before any SPI chipset controllers (e.g., APA102, P9813).
 
+#include "arm/teensy/is_teensy.h"
+
 #if defined(__EMSCRIPTEN__) || defined(FASTLED_STUB_IMPL)
 #include "stub/spi_output_template.h"
 
@@ -28,13 +30,13 @@
 #elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 #include "apollo3/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_3X
 #include "arm/teensy/teensy3_common/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_4X
 #include "arm/teensy/teensy4_common/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_LC
 #include "arm/teensy/teensy_lc/spi_output_template.h"
 
 #elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \

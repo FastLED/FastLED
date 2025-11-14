@@ -1,7 +1,9 @@
 #ifndef __INC_FASTSPI_ARM_MXRT1062_H
 #define __INC_FASTSPI_ARM_MXRT1062_H
 
-#if defined (FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if FL_IS_TEENSY_4X
 #include <SPI.h>
 #include "fastspi_types.h"
 

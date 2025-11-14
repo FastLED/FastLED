@@ -21,10 +21,13 @@
 /// - data2 (D2): PCS2 / WP pin
 /// - data3 (D3): PCS3 / HOLD pin
 
-#if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if FL_IS_TEENSY_4X
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
+#include "fl/log.h"
 #include <SPI.h>
 #include <imxrt.h>
 #include <cstring> // ok include
@@ -73,8 +76,7 @@ private:
     int8_t mData3Pin;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for quad-lane)
-    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    DMABuffer mDMABuffer;            // DMA buffer (managed internally by DMABuffer)
     size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
     bool mBufferAcquired;
 
@@ -100,7 +102,6 @@ SpiHw4MXRT1062::SpiHw4MXRT1062(int bus_id, const char* name)
     , mData2Pin(-1)
     , mData3Pin(-1)
     , mDMABuffer()
-    , mMaxBytesPerLane(0)
     , mCurrentTotalSize(0)
     , mBufferAcquired(false)
 {
@@ -134,7 +135,7 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
-        FL_WARN("SpiHw4MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
+        FL_LOG_SPI("SpiHw4MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
@@ -154,7 +155,7 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_WARN("SpiHw4MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
+            FL_LOG_SPI("SpiHw4MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
             return false;
     }
 
@@ -174,16 +175,39 @@ bool SpiHw4MXRT1062::begin(const SpiHw4::Config& config) {
 
     // Warn if quad mode requested but pins aren't available on standard boards
     if (mActiveLanes == 4) {
-        FL_WARN("SpiHw4MXRT1062: Quad-SPI mode enabled with 4 lanes");
-        FL_WARN("  Note: data2/data3 pins (PCS2/PCS3) are not exposed on standard Teensy 4.0/4.1 boards");
-        FL_WARN("  This requires custom hardware or breakout adapters");
+        FL_LOG_SPI("SpiHw4MXRT1062: Quad-SPI mode enabled with 4 lanes");
+        FL_LOG_SPI("  Note: data2/data3 pins (PCS2/PCS3) are not exposed on standard Teensy 4.0/4.1 boards");
+        FL_LOG_SPI("  This requires custom hardware or breakout adapters");
     }
+
+    // Configure custom pins BEFORE calling begin()
+    // The Teensy SPI library requires setMOSI/setSCK/setMISO to be called before begin()
+    // to use alternate pins. Without these calls, pins remain at default (11,13 for SPI0).
+    if (mClockPin >= 0) {
+        mSPI->setSCK(mClockPin);
+    }
+    if (mData0Pin >= 0) {
+        mSPI->setMOSI(mData0Pin);
+    }
+    // Note: For quad-mode, data1-3 are additional output lanes
+    // The Teensy SPI library doesn't have setMISO equivalents for lanes 2-3
+    // but we set MISO for lane 1 for potential bidirectional use
+    if (mData1Pin >= 0) {
+        mSPI->setMISO(mData1Pin);
+    }
+    // data2_pin and data3_pin require direct register manipulation (not supported by core library)
 
     // Initialize the SPI peripheral
     mSPI->begin();
 
-    FL_WARN("SpiHw4MXRT1062: Initialized on bus " << mBusId
-            << " with " << static_cast<int>(mActiveLanes) << " lanes");
+    FL_LOG_SPI("SpiHw4MXRT1062: Initialized on bus " << mBusId
+            << " clock=" << mClockSpeed << "Hz"
+            << " lanes=" << static_cast<int>(mActiveLanes)
+            << " pins: CLK=" << (int)mClockPin
+            << " D0=" << (int)mData0Pin
+            << " D1=" << (int)mData1Pin
+            << " D2=" << (int)mData2Pin
+            << " D3=" << (int)mData3Pin);
 
     mInitialized = true;
     mTransactionActive = false;
@@ -197,13 +221,13 @@ void SpiHw4MXRT1062::end() {
 
 DMABuffer SpiHw4MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -214,31 +238,20 @@ DMABuffer SpiHw4MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
     // Validate size against Teensy practical limit (256KB for embedded systems)
     constexpr size_t MAX_SIZE = 256 * 1024;
     if (total_size > MAX_SIZE) {
-        return SPIError::BUFFER_TOO_LARGE;
+        return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
 
-    // Reallocate buffer only if we need more capacity
-    if (bytes_per_lane > mMaxBytesPerLane) {
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-        }
-
-        // Allocate DMA-capable memory (regular malloc for Teensy)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
-        if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
-        }
-
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
-        mMaxBytesPerLane = bytes_per_lane;
+    // Allocate new DMABuffer (manages memory internally via fl::vector)
+    mDMABuffer = DMABuffer(total_size);
+    if (!mDMABuffer.ok()) {
+        return DMABuffer(SPIError::ALLOCATION_FAILED);
     }
 
     mBufferAcquired = true;
     mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return the buffer (DMABuffer is copyable via shared_ptr)
+    return mDMABuffer;
 }
 
 bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
@@ -252,6 +265,9 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
     if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
+
+    FL_LOG_SPI("SpiHw4MXRT1062: Transmitting " << mCurrentTotalSize << " bytes via LPSPI bus " << mBusId
+            << " with " << static_cast<int>(mActiveLanes) << " lanes");
 
     // Begin SPI transaction with configured clock speed
     mSPI->beginTransaction(SPISettings(mClockSpeed, MSBFIRST, SPI_MODE0));
@@ -285,11 +301,12 @@ bool SpiHw4MXRT1062::transmit(TransmitMode mode) {
     // Transmit data using internal DMA buffer
     // In quad mode, each byte is transmitted with 2 bits per data line
     // The transposer has already prepared the data in interleaved format
+    fl::span<uint8_t> buffer_span = mDMABuffer.data();
     for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for transmit FIFO to have space
         while (!(port->SR & LPSPI_SR_TDF)) ;
 
-        port->TDR = mDMABuffer[i];
+        port->TDR = buffer_span[i];
     }
 
     // Wait for transmission to complete
@@ -346,14 +363,10 @@ void SpiHw4MXRT1062::cleanup() {
             waitComplete();
         }
 
-        // Free DMA buffer
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-            mMaxBytesPerLane = 0;
-            mCurrentTotalSize = 0;
-            mBufferAcquired = false;
-        }
+        // Reset DMA buffer (shared_ptr will handle deallocation)
+        mDMABuffer.reset();
+        mCurrentTotalSize = 0;
+        mBufferAcquired = false;
 
         mSPI->end();
         mSPI = nullptr;
@@ -368,6 +381,8 @@ void SpiHw4MXRT1062::cleanup() {
 /// Teensy 4.x factory override - returns available 4-lane SPI bus instances
 /// Strong definition overrides weak default
 fl::vector<SpiHw4*> SpiHw4::createInstances() {
+    FL_LOG_SPI("SpiHw4MXRT1062::createInstances() called - Teensy 4.x hardware SPI factory active");
+
     fl::vector<SpiHw4*> controllers;
 
     // Teensy 4.x has 3 LPSPI peripherals available
@@ -385,4 +400,4 @@ fl::vector<SpiHw4*> SpiHw4::createInstances() {
 
 }  // namespace fl
 
-#endif  // __IMXRT1062__ && ARM_HARDWARE_SPI
+#endif  // FL_IS_TEENSY_4X

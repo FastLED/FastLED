@@ -11,6 +11,12 @@ Teensy 4.0/4.1 (IMXRT1062) support.
 - `octows2811_controller.h`: OctoWS2811 integration.
 - `led_sysdefs_arm_mxrt1062.h`: System defines for RT1062.
 
-Notes:
+## Multi-Lane SPI Support
+
+For detailed information about Teensy 4.x LPSPI dual/quad-mode support:
+- **Platform Documentation**: `src/platforms/arm/teensy/teensy4_common/README.md` - Complete LPSPI feature overview
+- **Implementation Guide**: `LP_SPI.md` - Technical details for quad-mode pin configuration
+
+## Notes
 - Very high CPU frequency; DWT-based timing and interrupt thresholds are critical for stability.
- - OctoWS2811 and SmartMatrix can offload large parallel outputs; ensure pin mappings and DMA settings match board wiring.
+- OctoWS2811 and SmartMatrix can offload large parallel outputs; ensure pin mappings and DMA settings match board wiring.

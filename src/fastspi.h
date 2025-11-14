@@ -37,9 +37,12 @@
 // Include platform-specific SPI device proxy implementations BEFORE FastLED.h
 // These provide the hardware SPI abstractions for each platform
 // This must happen before FastLED.h includes chipsets.h
+
+#include "platforms/arm/teensy/is_teensy.h"
+
 #if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3) || defined(ESP32C3) || defined(ESP32P4)
 #include "platforms/esp/32/drivers/spi/spi_device_proxy.h"
-#elif defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_4X
 #include "platforms/arm/mxrt1062/spi_device_proxy.h"
 #elif defined(NRF51)
 #include "platforms/arm/nrf52/spi_device_proxy.h"
@@ -74,13 +77,13 @@
 #elif defined(FASTLED_APOLLO3) && defined(FASTLED_ALL_PINS_HARDWARE_SPI)
 #include "platforms/apollo3/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSY3) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_3X
 #include "platforms/arm/teensy/teensy3_common/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSY4) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_4X
 #include "platforms/arm/teensy/teensy4_common/spi_output_template.h"
 
-#elif defined(FASTLED_TEENSYLC) && defined(ARM_HARDWARE_SPI)
+#elif FL_IS_TEENSY_LC
 #include "platforms/arm/teensy/teensy_lc/spi_output_template.h"
 
 #elif defined(__SAM3X8E__) || defined(__SAMD21G18A__) || defined(__SAMD21J18A__) || defined(__SAMD21E17A__) || \

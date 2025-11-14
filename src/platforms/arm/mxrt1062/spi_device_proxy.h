@@ -16,13 +16,16 @@
 /// These pins are not exposed on standard Teensy 4.0/4.1 boards but can be
 /// used with custom boards or breakout adapters.
 
-#if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if FL_IS_TEENSY_4X
 
 #include "ftl/vector.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h"
 #include "ftl/stdint.h"
 #include "fl/stddef.h"
+#include "fl/log.h"
 #include <SPI.h>
 
 namespace fl {
@@ -92,7 +95,7 @@ public:
         mHandle = mBusManager->registerDevice(CLOCK_PIN, DATA_PIN, SPI_CLOCK_RATE, this);
 
         if (!mHandle.is_valid) {
-            FL_WARN("SPIDeviceProxy: Failed to register with bus manager (pin "
+            FL_LOG_SPI("SPIDeviceProxy: Failed to register with bus manager (pin "
                     << static_cast<int>(CLOCK_PIN) << ":" << static_cast<int>(DATA_PIN) << ")");
             return;
         }
@@ -220,4 +223,4 @@ private:
 
 }  // namespace fl
 
-#endif  // __IMXRT1062__ && ARM_HARDWARE_SPI
+#endif  // FL_IS_TEENSY_4X

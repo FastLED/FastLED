@@ -651,7 +651,7 @@ static uint8_t getLaneByte(const LaneData& lane,
 | ESP32-C6 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
 | ESP32-H2 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
 | ESP32-P4 | ✅       | ⚠️       | 2 | Supports Octal-SPI (8 lanes, future) |
-| **Teensy 4.0/4.1** | ✅ | ⚠️ | 3 (SPI, SPI1, SPI2) | LPSPI supports dual/quad via WIDTH register; Quad mode requires data2/data3 pins (PCS2/PCS3) not exposed on standard boards |
+| **Teensy 4.0/4.1** | ✅ | ⚠️ | 3 (SPI, SPI1, SPI2) | LPSPI supports dual/quad via WIDTH register; Quad mode requires data2/data3 pins (PCS2/PCS3) not exposed on standard boards. See `LP_SPI.md` for implementation details |
 | Testing  | ✅       | ✅       | N/A | Mock drivers for unit tests |
 
 ### Future Platforms
@@ -1239,10 +1239,11 @@ FastLED's Advanced SPI system provides **intelligent, automatic parallel LED con
 - **ESP32 SPI Proxy:** `src/platforms/esp/32/spi_device_proxy.h`
 
 #### Teensy 4.x
-- **Teensy Quad-SPI:** `src/platforms/arm/mxrt1062/spi_hw_4_mxrt1062.cpp`
-- **Teensy Dual-SPI:** `src/platforms/arm/mxrt1062/spi_hw_2_mxrt1062.cpp`
+- **Teensy Quad-SPI:** `src/platforms/arm/teensy/teensy4_common/spi_hw_4_mxrt1062.cpp`
+- **Teensy Dual-SPI:** `src/platforms/arm/teensy/teensy4_common/spi_hw_2_mxrt1062.cpp`
 - **Teensy Single-SPI:** `src/platforms/arm/mxrt1062/fastspi_arm_mxrt1062.h`
 - **Teensy SPI Proxy:** `src/platforms/arm/mxrt1062/spi_device_proxy.h`
+- **LPSPI Implementation Guide:** `LP_SPI.md` (quad-mode pin configuration details)
 
 #### Platform Detection
 - **Platform Detection:** `src/platforms/quad_spi_platform.h`

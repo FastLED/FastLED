@@ -11,6 +11,8 @@ Teensy 4.0/4.1 (IMXRT1062) support.
 - `octows2811_controller.h`: OctoWS2811 integration.
 - `clockless_objectfled.h/cpp`: Legacy single-controller ObjectFLED wrapper.
 - `led_sysdefs_arm_mxrt1062.h`: System defines for RT1062.
+- `spi_hw_4_mxrt1062.cpp`: Quad-SPI (4-lane) LPSPI driver.
+- `spi_hw_2_mxrt1062.cpp`: Dual-SPI (2-lane) LPSPI driver.
 
 ## Multi-Strip LED Control
 
@@ -29,7 +31,121 @@ Use the Channel API for new projects. See `fl/channels/channel.h` for documentat
 - 200 LEDs: ~6ms transmission time
 - Achieves 60fps easily with 500+ LEDs per instance
 
+## LPSPI Multi-Lane SPI Support
+
+Teensy 4.x features the **LPSPI (Low Power Serial Peripheral Interface)** peripheral, which natively supports multi-lane (dual/quad) SPI operation for parallel LED strip control.
+
+### Current Implementation Status
+
+FastLED provides complete dual-lane and quad-lane SPI drivers for Teensy 4.x:
+
+- **Dual-SPI (2 lanes)**: ✅ Fully supported - Uses D0 (MOSI) and D1 (MISO)
+- **Quad-SPI (4 lanes)**: ⚠️ **Hardware ready, pin configuration incomplete**
+
+#### What Works
+
+The Teensy 4.x LPSPI drivers (`spi_hw_2_mxrt1062.cpp` and `spi_hw_4_mxrt1062.cpp`) include:
+
+1. **Complete TCR.WIDTH configuration** - Hardware correctly switches between 1-bit, 2-bit, and 4-bit modes
+2. **Direct register access** - Efficient LPSPI peripheral control
+3. **Bus management** - Automatic routing through SPI Bus Manager
+4. **Bit-interleaving** - Optimized parallel data transmission
+
+#### Hardware Limitation: Quad-Mode Pin Availability
+
+Standard Teensy 4.0/4.1 boards **do not expose** the PCS2 and PCS3 pins required for quad-mode (4-lane) operation:
+
+| Signal | Standard Name | Quad-Mode Usage | Teensy 4.0/4.1 Availability |
+|--------|---------------|-----------------|----------------------------|
+| SCK | Serial Clock | Clock (always) | ✅ Exposed (pin 13) |
+| SDO | Serial Data Out | D0 (data lane 0) | ✅ Exposed (pin 11) |
+| SDI | Serial Data In | D1 (data lane 1) | ✅ Exposed (pin 12) |
+| PCS2 | Chip Select 2 | D2 (data lane 2) | ❌ Not exposed |
+| PCS3 | Chip Select 3 | D3 (data lane 3) | ❌ Not exposed |
+
+**Quad-mode requires** one of the following:
+- Custom PCB designs that break out PCS2/PCS3 pins
+- Breakout adapters exposing the full iMXRT1062 pin set
+- Advanced soldering directly to processor pads
+
+### LPSPI Bus Mapping
+
+The iMXRT1062 has four LPSPI peripherals, of which Teensy exposes three:
+
+| Teensy SPI Bus | Hardware Peripheral | Memory Address | Default Pins (Teensy 4.0/4.1) |
+|---------------|---------------------|----------------|-------------------------------|
+| `SPI` (bus 0) | **LPSPI4** | 0x403A0000 | SCK=13, MOSI=11, MISO=12 |
+| `SPI1` (bus 1) | **LPSPI3** | 0x403B0000 | SCK=27, MOSI=26, MISO=1 |
+| `SPI2` (bus 2) | **LPSPI1** | 0x40394000 | SCK=45, MOSI=43, MISO=42 |
+
+Each LPSPI peripheral supports:
+- **Single-lane (1-bit)**: Standard SPI mode
+- **Dual-lane (2-bit)**: 2× throughput using D0 and D1
+- **Quad-lane (4-bit)**: 4× throughput using D0, D1, D2, and D3
+
+### Dual-SPI Usage (Fully Supported)
+
+Dual-SPI works on standard Teensy 4.x boards without hardware modifications:
+
+```cpp
+#include <FastLED.h>
+
+#define CLOCK_PIN 13  // SCK
+#define NUM_LEDS 100
+
+CRGB leds_strip1[NUM_LEDS];
+CRGB leds_strip2[NUM_LEDS];
+
+void setup() {
+    // Add 2 strips sharing clock pin 13
+    // FastLED auto-detects and enables Dual-SPI (2 parallel lanes)
+    FastLED.addLeds<APA102, 11, CLOCK_PIN>(leds_strip1, NUM_LEDS);  // D0 = pin 11 (MOSI)
+    FastLED.addLeds<APA102, 12, CLOCK_PIN>(leds_strip2, NUM_LEDS);  // D1 = pin 12 (MISO)
+}
+
+void loop() {
+    // Set colors independently
+    fill_rainbow(leds_strip1, NUM_LEDS, 0, 7);
+    fill_rainbow(leds_strip2, NUM_LEDS, 128, 7);
+
+    // Both strips transmit in parallel via LPSPI hardware
+    FastLED.show();
+}
+```
+
+### Quad-SPI Implementation Requirements
+
+To enable full quad-mode support, the following steps are required (see `LP_SPI.md` in project root for detailed technical guide):
+
+1. **Pin Mapping Research** - Identify which processor pins provide PCS2/PCS3 functions
+2. **IOMUXC Configuration** - Implement direct register manipulation to configure D2/D3 pins:
+   - `IOMUXC_SW_MUX_CTL` registers (alternate function selection)
+   - `IOMUXC_SW_PAD_CTL` registers (electrical properties)
+   - `SELECT_INPUT` registers (signal routing)
+3. **Integration** - Add pin configuration calls to `spi_hw_4_mxrt1062.cpp::init()`
+4. **Custom Hardware** - Design PCB or breakout to expose PCS2/PCS3 pins
+5. **Testing** - Validate with logic analyzer and real LED strips
+
+**Status**: Implementation roadmap documented in `LP_SPI.md`. Hardware constraints make this a **low priority** feature (requires custom PCBs, not accessible to most users).
+
+### Technical References
+
+- **LPSPI Implementation Guide**: See `LP_SPI.md` in project root for complete quad-mode implementation details
+- **Advanced SPI System**: See `src/platforms/README_SPI_ADVANCED.md` for multi-lane SPI architecture
+- **NXP Reference Manual**: [i.MX RT1060 Reference Manual (Chapter 29: LPSPI)](https://www.pjrc.com/teensy/IMXRT1060RM_rev2.pdf)
+- **Teensy Core Library**: Arduino/hardware/teensy/avr/cores/teensy4/ (SPI.cpp, imxrt.h)
+
+### Platform Comparison: Multi-Lane SPI Support
+
+| Platform | Dual-SPI | Quad-SPI | Notes |
+|----------|----------|----------|-------|
+| **Teensy 4.x** | ✅ | ⚠️ | Dual works on standard boards; Quad requires custom PCB for PCS2/PCS3 |
+| ESP32 | ✅ | ✅ | Full support on standard dev boards |
+| ESP32-S2/S3 | ✅ | ✅ | Full support |
+| ESP32-C3/C6 | ✅ | ❌ | Dual-SPI only (2 lanes max) |
+
 ## Notes
 - Very high CPU frequency; DWT-based timing and interrupt thresholds are critical for stability.
 - OctoWS2811 and SmartMatrix can offload large parallel outputs; ensure pin mappings and DMA settings match board wiring.
 - For multi-strip LED projects on Teensy 4.x, see the Channel API documentation.
+- For SPI-based LED strips (APA102, SK9822, LPD8806), dual-SPI provides 2× performance on standard boards without modifications.

@@ -7,10 +7,13 @@
 /// The IMXRT1062's LPSPI peripheral supports dual-mode transfers by configuring
 /// the WIDTH field in the transmit command register (TCR).
 
-#if defined(__IMXRT1062__) && defined(ARM_HARDWARE_SPI)
+#include "platforms/arm/teensy/is_teensy.h"
+
+#if FL_IS_TEENSY_4X
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
+#include "fl/log.h"
 #include <SPI.h>
 #include <imxrt.h>
 #include <cstring> // ok include
@@ -60,8 +63,7 @@ private:
     int8_t mData1Pin;
 
     // DMA buffer management
-    fl::span<uint8_t> mDMABuffer;    // Allocated DMA buffer (interleaved format for dual-lane)
-    size_t mMaxBytesPerLane;         // Max bytes per lane we've allocated for
+    DMABuffer mDMABuffer;            // DMA buffer (managed internally by DMABuffer)
     size_t mCurrentTotalSize;        // Current transmission size (bytes_per_lane * num_lanes)
     bool mBufferAcquired;
 
@@ -84,7 +86,6 @@ SpiHw2MXRT1062::SpiHw2MXRT1062(int bus_id, const char* name)
     , mData0Pin(-1)
     , mData1Pin(-1)
     , mDMABuffer()
-    , mMaxBytesPerLane(0)
     , mCurrentTotalSize(0)
     , mBufferAcquired(false)
 {
@@ -118,7 +119,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
-        FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
+        FL_LOG_SPI("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
@@ -138,13 +139,13 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_WARN("SpiHw2MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
+            FL_LOG_SPI("SpiHw2MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
             return false;
     }
 
     // Validate that both data pins are specified
     if (config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_WARN("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
+        FL_LOG_SPI("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
         return false;
     }
 
@@ -153,6 +154,21 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     mClockPin = config.clock_pin;
     mData0Pin = config.data0_pin;
     mData1Pin = config.data1_pin;
+
+    // Configure custom pins BEFORE calling begin()
+    // The Teensy SPI library requires setMOSI/setSCK/setMISO to be called before begin()
+    // to use alternate pins. Without these calls, pins remain at default (11,13 for SPI0).
+    if (mClockPin >= 0) {
+        mSPI->setSCK(mClockPin);
+    }
+    if (mData0Pin >= 0) {
+        mSPI->setMOSI(mData0Pin);
+    }
+    // Note: data1_pin is for dual-mode output, not MISO (input)
+    // Setting MISO for potential bidirectional use
+    if (mData1Pin >= 0) {
+        mSPI->setMISO(mData1Pin);
+    }
 
     // Initialize the SPI peripheral
     // Note: The Teensy SPI library doesn't expose low-level LPSPI configuration
@@ -169,7 +185,11 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     // For now, we mark it as initialized and will handle dual-mode encoding
     // in the transmit function.
 
-    FL_WARN("SpiHw2MXRT1062: Initialized on bus " << mBusId
+    FL_LOG_SPI("SpiHw2MXRT1062: Initialized on bus " << mBusId
+            << " clock=" << mClockSpeed << "Hz"
+            << " pins: CLK=" << (int)mClockPin
+            << " D0=" << (int)mData0Pin
+            << " D1=" << (int)mData1Pin
             << " (Note: Teensy SPI library has limited dual-mode support)");
 
     mInitialized = true;
@@ -184,13 +204,13 @@ void SpiHw2MXRT1062::end() {
 
 DMABuffer SpiHw2MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
     if (!mInitialized) {
-        return SPIError::NOT_INITIALIZED;
+        return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
     // Auto-wait if previous transmission still active
     if (mTransactionActive) {
         if (!waitComplete()) {
-            return SPIError::BUSY;
+            return DMABuffer(SPIError::BUSY);
         }
     }
 
@@ -201,31 +221,20 @@ DMABuffer SpiHw2MXRT1062::acquireDMABuffer(size_t bytes_per_lane) {
     // Validate size against Teensy practical limit (256KB for embedded systems)
     constexpr size_t MAX_SIZE = 256 * 1024;
     if (total_size > MAX_SIZE) {
-        return SPIError::BUFFER_TOO_LARGE;
+        return DMABuffer(SPIError::BUFFER_TOO_LARGE);
     }
 
-    // Reallocate buffer only if we need more capacity
-    if (bytes_per_lane > mMaxBytesPerLane) {
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-        }
-
-        // Allocate DMA-capable memory (regular malloc for Teensy)
-        uint8_t* ptr = static_cast<uint8_t*>(malloc(total_size));
-        if (!ptr) {
-            return SPIError::ALLOCATION_FAILED;
-        }
-
-        mDMABuffer = fl::span<uint8_t>(ptr, total_size);
-        mMaxBytesPerLane = bytes_per_lane;
+    // Allocate new DMABuffer (manages memory internally via fl::vector)
+    mDMABuffer = DMABuffer(total_size);
+    if (!mDMABuffer.ok()) {
+        return DMABuffer(SPIError::ALLOCATION_FAILED);
     }
 
     mBufferAcquired = true;
     mCurrentTotalSize = total_size;
 
-    // Return span of current size (not max allocated size)
-    return fl::span<uint8_t>(mDMABuffer.data(), total_size);
+    // Return the buffer (DMABuffer is copyable via shared_ptr)
+    return mDMABuffer;
 }
 
 bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
@@ -239,6 +248,8 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
     if (mCurrentTotalSize == 0) {
         return true;  // Nothing to transmit
     }
+
+    FL_LOG_SPI("SpiHw2MXRT1062: Transmitting " << mCurrentTotalSize << " bytes via LPSPI bus " << mBusId);
 
     // Begin SPI transaction with configured clock speed
     mSPI->beginTransaction(SPISettings(mClockSpeed, MSBFIRST, SPI_MODE0));
@@ -275,11 +286,12 @@ bool SpiHw2MXRT1062::transmit(TransmitMode mode) {
     // Transmit data using internal DMA buffer
     // In dual mode, each byte in the buffer will be transmitted as nibbles
     // split across the two data lines
+    fl::span<uint8_t> buffer_span = mDMABuffer.data();
     for (size_t i = 0; i < mCurrentTotalSize; ++i) {
         // Wait for transmit FIFO to have space
         while (!(port->SR & LPSPI_SR_TDF)) ;
 
-        port->TDR = mDMABuffer[i];
+        port->TDR = buffer_span[i];
     }
 
     // Wait for transmission to complete
@@ -336,14 +348,10 @@ void SpiHw2MXRT1062::cleanup() {
             waitComplete();
         }
 
-        // Free DMA buffer
-        if (!mDMABuffer.empty()) {
-            free(mDMABuffer.data());
-            mDMABuffer = fl::span<uint8_t>();
-            mMaxBytesPerLane = 0;
-            mCurrentTotalSize = 0;
-            mBufferAcquired = false;
-        }
+        // Reset DMA buffer (shared_ptr will handle deallocation)
+        mDMABuffer.reset();
+        mCurrentTotalSize = 0;
+        mBufferAcquired = false;
 
         mSPI->end();
         mSPI = nullptr;
@@ -358,6 +366,8 @@ void SpiHw2MXRT1062::cleanup() {
 /// Teensy 4.x factory override - returns available 2-lane SPI bus instances
 /// Strong definition overrides weak default
 fl::vector<SpiHw2*> SpiHw2::createInstances() {
+    FL_LOG_SPI("SpiHw2MXRT1062::createInstances() called - Teensy 4.x hardware SPI factory active");
+
     fl::vector<SpiHw2*> controllers;
 
     // Teensy 4.x has 3 LPSPI peripherals available
@@ -375,4 +385,4 @@ fl::vector<SpiHw2*> SpiHw2::createInstances() {
 
 }  // namespace fl
 
-#endif  // __IMXRT1062__ && ARM_HARDWARE_SPI
+#endif  // FL_IS_TEENSY_4X
