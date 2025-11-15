@@ -351,22 +351,29 @@ private:
 //----------------------------------------------------------------------------
 // FunctionList: Container for managing multiple callbacks with add/remove
 //----------------------------------------------------------------------------
-template <typename FunctionType> class FunctionListBase {
-  protected:
-    fl::vector<pair<int, FunctionType>> mFunctions;
+
+// Primary template declaration (no definition - only specializations exist)
+template <typename> class FunctionList;
+
+// Partial specialization for function signature syntax: FunctionList<void(Args...)>
+// Supports: FunctionList<void()>, FunctionList<void(float)>, FunctionList<void(u8, float, float)>, etc.
+template <typename... Args>
+class FunctionList<void(Args...)> {
+  private:
+    fl::vector<pair<int, function<void(Args...)>>> mFunctions;
     int mCounter = 0;
 
   public:
     // Iterator types
-    using iterator = typename fl::vector<pair<int, FunctionType>>::iterator;
-    using const_iterator = typename fl::vector<pair<int, FunctionType>>::const_iterator;
+    using iterator = typename fl::vector<pair<int, function<void(Args...)>>>::iterator;
+    using const_iterator = typename fl::vector<pair<int, function<void(Args...)>>>::const_iterator;
 
-    FunctionListBase() = default;
-    ~FunctionListBase() = default;
+    FunctionList() = default;
+    ~FunctionList() = default;
 
-    int add(FunctionType function) {
+    int add(function<void(Args...)> fn) {
         int id = mCounter++;
-        pair<int, FunctionType> entry(id, function);
+        pair<int, function<void(Args...)>> entry(id, fn);
         mFunctions.push_back(entry);
         return id;
     }
@@ -395,18 +402,9 @@ template <typename FunctionType> class FunctionListBase {
 
     // Boolean conversion for if (callback) checks
     explicit operator bool() const { return !empty(); }
-};
 
-// Primary template declaration (no definition - only specializations exist)
-template <typename> class FunctionList;
-
-// Partial specialization for function signature syntax: FunctionList<void(Args...)>
-// Supports: FunctionList<void()>, FunctionList<void(float)>, FunctionList<void(u8, float, float)>, etc.
-template <typename... Args>
-class FunctionList<void(Args...)> : public FunctionListBase<function<void(Args...)>> {
-  public:
     void invoke(Args... args) {
-        for (const auto &pair : this->mFunctions) {
+        for (const auto &pair : mFunctions) {
             auto &function = pair.second;
             function(args...);
         }
