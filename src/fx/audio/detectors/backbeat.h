@@ -2,7 +2,6 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
-#include "fl/function_list.h"
 #include "fx/audio/detectors/beat.h"
 #include "fx/audio/detectors/downbeat.h"
 #include "ftl/function.h"

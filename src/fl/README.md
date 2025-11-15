@@ -57,7 +57,7 @@ Common types to reach for:
 - Strings and streams: `fl::string`, `fl::ostream`, `fl::sstream`, `fl::printf`
 - Optionals and variants: `fl::optional<T>`, `fl::variant<...>`
 - Memory/ownership: `fl::unique_ptr<T>`, `fl::shared_ptr<T>`, `fl::weak_ptr<T>`
-- Functional: `fl::function<Signature>`, `fl::function_list<Signature>`
+- Functional: `fl::function<Signature>` (in `ftl/function.h`), `fl::FunctionList<Signature>` (in `ftl/function.h`)
 - Concurrency: `fl::thread`, `fl::mutex`, `fl::thread_local`
 - Async: `fl::promise<T>`, `fl::task`
 - Math: `fl::math`, `fl::sin32`, `fl::random`, `fl::gamma`, `fl::gradient`
@@ -260,7 +260,7 @@ Threads, synchronization, async primitives, eventing, and callable utilities.
 
 - Threads and sync: `thread.h`, `mutex.h`, `thread_local.h`
 - Async primitives: `promise.h`, `promise_result.h`, `task.h`, `async.h`
-- Functional: `function.h`, `function_list.h`, `functional.h`
+- Functional: `function.h` (in `ftl/`), `functional.h`
 - Events and engine hooks: `engine_events.h`
 - Interrupt service routines: `isr.h`
 
@@ -273,8 +273,7 @@ Per‑header quick descriptions:
 - `promise_result.h`: Result type accompanying promises/futures.
 - `task.h`: Lightweight async task primitive for orchestration.
 - `async.h`: Helpers for async composition and coordination.
-- `function.h`: Type‑erased callable wrapper analogous to `std::function`.
-- `function_list.h`: Multicast list of callables with simple invoke semantics.
+- `ftl/function.h`: Type‑erased callable wrapper analogous to `std::function`, and `FunctionList` for multicast callbacks.
 - `functional.h`: Adapters, binders, and predicates for composing callables.
 - `engine_events.h`: Event channel definitions for engine‑style systems.
 - `isr.h`: Cross-platform interrupt service routine (ISR) attachment API for timer and GPIO interrupts.
@@ -357,17 +356,17 @@ void ownership_example() {
 
 ### Functional Utilities
 
-- Callables and lists: `function.h`, `function_list.h`, `functional.h`
+- Callables and lists: `ftl/function.h`, `functional.h`
 
 Why: Store callbacks and multicast them safely.
 
 ```cpp
-#include "fl/function_list.h"
+#include "ftl/function.h"
 
 void on_event(int code) { /* ... */ }
 
 void register_handlers() {
-    fl::function_list<void(int)> handlers;
+    fl::FunctionList<void(int)> handlers;
     handlers.add(on_event);
     handlers(200); // invoke all
 }
