@@ -105,7 +105,7 @@ class TestNoStdNamespace(unittest.TestCase):
         def on_fail(msg: str) -> None:
             self.fail(
                 msg + "\n"
-                "Use 'ftl::' namespace instead of 'std::' for standard library types (e.g., ftl::vector, ftl::shared_ptr). "
+                "Use 'fl::' namespace instead of 'std::' for standard library types (e.g., fl::vector, fl::shared_ptr). "
                 "You can add '// okay std namespace' at the end of the line to silence this error for specific cases."
             )
 
@@ -126,7 +126,7 @@ class TestNoStdNamespace(unittest.TestCase):
         def on_fail(msg: str) -> None:
             self.fail(
                 msg + "\n"
-                "Use 'ftl::' namespace instead of 'std::' for standard library types (e.g., ftl::vector, ftl::shared_ptr). "
+                "Use 'fl::' namespace instead of 'std::' for standard library types (e.g., fl::vector, fl::shared_ptr). "
                 "You can add '// okay std namespace' at the end of the line to silence this error for specific cases."
             )
 
