@@ -119,7 +119,7 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
 
     // Validate bus_num against mBusId if driver has pre-assigned ID
     if (mBusId != -1 && config.bus_num != static_cast<uint8_t>(mBusId)) {
-        FL_LOG_SPI("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
+        FL_WARN("SpiHw2MXRT1062: Bus mismatch - expected " << mBusId << ", got " << static_cast<int>(config.bus_num));
         return false;
     }
 
@@ -139,13 +139,13 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
             mBusId = 2;
             break;
         default:
-            FL_LOG_SPI("SpiHw2MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
+            FL_WARN("SpiHw2MXRT1062: Invalid bus number " << static_cast<int>(bus_num));
             return false;
     }
 
     // Validate that both data pins are specified
     if (config.data0_pin < 0 || config.data1_pin < 0) {
-        FL_LOG_SPI("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
+        FL_WARN("SpiHw2MXRT1062: Dual-SPI requires both data0 and data1 pins");
         return false;
     }
 
@@ -154,6 +154,40 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     mClockPin = config.clock_pin;
     mData0Pin = config.data0_pin;
     mData1Pin = config.data1_pin;
+
+    // Validate pins match hardware capabilities
+    // Each LPSPI bus has fixed pin assignments on Teensy 4.x
+    struct ValidPinSet {
+        uint8_t bus_id;
+        int8_t sck, mosi, miso;
+    };
+    constexpr ValidPinSet valid_pins[] = {
+        {0, 13, 11, 12},  // SPI  (LPSPI4)
+        {1, 27, 26, 1},   // SPI1 (LPSPI3)
+        {2, 45, 43, 42}   // SPI2 (LPSPI1)
+    };
+
+    bool pins_valid = false;
+    for (const auto& vp : valid_pins) {
+        if (vp.bus_id == static_cast<uint8_t>(mBusId) &&
+            vp.sck == mClockPin &&
+            vp.mosi == mData0Pin &&
+            vp.miso == mData1Pin) {
+            pins_valid = true;
+            break;
+        }
+    }
+
+    if (!pins_valid) {
+        FL_WARN("SpiHw2MXRT1062: Invalid pin combination for bus " << mBusId);
+        FL_WARN("  Expected: SCK=" << (int)valid_pins[mBusId].sck
+                   << " D0=" << (int)valid_pins[mBusId].mosi
+                   << " D1=" << (int)valid_pins[mBusId].miso);
+        FL_WARN("  Got: SCK=" << (int)mClockPin
+                   << " D0=" << (int)mData0Pin
+                   << " D1=" << (int)mData1Pin);
+        return false;
+    }
 
     // Configure custom pins BEFORE calling begin()
     // The Teensy SPI library requires setMOSI/setSCK/setMISO to be called before begin()
@@ -175,22 +209,31 @@ bool SpiHw2MXRT1062::begin(const SpiHw2::Config& config) {
     // We'll use the standard begin() and configure dual mode per-transaction
     mSPI->begin();
 
-    // Note: For true dual-mode operation, we would need to:
-    // 1. Configure MOSI and MISO pins for bidirectional use
-    // 2. Set the WIDTH field in TCR register to 0b01 (2-bit transfer)
-    // 3. Handle the pin remapping for dual-mode
-    //
-    // The Teensy core SPI library doesn't expose these low-level controls,
-    // so a complete implementation would need direct register access.
-    // For now, we mark it as initialized and will handle dual-mode encoding
-    // in the transmit function.
+    // Configure CFGR1 for dual-mode operation
+    // OUTCFG bit (26) must be set to enable pin tristating for multi-bit SPI
+    // This allows the LPSPI hardware to control SDI (MISO) as an output in dual-mode
+    IMXRT_LPSPI_t* port = getPort();
+    if (port) {
+        uint32_t cfgr1 = port->CFGR1;
+
+        // Set OUTCFG (bit 26) to enable data output tristating for multi-bit mode
+        cfgr1 |= LPSPI_CFGR1_OUTCFG;
+
+        // Keep PINCFG at default (0 = kLPSPI_SdiInSdoOut)
+        // In dual-mode, the hardware automatically handles pin direction
+        // based on TCR.WIDTH setting
+
+        port->CFGR1 = cfgr1;
+
+        FL_LOG_SPI("SpiHw2MXRT1062: Configured CFGR1=" << cfgr1
+                   << " (OUTCFG enabled for dual-mode)");
+    }
 
     FL_LOG_SPI("SpiHw2MXRT1062: Initialized on bus " << mBusId
             << " clock=" << mClockSpeed << "Hz"
             << " pins: CLK=" << (int)mClockPin
             << " D0=" << (int)mData0Pin
-            << " D1=" << (int)mData1Pin
-            << " (Note: Teensy SPI library has limited dual-mode support)");
+            << " D1=" << (int)mData1Pin);
 
     mInitialized = true;
     mTransactionActive = false;

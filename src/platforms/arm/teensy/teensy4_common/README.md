@@ -39,7 +39,7 @@ Teensy 4.x features the **LPSPI (Low Power Serial Peripheral Interface)** periph
 
 FastLED provides complete dual-lane and quad-lane SPI drivers for Teensy 4.x:
 
-- **Dual-SPI (2 lanes)**: ✅ Fully supported - Uses D0 (MOSI) and D1 (MISO)
+- **Dual-SPI (2 lanes)**: ⚠️ **POTENTIALLY FIXED (Iteration 4) - Hardware testing required**
 - **Quad-SPI (4 lanes)**: ⚠️ **Hardware ready, pin configuration incomplete**
 
 #### What Works
@@ -50,6 +50,36 @@ The Teensy 4.x LPSPI drivers (`spi_hw_2_mxrt1062.cpp` and `spi_hw_4_mxrt1062.cpp
 2. **Direct register access** - Efficient LPSPI peripheral control
 3. **Bus management** - Automatic routing through SPI Bus Manager
 4. **Bit-interleaving** - Optimized parallel data transmission
+
+#### Dual-SPI Status: Potentially Fixed (Iteration 4)
+
+**⚠️ TESTING REQUIRED**: Dual-SPI on Teensy 4.x has received a potential fix in iteration 4 but requires hardware testing:
+
+**The Fix (Iteration 4)**: Added CFGR1 register configuration to enable OUTCFG (bit 26), which allows the LPSPI hardware to control the SDI (MISO) pin as an output in dual-mode.
+
+**What Was Changed**:
+1. Set `CFGR1.OUTCFG = 1` after `SPI.begin()` to enable pin tristating for multi-bit SPI
+2. Added pin validation to ensure correct pin combinations
+3. LPSPI hardware configures `TCR.WIDTH = 0b01` for dual-mode (already existed)
+4. Pin configuration remains `PINCFG = 0` (kLPSPI_SdiInSdoOut) - hardware auto-handles direction
+
+**Hardware Testing Needed**:
+1. Connect LED strips to pins 11 and 12 (with shared clock on pin 13)
+2. Use a logic analyzer to verify both pins output data
+3. Define `FASTLED_LOG_SPI_ENABLED` to see debug output
+
+**Previous Workaround** (if fix doesn't work): Use separate SPI buses:
+```cpp
+// If dual-SPI still doesn't work, use separate buses:
+
+// Use separate SPI buses:
+FastLED.addLeds<APA102, 11, 13>(leds1, NUM_LEDS);  // SPI (bus 0): pins 11,13
+FastLED.addLeds<APA102, 26, 27>(leds2, NUM_LEDS);  // SPI1 (bus 1): pins 26,27
+```
+
+**Technical Details**: See `RESEARCH.md` and iteration summaries in `.agent_task/` for complete analysis.
+
+
 
 #### Hardware Limitation: Quad-Mode Pin Availability
 
@@ -83,9 +113,9 @@ Each LPSPI peripheral supports:
 - **Dual-lane (2-bit)**: 2× throughput using D0 and D1
 - **Quad-lane (4-bit)**: 4× throughput using D0, D1, D2, and D3
 
-### Dual-SPI Usage (Fully Supported)
+### Dual-SPI Usage (⚠️ TESTING REQUIRED - See Status Above)
 
-Dual-SPI works on standard Teensy 4.x boards without hardware modifications:
+**Note**: Due to pin configuration issues, dual-SPI on Teensy 4.x is currently non-functional. The code below shows the intended usage pattern, but users should use separate SPI buses (SPI, SPI1, SPI2) instead until the IOMUXC configuration is fixed:
 
 ```cpp
 #include <FastLED.h>
@@ -139,7 +169,7 @@ To enable full quad-mode support, the following steps are required (see `LP_SPI.
 
 | Platform | Dual-SPI | Quad-SPI | Notes |
 |----------|----------|----------|-------|
-| **Teensy 4.x** | ✅ | ⚠️ | Dual works on standard boards; Quad requires custom PCB for PCS2/PCS3 |
+| **Teensy 4.x** | ⚠️ | ⚠️ | Both experimental - pin configuration issues; use separate SPI buses instead |
 | ESP32 | ✅ | ✅ | Full support on standard dev boards |
 | ESP32-S2/S3 | ✅ | ✅ | Full support |
 | ESP32-C3/C6 | ✅ | ❌ | Dual-SPI only (2 lanes max) |
