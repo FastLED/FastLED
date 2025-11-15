@@ -6,13 +6,14 @@ Automatically run PlatformIO upload and monitor commands, diagnose any failures,
 
 Use the 'fix-board-agent' sub-agent to:
 
-1. **Execute Upload/Monitor**: Run `pio run -t upload -t monitor` for 30 seconds
-2. **Capture Logs**: Save all output for analysis
-3. **Diagnose Issues**: Identify upload failures, compilation errors, runtime crashes, or configuration problems
-4. **Strategize Fixes**: Determine the root cause and plan corrective actions
-5. **Apply Fixes**: Automatically fix code, configuration, or suggest manual hardware fixes
-6. **Verify Results**: Re-test after applying fixes (up to 3 attempts)
-7. **Report**: Provide detailed summary with status and any required manual steps
+1. **Compile First**: Run `pio run` to ensure code compiles cleanly
+2. **Execute Upload/Monitor**: Run `pio run -t upload -t monitor` for 45 seconds
+3. **Capture Logs**: Save all output to timestamped log file for analysis
+4. **Diagnose Issues**: Identify upload failures, compilation errors, runtime crashes, ESP-IDF errors, or configuration problems
+5. **Strategize Fixes**: Determine the root cause and plan corrective actions
+6. **Apply Fixes**: Automatically fix code, configuration, or suggest manual hardware fixes
+7. **Verify Results**: Re-test after applying fixes (up to 3 attempts)
+8. **Report**: Provide detailed summary with status and any required manual steps
 
 ## What Gets Fixed Automatically
 

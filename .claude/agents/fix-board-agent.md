@@ -14,25 +14,28 @@ Run PlatformIO upload and monitor commands, capture their output, diagnose any f
 
 1. **Setup and Execution**
    - Create a todo list with TodoWrite to track your progress
-   - Determine if a build is needed (check if `.pio/build/` directory exists and is recent)
-   - Run `pio run -t upload -t monitor` in the background with 30-second timeout
-   - Capture all output to a temporary log file
+   - **Step 1 - Compile**: Run `pio run` first to verify code compiles without errors
+   - **Step 2 - Upload/Monitor**: Run `pio run -t upload -t monitor` with 45-second timeout
+   - Capture all output to timestamped log file: `pio_board_debug_$(date +%Y%m%d_%H%M%S).log`
 
 2. **Log Capture Strategy**
-   - Use `Bash` with `run_in_background: true` to start the PlatformIO process
-   - Monitor the output using `BashOutput` tool
-   - After 30 seconds, kill the process using `KillShell`
-   - Save all captured output to `pio_board_debug_[timestamp].log`
+   - Use `timeout 45s` command to run PlatformIO upload/monitor
+   - Redirect all output (stdout and stderr) to the log file
+   - After completion, read the entire log file for analysis
+   - Tail the log (last 100-200 lines) for quick error scanning
 
 3. **Log Analysis**
-   - Read the captured log file
+   - Read the captured log file (focus on last 100-200 lines for runtime errors)
    - Identify error patterns:
+     - **ESP-IDF Error Format**: `E (timestamp) component: message` (e.g., `E (18458) rmt: rmt_tx_register_to_group(167): no free tx channels`)
+     - **Application Warnings**: `WARN: message` or `WARN message` (e.g., `WARN: Failed to create RMT channel`)
      - **Upload failures**: "Could not open port", "No such port", permission denied, timeout errors
      - **Compilation errors**: Undefined references, syntax errors, missing headers, type mismatches
-     - **Runtime errors**: Crashes, watchdog resets, brownout detector, stack overflows
+     - **Runtime errors**: Crashes, watchdog resets, brownout detector, stack overflows, assert failures
      - **Connection issues**: Serial port not found, wrong baud rate, device not responding
      - **Configuration issues**: Wrong board, wrong framework, missing dependencies
      - **Hardware issues**: Power problems, wiring issues, bootloader problems
+     - **Resource exhaustion**: "no free channels", "out of memory", "queue full", "buffer overflow"
 
 4. **Diagnosis and Strategy**
    - Based on error patterns, create a diagnostic report:
@@ -90,16 +93,28 @@ Run PlatformIO upload and monitor commands, capture their output, diagnose any f
 
 ## Command Execution Patterns
 
-### Running PlatformIO in Background
+### Step 1: Compile Only
 ```bash
-# Start the process in background
-pio run -t upload -t monitor > pio_output.log 2>&1
+# Verify code compiles without errors
+pio run
 ```
 
-### Killing After Timeout
+### Step 2: Upload and Monitor with Timeout
 ```bash
-# Use timeout command
-timeout 30s pio run -t upload -t monitor > pio_output.log 2>&1 || true
+# Create timestamped log file
+LOGFILE="pio_board_debug_$(date +%Y%m%d_%H%M%S).log"
+
+# Run with 45-second timeout, capture all output
+timeout 45s pio run -t upload -t monitor > "$LOGFILE" 2>&1 || true
+
+# Tail the log for quick error scanning
+tail -n 100 "$LOGFILE"
+```
+
+### Alternative: Direct log capture in single command
+```bash
+# One-liner for compile + upload + monitor
+pio run && timeout 45s pio run -t upload -t monitor > "pio_board_debug_$(date +%Y%m%d_%H%M%S).log" 2>&1 || true
 ```
 
 ### Port Detection
@@ -108,13 +123,42 @@ timeout 30s pio run -t upload -t monitor > pio_output.log 2>&1 || true
 pio device list
 ```
 
-### Quick Compilation Check
+### Analyzing Logs for Error Patterns
 ```bash
-# Just compile without upload
-pio run
+# Search for ESP-IDF errors
+grep -E "^E \([0-9]+\)" pio_board_debug_*.log
+
+# Search for application warnings
+grep "WARN:" pio_board_debug_*.log
+
+# Get last 200 lines for runtime error analysis
+tail -n 200 pio_board_debug_*.log
 ```
 
 ## Common Error Patterns and Fixes
+
+### ESP-IDF RMT Channel Exhaustion
+- **Pattern**: `E (timestamp) rmt: rmt_tx_register_to_group(167): no free tx channels`, `WARN: Failed to create RMT channel`
+- **Context**: ESP32 has limited RMT channels (typically 4-8 depending on variant). This error occurs when trying to use more channels than available.
+- **Diagnosis**:
+  - Check how many channels are being requested simultaneously
+  - Look for workers being created but not properly released
+  - Check for channel leaks (channels created but not destroyed)
+- **Fix Options**:
+  1. Reduce the number of simultaneous outputs (use fewer pins)
+  2. Implement channel pooling/reuse (destroy unused channels before creating new ones)
+  3. Check worker pool implementation - ensure workers are properly released after use
+  4. Add error handling for channel creation failures (graceful degradation)
+  5. Consider using time-multiplexing (serialize outputs instead of parallel)
+
+### ESP-IDF Generic Errors
+- **Pattern**: `E (timestamp) component: message` (e.g., `E (12345) gpio: gpio_set_level(123): GPIO number error`)
+- **Fix**: Parse the component name and error message, search for ESP-IDF documentation or similar issues
+
+### Application Warnings
+- **Pattern**: `WARN: Failed to configure worker`, `WARN: Failed to create RMT channel: 261`
+- **Context**: Application-level warnings often indicate resource exhaustion or configuration failures
+- **Fix**: Trace warning source in code, check for resource limits, validate configuration
 
 ### Port Not Found
 - **Pattern**: `Could not open port /dev/ttyUSB0`, `[Errno 2] No such file`
@@ -156,16 +200,101 @@ pio run
 ## Diagnostic Checklist
 
 Use TodoWrite to create a checklist like:
-- [ ] Run initial upload/monitor command
-- [ ] Capture and analyze logs
+- [ ] Run initial compilation (pio run)
+- [ ] Run upload/monitor with timeout (45s)
+- [ ] Capture and save logs to timestamped file
+- [ ] Tail logs for quick error scanning
+- [ ] Search for ESP-IDF errors (E (timestamp) pattern)
+- [ ] Search for application warnings (WARN: pattern)
 - [ ] Identify root cause(s)
 - [ ] Develop fix strategy
 - [ ] Apply fix #1
-- [ ] Verify fix #1
+- [ ] Verify fix #1 (re-run upload/monitor)
 - [ ] [If needed] Apply fix #2
 - [ ] [If needed] Verify fix #2
 - [ ] Generate final report
 - [ ] Clean up temporary files (if successful)
+
+## Example Workflow: RMT Channel Exhaustion
+
+Here's a detailed example of detecting and fixing RMT channel exhaustion errors:
+
+### 1. Error Detection
+After running `timeout 45s pio run -t upload -t monitor`, analyze logs:
+```bash
+# Scan for ESP-IDF RMT errors
+grep -E "E \([0-9]+\) rmt:" pio_board_debug_*.log
+# Output: E (18458) rmt: rmt_tx_register_to_group(167): no free tx channels
+#         E (18460) rmt: rmt_new_tx_channel(298): register channel failed
+
+# Scan for application warnings
+grep "WARN:" pio_board_debug_*.log
+# Output: WARN: Failed to create RMT channel: 261
+#         WARN: Failed to create RMT channel
+#         WARN: Failed to configure worker
+```
+
+### 2. Pattern Matching
+Detected patterns indicate:
+- **Root Cause**: RMT channel resource exhaustion ("no free tx channels")
+- **Impact**: Worker creation failures, channel configuration failures
+- **Error Code**: 261 (likely ESP_ERR_NOT_FOUND or similar)
+
+### 3. Investigation Steps
+```bash
+# Find RMT-related source files
+find src -name "*rmt*" -type f
+
+# Search for worker pool and channel management
+grep -r "rmt_new_tx_channel\|create.*channel\|acquire.*worker" src/platforms/esp/32/drivers/rmt/
+```
+
+### 4. Common Root Causes
+- **Too many pins**: Code attempting to use more output pins than available RMT channels
+- **Worker leak**: Workers created but not properly destroyed/released
+- **Missing cleanup**: Channels not freed when no longer needed
+- **Simultaneous use**: All channels allocated simultaneously instead of time-multiplexed
+
+### 5. Fix Strategy
+Depending on diagnosis:
+1. **Reduce pin count**: Modify example/test to use fewer simultaneous outputs
+2. **Fix worker lifecycle**: Ensure workers are destroyed when done
+3. **Implement pooling**: Reuse workers instead of creating new ones
+4. **Add error handling**: Gracefully handle channel allocation failures
+
+### 6. Code Analysis
+Examine worker pool implementation:
+```bash
+# Read worker pool code
+cat src/platforms/esp/32/drivers/rmt/rmt_5/rmt5_worker_pool.cpp
+
+# Look for lifecycle management
+grep -A5 -B5 "acquire\|release\|create\|destroy" src/platforms/esp/32/drivers/rmt/rmt_5/rmt5_worker_pool.cpp
+```
+
+### 7. Apply Fix
+Example fixes:
+- Ensure `releaseWorker()` is called after transmission completes
+- Add channel limit checks before creating workers
+- Implement worker reuse instead of creating new ones
+- Add timeout-based cleanup for stale workers
+
+### 8. Verification
+After applying fix:
+```bash
+# Clean build
+pio run -t clean
+
+# Recompile
+pio run
+
+# Test with monitoring
+timeout 45s pio run -t upload -t monitor > pio_board_verify_$(date +%Y%m%d_%H%M%S).log 2>&1
+
+# Check for errors
+grep -E "E \([0-9]+\)|WARN:" pio_board_verify_*.log
+# Expected: No RMT channel errors
+```
 
 ## Success Criteria
 
