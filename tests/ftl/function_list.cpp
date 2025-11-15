@@ -221,6 +221,208 @@ TEST_CASE("function_list - backward compatibility with function_list<void()>") {
     REQUIRE(call_count == 2);
 }
 
+TEST_CASE("function_list - self-removal during iteration") {
+    function_list<void()> callbacks;
+    int call_count_1 = 0;
+    int call_count_2 = 0;
+    int call_count_3 = 0;
+
+    int id1 = -1;
+    int id2 = -1;
+    int id3 = -1;
+
+    // First callback removes itself
+    id1 = callbacks.add([&]() {
+        call_count_1++;
+        callbacks.remove(id1);
+    });
+
+    // Second callback is normal
+    id2 = callbacks.add([&]() {
+        call_count_2++;
+    });
+
+    // Third callback removes itself
+    id3 = callbacks.add([&]() {
+        call_count_3++;
+        callbacks.remove(id3);
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);
+    REQUIRE(call_count_2 == 1);
+    REQUIRE(call_count_3 == 1);
+
+    // Second invocation - only id2 should execute (id1 and id3 removed themselves)
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);  // No change
+    REQUIRE(call_count_2 == 2);  // Incremented
+    REQUIRE(call_count_3 == 1);  // No change
+}
+
+TEST_CASE("function_list - remove other callback during iteration") {
+    function_list<void()> callbacks;
+    int call_count_1 = 0;
+    int call_count_2 = 0;
+    int call_count_3 = 0;
+
+    int id1 = -1;
+    int id2 = -1;
+    int id3 = -1;
+
+    // First callback removes the third callback
+    id1 = callbacks.add([&]() {
+        call_count_1++;
+        callbacks.remove(id3);
+    });
+
+    id2 = callbacks.add([&]() {
+        call_count_2++;
+    });
+
+    id3 = callbacks.add([&]() {
+        call_count_3++;
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);
+    REQUIRE(call_count_2 == 1);
+    REQUIRE(call_count_3 == 0);  // Never called because removed by id1
+}
+
+TEST_CASE("function_list - remove callback before current position") {
+    function_list<void()> callbacks;
+    int call_count_1 = 0;
+    int call_count_2 = 0;
+    int call_count_3 = 0;
+
+    int id1 = -1;
+    int id2 = -1;
+    int id3 = -1;
+
+    id1 = callbacks.add([&]() {
+        call_count_1++;
+    });
+
+    id2 = callbacks.add([&]() {
+        call_count_2++;
+    });
+
+    // Third callback removes the first callback (already executed)
+    id3 = callbacks.add([&]() {
+        call_count_3++;
+        callbacks.remove(id1);
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);
+    REQUIRE(call_count_2 == 1);
+    REQUIRE(call_count_3 == 1);
+
+    // Second invocation - id1 should be gone
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);  // No change
+    REQUIRE(call_count_2 == 2);  // Incremented
+    REQUIRE(call_count_3 == 2);  // Incremented
+}
+
+TEST_CASE("function_list - nested invocations") {
+    function_list<void()> callbacks;
+    int call_count_outer = 0;
+    int call_count_inner = 0;
+
+    function_list<void()> inner_callbacks;
+    inner_callbacks.add([&]() {
+        call_count_inner++;
+    });
+
+    // Outer callback invokes inner callback list
+    callbacks.add([&]() {
+        call_count_outer++;
+        inner_callbacks.invoke();
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_outer == 1);
+    REQUIRE(call_count_inner == 1);
+}
+
+TEST_CASE("function_list - recursive self-invocation") {
+    function_list<void(int)> callbacks;
+    int total_calls = 0;
+
+    callbacks.add([&](int depth) {
+        total_calls++;
+        if (depth > 0) {
+            callbacks.invoke(depth - 1);  // Recursive call
+        }
+    });
+
+    callbacks.invoke(3);  // Should call: depth=3, depth=2, depth=1, depth=0
+    REQUIRE(total_calls == 4);
+}
+
+TEST_CASE("function_list - multiple removals in one callback") {
+    function_list<void()> callbacks;
+    int call_count_1 = 0;
+    int call_count_2 = 0;
+    int call_count_3 = 0;
+    int call_count_4 = 0;
+
+    int id1 = -1;
+    int id2 = -1;
+    int id3 = -1;
+    int id4 = -1;
+
+    // First callback removes multiple others
+    id1 = callbacks.add([&]() {
+        call_count_1++;
+        callbacks.remove(id2);
+        callbacks.remove(id4);
+    });
+
+    id2 = callbacks.add([&]() {
+        call_count_2++;
+    });
+
+    id3 = callbacks.add([&]() {
+        call_count_3++;
+    });
+
+    id4 = callbacks.add([&]() {
+        call_count_4++;
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);
+    REQUIRE(call_count_2 == 0);  // Removed before execution
+    REQUIRE(call_count_3 == 1);  // Not removed
+    REQUIRE(call_count_4 == 0);  // Removed before execution
+}
+
+TEST_CASE("function_list - add during iteration") {
+    function_list<void()> callbacks;
+    int call_count_1 = 0;
+    int call_count_2 = 0;
+
+    // First callback adds a second callback
+    callbacks.add([&]() {
+        call_count_1++;
+        callbacks.add([&]() {
+            call_count_2++;
+        });
+    });
+
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 1);
+    REQUIRE(call_count_2 == 0);  // New callback won't execute until next call
+
+    // Second invocation should execute the newly added callback
+    callbacks.invoke();
+    REQUIRE(call_count_1 == 2);
+    REQUIRE(call_count_2 == 1);  // Now the second callback executes
+}
+
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*

@@ -9,6 +9,7 @@
 #include "fl/align.h"
 #include "ftl/pair.h"
 #include "ftl/vector.h"
+#include "ftl/bitset.h"
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
 #define FASTLED_INLINE_LAMBDA_SIZE 64
@@ -360,8 +361,16 @@ template <typename> class function_list;
 template <typename... Args>
 class function_list<void(Args...)> {
   private:
-    fl::vector<pair<int, function<void(Args...)>>> mFunctions;
+    using FunctionType = function<void(Args...)>;
+    using FunctionPair = pair<int, FunctionType>;
+    using FunctionVector = fl::vector<FunctionPair>;
+  
+    FunctionVector mFunctions;
     int mCounter = 0;
+
+    // Temporary tracking during invocation only
+    mutable fl::bitset<32> mValid;  // Inlined bitset for common case (up to 32 callbacks)
+    mutable bool mInvoking = false;  // True when inside invoke()
 
   public:
     // Iterator types
@@ -379,14 +388,46 @@ class function_list<void(Args...)> {
     }
 
     void remove(int id) {
-        for (int i = mFunctions.size() - 1; i >= 0; --i) {
-            if (mFunctions[i].first == id) {
-                mFunctions.erase(mFunctions.begin() + i);
+        if (mInvoking) {
+            // During invocation: mark in bitset for deferred removal
+            for (size_t i = 0; i < mFunctions.size(); ++i) {
+                if (mFunctions[i].first == id) {
+                    mValid.reset(i);
+                }
             }
+        } else {
+            // Outside invocation: immediately compact to remove
+            size_t write_pos = 0;
+            for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
+                if (mFunctions[read_pos].first != id) {
+                    if (write_pos != read_pos) {
+                        mFunctions[write_pos] = mFunctions[read_pos];
+                    }
+                    write_pos++;
+                }
+            }
+            mFunctions.resize(write_pos);
         }
     }
 
-    void clear() { mFunctions.clear(); }
+    void clear() {
+        mFunctions.clear();
+    }
+
+    // Compact the storage by removing invalid (tombstoned) callbacks
+    // Used internally after invocation if removals occurred
+    void compact() {
+        size_t write_pos = 0;
+        for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
+            if (mValid.test(read_pos)) {
+                if (write_pos != read_pos) {
+                    mFunctions[write_pos] = mFunctions[read_pos];
+                }
+                write_pos++;
+            }
+        }
+        mFunctions.resize(write_pos);
+    }
 
     // Iterator methods
     iterator begin() { return mFunctions.begin(); }
@@ -397,21 +438,41 @@ class function_list<void(Args...)> {
     const_iterator cend() const { return mFunctions.cend(); }
 
     // Size information
-    fl::size size() const { return mFunctions.size(); }
+    fl::size size() const {
+        return mFunctions.size();
+    }
     bool empty() const { return mFunctions.empty(); }
 
     // Boolean conversion for if (callback) checks
     explicit operator bool() const { return !empty(); }
 
-    void invoke(Args... args) {
-        for (const auto &pair : mFunctions) {
-            auto &function = pair.second;
-            function(args...);
+    void invoke(Args... args) const {
+        // Save size at start - newly added callbacks won't execute until next call
+        const size_t invoke_size = mFunctions.size();
+
+        // Set up invocation state
+        mInvoking = true;
+        mValid.resize(invoke_size);
+        mValid.assign(invoke_size, true);  // Fill with all 1s (all valid initially)
+
+        // Iterate and invoke callbacks, checking bitset for removals
+        for (size_t i = 0; i < invoke_size; ++i) {
+            if (mValid.test(i)) {
+                mFunctions[i].second(args...);
+            }
+        }
+
+        // Clean up invocation state
+        mInvoking = false;
+
+        // If any callbacks were removed during invocation, compact
+        if (mValid.count() < invoke_size) {
+            const_cast<function_list*>(this)->compact();
         }
     }
 
     // Call operator - syntactic sugar for invoke()
-    void operator()(Args... args) {
+    void operator()(Args... args) const {
         invoke(args...);
     }
 };
