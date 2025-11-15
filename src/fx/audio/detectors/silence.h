@@ -18,10 +18,10 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(bool silent)> onSilenceChange;
-    FunctionList<void()> onSilenceStart;
-    FunctionList<void()> onSilenceEnd;
-    FunctionList<void(u32 durationMs)> onSilenceDuration;
+    function_list<void(bool silent)> onSilenceChange;
+    function_list<void()> onSilenceStart;
+    function_list<void()> onSilenceEnd;
+    function_list<void(u32 durationMs)> onSilenceDuration;
 
     // State access
     bool isSilent() const { return mIsSilent; }

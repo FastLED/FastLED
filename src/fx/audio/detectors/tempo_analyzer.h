@@ -19,11 +19,11 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(float bpm)> onTempo;
-    FunctionList<void(float bpm, float confidence)> onTempoWithConfidence;
-    FunctionList<void(float bpm)> onTempoChange;
-    FunctionList<void()> onTempoStable;
-    FunctionList<void()> onTempoUnstable;
+    function_list<void(float bpm)> onTempo;
+    function_list<void(float bpm, float confidence)> onTempoWithConfidence;
+    function_list<void(float bpm)> onTempoChange;
+    function_list<void()> onTempoStable;
+    function_list<void()> onTempoUnstable;
 
     // State access
     float getBPM() const { return mCurrentBPM; }

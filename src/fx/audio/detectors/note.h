@@ -40,9 +40,9 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(uint8_t note, uint8_t velocity)> onNoteOn;   // Note started
-    FunctionList<void(uint8_t note)> onNoteOff;           // Note ended
-    FunctionList<void(uint8_t note, uint8_t velocity)> onNoteChange; // Note changed while held
+    function_list<void(uint8_t note, uint8_t velocity)> onNoteOn;   // Note started
+    function_list<void(uint8_t note)> onNoteOff;           // Note ended
+    function_list<void(uint8_t note, uint8_t velocity)> onNoteChange; // Note changed while held
 
     // State access
     uint8_t getCurrentNote() const { return mCurrentNote; }

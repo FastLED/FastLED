@@ -87,7 +87,7 @@ TEST_CASE("Copy and move semantics") {
 }
 
 TEST_CASE("Function list void float") {
-    fl::FunctionList<void(float)> fl;
+    fl::function_list<void(float)> fl;
     fl.add([](float) { /* do nothing */ });
     fl.invoke(1);
 }

@@ -19,10 +19,10 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void()> onBeat;
-    FunctionList<void(float phase)> onBeatPhase;
-    FunctionList<void(float strength)> onOnset;
-    FunctionList<void(float bpm, float confidence)> onTempoChange;
+    function_list<void()> onBeat;
+    function_list<void(float phase)> onBeatPhase;
+    function_list<void(float strength)> onOnset;
+    function_list<void(float bpm, float confidence)> onTempoChange;
 
     // State access
     bool isBeat() const { return mBeatDetected; }

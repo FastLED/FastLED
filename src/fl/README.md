@@ -57,7 +57,7 @@ Common types to reach for:
 - Strings and streams: `fl::string`, `fl::ostream`, `fl::sstream`, `fl::printf`
 - Optionals and variants: `fl::optional<T>`, `fl::variant<...>`
 - Memory/ownership: `fl::unique_ptr<T>`, `fl::shared_ptr<T>`, `fl::weak_ptr<T>`
-- Functional: `fl::function<Signature>` (in `ftl/function.h`), `fl::FunctionList<Signature>` (in `ftl/function.h`)
+- Functional: `fl::function<Signature>` (in `ftl/function.h`), `fl::function_list<Signature>` (in `ftl/function.h`)
 - Concurrency: `fl::thread`, `fl::mutex`, `fl::thread_local`
 - Async: `fl::promise<T>`, `fl::task`
 - Math: `fl::math`, `fl::sin32`, `fl::random`, `fl::gamma`, `fl::gradient`
@@ -273,7 +273,7 @@ Per‑header quick descriptions:
 - `promise_result.h`: Result type accompanying promises/futures.
 - `task.h`: Lightweight async task primitive for orchestration.
 - `async.h`: Helpers for async composition and coordination.
-- `ftl/function.h`: Type‑erased callable wrapper analogous to `std::function`, and `FunctionList` for multicast callbacks.
+- `ftl/function.h`: Type‑erased callable wrapper analogous to `std::function`, and `function_list` for multicast callbacks.
 - `functional.h`: Adapters, binders, and predicates for composing callables.
 - `engine_events.h`: Event channel definitions for engine‑style systems.
 - `isr.h`: Cross-platform interrupt service routine (ISR) attachment API for timer and GPIO interrupts.
@@ -366,7 +366,7 @@ Why: Store callbacks and multicast them safely.
 void on_event(int code) { /* ... */ }
 
 void register_handlers() {
-    fl::FunctionList<void(int)> handlers;
+    fl::function_list<void(int)> handlers;
     handlers.add(on_event);
     handlers(200); // invoke all
 }

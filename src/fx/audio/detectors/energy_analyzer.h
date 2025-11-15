@@ -18,9 +18,9 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(float rms)> onEnergy;
-    FunctionList<void(float peak)> onPeak;
-    FunctionList<void(float avgEnergy)> onAverageEnergy;
+    function_list<void(float rms)> onEnergy;
+    function_list<void(float peak)> onPeak;
+    function_list<void(float avgEnergy)> onAverageEnergy;
 
     // State access
     float getRMS() const { return mCurrentRMS; }

@@ -51,9 +51,9 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(const Chord& chord)> onChord;
-    FunctionList<void(const Chord& chord)> onChordChange;
-    FunctionList<void()> onChordEnd;
+    function_list<void(const Chord& chord)> onChord;
+    function_list<void(const Chord& chord)> onChordChange;
+    function_list<void()> onChordEnd;
 
     // State access
     const Chord& getCurrentChord() const { return mCurrentChord; }

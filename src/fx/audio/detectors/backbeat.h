@@ -70,7 +70,7 @@ public:
     // ----- Callbacks (multiple listeners supported) -----
 
     /** Fires on detected backbeat (beats 2, 4) with beat number, confidence, and strength */
-    FunctionList<void(u8 beatNumber, float confidence, float strength)> onBackbeat;
+    function_list<void(u8 beatNumber, float confidence, float strength)> onBackbeat;
 
     // ----- State Access -----
 

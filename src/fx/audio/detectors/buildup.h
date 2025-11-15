@@ -58,11 +58,11 @@ public:
     void reset() override;
 
     // Event callbacks (multiple listeners supported)
-    FunctionList<void()> onBuildupStart;                      // Fired when buildup starts
-    FunctionList<void(float progress)> onBuildupProgress;              // Fired during buildup (0.0-1.0)
-    FunctionList<void()> onBuildupPeak;                       // Fired at peak (just before drop)
-    FunctionList<void()> onBuildupEnd;                        // Fired when buildup ends (cancelled)
-    FunctionList<void(const Buildup&)> onBuildup;             // Fired every frame during buildup
+    function_list<void()> onBuildupStart;                      // Fired when buildup starts
+    function_list<void(float progress)> onBuildupProgress;              // Fired during buildup (0.0-1.0)
+    function_list<void()> onBuildupPeak;                       // Fired at peak (just before drop)
+    function_list<void()> onBuildupEnd;                        // Fired when buildup ends (cancelled)
+    function_list<void(const Buildup&)> onBuildup;             // Fired every frame during buildup
 
     // State access
     bool isBuilding() const { return mBuildupActive; }

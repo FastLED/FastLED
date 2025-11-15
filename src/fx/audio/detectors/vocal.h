@@ -26,9 +26,9 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(bool active)> onVocalChange;
-    FunctionList<void()> onVocalStart;
-    FunctionList<void()> onVocalEnd;
+    function_list<void(bool active)> onVocalChange;
+    function_list<void()> onVocalStart;
+    function_list<void()> onVocalEnd;
 
     // State access
     bool isVocal() const { return mVocalActive; }

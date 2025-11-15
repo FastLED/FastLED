@@ -349,16 +349,16 @@ private:
 
 
 //----------------------------------------------------------------------------
-// FunctionList: Container for managing multiple callbacks with add/remove
+// function_list: Container for managing multiple callbacks with add/remove
 //----------------------------------------------------------------------------
 
 // Primary template declaration (no definition - only specializations exist)
-template <typename> class FunctionList;
+template <typename> class function_list;
 
-// Partial specialization for function signature syntax: FunctionList<void(Args...)>
-// Supports: FunctionList<void()>, FunctionList<void(float)>, FunctionList<void(u8, float, float)>, etc.
+// Partial specialization for function signature syntax: function_list<void(Args...)>
+// Supports: function_list<void()>, function_list<void(float)>, function_list<void(u8, float, float)>, etc.
 template <typename... Args>
-class FunctionList<void(Args...)> {
+class function_list<void(Args...)> {
   private:
     fl::vector<pair<int, function<void(Args...)>>> mFunctions;
     int mCounter = 0;
@@ -368,8 +368,8 @@ class FunctionList<void(Args...)> {
     using iterator = typename fl::vector<pair<int, function<void(Args...)>>>::iterator;
     using const_iterator = typename fl::vector<pair<int, function<void(Args...)>>>::const_iterator;
 
-    FunctionList() = default;
-    ~FunctionList() = default;
+    function_list() = default;
+    ~function_list() = default;
 
     int add(function<void(Args...)> fn) {
         int id = mCounter++;
@@ -416,13 +416,13 @@ class FunctionList<void(Args...)> {
     }
 };
 
-// Partial specialization for non-void return types: FunctionList<R(Args...)> where R != void
+// Partial specialization for non-void return types: function_list<R(Args...)> where R != void
 // Triggers a compile-time error when attempting to use non-void return types
 template <typename R, typename... Args>
-class FunctionList<R(Args...)> {
+class function_list<R(Args...)> {
     static_assert(fl::is_same<R, void>::value,
-                  "FunctionList only supports void return type. "
-                  "Use FunctionList<void(Args...)> instead of FunctionList<ReturnType(Args...)>.");
+                  "function_list only supports void return type. "
+                  "Use function_list<void(Args...)> instead of function_list<ReturnType(Args...)>.");
 };
 
 } // namespace fl

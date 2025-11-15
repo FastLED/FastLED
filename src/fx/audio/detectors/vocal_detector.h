@@ -14,9 +14,9 @@ public:
     void reset();
 
     // Vocal state change callbacks (multiple listeners supported)
-    FunctionList<void(bool active)> onVocalChange;  // Called when vocal state changes
-    FunctionList<void()> onVocalStart;       // Called when vocals start
-    FunctionList<void()> onVocalEnd;         // Called when vocals end
+    function_list<void(bool active)> onVocalChange;  // Called when vocal state changes
+    function_list<void()> onVocalStart;       // Called when vocals start
+    function_list<void()> onVocalEnd;         // Called when vocals end
 
     // Configuration
     void setThreshold(float threshold) { mThreshold = threshold; }

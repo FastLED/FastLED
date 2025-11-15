@@ -60,9 +60,9 @@ public:
     void reset() override;
 
     // Event callbacks (multiple listeners supported)
-    FunctionList<void()> onDrop;                          // Fired when drop detected
-    FunctionList<void(const Drop&)> onDropEvent;          // Fired with drop details
-    FunctionList<void(float impact)> onDropImpact;               // Fired with impact strength
+    function_list<void()> onDrop;                          // Fired when drop detected
+    function_list<void(const Drop&)> onDropEvent;          // Fired with drop details
+    function_list<void(float impact)> onDropImpact;               // Fired with impact strength
 
     // State access
     const Drop& getLastDrop() const { return mLastDrop; }

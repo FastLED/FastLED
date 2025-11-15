@@ -21,10 +21,10 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void()> onCrescendo;          // Loudness increasing
-    FunctionList<void()> onDiminuendo;         // Loudness decreasing
-    FunctionList<void(float trend)> onDynamicTrend;  // Current trend (-1 to +1)
-    FunctionList<void(float compression)> onCompressionRatio;  // Dynamic range compression
+    function_list<void()> onCrescendo;          // Loudness increasing
+    function_list<void()> onDiminuendo;         // Loudness decreasing
+    function_list<void(float trend)> onDynamicTrend;  // Current trend (-1 to +1)
+    function_list<void(float compression)> onCompressionRatio;  // Dynamic range compression
 
     // Configuration
     void setHistorySize(fl::size size);

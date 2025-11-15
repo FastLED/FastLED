@@ -1,13 +1,13 @@
 /// @file function_list.cpp
-/// @brief Comprehensive tests for FunctionList class
+/// @brief Comprehensive tests for function_list class
 
 #include "test.h"
 #include "ftl/function.h"
 
 using namespace fl;
 
-TEST_CASE("FunctionList<void()> - no arguments") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list<void()> - no arguments") {
+    function_list<void()> callbacks;
     int call_count = 0;
     
     callbacks.add([&call_count]() { call_count++; });
@@ -20,8 +20,8 @@ TEST_CASE("FunctionList<void()> - no arguments") {
     REQUIRE(call_count == 2);
 }
 
-TEST_CASE("FunctionList<void(float)> - single argument") {
-    FunctionList<void(float)> callbacks;
+TEST_CASE("function_list<void(float)> - single argument") {
+    function_list<void(float)> callbacks;
     float received_value = 0.0f;
     
     callbacks.add([&received_value](float v) { received_value = v; });
@@ -32,8 +32,8 @@ TEST_CASE("FunctionList<void(float)> - single argument") {
     REQUIRE(received_value == 99.9f);
 }
 
-TEST_CASE("FunctionList<void(uint8_t, float, float)> - multiple arguments") {
-    FunctionList<void(uint8_t, float, float)> callbacks;
+TEST_CASE("function_list<void(uint8_t, float, float)> - multiple arguments") {
+    function_list<void(uint8_t, float, float)> callbacks;
     uint8_t received_u8 = 0;
     float received_f1 = 0.0f;
     float received_f2 = 0.0f;
@@ -50,8 +50,8 @@ TEST_CASE("FunctionList<void(uint8_t, float, float)> - multiple arguments") {
     REQUIRE(received_f2 == 2.5f);
 }
 
-TEST_CASE("FunctionList<void()> - function signature syntax with no args") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list<void()> - function signature syntax with no args") {
+    function_list<void()> callbacks;
     int call_count = 0;
     
     callbacks.add([&call_count]() { call_count++; });
@@ -62,8 +62,8 @@ TEST_CASE("FunctionList<void()> - function signature syntax with no args") {
     REQUIRE(call_count == 2);
 }
 
-TEST_CASE("FunctionList<void(float)> - function signature syntax with single arg") {
-    FunctionList<void(float)> callbacks;
+TEST_CASE("function_list<void(float)> - function signature syntax with single arg") {
+    function_list<void(float)> callbacks;
     float received_value = 0.0f;
     
     callbacks.add([&received_value](float v) { received_value = v; });
@@ -71,8 +71,8 @@ TEST_CASE("FunctionList<void(float)> - function signature syntax with single arg
     REQUIRE(received_value == 3.14f);
 }
 
-TEST_CASE("FunctionList<void(uint8_t, float, float)> - function signature syntax with multiple args") {
-    FunctionList<void(uint8_t, float, float)> callbacks;
+TEST_CASE("function_list<void(uint8_t, float, float)> - function signature syntax with multiple args") {
+    function_list<void(uint8_t, float, float)> callbacks;
     uint8_t received_u8 = 0;
     float received_f1 = 0.0f;
     float received_f2 = 0.0f;
@@ -89,8 +89,8 @@ TEST_CASE("FunctionList<void(uint8_t, float, float)> - function signature syntax
     REQUIRE(received_f2 == 10.0f);
 }
 
-TEST_CASE("FunctionList - add() returns unique IDs") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - add() returns unique IDs") {
+    function_list<void()> callbacks;
     
     int id1 = callbacks.add([]() {});
     int id2 = callbacks.add([]() {});
@@ -101,8 +101,8 @@ TEST_CASE("FunctionList - add() returns unique IDs") {
     REQUIRE(id1 != id3);
 }
 
-TEST_CASE("FunctionList - remove() by ID") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - remove() by ID") {
+    function_list<void()> callbacks;
     int call_count_1 = 0;
     int call_count_2 = 0;
     int call_count_3 = 0;
@@ -125,8 +125,8 @@ TEST_CASE("FunctionList - remove() by ID") {
     REQUIRE(call_count_3 == 2);
 }
 
-TEST_CASE("FunctionList - clear() removes all callbacks") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - clear() removes all callbacks") {
+    function_list<void()> callbacks;
     int call_count = 0;
     
     callbacks.add([&call_count]() { call_count++; });
@@ -141,8 +141,8 @@ TEST_CASE("FunctionList - clear() removes all callbacks") {
     REQUIRE(call_count == 3);  // No additional calls after clear()
 }
 
-TEST_CASE("FunctionList - empty() and size()") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - empty() and size()") {
+    function_list<void()> callbacks;
     
     REQUIRE(callbacks.empty());
     REQUIRE(callbacks.size() == 0);
@@ -163,8 +163,8 @@ TEST_CASE("FunctionList - empty() and size()") {
     REQUIRE(callbacks.size() == 0);
 }
 
-TEST_CASE("FunctionList - operator bool()") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - operator bool()") {
+    function_list<void()> callbacks;
     
     REQUIRE_FALSE(callbacks);  // Empty list is false
     
@@ -175,8 +175,8 @@ TEST_CASE("FunctionList - operator bool()") {
     REQUIRE_FALSE(callbacks);  // Empty again
 }
 
-TEST_CASE("FunctionList - multiple callbacks invoked in order") {
-    FunctionList<void(int)> callbacks;
+TEST_CASE("function_list - multiple callbacks invoked in order") {
+    function_list<void(int)> callbacks;
     fl::vector<int> call_order;
     
     callbacks.add([&call_order](int value) { call_order.push_back(value * 1); });
@@ -191,8 +191,8 @@ TEST_CASE("FunctionList - multiple callbacks invoked in order") {
     REQUIRE(call_order[2] == 30);
 }
 
-TEST_CASE("FunctionList - iterator support") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - iterator support") {
+    function_list<void()> callbacks;
     
     callbacks.add([]() {});
     callbacks.add([]() {});
@@ -209,8 +209,8 @@ TEST_CASE("FunctionList - iterator support") {
     REQUIRE(count == 3);
 }
 
-TEST_CASE("FunctionList - backward compatibility with FunctionList<void()>") {
-    FunctionList<void()> callbacks;
+TEST_CASE("function_list - backward compatibility with function_list<void()>") {
+    function_list<void()> callbacks;
     int call_count = 0;
     
     callbacks.add([&call_count]() { call_count++; });
@@ -224,9 +224,9 @@ TEST_CASE("FunctionList - backward compatibility with FunctionList<void()>") {
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*
-TEST_CASE("FunctionList<void(int(float))> - should NOT compile due to non-void return type") {
+TEST_CASE("function_list<void(int(float))> - should NOT compile due to non-void return type") {
     // This should trigger static_assert with message:
-    // "FunctionList only supports void return type."
-    FunctionList<void(int(float))> callbacks;  // ERROR: non-void return type
+    // "function_list only supports void return type."
+    function_list<void(int(float))> callbacks;  // ERROR: non-void return type
 }
 */

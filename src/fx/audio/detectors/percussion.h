@@ -18,11 +18,11 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(const char* type)> onPercussionHit;
-    FunctionList<void()> onKick;
-    FunctionList<void()> onSnare;
-    FunctionList<void()> onHiHat;
-    FunctionList<void()> onTom;
+    function_list<void(const char* type)> onPercussionHit;
+    function_list<void()> onKick;
+    function_list<void()> onSnare;
+    function_list<void()> onHiHat;
+    function_list<void()> onTom;
 
     // Configuration
     void setKickThreshold(float threshold) { mKickThreshold = threshold; }

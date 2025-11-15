@@ -118,7 +118,7 @@ class UISlider : public UIElement {
     };
 
   private:
-    FunctionList<void(UISlider &)> mCallbacks;
+    function_list<void(UISlider &)> mCallbacks;
     float mLastFrameValue = 0;
     bool mLastFrameValueValid = false;
     Listener mListener;
@@ -228,9 +228,9 @@ class UIButton : public UIElement {
     };
 
   private:
-    FunctionList<void(UIButton &)> mCallbacks;
-    FunctionList<void()> mPressCallbacks;
-    FunctionList<void()> mReleaseCallbacks;
+    function_list<void(UIButton &)> mCallbacks;
+    function_list<void()> mPressCallbacks;
+    function_list<void()> mReleaseCallbacks;
     Listener mListener;
     fl::shared_ptr<Button> mRealButton;
 };
@@ -290,7 +290,7 @@ class UICheckbox : public UIElement {
     };
 
   private:
-    FunctionList<void(UICheckbox &)> mCallbacks;
+    function_list<void(UICheckbox &)> mCallbacks;
     bool mLastFrameValue = false;
     bool mLastFrameValueValid = false;
     Listener mListener;
@@ -359,7 +359,7 @@ class UINumberField : public UIElement {
     Listener mListener;
     double mLastFrameValue = 0;
     bool mLastFrameValueValid = false;
-    FunctionList<void(UINumberField &)> mCallbacks;
+    function_list<void(UINumberField &)> mCallbacks;
 };
 
 class UITitle : public UIElement {
@@ -521,7 +521,7 @@ class UIDropdown : public UIElement {
     };
 
   private:
-    FunctionList<void(UIDropdown &)> mCallbacks;
+    function_list<void(UIDropdown &)> mCallbacks;
     int mLastFrameValue = -1;
     bool mLastFrameValueValid = false;
     fl::shared_ptr<Button> mNextButton;  // Must be before mListener to ensure proper initialization order

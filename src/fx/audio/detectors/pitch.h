@@ -38,10 +38,10 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(float hz)> onPitch;  // Continuous pitch updates
-    FunctionList<void(float hz, float confidence)> onPitchWithConfidence;
-    FunctionList<void(float hz)> onPitchChange;  // Fires when pitch changes significantly
-    FunctionList<void(bool voiced)> onVoicedChange;  // Fires when voiced/unvoiced state changes
+    function_list<void(float hz)> onPitch;  // Continuous pitch updates
+    function_list<void(float hz, float confidence)> onPitchWithConfidence;
+    function_list<void(float hz)> onPitchChange;  // Fires when pitch changes significantly
+    function_list<void(bool voiced)> onVoicedChange;  // Fires when voiced/unvoiced state changes
 
     // State access
     float getPitch() const { return mCurrentPitch; }

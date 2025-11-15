@@ -25,9 +25,9 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void()> onTransient;
-    FunctionList<void(float strength)> onTransientWithStrength;
-    FunctionList<void(float strength)> onAttack;
+    function_list<void()> onTransient;
+    function_list<void(float strength)> onTransientWithStrength;
+    function_list<void(float strength)> onAttack;
 
     // State access
     bool isTransient() const { return mTransientDetected; }

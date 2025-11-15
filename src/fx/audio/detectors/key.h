@@ -89,9 +89,9 @@ public:
     void reset() override;
 
     // Event callbacks (multiple listeners supported)
-    FunctionList<void(const Key& key)> onKey;           // Every frame with current key
-    FunctionList<void(const Key& key)> onKeyChange;     // When key changes
-    FunctionList<void()> onKeyEnd;                  // When key ends (confidence drops)
+    function_list<void(const Key& key)> onKey;           // Every frame with current key
+    function_list<void(const Key& key)> onKeyChange;     // When key changes
+    function_list<void()> onKeyEnd;                  // When key ends (confidence drops)
 
     // State access
     const Key& getCurrentKey() const { return mCurrentKey; }

@@ -17,10 +17,10 @@ public:
     void reset() override;
 
     // Callbacks (multiple listeners supported)
-    FunctionList<void(float bass, float mid, float treble)> onLevelsUpdate;
-    FunctionList<void(float level)> onBassLevel;
-    FunctionList<void(float level)> onMidLevel;
-    FunctionList<void(float level)> onTrebleLevel;
+    function_list<void(float bass, float mid, float treble)> onLevelsUpdate;
+    function_list<void(float level)> onBassLevel;
+    function_list<void(float level)> onMidLevel;
+    function_list<void(float level)> onTrebleLevel;
 
     // State access
     float getBass() const { return mBass; }

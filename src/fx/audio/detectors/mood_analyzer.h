@@ -72,9 +72,9 @@ public:
     void reset() override;
 
     // Event callbacks (multiple listeners supported)
-    FunctionList<void(const Mood& mood)> onMood;              // Every frame
-    FunctionList<void(const Mood& mood)> onMoodChange;        // Mood category changes
-    FunctionList<void(float valence, float arousal)> onValenceArousal;   // Raw values
+    function_list<void(const Mood& mood)> onMood;              // Every frame
+    function_list<void(const Mood& mood)> onMoodChange;        // Mood category changes
+    function_list<void(float valence, float arousal)> onValenceArousal;   // Raw values
 
     // State access
     const Mood& getCurrentMood() const { return mCurrentMood; }

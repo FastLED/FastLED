@@ -19,11 +19,11 @@ public:
     static constexpr uint32_t HIHAT_COOLDOWN_MS = 30;
 
     // Percussion detection callbacks (multiple listeners supported)
-    FunctionList<void()> onKick;
-    FunctionList<void()> onSnare;
-    FunctionList<void()> onHiHat;
-    FunctionList<void()> onTom;
-    FunctionList<void(const char* type)> onPercussionHit;
+    function_list<void()> onKick;
+    function_list<void()> onSnare;
+    function_list<void()> onHiHat;
+    function_list<void()> onTom;
+    function_list<void(const char* type)> onPercussionHit;
 
     // Configuration methods
     void setKickThreshold(float threshold) { mKickThreshold = threshold; }

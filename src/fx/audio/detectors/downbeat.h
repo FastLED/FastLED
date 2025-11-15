@@ -51,16 +51,16 @@ public:
     // ----- Callbacks (multiple listeners supported) -----
 
     /** Fires on detected downbeat (first beat of measure) */
-    FunctionList<void()> onDownbeat;
+    function_list<void()> onDownbeat;
 
     /** Fires on each beat with beat number (1-based, downbeat = 1) */
-    FunctionList<void(u8 beatNumber)> onMeasureBeat;
+    function_list<void(u8 beatNumber)> onMeasureBeat;
 
     /** Fires when time signature changes */
-    FunctionList<void(u8 beatsPerMeasure)> onMeterChange;
+    function_list<void(u8 beatsPerMeasure)> onMeterChange;
 
     /** Fires with measure phase each frame (0-1 range) */
-    FunctionList<void(float phase)> onMeasurePhase;
+    function_list<void(float phase)> onMeasurePhase;
 
     // ----- State Access -----
 
