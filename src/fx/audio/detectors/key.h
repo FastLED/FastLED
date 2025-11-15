@@ -32,6 +32,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 #include "fl/int.h"
@@ -88,10 +89,10 @@ public:
     const char* getName() const override { return "KeyDetector"; }
     void reset() override;
 
-    // Event callbacks
-    function<void(const Key& key)> onKey;           // Every frame with current key
-    function<void(const Key& key)> onKeyChange;     // When key changes
-    function<void()> onKeyEnd;                      // When key ends (confidence drops)
+    // Event callbacks (multiple listeners supported)
+    FunctionList<void(const Key& key)> onKey;           // Every frame with current key
+    FunctionList<void(const Key& key)> onKeyChange;     // When key changes
+    FunctionList<void()> onKeyEnd;                  // When key ends (confidence drops)
 
     // State access
     const Key& getCurrentKey() const { return mCurrentKey; }

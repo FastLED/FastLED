@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "fx/audio/detectors/pitch.h"
 #include "ftl/function.h"
 #include "fl/ptr.h"
@@ -39,10 +40,10 @@ public:
     const char* getName() const override { return "NoteDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(uint8_t note, uint8_t velocity)> onNoteOn;   // Note started
-    function<void(uint8_t note)> onNoteOff;                    // Note ended
-    function<void(uint8_t note, uint8_t velocity)> onNoteChange; // Note changed while held
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(uint8_t note, uint8_t velocity)> onNoteOn;   // Note started
+    FunctionList<void(uint8_t note)> onNoteOff;           // Note ended
+    FunctionList<void(uint8_t note, uint8_t velocity)> onNoteChange; // Note changed while held
 
     // State access
     uint8_t getCurrentNote() const { return mCurrentNote; }

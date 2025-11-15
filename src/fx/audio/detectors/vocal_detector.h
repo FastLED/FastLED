@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 
 namespace fl {
 
@@ -12,14 +13,10 @@ public:
     void update(shared_ptr<AudioContext> context);
     void reset();
 
-    // Callback types
-    using VocalChangeCallback = void(*)(bool isVocal);
-    using VoidCallback = void(*)();
-
-    // Vocal state change callbacks
-    VocalChangeCallback onVocalChange = nullptr;  // Called when vocal state changes
-    VoidCallback onVocalStart = nullptr;          // Called when vocals start
-    VoidCallback onVocalEnd = nullptr;            // Called when vocals end
+    // Vocal state change callbacks (multiple listeners supported)
+    FunctionList<void(bool active)> onVocalChange;  // Called when vocal state changes
+    FunctionList<void()> onVocalStart;       // Called when vocals start
+    FunctionList<void()> onVocalEnd;         // Called when vocals end
 
     // Configuration
     void setThreshold(float threshold) { mThreshold = threshold; }

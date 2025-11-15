@@ -87,328 +87,328 @@ void AudioProcessor::update(const AudioSample& sample) {
 
 void AudioProcessor::onBeat(function<void()> callback) {
     auto detector = getBeatDetector();
-    detector->onBeat = callback;
+    detector->onBeat.add(callback);
 }
 
 void AudioProcessor::onBeatPhase(function<void(float)> callback) {
     auto detector = getBeatDetector();
-    detector->onBeatPhase = callback;
+    detector->onBeatPhase.add(callback);
 }
 
 void AudioProcessor::onOnset(function<void(float)> callback) {
     auto detector = getBeatDetector();
-    detector->onOnset = callback;
+    detector->onOnset.add(callback);
 }
 
 void AudioProcessor::onTempoChange(function<void(float, float)> callback) {
     auto detector = getBeatDetector();
-    detector->onTempoChange = callback;
+    detector->onTempoChange.add(callback);
 }
 
 void AudioProcessor::onTempo(function<void(float)> callback) {
     auto detector = getTempoAnalyzer();
-    detector->onTempo = callback;
+    detector->onTempo.add(callback);
 }
 
 void AudioProcessor::onTempoWithConfidence(function<void(float, float)> callback) {
     auto detector = getTempoAnalyzer();
-    detector->onTempoWithConfidence = callback;
+    detector->onTempoWithConfidence.add(callback);
 }
 
 void AudioProcessor::onTempoStable(function<void()> callback) {
     auto detector = getTempoAnalyzer();
-    detector->onTempoStable = callback;
+    detector->onTempoStable.add(callback);
 }
 
 void AudioProcessor::onTempoUnstable(function<void()> callback) {
     auto detector = getTempoAnalyzer();
-    detector->onTempoUnstable = callback;
+    detector->onTempoUnstable.add(callback);
 }
 
 void AudioProcessor::onBass(function<void(float)> callback) {
     auto detector = getFrequencyBands();
-    detector->onBassLevel = callback;
+    detector->onBassLevel.add(callback);
 }
 
 void AudioProcessor::onMid(function<void(float)> callback) {
     auto detector = getFrequencyBands();
-    detector->onMidLevel = callback;
+    detector->onMidLevel.add(callback);
 }
 
 void AudioProcessor::onTreble(function<void(float)> callback) {
     auto detector = getFrequencyBands();
-    detector->onTrebleLevel = callback;
+    detector->onTrebleLevel.add(callback);
 }
 
 void AudioProcessor::onFrequencyBands(function<void(float, float, float)> callback) {
     auto detector = getFrequencyBands();
-    detector->onLevelsUpdate = callback;
+    detector->onLevelsUpdate.add(callback);
 }
 
 void AudioProcessor::onEnergy(function<void(float)> callback) {
     auto detector = getEnergyAnalyzer();
-    detector->onEnergy = callback;
+    detector->onEnergy.add(callback);
 }
 
 void AudioProcessor::onPeak(function<void(float)> callback) {
     auto detector = getEnergyAnalyzer();
-    detector->onPeak = callback;
+    detector->onPeak.add(callback);
 }
 
 void AudioProcessor::onAverageEnergy(function<void(float)> callback) {
     auto detector = getEnergyAnalyzer();
-    detector->onAverageEnergy = callback;
+    detector->onAverageEnergy.add(callback);
 }
 
 void AudioProcessor::onTransient(function<void()> callback) {
     auto detector = getTransientDetector();
-    detector->onTransient = callback;
+    detector->onTransient.add(callback);
 }
 
 void AudioProcessor::onTransientWithStrength(function<void(float)> callback) {
     auto detector = getTransientDetector();
-    detector->onTransientWithStrength = callback;
+    detector->onTransientWithStrength.add(callback);
 }
 
 void AudioProcessor::onAttack(function<void(float)> callback) {
     auto detector = getTransientDetector();
-    detector->onAttack = callback;
+    detector->onAttack.add(callback);
 }
 
 void AudioProcessor::onSilence(function<void(bool)> callback) {
     auto detector = getSilenceDetector();
-    detector->onSilenceChange = callback;
+    detector->onSilenceChange.add(callback);
 }
 
 void AudioProcessor::onSilenceStart(function<void()> callback) {
     auto detector = getSilenceDetector();
-    detector->onSilenceStart = callback;
+    detector->onSilenceStart.add(callback);
 }
 
 void AudioProcessor::onSilenceEnd(function<void()> callback) {
     auto detector = getSilenceDetector();
-    detector->onSilenceEnd = callback;
+    detector->onSilenceEnd.add(callback);
 }
 
 void AudioProcessor::onSilenceDuration(function<void(u32)> callback) {
     auto detector = getSilenceDetector();
-    detector->onSilenceDuration = callback;
+    detector->onSilenceDuration.add(callback);
 }
 
 void AudioProcessor::onCrescendo(function<void()> callback) {
     auto detector = getDynamicsAnalyzer();
-    detector->onCrescendo = callback;
+    detector->onCrescendo.add(callback);
 }
 
 void AudioProcessor::onDiminuendo(function<void()> callback) {
     auto detector = getDynamicsAnalyzer();
-    detector->onDiminuendo = callback;
+    detector->onDiminuendo.add(callback);
 }
 
 void AudioProcessor::onDynamicTrend(function<void(float)> callback) {
     auto detector = getDynamicsAnalyzer();
-    detector->onDynamicTrend = callback;
+    detector->onDynamicTrend.add(callback);
 }
 
 void AudioProcessor::onCompressionRatio(function<void(float)> callback) {
     auto detector = getDynamicsAnalyzer();
-    detector->onCompressionRatio = callback;
+    detector->onCompressionRatio.add(callback);
 }
 
 void AudioProcessor::onPitch(function<void(float)> callback) {
     auto detector = getPitchDetector();
-    detector->onPitch = callback;
+    detector->onPitch.add(callback);
 }
 
 void AudioProcessor::onPitchWithConfidence(function<void(float, float)> callback) {
     auto detector = getPitchDetector();
-    detector->onPitchWithConfidence = callback;
+    detector->onPitchWithConfidence.add(callback);
 }
 
 void AudioProcessor::onPitchChange(function<void(float)> callback) {
     auto detector = getPitchDetector();
-    detector->onPitchChange = callback;
+    detector->onPitchChange.add(callback);
 }
 
 void AudioProcessor::onVoicedChange(function<void(bool)> callback) {
     auto detector = getPitchDetector();
-    detector->onVoicedChange = callback;
+    detector->onVoicedChange.add(callback);
 }
 
 void AudioProcessor::onNoteOn(function<void(uint8_t, uint8_t)> callback) {
     auto detector = getNoteDetector();
-    detector->onNoteOn = callback;
+    detector->onNoteOn.add(callback);
 }
 
 void AudioProcessor::onNoteOff(function<void(uint8_t)> callback) {
     auto detector = getNoteDetector();
-    detector->onNoteOff = callback;
+    detector->onNoteOff.add(callback);
 }
 
 void AudioProcessor::onNoteChange(function<void(uint8_t, uint8_t)> callback) {
     auto detector = getNoteDetector();
-    detector->onNoteChange = callback;
+    detector->onNoteChange.add(callback);
 }
 
 void AudioProcessor::onDownbeat(function<void()> callback) {
     auto detector = getDownbeatDetector();
-    detector->onDownbeat = callback;
+    detector->onDownbeat.add(callback);
 }
 
 void AudioProcessor::onMeasureBeat(function<void(u8)> callback) {
     auto detector = getDownbeatDetector();
-    detector->onMeasureBeat = callback;
+    detector->onMeasureBeat.add(callback);
 }
 
 void AudioProcessor::onMeterChange(function<void(u8)> callback) {
     auto detector = getDownbeatDetector();
-    detector->onMeterChange = callback;
+    detector->onMeterChange.add(callback);
 }
 
 void AudioProcessor::onMeasurePhase(function<void(float)> callback) {
     auto detector = getDownbeatDetector();
-    detector->onMeasurePhase = callback;
+    detector->onMeasurePhase.add(callback);
 }
 
 void AudioProcessor::onBackbeat(function<void(u8 beatNumber, float confidence, float strength)> callback) {
     auto detector = getBackbeatDetector();
-    detector->onBackbeat = callback;
+    detector->onBackbeat.add(callback);
 }
 
 void AudioProcessor::onVocal(function<void(bool)> callback) {
     auto detector = getVocalDetector();
-    detector->onVocalChange = callback;
+    detector->onVocalChange.add(callback);
 }
 
 void AudioProcessor::onVocalStart(function<void()> callback) {
     auto detector = getVocalDetector();
-    detector->onVocalStart = callback;
+    detector->onVocalStart.add(callback);
 }
 
 void AudioProcessor::onVocalEnd(function<void()> callback) {
     auto detector = getVocalDetector();
-    detector->onVocalEnd = callback;
+    detector->onVocalEnd.add(callback);
 }
 
 void AudioProcessor::onVocalConfidence(function<void(float)> callback) {
     auto detector = getVocalDetector();
     // This callback fires every frame with the current confidence
     // We need to wrap it since VocalDetector doesn't have this callback built-in
-    detector->onVocalChange = [callback, detector](bool) {
+    detector->onVocalChange.add([callback, detector](bool) {
         if (callback) {
             callback(detector->getConfidence());
         }
-    };
+    });
 }
 
 void AudioProcessor::onPercussion(function<void(const char*)> callback) {
     auto detector = getPercussionDetector();
-    detector->onPercussionHit = callback;
+    detector->onPercussionHit.add(callback);
 }
 
 void AudioProcessor::onKick(function<void()> callback) {
     auto detector = getPercussionDetector();
-    detector->onKick = callback;
+    detector->onKick.add(callback);
 }
 
 void AudioProcessor::onSnare(function<void()> callback) {
     auto detector = getPercussionDetector();
-    detector->onSnare = callback;
+    detector->onSnare.add(callback);
 }
 
 void AudioProcessor::onHiHat(function<void()> callback) {
     auto detector = getPercussionDetector();
-    detector->onHiHat = callback;
+    detector->onHiHat.add(callback);
 }
 
 void AudioProcessor::onTom(function<void()> callback) {
     auto detector = getPercussionDetector();
-    detector->onTom = callback;
+    detector->onTom.add(callback);
 }
 
 void AudioProcessor::onChord(function<void(const Chord&)> callback) {
     auto detector = getChordDetector();
-    detector->onChord = callback;
+    detector->onChord.add(callback);
 }
 
 void AudioProcessor::onChordChange(function<void(const Chord&)> callback) {
     auto detector = getChordDetector();
-    detector->onChordChange = callback;
+    detector->onChordChange.add(callback);
 }
 
 void AudioProcessor::onChordEnd(function<void()> callback) {
     auto detector = getChordDetector();
-    detector->onChordEnd = callback;
+    detector->onChordEnd.add(callback);
 }
 
 void AudioProcessor::onKey(function<void(const Key&)> callback) {
     auto detector = getKeyDetector();
-    detector->onKey = callback;
+    detector->onKey.add(callback);
 }
 
 void AudioProcessor::onKeyChange(function<void(const Key&)> callback) {
     auto detector = getKeyDetector();
-    detector->onKeyChange = callback;
+    detector->onKeyChange.add(callback);
 }
 
 void AudioProcessor::onKeyEnd(function<void()> callback) {
     auto detector = getKeyDetector();
-    detector->onKeyEnd = callback;
+    detector->onKeyEnd.add(callback);
 }
 
 void AudioProcessor::onMood(function<void(const Mood&)> callback) {
     auto detector = getMoodAnalyzer();
-    detector->onMood = callback;
+    detector->onMood.add(callback);
 }
 
 void AudioProcessor::onMoodChange(function<void(const Mood&)> callback) {
     auto detector = getMoodAnalyzer();
-    detector->onMoodChange = callback;
+    detector->onMoodChange.add(callback);
 }
 
 void AudioProcessor::onValenceArousal(function<void(float, float)> callback) {
     auto detector = getMoodAnalyzer();
-    detector->onValenceArousal = callback;
+    detector->onValenceArousal.add(callback);
 }
 
 void AudioProcessor::onBuildupStart(function<void()> callback) {
     auto detector = getBuildupDetector();
-    detector->onBuildupStart = callback;
+    detector->onBuildupStart.add(callback);
 }
 
 void AudioProcessor::onBuildupProgress(function<void(float)> callback) {
     auto detector = getBuildupDetector();
-    detector->onBuildupProgress = callback;
+    detector->onBuildupProgress.add(callback);
 }
 
 void AudioProcessor::onBuildupPeak(function<void()> callback) {
     auto detector = getBuildupDetector();
-    detector->onBuildupPeak = callback;
+    detector->onBuildupPeak.add(callback);
 }
 
 void AudioProcessor::onBuildupEnd(function<void()> callback) {
     auto detector = getBuildupDetector();
-    detector->onBuildupEnd = callback;
+    detector->onBuildupEnd.add(callback);
 }
 
 void AudioProcessor::onBuildup(function<void(const Buildup&)> callback) {
     auto detector = getBuildupDetector();
-    detector->onBuildup = callback;
+    detector->onBuildup.add(callback);
 }
 
 void AudioProcessor::onDrop(function<void()> callback) {
     auto detector = getDropDetector();
-    detector->onDrop = callback;
+    detector->onDrop.add(callback);
 }
 
 void AudioProcessor::onDropEvent(function<void(const Drop&)> callback) {
     auto detector = getDropDetector();
-    detector->onDropEvent = callback;
+    detector->onDropEvent.add(callback);
 }
 
 void AudioProcessor::onDropImpact(function<void(float)> callback) {
     auto detector = getDropDetector();
-    detector->onDropImpact = callback;
+    detector->onDropImpact.add(callback);
 }
 
 const AudioSample& AudioProcessor::getSample() const {

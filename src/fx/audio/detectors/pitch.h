@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -37,11 +38,11 @@ public:
     const char* getName() const override { return "PitchDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(float hz)> onPitch;  // Continuous pitch updates
-    function<void(float hz, float confidence)> onPitchWithConfidence;
-    function<void(float hz)> onPitchChange;  // Fires when pitch changes significantly
-    function<void(bool voiced)> onVoicedChange;  // Fires when voiced/unvoiced state changes
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(float hz)> onPitch;  // Continuous pitch updates
+    FunctionList<void(float hz, float confidence)> onPitchWithConfidence;
+    FunctionList<void(float hz)> onPitchChange;  // Fires when pitch changes significantly
+    FunctionList<void(bool voiced)> onVoicedChange;  // Fires when voiced/unvoiced state changes
 
     // State access
     float getPitch() const { return mCurrentPitch; }

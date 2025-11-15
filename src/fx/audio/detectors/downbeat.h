@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "fx/audio/detectors/beat.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
@@ -48,19 +49,19 @@ public:
     const char* getName() const override { return "DownbeatDetector"; }
     void reset() override;
 
-    // ----- Callbacks -----
+    // ----- Callbacks (multiple listeners supported) -----
 
     /** Fires on detected downbeat (first beat of measure) */
-    function<void()> onDownbeat;
+    FunctionList<void()> onDownbeat;
 
     /** Fires on each beat with beat number (1-based, downbeat = 1) */
-    function<void(u8 beatNumber)> onMeasureBeat;
+    FunctionList<void(u8 beatNumber)> onMeasureBeat;
 
     /** Fires when time signature changes */
-    function<void(u8 beatsPerMeasure)> onMeterChange;
+    FunctionList<void(u8 beatsPerMeasure)> onMeterChange;
 
     /** Fires with measure phase each frame (0-1 range) */
-    function<void(float phase)> onMeasurePhase;
+    FunctionList<void(float phase)> onMeasurePhase;
 
     // ----- State Access -----
 

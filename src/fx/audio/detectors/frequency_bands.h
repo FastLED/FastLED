@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 
 namespace fl {
@@ -16,11 +17,11 @@ public:
     const char* getName() const override { return "FrequencyBands"; }
     void reset() override;
 
-    // Callbacks
-    function<void(float bass, float mid, float treble)> onLevelsUpdate;
-    function<void(float level)> onBassLevel;
-    function<void(float level)> onMidLevel;
-    function<void(float level)> onTrebleLevel;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(float bass, float mid, float treble)> onLevelsUpdate;
+    FunctionList<void(float level)> onBassLevel;
+    FunctionList<void(float level)> onMidLevel;
+    FunctionList<void(float level)> onTrebleLevel;
 
     // State access
     float getBass() const { return mBass; }

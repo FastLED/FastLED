@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -18,12 +19,12 @@ public:
     const char* getName() const override { return "TempoAnalyzer"; }
     void reset() override;
 
-    // Callbacks
-    function<void(float bpm)> onTempo;
-    function<void(float bpm, float confidence)> onTempoWithConfidence;
-    function<void(float bpm)> onTempoChange;
-    function<void()> onTempoStable;
-    function<void()> onTempoUnstable;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(float bpm)> onTempo;
+    FunctionList<void(float bpm, float confidence)> onTempoWithConfidence;
+    FunctionList<void(float bpm)> onTempoChange;
+    FunctionList<void()> onTempoStable;
+    FunctionList<void()> onTempoUnstable;
 
     // State access
     float getBPM() const { return mCurrentBPM; }

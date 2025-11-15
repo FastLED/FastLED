@@ -1,6 +1,7 @@
 #pragma once
 
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 
 namespace fl {
 
@@ -17,15 +18,12 @@ public:
     static constexpr uint32_t SNARE_COOLDOWN_MS = 50;
     static constexpr uint32_t HIHAT_COOLDOWN_MS = 30;
 
-    // Callback types
-    using PercussionCallback = void(*)();
-    using StringCallback = void(*)(const char*);
-
-    // Percussion detection callbacks
-    PercussionCallback onKick = nullptr;
-    PercussionCallback onSnare = nullptr;
-    PercussionCallback onHiHat = nullptr;
-    StringCallback onPercussionHit = nullptr;
+    // Percussion detection callbacks (multiple listeners supported)
+    FunctionList<void()> onKick;
+    FunctionList<void()> onSnare;
+    FunctionList<void()> onHiHat;
+    FunctionList<void()> onTom;
+    FunctionList<void(const char* type)> onPercussionHit;
 
     // Configuration methods
     void setKickThreshold(float threshold) { mKickThreshold = threshold; }

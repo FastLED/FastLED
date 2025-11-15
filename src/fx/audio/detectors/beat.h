@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -18,11 +19,11 @@ public:
     const char* getName() const override { return "BeatDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void()> onBeat;
-    function<void(float phase)> onBeatPhase;
-    function<void(float strength)> onOnset;
-    function<void(float bpm, float confidence)> onTempoChange;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void()> onBeat;
+    FunctionList<void(float phase)> onBeatPhase;
+    FunctionList<void(float strength)> onOnset;
+    FunctionList<void(float bpm, float confidence)> onTempoChange;
 
     // State access
     bool isBeat() const { return mBeatDetected; }

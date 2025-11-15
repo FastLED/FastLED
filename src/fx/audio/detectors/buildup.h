@@ -5,6 +5,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 
 namespace fl {
@@ -57,12 +58,12 @@ public:
     const char* getName() const override { return "BuildupDetector"; }
     void reset() override;
 
-    // Event callbacks
-    function<void()> onBuildupStart;                    // Fired when buildup starts
-    function<void(float progress)> onBuildupProgress;   // Fired during buildup (0.0-1.0)
-    function<void()> onBuildupPeak;                     // Fired at peak (just before drop)
-    function<void()> onBuildupEnd;                      // Fired when buildup ends (cancelled)
-    function<void(const Buildup&)> onBuildup;           // Fired every frame during buildup
+    // Event callbacks (multiple listeners supported)
+    FunctionList<void()> onBuildupStart;                      // Fired when buildup starts
+    FunctionList<void(float progress)> onBuildupProgress;              // Fired during buildup (0.0-1.0)
+    FunctionList<void()> onBuildupPeak;                       // Fired at peak (just before drop)
+    FunctionList<void()> onBuildupEnd;                        // Fired when buildup ends (cancelled)
+    FunctionList<void(const Buildup&)> onBuildup;             // Fired every frame during buildup
 
     // State access
     bool isBuilding() const { return mBuildupActive; }

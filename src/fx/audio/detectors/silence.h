@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -17,11 +18,11 @@ public:
     const char* getName() const override { return "SilenceDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(bool silent)> onSilenceChange;
-    function<void()> onSilenceStart;
-    function<void()> onSilenceEnd;
-    function<void(u32 durationMs)> onSilenceDuration;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(bool silent)> onSilenceChange;
+    FunctionList<void()> onSilenceStart;
+    FunctionList<void()> onSilenceEnd;
+    FunctionList<void(u32 durationMs)> onSilenceDuration;
 
     // State access
     bool isSilent() const { return mIsSilent; }

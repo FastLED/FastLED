@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 
 namespace fl {
@@ -17,12 +18,12 @@ public:
     const char* getName() const override { return "PercussionDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(const char* type)> onPercussionHit;
-    function<void()> onKick;
-    function<void()> onSnare;
-    function<void()> onHiHat;
-    function<void()> onTom;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(const char* type)> onPercussionHit;
+    FunctionList<void()> onKick;
+    FunctionList<void()> onSnare;
+    FunctionList<void()> onHiHat;
+    FunctionList<void()> onTom;
 
     // Configuration
     void setKickThreshold(float threshold) { mKickThreshold = threshold; }

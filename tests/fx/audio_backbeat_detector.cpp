@@ -73,12 +73,12 @@ TEST_CASE("BackbeatDetector - Callbacks") {
     float backbeat_confidence = 0.0f;
     float backbeat_strength = 0.0f;
 
-    detector.onBackbeat = [&](u8 beatNumber, float confidence, float strength) {
+    detector.onBackbeat.add([&](u8 beatNumber, float confidence, float strength) {
         backbeat_called = true;
         backbeat_number = beatNumber;
         backbeat_confidence = confidence;
         backbeat_strength = strength;
-    };
+    });
 
     // Create a simple audio context with synthetic audio
     vector<i16> samples(512, 0);

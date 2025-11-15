@@ -38,20 +38,14 @@ void BeatDetector::update(shared_ptr<AudioContext> context) {
 
     if (mBeatDetected) {
         updateTempo(timestamp);
-        if (onBeat) {
-            onBeat();
-        }
-        if (onOnset) {
-            onOnset(mSpectralFlux);
-        }
+        onBeat();
+        onOnset(mSpectralFlux);
         mLastBeatTime = timestamp;
     }
 
     // Update phase regardless of beat detection
     updatePhase(timestamp);
-    if (onBeatPhase) {
-        onBeatPhase(mPhase);
-    }
+    onBeatPhase(mPhase);
 
     // Update previous magnitudes for next frame
     for (size i = 0; i < fft.bins_raw.size() && i < mPreviousMagnitudes.size(); i++) {
@@ -144,7 +138,7 @@ void BeatDetector::updateTempo(u32 timestamp) {
 
         // Check if tempo changed significantly
         float bpmDiff = fl::fl_abs(newBPM - mBPM);
-        if (bpmDiff > 5.0f && onTempoChange) {
+        if (bpmDiff > 5.0f) {
             onTempoChange(newBPM, mConfidence);
         }
 

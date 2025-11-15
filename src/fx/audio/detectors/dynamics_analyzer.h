@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -20,11 +21,11 @@ public:
     const char* getName() const override { return "DynamicsAnalyzer"; }
     void reset() override;
 
-    // Callbacks
-    function<void()> onCrescendo;          // Loudness increasing
-    function<void()> onDiminuendo;         // Loudness decreasing
-    function<void(float trend)> onDynamicTrend;  // Current trend (-1 to +1)
-    function<void(float compression)> onCompressionRatio;  // Dynamic range compression
+    // Callbacks (multiple listeners supported)
+    FunctionList<void()> onCrescendo;          // Loudness increasing
+    FunctionList<void()> onDiminuendo;         // Loudness decreasing
+    FunctionList<void(float trend)> onDynamicTrend;  // Current trend (-1 to +1)
+    FunctionList<void(float compression)> onCompressionRatio;  // Dynamic range compression
 
     // Configuration
     void setHistorySize(fl::size size);

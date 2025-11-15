@@ -9,6 +9,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "fl/ptr.h"
 
@@ -25,10 +26,10 @@ public:
     const char* getName() const override { return "VocalDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(bool active)> onVocalChange;
-    function<void()> onVocalStart;
-    function<void()> onVocalEnd;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(bool active)> onVocalChange;
+    FunctionList<void()> onVocalStart;
+    FunctionList<void()> onVocalEnd;
 
     // State access
     bool isVocal() const { return mVocalActive; }

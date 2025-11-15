@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -17,10 +18,10 @@ public:
     const char* getName() const override { return "EnergyAnalyzer"; }
     void reset() override;
 
-    // Callbacks
-    function<void(float rms)> onEnergy;
-    function<void(float peak)> onPeak;
-    function<void(float avgEnergy)> onAverageEnergy;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(float rms)> onEnergy;
+    FunctionList<void(float peak)> onPeak;
+    FunctionList<void(float avgEnergy)> onAverageEnergy;
 
     // State access
     float getRMS() const { return mCurrentRMS; }

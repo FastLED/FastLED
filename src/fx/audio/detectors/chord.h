@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "fl/ptr.h"
 
@@ -50,10 +51,10 @@ public:
     const char* getName() const override { return "ChordDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void(const Chord& chord)> onChord;
-    function<void(const Chord& chord)> onChordChange;
-    function<void()> onChordEnd;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void(const Chord& chord)> onChord;
+    FunctionList<void(const Chord& chord)> onChordChange;
+    FunctionList<void()> onChordEnd;
 
     // State access
     const Chord& getCurrentChord() const { return mCurrentChord; }

@@ -94,7 +94,7 @@ class Button {
     bool mPressedLastFrame = false;  // Don't read this variale, it's used internally.
     bool mClickedThisFrame = false;  // This is true if clicked this frame.
 
-    fl::FunctionList<void> mOnClickCallbacks;
+    fl::FunctionList<void()> mOnClickCallbacks;
     // fl::FunctionList<void(Button&)> mOnChangedCallbacks;
 };
 

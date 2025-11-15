@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "fx/audio/detectors/beat.h"
 #include "fx/audio/detectors/downbeat.h"
 #include "ftl/function.h"
@@ -67,10 +68,10 @@ public:
     const char* getName() const override { return "BackbeatDetector"; }
     void reset() override;
 
-    // ----- Callbacks -----
+    // ----- Callbacks (multiple listeners supported) -----
 
     /** Fires on detected backbeat (beats 2, 4) with beat number, confidence, and strength */
-    function<void(u8 beatNumber, float confidence, float strength)> onBackbeat;
+    FunctionList<void(u8 beatNumber, float confidence, float strength)> onBackbeat;
 
     // ----- State Access -----
 

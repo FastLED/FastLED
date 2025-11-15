@@ -2,6 +2,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "ftl/vector.h"
 
@@ -24,10 +25,10 @@ public:
     const char* getName() const override { return "TransientDetector"; }
     void reset() override;
 
-    // Callbacks
-    function<void()> onTransient;
-    function<void(float strength)> onTransientWithStrength;
-    function<void(float strength)> onAttack;
+    // Callbacks (multiple listeners supported)
+    FunctionList<void()> onTransient;
+    FunctionList<void(float strength)> onTransientWithStrength;
+    FunctionList<void(float strength)> onAttack;
 
     // State access
     bool isTransient() const { return mTransientDetected; }

@@ -4,6 +4,8 @@
 #include "ftl/vector.h"
 #include "ftl/type_traits.h"
 
+/* TODO: embed this in ftl/function.h */
+
 namespace fl {
 
 template <typename FunctionType> class FunctionListBase {
@@ -49,10 +51,18 @@ template <typename FunctionType> class FunctionListBase {
     // Size information
     fl::size size() const { return mFunctions.size(); }
     bool empty() const { return mFunctions.empty(); }
+
+    // Boolean conversion for if (callback) checks
+    explicit operator bool() const { return !empty(); }
 };
 
+// Primary template declaration (no definition - only specializations exist)
+template <typename> class FunctionList;
+
+// Partial specialization for function signature syntax: FunctionList<void(Args...)>
+// Supports: FunctionList<void()>, FunctionList<void(float)>, FunctionList<void(u8, float, float)>, etc.
 template <typename... Args>
-class FunctionList : public FunctionListBase<function<void(Args...)>> {
+class FunctionList<void(Args...)> : public FunctionListBase<function<void(Args...)>> {
   public:
     void invoke(Args... args) {
         for (const auto &pair : this->mFunctions) {
@@ -60,28 +70,20 @@ class FunctionList : public FunctionListBase<function<void(Args...)>> {
             function(args...);
         }
     }
-};
 
-template <>
-class FunctionList<void> : public FunctionListBase<function<void()>> {
-  public:
-    void invoke() {
-        for (const auto &pair : this->mFunctions) {
-            auto &function = pair.second;
-            function();
-        }
+    // Call operator - syntactic sugar for invoke()
+    void operator()(Args... args) {
+        invoke(args...);
     }
 };
 
-template <>
-class FunctionList<void()> : public FunctionListBase<function<void()>> {
-  public:
-    void invoke() {
-        for (const auto &pair : this->mFunctions) {
-            auto &function = pair.second;
-            function();
-        }
-    }
+// Partial specialization for non-void return types: FunctionList<R(Args...)> where R != void
+// Triggers a compile-time error when attempting to use non-void return types
+template <typename R, typename... Args>
+class FunctionList<R(Args...)> {
+    static_assert(fl::is_same<R, void>::value,
+                  "FunctionList only supports void return type. "
+                  "Use FunctionList<void(Args...)> instead of FunctionList<ReturnType(Args...)>.");
 };
 
 } // namespace fl

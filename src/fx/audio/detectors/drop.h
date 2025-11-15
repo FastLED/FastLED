@@ -5,6 +5,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 
 namespace fl {
@@ -59,10 +60,10 @@ public:
     const char* getName() const override { return "DropDetector"; }
     void reset() override;
 
-    // Event callbacks
-    function<void()> onDrop;                        // Fired when drop detected
-    function<void(const Drop&)> onDropEvent;        // Fired with drop details
-    function<void(float impact)> onDropImpact;      // Fired with impact strength
+    // Event callbacks (multiple listeners supported)
+    FunctionList<void()> onDrop;                          // Fired when drop detected
+    FunctionList<void(const Drop&)> onDropEvent;          // Fired with drop details
+    FunctionList<void(float impact)> onDropImpact;               // Fired with impact strength
 
     // State access
     const Drop& getLastDrop() const { return mLastDrop; }

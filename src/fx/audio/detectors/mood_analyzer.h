@@ -5,6 +5,7 @@
 
 #include "fl/audio/audio_detector.h"
 #include "fl/audio/audio_context.h"
+#include "fl/function_list.h"
 #include "ftl/function.h"
 #include "fl/int.h"
 
@@ -71,10 +72,10 @@ public:
     const char* getName() const override { return "MoodAnalyzer"; }
     void reset() override;
 
-    // Event callbacks
-    function<void(const Mood& mood)> onMood;              // Every frame
-    function<void(const Mood& mood)> onMoodChange;        // Mood category changes
-    function<void(float valence, float arousal)> onValenceArousal;  // Raw values
+    // Event callbacks (multiple listeners supported)
+    FunctionList<void(const Mood& mood)> onMood;              // Every frame
+    FunctionList<void(const Mood& mood)> onMoodChange;        // Mood category changes
+    FunctionList<void(float valence, float arousal)> onValenceArousal;   // Raw values
 
     // State access
     const Mood& getCurrentMood() const { return mCurrentMood; }
