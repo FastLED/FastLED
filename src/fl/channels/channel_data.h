@@ -6,12 +6,23 @@
 #include "ftl/vector.h"
 #include "ftl/stdint.h"
 #include "ftl/shared_ptr.h"
+#include "ftl/function.h"
 #include "channel_config.h"
 
 namespace fl {
 
 class ChannelData;
 FASTLED_SHARED_PTR(ChannelData);
+
+/// @brief Padding generator function type
+///
+/// Called by the engine to extend the encoded data buffer to an exact target size.
+/// The function should modify the buffer in-place to reach the target size
+/// (e.g., inserting zero bytes after a preamble for block alignment).
+///
+/// @param buffer Reference to the encoded data buffer to modify
+/// @param targetSize Exact size the buffer must reach (always >= current buffer size)
+using PaddingGenerator = fl::function<void(fl::vector_psram<uint8_t>&, size_t targetSize)>;
 
 /// @brief Transmission data for a single LED channel
 ///
@@ -54,6 +65,24 @@ public:
     /// @param inUse true to mark as in use, false to mark as available
     void setInUse(bool inUse) { mInUse = inUse; }
 
+    /// @brief Set the padding generator for this channel
+    /// @param generator Function that extends buffer to exact target size (nullptr to disable)
+    void setPaddingGenerator(PaddingGenerator generator) {
+        mPaddingGenerator = fl::move(generator);
+    }
+
+    /// @brief Apply padding to the encoded data buffer to reach target size
+    ///
+    /// If a padding generator is configured, it will be called to extend
+    /// the buffer to the exact target size. Otherwise, this is a no-op.
+    ///
+    /// @param targetSize Exact size the buffer must reach (must be >= current size)
+    void applyPadding(size_t targetSize) {
+        if (mPaddingGenerator) {
+            mPaddingGenerator(mEncodedData, targetSize);
+        }
+    }
+
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
@@ -74,6 +103,7 @@ private:
     const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset)
     fl::vector_psram<uint8_t> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
+    PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
 };
 
 }  // namespace fl
