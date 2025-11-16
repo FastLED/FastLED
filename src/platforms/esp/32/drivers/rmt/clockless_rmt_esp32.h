@@ -28,7 +28,7 @@
 #pragma once
 
 #include "platforms/esp/esp_version.h"
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #if !FASTLED_ESP32_HAS_RMT
 #error "How did we get here?"

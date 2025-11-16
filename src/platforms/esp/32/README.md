@@ -82,7 +82,7 @@ Additional I2S defines and guidance:
 - **Backend selection**
   - **`FASTLED_ESP32_I2S`**: Enable I2S-parallel backend. Good for many strips with identical timing. See `clockless_i2s_esp32.h`.
   - **`FASTLED_ESP32_USE_CLOCKLESS_SPI`**: Force the WS2812-over-SPI path instead of RMT when available. Only supports WS2811/WS2812 timings. See `fastled_esp32.h` and `clockless_spi_esp32.h`.
-  - The normal default is RMT when available (`FASTLED_ESP32_HAS_RMT` comes from `third_party/espressif/led_strip/src/enabled.h`).
+  - The normal default is RMT when available (`FASTLED_ESP32_HAS_RMT` comes from `platforms/esp/32/feature_flags/enabled.h`).
 
 - **SPI tuning (clocked LEDs and WS2812-over-SPI path)**
   - **`FASTLED_ALL_PINS_HARDWARE_SPI`**: Use the hardware SPI driver. See notes in `fastspi_esp32.h`.

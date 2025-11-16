@@ -3,7 +3,7 @@
 #define _FASTLED_ESP32_H
 
 #include "fastpin_esp32.h"
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #ifdef FASTLED_ALL_PINS_HARDWARE_SPI
 #include "fastspi_esp32.h"

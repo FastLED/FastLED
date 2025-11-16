@@ -6,7 +6,7 @@
 
 #include "fl/compiler_control.h"
 
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_RMT && !FASTLED_RMT5
 

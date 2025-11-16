@@ -4,6 +4,9 @@
 // This example generates a rectangular animation grid and samples a circular
 // region from it to display on a ring of LEDs using Fx2dTo1d.
 
+// Use SPI-based WS2812 driver instead of RMT on ESP32
+#define FASTLED_ESP32_USE_CLOCKLESS_SPI
+
 // FastLED.h must be included first to trigger precompiled headers for FastLED's build system
 #include "FastLED.h"
 

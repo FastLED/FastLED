@@ -14,7 +14,7 @@
 #if defined(ESP32) || defined(ARDUINO_ARCH_ESP32)
 
 // Include ESP32 driver availability checks
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 // Include portable blocking clockless controller for fallback
 #include "platforms/shared/clockless_blocking.h"

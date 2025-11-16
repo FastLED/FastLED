@@ -16,7 +16,7 @@ from typing import List, Set
 EXCLUDED_TEST_FILES: Set[str] = set()
 
 # Subdirectories containing tests that should be discovered
-TEST_SUBDIRS: List[str] = ["fl", "fx", "ftl"]
+TEST_SUBDIRS: List[str] = ["fl", "fl/channels", "fx", "ftl"]
 
 # ============================================================================
 # Test Categorization Configuration (for Unity Builds)

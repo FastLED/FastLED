@@ -1,6 +1,6 @@
 #pragma once
 
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_RMT5
 

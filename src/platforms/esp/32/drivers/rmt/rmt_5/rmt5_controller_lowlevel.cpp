@@ -2,7 +2,7 @@
 
 #include "fl/compiler_control.h"
 
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 #include "fl/cstring.h"
 
 #if FASTLED_RMT5

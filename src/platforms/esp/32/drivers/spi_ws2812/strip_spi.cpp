@@ -1,59 +1,72 @@
 #ifdef ESP32
 
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
-
-/*
- * SPDX-FileCopyrightText: 2023-2024 Espressif Systems (Shanghai) CO LTD
- *
- * SPDX-License-Identifier: Unlicense OR CC0-1.0
- */
-#include "freertos/FreeRTOS.h"
-#include "freertos/task.h"
-#include "third_party/espressif/led_strip/src/led_strip.h"
 #include "platforms/esp/32/core/esp_log_control.h"  // Control ESP logging before including esp_log.h
 #include "esp_log.h"
 #include "esp_err.h"
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
 
 #include "strip_spi.h"
-
 #include "rgbw.h"
 #include "fl/warn.h"
+#include "fl/dbg.h"
+#include "fl/cstring.h"
+#include "ftl/vector.h"
+
 namespace fl {
 static const char *STRIP_SPI_TAG = "strip_spi";
 
-led_strip_handle_t configure_led(int pin, uint32_t led_count, led_model_t led_model, spi_host_device_t spi_bus, bool with_dma)
-{
-    // LED strip general initialization, according to your led board design
-    led_strip_config_t strip_config = {
-        .strip_gpio_num = pin, // The GPIO that connected to the LED strip's data line
-        .max_leds = led_count,      // The number of LEDs in the strip,
-        .led_model = led_model,        // LED strip model
-        // set the color order of the strip: RGB
-        .color_component_format = LED_STRIP_COLOR_COMPONENT_FMT_RGB,
-        .flags = {
-            .invert_out = false, // don't invert the output signal
-        },
-        // use default timings initialization, avoid compiler warnings
-        .timings = {},
-    };
+/// @brief Encode a single LED color byte to SPI bits (WS2812)
+/// @param data LED color byte (0-255)
+/// @param buf Output buffer (must be zeroed, 3 bytes)
+///
+/// Each LED bit → 3 SPI bits at 2.5MHz:
+/// - Low bit (0): 100 (binary) → ~400ns high, ~800ns low
+/// - High bit (1): 110 (binary) → ~800ns high, ~400ns low
+///
+/// Ported directly from Espressif led_strip_spi_dev.cpp
+static void encodeLedByte(uint8_t data, uint8_t* buf) {
+    // WS2812 timing via SPI at 2.5MHz (400ns per bit):
+    // Each LED bit needs 3 SPI bits:
+    //   LED '0' → 100 (1×400ns high + 2×400ns low = 400ns + 800ns)
+    //   LED '1' → 110 (2×400ns high + 1×400ns low = 800ns + 400ns)
+    //
+    // Process byte from MSB to LSB:
+    // Byte 0bABCDEFGH → SPI bits: AAA|BBB|CCC|DDD|EEE|FFF|GGG|HHH (24 bits)
+    //
+    // Output format (3 bytes):
+    //   buf[0] = AAABBBCC (bits 7-2 of output)
+    //   buf[1] = CDDDEEEF (bits 15-10 of output)
+    //   buf[2] = FFGGGHHH (bits 23-18 of output)
 
-    // LED strip backend configuration: SPI
-    led_strip_spi_config_t spi_config = {
-        .clk_src = SPI_CLK_SRC_DEFAULT, // different clock source can lead to different power consumption
-        .spi_bus = spi_bus,           // SPI bus ID
-        .flags = {
-            .with_dma = with_dma, // Using DMA can improve performance and help drive more LEDs
+    // Buffer is zero-initialized, so we only need to set high bits
+    buf[0] = 0;
+    buf[1] = 0;
+    buf[2] = 0;
+
+    // Process each bit from MSB (bit 7) to LSB (bit 0)
+    for (int bit = 7; bit >= 0; bit--) {
+        uint8_t pattern = (data & (1 << bit)) ? 0b110 : 0b100;  // High bit: 110, Low bit: 100
+
+        // Map LED bit position to SPI byte/bit positions
+        int spi_bit_offset = (7 - bit) * 3;  // Each LED bit → 3 SPI bits
+        int byte_idx = spi_bit_offset / 8;
+        int bit_offset = spi_bit_offset % 8;
+
+        // Write 3-bit pattern into output buffer
+        if (bit_offset <= 5) {
+            // Pattern fits entirely in one byte
+            buf[byte_idx] |= (pattern << (5 - bit_offset));
+        } else {
+            // Pattern spans two bytes
+            buf[byte_idx] |= (pattern >> (bit_offset - 5));
+            buf[byte_idx + 1] |= (pattern << (13 - bit_offset));
         }
-    };
-
-    // LED Strip object handle
-    led_strip_handle_t led_strip;
-    ESP_ERROR_CHECK(led_strip_new_spi_device(&strip_config, &spi_config, &led_strip));
-    FASTLED_ESP_LOGI(STRIP_SPI_TAG, "Created LED strip object with SPI backend");
-    return led_strip;
+    }
 }
 
 struct SpiHostUsed {
@@ -101,9 +114,10 @@ static void releaseSpiHost(spi_host_device_t spi_host)
 class SpiStripWs2812 : public ISpiStripWs2812 {
 public:
     SpiStripWs2812(int pin, uint32_t led_count, ISpiStripWs2812::SpiHostMode spi_bus_mode, ISpiStripWs2812::DmaMode dma_mode = DMA_AUTO)
-        : mIsRgbw(false), // SPI implementation currently only supports RGB
-          mLedCount(led_count)
+        : mLedCount(led_count)
+        , mDrawIssued(false)
     {
+        // Determine SPI host
         switch (spi_bus_mode) {
             case ISpiStripWs2812::SPI_HOST_MODE_AUTO:
                 mSpiHost = getNextAvailableSpiHost();
@@ -123,22 +137,81 @@ public:
                 ESP_ERROR_CHECK(ESP_ERR_NOT_SUPPORTED);
         }
 
-        bool with_dma = dma_mode == ISpiStripWs2812::DMA_ENABLED || dma_mode == ISpiStripWs2812::DMA_AUTO;
-        led_strip_handle_t led_strip = configure_led(pin, led_count, LED_MODEL_WS2812, mSpiHost, with_dma);
-        mStrip = led_strip;
+        // Determine DMA mode
+        bool with_dma = (dma_mode == ISpiStripWs2812::DMA_ENABLED) ||
+                       (dma_mode == ISpiStripWs2812::DMA_AUTO);
+
+        // Allocate LED pixel buffer (RGB: 3 bytes per pixel)
+        mLedBuffer.resize(led_count * 3);
+        fl::memset(mLedBuffer.data(), 0, mLedBuffer.size());
+
+        // Allocate SPI buffer (3x LED data for WS2812 encoding)
+        mSpiBuffer.resize(led_count * 3 * 3);  // Each LED byte → 3 SPI bytes
+        fl::memset(mSpiBuffer.data(), 0, mSpiBuffer.size());
+
+        // Initialize SPI bus
+        spi_bus_config_t bus_config = {};
+        bus_config.mosi_io_num = pin;
+        bus_config.miso_io_num = -1;  // Not used
+        bus_config.sclk_io_num = -1;  // Not used (data-only SPI)
+        bus_config.quadwp_io_num = -1;
+        bus_config.quadhd_io_num = -1;
+        bus_config.max_transfer_sz = mSpiBuffer.size();
+        bus_config.flags = SPICOMMON_BUSFLAG_MASTER | SPICOMMON_BUSFLAG_GPIO_PINS;
+
+        int dma_chan = with_dma ? SPI_DMA_CH_AUTO : SPI_DMA_DISABLED;
+        esp_err_t ret = spi_bus_initialize(mSpiHost, &bus_config, dma_chan);
+        if (ret != ESP_OK) {
+            FL_WARN("SPI bus initialize failed: " << esp_err_to_name(ret));
+            ESP_ERROR_CHECK(ret);
+        }
+        FL_DBG("SPI bus initialized on host " << mSpiHost);
+
+        // Configure SPI device
+        spi_device_interface_config_t dev_config = {};
+        dev_config.mode = 0;  // SPI mode 0 (CPOL=0, CPHA=0)
+        dev_config.clock_speed_hz = 2500000;  // 2.5MHz for WS2812
+        dev_config.spics_io_num = -1;  // No CS pin
+        dev_config.queue_size = 1;  // Single transaction at a time
+        dev_config.flags = SPI_DEVICE_NO_DUMMY;
+
+        ret = spi_bus_add_device(mSpiHost, &dev_config, &mSpiDevice);
+        if (ret != ESP_OK) {
+            FL_WARN("SPI device add failed: " << esp_err_to_name(ret));
+            spi_bus_free(mSpiHost);
+            ESP_ERROR_CHECK(ret);
+        }
+        FL_DBG("SPI device created for " << led_count << " LEDs on pin " << pin);
     }
 
     ~SpiStripWs2812() override
     {
         waitDone();
-        led_strip_del(mStrip);
+
+        if (mSpiDevice) {
+            spi_bus_remove_device(mSpiDevice);
+            mSpiDevice = nullptr;
+        }
+
+        spi_bus_free(mSpiHost);
         releaseSpiHost(mSpiHost);
-        mStrip = nullptr;
+
+        FL_DBG("SPI device destroyed");
     }
 
     void setPixel(uint32_t index, uint8_t red, uint8_t green, uint8_t blue) override
     {
-        ESP_ERROR_CHECK(led_strip_set_pixel(mStrip, index, red, green, blue));
+        if (index >= mLedCount) {
+            FL_WARN("setPixel index out of range: " << index << " >= " << mLedCount);
+            return;
+        }
+
+        // Store in RGB order (WS2812 expects GRB, but we'll handle that in encoding)
+        // Actually, let's store in GRB order directly to match WS2812 protocol
+        uint32_t offset = index * 3;
+        mLedBuffer[offset + 0] = green;
+        mLedBuffer[offset + 1] = red;
+        mLedBuffer[offset + 2] = blue;
     }
 
     void drawAsync() override
@@ -147,8 +220,27 @@ public:
         {
             waitDone();
         }
-        ESP_ERROR_CHECK(led_strip_refresh_async(mStrip));
+
+        // Encode LED buffer to SPI buffer
+        for (size_t i = 0; i < mLedBuffer.size(); i++) {
+            encodeLedByte(mLedBuffer[i], &mSpiBuffer[i * 3]);
+        }
+
+        // Prepare SPI transaction
+        fl::memset(&mTransaction, 0, sizeof(mTransaction));
+        mTransaction.length = mSpiBuffer.size() * 8;  // Length in bits
+        mTransaction.tx_buffer = mSpiBuffer.data();
+        mTransaction.rx_buffer = nullptr;
+
+        // Queue transaction (non-blocking)
+        esp_err_t ret = spi_device_queue_trans(mSpiDevice, &mTransaction, portMAX_DELAY);
+        if (ret != ESP_OK) {
+            FL_WARN("SPI transaction queue failed: " << esp_err_to_name(ret));
+            ESP_ERROR_CHECK(ret);
+        }
+
         mDrawIssued = true;
+        FL_DBG("SPI transaction queued (" << mSpiBuffer.size() << " bytes)");
     }
 
     void waitDone() override
@@ -157,8 +249,17 @@ public:
         {
             return;
         }
-        ESP_ERROR_CHECK(led_strip_refresh_wait_done(mStrip));
+
+        // Wait for transaction to complete
+        spi_transaction_t* trans_ptr = nullptr;
+        esp_err_t ret = spi_device_get_trans_result(mSpiDevice, &trans_ptr, portMAX_DELAY);
+        if (ret != ESP_OK) {
+            FL_WARN("SPI transaction wait failed: " << esp_err_to_name(ret));
+            ESP_ERROR_CHECK(ret);
+        }
+
         mDrawIssued = false;
+        FL_DBG("SPI transaction complete");
     }
 
     bool isDrawing() override
@@ -167,20 +268,7 @@ public:
     }
 
     void fill(uint8_t red, uint8_t green, uint8_t blue) {
-        for (int i = 0; i < mLedCount; i++)
-        {
-            setPixel(i, red, green, blue);
-        }
-    }
-
-    void clear()
-    {
-        ESP_ERROR_CHECK(led_strip_clear(mStrip));
-    }
-
-    void fill_color(uint8_t red, uint8_t green, uint8_t blue)
-    {
-        for (int i = 0; i < mLedCount; i++)
+        for (uint32_t i = 0; i < mLedCount; i++)
         {
             setPixel(i, red, green, blue);
         }
@@ -197,11 +285,14 @@ public:
     }
 
 private:
-    spi_host_device_t mSpiHost = SPI2_HOST;
-    led_strip_handle_t mStrip;
-    bool mDrawIssued = false;
-    bool mIsRgbw;
-    u32 mLedCount = 0;
+    spi_host_device_t mSpiHost;
+    spi_device_handle_t mSpiDevice;
+    u32 mLedCount;
+    bool mDrawIssued;
+
+    fl::vector<uint8_t> mLedBuffer;   // LED pixel data (3 bytes per LED: GRB)
+    fl::vector<uint8_t> mSpiBuffer;   // Encoded SPI data (9 bytes per LED)
+    spi_transaction_t mTransaction;   // SPI transaction descriptor
 };
 
 

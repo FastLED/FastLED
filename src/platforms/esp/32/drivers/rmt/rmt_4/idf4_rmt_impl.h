@@ -5,7 +5,7 @@
 #ifdef ESP32
 #ifndef FASTLED_ESP32_I2S
 
-#include "third_party/espressif/led_strip/src/enabled.h"
+#include "platforms/esp/32/feature_flags/enabled.h"
 
 #if !FASTLED_RMT5
 
