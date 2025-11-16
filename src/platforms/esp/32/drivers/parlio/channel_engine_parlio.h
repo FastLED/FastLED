@@ -126,7 +126,6 @@
 // Forward declarations for PARLIO types (avoid including driver headers in .h)
 struct parlio_tx_unit_t;
 typedef struct parlio_tx_unit_t* parlio_tx_unit_handle_t;
-enum gpio_num_t : int;  // ESP-IDF GPIO enum
 
 namespace fl {
 
@@ -188,7 +187,7 @@ private:
     struct ParlioState {
         parlio_tx_unit_handle_t tx_unit;     ///< PARLIO TX unit handle
         uint8_t data_width;                   ///< Number of parallel data lines (1/2/4/8/16)
-        fl::vector<gpio_num_t> pins;          ///< GPIO pin assignments
+        fl::vector<int> pins;                 ///< GPIO pin assignments (gpio_num_t cast to int)
         volatile bool transmitting;           ///< Transmission in progress flag
 
         // Double-buffered DMA streaming (DMA-capable memory)
@@ -229,12 +228,15 @@ private:
     void initializeIfNeeded();
 
     /// @brief ISR callback for transmission completion (static wrapper)
-    static bool IRAM_ATTR txDoneCallback(parlio_tx_unit_handle_t tx_unit,
-                                         const void* edata,
-                                         void* user_ctx);
+    /// @note IRAM_ATTR applied in implementation (.cpp) to avoid section conflicts
+    /// @note edata is const void* because parlio_tx_done_event_data_t is an ESP-IDF anonymous struct typedef
+    static bool txDoneCallback(parlio_tx_unit_handle_t tx_unit,
+                               const void* edata,
+                               void* user_ctx);
 
     /// @brief Transpose and queue next chunk (called from ISR or main thread)
-    bool IRAM_ATTR transposeAndQueueNextChunk();
+    /// @note IRAM_ATTR applied in implementation (.cpp) to avoid section conflicts
+    bool transposeAndQueueNextChunk();
 
     /// @brief Initialization flag
     bool mInitialized;

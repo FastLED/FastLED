@@ -211,7 +211,7 @@ static bool transposeAndPack(fl::span<const ChannelDataPtr> channelData,
         for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
             // Step 1: Encode each strip's byte into 32-bit waveform
             for (size_t stripIdx = 0; stripIdx < channelData.size(); stripIdx++) {
-                const uint8_t* data = channelData[stripIdx]->getData();
+                const uint8_t* data = channelData[stripIdx]->getData().data();
                 size_t byteOffset = ledIdx * 3 + colorIdx;
                 uint8_t byte = data[byteOffset];
                 waveforms[stripIdx] = encodeLedByte(byte);
@@ -318,7 +318,7 @@ static size_t calculateStreamingChunkSize(uint8_t dataWidth) {
 
     // Don't exceed hardware limits
     size_t maxLedsPerChunk = calculateMaxLedsPerChunk(dataWidth);
-    return ftl::min(targetLedsPerChunk, maxLedsPerChunk);
+    return (targetLedsPerChunk < maxLedsPerChunk) ? targetLedsPerChunk : maxLedsPerChunk;
 }
 
 //=============================================================================
@@ -407,6 +407,9 @@ bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_un
                                                      const void* edata,
                                                      void* user_ctx) {
     // ISR context - must be fast and IRAM-safe
+    // Note: edata is actually const parlio_tx_done_event_data_t* but we don't use it
+    (void)edata;  // Unused parameter
+    (void)tx_unit;  // Unused parameter
     ChannelEnginePARLIO* self = static_cast<ChannelEnginePARLIO*>(user_ctx);
     if (!self) {
         return false;
@@ -433,7 +436,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_un
 bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
     // Calculate chunk parameters
     size_t ledsRemaining = mState.total_leds - mState.current_led;
-    size_t ledsThisChunk = ftl::min(ledsRemaining, mState.leds_per_chunk);
+    size_t ledsThisChunk = (ledsRemaining < mState.leds_per_chunk) ? ledsRemaining : mState.leds_per_chunk;
 
     if (ledsThisChunk == 0) {
         return true;  // Nothing to do
@@ -465,7 +468,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
         for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
             // Encode each strip's byte into waveform
             for (size_t stripIdx = 0; stripIdx < mState.source_channels.size(); stripIdx++) {
-                const uint8_t* data = mState.source_channels[stripIdx]->getData();
+                const uint8_t* data = mState.source_channels[stripIdx]->getData().data();
                 size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
                 uint8_t byte = data[byteOffset];
                 waveforms[stripIdx] = encodeLedByte(byte);
@@ -696,7 +699,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     // Step 3: Configure GPIO pins
     mState.pins.clear();
     for (size_t i = 0; i < mState.data_width; i++) {
-        mState.pins.push_back(static_cast<gpio_num_t>(DEFAULT_PARLIO_PINS[i]));
+        mState.pins.push_back(DEFAULT_PARLIO_PINS[i]);
     }
 
     // Step 4: Configure PARLIO TX unit
@@ -709,7 +712,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     // Assign GPIO pins
     for (size_t i = 0; i < mState.data_width; i++) {
-        config.data_gpio_nums[i] = mState.pins[i];
+        config.data_gpio_nums[i] = static_cast<gpio_num_t>(mState.pins[i]);
     }
     for (size_t i = mState.data_width; i < 16; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
@@ -730,7 +733,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     // Step 6: Register ISR callback for streaming
     parlio_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done = txDoneCallback;
+    callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
 
     err = parlio_tx_unit_register_event_callbacks(mState.tx_unit, &callbacks, this);
     if (err != ESP_OK) {
