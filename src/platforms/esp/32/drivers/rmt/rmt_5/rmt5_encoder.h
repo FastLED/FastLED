@@ -81,22 +81,22 @@ private:
     uint32_t mBit1LowTicks;
     uint32_t mResetTicks;
 
-    // Static callbacks for rmt_encoder_t interface
-    static size_t encodeCallback(rmt_encoder_t *encoder,
-                                 rmt_channel_handle_t channel,
-                                 const void *primary_data, size_t data_size,
-                                 rmt_encode_state_t *ret_state);
+    // Static callbacks for rmt_encoder_t interface (run in ISR context)
+    static size_t IRAM_ATTR encodeCallback(rmt_encoder_t *encoder,
+                                            rmt_channel_handle_t channel,
+                                            const void *primary_data, size_t data_size,
+                                            rmt_encode_state_t *ret_state);
 
-    static esp_err_t resetCallback(rmt_encoder_t *encoder);
+    static esp_err_t IRAM_ATTR resetCallback(rmt_encoder_t *encoder);
     static esp_err_t delCallback(rmt_encoder_t *encoder);
 
-    // Instance method called by static callback
-    size_t encode(rmt_channel_handle_t channel,
-                  const void *primary_data, size_t data_size,
-                  rmt_encode_state_t *ret_state);
+    // Instance method called by static callback (runs in ISR context)
+    size_t IRAM_ATTR encode(rmt_channel_handle_t channel,
+                            const void *primary_data, size_t data_size,
+                            rmt_encode_state_t *ret_state);
 
-    // Helper: reset encoder state
-    esp_err_t reset();
+    // Helper: reset encoder state (runs in ISR context)
+    esp_err_t IRAM_ATTR reset();
 
     // Helper: delete encoder and free resources
     esp_err_t del();

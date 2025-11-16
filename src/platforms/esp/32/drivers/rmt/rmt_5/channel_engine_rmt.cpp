@@ -332,18 +332,26 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
                    << dataSize << " bytes (" << (dataSize/3) << " LEDs)");
     } else {
         // Non-DMA mode: use hardware memory blocks
-        // OPTIMIZATION: When one channel uses DMA, it frees up hardware memory for others!
-        // ESP32-S3: 192 total words, double-buffering allows only 2 active channels (96 words each)
-        // When 1 channel uses DMA → 1 non-DMA channel can use ALL 192 words = QUAD-BUFFERING!
+        // OPTIMIZATION: Maximize buffer size based on channel count
+        // ESP32-S3: 192 total words available
+
         if (mDMAChannelsInUse > 0) {
-            // DMA channel uses 0 words → all 192 words available for 1 non-DMA channel
+            // One DMA channel active → all 192 words available for this non-DMA channel
             // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
             mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
             FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
                        << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
+        } else if (mChannels.empty()) {
+            // First channel being created → speculatively allocate all 192 words
+            // This optimizes single-strip setups for maximum WiFi resistance
+            // If more strips are added later, they'll share the memory pool
+            mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+            FL_LOG_RMT("First non-DMA channel: QUAD-BUFFERING with " << mem_block_symbols
+                       << " symbols (optimized for single-strip setup)");
         } else {
-            // Standard double-buffer size when no DMA channels active
-            mem_block_symbols = FASTLED_RMT5_MAX_PULSES;
+            // Multiple non-DMA channels → use standard double-buffer size
+            // ESP32-S3 can support 2 double-buffered channels (96 words each)
+            mem_block_symbols = FASTLED_RMT5_MAX_PULSES;  // 48 * 2 = 96
         }
     }
 
@@ -353,6 +361,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
     tx_config.mem_block_symbols = mem_block_symbols;
     tx_config.trans_queue_depth = 1;
+    tx_config.intr_priority = 3;  // Level 3 (highest officially supported by RMT driver)
     tx_config.flags.invert_out = 0;
     tx_config.flags.with_dma = useDMA ? 1 : 0;
 

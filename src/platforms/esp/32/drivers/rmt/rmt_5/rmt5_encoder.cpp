@@ -116,9 +116,9 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     return ESP_OK;
 }
 
-size_t FastLEDRmtEncoder::encode(rmt_channel_handle_t channel,
-                                 const void *primary_data, size_t data_size,
-                                 rmt_encode_state_t *ret_state) {
+size_t IRAM_ATTR FastLEDRmtEncoder::encode(rmt_channel_handle_t channel,
+                                           const void *primary_data, size_t data_size,
+                                           rmt_encode_state_t *ret_state) {
     // CRITICAL: Use separate variables for session state and accumulated state
     // This matches ESP-IDF led_strip encoder pattern exactly
     rmt_encode_state_t session_state = RMT_ENCODING_RESET;
@@ -164,7 +164,7 @@ out:
     return encoded_symbols;
 }
 
-esp_err_t FastLEDRmtEncoder::reset() {
+esp_err_t IRAM_ATTR FastLEDRmtEncoder::reset() {
     mState = 0;
     if (mBytesEncoder) {
         mBytesEncoder->reset(mBytesEncoder);
@@ -191,15 +191,15 @@ esp_err_t FastLEDRmtEncoder::del() {
 // Static Callbacks (C linkage for rmt_encoder_t interface)
 //=============================================================================
 
-size_t FastLEDRmtEncoder::encodeCallback(rmt_encoder_t *encoder,
-                                         rmt_channel_handle_t channel,
-                                         const void *primary_data, size_t data_size,
-                                         rmt_encode_state_t *ret_state) {
+size_t IRAM_ATTR FastLEDRmtEncoder::encodeCallback(rmt_encoder_t *encoder,
+                                                    rmt_channel_handle_t channel,
+                                                    const void *primary_data, size_t data_size,
+                                                    rmt_encode_state_t *ret_state) {
     fastled_encoder_wrapper_t *wrapper = reinterpret_cast<fastled_encoder_wrapper_t*>(encoder);
     return wrapper->instance->encode(channel, primary_data, data_size, ret_state);
 }
 
-esp_err_t FastLEDRmtEncoder::resetCallback(rmt_encoder_t *encoder) {
+esp_err_t IRAM_ATTR FastLEDRmtEncoder::resetCallback(rmt_encoder_t *encoder) {
     fastled_encoder_wrapper_t *wrapper = reinterpret_cast<fastled_encoder_wrapper_t*>(encoder);
     return wrapper->instance->reset();
 }
