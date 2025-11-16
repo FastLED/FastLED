@@ -16,4 +16,4 @@ void on_startup() {
 
 //#define PIN_DATA 21
 
-#include "../examples/AnimartrixRing/AnimartrixRing.ino"
+#include "../examples/BlinkParallel/BlinkParallel.ino"

@@ -309,8 +309,12 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
     if (state->channel && state->pin != pin) {
         FL_DBG("Pin changed from " << static_cast<int>(state->pin)
                << " to " << static_cast<int>(pin) << ", recreating channel");
+
+        // Wait for any pending transmission to complete
         rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
-        rmt_disable(state->channel);
+
+        // Delete channel directly - no need to disable since we're deleting
+        // (rmt_del_channel handles cleanup internally)
         rmt_del_channel(state->channel);
         state->channel = nullptr;
     }
