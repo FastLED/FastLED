@@ -9,6 +9,8 @@
 
 This directory contains **low-level infrastructure** for the FastLED audio system. It provides the foundational building blocks that all audio detectors and effects use.
 
+*for a high level audio processing library go here https://github.com/FastLED/FastLED/tree/master/src/fx/audio**
+
 **What belongs here:**
 - ✅ Shared computation state (AudioContext)
 - ✅ Base class interfaces (AudioDetector)
