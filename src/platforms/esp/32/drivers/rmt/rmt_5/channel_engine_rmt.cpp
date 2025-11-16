@@ -285,6 +285,17 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
 
 void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
     FL_ASSERT(channel != nullptr, "releaseChannel called with nullptr");
+
+    // Release pooled buffer if one was acquired
+    if (!channel->pooledBuffer.empty()) {
+        if (channel->useDMA) {
+            mBufferPool.releaseDMA();
+        } else {
+            mBufferPool.releaseInternal(channel->pooledBuffer);
+        }
+        channel->pooledBuffer = fl::span<uint8_t>();
+    }
+
     channel->inUse = false;
     channel->transmissionComplete = false;
     // NOTE: Keep channel and encoder alive for reuse
@@ -437,9 +448,37 @@ void ChannelEngineRMT::processPendingChannels() {
         channel->reset_us = pending.reset_us;
         channel->transmissionComplete = false;
 
+        // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
+        fl::size dataSize = pending.data->getSize();
+        fl::span<uint8_t> pooledBuffer = channel->useDMA ?
+            mBufferPool.acquireDMA(dataSize) :
+            mBufferPool.acquireInternal(dataSize);
+
+        if (pooledBuffer.empty()) {
+            FL_WARN("Failed to acquire pooled buffer for pin " << pending.pin
+                    << " (" << dataSize << " bytes, DMA=" << channel->useDMA << ")");
+            releaseChannel(channel);
+            ++i;
+            continue;
+        }
+
+        // Copy data from PSRAM to pooled buffer using writeWithPadding
+        // Note: writeWithPadding uses zero padding since RMT can handle any byte array size
+        pending.data->writeWithPadding(pooledBuffer);
+
+        // Store pooled buffer in channel state for release on completion
+        channel->pooledBuffer = pooledBuffer;
+
         esp_err_t err = rmt_enable(channel->channel);
         if (err != ESP_OK) {
             FL_LOG_RMT("Failed to enable channel: " << esp_err_to_name(err));
+            // Release buffer back to pool before releasing channel
+            if (channel->useDMA) {
+                mBufferPool.releaseDMA();
+            } else {
+                mBufferPool.releaseInternal(channel->pooledBuffer);
+            }
+            channel->pooledBuffer = fl::span<uint8_t>();
             releaseChannel(channel);
             ++i;
             continue;
@@ -450,6 +489,13 @@ void ChannelEngineRMT::processPendingChannels() {
         if (err != ESP_OK) {
             FL_LOG_RMT("Failed to reset encoder: " << esp_err_to_name(err));
             rmt_disable(channel->channel);
+            // Release buffer back to pool before releasing channel
+            if (channel->useDMA) {
+                mBufferPool.releaseDMA();
+            } else {
+                mBufferPool.releaseInternal(channel->pooledBuffer);
+            }
+            channel->pooledBuffer = fl::span<uint8_t>();
             releaseChannel(channel);
             ++i;
             continue;
@@ -457,13 +503,21 @@ void ChannelEngineRMT::processPendingChannels() {
 
         rmt_transmit_config_t tx_config = {};
         tx_config.loop_count = 0;
+        // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
         err = rmt_transmit(channel->channel, encoder,
-                          pending.data->getData().data(),
-                          pending.data->getSize(),
+                          pooledBuffer.data(),
+                          pooledBuffer.size(),
                           &tx_config);
         if (err != ESP_OK) {
             FL_LOG_RMT("Failed to transmit: " << esp_err_to_name(err));
             rmt_disable(channel->channel);
+            // Release buffer back to pool before releasing channel
+            if (channel->useDMA) {
+                mBufferPool.releaseDMA();
+            } else {
+                mBufferPool.releaseInternal(channel->pooledBuffer);
+            }
+            channel->pooledBuffer = fl::span<uint8_t>();
             releaseChannel(channel);
             ++i;
             continue;

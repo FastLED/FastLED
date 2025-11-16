@@ -19,6 +19,7 @@
 #include "ftl/hash_map.h"
 #include "ftl/time.h"
 #include "fl/timeout.h"
+#include "buffer_pool.h"
 
 FL_EXTERN_C_BEGIN
 #include "driver/rmt_tx.h"
@@ -63,6 +64,7 @@ private:
         bool inUse;
         bool useDMA;  // Whether this channel uses DMA
         uint32_t reset_us;
+        fl::span<uint8_t> pooledBuffer;  // Buffer acquired from pool (must be released on complete)
     };
 
     /// @brief Pending channel data to be transmitted when HW channels become available
@@ -133,6 +135,9 @@ private:
 
     /// @brief Encoder cache: timing -> encoder handle (never deleted until shutdown)
     fl::hash_map<ChipsetTiming, rmt_encoder_handle_t, TimingHash, TimingEqual> mEncoderCache;
+
+    /// @brief Buffer pool for PSRAM -> DRAM/DMA memory transfer
+    RMTBufferPool mBufferPool;
 
     /// @brief Track DMA channel usage (only 1 allowed on ESP32-S3)
     int mDMAChannelsInUse;

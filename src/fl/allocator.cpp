@@ -137,7 +137,7 @@ void* Malloc(fl::size size) {
     return ptr;
 }
 
-void Free(void *ptr) { 
+void Free(void *ptr) {
 #if defined(FASTLED_TESTING)
     if (gMallocFreeHook && ptr) {
         MemoryGuard allows_hook;
@@ -146,8 +146,54 @@ void Free(void *ptr) {
         }
     }
 #endif
-    
-    Dealloc(ptr); 
+
+    Dealloc(ptr);
 }
+
+#ifdef ESP32
+// ESP32-specific memory allocation for RMT buffer pooling
+// These functions provide direct access to specific memory regions for performance
+
+void* InternalAlloc(fl::size size) {
+    // MALLOC_CAP_INTERNAL: Internal DRAM (fast, not in PSRAM)
+    // MALLOC_CAP_8BIT: Ensure byte-accessible memory
+    void* ptr = heap_caps_malloc(size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    if (ptr) {
+        fl::memset(ptr, 0, size);  // Zero-initialize
+    }
+    return ptr;
+}
+
+void* InternalRealloc(void* ptr, fl::size size) {
+    // Realloc in internal DRAM - may relocate or expand in-place
+    void* new_ptr = heap_caps_realloc(ptr, size, MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+
+    // Zero-initialize any newly allocated bytes (if expanded)
+    // Note: heap_caps_realloc preserves existing data, we only zero new space
+    // This is best-effort - we don't track old size, so we can't selectively zero
+    // For safety, caller should manage initialization if needed
+
+    return new_ptr;
+}
+
+void InternalFree(void* ptr) {
+    heap_caps_free(ptr);
+}
+
+void* DMAAlloc(fl::size size) {
+    // MALLOC_CAP_DMA: DMA-capable memory (limited on ESP32)
+    // MALLOC_CAP_INTERNAL: Must be in internal SRAM (not PSRAM) for most DMA
+    // MALLOC_CAP_8BIT: Ensure byte-accessible
+    void* ptr = heap_caps_malloc(size, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL | MALLOC_CAP_8BIT);
+    if (ptr) {
+        fl::memset(ptr, 0, size);  // Zero-initialize
+    }
+    return ptr;
+}
+
+void DMAFree(void* ptr) {
+    heap_caps_free(ptr);
+}
+#endif
 
 } // namespace fl
