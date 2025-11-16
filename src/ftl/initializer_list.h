@@ -2,6 +2,8 @@
 
 #pragma once
 
+// Need fl::size type definition
+#include "fl/int.h"
 
 // Define if initializer_list is available
 // Check for C++11 and if std::initializer_list exists
