@@ -24,7 +24,7 @@ FL_EXTERN_C_END
 // RMT clock frequency configuration
 // This can be overridden before including FastLED.h if different frequency is needed
 #ifndef FASTLED_RMT5_CLOCK_HZ
-#define FASTLED_RMT5_CLOCK_HZ 40000000  // 40MHz (25ns resolution), same as NeoPixelBus.
+#define FASTLED_RMT5_CLOCK_HZ 10000000  // 10MHz (100ns resolution)
 #endif
 
 // RMT memory configuration (matching RMT4)

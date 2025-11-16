@@ -300,6 +300,13 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
 void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
     FL_ASSERT(channel != nullptr, "releaseChannel called with nullptr");
 
+    // CRITICAL: Wait for RMT hardware to fully complete transmission
+    // The ISR callback (transmitDoneCallback) may fire slightly before the last bits
+    // have fully propagated out of the RMT peripheral. We must ensure hardware is
+    // truly done before allowing buffer reuse to prevent race conditions.
+    esp_err_t wait_result = rmt_tx_wait_all_done(channel->channel, pdMS_TO_TICKS(100));
+    FL_ASSERT(wait_result == ESP_OK, "RMT transmission wait timeout - hardware may be stalled");
+
     // Release pooled buffer if one was acquired
     if (!channel->pooledBuffer.empty()) {
         if (channel->useDMA) {
@@ -623,6 +630,39 @@ void ChannelEngineRMT::processPendingChannels() {
 // ISR Callback
 //=============================================================================
 
+/// @brief ISR callback fired when RMT transmission completes
+///
+/// CRITICAL TIMING CONTRACT:
+/// This callback is invoked by ESP-IDF when the RMT peripheral signals that
+/// the transmission queue is empty. However, there is a small timing window
+/// where the callback may fire BEFORE the last bits have fully propagated
+/// out of the RMT shift register and onto the GPIO pin.
+///
+/// RACE CONDITION PREVENTION:
+/// To prevent buffer corruption, releaseChannel() MUST call rmt_tx_wait_all_done()
+/// with a timeout BEFORE marking the channel as available for reuse. This ensures
+/// the RMT hardware has fully completed transmission before:
+///   1. The channel's pooled buffer is released back to the buffer pool
+///   2. The ChannelData's mInUse flag is cleared (allowing new pixel data writes)
+///   3. The channel is marked as available for acquisition by other transmissions
+///
+/// Without this hardware wait, the following race condition can occur:
+///   - Frame N transmission starts (RMT hardware reading buffer A)
+///   - ISR fires (callback sets transmissionComplete = true)
+///   - Main thread calls releaseChannel() → clears mInUse flag
+///   - User calls FastLED.show() for Frame N+1
+///   - ClocklessRMT::showPixels() sees mInUse == false → proceeds to encode
+///   - NEW pixel data overwrites buffer A while RMT is still shifting it out
+///   - LEDs display corrupted mix of Frame N and Frame N+1 data
+///
+/// SYNCHRONIZATION STRATEGY:
+/// - ISR: Sets transmissionComplete flag (lightweight, non-blocking)
+/// - Main thread poll(): Calls releaseChannel() when transmissionComplete is true
+/// - releaseChannel(): Calls rmt_tx_wait_all_done() to ensure hardware is done
+/// - ClocklessRMT::showPixels(): Asserts !mInUse before writing new pixel data
+///
+/// This multi-layered approach provides both correctness (hardware wait) and
+/// fail-fast debugging (assertions catch any timing bugs).
 bool IRAM_ATTR ChannelEngineRMT::transmitDoneCallback(
     rmt_channel_handle_t channel,
     const rmt_tx_done_event_data_t *edata,
@@ -635,6 +675,7 @@ bool IRAM_ATTR ChannelEngineRMT::transmitDoneCallback(
     }
 
     // Mark transmission as complete (polled by main thread)
+    // NOTE: This flag triggers releaseChannel(), which performs hardware wait
     state->transmissionComplete = true;
 
     // Non-blocking design - no semaphore signal needed

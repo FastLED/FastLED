@@ -51,11 +51,9 @@ protected:
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        // Safety check: don't modify buffer if engine is currently transmitting it
-        if (mChannelData->isInUse()) {
-            FL_ASSERT(false, "ClocklessRMT: Skipping update - buffer in use by engine");
-            return;
-        }
+        // Fail-fast race condition detection: Buffer MUST NOT be in use
+        // If this assertion fires, the hardware wait in releaseChannel() is insufficient
+        FL_ASSERT(!mChannelData->isInUse(), "ClocklessRMT: Race condition - buffer still in use by engine!");
 
         // Convert pixels to encoded byte data
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());

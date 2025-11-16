@@ -65,15 +65,17 @@ esp_err_t FastLEDRmtEncoder::initialize(const ChipsetTiming& timing, uint32_t re
     // RMT resolution is typically 40MHz (25ns per tick)
     const uint64_t ns_per_tick = 1000000000ULL / resolution_hz;
 
+    // Bit 0: High for T1, Low for (T2 + T3)
     mBit0HighTicks = (timing.T1 + ns_per_tick / 2) / ns_per_tick;
-    mBit0LowTicks = (timing.T2 + ns_per_tick / 2) / ns_per_tick;
-    mBit1HighTicks = (timing.T2 + ns_per_tick / 2) / ns_per_tick;
-    mBit1LowTicks = (timing.T1 + ns_per_tick / 2) / ns_per_tick;
+    mBit0LowTicks = ((timing.T2 + timing.T3) + ns_per_tick / 2) / ns_per_tick;
+    // Bit 1: High for (T1 + T2), Low for T3
+    mBit1HighTicks = ((timing.T1 + timing.T2) + ns_per_tick / 2) / ns_per_tick;
+    mBit1LowTicks = (timing.T3 + ns_per_tick / 2) / ns_per_tick;
     mResetTicks = (timing.RESET * 1000ULL + ns_per_tick / 2) / ns_per_tick;  // RESET is in microseconds
 
     FL_LOG_RMT("FastLEDRmtEncoder: Timing (ticks @ " << resolution_hz << " Hz):");
-    FL_LOG_RMT("  Bit0: " << mBit0HighTicks << "H + " << mBit0LowTicks << "L");
-    FL_LOG_RMT("  Bit1: " << mBit1HighTicks << "H + " << mBit1LowTicks << "L");
+    FL_LOG_RMT("  Bit0: " << mBit0HighTicks << "H + " << mBit0LowTicks << "L = " << (mBit0HighTicks + mBit0LowTicks) << " ticks");
+    FL_LOG_RMT("  Bit1: " << mBit1HighTicks << "H + " << mBit1LowTicks << "L = " << (mBit1HighTicks + mBit1LowTicks) << " ticks");
     FL_LOG_RMT("  Reset: " << mResetTicks << " ticks (" << timing.RESET << " us)");
 
     // Create bytes encoder for pixel data

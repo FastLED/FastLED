@@ -326,12 +326,13 @@ struct TIMING_SM16824E {
 
 /// WS2811 RGB controller @ 400 kHz (slower variant)
 /// Four-phase: TH0=800ns, TH1=1600ns, TL0=1700ns, TL1=900ns
+/// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_400KHZ {
     enum : uint32_t {
         T1 = 800,
         T2 = 800,
         T3 = 900,
-        RESET = 50
+        RESET = 280
     };
 };
 
@@ -409,12 +410,13 @@ struct TIMING_UCS1912 {
 /// WS2811 RGB controller @ 800 kHz (fast variant)
 /// Four-phase: TH0=500ns, TH1=2500ns, TL0=4000ns, TL1=2000ns
 /// @note Legacy definition
+/// @note Reset time increased to 280us for reliability (datasheet minimum is 50us)
 struct TIMING_WS2811_800KHZ_LEGACY {
     enum : uint32_t {
         T1 = 500,
         T2 = 2000,
         T3 = 2000,
-        RESET = 50
+        RESET = 280
     };
 };
 
