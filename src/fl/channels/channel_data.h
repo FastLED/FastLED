@@ -7,6 +7,7 @@
 #include "ftl/stdint.h"
 #include "ftl/shared_ptr.h"
 #include "ftl/function.h"
+#include "ftl/span.h"
 #include "channel_config.h"
 
 namespace fl {
@@ -16,13 +17,16 @@ FASTLED_SHARED_PTR(ChannelData);
 
 /// @brief Padding generator function type
 ///
-/// Called by the engine to extend the encoded data buffer to an exact target size.
-/// The function should modify the buffer in-place to reach the target size
-/// (e.g., inserting zero bytes after a preamble for block alignment).
+/// Called by writeWithPadding() to write source data with padding to destination buffer.
+/// The function receives the original encoded data (src) and writes to the destination (dst)
+/// with any necessary padding applied (e.g., inserting zero bytes after a preamble for block alignment).
 ///
-/// @param buffer Reference to the encoded data buffer to modify
-/// @param targetSize Exact size the buffer must reach (always >= current buffer size)
-using PaddingGenerator = fl::function<void(fl::vector_psram<uint8_t>&, size_t targetSize)>;
+/// Default behavior (if no generator set): Left-pad with zeros, then memcopy data.
+/// Layout: [PADDING (zeros)][LED DATA] - padding bytes transmit to non-existent pixels first.
+///
+/// @param src Source encoded data (read-only)
+/// @param dst Destination buffer to write to (dst.size() >= src.size())
+using PaddingGenerator = fl::function<void(fl::span<const uint8_t> src, fl::span<uint8_t> dst)>;
 
 /// @brief Transmission data for a single LED channel
 ///
@@ -66,22 +70,31 @@ public:
     void setInUse(bool inUse) { mInUse = inUse; }
 
     /// @brief Set the padding generator for this channel
-    /// @param generator Function that extends buffer to exact target size (nullptr to disable)
+    /// @param generator Function that writes data with padding to destination (nullptr for default left-padding)
     void setPaddingGenerator(PaddingGenerator generator) {
         mPaddingGenerator = fl::move(generator);
     }
 
-    /// @brief Apply padding to the encoded data buffer to reach target size
+    /// @brief Write encoded data with padding to destination buffer
     ///
-    /// If a padding generator is configured, it will be called to extend
-    /// the buffer to the exact target size. Otherwise, this is a no-op.
+    /// This method separates the concern of data preparation from memory format.
+    /// It writes the encoded data with padding applied to a caller-provided span,
+    /// allowing the caller to control the destination memory type (DRAM, DMA, etc.)
     ///
-    /// @param targetSize Exact size the buffer must reach (must be >= current size)
-    void applyPadding(size_t targetSize) {
-        if (mPaddingGenerator) {
-            mPaddingGenerator(mEncodedData, targetSize);
-        }
-    }
+    /// @param dst Destination buffer to write to (size determines target padding size)
+    ///
+    /// The destination buffer size must be >= current data size. If a padding
+    /// generator is configured, it will be used to extend the data to fill the
+    /// entire destination buffer.
+    void writeWithPadding(fl::span<uint8_t> dst);
+
+    /// @brief Calculate the size needed for writeWithPadding() without allocating
+    ///
+    /// Returns the current data size without applying padding. The actual size
+    /// after writeWithPadding() will be dst.size() (fills entire destination).
+    ///
+    /// @return Current size of encoded data (minimum required dst size)
+    size_t getMinimumSize() const { return mEncodedData.size(); }
 
 private:
     /// @brief Friend declaration for make_shared to access private constructor

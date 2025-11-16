@@ -121,19 +121,6 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
     }
     FL_LOG_RMT("ChannelEngineRMT::beginTransmission() is running");
 
-    // Find maximum buffer size among all channels (for block alignment)
-    size_t maxSize = 0;
-    for (const auto& data : channelData) {
-        if (data->getSize() > maxSize) {
-            maxSize = data->getSize();
-        }
-    }
-
-    // Apply padding to all channels to reach max size (if padding generator configured)
-    for (const auto& data : channelData) {
-        data->applyPadding(maxSize);
-    }
-
     // Sort: smallest strips first (helps async parallelism)
     fl::vector_inlined<ChannelDataPtr, 16> sorted;
     for (const auto& data : channelData) {
