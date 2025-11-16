@@ -1,15 +1,30 @@
 #!/usr/bin/env python3
-"""Upload and monitor attached device with self-healing port management.
+"""Three-phase device workflow: Compile → Upload → Monitor.
 
-This script compiles a PlatformIO project, uploads it to an attached device,
-and monitors the serial output. It includes self-healing logic to kill any
-lingering monitor processes that might prevent upload.
+This script orchestrates a complete device development workflow in three distinct phases:
+
+Phase 1: Compile
+    - Builds the PlatformIO project for the target environment
+    - Validates code compiles without errors
+
+Phase 2: Upload (with self-healing)
+    - Kills lingering monitor processes that may lock the serial port
+    - Uploads firmware to the attached device
+    - Handles port conflicts automatically
+
+Phase 3: Monitor
+    - Attaches to serial monitor and displays real-time output
+    - Captures output for analysis
+    - Exits with code 1 if any fail keyword is detected (--fail-on)
+    - Provides output summary (first/last 100 lines)
 
 Usage:
     uv run ci/debug_attached.py                          # Auto-detect environment
     uv run ci/debug_attached.py esp32dev                 # Specific environment
     uv run ci/debug_attached.py --verbose                # Verbose mode
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
+    uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found
+    uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
     uv run ci/debug_attached.py esp32dev --verbose --upload-port COM3
 """
 
@@ -119,25 +134,29 @@ def run_compile(
     return success
 
 
-def run_upload_monitor(
+def run_upload(
     build_dir: Path,
     environment: str | None = None,
     upload_port: str | None = None,
     verbose: bool = False,
-    timeout: int = 45,
-) -> tuple[bool, list[str]]:
-    """Upload firmware and monitor serial output.
+) -> bool:
+    """Upload firmware to device.
+
+    This function includes self-healing logic to kill lingering monitor
+    processes before attempting upload.
 
     Args:
         build_dir: Project directory containing platformio.ini
         environment: PlatformIO environment to upload (None = default)
         upload_port: Serial port to use (None = auto-detect)
         verbose: Enable verbose output
-        timeout: Maximum time to run (seconds)
 
     Returns:
-        Tuple of (success, output_lines)
+        True if upload succeeded, False otherwise.
     """
+    # Self-healing: Kill lingering monitors before upload
+    kill_lingering_monitors()
+
     cmd = [
         "pio",
         "run",
@@ -145,8 +164,6 @@ def run_upload_monitor(
         str(build_dir),
         "-t",
         "upload",
-        "-t",
-        "monitor",
     ]
     if environment:
         cmd.extend(["--environment", environment])
@@ -156,8 +173,83 @@ def run_upload_monitor(
         cmd.append("--verbose")
 
     print("=" * 60)
-    print("UPLOADING AND MONITORING")
+    print("UPLOADING")
+    print("=" * 60)
+
+    formatter = TimestampFormatter()
+    proc = RunningProcess(
+        cmd,
+        cwd=build_dir,
+        auto_run=True,
+        output_formatter=formatter,
+        env=get_utf8_env(),
+    )
+
+    try:
+        # 15 minute timeout per CLAUDE.md standards
+        while line := proc.get_next_line(timeout=900):
+            if isinstance(line, EndOfStream):
+                break
+            print(line)
+    except KeyboardInterrupt:
+        print("\nKeyboardInterrupt: Stopping upload")
+        proc.terminate()
+        notify_main_thread()
+        raise
+
+    proc.wait()
+    success = proc.returncode == 0
+
+    if success:
+        print("\n✅ Upload succeeded\n")
+    else:
+        print(f"\n❌ Upload failed (exit code {proc.returncode})\n")
+
+    return success
+
+
+def run_monitor(
+    build_dir: Path,
+    environment: str | None = None,
+    monitor_port: str | None = None,
+    verbose: bool = False,
+    timeout: int = 10,
+    fail_keywords: list[str] | None = None,
+) -> tuple[bool, list[str]]:
+    """Attach to serial monitor and capture output.
+
+    Args:
+        build_dir: Project directory containing platformio.ini
+        environment: PlatformIO environment to monitor (None = default)
+        monitor_port: Serial port to monitor (None = auto-detect)
+        verbose: Enable verbose output
+        timeout: Maximum time to monitor in seconds (default: 10)
+        fail_keywords: List of keywords that trigger exit code 1 if found
+
+    Returns:
+        Tuple of (success, output_lines)
+    """
+    if fail_keywords is None:
+        fail_keywords = []
+    cmd = [
+        "pio",
+        "device",
+        "monitor",
+        "--project-dir",
+        str(build_dir),
+    ]
+    if environment:
+        cmd.extend(["--environment", environment])
+    if monitor_port:
+        cmd.extend(["--port", monitor_port])
+    if verbose:
+        cmd.append("--verbose")
+
+    print("=" * 60)
+    print("MONITORING SERIAL OUTPUT")
     print(f"Timeout: {timeout} seconds")
+    if fail_keywords:
+        print(f"Fail keywords: {', '.join(fail_keywords)}")
     print("=" * 60)
 
     formatter = TimestampFormatter()
@@ -171,6 +263,10 @@ def run_upload_monitor(
 
     output_lines = []
     start_time = time.time()
+    keyword_found = False
+    matched_keyword = None
+    matched_line = None
+    timeout_reached = False
 
     try:
         while True:
@@ -178,6 +274,7 @@ def run_upload_monitor(
             elapsed = time.time() - start_time
             if elapsed >= timeout:
                 print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
+                timeout_reached = True
                 proc.terminate()
                 break
 
@@ -189,18 +286,45 @@ def run_upload_monitor(
                 if line:
                     output_lines.append(line)
                     print(line)  # Real-time output
+
+                    # Check for fail keywords
+                    if fail_keywords and not keyword_found:
+                        for keyword in fail_keywords:
+                            if keyword in line:
+                                keyword_found = True
+                                matched_keyword = keyword
+                                matched_line = line
+                                print(f"\n🚨 FAIL KEYWORD DETECTED: '{keyword}'")
+                                print(f"   Matched line: {line}")
+                                print("   Terminating monitor...\n")
+                                proc.terminate()
+                                break
+
+                    if keyword_found:
+                        break
+
             except TimeoutError:
                 # No output within 30 seconds - continue waiting (check overall timeout on next loop)
                 continue
 
     except KeyboardInterrupt:
-        print("\nKeyboardInterrupt: Stopping upload/monitor")
+        print("\nKeyboardInterrupt: Stopping monitor")
         proc.terminate()
         notify_main_thread()
         raise
 
     proc.wait()
-    success = proc.returncode == 0
+
+    # Determine success based on exit conditions
+    if keyword_found:
+        # Keyword match always means failure
+        success = False
+    elif timeout_reached:
+        # Normal timeout is considered success (exit 0)
+        success = True
+    else:
+        # Process exited on its own - use actual return code
+        success = proc.returncode == 0
 
     # Display first 100 and last 100 lines summary
     print("\n" + "=" * 60)
@@ -226,10 +350,15 @@ def run_upload_monitor(
 
     print("\n" + "=" * 60)
 
-    if success:
-        print("✅ Upload and monitor completed successfully")
+    if keyword_found:
+        print(f"❌ Monitor failed - keyword '{matched_keyword}' detected")
+        print(f"   Matched line: {matched_line}")
+    elif timeout_reached:
+        print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
+    elif success:
+        print("✅ Monitor completed successfully")
     else:
-        print(f"❌ Upload/monitor failed (exit code {proc.returncode})")
+        print(f"❌ Monitor failed (exit code {proc.returncode})")
 
     return success, output_lines
 
@@ -245,6 +374,8 @@ Examples:
   %(prog)s esp32dev                 # Specific environment
   %(prog)s --verbose                # Verbose mode
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
+  %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found in output
+  %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
   %(prog)s esp32dev --verbose --upload-port COM3
         """,
     )
@@ -269,8 +400,8 @@ Examples:
         "--timeout",
         "-t",
         type=int,
-        default=45,
-        help="Timeout for upload and monitor phase in seconds (default: 45)",
+        default=10,
+        help="Timeout for monitor phase in seconds (default: 10)",
     )
     parser.add_argument(
         "--project-dir",
@@ -278,6 +409,13 @@ Examples:
         type=Path,
         default=Path.cwd(),
         help="PlatformIO project directory (default: current directory)",
+    )
+    parser.add_argument(
+        "--fail-on",
+        "-f",
+        action="append",
+        dest="fail_keywords",
+        help="Keyword that triggers exit code 1 if found in monitor output (can be specified multiple times)",
     )
 
     return parser.parse_args()
@@ -306,26 +444,28 @@ def main() -> int:
     print()
 
     try:
-        # Step 1: Compile
+        # Phase 1: Compile
         if not run_compile(build_dir, args.environment, args.verbose):
             return 1
 
-        # Step 2: Kill lingering monitors (self-healing)
-        kill_lingering_monitors()
+        # Phase 2: Upload (includes self-healing port cleanup)
+        if not run_upload(build_dir, args.environment, args.upload_port, args.verbose):
+            return 1
 
-        # Step 3: Upload and monitor
-        success, output = run_upload_monitor(
+        # Phase 3: Monitor serial output
+        success, output = run_monitor(
             build_dir,
             args.environment,
-            args.upload_port,
+            args.upload_port,  # Use same port for monitoring
             args.verbose,
             args.timeout,
+            args.fail_keywords,
         )
 
         if not success:
             return 1
 
-        print("\n✅ All steps completed successfully")
+        print("\n✅ All three phases completed successfully")
         return 0
 
     except KeyboardInterrupt:

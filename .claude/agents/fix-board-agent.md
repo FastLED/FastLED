@@ -14,15 +14,18 @@ Run PlatformIO upload and monitor commands, capture their output, diagnose any f
 
 1. **Setup and Execution**
    - Create a todo list with TodoWrite to track your progress
-   - **Step 1 - Compile**: Run `pio run` first to verify code compiles without errors
-   - **Step 2 - Upload/Monitor**: Run `pio run -t upload -t monitor` with 45-second timeout
+   - **Use `uv run ci/debug_attached.py`** for the three-phase workflow:
+     - **Phase 1 - Compile**: Builds the project and verifies code compiles without errors
+     - **Phase 2 - Upload**: Uploads firmware with automatic port conflict resolution (kills lingering monitors)
+     - **Phase 3 - Monitor**: Attaches to serial monitor for 10 seconds (default) to capture boot/runtime output
    - Capture all output to timestamped log file: `pio_board_debug_$(date +%Y%m%d_%H%M%S).log`
+   - Use `--fail-on` flags to detect specific error keywords (e.g., `PANIC`, `guru meditation`, `ERROR`)
 
-2. **Log Capture Strategy**
-   - Use `timeout 45s` command to run PlatformIO upload/monitor
-   - Redirect all output (stdout and stderr) to the log file
-   - After completion, read the entire log file for analysis
-   - Tail the log (last 100-200 lines) for quick error scanning
+2. **Command Usage**
+   - Basic: `uv run ci/debug_attached.py esp32dev --timeout 10`
+   - With keyword detection: `uv run ci/debug_attached.py esp32dev --timeout 10 --fail-on PANIC --fail-on "guru meditation"`
+   - Specific port: `uv run ci/debug_attached.py esp32dev --upload-port COM3 --timeout 10`
+   - Redirect output: `uv run ci/debug_attached.py esp32dev --timeout 10 > pio_board_debug_$(date +%Y%m%d_%H%M%S).log 2>&1`
 
 3. **Log Analysis**
    - Read the captured log file (focus on last 100-200 lines for runtime errors)
@@ -93,28 +96,39 @@ Run PlatformIO upload and monitor commands, capture their output, diagnose any f
 
 ## Command Execution Patterns
 
-### Step 1: Compile Only
-```bash
-# Verify code compiles without errors
-pio run
-```
-
-### Step 2: Upload and Monitor with Timeout
+### Three-Phase Workflow (Recommended)
 ```bash
 # Create timestamped log file
 LOGFILE="pio_board_debug_$(date +%Y%m%d_%H%M%S).log"
 
-# Run with 45-second timeout, capture all output
-timeout 45s pio run -t upload -t monitor > "$LOGFILE" 2>&1 || true
+# Run all three phases: Compile → Upload → Monitor (10 second timeout)
+# With keyword detection for common ESP32 errors
+uv run ci/debug_attached.py esp32dev --timeout 10 \
+  --fail-on PANIC \
+  --fail-on "guru meditation" \
+  --fail-on "E (" \
+  > "$LOGFILE" 2>&1
 
-# Tail the log for quick error scanning
-tail -n 100 "$LOGFILE"
+# Check exit code
+# 0 = success (normal timeout or clean exit)
+# 1 = failure (compile/upload error, process crash, or keyword match)
+# 130 = user interrupt
 ```
 
-### Alternative: Direct log capture in single command
+### Exit Code Handling
 ```bash
-# One-liner for compile + upload + monitor
-pio run && timeout 45s pio run -t upload -t monitor > "pio_board_debug_$(date +%Y%m%d_%H%M%S).log" 2>&1 || true
+# Run and handle different outcomes
+uv run ci/debug_attached.py esp32dev --timeout 10 > "$LOGFILE" 2>&1
+EXIT_CODE=$?
+
+if [ $EXIT_CODE -eq 0 ]; then
+  echo "Success - normal timeout or clean exit"
+elif [ $EXIT_CODE -eq 1 ]; then
+  echo "Failure detected - analyze logs"
+  tail -n 200 "$LOGFILE"
+elif [ $EXIT_CODE -eq 130 ]; then
+  echo "User interrupted"
+fi
 ```
 
 ### Port Detection
@@ -133,6 +147,8 @@ grep "WARN:" pio_board_debug_*.log
 
 # Get last 200 lines for runtime error analysis
 tail -n 200 pio_board_debug_*.log
+
+# The script also provides automatic summary (first/last 100 lines)
 ```
 
 ## Common Error Patterns and Fixes
@@ -200,16 +216,17 @@ tail -n 200 pio_board_debug_*.log
 ## Diagnostic Checklist
 
 Use TodoWrite to create a checklist like:
-- [ ] Run initial compilation (pio run)
-- [ ] Run upload/monitor with timeout (45s)
-- [ ] Capture and save logs to timestamped file
-- [ ] Tail logs for quick error scanning
+- [ ] Run three-phase workflow (compile → upload → monitor, 10s timeout)
+- [ ] Capture output to timestamped log file
+- [ ] Check exit code (0=success, 1=failure, 130=interrupt)
+- [ ] Analyze logs (focus on last 100-200 lines)
 - [ ] Search for ESP-IDF errors (E (timestamp) pattern)
 - [ ] Search for application warnings (WARN: pattern)
+- [ ] Check for keyword matches (PANIC, guru meditation, etc.)
 - [ ] Identify root cause(s)
 - [ ] Develop fix strategy
 - [ ] Apply fix #1
-- [ ] Verify fix #1 (re-run upload/monitor)
+- [ ] Verify fix #1 (re-run debug_attached.py)
 - [ ] [If needed] Apply fix #2
 - [ ] [If needed] Verify fix #2
 - [ ] Generate final report
@@ -220,9 +237,12 @@ Use TodoWrite to create a checklist like:
 Here's a detailed example of detecting and fixing RMT channel exhaustion errors:
 
 ### 1. Error Detection
-After running `timeout 45s pio run -t upload -t monitor`, analyze logs:
+After running `uv run ci/debug_attached.py esp32dev --timeout 10`, analyze logs:
 ```bash
-# Scan for ESP-IDF RMT errors
+# The script captures output and provides summary automatically
+# Exit code 1 indicates failure was detected
+
+# Scan for ESP-IDF RMT errors in captured log
 grep -E "E \([0-9]+\) rmt:" pio_board_debug_*.log
 # Output: E (18458) rmt: rmt_tx_register_to_group(167): no free tx channels
 #         E (18460) rmt: rmt_new_tx_channel(298): register channel failed
@@ -282,26 +302,37 @@ Example fixes:
 ### 8. Verification
 After applying fix:
 ```bash
-# Clean build
-pio run -t clean
+# Run full three-phase workflow to verify fix
+LOGFILE="pio_board_verify_$(date +%Y%m%d_%H%M%S).log"
+uv run ci/debug_attached.py esp32dev --timeout 10 \
+  --fail-on PANIC \
+  --fail-on "guru meditation" \
+  --fail-on "no free tx channels" \
+  > "$LOGFILE" 2>&1
 
-# Recompile
-pio run
+EXIT_CODE=$?
 
-# Test with monitoring
-timeout 45s pio run -t upload -t monitor > pio_board_verify_$(date +%Y%m%d_%H%M%S).log 2>&1
+if [ $EXIT_CODE -eq 0 ]; then
+  echo "✅ Fix verified - board working correctly"
+  rm "$LOGFILE"  # Clean up on success
+elif [ $EXIT_CODE -eq 1 ]; then
+  echo "❌ Fix unsuccessful - errors still present"
+  tail -n 200 "$LOGFILE"
+fi
 
-# Check for errors
-grep -E "E \([0-9]+\)|WARN:" pio_board_verify_*.log
+# Alternative: Check logs manually for errors
+grep -E "E \([0-9]+\)|WARN:" "$LOGFILE"
 # Expected: No RMT channel errors
 ```
 
 ## Success Criteria
 
 **Complete Success (✅)**:
+- All three phases complete successfully (exit code 0)
+- Compilation succeeds without errors
 - Upload completes without errors
-- Serial monitor shows expected output
-- No crashes or resets during 30-second monitoring
+- Serial monitor shows expected output for 10 seconds
+- No crashes, resets, or keyword matches during monitoring
 - Temporary logs deleted
 
 **Partial Success (⚠️)**:

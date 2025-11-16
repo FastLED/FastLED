@@ -58,6 +58,28 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
 - `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
 
+### Device Debug Workflow (Compile → Upload → Monitor)
+`uv run ci/debug_attached.py` - Three-phase workflow for attached device development:
+
+**Phase 1: Compile** - Build PlatformIO project for target environment
+**Phase 2: Upload** - Upload firmware with automatic port conflict resolution (kills lingering monitors)
+**Phase 3: Monitor** - Attach to serial monitor, capture output, detect failure keywords
+
+**Usage:**
+- `uv run ci/debug_attached.py` - Auto-detect environment
+- `uv run ci/debug_attached.py esp32dev` - Specific environment
+- `uv run ci/debug_attached.py --upload-port COM3` - Specific serial port
+- `uv run ci/debug_attached.py --timeout 60` - Monitor timeout (default: 10s)
+- `uv run ci/debug_attached.py --fail-on PANIC` - Exit 1 if keyword found in output
+- `uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH` - Multiple failure keywords
+
+**Exit Codes:**
+- 0: Success (normal timeout or clean exit)
+- 1: Failure (compile/upload error, process crash, or keyword match)
+- 130: User interrupt (Ctrl+C)
+
+**Note:** Normal timeout is considered success (exit 0). Only keyword matches (`--fail-on`) or actual failures cause exit 1.
+
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes
   - Reviews src/, examples/, and ci/ changes against project standards
