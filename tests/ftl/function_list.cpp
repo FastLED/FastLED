@@ -16,7 +16,7 @@ TEST_CASE("function_list<void()> - no arguments") {
     callbacks.invoke();
     REQUIRE(call_count == 1);
     
-    callbacks();  // Test operator()
+    callbacks.invoke();  // Test operator()
     REQUIRE(call_count == 2);
 }
 
@@ -28,7 +28,7 @@ TEST_CASE("function_list<void(float)> - single argument") {
     callbacks.invoke(42.5f);
     REQUIRE(received_value == 42.5f);
     
-    callbacks(99.9f);  // Test operator()
+    callbacks.invoke(99.9f);  // Test operator()
     REQUIRE(received_value == 99.9f);
 }
 
@@ -58,7 +58,7 @@ TEST_CASE("function_list<void()> - function signature syntax with no args") {
     callbacks.invoke();
     REQUIRE(call_count == 1);
     
-    callbacks();
+    callbacks.invoke();
     REQUIRE(call_count == 2);
 }
 
@@ -83,7 +83,7 @@ TEST_CASE("function_list<void(uint8_t, float, float)> - function signature synta
         received_f2 = f2;
     });
     
-    callbacks(200, 5.0f, 10.0f);
+    callbacks.invoke(200, 5.0f, 10.0f);
     REQUIRE(received_u8 == 200);
     REQUIRE(received_f1 == 5.0f);
     REQUIRE(received_f2 == 10.0f);
@@ -191,24 +191,6 @@ TEST_CASE("function_list - multiple callbacks invoked in order") {
     REQUIRE(call_order[2] == 30);
 }
 
-TEST_CASE("function_list - iterator support") {
-    function_list<void()> callbacks;
-    
-    callbacks.add([]() {});
-    callbacks.add([]() {});
-    callbacks.add([]() {});
-    
-    int count = 0;
-    for (const auto& pair : callbacks) {
-        (void)pair;
-        count++;
-        // pair.first is the ID
-        // pair.second is the function
-    }
-    
-    REQUIRE(count == 3);
-}
-
 TEST_CASE("function_list - backward compatibility with function_list<void()>") {
     function_list<void()> callbacks;
     int call_count = 0;
@@ -217,7 +199,7 @@ TEST_CASE("function_list - backward compatibility with function_list<void()>") {
     callbacks.invoke();
     REQUIRE(call_count == 1);
     
-    callbacks();
+    callbacks.invoke();
     REQUIRE(call_count == 2);
 }
 

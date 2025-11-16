@@ -9,7 +9,7 @@
 #include "fl/align.h"
 #include "ftl/pair.h"
 #include "ftl/vector.h"
-#include "ftl/bitset.h"
+#include "ftl/algorithm.h"  // for fl::sort
 
 #ifndef FASTLED_INLINE_LAMBDA_SIZE
 #define FASTLED_INLINE_LAMBDA_SIZE 64
@@ -353,8 +353,13 @@ private:
 // function_list: Container for managing multiple callbacks with add/remove
 //----------------------------------------------------------------------------
 
-// Primary template declaration (no definition - only specializations exist)
-template <typename> class function_list;
+// Primary template declaration with static assertion for invalid usage
+// Only specializations for function signatures (e.g., function_list<void(Args...)>) are valid
+template <typename T>
+class function_list {
+    static_assert(fl::is_same<T, void>::value && !fl::is_same<T, void>::value,
+                  "function_list requires a void returning function signature.");
+};
 
 // Partial specialization for function signature syntax: function_list<void(Args...)>
 // Supports: function_list<void()>, function_list<void(float)>, function_list<void(u8, float, float)>, etc.
@@ -362,51 +367,41 @@ template <typename... Args>
 class function_list<void(Args...)> {
   private:
     using FunctionType = function<void(Args...)>;
-    using FunctionPair = pair<int, FunctionType>;
-    using FunctionVector = fl::vector<FunctionPair>;
-  
-    FunctionVector mFunctions;
-    int mCounter = 0;
 
-    // Temporary tracking during invocation only
-    mutable fl::bitset<32> mValid;  // Inlined bitset for common case (up to 32 callbacks)
-    mutable bool mInvoking = false;  // True when inside invoke()
+    struct FunctionEntry {
+        int id;
+        int priority;
+        FunctionType fn;
+
+        FunctionEntry() : id(0), priority(0), fn() {}
+        FunctionEntry(int id_, int priority_, FunctionType fn_)
+            : id(id_), priority(priority_), fn(fn_) {}
+    };
+
+    using FunctionVector = fl::vector<FunctionEntry>;
+
+    FunctionVector mFunctions;
+    int mIdCounter = 0;
+
+    bool mNeedsCompact = false;  // True when functions have been cleared during invocation
 
   public:
-    // Iterator types
-    using iterator = typename fl::vector<pair<int, function<void(Args...)>>>::iterator;
-    using const_iterator = typename fl::vector<pair<int, function<void(Args...)>>>::const_iterator;
-
     function_list() = default;
     ~function_list() = default;
 
-    int add(function<void(Args...)> fn) {
-        int id = mCounter++;
-        pair<int, function<void(Args...)>> entry(id, fn);
-        mFunctions.push_back(entry);
+    int add(function<void(Args...)> fn, int priority = 0) {
+        int id = mIdCounter++;
+        mFunctions.push_back(FunctionEntry(id, priority, fn));
         return id;
     }
 
     void remove(int id) {
-        if (mInvoking) {
-            // During invocation: mark in bitset for deferred removal
-            for (size_t i = 0; i < mFunctions.size(); ++i) {
-                if (mFunctions[i].first == id) {
-                    mValid.reset(i);
-                }
+        // During invocation: clear the function for deferred removal
+        for (size_t i = 0; i < mFunctions.size(); ++i) {
+            if (mFunctions[i].id == id) {
+                mFunctions[i].fn.clear();
+                mNeedsCompact = true;
             }
-        } else {
-            // Outside invocation: immediately compact to remove
-            size_t write_pos = 0;
-            for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
-                if (mFunctions[read_pos].first != id) {
-                    if (write_pos != read_pos) {
-                        mFunctions[write_pos] = mFunctions[read_pos];
-                    }
-                    write_pos++;
-                }
-            }
-            mFunctions.resize(write_pos);
         }
     }
 
@@ -414,12 +409,13 @@ class function_list<void(Args...)> {
         mFunctions.clear();
     }
 
-    // Compact the storage by removing invalid (tombstoned) callbacks
+    // Compact the storage by removing invalid (cleared) callbacks
     // Used internally after invocation if removals occurred
     void compact() {
+        if (!mNeedsCompact) return;
         size_t write_pos = 0;
         for (size_t read_pos = 0; read_pos < mFunctions.size(); ++read_pos) {
-            if (mValid.test(read_pos)) {
+            if (mFunctions[read_pos].fn) {  // Check if function is still valid
                 if (write_pos != read_pos) {
                     mFunctions[write_pos] = mFunctions[read_pos];
                 }
@@ -427,52 +423,67 @@ class function_list<void(Args...)> {
             }
         }
         mFunctions.resize(write_pos);
+        mNeedsCompact = false;
     }
 
-    // Iterator methods
-    iterator begin() { return mFunctions.begin(); }
-    iterator end() { return mFunctions.end(); }
-    const_iterator begin() const { return mFunctions.begin(); }
-    const_iterator end() const { return mFunctions.end(); }
-    const_iterator cbegin() const { return mFunctions.cbegin(); }
-    const_iterator cend() const { return mFunctions.cend(); }
-
-    // Size information
+    // Size information - counts only valid (non-cleared) functions
     fl::size size() const {
-        return mFunctions.size();
+        fl::size count = 0;
+        for (const auto& entry : mFunctions) {
+            if (entry.fn) {
+                ++count;
+            }
+        }
+        return count;
     }
-    bool empty() const { return mFunctions.empty(); }
+    bool empty() const { return size() == 0; }
 
     // Boolean conversion for if (callback) checks
     explicit operator bool() const { return !empty(); }
 
-    void invoke(Args... args) const {
+    void invoke(Args... args) {
+        if (mFunctions.empty()) return;
+        // Compact the storage by removing invalid (cleared) callbacks
+        compact();
         // Save size at start - newly added callbacks won't execute until next call
         const size_t invoke_size = mFunctions.size();
+        // Early return if no callbacks
+        if (invoke_size == 0) {
+            return;
+        }
 
-        // Set up invocation state
-        mInvoking = true;
-        mValid.resize(invoke_size);
-        mValid.assign(invoke_size, true);  // Fill with all 1s (all valid initially)
-
-        // Iterate and invoke callbacks, checking bitset for removals
+        // Collect unique priorities into a small vector (usually very few unique values)
+        fl::vector_inlined<int, 16> priorities;
         for (size_t i = 0; i < invoke_size; ++i) {
-            if (mValid.test(i)) {
-                mFunctions[i].second(args...);
+            if (!mFunctions[i].fn) continue;  // Skip already-cleared functions
+
+            int p = mFunctions[i].priority;
+            // Only add if not already present
+            if (priorities.find(p) == priorities.end()) {
+                priorities.push_back(p);
             }
         }
 
-        // Clean up invocation state
-        mInvoking = false;
+        // Sort priorities (higher priority first) - cheap since there are usually very few unique priorities
+        fl::sort(priorities.begin(), priorities.end(), [](int a, int b) { return a > b; });
 
-        // If any callbacks were removed during invocation, compact
-        if (mValid.count() < invoke_size) {
-            const_cast<function_list*>(this)->compact();
+        // Iterate through priorities (highest first), then through functions matching each priority
+        for (size_t p_idx = 0; p_idx < priorities.size(); ++p_idx) {
+            int current_priority = priorities[p_idx];
+            for (size_t i = 0; i < invoke_size; ++i) {
+                if (mFunctions.empty()) {
+                    return;  // Clear happened.
+                }
+                if (mFunctions[i].fn && mFunctions[i].priority == current_priority) {
+                    mFunctions[i].fn(args...);
+                }
+            }
         }
+        compact();
     }
 
     // Call operator - syntactic sugar for invoke()
-    void operator()(Args... args) const {
+    void operator()(Args... args) {
         invoke(args...);
     }
 };

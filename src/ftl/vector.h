@@ -1216,6 +1216,24 @@ class FL_ALIGN InlinedVector {
         return end();
     }
 
+    iterator find(const T& value) {
+        for (iterator it = begin(); it != end(); ++it) {
+            if (*it == value) {
+                return it;
+            }
+        }
+        return end();
+    }
+
+    const_iterator find(const T& value) const {
+        for (const_iterator it = begin(); it != end(); ++it) {
+            if (*it == value) {
+                return it;
+            }
+        }
+        return end();
+    }
+
     void erase(iterator pos) {
         if (mUsingHeap) {
             mHeap.erase(pos);
