@@ -25,6 +25,7 @@ Usage:
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
     uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found
     uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
+    uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
     uv run ci/debug_attached.py esp32dev --verbose --upload-port COM3
 """
 
@@ -215,6 +216,7 @@ def run_monitor(
     verbose: bool = False,
     timeout: int = 10,
     fail_keywords: list[str] | None = None,
+    stream: bool = False,
 ) -> tuple[bool, list[str]]:
     """Attach to serial monitor and capture output.
 
@@ -225,6 +227,7 @@ def run_monitor(
         verbose: Enable verbose output
         timeout: Maximum time to monitor in seconds (default: 10)
         fail_keywords: List of keywords that trigger exit code 1 if found
+        stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
 
     Returns:
         Tuple of (success, output_lines)
@@ -247,7 +250,10 @@ def run_monitor(
 
     print("=" * 60)
     print("MONITORING SERIAL OUTPUT")
-    print(f"Timeout: {timeout} seconds")
+    if stream:
+        print("Mode: STREAMING (runs until Ctrl+C)")
+    else:
+        print(f"Timeout: {timeout} seconds")
     if fail_keywords:
         print(f"Fail keywords: {', '.join(fail_keywords)}")
     print("=" * 60)
@@ -270,13 +276,14 @@ def run_monitor(
 
     try:
         while True:
-            # Check timeout
-            elapsed = time.time() - start_time
-            if elapsed >= timeout:
-                print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
-                timeout_reached = True
-                proc.terminate()
-                break
+            # Check timeout (unless in streaming mode)
+            if not stream:
+                elapsed = time.time() - start_time
+                if elapsed >= timeout:
+                    print(f"\n⏱️  Timeout reached ({timeout}s), stopping monitor...")
+                    timeout_reached = True
+                    proc.terminate()
+                    break
 
             # Read next line with 30-second timeout
             try:
@@ -355,6 +362,8 @@ def run_monitor(
         print(f"   Matched line: {matched_line}")
     elif timeout_reached:
         print(f"✅ Monitor completed successfully (timeout reached after {timeout}s)")
+    elif stream and success:
+        print("✅ Monitor completed successfully (streaming mode ended)")
     elif success:
         print("✅ Monitor completed successfully")
     else:
@@ -376,6 +385,7 @@ Examples:
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
   %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found in output
   %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
+  %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
   %(prog)s esp32dev --verbose --upload-port COM3
         """,
     )
@@ -416,6 +426,12 @@ Examples:
         action="append",
         dest="fail_keywords",
         help="Keyword that triggers exit code 1 if found in monitor output (can be specified multiple times)",
+    )
+    parser.add_argument(
+        "--stream",
+        "-s",
+        action="store_true",
+        help="Stream mode: monitor runs indefinitely until Ctrl+C (ignores timeout)",
     )
 
     return parser.parse_args()
@@ -460,6 +476,7 @@ def main() -> int:
             args.verbose,
             args.timeout,
             args.fail_keywords,
+            args.stream,
         )
 
         if not success:
