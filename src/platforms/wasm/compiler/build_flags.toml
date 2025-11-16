@@ -205,18 +205,17 @@ flags = [
     
     # Aggressive Build Speed Optimizations
     "-fno-inline-functions",                 # Disable function inlining
-    "-fno-vectorize",                       # Disable vectorization optimizations 
+    "-fno-vectorize",                       # Disable vectorization optimizations
     "-fno-unroll-loops",                    # Disable loop unrolling
     "-fno-strict-aliasing",                 # Disable strict aliasing assumptions
-    "-fno-merge-constants",                 # Don't merge identical constants (faster linking)
-    "-fno-merge-all-constants",             # Don't merge all constants (faster linking)
-    
-    # Template and Instantiation Optimizations  
+
+    # Template and Instantiation Optimizations
     "-fno-delayed-template-parsing",        # Parse templates immediately (faster compilation)
     "-fmax-type-align=4",                   # Limit type alignment (smaller object files)
-    
+
     # Code Generation Optimizations for Speed
     "-ffast-math",                          # Enable fast math optimizations (if acceptable)
+    "-fno-finite-math-only",                # Allow NaN/Inf even with fast-math (fixes __builtin_nan warnings)
     "-fno-math-errno",                      # Don't set errno for math functions
     "-fno-exceptions",                      # Explicitly disable exceptions (already in base but emphasize)
     "-fno-rtti",                           # Explicitly disable RTTI (already in base but emphasize)

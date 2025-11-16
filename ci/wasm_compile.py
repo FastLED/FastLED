@@ -109,11 +109,23 @@ def main() -> int:
         )
     console.print()
 
-    # Compile the WASM (always use --just-compile to avoid opening browser)
+    # Compile the WASM using native toolchain (clang-tool-chain emscripten)
     console.print(
         f"[bold cyan]Step 1/{'2' if args.run else '1'}:[/bold cyan] Compiling WASM..."
     )
-    compile_cmd = ["fastled", args.sketch_dir, "--just-compile"] + unknown_args
+
+    # Use native compiler instead of Docker-based fastled command
+    # Output to examples/<name>/fastled.js to match expected location
+    output_js = Path("examples") / example_name / "fastled.js"
+    compile_cmd = [
+        sys.executable,
+        "-m",
+        "ci.wasm_compile_native",
+        "--example",
+        example_name,
+        "-o",
+        str(output_js),
+    ] + unknown_args
     compile_result = run_command(compile_cmd)
 
     if compile_result != 0:
