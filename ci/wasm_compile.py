@@ -1,4 +1,5 @@
 import argparse
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -115,8 +116,11 @@ def main() -> int:
     )
 
     # Use native compiler instead of Docker-based fastled command
-    # Output to examples/<name>/fastled.js to match expected location
-    output_js = Path("examples") / example_name / "fastled.js"
+    # Output to examples/<name>/fastled_js/fastled.js to match expected location
+    output_dir = Path("examples") / example_name / "fastled_js"
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    output_js = output_dir / "fastled.js"
     compile_cmd = [
         sys.executable,
         "-m",
@@ -131,6 +135,19 @@ def main() -> int:
     if compile_result != 0:
         console.print("[bold red]✗ WASM compilation failed[/bold red]")
         return compile_result
+
+    # Copy template files (index.html, index.css, index.js) to output directory
+    template_dir = Path("src") / "platforms" / "wasm" / "compiler"
+    template_files = ["index.html", "index.css", "index.js"]
+
+    for template_file in template_files:
+        src = template_dir / template_file
+        dst = output_dir / template_file
+        if src.exists():
+            shutil.copy2(src, dst)
+            console.print(f"[dim]Copied {template_file} to output directory[/dim]")
+        else:
+            console.print(f"[yellow]Warning: Template file not found: {src}[/yellow]")
 
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 
