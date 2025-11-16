@@ -48,6 +48,11 @@
 namespace fl {
 namespace third_party {
 
+// Bring assembly macros/functions into scope
+using ::MULSHIFT32;
+using ::FASTABS;
+using ::CLZ;
+
 typedef int ARRAY3[3];	/* for short-block reordering */
 
 /* optional pre-emphasis for high-frequency scale factor bands */

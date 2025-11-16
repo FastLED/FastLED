@@ -49,6 +49,11 @@
 namespace fl {
 namespace third_party {
 
+// Bring assembly macros/functions into scope
+using ::MULSHIFT32;
+using ::FASTABS;
+using ::CLZ;
+
 #define COS0_0  0x4013c251	/* Q31 */
 #define COS0_1  0x40b345bd	/* Q31 */
 #define COS0_2  0x41fa2d6d	/* Q31 */

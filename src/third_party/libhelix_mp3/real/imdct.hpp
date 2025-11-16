@@ -49,6 +49,12 @@
 namespace fl {
 namespace third_party {
 
+// Bring assembly macros/functions into scope
+using ::MULSHIFT32;
+using ::FASTABS;
+using ::CLZ;
+using ::clip_2n_helper;
+
 /**************************************************************************************
  * Function:    AntiAlias
  *
