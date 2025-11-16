@@ -6,15 +6,16 @@
 ///
 /// ## Hardware Requirements
 /// - ESP32-P4 or ESP32-S3 (only variants with PARLIO peripheral)
-/// - Up to 16 WS2812/WS2812B LED strips
+/// - 5-8 WS2812/WS2812B LED strips (8-bit width only in current implementation)
 /// - Configurable GPIO pins (default: GPIO 1-8 for 8-bit width)
 ///
 /// ## Features
-/// - **Parallel Transmission**: Drive up to 16 LED strips simultaneously with zero CPU overhead
+/// - **Parallel Transmission**: Drive 5-8 LED strips simultaneously with zero CPU overhead
 /// - **WS2812 Timing**: Accurate 3.2 MHz clock with 4-tick encoding (312.5ns per tick)
 /// - **Async Operation**: Non-blocking transmission with pollDerived() state tracking
 /// - **Large LED Support**: Automatic chunking for >682 LEDs per strip (at 8-bit width)
 /// - **Bit Transposition**: Efficient algorithm to convert per-strip RGB data to bit-parallel format
+/// - **ISR Streaming**: Memory-safe ping-pong buffering with owned channel pointer storage
 ///
 /// ## Usage Example
 /// ```cpp
@@ -71,11 +72,14 @@
 /// ```
 ///
 /// ### Data Width Configuration
-/// - 1-bit: 1 strip (8 ticks per byte)
-/// - 2-bit: 2 strips (4 ticks per byte)
-/// - 4-bit: 4 strips (2 ticks per byte)
-/// - 8-bit: 8 strips (1 tick per byte) **[default]**
-/// - 16-bit: 16 strips (1 tick per 2 bytes)
+/// **Current Implementation: 8-bit width only (5-8 channels)**
+/// - 8-bit: 5-8 strips (1 tick per byte) **[SUPPORTED]**
+///
+/// **Future Support (not yet implemented in ISR streaming):**
+/// - 1-bit: 1 strip (8 ticks per byte) - blocked with clear error
+/// - 2-bit: 2 strips (4 ticks per byte) - blocked with clear error
+/// - 4-bit: 3-4 strips (2 ticks per byte) - blocked with clear error
+/// - 16-bit: 9-16 strips (1 tick per 2 bytes) - blocked with clear error
 ///
 /// ### Buffer Size Calculation
 /// ```
@@ -101,8 +105,11 @@
 ///
 /// ## Limitations
 /// - **Platform-Specific**: Only available on ESP32-P4 and ESP32-S3 with PARLIO peripheral
+/// - **Channel Count**: Only 5-8 channels currently supported (8-bit width)
+///   - 1-4 channels: Not supported (ISR lacks 1/2/4-bit transposition)
+///   - 9-16 channels: Not supported (ISR lacks 16-bit transposition)
+///   - Driver will fail-fast with clear error message for unsupported configurations
 /// - **Fixed Pins**: Currently uses hardcoded GPIO 1-8 (future: user-configurable)
-/// - **Data Width**: Fixed at 8 channels (future: dynamic based on channel count)
 /// - **Multi-Chunk**: Falls back to single chunk for very large LED counts (>682 LEDs)
 ///
 /// ## See Also
@@ -198,7 +205,7 @@ private:
         volatile uint8_t* fill_buffer;        ///< Buffer being filled
 
         // Streaming state
-        fl::span<const ChannelDataPtr> source_channels; ///< Source channel data (persists during transmission)
+        fl::vector<ChannelDataPtr> source_channels; ///< Source channel data (owned copy - prevents dangling references)
         volatile size_t current_led;          ///< Current LED position in source data
         volatile size_t total_leds;           ///< Total LEDs to transmit
         volatile size_t leds_per_chunk;       ///< LEDs per DMA chunk

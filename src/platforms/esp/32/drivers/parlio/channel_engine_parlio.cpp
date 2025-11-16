@@ -575,18 +575,26 @@ ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
 }
 
 void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+    // Validate channel data first (before initialization)
+    if (channelData.size() == 0) {
+        FL_DBG("PARLIO: No channels to transmit");
+        return;
+    }
+
+    // If not initialized yet, determine data width from actual channel count
+    if (!mInitialized) {
+        size_t numChannels = channelData.size();
+        mState.data_width = determineDataWidth(numChannels);
+        FL_DBG("PARLIO: Detected " << numChannels << " channels, using data_width="
+                << static_cast<int>(mState.data_width));
+    }
+
     // Ensure PARLIO peripheral is initialized
     initializeIfNeeded();
 
     // If initialization failed, abort
     if (!mInitialized || mState.tx_unit == nullptr) {
         FL_WARN("PARLIO: Cannot transmit - initialization failed");
-        return;
-    }
-
-    // Validate channel data
-    if (channelData.size() == 0) {
-        FL_DBG("PARLIO: No channels to transmit");
         return;
     }
 
@@ -643,7 +651,11 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
             << " channels, " << numLeds << " LEDs (streaming mode)");
 
     // Initialize streaming state
-    mState.source_channels = channelData;
+    // Copy channel pointers (not the LED data, just the pointers) to prevent dangling references
+    mState.source_channels.clear();
+    for (const auto& channelPtr : channelData) {
+        mState.source_channels.push_back(channelPtr);
+    }
     mState.total_leds = numLeds;
     mState.current_led = 0;
     mState.stream_complete = false;
@@ -686,11 +698,24 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     FL_DBG("PARLIO: Starting initialization (streaming mode)");
 
-    // Step 1: Determine data width
-    size_t numChannels = 8;
-    mState.data_width = determineDataWidth(numChannels);
+    // Step 1: Data width should already be set by beginTransmission()
+    // If not set, default to 8-bit for backward compatibility
+    if (mState.data_width == 0) {
+        FL_WARN("PARLIO: Data width not set, defaulting to 8-bit");
+        mState.data_width = 8;
+    }
 
     FL_DBG("PARLIO: Using data_width=" << static_cast<int>(mState.data_width));
+
+    // Temporary limitation: ISR streaming only supports 8-bit width
+    // This is because transposeAndQueueNextChunk() only implements 8-bit transposition
+    if (mState.data_width != 8) {
+        FL_WARN("PARLIO: Only 8-bit width (5-8 channels) currently supported in streaming mode");
+        FL_WARN("PARLIO: Requested width: " << static_cast<int>(mState.data_width)
+                << " - initialization aborted");
+        mInitialized = false;
+        return;
+    }
 
     // Step 2: Calculate streaming chunk size
     mState.leds_per_chunk = calculateStreamingChunkSize(mState.data_width);
