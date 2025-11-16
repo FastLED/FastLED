@@ -48,10 +48,7 @@
 namespace fl {
 namespace third_party {
 
-// Bring assembly macros/functions into scope
-using ::MULSHIFT32;
-using ::FASTABS;
-using ::CLZ;
+
 
 /**************************************************************************************
  * Function:    MidSideProc
@@ -307,4 +304,3 @@ void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHe
 
 }  // namespace third_party
 }  // namespace fl
-

@@ -56,11 +56,14 @@
 #ifndef _ASSEMBLY_H
 #define _ASSEMBLY_H
 
+namespace fl {
+namespace third_party {
+
 #if (defined _WIN32 && !defined _WIN32_WCE && defined _M_IX86) || (defined __WINS__ && defined _SYMBIAN) || defined(_OPENWAVE_SIMULATOR) || defined(WINCE_EMULATOR)    /* Symbian emulator for Ix86 */
 
 #pragma warning( disable : 4035 )	/* complains about inline asm not returning a value */
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	__asm {
 		mov		eax, x
@@ -69,7 +72,7 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 	}
 }
 
-static __inline int FASTABS(int x) 
+__inline int FASTABS(int x)
 {
 	int sign;
 
@@ -80,7 +83,7 @@ static __inline int FASTABS(int x)
 	return x;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
 	int numZeros;
 
@@ -91,7 +94,7 @@ static __inline int CLZ(int x)
 	while (!(x & 0x80000000)) {
 		numZeros++;
 		x <<= 1;
-	} 
+	}
 
 	return numZeros;
 }
@@ -107,7 +110,7 @@ typedef long long Word64;
 typedef __int64 Word64;
 #endif
 
-static __inline Word64 MADD64(Word64 sum, int x, int y)
+__inline Word64 MADD64(Word64 sum, int x, int y)
 {
 	unsigned int sumLo = ((unsigned int *)&sum)[0];
 	int sumHi = ((int *)&sum)[1];
@@ -122,7 +125,7 @@ static __inline Word64 MADD64(Word64 sum, int x, int y)
 	/* equivalent to return (sum + ((__int64)x * y)); */
 }
 
-static __inline Word64 SHL64(Word64 x, int n)
+__inline Word64 SHL64(Word64 x, int n)
 {
 	unsigned int xLo = ((unsigned int *)&x)[0];
 	int xHi = ((int *)&x)[1];
@@ -152,7 +155,7 @@ static __inline Word64 SHL64(Word64 x, int n)
 	}
 }
 
-static __inline Word64 SAR64(Word64 x, int n)
+__inline Word64 SAR64(Word64 x, int n)
 {
 	unsigned int xLo = ((unsigned int *)&x)[0];
 	int xHi = ((int *)&x)[1];
@@ -190,7 +193,7 @@ static __inline Word64 SAR64(Word64 x, int n)
 #define MULSHIFT32	xmp3_MULSHIFT32
 int32_t MULSHIFT32(int32_t x, int32_t y);
 
-static __inline int FASTABS(int x) 
+__inline int FASTABS(int x)
 {
 	int sign;
 
@@ -201,7 +204,7 @@ static __inline int FASTABS(int x)
 	return x;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
 	int numZeros;
 
@@ -212,14 +215,14 @@ static __inline int CLZ(int x)
 	while (!(x & 0x80000000)) {
 		numZeros++;
 		x <<= 1;
-	} 
+	}
 
 	return numZeros;
 }
 
 #elif defined ARM_ADS
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	/* important rules for smull RdLo, RdHi, Rm, Rs:
 	 *     RdHi and Rm can't be the same register
@@ -239,7 +242,7 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 	return y;
 }
 
-static __inline int FASTABS(int x) 
+__inline int FASTABS(int x)
 {
 	int t=0; /*Really is not necessary to initialiaze only to avoid warning*/
 
@@ -251,7 +254,7 @@ static __inline int FASTABS(int x)
 	return t;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
 	int numZeros;
 
@@ -262,7 +265,7 @@ static __inline int CLZ(int x)
 	while (!(x & 0x80000000)) {
 		numZeros++;
 		x <<= 1;
-	} 
+	}
 
 	return numZeros;
 }
@@ -273,11 +276,11 @@ static __inline int CLZ(int x)
 	
 typedef long long Word64;
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y) {
+__inline int32_t MULSHIFT32(int32_t x, int32_t y) {
 	return x * y;
 }
 
-static __inline Word64 SAR64(Word64 x, int n) {
+__inline Word64 SAR64(Word64 x, int n) {
 	return x >>= n;
 }
 
@@ -291,16 +294,16 @@ typedef union _U64 {
 	} r;
 } U64;
 
-static __inline Word64 MADD64(Word64 sum64, int x, int y)
+__inline Word64 MADD64(Word64 sum64, int x, int y)
 {
 	sum64 += (Word64)x * (Word64)y;
 
 	return sum64;
 }
-	
+
 #else
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	/* important rules for smull RdLo, RdHi, Rm, Rs:
 	 *     RdHi and Rm can't be the same register
@@ -320,21 +323,21 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 
 #endif
 
-static __inline int FASTABS(int x) 
+__inline int FASTABS(int x)
 {
 	int t=0; /*Really is not necessary to initialiaze only to avoid warning*/
 
 	__asm__ volatile (
 		"eor %0,%2,%2, asr #31;"
 		"sub %0,%1,%2, asr #31;"
-		: "=&r" (t) 
+		: "=&r" (t)
 		: "0" (t), "r" (x)
 	 );
 
 	return t;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
 	int numZeros;
 
@@ -345,7 +348,7 @@ static __inline int CLZ(int x)
 	while (!(x & 0x80000000)) {
 		numZeros++;
 		x <<= 1;
-	} 
+	}
 
 	return numZeros;
 }
@@ -356,14 +359,14 @@ static __inline int CLZ(int x)
 
 typedef long long Word64;
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
 	unsigned int result = 0;
 	asm volatile ("mulh %0, %1, %2" : "=r"(result): "r"(x), "r"(y));
 	return result;
 }
 
-static __inline int FASTABS(int x) 
+__inline int FASTABS(int x) 
 {
 	int sign;
 
@@ -374,7 +377,7 @@ static __inline int FASTABS(int x)
 	return x;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
 	int numZeros;
 
@@ -390,7 +393,7 @@ static __inline int CLZ(int x)
 	return numZeros;
 }
 
-static __inline Word64 MADD64(Word64 sum, int a, int b)
+__inline Word64 MADD64(Word64 sum, int a, int b)
 {
 	unsigned int result_hi = 0;
 	unsigned int result_lo = 0;
@@ -404,12 +407,12 @@ static __inline Word64 MADD64(Word64 sum, int a, int b)
 	return result;
 }
 
-static __inline Word64 SHL64(Word64 x, int n)
+__inline Word64 SHL64(Word64 x, int n)
 {
 	return (x<<n);
 }
 
-static __inline Word64 SAR64(Word64 x, int n)
+__inline Word64 SAR64(Word64 x, int n)
 {
 	return (x >> n);
 }
@@ -420,14 +423,14 @@ static __inline Word64 SAR64(Word64 x, int n)
 
 typedef long long Word64;
 
-static __inline Word64 MADD64(Word64 sum64, int x, int y)
+__inline Word64 MADD64(Word64 sum64, int x, int y)
 {
     return (sum64 + ((long long)x * y));
 }
 
 #if XCHAL_HAVE_MUL32_HIGH
 
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     /* important rules for smull RdLo, RdHi, Rm, Rs:
      *     RdHi and Rm can't be the same register
@@ -447,7 +450,7 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 #else
 
 // Fallback for Xtensa without MUL32_HIGH (e.g., ESP8266)
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     Word64 result = ((Word64) x) * y;
     return (int32_t)(result >> 32);
@@ -457,7 +460,7 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 
 #if XCHAL_HAVE_ABS
 
-static __inline int FASTABS(int x)
+__inline int FASTABS(int x)
 {
     int ret;
     asm volatile ("abs %0, %1" : "=r" (ret) : "r" (x));
@@ -467,7 +470,7 @@ static __inline int FASTABS(int x)
 #else
 
 // Fallback for Xtensa without ABS instruction (e.g., ESP8266)
-static __inline int FASTABS(int x)
+__inline int FASTABS(int x)
 {
     int sign;
     sign = x >> (sizeof(int) * 8 - 1);
@@ -478,12 +481,12 @@ static __inline int FASTABS(int x)
 
 #endif
 
-static __inline Word64 SAR64(Word64 x, int n)
+__inline Word64 SAR64(Word64 x, int n)
 {
     return x >> n;
 }
 
-static __inline int CLZ(int x)
+__inline int CLZ(int x)
 {
     return __builtin_clz(x);
 }
@@ -495,7 +498,7 @@ typedef long long Word64;
 /**
  * Multiply together two 32-bit numbers and return the top 32-bits of the result.
  */
-static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
+__inline int32_t MULSHIFT32(int32_t x, int32_t y)
 {
     Word64 result = ((Word64) x) * y;
 
@@ -505,7 +508,7 @@ static __inline int32_t MULSHIFT32(int32_t x, int32_t y)
 /**
  * Absolute value of x
  */
-static __inline int32_t FASTABS(int32_t x)
+__inline int32_t FASTABS(int32_t x)
 {
     int32_t sign;
 
@@ -519,7 +522,7 @@ static __inline int32_t FASTABS(int32_t x)
 /**
  * Leading zeros
  */
-static __inline int32_t CLZ(int32_t x)
+__inline int32_t CLZ(int32_t x)
 {
     int32_t numZeros;
 
@@ -538,7 +541,7 @@ static __inline int32_t CLZ(int32_t x)
 /**
  * Increase sum by x * y
  */
-static __inline Word64 MADD64(Word64 sum64, int x, int y)
+__inline Word64 MADD64(Word64 sum64, int x, int y)
 {
     sum64 += (Word64)x * (Word64)y;
 
@@ -548,7 +551,7 @@ static __inline Word64 MADD64(Word64 sum64, int x, int y)
 /**
  * Shift left
  */
-static __inline Word64 SHL64(Word64 x, int n)
+__inline Word64 SHL64(Word64 x, int n)
 {
     return ((Word64) x) << n;
 }
@@ -556,7 +559,7 @@ static __inline Word64 SHL64(Word64 x, int n)
 /**
  * Shift right
  */
-static __inline Word64 SAR64(Word64 x, int n)
+__inline Word64 SAR64(Word64 x, int n)
 {
     return x >> n;
 }
@@ -564,5 +567,8 @@ static __inline Word64 SAR64(Word64 x, int n)
 #endif
 
 #endif	/* platforms */
+
+} /* namespace third_party */
+} /* namespace fl */
 
 #endif /* _ASSEMBLY_H */

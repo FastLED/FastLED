@@ -64,7 +64,7 @@
 #endif
 
 /* Helper function for clipping to range [-2^n, 2^n - 1] */
-static __inline int32_t clip_2n_helper(int32_t val, int32_t n) {
+__inline int32_t clip_2n_helper(int32_t val, int32_t n) {
 	int32_t sign = val >> 31;
 	int32_t shifted;
 	int32_t mask;
