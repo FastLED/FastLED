@@ -140,6 +140,7 @@ This list highlights commonly used examples. It is not exhaustive—browse the f
 ### Audio and reactive demos
 
 - `Audio/` — audio input + analysis (simple and advanced variants)
+- `AudioInput/` — I2S microphone input (ESP32 & Teensy, INMP441 compatible)
 - `Ports/PJRCSpectrumAnalyzer/` — Teensy-centric spectrum analyzer
 
 ### Storage, SD card, and data

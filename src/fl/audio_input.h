@@ -78,6 +78,64 @@ struct AudioConfigPdm {
         : mPinDin(pin_din), mPinClk(pin_clk), mI2sNum(i2s_num), mSampleRate(sample_rate), mInvert(invert) {}
 };
 
+// Teensy Audio Library configuration helpers
+// Note: Teensy uses FIXED hardware pins that cannot be changed in software.
+// Pin assignments vary by board model - see Teensy Audio Library documentation.
+//
+// Teensy 3.x I2S pins (only I2S1 available):
+//   BCLK=9, MCLK=11, RX=13, LRCLK=23
+//
+// Teensy 4.x I2S1 pins:
+//   BCLK=21, MCLK=23, RX=8, LRCLK=20
+//
+// Teensy 4.x I2S2 pins:
+//   BCLK=4, MCLK=33, RX=5, LRCLK=3
+namespace TeensyI2S {
+    enum I2SPort {
+        I2S1 = 0,  // Primary I2S (available on all Teensy 3.x and 4.x)
+        I2S2 = 1   // Secondary I2S (Teensy 4.x only)
+    };
+
+    // Get LRCLK (WS) pin for given I2S port
+    constexpr int getPinWS(I2SPort port) {
+#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+        // Teensy 3.x - only I2S1 available
+        return (port == I2S1) ? 23 : -1;
+#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+        // Teensy 4.x - I2S1 and I2S2 available
+        return (port == I2S1) ? 20 : 3;
+#else
+        return -1;  // Unknown platform
+#endif
+    }
+
+    // Get RX (SD) pin for given I2S port
+    constexpr int getPinSD(I2SPort port) {
+#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+        // Teensy 3.x
+        return (port == I2S1) ? 13 : -1;
+#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+        // Teensy 4.x
+        return (port == I2S1) ? 8 : 5;
+#else
+        return -1;
+#endif
+    }
+
+    // Get BCLK pin for given I2S port
+    constexpr int getPinCLK(I2SPort port) {
+#if defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__)
+        // Teensy 3.x
+        return (port == I2S1) ? 9 : -1;
+#elif defined(__IMXRT1062__) || defined(__IMXRT1052__)
+        // Teensy 4.x
+        return (port == I2S1) ? 21 : 4;
+#else
+        return -1;
+#endif
+    }
+}
+
 
 class AudioConfig : public fl::Variant<AudioConfigI2S, AudioConfigPdm> {
 public:
@@ -86,6 +144,30 @@ public:
         AudioConfigI2S config(pin_ws, pin_sd, pin_clk, i2s_num, channel, sample_rate, 16);
         return AudioConfig(config);
     }
+
+    // Factory method for Teensy I2S microphones (INMP441, ICS43432, SPH0645LM4H, etc.)
+    // Teensy uses fixed hardware pins - see TeensyI2S namespace for pin assignments.
+    // Example: auto config = AudioConfig::CreateTeensyI2S(TeensyI2S::I2S1, Right, 44100);
+    static AudioConfig CreateTeensyI2S(
+        TeensyI2S::I2SPort port = TeensyI2S::I2S1,
+        AudioChannel channel = Right,
+        u16 sample_rate = AUDIO_DEFAULT_SAMPLE_RATE,
+        u8 bit_resolution = AUDIO_DEFAULT_BIT_RESOLUTION
+    ) {
+        AudioConfigI2S config(
+            TeensyI2S::getPinWS(port),     // pin_ws (LRCLK)
+            TeensyI2S::getPinSD(port),     // pin_sd (RX)
+            TeensyI2S::getPinCLK(port),    // pin_clk (BCLK)
+            static_cast<int>(port),        // i2s_num
+            channel,
+            sample_rate,
+            bit_resolution,
+            Philips,                       // comm_format (Teensy uses I2S Philips)
+            false                          // invert
+        );
+        return AudioConfig(config);
+    }
+
     AudioConfig(const AudioConfigI2S& config) : fl::Variant<AudioConfigI2S, AudioConfigPdm>(config) {}
     AudioConfig(const AudioConfigPdm& config) : fl::Variant<AudioConfigI2S, AudioConfigPdm>(config) {}
 };

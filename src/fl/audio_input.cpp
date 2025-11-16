@@ -12,10 +12,24 @@
 
 
 // Auto-determine platform audio input support
+
+// First check for Teensy (before Arduino, since Teensy is Arduino-compatible)
+#include "platforms/arm/teensy/is_teensy.h"
+#ifndef FASTLED_USES_TEENSY_AUDIO_INPUT
+  #if FL_IS_TEENSY
+    #define FASTLED_USES_TEENSY_AUDIO_INPUT 1
+  #else
+    #define FASTLED_USES_TEENSY_AUDIO_INPUT 0
+  #endif
+#endif
+
 #ifndef FASTLED_USES_ARDUINO_AUDIO_INPUT
   #if defined(ESP32) && !defined(ESP8266)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif defined(__EMSCRIPTEN__)
+    #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
+  #elif FASTLED_USES_TEENSY_AUDIO_INPUT
+    // Teensy uses its own audio implementation, not generic Arduino
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 0
   #elif FL_HAS_INCLUDE(<Arduino.h>)
     #define FASTLED_USES_ARDUINO_AUDIO_INPUT 1
@@ -46,7 +60,9 @@
 #endif
 
 // Include platform-specific audio input implementation
-#if FASTLED_USES_ARDUINO_AUDIO_INPUT
+#if FASTLED_USES_TEENSY_AUDIO_INPUT
+#include "platforms/arm/teensy/audio_input_teensy.hpp"
+#elif FASTLED_USES_ARDUINO_AUDIO_INPUT
 #include "platforms/arduino/audio_input.hpp"
 #elif FASTLED_USES_ESP32_AUDIO_INPUT
 #include "platforms/esp/32/audio/audio_impl.hpp"
@@ -56,7 +72,12 @@
 
 namespace fl {
 
-#if FASTLED_USES_ARDUINO_AUDIO_INPUT
+#if FASTLED_USES_TEENSY_AUDIO_INPUT
+// Use Teensy audio implementation
+fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
+    return teensy_create_audio_input(config, error_message);
+}
+#elif FASTLED_USES_ARDUINO_AUDIO_INPUT
 // Use Arduino audio implementation
 fl::shared_ptr<IAudioInput> platform_create_audio_input(const AudioConfig &config, fl::string *error_message) {
     return arduino_create_audio_input(config, error_message);
