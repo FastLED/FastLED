@@ -61,7 +61,7 @@
 
 // Include platform-specific audio input implementation
 #if FASTLED_USES_TEENSY_AUDIO_INPUT
-#include "platforms/arm/teensy/audio_input_teensy.hpp"
+#include "platforms/arm/teensy/audio_input_teensy.h"
 #elif FASTLED_USES_ARDUINO_AUDIO_INPUT
 #include "platforms/arduino/audio_input.hpp"
 #elif FASTLED_USES_ESP32_AUDIO_INPUT
