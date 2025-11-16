@@ -38,6 +38,89 @@ config.add(channel1_config)
       .setDither(BINARY_DITHER);
 ```
 
+### Multi-Lane SPI (ESP32 Only)
+
+**Available on ESP32 SPI-based engines (`ChannelEngineSpi`):**
+
+The SPI channel engine supports multi-lane (dual/quad) SPI transmission for **higher throughput** to a single LED strip. This uses the ESP32's dual/quad SPI modes to send data across multiple pins simultaneously.
+
+**Platform Support:**
+- **ESP32 classic, S2, S3**: Supports 1, 2, or 4 lanes (single/dual/quad modes)
+- **ESP32-C6, C3, H2**: Supports 1 or 2 lanes only (single/dual modes, no quad)
+
+**Throughput Benefits:**
+- **Single-lane (default)**: Standard SPI transmission (~2.5 MHz for WS2812)
+- **Dual-lane**: 2x throughput by using 2 data pins
+- **Quad-lane**: 4x throughput by using 4 data pins (ESP32/S2/S3 only)
+
+**How It Works:**
+
+Multi-lane SPI modes (SPI_TRANS_MODE_DIO/QIO) split each byte across multiple data lines, sending nibbles or bits in parallel. This is designed for QSPI flash communication but works perfectly for WS2812-over-SPI encoding - the same encoded bit stream is transmitted faster using multiple pins.
+
+**Important**: This is NOT for driving multiple independent LED strips in parallel. For parallel strips, use separate channels or the I2S-based engine (SpiHw16).
+
+**Example Usage:**
+
+```cpp
+#include "FastLED.h"
+#include "fl/channels/channel_engine_spi.h"
+
+#define NUM_LEDS 300
+#define DATA0_PIN 23  // MOSI
+#define DATA1_PIN 19  // MISO (for dual mode)
+#define DATA2_PIN 18  // WP (for quad mode, ESP32/S2/S3 only)
+#define DATA3_PIN 5   // HD (for quad mode, ESP32/S2/S3 only)
+
+CRGB leds[NUM_LEDS];
+fl::ChannelEngineSpi* spiEngine;
+
+void setup() {
+    // Create SPI engine
+    spiEngine = new fl::ChannelEngineSpi();
+
+    // Configure multi-lane pins BEFORE creating channels
+    // Option 1: Dual-lane (2x throughput)
+    spiEngine->configureMultiLanePins(fl::MultiLanePinConfig(DATA0_PIN, DATA1_PIN));
+
+    // Option 2: Quad-lane (4x throughput, ESP32/S2/S3 only)
+    // spiEngine->configureMultiLanePins(
+    //     fl::MultiLanePinConfig(DATA0_PIN, DATA1_PIN, DATA2_PIN, DATA3_PIN));
+
+    // Create channel with same data0_pin
+    auto timing = fl::makeTimingConfig<fl::TIMING_WS2812_800KHZ>();
+    fl::ChannelConfig config(DATA0_PIN, timing, fl::span<CRGB>(leds, NUM_LEDS), RGB);
+
+    // Create channel (automatically uses multi-lane config for DATA0_PIN)
+    auto channel = fl::Channel::create(spiEngine, config);
+    FastLED.addLedChannel(channel);
+}
+
+void loop() {
+    // Normal FastLED usage - multi-lane transmission is automatic
+    fill_rainbow(leds, NUM_LEDS, 0, 255 / NUM_LEDS);
+    FastLED.show();
+    delay(20);
+}
+```
+
+**Wiring:**
+
+For dual-lane mode, connect both data pins to the LED strip's data input:
+- **ESP32 classic**: Use IO_MUX pins for best performance (lower latency)
+- **ESP32-C6**: Only SPI2_HOST available (GPIO matrix routing, ~25ns delay)
+- All data pins must be physically connected together at the LED strip
+
+**Performance Notes:**
+- Multi-lane modes reduce transmission time by 2x (dual) or 4x (quad)
+- Timer ISR automatically scales encoding throughput based on lane count:
+  - Single-lane: 40 LEDs/chunk (120 bytes → 360 SPI bytes @ 3x expansion)
+  - Dual-lane: 80 LEDs/chunk (240 bytes → 720 SPI bytes)
+  - Quad-lane: 160 LEDs/chunk (480 bytes → 1440 SPI bytes)
+- Maintains constant CPU utilization across all lane modes (4 kHz ISR rate)
+- Useful for very long LED strips (300+ LEDs) where transmission time is a bottleneck
+- GPIO matrix routing adds ~25ns delay vs IO_MUX (negligible for most use cases)
+- DMA is automatically used for buffers > 64 bytes
+
 ## Minimal Example: 4 Parallel LED Strips
 
 ```cpp

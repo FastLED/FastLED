@@ -261,8 +261,13 @@ template <typename T> struct decay {
 template <typename T> using decay_t = typename decay<T>::type;
 
 // Define is_pod trait (basic implementation)
+// Enums are POD types, so we use compiler intrinsics to detect them
 template <typename T> struct is_pod {
+#if defined(__GNUC__) || defined(__clang__) || defined(_MSC_VER)
+    enum : bool { value = __is_enum(T) }; // Enums are POD
+#else
     enum : bool { value = false }; // Default to false for safety
+#endif
 };
 
 // Specializations for fundamental types

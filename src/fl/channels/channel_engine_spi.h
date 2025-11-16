@@ -108,11 +108,72 @@ struct SpiTimingConfig {
     }
 };
 
+/// @brief Multi-lane SPI pin configuration
+///
+/// Configures which GPIO pins to use for dual/quad SPI transmission.
+/// The number of lanes is determined by which pins are set (>= 0):
+/// - 1 lane: Only data0_pin set
+/// - 2 lanes (dual): data0_pin and data1_pin set
+/// - 4 lanes (quad): data0_pin, data1_pin, data2_pin, and data3_pin set
+///
+/// Platform support:
+/// - ESP32 classic, S2, S3: Supports 1, 2, or 4 lanes
+/// - ESP32-C6, C3, H2: Supports 1 or 2 lanes only (no quad)
+struct MultiLanePinConfig {
+    gpio_num_t data0_pin;  ///< Data0/MOSI pin (always required)
+    gpio_num_t data1_pin;  ///< Data1/MISO pin for dual/quad mode (-1 if unused)
+    gpio_num_t data2_pin;  ///< Data2/WP pin for quad mode (-1 if unused, ESP32/S2/S3 only)
+    gpio_num_t data3_pin;  ///< Data3/HD pin for quad mode (-1 if unused, ESP32/S2/S3 only)
+
+    /// @brief Default constructor (single-lane mode)
+    constexpr MultiLanePinConfig()
+        : data0_pin(static_cast<gpio_num_t>(-1))
+        , data1_pin(static_cast<gpio_num_t>(-1))
+        , data2_pin(static_cast<gpio_num_t>(-1))
+        , data3_pin(static_cast<gpio_num_t>(-1))
+    {}
+
+    /// @brief Single-lane constructor
+    constexpr explicit MultiLanePinConfig(gpio_num_t data0)
+        : data0_pin(data0)
+        , data1_pin(static_cast<gpio_num_t>(-1))
+        , data2_pin(static_cast<gpio_num_t>(-1))
+        , data3_pin(static_cast<gpio_num_t>(-1))
+    {}
+
+    /// @brief Dual-lane constructor
+    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1)
+        : data0_pin(data0)
+        , data1_pin(data1)
+        , data2_pin(static_cast<gpio_num_t>(-1))
+        , data3_pin(static_cast<gpio_num_t>(-1))
+    {}
+
+    /// @brief Quad-lane constructor (ESP32/S2/S3 only)
+    constexpr MultiLanePinConfig(gpio_num_t data0, gpio_num_t data1,
+                                  gpio_num_t data2, gpio_num_t data3)
+        : data0_pin(data0)
+        , data1_pin(data1)
+        , data2_pin(data2)
+        , data3_pin(data3)
+    {}
+
+    /// @brief Get number of active lanes
+    uint8_t getLaneCount() const {
+        uint8_t count = (data0_pin >= 0) ? 1 : 0;
+        if (data1_pin >= 0) count++;
+        if (data2_pin >= 0) count++;
+        if (data3_pin >= 0) count++;
+        return count;
+    }
+};
+
 /// @brief SPI-based ChannelEngine implementation
 ///
 /// Consolidates SPI LED strip functionality:
 /// - Direct ESP-IDF SPI master driver integration
 /// - WS2812-over-SPI bit encoding (2.5MHz, 3:1 expansion)
+/// - Multi-lane SPI support (dual/quad modes for higher throughput)
 /// - Channel persistence between frames (avoid recreation overhead)
 /// - On-demand SPI bus allocation with reference counting
 /// - DMA support with PSRAM→DRAM buffer copying
@@ -122,6 +183,19 @@ class ChannelEngineSpi : public ChannelEngine, public EngineEvents::Listener {
 public:
     ChannelEngineSpi();
     ~ChannelEngineSpi() override;
+
+    /// @brief Configure multi-lane SPI pins for a specific data pin
+    /// @param pinConfig Multi-lane pin configuration
+    ///
+    /// Example usage:
+    /// @code
+    /// // Dual-lane SPI (2x throughput)
+    /// engine.configureMultiLanePins(MultiLanePinConfig(23, 19));
+    ///
+    /// // Quad-lane SPI (4x throughput, ESP32/S2/S3 only)
+    /// engine.configureMultiLanePins(MultiLanePinConfig(23, 19, 18, 5));
+    /// @endcode
+    void configureMultiLanePins(const MultiLanePinConfig& pinConfig);
 
     // EngineEvents::Listener interface
     void onEndFrame() override;
@@ -140,11 +214,17 @@ private:
     struct SpiChannelState {
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
         spi_device_handle_t spi_device;    ///< Device handle from spi_bus_add_device
-        gpio_num_t pin;                    ///< Output GPIO pin
+        gpio_num_t pin;                    ///< Output GPIO pin (data0/MOSI)
         SpiTimingConfig timing;            ///< Timing configuration
         volatile bool transmissionComplete; ///< Set when all encoding/transmission complete
         bool inUse;                        ///< Channel active flag
         bool useDMA;                       ///< DMA enabled for this channel
+
+        // Multi-lane SPI support (dual/quad modes)
+        uint8_t numLanes;                  ///< Number of active data lanes (1, 2, or 4)
+        gpio_num_t data1_pin;              ///< Data1/MISO pin for dual/quad mode (-1 if unused)
+        gpio_num_t data2_pin;              ///< Data2/WP pin for quad mode (-1 if unused)
+        gpio_num_t data3_pin;              ///< Data3/HD pin for quad mode (-1 if unused)
 
         // Event-driven streaming state
         volatile bool hasNewData;          ///< Set by post_cb, cleared by timer ISR after posting transaction
@@ -182,6 +262,7 @@ private:
         spi_host_device_t host;
         int refCount;  ///< Reference counting (multiple channels can share a bus)
         bool initialized; ///< Bus has been initialized
+        uint8_t activeLanes; ///< Number of lanes in use (0=unused, 1=single, 2=dual, 4=quad)
     };
 
     /// @brief Hash function for SpiTimingConfig (future use for caching)
@@ -279,6 +360,9 @@ private:
 
     /// @brief Track last frame number to allow retry once per frame
     uint32_t mLastRetryFrame;
+
+    /// @brief Multi-lane pin configurations (keyed by data0_pin)
+    fl::hash_map<gpio_num_t, MultiLanePinConfig> mMultiLaneConfigs;
 };
 
 } // namespace fl

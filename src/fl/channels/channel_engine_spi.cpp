@@ -9,6 +9,7 @@
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
+#include "platforms/esp/is_esp.h"  // Platform detection (FL_IS_ESP_32C6, etc.)
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/math_macros.h"
@@ -63,6 +64,7 @@ ChannelEngineSpi::ChannelEngineSpi()
 ChannelEngineSpi::~ChannelEngineSpi() {
     FL_DBG("ChannelEngineSpi: Destructor called");
     EngineEvents::removeListener(this);
+    mMultiLaneConfigs.clear();
 
     // Clean up all channels
     for (auto& channel : mChannels) {
@@ -97,6 +99,35 @@ ChannelEngineSpi::~ChannelEngineSpi() {
             releaseSpiHost(channel.spi_host);
         }
     }
+}
+
+void ChannelEngineSpi::configureMultiLanePins(const MultiLanePinConfig& pinConfig) {
+    if (pinConfig.data0_pin < 0) {
+        FL_WARN("ChannelEngineSpi: Invalid multi-lane config - data0_pin must be >= 0");
+        return;
+    }
+
+    uint8_t laneCount = pinConfig.getLaneCount();
+    FL_DBG("ChannelEngineSpi: Configuring " << static_cast<int>(laneCount)
+           << "-lane SPI for pin " << pinConfig.data0_pin
+           << " (data0=" << pinConfig.data0_pin
+           << ", data1=" << pinConfig.data1_pin
+           << ", data2=" << pinConfig.data2_pin
+           << ", data3=" << pinConfig.data3_pin << ")");
+
+    // Validate platform capabilities
+    #if defined(FL_IS_ESP_32C6) || defined(FL_IS_ESP_32C3) || defined(FL_IS_ESP_32H2)
+        // ESP32-C6/C3/H2: Dual-lane max (no quad support)
+        if (laneCount > 2) {
+            FL_WARN("ChannelEngineSpi: ESP32-C6/C3/H2 only supports dual-lane SPI (max 2 lanes), "
+                    << "requested " << static_cast<int>(laneCount) << " lanes");
+            return;
+        }
+    #endif
+
+    // Store the configuration
+    mMultiLaneConfigs[pinConfig.data0_pin] = pinConfig;
+    FL_DBG("ChannelEngineSpi: Multi-lane configuration stored for pin " << pinConfig.data0_pin);
 }
 
 void ChannelEngineSpi::onEndFrame() {
@@ -213,6 +244,25 @@ ChannelEngineSpi::SpiChannelState* ChannelEngineSpi::acquireChannel(
     newChannel.spi_host = SPI_HOST_MAX;
     newChannel.spi_device = nullptr;
 
+    // Check if there's a multi-lane configuration for this pin
+    auto it = mMultiLaneConfigs.find(pin);
+    if (it != mMultiLaneConfigs.end()) {
+        // Apply multi-lane configuration
+        const MultiLanePinConfig& config = it->second;
+        newChannel.numLanes = config.getLaneCount();
+        newChannel.data1_pin = config.data1_pin;
+        newChannel.data2_pin = config.data2_pin;
+        newChannel.data3_pin = config.data3_pin;
+        FL_DBG("ChannelEngineSpi: Applying " << static_cast<int>(newChannel.numLanes)
+               << "-lane configuration for pin " << pin);
+    } else {
+        // Default to single-lane mode
+        newChannel.numLanes = 1;
+        newChannel.data1_pin = static_cast<gpio_num_t>(-1);
+        newChannel.data2_pin = static_cast<gpio_num_t>(-1);
+        newChannel.data3_pin = static_cast<gpio_num_t>(-1);
+    }
+
     if (!createChannel(&newChannel, pin, timing, dataSize)) {
         FL_WARN("ChannelEngineSpi: Failed to create channel for pin " << pin);
         return nullptr;
@@ -255,14 +305,23 @@ bool ChannelEngineSpi::createChannel(SpiChannelState* state, gpio_num_t pin,
     // Use DMA for larger buffers (>64 bytes) similar to Espressif driver
     state->useDMA = (spiBufferSize > 64);
 
-    // Configure SPI bus
+    // Configure SPI bus with multi-lane support
     spi_bus_config_t bus_config = {};
-    bus_config.mosi_io_num = pin;
-    bus_config.miso_io_num = -1;  // Not used
-    bus_config.sclk_io_num = -1;  // Not used (data-only mode)
-    bus_config.quadwp_io_num = -1;
-    bus_config.quadhd_io_num = -1;
+    bus_config.mosi_io_num = pin;                           // Data0 (always present)
+    bus_config.miso_io_num = state->data1_pin;              // Data1 for dual/quad mode (-1 if unused)
+    bus_config.sclk_io_num = -1;                            // Not used (data-only mode)
+    bus_config.quadwp_io_num = state->data2_pin;            // Data2 for quad mode (-1 if unused)
+    bus_config.quadhd_io_num = state->data3_pin;            // Data3 for quad mode (-1 if unused)
     bus_config.max_transfer_sz = spiBufferSize;
+
+    // Set flags based on lane count (1, 2, or 4 lanes)
+    bus_config.flags = SPICOMMON_BUSFLAG_MASTER;
+    if (state->numLanes >= 4) {
+        bus_config.flags |= SPICOMMON_BUSFLAG_QUAD;  // Quad mode (4 lanes)
+    } else if (state->numLanes >= 2) {
+        bus_config.flags |= SPICOMMON_BUSFLAG_DUAL;  // Dual mode (2 lanes)
+    }
+    // else: standard SPI (1 data line)
 
     // Initialize SPI bus
     esp_err_t ret = spi_bus_initialize(state->spi_host, &bus_config,
@@ -284,6 +343,13 @@ bool ChannelEngineSpi::createChannel(SpiChannelState* state, gpio_num_t pin,
     dev_config.spics_io_num = -1;  // No CS pin
     dev_config.queue_size = 4;  // Transaction queue size
     dev_config.post_cb = spiPostTransactionCallback;  // ISR callback when transaction completes
+
+    // Set HALFDUPLEX flag for multi-lane modes (required for dual/quad SPI)
+    if (state->numLanes >= 2) {
+        dev_config.flags = SPI_DEVICE_HALFDUPLEX;
+    } else {
+        dev_config.flags = 0;
+    }
 
     // Add device to bus
     ret = spi_bus_add_device(state->spi_host, &dev_config, &state->spi_device);
@@ -355,6 +421,11 @@ bool ChannelEngineSpi::createChannel(SpiChannelState* state, gpio_num_t pin,
     state->timerHandle = isr_handle;
 
     FL_DBG("ChannelEngineSpi: Channel created successfully - pin=" << pin
+           << ", lanes=" << static_cast<int>(state->numLanes)
+           << " (data0=" << pin
+           << ", data1=" << state->data1_pin
+           << ", data2=" << state->data2_pin
+           << ", data3=" << state->data3_pin << ")"
            << ", host=" << state->spi_host
            << ", dma=" << state->useDMA
            << ", freq=" << timing.clock_hz << " Hz"
@@ -458,13 +529,18 @@ spi_host_device_t ChannelEngineSpi::acquireSpiHost() {
             newTracking.host = host;
             newTracking.refCount = 0;
             newTracking.initialized = false;
+            newTracking.activeLanes = 0;  // No lanes in use yet
             sSpiHostUsage.push_back(newTracking);
             tracking = &sSpiHostUsage.back();
         }
 
         // ESP32 SPI limitation: Each host can only have one bus configuration
-        // For LED strips, we can only use one MOSI pin per host
+        // This means one set of pins (data0/data1/data2/data3) per host
+        // Multi-lane (dual/quad) uses multiple pins on the SAME host
         // So we limit to refCount == 0 (not yet in use)
+        //
+        // Future enhancement: Could allow multiple channels to share the same host
+        // if they have identical pin configurations (bus sharing)
         if (tracking->refCount == 0) {
             tracking->refCount++;
             tracking->initialized = true;
@@ -674,8 +750,12 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void* user_data) {
         return;  // All done
     }
 
-    // Encode one chunk (40 LEDs = 120 bytes → 360 SPI bytes @ 3x expansion)
-    const size_t chunk_size_leds = 40;
+    // Encode one chunk with lane-scaled throughput
+    // Single-lane: 40 LEDs per ISR fire (250μs period)
+    // Dual-lane: 80 LEDs (2x throughput, 2x encoding needed)
+    // Quad-lane: 160 LEDs (4x throughput, 4x encoding needed)
+    const size_t base_chunk_leds = 40;
+    const size_t chunk_size_leds = base_chunk_leds * channel->numLanes;
     const size_t chunk_size_bytes = chunk_size_leds * 3;  // RGB
 
     size_t bytes_to_encode = fl_min(chunk_size_bytes, channel->ledBytesRemaining);
@@ -705,10 +785,19 @@ void IRAM_ATTR ChannelEngineSpi::timerEncodingISR(void* user_data) {
         // Select which transaction to use
         spi_transaction_t* trans = channel->transAInFlight ? &channel->transB : &channel->transA;
 
-        // Setup transaction
+        // Setup transaction with multi-lane flags
         trans->length = channel->stagingOffset * 8;  // Convert to bits
         trans->tx_buffer = channel->currentStaging;
         trans->user = channel;
+
+        // Set transaction mode based on lane count (1, 2, or 4 lanes)
+        if (channel->numLanes >= 4) {
+            trans->flags = SPI_TRANS_MODE_QIO;  // Quad I/O mode
+        } else if (channel->numLanes >= 2) {
+            trans->flags = SPI_TRANS_MODE_DIO;  // Dual I/O mode
+        } else {
+            trans->flags = 0;  // Standard SPI mode
+        }
 
         // Try to queue transaction (non-blocking in ISR)
         esp_err_t ret = spi_device_queue_trans(channel->spi_device, trans, 0);
