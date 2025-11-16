@@ -1,5 +1,11 @@
 /// @file channel_engine_rmt.cpp
 /// @brief RMT5 ChannelEngine implementation
+///
+/// To enable RMT operational logging (channel creation, queueing, transmission):
+///   #define FASTLED_LOG_RMT_ENABLED
+///
+/// RMT logging uses FL_LOG_RMT which is compile-time controlled via fl/log.h.
+/// When disabled (default), FL_LOG_RMT produces no code overhead (zero-cost abstraction).
 
 #ifdef ESP32
 
@@ -27,8 +33,6 @@ FL_EXTERN_C_BEGIN
 #include "freertos/FreeRTOS.h"  // For pdMS_TO_TICKS
 FL_EXTERN_C_END
 
-#define RMT_ENGINE_TAG "channel_engine_rmt"
-
 namespace fl {
 
 //=============================================================================
@@ -39,7 +43,12 @@ ChannelEngineRMT::ChannelEngineRMT()
 {
     // Register as listener for end frame events
     EngineEvents::addListener(this);
-    FL_DBG("RMT Channel Engine initialized");
+
+    // Suppress ESP-IDF RMT "no free channels" errors (expected during time-multiplexing)
+    // Only show critical RMT errors (ESP_LOG_ERROR and above)
+    esp_log_level_set("rmt", ESP_LOG_NONE);
+
+    FL_LOG_RMT("RMT Channel Engine initialized");
 }
 
 ChannelEngineRMT::~ChannelEngineRMT() {
@@ -67,7 +76,7 @@ ChannelEngineRMT::~ChannelEngineRMT() {
     }
     mEncoderCache.clear();
 
-    FL_DBG("RMT Channel Engine destroyed");
+    FL_LOG_RMT("RMT Channel Engine destroyed");
 }
 
 //=============================================================================
@@ -75,7 +84,7 @@ ChannelEngineRMT::~ChannelEngineRMT() {
 //=============================================================================
 
 void ChannelEngineRMT::onEndFrame() {
-    FL_WARN("ChannelEngineRMT::onEndFrame() - starting");
+    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - starting");
     show();
     int pollCount = 0;
     while (poll() == EngineState::BUSY) {
@@ -85,21 +94,14 @@ void ChannelEngineRMT::onEndFrame() {
         }
         fl::delayMicroseconds(100);
     }
-    FL_WARN("ChannelEngineRMT::onEndFrame() - completed after " << pollCount << " polls");
+    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - completed after " << pollCount << " polls");
 }
 
 void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
     if (channelData.size() == 0) {
         return;
     }
-    FL_DBG("ChannelEngineRMT::beginTransmission() is running");
-
-    // Set log level based on build type
-#ifdef NDEBUG
-    esp_log_level_set(RMT_ENGINE_TAG, ESP_LOG_INFO);
-#else
-    esp_log_level_set(RMT_ENGINE_TAG, ESP_LOG_VERBOSE);
-#endif
+    FL_LOG_RMT("ChannelEngineRMT::beginTransmission() is running");
 
     // Sort: smallest strips first (helps async parallelism)
     fl::vector_inlined<ChannelDataPtr, 16> sorted;
@@ -144,33 +146,33 @@ ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
 
         if (ch.transmissionComplete) {
             completedCount++;
-            FL_WARN("Channel on pin " << ch.pin << " completed transmission");
+            FL_LOG_RMT("Channel on pin " << ch.pin << " completed transmission");
 
             // Disable channel to release HW resources
             if (ch.channel) {
                 esp_err_t err = rmt_disable(ch.channel);
                 if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    FL_WARN("Failed to disable channel: " << err);
+                    FL_LOG_RMT("Failed to disable channel: " << err);
                 }
             }
 
             // Release channel back to pool
-            FL_WARN("Releasing channel " << ch.pin);
+            FL_LOG_RMT("Releasing channel " << ch.pin);
             releaseChannel(&ch);
 
             // Try to start pending channels
             processPendingChannels();
         } else {
-            FL_WARN("Channel on pin " << ch.pin << " still transmitting (inUse=true, complete=false)");
+            FL_LOG_RMT("Channel on pin " << ch.pin << " still transmitting (inUse=true, complete=false)");
         }
     }
 
     // Check if any pending channels remain
     if (!mPendingChannels.empty()) {
         anyActive = true;
-        FL_WARN("Pending channels: " << mPendingChannels.size());
+        FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
     } else if (activeCount > 0) {
-        FL_WARN("No pending channels, but " << activeCount << " active channels (" << completedCount << " completed)");
+        FL_LOG_RMT("No pending channels, but " << activeCount << " active channels (" << completedCount << " completed)");
     }
 
     return anyActive ? EngineState::BUSY : EngineState::READY;
@@ -184,7 +186,7 @@ rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& t
     // Look up in cache
     auto it = mEncoderCache.find(timing);
     if (it != mEncoderCache.end()) {
-        FL_DBG("Reusing cached encoder for timing: " << timing.name);
+        FL_LOG_RMT("Reusing cached encoder for timing: " << timing.name);
         return it->second;
     }
 
@@ -198,7 +200,7 @@ rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& t
 
     // Cache it forever (never deleted until shutdown)
     mEncoderCache[timing] = encoder;
-    FL_DBG("Created and cached encoder for timing: " << timing.name);
+    FL_LOG_RMT("Created and cached encoder for timing: " << timing.name);
     return encoder;
 }
 
@@ -212,7 +214,7 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
         if (!ch.inUse && ch.channel && ch.pin == pin) {
             ch.inUse = true;
             configureChannel(&ch, pin, timing);
-            FL_DBG("Reusing channel for pin " << static_cast<int>(pin));
+            FL_LOG_RMT("Reusing channel for pin " << static_cast<int>(pin));
             return &ch;
         }
     }
@@ -222,7 +224,7 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
         if (!ch.inUse && ch.channel) {
             ch.inUse = true;
             configureChannel(&ch, pin, timing);
-            FL_DBG("Reconfiguring idle channel for pin " << static_cast<int>(pin));
+            FL_LOG_RMT("Reconfiguring idle channel for pin " << static_cast<int>(pin));
             return &ch;
         }
     }
@@ -242,7 +244,7 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
             return nullptr;
         }
 
-        FL_DBG("Created new channel for pin " << static_cast<int>(pin)
+        FL_LOG_RMT("Created new channel for pin " << static_cast<int>(pin)
                << " (total: " << mChannels.size() << ")");
         return stablePtr;
     }
@@ -270,7 +272,8 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
-        FL_WARN("Failed to create RMT channel on pin " << static_cast<int>(pin)
+        // This is expected when all HW channels are in use (time-multiplexing scenario)
+        FL_LOG_RMT("Failed to create RMT channel on pin " << static_cast<int>(pin)
                 << ": " << esp_err_to_name(err));
         state->channel = nullptr;
         return false;
@@ -282,7 +285,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     state->pin = pin;
     state->timing = timing;
     state->transmissionComplete = false;
-    FL_DBG("RMT channel created on GPIO " << static_cast<int>(pin));
+    FL_LOG_RMT("RMT channel created on GPIO " << static_cast<int>(pin));
     return true;
 }
 
@@ -300,14 +303,14 @@ bool ChannelEngineRMT::registerChannelCallback(ChannelState* state) {
         return false;
     }
 
-    FL_DBG("Registered callback for channel on GPIO " << static_cast<int>(state->pin));
+    FL_LOG_RMT("Registered callback for channel on GPIO " << static_cast<int>(state->pin));
     return true;
 }
 
 void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing) {
     // If pin changed, destroy and recreate channel
     if (state->channel && state->pin != pin) {
-        FL_DBG("Pin changed from " << static_cast<int>(state->pin)
+        FL_LOG_RMT("Pin changed from " << static_cast<int>(state->pin)
                << " to " << static_cast<int>(pin) << ", recreating channel");
 
         // Wait for any pending transmission to complete
@@ -322,7 +325,7 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
     // Create channel if needed
     if (!state->channel) {
         if (!createChannel(state, pin, timing)) {
-            FL_WARN("Failed to recreate channel for pin " << static_cast<int>(pin));
+            FL_LOG_RMT("Failed to recreate channel for pin " << static_cast<int>(pin));
             return;
         }
 
@@ -375,7 +378,7 @@ void ChannelEngineRMT::processPendingChannels() {
 
         esp_err_t err = rmt_enable(channel->channel);
         if (err != ESP_OK) {
-            FL_WARN("Failed to enable channel: " << esp_err_to_name(err));
+            FL_LOG_RMT("Failed to enable channel: " << esp_err_to_name(err));
             releaseChannel(channel);
             ++i;
             continue;
@@ -384,7 +387,7 @@ void ChannelEngineRMT::processPendingChannels() {
         // Explicitly reset encoder before each transmission to ensure clean state
         err = encoder->reset(encoder);
         if (err != ESP_OK) {
-            FL_WARN("Failed to reset encoder: " << esp_err_to_name(err));
+            FL_LOG_RMT("Failed to reset encoder: " << esp_err_to_name(err));
             rmt_disable(channel->channel);
             releaseChannel(channel);
             ++i;
@@ -398,15 +401,15 @@ void ChannelEngineRMT::processPendingChannels() {
                           pending.data->getSize(),
                           &tx_config);
         if (err != ESP_OK) {
-            FL_WARN("Failed to transmit: " << esp_err_to_name(err));
+            FL_LOG_RMT("Failed to transmit: " << esp_err_to_name(err));
             rmt_disable(channel->channel);
             releaseChannel(channel);
             ++i;
             continue;
         }
 
-        ESP_LOGD(RMT_ENGINE_TAG, "Started transmission for pin %d (%zu bytes)",
-                 pending.pin, static_cast<size_t>(pending.data->getSize()));
+        FL_LOG_RMT("Started transmission for pin " << pending.pin
+                   << " (" << pending.data->getSize() << " bytes)");
 
         // Remove from pending queue (swap with last and pop)
         if (i < mPendingChannels.size() - 1) {
