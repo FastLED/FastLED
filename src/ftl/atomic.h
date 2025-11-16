@@ -5,8 +5,9 @@
 
 // Determine if we need real atomics:
 // 1. Multi-threaded mode (pthread support)
-// 2. ESP platforms (ISRs require atomic operations, and ESP has fast hardware atomics)
-#if FASTLED_MULTITHREADED || defined(ESP32) || defined(ESP8266)
+// 2. ESP32 platforms (ISRs require atomic operations, and ESP32 has fast hardware atomics)
+// Note: ESP8266 excluded - lacks native atomic support, would require linking libatomic
+#if FASTLED_MULTITHREADED || defined(ESP32)
 #define FASTLED_USE_REAL_ATOMICS 1
 #include "platforms/atomic.h"
 #else
