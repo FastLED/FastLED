@@ -58,6 +58,30 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run test.py --qemu esp32s3` - Run QEMU tests (installs QEMU automatically)
 - `FASTLED_QEMU_SKIP_INSTALL=true uv run test.py --qemu esp32s3` - Skip QEMU installation step
 
+### Hardware Debug (Attached Devices)
+FastLED provides a self-healing script for uploading and monitoring PlatformIO projects on physical devices:
+
+- `uv run ci/debug_attached.py` - Auto-detect environment and upload to attached device
+- `uv run ci/debug_attached.py esp32dev` - Upload to specific PlatformIO environment
+- `uv run ci/debug_attached.py --upload-port /dev/ttyUSB0` - Specify serial port (Linux/Mac)
+- `uv run ci/debug_attached.py --upload-port COM3` - Specify serial port (Windows)
+- `uv run ci/debug_attached.py --verbose` - Enable verbose compilation output
+- `uv run ci/debug_attached.py --timeout 60` - Set monitor timeout (default: 45 seconds)
+- `uv run ci/debug_attached.py --project-dir path/to/project` - Specify PlatformIO project directory
+
+**Features:**
+- Compiles PlatformIO project with standard 15-minute timeout (per CLAUDE.md standards)
+- Self-healing: Automatically kills lingering `pio device monitor` processes that lock serial ports
+- Uploads firmware and monitors serial output with configurable timeout
+- Displays output summary (first 100 and last 100 lines) for quick review
+- Proper KeyboardInterrupt handling with `notify_main_thread()` for clean shutdown
+
+**Workflow:**
+1. Compile the project (`pio run`)
+2. Kill any lingering monitor processes (self-healing step)
+3. Upload firmware and monitor serial output (`pio run -t upload -t monitor`)
+4. Display output summary and success/failure status
+
 ### Code Review
 - `/code_review` - Run specialized code review checks on changes
   - Reviews src/, examples/, and ci/ changes against project standards
