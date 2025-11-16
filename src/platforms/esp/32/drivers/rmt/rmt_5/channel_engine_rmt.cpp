@@ -346,6 +346,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         dma_config.trans_queue_depth = 1;
         dma_config.flags.invert_out = 0;
         dma_config.flags.with_dma = 1;  // Enable DMA
+        dma_config.intr_priority = 3;  // High known value.
 
         esp_err_t dma_err = rmt_new_tx_channel(&dma_config, &state->channel);
         if (dma_err == ESP_OK) {
@@ -402,6 +403,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = 0;
     tx_config.flags.with_dma = 0;  // Non-DMA
+    tx_config.intr_priority = 3;  // Optimal priority (tested on ESP32-C6)
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
