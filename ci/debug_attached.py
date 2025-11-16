@@ -181,13 +181,17 @@ def run_upload_monitor(
                 proc.terminate()
                 break
 
-            # Read next line with small timeout
-            line = proc.get_next_line(timeout=1)
-            if isinstance(line, EndOfStream):
-                break
-            if line:
-                output_lines.append(line)
-                print(line)  # Real-time output
+            # Read next line with 30-second timeout
+            try:
+                line = proc.get_next_line(timeout=30)
+                if isinstance(line, EndOfStream):
+                    break
+                if line:
+                    output_lines.append(line)
+                    print(line)  # Real-time output
+            except TimeoutError:
+                # No output within 30 seconds - continue waiting (check overall timeout on next loop)
+                continue
 
     except KeyboardInterrupt:
         print("\nKeyboardInterrupt: Stopping upload/monitor")
