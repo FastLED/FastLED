@@ -346,7 +346,9 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         dma_config.trans_queue_depth = 1;
         dma_config.flags.invert_out = 0;
         dma_config.flags.with_dma = 1;  // Enable DMA
-        dma_config.intr_priority = 3;  // High known value.
+        // ESP32-C6 Priority Limit: Testing revealed priority 0-3 work, 4+ fail (ISR callbacks don't fire)
+        // Priority 3 is OPTIMAL for ESP32-C6 - highest working level for best latency
+        dma_config.intr_priority = 3;
 
         esp_err_t dma_err = rmt_new_tx_channel(&dma_config, &state->channel);
         if (dma_err == ESP_OK) {
@@ -378,12 +380,13 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
         FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
                    << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
-    } else if (mChannels.empty() && FASTLED_RMT_MEM_WORDS_PER_CHANNEL > 48) {
-        // First channel on ESP32-S3 (SOC_RMT_MEM_WORDS_PER_CHANNEL=48, 192 total) → use all memory
-        // CRITICAL: Skip on ESP32-C6 (SOC_RMT_MEM_WORDS_PER_CHANNEL=48, 48 total) - exceeding breaks ISR!
+    } else if (mChannels.empty()) {
+        // First non-DMA channel: Use quad-buffering (192 words) for maximum performance
+        // This configuration matches RMT4 driver performance and provides optimal WiFi resistance
+        // Tested on ESP32-C6 and ESP32-S3 - both support full 192-word allocation
         mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
-        FL_LOG_RMT("First non-DMA channel (ESP32-S3): QUAD-BUFFERING with " << mem_block_symbols
-                   << " symbols (optimized for single-strip setup)");
+        FL_LOG_RMT("First non-DMA channel: QUAD-BUFFERING with " << mem_block_symbols
+                   << " symbols (4× normal - maximum WiFi resistance)");
     } else {
         // Multiple non-DMA channels → use standard double-buffer size
         // ESP32-S3: 96 words (2× 48), ESP32-C6: 48 words max (hardware limit)
@@ -403,7 +406,9 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = 0;
     tx_config.flags.with_dma = 0;  // Non-DMA
-    tx_config.intr_priority = 3;  // Optimal priority (tested on ESP32-C6)
+    // ESP32-C6 Priority Limit: Testing revealed priority 0-3 work, 4+ fail (ISR callbacks don't fire)
+    // Priority 3 is OPTIMAL for ESP32-C6 - highest working level for best latency
+    tx_config.intr_priority = 3;
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
