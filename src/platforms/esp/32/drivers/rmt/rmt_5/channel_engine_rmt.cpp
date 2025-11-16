@@ -40,6 +40,9 @@ namespace fl {
 //=============================================================================
 
 ChannelEngineRMT::ChannelEngineRMT()
+    : mDMAChannelsInUse(0)
+    , mAllocationFailed(false)
+    , mLastRetryFrame(0)
 {
     // Register as listener for end frame events
     EngineEvents::addListener(this);
@@ -66,6 +69,12 @@ ChannelEngineRMT::~ChannelEngineRMT() {
             rmt_tx_wait_all_done(ch.channel, pdMS_TO_TICKS(1000));
             rmt_disable(ch.channel);
             rmt_del_channel(ch.channel);
+
+            // Track DMA cleanup
+            if (ch.useDMA) {
+                mDMAChannelsInUse--;
+                FL_LOG_RMT("Released DMA channel (remaining: " << mDMAChannelsInUse << ")");
+            }
         }
     }
     mChannels.clear();
@@ -85,6 +94,15 @@ ChannelEngineRMT::~ChannelEngineRMT() {
 
 void ChannelEngineRMT::onEndFrame() {
     FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - starting");
+
+    // Reset allocation failure flag once per frame to allow retry
+    // Use simple frame counter increment to track frames
+    mLastRetryFrame++;
+    if (mAllocationFailed) {
+        FL_LOG_RMT("Resetting allocation failure flag (retry once per frame)");
+        mAllocationFailed = false;
+    }
+
     show();
     int pollCount = 0;
     while (poll() == EngineState::BUSY) {
@@ -243,6 +261,12 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
     }
 
     // Strategy 3: Create new channel if HW available
+    // BUT: Skip if allocation previously failed (retry once per frame via onEndFrame)
+    if (mAllocationFailed) {
+        FL_LOG_RMT("Skipping channel creation (allocation failed, will retry next frame)");
+        return nullptr;
+    }
+
     ChannelState newCh = {};
     if (createChannel(&newCh, pin, timing)) {
         newCh.inUse = true;
@@ -252,8 +276,12 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
         ChannelState* stablePtr = &mChannels.back();
         if (!registerChannelCallback(stablePtr)) {
             FL_WARN("Failed to register callback for new channel");
+            if (stablePtr->useDMA) {
+                mDMAChannelsInUse--;
+            }
             rmt_del_channel(stablePtr->channel);
             mChannels.pop_back();
+            mAllocationFailed = true;  // Mark failure
             return nullptr;
         }
 
@@ -262,7 +290,9 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
         return stablePtr;
     }
 
-    // No HW channels available
+    // No HW channels available - mark allocation failed
+    FL_LOG_RMT("Channel allocation failed - max channels reached");
+    mAllocationFailed = true;
     return nullptr;
 }
 
@@ -274,6 +304,18 @@ void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
 }
 
 bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing) {
+    // Determine if this channel should use DMA
+    // Only allow DMA if: (1) globally enabled, (2) no DMA channels currently in use
+    bool useDMA = false;
+#if FASTLED_RMT5_USE_DMA
+    if (mDMAChannelsInUse == 0) {
+        useDMA = true;
+        FL_LOG_RMT("Enabling DMA for channel on pin " << static_cast<int>(pin));
+    } else {
+        FL_LOG_RMT("DMA already in use by another channel, disabling for pin " << static_cast<int>(pin));
+    }
+#endif
+
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
@@ -281,7 +323,7 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.mem_block_symbols = FASTLED_RMT5_MAX_PULSES;
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = 0;
-    tx_config.flags.with_dma = 0;
+    tx_config.flags.with_dma = useDMA ? 1 : 0;
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
@@ -292,13 +334,21 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
         return false;
     }
 
+    // Track DMA usage
+    if (useDMA) {
+        mDMAChannelsInUse++;
+        FL_LOG_RMT("DMA channels in use: " << mDMAChannelsInUse);
+    }
+
     // NOTE: Callback registration moved to registerChannelCallback()
     // to avoid dangling pointer issues when ChannelState is copied
 
     state->pin = pin;
     state->timing = timing;
+    state->useDMA = useDMA;
     state->transmissionComplete = false;
-    FL_LOG_RMT("RMT channel created on GPIO " << static_cast<int>(pin));
+    FL_LOG_RMT("RMT channel created on GPIO " << static_cast<int>(pin)
+               << (useDMA ? " (DMA enabled)" : " (DMA disabled)"));
     return true;
 }
 
@@ -329,10 +379,17 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         // Wait for any pending transmission to complete
         rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
 
+        // Track DMA cleanup before deleting
+        if (state->useDMA) {
+            mDMAChannelsInUse--;
+            FL_LOG_RMT("Released DMA channel during reconfiguration (remaining: " << mDMAChannelsInUse << ")");
+        }
+
         // Delete channel directly - no need to disable since we're deleting
         // (rmt_del_channel handles cleanup internally)
         rmt_del_channel(state->channel);
         state->channel = nullptr;
+        state->useDMA = false;
     }
 
     // Create channel if needed
@@ -345,8 +402,12 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         // Register callback after creation (state pointer is already stable here)
         if (!registerChannelCallback(state)) {
             FL_WARN("Failed to register callback after reconfiguration");
+            if (state->useDMA) {
+                mDMAChannelsInUse--;
+            }
             rmt_del_channel(state->channel);
             state->channel = nullptr;
+            state->useDMA = false;
             return;
         }
     }

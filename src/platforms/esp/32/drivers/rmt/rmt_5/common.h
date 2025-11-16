@@ -101,6 +101,17 @@ FL_EXTERN_C_END
 #define FASTLED_RMT5_MAX_PULSES (FASTLED_RMT_MEM_WORDS_PER_CHANNEL * FASTLED_RMT_MEM_BLOCKS)
 #define FASTLED_RMT5_PULSES_PER_FILL (FASTLED_RMT5_MAX_PULSES / FASTLED_RMT_MEM_BLOCKS)  // Half buffer
 
+// DMA configuration
+// ⚠️ WARNING: DMA has significant limitations and risks on ESP32-S3:
+//   1. HARDWARE LIMIT: Only ONE RMT channel can use DMA simultaneously
+//   2. SYSTEM CONTENTION: DMA channels are shared with SPI, I2S, UART, ADC/DAC
+//      - Enabling DMA for RMT may starve other peripherals
+//
+// For WiFi robustness, raise interrupt priority instead of using DMA!
+#ifndef FASTLED_RMT5_USE_DMA
+#define FASTLED_RMT5_USE_DMA 0  // Default: disabled (safer and recommended)
+#endif
+
 // Interrupt mode selection
 // 0 = RMT threshold interrupts (original, less aggressive, lower CPU overhead)
 // 1 = Timer-driven interrupts (new, sub-microsecond filling, nibble-level granularity, higher CPU)

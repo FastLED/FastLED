@@ -61,6 +61,7 @@ private:
         ChipsetTiming timing;
         volatile bool transmissionComplete;
         bool inUse;
+        bool useDMA;  // Whether this channel uses DMA
         uint32_t reset_us;
     };
 
@@ -132,6 +133,15 @@ private:
 
     /// @brief Encoder cache: timing -> encoder handle (never deleted until shutdown)
     fl::hash_map<ChipsetTiming, rmt_encoder_handle_t, TimingHash, TimingEqual> mEncoderCache;
+
+    /// @brief Track DMA channel usage (only 1 allowed on ESP32-S3)
+    int mDMAChannelsInUse;
+
+    /// @brief Track allocation failures to avoid hammering the driver
+    bool mAllocationFailed;
+
+    /// @brief Track last frame number to allow retry once per frame
+    uint32_t mLastRetryFrame;
 };
 
 } // namespace fl
