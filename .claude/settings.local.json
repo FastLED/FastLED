@@ -65,7 +65,9 @@
       "Bash(docker inspect:*)",
       "SlashCommand(/git-historian LIB8 attiny85 math8 scale8 --paths src/lib8tion)",
       "WebFetch(domain:www.espressif.com)",
-      "Bash(sed:*)"
+      "Bash(sed:*)",
+      "Bash(ls -la \"C:\\Users\\niteris\\dev\\fastled2\\src\\platforms\\esp\\32\\drivers\\rmt\\rmt_5\"\" 2>/dev/null | grep -E \".h)",
+      "Bash(.cpp \")"
     ],
     "deny": []
   }
