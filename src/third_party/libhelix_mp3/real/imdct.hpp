@@ -46,6 +46,9 @@
 #include "assembly.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    AntiAlias
  *
@@ -790,3 +793,6 @@ int32_t IMDCT(MP3DecInfo *mp3DecInfo, int32_t gr, int32_t ch)
 	/* output has gained 2 int bits */
 	return 0;
 }
+
+}  // namespace third_party
+}  // namespace fl

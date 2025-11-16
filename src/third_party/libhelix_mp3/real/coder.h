@@ -107,33 +107,36 @@ static __inline int32_t clip_2n_helper(int32_t val, int32_t n) {
 #define MAX_REORDER_SAMPS		((192-126)*3)		/* largest critical band for short blocks (see sfBandTable) */
 #define VBUF_LENGTH				(17 * 2 * NBANDS)	/* for double-sized vbuf FIFO */
 
-/* additional external symbols to name-mangle for static linking */
-#define	SetBitstreamPointer	STATNAME(SetBitstreamPointer)
-#define	GetBits				STATNAME(GetBits)
-#define	CalcBitsUsed		STATNAME(CalcBitsUsed)
-#define	DequantChannel		STATNAME(DequantChannel)
-#define	MidSideProc			STATNAME(MidSideProc)
-#define	IntensityProcMPEG1	STATNAME(IntensityProcMPEG1)
-#define	IntensityProcMPEG2	STATNAME(IntensityProcMPEG2)
-#define PolyphaseMono		STATNAME(PolyphaseMono)
-#define PolyphaseStereo		STATNAME(PolyphaseStereo)
-#define FDCT32				STATNAME(FDCT32)
+/* additional external symbols to name-mangle for static linking
+ * NOTE: These macros are disabled because we use C++ namespaces (fl::third_party)
+ *       for symbol isolation instead of preprocessor prefixing
+ */
+// #define	SetBitstreamPointer	STATNAME(SetBitstreamPointer)
+// #define	GetBits				STATNAME(GetBits)
+// #define	CalcBitsUsed		STATNAME(CalcBitsUsed)
+// #define	DequantChannel		STATNAME(DequantChannel)
+// #define	MidSideProc			STATNAME(MidSideProc)
+// #define	IntensityProcMPEG1	STATNAME(IntensityProcMPEG1)
+// #define	IntensityProcMPEG2	STATNAME(IntensityProcMPEG2)
+// #define PolyphaseMono		STATNAME(PolyphaseMono)
+// #define PolyphaseStereo		STATNAME(PolyphaseStereo)
+// #define FDCT32				STATNAME(FDCT32)
 
-#define	ISFMpeg1			STATNAME(ISFMpeg1)
-#define	ISFMpeg2			STATNAME(ISFMpeg2)
-#define	ISFIIP				STATNAME(ISFIIP)
-#define uniqueIDTab			STATNAME(uniqueIDTab)
-#define	coef32				STATNAME(coef32)
-#define	polyCoef			STATNAME(polyCoef)
-#define	csa					STATNAME(csa)
-#define	imdctWin			STATNAME(imdctWin)
+// #define	ISFMpeg1			STATNAME(ISFMpeg1)
+// #define	ISFMpeg2			STATNAME(ISFMpeg2)
+// #define	ISFIIP				STATNAME(ISFIIP)
+// #define uniqueIDTab			STATNAME(uniqueIDTab)
+// #define	coef32				STATNAME(coef32)
+// #define	polyCoef			STATNAME(polyCoef)
+// #define	csa					STATNAME(csa)
+// #define	imdctWin			STATNAME(imdctWin)
 
-#define	huffTable			STATNAME(huffTable)
-#define	huffTabOffset		STATNAME(huffTabOffset)
-#define	huffTabLookup		STATNAME(huffTabLookup)
-#define	quadTable			STATNAME(quadTable)
-#define	quadTabOffset		STATNAME(quadTabOffset)
-#define	quadTabMaxBits		STATNAME(quadTabMaxBits)
+// #define	huffTable			STATNAME(huffTable)
+// #define	huffTabOffset		STATNAME(huffTabOffset)
+// #define	huffTabLookup		STATNAME(huffTabLookup)
+// #define	quadTable			STATNAME(quadTable)
+// #define	quadTabOffset		STATNAME(quadTabOffset)
+// #define	quadTabMaxBits		STATNAME(quadTabMaxBits)
 
 /* map these to the corresponding 2-bit values in the frame header */
 typedef enum {
@@ -142,6 +145,9 @@ typedef enum {
 	Dual = 0x02,	/* two independent channels, L and R always have exactly 1/2 the total bitrate */
 	Mono = 0x03		/* one channel */
 } StereoMode;
+
+namespace fl {
+namespace third_party {
 
 typedef struct _BitStreamInfo {
 	const unsigned char *bytePtr;
@@ -322,5 +328,8 @@ extern const int32_t ISFIIP[2][2];
 extern const int32_t csa[8][2];
 extern const int32_t coef32[31];
 extern const int32_t polyCoef[264];
+
+}  // namespace third_party
+}  // namespace fl
 
 #endif	/* _CODER_H */

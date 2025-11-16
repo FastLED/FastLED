@@ -66,10 +66,6 @@
 //#error No platform defined. See valid options in mp3dec.h
 #endif
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /* determining MAINBUF_SIZE:
  *   max mainDataBegin = (2^9 - 1) bytes (since 9-bit offset) = 511
  *   max nSlots (concatenated with mainDataBegin bytes from before) = 1440 - 9 - 4 + 1 = 1428
@@ -118,7 +114,12 @@ typedef struct _MP3FrameInfo {
 	int version;
 } MP3FrameInfo;
 
-/* public API */
+#ifdef __cplusplus
+namespace fl {
+namespace third_party {
+#endif
+
+/* Internal API - all symbols in fl::third_party namespace */
 HMP3Decoder MP3InitDecoder(void);
 void MP3FreeDecoder(HMP3Decoder hMP3Decoder);
 int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *bytesLeft, short *outbuf, int useSize);
@@ -128,7 +129,8 @@ int MP3GetNextFrameInfo(HMP3Decoder hMP3Decoder, MP3FrameInfo *mp3FrameInfo, uns
 int MP3FindSyncWord(const unsigned char *buf, int nBytes);
 
 #ifdef __cplusplus
-}
+}  // namespace third_party
+}  // namespace fl
 #endif
 
 #endif	/* _MP3DEC_H */

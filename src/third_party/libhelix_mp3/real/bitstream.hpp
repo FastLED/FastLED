@@ -45,6 +45,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    SetBitstreamPointer
  *
@@ -385,6 +388,8 @@ int UnpackSideInfo(MP3DecInfo *mp3DecInfo, const unsigned char *buf)
 
 	ASSERT(nBytes == CalcBitsUsed(bsi, buf, 0) >> 3);
 
-	return nBytes;	
+	return nBytes;
 }
 
+}  // namespace third_party
+}  // namespace fl

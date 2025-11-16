@@ -44,6 +44,9 @@
 #include "coder.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /* NOTE - regenerated tables to use shorts instead of ints 
  *        (all needed data can fit in 16 bits - see below)
  *
@@ -754,3 +757,6 @@ const unsigned char quadTable[64+16] = {
 
 const int32_t quadTabOffset[2] = {0, 64};
 const int32_t quadTabMaxBits[2] = {6, 4};
+
+}  // namespace third_party
+}  // namespace fl

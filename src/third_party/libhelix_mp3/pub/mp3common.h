@@ -95,6 +95,9 @@ typedef struct _MP3DecInfo {
 
 } MP3DecInfo;
 
+namespace fl {
+namespace third_party {
+
 typedef struct _SFBandTable {
 	short l[23];
 	short s[14];
@@ -121,5 +124,8 @@ extern const short bitsPerSlotTab[3];
 extern const short sideBytesTab[3][2];
 extern const short slotTab[3][3][15];
 extern const SFBandTable sfBandTable[3][3];
+
+}  // namespace third_party
+}  // namespace fl
 
 #endif	/* _MP3COMMON_H */

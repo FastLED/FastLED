@@ -49,6 +49,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 // Compile C++ polyphase implementation unless ARM32 assembly is available
 // ARM assembly (asmpoly_gcc.S) compiles only on: __GNUC__ && __arm__ && !__thumb__ && !__thumb2__ && !__AVR__
 // This matches: ARM Cortex-A (full ARM32 instruction set)
@@ -307,3 +310,6 @@ void PolyphaseStereo(short *pcm, int32_t *vbuf, const int32_t *coefBase)
 }
 
 #endif // COMPILE_CPP_POLYPHASE
+
+}  // namespace third_party
+}  // namespace fl

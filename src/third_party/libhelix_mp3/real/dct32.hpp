@@ -46,6 +46,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 #define COS0_0  0x4013c251	/* Q31 */
 #define COS0_1  0x40b345bd	/* Q31 */
 #define COS0_2  0x41fa2d6d	/* Q31 */
@@ -279,3 +282,6 @@ void FDCT32(int32_t *buf, int32_t *dest, int32_t offset, int32_t oddBlock, int32
 		}
 	}
 }
+
+}  // namespace third_party
+}  // namespace fl

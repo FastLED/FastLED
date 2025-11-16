@@ -51,6 +51,9 @@
 #include "coder.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    ClearBuffer
  *
@@ -141,7 +144,7 @@ MP3DecInfo *AllocateBuffers(void)
 	return mp3DecInfo;
 }
 
-#define SAFE_FREE(x)	{if (x)	free(x);	(x) = 0;}	/* helper macro */
+#define SAFE_FREE(x)	{if (x)	fl::free(x);	(x) = 0;}	/* helper macro */
 
 /**************************************************************************************
  * Function:    FreeBuffers
@@ -171,3 +174,6 @@ void FreeBuffers(MP3DecInfo *mp3DecInfo)
 
 	SAFE_FREE(mp3DecInfo);
 }
+
+}  // namespace third_party
+}  // namespace fl

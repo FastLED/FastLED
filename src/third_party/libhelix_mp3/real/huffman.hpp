@@ -44,6 +44,9 @@
 #include "coder.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /* helper macros - see comments in hufftabs.c about the format of the huffman tables */
 #define GetMaxbits(x)   ((int)( (((unsigned short)(x)) >>  0) & 0x000f))
 #define GetHLen(x)      ((int)( (((unsigned short)(x)) >> 12) & 0x000f))
@@ -458,3 +461,5 @@ int DecodeHuffman(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bitOffs
 	return (buf - startBuf);
 }
 
+}  // namespace third_party
+}  // namespace fl

@@ -45,6 +45,9 @@
 #include "assembly.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 typedef int ARRAY3[3];	/* for short-block reordering */
 
 /* optional pre-emphasis for high-frequency scale factor bands */
@@ -372,3 +375,5 @@ int32_t DequantChannel(int32_t *sampleBuf, int32_t *workBuf, int32_t *nonZeroBou
 	return CLZ(gbMask) - 1;
 }
 
+}  // namespace third_party
+}  // namespace fl

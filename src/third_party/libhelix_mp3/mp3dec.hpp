@@ -48,6 +48,8 @@
 
 #include "pub/mp3common.h"	/* includes mp3dec.h (public API) and internal, platform-independent API */
 
+namespace fl {
+namespace third_party {
 
 //#define PROFILE
 #ifdef PROFILE
@@ -485,3 +487,6 @@ int MP3Decode(HMP3Decoder hMP3Decoder, const unsigned char **inbuf, size_t *byte
 	}
 	return ERR_MP3_NONE;
 }
+
+}  // namespace third_party
+}  // namespace fl

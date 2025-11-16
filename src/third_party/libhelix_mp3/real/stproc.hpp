@@ -45,6 +45,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    MidSideProc
  *
@@ -296,4 +299,7 @@ void IntensityProcMPEG2(int32_t x[MAX_NCHAN][MAX_NSAMP], int32_t nSamps, FrameHe
 
 	return;
 }
+
+}  // namespace third_party
+}  // namespace fl
 

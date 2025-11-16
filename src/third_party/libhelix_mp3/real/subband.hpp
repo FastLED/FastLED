@@ -46,6 +46,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    Subband
  *
@@ -93,3 +96,5 @@ int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf)
 	return 0;
 }
 
+}  // namespace third_party
+}  // namespace fl

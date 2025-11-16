@@ -44,6 +44,9 @@
 #include "coder.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /* scale factor lengths (num bits) */
 static const char SFLenTab[16][2] = {
 	{0, 0},    {0, 1},
@@ -388,3 +391,5 @@ int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bi
 	return (buf - startBuf);
 }
 
+}  // namespace third_party
+}  // namespace fl

@@ -46,6 +46,9 @@
 #include "ftl/stdint.h"
 #include "assembly.h"
 
+namespace fl {
+namespace third_party {
+
 /**************************************************************************************
  * Function:    Dequantize
  *
@@ -161,3 +164,6 @@ int Dequantize(MP3DecInfo *mp3DecInfo, int gr)
 	/* output format Q(DQ_FRACBITS_OUT) */
 	return 0;
 }
+
+}  // namespace third_party
+}  // namespace fl

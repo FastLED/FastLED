@@ -44,6 +44,9 @@
 #include "pub/mp3common.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /* indexing = [version][samplerate index]
  * sample rate of frame (Hz)
  */
@@ -179,4 +182,5 @@ const SFBandTable sfBandTable[3][3] = {
 	},
 };
 
-
+}  // namespace third_party
+}  // namespace fl

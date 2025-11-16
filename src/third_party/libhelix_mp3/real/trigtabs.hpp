@@ -46,6 +46,9 @@
 #include "coder.h"
 #include "ftl/stdint.h"
 
+namespace fl {
+namespace third_party {
+
 /* post-IMDCT window, win[blockType][i]
  * format = Q31
  * Fused sin window with final stage of IMDCT
@@ -310,6 +313,9 @@ const int32_t polyCoef[264] = {
 	0x00040ef8, (int32_t)0xfffc425c, 0x00009af0, (int32_t)0xffff6ce0, 0x00001a88, (int32_t)0xffffe9b0, 0x000001d4, (int32_t)0xfffffe94,
 	(int32_t)0xffffffec, 0x00000018, 0x0000028c, (int32_t)0xfffffe04, 0x000002e4, 0x00000480, (int32_t)0xffff7a90, 0x0000b2fc,
 	0x0003fc28, (int32_t)0xfffc2c90, 0x000099b8, (int32_t)0xffff6a3c, 0x00001988, (int32_t)0xffffe898, 0x000001bc, (int32_t)0xfffffe7c,
-	0x000001a0, 0x0000187c, 0x000097fc, 0x0003e84c, (int32_t)0xffff6424, (int32_t)0xffffff4c, 0x00000248, (int32_t)0xffffffec, 
+	0x000001a0, 0x0000187c, 0x000097fc, 0x0003e84c, (int32_t)0xffff6424, (int32_t)0xffffff4c, 0x00000248, (int32_t)0xffffffec,
 };
+
+}  // namespace third_party
+}  // namespace fl
 
