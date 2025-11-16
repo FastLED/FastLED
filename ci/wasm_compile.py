@@ -136,9 +136,18 @@ def main() -> int:
         console.print("[bold red]✗ WASM compilation failed[/bold red]")
         return compile_result
 
-    # Copy template files (index.html, index.css, index.js) to output directory
+    # Copy template files to output directory
     template_dir = Path("src") / "platforms" / "wasm" / "compiler"
-    template_files = ["index.html", "index.css", "index.js"]
+
+    # Copy individual template files
+    template_files = [
+        "index.html",
+        "index.css",
+        "index.js",
+        "jsconfig.json",
+        "types.d.ts",
+        "emscripten.d.ts",
+    ]
 
     for template_file in template_files:
         src = template_dir / template_file
@@ -148,6 +157,19 @@ def main() -> int:
             console.print(f"[dim]Copied {template_file} to output directory[/dim]")
         else:
             console.print(f"[yellow]Warning: Template file not found: {src}[/yellow]")
+
+    # Copy entire modules directory
+    modules_src = template_dir / "modules"
+    modules_dst = output_dir / "modules"
+    if modules_src.exists():
+        if modules_dst.exists():
+            shutil.rmtree(modules_dst)
+        shutil.copytree(modules_src, modules_dst)
+        console.print(f"[dim]Copied modules directory to output[/dim]")
+    else:
+        console.print(
+            f"[yellow]Warning: modules directory not found: {modules_src}[/yellow]"
+        )
 
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 
