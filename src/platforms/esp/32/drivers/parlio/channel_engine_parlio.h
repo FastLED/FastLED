@@ -1,5 +1,116 @@
 /// @file channel_engine_parlio.h
-/// @brief Parallel IO implementation of ChannelEngine for ESP32
+/// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/S3
+///
+/// This file implements a ChannelEngine that uses ESP32's Parallel IO (PARLIO) peripheral
+/// to drive multiple WS2812/WS2812B LED strips simultaneously on parallel GPIO pins.
+///
+/// ## Hardware Requirements
+/// - ESP32-P4 or ESP32-S3 (only variants with PARLIO peripheral)
+/// - Up to 16 WS2812/WS2812B LED strips
+/// - Configurable GPIO pins (default: GPIO 1-8 for 8-bit width)
+///
+/// ## Features
+/// - **Parallel Transmission**: Drive up to 16 LED strips simultaneously with zero CPU overhead
+/// - **WS2812 Timing**: Accurate 3.2 MHz clock with 4-tick encoding (312.5ns per tick)
+/// - **Async Operation**: Non-blocking transmission with pollDerived() state tracking
+/// - **Large LED Support**: Automatic chunking for >682 LEDs per strip (at 8-bit width)
+/// - **Bit Transposition**: Efficient algorithm to convert per-strip RGB data to bit-parallel format
+///
+/// ## Usage Example
+/// ```cpp
+/// // ChannelEnginePARLIO is automatically registered when FASTLED_ESP32_HAS_PARLIO is enabled
+/// // Simply use FastLED's standard API:
+///
+/// CRGB leds[100];
+/// void setup() {
+///     FastLED.addLeds<WS2812, 1, GRB>(leds, 100);  // GPIO 1
+///     // PARLIO engine handles the rest automatically
+/// }
+///
+/// void loop() {
+///     // Update LED data
+///     fill_rainbow(leds, 100, 0, 7);
+///     FastLED.show();  // Non-blocking transmission via PARLIO
+/// }
+/// ```
+///
+/// ## Performance Characteristics
+/// - **Frame Rate**: 60+ FPS for typical LED counts (<500 LEDs per strip)
+/// - **Chunk Size**: 100 LEDs per chunk (configurable, optimized for streaming)
+/// - **Memory Usage**: ~19.2 KB total (2 × 100 LEDs × 96 bytes for 8-bit width ping-pong buffers)
+///   - **80%+ reduction** vs. non-streaming (96 KB for 1000 LEDs → 19.2 KB)
+/// - **CPU Overhead**: Minimal - ISR handles buffer refilling automatically during DMA transmission
+///
+/// ## Technical Details
+///
+/// ### WS2812 Timing
+/// PARLIO clock: 3.2 MHz (312.5ns per tick)
+/// - Bit 0: 0b1000 (1 tick high, 3 ticks low = 312.5ns high, 937.5ns low)
+/// - Bit 1: 0b1110 (3 ticks high, 1 tick low = 937.5ns high, 312.5ns low)
+/// - Each LED byte → 32 bits (8 bits × 4 ticks)
+/// - Each RGB LED → 96 bits total (24 bytes × 4 ticks)
+///
+/// ### Bit Transposition Algorithm
+/// PARLIO requires data in bit-parallel format (one byte per clock tick across all strips).
+/// The implementation transposes per-strip RGB data into this format:
+///
+/// **Input** (per-strip):
+/// ```
+/// Strip 0: [R0, G0, B0, R1, G1, B1, ...]
+/// Strip 1: [R0, G0, B0, R1, G1, B1, ...]
+/// Strip N: [R0, G0, B0, R1, G1, B1, ...]
+/// ```
+///
+/// **Output** (bit-parallel, 8-bit width):
+/// ```
+/// Byte 0:  [S7_b31, S6_b31, ..., S1_b31, S0_b31]  // MSB of all strips at tick 0
+/// Byte 1:  [S7_b30, S6_b30, ..., S1_b30, S0_b30]  // Bit 30 of all strips at tick 1
+/// ...
+/// Byte 31: [S7_b0,  S6_b0,  ..., S1_b0,  S0_b0]   // LSB of all strips at tick 31
+/// (Pattern repeats for each LED color component)
+/// ```
+///
+/// ### Data Width Configuration
+/// - 1-bit: 1 strip (8 ticks per byte)
+/// - 2-bit: 2 strips (4 ticks per byte)
+/// - 4-bit: 4 strips (2 ticks per byte)
+/// - 8-bit: 8 strips (1 tick per byte) **[default]**
+/// - 16-bit: 16 strips (1 tick per 2 bytes)
+///
+/// ### Buffer Size Calculation
+/// ```
+/// Total bytes = numLeds × 3 colors × 32 ticks × ceil(dataWidth / 8)
+/// ```
+///
+/// Examples:
+/// - 100 LEDs × 8 strips (8-bit): 100 × 3 × 32 × 1 = 9,600 bytes
+/// - 500 LEDs × 8 strips (8-bit): 500 × 3 × 32 × 1 = 48,000 bytes
+/// - 1000 LEDs × 8 strips (8-bit): 1000 × 3 × 32 × 1 = 96,000 bytes
+///
+/// ### ISR-Based Streaming with Ping-Pong Buffering
+/// To minimize memory usage while supporting arbitrary LED counts:
+/// - **Double buffering**: Two small buffers (~100 LEDs each, ~9.6 KB per buffer)
+/// - **ISR callback**: Hardware triggers callback when chunk transmission completes
+/// - **Automatic refilling**: While DMA transmits buffer A, ISR transposes data into buffer B
+/// - **Zero-copy streaming**: Supports 1000+ LEDs with <20 KB memory footprint
+/// - **Chunk size**: 100 LEDs (configurable), balancing memory vs. ISR frequency
+///
+/// **Memory scaling comparison:**
+/// - Non-streaming: 1000 LEDs × 96 bytes = 96,000 bytes
+/// - ISR streaming: 2 × 100 LEDs × 96 bytes = 19,200 bytes (80% reduction)
+///
+/// ## Limitations
+/// - **Platform-Specific**: Only available on ESP32-P4 and ESP32-S3 with PARLIO peripheral
+/// - **Fixed Pins**: Currently uses hardcoded GPIO 1-8 (future: user-configurable)
+/// - **Data Width**: Fixed at 8 channels (future: dynamic based on channel count)
+/// - **Multi-Chunk**: Falls back to single chunk for very large LED counts (>682 LEDs)
+///
+/// ## See Also
+/// - Implementation: `channel_engine_parlio.cpp`
+/// - Unit Tests: `tests/fl/channels/parlio.cpp`
+/// - Example Sketch: `examples/ParlioTest/ParlioTest.ino`
+/// - Feature Flag: `FASTLED_ESP32_HAS_PARLIO` in `src/platforms/esp/32/feature_flags/enabled.h`
+/// - Reference: WLED PARLIO driver (https://github.com/troyhacks/WLED/blob/P4_experimental/wled00%2Fparlio.cpp)
 
 #pragma once
 
@@ -12,14 +123,49 @@
 #include "ftl/span.h"
 #include "ftl/vector.h"
 
+// Forward declarations for PARLIO types (avoid including driver headers in .h)
+struct parlio_tx_unit_t;
+typedef struct parlio_tx_unit_t* parlio_tx_unit_handle_t;
+enum gpio_num_t : int;  // ESP-IDF GPIO enum
+
 namespace fl {
 
-/// @brief Parallel IO-based ChannelEngine implementation
+/// @brief Parallel IO-based ChannelEngine implementation for ESP32-P4/S3
 ///
-/// Manages parallel LED output using ESP32's Parallel IO peripheral.
-/// Allows simultaneous transmission to multiple LED strips on parallel pins.
+/// This class implements the ChannelEngine interface using ESP32's PARLIO peripheral
+/// to drive multiple WS2812/WS2812B LED strips simultaneously in parallel.
 ///
-/// Listens to onEndFrame events and manages transmission state.
+/// ## Architecture
+/// - Inherits from ChannelEngine for standard FastLED integration
+/// - Implements EngineEvents::Listener to receive frame completion events
+/// - Uses PARLIO TX unit for hardware-accelerated parallel transmission
+/// - **ISR-based streaming**: Ping-pong buffering with automatic DMA refilling
+/// - Maintains internal state for async operation (transmitting flag, double buffers, streaming position)
+///
+/// ## Lifecycle
+/// 1. **Construction**: Registers as EngineEvents listener
+/// 2. **First Transmission**: Lazy initialization of PARLIO peripheral (double buffers, ISR callbacks)
+/// 3. **Each Frame**:
+///    - beginTransmission() → transposes first 2 chunks into ping-pong buffers
+///    - DMA starts transmitting first chunk
+///    - ISR callback auto-transposes and queues remaining chunks
+/// 4. **Polling**: pollDerived() checks streaming status (non-blocking, ISR-driven)
+/// 5. **Destruction**: Waits for active transmission, cleans up hardware resources
+///
+/// ## Thread Safety
+/// - Not thread-safe - expected to be called from single thread (Arduino loop)
+/// - Uses volatile flag for transmission state (polling from main loop)
+/// - Hardware synchronization via PARLIO driver's wait functions
+///
+/// ## Memory Management
+/// - **Ping-pong double buffering**: Two fixed-size DMA-capable buffers
+/// - **Buffer size**: Independent of total LED count, determined by chunk size (default: 100 LEDs)
+/// - **Fixed allocation**: ~19.2 KB for 8-bit width (2 × 100 LEDs × 96 bytes)
+/// - **Streaming architecture**: Supports arbitrary LED counts without memory scaling
+/// - **ISR transposition**: Data is transposed on-the-fly during transmission, not upfront
+///
+/// @note Only available on ESP32-P4 and ESP32-S3 with PARLIO peripheral.
+///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
 class ChannelEnginePARLIO : public ChannelEngine, public EngineEvents::Listener {
 public:
     ChannelEnginePARLIO();
@@ -38,11 +184,63 @@ protected:
     void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
 
 private:
+    /// @brief PARLIO hardware state with ISR-based streaming support
+    struct ParlioState {
+        parlio_tx_unit_handle_t tx_unit;     ///< PARLIO TX unit handle
+        uint8_t data_width;                   ///< Number of parallel data lines (1/2/4/8/16)
+        fl::vector<gpio_num_t> pins;          ///< GPIO pin assignments
+        volatile bool transmitting;           ///< Transmission in progress flag
+
+        // Double-buffered DMA streaming (DMA-capable memory)
+        uint8_t* buffer_a;                    ///< First DMA buffer (ping-pong, heap_caps_malloc)
+        uint8_t* buffer_b;                    ///< Second DMA buffer (ping-pong, heap_caps_malloc)
+        size_t buffer_size;                   ///< Size of each DMA buffer in bytes
+        volatile uint8_t* active_buffer;      ///< Currently transmitting buffer
+        volatile uint8_t* fill_buffer;        ///< Buffer being filled
+
+        // Streaming state
+        fl::span<const ChannelDataPtr> source_channels; ///< Source channel data (persists during transmission)
+        volatile size_t current_led;          ///< Current LED position in source data
+        volatile size_t total_leds;           ///< Total LEDs to transmit
+        volatile size_t leds_per_chunk;       ///< LEDs per DMA chunk
+
+        // Synchronization
+        volatile bool stream_complete;        ///< All chunks transmitted flag
+        volatile bool error_occurred;         ///< Error flag for ISR
+
+        ParlioState()
+            : tx_unit(nullptr)
+            , data_width(0)
+            , transmitting(false)
+            , buffer_a(nullptr)
+            , buffer_b(nullptr)
+            , buffer_size(0)
+            , active_buffer(nullptr)
+            , fill_buffer(nullptr)
+            , current_led(0)
+            , total_leds(0)
+            , leds_per_chunk(0)
+            , stream_complete(false)
+            , error_occurred(false)
+        {}
+    };
+
     /// @brief Initialize PARLIO peripheral on first use
     void initializeIfNeeded();
 
+    /// @brief ISR callback for transmission completion (static wrapper)
+    static bool IRAM_ATTR txDoneCallback(parlio_tx_unit_handle_t tx_unit,
+                                         const void* edata,
+                                         void* user_ctx);
+
+    /// @brief Transpose and queue next chunk (called from ISR or main thread)
+    bool IRAM_ATTR transposeAndQueueNextChunk();
+
     /// @brief Initialization flag
     bool mInitialized;
+
+    /// @brief PARLIO hardware state
+    ParlioState mState;
 };
 
 } // namespace fl
