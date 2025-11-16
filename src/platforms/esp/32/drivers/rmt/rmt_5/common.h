@@ -46,7 +46,17 @@ FL_EXTERN_C_END
 //   2. SYSTEM CONTENTION: DMA channels are shared with SPI, I2S, UART, ADC/DAC
 //      - Enabling DMA for RMT may starve other peripherals
 //
-// For WiFi robustness, raise interrupt priority instead of using DMA!
+// DMA Buffer Sizing:
+// - With DMA: Full strip size (num_bytes * 8 symbols + 16) - zero WiFi flicker!
+// - Without DMA: Double-buffering with FASTLED_RMT5_MAX_PULSES symbols
+//
+// OPTIMIZATION: When one channel uses DMA, it frees up hardware RMT memory!
+// ESP32-S3 example (4 channels × 48 words = 192 total):
+// - Normal double-buffer: 2 channels max (each needs 96 words = 48×2)
+// - With 1 DMA channel: 1 non-DMA channel gets ALL 192 words = QUAD-BUFFERING!
+// - Result: 4× the base memory (192 vs 48) = maximum WiFi resistance!
+//
+// For WiFi robustness with multiple strips, raise interrupt priority instead!
 #ifndef FASTLED_RMT5_USE_DMA
 #define FASTLED_RMT5_USE_DMA 0  // Default: disabled (safer and recommended)
 #endif

@@ -98,22 +98,25 @@ private:
     };
 
     /// @brief Acquire a channel for given pin and timing
+    /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return Pointer to channel state, or nullptr if no HW available
-    ChannelState* acquireChannel(gpio_num_t pin, const ChipsetTiming& timing);
+    ChannelState* acquireChannel(gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize = 0);
 
     /// @brief Release a channel (marks as available for reuse)
     void releaseChannel(ChannelState* channel);
 
     /// @brief Create new RMT channel with given configuration
+    /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     /// @return true if channel created successfully
-    bool createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing);
+    bool createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize = 0);
 
     /// @brief Register ISR callback for channel (must be called AFTER ChannelState is in final location)
     /// @return true if callback registered successfully
     bool registerChannelCallback(ChannelState* state);
 
     /// @brief Configure existing channel (handle pin/timing changes)
-    void configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing);
+    /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
+    void configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize = 0);
 
     /// @brief Get or create cached encoder for timing configuration
     /// @return Encoder handle, or nullptr on failure

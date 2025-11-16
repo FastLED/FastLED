@@ -226,24 +226,29 @@ rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& t
 // Channel Management
 //=============================================================================
 
-ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin, const ChipsetTiming& timing) {
+ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
-    for (auto& ch : mChannels) {
-        if (!ch.inUse && ch.channel && ch.pin == pin) {
-            ch.inUse = true;
-            configureChannel(&ch, pin, timing);
-            FL_LOG_RMT("Reusing channel for pin " << static_cast<int>(pin));
-            return &ch;
-        }
-    }
+    // Note: For DMA channels, we skip reuse since buffer size might differ
+    bool skipReuse = (dataSize > 0);
 
-    // Strategy 2: Find any idle channel (requires reconfiguration)
-    for (auto& ch : mChannels) {
-        if (!ch.inUse && ch.channel) {
-            ch.inUse = true;
-            configureChannel(&ch, pin, timing);
-            FL_LOG_RMT("Reconfiguring idle channel for pin " << static_cast<int>(pin));
-            return &ch;
+    if (!skipReuse) {
+        for (auto& ch : mChannels) {
+            if (!ch.inUse && ch.channel && ch.pin == pin && !ch.useDMA) {
+                ch.inUse = true;
+                configureChannel(&ch, pin, timing, dataSize);
+                FL_LOG_RMT("Reusing non-DMA channel for pin " << static_cast<int>(pin));
+                return &ch;
+            }
+        }
+
+        // Strategy 2: Find any idle non-DMA channel (requires reconfiguration)
+        for (auto& ch : mChannels) {
+            if (!ch.inUse && ch.channel && !ch.useDMA) {
+                ch.inUse = true;
+                configureChannel(&ch, pin, timing, dataSize);
+                FL_LOG_RMT("Reconfiguring idle non-DMA channel for pin " << static_cast<int>(pin));
+                return &ch;
+            }
         }
     }
 
@@ -255,7 +260,7 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
     }
 
     ChannelState newCh = {};
-    if (createChannel(&newCh, pin, timing)) {
+    if (createChannel(&newCh, pin, timing, dataSize)) {
         newCh.inUse = true;
         mChannels.push_back(newCh);
 
@@ -301,7 +306,7 @@ void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
     // NOTE: Keep channel and encoder alive for reuse
 }
 
-bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing) {
+bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // Determine if this channel should use DMA
     // Only allow DMA if: (1) globally enabled, (2) no DMA channels currently in use
     bool useDMA = false;
@@ -314,11 +319,39 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     }
 #endif
 
+    // Calculate buffer size:
+    // - Without DMA: Use hardware memory blocks (limited to 48 words on ESP32-S3)
+    // - With DMA: Use full strip size (each byte = 8 RMT symbols + 1 reset symbol)
+    fl::size mem_block_symbols;
+    if (useDMA && dataSize > 0) {
+        // DMA mode: allocate enough symbols for the entire LED strip
+        // Each byte needs 8 RMT symbols (1 symbol per bit)
+        // Add extra space for reset pulse (typically 1 symbol, but use 16 for safety)
+        mem_block_symbols = (dataSize * 8) + 16;
+        FL_LOG_RMT("DMA buffer size: " << mem_block_symbols << " symbols for "
+                   << dataSize << " bytes (" << (dataSize/3) << " LEDs)");
+    } else {
+        // Non-DMA mode: use hardware memory blocks
+        // OPTIMIZATION: When one channel uses DMA, it frees up hardware memory for others!
+        // ESP32-S3: 192 total words, double-buffering allows only 2 active channels (96 words each)
+        // When 1 channel uses DMA → 1 non-DMA channel can use ALL 192 words = QUAD-BUFFERING!
+        if (mDMAChannelsInUse > 0) {
+            // DMA channel uses 0 words → all 192 words available for 1 non-DMA channel
+            // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
+            mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+            FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
+                       << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
+        } else {
+            // Standard double-buffer size when no DMA channels active
+            mem_block_symbols = FASTLED_RMT5_MAX_PULSES;
+        }
+    }
+
     rmt_tx_channel_config_t tx_config = {};
     tx_config.gpio_num = pin;
     tx_config.clk_src = RMT_CLK_SRC_DEFAULT;
     tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
-    tx_config.mem_block_symbols = FASTLED_RMT5_MAX_PULSES;
+    tx_config.mem_block_symbols = mem_block_symbols;
     tx_config.trans_queue_depth = 1;
     tx_config.flags.invert_out = 0;
     tx_config.flags.with_dma = useDMA ? 1 : 0;
@@ -368,7 +401,7 @@ bool ChannelEngineRMT::registerChannelCallback(ChannelState* state) {
     return true;
 }
 
-void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing) {
+void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // If pin changed, destroy and recreate channel
     if (state->channel && state->pin != pin) {
         FL_LOG_RMT("Pin changed from " << static_cast<int>(state->pin)
@@ -392,7 +425,7 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
 
     // Create channel if needed
     if (!state->channel) {
-        if (!createChannel(state, pin, timing)) {
+        if (!createChannel(state, pin, timing, dataSize)) {
             FL_LOG_RMT("Failed to recreate channel for pin " << static_cast<int>(pin));
             return;
         }
@@ -428,8 +461,11 @@ void ChannelEngineRMT::processPendingChannels() {
     for (size_t i = 0; i < mPendingChannels.size(); ) {
         const auto& pending = mPendingChannels[i];
 
+        // Get data size for DMA buffer calculation
+        fl::size dataSize = pending.data->getSize();
+
         // Acquire channel for this transmission
-        ChannelState* channel = acquireChannel(static_cast<gpio_num_t>(pending.pin), pending.timing);
+        ChannelState* channel = acquireChannel(static_cast<gpio_num_t>(pending.pin), pending.timing, dataSize);
         if (!channel) {
             ++i;  // No HW available, leave in queue
             continue;
@@ -449,7 +485,7 @@ void ChannelEngineRMT::processPendingChannels() {
         channel->transmissionComplete = false;
 
         // Acquire buffer from pool (PSRAM -> DRAM/DMA transfer)
-        fl::size dataSize = pending.data->getSize();
+        // Note: dataSize already retrieved earlier for channel acquisition
         fl::span<uint8_t> pooledBuffer = channel->useDMA ?
             mBufferPool.acquireDMA(dataSize) :
             mBufferPool.acquireInternal(dataSize);
