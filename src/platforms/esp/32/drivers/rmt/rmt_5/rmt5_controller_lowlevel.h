@@ -12,7 +12,6 @@
 #include "fl/chipsets/led_timing.h"
 #include "fl/channels/channel_data.h"
 #include "fl/channels/channel_engine.h"
-#include "rmt5_worker_base.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -21,8 +20,6 @@ FL_EXTERN_C_BEGIN
 FL_EXTERN_C_END
 
 namespace fl {
-
-class IRmtWorkerBase;
 
 /**
  * RmtController5LowLevel - Lightweight FastLED controller using ChannelEngine
