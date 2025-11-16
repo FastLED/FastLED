@@ -105,7 +105,8 @@ namespace TeensyI2S {
         // Teensy 4.x - I2S1 and I2S2 available
         return (port == I2S1) ? 20 : 3;
 #else
-        return -1;  // Unknown platform
+        // Unknown platform - evaluate parameter to avoid unused warning
+        return (port == I2S1 || port == I2S2) ? -1 : -1;
 #endif
     }
 
@@ -118,7 +119,8 @@ namespace TeensyI2S {
         // Teensy 4.x
         return (port == I2S1) ? 8 : 5;
 #else
-        return -1;
+        // Unknown platform - evaluate parameter to avoid unused warning
+        return (port == I2S1 || port == I2S2) ? -1 : -1;
 #endif
     }
 
@@ -131,7 +133,8 @@ namespace TeensyI2S {
         // Teensy 4.x
         return (port == I2S1) ? 21 : 4;
 #else
-        return -1;
+        // Unknown platform - evaluate parameter to avoid unused warning
+        return (port == I2S1 || port == I2S2) ? -1 : -1;
 #endif
     }
 }

@@ -3,6 +3,7 @@
 
 #include "test.h"
 #include "ftl/function.h"
+#include "fl/unused.h"
 
 using namespace fl;
 
@@ -223,6 +224,7 @@ TEST_CASE("function_list - self-removal during iteration") {
     id2 = callbacks.add([&]() {
         call_count_2++;
     });
+    FL_UNUSED(id2);  // id2 not used after assignment - callback doesn't remove itself
 
     // Third callback removes itself
     id3 = callbacks.add([&]() {
@@ -257,10 +259,12 @@ TEST_CASE("function_list - remove other callback during iteration") {
         call_count_1++;
         callbacks.remove(id3);
     });
+    FL_UNUSED(id1);  // id1 not used after assignment - only id3 is removed
 
     id2 = callbacks.add([&]() {
         call_count_2++;
     });
+    FL_UNUSED(id2);  // id2 not used after assignment - normal callback
 
     id3 = callbacks.add([&]() {
         call_count_3++;
@@ -289,12 +293,14 @@ TEST_CASE("function_list - remove callback before current position") {
     id2 = callbacks.add([&]() {
         call_count_2++;
     });
+    FL_UNUSED(id2);  // id2 not used after assignment - normal callback
 
     // Third callback removes the first callback (already executed)
     id3 = callbacks.add([&]() {
         call_count_3++;
         callbacks.remove(id1);
     });
+    FL_UNUSED(id3);  // id3 not used after assignment - removes id1 in lambda
 
     callbacks.invoke();
     REQUIRE(call_count_1 == 1);
@@ -362,6 +368,7 @@ TEST_CASE("function_list - multiple removals in one callback") {
         callbacks.remove(id2);
         callbacks.remove(id4);
     });
+    FL_UNUSED(id1);  // id1 not used after assignment - removes id2 and id4 in lambda
 
     id2 = callbacks.add([&]() {
         call_count_2++;
@@ -370,6 +377,7 @@ TEST_CASE("function_list - multiple removals in one callback") {
     id3 = callbacks.add([&]() {
         call_count_3++;
     });
+    FL_UNUSED(id3);  // id3 not used after assignment - normal callback
 
     id4 = callbacks.add([&]() {
         call_count_4++;

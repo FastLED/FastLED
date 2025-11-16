@@ -522,8 +522,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     }
 
     if (!transmit_ok) {
-        const char* mode_name = is_hexadeca_mode ? "Hexadeca" : (is_octal_mode ? "Octal" : "Quad");
-        FL_WARN_FMT("SPI Bus Manager: " << mode_name << "-SPI transmit failed");
+        FL_WARN_FMT("SPI Bus Manager: " << (is_hexadeca_mode ? "Hexadeca" : (is_octal_mode ? "Octal" : "Quad")) << "-SPI transmit failed");
     }
 
     // Clear lane buffers for next frame
