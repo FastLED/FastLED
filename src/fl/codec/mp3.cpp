@@ -1,5 +1,5 @@
 #include "fl/codec/mp3.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 
 // Include Helix MP3 decoder internal API (in fl::third_party namespace)
 #include "third_party/libhelix_mp3/pub/mp3dec.h"

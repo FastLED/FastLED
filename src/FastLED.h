@@ -96,7 +96,7 @@
 // C STRING FUNCTION USING DECLARATIONS
 // ============================================================================
 
-/// Memory functions are available in fl:: namespace via fl/cstring.h
+/// Memory functions are available in fl:: namespace via ftl/cstring.h
 /// Using declarations cannot work because system headers define memset/memcpy/memmove
 /// before FastLED.h is fully processed, causing signature conflicts even though
 /// fl::size and ::size_t refer to the same underlying type.

@@ -3,7 +3,7 @@
 #include "fl/compiler_control.h"
 
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 
 #if FASTLED_RMT5
 

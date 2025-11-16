@@ -1,7 +1,7 @@
 #pragma once
 
 #include "fl/has_include.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include "ftl/bit_cast.h"
 
 // Conditional stack array support includes - must be before namespace

@@ -27,7 +27,7 @@
 // Include standard library headers outside namespace to avoid conflicts
 #include "ftl/cstdlib.h"
 #include "fl/str.h"
-#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "ftl/string.h"
 
 #include "tjpgd.h"

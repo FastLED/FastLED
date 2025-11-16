@@ -15,7 +15,7 @@
 #include "pio_asm.h"
 #include "fl/warn.h"
 #include <cstring> // ok include
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include "ftl/time.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 

@@ -4,7 +4,7 @@
 #include "ftl/cstddef.h"
 #include "ftl/cstdlib.h"
 #include "fl/str.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 
 #ifdef ESP32
 #include "esp_heap_caps.h"

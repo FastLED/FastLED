@@ -158,7 +158,7 @@ See below for detailed the API documentation.
 #include "ftl/math.h"
 #include "fl/math_macros.h"
 #include "fl/str.h"
-#include "fl/cstring.h"  // for fl::memset(), fl::memcpy(), fl::memmove()
+#include "ftl/cstring.h"  // for fl::memset(), fl::memcpy(), fl::memmove()
 
 
 // #ifdef __cplusplus

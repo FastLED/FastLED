@@ -13,7 +13,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/dbg.h"
 #include "fl/log.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>

@@ -50,7 +50,7 @@
 #include "platforms/shared/spi_hw_8.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include <cstring> // ok include
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 #include "platforms/arm/stm32/stm32_gpio_timer_helpers.h"  // Centralized GPIO/Timer/DMA helpers

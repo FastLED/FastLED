@@ -6,7 +6,7 @@
 #include "fl/xymap.h"
 #include "frame.h"
 
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 namespace fl {
 
 Frame::Frame(int pixels_count) : mPixelsCount(pixels_count), mRgb(), mIsFromCodec(false) {

@@ -17,7 +17,7 @@
 #include "ftl/string.h"
 #include "ftl/malloc.h"
 #include "fl/str.h"
-#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
 #include "cq_kernel.h"
 #include "fft_precision.h"
 

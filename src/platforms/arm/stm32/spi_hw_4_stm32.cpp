@@ -43,7 +43,7 @@
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 
 #include <cstring> // ok include
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError

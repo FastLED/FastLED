@@ -3,7 +3,7 @@
 #include "ftl/utility.h"
 #include "fl/str.h"
 #include "fl/compiler_control.h"
-#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 // Include stdio for FILE type needed by pl_mpeg
 #include "ftl/stdio.h"

@@ -2,7 +2,7 @@
 #include "fl/scoped_array.h"
 #include "ftl/string.h"
 #include "fl/str.h"
-#include "fl/cstring.h"  // for fl::memset() and fl::memcpy()
+#include "ftl/cstring.h"  // for fl::memset() and fl::memcpy()
 
 namespace fl {
 namespace third_party {

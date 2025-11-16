@@ -3,7 +3,7 @@
 #include "fl/allocator.h"
 #include "rgbw.h"
 #include "fl/str.h"
-#include "fl/cstring.h"  // for fl::memset()
+#include "ftl/cstring.h"  // for fl::memset()
 
 namespace fl {
 

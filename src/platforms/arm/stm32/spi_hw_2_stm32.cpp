@@ -43,7 +43,7 @@
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 
 // Allow software-mode testing without hardware Timer/DMA
 // Define this to enable software GPIO bitbanging mode for testing

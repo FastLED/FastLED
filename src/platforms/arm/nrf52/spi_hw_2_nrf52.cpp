@@ -7,7 +7,7 @@
 #if defined(NRF52) || defined(NRF52832) || defined(NRF52840) || defined(NRF52833)
 
 #include "spi_hw_2_nrf52.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
 
 namespace fl {

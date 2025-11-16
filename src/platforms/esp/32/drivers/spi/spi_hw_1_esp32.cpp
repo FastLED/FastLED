@@ -12,7 +12,7 @@
 #if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_1.h"
-#include "fl/cstring.h"
+#include "ftl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>

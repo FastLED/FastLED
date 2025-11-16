@@ -2,7 +2,7 @@
 #include <string.h>  // ok include - for strcmp
 #include "fl/str.h"
 #include "ftl/stdio.h"  // For fl::snprintf
-#include "fl/cstring.h"  // For fl::memcpy
+#include "ftl/cstring.h"  // For fl::memcpy
 
 #include "crgb.h"
 #include "fl/fft.h"
