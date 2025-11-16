@@ -36,6 +36,12 @@ FL_EXTERN_C_END
 namespace fl {
 
 //=============================================================================
+// Static member initialization
+//=============================================================================
+
+DMAState ChannelEngineRMT::sDMAAvailability = DMAState::UNKNOWN;
+
+//=============================================================================
 // Constructor / Destructor
 //=============================================================================
 
@@ -104,15 +110,22 @@ void ChannelEngineRMT::onEndFrame() {
     }
 
     show();
-    int pollCount = 0;
+
+    uint32_t startTime = fl::time();
+    fl::Timeout warnTimer(startTime, 100);  // Warn every 100ms
+
     while (poll() == EngineState::BUSY) {
-        pollCount++;
-        if (pollCount % 100 == 0) {  // Log every 10ms (100 * 100us)
-            FL_WARN("ChannelEngineRMT::onEndFrame() stuck in busy loop, poll count: " << pollCount);
+        uint32_t now = fl::time();
+        if (warnTimer.done(now)) {
+            uint32_t elapsed = now - startTime;
+            FL_WARN("ChannelEngineRMT::onEndFrame() stuck in busy loop, elapsed: " << elapsed << "ms");
+            warnTimer.reset(now);  // Reset for next warning (keeps same 100ms duration)
         }
         fl::delayMicroseconds(100);
     }
-    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - completed after " << pollCount << " polls");
+
+    uint32_t totalTime = fl::time() - startTime;
+    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - completed in " << totalTime << "ms");
 }
 
 void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
@@ -228,27 +241,23 @@ rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& t
 
 ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
-    // Note: For DMA channels, we skip reuse since buffer size might differ
-    bool skipReuse = (dataSize > 0);
-
-    if (!skipReuse) {
-        for (auto& ch : mChannels) {
-            if (!ch.inUse && ch.channel && ch.pin == pin && !ch.useDMA) {
-                ch.inUse = true;
-                configureChannel(&ch, pin, timing, dataSize);
-                FL_LOG_RMT("Reusing non-DMA channel for pin " << static_cast<int>(pin));
-                return &ch;
-            }
+    // Note: DMA channels are not reused (checked via !ch.useDMA below)
+    for (auto& ch : mChannels) {
+        if (!ch.inUse && ch.channel && ch.pin == pin && !ch.useDMA) {
+            ch.inUse = true;
+            configureChannel(&ch, pin, timing, dataSize);
+            FL_LOG_RMT("Reusing non-DMA channel for pin " << static_cast<int>(pin));
+            return &ch;
         }
+    }
 
-        // Strategy 2: Find any idle non-DMA channel (requires reconfiguration)
-        for (auto& ch : mChannels) {
-            if (!ch.inUse && ch.channel && !ch.useDMA) {
-                ch.inUse = true;
-                configureChannel(&ch, pin, timing, dataSize);
-                FL_LOG_RMT("Reconfiguring idle non-DMA channel for pin " << static_cast<int>(pin));
-                return &ch;
-            }
+    // Strategy 2: Find any idle non-DMA channel (requires reconfiguration)
+    for (auto& ch : mChannels) {
+        if (!ch.inUse && ch.channel && !ch.useDMA) {
+            ch.inUse = true;
+            configureChannel(&ch, pin, timing, dataSize);
+            FL_LOG_RMT("Reconfiguring idle non-DMA channel for pin " << static_cast<int>(pin));
+            return &ch;
         }
     }
 
@@ -307,52 +316,82 @@ void ChannelEngineRMT::releaseChannel(ChannelState* channel) {
 }
 
 bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
-    // Determine if this channel should use DMA
-    // Only allow DMA if: (1) globally enabled, (2) no DMA channels currently in use
-    bool useDMA = false;
-#if FASTLED_RMT5_USE_DMA
-    if (mDMAChannelsInUse == 0) {
-        useDMA = true;
-        FL_LOG_RMT("Enabling DMA for channel on pin " << static_cast<int>(pin));
+    // Runtime DMA detection: Try DMA first if hardware availability is unknown or confirmed
+    // Only allow DMA if no DMA channels currently in use (hardware limit: 1 DMA channel)
+    bool tryDMA = false;
+    if (mDMAChannelsInUse == 0 && sDMAAvailability != DMAState::UNAVAILABLE) {
+        tryDMA = true;
+        FL_LOG_RMT("Attempting DMA channel creation for pin " << static_cast<int>(pin)
+                   << " (state: " << (sDMAAvailability == DMAState::UNKNOWN ? "unknown" : "available") << ")");
+    } else if (mDMAChannelsInUse > 0) {
+        FL_LOG_RMT("DMA already in use by another channel, using non-DMA for pin " << static_cast<int>(pin));
     } else {
-        FL_LOG_RMT("DMA already in use by another channel, disabling for pin " << static_cast<int>(pin));
+        FL_LOG_RMT("DMA known to be unavailable on this platform, using non-DMA for pin " << static_cast<int>(pin));
     }
-#endif
 
-    // Calculate buffer size:
-    // - Without DMA: Use hardware memory blocks (limited to 48 words on ESP32-S3)
-    // - With DMA: Use full strip size (each byte = 8 RMT symbols + 1 reset symbol)
-    fl::size mem_block_symbols;
-    if (useDMA && dataSize > 0) {
+    // STEP 1: Try DMA channel creation if enabled
+    if (tryDMA && dataSize > 0) {
         // DMA mode: allocate enough symbols for the entire LED strip
         // Each byte needs 8 RMT symbols (1 symbol per bit)
         // Add extra space for reset pulse (typically 1 symbol, but use 16 for safety)
-        mem_block_symbols = (dataSize * 8) + 16;
-        FL_LOG_RMT("DMA buffer size: " << mem_block_symbols << " symbols for "
+        fl::size dma_mem_block_symbols = (dataSize * 8) + 16;
+        FL_LOG_RMT("Attempting DMA buffer allocation: " << dma_mem_block_symbols << " symbols for "
                    << dataSize << " bytes (" << (dataSize/3) << " LEDs)");
-    } else {
-        // Non-DMA mode: use hardware memory blocks
-        // OPTIMIZATION: Maximize buffer size based on channel count
-        // ESP32-S3: 192 total words available
 
-        if (mDMAChannelsInUse > 0) {
-            // One DMA channel active → all 192 words available for this non-DMA channel
-            // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
-            mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
-            FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
-                       << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
-        } else if (mChannels.empty()) {
-            // First channel being created → speculatively allocate all 192 words
-            // This optimizes single-strip setups for maximum WiFi resistance
-            // If more strips are added later, they'll share the memory pool
-            mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
-            FL_LOG_RMT("First non-DMA channel: QUAD-BUFFERING with " << mem_block_symbols
-                       << " symbols (optimized for single-strip setup)");
+        rmt_tx_channel_config_t dma_config = {};
+        dma_config.gpio_num = pin;
+        dma_config.clk_src = RMT_CLK_SRC_DEFAULT;
+        dma_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
+        dma_config.mem_block_symbols = dma_mem_block_symbols;
+        dma_config.trans_queue_depth = 1;
+        dma_config.flags.invert_out = 0;
+        dma_config.flags.with_dma = 1;  // Enable DMA
+
+        esp_err_t dma_err = rmt_new_tx_channel(&dma_config, &state->channel);
+        if (dma_err == ESP_OK) {
+            // DMA SUCCESS - mark as available and track usage
+            sDMAAvailability = DMAState::AVAILABLE;
+            mDMAChannelsInUse++;
+            state->pin = pin;
+            state->timing = timing;
+            state->useDMA = true;
+            state->transmissionComplete = false;
+            FL_LOG_RMT("DMA channel created successfully on GPIO " << static_cast<int>(pin)
+                       << " (" << dma_mem_block_symbols << " symbols, DMA channels in use: " << mDMAChannelsInUse << ")");
+            return true;
         } else {
-            // Multiple non-DMA channels → use standard double-buffer size
-            // ESP32-S3 can support 2 double-buffered channels (96 words each)
-            mem_block_symbols = FASTLED_RMT5_MAX_PULSES;  // 48 * 2 = 96
+            // DMA FAILED - mark as unavailable and fall through to non-DMA
+            sDMAAvailability = DMAState::UNAVAILABLE;
+            FL_LOG_RMT("DMA channel creation failed: " << esp_err_to_name(dma_err)
+                       << " - platform does not support DMA (ESP32-C3/C6/H2?), falling back to non-DMA");
         }
+    }
+
+    // STEP 2: Create non-DMA channel (either DMA not attempted, failed, or disabled)
+    // Calculate optimal buffer size based on channel count
+    // ESP32-S3: 192 total words available
+    fl::size mem_block_symbols;
+    if (mDMAChannelsInUse > 0) {
+        // One DMA channel active → all 192 words available for this non-DMA channel
+        // Quad-buffering: 4× the memory blocks = 4 × 48 = 192 words
+        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+        FL_LOG_RMT("Non-DMA channel with DMA sibling: QUAD-BUFFERING with " << mem_block_symbols
+                   << " symbols (4× normal, 2× double-buffer - maximum WiFi resistance!)");
+    } else if (mChannels.empty() && FASTLED_RMT_MEM_WORDS_PER_CHANNEL > 48) {
+        // First channel on ESP32-S3 (SOC_RMT_MEM_WORDS_PER_CHANNEL=48, 192 total) → use all memory
+        // CRITICAL: Skip on ESP32-C6 (SOC_RMT_MEM_WORDS_PER_CHANNEL=48, 48 total) - exceeding breaks ISR!
+        mem_block_symbols = FASTLED_RMT_MEM_WORDS_PER_CHANNEL * 4;  // 48 * 4 = 192
+        FL_LOG_RMT("First non-DMA channel (ESP32-S3): QUAD-BUFFERING with " << mem_block_symbols
+                   << " symbols (optimized for single-strip setup)");
+    } else {
+        // Multiple non-DMA channels → use standard double-buffer size
+        // ESP32-S3: 96 words (2× 48), ESP32-C6: 48 words max (hardware limit)
+        mem_block_symbols = FASTLED_RMT5_MAX_PULSES;  // 48 * 2 = 96 on S3, limited below
+        // CRITICAL: Cap at hardware limit for ESP32-C6 compatibility
+        if (mem_block_symbols > SOC_RMT_MEM_WORDS_PER_CHANNEL) {
+            mem_block_symbols = SOC_RMT_MEM_WORDS_PER_CHANNEL;  // ESP32-C6: 48 max
+        }
+        FL_LOG_RMT("Non-DMA channels: " << mem_block_symbols << " symbols (hardware limit)");
     }
 
     rmt_tx_channel_config_t tx_config = {};
@@ -361,23 +400,16 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     tx_config.resolution_hz = FASTLED_RMT5_CLOCK_HZ;
     tx_config.mem_block_symbols = mem_block_symbols;
     tx_config.trans_queue_depth = 1;
-    tx_config.intr_priority = 3;  // Level 3 (highest officially supported by RMT driver)
     tx_config.flags.invert_out = 0;
-    tx_config.flags.with_dma = useDMA ? 1 : 0;
+    tx_config.flags.with_dma = 0;  // Non-DMA
 
     esp_err_t err = rmt_new_tx_channel(&tx_config, &state->channel);
     if (err != ESP_OK) {
         // This is expected when all HW channels are in use (time-multiplexing scenario)
-        FL_LOG_RMT("Failed to create RMT channel on pin " << static_cast<int>(pin)
+        FL_LOG_RMT("Failed to create non-DMA RMT channel on pin " << static_cast<int>(pin)
                 << ": " << esp_err_to_name(err));
         state->channel = nullptr;
         return false;
-    }
-
-    // Track DMA usage
-    if (useDMA) {
-        mDMAChannelsInUse++;
-        FL_LOG_RMT("DMA channels in use: " << mDMAChannelsInUse);
     }
 
     // NOTE: Callback registration moved to registerChannelCallback()
@@ -385,10 +417,10 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
 
     state->pin = pin;
     state->timing = timing;
-    state->useDMA = useDMA;
+    state->useDMA = false;  // Non-DMA channel
     state->transmissionComplete = false;
-    FL_LOG_RMT("RMT channel created on GPIO " << static_cast<int>(pin)
-               << (useDMA ? " (DMA enabled)" : " (DMA disabled)"));
+    FL_LOG_RMT("Non-DMA RMT channel created on GPIO " << static_cast<int>(pin)
+               << " (" << mem_block_symbols << " symbols)");
     return true;
 }
 

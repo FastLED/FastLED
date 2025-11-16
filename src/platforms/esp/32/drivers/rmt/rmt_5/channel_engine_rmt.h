@@ -28,6 +28,13 @@ FL_EXTERN_C_END
 
 namespace fl {
 
+/// @brief DMA availability state (learned at runtime)
+enum class DMAState {
+    UNKNOWN,      ///< Haven't attempted DMA channel creation yet
+    AVAILABLE,    ///< DMA successfully created (ESP32-S3)
+    UNAVAILABLE   ///< DMA creation failed - hardware limitation (ESP32-C3/C6/H2)
+};
+
 /// @brief RMT5-based ChannelEngine implementation
 ///
 /// Consolidates all RMT functionality:
@@ -35,6 +42,7 @@ namespace fl {
 /// - Encoder caching by timing configuration (never deleted)
 /// - Channel persistence between frames (avoid recreation overhead)
 /// - On-demand HW channel allocation with sequential reuse
+/// - Runtime DMA detection with graceful fallback
 ///
 /// Listens to onEndFrame events and polls channels until transmission completes.
 class ChannelEngineRMT : public ChannelEngine, public EngineEvents::Listener {
@@ -150,6 +158,9 @@ private:
 
     /// @brief Track last frame number to allow retry once per frame
     uint32_t mLastRetryFrame;
+
+    /// @brief Runtime DMA availability state (shared across all instances, learned on first attempt - lazy)
+    static DMAState sDMAAvailability;
 };
 
 } // namespace fl
