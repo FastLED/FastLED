@@ -44,6 +44,7 @@
 #ifndef _MP3COMMON_H
 #define _MP3COMMON_H
 
+#include "ftl/stdint.h"  // MUST be first - defines int32_t used in inline functions
 #include "mp3dec.h"
 #include "statname.h"	/* do name-mangling for static linking */
 
@@ -116,7 +117,6 @@ int UnpackScaleFactors(MP3DecInfo *mp3DecInfo, const unsigned char *buf, int *bi
 int Subband(MP3DecInfo *mp3DecInfo, short *pcmBuf);
 
 /* mp3tabs.c - global ROM tables */
-#include "ftl/stdint.h"
 extern const int32_t samplerateTab[3][3];
 extern const short bitrateTab[3][3][15];
 extern const short samplesPerFrameTab[3][3];
