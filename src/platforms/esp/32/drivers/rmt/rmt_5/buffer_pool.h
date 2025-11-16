@@ -5,8 +5,8 @@
 #if FASTLED_RMT5
 
 #include "fl/allocator.h"
-#include "fl/span.h"
-#include "fl/vector.h"
+#include "ftl/span.h"
+#include "ftl/vector.h"
 #include "ftl/stdint.h"
 
 namespace fl {

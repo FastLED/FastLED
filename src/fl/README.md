@@ -68,9 +68,9 @@ Common types to reach for:
 Example: using containers, views, and ownership
 
 ```cpp
-#include "fl/vector.h"
-#include "fl/span.h"
-#include "../ftl/memory.h"   // for fl::make_unique
+#include "ftl/vector.h"
+#include "ftl/span.h"
+#include "ftl/memory.h"   // for fl::make_unique
 
 void process(fl::span<const int> values) {
     // Non-owning view over contiguous data
@@ -310,8 +310,8 @@ This section groups headers by domain, explains their role, and shows minimal us
 Why: Embedded‑aware containers with predictable behavior across platforms. Prefer passing `fl::span<T>` to functions.
 
 ```cpp
-#include "fl/vector.h"
-#include "fl/span.h"
+#include "ftl/vector.h"
+#include "ftl/span.h"
 
 size_t count_nonzero(fl::span<const uint8_t> bytes) {
     size_t count = 0;
