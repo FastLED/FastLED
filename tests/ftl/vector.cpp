@@ -487,12 +487,188 @@ TEST_CASE("Initializer list constructors") {
         fl::FixedVector<int, 5> fixed_vec{};
         fl::HeapVector<int> heap_vec{};
         fl::InlinedVector<int, 3> inlined_vec{};
-        
+
         CHECK(fixed_vec.size() == 0);
         CHECK(fixed_vec.empty());
         CHECK(heap_vec.size() == 0);
         CHECK(heap_vec.empty());
         CHECK(inlined_vec.size() == 0);
         CHECK(inlined_vec.empty());
+    }
+}
+
+// Test automatic realloc() optimization for trivially copyable types
+TEST_CASE("Automatic realloc optimization for trivially copyable types") {
+    SUBCASE("Default allocator with int (trivially copyable)") {
+        // int is trivially copyable - default allocator should automatically use realloc()
+        fl::vector<int> vec;  // Uses fl::allocator<int> by default
+
+        // Test basic operations
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+
+        // Test resize - this should automatically trigger reallocate() optimization
+        vec.resize(10);
+        CHECK(vec.size() == 10);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+
+        // Test shrink
+        vec.resize(2);
+        CHECK(vec.size() == 2);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+    }
+
+    SUBCASE("Default allocator with struct POD (trivially copyable)") {
+        // Simple POD struct should automatically use realloc() optimization
+        struct SimplePOD {
+            int x;
+            int y;
+        };
+
+        fl::vector<SimplePOD> vec;  // Uses fl::allocator<SimplePOD> by default
+
+        vec.push_back({1, 2});
+        vec.push_back({3, 4});
+
+        CHECK(vec.size() == 2);
+        CHECK(vec[0].x == 1);
+        CHECK(vec[0].y == 2);
+        CHECK(vec[1].x == 3);
+        CHECK(vec[1].y == 4);
+
+        // Trigger reallocation - should automatically use realloc()
+        vec.reserve(100);
+        CHECK(vec.capacity() >= 100);
+        CHECK(vec[0].x == 1);
+        CHECK(vec[1].x == 3);
+    }
+
+    SUBCASE("Default allocator stress test with automatic realloc") {
+        // Test many reallocations - all automatically optimized
+        fl::vector<int> vec;
+
+        for (int i = 0; i < 1000; ++i) {
+            vec.push_back(i);
+        }
+
+        CHECK(vec.size() == 1000);
+
+        // Verify all values are correct after many reallocations
+        for (int i = 0; i < 1000; ++i) {
+            CHECK(vec[i] == i);
+        }
+    }
+
+    SUBCASE("Non-trivially copyable types use safe path") {
+        // This struct has a non-trivial destructor
+        // Default allocator should automatically use allocate-copy-deallocate
+        struct NonTriviallyCopyable {
+            int* ptr;
+            NonTriviallyCopyable(int val = 0) : ptr(new int(val)) {}
+            ~NonTriviallyCopyable() { delete ptr; }
+            NonTriviallyCopyable(const NonTriviallyCopyable& other) : ptr(new int(*other.ptr)) {}
+            NonTriviallyCopyable& operator=(const NonTriviallyCopyable& other) {
+                if (this != &other) {
+                    delete ptr;
+                    ptr = new int(*other.ptr);
+                }
+                return *this;
+            }
+        };
+
+        // Should compile and work correctly (using safe allocate-copy-deallocate)
+        fl::vector<NonTriviallyCopyable> vec;
+        vec.push_back(NonTriviallyCopyable(42));
+        vec.push_back(NonTriviallyCopyable(100));
+
+        CHECK(vec.size() == 2);
+        CHECK(*vec[0].ptr == 42);
+        CHECK(*vec[1].ptr == 100);
+
+        // Trigger reallocation - should use safe path, not realloc()
+        vec.reserve(100);
+        CHECK(vec.capacity() >= 100);
+        CHECK(*vec[0].ptr == 42);
+        CHECK(*vec[1].ptr == 100);
+    }
+}
+
+// BACKWARDS COMPATIBILITY: allocator_realloc still works but is now redundant
+TEST_CASE("allocator_realloc backwards compatibility") {
+    SUBCASE("allocator_realloc still works (now redundant)") {
+        // This still compiles and works, but provides no benefit over default allocator
+        fl::vector<int, fl::allocator_realloc<int>> vec;
+
+        vec.push_back(10);
+        vec.push_back(20);
+        vec.push_back(30);
+
+        CHECK(vec.size() == 3);
+        CHECK(vec[0] == 10);
+        CHECK(vec[1] == 20);
+        CHECK(vec[2] == 30);
+    }
+}
+
+// COMPILE-TIME TEST: Non-trivially copyable types should fail to compile
+// Uncomment these tests to verify static_assert works:
+//
+// TEST_CASE("allocator_realloc with non-POD types - SHOULD NOT COMPILE") {
+//     // This struct has a non-trivial destructor
+//     struct NonTriviallyCopyable {
+//         int* ptr;
+//         NonTriviallyCopyable() : ptr(new int(0)) {}
+//         ~NonTriviallyCopyable() { delete ptr; }
+//     };
+//
+//     // ❌ This should fail to compile with static_assert error:
+//     // "allocator_realloc<T> requires T to be trivially copyable"
+//     fl::vector<NonTriviallyCopyable, fl::allocator_realloc<NonTriviallyCopyable>> vec;
+// }
+//
+// TEST_CASE("allocator_realloc with fl::vector - SHOULD NOT COMPILE") {
+//     // ❌ Nested vectors with allocator_realloc should fail:
+//     // fl::vector is not trivially copyable
+//     fl::vector<fl::vector<int>, fl::allocator_realloc<fl::vector<int>>> nested;
+// }
+
+TEST_CASE("is_trivially_copyable trait") {
+    SUBCASE("Fundamental types are trivially copyable") {
+        CHECK(fl::is_trivially_copyable<int>::value);
+        CHECK(fl::is_trivially_copyable<float>::value);
+        CHECK(fl::is_trivially_copyable<double>::value);
+        CHECK(fl::is_trivially_copyable<char>::value);
+        CHECK(fl::is_trivially_copyable<bool>::value);
+    }
+
+    SUBCASE("Pointers are trivially copyable") {
+        CHECK(fl::is_trivially_copyable<int*>::value);
+        CHECK(fl::is_trivially_copyable<void*>::value);
+    }
+
+    SUBCASE("Simple POD structs are trivially copyable") {
+        struct SimplePOD {
+            int x;
+            float y;
+        };
+        CHECK(fl::is_trivially_copyable<SimplePOD>::value);
+    }
+
+    SUBCASE("Types with non-trivial operations are NOT trivially copyable") {
+        struct NonTriviallyCopyable {
+            int* ptr;
+            NonTriviallyCopyable() : ptr(nullptr) {}
+            ~NonTriviallyCopyable() { delete ptr; }
+        };
+        CHECK_FALSE(fl::is_trivially_copyable<NonTriviallyCopyable>::value);
     }
 }

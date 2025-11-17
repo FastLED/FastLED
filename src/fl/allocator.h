@@ -147,19 +147,49 @@ template <typename T> class allocator {
         return {allocate(n), n};
     }
 
-    // Optional: reallocate() for POD types that support in-place resizing
-    // Allows allocator to use realloc() for efficiency
-    // Only called if allocator_traits detects this method exists
-    // Returns nullptr on failure; caller must handle fallback
+    // Optional: reallocate() for in-place resizing
+    // Automatically uses fl::realloc() for trivially copyable types
+    // Returns nullptr on failure or if type is not trivially copyable
     pointer reallocate(pointer ptr, fl::size old_count, fl::size new_count) {
-        // Default implementation: no in-place realloc support
-        // Specialized allocators like allocator_realloc<T> override this
-        // to use fl::realloc() for POD types
+        return reallocate_impl(ptr, old_count, new_count,
+            fl::integral_constant<bool, fl::is_trivially_copyable<T>::value>{});
+    }
+
+private:
+    // SFINAE: Use fl::realloc() for trivially copyable types
+    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::true_type) {
+        if (new_count == 0) {
+            if (ptr) {
+                deallocate(ptr, old_count);
+            }
+            return nullptr;
+        }
+
+        // Safe to use realloc() - type is trivially copyable
+        void* result = fl::realloc(ptr, new_count * sizeof(T));
+        if (!result) {
+            return nullptr;  // Realloc failed
+        }
+
+        T* new_ptr = static_cast<T*>(result);
+
+        // Zero-initialize any newly allocated memory
+        if (new_count > old_count) {
+            fl::memset(new_ptr + old_count, 0, (new_count - old_count) * sizeof(T));
+        }
+
+        return new_ptr;
+    }
+
+    // SFINAE: Don't use realloc() for non-trivially-copyable types
+    pointer reallocate_impl(pointer ptr, fl::size old_count, fl::size new_count, fl::false_type) {
         FASTLED_UNUSED(ptr);
         FASTLED_UNUSED(old_count);
         FASTLED_UNUSED(new_count);
         return nullptr;  // Signal: not supported, use standard allocate-copy-deallocate
     }
+
+public:
 
     // Use this to allocate large blocks of memory for T.
     // This is useful for large arrays or objects that need to be allocated
@@ -200,16 +230,30 @@ template <typename T> class allocator {
         }
 };
 
-// Specialized allocator that supports in-place realloc() for efficient resizing
-// Uses ::realloc() (from stdlib) to potentially resize memory without copying
-// Works best with POD types; be cautious with types that have complex constructors
+// DEPRECATED: allocator_realloc is now REDUNDANT
 //
-// Usage:
-//   fl::vector<int, fl::allocator_realloc<int>> vec;
-//   // Vector will use realloc() for resizing instead of allocate-copy-deallocate
+// ℹ️  The default fl::allocator<T> now automatically uses realloc() for trivially
+//    copyable types, making this specialized allocator unnecessary.
+//
+// ✅ NEW RECOMMENDED USAGE:
+//    fl::vector<int> vec;              // Automatically uses realloc() optimization
+//    fl::vector<CRGB> leds;            // Automatically uses realloc() optimization
+//    fl::vector<fl::string> strs;      // Automatically uses safe allocate-copy-deallocate
+//
+// This class is kept for backwards compatibility but provides no additional benefit.
+// The compile-time safety check below ensures this allocator is only used with
+// trivially copyable types (same restriction as fl::allocator now has).
 //
 template <typename T>
 class allocator_realloc {
+private:
+    // SAFETY CHECK: Compile-time verification that T is trivially copyable
+    // This prevents undefined behavior from using realloc() with non-trivially-copyable types
+    static_assert(fl::is_trivially_copyable<T>::value,
+        "allocator_realloc<T> requires T to be trivially copyable. "
+        "NOTE: This allocator is now redundant - fl::allocator<T> automatically "
+        "optimizes trivially copyable types. Just use fl::vector<T> instead.");
+
 public:
     // Type definitions required by STL
     using value_type = T;

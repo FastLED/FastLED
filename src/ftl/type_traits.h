@@ -796,6 +796,33 @@ template <typename T> struct is_enum {
 #endif
 
 //-------------------------------------------------------------------------------
+// is_trivially_copyable trait - detects types safe for memcpy/realloc
+// Critical for determining if a type can be safely used with fl::realloc()
+//-------------------------------------------------------------------------------
+#if defined(__GNUC__) || defined(__clang__)
+// GCC and Clang support __is_trivially_copyable intrinsic
+template <typename T> struct is_trivially_copyable {
+    enum : bool { value = __is_trivially_copyable(T) };
+};
+#elif defined(_MSC_VER)
+// MSVC supports __is_trivially_copyable
+template <typename T> struct is_trivially_copyable {
+    enum : bool { value = __is_trivially_copyable(T) };
+};
+#else
+// Fallback for other compilers - use is_pod as conservative approximation
+// This is overly conservative but safe (may reject some valid types)
+template <typename T> struct is_trivially_copyable {
+    enum : bool { value = is_pod<T>::value };
+};
+#endif
+
+// Helper for variable template compatibility
+template <typename T> struct is_trivially_copyable_v_helper {
+    static constexpr bool value = is_trivially_copyable<T>::value;
+};
+
+//-------------------------------------------------------------------------------
 // underlying_type trait - gets underlying type of enum
 //-------------------------------------------------------------------------------
 #if defined(__GNUC__) || defined(__clang__)
