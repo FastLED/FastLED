@@ -1,9 +1,10 @@
 /// @file channel_engine_parlio.cpp
-/// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/S3
+/// @brief Parallel IO implementation of ChannelEngine for ESP32-P4/C6/H2/C5
 ///
 /// This implementation uses ESP32's Parallel IO (PARLIO) peripheral to drive
 /// multiple LED strips simultaneously on parallel GPIO pins. It supports
-/// ESP32-P4 and ESP32-S3 variants that have PARLIO hardware.
+/// ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 variants that have PARLIO hardware.
+/// Note: ESP32-S3 does NOT have PARLIO (it has LCD peripheral instead).
 
 #ifdef ESP32
 

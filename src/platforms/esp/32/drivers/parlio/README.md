@@ -1,8 +1,10 @@
-# FastLED PARLIO Driver for ESP32-P4/S3
+# FastLED PARLIO Driver for ESP32-P4/C6/H2/C5
 
 ## Overview
 
-The PARLIO (Parallel I/O) driver is a high-performance LED controller implementation for ESP32-P4 and ESP32-S3 chips that enables controlling up to 16 WS2812 LED strips simultaneously using hardware DMA. This driver achieves exceptional performance by offloading the precise timing requirements to dedicated hardware, freeing the CPU for other tasks.
+The PARLIO (Parallel I/O) driver is a high-performance LED controller implementation for ESP32 chips with PARLIO hardware (ESP32-P4, ESP32-C6, ESP32-H2, ESP32-C5) that enables controlling up to 16 WS2812 LED strips simultaneously using hardware DMA. This driver achieves exceptional performance by offloading the precise timing requirements to dedicated hardware, freeing the CPU for other tasks.
+
+**Note**: ESP32-S3 does NOT have PARLIO hardware (it uses the LCD peripheral instead).
 
 ## Key Features
 
@@ -93,7 +95,12 @@ Chunks are transmitted sequentially with seamless timing continuity.
 
 ### Compatible Chips
 - **ESP32-P4**: Full PARLIO support (up to 16 parallel outputs)
-- **ESP32-S3**: Full PARLIO support (up to 16 parallel outputs)
+- **ESP32-C6**: Full PARLIO support (up to 16 parallel outputs)
+- **ESP32-H2**: Full PARLIO support (up to 16 parallel outputs)
+- **ESP32-C5**: Full PARLIO support (up to 16 parallel outputs)
+
+**NOT Compatible**:
+- **ESP32-S3**: Does NOT have PARLIO hardware (uses LCD peripheral instead)
 
 ### Supported LED Types
 - **WS2812 / WS2812B** (RGB, tested)

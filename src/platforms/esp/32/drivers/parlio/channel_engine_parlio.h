@@ -173,7 +173,8 @@ namespace fl {
 /// - **Streaming architecture**: Supports arbitrary LED counts without memory scaling
 /// - **ISR transposition**: Data is transposed on-the-fly during transmission, not upfront
 ///
-/// @note Only available on ESP32-P4 and ESP32-S3 with PARLIO peripheral.
+/// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with PARLIO peripheral.
+///       ESP32-S3 does NOT have PARLIO hardware (uses LCD peripheral instead).
 ///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
 class ChannelEnginePARLIO : public ChannelEngine, public EngineEvents::Listener {
 public:

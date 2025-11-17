@@ -2,7 +2,7 @@
 
 #ifdef ESP32
 
-#define FASTLED_USES_ESP32P4_PARLIO  // Enable PARLIO driver for ESP32-P4/S3
+#define FASTLED_USES_ESP32P4_PARLIO  // Enable PARLIO driver for ESP32-P4/C6/H2/C5 (NOT S3!)
 
 #include "FastLED.h"
 
@@ -13,7 +13,7 @@
 #define NUM_LEDS (NUM_LEDS_PER_STRIP * NUM_STRIPS)
 
 // Pin definitions - Choose GPIO pins that support PARLIO output
-// These are example pins; adjust based on your ESP32-P4/S3 board layout
+// These are example pins; adjust based on your ESP32-P4/C6/H2/C5 board layout
 #define PIN0 1
 #define PIN1 2
 #define PIN2 3
