@@ -77,7 +77,7 @@ extern rmt_block_mem_t RMTMEM;
  * refill operations. It MUST NOT use any FreeRTOS APIs.
  *
  * REQUIREMENTS:
- * - Marked IRAM_ATTR (code in IRAM, not flash)
+ * - Marked FL_IRAM (code in IRAM, not flash)
  * - Marked extern "C" (for ASM_2_C_SHIM.h linkage)
  * - No FreeRTOS API calls (no portENTER_CRITICAL_ISR, no xSemaphore*, etc.)
  * - Fast execution (<500ns target for WS2812 timing)

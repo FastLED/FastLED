@@ -80,7 +80,7 @@ FL_EXTERN_C_BEGIN
  *
  * Key Differences from Xtensa:
  * 1. No fixed priority levels - all priorities are software-configurable (1-7)
- * 2. C handlers work at priority 1-3 with IRAM_ATTR (same as Xtensa)
+ * 2. C handlers work at priority 1-3 with FL_IRAM (same as Xtensa)
  * 3. Priority 4-7 requires assembly (same as Xtensa per ESP-IDF docs)
  * 4. Standard RISC-V trap/return mechanism (mret instruction)
  * 5. Custom interrupt controller handles arbitration (NOT PLIC)
@@ -163,7 +163,7 @@ FL_EXTERN_C_BEGIN
  * - Caller-saved registers per RISC-V ABI
  *
  * The C compiler automatically generates prologue/epilogue for ISR functions
- * marked with IRAM_ATTR, saving/restoring necessary registers.
+ * marked with FL_IRAM, saving/restoring necessary registers.
  *
  * Stack alignment: 16-byte boundary for ABI compliance
  *
@@ -198,7 +198,7 @@ FL_EXTERN_C_BEGIN
  * This applies to BOTH Xtensa AND RISC-V architectures on ESP32 platforms.
  *
  * C handlers (priority 1-3) must be:
- * 1. Marked with IRAM_ATTR (placed in IRAM, not flash)
+ * 1. Marked with FL_IRAM (placed in IRAM, not flash)
  * 2. Keep execution time minimal for high priorities
  * 3. No printf/malloc in handlers (good practice)
  * 4. Use ESP-IDF APIs (no manual PLIC operations needed)
@@ -207,10 +207,10 @@ FL_EXTERN_C_BEGIN
  */
 
 // Official FastLED handler (priority 1-3) - RECOMMENDED
-void IRAM_ATTR fastled_riscv_official_handler(void *arg);
+void FL_IRAM fastled_riscv_official_handler(void *arg);
 
 // Experimental high priority handler (priority 4-7) - CUSTOM only
-void IRAM_ATTR fastled_riscv_experimental_handler(void *arg);
+void FL_IRAM fastled_riscv_experimental_handler(void *arg);
 
 //=============================================================================
 // ESP32-C3/C6 INTERRUPT CONTROLLER INTERFACE (NOT PLIC)
@@ -297,7 +297,7 @@ static inline void fastled_plic_complete(uint32_t interrupt_id) {
  * Parameters:
  *   source: Interrupt source (e.g., ETS_RMT_INTR_SOURCE)
  *   priority: Priority level 1-3 for official, 4-7 for experimental
- *   handler: C function to handle interrupt (must be IRAM_ATTR)
+ *   handler: C function to handle interrupt (must be FL_IRAM)
  *   arg: User argument passed to handler
  *   handle: Pointer to store interrupt handle
  *
@@ -398,10 +398,10 @@ esp_err_t fastled_riscv_rmt_init_experimental(
 );
 
 // RMT official handler prototype (priority 1-3)
-void IRAM_ATTR fastled_riscv_rmt_official_handler(void *arg);
+void FL_IRAM fastled_riscv_rmt_official_handler(void *arg);
 
 // RMT experimental handler prototype (priority 4-7)
-void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
+void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg);
 
 //=============================================================================
 // INTERRUPT TRAMPOLINE MACRO (OPTIONAL FOR RISC-V)
@@ -453,7 +453,7 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
  *
  * RECOMMENDED APPROACH FOR ESP32-C3/C6:
  * - Use standard ESP-IDF interrupt allocation (esp_intr_alloc)
- * - Use simple C handlers with IRAM_ATTR (no assembly required)
+ * - Use simple C handlers with FL_IRAM (no assembly required)
  * - ESP-IDF handles all interrupt controller protocol automatically
  * - Priority levels 1-7 all work with C handlers
  *
@@ -471,7 +471,7 @@ void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg);
  * Example Usage (RISC-V):
  *
  * // Define your C handler function
- * void IRAM_ATTR my_rmt_handler(void* arg) {
+ * void FL_IRAM my_rmt_handler(void* arg) {
  *     // Handle RMT interrupt - can use normal C code
  * }
  *
@@ -648,7 +648,7 @@ extern void riscv_critical_isr(void);  // Optional assembly handler
  * RISC-V Interrupt Safety Guidelines:
  *
  * 1. IRAM Placement (Critical):
- *    - Mark all high-priority handlers with IRAM_ATTR
+ *    - Mark all high-priority handlers with FL_IRAM
  *    - Ensures operation when flash cache disabled
  *    - Required for priority levels that might preempt flash ops
  *
@@ -756,7 +756,7 @@ extern void riscv_critical_isr(void);  // Optional assembly handler
  *
  * 2. Priority levels: 1-7 (independently programmable)
  *    - Level 7 is highest priority
- *    - Levels 1-3: Officially documented, support C handlers with IRAM_ATTR
+ *    - Levels 1-3: Officially documented, support C handlers with FL_IRAM
  *    - Levels 4-7: Documentation incomplete - requirements unclear
  *
  *    CITATION: ESP-IDF docs state "shared interrupts can use priority levels 2 and 3"
@@ -796,7 +796,7 @@ extern void riscv_critical_isr(void);  // Optional assembly handler
  * 1. OFFICIAL APPROACH (recommended):
  *    - Use priority levels 1-3 with official RMT driver
  *    - Standard ESP-IDF interrupt allocation
- *    - Simple C handlers with IRAM_ATTR
+ *    - Simple C handlers with FL_IRAM
  *    - No assembly trampolines needed
  *    - Fully documented and supported
  *

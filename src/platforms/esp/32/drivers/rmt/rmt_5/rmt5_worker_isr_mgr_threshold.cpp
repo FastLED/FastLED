@@ -126,11 +126,11 @@ public:
     bool isChannelOccupied(uint8_t channel_id) const;
     ThresholdIsrData* getIsrData(uint8_t channel_id);
 
-    static void IRAM_ATTR fillNextHalf(ThresholdIsrData* isr_data) __attribute__((hot));
-    static void IRAM_ATTR fillAll(ThresholdIsrData* isr_data) __attribute__((hot));
+    static void FL_IRAM fillNextHalf(ThresholdIsrData* isr_data) __attribute__((hot));
+    static void FL_IRAM fillAll(ThresholdIsrData* isr_data) __attribute__((hot));
     static void tx_start(uint8_t channel_id);
-    static void IRAM_ATTR sharedGlobalISR(void* arg) __attribute__((hot));
-    static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
+    static void FL_IRAM sharedGlobalISR(void* arg) __attribute__((hot));
+    static FASTLED_FORCE_INLINE void FL_IRAM convertByteToRmt(
         uint8_t byte_val,
         const rmt_nibble_lut_t& lut,
         volatile rmt_item32_t* out
@@ -354,7 +354,7 @@ ThresholdIsrData* RmtWorkerIsrMgrThresholdImpl::getIsrData(uint8_t channel_id) {
 // OPTIMIZATION: Use 64-bit writes instead of 8x 32-bit writes for better memory bandwidth
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::convertByteToRmt(
+FASTLED_FORCE_INLINE void FL_IRAM RmtWorkerIsrMgrThresholdImpl::convertByteToRmt(
     uint8_t byte_val,
     const rmt_nibble_lut_t& lut,
     volatile rmt_item32_t* out
@@ -387,7 +387,7 @@ FL_DISABLE_WARNING_POP
 // OPTIMIZATION: Matches RMT4 approach - no defensive checks, trust the buffer sizing math
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __restrict__ isr_data) {
+void FL_IRAM RmtWorkerIsrMgrThresholdImpl::fillNextHalf(RmtWorkerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
@@ -473,7 +473,7 @@ FL_DISABLE_WARNING_POP
 // maximizing buffer utilization beyond the ping-pong half-buffer strategy.
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restrict__ isr_data) {
+void FL_IRAM RmtWorkerIsrMgrThresholdImpl::fillAll(RmtWorkerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // Get hardware read pointer (where the RMT engine is currently reading from)
@@ -650,7 +650,7 @@ void RmtWorkerIsrMgrThresholdImpl::deallocateInterrupt(uint8_t channel_id) {
 // OPTIMIZATION: Uses __builtin_ctz (count trailing zeros) to find active channels
 // instead of linear iteration. This provides 3-4x speedup for sparse interrupts (1-2 channels).
 // The ESP32's Xtensa NSAU instruction makes __builtin_ctz a single-cycle operation.
-void IRAM_ATTR RmtWorkerIsrMgrThresholdImpl::sharedGlobalISR(void* arg) {
+void FL_IRAM RmtWorkerIsrMgrThresholdImpl::sharedGlobalISR(void* arg) {
     // Direct static member access (no instance needed, zero overhead)
     // Read interrupt status once - captures all pending channel interrupts atomically
     uint32_t intr_st = RMT5_READ_INTERRUPT_STATUS();

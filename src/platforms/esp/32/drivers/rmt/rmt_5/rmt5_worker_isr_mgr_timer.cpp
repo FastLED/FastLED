@@ -146,12 +146,12 @@ public:
     bool isChannelOccupied(uint8_t channel_id) const;
     TimerIsrData* getIsrData(uint8_t channel_id);
 
-    static void IRAM_ATTR fillNextHalf(TimerIsrData* isr_data) __attribute__((hot));
-    static void IRAM_ATTR fillAll(TimerIsrData* isr_data) __attribute__((hot));
+    static void FL_IRAM fillNextHalf(TimerIsrData* isr_data) __attribute__((hot));
+    static void FL_IRAM fillAll(TimerIsrData* isr_data) __attribute__((hot));
     static void tx_start(uint8_t channel_id);
-    static void IRAM_ATTR sharedGlobalISR_FillAll(void* arg) __attribute__((hot));
-    static bool IRAM_ATTR timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx);
-    static FASTLED_FORCE_INLINE void IRAM_ATTR convertByteToRmt(
+    static void FL_IRAM sharedGlobalISR_FillAll(void* arg) __attribute__((hot));
+    static bool FL_IRAM timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t* edata, void* user_ctx);
+    static FASTLED_FORCE_INLINE void FL_IRAM convertByteToRmt(
         uint8_t byte_val,
         const rmt_nibble_lut_t& lut,
         volatile rmt_item32_t* out
@@ -386,7 +386,7 @@ TimerIsrData* RmtWorkerIsrMgrTimerImpl::getIsrData(uint8_t channel_id) {
 // OPTIMIZATION: Use 64-bit writes instead of 8x 32-bit writes for better memory bandwidth
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-FASTLED_FORCE_INLINE void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::convertByteToRmt(
+FASTLED_FORCE_INLINE void FL_IRAM RmtWorkerIsrMgrTimerImpl::convertByteToRmt(
     uint8_t byte_val,
     const rmt_nibble_lut_t& lut,
     volatile rmt_item32_t* out
@@ -419,7 +419,7 @@ FL_DISABLE_WARNING_POP
 // OPTIMIZATION: Matches RMT4 approach - no defensive checks, trust the buffer sizing math
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillNextHalf(TimerIsrData* __restrict__ isr_data) {
+void FL_IRAM RmtWorkerIsrMgrTimerImpl::fillNextHalf(TimerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // OPTIMIZATION: Cache volatile member variables to avoid repeated access
@@ -505,7 +505,7 @@ FL_DISABLE_WARNING_POP
 // maximizing buffer utilization beyond the ping-pong half-buffer strategy.
 FL_DISABLE_WARNING_PUSH
 FL_DISABLE_WARNING(attributes)
-void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::fillAll(TimerIsrData* __restrict__ isr_data) {
+void FL_IRAM RmtWorkerIsrMgrTimerImpl::fillAll(TimerIsrData* __restrict__ isr_data) {
     // ISR data pointer passed directly - no array lookup needed
 
     // Get hardware read pointer (where the RMT engine is currently reading from)
@@ -811,7 +811,7 @@ void RmtWorkerIsrMgrTimerImpl::tx_start(uint8_t channel_id) {
 }
 
 // Timer alarm callback - calls sharedGlobalISR_FillAll
-bool IRAM_ATTR RmtWorkerIsrMgrTimerImpl::timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
+bool FL_IRAM RmtWorkerIsrMgrTimerImpl::timer_alarm_callback(gptimer_handle_t timer, const gptimer_alarm_event_data_t *edata, void *user_ctx) {
     // Call the fill-all ISR directly
     RmtWorkerIsrMgrTimerImpl::sharedGlobalISR_FillAll(nullptr);
     return false;  // No high-priority task woken
@@ -918,7 +918,7 @@ void RmtWorkerIsrMgrTimerImpl::deallocateInterrupt(uint8_t channel_id) {
 // OPTIMIZATION: Called by high-frequency timer at sub-microsecond intervals
 // This ISR fills all active channels and detects completion via buffer pointer inspection
 // Key difference: No RMT interrupt handling - timer drives everything
-void IRAM_ATTR RmtWorkerIsrMgrTimerImpl::sharedGlobalISR_FillAll(void* arg) {
+void FL_IRAM RmtWorkerIsrMgrTimerImpl::sharedGlobalISR_FillAll(void* arg) {
     // Platform-specific bit layout validation
 #if !defined(CONFIG_IDF_TARGET_ESP32) && !defined(CONFIG_IDF_TARGET_ESP32S3) && !defined(CONFIG_IDF_TARGET_ESP32C3) && !defined(CONFIG_IDF_TARGET_ESP32C6) && !defined(CONFIG_IDF_TARGET_ESP32H2) && !defined(CONFIG_IDF_TARGET_ESP32C5) && !defined(CONFIG_IDF_TARGET_ESP32P4)
 #error "RMT5 worker ISR not yet implemented for this ESP32 variant"

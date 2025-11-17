@@ -72,7 +72,7 @@ constexpr uint8_t ESP32_PLATFORM_ID = 1;
  * Timer alarm callback - calls user handler
  * This runs in ISR context and must be IRAM-safe
  */
-static bool IRAM_ATTR timer_alarm_callback(
+static bool FL_IRAM timer_alarm_callback(
     gptimer_handle_t timer,
     const gptimer_alarm_event_data_t* edata,
     void* user_ctx)
@@ -96,7 +96,7 @@ static bool IRAM_ATTR timer_alarm_callback(
  * GPIO interrupt handler - calls user handler
  * This runs in ISR context
  */
-static void IRAM_ATTR gpio_isr_wrapper(void* arg)
+static void FL_IRAM gpio_isr_wrapper(void* arg)
 {
     esp32_isr_handle_data* handle_data = static_cast<esp32_isr_handle_data*>(arg);
     if (handle_data && handle_data->user_handler) {

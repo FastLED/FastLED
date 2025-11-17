@@ -12,7 +12,7 @@
  * where WiFi interference cannot be tolerated.
  *
  * CRITICAL REQUIREMENTS FOR C HANDLER FUNCTIONS:
- * 1. MUST be marked IRAM_ATTR (code must be in IRAM, not flash)
+ * 1. MUST be marked FL_IRAM (code must be in IRAM, not flash)
  * 2. MUST NOT call FreeRTOS APIs (xSemaphore*, xQueue*, xTask*, etc.)
  * 3. MUST access only DRAM variables (use DRAM_ATTR for global state)
  * 4. SHOULD complete in <500ns (WS2812 timing safety margin)
@@ -138,7 +138,7 @@ FL_EXTERN_C_BEGIN
  * PARAMETERS:
  *   handler_name: Symbol name for the NMI handler (e.g., "xt_nmi")
  *                 This is the symbol ESP-IDF will call when NMI fires.
- *   c_function:   Name of C function to call (must be IRAM_ATTR)
+ *   c_function:   Name of C function to call (must be FL_IRAM)
  *                 Function signature: extern "C" void c_function(void)
  *
  * GENERATED HANDLER:
@@ -157,7 +157,7 @@ FL_EXTERN_C_BEGIN
  *
  * USAGE EXAMPLE:
  *   // Declare C handler function (in your .cpp file)
- *   extern "C" void IRAM_ATTR rmt_nmi_refill_buffer(void) {
+ *   extern "C" void FL_IRAM rmt_nmi_refill_buffer(void) {
  *       // Your RMT buffer refill logic here
  *       // NO FreeRTOS calls! NO flash access!
  *   }
@@ -179,7 +179,7 @@ FL_EXTERN_C_BEGIN
  * 1. ESP-IDF requires handler=nullptr and arg=nullptr for Level 7
  * 2. ESP-IDF looks for the "xt_nmi" symbol at link time
  * 3. C function MUST be extern "C" for correct symbol name
- * 4. C function MUST be IRAM_ATTR to avoid flash cache misses
+ * 4. C function MUST be FL_IRAM to avoid flash cache misses
  * 5. Do not call this macro multiple times with same handler_name
  */
 #define FASTLED_NMI_ASM_SHIM_STATIC(handler_name, c_function) \
@@ -284,7 +284,7 @@ FL_EXTERN_C_BEGIN
  * FUNCTION POINTER REQUIREMENTS:
  *   - Must be declared with DRAM_ATTR (in DRAM, not flash)
  *   - Type: typedef void (*nmi_handler_t)(void)
- *   - Must point to IRAM_ATTR function
+ *   - Must point to FL_IRAM function
  *   - Example: nmi_handler_t DRAM_ATTR g_nmi_handler = &default_handler;
  *
  * PERFORMANCE:
@@ -299,8 +299,8 @@ FL_EXTERN_C_BEGIN
  *   typedef void (*nmi_handler_t)(void);
  *
  *   // Define handler functions
- *   extern "C" void IRAM_ATTR nmi_handler_default(void) { /* ... */ }
- *   extern "C" void IRAM_ATTR nmi_handler_alternate(void) { /* ... */ }
+ *   extern "C" void FL_IRAM nmi_handler_default(void) { /* ... */ }
+ *   extern "C" void FL_IRAM nmi_handler_alternate(void) { /* ... */ }
  *
  *   // Declare function pointer in DRAM
  *   nmi_handler_t DRAM_ATTR g_nmi_handler = &nmi_handler_default;
@@ -318,7 +318,7 @@ FL_EXTERN_C_BEGIN
  *
  * CRITICAL NOTES:
  * 1. Function pointer variable MUST be in DRAM (use DRAM_ATTR)
- * 2. Pointed-to function MUST be in IRAM (use IRAM_ATTR)
+ * 2. Pointed-to function MUST be in IRAM (use FL_IRAM)
  * 3. Updating pointer while NMI enabled creates race condition (disable first)
  * 4. Null pointer check not included (would add overhead, assume valid)
  */
@@ -400,10 +400,10 @@ FL_EXTERN_C_BEGIN
  *   FASTLED_NMI_DECLARE_C_HANDLER(my_nmi_handler);
  *
  * EXPANDS TO:
- *   extern "C" void IRAM_ATTR my_nmi_handler(void);
+ *   extern "C" void FL_IRAM my_nmi_handler(void);
  */
 #define FASTLED_NMI_DECLARE_C_HANDLER(function_name) \
-    extern "C" void IRAM_ATTR function_name(void)
+    extern "C" void FL_IRAM function_name(void)
 
 /*
  * FASTLED_NMI_DECLARE_FUNCTION_POINTER

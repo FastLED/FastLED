@@ -141,7 +141,7 @@ FL_EXTERN_C_BEGIN
  *
  * Assembly implementation requirements:
  * 1. Save all used registers to stack (16-byte aligned)
- * 2. Call C handler function (marked IRAM_ATTR)
+ * 2. Call C handler function (marked FL_IRAM)
  * 3. Restore registers from stack
  * 4. Execute "rfi 4" to return from interrupt
  *
@@ -169,13 +169,13 @@ extern void xt_highint5(void);
 //=============================================================================
 
 /*
- * C Handler Functions (IRAM_ATTR required) - EXPERIMENTAL ONLY
+ * C Handler Functions (FL_IRAM required) - EXPERIMENTAL ONLY
  *
  * These functions are called from the assembly shims for CUSTOM implementations.
  * They are NOT part of the official FastLED RMT driver which uses level 1-3.
  *
  * Requirements for custom handlers:
- * 1. Marked with IRAM_ATTR (placed in IRAM, not flash)
+ * 1. Marked with FL_IRAM (placed in IRAM, not flash)
  * 2. Keep execution time minimal
  * 3. No printf, malloc, or FreeRTOS calls
  * 4. Only register and memory operations
@@ -186,10 +186,10 @@ extern void xt_highint5(void);
  */
 
 // Level 4 C handler - EXPERIMENTAL, called from xt_highint4 assembly shim
-void IRAM_ATTR fastled_esp32s3_level4_handler(void);
+void FL_IRAM fastled_esp32s3_level4_handler(void);
 
 // Level 5 C handler - EXPERIMENTAL, called from xt_highint5 assembly shim
-void IRAM_ATTR fastled_esp32s3_level5_handler(void);
+void FL_IRAM fastled_esp32s3_level5_handler(void);
 
 //=============================================================================
 // INTERRUPT INSTALLATION HELPERS
@@ -384,7 +384,7 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
  * Example Usage:
  *
  * // Define your C handler function
- * void IRAM_ATTR my_rmt_handler(void* arg) {
+ * void FL_IRAM my_rmt_handler(void* arg) {
  *     // Handle RMT interrupt - minimal code only
  * }
  *
@@ -427,7 +427,7 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
  *     s32i  a3, a1, FASTLED_ISR_A3_OFFSET
  *     # ... save other registers as needed
  *
- *     # Call C handler (must be IRAM_ATTR)
+ *     # Call C handler (must be FL_IRAM)
  *     call0 fastled_esp32s3_level5_handler
  *
  *     # Restore registers
@@ -462,7 +462,7 @@ esp_err_t fastled_esp32s3_rmt_init_custom(
  *
  * 1. IRAM Placement:
  *    - All handler code must be in IRAM (not flash)
- *    - Use IRAM_ATTR for C functions
+ *    - Use FL_IRAM for C functions
  *    - Use .iram1 section for assembly
  *    - Ensures operation when flash cache disabled
  *

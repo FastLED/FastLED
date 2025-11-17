@@ -63,7 +63,7 @@
  *      FastLED CPixelLEDController template, and ESP32RMTController,
  *      which just handles driving the RMT peripheral. One benefit of
  *      this design is that ESP32RMTContoller is not a template, so
- *      its methods can be marked with the IRAM_ATTR and end up in
+ *      its methods can be marked with the FL_IRAM and end up in
  *      IRAM memory. Another benefit is that all of the color channel
  *      processing is done up-front, in the templated class, so we
  *      can fill the RMT buffers more quickly.
