@@ -130,7 +130,7 @@ esp_err_t fastled_riscv_install_experimental_interrupt(
 // INTERRUPT HANDLER IMPLEMENTATIONS
 //=============================================================================
 
-void IRAM_ATTR fastled_riscv_official_handler(void *arg) {
+void FL_IRAM fastled_riscv_official_handler(void *arg) {
     // Official handler implementation (priority 1-3)
     // This is a placeholder - actual RMT handling would go here
     (void)arg;
@@ -139,7 +139,7 @@ void IRAM_ATTR fastled_riscv_official_handler(void *arg) {
     // For now, this is just a stub to verify interrupt installation works
 }
 
-void IRAM_ATTR fastled_riscv_experimental_handler(void *arg) {
+void FL_IRAM fastled_riscv_experimental_handler(void *arg) {
     // CRITICAL: This C handler CANNOT be used for priority 4-7 interrupts.
     // According to ESP-IDF docs, priority >3 requires ASSEMBLY handlers.
     // This function exists only for API completeness but will never be called
@@ -208,7 +208,7 @@ esp_err_t fastled_riscv_rmt_init_experimental(
     return ESP_ERR_NOT_SUPPORTED;
 }
 
-void IRAM_ATTR fastled_riscv_rmt_official_handler(void *arg) {
+void FL_IRAM fastled_riscv_rmt_official_handler(void *arg) {
     // RMT official handler (priority 1-3)
     (void)arg;
 
@@ -216,7 +216,7 @@ void IRAM_ATTR fastled_riscv_rmt_official_handler(void *arg) {
     // This would handle RMT peripheral interrupts for LED timing
 }
 
-void IRAM_ATTR fastled_riscv_rmt_experimental_handler(void *arg) {
+void FL_IRAM fastled_riscv_rmt_experimental_handler(void *arg) {
     // CRITICAL: This C handler CANNOT be used for priority 4-7 interrupts.
     // Priority >3 requires ASSEMBLY handlers per ESP-IDF documentation.
     // This function exists only for API completeness but will never be called.

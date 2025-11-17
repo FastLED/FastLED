@@ -29,7 +29,7 @@ static fl::isr::isr_handle_t s_isr_handle;
  * Timer alarm callback - calls the ISR
  * This runs in ISR context and must be IRAM-safe
  */
-static void IRAM_ATTR spi_isr_wrapper(void* user_ctx) {
+static void FL_IRAM spi_isr_wrapper(void* user_ctx) {
     (void)user_ctx;
 
     // Call the actual SPI ISR

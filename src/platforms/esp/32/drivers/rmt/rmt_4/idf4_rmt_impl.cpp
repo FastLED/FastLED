@@ -47,9 +47,9 @@ FL_EXTERN_C_BEGIN
 
 FL_EXTERN_C_END
 
-#ifndef IRAM_ATTR  // Fix for Arduino Cloud Compiler
-#warning "IRAM_ATTR not defined, are you in the Arduino Cloud compiler?, disbaling IRAM_ATTR."
-#define IRAM_ATTR
+#ifndef FL_IRAM  // Fix for Arduino Cloud Compiler
+#warning "FL_IRAM not defined, are you in the Arduino Cloud compiler?, disbaling FL_IRAM."
+#define FL_IRAM
 #endif
 
 #pragma GCC diagnostic push
@@ -237,7 +237,7 @@ extern rmt_block_mem_t RMTMEM;
 
 // -- Write one byte's worth of RMT pulses to the big buffer
 //    out: A pointer into an array at least 8 units long (one unit for each bit).
-FASTLED_FORCE_INLINE void IRAM_ATTR convert_byte_to_rmt(
+FASTLED_FORCE_INLINE void FL_IRAM convert_byte_to_rmt(
     FASTLED_REGISTER uint8_t byteval,
     FASTLED_REGISTER uint32_t zero,
     FASTLED_REGISTER uint32_t one,
@@ -695,7 +695,7 @@ void fl::ESP32RMTController::tx_start()
     mLastFill = __clock_cycles();
 }
 
-void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
+void FL_IRAM _rmt_set_tx_intr_disable(rmt_channel_t channel)
 {
     // rmt_ll_enable_tx_end_interrupt(&RMT, channel)
 #if INLINE_RMT_SET_TX_INTR_DISABLE
@@ -792,7 +792,7 @@ void IRAM_ATTR _rmt_set_tx_intr_disable(rmt_channel_t channel)
 //    handler (below), or as a callback from the built-in
 //    interrupt handler. It is static because we don't know which
 //    controller is done until we look it up.
-void IRAM_ATTR fl::ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
+void FL_IRAM fl::ESP32RMTController::doneOnChannel(rmt_channel_t channel, void *arg)
 {
     fl::ESP32RMTController *pController = gOnChannel[channel];
 
@@ -825,7 +825,7 @@ void IRAM_ATTR fl::ESP32RMTController::doneOnChannel(rmt_channel_t channel, void
 //    This interrupt handler handles two cases: a controller is
 //    done writing its data, or a controller needs to fill the
 //    next half of the RMT buffer with data.
-void IRAM_ATTR fl::ESP32RMTController::interruptHandler(void *arg)
+void FL_IRAM fl::ESP32RMTController::interruptHandler(void *arg)
 {
     // -- The basic structure of this code is borrowed from the
     //    interrupt handler in esp-idf/components/driver/rmt.c

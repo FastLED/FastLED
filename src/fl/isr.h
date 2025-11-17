@@ -25,11 +25,19 @@ namespace isr {
  * @param user_data: User-provided context pointer (can be nullptr)
  *
  * Requirements:
- * - Must be placed in fast memory (IRAM on ESP32, .text_ram on STM32, etc.)
+ * - Must be placed in fast memory using the FL_IRAM attribute (see fl/compiler_control.h)
+ *    - ESP32/ESP8266: Places code in IRAM (internal SRAM)
+ *    - STM32: Places code in .text_ram section
+ *    - Other platforms: No-op (functions execute from normal memory)
  * - Should execute quickly (typically <10us)
  * - Cannot use blocking operations
  * - Cannot use malloc/free
  * - Platform-specific restrictions may apply (see platform docs)
+ *
+ * Example:
+ *   void FL_IRAM my_timer_isr(void* user_data) {
+ *       // Fast ISR handler code here
+ *   }
  */
 typedef void (*isr_handler_t)(void* user_data);
 

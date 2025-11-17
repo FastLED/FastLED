@@ -98,7 +98,7 @@ protected:
 	}
 
 
-	static uint32_t IRAM_ATTR showRGBInternal(PixelController<RGB_ORDER> pixels) {
+	static uint32_t FL_IRAM showRGBInternal(PixelController<RGB_ORDER> pixels) {
 		// Setup the pixel controller and load/scale the first byte
 		pixels.preStepFirstByteDithering();
 		FASTLED_REGISTER uint32_t b = pixels.loadAndScale0();

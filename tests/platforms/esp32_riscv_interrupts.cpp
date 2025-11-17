@@ -29,7 +29,7 @@ TEST_CASE("riscv_interrupts_documentation_exists") {
 #include "esp_intr_alloc.h"
 
 // Mock handler for testing
-static void IRAM_ATTR test_interrupt_handler(void *arg) {
+static void FL_IRAM test_interrupt_handler(void *arg) {
     (void)arg;
     // Test handler - does nothing
 }

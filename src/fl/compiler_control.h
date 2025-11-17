@@ -276,3 +276,29 @@
   // Unsupported compiler: no-op
   #define FL_NODISCARD
 #endif
+
+// IRAM/Fast Memory Placement Attribute
+// Places function/data in fast internal RAM instead of flash memory.
+// Critical for ISR handlers on ESP32 (flash cache disabled during flash operations).
+//
+// Usage: void FL_IRAM myInterruptHandler() { ... }
+//
+// Platform behavior:
+//   ESP32/ESP8266: Uses IRAM_ATTR (places code in internal SRAM)
+//   STM32 (future): Uses .text_ram section attribute
+//   Other platforms: No-op (functions execute from normal memory)
+#if defined(ESP32) || defined(ESP8266)
+  // ESP32/ESP8266: Use IRAM_ATTR from ESP-IDF/SDK
+  #ifndef IRAM_ATTR
+    FL_EXTERN_C_BEGIN
+    #include "esp_attr.h"
+    FL_EXTERN_C_END
+  #endif
+  #define FL_IRAM IRAM_ATTR
+#elif defined(__arm__) && defined(STM32)
+  // STM32: Place in fast RAM section (.text_ram)
+  #define FL_IRAM __attribute__((section(".text_ram")))
+#else
+  // Other platforms: No-op
+  #define FL_IRAM
+#endif

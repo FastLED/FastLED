@@ -147,13 +147,13 @@ private:
     //    handler (below), or as a callback from the built-in
     //    interrupt handler. It is static because we don't know which
     //    controller is done until we look it up.
-    static void IRAM_ATTR doneOnChannel(rmt_channel_t channel, void *arg);
+    static void FL_IRAM doneOnChannel(rmt_channel_t channel, void *arg);
 
     // -- Custom interrupt handler
     //    This interrupt handler handles two cases: a controller is
     //    done writing its data, or a controller needs to fill the
     //    next half of the RMT buffer with data.
-    static void IRAM_ATTR interruptHandler(void *arg);
+    static void FL_IRAM interruptHandler(void *arg);
 
     // -- Fill RMT buffer
     //    Puts 32 bits of pixel data into the next 32 slots in the RMT memory
@@ -161,7 +161,7 @@ private:
     //    long to hold the signal high, followed by how long to hold it low.
     //    NOTE: Now the default is to use 128-bit buffers, so half a buffer is
     //          is 64 bits. See FASTLED_RMT_MEM_BLOCKS
-    void IRAM_ATTR fillNext(bool check_time);
+    void FL_IRAM fillNext(bool check_time);
 
     // -- Get or create the pixel data buffer
     uint8_t *getPixelBuffer(int size_in_bytes);

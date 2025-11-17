@@ -122,7 +122,7 @@ int pgcd(int smallest, int precision, int a, int b, int c) {
 }
 
 // -- Custom interrupt handler
-static IRAM_ATTR void interruptHandler(void *arg) {
+static FL_IRAM void interruptHandler(void *arg) {
     if (i2s->int_st.out_eof) {
         i2s->int_clr.val = i2s->int_raw.val;
 #if FASTLED_ESP32_I2S_NUM_DMA_BUFFERS > 2
