@@ -4,7 +4,7 @@
 LUT - Look up table implementation for various types.
 */
 
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "fl/force_inline.h"
 #include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/unique_ptr.h"  // For fl::unique_ptr<T>

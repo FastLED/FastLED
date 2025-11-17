@@ -4,7 +4,7 @@
 #include "ftl/type_traits.h"
 #include "ftl/bit_cast.h"
 #include "ftl/new.h"   // for placement new operator
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 
 #include "ftl/initializer_list.h"
 #include "fl/alloca.h"

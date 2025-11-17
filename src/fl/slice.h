@@ -4,7 +4,7 @@
 #include "ftl/stdint.h"
 #include "fl/clamp.h"
 #include "fl/geometry.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/type_traits.h"
 
 namespace fl {

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ftl/stdint.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/initializer_list.h"
 #include "ftl/new.h"
 #include "ftl/move.h"

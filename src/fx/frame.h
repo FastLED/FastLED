@@ -7,7 +7,7 @@
 #include "ftl/vector.h"
 #include "ftl/stdint.h"
 
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "fl/draw_mode.h"
 #include "fl/codec/pixel.h"
 

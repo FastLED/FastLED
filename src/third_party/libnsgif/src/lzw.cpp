@@ -10,7 +10,7 @@
 #include "ftl/cstddef.h"
 #include "ftl/assert.h"
 #include "fl/int.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 
 #include "lzw.h"
 

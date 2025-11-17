@@ -7,7 +7,7 @@
 #include "ftl/memory.h"
 #include "fl/xymap.h"
 #include "ftl/vector.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "fx/fx2d.h"
 
 // Optimized for 2^n grid sizes in terms of both memory and performance.

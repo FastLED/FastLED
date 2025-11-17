@@ -12,7 +12,7 @@
 #include "ftl/assert.h"
 #include "fl/int.h"
 #include "ftl/limits.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/cstring.h"
 #include "ftl/string.h"
 #include "fl/str.h"

@@ -1,5 +1,5 @@
 #include "test.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/vector.h"
 
 using namespace fl;
@@ -138,15 +138,30 @@ TEST_CASE("fl::allocator") {
         alloc.deallocate(result.ptr, result.count);
     }
 
-    SUBCASE("reallocate returns nullptr") {
+    SUBCASE("reallocate works for trivially copyable types") {
         allocator<int> alloc;
         int* ptr = alloc.allocate(5);
 
-        // Basic allocator's reallocate should return nullptr (not supported)
-        int* new_ptr = alloc.reallocate(ptr, 5, 10);
-        CHECK_EQ(new_ptr, nullptr);
+        // Initialize data
+        for (int i = 0; i < 5; ++i) {
+            ptr[i] = i * 10;
+        }
 
-        alloc.deallocate(ptr, 5);
+        // Basic allocator's reallocate should work for trivially copyable types (like int)
+        int* new_ptr = alloc.reallocate(ptr, 5, 10);
+        CHECK(new_ptr != nullptr);
+
+        // Verify data was preserved
+        for (int i = 0; i < 5; ++i) {
+            CHECK_EQ(new_ptr[i], i * 10);
+        }
+
+        // Verify new memory is zero-initialized
+        for (int i = 5; i < 10; ++i) {
+            CHECK_EQ(new_ptr[i], 0);
+        }
+
+        alloc.deallocate(new_ptr, 10);
     }
 
     SUBCASE("rebind allocator") {
@@ -1193,7 +1208,7 @@ TEST_CASE("fl::allocator integration with vector") {
     }
 }
 #include "test.h"
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/vector.h"
 
 

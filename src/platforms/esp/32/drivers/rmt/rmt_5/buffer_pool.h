@@ -4,7 +4,7 @@
 
 #if FASTLED_RMT5
 
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"
 #include "ftl/stdint.h"

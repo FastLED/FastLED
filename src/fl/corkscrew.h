@@ -29,7 +29,7 @@
  * - gapParams: Optional gap compensation for solder points in a strip.
  */
 
-#include "fl/allocator.h"
+#include "ftl/allocator.h"
 #include "fl/geometry.h"
 #include "ftl/math.h"
 #include "fl/math_macros.h"
