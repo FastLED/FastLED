@@ -21,167 +21,78 @@ namespace fl {
 namespace isr {
 
 // =============================================================================
-// Null ISR Implementation Class
+// Null ISR Implementation (Free Functions)
 // =============================================================================
 
 /**
  * Null implementation that provides safe no-op defaults.
  * Used when no platform-specific ISR implementation is available.
  */
-class NullIsrImpl : public IsrImpl {
-public:
-    NullIsrImpl() = default;
-    ~NullIsrImpl() override = default;
 
-    int attachTimerHandler(const isr_config_t& config, isr_handle_t* out_handle) override {
-        (void)config;
-        if (out_handle) {
-            *out_handle = isr_handle_t();  // Invalid handle
-        }
-        return -100;  // Not implemented error
+int null_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
+    (void)config;
+    if (out_handle) {
+        *out_handle = isr_handle_t();  // Invalid handle
     }
-
-    int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) override {
-        (void)pin;
-        (void)config;
-        if (out_handle) {
-            *out_handle = isr_handle_t();  // Invalid handle
-        }
-        return -100;  // Not implemented error
-    }
-
-    int detachHandler(isr_handle_t& handle) override {
-        handle = isr_handle_t();  // Invalidate handle
-        return -100;  // Not implemented error
-    }
-
-    int enableHandler(const isr_handle_t& handle) override {
-        (void)handle;
-        return -100;  // Not implemented error
-    }
-
-    int disableHandler(const isr_handle_t& handle) override {
-        (void)handle;
-        return -100;  // Not implemented error
-    }
-
-    bool isHandlerEnabled(const isr_handle_t& handle) override {
-        (void)handle;
-        return false;
-    }
-
-    const char* getErrorString(int error_code) override {
-        switch (error_code) {
-            case 0: return "Success";
-            case -100: return "Not implemented (no platform ISR support)";
-            default: return "Unknown error";
-        }
-    }
-
-    const char* getPlatformName() override {
-        return "Null";
-    }
-
-    uint32_t getMaxTimerFrequency() override {
-        return 0;  // No timer support
-    }
-
-    uint32_t getMinTimerFrequency() override {
-        return 0;  // No timer support
-    }
-
-    uint8_t getMaxPriority() override {
-        return 0;  // No priority support
-    }
-
-    bool requiresAssemblyHandler(uint8_t priority) override {
-        (void)priority;
-        return false;
-    }
-};
-
-// =============================================================================
-// Weak Symbol Factory Function (Static Member)
-// =============================================================================
-
-// Only provide weak symbol if no platform implementation is available
-// On Windows, weak symbols don't work reliably, so we use conditional compilation
-// Note: ESP32 with ESP-IDF < 5.0 also uses the null implementation (no gptimer API)
-#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL)
-    // For ESP32 platforms, check if we need the null implementation (ESP-IDF < 5.0)
-    #if !defined(ESP32)
-        // Not ESP32 - provide null implementation
-    #elif defined(ESP32) && ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0)
-        // ESP32 with old ESP-IDF - provide null implementation
-    #else
-        // ESP32 with ESP-IDF >= 5.0 - skip null implementation (platform provides it)
-        #define SKIP_NULL_ISR_IMPL
-    #endif
-#endif
-
-#if !defined(STUB_PLATFORM) && !defined(FASTLED_STUB_IMPL) && !defined(SKIP_NULL_ISR_IMPL)
-
-/**
- * Default factory that returns the null implementation.
- * Platform-specific implementations override this via conditional compilation.
- */
-IsrImpl& IsrImpl::get_instance() {
-    static NullIsrImpl null_impl;
-    return null_impl;
+    return -100;  // Not implemented error
 }
 
-#endif
-
-// =============================================================================
-// Public API Functions (forward to implementation)
-// =============================================================================
-
-int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle) {
-    return IsrImpl::get_instance().attachTimerHandler(config, handle);
+int null_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
+    (void)pin;
+    (void)config;
+    if (out_handle) {
+        *out_handle = isr_handle_t();  // Invalid handle
+    }
+    return -100;  // Not implemented error
 }
 
-int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) {
-    return IsrImpl::get_instance().attachExternalHandler(pin, config, handle);
+int null_detach_handler(isr_handle_t& handle) {
+    handle = isr_handle_t();  // Invalidate handle
+    return -100;  // Not implemented error
 }
 
-int detachHandler(isr_handle_t& handle) {
-    return IsrImpl::get_instance().detachHandler(handle);
+int null_enable_handler(const isr_handle_t& handle) {
+    (void)handle;
+    return -100;  // Not implemented error
 }
 
-int enableHandler(const isr_handle_t& handle) {
-    return IsrImpl::get_instance().enableHandler(handle);
+int null_disable_handler(const isr_handle_t& handle) {
+    (void)handle;
+    return -100;  // Not implemented error
 }
 
-int disableHandler(const isr_handle_t& handle) {
-    return IsrImpl::get_instance().disableHandler(handle);
+bool null_is_handler_enabled(const isr_handle_t& handle) {
+    (void)handle;
+    return false;
 }
 
-bool isHandlerEnabled(const isr_handle_t& handle) {
-    return IsrImpl::get_instance().isHandlerEnabled(handle);
+const char* null_get_error_string(int error_code) {
+    switch (error_code) {
+        case 0: return "Success";
+        case -100: return "Not implemented (no platform ISR support)";
+        default: return "Unknown error";
+    }
 }
 
-const char* getErrorString(int error_code) {
-    return IsrImpl::get_instance().getErrorString(error_code);
+const char* null_get_platform_name() {
+    return "Null";
 }
 
-const char* getPlatformName() {
-    return IsrImpl::get_instance().getPlatformName();
+uint32_t null_get_max_timer_frequency() {
+    return 0;  // No timer support
 }
 
-uint32_t getMaxTimerFrequency() {
-    return IsrImpl::get_instance().getMaxTimerFrequency();
+uint32_t null_get_min_timer_frequency() {
+    return 0;  // No timer support
 }
 
-uint32_t getMinTimerFrequency() {
-    return IsrImpl::get_instance().getMinTimerFrequency();
+uint8_t null_get_max_priority() {
+    return 0;  // No priority support
 }
 
-uint8_t getMaxPriority() {
-    return IsrImpl::get_instance().getMaxPriority();
-}
-
-bool requiresAssemblyHandler(uint8_t priority) {
-    return IsrImpl::get_instance().requiresAssemblyHandler(priority);
+bool null_requires_assembly_handler(uint8_t priority) {
+    (void)priority;
+    return false;
 }
 
 } // namespace isr

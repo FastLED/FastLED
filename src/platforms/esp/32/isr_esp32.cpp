@@ -105,15 +105,10 @@ static void IRAM_ATTR gpio_isr_wrapper(void* arg)
 }
 
 // =============================================================================
-// ESP32 ISR Implementation Class
+// ESP32 ISR Implementation (Free Functions)
 // =============================================================================
 
-class Esp32IsrImpl : public IsrImpl {
-public:
-    Esp32IsrImpl() = default;
-    ~Esp32IsrImpl() override = default;
-
-    int attachTimerHandler(const isr_config_t& config, isr_handle_t* out_handle) override {
+int esp32_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -234,9 +229,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) override {
+int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             FL_WARN("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -312,9 +307,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    int detachHandler(isr_handle_t& handle) override {
+int esp32_detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -351,9 +346,9 @@ public:
 
         FL_DBG("Handler detached");
         return 0;  // Success
-    }
+}
 
-    int enableHandler(const isr_handle_t& handle) override {
+int esp32_enable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -375,9 +370,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    int disableHandler(const isr_handle_t& handle) override {
+int esp32_disable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             FL_WARN("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -399,9 +394,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    bool isHandlerEnabled(const isr_handle_t& handle) override {
+bool esp32_is_handler_enabled(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != ESP32_PLATFORM_ID) {
             return false;
         }
@@ -412,9 +407,9 @@ public:
         }
 
         return handle_data->is_enabled;
-    }
+}
 
-    const char* getErrorString(int error_code) override {
+const char* esp32_get_error_string(int error_code) {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -432,64 +427,50 @@ public:
             case -13: return "Disable failed";
             default: return "Unknown error";
         }
-    }
+}
 
-    const char* getPlatformName() override {
+const char* esp32_get_platform_name() {
 #if defined(CONFIG_IDF_TARGET_ESP32)
-        return "ESP32";
+    return "ESP32";
 #elif defined(CONFIG_IDF_TARGET_ESP32S2)
-        return "ESP32-S2";
+    return "ESP32-S2";
 #elif defined(CONFIG_IDF_TARGET_ESP32S3)
-        return "ESP32-S3";
+    return "ESP32-S3";
 #elif defined(CONFIG_IDF_TARGET_ESP32C3)
-        return "ESP32-C3";
+    return "ESP32-C3";
 #elif defined(CONFIG_IDF_TARGET_ESP32C6)
-        return "ESP32-C6";
+    return "ESP32-C6";
 #else
-        return "ESP32 (unknown)";
+    return "ESP32 (unknown)";
 #endif
-    }
+}
 
-    uint32_t getMaxTimerFrequency() override {
-        return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
-    }
+uint32_t esp32_get_max_timer_frequency() {
+    return 40000000;  // 40 MHz (limited by hardware divider >= 2 requirement)
+}
 
-    uint32_t getMinTimerFrequency() override {
-        return 1;  // 1 Hz
-    }
+uint32_t esp32_get_min_timer_frequency() {
+    return 1;  // 1 Hz
+}
 
-    uint8_t getMaxPriority() override {
+uint8_t esp32_get_max_priority() {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
-        // RISC-V: Priority 1-7 (but 4-7 may have limitations)
-        return 7;
+    // RISC-V: Priority 1-7 (but 4-7 may have limitations)
+    return 7;
 #else
-        // Xtensa: Priority 1-3 (official), 4-5 (experimental, requires assembly)
-        return 5;
+    // Xtensa: Priority 1-3 (official), 4-5 (experimental, requires assembly)
+    return 5;
 #endif
-    }
+}
 
-    bool requiresAssemblyHandler(uint8_t priority) override {
+bool esp32_requires_assembly_handler(uint8_t priority) {
 #if defined(CONFIG_IDF_TARGET_ESP32C3) || defined(CONFIG_IDF_TARGET_ESP32C6)
-        // RISC-V: All priority levels can use C handlers
-        return false;
+    // RISC-V: All priority levels can use C handlers
+    return false;
 #else
-        // Xtensa: Priority 4+ requires assembly handlers
-        return priority >= 4;
+    // Xtensa: Priority 4+ requires assembly handlers
+    return priority >= 4;
 #endif
-    }
-};
-
-// =============================================================================
-// Strong Symbol Factory Function (overrides weak default)
-// =============================================================================
-
-/**
- * Strong symbol that overrides the weak default in isr_null.cpp.
- * Returns the ESP32-specific implementation.
- */
-IsrImpl& IsrImpl::get_instance() {
-    static Esp32IsrImpl esp32_impl;
-    return esp32_impl;
 }
 
 } // namespace isr

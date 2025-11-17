@@ -16,6 +16,7 @@
 #include "channel_engine_parlio.h"
 #include "fl/warn.h"
 #include "fl/dbg.h"
+#include "fl/transposition.h"
 #include "ftl/algorithm.h"
 #include "ftl/time.h"
 #include "ftl/assert.h"

@@ -98,15 +98,10 @@ static void timer_thread_func(stub_isr_handle_data* handle_data)
 }
 
 // =============================================================================
-// Stub ISR Implementation Class
+// Stub ISR Implementation (Free Functions)
 // =============================================================================
 
-class StubIsrImpl : public IsrImpl {
-public:
-    StubIsrImpl() = default;
-    ~StubIsrImpl() override = default;
-
-    int attachTimerHandler(const isr_config_t& config, isr_handle_t* out_handle) override {
+int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             STUB_LOG("attachTimerHandler: handler is null");
             return -1;  // Invalid parameter
@@ -151,9 +146,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) override {
+int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* out_handle) {
         if (!config.handler) {
             STUB_LOG("attachExternalHandler: handler is null");
             return -1;  // Invalid parameter
@@ -181,9 +176,9 @@ public:
         }
 
         return 0;  // Success
-    }
+}
 
-    int detachHandler(isr_handle_t& handle) override {
+int stub_detach_handler(isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("detachHandler: invalid handle");
             return -1;  // Invalid handle
@@ -209,9 +204,9 @@ public:
 
         STUB_LOG("Stub handler detached");
         return 0;  // Success
-    }
+}
 
-    int enableHandler(const isr_handle_t& handle) override {
+int stub_enable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("enableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -226,9 +221,9 @@ public:
         handle_data->is_enabled = true;
         STUB_LOG("Stub handler enabled");
         return 0;  // Success
-    }
+}
 
-    int disableHandler(const isr_handle_t& handle) override {
+int stub_disable_handler(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             STUB_LOG("disableHandler: invalid handle");
             return -1;  // Invalid handle
@@ -243,9 +238,9 @@ public:
         handle_data->is_enabled = false;
         STUB_LOG("Stub handler disabled");
         return 0;  // Success
-    }
+}
 
-    bool isHandlerEnabled(const isr_handle_t& handle) override {
+bool stub_is_handler_enabled(const isr_handle_t& handle) {
         if (!handle.is_valid() || handle.platform_id != STUB_PLATFORM_ID) {
             return false;
         }
@@ -256,9 +251,9 @@ public:
         }
 
         return handle_data->is_enabled;
-    }
+}
 
-    const char* getErrorString(int error_code) override {
+const char* stub_get_error_string(int error_code) {
         switch (error_code) {
             case 0: return "Success";
             case -1: return "Invalid parameter";
@@ -267,41 +262,27 @@ public:
             case -4: return "Thread creation failed";
             default: return "Unknown error";
         }
-    }
+}
 
-    const char* getPlatformName() override {
-        return "Stub";
-    }
+const char* stub_get_platform_name() {
+    return "Stub";
+}
 
-    uint32_t getMaxTimerFrequency() override {
-        return 0;  // Unlimited in simulation
-    }
+uint32_t stub_get_max_timer_frequency() {
+    return 0;  // Unlimited in simulation
+}
 
-    uint32_t getMinTimerFrequency() override {
-        return 1;  // 1 Hz
-    }
+uint32_t stub_get_min_timer_frequency() {
+    return 1;  // 1 Hz
+}
 
-    uint8_t getMaxPriority() override {
-        return 1;  // No priority in stub
-    }
+uint8_t stub_get_max_priority() {
+    return 1;  // No priority in stub
+}
 
-    bool requiresAssemblyHandler(uint8_t priority) override {
-        (void)priority;
-        return false;  // Stub never requires assembly
-    }
-};
-
-// =============================================================================
-// Strong Symbol Factory Function (overrides weak default)
-// =============================================================================
-
-/**
- * Strong symbol that overrides the weak default in isr_null.cpp.
- * Returns the stub-specific implementation.
- */
-IsrImpl& IsrImpl::get_instance() {
-    static StubIsrImpl stub_impl;
-    return stub_impl;
+bool stub_requires_assembly_handler(uint8_t priority) {
+    (void)priority;
+    return false;  // Stub never requires assembly
 }
 
 } // namespace isr

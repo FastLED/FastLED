@@ -15,9 +15,6 @@
 namespace fl {
 namespace isr {
 
-// Forward declaration of interface
-class IsrImpl;
-
 // =============================================================================
 // ISR Handler Function Type
 // =============================================================================
@@ -128,104 +125,53 @@ constexpr uint8_t ISR_PRIORITY_MAX        = 7;  // Maximum (may require assembly
 // - Stub: All priorities treated equally
 
 // =============================================================================
-// ISR Platform Interface
+// Platform-Specific Function Declarations
 // =============================================================================
 
-/**
- * Abstract interface for platform-specific ISR implementations.
- *
- * Platforms provide implementations via the make_isr_impl() factory function.
- * The null implementation (weak symbol) provides safe no-op defaults.
- */
-class IsrImpl {
-public:
-    virtual ~IsrImpl() {}
+// Platform implementations provide these free functions:
+// Each platform (null, stub, esp32) provides its own implementation
 
-    /**
-     * Attach a timer-based ISR handler.
-     * @return 0 on success, negative error code on failure
-     */
-    virtual int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle) = 0;
+// Null platform (default/fallback)
+int null_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle);
+int null_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle);
+int null_detach_handler(isr_handle_t& handle);
+int null_enable_handler(const isr_handle_t& handle);
+int null_disable_handler(const isr_handle_t& handle);
+bool null_is_handler_enabled(const isr_handle_t& handle);
+const char* null_get_error_string(int error_code);
+const char* null_get_platform_name();
+uint32_t null_get_max_timer_frequency();
+uint32_t null_get_min_timer_frequency();
+uint8_t null_get_max_priority();
+bool null_requires_assembly_handler(uint8_t priority);
 
-    /**
-     * Attach an external interrupt handler (GPIO-based).
-     * @return 0 on success, negative error code on failure
-     */
-    virtual int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle) = 0;
+// Stub platform (testing/simulation)
+int stub_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle);
+int stub_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle);
+int stub_detach_handler(isr_handle_t& handle);
+int stub_enable_handler(const isr_handle_t& handle);
+int stub_disable_handler(const isr_handle_t& handle);
+bool stub_is_handler_enabled(const isr_handle_t& handle);
+const char* stub_get_error_string(int error_code);
+const char* stub_get_platform_name();
+uint32_t stub_get_max_timer_frequency();
+uint32_t stub_get_min_timer_frequency();
+uint8_t stub_get_max_priority();
+bool stub_requires_assembly_handler(uint8_t priority);
 
-    /**
-     * Detach an ISR handler.
-     * @return 0 on success, negative error code on failure
-     */
-    virtual int detachHandler(isr_handle_t& handle) = 0;
-
-    /**
-     * Enable an ISR (after temporary disable).
-     * @return 0 on success, negative error code on failure
-     */
-    virtual int enableHandler(const isr_handle_t& handle) = 0;
-
-    /**
-     * Disable an ISR temporarily (without detaching).
-     * @return 0 on success, negative error code on failure
-     */
-    virtual int disableHandler(const isr_handle_t& handle) = 0;
-
-    /**
-     * Query if an ISR is currently enabled.
-     * @return true if enabled, false if disabled or invalid
-     */
-    virtual bool isHandlerEnabled(const isr_handle_t& handle) = 0;
-
-    /**
-     * Get platform-specific error description.
-     * @return Human-readable error string
-     */
-    virtual const char* getErrorString(int error_code) = 0;
-
-    /**
-     * Get the platform name.
-     * @return String like "ESP32", "Teensy", "AVR", "STM32", "Stub"
-     */
-    virtual const char* getPlatformName() = 0;
-
-    /**
-     * Get the maximum timer frequency supported by this platform.
-     * @return Maximum frequency in Hz, or 0 if unlimited
-     */
-    virtual uint32_t getMaxTimerFrequency() = 0;
-
-    /**
-     * Get the minimum timer frequency supported by this platform.
-     * @return Minimum frequency in Hz
-     */
-    virtual uint32_t getMinTimerFrequency() = 0;
-
-    /**
-     * Get the maximum priority level supported by this platform.
-     * @return Maximum priority value
-     */
-    virtual uint8_t getMaxPriority() = 0;
-
-    /**
-     * Check if assembly is required for a given priority level.
-     * @return true if assembly handler required, false if C handler allowed
-     */
-    virtual bool requiresAssemblyHandler(uint8_t priority) = 0;
-
-    /**
-     * Platform factory function - creates platform-specific ISR implementation.
-     *
-     * This function uses weak symbol binding:
-     * - Default (weak): Returns NullIsrImpl that provides safe no-op defaults
-     * - Platform-specific (strong): Returns actual implementation (ESP32IsrImpl, StubIsrImpl, etc.)
-     *
-     * Platforms opt-in by providing a strong symbol for this function.
-     *
-     * @return Reference to singleton instance (never null)
-     */
-    static IsrImpl& get_instance();
-};
+// ESP32 platform
+int esp32_attach_timer_handler(const isr_config_t& config, isr_handle_t* handle);
+int esp32_attach_external_handler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle);
+int esp32_detach_handler(isr_handle_t& handle);
+int esp32_enable_handler(const isr_handle_t& handle);
+int esp32_disable_handler(const isr_handle_t& handle);
+bool esp32_is_handler_enabled(const isr_handle_t& handle);
+const char* esp32_get_error_string(int error_code);
+const char* esp32_get_platform_name();
+uint32_t esp32_get_max_timer_frequency();
+uint32_t esp32_get_min_timer_frequency();
+uint8_t esp32_get_max_priority();
+bool esp32_requires_assembly_handler(uint8_t priority);
 
 // =============================================================================
 // Cross-Platform ISR API
@@ -256,7 +202,15 @@ public:
  * - STM32: Uses hardware timer, frequency depends on system clock
  * - Stub: Uses software simulation, unlimited frequency
  */
-int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullptr);
+inline int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullptr) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_attach_timer_handler(config, handle);
+#elif defined(ESP32)
+    return esp32_attach_timer_handler(config, handle);
+#else
+    return null_attach_timer_handler(config, handle);
+#endif
+}
 
 /**
  * Attach an external interrupt handler (GPIO-based).
@@ -281,7 +235,15 @@ int attachTimerHandler(const isr_config_t& config, isr_handle_t* handle = nullpt
  * - STM32: Uses HAL_NVIC_SetPriority and EXTI configuration
  * - Stub: Simulates GPIO events
  */
-int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle = nullptr);
+inline int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t* handle = nullptr) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_attach_external_handler(pin, config, handle);
+#elif defined(ESP32)
+    return esp32_attach_external_handler(pin, config, handle);
+#else
+    return null_attach_external_handler(pin, config, handle);
+#endif
+}
 
 /**
  * Detach an ISR handler.
@@ -291,7 +253,15 @@ int attachExternalHandler(uint8_t pin, const isr_config_t& config, isr_handle_t*
  *
  * After detachment, the handle is invalidated and should not be reused.
  */
-int detachHandler(isr_handle_t& handle);
+inline int detachHandler(isr_handle_t& handle) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_detach_handler(handle);
+#elif defined(ESP32)
+    return esp32_detach_handler(handle);
+#else
+    return null_detach_handler(handle);
+#endif
+}
 
 /**
  * Enable an ISR (after temporary disable).
@@ -299,7 +269,15 @@ int detachHandler(isr_handle_t& handle);
  * @param handle: Handle to the ISR
  * @return: 0 on success, negative error code on failure
  */
-int enableHandler(const isr_handle_t& handle);
+inline int enableHandler(const isr_handle_t& handle) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_enable_handler(handle);
+#elif defined(ESP32)
+    return esp32_enable_handler(handle);
+#else
+    return null_enable_handler(handle);
+#endif
+}
 
 /**
  * Disable an ISR temporarily (without detaching).
@@ -307,7 +285,15 @@ int enableHandler(const isr_handle_t& handle);
  * @param handle: Handle to the ISR
  * @return: 0 on success, negative error code on failure
  */
-int disableHandler(const isr_handle_t& handle);
+inline int disableHandler(const isr_handle_t& handle) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_disable_handler(handle);
+#elif defined(ESP32)
+    return esp32_disable_handler(handle);
+#else
+    return null_disable_handler(handle);
+#endif
+}
 
 /**
  * Query if an ISR is currently enabled.
@@ -315,7 +301,15 @@ int disableHandler(const isr_handle_t& handle);
  * @param handle: Handle to the ISR
  * @return: true if enabled, false if disabled or invalid
  */
-bool isHandlerEnabled(const isr_handle_t& handle);
+inline bool isHandlerEnabled(const isr_handle_t& handle) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_is_handler_enabled(handle);
+#elif defined(ESP32)
+    return esp32_is_handler_enabled(handle);
+#else
+    return null_is_handler_enabled(handle);
+#endif
+}
 
 /**
  * Get platform-specific error description.
@@ -323,7 +317,15 @@ bool isHandlerEnabled(const isr_handle_t& handle);
  * @param error_code: Error code returned by attachTimerHandler/attachExternalHandler
  * @return: Human-readable error string
  */
-const char* getErrorString(int error_code);
+inline const char* getErrorString(int error_code) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_get_error_string(error_code);
+#elif defined(ESP32)
+    return esp32_get_error_string(error_code);
+#else
+    return null_get_error_string(error_code);
+#endif
+}
 
 // =============================================================================
 // Platform Information
@@ -333,32 +335,72 @@ const char* getErrorString(int error_code);
  * Get the platform name.
  * @return: String like "ESP32", "Teensy", "AVR", "STM32", "Stub"
  */
-const char* getPlatformName();
+inline const char* getPlatformName() {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_get_platform_name();
+#elif defined(ESP32)
+    return esp32_get_platform_name();
+#else
+    return null_get_platform_name();
+#endif
+}
 
 /**
  * Get the maximum timer frequency supported by this platform.
  * @return: Maximum frequency in Hz, or 0 if unlimited
  */
-uint32_t getMaxTimerFrequency();
+inline uint32_t getMaxTimerFrequency() {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_get_max_timer_frequency();
+#elif defined(ESP32)
+    return esp32_get_max_timer_frequency();
+#else
+    return null_get_max_timer_frequency();
+#endif
+}
 
 /**
  * Get the minimum timer frequency supported by this platform.
  * @return: Minimum frequency in Hz
  */
-uint32_t getMinTimerFrequency();
+inline uint32_t getMinTimerFrequency() {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_get_min_timer_frequency();
+#elif defined(ESP32)
+    return esp32_get_min_timer_frequency();
+#else
+    return null_get_min_timer_frequency();
+#endif
+}
 
 /**
  * Get the maximum priority level supported by this platform.
  * @return: Maximum priority value
  */
-uint8_t getMaxPriority();
+inline uint8_t getMaxPriority() {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_get_max_priority();
+#elif defined(ESP32)
+    return esp32_get_max_priority();
+#else
+    return null_get_max_priority();
+#endif
+}
 
 /**
  * Check if assembly is required for a given priority level.
  * @param priority: Priority level to check
  * @return: true if assembly handler required, false if C handler allowed
  */
-bool requiresAssemblyHandler(uint8_t priority);
+inline bool requiresAssemblyHandler(uint8_t priority) {
+#if defined(STUB_PLATFORM) || defined(FASTLED_STUB_IMPL)
+    return stub_requires_assembly_handler(priority);
+#elif defined(ESP32)
+    return esp32_requires_assembly_handler(priority);
+#else
+    return null_requires_assembly_handler(priority);
+#endif
+}
 
 } // namespace isr
 } // namespace fl
