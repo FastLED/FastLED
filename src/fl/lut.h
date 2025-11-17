@@ -6,7 +6,7 @@ LUT - Look up table implementation for various types.
 
 #include "fl/allocator.h"
 #include "fl/force_inline.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/unique_ptr.h"  // For fl::unique_ptr<T>
 #include "ftl/stdint.h"
 
@@ -16,7 +16,7 @@ namespace fl {
 
 // LUT holds a look up table to map data from one
 // value to another. This can be quite big (1/3rd of the frame buffer)
-// so a Referent is used to allow memory sharing.
+// so fl::shared_ptr is used to allow memory sharing.
 
 template <typename T> class LUT;
 

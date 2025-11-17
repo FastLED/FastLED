@@ -2,7 +2,7 @@
 
 #include "ftl/cstring.h"
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/xymap.h"
 #include "ftl/vector.h"
 #include "ftl/stdint.h"

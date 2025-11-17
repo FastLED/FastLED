@@ -10,7 +10,7 @@
 
 #include "fl/colorutils.h"
 #include "fl/gradient.h"
-#include "fl/ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
+#include "ftl/shared_ptr.h"  // For FASTLED_SHARED_PTR macros and shared_ptr
 #include "fl/wave_simulation.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

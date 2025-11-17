@@ -5,7 +5,7 @@
 #include "crgb.h"
 #include "detail/draw_context.h"
 #include "detail/transition.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
 #include "fl/unused.h"
 

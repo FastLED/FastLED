@@ -2,7 +2,7 @@
 
 #include "ftl/stdint.h"
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/shared_ptr.h"  // For shared_ptr
 
 // Forward declarations to avoid including heavy headers

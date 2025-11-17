@@ -9,7 +9,7 @@
 // #include "fl/raster.h"
 // #include "fl/xypath.h"
 #include "ftl/function.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/tile2x2.h"
 #include "fl/transform.h"
 

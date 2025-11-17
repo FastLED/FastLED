@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "fl/ptr.h"
+#include "ftl/shared_ptr.h"
 #include "ftl/span.h"
 #include "fl/str.h"
 #include "fl/codec/pixel.h"

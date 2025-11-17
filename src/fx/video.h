@@ -2,7 +2,7 @@
 
 #include "ftl/stdint.h"
 
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str.h"
 #include "fx/fx1d.h"
 #include "fx/time.h"

@@ -5,7 +5,7 @@
 #include "ftl/stdint.h"
 #include "fl/int.h"
 
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/str_fwd.h"     // Lightweight forward declarations for string
 #include "fx/video.h"
 #include "fl/screenmap.h"

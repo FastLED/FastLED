@@ -15,7 +15,7 @@ Based on works and code by Shawn Silverman.
 #include "ftl/vector.h"
 #include "fl/warn.h"
 
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/supersample.h"
 #include "fl/xymap.h"
 #include "fx/fx.h"

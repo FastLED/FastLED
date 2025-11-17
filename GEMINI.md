@@ -629,7 +629,7 @@ bash lint
 - ❌ `#include <variant>` → ✅ `#include "fl/variant.h"`
 - ❌ `#include <utility>` → ✅ `#include "fl/pair.h"` (for std::pair)
 - ❌ `#include <string>` → ✅ `#include "fl/string.h"`
-- ❌ `#include <memory>` → ✅ `#include "fl/scoped_ptr.h"` or `#include "fl/ptr.h"`
+- ❌ `#include <memory>` → ✅ `#include "fl/scoped_ptr.h"` or `#include "ftl/shared_ptr.h"`
 
 **Stream/IO:**
 - ❌ `#include <sstream>` → ✅ `#include "fl/sstream.h"`

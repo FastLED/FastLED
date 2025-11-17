@@ -2,7 +2,7 @@
 
 #include "crgb.h"
 #include "ftl/map.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "fl/ui.h"
 #include "fl/xymap.h"
 #include "fx/detail/fx_compositor.h"

@@ -12,7 +12,7 @@
 #include "ftl/stdint.h"
 
 #include "crgb.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/shared_ptr.h"  // For shared_ptr
 #include "fl/xymap.h"       // Needed for constructor parameter
 #include "fx/fx2d.h"

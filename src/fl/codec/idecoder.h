@@ -4,7 +4,7 @@
 #include "fl/str.h"
 #include "ftl/stdint.h"
 #include "fl/bytestream.h"
-#include "fl/ptr.h"
+#include "ftl/shared_ptr.h"
 #include "ftl/function.h"
 #include "fl/audio.h"
 #include "fx/frame.h"

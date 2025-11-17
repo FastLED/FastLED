@@ -3,7 +3,6 @@
 
 #include "fl/ui.h"
 #include "ftl/shared_ptr.h"  // For make_shared
-#include "fl/referent.h"    // For Referent base class
 
 #include "digital_pin.h"
 
@@ -30,7 +29,7 @@ namespace fl {
 
 
 #if USE_ARDUINO
-class DigitalPinImpl : public Referent {
+class DigitalPinImpl {
   public:
     DigitalPinImpl(int DigitalPin) : mDigitalPin(DigitalPin) {}
    ~DigitalPinImpl() = default;
@@ -56,7 +55,7 @@ class DigitalPinImpl : public Referent {
 };
 
 #else
-class DigitalPinImpl : public Referent {
+class DigitalPinImpl {
   public:
     DigitalPinImpl(int pin) : mPin(pin) {}
     ~DigitalPinImpl() = default;

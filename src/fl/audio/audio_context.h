@@ -3,7 +3,7 @@
 #include "fl/audio.h"
 #include "fl/fft.h"
 #include "ftl/vector.h"
-#include "fl/ptr.h"
+#include "ftl/shared_ptr.h"
 #include "ftl/span.h"
 
 namespace fl {

@@ -114,7 +114,7 @@ Containers, views, algorithms, compile‑time utilities, memory/ownership, porta
 - Tuples and algebraic types: `tuple.h`, `pair.h`, `optional.h`, `variant.h`
 - Algorithms and helpers: `algorithm.h`, `transform.h`, `comparators.h`, `range_access.h`
 - Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`, `namespace.h`
-- Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `ptr.h`, `ptr_impl.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
+- Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
 - Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `insert_result.h`, `singleton.h`
 
 Per‑header quick descriptions:
@@ -155,7 +155,6 @@ Per‑header quick descriptions:
 - `weak_ptr.h`: Non‑owning reference to `shared_ptr`‑managed objects.
 - `scoped_ptr.h`: Scope‑bound ownership (no move) for simple RAII cleanup.
 - `scoped_array.h`: RAII wrapper for array allocations.
-- `ptr.h`/`ptr_impl.h`: Pointer abstractions and shared machinery for smart pointers.
 - `referent.h`: Base support for referent/observer relationships.
 - `allocator.h`: Custom allocators tailored for embedded constraints.
 - `memory.h`: Low‑level memory helpers (construct/destroy, address utilities).

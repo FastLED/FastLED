@@ -19,7 +19,7 @@ extern "C" {
 
 #include "fl/geometry.h"
 #include "fl/math_macros.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macro
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macro
 #include "ftl/optional.h"
 #include "ftl/type_traits.h"
 #include "ftl/vector.h"

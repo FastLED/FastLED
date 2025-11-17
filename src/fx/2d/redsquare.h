@@ -3,7 +3,7 @@
 #pragma once
 
 #include "fl/fastled.h"
-#include "fl/ptr.h"         // For FASTLED_SHARED_PTR macros
+#include "ftl/shared_ptr.h"         // For FASTLED_SHARED_PTR macros
 #include "ftl/shared_ptr.h"  // For shared_ptr
 #include "fx/fx2d.h"
 

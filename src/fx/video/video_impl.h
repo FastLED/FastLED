@@ -2,7 +2,7 @@
 
 #include "ftl/stdint.h"
 #include "crgb.h"
-#include "fl/ptr.h"
+#include "ftl/shared_ptr.h"
 
 // Forward declarations - actual includes moved to cpp
 namespace fl {

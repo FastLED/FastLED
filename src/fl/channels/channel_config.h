@@ -4,7 +4,7 @@
 #include "fl/rgbw.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"
-#include "fl/ptr.h"
+#include "ftl/shared_ptr.h"
 #include "fl/screenmap.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "fl/eorder.h"
