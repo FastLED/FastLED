@@ -50,275 +50,73 @@ static constexpr int DEFAULT_PARLIO_PINS[] = {
 //=============================================================================
 
 //-----------------------------------------------------------------------------
-// Bit Transposition Algorithm Design
+// ISR Transposition Algorithm Design
 //-----------------------------------------------------------------------------
 //
 // PARLIO hardware transmits data in parallel across multiple GPIO pins.
-// For WS2812 LEDs, we need to transpose data from per-strip format to
-// bit-parallel format.
+// For WS2812 LEDs, we use the generic waveform generator (fl::channels::waveform_generator)
+// with custom bit-packing for PARLIO's parallel format.
 //
-// INPUT FORMAT (per-strip):
+// INPUT FORMAT (per-strip layout):
 //   Strip 0: [LED0_R, LED0_G, LED0_B, LED1_R, LED1_G, LED1_B, ...]
 //   Strip 1: [LED0_R, LED0_G, LED0_B, LED1_R, LED1_G, LED1_B, ...]
-//   Strip N: [LED0_R, LED0_G, LED0_B, LED1_R, LED1_G, LED1_B, ...]
+//   ...
+//   Strip 7: [LED0_R, LED0_G, LED0_B, LED1_R, LED1_G, LED1_B, ...]
 //
-// OUTPUT FORMAT (bit-parallel):
-//   For each LED byte position across all strips:
-//     - Encode byte using encodeLedByte() → 32-bit waveform
-//     - Transpose bits across strips at each clock tick
-//     - Pack into width-specific format
+// ISR PROCESSING (per LED byte):
+//   For each color byte position:
+//     1. Read byte from all 8 lanes (per-strip layout with stride)
+//     2. Expand each byte using fl::expandByteToWaveforms() with precomputed bit0/bit1 patterns
+//        - Each byte → 32 pulse bytes (0xFF=HIGH, 0x00=LOW)
+//     3. Bit-pack transpose: convert pulse bytes to PARLIO's bit-packed format
+//        - Each pulse byte → 1 bit, packed across lanes
 //
-// ALGORITHM STEPS:
+// OUTPUT FORMAT (bit-parallel, 8 lanes):
+//   Byte 0:  [S7_p0, S6_p0, ..., S1_p0, S0_p0]  // Pulse 0 from all strips
+//   Byte 1:  [S7_p1, S6_p1, ..., S1_p1, S0_p1]  // Pulse 1 from all strips
+//   ...
+//   Byte 31: [S7_p31, S6_p31, ..., S1_p31, S0_p31]  // Pulse 31 from all strips
+//   (Pattern repeats for each color of each LED)
 //
-// 1. Iterate through each LED position (0 to numLeds-1)
-// 2. For each color channel (R, G, B):
-//    a. For each strip (0 to numStrips-1):
-//       - Get LED byte: channelData[strip]->getData()[ledIndex*3 + colorChannel]
-//       - Encode: waveform[strip] = encodeLedByte(byte)
-//    b. Transpose waveform bits:
-//       - Each waveform is 32 bits (8 LED bits × 4 clock ticks)
-//       - For each clock tick (0 to 31):
-//         - Extract bit [tick] from each strip's waveform
-//         - Pack into width-specific byte(s)
-//         - Append to transposed_buffer
-//
-// MEMORY LAYOUT EXAMPLES:
-//
-// For 1-bit width (1 strip):
-//   - Each clock tick = 1 bit → packed into bytes (8 ticks per byte)
-//   - Each LED byte = 32 bits = 4 bytes
-//   - Each LED (RGB) = 12 bytes
-//
-// For 8-bit width (8 strips):
-//   - Each clock tick = 8 bits = 1 byte
-//   - Each LED byte = 32 ticks = 32 bytes
-//   - Each LED (RGB) = 96 bytes
-//
-// For 16-bit width (16 strips):
-//   - Each clock tick = 16 bits = 2 bytes
-//   - Each LED byte = 32 ticks = 64 bytes
-//   - Each LED (RGB) = 192 bytes
+// MEMORY LAYOUT:
+//   For 8 lanes:
+//     - Each LED byte → 32 ticks × 1 byte = 32 bytes (after waveform encoding)
+//     - Each LED (RGB) → 96 bytes (after waveform encoding)
 //
 // BUFFER SIZE CALCULATION:
-//   For N LEDs, M strips, width W:
-//   - Each LED = 3 bytes (RGB)
-//   - Each byte = 32 clock ticks
-//   - Each tick uses ceil(W / 8) bytes
-//   - Total: N × 3 × 32 × ceil(W / 8) bytes
+//   Scratch buffer: N LEDs × 3 colors × 8 strips bytes (per-strip layout)
+//   DMA chunks: 100 LEDs × 3 × 32 ticks × 1 byte = 9600 bytes (per buffer)
 //
-// EXAMPLE (3 LEDs, 2 strips, 8-bit width):
-//   Input sizes: 9 bytes per strip (3 LEDs × 3 bytes)
-//   Output size: 3 LEDs × 3 bytes × 32 ticks × 1 byte = 288 bytes
+// EXAMPLE (1000 LEDs, 8 strips):
+//   Scratch buffer: 1000 × 3 × 8 = 24,000 bytes (per-strip layout)
+//   DMA buffers: 2 × (100 × 3 × 32 × 1) = 19,200 bytes (ping-pong expanded waveforms)
+//   Total: ~43 KB (waveform expansion happens in ISR, not stored)
 //
 // CHUNKING STRATEGY:
 //   PARLIO has 65535 byte max transfer size. For large LED counts:
 //   - Break transmission at LED boundaries (not in middle of RGB)
-//   - Calculate chunk size: min(numLeds, 65535 / (3 × 32 × ceil(W/8)))
-//   - Transmit chunks sequentially
+//   - Fixed chunk size: 100 LEDs (9600 bytes per chunk)
+//   - Max ~682 LEDs per chunk (65535 / 96 bytes per LED)
+//   - Transmit chunks sequentially via ping-pong DMA buffering
+//
+// WAVEFORM GENERATION:
+//   Uses generic waveform generator with WS2812 timing parameters:
+//   - T1: 312ns (HIGH time for bit 0)
+//   - T2: 625ns (additional HIGH time for bit 1)
+//   - T3: 312ns (LOW tail duration)
+//   - Clock: 3.2 MHz (312.5ns per pulse)
+//   - Result: 4 pulses per bit (bit0=[0xFF,0x00,0x00,0x00], bit1=[0xFF,0xFF,0xFF,0x00])
 //
 //-----------------------------------------------------------------------------
 
-/// @brief Encode a single LED byte (0x00-0xFF) into 32-bit PARLIO waveform
-/// @param byte LED color byte to encode (R, G, or B value)
-/// @return 32-bit waveform for PARLIO transmission
+/// @brief Calculate optimal chunk size for 8-lane streaming
+/// @return LEDs per chunk for ping-pong buffering
 ///
-/// WS2812 timing with PARLIO 4-tick encoding:
-/// - Bit 0: 0b1000 (312.5ns high, 937.5ns low)
-/// - Bit 1: 0b1110 (937.5ns high, 312.5ns low)
-///
-/// Each byte produces 8 × 4 = 32 bits of output.
-/// MSB is transmitted first (standard WS2812 protocol).
-///
-/// Examples:
-/// - encodeLedByte(0xFF) = 0xEEEEEEEE (all bits 1)
-/// - encodeLedByte(0x00) = 0x88888888 (all bits 0)
-/// - encodeLedByte(0xAA) = 0xEE88EE88EE88EE88 (10101010)
-static uint32_t IRAM_ATTR encodeLedByte(uint8_t byte) {
-    uint32_t result = 0;
-
-    // Process each bit (MSB first)
-    for (int i = 7; i >= 0; i--) {
-        // Shift result to make room for 4 new bits
-        result <<= 4;
-
-        // Check bit value
-        if (byte & (1 << i)) {
-            // Bit is 1: encode as 0b1110 (hex: 0xE)
-            result |= 0xE;
-        } else {
-            // Bit is 0: encode as 0b1000 (hex: 0x8)
-            result |= 0x8;
-        }
-    }
-
-    return result;
-}
-
-/// @brief Determine optimal data width based on channel count
-/// @param numChannels Number of active channels/strips
-/// @return Power-of-2 data width (1, 2, 4, 8, or 16)
-static uint8_t determineDataWidth(size_t numChannels) {
-    if (numChannels <= 1) return 1;
-    if (numChannels <= 2) return 2;
-    if (numChannels <= 4) return 4;
-    if (numChannels <= 8) return 8;
-    return 16;
-}
-
-/// @brief Transpose and pack LED data for PARLIO transmission
-/// @param channelData Input channel data (per-strip RGB data)
-/// @param numLeds Number of LEDs per strip
-/// @param dataWidth PARLIO data width (1, 2, 4, 8, or 16)
-/// @param outputBuffer Output buffer for transposed data
-/// @return true if successful, false on error
-///
-/// This function performs the complex bit transposition algorithm:
-/// 1. For each LED position and color channel (R, G, B):
-///    - Encode each strip's byte using encodeLedByte() → 32-bit waveform
-///    - Transpose waveform bits across strips at each clock tick
-///    - Pack into width-specific format
-///
-/// Memory layout depends on data width:
-/// - 1-bit: 8 ticks per byte (each tick = 1 bit)
-/// - 2-bit: 4 ticks per byte (each tick = 2 bits)
-/// - 4-bit: 2 ticks per byte (each tick = 4 bits)
-/// - 8-bit: 1 tick per byte (each tick = 8 bits = 1 byte)
-/// - 16-bit: 1 tick per 2 bytes (each tick = 16 bits = 2 bytes)
-static bool transposeAndPack(fl::span<const ChannelDataPtr> channelData,
-                              size_t numLeds,
-                              uint8_t dataWidth,
-                              fl::vector<uint8_t>& outputBuffer) {
-    // Validate inputs
-    if (channelData.size() == 0 || numLeds == 0) {
-        return false;
-    }
-
-    // Calculate buffer size needed:
-    // numLeds × 3 colors × 32 ticks × (dataWidth / 8) bytes per tick
-    size_t bytesPerTick = (dataWidth + 7) / 8;  // Round up to nearest byte
-    size_t totalBytes = numLeds * 3 * 32 * bytesPerTick;
-
-    // Resize output buffer
-    outputBuffer.clear();
-    outputBuffer.reserve(totalBytes);
-
-    // Temporary storage for encoded waveforms (one per strip)
-    uint32_t waveforms[16] = {0};  // Max 16 strips
-
-    // Process each LED
-    for (size_t ledIdx = 0; ledIdx < numLeds; ledIdx++) {
-        // Process each color channel (R, G, B)
-        for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
-            // Step 1: Encode each strip's byte into 32-bit waveform
-            for (size_t stripIdx = 0; stripIdx < channelData.size(); stripIdx++) {
-                const uint8_t* data = channelData[stripIdx]->getData().data();
-                size_t byteOffset = ledIdx * 3 + colorIdx;
-                uint8_t byte = data[byteOffset];
-                waveforms[stripIdx] = encodeLedByte(byte);
-            }
-
-            // Step 2: Transpose bits across strips for each clock tick
-            // Each waveform has 32 bits (8 LED bits × 4 clock ticks)
-            for (size_t tick = 0; tick < 32; tick++) {
-                // Extract bit at position 'tick' from each strip's waveform
-                // Process MSB first (bit 31 down to bit 0)
-                size_t bitPos = 31 - tick;
-
-                // Pack bits based on data width
-                if (dataWidth == 1) {
-                    // 1-bit width: 8 ticks per byte
-                    if (tick % 8 == 0) {
-                        outputBuffer.push_back(0);  // Start new byte
-                    }
-                    // Extract bit from strip 0 and shift into byte
-                    uint8_t bit = (waveforms[0] >> bitPos) & 0x01;
-                    outputBuffer.back() |= (bit << (7 - (tick % 8)));
-
-                } else if (dataWidth == 2) {
-                    // 2-bit width: 4 ticks per byte
-                    if (tick % 4 == 0) {
-                        outputBuffer.push_back(0);  // Start new byte
-                    }
-                    // Extract bits from strips 0-1
-                    for (size_t stripIdx = 0; stripIdx < 2; stripIdx++) {
-                        uint8_t bit = (waveforms[stripIdx] >> bitPos) & 0x01;
-                        outputBuffer.back() |= (bit << (7 - (tick % 4) * 2 - stripIdx));
-                    }
-
-                } else if (dataWidth == 4) {
-                    // 4-bit width: 2 ticks per byte
-                    if (tick % 2 == 0) {
-                        outputBuffer.push_back(0);  // Start new byte
-                    }
-                    // Extract bits from strips 0-3
-                    for (size_t stripIdx = 0; stripIdx < 4; stripIdx++) {
-                        uint8_t bit = (waveforms[stripIdx] >> bitPos) & 0x01;
-                        outputBuffer.back() |= (bit << (7 - (tick % 2) * 4 - stripIdx));
-                    }
-
-                } else if (dataWidth == 8) {
-                    // 8-bit width: 1 tick per byte
-                    uint8_t byte = 0;
-                    // Extract bits from strips 0-7
-                    for (size_t stripIdx = 0; stripIdx < 8 && stripIdx < channelData.size(); stripIdx++) {
-                        uint8_t bit = (waveforms[stripIdx] >> bitPos) & 0x01;
-                        byte |= (bit << (7 - stripIdx));
-                    }
-                    outputBuffer.push_back(byte);
-
-                } else if (dataWidth == 16) {
-                    // 16-bit width: 1 tick per 2 bytes
-                    uint16_t word = 0;
-                    // Extract bits from strips 0-15
-                    for (size_t stripIdx = 0; stripIdx < 16 && stripIdx < channelData.size(); stripIdx++) {
-                        uint8_t bit = (waveforms[stripIdx] >> bitPos) & 0x01;
-                        word |= (bit << (15 - stripIdx));
-                    }
-                    // Write as big-endian (MSB first)
-                    outputBuffer.push_back((word >> 8) & 0xFF);
-                    outputBuffer.push_back(word & 0xFF);
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
-/// @brief Calculate maximum LEDs per chunk based on PARLIO transfer size limit
-/// @param dataWidth PARLIO data width (1, 2, 4, 8, or 16)
-/// @return Maximum number of LEDs that fit in one chunk
-///
-/// PARLIO has a maximum transfer size of 65535 bytes per transmission.
-/// Each LED requires: 3 colors × 32 ticks × (dataWidth / 8) bytes per tick
-///
-/// Examples:
-/// - 8-bit width: 3 × 32 × 1 = 96 bytes per LED → max 682 LEDs
-/// - 16-bit width: 3 × 32 × 2 = 192 bytes per LED → max 341 LEDs
-static size_t calculateMaxLedsPerChunk(uint8_t dataWidth) {
-    size_t bytesPerTick = (dataWidth + 7) / 8;
-    size_t bytesPerLed = 3 * 32 * bytesPerTick;
-    size_t maxBytes = 65535;  // PARLIO max transfer size
-    return maxBytes / bytesPerLed;
-}
-
-/// @brief Calculate optimal chunk size for streaming (balances memory vs. refill frequency)
-/// @param dataWidth PARLIO data width (1, 2, 4, 8, or 16)
-/// @return Optimal LEDs per chunk for ping-pong buffering
-///
-/// For streaming mode, we use smaller chunks to reduce memory usage while
-/// ensuring the ISR has enough time to refill the next buffer.
-///
-/// Target: ~50-100 LEDs per chunk (4.8-9.6KB for 8-bit width)
-/// This provides ~1.5-3ms transmission time per chunk at WS2812 speeds,
-/// giving plenty of time for ISR to transpose the next chunk.
-static size_t calculateStreamingChunkSize(uint8_t dataWidth) {
-    // Start with a reasonable default
-    size_t targetLedsPerChunk = 100;
-
-    // Don't exceed hardware limits
-    size_t maxLedsPerChunk = calculateMaxLedsPerChunk(dataWidth);
-    return (targetLedsPerChunk < maxLedsPerChunk) ? targetLedsPerChunk : maxLedsPerChunk;
+/// For 8-lane mode: 3 colors × 32 ticks × 1 byte = 96 bytes per LED
+/// PARLIO max transfer size: 65535 bytes → max 682 LEDs
+/// Target: 100 LEDs per chunk (9.6KB) for balanced memory/performance
+static size_t calculateStreamingChunkSize() {
+    return 100;  // Optimal for 8-lane configuration
 }
 
 //=============================================================================
@@ -369,7 +167,7 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
         FL_DBG("PARLIO: TX unit cleanup complete");
     }
 
-    // Free DMA buffers
+    // Free DMA buffers (waveform output buffers)
     if (mState.buffer_a != nullptr) {
         heap_caps_free(mState.buffer_a);
         mState.buffer_a = nullptr;
@@ -381,8 +179,10 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
 
     // Clear state
     mState.pins.clear();
+    mState.scratch_padded_buffer.clear();
     mState.buffer_size = 0;
-    mState.data_width = 0;
+    mState.num_lanes = 0;
+    mState.lane_stride = 0;
     mState.transmitting = false;
     mState.stream_complete = false;
     mState.error_occurred = false;
@@ -398,6 +198,7 @@ void ChannelEnginePARLIO::onEndFrame() {
     // Frame has ended - this is a good time to check state
     // Currently a no-op, may be used for cleanup or diagnostics later
 }
+
 
 //=============================================================================
 // Private Methods - ISR Streaming Support
@@ -434,6 +235,10 @@ bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_un
 }
 
 bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
+    // ISR-OPTIMIZED: Generic waveform expansion + bit-pack transposition
+    // Uses fl::expandByteToWaveforms() with precomputed bit0/bit1 patterns
+    // Transposes byte-based waveforms to PARLIO's bit-packed format
+
     // Calculate chunk parameters
     size_t ledsRemaining = mState.total_leds - mState.current_led;
     size_t ledsThisChunk = (ledsRemaining < mState.leds_per_chunk) ? ledsRemaining : mState.leds_per_chunk;
@@ -442,23 +247,18 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
         return true;  // Nothing to do
     }
 
-    // Swap buffers: what was being filled is now active
+    // Get the next buffer to fill
     uint8_t* nextBuffer = const_cast<uint8_t*>(mState.fill_buffer);
 
-    // Create offset channel spans for this chunk
-    // Note: We need to offset into each channel's data by current_led position
-    size_t byteOffset = mState.current_led * 3;  // 3 bytes per LED (RGB)
+    // Temporary waveform buffers for each lane (stack-allocated for ISR safety)
+    // Each byte expands to 8 bits × pulses_per_bit (typically 4) = 32 bytes
+    uint8_t laneWaveforms[8][32];
 
-    // Create temporary offset channel data
-    // WARNING: This creates temporary ChannelDataPtr objects in ISR
-    // For now, we'll use a simpler approach - store offset pointers
+    // Precomputed waveform spans
+    fl::span<const uint8_t> bit0_wave(mState.bit0_waveform.data(), mState.pulses_per_bit);
+    fl::span<const uint8_t> bit1_wave(mState.bit1_waveform.data(), mState.pulses_per_bit);
 
-    // Transpose this chunk into the fill buffer
-    // We'll use a simplified inline version for ISR context
-    size_t bytesPerTick = (mState.data_width + 7) / 8;
     size_t outputIdx = 0;
-
-    uint32_t waveforms[16] = {0};  // Max 16 strips
 
     // Process each LED in this chunk
     for (size_t ledIdx = 0; ledIdx < ledsThisChunk; ledIdx++) {
@@ -466,32 +266,32 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
 
         // Process each color channel (R, G, B)
         for (size_t colorIdx = 0; colorIdx < 3; colorIdx++) {
-            // Encode each strip's byte into waveform
-            for (size_t stripIdx = 0; stripIdx < mState.source_channels.size(); stripIdx++) {
-                const uint8_t* data = mState.source_channels[stripIdx]->getData().data();
-                size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
-                uint8_t byte = data[byteOffset];
-                waveforms[stripIdx] = encodeLedByte(byte);
+            size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
+
+            // Step 1: Expand each lane's byte to waveform using generic function
+            for (size_t lane = 0; lane < 8; lane++) {
+                const uint8_t* laneData = mState.scratch_padded_buffer.data() + (lane * mState.lane_stride);
+                uint8_t byte = laneData[byteOffset];
+
+                // Use generic waveform expansion
+                fl::span<uint8_t> waveformOutput(laneWaveforms[lane], 32);
+                fl::expandByteToWaveforms(byte, bit0_wave, bit1_wave, waveformOutput);
             }
 
-            // Transpose bits for 8-bit width (most common case)
-            if (mState.data_width == 8) {
-                for (size_t tick = 0; tick < 32; tick++) {
-                    size_t bitPos = 31 - tick;
-                    uint8_t outputByte = 0;
+            // Step 2: Bit-pack transpose waveform bytes to PARLIO format
+            // Convert byte-based waveforms (0xFF/0x00) to bit-packed output
+            const size_t pulsesPerByte = 8 * mState.pulses_per_bit;  // Should be 32
+            for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                uint8_t outputByte = 0;
 
-                    for (size_t stripIdx = 0; stripIdx < 8 && stripIdx < mState.source_channels.size(); stripIdx++) {
-                        uint8_t bit = (waveforms[stripIdx] >> bitPos) & 0x01;
-                        outputByte |= (bit << (7 - stripIdx));
-                    }
-
-                    nextBuffer[outputIdx++] = outputByte;
+                // Extract one pulse from each lane and pack into bits
+                for (size_t lane = 0; lane < 8; lane++) {
+                    uint8_t pulse = laneWaveforms[lane][tick];
+                    uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
+                    outputByte |= (bit << (7 - lane));
                 }
-            } else {
-                // Other widths not yet optimized for ISR - would need similar treatment
-                // For now, mark error
-                mState.error_occurred = true;
-                return false;
+
+                nextBuffer[outputIdx++] = outputByte;
             }
         }
     }
@@ -500,13 +300,12 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
     parlio_transmit_config_t tx_config = {};
     tx_config.idle_value = 0x0000;
 
-    size_t chunkBytes = outputIdx;
-    size_t chunkBits = chunkBytes * 8;  // PARLIO API requires payload size in bits
+    size_t chunkBits = outputIdx * 8;  // PARLIO API requires payload size in bits
 
     esp_err_t err = parlio_tx_unit_transmit(
         mState.tx_unit,
         nextBuffer,
-        chunkBits,  // Payload size in bits, not bytes
+        chunkBits,
         &tx_config
     );
 
@@ -581,14 +380,6 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
         return;
     }
 
-    // If not initialized yet, determine data width from actual channel count
-    if (!mInitialized) {
-        size_t numChannels = channelData.size();
-        mState.data_width = determineDataWidth(numChannels);
-        FL_DBG("PARLIO: Detected " << numChannels << " channels, using data_width="
-                << static_cast<int>(mState.data_width));
-    }
-
     // Ensure PARLIO peripheral is initialized
     initializeIfNeeded();
 
@@ -604,15 +395,14 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
         return;
     }
 
-    // Validate channel count matches configured data width
-    if (channelData.size() > mState.data_width) {
-        FL_WARN("PARLIO: Channel count (" << channelData.size()
-                << ") exceeds data_width (" << static_cast<int>(mState.data_width) << ")");
+    // Validate channel count is exactly 8
+    if (channelData.size() != 8) {
+        FL_WARN("PARLIO: Only 8 channels supported (got " << channelData.size() << " channels)");
         return;
     }
 
-    // Validate LED data consistency across all channels
-    size_t firstChannelSize = 0;
+    // Validate LED data and find maximum channel size
+    size_t maxChannelSize = 0;
     bool hasData = false;
 
     for (size_t i = 0; i < channelData.size(); i++) {
@@ -624,13 +414,9 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
         size_t dataSize = channelData[i]->getSize();
 
         if (dataSize > 0) {
-            if (!hasData) {
-                firstChannelSize = dataSize;
-                hasData = true;
-            } else if (dataSize != firstChannelSize) {
-                FL_WARN("PARLIO: Channel " << i << " has " << dataSize
-                        << " bytes, expected " << firstChannelSize);
-                return;
+            hasData = true;
+            if (dataSize > maxChannelSize) {
+                maxChannelSize = dataSize;
             }
         }
 
@@ -641,21 +427,47 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
         }
     }
 
-    if (!hasData || firstChannelSize == 0) {
+    if (!hasData || maxChannelSize == 0) {
         FL_DBG("PARLIO: No LED data to transmit");
         return;
     }
 
-    size_t numLeds = firstChannelSize / 3;
+    size_t numLeds = maxChannelSize / 3;
     FL_DBG("PARLIO: beginTransmission - " << channelData.size()
             << " channels, " << numLeds << " LEDs (streaming mode)");
 
-    // Initialize streaming state
-    // Copy channel pointers (not the LED data, just the pointers) to prevent dangling references
-    mState.source_channels.clear();
-    for (const auto& channelPtr : channelData) {
-        mState.source_channels.push_back(channelPtr);
+    // Prepare single segmented scratch buffer for all N lanes
+    // Layout: [lane0_data][lane1_data]...[laneN_data]
+    // Each lane is maxChannelSize bytes (padded to same size)
+    // This is regular heap (non-DMA) - only output waveform buffers need DMA capability
+
+    size_t totalBufferSize = channelData.size() * maxChannelSize;
+    mState.scratch_padded_buffer.resize(totalBufferSize);
+    mState.lane_stride = maxChannelSize;
+    mState.num_lanes = channelData.size();
+
+    FL_DBG("PARLIO: Prepared scratch buffer: " << totalBufferSize
+            << " bytes (" << channelData.size() << " lanes × " << maxChannelSize << " bytes)");
+
+    // Write all channels to segmented scratch buffer with stride-based layout
+    for (size_t i = 0; i < channelData.size(); i++) {
+        size_t dataSize = channelData[i]->getSize();
+        uint8_t* laneDst = mState.scratch_padded_buffer.data() + (i * maxChannelSize);
+        fl::span<uint8_t> dst(laneDst, maxChannelSize);
+
+        if (dataSize < maxChannelSize) {
+            // Lane needs padding
+            FL_DBG("PARLIO: Padding lane " << i << " from " << dataSize
+                    << " to " << maxChannelSize << " bytes");
+            channelData[i]->writeWithPadding(dst);
+        } else {
+            // No padding needed - direct copy
+            const auto& srcData = channelData[i]->getData();
+            fl::memcpy(laneDst, srcData.data(), maxChannelSize);
+        }
     }
+
+    // Initialize streaming state
     mState.total_leds = numLeds;
     mState.current_led = 0;
     mState.stream_complete = false;
@@ -696,34 +508,35 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         return;
     }
 
-    FL_DBG("PARLIO: Starting initialization (streaming mode)");
+    FL_DBG("PARLIO: Starting initialization (8-lane mode)");
 
-    // Step 1: Data width should already be set by beginTransmission()
-    // If not set, default to 8-bit for backward compatibility
-    if (mState.data_width == 0) {
-        FL_WARN("PARLIO: Data width not set, defaulting to 8-bit");
-        mState.data_width = 8;
-    }
+    // Step 1: Calculate streaming chunk size (hardcoded for 8 lanes)
+    mState.leds_per_chunk = calculateStreamingChunkSize();
+    FL_DBG("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs");
 
-    FL_DBG("PARLIO: Using data_width=" << static_cast<int>(mState.data_width));
+    // Step 2: Generate precomputed waveforms using generic waveform generator
+    // WS2812 timing parameters (nanoseconds):
+    // - T1: 312ns (HIGH time for bit 0)
+    // - T2: 625ns (additional HIGH time for bit 1)
+    // - T3: 312ns (LOW tail duration)
+    fl::span<uint8_t> bit0_span(mState.bit0_waveform.data(), mState.bit0_waveform.size());
+    fl::span<uint8_t> bit1_span(mState.bit1_waveform.data(), mState.bit1_waveform.size());
 
-    // Temporary limitation: ISR streaming only supports 8-bit width
-    // This is because transposeAndQueueNextChunk() only implements 8-bit transposition
-    if (mState.data_width != 8) {
-        FL_WARN("PARLIO: Only 8-bit width (5-8 channels) currently supported in streaming mode");
-        FL_WARN("PARLIO: Requested width: " << static_cast<int>(mState.data_width)
-                << " - initialization aborted");
+    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312, bit0_span);
+    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312, bit1_span);
+
+    if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {
+        FL_WARN("PARLIO: Failed to generate waveforms (bit0=" << bit0_size << ", bit1=" << bit1_size << ")");
         mInitialized = false;
         return;
     }
 
-    // Step 2: Calculate streaming chunk size
-    mState.leds_per_chunk = calculateStreamingChunkSize(mState.data_width);
-    FL_DBG("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs");
+    mState.pulses_per_bit = bit0_size;
+    FL_DBG("PARLIO: Generated waveforms: " << mState.pulses_per_bit << " pulses per bit");
 
-    // Step 3: Configure GPIO pins
+    // Step 3: Configure GPIO pins (always 8 pins)
     mState.pins.clear();
-    for (size_t i = 0; i < mState.data_width; i++) {
+    for (size_t i = 0; i < 8; i++) {
         mState.pins.push_back(DEFAULT_PARLIO_PINS[i]);
     }
 
@@ -731,15 +544,15 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     parlio_tx_unit_config_t config = {};
     config.clk_src = PARLIO_CLK_SRC_DEFAULT;
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
-    config.data_width = mState.data_width;
+    config.data_width = 8;  // Always 8 lanes
     config.trans_queue_depth = 2;  // Support ping-pong buffering
     config.max_transfer_size = 65535;
 
-    // Assign GPIO pins
-    for (size_t i = 0; i < mState.data_width; i++) {
+    // Assign GPIO pins (always 8 pins)
+    for (size_t i = 0; i < 8; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(mState.pins[i]);
     }
-    for (size_t i = mState.data_width; i < 16; i++) {
+    for (size_t i = 8; i < 16; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
     }
 
@@ -785,8 +598,8 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     // Step 8: Allocate double buffers for ping-pong streaming
     // Use DMA-capable memory (required for PARLIO/GDMA)
-    size_t bytesPerTick = (mState.data_width + 7) / 8;
-    size_t bufferSize = mState.leds_per_chunk * 3 * 32 * bytesPerTick;
+    // For 8 lanes: 1 byte per tick
+    size_t bufferSize = mState.leds_per_chunk * 3 * 32 * 1;  // 3 colors × 32 ticks × 1 byte
 
     mState.buffer_a = static_cast<uint8_t*>(
         heap_caps_malloc(bufferSize, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)

@@ -2,7 +2,7 @@
 /// @brief Tests for generic waveform generator
 
 #include "doctest.h"
-#include "fl/clockless/waveform_generator.h"
+#include "fl/channels/waveform_generator.h"
 #include "ftl/vector.h"
 
 using namespace fl;
