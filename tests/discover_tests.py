@@ -41,7 +41,11 @@ def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[
                 rel_path = f.resolve().relative_to(tests_dir)
                 test_files.append(rel_path.as_posix())
 
-    return test_files
+    # Deduplicate while preserving order (use dict for Python 3.7+ ordered guarantee)
+    seen = {}
+    for path in test_files:
+        seen[path] = None
+    return list(seen.keys())
 
 
 def main() -> None:

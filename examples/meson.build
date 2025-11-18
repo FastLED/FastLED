@@ -36,30 +36,11 @@ fs = import('fs')
 # Compiles all Arduino examples for the host platform using STUB backend.
 # Discovers all .ino files and uses their parent directory as the sketch directory.
 
-# Blacklist of examples that won't compile with STUB platform
-# After build config refactoring (proper 16MB stack + pthread support), many "memory crash" examples now work!
-# Keep only truly platform-specific examples here.
-stub_incompatible_examples = [
-    # ESP-specific (RMT, QSPI, LCD, etc.)
-    'BulkRmtSimple',          # ESP32 RMT peripheral
-    'Esp32P4Parlio',          # ESP32-P4 Parallel IO
-    'Esp32S3I2SDemo',         # ESP32-S3 I2S parallel output (requires esp_psram.h)
-    'Esp8266Uart',            # ESP8266 UART
-
-
-    # Other platform-specific
-    'OctoWS2811',             # Teensy OctoWS2811 library
-    'OctoWS2811Demo',         # Teensy OctoWS2811 library
-    'Parallel_IO',            # RP2040-specific PIO
-    'ParallelSPI',            # Platform-specific SPI
-    'PJRCSpectrumAnalyzer',   # Teensy OctoWS2811 library
-    'SAMD_SingleSPI',         # SAMD-specific
-]
-
 # Discover all .ino files using Python helper scripts
 discover_script = project_root / 'ci' / 'meson' / 'discover_examples.py'
 discover_includes_script = project_root / 'ci' / 'meson' / 'discover_example_includes.py'
 discover_sources_script = project_root / 'ci' / 'meson' / 'discover_example_sources.py'
+filter_script = project_root / 'ci' / 'meson' / 'filter_examples_for_stub.py'
 examples_dir = project_root / 'examples'
 
 # Get include directories for each example - this also gives us the example paths
@@ -75,6 +56,29 @@ result_sources = run_command(
     check: true,
     capture: true
 )
+
+# Get @filter-based exclusions for stub platform
+result_filter = run_command(
+    'python', filter_script, examples_dir,
+    check: true,
+    capture: true
+)
+
+# Parse filter results: SKIP:<name>:<reason>
+# Build list of examples that should be skipped for stub platform
+stub_incompatible_examples = []
+filter_reasons = {}  # Map example name to skip reason
+foreach line : result_filter.stdout().strip().split('\n')
+    if line != ''
+        parts = line.split(':')
+        if parts.length() >= 3 and parts[0] == 'SKIP'
+            example_name = parts[1]
+            reason = parts[2]
+            stub_incompatible_examples += [example_name]
+            filter_reasons += {example_name: reason}
+        endif
+    endif
+endforeach
 
 # Parse include information: EXAMPLE:<name>:<dir1>:<dir2>:...
 # The first directory (dir1) is always the example's root directory (sketch directory)

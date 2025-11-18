@@ -256,9 +256,10 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
     // Each byte expands to 8 bits × pulses_per_bit (typically 4) = 32 bytes
     uint8_t laneWaveforms[8][32];
 
-    // Precomputed waveform spans
-    fl::span<const uint8_t> bit0_wave(mState.bit0_waveform.data(), mState.pulses_per_bit);
-    fl::span<const uint8_t> bit1_wave(mState.bit1_waveform.data(), mState.pulses_per_bit);
+    // Precomputed waveform pointers
+    const uint8_t* bit0_wave = mState.bit0_waveform.data();
+    const uint8_t* bit1_wave = mState.bit1_waveform.data();
+    size_t waveform_size = mState.pulses_per_bit;
 
     size_t outputIdx = 0;
 
@@ -276,8 +277,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
                 uint8_t byte = laneData[byteOffset];
 
                 // Use generic waveform expansion
-                fl::span<uint8_t> waveformOutput(laneWaveforms[lane], 32);
-                fl::expandByteToWaveforms(byte, bit0_wave, bit1_wave, waveformOutput);
+                fl::expandByteToWaveforms(byte, bit0_wave, waveform_size, bit1_wave, waveform_size, laneWaveforms[lane], 32);
             }
 
             // Step 2: Bit-pack transpose waveform bytes to PARLIO format
@@ -521,11 +521,10 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     // - T1: 312ns (HIGH time for bit 0)
     // - T2: 625ns (additional HIGH time for bit 1)
     // - T3: 312ns (LOW tail duration)
-    fl::span<uint8_t> bit0_span(mState.bit0_waveform.data(), mState.bit0_waveform.size());
-    fl::span<uint8_t> bit1_span(mState.bit1_waveform.data(), mState.bit1_waveform.size());
-
-    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312, bit0_span);
-    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312, bit1_span);
+    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312,
+        mState.bit0_waveform.data(), mState.bit0_waveform.size());
+    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312,
+        mState.bit1_waveform.data(), mState.bit1_waveform.size());
 
     if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {
         FL_WARN("PARLIO: Failed to generate waveforms (bit0=" << bit0_size << ", bit1=" << bit1_size << ")");

@@ -16,9 +16,12 @@ def extract_test_name(test_file_path: str) -> str:
     Extract a unique test name from a test file path.
 
     Naming rules:
-    - fl/*.cpp files: prefix with "fl_" (e.g., fl/algorithm.cpp -> fl_algorithm)
-    - ftl/*.cpp files: prefix with "ftl_" (e.g., ftl/algorithm.cpp -> ftl_algorithm)
-    - fx/*.cpp files: prefix with "fx_" (e.g., fx/engine.cpp -> fx_engine)
+    - fl/*.cpp files: prefix with "fl_" and include subdirectories
+      (e.g., fl/algorithm.cpp -> fl_algorithm, fl/channels/spi.cpp -> fl_channels_spi)
+    - ftl/*.cpp files: prefix with "ftl_" and include subdirectories
+      (e.g., ftl/algorithm.cpp -> ftl_algorithm)
+    - fx/*.cpp files: prefix with "fx_" and include subdirectories
+      (e.g., fx/engine.cpp -> fx_engine)
     - Other files: use basename without .cpp (e.g., noise/test_noise.cpp -> test_noise)
 
     Args:
@@ -27,18 +30,21 @@ def extract_test_name(test_file_path: str) -> str:
     Returns:
         Test name to use as executable name
     """
-    # Get the base filename without extension
-    base_name = test_file_path.split("/")[-1].replace(".cpp", "")
+    # Remove .cpp extension
+    path_no_ext = test_file_path.replace(".cpp", "")
 
-    # Add prefix for subdirectory files to avoid naming conflicts
+    # For fl/, ftl/, fx/ subdirectories, convert path to name with underscores
+    # This ensures uniqueness for nested files (e.g., fl/channels/spi.cpp vs fl/spi.cpp)
     if test_file_path.startswith("fl/"):
-        return f"fl_{base_name}"
+        # Replace / with _ to create unique name: fl/channels/spi.cpp -> fl_channels_spi
+        return path_no_ext.replace("/", "_")
     elif test_file_path.startswith("ftl/"):
-        return f"ftl_{base_name}"
+        return path_no_ext.replace("/", "_")
     elif test_file_path.startswith("fx/"):
-        return f"fx_{base_name}"
+        return path_no_ext.replace("/", "_")
     else:
-        return base_name
+        # For other files, just use basename
+        return path_no_ext.split("/")[-1]
 
 
 def categorize_test(test_name: str, test_file_path: str) -> str:
