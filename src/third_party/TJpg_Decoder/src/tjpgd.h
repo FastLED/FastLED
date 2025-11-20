@@ -6,24 +6,11 @@
 
 // Include standard library headers outside namespace to avoid conflicts
 #include "ftl/string.h"
-#if !defined(_WIN32)	/* Embedded platform */
 #include "ftl/stdint.h"
-#endif
+#include "tjpgdcnf.h"
 
 namespace fl {
 namespace third_party {
-
-extern "C" {
-
-#include "tjpgdcnf.h"
-
-#if defined(_WIN32)	/* VC++ or some compiler without stdint.h */
-typedef unsigned char	uint8_t;
-typedef unsigned short	uint16_t;
-typedef short			int16_t;
-typedef unsigned long	uint32_t;
-typedef long			int32_t;
-#endif
 
 #if JD_FASTDECODE >= 1
 typedef int16_t jd_yuv_t;
@@ -134,9 +121,6 @@ JRESULT jd_decomp_progressive(
     uint8_t* more_data_needed,                 /* Output: needs more input data */
     uint8_t* processing_complete               /* Output: decode finished */
 );
-
-
-} // extern "C"
 
 } // namespace third_party
 } // namespace fl
