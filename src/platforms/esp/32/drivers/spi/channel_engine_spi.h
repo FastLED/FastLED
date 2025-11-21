@@ -177,8 +177,8 @@ struct MultiLanePinConfig {
 /// - On-demand SPI bus allocation with reference counting
 /// - DMA support with PSRAM→DRAM buffer copying
 ///
-/// Listens to onEndFrame events and polls channels until transmission completes.
-class ChannelEngineSpi : public ChannelEngine, public EngineEvents::Listener {
+/// Managed by ChannelBusManager which handles frame lifecycle events.
+class ChannelEngineSpi : public ChannelEngine {
 public:
     ChannelEngineSpi();
     ~ChannelEngineSpi() override;
@@ -195,9 +195,6 @@ public:
     /// engine.configureMultiLanePins(MultiLanePinConfig(23, 19, 18, 5));
     /// @endcode
     void configureMultiLanePins(const MultiLanePinConfig& pinConfig);
-
-    // EngineEvents::Listener interface
-    void onEndFrame() override;
 
 protected:
     /// @brief Query engine state (hardware polling implementation)

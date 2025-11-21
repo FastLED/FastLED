@@ -60,12 +60,10 @@ ChannelEngineSpi::ChannelEngineSpi()
     , mLastRetryFrame(0)
 {
     FL_DBG("ChannelEngineSpi: Constructor called");
-    EngineEvents::addListener(this);
 }
 
 ChannelEngineSpi::~ChannelEngineSpi() {
     FL_DBG("ChannelEngineSpi: Destructor called");
-    EngineEvents::removeListener(this);
     mMultiLaneConfigs.clear();
 
     // Clean up all channels
@@ -130,16 +128,6 @@ void ChannelEngineSpi::configureMultiLanePins(const MultiLanePinConfig& pinConfi
     // Store the configuration
     mMultiLaneConfigs[pinConfig.data0_pin] = pinConfig;
     FL_DBG("ChannelEngineSpi: Multi-lane configuration stored for pin " << pinConfig.data0_pin);
-}
-
-void ChannelEngineSpi::onEndFrame() {
-    // Poll until all transmissions complete
-    // Similar to ChannelEngineRMT pattern
-    Timeout timeout(time(), 10);  // 10ms timeout
-    while (poll() != EngineState::READY && !timeout.done(time())) {
-        // Busy-wait for transmission completion
-        yield();
-    }
 }
 
 ChannelEngine::EngineState ChannelEngineSpi::pollDerived() {

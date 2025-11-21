@@ -21,13 +21,13 @@
 ///
 /// ## Usage Example
 /// ```cpp
-/// // ChannelEnginePARLIO is automatically registered when FASTLED_ESP32_HAS_PARLIO is enabled
-/// // Simply use FastLED's standard API:
+/// // ChannelEnginePARLIO is automatically registered with ChannelBusManager
+/// // when FASTLED_ESP32_HAS_PARLIO is enabled. Simply use FastLED's standard API:
 ///
 /// CRGB leds[100];
 /// void setup() {
 ///     FastLED.addLeds<WS2812, 1, GRB>(leds, 100);  // GPIO 1
-///     // PARLIO engine handles the rest automatically
+///     // PARLIO engine auto-selects 1/2/4/8/16-bit mode based on channel count
 /// }
 ///
 /// void loop() {
@@ -107,21 +107,20 @@
 /// - Simple per-strip layout (no pre-processing required)
 /// - Waveform expansion only when needed (no upfront 32x memory blowup)
 ///
-/// ## Channel Count Support
-/// Supports 1-16 channels with automatic data width selection:
+/// ## Polymorphic Channel Count Support
+/// The engine automatically selects optimal data width per batch:
 ///
-/// | Channels | Data Width | Dummy Lanes | Memory per 100 LEDs |
-/// |----------|------------|-------------|---------------------|
-/// | 1        | 1-bit      | 0           | ~1.2 KB             |
-/// | 2        | 2-bit      | 0           | ~2.4 KB             |
-/// | 3        | 4-bit      | 1           | ~4.8 KB             |
-/// | 4        | 4-bit      | 0           | ~4.8 KB             |
-/// | 5-7      | 8-bit      | 3-1         | ~9.6 KB             |
-/// | 8        | 8-bit      | 0           | ~9.6 KB             |
-/// | 9-15     | 16-bit     | 7-1         | ~19.2 KB            |
-/// | 16       | 16-bit     | 0           | ~19.2 KB            |
+/// | Channels | Selected Engine | Data Width | Dummy Lanes | Memory per 100 LEDs |
+/// |----------|-----------------|------------|-------------|---------------------|
+/// | 1        | 1-bit engine    | 1-bit      | 0           | ~1.2 KB             |
+/// | 2        | 2-bit engine    | 2-bit      | 0           | ~2.4 KB             |
+/// | 3-4      | 4-bit engine    | 4-bit      | 1-0         | ~4.8 KB             |
+/// | 5-8      | 8-bit engine    | 8-bit      | 3-0         | ~9.6 KB             |
+/// | 9-16     | 16-bit engine   | 16-bit     | 7-0         | ~19.2 KB            |
 ///
-/// Non-power-of-2 channel counts use dummy lanes (kept LOW, no LED artifacts).
+/// - Engine selection happens per-batch in beginTransmission()
+/// - Non-power-of-2 channel counts use dummy lanes (kept LOW, no LED artifacts)
+/// - Maximum capability allocated at construction (all 1/2/4/8/16-bit engines)
 ///
 /// ## Limitations
 /// - **Platform-Specific**: Only available on ESP32-P4, ESP32-C6, ESP32-H2, ESP32-C5 with PARLIO peripheral
@@ -161,6 +160,8 @@ namespace fl {
 /// @brief Select optimal PARLIO data width for given channel count
 /// @param channel_count Number of actual channels (1-16)
 /// @return Data width (1, 2, 4, 8, or 16), or 0 if invalid
+/// @note This helper is used internally by ChannelEnginePARLIOImpl for validation.
+///       The polymorphic ChannelEnginePARLIO wrapper uses simplified 8/16-bit selection.
 inline size_t selectDataWidth(size_t channel_count) {
     if (channel_count == 0 || channel_count > 16) return 0;
     if (channel_count <= 1) return 1;
@@ -198,52 +199,18 @@ inline size_t calculateChunkSize(size_t data_width) {
 // Class Declaration
 //=============================================================================
 
-/// @brief Parallel IO ChannelEngine implementation with runtime data width selection
+/// @brief Internal PARLIO implementation with fixed data width
 ///
-/// This class implements the ChannelEngine interface using ESP32's PARLIO peripheral
-/// to drive multiple WS2812/WS2812B LED strips simultaneously in parallel.
+/// This is the actual hardware driver implementation. It is used internally
+/// by the polymorphic ChannelEnginePARLIO wrapper class.
 ///
-/// ## Architecture
-/// - Runtime data width selection (1, 2, 4, 8, or 16 bits) based on channel count
-/// - Inherits from ChannelEngine for standard FastLED integration
-/// - Implements EngineEvents::Listener to receive frame completion events
-/// - Uses PARLIO TX unit for hardware-accelerated parallel transmission
-/// - **ISR-based streaming**: Ping-pong buffering with automatic DMA refilling
-/// - Maintains internal state for async operation (transmitting flag, double buffers, streaming position)
-///
-/// ## Lifecycle
-/// 1. **Construction**: Registers as EngineEvents listener, sets data width
-/// 2. **First Transmission**: Lazy initialization of PARLIO peripheral (double buffers, ISR callbacks)
-/// 3. **Each Frame**:
-///    - beginTransmission() → transposes first 2 chunks into ping-pong buffers
-///    - DMA starts transmitting first chunk
-///    - ISR callback auto-transposes and queues remaining chunks
-/// 4. **Polling**: pollDerived() checks streaming status (non-blocking, ISR-driven)
-/// 5. **Destruction**: Waits for active transmission, cleans up hardware resources
-///
-/// ## Thread Safety
-/// - Not thread-safe - expected to be called from single thread (Arduino loop)
-/// - Uses volatile flag for transmission state (polling from main loop)
-/// - Hardware synchronization via PARLIO driver's wait functions
-///
-/// ## Memory Management
-/// - **Ping-pong double buffering**: Two fixed-size DMA-capable buffers
-/// - **Buffer size**: Width-adaptive (1-bit: ~1.2KB, 8-bit: ~9.6KB, 16-bit: ~19.2KB per buffer)
-/// - **Streaming architecture**: Supports arbitrary LED counts without memory scaling
-/// - **ISR transposition**: Data is transposed on-the-fly during transmission, not upfront
-/// - **Dummy lane optimization**: Scratch buffer only allocated for actual channels, not dummy lanes
-///
-/// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with PARLIO peripheral.
-///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
-class ChannelEnginePARLIO : public ChannelEngine, public EngineEvents::Listener {
+/// @note This class should not be used directly - use ChannelEnginePARLIO instead.
+class ChannelEnginePARLIOImpl : public ChannelEngine {
 public:
     /// @brief Constructor with runtime data width selection
     /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
-    explicit ChannelEnginePARLIO(size_t data_width);
-    ~ChannelEnginePARLIO() override;
-
-    // EngineEvents::Listener interface
-    void onEndFrame() override;
+    explicit ChannelEnginePARLIOImpl(size_t data_width);
+    ~ChannelEnginePARLIOImpl() override;
 
 protected:
     /// @brief Query engine state (hardware polling implementation)
@@ -339,13 +306,87 @@ private:
 };
 
 //=============================================================================
+// Polymorphic Wrapper Class
+//=============================================================================
+
+/// @brief Polymorphic PARLIO engine that auto-selects optimal data width implementation
+///
+/// This wrapper class contains five internal engine instances (1, 2, 4, 8, 16-bit)
+/// and automatically delegates operations to the appropriate engine based on
+/// the number of channels in each batch.
+///
+/// ## Architecture
+/// - Contains five ChannelEnginePARLIOImpl instances (1, 2, 4, 8, 16-bit)
+/// - Delegates to 1-bit engine for 1 channel
+/// - Delegates to 2-bit engine for 2 channels
+/// - Delegates to 4-bit engine for 3-4 channels
+/// - Delegates to 8-bit engine for 5-8 channels
+/// - Delegates to 16-bit engine for 9-16 channels
+/// - Selection happens per-batch in beginTransmission()
+/// - Inherits from ChannelEngine for standard FastLED integration
+/// - Implements EngineEvents::Listener to receive frame completion events
+///
+/// ## Lifecycle
+/// 1. **Construction**: Creates all 1/2/4/8/16-bit sub-engines
+/// 2. **Each Frame**:
+///    - enqueue() → batches channel data (inherited from ChannelEngine)
+///    - show() → calls beginTransmission()
+///    - beginTransmission() → selects engine based on channel count, delegates
+/// 3. **Polling**: pollDerived() checks active engine's state
+/// 4. **Destruction**: Cleans up all sub-engines
+///
+/// ## Memory Management
+/// - Allocates all supported engines (1, 2, 4, 8, 16-bit)
+/// - Total memory: ~37.2 KB (1-bit: ~1.2KB + 2-bit: ~2.4KB + 4-bit: ~4.8KB + 8-bit: ~9.6KB + 16-bit: ~19.2KB per buffer pair)
+/// - Only active engine uses resources during transmission
+/// - Engine selection optimizes memory usage per batch
+///
+/// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with PARLIO peripheral.
+///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
+class ChannelEnginePARLIO : public ChannelEngine {
+public:
+    /// @brief Constructor - creates all 1/2/4/8/16-bit sub-engines
+    ChannelEnginePARLIO();
+    ~ChannelEnginePARLIO() override;
+
+protected:
+    /// @brief Query engine state (delegates to active engine)
+    /// @return Current engine state from active engine
+    EngineState pollDerived() override;
+
+    /// @brief Begin LED data transmission with automatic engine selection
+    /// @param channelData Span of channel data to transmit
+    /// @note Selects optimal engine based on channel count (1, 2, 4, 8, or 16-bit)
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+
+private:
+    /// @brief 1-bit sub-engine (handles 1 channel)
+    ChannelEnginePARLIOImpl* mEngine1Bit;
+
+    /// @brief 2-bit sub-engine (handles 2 channels)
+    ChannelEnginePARLIOImpl* mEngine2Bit;
+
+    /// @brief 4-bit sub-engine (handles 3-4 channels)
+    ChannelEnginePARLIOImpl* mEngine4Bit;
+
+    /// @brief 8-bit sub-engine (handles 5-8 channels)
+    ChannelEnginePARLIOImpl* mEngine8Bit;
+
+    /// @brief 16-bit sub-engine (handles 9-16 channels)
+    ChannelEnginePARLIOImpl* mEngine16Bit;
+
+    /// @brief Currently active engine (selected per-batch)
+    ChannelEnginePARLIOImpl* mActiveEngine;
+};
+
+//=============================================================================
 // Factory Function
 //=============================================================================
 
-/// @brief Create PARLIO engine instance based on channel count
-/// @param channel_count Number of channels (1-16)
-/// @return ChannelEngine pointer, or nullptr if invalid
-ChannelEngine* createParlioEngine(size_t channel_count);
+/// @brief Create polymorphic PARLIO engine instance
+/// @return ChannelEngine pointer, or nullptr if creation fails
+/// @note Engine auto-selects optimal data width per batch (1, 2, 4, 8, or 16-bit)
+ChannelEngine* createParlioEngine();
 
 } // namespace fl
 

@@ -44,14 +44,11 @@ enum class DMAState {
 /// - On-demand HW channel allocation with sequential reuse
 /// - Runtime DMA detection with graceful fallback
 ///
-/// Listens to onEndFrame events and polls channels until transmission completes.
-class ChannelEngineRMT : public ChannelEngine, public EngineEvents::Listener {
+/// Managed by ChannelBusManager which handles frame lifecycle events.
+class ChannelEngineRMT : public ChannelEngine {
 public:
     ChannelEngineRMT();
     ~ChannelEngineRMT() override;
-
-    // EngineEvents::Listener interface
-    void onEndFrame() override;
 
 protected:
     /// @brief Query engine state (hardware polling implementation)
@@ -155,9 +152,6 @@ private:
 
     /// @brief Track allocation failures to avoid hammering the driver
     bool mAllocationFailed;
-
-    /// @brief Track last frame number to allow retry once per frame
-    uint32_t mLastRetryFrame;
 
     /// @brief Runtime DMA availability state (shared across all instances, learned on first attempt - lazy)
     static DMAState sDMAAvailability;

@@ -18,6 +18,9 @@
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "spi/channel_engine_spi.h"
 #endif
+#if FASTLED_ESP32_HAS_PARLIO
+#include "parlio/channel_engine_parlio.h"
+#endif
 
 namespace fl {
 
@@ -28,10 +31,11 @@ ChannelBusManager::ChannelBusManager() {
     EngineEvents::addListener(this);
 
     // Construct owned engines and register them with priorities
-    #if FASTLED_RMT5
-    mRmtEngine = new ChannelEngineRMT();
-    registerEngine(PRIORITY_RMT, mRmtEngine);
-    FL_DBG("ChannelBusManager: Registered RMT engine (priority " << PRIORITY_RMT << ")");
+    // Register in priority order (highest first) for clarity
+    #if FASTLED_ESP32_HAS_PARLIO
+    mParlioEngine = createParlioEngine();
+    registerEngine(PRIORITY_PARLIO, mParlioEngine);
+    FL_DBG("ChannelBusManager: Registered PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
@@ -39,16 +43,22 @@ ChannelBusManager::ChannelBusManager() {
     registerEngine(PRIORITY_SPI, mSpiEngine);
     FL_DBG("ChannelBusManager: Registered SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
+
+    #if FASTLED_RMT5
+    mRmtEngine = new ChannelEngineRMT();
+    registerEngine(PRIORITY_RMT, mRmtEngine);
+    FL_DBG("ChannelBusManager: Registered RMT engine (priority " << PRIORITY_RMT << ")");
+    #endif
 }
 
 ChannelBusManager::~ChannelBusManager() {
     FL_DBG("ChannelBusManager: Destructor called");
 
     // Cleanup owned engines
-    #if FASTLED_RMT5
-    if (mRmtEngine) {
-        delete mRmtEngine;
-        mRmtEngine = nullptr;
+    #if FASTLED_ESP32_HAS_PARLIO
+    if (mParlioEngine) {
+        delete mParlioEngine;
+        mParlioEngine = nullptr;
     }
     #endif
 
@@ -56,6 +66,13 @@ ChannelBusManager::~ChannelBusManager() {
     if (mSpiEngine) {
         delete mSpiEngine;
         mSpiEngine = nullptr;
+    }
+    #endif
+
+    #if FASTLED_RMT5
+    if (mRmtEngine) {
+        delete mRmtEngine;
+        mRmtEngine = nullptr;
     }
     #endif
 }

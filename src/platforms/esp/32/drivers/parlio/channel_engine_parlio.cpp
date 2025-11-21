@@ -115,10 +115,10 @@ static constexpr int DEFAULT_PARLIO_PINS[] = {
 //-----------------------------------------------------------------------------
 
 //=============================================================================
-// Constructors / Destructors
+// Constructors / Destructors - Implementation Class
 //=============================================================================
 
-ChannelEnginePARLIO::ChannelEnginePARLIO(size_t data_width)
+ChannelEnginePARLIOImpl::ChannelEnginePARLIOImpl(size_t data_width)
     : mInitialized(false)
     , mState(data_width)
 {
@@ -129,16 +129,10 @@ ChannelEnginePARLIO::ChannelEnginePARLIO(size_t data_width)
         return;
     }
 
-    // Register as listener for end frame events
-    EngineEvents::addListener(this);
-
     FL_LOG_PARLIO("PARLIO Channel Engine initialized (data_width=" << data_width << ")");
 }
 
-ChannelEnginePARLIO::~ChannelEnginePARLIO() {
-    // Unregister from events
-    EngineEvents::removeListener(this);
-
+ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     // Wait for any active transmissions to complete
     while (pollDerived() == EngineState::BUSY) {
         fl::delayMicroseconds(100);
@@ -194,27 +188,17 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
 }
 
 //=============================================================================
-// EngineEvents::Listener Interface
-//=============================================================================
-
-void ChannelEnginePARLIO::onEndFrame() {
-    // Frame has ended - this is a good time to check state
-    // Currently a no-op, may be used for cleanup or diagnostics later
-}
-
-
-//=============================================================================
 // Private Methods - ISR Streaming Support
 //=============================================================================
 
-bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
+bool IRAM_ATTR ChannelEnginePARLIOImpl::txDoneCallback(parlio_tx_unit_handle_t tx_unit,
                                                      const void* edata,
                                                      void* user_ctx) {
     // ISR context - must be fast and IRAM-safe
     // Note: edata is actually const parlio_tx_done_event_data_t* but we don't use it
     (void)edata;  // Unused parameter
     (void)tx_unit;  // Unused parameter
-    auto* self = static_cast<ChannelEnginePARLIO*>(user_ctx);
+    auto* self = static_cast<ChannelEnginePARLIOImpl*>(user_ctx);
     if (!self) {
         return false;
     }
@@ -237,7 +221,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_un
     return false;  // No high-priority task woken
 }
 
-bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
+bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
     // ISR-OPTIMIZED: Generic waveform expansion + bit-pack transposition
     // Uses fl::expandByteToWaveforms() with precomputed bit0/bit1 patterns
     // Transposes byte-based waveforms to PARLIO's bit-packed format
@@ -359,7 +343,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
 // Protected Interface - ChannelEngine Implementation
 //=============================================================================
 
-ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
+ChannelEngine::EngineState ChannelEnginePARLIOImpl::pollDerived() {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized || mState.tx_unit == nullptr) {
         return EngineState::READY;
@@ -403,7 +387,7 @@ ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
     return EngineState::BUSY;
 }
 
-void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+void ChannelEnginePARLIOImpl::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
     // Validate channel data first (before initialization)
     if (channelData.size() == 0) {
         FL_LOG_PARLIO("PARLIO: No channels to transmit");
@@ -552,7 +536,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
 // Private Methods - Initialization
 //=============================================================================
 
-void ChannelEnginePARLIO::initializeIfNeeded() {
+void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     if (mInitialized) {
         return;
     }
@@ -724,19 +708,132 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 }
 
 //=============================================================================
+// Polymorphic Wrapper Class Implementation
+//=============================================================================
+
+ChannelEnginePARLIO::ChannelEnginePARLIO()
+    : mEngine1Bit(nullptr)
+    , mEngine2Bit(nullptr)
+    , mEngine4Bit(nullptr)
+    , mEngine8Bit(nullptr)
+    , mEngine16Bit(nullptr)
+    , mActiveEngine(nullptr)
+{
+    FL_LOG_PARLIO("PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
+
+    // Create all sub-engines at construction (max capability allocation)
+    mEngine1Bit = new ChannelEnginePARLIOImpl(1);
+    mEngine2Bit = new ChannelEnginePARLIOImpl(2);
+    mEngine4Bit = new ChannelEnginePARLIOImpl(4);
+    mEngine8Bit = new ChannelEnginePARLIOImpl(8);
+    mEngine16Bit = new ChannelEnginePARLIOImpl(16);
+
+    FL_LOG_PARLIO("PARLIO: Polymorphic engine ready (all 1/2/4/8/16-bit sub-engines created)");
+}
+
+ChannelEnginePARLIO::~ChannelEnginePARLIO() {
+    FL_LOG_PARLIO("PARLIO: Destroying polymorphic engine");
+
+    // Delete all sub-engines
+    if (mEngine1Bit) {
+        delete mEngine1Bit;
+        mEngine1Bit = nullptr;
+    }
+
+    if (mEngine2Bit) {
+        delete mEngine2Bit;
+        mEngine2Bit = nullptr;
+    }
+
+    if (mEngine4Bit) {
+        delete mEngine4Bit;
+        mEngine4Bit = nullptr;
+    }
+
+    if (mEngine8Bit) {
+        delete mEngine8Bit;
+        mEngine8Bit = nullptr;
+    }
+
+    if (mEngine16Bit) {
+        delete mEngine16Bit;
+        mEngine16Bit = nullptr;
+    }
+
+    mActiveEngine = nullptr;
+
+    FL_LOG_PARLIO("PARLIO: Polymorphic engine destroyed");
+}
+
+ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
+    // Poll the active engine if one is selected
+    if (mActiveEngine) {
+        return mActiveEngine->poll();
+    }
+
+    // No active engine = ready state
+    return EngineState::READY;
+}
+
+void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
+    // Validate channel data
+    if (channelData.size() == 0) {
+        FL_LOG_PARLIO("PARLIO: No channels to transmit");
+        return;
+    }
+
+    size_t channel_count = channelData.size();
+
+    // Validate channel count is within bounds
+    if (channel_count > 16) {
+        FL_WARN("PARLIO: Too many channels (got " << channel_count << ", max 16)");
+        return;
+    }
+
+    // Select optimal engine based on channel count using selectDataWidth() helper
+    size_t optimal_width = selectDataWidth(channel_count);
+
+    switch (optimal_width) {
+        case 1:
+            mActiveEngine = mEngine1Bit;
+            FL_LOG_PARLIO("PARLIO: Selected 1-bit engine for " << channel_count << " channel(s)");
+            break;
+        case 2:
+            mActiveEngine = mEngine2Bit;
+            FL_LOG_PARLIO("PARLIO: Selected 2-bit engine for " << channel_count << " channel(s)");
+            break;
+        case 4:
+            mActiveEngine = mEngine4Bit;
+            FL_LOG_PARLIO("PARLIO: Selected 4-bit engine for " << channel_count << " channel(s)");
+            break;
+        case 8:
+            mActiveEngine = mEngine8Bit;
+            FL_LOG_PARLIO("PARLIO: Selected 8-bit engine for " << channel_count << " channel(s)");
+            break;
+        case 16:
+            mActiveEngine = mEngine16Bit;
+            FL_LOG_PARLIO("PARLIO: Selected 16-bit engine for " << channel_count << " channel(s)");
+            break;
+        default:
+            FL_WARN("PARLIO: Invalid data width " << optimal_width << " for " << channel_count << " channel(s)");
+            return;
+    }
+
+    // Delegate transmission to selected engine
+    // We need to enqueue the data and call show() on the sub-engine
+    for (const auto& channel : channelData) {
+        mActiveEngine->enqueue(channel);
+    }
+    mActiveEngine->show();
+}
+
+//=============================================================================
 // Factory Function Implementation
 //=============================================================================
 
-ChannelEngine* createParlioEngine(size_t channel_count) {
-    size_t width = selectDataWidth(channel_count);
-
-    if (width == 0) {
-        FL_WARN("PARLIO: Invalid channel count " << channel_count << " (must be 1-16)");
-        return nullptr;
-    }
-
-    FL_LOG_PARLIO("PARLIO: Creating " << width << "-bit engine for " << channel_count << " channel(s)");
-    return new ChannelEnginePARLIO(width);
+ChannelEngine* createParlioEngine() {
+    FL_LOG_PARLIO("PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
+    return new ChannelEnginePARLIO();
 }
 
 } // namespace fl

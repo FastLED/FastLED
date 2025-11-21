@@ -38,6 +38,9 @@ class ChannelEngineRMT;
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 class ChannelEngineSpi;
 #endif
+#if FASTLED_ESP32_HAS_PARLIO
+class ChannelEnginePARLIO;
+#endif
 }
 
 namespace fl {
@@ -56,7 +59,7 @@ namespace fl {
 class ChannelBusManager : public ChannelEngine, public EngineEvents::Listener {
 public:
     /// @brief Engine priority constants
-    static constexpr int PRIORITY_PARLIO = 100;  ///< Highest (future - PARLIO engine)
+    static constexpr int PRIORITY_PARLIO = 100;  ///< Highest (PARLIO engine - ESP32-P4/C6/H2/C5)
     static constexpr int PRIORITY_SPI = 50;      ///< Medium (SPI engine)
     static constexpr int PRIORITY_RMT = 10;      ///< Lowest (RMT fallback)
 
@@ -128,6 +131,9 @@ private:
     #endif
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
     ChannelEngineSpi* mSpiEngine = nullptr;
+    #endif
+    #if FASTLED_ESP32_HAS_PARLIO
+    ChannelEnginePARLIO* mParlioEngine = nullptr;
     #endif
 
     /// @brief Private constructor (singleton pattern)

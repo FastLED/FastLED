@@ -48,11 +48,7 @@ DMAState ChannelEngineRMT::sDMAAvailability = DMAState::UNKNOWN;
 ChannelEngineRMT::ChannelEngineRMT()
     : mDMAChannelsInUse(0)
     , mAllocationFailed(false)
-    , mLastRetryFrame(0)
 {
-    // Register as listener for end frame events
-    EngineEvents::addListener(this);
-
     // Suppress ESP-IDF RMT "no free channels" errors (expected during time-multiplexing)
     // Only show critical RMT errors (ESP_LOG_ERROR and above)
     esp_log_level_set("rmt", ESP_LOG_NONE);
@@ -61,9 +57,6 @@ ChannelEngineRMT::ChannelEngineRMT()
 }
 
 ChannelEngineRMT::~ChannelEngineRMT() {
-    // Unregister from events
-    EngineEvents::removeListener(this);
-
     // Wait for all active transmissions to complete
     while (pollDerived() == EngineState::BUSY) {
         fl::delayMicroseconds(100);
@@ -98,41 +91,17 @@ ChannelEngineRMT::~ChannelEngineRMT() {
 // Public Interface
 //=============================================================================
 
-void ChannelEngineRMT::onEndFrame() {
-    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - starting");
-
-    // Reset allocation failure flag once per frame to allow retry
-    // Use simple frame counter increment to track frames
-    mLastRetryFrame++;
-    if (mAllocationFailed) {
-        FL_LOG_RMT("Resetting allocation failure flag (retry once per frame)");
-        mAllocationFailed = false;
-    }
-
-    show();
-
-    uint32_t startTime = fl::time();
-    fl::Timeout warnTimer(startTime, 100);  // Warn every 100ms
-
-    while (poll() == EngineState::BUSY) {
-        uint32_t now = fl::time();
-        if (warnTimer.done(now)) {
-            uint32_t elapsed = now - startTime;
-            FL_WARN("ChannelEngineRMT::onEndFrame() stuck in busy loop, elapsed: " << elapsed << "ms");
-            warnTimer.reset(now);  // Reset for next warning (keeps same 100ms duration)
-        }
-        fl::delayMicroseconds(100);
-    }
-
-    uint32_t totalTime = fl::time() - startTime;
-    FL_LOG_RMT("ChannelEngineRMT::onEndFrame() - completed in " << totalTime << "ms");
-}
-
 void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
     if (channelData.size() == 0) {
         return;
     }
     FL_LOG_RMT("ChannelEngineRMT::beginTransmission() is running");
+
+    // Reset allocation failure flag at start of each frame to allow retry
+    if (mAllocationFailed) {
+        FL_LOG_RMT("Resetting allocation failure flag (retry at start of frame)");
+        mAllocationFailed = false;
+    }
 
     // Sort: smallest strips first (helps async parallelism)
     fl::vector_inlined<ChannelDataPtr, 16> sorted;
