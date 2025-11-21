@@ -416,9 +416,9 @@ TEST_CASE("function_list - add during iteration") {
 // Compile-time error test - commented out because it should NOT compile
 // Uncomment this test to verify that non-void return types trigger static_assert
 /*
-TEST_CASE("function_list<void(int(float))> - should NOT compile due to non-void return type") {
+TEST_CASE("function_list<int(float)> - should NOT compile due to non-void return type") {
     // This should trigger static_assert with message:
     // "function_list only supports void return type."
-    function_list<void(int(float))> callbacks;  // ERROR: non-void return type
+    function_list<int(float)> callbacks;  // ERROR: non-void return type
 }
 */
