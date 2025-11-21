@@ -6,4 +6,6 @@
 /// @deprecated This header is maintained for backwards compatibility.
 /// New code should use fl/transposition.h directly.
 
+// ok no namespace fl
+
 #include "fl/transposition.h"

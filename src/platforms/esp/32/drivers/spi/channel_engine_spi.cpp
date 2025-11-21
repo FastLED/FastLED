@@ -16,6 +16,8 @@
 #include "ftl/time.h"
 
 FL_EXTERN_C_BEGIN
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
 #include "esp_check.h"
 #include "esp_heap_caps.h"
 #include "soc/spi_periph.h"
