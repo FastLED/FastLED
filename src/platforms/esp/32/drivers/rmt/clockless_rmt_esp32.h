@@ -38,7 +38,7 @@
 #if !FASTLED_RMT5
 #include "rmt_4/idf4_clockless_rmt_esp32.h"
 #else
-#include "rmt_5/idf5_clockless_rmt_esp32.h"
+#include "rmt_5/idf5_clockless.h"
 #endif
 
 

@@ -227,7 +227,7 @@ RmtWorker* RmtWorkerPool::acquireWorker(
 **Files Created**:
 - `rmt5_controller_lowlevel.h` (94 lines) - Controller interface
 - `rmt5_controller_lowlevel.cpp` (152 lines) - Controller implementation
-- `idf5_clockless_rmt_esp32_v2.h` (52 lines) - V2 ClocklessController template
+- `idf5_clockless.h` (75 lines) - ClocklessIdf5 template (ChannelBusManager-based, aliased as ClocklessRMT for compatibility)
 
 **Integration Hook Points**:
 ```cpp
@@ -274,10 +274,7 @@ void RmtController5LowLevel::waitForPreviousTransmission() {
 
 **Files Modified**:
 - ✅ `src/platforms/esp/32/drivers/rmt/clockless_rmt_esp32.h` - Conditional include logic
-- ✅ `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless_rmt_esp32_v2.h` - New V2 driver
-
-**Files Preserved** (unchanged):
-- ✅ `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless_rmt_esp32.h` - Old driver (legacy fallback)
+- ✅ `src/platforms/esp/32/drivers/rmt/rmt_5/idf5_clockless.h` - ChannelBusManager-based driver
 
 ### Architecture Comparison
 
@@ -733,7 +730,7 @@ uv run test.py --qemu esp32c3  # RISC-V
 **Phase 3 - FastLED Integration**:
 - [x] Create `rmt5_controller_lowlevel.h` interface
 - [x] Create `rmt5_controller_lowlevel.cpp` implementation
-- [x] Create `idf5_clockless_rmt_esp32_v2.h` V2 template
+- [x] Create `idf5_clockless.h` template (ChannelBusManager-based)
 - [x] Modify `clockless_rmt_esp32.h` for conditional include
 - [x] Add `FASTLED_RMT5_V2` define with default=1
 - [x] Verify compilation with both drivers
@@ -792,7 +789,7 @@ uv run test.py --qemu esp32c3  # RISC-V
 | `rmt5_worker_pool.cpp` | 156 | ✅ | Singleton pool with worker allocation |
 | `rmt5_controller_lowlevel.h` | 94 | ✅ | Controller interface |
 | `rmt5_controller_lowlevel.cpp` | 152 | ✅ | Controller implementation |
-| `idf5_clockless_rmt_esp32_v2.h` | 52 | ✅ | V2 ClocklessController template |
+| `idf5_clockless.h` | 75 | ✅ | ClocklessIdf5 template (ChannelBusManager-based) |
 
 ### Alternative Strategies (Design Only)
 

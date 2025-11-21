@@ -90,8 +90,7 @@ platforms/esp/32/core/fastled_esp32.h (Master Aggregator)
     │       │     └── idf4_rmt_impl.h / idf4_rmt_impl.cpp
     │       │
     │       └─→ rmt_5/ (ESP-IDF 5.x - default, DMA-backed)
-    │             ├── idf5_clockless_rmt_esp32.h (legacy)
-    │             ├── idf5_clockless_rmt_esp32_v2.h (default)
+    │             ├── idf5_clockless.h (ChannelBusManager-based)
     │             ├── idf5_rmt.h / idf5_rmt.cpp
     │             ├── strip_rmt.h / strip_rmt.cpp
     │             └── rmt5_* worker pool implementation (7 files)
@@ -170,11 +169,7 @@ The RMT driver has completely separate implementations for ESP-IDF 4.x vs 5.x du
     #include "rmt_4/idf4_clockless_rmt_esp32.h"
 #else
     // ESP-IDF 5.x path
-    #if FASTLED_RMT5_V2
-        #include "rmt_5/idf5_clockless_rmt_esp32_v2.h"  // Default (worker pool)
-    #else
-        #include "rmt_5/idf5_clockless_rmt_esp32.h"     // Legacy
-    #endif
+    #include "rmt_5/idf5_clockless.h"  // ChannelBusManager-based
 #endif
 ```
 
@@ -458,7 +453,7 @@ The LCD_CAM driver family includes two variants using different peripherals:
 ### From Driver Files (e.g., `drivers/rmt/clockless_rmt_esp32.h`)
 ```cpp
 #include "rmt_4/idf4_clockless_rmt_esp32.h"  // Relative (same parent)
-#include "rmt_5/idf5_clockless_rmt_esp32_v2.h"  // Relative (same parent)
+#include "rmt_5/idf5_clockless.h"  // Relative (same parent)
 ```
 
 ### From Global Headers (e.g., `src/fastspi.h`)

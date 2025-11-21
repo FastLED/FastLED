@@ -21,7 +21,7 @@
 
 namespace fl {
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
+class ClocklessIdf5 : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Channel data for transmission
@@ -34,7 +34,7 @@ private:
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessRMT()
+    ClocklessIdf5()
         : mEngine(&getChannelBusManager())
     {
         // Create channel data with pin and timing configuration
@@ -52,7 +52,7 @@ protected:
     {
         // Fail-fast race condition detection: Buffer MUST NOT be in use
         // If this assertion fires, the hardware wait in releaseChannel() is insufficient
-        FL_ASSERT(!mChannelData->isInUse(), "ClocklessRMT: Race condition - buffer still in use by engine!");
+        FL_ASSERT(!mChannelData->isInUse(), "ClocklessIdf5: Race condition - buffer still in use by engine!");
 
         // Convert pixels to encoded byte data
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
@@ -64,6 +64,11 @@ protected:
         mEngine->enqueue(mChannelData);
     }
 };
+
+// Backward compatibility alias
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+using ClocklessRMT = ClocklessIdf5<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+
 }  // namespace fl
 
 #endif // FASTLED_RMT5

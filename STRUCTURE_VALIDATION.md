@@ -27,7 +27,7 @@ src/platforms/esp/
 │   │   └── ...
 │   │
 │   ├── rmt_5/                   # ✅ IDF 5.x RMT implementation (13 files)
-│   │   ├── idf5_clockless_rmt_esp32_v2.h  # NEW (default)
+│   │   ├── idf5_clockless.h  # ChannelBusManager-based
 │   │   ├── rmt5_controller_lowlevel.cpp
 │   │   ├── rmt5_worker.cpp      # Worker pool system
 │   │   ├── rmt5_worker_pool.cpp
@@ -313,11 +313,7 @@ void I2SClocklessLedDriver::showPixels() {
     #if !FASTLED_RMT5  // ESP_IDF_VERSION < 5
         #include "rmt_4/idf4_clockless_rmt_esp32.h"
     #else
-        #if FASTLED_RMT5_V2
-            #include "rmt_5/idf5_clockless_rmt_esp32_v2.h"  // Default
-        #else
-            #include "rmt_5/idf5_clockless_rmt_esp32.h"     // Legacy
-        #endif
+        #include "rmt_5/idf5_clockless.h"  // ChannelBusManager-based
     #endif
 #endif
 ```
@@ -360,7 +356,7 @@ src/platforms/esp/
     │   │   │   ├── idf4_rmt_impl.cpp
     │   │   │   └── ...
     │   │   └── rmt_5/                  # ✅ KEEP separate (IDF 5.x)
-    │   │       ├── idf5_clockless_rmt_esp32_v2.h
+    │   │       ├── idf5_clockless.h
     │   │       ├── rmt5_controller_lowlevel.cpp
     │   │       ├── rmt5_worker.cpp
     │   │       ├── rmt5_worker_pool.cpp
