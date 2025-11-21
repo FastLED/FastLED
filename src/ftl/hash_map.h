@@ -720,10 +720,11 @@ class FL_ALIGN HashMap {
             idx = p.first;
             is_new = p.second;
             
-            // If still npos() after resize, something is seriously wrong
+            // If still npos() after resize, allocation failed catastrophically
             if (idx == npos()) {
                 // This should never happen after a successful resize
                 static T default_value{};
+                FASTLED_ASSERT(false, "HashMap::operator[]: Failed to allocate after rehash");
                 return default_value;
             }
         }

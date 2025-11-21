@@ -30,7 +30,7 @@ def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[
     # Find all test_*.cpp files recursively
     for f in sorted(tests_dir.rglob("test_*.cpp")):
         if f.name not in excluded:
-            rel_path = f.resolve().relative_to(tests_dir)
+            rel_path = f.relative_to(tests_dir)
             test_files.append(rel_path.as_posix())
 
     # Also find *.cpp files directly in specified subdirectories
@@ -38,7 +38,7 @@ def discover_test_files(tests_dir: Path, excluded: Set[str], test_subdirs: List[
         subdir_path = tests_dir / subdir
         if subdir_path.exists():
             for f in sorted(subdir_path.glob("*.cpp")):
-                rel_path = f.resolve().relative_to(tests_dir)
+                rel_path = f.relative_to(tests_dir)
                 test_files.append(rel_path.as_posix())
 
     # Deduplicate while preserving order (use dict for Python 3.7+ ordered guarantee)

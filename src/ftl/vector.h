@@ -253,42 +253,42 @@ class FL_ALIGN FixedVector {
     }
 
     bool insert(iterator pos, const T &value) {
-        if (current_size < N) {
-            // shift all element from pos to end to the right
-            for (iterator p = end(); p != pos; --p) {
-                T temp = fl::move(*(p - 1));
-                (p)->~T(); // Destroy the current element
-                // Clear the memory
-                void *vp = static_cast<void *>(p);
-                fl::memset(vp, 0, sizeof(T));
-                new (p) T(fl::move(temp)); // Use move constructor
-            }
-            ++current_size;
-            // now insert the new value
-            new (pos) T(value);
-            return true;
+        if (current_size >= N) {
+            return false;
         }
-        return false;
+
+        // Construct a new element at end() position using placement new
+        new (end()) T();
+        ++current_size;
+
+        // Shift elements from [pos, end-1) to the right by one position
+        for (iterator p = end() - 1; p > pos; --p) {
+            *p = fl::move(*(p - 1));
+        }
+
+        // Assign the new value to the insertion position
+        *pos = value;
+        return true;
     }
 
     // Move version of insert
     bool insert(iterator pos, T &&value) {
-        if (current_size < N) {
-            // shift all element from pos to end to the right
-            for (iterator p = end(); p != pos; --p) {
-                T temp = fl::move(*(p - 1));
-                (p)->~T(); // Destroy the current element
-                // Clear the memory
-                void *vp = static_cast<void *>(p);
-                fl::memset(vp, 0, sizeof(T));
-                new (p) T(fl::move(temp)); // Use move constructor
-            }
-            ++current_size;
-            // now insert the new value
-            new (pos) T(fl::move(value));
-            return true;
+        if (current_size >= N) {
+            return false;
         }
-        return false;
+
+        // Construct a new element at end() position using placement new
+        new (end()) T();
+        ++current_size;
+
+        // Shift elements from [pos, end-1) to the right by one position
+        for (iterator p = end() - 1; p > pos; --p) {
+            *p = fl::move(*(p - 1));
+        }
+
+        // Move-assign the new value to the insertion position
+        *pos = fl::move(value);
+        return true;
     }
 
     const_iterator find(const T &value) const {
@@ -1084,7 +1084,13 @@ class FL_ALIGN InlinedVector {
                 mUsingHeap = true;
             }
         } else {
-            if (mUsingHeap) {
+            // Don't transition from heap to fixed if current size exceeds inline capacity
+            // This would cause data loss as FixedVector silently fails when full
+            if (mUsingHeap && mHeap.size() > INLINED_SIZE) {
+                // Keep using heap - cannot fit in inline storage
+                mHeap.reserve(size);
+            } else if (mUsingHeap) {
+                // Safe to transition: current size fits in inline storage
                 mFixed.reserve(size);
                 for (auto &v : mHeap) {
                     mFixed.push_back(v);
@@ -1092,6 +1098,7 @@ class FL_ALIGN InlinedVector {
                 mHeap.clear();
                 mUsingHeap = false;
             } else {
+                // Already using fixed storage
                 mFixed.reserve(size);
             }
         }
