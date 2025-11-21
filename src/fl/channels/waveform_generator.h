@@ -146,7 +146,8 @@ size_t generateBit1Waveform(
 /// @return Number of bytes written
 ///
 /// @note Both b0_waveform and b1_waveform must be the same size (pulsesPerBit)
-size_t expandByteToWaveforms(
+/// @note FL_IRAM required - this function is called from ISR context in PARLIO driver
+FL_IRAM size_t expandByteToWaveforms(
     uint8_t dataByte,
     const uint8_t* b0_waveform,
     size_t b0_waveform_size,

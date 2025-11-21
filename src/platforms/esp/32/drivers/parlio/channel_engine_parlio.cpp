@@ -517,13 +517,23 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     FL_DBG("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs");
 
     // Step 2: Generate precomputed waveforms using generic waveform generator
-    // WS2812 timing parameters (nanoseconds):
-    // - T1: 312ns (HIGH time for bit 0)
-    // - T2: 625ns (additional HIGH time for bit 1)
-    // - T3: 312ns (LOW tail duration)
-    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312,
+    // WS2812 timing parameters (nanoseconds) for 4-tick encoding at 3.2 MHz:
+    // - T1: 312ns (HIGH time for bit 0 → 1 pulse at 312ns resolution)
+    // - T2: 313ns (additional HIGH time for bit 1 → 2 pulses at 312ns resolution)
+    // - T3: 312ns (LOW tail duration → 1 pulse at 312ns resolution)
+    //
+    // Resulting waveforms:
+    // - Bit 0: 1 pulse HIGH + 3 pulses LOW = 312.5ns H + 937.5ns L = 1250ns total
+    // - Bit 1: 3 pulses HIGH + 1 pulse LOW = 937.5ns H + 312.5ns L = 1250ns total
+    //
+    // WS2812 specification compliance (all within tolerance):
+    // - T0H: 312.5ns (spec: 400±150ns = 250-550ns) ✓
+    // - T0L: 937.5ns (spec: 850±150ns = 700-1000ns) ✓
+    // - T1H: 937.5ns (spec: 800±150ns = 650-950ns) ✓
+    // - T1L: 312.5ns (spec: 450±150ns = 300-600ns) ✓
+    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 313, 312,
         mState.bit0_waveform.data(), mState.bit0_waveform.size());
-    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 625, 312,
+    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 313, 312,
         mState.bit1_waveform.data(), mState.bit1_waveform.size());
 
     if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {
@@ -570,22 +580,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     FL_DBG("PARLIO: TX unit created");
 
-    // Step 6: Register ISR callback for streaming
-    parlio_tx_event_callbacks_t callbacks = {};
-    callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
-
-    err = parlio_tx_unit_register_event_callbacks(mState.tx_unit, &callbacks, this);
-    if (err != ESP_OK) {
-        FL_WARN("PARLIO: Failed to register callbacks: " << err);
-        parlio_del_tx_unit(mState.tx_unit);
-        mState.tx_unit = nullptr;
-        mInitialized = false;
-        return;
-    }
-
-    FL_DBG("PARLIO: ISR callbacks registered");
-
-    // Step 7: Enable TX unit
+    // Step 6: Enable TX unit
     err = parlio_tx_unit_enable(mState.tx_unit);
     if (err != ESP_OK) {
         FL_WARN("PARLIO: Failed to enable TX unit: " << err);
@@ -596,6 +591,29 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     }
 
     FL_DBG("PARLIO: TX unit enabled");
+
+    // Step 7: Register ISR callback for streaming
+    parlio_tx_event_callbacks_t callbacks = {};
+    callbacks.on_trans_done = reinterpret_cast<parlio_tx_done_callback_t>(txDoneCallback);
+
+    err = parlio_tx_unit_register_event_callbacks(mState.tx_unit, &callbacks, this);
+    if (err != ESP_OK) {
+        FL_WARN("PARLIO: Failed to register callbacks: " << err);
+        // Clean up: disable then delete (unit was enabled at line 574)
+        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
+        if (disable_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to disable TX unit during cleanup: " << disable_err);
+        }
+        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
+        if (del_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to delete TX unit during cleanup: " << del_err);
+        }
+        mState.tx_unit = nullptr;
+        mInitialized = false;
+        return;
+    }
+
+    FL_DBG("PARLIO: ISR callbacks registered");
 
     // Step 8: Allocate double buffers for ping-pong streaming
     // Use DMA-capable memory (required for PARLIO/GDMA)
@@ -623,8 +641,14 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         }
 
         // Clean up TX unit
-        parlio_tx_unit_disable(mState.tx_unit);
-        parlio_del_tx_unit(mState.tx_unit);
+        esp_err_t disable_err = parlio_tx_unit_disable(mState.tx_unit);
+        if (disable_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to disable TX unit during buffer cleanup: " << disable_err);
+        }
+        esp_err_t del_err = parlio_del_tx_unit(mState.tx_unit);
+        if (del_err != ESP_OK) {
+            FL_WARN("PARLIO: Failed to delete TX unit during buffer cleanup: " << del_err);
+        }
         mState.tx_unit = nullptr;
         mInitialized = false;
         return;

@@ -206,6 +206,7 @@
   #define FL_MAYBE_UNUSED
 #endif
 
+
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus
   #define FL_EXTERN_C_BEGIN extern "C" {
@@ -216,6 +217,22 @@
   #define FL_EXTERN_C_END
   #define FL_EXTERN_C
 #endif
+
+// Platform-specific IRAM attribute for functions that must run from IRAM
+// (ESP32: required for ISR handlers and functions called from ISRs)
+#ifdef ESP32
+  #ifdef __cplusplus
+    FL_EXTERN_C_BEGIN
+    #include "esp_attr.h"  // Provides IRAM_ATTR for ESP32
+    FL_EXTERN_C_END
+  #else
+    #include "esp_attr.h"
+  #endif
+  #define FL_IRAM IRAM_ATTR
+#else
+  #define FL_IRAM  // No-op on non-ESP32 platforms
+#endif
+
 
 // Inline constexpr macro for C++11/17 compatibility
 // In C++17+, constexpr variables are implicitly inline (external linkage)

@@ -96,7 +96,7 @@ size_t generateBit1Waveform(
     return total_pulses;
 }
 
-size_t expandByteToWaveforms(
+FL_IRAM size_t expandByteToWaveforms(
     uint8_t dataByte,
     const uint8_t* b0_waveform,
     size_t b0_waveform_size_max,
