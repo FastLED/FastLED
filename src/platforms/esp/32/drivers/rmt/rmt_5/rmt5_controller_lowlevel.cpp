@@ -8,9 +8,8 @@
 #if FASTLED_RMT5
 
 #include "rmt5_controller_lowlevel.h"
-#include "channel_engine_rmt.h"
 #include "fl/chipsets/chipset_timing_config.h"
-#include "fl/singleton.h"
+#include "platforms/esp/32/drivers/channel_bus_manager.h"
 
 FL_EXTERN_C_BEGIN
 
@@ -32,8 +31,8 @@ RmtController5LowLevel::RmtController5LowLevel(
     const ChipsetTiming& timing
 )
 {
-    // Get the singleton ChannelEngineRMT instance
-    mEngine = &fl::Singleton<ChannelEngineRMT>::instance();
+    // Get the ChannelBusManager singleton instance (which manages RMT/SPI engines)
+    mEngine = &ChannelBusManager::instance();
 
     // Create ChipsetTimingConfig from ChipsetTiming
     ChipsetTimingConfig timingConfig(

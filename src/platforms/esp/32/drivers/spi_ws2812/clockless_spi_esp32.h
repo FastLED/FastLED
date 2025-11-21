@@ -72,10 +72,15 @@ protected:
     }
 };
 
-// Convenient alias for SPI-based clockless controller
+// Convenient alias for SPI-based clockless controller (legacy)
+// Note: New ChannelEngine-based ClocklessSPI is defined in idf5_clockless_spi_esp32.h
+// This alias is preserved for backward compatibility with code that explicitly uses ClocklessSpiWs2812Controller
 namespace fl {
+// Only define alias if new driver isn't already defining it
+#if !defined(FL_CLOCKLESS_SPI_CHANNEL_ENGINE_DEFINED)
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
 using ClocklessSPI = ::ClocklessSpiWs2812Controller<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+#endif
 }
 
 #endif  // FASTLED_RMT5

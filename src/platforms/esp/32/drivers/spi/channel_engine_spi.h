@@ -23,17 +23,9 @@
 #include "fl/timeout.h"
 #include "fl/isr.h"
 
-// Forward declarations for ESP-IDF SPI types (avoid including driver headers in .h)
-typedef int gpio_num_t;
-typedef enum {
-    SPI1_HOST = 0,
-    SPI2_HOST,
-    SPI3_HOST,
-    SPI_HOST_MAX
-} spi_host_device_t;
-struct spi_device_t;
-typedef struct spi_device_t* spi_device_handle_t;
-struct spi_transaction_t;
+// Include ESP-IDF headers for SPI and GPIO types
+#include "driver/spi_master.h"
+#include "driver/gpio.h"
 
 namespace fl {
 

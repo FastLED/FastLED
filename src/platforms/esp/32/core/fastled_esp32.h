@@ -19,6 +19,9 @@
 #endif
 
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+// New ChannelEngine-based SPI driver (preferred)
+#include "platforms/esp/32/drivers/spi/idf5_clockless_spi_esp32.h"
+// Old factory-based SPI driver (backward compatibility)
 #include "platforms/esp/32/drivers/spi_ws2812/clockless_spi_esp32.h"
 #endif
 

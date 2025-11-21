@@ -2,14 +2,12 @@
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
-#if FASTLED_RMT5
-
-
+#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 
 // signal to the world that we have a ClocklessController to allow WS2812 and others.
 #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-
-//#define FASTLED_RMT_USE_DMA
+// Mark that new ChannelEngine-based ClocklessSPI is defined (prevents old alias collision)
+#define FL_CLOCKLESS_SPI_CHANNEL_ENGINE_DEFINED 1
 
 #include "crgb.h"
 #include "eorder.h"
@@ -20,21 +18,21 @@
 #include "fl/chipsets/timing_traits.h"
 
 namespace fl {
-template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+class ClocklessSPI : public CPixelLEDController<RGB_ORDER>
 {
 private:
     // Channel data for transmission
     ChannelDataPtr mChannelData;
 
-    // Channel engine reference (singleton)
+    // Channel engine reference (manager provides best available engine)
     ChannelEngine* mEngine;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessRMT()
+    ClocklessSPI()
         : mEngine(&ChannelBusManager::instance())
     {
         // Create channel data with pin and timing configuration
@@ -52,7 +50,7 @@ protected:
     {
         // Fail-fast race condition detection: Buffer MUST NOT be in use
         // If this assertion fires, the hardware wait in releaseChannel() is insufficient
-        FL_ASSERT(!mChannelData->isInUse(), "ClocklessRMT: Race condition - buffer still in use by engine!");
+        FL_ASSERT(!mChannelData->isInUse(), "ClocklessSPI: Race condition - buffer still in use by engine!");
 
         // Convert pixels to encoded byte data
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
@@ -66,4 +64,4 @@ protected:
 };
 }  // namespace fl
 
-#endif // FASTLED_RMT5
+#endif // FASTLED_ESP32_HAS_CLOCKLESS_SPI
