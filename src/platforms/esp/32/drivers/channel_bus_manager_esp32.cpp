@@ -15,7 +15,7 @@
 #include "channel_bus_manager.h"
 #include "fl/dbg.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
-#include "ftl/unique_ptr.h"
+#include "ftl/shared_ptr.h"
 
 // Include concrete engine implementations
 #if FASTLED_RMT5
@@ -49,17 +49,17 @@ static void initializeChannelBusManager() {
 
     // Add engines (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO
-    manager.addEngine(PRIORITY_PARLIO, fl::unique_ptr<ChannelEngine>(createParlioEngine()));
+    manager.addEngine(PRIORITY_PARLIO, fl::shared_ptr<ChannelEngine>(createParlioEngine()));
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    manager.addEngine(PRIORITY_SPI, fl::make_unique<ChannelEngineSpi>());
+    manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
 
     #if FASTLED_RMT5
-    manager.addEngine(PRIORITY_RMT, fl::make_unique<ChannelEngineRMT>());
+    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>());
     FL_DBG("ESP32: Added RMT engine (priority " << PRIORITY_RMT << ")");
     #endif
 
