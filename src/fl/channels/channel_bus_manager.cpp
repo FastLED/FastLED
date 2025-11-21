@@ -1,27 +1,12 @@
 /// @file channel_bus_manager.cpp
 /// @brief Implementation of unified channel bus manager
 
-#include "fl/compiler_control.h"
-#ifdef ESP32
-
 #include "channel_bus_manager.h"
 #include "fl/dbg.h"
 #include "fl/warn.h"
 #include "fl/engine_events.h"
 #include "ftl/algorithm.h"
 #include "ftl/move.h"
-#include "ftl/unique_ptr.h"
-
-// Include concrete engine implementations
-#if FASTLED_RMT5
-#include "rmt/rmt_5/channel_engine_rmt.h"
-#endif
-#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-#include "spi/channel_engine_spi.h"
-#endif
-#if FASTLED_ESP32_HAS_PARLIO
-#include "parlio/channel_engine_parlio.h"
-#endif
 
 namespace fl {
 
@@ -30,27 +15,6 @@ ChannelBusManager::ChannelBusManager() {
 
     // Register as frame event listener for per-frame reset
     EngineEvents::addListener(this);
-
-    // Construct owned engines and add them with priorities
-    // Add in priority order (highest first) for clarity
-    #if FASTLED_ESP32_HAS_PARLIO
-    mEngines.push_back({PRIORITY_PARLIO, fl::unique_ptr<ChannelEngine>(createParlioEngine())});
-    FL_DBG("ChannelBusManager: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
-    #endif
-
-    #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    mEngines.push_back({PRIORITY_SPI, fl::make_unique<ChannelEngineSpi>()});
-    FL_DBG("ChannelBusManager: Added SPI engine (priority " << PRIORITY_SPI << ")");
-    #endif
-
-    #if FASTLED_RMT5
-    mEngines.push_back({PRIORITY_RMT, fl::make_unique<ChannelEngineRMT>()});
-    FL_DBG("ChannelBusManager: Added RMT engine (priority " << PRIORITY_RMT << ")");
-    #endif
-
-    // Sort by priority descending (highest first)
-    fl::sort(mEngines.begin(), mEngines.end());
-    FL_DBG("ChannelBusManager: Sorted " << mEngines.size() << " engines by priority");
 }
 
 ChannelBusManager::~ChannelBusManager() {
@@ -58,11 +22,21 @@ ChannelBusManager::~ChannelBusManager() {
     // Owned engines automatically cleaned up by unique_ptr destructors
 }
 
-ChannelBusManager& ChannelBusManager::instance() {
-    static ChannelBusManager instance;
-    return instance;
+void ChannelBusManager::addEngine(int priority, fl::unique_ptr<ChannelEngine>&& engine) {
+    if (!engine) {
+        FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
+        return;
+    }
+
+    mEngines.push_back({priority, fl::move(engine)});
+    FL_DBG("ChannelBusManager: Added engine (priority " << priority << ")");
+
+    // Sort engines by priority descending (highest first) after each insertion
+    // Only 1-4 engines expected, so sorting on insert is negligible
+    fl::sort(mEngines.begin(), mEngines.end());
 }
 
+// ChannelEngine interface implementation
 void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
     // Select engine on first call if not already selected
     if (!mActiveEngine) {
@@ -155,5 +129,3 @@ ChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {
 }
 
 } // namespace fl
-
-#endif // ESP32

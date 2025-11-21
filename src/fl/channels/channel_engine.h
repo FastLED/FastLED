@@ -113,9 +113,13 @@ protected:
     void setLastError(const fl::string& error) { mLastError = error; }
     void clearError() { mLastError.clear(); }
 
+public:
+    /// @brief Virtual destructor (public for unique_ptr management)
+    virtual ~ChannelEngine() = default;
+
+protected:
     /// @brief Protected constructor (base class pattern)
     ChannelEngine() = default;
-    virtual ~ChannelEngine() = default;  // FastLED will never delete a channel engine.
 
     // Non-copyable, non-movable
     ChannelEngine(const ChannelEngine&) = delete;

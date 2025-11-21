@@ -32,7 +32,7 @@ RmtController5LowLevel::RmtController5LowLevel(
 )
 {
     // Get the ChannelBusManager singleton instance (which manages RMT/SPI engines)
-    mEngine = &ChannelBusManager::instance();
+    mEngine = &getChannelBusManager();
 
     // Create ChipsetTimingConfig from ChipsetTiming
     ChipsetTimingConfig timingConfig(

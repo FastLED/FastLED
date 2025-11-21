@@ -33,7 +33,7 @@ private:
 
 public:
     ClocklessSPI()
-        : mEngine(&ChannelBusManager::instance())
+        : mEngine(&getChannelBusManager())
     {
         // Create channel data with pin and timing configuration
         ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
