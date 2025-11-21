@@ -56,19 +56,6 @@ class WS2812LCD_RGB:
 template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
 using WS2812Controller800Khz = WS2812LCD_RGB<DATA_PIN, RGB_ORDER>;
 #define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
-#elif defined(FASTLED_USES_ESP32P4_PARLIO)
-#include "platforms/esp/32/drivers/parlio/clockless_parlio_esp32p4.h"
-// Explicit name for Parlio-based WS2812 controller (ESP32-P4)
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
-class WS2812Parlio:
-	public fl::ClocklessController_Parlio_Esp32P4_WS2812<
-		DATA_PIN,
-		RGB_ORDER
-	> {};
-// Default WS2812 controller typedef (selects Parlio on ESP32-P4)
-template <fl::u8 DATA_PIN, EOrder RGB_ORDER = fl::GRB>
-using WS2812Controller800Khz = WS2812Parlio<DATA_PIN, RGB_ORDER>;
-#define FASTLED_WS2812_HAS_SPECIAL_DRIVER 1
 #elif (defined(PICO_RP2040) || defined(PICO_RP2350) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_ARCH_RP2350)) && defined(FASTLED_RP2040_CLOCKLESS_PIO_AUTO)
 #include "platforms/arm/rp/rpcommon/clockless_rp_pio_auto.h"
 // Explicit name for RP2040/RP2350 PIO automatic parallel WS2812 controller

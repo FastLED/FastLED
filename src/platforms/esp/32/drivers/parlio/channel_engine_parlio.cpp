@@ -5,6 +5,9 @@
 /// multiple LED strips simultaneously on parallel GPIO pins. It supports
 /// ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 variants that have PARLIO hardware.
 /// Note: ESP32-S3 does NOT have PARLIO (it has LCD peripheral instead).
+///
+/// This is a runtime-configurable implementation supporting 1-16 channels with
+/// power-of-2 data widths (1, 2, 4, 8, 16) determined at construction time.
 
 #ifdef ESP32
 
@@ -15,7 +18,7 @@
 
 #include "channel_engine_parlio.h"
 #include "fl/warn.h"
-#include "fl/dbg.h"
+#include "fl/log.h"
 #include "fl/transposition.h"
 #include "ftl/algorithm.h"
 #include "ftl/time.h"
@@ -111,27 +114,25 @@ static constexpr int DEFAULT_PARLIO_PINS[] = {
 //
 //-----------------------------------------------------------------------------
 
-/// @brief Calculate optimal chunk size for 8-lane streaming
-/// @return LEDs per chunk for ping-pong buffering
-///
-/// For 8-lane mode: 3 colors × 32 ticks × 1 byte = 96 bytes per LED
-/// PARLIO max transfer size: 65535 bytes → max 682 LEDs
-/// Target: 100 LEDs per chunk (9.6KB) for balanced memory/performance
-static size_t calculateStreamingChunkSize() {
-    return 100;  // Optimal for 8-lane configuration
-}
-
 //=============================================================================
-// Constructor / Destructor
+// Constructors / Destructors
 //=============================================================================
 
-ChannelEnginePARLIO::ChannelEnginePARLIO()
+ChannelEnginePARLIO::ChannelEnginePARLIO(size_t data_width)
     : mInitialized(false)
+    , mState(data_width)
 {
+    // Validate data width
+    if (data_width != 1 && data_width != 2 && data_width != 4 && data_width != 8 && data_width != 16) {
+        FL_WARN("PARLIO: Invalid data_width=" << data_width << " (must be 1, 2, 4, 8, or 16)");
+        // Constructor will still complete, but initialization will fail
+        return;
+    }
+
     // Register as listener for end frame events
     EngineEvents::addListener(this);
 
-    FL_DBG("PARLIO Channel Engine initialized");
+    FL_LOG_PARLIO("PARLIO Channel Engine initialized (data_width=" << data_width << ")");
 }
 
 ChannelEnginePARLIO::~ChannelEnginePARLIO() {
@@ -145,7 +146,7 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
 
     // Clean up PARLIO TX unit resources
     if (mState.tx_unit != nullptr) {
-        FL_DBG("PARLIO: Cleaning up TX unit");
+        FL_LOG_PARLIO("PARLIO: Cleaning up TX unit");
 
         // Wait for any pending transmissions (with timeout)
         esp_err_t err = parlio_tx_unit_wait_all_done(mState.tx_unit, pdMS_TO_TICKS(1000));
@@ -166,7 +167,7 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
         }
 
         mState.tx_unit = nullptr;
-        FL_DBG("PARLIO: TX unit cleanup complete");
+        FL_LOG_PARLIO("PARLIO: TX unit cleanup complete");
     }
 
     // Free DMA buffers (waveform output buffers)
@@ -189,7 +190,7 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
     mState.stream_complete = false;
     mState.error_occurred = false;
 
-    FL_DBG("PARLIO: Channel Engine destroyed");
+    FL_LOG_PARLIO("PARLIO: Channel Engine destroyed");
 }
 
 //=============================================================================
@@ -213,7 +214,7 @@ bool IRAM_ATTR ChannelEnginePARLIO::txDoneCallback(parlio_tx_unit_handle_t tx_un
     // Note: edata is actually const parlio_tx_done_event_data_t* but we don't use it
     (void)edata;  // Unused parameter
     (void)tx_unit;  // Unused parameter
-    ChannelEnginePARLIO* self = static_cast<ChannelEnginePARLIO*>(user_ctx);
+    auto* self = static_cast<ChannelEnginePARLIO*>(user_ctx);
     if (!self) {
         return false;
     }
@@ -254,7 +255,8 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
 
     // Temporary waveform buffers for each lane (stack-allocated for ISR safety)
     // Each byte expands to 8 bits × pulses_per_bit (typically 4) = 32 bytes
-    uint8_t laneWaveforms[8][32];
+    // Allocate for maximum width (16 lanes) - only use first mState.data_width entries
+    uint8_t laneWaveforms[16][32];
 
     // Precomputed waveform pointers
     const uint8_t* bit0_wave = mState.bit0_waveform.data();
@@ -272,28 +274,54 @@ bool IRAM_ATTR ChannelEnginePARLIO::transposeAndQueueNextChunk() {
             size_t byteOffset = absoluteLedIdx * 3 + colorIdx;
 
             // Step 1: Expand each lane's byte to waveform using generic function
-            for (size_t lane = 0; lane < 8; lane++) {
-                const uint8_t* laneData = mState.scratch_padded_buffer.data() + (lane * mState.lane_stride);
-                uint8_t byte = laneData[byteOffset];
+            for (size_t lane = 0; lane < mState.data_width; lane++) {
+                if (lane < mState.actual_channels) {
+                    // Real channel - expand waveform from scratch buffer
+                    const uint8_t* laneData = mState.scratch_padded_buffer.data() + (lane * mState.lane_stride);
+                    uint8_t byte = laneData[byteOffset];
 
-                // Use generic waveform expansion
-                fl::expandByteToWaveforms(byte, bit0_wave, waveform_size, bit1_wave, waveform_size, laneWaveforms[lane], 32);
+                    // Use generic waveform expansion
+                    fl::expandByteToWaveforms(byte, bit0_wave, waveform_size, bit1_wave, waveform_size, laneWaveforms[lane], 32);
+                } else {
+                    // Dummy lane - zero waveform (keeps GPIO LOW)
+                    fl::memset(laneWaveforms[lane], 0x00, 32);
+                }
             }
 
             // Step 2: Bit-pack transpose waveform bytes to PARLIO format
             // Convert byte-based waveforms (0xFF/0x00) to bit-packed output
             const size_t pulsesPerByte = 8 * mState.pulses_per_bit;  // Should be 32
-            for (size_t tick = 0; tick < pulsesPerByte; tick++) {
-                uint8_t outputByte = 0;
 
-                // Extract one pulse from each lane and pack into bits
-                for (size_t lane = 0; lane < 8; lane++) {
-                    uint8_t pulse = laneWaveforms[lane][tick];
-                    uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
-                    outputByte |= (bit << (7 - lane));
+            if (mState.data_width <= 8) {
+                // Pack into single bytes (1, 2, 4, or 8-bit widths)
+                for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                    uint8_t outputByte = 0;
+
+                    // Extract one pulse from each lane and pack into bits
+                    for (size_t lane = 0; lane < mState.data_width; lane++) {
+                        uint8_t pulse = laneWaveforms[lane][tick];
+                        uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
+                        outputByte |= (bit << (mState.data_width - 1 - lane));
+                    }
+
+                    nextBuffer[outputIdx++] = outputByte;
                 }
+            } else if (mState.data_width == 16) {
+                // Pack into 16-bit words (two bytes per tick)
+                for (size_t tick = 0; tick < pulsesPerByte; tick++) {
+                    uint16_t outputWord = 0;
 
-                nextBuffer[outputIdx++] = outputByte;
+                    // Extract one pulse from each lane and pack into bits
+                    for (size_t lane = 0; lane < 16; lane++) {
+                        uint8_t pulse = laneWaveforms[lane][tick];
+                        uint8_t bit = (pulse != 0) ? 1 : 0;  // Convert 0xFF→1, 0x00→0
+                        outputWord |= (bit << (15 - lane));
+                    }
+
+                    // Write as two bytes (high byte first, then low byte)
+                    nextBuffer[outputIdx++] = (outputWord >> 8) & 0xFF;  // High byte
+                    nextBuffer[outputIdx++] = outputWord & 0xFF;          // Low byte
+                }
             }
         }
     }
@@ -353,7 +381,7 @@ ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
         if (err == ESP_OK) {
             mState.transmitting = false;
             mState.stream_complete = false;
-            FL_DBG("PARLIO: Streaming transmission complete");
+            FL_LOG_PARLIO("PARLIO: Streaming transmission complete");
             return EngineState::READY;
         } else if (err == ESP_ERR_TIMEOUT) {
             // Final chunk still transmitting
@@ -378,8 +406,33 @@ ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
 void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
     // Validate channel data first (before initialization)
     if (channelData.size() == 0) {
-        FL_DBG("PARLIO: No channels to transmit");
+        FL_LOG_PARLIO("PARLIO: No channels to transmit");
         return;
+    }
+
+    // Validate channel count is within bounds
+    size_t channel_count = channelData.size();
+    if (channel_count > 16) {
+        FL_WARN("PARLIO: Too many channels (got " << channel_count << ", max 16)");
+        return;
+    }
+
+    // Validate channel count matches data_width constraints
+    size_t required_width = selectDataWidth(channel_count);
+    if (required_width != mState.data_width) {
+        FL_WARN("PARLIO: Channel count " << channel_count
+                << " requires data_width=" << required_width
+                << " but this instance is data_width=" << mState.data_width);
+        return;
+    }
+
+    // Store actual channel count (for dummy lane logic)
+    mState.actual_channels = channel_count;
+    mState.dummy_lanes = mState.data_width - channel_count;
+
+    if (mState.dummy_lanes > 0) {
+        FL_LOG_PARLIO("PARLIO: Using " << mState.dummy_lanes << " dummy lanes "
+                << "(channels=" << channel_count << ", width=" << mState.data_width << ")");
     }
 
     // Ensure PARLIO peripheral is initialized
@@ -394,12 +447,6 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
     // Check if we're already transmitting
     if (mState.transmitting) {
         FL_WARN("PARLIO: Transmission already in progress");
-        return;
-    }
-
-    // Validate channel count is exactly 8
-    if (channelData.size() != 8) {
-        FL_WARN("PARLIO: Only 8 channels supported (got " << channelData.size() << " channels)");
         return;
     }
 
@@ -430,12 +477,12 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
     }
 
     if (!hasData || maxChannelSize == 0) {
-        FL_DBG("PARLIO: No LED data to transmit");
+        FL_LOG_PARLIO("PARLIO: No LED data to transmit");
         return;
     }
 
     size_t numLeds = maxChannelSize / 3;
-    FL_DBG("PARLIO: beginTransmission - " << channelData.size()
+    FL_LOG_PARLIO("PARLIO: beginTransmission - " << channelData.size()
             << " channels, " << numLeds << " LEDs (streaming mode)");
 
     // Prepare single segmented scratch buffer for all N lanes
@@ -448,7 +495,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
     mState.lane_stride = maxChannelSize;
     mState.num_lanes = channelData.size();
 
-    FL_DBG("PARLIO: Prepared scratch buffer: " << totalBufferSize
+    FL_LOG_PARLIO("PARLIO: Prepared scratch buffer: " << totalBufferSize
             << " bytes (" << channelData.size() << " lanes × " << maxChannelSize << " bytes)");
 
     // Write all channels to segmented scratch buffer with stride-based layout
@@ -459,7 +506,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
 
         if (dataSize < maxChannelSize) {
             // Lane needs padding
-            FL_DBG("PARLIO: Padding lane " << i << " from " << dataSize
+            FL_LOG_PARLIO("PARLIO: Padding lane " << i << " from " << dataSize
                     << " to " << maxChannelSize << " bytes");
             channelData[i]->writeWithPadding(dst);
         } else {
@@ -486,7 +533,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
         return;
     }
 
-    FL_DBG("PARLIO: Initial chunk queued, streaming started");
+    FL_LOG_PARLIO("PARLIO: Initial chunk queued, streaming started");
 
     // If there are more chunks, queue second chunk (into buffer_b)
     if (mState.current_led < mState.total_leds) {
@@ -495,7 +542,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
             mState.transmitting = false;
             return;
         }
-        FL_DBG("PARLIO: Second chunk queued");
+        FL_LOG_PARLIO("PARLIO: Second chunk queued");
     }
 
     // ISR will handle remaining chunks automatically
@@ -510,11 +557,11 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         return;
     }
 
-    FL_DBG("PARLIO: Starting initialization (8-lane mode)");
+    FL_LOG_PARLIO("PARLIO: Starting initialization (data_width=" << mState.data_width << ")");
 
-    // Step 1: Calculate streaming chunk size (hardcoded for 8 lanes)
-    mState.leds_per_chunk = calculateStreamingChunkSize();
-    FL_DBG("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs");
+    // Step 1: Calculate width-adaptive streaming chunk size
+    mState.leds_per_chunk = calculateChunkSize(mState.data_width);
+    FL_LOG_PARLIO("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs (optimized for " << mState.data_width << "-bit width)");
 
     // Step 2: Generate precomputed waveforms using generic waveform generator
     // WS2812 timing parameters (nanoseconds) for 4-tick encoding at 3.2 MHz:
@@ -543,27 +590,32 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     }
 
     mState.pulses_per_bit = bit0_size;
-    FL_DBG("PARLIO: Generated waveforms: " << mState.pulses_per_bit << " pulses per bit");
+    FL_LOG_PARLIO("PARLIO: Generated waveforms: " << mState.pulses_per_bit << " pulses per bit");
 
-    // Step 3: Configure GPIO pins (always 8 pins)
+    // Step 3: Configure GPIO pins for data_width lanes
+    // Note: actual_channels will be set later in beginTransmission()
+    // For now, allocate pins for full data_width
     mState.pins.clear();
-    for (size_t i = 0; i < 8; i++) {
+    for (size_t i = 0; i < mState.data_width; i++) {
         mState.pins.push_back(DEFAULT_PARLIO_PINS[i]);
     }
+
+    FL_LOG_PARLIO("PARLIO: Configured " << mState.data_width << " GPIO pins");
 
     // Step 4: Configure PARLIO TX unit
     parlio_tx_unit_config_t config = {};
     config.clk_src = PARLIO_CLK_SRC_DEFAULT;
     config.output_clk_freq_hz = PARLIO_CLOCK_FREQ_HZ;
-    config.data_width = 8;  // Always 8 lanes
+    config.data_width = mState.data_width;  // Runtime parameter
     config.trans_queue_depth = 2;  // Support ping-pong buffering
     config.max_transfer_size = 65535;
 
-    // Assign GPIO pins (always 8 pins)
-    for (size_t i = 0; i < 8; i++) {
+    // Assign GPIO pins for data_width lanes
+    for (size_t i = 0; i < mState.data_width; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(mState.pins[i]);
     }
-    for (size_t i = 8; i < 16; i++) {
+    // Mark unused pins as invalid
+    for (size_t i = mState.data_width; i < 16; i++) {
         config.data_gpio_nums[i] = static_cast<gpio_num_t>(-1);
     }
 
@@ -578,7 +630,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         return;
     }
 
-    FL_DBG("PARLIO: TX unit created");
+    FL_LOG_PARLIO("PARLIO: TX unit created");
 
     // Step 6: Enable TX unit
     err = parlio_tx_unit_enable(mState.tx_unit);
@@ -590,7 +642,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         return;
     }
 
-    FL_DBG("PARLIO: TX unit enabled");
+    FL_LOG_PARLIO("PARLIO: TX unit enabled");
 
     // Step 7: Register ISR callback for streaming
     parlio_tx_event_callbacks_t callbacks = {};
@@ -613,12 +665,13 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
         return;
     }
 
-    FL_DBG("PARLIO: ISR callbacks registered");
+    FL_LOG_PARLIO("PARLIO: ISR callbacks registered");
 
     // Step 8: Allocate double buffers for ping-pong streaming
     // Use DMA-capable memory (required for PARLIO/GDMA)
-    // For 8 lanes: 1 byte per tick
-    size_t bufferSize = mState.leds_per_chunk * 3 * 32 * 1;  // 3 colors × 32 ticks × 1 byte
+    // Buffer size depends on data_width
+    size_t bytes_per_led = calculateBytesPerLed(mState.data_width);
+    size_t bufferSize = mState.leds_per_chunk * bytes_per_led;
 
     mState.buffer_a = static_cast<uint8_t*>(
         heap_caps_malloc(bufferSize, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL)
@@ -656,7 +709,7 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
 
     mState.buffer_size = bufferSize;
 
-    FL_DBG("PARLIO: DMA-capable double buffers allocated (2 × " << bufferSize << " = "
+    FL_LOG_PARLIO("PARLIO: DMA-capable double buffers allocated (2 × " << bufferSize << " = "
             << (bufferSize * 2) << " bytes total)");
 
     // Initialize streaming state
@@ -667,7 +720,23 @@ void ChannelEnginePARLIO::initializeIfNeeded() {
     mState.total_leds = 0;
 
     mInitialized = true;
-    FL_DBG("PARLIO: Initialization complete (streaming mode active)");
+    FL_LOG_PARLIO("PARLIO: Initialization complete (streaming mode active)");
+}
+
+//=============================================================================
+// Factory Function Implementation
+//=============================================================================
+
+ChannelEngine* createParlioEngine(size_t channel_count) {
+    size_t width = selectDataWidth(channel_count);
+
+    if (width == 0) {
+        FL_WARN("PARLIO: Invalid channel count " << channel_count << " (must be 1-16)");
+        return nullptr;
+    }
+
+    FL_LOG_PARLIO("PARLIO: Creating " << width << "-bit engine for " << channel_count << " channel(s)");
+    return new ChannelEnginePARLIO(width);
 }
 
 } // namespace fl
