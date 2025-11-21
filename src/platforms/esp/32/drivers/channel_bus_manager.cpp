@@ -10,6 +10,7 @@
 #include "fl/engine_events.h"
 #include "ftl/algorithm.h"
 #include "ftl/move.h"
+#include "ftl/unique_ptr.h"
 
 // Include concrete engine implementations
 #if FASTLED_RMT5
@@ -30,74 +31,36 @@ ChannelBusManager::ChannelBusManager() {
     // Register as frame event listener for per-frame reset
     EngineEvents::addListener(this);
 
-    // Construct owned engines and register them with priorities
-    // Register in priority order (highest first) for clarity
+    // Construct owned engines and add them with priorities
+    // Add in priority order (highest first) for clarity
     #if FASTLED_ESP32_HAS_PARLIO
-    mParlioEngine = createParlioEngine();
-    registerEngine(PRIORITY_PARLIO, mParlioEngine);
-    FL_DBG("ChannelBusManager: Registered PARLIO engine (priority " << PRIORITY_PARLIO << ")");
+    mEngines.push_back({PRIORITY_PARLIO, fl::unique_ptr<ChannelEngine>(createParlioEngine())});
+    FL_DBG("ChannelBusManager: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    mSpiEngine = new ChannelEngineSpi();
-    registerEngine(PRIORITY_SPI, mSpiEngine);
-    FL_DBG("ChannelBusManager: Registered SPI engine (priority " << PRIORITY_SPI << ")");
+    mEngines.push_back({PRIORITY_SPI, fl::make_unique<ChannelEngineSpi>()});
+    FL_DBG("ChannelBusManager: Added SPI engine (priority " << PRIORITY_SPI << ")");
     #endif
 
     #if FASTLED_RMT5
-    mRmtEngine = new ChannelEngineRMT();
-    registerEngine(PRIORITY_RMT, mRmtEngine);
-    FL_DBG("ChannelBusManager: Registered RMT engine (priority " << PRIORITY_RMT << ")");
+    mEngines.push_back({PRIORITY_RMT, fl::make_unique<ChannelEngineRMT>()});
+    FL_DBG("ChannelBusManager: Added RMT engine (priority " << PRIORITY_RMT << ")");
     #endif
+
+    // Sort by priority descending (highest first)
+    fl::sort(mEngines.begin(), mEngines.end());
+    FL_DBG("ChannelBusManager: Sorted " << mEngines.size() << " engines by priority");
 }
 
 ChannelBusManager::~ChannelBusManager() {
     FL_DBG("ChannelBusManager: Destructor called");
-
-    // Cleanup owned engines
-    #if FASTLED_ESP32_HAS_PARLIO
-    if (mParlioEngine) {
-        delete mParlioEngine;
-        mParlioEngine = nullptr;
-    }
-    #endif
-
-    #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    if (mSpiEngine) {
-        delete mSpiEngine;
-        mSpiEngine = nullptr;
-    }
-    #endif
-
-    #if FASTLED_RMT5
-    if (mRmtEngine) {
-        delete mRmtEngine;
-        mRmtEngine = nullptr;
-    }
-    #endif
+    // Owned engines automatically cleaned up by unique_ptr destructors
 }
 
 ChannelBusManager& ChannelBusManager::instance() {
     static ChannelBusManager instance;
     return instance;
-}
-
-void ChannelBusManager::registerEngine(int priority, ChannelEngine* engine) {
-    if (!engine) {
-        FL_WARN("ChannelBusManager::registerEngine() - null engine pointer ignored");
-        return;
-    }
-
-    FL_DBG("ChannelBusManager: Registering engine with priority " << priority);
-
-    // Add engine to registry
-    EngineEntry entry{priority, engine};
-    mEngines.push_back(entry);
-
-    // Sort by priority descending (highest first)
-    fl::sort(mEngines.begin(), mEngines.end());
-
-    FL_DBG("ChannelBusManager: Now have " << mEngines.size() << " registered engines");
 }
 
 void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
@@ -163,7 +126,7 @@ ChannelEngine* ChannelBusManager::selectEngine() {
 
     // Engines are already sorted by priority descending, so first is highest priority
     EngineEntry& entry = mEngines[0];
-    mActiveEngine = entry.engine;
+    mActiveEngine = entry.engine.get();
     mActiveEnginePriority = entry.priority;
 
     FL_DBG("ChannelBusManager: Selected engine with priority " << mActiveEnginePriority);
@@ -183,7 +146,7 @@ ChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {
         if (mEngines[i].priority < mActiveEnginePriority) {
             // Found next lower priority engine
             mActiveEnginePriority = mEngines[i].priority;
-            return mEngines[i].engine;
+            return mEngines[i].engine.get();
         }
     }
 

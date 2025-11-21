@@ -28,20 +28,8 @@
 #include "fl/channels/channel_data.h"
 #include "fl/engine_events.h"
 #include "ftl/vector.h"
+#include "ftl/unique_ptr.h"
 #include "platforms/esp/32/feature_flags/enabled.h"
-
-// Forward declarations
-namespace fl {
-#if FASTLED_RMT5
-class ChannelEngineRMT;
-#endif
-#if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-class ChannelEngineSpi;
-#endif
-#if FASTLED_ESP32_HAS_PARLIO
-class ChannelEnginePARLIO;
-#endif
-}
 
 namespace fl {
 
@@ -68,13 +56,6 @@ public:
     /// @note Returns ChannelBusManager& which implicitly converts to ChannelEngine&
     static ChannelBusManager& instance();
 
-    /// @brief Register an engine with given priority
-    /// @param priority Engine priority (higher = preferred)
-    /// @param engine Pointer to engine instance (must outlive manager)
-    /// @note Called during static initialization by each engine
-    /// @note Engines are sorted by priority descending (highest first)
-    void registerEngine(int priority, ChannelEngine* engine);
-
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
     /// @note Selects engine on first call, then forwards to base class enqueue()
@@ -95,10 +76,10 @@ protected:
     void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
 
 private:
-    /// @brief Engine registry entry (priority + pointer)
+    /// @brief Engine registry entry (priority + owned pointer)
     struct EngineEntry {
         int priority;
-        ChannelEngine* engine;
+        fl::unique_ptr<ChannelEngine> engine;
 
         /// @brief Sort by priority descending (highest first)
         bool operator<(const EngineEntry& other) const {
@@ -116,7 +97,8 @@ private:
     /// @note Searches for engine with priority lower than current active engine
     ChannelEngine* getNextLowerPriorityEngine();
 
-    /// @brief Registered engines sorted by priority descending
+    /// @brief Owned engines sorted by priority descending
+    /// @note Each entry contains priority and owned unique_ptr to engine
     fl::vector<EngineEntry> mEngines;
 
     /// @brief Currently active engine (cached for performance)
@@ -125,21 +107,10 @@ private:
     /// @brief Priority of active engine (for fallback logic)
     int mActiveEnginePriority = -1;
 
-    /// @brief Owned sub-engines (constructed and managed by ChannelBusManager)
-    #if FASTLED_RMT5
-    ChannelEngineRMT* mRmtEngine = nullptr;
-    #endif
-    #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
-    ChannelEngineSpi* mSpiEngine = nullptr;
-    #endif
-    #if FASTLED_ESP32_HAS_PARLIO
-    ChannelEnginePARLIO* mParlioEngine = nullptr;
-    #endif
-
     /// @brief Private constructor (singleton pattern)
     ChannelBusManager();
 
-    /// @brief Destructor - cleanup owned engines
+    /// @brief Destructor - cleanup owned engines (automatic via unique_ptr)
     ~ChannelBusManager() override;
 
     // Non-copyable, non-movable
