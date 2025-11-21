@@ -364,7 +364,8 @@ class FL_ALIGN HeapVector {
     };
 
     // Default constructor
-    HeapVector() : mArray(nullptr),mCapacity(0), mSize(0) {}
+    HeapVector() : mArray(nullptr),mCapacity(0), mSize(0) {
+    }
     
     // Constructor with size and value
     HeapVector(fl::size size, const T &value = T()) : mCapacity(size), mSize(size) {
@@ -376,12 +377,12 @@ class FL_ALIGN HeapVector {
             }
         }
     }
-    HeapVector(const HeapVector<T> &other) {
+    HeapVector(const HeapVector<T, Allocator> &other) {
         reserve(other.size());
         assign(other.begin(), other.end());
     }
     // Move constructor - directly transfer ownership to maintain invariants
-    HeapVector(HeapVector<T> &&other)
+    HeapVector(HeapVector<T, Allocator> &&other) noexcept
         : mArray(other.mArray)
         , mCapacity(other.mCapacity)
         , mSize(other.mSize)
@@ -392,7 +393,7 @@ class FL_ALIGN HeapVector {
         other.mCapacity = 0;
     }
     HeapVector &operator=(
-        const HeapVector<T> &other) { // cppcheck-suppress operatorEqVarError
+        const HeapVector<T, Allocator> &other) { // cppcheck-suppress operatorEqVarError
         if (this != &other) {
             mAlloc = other.mAlloc;
             assign(other.begin(), other.end());
@@ -401,7 +402,7 @@ class FL_ALIGN HeapVector {
     }
 
     // Move assignment operator - explicitly defined to maintain invariants
-    HeapVector &operator=(HeapVector<T> &&other) {
+    HeapVector &operator=(HeapVector<T, Allocator> &&other) noexcept {
         if (this != &other) {
             // Clean up our own resources first
             clear();
@@ -452,9 +453,7 @@ class FL_ALIGN HeapVector {
     // Destructor
     ~HeapVector() {
         clear();  // Destroys all elements and sets mSize = 0
-        // Invariant checks
         if (mArray) {
-            // No need to destroy elements again - clear() already did that
             mAlloc.deallocate(mArray, mCapacity);
             mArray = nullptr;
         }
