@@ -264,7 +264,7 @@ template <typename Key, typename Value, fl::size N> class FixedMap {
 
 // Closest data structure to an std::map. Always sorted.
 // O(n + log(n)) for insertions, O(log(n)) for searches, O(n) for iteration.
-template <typename Key, typename Value, typename Less = fl::less<Key>>
+template <typename Key, typename Value, typename Less = fl::less<Key>, typename Allocator = fl::allocator<fl::pair<Key, Value>>>
 class SortedHeapMap {
   public:
     // Standard typedefs to match std::map interface
@@ -274,6 +274,7 @@ class SortedHeapMap {
     using size_type = fl::size;
     using difference_type = ptrdiff_t;
     using key_compare = Less;
+    using allocator_type = Allocator;
     using reference = value_type&;
     using const_reference = const value_type&;
     using pointer = value_type*;
@@ -287,7 +288,7 @@ class SortedHeapMap {
         }
     };
 
-    SortedHeapVector<value_type, PairLess> data;
+    SortedHeapVector<value_type, PairLess, Allocator> data;
 
     // Value comparison class for std::map compatibility
     class value_compare {
@@ -301,13 +302,25 @@ class SortedHeapMap {
     };
 
   public:
-    typedef typename SortedHeapVector<value_type, PairLess>::iterator iterator;
-    typedef typename SortedHeapVector<value_type, PairLess>::const_iterator const_iterator;
+    typedef typename SortedHeapVector<value_type, PairLess, Allocator>::iterator iterator;
+    typedef typename SortedHeapVector<value_type, PairLess, Allocator>::const_iterator const_iterator;
 
     // Constructors
     SortedHeapMap(Less less = Less()) : data(PairLess{less}) {}
     SortedHeapMap(const SortedHeapMap& other) = default;
     SortedHeapMap& operator=(const SortedHeapMap& other) = default;
+
+    // Move constructor
+    SortedHeapMap(SortedHeapMap&& other) noexcept
+        : data(fl::move(other.data)) {}
+
+    // Move assignment operator
+    SortedHeapMap& operator=(SortedHeapMap&& other) noexcept {
+        if (this != &other) {
+            data = fl::move(other.data);
+        }
+        return *this;
+    }
 
     // Iterators
     iterator begin() { return data.begin(); }

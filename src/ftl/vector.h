@@ -835,18 +835,45 @@ public:
     }
 };
 
-template <typename T, typename LessThan = fl::less<T>> 
+template <typename T, typename LessThan = fl::less<T>, typename Allocator = fl::allocator<T>>
 class FL_ALIGN SortedHeapVector {
   private:
-    HeapVector<T> mArray;
+    HeapVector<T, Allocator> mArray;
     LessThan mLess;
     fl::size mMaxSize = fl::size(-1);
 
   public:
-    typedef typename HeapVector<T>::iterator iterator;
-    typedef typename HeapVector<T>::const_iterator const_iterator;
+    typedef typename HeapVector<T, Allocator>::iterator iterator;
+    typedef typename HeapVector<T, Allocator>::const_iterator const_iterator;
 
     SortedHeapVector(LessThan less = LessThan()) : mLess(less) {}
+
+    // Copy constructor
+    SortedHeapVector(const SortedHeapVector& other) = default;
+
+    // Copy assignment
+    SortedHeapVector& operator=(const SortedHeapVector& other) = default;
+
+    // Move constructor
+    SortedHeapVector(SortedHeapVector&& other) noexcept
+        : mArray(fl::move(other.mArray))
+        , mLess(fl::move(other.mLess))
+        , mMaxSize(other.mMaxSize) {
+        // Leave other in valid empty state
+        other.mMaxSize = fl::size(-1);
+    }
+
+    // Move assignment operator
+    SortedHeapVector& operator=(SortedHeapVector&& other) noexcept {
+        if (this != &other) {
+            mArray = fl::move(other.mArray);
+            mLess = fl::move(other.mLess);
+            mMaxSize = other.mMaxSize;
+            // Leave other in valid empty state
+            other.mMaxSize = fl::size(-1);
+        }
+        return *this;
+    }
 
     void setMaxSize(fl::size n) {
         if (mMaxSize == n) {

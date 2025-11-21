@@ -176,6 +176,29 @@ template <typename Key, typename Allocator = fl::allocator<Key>> class VectorSet
     // Constructor
     constexpr VectorSet() = default;
 
+    // Copy constructor
+    VectorSet(const VectorSet<Key, Allocator> &other) : data(other.data) {}
+
+    // Move constructor
+    VectorSet(VectorSet<Key, Allocator> &&other) noexcept
+        : data(fl::move(other.data)) {}
+
+    // Copy assignment operator
+    VectorSet &operator=(const VectorSet<Key, Allocator> &other) {
+        if (this != &other) {
+            data = other.data;
+        }
+        return *this;
+    }
+
+    // Move assignment operator
+    VectorSet &operator=(VectorSet<Key, Allocator> &&other) noexcept {
+        if (this != &other) {
+            data = fl::move(other.data);
+        }
+        return *this;
+    }
+
     iterator begin() { return data.begin(); }
     iterator end() { return data.end(); }
     const_iterator begin() const { return data.begin(); }
