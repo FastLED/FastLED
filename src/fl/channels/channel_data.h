@@ -96,6 +96,9 @@ public:
     /// @return Current size of encoded data (minimum required dst size)
     size_t getMinimumSize() const { return mEncodedData.size(); }
 
+    /// @brief Destructor with debug logging
+    ~ChannelData();
+
 private:
     /// @brief Friend declaration for make_shared to access private constructor
     template<typename T, typename... Args>
@@ -114,9 +117,9 @@ private:
 
     const int mPin;                         ///< GPIO pin number
     const ChipsetTimingConfig mTiming;      ///< Chipset timing (T0H, T1H, T0L, reset)
+    PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
     fl::vector_psram<uint8_t> mEncodedData; ///< Encoded transmission bytes (PSRAM)
     volatile bool mInUse = false;           ///< Engine is transmitting this data (prevents creator updates)
-    PaddingGenerator mPaddingGenerator;     ///< Optional padding generator for block-size alignment
 };
 
 }  // namespace fl

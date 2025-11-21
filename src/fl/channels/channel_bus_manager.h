@@ -26,7 +26,7 @@
 #include "fl/channels/channel_data.h"
 #include "fl/engine_events.h"
 #include "ftl/vector.h"
-#include "ftl/unique_ptr.h"
+#include "ftl/shared_ptr.h"
 
 namespace fl {
 
@@ -42,15 +42,15 @@ public:
     /// @brief Constructor
     ChannelBusManager();
 
-    /// @brief Destructor - cleanup owned engines (automatic via unique_ptr)
+    /// @brief Destructor - cleanup shared engines (automatic via shared_ptr)
     ~ChannelBusManager() override;
 
     /// @brief Add an engine with priority (higher = preferred)
     /// @param priority Engine priority (higher values = higher priority)
-    /// @param engine Owned engine implementation (transfers ownership via move)
+    /// @param engine Shared engine implementation (allows caller to retain reference for testing)
     /// @note Platform-specific code calls this during static initialization
     /// @note Engines are automatically sorted by priority on each insertion
-    void addEngine(int priority, fl::unique_ptr<ChannelEngine>&& engine);
+    void addEngine(int priority, fl::shared_ptr<ChannelEngine> engine);
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
@@ -72,10 +72,10 @@ protected:
     void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
 
 private:
-    /// @brief Engine registry entry (priority + owned pointer)
+    /// @brief Engine registry entry (priority + shared pointer)
     struct EngineEntry {
         int priority;
-        fl::unique_ptr<ChannelEngine> engine;
+        fl::shared_ptr<ChannelEngine> engine;
 
         /// @brief Sort by priority descending (highest first)
         bool operator<(const EngineEntry& other) const {
@@ -93,8 +93,8 @@ private:
     /// @note Searches for engine with priority lower than current active engine
     ChannelEngine* getNextLowerPriorityEngine();
 
-    /// @brief Owned engines sorted by priority descending
-    /// @note Each entry contains priority and owned unique_ptr to engine
+    /// @brief Shared engines sorted by priority descending
+    /// @note Each entry contains priority and shared_ptr to engine
     fl::vector<EngineEntry> mEngines;
 
     /// @brief Currently active engine (cached for performance)

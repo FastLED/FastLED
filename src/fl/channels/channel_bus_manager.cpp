@@ -19,16 +19,20 @@ ChannelBusManager::ChannelBusManager() {
 
 ChannelBusManager::~ChannelBusManager() {
     FL_DBG("ChannelBusManager: Destructor called");
-    // Owned engines automatically cleaned up by unique_ptr destructors
+
+    // Remove self from EngineEvents listener list
+    EngineEvents::removeListener(this);
+
+    // Shared engines automatically cleaned up by shared_ptr destructors
 }
 
-void ChannelBusManager::addEngine(int priority, fl::unique_ptr<ChannelEngine>&& engine) {
+void ChannelBusManager::addEngine(int priority, fl::shared_ptr<ChannelEngine> engine) {
     if (!engine) {
         FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
         return;
     }
 
-    mEngines.push_back({priority, fl::move(engine)});
+    mEngines.push_back({priority, engine});
     FL_DBG("ChannelBusManager: Added engine (priority " << priority << ")");
 
     // Sort engines by priority descending (highest first) after each insertion
@@ -75,12 +79,18 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
     }
 
     // Forward channel data to active engine by enqueueing and showing
-    // We can't call beginTransmission() directly as it's protected
+    // Poll first to ensure active engine is in READY state
     FL_DBG("ChannelBusManager: Transmitting with priority " << mActiveEnginePriority);
+    FL_DBG("ChannelBusManager: Polling active engine before transmission");
+    mActiveEngine->poll();  // Clear any previous transmission state
+
+    FL_DBG("ChannelBusManager: Enqueueing " << channelData.size() << " channels");
     for (const auto& channel : channelData) {
         mActiveEngine->enqueue(channel);
     }
+    FL_DBG("ChannelBusManager: Calling show() on active engine");
     mActiveEngine->show();
+    FL_DBG("ChannelBusManager: Transmission complete");
     clearError();  // Success - clear any previous errors
 }
 

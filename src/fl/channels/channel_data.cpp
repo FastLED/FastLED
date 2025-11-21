@@ -51,4 +51,6 @@ void ChannelData::writeWithPadding(fl::span<uint8_t> dst) {
     }
 }
 
+ChannelData::~ChannelData() = default;
+
 }  // namespace fl
