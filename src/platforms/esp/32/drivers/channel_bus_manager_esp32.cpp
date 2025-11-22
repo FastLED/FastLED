@@ -49,7 +49,7 @@ static void initializeChannelBusManager() {
 
     // Add engines (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO
-    manager.addEngine(PRIORITY_PARLIO, fl::shared_ptr<ChannelEngine>(createParlioEngine()));
+    manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>());
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
 
