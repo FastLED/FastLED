@@ -300,6 +300,7 @@ def setup_meson_build(
             )
 
         # Check if unity setting has changed since last configure
+        unity_changed = False
         if unity_marker.exists():
             try:
                 last_unity_setting = unity_marker.read_text().strip() == "True"
@@ -309,6 +310,7 @@ def setup_meson_build(
                     )
                     _ts_print("[MESON] 🔄 Forcing reconfigure to update build targets")
                     force_reconfigure = True
+                    unity_changed = True
             except (OSError, IOError):
                 # If we can't read the marker, force reconfigure to be safe
                 _ts_print("[MESON] ⚠️  Could not read unity marker, forcing reconfigure")
@@ -318,6 +320,46 @@ def setup_meson_build(
             # Force reconfigure to ensure Meson is configured with correct unity setting
             _ts_print("[MESON] ℹ️  No unity marker found, forcing reconfigure")
             force_reconfigure = True
+
+        # CRITICAL: Delete thin archives when unity build settings change
+        # Thin archives store file paths to object files. When unity builds change,
+        # object file names change (e.g., src_foo.cpp.obj → fastled-unity0.cpp.obj),
+        # causing thin archives to reference non-existent files.
+        # NOTE: We must delete archives regardless of current thin_archives setting,
+        # because old thin archives from previous builds may still exist.
+        if unity_changed:
+            # Delete main FastLED library archive
+            libfastled_a = build_dir / "libfastled.a"
+            if libfastled_a.exists():
+                try:
+                    _ts_print(
+                        "[MESON] 🗑️  Deleting libfastled.a due to unity build change"
+                    )
+                    libfastled_a.unlink()
+                except (OSError, IOError) as e:
+                    _ts_print(f"[MESON] Warning: Could not delete libfastled.a: {e}")
+
+            # Delete all platforms_shared static library archives
+            # These may be thin archives that reference individual object files
+            import glob
+
+            platforms_shared_archives = glob.glob(
+                str(build_dir / "libplatforms_shared_*.a")
+            )
+            if platforms_shared_archives:
+                deleted_count = 0
+                for archive_path in platforms_shared_archives:
+                    try:
+                        Path(archive_path).unlink()
+                        deleted_count += 1
+                    except (OSError, IOError) as e:
+                        _ts_print(
+                            f"[MESON] Warning: Could not delete {archive_path}: {e}"
+                        )
+                if deleted_count > 0:
+                    _ts_print(
+                        f"[MESON] 🗑️  Deleted {deleted_count} platforms_shared archives due to unity build change"
+                    )
 
         # Check if source files have changed since last configure
         # This detects when files are added or removed, which requires reconfigure
