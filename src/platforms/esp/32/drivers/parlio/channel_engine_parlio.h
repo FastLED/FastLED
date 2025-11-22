@@ -265,9 +265,9 @@ private:
         fl::vector<uint8_t> scratch_padded_buffer; ///< Contiguous buffer for actual channels only (regular heap, non-DMA)
 
         // Precomputed waveforms (generated from timing parameters during initialization)
-        fl::array<uint8_t, 4> bit0_waveform;      ///< Waveform pattern for bit 0 (4 pulses)
-        fl::array<uint8_t, 4> bit1_waveform;      ///< Waveform pattern for bit 1 (4 pulses)
-        size_t pulses_per_bit;                     ///< Number of pulses per bit (should be 4 for WS2812)
+        fl::array<uint8_t, 16> bit0_waveform;      ///< Waveform pattern for bit 0 (up to 16 pulses)
+        fl::array<uint8_t, 16> bit1_waveform;      ///< Waveform pattern for bit 1 (up to 16 pulses)
+        size_t pulses_per_bit;                     ///< Number of pulses per bit (varies by clock frequency)
 
         ParlioState(size_t width)
             : tx_unit(nullptr)

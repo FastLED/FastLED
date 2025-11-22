@@ -1,5 +1,5 @@
 {
-    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "terminal.integrated.shellIntegration.enabled": false,
     "terminal.integrated.profiles.windows": {
         "Command Prompt": {

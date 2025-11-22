@@ -40,9 +40,10 @@ namespace fl {
 //=============================================================================
 
 // WS2812 timing requirements with PARLIO
-// Clock: 3.2 MHz (312.5ns per tick)
-// Each LED bit is encoded as 4 clock ticks
-static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 3200000;  // 3.2 MHz
+// Clock: 8.0 MHz (125ns per tick) - Testing ESP32-C6 compatibility
+// Each LED bit is encoded as 10 clock ticks (1.25μs total)
+// Divides evenly from 80MHz (80/10) and 40MHz (40/5)
+static constexpr uint32_t PARLIO_CLOCK_FREQ_HZ = 8000000;  // 8.0 MHz
 
 // Default GPIO pins for PARLIO output (can be customized later)
 // These are just placeholders - real pins should be configured per platform
@@ -576,14 +577,19 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     // - Bit 0: 1 pulse HIGH + 3 pulses LOW = 312.5ns H + 937.5ns L = 1250ns total
     // - Bit 1: 3 pulses HIGH + 1 pulse LOW = 937.5ns H + 312.5ns L = 1250ns total
     //
-    // WS2812 specification compliance (all within tolerance):
-    // - T0H: 312.5ns (spec: 400±150ns = 250-550ns) ✓
-    // - T0L: 937.5ns (spec: 850±150ns = 700-1000ns) ✓
-    // - T1H: 937.5ns (spec: 800±150ns = 650-950ns) ✓
-    // - T1L: 312.5ns (spec: 450±150ns = 300-600ns) ✓
-    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 313, 312,
+    // WS2812 specification compliance (testing 8MHz with standard timing):
+    // - T0H: 375ns (spec: 400±150ns = 250-550ns) ✓
+    // - T0L: 875ns (spec: 850±150ns = 700-1000ns) ✓
+    // - T1H: 875ns (spec: 800±150ns = 650-950ns) ✓
+    // - T1L: 375ns (spec: 450±150ns = 300-600ns) ✓
+    // WS2812B timing adapted for 8MHz clock
+    // With 8MHz (125ns/pulse), total = 10 pulses = 1.25μs per bit (standard timing)
+    // Bit 0: t1=375ns (3 pulses HIGH), t2=500ns, t3=375ns (7 pulses LOW total)
+    // Bit 1: t1=375ns, t2=500ns (7 pulses HIGH total), t3=375ns (3 pulses LOW)
+    // This matches standard WS2812 timing requirements
+    size_t bit0_size = fl::generateBit0Waveform(PARLIO_CLOCK_FREQ_HZ, 375, 500, 375,
         mState.bit0_waveform.data(), mState.bit0_waveform.size());
-    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 312, 313, 312,
+    size_t bit1_size = fl::generateBit1Waveform(PARLIO_CLOCK_FREQ_HZ, 375, 500, 375,
         mState.bit1_waveform.data(), mState.bit1_waveform.size());
 
     if (bit0_size == 0 || bit1_size == 0 || bit0_size != bit1_size) {

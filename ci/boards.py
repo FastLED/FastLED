@@ -15,7 +15,7 @@ ESP32_IDF_5_1_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/r
 # TODO: Upgrade toolkit to 5.3
 ESP32_IDF_5_3_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/53.03.10/platform-espressif32.zip"
 ESP32_IDF_5_4_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/54.03.20/platform-espressif32.zip"
-ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.30-2/platform-espressif32.zip"
+ESP32_IDF_5_5_PIOARDUINO = "https://github.com/pioarduino/platform-espressif32/releases/download/55.03.34/platform-espressif32.zip"
 ESP32_IDF_LATEST_PIOARDUINO = ESP32_IDF_5_5_PIOARDUINO
 
 ESP32_IDF_LATEST_PIOARDUINO = (

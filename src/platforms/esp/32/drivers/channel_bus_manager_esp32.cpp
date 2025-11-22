@@ -35,7 +35,7 @@ namespace fl {
 namespace {
     constexpr int PRIORITY_PARLIO = 100;  ///< Highest (PARLIO engine - ESP32-P4/C6/H2/C5)
     constexpr int PRIORITY_SPI = 50;      ///< Medium (SPI engine)
-    constexpr int PRIORITY_RMT = 200;     ///< TESTING: Temporarily highest priority for RMT testing
+    constexpr int PRIORITY_RMT = 10;      ///< Lowest (Fallback RMT engine - all ESP32 variants)
 }
 
 /// @brief Initialize ESP32 channel bus manager with platform-specific engines
@@ -49,13 +49,28 @@ static void initializeChannelBusManager() {
 
     // Add engines (automatically sorted by priority on each insertion)
     #if FASTLED_ESP32_HAS_PARLIO
+    #if defined(CONFIG_IDF_TARGET_ESP32C6)
+    // PARLIO has clock gating bug on ESP32-C6 (ESP-IDF ≤ v5.4.1)
+    // TX clock domain must be enabled BEFORE querying frequency, but driver
+    // queries frequency first, causing ALL clock sources/frequencies to fail
+    // with ESP_ERR_NOT_SUPPORTED (error 258).
+    // Disabling PARLIO on C6 until ESP-IDF driver is fixed.
+    FL_WARN("ESP32-C6: PARLIO driver disabled due to clock initialization bug (ESP-IDF ≤v5.4.1)");
+    FL_WARN("ESP32-C6: Falling back to RMT driver for LED control");
+    #else
     manager.addEngine(PRIORITY_PARLIO, fl::make_shared<ChannelEnginePARLIO>());
     FL_DBG("ESP32: Added PARLIO engine (priority " << PRIORITY_PARLIO << ")");
     #endif
+    #endif
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
+    #if defined(CONFIG_IDF_TARGET_ESP32C6)
+    // ESP32-C6 does not have available SPI hosts for LED control (max 0 hosts)
+    FL_DBG("ESP32-C6: SPI engine not available (no SPI hosts)");
+    #else
     manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");
+    #endif
     #endif
 
     #if FASTLED_RMT5
