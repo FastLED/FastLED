@@ -70,20 +70,21 @@ void ChannelBusManager::show() {
 }
 
 IChannelEngine::EngineState ChannelBusManager::poll() {
-    if (mActiveEngine) {
-        // Forward to active engine's poll()
-        EngineState state = mActiveEngine->poll();
-
-        // Clear transmitting channels when READY
-        if (state == EngineState::READY && !mTransmittingChannels.empty()) {
-            mTransmittingChannels.clear();
+    // Poll all registered engines to allow buffer cleanup
+    // even when mActiveEngine is nullptr (after onEndFrame reset)
+    bool anyBusy = false;
+    for (auto& entry : mEngines) {
+        if (entry.engine->poll() == EngineState::BUSY) {
+            anyBusy = true;
         }
-
-        return state;
     }
 
-    // No active engine = idle state
-    return EngineState::READY;
+    // Clear transmitting channels when all engines are ready
+    if (!anyBusy && !mTransmittingChannels.empty()) {
+        mTransmittingChannels.clear();
+    }
+
+    return anyBusy ? EngineState::BUSY : EngineState::READY;
 }
 
 void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
@@ -98,25 +99,24 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
     }
 
     // Forward channel data to active engine by enqueueing and showing
-    // Poll first to ensure active engine is in READY state
-    FL_DBG("ChannelBusManager: Transmitting with priority " << mActiveEnginePriority);
-    FL_DBG("ChannelBusManager: Polling active engine before transmission");
-    mActiveEngine->poll();  // Clear any previous transmission state
+    // Poll in a loop until engine is ready for new data
+    while (mActiveEngine->poll() != EngineState::READY) {
+        // Keep polling until previous transmission completes
+    }
 
-    FL_DBG("ChannelBusManager: Enqueueing " << channelData.size() << " channels");
     for (const auto& channel : channelData) {
         mActiveEngine->enqueue(channel);
     }
-    FL_DBG("ChannelBusManager: Calling show() on active engine");
     mActiveEngine->show();
-    FL_DBG("ChannelBusManager: Transmission complete");
     mLastError.clear();  // Success - clear any previous errors
 }
 
 void ChannelBusManager::onEndFrame() {
+    // Trigger transmission of all batched channel data
+    show();
+
     // Reset to highest priority engine for next frame
     // This allows us to re-evaluate engine selection each frame
-    FL_DBG("ChannelBusManager: Resetting to highest priority engine for next frame");
     mActiveEngine = nullptr;
     mActiveEnginePriority = -1;
 }
@@ -132,7 +132,6 @@ IChannelEngine* ChannelBusManager::selectEngine() {
     mActiveEngine = entry.engine.get();
     mActiveEnginePriority = entry.priority;
 
-    FL_DBG("ChannelBusManager: Selected engine with priority " << mActiveEnginePriority);
     return mActiveEngine;
 }
 

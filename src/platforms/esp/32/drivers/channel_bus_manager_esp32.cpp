@@ -35,7 +35,7 @@ namespace fl {
 namespace {
     constexpr int PRIORITY_PARLIO = 100;  ///< Highest (PARLIO engine - ESP32-P4/C6/H2/C5)
     constexpr int PRIORITY_SPI = 50;      ///< Medium (SPI engine)
-    constexpr int PRIORITY_RMT = 10;      ///< Lowest (RMT fallback)
+    constexpr int PRIORITY_RMT = 200;     ///< TESTING: Temporarily highest priority for RMT testing
 }
 
 /// @brief Initialize ESP32 channel bus manager with platform-specific engines

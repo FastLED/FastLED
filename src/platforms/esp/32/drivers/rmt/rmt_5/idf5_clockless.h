@@ -50,9 +50,10 @@ protected:
     // Prepares data for the draw.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        // Fail-fast race condition detection: Buffer MUST NOT be in use
-        // If this assertion fires, the hardware wait in releaseChannel() is insufficient
-        FL_ASSERT(!mChannelData->isInUse(), "ClocklessIdf5: Race condition - buffer still in use by engine!");
+        // Wait for previous transmission to complete and release buffer
+        while (mChannelData->isInUse()) {
+            mEngine->poll();  // Keep polling until buffer is released
+        }
 
         // Convert pixels to encoded byte data
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
@@ -60,7 +61,7 @@ protected:
         data.clear();
         iterator.writeWS2812(&data);
 
-        // Enqueue for transmission (will be sent when engine->show() is called)
+        // Enqueue for transmission (actual transmission happens in onEndFrame)
         mEngine->enqueue(mChannelData);
     }
 };

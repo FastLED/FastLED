@@ -5,10 +5,12 @@
 #include "sdkconfig.h"
 #include "platforms/esp/esp_version.h"
 
+#if !defined(FASTLED_ESP32_HAS_CLOCKLESS_SPI)
 #if ESP_IDF_VERSION < ESP_IDF_VERSION_VAL(5, 0, 0) || defined(CONFIG_IDF_TARGET_ESP8266)
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 0
 #else
 #define FASTLED_ESP32_HAS_CLOCKLESS_SPI 1
+#endif
 #endif
 
 // RMT driver availability
