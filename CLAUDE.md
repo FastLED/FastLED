@@ -69,9 +69,17 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `bash debug` - Auto-detect environment
 - `bash debug esp32dev` - Specific environment
 - `bash debug --upload-port COM3` - Specific serial port
-- `bash debug --timeout 60` - Monitor timeout (default: 10s)
+- `bash debug --timeout 120` - Monitor timeout in seconds (default: 80s)
+- `bash debug --timeout 2m` - Monitor timeout with time suffix (2 minutes)
+- `bash debug --timeout 5000ms` - Monitor timeout in milliseconds (5 seconds)
 - `bash debug --fail-on PANIC` - Exit 1 if keyword found in output
 - `bash debug --fail-on ERROR --fail-on CRASH` - Multiple failure keywords
+
+**Timeout Formats:**
+- Plain number: `120` (assumes seconds)
+- Seconds: `120s`
+- Minutes: `2m`
+- Milliseconds: `5000ms`
 
 **Exit Codes:**
 - 0: Success (normal timeout or clean exit)

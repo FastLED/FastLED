@@ -23,6 +23,9 @@ Usage:
     uv run ci/debug_attached.py esp32dev                 # Specific environment
     uv run ci/debug_attached.py --verbose                # Verbose mode
     uv run ci/debug_attached.py --upload-port /dev/ttyUSB0  # Specific port
+    uv run ci/debug_attached.py --timeout 120            # Monitor for 120 seconds
+    uv run ci/debug_attached.py --timeout 2m             # Monitor for 2 minutes
+    uv run ci/debug_attached.py --timeout 5000ms         # Monitor for 5 seconds
     uv run ci/debug_attached.py --fail-on PANIC          # Exit 1 if "PANIC" found
     uv run ci/debug_attached.py --fail-on ERROR --fail-on CRASH  # Multiple keywords
     uv run ci/debug_attached.py --stream                 # Stream mode (runs until Ctrl+C)
@@ -30,6 +33,7 @@ Usage:
 """
 
 import argparse
+import re
 import sys
 import time
 from pathlib import Path
@@ -41,6 +45,58 @@ from running_process.process_output_reader import EndOfStream
 from ci.compiler.build_utils import get_utf8_env
 from ci.util.global_interrupt_handler import notify_main_thread
 from ci.util.output_formatter import TimestampFormatter
+
+
+def parse_timeout(timeout_str: str) -> int:
+    """Parse timeout string with optional suffix into seconds.
+
+    Supported formats:
+        - Plain number: "120" → 120 seconds
+        - Milliseconds: "5000ms" → 5 seconds
+        - Seconds: "120s" → 120 seconds
+        - Minutes: "2m" → 120 seconds
+
+    Args:
+        timeout_str: Timeout string (e.g., "120", "2m", "5000ms")
+
+    Returns:
+        Timeout in seconds (integer)
+
+    Raises:
+        ValueError: If format is invalid or value is not positive
+    """
+    timeout_str = timeout_str.strip()
+
+    # Match number with optional suffix
+    match = re.match(r"^(\d+(?:\.\d+)?)\s*(ms|s|m)?$", timeout_str, re.IGNORECASE)
+    if not match:
+        raise ValueError(
+            f"Invalid timeout format: '{timeout_str}'. "
+            f"Expected formats: '120', '120s', '2m', '5000ms'"
+        )
+
+    value_str, suffix = match.groups()
+    value = float(value_str)
+
+    if value <= 0:
+        raise ValueError(f"Timeout must be positive, got: {value}")
+
+    # Convert to seconds
+    if suffix is None or suffix.lower() == "s":
+        # Default is seconds
+        seconds = value
+    elif suffix.lower() == "ms":
+        # Milliseconds to seconds
+        seconds = value / 1000
+    elif suffix.lower() == "m":
+        # Minutes to seconds
+        seconds = value * 60
+    else:
+        # Should never reach here due to regex
+        raise ValueError(f"Unknown suffix: {suffix}")
+
+    # Return as integer (round up to ensure at least 1 second for small values)
+    return max(1, int(seconds))
 
 
 def kill_lingering_monitors() -> int:
@@ -214,7 +270,7 @@ def run_monitor(
     environment: str | None = None,
     monitor_port: str | None = None,
     verbose: bool = False,
-    timeout: int = 10,
+    timeout: int = 80,
     fail_keywords: list[str] | None = None,
     stream: bool = False,
 ) -> tuple[bool, list[str]]:
@@ -225,7 +281,7 @@ def run_monitor(
         environment: PlatformIO environment to monitor (None = default)
         monitor_port: Serial port to monitor (None = auto-detect)
         verbose: Enable verbose output
-        timeout: Maximum time to monitor in seconds (default: 10)
+        timeout: Maximum time to monitor in seconds (default: 80)
         fail_keywords: List of keywords that trigger exit code 1 if found
         stream: If True, monitor runs indefinitely until Ctrl+C (ignores timeout)
 
@@ -383,6 +439,9 @@ Examples:
   %(prog)s esp32dev                 # Specific environment
   %(prog)s --verbose                # Verbose mode
   %(prog)s --upload-port /dev/ttyUSB0  # Specific port
+  %(prog)s --timeout 120            # Monitor for 120 seconds
+  %(prog)s --timeout 2m             # Monitor for 2 minutes
+  %(prog)s --timeout 5000ms         # Monitor for 5 seconds
   %(prog)s --fail-on PANIC          # Exit 1 if "PANIC" found in output
   %(prog)s --fail-on ERROR --fail-on CRASH  # Multiple failure keywords
   %(prog)s --stream                 # Stream mode (runs until Ctrl+C)
@@ -409,9 +468,9 @@ Examples:
     parser.add_argument(
         "--timeout",
         "-t",
-        type=int,
-        default=10,
-        help="Timeout for monitor phase in seconds (default: 10)",
+        type=str,
+        default="80",
+        help="Timeout for monitor phase. Supports: plain number (seconds), '120s', '2m', '5000ms' (default: 80)",
     )
     parser.add_argument(
         "--project-dir",
@@ -449,6 +508,13 @@ def main() -> int:
         print("   Make sure you're running this from a PlatformIO project directory")
         return 1
 
+    # Parse timeout string with suffix support
+    try:
+        timeout_seconds = parse_timeout(args.timeout)
+    except ValueError as e:
+        print(f"❌ Error: {e}")
+        return 1
+
     print("FastLED Debug Attached Device")
     print("=" * 60)
     print(f"Project: {build_dir}")
@@ -474,7 +540,7 @@ def main() -> int:
             args.environment,
             args.upload_port,  # Use same port for monitoring
             args.verbose,
-            args.timeout,
+            timeout_seconds,
             args.fail_keywords,
             args.stream,
         )
