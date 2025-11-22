@@ -150,7 +150,7 @@ public:
 
     template<int BITS,int PX> __attribute__ ((always_inline)) inline static void writeBits(FASTLED_REGISTER uint32_t & next_mark, FASTLED_REGISTER Lines & b, Lines & b3, PixelController<RGB_ORDER,LANES, PORT_MASK> &pixels) { // , FASTLED_REGISTER uint32_t & b2)  {
         Lines b2;
-        ::transpose8x1(b.bytes,b2.bytes);
+        fl::transpose8x1(b.bytes,b2.bytes);
 
         FASTLED_REGISTER uint8_t d = pixels.template getd<PX>(pixels);
         FASTLED_REGISTER uint8_t scale = pixels.template getscale<PX>(pixels);

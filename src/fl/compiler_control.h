@@ -219,8 +219,16 @@
 #endif
 
 // Platform-specific IRAM attribute for functions that must run from IRAM
-// (ESP32: required for ISR handlers and functions called from ISRs)
-#ifdef ESP32
+// (ESP32/ESP8266: required for ISR handlers and functions called from ISRs)
+//
+// Usage: void FL_IRAM myInterruptHandler() { ... }
+//
+// Platform behavior:
+//   ESP32: Uses IRAM_ATTR from esp_attr.h (places code in internal SRAM)
+//   ESP8266: Uses IRAM_ATTR from Arduino SDK (places code in internal SRAM)
+//   STM32: Uses .text_ram section attribute (places code in fast RAM)
+//   Other platforms: No-op (functions execute from normal memory)
+#if defined(ESP32)
   #ifdef __cplusplus
     FL_EXTERN_C_BEGIN
     #include "esp_attr.h"  // Provides IRAM_ATTR for ESP32
@@ -229,8 +237,18 @@
     #include "esp_attr.h"
   #endif
   #define FL_IRAM IRAM_ATTR
+#elif defined(ESP8266)
+  // ESP8266: IRAM_ATTR is provided by Arduino ESP8266 SDK (via ets_sys.h -> c_types.h)
+  // No need to include headers - it's already defined by the platform
+  #ifndef IRAM_ATTR
+    #define IRAM_ATTR __attribute__((section(".iram.text")))
+  #endif
+  #define FL_IRAM IRAM_ATTR
+#elif defined(__arm__) && defined(STM32)
+  // STM32: Place in fast RAM section (.text_ram)
+  #define FL_IRAM __attribute__((section(".text_ram")))
 #else
-  #define FL_IRAM  // No-op on non-ESP32 platforms
+  #define FL_IRAM  // No-op on other platforms
 #endif
 
 
@@ -277,28 +295,3 @@
   #define FL_NODISCARD
 #endif
 
-// IRAM/Fast Memory Placement Attribute
-// Places function/data in fast internal RAM instead of flash memory.
-// Critical for ISR handlers on ESP32 (flash cache disabled during flash operations).
-//
-// Usage: void FL_IRAM myInterruptHandler() { ... }
-//
-// Platform behavior:
-//   ESP32/ESP8266: Uses IRAM_ATTR (places code in internal SRAM)
-//   STM32 (future): Uses .text_ram section attribute
-//   Other platforms: No-op (functions execute from normal memory)
-#if defined(ESP32) || defined(ESP8266)
-  // ESP32/ESP8266: Use IRAM_ATTR from ESP-IDF/SDK
-  #ifndef IRAM_ATTR
-    FL_EXTERN_C_BEGIN
-    #include "esp_attr.h"
-    FL_EXTERN_C_END
-  #endif
-  #define FL_IRAM IRAM_ATTR
-#elif defined(__arm__) && defined(STM32)
-  // STM32: Place in fast RAM section (.text_ram)
-  #define FL_IRAM __attribute__((section(".text_ram")))
-#else
-  // Other platforms: No-op
-  #define FL_IRAM
-#endif
