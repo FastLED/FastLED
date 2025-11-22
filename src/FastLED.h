@@ -35,6 +35,17 @@
 #endif
 #endif
 
+// ESP32 RMT Driver conflict prevention
+// Arduino ESP32 Core 3.x includes a neopixelWrite() function that uses the new RMT driver,
+// which conflicts with FastLED's legacy RMT4 driver when FASTLED_RMT5=0.
+// Disable Arduino's built-in RGB LED support to prevent the conflict.
+// Reference: https://github.com/espressif/arduino-esp32/issues/9866
+#ifdef FASTLED_RMT5
+#if FASTLED_RMT5 == 0 && !defined(ESP32_ARDUINO_NO_RGB_BUILTIN)
+#error "Please also define ESP32_ARDUINO_NO_RGB_BUILTIN to prevent conflicts with FastLED's RMT driver."
+#endif
+#endif
+
 
 #if !defined(FASTLED_FAKE_SPI_FORWARDS_TO_FAKE_CLOCKLESS)
 #if defined(__EMSCRIPTEN__)
