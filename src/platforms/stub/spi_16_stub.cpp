@@ -197,18 +197,16 @@ fl::vector<fl::vector<uint8_t>> SpiHw16Stub::extractLanes(uint8_t num_lanes, siz
 // Factory Implementation
 // ============================================================================
 
-/// Stub factory override - returns mock instances for testing
-/// Strong definition overrides weak default
-FL_LINK_WEAK
-fl::vector<SpiHw16*> SpiHw16::createInstances() {
-    fl::vector<SpiHw16*> controllers;
-
-    // Provide 1 mock 16-lane SPI bus for testing (I2S0)
-    static SpiHw16Stub controller0(0, "MockHexadecaSPI0");  // Bus 0 (I2S0) - static lifetime
-
-    controllers.push_back(&controller0);
-
-    return controllers;
+/// Register stub instances during static initialization
+namespace {
+    struct SpiHw16StubRegistrar {
+        SpiHw16StubRegistrar() {
+            // Provide 1 mock 16-lane SPI bus for testing (I2S0)
+            static auto controller0 = fl::make_shared<SpiHw16Stub>(0, "MockHexadecaSPI0");
+            SpiHw16::registerInstance(controller0);
+        }
+    };
+    static SpiHw16StubRegistrar g_spi_hw16_stub_registrar;
 }
 
 }  // namespace fl

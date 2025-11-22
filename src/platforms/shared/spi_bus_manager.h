@@ -66,7 +66,7 @@ struct SPIBusInfo {
     uint8_t num_devices;            ///< Number of devices on this bus
     SPIDeviceInfo devices[16];      ///< Device list (max 16 for I2S parallel mode)
     uint8_t spi_bus_num;            ///< Hardware SPI bus number (2 or 3)
-    void* hw_controller;            ///< Pointer to hardware controller (Single/Dual/Quad/Octo/Hexadeca)
+    fl::shared_ptr<SpiHwBase> hw_controller;  ///< Polymorphic hardware controller (SpiHw1/2/4/8/16)
     bool is_initialized;            ///< Whether hardware is initialized
     const char* error_message;      ///< Error message if initialization failed
 

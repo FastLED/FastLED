@@ -201,22 +201,30 @@ fl::vector<fl::vector<uint8_t>> SpiHw2Stub::extractLanes(uint8_t num_lanes, size
 }
 
 // ============================================================================
-// Factory Implementation (Weak Linkage for Testing)
+// Instance Registration
 // ============================================================================
 
-FL_LINK_WEAK
-fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    fl::vector<SpiHw2*> controllers;
+namespace {
 
-    // Create two mock controllers for testing
-    static SpiHw2Stub controller0(0, "MockDual0");
-    static SpiHw2Stub controller1(1, "MockDual1");
-
-    controllers.push_back(&controller0);
-    controllers.push_back(&controller1);
-
-    return controllers;
+// Singleton getters for mock controller instances (Meyer's Singleton pattern)
+fl::shared_ptr<SpiHw2Stub>& getController0_Spi2() {
+    static fl::shared_ptr<SpiHw2Stub> instance = fl::make_shared<SpiHw2Stub>(0, "MockDual0");
+    return instance;
 }
+
+fl::shared_ptr<SpiHw2Stub>& getController1_Spi2() {
+    static fl::shared_ptr<SpiHw2Stub> instance = fl::make_shared<SpiHw2Stub>(1, "MockDual1");
+    return instance;
+}
+
+/// Register instances at static initialization time via constructor attribute
+FL_CONSTRUCTOR
+static void registerSpiHw2Instances() {
+    SpiHw2::registerInstance(getController0_Spi2());
+    SpiHw2::registerInstance(getController1_Spi2());
+}
+
+}  // anonymous namespace
 
 }  // namespace fl
 

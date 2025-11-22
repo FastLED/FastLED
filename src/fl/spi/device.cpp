@@ -30,11 +30,10 @@ Device::~Device() {
 
     FL_LOG_SPI("SPI Device: Checking owned hardware backend");
     // Clean up owned hardware backend (for SINGLE_SPI mode)
+    // Note: hw_backend is now a shared_ptr, so cleanup is automatic
     if (pImpl && pImpl->owns_backend && pImpl->hw_backend) {
         FL_LOG_SPI("SPI Device: Cleaning up owned hardware backend");
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
-        hw->end();
-        delete hw;
+        pImpl->hw_backend->end();
         pImpl->hw_backend = nullptr;
     }
     FL_LOG_SPI("SPI Device: Destructor complete");
@@ -88,14 +87,14 @@ fl::optional<fl::Error> Device::begin() {
     const SPIBusInfo* bus_info = mgr.getBusInfo(pImpl->bus_handle.bus_id);
     if (bus_info && bus_info->bus_type == SPIBusType::SINGLE_SPI && !bus_info->hw_controller) {
         // Create and initialize a SpiHw1 controller
-        const fl::vector<SpiHw1*>& controllers = SpiHw1::getAll();
+        const fl::vector<fl::shared_ptr<SpiHw1>>& controllers = SpiHw1::getAll();
         if (controllers.empty()) {
             FL_WARN("SPI Device: No SpiHw1 controllers available on this platform");
             return fl::Error("No SpiHw1 controllers available");
         }
 
         // Use the first available controller (could be improved with bus number selection)
-        SpiHw1* hw = controllers[0];
+        fl::shared_ptr<SpiHw1> hw = controllers[0];
 
         SpiHw1::Config hw_config;
         hw_config.clock_pin = pImpl->config.clock_pin;
@@ -265,9 +264,8 @@ DMABuffer Device::acquireBuffer(size_t size) {
         return DMABuffer(SPIError::NOT_INITIALIZED);
     }
 
-    // For single-lane SPI, use SpiHw1 interface
-    // Note: For now, we assume single-lane. Multi-lane support will be added later.
-    SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
+    // Use polymorphic interface (works for SpiHw1/2/4/8)
+    SpiHwBase* hw = pImpl->hw_backend.get();
 
     // Always acquire a fresh buffer from hardware
     // Note: The hardware controller may internally cache/reuse buffers
@@ -297,8 +295,8 @@ fl::optional<fl::Error> Device::transmit(DMABuffer& buffer, bool async) {
         return fl::Error("No hardware controller");
     }
 
-    // For single-lane SPI, use SpiHw1 interface
-    SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
+    // Use polymorphic interface (works for SpiHw1/2/4/8)
+    SpiHwBase* hw = pImpl->hw_backend.get();
 
     // Start transmission
     TransmitMode mode = async ? TransmitMode::ASYNC : TransmitMode::SYNC;
@@ -332,8 +330,8 @@ bool Device::waitComplete(uint32_t timeout_ms) {
         return false;
     }
 
-    // For single-lane SPI, use SpiHw1 interface
-    SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
+    // Use polymorphic interface (works for SpiHw1/2/4/8)
+    SpiHwBase* hw = pImpl->hw_backend.get();
 
     return hw->waitComplete(timeout_ms);
 }
@@ -348,8 +346,8 @@ bool Device::isBusy() const {
         return false;
     }
 
-    // For single-lane SPI, use SpiHw1 interface
-    SpiHw1* hw = static_cast<SpiHw1*>(pImpl->hw_backend);
+    // Use polymorphic interface (works for SpiHw1/2/4/8)
+    SpiHwBase* hw = pImpl->hw_backend.get();
 
     return hw->isBusy();
 }

@@ -1,32 +1,51 @@
 /// @file spi_hw_2.cpp
-/// @brief Default (weak) implementation of 2-lane hardware SPI factory
+/// @brief Direct instance injection for 2-lane hardware SPI
 ///
-/// This provides a weak default implementation that returns an empty vector.
-/// Platform-specific implementations (ESP32, RP2040, etc.) override this
-/// with their own strong definitions.
+/// Platform-specific implementations register their instances directly
+/// during static initialization via registerInstance().
 
 #include "platforms/shared/spi_hw_2.h"
 #include "fl/compiler_control.h"
 
 namespace fl {
 
-
-/// Weak default factory - returns empty vector (no 2-lane SPI support)
-/// Platform-specific implementations override this function
-FL_LINK_WEAK
-fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    // Default: no 2-lane hardware SPI available
-    // Platform implementations will override this with their own strong definition
-    return fl::vector<SpiHw2*>();
+namespace {
+    /// Static registry of all registered instances
+    fl::vector<fl::shared_ptr<SpiHw2>>& getRegistry() {
+        static fl::vector<fl::shared_ptr<SpiHw2>> registry;
+        return registry;
+    }
 }
 
+/// Register a platform-specific instance
+/// Called by platform implementations during static initialization
+void SpiHw2::registerInstance(fl::shared_ptr<SpiHw2> instance) {
+    if (instance) {
+        getRegistry().push_back(instance);
+    }
+}
 
+/// Remove a registered instance
+bool SpiHw2::removeInstance(const fl::shared_ptr<SpiHw2>& instance) {
+    auto& registry = getRegistry();
+    for (size_t i = 0; i < registry.size(); ++i) {
+        if (registry[i] == instance) {
+            registry.erase(registry.begin() + i);
+            return true;
+        }
+    }
+    return false;
+}
 
-/// Get all available 2-lane hardware SPI devices on this platform
+/// Clear all registered instances (primarily for testing)
+void SpiHw2::clearInstances() {
+    getRegistry().clear();
+}
+
+/// Get all registered instances
 /// Implementation moved to cpp to avoid Teensy 3.x __cxa_guard linkage issues
-const fl::vector<SpiHw2*>& SpiHw2::getAll() {
-    static fl::vector<SpiHw2*> instances = createInstances();
-    return instances;
+const fl::vector<fl::shared_ptr<SpiHw2>>& SpiHw2::getAll() {
+    return getRegistry();
 }
 
 }  // namespace fl

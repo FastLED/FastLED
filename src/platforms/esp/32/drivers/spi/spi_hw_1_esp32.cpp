@@ -12,41 +12,13 @@
 #if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_1.h"
+#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
+#include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
 #include "ftl/cstring.h"
 #include <driver/spi_master.h>
 #include <esp_heap_caps.h>
 #include <esp_err.h>
 #include <cstring> // ok include
-
-// Include soc_caps.h if available (ESP-IDF 4.0+)
-// Older versions (like IDF 3.3) don't have this header
-#include "fl/has_include.h"
-#include "platforms/shared/spi_bus_manager.h"  // For DMABuffer, TransmitMode, SPIError
-#if FL_HAS_INCLUDE(<soc/soc_caps.h>)
-  #include "soc/soc_caps.h"
-#endif
-
-// Determine SPI3_HOST availability using SOC capability macro
-// SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available
-// SPI3_HOST is available when SOC_SPI_PERIPH_NUM > 2 (SPI1, SPI2, SPI3)
-#ifndef SOC_SPI_PERIPH_NUM
-    #define SOC_SPI_PERIPH_NUM 2  // Default to 2 for older ESP-IDF versions
-#endif
-
-// ESP-IDF 3.3 compatibility: SPI_DMA_CH_AUTO was added in IDF 4.0
-// On older versions, use DMA channel 1 as default
-#ifndef SPI_DMA_CH_AUTO
-    #define SPI_DMA_CH_AUTO 1
-#endif
-
-// ESP-IDF compatibility: Ensure SPI host constants are defined
-// Modern IDF uses SPI2_HOST/SPI3_HOST, older versions may not have them
-#ifndef SPI2_HOST
-    #define SPI2_HOST ((spi_host_device_t)1)
-#endif
-#ifndef SPI3_HOST
-    #define SPI3_HOST ((spi_host_device_t)2)
-#endif
 
 namespace fl {
 
@@ -305,26 +277,22 @@ void SPISingleESP32::cleanup() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Instance Management (accessed by spi_esp32_init.cpp)
 // ============================================================================
 
-/// ESP32 factory override - returns available SPI bus instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw1*> SpiHw1::createInstances() {
-    fl::vector<SpiHw1*> controllers;
-
-    // Bus 2 is available on all ESP32 platforms
-    static SPISingleESP32 controller2(2, "SPI2");  // Bus 2 - static lifetime
-    controllers.push_back(&controller2);
+// Singleton getters for controller instances (Meyer's Singleton pattern)
+// These are called from the centralized registration in spi_esp32_init.cpp
+fl::shared_ptr<SPISingleESP32>& getController2() {
+    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
+    return instance;
+}
 
 #if SOC_SPI_PERIPH_NUM > 2
-    // Bus 3 is only available when SOC has more than 2 SPI peripherals
-    static SPISingleESP32 controller3(3, "SPI3");  // Bus 3 - static lifetime
-    controllers.push_back(&controller3);
-#endif
-
-    return controllers;
+fl::shared_ptr<SPISingleESP32>& getController3() {
+    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
+    return instance;
 }
+#endif
 
 }  // namespace fl
 

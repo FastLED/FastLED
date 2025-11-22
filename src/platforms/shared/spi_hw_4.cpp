@@ -1,31 +1,51 @@
 /// @file spi_hw_4.cpp
-/// @brief Default (weak) implementation of 4-lane hardware SPI factory
+/// @brief Direct instance injection for 4-lane hardware SPI
 ///
-/// This provides a weak default implementation that returns an empty vector.
-/// Platform-specific implementations (ESP32, RP2040, etc.) override this
-/// with their own strong definitions.
+/// Platform-specific implementations register their instances directly
+/// during static initialization via registerInstance().
 
 #include "platforms/shared/spi_hw_4.h"
 #include "fl/compiler_control.h"
 
 namespace fl {
 
-/// Get all available 4-lane hardware SPI devices on this platform
+namespace {
+    /// Static registry of all registered instances
+    fl::vector<fl::shared_ptr<SpiHw4>>& getRegistry() {
+        static fl::vector<fl::shared_ptr<SpiHw4>> registry;
+        return registry;
+    }
+}
+
+/// Register a platform-specific instance
+/// Called by platform implementations during static initialization
+void SpiHw4::registerInstance(fl::shared_ptr<SpiHw4> instance) {
+    if (instance) {
+        getRegistry().push_back(instance);
+    }
+}
+
+/// Remove a registered instance
+bool SpiHw4::removeInstance(const fl::shared_ptr<SpiHw4>& instance) {
+    auto& registry = getRegistry();
+    for (size_t i = 0; i < registry.size(); ++i) {
+        if (registry[i] == instance) {
+            registry.erase(registry.begin() + i);
+            return true;
+        }
+    }
+    return false;
+}
+
+/// Clear all registered instances (primarily for testing)
+void SpiHw4::clearInstances() {
+    getRegistry().clear();
+}
+
+/// Get all registered instances
 /// This is moved out of the header to avoid __cxa_guard conflicts on some platforms
-const fl::vector<SpiHw4*>& SpiHw4::getAll() {
-    static fl::vector<SpiHw4*> instances = createInstances();
-    return instances;
+const fl::vector<fl::shared_ptr<SpiHw4>>& SpiHw4::getAll() {
+    return getRegistry();
 }
-
-
-/// Weak default factory - returns empty vector (no 4-lane SPI support)
-/// Platform-specific implementations override this function
-FL_LINK_WEAK
-fl::vector<SpiHw4*> SpiHw4::createInstances() {
-    // Default: no 4-lane hardware SPI available
-    // Platform implementations will override this with their own strong definition
-    return fl::vector<SpiHw4*>();
-}
-
 
 }  // namespace fl

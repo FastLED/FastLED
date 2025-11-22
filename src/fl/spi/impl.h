@@ -7,6 +7,7 @@
 #include "fl/spi.h"
 #include "platforms/shared/spi_bus_manager.h"
 #include "platforms/shared/spi_types.h"
+#include "platforms/shared/spi_hw_base.h"
 #include "fl/log.h"
 #include "fl/numeric_limits.h"
 
@@ -31,7 +32,7 @@ struct Device::Impl {
     /// @brief Platform-specific backend pointer (for single-lane SPI)
     /// @note For multi-lane SPI, the backend is managed by SPIBusManager
     /// @note For SINGLE_SPI mode (passthrough), this Device owns the controller
-    void* hw_backend;
+    fl::shared_ptr<SpiHwBase> hw_backend;
 
     /// @brief True if this Device owns the hw_backend (SINGLE_SPI mode)
     bool owns_backend;

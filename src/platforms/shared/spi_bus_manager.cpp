@@ -208,42 +208,9 @@ void SPIBusManager::waitComplete(SPIBusHandle handle) {
         return;
     }
 
-    // Route to appropriate backend
-    switch (bus.bus_type) {
-        case SPIBusType::DUAL_SPI: {
-            if (bus.hw_controller) {
-                // 2-lane (Dual-SPI)
-                SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
-                dual->waitComplete();
-            }
-            break;
-        }
-        case SPIBusType::QUAD_SPI: {
-            if (bus.hw_controller) {
-                // 4-lane (Quad-SPI)
-                SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
-                quad->waitComplete();
-            }
-            break;
-        }
-        case SPIBusType::OCTO_SPI: {
-            if (bus.hw_controller) {
-                // 8-lane (Octal-SPI)
-                SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
-                octal->waitComplete();
-            }
-            break;
-        }
-        case SPIBusType::HEXADECA_SPI: {
-            if (bus.hw_controller) {
-                // 16-lane (Hexadeca-SPI)
-                SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
-                hexadeca->waitComplete();
-            }
-            break;
-        }
-        default:
-            break;
+    // Use polymorphic interface - works for all SPI types
+    if (bus.hw_controller) {
+        bus.hw_controller->waitComplete();
     }
 }
 
@@ -271,8 +238,6 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
             return;
         }
 
-        SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
-
         // Find maximum lane size
         size_t max_size = 0;
         for (uint8_t i = 0; i < bus.num_devices && i < 2; i++) {
@@ -285,8 +250,8 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
             return;  // No data to transmit
         }
 
-        // Acquire DMA buffer (zero-copy API)
-        DMABuffer result = dual->acquireDMABuffer(max_size);
+        // Acquire DMA buffer (zero-copy API) - use polymorphic interface
+        DMABuffer result = bus.hw_controller->acquireDMABuffer(max_size);
         if (!result.ok()) {
             FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Dual-SPI: " << static_cast<int>(result.error()));
             // Clear buffers and bail
@@ -323,10 +288,10 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
             return;
         }
 
-        // Transmit via Dual-SPI hardware
-        bool transmit_ok = dual->transmit(TransmitMode::ASYNC);
+        // Transmit via Dual-SPI hardware - use polymorphic interface
+        bool transmit_ok = bus.hw_controller->transmit(TransmitMode::ASYNC);
         if (transmit_ok) {
-            dual->waitComplete();
+            bus.hw_controller->waitComplete();
         } else {
             FL_WARN("SPI Bus Manager: Dual-SPI transmit failed");
         }
@@ -367,7 +332,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     DMABuffer result;
     fl::span<uint8_t> dma_buf;
     if (is_hexadeca) {
-        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller.get());
         result = hexadeca->acquireDMABuffer(max_size);
         if (!result.ok()) {
             FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Hexadeca-SPI: " << static_cast<int>(result.error()));
@@ -379,7 +344,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
         }
         dma_buf = result.data();
     } else if (is_octal) {
-        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller.get());
         result = octal->acquireDMABuffer(max_size);
         if (!result.ok()) {
             FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Octal-SPI: " << static_cast<int>(result.error()));
@@ -391,7 +356,7 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
         }
         dma_buf = result.data();
     } else {
-        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller.get());
         result = quad->acquireDMABuffer(max_size);
         if (!result.ok()) {
             FL_WARN_FMT("SPI Bus Manager: Failed to acquire DMA buffer for Quad-SPI: " << static_cast<int>(result.error()));
@@ -500,21 +465,21 @@ void SPIBusManager::finalizeTransmission(SPIBusHandle handle) {
     bool transmit_ok = false;
     if (is_hexadeca_mode) {
         // 16-lane (Hexadeca-SPI)
-        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller.get());
         transmit_ok = hexadeca->transmit(TransmitMode::ASYNC);
         if (transmit_ok) {
             hexadeca->waitComplete();
         }
     } else if (is_octal_mode) {
         // 8-lane (Octal-SPI)
-        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller.get());
         transmit_ok = octal->transmit(TransmitMode::ASYNC);
         if (transmit_ok) {
             octal->waitComplete();
         }
     } else {
         // 4-lane (Quad-SPI)
-        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller.get());
         transmit_ok = quad->transmit(TransmitMode::ASYNC);
         if (transmit_ok) {
             quad->waitComplete();
@@ -674,8 +639,8 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         }
 
         // Try each controller until we find one that works
-        SpiHw2* dual_ctrl = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw2> dual_ctrl;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 dual_ctrl = ctrl;
                 break;
@@ -726,8 +691,8 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         }
 
         // Try each controller until we find one that works
-        SpiHw4* quad_ctrl = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw4> quad_ctrl;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 quad_ctrl = ctrl;
                 break;
@@ -782,8 +747,8 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         }
 
         // Try each controller until we find one that works
-        SpiHw8* octal_ctrl = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw8> octal_ctrl;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 octal_ctrl = ctrl;
                 break;
@@ -842,8 +807,8 @@ bool SPIBusManager::promoteToMultiSPI(SPIBusInfo& bus) {
         }
 
         // Try each controller until we find one that works
-        SpiHw16* hexadeca_ctrl = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw16> hexadeca_ctrl;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 hexadeca_ctrl = ctrl;
                 break;
@@ -1005,7 +970,7 @@ void SPIBusManager::releaseBusHardware(SPIBusInfo& bus) {
     // Release Single-SPI controller (runtime detection)
     if (bus.bus_type == SPIBusType::SINGLE_SPI && bus.hw_controller) {
         FL_DBG("SPIBusManager: releaseBusHardware() releasing SINGLE_SPI controller");
-        SpiHw1* single = static_cast<SpiHw1*>(bus.hw_controller);
+        SpiHw1* single = static_cast<SpiHw1*>(bus.hw_controller.get());
         FL_DBG("SPIBusManager: releaseBusHardware() calling single->end()");
         single->end();  // Shutdown SPI peripheral
         FL_DBG("SPIBusManager: releaseBusHardware() nulling hw_controller");
@@ -1014,28 +979,28 @@ void SPIBusManager::releaseBusHardware(SPIBusInfo& bus) {
 
     // Release Dual-SPI controller (runtime detection)
     if (bus.bus_type == SPIBusType::DUAL_SPI && bus.hw_controller) {
-        SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller);
+        SpiHw2* dual = static_cast<SpiHw2*>(bus.hw_controller.get());
         dual->end();  // Shutdown SPI/SERCOM peripheral
         bus.hw_controller = nullptr;
     }
 
     // Release Quad-SPI controller
     if (bus.bus_type == SPIBusType::QUAD_SPI && bus.hw_controller) {
-        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller);
+        SpiHw4* quad = static_cast<SpiHw4*>(bus.hw_controller.get());
         quad->end();  // Shutdown SPI peripheral
         bus.hw_controller = nullptr;
     }
 
     // Release Octal-SPI controller
     if (bus.bus_type == SPIBusType::OCTO_SPI && bus.hw_controller) {
-        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller);
+        SpiHw8* octal = static_cast<SpiHw8*>(bus.hw_controller.get());
         octal->end();  // Shutdown SPI peripheral
         bus.hw_controller = nullptr;
     }
 
     // Release Hexadeca-SPI controller
     if (bus.bus_type == SPIBusType::HEXADECA_SPI && bus.hw_controller) {
-        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller);
+        SpiHw16* hexadeca = static_cast<SpiHw16*>(bus.hw_controller.get());
         hexadeca->end();  // Shutdown SPI/I2S peripheral
         bus.hw_controller = nullptr;
     }

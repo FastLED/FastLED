@@ -206,6 +206,17 @@
   #define FL_MAYBE_UNUSED
 #endif
 
+// Mark functions to run during C++ static initialization (before main())
+// Used for auto-registration of platform-specific implementations
+#if defined(__GNUC__) || defined(__clang__)
+  #define FL_CONSTRUCTOR __attribute__((constructor))
+#elif defined(_MSC_VER)
+  // MSVC requires different approach - use #pragma init_seg
+  #define FL_CONSTRUCTOR
+  #pragma message("Warning: FL_CONSTRUCTOR not fully supported on MSVC")
+#else
+  #define FL_CONSTRUCTOR
+#endif
 
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus

@@ -104,63 +104,54 @@ FastLED has evolved its platform directory to contain **dispatch headers** that 
 3. **Easy to maintain**: Adding new variants only requires changes in platform-specific headers
 4. **Follows existing patterns**: See `platforms/int.h`, `platforms/audio.h` for reference implementations
 
-#### Real-world example: Quad-SPI detection
+#### Real-world example: SPI hardware registration
 
-**Modern approach** uses runtime detection with weak symbols instead of compile-time macros:
+**Modern approach** uses centralized static initialization with instance registration:
 
+**Platform-specific implementation** in `platforms/esp/32/drivers/spi/spi_esp32_init.cpp`:
 ```cpp
-// platforms/quad_spi_platform.h - Simple compile-time API check
-#if defined(FASTLED_TESTING) || defined(ESP32)
-    #define FASTLED_HAS_QUAD_SPI_API 1
-#else
-    #define FASTLED_HAS_QUAD_SPI_API 0
-#endif
-```
+namespace fl {
 
-**Platform-specific implementation** in `platforms/esp/32/spi_quad_esp32.cpp`:
-```cpp
-// Weak default in platforms/shared/spi_quad.cpp
-FL_LINK_WEAK
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
-    return fl::vector<SPIQuad*>();  // No Quad-SPI
+// Forward declaration of the ESP32 Single-SPI implementation class
+class SPISingleESP32;
+
+namespace {
+
+// Singleton getters for controller instances (Meyer's Singleton pattern)
+fl::shared_ptr<SPISingleESP32>& getController2() {
+    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
+    return instance;
 }
 
-// Strong override in platforms/esp/32/spi_quad_esp32.cpp
-fl::vector<SPIQuad*> SPIQuad::createInstances() {
-    fl::vector<SPIQuad*> controllers;
-
-#if defined(ESP32) || defined(ESP32S2) || defined(ESP32S3)
-    static SPIQuadESP32 controller2(2, "HSPI");
-    static SPIQuadESP32 controller3(3, "VSPI");
-    controllers.push_back(&controller2);
-    controllers.push_back(&controller3);
-#elif defined(ESP32C3)
-    static SPIQuadESP32 controller2(2, "SPI2");  // Dual-SPI only
-    controllers.push_back(&controller2);
-#elif defined(ESP32P4)
-    // Octal-SPI support - future enhancement
-    static SPIQuadESP32 controller2(2, "SPI2");
-    static SPIQuadESP32 controller3(3, "SPI3");
-    controllers.push_back(&controller2);
-    controllers.push_back(&controller3);
+#if SOC_SPI_PERIPH_NUM > 2
+fl::shared_ptr<SPISingleESP32>& getController3() {
+    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
+    return instance;
+}
 #endif
 
-    return controllers;
+// Register all ESP32 SPI hardware instances at static initialization time
+FL_CONSTRUCTOR
+static void registerAllESP32SpiInstances() {
+    // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
+    SpiHw1::registerInstance(getController2());
+    #if SOC_SPI_PERIPH_NUM > 2
+    SpiHw1::registerInstance(getController3());
+    #endif
+
+    // Note: For parallel strips (2+ strips), ESP32 uses the I2S peripheral via SpiHw16,
+    // which is registered in the I2S driver initialization code.
 }
+
+}  // anonymous namespace
+}  // namespace fl
 ```
 
-**Runtime usage**:
-```cpp
-// Check available controllers at runtime
-const auto& controllers = SPIQuad::getAll();
-if (controllers.empty()) {
-    // Platform doesn't support Quad-SPI
-} else {
-    // Use controllers[0], controllers[1], etc.
-}
-```
-
-This pattern uses weak linkage to provide default behavior while allowing platform-specific implementations to override at link time. It moves platform detection from compile-time to runtime, making the codebase more maintainable and testable.
+**Key advantages**:
+- **Centralized registration**: All SPI instances registered in one place, easier to understand and maintain
+- **Meyer's Singleton**: Thread-safe lazy initialization using static local variables
+- **SOC capability detection**: Automatically adapts to different ESP32 variants (ESP32, ESP32-S3, ESP32-C3, etc.)
+- **Type-safe shared pointers**: Automatic memory management with fl::shared_ptr
 
 ### Controller types in FastLED
 

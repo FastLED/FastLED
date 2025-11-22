@@ -15,7 +15,9 @@
 #include "ftl/span.h"
 #include "ftl/stdint.h"
 #include "ftl/limits.h"
+#include "ftl/shared_ptr.h"
 #include "platforms/shared/spi_types.h"
+#include "platforms/shared/spi_hw_base.h"
 
 namespace fl {
 
@@ -27,7 +29,7 @@ class SpiHw1;
 /// and provide concrete implementations of all virtual methods.
 ///
 /// Naming: "SpiHw1" = SPI Hardware 1-lane
-class SpiHw1 {
+class SpiHw1 : public SpiHwBase {
 public:
     virtual ~SpiHw1() = default;
 
@@ -52,60 +54,79 @@ public:
     /// @returns true on success, false on error
     virtual bool begin(const Config& config) = 0;
 
+    /// @brief Polymorphic begin() override for SpiHwBase interface
+    /// @param config Type-erased config pointer (must be Config*)
+    /// @returns true on success, false on error
+    bool begin(const void* config) override {
+        return begin(*static_cast<const Config*>(config));
+    }
+
+    /// @brief Get lane count for polymorphic interface
+    /// @returns Always returns 1 for single-lane SPI
+    uint8_t getLaneCount() const override { return 1; }
+
     /// Shutdown SPI peripheral and release resources
     /// @note Should wait for any pending transmissions to complete
-    virtual void end() = 0;
+    virtual void end() override = 0;
 
     /// Acquire writable DMA buffer for zero-copy transmission
     /// @param size Number of bytes needed
     /// @returns DMABuffer containing buffer span or error code
     /// @note Automatically waits (calls waitComplete()) if previous transmission active
     /// @note Buffer remains valid until waitComplete() is called
-    virtual DMABuffer acquireDMABuffer(size_t size) = 0;
+    virtual DMABuffer acquireDMABuffer(size_t size) override = 0;
 
     /// Transmit data from previously acquired DMA buffer
     /// @param mode Transmission mode hint (SYNC or ASYNC)
     /// @returns true if transmitted successfully, false on error
     /// @note ESP32: Queues async DMA transaction (non-blocking)
     /// @note Must call acquireDMABuffer() before this
-    virtual bool transmit(TransmitMode mode = TransmitMode::ASYNC) = 0;
+    virtual bool transmit(TransmitMode mode = TransmitMode::ASYNC) override = 0;
 
     /// Wait for current transmission to complete (blocking)
     /// @param timeout_ms Maximum wait time in milliseconds
     /// @returns true if completed, false on timeout
     /// @note **Releases DMA buffer** - buffer acquired via acquireDMABuffer() becomes invalid
-    virtual bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) = 0;
+    virtual bool waitComplete(uint32_t timeout_ms = (fl::numeric_limits<uint32_t>::max)()) override = 0;
 
     /// Check if a transmission is currently in progress
     /// @returns true if busy, false if idle
-    virtual bool isBusy() const = 0;
+    virtual bool isBusy() const override = 0;
 
     /// Get initialization status
     /// @returns true if initialized, false otherwise
-    virtual bool isInitialized() const = 0;
+    virtual bool isInitialized() const override = 0;
 
     /// Get the SPI bus number/ID for this controller
     /// @returns SPI bus number (e.g., 2 or 3 for ESP32), or -1 if not assigned
-    virtual int getBusId() const = 0;
+    virtual int getBusId() const override = 0;
 
     /// Get the platform-specific peripheral name for this controller
     /// @returns Human-readable peripheral name (e.g., "HSPI", "VSPI", "SPI0")
     /// @note Primarily for debugging, logging, and error messages
     /// @note Returns "Unknown" if not assigned
-    virtual const char* getName() const = 0;
+    virtual const char* getName() const override = 0;
 
     /// Get all available 1-lane hardware SPI devices on this platform
     /// @returns Reference to static vector of available devices
     /// @note Cached - only allocates once on first call
     /// @note Returns empty vector if platform doesn't support hardware SPI
-    /// @note Returns bare pointers - instances are alive forever (static lifetime)
-    static const fl::vector<SpiHw1*>& getAll();
+    /// @note Instances are managed via shared_ptr for safe lifetime management
+    static const fl::vector<fl::shared_ptr<SpiHw1>>& getAll();
 
-private:
-    /// Platform-specific factory implementation (weak linkage)
-    /// Each platform overrides this with strong definition
-    /// @returns Vector of platform-specific instances
-    static fl::vector<SpiHw1*> createInstances();
+    /// Register a platform-specific instance
+    /// @param instance Shared pointer to platform-specific SpiHw1 instance
+    /// @note Called by platform implementations during static initialization
+    static void registerInstance(fl::shared_ptr<SpiHw1> instance);
+
+    /// Remove a registered instance
+    /// @param instance The shared pointer to remove from the registry
+    /// @returns true if removed, false if not found
+    static bool removeInstance(const fl::shared_ptr<SpiHw1>& instance);
+
+    /// Clear all registered instances (primarily for testing)
+    /// @note Use with caution - invalidates all references returned by getAll()
+    static void clearInstances();
 };
 
 }  // namespace fl

@@ -34,14 +34,17 @@ ParallelDevice::Config::Config()
 // Implementation Details (pImpl pattern)
 // ============================================================================
 
-struct ParallelDevice::Impl : public DeviceImplBase {
+struct ParallelDevice::Impl {
     Config config;
+    bool initialized;
+    void* backend;  // Points to SpiIsr* or SpiBlock* (not owned by shared_ptr)
     bool is_isr_mode;
     uint8_t backend_width;  // 1, 2, 4, 8, 16, or 32
 
     Impl(const Config& cfg)
-        : DeviceImplBase()
-        , config(cfg)
+        : config(cfg)
+        , initialized(false)
+        , backend(nullptr)
         , is_isr_mode(false)
         , backend_width(0) {
     }
@@ -75,7 +78,8 @@ struct ParallelDevice::Impl : public DeviceImplBase {
 
         // Note: SpiIsr* and SpiBlock* backends don't need delete
         // (they're typically stack-allocated in this impl)
-        clearBackend();  // Use base class method
+        backend = nullptr;
+        initialized = false;
     }
 };
 
@@ -222,7 +226,7 @@ void ParallelDevice::end() {
 }
 
 bool ParallelDevice::isReady() const {
-    return pImpl && pImpl->isReady();
+    return pImpl && pImpl->initialized && pImpl->backend != nullptr;
 }
 
 Result<Transaction> ParallelDevice::write(const uint8_t* data, size_t size) {

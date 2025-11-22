@@ -42,20 +42,8 @@ struct MultiLaneDevice::Impl : public DeviceImplBase {
     void releaseBackend() {
         if (!backend) return;
 
-        // Call end() on appropriate backend type
-        if (backend_type == 1) {
-            SpiHw1* hw = static_cast<SpiHw1*>(backend);
-            hw->end();
-        } else if (backend_type == 2) {
-            SpiHw2* hw = static_cast<SpiHw2*>(backend);
-            hw->end();
-        } else if (backend_type == 4) {
-            SpiHw4* hw = static_cast<SpiHw4*>(backend);
-            hw->end();
-        } else if (backend_type == 8) {
-            SpiHw8* hw = static_cast<SpiHw8*>(backend);
-            hw->end();
-        }
+        // Use polymorphic interface - no casting needed!
+        backend->end();
 
         clearBackend();  // Use base class method
     }
@@ -111,8 +99,8 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
         }
 
         // Find first available controller
-        SpiHw1* hw = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw1> hw;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 hw = ctrl;
                 break;
@@ -149,8 +137,8 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
         }
 
         // Find first available controller
-        SpiHw2* hw = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw2> hw;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 hw = ctrl;
                 break;
@@ -188,8 +176,8 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
         }
 
         // Find first available controller
-        SpiHw4* hw = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw4> hw;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 hw = ctrl;
                 break;
@@ -229,8 +217,8 @@ fl::optional<fl::Error> MultiLaneDevice::begin() {
         }
 
         // Find first available controller
-        SpiHw8* hw = nullptr;
-        for (auto* ctrl : controllers) {
+        fl::shared_ptr<SpiHw8> hw;
+        for (const auto& ctrl : controllers) {
             if (!ctrl->isInitialized()) {
                 hw = ctrl;
                 break;
@@ -344,24 +332,8 @@ Result<void> MultiLaneDevice::flush() {
     // Use expected_size for DMA buffer allocation (all lanes now guaranteed same size)
     size_t max_size = expected_size;
 
-    // Acquire DMA buffer from hardware backend
-    DMABuffer dma_buffer;
-    if (pImpl->backend_type == 1) {
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->backend);
-        dma_buffer = hw->acquireDMABuffer(max_size);
-    } else if (pImpl->backend_type == 2) {
-        SpiHw2* hw = static_cast<SpiHw2*>(pImpl->backend);
-        dma_buffer = hw->acquireDMABuffer(max_size);
-    } else if (pImpl->backend_type == 4) {
-        SpiHw4* hw = static_cast<SpiHw4*>(pImpl->backend);
-        dma_buffer = hw->acquireDMABuffer(max_size);
-    } else if (pImpl->backend_type == 8) {
-        SpiHw8* hw = static_cast<SpiHw8*>(pImpl->backend);
-        dma_buffer = hw->acquireDMABuffer(max_size);
-    } else {
-        return Result<void>::failure(SPIError::NOT_INITIALIZED,
-            "Invalid backend type");
-    }
+    // Acquire DMA buffer from hardware backend - use polymorphic interface
+    DMABuffer dma_buffer = pImpl->backend->acquireDMABuffer(max_size);
 
     if (!dma_buffer.ok()) {
         FL_WARN("MultiLaneDevice: Failed to acquire DMA buffer");
@@ -447,21 +419,8 @@ Result<void> MultiLaneDevice::flush() {
             error ? error : "Transposition failed");
     }
 
-    // Transmit via hardware backend
-    bool transmit_ok = false;
-    if (pImpl->backend_type == 1) {
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->backend);
-        transmit_ok = hw->transmit(TransmitMode::ASYNC);
-    } else if (pImpl->backend_type == 2) {
-        SpiHw2* hw = static_cast<SpiHw2*>(pImpl->backend);
-        transmit_ok = hw->transmit(TransmitMode::ASYNC);
-    } else if (pImpl->backend_type == 4) {
-        SpiHw4* hw = static_cast<SpiHw4*>(pImpl->backend);
-        transmit_ok = hw->transmit(TransmitMode::ASYNC);
-    } else if (pImpl->backend_type == 8) {
-        SpiHw8* hw = static_cast<SpiHw8*>(pImpl->backend);
-        transmit_ok = hw->transmit(TransmitMode::ASYNC);
-    }
+    // Transmit via hardware backend - use polymorphic interface
+    bool transmit_ok = pImpl->backend->transmit(TransmitMode::ASYNC);
 
     if (!transmit_ok) {
         FL_WARN("MultiLaneDevice: Hardware transmit failed");
@@ -487,22 +446,8 @@ bool MultiLaneDevice::waitComplete(uint32_t timeout_ms) {
         return false;
     }
 
-    // Wait on appropriate backend
-    if (pImpl->backend_type == 1) {
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->backend);
-        return hw->waitComplete(timeout_ms);
-    } else if (pImpl->backend_type == 2) {
-        SpiHw2* hw = static_cast<SpiHw2*>(pImpl->backend);
-        return hw->waitComplete(timeout_ms);
-    } else if (pImpl->backend_type == 4) {
-        SpiHw4* hw = static_cast<SpiHw4*>(pImpl->backend);
-        return hw->waitComplete(timeout_ms);
-    } else if (pImpl->backend_type == 8) {
-        SpiHw8* hw = static_cast<SpiHw8*>(pImpl->backend);
-        return hw->waitComplete(timeout_ms);
-    }
-
-    return false;
+    // Use polymorphic interface - no casting needed!
+    return pImpl->backend->waitComplete(timeout_ms);
 }
 
 bool MultiLaneDevice::isBusy() const {
@@ -510,22 +455,8 @@ bool MultiLaneDevice::isBusy() const {
         return false;
     }
 
-    // Check busy status on appropriate backend
-    if (pImpl->backend_type == 1) {
-        SpiHw1* hw = static_cast<SpiHw1*>(pImpl->backend);
-        return hw->isBusy();
-    } else if (pImpl->backend_type == 2) {
-        SpiHw2* hw = static_cast<SpiHw2*>(pImpl->backend);
-        return hw->isBusy();
-    } else if (pImpl->backend_type == 4) {
-        SpiHw4* hw = static_cast<SpiHw4*>(pImpl->backend);
-        return hw->isBusy();
-    } else if (pImpl->backend_type == 8) {
-        SpiHw8* hw = static_cast<SpiHw8*>(pImpl->backend);
-        return hw->isBusy();
-    }
-
-    return false;
+    // Use polymorphic interface - no casting needed!
+    return pImpl->backend->isBusy();
 }
 
 WriteResult MultiLaneDevice::writeImpl(fl::span<const fl::span<const uint8_t>> lane_data) {

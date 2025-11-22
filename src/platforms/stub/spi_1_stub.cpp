@@ -145,22 +145,30 @@ void SpiHw1Stub::reset() {
 }
 
 // ============================================================================
-// Factory Implementation (Weak Linkage for Testing)
+// Instance Registration
 // ============================================================================
 
-FL_LINK_WEAK
-fl::vector<SpiHw1*> SpiHw1::createInstances() {
-    fl::vector<SpiHw1*> controllers;
+namespace {
 
-    // Create two mock controllers for testing
-    static SpiHw1Stub controller0(0, "MockSingle0");
-    static SpiHw1Stub controller1(1, "MockSingle1");
-
-    controllers.push_back(&controller0);
-    controllers.push_back(&controller1);
-
-    return controllers;
+// Singleton getters for mock controller instances (Meyer's Singleton pattern)
+fl::shared_ptr<SpiHw1Stub>& getController0_Spi1() {
+    static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(0, "MockSingle0");
+    return instance;
 }
+
+fl::shared_ptr<SpiHw1Stub>& getController1_Spi1() {
+    static fl::shared_ptr<SpiHw1Stub> instance = fl::make_shared<SpiHw1Stub>(1, "MockSingle1");
+    return instance;
+}
+
+/// Register instances at static initialization time via constructor attribute
+FL_CONSTRUCTOR
+static void registerSpiHw1Instances() {
+    SpiHw1::registerInstance(getController0_Spi1());
+    SpiHw1::registerInstance(getController1_Spi1());
+}
+
+}  // anonymous namespace
 
 }  // namespace fl
 

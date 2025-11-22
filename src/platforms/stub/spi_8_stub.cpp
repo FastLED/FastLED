@@ -185,24 +185,30 @@ fl::vector<fl::vector<uint8_t>> SpiHw8Stub::extractLanes(uint8_t num_lanes, size
 }
 
 // ============================================================================
-// Factory Implementation
+// Instance Registration
 // ============================================================================
 
-/// Stub factory override - returns mock instances for testing
-/// Strong definition overrides weak default
-FL_LINK_WEAK
-fl::vector<SpiHw8*> SpiHw8::createInstances() {
-    fl::vector<SpiHw8*> controllers;
+namespace {
 
-    // Provide 2 mock 8-lane SPI buses for testing
-    static SpiHw8Stub controller2(2, "MockOctalSPI2");  // Bus 2 - static lifetime
-    static SpiHw8Stub controller3(3, "MockOctalSPI3");  // Bus 3 - static lifetime
-
-    controllers.push_back(&controller2);
-    controllers.push_back(&controller3);
-
-    return controllers;
+// Singleton getters for mock controller instances (Meyer's Singleton pattern)
+fl::shared_ptr<SpiHw8Stub>& getController2_Spi8() {
+    static fl::shared_ptr<SpiHw8Stub> instance = fl::make_shared<SpiHw8Stub>(2, "MockOctalSPI2");
+    return instance;
 }
+
+fl::shared_ptr<SpiHw8Stub>& getController3_Spi8() {
+    static fl::shared_ptr<SpiHw8Stub> instance = fl::make_shared<SpiHw8Stub>(3, "MockOctalSPI3");
+    return instance;
+}
+
+/// Register instances at static initialization time via constructor attribute
+FL_CONSTRUCTOR
+static void registerSpiHw8Instances() {
+    SpiHw8::registerInstance(getController2_Spi8());
+    SpiHw8::registerInstance(getController3_Spi8());
+}
+
+}  // anonymous namespace
 
 }  // namespace fl
 
