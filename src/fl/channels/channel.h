@@ -23,7 +23,7 @@
 namespace fl {
 
 // Forward declarations
-class ChannelEngine;
+class IChannelEngine;
 class ChannelData;
 struct LEDSettings;
 
@@ -44,7 +44,7 @@ public:
     /// @return Shared pointer to channel (auto-cleanup when out of scope)
     template<typename CHANNEL_ENGINE>
     static ChannelPtr create(const ChannelConfig& config) {
-        ChannelEngine* engine = fl::Singleton<CHANNEL_ENGINE>::instance();
+        IChannelEngine* engine = fl::Singleton<CHANNEL_ENGINE>::instance();
         return create(config, engine);
     }
 
@@ -52,7 +52,7 @@ public:
     /// @param config Channel configuration
     /// @param engine Channel engine this channel belongs to
     /// @return Shared pointer to the channel
-    static ChannelPtr create(const ChannelConfig& config, ChannelEngine* engine);
+    static ChannelPtr create(const ChannelConfig& config, IChannelEngine* engine);
 
     /// @brief Destructor
     virtual ~Channel();
@@ -70,12 +70,12 @@ public:
     const ChipsetTimingConfig& getTiming() const { return mTiming; }
 
     /// @brief Get the channel engine this channel belongs to
-    /// @return Pointer to the ChannelEngine, or nullptr if not set
-    ChannelEngine* getChannelEngine() const { return mEngine; }
+    /// @return Pointer to the IChannelEngine, or nullptr if not set
+    IChannelEngine* getChannelEngine() const { return mEngine; }
 
     /// @brief Set the channel engine this channel belongs to
-    /// @param engine Pointer to the ChannelEngine
-    void setChannelEngine(ChannelEngine* engine) { mEngine = engine; }
+    /// @param engine Pointer to the IChannelEngine
+    void setChannelEngine(IChannelEngine* engine) { mEngine = engine; }
 
 private:
     // CPixelLEDController interface implementation
@@ -88,7 +88,7 @@ private:
 
     /// @brief Private constructor (use create() factory method)
     Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-            EOrder rgbOrder, ChannelEngine* engine, const LEDSettings& settings);
+            EOrder rgbOrder, IChannelEngine* engine, const LEDSettings& settings);
 
     // Non-copyable, non-movable
     Channel(const Channel&) = delete;
@@ -101,7 +101,7 @@ private:
     const int mPin;
     const ChipsetTimingConfig mTiming;
     const EOrder mRgbOrder;
-    ChannelEngine* mEngine;
+    IChannelEngine* mEngine;
     const int32_t mId;
     ChannelDataPtr mChannelData;
 };

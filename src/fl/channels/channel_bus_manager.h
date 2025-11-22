@@ -32,12 +32,12 @@ namespace fl {
 
 /// @brief Unified channel bus manager with priority-based engine selection
 ///
-/// This manager inherits from ChannelEngine and acts as a transparent proxy
+/// This manager inherits from IChannelEngine and acts as a transparent proxy
 /// to concrete engine implementations (RMT, SPI, PARLIO). Strip drivers use
-/// it polymorphically through the ChannelEngine interface.
+/// it polymorphically through the IChannelEngine interface.
 ///
 /// Platform-specific code registers engines during static initialization.
-class ChannelBusManager : public ChannelEngine, public EngineEvents::Listener {
+class ChannelBusManager : public IChannelEngine, public EngineEvents::Listener {
 public:
     /// @brief Constructor
     ChannelBusManager();
@@ -50,32 +50,35 @@ public:
     /// @param engine Shared engine implementation (allows caller to retain reference for testing)
     /// @note Platform-specific code calls this during static initialization
     /// @note Engines are automatically sorted by priority on each insertion
-    void addEngine(int priority, fl::shared_ptr<ChannelEngine> engine);
+    void addEngine(int priority, fl::shared_ptr<IChannelEngine> engine);
 
     /// @brief Enqueue channel data for transmission
     /// @param channelData Channel data to transmit
-    /// @note Selects engine on first call, then forwards to base class enqueue()
+    /// @note Selects engine on first call, then batches channel data
     void enqueue(ChannelDataPtr channelData) override;
+
+    /// @brief Trigger transmission of enqueued data
+    void show() override;
+
+    /// @brief Query engine state and perform maintenance
+    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
+    EngineState poll() override;
 
     /// @brief Reset to highest priority engine for next frame
     /// @note Called at frame boundaries to allow engine re-evaluation
     void onEndFrame() override;
 
-protected:
-    /// @brief Query engine state (polls active engine)
-    /// @return Current engine state from active engine, or READY if no engine
-    EngineState pollDerived() override;
-
+private:
     /// @brief Begin transmission using active engine with fallback
     /// @param channelData Span of channel data to transmit
     /// @note Tries active engine, falls back to next priority on failure
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
 
 private:
     /// @brief Engine registry entry (priority + shared pointer)
     struct EngineEntry {
         int priority;
-        fl::shared_ptr<ChannelEngine> engine;
+        fl::shared_ptr<IChannelEngine> engine;
 
         /// @brief Sort by priority descending (highest first)
         bool operator<(const EngineEntry& other) const {
@@ -86,22 +89,29 @@ private:
     /// @brief Select engine for current operation
     /// @return Pointer to selected engine, or nullptr if none available
     /// @note Selects highest priority engine from registry
-    ChannelEngine* selectEngine();
+    IChannelEngine* selectEngine();
 
     /// @brief Get next lower priority engine for fallback
     /// @return Pointer to next engine, or nullptr if none available
     /// @note Searches for engine with priority lower than current active engine
-    ChannelEngine* getNextLowerPriorityEngine();
+    IChannelEngine* getNextLowerPriorityEngine();
 
     /// @brief Shared engines sorted by priority descending
     /// @note Each entry contains priority and shared_ptr to engine
     fl::vector<EngineEntry> mEngines;
 
     /// @brief Currently active engine (cached for performance)
-    ChannelEngine* mActiveEngine = nullptr;
+    IChannelEngine* mActiveEngine = nullptr;
 
     /// @brief Priority of active engine (for fallback logic)
     int mActiveEnginePriority = -1;
+
+    /// @brief Internal state management for IChannelEngine interface
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
+    fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
+
+    /// @brief Error message storage
+    fl::string mLastError;
 
     // Non-copyable, non-movable
     ChannelBusManager(const ChannelBusManager&) = delete;

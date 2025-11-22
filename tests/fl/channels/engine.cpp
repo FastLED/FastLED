@@ -1,5 +1,5 @@
 /// @file engine.cpp
-/// @brief Tests for the Channel and ChannelEngine API
+/// @brief Tests for the Channel and IChannelEngine API
 
 #include "test.h"
 #include "fl/channels/channel.h"
@@ -7,27 +7,49 @@
 #include "fl/channels/channel_engine.h"
 #include "fl/channels/channel_data.h"
 #include "fl/chipsets/chipset_timing_config.h"
+#include "ftl/vector.h"
+#include "ftl/move.h"
 
 namespace channel_engine_test {
 
 using namespace fl;
 
-/// Mock ChannelEngine for testing
-class MockEngine : public ChannelEngine {
+/// Mock IChannelEngine for testing
+class MockEngine : public IChannelEngine {
 public:
     int transmitCount = 0;
     int lastChannelCount = 0;
 
-protected:
-    void beginTransmission(fl::span<const ChannelDataPtr> channels) override {
+    void enqueue(ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueuedChannels.push_back(channelData);
+        }
+    }
+
+    void show() override {
+        if (!mEnqueuedChannels.empty()) {
+            mTransmittingChannels = fl::move(mEnqueuedChannels);
+            mEnqueuedChannels.clear();
+            beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+        }
+    }
+
+    EngineState poll() override {
+        // Mock implementation: always return READY after transmission
+        if (!mTransmittingChannels.empty()) {
+            mTransmittingChannels.clear();
+        }
+        return EngineState::READY;
+    }
+
+private:
+    void beginTransmission(fl::span<const ChannelDataPtr> channels) {
         transmitCount++;
         lastChannelCount = channels.size();
     }
 
-    EngineState pollDerived() override {
-        // Mock implementation: always return READY after transmission
-        return EngineState::READY;
-    }
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;
+    fl::vector<ChannelDataPtr> mTransmittingChannels;
 };
 
 TEST_CASE("Channel basic operations") {

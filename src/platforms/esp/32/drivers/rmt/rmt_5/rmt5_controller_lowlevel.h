@@ -22,10 +22,10 @@ FL_EXTERN_C_END
 namespace fl {
 
 /**
- * RmtController5LowLevel - Lightweight FastLED controller using ChannelEngine
+ * RmtController5LowLevel - Lightweight FastLED controller using IChannelEngine
  *
  * Architecture:
- * - Creates ChannelData for transmission via ChannelEngine
+ * - Creates ChannelData for transmission via IChannelEngine
  * - Uses ChannelEngineRMT for actual RMT worker management
  * - Integrates with FastLED via standard controller interface
  *
@@ -36,7 +36,7 @@ namespace fl {
  *
  * Memory Model:
  * - Controller owns ChannelData (persistent)
- * - ChannelEngine manages RMT workers (temporary)
+ * - IChannelEngine manages RMT workers (temporary)
  */
 class RmtController5LowLevel {
 public:
@@ -57,7 +57,7 @@ private:
     ChannelDataPtr mChannelData;
 
     // Channel engine for RMT transmission
-    ChannelEngine* mEngine;
+    IChannelEngine* mEngine;
 };
 
 } // namespace fl

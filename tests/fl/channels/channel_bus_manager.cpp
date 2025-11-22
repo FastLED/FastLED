@@ -6,6 +6,8 @@
 #include "fl/channels/channel_data.h"
 #include "fl/chipsets/chipset_timing_config.h"
 #include "ftl/shared_ptr.h"
+#include "ftl/vector.h"
+#include "ftl/move.h"
 #include "fl/dbg.h"
 
 namespace channel_bus_manager_test {
@@ -14,7 +16,7 @@ using namespace fl;
 
 /// Simple fake engine for testing - no mocks needed
 /// Tracks transmission calls without actually transmitting
-class FakeEngine : public ChannelEngine {
+class FakeEngine : public IChannelEngine {
 public:
     FakeEngine(const char* name, bool shouldFail = false)
         : mName(name), mShouldFail(shouldFail) {
@@ -30,29 +32,48 @@ public:
     void reset() { mTransmitCount = 0; mLastChannelCount = 0; }
     void setShouldFail(bool shouldFail) { mShouldFail = shouldFail; }
 
-protected:
-    void beginTransmission(fl::span<const ChannelDataPtr> channels) override {
-        mTransmitCount++;
-        mLastChannelCount = static_cast<int>(channels.size());
-
-        if (mShouldFail) {
-            setLastError(fl::string("Engine ") + mName + " failed");
+    void enqueue(ChannelDataPtr channelData) override {
+        if (channelData) {
+            mEnqueuedChannels.push_back(channelData);
         }
     }
 
-    EngineState pollDerived() override {
+    void show() override {
+        if (!mEnqueuedChannels.empty()) {
+            mTransmittingChannels = fl::move(mEnqueuedChannels);
+            mEnqueuedChannels.clear();
+            beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+        }
+    }
+
+    EngineState poll() override {
         if (mShouldFail) {
             return EngineState::ERROR;
         }
         // Fake implementation: always return READY (transmission completes instantly)
+        if (!mTransmittingChannels.empty()) {
+            mTransmittingChannels.clear();
+        }
         return EngineState::READY;
     }
 
 private:
+    void beginTransmission(fl::span<const ChannelDataPtr> channels) {
+        mTransmitCount++;
+        mLastChannelCount = static_cast<int>(channels.size());
+
+        if (mShouldFail) {
+            mLastError = fl::string("Engine ") + mName + " failed";
+        }
+    }
+
     const char* mName;
     bool mShouldFail;
     int mTransmitCount = 0;
     int mLastChannelCount = 0;
+    fl::string mLastError;
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;
+    fl::vector<ChannelDataPtr> mTransmittingChannels;
 };
 
 /// Helper to create dummy channel data
@@ -68,7 +89,7 @@ TEST_CASE("ChannelBusManager - Basic initialization") {
     ChannelBusManager manager;
 
     // Should be in READY state with no engines
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Add single engine") {
@@ -81,13 +102,13 @@ TEST_CASE("ChannelBusManager - Add single engine") {
     manager.enqueue(channelData);
 
     // Poll before show to ensure clean state
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // Now test actual transmission
     manager.show();
 
     // Poll after show - should still be READY (fake engine completes instantly)
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // Verify engine was actually used
     CHECK(engine->getTransmitCount() == 1);
@@ -165,21 +186,21 @@ TEST_CASE("ChannelBusManager - No engines available") {
     manager.show();
 
     // Should not crash - manager handles gracefully
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Null engine ignored") {
     ChannelBusManager manager;
 
     // Add null engine - should be ignored
-    manager.addEngine(100, fl::shared_ptr<ChannelEngine>(nullptr));
+    manager.addEngine(100, fl::shared_ptr<IChannelEngine>(nullptr));
 
     auto channelData = createDummyChannelData();
     manager.enqueue(channelData);
     manager.show();
 
     // Should handle gracefully (no crash)
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Poll forwards to active engine") {
@@ -189,12 +210,12 @@ TEST_CASE("ChannelBusManager - Poll forwards to active engine") {
     manager.addEngine(100, engine);
 
     // Before any enqueue, should be READY
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 
     // After enqueue and show, should still be READY (fake engine returns READY)
     manager.enqueue(createDummyChannelData());
     manager.show();
-    CHECK(manager.poll() == ChannelEngine::EngineState::READY);
+    CHECK(manager.poll() == IChannelEngine::EngineState::READY);
 }
 
 TEST_CASE("ChannelBusManager - Multiple frames with same engine") {

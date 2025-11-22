@@ -26,7 +26,7 @@ private:
     ChannelDataPtr mChannelData;
 
     // Channel engine reference (manager provides best available engine)
-    ChannelEngine* mEngine;
+    IChannelEngine* mEngine;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");

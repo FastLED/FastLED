@@ -58,12 +58,10 @@ ChannelEngineSpi::ChannelEngineSpi()
     , mLastRetryFrame(0)
 {
     FL_DBG("ChannelEngineSpi: Constructor called");
-    EngineEvents::addListener(this);
 }
 
 ChannelEngineSpi::~ChannelEngineSpi() {
     FL_DBG("ChannelEngineSpi: Destructor called");
-    EngineEvents::removeListener(this);
     mMultiLaneConfigs.clear();
 
     // Clean up all channels
@@ -130,17 +128,33 @@ void ChannelEngineSpi::configureMultiLanePins(const MultiLanePinConfig& pinConfi
     FL_DBG("ChannelEngineSpi: Multi-lane configuration stored for pin " << pinConfig.data0_pin);
 }
 
-void ChannelEngineSpi::onEndFrame() {
-    // Poll until all transmissions complete
-    // Similar to ChannelEngineRMT pattern
-    Timeout timeout(time(), 10);  // 10ms timeout
-    while (poll() != EngineState::READY && !timeout.done(time())) {
-        // Busy-wait for transmission completion
-        yield();
+void ChannelEngineSpi::enqueue(ChannelDataPtr channelData) {
+    if (!channelData) {
+        FL_WARN("ChannelEngineSpi: Null channel data passed to enqueue()");
+        return;
     }
+
+    FL_DBG("ChannelEngineSpi: Enqueuing channel for pin " << channelData->getPin());
+    mEnqueuedChannels.push_back(channelData);
 }
 
-ChannelEngine::EngineState ChannelEngineSpi::pollDerived() {
+void ChannelEngineSpi::show() {
+    if (mEnqueuedChannels.empty()) {
+        FL_DBG("ChannelEngineSpi: show() called with no enqueued channels");
+        return;
+    }
+
+    FL_DBG("ChannelEngineSpi: show() - starting transmission of " << mEnqueuedChannels.size() << " channels");
+
+    // Move enqueued channels to transmitting list
+    mTransmittingChannels = fl::move(mEnqueuedChannels);
+    mEnqueuedChannels.clear();
+
+    // Begin transmission of all channels
+    beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+}
+
+IChannelEngine::EngineState ChannelEngineSpi::poll() {
     bool anyBusy = false;
     bool anyError = false;
 
@@ -170,9 +184,17 @@ ChannelEngine::EngineState ChannelEngineSpi::pollDerived() {
         processPendingChannels();
     }
 
+    // Determine final state
     if (anyError) return EngineState::ERROR;
     if (anyBusy) return EngineState::BUSY;
     if (!mPendingChannels.empty()) return EngineState::DRAINING;
+
+    // All channels complete - clear transmitting list
+    if (!mTransmittingChannels.empty()) {
+        FL_DBG("ChannelEngineSpi: All transmissions complete, clearing " << mTransmittingChannels.size() << " channels");
+        mTransmittingChannels.clear();
+    }
+
     return EngineState::READY;
 }
 

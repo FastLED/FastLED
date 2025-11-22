@@ -26,7 +26,7 @@ ChannelBusManager::~ChannelBusManager() {
     // Shared engines automatically cleaned up by shared_ptr destructors
 }
 
-void ChannelBusManager::addEngine(int priority, fl::shared_ptr<ChannelEngine> engine) {
+void ChannelBusManager::addEngine(int priority, fl::shared_ptr<IChannelEngine> engine) {
     if (!engine) {
         FL_WARN("ChannelBusManager::addEngine() - Null engine provided");
         return;
@@ -40,27 +40,46 @@ void ChannelBusManager::addEngine(int priority, fl::shared_ptr<ChannelEngine> en
     fl::sort(mEngines.begin(), mEngines.end());
 }
 
-// ChannelEngine interface implementation
+// IChannelEngine interface implementation
 void ChannelBusManager::enqueue(ChannelDataPtr channelData) {
     // Select engine on first call if not already selected
     if (!mActiveEngine) {
         mActiveEngine = selectEngine();
         if (!mActiveEngine) {
             FL_WARN("ChannelBusManager::enqueue() - No engines available");
-            setLastError("No engines available for channel data");
+            mLastError = "No engines available for channel data";
             return;
         }
     }
 
-    // Forward to base class to batch the channel data
-    // The base class will call beginTransmission() later when show() is called
-    ChannelEngine::enqueue(channelData);
+    // Batch the channel data for later transmission
+    if (channelData) {
+        mEnqueuedChannels.push_back(channelData);
+    }
 }
 
-ChannelEngine::EngineState ChannelBusManager::pollDerived() {
+void ChannelBusManager::show() {
+    if (!mEnqueuedChannels.empty()) {
+        // Move enqueued channels to transmitting channels
+        mTransmittingChannels = fl::move(mEnqueuedChannels);
+        mEnqueuedChannels.clear();
+
+        // Begin transmission
+        beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+    }
+}
+
+IChannelEngine::EngineState ChannelBusManager::poll() {
     if (mActiveEngine) {
-        // Forward to active engine's poll() (not pollDerived - we want the wrapper logic)
-        return mActiveEngine->poll();
+        // Forward to active engine's poll()
+        EngineState state = mActiveEngine->poll();
+
+        // Clear transmitting channels when READY
+        if (state == EngineState::READY && !mTransmittingChannels.empty()) {
+            mTransmittingChannels.clear();
+        }
+
+        return state;
     }
 
     // No active engine = idle state
@@ -74,7 +93,7 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
 
     if (!mActiveEngine) {
         FL_WARN("ChannelBusManager::beginTransmission() - No active engine selected");
-        setLastError("No active engine selected");
+        mLastError = "No active engine selected";
         return;
     }
 
@@ -91,7 +110,7 @@ void ChannelBusManager::beginTransmission(fl::span<const ChannelDataPtr> channel
     FL_DBG("ChannelBusManager: Calling show() on active engine");
     mActiveEngine->show();
     FL_DBG("ChannelBusManager: Transmission complete");
-    clearError();  // Success - clear any previous errors
+    mLastError.clear();  // Success - clear any previous errors
 }
 
 void ChannelBusManager::onEndFrame() {
@@ -102,7 +121,7 @@ void ChannelBusManager::onEndFrame() {
     mActiveEnginePriority = -1;
 }
 
-ChannelEngine* ChannelBusManager::selectEngine() {
+IChannelEngine* ChannelBusManager::selectEngine() {
     if (mEngines.empty()) {
         FL_WARN("ChannelBusManager::selectEngine() - No engines registered");
         return nullptr;
@@ -117,7 +136,7 @@ ChannelEngine* ChannelBusManager::selectEngine() {
     return mActiveEngine;
 }
 
-ChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {
+IChannelEngine* ChannelBusManager::getNextLowerPriorityEngine() {
     // NOTE: Currently unused - fallback logic to be implemented in future PR
     // This method will be used to switch to lower priority engine when
     // the current engine runs out of channels

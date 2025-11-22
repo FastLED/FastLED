@@ -35,7 +35,7 @@ enum class DMAState {
     UNAVAILABLE   ///< DMA creation failed - hardware limitation (ESP32-C3/C6/H2)
 };
 
-/// @brief RMT5-based ChannelEngine implementation
+/// @brief RMT5-based IChannelEngine implementation
 ///
 /// Consolidates all RMT functionality:
 /// - Direct channel management (no worker abstraction)
@@ -45,21 +45,27 @@ enum class DMAState {
 /// - Runtime DMA detection with graceful fallback
 ///
 /// Managed by ChannelBusManager which handles frame lifecycle events.
-class ChannelEngineRMT : public ChannelEngine {
+class ChannelEngineRMT : public IChannelEngine {
 public:
     ChannelEngineRMT();
     ~ChannelEngineRMT() override;
 
-protected:
-    /// @brief Query engine state (hardware polling implementation)
-    /// @return Current engine state (READY, BUSY, or ERROR)
-    EngineState pollDerived() override;
+    /// @brief Enqueue channel data for transmission
+    /// @param channelData Channel data to transmit
+    void enqueue(ChannelDataPtr channelData) override;
 
-    /// @brief Begin LED data transmission for all channels
-    /// @param channelData Span of channel data to transmit
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+    /// @brief Trigger transmission of enqueued data
+    void show() override;
+
+    /// @brief Query engine state and perform maintenance
+    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
+    EngineState poll() override;
 
 private:
+    /// @brief Begin LED data transmission for all channels (internal)
+    /// @param channelData Span of channel data to transmit
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
+
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
         rmt_channel_handle_t channel;
@@ -138,8 +144,14 @@ private:
     /// @brief All RMT channels (active and idle)
     fl::vector_inlined<ChannelState, 16> mChannels;
 
-    /// @brief Pending channels waiting for available HW
+    /// @brief Pending channel data waiting for show() to be called
+    fl::vector_inlined<ChannelDataPtr, 16> mEnqueuedChannels;
+
+    /// @brief Pending channels waiting for available HW (after show() called)
     fl::vector_inlined<PendingChannel, 16> mPendingChannels;
+
+    /// @brief Channels currently being transmitted (for cleanup on poll())
+    fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
 
     /// @brief Encoder cache: timing -> encoder handle (never deleted until shutdown)
     fl::hash_map<ChipsetTiming, rmt_encoder_handle_t, TimingHash, TimingEqual> mEncoderCache;

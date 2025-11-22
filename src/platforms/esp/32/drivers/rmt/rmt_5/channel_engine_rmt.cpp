@@ -58,7 +58,7 @@ ChannelEngineRMT::ChannelEngineRMT()
 
 ChannelEngineRMT::~ChannelEngineRMT() {
     // Wait for all active transmissions to complete
-    while (pollDerived() == EngineState::BUSY) {
+    while (poll() == EngineState::BUSY) {
         fl::delayMicroseconds(100);
     }
 
@@ -88,7 +88,95 @@ ChannelEngineRMT::~ChannelEngineRMT() {
 }
 
 //=============================================================================
-// Public Interface
+// IChannelEngine Interface Implementation
+//=============================================================================
+
+void ChannelEngineRMT::enqueue(ChannelDataPtr channelData) {
+    mEnqueuedChannels.push_back(channelData);
+}
+
+void ChannelEngineRMT::show() {
+    if (mEnqueuedChannels.empty()) {
+        return;
+    }
+    FL_ASSERT(mTransmittingChannels.empty(), "ChannelEngineRMT: Cannot show() while channels are still transmitting");
+    FL_ASSERT(poll() == EngineState::READY, "ChannelEngineRMT: Cannot show() while hardware is busy");
+
+    // Mark all channels as in use before transmission
+    for (auto& channel : mEnqueuedChannels) {
+        channel->setInUse(true);
+    }
+
+    // Create a const span from the enqueued channels and pass to beginTransmission
+    fl::span<const ChannelDataPtr> channelSpan(mEnqueuedChannels.data(), mEnqueuedChannels.size());
+    beginTransmission(channelSpan);
+
+    // Move enqueued channels to transmitting list (async operation started)
+    // Don't clear mInUse flags yet - poll() will do that when transmission completes
+    mTransmittingChannels = fl::move(mEnqueuedChannels);
+}
+
+ChannelEngineRMT::EngineState ChannelEngineRMT::poll() {
+    // Check hardware status
+    bool anyActive = false;
+    int activeCount = 0;
+    int completedCount = 0;
+
+    // Check each channel for completion
+    for (auto& ch : mChannels) {
+        if (!ch.inUse) {
+            continue;
+        }
+
+        activeCount++;
+        anyActive = true;
+
+        if (ch.transmissionComplete) {
+            completedCount++;
+            FL_LOG_RMT("Channel on pin " << ch.pin << " completed transmission");
+
+            // Disable channel to release HW resources
+            if (ch.channel) {
+                esp_err_t err = rmt_disable(ch.channel);
+                if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
+                    FL_LOG_RMT("Failed to disable channel: " << err);
+                }
+            }
+
+            // Release channel back to pool
+            FL_LOG_RMT("Releasing channel " << ch.pin);
+            releaseChannel(&ch);
+
+            // Try to start pending channels
+            processPendingChannels();
+        } else {
+            FL_LOG_RMT("Channel on pin " << ch.pin << " still transmitting (inUse=true, complete=false)");
+        }
+    }
+
+    // Check if any pending channels remain
+    if (!mPendingChannels.empty()) {
+        anyActive = true;
+        FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
+    } else if (activeCount > 0) {
+        FL_LOG_RMT("No pending channels, but " << activeCount << " active channels (" << completedCount << " completed)");
+    }
+
+    // When transmission completes (READY or ERROR), clear the "in use" flags
+    // and release the transmitted channels
+    EngineState state = anyActive ? EngineState::BUSY : EngineState::READY;
+    if (state == EngineState::READY) {
+        for (auto& channel : mTransmittingChannels) {
+            channel->setInUse(false);
+        }
+        mTransmittingChannels.clear();
+    }
+
+    return state;
+}
+
+//=============================================================================
+// Internal Transmission Logic
 //=============================================================================
 
 void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
@@ -231,7 +319,7 @@ ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin,
     }
 
     // Strategy 3: Create new channel if HW available
-    // BUT: Skip if allocation previously failed (retry once per frame via onEndFrame)
+    // BUT: Skip if allocation previously failed (reset at start of next frame in beginTransmission)
     if (mAllocationFailed) {
         FL_LOG_RMT("Skipping channel creation (allocation failed, will retry next frame)");
         return nullptr;

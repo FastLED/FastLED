@@ -15,7 +15,6 @@
 
 #include "fl/channels/channel_engine.h"
 #include "fl/channels/channel_data.h"
-#include "fl/engine_events.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"
 #include "ftl/hash_map.h"
@@ -168,7 +167,7 @@ struct MultiLanePinConfig {
     }
 };
 
-/// @brief SPI-based ChannelEngine implementation
+/// @brief SPI-based IChannelEngine implementation
 ///
 /// Consolidates SPI LED strip functionality:
 /// - Direct ESP-IDF SPI master driver integration
@@ -178,8 +177,7 @@ struct MultiLanePinConfig {
 /// - On-demand SPI bus allocation with reference counting
 /// - DMA support with PSRAM→DRAM buffer copying
 ///
-/// Listens to onEndFrame events and polls channels until transmission completes.
-class ChannelEngineSpi : public ChannelEngine, public EngineEvents::Listener {
+class ChannelEngineSpi : public IChannelEngine {
 public:
     ChannelEngineSpi();
     ~ChannelEngineSpi() override;
@@ -197,19 +195,15 @@ public:
     /// @endcode
     void configureMultiLanePins(const MultiLanePinConfig& pinConfig);
 
-    // EngineEvents::Listener interface
-    void onEndFrame() override;
-
-protected:
-    /// @brief Query engine state (hardware polling implementation)
-    /// @return Current engine state (READY, BUSY, or ERROR)
-    EngineState pollDerived() override;
-
-    /// @brief Begin LED data transmission for all channels
-    /// @param channelData Span of channel data to transmit
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+    // IChannelEngine interface implementation
+    void enqueue(ChannelDataPtr channelData) override;
+    void show() override;
+    EngineState poll() override;
 
 private:
+    /// @brief Begin LED data transmission for all channels (internal helper)
+    /// @param channelData Span of channel data to transmit
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
     /// @brief SPI channel state (per-pin tracking)
     struct SpiChannelState {
         spi_host_device_t spi_host;        ///< SPI peripheral (SPI2_HOST, SPI3_HOST, etc.)
@@ -363,6 +357,13 @@ private:
 
     /// @brief Multi-lane pin configurations (keyed by data0_pin)
     fl::hash_map<gpio_num_t, MultiLanePinConfig> mMultiLaneConfigs;
+
+    // IChannelEngine state management
+    /// @brief Channels enqueued via enqueue(), waiting for show()
+    fl::vector_inlined<ChannelDataPtr, 16> mEnqueuedChannels;
+
+    /// @brief Channels currently transmitting (tracked by poll() for cleanup)
+    fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
 };
 
 } // namespace fl

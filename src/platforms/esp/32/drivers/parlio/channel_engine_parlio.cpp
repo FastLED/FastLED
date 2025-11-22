@@ -134,7 +134,7 @@ ChannelEnginePARLIOImpl::ChannelEnginePARLIOImpl(size_t data_width)
 
 ChannelEnginePARLIOImpl::~ChannelEnginePARLIOImpl() {
     // Wait for any active transmissions to complete
-    while (pollDerived() == EngineState::BUSY) {
+    while (poll() == EngineState::BUSY) {
         fl::delayMicroseconds(100);
     }
 
@@ -340,10 +340,27 @@ bool IRAM_ATTR ChannelEnginePARLIOImpl::transposeAndQueueNextChunk() {
 }
 
 //=============================================================================
-// Protected Interface - ChannelEngine Implementation
+// Public Interface - IChannelEngine Implementation
 //=============================================================================
 
-ChannelEngine::EngineState ChannelEnginePARLIOImpl::pollDerived() {
+void ChannelEnginePARLIOImpl::enqueue(ChannelDataPtr channelData) {
+    if (channelData) {
+        mEnqueuedChannels.push_back(channelData);
+    }
+}
+
+void ChannelEnginePARLIOImpl::show() {
+    if (!mEnqueuedChannels.empty()) {
+        // Move enqueued channels to transmitting channels
+        mTransmittingChannels = fl::move(mEnqueuedChannels);
+        mEnqueuedChannels.clear();
+
+        // Begin transmission
+        beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+    }
+}
+
+IChannelEngine::EngineState ChannelEnginePARLIOImpl::poll() {
     // If not initialized, we're ready (no hardware to poll)
     if (!mInitialized || mState.tx_unit == nullptr) {
         return EngineState::READY;
@@ -365,6 +382,8 @@ ChannelEngine::EngineState ChannelEnginePARLIOImpl::pollDerived() {
         if (err == ESP_OK) {
             mState.transmitting = false;
             mState.stream_complete = false;
+            // Clear transmitting channels on completion
+            mTransmittingChannels.clear();
             FL_LOG_PARLIO("PARLIO: Streaming transmission complete");
             return EngineState::READY;
         } else if (err == ESP_ERR_TIMEOUT) {
@@ -765,10 +784,34 @@ ChannelEnginePARLIO::~ChannelEnginePARLIO() {
     FL_LOG_PARLIO("PARLIO: Polymorphic engine destroyed");
 }
 
-ChannelEngine::EngineState ChannelEnginePARLIO::pollDerived() {
+void ChannelEnginePARLIO::enqueue(ChannelDataPtr channelData) {
+    if (channelData) {
+        mEnqueuedChannels.push_back(channelData);
+    }
+}
+
+void ChannelEnginePARLIO::show() {
+    if (!mEnqueuedChannels.empty()) {
+        // Move enqueued channels to transmitting channels
+        mTransmittingChannels = fl::move(mEnqueuedChannels);
+        mEnqueuedChannels.clear();
+
+        // Begin transmission (selects engine and delegates)
+        beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+    }
+}
+
+IChannelEngine::EngineState ChannelEnginePARLIO::poll() {
     // Poll the active engine if one is selected
     if (mActiveEngine) {
-        return mActiveEngine->poll();
+        EngineState state = mActiveEngine->poll();
+
+        // Clear transmitting channels when READY
+        if (state == EngineState::READY && !mTransmittingChannels.empty()) {
+            mTransmittingChannels.clear();
+        }
+
+        return state;
     }
 
     // No active engine = ready state
@@ -831,7 +874,7 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
 // Factory Function Implementation
 //=============================================================================
 
-ChannelEngine* createParlioEngine() {
+IChannelEngine* createParlioEngine() {
     FL_LOG_PARLIO("PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
     return new ChannelEnginePARLIO();
 }

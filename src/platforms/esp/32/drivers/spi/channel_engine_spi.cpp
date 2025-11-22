@@ -64,6 +64,10 @@ ChannelEngineSpi::ChannelEngineSpi()
 
 ChannelEngineSpi::~ChannelEngineSpi() {
     FL_DBG("ChannelEngineSpi: Destructor called");
+
+    // Poll to ensure cleanup of any in-flight transmissions
+    poll();
+
     mMultiLaneConfigs.clear();
 
     // Clean up all channels
@@ -130,7 +134,33 @@ void ChannelEngineSpi::configureMultiLanePins(const MultiLanePinConfig& pinConfi
     FL_DBG("ChannelEngineSpi: Multi-lane configuration stored for pin " << pinConfig.data0_pin);
 }
 
-ChannelEngine::EngineState ChannelEngineSpi::pollDerived() {
+void ChannelEngineSpi::enqueue(ChannelDataPtr channelData) {
+    if (!channelData) {
+        FL_WARN("ChannelEngineSpi: Null channel data passed to enqueue()");
+        return;
+    }
+
+    FL_DBG("ChannelEngineSpi: Enqueuing channel for pin " << channelData->getPin());
+    mEnqueuedChannels.push_back(channelData);
+}
+
+void ChannelEngineSpi::show() {
+    if (mEnqueuedChannels.empty()) {
+        FL_DBG("ChannelEngineSpi: show() called with no enqueued channels");
+        return;
+    }
+
+    FL_DBG("ChannelEngineSpi: show() - starting transmission of " << mEnqueuedChannels.size() << " channels");
+
+    // Move enqueued channels to transmitting list
+    mTransmittingChannels = fl::move(mEnqueuedChannels);
+    mEnqueuedChannels.clear();
+
+    // Begin transmission of all channels
+    beginTransmission(fl::span<const ChannelDataPtr>(mTransmittingChannels.data(), mTransmittingChannels.size()));
+}
+
+IChannelEngine::EngineState ChannelEngineSpi::poll() {
     bool anyBusy = false;
     bool anyError = false;
 
@@ -160,9 +190,17 @@ ChannelEngine::EngineState ChannelEngineSpi::pollDerived() {
         processPendingChannels();
     }
 
+    // Determine final state
     if (anyError) return EngineState::ERROR;
     if (anyBusy) return EngineState::BUSY;
     if (!mPendingChannels.empty()) return EngineState::DRAINING;
+
+    // All channels complete - clear transmitting list
+    if (!mTransmittingChannels.empty()) {
+        FL_DBG("ChannelEngineSpi: All transmissions complete, clearing " << mTransmittingChannels.size() << " channels");
+        mTransmittingChannels.clear();
+    }
+
     return EngineState::READY;
 }
 

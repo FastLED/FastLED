@@ -1,143 +1,89 @@
 /// @file channel_engine.h
-/// @brief ESP32-P4 PARLIO DMA engine - the powerhouse that drives it all
+/// @brief Minimal interface for LED channel transmission engines
 ///
-/// This is the beating heart of the parallel I/O system - the DMA engine that
-/// powers multi-channel LED output with hardware-accelerated timing.
+/// This pure interface defines the contract for LED channel engines without
+/// imposing any specific state management or batching strategy. Concrete
+/// implementations handle their own internal state as needed.
+///
+/// Design Philosophy:
+/// - Pure interface: No state management, no helper methods
+/// - Three operations: enqueue(), show(), poll()
+/// - Flexible: Implementations decide when/how to batch and transmit
+/// - Composable: Easy to delegate and wrap (e.g., ChannelBusManager)
+///
+/// Migration from ChannelEngine:
+/// The old ChannelEngine base class managed shared state (mPendingChannels,
+/// mTransmittingChannels, mLastError) which complicated delegation patterns.
+/// This interface leaves all state management to concrete implementations.
 
 #pragma once
 
-#include "ftl/span.h"
-#include "ftl/stdint.h"
 #include "ftl/shared_ptr.h"
-#include "ftl/string.h"
-#include "ftl/vector.h"
 
 namespace fl {
 
 // Forward declarations
-class Channel;
 class ChannelData;
-
-FASTLED_SHARED_PTR(Channel);
 FASTLED_SHARED_PTR(ChannelData);
 
-/// @brief Base class for LED channel transmission engines
+/// @brief Minimal interface for LED channel transmission engines
 ///
-/// ============================================================================
-/// IMPLEMENTERS: YOU MUST OVERRIDE THESE TWO METHODS IN YOUR DERIVED CLASS:
-/// 1. poll() - Check hardware state and return current engine status
-/// 2. beginTransmission() - Actually transmit the LED data to hardware
-/// ============================================================================
-///
-/// The engine manages exclusive access to the peripheral hardware,
-/// ensuring only one group can use the DMA controller at a time
-/// using semaphore-based locking for thread-safe access.
+/// Pure interface with no state management. Concrete implementations
+/// handle their own batching, error tracking, and cleanup logic.
 ///
 /// State Machine Behavior:
 /// Typical flow: READY → BUSY → DRAINING → READY
 ///
-/// Some implementations may skip BUSY state if they use internal mechanisms
-/// (like ISRs) to asynchronously queue pending channels to the hardware.
-///
 /// Usage Pattern:
-/// 1. Channels call enqueue() to submit data for transmission
-/// 2. User calls show() to trigger actual transmission
-/// 3. show() internally calls beginTransmission() with batched data
+/// 1. Call enqueue() one or more times to submit LED data
+/// 2. Call show() to trigger transmission
+/// 3. Call poll() to check transmission status and perform cleanup
 ///
-/// Implementation is hidden in .cpp file for complete platform isolation.
-class ChannelEngine {
+/// Implementation Guidelines:
+/// - enqueue(): Store channel data for later transmission
+/// - show(): Initiate transmission of enqueued data (may block if BUSY/DRAINING)
+/// - poll(): Return current hardware state and perform cleanup when complete
+class IChannelEngine {
 public:
     enum class EngineState {
-        READY,      ///< Hardware idle; ready to accept beginTransmission() non-blocking
-        BUSY,       ///< Active: channels transmitting or queued (scheduler still enqueuing)
-        DRAINING,   ///< All channels submitted; still transmitting; beginTransmission() will block
-        ERROR,      ///< Engine encountered an error; check getLastError() for details
+        READY,      ///< Hardware idle; ready to accept new transmissions
+        BUSY,       ///< Active: channels transmitting or queued
+        DRAINING,   ///< All channels submitted; still transmitting
+        ERROR,      ///< Engine encountered an error
     };
 
-    /// @brief Enqueue channel data for later transmission
-    /// @param channelData Channel data to transmit when show() is called
-    /// @note Non-blocking. Data is batched until show() is called.
-    /// @note Very clever engines may begin transmission immediately after
-    ///       certain batch sizes to save memory.
-    virtual void enqueue(ChannelDataPtr channelData);
+    /// @brief Enqueue channel data for transmission
+    /// @param channelData Channel data to transmit
+    /// @note Behavior depends on implementation - may batch or transmit immediately
+    /// @note Non-blocking. Data is stored until show() is called (typical pattern).
+    /// @note Clever implementations may begin transmission early to save memory.
+    virtual void enqueue(ChannelDataPtr channelData) = 0;
 
-    /// @brief Transmit all enqueued channel data
-    /// @note Calls beginTransmission() with all batched channel data, then clears the queue
-    void show();
+    /// @brief Trigger transmission of enqueued data
+    /// @note May block depending on current engine state (poll() returns BUSY/DRAINING)
+    /// @note Typical behavior: Wait for hardware to be READY, then transmit all enqueued data
+    virtual void show() = 0;
 
-    /// @brief Query engine state and manage channel buffer flags
-    ///
-    /// This method calls pollDerived() to check hardware status. When transmission
-    /// completes (READY, ERROR states), it automatically clears the "in use" flags
-    /// on all transmitted channels and clears the transmission queue.
-    ///
+    /// @brief Query engine state and perform maintenance
     /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
     /// @note Non-blocking. Returns immediately with current hardware status.
-    EngineState poll();
+    /// @note Implementations should use this to:
+    ///   - Check hardware transmission status
+    ///   - Clear channel "in use" flags when transmission completes
+    ///   - Update internal error state if needed
+    virtual EngineState poll() = 0;
 
-    /// @brief Get the last error message
-    /// @return Error description string, or empty string if no error occurred
-    /// @note Only valid when poll() returns EngineState::ERROR
-    fl::string getLastError() { return mLastError; }
-
-protected:
-    //==========================================================================
-    // IMPLEMENTERS: YOU MUST OVERRIDE THIS METHOD
-    //==========================================================================
-    /// @brief Query engine state (hardware polling implementation)
-    ///
-    /// **OVERRIDE THIS METHOD IN YOUR DERIVED CLASS**
-    ///
-    /// This method should check the hardware state and return the current status.
-    /// The base poll() method will call this and handle channel cleanup automatically.
-    ///
-    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
-    /// @note Non-blocking. Should return immediately with current hardware status.
-    virtual EngineState pollDerived() = 0;
-
-    //==========================================================================
-    // IMPLEMENTERS: YOU MUST OVERRIDE THIS METHOD
-    //==========================================================================
-    /// @brief Begin LED data transmission for all channels
-    ///
-    /// **OVERRIDE THIS METHOD IN YOUR DERIVED CLASS**
-    ///
-    /// This is where you implement the actual hardware transmission logic.
-    /// Write the LED data to your hardware peripheral (e.g., DMA, SPI, bit-banging).
-    ///
-    /// @param channelData Span of channel data to transmit (const - do not modify the pointers)
-    /// @warning This will block if poll() returns BUSY or DRAINING.
-    /// @note Called automatically by show() - you don't call this directly from user code
-    virtual void beginTransmission(fl::span<const ChannelDataPtr> channelData) = 0;
-
-    void setLastError(const fl::string& error) { mLastError = error; }
-    void clearError() { mLastError.clear(); }
-
-public:
-    /// @brief Virtual destructor (public for unique_ptr management)
-    virtual ~ChannelEngine() = default;
+    /// @brief Virtual destructor
+    virtual ~IChannelEngine() = default;
 
 protected:
-    /// @brief Protected constructor (base class pattern)
-    ChannelEngine() = default;
+    IChannelEngine() = default;
 
     // Non-copyable, non-movable
-    ChannelEngine(const ChannelEngine&) = delete;
-    ChannelEngine& operator=(const ChannelEngine&) = delete;
-    ChannelEngine(ChannelEngine&&) = delete;
-    ChannelEngine& operator=(ChannelEngine&&) = delete;
-
-private:
-    /// @brief Pending channel data waiting for show() to be called
-    /// @note Uses inlined vector with capacity 16 to avoid heap allocation for typical use cases
-    fl::vector_inlined<ChannelDataPtr, 16> mPendingChannels;
-
-    /// @brief Channels currently being transmitted (async operation in progress)
-    /// @note These channels will have their "in use" flags cleared when poll() returns READY or ERROR
-    fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
-
-    fl::string mLastError;
+    IChannelEngine(const IChannelEngine&) = delete;
+    IChannelEngine& operator=(const IChannelEngine&) = delete;
+    IChannelEngine(IChannelEngine&&) = delete;
+    IChannelEngine& operator=(IChannelEngine&&) = delete;
 };
-
 
 }  // namespace fl

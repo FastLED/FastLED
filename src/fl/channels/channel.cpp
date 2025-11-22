@@ -19,13 +19,13 @@ int32_t Channel::nextId() {
     return gNextChannelId.fetch_add(1);
 }
 
-ChannelPtr Channel::create(const ChannelConfig &config, ChannelEngine *engine) {
+ChannelPtr Channel::create(const ChannelConfig &config, IChannelEngine *engine) {
     return fl::make_shared<Channel>(config.pin, config.timing, config.mLeds,
                                      config.rgb_order, engine, config.settings);
 }
 
 Channel::Channel(int pin, const ChipsetTimingConfig& timing, fl::span<CRGB> leds,
-                 EOrder rgbOrder, ChannelEngine* engine, const LEDSettings& settings)
+                 EOrder rgbOrder, IChannelEngine* engine, const LEDSettings& settings)
     : CPixelLEDController<RGB>()
     , mPin(pin)
     , mTiming(timing)

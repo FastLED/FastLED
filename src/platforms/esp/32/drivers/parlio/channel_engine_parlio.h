@@ -205,21 +205,28 @@ inline size_t calculateChunkSize(size_t data_width) {
 /// by the polymorphic ChannelEnginePARLIO wrapper class.
 ///
 /// @note This class should not be used directly - use ChannelEnginePARLIO instead.
-class ChannelEnginePARLIOImpl : public ChannelEngine {
+class ChannelEnginePARLIOImpl : public IChannelEngine {
 public:
     /// @brief Constructor with runtime data width selection
     /// @param data_width PARLIO data width (1, 2, 4, 8, or 16)
     explicit ChannelEnginePARLIOImpl(size_t data_width);
     ~ChannelEnginePARLIOImpl() override;
 
-protected:
-    /// @brief Query engine state (hardware polling implementation)
-    /// @return Current engine state (READY, BUSY, or ERROR)
-    EngineState pollDerived() override;
+    /// @brief Enqueue channel data for transmission
+    /// @param channelData Channel data to transmit
+    void enqueue(ChannelDataPtr channelData) override;
 
-    /// @brief Begin LED data transmission for all channels
+    /// @brief Trigger transmission of enqueued data
+    void show() override;
+
+    /// @brief Query engine state and perform maintenance
+    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
+    EngineState poll() override;
+
+private:
+    /// @brief Begin LED data transmission for all enqueued channels
     /// @param channelData Span of channel data to transmit
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
 
 private:
     /// @brief PARLIO hardware state with ISR-based streaming support
@@ -303,6 +310,10 @@ private:
 
     /// @brief PARLIO hardware state
     ParlioState mState;
+
+    /// @brief Internal state management for IChannelEngine interface
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
+    fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
 };
 
 //=============================================================================
@@ -323,8 +334,8 @@ private:
 /// - Delegates to 8-bit engine for 5-8 channels
 /// - Delegates to 16-bit engine for 9-16 channels
 /// - Selection happens per-batch in beginTransmission()
-/// - Inherits from ChannelEngine for standard FastLED integration
-/// - Implements EngineEvents::Listener to receive frame completion events
+/// - Inherits from IChannelEngine for standard FastLED integration
+/// - Managed by ChannelBusManager which handles frame lifecycle events
 ///
 /// ## Lifecycle
 /// 1. **Construction**: Creates all 1/2/4/8/16-bit sub-engines
@@ -343,21 +354,28 @@ private:
 ///
 /// @note Only available on ESP32-P4, ESP32-C6, ESP32-H2, and ESP32-C5 with PARLIO peripheral.
 ///       Compilation is guarded by FASTLED_ESP32_HAS_PARLIO feature flag.
-class ChannelEnginePARLIO : public ChannelEngine {
+class ChannelEnginePARLIO : public IChannelEngine {
 public:
     /// @brief Constructor - creates all 1/2/4/8/16-bit sub-engines
     ChannelEnginePARLIO();
     ~ChannelEnginePARLIO() override;
 
-protected:
-    /// @brief Query engine state (delegates to active engine)
-    /// @return Current engine state from active engine
-    EngineState pollDerived() override;
+    /// @brief Enqueue channel data for transmission
+    /// @param channelData Channel data to transmit
+    void enqueue(ChannelDataPtr channelData) override;
 
+    /// @brief Trigger transmission of enqueued data
+    void show() override;
+
+    /// @brief Query engine state and perform maintenance
+    /// @return Current engine state (READY, BUSY, DRAINING, or ERROR)
+    EngineState poll() override;
+
+private:
     /// @brief Begin LED data transmission with automatic engine selection
     /// @param channelData Span of channel data to transmit
     /// @note Selects optimal engine based on channel count (1, 2, 4, 8, or 16-bit)
-    void beginTransmission(fl::span<const ChannelDataPtr> channelData) override;
+    void beginTransmission(fl::span<const ChannelDataPtr> channelData);
 
 private:
     /// @brief 1-bit sub-engine (handles 1 channel)
@@ -377,6 +395,10 @@ private:
 
     /// @brief Currently active engine (selected per-batch)
     ChannelEnginePARLIOImpl* mActiveEngine;
+
+    /// @brief Internal state management for IChannelEngine interface
+    fl::vector<ChannelDataPtr> mEnqueuedChannels;  ///< Channels enqueued via enqueue(), waiting for show()
+    fl::vector<ChannelDataPtr> mTransmittingChannels;  ///< Channels currently transmitting (for cleanup)
 };
 
 //=============================================================================
@@ -384,9 +406,9 @@ private:
 //=============================================================================
 
 /// @brief Create polymorphic PARLIO engine instance
-/// @return ChannelEngine pointer, or nullptr if creation fails
+/// @return IChannelEngine pointer, or nullptr if creation fails
 /// @note Engine auto-selects optimal data width per batch (1, 2, 4, 8, or 16-bit)
-ChannelEngine* createParlioEngine();
+IChannelEngine* createParlioEngine();
 
 } // namespace fl
 
