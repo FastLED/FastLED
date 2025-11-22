@@ -218,54 +218,6 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
     processPendingChannels();
 }
 
-ChannelEngine::EngineState ChannelEngineRMT::pollDerived() {
-    bool anyActive = false;
-    int activeCount = 0;
-    int completedCount = 0;
-
-    // Check each channel for completion
-    for (auto& ch : mChannels) {
-        if (!ch.inUse) {
-            continue;
-        }
-
-        activeCount++;
-        anyActive = true;
-
-        if (ch.transmissionComplete) {
-            completedCount++;
-            FL_LOG_RMT("Channel on pin " << ch.pin << " completed transmission");
-
-            // Disable channel to release HW resources
-            if (ch.channel) {
-                esp_err_t err = rmt_disable(ch.channel);
-                if (err != ESP_OK && err != ESP_ERR_INVALID_STATE) {
-                    FL_LOG_RMT("Failed to disable channel: " << err);
-                }
-            }
-
-            // Release channel back to pool
-            FL_LOG_RMT("Releasing channel " << ch.pin);
-            releaseChannel(&ch);
-
-            // Try to start pending channels
-            processPendingChannels();
-        } else {
-            FL_LOG_RMT("Channel on pin " << ch.pin << " still transmitting (inUse=true, complete=false)");
-        }
-    }
-
-    // Check if any pending channels remain
-    if (!mPendingChannels.empty()) {
-        anyActive = true;
-        FL_LOG_RMT("Pending channels: " << mPendingChannels.size());
-    } else if (activeCount > 0) {
-        FL_LOG_RMT("No pending channels, but " << activeCount << " active channels (" << completedCount << " completed)");
-    }
-
-    return anyActive ? EngineState::BUSY : EngineState::READY;
-}
-
 //=============================================================================
 // Encoder Cache
 //=============================================================================
