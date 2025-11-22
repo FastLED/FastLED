@@ -545,10 +545,32 @@ class DockerCompilationOrchestrator:
         """Ensure Docker image exists, optionally building it.
 
         Attempts to:
-        1. Use existing local image (with or without registry prefix)
-        2. Pull from Docker registry (if not building)
-        3. Build locally (if build_if_missing=True)
+        1. Ensure Docker is running (auto-start if needed)
+        2. Use existing local image (with or without registry prefix)
+        3. Pull from Docker registry (if not building)
+        4. Build locally (if build_if_missing=True)
         """
+        # First, ensure Docker is running
+        from ci.util.docker_command import is_docker_available
+
+        if not is_docker_available():
+            print("Docker is not running. Attempting to start Docker...")
+            print()
+
+            from ci.util.docker_helper import attempt_start_docker
+
+            success, message = attempt_start_docker()
+
+            if success:
+                print(f"✓ {message}")
+                print()
+            else:
+                print(f"❌ {message}")
+                print()
+                print("Please ensure Docker is installed and running, then try again.")
+                print("Docker Desktop: https://www.docker.com/products/docker-desktop")
+                return False
+
         try:
             result = subprocess.run(
                 [get_docker_command(), "image", "inspect", self.config.image_name],
