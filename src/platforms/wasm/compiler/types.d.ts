@@ -32,11 +32,14 @@ interface ScreenMapData {
 
 /**
  * Audio data structure for audio processing
+ * Note: Audio samples are sent directly to WASM via pushAudioSamples(),
+ * so no JS-side buffering is needed. This only stores audio contexts and processors.
  */
 interface AudioData {
-  frequencyData: Float32Array;
-  timeData: Float32Array;
-  volume: number;
+  audioContexts: { [id: string]: AudioContext };
+  audioProcessors: { [id: string]: any };
+  audioSources: { [id: string]: MediaElementAudioSourceNode | MediaStreamAudioSourceNode };
+  mediaStreams: { [id: string]: MediaStream };
   [key: string]: any;
 }
 

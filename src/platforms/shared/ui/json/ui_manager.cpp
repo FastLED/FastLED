@@ -71,7 +71,7 @@ void JsonUiManager::processPendingUpdates() {
         // Check if new components were added
         shouldUpdate = mItemsAdded;
         mItemsAdded = false;
-        
+
         // Poll all components for changes (eliminates need for manual notifications)
         if (!shouldUpdate) {
             for (auto &componentRef : mComponents) {
@@ -84,7 +84,7 @@ void JsonUiManager::processPendingUpdates() {
             }
         }
     }
-    
+
     if (shouldUpdate) {
         fl::Json doc = fl::Json::array();
         toJson(doc);

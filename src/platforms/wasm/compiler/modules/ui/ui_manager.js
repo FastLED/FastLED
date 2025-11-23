@@ -1155,6 +1155,137 @@ export class JsonUiManager {
     return fullWidthPatterns.some((pattern) => pattern.test(groupName));
   }
 
+  /**
+   * Update existing UI elements without destroying them
+   * This preserves audio elements, file selections, and other stateful UI
+   * Uses smart diffing to only update elements that actually changed
+   */
+  updateExistingElements(jsonData) {
+    if (this.debugMode) {
+      console.log('🎵 Updating existing UI elements:', jsonData.length, 'elements received');
+    }
+
+    // Track which elements we've seen in this update
+    const seenIds = new Set();
+    let updateCount = 0;
+    let createCount = 0;
+    let skipCount = 0;
+
+    jsonData.forEach((data) => {
+      if (data.type === 'title') {
+        setTitle(data);
+        return;
+      }
+      if (data.type === 'description') {
+        setDescription(data);
+        return;
+      }
+
+      // Get the element ID
+      const elementId = data.id;
+      seenIds.add(elementId);
+
+      // Check if this element already exists
+      const existingElement = this.uiElements[elementId];
+
+      if (existingElement && existingElement.parentNode) {
+        // Element exists - check if value actually changed before updating
+        const previousValue = this.previousUiState[elementId];
+        const newValue = data.value;
+
+        // Smart diff: skip update if value hasn't changed
+        if (previousValue === newValue) {
+          skipCount++;
+          if (this.debugMode) {
+            console.log(`🎵 Skipping unchanged element: ${elementId} (value: ${newValue})`);
+          }
+          return;
+        }
+
+        // Value changed - update the element
+        if (existingElement.type === 'checkbox') {
+          existingElement.checked = Boolean(newValue);
+        } else if (existingElement.type === 'range') {
+          existingElement.value = newValue;
+          // Also update the display value if it exists
+          const valueDisplay = existingElement.parentElement.querySelector('.slider-value');
+          if (valueDisplay) {
+            valueDisplay.textContent = Number(newValue).toFixed(3);
+          }
+        } else if (existingElement.type === 'number') {
+          existingElement.value = newValue;
+        } else if (existingElement.tagName === 'SELECT') {
+          existingElement.selectedIndex = newValue;
+        } else if (existingElement.type === 'submit') {
+          existingElement.setAttribute('data-pressed', newValue ? 'true' : 'false');
+          if (newValue) {
+            existingElement.classList.add('active');
+          } else {
+            existingElement.classList.remove('active');
+          }
+        } else if (existingElement.type === 'file') {
+          // Skip file inputs - cannot programmatically set file values
+          if (this.debugMode) {
+            console.log(`🎵 Skipping file input update for ${elementId}`);
+          }
+          skipCount++;
+          return;
+        } else {
+          existingElement.value = newValue;
+        }
+
+        // Update previous state
+        this.previousUiState[elementId] = newValue;
+        updateCount++;
+
+        if (this.debugMode) {
+          console.log(`🎵 Updated element: ${elementId} (${previousValue} → ${newValue})`);
+        }
+      } else {
+        // Element doesn't exist - create it (new element added)
+        if (this.debugMode) {
+          console.log(`🎵 Creating new element: ${elementId}`);
+        }
+
+        // Find or create the appropriate container
+        const { group } = data;
+        const hasGroup = group !== '' && group !== undefined && group !== null;
+
+        let targetContainer;
+        if (hasGroup) {
+          // Get or create the group
+          let groupInfo = this.findExistingGroup(group);
+          if (!groupInfo) {
+            groupInfo = this.createGroupContainer(group);
+          }
+          targetContainer = groupInfo.content;
+        } else {
+          targetContainer = this.getUngroupedContainer(
+            document.getElementById(this.uiControlsId),
+          );
+        }
+
+        // Create and add the new control
+        const control = this.createControlElement(data);
+        if (control) {
+          targetContainer.appendChild(control);
+          this.registerControlElement(control, data);
+          createCount++;
+
+          if (this.debugMode) {
+            console.log(`🎵 New element created and added: ${elementId}`);
+          }
+        }
+      }
+    });
+
+    if (this.debugMode) {
+      console.log(
+        `🎵 Update complete: ${seenIds.size} elements processed (${updateCount} updated, ${createCount} created, ${skipCount} skipped)`,
+      );
+    }
+  }
+
   // Clear all UI elements and groups
   clearUiElements() {
     // Record removal of all elements if recorder is active
@@ -1222,35 +1353,9 @@ export class JsonUiManager {
       } else if (element.tagName === 'SELECT') {
         currentValue = parseInt(element.value, 10);
       } else if (element.type === 'file' && element.accept === 'audio/*') {
-        // Handle audio input - get all accumulated sample blocks with timestamps
-        if (
-          window.audioData && window.audioData.audioBuffers && window.audioData.hasActiveSamples
-        ) {
-          const bufferStorage = window.audioData.audioBuffers[element.id];
-
-          if (bufferStorage && bufferStorage.getBufferCount() > 0) {
-            // Get all samples using the optimized storage system
-            const samples = bufferStorage.getAllSamples();
-            changes[id] = samples;
-            hasChanges = true;
-
-            // Debug logging for audio stats (only when enabled)
-            if (this.debugMode) {
-              const stats = bufferStorage.getStats();
-              console.log(
-                `🎵 UI Audio ${id}: ${stats.bufferCount} blocks, ${stats.totalSamples} samples, ${stats.storageType} storage, ~${
-                  stats.memoryEstimateKB.toFixed(1)
-                }KB`,
-              );
-            }
-
-            // Clear the buffer with proper cleanup after sending samples
-            bufferStorage.clear();
-            window.audioData.hasActiveSamples = false;
-
-            continue; // Skip the comparison below for audio
-          }
-        }
+        // Audio samples are sent directly to WASM via pushSamplesToWasm()
+        // No JS-side buffering or JSON serialization needed
+        continue;
       } else {
         currentValue = parseFloat(element.value);
       }
@@ -1265,40 +1370,13 @@ export class JsonUiManager {
     }
 
     if (hasChanges) {
-      // Send changes directly without wrapping in "value" objects
-      const transformedChanges = {};
-      for (const [id, value] of Object.entries(changes)) {
-        const key = `${id}`;
-        // Wrap audio data in an object with "audioData" key for C++ backend
-        const element = this.uiElements[id];
-        if (element && element.type === 'file' && element.accept === 'audio/*') {
-          transformedChanges[key] = { audioData: value };
-        } else {
-          transformedChanges[key] = value;
-        }
-      }
-      // console.log('*** SENDING TO BACKEND:', JSON.stringify(transformedChanges));
-
-      // Check if there's audio data in the changes
-      const audioKeys = Object.keys(changes).filter((key) => this.uiElements[key]
-        && this.uiElements[key].type === 'file'
-        && this.uiElements[key].accept === 'audio/*');
-
-      // Debug logging for audio processing (only when enabled)
-      if (this.debugMode && audioKeys.length > 0) {
-        audioKeys.forEach((key) => {
-          const audioData = changes[key];
-          console.log(`🎵 UI Audio ${key}: ${audioData.length} samples sent to backend`);
-        });
-      }
-
       // Log outbound changes to the inspector
       if (window.jsonInspector) {
-        window.jsonInspector.logOutboundEvent(transformedChanges, 'JS → C++');
+        window.jsonInspector.logOutboundEvent(changes, 'JS → C++');
       }
 
-      // Return the transformed format
-      return transformedChanges;
+      // Return the changes (audio data is sent separately via pushSamplesToWasm)
+      return changes;
     }
 
     return null;
@@ -1310,6 +1388,17 @@ export class JsonUiManager {
     // Store the JSON data for potential layout rebuilds
     this.lastJsonData = JSON.parse(JSON.stringify(jsonData));
 
+    // CRITICAL FIX: Check if we have existing UI elements
+    // If yes, update them instead of clearing and recreating
+    const hasExistingElements = Object.keys(this.uiElements).length > 0;
+
+    if (hasExistingElements) {
+      // Update existing elements instead of clearing
+      this.updateExistingElements(jsonData);
+      return;
+    }
+
+    // No existing elements - do full UI initialization
     // Clear existing UI elements
     this.clearUiElements();
 

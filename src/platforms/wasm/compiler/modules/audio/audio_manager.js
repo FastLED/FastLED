@@ -39,13 +39,6 @@
 const AUDIO_SAMPLE_BLOCK_SIZE = 512;
 
 /**
- * Maximum number of audio buffers to accumulate before cleanup
- * Prevents excessive memory usage during long playback sessions
- * @constant {number}
- */
-const MAX_AUDIO_BUFFER_LIMIT = 10;
-
-/**
  * Debug configuration for audio processing
  * Controls logging frequency to prevent console spam while maintaining visibility
  * @constant {Object}
@@ -625,15 +618,10 @@ export class AudioManager {
       console.log('Initializing global audio data storage');
       window.audioData = {
         audioContexts: {}, // Store audio contexts by ID
-        audioSamples: {}, // Store current audio samples by ID
-        audioBuffers: {}, // Store optimized audio buffer storage by ID
         audioProcessors: {}, // Store audio processors by ID
         audioSources: {}, // Store MediaElementSourceNodes by ID
         mediaStreams: {}, // Store MediaStreams for microphone capture by ID
-        hasActiveSamples: false,
-        frequencyData: new Float32Array(0), // Store frequency analysis data
-        timeData: new Float32Array(0), // Store time domain data
-        volume: 0 // Store current volume level
+        // Note: Audio samples are sent directly to WASM via pushSamplesToWasm()
       };
     }
   }
@@ -835,13 +823,9 @@ export class AudioManager {
    * @param {HTMLAudioElement} audioElement - Audio element
    */
   handleAudioSamples(sampleBuffer, timestamp, audioElement) {
-    // Store samples if audio is playing
+    // Push audio samples directly to C++ via WASM (no JS buffering needed)
     if (!audioElement.paused) {
-      const audioId = audioElement.parentNode.querySelector('input').id;
-      this.storeAudioSamples(sampleBuffer, audioId, audioElement);
       this.updateProcessingIndicator();
-
-      // Push audio samples to C++ via WASM
       this.pushSamplesToWasm(sampleBuffer, timestamp);
     }
   }
@@ -903,10 +887,7 @@ export class AudioManager {
     window.audioData.audioContexts[audioId] = components.audioContext;
     window.audioData.audioProcessors[audioId] = components.processor;
     window.audioData.audioSources[audioId] = components.source; // Store source for cleanup
-    window.audioData.audioBuffers[audioId] = new AudioBufferStorage(audioId);
-
-    // Create a placeholder for current samples (for backward compatibility)
-    window.audioData.audioSamples[audioId] = new Int16Array(AUDIO_SAMPLE_BLOCK_SIZE);
+    // Note: Audio samples are sent directly to WASM via pushSamplesToWasm(), no JS buffering needed
   }
 
   /**
@@ -917,48 +898,6 @@ export class AudioManager {
     audioElement.play().catch((err) => {
       console.error('Error playing audio:', err);
     });
-  }
-
-  /**
-   * Store a copy of the current audio samples
-   * @param {Int16Array} sampleBuffer - Buffer containing current samples
-   * @param {string} audioId - The ID of the audio input
-   * @param {HTMLAudioElement} audioElement - The audio element (for timestamp)
-   */
-  storeAudioSamples(sampleBuffer, audioId, audioElement) {
-    const bufferCopy = new Int16Array(sampleBuffer);
-
-    // Update the current samples reference for backward compatibility
-    if (window.audioData.audioSamples[audioId]) {
-      window.audioData.audioSamples[audioId].set(bufferCopy);
-    }
-
-    // Get timestamp with priority order
-    let timestamp = 0;
-    const audioContext = window.audioData.audioContexts[audioId];
-
-    if (audioElement && !audioElement.paused && audioElement.currentTime >= 0) {
-      // Use audio element's currentTime (seconds) converted to milliseconds
-      timestamp = Math.floor(audioElement.currentTime * 1000);
-    } else if (audioContext && audioContext.currentTime >= 0) {
-      // Fallback to AudioContext.currentTime
-      timestamp = Math.floor(audioContext.currentTime * 1000);
-    } else {
-      // Final fallback: use performance.now()
-      timestamp = Math.floor(performance.now());
-    }
-
-    // Debug logging (controlled by AUDIO_DEBUG settings)
-    if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.sampleRate) {
-      const processor = window.audioData.audioProcessors[audioId];
-      const processorType = processor ? processor.getType() : 'unknown';
-      console.log(`🎵 Audio ${audioId} (${processorType}): Processing samples`);
-    }
-
-    // Use optimized buffer storage system
-    const bufferStorage = window.audioData.audioBuffers[audioId];
-    bufferStorage.addSamples(bufferCopy, timestamp);
-    window.audioData.hasActiveSamples = true;
   }
 
   /**
@@ -1471,7 +1410,7 @@ export class AudioManager {
       pauseIcon.style.display = 'none';
     });
 
-    // Seek on progress bar click
+    // Seek on progress bar click - with proper cleanup
     let isSeeking = false;
 
     const seek = (e) => {
@@ -1481,19 +1420,25 @@ export class AudioManager {
       audio.currentTime = percentage * audio.duration;
     };
 
-    progressContainer.addEventListener('mousedown', (e) => {
-      isSeeking = true;
-      seek(e);
-    });
-
-    document.addEventListener('mousemove', (e) => {
+    const handleMouseMove = (e) => {
       if (isSeeking) {
         seek(e);
       }
-    });
+    };
 
-    document.addEventListener('mouseup', () => {
+    const handleMouseUp = () => {
       isSeeking = false;
+      // Clean up document-level listeners when seeking ends
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+
+    progressContainer.addEventListener('mousedown', (e) => {
+      isSeeking = true;
+      seek(e);
+      // Add document-level listeners only when actively seeking
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
     });
 
     progressContainer.addEventListener('click', seek);
@@ -1566,18 +1511,6 @@ export class AudioManager {
         console.warn('Error closing previous audio context:', e);
       }
       delete window.audioData.audioContexts[inputId];
-    }
-
-    // Clean up buffer storage with proper memory cleanup
-    if (window.audioData?.audioBuffers?.[inputId]) {
-      const bufferStorage = window.audioData.audioBuffers[inputId];
-      bufferStorage.clear();
-      delete window.audioData.audioBuffers[inputId];
-    }
-
-    // Clean up sample references
-    if (window.audioData?.audioSamples?.[inputId]) {
-      delete window.audioData.audioSamples[inputId];
     }
 
     // Clean up media streams
@@ -1860,134 +1793,5 @@ window.getAudioWorkletEnvironmentInfo = function () {
   return info;
 };
 
-/**
- * Get audio buffer statistics for all active audio inputs (debugging)
- * @returns {Object} Statistics for all audio buffers
- */
-window.getAudioBufferStats = function () {
-  if (!window.audioData || !window.audioData.audioBuffers) {
-    return { error: 'No audio data available' };
-  }
-
-  const stats = {};
-  for (const [audioId, bufferStorage] of Object.entries(window.audioData.audioBuffers)) {
-    if (bufferStorage && typeof bufferStorage.getStats === 'function') {
-      stats[audioId] = bufferStorage.getStats();
-    }
-  }
-
-  // Calculate totals
-  const totals = Object.values(stats).reduce((acc, stat) => ({
-    totalBufferCount: acc.totalBufferCount + stat.bufferCount,
-    totalSamples: acc.totalSamples + stat.totalSamples,
-    totalMemoryKB: acc.totalMemoryKB + stat.memoryEstimateKB,
-    activeStreams: acc.activeStreams + 1,
-  }), {
-    totalBufferCount: 0, totalSamples: 0, totalMemoryKB: 0, activeStreams: 0,
-  });
-
-  return {
-    individual: stats,
-    totals,
-    limit: {
-      maxBuffers: MAX_AUDIO_BUFFER_LIMIT,
-      description:
-        `Limited to ${MAX_AUDIO_BUFFER_LIMIT} audio buffers to prevent accumulation during engine freezes`,
-    },
-  };
-};
-
-/**
- * Audio Buffer Storage Manager
- * Simple buffer storage with limiting to prevent accumulation during engine freezes
- */
-class AudioBufferStorage {
-  constructor(audioId) {
-    this.audioId = audioId;
-    this.buffers = []; // Simple array of audio buffers
-    this.totalSamples = 0;
-  }
-
-  /**
-   * Add audio samples to the buffer with automatic limiting
-   * @param {Int16Array} sampleBuffer - Raw audio samples
-   * @param {number} timestamp - Sample timestamp
-   */
-  addSamples(sampleBuffer, timestamp) {
-    // Enforce buffer limit to prevent excessive accumulation during engine freezes
-    while (this.buffers.length >= MAX_AUDIO_BUFFER_LIMIT) {
-      const removedBuffer = this.buffers.shift();
-      this.totalSamples -= removedBuffer.samples.length;
-      // Only log buffer drops when debugging is enabled or occasionally for important info
-      if (AUDIO_DEBUG.enabled && Math.random() < AUDIO_DEBUG.bufferRate) {
-        console.log(
-          `🎵 Audio ${this.audioId}: Dropping oldest buffer (limit: ${MAX_AUDIO_BUFFER_LIMIT})`,
-        );
-      }
-    }
-
-    // Add new buffer
-    this.buffers.push({
-      samples: Array.from(sampleBuffer), // Convert to regular array for JSON serialization
-      timestamp,
-    });
-    this.totalSamples += sampleBuffer.length;
-  }
-
-  /**
-   * Get all buffered samples in the format expected by the backend
-   * @returns {Array} Array of sample objects with timestamp
-   */
-  getAllSamples() {
-    return this.buffers.map((buffer) => ({
-      samples: buffer.samples,
-      timestamp: buffer.timestamp,
-    }));
-  }
-
-  /**
-   * Get the current number of buffered blocks
-   * @returns {number} Number of audio blocks
-   */
-  getBufferCount() {
-    return this.buffers.length;
-  }
-
-  /**
-   * Get total number of samples across all buffers
-   * @returns {number} Total sample count
-   */
-  getTotalSamples() {
-    return this.totalSamples;
-  }
-
-  /**
-   * Clear all buffered data
-   */
-  clear() {
-    this.buffers = [];
-    this.totalSamples = 0;
-  }
-
-  /**
-   * Get storage statistics for debugging
-   * @returns {Object} Storage statistics
-   */
-  getStats() {
-    return {
-      bufferCount: this.getBufferCount(),
-      totalSamples: this.totalSamples,
-      storageType: 'simple',
-      memoryEstimateKB: this._estimateMemoryUsage(),
-    };
-  }
-
-  /**
-   * Estimate memory usage in KB
-   * @private
-   */
-  _estimateMemoryUsage() {
-    // Regular array = ~8 bytes per sample + object overhead
-    return ((this.totalSamples * 8) + (this.buffers.length * 50)) / 1024;
-  }
-}
+// Note: AudioBufferStorage class removed - audio samples are sent directly to WASM
+// via pushSamplesToWasm() and stored in C++ ring buffer. No JS-side buffering needed.
