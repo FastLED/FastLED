@@ -73,9 +73,20 @@ protected:
     //    This is the main entry point for the controller.
     virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        // Fail-fast race condition detection: Buffer MUST NOT be in use
-        // If this assertion fires, the hardware wait in releaseChannel() is insufficient
-        FL_ASSERT(!mChannelData->isInUse(), "ClocklessIdf4: Race condition - buffer still in use by engine!");
+        // Wait for previous transmission to complete and release buffer
+        // This prevents race conditions when show() is called faster than hardware can transmit
+        uint32_t startTime = millis();
+        uint32_t lastWarnTime = startTime;
+        while (mChannelData->isInUse()) {
+            mEngine->poll();  // Keep polling until buffer is released
+
+            // Warn every second if still waiting (possible deadlock or hardware issue)
+            uint32_t elapsed = millis() - startTime;
+            if (elapsed > 1000 && (millis() - lastWarnTime) >= 1000) {
+                FL_WARN("ClocklessIdf4: Waiting " << elapsed << "ms for buffer release - possible deadlock or slow hardware");
+                lastWarnTime = millis();
+            }
+        }
 
         // Convert pixels to encoded byte data
         fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());

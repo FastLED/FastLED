@@ -2,8 +2,12 @@
 /// Functions to limit the power used by FastLED
 
 /// Disables pragma messages and warnings
-#define FASTLED_INTERNAL
-#include "FastLED.h"
+#include "led_sysdefs.h"      // Must be included first (required by lib8tion.h)
+#include "pixeltypes.h"       // CRGB
+#include "controller.h"       // CLEDController
+#include "fastpin.h"          // Pin
+#include "fl/int.h"           // fl::u32, fl::u8
+#include "power_mgt.h"        // Function declarations (to avoid redefinition errors)
 // POWER MANAGEMENT
 
 /// @name Power Usage Values
@@ -44,6 +48,7 @@ static const uint8_t gDark_mW  =  1 * 5; ///<  1mA @ 5v =  5mW
 #define POWER_LED 1
 
 /// Debug Option: Set to enable Serial debug statements for power limit functions
+/// @note If you enable this, you'll need to include the appropriate headers for Serial (e.g., Arduino.h)
 #define POWER_DEBUG_PRINT 0
 
 
@@ -161,30 +166,14 @@ uint8_t calculate_max_brightness_for_power_mW( uint8_t target_brightness, fl::u3
     return recommended_brightness;
 }
 
-
 void set_max_power_indicator_LED( uint8_t pinNumber)
 {
     gMaxPowerIndicatorLEDPinNumber = pinNumber;
 }
 
-void set_max_power_in_volts_and_milliamps( uint8_t volts, uint32_t milliamps)
-{
-    FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
-}
-
-void set_max_power_in_milliwatts( uint32_t powerInmW)
-{
-    FastLED.setMaxPowerInMilliWatts(powerInmW);
-}
-
-void show_at_max_brightness_for_power()
-{
-    // power management usage is now in FastLED.show, no need for this function
-    FastLED.show();
-}
-
-void delay_at_max_brightness_for_power( uint16_t ms)
-{
-    FastLED.delay(ms);
-}
-
+// Note: The following deprecated wrapper functions have been moved to FastLED.cpp:
+// - set_max_power_in_volts_and_milliamps()
+// - set_max_power_in_milliwatts()
+// - show_at_max_brightness_for_power()
+// - delay_at_max_brightness_for_power()
+// These functions depend on the FastLED singleton and don't belong in this core power calculation file.

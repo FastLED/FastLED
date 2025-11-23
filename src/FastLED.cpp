@@ -371,7 +371,35 @@ uint8_t get_brightness() {
 	return FastLED.getBrightness();
 }
 
+// ============================================================================
+// Deprecated Power Management Wrapper Functions
+// ============================================================================
+// These functions wrap the CFastLED singleton methods for backward compatibility.
+// They were originally in power_mgt.cpp but have been moved here to avoid
+// circular dependencies (power_mgt.cpp should not include FastLED.h).
 
+void set_max_power_in_volts_and_milliamps(uint8_t volts, uint32_t milliamps)
+{
+	FastLED.setMaxPowerInVoltsAndMilliamps(volts, milliamps);
+}
+
+void set_max_power_in_milliwatts(uint32_t powerInmW)
+{
+	FastLED.setMaxPowerInMilliWatts(powerInmW);
+}
+
+void show_at_max_brightness_for_power()
+{
+	// power management usage is now in FastLED.show, no need for this function
+	FastLED.show();
+}
+
+void delay_at_max_brightness_for_power(uint16_t ms)
+{
+	FastLED.delay(ms);
+}
+
+// ============================================================================
 
 #ifdef NEED_CXX_BITS
 namespace __cxxabiv1

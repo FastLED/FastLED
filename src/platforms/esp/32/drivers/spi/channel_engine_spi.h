@@ -234,6 +234,7 @@ private:
         // LED source data
         const uint8_t* ledSource;          ///< Current position in source LED data
         size_t ledBytesRemaining;          ///< LED bytes left to encode
+        ChannelDataPtr sourceData;         ///< Reference to source ChannelData for cleanup
 
         // Double-buffered transactions
         spi_transaction_t transA;          ///< Transaction A

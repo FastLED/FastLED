@@ -178,6 +178,12 @@ IChannelEngine::EngineState ChannelEngineSpi::poll() {
             // All encoding and transmission done
             FL_DBG("ChannelEngineSpi: Streaming complete for pin " << channel.pin);
             channel.transmissionComplete = true;
+
+            // Clear in-use flag on source data
+            if (channel.sourceData) {
+                channel.sourceData->setInUse(false);
+            }
+
             releaseChannel(&channel);
         } else if (!streaming_complete) {
             // Still encoding/transmitting
@@ -229,6 +235,9 @@ void ChannelEngineSpi::beginTransmission(fl::span<const ChannelDataPtr> channelD
             continue;
         }
 
+        // Mark data as in-use (prevents strip driver from modifying during TX)
+        data->setInUse(true);
+
         // Initialize streaming state for this channel
         channel->ledSource = ledData.data();
         channel->ledBytesRemaining = ledData.size();
@@ -237,6 +246,9 @@ void ChannelEngineSpi::beginTransmission(fl::span<const ChannelDataPtr> channelD
         channel->transAInFlight = false;
         channel->transBInFlight = false;
         channel->transmissionComplete = false;
+
+        // Store reference to source data for cleanup
+        channel->sourceData = data;
 
         // Kick-start the timer ISR by setting hasNewData flag
         // The timer ISR will start encoding chunks and posting transactions
@@ -309,6 +321,7 @@ void ChannelEngineSpi::releaseChannel(SpiChannelState* channel) {
         channel->transmissionComplete = false;
         channel->hasNewData = false;
         channel->ledBytesRemaining = 0;
+        channel->sourceData = nullptr;  // Release reference to ChannelData
     }
 }
 
