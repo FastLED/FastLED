@@ -8,7 +8,7 @@
 
 #include "platforms/esp/32/feature_flags/enabled.h"
 
-#if FASTLED_RMT5
+#if FASTLED_RMT5  // Must check BEFORE including any RMT5 headers to prevent symbol conflicts
 
 #include "fl/channels/channel_engine.h"
 #include "fl/channels/channel_data.h"

@@ -880,9 +880,9 @@ void ChannelEnginePARLIO::beginTransmission(fl::span<const ChannelDataPtr> chann
 // Factory Function Implementation
 //=============================================================================
 
-IChannelEngine* createParlioEngine() {
+fl::shared_ptr<IChannelEngine> createParlioEngine() {
     FL_LOG_PARLIO("PARLIO: Creating polymorphic engine (1/2/4/8/16-bit auto-select)");
-    return new ChannelEnginePARLIO();
+    return fl::make_shared<ChannelEnginePARLIO>();
 }
 
 } // namespace fl

@@ -85,9 +85,8 @@ platforms/esp/32/core/fastled_esp32.h (Master Aggregator)
     ├─→ drivers/rmt/clockless_rmt_esp32.h (Default driver)
     │       ↓
     │       ├─→ rmt_4/ (ESP-IDF 4.x - legacy)
-    │       │     ├── idf4_clockless_rmt_esp32.h
-    │       │     ├── idf4_rmt.h / idf4_rmt.cpp
-    │       │     └── idf4_rmt_impl.h / idf4_rmt_impl.cpp
+    │       │     ├── idf4_clockless_rmt_esp32.h (ChannelBusManager-based)
+    │       │     └── channel_engine_rmt4.h / channel_engine_rmt4.cpp
     │       │
     │       └─→ rmt_5/ (ESP-IDF 5.x - default, DMA-backed)
     │             ├── idf5_clockless.h (ChannelBusManager-based)

@@ -21,100 +21,77 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
- *
- * The default FastLED driver takes over control of the RMT interrupt
- * handler, making it hard to use the RMT device for other
- * (non-FastLED) purposes. You can change it's behavior to use the ESP
- * core driver instead, allowing other RMT applications to
- * co-exist. To switch to this mode, add the following directive
- * before you include FastLED.h:
- *
- *      #define FASTLED_RMT_BUILTIN_DRIVER 1
  */
 
 #pragma once
 
+#include "platforms/esp/32/feature_flags/enabled.h"
 
+#if !FASTLED_RMT5
 
-#include "platforms/esp/32/core/fastpin_esp32.h"
+// Signal to the world that we have a ClocklessController to allow WS2812 and others
+#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
-#include "platforms/esp/esp_version.h"
+#include "crgb.h"
+#include "eorder.h"
 #include "pixel_iterator.h"
-#include "idf4_rmt.h"
-#include "fl/chipsets/led_timing.h"
+#include "fl/channels/channel_data.h"
+#include "fl/channels/channel_engine.h"
+#include "platforms/esp/32/drivers/channel_bus_manager.h"
+#include "platforms/esp/32/core/fastpin_esp32.h"
 #include "fl/chipsets/timing_traits.h"
 
-
-
-// -- Core or custom driver
-#ifndef FASTLED_RMT_BUILTIN_DRIVER
-#define FASTLED_RMT_BUILTIN_DRIVER false
-#endif
-
-// -- Max RMT TX channel
-#ifndef FASTLED_RMT_MAX_CHANNELS
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(4, 4, 0)
-// 8 for (ESP32)  4 for (ESP32S2, ESP32S3)  2 for (ESP32C3, ESP32H2)
-#include "soc/soc_caps.h"
-#define FASTLED_RMT_MAX_CHANNELS SOC_RMT_TX_CANDIDATES_PER_GROUP
-#else
-#ifdef CONFIG_IDF_TARGET_ESP32S2
-#define FASTLED_RMT_MAX_CHANNELS 4
-#else
-#define FASTLED_RMT_MAX_CHANNELS 8
-#endif
-#endif
-#endif
-
 namespace fl {
-// Platform-specific headers are included conditionally below
-#define FL_CLOCKLESS_CONTROLLER_DEFINED 1
-// Not used.
-//#define NUM_COLOR_CHANNELS 3
 
 template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
-class ClocklessRMT : public CPixelLEDController<RGB_ORDER>
+class ClocklessIdf4 : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    // Extract timing values from timing type's enum members
-    static constexpr uint32_t T1 = TIMING::T1;
-    static constexpr uint32_t T2 = TIMING::T2;
-    static constexpr uint32_t T3 = TIMING::T3;
+    // Channel data for transmission
+    ChannelDataPtr mChannelData;
 
-    // Convert to runtime ChipsetTiming for RMT controller
-    static constexpr ChipsetTiming runtime_timing() {
-        return {TIMING::T1, TIMING::T2, TIMING::T3, TIMING::RESET, "timing"};
-    }
-
-    // -- The actual controller object for ESP32
-    RmtController mRMTController;
+    // Channel engine reference (singleton)
+    IChannelEngine* mEngine;
 
     // -- Verify that the pin is valid
     static_assert(FastPin<DATA_PIN>::validpin(), "This pin has been marked as an invalid pin, common reasons includes it being a ground pin, read only, or too noisy (e.g. hooked up to the uart).");
 
 public:
-    ClocklessRMT()
-        : mRMTController(
-            DATA_PIN, runtime_timing(),
-            FASTLED_RMT_MAX_CHANNELS,
-            FASTLED_RMT_BUILTIN_DRIVER
-        )
+    ClocklessIdf4()
+        : mEngine(&getChannelBusManager())
     {
+        // Create channel data with pin and timing configuration
+        ChipsetTimingConfig timing = makeTimingConfig<TIMING>();
+        mChannelData = ChannelData::create(DATA_PIN, timing);
     }
 
-    void init()
-    {
-    }
-
+    void init() override { }
     virtual uint16_t getMaxRefreshRate() const { return 400; }
 
 protected:
     // -- Show pixels
     //    This is the main entry point for the controller.
-    virtual void showPixels(PixelController<RGB_ORDER> &pixels)
+    virtual void showPixels(PixelController<RGB_ORDER> &pixels) override
     {
-        PixelIterator iterator = pixels.as_iterator(this->getRgbw());
-        mRMTController.showPixels(iterator);
+        // Fail-fast race condition detection: Buffer MUST NOT be in use
+        // If this assertion fires, the hardware wait in releaseChannel() is insufficient
+        FL_ASSERT(!mChannelData->isInUse(), "ClocklessIdf4: Race condition - buffer still in use by engine!");
+
+        // Convert pixels to encoded byte data
+        fl::PixelIterator iterator = pixels.as_iterator(this->getRgbw());
+        auto& data = mChannelData->getData();
+        data.clear();
+        iterator.writeWS2812(&data);
+
+        // Enqueue for transmission (will be sent when engine->show() is called)
+        mEngine->enqueue(mChannelData);
     }
 };
+
+// Backward compatibility alias
+template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+using ClocklessRMT = ClocklessIdf4<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+
 }  // namespace fl
+
+#endif // !FASTLED_RMT5

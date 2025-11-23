@@ -18,8 +18,14 @@
 #include "ftl/shared_ptr.h"
 
 // Include concrete engine implementations
-#if FASTLED_RMT5
+// ESP32-C6, C5, P4, H2 only support RMT5 (new driver) - force RMT5 even if flag is 0
+#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
 #include "rmt/rmt_5/channel_engine_rmt.h"
+#elif FASTLED_RMT5
+#include "rmt/rmt_5/channel_engine_rmt.h"
+#else
+#include "rmt/rmt_4/channel_engine_rmt4.h"
 #endif
 #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
 #include "spi/channel_engine_spi.h"
@@ -73,9 +79,17 @@ static void initializeChannelBusManager() {
     #endif
     #endif
 
-    #if FASTLED_RMT5
+    // ESP32-C6, C5, P4, H2 only support RMT5 - force RMT5 even if flag is 0
+    #if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+        defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
     manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>());
-    FL_DBG("ESP32: Added RMT engine (priority " << PRIORITY_RMT << ")");
+    FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ") [forced for RMT5-only chip]");
+    #elif FASTLED_RMT5
+    manager.addEngine(PRIORITY_RMT, fl::make_shared<ChannelEngineRMT>());
+    FL_DBG("ESP32: Added RMT5 engine (priority " << PRIORITY_RMT << ")");
+    #else
+    manager.addEngine(PRIORITY_RMT, ChannelEngineRMT4::create());
+    FL_DBG("ESP32: Added RMT4 engine (priority " << PRIORITY_RMT << ")");
     #endif
 
     FL_DBG("ESP32: ChannelBusManager initialization complete");

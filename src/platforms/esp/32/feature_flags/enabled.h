@@ -25,7 +25,11 @@
 // so we keep it because "RMT" is specific to ESP32
 // Auto-detect RMT5 based on ESP-IDF version if not explicitly defined
 #if !defined(FASTLED_RMT5)
-#if ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0) && FASTLED_ESP32_HAS_RMT
+// ESP32-C6, C5, P4, H2 only support RMT5 (new driver) - no fallback to RMT4
+#if defined(CONFIG_IDF_TARGET_ESP32C6) || defined(CONFIG_IDF_TARGET_ESP32C5) || \
+    defined(CONFIG_IDF_TARGET_ESP32P4) || defined(CONFIG_IDF_TARGET_ESP32H2)
+#define FASTLED_RMT5 1
+#elif ESP_IDF_VERSION >= ESP_IDF_VERSION_VAL(5, 0, 0) && FASTLED_ESP32_HAS_RMT
 #define FASTLED_RMT5 1
 #else
 #define FASTLED_RMT5 0  // Legacy driver or no RMT

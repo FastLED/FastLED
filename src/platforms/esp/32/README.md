@@ -91,15 +91,13 @@ Additional I2S defines and guidance:
   - **`FASTLED_ESP32_SPI_BULK_TRANSFER_SIZE`**: Bulk block size (CRGBs) when bulk mode is enabled. Default `64`.
 
 - **RMT (IDF4 path in `rmt_4/`)**
-  - **`FASTLED_RMT_BUILTIN_DRIVER`**: Use the ESP-IDF built-in `rmt` driver (prebuilds full symbol buffer) instead of FastLED’s incremental ISR driver. Reduces flicker but uses much more RAM. Default `false`. Not supported on IDF5 (see warning in `rmt_5/idf5_rmt.cpp`).
   - **`FASTLED_RMT_SERIAL_DEBUG`**: When `1`, print RMT errors to Serial for debugging. Default `0`.
   - **`FASTLED_RMT_MEM_WORDS_PER_CHANNEL`**: Override RMT words per channel. Defaults to `SOC_RMT_MEM_WORDS_PER_CHANNEL` on newer IDF or `64` on older.
   - **`FASTLED_RMT_MEM_BLOCKS`**: Number of RMT memory blocks per channel to use. Default `2`. Higher values reduce refill interrupts but consume more shared memory and reduce usable channels per group.
-  - **`FASTLED_RMT_MAX_CONTROLLERS`**: Max FastLED controllers the driver can queue. Default `32`.
   - **`FASTLED_RMT_MAX_CHANNELS`**: Max TX channels to use. Defaults to SoC capability (e.g., `SOC_RMT_TX_CANDIDATES_PER_GROUP`) or chip-specific constants. Reduce to reserve channels for other RMT users.
-  - **`FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM`**: Max RTOS ticks to wait for the RMT TX semaphore before bailing out. Default `portMAX_DELAY`. Example to cap at ~2s: `#define FASTLED_RMT_MAX_TICKS_FOR_GTX_SEM (2000/portTICK_PERIOD_MS)`.
-  - **`FASTLED_ESP32_FLASH_LOCK`**: When set to `1`, blocks flash operations during show to avoid timing disruptions. See comments in `rmt_4/idf4_rmt.h` and usage in `idf4_rmt_impl.cpp`.
-  - (Not currently used) **`FASTLED_RMT_SHOW_TIMER`**: Timer debug toggle (commented out in `rmt_4/idf4_rmt.h`).
+  - **`FASTLED_RMT4_TRANSMISSION_TIMEOUT_MS`**: Maximum time in milliseconds to wait for RMT transmission to complete before considering it stuck. Default `2000` (2 seconds). Set to `0` to disable timeout detection.
+  - **`FASTLED_ESP32_FLASH_LOCK`**: When set to `1`, blocks flash operations during show to avoid timing disruptions. Default `0`. Note: Currently only supported on IDF 3.x; IDF 4.x+ support is pending.
+  - (Not currently used) **`FASTLED_RMT_SHOW_TIMER`**: Timer debug toggle (legacy flag, no longer used).
   - **`FASTLED_INTERRUPT_RETRY_COUNT`**: Global retry count when timing is disrupted (also used by the blockless path). Default `2` in `fastled_config.h`.
   - **`FASTLED_DEBUG_COUNT_FRAME_RETRIES`**: When defined, enable counters/logging of frame retries due to timing issues (used in blockless/clockless drivers).
 
@@ -352,11 +350,9 @@ Important compatibility note:
 
 Behavioral differences and practical guidance:
 - RMT4 (IDF4)
-  - Tends to be more resistant to visible flicker during heavy Wi‑Fi/BLE activity, especially when combined with the IDF4 builtin driver path:
-    ```c++
-    #define FASTLED_RMT_BUILTIN_DRIVER 1  // IDF4 only
-    ```
-  - Uses more RAM when the builtin driver is enabled because full symbol buffers are staged.
+  - Uses ISR-driven double-buffering for LED transmission with WiFi interference detection.
+  - Supports time-multiplexing for >8 LED strips via channel sharing.
+  - Enable `FASTLED_ESP32_FLASH_LOCK` to reduce flicker during WiFi activity (IDF 3.x only).
 
 - RMT5 (IDF5)
   - Asynchronous, DMA‑backed LED driver. Your sketch can continue running while a frame is transmitted.
@@ -367,7 +363,7 @@ Behavioral differences and practical guidance:
 
 Quick PlatformIO examples
 
-- Force RMT4 on IDF5 (legacy path) and, when using IDF4, enable builtin RMT driver for flicker resistance:
+- Force RMT4 on IDF5 (legacy path):
   ```ini
   [env:esp32dev_rmt4]
   platform = espressif32
@@ -375,8 +371,6 @@ Quick PlatformIO examples
   framework = arduino
   build_flags =
     -D FASTLED_RMT5=0
-    ; On IDF4 only, you may also add:
-    ; -D FASTLED_RMT_BUILTIN_DRIVER=1
   ```
 
 - Enable I2S on ESP32Dev or ESP32‑S3 with extra DMA buffers:

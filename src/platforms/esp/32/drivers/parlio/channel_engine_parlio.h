@@ -406,9 +406,9 @@ private:
 //=============================================================================
 
 /// @brief Create polymorphic PARLIO engine instance
-/// @return IChannelEngine pointer, or nullptr if creation fails
+/// @return Shared pointer to IChannelEngine, or nullptr if creation fails
 /// @note Engine auto-selects optimal data width per batch (1, 2, 4, 8, or 16-bit)
-IChannelEngine* createParlioEngine();
+fl::shared_ptr<IChannelEngine> createParlioEngine();
 
 } // namespace fl
 

@@ -65,7 +65,7 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) {
             }
             slot.data = newData;
             slot.capacity = size;
-            FL_DBG("RMTBufferPool: Resized buffer " << i << " to " << size << " bytes");
+            FL_LOG_RMT("RMTBufferPool: Resized buffer " << i << " to " << size << " bytes");
             return static_cast<int>(i);
         }
     }
@@ -81,7 +81,7 @@ int RMTBufferPool::allocateOrResizeSlot(fl::size size) {
     newSlot.inUse = false;
 
     mInternalBuffers.push_back(newSlot);
-    FL_DBG("RMTBufferPool: Allocated new buffer " << (mInternalBuffers.size() - 1)
+    FL_LOG_RMT("RMTBufferPool: Allocated new buffer " << (mInternalBuffers.size() - 1)
            << " with " << size << " bytes");
     return static_cast<int>(mInternalBuffers.size() - 1);
 }
@@ -133,7 +133,7 @@ fl::span<uint8_t> RMTBufferPool::acquireDMA(fl::size size) {
             return fl::span<uint8_t>();
         }
         mDMABuffer.capacity = size;
-        FL_DBG("RMTBufferPool: Allocated DMA buffer with " << size << " bytes");
+        FL_LOG_RMT("RMTBufferPool: Allocated DMA buffer with " << size << " bytes");
     }
 
     mDMABuffer.inUse = true;

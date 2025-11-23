@@ -181,6 +181,7 @@ ChannelEngineRMT::EngineState ChannelEngineRMT::poll() {
 
 void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelData) {
     if (channelData.size() == 0) {
+        FL_LOG_RMT("beginTransmission: No channels to transmit");
         return;
     }
     FL_LOG_RMT("ChannelEngineRMT::beginTransmission() is running");
@@ -251,6 +252,7 @@ rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& t
 ChannelEngineRMT::ChannelState* ChannelEngineRMT::acquireChannel(gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize) {
     // Strategy 1: Find channel with matching pin (zero-cost reuse)
     // Note: DMA channels are not reused (checked via !ch.useDMA below)
+    FL_LOG_RMT("acquireChannel: Finding channel with matching pin " << static_cast<int>(pin));
     for (auto& ch : mChannels) {
         if (!ch.inUse && ch.channel && ch.pin == pin && !ch.useDMA) {
             ch.inUse = true;
