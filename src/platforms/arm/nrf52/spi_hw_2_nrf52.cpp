@@ -465,21 +465,21 @@ void SPIDualNRF52::startTransmission() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// NRF52 factory override - returns available Dual-SPI instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw2*> SpiHw2::createInstances() {
-    fl::vector<SpiHw2*> controllers;
-
-    // NRF52 has at least SPIM0 and SPIM1 available for dual-SPI
-    // Create one logical dual-SPI controller (using SPIM0+SPIM1)
-    static SPIDualNRF52 controller0(0, "SPIM0+1");
-    controllers.push_back(&controller0);
-
-    return controllers;
+/// Register NRF52 SPI hardware instances during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw2::registerInstance()
+namespace {
+    void init_spi_hw_2_nrf52() {
+        // NRF52 has at least SPIM0 and SPIM1 available for dual-SPI
+        // Create one logical dual-SPI controller (using SPIM0+SPIM1)
+        static auto controller0 = fl::make_shared<SPIDualNRF52>(0, "SPIM0+1");
+        SpiHw2::registerInstance(controller0);
+    }
 }
+FL_INIT(init_spi_hw_2_nrf52);
 
 }  // namespace fl
 

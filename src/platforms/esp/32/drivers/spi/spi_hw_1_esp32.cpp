@@ -282,14 +282,15 @@ void SPISingleESP32::cleanup() {
 
 // Singleton getters for controller instances (Meyer's Singleton pattern)
 // These are called from the centralized registration in spi_esp32_init.cpp
-fl::shared_ptr<SPISingleESP32>& getController2() {
-    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
+// Return as SpiHw1 base class pointer to avoid forward declaration issues
+fl::shared_ptr<SpiHw1>& getController2() {
+    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(2, "SPI2");
     return instance;
 }
 
 #if SOC_SPI_PERIPH_NUM > 2
-fl::shared_ptr<SPISingleESP32>& getController3() {
-    static fl::shared_ptr<SPISingleESP32> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
+fl::shared_ptr<SpiHw1>& getController3() {
+    static fl::shared_ptr<SpiHw1> instance = fl::make_shared<SPISingleESP32>(3, "SPI3");
     return instance;
 }
 #endif

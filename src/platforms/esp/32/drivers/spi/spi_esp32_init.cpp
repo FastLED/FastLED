@@ -11,37 +11,20 @@
 #if defined(FL_IS_ESP32)
 
 #include "platforms/shared/spi_hw_1.h"
-#include "fl/shared_ptr.h"
+#include "platforms/esp/32/drivers/spi/spi_hw_base.h"  // Common ESP32 SPI definitions
+#include "ftl/shared_ptr.h"
 #include "fl/compiler_control.h"
-
-// Include soc_caps.h if available (ESP-IDF 4.0+)
-#include "fl/has_include.h"
-#if FL_HAS_INCLUDE(<soc/soc_caps.h>)
-  #include "soc/soc_caps.h"
-#endif
-
-// Determine SPI3_HOST availability using SOC capability macro
-#ifndef SOC_SPI_PERIPH_NUM
-    #define SOC_SPI_PERIPH_NUM 2  // Default to 2 for older ESP-IDF versions
-#endif
 
 namespace fl {
 
-// Forward declaration of the ESP32 Single-SPI implementation class
-class SPISingleESP32;
+// Forward declare the singleton getter functions from spi_hw_1_esp32.cpp
+class SpiHw1;  // Full declaration from spi_hw_1.h above
+extern fl::shared_ptr<SpiHw1>& getController2();
+#if SOC_SPI_PERIPH_NUM > 2
+extern fl::shared_ptr<SpiHw1>& getController3();
+#endif
 
 namespace {
-
-// ============================================================================
-// SpiHw1 (Single-lane SPI) Instance Management
-// ============================================================================
-
-// Singleton getters for SpiHw1 controller instances
-// These reference the SPISingleESP32 instances defined in spi_hw_1_esp32.cpp
-extern fl::shared_ptr<SPISingleESP32>& getController2();
-#if SOC_SPI_PERIPH_NUM > 2
-extern fl::shared_ptr<SPISingleESP32>& getController3();
-#endif
 
 // ============================================================================
 // Centralized Registration via Single Static Constructor
@@ -51,6 +34,7 @@ extern fl::shared_ptr<SPISingleESP32>& getController3();
 FL_CONSTRUCTOR
 static void registerAllESP32SpiInstances() {
     // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
+    // Access singleton instances from spi_hw_1_esp32.cpp
     SpiHw1::registerInstance(getController2());
     #if SOC_SPI_PERIPH_NUM > 2
     SpiHw1::registerInstance(getController3());

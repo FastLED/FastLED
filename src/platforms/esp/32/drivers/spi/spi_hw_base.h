@@ -17,6 +17,10 @@
   #include <soc/soc_caps.h>
 #endif
 
+// Include driver/spi_master.h for spi_host_device_t type definition
+// Required for SPI2_HOST/SPI3_HOST macro definitions below
+#include <driver/spi_master.h>
+
 // Determine SPI3_HOST availability using SOC capability macro
 // SOC_SPI_PERIPH_NUM indicates the number of SPI peripherals available
 // SPI3_HOST is available when SOC_SPI_PERIPH_NUM > 2 (SPI1, SPI2, SPI3)

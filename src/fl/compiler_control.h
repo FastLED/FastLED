@@ -218,6 +218,20 @@
   #define FL_CONSTRUCTOR
 #endif
 
+// FL_INIT: Convenient macro for static initialization functions
+// Registers a function to run during C++ static initialization (before main())
+// Usage:
+//   namespace { void init_my_feature() { /* code */ } }
+//   FL_INIT(init_my_feature);
+FL_DISABLE_WARNING_PUSH
+FL_DISABLE_WARNING_GLOBAL_CONSTRUCTORS
+#define FL_INIT(func) \
+  namespace { \
+    FL_CONSTRUCTOR \
+    void __fl_init_##func() { func(); } \
+  }
+FL_DISABLE_WARNING_POP
+
 // C linkage macros for compatibility with C++ name mangling
 #ifdef __cplusplus
   #define FL_EXTERN_C_BEGIN extern "C" {
@@ -235,31 +249,18 @@
 // Usage: void FL_IRAM myInterruptHandler() { ... }
 //
 // Platform behavior:
-//   ESP32: Uses IRAM_ATTR from esp_attr.h (places code in internal SRAM)
-//   ESP8266: Uses IRAM_ATTR from Arduino SDK (places code in internal SRAM)
-//   STM32: Uses .text_ram section attribute (places code in fast RAM)
+//   ESP32: Places code in internal SRAM with unique section names (.iram1.text.N)
+//   ESP8266: Places code in internal SRAM with unique section names (.iram.text.N)
+//   STM32: Places code in fast RAM with unique section names (.text_ram.N)
 //   Other platforms: No-op (functions execute from normal memory)
-#if defined(ESP32)
-  #ifdef __cplusplus
-    FL_EXTERN_C_BEGIN
-    #include "esp_attr.h"  // Provides IRAM_ATTR for ESP32
-    FL_EXTERN_C_END
-  #else
-    #include "esp_attr.h"
-  #endif
-  #define FL_IRAM IRAM_ATTR
-#elif defined(ESP8266)
-  // ESP8266: IRAM_ATTR is provided by Arduino ESP8266 SDK (via ets_sys.h -> c_types.h)
-  // No need to include headers - it's already defined by the platform
-  #ifndef IRAM_ATTR
-    #define IRAM_ATTR __attribute__((section(".iram.text")))
-  #endif
-  #define FL_IRAM IRAM_ATTR
-#elif defined(__arm__) && defined(STM32)
-  // STM32: Place in fast RAM section (.text_ram)
-  #define FL_IRAM __attribute__((section(".text_ram")))
-#else
-  #define FL_IRAM  // No-op on other platforms
+//
+// Each FL_IRAM usage automatically generates a unique section using __COUNTER__
+// for better debugging, linker control, and IRAM usage tracking.
+//
+// Platform-specific definitions are in led_sysdefs_*.h headers.
+// This fallback applies only to platforms that don't define FL_IRAM.
+#ifndef FL_IRAM
+  #define FL_IRAM  // No-op on platforms without IRAM support
 #endif
 
 

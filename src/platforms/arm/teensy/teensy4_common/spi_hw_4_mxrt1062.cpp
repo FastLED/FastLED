@@ -375,28 +375,28 @@ void SpiHw4MXRT1062::cleanup() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// Teensy 4.x factory override - returns available 4-lane SPI bus instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw4*> SpiHw4::createInstances() {
-    FL_LOG_SPI("SpiHw4MXRT1062::createInstances() called - Teensy 4.x hardware SPI factory active");
+/// Register Teensy 4.x SPI hardware instances during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw4::registerInstance()
+namespace {
+    void init_spi_hw_4_mxrt1062() {
+        FL_LOG_SPI("SpiHw4MXRT1062::Registrar - Teensy 4.x hardware SPI registration active");
 
-    fl::vector<SpiHw4*> controllers;
+        // Teensy 4.x has 3 LPSPI peripherals available
+        // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
+        static auto controller0 = fl::make_shared<SpiHw4MXRT1062>(0, "SPI");
+        static auto controller1 = fl::make_shared<SpiHw4MXRT1062>(1, "SPI1");
+        static auto controller2 = fl::make_shared<SpiHw4MXRT1062>(2, "SPI2");
 
-    // Teensy 4.x has 3 LPSPI peripherals available
-    // SPI (bus 0), SPI1 (bus 1), SPI2 (bus 2)
-    static SpiHw4MXRT1062 controller0(0, "SPI");
-    static SpiHw4MXRT1062 controller1(1, "SPI1");
-    static SpiHw4MXRT1062 controller2(2, "SPI2");
-
-    controllers.push_back(&controller0);
-    controllers.push_back(&controller1);
-    controllers.push_back(&controller2);
-
-    return controllers;
+        SpiHw4::registerInstance(controller0);
+        SpiHw4::registerInstance(controller1);
+        SpiHw4::registerInstance(controller2);
+    }
 }
+FL_INIT(init_spi_hw_4_mxrt1062);
 
 }  // namespace fl
 

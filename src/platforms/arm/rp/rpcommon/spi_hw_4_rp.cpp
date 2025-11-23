@@ -552,23 +552,23 @@ void SPIQuadRP2040::cleanup() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// RP2040/RP2350 factory override - returns available SPI bus instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw4*> SpiHw4::createInstances() {
-    fl::vector<SpiHw4*> controllers;
+/// Register RP2040/RP2350 SPI hardware instances during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw4::registerInstance()
+namespace {
+    void init_spi_hw_4_rp() {
+        // Create 2 logical SPI buses (each uses separate PIO state machine)
+        static auto controller0 = fl::make_shared<SPIQuadRP2040>(0, "SPI0");
+        static auto controller1 = fl::make_shared<SPIQuadRP2040>(1, "SPI1");
 
-    // Create 2 logical SPI buses (each uses separate PIO state machine)
-    static SPIQuadRP2040 controller0(0, "SPI0");
-    controllers.push_back(&controller0);
-
-    static SPIQuadRP2040 controller1(1, "SPI1");
-    controllers.push_back(&controller1);
-
-    return controllers;
+        SpiHw4::registerInstance(controller0);
+        SpiHw4::registerInstance(controller1);
+    }
 }
+FL_INIT(init_spi_hw_4_rp);
 
 }  // namespace fl
 

@@ -561,20 +561,20 @@ void SPIQuadSAMD51::cleanup() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// SAMD51 factory override - returns available SPI bus instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw4*> SpiHw4::createInstances() {
-    fl::vector<SpiHw4*> controllers;
-
-    // SAMD51 has one QSPI peripheral
-    static SPIQuadSAMD51 controller0(0, "QSPI");
-    controllers.push_back(&controller0);
-
-    return controllers;
+/// Register SAMD51 SPI hardware instances during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw4::registerInstance()
+namespace {
+    void init_spi_hw_4_samd51() {
+        // SAMD51 has one QSPI peripheral
+        static auto controller0 = fl::make_shared<SPIQuadSAMD51>(0, "QSPI");
+        SpiHw4::registerInstance(controller0);
+    }
 }
+FL_INIT(init_spi_hw_4_samd51);
 
 }  // namespace fl
 

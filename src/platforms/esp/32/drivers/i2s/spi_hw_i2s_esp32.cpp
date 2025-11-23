@@ -385,20 +385,20 @@ fl::vector<int> SpiHwI2SESP32::extract_data_pins(const Config& config) {
 }
 
 // ============================================================================
-// Factory Function - Strong Definition Overrides Weak Default
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-// This strong definition overrides the weak default in spi_hw_16.cpp
-// It registers the ESP32 I2S controller with the SpiHw16 factory system
-fl::vector<SpiHw16*> SpiHw16::createInstances() {
-    fl::vector<SpiHw16*> controllers;
-
-    // Single static instance (I2S0 only available on ESP32)
-    static SpiHwI2SESP32 i2s0_controller(0);
-    controllers.push_back(&i2s0_controller);
-
-    return controllers;
+/// Register ESP32 I2S SPI hardware instance during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw16::registerInstance()
+namespace {
+    void init_spi_i2s_esp32() {
+        // Single static instance (I2S0 only available on ESP32)
+        static auto i2s0_controller = fl::make_shared<SpiHwI2SESP32>(0);
+        SpiHw16::registerInstance(i2s0_controller);
+    }
 }
+FL_INIT(init_spi_i2s_esp32);
 
 } // namespace fl
 

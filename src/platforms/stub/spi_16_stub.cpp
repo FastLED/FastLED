@@ -199,15 +199,13 @@ fl::vector<fl::vector<uint8_t>> SpiHw16Stub::extractLanes(uint8_t num_lanes, siz
 
 /// Register stub instances during static initialization
 namespace {
-    struct SpiHw16StubRegistrar {
-        SpiHw16StubRegistrar() {
-            // Provide 1 mock 16-lane SPI bus for testing (I2S0)
-            static auto controller0 = fl::make_shared<SpiHw16Stub>(0, "MockHexadecaSPI0");
-            SpiHw16::registerInstance(controller0);
-        }
-    };
-    static SpiHw16StubRegistrar g_spi_hw16_stub_registrar;
+    void init_spi_16_stub() {
+        // Provide 1 mock 16-lane SPI bus for testing (I2S0)
+        static auto controller0 = fl::make_shared<SpiHw16Stub>(0, "MockHexadecaSPI0");
+        SpiHw16::registerInstance(controller0);
+    }
 }
+FL_INIT(init_spi_16_stub);
 
 }  // namespace fl
 

@@ -533,21 +533,21 @@ void SPIQuadNRF52::startTransmission() {
 }
 
 // ============================================================================
-// Factory Implementation
+// Static Registration - New Polymorphic Pattern
 // ============================================================================
 
-/// NRF52840/52833 factory override - returns available Quad-SPI instances
-/// Strong definition overrides weak default
-fl::vector<SpiHw4*> SpiHw4::createInstances() {
-    fl::vector<SpiHw4*> controllers;
-
-    // NRF52840/52833 has all four SPIM peripherals (SPIM0-3) available for quad-SPI
-    // Create one logical quad-SPI controller (using SPIM0+SPIM1+SPIM2+SPIM3)
-    static SPIQuadNRF52 controller0(0, "SPIM0+1+2+3");
-    controllers.push_back(&controller0);
-
-    return controllers;
+/// Register NRF52840/52833 SPI hardware instances during static initialization
+/// This replaces the old createInstances() factory pattern with the new
+/// centralized registration system using SpiHw4::registerInstance()
+namespace {
+    void init_spi_hw_4_nrf52() {
+        // NRF52840/52833 has all four SPIM peripherals (SPIM0-3) available for quad-SPI
+        // Create one logical quad-SPI controller (using SPIM0+SPIM1+SPIM2+SPIM3)
+        static auto controller0 = fl::make_shared<SPIQuadNRF52>(0, "SPIM0+1+2+3");
+        SpiHw4::registerInstance(controller0);
+    }
 }
+FL_INIT(init_spi_hw_4_nrf52);
 
 }  // namespace fl
 

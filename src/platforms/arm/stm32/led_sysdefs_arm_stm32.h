@@ -91,4 +91,20 @@ typedef volatile       uint8_t RwReg; /**< Read-Write 8-bit register (volatile u
 extern "C" void yield();
 #endif
 
+// Platform-specific IRAM attribute for STM32
+// STM32: Places code in fast RAM section (.text_ram) for time-critical functions
+// Uses __COUNTER__ to generate unique section names (.text_ram.0, .text_ram.1, etc.)
+// for better debugging and linker control
+#ifndef FL_IRAM
+  // Helper macros for stringification
+  #ifndef _FL_IRAM_STRINGIFY2
+    #define _FL_IRAM_STRINGIFY2(x) #x
+    #define _FL_IRAM_STRINGIFY(x) _FL_IRAM_STRINGIFY2(x)
+  #endif
+
+  // Generate unique section name using __COUNTER__ (e.g., .text_ram.0, .text_ram.1)
+  #define _FL_IRAM_SECTION_NAME(counter) ".text_ram." _FL_IRAM_STRINGIFY(counter)
+  #define FL_IRAM __attribute__((section(_FL_IRAM_SECTION_NAME(__COUNTER__))))
+#endif
+
 #endif
