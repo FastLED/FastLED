@@ -35,9 +35,12 @@ FL_CONSTRUCTOR
 static void registerAllESP32SpiInstances() {
     // SpiHw1 (Single-lane): Register SPI2_HOST and SPI3_HOST for single-strip configurations
     // Access singleton instances from spi_hw_1_esp32.cpp
-    SpiHw1::registerInstance(getController2());
+    // Get references and copy to ensure proper shared_ptr type conversion
+    fl::shared_ptr<SpiHw1> ctrl2 = getController2();
+    SpiHw1::registerInstance(ctrl2);
     #if SOC_SPI_PERIPH_NUM > 2
-    SpiHw1::registerInstance(getController3());
+    fl::shared_ptr<SpiHw1> ctrl3 = getController3();
+    SpiHw1::registerInstance(ctrl3);
     #endif
 
     // Note: ESP32 does not register SpiHw2/4/8/16 instances here.

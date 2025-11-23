@@ -71,8 +71,10 @@ static void initializeChannelBusManager() {
 
     #if FASTLED_ESP32_HAS_CLOCKLESS_SPI
     #if defined(CONFIG_IDF_TARGET_ESP32C6)
-    // ESP32-C6 does not have available SPI hosts for LED control (max 0 hosts)
-    FL_DBG("ESP32-C6: SPI engine not available (no SPI hosts)");
+    // ESP32-C6 has SPI2 available, but only 1 host vs 2-3 on other ESP32 chips.
+    // RMT5 provides better performance and scalability for LED control on this platform.
+    // Note: SPI0/SPI1 are reserved for flash operations and cannot be used.
+    FL_DBG("ESP32-C6: SPI engine not enabled (only 1 SPI host available, RMT5 preferred)");
     #else
     manager.addEngine(PRIORITY_SPI, fl::make_shared<ChannelEngineSpi>());
     FL_DBG("ESP32: Added SPI engine (priority " << PRIORITY_SPI << ")");

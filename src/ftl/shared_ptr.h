@@ -159,8 +159,8 @@ public:
         acquire();
     }
     
-    // Converting copy constructor
-    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value || fl::is_base_of<Y, T>::value>::type>
+    // Converting copy constructor (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
     shared_ptr(const shared_ptr<Y>& other) : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
         acquire();
     }
@@ -171,8 +171,8 @@ public:
         other.control_block_ = nullptr;
     }
     
-    // Converting move constructor
-    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value || fl::is_base_of<Y, T>::value>::type>
+    // Converting move constructor (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
     shared_ptr(shared_ptr<Y>&& other) noexcept : ptr_(static_cast<T*>(other.ptr_)), control_block_(other.control_block_) {
         other.ptr_ = nullptr;
         other.control_block_ = nullptr;
@@ -200,10 +200,11 @@ public:
         return *this;
     }
     
-    template<typename Y>
+    // Converting copy assignment (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
     shared_ptr& operator=(const shared_ptr<Y>& other) {
         reset();
-        ptr_ = other.ptr_;
+        ptr_ = static_cast<T*>(other.ptr_);
         control_block_ = other.control_block_;
         acquire();
         return *this;
@@ -217,11 +218,15 @@ public:
         return *this;
     }
     
-    template<typename Y>
+    // Converting move assignment (allows upcasting: shared_ptr<Derived> → shared_ptr<Base>)
+    template<typename Y, typename = typename fl::enable_if<fl::is_base_of<T, Y>::value>::type>
     shared_ptr& operator=(shared_ptr<Y>&& other) noexcept {
         if (static_cast<void*>(this) != static_cast<void*>(&other)) {
-            this->swap(other);
-            other.reset();
+            reset();
+            ptr_ = static_cast<T*>(other.ptr_);
+            control_block_ = other.control_block_;
+            other.ptr_ = nullptr;
+            other.control_block_ = nullptr;
         }
         return *this;
     }

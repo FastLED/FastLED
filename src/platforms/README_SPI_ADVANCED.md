@@ -639,6 +639,30 @@ static uint8_t getLaneByte(const LaneData& lane,
 
 ## Platform Support
 
+### ESP32 SPI Peripheral Availability
+
+Understanding ESP32 SPI peripheral allocation is critical for LED control implementation:
+
+| Platform | SPI0 | SPI1 | SPI2 | SPI3 | Available for LEDs | FastLED Uses |
+|----------|------|------|------|------|-------------------|--------------|
+| **ESP32 (classic)** | Flash cache | Flash | ✅ General | ✅ General | **SPI2 + SPI3** (2 hosts) | ✅ **SPI Engine** |
+| **ESP32-S2** | Flash cache | Flash | ✅ General | ✅ General | **SPI2 + SPI3** (2 hosts) | ✅ **SPI Engine** |
+| **ESP32-S3** | Flash cache | Flash | ✅ General | ✅ General | **SPI2 + SPI3** (2 hosts) | ✅ **SPI Engine** |
+| **ESP32-C3** | Flash cache | Flash | ✅ General | ❌ N/A | **SPI2 only** (1 host) | ⚠️ **SPI Engine** (limited) |
+| **ESP32-C6** | Flash cache | Flash | ✅ General | ❌ N/A | **SPI2 only** (1 host) | ❌ **RMT5** (SPI not used) |
+| **ESP32-H2** | Flash cache | Flash | ✅ General | ❌ N/A | **SPI2 only** (1 host) | ❌ **RMT5** (SPI not used) |
+| **ESP32-P4** | Flash cache | Flash | ✅ General | ✅ General | **SPI2 + SPI3** (2 hosts) | ✅ **SPI Engine** + Octal |
+
+**Key Points:**
+
+- **SPI0/SPI1**: Always reserved for flash/PSRAM operations across all ESP32 variants
+- **SPI2/SPI3**: General-purpose SPI hosts that can be used for LED control
+- **ESP32-C6 Design Decision**: While ESP32-C6 has SPI2 available, FastLED uses RMT5 instead because:
+  - Only 1 SPI host available (vs 2-3 on other variants) limits scalability
+  - RMT5 provides better performance and nanosecond-precise timing
+  - Preserves SPI2 for other user peripherals
+- **ESP-IDF Restriction**: `spi_bus_initialize()` documentation explicitly states "SPI0/1 is not supported" for general use
+
 ### Current Support
 
 | Platform | Dual-SPI | Quad-SPI | Buses | Notes |
@@ -648,8 +672,8 @@ static uint8_t getLaneByte(const LaneData& lane,
 | ESP32-S3 | ✅       | ✅       | 2 | Full support |
 | ESP32-C3 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
 | ESP32-C2 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
-| ESP32-C6 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
-| ESP32-H2 | ✅       | ❌       | 1 (SPI2) | Dual-SPI only (2 lanes max) |
+| ESP32-C6 | ⚠️       | ❌       | 1 (SPI2) | **SPI2 available but not used** - RMT5 preferred (better performance, preserves SPI2 for users) |
+| ESP32-H2 | ⚠️       | ❌       | 1 (SPI2) | **SPI2 available but not used** - RMT5 preferred |
 | ESP32-P4 | ✅       | ⚠️       | 2 | Supports Octal-SPI (8 lanes, future) |
 | **Teensy 4.0/4.1** | ✅ | ⚠️ | 3 (SPI, SPI1, SPI2) | LPSPI supports dual/quad via WIDTH register; Quad mode requires data2/data3 pins (PCS2/PCS3) not exposed on standard boards. See `LP_SPI.md` for implementation details |
 | Testing  | ✅       | ✅       | N/A | Mock drivers for unit tests |
