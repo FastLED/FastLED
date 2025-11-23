@@ -75,14 +75,14 @@ ChannelEngineRMT::~ChannelEngineRMT() {
                 FL_LOG_RMT("Released DMA channel (remaining: " << mDMAChannelsInUse << ")");
             }
         }
+
+        // Delete per-channel encoder
+        if (ch.encoder) {
+            rmt_del_encoder(ch.encoder);
+            ch.encoder = nullptr;
+        }
     }
     mChannels.clear();
-
-    // Destroy all cached encoders
-    for (const auto& pair : mEncoderCache) {
-        rmt_del_encoder(pair.second);
-    }
-    mEncoderCache.clear();
 
     FL_LOG_RMT("RMT Channel Engine destroyed");
 }
@@ -220,32 +220,6 @@ void ChannelEngineRMT::beginTransmission(fl::span<const ChannelDataPtr> channelD
 }
 
 //=============================================================================
-// Encoder Cache
-//=============================================================================
-
-rmt_encoder_handle_t ChannelEngineRMT::getOrCreateEncoder(const ChipsetTiming& timing) {
-    // Look up in cache
-    auto it = mEncoderCache.find(timing);
-    if (it != mEncoderCache.end()) {
-        FL_LOG_RMT("Reusing cached encoder for timing: " << timing.name);
-        return it->second;
-    }
-
-    // Create new encoder
-    rmt_encoder_handle_t encoder;
-    esp_err_t err = fastled_rmt_new_encoder(timing, FASTLED_RMT5_CLOCK_HZ, &encoder);
-    if (err != ESP_OK) {
-        FL_WARN("Failed to create encoder: " << esp_err_to_name(err));
-        return nullptr;
-    }
-
-    // Cache it forever (never deleted until shutdown)
-    mEncoderCache[timing] = encoder;
-    FL_LOG_RMT("Created and cached encoder for timing: " << timing.name);
-    return encoder;
-}
-
-//=============================================================================
 // Channel Management
 //=============================================================================
 
@@ -377,8 +351,20 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
             state->timing = timing;
             state->useDMA = true;
             state->transmissionComplete = false;
+
+            // Create encoder for this DMA channel
+            esp_err_t enc_err = fastled_rmt_new_encoder(timing, FASTLED_RMT5_CLOCK_HZ, &state->encoder);
+            if (enc_err != ESP_OK) {
+                FL_WARN("Failed to create encoder for DMA channel: " << esp_err_to_name(enc_err));
+                rmt_del_channel(state->channel);
+                state->channel = nullptr;
+                mDMAChannelsInUse--;
+                sDMAAvailability = DMAState::UNAVAILABLE;
+                return false;
+            }
+
             FL_LOG_RMT("DMA channel created successfully on GPIO " << static_cast<int>(pin)
-                       << " (" << dma_mem_block_symbols << " symbols, DMA channels in use: " << mDMAChannelsInUse << ")");
+                       << " (" << dma_mem_block_symbols << " symbols, DMA channels in use: " << mDMAChannelsInUse << ") with dedicated encoder");
             return true;
         } else {
             // DMA FAILED - mark as unavailable and fall through to non-DMA
@@ -444,8 +430,18 @@ bool ChannelEngineRMT::createChannel(ChannelState* state, gpio_num_t pin, const 
     state->timing = timing;
     state->useDMA = false;  // Non-DMA channel
     state->transmissionComplete = false;
+
+    // Create encoder for this channel
+    esp_err_t enc_err = fastled_rmt_new_encoder(timing, FASTLED_RMT5_CLOCK_HZ, &state->encoder);
+    if (enc_err != ESP_OK) {
+        FL_WARN("Failed to create encoder for channel: " << esp_err_to_name(enc_err));
+        rmt_del_channel(state->channel);
+        state->channel = nullptr;
+        return false;
+    }
+
     FL_LOG_RMT("Non-DMA RMT channel created on GPIO " << static_cast<int>(pin)
-               << " (" << mem_block_symbols << " symbols)");
+               << " (" << mem_block_symbols << " symbols) with dedicated encoder");
     return true;
 }
 
@@ -476,6 +472,12 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         // Wait for any pending transmission to complete
         rmt_tx_wait_all_done(state->channel, pdMS_TO_TICKS(100));
 
+        // Delete encoder before deleting channel
+        if (state->encoder) {
+            rmt_del_encoder(state->encoder);
+            state->encoder = nullptr;
+        }
+
         // Track DMA cleanup before deleting
         if (state->useDMA) {
             mDMAChannelsInUse--;
@@ -499,6 +501,10 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         // Register callback after creation (state pointer is already stable here)
         if (!registerChannelCallback(state)) {
             FL_WARN("Failed to register callback after reconfiguration");
+            if (state->encoder) {
+                rmt_del_encoder(state->encoder);
+                state->encoder = nullptr;
+            }
             if (state->useDMA) {
                 mDMAChannelsInUse--;
             }
@@ -509,7 +515,7 @@ void ChannelEngineRMT::configureChannel(ChannelState* state, gpio_num_t pin, con
         }
     }
 
-    // Update timing (encoder will be fetched from cache)
+    // Update timing - encoder is already created in createChannel()
     state->timing = timing;
     state->transmissionComplete = false;
 }
@@ -537,10 +543,9 @@ void ChannelEngineRMT::processPendingChannels() {
             continue;
         }
 
-        // Get cached encoder (or create new one)
-        rmt_encoder_handle_t encoder = getOrCreateEncoder(pending.timing);
-        if (!encoder) {
-            FL_WARN("Failed to get encoder for pin " << pending.pin);
+        // Verify channel has encoder (should always be true if createChannel succeeded)
+        if (!channel->encoder) {
+            FL_WARN("Channel missing encoder for pin " << pending.pin);
             releaseChannel(channel);
             ++i;
             continue;
@@ -587,7 +592,7 @@ void ChannelEngineRMT::processPendingChannels() {
         }
 
         // Explicitly reset encoder before each transmission to ensure clean state
-        err = encoder->reset(encoder);
+        err = channel->encoder->reset(channel->encoder);
         if (err != ESP_OK) {
             FL_LOG_RMT("Failed to reset encoder: " << esp_err_to_name(err));
             rmt_disable(channel->channel);
@@ -606,7 +611,7 @@ void ChannelEngineRMT::processPendingChannels() {
         rmt_transmit_config_t tx_config = {};
         tx_config.loop_count = 0;
         // Pass pooled buffer (DRAM/DMA) instead of PSRAM pointer
-        err = rmt_transmit(channel->channel, encoder,
+        err = rmt_transmit(channel->channel, channel->encoder,
                           pooledBuffer.data(),
                           pooledBuffer.size(),
                           &tx_config);

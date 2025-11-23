@@ -22,7 +22,7 @@
 namespace fl {
 
 // Define platform-default ClocklessController alias for ESP32
-// Multiple driver types are available (ClocklessRMT, ClocklessSPI, ClocklessI2S)
+// Multiple driver types are available (ClocklessIdf4/ClocklessIdf5, ClocklessSPI, ClocklessI2S)
 // This alias selects the preferred default for backward compatibility
 #ifdef FASTLED_ESP32_I2S
   // I2S driver requested explicitly
@@ -32,9 +32,16 @@ namespace fl {
 
 #elif FASTLED_ESP32_HAS_RMT && !defined(FASTLED_ESP32_USE_CLOCKLESS_SPI)
   // RMT is preferred default for ESP32 (best performance, most features)
-  #pragma message "ESP32: Using ClocklessRMT as default ClocklessController"
-  template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
-  using ClocklessController = ClocklessRMT<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  // Use ClocklessIdf4 (ESP-IDF 4.x) or ClocklessIdf5 (ESP-IDF 5.x) based on FASTLED_RMT5
+  #if FASTLED_RMT5
+    #pragma message "ESP32: Using ClocklessIdf5 (RMT5/ESP-IDF 5.x) as default ClocklessController"
+    template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 280>
+    using ClocklessController = ClocklessIdf5<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  #else
+    #pragma message "ESP32: Using ClocklessIdf4 (RMT4/ESP-IDF 4.x) as default ClocklessController"
+    template <int DATA_PIN, typename TIMING, EOrder RGB_ORDER = RGB, int XTRA0 = 0, bool FLIP = false, int WAIT_TIME = 5>
+    using ClocklessController = ClocklessIdf4<DATA_PIN, TIMING, RGB_ORDER, XTRA0, FLIP, WAIT_TIME>;
+  #endif
   #define FL_CLOCKLESS_CONTROLLER_DEFINED 1
 
 #elif FASTLED_ESP32_HAS_CLOCKLESS_SPI

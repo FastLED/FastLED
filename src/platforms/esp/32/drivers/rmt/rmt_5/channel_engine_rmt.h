@@ -16,7 +16,6 @@
 #include "fl/engine_events.h"
 #include "ftl/span.h"
 #include "ftl/vector.h"
-#include "ftl/hash_map.h"
 #include "ftl/time.h"
 #include "fl/timeout.h"
 #include "buffer_pool.h"
@@ -69,6 +68,7 @@ private:
     /// @brief RMT channel state (replaces RmtWorkerSimple)
     struct ChannelState {
         rmt_channel_handle_t channel;
+        rmt_encoder_handle_t encoder;  // Per-channel encoder (prevents race conditions)
         gpio_num_t pin;
         ChipsetTiming timing;
         volatile bool transmissionComplete;
@@ -86,27 +86,6 @@ private:
         uint32_t reset_us;
     };
 
-    /// @brief Hash function for ChipsetTiming (encoder cache key)
-    struct TimingHash {
-        size_t operator()(const ChipsetTiming& t) const {
-            // Simple hash combining all timing values
-            // Use FNV-1a algorithm for better distribution
-            size_t hash = 2166136261u;
-            hash = (hash ^ t.T1) * 16777619u;
-            hash = (hash ^ t.T2) * 16777619u;
-            hash = (hash ^ t.T3) * 16777619u;
-            hash = (hash ^ t.RESET) * 16777619u;
-            return hash;
-        }
-    };
-
-    /// @brief Equality function for ChipsetTiming (encoder cache key)
-    struct TimingEqual {
-        bool operator()(const ChipsetTiming& a, const ChipsetTiming& b) const {
-            return a.T1 == b.T1 && a.T2 == b.T2 &&
-                   a.T3 == b.T3 && a.RESET == b.RESET;
-        }
-    };
 
     /// @brief Acquire a channel for given pin and timing
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
@@ -129,10 +108,6 @@ private:
     /// @param dataSize Size of LED data in bytes (0 = use default buffer size)
     void configureChannel(ChannelState* state, gpio_num_t pin, const ChipsetTiming& timing, fl::size dataSize = 0);
 
-    /// @brief Get or create cached encoder for timing configuration
-    /// @return Encoder handle, or nullptr on failure
-    rmt_encoder_handle_t getOrCreateEncoder(const ChipsetTiming& timing);
-
     /// @brief Process pending channels that couldn't be started earlier
     void processPendingChannels();
 
@@ -152,9 +127,6 @@ private:
 
     /// @brief Channels currently being transmitted (for cleanup on poll())
     fl::vector_inlined<ChannelDataPtr, 16> mTransmittingChannels;
-
-    /// @brief Encoder cache: timing -> encoder handle (never deleted until shutdown)
-    fl::hash_map<ChipsetTiming, rmt_encoder_handle_t, TimingHash, TimingEqual> mEncoderCache;
 
     /// @brief Buffer pool for PSRAM -> DRAM/DMA memory transfer
     RMTBufferPool mBufferPool;

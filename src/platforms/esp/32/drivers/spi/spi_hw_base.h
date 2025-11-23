@@ -10,11 +10,16 @@
 
 #if defined(FL_IS_ESP32)
 
-// Include soc_caps.h if available (ESP-IDF 4.0+)
-// Older versions (like IDF 3.3) don't have this header
+// Include ESP-IDF headers first to detect what's already defined
 #include "fl/has_include.h"
 #if FL_HAS_INCLUDE(<soc/soc_caps.h>)
   #include <soc/soc_caps.h>
+#endif
+#if FL_HAS_INCLUDE(<driver/spi_common.h>)
+  #include <driver/spi_common.h>  // For spi_host_device_t, spi_common_dma_t
+#endif
+#if FL_HAS_INCLUDE(<hal/spi_types.h>)
+  #include <hal/spi_types.h>  // For SPI2_HOST, SPI3_HOST (modern ESP-IDF)
 #endif
 
 // Include driver/spi_master.h for spi_host_device_t type definition
@@ -30,12 +35,14 @@
 
 // ESP-IDF 3.3 compatibility: SPI_DMA_CH_AUTO was added in IDF 4.0
 // On older versions, use DMA channel 1 as default
+// Note: Only define if not already defined by ESP-IDF headers
 #ifndef SPI_DMA_CH_AUTO
     #define SPI_DMA_CH_AUTO 1
 #endif
 
 // ESP-IDF compatibility: Ensure SPI host constants are defined
-// Modern IDF uses SPI2_HOST/SPI3_HOST, older versions may not have them
+// Modern IDF defines these as enum values in hal/spi_types.h (included above)
+// Only define as macros for very old ESP-IDF versions that don't have them
 #ifndef SPI2_HOST
     #define SPI2_HOST ((spi_host_device_t)1)
 #endif
