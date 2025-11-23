@@ -100,12 +100,25 @@ fl::UISlider audioBrightnessMultiplier("Audio Brightness Multiplier", 1.5, 0.0,
                                        3.0, 0.1);
 fl::UISlider audioSensitivity("Audio Sensitivity", 128, 0, 255, 1);
 
+// Downbeat darkness UI controls
+fl::UICheckbox enableDownbeatDarkness("Enable Downbeat Darkness", true);
+fl::UISlider downbeatDarknessAmount("Downbeat Darkness Amount", 0.3, 0.0, 1.0, 0.05);
+fl::UISlider darknessFadeDuration("Darkness Fade Duration (ms)", 300, 50, 1000, 50);
+
 // Audio reactive processor
 fl::AudioReactive audioReactive;
 
 // Audio processor for downbeat detection
 fl::AudioProcessor audioProcessor;
-bool flashWhiteThisFrame = false;
+
+// Downbeat darkness state
+bool darknessTrigger = false;
+float darknessAmount = 1.0f; // 1.0 = no darkness, 0.0 = full darkness
+unsigned long lastDarknessTime = 0;
+
+// Audio timeout tracking
+unsigned long lastValidAudioTime = 0;
+const unsigned long AUDIO_TIMEOUT_MS = 1000;
 
 // Calculate average brightness percentage from LED array
 float getAverageBrightness(CRGB *leds, int numLeds) {
@@ -172,9 +185,14 @@ void setup() {
     audioReactive.begin(audioConfig);
 
     // Setup downbeat detector callback
-    audioProcessor.onDownbeat([]() { flashWhiteThisFrame = true; });
+    audioProcessor.onDownbeat([]() {
+        darknessTrigger = true;
+        FL_WARN("Downbeat detected! Triggering darkness effect");
+    });
 
     Serial.println("AnimartrixRing setup complete");
+    FL_WARN("Setup complete - Audio Reactive: " << enableAudioReactive.value()
+            << ", Downbeat Darkness: " << enableDownbeatDarkness.value());
 }
 
 void loop() {
@@ -182,13 +200,32 @@ void loop() {
     float audioSpeedFactor = 1.0f;
     float audioBrightnessFactor = 1.0f;
 
+    EVERY_N_MILLISECONDS(3000) {
+        FL_WARN("Audio Reactive Enabled: " << enableAudioReactive.value()
+                << ", Downbeat Darkness Enabled: " << enableDownbeatDarkness.value());
+    }
+
+    // Track audio reactive state transitions
+    static bool previousAudioReactiveState = false;
+
     if (enableAudioReactive.value()) {
+        // Initialize timer when first enabled
+        if (!previousAudioReactiveState) {
+            lastValidAudioTime = millis();
+            FL_WARN("Audio Reactive ENABLED - starting audio processing (1000ms timeout)");
+            previousAudioReactiveState = true;
+        }
+
         // Process audio samples
         fl::AudioSample sample = audio.next();
         if (sample.isValid()) {
+            lastValidAudioTime = millis(); // Update last valid audio timestamp
             audioReactive.processSample(sample);
 
             const fl::AudioData &audioData = audioReactive.getSmoothedData();
+            EVERY_N_MILLISECONDS(2000) {
+                FL_WARN("Audio processing active - Volume: " << (int)audioData.volume);
+            }
 
             // Map volume to speed (0-1 range, scaled by multiplier)
             if (audioAffectsSpeed.value()) {
@@ -206,6 +243,28 @@ void loop() {
 
             // Process audio for downbeat detection
             audioProcessor.update(sample);
+        } else {
+            // Check for audio timeout - auto-disable if no valid audio for 1000ms
+            unsigned long currentTime = millis();
+            if (lastValidAudioTime > 0 && (currentTime - lastValidAudioTime) > AUDIO_TIMEOUT_MS) {
+                FL_WARN("No valid audio for " << AUDIO_TIMEOUT_MS << "ms - AUTO-DISABLING Audio Reactive");
+                enableAudioReactive = false; // Use assignment operator
+                lastValidAudioTime = 0; // Reset timer
+            } else {
+                EVERY_N_MILLISECONDS(5000) {
+                    FL_WARN("Audio sample is INVALID - check microphone/audio input");
+                }
+            }
+        }
+    } else {
+        // Reset state when disabled
+        if (previousAudioReactiveState) {
+            FL_WARN("Audio Reactive DISABLED");
+            previousAudioReactiveState = false;
+        }
+
+        EVERY_N_MILLISECONDS(5000) {
+            FL_WARN("Audio Reactive is DISABLED - enable in UI to use downbeat detection");
         }
     }
 
@@ -216,10 +275,53 @@ void loop() {
     // Draw the effect
     fxEngine.draw(millis(), leds);
 
-    // Flash white on downbeat
-    if (flashWhiteThisFrame) {
-        fill_solid(leds, NUM_LEDS, CRGB::White);
-        flashWhiteThisFrame = false;
+    // Apply downbeat darkness effect if enabled
+    if (enableDownbeatDarkness.value() && enableAudioReactive.value()) {
+        static bool firstRun = true;
+        if (firstRun) {
+            FL_WARN("Downbeat darkness ACTIVE - waiting for downbeats...");
+            firstRun = false;
+        }
+
+        unsigned long currentTime = millis();
+
+        // Trigger darkness on downbeat
+        if (darknessTrigger) {
+            darknessAmount = 1.0f - downbeatDarknessAmount.value(); // Convert darkness to brightness multiplier
+            lastDarknessTime = currentTime;
+            darknessTrigger = false;
+            FL_WARN("Applying darkness: " << darknessAmount << " (configured darkness: " << downbeatDarknessAmount.value() << ")");
+        }
+
+        // Fade back to normal brightness using exponential curve
+        if (darknessAmount < 1.0f) {
+            unsigned long elapsed = currentTime - lastDarknessTime;
+            float fadeDuration = darknessFadeDuration.value();
+
+            if (elapsed < fadeDuration) {
+                // Exponential fade: smoother and more natural
+                float progress = elapsed / fadeDuration; // 0 to 1
+                float targetDarkness = 1.0f - downbeatDarknessAmount.value();
+                darknessAmount = targetDarkness + (1.0f - targetDarkness) * (1.0f - fl::exp(-5.0f * progress));
+            } else {
+                darknessAmount = 1.0f; // Fully recovered
+            }
+        }
+
+        // Apply darkness to LEDs (scale brightness)
+        if (darknessAmount < 1.0f) {
+            uint8_t scaleFactor = static_cast<uint8_t>(darknessAmount * 255.0f);
+            FL_WARN("Scaling LEDs by " << scaleFactor << "/255 (darknessAmount: " << darknessAmount << ")");
+            for (int i = 0; i < NUM_LEDS; i++) {
+                leds[i].nscale8(scaleFactor);
+            }
+        }
+    } else {
+        EVERY_N_MILLISECONDS(5000) {
+            FL_WARN("Downbeat darkness NOT active - DownbeatDarkness: "
+                    << enableDownbeatDarkness.value() << ", AudioReactive: "
+                    << enableAudioReactive.value());
+        }
     }
 
     // Calculate final brightness
