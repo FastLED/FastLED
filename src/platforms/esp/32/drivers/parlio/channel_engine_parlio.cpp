@@ -107,11 +107,11 @@ static constexpr int DEFAULT_PARLIO_PINS[] = {
 //
 // WAVEFORM GENERATION:
 //   Uses generic waveform generator with WS2812 timing parameters:
-//   - T1: 312ns (HIGH time for bit 0)
-//   - T2: 625ns (additional HIGH time for bit 1)
-//   - T3: 312ns (LOW tail duration)
-//   - Clock: 3.2 MHz (312.5ns per pulse)
-//   - Result: 4 pulses per bit (bit0=[0xFF,0x00,0x00,0x00], bit1=[0xFF,0xFF,0xFF,0x00])
+//   - T1: 375ns (initial HIGH time)
+//   - T2: 500ns (additional HIGH time for bit 1)
+//   - T3: 375ns (LOW tail duration)
+//   - Clock: 8.0 MHz (125ns per pulse)
+//   - Result: 10 pulses per bit (bit0=3H+7L, bit1=7H+3L)
 //
 //-----------------------------------------------------------------------------
 
@@ -568,16 +568,16 @@ void ChannelEnginePARLIOImpl::initializeIfNeeded() {
     FL_LOG_PARLIO("PARLIO: Chunk size=" << mState.leds_per_chunk << " LEDs (optimized for " << mState.data_width << "-bit width)");
 
     // Step 2: Generate precomputed waveforms using generic waveform generator
-    // WS2812 timing parameters (nanoseconds) for 4-tick encoding at 3.2 MHz:
-    // - T1: 312ns (HIGH time for bit 0 → 1 pulse at 312ns resolution)
-    // - T2: 313ns (additional HIGH time for bit 1 → 2 pulses at 312ns resolution)
-    // - T3: 312ns (LOW tail duration → 1 pulse at 312ns resolution)
+    // WS2812 timing parameters (nanoseconds) for 10-tick encoding at 8.0 MHz:
+    // - T1: 375ns (initial HIGH time → 3 pulses at 125ns resolution)
+    // - T2: 500ns (additional HIGH time for bit 1 → 4 pulses at 125ns resolution)
+    // - T3: 375ns (LOW tail duration → 3 pulses at 125ns resolution)
     //
     // Resulting waveforms:
-    // - Bit 0: 1 pulse HIGH + 3 pulses LOW = 312.5ns H + 937.5ns L = 1250ns total
-    // - Bit 1: 3 pulses HIGH + 1 pulse LOW = 937.5ns H + 312.5ns L = 1250ns total
+    // - Bit 0: 3 pulses HIGH + 7 pulses LOW = 375ns H + 875ns L = 1250ns total
+    // - Bit 1: 7 pulses HIGH + 3 pulses LOW = 875ns H + 375ns L = 1250ns total
     //
-    // WS2812 specification compliance (testing 8MHz with standard timing):
+    // WS2812 specification compliance (8.0 MHz clock with standard timing):
     // - T0H: 375ns (spec: 400±150ns = 250-550ns) ✓
     // - T0L: 875ns (spec: 850±150ns = 700-1000ns) ✓
     // - T1H: 875ns (spec: 800±150ns = 650-950ns) ✓

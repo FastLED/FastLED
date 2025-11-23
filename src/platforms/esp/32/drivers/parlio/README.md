@@ -13,7 +13,7 @@ The PARLIO (Parallel I/O) driver is a high-performance LED controller implementa
 - **WS2812 Timing**: Precise waveform generation matching WS2812/WS2812B specifications
 - **High Performance**: 100+ FPS for 1000 LEDs across 8 strips
 - **Large LED Counts**: Automatic chunking handles thousands of LEDs per strip
-- **Internal Clock**: No external clock pin required - uses internal 3.2 MHz timing
+- **Internal Clock**: No external clock pin required - uses internal 8.0 MHz timing
 
 ### Enhanced Features (New!)
 
@@ -36,14 +36,14 @@ WS2812 LEDs require precise pulse-width modulation to encode data:
 
 Unlike simple GPIO bit-banging, PARLIO requires pre-encoded timing waveforms. The driver implements this through:
 
-1. **Bitpattern Encoding**: Each LED bit (0 or 1) expands to a 4-bit timing pattern:
-   - `1000` = short pulse (logical '0')
-   - `1110` = long pulse (logical '1')
+1. **Bitpattern Encoding**: Each LED bit (0 or 1) expands to a 10-bit timing pattern:
+   - Bit 0: 3 ticks high, 7 ticks low (375ns high, 875ns low)
+   - Bit 1: 7 ticks high, 3 ticks low (875ns high, 375ns low)
 
-2. **Waveform Cache**: Each 8-bit color value maps to a 32-bit waveform:
-   - 8 LED bits × 4 clock cycles = 32-bit pattern per color byte
-   - Clocked at 3.2 MHz (800kHz × 4) for precise timing
-   - Example: Color value `0xFF` → `0b11101110111011101110111011101110`
+2. **Waveform Cache**: Each 8-bit color value maps to an 80-bit waveform:
+   - 8 LED bits × 10 clock cycles = 80-bit pattern per color byte
+   - Clocked at 8.0 MHz (125ns per tick) for precise timing
+   - Example: Color value `0xFF` → 10 bits of (7H+3L) pattern per bit
 
 3. **Bit Transposition**: For parallel output, bits are transposed across time-slices:
    - All strips' bit N collected into time-slice N
@@ -58,22 +58,22 @@ buffer_size = (num_leds × bits_per_led × data_width + 7) / 8 bytes
 ```
 
 Where:
-- **RGB mode**: 96 bits per LED (3 color components × 32-bit waveform each)
-- **RGBW mode**: 128 bits per LED (4 color components × 32-bit waveform each)
+- **RGB mode**: 240 bits per LED (3 color components × 80-bit waveform each)
+- **RGBW mode**: 320 bits per LED (4 color components × 80-bit waveform each)
 - data_width = number of parallel strips (1, 2, 4, 8, or 16)
 - **Double buffering**: 2× buffer size (automatic, transparent to user)
 
 **Examples (RGB mode)**:
-- 1 LED, 1 strip: 12 bytes (96 bits)
-- 1 LED, 8 strips: 96 bytes (768 bits)
-- 100 LEDs, 8 strips: 9,600 bytes
-- 1000 LEDs, 8 strips: 96,000 bytes (chunked into ~2 transfers)
+- 1 LED, 1 strip: 30 bytes (240 bits)
+- 1 LED, 8 strips: 240 bytes (1920 bits)
+- 100 LEDs, 8 strips: 24,000 bytes
+- 1000 LEDs, 8 strips: 240,000 bytes (chunked into ~4 transfers)
 
 **Examples (RGBW mode)**:
-- 1 LED, 1 strip: 16 bytes (128 bits)
-- 1 LED, 8 strips: 128 bytes (1024 bits)
-- 100 LEDs, 8 strips: 12,800 bytes
-- 1000 LEDs, 8 strips: 128,000 bytes (chunked into ~2 transfers)
+- 1 LED, 1 strip: 40 bytes (320 bits)
+- 1 LED, 8 strips: 320 bytes (2560 bits)
+- 100 LEDs, 8 strips: 32,000 bytes
+- 1000 LEDs, 8 strips: 320,000 bytes (chunked into ~5 transfers)
 
 **Note**: With double buffering (always enabled), actual memory usage is 2× these values
 
@@ -82,12 +82,14 @@ Where:
 PARLIO hardware limits single DMA transfers to 65,535 bytes. The driver automatically chunks larger transfers:
 
 ```
-Max LEDs per chunk (width=8) = 65,535 / 96 = 682 LEDs
+Max LEDs per chunk (width=8) = 65,535 / 240 = 273 LEDs
 ```
 
 For 1000 LEDs:
-- Chunk 0: 682 LEDs (65,472 bytes)
-- Chunk 1: 318 LEDs (30,528 bytes)
+- Chunk 0: 273 LEDs (65,520 bytes)
+- Chunk 1: 273 LEDs (65,520 bytes)
+- Chunk 2: 273 LEDs (65,520 bytes)
+- Chunk 3: 181 LEDs (43,440 bytes)
 
 Chunks are transmitted sequentially with seamless timing continuity.
 
@@ -240,9 +242,9 @@ CRGB leds[NUM_LEDS];
 void setup() {
     // For small LED counts (≤256), enable auto-clock for +50% FPS boost
     // Driver automatically adjusts clock frequency based on LED count:
-    // - ≤256 LEDs: 150% speed (3.2 MHz → 4.8 MHz)
-    // - ≤512 LEDs: 137.5% speed (3.2 MHz → 4.4 MHz)
-    // - >512 LEDs: 100% speed (3.2 MHz)
+    // - ≤256 LEDs: 150% speed (8.0 MHz → 12.0 MHz)
+    // - ≤512 LEDs: 137.5% speed (8.0 MHz → 11.0 MHz)
+    // - >512 LEDs: 100% speed (8.0 MHz)
 
     FastLED.addLeds<WS2812, DATA_PIN>(leds, NUM_LEDS);
     // Auto-clock adjustment is enabled by default for optimal performance
@@ -287,7 +289,7 @@ The driver uses sensible defaults, but you can customize if needed:
 
 ParlioDriverConfig config;
 config.clk_gpio = -1;              // [UNUSED] Internal clock used
-config.clock_freq_hz = 0;          // 0 = use default 3.2 MHz for WS2812
+config.clock_freq_hz = 0;          // 0 = use default 8.0 MHz for WS2812
 config.num_strips = 8;             // Number of parallel strips
 config.is_rgbw = false;            // Auto-detected from chipset type
 config.auto_clock_adjustment = true; // Enable dynamic clock tuning
@@ -315,10 +317,10 @@ config.auto_clock_adjustment = true; // Enable dynamic clock tuning
 ### Timing Calculations
 
 ```
-Clock frequency: 3.2 MHz = 312.5ns per tick
-LED bit time: 4 ticks = 1.25μs
-Color byte time: 32 ticks = 10μs
-Full RGB LED: 96 ticks = 30μs
+Clock frequency: 8.0 MHz = 125ns per tick
+LED bit time: 10 ticks = 1.25μs
+Color byte time: 80 ticks = 10μs
+Full RGB LED: 240 ticks = 30μs
 
 Frame time (1000 LEDs, 1 strip):
 1000 LEDs × 30μs = 30ms = ~33 FPS theoretical
@@ -333,16 +335,16 @@ Actual: ~100-120 FPS (including overhead)
 
 **RGB Mode (with double buffering)**:
 ```
-Single LED (width=8): 96 bytes × 2 = 192 bytes
-100 LEDs (width=8): 9.6 KB × 2 = 19.2 KB
-1000 LEDs (width=8): 94 KB × 2 = 188 KB
+Single LED (width=8): 240 bytes × 2 = 480 bytes
+100 LEDs (width=8): 24 KB × 2 = 48 KB
+1000 LEDs (width=8): 234 KB × 2 = 468 KB
 ```
 
 **RGBW Mode (with double buffering)**:
 ```
-Single LED (width=8): 128 bytes × 2 = 256 bytes
-100 LEDs (width=8): 12.8 KB × 2 = 25.6 KB
-1000 LEDs (width=8): 125 KB × 2 = 250 KB
+Single LED (width=8): 320 bytes × 2 = 640 bytes
+100 LEDs (width=8): 32 KB × 2 = 64 KB
+1000 LEDs (width=8): 312 KB × 2 = 624 KB
 ```
 
 **Note**: Double buffering is always enabled for optimal performance. Memory usage is 2× compared to single-buffer implementations, but the performance benefit (+15-30% FPS) justifies the cost.
@@ -351,7 +353,7 @@ Single LED (width=8): 128 bytes × 2 = 256 bytes
 
 ### Clock Configuration
 
-The driver uses an internal clock source at 3.2 MHz:
+The driver uses an internal clock source at 8.0 MHz:
 - No external clock pin required
 - Precise timing for WS2812 protocol
 - Automatically configured by the driver
@@ -379,8 +381,8 @@ The driver automatically selects the optimal bit width based on the number of st
 ### 1. RGBW Support
 
 The driver automatically detects RGBW chipsets (like SK6812) and adjusts buffer sizing accordingly:
-- **RGB**: 3 components × 32 bits = 96 bits per LED
-- **RGBW**: 4 components × 32 bits = 128 bits per LED
+- **RGB**: 3 components × 80 bits = 240 bits per LED
+- **RGBW**: 4 components × 80 bits = 320 bits per LED
 - Component order: G, R, B, W (W always last for RGBW)
 - No API changes needed - just use `addLeds<SK6812, ...>()`
 
@@ -405,8 +407,8 @@ Always-on ping-pong buffering for parallel processing:
 ### 4. Dynamic Clock Adjustment
 
 Automatic clock frequency tuning based on LED count:
-- **≤256 LEDs**: 150% base frequency (e.g., 3.2 MHz → 4.8 MHz)
-- **≤512 LEDs**: 137.5% base frequency (e.g., 3.2 MHz → 4.4 MHz)
+- **≤256 LEDs**: 150% base frequency (e.g., 8.0 MHz → 12.0 MHz)
+- **≤512 LEDs**: 137.5% base frequency (e.g., 8.0 MHz → 11.0 MHz)
 - **>512 LEDs**: 100% base frequency (maintains stable timing)
 - Enabled by default via `config.auto_clock_adjustment = true`
 - Safety limits: 1-40 MHz, max 2× base frequency

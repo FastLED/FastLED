@@ -27,7 +27,7 @@ parlio_tx_unit_config_t cfg = {
     .data_width = 8,  // Number of parallel channels (8 or 16)
     .clk_out_gpio_num = <CLK_PIN>,
     .data_gpio_nums = {PIN0, PIN1, ..., PIN7},  // LED output pins
-    .output_clk_freq_hz = 12000000,  // High enough for WS2812 timing
+    .output_clk_freq_hz = 8000000,  // 8.0 MHz (current implementation)
     .bit_pack_order = PARLIO_BIT_MSB_FIRST,  // Match WS2812 bit order
     // valid_gpio_num = -1 (unused, no separate latch)
 };
@@ -133,7 +133,7 @@ void PIOParallelController::init() {
         .data_width = DATA_WIDTH,
         .clk_out_gpio_num = clk_pin,
         .data_gpio_nums = {data_pins[0], data_pins[1], ..., data_pins[DATA_WIDTH-1]},
-        .output_clk_freq_hz = 12000000,  // Configurable based on WS2812 timing
+        .output_clk_freq_hz = 8000000,  // 8.0 MHz (current implementation)
         .bit_pack_order = PARLIO_BIT_MSB_FIRST,
     };
 
@@ -205,13 +205,14 @@ void PIOParallelController::showPixels(CRGB* leds[], uint16_t num_leds) {
 To meet WS2812 protocol (T0H/T1H/T0L/T1L):
 
 1. **Choose clock frequency**:
-   - 12.5 MHz (80 ns tick) or 10 MHz (100 ns tick)
+   - Current implementation: 8.0 MHz (125 ns tick)
+   - Alternative options: 12.5 MHz (80 ns tick) or 10 MHz (100 ns tick)
    - Configurable via `output_clk_freq_hz`
 
-2. **Encode bit patterns**:
-   - Using 16 clocks per bit @ 80ns = 1.28µs total
-   - "0" bit: 5 high + 11 low ≈ 0.4µs H, 0.88µs L
-   - "1" bit: 11 high + 5 low ≈ 0.88µs H, 0.4µs L
+2. **Encode bit patterns** (for 8.0 MHz implementation):
+   - Using 10 clocks per bit @ 125ns = 1.25µs total
+   - "0" bit: 3 high + 7 low = 375ns H, 875ns L
+   - "1" bit: 7 high + 3 low = 875ns H, 375ns L
 
 3. **Clock source**:
    - Default: `PARLIO_CLK_SRC_DEFAULT` (APB clock derived)

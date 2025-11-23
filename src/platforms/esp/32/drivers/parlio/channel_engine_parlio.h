@@ -13,7 +13,7 @@
 /// - **Multi-Channel Support**: Drive 1-16 LED strips simultaneously
 /// - **Power-of-2 Optimization**: Native support for 1, 2, 4, 8, 16 channels
 /// - **Non-Power-of-2 Support**: Automatic dummy lane management for 3, 5-7, 9-15 channels
-/// - **WS2812 Timing**: Accurate 3.2 MHz clock with 4-tick encoding (312.5ns per tick)
+/// - **WS2812 Timing**: Accurate 8.0 MHz clock with 10-tick encoding (125ns per tick)
 /// - **Async Operation**: Non-blocking transmission with pollDerived() state tracking
 /// - **Large LED Support**: Automatic chunking with width-adaptive sizing
 /// - **ISR Transposition**: Direct waveform encoding and bit transposition in ISR callback
@@ -49,11 +49,11 @@
 /// ## Technical Details
 ///
 /// ### WS2812 Timing
-/// PARLIO clock: 3.2 MHz (312.5ns per tick)
-/// - Bit 0: 0b1000 (1 tick high, 3 ticks low = 312.5ns high, 937.5ns low)
-/// - Bit 1: 0b1110 (3 ticks high, 1 tick low = 937.5ns high, 312.5ns low)
-/// - Each LED byte → 32 bits (8 bits × 4 ticks)
-/// - Each RGB LED → 96 bits total (24 bytes × 4 ticks)
+/// PARLIO clock: 8.0 MHz (125ns per tick)
+/// - Bit 0: 3 ticks high, 7 ticks low (375ns high, 875ns low)
+/// - Bit 1: 7 ticks high, 3 ticks low (875ns high, 375ns low)
+/// - Each LED byte → 80 bits (8 bits × 10 ticks)
+/// - Each RGB LED → 240 bits total (24 bits × 10 ticks)
 ///
 /// ### ISR Transposition Algorithm
 /// PARLIO requires data in bit-parallel format (one byte per clock tick across all strips).
