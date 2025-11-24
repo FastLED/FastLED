@@ -55,6 +55,9 @@ private:
 // Factory function for creating WASM audio input
 fl::shared_ptr<IAudioInput> wasm_create_audio_input(const AudioConfig& config, fl::string* error_message = nullptr);
 
+// Get the global WASM audio input instance (for integration with UIAudio)
+WasmAudioInput* wasm_get_audio_input();
+
 } // namespace fl
 
 #endif // __EMSCRIPTEN__

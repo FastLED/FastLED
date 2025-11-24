@@ -38,6 +38,11 @@ WasmAudioInput::~WasmAudioInput() {
 }
 
 void WasmAudioInput::start() {
+    if (mRunning) {
+        FL_DBG("WasmAudioInput already running - skipping start");
+        return;  // Already running, don't re-initialize
+    }
+
     mRunning = true;
     mHasError = false;
     mErrorMessage.clear();
@@ -139,6 +144,10 @@ fl::shared_ptr<IAudioInput> wasm_create_audio_input(const AudioConfig& config, f
 
     FL_DBG("Created WASM audio input");
     return input;
+}
+
+WasmAudioInput* wasm_get_audio_input() {
+    return g_wasmAudioInput;
 }
 
 } // namespace fl

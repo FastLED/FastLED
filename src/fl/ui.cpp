@@ -56,8 +56,9 @@ UIDescription::~UIDescription() {}
 UIHelp::UIHelp(const char *markdownContent) : mImpl(markdownContent) {}
 UIHelp::~UIHelp() {}
 
-// UIAudio constructor
+// UIAudio constructors
 UIAudio::UIAudio(const char *name) : mImpl(name) {}
+UIAudio::UIAudio(const char *name, const fl::AudioConfig& config) : mImpl(name, config) {}
 UIAudio::~UIAudio() {}
 
 // UIDropdown constructors

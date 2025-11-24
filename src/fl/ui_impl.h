@@ -3,6 +3,7 @@
 #include "ftl/stdint.h"
 
 #include "fl/audio.h"
+#include "fl/audio_input.h"  // For AudioConfig
 #include "fl/math_macros.h"
 #include "fl/str.h"
 #include "ftl/type_traits.h"
@@ -233,6 +234,10 @@ class UIHelpImpl {
 class UIAudioImpl {
   public:
     UIAudioImpl(const char *name) { FASTLED_UNUSED(name); }
+    UIAudioImpl(const char *name, const fl::AudioConfig& config) {
+        FASTLED_UNUSED(name);
+        FASTLED_UNUSED(config);
+    }
     ~UIAudioImpl() {}
 
     AudioSample next() {
@@ -244,7 +249,7 @@ class UIAudioImpl {
         FASTLED_WARN("Audio sample not implemented");
         return false;
     }
-    
+
     // Stub method for group setting (does nothing on non-WASM platforms)
     void setGroup(const fl::string& groupName) { FASTLED_UNUSED(groupName); }
 };

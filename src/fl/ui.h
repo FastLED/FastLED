@@ -6,6 +6,7 @@
 #include "fl/str.h"
 #include "fl/int.h"
 #include "fl/audio.h"
+#include "fl/audio_input.h"  // For AudioConfig
 #include "fl/engine_events.h"
 #include "ftl/function.h"
 #include "fl/math_macros.h"
@@ -420,6 +421,7 @@ class UIAudio : public UIElement {
   public:
     FL_NO_COPY(UIAudio)
     UIAudio(const char *name);
+    UIAudio(const char *name, const fl::AudioConfig& config);
     ~UIAudio();
     AudioSample next() { return mImpl.next(); }
     bool hasNext() { return mImpl.hasNext(); }

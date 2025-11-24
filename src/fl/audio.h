@@ -114,9 +114,10 @@ class AudioSampleImpl {
     template <typename It> void assign(It begin, It end, fl::u32 timestamp) {
         mSignedPcm.assign(begin, end);
         mTimestamp = timestamp;
-        // Pre-compute zero crossings and RMS for O(1) access
+        // Pre-compute zero crossings for O(1) access
         initZeroCrossings();
-        initRms();
+        // RMS is computed lazily on first access to avoid blocking
+        mRmsComputed = false;
     }
     const VectorPCM &pcm() const { return mSignedPcm; }
     fl::u32 timestamp() const { return mTimestamp; }
@@ -127,6 +128,7 @@ class AudioSampleImpl {
         mZeroCrossings = 0;
         mRms = 0.0f;
         mTimestamp = 0;
+        mRmsComputed = false;
     }
 
     // "Zero crossing factor". High values > .4 indicate hissing
@@ -148,8 +150,14 @@ class AudioSampleImpl {
     }
 
     // Root mean square amplitude of the audio signal
-    // Returns: RMS value (pre-computed, O(1) access)
-    float rms() const { return mRms; }
+    // Returns: RMS value (computed lazily on first access)
+    float rms() const {
+        if (!mRmsComputed) {
+            const_cast<AudioSampleImpl*>(this)->initRms();
+            const_cast<AudioSampleImpl*>(this)->mRmsComputed = true;
+        }
+        return mRms;
+    }
 
   private:
     void initZeroCrossings() {
@@ -182,8 +190,9 @@ class AudioSampleImpl {
 
     VectorPCM mSignedPcm;
     fl::i16 mZeroCrossings = 0;
-    float mRms = 0.0f;  // Pre-computed RMS value
+    float mRms = 0.0f;  // Lazily computed RMS value
     fl::u32 mTimestamp = 0;
+    mutable bool mRmsComputed = false;  // Track if RMS has been computed
 };
 
 } // namespace fl
