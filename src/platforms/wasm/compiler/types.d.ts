@@ -137,6 +137,16 @@ declare class FastLEDPerformanceMonitor {
   [key: string]: any;
 }
 
+/**
+ * FastLED Worker Manager for background worker control
+ */
+declare class FastLEDWorkerManager {
+  constructor();
+  isWorkerActive: boolean;
+  isFallbackMode: boolean;
+  [key: string]: any;
+}
+
 // ============================================================================
 // Audio Worklet Types
 // ============================================================================
@@ -209,6 +219,7 @@ declare global {
   interface Window {
     // FastLED Core
     fastLEDController: FastLEDAsyncController | null;
+    fastLEDWorkerManager: FastLEDWorkerManager;
     fastLEDEvents: FastLEDEvents;
     fastLEDPerformanceMonitor: FastLEDPerformanceMonitor;
     fastLEDDebug: any;
@@ -252,8 +263,8 @@ declare global {
     getFastLEDController: () => FastLEDAsyncController | null;
     getFastLEDPerformanceStats: () => any;
     startFastLED: () => Promise<void>;
-    stopFastLED: () => void;
-    toggleFastLED: () => Promise<void>;
+    stopFastLED: () => Promise<boolean>;
+    toggleFastLED: () => Promise<boolean>;
 
     // Debug Functions
     fastLEDDebugLog: (...args: any[]) => void;
@@ -343,5 +354,6 @@ export {
   VideoRecorder,
   JsonInspector,
   FastLEDEvents,
-  FastLEDPerformanceMonitor
+  FastLEDPerformanceMonitor,
+  FastLEDWorkerManager
 };

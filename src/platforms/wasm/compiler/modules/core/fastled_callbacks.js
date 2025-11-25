@@ -43,6 +43,23 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './f
  * @returns {Promise<void>} Promise that resolves when frame is rendered
  */
 globalThis.FastLED_onFrame = async function (frameData) {
+  // Skip frame rendering on main thread if worker is active
+  const hasController = !!window.fastLEDController;
+  const workerMode = hasController && window.fastLEDController.workerMode;
+  const hasWorkerManager = !!window.fastLEDWorkerManager;
+  const isWorkerActive = hasWorkerManager && window.fastLEDWorkerManager.isWorkerActive;
+
+  // Log worker status every 60 frames for debugging
+  const shouldLogWorkerStatus = !globalThis.fastLEDFrameCount || globalThis.fastLEDFrameCount % 60 === 0;
+  if (shouldLogWorkerStatus) {
+    console.log(`FastLED_onFrame worker check: controller=${hasController}, workerMode=${workerMode}, manager=${hasWorkerManager}, active=${isWorkerActive}`);
+  }
+
+  if (hasController && workerMode && hasWorkerManager && isWorkerActive) {
+    FASTLED_DEBUG_LOG('CALLBACKS', 'Skipping main thread frame rendering - worker is active');
+    return;
+  }
+
   // Only log every 60 frames to avoid spam
   const shouldLog = !globalThis.fastLEDFrameCount || globalThis.fastLEDFrameCount % 60 === 0;
   globalThis.fastLEDFrameCount = (globalThis.fastLEDFrameCount || 0) + 1;

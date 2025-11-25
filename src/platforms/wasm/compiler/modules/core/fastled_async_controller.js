@@ -47,7 +47,6 @@ class FastLEDAsyncController {
     this.lastSlowFrameWarningTime = 0; // Track last slow frame warning timestamp
 
     // Worker integration properties
-    this.workerMode = false; // Whether running in background worker mode
     this.isMainThread = typeof Worker !== 'undefined' && typeof window !== 'undefined';
     this.canvasElement = null; // Reference to canvas element for worker transfer
 
@@ -610,14 +609,14 @@ class FastLEDAsyncController {
       };
 
       // Initialize worker manager
+      console.log('🔧 [ITERATION_12] Calling fastLEDWorkerManager.initialize()...');
       const success = await fastLEDWorkerManager.initialize(workerConfig);
+      console.log('🔧 [ITERATION_12] initialize() returned:', success);
+      console.log('🔧 [ITERATION_12] fastLEDWorkerManager.isWorkerActive:', fastLEDWorkerManager.isWorkerActive);
 
       if (success) {
-        this.workerMode = !fastLEDWorkerManager.isFallbackMode;
-
         FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker mode initialized', {
           workerActive: fastLEDWorkerManager.isWorkerActive,
-          fallbackMode: fastLEDWorkerManager.isFallbackMode,
           capabilities: fastLEDWorkerManager.capabilities
         });
 
@@ -627,16 +626,13 @@ class FastLEDAsyncController {
         FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'initializeWorkerMode', 'EXIT', { success: true });
         return true;
       } else {
-        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker initialization failed, using fallback');
-        FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'initializeWorkerMode', 'EXIT', { success: false });
-        return false;
+        throw new Error('Worker initialization failed');
       }
 
     } catch (error) {
       FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Worker initialization error', error);
-      this.workerMode = false;
       FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'initializeWorkerMode', 'EXIT', { success: false });
-      return false;
+      throw error; // Re-throw to propagate error
     }
   }
 
@@ -697,90 +693,67 @@ class FastLEDAsyncController {
   }
 
   /**
-   * Start animation loop in appropriate mode (worker or main thread)
+   * Start animation loop in worker mode
    * @returns {Promise<void>} Promise that resolves when start is complete
    */
   async startWithWorkerSupport() {
     FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'startWithWorkerSupport', 'ENTER');
 
-    if (this.workerMode && fastLEDWorkerManager.isWorkerActive) {
+    if (fastLEDWorkerManager.isWorkerActive) {
       FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Starting animation in worker mode');
 
-      try {
-        // Send start command to worker
-        const startMessage = {
-          type: 'start',
-          payload: {
-            frameRate: this.frameRate
-          }
-        };
-
-        const response = await fastLEDWorkerManager.sendMessageWithResponse(startMessage);
-
-        if (response && response.success) {
-          this.running = true;
-          FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker animation started successfully');
-        } else {
-          throw new Error('Worker start command failed');
+      // Send start command to worker
+      const startMessage = {
+        type: 'start',
+        payload: {
+          frameRate: this.frameRate
         }
+      };
 
-        FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'startWithWorkerSupport', 'EXIT', { workerMode: true });
+      const response = await fastLEDWorkerManager.sendMessageWithResponse(startMessage);
 
-      } catch (error) {
-        FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Worker start failed, falling back to main thread', error);
-
-        // Fall back to main thread mode
-        this.workerMode = false;
-        await this.start();
+      if (response && response.success) {
+        this.running = true;
+        FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker animation started successfully');
+      } else {
+        throw new Error('Worker start command failed');
       }
+
+      FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'startWithWorkerSupport', 'EXIT');
     } else {
-      FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Starting animation in main thread mode');
-
-      // Use original main thread start method
-      await this.start();
-
-      FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'startWithWorkerSupport', 'EXIT', { workerMode: false });
+      throw new Error('Worker not active - cannot start animation');
     }
   }
 
   /**
-   * Stop animation loop in appropriate mode (worker or main thread)
+   * Stop animation loop in worker mode
    */
   stopWithWorkerSupport() {
     FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'stopWithWorkerSupport', 'ENTER');
 
-    if (this.workerMode && fastLEDWorkerManager.isWorkerActive) {
+    if (fastLEDWorkerManager.isWorkerActive) {
       FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Stopping animation in worker mode');
 
-      try {
-        // Send stop command to worker
-        const stopMessage = {
-          type: 'stop',
-          payload: {}
-        };
+      // Send stop command to worker
+      const stopMessage = {
+        type: 'stop',
+        payload: {}
+      };
 
-        fastLEDWorkerManager.sendMessageWithResponse(stopMessage)
-          .then((response) => {
-            if (response && response.success) {
-              this.running = false;
-              FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker animation stopped successfully');
-            }
-          })
-          .catch((error) => {
-            FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Worker stop failed', error);
-            // Force local stop
+      fastLEDWorkerManager.sendMessageWithResponse(stopMessage)
+        .then((response) => {
+          if (response && response.success) {
             this.running = false;
-          });
-
-      } catch (error) {
-        FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Worker stop error', error);
-        this.running = false;
-      }
+            FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker animation stopped successfully');
+          }
+        })
+        .catch((error) => {
+          FASTLED_DEBUG_ERROR('ASYNC_CONTROLLER', 'Worker stop failed', error);
+          // Force local stop
+          this.running = false;
+        });
     } else {
-      FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Stopping animation in main thread mode');
-
-      // Use original main thread stop method
-      this.stop();
+      throw new Error('Worker not active - cannot stop animation');
     }
 
     FASTLED_DEBUG_TRACE('ASYNC_CONTROLLER', 'stopWithWorkerSupport', 'EXIT');
@@ -792,7 +765,6 @@ class FastLEDAsyncController {
    */
   getModeInfo() {
     return {
-      workerMode: this.workerMode,
       isMainThread: this.isMainThread,
       workerStatus: fastLEDWorkerManager.getStatus(),
       running: this.running,
@@ -810,7 +782,6 @@ class FastLEDAsyncController {
       fastLEDWorkerManager.destroy();
     }
 
-    this.workerMode = false;
     this.canvasElement = null;
 
     FASTLED_DEBUG_LOG('ASYNC_CONTROLLER', 'Worker resources cleaned up');

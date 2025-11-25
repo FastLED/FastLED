@@ -60,9 +60,6 @@ export class FastLEDWorkerManager {
     /** @type {boolean} Current worker operational status */
     this.isWorkerActive = false;
 
-    /** @type {boolean} Whether fallback mode is active */
-    this.isFallbackMode = false;
-
     /** @type {Map<string, Function>} Pending message callbacks */
     this.pendingCallbacks = new Map();
 
@@ -100,19 +97,30 @@ export class FastLEDWorkerManager {
       webgl2: false
     };
 
+    console.log('🔧 detectCapabilities:', {
+      offscreenCanvas: capabilities.offscreenCanvas,
+      sharedArrayBuffer: capabilities.sharedArrayBuffer,
+      transferableObjects: capabilities.transferableObjects
+    });
+
     // Test WebGL 2.0 support with OffscreenCanvas
     if (capabilities.offscreenCanvas) {
       try {
         const testCanvas = new OffscreenCanvas(1, 1);
         const ctx = testCanvas.getContext('webgl2');
         capabilities.webgl2 = !!ctx;
+        console.log('🔧 WebGL2 OffscreenCanvas test: SUCCESS');
         FASTLED_DEBUG_LOG('WORKER_MANAGER', 'WebGL2 OffscreenCanvas test successful');
       } catch (error) {
+        console.error('🔧 WebGL2 OffscreenCanvas test: FAILED', error);
         FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'WebGL2 OffscreenCanvas test failed', error);
         capabilities.webgl2 = false;
       }
+    } else {
+      console.warn('🔧 OffscreenCanvas not available in this browser');
     }
 
+    console.log('🔧 Final capabilities:', capabilities);
     FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Capabilities detected', capabilities);
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'detectCapabilities', 'EXIT');
 
@@ -126,37 +134,41 @@ export class FastLEDWorkerManager {
    */
   async initialize(config) {
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'initialize', 'ENTER', { config });
+    console.log('🔧 initialize() called');
 
     try {
       // Validate configuration
       if (!config.canvas || !config.fastledModule) {
+        console.error('🔧 Invalid config: missing canvas or WASM module');
         throw new Error('Invalid worker configuration: missing canvas or WASM module');
       }
+      console.log('🔧 Config validation: OK');
 
       this.mainCanvas = config.canvas;
       this.maxRetries = config.maxRetries || 3;
 
-      // Check if worker mode is supported and beneficial
-      if (!this.shouldUseWorker()) {
-        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker mode not supported, using fallback');
-        return this.initializeFallback(config);
-      }
-
       // Transfer canvas control to OffscreenCanvas
+      console.log('🔧 About to transfer canvas to offscreen...');
       this.offscreenCanvas = this.mainCanvas.transferControlToOffscreen();
+      console.log('🔧 Canvas transferred successfully');
       FASTLED_DEBUG_LOG('WORKER_MANAGER', `Canvas control transferred to OffscreenCanvas`);
 
       // Create and configure worker
+      console.log('🔧 About to create worker...');
       await this.createWorker(config);
+      console.log('🔧 Worker created successfully');
 
       // Verify worker is operational
+      console.log('🔧 About to verify worker readiness...');
       const isWorkerReady = await this.verifyWorkerReady();
+      console.log(`🔧 Worker ready check: ${isWorkerReady}`);
       if (!isWorkerReady) {
         throw new Error('Worker failed readiness verification');
       }
 
       this.isWorkerActive = true;
-      this.isFallbackMode = false;
+      console.log('🔧 Worker mode fully initialized!');
+      console.log('🔧 Set isWorkerActive =', this.isWorkerActive);
 
       // Emit success event
       fastLEDEvents.emit('worker:initialized', {
@@ -171,48 +183,17 @@ export class FastLEDWorkerManager {
       return true;
 
     } catch (error) {
+      console.error('🔧 Worker initialization FAILED:', error);
+      console.error('🔧 Error message:', error.message);
+      console.error('🔧 Error stack:', error.stack);
       FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Worker initialization failed', error);
 
-      // Attempt fallback if enabled
-      if (config.enableFallback !== false) {
-        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Attempting fallback initialization');
-        return this.initializeFallback(config);
-      }
-
+      // Fail hard - no fallback mode
       FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'initialize', 'EXIT', { success: false });
-      return false;
+      throw error; // Re-throw to propagate the error
     }
   }
 
-  /**
-   * Determines if background worker should be used based on capabilities
-   * @returns {boolean} Whether worker mode should be used
-   */
-  shouldUseWorker() {
-    // Require OffscreenCanvas and WebGL2 for worker mode
-    const required = this.capabilities.offscreenCanvas && this.capabilities.webgl2;
-
-    // Check for user preference or feature flags
-    const userPreference = new URLSearchParams(window.location.search).get('worker');
-    if (userPreference === '0' || userPreference === 'false') {
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker mode disabled by user preference');
-      return false;
-    }
-
-    // Check for compile-time feature flags
-    if (typeof window !== 'undefined' && /** @type {*} */(window).FASTLED_ENABLE_BACKGROUND_WORKER === false) {
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker mode disabled by compile flag');
-      return false;
-    }
-
-    FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker mode decision', {
-      required,
-      userPreference,
-      shouldUse: required
-    });
-
-    return required;
-  }
 
   /**
    * Creates and configures the background worker
@@ -221,21 +202,28 @@ export class FastLEDWorkerManager {
    */
   async createWorker(config) {
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'createWorker', 'ENTER');
+    console.log('🔧 createWorker: ENTER');
 
     try {
       // Create worker with the background worker script
+      console.log('🔧 createWorker: Creating Worker instance...');
       const workerScript = new URL('./fastled_background_worker.js', import.meta.url);
+      console.log('🔧 createWorker: Worker script URL:', workerScript.href);
       this.worker = new Worker(workerScript, {
         type: 'module',
         name: 'fastled-background-worker'
       });
+      console.log('🔧 createWorker: Worker instance created');
 
       // Set up worker message handling
+      console.log('🔧 createWorker: Setting up message handlers...');
       this.worker.onmessage = this.handleWorkerMessage.bind(this);
       this.worker.onerror = this.handleWorkerError.bind(this);
       this.worker.onmessageerror = this.handleWorkerMessageError.bind(this);
+      console.log('🔧 createWorker: Message handlers set up');
 
       // Initialize worker with configuration
+      console.log('🔧 createWorker: Preparing initialization message...');
       const initMessage = {
         type: 'initialize',
         id: this.generateMessageId(),
@@ -249,16 +237,24 @@ export class FastLEDWorkerManager {
           }
         }
       };
+      console.log('🔧 createWorker: Init message prepared, id:', initMessage.id);
 
+      console.log('🔧 createWorker: About to call sendMessageWithResponse...');
+      console.log('🔧 createWorker: isWorkerActive BEFORE send:', this.isWorkerActive);
       const success = await this.sendMessageWithResponse(initMessage, [this.offscreenCanvas]);
+      console.log('🔧 createWorker: sendMessageWithResponse returned:', success);
       if (!success) {
         throw new Error('Worker initialization message failed');
       }
 
       FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker created and configured successfully');
+      console.log('🔧 createWorker: EXIT (success)');
       FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'createWorker', 'EXIT');
 
     } catch (error) {
+      console.error('🔧 createWorker: EXCEPTION caught:', error);
+      console.error('🔧 createWorker: Error message:', error.message);
+      console.error('🔧 createWorker: Error stack:', error.stack);
       FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to create worker', error);
       this.terminateWorker();
       throw error;
@@ -283,10 +279,12 @@ export class FastLEDWorkerManager {
       const response = await this.sendMessageWithResponse(pingMessage, null, 5000); // 5 second timeout
       const roundTripTime = performance.now() - startTime;
 
-      if (response && response.type === 'pong') {
+      // Response comes back wrapped - check response.payload for the actual pong data
+      // or check response.type === 'pong' if unwrapped by callback
+      if (response && (response.type === 'pong' || response.payload?.type === 'pong')) {
         FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker ready', {
           roundTripTime: `${roundTripTime.toFixed(2)}ms`,
-          workerTimestamp: response.payload?.timestamp
+          workerTimestamp: response.timestamp || response.payload?.timestamp
         });
         FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'verifyWorkerReady', 'EXIT', { ready: true });
         return true;
@@ -303,39 +301,6 @@ export class FastLEDWorkerManager {
     }
   }
 
-  /**
-   * Initializes fallback mode using main thread rendering
-   * @param {WorkerConfiguration} _config - Configuration for fallback (unused)
-   * @returns {Promise<boolean>} Success status
-   */
-  async initializeFallback(_config) {
-    FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'initializeFallback', 'ENTER');
-
-    try {
-      this.isFallbackMode = true;
-      this.isWorkerActive = false;
-
-      // Clean up any existing worker resources
-      this.terminateWorker();
-
-      // Emit fallback mode event
-      fastLEDEvents.emit('worker:fallback', {
-        mode: 'main_thread',
-        reason: 'worker_unavailable',
-        capabilities: this.capabilities
-      });
-
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Fallback mode initialized successfully');
-      FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'initializeFallback', 'EXIT', { success: true });
-
-      return true;
-
-    } catch (error) {
-      FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Fallback initialization failed', error);
-      FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'initializeFallback', 'EXIT', { success: false });
-      return false;
-    }
-  }
 
   /**
    * Sends a message to the worker and waits for response
@@ -346,45 +311,69 @@ export class FastLEDWorkerManager {
    */
   async sendMessageWithResponse(message, transferables = null, timeout = 10000) {
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'sendMessageWithResponse', 'ENTER', { messageType: message.type });
+    console.log('🔧 sendMessageWithResponse: ENTER, type:', message.type);
+    console.log('🔧 sendMessageWithResponse: this.worker exists:', !!this.worker);
+    console.log('🔧 sendMessageWithResponse: this.isWorkerActive:', this.isWorkerActive);
 
-    if (!this.worker || !this.isWorkerActive) {
-      throw new Error('Worker not available for message sending');
+    if (!this.worker) {
+      console.error('🔧 sendMessageWithResponse: Worker is null!');
+      throw new Error('Worker not available for message sending (worker is null)');
     }
+
+    // NOTE: For initialization and ping messages, we allow sending even when isWorkerActive is false
+    // because the worker needs to receive the initialization message to become active,
+    // and ping is used for readiness verification before setting isWorkerActive
+    if (!this.isWorkerActive && message.type !== 'initialize' && message.type !== 'ping') {
+      console.error('🔧 sendMessageWithResponse: Worker not active and message type is:', message.type);
+      throw new Error('Worker not active for message sending (only initialize/ping allowed)');
+    }
+    console.log('🔧 sendMessageWithResponse: Validation passed, proceeding...');
 
     return new Promise((resolve, reject) => {
       const messageId = message.id || this.generateMessageId();
       message.id = messageId;
+      console.log('🔧 sendMessageWithResponse: Message ID:', messageId);
 
       // Set up timeout
       const timeoutId = setTimeout(() => {
+        console.error('🔧 sendMessageWithResponse: TIMEOUT after', timeout, 'ms for message:', messageId);
         this.pendingCallbacks.delete(messageId);
         reject(new Error(`Worker message timeout after ${timeout}ms`));
       }, timeout);
 
       // Store callback for response
       this.pendingCallbacks.set(messageId, (response) => {
+        console.log('🔧 sendMessageWithResponse: Response received for message:', messageId);
         clearTimeout(timeoutId);
         this.pendingCallbacks.delete(messageId);
         resolve(response);
       });
+      console.log('🔧 sendMessageWithResponse: Callback stored for ID:', messageId);
+      console.log('🔧 sendMessageWithResponse: Pending count:', this.pendingCallbacks.size);
+      console.log('🔧 sendMessageWithResponse: Pending IDs after store:', Array.from(this.pendingCallbacks.keys()));
 
       try {
         // Send message to worker
         if (transferables && transferables.length > 0) {
+          console.log('🔧 sendMessageWithResponse: Posting message WITH transferables...');
           this.worker.postMessage(message, transferables);
+          console.log('🔧 sendMessageWithResponse: Message posted (with transferables)');
           FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Message sent with transferables', {
             type: message.type,
             id: messageId,
             transferables: transferables.length
           });
         } else {
+          console.log('🔧 sendMessageWithResponse: Posting message WITHOUT transferables...');
           this.worker.postMessage(message);
+          console.log('🔧 sendMessageWithResponse: Message posted (no transferables)');
           FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Message sent', {
             type: message.type,
             id: messageId
           });
         }
       } catch (error) {
+        console.error('🔧 sendMessageWithResponse: postMessage EXCEPTION:', error);
         clearTimeout(timeoutId);
         this.pendingCallbacks.delete(messageId);
         reject(error);
@@ -398,22 +387,34 @@ export class FastLEDWorkerManager {
    */
   handleWorkerMessage(event) {
     const { data } = event;
+    console.log('🔧 handleWorkerMessage: Received message, type:', data.type, 'id:', data.id);
+    console.log('🔧 handleWorkerMessage: Full message data:', JSON.stringify(data).substring(0, 200));
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'handleWorkerMessage', 'ENTER', { messageType: data.type });
 
     try {
       // Handle response to pending callback
+      console.log('🔧 handleWorkerMessage: Checking pending callbacks, count:', this.pendingCallbacks.size);
+      console.log('🔧 handleWorkerMessage: Pending callback IDs:', Array.from(this.pendingCallbacks.keys()));
+      console.log('🔧 handleWorkerMessage: Message data.id:', data.id, 'type:', typeof data.id);
+
       if (data.id && this.pendingCallbacks.has(data.id)) {
+        console.log('🔧 handleWorkerMessage: Found matching callback for id:', data.id);
         const callback = this.pendingCallbacks.get(data.id);
         callback(data.payload || data);
+        console.log('🔧 handleWorkerMessage: Callback invoked');
         return;
       }
+      console.log('🔧 handleWorkerMessage: No exact match by ID');
 
       // Check for response-type messages (with _response suffix)
       if (data.type && data.type.endsWith('_response') && data.id) {
+        console.log('🔧 handleWorkerMessage: Message type ends with _response');
         // Try to find callback by ID even if not exact match
         if (this.pendingCallbacks.has(data.id)) {
+          console.log('🔧 handleWorkerMessage: Found callback for _response message');
           const callback = this.pendingCallbacks.get(data.id);
           callback(data.payload || data);
+          console.log('🔧 handleWorkerMessage: Callback invoked');
           return;
         }
       }
@@ -422,14 +423,6 @@ export class FastLEDWorkerManager {
       switch (data.type) {
         case 'frame_rendered':
           this.handleFrameRendered(data.payload);
-          break;
-
-        case 'frame_imageBitmap':
-          this.handleFrameImageBitmap(data.payload);
-          break;
-
-        case 'frame_shared':
-          this.handleFrameShared(data.payload);
           break;
 
         case 'error':
@@ -483,140 +476,7 @@ export class FastLEDWorkerManager {
     });
   }
 
-  /**
-   * Handles SharedArrayBuffer frame transfers from worker
-   * @param {Object} payload - Frame shared memory references
-   */
-  handleFrameShared(payload) {
-    try {
-      if (!payload.sharedFrameHeader || !payload.sharedPixelBuffer) {
-        FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Invalid shared frame payload - missing buffers');
-        return;
-      }
 
-      // Read frame header from shared memory using atomic operations
-      const headerView = new Int32Array(payload.sharedFrameHeader);
-
-      // Check if data is ready (write flag should be 0)
-      const writeFlag = Atomics.load(headerView, 7);
-      if (writeFlag !== 0) {
-        // Data is still being written, skip this frame
-        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Frame data not ready, skipping');
-        return;
-      }
-
-      // Atomically read frame information
-      const frameInfo = {
-        frameNumber: Atomics.load(headerView, 0),
-        screenMapOffset: Atomics.load(headerView, 1),
-        pixelDataSize: Atomics.load(headerView, 2),
-        screenMapPresent: Atomics.load(headerView, 3),
-        timestampLow: Atomics.load(headerView, 4),
-        timestampFrac: Atomics.load(headerView, 5),
-        numStrips: Atomics.load(headerView, 6)
-      };
-
-      // Reconstruct timestamp
-      frameInfo.timestamp = frameInfo.timestampLow + (frameInfo.timestampFrac / 1000);
-
-      // Read pixel data from shared memory
-      const pixelView = new Uint8Array(payload.sharedPixelBuffer);
-
-      // Reconstruct frame data structure using payload information
-      const frameData = {
-        numStrips: frameInfo.numStrips,
-        strips: [],
-        timestamp: frameInfo.timestamp,
-        frameNumber: frameInfo.frameNumber
-      };
-
-      // Reconstruct strips using frameDataStructure from payload
-      if (payload.frameDataStructure) {
-        for (const stripInfo of payload.frameDataStructure) {
-          if (stripInfo.sharedOffset >= 0 && stripInfo.sharedLength > 0) {
-            // Read pixel data from shared buffer at the specified offset
-            const stripPixelData = new Uint8Array(pixelView.buffer,
-                                                  stripInfo.sharedOffset,
-                                                  stripInfo.sharedLength);
-
-            // Convert raw pixel data to pixel objects (assuming RGB format)
-            const pixels = [];
-            for (let i = 0; i < stripPixelData.length; i += 3) {
-              if (i + 2 < stripPixelData.length) {
-                pixels.push({
-                  r: stripPixelData[i],
-                  g: stripPixelData[i + 1],
-                  b: stripPixelData[i + 2]
-                });
-              }
-            }
-
-            frameData.strips.push({
-              stripId: stripInfo.strip_id,
-              numPixels: pixels.length,
-              pixels: pixels,
-              pixel_data: stripPixelData // Keep reference to shared data
-            });
-          }
-        }
-      }
-
-      // Read screen map if present
-      if (frameInfo.screenMapPresent && frameInfo.screenMapOffset >= 0 && payload.screenMapLength > 0) {
-        try {
-          const screenMapData = new Uint8Array(pixelView.buffer,
-                                               frameInfo.screenMapOffset,
-                                               payload.screenMapLength);
-          const screenMapJson = new TextDecoder().decode(screenMapData);
-          frameData.screenMap = JSON.parse(screenMapJson);
-        } catch (error) {
-          FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to parse screen map from shared memory', error);
-        }
-      }
-
-      // Emit frame data event for graphics managers
-      fastLEDEvents.emit('frame:data', {
-        source: 'background_worker_shared',
-        frameData,
-        timestamp: frameInfo.timestamp
-      });
-
-    } catch (error) {
-      FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to process shared frame data', error);
-    }
-  }
-
-  /**
-   * Handles ImageBitmap frame transfers from worker
-   * @param {Object} payload - Frame ImageBitmap data
-   */
-  handleFrameImageBitmap(payload) {
-    // Display the ImageBitmap on the main canvas
-    if (payload.imageBitmap && this.mainCanvas) {
-      try {
-        const ctx = this.mainCanvas.getContext('2d');
-        if (ctx) {
-          // Draw ImageBitmap to main canvas
-          ctx.drawImage(payload.imageBitmap, 0, 0);
-
-          // Close ImageBitmap to free memory
-          if (payload.imageBitmap.close) {
-            payload.imageBitmap.close();
-          }
-        }
-      } catch (error) {
-        FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Failed to render ImageBitmap', error);
-      }
-    }
-
-    // Emit event for frame display
-    fastLEDEvents.emit('frame:displayed', {
-      source: 'background_worker',
-      timestamp: payload.timestamp,
-      width: payload.width,
-      height: payload.height
-    });
-  }
 
   /**
    * Handles performance statistics from worker
@@ -635,6 +495,13 @@ export class FastLEDWorkerManager {
    * @param {ErrorEvent} event - Worker error event
    */
   handleWorkerError(event) {
+    console.error('🔧 handleWorkerError: Worker error occurred!');
+    console.error('🔧 handleWorkerError: message:', event.message);
+    console.error('🔧 handleWorkerError: filename:', event.filename);
+    console.error('🔧 handleWorkerError: lineno:', event.lineno);
+    console.error('🔧 handleWorkerError: colno:', event.colno);
+    console.error('🔧 handleWorkerError: error:', event.error);
+
     FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Worker error', {
       message: event.message,
       filename: event.filename,
@@ -644,7 +511,8 @@ export class FastLEDWorkerManager {
     });
 
     // Attempt recovery or fallback
-    this.handleWorkerFailure('worker_error', event.error);
+    const error = event.error || new Error(event.message || 'Worker error (no details)');
+    this.handleWorkerFailure('worker_error', error);
   }
 
   /**
@@ -666,11 +534,11 @@ export class FastLEDWorkerManager {
   }
 
   /**
-   * Handles worker failure and attempts recovery
+   * Handles worker failure - fails hard without recovery
    * @param {string} reason - Failure reason
    * @param {Error} error - Error object
    */
-  async handleWorkerFailure(reason, error) {
+  handleWorkerFailure(reason, error) {
     FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Worker failure detected', { reason, error });
 
     this.isWorkerActive = false;
@@ -678,34 +546,17 @@ export class FastLEDWorkerManager {
     // Emit failure event
     fastLEDEvents.emit('worker:failed', {
       reason,
-      error: error.message,
-      retryCount: this.retryCount
+      error: error.message
     });
 
-    // Attempt recovery if retries remain
-    if (this.retryCount < this.maxRetries) {
-      this.retryCount++;
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Attempting worker recovery', { attempt: this.retryCount });
+    // Terminate worker and fail hard
+    this.terminateWorker();
 
-      try {
-        // Terminate failed worker
-        this.terminateWorker();
-
-        // Wait before retry
-        await new Promise((resolve) => {
-          setTimeout(() => resolve(), 1000 * this.retryCount);
-        });
-
-        // Attempt to recreate worker (would need original config - store it)
-        // For now, fall back to main thread mode
-        await this.initializeFallback(/** @type {WorkerConfiguration} */({}));
-
-      } catch (recoveryError) {
-        FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Worker recovery failed', recoveryError);
-      }
-    } else {
-      FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Max retries exceeded, falling back to main thread');
-      await this.initializeFallback(/** @type {WorkerConfiguration} */({}));
+    // Show user-friendly error message
+    const errorDisplay = document.getElementById('error-display');
+    if (errorDisplay) {
+      errorDisplay.textContent = `Worker error: ${error.message}. Please refresh the page.`;
+      errorDisplay.style.color = '#ff6b6b';
     }
   }
 
@@ -751,7 +602,7 @@ export class FastLEDWorkerManager {
     this.mainCanvas = null;
 
     fastLEDEvents.emit('worker:destroyed', {
-      mode: this.isFallbackMode ? 'fallback' : 'worker'
+      mode: 'worker'
     });
 
     FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker manager destroyed');
@@ -765,9 +616,7 @@ export class FastLEDWorkerManager {
   getStatus() {
     return {
       isWorkerActive: this.isWorkerActive,
-      isFallbackMode: this.isFallbackMode,
       capabilities: this.capabilities,
-      retryCount: this.retryCount,
       pendingCallbacks: this.pendingCallbacks.size,
       hasCanvas: !!this.offscreenCanvas || !!this.mainCanvas
     };

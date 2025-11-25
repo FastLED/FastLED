@@ -170,6 +170,19 @@ class FastLEDEventSystem extends EventTarget {
   }
 
   /**
+   * Convenience method for addEventListener with detail unwrapping
+   * Provides a simpler API similar to Node.js EventEmitter
+   * @param {string} eventName - Name of the event to listen for
+   * @param {Function} callback - Callback function that receives event detail
+   */
+  on(eventName, callback) {
+    this.addEventListener(eventName, (event) => {
+      // Unwrap the detail object for convenience
+      callback(event.detail);
+    });
+  }
+
+  /**
      * Emit an error event
      * @param {string} errorType - Type of error
      * @param {string} errorMessage - Error message

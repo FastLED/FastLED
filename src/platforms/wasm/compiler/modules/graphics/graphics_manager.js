@@ -42,13 +42,8 @@
  * Creates and injects WebGL shaders into the document head
  * Ensures shaders are only created once by checking for existing elements
  */
-function createShaders() {
-  const fragmentShaderId = 'fastled_FragmentShader';
-  const vertexShaderId = 'fastled_vertexShader';
-  if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
-    return;
-  }
-  const vertexShaderStr = `
+// Shader source code (used by both main thread and worker)
+const VERTEX_SHADER_SRC = `
         attribute vec2 a_position;
         attribute vec2 a_texCoord;
         varying vec2 v_texCoord;
@@ -58,7 +53,7 @@ function createShaders() {
         }
         `;
 
-  const fragmentShaderStr = `
+const FRAGMENT_SHADER_SRC = `
         precision mediump float;
         uniform sampler2D u_image;
         varying vec2 v_texCoord;
@@ -66,16 +61,33 @@ function createShaders() {
             gl_FragColor = texture2D(u_image, v_texCoord);
         }
         `;
+
+function createShaders() {
+  const fragmentShaderId = 'fastled_FragmentShader';
+  const vertexShaderId = 'fastled_vertexShader';
+
+  // In worker context, document is not available - shaders will be used directly
+  if (typeof document === 'undefined') {
+    return { vertex: VERTEX_SHADER_SRC, fragment: FRAGMENT_SHADER_SRC };
+  }
+
+  // Main thread: inject shaders into DOM if not already present
+  if (document.getElementById(fragmentShaderId) && document.getElementById(vertexShaderId)) {
+    return { vertex: VERTEX_SHADER_SRC, fragment: FRAGMENT_SHADER_SRC };
+  }
+
   const fragmentShader = document.createElement('script');
   const vertexShader = document.createElement('script');
   fragmentShader.id = fragmentShaderId;
   vertexShader.id = vertexShaderId;
   fragmentShader.type = 'x-shader/x-fragment';
   vertexShader.type = 'x-shader/x-vertex';
-  fragmentShader.text = fragmentShaderStr;
-  vertexShader.text = vertexShaderStr;
+  fragmentShader.text = FRAGMENT_SHADER_SRC;
+  vertexShader.text = VERTEX_SHADER_SRC;
   document.head.appendChild(fragmentShader);
   document.head.appendChild(vertexShader);
+
+  return { vertex: VERTEX_SHADER_SRC, fragment: FRAGMENT_SHADER_SRC };
 }
 
 /**
@@ -137,11 +149,20 @@ export class GraphicsManager {
    * @returns {boolean} True if initialization was successful
    */
   initialize() {
-    /** @type {HTMLCanvasElement} */
-    this.canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(this.canvasId));
-    if (!this.canvas) {
-      console.error(`Canvas with id ${this.canvasId} not found`);
-      return false;
+    // Check if canvasId is actually an OffscreenCanvas (worker context)
+    // @ts-ignore - OffscreenCanvas type checking
+    if (typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas) {
+      // Worker context: use OffscreenCanvas directly
+      /** @type {HTMLCanvasElement} */
+      this.canvas = /** @type {HTMLCanvasElement} */ (/** @type {*} */ (this.canvasId));
+    } else {
+      // Main thread: look up canvas by ID
+      /** @type {HTMLCanvasElement} */
+      this.canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(this.canvasId));
+      if (!this.canvas) {
+        console.error(`Canvas with id ${this.canvasId} not found`);
+        return false;
+      }
     }
 
     this.gl = this.canvas.getContext('webgl');
@@ -243,22 +264,23 @@ export class GraphicsManager {
    * @returns {boolean} True if initialization was successful
    */
   initWebGL() {
-    createShaders();
-    const canvas = document.getElementById(this.canvasId);
-    this.gl = canvas.getContext('webgl');
+    const shaders = createShaders();
+
+    // Use this.canvas which was already set up in initialize()
+    this.gl = this.canvas.getContext('webgl');
     if (!this.gl) {
       console.error('WebGL not supported');
       return false;
     }
 
-    // Create shaders
+    // Create shaders using the source strings
     const vertexShader = this.createShader(
       this.gl.VERTEX_SHADER,
-      document.getElementById('fastled_vertexShader').text,
+      shaders.vertex,
     );
     const fragmentShader = this.createShader(
       this.gl.FRAGMENT_SHADER,
-      document.getElementById('fastled_FragmentShader').text,
+      shaders.fragment,
     );
 
     // Create program
@@ -364,8 +386,15 @@ export class GraphicsManager {
 
       // Only update canvas size if it's different from current size
       if (this.canvas.width !== screenWidth || this.canvas.height !== screenHeight) {
-        this.canvas.width = screenWidth;
-        this.canvas.height = screenHeight;
+        // Try to resize canvas, but skip if it's been transferred to worker
+        try {
+          this.canvas.width = screenWidth;
+          this.canvas.height = screenHeight;
+        } catch (error) {
+          // Canvas has been transferred to offscreen worker - this is expected
+          console.log('Canvas resize skipped - canvas is controlled by worker');
+          return;
+        }
 
         // Update WebGL viewport to match new canvas size
         if (this.gl) {

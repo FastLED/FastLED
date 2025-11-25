@@ -17,13 +17,11 @@
 
 /* eslint-env worker */
 
-// Worker-specific imports and initialization - Optimized loading
-/** @type {function(string): void} */
-// @ts-ignore
-const importScripts = self.importScripts;
-importScripts('../fastled.js'); // Import the WASM module
+// Worker-specific imports and initialization - ES6 module imports
+// NOTE: Workers created with {type: 'module'} must use ES6 imports, not importScripts()
+// The fastled.js WASM module will be loaded dynamically after worker initialization
 
-/* global fastled, postMessage, self, performance, requestAnimationFrame, cancelAnimationFrame */
+/* global postMessage, self, performance, requestAnimationFrame, cancelAnimationFrame */
 
 /**
  * @typedef {Object} WorkerState
@@ -40,11 +38,6 @@ importScripts('../fastled.js'); // Import the WASM module
  * @property {number} startTime - Worker start timestamp
  * @property {number} lastFrameTime - Last frame timestamp
  * @property {number} averageFrameTime - Average frame time in ms
- * @property {Int32Array|null} sharedFrameBuffer - Shared frame buffer
- * @property {Int32Array|null} sharedFrameHeader - Shared frame header
- * @property {Uint8ClampedArray|null} sharedPixelBuffer - Shared pixel buffer
- * @property {boolean} useSharedMemory - Whether shared memory is enabled
- * @property {number} maxPixelDataSize - Maximum pixel data size
  * @property {Object|null} externFunctions - External functions
  * @property {Object|null} wasmFunctions - WASM functions
  */
@@ -67,13 +60,6 @@ const workerState = {
   startTime: performance.now(),
   lastFrameTime: 0,
   averageFrameTime: 16.67, // Default to ~60 FPS
-
-  // SharedArrayBuffer support for zero-copy data transfer
-  sharedFrameBuffer: null,
-  sharedFrameHeader: null,
-  sharedPixelBuffer: null,
-  useSharedMemory: false,
-  maxPixelDataSize: 0,
 
   // Function references
   externFunctions: null,
@@ -130,6 +116,12 @@ self.onmessage = async function(event) {
 
   workerLog('TRACE', 'BACKGROUND_WORKER', 'Message received', { type, id });
 
+  // Ignore messages without a type (possibly from browser devtools or other sources)
+  if (!type) {
+    workerLog('TRACE', 'BACKGROUND_WORKER', 'Ignoring message without type', event.data);
+    return;
+  }
+
   try {
     let response = null;
 
@@ -164,11 +156,24 @@ self.onmessage = async function(event) {
 
     // Send response back to main thread
     if (id && response !== null) {
+      console.log('🔧 [WORKER] About to send response:', {
+        type: `${type}_response`,
+        id,
+        hasPayload: !!response,
+        success: true
+      });
       postMessage({
         type: `${type}_response`,
         id,
         payload: response,
         success: true
+      });
+      console.log('🔧 [WORKER] Response sent for message:', id);
+    } else {
+      console.log('🔧 [WORKER] NOT sending response:', {
+        hasId: !!id,
+        hasResponse: response !== null,
+        originalType: type
       });
     }
 
@@ -202,48 +207,6 @@ self.onmessage = async function(event) {
   }
 };
 
-/**
- * Initializes SharedArrayBuffer for zero-copy data transfer
- * @param {Object} payload - Initialization payload containing shared buffers
- * @returns {Promise<void>}
- */
-async function initializeSharedMemory(payload) {
-  try {
-    // Check if SharedArrayBuffer is available and provided
-    if (typeof SharedArrayBuffer === 'undefined') {
-      workerLog('LOG', 'BACKGROUND_WORKER', 'SharedArrayBuffer not available, using standard transfer');
-      return;
-    }
-
-    if (!payload.sharedBuffers) {
-      workerLog('LOG', 'BACKGROUND_WORKER', 'No shared buffers provided, using standard transfer');
-      return;
-    }
-
-    const { frameBuffer, pixelBuffer, maxPixelDataSize } = payload.sharedBuffers;
-
-    if (frameBuffer instanceof SharedArrayBuffer && pixelBuffer instanceof SharedArrayBuffer) {
-      workerState.sharedFrameBuffer = new Int32Array(frameBuffer);
-      workerState.sharedPixelBuffer = new Uint8ClampedArray(pixelBuffer);
-      workerState.maxPixelDataSize = maxPixelDataSize || 1024 * 1024; // Default 1MB
-      workerState.useSharedMemory = true;
-
-      // Create views for shared memory access
-      // Frame header: [frameCount, pixelDataOffset, pixelDataLength, screenMapPresent, timestamp]
-      workerState.sharedFrameHeader = new Int32Array(frameBuffer, 0, 8);
-
-      workerLog('LOG', 'BACKGROUND_WORKER', 'SharedArrayBuffer initialized successfully', {
-        frameBufferSize: frameBuffer.byteLength,
-        pixelBufferSize: pixelBuffer.byteLength,
-        maxPixelDataSize: workerState.maxPixelDataSize
-      });
-    }
-  } catch (error) {
-    workerLog('ERROR', 'BACKGROUND_WORKER', 'SharedArrayBuffer initialization failed', error);
-    // Fall back to standard transfer
-    workerState.useSharedMemory = false;
-  }
-}
 
 /**
  * Handles worker initialization
@@ -258,9 +221,6 @@ async function handleInitialize(payload) {
     workerState.canvas = payload.canvas;
     workerState.capabilities = payload.capabilities;
     workerState.frameRate = payload.frameRate || 60;
-
-    // Initialize SharedArrayBuffer support if available
-    await initializeSharedMemory(payload);
 
     // Validate OffscreenCanvas
     if (!workerState.canvas || !(workerState.canvas instanceof OffscreenCanvas)) {
@@ -311,21 +271,58 @@ async function initializeFastLEDModule() {
   workerLog('LOG', 'BACKGROUND_WORKER', 'Loading FastLED WASM module...');
 
   try {
-    // Load the FastLED WASM module
-    // Note: The module is loaded via importScripts at the top of this file
-    // @ts-ignore - fastled is loaded globally via importScripts
+    // For module workers, we need to dynamically load the fastled.js script
+    // Module workers don't support importScripts(), so we use dynamic import or script injection
+
+    // Check if fastled is already available (from a previous initialization attempt)
+    // @ts-ignore - fastled is loaded dynamically
     if (typeof self.fastled !== 'function') {
-      throw new Error('FastLED module not available in worker context');
+      // Load fastled.js by injecting it as a script tag in the worker global scope
+      // Since workers don't have document, we'll use a workaround with importScripts wrapped in a non-module worker
+      // OR we can use fetch + eval (less safe but works for trusted code)
+
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Dynamically loading fastled.js...');
+
+      // Fetch the fastled.js script and evaluate it in the worker context
+      // Worker is at /modules/core/fastled_background_worker.js, fastled.js is at /fastled.js
+      // So we need to go up two levels: ../../fastled.js
+      const fastledScriptPath = new URL('../../fastled.js', self.location.href).href;
+      workerLog('LOG', 'BACKGROUND_WORKER', `Fetching: ${fastledScriptPath}`);
+
+      const response = await fetch(fastledScriptPath);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch fastled.js: ${response.status} ${response.statusText}`);
+      }
+
+      const scriptText = await response.text();
+      workerLog('LOG', 'BACKGROUND_WORKER', `Fetched ${scriptText.length} bytes, evaluating...`);
+
+      // Evaluate the script in the worker's global scope
+      // This is safe because fastled.js is our own trusted code
+      // Using Function constructor instead of eval to satisfy ESLint
+      // The script defines 'var fastled = ...' so we need to return it and assign to self
+      const scriptFunc = new Function(`${scriptText}\nreturn fastled;`);
+      // @ts-ignore - fastled is dynamically loaded from Emscripten-generated code
+      self.fastled = scriptFunc.call(self);
+
+      workerLog('LOG', 'BACKGROUND_WORKER', 'fastled.js evaluated successfully');
+    }
+
+    // Verify fastled function is now available
+    // @ts-ignore - fastled is loaded dynamically
+    if (typeof self.fastled !== 'function') {
+      throw new Error('FastLED module not available after dynamic load');
     }
 
     // Initialize the module
-    // @ts-ignore - fastled is loaded globally via importScripts
+    // @ts-ignore - fastled is loaded dynamically
     workerState.fastledModule = await self.fastled({
       canvas: workerState.canvas,
       locateFile: (path) => {
         // Resolve WASM file paths relative to worker location
+        // Worker is at /modules/core/, so WASM files need to go up two levels
         if (path.endsWith('.wasm')) {
-          return `../${path}`;
+          return `../../${path}`;
         }
         return path;
       }
@@ -561,17 +558,18 @@ async function executeFrameLoop(currentTime) {
     const frameData = extractFrameData();
 
     if (frameData) {
-      // Render frame locally in worker
+      // Render frame to OffscreenCanvas (automatically syncs to main thread canvas)
       workerState.graphicsManager.updateCanvas(frameData);
 
-      // Transfer data to main thread using the most efficient method
-      if (workerState.useSharedMemory) {
-        // Use SharedArrayBuffer for zero-copy transfer
-        transferFrameDataShared(frameData, currentTime);
-      } else {
-        // Use standard postMessage (fallback)
-        transferFrameDataStandard(frameData, currentTime);
-      }
+      // Send lightweight performance telemetry to main thread
+      postMessage({
+        type: 'frame_rendered',
+        payload: {
+          frameNumber: workerState.frameCount,
+          timestamp: currentTime,
+          frameTime: performance.now() - frameStartTime
+        }
+      });
     }
 
     // Update performance metrics
@@ -593,138 +591,6 @@ async function executeFrameLoop(currentTime) {
   }
 }
 
-/**
- * Transfers frame data using SharedArrayBuffer (zero-copy)
- * @param {Object} frameData - Frame data from WASM
- * @param {number} timestamp - Current timestamp
- */
-function transferFrameDataShared(frameData, timestamp) {
-  try {
-    if (!workerState.sharedFrameHeader || !workerState.sharedPixelBuffer) {
-      // Fall back to standard transfer if shared memory is not available
-      transferFrameDataStandard(frameData, timestamp);
-      return;
-    }
-
-    // Calculate total pixel data size
-    let totalPixelDataSize = 0;
-    for (const strip of frameData) {
-      if (strip.pixel_data) {
-        totalPixelDataSize += strip.pixel_data.length;
-      }
-    }
-
-    // Check if pixel data fits in shared buffer
-    if (totalPixelDataSize > workerState.maxPixelDataSize) {
-      workerLog('WARN', 'BACKGROUND_WORKER', `Pixel data too large for shared buffer: ${totalPixelDataSize} > ${workerState.maxPixelDataSize}`);
-      transferFrameDataStandard(frameData, timestamp);
-      return;
-    }
-
-    // Use atomic operations for synchronization
-    const header = new Int32Array(workerState.sharedFrameHeader);
-
-    // Atomic write sequence: set write flag first, then data, then commit
-    Atomics.store(header, 7, 1); // Set write flag (reserved field becomes write flag)
-
-    // Write frame header to shared memory
-    Atomics.store(header, 0, workerState.frameCount); // frameNumber
-    Atomics.store(header, 1, 0); // pixelDataOffset (will be updated)
-    Atomics.store(header, 2, totalPixelDataSize); // pixelDataLength
-    Atomics.store(header, 3, frameData.screenMap ? 1 : 0); // screenMapPresent
-    Atomics.store(header, 4, Math.floor(timestamp)); // timestamp (lower 32 bits)
-    Atomics.store(header, 5, Math.floor((timestamp * 1000) % 1000)); // timestamp fractional part
-    Atomics.store(header, 6, frameData.length); // number of strips
-
-    // Write pixel data to shared buffer
-    const pixelView = new Uint8Array(workerState.sharedPixelBuffer);
-    let pixelOffset = 0;
-
-    for (let i = 0; i < frameData.length; i++) {
-      const strip = frameData[i];
-      if (strip.pixel_data && strip.pixel_data.length > 0) {
-        // Copy pixel data to shared buffer
-        pixelView.set(strip.pixel_data, pixelOffset);
-        strip.sharedOffset = pixelOffset; // Store offset for main thread
-        strip.sharedLength = strip.pixel_data.length;
-        pixelOffset += strip.pixel_data.length;
-
-        // Clear local pixel data to save memory (it's now in shared buffer)
-        strip.pixel_data = null;
-      } else {
-        strip.sharedOffset = -1; // No pixel data
-        strip.sharedLength = 0;
-      }
-    }
-
-    // Write screen map to shared buffer if present (after pixel data)
-    let screenMapOffset = -1;
-    let screenMapLength = 0;
-    if (frameData.screenMap) {
-      const screenMapJson = JSON.stringify(frameData.screenMap);
-      const screenMapBytes = new TextEncoder().encode(screenMapJson);
-
-      if (pixelOffset + screenMapBytes.length <= workerState.maxPixelDataSize) {
-        pixelView.set(screenMapBytes, pixelOffset);
-        screenMapOffset = pixelOffset;
-        screenMapLength = screenMapBytes.length;
-        pixelOffset += screenMapBytes.length;
-      }
-    }
-
-    // Update header with screen map info using atomic operations
-    if (screenMapOffset >= 0) {
-      // Store screen map info in header
-      Atomics.store(header, 1, screenMapOffset); // pixelDataOffset now stores screenMap offset
-    }
-
-    // Atomic commit: clear write flag to signal data is ready
-    Atomics.store(header, 7, 0); // Clear write flag to commit the frame
-
-    // Notify main thread that new frame data is available in shared memory
-    postMessage({
-      type: 'frame_shared',
-      payload: {
-        frameNumber: workerState.frameCount,
-        timestamp: timestamp,
-        stripCount: frameData.length,
-        totalPixelDataSize: totalPixelDataSize,
-        screenMapOffset: screenMapOffset,
-        screenMapLength: screenMapLength,
-        sharedFrameHeader: workerState.sharedFrameHeader,
-        sharedPixelBuffer: workerState.sharedPixelBuffer,
-        frameDataStructure: frameData.map(strip => ({
-          strip_id: strip.strip_id,
-          sharedOffset: strip.sharedOffset,
-          sharedLength: strip.sharedLength
-        }))
-      }
-    });
-
-  } catch (error) {
-    workerLog('ERROR', 'BACKGROUND_WORKER', 'SharedArrayBuffer transfer failed', error);
-    // Fall back to standard transfer
-    transferFrameDataStandard(frameData, timestamp);
-  }
-}
-
-/**
- * Transfers frame data using standard postMessage (with copying)
- * @param {Object} frameData - Frame data from WASM
- * @param {number} timestamp - Current timestamp
- */
-function transferFrameDataStandard(frameData, timestamp) {
-  // Standard postMessage approach (existing behavior)
-  postMessage({
-    type: 'frame_rendered',
-    payload: {
-      frameNumber: workerState.frameCount,
-      timestamp: timestamp,
-      hasScreenMap: !!frameData.screenMap,
-      pixelCount: Array.isArray(frameData) ? frameData.length : 0
-    }
-  });
-}
 
 /**
  * Extracts frame data from the WASM module

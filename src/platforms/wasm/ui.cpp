@@ -144,13 +144,15 @@ void ensureWasmUiSystemInitialized() {
                     const uiElements = JSON.parse(jsonStr);
 
                     // Log the inbound event to the inspector if available
-                    if (window.jsonInspector) {
-                        window.jsonInspector.logInboundEvent(uiElements, 'C++ → JS');
+                    // Use globalThis for compatibility with both main thread and Web Workers
+                    if (globalThis.jsonInspector) {
+                        globalThis.jsonInspector.logInboundEvent(uiElements, 'C++ → JS');
                     }
 
                     // Route to UI manager - will update existing elements or create new ones
-                    if (window.uiManager && typeof window.uiManager.addUiElements === 'function') {
-                        window.uiManager.addUiElements(uiElements);
+                    // Use globalThis for compatibility with both main thread and Web Workers
+                    if (globalThis.uiManager && typeof globalThis.uiManager.addUiElements === 'function') {
+                        globalThis.uiManager.addUiElements(uiElements);
                         //console.log('UI elements processed:', uiElements.length, 'elements');
                     } else {
                         console.warn('UI Manager not available');

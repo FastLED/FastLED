@@ -94,7 +94,7 @@ export class GraphicsManagerThreeJS {
     const { canvasId, threeJsModules } = graphicsArgs;
 
     // Configuration
-    /** @type {string} HTML canvas element ID */
+    /** @type {string|OffscreenCanvas} HTML canvas element ID or OffscreenCanvas instance */
     this.canvasId = canvasId;
 
     /** @type {Object} Three.js modules and dependencies */
@@ -168,6 +168,9 @@ export class GraphicsManagerThreeJS {
 
     /** @type {boolean} Whether to use merged geometries for performance */
     this.useMergedGeometry = true; // Enable geometry merging by default
+
+    /** @type {HTMLCanvasElement|OffscreenCanvas|null} Stored canvas reference */
+    this.canvas = null;
   }
 
   /**
@@ -221,6 +224,25 @@ export class GraphicsManagerThreeJS {
    * @param {Object} frameData - The frame data containing screen mapping information
    */
   initThreeJS(frameData) {
+    // Get canvas - either OffscreenCanvas (worker) or HTMLCanvasElement (main thread)
+    let canvas;
+    if (typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas) {
+      // Worker context: use OffscreenCanvas directly
+      canvas = this.canvasId;
+    } else {
+      // Main thread: look up canvas by ID
+      const canvasElement = document.getElementById(/** @type {string} */(this.canvasId));
+      if (!canvasElement) {
+        console.warn('initThreeJS: Canvas element not found');
+        return;
+      }
+      // Cast to HTMLCanvasElement (we know it's a canvas)
+      canvas = /** @type {HTMLCanvasElement} */(canvasElement);
+    }
+
+    // Store canvas reference for other methods
+    this.canvas = canvas;
+
     this._setupCanvasAndDimensions(frameData);
     this._setupScene();
     this._setupRenderer();
@@ -242,7 +264,7 @@ export class GraphicsManagerThreeJS {
     const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
     const MAX_WIDTH = 640; // Max pixels width on browser
 
-    const canvas = document.getElementById(this.canvasId);
+    const canvas = this.canvas; // Use stored canvas reference
     const { screenMap } = frameData;
     const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
     const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
@@ -256,15 +278,18 @@ export class GraphicsManagerThreeJS {
     this.SCREEN_WIDTH = targetWidth * RESOLUTION_BOOST;
     this.SCREEN_HEIGHT = targetHeight * RESOLUTION_BOOST;
 
-    // Set internal canvas size to 2x for higher resolution
+    // Set canvas size
     canvas.width = targetWidth * RESOLUTION_BOOST;
     canvas.height = targetHeight * RESOLUTION_BOOST;
 
-    // But keep display size the same
-    canvas.style.width = `${targetWidth}px`;
-    canvas.style.height = `${targetHeight}px`;
-    canvas.style.maxWidth = `${targetWidth}px`;
-    canvas.style.maxHeight = `${targetHeight}px`;
+    // Set display size only for HTMLCanvasElement (not OffscreenCanvas)
+    // @ts-ignore - Type guard for HTMLCanvasElement.style property
+    if (typeof window !== 'undefined' && !(canvas instanceof OffscreenCanvas) && canvas.style) {
+      canvas.style.width = `${targetWidth}px`;
+      canvas.style.height = `${targetHeight}px`;
+      canvas.style.maxWidth = `${targetWidth}px`;
+      canvas.style.maxHeight = `${targetHeight}px`;
+    }
 
     // Store the bounds for orthographic camera calculations
     this.screenBounds = {
@@ -329,10 +354,9 @@ export class GraphicsManagerThreeJS {
    */
   _setupRenderer() {
     const { THREE } = this.threeJsModules;
-    const canvas = document.getElementById(this.canvasId);
 
     this.renderer = new THREE.WebGLRenderer({
-      canvas,
+      canvas: this.canvas, // Use stored canvas reference
       antialias: true,
     });
     this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);

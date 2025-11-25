@@ -63,6 +63,71 @@ import { FASTLED_DEBUG_LOG, FASTLED_DEBUG_ERROR, FASTLED_DEBUG_TRACE } from './m
 
 /** URL parameters for runtime configuration */
 const urlParams = new URLSearchParams(window.location.search);
+console.log(`⭐ index.js loading, URL: ${window.location.href}`);
+
+/**
+ * Browser Compatibility Check
+ * FastLED WASM requires OffscreenCanvas and WebGL2 support for Web Worker mode
+ */
+(function checkBrowserCompatibility() {
+  const errors = [];
+
+  // Check OffscreenCanvas support
+  if (typeof OffscreenCanvas === 'undefined') {
+    errors.push('OffscreenCanvas not supported');
+  } else {
+    // Check WebGL2 support with OffscreenCanvas
+    try {
+      const testCanvas = new OffscreenCanvas(1, 1);
+      const ctx = testCanvas.getContext('webgl2');
+      if (!ctx) {
+        errors.push('WebGL2 not supported with OffscreenCanvas');
+      }
+    } catch (error) {
+      errors.push(`OffscreenCanvas WebGL2 test failed: ${error.message}`);
+    }
+  }
+
+  if (errors.length > 0) {
+    const errorMessage = `
+      <div style="
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: #ff6b6b;
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 600px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        z-index: 10000;
+      ">
+        <h2 style="margin-top: 0;">Browser Not Supported</h2>
+        <p>This browser doesn't support the required features for FastLED WASM:</p>
+        <ul style="text-align: left;">
+          ${errors.map(err => `<li>${err}</li>`).join('')}
+        </ul>
+        <p><strong>Please use one of these browsers:</strong></p>
+        <ul style="text-align: left;">
+          <li>Chrome 69+ or Edge 79+</li>
+          <li>Firefox 105+</li>
+          <li>Safari 16.4+</li>
+        </ul>
+      </div>
+    `;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.body.insertAdjacentHTML('beforeend', errorMessage);
+    });
+
+    // Throw error to prevent further loading
+    throw new Error(`Browser compatibility check failed: ${errors.join(', ')}`);
+  }
+
+  console.log('✅ Browser compatibility check passed');
+})();
 
 /** Force fast 2D renderer when gfx=0 URL parameter is present */
 const FORCE_FAST_RENDERER = urlParams.get('gfx') === '0';
@@ -478,13 +543,35 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
 
     FASTLED_DEBUG_LOG('INDEX_JS', 'Globals exposed, calling controller.setup()...');
 
-    // Setup FastLED synchronously
-    fastLEDController.setup();
+    // Setup FastLED with proper error handling
+    console.log('🔧 About to call fastLEDController.setup()');
+    try {
+      fastLEDController.setup();
+      console.log('🔧 fastLEDController.setup() completed successfully');
+    } catch (error) {
+      console.error('🔧 setup() threw error:', error);
+      console.error('🔧 Error stack:', error.stack);
+      throw error; // Re-throw to prevent silent failure
+    }
 
-    FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, starting animation loop...');
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Controller setup completed, initializing worker mode...');
 
-    // Start the async animation loop
-    fastLEDController.start();
+    // Initialize Web Worker mode for background thread rendering (always enabled)
+    const canvas = /** @type {HTMLCanvasElement | null} */ (document.getElementById('myCanvas'));
+    if (!canvas) {
+      throw new Error('Canvas element not found');
+    }
+
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Initializing Web Worker mode with OffscreenCanvas...');
+    await fastLEDController.initializeWorkerMode(canvas, {
+      maxRetries: 3
+    });
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Web Worker mode initialized successfully');
+
+    // Start the async animation loop in worker mode
+    await fastLEDController.startWithWorkerSupport();
+    FASTLED_DEBUG_LOG('INDEX_JS', 'Animation loop started with Web Worker support');
+    console.log('FastLED running in Web Worker mode (background thread)');
 
     FASTLED_DEBUG_LOG('INDEX_JS', 'Animation loop started, setting up UI controls...');
 
@@ -502,10 +589,10 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
     });
 
     if (startBtn) {
-      startBtn.onclick = () => {
+      startBtn.onclick = async () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked');
         if (fastLEDController.setupCompleted) {
-          fastLEDController.start();
+          await fastLEDController.startWithWorkerSupport();
         } else {
           console.warn('FastLED setup not completed yet');
           FASTLED_DEBUG_LOG('INDEX_JS', 'Start button clicked but setup not completed');
@@ -514,16 +601,16 @@ async function FastLED_SetupAndLoop(moduleInstance, frame_rate) {
     }
 
     if (stopBtn) {
-      stopBtn.onclick = () => {
+      stopBtn.onclick = async () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Stop button clicked');
-        fastLEDController.stop();
+        await fastLEDController.stopWithWorkerSupport();
       };
     }
 
     if (toggleBtn) {
-      toggleBtn.onclick = () => {
+      toggleBtn.onclick = async () => {
         FASTLED_DEBUG_LOG('INDEX_JS', 'Toggle button clicked');
-        const isRunning = toggleFastLED();
+        const isRunning = await toggleFastLED();
         toggleBtn.textContent = isRunning ? 'Pause' : 'Resume';
       };
     }
@@ -899,36 +986,38 @@ async function startFastLED() {
     console.error('FastLED controller not initialized');
     return;
   }
-  await fastLEDController.start();
+  await fastLEDController.startWithWorkerSupport();
 }
 
 /**
  * Stops the FastLED animation loop (for external control)
- * @returns {boolean} True if stopped successfully, false otherwise
+ * @returns {Promise<boolean>} Promise that resolves to true if stopped successfully, false otherwise
  */
-function stopFastLED() {
+async function stopFastLED() {
   if (!fastLEDController) {
     console.error('FastLED controller not initialized');
     return false;
   }
-  fastLEDController.stop();
+  await fastLEDController.stopWithWorkerSupport();
   return true;
 }
 
 /**
  * Toggles the FastLED animation loop
- * @returns {Promise<void>} Promise that resolves when toggle is complete
+ * @returns {Promise<boolean>} Promise that resolves to running state (true if now running)
  */
 async function toggleFastLED() {
   if (!fastLEDController) {
     console.error('FastLED controller not initialized');
-    return;
+    return false;
   }
 
   if (fastLEDController.running) {
-    fastLEDController.stop();
+    await fastLEDController.stopWithWorkerSupport();
+    return false;
   } else {
-    await fastLEDController.start();
+    await fastLEDController.startWithWorkerSupport();
+    return true;
   }
 }
 
