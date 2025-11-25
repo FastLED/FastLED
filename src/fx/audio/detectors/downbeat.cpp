@@ -277,7 +277,7 @@ bool DownbeatDetector::detectDownbeat(u32 timestamp, float accent) {
     // Additional confidence boost for structural downbeats (at beat boundary)
     // This compensates for timing uncertainties in the first few measures
     if (atBeatCounterBoundary && mConfidence < 0.6f) {
-        mConfidence = fl::max(mConfidence, 0.55f);  // Ensure minimum confidence at boundaries
+        mConfidence = fl::fl_max(mConfidence, 0.55f);  // Ensure minimum confidence at boundaries
     }
 
     // Determine if this is a downbeat
