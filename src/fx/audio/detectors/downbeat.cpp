@@ -212,7 +212,24 @@ bool DownbeatDetector::detectDownbeat(u32 timestamp, float accent) {
 
     // If we haven't detected any downbeats yet, consider this one
     if (mLastDownbeatTime == 0) {
-        mConfidence = 0.5f;  // Low initial confidence
+        // Use accent strength for initial confidence instead of fixed 0.5
+        // This provides a better estimate based on actual audio characteristics
+        float meanAccent = 1.0f;
+        if (!mBeatAccents.empty()) {
+            float sum = 0.0f;
+            for (size i = 0; i < mBeatAccents.size(); i++) {
+                sum += mBeatAccents[i];
+            }
+            meanAccent = sum / static_cast<float>(mBeatAccents.size());
+        }
+
+        // Calculate accent-based confidence
+        // If we have accent history, use it; otherwise use raw accent with moderate confidence
+        float accentConfidence = meanAccent > 0.0f
+            ? fl::clamp(accent / (meanAccent * mAccentThreshold), 0.0f, 1.0f)
+            : fl::clamp(accent * 0.5f, 0.3f, 0.7f);  // Raw accent scaled to 30-70% range
+
+        mConfidence = accentConfidence;
         return true;
     }
 
@@ -251,7 +268,17 @@ bool DownbeatDetector::detectDownbeat(u32 timestamp, float accent) {
         ? fl::clamp(accent / (meanAccent * mAccentThreshold), 0.0f, 1.0f)
         : 0.5f;
 
-    mConfidence = (timingConfidence * 0.5f) + (accentConfidence * 0.5f);
+    // Adaptive weighting: favor accent when at beat boundary (structural downbeat)
+    // This improves recall for first downbeat after warm-up
+    float accentWeight = atBeatCounterBoundary ? 0.7f : 0.5f;
+    float timingWeight = atBeatCounterBoundary ? 0.3f : 0.5f;
+    mConfidence = (timingConfidence * timingWeight) + (accentConfidence * accentWeight);
+
+    // Additional confidence boost for structural downbeats (at beat boundary)
+    // This compensates for timing uncertainties in the first few measures
+    if (atBeatCounterBoundary && mConfidence < 0.6f) {
+        mConfidence = fl::max(mConfidence, 0.55f);  // Ensure minimum confidence at boundaries
+    }
 
     // Determine if this is a downbeat
     bool isDownbeat = false;
