@@ -250,6 +250,22 @@ class UCS1904 : public UCS1904Controller800Khz<DATA_PIN, RGB_ORDER> {};
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
 class UCS2903 : public UCS2903Controller<DATA_PIN, RGB_ORDER> {};
 
+/// @brief UCS7604 controller class (8-bit @ 800kHz).
+/// @copydetails UCS7604Controller8bit
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class UCS7604 : public UCS7604Controller8bit<DATA_PIN, RGB_ORDER> {};
+
+/// @brief UCS7604HD controller class (16-bit @ 800kHz).
+/// @copydetails UCS7604Controller16bit
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class UCS7604HD : public UCS7604Controller16bit<DATA_PIN, RGB_ORDER> {};
+
+/// @brief UCS7604HD_1600 controller class (16-bit @ 1600kHz).
+/// High-speed variant of UCS7604HD with twice the data rate
+/// @copydetails UCS7604Controller16bit1600
+template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>
+class UCS7604HD_1600 : public UCS7604Controller16bit1600<DATA_PIN, RGB_ORDER> {};
+
 /// @brief WS2812 controller class.
 /// @copydetails WS2812Controller800Khz
 template<fl::u8 DATA_PIN, fl::EOrder RGB_ORDER>

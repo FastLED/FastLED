@@ -121,7 +121,16 @@ template <
 class UCS7604ControllerT : public CPixelLEDController<RGB_ORDER>
 {
 private:
-    using DelegateController = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
+    using DelegateControllerBase = CLOCKLESS_CONTROLLER<DATA_PIN, CHIPSET_TIMING, RGB>;
+
+    // Helper class to access protected methods of the delegate controller
+    class DelegateController : public DelegateControllerBase {
+        friend class UCS7604ControllerT<DATA_PIN, RGB_ORDER, MODE, CHIPSET_TIMING, CLOCKLESS_CONTROLLER>;
+        void callShowPixels(PixelController<RGB> & pixels) {
+            DelegateControllerBase::showPixels(pixels);
+        }
+    };
+
     DelegateController mDelegate;  // Clockless controller for wire transmission (always RGB)
 
     static constexpr uint8_t PREAMBLE_LEN = 15;
@@ -269,7 +278,7 @@ protected:
         
         // Step 5: Construct PixelController and send to delegate controller
         PixelController<RGB> pixel_data(fake_pixels, num_pixels, ColorAdjustment::noAdjustment(), DISABLE_DITHER);
-        mDelegate.showPixels(pixel_data);
+        mDelegate.callShowPixels(pixel_data);
     }
 
     
