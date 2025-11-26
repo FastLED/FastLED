@@ -1,4 +1,5 @@
 import argparse
+import json
 import shutil
 import subprocess
 import sys
@@ -183,6 +184,35 @@ def main() -> int:
         console.print(
             f"[yellow]Warning: vendor directory not found: {vendor_src}[/yellow]"
         )
+
+    # Generate files.json manifest for data files
+    # This lists data files (.json, .csv, .txt, .bin, etc.) that the sketch can load
+    example_dir = Path("examples") / example_name
+    data_extensions = {".json", ".csv", ".txt", ".cfg", ".bin", ".dat", ".mp3", ".wav"}
+    data_files = []
+
+    # Scan example directory for data files (exclude .ino and fastled_js output dir)
+    for file_path in example_dir.rglob("*"):
+        if (
+            file_path.is_file()
+            and file_path.suffix.lower() in data_extensions
+            and "fastled_js" not in file_path.parts
+        ):
+            # Get relative path from example directory
+            rel_path = file_path.relative_to(example_dir)
+            data_files.append({"path": str(rel_path), "size": file_path.stat().st_size})
+
+    # Write files.json to output directory
+    files_json_path = output_dir / "files.json"
+    with open(files_json_path, "w", encoding="utf-8") as f:
+        json.dump(data_files, f, indent=2)
+
+    if data_files:
+        console.print(
+            f"[dim]Generated files.json with {len(data_files)} data file(s)[/dim]"
+        )
+    else:
+        console.print(f"[dim]Generated empty files.json (no data files found)[/dim]")
 
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 
