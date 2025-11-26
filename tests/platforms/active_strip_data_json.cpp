@@ -24,18 +24,8 @@ TEST_CASE("ActiveStripData JSON Round-Trip Test") {
             
             // Create RGB buffer from pixels
             fl::vector<uint8_t> rgbBuffer;
-            rgbBuffer.resize(pixels.size() * 3);
-            
             auto iterator = pixels.as_iterator(RgbwInvalid());
-            size_t idx = 0;
-            while (iterator.has(1)) {
-                uint8_t r, g, b;
-                iterator.loadAndScaleRGB(&r, &g, &b);
-                rgbBuffer[idx++] = r;
-                rgbBuffer[idx++] = g;
-                rgbBuffer[idx++] = b;
-                iterator.advanceData();
-            }
+            iterator.writeWS2812(&rgbBuffer);
             
             data.update(mStripId, 1000, fl::span<const uint8_t>(rgbBuffer.data(), rgbBuffer.size()));
         }

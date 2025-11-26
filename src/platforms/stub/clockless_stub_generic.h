@@ -28,17 +28,7 @@ protected:
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
-		mRgb.resize(iterator.size() * 3);
-		auto out_iterator = mRgb.data();
-		while (iterator.has(1)) {
-			uint8_t r, g, b;
-			iterator.loadAndScaleRGB(&r, &g, &b);
-			out_iterator[0] = r;
-			out_iterator[1] = g;
-			out_iterator[2] = b;
-			out_iterator += 3;
-			iterator.advanceData();
-		}
+		iterator.writeWS2812(&mRgb);
 		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
 	}
 
@@ -61,17 +51,7 @@ protected:
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
-		mRgb.resize(iterator.size() * 3);
-		auto out_iterator = mRgb.data();
-		while (iterator.has(1)) {
-			uint8_t r, g, b;
-			iterator.loadAndScaleRGB(&r, &g, &b);
-			out_iterator[0] = r;
-			out_iterator[1] = g;
-			out_iterator[2] = b;
-			out_iterator += 3;
-			iterator.advanceData();
-		}
+		iterator.writeWS2812(&mRgb);
 		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
 	}
 
@@ -95,17 +75,7 @@ protected:
 		PixelController<RGB> pixels_rgb = pixels; // Converts to RGB pixels
 		pixels_rgb.disableColorAdjustment();
 		auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
-		mRgb.resize(iterator.size() * 3);
-		auto out_iterator = mRgb.data();
-		while (iterator.has(1)) {
-			uint8_t r, g, b;
-			iterator.loadAndScaleRGB(&r, &g, &b);
-			out_iterator[0] = r;
-			out_iterator[1] = g;
-			out_iterator[2] = b;
-			out_iterator += 3;
-			iterator.advanceData();
-		}
+		iterator.writeWS2812(&mRgb);
 		mTracker.update(fl::span<const uint8_t>(mRgb.data(), mRgb.size()));
 	}
 

@@ -45,28 +45,7 @@ protected:
                 "mLedStrip->numPixels() (" << mLedStrip->numPixels() << ") != pixels.size() (" << iterator.size() << ")");
         }
         auto output_iterator = mLedStrip->outputIterator();
-        if (is_rgbw) {
-            uint8_t r, g, b, w;
-            for (uint16_t i = 0; iterator.has(1); i++) {
-                iterator.loadAndScaleRGBW(&r, &g, &b, &w);
-                output_iterator(r);
-                output_iterator(g);
-                output_iterator(b);
-                output_iterator(w);
-                iterator.advanceData();
-                iterator.stepDithering();
-            }
-        } else {
-            uint8_t r, g, b;
-            for (uint16_t i = 0; iterator.has(1); i++) {
-                iterator.loadAndScaleRGB(&r, &g, &b);
-                output_iterator(r);
-                output_iterator(g);
-                output_iterator(b);
-                iterator.advanceData();
-                iterator.stepDithering();
-            }
-        }
+        iterator.writeWS2812(output_iterator);
         output_iterator.finish();
         mLedStrip->drawAsync();
     }

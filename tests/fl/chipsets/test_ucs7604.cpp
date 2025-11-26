@@ -131,15 +131,7 @@ public:
         PixelController<RGB> pixels_rgb = pixels;
         pixels_rgb.disableColorAdjustment();
         auto iterator = pixels_rgb.as_iterator(RgbwInvalid());
-
-        while (iterator.has(1)) {
-            uint8_t r, g, b;
-            iterator.loadAndScaleRGB(&r, &g, &b);
-            capturedBytes.push_back(r);
-            capturedBytes.push_back(g);
-            capturedBytes.push_back(b);
-            iterator.advanceData();
-        }
+        iterator.writeWS2812(&capturedBytes);
     }
 };
 
