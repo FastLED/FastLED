@@ -23,12 +23,70 @@
 
 /* global postMessage, self, performance, requestAnimationFrame, cancelAnimationFrame */
 
+// CRITICAL FIX: Workers don't support import maps, but Three.js jsm files use bare "three" imports.
+// Solution: Use local vendor files with patched relative imports to three.module.js
+
+import { VideoRecorder } from '../recording/video_recorder.js';
+
+/**
+ * Loads ThreeJS modules for 3D rendering in worker context
+ * @returns {Promise<Object>} ThreeJS modules object
+ */
+async function loadThreeJSModules() {
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Loading ThreeJS modules in worker context...');
+
+  try {
+    // WORKER FIX: Use local vendor files with relative paths
+    // Workers don't support import maps, so we need to use full relative paths
+    const [
+      THREE,
+      { EffectComposer },
+      { RenderPass },
+      { UnrealBloomPass },
+      { OutputPass },
+      BufferGeometryUtils
+    ] = await Promise.all([
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/three.module.js'),
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/examples/jsm/postprocessing/EffectComposer.js'),
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/examples/jsm/postprocessing/RenderPass.js'),
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js'),
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/examples/jsm/postprocessing/OutputPass.js'),
+      // @ts-ignore - Local vendor module import
+      import('../../vendor/three/examples/jsm/utils/BufferGeometryUtils.js')
+    ]);
+
+    const modules = {
+      THREE,
+      EffectComposer,
+      RenderPass,
+      UnrealBloomPass,
+      OutputPass,
+      BufferGeometryUtils
+    };
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'ThreeJS modules loaded successfully', {
+      moduleNames: Object.keys(modules)
+    });
+
+    return modules;
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to load ThreeJS modules', error);
+    throw error;
+  }
+}
+
 /**
  * @typedef {Object} WorkerState
  * @property {boolean} initialized - Worker initialization status
  * @property {OffscreenCanvas|null} canvas - OffscreenCanvas instance
  * @property {Object|null} fastledModule - WASM module instance
  * @property {Object|null} graphicsManager - Graphics rendering manager
+ * @property {VideoRecorder|null} videoRecorder - Video recorder instance
  * @property {boolean} running - Animation loop status
  * @property {number} frameRate - Target frame rate
  * @property {Object} capabilities - Worker capabilities
@@ -41,6 +99,7 @@
  * @property {Object|null} externFunctions - External functions
  * @property {Object|null} wasmFunctions - WASM functions
  * @property {Function|null} processUiInput - UI input processing function
+ * @property {Object} urlParams - URL parameters from main thread
  */
 
 /**
@@ -52,6 +111,7 @@ const workerState = {
   canvas: null,
   fastledModule: null,
   graphicsManager: null,
+  videoRecorder: null,
   running: false,
   frameRate: 60,
   capabilities: null,
@@ -65,7 +125,10 @@ const workerState = {
   // Function references
   externFunctions: null,
   wasmFunctions: null,
-  processUiInput: null
+  processUiInput: null,
+
+  // URL parameters passed from main thread
+  urlParams: {}
 };
 
 /**
@@ -156,6 +219,14 @@ self.onmessage = async function(event) {
         response = handleUiChanges(payload);
         break;
 
+      case 'start_recording':
+        response = await handleStartRecording(payload);
+        break;
+
+      case 'stop_recording':
+        response = await handleStopRecording(payload);
+        break;
+
       default:
         throw new Error(`Unknown message type: ${type}`);
     }
@@ -227,6 +298,9 @@ async function handleInitialize(payload) {
     workerState.canvas = payload.canvas;
     workerState.capabilities = payload.capabilities;
     workerState.frameRate = payload.frameRate || 60;
+    workerState.urlParams = payload.urlParams || {}; // Store URL parameters from main thread
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'URL parameters received from main thread', workerState.urlParams);
 
     // Validate OffscreenCanvas
     if (!workerState.canvas || !(workerState.canvas instanceof OffscreenCanvas)) {
@@ -320,10 +394,25 @@ async function initializeFastLEDModule() {
       throw new Error('FastLED module not available after dynamic load');
     }
 
-    // Initialize the module
+    // Initialize the module with URL parameters passed through
     // @ts-ignore - fastled is loaded dynamically
     workerState.fastledModule = await self.fastled({
       canvas: workerState.canvas,
+      // Pass URL parameters to WASM module via environment
+      // This allows C++ code to access them through getenv() or similar
+      preRun: [(Module) => {
+        // Set URL parameters as environment variables for C++ access
+        if (workerState.urlParams) {
+          for (const [key, value] of Object.entries(workerState.urlParams)) {
+            workerLog('LOG', 'BACKGROUND_WORKER', `Setting URL param: ${key}=${value}`);
+            // Store in Module for JavaScript access
+            if (!Module.urlParams) {
+              Module.urlParams = {};
+            }
+            Module.urlParams[key] = value;
+          }
+        }
+      }],
       locateFile: (path) => {
         // Resolve WASM file paths relative to worker location
         // Worker is at /modules/core/, so WASM files need to go up two levels
@@ -358,14 +447,41 @@ async function initializeGraphicsManager() {
   workerLog('LOG', 'BACKGROUND_WORKER', 'Initializing graphics manager...');
 
   try {
-    // Dynamically import GraphicsManager module for worker context
-    const { GraphicsManager } = await import('../graphics/graphics_manager.js');
+    // Check URL parameters for graphics mode override
+    const FORCE_FAST_RENDERER = workerState.urlParams['gfx'] === '0';
+    const FORCE_THREEJS_RENDERER = workerState.urlParams['gfx'] === '1';
 
-    // Create graphics manager with OffscreenCanvas
-    workerState.graphicsManager = new GraphicsManager({
-      canvasId: /** @type {string} */ (/** @type {*} */ (workerState.canvas)), // Pass OffscreenCanvas directly
-      usePixelatedRendering: true
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Graphics mode selection', {
+      gfxParam: workerState.urlParams['gfx'],
+      FORCE_FAST_RENDERER,
+      FORCE_THREEJS_RENDERER
     });
+
+    if (FORCE_FAST_RENDERER) {
+      // Use fast 2D renderer (explicitly requested)
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Using Fast GraphicsManager (2D) - forced by URL param gfx=0');
+
+      const graphicsManagerModule = await import('../graphics/graphics_manager.js');
+      workerState.graphicsManager = new graphicsManagerModule.GraphicsManager({
+        canvas: workerState.canvas, // Pass OffscreenCanvas directly (not canvasId)
+        usePixelatedRendering: true
+      });
+    } else {
+      // Default to ThreeJS renderer (gfx=1) if no parameter specified
+      const explicitlyRequested = FORCE_THREEJS_RENDERER ? 'gfx=1' : 'default (gfx=1)';
+      workerLog('LOG', 'BACKGROUND_WORKER', `ThreeJS renderer (${explicitlyRequested}) - loading ThreeJS modules...`);
+
+      const threeJsModules = await loadThreeJSModules();
+      workerLog('LOG', 'BACKGROUND_WORKER', 'ThreeJS modules loaded, creating GraphicsManagerThreeJS...');
+
+      const graphicsManagerModule = await import('../graphics/graphics_manager_threejs.js');
+      workerState.graphicsManager = new graphicsManagerModule.GraphicsManagerThreeJS({
+        canvas: workerState.canvas, // Pass OffscreenCanvas directly
+        threeJsModules: threeJsModules
+      });
+
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Beautiful 3D GraphicsManager (ThreeJS) initialized in worker mode');
+    }
 
     // The graphics manager will handle WebGL setup internally
     workerLog('LOG', 'BACKGROUND_WORKER', 'Graphics manager initialized', {
@@ -541,6 +657,143 @@ function handleUiChanges(payload) {
 
   } catch (error) {
     workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to process UI changes', error);
+    throw error;
+  }
+}
+
+/**
+ * Handles start_recording message to begin video capture
+ * @param {Object} payload - Recording configuration
+ * @returns {Promise<Object>} Recording start confirmation
+ */
+async function handleStartRecording(payload) {
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Starting video recording', payload);
+
+  try {
+    // Check if canvas is available
+    if (!workerState.canvas) {
+      throw new Error('Canvas not available for video recording');
+    }
+
+    // Check if already recording
+    if (workerState.videoRecorder && workerState.videoRecorder.isRecording) {
+      throw new Error('Video recording already in progress');
+    }
+
+    // Create video recorder if it doesn't exist
+    if (!workerState.videoRecorder) {
+      workerLog('LOG', 'BACKGROUND_WORKER', 'Creating VideoRecorder instance');
+
+      workerState.videoRecorder = new VideoRecorder({
+        // @ts-ignore - VideoRecorder types expect HTMLCanvasElement but OffscreenCanvas also works
+        canvas: workerState.canvas,
+        audioContext: null, // No audio in worker context
+        fps: payload.fps || 60,
+        settings: payload.settings || {},
+        onStateChange: (isRecording) => {
+          // Notify main thread of state changes
+          postMessage({
+            type: 'recording_state_changed',
+            payload: { isRecording }
+          });
+        }
+      });
+    }
+
+    // Start recording
+    await workerState.videoRecorder.startRecording();
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Video recording started successfully');
+
+    return {
+      success: true,
+      codec: workerState.videoRecorder.selectedMimeType
+    };
+
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to start video recording', error);
+    throw error;
+  }
+}
+
+/**
+ * Handles stop_recording message to end video capture and return blob
+ * @param {Object} _payload - Unused payload
+ * @returns {Promise<Object>} Recording blob and metadata
+ */
+async function handleStopRecording(_payload) {
+  workerLog('LOG', 'BACKGROUND_WORKER', 'Stopping video recording');
+
+  try {
+    if (!workerState.videoRecorder) {
+      throw new Error('No video recorder instance');
+    }
+
+    if (!workerState.videoRecorder.isRecording) {
+      throw new Error('Not currently recording');
+    }
+
+    // Stop the media recorder and wait for blob to be ready
+    const blob = await new Promise((resolve, reject) => {
+      const recorder = workerState.videoRecorder;
+
+      // Override the onstop handler to capture the blob
+      const originalOnStop = recorder.mediaRecorder.onstop;
+      recorder.mediaRecorder.onstop = () => {
+        try {
+          // Create blob from recorded chunks
+          const recordedBlob = new Blob(recorder.recordedChunks, {
+            type: recorder.selectedMimeType || 'video/webm',
+          });
+
+          workerLog('LOG', 'BACKGROUND_WORKER', 'Blob created from chunks', {
+            chunks: recorder.recordedChunks.length,
+            size: recordedBlob.size
+          });
+
+          // Call original handler if needed (note: may fail in worker context)
+          if (originalOnStop && typeof originalOnStop === 'function') {
+            try {
+              // @ts-ignore - onstop event handler, ignoring potential errors
+              originalOnStop();
+            } catch (e) {
+              // Ignore errors from original handler (download will fail in worker)
+              workerLog('LOG', 'BACKGROUND_WORKER', 'Original onstop handler error (expected in worker)', e);
+            }
+          }
+
+          resolve(recordedBlob);
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      // Stop recording
+      recorder.isRecording = false;
+      recorder.mediaRecorder.stop();
+
+      // Notify state change
+      if (recorder.onStateChange) {
+        recorder.onStateChange(false);
+      }
+    });
+
+    workerLog('LOG', 'BACKGROUND_WORKER', 'Video recording stopped successfully', {
+      blobSize: blob.size,
+      blobType: blob.type
+    });
+
+    // Return blob to main thread
+    return {
+      success: true,
+      blob: blob,
+      mimeType: blob.type,
+      size: blob.size,
+      preferredFormat: workerState.videoRecorder.preferredFormat
+    };
+
+  } catch (error) {
+    workerLog('ERROR', 'BACKGROUND_WORKER', 'Failed to stop video recording', error);
     throw error;
   }
 }

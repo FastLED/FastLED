@@ -155,8 +155,8 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://threejs.org/build/three.module.js",
-                "three/addons/": "https://threejs.org/examples/jsm/"
+                "three": "./vendor/three/three.module.js",
+                "three/addons/": "./vendor/three/examples/jsm/"
             }
         }
     </script>
@@ -164,20 +164,19 @@
 </body>
 
 <script type="module">
-    import * as THREE from 'https://threejs.org/build/three.module.js';
+    import * as THREE from './vendor/three/three.module.js';
 
-    import Stats from 'three/addons/libs/stats.module.js';
-    import { GUI } from 'three/addons/libs/lil-gui.module.min.js';
+    import Stats from './vendor/three/examples/jsm/libs/stats.module.js';
+    import { GUI } from './vendor/three/examples/jsm/libs/lil-gui.module.min.js';
 
-    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
-    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-    import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
-    import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
-    import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
-    import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+    import { OrbitControls } from './vendor/three/examples/jsm/controls/OrbitControls.js';
+    import { GLTFLoader } from './vendor/three/examples/jsm/loaders/GLTFLoader.js';
+    import { EffectComposer } from './vendor/three/examples/jsm/postprocessing/EffectComposer.js';
+    import { RenderPass } from './vendor/three/examples/jsm/postprocessing/RenderPass.js';
+    import { UnrealBloomPass } from './vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js';
+    import { OutputPass } from './vendor/three/examples/jsm/postprocessing/OutputPass.js';
 
-    // import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
-    import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+    import * as BufferGeometryUtils from './vendor/three/examples/jsm/utils/BufferGeometryUtils.js';
 
 
     window.threeJsModules = { THREE, Stats, GUI, OrbitControls, GLTFLoader, EffectComposer, RenderPass, UnrealBloomPass, OutputPass, BufferGeometryUtils };

@@ -43,78 +43,11 @@ class FastLEDEventSystem extends EventTarget {
 
   /**
      * Set up default event listeners for FastLED events
+     * Note: Circular event listeners removed - only worker events are used for thread communication
      */
   setupEventListeners() {
-    // Strip events
-    this.addEventListener('strip_added', (event) => {
-      this.eventStats.stripAdded++;
-      const { stripId, numLeds } = event.detail;
-      if (globalThis.FastLED_onStripAdded) {
-        globalThis.FastLED_onStripAdded(stripId, numLeds).catch((error) => {
-          console.error('Error in strip_added event handler:', error);
-          this.emitError('strip_added_handler', error.message, { stripId, numLeds });
-        });
-      }
-    });
-
-    // Strip update events
-    this.addEventListener('strip_update', (event) => {
-      this.eventStats.stripUpdated++;
-      const { stripData } = event.detail;
-      if (globalThis.FastLED_onStripUpdate) {
-        globalThis.FastLED_onStripUpdate(stripData).catch((error) => {
-          console.error('Error in strip_update event handler:', error);
-          this.emitError('strip_update_handler', error.message, stripData);
-        });
-      }
-    });
-
-    // Frame events
-    this.addEventListener('frame_ready', (event) => {
-      this.eventStats.frameCount++;
-      const { frameData } = event.detail;
-      if (globalThis.FastLED_onFrame) {
-        globalThis.FastLED_onFrame(frameData).catch((error) => {
-          console.error('Error in frame_ready event handler:', error);
-          this.emitError('frame_handler', error.message, { frameDataLength: frameData.length });
-        });
-      }
-    });
-
-    // UI events
-    this.addEventListener('ui_update', (event) => {
-      this.eventStats.uiUpdated++;
-      const { uiData } = event.detail;
-      if (globalThis.FastLED_onUiElementsAdded) {
-        globalThis.FastLED_onUiElementsAdded(uiData).catch((error) => {
-          console.error('Error in ui_update event handler:', error);
-          this.emitError('ui_update_handler', error.message, uiData);
-        });
-      }
-    });
-
-    // Error events
-    this.addEventListener('error', (event) => {
-      this.eventStats.errors++;
-      const { errorType, errorMessage, errorData } = event.detail;
-      console.error(`FastLED Event Error [${errorType}]: ${errorMessage}`, errorData);
-
-      // Call global error handler if available
-      if (globalThis.FastLED_onError) {
-        globalThis.FastLED_onError(errorType, errorMessage, errorData).catch((error) => {
-          console.error('Error in error event handler:', error);
-          // Don't emit another error to avoid loops
-        });
-      }
-    });
-
-    // Performance monitoring events
-    this.addEventListener('performance_warning', (event) => {
-      const { metric, value, threshold } = event.detail;
-      console.warn(`FastLED Performance Warning: ${metric} = ${value} (threshold: ${threshold})`);
-    });
-
-    console.log('FastLED event listeners set up successfully');
+    // Intentionally empty - worker events are registered directly by consumers
+    // This prevents circular dependencies and unnecessary event overhead
   }
 
   /**

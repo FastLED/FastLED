@@ -171,6 +171,19 @@ def main() -> int:
             f"[yellow]Warning: modules directory not found: {modules_src}[/yellow]"
         )
 
+    # Copy entire vendor directory (Three.js and other third-party libraries)
+    vendor_src = template_dir / "vendor"
+    vendor_dst = output_dir / "vendor"
+    if vendor_src.exists():
+        if vendor_dst.exists():
+            shutil.rmtree(vendor_dst)
+        shutil.copytree(vendor_src, vendor_dst)
+        console.print(f"[dim]Copied vendor directory to output[/dim]")
+    else:
+        console.print(
+            f"[yellow]Warning: vendor directory not found: {vendor_src}[/yellow]"
+        )
+
     console.print("[bold green]✓ WASM compilation successful[/bold green]")
 
     # Run tests if --run flag is provided

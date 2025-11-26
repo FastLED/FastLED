@@ -30,6 +30,8 @@
     "node_modules",
     "dist",
     "build",
+    "vendor/**",
+    "**/vendor/**",
     "../../../../../node_modules/**",
     "../../../../../../node_modules/**"
   ]

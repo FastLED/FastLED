@@ -28,7 +28,6 @@ import { JsonUiManager } from './modules/ui/ui_manager.js';
 // Graphics System imports
 import { GraphicsManager } from './modules/graphics/graphics_manager.js';
 import { GraphicsManagerThreeJS } from './modules/graphics/graphics_manager_threejs.js';
-import { isDenseGrid } from './modules/graphics/graphics_utils.js';
 
 // Utility imports
 import { JsonInspector } from './modules/utils/json_inspector.js';
@@ -413,8 +412,6 @@ function updateCanvas(frameData) {
     return;
   }
   if (!graphicsManager) {
-    const isDenseMap = isDenseGrid(/** @type {import('./modules/graphics/graphics_utils.js').FrameData} */ (frameData));
-
     // Ensure graphicsArgs has required properties
     const currentGraphicsArgs = {
       canvasId: canvasId || 'canvas',
@@ -422,57 +419,26 @@ function updateCanvas(frameData) {
       ...graphicsArgs
     };
 
-    // Try to create graphics manager with WebGL error handling and fallback
+    // Try to create graphics manager - default to ThreeJS (gfx=1) if not specified
     try {
-      if (FORCE_THREEJS_RENDERER) {
-        console.log('Creating Beautiful GraphicsManager with canvas ID (forced)', canvasId);
-        graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
-      } else if (FORCE_FAST_RENDERER) {
-        console.log('Creating Fast GraphicsManager with canvas ID (forced)', canvasId);
-        graphicsManager = new GraphicsManager(currentGraphicsArgs);
-      } else if (isDenseMap) {
-        console.log('Creating Fast GraphicsManager with canvas ID', canvasId);
+      if (FORCE_FAST_RENDERER) {
+        console.log('Creating Fast GraphicsManager with canvas ID (gfx=0)', canvasId);
         graphicsManager = new GraphicsManager(currentGraphicsArgs);
       } else {
-        console.log('Creating Beautiful GraphicsManager with canvas ID', canvasId);
-        try {
-          graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
-        } catch (webglError) {
-          console.warn('Three.js GraphicsManager failed, falling back to Fast GraphicsManager:', webglError);
-          // Fall back to fast 2D renderer if WebGL fails
-          graphicsManager = new GraphicsManager(currentGraphicsArgs);
-
-          // Show user notification about fallback
-          const errorDisplay = document.getElementById('error-display');
-          if (errorDisplay) {
-            errorDisplay.textContent = 'Using fast 2D renderer (WebGL unavailable)';
-            errorDisplay.style.color = '#ffaa00'; // Orange warning color
-          }
-        }
+        // Default to ThreeJS renderer (gfx=1) if no parameter specified
+        const explicitlyRequested = FORCE_THREEJS_RENDERER ? 'gfx=1' : 'default (gfx=1)';
+        console.log(`Creating Beautiful GraphicsManager with canvas ID (${explicitlyRequested})`, canvasId);
+        graphicsManager = new GraphicsManagerThreeJS(currentGraphicsArgs);
       }
     } catch (error) {
       console.error('Failed to create graphics manager:', error);
 
-      // Last resort fallback - try the fast renderer
-      try {
-        console.log('Attempting fallback to Fast GraphicsManager...');
-        graphicsManager = new GraphicsManager(currentGraphicsArgs);
-
-        const errorDisplay = document.getElementById('error-display');
-        if (errorDisplay) {
-          errorDisplay.textContent = 'Using fallback 2D renderer';
-          errorDisplay.style.color = '#ffaa00';
-        }
-      } catch (fallbackError) {
-        console.error('All graphics managers failed:', fallbackError);
-
-        const errorDisplay = document.getElementById('error-display');
-        if (errorDisplay) {
-          errorDisplay.textContent = 'Graphics initialization failed. Please refresh the page.';
-          errorDisplay.style.color = '#ff6b6b'; // Red error color
-        }
-        return; // Exit early if all graphics managers fail
+      const errorDisplay = document.getElementById('error-display');
+      if (errorDisplay) {
+        errorDisplay.textContent = `Graphics initialization failed: ${error.message}`;
+        errorDisplay.style.color = '#ff6b6b'; // Red error color
       }
+      return; // Exit early on failure
     }
 
     // Expose graphics manager globally for video recorder initialization
@@ -1094,20 +1060,47 @@ function initializeVideoRecorder() {
     return;
   }
 
-  const canvas = document.getElementById('myCanvas');
   const recordButton = document.getElementById('record-btn');
 
-  if (!canvas || !recordButton) {
-    console.warn('Canvas or record button not found, video recording disabled');
+  if (!recordButton) {
+    console.warn('Record button not found, video recording disabled');
+    return;
+  }
+
+  // Check if worker mode is active - if so, use worker-based recording
+  if (window.fastLEDWorkerManager && window.fastLEDWorkerManager.isWorkerActive) {
+    console.log('Worker mode active - using worker-based video recording');
+    initializeWorkerVideoRecorder(recordButton);
+    return;
+  }
+
+  // For non-worker mode, wait for canvas to be ready
+  const canvas = document.getElementById('myCanvas');
+  if (!canvas) {
+    console.warn('Canvas not found, video recording disabled');
     return;
   }
 
   // Wait for canvas to be properly initialized with graphics manager
   let retryCount = 0;
   const maxRetries = 30; // Max 6 seconds of retrying
+  let initialized = false; // Track if initialization succeeded
 
   const tryInitialize = () => {
+    // Stop retrying if already initialized
+    if (initialized) {
+      return;
+    }
+
     try {
+      // Check if worker mode became active during retry period
+      if (window.fastLEDWorkerManager && window.fastLEDWorkerManager.isWorkerActive) {
+        console.log('Worker mode became active - switching to worker-based recording');
+        initializeWorkerVideoRecorder(recordButton);
+        initialized = true; // Mark as successfully initialized
+        return;
+      }
+
       // Check if graphics manager has been initialized (this is the real dependency)
       if (typeof window.graphicsManager === 'undefined' && typeof graphicsManager === 'undefined') {
         throw new Error('Graphics manager not initialized yet');
@@ -1119,6 +1112,7 @@ function initializeVideoRecorder() {
       }
 
       actuallyInitializeVideoRecorder(canvas, recordButton);
+      initialized = true; // Mark as successfully initialized
     } catch (error) {
       retryCount++;
       if (retryCount < maxRetries) {
@@ -1132,6 +1126,101 @@ function initializeVideoRecorder() {
 
   // Start trying to initialize after a short delay
   setTimeout(tryInitialize, 1000);
+}
+
+/**
+ * Initializes video recording that delegates to the background worker
+ * @param {HTMLElement} recordButton - The record button element
+ */
+function initializeWorkerVideoRecorder(recordButton) {
+  console.log('Initializing worker-based video recorder');
+
+  // Check if MediaRecorder is supported
+  if (typeof MediaRecorder === 'undefined') {
+    console.warn('MediaRecorder API not supported, video recording disabled');
+    recordButton.style.display = 'none';
+    return;
+  }
+
+  let isRecording = false;
+
+  // Handle record button click
+  recordButton.addEventListener('click', async () => {
+    if (!window.fastLEDWorkerManager || !window.fastLEDWorkerManager.isWorkerActive) {
+      console.error('Worker not active, cannot record');
+      return;
+    }
+
+    try {
+      if (!isRecording) {
+        // Start recording
+        const response = await window.fastLEDWorkerManager.sendMessageWithResponse({
+          type: 'start_recording',
+          payload: {
+            fps: 60,
+            settings: window.getVideoSettings ? window.getVideoSettings() : {}
+          }
+        });
+
+        if (response.success) {
+          isRecording = true;
+          recordButton.classList.add('recording');
+
+          // Update icons
+          const recordIcon = /** @type {HTMLElement|null} */ (recordButton.querySelector('.record-icon'));
+          const stopIcon = /** @type {HTMLElement|null} */ (recordButton.querySelector('.stop-icon'));
+          if (recordIcon) recordIcon.style.display = 'none';
+          if (stopIcon) stopIcon.style.display = 'block';
+
+          console.log('Recording started with codec:', response.codec);
+        }
+      } else {
+        // Stop recording
+        const response = await window.fastLEDWorkerManager.sendMessageWithResponse({
+          type: 'stop_recording',
+          payload: {}
+        });
+
+        if (response.success && response.blob) {
+          isRecording = false;
+          recordButton.classList.remove('recording');
+
+          // Update icons
+          const recordIcon = /** @type {HTMLElement|null} */ (recordButton.querySelector('.record-icon'));
+          const stopIcon = /** @type {HTMLElement|null} */ (recordButton.querySelector('.stop-icon'));
+          if (recordIcon) recordIcon.style.display = 'block';
+          if (stopIcon) stopIcon.style.display = 'none';
+
+          // Trigger download
+          const timestamp = new Date().toISOString().replace(/[:.]/g, '-').substring(0, 19);
+          const extension = response.preferredFormat || 'webm';
+          const filename = `fastled-recording-${timestamp}.${extension}`;
+
+          const url = URL.createObjectURL(response.blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = filename;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+
+          console.log('Recording saved:', filename, `(${(response.size / 1024 / 1024).toFixed(2)} MB)`);
+        }
+      }
+    } catch (error) {
+      console.error('Recording error:', error);
+      isRecording = false;
+      recordButton.classList.remove('recording');
+    }
+  });
+
+  // Update tooltip
+  if (window.updateRecordButtonTooltip) {
+    window.updateRecordButtonTooltip();
+  }
+
+  console.log('Worker-based video recorder initialized');
 }
 
 /**

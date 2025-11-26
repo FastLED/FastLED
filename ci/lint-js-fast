@@ -37,8 +37,8 @@ else
     fi
 fi
 
-# Find JavaScript and TypeScript files (exclude node_modules)
-JS_FILES=$(find src/platforms/wasm -name "*.js" -type f 2>/dev/null)
+# Find JavaScript and TypeScript files (exclude node_modules and vendor)
+JS_FILES=$(find src/platforms/wasm -name "*.js" -type f -not -path "*/node_modules/*" -not -path "*/vendor/*" 2>/dev/null)
 TS_FILES=$(find ci/docker/avr8js -name "*.ts" -type f -not -path "*/node_modules/*" 2>/dev/null)
 
 if [ -z "$JS_FILES" ] && [ -z "$TS_FILES" ]; then
@@ -89,11 +89,12 @@ cd ../../src/platforms/wasm/compiler
 # Check if TypeScript is available (local installation first, then global)
 if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    # Run TypeScript and filter out Node.js events library errors
+    # Run TypeScript and filter out Node.js events library errors and vendor files
     TSC_OUTPUT=$(../../../../.cache/js-tools/node_modules/.bin/tsc.cmd --noEmit --project jsconfig.json 2>&1)
     TSC_EXIT_CODE=$?
-    # Filter out the specific Node.js events error
-    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+    # Filter out Node.js events error and vendor directory errors (third-party code)
+    # This awk script filters out vendor errors and their continuation lines (which start with spaces)
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} !skip {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
 
     if [ -n "$FILTERED_OUTPUT" ]; then
         echo "$FILTERED_OUTPUT"
@@ -106,11 +107,12 @@ if [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc.cmd" ]; then
     echo -e "${GREEN}✅ JSDoc type checking completed successfully${NC}"
 elif [ -f "../../../../.cache/js-tools/node_modules/.bin/tsc" ]; then
     echo -e "${BLUE}Using local TypeScript for JSDoc type checking...${NC}"
-    # Run TypeScript and filter out Node.js events library errors
+    # Run TypeScript and filter out Node.js events library errors and vendor files
     TSC_OUTPUT=$(../../../../.cache/js-tools/node_modules/.bin/tsc --noEmit --project jsconfig.json 2>&1)
     TSC_EXIT_CODE=$?
-    # Filter out the specific Node.js events error
-    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
+    # Filter out Node.js events error and vendor directory errors (third-party code)
+    # This awk script filters out vendor errors and their continuation lines (which start with spaces)
+    FILTERED_OUTPUT=$(echo "$TSC_OUTPUT" | awk '/^vendor\// {skip=1; next} /^[^ ]/ {skip=0} !skip {print}' | grep -v "node_modules/events/events.js.*Property 'context' does not exist on type 'Error'" || true)
 
     if [ -n "$FILTERED_OUTPUT" ]; then
         echo "$FILTERED_OUTPUT"

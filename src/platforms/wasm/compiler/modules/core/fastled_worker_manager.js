@@ -224,6 +224,14 @@ export class FastLEDWorkerManager {
 
       // Initialize worker with configuration
       console.log('🔧 createWorker: Preparing initialization message...');
+
+      // Extract URL parameters from main thread to pass to worker
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlParamsObject = {};
+      for (const [key, value] of urlParams.entries()) {
+        urlParamsObject[key] = value;
+      }
+
       const initMessage = {
         type: 'initialize',
         id: this.generateMessageId(),
@@ -231,6 +239,7 @@ export class FastLEDWorkerManager {
           canvas: this.offscreenCanvas,
           capabilities: this.capabilities,
           frameRate: config.frameRate,
+          urlParams: urlParamsObject, // Pass URL parameters to worker
           wasmModuleConfig: {
             // Extract relevant WASM configuration for worker
             // Note: Full module transfer happens separately
@@ -238,6 +247,7 @@ export class FastLEDWorkerManager {
         }
       };
       console.log('🔧 createWorker: Init message prepared, id:', initMessage.id);
+      console.log('🔧 createWorker: URL params being passed to worker:', urlParamsObject);
 
       console.log('🔧 createWorker: About to call sendMessageWithResponse...');
       console.log('🔧 createWorker: isWorkerActive BEFORE send:', this.isWorkerActive);
@@ -509,11 +519,6 @@ export class FastLEDWorkerManager {
         console.warn('UI Manager not available on main thread');
       }
 
-      // Emit event for external listeners
-      if (window.fastLEDEvents) {
-        window.fastLEDEvents.emitUiUpdate(payload.elements);
-      }
-
     } catch (error) {
       FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Error handling UI elements from worker', error);
     }
@@ -629,10 +634,6 @@ export class FastLEDWorkerManager {
 
     this.terminateWorker();
     this.mainCanvas = null;
-
-    fastLEDEvents.emit('worker:destroyed', {
-      mode: 'worker'
-    });
 
     FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Worker manager destroyed');
     FASTLED_DEBUG_TRACE('WORKER_MANAGER', 'destroy', 'EXIT');

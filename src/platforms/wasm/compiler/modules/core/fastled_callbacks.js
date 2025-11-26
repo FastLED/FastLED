@@ -251,11 +251,6 @@ globalThis.FastLED_onStripAdded = async function (stripId, numLeds) {
     if (window.uiManager && typeof window.uiManager.onStripAdded === 'function') {
       window.uiManager.onStripAdded(stripId, numLeds);
     }
-
-    // Trigger custom event for external listeners
-    if (window.fastLEDEvents) {
-      window.fastLEDEvents.emitStripAdded(stripId, numLeds);
-    }
   } catch (error) {
     console.error('Error in FastLED_onStripAdded:', error);
     throw error; // Re-throw to let controller handle
@@ -286,11 +281,6 @@ globalThis.FastLED_onUiElementsAdded = async function (uiData) {
     } else {
       console.warn('UI Manager not available or addUiElements method missing');
     }
-
-    // Trigger custom event for external listeners
-    if (window.fastLEDEvents) {
-      window.fastLEDEvents.emitUiUpdate(uiData);
-    }
   } catch (error) {
     console.error('Error in FastLED_onUiElementsAdded:', error);
     throw error; // Re-throw to let controller handle
@@ -315,13 +305,6 @@ globalThis.FastLED_onError = async function (errorType, errorMessage, errorData 
     if (errorDisplay) {
       errorDisplay.textContent = `FastLED Error: ${errorMessage}`;
       errorDisplay.style.display = 'block';
-    }
-
-    // Trigger custom event for external error handlers
-    if (window.fastLEDEvents) {
-      window.fastLEDEvents.dispatchEvent(new CustomEvent('error', {
-        detail: { errorType, errorMessage, errorData },
-      }));
     }
   } catch (error) {
     console.error('Error in FastLED_onError handler:', error);

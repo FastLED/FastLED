@@ -87,15 +87,16 @@ export class GraphicsManagerThreeJS {
   /**
    * Creates a new GraphicsManagerThreeJS instance
    * @param {Object} graphicsArgs - Configuration options
-   * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
+   * @param {string} [graphicsArgs.canvasId] - ID of the canvas element to render to (main thread)
+   * @param {HTMLCanvasElement|OffscreenCanvas} [graphicsArgs.canvas] - Canvas object directly (worker thread)
    * @param {Object} graphicsArgs.threeJsModules - Three.js modules and dependencies
    */
   constructor(graphicsArgs) {
-    const { canvasId, threeJsModules } = graphicsArgs;
+    const { canvasId, canvas, threeJsModules } = graphicsArgs;
 
     // Configuration
-    /** @type {string|OffscreenCanvas} HTML canvas element ID or OffscreenCanvas instance */
-    this.canvasId = canvasId;
+    /** @type {string|HTMLCanvasElement|OffscreenCanvas} HTML canvas element ID or canvas instance */
+    this.canvasId = canvas || canvasId;
 
     /** @type {Object} Three.js modules and dependencies */
     this.threeJsModules = threeJsModules;
@@ -214,7 +215,10 @@ export class GraphicsManagerThreeJS {
 
     // Don't remove the renderer or canvas
     if (this.renderer) {
-      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+      // OffscreenCanvas doesn't have a .style property, so we need to pass false
+      // to prevent Three.js from trying to set canvas.style.width/height
+      const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && this.canvas instanceof OffscreenCanvas;
+      this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, !isOffscreenCanvas);
     }
   }
 
@@ -224,24 +228,42 @@ export class GraphicsManagerThreeJS {
    * @param {Object} frameData - The frame data containing screen mapping information
    */
   initThreeJS(frameData) {
-    // Get canvas - either OffscreenCanvas (worker) or HTMLCanvasElement (main thread)
-    let canvas;
-    if (typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas) {
-      // Worker context: use OffscreenCanvas directly
-      canvas = this.canvasId;
-    } else {
-      // Main thread: look up canvas by ID
-      const canvasElement = document.getElementById(/** @type {string} */(this.canvasId));
-      if (!canvasElement) {
-        console.warn('initThreeJS: Canvas element not found');
+    // Get canvas - either OffscreenCanvas (worker), HTMLCanvasElement, or string ID (main thread)
+    // If canvas is already stored from a previous initialization, reuse it
+    if (!this.canvas) {
+      // First-time initialization: resolve canvas from canvasId
+      // @ts-ignore - OffscreenCanvas type checking
+      const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas;
+      // @ts-ignore - HTMLCanvasElement type checking
+      const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && this.canvasId instanceof HTMLCanvasElement;
+
+      if (isOffscreenCanvas || isHTMLCanvas) {
+        // Worker context or direct canvas object: use canvas directly
+        this.canvas = /** @type {HTMLCanvasElement|OffscreenCanvas} */ (this.canvasId);
+      } else if (typeof this.canvasId === 'string') {
+        // Main thread: look up canvas by ID
+        const canvasElement = document.getElementById(this.canvasId);
+        if (!canvasElement) {
+          console.warn('initThreeJS: Canvas element not found');
+          return;
+        }
+        this.canvas = /** @type {HTMLCanvasElement|OffscreenCanvas} */ (canvasElement);
+      } else {
+        console.error('Invalid canvas parameter: must be string ID, HTMLCanvasElement, or OffscreenCanvas', {
+          canvasIdType: typeof this.canvasId,
+          canvasIdValue: this.canvasId
+        });
         return;
       }
-      // Cast to HTMLCanvasElement (we know it's a canvas)
-      canvas = /** @type {HTMLCanvasElement} */(canvasElement);
+    } else {
+      console.log('initThreeJS: Reusing existing canvas reference');
     }
 
-    // Store canvas reference for other methods
-    this.canvas = canvas;
+    // Guard: Ensure canvas was successfully resolved
+    if (!this.canvas) {
+      console.error('initThreeJS: Canvas resolution failed - cannot initialize Three.js');
+      return;
+    }
 
     this._setupCanvasAndDimensions(frameData);
     this._setupScene();
@@ -264,7 +286,16 @@ export class GraphicsManagerThreeJS {
     const RESOLUTION_BOOST = 2; // 2x resolution for higher quality
     const MAX_WIDTH = 640; // Max pixels width on browser
 
-    const canvas = this.canvas; // Use stored canvas reference
+    // Defensive check: Ensure canvas is defined
+    if (!this.canvas) {
+      console.error('_setupCanvasAndDimensions: canvas is undefined or null', {
+        hasCanvasId: !!this.canvasId,
+        canvasIdType: typeof this.canvasId,
+        canvasIdValue: this.canvasId
+      });
+      throw new Error('Canvas reference is undefined in _setupCanvasAndDimensions');
+    }
+
     const { screenMap } = frameData;
     const screenMapWidth = screenMap.absMax[0] - screenMap.absMin[0];
     const screenMapHeight = screenMap.absMax[1] - screenMap.absMin[1];
@@ -279,16 +310,16 @@ export class GraphicsManagerThreeJS {
     this.SCREEN_HEIGHT = targetHeight * RESOLUTION_BOOST;
 
     // Set canvas size
-    canvas.width = targetWidth * RESOLUTION_BOOST;
-    canvas.height = targetHeight * RESOLUTION_BOOST;
+    this.canvas.width = targetWidth * RESOLUTION_BOOST;
+    this.canvas.height = targetHeight * RESOLUTION_BOOST;
 
     // Set display size only for HTMLCanvasElement (not OffscreenCanvas)
     // @ts-ignore - Type guard for HTMLCanvasElement.style property
-    if (typeof window !== 'undefined' && !(canvas instanceof OffscreenCanvas) && canvas.style) {
-      canvas.style.width = `${targetWidth}px`;
-      canvas.style.height = `${targetHeight}px`;
-      canvas.style.maxWidth = `${targetWidth}px`;
-      canvas.style.maxHeight = `${targetHeight}px`;
+    if (typeof window !== 'undefined' && !(this.canvas instanceof OffscreenCanvas) && this.canvas.style) {
+      this.canvas.style.width = `${targetWidth}px`;
+      this.canvas.style.height = `${targetHeight}px`;
+      this.canvas.style.maxWidth = `${targetWidth}px`;
+      this.canvas.style.maxHeight = `${targetHeight}px`;
     }
 
     // Store the bounds for orthographic camera calculations
@@ -359,7 +390,10 @@ export class GraphicsManagerThreeJS {
       canvas: this.canvas, // Use stored canvas reference
       antialias: true,
     });
-    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT);
+    // OffscreenCanvas doesn't have a .style property, so we need to pass false
+    // to prevent Three.js from trying to set canvas.style.width/height
+    const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && this.canvas instanceof OffscreenCanvas;
+    this.renderer.setSize(this.SCREEN_WIDTH, this.SCREEN_HEIGHT, !isOffscreenCanvas);
   }
 
   /**

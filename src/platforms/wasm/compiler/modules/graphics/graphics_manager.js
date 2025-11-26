@@ -98,17 +98,18 @@ export class GraphicsManager {
   /**
    * Creates a new GraphicsManager instance
    * @param {Object} graphicsArgs - Configuration options
-   * @param {string} graphicsArgs.canvasId - ID of the canvas element to render to
+   * @param {string} [graphicsArgs.canvasId] - ID of the canvas element to render to (main thread)
+   * @param {HTMLCanvasElement|OffscreenCanvas} [graphicsArgs.canvas] - Canvas object directly (worker thread)
    * @param {Object} [graphicsArgs.threeJsModules] - Three.js modules (unused but kept for consistency)
    * @param {boolean} [graphicsArgs.usePixelatedRendering=true] - Whether to use pixelated rendering
    */
   constructor(graphicsArgs) {
-    const { canvasId, usePixelatedRendering = true } = graphicsArgs;
+    const { canvasId, canvas, usePixelatedRendering = true } = graphicsArgs;
 
-    /** @type {string} */
-    this.canvasId = canvasId;
+    /** @type {string|HTMLCanvasElement|OffscreenCanvas} */
+    this.canvasId = canvas || canvasId;
 
-    /** @type {HTMLCanvasElement|null} */
+    /** @type {HTMLCanvasElement|OffscreenCanvas|null} */
     this.canvas = null;
 
     /** @type {WebGLRenderingContext|null} */
@@ -149,20 +150,25 @@ export class GraphicsManager {
    * @returns {boolean} True if initialization was successful
    */
   initialize() {
-    // Check if canvasId is actually an OffscreenCanvas (worker context)
+    // Check if canvasId is actually a canvas object (OffscreenCanvas or HTMLCanvasElement)
     // @ts-ignore - OffscreenCanvas type checking
-    if (typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas) {
-      // Worker context: use OffscreenCanvas directly
-      /** @type {HTMLCanvasElement} */
-      this.canvas = /** @type {HTMLCanvasElement} */ (/** @type {*} */ (this.canvasId));
-    } else {
+    const isOffscreenCanvas = typeof OffscreenCanvas !== 'undefined' && this.canvasId instanceof OffscreenCanvas;
+    // @ts-ignore - HTMLCanvasElement type checking
+    const isHTMLCanvas = typeof HTMLCanvasElement !== 'undefined' && this.canvasId instanceof HTMLCanvasElement;
+
+    if (isOffscreenCanvas || isHTMLCanvas) {
+      // Worker context or direct canvas object: use canvas directly
+      this.canvas = /** @type {HTMLCanvasElement|OffscreenCanvas} */ (this.canvasId);
+    } else if (typeof this.canvasId === 'string') {
       // Main thread: look up canvas by ID
-      /** @type {HTMLCanvasElement} */
-      this.canvas = /** @type {HTMLCanvasElement} */ (document.getElementById(this.canvasId));
+      this.canvas = /** @type {HTMLCanvasElement|OffscreenCanvas} */ (document.getElementById(this.canvasId));
       if (!this.canvas) {
         console.error(`Canvas with id ${this.canvasId} not found`);
         return false;
       }
+    } else {
+      console.error('Invalid canvas parameter: must be string ID, HTMLCanvasElement, or OffscreenCanvas');
+      return false;
     }
 
     this.gl = this.canvas.getContext('webgl');
