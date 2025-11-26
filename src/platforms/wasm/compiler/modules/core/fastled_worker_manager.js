@@ -450,6 +450,7 @@ export class FastLEDWorkerManager {
 
         case 'ui_elements_add':
           // Handle UI elements from C++ worker thread - call uiManager on main thread
+          //console.log('🎨 [WORKER_MANAGER] Received ui_elements_add message from worker:', data);
           this.handleUiElementsAdd(data.payload);
           break;
 
@@ -499,27 +500,40 @@ export class FastLEDWorkerManager {
    */
   handleUiElementsAdd(payload) {
     FASTLED_DEBUG_LOG('WORKER_MANAGER', 'Received UI elements from worker', payload);
+    //console.log('🎨 [WORKER_MANAGER] handleUiElementsAdd called with payload:', payload);
+    //console.log('🎨 [WORKER_MANAGER] payload.elements:', payload ? payload.elements : 'NO PAYLOAD');
+    //console.log('🎨 [WORKER_MANAGER] window.uiManager exists:', !!window.uiManager);
+    //console.log('🎨 [WORKER_MANAGER] uiManager.addUiElements exists:', window.uiManager ? typeof window.uiManager.addUiElements : 'N/A');
 
     try {
       if (!payload || !payload.elements) {
+        //console.error('🎨 [WORKER_MANAGER] Invalid UI elements payload - missing elements array');
         FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Invalid UI elements payload', payload);
         return;
       }
 
+      console.log('🎨 [WORKER_MANAGER] Payload validation passed, elements count:', payload.elements.length);
+
       // Log the inbound event to the inspector if available
       if (window.jsonInspector) {
+        //console.log('🎨 [WORKER_MANAGER] Logging to jsonInspector');
         window.jsonInspector.logInboundEvent(payload.elements, 'Worker → Main');
       }
 
       // Call UI manager on main thread to add/update UI elements
       if (window.uiManager && typeof window.uiManager.addUiElements === 'function') {
+        //console.log('🎨 [WORKER_MANAGER] Calling uiManager.addUiElements with', payload.elements.length, 'elements');
         window.uiManager.addUiElements(payload.elements);
-        FASTLED_DEBUG_LOG('WORKER_MANAGER', 'UI elements processed by uiManager');
+        //console.log('🎨 [WORKER_MANAGER] UI elements processed by uiManager - SUCCESS');
+        //FASTLED_DEBUG_LOG('WORKER_MANAGER', 'UI elements processed by uiManager');
       } else {
+        console.error('🎨 [WORKER_MANAGER] UI Manager not available on main thread!');
         console.warn('UI Manager not available on main thread');
       }
 
     } catch (error) {
+      console.error('🎨 [WORKER_MANAGER] Exception in handleUiElementsAdd:', error);
+      console.error('🎨 [WORKER_MANAGER] Error stack:', error.stack);
       FASTLED_DEBUG_ERROR('WORKER_MANAGER', 'Error handling UI elements from worker', error);
     }
   }

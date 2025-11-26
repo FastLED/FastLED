@@ -445,8 +445,12 @@ class FastLEDAsyncController {
       const changes = window.uiManager.processUiChanges();
 
       if (changes && Object.keys(changes).length > 0) {
+        //console.log('🎮 [UI_UPDATES] Detected UI changes:', changes);
+        //console.log('🎮 [UI_UPDATES] Worker active:', fastLEDWorkerManager?.isWorkerActive);
+
         // Send UI changes to worker thread via worker manager
         if (fastLEDWorkerManager && fastLEDWorkerManager.isWorkerActive) {
+          //console.log('🎮 [UI_UPDATES] Sending changes to worker');
           const message = {
             type: 'ui_changes',
             payload: {
@@ -456,7 +460,9 @@ class FastLEDAsyncController {
 
           // Send to worker (fire and forget, no response needed)
           fastLEDWorkerManager.worker.postMessage(message);
+          //console.log('🎮 [UI_UPDATES] Changes sent to worker successfully');
         } else {
+          //console.log('🎮 [UI_UPDATES] Using non-worker mode, calling C++ directly');
           // Fallback for non-worker mode: call C++ directly
           if (this.processUiInput) {
             const uiJson = JSON.stringify(changes);

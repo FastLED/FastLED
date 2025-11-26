@@ -906,6 +906,28 @@ async function localLoadFastLed(options) {
       }
     }, 5000); // Run cleanup every 5 seconds
 
+    // Set up periodic UI polling for worker mode
+    // In worker mode, there's no main thread loop, so we poll for UI changes
+    setInterval(() => {
+      if (window.fastLEDWorkerManager && window.fastLEDWorkerManager.isWorkerActive) {
+        // Worker mode: poll UI changes and send to worker
+        if (window.uiManager && typeof window.uiManager.processUiChanges === 'function') {
+          const changes = window.uiManager.processUiChanges();
+          if (changes && Object.keys(changes).length > 0) {
+            //console.log('🎮 [UI_POLL] Detected UI changes in worker mode:', changes);
+            const message = {
+              type: 'ui_changes',
+              payload: {
+                changes: changes
+              }
+            };
+            window.fastLEDWorkerManager.worker.postMessage(message);
+            //console.log('🎮 [UI_POLL] UI changes sent to worker');
+          }
+        }
+      }
+    }, 1000 / 60); // Poll at 60Hz to match typical frame rate
+
     const { threeJs } = options;
     console.log('ThreeJS:', threeJs);
     const fastLedLoader = options.fastled;
