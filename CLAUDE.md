@@ -46,6 +46,21 @@ FastLED supports fast host-based compilation of `.ino` examples using Meson buil
 - `uv run python ci/util/meson_example_runner.py` - Compile all examples directly
 - `uv run python ci/util/meson_example_runner.py Blink --full` - Compile and execute specific example
 
+### WASM Development Workflow
+`bash run wasm <example>` - Compile WASM example and serve with live-server:
+
+**Usage:**
+- `bash run wasm AnimartrixRing` - Compile AnimartrixRing to WASM and serve with live-server
+- `bash run wasm Blink` - Compile Blink to WASM and serve with live-server
+
+**What it does:**
+1. Compiles the example to WASM using `bash compile wasm <example>`
+2. Serves the output directory (`examples/<example>/fastled_js/`) with live-server
+3. Opens browser automatically for interactive testing
+
+**Requirements:**
+- Install live-server: `npm install -g live-server`
+
 ### Git Historian (Code Search)
 - `/git-historian keyword1 keyword2` - Search codebase and recent git history for keywords
 - `/git-historian "error handling" config` - Search for multi-word phrases (use quotes)

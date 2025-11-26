@@ -2,4 +2,77 @@
 set -e
 
 cd "$(dirname "$0")"
-uv run python ci/run.py "$@"
+
+# bash run wasm <example_name> - Compile WASM example and serve with live-server
+# Example: bash run wasm AnimartrixRing
+
+if [ $# -eq 0 ]; then
+    echo "Usage: bash run wasm <example_name>"
+    echo ""
+    echo "Examples:"
+    echo "  bash run wasm AnimartrixRing"
+    echo "  bash run wasm Blink"
+    echo ""
+    echo "This will:"
+    echo "  1. Compile the example to WASM"
+    echo "  2. Serve the output directory with live-server"
+    exit 1
+fi
+
+if [ "$1" != "wasm" ]; then
+    echo "Error: First argument must be 'wasm'"
+    echo "Usage: bash run wasm <example_name>"
+    exit 1
+fi
+
+if [ $# -lt 2 ]; then
+    echo "Error: Example name required"
+    echo "Usage: bash run wasm <example_name>"
+    exit 1
+fi
+
+EXAMPLE_NAME="$2"
+
+# Step 1: Compile WASM
+echo ""
+echo "=========================================="
+echo "Step 1: Compiling ${EXAMPLE_NAME} to WASM"
+echo "=========================================="
+echo ""
+
+bash compile wasm "$EXAMPLE_NAME"
+COMPILE_EXIT=$?
+
+if [ $COMPILE_EXIT -ne 0 ]; then
+    echo ""
+    echo "Error: WASM compilation failed"
+    exit $COMPILE_EXIT
+fi
+
+# Step 2: Check if live-server is installed
+if ! command -v live-server &> /dev/null; then
+    echo ""
+    echo "Error: live-server not found"
+    echo "Install it with: npm install -g live-server"
+    exit 1
+fi
+
+# Step 3: Serve with live-server
+OUTPUT_DIR="examples/${EXAMPLE_NAME}/fastled_js"
+
+if [ ! -d "$OUTPUT_DIR" ]; then
+    echo ""
+    echo "Error: Output directory not found: $OUTPUT_DIR"
+    exit 1
+fi
+
+echo ""
+echo "=========================================="
+echo "Step 2: Serving ${OUTPUT_DIR}"
+echo "=========================================="
+echo ""
+echo "Starting live-server..."
+echo "Press Ctrl+C to stop"
+echo ""
+
+live-server "$OUTPUT_DIR"
