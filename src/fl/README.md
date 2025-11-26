@@ -113,7 +113,7 @@ Containers, views, algorithms, compile‑time utilities, memory/ownership, porta
 - Views and ranges: `span.h`, `slice.h`, `range_access.h`
 - Tuples and algebraic types: `tuple.h`, `pair.h`, `optional.h`, `variant.h`
 - Algorithms and helpers: `algorithm.h`, `transform.h`, `comparators.h`, `range_access.h`
-- Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`, `namespace.h`
+- Types and traits: `types.h`, `type_traits.h`, `initializer_list.h`, `utility.h`, `move.h`, `template_magic.h`, `stdint.h`, `cstddef.h`
 - Memory/ownership: `unique_ptr.h`, `shared_ptr.h`, `weak_ptr.h`, `scoped_ptr.h`, `scoped_array.h`, `referent.h`, `allocator.h`, `memory.h`, `memfill.h`, `inplacenew.h`
 - Portability and compiler control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `log.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`, `deprecated.h`, `avr_disallowed.h`, `bit_cast.h`, `id_tracker.h`, `insert_result.h`, `singleton.h`
 
@@ -149,7 +149,6 @@ Per‑header quick descriptions:
 - `template_magic.h`: Metaprogramming helpers to simplify template code.
 - `stdint.h`: Fixed‑width integer definitions for cross‑compiler consistency.
 - `cstddef.h`: Size/ptrdiff and nullptr utilities for portability.
-- `namespace.h`: Internal macros/utilities for managing `fl::` namespaces safely.
 - `unique_ptr.h`: Exclusive ownership smart pointer with RAII semantics.
 - `shared_ptr.h`: Reference‑counted shared ownership smart pointer.
 - `weak_ptr.h`: Non‑owning reference to `shared_ptr`‑managed objects.
@@ -910,7 +909,7 @@ Why: Cross‑platform text formatting, buffered I/O, and optional file access on
 ### Algorithms and Utilities
 
 - Algorithms and transforms: `algorithm.h`, `transform.h`, `range_access.h`
-- Compile‑time utilities: `type_traits.h`, `tuple.h`, `variant.h`, `optional.h`, `utility.h`, `initializer_list.h`, `template_magic.h`, `types.h`, `stdint.h`, `namespace.h`
+- Compile‑time utilities: `type_traits.h`, `tuple.h`, `variant.h`, `optional.h`, `utility.h`, `initializer_list.h`, `template_magic.h`, `types.h`, `stdint.h`
 - Platform shims and control: `compiler_control.h`, `force_inline.h`, `virtual_if_not_avr.h`, `has_define.h`, `register.h`, `warn.h`, `trace.h`, `dbg.h`, `assert.h`, `unused.h`, `export.h`, `dll.h`
 
 Why: Familiar patterns with embedded‑appropriate implementations and compiler‑portable controls.
