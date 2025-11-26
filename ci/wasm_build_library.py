@@ -211,6 +211,9 @@ def get_source_files() -> list[Path]:
     src_dir = PROJECT_ROOT / "src"
     sources = []
     for cpp_file in src_dir.rglob("*.cpp"):
+        # Exclude entry_point.cpp (it's compiled separately in wasm_compile_native.py)
+        if cpp_file.name == "entry_point.cpp":
+            continue
         sources.append(cpp_file.resolve())
 
     return sorted(sources)  # Sort for deterministic ordering
@@ -757,12 +760,78 @@ def build_library(
 
         print(f"Found {len(all_objects)} object files")
 
-        # Step 9: Create thin archive
-        archive_result = create_thin_archive(emar, all_objects, LIBRARY_OUTPUT, verbose)
+        # Step 9: Partial linking optimization (combine all objects into one)
+        # This dramatically speeds up final linking by reducing file I/O
+        partial_object = BUILD_DIR / "libfastled_partial.o"
+        needs_partial_relink = force
+
+        # Check if partial object needs to be regenerated
+        if not needs_partial_relink and partial_object.exists():
+            partial_mtime = partial_object.stat().st_mtime
+            # Check if any input object is newer
+            for obj in all_objects:
+                if obj.stat().st_mtime > partial_mtime:
+                    needs_partial_relink = True
+                    break
+        else:
+            needs_partial_relink = True
+
+        if needs_partial_relink:
+            print(f"Partial linking {len(all_objects)} objects into single object...")
+
+            # Use response file for wasm-ld (Windows command line is too short)
+            response_file = BUILD_DIR / "partial_link_objects.rsp"
+            with open(response_file, "w") as f:
+                for obj_path in all_objects:
+                    f.write(f'"{obj_path}"\n')
+
+            # Find wasm-ld (it's in the same directory as em++)
+            emcc_dir = emcc.parent
+            wasm_ld = (
+                emcc_dir / "wasm-ld.exe"
+                if emcc_dir.name == "emscripten"
+                else emcc_dir / "wasm-ld"
+            )
+            if not wasm_ld.exists():
+                # Try in bin subdirectory
+                wasm_ld = (
+                    emcc_dir.parent
+                    / "bin"
+                    / ("wasm-ld.exe" if sys.platform == "win32" else "wasm-ld")
+                )
+
+            # Partial link command using wasm-ld directly
+            partial_link_cmd = [
+                str(wasm_ld),
+                "-r",  # Relocatable output
+                "--threads=8",  # Use threading for faster partial linking
+                f"@{response_file}",
+                "-o",
+                str(partial_object),
+            ]
+
+            if verbose:
+                print(
+                    f"Partial link command: wasm-ld -r @{response_file.name} -o {partial_object}"
+                )
+
+            result = subprocess.run(partial_link_cmd, cwd=PROJECT_ROOT)
+            if result.returncode != 0:
+                print(f"✗ Partial linking failed with return code {result.returncode}")
+                return result.returncode
+
+            print(f"✓ Partial object created: {partial_object}")
+        else:
+            print(f"✓ Partial object is up-to-date")
+
+        # Step 10: Create thin archive from partial object (single file, much faster)
+        archive_result = create_thin_archive(
+            emar, [partial_object], LIBRARY_OUTPUT, verbose
+        )
         if archive_result != 0:
             return archive_result
 
-        # Step 10: Save metadata for future builds
+        # Step 11: Save metadata for future builds
         metadata = {
             "flags_hash": flags_hash,
             "build_mode": build_mode,

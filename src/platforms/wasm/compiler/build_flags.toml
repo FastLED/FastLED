@@ -262,7 +262,9 @@ flags = [
     "-sWASM=1",                                # Generate WebAssembly output (not asm.js)
 
     # Linker Performance Optimization
-    "-Wl,--threads=6",                        # Enable parallel linking with 6 threads (balanced for performance)
+    # Note: With partial linking reducing input to single object file, threading overhead isn't worth it
+    # Testing showed 1 thread is as fast or faster than 8/16 threads for this small workload
+    "-fuse-ld=wasm-ld",                      # Explicitly use wasm-ld (default, but explicit for clarity)
 
     # Threading Support
     "-pthread",                               # Enable POSIX threads support
@@ -305,7 +307,8 @@ flags = [
     # Re-enable for release builds: "-Wl,--gc-sections"
     "-Wl,--strip-debug",                     # Strip debug info from quick builds (faster linking)
     "-Wl,--no-demangle",                     # Disable symbol demangling (faster linking)
-    "--source-map-base=http://localhost:8000/", # Base URL for source map files
+    "-Wl,--no-export-dynamic",              # Don't export all symbols (faster symbol processing)
+    # Note: --source-map-base removed in quick mode for faster linking
 ]
 
 [linking.library]
