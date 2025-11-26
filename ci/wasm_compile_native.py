@@ -161,7 +161,7 @@ def ensure_library_built(
 
 
 def create_wrapper_for_example(example_name: str, output_path: Path) -> Path:
-    """Create a wrapper .cpp file for an example sketch."""
+    """Create a wrapper .cpp file for an example sketch (incremental-safe)."""
     example_dir = PROJECT_ROOT / "examples" / example_name
     ino_file = example_dir / f"{example_name}.ino"
 
@@ -174,10 +174,74 @@ def create_wrapper_for_example(example_name: str, output_path: Path) -> Path:
 #include "{ino_file.as_posix()}"
 """
 
+    # Only write if content changed (preserve timestamp for incremental builds)
+    if output_path.exists():
+        with open(output_path, "r") as f:
+            existing_content = f.read()
+        if existing_content == wrapper_content:
+            return output_path  # No change, preserve timestamp
+
     with open(output_path, "w") as f:
         f.write(wrapper_content)
 
     return output_path
+
+
+def needs_linking(
+    sketch_object: Path,
+    entry_point_object: Path,
+    library_archive: Path,
+    output_wasm: Path,
+) -> bool:
+    """
+    Check if linking is needed by comparing timestamps.
+
+    Args:
+        sketch_object: Sketch .o file
+        entry_point_object: Entry point .o file
+        library_archive: Library .a archive
+        output_wasm: Output .wasm file
+
+    Returns:
+        True if linking is needed, False if output is up-to-date
+    """
+    # If output doesn't exist, we need to link
+    if not output_wasm.exists():
+        return True
+
+    # Get output modification time
+    output_mtime = output_wasm.stat().st_mtime
+
+    # Check if any input is newer than output
+    inputs = [sketch_object, entry_point_object, library_archive]
+    for input_file in inputs:
+        if not input_file.exists():
+            return True  # Input missing, need to link
+        if input_file.stat().st_mtime > output_mtime:
+            return True  # Input is newer, need to link
+
+    # All inputs are older than output, no linking needed
+    return False
+
+
+def needs_compilation(source_file: Path, output_object: Path) -> bool:
+    """
+    Check if source needs recompilation.
+
+    Args:
+        source_file: Source .cpp file
+        output_object: Output .o file
+
+    Returns:
+        True if compilation needed, False if up-to-date
+    """
+    if not output_object.exists():
+        return True
+
+    source_mtime = source_file.stat().st_mtime
+    object_mtime = output_object.stat().st_mtime
+
+    return source_mtime > object_mtime
 
 
 def compile_object(
@@ -186,6 +250,7 @@ def compile_object(
     emcc: Path,
     flags: dict[str, list[str]],
     verbose: bool = False,
+    force: bool = False,
 ) -> bool:
     """
     Compile a single source file to an object file using PCH.
@@ -196,10 +261,17 @@ def compile_object(
         emcc: Path to em++ compiler
         flags: Build flags dictionary
         verbose: Enable verbose output
+        force: Force recompilation even if up-to-date
 
     Returns:
         True if successful
     """
+    # Check if compilation is needed
+    if not force and not needs_compilation(source_file, output_object):
+        if verbose:
+            print(f"✓ {source_file.name} is up-to-date")
+        return True
+
     # Build includes
     includes = [
         "-Isrc",
@@ -292,32 +364,59 @@ def compile_wasm(
         # Phase 3: Compile sketch wrapper to object file
         phase3_start = time.time()
         sketch_object = BUILD_DIR / "sketch.o"
-        print(f"Compiling sketch: {source_file.name}")
-        if not compile_object(source_file, sketch_object, emcc, flags, verbose):
-            print("✗ Sketch compilation failed")
-            return 1
+        if needs_compilation(source_file, sketch_object) or force:
+            print(f"Compiling sketch: {source_file.name}")
+            if not compile_object(
+                source_file, sketch_object, emcc, flags, verbose, force
+            ):
+                print("✗ Sketch compilation failed")
+                return 1
+        else:
+            print(f"✓ Sketch is up-to-date")
         phase3_time = time.time() - phase3_start
         if verbose:
             print(f"Sketch compilation: {phase3_time:.2f}s")
 
         # Phase 3b: Compile entry_point.cpp to object file
         entry_point_object = BUILD_DIR / "entry_point.o"
-        print(f"Compiling entry point: {ENTRY_POINT_CPP.name}")
-        if not compile_object(
-            ENTRY_POINT_CPP, entry_point_object, emcc, flags, verbose
-        ):
-            print("✗ Entry point compilation failed")
-            return 1
+        if needs_compilation(ENTRY_POINT_CPP, entry_point_object) or force:
+            print(f"Compiling entry point: {ENTRY_POINT_CPP.name}")
+            if not compile_object(
+                ENTRY_POINT_CPP, entry_point_object, emcc, flags, verbose, force
+            ):
+                print("✗ Entry point compilation failed")
+                return 1
+        else:
+            print(f"✓ Entry point is up-to-date")
         phase3_time += time.time() - phase3_start
 
         # Phase 4: Link everything together
         phase4_start = time.time()
-        print("Linking final WASM module...")
         library_archive = BUILD_DIR / "libfastled.a"
 
         if not library_archive.exists():
             print(f"✗ Library not found: {library_archive}")
             return 1
+
+        # Check if linking is needed (incremental linking)
+        wasm_output = output_file.with_suffix(".wasm")
+        if not force and not needs_linking(
+            sketch_object, entry_point_object, library_archive, wasm_output
+        ):
+            phase4_time = time.time() - phase4_start
+            total_time = time.time() - start_time
+            print("✓ WASM output is up-to-date, skipping linking")
+            print(f"  - {output_file}")
+            if wasm_output.exists():
+                print(f"  - {wasm_output}")
+            print(f"\nBuild times:")
+            print(f"  Library:  {phase2_time:.2f}s")
+            print(f"  Sketch:   {phase3_time:.2f}s")
+            print(f"  Linking:  {phase4_time:.2f}s (skipped)")
+            print(f"  Total:    {total_time:.2f}s")
+            return 0
+
+        print("Linking final WASM module...")
 
         # Build includes for linking
         includes = [

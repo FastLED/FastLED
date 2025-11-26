@@ -225,7 +225,7 @@ flags = [
 link_flags = [
     # Reduce memory for faster startup (override base setting)
     "-sINITIAL_MEMORY=67108864",            # Reduce initial memory to 64MB (faster startup)
-    
+
     # Disable Non-Essential Runtime Features for Speed
     "-sASSERTIONS=0",                       # Disable runtime assertions
     "-sSTACK_OVERFLOW_CHECK=0",             # Disable stack overflow checking
@@ -257,10 +257,13 @@ flags = [
 
 flags = [
     # Note: Linker selection is set dynamically: -fuse-ld={linker} (mold/lld)
-    
+
     # WebAssembly Configuration
     "-sWASM=1",                                # Generate WebAssembly output (not asm.js)
-    
+
+    # Linker Performance Optimization
+    "-Wl,--threads=6",                        # Enable parallel linking with 6 threads (balanced for performance)
+
     # Threading Support
     "-pthread",                               # Enable POSIX threads support
     "-sUSE_PTHREADS=1",                       # Use Emscripten's pthread implementation
@@ -277,7 +280,7 @@ flags = [
 flags = [
     # Entry Point and Module Configuration
     # Note: Uses proper main() entry point from src/platforms/wasm/entry_point.cpp
-    "--emit-symbol-map",                     # Generate symbol map for debugging
+    # Note: --emit-symbol-map removed in quick mode (override with -sEMIT_SYMBOL_MAP=1 if needed)
     "-sMODULARIZE=1",                        # Create a factory function (not global)
     "-sEXPORT_NAME=fastled",                 # Name of the exported factory function
     
@@ -298,7 +301,10 @@ flags = [
     "-sFILESYSTEM=0",                        # Disable filesystem support (not needed)
     
     # Optimization and Debugging
-    "-Wl,--gc-sections",                     # Remove unused code sections
+    # Note: --gc-sections disabled in quick mode for faster linking (saves ~1-2s)
+    # Re-enable for release builds: "-Wl,--gc-sections"
+    "-Wl,--strip-debug",                     # Strip debug info from quick builds (faster linking)
+    "-Wl,--no-demangle",                     # Disable symbol demangling (faster linking)
     "--source-map-base=http://localhost:8000/", # Base URL for source map files
 ]
 
